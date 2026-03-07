@@ -2,7 +2,7 @@ name: Nightly (Long-Tail Matrix)
 
 on:
   schedule:
-    - cron: '0 2 * * *' # 2 AM UTC
+    - cron: "0 2 * * *" # 2 AM UTC
   workflow_dispatch:
 
 jobs:
@@ -25,8 +25,8 @@ jobs:
         uses: actions/setup-node@v4 # v4.0.3
         with:
           node-version: "20"
-          cache: 'pnpm'
-          cache-dependency-path: '**/pnpm-lock.yaml'
+          cache: "pnpm"
+          cache-dependency-path: "**/pnpm-lock.yaml"
 
       - name: Install
         run: pnpm install --frozen-lockfile

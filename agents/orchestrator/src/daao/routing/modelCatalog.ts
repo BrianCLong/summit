@@ -19,8 +19,8 @@ export const DEFAULT_CATALOG: ModelSpec[] = [
       maxTokens: 128000,
       reasoning: false,
       coding: true,
-      domains: ["general", "fast"]
-    }
+      domains: ["general", "fast"],
+    },
   },
   {
     id: "gpt-4o",
@@ -30,8 +30,8 @@ export const DEFAULT_CATALOG: ModelSpec[] = [
       maxTokens: 128000,
       reasoning: true,
       coding: true,
-      domains: ["general", "complex"]
-    }
+      domains: ["general", "complex"],
+    },
   },
   {
     id: "o1-preview",
@@ -41,8 +41,8 @@ export const DEFAULT_CATALOG: ModelSpec[] = [
       maxTokens: 128000,
       reasoning: true,
       coding: true,
-      domains: ["math", "science", "deep-reasoning"]
-    }
+      domains: ["math", "science", "deep-reasoning"],
+    },
   },
   {
     id: "claude-3-haiku-20240307",
@@ -52,8 +52,8 @@ export const DEFAULT_CATALOG: ModelSpec[] = [
       maxTokens: 200000,
       reasoning: false,
       coding: true,
-      domains: ["fast"]
-    }
+      domains: ["fast"],
+    },
   },
   {
     id: "claude-3-5-sonnet-20241022",
@@ -63,9 +63,9 @@ export const DEFAULT_CATALOG: ModelSpec[] = [
       maxTokens: 200000,
       reasoning: true,
       coding: true,
-      domains: ["coding", "complex"]
-    }
-  }
+      domains: ["coding", "complex"],
+    },
+  },
 ];
 
 export interface ModelCatalog {
@@ -79,6 +79,6 @@ export class DefaultModelCatalog implements ModelCatalog {
   }
 
   async getModel(id: string): Promise<ModelSpec | undefined> {
-    return DEFAULT_CATALOG.find(m => m.id === id);
+    return DEFAULT_CATALOG.find((m) => m.id === id);
   }
 }

@@ -4,20 +4,20 @@
  * Central orchestrator for document governance operations.
  */
 
-import { Driver } from 'neo4j-driver';
-import { v4 as uuidv4 } from 'uuid';
+import { Driver } from "neo4j-driver";
+import { v4 as uuidv4 } from "uuid";
 import {
   DocumentTypeDefinition,
   DocumentInstance,
   DocumentSearchQuery,
   DocumentSearchResult,
   ClassificationLevel,
-} from '../types/document.js';
-import { DocumentRelationship, RelationshipTypeId } from '../types/relationship.js';
-import { LifecycleEngine } from './LifecycleEngine.js';
-import { RiskScoringService } from './RiskScoringService.js';
-import { ComplianceService } from './ComplianceService.js';
-import { ProvenanceService } from './ProvenanceService.js';
+} from "../types/document.js";
+import { DocumentRelationship, RelationshipTypeId } from "../types/relationship.js";
+import { LifecycleEngine } from "./LifecycleEngine.js";
+import { RiskScoringService } from "./RiskScoringService.js";
+import { ComplianceService } from "./ComplianceService.js";
+import { ProvenanceService } from "./ProvenanceService.js";
 
 export interface CreateDocumentInput {
   document_type_id: string;
@@ -83,7 +83,7 @@ export class DocumentGovernanceManager {
         throw new Error(`Document type not found: ${input.document_type_id}`);
       }
 
-      const docType = dtResult.records[0].get('dt').properties;
+      const docType = dtResult.records[0].get("dt").properties;
       const lifecycleDef = this.lifecycleEngine.getLifecycleDefinition(docType.lifecycle);
 
       const now = new Date().toISOString();
@@ -92,7 +92,7 @@ export class DocumentGovernanceManager {
         document_type_id: input.document_type_id,
         title: input.title,
         description: input.description,
-        version: '1.0.0',
+        version: "1.0.0",
         status: lifecycleDef.default_state,
         classification: input.classification,
         owner_id: input.owner_id,
@@ -196,7 +196,7 @@ export class DocumentGovernanceManager {
         return null;
       }
 
-      const d = result.records[0].get('d').properties;
+      const d = result.records[0].get("d").properties;
       return {
         id: d.id,
         document_type_id: d.document_type_id,
@@ -214,7 +214,7 @@ export class DocumentGovernanceManager {
         effective_date: d.effective_date?.toString(),
         expiration_date: d.expiration_date?.toString(),
         tags: d.tags || [],
-        metadata: JSON.parse(d.metadata || '{}'),
+        metadata: JSON.parse(d.metadata || "{}"),
       };
     } finally {
       await session.close();
@@ -257,12 +257,12 @@ export class DocumentGovernanceManager {
       }
 
       if (conditions.length > 0) {
-        cypherQuery += ` WHERE ${conditions.join(' AND ')}`;
+        cypherQuery += ` WHERE ${conditions.join(" AND ")}`;
       }
 
       // Count total
       const countResult = await session.run(`${cypherQuery} RETURN count(d) as total`, params);
-      const total = countResult.records[0].get('total').toNumber();
+      const total = countResult.records[0].get("total").toNumber();
 
       // Get paginated results
       cypherQuery += ` RETURN d ORDER BY d.${query.sort_by} ${query.sort_order.toUpperCase()} SKIP $offset LIMIT $limit`;
@@ -272,7 +272,7 @@ export class DocumentGovernanceManager {
       const result = await session.run(cypherQuery, params);
 
       const documents = result.records.map((record) => {
-        const d = record.get('d').properties;
+        const d = record.get("d").properties;
         return {
           id: d.id,
           document_type_id: d.document_type_id,
@@ -288,7 +288,7 @@ export class DocumentGovernanceManager {
           updated_by: d.updated_by,
           updated_at: d.updated_at.toString(),
           tags: d.tags || [],
-          metadata: JSON.parse(d.metadata || '{}'),
+          metadata: JSON.parse(d.metadata || "{}"),
         };
       });
 
@@ -328,7 +328,7 @@ export class DocumentGovernanceManager {
         is_active: true,
       };
 
-      const relTypeName = relationshipType.replace('rel.', '');
+      const relTypeName = relationshipType.replace("rel.", "");
 
       await session.run(
         `
@@ -362,14 +362,14 @@ export class DocumentGovernanceManager {
    */
   async getDocumentRelationships(
     documentId: string,
-    direction: 'outgoing' | 'incoming' | 'both' = 'both'
+    direction: "outgoing" | "incoming" | "both" = "both"
   ): Promise<DocumentRelationship[]> {
     const session = this.driver.session();
     try {
       let query: string;
-      if (direction === 'outgoing') {
+      if (direction === "outgoing") {
         query = `MATCH (d:Document {id: $documentId})-[r]->(target:Document) RETURN r, d.id as source, target.id as target, type(r) as relType`;
-      } else if (direction === 'incoming') {
+      } else if (direction === "incoming") {
         query = `MATCH (source:Document)-[r]->(d:Document {id: $documentId}) RETURN r, source.id as source, d.id as target, type(r) as relType`;
       } else {
         query = `
@@ -384,12 +384,12 @@ export class DocumentGovernanceManager {
       const result = await session.run(query, { documentId });
 
       return result.records.map((record) => {
-        const r = record.get('r').properties;
+        const r = record.get("r").properties;
         return {
           id: r.id,
-          relationship_type: `rel.${record.get('relType')}` as RelationshipTypeId,
-          source_document_id: record.get('source'),
-          target_document_id: record.get('target'),
+          relationship_type: `rel.${record.get("relType")}` as RelationshipTypeId,
+          source_document_id: record.get("source"),
+          target_document_id: record.get("target"),
           description: r.description,
           created_by: r.created_by,
           created_at: r.created_at.toString(),

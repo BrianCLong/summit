@@ -113,16 +113,16 @@ Summit deployed its own platform internally with three agent archetypes:
 
 ### **Quantitative Impact**
 
-| Metric | Before | After | Improvement |
-|--------|--------|-------|-------------|
-| **Approval Cycle Time** | 48 hours | 18 hours | **-63%** |
-| **Stale Approvals (>72h)** | 20% | 3% | **-85%** |
-| **Incident MTTR** | 8 hours | 3.5 hours | **-56%** |
-| **Postmortems Completed** | 60% | 95% | **+58%** |
-| **SLA Compliance** | 85% | 97% | **+14%** |
-| **Time in Meetings** | 12 hrs/week | 9 hrs/week | **-25%** |
-| **Context Switching** | 8 tools/day | 2 tools/day | **-75%** |
-| **Onboarding Time** | 15 days | 5 days | **-67%** |
+| Metric                     | Before      | After       | Improvement |
+| -------------------------- | ----------- | ----------- | ----------- |
+| **Approval Cycle Time**    | 48 hours    | 18 hours    | **-63%**    |
+| **Stale Approvals (>72h)** | 20%         | 3%          | **-85%**    |
+| **Incident MTTR**          | 8 hours     | 3.5 hours   | **-56%**    |
+| **Postmortems Completed**  | 60%         | 95%         | **+58%**    |
+| **SLA Compliance**         | 85%         | 97%         | **+14%**    |
+| **Time in Meetings**       | 12 hrs/week | 9 hrs/week  | **-25%**    |
+| **Context Switching**      | 8 tools/day | 2 tools/day | **-75%**    |
+| **Onboarding Time**        | 15 days     | 5 days      | **-67%**    |
 
 ### **Qualitative Impact**
 
@@ -280,4 +280,4 @@ Summit is the AI-First Company Operating System that combines governance, proven
 
 ---
 
-*This case study was last updated on November 20, 2025. Metrics and results reflect Summit's internal deployment from August to November 2025.*
+_This case study was last updated on November 20, 2025. Metrics and results reflect Summit's internal deployment from August to November 2025._

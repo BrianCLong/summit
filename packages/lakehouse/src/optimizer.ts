@@ -3,11 +3,11 @@
  * Performance optimization and data layout management
  */
 
-import { BaseTable } from './table-formats/base-table.js';
-import { ZOrderConfig, OptimizeResult } from './types.js';
-import pino from 'pino';
+import { BaseTable } from "./table-formats/base-table.js";
+import { ZOrderConfig, OptimizeResult } from "./types.js";
+import pino from "pino";
 
-const logger = pino({ name: 'lakehouse-optimizer' });
+const logger = pino({ name: "lakehouse-optimizer" });
 
 export interface OptimizationStrategy {
   compaction: boolean;
@@ -17,18 +17,15 @@ export interface OptimizationStrategy {
 }
 
 export class LakehouseOptimizer {
-  async optimizeTable(
-    table: BaseTable,
-    strategy: OptimizationStrategy
-  ): Promise<OptimizeResult> {
-    logger.info({ table: table.getName(), strategy }, 'Starting table optimization');
+  async optimizeTable(table: BaseTable, strategy: OptimizationStrategy): Promise<OptimizeResult> {
+    logger.info({ table: table.getName(), strategy }, "Starting table optimization");
 
     let totalResult: OptimizeResult = {
       filesAdded: 0,
       filesRemoved: 0,
       bytesAdded: 0,
       bytesRemoved: 0,
-      duration: 0
+      duration: 0,
     };
 
     const startTime = Date.now();
@@ -50,40 +47,40 @@ export class LakehouseOptimizer {
 
     totalResult.duration = Date.now() - startTime;
 
-    logger.info({ table: table.getName(), result: totalResult }, 'Optimization completed');
+    logger.info({ table: table.getName(), result: totalResult }, "Optimization completed");
 
     return totalResult;
   }
 
   private async performCompaction(table: BaseTable): Promise<OptimizeResult> {
-    logger.info({ table: table.getName() }, 'Performing compaction');
+    logger.info({ table: table.getName() }, "Performing compaction");
 
     const dataFiles = await table.listDataFiles();
 
     // Identify small files that need compaction
     const avgFileSize = dataFiles.reduce((sum, f) => sum + f.fileSizeBytes, 0) / dataFiles.length;
-    const smallFiles = dataFiles.filter(f => f.fileSizeBytes < avgFileSize * 0.5);
+    const smallFiles = dataFiles.filter((f) => f.fileSizeBytes < avgFileSize * 0.5);
 
     if (smallFiles.length < 2) {
-      logger.info('No compaction needed');
+      logger.info("No compaction needed");
       return {
         filesAdded: 0,
         filesRemoved: 0,
         bytesAdded: 0,
         bytesRemoved: 0,
-        duration: 0
+        duration: 0,
       };
     }
 
     // Would perform actual file compaction here
     const result = await table.compact();
 
-    logger.info({ result }, 'Compaction completed');
+    logger.info({ result }, "Compaction completed");
     return result;
   }
 
   private async performZOrdering(table: BaseTable): Promise<OptimizeResult> {
-    logger.info({ table: table.getName() }, 'Performing Z-ordering');
+    logger.info({ table: table.getName() }, "Performing Z-ordering");
 
     // Z-ordering implementation would go here
     // This reorganizes data to improve query performance
@@ -93,7 +90,7 @@ export class LakehouseOptimizer {
       filesRemoved: 0,
       bytesAdded: 0,
       bytesRemoved: 0,
-      duration: 0
+      duration: 0,
     };
   }
 
@@ -110,23 +107,27 @@ export class LakehouseOptimizer {
       avgFileSize: 0,
       minFileSize: 0,
       maxFileSize: 0,
-      recommendations: [] as string[]
+      recommendations: [] as string[],
     };
 
     if (dataFiles.length > 0) {
-      const fileSizes = dataFiles.map(f => f.fileSizeBytes);
+      const fileSizes = dataFiles.map((f) => f.fileSizeBytes);
       analysis.avgFileSize = analysis.totalSize / dataFiles.length;
       analysis.minFileSize = Math.min(...fileSizes);
       analysis.maxFileSize = Math.max(...fileSizes);
 
       // Generate recommendations
-      const smallFileCount = dataFiles.filter(f => f.fileSizeBytes < analysis.avgFileSize * 0.5).length;
+      const smallFileCount = dataFiles.filter(
+        (f) => f.fileSizeBytes < analysis.avgFileSize * 0.5
+      ).length;
       if (smallFileCount > dataFiles.length * 0.3) {
-        analysis.recommendations.push('High number of small files detected. Consider compaction.');
+        analysis.recommendations.push("High number of small files detected. Consider compaction.");
       }
 
       if (dataFiles.length > 1000) {
-        analysis.recommendations.push('Large number of files. Consider Z-ordering for better query performance.');
+        analysis.recommendations.push(
+          "Large number of files. Consider Z-ordering for better query performance."
+        );
       }
     }
 
@@ -140,15 +141,15 @@ export class LakehouseOptimizer {
       compaction: false,
       zOrdering: false,
       vacuuming: false,
-      statisticsUpdate: false
+      statisticsUpdate: false,
     };
 
     // Determine optimization strategy based on analysis
-    if (analysis.recommendations.includes('Consider compaction')) {
+    if (analysis.recommendations.includes("Consider compaction")) {
       plan.compaction = true;
     }
 
-    if (analysis.recommendations.includes('Consider Z-ordering')) {
+    if (analysis.recommendations.includes("Consider Z-ordering")) {
       plan.zOrdering = true;
     }
 
@@ -158,7 +159,7 @@ export class LakehouseOptimizer {
 
     plan.statisticsUpdate = true;
 
-    logger.info({ table: table.getName(), plan }, 'Optimization plan generated');
+    logger.info({ table: table.getName(), plan }, "Optimization plan generated");
 
     return plan;
   }
@@ -169,7 +170,7 @@ export class LakehouseOptimizer {
       filesRemoved: a.filesRemoved + b.filesRemoved,
       bytesAdded: a.bytesAdded + b.bytesAdded,
       bytesRemoved: a.bytesRemoved + b.bytesRemoved,
-      duration: a.duration + b.duration
+      duration: a.duration + b.duration,
     };
   }
 }

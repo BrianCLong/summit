@@ -71,7 +71,10 @@
       "sourceConnector": "alert-mini",
       "source": "./fixtures/alerts.json",
       "steps": [
-        { "stage": "fixture", "detail": "connectors/contracts/reference/alert-mini/fixtures/alerts.json" },
+        {
+          "stage": "fixture",
+          "detail": "connectors/contracts/reference/alert-mini/fixtures/alerts.json"
+        },
         { "stage": "mapping", "hint": "asset-record" }
       ]
     },
@@ -80,7 +83,10 @@
       "sourceConnector": "alert-mini",
       "source": "./fixtures/alerts.json",
       "steps": [
-        { "stage": "fixture", "detail": "connectors/contracts/reference/alert-mini/fixtures/alerts.json" },
+        {
+          "stage": "fixture",
+          "detail": "connectors/contracts/reference/alert-mini/fixtures/alerts.json"
+        },
         { "stage": "mapping", "hint": "asset-record" }
       ]
     },
@@ -89,7 +95,10 @@
       "sourceConnector": "alert-mini",
       "source": "./fixtures/alerts.json",
       "steps": [
-        { "stage": "fixture", "detail": "connectors/contracts/reference/alert-mini/fixtures/alerts.json" },
+        {
+          "stage": "fixture",
+          "detail": "connectors/contracts/reference/alert-mini/fixtures/alerts.json"
+        },
         { "stage": "mapping", "hint": "alert-record" }
       ]
     },
@@ -98,7 +107,10 @@
       "sourceConnector": "alert-mini",
       "source": "./fixtures/alerts.json",
       "steps": [
-        { "stage": "fixture", "detail": "connectors/contracts/reference/alert-mini/fixtures/alerts.json" },
+        {
+          "stage": "fixture",
+          "detail": "connectors/contracts/reference/alert-mini/fixtures/alerts.json"
+        },
         { "stage": "mapping", "hint": "alert-record" }
       ]
     }

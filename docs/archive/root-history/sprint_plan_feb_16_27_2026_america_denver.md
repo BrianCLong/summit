@@ -8,55 +8,55 @@
 
 ## Sprint Backlog (stories, AC, estimate)
 
-1. **Compliance Pack v1 — SOC2/ISO/PCI-Lite Mapping** — *5 pts*  
+1. **Compliance Pack v1 — SOC2/ISO/PCI-Lite Mapping** — _5 pts_
    Map SOC 2 TSC and ISO 27001 controls to OPA policies, receipts/provenance, access logs, SDLC artifacts, DR drills, and PCI-lite posture doc for hosted path.  
    **AC:** Mappings published as docs-as-code; references to evidence locations are actionable; starter PCI-lite posture doc checked in; links from Trust/Docs entrypoint.
 
-2. **Evidence Collector Jobs — Signed Bundles** — *8 pts*  
+2. **Evidence Collector Jobs — Signed Bundles** — _8 pts_
    Scheduled job packages access review snapshots, KMS key rotation pointers, policy/config change history, and Switchboard incident summaries into signed bundles.  
    **AC:** Cron + on-demand trigger; bundle manifest with signatures; receipts stored; retry/idempotent; export API documented.
 
-3. **Compliance Posture Dashboard** — *5 pts*  
+3. **Compliance Posture Dashboard** — _5 pts_
    Dashboard surfaces privileged ops volume, policy denials, dual-control adherence, key rotation age, and retention/purge events.  
    **AC:** Tiles fed by existing telemetry; dual-control and purge signals visible; alert thresholds configurable; demo-ready view.
 
-4. **Region Tags as Policy Inputs** — *5 pts*  
+4. **Region Tags as Policy Inputs** — _5 pts_
    Tenant `region_tag` becomes first-class ABAC input; cross-region writes denied.  
    **AC:** Policy tests include allow/deny by region; receipts show decision context; regression suite updated.
 
-5. **Storage Sharding Rules v0** — *3 pts*  
+5. **Storage Sharding Rules v0** — _3 pts_
    Partition object storage paths/buckets by region+tenant; document DB partition strategy.  
    **AC:** Prefixing rules implemented/configurable; runbook + diagrams committed; smoke test proves correct placement.
 
-6. **Retention Classes & Purge Enforcement Hardening** — *5 pts*  
+6. **Retention Classes & Purge Enforcement Hardening** — _5 pts_
    Automate purge schedules per tenant retention profile; sign purge manifests.  
    **AC:** Manifests signed and queryable/exportable; failure alerts; audit trail retained.
 
-7. **SCIM Provisioning v1 (Create/Update/Deprovision)** — *5 pts*  
+7. **SCIM Provisioning v1 (Create/Update/Deprovision)** — _5 pts_
    SCIM flows create/update/deprovision users/groups with group→ABAC/role mapping and receipts.  
    **AC:** Contract tests green; receipts stored; error handling for drift; dry-run toggle for tenants.
 
-8. **Role Catalog v1 (Least-Privilege)** — *3 pts*  
+8. **Role Catalog v1 (Least-Privilege)** — _3 pts_
    Ship enterprise default roles: Tenant Admin, Security Admin, Auditor (read-only), Billing Admin, Operator, Developer.  
    **AC:** Catalog published; regression tests validate least-privilege; dual-control for privileged changes enforced.
 
-9. **Access Review Export + Dual-Control Signoff (MVP)** — *5 pts*  
+9. **Access Review Export + Dual-Control Signoff (MVP)** — _5 pts_
    Quarterly access review export with users, roles, last activity, and privileged actions; signoff requires dual-control with rationale.  
    **AC:** Export downloadable; signoff receipts stored; rationale mandatory; audit log entries emitted.
 
-10. **Notary Adapter Reliability (Retry + DLQ + Replay)** — *5 pts*  
+10. **Notary Adapter Reliability (Retry + DLQ + Replay)** — _5 pts_
     Implement retry strategy, idempotency, DLQ, and replay tooling for receipts/evidence notarization; add contract tests.  
     **AC:** Retries bounded with backoff; idempotent keys; DLQ replay script; contract tests pass.
 
-11. **Storage Adapter Resilience (Multipart + Checksums)** — *3 pts*  
+11. **Storage Adapter Resilience (Multipart + Checksums)** — _3 pts_
     Ensure multipart uploads, checksum validation, and consistent prefixing by tenant/region; add partial-outage runbook.  
     **AC:** Checksums enforced; partial outage runbook merged; synthetic probe covers multipart path.
 
-12. **Identity Adapter Robustness (OIDC Claims + Skew)** — *3 pts*  
+12. **Identity Adapter Robustness (OIDC Claims + Skew)** — _3 pts_
     Normalize OIDC claims, enforce tenant-bound tokens, and handle clock skew; add incident runbook + synthetics.  
     **AC:** Claim normalization documented; skew tolerance tested; synthetics scheduled; runbook published.
 
-*Total forecast: 55 pts (stretch accounted via buffer for dashboard polish + adapter synthetics).*  
+_Total forecast: 55 pts (stretch accounted via buffer for dashboard polish + adapter synthetics)._
 **Capacity:** ~55 pts.
 
 ---
@@ -80,7 +80,7 @@
 
 ## Capacity & Calendar
 
-- **Capacity:** ~55 pts (team + reliability guardrails).  
+- **Capacity:** ~55 pts (team + reliability guardrails).
 - **Ceremonies:**
   - Sprint Planning: Mon Feb 16, 09:30–11:00
   - Daily Stand-up: 09:15–09:30
@@ -101,6 +101,7 @@
 ## QA Plan
 
 **Functional:**
+
 - Control mappings link to evidence locations; PCI-lite doc accessible.
 - Evidence collector: scheduled + on-demand bundles signed; manifests verifiable.
 - Dashboard: privileged ops volume, denials, dual-control adherence, key rotation age, retention/purge signals.
@@ -113,6 +114,7 @@
 **E2E:** SCIM provision users/groups → assign roles → attempt cross-region write (denied with receipt) → run access review export + dual-control signoff → generate compliance evidence bundle (SBOM/SLSA, DR drill, purge manifests, key-rotation pointers) → view compliance posture dashboard.
 
 **Non-functional:**
+
 - Residency and adapter synthetics green; retry budgets respected; alerting for SCIM/residency/notary/storage failures.
 - Coverage for new policy/tests ≥80%; SLO/error budget impact tracked.
 
@@ -146,20 +148,20 @@
 
 ## Jira-ready ticket matrix (copy/paste)
 
-| ID      | Title                                            | Owner  | Est | Dependencies | Acceptance Criteria (summary)                           |
-| ------- | ------------------------------------------------ | ------ | --: | ------------ | ------------------------------------------------------- |
-| CMP-201 | Compliance Pack v1 (SOC2/ISO/PCI-lite mapping)   | Docs+BE|   5 | —            | Docs-as-code mapping; PCI-lite posture doc; links live  |
-| CMP-202 | Evidence Collector Jobs (signed bundles)         | BE     |   8 | CMP-201      | Cron + on-demand; signed manifests; receipts; export API|
-| CMP-203 | Compliance Posture Dashboard                     | FE+Data|   5 | CMP-201      | Tiles for privileged ops/denials/dual-control/keys/purge|
-| RES-211 | Region Tags as Policy Inputs                     | BE     |   5 | CMP-202      | ABAC tests pass; receipts show region_tag decisions      |
-| RES-212 | Storage Sharding Rules v0                        | BE+Ops |   3 | RES-211      | Region+tenant prefixing; doc + smoke test                |
-| RES-213 | Retention Classes & Purge Enforcement Hardening  | BE+Ops |   5 | RES-212      | Signed purge manifests; alerts; audit trail              |
-| IDN-221 | SCIM Provisioning v1                             | BE     |   5 | RES-211      | Create/update/deprovision; mapping; receipts; contract tests |
-| IDN-222 | Role Catalog v1 (least-privilege)                | BE+Sec |   3 | IDN-221      | Catalog published; LP regression; dual-control enforced   |
-| IDN-223 | Access Review Export + Dual-Control Signoff      | FE+BE  |   5 | IDN-222      | Export + rationale; receipts; audit entries              |
-| ADP-231 | Notary Adapter Reliability (retry+DLQ+replay)    | BE+Ops |   5 | CMP-202      | Bounded retries; idempotent keys; DLQ+replay; contracts  |
-| ADP-232 | Storage Adapter Resilience (multipart+checksums) | BE+Ops |   3 | RES-212      | Checksums enforced; synthetics; outage runbook           |
-| ADP-233 | Identity Adapter Robustness (OIDC claims+skew)   | BE+Ops |   3 | IDN-221      | Claim normalization; skew tolerance; synthetics; runbook |
+| ID      | Title                                            | Owner   | Est | Dependencies | Acceptance Criteria (summary)                                |
+| ------- | ------------------------------------------------ | ------- | --: | ------------ | ------------------------------------------------------------ |
+| CMP-201 | Compliance Pack v1 (SOC2/ISO/PCI-lite mapping)   | Docs+BE |   5 | —            | Docs-as-code mapping; PCI-lite posture doc; links live       |
+| CMP-202 | Evidence Collector Jobs (signed bundles)         | BE      |   8 | CMP-201      | Cron + on-demand; signed manifests; receipts; export API     |
+| CMP-203 | Compliance Posture Dashboard                     | FE+Data |   5 | CMP-201      | Tiles for privileged ops/denials/dual-control/keys/purge     |
+| RES-211 | Region Tags as Policy Inputs                     | BE      |   5 | CMP-202      | ABAC tests pass; receipts show region_tag decisions          |
+| RES-212 | Storage Sharding Rules v0                        | BE+Ops  |   3 | RES-211      | Region+tenant prefixing; doc + smoke test                    |
+| RES-213 | Retention Classes & Purge Enforcement Hardening  | BE+Ops  |   5 | RES-212      | Signed purge manifests; alerts; audit trail                  |
+| IDN-221 | SCIM Provisioning v1                             | BE      |   5 | RES-211      | Create/update/deprovision; mapping; receipts; contract tests |
+| IDN-222 | Role Catalog v1 (least-privilege)                | BE+Sec  |   3 | IDN-221      | Catalog published; LP regression; dual-control enforced      |
+| IDN-223 | Access Review Export + Dual-Control Signoff      | FE+BE   |   5 | IDN-222      | Export + rationale; receipts; audit entries                  |
+| ADP-231 | Notary Adapter Reliability (retry+DLQ+replay)    | BE+Ops  |   5 | CMP-202      | Bounded retries; idempotent keys; DLQ+replay; contracts      |
+| ADP-232 | Storage Adapter Resilience (multipart+checksums) | BE+Ops  |   3 | RES-212      | Checksums enforced; synthetics; outage runbook               |
+| ADP-233 | Identity Adapter Robustness (OIDC claims+skew)   | BE+Ops  |   3 | IDN-221      | Claim normalization; skew tolerance; synthetics; runbook     |
 
 ---
 

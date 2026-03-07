@@ -13,10 +13,7 @@ The Analyst Console provides a sophisticated interface for intelligence analysts
 ## Quick Start
 
 ```tsx
-import {
-  AnalystConsole,
-  generateMockDataset,
-} from '@/features/analyst-console'
+import { AnalystConsole, generateMockDataset } from '@/features/analyst-console'
 
 // Generate sample data
 const data = generateMockDataset({
@@ -62,8 +59,8 @@ The console uses React Context (`AnalystViewContext`) for global state:
 
 ```tsx
 interface AnalystViewState {
-  timeWindow: TimeWindow       // from/to ISO timestamps
-  filters: AnalystViewFilters  // entity types, event types, confidence
+  timeWindow: TimeWindow // from/to ISO timestamps
+  filters: AnalystViewFilters // entity types, event types, confidence
   selection: AnalystSelectionState // selected entity/event/location IDs
 }
 ```
@@ -72,7 +69,8 @@ interface AnalystViewState {
 
 ```tsx
 // Full context access
-const { state, setTimeWindow, setFilters, setSelection, resetAll } = useAnalystView()
+const { state, setTimeWindow, setFilters, setSelection, resetAll } =
+  useAnalystView()
 
 // Time brush control
 const { timeWindow, setTimeWindow } = useGlobalTimeBrush()
@@ -119,6 +117,7 @@ Main component that orchestrates all panes.
 Entity network visualization with SVG-based rendering.
 
 **Features:**
+
 - Node coloring by entity type
 - Selection highlighting with connected entity emphasis
 - Zoom controls
@@ -129,6 +128,7 @@ Entity network visualization with SVG-based rendering.
 Temporal event display with time brush functionality.
 
 **Features:**
+
 - Histogram visualization of event density
 - Draggable time window selection
 - Event cards with severity indicators
@@ -139,6 +139,7 @@ Temporal event display with time brush functionality.
 Geographic visualization of locations.
 
 **Features:**
+
 - Marker clustering for overlapping points
 - Zoom and pan controls
 - Tooltip with location details
@@ -149,6 +150,7 @@ Geographic visualization of locations.
 Dynamic summary panel explaining the current view state.
 
 **Sections:**
+
 - **Summary**: Auto-generated headline describing what's visible
 - **View Metrics**: Entity, link, event, location counts
 - **Top Entities**: Ranked by importance score and connections
@@ -158,15 +160,15 @@ Dynamic summary panel explaining the current view state.
 
 ## Keyboard Shortcuts
 
-| Shortcut | Action |
-|----------|--------|
-| `⌘1` | Focus Graph pane |
-| `⌘2` | Focus Timeline pane |
-| `⌘3` | Focus Map pane |
-| `P` | Toggle provenance overlay |
-| `E` | Toggle Explain panel |
-| `R` | Reset all filters and selections |
-| `Esc` | Clear current selection |
+| Shortcut | Action                           |
+| -------- | -------------------------------- |
+| `⌘1`     | Focus Graph pane                 |
+| `⌘2`     | Focus Timeline pane              |
+| `⌘3`     | Focus Map pane                   |
+| `P`      | Toggle provenance overlay        |
+| `E`      | Toggle Explain panel             |
+| `R`      | Reset all filters and selections |
+| `Esc`    | Clear current selection          |
 
 ## Data Types
 
@@ -176,9 +178,9 @@ Dynamic summary panel explaining the current view state.
 interface AnalystEntity {
   id: string
   label: string
-  type: string                 // "Person", "Org", "Account", etc.
-  importanceScore?: number     // 0-1, for ranking
-  confidence?: number          // 0-1, data quality
+  type: string // "Person", "Org", "Account", etc.
+  importanceScore?: number // 0-1, for ranking
+  confidence?: number // 0-1, data quality
   properties?: Record<string, unknown>
   tags?: string[]
   createdAt?: string
@@ -193,7 +195,7 @@ interface AnalystLink {
   id: string
   sourceId: string
   targetId: string
-  type: string                 // "communicatesWith", "funds", etc.
+  type: string // "communicatesWith", "funds", etc.
   weight?: number
   timestamp?: string
   confidence?: number
@@ -205,9 +207,9 @@ interface AnalystLink {
 ```typescript
 interface AnalystEvent {
   id: string
-  type: string                 // "COMMUNICATION", "TRANSACTION", etc.
-  entityIds: string[]          // Entities involved
-  timestamp: string            // ISO 8601
+  type: string // "COMMUNICATION", "TRANSACTION", etc.
+  entityIds: string[] // Entities involved
+  timestamp: string // ISO 8601
   durationMinutes?: number
   summary: string
   severity?: 'info' | 'low' | 'medium' | 'high' | 'critical'
@@ -219,7 +221,7 @@ interface AnalystEvent {
 ```typescript
 interface AnalystLocation {
   id: string
-  entityId?: string            // Associated entity
+  entityId?: string // Associated entity
   label?: string
   lat: number
   lon: number
@@ -239,6 +241,7 @@ pnpm storybook
 ```
 
 Navigate to **Features → AnalystConsole** to see:
+
 - Default configuration
 - Large dataset performance
 - Custom time windows
@@ -252,6 +255,7 @@ pnpm test src/features/analyst-console
 ```
 
 Test coverage includes:
+
 - Context hook functionality
 - Selection state management
 - Time window updates

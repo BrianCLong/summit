@@ -1,7 +1,7 @@
 export enum AttributionBand {
   LOW = "C1",
   MODERATE = "C2",
-  HIGH = "C3"
+  HIGH = "C3",
 }
 
 export interface AttributionScore {
@@ -21,9 +21,12 @@ export class ConfidenceBands {
 
   public static getDisclosureReadiness(band: AttributionBand): string {
     switch (band) {
-      case AttributionBand.HIGH: return "Public / Legal";
-      case AttributionBand.MODERATE: return "Partner Sharing";
-      case AttributionBand.LOW: return "Internal Only";
+      case AttributionBand.HIGH:
+        return "Public / Legal";
+      case AttributionBand.MODERATE:
+        return "Partner Sharing";
+      case AttributionBand.LOW:
+        return "Internal Only";
     }
   }
 }

@@ -10,12 +10,12 @@
  * @module connector-manager
  */
 
-import { EventEmitter } from 'eventemitter3';
-import type { Logger } from 'pino';
+import { EventEmitter } from "eventemitter3";
+import type { Logger } from "pino";
 
-import type { RawSignalInput } from '@intelgraph/signal-contracts';
+import type { RawSignalInput } from "@intelgraph/signal-contracts";
 
-import { BaseConnector, type ConnectorStatus } from './base-connector.js';
+import { BaseConnector, type ConnectorStatus } from "./base-connector.js";
 
 /**
  * Manager events
@@ -60,7 +60,7 @@ export class ConnectorManager extends EventEmitter<ConnectorManagerEvents> {
 
   constructor(logger: Logger, config?: Partial<ConnectorManagerConfig>) {
     super();
-    this.logger = logger.child({ component: 'connector-manager' });
+    this.logger = logger.child({ component: "connector-manager" });
     this.config = { ...defaultConfig, ...config };
   }
 
@@ -75,22 +75,22 @@ export class ConnectorManager extends EventEmitter<ConnectorManagerEvents> {
     }
 
     // Set up event forwarding
-    connector.on('signal', (signal) => {
-      this.emit('signal', signal, info.connectorId);
+    connector.on("signal", (signal) => {
+      this.emit("signal", signal, info.connectorId);
     });
 
-    connector.on('statusChange', (status) => {
-      this.emit('connectorStatusChange', info.connectorId, status);
+    connector.on("statusChange", (status) => {
+      this.emit("connectorStatusChange", info.connectorId, status);
     });
 
-    connector.on('error', (error) => {
-      this.emit('error', error, info.connectorId);
+    connector.on("error", (error) => {
+      this.emit("error", error, info.connectorId);
     });
 
     this.connectors.set(info.connectorId, connector);
-    this.emit('connectorAdded', info.connectorId);
+    this.emit("connectorAdded", info.connectorId);
 
-    this.logger.info({ connectorId: info.connectorId, name: info.name }, 'Connector added');
+    this.logger.info({ connectorId: info.connectorId, name: info.name }, "Connector added");
 
     if (this.config.autoStart) {
       await connector.connect();
@@ -110,9 +110,9 @@ export class ConnectorManager extends EventEmitter<ConnectorManagerEvents> {
     await connector.disconnect();
     connector.removeAllListeners();
     this.connectors.delete(connectorId);
-    this.emit('connectorRemoved', connectorId);
+    this.emit("connectorRemoved", connectorId);
 
-    this.logger.info({ connectorId }, 'Connector removed');
+    this.logger.info({ connectorId }, "Connector removed");
   }
 
   /**
@@ -133,7 +133,7 @@ export class ConnectorManager extends EventEmitter<ConnectorManagerEvents> {
    * Start all connectors
    */
   async startAll(): Promise<void> {
-    this.logger.info({ count: this.connectors.size }, 'Starting all connectors');
+    this.logger.info({ count: this.connectors.size }, "Starting all connectors");
 
     const connectors = Array.from(this.connectors.values());
     const batches: BaseConnector[][] = [];
@@ -147,32 +147,38 @@ export class ConnectorManager extends EventEmitter<ConnectorManagerEvents> {
       await Promise.all(
         batch.map((connector) =>
           connector.connect().catch((error) => {
-            this.logger.error({ error, connectorId: connector.getInfo().connectorId }, 'Failed to start connector');
-          }),
-        ),
+            this.logger.error(
+              { error, connectorId: connector.getInfo().connectorId },
+              "Failed to start connector"
+            );
+          })
+        )
       );
     }
 
     this.startHealthCheck();
-    this.logger.info('All connectors started');
+    this.logger.info("All connectors started");
   }
 
   /**
    * Stop all connectors
    */
   async stopAll(): Promise<void> {
-    this.logger.info({ count: this.connectors.size }, 'Stopping all connectors');
+    this.logger.info({ count: this.connectors.size }, "Stopping all connectors");
     this.stopHealthCheck();
 
     await Promise.all(
       Array.from(this.connectors.values()).map((connector) =>
         connector.disconnect().catch((error) => {
-          this.logger.error({ error, connectorId: connector.getInfo().connectorId }, 'Failed to stop connector');
-        }),
-      ),
+          this.logger.error(
+            { error, connectorId: connector.getInfo().connectorId },
+            "Failed to stop connector"
+          );
+        })
+      )
     );
 
-    this.logger.info('All connectors stopped');
+    this.logger.info("All connectors stopped");
   }
 
   /**
@@ -182,7 +188,7 @@ export class ConnectorManager extends EventEmitter<ConnectorManagerEvents> {
     this.stopHealthCheck();
     this.healthCheckTimer = setInterval(
       () => this.checkAllHealth(),
-      this.config.healthCheckIntervalMs,
+      this.config.healthCheckIntervalMs
     );
   }
 
@@ -201,10 +207,13 @@ export class ConnectorManager extends EventEmitter<ConnectorManagerEvents> {
    */
   private checkAllHealth(): void {
     const statuses = this.getStatus();
-    const unhealthy = statuses.filter((s) => s.status === 'error' || s.status === 'disconnected');
+    const unhealthy = statuses.filter((s) => s.status === "error" || s.status === "disconnected");
 
     if (unhealthy.length > 0) {
-      this.logger.warn({ unhealthyCount: unhealthy.length, connectors: unhealthy.map((u) => u.connectorId) }, 'Unhealthy connectors detected');
+      this.logger.warn(
+        { unhealthyCount: unhealthy.length, connectors: unhealthy.map((u) => u.connectorId) },
+        "Unhealthy connectors detected"
+      );
     }
   }
 
@@ -231,9 +240,9 @@ export class ConnectorManager extends EventEmitter<ConnectorManagerEvents> {
     signalsReceived: number;
     signalsEmitted: number;
     errorsCount: number;
-    byConnector: Record<string, ReturnType<BaseConnector['getMetrics']>>;
+    byConnector: Record<string, ReturnType<BaseConnector["getMetrics"]>>;
   } {
-    const byConnector: Record<string, ReturnType<BaseConnector['getMetrics']>> = {};
+    const byConnector: Record<string, ReturnType<BaseConnector["getMetrics"]>> = {};
     let signalsReceived = 0;
     let signalsEmitted = 0;
     let errorsCount = 0;
@@ -248,7 +257,7 @@ export class ConnectorManager extends EventEmitter<ConnectorManagerEvents> {
       signalsEmitted += metrics.signalsEmitted;
       errorsCount += metrics.errorsCount;
 
-      if (info.status === 'connected') {
+      if (info.status === "connected") {
         connectedCount++;
       }
     }
@@ -276,7 +285,7 @@ export class ConnectorManager extends EventEmitter<ConnectorManagerEvents> {
  */
 export function createConnectorManager(
   logger: Logger,
-  config?: Partial<ConnectorManagerConfig>,
+  config?: Partial<ConnectorManagerConfig>
 ): ConnectorManager {
   return new ConnectorManager(logger, config);
 }

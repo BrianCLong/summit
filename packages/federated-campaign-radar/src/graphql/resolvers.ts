@@ -2,8 +2,8 @@
  * GraphQL Resolvers for Federated Campaign Radar
  */
 
-import { PubSub, withFilter } from 'graphql-subscriptions';
-import { GraphQLScalarType, Kind } from 'graphql';
+import { PubSub, withFilter } from "graphql-subscriptions";
+import { GraphQLScalarType, Kind } from "graphql";
 import {
   CampaignSignal,
   CampaignCluster,
@@ -15,21 +15,21 @@ import {
   AlertSeverity,
   AlertStatus,
   ParticipantStatus,
-} from '../core/types';
-import { SignalNormalizer } from '../core/SignalNormalizer';
-import { FederationService } from '../federation/FederationService';
-import { ClusteringEngine } from '../clustering/ClusteringEngine';
-import { AlertEngine } from '../alerts/AlertEngine';
+} from "../core/types";
+import { SignalNormalizer } from "../core/SignalNormalizer";
+import { FederationService } from "../federation/FederationService";
+import { ClusteringEngine } from "../clustering/ClusteringEngine";
+import { AlertEngine } from "../alerts/AlertEngine";
 
 // PubSub instance for subscriptions
 const pubsub = new PubSub();
 
 // Subscription event names
 const EVENTS = {
-  ALERT_CREATED: 'ALERT_CREATED',
-  CLUSTER_UPDATED: 'CLUSTER_UPDATED',
-  CROSS_TENANT_SPIKE: 'CROSS_TENANT_SPIKE',
-  FEDERATION_EVENT: 'FEDERATION_EVENT',
+  ALERT_CREATED: "ALERT_CREATED",
+  CLUSTER_UPDATED: "CLUSTER_UPDATED",
+  CROSS_TENANT_SPIKE: "CROSS_TENANT_SPIKE",
+  FEDERATION_EVENT: "FEDERATION_EVENT",
 };
 
 /**
@@ -46,8 +46,8 @@ export interface ResolverContext {
 
 // Custom scalars
 const DateTimeScalar = new GraphQLScalarType({
-  name: 'DateTime',
-  description: 'DateTime custom scalar type',
+  name: "DateTime",
+  description: "DateTime custom scalar type",
   serialize(value: unknown): string {
     if (value instanceof Date) {
       return value.toISOString();
@@ -55,10 +55,10 @@ const DateTimeScalar = new GraphQLScalarType({
     return String(value);
   },
   parseValue(value: unknown): Date {
-    if (typeof value === 'string' || typeof value === 'number') {
+    if (typeof value === "string" || typeof value === "number") {
       return new Date(value);
     }
-    throw new Error('Invalid DateTime value');
+    throw new Error("Invalid DateTime value");
   },
   parseLiteral(ast): Date | null {
     if (ast.kind === Kind.STRING || ast.kind === Kind.INT) {
@@ -69,8 +69,8 @@ const DateTimeScalar = new GraphQLScalarType({
 });
 
 const JSONScalar = new GraphQLScalarType({
-  name: 'JSON',
-  description: 'JSON custom scalar type',
+  name: "JSON",
+  description: "JSON custom scalar type",
   serialize(value: unknown): unknown {
     return value;
   },
@@ -113,36 +113,27 @@ export const resolvers = {
         limit?: number;
         offset?: number;
       },
-      context: ResolverContext,
+      context: ResolverContext
     ): Promise<CampaignCluster[]> => {
-      let clusters = context.clusteringEngine.getActiveClusters(
-        args.filters?.minThreatLevel,
-      );
+      let clusters = context.clusteringEngine.getActiveClusters(args.filters?.minThreatLevel);
 
       // Apply filters
       if (args.filters) {
         if (args.filters.status) {
-          clusters = clusters.filter((c) =>
-            args.filters!.status!.includes(c.status),
-          );
+          clusters = clusters.filter((c) => args.filters!.status!.includes(c.status));
         }
         if (args.filters.minSignalCount) {
-          clusters = clusters.filter(
-            (c) => c.signalCount >= args.filters!.minSignalCount!,
-          );
+          clusters = clusters.filter((c) => c.signalCount >= args.filters!.minSignalCount!);
         }
         if (args.filters.minCrossTenantConfidence) {
           clusters = clusters.filter(
-            (c) =>
-              c.crossTenantConfidence >=
-              args.filters!.minCrossTenantConfidence!,
+            (c) => c.crossTenantConfidence >= args.filters!.minCrossTenantConfidence!
           );
         }
         if (args.filters.temporalRange) {
           const { start, end } = args.filters.temporalRange;
           clusters = clusters.filter(
-            (c) =>
-              c.temporalRange.end >= start && c.temporalRange.start <= end,
+            (c) => c.temporalRange.end >= start && c.temporalRange.start <= end
           );
         }
       }
@@ -156,7 +147,7 @@ export const resolvers = {
     getCluster: async (
       _parent: unknown,
       args: { clusterId: string },
-      context: ResolverContext,
+      context: ResolverContext
     ): Promise<CampaignCluster | undefined> => {
       return context.clusteringEngine.getCluster(args.clusterId);
     },
@@ -164,7 +155,7 @@ export const resolvers = {
     getClusterHistory: async (
       _parent: unknown,
       args: { clusterId: string },
-      context: ResolverContext,
+      context: ResolverContext
     ): Promise<CampaignCluster[]> => {
       return context.clusteringEngine.getClusterHistory(args.clusterId);
     },
@@ -181,21 +172,17 @@ export const resolvers = {
         limit?: number;
         offset?: number;
       },
-      context: ResolverContext,
+      context: ResolverContext
     ): Promise<FederatedAlert[]> => {
       let alerts = context.alertEngine.getActiveAlerts();
 
       // Apply filters
       if (args.filters) {
         if (args.filters.severity) {
-          alerts = alerts.filter((a) =>
-            args.filters!.severity!.includes(a.severity),
-          );
+          alerts = alerts.filter((a) => args.filters!.severity!.includes(a.severity));
         }
         if (args.filters.status) {
-          alerts = alerts.filter((a) =>
-            args.filters!.status!.includes(a.status),
-          );
+          alerts = alerts.filter((a) => args.filters!.status!.includes(a.status));
         }
         if (args.filters.crossTenantOnly) {
           alerts = alerts.filter((a) => a.crossTenantSignal);
@@ -211,7 +198,7 @@ export const resolvers = {
     getAlert: async (
       _parent: unknown,
       args: { alertId: string },
-      context: ResolverContext,
+      context: ResolverContext
     ): Promise<FederatedAlert | undefined> => {
       return context.alertEngine.getAlert(args.alertId);
     },
@@ -219,61 +206,41 @@ export const resolvers = {
     getAggregatedStats: async (
       _parent: unknown,
       args: { signalType: SignalType; windowHours?: number },
-      context: ResolverContext,
+      context: ResolverContext
     ) => {
       return context.federationService.queryAggregatedStats(
         args.signalType,
-        args.windowHours || 24,
+        args.windowHours || 24
       );
     },
 
-    getCrossTenantOverlap: async (
-      _parent: unknown,
-      _args: unknown,
-      context: ResolverContext,
-    ) => {
+    getCrossTenantOverlap: async (_parent: unknown, _args: unknown, context: ResolverContext) => {
       return context.clusteringEngine.computeCrossTenantOverlap();
     },
 
-    getPrivacyBudget: async (
-      _parent: unknown,
-      _args: unknown,
-      context: ResolverContext,
-    ) => {
+    getPrivacyBudget: async (_parent: unknown, _args: unknown, context: ResolverContext) => {
       return context.federationService.getPrivacyBudgetStatus();
     },
 
     getParticipants: async (
       _parent: unknown,
       args: { status?: ParticipantStatus },
-      _context: ResolverContext,
+      _context: ResolverContext
     ) => {
       // Would fetch from federation service
       return [];
     },
 
-    getSharingAgreements: async (
-      _parent: unknown,
-      _args: unknown,
-      _context: ResolverContext,
-    ) => {
+    getSharingAgreements: async (_parent: unknown, _args: unknown, _context: ResolverContext) => {
       // Would fetch from federation service
       return [];
     },
 
-    getAlertMetrics: async (
-      _parent: unknown,
-      _args: unknown,
-      context: ResolverContext,
-    ) => {
+    getAlertMetrics: async (_parent: unknown, _args: unknown, context: ResolverContext) => {
       return context.alertEngine.getMetrics();
     },
 
-    getEvaluationMetrics: async (
-      _parent: unknown,
-      _args: unknown,
-      _context: ResolverContext,
-    ) => {
+    getEvaluationMetrics: async (_parent: unknown, _args: unknown, _context: ResolverContext) => {
       // Would compute from historical data
       return {
         timeToDetect: {
@@ -323,7 +290,7 @@ export const resolvers = {
           }>;
         };
       },
-      context: ResolverContext,
+      context: ResolverContext
     ) => {
       try {
         let signal: CampaignSignal;
@@ -333,21 +300,21 @@ export const resolvers = {
           case SignalType.NARRATIVE:
           case SignalType.CLAIM:
             signal = await context.signalNormalizer.normalizeNarrative({
-              text: args.input.content.text || '',
+              text: args.input.content.text || "",
               platform: args.input.channelMetadata.platform,
             });
             break;
 
           case SignalType.URL:
             signal = await context.signalNormalizer.normalizeURL({
-              url: args.input.content.url || '',
+              url: args.input.content.url || "",
             });
             break;
 
           case SignalType.ACCOUNT_HANDLE:
             signal = await context.signalNormalizer.normalizeAccount({
               platform: args.input.channelMetadata.platform,
-              handle: args.input.content.accountHandle || '',
+              handle: args.input.content.accountHandle || "",
             });
             break;
 
@@ -377,7 +344,7 @@ export const resolvers = {
     performClustering: async (
       _parent: unknown,
       args: { signalType?: SignalType; windowHours?: number },
-      context: ResolverContext,
+      context: ResolverContext
     ): Promise<CampaignCluster[]> => {
       const clusters = await context.clusteringEngine.performClustering();
 
@@ -396,12 +363,9 @@ export const resolvers = {
     acknowledgeAlert: async (
       _parent: unknown,
       args: { alertId: string },
-      context: ResolverContext,
+      context: ResolverContext
     ): Promise<FederatedAlert> => {
-      const success = context.alertEngine.acknowledgeAlert(
-        args.alertId,
-        context.participantId,
-      );
+      const success = context.alertEngine.acknowledgeAlert(args.alertId, context.participantId);
 
       if (!success) {
         throw new Error(`Alert not found: ${args.alertId}`);
@@ -425,21 +389,17 @@ export const resolvers = {
           lessonsLearned?: string[];
         };
       },
-      context: ResolverContext,
+      context: ResolverContext
     ): Promise<FederatedAlert> => {
-      const success = context.alertEngine.resolveAlert(
-        args.alertId,
-        context.participantId,
-        {
-          resolutionType: args.input.resolutionType as
-            | 'MITIGATED'
-            | 'EXPIRED'
-            | 'FALSE_POSITIVE'
-            | 'ESCALATED',
-          notes: args.input.notes,
-          lessonsLearned: args.input.lessonsLearned,
-        },
-      );
+      const success = context.alertEngine.resolveAlert(args.alertId, context.participantId, {
+        resolutionType: args.input.resolutionType as
+          | "MITIGATED"
+          | "EXPIRED"
+          | "FALSE_POSITIVE"
+          | "ESCALATED",
+        notes: args.input.notes,
+        lessonsLearned: args.input.lessonsLearned,
+      });
 
       if (!success) {
         throw new Error(`Alert not found: ${args.alertId}`);
@@ -457,7 +417,7 @@ export const resolvers = {
     generateResponsePack: async (
       _parent: unknown,
       args: { alertId: string },
-      context: ResolverContext,
+      context: ResolverContext
     ) => {
       const pack = await context.alertEngine.generateResponsePack(args.alertId);
 
@@ -471,12 +431,12 @@ export const resolvers = {
     registerParticipant: async (
       _parent: unknown,
       args: { publicKey: string; capabilities: string[] },
-      context: ResolverContext,
+      context: ResolverContext
     ) => {
       return context.federationService.registerParticipant(
         context.participantId,
         args.publicKey,
-        args.capabilities,
+        args.capabilities
       );
     },
 
@@ -490,24 +450,24 @@ export const resolvers = {
           validDays: number;
         };
       },
-      context: ResolverContext,
+      context: ResolverContext
     ) => {
       return context.federationService.createSharingAgreement(
         args.input.participantIds,
         args.input.signalTypes,
         args.input.privacyLevels,
-        args.input.validDays,
+        args.input.validDays
       );
     },
 
     initiateSecureAggregation: async (
       _parent: unknown,
       args: { aggregationType: string; participantIds: string[] },
-      context: ResolverContext,
+      context: ResolverContext
     ) => {
       return context.federationService.initiateSecureAggregation(
-        args.aggregationType as 'SUM' | 'MEAN' | 'COUNT',
-        args.participantIds,
+        args.aggregationType as "SUM" | "MEAN" | "COUNT",
+        args.participantIds
       );
     },
   },
@@ -531,13 +491,11 @@ export const resolvers = {
             AlertSeverity.CRITICAL,
           ];
 
-          const alertIndex = severityOrder.indexOf(
-            payload.alertCreated.severity,
-          );
+          const alertIndex = severityOrder.indexOf(payload.alertCreated.severity);
           const minIndex = severityOrder.indexOf(variables.minSeverity);
 
           return alertIndex >= minIndex;
-        },
+        }
       ),
     },
 
@@ -555,13 +513,11 @@ export const resolvers = {
             ThreatLevel.CRITICAL,
           ];
 
-          const clusterIndex = threatOrder.indexOf(
-            payload.clusterUpdated.threatLevel,
-          );
+          const clusterIndex = threatOrder.indexOf(payload.clusterUpdated.threatLevel);
           const minIndex = threatOrder.indexOf(variables.minThreatLevel);
 
           return clusterIndex >= minIndex;
-        },
+        }
       ),
     },
 

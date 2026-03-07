@@ -9,9 +9,9 @@ groups:
           team: sre
           channel: pagerduty
         annotations:
-          summary: 'Error rate above 2% for API and gateway'
+          summary: "Error rate above 2% for API and gateway"
           description: '5xx ratio is breaching SLO for {{ $labels.service }} (value: {{ printf "%0.2f" $value }}). Investigate upstream dependencies and recent deploys.'
-          runbook_url: 'https://docs.intelgraph.com/runbooks/summit-red-high-error'
+          runbook_url: "https://docs.intelgraph.com/runbooks/summit-red-high-error"
 
       - alert: SummitLatencyRegressionP95
         expr: histogram_quantile(0.95, sum by (le, service) (rate(http_request_duration_seconds_bucket{service=~"api|gateway"}[5m]))) > 0.6
@@ -21,9 +21,9 @@ groups:
           team: sre
           slo: latency
         annotations:
-          summary: 'p95 latency regression for {{ $labels.service }}'
-          description: 'p95 latency exceeds 600ms over 10m. Compare against baseline, check DB health, and verify recent feature flags.'
-          runbook_url: 'https://docs.intelgraph.com/runbooks/summit-red-latency'
+          summary: "p95 latency regression for {{ $labels.service }}"
+          description: "p95 latency exceeds 600ms over 10m. Compare against baseline, check DB health, and verify recent feature flags."
+          runbook_url: "https://docs.intelgraph.com/runbooks/summit-red-latency"
 
       - alert: SummitTrafficDrop
         expr: sum(rate(http_requests_total{service=~"api|gateway"}[5m])) < 1
@@ -33,9 +33,9 @@ groups:
           team: sre
           slo: availability
         annotations:
-          summary: 'Traffic drop detected for Summit entrypoints'
-          description: 'Request volume is near-zero for API or gateway for 5m. Verify ingress, DNS, and upstream health checks.'
-          runbook_url: 'https://docs.intelgraph.com/runbooks/summit-traffic-drop'
+          summary: "Traffic drop detected for Summit entrypoints"
+          description: "Request volume is near-zero for API or gateway for 5m. Verify ingress, DNS, and upstream health checks."
+          runbook_url: "https://docs.intelgraph.com/runbooks/summit-traffic-drop"
 
       - alert: SummitContainerCpuSaturation
         expr: avg(rate(container_cpu_usage_seconds_total{name=~"summit.*"}[5m])) * 100 > 80
@@ -45,9 +45,9 @@ groups:
           team: sre
           slo: saturation
         annotations:
-          summary: 'Container CPU saturation for Summit workloads'
-          description: 'Average CPU utilization across summit containers is above 80% for 10m. Check autoscaling, noisy neighbors, and workload spikes.'
-          runbook_url: 'https://docs.intelgraph.com/runbooks/summit-cpu-saturation'
+          summary: "Container CPU saturation for Summit workloads"
+          description: "Average CPU utilization across summit containers is above 80% for 10m. Check autoscaling, noisy neighbors, and workload spikes."
+          runbook_url: "https://docs.intelgraph.com/runbooks/summit-cpu-saturation"
 
       - alert: SummitContainerMemorySaturation
         expr: avg(container_memory_usage_bytes{name=~"summit.*"} / container_spec_memory_limit_bytes{name=~"summit.*"}) * 100 > 85
@@ -57,6 +57,6 @@ groups:
           team: sre
           slo: saturation
         annotations:
-          summary: 'Container memory saturation for Summit workloads'
-          description: 'Average memory utilization across summit containers is above 85% for 10m. Validate memory leaks, GC health, and right-size limits.'
-          runbook_url: 'https://docs.intelgraph.com/runbooks/summit-memory-saturation'
+          summary: "Container memory saturation for Summit workloads"
+          description: "Average memory utilization across summit containers is above 85% for 10m. Validate memory leaks, GC health, and right-size limits."
+          runbook_url: "https://docs.intelgraph.com/runbooks/summit-memory-saturation"

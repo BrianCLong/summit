@@ -1,7 +1,7 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice } from "@reduxjs/toolkit";
 
 const activeMeasuresSlice = createSlice({
-  name: 'activeMeasures',
+  name: "activeMeasures",
   initialState: { portfolio: [], tuners: { proportionality: 0.5 } },
   reducers: {
     updateTuners: (state, action) => {

@@ -26,10 +26,10 @@ on:
   pull_request:
     branches: [main]
     paths-ignore:
-      - 'docs/**'
-      - '**.md'
-      - 'prompts/**'
-      - 'evidence/**'
+      - "docs/**"
+      - "**.md"
+      - "prompts/**"
+      - "evidence/**"
     # CRITICAL: NO paths-ignore rules
     # This gate MUST run on every change to guarantee release readiness
   push:
@@ -62,7 +62,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
         with:
-          cache: 'pnpm'
+          cache: "pnpm"
           node-version: "20"
 
       - name: Setup Python

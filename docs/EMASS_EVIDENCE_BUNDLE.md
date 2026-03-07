@@ -164,13 +164,13 @@ apiVersion: v1
 kind: Node
 metadata:
   labels:
-    security.intelgraph.io/classification: 'UNCLASSIFIED'
-    security.intelgraph.io/fips-validated: 'true'
-    security.intelgraph.io/air-gap: 'true'
+    security.intelgraph.io/classification: "UNCLASSIFIED"
+    security.intelgraph.io/fips-validated: "true"
+    security.intelgraph.io/air-gap: "true"
   taints:
-    - key: 'classification/unclassified'
-      value: 'true'
-      effect: 'NoSchedule'
+    - key: "classification/unclassified"
+      value: "true"
+      effect: "NoSchedule"
 ```
 
 #### 4.3 Pod Scheduling Verification

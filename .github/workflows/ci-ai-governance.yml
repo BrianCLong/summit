@@ -3,9 +3,9 @@ name: AI Governance Enforcement
 on:
   pull_request:
     paths:
-      - 'src/agents/policies/**'
-      - 'src/api/**/middleware/policyGuard.ts'
-      - '.github/policies/**'
+      - "src/agents/policies/**"
+      - "src/api/**/middleware/policyGuard.ts"
+      - ".github/policies/**"
 
 jobs:
   ai-policy-validation:
@@ -35,7 +35,7 @@ jobs:
       - name: Setup Open Policy Agent (OPA)
         uses: open-policy-agent/setup-opa@v2
         with:
-          version: 'latest'
+          version: "latest"
 
       - name: Run Open Policy Agent (OPA) Validation
         run: |

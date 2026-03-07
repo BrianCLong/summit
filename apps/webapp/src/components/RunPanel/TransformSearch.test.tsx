@@ -38,7 +38,7 @@ describe('TransformSearch', () => {
 
     // Expect loading state first if needed, but waitFor handles async appearance
     await waitFor(() => {
-        expect(screen.getByText('Run Transforms')).toBeInTheDocument();
+      expect(screen.getByText('Run Transforms')).toBeInTheDocument();
     });
 
     expect(screen.getByTestId('transform-search-input')).toBeInTheDocument();
@@ -52,7 +52,7 @@ describe('TransformSearch', () => {
     render(<TransformSearch />);
 
     await waitFor(() => {
-        expect(screen.getByText('To IP Address')).toBeInTheDocument();
+      expect(screen.getByText('To IP Address')).toBeInTheDocument();
     });
 
     const input = screen.getByTestId('transform-search-input');
@@ -66,13 +66,13 @@ describe('TransformSearch', () => {
 
   it('shows error on fetch fail', async () => {
     (global.fetch as any).mockResolvedValue({
-        ok: false,
+      ok: false,
     });
 
     render(<TransformSearch />);
 
     await waitFor(() => {
-        expect(screen.getByText('Error loading transforms')).toBeInTheDocument();
+      expect(screen.getByText('Error loading transforms')).toBeInTheDocument();
     });
   });
 });

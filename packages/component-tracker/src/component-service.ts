@@ -1,8 +1,4 @@
-import {
-  Component,
-  BillOfMaterials,
-  ComponentInventory,
-} from '@intelgraph/supply-chain-types';
+import { Component, BillOfMaterials, ComponentInventory } from "@intelgraph/supply-chain-types";
 
 /**
  * Component availability status
@@ -23,9 +19,9 @@ export interface ComponentAvailability {
   alternatives: Array<{
     componentId: string;
     partNumber: string;
-    substitutionRisk: 'low' | 'medium' | 'high';
+    substitutionRisk: "low" | "medium" | "high";
   }>;
-  riskLevel: 'low' | 'medium' | 'high' | 'critical';
+  riskLevel: "low" | "medium" | "high" | "critical";
 }
 
 /**
@@ -39,7 +35,7 @@ export interface PriceVolatility {
     price: number;
   }>;
   volatilityScore: number; // 0-100
-  trend: 'stable' | 'increasing' | 'decreasing' | 'volatile';
+  trend: "stable" | "increasing" | "decreasing" | "volatile";
   priceChangePercent30Days: number;
   priceChangePercent90Days: number;
   forecast: Array<{
@@ -56,10 +52,10 @@ export interface ObsolescenceRisk {
   componentId: string;
   partNumber: string;
   manufacturer: string;
-  riskLevel: 'low' | 'medium' | 'high';
+  riskLevel: "low" | "medium" | "high";
   factors: Array<{
     factor: string;
-    impact: 'positive' | 'negative';
+    impact: "positive" | "negative";
     weight: number;
   }>;
   estimatedEndOfLife?: Date;
@@ -80,44 +76,44 @@ export class ComponentTracker {
     inventory: ComponentInventory[],
     component: Component
   ): Promise<ComponentAvailability> {
-    const componentInventory = inventory.filter(inv => inv.componentId === componentId);
+    const componentInventory = inventory.filter((inv) => inv.componentId === componentId);
 
     const totalQuantity = componentInventory.reduce((sum, inv) => sum + inv.quantity, 0);
     const availableQuantity = componentInventory
-      .filter(inv => inv.status === 'available')
+      .filter((inv) => inv.status === "available")
       .reduce((sum, inv) => sum + inv.quantity, 0);
     const reservedQuantity = componentInventory
-      .filter(inv => inv.status === 'reserved')
+      .filter((inv) => inv.status === "reserved")
       .reduce((sum, inv) => sum + inv.quantity, 0);
     const inTransitQuantity = componentInventory
-      .filter(inv => inv.status === 'in-transit')
+      .filter((inv) => inv.status === "in-transit")
       .reduce((sum, inv) => sum + inv.quantity, 0);
 
-    const locations = componentInventory.map(inv => ({
+    const locations = componentInventory.map((inv) => ({
       locationId: inv.locationId,
       quantity: inv.quantity,
       status: inv.status,
     }));
 
     // Determine risk level
-    let riskLevel: 'low' | 'medium' | 'high' | 'critical';
+    let riskLevel: "low" | "medium" | "high" | "critical";
     const availabilityRatio = availableQuantity / requiredQuantity;
 
     if (availabilityRatio >= 2) {
-      riskLevel = 'low';
+      riskLevel = "low";
     } else if (availabilityRatio >= 1) {
-      riskLevel = 'medium';
+      riskLevel = "medium";
     } else if (availabilityRatio >= 0.5) {
-      riskLevel = 'high';
+      riskLevel = "high";
     } else {
-      riskLevel = 'critical';
+      riskLevel = "critical";
     }
 
     // Get alternatives
-    const alternatives = (component.alternativeComponents || []).map(altId => ({
+    const alternatives = (component.alternativeComponents || []).map((altId) => ({
       componentId: altId,
       partNumber: `ALT-${altId.substring(0, 8)}`,
-      substitutionRisk: 'medium' as const,
+      substitutionRisk: "medium" as const,
     }));
 
     return {
@@ -147,7 +143,7 @@ export class ComponentTracker {
         currentPrice: 0,
         historicalPrices: [],
         volatilityScore: 0,
-        trend: 'stable',
+        trend: "stable",
         priceChangePercent30Days: 0,
         priceChangePercent90Days: 0,
         forecast: [],
@@ -162,29 +158,29 @@ export class ComponentTracker {
     const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
     const ninetyDaysAgo = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
 
-    const price30DaysAgo = sortedPrices.find(p => p.date <= thirtyDaysAgo)?.price || currentPrice;
-    const price90DaysAgo = sortedPrices.find(p => p.date <= ninetyDaysAgo)?.price || currentPrice;
+    const price30DaysAgo = sortedPrices.find((p) => p.date <= thirtyDaysAgo)?.price || currentPrice;
+    const price90DaysAgo = sortedPrices.find((p) => p.date <= ninetyDaysAgo)?.price || currentPrice;
 
     const change30Days = ((currentPrice - price30DaysAgo) / price30DaysAgo) * 100;
     const change90Days = ((currentPrice - price90DaysAgo) / price90DaysAgo) * 100;
 
     // Calculate volatility (standard deviation)
-    const prices = sortedPrices.map(p => p.price);
+    const prices = sortedPrices.map((p) => p.price);
     const avgPrice = prices.reduce((sum, p) => sum + p, 0) / prices.length;
     const variance = prices.reduce((sum, p) => sum + Math.pow(p - avgPrice, 2), 0) / prices.length;
     const stdDev = Math.sqrt(variance);
     const volatilityScore = Math.min(100, (stdDev / avgPrice) * 100);
 
     // Determine trend
-    let trend: 'stable' | 'increasing' | 'decreasing' | 'volatile';
+    let trend: "stable" | "increasing" | "decreasing" | "volatile";
     if (volatilityScore > 20) {
-      trend = 'volatile';
+      trend = "volatile";
     } else if (change30Days > 5) {
-      trend = 'increasing';
+      trend = "increasing";
     } else if (change30Days < -5) {
-      trend = 'decreasing';
+      trend = "decreasing";
     } else {
-      trend = 'stable';
+      trend = "stable";
     }
 
     // Simple forecast (linear regression)
@@ -208,25 +204,25 @@ export class ComponentTracker {
   assessObsolescence(component: Component): ObsolescenceRisk {
     const factors: Array<{
       factor: string;
-      impact: 'positive' | 'negative';
+      impact: "positive" | "negative";
       weight: number;
     }> = [];
 
     let riskScore = 0;
 
     // Check if component is marked for obsolescence
-    if (component.obsolescenceRisk === 'high') {
+    if (component.obsolescenceRisk === "high") {
       riskScore += 40;
       factors.push({
-        factor: 'Marked as high obsolescence risk',
-        impact: 'negative',
+        factor: "Marked as high obsolescence risk",
+        impact: "negative",
         weight: 40,
       });
-    } else if (component.obsolescenceRisk === 'medium') {
+    } else if (component.obsolescenceRisk === "medium") {
       riskScore += 20;
       factors.push({
-        factor: 'Marked as medium obsolescence risk',
-        impact: 'negative',
+        factor: "Marked as medium obsolescence risk",
+        impact: "negative",
         weight: 20,
       });
     }
@@ -235,8 +231,8 @@ export class ComponentTracker {
     if (component.isControlled) {
       riskScore += 10;
       factors.push({
-        factor: 'Export controlled component',
-        impact: 'negative',
+        factor: "Export controlled component",
+        impact: "negative",
         weight: 10,
       });
     }
@@ -245,45 +241,45 @@ export class ComponentTracker {
     if (component.alternativeComponents && component.alternativeComponents.length > 0) {
       factors.push({
         factor: `${component.alternativeComponents.length} alternative components available`,
-        impact: 'positive',
+        impact: "positive",
         weight: -10,
       });
     } else {
       riskScore += 15;
       factors.push({
-        factor: 'No alternative components identified',
-        impact: 'negative',
+        factor: "No alternative components identified",
+        impact: "negative",
         weight: 15,
       });
     }
 
     // Determine risk level
-    let riskLevel: 'low' | 'medium' | 'high';
+    let riskLevel: "low" | "medium" | "high";
     if (riskScore >= 50) {
-      riskLevel = 'high';
+      riskLevel = "high";
     } else if (riskScore >= 25) {
-      riskLevel = 'medium';
+      riskLevel = "medium";
     } else {
-      riskLevel = 'low';
+      riskLevel = "low";
     }
 
     // Generate mitigation actions
     const mitigationActions: string[] = [];
-    if (riskLevel === 'high') {
-      mitigationActions.push('Identify and qualify alternative components immediately');
-      mitigationActions.push('Build strategic inventory (last-time buy)');
-      mitigationActions.push('Engage with manufacturer for extended support');
-    } else if (riskLevel === 'medium') {
-      mitigationActions.push('Monitor manufacturer announcements');
-      mitigationActions.push('Begin alternative component qualification');
+    if (riskLevel === "high") {
+      mitigationActions.push("Identify and qualify alternative components immediately");
+      mitigationActions.push("Build strategic inventory (last-time buy)");
+      mitigationActions.push("Engage with manufacturer for extended support");
+    } else if (riskLevel === "medium") {
+      mitigationActions.push("Monitor manufacturer announcements");
+      mitigationActions.push("Begin alternative component qualification");
     } else {
-      mitigationActions.push('Continue regular monitoring');
+      mitigationActions.push("Continue regular monitoring");
     }
 
     return {
       componentId: component.id,
       partNumber: component.partNumber,
-      manufacturer: component.manufacturer || 'Unknown',
+      manufacturer: component.manufacturer || "Unknown",
       riskLevel,
       factors,
       mitigationActions,
@@ -315,14 +311,14 @@ export class ComponentTracker {
       componentId,
       partNumber: `PART-${componentId.substring(0, 8)}`,
       serialNumber,
-      currentLocation: 'Warehouse A',
-      status: 'In Stock',
+      currentLocation: "Warehouse A",
+      status: "In Stock",
       history: [
         {
           timestamp: new Date(),
-          location: 'Warehouse A',
-          event: 'Received',
-          actor: 'System',
+          location: "Warehouse A",
+          event: "Received",
+          actor: "System",
         },
       ],
     };
@@ -362,43 +358,51 @@ export class ComponentTracker {
     // Serial number format check
     const serialValid = this.validateSerialNumber(serialNumber);
     checks.push({
-      check: 'Serial Number Format',
+      check: "Serial Number Format",
       passed: serialValid,
-      details: serialValid ? 'Valid format' : 'Invalid format',
+      details: serialValid ? "Valid format" : "Invalid format",
     });
-    if (serialValid) {passedChecks++;}
+    if (serialValid) {
+      passedChecks++;
+    }
 
     // Manufacturer code check
     if (verificationData.manufacturerCode) {
       const codeValid = this.validateManufacturerCode(verificationData.manufacturerCode);
       checks.push({
-        check: 'Manufacturer Code',
+        check: "Manufacturer Code",
         passed: codeValid,
-        details: codeValid ? 'Valid code' : 'Invalid or unknown code',
+        details: codeValid ? "Valid code" : "Invalid or unknown code",
       });
-      if (codeValid) {passedChecks++;}
+      if (codeValid) {
+        passedChecks++;
+      }
     }
 
     // Batch number check
     if (verificationData.batchNumber) {
       const batchValid = this.validateBatchNumber(verificationData.batchNumber);
       checks.push({
-        check: 'Batch Number',
+        check: "Batch Number",
         passed: batchValid,
-        details: batchValid ? 'Valid batch' : 'Unknown batch',
+        details: batchValid ? "Valid batch" : "Unknown batch",
       });
-      if (batchValid) {passedChecks++;}
+      if (batchValid) {
+        passedChecks++;
+      }
     }
 
     // RFID authentication
     if (verificationData.rfidData) {
       const rfidValid = this.validateRFID(verificationData.rfidData);
       checks.push({
-        check: 'RFID Authentication',
+        check: "RFID Authentication",
         passed: rfidValid,
-        details: rfidValid ? 'Authenticated' : 'Authentication failed',
+        details: rfidValid ? "Authenticated" : "Authentication failed",
       });
-      if (rfidValid) {passedChecks++;}
+      if (rfidValid) {
+        passedChecks++;
+      }
     }
 
     const confidence = (passedChecks / totalChecks) * 100;
@@ -406,11 +410,11 @@ export class ComponentTracker {
 
     let recommendation: string;
     if (authentic) {
-      recommendation = 'Component appears authentic - approved for use';
+      recommendation = "Component appears authentic - approved for use";
     } else if (confidence >= 50) {
-      recommendation = 'Uncertain authenticity - additional verification recommended';
+      recommendation = "Uncertain authenticity - additional verification recommended";
     } else {
-      recommendation = 'High risk of counterfeit - quarantine and investigate';
+      recommendation = "High risk of counterfeit - quarantine and investigate";
     }
 
     return {
@@ -427,13 +431,17 @@ export class ComponentTracker {
     historicalPrices: Array<{ date: Date; price: number }>,
     daysAhead: number
   ): Array<{ date: Date; predictedPrice: number; confidence: number }> {
-    if (historicalPrices.length < 2) {return [];}
+    if (historicalPrices.length < 2) {
+      return [];
+    }
 
     // Simple linear regression
     const n = historicalPrices.length;
     const baseTime = historicalPrices[0].date.getTime();
-    const xValues = historicalPrices.map(p => (p.date.getTime() - baseTime) / (1000 * 60 * 60 * 24));
-    const yValues = historicalPrices.map(p => p.price);
+    const xValues = historicalPrices.map(
+      (p) => (p.date.getTime() - baseTime) / (1000 * 60 * 60 * 24)
+    );
+    const yValues = historicalPrices.map((p) => p.price);
 
     const sumX = xValues.reduce((sum, x) => sum + x, 0);
     const sumY = yValues.reduce((sum, y) => sum + y, 0);

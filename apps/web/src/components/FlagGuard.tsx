@@ -12,10 +12,13 @@ interface FlagProps {
 export function FlagGuard({ required, children, fallback }: FlagProps) {
   const { user, loading: authLoading } = useAuth()
 
-  const { hasAllPermissions, loading: rbacLoading } = useRbacMultiple(required, {
-    user,
-    fallback: false
-  })
+  const { hasAllPermissions, loading: rbacLoading } = useRbacMultiple(
+    required,
+    {
+      user,
+      fallback: false,
+    }
+  )
 
   if (authLoading || rbacLoading) {
     return null

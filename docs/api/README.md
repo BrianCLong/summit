@@ -21,12 +21,14 @@
 The IntelGraph Platform provides two complementary APIs:
 
 ### REST API
+
 - **Base URL**: `http://localhost:4000/api`
 - **Documentation**: [http://localhost:4000/api/docs](http://localhost:4000/api/docs)
 - **Format**: JSON
 - **Use Cases**: Case management, evidence handling, data ingestion, admin operations
 
 ### GraphQL API
+
 - **Endpoint**: `http://localhost:4000/graphql`
 - **Playground**: [http://localhost:4000/api/docs/graphql-playground](http://localhost:4000/api/docs/graphql-playground)
 - **Use Cases**: Entity queries, relationship mapping, analytics, investigations
@@ -85,6 +87,7 @@ Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...
 ### Token Validation
 
 Tokens are validated against:
+
 - JWKS endpoint for signature verification
 - Audience and issuer claims
 - Expiration time
@@ -97,32 +100,33 @@ Tokens are validated against:
 ### REST API Reference
 
 Full REST API documentation with interactive examples is available at:
+
 - **Swagger UI**: [/api/docs](http://localhost:4000/api/docs)
 - **ReDoc**: [/api/docs/redoc](http://localhost:4000/api/docs/redoc)
 - **OpenAPI Spec**: [/api/docs/openapi.json](http://localhost:4000/api/docs/openapi.json)
 
 ### Key Endpoints
 
-| Category | Endpoint | Description |
-|----------|----------|-------------|
-| **Cases** | `POST /api/cases` | Create new investigation case |
-| **Cases** | `GET /api/cases/{id}` | Get case by ID |
-| **Cases** | `POST /api/cases/{id}/approve` | Approve case |
-| **Cases** | `GET /api/cases/{id}/export` | Export case data |
-| **Evidence** | `GET /api/evidence/{id}/annotations` | List annotations |
-| **Evidence** | `POST /api/evidence/{id}/annotations` | Create annotation |
-| **Evidence** | `GET /api/evidence/{id}/pdf` | Export as PDF |
-| **Ingest** | `GET /api/ingest/connectors` | List data connectors |
-| **Ingest** | `POST /api/ingest/start` | Start ingestion job |
-| **Ingest** | `GET /api/ingest/progress/{id}` | Check job progress |
-| **Triage** | `GET /api/triage/suggestions` | List suggestions |
-| **Triage** | `POST /api/triage/suggestions` | Create suggestion |
-| **Triage** | `POST /api/triage/suggestions/{id}/approve` | Approve suggestion |
-| **Analytics** | `GET /api/analytics/link-prediction` | Predict entity links |
-| **Copilot** | `POST /api/copilot/estimate` | Estimate query cost |
-| **Copilot** | `POST /api/copilot/classify` | Classify prompt safety |
-| **Admin** | `GET /api/admin/users` | List users |
-| **Admin** | `GET /api/admin/audit` | Query audit logs |
+| Category      | Endpoint                                    | Description                   |
+| ------------- | ------------------------------------------- | ----------------------------- |
+| **Cases**     | `POST /api/cases`                           | Create new investigation case |
+| **Cases**     | `GET /api/cases/{id}`                       | Get case by ID                |
+| **Cases**     | `POST /api/cases/{id}/approve`              | Approve case                  |
+| **Cases**     | `GET /api/cases/{id}/export`                | Export case data              |
+| **Evidence**  | `GET /api/evidence/{id}/annotations`        | List annotations              |
+| **Evidence**  | `POST /api/evidence/{id}/annotations`       | Create annotation             |
+| **Evidence**  | `GET /api/evidence/{id}/pdf`                | Export as PDF                 |
+| **Ingest**    | `GET /api/ingest/connectors`                | List data connectors          |
+| **Ingest**    | `POST /api/ingest/start`                    | Start ingestion job           |
+| **Ingest**    | `GET /api/ingest/progress/{id}`             | Check job progress            |
+| **Triage**    | `GET /api/triage/suggestions`               | List suggestions              |
+| **Triage**    | `POST /api/triage/suggestions`              | Create suggestion             |
+| **Triage**    | `POST /api/triage/suggestions/{id}/approve` | Approve suggestion            |
+| **Analytics** | `GET /api/analytics/link-prediction`        | Predict entity links          |
+| **Copilot**   | `POST /api/copilot/estimate`                | Estimate query cost           |
+| **Copilot**   | `POST /api/copilot/classify`                | Classify prompt safety        |
+| **Admin**     | `GET /api/admin/users`                      | List users                    |
+| **Admin**     | `GET /api/admin/audit`                      | Query audit logs              |
 
 ---
 
@@ -271,17 +275,16 @@ curl -X POST http://localhost:4000/api/copilot/cookbook \
 ```graphql
 # Create a person entity
 mutation CreatePerson {
-  createEntity(input: {
-    type: PERSON
-    name: "John Doe"
-    description: "Subject of investigation"
-    properties: {
-      dateOfBirth: "1980-01-01"
-      nationality: "US"
+  createEntity(
+    input: {
+      type: PERSON
+      name: "John Doe"
+      description: "Subject of investigation"
+      properties: { dateOfBirth: "1980-01-01", nationality: "US" }
+      confidence: 0.95
+      sourceIds: ["manual-entry-1"]
     }
-    confidence: 0.95
-    sourceIds: ["manual-entry-1"]
-  }) {
+  ) {
     id
     name
     type
@@ -292,21 +295,26 @@ mutation CreatePerson {
 
 # Create a relationship
 mutation CreateRelationship {
-  createRelationship(input: {
-    type: WORKS_FOR
-    sourceId: "person123"
-    targetId: "org456"
-    properties: {
-      position: "CEO"
-      startDate: "2020-01-01"
+  createRelationship(
+    input: {
+      type: WORKS_FOR
+      sourceId: "person123"
+      targetId: "org456"
+      properties: { position: "CEO", startDate: "2020-01-01" }
+      confidence: 1.0
+      sourceIds: ["linkedin-1"]
     }
-    confidence: 1.0
-    sourceIds: ["linkedin-1"]
-  }) {
+  ) {
     id
     type
-    source { id name }
-    target { id name }
+    source {
+      id
+      name
+    }
+    target {
+      id
+      name
+    }
   }
 }
 ```
@@ -316,12 +324,9 @@ mutation CreateRelationship {
 ```graphql
 # Find shortest path between two entities
 query FindPath {
-  findPaths(input: {
-    sourceId: "person1"
-    targetId: "person2"
-    algorithm: SHORTEST_PATH
-    maxDepth: 6
-  }) {
+  findPaths(
+    input: { sourceId: "person1", targetId: "person2", algorithm: SHORTEST_PATH, maxDepth: 6 }
+  ) {
     paths {
       nodes {
         id
@@ -360,12 +365,14 @@ query Centrality {
 ```graphql
 # Create investigation with entities
 mutation CreateInvestigation {
-  createInvestigation(input: {
-    name: "Fraud Investigation Alpha"
-    description: "Investigating suspicious transactions"
-    priority: HIGH
-    assignedTo: ["user1", "user2"]
-  }) {
+  createInvestigation(
+    input: {
+      name: "Fraud Investigation Alpha"
+      description: "Investigating suspicious transactions"
+      priority: HIGH
+      assignedTo: ["user1", "user2"]
+    }
+  ) {
     id
     name
     status
@@ -393,10 +400,30 @@ query GetInvestigation {
     id
     name
     status
-    entities { id name type }
-    relationships { id type source { name } target { name } }
-    hypotheses { title confidence status }
-    timeline { timestamp title }
+    entities {
+      id
+      name
+      type
+    }
+    relationships {
+      id
+      type
+      source {
+        name
+      }
+      target {
+        name
+      }
+    }
+    hypotheses {
+      title
+      confidence
+      status
+    }
+    timeline {
+      timestamp
+      title
+    }
     summary {
       entityCount
       relationshipCount
@@ -474,15 +501,15 @@ GraphQL returns both data and errors:
 
 ### Common Error Codes
 
-| HTTP Status | Error Code | Description |
-|-------------|------------|-------------|
-| 400 | `Bad Request` | Invalid request format or parameters |
-| 401 | `Unauthorized` | Missing or invalid JWT token |
-| 403 | `Forbidden` | Insufficient permissions |
-| 404 | `Not Found` | Resource not found |
-| 409 | `Conflict` | Resource conflict (e.g., nonce replay) |
-| 429 | `Too Many Requests` | Rate limit exceeded |
-| 500 | `Internal Server Error` | Server-side error |
+| HTTP Status | Error Code              | Description                            |
+| ----------- | ----------------------- | -------------------------------------- |
+| 400         | `Bad Request`           | Invalid request format or parameters   |
+| 401         | `Unauthorized`          | Missing or invalid JWT token           |
+| 403         | `Forbidden`             | Insufficient permissions               |
+| 404         | `Not Found`             | Resource not found                     |
+| 409         | `Conflict`              | Resource conflict (e.g., nonce replay) |
+| 429         | `Too Many Requests`     | Rate limit exceeded                    |
+| 500         | `Internal Server Error` | Server-side error                      |
 
 ---
 
@@ -500,11 +527,11 @@ X-RateLimit-Reset: 1642248000
 
 ### Limits by Endpoint
 
-| Endpoint | Limit | Window |
-|----------|-------|--------|
-| `/api/admin/audit/record` | 60 requests | 1 minute |
-| GraphQL queries | 100 requests | 1 minute |
-| REST endpoints | 200 requests | 1 minute |
+| Endpoint                  | Limit        | Window   |
+| ------------------------- | ------------ | -------- |
+| `/api/admin/audit/record` | 60 requests  | 1 minute |
+| GraphQL queries           | 100 requests | 1 minute |
+| REST endpoints            | 200 requests | 1 minute |
 
 ### Handling Rate Limits
 
@@ -514,18 +541,18 @@ async function makeRequestWithRetry(url, options, maxRetries = 3) {
     const response = await fetch(url, options);
 
     if (response.status === 429) {
-      const resetTime = response.headers.get('X-RateLimit-Reset');
+      const resetTime = response.headers.get("X-RateLimit-Reset");
       const waitTime = resetTime ? parseInt(resetTime) * 1000 - Date.now() : 1000;
 
       console.log(`Rate limited. Waiting ${waitTime}ms...`);
-      await new Promise(resolve => setTimeout(resolve, waitTime));
+      await new Promise((resolve) => setTimeout(resolve, waitTime));
       continue;
     }
 
     return response;
   }
 
-  throw new Error('Max retries exceeded');
+  throw new Error("Max retries exceeded");
 }
 ```
 
@@ -536,6 +563,7 @@ async function makeRequestWithRetry(url, options, maxRetries = 3) {
 ### 1. Security
 
 ✅ **DO:**
+
 - Always use HTTPS in production
 - Rotate JWT tokens regularly
 - Store tokens securely (never in localStorage for web apps)
@@ -543,6 +571,7 @@ async function makeRequestWithRetry(url, options, maxRetries = 3) {
 - Use environment variables for sensitive configuration
 
 ❌ **DON'T:**
+
 - Hardcode API tokens in source code
 - Expose tokens in URLs or logs
 - Bypass SSL certificate validation
@@ -551,6 +580,7 @@ async function makeRequestWithRetry(url, options, maxRetries = 3) {
 ### 2. Performance
 
 ✅ **DO:**
+
 - Use GraphQL field selection to request only needed data
 - Implement pagination for large result sets
 - Cache responses when appropriate
@@ -558,6 +588,7 @@ async function makeRequestWithRetry(url, options, maxRetries = 3) {
 - Implement exponential backoff for retries
 
 ❌ **DON'T:**
+
 - Make redundant API calls
 - Fetch large datasets without pagination
 - Ignore rate limit headers
@@ -566,6 +597,7 @@ async function makeRequestWithRetry(url, options, maxRetries = 3) {
 ### 3. Error Handling
 
 ✅ **DO:**
+
 - Always check both `data` and `errors` in GraphQL responses
 - Implement proper error logging
 - Provide user-friendly error messages
@@ -573,6 +605,7 @@ async function makeRequestWithRetry(url, options, maxRetries = 3) {
 - Retry transient errors with exponential backoff
 
 ❌ **DON'T:**
+
 - Expose internal error details to end users
 - Ignore error responses
 - Retry non-idempotent operations without caution
@@ -580,6 +613,7 @@ async function makeRequestWithRetry(url, options, maxRetries = 3) {
 ### 4. GraphQL Best Practices
 
 ✅ **DO:**
+
 - Use variables for dynamic values
 - Leverage fragments for reusable field selections
 - Use persisted queries in production
@@ -587,6 +621,7 @@ async function makeRequestWithRetry(url, options, maxRetries = 3) {
 - Subscribe to updates for real-time features
 
 ❌ **DON'T:**
+
 - Use string interpolation for query parameters
 - Create overly complex nested queries
 - Subscribe to updates you don't need
@@ -594,6 +629,7 @@ async function makeRequestWithRetry(url, options, maxRetries = 3) {
 ### 5. Monitoring
 
 ✅ **DO:**
+
 - Monitor API response times
 - Track error rates and types
 - Set up alerts for rate limit warnings
@@ -608,13 +644,13 @@ async function makeRequestWithRetry(url, options, maxRetries = 3) {
 
 ```javascript
 // Using fetch
-const response = await fetch('http://localhost:4000/api/cases', {
-  method: 'POST',
+const response = await fetch("http://localhost:4000/api/cases", {
+  method: "POST",
   headers: {
-    'Authorization': `Bearer ${token}`,
-    'Content-Type': 'application/json'
+    Authorization: `Bearer ${token}`,
+    "Content-Type": "application/json",
   },
-  body: JSON.stringify({ title: 'New Case' })
+  body: JSON.stringify({ title: "New Case" }),
 });
 
 const data = await response.json();

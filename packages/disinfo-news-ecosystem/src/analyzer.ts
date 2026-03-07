@@ -1,21 +1,21 @@
-import { analyzeContent } from './signals/content.js';
-import { analyzeProvenance } from './signals/provenance.js';
-import { analyzeNetwork } from './signals/network.js';
-import { generatePlaybook } from './playbooks.js';
+import { analyzeContent } from "./signals/content.js";
+import { analyzeProvenance } from "./signals/provenance.js";
+import { analyzeNetwork } from "./signals/network.js";
+import { generatePlaybook } from "./playbooks.js";
 
 function sanitize(text: string): string {
-  return text.replace(/<[^>]*>/g, '');
+  return text.replace(/<[^>]*>/g, "");
 }
 
 export async function analyzeBundle(bundle: any, evidenceId: string) {
   const sanitizedBundle = {
-      ...bundle,
-      items: (bundle.items || []).map((item: any) => {
-          if (item.text) {
-              return { ...item, text: sanitize(item.text) };
-          }
-          return item;
-      })
+    ...bundle,
+    items: (bundle.items || []).map((item: any) => {
+      if (item.text) {
+        return { ...item, text: sanitize(item.text) };
+      }
+      return item;
+    }),
   };
 
   const contentSignals = analyzeContent(sanitizedBundle);
@@ -30,8 +30,8 @@ export async function analyzeBundle(bundle: any, evidenceId: string) {
     signals: {
       content: contentSignals,
       provenance: provenanceSignals,
-      network: networkSignals
-    }
+      network: networkSignals,
+    },
   };
 
   const { mitigations, targetingGap } = generatePlaybook(reportBase);
@@ -39,7 +39,7 @@ export async function analyzeBundle(bundle: any, evidenceId: string) {
   return {
     ...reportBase,
     targeting_gap: targetingGap,
-    mitigations: mitigations
+    mitigations: mitigations,
   };
 }
 

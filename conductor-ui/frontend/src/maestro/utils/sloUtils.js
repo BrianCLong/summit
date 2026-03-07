@@ -1,32 +1,30 @@
-import React from 'react';
+import React from "react";
 export var SLIType;
 (function (SLIType) {
-  SLIType['AVAILABILITY'] = 'availability';
-  SLIType['LATENCY'] = 'latency';
-  SLIType['ERROR_RATE'] = 'error_rate';
-  SLIType['THROUGHPUT'] = 'throughput';
-  SLIType['CUSTOM'] = 'custom';
+  SLIType["AVAILABILITY"] = "availability";
+  SLIType["LATENCY"] = "latency";
+  SLIType["ERROR_RATE"] = "error_rate";
+  SLIType["THROUGHPUT"] = "throughput";
+  SLIType["CUSTOM"] = "custom";
 })(SLIType || (SLIType = {}));
 export var AlertSeverity;
 (function (AlertSeverity) {
-  AlertSeverity['INFO'] = 'info';
-  AlertSeverity['WARNING'] = 'warning';
-  AlertSeverity['CRITICAL'] = 'critical';
+  AlertSeverity["INFO"] = "info";
+  AlertSeverity["WARNING"] = "warning";
+  AlertSeverity["CRITICAL"] = "critical";
 })(AlertSeverity || (AlertSeverity = {}));
 export class SLOManager {
   constructor(options = {}) {
-    this.endpoint = options.endpoint || '/api/maestro/v1/slo';
+    this.endpoint = options.endpoint || "/api/maestro/v1/slo";
     this.grafanaUrl =
-      options.grafanaUrl ||
-      process.env.GRAFANA_URL ||
-      'https://grafana.intelgraph.io';
-    this.grafanaToken = options.grafanaToken || process.env.GRAFANA_TOKEN || '';
+      options.grafanaUrl || process.env.GRAFANA_URL || "https://grafana.intelgraph.io";
+    this.grafanaToken = options.grafanaToken || process.env.GRAFANA_TOKEN || "";
   }
   // SLO CRUD operations
   async createSLO(slo) {
     const response = await fetch(`${this.endpoint}/slos`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(slo),
     });
     if (!response.ok) {
@@ -36,9 +34,9 @@ export class SLOManager {
   }
   async getSLOs(filters) {
     const params = new URLSearchParams();
-    if (filters?.service) params.append('service', filters.service);
-    if (filters?.status) params.append('status', filters.status);
-    if (filters?.limit) params.append('limit', filters.limit.toString());
+    if (filters?.service) params.append("service", filters.service);
+    if (filters?.status) params.append("status", filters.status);
+    if (filters?.limit) params.append("limit", filters.limit.toString());
     const response = await fetch(`${this.endpoint}/slos?${params}`);
     if (!response.ok) {
       throw new Error(`Failed to fetch SLOs: ${response.statusText}`);
@@ -54,8 +52,8 @@ export class SLOManager {
   }
   async updateSLO(id, updates) {
     const response = await fetch(`${this.endpoint}/slos/${id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(updates),
     });
     if (!response.ok) {
@@ -65,7 +63,7 @@ export class SLOManager {
   }
   async deleteSLO(id) {
     const response = await fetch(`${this.endpoint}/slos/${id}`, {
-      method: 'DELETE',
+      method: "DELETE",
     });
     if (!response.ok) {
       throw new Error(`Failed to delete SLO: ${response.statusText}`);
@@ -74,8 +72,8 @@ export class SLOManager {
   // SLI calculation
   async calculateSLI(slo, timeRange) {
     const response = await fetch(`${this.endpoint}/slos/${slo.id}/sli`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ timeRange }),
     });
     if (!response.ok) {
@@ -95,15 +93,12 @@ export class SLOManager {
     const remaining = Math.max(0, total - consumed);
     const consumedPercentage = total > 0 ? (consumed / total) * 100 : 0;
     // Calculate burn rate (simplified)
-    const burnRate =
-      consumed > 0 ? consumed / (windowMs / (1000 * 60 * 60)) : 0; // errors per hour
+    const burnRate = consumed > 0 ? consumed / (windowMs / (1000 * 60 * 60)) : 0; // errors per hour
     // Project exhaustion date
     let exhaustionDate;
     if (burnRate > 0 && remaining > 0) {
       const hoursToExhaustion = remaining / burnRate;
-      exhaustionDate = new Date(
-        Date.now() + hoursToExhaustion * 60 * 60 * 1000,
-      ).toISOString();
+      exhaustionDate = new Date(Date.now() + hoursToExhaustion * 60 * 60 * 1000).toISOString();
     }
     const isHealthy = consumedPercentage < 80; // Healthy if less than 80% consumed
     return {
@@ -122,11 +117,11 @@ export class SLOManager {
     const value = parseInt(match[1]);
     const unit = match[2];
     switch (unit) {
-      case 'm':
+      case "m":
         return value * 60 * 1000; // minutes
-      case 'h':
+      case "h":
         return value * 60 * 60 * 1000; // hours
-      case 'd':
+      case "d":
         return value * 24 * 60 * 60 * 1000; // days
       default:
         throw new Error(`Unknown window unit: ${unit}`);
@@ -136,9 +131,9 @@ export class SLOManager {
   async createGrafanaDashboard(slo) {
     const dashboard = this.generateSLODashboard(slo);
     const response = await fetch(`${this.grafanaUrl}/api/dashboards/db`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         Authorization: `Bearer ${this.grafanaToken}`,
       },
       body: JSON.stringify({
@@ -147,9 +142,7 @@ export class SLOManager {
       }),
     });
     if (!response.ok) {
-      throw new Error(
-        `Failed to create Grafana dashboard: ${response.statusText}`,
-      );
+      throw new Error(`Failed to create Grafana dashboard: ${response.statusText}`);
     }
     const result = await response.json();
     return { ...dashboard, id: result.id, uid: result.uid };
@@ -158,59 +151,59 @@ export class SLOManager {
     const panels = [
       {
         id: 1,
-        title: 'SLO Compliance',
-        type: 'stat',
+        title: "SLO Compliance",
+        type: "stat",
         targets: [
           {
             expr: this.generateSLIQuery(slo.sli),
-            refId: 'A',
-            legendFormat: 'Current SLI',
+            refId: "A",
+            legendFormat: "Current SLI",
           },
         ],
         fieldConfig: {
           defaults: {
-            unit: 'percent',
+            unit: "percent",
             min: 0,
             max: 100,
             thresholds: {
               steps: [
-                { color: 'red', value: 0 },
-                { color: 'yellow', value: slo.objective - 5 },
-                { color: 'green', value: slo.objective },
+                { color: "red", value: 0 },
+                { color: "yellow", value: slo.objective - 5 },
+                { color: "green", value: slo.objective },
               ],
             },
           },
         },
         options: {
-          orientation: 'auto',
+          orientation: "auto",
           reduceOptions: {
             values: false,
-            calcs: ['lastNotNull'],
+            calcs: ["lastNotNull"],
           },
         },
         gridPos: { h: 8, w: 12, x: 0, y: 0 },
       },
       {
         id: 2,
-        title: 'Error Budget',
-        type: 'gauge',
+        title: "Error Budget",
+        type: "gauge",
         targets: [
           {
             expr: `100 - (${this.generateSLIQuery(slo.sli)})`,
-            refId: 'A',
-            legendFormat: 'Error Budget Consumed',
+            refId: "A",
+            legendFormat: "Error Budget Consumed",
           },
         ],
         fieldConfig: {
           defaults: {
-            unit: 'percent',
+            unit: "percent",
             min: 0,
             max: 100 - slo.objective,
             thresholds: {
               steps: [
-                { color: 'green', value: 0 },
-                { color: 'yellow', value: (100 - slo.objective) * 0.7 },
-                { color: 'red', value: (100 - slo.objective) * 0.9 },
+                { color: "green", value: 0 },
+                { color: "yellow", value: (100 - slo.objective) * 0.7 },
+                { color: "red", value: (100 - slo.objective) * 0.9 },
               ],
             },
           },
@@ -223,64 +216,64 @@ export class SLOManager {
       },
       {
         id: 3,
-        title: 'SLI Trend',
-        type: 'timeseries',
+        title: "SLI Trend",
+        type: "timeseries",
         targets: [
           {
             expr: this.generateSLIQuery(slo.sli),
-            refId: 'A',
-            legendFormat: 'SLI Value',
-            interval: '1m',
+            refId: "A",
+            legendFormat: "SLI Value",
+            interval: "1m",
           },
           {
             expr: `${slo.objective}`,
-            refId: 'B',
-            legendFormat: 'SLO Target',
+            refId: "B",
+            legendFormat: "SLO Target",
           },
         ],
         fieldConfig: {
           defaults: {
-            unit: 'percent',
+            unit: "percent",
             min: 0,
             max: 100,
           },
         },
         options: {
-          legend: { displayMode: 'list', placement: 'bottom' },
+          legend: { displayMode: "list", placement: "bottom" },
         },
         gridPos: { h: 8, w: 24, x: 0, y: 8 },
       },
       {
         id: 4,
-        title: 'Error Budget Burn Rate',
-        type: 'timeseries',
+        title: "Error Budget Burn Rate",
+        type: "timeseries",
         targets: [
           {
             expr: `rate(${this.generateSLIQuery(slo.sli)}[5m]) * 60 * 60`, // Errors per hour
-            refId: 'A',
-            legendFormat: 'Burn Rate (errors/hour)',
-            interval: '1m',
+            refId: "A",
+            legendFormat: "Burn Rate (errors/hour)",
+            interval: "1m",
           },
         ],
         fieldConfig: {
           defaults: {
-            unit: 'short',
+            unit: "short",
           },
         },
         options: {
-          legend: { displayMode: 'list', placement: 'bottom' },
+          legend: { displayMode: "list", placement: "bottom" },
         },
         gridPos: { h: 8, w: 12, x: 0, y: 16 },
       },
       {
         id: 5,
-        title: 'Alert Status',
-        type: 'table',
+        title: "Alert Status",
+        type: "table",
         targets: [
           {
             expr: `ALERTS{service="${slo.service}"}`,
-            refId: 'A',
-            format: 'table',
+            refId: "A",
+            format: "table",
           },
         ],
         fieldConfig: {
@@ -295,29 +288,29 @@ export class SLOManager {
     return {
       title: `SLO: ${slo.name}`,
       description: `Service Level Objective dashboard for ${slo.service}`,
-      tags: ['slo', 'maestro', slo.service],
+      tags: ["slo", "maestro", slo.service],
       panels,
       templating: {
         list: [
           {
-            name: 'service',
-            label: 'Service',
-            type: 'constant',
+            name: "service",
+            label: "Service",
+            type: "constant",
             query: slo.service,
           },
           {
-            name: 'window',
-            label: 'Time Window',
-            type: 'constant',
+            name: "window",
+            label: "Time Window",
+            type: "constant",
             query: slo.window,
           },
         ],
       },
       time: {
-        from: 'now-24h',
-        to: 'now',
+        from: "now-24h",
+        to: "now",
       },
-      refresh: '1m',
+      refresh: "1m",
       schemaVersion: 30,
       version: 1,
     };
@@ -343,8 +336,8 @@ export class SLOManager {
     const alerts = this.generateAlertRules(slo);
     for (const alert of alerts) {
       await fetch(`${this.endpoint}/alerts`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(alert),
       });
     }
@@ -357,7 +350,7 @@ export class SLOManager {
         name: `${slo.name} - SLI Breach`,
         condition: `${baseQuery} < ${slo.objective}`,
         threshold: slo.objective,
-        duration: '5m',
+        duration: "5m",
         severity: AlertSeverity.WARNING,
         enabled: slo.alerting.enabled,
       },
@@ -366,7 +359,7 @@ export class SLOManager {
         name: `${slo.name} - Error Budget Critical`,
         condition: `(100 - ${baseQuery}) > ${(100 - slo.objective) * 0.8}`,
         threshold: (100 - slo.objective) * 0.8,
-        duration: '2m',
+        duration: "2m",
         severity: AlertSeverity.CRITICAL,
         enabled: slo.alerting.enabled,
       },
@@ -375,7 +368,7 @@ export class SLOManager {
         name: `${slo.name} - High Burn Rate`,
         condition: `rate(${baseQuery}[10m]) > ${(100 - slo.objective) * 0.1}`,
         threshold: (100 - slo.objective) * 0.1,
-        duration: '10m',
+        duration: "10m",
         severity: AlertSeverity.WARNING,
         enabled: slo.alerting.enabled,
       },
@@ -394,16 +387,11 @@ export class SLOManager {
           errorBudget,
           trend: this.calculateTrend(sliData.datapoints),
         };
-      }),
+      })
     );
-    const compliantSLOs = reports.filter(
-      (r) => r.compliance >= r.slo.objective,
-    ).length;
-    const atRiskSLOs = reports.filter(
-      (r) => r.errorBudget.consumedPercentage > 80,
-    ).length;
-    const averageCompliance =
-      reports.reduce((sum, r) => sum + r.compliance, 0) / reports.length;
+    const compliantSLOs = reports.filter((r) => r.compliance >= r.slo.objective).length;
+    const atRiskSLOs = reports.filter((r) => r.errorBudget.consumedPercentage > 80).length;
+    const averageCompliance = reports.reduce((sum, r) => sum + r.compliance, 0) / reports.length;
     return {
       summary: {
         totalSLOs: reports.length,
@@ -415,22 +403,17 @@ export class SLOManager {
     };
   }
   calculateTrend(datapoints) {
-    if (datapoints.length < 2) return 'stable';
+    if (datapoints.length < 2) return "stable";
     const recent = datapoints.slice(-Math.min(10, datapoints.length));
-    const sum = recent.reduce(
-      (acc, [_, value], idx) => acc + value * (idx + 1),
-      0,
-    );
+    const sum = recent.reduce((acc, [_, value], idx) => acc + value * (idx + 1), 0);
     const weightedSum = recent.reduce((acc, _, idx) => acc + (idx + 1), 0);
     const weightedAvg = sum / weightedSum;
     const earlierAvg =
-      recent
-        .slice(0, Math.floor(recent.length / 2))
-        .reduce((acc, [_, value]) => acc + value, 0) /
+      recent.slice(0, Math.floor(recent.length / 2)).reduce((acc, [_, value]) => acc + value, 0) /
       Math.floor(recent.length / 2);
     const diff = weightedAvg - earlierAvg;
-    if (Math.abs(diff) < 1) return 'stable';
-    return diff > 0 ? 'improving' : 'degrading';
+    if (Math.abs(diff) < 1) return "stable";
+    return diff > 0 ? "improving" : "degrading";
   }
 }
 // Global SLO manager instance
@@ -447,7 +430,7 @@ export const useSLO = () => {
       const fetchedSLOs = await sloManager.getSLOs(filters);
       setSLOs(fetchedSLOs);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch SLOs');
+      setError(err instanceof Error ? err.message : "Failed to fetch SLOs");
     } finally {
       setLoading(false);
     }
@@ -458,7 +441,7 @@ export const useSLO = () => {
       setSLOs((prev) => [...prev, newSLO]);
       return newSLO;
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create SLO');
+      setError(err instanceof Error ? err.message : "Failed to create SLO");
       throw err;
     }
   }, []);
@@ -468,7 +451,7 @@ export const useSLO = () => {
       setSLOs((prev) => prev.map((slo) => (slo.id === id ? updatedSLO : slo)));
       return updatedSLO;
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to update SLO');
+      setError(err instanceof Error ? err.message : "Failed to update SLO");
       throw err;
     }
   }, []);
@@ -477,7 +460,7 @@ export const useSLO = () => {
       await sloManager.deleteSLO(id);
       setSLOs((prev) => prev.filter((slo) => slo.id !== id));
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to delete SLO');
+      setError(err instanceof Error ? err.message : "Failed to delete SLO");
       throw err;
     }
   }, []);

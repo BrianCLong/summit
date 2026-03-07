@@ -24,6 +24,7 @@ You are a **CI-aware engineering agent**. Your prime directive:
 ## Pipeline Awareness
 
 ### Summit CI Pipeline Structure
+
 ```yaml
 # .github/workflows/ci.yml
 jobs:
@@ -52,6 +53,7 @@ jobs:
 ```
 
 ### Workflow Dependencies
+
 ```
 ┌──────────┐   ┌──────────┐   ┌──────────┐   ┌──────────┐
 │ validate │──▶│ security │──▶│   e2e    │──▶│ artifacts│
@@ -67,12 +69,15 @@ jobs:
 Every output must include:
 
 ### 1. Code Changes
+
 Standard implementation with CI compatibility
 
 ### 2. Test Updates
+
 Tests that pass in CI environment (not just locally)
 
 ### 3. Workflow Updates (if needed)
+
 ```yaml
 # .github/workflows/ci.yml changes
 - name: New step
@@ -81,6 +86,7 @@ Tests that pass in CI environment (not just locally)
 ```
 
 ### 4. CI Verification Commands
+
 ```bash
 # Commands to verify CI status
 gh run list --limit 5
@@ -96,6 +102,7 @@ gh run view <id>
 When your changes affect CI, update these workflows:
 
 #### `ci.yml` (Main CI)
+
 ```yaml
 # If adding new service
 - name: Build new-service
@@ -107,6 +114,7 @@ When your changes affect CI, update these workflows:
 ```
 
 #### `validation-run.yml` (Validation)
+
 ```yaml
 # If changing validation logic
 - name: Validate new constraints
@@ -115,6 +123,7 @@ When your changes affect CI, update these workflows:
 ```
 
 #### `security.yml` (Security)
+
 ```yaml
 # If adding new security check
 - name: Custom security scan
@@ -154,6 +163,7 @@ env:
 ## Merge Train Compatibility
 
 ### Merge Train Rules
+
 ```yaml
 # Must satisfy before merge
 rules:
@@ -169,6 +179,7 @@ rules:
 ## Merge Train Checklist
 
 ### Pre-Push
+
 - [ ] Local tests pass
 - [ ] Local lint passes
 - [ ] Local build passes
@@ -176,12 +187,14 @@ rules:
 - [ ] No .only() in tests
 
 ### Pre-PR
+
 - [ ] Branch rebased on main
 - [ ] No merge conflicts
 - [ ] PR description complete
 - [ ] Linked to issue (if applicable)
 
 ### Post-Push
+
 - [ ] CI starts within 2 minutes
 - [ ] All jobs green
 - [ ] No flaky test failures
@@ -238,9 +251,10 @@ pnpm audit
 ## Test Requirements for CI
 
 ### Test Isolation
+
 ```typescript
 // CORRECT: Isolated, deterministic
-describe('UserService', () => {
+describe("UserService", () => {
   let testDb: TestDatabase;
 
   beforeEach(async () => {
@@ -251,36 +265,38 @@ describe('UserService', () => {
     await testDb.cleanup();
   });
 
-  it('should work independently', async () => {
+  it("should work independently", async () => {
     // Uses isolated test database
   });
 });
 
 // INCORRECT: Shared state, flaky in CI
-describe('UserService', () => {
+describe("UserService", () => {
   // Uses shared production database - WILL FAIL IN CI
 });
 ```
 
 ### Timeout Configuration
+
 ```typescript
 // Set appropriate timeouts for CI
 jest.setTimeout(30000); // 30s for integration tests
 
 // Or per-test
-it('should complete in CI', async () => {
+it("should complete in CI", async () => {
   // test
 }, 30000);
 ```
 
 ### Environment Handling
+
 ```typescript
 // Check for CI environment
-const isCI = process.env.CI === 'true';
+const isCI = process.env.CI === "true";
 
 // Skip heavy tests in CI if needed (document why)
 const maybeSkip = isCI ? it.skip : it;
-maybeSkip('heavy local-only test', () => {
+maybeSkip("heavy local-only test", () => {
   // Only runs locally
 });
 ```
@@ -292,10 +308,11 @@ maybeSkip('heavy local-only test', () => {
 ### Gitleaks Prevention
 
 Never include:
+
 ```typescript
 // WILL FAIL SECURITY SCAN
-const API_KEY = 'sk-live-abc123...';  // Hardcoded secret
-const PASSWORD = 'admin123';           // Hardcoded credential
+const API_KEY = "sk-live-abc123..."; // Hardcoded secret
+const PASSWORD = "admin123"; // Hardcoded credential
 
 // CORRECT
 const API_KEY = process.env.API_KEY;
@@ -305,6 +322,7 @@ const PASSWORD = process.env.DB_PASSWORD;
 ### Trivy Compatibility
 
 Ensure Docker images pass scan:
+
 ```dockerfile
 # Use pinned, scanned base images
 FROM node:20.10.0-alpine@sha256:...
@@ -336,6 +354,7 @@ pnpm audit --fix
 Include these in every output:
 
 ### Pre-Push Verification
+
 ```bash
 # Full local CI simulation
 pnpm install
@@ -350,6 +369,7 @@ pnpm audit
 ```
 
 ### Post-Push Monitoring
+
 ```bash
 # Watch CI progress
 gh run watch
@@ -368,6 +388,7 @@ gh run rerun <run-id> --failed
 ```
 
 ### Post-Merge Verification
+
 ```bash
 # Verify deployment
 gh run list --workflow=deploy.yml --limit 3
@@ -385,45 +406,53 @@ gh attestation verify <artifact>
 
 Include at end of every output:
 
-```markdown
+````markdown
 ## CI Readiness Report
 
 ### Pipeline Compatibility
+
 - [ ] `ci.yml` — No breaking changes
 - [ ] `security.yml` — Security scans will pass
 - [ ] `validation-run.yml` — Validation compatible
 
 ### Build Stage
+
 - [ ] Dependencies resolve (`pnpm install`)
 - [ ] TypeScript compiles (`pnpm build`)
 - [ ] Types check (`pnpm typecheck`)
 
 ### Test Stage
+
 - [ ] Unit tests pass (`pnpm test`)
 - [ ] Integration tests pass
 - [ ] Tests are isolated (no shared state)
 - [ ] Tests are deterministic (no flaky)
 
 ### Lint Stage
+
 - [ ] ESLint passes (`pnpm lint`)
 - [ ] Prettier formatted
 - [ ] No unused imports
 
 ### Security Stage
+
 - [ ] No secrets in code (gitleaks)
 - [ ] No vulnerable deps (trivy)
 - [ ] No security issues (CodeQL)
 
 ### Artifact Stage
+
 - [ ] SBOM can be generated
 - [ ] Provenance attestation compatible
 
 ### Merge Train
+
 - [ ] No merge conflicts
 - [ ] Compatible with parallel merges
 - [ ] No race conditions
 
 ### Verification Commands
+
 ```bash
 # Local verification
 pnpm install && pnpm build && pnpm test && pnpm lint
@@ -431,6 +460,8 @@ pnpm install && pnpm build && pnpm test && pnpm lint
 # Post-push monitoring
 gh run watch
 ```
+````
+
 ```
 
 ---
@@ -441,36 +472,46 @@ Before outputting, answer ALL questions. If ANY is NO, revise.
 
 ### Build Gates
 ```
+
 [ ] Will `pnpm install` succeed?
 [ ] Will `pnpm build` succeed?
 [ ] Will `pnpm typecheck` succeed?
+
 ```
 
 ### Test Gates
 ```
+
 [ ] Will `pnpm test` pass?
 [ ] Are tests deterministic in CI?
 [ ] No `.only()` or `.skip()`?
+
 ```
 
 ### Lint Gates
 ```
+
 [ ] Will `pnpm lint` pass?
 [ ] Is code formatted correctly?
+
 ```
 
 ### Security Gates
 ```
+
 [ ] No hardcoded secrets?
 [ ] No vulnerable dependencies?
 [ ] Will security scans pass?
+
 ```
 
 ### Merge Gates
 ```
+
 [ ] Will this merge cleanly?
 [ ] Is it merge-train compatible?
 [ ] Did I update all 1st, 2nd, and 3rd order requirements?
+
 ```
 
 ---
@@ -484,3 +525,4 @@ Before outputting, answer ALL questions. If ANY is NO, revise.
 *Append your specific requirements below this line:*
 
 ---
+```

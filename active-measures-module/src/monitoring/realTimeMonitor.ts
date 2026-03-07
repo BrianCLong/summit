@@ -6,8 +6,8 @@
  * response mechanisms.
  */
 
-import { EventEmitter } from 'events';
-import { WebSocketServer, WebSocket } from 'ws';
+import { EventEmitter } from "events";
+import { WebSocketServer, WebSocket } from "ws";
 
 export interface MonitoringConfig {
   enableRealTimeTracking: boolean;
@@ -218,136 +218,136 @@ export interface HealthScore {
 // Enums
 
 export enum MetricType {
-  ENGAGEMENT = 'engagement',
-  REACH = 'reach',
-  SENTIMENT = 'sentiment',
-  VIRALITY = 'virality',
-  ATTRIBUTION = 'attribution',
-  EFFECTIVENESS = 'effectiveness',
-  RISK_EXPOSURE = 'risk_exposure',
-  COMPLIANCE = 'compliance',
-  PERFORMANCE = 'performance',
-  COST = 'cost',
-  TIMELINE = 'timeline',
-  QUALITY = 'quality',
+  ENGAGEMENT = "engagement",
+  REACH = "reach",
+  SENTIMENT = "sentiment",
+  VIRALITY = "virality",
+  ATTRIBUTION = "attribution",
+  EFFECTIVENESS = "effectiveness",
+  RISK_EXPOSURE = "risk_exposure",
+  COMPLIANCE = "compliance",
+  PERFORMANCE = "performance",
+  COST = "cost",
+  TIMELINE = "timeline",
+  QUALITY = "quality",
 }
 
 export enum MetricSource {
-  SOCIAL_MEDIA_API = 'social_media_api',
-  NEWS_MONITORING = 'news_monitoring',
-  SURVEY_DATA = 'survey_data',
-  WEB_ANALYTICS = 'web_analytics',
-  SENTIMENT_ANALYSIS = 'sentiment_analysis',
-  BEHAVIORAL_TRACKING = 'behavioral_tracking',
-  INTERNAL_SYSTEMS = 'internal_systems',
-  EXTERNAL_FEEDS = 'external_feeds',
-  AI_ANALYSIS = 'ai_analysis',
-  HUMAN_ASSESSMENT = 'human_assessment',
+  SOCIAL_MEDIA_API = "social_media_api",
+  NEWS_MONITORING = "news_monitoring",
+  SURVEY_DATA = "survey_data",
+  WEB_ANALYTICS = "web_analytics",
+  SENTIMENT_ANALYSIS = "sentiment_analysis",
+  BEHAVIORAL_TRACKING = "behavioral_tracking",
+  INTERNAL_SYSTEMS = "internal_systems",
+  EXTERNAL_FEEDS = "external_feeds",
+  AI_ANALYSIS = "ai_analysis",
+  HUMAN_ASSESSMENT = "human_assessment",
 }
 
 export enum AlertSeverity {
-  LOW = 'low',
-  MEDIUM = 'medium',
-  HIGH = 'high',
-  CRITICAL = 'critical',
-  EMERGENCY = 'emergency',
+  LOW = "low",
+  MEDIUM = "medium",
+  HIGH = "high",
+  CRITICAL = "critical",
+  EMERGENCY = "emergency",
 }
 
 export enum AlertType {
-  PERFORMANCE_DEGRADATION = 'performance_degradation',
-  ANOMALY_DETECTED = 'anomaly_detected',
-  THRESHOLD_EXCEEDED = 'threshold_exceeded',
-  COMPLIANCE_VIOLATION = 'compliance_violation',
-  SECURITY_INCIDENT = 'security_incident',
-  SYSTEM_ERROR = 'system_error',
-  EFFECTIVENESS_DECLINE = 'effectiveness_decline',
-  RISK_ESCALATION = 'risk_escalation',
-  ATTRIBUTION_WARNING = 'attribution_warning',
-  RESOURCE_EXHAUSTION = 'resource_exhaustion',
+  PERFORMANCE_DEGRADATION = "performance_degradation",
+  ANOMALY_DETECTED = "anomaly_detected",
+  THRESHOLD_EXCEEDED = "threshold_exceeded",
+  COMPLIANCE_VIOLATION = "compliance_violation",
+  SECURITY_INCIDENT = "security_incident",
+  SYSTEM_ERROR = "system_error",
+  EFFECTIVENESS_DECLINE = "effectiveness_decline",
+  RISK_ESCALATION = "risk_escalation",
+  ATTRIBUTION_WARNING = "attribution_warning",
+  RESOURCE_EXHAUSTION = "resource_exhaustion",
 }
 
 export enum AlertStatus {
-  ACTIVE = 'active',
-  ACKNOWLEDGED = 'acknowledged',
-  INVESTIGATING = 'investigating',
-  RESOLVED = 'resolved',
-  SUPPRESSED = 'suppressed',
+  ACTIVE = "active",
+  ACKNOWLEDGED = "acknowledged",
+  INVESTIGATING = "investigating",
+  RESOLVED = "resolved",
+  SUPPRESSED = "suppressed",
 }
 
 export enum RecommendedAction {
-  ADJUST_PARAMETERS = 'adjust_parameters',
-  SCALE_UP = 'scale_up',
-  SCALE_DOWN = 'scale_down',
-  PAUSE_OPERATION = 'pause_operation',
-  ABORT_OPERATION = 'abort_operation',
-  INVESTIGATE_FURTHER = 'investigate_further',
-  NOTIFY_OPERATOR = 'notify_operator',
-  AUTOMATIC_REMEDIATION = 'automatic_remediation',
-  MANUAL_REVIEW = 'manual_review',
-  ESCALATE_TO_SUPERVISOR = 'escalate_to_supervisor',
+  ADJUST_PARAMETERS = "adjust_parameters",
+  SCALE_UP = "scale_up",
+  SCALE_DOWN = "scale_down",
+  PAUSE_OPERATION = "pause_operation",
+  ABORT_OPERATION = "abort_operation",
+  INVESTIGATE_FURTHER = "investigate_further",
+  NOTIFY_OPERATOR = "notify_operator",
+  AUTOMATIC_REMEDIATION = "automatic_remediation",
+  MANUAL_REVIEW = "manual_review",
+  ESCALATE_TO_SUPERVISOR = "escalate_to_supervisor",
 }
 
 export enum Priority {
-  LOW = 'low',
-  MEDIUM = 'medium',
-  HIGH = 'high',
-  CRITICAL = 'critical',
+  LOW = "low",
+  MEDIUM = "medium",
+  HIGH = "high",
+  CRITICAL = "critical",
 }
 
 export enum AnomalyType {
-  STATISTICAL_OUTLIER = 'statistical_outlier',
-  TREND_DEVIATION = 'trend_deviation',
-  PATTERN_ANOMALY = 'pattern_anomaly',
-  CORRELATION_BREAK = 'correlation_break',
-  SEASONAL_ANOMALY = 'seasonal_anomaly',
-  POINT_ANOMALY = 'point_anomaly',
-  CONTEXTUAL_ANOMALY = 'contextual_anomaly',
+  STATISTICAL_OUTLIER = "statistical_outlier",
+  TREND_DEVIATION = "trend_deviation",
+  PATTERN_ANOMALY = "pattern_anomaly",
+  CORRELATION_BREAK = "correlation_break",
+  SEASONAL_ANOMALY = "seasonal_anomaly",
+  POINT_ANOMALY = "point_anomaly",
+  CONTEXTUAL_ANOMALY = "contextual_anomaly",
 }
 
 export enum FeedbackType {
-  PARAMETER_ADJUSTMENT = 'parameter_adjustment',
-  RESOURCE_REALLOCATION = 'resource_reallocation',
-  STRATEGY_MODIFICATION = 'strategy_modification',
-  TIMING_ADJUSTMENT = 'timing_adjustment',
-  TARGET_REFINEMENT = 'target_refinement',
-  CONTENT_OPTIMIZATION = 'content_optimization',
+  PARAMETER_ADJUSTMENT = "parameter_adjustment",
+  RESOURCE_REALLOCATION = "resource_reallocation",
+  STRATEGY_MODIFICATION = "strategy_modification",
+  TIMING_ADJUSTMENT = "timing_adjustment",
+  TARGET_REFINEMENT = "target_refinement",
+  CONTENT_OPTIMIZATION = "content_optimization",
 }
 
 export enum OperationStatus {
-  PLANNING = 'planning',
-  ACTIVE = 'active',
-  PAUSED = 'paused',
-  COMPLETED = 'completed',
-  ABORTED = 'aborted',
-  ERROR = 'error',
+  PLANNING = "planning",
+  ACTIVE = "active",
+  PAUSED = "paused",
+  COMPLETED = "completed",
+  ABORTED = "aborted",
+  ERROR = "error",
 }
 
 export enum TrendDirection {
-  INCREASING = 'increasing',
-  DECREASING = 'decreasing',
-  STABLE = 'stable',
-  VOLATILE = 'volatile',
+  INCREASING = "increasing",
+  DECREASING = "decreasing",
+  STABLE = "stable",
+  VOLATILE = "volatile",
 }
 
 export enum KPIStatus {
-  ON_TARGET = 'on_target',
-  ABOVE_TARGET = 'above_target',
-  BELOW_TARGET = 'below_target',
-  CRITICAL = 'critical',
+  ON_TARGET = "on_target",
+  ABOVE_TARGET = "above_target",
+  BELOW_TARGET = "below_target",
+  CRITICAL = "critical",
 }
 
 export enum RiskLevel {
-  LOW = 'low',
-  MEDIUM = 'medium',
-  HIGH = 'high',
-  CRITICAL = 'critical',
+  LOW = "low",
+  MEDIUM = "medium",
+  HIGH = "high",
+  CRITICAL = "critical",
 }
 
 export enum HealthStatus {
-  HEALTHY = 'healthy',
-  WARNING = 'warning',
-  CRITICAL = 'critical',
-  DOWN = 'down',
+  HEALTHY = "healthy",
+  WARNING = "warning",
+  CRITICAL = "critical",
+  DOWN = "down",
 }
 
 /**
@@ -392,7 +392,7 @@ export class RealTimeMonitor extends EventEmitter {
 
     this.monitoringIntervals.set(operationId, interval);
 
-    this.emit('monitoring_started', { operationId });
+    this.emit("monitoring_started", { operationId });
   }
 
   /**
@@ -408,7 +408,7 @@ export class RealTimeMonitor extends EventEmitter {
       this.monitoringIntervals.delete(operationId);
     }
 
-    this.emit('monitoring_stopped', { operationId });
+    this.emit("monitoring_stopped", { operationId });
   }
 
   /**
@@ -420,7 +420,7 @@ export class RealTimeMonitor extends EventEmitter {
     value: number,
     unit: string,
     source: MetricSource,
-    context?: Partial<MetricContext>,
+    context?: Partial<MetricContext>
   ): Promise<string> {
     const metric: MonitoringMetric = {
       id: this.generateMetricId(),
@@ -442,7 +442,7 @@ export class RealTimeMonitor extends EventEmitter {
     this.metrics.get(operationId)!.push(metric);
 
     // Emit real-time update
-    this.emit('metric_recorded', metric);
+    this.emit("metric_recorded", metric);
 
     // Check for immediate alerts
     await this.checkMetricThresholds(metric);
@@ -461,7 +461,7 @@ export class RealTimeMonitor extends EventEmitter {
     sourceMetrics: MetricType[],
     targetParameters: string[],
     feedbackType: FeedbackType,
-    sensitivity: number = 0.5,
+    sensitivity: number = 0.5
   ): string {
     const feedbackLoop: FeedbackLoop = {
       id: this.generateFeedbackLoopId(),
@@ -477,7 +477,7 @@ export class RealTimeMonitor extends EventEmitter {
 
     this.feedbackLoops.set(feedbackLoop.id, feedbackLoop);
 
-    this.emit('feedback_loop_created', feedbackLoop);
+    this.emit("feedback_loop_created", feedbackLoop);
 
     return feedbackLoop.id;
   }
@@ -488,7 +488,7 @@ export class RealTimeMonitor extends EventEmitter {
   getDashboard(operationId: string): OperationDashboard {
     const operationMetrics = this.metrics.get(operationId) || [];
     const operationAlerts = Array.from(this.alerts.values()).filter(
-      (alert) => alert.operationId === operationId,
+      (alert) => alert.operationId === operationId
     );
 
     const dashboard: OperationDashboard = {
@@ -502,9 +502,7 @@ export class RealTimeMonitor extends EventEmitter {
       trends: this.analyzeTrends(operationMetrics),
       forecasts: this.generateForecasts(operationMetrics),
 
-      activeAlerts: operationAlerts.filter(
-        (a) => a.status === AlertStatus.ACTIVE,
-      ),
+      activeAlerts: operationAlerts.filter((a) => a.status === AlertStatus.ACTIVE),
       riskIndicators: this.calculateRiskIndicators(operationId),
 
       activeFeedbackLoops: this.getFeedbackLoopStatuses(operationId),
@@ -518,9 +516,7 @@ export class RealTimeMonitor extends EventEmitter {
   /**
    * Get anomaly detection results
    */
-  async detectAnomalies(
-    operationId: string,
-  ): Promise<AnomalyDetectionResult[]> {
+  async detectAnomalies(operationId: string): Promise<AnomalyDetectionResult[]> {
     const operationMetrics = this.metrics.get(operationId) || [];
 
     if (operationMetrics.length < 10) {
@@ -530,8 +526,7 @@ export class RealTimeMonitor extends EventEmitter {
     const anomalies: AnomalyDetectionResult[] = [];
 
     // Statistical outlier detection
-    const statisticalAnomalies =
-      this.detectStatisticalOutliers(operationMetrics);
+    const statisticalAnomalies = this.detectStatisticalOutliers(operationMetrics);
     anomalies.push(...statisticalAnomalies);
 
     // Trend deviation detection
@@ -548,10 +543,7 @@ export class RealTimeMonitor extends EventEmitter {
   /**
    * Acknowledge an alert
    */
-  async acknowledgeAlert(
-    alertId: string,
-    acknowledgedBy: string,
-  ): Promise<void> {
+  async acknowledgeAlert(alertId: string, acknowledgedBy: string): Promise<void> {
     const alert = this.alerts.get(alertId);
     if (!alert) {
       throw new Error(`Alert not found: ${alertId}`);
@@ -561,7 +553,7 @@ export class RealTimeMonitor extends EventEmitter {
     alert.acknowledgedBy = acknowledgedBy;
     alert.acknowledgedAt = new Date();
 
-    this.emit('alert_acknowledged', alert);
+    this.emit("alert_acknowledged", alert);
   }
 
   /**
@@ -577,7 +569,7 @@ export class RealTimeMonitor extends EventEmitter {
     alert.resolvedAt = new Date();
     alert.resolution = resolution;
 
-    this.emit('alert_resolved', alert);
+    this.emit("alert_resolved", alert);
   }
 
   /**
@@ -592,15 +584,15 @@ export class RealTimeMonitor extends EventEmitter {
   } {
     const totalMetrics = Array.from(this.metrics.values()).reduce(
       (sum, metrics) => sum + metrics.length,
-      0,
+      0
     );
 
     const activeAlerts = Array.from(this.alerts.values()).filter(
-      (alert) => alert.status === AlertStatus.ACTIVE,
+      (alert) => alert.status === AlertStatus.ACTIVE
     ).length;
 
     const activeFeedbackLoops = Array.from(this.feedbackLoops.values()).filter(
-      (loop) => loop.enabled,
+      (loop) => loop.enabled
     ).length;
 
     return {
@@ -609,9 +601,7 @@ export class RealTimeMonitor extends EventEmitter {
       activeAlerts,
       activeFeedbackLoops,
       avgMetricsPerOperation:
-        this.activeOperations.size > 0
-          ? totalMetrics / this.activeOperations.size
-          : 0,
+        this.activeOperations.size > 0 ? totalMetrics / this.activeOperations.size : 0,
     };
   }
 
@@ -620,13 +610,13 @@ export class RealTimeMonitor extends EventEmitter {
   private initializeWebSocketServer(): void {
     this.wsServer = new WebSocketServer({ port: 8080 });
 
-    this.wsServer.on('connection', (ws: WebSocket) => {
-      ws.on('message', (message: string) => {
+    this.wsServer.on("connection", (ws: WebSocket) => {
+      ws.on("message", (message: string) => {
         try {
           const data = JSON.parse(message);
           this.handleWebSocketMessage(ws, data);
         } catch (error) {
-          ws.send(JSON.stringify({ error: 'Invalid JSON' }));
+          ws.send(JSON.stringify({ error: "Invalid JSON" }));
         }
       });
     });
@@ -634,23 +624,23 @@ export class RealTimeMonitor extends EventEmitter {
 
   private handleWebSocketMessage(ws: WebSocket, data: any): void {
     switch (data.type) {
-      case 'subscribe_operation':
+      case "subscribe_operation":
         // Add client to operation subscription
         ws.send(
           JSON.stringify({
-            type: 'subscription_confirmed',
+            type: "subscription_confirmed",
             operationId: data.operationId,
-          }),
+          })
         );
         break;
 
-      case 'get_dashboard':
+      case "get_dashboard":
         const dashboard = this.getDashboard(data.operationId);
         ws.send(
           JSON.stringify({
-            type: 'dashboard_data',
+            type: "dashboard_data",
             data: dashboard,
-          }),
+          })
         );
         break;
     }
@@ -660,7 +650,7 @@ export class RealTimeMonitor extends EventEmitter {
     if (!this.wsServer) return;
 
     const message = JSON.stringify({
-      type: 'metric_update',
+      type: "metric_update",
       data: metric,
     });
 
@@ -687,7 +677,7 @@ export class RealTimeMonitor extends EventEmitter {
         metricType,
         value,
         this.getMetricUnit(metricType),
-        MetricSource.AI_ANALYSIS,
+        MetricSource.AI_ANALYSIS
       );
     }
   }
@@ -710,21 +700,21 @@ export class RealTimeMonitor extends EventEmitter {
 
   private getMetricUnit(metricType: MetricType): string {
     const units = {
-      [MetricType.ENGAGEMENT]: 'percentage',
-      [MetricType.REACH]: 'count',
-      [MetricType.SENTIMENT]: 'score',
-      [MetricType.EFFECTIVENESS]: 'percentage',
-      [MetricType.ATTRIBUTION]: 'score',
-      [MetricType.RISK_EXPOSURE]: 'score',
-      [MetricType.COMPLIANCE]: 'percentage',
-      [MetricType.PERFORMANCE]: 'score',
-      [MetricType.COST]: 'currency',
-      [MetricType.TIMELINE]: 'days',
-      [MetricType.QUALITY]: 'score',
-      [MetricType.VIRALITY]: 'coefficient',
+      [MetricType.ENGAGEMENT]: "percentage",
+      [MetricType.REACH]: "count",
+      [MetricType.SENTIMENT]: "score",
+      [MetricType.EFFECTIVENESS]: "percentage",
+      [MetricType.ATTRIBUTION]: "score",
+      [MetricType.RISK_EXPOSURE]: "score",
+      [MetricType.COMPLIANCE]: "percentage",
+      [MetricType.PERFORMANCE]: "score",
+      [MetricType.COST]: "currency",
+      [MetricType.TIMELINE]: "days",
+      [MetricType.QUALITY]: "score",
+      [MetricType.VIRALITY]: "coefficient",
     };
 
-    return units[metricType] || 'units';
+    return units[metricType] || "units";
   }
 
   private async analyzeMetrics(operationId: string): Promise<void> {
@@ -737,7 +727,7 @@ export class RealTimeMonitor extends EventEmitter {
             operationId,
             AlertType.ANOMALY_DETECTED,
             anomaly.severity,
-            'Anomaly Detected',
+            "Anomaly Detected",
             anomaly.description,
             anomaly.affectedMetrics,
             anomaly.suggestedActions.map((action) => ({
@@ -745,10 +735,10 @@ export class RealTimeMonitor extends EventEmitter {
               action: RecommendedAction.INVESTIGATE_FURTHER,
               priority: Priority.HIGH,
               description: action,
-              expectedImpact: 'Reduce anomaly impact',
+              expectedImpact: "Reduce anomaly impact",
               confidence: anomaly.confidence,
               automatable: false,
-            })),
+            }))
           );
         }
       }
@@ -761,18 +751,16 @@ export class RealTimeMonitor extends EventEmitter {
 
     // Check effectiveness decline
     const effectivenessMetrics = recentMetrics.filter(
-      (m) => m.metricType === MetricType.EFFECTIVENESS,
+      (m) => m.metricType === MetricType.EFFECTIVENESS
     );
     if (effectivenessMetrics.length >= 3) {
-      const trend = this.calculateTrend(
-        effectivenessMetrics.map((m) => m.value),
-      );
+      const trend = this.calculateTrend(effectivenessMetrics.map((m) => m.value));
       if (trend < -this.config.alertThresholds.effectivenessDecline) {
         await this.createAlert(
           operationId,
           AlertType.EFFECTIVENESS_DECLINE,
           AlertSeverity.HIGH,
-          'Effectiveness Decline Detected',
+          "Effectiveness Decline Detected",
           `Effectiveness has declined by ${Math.abs(trend * 100).toFixed(1)}%`,
           effectivenessMetrics.map((m) => m.id),
           [
@@ -780,12 +768,12 @@ export class RealTimeMonitor extends EventEmitter {
               id: this.generateAlertRecommendationId(),
               action: RecommendedAction.ADJUST_PARAMETERS,
               priority: Priority.HIGH,
-              description: 'Consider adjusting operation parameters',
-              expectedImpact: 'Improve effectiveness',
+              description: "Consider adjusting operation parameters",
+              expectedImpact: "Improve effectiveness",
               confidence: 0.8,
               automatable: true,
             },
-          ],
+          ]
         );
       }
     }
@@ -805,7 +793,7 @@ export class RealTimeMonitor extends EventEmitter {
         metric.operationId,
         AlertType.THRESHOLD_EXCEEDED,
         AlertSeverity.HIGH,
-        'Metric Threshold Exceeded',
+        "Metric Threshold Exceeded",
         `${metric.metricType} value ${metric.value} exceeded threshold ${threshold}`,
         [metric.id],
         [
@@ -813,20 +801,20 @@ export class RealTimeMonitor extends EventEmitter {
             id: this.generateAlertRecommendationId(),
             action: RecommendedAction.INVESTIGATE_FURTHER,
             priority: Priority.HIGH,
-            description: 'Investigate cause of threshold breach',
-            expectedImpact: 'Prevent escalation',
+            description: "Investigate cause of threshold breach",
+            expectedImpact: "Prevent escalation",
             confidence: 0.9,
             automatable: false,
           },
-        ],
+        ]
       );
     }
   }
 
   private async processFeedbackLoops(operationId: string): Promise<void> {
-    const operationFeedbackLoops = Array.from(
-      this.feedbackLoops.values(),
-    ).filter((loop) => loop.operationId === operationId && loop.enabled);
+    const operationFeedbackLoops = Array.from(this.feedbackLoops.values()).filter(
+      (loop) => loop.operationId === operationId && loop.enabled
+    );
 
     for (const loop of operationFeedbackLoops) {
       await this.processFeedbackLoop(loop);
@@ -838,15 +826,14 @@ export class RealTimeMonitor extends EventEmitter {
 
     // Get relevant source metrics
     const sourceMetrics = operationMetrics.filter((m) =>
-      loop.sourceMetrics.includes(m.metricType.toString()),
+      loop.sourceMetrics.includes(m.metricType.toString())
     );
 
     if (sourceMetrics.length === 0) return;
 
     // Calculate adjustment needed
     const recentMetrics = sourceMetrics.slice(-5); // Last 5 metrics
-    const average =
-      recentMetrics.reduce((sum, m) => sum + m.value, 0) / recentMetrics.length;
+    const average = recentMetrics.reduce((sum, m) => sum + m.value, 0) / recentMetrics.length;
 
     // Determine if adjustment is needed
     const targetValue = this.getTargetValue(loop.feedbackType);
@@ -872,7 +859,7 @@ export class RealTimeMonitor extends EventEmitter {
         loop.lastTriggered = new Date();
 
         // Emit adjustment event
-        this.emit('feedback_adjustment', {
+        this.emit("feedback_adjustment", {
           feedbackLoopId: loop.id,
           adjustment: feedbackAdjustment,
         });
@@ -887,7 +874,7 @@ export class RealTimeMonitor extends EventEmitter {
     title: string,
     description: string,
     metricIds: string[],
-    recommendations: AlertRecommendation[],
+    recommendations: AlertRecommendation[]
   ): Promise<void> {
     const alert: Alert = {
       id: this.generateAlertId(),
@@ -904,16 +891,13 @@ export class RealTimeMonitor extends EventEmitter {
 
     this.alerts.set(alert.id, alert);
 
-    this.emit('alert_created', alert);
+    this.emit("alert_created", alert);
 
     // Broadcast alert to WebSocket clients
     this.broadcastAlert(alert);
 
     // Auto-remediation if configured and safe
-    if (
-      this.config.enableAutomaticResponse &&
-      this.isAutoRemediationSafe(alert)
-    ) {
+    if (this.config.enableAutomaticResponse && this.isAutoRemediationSafe(alert)) {
       await this.executeAutoRemediation(alert);
     }
   }
@@ -922,7 +906,7 @@ export class RealTimeMonitor extends EventEmitter {
     if (!this.wsServer) return;
 
     const message = JSON.stringify({
-      type: 'alert',
+      type: "alert",
       data: alert,
     });
 
@@ -935,27 +919,22 @@ export class RealTimeMonitor extends EventEmitter {
 
   private isAutoRemediationSafe(alert: Alert): boolean {
     // Only allow auto-remediation for low-risk alerts
-    return (
-      alert.severity === AlertSeverity.LOW ||
-      alert.severity === AlertSeverity.MEDIUM
-    );
+    return alert.severity === AlertSeverity.LOW || alert.severity === AlertSeverity.MEDIUM;
   }
 
   private async executeAutoRemediation(alert: Alert): Promise<void> {
-    const automatableRecommendations = alert.recommendations.filter(
-      (r) => r.automatable,
-    );
+    const automatableRecommendations = alert.recommendations.filter((r) => r.automatable);
 
     for (const recommendation of automatableRecommendations) {
       try {
         await this.executeRecommendation(alert.operationId, recommendation);
 
-        this.emit('auto_remediation_executed', {
+        this.emit("auto_remediation_executed", {
           alertId: alert.id,
           recommendationId: recommendation.id,
         });
       } catch (error) {
-        this.emit('auto_remediation_failed', {
+        this.emit("auto_remediation_failed", {
           alertId: alert.id,
           recommendationId: recommendation.id,
           error: error.message,
@@ -966,7 +945,7 @@ export class RealTimeMonitor extends EventEmitter {
 
   private async executeRecommendation(
     operationId: string,
-    recommendation: AlertRecommendation,
+    recommendation: AlertRecommendation
   ): Promise<void> {
     switch (recommendation.action) {
       case RecommendedAction.ADJUST_PARAMETERS:
@@ -996,9 +975,7 @@ export class RealTimeMonitor extends EventEmitter {
   private calculateHealthScore(operationId: string): HealthScore {
     const operationMetrics = this.metrics.get(operationId) || [];
     const operationAlerts = Array.from(this.alerts.values()).filter(
-      (alert) =>
-        alert.operationId === operationId &&
-        alert.status === AlertStatus.ACTIVE,
+      (alert) => alert.operationId === operationId && alert.status === AlertStatus.ACTIVE
     );
 
     // Base health on metrics and alerts
@@ -1050,21 +1027,14 @@ export class RealTimeMonitor extends EventEmitter {
     const kpis: KPIMetric[] = [];
 
     // Calculate KPIs for each metric type
-    const metricTypes = [
-      MetricType.ENGAGEMENT,
-      MetricType.EFFECTIVENESS,
-      MetricType.SENTIMENT,
-    ];
+    const metricTypes = [MetricType.ENGAGEMENT, MetricType.EFFECTIVENESS, MetricType.SENTIMENT];
 
     metricTypes.forEach((metricType) => {
       const typeMetrics = metrics.filter((m) => m.metricType === metricType);
       if (typeMetrics.length > 0) {
         const recent = typeMetrics.slice(-1)[0];
-        const average =
-          typeMetrics.reduce((sum, m) => sum + m.value, 0) / typeMetrics.length;
-        const trend = this.calculateTrend(
-          typeMetrics.slice(-5).map((m) => m.value),
-        );
+        const average = typeMetrics.reduce((sum, m) => sum + m.value, 0) / typeMetrics.length;
+        const trend = this.calculateTrend(typeMetrics.slice(-5).map((m) => m.value));
 
         kpis.push({
           name: metricType,
@@ -1077,10 +1047,7 @@ export class RealTimeMonitor extends EventEmitter {
               : trend < -0.1
                 ? TrendDirection.DECREASING
                 : TrendDirection.STABLE,
-          status: this.getKPIStatus(
-            recent.value,
-            this.getKPITarget(metricType),
-          ),
+          status: this.getKPIStatus(recent.value, this.getKPITarget(metricType)),
           lastMeasured: recent.timestamp,
         });
       }
@@ -1117,9 +1084,7 @@ export class RealTimeMonitor extends EventEmitter {
     return KPIStatus.CRITICAL;
   }
 
-  private generateRealtimeMetricSummaries(
-    metrics: MonitoringMetric[],
-  ): RealtimeMetricSummary[] {
+  private generateRealtimeMetricSummaries(metrics: MonitoringMetric[]): RealtimeMetricSummary[] {
     const summaries: RealtimeMetricSummary[] = [];
     const metricTypes = [...new Set(metrics.map((m) => m.metricType))];
 
@@ -1131,8 +1096,7 @@ export class RealTimeMonitor extends EventEmitter {
 
       if (values.length > 0) {
         const current = values[values.length - 1];
-        const previous =
-          values.length > 1 ? values[values.length - 2] : current;
+        const previous = values.length > 1 ? values[values.length - 2] : current;
 
         summaries.push({
           metricType,
@@ -1141,8 +1105,7 @@ export class RealTimeMonitor extends EventEmitter {
           min: Math.min(...values),
           max: Math.max(...values),
           change: current - previous,
-          changePercent:
-            previous !== 0 ? ((current - previous) / previous) * 100 : 0,
+          changePercent: previous !== 0 ? ((current - previous) / previous) * 100 : 0,
           sparklineData,
         });
       }
@@ -1175,7 +1138,7 @@ export class RealTimeMonitor extends EventEmitter {
                   : TrendDirection.STABLE,
           strength: Math.min(1, strength),
           confidence: Math.min(1, typeMetrics.length / 20), // More data = higher confidence
-          timeframe: '10 samples',
+          timeframe: "10 samples",
           description: this.generateTrendDescription(metricType, trendValue),
         });
       }
@@ -1198,18 +1161,10 @@ export class RealTimeMonitor extends EventEmitter {
     return slope;
   }
 
-  private generateTrendDescription(
-    metricType: MetricType,
-    trend: number,
-  ): string {
-    const direction =
-      trend > 0 ? 'increasing' : trend < 0 ? 'decreasing' : 'stable';
+  private generateTrendDescription(metricType: MetricType, trend: number): string {
+    const direction = trend > 0 ? "increasing" : trend < 0 ? "decreasing" : "stable";
     const magnitude =
-      Math.abs(trend) > 0.5
-        ? 'strongly'
-        : Math.abs(trend) > 0.2
-          ? 'moderately'
-          : 'slightly';
+      Math.abs(trend) > 0.5 ? "strongly" : Math.abs(trend) > 0.2 ? "moderately" : "slightly";
 
     return `${metricType} is ${magnitude} ${direction}`;
   }
@@ -1239,12 +1194,12 @@ export class RealTimeMonitor extends EventEmitter {
 
         forecasts.push({
           metricType,
-          timeframe: '5 periods ahead',
+          timeframe: "5 periods ahead",
           predictedValue,
           confidence,
           upperBound: predictedValue + margin,
           lowerBound: predictedValue - margin,
-          methodology: 'Linear extrapolation with volatility adjustment',
+          methodology: "Linear extrapolation with volatility adjustment",
         });
       }
     });
@@ -1256,9 +1211,7 @@ export class RealTimeMonitor extends EventEmitter {
     if (values.length < 2) return 0;
 
     const mean = values.reduce((sum, val) => sum + val, 0) / values.length;
-    const variance =
-      values.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) /
-      values.length;
+    const variance = values.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / values.length;
     const stdDev = Math.sqrt(variance);
 
     return mean !== 0 ? stdDev / Math.abs(mean) : stdDev;
@@ -1270,17 +1223,15 @@ export class RealTimeMonitor extends EventEmitter {
 
     // Attribution risk
     const attributionMetrics = operationMetrics.filter(
-      (m) => m.metricType === MetricType.ATTRIBUTION,
+      (m) => m.metricType === MetricType.ATTRIBUTION
     );
     if (attributionMetrics.length > 0) {
       const recent = attributionMetrics.slice(-1)[0];
-      const trend = this.calculateTrend(
-        attributionMetrics.slice(-5).map((m) => m.value),
-      );
+      const trend = this.calculateTrend(attributionMetrics.slice(-5).map((m) => m.value));
 
       indicators.push({
-        id: 'attribution_risk',
-        name: 'Attribution Risk',
+        id: "attribution_risk",
+        name: "Attribution Risk",
         currentLevel:
           recent.value > 0.7
             ? RiskLevel.HIGH
@@ -1293,8 +1244,8 @@ export class RealTimeMonitor extends EventEmitter {
             : trend < -0.1
               ? TrendDirection.DECREASING
               : TrendDirection.STABLE,
-        description: 'Risk of operation being attributed to source',
-        mitigation: 'Implement additional obfuscation measures',
+        description: "Risk of operation being attributed to source",
+        mitigation: "Implement additional obfuscation measures",
         lastAssessed: recent.timestamp,
       });
     }
@@ -1321,29 +1272,21 @@ export class RealTimeMonitor extends EventEmitter {
     // Calculate effectiveness based on adjustment history
     const recentAdjustments = loop.adjustmentHistory.slice(-10);
     const avgImpact =
-      recentAdjustments.reduce((sum, adj) => sum + adj.impact, 0) /
-      recentAdjustments.length;
+      recentAdjustments.reduce((sum, adj) => sum + adj.impact, 0) / recentAdjustments.length;
     const avgConfidence =
-      recentAdjustments.reduce((sum, adj) => sum + adj.confidence, 0) /
-      recentAdjustments.length;
+      recentAdjustments.reduce((sum, adj) => sum + adj.confidence, 0) / recentAdjustments.length;
 
     return avgImpact * avgConfidence * 100; // 0-100 scale
   }
 
-  private calculatePerformanceSummary(
-    metrics: MonitoringMetric[],
-  ): PerformanceSummary {
-    const effectiveness = this.getMetricScore(
-      metrics,
-      MetricType.EFFECTIVENESS,
-    );
+  private calculatePerformanceSummary(metrics: MonitoringMetric[]): PerformanceSummary {
+    const effectiveness = this.getMetricScore(metrics, MetricType.EFFECTIVENESS);
     const attribution = this.getMetricScore(metrics, MetricType.ATTRIBUTION);
     const compliance = this.getMetricScore(metrics, MetricType.COMPLIANCE);
     const riskExposure = this.getMetricScore(metrics, MetricType.RISK_EXPOSURE);
 
     const efficiency = (effectiveness + compliance) / 2;
-    const overallScore =
-      (effectiveness + efficiency + compliance + (100 - attribution)) / 4;
+    const overallScore = (effectiveness + efficiency + compliance + (100 - attribution)) / 4;
 
     return {
       overallScore,
@@ -1352,18 +1295,11 @@ export class RealTimeMonitor extends EventEmitter {
       attribution,
       compliance,
       riskLevel:
-        riskExposure > 70
-          ? RiskLevel.HIGH
-          : riskExposure > 40
-            ? RiskLevel.MEDIUM
-            : RiskLevel.LOW,
+        riskExposure > 70 ? RiskLevel.HIGH : riskExposure > 40 ? RiskLevel.MEDIUM : RiskLevel.LOW,
     };
   }
 
-  private getMetricScore(
-    metrics: MonitoringMetric[],
-    metricType: MetricType,
-  ): number {
+  private getMetricScore(metrics: MonitoringMetric[], metricType: MetricType): number {
     const typeMetrics = metrics.filter((m) => m.metricType === metricType);
     if (typeMetrics.length === 0) return 50; // Default neutral score
 
@@ -1385,9 +1321,7 @@ export class RealTimeMonitor extends EventEmitter {
 
   // Anomaly detection methods
 
-  private detectStatisticalOutliers(
-    metrics: MonitoringMetric[],
-  ): AnomalyDetectionResult[] {
+  private detectStatisticalOutliers(metrics: MonitoringMetric[]): AnomalyDetectionResult[] {
     const anomalies: AnomalyDetectionResult[] = [];
     const metricTypes = [...new Set(metrics.map((m) => m.metricType))];
 
@@ -1398,8 +1332,7 @@ export class RealTimeMonitor extends EventEmitter {
         const values = typeMetrics.map((m) => m.value);
         const mean = values.reduce((sum, val) => sum + val, 0) / values.length;
         const stdDev = Math.sqrt(
-          values.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) /
-            values.length,
+          values.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / values.length
         );
 
         // Check recent values for outliers (> 2 standard deviations)
@@ -1418,9 +1351,9 @@ export class RealTimeMonitor extends EventEmitter {
               confidence: Math.min(1, zScore / 2),
               severity: zScore > 3 ? AlertSeverity.HIGH : AlertSeverity.MEDIUM,
               suggestedActions: [
-                'Investigate data source for errors',
-                'Check for external factors affecting metric',
-                'Consider adjusting monitoring thresholds',
+                "Investigate data source for errors",
+                "Check for external factors affecting metric",
+                "Consider adjusting monitoring thresholds",
               ],
             });
           }
@@ -1431,9 +1364,7 @@ export class RealTimeMonitor extends EventEmitter {
     return anomalies;
   }
 
-  private detectTrendDeviations(
-    metrics: MonitoringMetric[],
-  ): AnomalyDetectionResult[] {
+  private detectTrendDeviations(metrics: MonitoringMetric[]): AnomalyDetectionResult[] {
     const anomalies: AnomalyDetectionResult[] = [];
     const metricTypes = [...new Set(metrics.map((m) => m.metricType))];
 
@@ -1456,12 +1387,11 @@ export class RealTimeMonitor extends EventEmitter {
             description: `${metricType} recent trend deviates significantly from historical pattern`,
             affectedMetrics: typeMetrics.slice(-5).map((m) => m.id),
             confidence: 0.8,
-            severity:
-              trendDeviation > 1 ? AlertSeverity.HIGH : AlertSeverity.MEDIUM,
+            severity: trendDeviation > 1 ? AlertSeverity.HIGH : AlertSeverity.MEDIUM,
             suggestedActions: [
-              'Analyze recent operational changes',
-              'Review external environmental factors',
-              'Consider trend reversal strategies',
+              "Analyze recent operational changes",
+              "Review external environmental factors",
+              "Consider trend reversal strategies",
             ],
           });
         }
@@ -1471,9 +1401,7 @@ export class RealTimeMonitor extends EventEmitter {
     return anomalies;
   }
 
-  private detectPatternAnomalies(
-    metrics: MonitoringMetric[],
-  ): AnomalyDetectionResult[] {
+  private detectPatternAnomalies(metrics: MonitoringMetric[]): AnomalyDetectionResult[] {
     const anomalies: AnomalyDetectionResult[] = [];
     // Pattern anomaly detection would require more sophisticated algorithms
     // This is a simplified placeholder implementation

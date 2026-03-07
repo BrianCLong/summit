@@ -53,16 +53,16 @@ intel:
       sighting_count: 0.10
       analyst_confidence: 0.10
     thresholds:
-      high: '>=80'
-      medium: '>=60'
+      high: ">=80"
+      medium: ">=60"
   decay:
     half_life_days:
       ip: 7
       domain: 14
       sha256: 45
   tlp:
-    allow_publish: ['WHITE', 'GREEN', 'AMBER']
-    block_publish: ['RED']
+    allow_publish: ["WHITE", "GREEN", "AMBER"]
+    block_publish: ["RED"]
   publish_rules:
     - list: detections.intel.bad_ips
       when: type==ip and score>=80 and tlp!=RED

@@ -8,8 +8,10 @@
  * @returns {string} The API base URL
  */
 export function getApiBaseUrl() {
-  return import.meta.env.VITE_API_BASE_URL ||
-         (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:4000');
+  return (
+    import.meta.env.VITE_API_BASE_URL ||
+    (typeof window !== "undefined" ? window.location.origin : "http://localhost:4000")
+  );
 }
 
 /**
@@ -17,8 +19,7 @@ export function getApiBaseUrl() {
  * @returns {string} The GraphQL HTTP URL
  */
 export function getGraphqlHttpUrl() {
-  return import.meta.env.VITE_GRAPHQL_HTTP_URL ||
-         `${getApiBaseUrl()}/graphql`;
+  return import.meta.env.VITE_GRAPHQL_HTTP_URL || `${getApiBaseUrl()}/graphql`;
 }
 
 /**
@@ -27,7 +28,7 @@ export function getGraphqlHttpUrl() {
  */
 export function getSocketBaseUrl() {
   const baseUrl = getApiBaseUrl();
-  return baseUrl.replace(/^http/, 'ws');
+  return baseUrl.replace(/^http/, "ws");
 }
 
 /**
@@ -35,8 +36,7 @@ export function getSocketBaseUrl() {
  * @returns {string} The GraphQL WebSocket URL
  */
 export function getGraphqlWsUrl() {
-  return import.meta.env.VITE_GRAPHQL_WS_URL ||
-         `${getSocketBaseUrl()}/graphql`;
+  return import.meta.env.VITE_GRAPHQL_WS_URL || `${getSocketBaseUrl()}/graphql`;
 }
 
 /**
@@ -44,8 +44,7 @@ export function getGraphqlWsUrl() {
  * @returns {string} The Grafana URL
  */
 export function getGrafanaUrl() {
-  return import.meta.env.VITE_GRAFANA_URL ||
-         'http://localhost:3001';
+  return import.meta.env.VITE_GRAFANA_URL || "http://localhost:3001";
 }
 
 /**
@@ -53,6 +52,5 @@ export function getGrafanaUrl() {
  * @returns {string} The Jaeger URL
  */
 export function getJaegerUrl() {
-  return import.meta.env.VITE_JAEGER_URL ||
-         'http://localhost:16686';
+  return import.meta.env.VITE_JAEGER_URL || "http://localhost:16686";
 }

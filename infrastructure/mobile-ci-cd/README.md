@@ -5,6 +5,7 @@ Automated build, test, and deployment pipelines for IntelGraph mobile applicatio
 ## Overview
 
 Our CI/CD pipeline uses GitHub Actions to automate:
+
 - **Linting & Testing**: Code quality checks on every PR
 - **Building**: Platform-specific builds for iOS, Android, PWA, Electron
 - **Testing**: Internal testing tracks for validation
@@ -15,17 +16,20 @@ Our CI/CD pipeline uses GitHub Actions to automate:
 ### iOS Pipeline (`github-actions-ios.yml`)
 
 **Triggers:**
+
 - Push to `main` or `develop`
 - Pull requests to `main`
 - Release published
 
 **Jobs:**
+
 1. **lint-and-test**: Lints, type-checks, and runs tests
 2. **build**: Builds IPA for iOS
 3. **deploy-testflight**: Uploads to TestFlight (main branch)
 4. **deploy-app-store**: Submits to App Store (releases)
 
 **Required Secrets:**
+
 - `CERTIFICATES_P12`: iOS signing certificate (base64)
 - `CERTIFICATES_PASSWORD`: Certificate password
 - `PROVISIONING_PROFILE`: Provisioning profile (base64)
@@ -37,17 +41,20 @@ Our CI/CD pipeline uses GitHub Actions to automate:
 ### Android Pipeline (`github-actions-android.yml`)
 
 **Triggers:**
+
 - Push to `main` or `develop`
 - Pull requests to `main`
 - Release published
 
 **Jobs:**
+
 1. **lint-and-test**: Lints, type-checks, and runs tests
 2. **build**: Builds AAB and APK
 3. **deploy-internal**: Uploads to Internal Testing (main branch)
 4. **deploy-production**: Uploads to Production (releases)
 
 **Required Secrets:**
+
 - `ANDROID_KEYSTORE_BASE64`: Keystore file (base64)
 - `ANDROID_KEY_ALIAS`: Keystore alias
 - `ANDROID_KEYSTORE_PASSWORD`: Keystore password
@@ -58,15 +65,18 @@ Our CI/CD pipeline uses GitHub Actions to automate:
 ### PWA Pipeline (`github-actions-pwa.yml`)
 
 **Triggers:**
+
 - Push to `main`
 - Pull requests to `main`
 
 **Jobs:**
+
 1. **lint-and-test**: Lints, type-checks, and runs tests
 2. **build**: Builds PWA
 3. **deploy**: Deploys to Vercel/Netlify
 
 **Required Secrets:**
+
 - `VERCEL_TOKEN`: Vercel deployment token
 - `VERCEL_PROJECT_ID`: Project ID
 - `VERCEL_ORG_ID`: Organization ID
@@ -74,16 +84,19 @@ Our CI/CD pipeline uses GitHub Actions to automate:
 ### Electron Pipeline (`github-actions-electron.yml`)
 
 **Triggers:**
+
 - Push to `main`
 - Release published
 
 **Jobs:**
+
 1. **build-windows**: Builds for Windows
 2. **build-mac**: Builds for macOS
 3. **build-linux**: Builds for Linux
 4. **release**: Creates GitHub release with artifacts
 
 **Required Secrets:**
+
 - `CSC_LINK`: Code signing certificate
 - `CSC_KEY_PASSWORD`: Certificate password
 - `APPLE_ID`: Apple ID (for notarization)
@@ -95,6 +108,7 @@ Our CI/CD pipeline uses GitHub Actions to automate:
 ### 1. iOS Certificates
 
 **Export Certificate:**
+
 ```bash
 # Open Keychain Access
 # Find "iPhone Distribution" certificate
@@ -108,6 +122,7 @@ base64 -i certificate.p12 -o certificate.txt
 ```
 
 **Export Provisioning Profile:**
+
 ```bash
 # Download from developer.apple.com
 # Certificates, IDs & Profiles > Profiles
@@ -119,6 +134,7 @@ base64 -i profile.mobileprovision -o profile.txt
 ```
 
 **Create App-Specific Password:**
+
 1. Go to appleid.apple.com
 2. Sign in
 3. Security > App-Specific Passwords
@@ -128,6 +144,7 @@ base64 -i profile.mobileprovision -o profile.txt
 ### 2. Android Keystore
 
 **Create Keystore:**
+
 ```bash
 keytool -genkeypair -v \
   -storetype PKCS12 \
@@ -144,6 +161,7 @@ base64 -i release.keystore -o keystore.txt
 ```
 
 **Google Play Service Account:**
+
 1. Go to Google Play Console
 2. Setup > API access
 3. Create new service account
@@ -160,6 +178,7 @@ base64 -i service-account.json -o service-account.txt
 ### 3. Sentry Integration
 
 **Get Auth Token:**
+
 1. Go to sentry.io
 2. Settings > Account > API > Auth Tokens
 3. Create new token with `project:releases` scope
@@ -168,6 +187,7 @@ base64 -i service-account.json -o service-account.txt
 ### 4. Vercel Deployment
 
 **Get Tokens:**
+
 ```bash
 # Install Vercel CLI
 npm i -g vercel
@@ -179,10 +199,12 @@ vercel link
 ```
 
 Copy to GitHub secrets:
+
 - `VERCEL_PROJECT_ID`
 - `VERCEL_ORG_ID`
 
 Get token from Vercel dashboard:
+
 - Settings > Tokens > Create Token
 - Copy to `VERCEL_TOKEN`
 
@@ -226,6 +248,7 @@ Release → Lint & Test → Build → Production Deploy
 ### Build Status
 
 Check GitHub Actions tab for build status:
+
 - ✅ Green: Build successful
 - ❌ Red: Build failed
 - 🟡 Yellow: Build in progress
@@ -233,6 +256,7 @@ Check GitHub Actions tab for build status:
 ### Release Notes
 
 Auto-generated from commits:
+
 - `feat:` → New features
 - `fix:` → Bug fixes
 - `docs:` → Documentation
@@ -241,6 +265,7 @@ Auto-generated from commits:
 ### Sentry Integration
 
 Releases are automatically tracked in Sentry:
+
 - Source maps uploaded
 - Commits associated
 - Release finalized
@@ -250,6 +275,7 @@ Releases are automatically tracked in Sentry:
 ### iOS Build Fails
 
 **Certificate Issues:**
+
 ```bash
 # Check certificate validity
 security find-identity -v -p codesigning
@@ -259,6 +285,7 @@ security cms -D -i profile.mobileprovision
 ```
 
 **Solution:**
+
 - Regenerate certificate
 - Update provisioning profile
 - Update GitHub secrets
@@ -266,12 +293,14 @@ security cms -D -i profile.mobileprovision
 ### Android Build Fails
 
 **Keystore Issues:**
+
 ```bash
 # Verify keystore
 keytool -list -v -keystore release.keystore
 ```
 
 **Solution:**
+
 - Verify keystore password
 - Check key alias
 - Update GitHub secrets
@@ -279,11 +308,13 @@ keytool -list -v -keystore release.keystore
 ### Deployment Fails
 
 **Check logs:**
+
 - GitHub Actions > Failed job > Logs
 - Identify error message
 - Fix and retry
 
 **Common issues:**
+
 - Expired credentials
 - Invalid secrets
 - Network timeouts
@@ -303,6 +334,7 @@ keytool -list -v -keystore release.keystore
 ## Support
 
 For CI/CD issues:
+
 - Slack: #mobile-ci-cd
 - Email: devops@intelgraph.com
 - GitHub Issues: Tag with `ci/cd`

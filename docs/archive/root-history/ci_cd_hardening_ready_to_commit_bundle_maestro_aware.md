@@ -133,7 +133,7 @@ jobs:
       - name: Setup toolchain
         uses: actions/setup-node@v4
         if: ${{ inputs.language == 'node' }}
-        with: { node-version: '22.x', cache: 'npm' }
+        with: { node-version: "22.x", cache: "npm" }
       - name: Compute cache key
         id: cache
         run: echo "key=${{ inputs.cache-key }}-${{ hashFiles('**/package-lock.json','**/pnpm-lock.yaml','**/yarn.lock','**/poetry.lock','**/Cargo.lock') }}" >> $GITHUB_OUTPUT
@@ -305,8 +305,8 @@ name: migration-gate
 on:
   pull_request:
     paths:
-      - 'db/migrations/**'
-      - '.ci/policies/**'
+      - "db/migrations/**"
+      - ".ci/policies/**"
 jobs:
   gate:
     runs-on: ubuntu-latest
@@ -328,7 +328,7 @@ jobs:
 name: nightly-health
 on:
   schedule:
-    - cron: '0 6 * * *'
+    - cron: "0 6 * * *"
 jobs:
   e2e:
     uses: ./.github/workflows/ci-reusable-test.yml
@@ -587,7 +587,7 @@ flags:
   risky_feature:
     owner: team-app
     default: false
-    description: 'Example risky code path behind flag'
+    description: "Example risky code path behind flag"
 ```
 
 ### `.ci/config/slo.yml`

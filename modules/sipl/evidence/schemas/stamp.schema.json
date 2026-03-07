@@ -4,8 +4,8 @@
   "type": "object",
   "required": ["created_at", "git_sha"],
   "properties": {
-    "created_at": {"type": "string"},
-    "git_sha": {"type": "string"}
+    "created_at": { "type": "string" },
+    "git_sha": { "type": "string" }
   },
   "additionalProperties": false
 }

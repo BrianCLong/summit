@@ -1,5 +1,5 @@
-import { type Page, type Locator, expect } from '@playwright/test';
-import { BasePage } from './BasePage';
+import { type Page, type Locator, expect } from "@playwright/test";
+import { BasePage } from "./BasePage";
 
 export class AdminTenantPage extends BasePage {
   readonly tenantList: Locator;
@@ -8,11 +8,11 @@ export class AdminTenantPage extends BasePage {
   constructor(page: Page) {
     super(page);
     this.tenantList = page.locator('[data-testid="tenant-list"]');
-    this.createTenantButton = page.getByRole('button', { name: /create tenant/i });
+    this.createTenantButton = page.getByRole("button", { name: /create tenant/i });
   }
 
   async goto() {
-    await super.goto('/admin');
+    await super.goto("/admin");
   }
 
   async verifyTenantListVisible() {
@@ -20,6 +20,6 @@ export class AdminTenantPage extends BasePage {
   }
 
   async verifyAccessDenied() {
-    await expect(this.page.locator('text=Access Denied')).toBeVisible();
+    await expect(this.page.locator("text=Access Denied")).toBeVisible();
   }
 }

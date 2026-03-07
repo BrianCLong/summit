@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 services:
   postgres:
     image: pgvector/pgvector:pg16
@@ -7,14 +7,14 @@ services:
       POSTGRES_DB: maestro
       POSTGRES_USER: maestro
       POSTGRES_PASSWORD: maestro-dev-secret
-      POSTGRES_INITDB_ARGS: '--auth-host=scram-sha-256'
+      POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256"
     ports:
-      - '5432:5432'
+      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./server/src/db/init:/docker-entrypoint-initdb.d
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U maestro -d maestro']
+      test: ["CMD-SHELL", "pg_isready -U maestro -d maestro"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -25,11 +25,11 @@ services:
     container_name: maestro-redis
     command: redis-server --requirepass redis-dev-secret
     ports:
-      - '6379:6379'
+      - "6379:6379"
     volumes:
       - redis_data:/data
     healthcheck:
-      test: ['CMD', 'redis-cli', '--raw', 'incr', 'ping']
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
       interval: 5s
       timeout: 3s
       retries: 5

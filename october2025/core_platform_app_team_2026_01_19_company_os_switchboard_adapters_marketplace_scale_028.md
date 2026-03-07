@@ -112,12 +112,9 @@ export interface StorageAdapter {
   put(
     key: string,
     bytes: Uint8Array,
-    ctx: AdapterContext,
+    ctx: AdapterContext
   ): Promise<{ receipt: AdapterReceiptMeta }>;
-  get(
-    key: string,
-    ctx: AdapterContext,
-  ): Promise<{ data: Uint8Array; receipt: AdapterReceiptMeta }>;
+  get(key: string, ctx: AdapterContext): Promise<{ data: Uint8Array; receipt: AdapterReceiptMeta }>;
 }
 ```
 
@@ -146,9 +143,7 @@ adapter-test run --kind storage --impl packages/adapters/s3 --matrix tests/stora
     {
       "type": "stat",
       "title": "Adapter Errors (5m)",
-      "targets": [
-        { "expr": "sum(rate(adapter_errors_total[5m])) by (adapter)" }
-      ]
+      "targets": [{ "expr": "sum(rate(adapter_errors_total[5m])) by (adapter)" }]
     },
     {
       "type": "graph",
@@ -194,7 +189,7 @@ companyos:
 switchboard:
   image.tag: 0.28.0
   marketplace:
-    channels: ['stable', 'canary']
+    channels: ["stable", "canary"]
 ```
 
 ```hcl

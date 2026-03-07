@@ -1,10 +1,10 @@
-import React, { useEffect, useRef, useState } from 'react';
-import io from 'socket.io-client';
-import $ from 'jquery';
-import { useDispatch, useSelector } from 'react-redux';
-import { useMutation } from '@apollo/client';
-import { START_RUN } from '../../graphql/copilot.gql';
-import { copilotActions } from '../../store/copilotSlice';
+import React, { useEffect, useRef, useState } from "react";
+import io from "socket.io-client";
+import $ from "jquery";
+import { useDispatch, useSelector } from "react-redux";
+import { useMutation } from "@apollo/client";
+import { START_RUN } from "../../graphql/copilot.gql";
+import { copilotActions } from "../../store/copilotSlice";
 import {
   Box,
   Card,
@@ -14,8 +14,8 @@ import {
   List,
   ListItem,
   ListItemText,
-} from '@mui/material';
-import NlGraphQueryExplainer from './NlGraphQueryExplainer';
+} from "@mui/material";
+import NlGraphQueryExplainer from "./NlGraphQueryExplainer";
 
 export default function CopilotRunPanel({ goalId }) {
   const dispatch = useDispatch();
@@ -26,13 +26,11 @@ export default function CopilotRunPanel({ goalId }) {
 
   useEffect(() => {
     // jQuery-powered Socket.IO init
-    socketRef.current = io('/', { path: '/realtime', autoConnect: true });
-    $(socketRef.current).on('connect', function () {
+    socketRef.current = io("/", { path: "/realtime", autoConnect: true });
+    $(socketRef.current).on("connect", function () {
       setConnected(true);
     });
-    socketRef.current.on('copilot:event', (ev) =>
-      dispatch(copilotActions.eventReceived(ev)),
-    );
+    socketRef.current.on("copilot:event", (ev) => dispatch(copilotActions.eventReceived(ev)));
     return () => {
       socketRef.current && socketRef.current.disconnect();
     };
@@ -43,7 +41,7 @@ export default function CopilotRunPanel({ goalId }) {
     const run = res?.data?.startCopilotRun;
     dispatch(copilotActions.runStarted(run));
     // join room for live events
-    socketRef.current.emit('joinRun', run.id);
+    socketRef.current.emit("joinRun", run.id);
   };
 
   return (
@@ -52,14 +50,10 @@ export default function CopilotRunPanel({ goalId }) {
         <CardContent>
           <Typography variant="h6">Copilot Orchestration</Typography>
           <Typography variant="body2" color="text.secondary">
-            Socket: {connected ? 'connected' : 'disconnected'}
+            Socket: {connected ? "connected" : "disconnected"}
           </Typography>
-          <Button
-            variant="contained"
-            onClick={handleStart}
-            disabled={loading || !goalId}
-          >
-            {loading ? 'Starting…' : 'Run Copilot'}
+          <Button variant="contained" onClick={handleStart} disabled={loading || !goalId}>
+            {loading ? "Starting…" : "Run Copilot"}
           </Button>
         </CardContent>
       </Card>

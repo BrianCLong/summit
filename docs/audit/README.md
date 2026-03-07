@@ -10,10 +10,10 @@ Evidence is collected automatically by the `soc2-evidence.yml` workflow.
 
 **Required Artifacts**:
 
-* `SBOM` (Software Bill of Materials) - from `sbom.yml`
-* `SLSA Attestation` - from `slsa-attestation.yml`
-* `Test Coverage Report` - from `pr-quality-gate.yml`
-* `Policy Scan Results` (OPA) - from `agentic-policy-check.yml`
+- `SBOM` (Software Bill of Materials) - from `sbom.yml`
+- `SLSA Attestation` - from `slsa-attestation.yml`
+- `Test Coverage Report` - from `pr-quality-gate.yml`
+- `Policy Scan Results` (OPA) - from `agentic-policy-check.yml`
 
 ## 2. Agent Action Logs
 
@@ -31,13 +31,16 @@ Agents must produce a log of their reasoning and actions.
 **Tier**: [Tier Level]
 
 ### Reasoning
+
 [Explanation of why this change was made]
 
 ### Plan
+
 1. [Step 1]
 2. [Step 2]
 
 ### Verification
+
 - [ ] Read file X
 - [ ] Ran test Y
 ```
@@ -58,12 +61,15 @@ Major decisions by agents or humans affecting the Constitution or Permission Tie
 **Status**: [Proposed/Accepted/Rejected]
 
 ## Context
+
 [Problem description]
 
 ## Decision
+
 [The decision made]
 
 ## Consequences
+
 [Positive and Negative impacts]
 ```
 

@@ -345,7 +345,7 @@ repo/
 **Webhook Verify (TS excerpt)**
 
 ```ts
-app.post('/stripe/webhook', verifyStripeSig, async (req, res) => {
+app.post("/stripe/webhook", verifyStripeSig, async (req, res) => {
   /* update order, store invoice */
 });
 ```

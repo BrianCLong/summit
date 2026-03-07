@@ -17,7 +17,7 @@ This document provides evidence that Summit's explainability and provenance expl
 4. **Accessible**: UI and CLI provide human-readable explanations
 5. **Trustworthy**: Confidence metrics and evidence backing are transparent
 
-**Key Achievement**: Operators, reviewers, and auditors can now answer *what/why/how trustworthy* in under 60 seconds.
+**Key Achievement**: Operators, reviewers, and auditors can now answer _what/why/how trustworthy_ in under 60 seconds.
 
 ---
 
@@ -71,26 +71,28 @@ This document provides evidence that Summit's explainability and provenance expl
 
 ### Endpoint Inventory
 
-| Endpoint | Method | Purpose | Auth | Tenant Isolated |
-|----------|--------|---------|------|-----------------|
-| `/api/explainability/runs` | GET | List runs | ✓ | ✓ |
-| `/api/explainability/runs/:id` | GET | Get run details | ✓ | ✓ |
-| `/api/explainability/runs/:id/lineage` | GET | Traverse provenance | ✓ | ✓ |
-| `/api/explainability/compare` | GET | Compare two runs | ✓ | ✓ |
-| `/api/explainability/runs/:id/verify` | GET | Verify linkage | ✓ | ✓ |
-| `/api/explainability/health` | GET | Health check | - | - |
+| Endpoint                               | Method | Purpose             | Auth | Tenant Isolated |
+| -------------------------------------- | ------ | ------------------- | ---- | --------------- |
+| `/api/explainability/runs`             | GET    | List runs           | ✓    | ✓               |
+| `/api/explainability/runs/:id`         | GET    | Get run details     | ✓    | ✓               |
+| `/api/explainability/runs/:id/lineage` | GET    | Traverse provenance | ✓    | ✓               |
+| `/api/explainability/compare`          | GET    | Compare two runs    | ✓    | ✓               |
+| `/api/explainability/runs/:id/verify`  | GET    | Verify linkage      | ✓    | ✓               |
+| `/api/explainability/health`           | GET    | Health check        | -    | -               |
 
 **Verification**: Zero mutation endpoints. All are GET requests.
 
 ### Example API Request/Response
 
 **Request**:
+
 ```bash
 curl -X GET "https://summit.example.com/api/explainability/runs/abc123" \
   -H "Authorization: Bearer $TOKEN"
 ```
 
 **Response**:
+
 ```json
 {
   "success": true,
@@ -299,12 +301,14 @@ $ summit explain export abc123 --output run-abc123.json
 **Purpose**: Quickly scan recent runs, filter by type/confidence/capability.
 
 **Key Features**:
+
 - Chronological list with summary cards
 - Color-coded confidence badges (green ≥80%, yellow ≥50%, red <50%)
 - Filter by run type, actor, capability
 - One-click access to detail view
 
 **User Flow**:
+
 1. Navigate to `/explainability` (or dedicated route)
 2. View timeline of recent runs
 3. Apply filters (e.g., "Show only agent_run with confidence ≥80%")
@@ -315,18 +319,21 @@ $ summit explain export abc123 --output run-abc123.json
 ### Run Detail View
 
 **Purpose**: Answer the four questions in under 60 seconds:
+
 1. **What ran?** → Run type, actor, capabilities
 2. **Why did it run?** → Explanation summary, why triggered
 3. **What did it produce?** → Outputs, artifacts, side effects
 4. **Can I trust it?** → Confidence metrics, evidence count, source reliability
 
 **Key Features**:
+
 - Expandable sections: Explanation, Confidence, Policy Decisions, Provenance, Assumptions/Limitations, Inputs/Outputs
 - Redaction indicators (shows count of redacted fields with info icon)
 - Links to provenance chains, SBOM, audit trail
 - Policy decision cards with allow/deny status
 
 **User Flow**:
+
 1. Select run from timeline
 2. View summary at top (what/when/who/confidence)
 3. Expand sections for deeper context
@@ -339,6 +346,7 @@ $ summit explain export abc123 --output run-abc123.json
 **Purpose**: Side-by-side comparison of two runs to understand deltas.
 
 **Key Features**:
+
 - Input two run IDs
 - Shows confidence delta (+/- percentage)
 - Shows duration delta (faster/slower)
@@ -346,6 +354,7 @@ $ summit explain export abc123 --output run-abc123.json
 - Diff view for changed inputs/outputs
 
 **User Flow**:
+
 1. Navigate to compare view
 2. Enter Run A and Run B IDs
 3. Click "Compare"
@@ -469,6 +478,7 @@ pred-001 (Prediction)
 ### PII Redaction Example
 
 **Before Redaction** (internal):
+
 ```json
 {
   "inputs": {
@@ -481,6 +491,7 @@ pred-001 (Prediction)
 ```
 
 **After Redaction** (API response):
+
 ```json
 {
   "inputs": {
@@ -488,7 +499,7 @@ pred-001 (Prediction)
       "user_email": "[REDACTED:PII]",
       "query": "find claims about user"
     },
-    "input_hash": "sha256:abc123...",  // Hash of ORIGINAL (unredacted) data
+    "input_hash": "sha256:abc123...", // Hash of ORIGINAL (unredacted) data
     "pii_fields_redacted": ["parameters.user_email"]
   },
   "redacted_fields": ["inputs.parameters.user_email"]
@@ -496,6 +507,7 @@ pred-001 (Prediction)
 ```
 
 **UI Display**:
+
 ```
 Inputs:
 {
@@ -509,6 +521,7 @@ Inputs:
 ### Secret Redaction Example
 
 **Before Redaction**:
+
 ```json
 {
   "inputs": {
@@ -521,6 +534,7 @@ Inputs:
 ```
 
 **After Redaction**:
+
 ```json
 {
   "inputs": {
@@ -541,16 +555,19 @@ Inputs:
 ### Test Case: Cross-Tenant Access Attempt
 
 **Setup**:
+
 - Run `abc123` belongs to `tenant-001`
 - User authenticated as `tenant-002`
 
 **Request**:
+
 ```bash
 curl -X GET "https://summit.example.com/api/explainability/runs/abc123" \
   -H "Authorization: Bearer $TENANT_002_TOKEN"
 ```
 
 **Response**:
+
 ```json
 {
   "success": false,

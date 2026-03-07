@@ -258,9 +258,7 @@
           "overrides": [
             {
               "matcher": { "id": "byName", "options": "Wasted Cost" },
-              "properties": [
-                { "id": "unit", "value": "currencyUSD" }
-              ]
+              "properties": [{ "id": "unit", "value": "currencyUSD" }]
             }
           ]
         }
@@ -382,9 +380,7 @@
             "unit": "currencyUSD",
             "thresholds": {
               "mode": "absolute",
-              "steps": [
-                { "value": null, "color": "green" }
-              ]
+              "steps": [{ "value": null, "color": "green" }]
             }
           }
         }

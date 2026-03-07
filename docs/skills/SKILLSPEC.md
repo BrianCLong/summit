@@ -18,9 +18,9 @@ Skillpacks are the distribution mechanism for these skills, designed to be:
 
 Summit Skills distinguish themselves from standard agent tools via **Evidence Layers**:
 
-* **Layer A (Provenance):** Every skill execution is signed and logged to the `ProvenanceLedger`.
-* **Layer B (Contracts):** Skills define a typed `SkillSpec` that is validated at compile-time.
-* **Layer C (Routing):** Skills are selected deterministically based on `triggers` and policy, not just LLM whim.
+- **Layer A (Provenance):** Every skill execution is signed and logged to the `ProvenanceLedger`.
+- **Layer B (Contracts):** Skills define a typed `SkillSpec` that is validated at compile-time.
+- **Layer C (Routing):** Skills are selected deterministically based on `triggers` and policy, not just LLM whim.
 
 ## SkillSpec Schema (`skill.yaml`)
 
@@ -104,36 +104,36 @@ The `steps` array is the core of a Skill. It defines a deterministic or bounded-
 
 Executes a shell command.
 
-* **Properties:** `command` (string), `cwd` (optional), `env` (optional).
-* **Safety:** Subject to sandbox restrictions (no network unless permitted, blocked dangerous commands).
+- **Properties:** `command` (string), `cwd` (optional), `env` (optional).
+- **Safety:** Subject to sandbox restrictions (no network unless permitted, blocked dangerous commands).
 
 ### 2. `edit`
 
 Modifies a file.
 
-* **Properties:** `file` (path), `merge_diff` (Git merge conflict format) OR `content` (full overwrite).
-* **Safety:** Must operate on non-ignored files, subject to `file_patterns` allowlist.
+- **Properties:** `file` (path), `merge_diff` (Git merge conflict format) OR `content` (full overwrite).
+- **Safety:** Must operate on non-ignored files, subject to `file_patterns` allowlist.
 
 ### 3. `verify`
 
-Runs a check that *must* pass for the skill to continue or succeed.
+Runs a check that _must_ pass for the skill to continue or succeed.
 
-* **Properties:** `check` (shell command returning 0 for success), `name` (description).
-* **Failure:** Can trigger `on_fail: abort` (default) or `on_fail: warn`.
+- **Properties:** `check` (shell command returning 0 for success), `name` (description).
+- **Failure:** Can trigger `on_fail: abort` (default) or `on_fail: warn`.
 
 ### 4. `cite`
 
 Injects documentation or context into the agent's working memory.
 
-* **Properties:** `source` (file path or URL), `excerpt` (optional range).
-* **Use Case:** "Read the style guide before writing code."
+- **Properties:** `source` (file path or URL), `excerpt` (optional range).
+- **Use Case:** "Read the style guide before writing code."
 
 ### 5. `ask_user`
 
 Requests explicit user input or confirmation.
 
-* **Properties:** `prompt` (string), `schema` (JSON schema for answer).
-* **Governance:** Required for `high` risk skills.
+- **Properties:** `prompt` (string), `schema` (JSON schema for answer).
+- **Governance:** Required for `high` risk skills.
 
 ## Evidence Bundle Artifacts
 

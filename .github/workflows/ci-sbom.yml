@@ -3,13 +3,13 @@ name: CI SBOM & Provenance
 on:
   pull_request:
   push:
-    branches: [ main ]
+    branches: [main]
   schedule:
-    - cron: '0 2 * * 1-5'   # Weekdays 02:00 UTC
+    - cron: "0 2 * * 1-5" # Weekdays 02:00 UTC
 
 permissions:
   contents: read
-  id-token: write   # needed for GitHub OIDC attestations
+  id-token: write # needed for GitHub OIDC attestations
   attestations: write
 
 jobs:
@@ -24,8 +24,8 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20.19.0'
-          cache: 'pnpm'
+          node-version: "20.19.0"
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -36,7 +36,7 @@ jobs:
           # We use cdxgen which is versatile for monorepos
           npx @cyclonedx/cdxgen -r . -o cyclonedx.xml -t javascript --fail-on-error
         env:
-          FETCH_LICENSE: 'true'
+          FETCH_LICENSE: "true"
 
       - name: Export dependencies to JSON for verification
         run: pnpm list --json --recursive > pnpm-deps.json

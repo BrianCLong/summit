@@ -106,23 +106,23 @@ Response:
 
 All resources MUST have these tags:
 
-| Tag Key       | Description                      | Example              |
-|---------------|----------------------------------|----------------------|
-| Environment   | Deployment environment           | production, staging  |
-| CostCenter    | Cost allocation                  | engineering, sales   |
-| Project       | Project name                     | summit, analytics    |
-| Owner         | Team or person responsible       | devops-team          |
-| ManagedBy     | How resource is managed          | terraform, manual    |
+| Tag Key     | Description                | Example             |
+| ----------- | -------------------------- | ------------------- |
+| Environment | Deployment environment     | production, staging |
+| CostCenter  | Cost allocation            | engineering, sales  |
+| Project     | Project name               | summit, analytics   |
+| Owner       | Team or person responsible | devops-team         |
+| ManagedBy   | How resource is managed    | terraform, manual   |
 
 ### Optional Tags
 
-| Tag Key       | Description                      | Example              |
-|---------------|----------------------------------|----------------------|
-| Application   | Application name                 | api, web-app         |
-| Component     | Component within application     | database, cache      |
-| Version       | Application version              | v1.2.3               |
-| CreatedBy     | Who created the resource         | john.doe             |
-| CreatedDate   | When resource was created        | 2024-01-15           |
+| Tag Key     | Description                  | Example         |
+| ----------- | ---------------------------- | --------------- |
+| Application | Application name             | api, web-app    |
+| Component   | Component within application | database, cache |
+| Version     | Application version          | v1.2.3          |
+| CreatedBy   | Who created the resource     | john.doe        |
+| CreatedDate | When resource was created    | 2024-01-15      |
 
 ### Tagging Automation
 
@@ -245,12 +245,12 @@ Response:
 
 ### Commitment Strategy
 
-| Workload Type       | Recommendation            | Commitment Length |
-|---------------------|---------------------------|-------------------|
-| Production (24/7)   | Reserved Instances        | 3 years           |
-| Production (12/5)   | Savings Plans             | 1 year            |
-| Staging             | On-Demand + Spot          | None              |
-| Development         | Spot Instances            | None              |
+| Workload Type     | Recommendation     | Commitment Length |
+| ----------------- | ------------------ | ----------------- |
+| Production (24/7) | Reserved Instances | 3 years           |
+| Production (12/5) | Savings Plans      | 1 year            |
+| Staging           | On-Demand + Spot   | None              |
+| Development       | Spot Instances     | None              |
 
 ### AWS Reserved Instances
 
@@ -287,6 +287,7 @@ gcloud compute commitments describe COMMITMENT_NAME \
 ### Savings Tracking
 
 Target savings from commitments:
+
 - **Goal**: 40% reduction vs on-demand
 - **Current**: 35% reduction
 - **Annual Savings**: ~$200,000
@@ -296,6 +297,7 @@ Target savings from commitments:
 ### Spot Instance Strategy
 
 Use spot instances for:
+
 - Batch processing jobs
 - CI/CD workloads
 - Development environments
@@ -312,9 +314,9 @@ metadata:
     node.kubernetes.io/lifecycle: spot
 spec:
   taints:
-  - key: spot
-    value: "true"
-    effect: NoSchedule
+    - key: spot
+      value: "true"
+      effect: NoSchedule
 ```
 
 ```yaml
@@ -325,10 +327,10 @@ metadata:
   name: batch-job
 spec:
   tolerations:
-  - key: spot
-    operator: Equal
-    value: "true"
-    effect: NoSchedule
+    - key: spot
+      operator: Equal
+      value: "true"
+      effect: NoSchedule
   nodeSelector:
     node.kubernetes.io/lifecycle: spot
 ```
@@ -443,12 +445,12 @@ Response:
 
 ### Budget by Cost Center
 
-| Cost Center     | Monthly Budget | Current Spend | Status        |
-|-----------------|----------------|---------------|---------------|
-| Engineering     | $6,000         | $5,100        | ✅ On Track   |
-| Data Science    | $2,000         | $1,800        | ✅ On Track   |
-| DevOps          | $2,000         | $1,643        | ✅ On Track   |
-| **Total**       | **$10,000**    | **$8,543**    | **✅ Good**   |
+| Cost Center  | Monthly Budget | Current Spend | Status      |
+| ------------ | -------------- | ------------- | ----------- |
+| Engineering  | $6,000         | $5,100        | ✅ On Track |
+| Data Science | $2,000         | $1,800        | ✅ On Track |
+| DevOps       | $2,000         | $1,643        | ✅ On Track |
+| **Total**    | **$10,000**    | **$8,543**    | **✅ Good** |
 
 ## Cost Anomaly Detection
 
@@ -477,6 +479,7 @@ anomalyDetection:
 ### Anomaly Alerts
 
 When anomalies are detected:
+
 1. Alert sent to cost-alerts channel
 2. Automatic analysis report generated
 3. Recommendation for investigation
@@ -488,7 +491,7 @@ When anomalies are detected:
 
 ```yaml
 finopsAutomation:
-  schedule: "0 */6 * * *"  # Every 6 hours
+  schedule: "0 */6 * * *" # Every 6 hours
   actions:
     - name: tag_enforcement
       enabled: true
@@ -517,6 +520,7 @@ finopsAutomation:
 ### Daily Cost Report
 
 Automated daily report includes:
+
 - Yesterday's spend by provider
 - Month-to-date spend vs budget
 - Top 10 cost drivers
@@ -528,6 +532,7 @@ Automated daily report includes:
 ### 1. Cost Visibility
 
 ✅ **Do**:
+
 - Review cost dashboard daily
 - Set up budget alerts
 - Tag all resources consistently
@@ -535,6 +540,7 @@ Automated daily report includes:
 - Share cost reports with stakeholders
 
 ❌ **Don't**:
+
 - Ignore small cost increases
 - Skip tagging "temporary" resources
 - Wait for month-end to review costs
@@ -543,6 +549,7 @@ Automated daily report includes:
 ### 2. Resource Optimization
 
 ✅ **Do**:
+
 - Right-size based on actual usage
 - Use autoscaling
 - Schedule non-production resources
@@ -550,6 +557,7 @@ Automated daily report includes:
 - Clean up unused resources
 
 ❌ **Don't**:
+
 - Over-provision "just in case"
 - Run dev/test 24/7
 - Keep unattached volumes
@@ -558,6 +566,7 @@ Automated daily report includes:
 ### 3. Commitment Management
 
 ✅ **Do**:
+
 - Analyze before committing
 - Start with 1-year terms
 - Monitor RI utilization
@@ -565,6 +574,7 @@ Automated daily report includes:
 - Use savings plans for flexibility
 
 ❌ **Don't**:
+
 - Buy 3-year RIs without analysis
 - Over-commit on new workloads
 - Let RIs sit unused
@@ -573,6 +583,7 @@ Automated daily report includes:
 ### 4. Architecture for Cost
 
 ✅ **Do**:
+
 - Use serverless where appropriate
 - Implement caching
 - Optimize data transfer
@@ -580,6 +591,7 @@ Automated daily report includes:
 - Archive old data to cheap storage
 
 ❌ **Don't**:
+
 - Transfer data unnecessarily
 - Store everything in hot storage
 - Run always-on for batch jobs
@@ -588,6 +600,7 @@ Automated daily report includes:
 ### 5. Cultural Practices
 
 ✅ **Do**:
+
 - Make cost everyone's responsibility
 - Include cost in code reviews
 - Celebrate cost optimizations
@@ -595,6 +608,7 @@ Automated daily report includes:
 - Train team on cost awareness
 
 ❌ **Don't**:
+
 - Make cost only FinOps' problem
 - Blame teams for overruns
 - Hide cost information
@@ -603,6 +617,7 @@ Automated daily report includes:
 ## Cost Optimization Checklist
 
 ### Weekly
+
 - [ ] Review cost dashboard
 - [ ] Check budget alerts
 - [ ] Apply rightsizing recommendations
@@ -610,6 +625,7 @@ Automated daily report includes:
 - [ ] Verify tagging compliance
 
 ### Monthly
+
 - [ ] Review monthly spend report
 - [ ] Analyze cost trends
 - [ ] Update budget forecasts
@@ -618,6 +634,7 @@ Automated daily report includes:
 - [ ] Generate stakeholder reports
 
 ### Quarterly
+
 - [ ] Review commitment strategy
 - [ ] Evaluate new pricing models
 - [ ] Assess architecture for cost
@@ -625,6 +642,7 @@ Automated daily report includes:
 - [ ] FinOps team retrospective
 
 ### Annual
+
 - [ ] Negotiate enterprise agreements
 - [ ] Plan commitment renewals
 - [ ] Review overall cloud strategy
@@ -635,14 +653,14 @@ Automated daily report includes:
 
 ### Cost Efficiency Metrics
 
-| Metric                          | Target  | Current | Status |
-|---------------------------------|---------|---------|--------|
-| Reserved Instance Coverage      | > 70%   | 68%     | ⚠️     |
-| Spot Instance Usage             | > 20%   | 18%     | ⚠️     |
-| Idle Resource Cost              | < 5%    | 7%      | ❌     |
-| Budget Variance                 | ± 10%   | +5%     | ✅     |
-| Cost per Transaction            | < $0.02 | $0.018  | ✅     |
-| Tagging Compliance              | > 95%   | 92%     | ⚠️     |
+| Metric                     | Target  | Current | Status |
+| -------------------------- | ------- | ------- | ------ |
+| Reserved Instance Coverage | > 70%   | 68%     | ⚠️     |
+| Spot Instance Usage        | > 20%   | 18%     | ⚠️     |
+| Idle Resource Cost         | < 5%    | 7%      | ❌     |
+| Budget Variance            | ± 10%   | +5%     | ✅     |
+| Cost per Transaction       | < $0.02 | $0.018  | ✅     |
+| Tagging Compliance         | > 95%   | 92%     | ⚠️     |
 
 ### Optimization ROI
 
@@ -654,12 +672,14 @@ Automated daily report includes:
 ## Support and Resources
 
 ### Internal Resources
+
 - **FinOps Team**: finops@company.com
 - **Cost Dashboard**: https://grafana.company.com/cost
 - **Slack Channel**: #cost-optimization
 - **Wiki**: https://wiki.company.com/finops
 
 ### External Resources
+
 - [AWS Cost Optimization](https://aws.amazon.com/pricing/cost-optimization/)
 - [Azure Cost Management](https://azure.microsoft.com/en-us/products/cost-management/)
 - [GCP Cost Optimization](https://cloud.google.com/cost-management)

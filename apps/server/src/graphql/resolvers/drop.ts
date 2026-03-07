@@ -1,21 +1,20 @@
-import { v4 as uuidv4 } from 'uuid';
-import fs from 'fs/promises';
-import path from 'path';
-import axios from 'axios';
-import { validateAndSanitizeDropInput } from '../../security/validation.js';
-import { securityLogger } from '../../observability/securityLogger.js';
+import { v4 as uuidv4 } from "uuid";
+import fs from "fs/promises";
+import path from "path";
+import axios from "axios";
+import { validateAndSanitizeDropInput } from "../../security/validation.js";
+import { securityLogger } from "../../observability/securityLogger.js";
 
-const QUARANTINE_DIR =
-  process.env.QUARANTINE_DIR || path.join(process.cwd(), 'quarantine');
-const KPW_MEDIA_URL = process.env.KPW_MEDIA_URL || 'http://localhost:7102';
-const LAC_URL = process.env.LAC_URL || 'http://localhost:7103'; // Assuming LAC has an API
+const QUARANTINE_DIR = process.env.QUARANTINE_DIR || path.join(process.cwd(), "quarantine");
+const KPW_MEDIA_URL = process.env.KPW_MEDIA_URL || "http://localhost:7102";
+const LAC_URL = process.env.LAC_URL || "http://localhost:7103"; // Assuming LAC has an API
 
 // Ensure quarantine directory exists
 fs.mkdir(QUARANTINE_DIR, { recursive: true }).catch(console.error);
 
 export const dropResolvers = {
   Query: {
-    health: () => 'ok',
+    health: () => "ok",
   },
   Mutation: {
     submitDrop: async (_: any, { input }: { input: { payload: string; metadata?: string } }) => {
@@ -28,8 +27,8 @@ export const dropResolvers = {
         // 1. Store raw payload in quarantine
         await fs.writeFile(quarantinePath, sanitized.payload);
 
-        let status = 'QUARANTINED';
-        let reason = 'Stored in quarantine, awaiting verification.';
+        let status = "QUARANTINED";
+        let reason = "Stored in quarantine, awaiting verification.";
 
         // 2. Simulate KPW-Media verification
         // In a real scenario, the payload would be processed to generate step commits
@@ -41,7 +40,7 @@ export const dropResolvers = {
           .catch(() => false);
 
         if (!kpwVerifyResult) {
-          reason = 'KPW-Media verification failed or not applicable.';
+          reason = "KPW-Media verification failed or not applicable.";
         }
 
         // 3. Simulate LAC evaluation
@@ -53,21 +52,21 @@ export const dropResolvers = {
 
         if (!lacEvalResult) {
           reason =
-            reason === 'Stored in quarantine, awaiting verification.'
-              ? 'LAC policy denied.'
-              : reason + ' LAC policy denied.';
+            reason === "Stored in quarantine, awaiting verification."
+              ? "LAC policy denied."
+              : reason + " LAC policy denied.";
         }
 
         if (kpwVerifyResult && lacEvalResult) {
-          status = 'VERIFIED';
-          reason = 'KPW-Media verified and LAC policy allowed.';
+          status = "VERIFIED";
+          reason = "KPW-Media verified and LAC policy allowed.";
         } else if (!kpwVerifyResult || !lacEvalResult) {
-          status = 'DENIED';
+          status = "DENIED";
           // Reason already set based on failures
         }
 
-        securityLogger.logEvent('drop_submission', {
-          level: 'info',
+        securityLogger.logEvent("drop_submission", {
+          level: "info",
           id: dropId,
           status,
           metadataKeys: sanitized.metadata ? Object.keys(sanitized.metadata) : [],
@@ -75,14 +74,14 @@ export const dropResolvers = {
 
         return { id: dropId, status, reason };
       } catch (error: any) {
-        securityLogger.logEvent('drop_submission', {
-          level: 'error',
+        securityLogger.logEvent("drop_submission", {
+          level: "error",
           id: dropId,
           message: error?.message,
         });
         return {
           id: dropId,
-          status: 'QUARANTINED',
+          status: "QUARANTINED",
           reason: `Processing error: ${error.message}`,
         };
       }

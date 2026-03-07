@@ -96,6 +96,7 @@ This document summarizes the comprehensive quantum computing readiness and post-
 ### 6. Services ✅
 
 **Crypto Service** (`@intelgraph/crypto-service`)
+
 - REST API for PQC operations
 - Key generation (Kyber, Dilithium, Hybrid)
 - Key encapsulation/decapsulation
@@ -105,6 +106,7 @@ This document summarizes the comprehensive quantum computing readiness and post-
 - Migration planning
 
 **Quantum Service** (`@intelgraph/quantum-service`)
+
 - REST API for quantum operations
 - Circuit simulation
 - QAOA optimization
@@ -116,6 +118,7 @@ This document summarizes the comprehensive quantum computing readiness and post-
 ### 7. Infrastructure ✅
 
 **PQC Migration Tools** (`infrastructure/pqc-migration/`)
+
 - Cryptographic inventory scanner
 - Key converter (classical → PQC)
 - Certificate generator (PQC certs)
@@ -126,6 +129,7 @@ This document summarizes the comprehensive quantum computing readiness and post-
 ### 8. Documentation ✅
 
 **Comprehensive Guides**:
+
 - `docs/quantum/PQC_ROADMAP.md`: Complete migration roadmap
 - `docs/quantum/QUANTUM_GUIDE.md`: Developer guide with examples
 - `infrastructure/pqc-migration/README.md`: Migration tools guide
@@ -203,7 +207,7 @@ This document summarizes the comprehensive quantum computing readiness and post-
 ### 1. Post-Quantum Cryptography
 
 ```typescript
-import { createKyberKEM, createDilithiumSignature } from '@intelgraph/post-quantum-crypto';
+import { createKyberKEM, createDilithiumSignature } from "@intelgraph/post-quantum-crypto";
 
 // Key encapsulation
 const kem = createKyberKEM();
@@ -213,83 +217,92 @@ const { ciphertext, sharedSecret } = await kem.encapsulate(keyPair.publicKey);
 // Digital signature
 const dss = createDilithiumSignature();
 const sigKeyPair = await dss.generateKeyPair();
-const message = new TextEncoder().encode('Secure message');
+const message = new TextEncoder().encode("Secure message");
 const { signature } = await dss.sign(message, sigKeyPair.privateKey);
 ```
 
 ### 2. Quantum Simulation
 
 ```typescript
-import { createCircuit, createStatevectorSimulator } from '@intelgraph/quantum-simulation';
+import { createCircuit, createStatevectorSimulator } from "@intelgraph/quantum-simulation";
 
-const circuit = createCircuit(2)
-  .h(0)
-  .cnot(0, 1)
-  .measure()
-  .build();
+const circuit = createCircuit(2).h(0).cnot(0, 1).measure().build();
 
 const simulator = createStatevectorSimulator();
 const result = await simulator.simulate(circuit, 1024);
-console.log(result.counts);  // Bell state: {"00": ~512, "11": ~512}
+console.log(result.counts); // Bell state: {"00": ~512, "11": ~512}
 ```
 
 ### 3. Quantum Optimization
 
 ```typescript
-import { createQAOAOptimizer } from '@intelgraph/quantum-optimization';
+import { createQAOAOptimizer } from "@intelgraph/quantum-optimization";
 
-const qaoa = createQAOAOptimizer({
-  numQubits: 4,
-  p: 2,
-  costHamiltonian: {
-    edges: [{ i: 0, j: 1, weight: 1 }, { i: 1, j: 2, weight: 1 }]
-  }
-}, simulator);
+const qaoa = createQAOAOptimizer(
+  {
+    numQubits: 4,
+    p: 2,
+    costHamiltonian: {
+      edges: [
+        { i: 0, j: 1, weight: 1 },
+        { i: 1, j: 2, weight: 1 },
+      ],
+    },
+  },
+  simulator
+);
 
 const result = await qaoa.optimize(100);
-console.log('Optimal solution:', result.optimalSolution);
+console.log("Optimal solution:", result.optimalSolution);
 ```
 
 ### 4. Quantum Machine Learning
 
 ```typescript
-import { createQNN } from '@intelgraph/quantum-ml';
+import { createQNN } from "@intelgraph/quantum-ml";
 
-const qnn = createQNN({
-  numQubits: 4,
-  layers: 3,
-  entangling: 'circular'
-}, simulator);
+const qnn = createQNN(
+  {
+    numQubits: 4,
+    layers: 3,
+    entangling: "circular",
+  },
+  simulator
+);
 
 await qnn.train(X_train, y_train, {
   learningRate: 0.01,
   epochs: 100,
   batchSize: 1,
-  optimizer: 'sgd'
+  optimizer: "sgd",
 });
 ```
 
 ## Migration Path
 
 ### Phase 1: Foundation (Complete ✅)
+
 - ✅ PQC algorithms implemented
 - ✅ Cryptographic agility framework
 - ✅ Quantum simulation platform
 - ✅ Documentation and guides
 
 ### Phase 2: Integration (In Progress)
+
 - [ ] Integrate PQC into authentication
 - [ ] Update TLS/SSL configuration
 - [ ] Migrate database encryption
 - [ ] Update code signing
 
 ### Phase 3: Deployment (Planned)
+
 - [ ] Production rollout
 - [ ] Performance monitoring
 - [ ] Security audits
 - [ ] Compliance validation
 
 ### Phase 4: Quantum Computing (Future)
+
 - [ ] Cloud quantum provider integration
 - [ ] Real quantum hardware access
 - [ ] Hybrid quantum-classical pipelines
@@ -316,20 +329,20 @@ await qnn.train(X_train, y_train, {
 
 ### PQC Operations (Operations/sec)
 
-| Algorithm | Key Gen | Encap/Sign | Decap/Verify |
-|-----------|---------|------------|--------------|
-| Kyber-768 | 35,000 | 32,000 | 28,000 |
-| Dilithium3 | 10,000 | 8,000 | 20,000 |
-| FALCON-512 | 5,000 | 8,000 | 25,000 |
+| Algorithm  | Key Gen | Encap/Sign | Decap/Verify |
+| ---------- | ------- | ---------- | ------------ |
+| Kyber-768  | 35,000  | 32,000     | 28,000       |
+| Dilithium3 | 10,000  | 8,000      | 20,000       |
+| FALCON-512 | 5,000   | 8,000      | 25,000       |
 
 ### Quantum Simulation
 
 | Qubits | Gates | Simulation Time |
-|--------|-------|-----------------|
-| 10 | 100 | <10ms |
-| 15 | 150 | ~50ms |
-| 20 | 200 | ~500ms |
-| 25 | 250 | ~5s |
+| ------ | ----- | --------------- |
+| 10     | 100   | <10ms           |
+| 15     | 150   | ~50ms           |
+| 20     | 200   | ~500ms          |
+| 25     | 250   | ~5s             |
 
 ## Testing
 
@@ -388,18 +401,21 @@ This implementation addresses:
 ## Future Roadmap
 
 ### Q2 2025
+
 - Cloud quantum provider integration
 - Hardware quantum backend support
 - Advanced error mitigation
 - Performance optimizations
 
 ### Q3 2025
+
 - Quantum machine learning enhancements
 - Specialized quantum algorithms
 - Production hardening
 - Advanced monitoring
 
 ### Q4 2025
+
 - Full quantum-classical hybrid pipelines
 - Real-time quantum optimization
 - Quantum advantage demonstrations

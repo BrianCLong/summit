@@ -225,7 +225,7 @@ charts/
 apiVersion: v2
 name: switchboard
 version: 0.1.0
-appVersion: '0.2.0'
+appVersion: "0.2.0"
 ```
 
 **`values.yaml`**
@@ -233,11 +233,11 @@ appVersion: '0.2.0'
 ```yaml
 image:
   repository: ghcr.io/org/switchboard-web
-  tag: '${GIT_SHA}'
+  tag: "${GIT_SHA}"
   pullPolicy: IfNotPresent
 opa:
   enabled: true
-  bundleURL: 'https://registry.example.com/opa/bundles/switchboard.tar.gz'
+  bundleURL: "https://registry.example.com/opa/bundles/switchboard.tar.gz"
 service:
   type: ClusterIP
   port: 80
@@ -267,15 +267,15 @@ spec:
     metadata:
       labels: { app: switchboard }
       annotations:
-        cosign.sigstore.dev/imageRef: '{{ .Values.image.repository }}:{{ .Values.image.tag }}'
+        cosign.sigstore.dev/imageRef: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
     spec:
       containers:
         - name: web
-          image: '{{ .Values.image.repository }}:{{ .Values.image.tag }}'
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           ports: [{ containerPort: 80 }]
         - name: opa
           image: openpolicyagent/opa:latest-rootless
-          args: ['run', '--server', '--log-level=info', '--bundle', '/policy']
+          args: ["run", "--server", "--log-level=info", "--bundle", "/policy"]
           volumeMounts:
             - name: policy
               mountPath: /policy
@@ -357,31 +357,22 @@ test_secret_requires_step_up_denied {
 openapi: 3.0.3
 info: { title: CompanyOS Switchboard API, version: 0.2.0 }
 paths:
-  /healthz:
-    { get: { summary: Liveness, responses: { '200': { description: OK } } } }
-  /readyz:
-    { get: { summary: Readiness, responses: { '200': { description: OK } } } }
-  /metrics:
-    {
-      get:
-        {
-          summary: Prometheus metrics,
-          responses: { '200': { description: OK } },
-        },
-    }
+  /healthz: { get: { summary: Liveness, responses: { "200": { description: OK } } } }
+  /readyz: { get: { summary: Readiness, responses: { "200": { description: OK } } } }
+  /metrics: { get: { summary: Prometheus metrics, responses: { "200": { description: OK } } } }
   /agents:
     get:
       summary: List registered agents
-      responses: { '200': { description: OK } }
+      responses: { "200": { description: OK } }
   /actions/dispatch:
     post:
       summary: Send structured action to agent with policy check
       requestBody: { required: true }
-      responses: { '202': { description: Accepted } }
+      responses: { "202": { description: Accepted } }
   /meetings/token:
     post:
       summary: Mint ephemeral meeting token (policy‑gated)
-      responses: { '200': { description: OK } }
+      responses: { "200": { description: OK } }
 ```
 
 ### 4.6 Observability Kit (Node/Next.js middleware)
@@ -389,34 +380,34 @@ paths:
 **`apps/web/src/middleware/obs.ts`**
 
 ```ts
-import { randomUUID } from 'crypto';
+import { randomUUID } from "crypto";
 
 export function withObs(handler: any) {
   return async (req: any, res: any) => {
-    const traceId = req.headers['x-trace-id'] || randomUUID();
+    const traceId = req.headers["x-trace-id"] || randomUUID();
     const start = Date.now();
-    res.setHeader('x-trace-id', traceId);
+    res.setHeader("x-trace-id", traceId);
     try {
       const result = await handler(req, res);
       const dur = Date.now() - start;
       console.log(
         JSON.stringify({
-          msg: 'request',
+          msg: "request",
           traceId,
           path: req.url,
           status: res.statusCode,
           dur,
-        }),
+        })
       );
       return result;
     } catch (e: any) {
       console.error(
         JSON.stringify({
-          msg: 'error',
+          msg: "error",
           traceId,
           path: req.url,
           err: e?.message,
-        }),
+        })
       );
       throw e;
     }
@@ -428,12 +419,12 @@ export function withObs(handler: any) {
 
 ```ts
 // apps/web/src/app/api/metrics/route.ts
-import client from 'prom-client';
+import client from "prom-client";
 const reg = new client.Registry();
 client.collectDefaultMetrics({ register: reg });
 export async function GET() {
   return new Response(await reg.metrics(), {
-    headers: { 'content-type': 'text/plain' },
+    headers: { "content-type": "text/plain" },
   });
 }
 ```

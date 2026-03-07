@@ -1,9 +1,9 @@
 ---
 name: Assistant v1.1 — Export Playbooks
 about: Track wizard + templates for reproducible exports with provenance
-title: 'Assistant v1.1: Export Playbooks'
-labels: ['release: v1.1', 'theme: exports', 'area: client', 'area: server']
-milestone: 'Assistant v1.1'
+title: "Assistant v1.1: Export Playbooks"
+labels: ["release: v1.1", "theme: exports", "area: client", "area: server"]
+milestone: "Assistant v1.1"
 ---
 
 ## Scope

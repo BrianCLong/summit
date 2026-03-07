@@ -6,8 +6,8 @@
  * operations, decisions, and data access.
  */
 
-import * as crypto from 'crypto';
-import * as jwt from 'jsonwebtoken';
+import * as crypto from "crypto";
+import * as jwt from "jsonwebtoken";
 
 export interface AuditConfig {
   enableImmutableLogging: boolean;
@@ -118,146 +118,146 @@ export interface GeolocationData {
 }
 
 export enum ActorType {
-  HUMAN_OPERATOR = 'human_operator',
-  AI_SYSTEM = 'ai_system',
-  AUTOMATED_PROCESS = 'automated_process',
-  EXTERNAL_SYSTEM = 'external_system',
-  SERVICE_ACCOUNT = 'service_account',
-  ADMIN_PROCESS = 'admin_process',
+  HUMAN_OPERATOR = "human_operator",
+  AI_SYSTEM = "ai_system",
+  AUTOMATED_PROCESS = "automated_process",
+  EXTERNAL_SYSTEM = "external_system",
+  SERVICE_ACCOUNT = "service_account",
+  ADMIN_PROCESS = "admin_process",
 }
 
 export enum UserRole {
-  ANALYST = 'analyst',
-  OPERATOR = 'operator',
-  SUPERVISOR = 'supervisor',
-  APPROVER = 'approver',
-  ADMINISTRATOR = 'administrator',
-  AUDITOR = 'auditor',
-  SYSTEM_ADMIN = 'system_admin',
+  ANALYST = "analyst",
+  OPERATOR = "operator",
+  SUPERVISOR = "supervisor",
+  APPROVER = "approver",
+  ADMINISTRATOR = "administrator",
+  AUDITOR = "auditor",
+  SYSTEM_ADMIN = "system_admin",
 }
 
 export enum ClassificationLevel {
-  UNCLASSIFIED = 'unclassified',
-  CONFIDENTIAL = 'confidential',
-  SECRET = 'secret',
-  TOP_SECRET = 'top_secret',
-  SCI = 'sci',
-  SAP = 'sap', // Special Access Program
+  UNCLASSIFIED = "unclassified",
+  CONFIDENTIAL = "confidential",
+  SECRET = "secret",
+  TOP_SECRET = "top_secret",
+  SCI = "sci",
+  SAP = "sap", // Special Access Program
 }
 
 export enum AuthMethod {
-  PASSWORD = 'password',
-  CERTIFICATE = 'certificate',
-  BIOMETRIC = 'biometric',
-  MULTI_FACTOR = 'multi_factor',
-  SMART_CARD = 'smart_card',
-  OAUTH = 'oauth',
-  SAML = 'saml',
+  PASSWORD = "password",
+  CERTIFICATE = "certificate",
+  BIOMETRIC = "biometric",
+  MULTI_FACTOR = "multi_factor",
+  SMART_CARD = "smart_card",
+  OAUTH = "oauth",
+  SAML = "saml",
 }
 
 export enum AuditAction {
   // Data Operations
-  CREATE = 'create',
-  READ = 'read',
-  UPDATE = 'update',
-  DELETE = 'delete',
-  EXPORT = 'export',
-  IMPORT = 'import',
+  CREATE = "create",
+  READ = "read",
+  UPDATE = "update",
+  DELETE = "delete",
+  EXPORT = "export",
+  IMPORT = "import",
 
   // Authentication & Authorization
-  LOGIN = 'login',
-  LOGOUT = 'logout',
-  PERMISSION_GRANTED = 'permission_granted',
-  PERMISSION_DENIED = 'permission_denied',
-  ROLE_ASSUMED = 'role_assumed',
+  LOGIN = "login",
+  LOGOUT = "logout",
+  PERMISSION_GRANTED = "permission_granted",
+  PERMISSION_DENIED = "permission_denied",
+  ROLE_ASSUMED = "role_assumed",
 
   // Operations Management
-  OPERATION_CREATED = 'operation_created',
-  OPERATION_UPDATED = 'operation_updated',
-  OPERATION_APPROVED = 'operation_approved',
-  OPERATION_REJECTED = 'operation_rejected',
-  OPERATION_EXECUTED = 'operation_executed',
-  OPERATION_PAUSED = 'operation_paused',
-  OPERATION_ABORTED = 'operation_aborted',
+  OPERATION_CREATED = "operation_created",
+  OPERATION_UPDATED = "operation_updated",
+  OPERATION_APPROVED = "operation_approved",
+  OPERATION_REJECTED = "operation_rejected",
+  OPERATION_EXECUTED = "operation_executed",
+  OPERATION_PAUSED = "operation_paused",
+  OPERATION_ABORTED = "operation_aborted",
 
   // Simulation & Analysis
-  SIMULATION_STARTED = 'simulation_started',
-  SIMULATION_COMPLETED = 'simulation_completed',
-  MODEL_TRAINED = 'model_trained',
-  ANALYSIS_PERFORMED = 'analysis_performed',
+  SIMULATION_STARTED = "simulation_started",
+  SIMULATION_COMPLETED = "simulation_completed",
+  MODEL_TRAINED = "model_trained",
+  ANALYSIS_PERFORMED = "analysis_performed",
 
   // Security Events
-  SECURITY_VIOLATION = 'security_violation',
-  ANOMALY_DETECTED = 'anomaly_detected',
-  INTRUSION_ATTEMPT = 'intrusion_attempt',
-  DATA_BREACH_SUSPECTED = 'data_breach_suspected',
+  SECURITY_VIOLATION = "security_violation",
+  ANOMALY_DETECTED = "anomaly_detected",
+  INTRUSION_ATTEMPT = "intrusion_attempt",
+  DATA_BREACH_SUSPECTED = "data_breach_suspected",
 
   // Administrative
-  CONFIG_CHANGED = 'config_changed',
-  USER_CREATED = 'user_created',
-  USER_MODIFIED = 'user_modified',
-  BACKUP_PERFORMED = 'backup_performed',
-  SYSTEM_MAINTENANCE = 'system_maintenance',
+  CONFIG_CHANGED = "config_changed",
+  USER_CREATED = "user_created",
+  USER_MODIFIED = "user_modified",
+  BACKUP_PERFORMED = "backup_performed",
+  SYSTEM_MAINTENANCE = "system_maintenance",
 }
 
 export enum ResourceType {
-  OPERATION = 'operation',
-  MEASURE = 'measure',
-  SIMULATION = 'simulation',
-  USER_ACCOUNT = 'user_account',
-  CONFIGURATION = 'configuration',
-  DATA_FILE = 'data_file',
-  REPORT = 'report',
-  LOG_FILE = 'log_file',
-  CERTIFICATE = 'certificate',
-  CRYPTOGRAPHIC_KEY = 'cryptographic_key',
+  OPERATION = "operation",
+  MEASURE = "measure",
+  SIMULATION = "simulation",
+  USER_ACCOUNT = "user_account",
+  CONFIGURATION = "configuration",
+  DATA_FILE = "data_file",
+  REPORT = "report",
+  LOG_FILE = "log_file",
+  CERTIFICATE = "certificate",
+  CRYPTOGRAPHIC_KEY = "cryptographic_key",
 }
 
 export enum UrgencyLevel {
-  LOW = 'low',
-  NORMAL = 'normal',
-  HIGH = 'high',
-  CRITICAL = 'critical',
-  EMERGENCY = 'emergency',
+  LOW = "low",
+  NORMAL = "normal",
+  HIGH = "high",
+  CRITICAL = "critical",
+  EMERGENCY = "emergency",
 }
 
 export enum RiskLevel {
-  MINIMAL = 'minimal',
-  LOW = 'low',
-  MODERATE = 'moderate',
-  HIGH = 'high',
-  CRITICAL = 'critical',
+  MINIMAL = "minimal",
+  LOW = "low",
+  MODERATE = "moderate",
+  HIGH = "high",
+  CRITICAL = "critical",
 }
 
 export enum OutcomeResult {
-  SUCCESS = 'success',
-  PARTIAL_SUCCESS = 'partial_success',
-  FAILURE = 'failure',
-  ERROR = 'error',
-  BLOCKED = 'blocked',
-  CANCELLED = 'cancelled',
+  SUCCESS = "success",
+  PARTIAL_SUCCESS = "partial_success",
+  FAILURE = "failure",
+  ERROR = "error",
+  BLOCKED = "blocked",
+  CANCELLED = "cancelled",
 }
 
 export enum ComplianceStatus {
-  COMPLIANT = 'compliant',
-  NON_COMPLIANT = 'non_compliant',
-  UNDER_REVIEW = 'under_review',
-  EXEMPTION_GRANTED = 'exemption_granted',
+  COMPLIANT = "compliant",
+  NON_COMPLIANT = "non_compliant",
+  UNDER_REVIEW = "under_review",
+  EXEMPTION_GRANTED = "exemption_granted",
 }
 
 export enum Priority {
-  LOW = 'low',
-  MEDIUM = 'medium',
-  HIGH = 'high',
-  CRITICAL = 'critical',
+  LOW = "low",
+  MEDIUM = "medium",
+  HIGH = "high",
+  CRITICAL = "critical",
 }
 
 export enum ConfidentialityLevel {
-  PUBLIC = 'public',
-  INTERNAL = 'internal',
-  CONFIDENTIAL = 'confidential',
-  RESTRICTED = 'restricted',
-  TOP_SECRET = 'top_secret',
+  PUBLIC = "public",
+  INTERNAL = "internal",
+  CONFIDENTIAL = "confidential",
+  RESTRICTED = "restricted",
+  TOP_SECRET = "top_secret",
 }
 
 export interface AuditQuery {
@@ -275,7 +275,7 @@ export interface AuditQuery {
   limit?: number;
   offset?: number;
   sortBy?: string;
-  sortOrder?: 'asc' | 'desc';
+  sortOrder?: "asc" | "desc";
 }
 
 export interface AuditQueryResult {
@@ -347,40 +347,40 @@ export interface AuditRecommendation {
 }
 
 export enum ViolationType {
-  UNAUTHORIZED_ACCESS = 'unauthorized_access',
-  DATA_EXFILTRATION = 'data_exfiltration',
-  PRIVILEGE_ESCALATION = 'privilege_escalation',
-  POLICY_VIOLATION = 'policy_violation',
-  ANOMALOUS_BEHAVIOR = 'anomalous_behavior',
-  COMPLIANCE_BREACH = 'compliance_breach',
+  UNAUTHORIZED_ACCESS = "unauthorized_access",
+  DATA_EXFILTRATION = "data_exfiltration",
+  PRIVILEGE_ESCALATION = "privilege_escalation",
+  POLICY_VIOLATION = "policy_violation",
+  ANOMALOUS_BEHAVIOR = "anomalous_behavior",
+  COMPLIANCE_BREACH = "compliance_breach",
 }
 
 export enum Severity {
-  LOW = 'low',
-  MEDIUM = 'medium',
-  HIGH = 'high',
-  CRITICAL = 'critical',
+  LOW = "low",
+  MEDIUM = "medium",
+  HIGH = "high",
+  CRITICAL = "critical",
 }
 
 export enum ViolationStatus {
-  OPEN = 'open',
-  INVESTIGATING = 'investigating',
-  RESOLVED = 'resolved',
-  FALSE_POSITIVE = 'false_positive',
+  OPEN = "open",
+  INVESTIGATING = "investigating",
+  RESOLVED = "resolved",
+  FALSE_POSITIVE = "false_positive",
 }
 
 export enum RecommendationCategory {
-  SECURITY_IMPROVEMENT = 'security_improvement',
-  COMPLIANCE_ENHANCEMENT = 'compliance_enhancement',
-  OPERATIONAL_EFFICIENCY = 'operational_efficiency',
-  RISK_MITIGATION = 'risk_mitigation',
+  SECURITY_IMPROVEMENT = "security_improvement",
+  COMPLIANCE_ENHANCEMENT = "compliance_enhancement",
+  OPERATIONAL_EFFICIENCY = "operational_efficiency",
+  RISK_MITIGATION = "risk_mitigation",
 }
 
 export enum EffortLevel {
-  LOW = 'low',
-  MEDIUM = 'medium',
-  HIGH = 'high',
-  VERY_HIGH = 'very_high',
+  LOW = "low",
+  MEDIUM = "medium",
+  HIGH = "high",
+  VERY_HIGH = "very_high",
 }
 
 /**
@@ -395,8 +395,7 @@ export class AuditEngine {
 
   constructor(config: AuditConfig, signingKey?: string) {
     this.config = config;
-    this.signingKey =
-      signingKey || process.env.AUDIT_SIGNING_KEY || 'default-key';
+    this.signingKey = signingKey || process.env.AUDIT_SIGNING_KEY || "default-key";
 
     // Initialize genesis hash
     if (config.enableHashChains && this.hashChain.length === 0) {
@@ -413,7 +412,7 @@ export class AuditEngine {
     resource: AuditResource,
     context: AuditContext,
     outcome: AuditOutcome,
-    metadata?: Partial<AuditMetadata>,
+    metadata?: Partial<AuditMetadata>
   ): Promise<string> {
     const entry: AuditEntry = {
       id: this.generateEntryId(),
@@ -424,8 +423,8 @@ export class AuditEngine {
       context,
       outcome,
       metadata: {
-        version: '1.0',
-        schema: 'active-measures-audit-v1',
+        version: "1.0",
+        schema: "active-measures-audit-v1",
         correlationId: this.generateCorrelationId(),
         traceId: this.generateTraceId(),
         priority: Priority.MEDIUM,
@@ -464,9 +463,7 @@ export class AuditEngine {
    * Query audit entries with advanced filtering
    */
   async query(query: AuditQuery): Promise<AuditQueryResult> {
-    const filteredEntries = this.auditStore.filter((entry) =>
-      this.matchesQuery(entry, query),
-    );
+    const filteredEntries = this.auditStore.filter((entry) => this.matchesQuery(entry, query));
 
     // Sort results
     if (query.sortBy) {
@@ -474,7 +471,7 @@ export class AuditEngine {
         const aVal = this.getNestedValue(a, query.sortBy!);
         const bVal = this.getNestedValue(b, query.sortBy!);
 
-        if (query.sortOrder === 'desc') {
+        if (query.sortOrder === "desc") {
           return bVal > aVal ? 1 : -1;
         }
         return aVal > bVal ? 1 : -1;
@@ -507,7 +504,7 @@ export class AuditEngine {
     description: string,
     timeRange: { start: Date; end: Date },
     filters: AuditQuery,
-    generatedBy: string,
+    generatedBy: string
   ): Promise<AuditReport> {
     const queryResult = await this.query({
       ...filters,
@@ -590,24 +587,24 @@ export class AuditEngine {
    * Export audit logs for external systems
    */
   async exportLogs(
-    format: 'json' | 'csv' | 'xml' | 'siem',
+    format: "json" | "csv" | "xml" | "siem",
     query?: AuditQuery,
-    encryption?: boolean,
+    encryption?: boolean
   ): Promise<Buffer> {
     const queryResult = await this.query(query || {});
     let exportData: string;
 
     switch (format) {
-      case 'json':
+      case "json":
         exportData = JSON.stringify(queryResult.entries, null, 2);
         break;
-      case 'csv':
+      case "csv":
         exportData = this.convertToCSV(queryResult.entries);
         break;
-      case 'xml':
+      case "xml":
         exportData = this.convertToXML(queryResult.entries);
         break;
-      case 'siem':
+      case "siem":
         exportData = this.convertToSIEM(queryResult.entries);
         break;
       default:
@@ -630,33 +627,29 @@ export class AuditEngine {
     archivedCount: number;
     archiveLocation: string;
   }> {
-    const entriesToArchive = this.auditStore.filter(
-      (entry) => entry.timestamp < beforeDate,
-    );
+    const entriesToArchive = this.auditStore.filter((entry) => entry.timestamp < beforeDate);
 
     // Export to archive format
     const archiveData = await this.exportLogs(
-      'json',
+      "json",
       {
         timeRange: { start: new Date(0), end: beforeDate },
       },
-      true,
+      true
     );
 
     // Generate archive filename
-    const archiveLocation = `audit-archive-${beforeDate.toISOString().split('T')[0]}.json.enc`;
+    const archiveLocation = `audit-archive-${beforeDate.toISOString().split("T")[0]}.json.enc`;
 
     // Remove archived entries from active store
-    this.auditStore = this.auditStore.filter(
-      (entry) => entry.timestamp >= beforeDate,
-    );
+    this.auditStore = this.auditStore.filter((entry) => entry.timestamp >= beforeDate);
 
     // Log the archival operation
     await this.logEntry(
       {
-        id: 'system',
+        id: "system",
         type: ActorType.AUTOMATED_PROCESS,
-        name: 'Archive Process',
+        name: "Archive Process",
         role: UserRole.SYSTEM_ADMIN,
         clearanceLevel: ClassificationLevel.TOP_SECRET,
         authentication: {
@@ -675,12 +668,11 @@ export class AuditEngine {
         size: archiveData.length,
       },
       {
-        businessJustification:
-          'Automated audit log archival for retention compliance',
+        businessJustification: "Automated audit log archival for retention compliance",
         urgencyLevel: UrgencyLevel.LOW,
         riskLevel: RiskLevel.MINIMAL,
-        complianceFramework: ['SOX', 'GDPR', 'NIST'],
-        tags: ['archive', 'retention', 'compliance'],
+        complianceFramework: ["SOX", "GDPR", "NIST"],
+        tags: ["archive", "retention", "compliance"],
       },
       {
         result: OutcomeResult.SUCCESS,
@@ -688,7 +680,7 @@ export class AuditEngine {
         dataModified: true,
         recordsAffected: entriesToArchive.length,
         complianceStatus: ComplianceStatus.COMPLIANT,
-      },
+      }
     );
 
     return {
@@ -716,16 +708,11 @@ export class AuditEngine {
   }
 
   private generateGenesisHash(): string {
-    return crypto
-      .createHash('sha256')
-      .update('ACTIVE_MEASURES_AUDIT_GENESIS')
-      .digest('hex');
+    return crypto.createHash("sha256").update("ACTIVE_MEASURES_AUDIT_GENESIS").digest("hex");
   }
 
   private getLastHash(): string {
-    return (
-      this.hashChain[this.hashChain.length - 1] || this.generateGenesisHash()
-    );
+    return this.hashChain[this.hashChain.length - 1] || this.generateGenesisHash();
   }
 
   private calculateEntryHash(entry: AuditEntry): string {
@@ -738,10 +725,7 @@ export class AuditEngine {
       },
     };
 
-    return crypto
-      .createHash('sha256')
-      .update(JSON.stringify(entryData))
-      .digest('hex');
+    return crypto.createHash("sha256").update(JSON.stringify(entryData)).digest("hex");
   }
 
   private signEntry(entry: AuditEntry): string {
@@ -750,7 +734,7 @@ export class AuditEngine {
       integrity: { ...entry.integrity, digitalSignature: undefined },
     };
 
-    return jwt.sign(entryData, this.signingKey, { algorithm: 'HS256' });
+    return jwt.sign(entryData, this.signingKey, { algorithm: "HS256" });
   }
 
   private verifySignature(entry: AuditEntry): boolean {
@@ -764,19 +748,14 @@ export class AuditEngine {
         integrity: { ...entry.integrity, digitalSignature: undefined },
       };
 
-      const decoded = jwt.verify(
-        entry.integrity.digitalSignature,
-        this.signingKey,
-      ) as any;
+      const decoded = jwt.verify(entry.integrity.digitalSignature, this.signingKey) as any;
       return JSON.stringify(decoded) === JSON.stringify(entryData);
     } catch {
       return false;
     }
   }
 
-  private determineConfidentiality(
-    classification: ClassificationLevel,
-  ): ConfidentialityLevel {
+  private determineConfidentiality(classification: ClassificationLevel): ConfidentialityLevel {
     const mapping = {
       [ClassificationLevel.UNCLASSIFIED]: ConfidentialityLevel.PUBLIC,
       [ClassificationLevel.CONFIDENTIAL]: ConfidentialityLevel.CONFIDENTIAL,
@@ -789,12 +768,10 @@ export class AuditEngine {
     return mapping[classification] || ConfidentialityLevel.INTERNAL;
   }
 
-  private async generateIntegrityData(
-    entry: Partial<AuditEntry>,
-  ): Promise<IntegrityData> {
+  private async generateIntegrityData(entry: Partial<AuditEntry>): Promise<IntegrityData> {
     return {
-      hash: '',
-      previousHash: '',
+      hash: "",
+      previousHash: "",
       digitalSignature: undefined,
       merkleRoot: undefined,
       blockHeight: this.currentBlockHeight,
@@ -804,15 +781,15 @@ export class AuditEngine {
 
   private validateEntry(entry: AuditEntry): void {
     if (!entry.id || !entry.timestamp || !entry.actor || !entry.action) {
-      throw new Error('Invalid audit entry: missing required fields');
+      throw new Error("Invalid audit entry: missing required fields");
     }
 
     if (entry.actor.clearanceLevel === undefined) {
-      throw new Error('Invalid audit entry: actor clearance level required');
+      throw new Error("Invalid audit entry: actor clearance level required");
     }
 
     if (entry.resource.classification === undefined) {
-      throw new Error('Invalid audit entry: resource classification required');
+      throw new Error("Invalid audit entry: resource classification required");
     }
   }
 
@@ -828,17 +805,14 @@ export class AuditEngine {
 
   private async checkForViolations(entry: AuditEntry): Promise<void> {
     // Check for suspicious patterns
-    if (
-      entry.action === AuditAction.LOGIN &&
-      entry.outcome.result === OutcomeResult.FAILURE
-    ) {
+    if (entry.action === AuditAction.LOGIN && entry.outcome.result === OutcomeResult.FAILURE) {
       // Multiple failed login attempts
       const recentFailures = this.auditStore.filter(
         (e) =>
           e.actor.id === entry.actor.id &&
           e.action === AuditAction.LOGIN &&
           e.outcome.result === OutcomeResult.FAILURE &&
-          entry.timestamp.getTime() - e.timestamp.getTime() < 300000, // 5 minutes
+          entry.timestamp.getTime() - e.timestamp.getTime() < 300000 // 5 minutes
       );
 
       if (recentFailures.length >= 3) {
@@ -869,7 +843,7 @@ export class AuditEngine {
   }
 
   private async logSecurityViolation(
-    violation: Omit<SecurityViolation, 'id' | 'timestamp' | 'status'>,
+    violation: Omit<SecurityViolation, "id" | "timestamp" | "status">
   ): Promise<void> {
     const securityViolation: SecurityViolation = {
       id: this.generateEntryId(),
@@ -879,34 +853,22 @@ export class AuditEngine {
     };
 
     // In a real implementation, this would be stored separately and trigger alerts
-    console.warn('Security violation detected:', securityViolation);
+    console.warn("Security violation detected:", securityViolation);
   }
 
   private matchesQuery(entry: AuditEntry, query: AuditQuery): boolean {
     if (query.actorId && entry.actor.id !== query.actorId) return false;
     if (query.action && entry.action !== query.action) return false;
-    if (query.resourceType && entry.resource.type !== query.resourceType)
+    if (query.resourceType && entry.resource.type !== query.resourceType) return false;
+    if (query.classification && entry.resource.classification !== query.classification)
       return false;
-    if (
-      query.classification &&
-      entry.resource.classification !== query.classification
-    )
-      return false;
-    if (query.operationId && entry.context.operationId !== query.operationId)
-      return false;
-    if (query.riskLevel && entry.context.riskLevel !== query.riskLevel)
-      return false;
-    if (
-      query.complianceStatus &&
-      entry.outcome.complianceStatus !== query.complianceStatus
-    )
+    if (query.operationId && entry.context.operationId !== query.operationId) return false;
+    if (query.riskLevel && entry.context.riskLevel !== query.riskLevel) return false;
+    if (query.complianceStatus && entry.outcome.complianceStatus !== query.complianceStatus)
       return false;
 
     if (query.timeRange) {
-      if (
-        entry.timestamp < query.timeRange.start ||
-        entry.timestamp > query.timeRange.end
-      ) {
+      if (entry.timestamp < query.timeRange.start || entry.timestamp > query.timeRange.end) {
         return false;
       }
     }
@@ -915,7 +877,7 @@ export class AuditEngine {
   }
 
   private getNestedValue(obj: any, path: string): any {
-    return path.split('.').reduce((current, prop) => current?.[prop], obj);
+    return path.split(".").reduce((current, prop) => current?.[prop], obj);
   }
 
   private generateAggregations(entries: AuditEntry[]): AuditAggregations {
@@ -945,9 +907,7 @@ export class AuditEngine {
     };
   }
 
-  private generateTimeDistribution(
-    entries: AuditEntry[],
-  ): Array<{ time: Date; count: number }> {
+  private generateTimeDistribution(entries: AuditEntry[]): Array<{ time: Date; count: number }> {
     const hourlyBuckets = new Map<string, number>();
 
     entries.forEach((entry) => {
@@ -965,33 +925,23 @@ export class AuditEngine {
 
   private generateSummary(entries: AuditEntry[]): AuditSummary {
     const uniqueActors = new Set(entries.map((e) => e.actor.id)).size;
-    const uniqueOperations = new Set(
-      entries.map((e) => e.context.operationId).filter(Boolean),
-    ).size;
+    const uniqueOperations = new Set(entries.map((e) => e.context.operationId).filter(Boolean))
+      .size;
 
-    const successCount = entries.filter(
-      (e) => e.outcome.result === OutcomeResult.SUCCESS,
-    ).length;
-    const errorCount = entries.filter(
-      (e) => e.outcome.result === OutcomeResult.ERROR,
-    ).length;
+    const successCount = entries.filter((e) => e.outcome.result === OutcomeResult.SUCCESS).length;
+    const errorCount = entries.filter((e) => e.outcome.result === OutcomeResult.ERROR).length;
 
     const securityViolations = entries.filter(
       (e) =>
-        e.action === AuditAction.SECURITY_VIOLATION ||
-        e.action === AuditAction.INTRUSION_ATTEMPT,
+        e.action === AuditAction.SECURITY_VIOLATION || e.action === AuditAction.INTRUSION_ATTEMPT
     ).length;
 
     const complianceViolations = entries.filter(
-      (e) => e.outcome.complianceStatus === ComplianceStatus.NON_COMPLIANT,
+      (e) => e.outcome.complianceStatus === ComplianceStatus.NON_COMPLIANT
     ).length;
 
-    const totalDuration = entries.reduce(
-      (sum, e) => sum + e.outcome.duration,
-      0,
-    );
-    const averageResponseTime =
-      entries.length > 0 ? totalDuration / entries.length : 0;
+    const totalDuration = entries.reduce((sum, e) => sum + e.outcome.duration, 0);
+    const averageResponseTime = entries.length > 0 ? totalDuration / entries.length : 0;
 
     return {
       totalEntries: entries.length,
@@ -1005,16 +955,12 @@ export class AuditEngine {
     };
   }
 
-  private async detectViolations(
-    entries: AuditEntry[],
-  ): Promise<SecurityViolation[]> {
+  private async detectViolations(entries: AuditEntry[]): Promise<SecurityViolation[]> {
     const violations: SecurityViolation[] = [];
 
     // Detect multiple failed logins
     const failedLogins = entries.filter(
-      (e) =>
-        e.action === AuditAction.LOGIN &&
-        e.outcome.result === OutcomeResult.FAILURE,
+      (e) => e.action === AuditAction.LOGIN && e.outcome.result === OutcomeResult.FAILURE
     );
 
     const userFailures = new Map<string, AuditEntry[]>();
@@ -1046,7 +992,7 @@ export class AuditEngine {
 
   private generateRecommendations(
     summary: AuditSummary,
-    violations: SecurityViolation[],
+    violations: SecurityViolation[]
   ): AuditRecommendation[] {
     const recommendations: AuditRecommendation[] = [];
 
@@ -1055,11 +1001,11 @@ export class AuditEngine {
         id: this.generateEntryId(),
         category: RecommendationCategory.OPERATIONAL_EFFICIENCY,
         priority: Priority.HIGH,
-        title: 'High Error Rate Detected',
+        title: "High Error Rate Detected",
         description: `Error rate of ${(summary.errorRate * 100).toFixed(1)}% exceeds acceptable threshold of 10%`,
-        impact: 'Reduced system reliability and user experience',
+        impact: "Reduced system reliability and user experience",
         effort: EffortLevel.MEDIUM,
-        timeline: '2-4 weeks',
+        timeline: "2-4 weeks",
       });
     }
 
@@ -1068,11 +1014,11 @@ export class AuditEngine {
         id: this.generateEntryId(),
         category: RecommendationCategory.SECURITY_IMPROVEMENT,
         priority: Priority.CRITICAL,
-        title: 'Security Violations Require Immediate Attention',
+        title: "Security Violations Require Immediate Attention",
         description: `${violations.length} security violations detected`,
-        impact: 'Potential security breach or compromise',
+        impact: "Potential security breach or compromise",
         effort: EffortLevel.HIGH,
-        timeline: 'Immediate',
+        timeline: "Immediate",
       });
     }
 
@@ -1081,11 +1027,11 @@ export class AuditEngine {
         id: this.generateEntryId(),
         category: RecommendationCategory.COMPLIANCE_ENHANCEMENT,
         priority: Priority.HIGH,
-        title: 'Compliance Violations Need Remediation',
+        title: "Compliance Violations Need Remediation",
         description: `${summary.complianceViolations} compliance violations identified`,
-        impact: 'Regulatory penalties and audit findings',
+        impact: "Regulatory penalties and audit findings",
         effort: EffortLevel.MEDIUM,
-        timeline: '1-2 weeks',
+        timeline: "1-2 weeks",
       });
     }
 
@@ -1095,15 +1041,7 @@ export class AuditEngine {
   // Export format converters
 
   private convertToCSV(entries: AuditEntry[]): string {
-    const headers = [
-      'ID',
-      'Timestamp',
-      'Actor',
-      'Action',
-      'Resource',
-      'Outcome',
-      'Duration',
-    ];
+    const headers = ["ID", "Timestamp", "Actor", "Action", "Resource", "Outcome", "Duration"];
 
     const rows = entries.map((entry) => [
       entry.id,
@@ -1115,7 +1053,7 @@ export class AuditEngine {
       entry.outcome.duration.toString(),
     ]);
 
-    return [headers, ...rows].map((row) => row.join(',')).join('\n');
+    return [headers, ...rows].map((row) => row.join(",")).join("\n");
   }
 
   private convertToXML(entries: AuditEntry[]): string {
@@ -1129,9 +1067,9 @@ export class AuditEngine {
         <resource>${entry.resource.id}</resource>
         <outcome>${entry.outcome.result}</outcome>
       </entry>
-    `,
+    `
       )
-      .join('');
+      .join("");
 
     return `<?xml version="1.0" encoding="UTF-8"?>
     <audit-log>
@@ -1144,21 +1082,21 @@ export class AuditEngine {
       .map((entry) =>
         JSON.stringify({
           timestamp: entry.timestamp.toISOString(),
-          source: 'active-measures',
+          source: "active-measures",
           event_type: entry.action,
           user: entry.actor.name,
           resource: entry.resource.id,
           outcome: entry.outcome.result,
           risk_level: entry.context.riskLevel,
           classification: entry.resource.classification,
-        }),
+        })
       )
-      .join('\n');
+      .join("\n");
   }
 
   private encryptData(data: Buffer): Buffer {
-    const algorithm = 'aes-256-gcm';
-    const key = crypto.scryptSync(this.signingKey, 'salt', 32);
+    const algorithm = "aes-256-gcm";
+    const key = crypto.scryptSync(this.signingKey, "salt", 32);
     const iv = crypto.randomBytes(16);
 
     const cipher = crypto.createCipher(algorithm, key);
@@ -1178,15 +1116,13 @@ export class AuditEngine {
   } {
     return {
       totalEntries: this.auditStore.length,
-      oldestEntry:
-        this.auditStore.length > 0 ? this.auditStore[0].timestamp : undefined,
+      oldestEntry: this.auditStore.length > 0 ? this.auditStore[0].timestamp : undefined,
       newestEntry:
         this.auditStore.length > 0
           ? this.auditStore[this.auditStore.length - 1].timestamp
           : undefined,
       integrityStatus:
-        this.config.enableHashChains &&
-        this.hashChain.length === this.auditStore.length + 1,
+        this.config.enableHashChains && this.hashChain.length === this.auditStore.length + 1,
     };
   }
 }

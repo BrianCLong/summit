@@ -37,25 +37,43 @@ const ModelsPage = React.lazy(() => import('@/pages/ModelsPage'))
 const ReportsPage = React.lazy(() => import('@/pages/ReportsPage'))
 const AdminPage = React.lazy(() => import('@/pages/AdminPage'))
 const FeatureFlagsPage = React.lazy(() => import('@/pages/admin/FeatureFlags'))
-const ConsistencyDashboard = React.lazy(() => import('@/pages/admin/ConsistencyDashboard').then(m => ({ default: m.ConsistencyDashboard })))
+const ConsistencyDashboard = React.lazy(() =>
+  import('@/pages/admin/ConsistencyDashboard').then(m => ({
+    default: m.ConsistencyDashboard,
+  }))
+)
 const HelpPage = React.lazy(() => import('@/pages/HelpPage'))
 const ChangelogPage = React.lazy(() => import('@/pages/ChangelogPage'))
-const InternalCommandDashboard = React.lazy(() => import('@/pages/internal/InternalCommandDashboard'))
+const InternalCommandDashboard = React.lazy(
+  () => import('@/pages/internal/InternalCommandDashboard')
+)
 const SignInPage = React.lazy(() => import('@/pages/SignInPage'))
 const SignupPage = React.lazy(() => import('@/pages/SignupPage'))
 const VerifyEmailPage = React.lazy(() => import('@/pages/VerifyEmailPage'))
 const TrialSignupPage = React.lazy(() => import('@/onboarding/trial-signup'))
 const AccessDeniedPage = React.lazy(() => import('@/pages/AccessDeniedPage'))
 const TriPanePage = React.lazy(() => import('@/pages/TriPanePage'))
-const GeoIntPane = React.lazy(() => import('@/panes/GeoIntPane').then(module => ({ default: module.GeoIntPane })))
-const NarrativeIntelligencePage = React.lazy(() => import('@/pages/NarrativeIntelligencePage'))
-const MissionControlPage = React.lazy(() => import('@/features/mission-control/MissionControlPage'))
+const GeoIntPane = React.lazy(() =>
+  import('@/panes/GeoIntPane').then(module => ({ default: module.GeoIntPane }))
+)
+const NarrativeIntelligencePage = React.lazy(
+  () => import('@/pages/NarrativeIntelligencePage')
+)
+const MissionControlPage = React.lazy(
+  () => import('@/features/mission-control/MissionControlPage')
+)
 const DemoControlPage = React.lazy(() => import('@/pages/DemoControlPage'))
 // const OnboardingWizard = React.lazy(() => import('@/pages/Onboarding/OnboardingWizard').then(module => ({ default: module.OnboardingWizard })))
-const MaestroDashboard = React.lazy(() => import('@/pages/maestro/MaestroDashboard'))
+const MaestroDashboard = React.lazy(
+  () => import('@/pages/maestro/MaestroDashboard')
+)
 const TrustDashboard = React.lazy(() => import('@/pages/TrustDashboard'))
-const CopilotPage = React.lazy(() => import('@/components/CopilotPanel').then(m => ({ default: m.CopilotPanel })))
-const InvestigationCanvas = React.lazy(() => import('@/pages/InvestigationCanvas'))
+const CopilotPage = React.lazy(() =>
+  import('@/components/CopilotPanel').then(m => ({ default: m.CopilotPanel }))
+)
+const InvestigationCanvas = React.lazy(
+  () => import('@/pages/InvestigationCanvas')
+)
 
 // New Switchboard Pages
 const ApprovalsPage = React.lazy(() => import('@/pages/ApprovalsPage'))
@@ -71,7 +89,12 @@ import { SearchProvider } from '@/contexts/SearchContext'
 import { AuthProvider } from '@/contexts/AuthContext'
 import { FeatureFlagProvider } from '@/contexts/FeatureFlagContext'
 import { ResilienceProvider } from '@/contexts/ResilienceContext'
-import { ErrorBoundary, NotFound, DataFetchErrorBoundary, MutationErrorBoundary } from '@/components/error'
+import {
+  ErrorBoundary,
+  NotFound,
+  DataFetchErrorBoundary,
+  MutationErrorBoundary,
+} from '@/components/error'
 import Explain from '@/components/Explain'
 import { CommandStatusProvider } from '@/features/internal-command/CommandStatusProvider'
 import { SnapshotProvider } from '@/features/snapshots'
@@ -81,20 +104,20 @@ import { isDemoModeEnabled } from '@/lib/demoMode'
 import { CommandPalette } from '@/components/CommandPalette'
 
 function App() {
-  const [showPalette, setShowPalette] = React.useState(false);
-  const [showExplain, setShowExplain] = React.useState(false);
+  const [showPalette, setShowPalette] = React.useState(false)
+  const [showExplain, setShowExplain] = React.useState(false)
   const demoModeEnabled = isDemoModeEnabled()
 
-  React.useEffect(()=>{
-    const onKey=(e:KeyboardEvent)=>{
-      if((e.key==='k' || e.key==='K') && (e.ctrlKey||e.metaKey)){
-        e.preventDefault();
-        setShowPalette(true);
+  React.useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.key === 'k' || e.key === 'K') && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault()
+        setShowPalette(true)
       }
-    };
-    window.addEventListener('keydown', onKey);
-    return ()=>window.removeEventListener('keydown', onKey);
-  },[]);
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
 
   return (
     <ApolloProvider client={apolloClient}>
@@ -108,236 +131,302 @@ function App() {
                   <CommandStatusProvider>
                     <ResilienceProvider>
                       <Router>
-                      <ErrorBoundary
-                        enableRetry={true}
-                        maxRetries={3}
-                        retryDelay={2000}
-                        severity="critical"
-                        boundaryName="app_root"
-                      >
-                    <React.Suspense
-                      fallback={
-                        <div className="flex h-screen items-center justify-center">
-                          <div className="text-center">
-                            <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent motion-reduce:animate-[spin_1.5s_linear_infinite]" />
-                            <p className="mt-4 text-sm text-muted-foreground">
-                              Loading...
-                            </p>
-                          </div>
-                        </div>
-                      }
-                    >
-                      {/* Explain overlay stub */}
-                      {showPalette && (
-                         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center" onClick={()=>setShowPalette(false)}>
-                           <div className="bg-white p-4 rounded shadow-lg w-96" onClick={e=>e.stopPropagation()}>
-                             <input type="text" placeholder="Command..." className="w-full border p-2 mb-2" autoFocus />
-                             <button onClick={()=>{ setShowPalette(false); setShowExplain(true); }} className="block w-full text-left p-2 hover:bg-gray-100">
-                               Explain this view
-                             </button>
-                           </div>
-                         </div>
-                      )}
-                      {showExplain && <Explain facts={["Linked via shared IP (1.2.3.4)", "Match score: 0.98"]} />}
+                        <ErrorBoundary
+                          enableRetry={true}
+                          maxRetries={3}
+                          retryDelay={2000}
+                          severity="critical"
+                          boundaryName="app_root"
+                        >
+                          <React.Suspense
+                            fallback={
+                              <div className="flex h-screen items-center justify-center">
+                                <div className="text-center">
+                                  <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent motion-reduce:animate-[spin_1.5s_linear_infinite]" />
+                                  <p className="mt-4 text-sm text-muted-foreground">
+                                    Loading...
+                                  </p>
+                                </div>
+                              </div>
+                            }
+                          >
+                            {/* Explain overlay stub */}
+                            {showPalette && (
+                              <div
+                                className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center"
+                                onClick={() => setShowPalette(false)}
+                              >
+                                <div
+                                  className="bg-white p-4 rounded shadow-lg w-96"
+                                  onClick={e => e.stopPropagation()}
+                                >
+                                  <input
+                                    type="text"
+                                    placeholder="Command..."
+                                    className="w-full border p-2 mb-2"
+                                    autoFocus
+                                  />
+                                  <button
+                                    onClick={() => {
+                                      setShowPalette(false)
+                                      setShowExplain(true)
+                                    }}
+                                    className="block w-full text-left p-2 hover:bg-gray-100"
+                                  >
+                                    Explain this view
+                                  </button>
+                                </div>
+                              </div>
+                            )}
+                            {showExplain && (
+                              <Explain
+                                facts={[
+                                  'Linked via shared IP (1.2.3.4)',
+                                  'Match score: 0.98',
+                                ]}
+                              />
+                            )}
 
-                      <Routes>
-                        {/* Auth routes */}
-                      <Route path="/signin" element={<SignInPage />} />
-                      <Route path="/signup" element={<SignupPage />} />
-                      <Route path="/trial-signup" element={<TrialSignupPage />} />
-                      <Route path="/verify-email" element={<VerifyEmailPage />} />
-                      <Route
-                        path="/access-denied"
-                        element={<AccessDeniedPage />}
-                      />
-                      <Route path="/maestro/*" element={
-                        <DataFetchErrorBoundary dataSourceName="Maestro Orchestrator">
-                          <MaestroDashboard />
-                        </DataFetchErrorBoundary>
-                      } />
-                      <Route path="/trust" element={<TrustDashboard />} />
+                            <Routes>
+                              {/* Auth routes */}
+                              <Route path="/signin" element={<SignInPage />} />
+                              <Route path="/signup" element={<SignupPage />} />
+                              <Route
+                                path="/trial-signup"
+                                element={<TrialSignupPage />}
+                              />
+                              <Route
+                                path="/verify-email"
+                                element={<VerifyEmailPage />}
+                              />
+                              <Route
+                                path="/access-denied"
+                                element={<AccessDeniedPage />}
+                              />
+                              <Route
+                                path="/maestro/*"
+                                element={
+                                  <DataFetchErrorBoundary dataSourceName="Maestro Orchestrator">
+                                    <MaestroDashboard />
+                                  </DataFetchErrorBoundary>
+                                }
+                              />
+                              <Route
+                                path="/trust"
+                                element={<TrustDashboard />}
+                              />
 
-                      {/* Switchboard Routes */}
-                      <Route path="/approvals" element={<ApprovalsPage />} />
-                      <Route path="/receipts" element={<ReceiptsPage />} />
-                      <Route path="/tenant-ops" element={<TenantOpsPage />} />
+                              {/* Switchboard Routes */}
+                              <Route
+                                path="/approvals"
+                                element={<ApprovalsPage />}
+                              />
+                              <Route
+                                path="/receipts"
+                                element={<ReceiptsPage />}
+                              />
+                              <Route
+                                path="/tenant-ops"
+                                element={<TenantOpsPage />}
+                              />
 
-                      {/* Workbench Route */}
-                      <Route path="/workbench" element={<WorkbenchShell />} />
-                      <Route path="/copilot" element={<CopilotPage />} />
+                              {/* Workbench Route */}
+                              <Route
+                                path="/workbench"
+                                element={<WorkbenchShell />}
+                              />
+                              <Route
+                                path="/copilot"
+                                element={<CopilotPage />}
+                              />
 
-                      {/* Protected routes with layout */}
-                      <Route path="/" element={<Layout />}>
-                        <Route index element={<HomePage />} />
-                        <Route
-                          path="explore"
-                          element={
-                            <DataFetchErrorBoundary dataSourceName="Explore">
-                              <ExplorePage />
-                            </DataFetchErrorBoundary>
-                          }
-                        />
+                              {/* Protected routes with layout */}
+                              <Route path="/" element={<Layout />}>
+                                <Route index element={<HomePage />} />
+                                <Route
+                                  path="explore"
+                                  element={
+                                    <DataFetchErrorBoundary dataSourceName="Explore">
+                                      <ExplorePage />
+                                    </DataFetchErrorBoundary>
+                                  }
+                                />
 
-                        <Route path="investigation" element={
-                          <DataFetchErrorBoundary dataSourceName="Investigation Canvas">
-                            <InvestigationCanvas />
-                          </DataFetchErrorBoundary>
-                        } />
+                                <Route
+                                  path="investigation"
+                                  element={
+                                    <DataFetchErrorBoundary dataSourceName="Investigation Canvas">
+                                      <InvestigationCanvas />
+                                    </DataFetchErrorBoundary>
+                                  }
+                                />
 
-                        {/* Tri-Pane Analysis - Wrapped with DataFetchErrorBoundary */}
-                        <Route
-                          path="analysis/tri-pane"
-                          element={
-                            <DataFetchErrorBoundary dataSourceName="Tri-Pane Analysis">
-                              <TriPanePage />
-                            </DataFetchErrorBoundary>
-                          }
-                        />
-                        <Route
-                          path="geoint"
-                          element={
-                            <DataFetchErrorBoundary dataSourceName="GeoInt">
-                              <GeoIntPane />
-                            </DataFetchErrorBoundary>
-                          }
-                        />
+                                {/* Tri-Pane Analysis - Wrapped with DataFetchErrorBoundary */}
+                                <Route
+                                  path="analysis/tri-pane"
+                                  element={
+                                    <DataFetchErrorBoundary dataSourceName="Tri-Pane Analysis">
+                                      <TriPanePage />
+                                    </DataFetchErrorBoundary>
+                                  }
+                                />
+                                <Route
+                                  path="geoint"
+                                  element={
+                                    <DataFetchErrorBoundary dataSourceName="GeoInt">
+                                      <GeoIntPane />
+                                    </DataFetchErrorBoundary>
+                                  }
+                                />
 
-                        {/* Narrative Intelligence */}
-                        <Route
-                          path="analysis/narrative"
-                          element={
-                            <DataFetchErrorBoundary dataSourceName="Narrative Intelligence">
-                              <NarrativeIntelligencePage />
-                            </DataFetchErrorBoundary>
-                          }
-                        />
+                                {/* Narrative Intelligence */}
+                                <Route
+                                  path="analysis/narrative"
+                                  element={
+                                    <DataFetchErrorBoundary dataSourceName="Narrative Intelligence">
+                                      <NarrativeIntelligencePage />
+                                    </DataFetchErrorBoundary>
+                                  }
+                                />
 
-                        {/* Alerts */}
-                        <Route path="alerts" element={<AlertsPage />} />
-                        <Route path="alerts/:id" element={<AlertDetailPage />} />
+                                {/* Alerts */}
+                                <Route path="alerts" element={<AlertsPage />} />
+                                <Route
+                                  path="alerts/:id"
+                                  element={<AlertDetailPage />}
+                                />
 
-                        {/* Cases */}
-                        <Route path="cases" element={<CasesPage />} />
-                        <Route path="cases/:id" element={<CaseDetailPage />} />
+                                {/* Cases */}
+                                <Route path="cases" element={<CasesPage />} />
+                                <Route
+                                  path="cases/:id"
+                                  element={<CaseDetailPage />}
+                                />
 
-                        {/* Dashboards - Wrapped with DataFetchErrorBoundary */}
-                        <Route
-                          path="dashboards/command-center"
-                          element={
-                            <DataFetchErrorBoundary dataSourceName="Command Center">
-                              <CommandCenterDashboard />
-                            </DataFetchErrorBoundary>
-                          }
-                        />
-                        <Route
-                          path="dashboards/supply-chain"
-                          element={
-                            <DataFetchErrorBoundary dataSourceName="Supply Chain">
-                              <SupplyChainDashboard />
-                            </DataFetchErrorBoundary>
-                          }
-                        />
-                        <Route
-                          path="dashboards/advanced"
-                          element={
-                            <DataFetchErrorBoundary dataSourceName="Advanced Dashboard">
-                              <AdvancedDashboardPage />
-                            </DataFetchErrorBoundary>
-                          }
-                        />
-                        <Route
-                          path="dashboards/usage-cost"
-                          element={
-                            <DataFetchErrorBoundary dataSourceName="Usage & Cost">
-                              <UsageCostDashboard />
-                            </DataFetchErrorBoundary>
-                          }
-                        />
-                        <Route
-                          path="internal/command"
-                          element={
-                            <DataFetchErrorBoundary dataSourceName="Internal Command Dashboard">
-                              <InternalCommandDashboard />
-                            </DataFetchErrorBoundary>
-                          }
-                        />
-                        <Route
-                          path="mission-control"
-                          element={
-                            <DataFetchErrorBoundary dataSourceName="Mission Control">
-                              <MissionControlPage />
-                            </DataFetchErrorBoundary>
-                          }
-                        />
+                                {/* Dashboards - Wrapped with DataFetchErrorBoundary */}
+                                <Route
+                                  path="dashboards/command-center"
+                                  element={
+                                    <DataFetchErrorBoundary dataSourceName="Command Center">
+                                      <CommandCenterDashboard />
+                                    </DataFetchErrorBoundary>
+                                  }
+                                />
+                                <Route
+                                  path="dashboards/supply-chain"
+                                  element={
+                                    <DataFetchErrorBoundary dataSourceName="Supply Chain">
+                                      <SupplyChainDashboard />
+                                    </DataFetchErrorBoundary>
+                                  }
+                                />
+                                <Route
+                                  path="dashboards/advanced"
+                                  element={
+                                    <DataFetchErrorBoundary dataSourceName="Advanced Dashboard">
+                                      <AdvancedDashboardPage />
+                                    </DataFetchErrorBoundary>
+                                  }
+                                />
+                                <Route
+                                  path="dashboards/usage-cost"
+                                  element={
+                                    <DataFetchErrorBoundary dataSourceName="Usage & Cost">
+                                      <UsageCostDashboard />
+                                    </DataFetchErrorBoundary>
+                                  }
+                                />
+                                <Route
+                                  path="internal/command"
+                                  element={
+                                    <DataFetchErrorBoundary dataSourceName="Internal Command Dashboard">
+                                      <InternalCommandDashboard />
+                                    </DataFetchErrorBoundary>
+                                  }
+                                />
+                                <Route
+                                  path="mission-control"
+                                  element={
+                                    <DataFetchErrorBoundary dataSourceName="Mission Control">
+                                      <MissionControlPage />
+                                    </DataFetchErrorBoundary>
+                                  }
+                                />
 
-                        <Route
-                          path="outreach"
-                          element={
-                            <DataFetchErrorBoundary dataSourceName="Outreach Dashboard">
-                              <OutreachDashboard />
-                            </DataFetchErrorBoundary>
-                          }
-                        />
+                                <Route
+                                  path="outreach"
+                                  element={
+                                    <DataFetchErrorBoundary dataSourceName="Outreach Dashboard">
+                                      <OutreachDashboard />
+                                    </DataFetchErrorBoundary>
+                                  }
+                                />
 
-                        {/* Data & Models */}
-                        <Route
-                          path="data/sources"
-                          element={<DataSourcesPage />}
-                        />
-                        <Route path="models" element={<ModelsPage />} />
-                        <Route path="reports" element={<ReportsPage />} />
+                                {/* Data & Models */}
+                                <Route
+                                  path="data/sources"
+                                  element={<DataSourcesPage />}
+                                />
+                                <Route path="models" element={<ModelsPage />} />
+                                <Route
+                                  path="reports"
+                                  element={<ReportsPage />}
+                                />
 
-                        {/* Admin - Wrapped with MutationErrorBoundary for critical operations */}
-                        <Route
-                          path="admin/*"
-                          element={
-                            <MutationErrorBoundary operationName="admin operation">
-                              <AdminPage />
-                            </MutationErrorBoundary>
-                          }
-                        />
-                        <Route
-                          path="admin/consistency"
-                          element={
-                            <MutationErrorBoundary operationName="consistency check">
-                              <ConsistencyDashboard />
-                            </MutationErrorBoundary>
-                          }
-                        />
-                        <Route
-                          path="admin/feature-flags"
-                          element={
-                            <MutationErrorBoundary operationName="feature flag update">
-                              <FeatureFlagsPage />
-                            </MutationErrorBoundary>
-                          }
-                        />
+                                {/* Admin - Wrapped with MutationErrorBoundary for critical operations */}
+                                <Route
+                                  path="admin/*"
+                                  element={
+                                    <MutationErrorBoundary operationName="admin operation">
+                                      <AdminPage />
+                                    </MutationErrorBoundary>
+                                  }
+                                />
+                                <Route
+                                  path="admin/consistency"
+                                  element={
+                                    <MutationErrorBoundary operationName="consistency check">
+                                      <ConsistencyDashboard />
+                                    </MutationErrorBoundary>
+                                  }
+                                />
+                                <Route
+                                  path="admin/feature-flags"
+                                  element={
+                                    <MutationErrorBoundary operationName="feature flag update">
+                                      <FeatureFlagsPage />
+                                    </MutationErrorBoundary>
+                                  }
+                                />
 
-                        {/* Support */}
-                        <Route path="help" element={<HelpPage />} />
-                        <Route path="changelog" element={<ChangelogPage />} />
+                                {/* Support */}
+                                <Route path="help" element={<HelpPage />} />
+                                <Route
+                                  path="changelog"
+                                  element={<ChangelogPage />}
+                                />
 
-                        {/* Explicitly Gated Demo Routes */}
-                        <Route
-                          path="demo"
-                          element={
-                            demoModeEnabled ? (
-                              <DemoModeGate>
-                                <DemoControlPage />
-                              </DemoModeGate>
-                            ) : (
-                              <Navigate to="/" replace />
-                            )
-                          }
-                        />
-                        {/* <Route path="onboarding" element={<OnboardingWizard />} /> */}
+                                {/* Explicitly Gated Demo Routes */}
+                                <Route
+                                  path="demo"
+                                  element={
+                                    demoModeEnabled ? (
+                                      <DemoModeGate>
+                                        <DemoControlPage />
+                                      </DemoModeGate>
+                                    ) : (
+                                      <Navigate to="/" replace />
+                                    )
+                                  }
+                                />
+                                {/* <Route path="onboarding" element={<OnboardingWizard />} /> */}
 
-                        {/* Catch all */}
-                        <Route path="*" element={<NotFound />} />
-                      </Route>
-                    </Routes>
-                    </React.Suspense>
-                    </ErrorBoundary>
+                                {/* Catch all */}
+                                <Route path="*" element={<NotFound />} />
+                              </Route>
+                            </Routes>
+                          </React.Suspense>
+                        </ErrorBoundary>
                       </Router>
                     </ResilienceProvider>
                   </CommandStatusProvider>

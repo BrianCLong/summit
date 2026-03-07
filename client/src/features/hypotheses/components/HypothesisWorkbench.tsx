@@ -1,5 +1,5 @@
-import React from 'react';
-import { createHypothesisStore } from '../store';
+import React from "react";
+import { createHypothesisStore } from "../store";
 
 const store = createHypothesisStore();
 

@@ -21,11 +21,11 @@ The input file should be a JSON array of `SecurityEvidence` objects:
     "timestamp": "2023-10-27T10:00:00Z",
     "source": "audit-log",
     "data": {
-       "subject": { "id": "service-a" },
-       "action": "write",
-       "resource": "db-prod",
-       "count": 100,
-       "reason": "Insufficient permissions"
+      "subject": { "id": "service-a" },
+      "action": "write",
+      "resource": "db-prod",
+      "count": 100,
+      "reason": "Insufficient permissions"
     }
   }
 ]
@@ -43,5 +43,6 @@ For each generated proposal, a directory is created in the output path (e.g., `.
 ## Integration
 
 This CLI is intended to be run:
-*   **Locally** by security engineers investigating alerts.
-*   **In CI/CD** (e.g., nightly) to batch process accumulated alerts and generate proposal artifacts for review.
+
+- **Locally** by security engineers investigating alerts.
+- **In CI/CD** (e.g., nightly) to batch process accumulated alerts and generate proposal artifacts for review.

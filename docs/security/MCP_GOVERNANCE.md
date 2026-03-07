@@ -21,27 +21,29 @@ The Gateway acts as a reverse proxy/broker for all MCP traffic.
 
 ### Responsibilities
 
-*   **Authentication**: Verifies the identity of the caller (Agent or User).
-*   **Authorization**: Checks if the caller is allowed to execute the requested tool or access the resource.
-*   **Audit Logging**: Records every interaction with a `trace_id` and `evidence_id`.
-*   **Rate Limiting**: Protects downstream services from agent loops.
+- **Authentication**: Verifies the identity of the caller (Agent or User).
+- **Authorization**: Checks if the caller is allowed to execute the requested tool or access the resource.
+- **Audit Logging**: Records every interaction with a `trace_id` and `evidence_id`.
+- **Rate Limiting**: Protects downstream services from agent loops.
 
 ## Policy Enforcement
 
 Policies are defined in code (initially) and will migrate to OPA (Open Policy Agent).
 
 ### Default Policy
-*   **Deny All**: By default, no tool execution is allowed.
-*   **Allow-List**: Specific high-trust tools are allow-listed for specific roles.
+
+- **Deny All**: By default, no tool execution is allowed.
+- **Allow-List**: Specific high-trust tools are allow-listed for specific roles.
 
 ## Audit Strategy
 
 All MCP interactions generate an audit event containing:
-*   Timestamp
-*   User/Agent ID
-*   Trace ID
-*   Tool/Resource ID
-*   Action (Execute/Read)
-*   Decision (Allow/Deny)
+
+- Timestamp
+- User/Agent ID
+- Trace ID
+- Tool/Resource ID
+- Action (Execute/Read)
+- Decision (Allow/Deny)
 
 These logs are shipped to the central SIEM for analysis.

@@ -106,28 +106,23 @@
 #### 2) Capsule Sign & Verify (TypeScript)
 
 ```ts
-import crypto from 'crypto';
+import crypto from "crypto";
 
 export function signCapsule(claim: object, priv: crypto.KeyObject) {
   const payload = Buffer.from(JSON.stringify(claim));
-  const sig = crypto.sign(null, payload, priv).toString('base64');
-  return { payload: payload.toString('base64'), sig };
+  const sig = crypto.sign(null, payload, priv).toString("base64");
+  return { payload: payload.toString("base64"), sig };
 }
 
 export function verifyCapsule(
   { payload, sig }: { payload: string; sig: string },
-  pub: crypto.KeyObject,
+  pub: crypto.KeyObject
 ) {
-  const ok = crypto.verify(
-    null,
-    Buffer.from(payload, 'base64'),
-    pub,
-    Buffer.from(sig, 'base64'),
-  );
-  if (!ok) throw new Error('invalid_signature');
-  const claim = JSON.parse(Buffer.from(payload, 'base64').toString('utf8'));
-  if (!claim.scope?.includes('read')) throw new Error('invalid_scope');
-  if (Date.now() / 1000 > claim.exp) throw new Error('expired');
+  const ok = crypto.verify(null, Buffer.from(payload, "base64"), pub, Buffer.from(sig, "base64"));
+  if (!ok) throw new Error("invalid_signature");
+  const claim = JSON.parse(Buffer.from(payload, "base64").toString("utf8"));
+  if (!claim.scope?.includes("read")) throw new Error("invalid_scope");
+  if (Date.now() / 1000 > claim.exp) throw new Error("expired");
   return claim;
 }
 ```
@@ -160,18 +155,9 @@ violation[msg] {
 
 ```tsx
 // apps/web/src/features/share/Watermark.tsx
-export default function Watermark({
-  who,
-  capsule,
-}: {
-  who: string;
-  capsule: string;
-}) {
+export default function Watermark({ who, capsule }: { who: string; capsule: string }) {
   return (
-    <div
-      className="pointer-events-none fixed inset-0 opacity-20 select-none"
-      aria-hidden
-    >
+    <div className="pointer-events-none fixed inset-0 opacity-20 select-none" aria-hidden>
       <div
         className="w-[200%] h-[200%] rotate-[-30deg] origin-top-left grid place-items-center"
         style={{ gap: 64 }}
@@ -203,30 +189,30 @@ checks:
     expect:
       delta_range: [-0.5, -0.1]
   - type: policy_denial
-    payload: { audience: 'segment:foo' }
+    payload: { audience: "segment:foo" }
     expect:
       http_status: 451
 ```
 
 ```ts
 // tools/redteam/run.ts
-import fs from 'fs';
-import assert from 'assert';
+import fs from "fs";
+import assert from "assert";
 
 async function runScenario(path: string) {
-  const yml = fs.readFileSync(path, 'utf8');
+  const yml = fs.readFileSync(path, "utf8");
   const s = parseYaml(yml); // assume available
   for (const c of s.checks) {
-    if (c.type === 'score_under_attack') {
+    if (c.type === "score_under_attack") {
       const r = await scoreSynthetic(c.timestamps);
       assert(r.deceptionScore <= c.expect.max_confidence);
       assert(r.uncertainty >= c.expect.min_uncertainty);
     }
-    if (c.type === 'xai_counterfactual_flip') {
+    if (c.type === "xai_counterfactual_flip") {
       const d = await counterfactualDelta(c.graph_edit);
       assert(d >= c.expect.delta_range[0] && d <= c.expect.delta_range[1]);
     }
-    if (c.type === 'policy_denial') {
+    if (c.type === "policy_denial") {
       const res = await postCapsule(c.payload);
       assert.equal(res.status, 451);
     }
@@ -234,8 +220,7 @@ async function runScenario(path: string) {
 }
 
 (async () => {
-  for (const f of fs.readdirSync('redteam/scenarios'))
-    await runScenario(`redteam/scenarios/${f}`);
+  for (const f of fs.readdirSync("redteam/scenarios")) await runScenario(`redteam/scenarios/${f}`);
 })();
 ```
 

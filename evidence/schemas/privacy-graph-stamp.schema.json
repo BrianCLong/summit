@@ -4,9 +4,9 @@
   "type": "object",
   "required": ["timestamp_iso", "git_commit", "actor"],
   "properties": {
-    "timestamp_iso": {"type": "string", "format": "date-time"},
-    "git_commit": {"type": "string"},
-    "actor": {"type": "string"}
+    "timestamp_iso": { "type": "string", "format": "date-time" },
+    "git_commit": { "type": "string" },
+    "actor": { "type": "string" }
   },
   "additionalProperties": false
 }

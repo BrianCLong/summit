@@ -1,2 +1,2 @@
 #!/usr/bin/env node
-console.log('ig-brief CLI placeholder');
+console.log("ig-brief CLI placeholder");

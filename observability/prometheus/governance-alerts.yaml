@@ -339,7 +339,7 @@ groups:
             Audit event rate has tripled compared to the hourly average.
             May indicate unusual activity or potential attack.
 
-# Recording Rules for Dashboard Performance
+  # Recording Rules for Dashboard Performance
   - name: governance-recording-rules
     interval: 30s
     rules:

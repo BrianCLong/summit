@@ -1,19 +1,8 @@
 import React, { useCallback, useState } from 'react';
-import {
-  View,
-  FlatList,
-  TouchableOpacity,
-  RefreshControl,
-} from 'react-native';
+import { View, FlatList, TouchableOpacity, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
-import {
-  Filter,
-  Bell,
-  MapPin,
-  Clock,
-  CheckCircle,
-} from 'lucide-react-native';
+import { Filter, Bell, MapPin, Clock, CheckCircle } from 'lucide-react-native';
 import { formatDistanceToNow } from 'date-fns';
 
 import { useAlerts, useAcknowledgeAlert, useMarkAlertRead } from '@/graphql/hooks';
@@ -90,9 +79,7 @@ export const AlertsScreen: React.FC = () => {
                       NEW
                     </Badge>
                   )}
-                  {alert.isAcknowledged && (
-                    <CheckCircle size={14} color="#22c55e" />
-                  )}
+                  {alert.isAcknowledged && <CheckCircle size={14} color="#22c55e" />}
                 </View>
 
                 <Text weight="semibold" numberOfLines={2}>
@@ -235,11 +222,7 @@ export const AlertsScreen: React.FC = () => {
         onEndReached={hasNextPage ? loadMore : undefined}
         onEndReachedThreshold={0.5}
         refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor="#0ea5e9"
-          />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#0ea5e9" />
         }
       />
 
@@ -273,10 +256,7 @@ export const AlertsScreen: React.FC = () => {
             >
               Clear
             </Button>
-            <Button
-              className="flex-1"
-              onPress={() => setShowFilters(false)}
-            >
+            <Button className="flex-1" onPress={() => setShowFilters(false)}>
               Apply
             </Button>
           </View>

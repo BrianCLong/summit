@@ -1,5 +1,5 @@
-import React from 'react';
-import { sloSnapshots, sloBudget } from '../mockData';
+import React from "react";
+import { sloSnapshots, sloBudget } from "../mockData";
 
 export function ObservabilityPage() {
   return (
@@ -7,8 +7,7 @@ export function ObservabilityPage() {
       <header>
         <h1 className="text-2xl font-semibold text-white">Observability</h1>
         <p className="mt-1 text-sm text-slate-400">
-          SLO widget tracks latency, error, and saturation with quick links to
-          runs.
+          SLO widget tracks latency, error, and saturation with quick links to runs.
         </p>
       </header>
       <section className="rounded-2xl border border-slate-800 bg-slate-900/60 p-4">
@@ -24,17 +23,14 @@ export function ObservabilityPage() {
           </thead>
           <tbody>
             {sloSnapshots.map((snapshot) => (
-              <tr
-                key={snapshot.service}
-                className="border-t border-slate-800/60"
-              >
+              <tr key={snapshot.service} className="border-t border-slate-800/60">
                 <td className="py-2 text-slate-200">{snapshot.service}</td>
                 <td>
                   <span
                     className={
                       snapshot.latencyP95Ms > sloBudget.latencyBudgetMs
-                        ? 'text-amber-300'
-                        : 'text-slate-300'
+                        ? "text-amber-300"
+                        : "text-slate-300"
                     }
                   >
                     {snapshot.latencyP95Ms}ms
@@ -43,9 +39,7 @@ export function ObservabilityPage() {
                 <td>
                   <span
                     className={
-                      snapshot.errorRate > sloBudget.errorBudget
-                        ? 'text-red-300'
-                        : 'text-slate-300'
+                      snapshot.errorRate > sloBudget.errorBudget ? "text-red-300" : "text-slate-300"
                     }
                   >
                     {(snapshot.errorRate * 100).toFixed(2)}%
@@ -66,12 +60,11 @@ export function ObservabilityPage() {
       <section className="rounded-2xl border border-slate-800 bg-slate-900/60 p-4 text-sm text-slate-200">
         <h2 className="text-lg font-semibold text-white">Self-SLO (UI)</h2>
         <p className="mt-2 text-slate-300">
-          UI latency p95: 820ms • Error budget burn: 2.1% • Observed long tasks:
-          0.7%
+          UI latency p95: 820ms • Error budget burn: 2.1% • Observed long tasks: 0.7%
         </p>
         <p className="mt-2 text-xs text-slate-400">
-          These metrics hydrate from the in-app telemetry hook and surface
-          regressions directly for operators.
+          These metrics hydrate from the in-app telemetry hook and surface regressions directly for
+          operators.
         </p>
       </section>
     </div>

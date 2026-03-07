@@ -1,4 +1,4 @@
-import { gql } from '@apollo/client';
+import { gql } from "@apollo/client";
 
 export const GET_DEDUPLICATION_CANDIDATES = gql`
   query GetDeduplicationCandidates($investigationId: ID, $threshold: Float) {

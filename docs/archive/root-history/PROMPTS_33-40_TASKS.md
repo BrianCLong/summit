@@ -3,6 +3,7 @@
 This document enumerates the eight independent feature tracks requested across prompts 33–40. Each section captures the objective, scope, key requirements, test expectations, and completion criteria to guide parallel execution without cross-coupling.
 
 ## 33) Break-Glass Access Flow (time-boxed elevation + mandatory justification)
+
 - **Goal:** Implement emergency access with explicit approvals and automatic expiry.
 - **Scope:** Backend auth/policy module only.
 - **Key Requirements:**
@@ -15,6 +16,7 @@ This document enumerates the eight independent feature tracks requested across p
 - **Done:** Cannot bypass ABAC/OPA; ops docs/runbook.
 
 ## 34) Audit Export + Tamper-Evident Chain (hash-chained events)
+
 - **Goal:** Add append-only audit store with `prevHash`/`eventHash` and export verification.
 - **Scope:** Audit module, export route, CLI verifier integration.
 - **Key Requirements:**
@@ -25,6 +27,7 @@ This document enumerates the eight independent feature tracks requested across p
 - **Done:** Tamper-evident chain enforced; export bundle includes schema + manifest.
 
 ## 35) Webhook Framework (signed delivery + retries + idempotency)
+
 - **Goal:** Webhook delivery for key events (case created, export ready, ingest completed).
 - **Scope:** New `webhooks` module, DB table, worker; no UI.
 - **Key Requirements:**
@@ -34,6 +37,7 @@ This document enumerates the eight independent feature tracks requested across p
 - **Done:** Zero duplicate deliveries beyond contract; clear observability.
 
 ## 36) Map Clustering + Spatial Index
+
 - **Goal:** Marker clustering and optional backend bbox helper.
 - **Scope:** Prefer frontend; optional `GET /geo/points?bbox=` if needed.
 - **Key Requirements:**
@@ -42,6 +46,7 @@ This document enumerates the eight independent feature tracks requested across p
 - **Tests:** Component tests for clustering toggle; bbox query deterministic; no regressions in other views.
 
 ## 37) Virtualized Graph Rendering + Performance Bench
+
 - **Goal:** Virtualized/progressive graph rendering for large datasets with responsive interactions.
 - **Scope:** Frontend graph component and performance benchmark harness only.
 - **Key Requirements:**
@@ -51,6 +56,7 @@ This document enumerates the eight independent feature tracks requested across p
 - **Done:** No visual regressions; accessibility preserved.
 
 ## 38) “Case Read Model” Cache (materialized views)
+
 - **Goal:** Read-model cache for case overview (`GET /cases/:id/overview`).
 - **Scope:** Backend module, storage table, updater job.
 - **Key Requirements:**
@@ -60,6 +66,7 @@ This document enumerates the eight independent feature tracks requested across p
 - **Done:** Reduces cold-load queries without regressions.
 
 ## 39) Fuzz + Property-Based Testing for Query & Ingest Boundaries
+
 - **Goal:** Add fuzz/property tests for GraphQL/REST boundaries and validators.
 - **Scope:** Test-only with minimal helpers; no product logic changes.
 - **Key Requirements:**
@@ -69,6 +76,7 @@ This document enumerates the eight independent feature tracks requested across p
 - **Done:** CI-bounded runtime; actionable repro logs.
 
 ## 40) Disaster Recovery: Backup/Restore Commands + Smoke Tests
+
 - **Goal:** CLI `ig backup create` / `ig backup restore` with checksum verification.
 - **Scope:** Tooling and admin module; no UI.
 - **Key Requirements:**

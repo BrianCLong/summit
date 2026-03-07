@@ -53,16 +53,16 @@ Represents raw source material ingested into the system.
 
 ```typescript
 interface Evidence {
-  id: string;                    // UUID
-  evidence_hash: string;         // SHA-256 checksum
-  evidence_type: EvidenceType;   // document | image | video | log | etc.
-  storage_uri: string;           // S3 URI or storage location
-  source_id: string;             // Reference to source
-  transform_chain: string[];     // Ordered list of transform IDs
-  license_id: string;            // License governing usage
-  classification_level: string;  // INTERNAL | CONFIDENTIAL | etc.
+  id: string; // UUID
+  evidence_hash: string; // SHA-256 checksum
+  evidence_type: EvidenceType; // document | image | video | log | etc.
+  storage_uri: string; // S3 URI or storage location
+  source_id: string; // Reference to source
+  transform_chain: string[]; // Ordered list of transform IDs
+  license_id: string; // License governing usage
+  classification_level: string; // INTERNAL | CONFIDENTIAL | etc.
   collected_at: Date;
-  registered_by: string;         // User or service ID
+  registered_by: string; // User or service ID
 }
 ```
 
@@ -72,16 +72,16 @@ Represents an assertion or finding derived from evidence.
 
 ```typescript
 interface Claim {
-  id: string;                    // UUID
-  content_hash: string;          // Hash of claim content
-  content: string;               // Human-readable claim text
-  claim_type: ClaimType;         // factual | inferential | predictive | evaluative
-  confidence: number;            // 0.0 to 1.0
-  evidence_ids: string[];        // Evidence supporting this claim
-  source_id: string;             // Original source
-  transform_chain: string[];     // Transforms applied to derive claim
-  created_by: string;            // User or service ID
-  investigation_id?: string;     // Optional investigation context
+  id: string; // UUID
+  content_hash: string; // Hash of claim content
+  content: string; // Human-readable claim text
+  claim_type: ClaimType; // factual | inferential | predictive | evaluative
+  confidence: number; // 0.0 to 1.0
+  evidence_ids: string[]; // Evidence supporting this claim
+  source_id: string; // Original source
+  transform_chain: string[]; // Transforms applied to derive claim
+  created_by: string; // User or service ID
+  investigation_id?: string; // Optional investigation context
   license_id: string;
   created_at: Date;
 }
@@ -95,14 +95,14 @@ Represents a data transformation or extraction operation.
 interface Transform {
   id: string;
   transform_type: TransformType; // extract | ocr | translate | normalize | etc.
-  input_hash: string;            // Hash of input data
-  output_hash: string;           // Hash of output data
-  algorithm: string;             // Algorithm/model used
-  version: string;               // Version of algorithm
+  input_hash: string; // Hash of input data
+  output_hash: string; // Hash of output data
+  algorithm: string; // Algorithm/model used
+  version: string; // Version of algorithm
   parameters: Record<string, any>; // Configuration used
   executed_by: string;
-  confidence?: number;           // Optional confidence score
-  parent_transforms: string[];   // Parent transforms in chain
+  confidence?: number; // Optional confidence score
+  parent_transforms: string[]; // Parent transforms in chain
   created_at: Date;
 }
 ```
@@ -112,17 +112,17 @@ interface Transform {
 Represents the relationship between a claim and supporting/contradicting evidence.
 
 ```typescript
-type ClaimEvidenceRelationType = 'SUPPORTS' | 'CONTRADICTS';
+type ClaimEvidenceRelationType = "SUPPORTS" | "CONTRADICTS";
 
 interface ClaimEvidenceLink {
   id: string;
   claim_id: string;
   evidence_id: string;
   relation_type: ClaimEvidenceRelationType;
-  confidence?: number;           // Optional confidence in the relationship
+  confidence?: number; // Optional confidence in the relationship
   created_by: string;
   created_at: Date;
-  notes?: string;                // Optional justification
+  notes?: string; // Optional justification
 }
 ```
 
@@ -369,15 +369,15 @@ The service provides `verifyAuditChain()` to detect tampering:
 
 ```typescript
 const result = await provenanceLedger.verifyAuditChain({
-  startDate: new Date('2025-01-01'),
-  endDate: new Date('2025-01-31'),
-  limit: 1000
+  startDate: new Date("2025-01-01"),
+  endDate: new Date("2025-01-31"),
+  limit: 1000,
 });
 
 if (!result.valid) {
-  console.error('Audit chain integrity compromised!');
-  console.error('Broken at record:', result.brokenAt);
-  console.error('Errors:', result.errors);
+  console.error("Audit chain integrity compromised!");
+  console.error("Broken at record:", result.brokenAt);
+  console.error("Errors:", result.errors);
 }
 ```
 
@@ -448,13 +448,13 @@ Each item includes its Merkle proof (path from leaf to root).
 
 ```typescript
 const evidence = await provenanceLedger.registerEvidence({
-  evidence_hash: 'abc123...', // SHA-256 of file
-  evidence_type: 'document',
-  storage_uri: 's3://bucket/evidence.pdf',
-  source_id: 'source-456',
+  evidence_hash: "abc123...", // SHA-256 of file
+  evidence_type: "document",
+  storage_uri: "s3://bucket/evidence.pdf",
+  source_id: "source-456",
   transform_chain: [],
-  license_id: 'license-789',
-  registered_by: 'user-123'
+  license_id: "license-789",
+  registered_by: "user-123",
 });
 ```
 
@@ -462,15 +462,15 @@ const evidence = await provenanceLedger.registerEvidence({
 
 ```typescript
 const claim = await provenanceLedger.registerClaim({
-  content: 'Transaction detected on 2025-01-15',
-  claim_type: 'factual',
+  content: "Transaction detected on 2025-01-15",
+  claim_type: "factual",
   confidence: 0.92,
   evidence_ids: [evidence.id],
-  source_id: 'source-456',
-  transform_chain: ['transform-ocr', 'transform-ner'],
-  created_by: 'system-ml-pipeline',
-  investigation_id: 'inv-123',
-  license_id: 'license-789'
+  source_id: "source-456",
+  transform_chain: ["transform-ocr", "transform-ner"],
+  created_by: "system-ml-pipeline",
+  investigation_id: "inv-123",
+  license_id: "license-789",
 });
 ```
 
@@ -481,20 +481,20 @@ const claim = await provenanceLedger.registerClaim({
 const supportLink = await provenanceLedger.linkClaimToEvidence({
   claim_id: claim.id,
   evidence_id: evidence.id,
-  relation_type: 'SUPPORTS',
+  relation_type: "SUPPORTS",
   confidence: 0.95,
-  created_by: 'analyst-456',
-  notes: 'Direct evidence from bank statement'
+  created_by: "analyst-456",
+  notes: "Direct evidence from bank statement",
 });
 
 // Another piece of evidence contradicts
 const contradictLink = await provenanceLedger.linkClaimToEvidence({
   claim_id: claim.id,
-  evidence_id: 'evidence-other',
-  relation_type: 'CONTRADICTS',
-  confidence: 0.80,
-  created_by: 'analyst-456',
-  notes: 'Witness testimony conflicts with claim'
+  evidence_id: "evidence-other",
+  relation_type: "CONTRADICTS",
+  confidence: 0.8,
+  created_by: "analyst-456",
+  notes: "Witness testimony conflicts with claim",
 });
 ```
 
@@ -502,15 +502,15 @@ const contradictLink = await provenanceLedger.linkClaimToEvidence({
 
 ```typescript
 const claims = await provenanceLedger.queryClaims({
-  investigation_id: 'inv-123',
-  confidence_min: 0.8
+  investigation_id: "inv-123",
+  confidence_min: 0.8,
 });
 
 for (const claim of claims) {
   const links = await provenanceLedger.getClaimEvidenceLinks(claim.id);
 
-  const supporting = links.filter(l => l.relation_type === 'SUPPORTS');
-  const contradicting = links.filter(l => l.relation_type === 'CONTRADICTS');
+  const supporting = links.filter((l) => l.relation_type === "SUPPORTS");
+  const contradicting = links.filter((l) => l.relation_type === "CONTRADICTS");
 
   console.log(`Claim: ${claim.content}`);
   console.log(`  Supporting evidence: ${supporting.length}`);
@@ -523,20 +523,20 @@ for (const claim of claims) {
 ```typescript
 // Create manifest
 const manifest = await provenanceLedger.createExportManifest({
-  claim_ids: ['claim-1', 'claim-2'],
-  export_type: 'DISCLOSURE',
-  classification_level: 'INTERNAL',
-  created_by: 'analyst-123',
-  authority_basis: ['legal-request-456']
+  claim_ids: ["claim-1", "claim-2"],
+  export_type: "DISCLOSURE",
+  classification_level: "INTERNAL",
+  created_by: "analyst-123",
+  authority_basis: ["legal-request-456"],
 });
 
 // Verify manifest integrity
 const verification = await provenanceLedger.verifyManifest(manifest.manifest_id);
 
 if (verification.bundle_valid) {
-  console.log('Manifest integrity verified');
+  console.log("Manifest integrity verified");
 } else {
-  console.error('Manifest verification failed:', verification);
+  console.error("Manifest verification failed:", verification);
 }
 ```
 
@@ -544,15 +544,15 @@ if (verification.bundle_valid) {
 
 ```typescript
 const auditVerification = await provenanceLedger.verifyAuditChain({
-  startDate: new Date('2025-01-01'),
-  endDate: new Date('2025-01-31')
+  startDate: new Date("2025-01-01"),
+  endDate: new Date("2025-01-31"),
 });
 
 if (auditVerification.valid) {
   console.log(`✓ Audit chain verified: ${auditVerification.verifiedRecords} records`);
 } else {
   console.error(`✗ Audit chain broken at: ${auditVerification.brokenAt}`);
-  console.error('Errors:', auditVerification.errors);
+  console.error("Errors:", auditVerification.errors);
 }
 ```
 
@@ -705,11 +705,13 @@ For legal or compliance disclosures:
 **Symptom**: `verifyAuditChain()` returns `valid: false`
 
 **Causes**:
+
 - Database tampering or corruption
 - Concurrent writes without proper locking
 - System clock issues causing timestamp problems
 
 **Resolution**:
+
 1. Review `brokenAt` and `errors` in verification result
 2. Check database logs for unauthorized access
 3. Restore from backup if tampering detected
@@ -719,11 +721,13 @@ For legal or compliance disclosures:
 **Symptom**: `verifyManifest()` returns `bundle_valid: false`
 
 **Causes**:
+
 - Manifest file modified after creation
 - Merkle tree corruption
 - Missing or modified items
 
 **Resolution**:
+
 1. Check `item_verifications` for specific failures
 2. Regenerate manifest from source data
 3. Use CLI tool for detailed verification
@@ -733,11 +737,13 @@ For legal or compliance disclosures:
 **Symptom**: Slow export manifest creation
 
 **Causes**:
+
 - Large number of items in manifest
 - Complex transform chains
 - Database query performance
 
 **Optimization**:
+
 1. Use database connection pooling
 2. Batch item fetching
 3. Implement caching for frequently accessed items
@@ -753,6 +759,7 @@ For legal or compliance disclosures:
 ## Support
 
 For issues or questions:
+
 - File an issue in the repository
 - Contact the platform team
 - Review existing documentation in `docs/`

@@ -2,9 +2,9 @@ name: Check Large Files
 
 on:
   push:
-    branches: ['**']
+    branches: ["**"]
   pull_request:
-    branches: ['**']
+    branches: ["**"]
 
 jobs:
   check-large-files:
@@ -19,16 +19,16 @@ jobs:
         run: |
           # Maximum file size in bytes (50MB)
           MAX_SIZE=52428800
-          
+
           # Get list of files in this commit/PR
           if [ "${{ github.event_name }}" == "pull_request" ]; then
             FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.sha }})
           else
             FILES=$(git diff-tree --no-commit-id --name-only -r ${{ github.sha }})
           fi
-          
+
           LARGE_FILES=""
-          
+
           # Check each file
           for FILE in $FILES; do
             if [ -f "$FILE" ]; then
@@ -40,7 +40,7 @@ jobs:
               fi
             fi
           done
-          
+
           if [ -n "$LARGE_FILES" ]; then
             echo "::error::Large files detected (>50MB):"
             echo -e "$LARGE_FILES"
@@ -49,5 +49,5 @@ jobs:
             echo "See README.md for instructions on using Git LFS."
             exit 1
           fi
-          
+
           echo "✅ No large files detected (all files < 50MB)"

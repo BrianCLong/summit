@@ -1,9 +1,9 @@
 ---
-name: 'Issue #5: Incomplete Audit Trail on User Actions'
+name: "Issue #5: Incomplete Audit Trail on User Actions"
 about: Ensure all user actions, especially tag deletions, are logged for compliance
-title: 'Issue #5: Incomplete Audit Trail on User Actions'
-labels: 'bug, security, compliance, backend'
-assignees: ''
+title: "Issue #5: Incomplete Audit Trail on User Actions"
+labels: "bug, security, compliance, backend"
+assignees: ""
 ---
 
 **Branch**: `feature/audit-tag-deletion`

@@ -35,7 +35,7 @@ jobs:
       - name: Set up Node 18
         uses: actions/setup-node@v4
         with:
-          cache: 'pnpm'
+          cache: "pnpm"
           node-version: 20
 
       - name: Enable Corepack
@@ -79,7 +79,7 @@ jobs:
         env:
           NODE_ENV: test
           WEB_URL: http://localhost:3000
-          RECORD_GOLDEN_PATH_VIDEO: 'true'
+          RECORD_GOLDEN_PATH_VIDEO: "true"
 
       - name: Locate Golden Path video
         id: golden-path-video
@@ -135,14 +135,14 @@ jobs:
       fail-fast: false
       matrix:
         layout: [cose-bilkent, dagre]
-        sprite: ['0', '1']
+        sprite: ["0", "1"]
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - name: Set up Node 18
         uses: actions/setup-node@v4
         with:
-          cache: 'pnpm'
+          cache: "pnpm"
           node-version: 20
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
@@ -174,20 +174,20 @@ jobs:
     needs: changes
       github.event_name == 'workflow_dispatch' ||
       (github.event_name == 'pull_request' &&
-        (contains(toJson(github.event.pull_request.labels), 'server') || needs.changes.outputs.server == 'true'))
+      (contains(toJson(github.event.pull_request.labels), 'server') || needs.changes.outputs.server == 'true'))
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - name: Set up Node 18
         uses: actions/setup-node@v4
         with:
-          cache: 'pnpm'
+          cache: "pnpm"
           node-version: 20
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
       - name: Launch backend stack (Redis+server)
         env:
-          DISABLE_SOCKET_AUTH: '1'
+          DISABLE_SOCKET_AUTH: "1"
         run: |
           docker compose -f docker-compose.yml up -d --build redis postgres neo4j
           # launch server with auth bypass for analytics namespace

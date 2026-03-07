@@ -6,16 +6,20 @@ import type {
   RecordSearchQuery,
   RetentionPolicy,
   SourceRecord,
-} from '@intelgraph/mdm-core';
-import { GoldenRecordManager, type GoldenRecordConfig, type GoldenRecordContextOptions } from '../manager/golden-record-manager.js';
-import { AuditLedger } from './audit-ledger.js';
-import { VersioningService } from './versioning-service.js';
-import { RetentionEngine } from './retention-engine.js';
-import { RecordDefinitionRegistry } from './record-definition-registry.js';
-import { RecordSearchEngine } from './record-search-engine.js';
-import { ExportPackBuilder, type ExportContext } from './export-pack-builder.js';
-import { LegalHoldService } from './legal-hold-service.js';
-import { ROLE_TEMPLATES } from './role-templates.js';
+} from "@intelgraph/mdm-core";
+import {
+  GoldenRecordManager,
+  type GoldenRecordConfig,
+  type GoldenRecordContextOptions,
+} from "../manager/golden-record-manager.js";
+import { AuditLedger } from "./audit-ledger.js";
+import { VersioningService } from "./versioning-service.js";
+import { RetentionEngine } from "./retention-engine.js";
+import { RecordDefinitionRegistry } from "./record-definition-registry.js";
+import { RecordSearchEngine } from "./record-search-engine.js";
+import { ExportPackBuilder, type ExportContext } from "./export-pack-builder.js";
+import { LegalHoldService } from "./legal-hold-service.js";
+import { ROLE_TEMPLATES } from "./role-templates.js";
 
 export interface RecordContext extends GoldenRecordContextOptions {
   recordType: string;
@@ -24,7 +28,7 @@ export interface RecordContext extends GoldenRecordContextOptions {
   reason?: string;
 }
 
-export interface RecordComplianceConfig extends Omit<GoldenRecordConfig, 'domain'> {
+export interface RecordComplianceConfig extends Omit<GoldenRecordConfig, "domain"> {
   domain: string;
 }
 
@@ -41,7 +45,11 @@ export class RecordCompliancePrimitive {
   constructor(
     recordConfig: RecordComplianceConfig,
     definitions: RecordDefinition[],
-    retentionPolicies: Array<{ recordType: string; tenantId: string; policy: RetentionPolicy }> = [],
+    retentionPolicies: Array<{
+      recordType: string;
+      tenantId: string;
+      policy: RetentionPolicy;
+    }> = [],
     dependencies?: {
       manager?: GoldenRecordManager;
       auditLedger?: AuditLedger;
@@ -61,8 +69,8 @@ export class RecordCompliancePrimitive {
     this.searchEngine = dependencies?.searchEngine ?? new RecordSearchEngine();
     this.exporter = dependencies?.exporter ?? new ExportPackBuilder();
 
-    definitions.forEach(def => this.definitions.register(def));
-    retentionPolicies.forEach(entry =>
+    definitions.forEach((def) => this.definitions.register(def));
+    retentionPolicies.forEach((entry) =>
       this.retention.registerPolicy(entry.recordType, entry.tenantId, entry.policy)
     );
   }
@@ -71,10 +79,7 @@ export class RecordCompliancePrimitive {
     return ROLE_TEMPLATES;
   }
 
-  async createRecord(
-    sourceRecords: SourceRecord[],
-    context: RecordContext
-  ): Promise<MasterRecord> {
+  async createRecord(sourceRecords: SourceRecord[], context: RecordContext): Promise<MasterRecord> {
     this.validateDefinition(context.recordType, sourceRecords);
 
     const record = await this.manager.createGoldenRecord(sourceRecords, context);
@@ -89,7 +94,7 @@ export class RecordCompliancePrimitive {
       recordType: context.recordType,
       tenantId: context.tenantId,
       actor: context.actor,
-      action: 'create',
+      action: "create",
       reason: context.reason,
     });
 
@@ -113,7 +118,7 @@ export class RecordCompliancePrimitive {
       recordType: context.recordType,
       tenantId: context.tenantId,
       actor: context.actor,
-      action: 'update',
+      action: "update",
       reason: context.reason,
     });
 
@@ -131,7 +136,7 @@ export class RecordCompliancePrimitive {
       recordType: context.recordType,
       tenantId: context.tenantId,
       actor: context.actor,
-      action: 'merge',
+      action: "merge",
       reason: context.reason,
     });
     return record;
@@ -145,10 +150,10 @@ export class RecordCompliancePrimitive {
 
     this.auditLedger.recordEvent({
       recordId,
-      recordType: record.metadata.recordType ?? 'unknown',
-      tenantId: record.metadata.tenantId ?? 'unknown',
+      recordType: record.metadata.recordType ?? "unknown",
+      tenantId: record.metadata.tenantId ?? "unknown",
       actor,
-      action: 'access',
+      action: "access",
       reason,
     });
 
@@ -158,20 +163,20 @@ export class RecordCompliancePrimitive {
   applyLegalHold(recordId: string, reason: string, actor: string): LegalHold {
     const record = this.getRecordOrThrow(recordId);
     const hold = this.legalHold.applyHold(
-      record.metadata.recordType ?? 'unknown',
-      record.metadata.tenantId ?? 'unknown',
+      record.metadata.recordType ?? "unknown",
+      record.metadata.tenantId ?? "unknown",
       actor,
       reason,
-      'record',
+      "record",
       [recordId]
     );
     this.retention.attachMetadata(record);
     this.auditLedger.recordEvent({
       recordId,
-      recordType: record.metadata.recordType ?? 'unknown',
-      tenantId: record.metadata.tenantId ?? 'unknown',
+      recordType: record.metadata.recordType ?? "unknown",
+      tenantId: record.metadata.tenantId ?? "unknown",
       actor,
-      action: 'hold_applied',
+      action: "hold_applied",
       reason,
     });
     return hold;
@@ -180,16 +185,16 @@ export class RecordCompliancePrimitive {
   releaseLegalHold(holdId: string, actor: string): LegalHold {
     const hold = this.legalHold.releaseHold(holdId);
     if (hold.recordIds) {
-      hold.recordIds.forEach(recordId => {
+      hold.recordIds.forEach((recordId) => {
         const record = this.manager.getGoldenRecord(recordId);
         if (record) {
           this.retention.attachMetadata(record);
           this.auditLedger.recordEvent({
             recordId,
-            recordType: record.metadata.recordType ?? 'unknown',
-            tenantId: record.metadata.tenantId ?? 'unknown',
+            recordType: record.metadata.recordType ?? "unknown",
+            tenantId: record.metadata.tenantId ?? "unknown",
             actor,
-            action: 'hold_released',
+            action: "hold_released",
             reason: hold.reason,
           });
         }
@@ -219,13 +224,16 @@ export class RecordCompliancePrimitive {
     return this.searchEngine.search(query);
   }
 
-  exportRecords(recordIds: string[], context: { requestedBy: string; recordType: string; tenantId: string }): CertifiedExportPack {
+  exportRecords(
+    recordIds: string[],
+    context: { requestedBy: string; recordType: string; tenantId: string }
+  ): CertifiedExportPack {
     const records = recordIds
-      .map(id => this.manager.getGoldenRecord(id))
+      .map((id) => this.manager.getGoldenRecord(id))
       .filter((r): r is MasterRecord => Boolean(r));
 
-    const auditTrail = recordIds.flatMap(id => this.auditLedger.getEventsForRecord(id));
-    const versions = recordIds.flatMap(id => this.versioning.getVersions(id));
+    const auditTrail = recordIds.flatMap((id) => this.auditLedger.getEventsForRecord(id));
+    const versions = recordIds.flatMap((id) => this.versioning.getVersions(id));
     const exportContext: ExportContext = {
       requestedBy: context.requestedBy,
       recordIds,
@@ -233,14 +241,14 @@ export class RecordCompliancePrimitive {
       tenantId: context.tenantId,
     };
 
-    records.forEach(record =>
+    records.forEach((record) =>
       this.auditLedger.recordEvent({
         recordId: record.id.id,
         recordType: record.metadata.recordType ?? context.recordType,
         tenantId: record.metadata.tenantId ?? context.tenantId,
         actor: context.requestedBy,
-        action: 'export',
-        reason: 'certified export pack generated',
+        action: "export",
+        reason: "certified export pack generated",
       })
     );
 
@@ -249,7 +257,7 @@ export class RecordCompliancePrimitive {
 
   runIntegrityCheck(): { auditChainValid: boolean; versionChecksumsMatch: boolean } {
     const auditChainValid = this.auditLedger.verifyIntegrity();
-    const versionChecksumsMatch = this.searchEngine.list().every(record => {
+    const versionChecksumsMatch = this.searchEngine.list().every((record) => {
       const checksumMatches = this.versioning.verifyCurrentData(record.id.id, record.data);
       const latestChecksum = this.versioning.latestChecksum(record.id.id);
       if (latestChecksum) {

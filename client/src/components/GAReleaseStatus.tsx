@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Card,
@@ -11,16 +11,9 @@ import {
   ListItemText,
   Typography,
   Button,
-} from '@mui/material';
-import Grid from '@mui/material/Grid';
-import {
-  CheckCircle,
-  Error as ErrorIcon,
-  Warning,
-  Info,
-  Rocket,
-  Build,
-} from '@mui/icons-material';
+} from "@mui/material";
+import Grid from "@mui/material/Grid";
+import { CheckCircle, Error as ErrorIcon, Warning, Info, Rocket, Build } from "@mui/icons-material";
 
 interface ReleaseInfo {
   version: string;
@@ -33,7 +26,7 @@ interface ReleaseInfo {
 
 interface ValidationResult {
   component: string;
-  status: 'pass' | 'fail' | 'warning';
+  status: "pass" | "fail" | "warning";
   message: string;
 }
 
@@ -47,8 +40,7 @@ interface DeploymentStatus {
 
 const GAReleaseStatus: React.FC = () => {
   const [releaseInfo, setReleaseInfo] = useState<ReleaseInfo | null>(null);
-  const [deploymentStatus, setDeploymentStatus] =
-    useState<DeploymentStatus | null>(null);
+  const [deploymentStatus, setDeploymentStatus] = useState<DeploymentStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -61,12 +53,12 @@ const GAReleaseStatus: React.FC = () => {
       setLoading(true);
 
       const [infoResponse, statusResponse] = await Promise.all([
-        fetch('/api/ga-release/info'),
-        fetch('/api/ga-release/status'),
+        fetch("/api/ga-release/info"),
+        fetch("/api/ga-release/status"),
       ]);
 
       if (!infoResponse.ok || !statusResponse.ok) {
-        throw new Error('Failed to fetch release data');
+        throw new Error("Failed to fetch release data");
       }
 
       const infoData = await infoResponse.json();
@@ -76,7 +68,7 @@ const GAReleaseStatus: React.FC = () => {
       setDeploymentStatus(statusData.data);
       setError(null);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
+      setError(err instanceof Error ? err.message : "Unknown error");
     } finally {
       setLoading(false);
     }
@@ -84,27 +76,27 @@ const GAReleaseStatus: React.FC = () => {
 
   const generateSBOM = async () => {
     try {
-      const response = await fetch('/api/ga-release/generate-sbom', {
-        method: 'POST',
+      const response = await fetch("/api/ga-release/generate-sbom", {
+        method: "POST",
       });
 
       if (response.ok) {
         // Refresh status after SBOM generation
         fetchReleaseData();
       }
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err: unknown) {
-      setError('Failed to generate SBOM');
+      setError("Failed to generate SBOM");
     }
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'pass':
+      case "pass":
         return <CheckCircle color="success" />;
-      case 'fail':
+      case "fail":
         return <ErrorIcon color="error" />;
-      case 'warning':
+      case "warning":
         return <Warning color="warning" />;
       default:
         return <Info color="info" />;
@@ -113,12 +105,7 @@ const GAReleaseStatus: React.FC = () => {
 
   if (loading) {
     return (
-      <Box
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        minHeight="200px"
-      >
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="200px">
         <CircularProgress />
       </Box>
     );
@@ -138,7 +125,7 @@ const GAReleaseStatus: React.FC = () => {
   return (
     <Box p={2}>
       <Typography variant="h4" gutterBottom>
-        <Rocket sx={{ mr: 1, verticalAlign: 'middle' }} />
+        <Rocket sx={{ mr: 1, verticalAlign: "middle" }} />
         GA Release Status
       </Typography>
 
@@ -159,20 +146,16 @@ const GAReleaseStatus: React.FC = () => {
                     <strong>Environment:</strong> {releaseInfo.environment}
                   </Typography>
                   <Typography>
-                    <strong>Commit:</strong>{' '}
-                    {releaseInfo.commitHash.substring(0, 8)}
+                    <strong>Commit:</strong> {releaseInfo.commitHash.substring(0, 8)}
                   </Typography>
                   <Typography>
-                    <strong>Build Date:</strong>{' '}
-                    {new Date(releaseInfo.buildDate).toLocaleString()}
+                    <strong>Build Date:</strong> {new Date(releaseInfo.buildDate).toLocaleString()}
                   </Typography>
 
                   <Box mt={2}>
                     <Chip
-                      label={
-                        releaseInfo.ready ? 'Ready for Deployment' : 'Not Ready'
-                      }
-                      color={releaseInfo.ready ? 'success' : 'warning'}
+                      label={releaseInfo.ready ? "Ready for Deployment" : "Not Ready"}
+                      color={releaseInfo.ready ? "success" : "warning"}
                       icon={releaseInfo.ready ? <CheckCircle /> : <Warning />}
                     />
                   </Box>
@@ -183,12 +166,7 @@ const GAReleaseStatus: React.FC = () => {
                     </Typography>
                     <Box display="flex" flexWrap="wrap" gap={1}>
                       {releaseInfo.features.map((feature) => (
-                        <Chip
-                          key={feature}
-                          label={feature}
-                          size="small"
-                          variant="outlined"
-                        />
+                        <Chip key={feature} label={feature} size="small" variant="outlined" />
                       ))}
                     </Box>
                   </Box>
@@ -209,29 +187,23 @@ const GAReleaseStatus: React.FC = () => {
                 <Box>
                   <Box mb={2}>
                     <Chip
-                      label={
-                        deploymentStatus.ready
-                          ? 'Validation Passed'
-                          : 'Validation Issues'
-                      }
-                      color={deploymentStatus.ready ? 'success' : 'error'}
+                      label={deploymentStatus.ready ? "Validation Passed" : "Validation Issues"}
+                      color={deploymentStatus.ready ? "success" : "error"}
                     />
                   </Box>
 
-          <Grid container spacing={1} mb={2}>
-            <Grid xs={6}>
+                  <Grid container spacing={1} mb={2}>
+                    <Grid xs={6}>
                       <Chip
-                        label={`Tests: ${deploymentStatus.testsPass ? 'Pass' : 'Fail'}`}
-                        color={deploymentStatus.testsPass ? 'success' : 'error'}
+                        label={`Tests: ${deploymentStatus.testsPass ? "Pass" : "Fail"}`}
+                        color={deploymentStatus.testsPass ? "success" : "error"}
                         size="small"
                       />
                     </Grid>
-            <Grid xs={6}>
+                    <Grid xs={6}>
                       <Chip
-                        label={`SBOM: ${deploymentStatus.sbomGenerated ? 'Generated' : 'Missing'}`}
-                        color={
-                          deploymentStatus.sbomGenerated ? 'success' : 'warning'
-                        }
+                        label={`SBOM: ${deploymentStatus.sbomGenerated ? "Generated" : "Missing"}`}
+                        color={deploymentStatus.sbomGenerated ? "success" : "warning"}
                         size="small"
                       />
                     </Grid>
@@ -252,9 +224,7 @@ const GAReleaseStatus: React.FC = () => {
                   <List dense>
                     {deploymentStatus.validations.map((validation, index) => (
                       <ListItem key={index}>
-                        <ListItemIcon>
-                          {getStatusIcon(validation.status)}
-                        </ListItemIcon>
+                        <ListItemIcon>{getStatusIcon(validation.status)}</ListItemIcon>
                         <ListItemText
                           primary={validation.component}
                           secondary={validation.message}

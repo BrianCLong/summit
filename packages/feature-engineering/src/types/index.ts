@@ -9,7 +9,7 @@ export interface FeatureSet {
 }
 
 export interface TransformConfig {
-  method: 'standard' | 'minmax' | 'robust' | 'log' | 'sqrt';
+  method: "standard" | "minmax" | "robust" | "log" | "sqrt";
   params?: Record<string, number>;
 }
 

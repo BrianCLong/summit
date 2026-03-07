@@ -17,14 +17,7 @@ import {
   Avatar,
   AvatarGroup,
 } from '@mui/material';
-import {
-  Folder,
-  Search,
-  Refresh,
-  AccessTime,
-  Person,
-  LocationOn,
-} from '@mui/icons-material';
+import { Folder, Search, Refresh, AccessTime, Person, LocationOn } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useCases } from '@/hooks/useCases';
 import { getPriorityColor } from '@/theme';
@@ -101,13 +94,12 @@ function CaseCard({ caseData, onClick }: CaseCardProps) {
           {/* Key entities preview */}
           {caseData.keyEntities && caseData.keyEntities.length > 0 && (
             <Box display="flex" alignItems="center" gap={1} mb={2}>
-              <AvatarGroup max={4} sx={{ '& .MuiAvatar-root': { width: 28, height: 28, fontSize: '0.75rem' } }}>
+              <AvatarGroup
+                max={4}
+                sx={{ '& .MuiAvatar-root': { width: 28, height: 28, fontSize: '0.75rem' } }}
+              >
                 {caseData.keyEntities.map((entity) => (
-                  <Avatar
-                    key={entity.id}
-                    src={entity.thumbnailUrl}
-                    alt={entity.name}
-                  >
+                  <Avatar key={entity.id} src={entity.thumbnailUrl} alt={entity.name}>
                     {entity.name.charAt(0)}
                   </Avatar>
                 ))}
@@ -151,7 +143,7 @@ export function CasesPage() {
   const filteredCases = cases.filter(
     (c) =>
       c.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      c.summary?.toLowerCase().includes(searchQuery.toLowerCase())
+      c.summary?.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   return (
@@ -196,12 +188,7 @@ export function CasesPage() {
       <Box sx={{ px: 2 }}>
         {isLoading ? (
           Array.from({ length: 4 }).map((_, i) => (
-            <Skeleton
-              key={i}
-              variant="rounded"
-              height={160}
-              sx={{ mb: 2, borderRadius: 2 }}
-            />
+            <Skeleton key={i} variant="rounded" height={160} sx={{ mb: 2, borderRadius: 2 }} />
           ))
         ) : filteredCases.length === 0 ? (
           <Box textAlign="center" py={4}>

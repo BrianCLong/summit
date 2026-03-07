@@ -7,25 +7,32 @@ Current work simulates narrative impact using generic time-series forecasting. T
 ## Epics
 
 ### Epic 1: Tipping Point Indicators
+
 Implement domain-specific metrics for narrative virality that go beyond simple volume forecasting.
+
 - **Narrative Reproduction Number ($R_t$)**: Calculate the effective reproduction number based on re-share/interaction velocity per time unit.
 - **Cross-Community Penetration**: Quantify how many distinct community clusters a narrative has infected using graph partitioning (Louvain/Leiden).
 - **Elite Uptake**: Track engagement from high-centrality nodes ("Elites") within the graph.
 - **Velocity & Acceleration**: First and second-order derivatives of narrative volume.
 
 ### Epic 2: Watchlist & Alerting System
+
 Enable analysts to curate watchlists of narratives (or narrative patterns) and set custom risk thresholds.
+
 - **Watchlist CRUD**: APIs to create/manage lists of tracked narratives.
 - **Threshold Configuration**: Define alerts for when specific indicators (e.g., $R_t > 1.5$) are breached.
 - **Push Alerts**: Real-time notifications via GraphQL subscriptions or webhooks when thresholds are crossed.
 
 ### Epic 3: Graph Schema Extensions
+
 Extend the Neo4j schema to store these new metrics and configurations efficiently.
+
 - New `NarrativeMetric` nodes for time-series history within the graph (or hybrid storage).
 - `WATCHLIST` relationships linking `User` or `Team` to `Narrative` nodes.
 - Properties on `Narrative` for current $R_t$ and risk score.
 
 ### Epic 4: Simulation Integration
+
 Update `NarrativeSimulationStudio` to compute these metrics during simulation ticks, allowing for "what-if" analysis of tipping points in synthetic scenarios.
 
 ## Neo4j Schema Extensions
@@ -130,11 +137,10 @@ Integration into `packages/narrative-engine/src/core/EventProcessor.ts`:
 
 ```typescript
 class TippingPointDetector {
-
   // Called every simulation tick
   analyze(narrativeState: NarrativeState, recentEvents: Event[]) {
     for (const narrativeId of narrativeState.activeNarratives) {
-      const events = recentEvents.filter(e => e.narrativeId === narrativeId);
+      const events = recentEvents.filter((e) => e.narrativeId === narrativeId);
 
       // Calculate R_t
       const rt = this.calculateRt(events, narrativeState);
@@ -144,7 +150,7 @@ class TippingPointDetector {
 
       // Check Thresholds
       if (rt > THRESHOLD_RT && !narrativeState.get(narrativeId).alertSent) {
-        this.emitAlert(narrativeId, { type: 'BREAKOUT_WARNING', value: rt });
+        this.emitAlert(narrativeId, { type: "BREAKOUT_WARNING", value: rt });
       }
 
       // Update State
@@ -174,16 +180,19 @@ class TippingPointDetector {
 Based on the strategic directive `docs/strategy/2026_01_27_NARRATIVE_WARFARE_DIRECTIVE.md`, we are expanding detection capabilities to focus on structural frames and baseline drift.
 
 ### Core Objectives
+
 1.  **Frame Extraction**: Identify latent narrative frames (invariant cores) distinct from surface claims.
 2.  **Role Classification**: Classify actors as `INITIATOR`, `VALIDATOR`, or `AMPLIFIER` based on temporal graph behavior.
 3.  **Drift Analytics**: Monitor long-term (30-90 day) shifts in discourse baseline rather than just short-term viral spikes.
 
 ### Schema Extensions (Implemented)
-*   **NarrativeFrame**: Tracks the invariant core and stability score of a frame.
-*   **BaselineDrift**: Metrics for tracking slow-burn influence.
-*   **ActorRole**: Enum for behavioral classification.
+
+- **NarrativeFrame**: Tracks the invariant core and stability score of a frame.
+- **BaselineDrift**: Metrics for tracking slow-burn influence.
+- **ActorRole**: Enum for behavioral classification.
 
 ### Implementation Priorities
-*   Integrate `FrameExtraction` into the OSINT ingestion pipeline.
-*   Update `RiskAssessment` logic to weigh `driftScore` heavily for "safe" but persistent content.
-*   Visualize `Frame` evolution lineages in the frontend.
+
+- Integrate `FrameExtraction` into the OSINT ingestion pipeline.
+- Update `RiskAssessment` logic to weigh `driftScore` heavily for "safe" but persistent content.
+- Visualize `Frame` evolution lineages in the frontend.

@@ -263,6 +263,7 @@ The Release Cut workflow automates the creation of immutable go-live tags with r
 ### Overview
 
 The workflow ensures:
+
 - Release notes are generated from verified go-live evidence
 - Tag patterns are validated (semver or prod-date format)
 - All evidence must pass verification before release creation
@@ -273,11 +274,13 @@ The workflow ensures:
 Before triggering a release cut:
 
 1. **Generate go-live evidence:**
+
    ```bash
    pnpm evidence:go-live:generate
    ```
 
 2. **Verify evidence passes:**
+
    ```bash
    pnpm evidence:go-live:verify
    ```
@@ -288,10 +291,10 @@ Before triggering a release cut:
 
 The workflow accepts two tag patterns:
 
-| Pattern | Format | Example |
-|---------|--------|---------|
-| Semver | `v{major}.{minor}.{patch}[-prerelease]` | `v5.2.49`, `v5.3.0-beta.1` |
-| Prod Date | `prod-{YYYY}-{MM}-{DD}` | `prod-2026-01-28` |
+| Pattern   | Format                                  | Example                    |
+| --------- | --------------------------------------- | -------------------------- |
+| Semver    | `v{major}.{minor}.{patch}[-prerelease]` | `v5.2.49`, `v5.3.0-beta.1` |
+| Prod Date | `prod-{YYYY}-{MM}-{DD}`                 | `prod-2026-01-28`          |
 
 ### Triggering the Workflow
 
@@ -367,12 +370,12 @@ pnpm release:notes
 
 ### Troubleshooting
 
-| Issue | Solution |
-|-------|----------|
-| Evidence not found | Run `pnpm evidence:go-live:generate` |
-| Evidence verification failed | Check CI checks status in evidence.json |
-| Tag already exists | Use a different tag or delete existing tag |
-| Release notes generation failed | Ensure evidence is valid and SHA matches |
+| Issue                           | Solution                                   |
+| ------------------------------- | ------------------------------------------ |
+| Evidence not found              | Run `pnpm evidence:go-live:generate`       |
+| Evidence verification failed    | Check CI checks status in evidence.json    |
+| Tag already exists              | Use a different tag or delete existing tag |
+| Release notes generation failed | Ensure evidence is valid and SHA matches   |
 
 ---
 
@@ -465,24 +468,25 @@ We have implemented a standardized Post-Deploy Monitoring Gate to validate produ
 ### Components
 
 1.  **Canary Script (`scripts/go-live/post-deploy-canary.sh`)**:
-    *   Verifies liveness/readiness probes (`/healthz`, `/readyz`).
-    *   Checks application health (`/health`).
-    *   Ensures metrics are exposed (`/metrics`).
-    *   Validates version info (`/status`).
+    - Verifies liveness/readiness probes (`/healthz`, `/readyz`).
+    - Checks application health (`/health`).
+    - Ensures metrics are exposed (`/metrics`).
+    - Validates version info (`/status`).
 
 2.  **SLO Snapshot (`scripts/go-live/prom-slo-snapshot.ts`)**:
-    *   Captures current error rates, latency, and pod restarts from Prometheus.
-    *   Generates a JSON snapshot and a Markdown summary.
+    - Captures current error rates, latency, and pod restarts from Prometheus.
+    - Generates a JSON snapshot and a Markdown summary.
 
 3.  **Evidence Generator**:
-    *   Aggregates canary and SLO results into a signed evidence bundle (`evidence.json`, `checksums.txt`).
+    - Aggregates canary and SLO results into a signed evidence bundle (`evidence.json`, `checksums.txt`).
 
 ### Running the Gate (GitHub Actions)
 
 Go to **Actions** -> **Post-Deploy Monitoring Gate** and run with:
-*   `base_url`: `https://api.prod.summit.example.com`
-*   `prom_url` (optional): `https://prometheus.ops.summit.example.com`
-*   `require_prom`: `true` (if Prometheus is critical for validation)
+
+- `base_url`: `https://api.prod.summit.example.com`
+- `prom_url` (optional): `https://prometheus.ops.summit.example.com`
+- `require_prom`: `true` (if Prometheus is critical for validation)
 
 ### Running Locally (Ops Workstation)
 
@@ -505,6 +509,6 @@ pnpm evidence:post-deploy:verify
 
 ### Interpretation
 
-*   **Canary Fail**: Immediate Rollback. The service is not responding correctly.
-*   **SLO Snapshot Fail (Error Rate > Threshold)**: Investigate immediately. Consider rollback if sustained.
-*   **Evidence Verification Fail**: The artifact has been tampered with or is incomplete.
+- **Canary Fail**: Immediate Rollback. The service is not responding correctly.
+- **SLO Snapshot Fail (Error Rate > Threshold)**: Investigate immediately. Consider rollback if sustained.
+- **Evidence Verification Fail**: The artifact has been tampered with or is incomplete.

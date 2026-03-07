@@ -161,15 +161,15 @@ owners:
 
 kpis:
   - name: sso_scim_coverage
-    target: '>=0.95'
+    target: ">=0.95"
   - name: cost_per_req_delta
-    target: '<=-0.10'
+    target: "<=-0.10"
   - name: cache_hit_rate
-    target: '>=0.90'
+    target: ">=0.90"
   - name: redaction_errors
-    target: '==0'
+    target: "==0"
   - name: disclosure_coverage
-    target: '==1.0'
+    target: "==1.0"
 
 budget:
   cost_per_req_max_usd: 0.01
@@ -198,11 +198,7 @@ Freeze window:
 
 ```yaml
 freeze_windows:
-  - {
-      start: '2025-12-07T00:00:00Z',
-      end: '2025-12-08T23:59:00Z',
-      reason: 'pre-release freeze',
-    }
+  - { start: "2025-12-07T00:00:00Z", end: "2025-12-08T23:59:00Z", reason: "pre-release freeze" }
 ```
 
 ---

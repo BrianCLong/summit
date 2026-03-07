@@ -16,9 +16,8 @@ vi.mock('@/contexts/KeyboardShortcutsContext', () => ({
 
 // Mock UI components to avoid Radix UI issues in test environment
 vi.mock('@/components/ui/Dialog', () => ({
-  Dialog: ({ open, children }: { open: boolean; children: React.ReactNode }) => (
-    open ? <div data-testid="dialog">{children}</div> : null
-  ),
+  Dialog: ({ open, children }: { open: boolean; children: React.ReactNode }) =>
+    open ? <div data-testid="dialog">{children}</div> : null,
   DialogContent: ({ children }: { children: React.ReactNode }) => (
     <div data-testid="dialog-content">{children}</div>
   ),

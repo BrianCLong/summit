@@ -1,59 +1,59 @@
-name: 'Maestro Pipeline Runner'
-description: 'Execute Maestro orchestration workflows in CI/CD'
-author: 'IntelGraph Team'
+name: "Maestro Pipeline Runner"
+description: "Execute Maestro orchestration workflows in CI/CD"
+author: "IntelGraph Team"
 
 inputs:
   pipeline:
-    description: 'Path to Maestro pipeline file'
+    description: "Path to Maestro pipeline file"
     required: true
   environment:
-    description: 'Target environment (development, staging, production)'
+    description: "Target environment (development, staging, production)"
     required: false
-    default: 'development'
+    default: "development"
   parameters:
-    description: 'Pipeline parameters as JSON string'
+    description: "Pipeline parameters as JSON string"
     required: false
-    default: '{}'
+    default: "{}"
   budget:
-    description: 'Budget limit in USD'
+    description: "Budget limit in USD"
     required: false
-    default: '5.00'
+    default: "5.00"
   timeout:
-    description: 'Timeout in minutes'
+    description: "Timeout in minutes"
     required: false
-    default: '30'
+    default: "30"
   maestro_url:
-    description: 'Maestro API URL'
+    description: "Maestro API URL"
     required: false
-    default: 'https://maestro-api.example.com'
+    default: "https://maestro-api.example.com"
   maestro_token:
-    description: 'Maestro API token'
+    description: "Maestro API token"
     required: true
   wait_for_completion:
-    description: 'Wait for pipeline completion'
+    description: "Wait for pipeline completion"
     required: false
-    default: 'true'
+    default: "true"
   output_format:
-    description: 'Output format (json, yaml, summary)'
+    description: "Output format (json, yaml, summary)"
     required: false
-    default: 'summary'
+    default: "summary"
 
 outputs:
   run_id:
-    description: 'Maestro run ID'
+    description: "Maestro run ID"
   status:
-    description: 'Final run status'
+    description: "Final run status"
   duration:
-    description: 'Execution duration in seconds'
+    description: "Execution duration in seconds"
   cost:
-    description: 'Total cost in USD'
+    description: "Total cost in USD"
   steps_completed:
-    description: 'Number of completed steps'
+    description: "Number of completed steps"
   steps_total:
-    description: 'Total number of steps'
+    description: "Total number of steps"
 
 runs:
-  using: 'composite'
+  using: "composite"
   steps:
     - name: Validate inputs
       shell: bash
@@ -257,5 +257,5 @@ runs:
         fi
 
 branding:
-  icon: 'zap'
-  color: 'blue'
+  icon: "zap"
+  color: "blue"

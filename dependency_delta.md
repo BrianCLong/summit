@@ -3,12 +3,14 @@
 Use this file to document changes to project dependencies.
 
 ## Format
+
 - Date: YYYY-MM-DD
 - Action: Add/Remove/Update
 - Package: <name>
 - Reason: <reason>
 
 ## 2026-01-31
+
 - Action: Add
 - Package: jsonschema, PyYAML
 - Reason: Foundational requirements for the CodeData Framework (deterministic configuration generation and evidence validation).
@@ -18,4 +20,5 @@ Use this file to document changes to project dependencies.
 - Reason: Initial implementation of Summit Governance Fabric (SGF) components.
 
 ## 2026-02-01
+
 - Added neo4j and psycopg2-binary for Graph Shape Guardrail

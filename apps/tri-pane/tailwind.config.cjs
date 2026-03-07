@@ -8,9 +8,9 @@ module.exports = {
         ink: "#111827",
         horizon: "#1e293b",
         accent: "#38bdf8",
-        sand: "#e2e8f0"
-      }
-    }
+        sand: "#e2e8f0",
+      },
+    },
   },
-  plugins: []
+  plugins: [],
 };

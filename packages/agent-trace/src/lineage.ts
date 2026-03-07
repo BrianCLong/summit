@@ -1,6 +1,6 @@
-import { spawnSync } from 'child_process';
-import { TraceStore } from './store.js';
-import type { TraceRecord } from './trace_record.js';
+import { spawnSync } from "child_process";
+import { TraceStore } from "./store.js";
+import type { TraceRecord } from "./trace_record.js";
 
 export interface LineageResult {
   file: string;
@@ -11,20 +11,26 @@ export interface LineageResult {
   conversation_url?: string;
 }
 
-export function getLineage(filePath: string, line: number, baseDir: string = process.cwd()): LineageResult | null {
+export function getLineage(
+  filePath: string,
+  line: number,
+  baseDir: string = process.cwd()
+): LineageResult | null {
   try {
     // Get revision that last touched the line using git blame
     // git blame -L <line>,<line> --porcelain <file>
-    const result = spawnSync('git', ['blame', '-L', `${line},${line}`, '--porcelain', filePath], { cwd: baseDir });
+    const result = spawnSync("git", ["blame", "-L", `${line},${line}`, "--porcelain", filePath], {
+      cwd: baseDir,
+    });
     if (result.error || result.status !== 0) {
       throw new Error(`git blame failed: ${result.stderr.toString()}`);
     }
     const output = result.stdout.toString();
-    const firstLine = output.split('\n')[0];
-    const revision = firstLine.split(' ')[0];
+    const firstLine = output.split("\n")[0];
+    const revision = firstLine.split(" ")[0];
 
-    if (!revision || revision === '0000000000000000000000000000000000000000') {
-      return { file: filePath, line, revision: 'uncommitted' };
+    if (!revision || revision === "0000000000000000000000000000000000000000") {
+      return { file: filePath, line, revision: "uncommitted" };
     }
 
     // Look up trace for this revision
@@ -43,7 +49,7 @@ export function getLineage(filePath: string, line: number, baseDir: string = pro
                   revision,
                   contributor: range.contributor?.type || conv.contributor?.type,
                   model_id: range.contributor?.model_id || conv.contributor?.model_id,
-                  conversation_url: conv.url
+                  conversation_url: conv.url,
                 };
               }
             }

@@ -32,6 +32,7 @@ bash scripts/ci/monitor-runner-capacity.sh
 ## What MERGE_SURGE Does
 
 When enabled, skips these expensive jobs in `ci-core.yml`:
+
 - `deterministic-build` (2x builds + checksums)
 - `golden-path` (bootstrap + smoke tests)
 - `e2e-tests` (Playwright suite)

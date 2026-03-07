@@ -2,12 +2,12 @@ name: GraphCI Determinism
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
     paths:
-      - 'ci/graphci/**'
+      - "ci/graphci/**"
   pull_request:
     paths:
-      - 'ci/graphci/**'
+      - "ci/graphci/**"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -22,8 +22,8 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
-          cache: 'pip'
+          python-version: "3.11"
+          cache: "pip"
 
       - name: Install dependencies
         run: |

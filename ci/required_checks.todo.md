@@ -6,17 +6,18 @@
 
 The following required status checks are configured on the `main` branch:
 
-| Check Name | App ID | Status |
-|------------|--------|--------|
-| Config Preflight | 15368 | ✅ Active |
-| Build & Package | 15368 | ✅ Active |
-| Verification Suite | 15368 | ✅ Active |
-| Governance Checks | 15368 | ✅ Active |
-| Schema Validation | 15368 | ✅ Active |
+| Check Name         | App ID | Status    |
+| ------------------ | ------ | --------- |
+| Config Preflight   | 15368  | ✅ Active |
+| Build & Package    | 15368  | ✅ Active |
+| Verification Suite | 15368  | ✅ Active |
+| Governance Checks  | 15368  | ✅ Active |
+| Schema Validation  | 15368  | ✅ Active |
 
 ## Discovery Method
 
 Retrieved via GitHub API:
+
 ```bash
 gh api repos/:owner/:repo/branches/main/protection/required_status_checks
 ```
@@ -36,6 +37,7 @@ gh api repos/:owner/:repo/branches/main/protection/required_status_checks
 ## Future Considerations
 
 If additional checks need to be added:
+
 1. Create the workflow job in the appropriate workflow file
 2. Ensure the job name matches exactly what will be required
 3. Update branch protection via GitHub UI or API

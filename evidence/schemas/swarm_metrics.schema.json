@@ -4,15 +4,15 @@
   "type": "object",
   "required": ["run_id", "metrics"],
   "properties": {
-    "run_id": {"type": "string"},
+    "run_id": { "type": "string" },
     "metrics": {
       "type": "object",
       "required": ["agentsSpawned", "stepsExecuted", "toolCalls", "wallMs"],
       "properties": {
-        "agentsSpawned": {"type": "integer"},
-        "stepsExecuted": {"type": "integer"},
-        "toolCalls": {"type": "integer"},
-        "wallMs": {"type": "integer"}
+        "agentsSpawned": { "type": "integer" },
+        "stepsExecuted": { "type": "integer" },
+        "toolCalls": { "type": "integer" },
+        "wallMs": { "type": "integer" }
       }
     }
   },

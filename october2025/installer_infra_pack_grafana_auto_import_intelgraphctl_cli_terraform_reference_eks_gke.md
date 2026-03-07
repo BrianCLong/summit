@@ -173,53 +173,43 @@ bash ops/grafana/import-dashboards.sh
 
 ```ts
 // cli/intelgraphctl/src/index.ts
-import { Command } from 'commander';
-import { preflight } from './commands/preflight.js';
-import { helm } from './commands/helm.js';
-import { seed } from './commands/seed.js';
-import { grafana } from './commands/grafana.js';
-import { smoke } from './commands/smoke.js';
+import { Command } from "commander";
+import { preflight } from "./commands/preflight.js";
+import { helm } from "./commands/helm.js";
+import { seed } from "./commands/seed.js";
+import { grafana } from "./commands/grafana.js";
+import { smoke } from "./commands/smoke.js";
 
 const program = new Command();
-program
-  .name('intelgraphctl')
-  .description('IntelGraph installer/bootstrapper')
-  .version('1.0.0');
+program.name("intelgraphctl").description("IntelGraph installer/bootstrapper").version("1.0.0");
 
 program
-  .command('preflight')
-  .requiredOption('--issuer <url>', 'Keycloak issuer')
-  .requiredOption('--host <host>', 'Ingress hostname')
+  .command("preflight")
+  .requiredOption("--issuer <url>", "Keycloak issuer")
+  .requiredOption("--host <host>", "Ingress hostname")
   .action(preflight);
 
 program
-  .command('install')
-  .requiredOption('--org <org>', 'GitHub org/repo, e.g. BrianCLong/intelgraph')
-  .requiredOption('--chart <name>', 'Chart name, e.g. intelgraph')
-  .requiredOption('--version <ver>', 'Chart version')
-  .option(
-    '--values <file>',
-    'values.yaml path',
-    'onboarding/values-sample.yaml',
-  )
+  .command("install")
+  .requiredOption("--org <org>", "GitHub org/repo, e.g. BrianCLong/intelgraph")
+  .requiredOption("--chart <name>", "Chart name, e.g. intelgraph")
+  .requiredOption("--version <ver>", "Chart version")
+  .option("--values <file>", "values.yaml path", "onboarding/values-sample.yaml")
   .action(helm.install);
 
-program
-  .command('seed')
-  .option('--tenant <id>', 'tenant id', 'pilot')
-  .action(seed);
+program.command("seed").option("--tenant <id>", "tenant id", "pilot").action(seed);
 
 program
-  .command('grafana')
-  .requiredOption('--url <url>', 'Grafana URL')
-  .requiredOption('--token <tok>', 'Grafana API token')
+  .command("grafana")
+  .requiredOption("--url <url>", "Grafana URL")
+  .requiredOption("--token <tok>", "Grafana API token")
   .action(grafana.importDashboards);
 
 program
-  .command('smoke')
-  .requiredOption('--gateway <url>', 'Gateway GraphQL URL')
-  .requiredOption('--issuer <url>', 'Keycloak issuer URL')
-  .requiredOption('--client-secret <sec>', 'Keycloak client secret')
+  .command("smoke")
+  .requiredOption("--gateway <url>", "Gateway GraphQL URL")
+  .requiredOption("--issuer <url>", "Keycloak issuer URL")
+  .requiredOption("--client-secret <sec>", "Keycloak client secret")
   .action(smoke);
 
 program.parse();
@@ -229,23 +219,23 @@ program.parse();
 
 ```ts
 // cli/intelgraphctl/src/lib/exec.ts
-import { execa } from 'execa';
+import { execa } from "execa";
 export const sh = (cmd: string, args: string[] = [], env: any = {}) =>
-  execa(cmd, args, { stdio: 'inherit', env });
+  execa(cmd, args, { stdio: "inherit", env });
 ```
 
 ```ts
 // cli/intelgraphctl/src/commands/preflight.ts
-import { sh } from '../lib/exec.js';
-import fetch from 'node-fetch';
+import { sh } from "../lib/exec.js";
+import fetch from "node-fetch";
 export async function preflight(opts: any) {
-  await sh('kubectl', ['cluster-info']);
-  await sh('helm', ['version']);
-  await sh('cosign', ['version']);
+  await sh("kubectl", ["cluster-info"]);
+  await sh("helm", ["version"]);
+  await sh("cosign", ["version"]);
   const r = await fetch(`${opts.issuer}/.well-known/openid-configuration`);
-  if (!r.ok) throw new Error('Issuer not reachable');
-  console.log('Issuer OK');
-  console.log('Host:', opts.host);
+  if (!r.ok) throw new Error("Issuer not reachable");
+  console.log("Issuer OK");
+  console.log("Host:", opts.host);
 }
 ```
 
@@ -264,22 +254,22 @@ export const helm = {
 
 ```ts
 // cli/intelgraphctl/src/commands/seed.ts
-import { execa } from 'execa';
+import { execa } from "execa";
 export async function seed(opts: any) {
   process.env.TENANT = opts.tenant;
-  await execa('node', ['bootstrap/seed-tenant.ts'], { stdio: 'inherit' });
+  await execa("node", ["bootstrap/seed-tenant.ts"], { stdio: "inherit" });
 }
 ```
 
 ```ts
 // cli/intelgraphctl/src/commands/grafana.ts
-import { execa } from 'execa';
+import { execa } from "execa";
 export const grafana = {
   async importDashboards(opts: any) {
     process.env.GRAFANA_URL = opts.url;
     process.env.GRAFANA_TOKEN = opts.token;
-    await execa('bash', ['ops/grafana/import-dashboards.sh'], {
-      stdio: 'inherit',
+    await execa("bash", ["ops/grafana/import-dashboards.sh"], {
+      stdio: "inherit",
     });
   },
 };
@@ -287,29 +277,29 @@ export const grafana = {
 
 ```ts
 // cli/intelgraphctl/src/commands/smoke.ts
-import fetch from 'node-fetch';
+import fetch from "node-fetch";
 export async function smoke(opts: any) {
   const tok = await fetch(`${opts.issuer}/protocol/openid-connect/token`, {
-    method: 'POST',
-    headers: { 'content-type': 'application/x-www-form-urlencoded' },
+    method: "POST",
+    headers: { "content-type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({
-      grant_type: 'client_credentials',
-      client_id: 'intelgraph-api',
-      client_secret: opts['client-secret'],
+      grant_type: "client_credentials",
+      client_id: "intelgraph-api",
+      client_secret: opts["client-secret"],
     }),
   })
     .then((r) => r.json())
     .then((j) => j.access_token);
   const res = await fetch(opts.gateway, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'content-type': 'application/json',
+      "content-type": "application/json",
       authorization: `Bearer ${tok}`,
     },
-    body: JSON.stringify({ query: '{ __typename }' }),
+    body: JSON.stringify({ query: "{ __typename }" }),
   });
-  if (!res.ok) throw new Error('Smoke failed');
-  console.log('Smoke OK');
+  if (!res.ok) throw new Error("Smoke failed");
+  console.log("Smoke OK");
 }
 ```
 
@@ -317,7 +307,7 @@ export async function smoke(opts: any) {
 
 ```ts
 // cli/intelgraphctl/__tests__/smoke.test.ts
-test('dummy', () => {
+test("dummy", () => {
   expect(1).toBe(1);
 });
 ```

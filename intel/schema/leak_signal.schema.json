@@ -12,8 +12,8 @@
       "type": "object",
       "required": ["start", "end"],
       "properties": {
-        "start": {"type": "string", "format": "date-time"},
-        "end": {"type": "string", "format": "date-time"}
+        "start": { "type": "string", "format": "date-time" },
+        "end": { "type": "string", "format": "date-time" }
       }
     },
     "odds_delta": {

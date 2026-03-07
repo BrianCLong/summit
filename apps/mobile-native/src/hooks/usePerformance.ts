@@ -32,22 +32,25 @@ export const useRenderPerformance = (componentName: string, props?: any) => {
  * Hook to measure async operation performance
  */
 export const useAsyncPerformance = () => {
-  const measure = useCallback(async <T,>(
-    name: string,
-    operation: () => Promise<T>,
-    category?: 'startup' | 'render' | 'network' | 'storage' | 'custom',
-  ): Promise<T> => {
-    performanceMonitor.mark(name);
+  const measure = useCallback(
+    async <T>(
+      name: string,
+      operation: () => Promise<T>,
+      category?: 'startup' | 'render' | 'network' | 'storage' | 'custom',
+    ): Promise<T> => {
+      performanceMonitor.mark(name);
 
-    try {
-      const result = await operation();
-      performanceMonitor.measure(name, category);
-      return result;
-    } catch (error) {
-      performanceMonitor.measure(name, category, {error: true});
-      throw error;
-    }
-  }, []);
+      try {
+        const result = await operation();
+        performanceMonitor.measure(name, category);
+        return result;
+      } catch (error) {
+        performanceMonitor.measure(name, category, {error: true});
+        throw error;
+      }
+    },
+    [],
+  );
 
   return {measure};
 };

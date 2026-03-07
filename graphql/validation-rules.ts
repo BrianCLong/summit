@@ -21,10 +21,10 @@ import {
   isNonNullType,
   GraphQLNamedType,
   GraphQLType,
-} from 'graphql';
+} from "graphql";
 
 export interface ValidationError {
-  type: 'error' | 'warning';
+  type: "error" | "warning";
   rule: string;
   message: string;
   path?: string;
@@ -71,12 +71,12 @@ export class SchemaValidator {
 
     for (const [typeName, type] of Object.entries(typeMap)) {
       // Skip built-in types
-      if (typeName.startsWith('__')) continue;
+      if (typeName.startsWith("__")) continue;
 
       // Type names should be PascalCase
       if (!this.isPascalCase(typeName)) {
         this.addError(
-          'naming-convention',
+          "naming-convention",
           `Type "${typeName}" should use PascalCase`,
           typeName,
           `Rename to "${this.toPascalCase(typeName)}"`
@@ -84,7 +84,7 @@ export class SchemaValidator {
       }
 
       // Validate object types
-      if (isObjectType(type) && !type.name.startsWith('__')) {
+      if (isObjectType(type) && !type.name.startsWith("__")) {
         this.validateObjectType(type);
       }
 
@@ -110,7 +110,7 @@ export class SchemaValidator {
       // Field names should be camelCase
       if (!this.isCamelCase(fieldName)) {
         this.addError(
-          'naming-convention',
+          "naming-convention",
           `Field "${type.name}.${fieldName}" should use camelCase`,
           `${type.name}.${fieldName}`,
           `Rename to "${this.toCamelCase(fieldName)}"`
@@ -121,7 +121,7 @@ export class SchemaValidator {
       for (const arg of field.args) {
         if (!this.isCamelCase(arg.name)) {
           this.addError(
-            'naming-convention',
+            "naming-convention",
             `Argument "${type.name}.${fieldName}(${arg.name})" should use camelCase`,
             `${type.name}.${fieldName}.${arg.name}`
           );
@@ -135,9 +135,9 @@ export class SchemaValidator {
    */
   private validateInputType(type: GraphQLInputObjectType): void {
     // Input types should end with "Input"
-    if (!type.name.endsWith('Input')) {
+    if (!type.name.endsWith("Input")) {
       this.addWarning(
-        'naming-convention',
+        "naming-convention",
         `Input type "${type.name}" should end with "Input"`,
         type.name,
         `Rename to "${type.name}Input"`
@@ -148,7 +148,7 @@ export class SchemaValidator {
     for (const [fieldName, field] of Object.entries(fields)) {
       if (!this.isCamelCase(fieldName)) {
         this.addError(
-          'naming-convention',
+          "naming-convention",
           `Input field "${type.name}.${fieldName}" should use camelCase`,
           `${type.name}.${fieldName}`
         );
@@ -164,7 +164,7 @@ export class SchemaValidator {
     for (const value of type.getValues()) {
       if (!this.isUpperCase(value.name)) {
         this.addWarning(
-          'naming-convention',
+          "naming-convention",
           `Enum value "${type.name}.${value.name}" should use UPPER_CASE`,
           `${type.name}.${value.name}`,
           `Rename to "${this.toUpperCase(value.name)}"`
@@ -180,7 +180,7 @@ export class SchemaValidator {
     const typeMap = schema.getTypeMap();
 
     for (const [typeName, type] of Object.entries(typeMap)) {
-      if (typeName.startsWith('__')) continue;
+      if (typeName.startsWith("__")) continue;
 
       if (isObjectType(type) || isInterfaceType(type)) {
         const fields = type.getFields();
@@ -189,20 +189,20 @@ export class SchemaValidator {
             // Deprecated fields should have a clear reason and migration path
             if (field.deprecationReason.length < 10) {
               this.addError(
-                'deprecation',
+                "deprecation",
                 `Deprecated field "${type.name}.${fieldName}" needs a detailed deprecation reason`,
                 `${type.name}.${fieldName}`,
-                'Provide a clear reason and migration path (minimum 10 characters)'
+                "Provide a clear reason and migration path (minimum 10 characters)"
               );
             }
 
             // Check if deprecation reason includes a timeline
             if (
               !field.deprecationReason.match(/\d{4}-\d{2}-\d{2}/) &&
-              !field.deprecationReason.toLowerCase().includes('use')
+              !field.deprecationReason.toLowerCase().includes("use")
             ) {
               this.addWarning(
-                'deprecation',
+                "deprecation",
                 `Deprecated field "${type.name}.${fieldName}" should include removal date or migration instructions`,
                 `${type.name}.${fieldName}`,
                 'Include "Use X instead" or removal date (YYYY-MM-DD)'
@@ -216,7 +216,7 @@ export class SchemaValidator {
         for (const value of type.getValues()) {
           if (value.deprecationReason && value.deprecationReason.length < 10) {
             this.addError(
-              'deprecation',
+              "deprecation",
               `Deprecated enum value "${type.name}.${value.name}" needs a detailed deprecation reason`,
               `${type.name}.${value.name}`
             );
@@ -233,44 +233,44 @@ export class SchemaValidator {
     const typeMap = schema.getTypeMap();
 
     for (const [typeName, type] of Object.entries(typeMap)) {
-      if (typeName.startsWith('__')) continue;
+      if (typeName.startsWith("__")) continue;
 
       if (isObjectType(type)) {
         const fields = type.getFields();
 
         // Check for overly generic names
-        const genericNames = ['data', 'info', 'details', 'item', 'value'];
+        const genericNames = ["data", "info", "details", "item", "value"];
         for (const [fieldName, field] of Object.entries(fields)) {
           if (genericNames.includes(fieldName.toLowerCase())) {
             this.addWarning(
-              'anti-pattern',
+              "anti-pattern",
               `Field "${type.name}.${fieldName}" uses a generic name`,
               `${type.name}.${fieldName}`,
-              'Use a more specific, descriptive name'
+              "Use a more specific, descriptive name"
             );
           }
 
           // Check for deeply nested lists
           if (this.isNestedList(field.type, 2)) {
             this.addWarning(
-              'anti-pattern',
+              "anti-pattern",
               `Field "${type.name}.${fieldName}" has deeply nested lists`,
               `${type.name}.${fieldName}`,
-              'Consider flattening the structure or using pagination'
+              "Consider flattening the structure or using pagination"
             );
           }
 
           // Check for missing pagination on list fields
-          if (this.isListField(field.type) && type.name === 'Query') {
+          if (this.isListField(field.type) && type.name === "Query") {
             const hasLimitArg = field.args.some(
-              (arg) => arg.name === 'limit' || arg.name === 'first'
+              (arg) => arg.name === "limit" || arg.name === "first"
             );
             if (!hasLimitArg) {
               this.addWarning(
-                'anti-pattern',
+                "anti-pattern",
                 `Query field "${fieldName}" returns a list but doesn't have pagination`,
                 `Query.${fieldName}`,
-                'Add pagination arguments (limit, offset or first, after)'
+                "Add pagination arguments (limit, offset or first, after)"
               );
             }
           }
@@ -280,10 +280,10 @@ export class SchemaValidator {
         const fieldCount = Object.keys(fields).length;
         if (fieldCount > 50) {
           this.addWarning(
-            'anti-pattern',
+            "anti-pattern",
             `Type "${typeName}" has ${fieldCount} fields (>50)`,
             typeName,
-            'Consider splitting into multiple types'
+            "Consider splitting into multiple types"
           );
         }
       }
@@ -297,7 +297,7 @@ export class SchemaValidator {
     const typeMap = schema.getTypeMap();
 
     for (const [typeName, type] of Object.entries(typeMap)) {
-      if (typeName.startsWith('__')) continue;
+      if (typeName.startsWith("__")) continue;
 
       if (isObjectType(type)) {
         const fields = type.getFields();
@@ -305,10 +305,10 @@ export class SchemaValidator {
           // Check for too many arguments
           if (field.args.length > 10) {
             this.addWarning(
-              'complexity',
+              "complexity",
               `Field "${type.name}.${fieldName}" has ${field.args.length} arguments (>10)`,
               `${type.name}.${fieldName}`,
-              'Consider using an input type to group arguments'
+              "Consider using an input type to group arguments"
             );
           }
 
@@ -320,10 +320,10 @@ export class SchemaValidator {
               !this.isNullableScalar(arg.type)
             ) {
               this.addWarning(
-                'complexity',
+                "complexity",
                 `Optional argument "${type.name}.${fieldName}(${arg.name})" has no default value`,
                 `${type.name}.${fieldName}.${arg.name}`,
-                'Provide a default value or make it required'
+                "Provide a default value or make it required"
               );
             }
           }
@@ -339,34 +339,32 @@ export class SchemaValidator {
     const typeMap = schema.getTypeMap();
 
     for (const [typeName, type] of Object.entries(typeMap)) {
-      if (typeName.startsWith('__')) continue;
+      if (typeName.startsWith("__")) continue;
 
       if (isInputObjectType(type)) {
         const fields = type.getFields();
 
         // Check for inputs without any required fields
-        const hasRequiredField = Object.values(fields).some((field) =>
-          isNonNullType(field.type)
-        );
+        const hasRequiredField = Object.values(fields).some((field) => isNonNullType(field.type));
 
         if (!hasRequiredField && Object.keys(fields).length > 3) {
           this.addWarning(
-            'input-validation',
+            "input-validation",
             `Input type "${typeName}" has no required fields`,
             typeName,
-            'Consider making at least one field required'
+            "Consider making at least one field required"
           );
         }
 
         // Check for string fields without validation
         for (const [fieldName, field] of Object.entries(fields)) {
           const fieldType = this.unwrapType(field.type);
-          if (fieldType.toString() === 'String' && !field.description) {
+          if (fieldType.toString() === "String" && !field.description) {
             this.addWarning(
-              'input-validation',
+              "input-validation",
               `String field "${typeName}.${fieldName}" has no description`,
               `${typeName}.${fieldName}`,
-              'Add description with validation constraints'
+              "Add description with validation constraints"
             );
           }
         }
@@ -383,7 +381,7 @@ export class SchemaValidator {
 
     // Collect all used types
     for (const [typeName, type] of Object.entries(typeMap)) {
-      if (typeName.startsWith('__')) continue;
+      if (typeName.startsWith("__")) continue;
 
       if (isObjectType(type) || isInterfaceType(type)) {
         const fields = type.getFields();
@@ -405,18 +403,15 @@ export class SchemaValidator {
 
     // Check for unused types
     for (const [typeName, type] of Object.entries(typeMap)) {
-      if (typeName.startsWith('__')) continue;
-      if (
-        ['Query', 'Mutation', 'Subscription'].includes(typeName)
-      )
-        continue;
+      if (typeName.startsWith("__")) continue;
+      if (["Query", "Mutation", "Subscription"].includes(typeName)) continue;
 
       if (!usedTypes.has(typeName) && !isScalarType(type)) {
         this.addWarning(
-          'unused-type',
+          "unused-type",
           `Type "${typeName}" is defined but never used`,
           typeName,
-          'Remove unused type or use it in your schema'
+          "Remove unused type or use it in your schema"
         );
       }
     }
@@ -445,7 +440,7 @@ export class SchemaValidator {
   }
 
   private toUpperCase(str: string): string {
-    return str.replace(/([A-Z])/g, '_$1').toUpperCase();
+    return str.replace(/([A-Z])/g, "_$1").toUpperCase();
   }
 
   private isListField(type: GraphQLType): boolean {
@@ -486,22 +481,12 @@ export class SchemaValidator {
     }
   }
 
-  private addError(
-    rule: string,
-    message: string,
-    path?: string,
-    suggestion?: string
-  ): void {
-    this.errors.push({ type: 'error', rule, message, path, suggestion });
+  private addError(rule: string, message: string, path?: string, suggestion?: string): void {
+    this.errors.push({ type: "error", rule, message, path, suggestion });
   }
 
-  private addWarning(
-    rule: string,
-    message: string,
-    path?: string,
-    suggestion?: string
-  ): void {
-    this.warnings.push({ type: 'warning', rule, message, path, suggestion });
+  private addWarning(rule: string, message: string, path?: string, suggestion?: string): void {
+    this.warnings.push({ type: "warning", rule, message, path, suggestion });
   }
 }
 

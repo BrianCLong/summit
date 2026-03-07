@@ -25,7 +25,7 @@ export const setupPushNotifications = async (): Promise<void> => {
   }
 
   // Listen for token refresh
-  messaging().onTokenRefresh((newToken) => {
+  messaging().onTokenRefresh(newToken => {
     console.log('[Notifications] FCM Token refreshed:', newToken);
     storage.set('fcm_token', newToken);
     // Send token to server
@@ -33,13 +33,13 @@ export const setupPushNotifications = async (): Promise<void> => {
   });
 
   // Handle foreground notifications
-  messaging().onMessage(async (remoteMessage) => {
+  messaging().onMessage(async remoteMessage => {
     console.log('[Notifications] Foreground message:', remoteMessage);
     await displayNotification(remoteMessage);
   });
 
   // Handle background notifications
-  messaging().setBackgroundMessageHandler(async (remoteMessage) => {
+  messaging().setBackgroundMessageHandler(async remoteMessage => {
     console.log('[Notifications] Background message:', remoteMessage);
     await displayNotification(remoteMessage);
   });
@@ -66,10 +66,10 @@ export const setupPushNotifications = async (): Promise<void> => {
 
   // Configure PushNotification
   PushNotification.configure({
-    onRegister: (token) => {
+    onRegister: token => {
       console.log('[Notifications] Device token:', token);
     },
-    onNotification: (notification) => {
+    onNotification: notification => {
       console.log('[Notifications] Local notification:', notification);
     },
     permissions: {

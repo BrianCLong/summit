@@ -104,7 +104,7 @@ interface ReadinessAssessment {
 
 function calculateReadinessScore(assessment: ReadinessAssessment): {
   score: number;
-  readinessLevel: 'High' | 'Medium' | 'Low';
+  readinessLevel: "High" | "Medium" | "Low";
   recommendations: string[];
 } {
   const avgScore =
@@ -114,8 +114,7 @@ function calculateReadinessScore(assessment: ReadinessAssessment): {
       assessment.changeReadiness) /
     4;
 
-  const readinessLevel =
-    avgScore >= 4 ? 'High' : avgScore >= 3 ? 'Medium' : 'Low';
+  const readinessLevel = avgScore >= 4 ? "High" : avgScore >= 3 ? "Medium" : "Low";
 
   return {
     score: avgScore,
@@ -253,9 +252,9 @@ kubectl apply -f monitoring-config.yaml
 
 ```yaml
 workflow:
-  name: 'Customer Onboarding Process'
-  priority: 'high'
-  complexity: 'medium'
+  name: "Customer Onboarding Process"
+  priority: "high"
+  complexity: "medium"
   estimatedHours: 16
   dependencies:
     - CRM integration
@@ -336,7 +335,7 @@ interface CustomerHealthMetrics {
 
 function calculateHealthScore(metrics: CustomerHealthMetrics): {
   score: number;
-  status: 'Healthy' | 'At Risk' | 'Critical';
+  status: "Healthy" | "At Risk" | "Critical";
   recommendations: string[];
 } {
   const weights = {
@@ -347,9 +346,7 @@ function calculateHealthScore(metrics: CustomerHealthMetrics): {
   };
 
   const usageScore =
-    metrics.platformAdoption * 0.4 +
-    metrics.workflowUtilization * 0.4 +
-    metrics.featureUsage * 0.2;
+    metrics.platformAdoption * 0.4 + metrics.workflowUtilization * 0.4 + metrics.featureUsage * 0.2;
 
   const performanceScore =
     metrics.systemUptime * 0.4 +
@@ -372,12 +369,7 @@ function calculateHealthScore(metrics: CustomerHealthMetrics): {
     businessValueScore * weights.businessValue +
     satisfactionScore * weights.satisfaction;
 
-  const status =
-    overallScore >= 80
-      ? 'Healthy'
-      : overallScore >= 60
-        ? 'At Risk'
-        : 'Critical';
+  const status = overallScore >= 80 ? "Healthy" : overallScore >= 60 ? "At Risk" : "Critical";
 
   return {
     score: overallScore,
@@ -468,31 +460,28 @@ class CustomerHealthMonitor {
     };
   }
 
-  private async identifyRisks(
-    customerId: string,
-    metrics: any,
-  ): Promise<Risk[]> {
+  private async identifyRisks(customerId: string, metrics: any): Promise<Risk[]> {
     const risks: Risk[] = [];
 
     // Usage pattern analysis
     if (metrics.platformAdoption < 50) {
       risks.push({
-        type: 'Low Adoption',
-        severity: 'High',
-        description: 'Platform adoption below 50%',
-        impact: 'Potential churn risk',
-        mitigation: 'Schedule adoption workshop',
+        type: "Low Adoption",
+        severity: "High",
+        description: "Platform adoption below 50%",
+        impact: "Potential churn risk",
+        mitigation: "Schedule adoption workshop",
       });
     }
 
     // Performance degradation
     if (metrics.workflowSuccessRate < 95) {
       risks.push({
-        type: 'Performance Issues',
-        severity: 'Medium',
-        description: 'Workflow success rate below target',
-        impact: 'User frustration, productivity loss',
-        mitigation: 'Technical review and optimization',
+        type: "Performance Issues",
+        severity: "Medium",
+        description: "Workflow success rate below target",
+        impact: "User frustration, productivity loss",
+        mitigation: "Technical review and optimization",
       });
     }
 
@@ -500,11 +489,11 @@ class CustomerHealthMonitor {
     const recentTickets = await this.getRecentSupportTickets(customerId);
     if (recentTickets.length > 10) {
       risks.push({
-        type: 'Support Volume',
-        severity: 'Medium',
-        description: 'High support ticket volume',
-        impact: 'User satisfaction decline',
-        mitigation: 'Proactive training session',
+        type: "Support Volume",
+        severity: "Medium",
+        description: "High support ticket volume",
+        impact: "User satisfaction decline",
+        mitigation: "Proactive training session",
       });
     }
 
@@ -584,7 +573,7 @@ Opportunity Interventions (2 weeks):
 
 ```typescript
 interface ExpansionTrigger {
-  type: 'usage' | 'success' | 'request' | 'opportunity';
+  type: "usage" | "success" | "request" | "opportunity";
   event: string;
   score: number; // 1-10 expansion likelihood
   timeline: string; // when to engage
@@ -593,32 +582,32 @@ interface ExpansionTrigger {
 
 const expansionTriggers: ExpansionTrigger[] = [
   {
-    type: 'usage',
-    event: 'Approaching license limits (>80% utilization)',
+    type: "usage",
+    event: "Approaching license limits (>80% utilization)",
     score: 9,
-    timeline: '30 days before limit',
-    owner: 'Customer Success Manager',
+    timeline: "30 days before limit",
+    owner: "Customer Success Manager",
   },
   {
-    type: 'success',
-    event: 'ROI targets exceeded by 50%+',
+    type: "success",
+    event: "ROI targets exceeded by 50%+",
     score: 8,
-    timeline: 'Quarterly business review',
-    owner: 'Account Executive',
+    timeline: "Quarterly business review",
+    owner: "Account Executive",
   },
   {
-    type: 'request',
-    event: 'Customer asks about additional features',
+    type: "request",
+    event: "Customer asks about additional features",
     score: 9,
-    timeline: 'Immediate',
-    owner: 'Solutions Engineer',
+    timeline: "Immediate",
+    owner: "Solutions Engineer",
   },
   {
-    type: 'opportunity',
-    event: 'New department expresses interest',
+    type: "opportunity",
+    event: "New department expresses interest",
     score: 7,
-    timeline: '2 weeks',
-    owner: 'Account Executive',
+    timeline: "2 weeks",
+    owner: "Account Executive",
   },
 ];
 ```

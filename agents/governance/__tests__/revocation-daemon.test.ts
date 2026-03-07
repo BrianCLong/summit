@@ -1,10 +1,10 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import { newDb } from 'pg-mem';
-import crypto from 'node:crypto';
-import { RevocationDaemon, RevocationCertificate } from '../src/provenance/revocation-daemon';
-import { AIProvenanceManager } from '../src/provenance/AIProvenanceManager';
+import { describe, it, expect, beforeEach } from "vitest";
+import { newDb } from "pg-mem";
+import crypto from "node:crypto";
+import { RevocationDaemon, RevocationCertificate } from "../src/provenance/revocation-daemon";
+import { AIProvenanceManager } from "../src/provenance/AIProvenanceManager";
 
-describe('RevocationDaemon', () => {
+describe("RevocationDaemon", () => {
   let db: any;
   let pool: any;
   let daemon: RevocationDaemon;
@@ -40,13 +40,13 @@ describe('RevocationDaemon', () => {
     pool = db.adapters.createPg().Pool;
 
     // Setup keys
-    const kp = crypto.generateKeyPairSync('ed25519');
+    const kp = crypto.generateKeyPairSync("ed25519");
     issuerKeyPair = {
-      publicKey: kp.publicKey.export({ type: 'spki', format: 'pem' }).toString(),
-      privateKey: kp.privateKey.export({ type: 'pkcs8', format: 'pem' }).toString(),
+      publicKey: kp.publicKey.export({ type: "spki", format: "pem" }).toString(),
+      privateKey: kp.privateKey.export({ type: "pkcs8", format: "pem" }).toString(),
     };
 
-    trustedKeys = new Map([['security-team', issuerKeyPair.publicKey]]);
+    trustedKeys = new Map([["security-team", issuerKeyPair.publicKey]]);
 
     // Mock ProvenanceManager
     provenanceManager = {} as unknown as AIProvenanceManager;
@@ -56,11 +56,11 @@ describe('RevocationDaemon', () => {
     daemon = new RevocationDaemon(provenanceManager, pgPool, trustedKeys);
   });
 
-  it('should verify signature and issue revocation', async () => {
-    const revokedHash = 'hash-123';
-    const reason = 'model_poisoning';
+  it("should verify signature and issue revocation", async () => {
+    const revokedHash = "hash-123";
+    const reason = "model_poisoning";
     const revocationTime = new Date();
-    const issuer = 'security-team';
+    const issuer = "security-team";
 
     const payload = JSON.stringify({
       revokedNodeHash: revokedHash,
@@ -69,57 +69,57 @@ describe('RevocationDaemon', () => {
       issuer,
     });
 
-    const signature = crypto.sign(
-        null,
-        Buffer.from(payload),
-        crypto.createPrivateKey(issuerKeyPair.privateKey)
-    ).toString('base64');
+    const signature = crypto
+      .sign(null, Buffer.from(payload), crypto.createPrivateKey(issuerKeyPair.privateKey))
+      .toString("base64");
 
     const cert: RevocationCertificate = {
       revokedNodeHash: revokedHash,
       reason,
       revocationTime,
       issuer,
-      signature
+      signature,
     };
 
     await daemon.issueRevocation(cert);
 
     // Verify DB
-    const rows = db.public.many(`SELECT * FROM revocation_ledger WHERE revoked_hash = '${revokedHash}'`);
+    const rows = db.public.many(
+      `SELECT * FROM revocation_ledger WHERE revoked_hash = '${revokedHash}'`
+    );
     expect(rows.length).toBe(1);
     expect(rows[0].issuer).toBe(issuer);
   });
 
-  it('should fail with invalid signature', async () => {
+  it("should fail with invalid signature", async () => {
     const cert: RevocationCertificate = {
-      revokedNodeHash: 'hash-bad',
-      reason: 'data_breach',
+      revokedNodeHash: "hash-bad",
+      reason: "data_breach",
       revocationTime: new Date(),
-      issuer: 'security-team',
-      signature: Buffer.from('fake').toString('base64')
+      issuer: "security-team",
+      signature: Buffer.from("fake").toString("base64"),
     };
 
-    await expect(daemon.issueRevocation(cert)).rejects.toThrow('Invalid signature');
+    await expect(daemon.issueRevocation(cert)).rejects.toThrow("Invalid signature");
   });
 
-  it('should fail with unknown issuer', async () => {
-     const cert: RevocationCertificate = {
-      revokedNodeHash: 'hash-bad',
-      reason: 'data_breach',
+  it("should fail with unknown issuer", async () => {
+    const cert: RevocationCertificate = {
+      revokedNodeHash: "hash-bad",
+      reason: "data_breach",
       revocationTime: new Date(),
-      issuer: 'unknown-guy',
-      signature: Buffer.from('fake').toString('base64')
+      issuer: "unknown-guy",
+      signature: Buffer.from("fake").toString("base64"),
     };
 
-    await expect(daemon.issueRevocation(cert)).rejects.toThrow('Unknown issuer');
+    await expect(daemon.issueRevocation(cert)).rejects.toThrow("Unknown issuer");
   });
 
-  it('should propagate taint to descendants', async () => {
-    const root = 'root';
-    const child1 = 'child1';
-    const child2 = 'child2';
-    const grandchild = 'grandchild';
+  it("should propagate taint to descendants", async () => {
+    const root = "root";
+    const child1 = "child1";
+    const child2 = "child2";
+    const grandchild = "grandchild";
 
     db.public.none(`
         INSERT INTO provenance_merkle_tree (node_hash, parent_hash, tainted) VALUES ('${root}', NULL, false);
@@ -131,22 +131,20 @@ describe('RevocationDaemon', () => {
     const revocationTime = new Date();
     const payload = JSON.stringify({
       revokedNodeHash: root,
-      reason: 'model_poisoning',
+      reason: "model_poisoning",
       revocationTime: revocationTime.toISOString(),
-      issuer: 'security-team',
+      issuer: "security-team",
     });
-    const signature = crypto.sign(
-        null,
-        Buffer.from(payload),
-        crypto.createPrivateKey(issuerKeyPair.privateKey)
-    ).toString('base64');
+    const signature = crypto
+      .sign(null, Buffer.from(payload), crypto.createPrivateKey(issuerKeyPair.privateKey))
+      .toString("base64");
 
     await daemon.issueRevocation({
-        revokedNodeHash: root,
-        reason: 'model_poisoning',
-        revocationTime,
-        issuer: 'security-team',
-        signature
+      revokedNodeHash: root,
+      reason: "model_poisoning",
+      revocationTime,
+      issuer: "security-team",
+      signature,
     });
 
     const nodes = db.public.many(`SELECT node_hash, tainted FROM provenance_merkle_tree`);

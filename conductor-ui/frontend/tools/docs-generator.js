@@ -5,25 +5,18 @@
  * Automatically generates comprehensive documentation from code, comments, and usage patterns
  */
 
-import {
-  readFileSync,
-  writeFileSync,
-  existsSync,
-  mkdirSync,
-  statSync,
-  readdirSync,
-} from 'fs';
-import { join, resolve, relative, extname, dirname } from 'path';
-import { fileURLToPath } from 'url';
+import { readFileSync, writeFileSync, existsSync, mkdirSync, statSync, readdirSync } from "fs";
+import { join, resolve, relative, extname, dirname } from "path";
+import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-const root = resolve(__dirname, '..');
+const root = resolve(__dirname, "..");
 
 class DocsGenerator {
   constructor() {
-    this.docsDir = join(root, 'docs');
-    this.reportDir = join(root, 'test-results', 'documentation');
+    this.docsDir = join(root, "docs");
+    this.reportDir = join(root, "test-results", "documentation");
     this.startTime = Date.now();
     this.documentationData = {
       components: [],
@@ -39,7 +32,7 @@ class DocsGenerator {
 
   async setup() {
     console
-      .log('📚 Setting up Documentation Generator...')
+      .log("📚 Setting up Documentation Generator...")
 
       [
         // Create directories
@@ -52,14 +45,14 @@ class DocsGenerator {
 
     // Create docs subdirectories
     const docsDirs = [
-      'components',
-      'hooks',
-      'utils',
-      'services',
-      'api',
-      'tools',
-      'guides',
-      'examples',
+      "components",
+      "hooks",
+      "utils",
+      "services",
+      "api",
+      "tools",
+      "guides",
+      "examples",
     ];
     docsDirs.forEach((dir) => {
       const dirPath = join(this.docsDir, dir);
@@ -70,28 +63,28 @@ class DocsGenerator {
   }
 
   async analyzeCodebase() {
-    console.log('🔍 Analyzing codebase for documentation...');
+    console.log("🔍 Analyzing codebase for documentation...");
 
     const sourceFiles = this.getSourceFiles();
 
     for (const file of sourceFiles) {
       const relativePath = relative(root, file);
-      const content = readFileSync(file, 'utf8');
+      const content = readFileSync(file, "utf8");
       const analysis = this.analyzeFile(relativePath, content);
 
       if (analysis) {
         // Categorize based on file path and content
-        if (relativePath.includes('components') || analysis.isComponent) {
+        if (relativePath.includes("components") || analysis.isComponent) {
           this.documentationData.components.push(analysis);
-        } else if (relativePath.includes('hooks') || analysis.isHook) {
+        } else if (relativePath.includes("hooks") || analysis.isHook) {
           this.documentationData.hooks.push(analysis);
-        } else if (relativePath.includes('utils') || analysis.isUtility) {
+        } else if (relativePath.includes("utils") || analysis.isUtility) {
           this.documentationData.utils.push(analysis);
-        } else if (relativePath.includes('services') || analysis.isService) {
+        } else if (relativePath.includes("services") || analysis.isService) {
           this.documentationData.services.push(analysis);
-        } else if (relativePath.includes('pages') || analysis.isPage) {
+        } else if (relativePath.includes("pages") || analysis.isPage) {
           this.documentationData.pages.push(analysis);
-        } else if (relativePath.includes('types') || analysis.hasTypes) {
+        } else if (relativePath.includes("types") || analysis.hasTypes) {
           this.documentationData.types.push(analysis);
         }
       }
@@ -109,11 +102,11 @@ class DocsGenerator {
   }
 
   analyzeFile(filePath, content) {
-    const lines = content.split('\n');
+    const lines = content.split("\n");
     const analysis = {
       filePath,
       name: this.extractNameFromPath(filePath),
-      description: '',
+      description: "",
       exports: [],
       imports: [],
       functions: [],
@@ -140,24 +133,24 @@ class DocsGenerator {
       const trimmed = line.trim();
 
       // Track multi-line comments
-      if (trimmed.startsWith('/*') && !trimmed.startsWith('/**')) {
+      if (trimmed.startsWith("/*") && !trimmed.startsWith("/**")) {
         inMultiLineComment = true;
         continue;
       }
-      if (trimmed.startsWith('/**')) {
+      if (trimmed.startsWith("/**")) {
         inJSDoc = true;
         currentComment = [];
         continue;
       }
-      if (trimmed.endsWith('*/')) {
+      if (trimmed.endsWith("*/")) {
         inMultiLineComment = false;
         inJSDoc = false;
         continue;
       }
 
       // Collect JSDoc comments
-      if (inJSDoc && trimmed.startsWith('*')) {
-        const commentText = trimmed.replace(/^\*\s?/, '');
+      if (inJSDoc && trimmed.startsWith("*")) {
+        const commentText = trimmed.replace(/^\*\s?/, "");
         if (commentText) {
           currentComment.push(commentText);
         }
@@ -165,9 +158,9 @@ class DocsGenerator {
       }
 
       // Single-line comments
-      if (trimmed.startsWith('//')) {
-        const commentText = trimmed.replace(/^\/\/\s?/, '');
-        if (commentText.includes('TODO') || commentText.includes('FIXME')) {
+      if (trimmed.startsWith("//")) {
+        const commentText = trimmed.replace(/^\/\/\s?/, "");
+        if (commentText.includes("TODO") || commentText.includes("FIXME")) {
           analysis.todos.push({
             line: i + 1,
             text: commentText,
@@ -181,9 +174,7 @@ class DocsGenerator {
       if (!trimmed || inMultiLineComment) continue;
 
       // Extract imports
-      const importMatch = trimmed.match(
-        /^import\s+(.+?)\s+from\s+['"]([^'"]+)['"]/,
-      );
+      const importMatch = trimmed.match(/^import\s+(.+?)\s+from\s+['"]([^'"]+)['"]/);
       if (importMatch) {
         analysis.imports.push({
           what: importMatch[1],
@@ -195,26 +186,25 @@ class DocsGenerator {
 
       // Extract exports
       const exportMatch =
-        trimmed.match(/^export\s+(.+)/) ||
-        trimmed.match(/^export\s+default\s+(.+)/);
+        trimmed.match(/^export\s+(.+)/) || trimmed.match(/^export\s+default\s+(.+)/);
       if (exportMatch) {
         analysis.exports.push({
           what: exportMatch[1],
-          isDefault: trimmed.includes('export default'),
+          isDefault: trimmed.includes("export default"),
           line: i + 1,
         });
       }
 
       // Detect React components
       const componentMatch = trimmed.match(
-        /^(?:export\s+)?(?:const|function)\s+([A-Z][a-zA-Z0-9]*)\s*[=:]?\s*(?:React\.FC|React\.FunctionComponent|\([^)]*\)\s*=>|\([^)]*\)\s*\{)/,
+        /^(?:export\s+)?(?:const|function)\s+([A-Z][a-zA-Z0-9]*)\s*[=:]?\s*(?:React\.FC|React\.FunctionComponent|\([^)]*\)\s*=>|\([^)]*\)\s*\{)/
       );
       if (componentMatch) {
         analysis.isComponent = true;
         analysis.components.push({
           name: componentMatch[1],
           line: i + 1,
-          description: currentComment.join(' '),
+          description: currentComment.join(" "),
           props: this.extractProps(lines, i),
         });
         currentComment = [];
@@ -223,14 +213,14 @@ class DocsGenerator {
 
       // Detect custom hooks
       const hookMatch = trimmed.match(
-        /^(?:export\s+)?(?:const|function)\s+(use[A-Z][a-zA-Z0-9]*)\s*[=:]?\s*/,
+        /^(?:export\s+)?(?:const|function)\s+(use[A-Z][a-zA-Z0-9]*)\s*[=:]?\s*/
       );
       if (hookMatch) {
         analysis.isHook = true;
         analysis.hooks.push({
           name: hookMatch[1],
           line: i + 1,
-          description: currentComment.join(' '),
+          description: currentComment.join(" "),
           returns: this.extractReturnType(lines, i),
         });
         currentComment = [];
@@ -239,14 +229,14 @@ class DocsGenerator {
 
       // Detect regular functions
       const functionMatch = trimmed.match(
-        /^(?:export\s+)?(?:async\s+)?(?:const|function)\s+([a-zA-Z][a-zA-Z0-9]*)\s*[=:]?\s*(?:\([^)]*\)\s*=>|\([^)]*\)\s*\{|async\s*\([^)]*\)\s*=>)/,
+        /^(?:export\s+)?(?:async\s+)?(?:const|function)\s+([a-zA-Z][a-zA-Z0-9]*)\s*[=:]?\s*(?:\([^)]*\)\s*=>|\([^)]*\)\s*\{|async\s*\([^)]*\)\s*=>)/
       );
       if (functionMatch && !componentMatch && !hookMatch) {
         analysis.functions.push({
           name: functionMatch[1],
           line: i + 1,
-          description: currentComment.join(' '),
-          isAsync: trimmed.includes('async'),
+          description: currentComment.join(" "),
+          isAsync: trimmed.includes("async"),
           params: this.extractParameters(lines, i),
         });
         currentComment = [];
@@ -255,22 +245,22 @@ class DocsGenerator {
 
       // Detect TypeScript interfaces and types
       const typeMatch = trimmed.match(
-        /^(?:export\s+)?(?:interface|type)\s+([A-Z][a-zA-Z0-9]*)\s*[=\{]/,
+        /^(?:export\s+)?(?:interface|type)\s+([A-Z][a-zA-Z0-9]*)\s*[=\{]/
       );
       if (typeMatch) {
         analysis.hasTypes = true;
         analysis.types.push({
           name: typeMatch[1],
-          kind: trimmed.includes('interface') ? 'interface' : 'type',
+          kind: trimmed.includes("interface") ? "interface" : "type",
           line: i + 1,
-          description: currentComment.join(' '),
+          description: currentComment.join(" "),
         });
         currentComment = [];
         continue;
       }
 
       // Reset comment collection if we hit actual code
-      if (trimmed && !trimmed.startsWith('//') && !inJSDoc) {
+      if (trimmed && !trimmed.startsWith("//") && !inJSDoc) {
         currentComment = [];
       }
     }
@@ -278,18 +268,14 @@ class DocsGenerator {
     // Determine file type based on content
     if (analysis.components.length > 0) analysis.isComponent = true;
     if (analysis.hooks.length > 0) analysis.isHook = true;
-    if (
-      analysis.functions.length > 0 &&
-      !analysis.isComponent &&
-      !analysis.isHook
-    ) {
-      if (filePath.includes('service') || filePath.includes('api')) {
+    if (analysis.functions.length > 0 && !analysis.isComponent && !analysis.isHook) {
+      if (filePath.includes("service") || filePath.includes("api")) {
         analysis.isService = true;
       } else {
         analysis.isUtility = true;
       }
     }
-    if (filePath.includes('pages') || filePath.includes('routes')) {
+    if (filePath.includes("pages") || filePath.includes("routes")) {
       analysis.isPage = true;
     }
 
@@ -300,66 +286,55 @@ class DocsGenerator {
   }
 
   extractFileDescription(content) {
-    const lines = content.split('\n');
+    const lines = content.split("\n");
     const description = [];
     let inInitialComment = false;
 
     for (const line of lines) {
       const trimmed = line.trim();
 
-      if (trimmed.startsWith('/**')) {
+      if (trimmed.startsWith("/**")) {
         inInitialComment = true;
         continue;
       }
 
-      if (inInitialComment && trimmed === '*/') {
+      if (inInitialComment && trimmed === "*/") {
         break;
       }
 
-      if (inInitialComment && trimmed.startsWith('*')) {
-        const text = trimmed.replace(/^\*\s?/, '');
-        if (text && !text.startsWith('@')) {
+      if (inInitialComment && trimmed.startsWith("*")) {
+        const text = trimmed.replace(/^\*\s?/, "");
+        if (text && !text.startsWith("@")) {
           description.push(text);
         }
       }
 
-      if (
-        trimmed &&
-        !trimmed.startsWith('//') &&
-        !trimmed.startsWith('/*') &&
-        !inInitialComment
-      ) {
+      if (trimmed && !trimmed.startsWith("//") && !trimmed.startsWith("/*") && !inInitialComment) {
         break;
       }
     }
 
-    return description.join(' ').trim();
+    return description.join(" ").trim();
   }
 
   extractProps(lines, startLine) {
     const props = [];
 
     // Look for TypeScript interface or type definitions
-    for (
-      let i = startLine - 10;
-      i < Math.min(lines.length, startLine + 10);
-      i++
-    ) {
+    for (let i = startLine - 10; i < Math.min(lines.length, startLine + 10); i++) {
       if (i < 0) continue;
 
       const line = lines[i]?.trim();
       if (!line) continue;
 
       // Match prop definitions like "name: string" or "onClick?: () => void"
-      const propMatch = line.match(
-        /^(\w+)(\??):\s*(.+?)[;,]?\s*(?:\/\/\s*(.+))?$/,
-      );
+      const propMatch = line.match(/^(\w+)(\??):\s*(.+?)[;,]?\s*(?:\/\/\s*(.+))?$/);
       if (propMatch) {
         props.push({
           name: propMatch[1],
           optional: !!propMatch[2],
           type: propMatch[3],
-          description: propMatch[4] || '',
+          description: propMatch[4] || "",
         });
       }
     }
@@ -376,15 +351,15 @@ class DocsGenerator {
     if (paramMatch) {
       const paramString = paramMatch[1];
       const paramParts = paramString
-        .split(',')
+        .split(",")
         .map((p) => p.trim())
         .filter(Boolean);
 
       for (const param of paramParts) {
-        const [name, type] = param.split(':').map((p) => p.trim());
+        const [name, type] = param.split(":").map((p) => p.trim());
         params.push({
-          name: name.replace(/[{}]/g, ''), // Remove destructuring brackets
-          type: type || 'any',
+          name: name.replace(/[{}]/g, ""), // Remove destructuring brackets
+          type: type || "any",
         });
       }
     }
@@ -401,32 +376,31 @@ class DocsGenerator {
       return returnMatch[1].trim();
     }
 
-    return 'unknown';
+    return "unknown";
   }
 
   extractNameFromPath(filePath) {
     const name =
       filePath
-        .split('/')
+        .split("/")
         .pop()
-        ?.replace(/\.(ts|tsx|js|jsx)$/, '') || 'Unknown';
+        ?.replace(/\.(ts|tsx|js|jsx)$/, "") || "Unknown";
     return name.charAt(0).toUpperCase() + name.slice(1);
   }
 
   async analyzeTools() {
-    console.log('🛠️ Analyzing development tools...');
+    console.log("🛠️ Analyzing development tools...");
 
-    const toolsDir = join(root, 'tools');
+    const toolsDir = join(root, "tools");
     if (!existsSync(toolsDir)) return;
 
     const toolFiles = readdirSync(toolsDir)
-      .filter((file) => file.endsWith('.js'))
+      .filter((file) => file.endsWith(".js"))
       .map((file) => join(toolsDir, file));
 
     for (const toolFile of toolFiles) {
-      const content = readFileSync(toolFile, 'utf8');
-      const toolName =
-        toolFile.split('/').pop()?.replace('.js', '') || 'Unknown';
+      const content = readFileSync(toolFile, "utf8");
+      const toolName = toolFile.split("/").pop()?.replace(".js", "") || "Unknown";
 
       const tool = {
         name: toolName,
@@ -441,23 +415,23 @@ class DocsGenerator {
   }
 
   extractToolDescription(content) {
-    const lines = content.split('\n');
+    const lines = content.split("\n");
 
     // Look for the main comment block at the top
     for (let i = 0; i < Math.min(10, lines.length); i++) {
       const line = lines[i].trim();
-      if (line.startsWith('/**') || line.startsWith('*')) {
+      if (line.startsWith("/**") || line.startsWith("*")) {
         const description = line
-          .replace(/^\/?\*+\s?/, '')
-          .replace(/\*\/$/, '')
+          .replace(/^\/?\*+\s?/, "")
+          .replace(/\*\/$/, "")
           .trim();
-        if (description && !description.startsWith('@')) {
+        if (description && !description.startsWith("@")) {
           return description;
         }
       }
     }
 
-    return 'Development tool';
+    return "Development tool";
   }
 
   extractToolUsage(content) {
@@ -481,9 +455,7 @@ class DocsGenerator {
       usageExamples.push(...nodeMatches);
     }
 
-    return usageExamples.length > 0
-      ? usageExamples
-      : ['Run directly with Node.js'];
+    return usageExamples.length > 0 ? usageExamples : ["Run directly with Node.js"];
   }
 
   extractToolFeatures(content) {
@@ -504,7 +476,7 @@ class DocsGenerator {
     if (methodMatches) {
       methodMatches.forEach((m) => {
         const method = m.match(/async\s+(\w+)/)?.[1];
-        if (method && method !== 'setup' && method !== 'cleanup') {
+        if (method && method !== "setup" && method !== "cleanup") {
           features.push(`${method} functionality`);
         }
       });
@@ -521,16 +493,11 @@ class DocsGenerator {
     };
 
     // Check if tool has CLI interface
-    if (
-      content.includes('process.argv') ||
-      content.includes('import.meta.url')
-    ) {
+    if (content.includes("process.argv") || content.includes("import.meta.url")) {
       cli.hasInterface = true;
 
       // Extract CLI options
-      const optionMatches = content.match(
-        /args\.includes\(['"`]([^'"`]+)['"`]\)/g,
-      );
+      const optionMatches = content.match(/args\.includes\(['"`]([^'"`]+)['"`]\)/g);
       if (optionMatches) {
         optionMatches.forEach((match) => {
           const option = match.match(/['"`]([^'"`]+)['"`]/)?.[1];
@@ -542,7 +509,7 @@ class DocsGenerator {
 
       // Extract CLI arguments
       const argMatches = content.match(
-        /args\.find\(arg => arg\.startsWith\(['"`]([^'"`]+)['"`]\)/g,
+        /args\.find\(arg => arg\.startsWith\(['"`]([^'"`]+)['"`]\)/g
       );
       if (argMatches) {
         argMatches.forEach((match) => {
@@ -558,23 +525,23 @@ class DocsGenerator {
   }
 
   async generateComponentDocs() {
-    console.log('⚛️ Generating component documentation...');
+    console.log("⚛️ Generating component documentation...");
 
     for (const component of this.documentationData.components) {
       const markdown = this.generateComponentMarkdown(component);
       const filename = `${component.name.toLowerCase()}.md`;
-      writeFileSync(join(this.docsDir, 'components', filename), markdown);
+      writeFileSync(join(this.docsDir, "components", filename), markdown);
     }
 
     // Generate component index
     const indexMarkdown = this.generateComponentIndex();
-    writeFileSync(join(this.docsDir, 'components', 'README.md'), indexMarkdown);
+    writeFileSync(join(this.docsDir, "components", "README.md"), indexMarkdown);
   }
 
   generateComponentMarkdown(component) {
     return `# ${component.name}
 
-${component.description || 'React component'}
+${component.description || "React component"}
 
 ## File Location
 \`${component.filePath}\`
@@ -586,7 +553,7 @@ ${
           (comp) => `
 ## Component: ${comp.name}
 
-${comp.description || 'Component description'}
+${comp.description || "Component description"}
 
 ${
   comp.props.length > 0
@@ -598,28 +565,28 @@ ${
 ${comp.props
   .map(
     (prop) =>
-      `| ${prop.name} | \`${prop.type}\` | ${prop.optional ? 'Yes' : 'No'} | ${prop.description || '-'} |`,
+      `| ${prop.name} | \`${prop.type}\` | ${prop.optional ? "Yes" : "No"} | ${prop.description || "-"} |`
   )
-  .join('\n')}
+  .join("\n")}
 `
-    : ''
+    : ""
 }
 
 ### Usage
 
 \`\`\`tsx
-import { ${comp.name} } from '${component.filePath.replace(/\.(ts|tsx)$/, '')}'
+import { ${comp.name} } from '${component.filePath.replace(/\.(ts|tsx)$/, "")}'
 
 function Example() {
   return (
-    <${comp.name}${comp.props.length > 0 ? ` ${comp.props[0].name}="${comp.props[0].type === 'string' ? 'example' : 'value'}"` : ''} />
+    <${comp.name}${comp.props.length > 0 ? ` ${comp.props[0].name}="${comp.props[0].type === "string" ? "example" : "value"}"` : ""} />
   )
 }
 \`\`\`
-`,
+`
         )
-        .join('\n')
-    : ''
+        .join("\n")
+    : ""
 }
 
 ${
@@ -632,23 +599,23 @@ ${component.functions
     (func) => `
 ### ${func.name}
 
-${func.description || 'Function description'}
+${func.description || "Function description"}
 
 ${
   func.params.length > 0
     ? `
 **Parameters:**
-${func.params.map((param) => `- \`${param.name}\`: \`${param.type}\``).join('\n')}
+${func.params.map((param) => `- \`${param.name}\`: \`${param.type}\``).join("\n")}
 `
-    : ''
+    : ""
 }
 
-${func.isAsync ? '**Returns:** Promise' : ''}
-`,
-  )
-  .join('\n')}
+${func.isAsync ? "**Returns:** Promise" : ""}
 `
-    : ''
+  )
+  .join("\n")}
+`
+    : ""
 }
 
 ${
@@ -656,9 +623,9 @@ ${
     ? `
 ## TODOs
 
-${component.todos.map((todo) => `- Line ${todo.line}: ${todo.text}`).join('\n')}
+${component.todos.map((todo) => `- Line ${todo.line}: ${todo.text}`).join("\n")}
 `
-    : ''
+    : ""
 }
 
 ---
@@ -675,10 +642,9 @@ This directory contains automatically generated documentation for all React comp
 
 ${this.documentationData.components
   .map(
-    (comp) =>
-      `- [${comp.name}](${comp.name.toLowerCase()}.md) - ${comp.description || 'Component'}`,
+    (comp) => `- [${comp.name}](${comp.name.toLowerCase()}.md) - ${comp.description || "Component"}`
   )
-  .join('\n')}
+  .join("\n")}
 
 ## Component Guidelines
 
@@ -727,23 +693,23 @@ export const Example: React.FC<ExampleProps> = ({
   }
 
   async generateHooksDocs() {
-    console.log('🪝 Generating hooks documentation...');
+    console.log("🪝 Generating hooks documentation...");
 
     for (const hookFile of this.documentationData.hooks) {
       const markdown = this.generateHooksMarkdown(hookFile);
       const filename = `${hookFile.name.toLowerCase()}.md`;
-      writeFileSync(join(this.docsDir, 'hooks', filename), markdown);
+      writeFileSync(join(this.docsDir, "hooks", filename), markdown);
     }
 
     // Generate hooks index
     const indexMarkdown = this.generateHooksIndex();
-    writeFileSync(join(this.docsDir, 'hooks', 'README.md'), indexMarkdown);
+    writeFileSync(join(this.docsDir, "hooks", "README.md"), indexMarkdown);
   }
 
   generateHooksMarkdown(hookFile) {
     return `# ${hookFile.name}
 
-${hookFile.description || 'Custom React hook'}
+${hookFile.description || "Custom React hook"}
 
 ## File Location
 \`${hookFile.filePath}\`
@@ -753,7 +719,7 @@ ${hookFile.hooks
     (hook) => `
 ## Hook: ${hook.name}
 
-${hook.description || 'Hook description'}
+${hook.description || "Hook description"}
 
 ### Returns
 \`${hook.returns}\`
@@ -761,7 +727,7 @@ ${hook.description || 'Hook description'}
 ### Usage
 
 \`\`\`tsx
-import { ${hook.name} } from '${hookFile.filePath.replace(/\.(ts|tsx)$/, '')}'
+import { ${hook.name} } from '${hookFile.filePath.replace(/\.(ts|tsx)$/, "")}'
 
 function ExampleComponent() {
   const result = ${hook.name}()
@@ -773,9 +739,9 @@ function ExampleComponent() {
   )
 }
 \`\`\`
-`,
+`
   )
-  .join('\n')}
+  .join("\n")}
 
 ${
   hookFile.functions.length > 0
@@ -787,21 +753,21 @@ ${hookFile.functions
     (func) => `
 ### ${func.name}
 
-${func.description || 'Helper function'}
+${func.description || "Helper function"}
 
 ${
   func.params.length > 0
     ? `
 **Parameters:**
-${func.params.map((param) => `- \`${param.name}\`: \`${param.type}\``).join('\n')}
+${func.params.map((param) => `- \`${param.name}\`: \`${param.type}\``).join("\n")}
 `
-    : ''
+    : ""
 }
-`,
-  )
-  .join('\n')}
 `
-    : ''
+  )
+  .join("\n")}
+`
+    : ""
 }
 
 ---
@@ -819,9 +785,9 @@ Custom React hooks used throughout the Maestro Build Plane application.
 ${this.documentationData.hooks
   .map(
     (hook) =>
-      `- [${hook.name}](${hook.name.toLowerCase()}.md) - ${hook.description || 'Custom hook'}`,
+      `- [${hook.name}](${hook.name.toLowerCase()}.md) - ${hook.description || "Custom hook"}`
   )
-  .join('\n')}
+  .join("\n")}
 
 ## Hook Guidelines
 
@@ -866,17 +832,17 @@ export function useApi<T>(url: string): UseApiResult<T> {
   }
 
   async generateToolsDocs() {
-    console.log('🛠️ Generating tools documentation...');
+    console.log("🛠️ Generating tools documentation...");
 
     for (const tool of this.documentationData.tools) {
       const markdown = this.generateToolMarkdown(tool);
       const filename = `${tool.name.toLowerCase()}.md`;
-      writeFileSync(join(this.docsDir, 'tools', filename), markdown);
+      writeFileSync(join(this.docsDir, "tools", filename), markdown);
     }
 
     // Generate tools index
     const indexMarkdown = this.generateToolsIndex();
-    writeFileSync(join(this.docsDir, 'tools', 'README.md'), indexMarkdown);
+    writeFileSync(join(this.docsDir, "tools", "README.md"), indexMarkdown);
   }
 
   generateToolMarkdown(tool) {
@@ -886,7 +852,7 @@ ${tool.description}
 
 ## Features
 
-${tool.features.map((feature) => `- ${feature}`).join('\n')}
+${tool.features.map((feature) => `- ${feature}`).join("\n")}
 
 ${
   tool.cli.hasInterface
@@ -898,14 +864,14 @@ ${
     ? `
 ### Available Options
 
-${tool.cli.options.map((option) => `- \`${option}\``).join('\n')}
+${tool.cli.options.map((option) => `- \`${option}\``).join("\n")}
 `
-    : ''
+    : ""
 }
 
 ### Usage Examples
 
-${tool.usage.map((usage) => `\`\`\`bash\n${usage}\n\`\`\``).join('\n\n')}
+${tool.usage.map((usage) => `\`\`\`bash\n${usage}\n\`\`\``).join("\n\n")}
 `
     : `
 ## Usage
@@ -940,11 +906,8 @@ Comprehensive documentation for all development tools in the Maestro Build Plane
 ## Available Tools
 
 ${this.documentationData.tools
-  .map(
-    (tool) =>
-      `- [${tool.name}](${tool.name.toLowerCase()}.md) - ${tool.description}`,
-  )
-  .join('\n')}
+  .map((tool) => `- [${tool.name}](${tool.name.toLowerCase()}.md) - ${tool.description}`)
+  .join("\n")}
 
 ## Tool Categories
 
@@ -999,7 +962,7 @@ Add tools to your package.json:
   }
 
   async generateMainReadme() {
-    console.log('📖 Generating main documentation...');
+    console.log("📖 Generating main documentation...");
 
     const readme = `# Maestro Build Plane Documentation
 
@@ -1140,21 +1103,18 @@ node tools/deployment-manager.js deploy --env=production --approve
 *Total documentation files: ${this.documentationData.components.length + this.documentationData.hooks.length + this.documentationData.tools.length + this.documentationData.utils.length + this.documentationData.services.length}*
 `;
 
-    writeFileSync(join(this.docsDir, 'README.md'), readme);
+    writeFileSync(join(this.docsDir, "README.md"), readme);
   }
 
   async generateReport() {
-    console.log('📄 Generating documentation report...');
+    console.log("📄 Generating documentation report...");
 
     const totalDuration = Date.now() - this.startTime;
     const report = {
       timestamp: new Date().toISOString(),
       duration: totalDuration,
       summary: {
-        totalFiles: Object.values(this.documentationData).reduce(
-          (acc, arr) => acc + arr.length,
-          0,
-        ),
+        totalFiles: Object.values(this.documentationData).reduce((acc, arr) => acc + arr.length, 0),
         components: this.documentationData.components.length,
         hooks: this.documentationData.hooks.length,
         utils: this.documentationData.utils.length,
@@ -1175,12 +1135,9 @@ node tools/deployment-manager.js deploy --env=production --approve
       },
       coverage: {
         documented:
-          this.documentationData.components.filter((c) => c.description)
-            .length +
+          this.documentationData.components.filter((c) => c.description).length +
           this.documentationData.hooks.filter((h) => h.description).length,
-        total:
-          this.documentationData.components.length +
-          this.documentationData.hooks.length,
+        total: this.documentationData.components.length + this.documentationData.hooks.length,
         percentage: 0,
       },
     };
@@ -1192,8 +1149,8 @@ node tools/deployment-manager.js deploy --env=production --approve
 
     // Write JSON report
     writeFileSync(
-      join(this.reportDir, 'docs-generation-report.json'),
-      JSON.stringify(report, null, 2),
+      join(this.reportDir, "docs-generation-report.json"),
+      JSON.stringify(report, null, 2)
     );
 
     return report;
@@ -1201,16 +1158,8 @@ node tools/deployment-manager.js deploy --env=production --approve
 
   getSourceFiles() {
     const sourceFiles = [];
-    const sourceDirs = [
-      'src',
-      'components',
-      'hooks',
-      'utils',
-      'services',
-      'pages',
-      'lib',
-    ];
-    const extensions = ['.ts', '.tsx', '.js', '.jsx'];
+    const sourceDirs = ["src", "components", "hooks", "utils", "services", "pages", "lib"];
+    const extensions = [".ts", ".tsx", ".js", ".jsx"];
 
     const scanDirectory = (dir) => {
       if (!existsSync(dir)) return;
@@ -1221,18 +1170,14 @@ node tools/deployment-manager.js deploy --env=production --approve
         entries.forEach((entry) => {
           const fullPath = join(dir, entry.name);
 
-          if (
-            entry.isDirectory() &&
-            !entry.name.startsWith('.') &&
-            entry.name !== 'node_modules'
-          ) {
+          if (entry.isDirectory() && !entry.name.startsWith(".") && entry.name !== "node_modules") {
             scanDirectory(fullPath);
           } else if (entry.isFile()) {
             const ext = extname(entry.name);
             if (
               extensions.includes(ext) &&
-              !entry.name.includes('.test.') &&
-              !entry.name.includes('.spec.')
+              !entry.name.includes(".test.") &&
+              !entry.name.includes(".spec.")
             ) {
               sourceFiles.push(fullPath);
             }
@@ -1266,7 +1211,7 @@ node tools/deployment-manager.js deploy --env=production --approve
       await this.analyzeCodebase();
 
       console.log(
-        `📚 Generating documentation for ${this.documentationData.components.length + this.documentationData.hooks.length + this.documentationData.tools.length} items...\n`,
+        `📚 Generating documentation for ${this.documentationData.components.length + this.documentationData.hooks.length + this.documentationData.tools.length} items...\n`
       );
 
       if (generateComponents) {
@@ -1287,50 +1232,36 @@ node tools/deployment-manager.js deploy --env=production --approve
 
       const report = generateReport ? await this.generateReport() : null;
 
-      console.log('\n🎯 Documentation Generation Summary:');
-      console.log(
-        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
-      );
-      console.log(
-        `  Total Files Processed:   ${report?.summary.totalFiles || 0}`,
-      );
-      console.log(
-        `  Components Documented:   ${report?.summary.components || 0}`,
-      );
+      console.log("\n🎯 Documentation Generation Summary:");
+      console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+      console.log(`  Total Files Processed:   ${report?.summary.totalFiles || 0}`);
+      console.log(`  Components Documented:   ${report?.summary.components || 0}`);
       console.log(`  Hooks Documented:        ${report?.summary.hooks || 0}`);
       console.log(`  Tools Documented:        ${report?.summary.tools || 0}`);
       console.log(`  Utilities Documented:    ${report?.summary.utils || 0}`);
+      console.log(`  Services Documented:     ${report?.summary.services || 0}`);
+      console.log(`  Documentation Coverage:  ${report?.coverage.percentage || 0}%`);
       console.log(
-        `  Services Documented:     ${report?.summary.services || 0}`,
-      );
-      console.log(
-        `  Documentation Coverage:  ${report?.coverage.percentage || 0}%`,
-      );
-      console.log(
-        `  Generation Duration:     ${report ? (report.duration / 1000).toFixed(2) : 0} seconds`,
+        `  Generation Duration:     ${report ? (report.duration / 1000).toFixed(2) : 0} seconds`
       );
 
-      console.log('\n📚 Documentation Files Created:');
+      console.log("\n📚 Documentation Files Created:");
       console.log(`  📖 Main README:          docs/README.md`);
       console.log(
-        `  ⚛️  Components:           docs/components/ (${report?.summary.components || 0} files)`,
+        `  ⚛️  Components:           docs/components/ (${report?.summary.components || 0} files)`
       );
-      console.log(
-        `  🪝 Hooks:                docs/hooks/ (${report?.summary.hooks || 0} files)`,
-      );
-      console.log(
-        `  🛠️ Tools:                docs/tools/ (${report?.summary.tools || 0} files)`,
-      );
+      console.log(`  🪝 Hooks:                docs/hooks/ (${report?.summary.hooks || 0} files)`);
+      console.log(`  🛠️ Tools:                docs/tools/ (${report?.summary.tools || 0} files)`);
 
       if (generateReport) {
         console.log(
-          `\n📄 Detailed report: ${join('test-results', 'documentation', 'docs-generation-report.json')}`,
+          `\n📄 Detailed report: ${join("test-results", "documentation", "docs-generation-report.json")}`
         );
       }
 
       return true;
     } catch (error) {
-      console.error('❌ Documentation generation failed:', error);
+      console.error("❌ Documentation generation failed:", error);
       return false;
     }
   }
@@ -1340,11 +1271,11 @@ node tools/deployment-manager.js deploy --env=production --approve
 if (import.meta.url === `file://${process.argv[1]}`) {
   const args = process.argv.slice(2);
   const options = {
-    generateComponents: !args.includes('--skip-components'),
-    generateHooks: !args.includes('--skip-hooks'),
-    generateTools: !args.includes('--skip-tools'),
-    generateMainDocs: !args.includes('--skip-main'),
-    generateReport: !args.includes('--no-report'),
+    generateComponents: !args.includes("--skip-components"),
+    generateHooks: !args.includes("--skip-hooks"),
+    generateTools: !args.includes("--skip-tools"),
+    generateMainDocs: !args.includes("--skip-main"),
+    generateReport: !args.includes("--no-report"),
   };
 
   const generator = new DocsGenerator();
@@ -1353,13 +1284,13 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     .then((success) => {
       console.log(
         success
-          ? '✅ Documentation generation completed successfully!'
-          : '❌ Documentation generation failed!',
+          ? "✅ Documentation generation completed successfully!"
+          : "❌ Documentation generation failed!"
       );
       process.exit(success ? 0 : 1);
     })
     .catch((error) => {
-      console.error('Documentation Generator failed:', error);
+      console.error("Documentation Generator failed:", error);
       process.exit(1);
     });
 }

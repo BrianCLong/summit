@@ -21,6 +21,6 @@
 
 ## Performance & cost budgets
 
-* **Latency budget (local analysis, no external LLM calls):** ≤ 3s for `sample_bundle.json` fixture on CI runner.
-* **Memory:** ≤ 512MB for fixture suite.
-* **Cost-per-run:** $0 (offline). Any future online enrichment must be optional + rate-limited.
+- **Latency budget (local analysis, no external LLM calls):** ≤ 3s for `sample_bundle.json` fixture on CI runner.
+- **Memory:** ≤ 512MB for fixture suite.
+- **Cost-per-run:** $0 (offline). Any future online enrichment must be optional + rate-limited.

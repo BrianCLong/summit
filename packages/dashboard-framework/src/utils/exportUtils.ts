@@ -1,6 +1,6 @@
-import { ExportOptions } from '../types';
+import { ExportOptions } from "../types";
 
 export const exportDashboard = (dashboardId: string, options: ExportOptions): Promise<void> => {
-    console.log('Exporting dashboard', dashboardId, options);
-    return Promise.resolve();
+  console.log("Exporting dashboard", dashboardId, options);
+  return Promise.resolve();
 };

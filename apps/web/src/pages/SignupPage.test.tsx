@@ -15,7 +15,9 @@ describe('SignupPage', () => {
       </MemoryRouter>
     )
 
-    expect(screen.getByRole('heading', { name: /sign up/i })).toBeInTheDocument()
+    expect(
+      screen.getByRole('heading', { name: /sign up/i })
+    ).toBeInTheDocument()
     expect(screen.getByLabelText(/first name/i)).toBeInTheDocument()
     expect(screen.getByLabelText(/email/i)).toBeInTheDocument()
     expect(screen.getByLabelText(/^password/i)).toBeInTheDocument()
@@ -53,19 +55,33 @@ describe('SignupPage', () => {
       </MemoryRouter>
     )
 
-    fireEvent.change(screen.getByLabelText(/first name/i), { target: { value: 'Test' } })
-    fireEvent.change(screen.getByLabelText(/last name/i), { target: { value: 'User' } })
-    fireEvent.change(screen.getByLabelText(/username/i), { target: { value: 'testuser' } })
-    fireEvent.change(screen.getByLabelText(/email/i), { target: { value: 'test@example.com' } })
-    fireEvent.change(screen.getByLabelText(/^password/i), { target: { value: 'password123' } })
+    fireEvent.change(screen.getByLabelText(/first name/i), {
+      target: { value: 'Test' },
+    })
+    fireEvent.change(screen.getByLabelText(/last name/i), {
+      target: { value: 'User' },
+    })
+    fireEvent.change(screen.getByLabelText(/username/i), {
+      target: { value: 'testuser' },
+    })
+    fireEvent.change(screen.getByLabelText(/email/i), {
+      target: { value: 'test@example.com' },
+    })
+    fireEvent.change(screen.getByLabelText(/^password/i), {
+      target: { value: 'password123' },
+    })
 
     const submitButton = screen.getByRole('button', { name: /create account/i })
     fireEvent.click(submitButton)
 
     // Wait for loading state
     // Currently implementation changes text to "Creating Account..."
-    expect(await screen.findByRole('button', { name: /creating account/i })).toBeInTheDocument()
+    expect(
+      await screen.findByRole('button', { name: /creating account/i })
+    ).toBeInTheDocument()
     // Button should be disabled (via aria-busy/disabled attribute check)
-    expect(screen.getByRole('button', { name: /creating account/i })).toBeDisabled()
+    expect(
+      screen.getByRole('button', { name: /creating account/i })
+    ).toBeDisabled()
   })
 })

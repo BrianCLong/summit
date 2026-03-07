@@ -1,6 +1,4 @@
 {
-  "notes": [
-    "TODO: wire to policy eval"
-  ],
+  "notes": ["TODO: wire to policy eval"],
   "status": "stub"
 }

@@ -1,15 +1,15 @@
-const fs = require('node:fs');
-const path = require('node:path');
+const fs = require("node:fs");
+const path = require("node:path");
 
-const rulesPath = path.join(__dirname, 'rules.json');
-const rules = JSON.parse(fs.readFileSync(rulesPath, 'utf8'));
+const rulesPath = path.join(__dirname, "rules.json");
+const rules = JSON.parse(fs.readFileSync(rulesPath, "utf8"));
 
 function normalizeLabels(labels = []) {
-  return labels.map((label) => (typeof label === 'string' ? label : label.name));
+  return labels.map((label) => (typeof label === "string" ? label : label.name));
 }
 
 function normalizeText(issue) {
-  return `${issue.title || ''}\n${issue.body || ''}`.toLowerCase();
+  return `${issue.title || ""}\n${issue.body || ""}`.toLowerCase();
 }
 
 function hasAnyKeyword(text, keywords) {
@@ -22,12 +22,12 @@ function detectCategory(text) {
       return rule.category;
     }
   }
-  return 'deps';
+  return "deps";
 }
 
 function hasFailingCheckReference(text) {
   return /(failing\s+(workflow|check)|workflow\s*[:#-]?\s*[\w./-]+|check\s*[:#-]?\s*[\w./-]+|run_id)/i.test(
-    text,
+    text
   );
 }
 
@@ -56,28 +56,29 @@ function classifyIssue(issue) {
   score = Math.max(0, Math.min(100, score));
 
   const confidence =
-    score >= rules.confidence.high
-      ? 'high'
-      : score >= rules.confidence.medium
-        ? 'medium'
-        : 'low';
+    score >= rules.confidence.high ? "high" : score >= rules.confidence.medium ? "medium" : "low";
 
-  const priority = score >= rules.confidence.high ? 'prio:P0' : score >= rules.confidence.medium ? 'prio:P1' : null;
+  const priority =
+    score >= rules.confidence.high
+      ? "prio:P0"
+      : score >= rules.confidence.medium
+        ? "prio:P1"
+        : null;
 
   const category = detectCategory(text);
 
   const desiredLabels = new Set();
-  if (isCandidate || priority === 'prio:P0') {
-    desiredLabels.add('queue:deterministic');
+  if (isCandidate || priority === "prio:P0") {
+    desiredLabels.add("queue:deterministic");
   }
   if (priority) {
     desiredLabels.add(priority);
   }
   if (hasGaKeyword || hasGaLabel) {
-    desiredLabels.add('ga:blocker');
+    desiredLabels.add("ga:blocker");
   }
-  if (confidence !== 'high') {
-    desiredLabels.add('needs-triage');
+  if (confidence !== "high") {
+    desiredLabels.add("needs-triage");
   }
 
   const queueOrder = issue.number;

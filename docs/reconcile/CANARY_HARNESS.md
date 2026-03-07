@@ -7,6 +7,6 @@
 
 Connector knobs & semantics cited for behavior you must configure/observe:
 
-* **Debezium PostgreSQL** connector event model (`op`, `before`, `after`, per-table topic).
-* **Tombstones** after deletes (`tombstones.on.delete=true` by default; controls compaction/delete propagation).
-* **Neo4j `MERGE` semantics** (`ON CREATE` / `ON MATCH`) to ensure idempotent upserts.
+- **Debezium PostgreSQL** connector event model (`op`, `before`, `after`, per-table topic).
+- **Tombstones** after deletes (`tombstones.on.delete=true` by default; controls compaction/delete propagation).
+- **Neo4j `MERGE` semantics** (`ON CREATE` / `ON MATCH`) to ensure idempotent upserts.

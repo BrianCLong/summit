@@ -13,24 +13,24 @@ Monitor and analyze bilateral relationships between countries, tracking cooperat
 ## Usage
 
 ```typescript
-import { BilateralRelationsMonitor, RelationshipStatus } from '@intelgraph/bilateral-relations';
+import { BilateralRelationsMonitor, RelationshipStatus } from "@intelgraph/bilateral-relations";
 
 const monitor = new BilateralRelationsMonitor();
 
 // Track relationship
 monitor.trackRelationship({
-  country1: 'USA',
-  country2: 'China',
+  country1: "USA",
+  country2: "China",
   status: RelationshipStatus.STRAINED,
   // ... details
 });
 
 // Assess health
-const health = monitor.assessRelationshipHealth('USA', 'China');
+const health = monitor.assessRelationshipHealth("USA", "China");
 
 // Identify crisis relationships
 const crises = monitor.identifyCrisisRelationships();
 
 // Detect risks
-const risks = monitor.detectRelationshipRisks('USA', 'China');
+const risks = monitor.detectRelationshipRisks("USA", "China");
 ```

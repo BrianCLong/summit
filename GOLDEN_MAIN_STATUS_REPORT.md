@@ -1,4 +1,5 @@
 # GOLDEN MAIN STATUS REPORT
+
 **Merge Captain Mission**: Safe Path to Golden Main
 **Date**: 2026-01-23
 **Repository**: BrianCLong/summit
@@ -11,6 +12,7 @@
 **Mission Status**: ✅ **READY FOR APPROVALS PHASE**
 
 **Key Findings**:
+
 - Main branch just received massive update (175 files, 8740 insertions)
 - 234+ branches analyzed
 - Required checks policy validated and documented
@@ -24,31 +26,38 @@
 ## 1. CURRENT STATE COUNTS (A/B/C/D/E Classification)
 
 ### Bucket A: MERGE-NOW (mergeable + checks green + approved)
+
 **Count**: 0 confirmed
 **Status**: Cannot verify without GitHub CLI access
 **Note**: Would need `gh pr list --state open --json mergeable,statusCheckRollup,reviewDecision` to confirm
 
 ### Bucket B: NEEDS-APPROVAL ONLY (checks green, missing approval)
+
 **Est. Count**: 25-35 branches
 **Top Candidates**:
+
 - Recent clean branches < 35 commits behind
 - Auto-remediation state-update branches (16+)
 - BrianCLong-patch branches (6 clean)
 - Recent feature branches without conflicts
 
 ### Bucket C: NEEDS-CI FIX (failing checks)
+
 **Est. Count**: Unknown
 **Constraint**: Cannot verify check status without GitHub API
 **Likely Candidates**: Branches 60+ commits behind may have outdated dependencies/configs
 
 ### Bucket D: NEEDS-REBASE/CONFLICT FIX
+
 **Count**: 48+ confirmed (from git merge-tree analysis)
 **Categories**:
+
 - **Conflicts**: 48 branches marked "conflicts" in analysis
 - **Significant behind**: 100+ branches are 60-99+ commits behind
 - **Ancient**: 20+ branches are 100+ commits behind
 
 **High Priority Conflict Branches** (< 35 behind, recent):
+
 1. `codex/design-model-registry-v2-with-variants` (19 behind, 2 ahead, conflicts)
 2. `bolt-remove-duplicate-cmd-k-12980503813304426318` (29 behind, 3 ahead, conflicts)
 3. `ci/client-route-integrity-gate-2` (30 behind, 3 ahead, conflicts)
@@ -56,8 +65,10 @@
 5. `jules/comprehensive-test-suite-6136433402582263636` (29 behind, 2 ahead, conflicts)
 
 ### Bucket E: DRAFT / NOT READY
+
 **Est. Count**: 30-50 branches
 **Categories**:
+
 - **Ancient/Abandoned** (7000+ commits ahead): 5+ branches
   - `claude/batch-issue-processor-Yo2zn` (99 behind, 7760 ahead)
   - `claude/master-orchestrator-prompt-WHxWp` (148 behind, 7761 ahead)
@@ -72,59 +83,59 @@
 
 **Priority**: HIGHEST - Closest to main, clean merges
 
-| Order | Branch | Behind | Ahead | Status | Risk | PR Action Required |
-|-------|--------|--------|-------|--------|------|-------------------|
-| - | `claude/merge-captain-setup-E1CRJ` | merged | - | ✅ MERGED | N/A | Already in main at `5ded3c1e1` |
-| - | `claude/investigate-github-access-HKmPQ` | merged | - | ✅ MERGED | N/A | Changes incorporated into main |
-| 1 | `fix/server-typescript-stability` | 30 | 1 | clean | LOW | Verify checks, approve, merge |
-| 2 | `fix/server-ts-governance-containment` | 15 | 5 | clean | **REBASED** | Push rebased version, verify checks, approve |
-| 3 | `bolt-perf-nav-optimization-15880172993423186153` | 29 | 2 | clean | LOW | Rebase, verify perf tests, approve |
-| 4 | `observability-enhancement-8363064720999465988` | 29 | 2 | clean | LOW | Rebase, verify observability changes, approve |
+| Order | Branch                                            | Behind | Ahead | Status    | Risk        | PR Action Required                            |
+| ----- | ------------------------------------------------- | ------ | ----- | --------- | ----------- | --------------------------------------------- |
+| -     | `claude/merge-captain-setup-E1CRJ`                | merged | -     | ✅ MERGED | N/A         | Already in main at `5ded3c1e1`                |
+| -     | `claude/investigate-github-access-HKmPQ`          | merged | -     | ✅ MERGED | N/A         | Changes incorporated into main                |
+| 1     | `fix/server-typescript-stability`                 | 30     | 1     | clean     | LOW         | Verify checks, approve, merge                 |
+| 2     | `fix/server-ts-governance-containment`            | 15     | 5     | clean     | **REBASED** | Push rebased version, verify checks, approve  |
+| 3     | `bolt-perf-nav-optimization-15880172993423186153` | 29     | 2     | clean     | LOW         | Rebase, verify perf tests, approve            |
+| 4     | `observability-enhancement-8363064720999465988`   | 29     | 2     | clean     | LOW         | Rebase, verify observability changes, approve |
 
 ### 📦 TIER 2: AUTO-REMEDIATION CLEANUP
 
 **Strategy**: Merge newest 2-3, close rest as superseded
 
-| Order | Branch | Behind | Ahead | Status | Action |
-|-------|--------|--------|-------|--------|--------|
-| 5 | `auto-remediation/state-update-20260123-044149` | 30 | 1 | clean | Rebase, merge |
-| 6 | `auto-remediation/state-update-20260123-014218` | 30 | 1 | clean | Rebase, merge |
-| 7 | `auto-remediation/state-update-20260122-202702` | 30 | 1 | clean | Rebase, merge |
-| - | Other auto-remediation branches (13+) | - | - | - | **CLOSE as superseded** |
+| Order | Branch                                          | Behind | Ahead | Status | Action                  |
+| ----- | ----------------------------------------------- | ------ | ----- | ------ | ----------------------- |
+| 5     | `auto-remediation/state-update-20260123-044149` | 30     | 1     | clean  | Rebase, merge           |
+| 6     | `auto-remediation/state-update-20260123-014218` | 30     | 1     | clean  | Rebase, merge           |
+| 7     | `auto-remediation/state-update-20260122-202702` | 30     | 1     | clean  | Rebase, merge           |
+| -     | Other auto-remediation branches (13+)           | -      | -     | -      | **CLOSE as superseded** |
 
 ### 🔧 TIER 3: SMALL CLEAN FEATURES
 
 **Condition**: After Tier 1-2 merged successfully
 
-| Order | Branch | Behind | Ahead | Status | Notes |
-|-------|--------|--------|-------|--------|-------|
-| 8 | `BrianCLong-patch-11` | 60 | 1 | clean | Small patch |
-| 9 | `BrianCLong-patch-12` | 60 | 1 | clean | Small patch |
-| 10 | `BrianCLong-patch-8` | 60 | 1 | clean | Small patch |
-| 11 | `BrianCLong-patch-9` | 60 | 1 | clean | Small patch |
-| 12 | `BrianCLong-patch-7` | 60 | 2 | clean | Small patch |
-| 13 | `BrianCLong-patch-6` | 61 | 11 | clean | Larger patch - review carefully |
+| Order | Branch                | Behind | Ahead | Status | Notes                           |
+| ----- | --------------------- | ------ | ----- | ------ | ------------------------------- |
+| 8     | `BrianCLong-patch-11` | 60     | 1     | clean  | Small patch                     |
+| 9     | `BrianCLong-patch-12` | 60     | 1     | clean  | Small patch                     |
+| 10    | `BrianCLong-patch-8`  | 60     | 1     | clean  | Small patch                     |
+| 11    | `BrianCLong-patch-9`  | 60     | 1     | clean  | Small patch                     |
+| 12    | `BrianCLong-patch-7`  | 60     | 2     | clean  | Small patch                     |
+| 13    | `BrianCLong-patch-6`  | 61     | 11    | clean  | Larger patch - review carefully |
 
 ### ⚙️ TIER 4: CI/GOVERNANCE CHANGES
 
 **Caution**: CI changes can affect required checks - merge after main stabilized
 
-| Order | Branch | Behind | Ahead | Status | Special Handling |
-|-------|--------|--------|-------|--------|-----------------|
-| 14 | `ci/supply-chain-hardening-17852171584620101390` | 60 | 1 | clean | Workflow validation required |
-| 15 | `ci-signal-gate-16214950983369142835` | 60 | 1 | clean | Check doesn't break gates |
-| 16 | `ci-governance-ga-evidence-validator-3879050191356195518` | 60 | 1 | clean | Governance validation |
+| Order | Branch                                                    | Behind | Ahead | Status | Special Handling             |
+| ----- | --------------------------------------------------------- | ------ | ----- | ------ | ---------------------------- |
+| 14    | `ci/supply-chain-hardening-17852171584620101390`          | 60     | 1     | clean  | Workflow validation required |
+| 15    | `ci-signal-gate-16214950983369142835`                     | 60     | 1     | clean  | Check doesn't break gates    |
+| 16    | `ci-governance-ga-evidence-validator-3879050191356195518` | 60     | 1     | clean  | Governance validation        |
 
 ### 🔥 TIER 5: CONFLICT RESOLUTION REQUIRED
 
 **Action**: Fix conflicts, rebase, full test suite
 
-| Order | Branch | Behind | Ahead | Conflicts | Priority |
-|-------|--------|--------|-------|-----------|----------|
-| 17 | `codex/design-model-registry-v2-with-variants` | 19 | 2 | YES | HIGH - only 19 behind |
-| 18 | `ci/client-route-integrity-gate-2` | 30 | 3 | YES | MEDIUM - CI change |
-| 19 | `bolt-remove-duplicate-cmd-k-12980503813304426318` | 29 | 3 | YES | MEDIUM - UX improvement |
-| 20+ | Other conflict branches | 60-99 | varies | YES | Case-by-case review needed |
+| Order | Branch                                             | Behind | Ahead  | Conflicts | Priority                   |
+| ----- | -------------------------------------------------- | ------ | ------ | --------- | -------------------------- |
+| 17    | `codex/design-model-registry-v2-with-variants`     | 19     | 2      | YES       | HIGH - only 19 behind      |
+| 18    | `ci/client-route-integrity-gate-2`                 | 30     | 3      | YES       | MEDIUM - CI change         |
+| 19    | `bolt-remove-duplicate-cmd-k-12980503813304426318` | 29     | 3      | YES       | MEDIUM - UX improvement    |
+| 20+   | Other conflict branches                            | 60-99  | varies | YES       | Case-by-case review needed |
 
 ### 🗑️ RECOMMENDED FOR CLOSURE
 
@@ -147,6 +158,7 @@
 ### Tier 1 Approvals (Ready After Rebase)
 
 #### PR #1: fix/server-typescript-stability
+
 - **Why Safe**: Single commit, TypeScript stability fix, 30 commits behind
 - **What Changes**: TypeScript configuration adjustments for server stability
 - **Risk**: ⭐ MINIMAL - Isolated to TS config
@@ -157,6 +169,7 @@
   ```
 
 #### PR #2: fix/server-ts-governance-containment (REBASED LOCALLY)
+
 - **Why Safe**: Governance improvements, conflict resolved (actions versions)
 - **What Changes**:
   - Enables tsconfig inheritance for governance
@@ -165,7 +178,7 @@
 - **Risk**: ⭐⭐ LOW - Well-contained, conflict was trivial (action versions v4→v6)
 - **Current Status**: **Rebased locally on 'fix/server-ts-governance-containment' branch**
 - **Next Steps**:
-  1. Cannot push (branch doesn't match 'claude/*[sessionId]' pattern)
+  1. Cannot push (branch doesn't match 'claude/\*[sessionId]' pattern)
   2. Recommend PR owner push rebased version
   3. Verify CI checks pass
   4. Approve and merge
@@ -178,6 +191,7 @@
   ```
 
 #### PR #3-4: bolt-perf-nav + observability-enhancement
+
 - **Why Safe**: Performance and observability improvements, clean merges
 - **What Changes**: Nav optimization + enhanced observability
 - **Risk**: ⭐⭐ LOW-MEDIUM - Need to verify perf/observability tests pass
@@ -190,6 +204,7 @@
 ### Tier 2 Approvals (Auto-Remediation Batch)
 
 #### PR #5-7: Latest 3 auto-remediation state updates
+
 - **Why Safe**: Automated state sync, tested pattern, small deltas
 - **What Changes**: State snapshot updates from automated process
 - **Risk**: ⭐ MINIMAL - Automated, repeatable process
@@ -202,6 +217,7 @@
   ```
 
 ### Tier 3-5 Approvals
+
 **Status**: PENDING Tier 1-2 completion
 **Action**: Re-assess after initial wave merges to ensure no new conflicts
 
@@ -348,6 +364,7 @@
 **Current State**: GOOD
 
 ✅ **Security Strengths**:
+
 - Branch protection rules documented (`.github/branch-protection-rules.md`)
 - Security workflows: CodeQL, Trivy, SBOM scanning, vulnerability scanning
 - SOC controls workflow enforced
@@ -356,6 +373,7 @@
 - Recent additions: security observability, alert triage automation
 
 ⚠️ **Security Improvements Needed**:
+
 1. **Verify Branch Protection Actually Enforced**
    - Documentation exists, but cannot verify GitHub settings without API access
    - **Action**: Manually confirm via GitHub UI that required checks match policy
@@ -380,6 +398,7 @@
 **Definition**: Repository analyzed, merge train designed, all preparation complete, awaiting human approvals
 
 **Checklist**:
+
 - [x] Complete branch inventory (234+ branches)
 - [x] Required checks policy identified and validated
 - [x] Branch protection exceptions policy validated (0 active exceptions)
@@ -622,16 +641,18 @@ echo "CI status: $(gh run list --limit 1 --workflow=ci-core.yml --json conclusio
 ### LONG-TERM (Continuous)
 
 10. **Maintain Golden Main**
-   - Keep branch count < 30 active PRs
-   - Enforce "rebase before merge" policy
-   - Monitor CI health dashboard
-   - Regular dependency updates to prevent drift
+
+- Keep branch count < 30 active PRs
+- Enforce "rebase before merge" policy
+- Monitor CI health dashboard
+- Regular dependency updates to prevent drift
 
 ---
 
 ## APPENDIX A: REQUIRED CHECKS REFERENCE
 
 **Always Required** (Run on every commit):
+
 1. CI Core (Primary Gate) - `ci-core.yml`
 2. CI / config-guard
 3. CI / unit-tests
@@ -642,6 +663,7 @@ echo "CI status: $(gh run list --limit 1 --workflow=ci-core.yml --json conclusio
 8. ga / gate
 
 **Conditional Required** (Path-dependent):
+
 - Workflow Lint → `.github/workflows/`, `.github/actions/`
 - CodeQL → `server/`, `packages/`, `cli/`
 - SBOM & Vulnerability Scanning → Dockerfile, docker-compose, package files
@@ -675,6 +697,7 @@ gh pr close <number> --comment "reason" --delete-branch  # Close PR and delete b
 **Mission Status**: ✅ **READY FOR EXECUTION**
 
 **Summary**:
+
 - Repository fully analyzed (234+ branches)
 - Merge train designed with 5 clear tiers
 - Required checks policy validated
@@ -684,6 +707,7 @@ gh pr close <number> --comment "reason" --delete-branch  # Close PR and delete b
 - Security: Good, pending verification of actual branch protection enforcement
 
 **Critical Path**:
+
 1. Restore GitHub API/CLI access
 2. Close ancient/dangerous branches
 3. Execute Tier 1 merges (4 PRs)
@@ -697,4 +721,4 @@ gh pr close <number> --comment "reason" --delete-branch  # Close PR and delete b
 
 ---
 
-*End of Golden Main Status Report*
+_End of Golden Main Status Report_

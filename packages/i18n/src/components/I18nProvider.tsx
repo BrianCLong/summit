@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
-import { I18nextProvider } from 'react-i18next';
-import type { I18nProviderProps } from '../types';
-import { initI18n, getI18nInstance } from '../config/i18next';
+import React, { useEffect, useState } from "react";
+import { I18nextProvider } from "react-i18next";
+import type { I18nProviderProps } from "../types";
+import { initI18n, getI18nInstance } from "../config/i18next";
 
 /**
  * I18n Provider Component
@@ -23,8 +23,8 @@ import { initI18n, getI18nInstance } from '../config/i18next';
  */
 export function I18nProvider({
   children,
-  defaultLocale = 'en-US',
-  fallbackLocale = 'en-US',
+  defaultLocale = "en-US",
+  fallbackLocale = "en-US",
   debug = false,
 }: I18nProviderProps) {
   const [i18nInstance, setI18nInstance] = useState(() => getI18nInstance());
@@ -59,10 +59,10 @@ export function I18nProvider({
     return (
       <div
         style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          minHeight: '100vh',
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          minHeight: "100vh",
         }}
       >
         <div>Loading translations...</div>
@@ -86,7 +86,7 @@ export function I18nProvider({
  */
 export function withI18n<P extends object>(
   Component: React.ComponentType<P>,
-  config?: Omit<I18nProviderProps, 'children'>
+  config?: Omit<I18nProviderProps, "children">
 ) {
   return (props: P) => (
     <I18nProvider {...config}>

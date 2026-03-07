@@ -1,9 +1,11 @@
 # Cost Spike Investigation Runbook
 
 ## Overview
+
 This runbook covers investigation and mitigation of unexpected cost increases.
 
 ## Symptoms
+
 - Cost guard alerts firing
 - Daily/monthly budget thresholds exceeded
 - Unexpected resource scaling events
@@ -11,6 +13,7 @@ This runbook covers investigation and mitigation of unexpected cost increases.
 ## Investigation Steps
 
 ### 1. Identify Cost Source
+
 ```bash
 # Check cost breakdown by service
 curl -s "http://prometheus:9090/api/v1/query?query=sum(increase(cloud_cost_total_dollars[24h]))by(service)" | jq
@@ -34,6 +37,7 @@ kubectl get pvc -A -o custom-columns=NAME:.metadata.name,SIZE:.spec.resources.re
 ```
 
 ### 3. Analyze Network Traffic
+
 ```bash
 # Check network egress by service
 curl -s "http://prometheus:9090/api/v1/query?query=sum(rate(container_network_transmit_bytes_total[1h]))by(pod)" | jq
@@ -43,6 +47,7 @@ kubectl logs -n intelgraph deployment/api-gateway --since=1h | grep -c "external
 ```
 
 ### 4. Review Database Costs
+
 ```sql
 -- PostgreSQL storage growth
 SELECT
@@ -63,6 +68,7 @@ RETURN name, attributes
 ```
 
 ### 5. Check for Data Ingestion Spikes
+
 ```bash
 # Ingest rate
 curl -s "http://prometheus:9090/api/v1/query?query=sum(rate(ingest_records_total[1h]))" | jq
@@ -76,11 +82,13 @@ kubectl exec -it kafka-0 -- kafka-consumer-groups.sh --bootstrap-server localhos
 ### Immediate Cost Control
 
 1. **Enable budget hard caps**
+
    ```bash
    kubectl apply -f k8s/cost-guard-hard-cap.yaml
    ```
 
 2. **Scale down non-critical workloads**
+
    ```bash
    # Scale down dev/test environments
    kubectl scale deployment --all --replicas=0 -n dev
@@ -88,6 +96,7 @@ kubectl exec -it kafka-0 -- kafka-consumer-groups.sh --bootstrap-server localhos
    ```
 
 3. **Pause expensive batch jobs**
+
    ```bash
    kubectl patch cronjob <job-name> -p '{"spec":{"suspend":true}}'
    ```
@@ -101,6 +110,7 @@ kubectl exec -it kafka-0 -- kafka-consumer-groups.sh --bootstrap-server localhos
 ### Investigation Actions
 
 1. **Review auto-scaling settings**
+
    ```yaml
    # Check HPA configurations
    kubectl get hpa -A -o yaml | grep -A10 "spec:"
@@ -128,12 +138,12 @@ kubectl exec -it kafka-0 -- kafka-consumer-groups.sh --bootstrap-server localhos
 
 ## Budget Policies
 
-| Resource Type | Daily Limit | Monthly Limit | Auto-Action |
-|---------------|-------------|---------------|-------------|
-| Compute | $500 | $12,000 | Scale down at 100% |
-| Storage | $100 | $2,500 | Alert at 80% |
-| Network | $50 | $1,000 | Rate limit at 90% |
-| **Total** | **$650** | **$15,000** | Hard stop at 110% |
+| Resource Type | Daily Limit | Monthly Limit | Auto-Action        |
+| ------------- | ----------- | ------------- | ------------------ |
+| Compute       | $500        | $12,000       | Scale down at 100% |
+| Storage       | $100        | $2,500        | Alert at 80%       |
+| Network       | $50         | $1,000        | Rate limit at 90%  |
+| **Total**     | **$650**    | **$15,000**   | Hard stop at 110%  |
 
 ## Escalation Path
 

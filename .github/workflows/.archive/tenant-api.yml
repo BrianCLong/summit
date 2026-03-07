@@ -4,12 +4,12 @@ on:
   push:
     branches: [main]
     paths:
-      - 'companyos/services/tenant-api/**'
-      - '.github/workflows/tenant-api.yml'
+      - "companyos/services/tenant-api/**"
+      - ".github/workflows/tenant-api.yml"
   pull_request:
     paths:
-      - 'companyos/services/tenant-api/**'
-      - '.github/workflows/tenant-api.yml'
+      - "companyos/services/tenant-api/**"
+      - ".github/workflows/tenant-api.yml"
 
 jobs:
   lint-and-typecheck:
@@ -24,8 +24,8 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'pnpm'
+          node-version: "20"
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -48,8 +48,8 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'pnpm'
+          node-version: "20"
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -70,8 +70,8 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'pnpm'
+          node-version: "20"
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -91,8 +91,8 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'pnpm'
+          node-version: "20"
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -104,11 +104,11 @@ jobs:
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
         with:
-          scan-type: 'fs'
-          scan-ref: 'companyos/services/tenant-api'
-          format: 'table'
-          exit-code: '0'
-          severity: 'CRITICAL,HIGH'
+          scan-type: "fs"
+          scan-ref: "companyos/services/tenant-api"
+          format: "table"
+          exit-code: "0"
+          severity: "CRITICAL,HIGH"
 
   sbom:
     name: Generate SBOM
@@ -124,8 +124,8 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'pnpm'
+          node-version: "20"
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile

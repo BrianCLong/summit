@@ -1,5 +1,5 @@
-import { randomUUID } from 'node:crypto';
-import type { AdapterCompatibilityMatrix } from './types.js';
+import { randomUUID } from "node:crypto";
+import type { AdapterCompatibilityMatrix } from "./types.js";
 
 interface MinimalManifestShape {
   id: string;
@@ -19,20 +19,20 @@ export function createDefaultSbom(
   compatibility: AdapterCompatibilityMatrix
 ): Record<string, unknown> {
   return {
-    bomFormat: 'CycloneDX',
-    specVersion: '1.5',
+    bomFormat: "CycloneDX",
+    specVersion: "1.5",
     serialNumber: `urn:uuid:${randomUUID()}`,
     metadata: {
       timestamp: new Date().toISOString(),
       tools: [
         {
-          vendor: 'Summit',
-          name: 'adapter-sdk',
+          vendor: "Summit",
+          name: "adapter-sdk",
           version: manifest.sdkVersion,
         },
       ],
       component: {
-        type: 'application',
+        type: "application",
         name: manifest.name,
         version: manifest.version,
         description: manifest.description,
@@ -41,13 +41,13 @@ export function createDefaultSbom(
     },
     components: [
       {
-        type: 'library',
-        name: 'adapter-entrypoint',
+        type: "library",
+        name: "adapter-entrypoint",
         version: manifest.version,
-        description: 'Adapter entrypoint artifact',
+        description: "Adapter entrypoint artifact",
         properties: [
-          { name: 'entrypoint', value: manifest.entrypoint },
-          { name: 'sdkVersion', value: manifest.sdkVersion },
+          { name: "entrypoint", value: manifest.entrypoint },
+          { name: "sdkVersion", value: manifest.sdkVersion },
         ],
       },
     ],
@@ -64,7 +64,7 @@ export function createDefaultSlsa(
   payloadDigest: string
 ): Record<string, unknown> {
   return {
-    _type: 'https://slsa.dev/provenance/v1',
+    _type: "https://slsa.dev/provenance/v1",
     subject: [
       {
         name: manifest.name,
@@ -74,9 +74,9 @@ export function createDefaultSlsa(
       },
     ],
     builder: {
-      id: 'https://summit.intelgraph.dev/adapter-sdk',
+      id: "https://summit.intelgraph.dev/adapter-sdk",
     },
-    buildType: 'https://summit.intelgraph.dev/adapter/bundle',
+    buildType: "https://summit.intelgraph.dev/adapter/bundle",
     invocation: {
       configSource: {
         uri: manifest.entrypoint,

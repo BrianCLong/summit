@@ -11,6 +11,7 @@ GitHub's release of the Copilot SDK demonstrates that **agentic runtimes must be
 ## The Strategy
 
 We will refactor `packages/maestro-core` into `@summit/agent-runtime`, a library that can be imported into:
+
 1.  **Summit Web App:** For in-browser agent capabilities.
 2.  **External Integrations:** Embedding Summit intelligence into partner tools.
 3.  **Edge Workers:** Running lightweight agents on Vercel/Cloudflare.
@@ -20,15 +21,17 @@ We will refactor `packages/maestro-core` into `@summit/agent-runtime`, a library
 The SDK will expose the core "OODA Loop" as a primitive:
 
 ```typescript
-import { AgentRuntime } from '@summit/agent-runtime';
+import { AgentRuntime } from "@summit/agent-runtime";
 
 const agent = new AgentRuntime({
-  policy: 'strict-compliance-v1',
-  tools: [/* MCP Tools */]
+  policy: "strict-compliance-v1",
+  tools: [
+    /* MCP Tools */
+  ],
 });
 
 // The loop is now programmable
-agent.on('plan', (step) => {
+agent.on("plan", (step) => {
   console.log(`Planning: ${step}`);
 });
 

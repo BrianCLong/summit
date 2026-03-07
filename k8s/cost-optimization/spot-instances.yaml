@@ -11,7 +11,7 @@ metadata:
 data:
   spot-enabled: "true"
   fallback-to-on-demand: "true"
-  spot-termination-grace-period: "120"  # seconds
+  spot-termination-grace-period: "120" # seconds
 
 ---
 # Priority Classes for workload scheduling
@@ -57,7 +57,7 @@ spec:
       values: ["amd64"]
     - key: karpenter.sh/capacity-type
       operator: In
-      values: ["spot", "on-demand"]  # Fallback to on-demand if spot unavailable
+      values: ["spot", "on-demand"] # Fallback to on-demand if spot unavailable
   limits:
     resources:
       cpu: 1000
@@ -66,7 +66,7 @@ spec:
     name: spot-provider
   # Spot instance diversification
   ttlSecondsAfterEmpty: 30
-  ttlSecondsUntilExpired: 604800  # 7 days
+  ttlSecondsUntilExpired: 604800 # 7 days
   consolidation:
     enabled: true
 
@@ -120,7 +120,7 @@ spec:
   strategy:
     type: RollingUpdate
     rollingUpdate:
-      maxUnavailable: 2  # Allow more disruption for cost savings
+      maxUnavailable: 2 # Allow more disruption for cost savings
       maxSurge: 1
   selector:
     matchLabels:
@@ -176,7 +176,7 @@ spec:
             matchLabels:
               app: analytics-worker
 
-      terminationGracePeriodSeconds: 120  # Allow time for graceful shutdown
+      terminationGracePeriodSeconds: 120 # Allow time for graceful shutdown
 
       containers:
         - name: worker
@@ -281,7 +281,7 @@ spec:
             - redis-server
             - --save
             - "60"
-            - "1000"  # Save every 60s if 1000+ keys changed
+            - "1000" # Save every 60s if 1000+ keys changed
             - --appendonly
             - "yes"
 
@@ -290,7 +290,7 @@ spec:
         name: data
       spec:
         accessModes: ["ReadWriteOnce"]
-        storageClassName: gp3  # Fast, cost-effective storage
+        storageClassName: gp3 # Fast, cost-effective storage
         resources:
           requests:
             storage: 10Gi
@@ -303,7 +303,7 @@ metadata:
   name: daily-reports-spot
   namespace: prod
 spec:
-  schedule: "0 2 * * *"  # 2 AM daily
+  schedule: "0 2 * * *" # 2 AM daily
   successfulJobsHistoryLimit: 3
   failedJobsHistoryLimit: 3
   concurrencyPolicy: Forbid

@@ -11,6 +11,7 @@
 You are a **coding agent** operating inside a live development environment (Warp, Cursor, or VSCode).
 
 Your output must:
+
 - Run **directly** in a terminal or file buffer
 - Include **all necessary commands** (pnpm, gh, git, etc.)
 - Provide **immediate CI-green assurance**
@@ -40,21 +41,27 @@ Your output must:
 Every response must include these sections in order:
 
 ### 1. Code Changes
+
 Complete file contents or diffs ready to apply
 
 ### 2. Tests
+
 All test files with complete implementations
 
 ### 3. Configurations
+
 Any config file updates needed
 
 ### 4. Scripts
+
 Helper scripts if required
 
 ### 5. Terminal Commands
+
 Exact commands to apply, test, and deploy
 
 ### 6. Post-Merge Validation
+
 Commands to verify successful deployment
 
 ---
@@ -62,6 +69,7 @@ Commands to verify successful deployment
 ## Terminal Command Blocks
 
 ### Apply Changes
+
 ```bash
 # Create/update files (use your IDE's file creation)
 # Then run validation:
@@ -83,6 +91,7 @@ pnpm typecheck
 ```
 
 ### Git Operations
+
 ```bash
 # Stage all changes
 git add -A
@@ -99,6 +108,7 @@ git push -u origin feature/your-branch-name
 ```
 
 ### PR Creation
+
 ```bash
 # Create pull request
 gh pr create \
@@ -120,6 +130,7 @@ gh pr create \
 ```
 
 ### Post-Merge Validation
+
 ```bash
 # After merge, verify deployment
 gh run list --limit 5
@@ -136,6 +147,7 @@ curl -s https://api.example.com/health | jq
 ## Quick Reference Commands
 
 ### Summit/IntelGraph Specific
+
 ```bash
 # Bootstrap (fresh clone)
 make bootstrap
@@ -151,6 +163,7 @@ make down
 ```
 
 ### Package Operations
+
 ```bash
 # Install all dependencies
 pnpm install
@@ -184,6 +197,7 @@ pnpm typecheck
 ```
 
 ### Database Operations
+
 ```bash
 # PostgreSQL migrations
 pnpm db:pg:migrate
@@ -195,6 +209,7 @@ pnpm db:neo4j:migrate
 ```
 
 ### Docker Operations
+
 ```bash
 # View logs
 docker-compose -f docker-compose.dev.yml logs -f <service>
@@ -218,11 +233,13 @@ Use this structure for every response:
 ### Files to Create/Update
 
 #### `path/to/file.ts`
+
 ```typescript
 // Complete file contents
 ```
 
 #### `path/to/test.ts`
+
 ```typescript
 // Complete test file
 ```
@@ -263,6 +280,7 @@ curl -s http://localhost:4000/health | jq
 ## Fast Iteration Patterns
 
 ### Pattern 1: Quick Fix
+
 ```bash
 # Single file fix cycle
 vim src/services/user.ts  # or use IDE
@@ -272,6 +290,7 @@ git add src/services/user.ts && git commit -m "fix(api): resolve user lookup"
 ```
 
 ### Pattern 2: Feature Addition
+
 ```bash
 # Multi-file feature cycle
 # 1. Create types
@@ -282,6 +301,7 @@ git add -A && git commit -m "feat(api): add entity search"
 ```
 
 ### Pattern 3: Refactor
+
 ```bash
 # Large refactor cycle
 # 1. Make changes across files
@@ -296,6 +316,7 @@ git add -A && git commit -m "refactor(core): rename getUserById to findUserById"
 ## Error Recovery Commands
 
 ### Build Failures
+
 ```bash
 # Clear and rebuild
 rm -rf node_modules/.cache
@@ -303,6 +324,7 @@ pnpm build --force
 ```
 
 ### Test Failures
+
 ```bash
 # Run specific failing test with verbose output
 pnpm test -- --verbose entity.test.ts
@@ -312,6 +334,7 @@ pnpm test -- --coverage entity.test.ts
 ```
 
 ### Lint Failures
+
 ```bash
 # Auto-fix what's possible
 pnpm lint --fix
@@ -321,6 +344,7 @@ pnpm exec eslint src/services/entity.ts --fix
 ```
 
 ### Type Failures
+
 ```bash
 # Check specific package
 pnpm --filter @intelgraph/api exec tsc --noEmit
@@ -330,6 +354,7 @@ pnpm graphql:codegen
 ```
 
 ### Docker Issues
+
 ```bash
 # Full reset
 make down
@@ -338,6 +363,7 @@ make up
 ```
 
 ### Git Issues
+
 ```bash
 # Unstage all
 git reset HEAD
@@ -354,6 +380,7 @@ git clean -fd
 ## CI Status Commands
 
 ### Check Workflow Status
+
 ```bash
 # List recent runs
 gh run list --limit 10
@@ -369,6 +396,7 @@ gh run view <run-id> --log-failed
 ```
 
 ### Re-run Failed Jobs
+
 ```bash
 # Re-run all failed jobs
 gh run rerun <run-id> --failed
@@ -387,22 +415,26 @@ Include at the end of every response:
 ## Verification Checklist
 
 ### Code Applied
+
 - [ ] All files created/updated
 - [ ] No syntax errors
 - [ ] Imports resolve
 
 ### Local Validation
+
 - [ ] `pnpm build` passes
 - [ ] `pnpm test` passes
 - [ ] `pnpm lint` passes
 - [ ] `pnpm typecheck` passes
 
 ### Git Status
+
 - [ ] Changes committed
 - [ ] Pushed to remote
 - [ ] PR created (if applicable)
 
 ### Commands Provided
+
 - [ ] Build commands
 - [ ] Test commands
 - [ ] Deploy commands
@@ -417,6 +449,6 @@ Include at the end of every response:
 
 ---
 
-*Append your specific requirements below this line:*
+_Append your specific requirements below this line:_
 
 ---

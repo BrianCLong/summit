@@ -52,7 +52,7 @@ export function findSubgraphMatches(
   options: {
     maxMatches?: number;
     exactMatch?: boolean; // require exact edge types
-  } = {},
+  } = {}
 ): MatchResult {
   const startTime = performance.now();
 
@@ -73,7 +73,9 @@ export function findSubgraphMatches(
   const reverseMapping = new Map<string, string>(); // graph -> pattern
 
   function backtrack(patternNodeIndex: number): void {
-    if (matches.length >= maxMatches) {return;}
+    if (matches.length >= maxMatches) {
+      return;
+    }
 
     // All pattern nodes mapped - found a match
     if (patternNodeIndex >= pattern.nodes.length) {
@@ -99,11 +101,15 @@ export function findSubgraphMatches(
     // Try mapping to each graph node
     for (const graphNode of graph.nodes) {
       // Skip if already mapped
-      if (reverseMapping.has(graphNode)) {continue;}
+      if (reverseMapping.has(graphNode)) {
+        continue;
+      }
 
       // Check degree compatibility
       const graphNeighbors = graphAdj.get(graphNode) || new Set();
-      if (graphNeighbors.size < patternNeighbors.size) {continue;}
+      if (graphNeighbors.size < patternNeighbors.size) {
+        continue;
+      }
 
       // Check consistency with existing mapping
       let consistent = true;
@@ -117,7 +123,9 @@ export function findSubgraphMatches(
         }
       }
 
-      if (!consistent) {continue;}
+      if (!consistent) {
+        continue;
+      }
 
       // Add mapping and recurse
       mapping.set(patternNode, graphNode);
@@ -155,7 +163,7 @@ export function discoverMotifs(
     motifSize?: number; // number of nodes in motif
     minFrequency?: number;
     sampleSize?: number;
-  } = {},
+  } = {}
 ): MotifResult {
   const startTime = performance.now();
 
@@ -222,7 +230,7 @@ export function detectAnomalousSubgraphs(
     subgraphSize?: number;
     numSamples?: number;
     threshold?: number; // z-score threshold
-  } = {},
+  } = {}
 ): Array<{
   nodes: string[];
   anomalyScore: number;
@@ -238,13 +246,10 @@ export function detectAnomalousSubgraphs(
     degrees.set(node, neighbors.size);
   }
 
-  const avgDegree =
-    Array.from(degrees.values()).reduce((sum, d) => sum + d, 0) / degrees.size;
+  const avgDegree = Array.from(degrees.values()).reduce((sum, d) => sum + d, 0) / degrees.size;
   const degreeStdDev = Math.sqrt(
-    Array.from(degrees.values()).reduce(
-      (sum, d) => sum + Math.pow(d - avgDegree, 2),
-      0,
-    ) / degrees.size,
+    Array.from(degrees.values()).reduce((sum, d) => sum + Math.pow(d - avgDegree, 2), 0) /
+      degrees.size
   );
 
   const anomalies: Array<{
@@ -274,7 +279,8 @@ export function detectAnomalousSubgraphs(
 
     // Check density anomaly
     const subgraphDensity = calculateDensity(subgraph);
-    const expectedDensity = (2 * graph.edges.length) / (graph.nodes.length * (graph.nodes.length - 1));
+    const expectedDensity =
+      (2 * graph.edges.length) / (graph.nodes.length * (graph.nodes.length - 1));
     const densityRatio = subgraphDensity / (expectedDensity || 0.01);
 
     if (densityRatio > 3) {
@@ -324,9 +330,7 @@ function sampleRandomNodes(nodes: string[], k: number): string[] {
 
 function extractSubgraph(graph: GraphData, nodes: string[]): Pattern {
   const nodeSet = new Set(nodes);
-  const edges = graph.edges.filter(
-    (e) => nodeSet.has(e.source) && nodeSet.has(e.target),
-  );
+  const edges = graph.edges.filter((e) => nodeSet.has(e.source) && nodeSet.has(e.target));
 
   return {
     nodes,
@@ -349,12 +353,14 @@ function canonicalizePattern(pattern: Pattern): string {
     })
     .sort();
 
-  return `N:${sortedNodes.join(',')}|E:${sortedEdges.join(',')}`;
+  return `N:${sortedNodes.join(",")}|E:${sortedEdges.join(",")}`;
 }
 
 function calculateDensity(pattern: Pattern): number {
   const n = pattern.nodes.length;
-  if (n < 2) {return 0;}
+  if (n < 2) {
+    return 0;
+  }
   const maxEdges = (n * (n - 1)) / 2;
   return pattern.edges.length / maxEdges;
 }

@@ -3,7 +3,7 @@
  * Dijkstra, A*, Bellman-Ford implementations
  */
 
-import type { GraphStorage, Node, Edge, Path } from '@intelgraph/graph-database';
+import type { GraphStorage, Node, Edge, Path } from "@intelgraph/graph-database";
 
 interface PriorityQueueItem {
   nodeId: string;
@@ -32,7 +32,9 @@ export class ShortestPathAlgorithms {
       queue.sort((a, b) => a.distance - b.distance);
       const current = queue.shift()!;
 
-      if (visited.has(current.nodeId)) {continue;}
+      if (visited.has(current.nodeId)) {
+        continue;
+      }
       visited.add(current.nodeId);
 
       // Found target
@@ -44,7 +46,9 @@ export class ShortestPathAlgorithms {
       const edges = this.storage.getOutgoingEdges(current.nodeId);
 
       for (const edge of edges) {
-        if (visited.has(edge.targetId)) {continue;}
+        if (visited.has(edge.targetId)) {
+          continue;
+        }
 
         const distance = current.distance + edge.weight;
         const currentDistance = distances.get(edge.targetId) ?? Infinity;
@@ -55,7 +59,7 @@ export class ShortestPathAlgorithms {
           queue.push({
             nodeId: edge.targetId,
             distance,
-            path: [...current.path, edge.targetId]
+            path: [...current.path, edge.targetId],
           });
         }
       }
@@ -95,7 +99,9 @@ export class ShortestPathAlgorithms {
       const edges = this.storage.getOutgoingEdges(current.nodeId);
 
       for (const edge of edges) {
-        if (closedSet.has(edge.targetId)) {continue;}
+        if (closedSet.has(edge.targetId)) {
+          continue;
+        }
 
         const tentativeGScore = (gScore.get(current.nodeId) ?? Infinity) + edge.weight;
 
@@ -104,11 +110,11 @@ export class ShortestPathAlgorithms {
           gScore.set(edge.targetId, tentativeGScore);
           fScore.set(edge.targetId, tentativeGScore + heuristic(edge.targetId, targetId));
 
-          if (!openSet.some(item => item.nodeId === edge.targetId)) {
+          if (!openSet.some((item) => item.nodeId === edge.targetId)) {
             openSet.push({
               nodeId: edge.targetId,
               distance: fScore.get(edge.targetId)!,
-              path: [...current.path, edge.targetId]
+              path: [...current.path, edge.targetId],
             });
           }
         }
@@ -155,7 +161,7 @@ export class ShortestPathAlgorithms {
       const targetDistance = distances.get(edge.targetId) ?? Infinity;
 
       if (sourceDistance + edge.weight < targetDistance) {
-        throw new Error('Graph contains negative cycle');
+        throw new Error("Graph contains negative cycle");
       }
     }
 
@@ -220,7 +226,9 @@ export class ShortestPathAlgorithms {
 
     // Get first shortest path
     const firstPath = this.dijkstra(sourceId, targetId);
-    if (!firstPath) {return [];}
+    if (!firstPath) {
+      return [];
+    }
 
     paths.push(firstPath);
 
@@ -240,7 +248,9 @@ export class ShortestPathAlgorithms {
         }
       }
 
-      if (candidates.length === 0) {break;}
+      if (candidates.length === 0) {
+        break;
+      }
 
       // Get shortest candidate
       candidates.sort((a, b) => a.weight - b.weight);
@@ -251,14 +261,20 @@ export class ShortestPathAlgorithms {
     return paths;
   }
 
-  private reconstructPath(sourceId: string, targetId: string, previous: Map<string, string>): Path | null {
+  private reconstructPath(
+    sourceId: string,
+    targetId: string,
+    previous: Map<string, string>
+  ): Path | null {
     const path: string[] = [];
     let current = targetId;
 
     while (current !== sourceId) {
       path.unshift(current);
       const prev = previous.get(current);
-      if (!prev) {return null;}
+      if (!prev) {
+        return null;
+      }
       current = prev;
     }
     path.unshift(sourceId);
@@ -270,13 +286,17 @@ export class ShortestPathAlgorithms {
 
     for (let i = 0; i < path.length; i++) {
       const node = this.storage.getNode(path[i]);
-      if (!node) {return null;}
+      if (!node) {
+        return null;
+      }
       nodes.push(node);
 
       if (i < path.length - 1) {
         const outgoingEdges = this.storage.getOutgoingEdges(path[i]);
-        const edge = outgoingEdges.find(e => e.targetId === path[i + 1]);
-        if (!edge) {return null;}
+        const edge = outgoingEdges.find((e) => e.targetId === path[i + 1]);
+        if (!edge) {
+          return null;
+        }
         edges.push(edge);
         totalWeight += edge.weight;
       }
@@ -286,7 +306,7 @@ export class ShortestPathAlgorithms {
       nodes,
       edges,
       length: path.length - 1,
-      weight: totalWeight
+      weight: totalWeight,
     };
   }
 }

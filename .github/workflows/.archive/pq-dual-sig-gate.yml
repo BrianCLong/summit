@@ -8,16 +8,16 @@ on:
   workflow_dispatch:
     inputs:
       force_verification:
-        description: 'Force verification even if no signature changes detected'
+        description: "Force verification even if no signature changes detected"
         required: false
-        default: 'false'
+        default: "false"
         type: boolean
 
 env:
-  NODE_VERSION: '20.11.x'
+  NODE_VERSION: "20.11.x"
   VERIFICATION_TIMEOUT: 300 # 5 minutes
-  PQ_SIGNATURE_DIR: '.verification'
-  DUAL_SIG_REQUIRED: 'true'
+  PQ_SIGNATURE_DIR: ".verification"
+  DUAL_SIG_REQUIRED: "true"
 
 jobs:
   pq-dual-signature-verification:
@@ -27,7 +27,7 @@ jobs:
 
     strategy:
       matrix:
-        signature_type: ['eddsa', 'pqc-dilithium']
+        signature_type: ["eddsa", "pqc-dilithium"]
         include:
           - signature_type: eddsa
             algorithm: ed25519
@@ -47,7 +47,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Install pnpm
         uses: pnpm/action-setup@v2

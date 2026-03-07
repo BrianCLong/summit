@@ -4,17 +4,17 @@ import React from 'react'
 import SchedulerBoard from '../SchedulerBoard'
 
 // Global EventSource mock setup
-let eventSourceInstance: any;
+let eventSourceInstance: any
 
 global.EventSource = class EventSource {
-    onmessage: ((event: MessageEvent) => void) | null = null;
-    close = vi.fn();
-    addEventListener = vi.fn();
-    removeEventListener = vi.fn();
-    constructor(url: string) {
-        eventSourceInstance = this;
-    }
-} as any;
+  onmessage: ((event: MessageEvent) => void) | null = null
+  close = vi.fn()
+  addEventListener = vi.fn()
+  removeEventListener = vi.fn()
+  constructor(url: string) {
+    eventSourceInstance = this
+  }
+} as any
 
 // Mock fetch
 global.fetch = vi.fn(() =>
@@ -37,19 +37,33 @@ describe('SchedulerBoard', () => {
 
     // Simulate incoming data
     const queueData = [
-      { id: '1', tenant: 'TenantA', eta: '10:00', pool: 'pool-1', cost: 10, preemptSuggestion: false },
-      { id: '2', tenant: 'TenantB', eta: '10:05', pool: 'pool-2', cost: 20, preemptSuggestion: true },
+      {
+        id: '1',
+        tenant: 'TenantA',
+        eta: '10:00',
+        pool: 'pool-1',
+        cost: 10,
+        preemptSuggestion: false,
+      },
+      {
+        id: '2',
+        tenant: 'TenantB',
+        eta: '10:05',
+        pool: 'pool-2',
+        cost: 20,
+        preemptSuggestion: true,
+      },
     ]
 
     // Simulate receiving data via onmessage
     if (eventSourceInstance) {
-        const event = { data: JSON.stringify(queueData) } as MessageEvent;
-        if (eventSourceInstance.onmessage) {
-            // Need to wrap in act? render and fireEvent handle it usually.
-            // Since this is outside react lifecycle event, strictly speaking yes,
-            // but for now let's try direct call.
-            eventSourceInstance.onmessage(event);
-        }
+      const event = { data: JSON.stringify(queueData) } as MessageEvent
+      if (eventSourceInstance.onmessage) {
+        // Need to wrap in act? render and fireEvent handle it usually.
+        // Since this is outside react lifecycle event, strictly speaking yes,
+        // but for now let's try direct call.
+        eventSourceInstance.onmessage(event)
+      }
     }
 
     // Verify items are rendered
@@ -64,20 +78,20 @@ describe('SchedulerBoard', () => {
 
     // Verify filtering behavior
     // TenantA should be visible
-    const rowA = screen.getByText('TenantA').closest('tr');
+    const rowA = screen.getByText('TenantA').closest('tr')
     expect(rowA).toBeVisible()
 
     // TenantB should be hidden (current impl) or removed (future impl)
-    const rowBText = screen.queryByText('TenantB');
+    const rowBText = screen.queryByText('TenantB')
 
     if (rowBText) {
-       const rowB = rowBText.closest('tr');
-       // If it exists, it must be hidden.
-       // Note: expect(element).not.toBeVisible() passes if display: none.
-       expect(rowB).not.toBeVisible();
+      const rowB = rowBText.closest('tr')
+      // If it exists, it must be hidden.
+      // Note: expect(element).not.toBeVisible() passes if display: none.
+      expect(rowB).not.toBeVisible()
     } else {
-       // If it doesn't exist (future implementation), that's also correct filtering.
-       expect(rowBText).not.toBeInTheDocument();
+      // If it doesn't exist (future implementation), that's also correct filtering.
+      expect(rowBText).not.toBeInTheDocument()
     }
   })
 })

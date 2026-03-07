@@ -3,8 +3,8 @@
  * Comprehensive Geospatial Intelligence Dashboard
  */
 
-import React, { useState, useCallback } from 'react';
-import Grid from '@mui/material/Grid';
+import React, { useState, useCallback } from "react";
+import Grid from "@mui/material/Grid";
 import {
   Box,
   Paper,
@@ -16,21 +16,16 @@ import {
   Stack,
   ToggleButton,
   ToggleButtonGroup,
-} from '@mui/material';
-import {
-  MyLocation,
-  Timeline,
-  Place,
-  TrendingUp,
-} from '@mui/icons-material';
-import { MapContainer } from './MapContainer';
-import { Marker, MarkerClusterLayer } from './layers/MarkerLayer';
-import { HeatmapLayer } from './layers/HeatmapLayer';
+} from "@mui/material";
+import { MyLocation, Timeline, Place, TrendingUp } from "@mui/icons-material";
+import { MapContainer } from "./MapContainer";
+import { Marker, MarkerClusterLayer } from "./layers/MarkerLayer";
+import { HeatmapLayer } from "./layers/HeatmapLayer";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { GeoJSONLayer, ChoroplethLayer } from './layers/GeoJSONLayer';
-import { LayerControl, LayerConfig } from './controls/LayerControl';
-import type { GeoPoint } from '@intelgraph/geospatial';
-import type { FeatureCollection } from 'geojson';
+import { GeoJSONLayer, ChoroplethLayer } from "./layers/GeoJSONLayer";
+import { LayerControl, LayerConfig } from "./controls/LayerControl";
+import type { GeoPoint } from "@intelgraph/geospatial";
+import type { FeatureCollection } from "geojson";
 
 export interface DashboardData {
   incidents: Array<{
@@ -67,27 +62,23 @@ export const GeospatialDashboard: React.FC<GeospatialDashboardProps> = ({
   onIncidentClick,
   onEntityClick,
 }) => {
-  const [viewMode, setViewMode] = useState<'map' | 'heatmap' | 'cluster'>('map');
+  const [viewMode, setViewMode] = useState<"map" | "heatmap" | "cluster">("map");
   const [layers, setLayers] = useState<LayerConfig[]>([
-    { id: 'incidents', name: 'Incidents', visible: true, opacity: 1, type: 'overlay' },
-    { id: 'entities', name: 'Entities', visible: true, opacity: 1, type: 'overlay' },
-    { id: 'geofences', name: 'Geofences', visible: true, opacity: 0.5, type: 'overlay' },
-    { id: 'hotspots', name: 'Hotspots', visible: false, opacity: 0.7, type: 'overlay' },
+    { id: "incidents", name: "Incidents", visible: true, opacity: 1, type: "overlay" },
+    { id: "entities", name: "Entities", visible: true, opacity: 1, type: "overlay" },
+    { id: "geofences", name: "Geofences", visible: true, opacity: 0.5, type: "overlay" },
+    { id: "hotspots", name: "Hotspots", visible: false, opacity: 0.7, type: "overlay" },
   ]);
 
   const handleLayerToggle = useCallback((layerId: string, visible: boolean) => {
     setLayers((prev) =>
-      prev.map((layer) =>
-        layer.id === layerId ? { ...layer, visible } : layer
-      )
+      prev.map((layer) => (layer.id === layerId ? { ...layer, visible } : layer))
     );
   }, []);
 
   const handleOpacityChange = useCallback((layerId: string, opacity: number) => {
     setLayers((prev) =>
-      prev.map((layer) =>
-        layer.id === layerId ? { ...layer, opacity } : layer
-      )
+      prev.map((layer) => (layer.id === layerId ? { ...layer, opacity } : layer))
     );
   }, []);
 
@@ -98,20 +89,20 @@ export const GeospatialDashboard: React.FC<GeospatialDashboardProps> = ({
     activeGeofences: data.geofences?.features.length || 0,
   };
 
-  const incidentsLayer = layers.find((l) => l.id === 'incidents');
-  const entitiesLayer = layers.find((l) => l.id === 'entities');
-  const geofencesLayer = layers.find((l) => l.id === 'geofences');
-  const hotspotsLayer = layers.find((l) => l.id === 'hotspots');
+  const incidentsLayer = layers.find((l) => l.id === "incidents");
+  const entitiesLayer = layers.find((l) => l.id === "entities");
+  const geofencesLayer = layers.find((l) => l.id === "geofences");
+  const hotspotsLayer = layers.find((l) => l.id === "hotspots");
 
   return (
-    <Box sx={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
+    <Box sx={{ height: "100vh", display: "flex", flexDirection: "column" }}>
       {/* Header */}
       <Paper
         elevation={2}
         sx={{
           p: 2,
           borderRadius: 0,
-          borderBottom: '2px solid #1976d2',
+          borderBottom: "2px solid #1976d2",
         }}
       >
         <Typography variant="h5" fontWeight="bold">
@@ -127,7 +118,7 @@ export const GeospatialDashboard: React.FC<GeospatialDashboardProps> = ({
         <Grid container spacing={2}>
           <Grid xs={12} sm={6} md={3}>
             <Card variant="outlined">
-              <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 } }}>
+              <CardContent sx={{ p: 1.5, "&:last-child": { pb: 1.5 } }}>
                 <Stack direction="row" alignItems="center" spacing={1}>
                   <Place color="primary" />
                   <Box>
@@ -142,7 +133,7 @@ export const GeospatialDashboard: React.FC<GeospatialDashboardProps> = ({
           </Grid>
           <Grid xs={12} sm={6} md={3}>
             <Card variant="outlined">
-              <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 } }}>
+              <CardContent sx={{ p: 1.5, "&:last-child": { pb: 1.5 } }}>
                 <Stack direction="row" alignItems="center" spacing={1}>
                   <TrendingUp color="error" />
                   <Box>
@@ -157,7 +148,7 @@ export const GeospatialDashboard: React.FC<GeospatialDashboardProps> = ({
           </Grid>
           <Grid xs={12} sm={6} md={3}>
             <Card variant="outlined">
-              <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 } }}>
+              <CardContent sx={{ p: 1.5, "&:last-child": { pb: 1.5 } }}>
                 <Stack direction="row" alignItems="center" spacing={1}>
                   <MyLocation color="success" />
                   <Box>
@@ -172,7 +163,7 @@ export const GeospatialDashboard: React.FC<GeospatialDashboardProps> = ({
           </Grid>
           <Grid xs={12} sm={6} md={3}>
             <Card variant="outlined">
-              <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 } }}>
+              <CardContent sx={{ p: 1.5, "&:last-child": { pb: 1.5 } }}>
                 <Stack direction="row" alignItems="center" spacing={1}>
                   <Timeline color="warning" />
                   <Box>
@@ -189,7 +180,7 @@ export const GeospatialDashboard: React.FC<GeospatialDashboardProps> = ({
       </Paper>
 
       {/* View Mode Selector */}
-      <Paper sx={{ p: 1, display: 'flex', justifyContent: 'center' }}>
+      <Paper sx={{ p: 1, display: "flex", justifyContent: "center" }}>
         <ToggleButtonGroup
           value={viewMode}
           exclusive
@@ -212,10 +203,10 @@ export const GeospatialDashboard: React.FC<GeospatialDashboardProps> = ({
       </Paper>
 
       {/* Map */}
-      <Box sx={{ flex: 1, position: 'relative' }}>
+      <Box sx={{ flex: 1, position: "relative" }}>
         <MapContainer height="100%">
           {/* Layer Control */}
-          <Box sx={{ position: 'absolute', top: 10, right: 10, zIndex: 1000 }}>
+          <Box sx={{ position: "absolute", top: 10, right: 10, zIndex: 1000 }}>
             <LayerControl
               layers={layers}
               onLayerToggle={handleLayerToggle}
@@ -224,7 +215,7 @@ export const GeospatialDashboard: React.FC<GeospatialDashboardProps> = ({
           </Box>
 
           {/* Incidents Layer */}
-          {viewMode === 'map' && incidentsLayer?.visible && (
+          {viewMode === "map" && incidentsLayer?.visible && (
             <>
               {data.incidents.map((incident) => (
                 <Marker
@@ -243,7 +234,7 @@ export const GeospatialDashboard: React.FC<GeospatialDashboardProps> = ({
           )}
 
           {/* Cluster View */}
-          {viewMode === 'cluster' && incidentsLayer?.visible && (
+          {viewMode === "cluster" && incidentsLayer?.visible && (
             <MarkerClusterLayer
               markers={data.incidents.map((i) => ({
                 id: i.id,
@@ -255,8 +246,10 @@ export const GeospatialDashboard: React.FC<GeospatialDashboardProps> = ({
           )}
 
           {/* Heatmap View */}
-          {viewMode === 'heatmap' && hotspotsLayer?.visible && data.hotspots && (
-            <HeatmapLayer points={data.hotspots.map((h) => ({ ...h.position, intensity: h.intensity }))} />
+          {viewMode === "heatmap" && hotspotsLayer?.visible && data.hotspots && (
+            <HeatmapLayer
+              points={data.hotspots.map((h) => ({ ...h.position, intensity: h.intensity }))}
+            />
           )}
 
           {/* Entities Layer */}
@@ -276,7 +269,7 @@ export const GeospatialDashboard: React.FC<GeospatialDashboardProps> = ({
             <GeoJSONLayer
               data={data.geofences}
               style={{
-                color: '#ff6b6b',
+                color: "#ff6b6b",
                 weight: 2,
                 opacity: geofencesLayer.opacity,
                 fillOpacity: 0.2,

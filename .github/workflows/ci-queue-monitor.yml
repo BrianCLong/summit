@@ -6,11 +6,11 @@ name: CI Queue Monitor & Resilience
 on:
   schedule:
     # Run every 30 minutes during active hours
-    - cron: '*/30 * * * *'
+    - cron: "*/30 * * * *"
   workflow_dispatch:
     inputs:
       emergency_mode:
-        description: 'Emergency analysis and mitigation'
+        description: "Emergency analysis and mitigation"
         required: false
         default: false
         type: boolean

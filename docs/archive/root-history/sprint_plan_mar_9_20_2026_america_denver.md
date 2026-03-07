@@ -66,15 +66,44 @@
 ```graphql
 scalar JSON
 
-type ShareLink { url: String!, id: ID!, expiresAt: String!, scopes: [String!]!, redactionPolicyId: ID, purpose: String! }
-type Report { id: ID!, title: String!, template: String!, data: JSON!, manifestId: ID!, createdAt: String! }
-type Receipt { id: ID!, tokenId: ID!, viewer: ID!, action: String!, ts: String!, docHash: String! }
+type ShareLink {
+  url: String!
+  id: ID!
+  expiresAt: String!
+  scopes: [String!]!
+  redactionPolicyId: ID
+  purpose: String!
+}
+type Report {
+  id: ID!
+  title: String!
+  template: String!
+  data: JSON!
+  manifestId: ID!
+  createdAt: String!
+}
+type Receipt {
+  id: ID!
+  tokenId: ID!
+  viewer: ID!
+  action: String!
+  ts: String!
+  docHash: String!
+}
 
 extend type Mutation {
-  createShare(target: JSON!, scopes: [String!]!, ttlHours: Int = 168, purpose: String!, basis: String!, retentionDays: Int = 30, redactionPolicyId: ID): ShareLink!
+  createShare(
+    target: JSON!
+    scopes: [String!]!
+    ttlHours: Int = 168
+    purpose: String!
+    basis: String!
+    retentionDays: Int = 30
+    redactionPolicyId: ID
+  ): ShareLink!
   revokeShare(id: ID!): Boolean!
   createReport(title: String!, template: String!, data: JSON!): Report!
-  exportReport(id: ID!, format: String!): String!   # returns download URL
+  exportReport(id: ID!, format: String!): String! # returns download URL
 }
 
 extend type Query {
@@ -86,21 +115,48 @@ extend type Query {
 **Node 18 — share token (scoped, purpose-bound)**
 
 ```javascript
-import jwt from 'jsonwebtoken';
-import { v4 as uuid } from 'uuid';
+import jwt from "jsonwebtoken";
+import { v4 as uuid } from "uuid";
 
-export async function createShare({ target, scopes, ttlHours, purpose, basis, retentionDays, policyId, viewer, workspaceId }) {
+export async function createShare({
+  target,
+  scopes,
+  ttlHours,
+  purpose,
+  basis,
+  retentionDays,
+  policyId,
+  viewer,
+  workspaceId,
+}) {
   const id = uuid();
-  const now = Math.floor(Date.now()/1000);
-  const exp = now + Math.min(ttlHours, 24*7) * 3600; // cap at 7d
+  const now = Math.floor(Date.now() / 1000);
+  const exp = now + Math.min(ttlHours, 24 * 7) * 3600; // cap at 7d
   const payload = {
-    sub: viewer, tid: id, aud: `ws:${workspaceId}`, scp: scopes,
-    pur: purpose, bas: basis, ret: retentionDays, pol: policyId, tgt: target
+    sub: viewer,
+    tid: id,
+    aud: `ws:${workspaceId}`,
+    scp: scopes,
+    pur: purpose,
+    bas: basis,
+    ret: retentionDays,
+    pol: policyId,
+    tgt: target,
   };
-  const token = jwt.sign(payload, process.env.SHARE_JWT_SECRET, { algorithm: 'HS512', expiresIn: exp - now });
+  const token = jwt.sign(payload, process.env.SHARE_JWT_SECRET, {
+    algorithm: "HS512",
+    expiresIn: exp - now,
+  });
   const url = `${process.env.PUBLIC_URL}/s/${token}`;
-  await appendReceipt({ tokenId: id, viewer, action: 'create_share', docHash: hashTarget(target) });
-  return { id, url, expiresAt: new Date(exp*1000).toISOString(), scopes, redactionPolicyId: policyId, purpose };
+  await appendReceipt({ tokenId: id, viewer, action: "create_share", docHash: hashTarget(target) });
+  return {
+    id,
+    url,
+    expiresAt: new Date(exp * 1000).toISOString(),
+    scopes,
+    redactionPolicyId: policyId,
+    purpose,
+  };
 }
 ```
 
@@ -114,7 +170,10 @@ export async function createShare({ target, scopes, ttlHours, purpose, basis, re
     { "type": "summary", "value": "{{summary}}" },
     { "type": "graph", "value": "{{{graphPng}}}" },
     { "type": "timeline", "value": "{{{timelineHtml}}}" },
-    { "type": "evidence", "each": "{{#each evidence}}<li>{{this.title}} — {{this.source}}</li>{{/each}}" }
+    {
+      "type": "evidence",
+      "each": "{{#each evidence}}<li>{{this.title}} — {{this.source}}</li>{{/each}}"
+    }
   ]
 }
 ```
@@ -122,14 +181,17 @@ export async function createShare({ target, scopes, ttlHours, purpose, basis, re
 **Server graph snapshot (Cytoscape headless)**
 
 ```javascript
-import cytoscape from 'cytoscape';
-import png from 'cytoscape-node-image'; png(cytoscape);
+import cytoscape from "cytoscape";
+import png from "cytoscape-node-image";
+png(cytoscape);
 
-export function renderSnapshot(elements, highlightIds){
+export function renderSnapshot(elements, highlightIds) {
   const cy = cytoscape({ headless: true, elements });
-  cy.elements().addClass('dim');
-  highlightIds.forEach(function(id){ cy.$(`#${id}`).removeClass('dim').addClass('highlight'); });
-  const dataUrl = cy.png({ output: 'base64', full: true, scale: 2 });
+  cy.elements().addClass("dim");
+  highlightIds.forEach(function (id) {
+    cy.$(`#${id}`).removeClass("dim").addClass("highlight");
+  });
+  const dataUrl = cy.png({ output: "base64", full: true, scale: 2 });
   return `data:image/png;base64,${dataUrl}`;
 }
 ```
@@ -139,31 +201,49 @@ export function renderSnapshot(elements, highlightIds){
 ```html
 <div class="watermark">Viewer: {{viewer}} • Token: {{tid}} • {{ts}}</div>
 <style>
-.watermark {
-  position: fixed; bottom: 24px; right: 24px; opacity: .25; font-size: 12px;
-  transform: rotate(-10deg); pointer-events: none; user-select: none;
-}
-.restricted::after {
-  content: "RESTRICTED"; position: fixed; top: 40%; left: 20%; font-size: 64px;
-  opacity: .12; letter-spacing: .5rem; transform: rotate(-30deg);
-}
+  .watermark {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    opacity: 0.25;
+    font-size: 12px;
+    transform: rotate(-10deg);
+    pointer-events: none;
+    user-select: none;
+  }
+  .restricted::after {
+    content: "RESTRICTED";
+    position: fixed;
+    top: 40%;
+    left: 20%;
+    font-size: 64px;
+    opacity: 0.12;
+    letter-spacing: 0.5rem;
+    transform: rotate(-30deg);
+  }
 </style>
 ```
 
 **jQuery — share link creator with attestation**
 
 ```javascript
-$(function(){
-  $('#share-btn').on('click', function(){
+$(function () {
+  $("#share-btn").on("click", function () {
     var payload = collectCurrentViewState(); // selection, filters, time range
-    var purpose = $('#purpose').val(), basis = $('#basis').val();
+    var purpose = $("#purpose").val(),
+      basis = $("#basis").val();
     $.ajax({
-      method:'POST', url:'/graphql', contentType:'application/json',
-      data: JSON.stringify({ query:
-        'mutation($t:JSON!,$s:[String!]!,$ttl:Int,$p:String!,$b:String!,$rd:Int){createShare(target:$t,scopes:$s,ttlHours:$ttl,purpose:$p,basis:$b,retentionDays:$rd){url,expiresAt}}',
-        variables:{ t: payload, s: ['view:slice'], ttl: 168, p: purpose, b: basis, rd: 30 }
-      })
-    }).done(function(res){ $('#share-url').val(res.data.createShare.url); });
+      method: "POST",
+      url: "/graphql",
+      contentType: "application/json",
+      data: JSON.stringify({
+        query:
+          "mutation($t:JSON!,$s:[String!]!,$ttl:Int,$p:String!,$b:String!,$rd:Int){createShare(target:$t,scopes:$s,ttlHours:$ttl,purpose:$p,basis:$b,retentionDays:$rd){url,expiresAt}}",
+        variables: { t: payload, s: ["view:slice"], ttl: 168, p: purpose, b: basis, rd: 30 },
+      }),
+    }).done(function (res) {
+      $("#share-url").val(res.data.createShare.url);
+    });
   });
 });
 ```
@@ -171,11 +251,16 @@ $(function(){
 **Immutable receipts (hash-chain sketch)**
 
 ```javascript
-async function appendReceipt({ tokenId, viewer, action, docHash }){
+async function appendReceipt({ tokenId, viewer, action, docHash }) {
   const prev = await receipts.last(); // get prior hash
   const rec = {
-    id: crypto.randomUUID(), tokenId, viewer, action, docHash,
-    ts: new Date().toISOString(), prevHash: prev?.hash || 'GENESIS'
+    id: crypto.randomUUID(),
+    tokenId,
+    viewer,
+    action,
+    docHash,
+    ts: new Date().toISOString(),
+    prevHash: prev?.hash || "GENESIS",
   };
   rec.hash = sha256(JSON.stringify(rec));
   await receipts.insert(rec);

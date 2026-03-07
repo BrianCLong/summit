@@ -9,8 +9,8 @@ groups:
         labels:
           severity: critical
         annotations:
-          summary: 'Service {{ $labels.instance }} is down'
-          description: '{{ $labels.job }} service at {{ $labels.instance }} has been down for more than 1 minute.'
+          summary: "Service {{ $labels.instance }} is down"
+          description: "{{ $labels.job }} service at {{ $labels.instance }} has been down for more than 1 minute."
 
       # High error rate
       - alert: HighErrorRate
@@ -23,8 +23,8 @@ groups:
         labels:
           severity: warning
         annotations:
-          summary: 'High error rate detected'
-          description: 'Error rate is {{ $value | humanizePercentage }} for {{ $labels.job }} at {{ $labels.instance }}'
+          summary: "High error rate detected"
+          description: "Error rate is {{ $value | humanizePercentage }} for {{ $labels.job }} at {{ $labels.instance }}"
 
       # High response time
       - alert: HighResponseTime
@@ -34,8 +34,8 @@ groups:
         labels:
           severity: warning
         annotations:
-          summary: 'High response time detected'
-          description: '95th percentile response time is {{ $value }}s for {{ $labels.job }}'
+          summary: "High response time detected"
+          description: "95th percentile response time is {{ $value }}s for {{ $labels.job }}"
 
       # Memory usage alerts
       - alert: HighMemoryUsage
@@ -48,8 +48,8 @@ groups:
         labels:
           severity: warning
         annotations:
-          summary: 'High memory usage'
-          description: 'Memory usage is {{ $value | humanizePercentage }} for {{ $labels.job }}'
+          summary: "High memory usage"
+          description: "Memory usage is {{ $value | humanizePercentage }} for {{ $labels.job }}"
 
       # CPU usage alerts
       - alert: HighCPUUsage
@@ -58,8 +58,8 @@ groups:
         labels:
           severity: warning
         annotations:
-          summary: 'High CPU usage'
-          description: 'CPU usage is {{ $value }}% for {{ $labels.job }}'
+          summary: "High CPU usage"
+          description: "CPU usage is {{ $value }}% for {{ $labels.job }}"
 
       # Database connection issues
       - alert: DatabaseConnectionFailure
@@ -68,8 +68,8 @@ groups:
         labels:
           severity: critical
         annotations:
-          summary: 'Database connection failure'
-          description: 'No active database connections for {{ $labels.database }}'
+          summary: "Database connection failure"
+          description: "No active database connections for {{ $labels.database }}"
 
       # AI/ML job queue buildup
       - alert: AIJobQueueBacklog
@@ -78,8 +78,8 @@ groups:
         labels:
           severity: warning
         annotations:
-          summary: 'AI job queue backlog'
-          description: '{{ $value }} AI jobs queued for {{ $labels.job_type }}'
+          summary: "AI job queue backlog"
+          description: "{{ $value }} AI jobs queued for {{ $labels.job_type }}"
 
       # AI/ML job processing time
       - alert: LongRunningAIJob
@@ -89,8 +89,8 @@ groups:
         labels:
           severity: warning
         annotations:
-          summary: 'Long-running AI jobs detected'
-          description: '95th percentile AI job duration is {{ $value }}s for {{ $labels.job_type }}'
+          summary: "Long-running AI jobs detected"
+          description: "95th percentile AI job duration is {{ $value }}s for {{ $labels.job_type }}"
 
       # GraphQL error rate
       - alert: HighGraphQLErrorRate
@@ -103,8 +103,8 @@ groups:
         labels:
           severity: warning
         annotations:
-          summary: 'High GraphQL error rate'
-          description: 'GraphQL error rate is {{ $value | humanizePercentage }}'
+          summary: "High GraphQL error rate"
+          description: "GraphQL error rate is {{ $value | humanizePercentage }}"
 
       # WebSocket connection issues
       - alert: WebSocketConnectionDrop
@@ -114,8 +114,8 @@ groups:
         labels:
           severity: warning
         annotations:
-          summary: 'Large WebSocket connection drop'
-          description: '{{ $value }} WebSocket connections dropped in the last 5 minutes'
+          summary: "Large WebSocket connection drop"
+          description: "{{ $value }} WebSocket connections dropped in the last 5 minutes"
 
       # Disk space alerts
       - alert: LowDiskSpace
@@ -128,8 +128,8 @@ groups:
         labels:
           severity: critical
         annotations:
-          summary: 'Low disk space'
-          description: 'Disk space is below 10% on {{ $labels.instance }}'
+          summary: "Low disk space"
+          description: "Disk space is below 10% on {{ $labels.instance }}"
 
       # Redis connection issues
       - alert: RedisConnectionFailure
@@ -138,8 +138,8 @@ groups:
         labels:
           severity: critical
         annotations:
-          summary: 'Redis connection failure'
-          description: 'Redis is down at {{ $labels.instance }}'
+          summary: "Redis connection failure"
+          description: "Redis is down at {{ $labels.instance }}"
 
       # Neo4j connection issues
       - alert: Neo4jConnectionFailure
@@ -148,8 +148,8 @@ groups:
         labels:
           severity: critical
         annotations:
-          summary: 'Neo4j connection failure'
-          description: 'Neo4j is down at {{ $labels.instance }}'
+          summary: "Neo4j connection failure"
+          description: "Neo4j is down at {{ $labels.instance }}"
 
       # GraphQL resolver latency
       - alert: HighResolverLatency
@@ -158,8 +158,8 @@ groups:
         labels:
           severity: warning
         annotations:
-          summary: 'High GraphQL resolver latency'
-          description: '95th percentile resolver duration is {{ $value }}s'
+          summary: "High GraphQL resolver latency"
+          description: "95th percentile resolver duration is {{ $value }}s"
 
       # Slow Neo4j queries
       - alert: SlowNeo4jQueries
@@ -168,8 +168,8 @@ groups:
         labels:
           severity: warning
         annotations:
-          summary: 'Slow Neo4j queries detected'
-          description: '95th percentile Neo4j query duration is {{ $value }}s'
+          summary: "Slow Neo4j queries detected"
+          description: "95th percentile Neo4j query duration is {{ $value }}s"
 
       # Low cache hit ratio
       - alert: LowCacheHitRatio
@@ -178,8 +178,8 @@ groups:
         labels:
           severity: warning
         annotations:
-          summary: 'Cache hit ratio below 80%'
-          description: 'Cache hit ratio is {{ $value | humanizePercentage }}'
+          summary: "Cache hit ratio below 80%"
+          description: "Cache hit ratio is {{ $value | humanizePercentage }}"
 
       # Slow LLM responses
       - alert: SlowLLMResponses
@@ -188,8 +188,8 @@ groups:
         labels:
           severity: warning
         annotations:
-          summary: 'LLM response time high'
-          description: '95th percentile LLM call duration is {{ $value }}s'
+          summary: "LLM response time high"
+          description: "95th percentile LLM call duration is {{ $value }}s"
 
       # High HTTP round-trip time
       - alert: HighRTT
@@ -198,8 +198,8 @@ groups:
         labels:
           severity: warning
         annotations:
-          summary: 'High HTTP round-trip time'
-          description: '95th percentile HTTP RTT is {{ $value }}s'
+          summary: "High HTTP round-trip time"
+          description: "95th percentile HTTP RTT is {{ $value }}s"
 
       # Data refresh lag
       - alert: DataRefreshLag
@@ -208,8 +208,8 @@ groups:
         labels:
           severity: warning
         annotations:
-          summary: 'Data refresh lag exceeds 60s'
-          description: 'Data refresh lag is {{ $value }} seconds'
+          summary: "Data refresh lag exceeds 60s"
+          description: "Data refresh lag is {{ $value }} seconds"
 
       # Tenant-specific slow query detection
       - alert: TenantSlowQuery
@@ -218,8 +218,8 @@ groups:
         labels:
           severity: warning
         annotations:
-          summary: 'Slow queries for tenant {{ $labels.tenant }}'
-          description: '99th percentile query duration is {{ $value }}s'
+          summary: "Slow queries for tenant {{ $labels.tenant }}"
+          description: "99th percentile query duration is {{ $value }}s"
 
       # Container memory pressure
       - alert: ContainerMemoryPressure
@@ -228,8 +228,8 @@ groups:
         labels:
           severity: warning
         annotations:
-          summary: 'Memory pressure on {{ $labels.pod }}'
-          description: 'Container using {{ $value | humanizePercentage }} of its memory limit'
+          summary: "Memory pressure on {{ $labels.pod }}"
+          description: "Container using {{ $value | humanizePercentage }} of its memory limit"
 
       # GNN prediction failures
       - alert: GNNPredictionFailures
@@ -238,8 +238,8 @@ groups:
         labels:
           severity: critical
         annotations:
-          summary: 'GNN prediction failures detected'
-          description: '{{ $value }} failures in the last 5 minutes'
+          summary: "GNN prediction failures detected"
+          description: "{{ $value }} failures in the last 5 minutes"
 
   - name: intelgraph.ml.rules
     rules:
@@ -250,8 +250,8 @@ groups:
         labels:
           severity: warning
         annotations:
-          summary: 'ML model loading failure'
-          description: '{{ $value }} ML model loading failures for {{ $labels.model_type }}'
+          summary: "ML model loading failure"
+          description: "{{ $value }} ML model loading failures for {{ $labels.model_type }}"
 
       # ML prediction accuracy drop
       - alert: MLAccuracyDrop
@@ -260,8 +260,8 @@ groups:
         labels:
           severity: warning
         annotations:
-          summary: 'ML model accuracy drop'
-          description: '{{ $labels.model_type }} accuracy dropped to {{ $value }}'
+          summary: "ML model accuracy drop"
+          description: "{{ $labels.model_type }} accuracy dropped to {{ $value }}"
 
       # GPU utilization issues
       - alert: LowGPUUtilization
@@ -270,8 +270,8 @@ groups:
         labels:
           severity: info
         annotations:
-          summary: 'Low GPU utilization during business hours'
-          description: 'GPU {{ $labels.gpu_id }} utilization is only {{ $value }}% during business hours'
+          summary: "Low GPU utilization during business hours"
+          description: "GPU {{ $labels.gpu_id }} utilization is only {{ $value }}% during business hours"
 
       # GPU memory issues
       - alert: HighGPUMemoryUsage
@@ -284,5 +284,5 @@ groups:
         labels:
           severity: warning
         annotations:
-          summary: 'High GPU memory usage'
-          description: 'GPU {{ $labels.gpu_id }} memory usage is {{ $value | humanizePercentage }}'
+          summary: "High GPU memory usage"
+          description: "GPU {{ $labels.gpu_id }} memory usage is {{ $value | humanizePercentage }}"

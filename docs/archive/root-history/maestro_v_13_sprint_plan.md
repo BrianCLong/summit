@@ -130,14 +130,7 @@ export function simulate(baseline: Metrics, patch: Partial<Metrics>) {
     "predMinutes": { "type": "number" },
     "risk": { "type": "number" }
   },
-  "required": [
-    "taskId",
-    "arm",
-    "predEval",
-    "predCostUSD",
-    "predMinutes",
-    "risk"
-  ]
+  "required": ["taskId", "arm", "predEval", "predCostUSD", "predMinutes", "risk"]
 }
 ```
 
@@ -173,9 +166,9 @@ export function simulate(baseline: Metrics, patch: Partial<Metrics>) {
 
 ```ts
 // services/evidence/api.ts
-import express from 'express';
+import express from "express";
 const app = express();
-app.get('/v1/releases/:id', (req, res) => {
+app.get("/v1/releases/:id", (req, res) => {
   res.json({
     id: req.params.id,
     controls: [
@@ -244,27 +237,27 @@ app.listen(8090);
     <script>
       $(function () {
         var items = [
-          { id: 'PR#421', roi: 4.2, cost: 0.18 },
-          { id: 'PR#437', roi: 2.1, cost: 0.06 },
+          { id: "PR#421", roi: 4.2, cost: 0.18 },
+          { id: "PR#437", roi: 2.1, cost: 0.06 },
         ];
         function render() {
-          $('#list').empty();
+          $("#list").empty();
           $.each(items, function (_, i) {
-            $('#list').append(
-              '<div class=it><b>' +
+            $("#list").append(
+              "<div class=it><b>" +
                 i.id +
-                '</b> · ROI ' +
+                "</b> · ROI " +
                 i.roi.toFixed(2) +
-                ' · $' +
+                " · $" +
                 i.cost.toFixed(2) +
                 ' <button data-id="' +
                 i.id +
-                '">Schedule</button></div>',
+                '">Schedule</button></div>'
             );
           });
         }
-        $(document).on('click', 'button', function () {
-          $.post('/api/portfolio/schedule', { id: $(this).data('id') });
+        $(document).on("click", "button", function () {
+          $.post("/api/portfolio/schedule", { id: $(this).data("id") });
         });
         render();
       });

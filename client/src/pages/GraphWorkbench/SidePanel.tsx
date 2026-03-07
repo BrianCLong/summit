@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   Card,
   CardContent,
@@ -7,7 +7,7 @@ import {
   ListItem,
   ListItemText,
   Divider,
-} from '@mui/material';
+} from "@mui/material";
 
 export default function SidePanel() {
   return (
@@ -20,10 +20,7 @@ export default function SidePanel() {
           </ListItem>
           <Divider />
           <ListItem>
-            <ListItemText
-              primary="Actions"
-              secondary="Expand neighbors, Tag, Risk"
-            />
+            <ListItemText primary="Actions" secondary="Expand neighbors, Tag, Risk" />
           </ListItem>
         </List>
       </CardContent>

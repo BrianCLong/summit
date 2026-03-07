@@ -8,10 +8,10 @@
  * @module @summit/cli/commands/audit
  */
 
-import { Command } from 'commander';
-import chalk from 'chalk';
-import { get } from '../client.js';
-import { formatOutput, formatDate } from '../utils.js';
+import { Command } from "commander";
+import chalk from "chalk";
+import { get } from "../client.js";
+import { formatOutput, formatDate } from "../utils.js";
 
 interface AuditLogEntry {
   id: string;
@@ -23,7 +23,7 @@ interface AuditLogEntry {
     type: string;
     id: string;
   };
-  outcome: 'success' | 'failure' | 'denied';
+  outcome: "success" | "failure" | "denied";
   verdict?: string;
   ipAddress?: string;
   userAgent?: string;
@@ -33,17 +33,17 @@ interface AuditLogEntry {
 /**
  * Query audit logs
  */
-const logs = new Command('logs')
-  .description('Query audit logs')
-  .option('--start <date>', 'Start date (ISO format)')
-  .option('--end <date>', 'End date (ISO format)')
-  .option('-u, --user <userId>', 'Filter by user ID')
-  .option('-a, --action <action>', 'Filter by action')
-  .option('-r, --resource <type>', 'Filter by resource type')
-  .option('-o, --outcome <outcome>', 'Filter by outcome (success, failure, denied)')
-  .option('-l, --limit <number>', 'Maximum entries to return', '50')
-  .option('--offset <number>', 'Offset for pagination', '0')
-  .option('-f, --format <format>', 'Output format (table, json)', 'table')
+const logs = new Command("logs")
+  .description("Query audit logs")
+  .option("--start <date>", "Start date (ISO format)")
+  .option("--end <date>", "End date (ISO format)")
+  .option("-u, --user <userId>", "Filter by user ID")
+  .option("-a, --action <action>", "Filter by action")
+  .option("-r, --resource <type>", "Filter by resource type")
+  .option("-o, --outcome <outcome>", "Filter by outcome (success, failure, denied)")
+  .option("-l, --limit <number>", "Maximum entries to return", "50")
+  .option("--offset <number>", "Offset for pagination", "0")
+  .option("-f, --format <format>", "Output format (table, json)", "table")
   .action(async (options) => {
     const params: Record<string, string> = {
       limit: options.limit,
@@ -57,19 +57,19 @@ const logs = new Command('logs')
     if (options.resource) params.resourceType = options.resource;
     if (options.outcome) params.outcome = options.outcome;
 
-    const response = await get<AuditLogEntry[]>('/audit/logs', params);
+    const response = await get<AuditLogEntry[]>("/audit/logs", params);
 
-    if (options.format === 'json') {
+    if (options.format === "json") {
       console.log(JSON.stringify(response.data, null, 2));
       return;
     }
 
     if (response.data.length === 0) {
-      console.log(chalk.yellow('No audit entries found.'));
+      console.log(chalk.yellow("No audit entries found."));
       return;
     }
 
-    console.log(chalk.bold('\nAudit Log Entries\n'));
+    console.log(chalk.bold("\nAudit Log Entries\n"));
 
     // Format for table display
     const displayData = response.data.map((entry) => ({
@@ -79,63 +79,91 @@ const logs = new Command('logs')
       action: entry.action,
       resource: `${entry.resource.type}/${entry.resource.id.substring(0, 8)}`,
       outcome: entry.outcome,
-      verdict: entry.verdict || '-',
+      verdict: entry.verdict || "-",
     }));
 
-    console.log(formatOutput(displayData, ['id', 'timestamp', 'user', 'action', 'resource', 'outcome', 'verdict']));
+    console.log(
+      formatOutput(displayData, [
+        "id",
+        "timestamp",
+        "user",
+        "action",
+        "resource",
+        "outcome",
+        "verdict",
+      ])
+    );
     console.log(`\nShowing ${response.data.length} entries (offset: ${options.offset})`);
   });
 
 /**
  * Export audit logs
  */
-const exportCmd = new Command('export')
-  .description('Export audit logs to file')
-  .option('--start <date>', 'Start date (ISO format)', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString())
-  .option('--end <date>', 'End date (ISO format)', new Date().toISOString())
-  .option('-u, --user <userId>', 'Filter by user ID')
-  .option('-a, --action <action>', 'Filter by action')
-  .option('--format <format>', 'Export format (json, csv)', 'json')
-  .option('-o, --output <path>', 'Output file path')
+const exportCmd = new Command("export")
+  .description("Export audit logs to file")
+  .option(
+    "--start <date>",
+    "Start date (ISO format)",
+    new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
+  )
+  .option("--end <date>", "End date (ISO format)", new Date().toISOString())
+  .option("-u, --user <userId>", "Filter by user ID")
+  .option("-a, --action <action>", "Filter by action")
+  .option("--format <format>", "Export format (json, csv)", "json")
+  .option("-o, --output <path>", "Output file path")
   .action(async (options) => {
     const params: Record<string, string> = {
       startDate: options.start,
       endDate: options.end,
-      limit: '10000', // Max export limit
+      limit: "10000", // Max export limit
     };
 
     if (options.user) params.userId = options.user;
     if (options.action) params.action = options.action;
 
-    console.log(chalk.blue('Fetching audit logs...'));
-    const response = await get<AuditLogEntry[]>('/audit/logs', params);
+    console.log(chalk.blue("Fetching audit logs..."));
+    const response = await get<AuditLogEntry[]>("/audit/logs", params);
 
     let output: string;
     let filename: string;
 
-    if (options.format === 'csv') {
+    if (options.format === "csv") {
       // Convert to CSV
-      const headers = ['id', 'timestamp', 'userId', 'action', 'resourceType', 'resourceId', 'outcome', 'verdict', 'ipAddress'];
-      const rows = response.data.map((entry) => [
-        entry.id,
-        entry.timestamp,
-        entry.userId,
-        entry.action,
-        entry.resource.type,
-        entry.resource.id,
-        entry.outcome,
-        entry.verdict || '',
-        entry.ipAddress || '',
-      ].map(v => `"${v}"`).join(','));
+      const headers = [
+        "id",
+        "timestamp",
+        "userId",
+        "action",
+        "resourceType",
+        "resourceId",
+        "outcome",
+        "verdict",
+        "ipAddress",
+      ];
+      const rows = response.data.map((entry) =>
+        [
+          entry.id,
+          entry.timestamp,
+          entry.userId,
+          entry.action,
+          entry.resource.type,
+          entry.resource.id,
+          entry.outcome,
+          entry.verdict || "",
+          entry.ipAddress || "",
+        ]
+          .map((v) => `"${v}"`)
+          .join(",")
+      );
 
-      output = [headers.join(','), ...rows].join('\n');
-      filename = options.output || `audit-export-${new Date().toISOString().split('T')[0]}.csv`;
+      output = [headers.join(","), ...rows].join("\n");
+      filename = options.output || `audit-export-${new Date().toISOString().split("T")[0]}.csv`;
     } else {
       output = JSON.stringify(response.data, null, 2);
-      filename = options.output || `audit-export-${new Date().toISOString().split('T')[0]}.json`;
+      filename = options.output || `audit-export-${new Date().toISOString().split("T")[0]}.json`;
     }
 
-    const { writeFileSync } = await import('fs');
+    const { writeFileSync } = await import("fs");
     writeFileSync(filename, output);
 
     console.log(chalk.green(`\nExported ${response.data.length} entries to ${filename}`));

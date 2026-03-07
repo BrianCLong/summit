@@ -37,33 +37,34 @@ incidentMode:
 
 ## Incident Mode in Codex (Runbook)
 
-1) **Capture incident context**
+1. **Capture incident context**
    - Collect failing checks, error logs, and dashboards.
    - Record artifacts and timestamps in the incident notes.
 
-2) **Propose a minimal fix branch**
+2. **Propose a minimal fix branch**
    - Create `incident/GA-YYYYMMDD-<short-desc>`.
    - Document scope boundaries and reversibility.
 
-3) **Implement a reversible fix**
+3. **Implement a reversible fix**
    - Touch the smallest set of files.
    - Avoid refactors or non-essential changes.
 
-4) **Run focused tests only**
+4. **Run focused tests only**
    - Execute the narrowest tests that prove the fix.
    - Record commands and outputs as evidence.
 
-5) **Open a PR with rollback instructions**
+5. **Open a PR with rollback instructions**
    - Include rollback triggers and steps.
    - Assign `incident-fix` + change classification label.
    - Include the AGENT-METADATA block.
 
-6) **Hand back to human owner**
+6. **Hand back to human owner**
    - Summarize impact, evidence, and rollback plan.
    - Defer final decision pending human approval.
 
 ## Exit Criteria
 
 Incident Mode ends when:
+
 - The triggering GA blocker is resolved, or
 - A Governed Exception is recorded with rollback triggers and monitoring.

@@ -2,7 +2,7 @@
  * Agent Fleet Governance - Comprehensive Test Suite
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from "vitest";
 import {
   createGovernanceFramework,
   AgentPolicyEngine,
@@ -16,57 +16,55 @@ import {
   type AgentPolicyContext,
   type PromptChain,
   type GovernanceEvent,
-} from '../src';
+} from "../src";
 
 // ============================================================================
 // Test Fixtures
 // ============================================================================
 
 const createMockContext = (overrides: Partial<AgentPolicyContext> = {}): AgentPolicyContext => ({
-  agentId: 'agent-001',
-  fleetId: 'fleet-001',
-  sessionId: 'session-001',
-  trustLevel: 'elevated',
-  classification: 'CONFIDENTIAL',
-  capabilities: ['read', 'analyze', 'recommend'],
-  requestedAction: 'analyze_data',
-  targetResource: 'entity:12345',
+  agentId: "agent-001",
+  fleetId: "fleet-001",
+  sessionId: "session-001",
+  trustLevel: "elevated",
+  classification: "CONFIDENTIAL",
+  capabilities: ["read", "analyze", "recommend"],
+  requestedAction: "analyze_data",
+  targetResource: "entity:12345",
   userContext: {
-    userId: 'user-001',
-    roles: ['analyst'],
-    clearance: 'SECRET',
-    organization: 'org-001',
+    userId: "user-001",
+    roles: ["analyst"],
+    clearance: "SECRET",
+    organization: "org-001",
   },
   environmentContext: {
     timestamp: Date.now(),
     airgapped: false,
     federalEnvironment: true,
-    slsaLevel: 'SLSA_3',
+    slsaLevel: "SLSA_3",
   },
   ...overrides,
 });
 
 const createMockChain = (): PromptChain => ({
-  id: 'chain-001',
-  name: 'Test Analysis Chain',
-  description: 'Test chain for analysis',
+  id: "chain-001",
+  name: "Test Analysis Chain",
+  description: "Test chain for analysis",
   steps: [
     {
-      id: 'step-1',
+      id: "step-1",
       sequence: 1,
-      llmProvider: 'test-provider',
+      llmProvider: "test-provider",
       prompt: {
-        template: 'Analyze the following: {{input}}',
-        variables: ['input'],
+        template: "Analyze the following: {{input}}",
+        variables: ["input"],
         maxTokens: 1000,
         temperature: 0.7,
-        classification: 'CONFIDENTIAL',
+        classification: "CONFIDENTIAL",
       },
-      inputMappings: { input: 'inputData' },
-      outputMappings: { result: 'analysisResult' },
-      validations: [
-        { type: 'safety', config: { blockedPatterns: ['harmful'] }, action: 'reject' },
-      ],
+      inputMappings: { input: "inputData" },
+      outputMappings: { result: "analysisResult" },
+      validations: [{ type: "safety", config: { blockedPatterns: ["harmful"] }, action: "reject" }],
       timeout: 30000,
       retryPolicy: { maxRetries: 2, backoffMs: 1000, backoffMultiplier: 2, retryableErrors: [] },
     },
@@ -75,15 +73,15 @@ const createMockChain = (): PromptChain => ({
     requiredApprovals: [],
     maxCostPerExecution: 10,
     maxDurationMs: 60000,
-    allowedClassifications: ['CONFIDENTIAL', 'SECRET'],
-    auditLevel: 'standard',
-    incidentEscalation: ['team-lead'],
+    allowedClassifications: ["CONFIDENTIAL", "SECRET"],
+    auditLevel: "standard",
+    incidentEscalation: ["team-lead"],
   },
   provenance: {
-    createdBy: 'test-user',
+    createdBy: "test-user",
     createdAt: new Date(),
-    version: '1.0.0',
-    slsaLevel: 'SLSA_3',
+    version: "1.0.0",
+    slsaLevel: "SLSA_3",
     attestations: [],
   },
   metadata: {},
@@ -93,18 +91,18 @@ const createMockChain = (): PromptChain => ({
 // Policy Engine Tests
 // ============================================================================
 
-describe('AgentPolicyEngine', () => {
+describe("AgentPolicyEngine", () => {
   let policyEngine: AgentPolicyEngine;
 
   beforeEach(() => {
     policyEngine = new AgentPolicyEngine({
       cacheEnabled: true,
-      failSafe: 'deny',
+      failSafe: "deny",
     });
   });
 
-  describe('evaluateAction', () => {
-    it('should return deny decision when OPA is unavailable (fail-safe)', async () => {
+  describe("evaluateAction", () => {
+    it("should return deny decision when OPA is unavailable (fail-safe)", async () => {
       const context = createMockContext();
       const decision = await policyEngine.evaluateAction(context);
 
@@ -113,14 +111,14 @@ describe('AgentPolicyEngine', () => {
       expect(decision.auditLevel).toBeDefined();
     });
 
-    it('should include policy path in decision', async () => {
+    it("should include policy path in decision", async () => {
       const context = createMockContext();
       const decision = await policyEngine.evaluateAction(context);
 
       expect(decision.policyPath).toBeDefined();
     });
 
-    it('should emit governance events', async () => {
+    it("should emit governance events", async () => {
       const events: GovernanceEvent[] = [];
       policyEngine.onEvent((event) => events.push(event));
 
@@ -131,7 +129,7 @@ describe('AgentPolicyEngine', () => {
       expect(events[0].type).toMatch(/policy_/);
     });
 
-    it('should track metrics', async () => {
+    it("should track metrics", async () => {
       const context = createMockContext();
       await policyEngine.evaluateAction(context);
 
@@ -140,19 +138,19 @@ describe('AgentPolicyEngine', () => {
     });
   });
 
-  describe('trust level checking', () => {
-    it('should correctly compare trust levels', () => {
-      expect(AgentPolicyEngine.checkTrustLevel('elevated', 'basic')).toBe(true);
-      expect(AgentPolicyEngine.checkTrustLevel('basic', 'elevated')).toBe(false);
-      expect(AgentPolicyEngine.checkTrustLevel('privileged', 'privileged')).toBe(true);
+  describe("trust level checking", () => {
+    it("should correctly compare trust levels", () => {
+      expect(AgentPolicyEngine.checkTrustLevel("elevated", "basic")).toBe(true);
+      expect(AgentPolicyEngine.checkTrustLevel("basic", "elevated")).toBe(false);
+      expect(AgentPolicyEngine.checkTrustLevel("privileged", "privileged")).toBe(true);
     });
   });
 
-  describe('classification checking', () => {
-    it('should correctly compare classification levels', () => {
-      expect(AgentPolicyEngine.checkClassification('SECRET', 'CONFIDENTIAL')).toBe(true);
-      expect(AgentPolicyEngine.checkClassification('CONFIDENTIAL', 'SECRET')).toBe(false);
-      expect(AgentPolicyEngine.checkClassification('TOP_SECRET', 'TOP_SECRET')).toBe(true);
+  describe("classification checking", () => {
+    it("should correctly compare classification levels", () => {
+      expect(AgentPolicyEngine.checkClassification("SECRET", "CONFIDENTIAL")).toBe(true);
+      expect(AgentPolicyEngine.checkClassification("CONFIDENTIAL", "SECRET")).toBe(false);
+      expect(AgentPolicyEngine.checkClassification("TOP_SECRET", "TOP_SECRET")).toBe(true);
     });
   });
 });
@@ -161,7 +159,7 @@ describe('AgentPolicyEngine', () => {
 // Incident Response Tests
 // ============================================================================
 
-describe('IncidentResponseManager', () => {
+describe("IncidentResponseManager", () => {
   let incidentManager: IncidentResponseManager;
 
   beforeEach(() => {
@@ -170,45 +168,45 @@ describe('IncidentResponseManager', () => {
     });
   });
 
-  describe('reportIncident', () => {
-    it('should create incident with unique ID', async () => {
+  describe("reportIncident", () => {
+    it("should create incident with unique ID", async () => {
       const incident = await incidentManager.reportIncident({
-        type: 'policy_violation',
-        severity: 'medium',
-        title: 'Test Incident',
-        description: 'Test description',
-        reporter: 'test-system',
-        classification: 'UNCLASSIFIED',
+        type: "policy_violation",
+        severity: "medium",
+        title: "Test Incident",
+        description: "Test description",
+        reporter: "test-system",
+        classification: "UNCLASSIFIED",
       });
 
       expect(incident.id).toMatch(/^INC-/);
-      expect(incident.status).toBe('detected');
+      expect(incident.status).toBe("detected");
       expect(incident.timeline.length).toBeGreaterThan(0);
     });
 
-    it('should set escalation path based on severity', async () => {
+    it("should set escalation path based on severity", async () => {
       const incident = await incidentManager.reportIncident({
-        type: 'safety_breach',
-        severity: 'critical',
-        title: 'Critical Incident',
-        description: 'Critical test',
-        reporter: 'test-system',
-        classification: 'SECRET',
+        type: "safety_breach",
+        severity: "critical",
+        title: "Critical Incident",
+        description: "Critical test",
+        reporter: "test-system",
+        classification: "SECRET",
       });
 
       expect(incident.escalationPath.length).toBeGreaterThan(0);
-      expect(incident.status).toBe('investigating');
+      expect(incident.status).toBe("investigating");
     });
 
-    it('should store evidence with hash', async () => {
+    it("should store evidence with hash", async () => {
       const incident = await incidentManager.reportIncident({
-        type: 'data_leak',
-        severity: 'high',
-        title: 'Data Leak Test',
-        description: 'Test evidence',
-        evidence: [{ type: 'log', source: 'test', data: { key: 'value' } }],
-        reporter: 'test-system',
-        classification: 'CONFIDENTIAL',
+        type: "data_leak",
+        severity: "high",
+        title: "Data Leak Test",
+        description: "Test evidence",
+        evidence: [{ type: "log", source: "test", data: { key: "value" } }],
+        reporter: "test-system",
+        classification: "CONFIDENTIAL",
       });
 
       expect(incident.evidence.length).toBe(1);
@@ -217,43 +215,43 @@ describe('IncidentResponseManager', () => {
     });
   });
 
-  describe('resolveIncident', () => {
-    it('should update incident status and timeline', async () => {
+  describe("resolveIncident", () => {
+    it("should update incident status and timeline", async () => {
       const incident = await incidentManager.reportIncident({
-        type: 'policy_violation',
-        severity: 'low',
-        title: 'Test Incident',
-        description: 'To be resolved',
-        reporter: 'test-system',
-        classification: 'UNCLASSIFIED',
+        type: "policy_violation",
+        severity: "low",
+        title: "Test Incident",
+        description: "To be resolved",
+        reporter: "test-system",
+        classification: "UNCLASSIFIED",
       });
 
       const resolved = await incidentManager.resolveIncident(incident.id, {
-        resolver: 'test-resolver',
-        rootCause: 'Test root cause',
-        lessonsLearned: ['Lesson 1'],
+        resolver: "test-resolver",
+        rootCause: "Test root cause",
+        lessonsLearned: ["Lesson 1"],
       });
 
-      expect(resolved?.status).toBe('resolved');
+      expect(resolved?.status).toBe("resolved");
       expect(resolved?.resolvedAt).toBeDefined();
-      expect(resolved?.rootCause).toBe('Test root cause');
+      expect(resolved?.rootCause).toBe("Test root cause");
     });
   });
 
-  describe('getActiveIncidents', () => {
-    it('should return only non-resolved incidents', async () => {
+  describe("getActiveIncidents", () => {
+    it("should return only non-resolved incidents", async () => {
       await incidentManager.reportIncident({
-        type: 'policy_violation',
-        severity: 'low',
-        title: 'Active Incident',
-        description: 'Still active',
-        reporter: 'test',
-        classification: 'UNCLASSIFIED',
+        type: "policy_violation",
+        severity: "low",
+        title: "Active Incident",
+        description: "Still active",
+        reporter: "test",
+        classification: "UNCLASSIFIED",
       });
 
       const active = incidentManager.getActiveIncidents();
       expect(active.length).toBeGreaterThan(0);
-      expect(active.every((i) => i.status !== 'resolved')).toBe(true);
+      expect(active.every((i) => i.status !== "resolved")).toBe(true);
     });
   });
 });
@@ -262,7 +260,7 @@ describe('IncidentResponseManager', () => {
 // Hallucination Auditor Tests
 // ============================================================================
 
-describe('HallucinationAuditor', () => {
+describe("HallucinationAuditor", () => {
   let auditor: HallucinationAuditor;
 
   beforeEach(() => {
@@ -273,13 +271,13 @@ describe('HallucinationAuditor', () => {
     });
   });
 
-  describe('audit', () => {
-    it('should detect citation fabrication patterns', async () => {
+  describe("audit", () => {
+    it("should detect citation fabrication patterns", async () => {
       const detection = await auditor.audit({
-        agentId: 'agent-001',
-        sessionId: 'session-001',
-        input: 'What is the capital of France?',
-        output: 'According to Smith et al. 2019 study, Paris is the capital.',
+        agentId: "agent-001",
+        sessionId: "session-001",
+        input: "What is the capital of France?",
+        output: "According to Smith et al. 2019 study, Paris is the capital.",
       });
 
       // May or may not detect based on pattern matching
@@ -289,12 +287,12 @@ describe('HallucinationAuditor', () => {
       }
     });
 
-    it('should include evidence in detection', async () => {
+    it("should include evidence in detection", async () => {
       const detection = await auditor.audit({
-        agentId: 'agent-001',
-        sessionId: 'session-001',
-        input: 'Test input',
-        output: 'According to Johnson et al. 2020 study, this is a fact.',
+        agentId: "agent-001",
+        sessionId: "session-001",
+        input: "Test input",
+        output: "According to Johnson et al. 2020 study, this is a fact.",
       });
 
       if (detection) {
@@ -302,12 +300,12 @@ describe('HallucinationAuditor', () => {
       }
     });
 
-    it('should return null for clean output', async () => {
+    it("should return null for clean output", async () => {
       const detection = await auditor.audit({
-        agentId: 'agent-001',
-        sessionId: 'session-001',
-        input: 'What is 2+2?',
-        output: 'The answer is 4.',
+        agentId: "agent-001",
+        sessionId: "session-001",
+        input: "What is 2+2?",
+        output: "The answer is 4.",
       });
 
       // Clean output may not trigger detection
@@ -316,8 +314,8 @@ describe('HallucinationAuditor', () => {
     });
   });
 
-  describe('generateReport', () => {
-    it('should generate report for time period', () => {
+  describe("generateReport", () => {
+    it("should generate report for time period", () => {
       const report = auditor.generateReport({
         start: new Date(Date.now() - 86400000),
         end: new Date(),
@@ -335,7 +333,7 @@ describe('HallucinationAuditor', () => {
 // Rollback Manager Tests
 // ============================================================================
 
-describe('RollbackManager', () => {
+describe("RollbackManager", () => {
   let rollbackManager: RollbackManager;
 
   beforeEach(() => {
@@ -345,13 +343,13 @@ describe('RollbackManager', () => {
     });
   });
 
-  describe('createCheckpoint', () => {
-    it('should create checkpoint with unique ID', async () => {
+  describe("createCheckpoint", () => {
+    it("should create checkpoint with unique ID", async () => {
       const checkpoint = await rollbackManager.createCheckpoint({
-        scope: 'agent',
-        agentId: 'agent-001',
-        state: { config: { version: '1.0' } },
-        createdBy: 'test-user',
+        scope: "agent",
+        agentId: "agent-001",
+        state: { config: { version: "1.0" } },
+        createdBy: "test-user",
       });
 
       expect(checkpoint.id).toMatch(/^CP-/);
@@ -360,71 +358,71 @@ describe('RollbackManager', () => {
     });
   });
 
-  describe('checkTrigger', () => {
-    it('should not trigger under threshold', async () => {
-      const triggered = await rollbackManager.checkTrigger('policy_violation', {
-        agentId: 'agent-001',
+  describe("checkTrigger", () => {
+    it("should not trigger under threshold", async () => {
+      const triggered = await rollbackManager.checkTrigger("policy_violation", {
+        agentId: "agent-001",
       });
 
       expect(triggered).toBe(false);
     });
 
-    it('should respect cooldown period', async () => {
+    it("should respect cooldown period", async () => {
       // Manually exceed threshold
       for (let i = 0; i < 15; i++) {
-        await rollbackManager.checkTrigger('policy_violation', {
-          agentId: 'agent-001',
+        await rollbackManager.checkTrigger("policy_violation", {
+          agentId: "agent-001",
         });
       }
 
       // Should be in cooldown now
-      const triggered = await rollbackManager.checkTrigger('policy_violation', {
-        agentId: 'agent-001',
+      const triggered = await rollbackManager.checkTrigger("policy_violation", {
+        agentId: "agent-001",
       });
 
       expect(triggered).toBe(false);
     });
   });
 
-  describe('initiateRollback', () => {
-    it('should create rollback with checkpoint', async () => {
+  describe("initiateRollback", () => {
+    it("should create rollback with checkpoint", async () => {
       // First create a checkpoint
       const checkpoint = await rollbackManager.createCheckpoint({
-        scope: 'agent',
-        agentId: 'agent-001',
-        state: { config: { version: '1.0' } },
-        createdBy: 'test-user',
+        scope: "agent",
+        agentId: "agent-001",
+        state: { config: { version: "1.0" } },
+        createdBy: "test-user",
       });
 
       const rollback = await rollbackManager.initiateRollback({
-        trigger: 'manual_trigger',
-        scope: 'agent',
-        agentId: 'agent-001',
-        reason: 'Test rollback',
-        initiatedBy: 'test-user',
+        trigger: "manual_trigger",
+        scope: "agent",
+        agentId: "agent-001",
+        reason: "Test rollback",
+        initiatedBy: "test-user",
         checkpointId: checkpoint.id,
       });
 
       expect(rollback.id).toMatch(/^RB-/);
-      expect(rollback.status).toBe('pending');
+      expect(rollback.status).toBe("pending");
       expect(rollback.steps.length).toBeGreaterThan(0);
     });
 
-    it('should throw when no checkpoint available', async () => {
+    it("should throw when no checkpoint available", async () => {
       await expect(
         rollbackManager.initiateRollback({
-          trigger: 'manual_trigger',
-          scope: 'agent',
-          agentId: 'nonexistent-agent',
-          reason: 'Test rollback',
-          initiatedBy: 'test-user',
-        }),
-      ).rejects.toThrow('No checkpoint available');
+          trigger: "manual_trigger",
+          scope: "agent",
+          agentId: "nonexistent-agent",
+          reason: "Test rollback",
+          initiatedBy: "test-user",
+        })
+      ).rejects.toThrow("No checkpoint available");
     });
   });
 
-  describe('getMetrics', () => {
-    it('should return rollback metrics', () => {
+  describe("getMetrics", () => {
+    it("should return rollback metrics", () => {
       const metrics = rollbackManager.getMetrics();
 
       expect(metrics.total).toBeDefined();
@@ -439,7 +437,7 @@ describe('RollbackManager', () => {
 // AI Provenance Manager Tests
 // ============================================================================
 
-describe('AIProvenanceManager', () => {
+describe("AIProvenanceManager", () => {
   let provenanceManager: AIProvenanceManager;
 
   beforeEach(() => {
@@ -449,14 +447,14 @@ describe('AIProvenanceManager', () => {
     });
   });
 
-  describe('createOutputProvenance', () => {
-    it('should create provenance with SLSA level', async () => {
+  describe("createOutputProvenance", () => {
+    it("should create provenance with SLSA level", async () => {
       const provenance = await provenanceManager.createOutputProvenance({
-        output: 'Test output response',
-        promptHash: 'abc123',
-        modelId: 'test-model',
-        agentId: 'agent-001',
-        sessionId: 'session-001',
+        output: "Test output response",
+        promptHash: "abc123",
+        modelId: "test-model",
+        agentId: "agent-001",
+        sessionId: "session-001",
         temperature: 0.7,
         maxTokens: 1000,
       });
@@ -466,13 +464,13 @@ describe('AIProvenanceManager', () => {
       expect(provenance.subject.digest.sha256).toBeDefined();
     });
 
-    it('should include cosign bundle when signing enabled', async () => {
+    it("should include cosign bundle when signing enabled", async () => {
       const provenance = await provenanceManager.createOutputProvenance({
-        output: 'Signed output',
-        promptHash: 'xyz789',
-        modelId: 'test-model',
-        agentId: 'agent-001',
-        sessionId: 'session-001',
+        output: "Signed output",
+        promptHash: "xyz789",
+        modelId: "test-model",
+        agentId: "agent-001",
+        sessionId: "session-001",
         temperature: 0.5,
         maxTokens: 500,
       });
@@ -482,14 +480,14 @@ describe('AIProvenanceManager', () => {
     });
   });
 
-  describe('verifyProvenance', () => {
-    it('should verify valid provenance', async () => {
+  describe("verifyProvenance", () => {
+    it("should verify valid provenance", async () => {
       const provenance = await provenanceManager.createOutputProvenance({
-        output: 'Verifiable output',
-        promptHash: 'verify123',
-        modelId: 'test-model',
-        agentId: 'agent-001',
-        sessionId: 'session-001',
+        output: "Verifiable output",
+        promptHash: "verify123",
+        modelId: "test-model",
+        agentId: "agent-001",
+        sessionId: "session-001",
         temperature: 0.7,
         maxTokens: 1000,
       });
@@ -500,22 +498,22 @@ describe('AIProvenanceManager', () => {
       expect(result.slsaLevel).toBeDefined();
     });
 
-    it('should return invalid for nonexistent provenance', async () => {
-      const result = await provenanceManager.verifyProvenance('nonexistent-id');
+    it("should return invalid for nonexistent provenance", async () => {
+      const result = await provenanceManager.verifyProvenance("nonexistent-id");
 
       expect(result.valid).toBe(false);
-      expect(result.slsaLevel).toBe('SLSA_0');
+      expect(result.slsaLevel).toBe("SLSA_0");
     });
   });
 
-  describe('exportProvenance', () => {
-    it('should export provenance as JSON', async () => {
+  describe("exportProvenance", () => {
+    it("should export provenance as JSON", async () => {
       const provenance = await provenanceManager.createOutputProvenance({
-        output: 'Exportable output',
-        promptHash: 'export123',
-        modelId: 'test-model',
-        agentId: 'agent-001',
-        sessionId: 'session-001',
+        output: "Exportable output",
+        promptHash: "export123",
+        modelId: "test-model",
+        agentId: "agent-001",
+        sessionId: "session-001",
         temperature: 0.7,
         maxTokens: 1000,
       });
@@ -524,7 +522,7 @@ describe('AIProvenanceManager', () => {
 
       expect(exported).toBeDefined();
       const parsed = JSON.parse(exported!);
-      expect(parsed._type).toBe('https://in-toto.io/Statement/v0.1');
+      expect(parsed._type).toBe("https://in-toto.io/Statement/v0.1");
     });
   });
 });
@@ -533,9 +531,9 @@ describe('AIProvenanceManager', () => {
 // Governance Framework Integration Tests
 // ============================================================================
 
-describe('GovernanceFramework', () => {
-  describe('createGovernanceFramework', () => {
-    it('should create all components', () => {
+describe("GovernanceFramework", () => {
+  describe("createGovernanceFramework", () => {
+    it("should create all components", () => {
       const framework = createGovernanceFramework();
 
       expect(framework.policyEngine).toBeInstanceOf(AgentPolicyEngine);
@@ -548,7 +546,7 @@ describe('GovernanceFramework', () => {
       expect(framework.dashboard).toBeInstanceOf(GovernanceDashboardService);
     });
 
-    it('should wire up event handlers', async () => {
+    it("should wire up event handlers", async () => {
       const framework = createGovernanceFramework();
       const events: GovernanceEvent[] = [];
 
@@ -566,7 +564,7 @@ describe('GovernanceFramework', () => {
 // Dashboard Service Tests
 // ============================================================================
 
-describe('GovernanceDashboardService', () => {
+describe("GovernanceDashboardService", () => {
   let dashboard: GovernanceDashboardService;
   let framework: ReturnType<typeof createGovernanceFramework>;
 
@@ -575,8 +573,8 @@ describe('GovernanceDashboardService', () => {
     dashboard = framework.dashboard;
   });
 
-  describe('getMetrics', () => {
-    it('should return comprehensive metrics', async () => {
+  describe("getMetrics", () => {
+    it("should return comprehensive metrics", async () => {
       const metrics = await dashboard.getMetrics();
 
       expect(metrics.timestamp).toBeDefined();
@@ -589,8 +587,8 @@ describe('GovernanceDashboardService', () => {
     });
   });
 
-  describe('getHealthStatus', () => {
-    it('should return health status for all components', async () => {
+  describe("getHealthStatus", () => {
+    it("should return health status for all components", async () => {
       const health = await dashboard.getHealthStatus();
 
       expect(health.overall).toMatch(/healthy|degraded|unhealthy/);
@@ -598,8 +596,8 @@ describe('GovernanceDashboardService', () => {
     });
   });
 
-  describe('getSummary', () => {
-    it('should return dashboard summary', async () => {
+  describe("getSummary", () => {
+    it("should return dashboard summary", async () => {
       const summary = await dashboard.getSummary();
 
       expect(summary.status).toBeDefined();
@@ -615,7 +613,7 @@ describe('GovernanceDashboardService', () => {
 // Compliance Validator Tests
 // ============================================================================
 
-describe('ICFY28ComplianceValidator', () => {
+describe("ICFY28ComplianceValidator", () => {
   let validator: ICFY28ComplianceValidator;
   let framework: ReturnType<typeof createGovernanceFramework>;
 
@@ -624,8 +622,8 @@ describe('ICFY28ComplianceValidator', () => {
     validator = framework.complianceValidator;
   });
 
-  describe('validate', () => {
-    it('should validate all IC FY28 controls', async () => {
+  describe("validate", () => {
+    it("should validate all IC FY28 controls", async () => {
       const result = await validator.validate();
 
       expect(result.timestamp).toBeDefined();
@@ -633,19 +631,19 @@ describe('ICFY28ComplianceValidator', () => {
       expect(result.validationLevel).toBeDefined();
     });
 
-    it('should categorize controls correctly', async () => {
+    it("should categorize controls correctly", async () => {
       const result = await validator.validate();
       const categories = new Set(result.controls.map((c) => c.category));
 
-      expect(categories.has('identity')).toBe(true);
-      expect(categories.has('access')).toBe(true);
-      expect(categories.has('ai_safety')).toBe(true);
-      expect(categories.has('supply_chain')).toBe(true);
+      expect(categories.has("identity")).toBe(true);
+      expect(categories.has("access")).toBe(true);
+      expect(categories.has("ai_safety")).toBe(true);
+      expect(categories.has("supply_chain")).toBe(true);
     });
   });
 
-  describe('getComplianceScore', () => {
-    it('should calculate compliance score', async () => {
+  describe("getComplianceScore", () => {
+    it("should calculate compliance score", async () => {
       await validator.validate();
       const score = validator.getComplianceScore();
 
@@ -656,8 +654,8 @@ describe('ICFY28ComplianceValidator', () => {
     });
   });
 
-  describe('getControlDefinitions', () => {
-    it('should return all control definitions', () => {
+  describe("getControlDefinitions", () => {
+    it("should return all control definitions", () => {
       const definitions = validator.getControlDefinitions();
 
       expect(definitions.length).toBeGreaterThan(0);

@@ -2,7 +2,7 @@ name: Media List Drift Detection
 
 on:
   schedule:
-    - cron: '0 0 * * 0' # Weekly
+    - cron: "0 0 * * 0" # Weekly
   workflow_dispatch:
 
 jobs:
@@ -13,7 +13,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.10'
+          python-version: "3.10"
       - name: Run media list generator (mock)
         run: |
           mkdir -p reports/media_ai_lists/test_slug/

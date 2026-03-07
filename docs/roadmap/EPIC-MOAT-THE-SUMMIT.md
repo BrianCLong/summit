@@ -1,4 +1,5 @@
 # Epic: Moat the Summit Agentic Stack
+
 **Strategic Initiative: Secure, Governed, Enterprise-Grade Multi-Agent OS**
 
 **Owner:** Architecture Council / Lawmaker (Jules)
@@ -30,13 +31,13 @@ Summit’s Agentic OS introduces a layered "Kernel" architecture to manage auton
 1.  **The Supervisor (Orchestration Layer)**
     - Manages agent lifecycles, resource allocation, and inter-agent communication.
     - **Implementation:** Enhanced `maestro` service with dynamic role allocation (Leader/Worker/Reviewer).
-    - **Difference:** Not just a task queue—a *state machine* that enforces workflow topology.
+    - **Difference:** Not just a task queue—a _state machine_ that enforces workflow topology.
 
 2.  **The Governance Fabric (Control Layer)**
-    - Intercepts *every* tool call and state change.
+    - Intercepts _every_ tool call and state change.
     - **Components:**
-        - **Policy Engine (OPA):** Evaluates "Can Agent X do Y on Resource Z?" in real-time.
-        - **Provenance Ledger:** Records the evaluation result, the prompt, and the tool output (WORM storage).
+      - **Policy Engine (OPA):** Evaluates "Can Agent X do Y on Resource Z?" in real-time.
+      - **Provenance Ledger:** Records the evaluation result, the prompt, and the tool output (WORM storage).
 
 3.  **The Graph Memory (Data Layer)**
     - **IntelGraph (Neo4j):** The shared "world model" for all agents. Agents read/write to the graph, not just scratchpads.
@@ -52,16 +53,17 @@ Summit’s Agentic OS introduces a layered "Kernel" architecture to manage auton
 
 We adopt a rigid "Security Scoping Matrix" to classify and constrain agents.
 
-| Scope | Definition | Permissions & Constraints | Use Case |
-| :--- | :--- | :--- | :--- |
-| **Scope 0** | **Deterministic Tool** | Read-only. No LLM reasoning. Fixed logic. | Data fetchers, report generators. |
-| **Scope 1** | **Copilot (Assisted)** | LLM generation. *Human must approve* side-effects. | Draft emails, code suggestions. |
-| **Scope 2** | **Bounded Agent** | Autonomous read/write within a *sandboxed graph subgraph*. | Intelligence analysis, false positive triage. |
-| **Scope 3** | **Sovereign Agent** | Full autonomy within policy limits. Multi-step planning. | Incident remediation, active threat hunting. |
+| Scope       | Definition             | Permissions & Constraints                                  | Use Case                                      |
+| :---------- | :--------------------- | :--------------------------------------------------------- | :-------------------------------------------- |
+| **Scope 0** | **Deterministic Tool** | Read-only. No LLM reasoning. Fixed logic.                  | Data fetchers, report generators.             |
+| **Scope 1** | **Copilot (Assisted)** | LLM generation. _Human must approve_ side-effects.         | Draft emails, code suggestions.               |
+| **Scope 2** | **Bounded Agent**      | Autonomous read/write within a _sandboxed graph subgraph_. | Intelligence analysis, false positive triage. |
+| **Scope 3** | **Sovereign Agent**    | Full autonomy within policy limits. Multi-step planning.   | Incident remediation, active threat hunting.  |
 
 **Enforcement:**
+
 - **Identity:** Every agent has a unique Service Account (SPIFFE/OIDC).
-- **Perimeter:** Network policies (NetworkPolicy) and Graph Views restrict data access. Scope 2 agents *cannot* technically query Scope 3 data.
+- **Perimeter:** Network policies (NetworkPolicy) and Graph Views restrict data access. Scope 2 agents _cannot_ technically query Scope 3 data.
 
 ---
 
@@ -70,7 +72,9 @@ We adopt a rigid "Security Scoping Matrix" to classify and constrain agents.
 **"Audit-by-Default"** is the core principle.
 
 ### 4.1 The Decision Ledger
+
 Every agent action is a transaction in the **Provenance Ledger**:
+
 ```json
 {
   "tx_id": "sha256:...",
@@ -85,9 +89,11 @@ Every agent action is a transaction in the **Provenance Ledger**:
   "outcome": "found_records: 12"
 }
 ```
-- **Auditor View:** A dashboard allowing playback of an incident timeline, showing exactly *why* the agent acted.
+
+- **Auditor View:** A dashboard allowing playback of an incident timeline, showing exactly _why_ the agent acted.
 
 ### 4.2 Policy-as-Code
+
 - **Jurisdiction:** "Data from EU region cannot be processed by US-hosted agents."
 - **Rate Limits:** "Max $50 spend per hour per agent."
 - **Ethical Boundaries:** "No active deception operations without Scope 3 approval."
@@ -99,11 +105,13 @@ Every agent action is a transaction in the **Provenance Ledger**:
 We treat "Agent Health" like "Server Health."
 
 ### 5.1 Metrics
+
 - **Cognitive Load:** Token consumption rate vs. task progress.
 - **Hallucination Rate:** Frequency of "correction" interventions by Supervisor or Human.
 - **Policy Violations:** Count of blocked actions (Leading indicator of misalignment).
 
 ### 5.2 Dashboards (Grafana)
+
 - **"The Control Room":** Live view of active agent swarms, their current Scope, and "Defcon" level.
 - **"The Audit Log":** Searchable history of all agent actions.
 
@@ -112,10 +120,12 @@ We treat "Agent Health" like "Server Health."
 ## 6. Summit-Native Differentiators
 
 **The "IntelGraph" Advantage:**
+
 - **OSINT/CTI Integration:** Agents don't start from zero. They plug into a pre-populated graph of threat actors, vulnerabilities, and narratives.
-- **Narrative Intelligence:** Our agents can simulate *adversarial* narratives using the `narrative-engine`, allowing for "Red Teaming" agents that test enterprise defenses.
+- **Narrative Intelligence:** Our agents can simulate _adversarial_ narratives using the `narrative-engine`, allowing for "Red Teaming" agents that test enterprise defenses.
 
 **High-Value Use Cases:**
+
 1.  **Governed Incident Response:** A Scope 3 agent identifies a breach, isolates the host (via policy-checked API), and updates the Graph incident record—all in seconds, with a perfect audit trail.
 2.  **Compliance Officer Agent:** Continuously scans the Graph for data residency violations or policy drift, auto-generating ticket remediations (Scope 2).
 
@@ -124,41 +134,47 @@ We treat "Agent Health" like "Server Health."
 ## 7. Delivery Phases
 
 ### Phase 1: The Foundation (Scope & Audit)
+
 - **Goal:** Enable Scope 0 and 1 agents with full audit logging.
 - **Deliverables:**
-    - [ ] `ProvenanceService` v1 (Immutable Ledger).
-    - [ ] Identity issuance for Agents (OIDC).
-    - [ ] Basic "Agent Health" Dashboard.
+  - [ ] `ProvenanceService` v1 (Immutable Ledger).
+  - [ ] Identity issuance for Agents (OIDC).
+  - [ ] Basic "Agent Health" Dashboard.
 
 ### Phase 2: The Governor (Policy & Control)
+
 - **Goal:** Enable Scope 2 agents with Policy-as-Code.
 - **Deliverables:**
-    - [ ] OPA Policy Engine integration for all Tool calls.
-    - [ ] "Scope" enforcement in the Graph (RBAC for nodes).
-    - [ ] HITL API for "Scope Escalation."
+  - [ ] OPA Policy Engine integration for all Tool calls.
+  - [ ] "Scope" enforcement in the Graph (RBAC for nodes).
+  - [ ] HITL API for "Scope Escalation."
 
 ### Phase 3: The Sovereign (Autonomy & Swarm)
+
 - **Goal:** Multi-agent swarms (Scope 3) with Supervisor orchestration.
 - **Deliverables:**
-    - [ ] `Maestro` Orchestrator for dynamic role assignment.
-    - [ ] Inter-agent "Conflict Resolution" protocol.
-    - [ ] Full "Control Room" UI for operators.
+  - [ ] `Maestro` Orchestrator for dynamic role assignment.
+  - [ ] Inter-agent "Conflict Resolution" protocol.
+  - [ ] Full "Control Room" UI for operators.
 
 ### Phase 4: Multimodal & Swarm Hardening (The Kimi Pivot)
+
 - **Goal:** Subsume Kimi K2.5-grade capabilities into the Governed Kernel.
 - **Deliverables:**
-    - [ ] **Swarm Runtime Primitives**: Planner/Shard/Execute/Merge with OPA budget gates.
-    - [ ] **Reasoning Budget Contract**: Multi-model routing based on Latency/Cost/Risk targets.
-    - [ ] **Summit Agent Conformance Suite (SACS)**: Signed vision grounding and tool-fidelity reports.
-    - [ ] **Multi-Scale Agent Runtime**: local-to-cloud continuity with unified UX.
+  - [ ] **Swarm Runtime Primitives**: Planner/Shard/Execute/Merge with OPA budget gates.
+  - [ ] **Reasoning Budget Contract**: Multi-model routing based on Latency/Cost/Risk targets.
+  - [ ] **Summit Agent Conformance Suite (SACS)**: Signed vision grounding and tool-fidelity reports.
+  - [ ] **Multi-Scale Agent Runtime**: local-to-cloud continuity with unified UX.
 
 ---
 
 **Risks:**
-- **Latency:** Intercepting every call for policy checks adds overhead. *Mitigation: Optimistic caching for common policies.*
-- **Complexity:** Graph schemas for provenance can explode. *Mitigation: Pruning and archiving strategies.*
+
+- **Latency:** Intercepting every call for policy checks adds overhead. _Mitigation: Optimistic caching for common policies._
+- **Complexity:** Graph schemas for provenance can explode. _Mitigation: Pruning and archiving strategies._
 
 **Success Metrics:**
+
 - **Safety:** 0 unlogged actions.
 - **Trust:** 100% of "high-risk" actions pass policy checks.
 - **Adoption:** 3 major enterprise pilots for "Scope 2" workloads within 6 months.

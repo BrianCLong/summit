@@ -1,30 +1,24 @@
-import { newDb, DataType } from 'pg-mem';
-describe('reporting materialized views', () => {
-  it('creates and refreshes reporting materialized views', async () => {
+import { newDb, DataType } from "pg-mem";
+describe("reporting materialized views", () => {
+  it("creates and refreshes reporting materialized views", async () => {
     const db = newDb({ autoCreateForeignKeyIndices: true });
     const truncateToDay = (value: Date) =>
-      new Date(
-        Date.UTC(
-          value.getUTCFullYear(),
-          value.getUTCMonth(),
-          value.getUTCDate(),
-        ),
-      );
+      new Date(Date.UTC(value.getUTCFullYear(), value.getUTCMonth(), value.getUTCDate()));
     db.public.registerFunction({
-      name: 'date_trunc',
+      name: "date_trunc",
       args: [DataType.text, DataType.timestamp],
       returns: DataType.timestamp,
       implementation: (part: string, value: Date) =>
-        part === 'day' ? truncateToDay(value) : value,
+        part === "day" ? truncateToDay(value) : value,
     });
     db.public.registerFunction({
-      name: 'date_trunc',
+      name: "date_trunc",
       args: [DataType.text, DataType.timestamptz],
       returns: DataType.timestamptz,
       implementation: (part: string, value: Date) =>
-        part === 'day' ? truncateToDay(value) : value,
+        part === "day" ? truncateToDay(value) : value,
     });
-    db.public.none('CREATE SCHEMA maestro; SET search_path TO maestro, public;');
+    db.public.none("CREATE SCHEMA maestro; SET search_path TO maestro, public;");
 
     db.public.none(`
       CREATE TABLE maestro.cases (
@@ -174,7 +168,7 @@ describe('reporting materialized views', () => {
     `);
     db.public.none(`INSERT INTO maestro.mv_reporting_entity_activity ${entityActivitySelect};`);
     db.public.none(
-      'CREATE UNIQUE INDEX idx_mv_reporting_entity_activity_bucket_type ON maestro.mv_reporting_entity_activity(bucket_day, type);',
+      "CREATE UNIQUE INDEX idx_mv_reporting_entity_activity_bucket_type ON maestro.mv_reporting_entity_activity(bucket_day, type);"
     );
 
     db.public.none(`
@@ -194,7 +188,7 @@ describe('reporting materialized views', () => {
     `);
     db.public.none(`INSERT INTO maestro.mv_reporting_case_snapshot ${caseSnapshotSelect};`);
     db.public.none(
-      'CREATE UNIQUE INDEX idx_mv_reporting_case_snapshot_case ON maestro.mv_reporting_case_snapshot(case_id);',
+      "CREATE UNIQUE INDEX idx_mv_reporting_case_snapshot_case ON maestro.mv_reporting_case_snapshot(case_id);"
     );
 
     db.public.none(`
@@ -211,77 +205,70 @@ describe('reporting materialized views', () => {
     `);
     db.public.none(`INSERT INTO maestro.mv_reporting_case_timeline ${caseTimelineSelect};`);
     db.public.none(
-      'CREATE UNIQUE INDEX idx_mv_reporting_case_timeline_day ON maestro.mv_reporting_case_timeline(case_id, event_day);',
+      "CREATE UNIQUE INDEX idx_mv_reporting_case_timeline_day ON maestro.mv_reporting_case_timeline(case_id, event_day);"
     );
 
     const { Pool } = db.adapters.createPg();
     const pool = new Pool();
 
     const recomputeViews = async () => {
-      await pool.query('TRUNCATE maestro.mv_reporting_entity_activity');
+      await pool.query("TRUNCATE maestro.mv_reporting_entity_activity");
       await pool.query(`INSERT INTO maestro.mv_reporting_entity_activity ${entityActivitySelect};`);
 
-      await pool.query('TRUNCATE maestro.mv_reporting_case_snapshot');
+      await pool.query("TRUNCATE maestro.mv_reporting_case_snapshot");
       await pool.query(`INSERT INTO maestro.mv_reporting_case_snapshot ${caseSnapshotSelect};`);
 
-      await pool.query('TRUNCATE maestro.mv_reporting_case_timeline');
+      await pool.query("TRUNCATE maestro.mv_reporting_case_timeline");
       await pool.query(`INSERT INTO maestro.mv_reporting_case_timeline ${caseTimelineSelect};`);
     };
 
     await recomputeViews();
     const refreshResult = [
       {
-        view_name: 'maestro.mv_reporting_entity_activity',
+        view_name: "maestro.mv_reporting_entity_activity",
         row_count: Number(
-          (await pool.query('SELECT COUNT(*) FROM maestro.mv_reporting_entity_activity'))
-            .rows[0].count,
+          (await pool.query("SELECT COUNT(*) FROM maestro.mv_reporting_entity_activity")).rows[0]
+            .count
         ),
-        status: 'ok',
+        status: "ok",
       },
       {
-        view_name: 'maestro.mv_reporting_case_snapshot',
+        view_name: "maestro.mv_reporting_case_snapshot",
         row_count: Number(
-          (await pool.query('SELECT COUNT(*) FROM maestro.mv_reporting_case_snapshot'))
-            .rows[0].count,
+          (await pool.query("SELECT COUNT(*) FROM maestro.mv_reporting_case_snapshot")).rows[0]
+            .count
         ),
-        status: 'ok',
+        status: "ok",
       },
       {
-        view_name: 'maestro.mv_reporting_case_timeline',
+        view_name: "maestro.mv_reporting_case_timeline",
         row_count: Number(
-          (await pool.query('SELECT COUNT(*) FROM maestro.mv_reporting_case_timeline'))
-            .rows[0].count,
+          (await pool.query("SELECT COUNT(*) FROM maestro.mv_reporting_case_timeline")).rows[0]
+            .count
         ),
-        status: 'ok',
+        status: "ok",
       },
     ];
 
-    const activity = await pool.query(
-      'SELECT * FROM maestro.mv_reporting_entity_activity',
-    );
+    const activity = await pool.query("SELECT * FROM maestro.mv_reporting_entity_activity");
     const snapshot = await pool.query(
-      'SELECT * FROM maestro.mv_reporting_case_snapshot ORDER BY case_id',
+      "SELECT * FROM maestro.mv_reporting_case_snapshot ORDER BY case_id"
     );
     const timeline = await pool.query(
-      'SELECT * FROM maestro.mv_reporting_case_timeline ORDER BY case_id',
+      "SELECT * FROM maestro.mv_reporting_case_timeline ORDER BY case_id"
     );
 
     expect(refreshResult).toHaveLength(3);
-    expect(refreshResult.every((row) => row.status === 'ok')).toBe(true);
+    expect(refreshResult.every((row) => row.status === "ok")).toBe(true);
     expect(activity.rowCount).toBeGreaterThan(0);
 
     const firstCase = snapshot.rows.find(
-      (row: any) =>
-        row.case_id === '00000000-0000-0000-0000-000000000001',
+      (row: any) => row.case_id === "00000000-0000-0000-0000-000000000001"
     );
     expect(firstCase.linked_entity_count).toBe(2);
     expect(firstCase.evidence_counts).toEqual({});
 
-    expect(
-      timeline.rows.some(
-        (row: any) => Number(row.transition_count || 0) > 0,
-      ),
-    ).toBe(true);
+    expect(timeline.rows.some((row: any) => Number(row.transition_count || 0) > 0)).toBe(true);
 
     await pool.end();
   });

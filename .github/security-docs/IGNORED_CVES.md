@@ -27,20 +27,21 @@ For each ignored CVE, we assess:
 
 ### Vulnerability Details
 
-| Field | Value |
-|-------|-------|
-| **CVE ID** | CVE-2024-22363 |
-| **Affected Package** | [To be determined - requires npm audit] |
-| **Vulnerability Type** | [To be determined] |
-| **CVSS Score** | [To be determined] |
-| **Published Date** | 2024 |
-| **Status** | Ignored |
+| Field                  | Value                                   |
+| ---------------------- | --------------------------------------- |
+| **CVE ID**             | CVE-2024-22363                          |
+| **Affected Package**   | [To be determined - requires npm audit] |
+| **Vulnerability Type** | [To be determined]                      |
+| **CVSS Score**         | [To be determined]                      |
+| **Published Date**     | 2024                                    |
+| **Status**             | Ignored                                 |
 
 ### Assessment
 
 **Affected Package:** [Requires investigation]
 
 To identify the affected package, run:
+
 ```bash
 npm audit | grep CVE-2024-22363
 ```
@@ -72,20 +73,21 @@ npm audit | grep CVE-2024-22363
 
 ### Vulnerability Details
 
-| Field | Value |
-|-------|-------|
-| **CVE ID** | CVE-2023-30533 |
-| **Affected Package** | [To be determined - requires npm audit] |
-| **Vulnerability Type** | [To be determined] |
-| **CVSS Score** | [To be determined] |
-| **Published Date** | 2023 |
-| **Status** | Ignored |
+| Field                  | Value                                   |
+| ---------------------- | --------------------------------------- |
+| **CVE ID**             | CVE-2023-30533                          |
+| **Affected Package**   | [To be determined - requires npm audit] |
+| **Vulnerability Type** | [To be determined]                      |
+| **CVSS Score**         | [To be determined]                      |
+| **Published Date**     | 2023                                    |
+| **Status**             | Ignored                                 |
 
 ### Assessment
 
 **Affected Package:** [Requires investigation]
 
 To identify the affected package, run:
+
 ```bash
 npm audit | grep CVE-2023-30533
 ```
@@ -117,20 +119,21 @@ npm audit | grep CVE-2023-30533
 
 ### Vulnerability Details
 
-| Field | Value |
-|-------|-------|
-| **CVE ID** | CVE-2022-24434 |
-| **Affected Package** | [To be determined - requires npm audit] |
-| **Vulnerability Type** | [To be determined] |
-| **CVSS Score** | [To be determined] |
-| **Published Date** | 2022 |
-| **Status** | Ignored |
+| Field                  | Value                                   |
+| ---------------------- | --------------------------------------- |
+| **CVE ID**             | CVE-2022-24434                          |
+| **Affected Package**   | [To be determined - requires npm audit] |
+| **Vulnerability Type** | [To be determined]                      |
+| **CVSS Score**         | [To be determined]                      |
+| **Published Date**     | 2022                                    |
+| **Status**             | Ignored                                 |
 
 ### Assessment
 
 **Affected Package:** [Requires investigation]
 
 To identify the affected package, run:
+
 ```bash
 npm audit | grep CVE-2022-24434
 ```
@@ -162,20 +165,21 @@ npm audit | grep CVE-2022-24434
 
 ### Vulnerability Details
 
-| Field | Value |
-|-------|-------|
-| **CVE ID** | CVE-2023-28155 |
-| **Affected Package** | [To be determined - requires npm audit] |
-| **Vulnerability Type** | [To be determined] |
-| **CVSS Score** | [To be determined] |
-| **Published Date** | 2023 |
-| **Status** | Ignored |
+| Field                  | Value                                   |
+| ---------------------- | --------------------------------------- |
+| **CVE ID**             | CVE-2023-28155                          |
+| **Affected Package**   | [To be determined - requires npm audit] |
+| **Vulnerability Type** | [To be determined]                      |
+| **CVSS Score**         | [To be determined]                      |
+| **Published Date**     | 2023                                    |
+| **Status**             | Ignored                                 |
 
 ### Assessment
 
 **Affected Package:** [Requires investigation]
 
 To identify the affected package, run:
+
 ```bash
 npm audit | grep CVE-2023-28155
 ```
@@ -205,12 +209,12 @@ npm audit | grep CVE-2023-28155
 
 ## Summary Table
 
-| CVE ID | Package | Type | CVSS | Exploitable | Justification | Next Review |
-|--------|---------|------|------|-------------|---------------|-------------|
-| CVE-2024-22363 | [TBD] | [TBD] | [TBD] | [TBD] | [TBD] | [TBD] |
-| CVE-2023-30533 | [TBD] | [TBD] | [TBD] | [TBD] | [TBD] | [TBD] |
-| CVE-2022-24434 | [TBD] | [TBD] | [TBD] | [TBD] | [TBD] | [TBD] |
-| CVE-2023-28155 | [TBD] | [TBD] | [TBD] | [TBD] | [TBD] | [TBD] |
+| CVE ID         | Package | Type  | CVSS  | Exploitable | Justification | Next Review |
+| -------------- | ------- | ----- | ----- | ----------- | ------------- | ----------- |
+| CVE-2024-22363 | [TBD]   | [TBD] | [TBD] | [TBD]       | [TBD]         | [TBD]       |
+| CVE-2023-30533 | [TBD]   | [TBD] | [TBD] | [TBD]       | [TBD]         | [TBD]       |
+| CVE-2022-24434 | [TBD]   | [TBD] | [TBD] | [TBD]       | [TBD]         | [TBD]       |
+| CVE-2023-28155 | [TBD]   | [TBD] | [TBD] | [TBD]       | [TBD]         | [TBD]       |
 
 ## Recommendations
 

@@ -1,4 +1,4 @@
-import { Pool } from 'pg';
+import { Pool } from "pg";
 export const pg = new Pool({
   host: process.env.PGHOST,
   port: Number(process.env.PGPORT || 5432),

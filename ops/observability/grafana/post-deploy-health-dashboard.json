@@ -190,9 +190,7 @@
           "overrides": [
             {
               "matcher": { "id": "byFrameRefID", "options": "A" },
-              "properties": [
-                { "id": "custom.thresholdsStyle", "value": { "mode": "area" } }
-              ]
+              "properties": [{ "id": "custom.thresholdsStyle", "value": { "mode": "area" } }]
             }
           ]
         }

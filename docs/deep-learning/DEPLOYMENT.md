@@ -41,30 +41,30 @@ Training → Validation → Optimization → Staging → Production
 ### 1. Distributed Training
 
 ```typescript
-import type { TrainingConfig } from '@intelgraph/deep-learning-core';
-import { DistributedTrainingOrchestrator } from '@intelgraph/distributed-training';
+import type { TrainingConfig } from "@intelgraph/deep-learning-core";
+import { DistributedTrainingOrchestrator } from "@intelgraph/distributed-training";
 
 // Configure distributed training
 const trainingConfig: TrainingConfig = {
-  modelId: 'intelligence-classifier-v1',
+  modelId: "intelligence-classifier-v1",
   batchSize: 256, // Per GPU
   epochs: 100,
   learningRate: 0.001,
-  optimizer: 'adamw',
-  lossFunction: 'cross_entropy',
-  metrics: ['accuracy', 'f1_score', 'precision', 'recall'],
+  optimizer: "adamw",
+  lossFunction: "cross_entropy",
+  metrics: ["accuracy", "f1_score", "precision", "recall"],
 
   // Distributed configuration
   distributed: {
-    strategy: 'data_parallel',
+    strategy: "data_parallel",
     numWorkers: 8,
   },
 
   // Mixed precision for faster training
   mixedPrecision: {
     enabled: true,
-    dtype: 'float16',
-    lossScale: 'dynamic',
+    dtype: "float16",
+    lossScale: "dynamic",
   },
 
   // Gradient accumulation for larger effective batch size
@@ -74,7 +74,7 @@ const trainingConfig: TrainingConfig = {
 
   // Early stopping
   earlyStopping: {
-    monitor: 'val_loss',
+    monitor: "val_loss",
     patience: 10,
     minDelta: 0.001,
   },
@@ -88,13 +88,13 @@ const trainingConfig: TrainingConfig = {
 
 // Initialize orchestrator
 const orchestrator = new DistributedTrainingOrchestrator({
-  strategy: 'data_parallel',
+  strategy: "data_parallel",
   numWorkers: 8,
-  backend: 'nccl',
+  backend: "nccl",
   mixedPrecision: {
     enabled: true,
-    dtype: 'float16',
-    lossScale: 'dynamic',
+    dtype: "float16",
+    lossScale: "dynamic",
   },
   gradientAccumulation: {
     steps: 4,
@@ -106,9 +106,9 @@ await orchestrator.initializeWorkers();
 await orchestrator.distributeModel(trainingConfig.modelId);
 
 // Submit training job
-const response = await fetch('http://localhost:3001/api/v1/training/start', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
+const response = await fetch("http://localhost:3001/api/v1/training/start", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
   body: JSON.stringify(trainingConfig),
 });
 
@@ -123,7 +123,7 @@ const checkStatus = setInterval(async () => {
   console.log(`Epoch ${status.currentEpoch}/${status.totalEpochs}`);
   console.log(`Loss: ${status.metrics.loss}, Accuracy: ${status.metrics.accuracy}`);
 
-  if (status.status === 'completed' || status.status === 'failed') {
+  if (status.status === "completed" || status.status === "failed") {
     clearInterval(checkStatus);
   }
 }, 5000);
@@ -132,10 +132,10 @@ const checkStatus = setInterval(async () => {
 ### 2. Learning Rate Scheduling
 
 ```typescript
-import { LearningRateScheduler } from '@intelgraph/distributed-training';
+import { LearningRateScheduler } from "@intelgraph/distributed-training";
 
 const scheduler = new LearningRateScheduler({
-  type: 'cosine',
+  type: "cosine",
   baseLR: 0.001,
   warmupSteps: 1000,
   decaySteps: 10000,
@@ -153,10 +153,10 @@ for (let step = 0; step < 10000; step++) {
 ### 3. Checkpointing
 
 ```typescript
-import { CheckpointManager } from '@intelgraph/distributed-training';
+import { CheckpointManager } from "@intelgraph/distributed-training";
 
 const checkpointManager = new CheckpointManager({
-  directory: '/models/checkpoints',
+  directory: "/models/checkpoints",
   frequency: 5,
   maxToKeep: 5,
   saveWeightsOnly: false,
@@ -182,18 +182,18 @@ const latestCheckpoint = checkpointManager.getLatestCheckpoint();
 Convert model to lower precision for faster inference:
 
 ```typescript
-import { ModelQuantizer } from '@intelgraph/model-optimization';
+import { ModelQuantizer } from "@intelgraph/model-optimization";
 
 // INT8 quantization
 const quantizer = new ModelQuantizer({
-  bitWidth: 'int8',
-  method: 'static',
+  bitWidth: "int8",
+  method: "static",
   calibrationSamples: 1000,
 });
 
 const result = await quantizer.quantize(
-  '/models/intelligence-classifier-v1.ckpt',
-  '/models/intelligence-classifier-v1-int8.ckpt'
+  "/models/intelligence-classifier-v1.ckpt",
+  "/models/intelligence-classifier-v1-int8.ckpt"
 );
 
 console.log(`Original size: ${result.originalSize / (1024 * 1024)} MB`);
@@ -206,15 +206,15 @@ console.log(`Compression ratio: ${result.compressionRatio}x`);
 Remove unnecessary weights:
 
 ```typescript
-import { ModelPruner } from '@intelgraph/model-optimization';
+import { ModelPruner } from "@intelgraph/model-optimization";
 
 const pruner = new ModelPruner({
-  method: 'magnitude',
+  method: "magnitude",
   pruningRate: 0.5, // Remove 50% of weights
   fineTuneEpochs: 10,
 });
 
-const result = await pruner.prune('/models/intelligence-classifier-v1.ckpt');
+const result = await pruner.prune("/models/intelligence-classifier-v1.ckpt");
 
 console.log(`Original parameters: ${result.originalParams}`);
 console.log(`Pruned parameters: ${result.prunedParams}`);
@@ -226,14 +226,14 @@ console.log(`Sparsity: ${result.sparsity * 100}%`);
 Train smaller student model from teacher:
 
 ```typescript
-import { KnowledgeDistiller } from '@intelgraph/model-optimization';
+import { KnowledgeDistiller } from "@intelgraph/model-optimization";
 
 const distiller = new KnowledgeDistiller({
-  teacherModelId: 'bert-large',
-  studentModelId: 'bert-small',
+  teacherModelId: "bert-large",
+  studentModelId: "bert-small",
   temperature: 4.0,
   alpha: 0.7, // Weight for distillation loss
-  beta: 0.3,  // Weight for student loss
+  beta: 0.3, // Weight for student loss
 });
 
 const result = await distiller.distill(trainingData);
@@ -248,14 +248,14 @@ console.log(`Teacher accuracy: ${result.metrics.teacherAccuracy}`);
 Export for cross-platform deployment:
 
 ```typescript
-import { ONNXExporter } from '@intelgraph/model-optimization';
+import { ONNXExporter } from "@intelgraph/model-optimization";
 
 const exporter = new ONNXExporter();
 
 // Export to ONNX
 const onnxPath = await exporter.export(
-  '/models/intelligence-classifier-v1.ckpt',
-  '/models/intelligence-classifier-v1.onnx',
+  "/models/intelligence-classifier-v1.ckpt",
+  "/models/intelligence-classifier-v1.onnx",
   {
     opsetVersion: 14,
     dynamicAxes: {
@@ -274,18 +274,15 @@ await exporter.optimize(onnxPath);
 Optimize for NVIDIA GPUs:
 
 ```typescript
-import { TensorRTOptimizer } from '@intelgraph/model-optimization';
+import { TensorRTOptimizer } from "@intelgraph/model-optimization";
 
 const trtOptimizer = new TensorRTOptimizer();
 
-const result = await trtOptimizer.optimize(
-  '/models/intelligence-classifier-v1.onnx',
-  {
-    precision: 'fp16',
-    maxBatchSize: 32,
-    workspace: 1 << 30, // 1GB
-  }
-);
+const result = await trtOptimizer.optimize("/models/intelligence-classifier-v1.onnx", {
+  precision: "fp16",
+  maxBatchSize: 32,
+  workspace: 1 << 30, // 1GB
+});
 
 console.log(`TensorRT engine: ${result.enginePath}`);
 console.log(`Speedup: ${result.speedup}x`);
@@ -296,20 +293,20 @@ console.log(`Speedup: ${result.speedup}x`);
 ### 1. Model Deployment
 
 ```typescript
-import type { DeploymentConfig } from '@intelgraph/deep-learning-core';
+import type { DeploymentConfig } from "@intelgraph/deep-learning-core";
 
 const deployConfig: DeploymentConfig = {
-  modelId: 'intelligence-classifier-v1',
-  version: 'v1.0.0',
-  environment: 'production',
+  modelId: "intelligence-classifier-v1",
+  version: "v1.0.0",
+  environment: "production",
 
   // Resource allocation
   replicas: 3,
   resources: {
-    cpuRequest: '4',
-    cpuLimit: '8',
-    memoryRequest: '8Gi',
-    memoryLimit: '16Gi',
+    cpuRequest: "4",
+    cpuLimit: "8",
+    memoryRequest: "8Gi",
+    memoryLimit: "16Gi",
     gpu: 1,
   },
 
@@ -330,9 +327,9 @@ const deployConfig: DeploymentConfig = {
 };
 
 // Deploy model
-const response = await fetch('http://localhost:3002/api/v1/models/deploy', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
+const response = await fetch("http://localhost:3002/api/v1/models/deploy", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
   body: JSON.stringify(deployConfig),
 });
 
@@ -343,13 +340,13 @@ console.log(`Model deployed: ${result.modelId} v${result.version}`);
 ### 2. Inference API
 
 ```typescript
-import type { InferenceRequest } from '@intelgraph/deep-learning-core';
+import type { InferenceRequest } from "@intelgraph/deep-learning-core";
 
 // Synchronous inference
 async function predict(input: any) {
   const request: InferenceRequest = {
-    modelId: 'intelligence-classifier-v1',
-    version: 'v1.0.0',
+    modelId: "intelligence-classifier-v1",
+    version: "v1.0.0",
     inputs: {
       features: input,
     },
@@ -357,9 +354,9 @@ async function predict(input: any) {
     returnMetadata: true,
   };
 
-  const response = await fetch('http://localhost:3002/api/v1/predict', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+  const response = await fetch("http://localhost:3002/api/v1/predict", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(request),
   });
 
@@ -367,10 +364,10 @@ async function predict(input: any) {
 }
 
 // Use prediction
-const result = await predict([0.1, 0.2, 0.3, /* ... */]);
-console.log('Predictions:', result.predictions);
-console.log('Confidences:', result.confidences);
-console.log('Inference time:', result.metadata.inferenceTime, 'ms');
+const result = await predict([0.1, 0.2, 0.3 /* ... */]);
+console.log("Predictions:", result.predictions);
+console.log("Confidences:", result.confidences);
+console.log("Inference time:", result.metadata.inferenceTime, "ms");
 ```
 
 ### 3. Batch Inference
@@ -380,14 +377,14 @@ For high-throughput scenarios:
 ```typescript
 async function batchPredict(inputs: any[]) {
   const requests = inputs.map((input) => ({
-    modelId: 'intelligence-classifier-v1',
+    modelId: "intelligence-classifier-v1",
     inputs: { features: input },
   }));
 
   const promises = requests.map((request) =>
-    fetch('http://localhost:3002/api/v1/predict', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+    fetch("http://localhost:3002/api/v1/predict", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(request),
     }).then((res) => res.json())
   );
@@ -406,14 +403,14 @@ Deploy multiple model versions:
 
 ```typescript
 // Deploy version A
-await deployModel({ ...config, version: 'v1.0.0' });
+await deployModel({ ...config, version: "v1.0.0" });
 
 // Deploy version B
-await deployModel({ ...config, version: 'v1.1.0' });
+await deployModel({ ...config, version: "v1.1.0" });
 
 // Route 90% to v1.0.0, 10% to v1.1.0
 async function predictWithABTest(input: any) {
-  const version = Math.random() < 0.9 ? 'v1.0.0' : 'v1.1.0';
+  const version = Math.random() < 0.9 ? "v1.0.0" : "v1.1.0";
 
   return await predict({
     ...input,
@@ -429,12 +426,12 @@ async function predictWithABTest(input: any) {
 ```typescript
 // Get model metrics
 const response = await fetch(
-  'http://localhost:3002/api/v1/models/intelligence-classifier-v1/metrics'
+  "http://localhost:3002/api/v1/models/intelligence-classifier-v1/metrics"
 );
 
 const metrics = await response.json();
 
-console.log('Metrics:', {
+console.log("Metrics:", {
   requestsPerSecond: metrics.requestsPerSecond,
   averageLatency: metrics.averageLatency,
   p95Latency: metrics.p95Latency,
@@ -447,11 +444,11 @@ console.log('Metrics:', {
 
 ```typescript
 // Check service health
-const healthResponse = await fetch('http://localhost:3002/health');
+const healthResponse = await fetch("http://localhost:3002/health");
 const health = await healthResponse.json();
 
-console.log('Service Status:', health.status);
-console.log('Deployed Models:', health.deployedModels);
+console.log("Service Status:", health.status);
+console.log("Deployed Models:", health.deployedModels);
 ```
 
 ### 3. Logging
@@ -465,8 +462,8 @@ const logger = {
       input,
       output,
       latency,
-      modelId: 'intelligence-classifier-v1',
-      version: 'v1.0.0',
+      modelId: "intelligence-classifier-v1",
+      version: "v1.0.0",
     });
   },
 };
@@ -489,13 +486,13 @@ const logger = {
 
 ### Expected Performance
 
-| Model Size | Hardware | Batch Size | Throughput | Latency (p95) |
-|-----------|----------|------------|------------|---------------|
-| Small (< 100MB) | CPU | 1 | 100 req/s | 15ms |
-| Small (< 100MB) | GPU | 32 | 500 req/s | 80ms |
-| Medium (100MB-1GB) | CPU | 1 | 20 req/s | 60ms |
-| Medium (100MB-1GB) | GPU | 32 | 200 req/s | 180ms |
-| Large (> 1GB) | GPU | 32 | 50 req/s | 700ms |
+| Model Size         | Hardware | Batch Size | Throughput | Latency (p95) |
+| ------------------ | -------- | ---------- | ---------- | ------------- |
+| Small (< 100MB)    | CPU      | 1          | 100 req/s  | 15ms          |
+| Small (< 100MB)    | GPU      | 32         | 500 req/s  | 80ms          |
+| Medium (100MB-1GB) | CPU      | 1          | 20 req/s   | 60ms          |
+| Medium (100MB-1GB) | GPU      | 32         | 200 req/s  | 180ms         |
+| Large (> 1GB)      | GPU      | 32         | 50 req/s   | 700ms         |
 
 ### Cost Optimization
 

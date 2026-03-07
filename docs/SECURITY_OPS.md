@@ -28,10 +28,11 @@ To trigger a rotation (Administrative action):
 
 ```typescript
 // Programmatic rotation
-await SecretManager.getInstance().rotateSecret('DATABASE_URL');
+await SecretManager.getInstance().rotateSecret("DATABASE_URL");
 ```
 
 This will:
+
 1. Generate a new secret (via Vault).
 2. Update the application state (if possible).
 3. Log the rotation to `audit_logs`.
@@ -39,6 +40,7 @@ This will:
 ### Emergency Rotation
 
 If a secret is compromised:
+
 1. Revoke the secret immediately in Vault/AWS.
 2. Generate a new secret.
 3. Restart the service to flush any in-memory caches (if `SecretManager` caching is aggressive).
@@ -49,6 +51,7 @@ If a secret is compromised:
 A pre-commit hook (`scripts/scan_secrets.py`) scans all staged files for high-entropy strings and known patterns (AWS keys, Private Keys).
 
 To run manually:
+
 ```bash
 python3 scripts/scan_secrets.py --all
 ```
@@ -66,6 +69,7 @@ If these are missing, it falls back to HTTP (warns in logs).
 ## Security Headers
 
 The following headers are enforced via `helmet`:
+
 - `Strict-Transport-Security`
 - `Content-Security-Policy`
 - `X-Frame-Options: DENY`

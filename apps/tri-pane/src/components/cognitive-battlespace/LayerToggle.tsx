@@ -1,6 +1,6 @@
-import React from 'react';
+import React from "react";
 
-export type Layer = 'reality' | 'narrative' | 'belief';
+export type Layer = "reality" | "narrative" | "belief";
 
 export function LayerToggle(props: {
   enabled: Record<Layer, boolean>;
@@ -12,11 +12,11 @@ export function LayerToggle(props: {
 
   return (
     <div className="flex items-center gap-2">
-      {(['reality', 'narrative', 'belief'] as Layer[]).map((layer) => (
+      {(["reality", "narrative", "belief"] as Layer[]).map((layer) => (
         <button
           key={layer}
           className={`rounded-full border px-3 py-1 text-xs ${
-            props.enabled[layer] ? 'bg-sand text-midnight' : 'text-sand'
+            props.enabled[layer] ? "bg-sand text-midnight" : "text-sand"
           }`}
           onClick={() => toggle(layer)}
         >

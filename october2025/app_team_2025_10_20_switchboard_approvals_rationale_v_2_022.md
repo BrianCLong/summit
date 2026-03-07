@@ -101,7 +101,7 @@ switchboard/
 
 ```ts
 // packages/api-client/src/types/approvals.ts
-export type RiskLevel = 'low' | 'medium' | 'high';
+export type RiskLevel = "low" | "medium" | "high";
 export interface RationaleTemplate {
   id: string;
   name: string;
@@ -118,7 +118,7 @@ export interface ApprovalRequest {
   risk: RiskLevel;
   requesterId: string;
   rationale: { templateId?: string; text: string };
-  status: 'pending' | 'approved' | 'denied' | 'escalated';
+  status: "pending" | "approved" | "denied" | "escalated";
   createdAt: string;
 }
 export interface ReceiptRef {
@@ -132,9 +132,9 @@ export interface ReceiptRef {
 
 ```tsx
 // apps/web/src/features/approvals/components/ApprovalPanel.tsx
-import { useState } from 'react';
-import { Check, X, Shield } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { useState } from "react";
+import { Check, X, Shield } from "lucide-react";
+import { Button } from "@/components/ui/button";
 export default function ApprovalPanel() {
   const [loading, setLoading] = useState(false);
   // TODO: wire to api-client, OPA preflight, receipts

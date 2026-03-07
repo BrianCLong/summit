@@ -2,7 +2,7 @@ name: Chronos Nightly NL→DAG→Exec Smoke
 
 on:
   schedule:
-    - cron: '30 3 * * *'
+    - cron: "30 3 * * *"
   workflow_dispatch: {}
 
 jobs:
@@ -21,7 +21,7 @@ jobs:
           node dist/cli.js ../../examples/resize-images.yaml > /tmp/ir.json
       - uses: actions/setup-go@v5
         with:
-          go-version: '1.22'
+          go-version: "1.22"
       - name: Dry-run execution
         run: |
           cd orchestration/runtime

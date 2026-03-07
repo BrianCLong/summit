@@ -57,11 +57,11 @@ jobs:
       - name: Install cosign
         uses: sigstore/cosign-installer@v3
         with:
-          cosign-release: 'v2.2.4'
+          cosign-release: "v2.2.4"
 
       - name: Sign and attach attestations
         env:
-          COSIGN_EXPERIMENTAL: '1'
+          COSIGN_EXPERIMENTAL: "1"
           IMAGE_REPOSITORY: ghcr.io/owner/app
           IMAGE_TAG: ${{ steps.image-tag.outputs.tag }}
         run: |

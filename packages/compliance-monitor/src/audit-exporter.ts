@@ -1,10 +1,10 @@
-import fs from 'fs/promises';
-import path from 'path';
-import { ControlRegistry } from './control-registry.js';
-import { ControlRunner } from './control-runner.js';
-import { NarrativeGenerator } from './narrative-generator.js';
-import { EvidenceStore } from './evidence-store.js';
-import { ExceptionRegistry } from './exception-registry.js';
+import fs from "fs/promises";
+import path from "path";
+import { ControlRegistry } from "./control-registry.js";
+import { ControlRunner } from "./control-runner.js";
+import { NarrativeGenerator } from "./narrative-generator.js";
+import { EvidenceStore } from "./evidence-store.js";
+import { ExceptionRegistry } from "./exception-registry.js";
 
 export interface AuditBundleManifest {
   generatedAt: Date;
@@ -38,31 +38,33 @@ export class AuditExporter {
   async exportBundle(outputDir: string): Promise<AuditBundleManifest> {
     await fs.mkdir(outputDir, { recursive: true });
     const controls = this.registry.list();
-    const controlsPath = path.join(outputDir, 'controls.json');
+    const controlsPath = path.join(outputDir, "controls.json");
     await fs.writeFile(controlsPath, JSON.stringify(controls, null, 2));
 
-    const evidencePath = path.join(outputDir, 'evidence.json');
-    const allEvidence = await Promise.all(controls.map(control => this.evidenceStore.listEvidence(control.id)));
+    const evidencePath = path.join(outputDir, "evidence.json");
+    const allEvidence = await Promise.all(
+      controls.map((control) => this.evidenceStore.listEvidence(control.id))
+    );
     const flatEvidence = allEvidence.flat();
     await fs.writeFile(
       evidencePath,
       JSON.stringify(
-        flatEvidence.map(record => ({ ...record, createdAt: record.createdAt.toISOString() })),
+        flatEvidence.map((record) => ({ ...record, createdAt: record.createdAt.toISOString() })),
         null,
         2
       )
     );
 
-    const narrativesPath = path.join(outputDir, 'narratives.md');
+    const narrativesPath = path.join(outputDir, "narratives.md");
     const narrativeDocs = await Promise.all(
-      controls.map(async control => {
+      controls.map(async (control) => {
         const evidence = await this.evidenceStore.latest(control.id);
         return this.narratives.build(control, evidence);
       })
     );
-    await fs.writeFile(narrativesPath, narrativeDocs.join('\n\n---\n\n'));
+    await fs.writeFile(narrativesPath, narrativeDocs.join("\n\n---\n\n"));
 
-    const exceptionsPath = path.join(outputDir, 'exceptions.json');
+    const exceptionsPath = path.join(outputDir, "exceptions.json");
     await fs.writeFile(exceptionsPath, JSON.stringify(this.exceptions.list(), null, 2));
 
     const manifest: AuditBundleManifest = {
@@ -73,7 +75,7 @@ export class AuditExporter {
       artifacts: [controlsPath, evidencePath, narrativesPath, exceptionsPath],
     };
 
-    await fs.writeFile(path.join(outputDir, 'manifest.json'), JSON.stringify(manifest, null, 2));
+    await fs.writeFile(path.join(outputDir, "manifest.json"), JSON.stringify(manifest, null, 2));
     return manifest;
   }
 }

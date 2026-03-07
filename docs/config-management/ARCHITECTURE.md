@@ -107,6 +107,7 @@ The Summit Configuration Management System provides centralized, versioned, and 
 ### 1. Configuration Service
 
 **Responsibilities:**
+
 - CRUD operations for configuration
 - Schema validation
 - Version management
@@ -118,6 +119,7 @@ The Summit Configuration Management System provides centralized, versioned, and 
 ### 2. Repository Layer
 
 **Consul Repository:**
+
 ```typescript
 class ConsulConfigRepository implements RepositoryWriter {
   - Store configurations in Consul KV
@@ -128,6 +130,7 @@ class ConsulConfigRepository implements RepositoryWriter {
 ```
 
 **PostgreSQL Repository:**
+
 ```typescript
 class PostgresConfigRepository implements RepositoryWriter {
   - Persistent storage for all versions
@@ -138,6 +141,7 @@ class PostgresConfigRepository implements RepositoryWriter {
 ```
 
 **Multi-Backend Repository:**
+
 ```typescript
 class MultiBackendRepository implements RepositoryWriter {
   - Consul (primary, real-time)
@@ -151,6 +155,7 @@ class MultiBackendRepository implements RepositoryWriter {
 ### 3. Secrets Management
 
 **Features:**
+
 - Integration with AWS Secrets Manager, GCP Secret Manager, Azure Key Vault
 - Automatic secret rotation
 - Version tracking
@@ -158,6 +163,7 @@ class MultiBackendRepository implements RepositoryWriter {
 - Encryption at rest and in transit
 
 **Rotation Policies:**
+
 ```typescript
 interface RotationPolicy {
   secretId: string;
@@ -171,6 +177,7 @@ interface RotationPolicy {
 ### 4. Approval Workflow
 
 **Workflow States:**
+
 ```
 PENDING → APPROVED → APPLIED
          ↓
@@ -178,6 +185,7 @@ PENDING → APPROVED → APPLIED
 ```
 
 **Implementation:**
+
 ```typescript
 interface ApprovalWorkflow {
   changeId: string;
@@ -187,7 +195,7 @@ interface ApprovalWorkflow {
   requestedAt: Date;
   approvers: string[];
   approvals: Approval[];
-  status: 'pending' | 'approved' | 'rejected' | 'applied';
+  status: "pending" | "approved" | "rejected" | "applied";
   autoApproveFor?: string[]; // environments with auto-approval
 }
 ```
@@ -195,6 +203,7 @@ interface ApprovalWorkflow {
 ### 5. Drift Detection
 
 **Continuous Monitoring:**
+
 - Periodic comparison of expected vs actual configuration
 - Automatic alerts on drift
 - Optional auto-remediation
@@ -203,6 +212,7 @@ interface ApprovalWorkflow {
 ### 6. CLI Tool
 
 **Commands:**
+
 ```bash
 # Configuration management
 summit-config get <config-id> [--env production]
@@ -279,12 +289,14 @@ summit-config schema validate <config-id> <config-file>
 ### Consul (Primary)
 
 **Use Cases:**
+
 - Real-time configuration distribution
 - Service discovery integration
 - Dynamic updates
 - Leader election
 
 **Schema:**
+
 ```
 summit/config/{configId}/latest → ConfigVersion
 summit/config/{configId}/versions/{versionNumber} → ConfigVersion
@@ -294,12 +306,14 @@ summit/config/{configId}/applied/{environment} → AppliedState
 ### PostgreSQL (Persistent)
 
 **Use Cases:**
+
 - Audit trail
 - Point-in-time recovery
 - Complex queries
 - Long-term storage
 
 **Schema:**
+
 ```sql
 CREATE TABLE config_versions (
   id UUID PRIMARY KEY,
@@ -365,6 +379,7 @@ CREATE TABLE secret_rotation_policies (
 ### In-Memory (Cache)
 
 **Use Cases:**
+
 - Fast local access
 - Offline operation
 - Reduced latency
@@ -376,6 +391,7 @@ CREATE TABLE secret_rotation_policies (
 ### Access Control
 
 **RBAC Policies:**
+
 ```yaml
 # Read-only access
 roles/config-reader:
@@ -406,6 +422,7 @@ roles/secrets-admin:
 ### Audit Trail
 
 **All operations logged:**
+
 - Who: Actor identity
 - What: Operation and data
 - When: Timestamp (UTC)
@@ -458,13 +475,13 @@ spec:
   template:
     spec:
       containers:
-      - name: config-service
-        image: summit/config-service:latest
-        envFrom:
-        - configMapRef:
-            name: config-service-config
-        - secretRef:
-            name: config-service-secrets
+        - name: config-service
+          image: summit/config-service:latest
+          envFrom:
+            - configMapRef:
+                name: config-service-config
+            - secretRef:
+                name: config-service-secrets
 ```
 
 ---

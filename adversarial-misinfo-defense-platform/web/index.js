@@ -1,26 +1,26 @@
 /**
  * Main entry point for Adversarial Misinformation Defense Platform Web UI
  */
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import React from "react";
+import ReactDOM from "react-dom/client";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 // Import components
-import App from './components/App';
-import Dashboard from './components/Dashboard';
-import ScenarioBuilder from './components/ScenarioBuilder';
-import ExerciseRunner from './components/ExerciseRunner';
-import ValidationSuite from './components/ValidationSuite';
-import TrainingCenter from './components/TrainingCenter';
-import TacticEvolver from './components/TacticEvolver';
-import Reports from './components/Reports';
+import App from "./components/App";
+import Dashboard from "./components/Dashboard";
+import ScenarioBuilder from "./components/ScenarioBuilder";
+import ExerciseRunner from "./components/ExerciseRunner";
+import ValidationSuite from "./components/ValidationSuite";
+import TrainingCenter from "./components/TrainingCenter";
+import TacticEvolver from "./components/TacticEvolver";
+import Reports from "./components/Reports";
 
 // Create router
 const router = createBrowserRouter([
   {
-    path: '/',
+    path: "/",
     element: <App />,
     children: [
       {
@@ -28,27 +28,27 @@ const router = createBrowserRouter([
         element: <Dashboard />,
       },
       {
-        path: 'scenarios',
+        path: "scenarios",
         element: <ScenarioBuilder />,
       },
       {
-        path: 'exercises',
+        path: "exercises",
         element: <ExerciseRunner />,
       },
       {
-        path: 'validation',
+        path: "validation",
         element: <ValidationSuite />,
       },
       {
-        path: 'training',
+        path: "training",
         element: <TrainingCenter />,
       },
       {
-        path: 'evolution',
+        path: "evolution",
         element: <TacticEvolver />,
       },
       {
-        path: 'reports',
+        path: "reports",
         element: <Reports />,
       },
     ],
@@ -56,10 +56,10 @@ const router = createBrowserRouter([
 ]);
 
 // Render application
-const root = ReactDOM.createRoot(document.getElementById('root'));
+const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
     <RouterProvider router={router} />
     <ToastContainer />
-  </React.StrictMode>,
+  </React.StrictMode>
 );

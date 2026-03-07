@@ -10,8 +10,8 @@
  * - Cache warming
  */
 
-import { EventEmitter } from 'events';
-import { CompressionManager, CompressionType } from '../storage/compression-manager';
+import { EventEmitter } from "events";
+import { CompressionManager, CompressionType } from "../storage/compression-manager";
 
 export interface CacheEntry {
   queryId: string;
@@ -54,7 +54,7 @@ export class ResultCache extends EventEmitter {
   };
 
   constructor(
-    maxSizeBytes: number = 1024 * 1024 * 1024, // 1GB default
+    maxSizeBytes: number = 1024 * 1024 * 1024 // 1GB default
   ) {
     super();
     this.maxSize = maxSizeBytes;
@@ -69,7 +69,7 @@ export class ResultCache extends EventEmitter {
 
     if (!entry) {
       this.stats.misses++;
-      this.emit('cache:miss', { queryHash });
+      this.emit("cache:miss", { queryHash });
       return null;
     }
 
@@ -86,7 +86,7 @@ export class ResultCache extends EventEmitter {
     this.updateAccessOrder(queryHash);
 
     this.stats.hits++;
-    this.emit('cache:hit', { queryHash, accessCount: entry.metadata.accessCount });
+    this.emit("cache:hit", { queryHash, accessCount: entry.metadata.accessCount });
 
     // Decompress if needed
     if (entry.metadata.compressed) {
@@ -108,7 +108,7 @@ export class ResultCache extends EventEmitter {
       columns: string[];
       executionTimeMs: number;
     },
-    ttl?: number,
+    ttl?: number
   ): Promise<void> {
     const resultSize = this.estimateSize(result);
 
@@ -148,7 +148,7 @@ export class ResultCache extends EventEmitter {
     this.cache.set(queryHash, entry);
     this.updateAccessOrder(queryHash);
 
-    this.emit('cache:set', {
+    this.emit("cache:set", {
       queryHash,
       size: compressedSize,
       compressed,
@@ -167,7 +167,7 @@ export class ResultCache extends EventEmitter {
         this.accessOrder.splice(index, 1);
       }
 
-      this.emit('cache:delete', { queryHash });
+      this.emit("cache:delete", { queryHash });
     }
 
     return deleted;
@@ -187,7 +187,7 @@ export class ResultCache extends EventEmitter {
       }
     }
 
-    this.emit('cache:invalidated', { tableName, count: invalidated });
+    this.emit("cache:invalidated", { tableName, count: invalidated });
 
     return invalidated;
   }
@@ -200,7 +200,7 @@ export class ResultCache extends EventEmitter {
     this.cache.clear();
     this.accessOrder = [];
 
-    this.emit('cache:cleared', { count });
+    this.emit("cache:cleared", { count });
   }
 
   /**
@@ -213,7 +213,7 @@ export class ResultCache extends EventEmitter {
 
     const totalUncompressed = Array.from(this.cache.values()).reduce(
       (sum, entry) => sum + entry.metadata.uncompressedSize,
-      0,
+      0
     );
 
     const totalRequests = this.stats.hits + this.stats.misses;
@@ -226,8 +226,7 @@ export class ResultCache extends EventEmitter {
       hits: this.stats.hits,
       misses: this.stats.misses,
       evictions: this.stats.evictions,
-      compressionRatio:
-        totalSize > 0 ? totalUncompressed / totalSize : 1,
+      compressionRatio: totalSize > 0 ? totalUncompressed / totalSize : 1,
     };
   }
 
@@ -261,18 +260,13 @@ export class ResultCache extends EventEmitter {
       queryId: string;
       result: any[];
       metadata: any;
-    }>,
+    }>
   ): Promise<void> {
     for (const query of queries) {
-      await this.set(
-        query.queryHash,
-        query.queryId,
-        query.result,
-        query.metadata,
-      );
+      await this.set(query.queryHash, query.queryId, query.result, query.metadata);
     }
 
-    this.emit('cache:warmed', { count: queries.length });
+    this.emit("cache:warmed", { count: queries.length });
   }
 
   // Private methods
@@ -284,7 +278,7 @@ export class ResultCache extends EventEmitter {
     const serialized = JSON.stringify(result);
     const compressed = await this.compressionManager.compress(
       Buffer.from(serialized),
-      CompressionType.ZSTD,
+      CompressionType.ZSTD
     );
 
     return {
@@ -296,7 +290,7 @@ export class ResultCache extends EventEmitter {
   private async decompressResult(entry: CacheEntry): Promise<any[]> {
     const decompressed = await this.compressionManager.decompress(
       entry.result,
-      CompressionType.ZSTD,
+      CompressionType.ZSTD
     );
 
     return JSON.parse(decompressed.toString());
@@ -308,7 +302,9 @@ export class ResultCache extends EventEmitter {
   }
 
   private isExpired(entry: CacheEntry): boolean {
-    if (!entry.ttl) {return false;}
+    if (!entry.ttl) {
+      return false;
+    }
 
     const age = Date.now() - entry.metadata.createdAt.getTime();
     return age > entry.ttl;
@@ -332,15 +328,12 @@ export class ResultCache extends EventEmitter {
     }
 
     // Evict LRU entries until we have space
-    while (
-      this.cache.size > 0 &&
-      currentSize + requiredSize > this.maxSize
-    ) {
+    while (this.cache.size > 0 && currentSize + requiredSize > this.maxSize) {
       const lruKey = this.accessOrder.shift();
       if (lruKey) {
         this.cache.delete(lruKey);
         this.stats.evictions++;
-        this.emit('cache:evicted', { queryHash: lruKey });
+        this.emit("cache:evicted", { queryHash: lruKey });
       }
     }
   }

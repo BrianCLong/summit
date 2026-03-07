@@ -1,13 +1,13 @@
-import { Router } from 'express';
-import config from 'config';
+import { Router } from "express";
+import config from "config";
 
 const router = Router();
 
-router.get('/health', (_req, res) => {
+router.get("/health", (_req, res) => {
   res.json({
-    status: 'ok',
-    service: config.get<string>('service.name'),
-    timestamp: new Date().toISOString()
+    status: "ok",
+    service: config.get<string>("service.name"),
+    timestamp: new Date().toISOString(),
   });
 });
 

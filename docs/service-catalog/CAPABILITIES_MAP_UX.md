@@ -27,18 +27,17 @@ This document specifies the user experience design for the Capabilities Map—th
 
 ### Primary Goals
 
-| Goal | Metric | Target |
-|------|--------|--------|
-| **Find owner in < 30 seconds** | Time to answer "who owns X?" | < 30s |
-| **Understand dependencies** | Time to identify critical deps | < 60s |
-| **Assess blast radius** | Time to see impact of failure | < 45s |
-| **Check health status** | Time to see if service is healthy | < 10s |
+| Goal                           | Metric                            | Target |
+| ------------------------------ | --------------------------------- | ------ |
+| **Find owner in < 30 seconds** | Time to answer "who owns X?"      | < 30s  |
+| **Understand dependencies**    | Time to identify critical deps    | < 60s  |
+| **Assess blast radius**        | Time to see impact of failure     | < 45s  |
+| **Check health status**        | Time to see if service is healthy | < 10s  |
 
 ### User Personas
 
 ```yaml
 personas:
-
   on_call_engineer:
     name: "On-Call Engineer"
     goal: "Quickly identify owner and runbook during incident"
@@ -225,6 +224,7 @@ The default landing experience—a visual map of business capabilities.
 ```
 
 **Interactions:**
+
 - Click capability → Capability detail panel
 - Hover capability → Quick stats tooltip
 - Click domain header → Expand/collapse
@@ -337,6 +337,7 @@ Interactive visualization of service dependencies.
 ```
 
 **Graph Interactions:**
+
 - Click node → Select and show details
 - Double-click → Navigate to service detail
 - Drag node → Reposition
@@ -493,12 +494,12 @@ Omnisearch that finds services, capabilities, owners, and documentation.
 
 Context-sensitive actions available throughout the UI.
 
-| Context | Quick Actions |
-|---------|--------------|
-| Service | Page Owner, View Runbook, Open Dashboard, View Code |
-| Capability | See Services, Contact Owner, View Docs |
-| Owner | Slack, Email, View Services |
-| Health Alert | View Runbook, Page On-Call, Open Incident |
+| Context      | Quick Actions                                       |
+| ------------ | --------------------------------------------------- |
+| Service      | Page Owner, View Runbook, Open Dashboard, View Code |
+| Capability   | See Services, Contact Owner, View Docs              |
+| Owner        | Slack, Email, View Services                         |
+| Health Alert | View Runbook, Page On-Call, Open Incident           |
 
 ### Keyboard Shortcuts
 
@@ -531,16 +532,16 @@ m               Open metrics/dashboard
 ```yaml
 colors:
   # Health status
-  health_green: "#22C55E"     # Healthy
-  health_yellow: "#F59E0B"    # Degraded
-  health_red: "#EF4444"       # Down
-  health_gray: "#9CA3AF"      # Unknown
+  health_green: "#22C55E" # Healthy
+  health_yellow: "#F59E0B" # Degraded
+  health_red: "#EF4444" # Down
+  health_gray: "#9CA3AF" # Unknown
 
   # Service tiers
-  tier_critical: "#7C3AED"    # Purple
-  tier_high: "#3B82F6"        # Blue
-  tier_medium: "#10B981"      # Teal
-  tier_low: "#6B7280"         # Gray
+  tier_critical: "#7C3AED" # Purple
+  tier_high: "#3B82F6" # Blue
+  tier_medium: "#10B981" # Teal
+  tier_low: "#6B7280" # Gray
 
   # Domains
   domain_security: "#DC2626"
@@ -577,18 +578,18 @@ typography:
 
 Use Lucide icons for consistency:
 
-| Concept | Icon |
-|---------|------|
-| Service | `server` |
-| Capability | `layers` |
-| Owner | `users` |
-| Health | `heart-pulse` |
-| Dependency | `git-branch` |
-| Documentation | `file-text` |
-| Runbook | `book-open` |
-| Dashboard | `bar-chart-2` |
-| Alert | `bell` |
-| Search | `search` |
+| Concept       | Icon          |
+| ------------- | ------------- |
+| Service       | `server`      |
+| Capability    | `layers`      |
+| Owner         | `users`       |
+| Health        | `heart-pulse` |
+| Dependency    | `git-branch`  |
+| Documentation | `file-text`   |
+| Runbook       | `book-open`   |
+| Dashboard     | `bar-chart-2` |
+| Alert         | `bell`        |
+| Search        | `search`      |
 
 ---
 
@@ -691,11 +692,11 @@ Hover over health indicator shows details:
 
 ### Responsive Design
 
-| Breakpoint | Layout |
-|------------|--------|
-| Desktop (>1200px) | Full layout with sidebars |
+| Breakpoint          | Layout                             |
+| ------------------- | ---------------------------------- |
+| Desktop (>1200px)   | Full layout with sidebars          |
 | Tablet (768-1200px) | Collapsible sidebar, smaller graph |
-| Mobile (<768px) | Stack layout, list view only |
+| Mobile (<768px)     | Stack layout, list view only       |
 
 ### Accessibility Requirements
 
@@ -831,14 +832,14 @@ performance:
 
 ### Performance Targets
 
-| Metric | Target |
-|--------|--------|
-| First Contentful Paint | < 1.5s |
-| Time to Interactive | < 3s |
-| Largest Contentful Paint | < 2.5s |
-| Search response | < 200ms |
+| Metric                   | Target  |
+| ------------------------ | ------- |
+| First Contentful Paint   | < 1.5s  |
+| Time to Interactive      | < 3s    |
+| Largest Contentful Paint | < 2.5s  |
+| Search response          | < 200ms |
 | Graph render (100 nodes) | < 500ms |
-| Health update latency | < 1s |
+| Health update latency    | < 1s    |
 
 ---
 

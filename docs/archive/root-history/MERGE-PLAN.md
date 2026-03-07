@@ -236,20 +236,20 @@ This document outlines the comprehensive strategy for merging Sprint 27 delivera
 # tests/flaky-tests.yml
 flaky_tests:
   quarantined:
-    - test: 'AuthController.integration.test.ts:WebAuthn flow with network timeout'
-      reason: 'Network timing dependency'
-      quarantine_date: '2024-09-19'
-      assigned_to: 'auth-team'
+    - test: "AuthController.integration.test.ts:WebAuthn flow with network timeout"
+      reason: "Network timing dependency"
+      quarantine_date: "2024-09-19"
+      assigned_to: "auth-team"
 
-    - test: 'GraphQLResolver.stress.test.ts:Concurrent query handling'
-      reason: 'Race condition in test setup'
-      quarantine_date: '2024-09-19'
-      assigned_to: 'api-team'
+    - test: "GraphQLResolver.stress.test.ts:Concurrent query handling"
+      reason: "Race condition in test setup"
+      quarantine_date: "2024-09-19"
+      assigned_to: "api-team"
 
-    - test: 'E2E.playwright.test.ts:Full user journey with file upload'
-      reason: 'File system timing on CI'
-      quarantine_date: '2024-09-19'
-      assigned_to: 'e2e-team'
+    - test: "E2E.playwright.test.ts:Full user journey with file upload"
+      reason: "File system timing on CI"
+      quarantine_date: "2024-09-19"
+      assigned_to: "e2e-team"
 
   retry_patterns:
     network_tests:
@@ -362,14 +362,14 @@ export class FlakyTestDetector {
 # ops/alerts/sprint27-merge.yml
 alerts:
   critical:
-    error_rate: '> 5%'
-    response_time_p95: '> 1000ms'
-    memory_usage: '> 90%'
+    error_rate: "> 5%"
+    response_time_p95: "> 1000ms"
+    memory_usage: "> 90%"
 
   warning:
-    error_rate: '> 1%'
-    response_time_p95: '> 500ms'
-    memory_usage: '> 80%'
+    error_rate: "> 1%"
+    response_time_p95: "> 500ms"
+    memory_usage: "> 80%"
 ```
 
 ---

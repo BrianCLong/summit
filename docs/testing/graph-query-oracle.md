@@ -42,18 +42,18 @@ The oracle uses the golden dataset from `data/golden-path/demo-investigation.jso
 
 ### Entities
 
-| Index | Type | Name | Key Properties |
-|-------|------|------|----------------|
-| 0 | PERSON | Avery Patel | role: analyst, affiliation: Helios Trust |
-| 1 | ORGANIZATION | Helios Trust | sector: finance, risk_score: 62 |
-| 2 | LOCATION | Lisbon | country: Portugal, lat: 38.7223, lng: -9.1393 |
+| Index | Type         | Name         | Key Properties                                |
+| ----- | ------------ | ------------ | --------------------------------------------- |
+| 0     | PERSON       | Avery Patel  | role: analyst, affiliation: Helios Trust      |
+| 1     | ORGANIZATION | Helios Trust | sector: finance, risk_score: 62               |
+| 2     | LOCATION     | Lisbon       | country: Portugal, lat: 38.7223, lng: -9.1393 |
 
 ### Relationships
 
-| Type | From | To | Properties |
-|------|------|-----|------------|
-| REPRESENTS | Avery Patel (0) | Helios Trust (1) | since: 2024-03-04 |
-| OPERATES_IN | Helios Trust (1) | Lisbon (2) | headquarters: true |
+| Type        | From             | To               | Properties         |
+| ----------- | ---------------- | ---------------- | ------------------ |
+| REPRESENTS  | Avery Patel (0)  | Helios Trust (1) | since: 2024-03-04  |
+| OPERATES_IN | Helios Trust (1) | Lisbon (2)       | headquarters: true |
 
 ### Graph Structure
 
@@ -73,11 +73,13 @@ The oracle uses the golden dataset from `data/golden-path/demo-investigation.jso
 **Description**: Find the shortest path from Avery Patel to Helios Trust.
 
 **Expected Result**:
+
 - Path length: 1
 - Path: `[Avery Patel] -> [Helios Trust]`
 - Relationship: REPRESENTS
 
 **Validation**:
+
 - Exact node count: 2
 - Exact relationship count: 1
 - Path order preserved
@@ -87,11 +89,13 @@ The oracle uses the golden dataset from `data/golden-path/demo-investigation.jso
 **Description**: Find the shortest path from Avery Patel to Lisbon.
 
 **Expected Result**:
+
 - Path length: 2
 - Path: `[Avery Patel] -> [Helios Trust] -> [Lisbon]`
 - Relationships: REPRESENTS, OPERATES_IN
 
 **Validation**:
+
 - Exact node count: 3
 - Exact relationship count: 2
 - Intermediate node is Helios Trust
@@ -101,10 +105,12 @@ The oracle uses the golden dataset from `data/golden-path/demo-investigation.jso
 **Description**: Query for a path between non-connected entities or non-existent IDs.
 
 **Expected Result**:
+
 - Path: null or empty
 - No error thrown
 
 **Validation**:
+
 - Result is null/empty
 - Query completes without error
 
@@ -113,10 +119,12 @@ The oracle uses the golden dataset from `data/golden-path/demo-investigation.jso
 **Description**: Find path from an entity to itself.
 
 **Expected Result**:
+
 - Path length: 0
 - Single node in path
 
 **Validation**:
+
 - Node count: 1
 - Relationship count: 0
 
@@ -129,12 +137,14 @@ The oracle uses the golden dataset from `data/golden-path/demo-investigation.jso
 **Description**: Query the neighborhood of Helios Trust at depth 1.
 
 **Expected Result**:
+
 - Center: Helios Trust
 - Depth 1: [Avery Patel, Lisbon]
 - Total entities: 3
 - Total relationships: 2
 
 **Validation**:
+
 - Entity count: 3
 - Relationship count: 2
 - All entity types present: Person, Organization, Location
@@ -144,11 +154,13 @@ The oracle uses the golden dataset from `data/golden-path/demo-investigation.jso
 **Description**: Query neighborhood of Helios Trust, filtered to Person type only.
 
 **Expected Result**:
+
 - Center: Helios Trust
 - Depth 1: [Avery Patel]
 - Total entities: 2
 
 **Validation**:
+
 - Only Person entities in results (besides center)
 - Lisbon excluded from results
 
@@ -157,9 +169,11 @@ The oracle uses the golden dataset from `data/golden-path/demo-investigation.jso
 **Description**: Query neighborhood filtering by REPRESENTS relationships.
 
 **Expected Result**:
+
 - Only relationships of type REPRESENTS returned
 
 **Validation**:
+
 - All relationships are REPRESENTS type
 - OPERATES_IN relationships excluded
 
@@ -168,10 +182,12 @@ The oracle uses the golden dataset from `data/golden-path/demo-investigation.jso
 **Description**: Query neighborhood with depth = 5 (beyond graph size).
 
 **Expected Result**:
+
 - Returns entire reachable graph
 - Does not exceed max depth limit
 
 **Validation**:
+
 - Result includes all 3 entities
 - truncated flag is false
 
@@ -184,10 +200,12 @@ The oracle uses the golden dataset from `data/golden-path/demo-investigation.jso
 **Description**: Retrieve an entity by its exact ID.
 
 **Expected Result**:
+
 - Returns the entity with matching properties
 - All required fields populated
 
 **Validation**:
+
 - Entity ID matches query
 - Entity type correct
 - Label/name matches expected
@@ -197,10 +215,12 @@ The oracle uses the golden dataset from `data/golden-path/demo-investigation.jso
 **Description**: Query for a non-existent entity ID.
 
 **Expected Result**:
+
 - Returns null
 - No error thrown
 
 **Validation**:
+
 - Result is null
 - No GraphQL errors
 
@@ -209,10 +229,12 @@ The oracle uses the golden dataset from `data/golden-path/demo-investigation.jso
 **Description**: Query all entities of type Organization.
 
 **Expected Result**:
+
 - Returns array containing Helios Trust
 - Pagination metadata correct
 
 **Validation**:
+
 - Count matches expected (1)
 - All results are of type Organization
 
@@ -225,9 +247,11 @@ The oracle uses the golden dataset from `data/golden-path/demo-investigation.jso
 **Description**: Get all outgoing relationships from Helios Trust.
 
 **Expected Result**:
+
 - Returns OPERATES_IN relationship to Lisbon
 
 **Validation**:
+
 - Source is Helios Trust
 - Target is Lisbon
 - Type is OPERATES_IN
@@ -237,9 +261,11 @@ The oracle uses the golden dataset from `data/golden-path/demo-investigation.jso
 **Description**: Get all incoming relationships to Helios Trust.
 
 **Expected Result**:
+
 - Returns REPRESENTS relationship from Avery Patel
 
 **Validation**:
+
 - Source is Avery Patel
 - Target is Helios Trust
 - Type is REPRESENTS
@@ -249,9 +275,11 @@ The oracle uses the golden dataset from `data/golden-path/demo-investigation.jso
 **Description**: Query relationships filtered by REPRESENTS type.
 
 **Expected Result**:
+
 - Only REPRESENTS relationships returned
 
 **Validation**:
+
 - All relationships are REPRESENTS type
 - Count matches expected
 
@@ -264,12 +292,14 @@ The oracle uses the golden dataset from `data/golden-path/demo-investigation.jso
 **Description**: Query overall graph statistics.
 
 **Expected Result**:
+
 - Entity count: 3
 - Relationship count: 2
 - Entity types: Person(1), Organization(1), Location(1)
 - Relationship types: REPRESENTS(1), OPERATES_IN(1)
 
 **Validation**:
+
 - Entity count >= 3
 - Relationship count >= 2
 - Type breakdown accurate
@@ -285,10 +315,12 @@ The oracle uses the golden dataset from `data/golden-path/demo-investigation.jso
 **Description**: Calculate degree centrality for all nodes.
 
 **Expected Result**:
+
 - Helios Trust has highest degree (2 connections)
 - Avery Patel and Lisbon have degree 1 each
 
 **Validation**:
+
 - Results sorted by score descending
 - Helios Trust ranked first
 - Tolerance: exact ordering for same scores (alphabetical tiebreaker)
@@ -298,9 +330,11 @@ The oracle uses the golden dataset from `data/golden-path/demo-investigation.jso
 **Description**: Identify the most connected node.
 
 **Expected Result**:
+
 - Helios Trust identified as hub (degree = 2)
 
 **Validation**:
+
 - Top result is Helios Trust
 - Score is 2
 
@@ -313,9 +347,11 @@ The oracle uses the golden dataset from `data/golden-path/demo-investigation.jso
 **Description**: Query with an invalid entity type.
 
 **Expected Result**:
+
 - Empty result set or validation error
 
 **Validation**:
+
 - No runtime exception
 - Appropriate error message if validation fails
 
@@ -324,9 +360,11 @@ The oracle uses the golden dataset from `data/golden-path/demo-investigation.jso
 **Description**: Query neighborhood with depth = -1.
 
 **Expected Result**:
+
 - Validation error or clamped to minimum (0 or 1)
 
 **Validation**:
+
 - No runtime exception
 - Query handled gracefully
 
@@ -335,10 +373,12 @@ The oracle uses the golden dataset from `data/golden-path/demo-investigation.jso
 **Description**: Query on an empty tenant/graph.
 
 **Expected Result**:
+
 - Empty result sets
 - No errors
 
 **Validation**:
+
 - Stats show 0 entities, 0 relationships
 - Queries return empty arrays
 
@@ -352,10 +392,10 @@ For deterministic queries, results must match exactly:
 
 ```typescript
 interface ExactMatchValidation {
-  nodeIds: string[];          // Exact set of node IDs
-  nodeCount: number;          // Exact count
-  relationshipCount: number;  // Exact count
-  pathOrder: string[];        // Ordered sequence
+  nodeIds: string[]; // Exact set of node IDs
+  nodeCount: number; // Exact count
+  relationshipCount: number; // Exact count
+  pathOrder: string[]; // Ordered sequence
 }
 ```
 
@@ -365,10 +405,10 @@ For non-deterministic results, validate set membership:
 
 ```typescript
 interface SetValidation {
-  mustInclude: string[];      // Required elements
-  mustExclude: string[];      // Forbidden elements
-  minCount: number;           // Minimum cardinality
-  maxCount: number;           // Maximum cardinality
+  mustInclude: string[]; // Required elements
+  mustExclude: string[]; // Forbidden elements
+  minCount: number; // Minimum cardinality
+  maxCount: number; // Maximum cardinality
 }
 ```
 
@@ -378,9 +418,9 @@ For ranking queries where ties are possible:
 
 ```typescript
 interface OrderingValidation {
-  topK: number;               // Check top K results
-  tiebreaker: 'alphabetical' | 'id' | 'any';
-  scoreTolerance: number;     // Float comparison epsilon
+  topK: number; // Check top K results
+  tiebreaker: "alphabetical" | "id" | "any";
+  scoreTolerance: number; // Float comparison epsilon
 }
 ```
 
@@ -388,13 +428,14 @@ interface OrderingValidation {
 
 ```typescript
 interface PerformanceThresholds {
-  maxLatencyMs: number;       // Query timeout
-  p95LatencyMs: number;       // 95th percentile target
-  p99LatencyMs: number;       // 99th percentile target
+  maxLatencyMs: number; // Query timeout
+  p95LatencyMs: number; // 95th percentile target
+  p99LatencyMs: number; // 99th percentile target
 }
 ```
 
 Default thresholds:
+
 - Simple queries: maxLatencyMs = 500
 - Pathfinding: maxLatencyMs = 1000
 - Neighborhood (depth 2): maxLatencyMs = 2000
@@ -410,6 +451,7 @@ The oracle produces a markdown report with the following structure:
 # Graph Query Oracle Report
 
 ## Summary
+
 - Total Scenarios: N
 - Passed: X
 - Failed: Y
@@ -419,28 +461,33 @@ The oracle produces a markdown report with the following structure:
 ## Results by Category
 
 ### Pathfinding
-| Scenario | Status | Latency (ms) | Details |
-|----------|--------|--------------|---------|
-| 1.1      | PASS   | 45           | -       |
+
+| Scenario | Status | Latency (ms) | Details      |
+| -------- | ------ | ------------ | ------------ |
+| 1.1      | PASS   | 45           | -            |
 | 1.2      | FAIL   | 67           | Missing node |
 
 ### Neighborhood
+
 ...
 
 ## Failures
 
 ### Scenario 1.2: Two-Hop Path
+
 - Expected: 3 nodes
 - Actual: 2 nodes
 - Diff: Missing intermediate node "Helios Trust"
 
 ## Performance Summary
-| Category      | Avg (ms) | P95 (ms) | P99 (ms) |
-|---------------|----------|----------|----------|
-| Pathfinding   | 52       | 89       | 120      |
-| Neighborhood  | 145      | 234      | 312      |
+
+| Category     | Avg (ms) | P95 (ms) | P99 (ms) |
+| ------------ | -------- | -------- | -------- |
+| Pathfinding  | 52       | 89       | 120      |
+| Neighborhood | 145      | 234      | 312      |
 
 ## Recommendations
+
 - Review pathfinding logic for scenario 1.2
 - Performance within thresholds
 ```
@@ -462,12 +509,12 @@ The oracle runs as part of the CI pipeline:
 
 ```yaml
 paths:
-  - 'services/graph-core/**'
-  - 'services/graph-api/**'
-  - 'services/graph-algos/**'
-  - 'packages/graph-*/**'
-  - 'server/src/services/Graph*'
-  - 'server/src/repos/*Repo.ts'
+  - "services/graph-core/**"
+  - "services/graph-api/**"
+  - "services/graph-algos/**"
+  - "packages/graph-*/**"
+  - "server/src/services/Graph*"
+  - "server/src/repos/*Repo.ts"
 ```
 
 ---
@@ -485,14 +532,14 @@ paths:
 
 ```typescript
 interface OracleScenario {
-  id: string;                 // Unique identifier (e.g., "path-1.1")
-  category: string;           // Category name
-  description: string;        // Human-readable description
-  setupRef: string;           // Reference to fixture/dataset
+  id: string; // Unique identifier (e.g., "path-1.1")
+  category: string; // Category name
+  description: string; // Human-readable description
+  setupRef: string; // Reference to fixture/dataset
   query: {
-    type: 'graphql' | 'rest'; // Query type
-    operation: string;        // Query/mutation name
-    variables: object;        // Query variables
+    type: "graphql" | "rest"; // Query type
+    operation: string; // Query/mutation name
+    variables: object; // Query variables
   };
   expected: {
     validation: ValidationRule[];

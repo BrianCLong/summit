@@ -7,15 +7,33 @@ import type { Entity } from '@/types'
 
 // Mock types if needed
 const mockEntities: Entity[] = [
-  { id: '1', name: 'John Doe', type: 'PERSON', confidence: 0.9, properties: {}, createdAt: '', updatedAt: '' },
-  { id: '2', name: 'Acme Corp', type: 'ORGANIZATION', confidence: 0.95, properties: {}, createdAt: '', updatedAt: '' }
+  {
+    id: '1',
+    name: 'John Doe',
+    type: 'PERSON',
+    confidence: 0.9,
+    properties: {},
+    createdAt: '',
+    updatedAt: '',
+  },
+  {
+    id: '2',
+    name: 'Acme Corp',
+    type: 'ORGANIZATION',
+    confidence: 0.95,
+    properties: {},
+    createdAt: '',
+    updatedAt: '',
+  },
 ]
 
 describe('InspectorPanel', () => {
   it('renders empty state when nothing selected', () => {
     useWorkbenchStore.setState({ selectedEntityIds: [] })
     render(<InspectorPanel entities={mockEntities} />)
-    expect(screen.getByText('Select an entity to view details')).toBeInTheDocument()
+    expect(
+      screen.getByText('Select an entity to view details')
+    ).toBeInTheDocument()
   })
 
   it('renders single entity details', () => {

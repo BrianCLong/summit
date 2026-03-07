@@ -3,7 +3,6 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-
 # Verifies commits are green before RC/GA promotion
 # Implements truth table-based check validation per REQUIRED_CHECKS_POLICY.json
 #

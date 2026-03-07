@@ -9,13 +9,13 @@ export interface DeployOptions {
 export class DeployCommand {
   async execute(options: DeployOptions): Promise<void> {
     // eslint-disable-next-line no-console
-    console.log('🚀 Deploying workflow');
+    console.log("🚀 Deploying workflow");
     // eslint-disable-next-line no-console
     console.log(`  file      : ${options.file}`);
     // eslint-disable-next-line no-console
     console.log(`  env       : ${options.env}`);
     // eslint-disable-next-line no-console
-    console.log(`  namespace : ${options.namespace ?? 'default'}`);
+    console.log(`  namespace : ${options.namespace ?? "default"}`);
     // eslint-disable-next-line no-console
     console.log(`  wait      : ${Boolean(options.wait)}`);
     // eslint-disable-next-line no-console

@@ -30,18 +30,16 @@ Twelve PRs to make schema changes safe & reversible, harden backups/DR, require 
 **`scripts/check-migration-plan.js`**
 
 ```js
-const fs = require('fs');
-const msg = process.env.PR_TITLE + ' ' + (process.env.PR_BODY || '');
+const fs = require("fs");
+const msg = process.env.PR_TITLE + " " + (process.env.PR_BODY || "");
 const touchesDb =
   /(db\/migrations|schema|prisma|sequelize|knex)/.test(msg) ||
-  (process.env.CHANGED_FILES || '')
-    .split('\n')
-    .some((p) => /db\/migrations|schema/.test(p));
-if (touchesDb && !fs.existsSync('SECURITY/migration-plan.md')) {
-  console.error('❌ DB change detected but SECURITY/migration-plan.md missing');
+  (process.env.CHANGED_FILES || "").split("\n").some((p) => /db\/migrations|schema/.test(p));
+if (touchesDb && !fs.existsSync("SECURITY/migration-plan.md")) {
+  console.error("❌ DB change detected but SECURITY/migration-plan.md missing");
   process.exit(1);
 }
-console.log('✅ Migration plan present or no DB change.');
+console.log("✅ Migration plan present or no DB change.");
 ```
 
 **`.github/workflows/migration-gate.yml`**
@@ -142,21 +140,18 @@ read_new_orders: { default: false, owners: [api] }
 **`scripts/backfill_orders.ts`**
 
 ```ts
-import { Pool } from 'pg';
+import { Pool } from "pg";
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 async function run() {
   const bsz = 1000;
   while (true) {
     const { rows } = await pool.query(
-      'SELECT id FROM orders WHERE new_total_cents IS NULL LIMIT $1',
-      [bsz],
+      "SELECT id FROM orders WHERE new_total_cents IS NULL LIMIT $1",
+      [bsz]
     );
     if (!rows.length) break;
     for (const r of rows) {
-      await pool.query(
-        'UPDATE orders SET new_total_cents = total_cents WHERE id=$1',
-        [r.id],
-      );
+      await pool.query("UPDATE orders SET new_total_cents = total_cents WHERE id=$1", [r.id]);
     }
   }
 }
@@ -173,9 +168,9 @@ run()
 ```ts
 export function writeOrder(db, order, flags) {
   return db.tx(async (t) => {
-    await t.insert('orders', order);
+    await t.insert("orders", order);
     if (flags.dual_write_orders) {
-      await t.none('UPDATE orders SET new_total_cents=$1 WHERE id=$2', [
+      await t.none("UPDATE orders SET new_total_cents=$1 WHERE id=$2", [
         order.total_cents,
         order.id,
       ]);
@@ -217,12 +212,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata: { name: db-green-pvc, namespace: prod }
 spec:
-  dataSource:
-    {
-      name: db-blue-snap,
-      kind: VolumeSnapshot,
-      apiGroup: snapshot.storage.k8s.io,
-    }
+  dataSource: { name: db-blue-snap, kind: VolumeSnapshot, apiGroup: snapshot.storage.k8s.io }
   storageClassName: gp3
   accessModes: [ReadWriteOnce]
   resources: { requests: { storage: 200Gi } }
@@ -249,8 +239,8 @@ stringData:
   AWS_SECRET_ACCESS_KEY: <ssm:db/backup/secret>
   WALG_S3_PREFIX: s3://intelgraph-prod-db/
   WALG_COMPRESSION_METHOD: brotli
-  WALG_DELTA_MAX_STEPS: '6'
-  WALG_UPLOAD_CONCURRENCY: '4'
+  WALG_DELTA_MAX_STEPS: "6"
+  WALG_UPLOAD_CONCURRENCY: "4"
 ```
 
 **`k8s/db/cron-backup.yaml`**
@@ -260,7 +250,7 @@ apiVersion: batch/v1
 kind: CronJob
 metadata: { name: pg-backup, namespace: prod }
 spec:
-  schedule: '*/30 * * * *'
+  schedule: "*/30 * * * *"
   jobTemplate:
     spec:
       template:
@@ -270,8 +260,8 @@ spec:
             - name: backup
               image: wal-g/wal-g:latest
               envFrom: [{ secretRef: { name: walg } }]
-              command: ['/bin/sh', '-c']
-              args: ['wal-g backup-push /var/lib/postgresql/data']
+              command: ["/bin/sh", "-c"]
+              args: ["wal-g backup-push /var/lib/postgresql/data"]
 ```
 
 **Rollback:** Disable CronJob; backups remain in last good state.
@@ -327,12 +317,12 @@ resource "aws_route53_record" "api" {
 **`server/middleware/reason.ts`**
 
 ```ts
-import type { Request, Response, NextFunction } from 'express';
+import type { Request, Response, NextFunction } from "express";
 export function requireReason(actions: string[]) {
   return (req: Request, res: Response, next: NextFunction) => {
     if (!actions.includes(req.path)) return next();
-    const reason = req.header('x-reason') || '';
-    if (!reason) return res.status(400).json({ error: 'reason_required' });
+    const reason = req.header("x-reason") || "";
+    if (!reason) return res.status(400).json({ error: "reason_required" });
     (req as any).reason = reason;
     next();
   };
@@ -344,7 +334,7 @@ export function requireReason(actions: string[]) {
 ```ts
 export function audit(req, res, next) {
   const start = Date.now();
-  res.on('finish', () => {
+  res.on("finish", () => {
     const rec = {
       ts: new Date().toISOString(),
       user: req.user?.id,
@@ -373,12 +363,12 @@ export function audit(req, res, next) {
 **`server/routes/webauthn.ts`** (skeleton)
 
 ```ts
-import express from 'express';
+import express from "express";
 const r = express.Router();
-r.post('/webauthn/challenge', (_req, res) => {
-  /* return challenge */ res.json({ challenge: '...' });
+r.post("/webauthn/challenge", (_req, res) => {
+  /* return challenge */ res.json({ challenge: "..." });
 });
-r.post('/webauthn/verify', (_req, res) => {
+r.post("/webauthn/verify", (_req, res) => {
   /* verify */ res.json({ ok: true, level: 2 });
 });
 export default r;
@@ -387,8 +377,8 @@ export default r;
 **`server/app.ts`** (wire)
 
 ```ts
-import { requireStepUp } from './middleware/stepup';
-app.post('/admin/delete-user', requireStepUp(2), handler);
+import { requireStepUp } from "./middleware/stepup";
+app.post("/admin/delete-user", requireStepUp(2), handler);
 ```
 
 **Rollback:** Lower required level or remove middleware.
@@ -404,16 +394,10 @@ app.post('/admin/delete-user', requireStepUp(2), handler);
 **`server/logger.ts`**
 
 ```ts
-import pino from 'pino';
+import pino from "pino";
 export const logger = pino({
   redact: {
-    paths: [
-      'req.headers.authorization',
-      'password',
-      'ssn',
-      'card.number',
-      'email',
-    ],
+    paths: ["req.headers.authorization", "password", "ssn", "card.number", "email"],
     remove: true,
   },
 });
@@ -493,15 +477,15 @@ exceptions:
     package: some-lib@1.2.3
     severity: HIGH
     expires: 2025-10-01
-    reason: 'No fixed version; sandboxed usage'
-    approver: 'security@intelgraph'
+    reason: "No fixed version; sandboxed usage"
+    approver: "security@intelgraph"
 ```
 
 **`scripts/vuln-allow.js`**
 
 ```js
-const fs = require('fs');
-const list = require('../.security/allowlist.yaml');
+const fs = require("fs");
+const list = require("../.security/allowlist.yaml");
 const today = new Date().toISOString().slice(0, 10);
 for (const e of list.exceptions) {
   if (e.expires < today) {
@@ -509,7 +493,7 @@ for (const e of list.exceptions) {
     process.exit(1);
   }
 }
-console.log('✅ Exceptions valid');
+console.log("✅ Exceptions valid");
 ```
 
 **`.github/workflows/vuln-allow-check.yml`**
@@ -548,10 +532,10 @@ INSERT INTO schema_version(version) VALUES (1) ON CONFLICT DO NOTHING;
 **`server/routes/schema.ts`**
 
 ```ts
-import express from 'express';
+import express from "express";
 const r = express.Router();
 let current = 1;
-r.get('/schema/version', (_req, res) => res.json({ version: current }));
+r.get("/schema/version", (_req, res) => res.json({ version: current }));
 export default r;
 ```
 

@@ -19,8 +19,8 @@
       "required": ["overall_status", "checks"],
       "properties": {
         "overall_status": {
-           "type": "string",
-           "enum": ["pass", "fail"]
+          "type": "string",
+          "enum": ["pass", "fail"]
         },
         "checks": {
           "type": "array",
@@ -46,11 +46,11 @@
           "type": "array",
           "items": {
             "type": "object",
-             "properties": {
-               "name": { "type": "string" },
-               "value": { "type": ["string", "number"] },
-               "status": { "type": "string" }
-             }
+            "properties": {
+              "name": { "type": "string" },
+              "value": { "type": ["string", "number"] },
+              "status": { "type": "string" }
+            }
           }
         }
       }

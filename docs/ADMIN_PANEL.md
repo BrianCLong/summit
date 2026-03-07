@@ -128,13 +128,13 @@ See `/server/db/migrations/postgres/2025-11-20_admin_panel_schema.sql` for compl
 
 ### Roles
 
-| Role | Capabilities | Access Level |
-|------|-------------|--------------|
-| **PLATFORM_ADMIN** | Full access to all admin operations across all tenants | Global |
-| **ADMIN** | Full access to admin operations within their tenant | Tenant |
-| **MODERATOR** | Content moderation only | Limited |
-| **ANALYST** | No admin access | None |
-| **VIEWER** | No admin access | None |
+| Role               | Capabilities                                           | Access Level |
+| ------------------ | ------------------------------------------------------ | ------------ |
+| **PLATFORM_ADMIN** | Full access to all admin operations across all tenants | Global       |
+| **ADMIN**          | Full access to admin operations within their tenant    | Tenant       |
+| **MODERATOR**      | Content moderation only                                | Limited      |
+| **ANALYST**        | No admin access                                        | None         |
+| **VIEWER**         | No admin access                                        | None         |
 
 ### Permission Model
 
@@ -149,20 +149,20 @@ Access is controlled by **OPA policies** (`/policy/admin-panel.rego`). All admin
 
 ### Operation Matrix
 
-| Operation | Platform Admin | Admin | Moderator |
-|-----------|:--------------:|:-----:|:---------:|
-| View dashboard | ✅ | ✅ (tenant) | ❌ |
-| Create user | ✅ | ✅ (tenant) | ❌ |
-| Edit user | ✅ | ✅ (tenant, non-admin) | ❌ |
-| Suspend user | ✅ | ✅ (tenant, non-admin) | ❌ |
-| Delete user | ✅ | ✅ (tenant, non-admin) | ❌ |
-| Impersonate user | ✅ | ✅ (tenant, non-admin) | ❌ |
-| View audit logs | ✅ | ✅ (tenant) | ❌ |
-| Moderate content | ✅ | ✅ | ✅ |
-| Manage feature flags | ✅ | ✅ (tenant) | ❌ |
-| Export data | ✅ | ✅ (tenant) | ❌ |
-| System config | ✅ | 👁️ (read-only) | ❌ |
-| Manage alerts | ✅ | ✅ (tenant) | ❌ |
+| Operation            | Platform Admin |         Admin          | Moderator |
+| -------------------- | :------------: | :--------------------: | :-------: |
+| View dashboard       |       ✅       |      ✅ (tenant)       |    ❌     |
+| Create user          |       ✅       |      ✅ (tenant)       |    ❌     |
+| Edit user            |       ✅       | ✅ (tenant, non-admin) |    ❌     |
+| Suspend user         |       ✅       | ✅ (tenant, non-admin) |    ❌     |
+| Delete user          |       ✅       | ✅ (tenant, non-admin) |    ❌     |
+| Impersonate user     |       ✅       | ✅ (tenant, non-admin) |    ❌     |
+| View audit logs      |       ✅       |      ✅ (tenant)       |    ❌     |
+| Moderate content     |       ✅       |           ✅           |    ✅     |
+| Manage feature flags |       ✅       |      ✅ (tenant)       |    ❌     |
+| Export data          |       ✅       |      ✅ (tenant)       |    ❌     |
+| System config        |       ✅       |     👁️ (read-only)     |    ❌     |
+| Manage alerts        |       ✅       |      ✅ (tenant)       |    ❌     |
 
 **Legend:** ✅ = Full Access, 👁️ = Read-Only, ❌ = No Access
 
@@ -185,6 +185,7 @@ Real-time overview of system health and key metrics:
 **Refresh Interval:** 30 seconds (auto-refresh)
 
 **Visualizations:**
+
 - Pie chart: User distribution by role
 - Bar chart: Top audit actions
 - Line chart: Activity trends (future enhancement)
@@ -222,11 +223,13 @@ mutation CreateUser($input: CreateUserInput!) {
 ```
 
 **Required Fields:**
+
 - `email` (unique)
 - `password`
 - `role`
 
 **Optional Fields:**
+
 - `username`
 - `firstName`, `lastName`
 - `metadata` (JSONB)
@@ -238,6 +241,7 @@ mutation CreateUser($input: CreateUserInput!) {
 Update user profile, role, or status.
 
 **Restrictions:**
+
 - Cannot elevate to PLATFORM_ADMIN (unless you are one)
 - Cannot modify PLATFORM_ADMIN users (unless you are one)
 - Cannot change your own role
@@ -249,17 +253,20 @@ Update user profile, role, or status.
 Temporarily disable user account with reason.
 
 **Inputs:**
+
 - `userId` - Target user ID
 - `reason` - Required explanation
 - `duration` - Optional duration in minutes (null = indefinite)
 
 **Effects:**
+
 - User cannot log in
 - Active sessions terminated
 - `isSuspended` flag set to `true`
 - Suspension reason and timestamp recorded
 
 **Restrictions:**
+
 - Cannot suspend self
 - Cannot suspend admins (unless PLATFORM_ADMIN)
 
@@ -285,6 +292,7 @@ Soft-delete user account (sets `isActive = false`).
 **Required:** Reason for deletion
 
 **Restrictions:**
+
 - Cannot delete self
 - Cannot delete admins (unless PLATFORM_ADMIN)
 
@@ -295,12 +303,14 @@ Soft-delete user account (sets `isActive = false`).
 Generate temporary password for user.
 
 **Flow:**
+
 1. Admin clicks "Reset Password"
 2. System generates secure random password
 3. Password displayed to admin (copy to clipboard)
 4. User must change password on next login
 
 **Security:**
+
 - Temporary password is only shown once
 - All password resets are audited
 - User receives email notification (if configured)
@@ -314,23 +324,27 @@ Temporarily assume user's identity for troubleshooting.
 **⚠️ Warning:** Powerful feature with strict compliance requirements.
 
 **Requirements:**
+
 - Admin or Platform Admin role
 - Reason for impersonation (required)
 - MFA verification (in production)
 - Trusted IP address
 
 **Restrictions:**
+
 - Cannot impersonate admins (unless PLATFORM_ADMIN)
 - Rate limited: 10 per hour
 - All actions logged with `[IMPERSONATED]` flag
 - Cannot perform destructive admin operations while impersonating
 
 **Audit Logs:**
+
 - `admin.impersonation.start`
 - `admin.impersonation.end`
 - All actions during impersonation tagged
 
 **Compliance:**
+
 - Impersonation sessions tracked in `user_impersonations` table
 - Start/end timestamps, IP address, user agent recorded
 - Visible in audit reports and compliance exports
@@ -355,6 +369,7 @@ Perform operations on multiple users at once:
 - **Bulk Delete**: Delete multiple users
 
 **Restrictions:**
+
 - Maximum 100 users per bulk operation
 - Reason required for destructive operations
 - Same permission checks as individual operations
@@ -373,18 +388,18 @@ Comprehensive audit trail for all user and admin actions. Every mutation emits a
 interface AuditLog {
   id: string;
   timestamp: Date;
-  userId?: string;                // Actor
-  action: string;                 // e.g., "admin.user.suspend"
-  resourceType: string;           // e.g., "user"
-  resourceId?: string;            // Target resource
-  details?: Record<string, any>;  // Action-specific data
-  ipAddress?: string;             // Origin IP
-  userAgent?: string;             // Browser/client
-  status: 'success' | 'failure' | 'error';
-  errorMessage?: string;          // If status != success
-  tenantId?: string;              // Tenant context
-  sessionId?: string;             // Session identifier
-  requestId?: string;             // Request correlation ID
+  userId?: string; // Actor
+  action: string; // e.g., "admin.user.suspend"
+  resourceType: string; // e.g., "user"
+  resourceId?: string; // Target resource
+  details?: Record<string, any>; // Action-specific data
+  ipAddress?: string; // Origin IP
+  userAgent?: string; // Browser/client
+  status: "success" | "failure" | "error";
+  errorMessage?: string; // If status != success
+  tenantId?: string; // Tenant context
+  sessionId?: string; // Session identifier
+  requestId?: string; // Request correlation ID
   metadata?: Record<string, any>; // Additional context
 }
 ```
@@ -392,6 +407,7 @@ interface AuditLog {
 ### Audit Actions
 
 **User Actions:**
+
 - `admin.user.create`
 - `admin.user.update`
 - `admin.user.suspend`
@@ -400,29 +416,35 @@ interface AuditLog {
 - `admin.user.password_reset`
 
 **Impersonation:**
+
 - `admin.impersonation.start`
 - `admin.impersonation.end`
 
 **Moderation:**
+
 - `admin.moderation.review`
 - `admin.moderation.assign`
 - `admin.moderation.escalate`
 
 **Feature Flags:**
+
 - `admin.feature_flag.create`
 - `admin.feature_flag.update`
 - `admin.feature_flag.delete`
 
 **Configuration:**
+
 - `admin.config.update`
 
 **Exports:**
+
 - `admin.export.create`
 - `admin.export.download`
 
 ### Search & Filter
 
 **Filters:**
+
 - User ID (actor)
 - Action type
 - Resource type/ID
@@ -465,6 +487,7 @@ query AuditLogs($filters: AuditLogFilters!) {
 ### Views
 
 **Pre-built summary views:**
+
 - `admin_audit_summary` - Daily aggregates
 - Recent events by user
 - Failed operations report
@@ -483,19 +506,19 @@ Queue-based workflow for reviewing user-reported content (entities, relationship
 ```typescript
 interface ModerationItem {
   id: string;
-  contentType: string;        // entity, relationship, investigation, comment
-  contentId: string;          // ID of reported content
-  reporter: User;             // Who reported it
-  reason: string;             // Why it was reported
+  contentType: string; // entity, relationship, investigation, comment
+  contentId: string; // ID of reported content
+  reporter: User; // Who reported it
+  reason: string; // Why it was reported
   category: ModerationCategory; // ABUSE, SPAM, INAPPROPRIATE, VIOLATION, OTHER
-  status: ModerationStatus;   // pending, approved, rejected, escalated
+  status: ModerationStatus; // pending, approved, rejected, escalated
   priority: ModerationPriority; // low, normal, high, critical
-  assignedTo?: User;          // Moderator assigned
-  reviewedBy?: User;          // Who reviewed it
+  assignedTo?: User; // Moderator assigned
+  reviewedBy?: User; // Who reviewed it
   reviewedAt?: Date;
-  resolution?: string;        // Outcome description
-  actionTaken?: string;       // content_removed, user_warned, etc.
-  notes?: string;             // Reviewer notes
+  resolution?: string; // Outcome description
+  actionTaken?: string; // content_removed, user_warned, etc.
+  notes?: string; // Reviewer notes
   createdAt: Date;
   updatedAt: Date;
 }
@@ -526,6 +549,7 @@ mutation ReviewModeration($input: ReviewModerationInput!) {
 ```
 
 **Inputs:**
+
 - `itemId` - Moderation item ID
 - `status` - APPROVED, REJECTED, ESCALATED
 - `actionTaken` - no_action, content_removed, user_warned, user_suspended
@@ -581,18 +605,18 @@ Dynamic feature rollout and A/B testing with fine-grained targeting.
 
 ```typescript
 interface FeatureFlag {
-  key: string;               // Unique identifier
-  name: string;              // Display name
+  key: string; // Unique identifier
+  name: string; // Display name
   description?: string;
-  flagType: 'boolean' | 'string' | 'number' | 'json';
+  flagType: "boolean" | "string" | "number" | "json";
   defaultValue: any;
   enabled: boolean;
   rolloutPercentage: number; // 0-100
-  targetUsers?: string[];    // Specific user IDs
-  targetRoles?: UserRole[];  // Specific roles
-  targetTenants?: string[];  // Specific tenants
+  targetUsers?: string[]; // Specific user IDs
+  targetRoles?: UserRole[]; // Specific roles
+  targetTenants?: string[]; // Specific tenants
   conditions?: Record<string, any>; // Advanced targeting
-  tags?: string[];           // Categorization
+  tags?: string[]; // Categorization
 }
 ```
 
@@ -692,9 +716,9 @@ interface DataExport {
   exportType: ExportType;
   format: ExportFormat;
   filters?: Record<string, any>;
-  status: 'pending' | 'processing' | 'completed' | 'failed';
+  status: "pending" | "processing" | "completed" | "failed";
   requestedBy: User;
-  fileUrl?: string;           // Pre-signed URL
+  fileUrl?: string; // Pre-signed URL
   fileSizeBytes?: number;
   recordCount?: number;
   startedAt?: Date;
@@ -721,15 +745,13 @@ mutation CreateDataExport($input: CreateDataExportInput!) {
 
 ```graphql
 mutation {
-  createDataExport(input: {
-    exportType: AUDIT_LOGS
-    format: CSV
-    filters: {
-      startDate: "2025-01-01"
-      endDate: "2025-11-20"
-      action: "admin.user.suspend"
+  createDataExport(
+    input: {
+      exportType: AUDIT_LOGS
+      format: CSV
+      filters: { startDate: "2025-01-01", endDate: "2025-11-20", action: "admin.user.suspend" }
     }
-  }) {
+  ) {
     id
     status
   }
@@ -769,12 +791,12 @@ Runtime configuration management for system-wide settings.
 
 ```typescript
 interface SystemConfig {
-  configKey: string;               // Unique key
-  configValue: any;                // Value (JSONB)
-  configType: 'string' | 'number' | 'boolean' | 'json' | 'array';
-  category: string;                // Security, features, limits, etc.
+  configKey: string; // Unique key
+  configValue: any; // Value (JSONB)
+  configType: "string" | "number" | "boolean" | "json" | "array";
+  category: string; // Security, features, limits, etc.
   description?: string;
-  isSensitive: boolean;            // Mask value in UI
+  isSensitive: boolean; // Mask value in UI
   validationSchema?: Record<string, any>; // JSON Schema for validation
   updatedBy?: User;
   updatedAt: Date;
@@ -806,6 +828,7 @@ mutation UpdateSystemConfig($input: UpdateSystemConfigInput!) {
 ```
 
 **Restrictions:**
+
 - Only PLATFORM_ADMIN can modify configuration
 - Sensitive config changes require approval ticket
 - All changes logged with reason
@@ -827,14 +850,14 @@ Real-time monitoring and alerting for system issues and anomalies.
 ```typescript
 interface AdminAlert {
   id: string;
-  alertType: AlertType;       // security, performance, error, warning, info
-  severity: AlertSeverity;    // critical, high, medium, low, info
+  alertType: AlertType; // security, performance, error, warning, info
+  severity: AlertSeverity; // critical, high, medium, low, info
   title: string;
   message: string;
-  source: string;             // system, monitoring, user_report, automated
+  source: string; // system, monitoring, user_report, automated
   resourceType?: string;
   resourceId?: string;
-  status: AlertStatus;        // active, acknowledged, resolved, dismissed
+  status: AlertStatus; // active, acknowledged, resolved, dismissed
   acknowledgedBy?: User;
   acknowledgedAt?: Date;
   resolvedBy?: User;
@@ -848,6 +871,7 @@ interface AdminAlert {
 ### Alert Types & Severity
 
 **Types:**
+
 - **SECURITY**: Auth failures, suspicious activity, policy violations
 - **PERFORMANCE**: High latency, resource exhaustion, slow queries
 - **ERROR**: System errors, service failures, data inconsistencies
@@ -855,6 +879,7 @@ interface AdminAlert {
 - **INFO**: Informational notifications
 
 **Severity:**
+
 - **CRITICAL**: Immediate action required, service disruption
 - **HIGH**: Significant issue, affects users
 - **MEDIUM**: Notable issue, monitor closely
@@ -909,6 +934,7 @@ mutation DismissAlert($id: ID!) {
 ### Integration
 
 Alerts can be created by:
+
 - Monitoring systems (Prometheus, Grafana)
 - Application errors
 - Security scans
@@ -922,6 +948,7 @@ Alerts can be created by:
 ### Authentication
 
 All admin operations require authentication via:
+
 - JWT token with valid signature
 - Active user account (not suspended)
 - Admin/Moderator role
@@ -980,6 +1007,7 @@ In case of suspected compromise:
 See `/graphql/schema/admin-panel.graphql` for complete schema.
 
 **Key Query Types:**
+
 - `adminDashboard`: Dashboard statistics
 - `users`: Search users with pagination
 - `auditLogs`: Search audit logs
@@ -988,6 +1016,7 @@ See `/graphql/schema/admin-panel.graphql` for complete schema.
 - `adminAlerts`: Active alerts
 
 **Key Mutation Types:**
+
 - `createUser`, `updateUser`, `deleteUser`
 - `suspendUser`, `unsuspendUser`
 - `resetUserPassword`
@@ -1002,6 +1031,7 @@ See `/graphql/schema/admin-panel.graphql` for complete schema.
 See `/server/src/services/AdminPanelService.ts` for service implementation.
 
 **Key Methods:**
+
 - `searchUsers(filters, limit, offset)`
 - `getUserById(userId)`
 - `createUser(data, createdBy)`
@@ -1023,6 +1053,7 @@ See `/server/src/services/AdminPanelService.ts` for service implementation.
 **Cause:** No valid JWT token
 
 **Solution:**
+
 1. Ensure you're logged in
 2. Check token expiration
 3. Refresh token if expired
@@ -1032,6 +1063,7 @@ See `/server/src/services/AdminPanelService.ts` for service implementation.
 **Cause:** User does not have admin role
 
 **Solution:**
+
 1. Verify your user role: `query { me { role } }`
 2. Contact platform admin to grant admin role
 3. Check OPA policy for specific operation
@@ -1041,6 +1073,7 @@ See `/server/src/services/AdminPanelService.ts` for service implementation.
 **Cause:** Attempting to modify PLATFORM_ADMIN user without being one
 
 **Solution:**
+
 - Only PLATFORM_ADMIN can modify other PLATFORM_ADMIN users
 - Contact platform admin for assistance
 
@@ -1049,6 +1082,7 @@ See `/server/src/services/AdminPanelService.ts` for service implementation.
 **Cause:** Too many operations in short period
 
 **Solution:**
+
 - Wait for rate limit window to reset
 - Check OPA policy for specific limits
 - Contact platform admin if limit too restrictive
@@ -1058,6 +1092,7 @@ See `/server/src/services/AdminPanelService.ts` for service implementation.
 **Cause:** Various
 
 **Solution:**
+
 1. Check database connection
 2. Verify `audit_logs` table exists
 3. Check service logs for errors
@@ -1068,6 +1103,7 @@ See `/server/src/services/AdminPanelService.ts` for service implementation.
 **Cause:** Background job failed
 
 **Solution:**
+
 1. Check export error message: `query { dataExport(id: "...") { errorMessage } }`
 2. Check service logs for background job errors
 3. Retry export with smaller dataset

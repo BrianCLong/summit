@@ -52,7 +52,7 @@ summit-ext show hello-world
 
 - **[Building Extensions](./building-extensions.md)**: Complete guide to building extensions
 - **[Quick Reference](./quick-reference.md)**: Cheat sheet for common tasks
-- **[API Reference](./api-reference.md)**: Full API documentation *(to be created)*
+- **[API Reference](./api-reference.md)**: Full API documentation _(to be created)_
 
 ## 🏗️ Architecture
 
@@ -90,32 +90,32 @@ Discovery → Validation → Permission Check → Loading → Activation → Reg
 
 ## 📦 Extension Types
 
-| Type | Description | Use Cases |
-|------|-------------|-----------|
-| **connector** | Data ingestion/export | S3, APIs, databases |
-| **widget** | UI visualization | Charts, dashboards, tables |
-| **command** | UI/CLI commands | Actions, workflows |
-| **tool** | Copilot tools | AI-powered analysis |
-| **analyzer** | Data analysis | Entity scoring, pattern detection |
-| **integration** | External services | Webhooks, notifications |
+| Type            | Description           | Use Cases                         |
+| --------------- | --------------------- | --------------------------------- |
+| **connector**   | Data ingestion/export | S3, APIs, databases               |
+| **widget**      | UI visualization      | Charts, dashboards, tables        |
+| **command**     | UI/CLI commands       | Actions, workflows                |
+| **tool**        | Copilot tools         | AI-powered analysis               |
+| **analyzer**    | Data analysis         | Entity scoring, pattern detection |
+| **integration** | External services     | Webhooks, notifications           |
 
 ## 🔐 Permissions
 
-| Permission | Description | Approval Required |
-|-----------|-------------|-------------------|
-| `entities:read` | Read entities | No |
-| `entities:write` | Create/update entities | No |
-| `relationships:read` | Read relationships | No |
-| `relationships:write` | Create relationships | No |
-| `investigations:read` | Read investigations | No |
-| `investigations:write` | Create/update investigations | No |
-| `network:access` | Network access | **Yes** ⚠️ |
-| `fs:read` | File system read | No |
-| `fs:write` | File system write | **Yes** ⚠️ |
-| `commands:execute` | Execute shell commands | **Yes** ⚠️ |
-| `api:access` | Access Summit API | No |
-| `webhook:register` | Register webhooks | No |
-| `user:data` | Access user data | No |
+| Permission             | Description                  | Approval Required |
+| ---------------------- | ---------------------------- | ----------------- |
+| `entities:read`        | Read entities                | No                |
+| `entities:write`       | Create/update entities       | No                |
+| `relationships:read`   | Read relationships           | No                |
+| `relationships:write`  | Create relationships         | No                |
+| `investigations:read`  | Read investigations          | No                |
+| `investigations:write` | Create/update investigations | No                |
+| `network:access`       | Network access               | **Yes** ⚠️        |
+| `fs:read`              | File system read             | No                |
+| `fs:write`             | File system write            | **Yes** ⚠️        |
+| `commands:execute`     | Execute shell commands       | **Yes** ⚠️        |
+| `api:access`           | Access Summit API            | No                |
+| `webhook:register`     | Register webhooks            | No                |
+| `user:data`            | Access user data             | No                |
 
 ## 🛠️ CLI Commands
 
@@ -173,6 +173,7 @@ summit-ext install <path-to-extension>
 ### Analytics Dashboard
 
 Complete example demonstrating:
+
 - Copilot tools (entity statistics, summaries)
 - UI commands and widgets
 - CLI commands
@@ -206,7 +207,7 @@ export async function activate(context: ExtensionContext) {
   return {
     dispose: async () => {
       // Cleanup...
-    }
+    },
   };
 }
 ```
@@ -229,6 +230,7 @@ Extensions can expose tools and skills to the AI copilot:
 ```
 
 The copilot can then:
+
 - Discover available tools
 - Call tools with parameters
 - Use tool results in responses
@@ -250,6 +252,7 @@ Extensions can add commands to the UI:
 ```
 
 Users can:
+
 - Open command palette (Cmd/Ctrl+P)
 - Search for extension commands
 - Execute commands
@@ -304,11 +307,11 @@ pnpm build && summit-ext reload
 ### Automated Testing
 
 ```typescript
-import { activate } from './index.js';
-import { createMockContext } from '@intelgraph/extensions/testing';
+import { activate } from "./index.js";
+import { createMockContext } from "@intelgraph/extensions/testing";
 
-describe('My Extension', () => {
-  it('activates successfully', async () => {
+describe("My Extension", () => {
+  it("activates successfully", async () => {
     const context = createMockContext();
     const activation = await activate(context);
     expect(activation).toBeDefined();

@@ -4,9 +4,9 @@
  * Manages request timeouts with configurable policies
  */
 
-import { createLogger } from '../utils/logger.js';
+import { createLogger } from "../utils/logger.js";
 
-const logger = createLogger('timeout-policy');
+const logger = createLogger("timeout-policy");
 
 export interface TimeoutConfig {
   default: number;
@@ -43,16 +43,13 @@ export class TimeoutPolicy {
   ): Promise<T> {
     const timeout = timeoutMs || this.config.default;
 
-    return Promise.race([
-      operation(),
-      this.createTimeoutPromise<T>(timeout, context),
-    ]);
+    return Promise.race([operation(), this.createTimeoutPromise<T>(timeout, context)]);
   }
 
   private createTimeoutPromise<T>(ms: number, context?: Record<string, any>): Promise<T> {
     return new Promise((_, reject) => {
       setTimeout(() => {
-        logger.error('Request timeout', { timeout: ms, context });
+        logger.error("Request timeout", { timeout: ms, context });
         reject(new TimeoutError(`Request timeout after ${ms}ms`, ms));
       }, ms);
     });
@@ -71,8 +68,11 @@ export class TimeoutPolicy {
 }
 
 export class TimeoutError extends Error {
-  constructor(message: string, public readonly timeout: number) {
+  constructor(
+    message: string,
+    public readonly timeout: number
+  ) {
     super(message);
-    this.name = 'TimeoutError';
+    this.name = "TimeoutError";
   }
 }

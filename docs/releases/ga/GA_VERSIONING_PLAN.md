@@ -10,11 +10,13 @@
 ## Current State
 
 ### Version Sources
+
 - **package.json**: `4.1.4`
 - **Last Git Tag**: `v1.7.0-complete`
 - **Main SHA**: `a1f20771eeadcc55fef9f83727edeee0d2c2dbc2`
 
 ### Existing Tags (Last 20)
+
 ```
 v2025.12.08.1709
 v2025.12.08.2127
@@ -43,7 +45,9 @@ v4.1.4-governance.1
 ## Versioning Strategy
 
 ### Semantic Versioning (SemVer)
+
 This repository follows **Semantic Versioning 2.0.0** (semver.org):
+
 - **MAJOR**: Breaking changes (incompatible API changes)
 - **MINOR**: New features (backward-compatible)
 - **PATCH**: Bug fixes (backward-compatible)
@@ -74,12 +78,14 @@ This repository follows **Semantic Versioning 2.0.0** (semver.org):
    - 71 commits of consolidation and hardening since v1.7.0-complete
 
 #### Why NOT 4.2.0?
+
 - While technically backward-compatible, the scope of changes (71 commits)
 - GA designation represents a major milestone
 - Infrastructure changes (Redis cluster, multi-tenancy) are foundational
 - Governance requirements are new mandatory gates
 
 #### Why NOT 24.x.x or date-based?
+
 - Repository has mixed versioning history (v4.x, v24.x, date-based)
 - SemVer (4.x → 5.x) provides clearer upgrade path
 - Maintains compatibility with existing package.json version (4.1.4 → 5.0.0)
@@ -97,6 +103,7 @@ Format: `v<MAJOR>.<MINOR>.<PATCH>-<PRERELEASE>`
 - **Prerelease**: `ga` (general availability designation)
 
 ### Alternative Tags (if needed):
+
 - `v5.0.0` (clean version, no prerelease)
 - `v5.0.0-ga.1` (if iteration needed)
 
@@ -107,6 +114,7 @@ Format: `v<MAJOR>.<MINOR>.<PATCH>-<PRERELEASE>`
 ### Option 1: Manual Version Bump (Recommended for GA)
 
 **package.json** root:
+
 ```json
 {
   "version": "5.0.0"
@@ -114,11 +122,13 @@ Format: `v<MAJOR>.<MINOR>.<PATCH>-<PRERELEASE>`
 ```
 
 **Affected Files:**
+
 1. `package.json` (root)
 2. `packages/*/package.json` (if monorepo, update workspace versions)
 3. `CHANGELOG.md` (add v5.0.0 entry)
 
 **Commands:**
+
 ```bash
 # Update root package.json
 npm version 5.0.0 --no-git-tag-version
@@ -132,11 +142,13 @@ pnpm -r exec npm version 5.0.0 --no-git-tag-version
 ### Option 2: Using Existing Release Script
 
 The repository has `scripts/release/release.mjs` which supports:
+
 ```bash
 pnpm release:cut --version 5.0.0 --skip-tag --skip-gh-release --dry-run
 ```
 
 This will:
+
 - Update package.json versions
 - Generate release notes
 - Prepare artifacts
@@ -148,6 +160,7 @@ This will:
 ## Tag Creation (DO NOT EXECUTE YET)
 
 ### Command (for runbook reference):
+
 ```bash
 # After version bump commit is on main
 git tag -a v5.0.0-ga -m "Summit v5.0.0 - General Availability Release
@@ -205,6 +218,7 @@ None. Backward compatible with v4.x versions.
 ### Upgrade Path
 
 From v4.x:
+
 - Standard update process
 - No migration required
 - New governance gates will apply to future PRs
@@ -217,16 +231,19 @@ From v4.x:
 Before tagging, verify:
 
 1. **package.json version matches tag**
+
    ```bash
    jq -r '.version' package.json  # Should output: 5.0.0
    ```
 
 2. **Workspace packages aligned** (if monorepo)
+
    ```bash
    find packages -name package.json -exec jq -r '.version' {} \;
    ```
 
 3. **CHANGELOG.md includes v5.0.0**
+
    ```bash
    grep "## \[5.0.0" CHANGELOG.md
    ```
@@ -241,16 +258,19 @@ Before tagging, verify:
 ## Risk Assessment
 
 ### Low Risk
+
 - ✓ Backward compatible (no breaking API changes)
 - ✓ Extensive CI testing infrastructure in place
 - ✓ Evidence bundle validation
 
 ### Medium Risk
+
 - ⚠ Large number of commits (71) since last tag
 - ⚠ New governance gates may require adjustment period
 - ⚠ Infrastructure changes (Redis cluster) need operational validation
 
 ### Mitigation
+
 - Comprehensive GA verification script (`ga_verify.mjs`)
 - Evidence bundle generation
 - Gradual rollout recommended
@@ -260,13 +280,13 @@ Before tagging, verify:
 
 ## Decision Record
 
-| Aspect | Decision | Rationale |
-|--------|----------|-----------|
-| **Version** | 5.0.0 | Major bump for GA + significant infrastructure changes |
-| **Tag Format** | v5.0.0-ga | SemVer with GA prerelease identifier |
-| **Versioning Scheme** | SemVer | Clearer than date-based for users |
-| **Bump Type** | Manual | Operator control for GA milestone |
-| **package.json** | 5.0.0 | Aligned with tag version |
+| Aspect                | Decision  | Rationale                                              |
+| --------------------- | --------- | ------------------------------------------------------ |
+| **Version**           | 5.0.0     | Major bump for GA + significant infrastructure changes |
+| **Tag Format**        | v5.0.0-ga | SemVer with GA prerelease identifier                   |
+| **Versioning Scheme** | SemVer    | Clearer than date-based for users                      |
+| **Bump Type**         | Manual    | Operator control for GA milestone                      |
+| **package.json**      | 5.0.0     | Aligned with tag version                               |
 
 ---
 

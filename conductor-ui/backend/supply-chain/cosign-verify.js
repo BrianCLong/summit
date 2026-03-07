@@ -1,19 +1,18 @@
-import { execSync, spawn } from 'child_process';
-import fs from 'fs';
-import path from 'path';
-import crypto from 'crypto';
-import { fileURLToPath } from 'url';
+import { execSync, spawn } from "child_process";
+import fs from "fs";
+import path from "path";
+import crypto from "crypto";
+import { fileURLToPath } from "url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export class CosignVerifier {
   constructor(options = {}) {
-    this.cosignBinary = options.cosignBinary || 'cosign';
-    this.publicKeyPath =
-      options.publicKeyPath || process.env.COSIGN_PUBLIC_KEY_PATH;
-    this.rekorUrl = options.rekorUrl || 'https://rekor.sigstore.dev';
-    this.fulcioUrl = options.fulcioUrl || 'https://fulcio.sigstore.dev';
-    this.oidcIssuer = options.oidcIssuer || 'https://oauth2.sigstore.dev/auth';
+    this.cosignBinary = options.cosignBinary || "cosign";
+    this.publicKeyPath = options.publicKeyPath || process.env.COSIGN_PUBLIC_KEY_PATH;
+    this.rekorUrl = options.rekorUrl || "https://rekor.sigstore.dev";
+    this.fulcioUrl = options.fulcioUrl || "https://fulcio.sigstore.dev";
+    this.oidcIssuer = options.oidcIssuer || "https://oauth2.sigstore.dev/auth";
     this.enableExperimental = options.enableExperimental || true;
   }
 
@@ -34,65 +33,65 @@ export class CosignVerifier {
     } = options;
 
     try {
-      const args = ['verify'];
+      const args = ["verify"];
 
       // Authentication method
       if (publicKey && fs.existsSync(publicKey)) {
-        args.push('--key', publicKey);
+        args.push("--key", publicKey);
       } else if (certificate) {
-        args.push('--certificate', certificate);
+        args.push("--certificate", certificate);
         if (certificateChain) {
-          args.push('--certificate-chain', certificateChain);
+          args.push("--certificate-chain", certificateChain);
         }
       } else {
         // Use keyless verification with certificate identity
-        args.push('--certificate-identity-regexp', '.*');
-        args.push('--certificate-oidc-issuer-regexp', '.*');
+        args.push("--certificate-identity-regexp", ".*");
+        args.push("--certificate-oidc-issuer-regexp", ".*");
       }
 
       // Rekor transparency log
       if (!skipTlogVerify) {
-        args.push('--rekor-url', this.rekorUrl);
+        args.push("--rekor-url", this.rekorUrl);
       } else {
-        args.push('--insecure-ignore-tlog');
+        args.push("--insecure-ignore-tlog");
       }
 
       // Certificate verification
       if (skipCertVerify) {
-        args.push('--insecure-ignore-sct');
+        args.push("--insecure-ignore-sct");
       }
 
       // Signature bundle
       if (bundle) {
-        args.push('--bundle', bundle);
+        args.push("--bundle", bundle);
       }
 
       // Signature file
       if (signature) {
-        args.push('--signature', signature);
+        args.push("--signature", signature);
       }
 
       // Issuer and subject for keyless verification
       if (issuer) {
-        args.push('--certificate-oidc-issuer', issuer);
+        args.push("--certificate-oidc-issuer", issuer);
       }
 
       if (subject) {
-        args.push('--certificate-identity', subject);
+        args.push("--certificate-identity", subject);
       }
 
       // Annotations
       for (const [key, value] of Object.entries(annotations)) {
-        args.push('--annotations', `${key}=${value}`);
+        args.push("--annotations", `${key}=${value}`);
       }
 
       // Allow insecure registry
       if (allowInsecure) {
-        args.push('--allow-insecure-registry');
+        args.push("--allow-insecure-registry");
       }
 
       // Output format
-      args.push('--output', 'json');
+      args.push("--output", "json");
 
       // Image reference
       args.push(imageRef);
@@ -123,24 +122,24 @@ export class CosignVerifier {
     const {
       publicKey = this.publicKeyPath,
       policy,
-      type = attestationType || 'slsaprovenance',
+      type = attestationType || "slsaprovenance",
     } = options;
 
     try {
-      const args = ['verify-attestation'];
+      const args = ["verify-attestation"];
 
       if (publicKey && fs.existsSync(publicKey)) {
-        args.push('--key', publicKey);
+        args.push("--key", publicKey);
       } else {
-        args.push('--certificate-identity-regexp', '.*');
-        args.push('--certificate-oidc-issuer-regexp', '.*');
+        args.push("--certificate-identity-regexp", ".*");
+        args.push("--certificate-oidc-issuer-regexp", ".*");
       }
 
-      args.push('--type', type);
-      args.push('--output', 'json');
+      args.push("--type", type);
+      args.push("--output", "json");
 
       if (policy) {
-        args.push('--policy', policy);
+        args.push("--policy", policy);
       }
 
       args.push(imageRef);
@@ -166,18 +165,10 @@ export class CosignVerifier {
     }
   }
 
-  async generateSBOM(imageRef, format = 'spdx-json') {
+  async generateSBOM(imageRef, format = "spdx-json") {
     try {
-      const args = [
-        'download',
-        'sbom',
-        '--output-file',
-        '-',
-        '--format',
-        format,
-        imageRef,
-      ];
-      const result = await this.executeCosign(args, { encoding: 'utf8' });
+      const args = ["download", "sbom", "--output-file", "-", "--format", format, imageRef];
+      const result = await this.executeCosign(args, { encoding: "utf8" });
 
       return {
         success: true,
@@ -199,17 +190,11 @@ export class CosignVerifier {
 
   async downloadAttestation(imageRef, predicateType) {
     try {
-      const args = [
-        'download',
-        'attestation',
-        '--predicate-type',
-        predicateType,
-        imageRef,
-      ];
-      const result = await this.executeCosign(args, { encoding: 'utf8' });
+      const args = ["download", "attestation", "--predicate-type", predicateType, imageRef];
+      const result = await this.executeCosign(args, { encoding: "utf8" });
 
       const attestations = result
-        .split('\n')
+        .split("\n")
         .filter((line) => line.trim())
         .map((line) => JSON.parse(line));
 
@@ -242,36 +227,34 @@ export class CosignVerifier {
     } = options;
 
     try {
-      const args = ['sign'];
+      const args = ["sign"];
 
       if (keyPath) {
-        args.push('--key', keyPath);
+        args.push("--key", keyPath);
       } else {
         // Use keyless signing
-        args.push('--fulcio-url', this.fulcioUrl);
-        args.push('--rekor-url', this.rekorUrl);
-        args.push('--oidc-issuer', this.oidcIssuer);
+        args.push("--fulcio-url", this.fulcioUrl);
+        args.push("--rekor-url", this.rekorUrl);
+        args.push("--oidc-issuer", this.oidcIssuer);
       }
 
       // Annotations
       for (const [key, value] of Object.entries(annotations)) {
-        args.push('-a', `${key}=${value}`);
+        args.push("-a", `${key}=${value}`);
       }
 
       if (recursive) {
-        args.push('--recursive');
+        args.push("--recursive");
       }
 
       if (allowInsecure) {
-        args.push('--allow-insecure-registry');
+        args.push("--allow-insecure-registry");
       }
 
       args.push(imageRef);
 
       const result = await this.executeCosign(args, {
-        env: passphrase
-          ? { ...process.env, COSIGN_PASSWORD: passphrase }
-          : process.env,
+        env: passphrase ? { ...process.env, COSIGN_PASSWORD: passphrase } : process.env,
       });
 
       return {
@@ -291,13 +274,13 @@ export class CosignVerifier {
   }
 
   async attachSBOM(imageRef, sbomPath, options = {}) {
-    const { type = 'spdx', allowInsecure = false } = options;
+    const { type = "spdx", allowInsecure = false } = options;
 
     try {
-      const args = ['attach', 'sbom', '--sbom', sbomPath, '--type', type];
+      const args = ["attach", "sbom", "--sbom", sbomPath, "--type", type];
 
       if (allowInsecure) {
-        args.push('--allow-insecure-registry');
+        args.push("--allow-insecure-registry");
       }
 
       args.push(imageRef);
@@ -324,24 +307,24 @@ export class CosignVerifier {
   }
 
   async attestSLSA(imageRef, provenancePath, options = {}) {
-    const { keyPath, type = 'slsaprovenance', allowInsecure = false } = options;
+    const { keyPath, type = "slsaprovenance", allowInsecure = false } = options;
 
     try {
-      const args = ['attest'];
+      const args = ["attest"];
 
       if (keyPath) {
-        args.push('--key', keyPath);
+        args.push("--key", keyPath);
       } else {
-        args.push('--fulcio-url', this.fulcioUrl);
-        args.push('--rekor-url', this.rekorUrl);
-        args.push('--oidc-issuer', this.oidcIssuer);
+        args.push("--fulcio-url", this.fulcioUrl);
+        args.push("--rekor-url", this.rekorUrl);
+        args.push("--oidc-issuer", this.oidcIssuer);
       }
 
-      args.push('--predicate', provenancePath);
-      args.push('--type', type);
+      args.push("--predicate", provenancePath);
+      args.push("--type", type);
 
       if (allowInsecure) {
-        args.push('--allow-insecure-registry');
+        args.push("--allow-insecure-registry");
       }
 
       args.push(imageRef);
@@ -371,27 +354,27 @@ export class CosignVerifier {
     return new Promise((resolve, reject) => {
       const env = {
         ...process.env,
-        COSIGN_EXPERIMENTAL: this.enableExperimental ? '1' : '0',
+        COSIGN_EXPERIMENTAL: this.enableExperimental ? "1" : "0",
         ...options.env,
       };
 
       const child = spawn(this.cosignBinary, args, {
         env,
-        stdio: ['pipe', 'pipe', 'pipe'],
+        stdio: ["pipe", "pipe", "pipe"],
       });
 
-      let stdout = '';
-      let stderr = '';
+      let stdout = "";
+      let stderr = "";
 
-      child.stdout.on('data', (data) => {
+      child.stdout.on("data", (data) => {
         stdout += data.toString();
       });
 
-      child.stderr.on('data', (data) => {
+      child.stderr.on("data", (data) => {
         stderr += data.toString();
       });
 
-      child.on('close', (code) => {
+      child.on("close", (code) => {
         if (code === 0) {
           try {
             // Try to parse as JSON first
@@ -402,13 +385,11 @@ export class CosignVerifier {
             resolve(stdout.trim());
           }
         } else {
-          reject(
-            new Error(`Cosign command failed (exit code ${code}): ${stderr}`),
-          );
+          reject(new Error(`Cosign command failed (exit code ${code}): ${stderr}`));
         }
       });
 
-      child.on('error', (error) => {
+      child.on("error", (error) => {
         reject(new Error(`Failed to spawn cosign: ${error.message}`));
       });
     });
@@ -416,10 +397,10 @@ export class CosignVerifier {
 
   async getCosignVersion() {
     try {
-      const result = await this.executeCosign(['version', '--json']);
+      const result = await this.executeCosign(["version", "--json"]);
       return result.gitVersion || result.version;
     } catch {
-      return 'unknown';
+      return "unknown";
     }
   }
 
@@ -443,10 +424,10 @@ export class CosignVerifier {
   // Policy evaluation helpers
   static createPolicy(rules) {
     const policy = {
-      apiVersion: 'v1alpha1',
-      kind: 'Policy',
+      apiVersion: "v1alpha1",
+      kind: "Policy",
       metadata: {
-        name: 'maestro-supply-chain-policy',
+        name: "maestro-supply-chain-policy",
       },
       spec: {
         requirements: [],
@@ -456,15 +437,15 @@ export class CosignVerifier {
     // Add signature requirement
     if (rules.requireSignature !== false) {
       policy.spec.requirements.push({
-        pattern: '*',
+        pattern: "*",
         authorities: rules.authorities || [
           {
             keyless: {
-              url: 'https://fulcio.sigstore.dev',
+              url: "https://fulcio.sigstore.dev",
               identities: rules.identities || [
                 {
-                  issuer: 'https://accounts.google.com',
-                  subject: '*',
+                  issuer: "https://accounts.google.com",
+                  subject: "*",
                 },
               ],
             },
@@ -477,14 +458,14 @@ export class CosignVerifier {
     if (rules.requireAttestations) {
       for (const attestation of rules.requireAttestations) {
         policy.spec.requirements.push({
-          pattern: '*',
+          pattern: "*",
           attestations: [
             {
               name: attestation.name || attestation.type,
               predicateType: attestation.predicateType,
               policy: attestation.policy || {
-                type: 'cue',
-                data: attestation.cuePolicy || 'true',
+                type: "cue",
+                data: attestation.cuePolicy || "true",
               },
             },
           ],
@@ -497,24 +478,24 @@ export class CosignVerifier {
 
   static generateSLSAProvenance(buildInfo) {
     return {
-      _type: 'https://in-toto.io/Statement/v0.1',
+      _type: "https://in-toto.io/Statement/v0.1",
       subject: [
         {
           name: buildInfo.artifact,
           digest: buildInfo.digest,
         },
       ],
-      predicateType: 'https://slsa.dev/provenance/v0.2',
+      predicateType: "https://slsa.dev/provenance/v0.2",
       predicate: {
         builder: {
-          id: buildInfo.builderId || 'https://github.com/actions/runner',
+          id: buildInfo.builderId || "https://github.com/actions/runner",
         },
-        buildType: buildInfo.buildType || 'https://github.com/actions/workflow',
+        buildType: buildInfo.buildType || "https://github.com/actions/workflow",
         invocation: {
           configSource: {
             uri: buildInfo.sourceUri,
             digest: buildInfo.sourceDigest,
-            entryPoint: buildInfo.entryPoint || '.github/workflows/build.yml',
+            entryPoint: buildInfo.entryPoint || ".github/workflows/build.yml",
           },
           parameters: buildInfo.parameters || {},
           environment: buildInfo.environment || {},
@@ -544,11 +525,9 @@ export const supplyChainMiddleware = (options = {}) => {
     // Add supply chain verification methods to request
     req.supplyChain = {
       verify: (imageRef, opts) => verifier.verifyImage(imageRef, opts),
-      verifyAttestation: (imageRef, type, opts) =>
-        verifier.verifyAttestation(imageRef, type, opts),
+      verifyAttestation: (imageRef, type, opts) => verifier.verifyAttestation(imageRef, type, opts),
       getSBOM: (imageRef, format) => verifier.generateSBOM(imageRef, format),
-      getAttestation: (imageRef, predicate) =>
-        verifier.downloadAttestation(imageRef, predicate),
+      getAttestation: (imageRef, predicate) => verifier.downloadAttestation(imageRef, predicate),
     };
 
     next();

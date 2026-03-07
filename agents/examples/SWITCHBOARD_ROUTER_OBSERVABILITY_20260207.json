@@ -30,7 +30,5 @@
     "Switchboard router uses shared observability helpers with structured error logging.",
     "Prompt registry and roadmap status updated for the change."
   ],
-  "stop_conditions": [
-    "Switchboard router tests cannot be executed due to missing dependencies."
-  ]
+  "stop_conditions": ["Switchboard router tests cannot be executed due to missing dependencies."]
 }

@@ -1,6 +1,7 @@
 # Cost Metrics Contract v1.0
 
 ## Overview
+
 This contract defines the standardized format for all cost-related events and ledger entries across the Summit Platform. This ensures uniform attribution to Tenants, Agents, and Operations.
 
 ## Event Schema (JSON)
@@ -50,18 +51,21 @@ This contract defines the standardized format for all cost-related events and le
 ## Backend Integration Points
 
 ### 1. Postgres (Budget Ledger)
+
 Table `budget_ledger` will be the primary source of truth for these events.
+
 - **Table Name**: `budget_ledger`
 - **Retention**: 90 days (standard), 365 days (audit-grade).
 
 ### 2. Prometheus / Grafana
+
 - **Namespace**: `summit_cost`
 - **Labels**: `tenant_id`, `agent_id`, `operation_type`.
 
 ## Enforcement Tiers
 
-| Tier | Utilization | Action |
-| :--- | :--- | :--- |
-| **Normal** | < 80% | Log & Record |
-| **Warning** | 80% - 99% | Emit `COST_WARNING` webhook, inject warning into Agent context |
-| **Critical** | >= 100% | Reject operation, emit `BUDGET_EXCEEDED` event |
+| Tier         | Utilization | Action                                                         |
+| :----------- | :---------- | :------------------------------------------------------------- |
+| **Normal**   | < 80%       | Log & Record                                                   |
+| **Warning**  | 80% - 99%   | Emit `COST_WARNING` webhook, inject warning into Agent context |
+| **Critical** | >= 100%     | Reject operation, emit `BUDGET_EXCEEDED` event                 |

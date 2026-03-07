@@ -20,6 +20,7 @@ After Batches 1-4, remaining low-severity vulnerabilities need to be addressed t
 **Estimated Low-Severity Vulnerabilities:** 258
 
 **Distribution:**
+
 - npm: 200
 - Python: 25
 - Rust: 12
@@ -29,18 +30,19 @@ After Batches 1-4, remaining low-severity vulnerabilities need to be addressed t
 ### Implementation Steps
 
 1. **Run comprehensive audits:**
+
    ```bash
    # npm/Node.js
    npm audit --all
    pnpm audit --all
-   
+
    # Python
    pip-audit
    safety check
-   
+
    # Rust
    cargo audit
-   
+
    # Go
    govulncheck ./...
    ```
@@ -56,6 +58,7 @@ After Batches 1-4, remaining low-severity vulnerabilities need to be addressed t
    - Group by package/module
 
 4. **Update dependencies:**
+
    ```bash
    npm update
    pnpm update
@@ -96,10 +99,12 @@ Repository contains `.archive/` and `.disabled/` directories with old code that 
 ### Current Status
 
 **Archived Directories:**
+
 - `.archive/` - Old versions and legacy code
 - `.disabled/` - Disabled features and experiments
 
 **Potential Issues:**
+
 - Outdated dependencies with vulnerabilities
 - Unused code that shouldn't be maintained
 - Security risks in old code
@@ -107,6 +112,7 @@ Repository contains `.archive/` and `.disabled/` directories with old code that 
 ### Implementation Steps
 
 1. **Audit archived code:**
+
    ```bash
    # Check for dependency files
    find .archive -name "package.json" -o -name "requirements.txt" -o -name "go.mod" -o -name "Cargo.toml"
@@ -114,6 +120,7 @@ Repository contains `.archive/` and `.disabled/` directories with old code that 
    ```
 
 2. **Identify vulnerable dependencies:**
+
    ```bash
    # For each dependency file found, run audit
    npm audit --prefix .archive/...
@@ -126,13 +133,14 @@ Repository contains `.archive/` and `.disabled/` directories with old code that 
    - **Option C:** Document as legacy
 
 4. **Update or remove:**
+
    ```bash
    # Option A: Remove
    git rm -r .archive/old-code
-   
+
    # Option B: Update
    cd .archive/legacy && npm update
-   
+
    # Option C: Document
    echo "# Legacy code - not maintained" > .archive/legacy/README.md
    ```
@@ -144,12 +152,14 @@ Repository contains `.archive/` and `.disabled/` directories with old code that 
 ### Directories to Review
 
 **In .archive/:**
+
 - legacy/
 - v039/
 - v038/
 - And other old versions
 
 **In .disabled/:**
+
 - adc/
 - afl-store/
 - atl/
@@ -186,6 +196,7 @@ Repository contains `.archive/` and `.disabled/` directories with old code that 
 ### Implementation Steps
 
 1. **Identify active Gradle files:**
+
    ```bash
    find . -name "build.gradle" -o -name "build.gradle.kts" | grep -v ".disabled" | grep -v ".archive"
    ```
@@ -222,17 +233,20 @@ Repository contains `.archive/` and `.disabled/` directories with old code that 
 **Title:** `security(batch-5a): resolve remaining low-severity vulnerabilities`
 
 **Description:**
+
 - Addresses all 258 remaining low-severity vulnerabilities
 - Updates dependencies across all ecosystems
 - Includes comprehensive testing
 
 **Files Changed:**
+
 - package.json, package-lock.json
 - requirements.txt files
 - Cargo.toml files
 - go.mod files
 
 **Tests:**
+
 - All audits pass
 - All tests pass
 - No functionality regressions
@@ -242,15 +256,18 @@ Repository contains `.archive/` and `.disabled/` directories with old code that 
 **Title:** `chore(batch-5b): clean up archived code and remove obsolete dependencies`
 
 **Description:**
+
 - Reviews and cleans up `.archive/` and `.disabled/` directories
 - Removes or updates vulnerable dependencies in archived code
 - Documents legacy code status
 
 **Files Changed:**
+
 - Archived code directories
 - Legacy documentation
 
 **Tests:**
+
 - No active code depends on archived code
 - Main application still functions
 
@@ -259,6 +276,7 @@ Repository contains `.archive/` and `.disabled/` directories with old code that 
 ## Implementation Checklist
 
 ### Phase 1: Low-Severity Cleanup
+
 - [ ] Run comprehensive audits
 - [ ] Identify low-severity issues
 - [ ] Prioritize by impact
@@ -267,6 +285,7 @@ Repository contains `.archive/` and `.disabled/` directories with old code that 
 - [ ] Create PR 5a
 
 ### Phase 2: Archive Review
+
 - [ ] Audit archived code
 - [ ] Identify vulnerable dependencies
 - [ ] Decide on each directory
@@ -275,6 +294,7 @@ Repository contains `.archive/` and `.disabled/` directories with old code that 
 - [ ] Create PR 5b
 
 ### Phase 3: Gradle Review (if needed)
+
 - [ ] Identify active Gradle files
 - [ ] Audit dependencies
 - [ ] Update if active
@@ -307,12 +327,12 @@ Repository contains `.archive/` and `.disabled/` directories with old code that 
 
 ## Timeline
 
-| Week | Task | Status |
-|------|------|--------|
-| 5 | Low-severity cleanup | Not Started |
-| 5 | Archive review | Not Started |
-| 5 | Gradle review | Not Started |
-| 5+ | PR review and merge | Not Started |
+| Week | Task                 | Status      |
+| ---- | -------------------- | ----------- |
+| 5    | Low-severity cleanup | Not Started |
+| 5    | Archive review       | Not Started |
+| 5    | Gradle review        | Not Started |
+| 5+   | PR review and merge  | Not Started |
 
 ---
 

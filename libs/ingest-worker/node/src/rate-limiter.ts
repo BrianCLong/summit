@@ -222,10 +222,10 @@ export class MultiTenantRateLimiter {
    * Get stats for all buckets.
    */
   getStats(): {
-    global: ReturnType<TokenBucket['getStats']>;
-    tenants: Record<string, ReturnType<TokenBucket['getStats']>>;
+    global: ReturnType<TokenBucket["getStats"]>;
+    tenants: Record<string, ReturnType<TokenBucket["getStats"]>>;
   } {
-    const tenants: Record<string, ReturnType<TokenBucket['getStats']>> = {};
+    const tenants: Record<string, ReturnType<TokenBucket["getStats"]>> = {};
 
     for (const [tenantId, bucket] of this.tenantBuckets) {
       tenants[tenantId] = bucket.getStats();
@@ -276,7 +276,7 @@ export class SlidingWindowRateLimiter {
   /**
    * Check if request is allowed and record it.
    */
-  allow(key: string = 'global'): boolean {
+  allow(key: string = "global"): boolean {
     const now = Date.now();
     const windowStart = now - this.windowMs;
 
@@ -306,7 +306,7 @@ export class SlidingWindowRateLimiter {
   /**
    * Get remaining allowance.
    */
-  getRemaining(key: string = 'global'): number {
+  getRemaining(key: string = "global"): number {
     const now = Date.now();
     const windowStart = now - this.windowMs;
 
@@ -319,7 +319,7 @@ export class SlidingWindowRateLimiter {
   /**
    * Get time until next allowance in ms.
    */
-  getResetTime(key: string = 'global'): number {
+  getResetTime(key: string = "global"): number {
     const now = Date.now();
     const windowStart = now - this.windowMs;
 
@@ -338,7 +338,7 @@ export class SlidingWindowRateLimiter {
   /**
    * Clear rate limit data for a key.
    */
-  reset(key: string = 'global'): void {
+  reset(key: string = "global"): void {
     this.windows.delete(key);
   }
 

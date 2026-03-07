@@ -7,8 +7,8 @@ metadata:
     app.kubernetes.io/name: dr-testing
     app.kubernetes.io/component: disaster-recovery
 spec:
-  schedule: '0 4 * * 0' # Every Sunday at 4 AM UTC
-  timeZone: 'UTC'
+  schedule: "0 4 * * 0" # Every Sunday at 4 AM UTC
+  timeZone: "UTC"
   successfulJobsHistoryLimit: 5
   failedJobsHistoryLimit: 5
   concurrencyPolicy: Forbid
@@ -26,7 +26,7 @@ spec:
             - name: dr-tester
               image: postgres:16-alpine
               imagePullPolicy: IfNotPresent
-              command: ['/bin/bash']
+              command: ["/bin/bash"]
               args:
                 - -c
                 - |
@@ -40,9 +40,9 @@ spec:
                 - name: DR_NAMESPACE
                   value: intelgraph-dr
                 - name: RTO_TARGET_MINUTES
-                  value: '60'
+                  value: "60"
                 - name: RPO_TARGET_MINUTES
-                  value: '15'
+                  value: "15"
                 - name: PGHOST
                   valueFrom:
                     secretKeyRef:
@@ -94,9 +94,9 @@ spec:
                       key: password
                       optional: true
                 - name: MAESTRO_BASE_URL
-                  value: 'http://maestro-server.intelgraph-staging.svc.cluster.local:4000'
+                  value: "http://maestro-server.intelgraph-staging.svc.cluster.local:4000"
                 - name: PROMETHEUS_GATEWAY
-                  value: 'http://prometheus-pushgateway.monitoring.svc.cluster.local:9091'
+                  value: "http://prometheus-pushgateway.monitoring.svc.cluster.local:9091"
                 - name: SLACK_WEBHOOK_URL
                   valueFrom:
                     secretKeyRef:
@@ -116,7 +116,7 @@ spec:
                 readOnlyRootFilesystem: true
                 allowPrivilegeEscalation: false
                 capabilities:
-                  drop: ['ALL']
+                  drop: ["ALL"]
               volumeMounts:
                 - name: tmp
                   mountPath: /tmp
@@ -134,8 +134,8 @@ metadata:
     app.kubernetes.io/name: dr-testing
     app.kubernetes.io/component: disaster-recovery
 spec:
-  schedule: '0 5 * * *' # Daily at 5 AM UTC
-  timeZone: 'UTC'
+  schedule: "0 5 * * *" # Daily at 5 AM UTC
+  timeZone: "UTC"
   successfulJobsHistoryLimit: 7
   failedJobsHistoryLimit: 7
   concurrencyPolicy: Forbid
@@ -153,7 +153,7 @@ spec:
             - name: dr-backup-tester
               image: postgres:16-alpine
               imagePullPolicy: IfNotPresent
-              command: ['/bin/bash']
+              command: ["/bin/bash"]
               args:
                 - -c
                 - |
@@ -165,9 +165,9 @@ spec:
                 - name: NAMESPACE
                   value: intelgraph-production
                 - name: RTO_TARGET_MINUTES
-                  value: '60'
+                  value: "60"
                 - name: RPO_TARGET_MINUTES
-                  value: '15'
+                  value: "15"
                 - name: PGHOST
                   valueFrom:
                     secretKeyRef:
@@ -219,7 +219,7 @@ spec:
                       key: password
                       optional: true
                 - name: PROMETHEUS_GATEWAY
-                  value: 'http://prometheus-pushgateway.monitoring.svc.cluster.local:9091'
+                  value: "http://prometheus-pushgateway.monitoring.svc.cluster.local:9091"
               resources:
                 requests:
                   cpu: 100m
@@ -233,7 +233,7 @@ spec:
                 readOnlyRootFilesystem: true
                 allowPrivilegeEscalation: false
                 capabilities:
-                  drop: ['ALL']
+                  drop: ["ALL"]
               volumeMounts:
                 - name: tmp
                   mountPath: /tmp
@@ -272,21 +272,21 @@ metadata:
     app.kubernetes.io/component: disaster-recovery
 rules:
   # Allow creating and managing test deployments and services
-  - apiGroups: ['apps']
-    resources: ['deployments']
-    verbs: ['create', 'delete', 'get', 'list', 'patch', 'update', 'watch']
-  - apiGroups: ['']
-    resources: ['services']
-    verbs: ['create', 'delete', 'get', 'list', 'patch', 'update', 'watch']
-  - apiGroups: ['']
-    resources: ['pods']
-    verbs: ['create', 'delete', 'get', 'list', 'watch']
-  - apiGroups: ['']
-    resources: ['namespaces']
-    verbs: ['create', 'get', 'list']
-  - apiGroups: ['']
-    resources: ['secrets', 'configmaps']
-    verbs: ['get', 'list']
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    verbs: ["create", "delete", "get", "list", "patch", "update", "watch"]
+  - apiGroups: [""]
+    resources: ["services"]
+    verbs: ["create", "delete", "get", "list", "patch", "update", "watch"]
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["create", "delete", "get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["namespaces"]
+    verbs: ["create", "get", "list"]
+  - apiGroups: [""]
+    resources: ["secrets", "configmaps"]
+    verbs: ["get", "list"]
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -314,9 +314,9 @@ metadata:
     app.kubernetes.io/component: disaster-recovery
 rules:
   # Production DR testing has more limited permissions (backup testing only)
-  - apiGroups: ['']
-    resources: ['secrets', 'configmaps']
-    verbs: ['get', 'list']
+  - apiGroups: [""]
+    resources: ["secrets", "configmaps"]
+    verbs: ["get", "list"]
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -352,8 +352,8 @@ spec:
           labels:
             severity: critical
           annotations:
-            summary: 'DR test failed'
-            description: 'DR test job {{ $labels.job_name }} in namespace {{ $labels.namespace }} has failed'
+            summary: "DR test failed"
+            description: "DR test job {{ $labels.job_name }} in namespace {{ $labels.namespace }} has failed"
 
         - alert: DRTestOverdue
           expr: (time() - kube_job_status_completion_time{job_name="dr-testing-backup-only"}) > 86400 # 24 hours
@@ -361,8 +361,8 @@ spec:
           labels:
             severity: warning
           annotations:
-            summary: 'DR backup test overdue'
-            description: 'DR backup test has not completed successfully in the last 24 hours'
+            summary: "DR backup test overdue"
+            description: "DR backup test has not completed successfully in the last 24 hours"
 
         - alert: DRFullTestOverdue
           expr: (time() - kube_job_status_completion_time{job_name="dr-testing-full"}) > 604800 # 7 days
@@ -370,8 +370,8 @@ spec:
           labels:
             severity: warning
           annotations:
-            summary: 'DR full test overdue'
-            description: 'DR full test has not completed successfully in the last 7 days'
+            summary: "DR full test overdue"
+            description: "DR full test has not completed successfully in the last 7 days"
 
         - alert: DRRTOViolation
           expr: postgres_dr_rto_minutes > 60
@@ -379,8 +379,8 @@ spec:
           labels:
             severity: critical
           annotations:
-            summary: 'DR RTO target violated'
-            description: 'DR recovery time {{ $value }} minutes exceeds target of 60 minutes'
+            summary: "DR RTO target violated"
+            description: "DR recovery time {{ $value }} minutes exceeds target of 60 minutes"
 
         - alert: DRTestRunningTooLong
           expr: kube_job_status_active{job_name=~"dr-testing-.*"} > 0 and (time() - kube_job_status_start_time{job_name=~"dr-testing-.*"}) > 3600 # 1 hour
@@ -388,5 +388,5 @@ spec:
           labels:
             severity: warning
           annotations:
-            summary: 'DR test running too long'
-            description: 'DR test job {{ $labels.job_name }} has been running for more than 1 hour'
+            summary: "DR test running too long"
+            description: "DR test job {{ $labels.job_name }} has been running for more than 1 hour"

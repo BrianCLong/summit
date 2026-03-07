@@ -20,15 +20,15 @@ export interface UsageEvent {
  * Usage Event Types
  */
 export enum UsageEventType {
-  VIEW = 'VIEW',
-  SEARCH = 'SEARCH',
-  DOWNLOAD = 'DOWNLOAD',
-  EDIT = 'EDIT',
-  COMMENT = 'COMMENT',
-  SHARE = 'SHARE',
-  BOOKMARK = 'BOOKMARK',
-  RATE = 'RATE',
-  CERTIFY = 'CERTIFY',
+  VIEW = "VIEW",
+  SEARCH = "SEARCH",
+  DOWNLOAD = "DOWNLOAD",
+  EDIT = "EDIT",
+  COMMENT = "COMMENT",
+  SHARE = "SHARE",
+  BOOKMARK = "BOOKMARK",
+  RATE = "RATE",
+  CERTIFY = "CERTIFY",
 }
 
 /**
@@ -118,11 +118,11 @@ export interface AdoptionMetrics {
  * Time Period
  */
 export enum TimePeriod {
-  DAY = 'DAY',
-  WEEK = 'WEEK',
-  MONTH = 'MONTH',
-  QUARTER = 'QUARTER',
-  YEAR = 'YEAR',
+  DAY = "DAY",
+  WEEK = "WEEK",
+  MONTH = "MONTH",
+  QUARTER = "QUARTER",
+  YEAR = "YEAR",
 }
 
 /**
@@ -141,9 +141,9 @@ export interface PopularAsset {
  * Trend Direction
  */
 export enum TrendDirection {
-  UP = 'UP',
-  DOWN = 'DOWN',
-  STABLE = 'STABLE',
+  UP = "UP",
+  DOWN = "DOWN",
+  STABLE = "STABLE",
 }
 
 /**
@@ -188,21 +188,21 @@ export interface Insight {
  * Insight Type
  */
 export enum InsightType {
-  USAGE_SPIKE = 'USAGE_SPIKE',
-  USAGE_DROP = 'USAGE_DROP',
-  QUALITY_ISSUE = 'QUALITY_ISSUE',
-  COVERAGE_GAP = 'COVERAGE_GAP',
-  ADOPTION_TREND = 'ADOPTION_TREND',
-  SEARCH_OPTIMIZATION = 'SEARCH_OPTIMIZATION',
+  USAGE_SPIKE = "USAGE_SPIKE",
+  USAGE_DROP = "USAGE_DROP",
+  QUALITY_ISSUE = "QUALITY_ISSUE",
+  COVERAGE_GAP = "COVERAGE_GAP",
+  ADOPTION_TREND = "ADOPTION_TREND",
+  SEARCH_OPTIMIZATION = "SEARCH_OPTIMIZATION",
 }
 
 /**
  * Insight Severity
  */
 export enum InsightSeverity {
-  INFO = 'INFO',
-  LOW = 'LOW',
-  MEDIUM = 'MEDIUM',
-  HIGH = 'HIGH',
-  CRITICAL = 'CRITICAL',
+  INFO = "INFO",
+  LOW = "LOW",
+  MEDIUM = "MEDIUM",
+  HIGH = "HIGH",
+  CRITICAL = "CRITICAL",
 }

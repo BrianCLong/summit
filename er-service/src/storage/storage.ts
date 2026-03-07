@@ -1,4 +1,4 @@
-import { randomUUID } from 'node:crypto';
+import { randomUUID } from "node:crypto";
 import type {
   MergeRecord,
   MergeRequest,
@@ -8,8 +8,8 @@ import type {
   ExplainResponse,
   ERFeatures,
   EntityRecord,
-} from '../types.js';
-import { buildFeatureContributions } from '../scoring/scorer.js';
+} from "../types.js";
+import { buildFeatureContributions } from "../scoring/scorer.js";
 
 /**
  * In-memory storage for ER operations with full audit trail
@@ -31,11 +31,11 @@ export class ERStorage {
     features: ERFeatures,
     featureWeights: Record<string, number>,
     threshold: number,
-    method: string,
+    method: string
   ): MergeRecord {
     const mergeId = randomUUID();
     const primaryId = request.primaryId || request.entityIds[0];
-    const mergedIds = request.entityIds.filter(id => id !== primaryId);
+    const mergedIds = request.entityIds.filter((id) => id !== primaryId);
 
     const record: MergeRecord = {
       mergeId,
@@ -58,7 +58,7 @@ export class ERStorage {
       id: randomUUID(),
       tenantId: request.tenantId,
       actor: request.actor,
-      event: 'merge',
+      event: "merge",
       target: mergeId,
       reason: request.reason,
       metadata: {
@@ -108,7 +108,7 @@ export class ERStorage {
       id: randomUUID(),
       tenantId: record.tenantId,
       actor,
-      event: 'revert',
+      event: "revert",
       target: mergeId,
       reason,
       metadata: {
@@ -144,9 +144,7 @@ export class ERStorage {
    * Get all merges for a tenant
    */
   getMergesByTenant(tenantId: string): MergeRecord[] {
-    return Array.from(this.merges.values()).filter(
-      m => m.tenantId === tenantId,
-    );
+    return Array.from(this.merges.values()).filter((m) => m.tenantId === tenantId);
   }
 
   /**
@@ -172,7 +170,7 @@ export class ERStorage {
       id: randomUUID(),
       tenantId: request.tenantId,
       actor: request.actor,
-      event: 'split',
+      event: "split",
       target: splitId,
       reason: request.reason,
       metadata: {
@@ -220,21 +218,21 @@ export class ERStorage {
   getAuditLog(options?: {
     tenantId?: string;
     actor?: string;
-    event?: 'merge' | 'revert' | 'split';
+    event?: "merge" | "revert" | "split";
     limit?: number;
   }): AuditEntry[] {
     let log = [...this.auditLog];
 
     if (options?.tenantId) {
-      log = log.filter(e => e.tenantId === options.tenantId);
+      log = log.filter((e) => e.tenantId === options.tenantId);
     }
 
     if (options?.actor) {
-      log = log.filter(e => e.actor === options.actor);
+      log = log.filter((e) => e.actor === options.actor);
     }
 
     if (options?.event) {
-      log = log.filter(e => e.event === options.event);
+      log = log.filter((e) => e.event === options.event);
     }
 
     // Sort by creation time, newest first
@@ -265,34 +263,26 @@ export class ERStorage {
    * Get all entities for a tenant
    */
   getEntitiesByTenant(tenantId: string): EntityRecord[] {
-    return Array.from(this.entities.values()).filter(
-      e => e.tenantId === tenantId,
-    );
+    return Array.from(this.entities.values()).filter((e) => e.tenantId === tenantId);
   }
 
   /**
    * Build human-readable rationale from features
    */
-  private buildRationale(
-    features: ERFeatures,
-    weights: Record<string, number>,
-  ): string[] {
+  private buildRationale(features: ERFeatures, weights: Record<string, number>): string[] {
     const rationale: string[] = [];
 
-    const sortedWeights = Object.entries(weights)
-      .sort(([, a], [, b]) => b - a);
+    const sortedWeights = Object.entries(weights).sort(([, a], [, b]) => b - a);
 
     for (const [feature, weight] of sortedWeights) {
       if (weight > 0.05) {
         const value = features[feature as keyof ERFeatures];
-        if (typeof value === 'number' && value > 0.3) {
+        if (typeof value === "number" && value > 0.3) {
           rationale.push(
-            `${feature}: ${(value * 100).toFixed(1)}% (weight: ${(weight * 100).toFixed(0)}%)`,
+            `${feature}: ${(value * 100).toFixed(1)}% (weight: ${(weight * 100).toFixed(0)}%)`
           );
-        } else if (typeof value === 'boolean' && value) {
-          rationale.push(
-            `${feature}: true (weight: ${(weight * 100).toFixed(0)}%)`,
-          );
+        } else if (typeof value === "boolean" && value) {
+          rationale.push(`${feature}: true (weight: ${(weight * 100).toFixed(0)}%)`);
         }
       }
     }

@@ -3,7 +3,7 @@
  * TRAINING/SIMULATION ONLY
  */
 
-import { v4 as uuid } from 'uuid';
+import { v4 as uuid } from "uuid";
 
 export interface CommunicationNode {
   id: string;
@@ -12,10 +12,10 @@ export interface CommunicationNode {
   aliases: string[];
 
   // Metrics
-  degree: number;          // Total connections
-  inDegree: number;        // Incoming connections
-  outDegree: number;       // Outgoing connections
-  betweenness: number;     // Centrality measure
+  degree: number; // Total connections
+  inDegree: number; // Incoming connections
+  outDegree: number; // Outgoing connections
+  betweenness: number; // Centrality measure
   pageRank: number;
 
   // Activity
@@ -32,17 +32,17 @@ export interface CommunicationEdge {
   id: string;
   source: string;
   target: string;
-  weight: number;          // Communication frequency
+  weight: number; // Communication frequency
 
   // Communication details
   firstContact: Date;
   lastContact: Date;
   totalCount: number;
-  totalDuration: number;   // seconds
+  totalDuration: number; // seconds
 
   // Types
-  types: Array<'voice' | 'sms' | 'email' | 'data'>;
-  direction: 'both' | 'source_to_target' | 'target_to_source';
+  types: Array<"voice" | "sms" | "email" | "data">;
+  direction: "both" | "source_to_target" | "target_to_source";
 
   isSimulated: boolean;
 }
@@ -79,7 +79,7 @@ export class CommunicationsMapper {
     target: string;
     targetType: string;
     timestamp: Date;
-    type: 'voice' | 'sms' | 'email' | 'data';
+    type: "voice" | "sms" | "email" | "data";
     duration?: number;
   }): void {
     // Ensure nodes exist
@@ -101,8 +101,8 @@ export class CommunicationsMapper {
         totalCount: 0,
         totalDuration: 0,
         types: [],
-        direction: 'source_to_target',
-        isSimulated: true
+        direction: "source_to_target",
+        isSimulated: true,
       };
       this.edges.set(edgeKey, edge);
 
@@ -153,13 +153,13 @@ export class CommunicationsMapper {
         lastSeen: new Date(),
         communicationCount: 0,
         attributes: {},
-        isSimulated: true
+        isSimulated: true,
       });
     }
   }
 
   private getEdgeKey(source: string, target: string): string {
-    return [source, target].sort().join('::');
+    return [source, target].sort().join("::");
   }
 
   /**
@@ -190,7 +190,7 @@ export class CommunicationsMapper {
 
               const edgeKey = this.getEdgeKey(id, neighborId);
               const edge = this.edges.get(edgeKey);
-              if (edge && !chainEdges.find(e => e.id === edge.id)) {
+              if (edge && !chainEdges.find((e) => e.id === edge.id)) {
                 chainEdges.push(edge);
               }
             }
@@ -204,7 +204,7 @@ export class CommunicationsMapper {
       hops: maxHops,
       nodes: Array.from(visitedNodes.values()),
       edges: chainEdges,
-      chainScore: this.calculateChainScore(Array.from(visitedNodes.keys()))
+      chainScore: this.calculateChainScore(Array.from(visitedNodes.keys())),
     };
   }
 
@@ -216,7 +216,7 @@ export class CommunicationsMapper {
     const edgeCount = this.edges.size;
 
     // Density
-    const maxEdges = nodeCount * (nodeCount - 1) / 2;
+    const maxEdges = (nodeCount * (nodeCount - 1)) / 2;
     const density = maxEdges > 0 ? edgeCount / maxEdges : 0;
 
     // Average degree
@@ -238,7 +238,7 @@ export class CommunicationsMapper {
       averageDegree,
       clusteringCoefficient: this.calculateClusteringCoefficient(),
       components,
-      diameter: this.estimateDiameter()
+      diameter: this.estimateDiameter(),
     };
   }
 
@@ -402,7 +402,7 @@ export class CommunicationsMapper {
         }
       }
 
-      const possibleTriangles = k * (k - 1) / 2;
+      const possibleTriangles = (k * (k - 1)) / 2;
       totalCoeff += triangles / possibleTriangles;
       count++;
     }

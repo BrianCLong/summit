@@ -4,8 +4,8 @@
  */
 
 // Context and hooks
-export { HelpProvider, useHelp, HelpContext } from './HelpContext.js';
-export type { HelpProviderProps } from './HelpContext.js';
+export { HelpProvider, useHelp, HelpContext } from "./HelpContext.js";
+export type { HelpProviderProps } from "./HelpContext.js";
 
 // Components
 export {
@@ -14,7 +14,7 @@ export {
   HelpSearch,
   HelpArticleView,
   HelpTooltip,
-} from './components/index.js';
+} from "./components/index.js";
 
 // Types
 export type {
@@ -28,4 +28,4 @@ export type {
   HelpTooltipProps,
   HelpArticleViewProps,
   HelpSearchProps,
-} from './types.js';
+} from "./types.js";

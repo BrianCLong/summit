@@ -2,8 +2,8 @@
  * Type declarations for @aws-sdk/client-s3
  * This package is an optional dependency and dynamically imported
  */
-declare module '@aws-sdk/client-s3' {
-  import { Readable } from 'stream';
+declare module "@aws-sdk/client-s3" {
+  import { Readable } from "stream";
 
   export interface S3ClientConfig {
     region?: string;

@@ -16,8 +16,8 @@ Transform IntelGraph from single-organization platform to **multi-organization i
 // Federated Node Architecture
 interface FederatedNode {
   organizationId: string;
-  jurisdiction: 'US' | 'EU' | 'NATO' | 'FVEY' | 'PRIVATE';
-  clearanceLevel: 'UNCLASSIFIED' | 'CONFIDENTIAL' | 'SECRET' | 'TOP_SECRET';
+  jurisdiction: "US" | "EU" | "NATO" | "FVEY" | "PRIVATE";
+  clearanceLevel: "UNCLASSIFIED" | "CONFIDENTIAL" | "SECRET" | "TOP_SECRET";
   sharingAgreements: SharingAgreement[];
   privacyPreservingQueries: ZKProofSystem;
   cryptographicIdentity: Ed25519KeyPair;
@@ -134,7 +134,7 @@ class PrivacyBudgetManager {
 
     if (query.includesPersonalData) sensitivity += 0.5;
     if (query.crossesJurisdictions) sensitivity += 0.3;
-    if (query.classification >= 'SECRET') sensitivity += 0.2;
+    if (query.classification >= "SECRET") sensitivity += 0.2;
 
     return sensitivity;
   }
@@ -183,47 +183,47 @@ contract FederatedIntelligenceRegistry {
 
 ```yaml
 deliverables:
-  - federated_node_architecture: 'Core federation protocols'
-  - privacy_preserving_crypto: 'Homomorphic encryption integration'
-  - zk_proof_system: 'Zero-knowledge membership verification'
-  - differential_privacy: 'Budget management and noise mechanisms'
+  - federated_node_architecture: "Core federation protocols"
+  - privacy_preserving_crypto: "Homomorphic encryption integration"
+  - zk_proof_system: "Zero-knowledge membership verification"
+  - differential_privacy: "Budget management and noise mechanisms"
 
 technical_stack:
-  encryption: 'Microsoft SEAL (homomorphic) + libsodium (transport)'
-  zk_proofs: 'Circom + snarkjs for membership verification'
-  mpc: 'MP-SPDZ framework for secure computation'
-  consensus: 'Tendermint for federated state agreement'
+  encryption: "Microsoft SEAL (homomorphic) + libsodium (transport)"
+  zk_proofs: "Circom + snarkjs for membership verification"
+  mpc: "MP-SPDZ framework for secure computation"
+  consensus: "Tendermint for federated state agreement"
 ```
 
 ### Phase 2: Pilot Partnership (Weeks 5-8)
 
 ```yaml
 pilot_partners:
-  - 'FBI Cyber Division (UNCLASSIFIED pilot)'
-  - 'Europol EC3 (cross-border threat sharing)'
-  - 'Major Financial Institution (fraud correlation)'
+  - "FBI Cyber Division (UNCLASSIFIED pilot)"
+  - "Europol EC3 (cross-border threat sharing)"
+  - "Major Financial Institution (fraud correlation)"
 
 pilot_scenarios:
   threat_intel_sharing:
-    - 'APT campaign indicators (IoCs)'
-    - 'Fraud pattern correlation across institutions'
-    - 'Cyber threat attribution without revealing sources'
+    - "APT campaign indicators (IoCs)"
+    - "Fraud pattern correlation across institutions"
+    - "Cyber threat attribution without revealing sources"
 
 privacy_validation:
-  - 'No raw PII crosses organizational boundaries'
-  - 'Differential privacy budget prevents reconstruction attacks'
-  - 'Zero-knowledge proofs verify capabilities without exposure'
+  - "No raw PII crosses organizational boundaries"
+  - "Differential privacy budget prevents reconstruction attacks"
+  - "Zero-knowledge proofs verify capabilities without exposure"
 ```
 
 ## 🧭 Phase 2 Pilot Crypto/IP Readiness (FTO)
 
 ### Component Inventory Mapped to Pilot Scope
 
-| Component                       | Pilot Touchpoints                                                                                  | Phase 2 Deliverable                                                                      | FTO Gate                                                                   |
-| ------------------------------- | -------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
-| Homomorphic encryption queries  | Privacy-preserving partner queries on cross-org indicators; CKKS/BFV pipelines in SEAL/OpenFHE     | Encrypted query path + aggregation with DP noise                                         | Counsel sign-off before partner data leaves org; verify library patent grants |
-| MPC threat correlation          | MP-SPDZ/ABY-style secure aggregation of fraud/IOC features across FBI/Europol/financial partners | Secure correlation protocol runbook + audit trail                                        | Confirm protocol/license provenance and export controls                     |
-| ZK membership proofs            | Circom/snarkjs verification for partner eligibility and capability attestations                    | Verifier circuit + registry contract interfaces                                          | Avoid copyleft contamination; validate proving key custody and auditability  |
+| Component                      | Pilot Touchpoints                                                                                | Phase 2 Deliverable                               | FTO Gate                                                                      |
+| ------------------------------ | ------------------------------------------------------------------------------------------------ | ------------------------------------------------- | ----------------------------------------------------------------------------- |
+| Homomorphic encryption queries | Privacy-preserving partner queries on cross-org indicators; CKKS/BFV pipelines in SEAL/OpenFHE   | Encrypted query path + aggregation with DP noise  | Counsel sign-off before partner data leaves org; verify library patent grants |
+| MPC threat correlation         | MP-SPDZ/ABY-style secure aggregation of fraud/IOC features across FBI/Europol/financial partners | Secure correlation protocol runbook + audit trail | Confirm protocol/license provenance and export controls                       |
+| ZK membership proofs           | Circom/snarkjs verification for partner eligibility and capability attestations                  | Verifier circuit + registry contract interfaces   | Avoid copyleft contamination; validate proving key custody and auditability   |
 
 ### Targeted Prior-Art & Patent/Licensing Scan (non-legal summary)
 
@@ -261,21 +261,21 @@ scaling_targets:
   privacy_budget_efficiency: 90% # useful queries vs noise
 
 optimizations:
-  query_caching: 'Privacy-preserving result caching'
-  batch_processing: 'MPC optimization for bulk operations'
-  network_topology: 'Geographic federation clustering'
-  cost_optimization: 'Homomorphic computation efficiency'
+  query_caching: "Privacy-preserving result caching"
+  batch_processing: "MPC optimization for bulk operations"
+  network_topology: "Geographic federation clustering"
+  cost_optimization: "Homomorphic computation efficiency"
 ```
 
 ---
 
 ## 🔐 **PHASE 2 CRYPTOGRAPHY INVENTORY & PILOT SCOPE**
 
-| Component | Implementation Path | Phase 2 Pilot Scope |
-| --- | --- | --- |
-| Homomorphic encryption (HE) query processing | Microsoft SEAL (CKKS/BFV) with parameter sets sized for IoC search; DP budget manager enforcing org-level epsilon caps | Encrypted IoC/indicator lookups between FBI Cyber and EC3; synthetic data only until FTO sign-off |
-| MPC threat correlation | MP-SPDZ (SPDZ2 + honest-majority fallbacks) with authenticated channels; audit logging per protocol round | Cross-org correlation for fraud + APT indicators with 24h time-window guardrails; runbooks for party add/drop |
-| ZK membership proofs | Circom + snarkjs Groth16 verifier; key ceremony + rotation SOP; curve BN254 with plan to migrate to BLS12-381 | Capability-guarded query allowlist checks for pilot participants; prove clearance without revealing capability sets |
+| Component                                    | Implementation Path                                                                                                    | Phase 2 Pilot Scope                                                                                                 |
+| -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| Homomorphic encryption (HE) query processing | Microsoft SEAL (CKKS/BFV) with parameter sets sized for IoC search; DP budget manager enforcing org-level epsilon caps | Encrypted IoC/indicator lookups between FBI Cyber and EC3; synthetic data only until FTO sign-off                   |
+| MPC threat correlation                       | MP-SPDZ (SPDZ2 + honest-majority fallbacks) with authenticated channels; audit logging per protocol round              | Cross-org correlation for fraud + APT indicators with 24h time-window guardrails; runbooks for party add/drop       |
+| ZK membership proofs                         | Circom + snarkjs Groth16 verifier; key ceremony + rotation SOP; curve BN254 with plan to migrate to BLS12-381          | Capability-guarded query allowlist checks for pilot participants; prove clearance without revealing capability sets |
 
 ---
 
@@ -310,11 +310,11 @@ Blocking/encumbered claims: none confirmed, but HE parameter sets and PLONK vari
 - **Go/No-Go gate**: Phase 2 pilot start is gated on written FTO sign-off; until then, pilot runs only with synthetic data and test vectors.
 - **Risk register updates**:
 
-  | Risk | Impact | Owner | Mitigation | Status |
-  | --- | --- | --- | --- | --- |
-  | FTO delay for HE/CKKS | Slips pilot start; potential rework of HE stack | Legal + Crypto Eng | Escalate MSR license review; keep OpenFHE BFV fallback ready | Open |
-  | PLONK patent uncertainty | Blocks optional ZK upgrade | Crypto Eng | Keep Groth16 default; engage Aztec for commercial terms if needed | Monitored |
-  | Export-control posture (EAR/FIPS) | Partner onboarding blocked if controls unclear | Compliance | Map cipher suites to EAR; prepare FIPS 140-3 alignment memo | Open |
+  | Risk                              | Impact                                          | Owner              | Mitigation                                                        | Status    |
+  | --------------------------------- | ----------------------------------------------- | ------------------ | ----------------------------------------------------------------- | --------- |
+  | FTO delay for HE/CKKS             | Slips pilot start; potential rework of HE stack | Legal + Crypto Eng | Escalate MSR license review; keep OpenFHE BFV fallback ready      | Open      |
+  | PLONK patent uncertainty          | Blocks optional ZK upgrade                      | Crypto Eng         | Keep Groth16 default; engage Aztec for commercial terms if needed | Monitored |
+  | Export-control posture (EAR/FIPS) | Partner onboarding blocked if controls unclear  | Compliance         | Map cipher suites to EAR; prepare FIPS 140-3 alignment memo       | Open      |
 
 - **Partner communications**: Send weekly pilot bulletin summarizing IP/FTO status; share design-around plan if gating persists beyond one week; confirm partners acknowledge synthetic-data-only constraint until sign-off.
 
@@ -355,21 +355,20 @@ class FederationAnalytics:
 ```yaml
 compliance_frameworks:
   gdpr:
-    status: 'COMPLIANT'
-    mechanisms: ['consent_management', 'right_to_erasure', 'data_minimization']
+    status: "COMPLIANT"
+    mechanisms: ["consent_management", "right_to_erasure", "data_minimization"]
 
   ccpa:
-    status: 'COMPLIANT'
-    mechanisms: ['consumer_rights', 'opt_out_mechanisms', 'transparency']
+    status: "COMPLIANT"
+    mechanisms: ["consumer_rights", "opt_out_mechanisms", "transparency"]
 
   itar:
-    status: 'COMPLIANT'
-    mechanisms:
-      ['export_control', 'person_verification', 'dual_use_restrictions']
+    status: "COMPLIANT"
+    mechanisms: ["export_control", "person_verification", "dual_use_restrictions"]
 
   nato_standards:
-    status: 'PENDING_CERTIFICATION'
-    mechanisms: ['classification_handling', 'need_to_know', 'caveat_processing']
+    status: "PENDING_CERTIFICATION"
+    mechanisms: ["classification_handling", "need_to_know", "caveat_processing"]
 ```
 
 ### Cryptographic Audit Trail

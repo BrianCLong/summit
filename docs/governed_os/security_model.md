@@ -11,6 +11,7 @@ gates. No compliance logic is implemented outside the policy engine.
 **MAESTRO Layers**: Foundation, Data, Agents, Tools, Infra, Observability, Security.
 
 **Threats Considered**
+
 - Privilege escalation between agents or flows
 - Citation laundering (claims without evidence)
 - Audit log tampering or repudiation
@@ -19,6 +20,7 @@ gates. No compliance logic is implemented outside the policy engine.
 - Prompt injection and tool abuse
 
 **Mitigations**
+
 - Deny-by-default scoped capabilities with step-level execution identities
 - Citation resolution gates in CI and runtime export gates
 - Signed approval stamps + immutable audit trail

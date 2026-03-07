@@ -2,7 +2,7 @@
  * Bulk Data Loader with optimizations
  */
 
-import { Pool } from 'pg';
+import { Pool } from "pg";
 
 export interface LoadOptions {
   batchSize?: number;
@@ -18,7 +18,7 @@ export class BulkLoader {
     tableName: string,
     data: any[][],
     columns: string[],
-    options: LoadOptions = {},
+    options: LoadOptions = {}
   ): Promise<{ loaded: number; errors: number }> {
     const batchSize = options.batchSize || 10000;
 
@@ -48,19 +48,19 @@ export class BulkLoader {
     const placeholders = batch
       .map(
         (_, idx) =>
-          `(${columns.map((_, colIdx) => `$${idx * columns.length + colIdx + 1}`).join(', ')})`,
+          `(${columns.map((_, colIdx) => `$${idx * columns.length + colIdx + 1}`).join(", ")})`
       )
-      .join(', ');
+      .join(", ");
 
     await this.pool.query(
-      `INSERT INTO ${tableName} (${columns.join(', ')}) VALUES ${placeholders}`,
-      batch.flat(),
+      `INSERT INTO ${tableName} (${columns.join(", ")}) VALUES ${placeholders}`,
+      batch.flat()
     );
   }
 
   async loadFromCSV(tableName: string, csvPath: string, columns: string[]): Promise<void> {
     await this.pool.query(`
-      COPY ${tableName} (${columns.join(', ')})
+      COPY ${tableName} (${columns.join(", ")})
       FROM '${csvPath}'
       WITH (FORMAT csv, HEADER true)
     `);

@@ -21,7 +21,8 @@ import {
 } from '@/components/ui/Dialog'
 
 export function SnapshotMenu() {
-  const { snapshots, addSnapshot, removeSnapshot, renameSnapshot } = useSnapshotStore()
+  const { snapshots, addSnapshot, removeSnapshot, renameSnapshot } =
+    useSnapshotStore()
   const { captureAll, restoreAll } = useSnapshotContext()
   const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false)
   const [newSnapshotName, setNewSnapshotName] = useState('')
@@ -32,7 +33,10 @@ export function SnapshotMenu() {
     if (Object.keys(data).length === 0) {
       console.warn('Snapshot captured empty state.')
     }
-    addSnapshot(newSnapshotName || `Snapshot ${new Date().toLocaleString()}`, data)
+    addSnapshot(
+      newSnapshotName || `Snapshot ${new Date().toLocaleString()}`,
+      data
+    )
     setNewSnapshotName('')
     setIsSaveDialogOpen(false)
   }
@@ -63,8 +67,11 @@ export function SnapshotMenu() {
               No saved snapshots
             </div>
           )}
-          {snapshots.map((s) => (
-            <div key={s.id} className="flex items-center justify-between px-2 py-1 hover:bg-accent rounded-sm group">
+          {snapshots.map(s => (
+            <div
+              key={s.id}
+              className="flex items-center justify-between px-2 py-1 hover:bg-accent rounded-sm group"
+            >
               <button
                 className="flex-1 text-left text-sm truncate mr-2"
                 onClick={() => handleRestore(s)}
@@ -75,7 +82,7 @@ export function SnapshotMenu() {
                 variant="ghost"
                 size="sm"
                 className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100"
-                onClick={(e) => {
+                onClick={e => {
                   e.stopPropagation()
                   removeSnapshot(s.id)
                 }}
@@ -96,13 +103,16 @@ export function SnapshotMenu() {
             <Input
               placeholder="Snapshot Name (e.g. Investigation A)"
               value={newSnapshotName}
-              onChange={(e) => setNewSnapshotName(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSave()}
+              onChange={e => setNewSnapshotName(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && handleSave()}
               autoFocus
             />
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsSaveDialogOpen(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setIsSaveDialogOpen(false)}
+            >
               Cancel
             </Button>
             <Button onClick={handleSave}>Save</Button>

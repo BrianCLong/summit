@@ -6,7 +6,7 @@
 image:
   repository: ghcr.io/<org>/intelgraph-server
   tag: latest
-  digest: '' # when set, image will be pulled by digest
+  digest: "" # when set, image will be pulled by digest
 ```
 
 **File:** `charts/intelgraph/templates/deployment.yaml` (render image by digest when provided)
@@ -166,9 +166,7 @@ build-publish:
     {
       "type": "stat",
       "title": "Requests per second",
-      "targets": [
-        { "expr": "sum(rate(graphql_requests_total[$__rate_interval]))" }
-      ],
+      "targets": [{ "expr": "sum(rate(graphql_requests_total[$__rate_interval]))" }],
       "gridPos": { "h": 6, "w": 8, "x": 16, "y": 14 }
     }
   ],

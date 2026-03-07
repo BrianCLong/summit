@@ -1,9 +1,11 @@
 # Slack Integration Setup
 
 ## Overview
+
 Complete setup guide for integrating Slack with Summit, including OAuth, Bolt framework, event subscriptions, slash commands, and interactive components.
 
 ## Prerequisites
+
 - Slack workspace with app installation permissions
 - Admin access or permission to create apps
 - Summit deployment with webhook endpoint
@@ -12,6 +14,7 @@ Complete setup guide for integrating Slack with Summit, including OAuth, Bolt fr
 ## Phase 1: Initial Setup
 
 ### 1.1 Create Slack App
+
 1. Navigate to https://api.slack.com/apps
 2. Click "Create New App"
 3. Choose "From scratch"
@@ -20,6 +23,7 @@ Complete setup guide for integrating Slack with Summit, including OAuth, Bolt fr
    - **Workspace**: Select your workspace
 
 ### 1.2 OAuth & Permissions
+
 1. Go to OAuth & Permissions
 2. Add Redirect URLs:
    - `https://your-domain.com/auth/slack/callback`
@@ -35,6 +39,7 @@ Complete setup guide for integrating Slack with Summit, including OAuth, Bolt fr
    - `reactions:write` - Add reactions
 
 ### 1.3 App Credentials
+
 1. Navigate to Basic Information
 2. Note your credentials:
    ```
@@ -46,6 +51,7 @@ Complete setup guide for integrating Slack with Summit, including OAuth, Bolt fr
 ## Phase 2: Environment Configuration
 
 ### 2.1 Environment Variables
+
 ```bash
 # Slack OAuth
 SLACK_CLIENT_ID=your_client_id
@@ -64,6 +70,7 @@ SLACK_TEAM_ID=T0XXXXXXX
 ```
 
 ### 2.2 Event Subscriptions
+
 1. Go to Event Subscriptions
 2. Enable Events: Toggle On
 3. Request URL: `https://your-domain.com/slack/events`
@@ -76,6 +83,7 @@ SLACK_TEAM_ID=T0XXXXXXX
    - `member_joined_channel`
 
 ### 2.3 Slash Commands
+
 1. Go to Slash Commands
 2. Create commands:
    - Command: `/summit`
@@ -86,6 +94,7 @@ SLACK_TEAM_ID=T0XXXXXXX
 ## Phase 3: Implementation
 
 ### 3.1 Slack Bolt App
+
 ```python
 from slack_bolt import App
 from slack_bolt.adapter.fastapi import SlackRequestHandler
@@ -105,7 +114,7 @@ handler = SlackRequestHandler(app)
 @api.get("/auth/slack")
 async def slack_oauth_start():
     from slack_sdk.oauth import AuthorizeUrlGenerator
-    
+
     generator = AuthorizeUrlGenerator(
         client_id=SLACK_CLIENT_ID,
         scopes=["channels:read", "chat:write", "commands"],
@@ -116,25 +125,26 @@ async def slack_oauth_start():
 @api.get("/auth/slack/callback")
 async def slack_oauth_callback(code: str):
     from slack_sdk.oauth import OAuth2Client
-    
+
     client = OAuth2Client(
         client_id=SLACK_CLIENT_ID,
         client_secret=SLACK_CLIENT_SECRET
     )
-    
+
     response = client.oauth_v2_access(
         code=code,
         redirect_uri=SLACK_REDIRECT_URI
     )
-    
+
     # Store tokens
     bot_token = response["access_token"]
     team_id = response["team"]["id"]
-    
+
     return {"success": True, "team_id": team_id}
 ```
 
 ### 3.2 Event Handlers
+
 ```python
 # Handle messages
 @app.message("hello")
@@ -165,6 +175,7 @@ def handle_reaction_added(event, say):
 ```
 
 ### 3.3 Interactive Components
+
 ```python
 # Handle button clicks
 @app.action("button_click")
@@ -172,7 +183,7 @@ def handle_button_click(ack, body, client):
     ack()
     user_id = body["user"]["id"]
     value = body["actions"][0]["value"]
-    
+
     client.chat_postMessage(
         channel=user_id,
         text=f"You clicked: {value}"
@@ -219,6 +230,7 @@ def send_interactive_message(channel, text):
 ```
 
 ### 3.4 FastAPI Integration
+
 ```python
 # Event endpoint
 @api.post("/slack/events")
@@ -239,27 +251,28 @@ async def slack_interactive(request: Request):
 ## Phase 4: Data Synchronization
 
 ### 4.1 Message Sync
+
 ```python
 class SlackSync:
     def __init__(self, bot_token):
         from slack_sdk import WebClient
         self.client = WebClient(token=bot_token)
-    
+
     async def sync_messages(self, channel_id, oldest=None):
         result = self.client.conversations_history(
             channel=channel_id,
             oldest=oldest,
             limit=100
         )
-        
+
         messages = result["messages"]
         for message in messages:
             await self.process_message(message)
-        
+
         if result["has_more"]:
             cursor = result["response_metadata"]["next_cursor"]
             await self.sync_messages(channel_id, cursor)
-    
+
     async def post_to_slack(self, channel, text, thread_ts=None):
         return self.client.chat_postMessage(
             channel=channel,
@@ -269,11 +282,12 @@ class SlackSync:
 ```
 
 ### 4.2 User Sync
+
 ```python
 async def sync_users():
     client = WebClient(token=SLACK_BOT_TOKEN)
     result = client.users_list()
-    
+
     for user in result["members"]:
         if not user["is_bot"] and not user["deleted"]:
             await store_user({
@@ -287,12 +301,14 @@ async def sync_users():
 ## Phase 5: Testing
 
 ### 5.1 Test Bot Token
+
 ```bash
 curl -X POST https://slack.com/api/auth.test \
   -H "Authorization: Bearer YOUR_BOT_TOKEN"
 ```
 
 ### 5.2 Test Message Posting
+
 ```bash
 curl -X POST https://slack.com/api/chat.postMessage \
   -H "Authorization: Bearer YOUR_BOT_TOKEN" \
@@ -301,6 +317,7 @@ curl -X POST https://slack.com/api/chat.postMessage \
 ```
 
 ### 5.3 Test Slash Command
+
 ```bash
 curl -X POST https://your-domain.com/slack/commands \
   -d "token=YOUR_VERIFICATION_TOKEN&command=/summit&text=test"
@@ -309,6 +326,7 @@ curl -X POST https://your-domain.com/slack/commands \
 ## Phase 6: Production Deployment
 
 ### 6.1 Security Checklist
+
 - [ ] Verify request signatures
 - [ ] Store tokens securely
 - [ ] Rate limiting implementation
@@ -317,6 +335,7 @@ curl -X POST https://your-domain.com/slack/commands \
 - [ ] Error handling
 
 ### 6.2 Monitoring
+
 - Event processing latency
 - Command response times
 - API call volume
@@ -324,6 +343,7 @@ curl -X POST https://your-domain.com/slack/commands \
 - Rate limit usage
 
 ### 6.3 Rate Limits
+
 - **Tier 1**: 1 request per minute
 - **Tier 2**: 20 requests per minute
 - **Tier 3**: 50 requests per minute
@@ -332,6 +352,7 @@ curl -X POST https://your-domain.com/slack/commands \
 ## Phase 7: Advanced Features
 
 ### 7.1 File Uploads
+
 ```python
 def upload_file(channel, file_path, title):
     with open(file_path, 'rb') as file:
@@ -343,6 +364,7 @@ def upload_file(channel, file_path, title):
 ```
 
 ### 7.2 Modals
+
 ```python
 def open_modal(trigger_id):
     app.client.views_open(
@@ -367,6 +389,7 @@ def open_modal(trigger_id):
 ```
 
 ### 7.3 Scheduled Messages
+
 ```python
 import time
 
@@ -379,6 +402,7 @@ def schedule_message(channel, text, post_at):
 ```
 
 ## Resources
+
 - [Slack API Documentation](https://api.slack.com/)
 - [Bolt for Python](https://slack.dev/bolt-python/)
 - [Block Kit Builder](https://app.slack.com/block-kit-builder)
@@ -387,12 +411,14 @@ def schedule_message(channel, text, post_at):
 ## Troubleshooting
 
 ### Common Issues
+
 1. **Invalid Token**: Verify token and scopes
 2. **URL Verification Failed**: Check endpoint accessibility
 3. **Rate Limited**: Implement backoff strategy
 4. **Event Not Received**: Verify event subscription settings
 
 ## Status
+
 - [x] Documentation created
 - [ ] OAuth implementation
 - [ ] Bolt app development

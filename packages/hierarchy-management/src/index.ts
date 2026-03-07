@@ -3,12 +3,12 @@
  * Hierarchical data management for organizational and product structures
  */
 
-export * from './builder/hierarchy-builder.js';
+export * from "./builder/hierarchy-builder.js";
 
 // Re-export types
 export type {
   Hierarchy,
   HierarchyNode,
   HierarchyType,
-  HierarchyStatus
-} from '@intelgraph/mdm-core';
+  HierarchyStatus,
+} from "@intelgraph/mdm-core";

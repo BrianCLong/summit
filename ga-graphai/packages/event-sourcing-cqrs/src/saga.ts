@@ -1,11 +1,11 @@
-import type { CommandBus } from './commandBus.js';
-import type { EventBus } from './eventBus.js';
-import type { Command, EventEnvelope, SagaState } from './types.js';
+import type { CommandBus } from "./commandBus.js";
+import type { EventBus } from "./eventBus.js";
+import type { Command, EventEnvelope, SagaState } from "./types.js";
 
 export interface SagaReaction<TData> {
   commands?: Command[];
   data?: Partial<TData>;
-  status?: SagaState['status'];
+  status?: SagaState["status"];
 }
 
 export interface SagaDefinition<TData> {
@@ -22,7 +22,7 @@ export class SagaOrchestrator {
 
   constructor(
     private readonly eventBus: EventBus,
-    private readonly commandBus?: CommandBus,
+    private readonly commandBus?: CommandBus
   ) {}
 
   register<TData>(definition: SagaDefinition<TData>): void {
@@ -50,7 +50,7 @@ export class SagaOrchestrator {
 
     const fresh: SagaState<TData> = {
       id: composedKey,
-      status: 'pending',
+      status: "pending",
       data: definition.initialState(),
       updatedAt: new Date().toISOString(),
     };
@@ -60,7 +60,7 @@ export class SagaOrchestrator {
 
   private async handleEvent<TData>(
     definition: SagaDefinition<TData>,
-    event: EventEnvelope,
+    event: EventEnvelope
   ): Promise<void> {
     const correlation = definition.correlate(event);
     const sagaState = this.getSagaState(definition, correlation);

@@ -2,7 +2,7 @@
  * Difference-in-Differences Estimator
  */
 
-import type { TreatmentEffect } from '../types/index.js';
+import type { TreatmentEffect } from "../types/index.js";
 
 export class DifferenceInDifferences {
   /**
@@ -34,10 +34,7 @@ export class DifferenceInDifferences {
     );
 
     // Confidence interval
-    const confidence: [number, number] = [
-      did - 1.96 * se,
-      did + 1.96 * se,
-    ];
+    const confidence: [number, number] = [did - 1.96 * se, did + 1.96 * se];
 
     const pValue = this.calculatePValue(did, se);
 
@@ -71,9 +68,9 @@ export class DifferenceInDifferences {
 
     const se = Math.sqrt(
       varTreatmentPre / treatmentPre.length +
-      varTreatmentPost / treatmentPost.length +
-      varControlPre / controlPre.length +
-      varControlPost / controlPost.length
+        varTreatmentPost / treatmentPost.length +
+        varControlPre / controlPre.length +
+        varControlPost / controlPost.length
     );
 
     return se;
@@ -81,6 +78,6 @@ export class DifferenceInDifferences {
 
   private calculatePValue(effect: number, se: number): number {
     const zScore = Math.abs(effect / se);
-    return zScore > 1.96 ? 0.05 : 0.10;
+    return zScore > 1.96 ? 0.05 : 0.1;
   }
 }

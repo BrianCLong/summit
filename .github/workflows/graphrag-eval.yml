@@ -2,7 +2,7 @@ name: graphrag-eval
 on:
   pull_request:
   push:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   graphrag_eval:

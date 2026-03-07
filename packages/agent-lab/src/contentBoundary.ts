@@ -1,4 +1,4 @@
-import crypto from 'crypto';
+import crypto from "crypto";
 
 export interface BoundedContent {
   text: string;
@@ -9,11 +9,11 @@ export interface BoundedContent {
 }
 
 const injectionPhrases = [
-  'ignore previous instructions',
-  'override safety',
-  'exfiltrate',
-  'leak secret',
-  'disable policy',
+  "ignore previous instructions",
+  "override safety",
+  "exfiltrate",
+  "leak secret",
+  "disable policy",
 ];
 
 const secretPattern = /(api|private)?\s*(key|token|secret|password)\b/gi;
@@ -23,31 +23,31 @@ export class ContentBoundary {
   constructor(private readonly maxLength = 2000) {}
 
   markUntrusted(raw: unknown): BoundedContent {
-    const text = typeof raw === 'string' ? raw : JSON.stringify(raw, null, 2);
+    const text = typeof raw === "string" ? raw : JSON.stringify(raw, null, 2);
     const redactions: string[] = [];
     let cleaned = text;
 
     injectionPhrases.forEach((phrase) => {
-      const regex = new RegExp(phrase, 'gi');
+      const regex = new RegExp(phrase, "gi");
       if (regex.test(cleaned)) {
-        cleaned = cleaned.replace(regex, '[blocked-directive]');
+        cleaned = cleaned.replace(regex, "[blocked-directive]");
         redactions.push(`blocked:${phrase}`);
       }
     });
 
     const secretMatches = cleaned.match(secretPattern) || [];
     if (secretMatches.length > 0) {
-      redactions.push('secret-phrase');
-      cleaned = cleaned.replace(secretPattern, '[redacted-secret]');
+      redactions.push("secret-phrase");
+      cleaned = cleaned.replace(secretPattern, "[redacted-secret]");
     }
 
     const envMatches = cleaned.match(envPattern) || [];
     if (envMatches.length > 0) {
-      redactions.push('env-name');
-      cleaned = cleaned.replace(envPattern, '[redacted-env]');
+      redactions.push("env-name");
+      cleaned = cleaned.replace(envPattern, "[redacted-env]");
     }
 
-    const hash = crypto.createHash('sha256').update(cleaned).digest('hex');
+    const hash = crypto.createHash("sha256").update(cleaned).digest("hex");
     let truncated = false;
     let bounded = cleaned;
 
@@ -62,7 +62,7 @@ export class ContentBoundary {
       truncated,
       hash,
       redactions,
-      tags: ['UNTRUSTED'],
+      tags: ["UNTRUSTED"],
     };
   }
 }

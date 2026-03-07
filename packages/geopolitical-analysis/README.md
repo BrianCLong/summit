@@ -74,13 +74,13 @@ import {
   PoliticalStabilityCalculator,
   FoodSecurityCalculator,
   SupplyChainCalculator,
-} from '@intelgraph/geopolitical-analysis';
+} from "@intelgraph/geopolitical-analysis";
 
 // Political stability assessment
 const politicalCalc = new PoliticalStabilityCalculator();
 const stability = politicalCalc.calculate({
-  countryCode: 'NO',
-  countryName: 'Norway',
+  countryCode: "NO",
+  countryName: "Norway",
   eliteCohesion: 90,
   governmentEffectiveness: 95,
   politicalViolenceRisk: 5,
@@ -95,8 +95,8 @@ console.log(stability.score); // 92.5
 // Food security assessment
 const foodCalc = new FoodSecurityCalculator();
 const foodSecurity = foodCalc.calculate({
-  countryCode: 'XX',
-  countryName: 'Example Country',
+  countryCode: "XX",
+  countryName: "Example Country",
   grainReservesDays: 45,
   foodPriceInflation: 12.5,
   importDependence: 60,
@@ -109,9 +109,9 @@ console.log(foodSecurity.socialUnrestRisk); // 65
 // Supply chain vulnerability
 const supplyCalc = new SupplyChainCalculator();
 const supplyChain = supplyCalc.calculate({
-  countryCode: 'US',
-  countryName: 'United States',
-  resourceType: 'rare-earth-elements',
+  countryCode: "US",
+  countryName: "United States",
+  resourceType: "rare-earth-elements",
   supplyConcentration: 80,
   alternativeSourcesAvailable: 20,
   transportationRisk: 40,
@@ -129,36 +129,36 @@ import {
   checkAnalysisCompliance,
   checkIndicatorCompliance,
   validatePurpose,
-} from '@intelgraph/geopolitical-analysis';
+} from "@intelgraph/geopolitical-analysis";
 
 // Check if analysis request is compliant
 const complianceCheck = checkAnalysisCompliance(
   {
-    countries: ['US', 'CN'],
-    indicatorTypes: ['POLITICAL_STABILITY', 'ECONOMIC_STABILITY'],
+    countries: ["US", "CN"],
+    indicatorTypes: ["POLITICAL_STABILITY", "ECONOMIC_STABILITY"],
   },
-  'analyst@example.com',
-  'Risk assessment for business continuity planning in Asian markets'
+  "analyst@example.com",
+  "Risk assessment for business continuity planning in Asian markets"
 );
 
 if (!complianceCheck.passed) {
-  console.error('Compliance violations:', complianceCheck.violations);
-  throw new Error('Analysis request violates ethical guidelines');
+  console.error("Compliance violations:", complianceCheck.violations);
+  throw new Error("Analysis request violates ethical guidelines");
 }
 
 // Validate purpose statement
 const purposeValidation = validatePurpose(
-  'Early warning system for humanitarian crisis preparedness'
+  "Early warning system for humanitarian crisis preparedness"
 );
 
 if (!purposeValidation.valid) {
-  console.warn('Purpose concerns:', purposeValidation.concerns);
+  console.warn("Purpose concerns:", purposeValidation.concerns);
 }
 
 // Check indicator data compliance
 const indicatorCheck = checkIndicatorCompliance(indicator);
 if (!indicatorCheck.passed) {
-  console.error('Indicator violations:', indicatorCheck.violations);
+  console.error("Indicator violations:", indicatorCheck.violations);
 }
 ```
 
@@ -171,7 +171,7 @@ import {
   normalize,
   calculateConfidence,
   detectTrend,
-} from '@intelgraph/geopolitical-analysis';
+} from "@intelgraph/geopolitical-analysis";
 
 // Convert score to risk level
 const risk = scoreToRiskLevel(85); // RiskLevel.CRITICAL
@@ -202,6 +202,7 @@ const trend = detectTrend([10, 15, 20, 25, 30]); // 'RISING'
 This package is designed for **legitimate analytical purposes only**:
 
 ✅ **Permitted Uses:**
+
 - Humanitarian early warning and crisis prevention
 - Risk assessment for business and policy planning
 - Scenario modeling for strategic planning
@@ -210,6 +211,7 @@ This package is designed for **legitimate analytical purposes only**:
 - Development program design
 
 ❌ **Prohibited Uses:**
+
 - Planning or executing false flag operations
 - Coup planning or regime change operations
 - Election manipulation
@@ -234,15 +236,15 @@ All analysis requests are automatically checked for:
 All compliance checks are logged for audit trails:
 
 ```typescript
-import { logComplianceCheck } from '@intelgraph/geopolitical-analysis';
+import { logComplianceCheck } from "@intelgraph/geopolitical-analysis";
 
 logComplianceCheck({
   timestamp: new Date(),
-  requestor: 'analyst@example.com',
-  purpose: 'Humanitarian early warning',
-  indicators: ['FOOD_SECURITY', 'HUMANITARIAN_CRISIS'],
+  requestor: "analyst@example.com",
+  purpose: "Humanitarian early warning",
+  indicators: ["FOOD_SECURITY", "HUMANITARIAN_CRISIS"],
   complianceResult: checkResult,
-  actionTaken: 'APPROVED',
+  actionTaken: "APPROVED",
 });
 ```
 

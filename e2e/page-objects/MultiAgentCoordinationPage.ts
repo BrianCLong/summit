@@ -1,5 +1,5 @@
-import { type Page, type Locator, expect } from '@playwright/test';
-import { BasePage } from './BasePage';
+import { type Page, type Locator, expect } from "@playwright/test";
+import { BasePage } from "./BasePage";
 
 export class MultiAgentCoordinationPage extends BasePage {
   readonly coordinationStatus: Locator;
@@ -10,11 +10,11 @@ export class MultiAgentCoordinationPage extends BasePage {
     super(page);
     this.coordinationStatus = page.locator('[data-testid="coordination-status"], .status-badge');
     this.agentList = page.locator('[data-testid="active-agents"], .agents-grid');
-    this.conflictAlert = page.getByRole('alert');
+    this.conflictAlert = page.getByRole("alert");
   }
 
   async goto() {
-    await super.goto('/analysis/narrative');
+    await super.goto("/analysis/narrative");
   }
 
   async verifyCoordinationStatus(status: string) {
@@ -22,12 +22,12 @@ export class MultiAgentCoordinationPage extends BasePage {
   }
 
   async getActiveAgentsCount() {
-    return await this.agentList.locator('.agent-card').count();
+    return await this.agentList.locator(".agent-card").count();
   }
 
   async resolveConflict() {
     if (await this.conflictAlert.isVisible()) {
-        await this.conflictAlert.getByRole('button', { name: /resolve|fix/i }).click();
+      await this.conflictAlert.getByRole("button", { name: /resolve|fix/i }).click();
     }
   }
 }

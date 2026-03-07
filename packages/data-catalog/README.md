@@ -56,6 +56,7 @@ The Data Catalog & Metadata service is a central registry for all data assets, s
 Represents an external connector or data source (database, API, file system, etc.).
 
 **Key Fields**:
+
 - `name`, `displayName`, `description`
 - `type`: DATABASE, API, FILE, STREAM, S3, SFTP, WEBHOOK
 - `connectionStatus`: ACTIVE, INACTIVE, ERROR, PENDING
@@ -67,6 +68,7 @@ Represents an external connector or data source (database, API, file system, etc
 Represents a collection of data (table, file, API endpoint, etc.).
 
 **Key Fields**:
+
 - `sourceId`: Parent data source
 - `name`, `displayName`, `description`, `fullyQualifiedName`
 - `status`: ACTIVE, DEPRECATED, ARCHIVED, DRAFT
@@ -81,6 +83,7 @@ Represents a collection of data (table, file, API endpoint, etc.).
 Enhanced field/column metadata with constraints and statistics.
 
 **Key Fields**:
+
 - `datasetId`: Parent dataset
 - `name`, `displayName`, `description`
 - `dataType`, `nativeDataType`
@@ -95,6 +98,7 @@ Enhanced field/column metadata with constraints and statistics.
 Maps source fields to canonical schema fields with transformation logic.
 
 **Key Fields**:
+
 - `sourceDatasetId`, `sourceFieldId`
 - `canonicalSchemaId`, `canonicalFieldId`
 - `transformationType`: DIRECT, CAST, CONCATENATE, SPLIT, LOOKUP, CALCULATION, CUSTOM
@@ -108,6 +112,7 @@ Maps source fields to canonical schema fields with transformation logic.
 Data usage constraints and licensing terms.
 
 **Key Fields**:
+
 - `licenseType`: PUBLIC_DOMAIN, OPEN_DATA, CREATIVE_COMMONS, PROPRIETARY, RESTRICTED
 - `allowedUseCases`, `restrictions`
 - `geographicRestrictions`, `allowedRegions`
@@ -119,6 +124,7 @@ Data usage constraints and licensing terms.
 Versioned schema registry entry.
 
 **Key Fields**:
+
 - `namespace`, `name`, `fullyQualifiedName`
 - `type`: CONNECTOR, CANONICAL, MAPPING, AVRO, JSON_SCHEMA, PROTOBUF
 - `schema`: Actual schema definition (JSON or string)
@@ -132,6 +138,7 @@ Versioned schema registry entry.
 Lightweight lineage tracking for impact analysis.
 
 **Key Fields**:
+
 - `entityId`, `entityType`
 - `upstreamSources`, `upstreamDatasets`, `upstreamFields`
 - `downstreamDatasets`, `downstreamCases`, `downstreamReports`
@@ -149,6 +156,7 @@ Lightweight lineage tracking for impact analysis.
 Manages data sources, datasets, fields, mappings, and licenses.
 
 **Key Methods**:
+
 ```typescript
 registerDataSource(data) → DataSource
 getDataSource(id) → DataSource | null
@@ -183,6 +191,7 @@ getImpactAnalysis(entityId) → { affectedDatasets, affectedMappings, affectedCa
 Manages schema registration, versioning, and compatibility checking.
 
 **Key Methods**:
+
 ```typescript
 registerSchema(request) → SchemaDefinition
 getSchema(id) → SchemaDefinition | null
@@ -204,6 +213,7 @@ getSchemaUsage(id) → SchemaUsageStatistics
 Provides unified search across all catalog entities.
 
 **Key Methods**:
+
 ```typescript
 search(request) → MetadataSearchResponse
 searchFieldsAdvanced(request) → MetadataSearchResult[]
@@ -211,6 +221,7 @@ performImpactAnalysis(request) → ImpactAnalysisResponse
 ```
 
 **Search Features**:
+
 - Unified search across sources, datasets, fields, mappings, schemas
 - Relevance scoring (exact match > partial > tags)
 - Faceted search (entity type, tags)
@@ -513,6 +524,7 @@ pnpm test DataSourceService.test.ts
 ### Integration Tests
 
 Integration tests are pending and will cover:
+
 - End-to-end flows: connector registration → dataset → field → mapping
 - Schema evolution workflows
 - Impact analysis with real data
@@ -533,6 +545,7 @@ Integration tests are pending and will cover:
 ### Policy Tags
 
 Policy tags track:
+
 - **Sensitivity**: PII, PHI, Financial, Classified
 - **Legal Basis**: GDPR, CCPA, HIPAA, etc.
 - **Retention**: Retention requirements in days

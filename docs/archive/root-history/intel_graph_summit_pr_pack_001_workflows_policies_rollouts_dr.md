@@ -42,7 +42,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: '20', cache: 'npm' }
+        with: { node-version: "20", cache: "npm" }
       - run: npm ci
       - run: npm run lint
       - run: npm run typecheck --if-present
@@ -68,7 +68,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: github/codeql-action/init@v3
-        with: { languages: 'javascript-typescript' }
+        with: { languages: "javascript-typescript" }
       - uses: github/codeql-action/analyze@v3
   containers:
     runs-on: ubuntu-latest
@@ -88,9 +88,9 @@ jobs:
         uses: aquasecurity/trivy-action@0.24.0
         with:
           image-ref: ghcr.io/${{ github.repository }}/app:${{ github.sha }}
-          vuln-type: 'os,library'
-          severity: 'CRITICAL,HIGH'
-          exit-code: '1'
+          vuln-type: "os,library"
+          severity: "CRITICAL,HIGH"
+          exit-code: "1"
       - name: SBOM (CycloneDX via cdxgen)
         run: |
           npm i -g @cyclonedx/cdxgen
@@ -101,7 +101,7 @@ jobs:
       - name: Install cosign
         uses: sigstore/cosign-installer@v3
       - name: Sign image (keyless)
-        env: { COSIGN_EXPERIMENTAL: 'true' }
+        env: { COSIGN_EXPERIMENTAL: "true" }
         run: cosign sign --yes ghcr.io/${{ github.repository }}/app:${{ github.sha }}
       - name: Generate provenance
         uses: actions/attest-build-provenance@v1
@@ -127,7 +127,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: '20', cache: 'npm' }
+        with: { node-version: "20", cache: "npm" }
       - run: npm ci && npm run build --if-present
       - name: Build & push image
         run: |
@@ -382,18 +382,17 @@ groups:
 **`scripts/verify_release.ts`**
 
 ```ts
-import fetch from 'node-fetch';
+import fetch from "node-fetch";
 
 const PROM = process.env.PROM_URL!; // e.g. https://prometheus.dev.svc
-const Q =
-  'sum(rate(http_requests_total{code=~"5.."}[5m]))/sum(rate(http_requests_total[5m]))';
-const THRESH = parseFloat(process.env.ERROR_BUDGET_THRESH || '0.02');
+const Q = 'sum(rate(http_requests_total{code=~"5.."}[5m]))/sum(rate(http_requests_total[5m]))';
+const THRESH = parseFloat(process.env.ERROR_BUDGET_THRESH || "0.02");
 
 async function main() {
   const r = await fetch(`${PROM}/api/v1/query?query=${encodeURIComponent(Q)}`);
   const j = await r.json();
-  const v = parseFloat(j.data.result?.[0]?.value?.[1] || '0');
-  if (isNaN(v)) throw new Error('No metric value');
+  const v = parseFloat(j.data.result?.[0]?.value?.[1] || "0");
+  if (isNaN(v)) throw new Error("No metric value");
   if (v > THRESH) {
     console.error(`❌ Error budget burn ${v} > ${THRESH}`);
     process.exit(1);
@@ -417,12 +416,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: '20', cache: 'npm' }
+        with: { node-version: "20", cache: "npm" }
       - run: npm i node-fetch@2
       - run: node scripts/verify_release.ts
         env:
           PROM_URL: ${{ secrets.PROM_URL }}
-          ERROR_BUDGET_THRESH: '0.02'
+          ERROR_BUDGET_THRESH: "0.02"
 ```
 
 **Rollback:** Bypass via environment protection override with reason logged.
@@ -492,7 +491,7 @@ apiVersion: batch/v1
 kind: CronJob
 metadata: { name: dr-restore-verify }
 spec:
-  schedule: '0 3 * * 1' # weekly Monday 03:00
+  schedule: "0 3 * * 1" # weekly Monday 03:00
   jobTemplate:
     spec:
       template:
@@ -501,7 +500,7 @@ spec:
           containers:
             - name: restore
               image: alpine:latest
-              command: ['/bin/sh', '-c']
+              command: ["/bin/sh", "-c"]
               args:
                 - |
                   echo "Restoring snapshot to scratch namespace...";
@@ -515,7 +514,7 @@ spec:
 name: dr-verify
 on:
   schedule:
-    - cron: '0 4 * * 1'
+    - cron: "0 4 * * 1"
 jobs:
   check:
     runs-on: ubuntu-latest
@@ -540,16 +539,16 @@ jobs:
 version: 2
 updates:
   - package-ecosystem: npm
-    directory: '/'
-    schedule: { interval: weekly, day: monday, time: '03:00' }
+    directory: "/"
+    schedule: { interval: weekly, day: monday, time: "03:00" }
     groups:
       minor-and-patch:
-        patterns: ['*']
-        update-types: ['minor', 'patch']
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
     open-pull-requests-limit: 10
-    pull-request-branch-name: { separator: '-' }
+    pull-request-branch-name: { separator: "-" }
     rebase-strategy: auto
-    reviewers: ['team/security']
+    reviewers: ["team/security"]
 ```
 
 **`.github/workflows/auto-merge-safe.yml`**

@@ -3,7 +3,6 @@
 > Evidence-IDs: EVD-PLACEHOLDER
 > Status: active
 
-
 # Evidence ID Consistency Gate
 
 The Evidence ID Consistency gate ensures that all `Evidence-IDs` references in governance documentation have corresponding entries in the evidence registry, maintaining traceability and completeness of governance artifacts.

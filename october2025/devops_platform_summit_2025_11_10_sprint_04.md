@@ -112,7 +112,7 @@ resource "aws_cloudfront_distribution" "gw" {
 export default {
   async fetch(request, env) {
     const reqClone = request.clone();
-    if (request.headers.get('content-type')?.includes('application/json')) {
+    if (request.headers.get("content-type")?.includes("application/json")) {
       const body = await reqClone.json();
       const tokenized = await tokenize(body, env);
       return fetch(request.url, {
@@ -130,18 +130,18 @@ async function tokenize(obj, env) {
   const walker = (o) =>
     Object.fromEntries(
       Object.entries(o).map(([k, v]) => {
-        if (typeof v === 'object' && v) return [k, walker(v)];
-        if (['email', 'ssn', 'phone'].includes(k)) {
+        if (typeof v === "object" && v) return [k, walker(v)];
+        if (["email", "ssn", "phone"].includes(k)) {
           const token = crypto.randomUUID();
           map[token] = v;
           return [k, `tok_${token}`];
         }
         return [k, v];
-      }),
+      })
     );
   const out = walker(obj);
   await fetch(env.VAULT_URL, {
-    method: 'POST',
+    method: "POST",
     body: JSON.stringify(map),
     headers: { Authorization: `Bearer ${env.VAULT_TOKEN}` },
   });
@@ -193,14 +193,14 @@ spec:
       metadata:
         serverAddress: http://prometheus.monitoring:9090
         metricName: gateway_duration_p95
-        threshold: '1.5' # seconds
+        threshold: "1.5" # seconds
         query: |
           histogram_quantile(0.95, sum(rate(http_server_request_duration_seconds_bucket{job="gateway"}[2m])) by (le))
     - type: prometheus
       metadata:
         serverAddress: http://prometheus.monitoring:9090
         metricName: gateway_err_rate
-        threshold: '0.01' # 1%
+        threshold: "0.01" # 1%
         query: |
           sum(rate(http_requests_total{job="gateway",status=~"5.."}[2m])) / sum(rate(http_requests_total{job="gateway"}[2m]))
 ```
@@ -242,13 +242,13 @@ violation[msg] {
   pii: true
   retention_days: 365
   rollout: online
-  rollback: 'revert 2025-11-10-001'
-  owner: '@data'
+  rollback: "revert 2025-11-10-001"
+  owner: "@data"
 - id: 2025-11-12-002-reindex-events
   service: events
   risk: low
   rollout: concurrent_index
-  rollback: 'drop index concurrently if exists events_ts_idx'
+  rollback: "drop index concurrently if exists events_ts_idx"
 ```
 
 ```yaml
@@ -256,7 +256,7 @@ violation[msg] {
 name: Schema Catalog Gate
 on:
   pull_request:
-    paths: ['db/migrations/**', 'db/catalog/**']
+    paths: ["db/migrations/**", "db/catalog/**"]
 jobs:
   validate:
     runs-on: ubuntu-latest
@@ -284,7 +284,7 @@ spec:
         value:
           name: envoy.filters.http.lua
           typed_config:
-            '@type': type.googleapis.com/envoy.extensions.filters.http.lua.v3.Lua
+            "@type": type.googleapis.com/envoy.extensions.filters.http.lua.v3.Lua
             inlineCode: |
               function envoy_on_request(request_handle)
                 local body = request_handle:body():getBytes(0, request_handle:body():length())

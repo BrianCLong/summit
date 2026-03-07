@@ -1,18 +1,18 @@
 // conductor-ui/frontend/src/views/admin/MultiRegionStatusView.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 
 type RegionStatus = {
   name: string;
-  health: 'green' | 'yellow' | 'red';
+  health: "green" | "yellow" | "red";
   replicaLag: number;
 };
 
 const fetchRegionStatus = async (): Promise<RegionStatus[]> => {
   await new Promise((res) => setTimeout(res, 300));
   return [
-    { name: 'us-east-1', health: 'green', replicaLag: 120 },
-    { name: 'us-west-2', health: 'green', replicaLag: 150 },
-    { name: 'eu-central-1', health: 'yellow', replicaLag: 1200 },
+    { name: "us-east-1", health: "green", replicaLag: 120 },
+    { name: "us-west-2", health: "green", replicaLag: 150 },
+    { name: "eu-central-1", health: "yellow", replicaLag: 1200 },
   ];
 };
 
@@ -24,13 +24,9 @@ export const MultiRegionStatusView = () => {
   }, []);
 
   const handleSimulateFailover = () => {
-    if (
-      confirm(
-        'This is a staging-only action. Proceed with failover simulation?',
-      )
-    ) {
-      console.log('Initiating staging failover...');
-      alert('Failover simulation started.');
+    if (confirm("This is a staging-only action. Proceed with failover simulation?")) {
+      console.log("Initiating staging failover...");
+      alert("Failover simulation started.");
     }
   };
 
@@ -57,9 +53,7 @@ export const MultiRegionStatusView = () => {
           ))}
         </tbody>
       </table>
-      <button onClick={handleSimulateFailover}>
-        Simulate Staging Failover
-      </button>
+      <button onClick={handleSimulateFailover}>Simulate Staging Failover</button>
     </div>
   );
 };

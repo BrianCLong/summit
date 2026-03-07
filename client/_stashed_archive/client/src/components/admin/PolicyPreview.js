@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   Box,
   Button,
@@ -10,26 +10,26 @@ import {
   ToggleButton,
   ToggleButtonGroup,
   Stack,
-} from '@mui/material';
-import { useDispatch, useSelector } from 'react-redux';
-import { toggleRtl } from '../../store/slices/uiSlice';
-import { loadLanguage } from '../../utils/i18n';
+} from "@mui/material";
+import { useDispatch, useSelector } from "react-redux";
+import { toggleRtl } from "../../store/slices/uiSlice";
+import { loadLanguage } from "../../utils/i18n";
 
 export default function PolicyPreview() {
-  const [action, setAction] = useState('query:Entity.props');
+  const [action, setAction] = useState("query:Entity.props");
   const [resource, setResource] = useState('{"type":"Entity","field":"props"}');
-  const [role, setRole] = useState('ANALYST');
+  const [role, setRole] = useState("ANALYST");
   const [result, setResult] = useState(null);
-  const [language, setLanguage] = useState('en');
+  const [language, setLanguage] = useState("en");
   const rtl = useSelector((s) => s.ui.rtl);
   const dispatch = useDispatch();
 
   const preview = async () => {
     try {
       const user = { role };
-      const res = await fetch('/api/admin/policy/preview', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("/api/admin/policy/preview", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action, user, resource: JSON.parse(resource) }),
       });
       const data = await res.json();
@@ -80,8 +80,8 @@ export default function PolicyPreview() {
                 </Button>
                 <Box>
                   <Typography variant="subtitle2">Decision</Typography>
-                  <pre style={{ whiteSpace: 'pre-wrap' }}>
-                    {result ? JSON.stringify(result, null, 2) : '—'}
+                  <pre style={{ whiteSpace: "pre-wrap" }}>
+                    {result ? JSON.stringify(result, null, 2) : "—"}
                   </pre>
                 </Box>
               </Stack>
@@ -95,20 +95,12 @@ export default function PolicyPreview() {
                 UI Settings
               </Typography>
               <Stack direction="row" spacing={2} alignItems="center">
-                <ToggleButtonGroup
-                  value={language}
-                  exclusive
-                  onChange={onLanguage}
-                  size="small"
-                >
+                <ToggleButtonGroup value={language} exclusive onChange={onLanguage} size="small">
                   <ToggleButton value="en">EN</ToggleButton>
                   <ToggleButton value="ar">AR</ToggleButton>
                 </ToggleButtonGroup>
-                <Button
-                  variant="outlined"
-                  onClick={() => dispatch(toggleRtl())}
-                >
-                  {rtl ? 'LTR' : 'RTL'}
+                <Button variant="outlined" onClick={() => dispatch(toggleRtl())}>
+                  {rtl ? "LTR" : "RTL"}
                 </Button>
               </Stack>
               <Typography variant="body2" sx={{ mt: 2 }}>

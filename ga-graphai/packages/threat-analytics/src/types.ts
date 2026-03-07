@@ -1,4 +1,4 @@
-export type ThreatSeverity = 'info' | 'low' | 'medium' | 'high' | 'critical';
+export type ThreatSeverity = "info" | "low" | "medium" | "high" | "critical";
 
 export interface BehaviorEvent {
   id?: string;
@@ -30,7 +30,7 @@ export interface BehaviorInsight {
   confidence: number;
   rationale: string[];
   zScore?: number;
-  trend?: 'spike' | 'drop' | 'drift' | 'oscillation';
+  trend?: "spike" | "drop" | "drift" | "oscillation";
 }
 
 export interface PatternMatch {
@@ -51,9 +51,9 @@ export interface TemporalInsight {
 export interface ThreatIntelIndicator {
   id: string;
   value: string;
-  type: 'ip' | 'hash' | 'domain' | 'email' | 'uri' | 'user';
+  type: "ip" | "hash" | "domain" | "email" | "uri" | "user";
   confidence: number;
-  source: 'MISP' | 'STIX' | 'TAXII' | 'custom';
+  source: "MISP" | "STIX" | "TAXII" | "custom";
   tags?: string[];
   validUntil?: string;
 }
@@ -99,12 +99,12 @@ export interface ThreatScore {
 
 export interface TriageAction {
   type:
-    | 'watch'
-    | 'isolate'
-    | 'investigate'
-    | 'block-indicator'
-    | 'open-ticket'
-    | 'collect-forensics';
+    | "watch"
+    | "isolate"
+    | "investigate"
+    | "block-indicator"
+    | "open-ticket"
+    | "collect-forensics";
   reason: string;
   owner?: string;
 }

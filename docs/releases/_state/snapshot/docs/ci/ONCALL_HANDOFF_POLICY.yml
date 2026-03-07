@@ -10,9 +10,9 @@ version: "1.1.0"
 # Run windows (UTC) - handoff only runs within these shift-change windows
 # The orchestrator runs hourly; this gates when handoff actually executes
 run_windows_utc:
-  - start: "09:00"   # Morning handoff window (EMEA -> Americas)
+  - start: "09:00" # Morning handoff window (EMEA -> Americas)
     end: "09:30"
-  - start: "17:00"   # Evening handoff window (Americas -> APAC)
+  - start: "17:00" # Evening handoff window (Americas -> APAC)
     end: "17:30"
 
 # Cadence hours - minimum time between handoff executions
@@ -23,9 +23,9 @@ cadence_hours: 8
 schedule:
   # Shift change times (UTC)
   shift_changes:
-    - "08:00"  # EMEA -> Americas handoff
-    - "16:00"  # Americas -> APAC handoff
-    - "00:00"  # APAC -> EMEA handoff
+    - "08:00" # EMEA -> Americas handoff
+    - "16:00" # Americas -> APAC handoff
+    - "00:00" # APAC -> EMEA handoff
 
   # Generate handoff note this many minutes before shift change
   lead_time_minutes: 30
@@ -39,11 +39,11 @@ content:
 
   # Sections to include
   include_sections:
-    - summary           # Quick status overview
-    - active_blockers   # Current P0/P1 blockers
-    - recent_events     # Last 8 hours of activity
-    - pending_actions   # Items needing attention
-    - release_status    # Current release line states
+    - summary # Quick status overview
+    - active_blockers # Current P0/P1 blockers
+    - recent_events # Last 8 hours of activity
+    - pending_actions # Items needing attention
+    - release_status # Current release line states
     - escalation_status # Active escalations
 
   # Time window for recent events

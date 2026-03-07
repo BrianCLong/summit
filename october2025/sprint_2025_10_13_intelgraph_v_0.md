@@ -110,8 +110,8 @@
 
 ```ts
 // server/src/collab/socket.ts
-import { Server } from 'socket.io';
-import http from 'http';
+import { Server } from "socket.io";
+import http from "http";
 
 export function attachCollab(server: http.Server) {
   const io = new Server(server, {
@@ -120,35 +120,33 @@ export function attachCollab(server: http.Server) {
 
   io.use((socket, next) => {
     const user = authenticate(socket.handshake.auth?.token);
-    if (!user) return next(new Error('unauthorized'));
+    if (!user) return next(new Error("unauthorized"));
     (socket as any).user = user;
     next();
   });
 
-  io.on('connection', (socket) => {
+  io.on("connection", (socket) => {
     const user = (socket as any).user;
 
-    socket.on('join', ({ caseId }) => {
-      if (!canJoin(user, caseId)) return socket.emit('error', 'forbidden');
+    socket.on("join", ({ caseId }) => {
+      if (!canJoin(user, caseId)) return socket.emit("error", "forbidden");
       socket.join(caseId);
-      io.to(caseId).emit('presence', {
+      io.to(caseId).emit("presence", {
         user: redact(user),
         t: Date.now(),
-        kind: 'join',
+        kind: "join",
       });
     });
 
-    socket.on('cursor', ({ caseId, pane, x, y }) => {
+    socket.on("cursor", ({ caseId, pane, x, y }) => {
       if (!socket.rooms.has(caseId)) return;
-      socket
-        .to(caseId)
-        .emit('cursor', { uid: user.id, pane, x, y, t: Date.now() });
+      socket.to(caseId).emit("cursor", { uid: user.id, pane, x, y, t: Date.now() });
     });
 
-    socket.on('comment', (msg) => handleComment(io, socket, msg));
-    socket.on('pinboard', (msg) => handlePinboard(io, socket, msg));
+    socket.on("comment", (msg) => handleComment(io, socket, msg));
+    socket.on("pinboard", (msg) => handlePinboard(io, socket, msg));
 
-    socket.on('disconnect', () => {
+    socket.on("disconnect", () => {
       // emit leave
     });
   });
@@ -164,25 +162,25 @@ export function attachCollab(server: http.Server) {
 // apps/web/src/collab/jquery-hooks.js
 $(function () {
   const socket = io({ auth: { token: window.jwt } });
-  socket.emit('join', { caseId: window.caseId });
+  socket.emit("join", { caseId: window.caseId });
 
-  $('#graph').on('mousemove', function (e) {
-    socket.emit('cursor', {
+  $("#graph").on("mousemove", function (e) {
+    socket.emit("cursor", {
       caseId: window.caseId,
-      pane: 'graph',
+      pane: "graph",
       x: e.pageX,
       y: e.pageY,
     });
   });
 
-  $(document).on('submit', '#comment-form', function (e) {
+  $(document).on("submit", "#comment-form", function (e) {
     e.preventDefault();
     const payload = {
       caseId: window.caseId,
-      target: $('#targetId').val(),
-      text: $('#commentText').val(),
+      target: $("#targetId").val(),
+      text: $("#commentText").val(),
     };
-    socket.emit('comment', payload);
+    socket.emit("comment", payload);
   });
 });
 ```
@@ -207,9 +205,9 @@ SET r.value = communityId, r.createdAt = datetime();
 
 ```ts
 // server/src/provenance/export-gate.ts
-import { evaluate } from '../policy/opa';
+import { evaluate } from "../policy/opa";
 export async function guardExport(ctx, bundle) {
-  const decision = await evaluate('intelgraph/export/allow', {
+  const decision = await evaluate("intelgraph/export/allow", {
     user: ctx.user,
     export: bundle.meta,
   });
@@ -255,45 +253,43 @@ log:
 
 ```ts
 // tests/e2e/collab.spec.ts
-import { test, expect } from '@playwright/test';
+import { test, expect } from "@playwright/test";
 
-test('two users see each other and comment', async ({ browser }) => {
+test("two users see each other and comment", async ({ browser }) => {
   const u1 = await browser.newPage();
   const u2 = await browser.newPage();
-  await u1.goto('/case/123');
-  await u2.goto('/case/123');
-  await u1.locator('#graph').hover();
-  await expect(u2.locator('.presence')).toBeVisible();
-  await u1.fill('#commentText', 'Check node A');
-  await u1.click('#commentSubmit');
-  await expect(u2.getByText('Check node A')).toBeVisible();
+  await u1.goto("/case/123");
+  await u2.goto("/case/123");
+  await u1.locator("#graph").hover();
+  await expect(u2.locator(".presence")).toBeVisible();
+  await u1.fill("#commentText", "Check node A");
+  await u1.click("#commentSubmit");
+  await expect(u2.getByText("Check node A")).toBeVisible();
 });
 ```
 
 ### 4.8 k6 — WebSocket + HTTP mix
 
 ```js
-import ws from 'k6/ws';
-import http from 'k6/http';
-export const options = { vus: 30, duration: '3m' };
+import ws from "k6/ws";
+import http from "k6/http";
+export const options = { vus: 30, duration: "3m" };
 export default function () {
   ws.connect(
-    'wss://localhost/collab',
+    "wss://localhost/collab",
     { headers: { Authorization: `Bearer ${__ENV.TOKEN}` } },
     function (socket) {
-      socket.on('open', function () {
-        socket.send(JSON.stringify({ type: 'join', caseId: '123' }));
+      socket.on("open", function () {
+        socket.send(JSON.stringify({ type: "join", caseId: "123" }));
       });
       socket.setTimeout(function () {
         socket.close();
       }, 5000);
-    },
+    }
   );
-  http.post(
-    'http://localhost:4000/graphql',
-    JSON.stringify({ query: '{ health }' }),
-    { headers: { 'Content-Type': 'application/json' } },
-  );
+  http.post("http://localhost:4000/graphql", JSON.stringify({ query: "{ health }" }), {
+    headers: { "Content-Type": "application/json" },
+  });
 }
 ```
 

@@ -12,11 +12,7 @@ const config: CodegenConfig = {
       },
     },
     'src/graphql/generated/hooks.ts': {
-      plugins: [
-        'typescript',
-        'typescript-operations',
-        'typescript-react-apollo',
-      ],
+      plugins: ['typescript', 'typescript-operations', 'typescript-react-apollo'],
       config: {
         withHooks: true,
         withComponent: false,

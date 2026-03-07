@@ -203,11 +203,11 @@ Internet
 
 ```typescript
 // Client Service (API Gateway)
-const response = await fetch('http://graph-core.summit.svc.cluster.local/api/v1/entities', {
-  method: 'GET',
+const response = await fetch("http://graph-core.summit.svc.cluster.local/api/v1/entities", {
+  method: "GET",
   headers: {
-    'x-tenant-id': tenantId,
-    'x-correlation-id': correlationId,
+    "x-tenant-id": tenantId,
+    "x-correlation-id": correlationId,
   },
 });
 ```
@@ -227,21 +227,21 @@ const response = await fetch('http://graph-core.summit.svc.cluster.local/api/v1/
 ```typescript
 // Producer Service
 await producer.send({
-  topic: 'entity-events',
+  topic: "entity-events",
   messages: [
     {
       key: entityId,
       value: JSON.stringify(event),
       headers: {
-        'x-tenant-id': tenantId,
-        'x-correlation-id': correlationId,
+        "x-tenant-id": tenantId,
+        "x-correlation-id": correlationId,
       },
     },
   ],
 });
 
 // Consumer Service
-consumer.on('message', async (message) => {
+consumer.on("message", async (message) => {
   const event = JSON.parse(message.value);
   // Process event
 });
@@ -262,9 +262,9 @@ consumer.on('message', async (message) => {
 const gateway = new ApolloGateway({
   supergraphSdl: federatedSchema,
   serviceList: [
-    { name: 'entities', url: 'http://graph-core.summit.svc.cluster.local/graphql' },
-    { name: 'users', url: 'http://user-service.summit.svc.cluster.local/graphql' },
-    { name: 'analytics', url: 'http://analytics-engine.summit.svc.cluster.local/graphql' },
+    { name: "entities", url: "http://graph-core.summit.svc.cluster.local/graphql" },
+    { name: "users", url: "http://user-service.summit.svc.cluster.local/graphql" },
+    { name: "analytics", url: "http://analytics-engine.summit.svc.cluster.local/graphql" },
   ],
 });
 ```
@@ -434,11 +434,11 @@ http:
 // No application code changes required!
 
 // Manual instrumentation (optional)
-import { trace } from '@opentelemetry/api';
+import { trace } from "@opentelemetry/api";
 
-const span = trace.getTracer('graph-core').startSpan('fetch-entity');
-span.setAttribute('entity.id', entityId);
-span.setAttribute('tenant.id', tenantId);
+const span = trace.getTracer("graph-core").startSpan("fetch-entity");
+span.setAttribute("entity.id", entityId);
+span.setAttribute("tenant.id", tenantId);
 
 try {
   const entity = await fetchEntity(entityId);
@@ -480,18 +480,18 @@ try {
 **Custom Application Metrics**:
 
 ```typescript
-import { Counter, Histogram } from 'prom-client';
+import { Counter, Histogram } from "prom-client";
 
 const requestCounter = new Counter({
-  name: 'summit_api_requests_total',
-  help: 'Total API requests',
-  labelNames: ['method', 'endpoint', 'status'],
+  name: "summit_api_requests_total",
+  help: "Total API requests",
+  labelNames: ["method", "endpoint", "status"],
 });
 
 const requestDuration = new Histogram({
-  name: 'summit_api_request_duration_seconds',
-  help: 'API request duration',
-  labelNames: ['method', 'endpoint'],
+  name: "summit_api_request_duration_seconds",
+  help: "API request duration",
+  labelNames: ["method", "endpoint"],
   buckets: [0.1, 0.5, 1, 2, 5, 10],
 });
 ```
@@ -597,14 +597,14 @@ spec:
   rules:
     - from:
         - source:
-            principals: ['cluster.local/ns/summit/sa/api-gateway']
+            principals: ["cluster.local/ns/summit/sa/api-gateway"]
       to:
         - operation:
-            methods: ['GET', 'POST']
-            paths: ['/api/v1/*']
+            methods: ["GET", "POST"]
+            paths: ["/api/v1/*"]
       when:
         - key: request.headers[x-tenant-id]
-          notValues: ['']
+          notValues: [""]
 ```
 
 ### 3. Network Policies
@@ -710,7 +710,7 @@ spec:
           name: http_requests_per_second
         target:
           type: AverageValue
-          averageValue: '1000'
+          averageValue: "1000"
 ```
 
 **Cluster Autoscaler**: Automatically adds nodes when pods are pending

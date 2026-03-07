@@ -6,12 +6,12 @@ Define interoperable standards mappings for Summit conversion-readiness UX check
 
 ## Standards Crosswalk
 
-| Heuristic | Summit Check Domain | External Standard |
-| --- | --- | --- |
-| Mobile-first | Responsive rendering and viewport checks | WCAG 2.2 responsive guidance |
-| Speed | Latency/performance budgets | Core Web Vitals |
-| Trust | Trust signal integrity checks | ISO/IEC 27001-aligned trust posture |
-| Checkout simplicity | Friction and field complexity checks | Baymard checkout guidance |
+| Heuristic           | Summit Check Domain                      | External Standard                   |
+| ------------------- | ---------------------------------------- | ----------------------------------- |
+| Mobile-first        | Responsive rendering and viewport checks | WCAG 2.2 responsive guidance        |
+| Speed               | Latency/performance budgets              | Core Web Vitals                     |
+| Trust               | Trust signal integrity checks            | ISO/IEC 27001-aligned trust posture |
+| Checkout simplicity | Friction and field complexity checks     | Baymard checkout guidance           |
 
 ## Required Properties
 

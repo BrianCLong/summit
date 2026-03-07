@@ -5,11 +5,11 @@
  * UI for labeling entity match/no-match tasks.
  */
 
-import React from 'react';
-import { Check, X, HelpCircle, Clock } from 'lucide-react';
-import { useLabelingStore } from '../../store/labelingStore';
-import { cn } from '../../utils/cn';
-import type { Sample, LabelingJob, Label } from '../../types';
+import React from "react";
+import { Check, X, HelpCircle, Clock } from "lucide-react";
+import { useLabelingStore } from "../../store/labelingStore";
+import { cn } from "../../utils/cn";
+import type { Sample, LabelingJob, Label } from "../../types";
 
 interface EntityMatchTaskProps {
   sample: Sample;
@@ -18,11 +18,7 @@ interface EntityMatchTaskProps {
   instructions: string;
 }
 
-export function EntityMatchTask({
-  sample,
-  onSubmit,
-  instructions,
-}: EntityMatchTaskProps) {
+export function EntityMatchTask({ sample, onSubmit, instructions }: EntityMatchTaskProps) {
   const [decision, setDecision] = React.useState<boolean | null>(null);
   const [confidenceValue, setConfidenceValue] = React.useState(0.8);
   const { notes, setNotes, getTimeSpent, keyboardShortcutsEnabled } = useLabelingStore();
@@ -41,17 +37,17 @@ export function EntityMatchTask({
       }
 
       switch (e.key.toLowerCase()) {
-        case 'y':
-        case 'm':
+        case "y":
+        case "m":
           setDecision(true);
           break;
-        case 'n':
+        case "n":
           setDecision(false);
           break;
-        case 'u':
+        case "u":
           setDecision(null);
           break;
-        case 'enter':
+        case "enter":
           if (decision !== null) {
             handleSubmit();
           }
@@ -59,8 +55,8 @@ export function EntityMatchTask({
       }
     };
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, [keyboardShortcutsEnabled, decision]);
 
   const handleSubmit = () => {
@@ -68,7 +64,7 @@ export function EntityMatchTask({
 
     const labels: Label[] = [
       {
-        fieldName: 'match',
+        fieldName: "match",
         value: decision,
         confidence: confidenceValue,
       },
@@ -76,7 +72,7 @@ export function EntityMatchTask({
 
     onSubmit(labels);
     setDecision(null);
-    setNotes('');
+    setNotes("");
   };
 
   return (
@@ -86,8 +82,8 @@ export function EntityMatchTask({
         <h3 className="text-sm font-medium text-blue-800 mb-1">Instructions</h3>
         <p className="text-sm text-blue-700">{instructions}</p>
         <p className="text-xs text-blue-600 mt-2">
-          Keyboard shortcuts: <kbd className="px-1 bg-blue-100 rounded">Y</kbd> Match,{' '}
-          <kbd className="px-1 bg-blue-100 rounded">N</kbd> No Match,{' '}
+          Keyboard shortcuts: <kbd className="px-1 bg-blue-100 rounded">Y</kbd> Match,{" "}
+          <kbd className="px-1 bg-blue-100 rounded">N</kbd> No Match,{" "}
           <kbd className="px-1 bg-blue-100 rounded">Enter</kbd> Submit
         </p>
       </div>
@@ -97,12 +93,12 @@ export function EntityMatchTask({
         <EntityCard
           title="Entity A"
           entity={entityA}
-          highlight={decision === true ? 'green' : decision === false ? 'red' : undefined}
+          highlight={decision === true ? "green" : decision === false ? "red" : undefined}
         />
         <EntityCard
           title="Entity B"
           entity={entityB}
-          highlight={decision === true ? 'green' : decision === false ? 'red' : undefined}
+          highlight={decision === true ? "green" : decision === false ? "red" : undefined}
         />
       </div>
 
@@ -111,10 +107,10 @@ export function EntityMatchTask({
         <button
           onClick={() => setDecision(true)}
           className={cn(
-            'flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all',
+            "flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all",
             decision === true
-              ? 'bg-green-500 text-white ring-4 ring-green-200'
-              : 'bg-green-100 text-green-800 hover:bg-green-200'
+              ? "bg-green-500 text-white ring-4 ring-green-200"
+              : "bg-green-100 text-green-800 hover:bg-green-200"
           )}
         >
           <Check className="h-5 w-5" />
@@ -124,10 +120,10 @@ export function EntityMatchTask({
         <button
           onClick={() => setDecision(false)}
           className={cn(
-            'flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all',
+            "flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all",
             decision === false
-              ? 'bg-red-500 text-white ring-4 ring-red-200'
-              : 'bg-red-100 text-red-800 hover:bg-red-200'
+              ? "bg-red-500 text-white ring-4 ring-red-200"
+              : "bg-red-100 text-red-800 hover:bg-red-200"
           )}
         >
           <X className="h-5 w-5" />
@@ -137,8 +133,8 @@ export function EntityMatchTask({
         <button
           onClick={() => setDecision(null)}
           className={cn(
-            'flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all',
-            'bg-gray-100 text-gray-800 hover:bg-gray-200'
+            "flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all",
+            "bg-gray-100 text-gray-800 hover:bg-gray-200"
           )}
         >
           <HelpCircle className="h-5 w-5" />
@@ -201,7 +197,7 @@ function EntityCard({
 }: {
   title: string;
   entity?: { id: string; type: string; name: string; properties: Record<string, unknown> };
-  highlight?: 'green' | 'red';
+  highlight?: "green" | "red";
 }) {
   if (!entity) {
     return (
@@ -215,9 +211,9 @@ function EntityCard({
   return (
     <div
       className={cn(
-        'rounded-lg border bg-card p-6 transition-all',
-        highlight === 'green' && 'ring-2 ring-green-500',
-        highlight === 'red' && 'ring-2 ring-red-500'
+        "rounded-lg border bg-card p-6 transition-all",
+        highlight === "green" && "ring-2 ring-green-500",
+        highlight === "red" && "ring-2 ring-red-500"
       )}
     >
       <h3 className="text-lg font-semibold mb-4">{title}</h3>
@@ -233,7 +229,7 @@ function EntityCard({
         {Object.entries(entity.properties || {}).map(([key, value]) => (
           <div key={key}>
             <span className="text-sm text-muted-foreground capitalize">
-              {key.replace(/_/g, ' ')}:
+              {key.replace(/_/g, " ")}:
             </span>
             <p className="font-medium">{String(value)}</p>
           </div>
@@ -246,5 +242,5 @@ function EntityCard({
 function formatTime(seconds: number): string {
   const mins = Math.floor(seconds / 60);
   const secs = seconds % 60;
-  return `${mins}:${secs.toString().padStart(2, '0')}`;
+  return `${mins}:${secs.toString().padStart(2, "0")}`;
 }

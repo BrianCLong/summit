@@ -27,10 +27,10 @@
  * ```
  */
 
-import express, { Express } from 'express';
-import { createAPI, type APIConfig } from '@intelgraph/rest-api';
-import { StreamingWebSocketServer, SSEServer } from '@intelgraph/streaming-api';
-import { SummitQL } from '@intelgraph/query-language';
+import express, { Express } from "express";
+import { createAPI, type APIConfig } from "@intelgraph/rest-api";
+import { StreamingWebSocketServer, SSEServer } from "@intelgraph/streaming-api";
+import { SummitQL } from "@intelgraph/query-language";
 
 export interface SummitAPIConfig {
   rest?: APIConfig;
@@ -72,26 +72,26 @@ export interface SummitAPI {
 export function createSummitAPI(config: SummitAPIConfig): SummitAPI {
   // Create REST API
   const restConfig: APIConfig = {
-    version: '1.0.0',
-    title: 'Summit API',
-    description: 'Intelligence analysis platform API',
-    basePath: '/api/v1',
+    version: "1.0.0",
+    title: "Summit API",
+    description: "Intelligence analysis platform API",
+    basePath: "/api/v1",
     ...config.rest,
     cors: {
       enabled: true,
-      origin: '*',
+      origin: "*",
       ...config.rest?.cors,
     },
     pagination: {
       defaultLimit: 50,
       maxLimit: 1000,
-      strategy: 'cursor',
+      strategy: "cursor",
       ...config.rest?.pagination,
     },
     openapi: {
       enabled: true,
-      path: '/openapi.json',
-      uiPath: '/docs',
+      path: "/openapi.json",
+      uiPath: "/docs",
       ...config.rest?.openapi,
     },
   };
@@ -104,7 +104,7 @@ export function createSummitAPI(config: SummitAPIConfig): SummitAPI {
   if (config.streaming?.websocket?.enabled !== false) {
     websocket = new StreamingWebSocketServer({
       server: app,
-      path: config.streaming?.websocket?.path || '/ws',
+      path: config.streaming?.websocket?.path || "/ws",
     });
   }
 
@@ -113,11 +113,9 @@ export function createSummitAPI(config: SummitAPIConfig): SummitAPI {
   if (config.streaming?.sse?.enabled) {
     sse = new SSEServer();
 
-    const ssePath = config.streaming.sse.path || '/stream';
+    const ssePath = config.streaming.sse.path || "/stream";
     app.get(ssePath, (req, res) => {
-      const topics = req.query.topics
-        ? (req.query.topics as string).split(',')
-        : undefined;
+      const topics = req.query.topics ? (req.query.topics as string).split(",") : undefined;
 
       sse!.handleConnection(req, res, { topics });
     });
@@ -131,7 +129,7 @@ export function createSummitAPI(config: SummitAPIConfig): SummitAPI {
       validate: true,
     });
 
-    const endpoint = config.queryLanguage.endpoint || '/query';
+    const endpoint = config.queryLanguage.endpoint || "/query";
     app.post(endpoint, express.json(), async (req, res, next) => {
       try {
         const { query, cache, stream } = req.body;
@@ -140,8 +138,8 @@ export function createSummitAPI(config: SummitAPIConfig): SummitAPI {
           return res.status(400).json({
             success: false,
             error: {
-              code: 'MISSING_QUERY',
-              message: 'Query is required',
+              code: "MISSING_QUERY",
+              message: "Query is required",
               timestamp: new Date().toISOString(),
               path: req.path,
             },
@@ -150,10 +148,10 @@ export function createSummitAPI(config: SummitAPIConfig): SummitAPI {
 
         if (stream) {
           // Streaming query
-          res.setHeader('Content-Type', 'application/x-ndjson');
+          res.setHeader("Content-Type", "application/x-ndjson");
 
           for await (const result of queryLanguage!.stream(query)) {
-            res.write(JSON.stringify(result) + '\n');
+            res.write(JSON.stringify(result) + "\n");
           }
 
           res.end();
@@ -176,8 +174,8 @@ export function createSummitAPI(config: SummitAPIConfig): SummitAPI {
           return res.status(400).json({
             success: false,
             error: {
-              code: 'MISSING_QUERY',
-              message: 'Query is required',
+              code: "MISSING_QUERY",
+              message: "Query is required",
               timestamp: new Date().toISOString(),
               path: req.path,
             },
@@ -193,7 +191,7 @@ export function createSummitAPI(config: SummitAPIConfig): SummitAPI {
         res.status(400).json({
           success: false,
           error: {
-            code: 'VALIDATION_ERROR',
+            code: "VALIDATION_ERROR",
             message: error instanceof Error ? error.message : String(error),
             timestamp: new Date().toISOString(),
             path: req.path,
@@ -211,8 +209,8 @@ export function createSummitAPI(config: SummitAPIConfig): SummitAPI {
           return res.status(400).json({
             success: false,
             error: {
-              code: 'MISSING_QUERY',
-              message: 'Query is required',
+              code: "MISSING_QUERY",
+              message: "Query is required",
               timestamp: new Date().toISOString(),
               path: req.path,
             },
@@ -239,23 +237,29 @@ export function createSummitAPI(config: SummitAPIConfig): SummitAPI {
 
     start(port: number) {
       const server = app.listen(port, () => {
-        console.log('\n🚀 Summit API Framework Started\n');
+        console.log("\n🚀 Summit API Framework Started\n");
         console.log(`REST API: http://localhost:${port}${restConfig.basePath}`);
         console.log(`API Docs: http://localhost:${port}${restConfig.openapi?.uiPath}`);
 
         if (websocket) {
-          console.log(`WebSocket: ws://localhost:${port}${config.streaming?.websocket?.path || '/ws'}`);
+          console.log(
+            `WebSocket: ws://localhost:${port}${config.streaming?.websocket?.path || "/ws"}`
+          );
         }
 
         if (sse) {
-          console.log(`SSE Stream: http://localhost:${port}${config.streaming?.sse?.path || '/stream'}`);
+          console.log(
+            `SSE Stream: http://localhost:${port}${config.streaming?.sse?.path || "/stream"}`
+          );
         }
 
         if (queryLanguage) {
-          console.log(`Query Language: http://localhost:${port}${config.queryLanguage?.endpoint || '/query'}`);
+          console.log(
+            `Query Language: http://localhost:${port}${config.queryLanguage?.endpoint || "/query"}`
+          );
         }
 
-        console.log('');
+        console.log("");
       });
 
       return server;
@@ -274,6 +278,6 @@ export function createSummitAPI(config: SummitAPIConfig): SummitAPI {
 }
 
 // Re-export sub-packages
-export * from '@intelgraph/rest-api';
-export * from '@intelgraph/streaming-api';
-export * from '@intelgraph/query-language';
+export * from "@intelgraph/rest-api";
+export * from "@intelgraph/streaming-api";
+export * from "@intelgraph/query-language";

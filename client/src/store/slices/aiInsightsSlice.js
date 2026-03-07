@@ -1,14 +1,14 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
   highlightEnabled: false,
-  selectedInsightType: '', // e.g., 'community_detection', 'link_prediction'
+  selectedInsightType: "", // e.g., 'community_detection', 'link_prediction'
   communityIdFilter: [0, 100], // Range for community IDs
   communityData: {}, // Stores community detection results: { nodeId: communityId, ... }
 };
 
 const aiInsightsSlice = createSlice({
-  name: 'aiInsights',
+  name: "aiInsights",
   initialState,
   reducers: {
     setHighlightEnabled: (state, action) => {

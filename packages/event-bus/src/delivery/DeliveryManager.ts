@@ -4,16 +4,10 @@
  * Implements at-least-once, at-most-once, and exactly-once delivery semantics
  */
 
-import { EventEmitter } from 'events';
-import Redis from 'ioredis';
-import type {
-  Message,
-  MessageEnvelope
-} from '../core/types.js';
-import {
-  DeliveryGuarantee,
-  MessageStatus
-} from '../core/types.js';
+import { EventEmitter } from "events";
+import Redis from "ioredis";
+import type { Message, MessageEnvelope } from "../core/types.js";
+import { DeliveryGuarantee, MessageStatus } from "../core/types.js";
 
 export interface DeliveryRecord {
   messageId: string;
@@ -39,10 +33,7 @@ export class DeliveryManager extends EventEmitter {
   /**
    * Start tracking message delivery
    */
-  async startDelivery(
-    message: Message,
-    guarantee: DeliveryGuarantee
-  ): Promise<void> {
+  async startDelivery(message: Message, guarantee: DeliveryGuarantee): Promise<void> {
     const messageId = message.metadata.messageId;
 
     // For exactly-once, check if already delivered
@@ -57,20 +48,16 @@ export class DeliveryManager extends EventEmitter {
       messageId,
       status: MessageStatus.PENDING,
       attempts: 1,
-      firstAttemptedAt: new Date()
+      firstAttemptedAt: new Date(),
     };
 
     this.deliveryRecords.set(messageId, record);
     this.inFlightMessages.add(messageId);
 
     // Store in Redis for persistence
-    await this.redis.hset(
-      'delivery:records',
-      messageId,
-      JSON.stringify(record)
-    );
+    await this.redis.hset("delivery:records", messageId, JSON.stringify(record));
 
-    this.emit('delivery:started', { messageId });
+    this.emit("delivery:started", { messageId });
   }
 
   /**
@@ -85,13 +72,9 @@ export class DeliveryManager extends EventEmitter {
     record.status = MessageStatus.PROCESSING;
     record.lastAttemptedAt = new Date();
 
-    await this.redis.hset(
-      'delivery:records',
-      messageId,
-      JSON.stringify(record)
-    );
+    await this.redis.hset("delivery:records", messageId, JSON.stringify(record));
 
-    this.emit('delivery:processing', { messageId });
+    this.emit("delivery:processing", { messageId });
   }
 
   /**
@@ -106,18 +89,14 @@ export class DeliveryManager extends EventEmitter {
     record.status = MessageStatus.COMPLETED;
     record.completedAt = new Date();
 
-    await this.redis.hset(
-      'delivery:records',
-      messageId,
-      JSON.stringify(record)
-    );
+    await this.redis.hset("delivery:records", messageId, JSON.stringify(record));
 
     // Mark as delivered for exactly-once semantics
-    await this.redis.sadd('delivery:completed', messageId);
-    await this.redis.expire('delivery:completed', 86400); // 24 hours
+    await this.redis.sadd("delivery:completed", messageId);
+    await this.redis.expire("delivery:completed", 86400); // 24 hours
 
     this.inFlightMessages.delete(messageId);
-    this.emit('delivery:completed', { messageId });
+    this.emit("delivery:completed", { messageId });
   }
 
   /**
@@ -133,14 +112,10 @@ export class DeliveryManager extends EventEmitter {
     record.failedAt = new Date();
     record.error = error;
 
-    await this.redis.hset(
-      'delivery:records',
-      messageId,
-      JSON.stringify(record)
-    );
+    await this.redis.hset("delivery:records", messageId, JSON.stringify(record));
 
     this.inFlightMessages.delete(messageId);
-    this.emit('delivery:failed', { messageId, error });
+    this.emit("delivery:failed", { messageId, error });
   }
 
   /**
@@ -156,20 +131,16 @@ export class DeliveryManager extends EventEmitter {
     record.lastAttemptedAt = new Date();
     record.status = MessageStatus.PENDING;
 
-    await this.redis.hset(
-      'delivery:records',
-      messageId,
-      JSON.stringify(record)
-    );
+    await this.redis.hset("delivery:records", messageId, JSON.stringify(record));
 
-    this.emit('delivery:retry', { messageId, attempt: record.attempts });
+    this.emit("delivery:retry", { messageId, attempt: record.attempts });
   }
 
   /**
    * Check if message has been delivered (for exactly-once)
    */
   async isDelivered(messageId: string): Promise<boolean> {
-    return (await this.redis.sismember('delivery:completed', messageId)) === 1;
+    return (await this.redis.sismember("delivery:completed", messageId)) === 1;
   }
 
   /**
@@ -200,9 +171,8 @@ export class DeliveryManager extends EventEmitter {
     return {
       totalMessages: records.length,
       inFlight: this.inFlightMessages.size,
-      completed: records.filter(r => r.status === MessageStatus.COMPLETED)
-        .length,
-      failed: records.filter(r => r.status === MessageStatus.FAILED).length
+      completed: records.filter((r) => r.status === MessageStatus.COMPLETED).length,
+      failed: records.filter((r) => r.status === MessageStatus.FAILED).length,
     };
   }
 }

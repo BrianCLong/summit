@@ -1,7 +1,7 @@
-const fs = require('fs');
+const fs = require("fs");
 
-const path = '.github/workflows/docs-lint.yml';
-let content = fs.readFileSync(path, 'utf8');
+const path = ".github/workflows/docs-lint.yml";
+let content = fs.readFileSync(path, "utf8");
 
 content = content.replace(
   `run: pnpm dlx markdownlint-cli '**/*.md' --ignore 'node_modules' --disable MD060 MD040 MD032 MD036 MD058 MD030 MD034 MD007 MD031 MD022`,

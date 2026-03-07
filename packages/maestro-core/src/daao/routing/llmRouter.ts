@@ -1,5 +1,5 @@
-import { ModelCatalog, ModelSpec } from './modelCatalog';
-import { DifficultySignal } from '../difficulty/difficulty';
+import { ModelCatalog, ModelSpec } from "./modelCatalog";
+import { DifficultySignal } from "../difficulty/difficulty";
 
 export interface RoutingDecision {
   modelId: string;
@@ -14,12 +14,16 @@ export class CostAwareLLMRouter {
     difficulty: DifficultySignal,
     estimatedInputTokens: number,
     budgetUsd: number = Infinity,
-    requiredCapabilities: Partial<ModelSpec['capabilities']> = {}
+    requiredCapabilities: Partial<ModelSpec["capabilities"]> = {}
   ): RoutingDecision {
     // 1. Filter by capabilities
-    let candidates = this.catalog.listModels().filter(m =>
-        Object.entries(requiredCapabilities).every(([k, v]) => !v || m.capabilities[k as keyof ModelSpec['capabilities']])
-    );
+    let candidates = this.catalog
+      .listModels()
+      .filter((m) =>
+        Object.entries(requiredCapabilities).every(
+          ([k, v]) => !v || m.capabilities[k as keyof ModelSpec["capabilities"]]
+        )
+      );
 
     if (candidates.length === 0) {
       throw new Error("No models match required capabilities");
@@ -28,8 +32,9 @@ export class CostAwareLLMRouter {
     // 2. Filter by budget
     // We assume output tokens approx = input tokens (simple heuristic) or 1000 fixed
     const estimatedOutputTokens = 1000;
-    candidates = candidates.filter(m => {
-      const cost = (estimatedInputTokens * m.costPerInputToken) + (estimatedOutputTokens * m.costPerOutputToken);
+    candidates = candidates.filter((m) => {
+      const cost =
+        estimatedInputTokens * m.costPerInputToken + estimatedOutputTokens * m.costPerOutputToken;
       return cost <= budgetUsd;
     });
 
@@ -40,11 +45,13 @@ export class CostAwareLLMRouter {
       // Wait, MWS says "refuse/downgrade".
       // Let's degrade to cheapest model.
       const cheapest = this.catalog.getCheapestModel(requiredCapabilities);
-      const cost = (estimatedInputTokens * cheapest.costPerInputToken) + (estimatedOutputTokens * cheapest.costPerOutputToken);
+      const cost =
+        estimatedInputTokens * cheapest.costPerInputToken +
+        estimatedOutputTokens * cheapest.costPerOutputToken;
       return {
         modelId: cheapest.id,
         estimatedCost: cost,
-        reason: "Budget exceeded; fallback to cheapest model"
+        reason: "Budget exceeded; fallback to cheapest model",
       };
     }
 
@@ -52,9 +59,9 @@ export class CostAwareLLMRouter {
     let selectedModel: ModelSpec;
     let reason: string;
 
-    if (difficulty.band === 'hard') {
+    if (difficulty.band === "hard") {
       // Prefer high tier
-      const highTier = candidates.filter(m => m.tier === 'high');
+      const highTier = candidates.filter((m) => m.tier === "high");
       if (highTier.length > 0) {
         // Pick best matching domain
         selectedModel = this.selectBestDomainMatch(highTier, difficulty.domain);
@@ -63,18 +70,18 @@ export class CostAwareLLMRouter {
         selectedModel = candidates[0]; // fallback to whatever is available
         reason = "Hard task: High tier not available within budget";
       }
-    } else if (difficulty.band === 'medium') {
+    } else if (difficulty.band === "medium") {
       // Prefer high tier if cheap enough, else medium/low?
       // Let's say medium prefers high tier but is okay with low tier if budget is tight.
       // Since we already filtered by budget, any candidate is affordable.
       // So pick high tier if available.
-      const highTier = candidates.filter(m => m.tier === 'high');
+      const highTier = candidates.filter((m) => m.tier === "high");
       if (highTier.length > 0) {
-         selectedModel = this.selectBestDomainMatch(highTier, difficulty.domain);
-         reason = "Medium task: High tier model affordable";
+        selectedModel = this.selectBestDomainMatch(highTier, difficulty.domain);
+        reason = "Medium task: High tier model affordable";
       } else {
-         selectedModel = this.selectBestDomainMatch(candidates, difficulty.domain);
-         reason = "Medium task: Low tier model selected (budget constrained)";
+        selectedModel = this.selectBestDomainMatch(candidates, difficulty.domain);
+        reason = "Medium task: Low tier model selected (budget constrained)";
       }
     } else {
       // Easy: prefer cheapest
@@ -84,24 +91,26 @@ export class CostAwareLLMRouter {
       reason = "Easy task: Cheapest model selected";
     }
 
-    const estimatedCost = (estimatedInputTokens * selectedModel.costPerInputToken) + (estimatedOutputTokens * selectedModel.costPerOutputToken);
+    const estimatedCost =
+      estimatedInputTokens * selectedModel.costPerInputToken +
+      estimatedOutputTokens * selectedModel.costPerOutputToken;
 
     return {
       modelId: selectedModel.id,
       estimatedCost,
-      reason
+      reason,
     };
   }
 
   private selectBestDomainMatch(candidates: ModelSpec[], domain: string): ModelSpec {
-     // Sort by domain match, then by cost (descending? no, we want best quality usually? or cheapest among best?)
-     // Let's assume within a tier, we want best domain match. Tie-break with cost (cheaper is better).
-     return candidates.sort((a, b) => {
-        const aHasDomain = a.domains.includes(domain);
-        const bHasDomain = b.domains.includes(domain);
-        if (aHasDomain && !bHasDomain) return -1;
-        if (!aHasDomain && bHasDomain) return 1;
-        return a.costPerInputToken - b.costPerInputToken;
-     })[0];
+    // Sort by domain match, then by cost (descending? no, we want best quality usually? or cheapest among best?)
+    // Let's assume within a tier, we want best domain match. Tie-break with cost (cheaper is better).
+    return candidates.sort((a, b) => {
+      const aHasDomain = a.domains.includes(domain);
+      const bHasDomain = b.domains.includes(domain);
+      if (aHasDomain && !bHasDomain) return -1;
+      if (!aHasDomain && bHasDomain) return 1;
+      return a.costPerInputToken - b.costPerInputToken;
+    })[0];
   }
 }

@@ -37,7 +37,7 @@ jobs:
       - name: Install cosign
         uses: sigstore/cosign-installer@v3.5.0
         with:
-          cosign-release: 'v2.4.0'
+          cosign-release: "v2.4.0"
 
       - name: Build images/packages
         id: build

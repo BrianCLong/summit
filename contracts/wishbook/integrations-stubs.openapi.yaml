@@ -7,14 +7,14 @@ paths:
     get:
       summary: TAXII server hello-world stub
       responses:
-        '200': { description: OK }
+        "200": { description: OK }
   /integrations/misp/v1/hello:
     get:
       summary: MISP hello-world stub
       responses:
-        '200': { description: OK }
+        "200": { description: OK }
   /integrations/siem/v1/hello:
     get:
       summary: SIEM/XDR hello-world stub
       responses:
-        '200': { description: OK }
+        "200": { description: OK }

@@ -1,4 +1,4 @@
-import type { GraphSnapshot, GraphUpdate, StructuredLogger } from './index.js';
+import type { GraphSnapshot, GraphUpdate, StructuredLogger } from "./index.js";
 
 export interface KafkaLikeMessage {
   key?: Buffer | string | null;
@@ -29,19 +29,17 @@ export interface KafkaStreamConfig {
   source: string;
   ingress?: string;
   fromBeginning?: boolean;
-  parseUpdate?: (
-    payload: KafkaLikeEachMessagePayload,
-  ) => GraphUpdate | Promise<GraphUpdate>;
+  parseUpdate?: (payload: KafkaLikeEachMessagePayload) => GraphUpdate | Promise<GraphUpdate>;
   onApplied?: (snapshot: GraphSnapshot) => void | Promise<void>;
   logger?: StructuredLogger;
 }
 
 function toUtf8(value?: Buffer | string | null): string {
   if (value === null || value === undefined) {
-    return '';
+    return "";
   }
   if (value instanceof Buffer) {
-    return value.toString('utf8');
+    return value.toString("utf8");
   }
   return String(value);
 }
@@ -56,7 +54,7 @@ export class KafkaGraphUpdateStream {
   constructor(
     consumer: KafkaLikeConsumer,
     applyUpdate: (update: GraphUpdate) => GraphSnapshot,
-    config: KafkaStreamConfig,
+    config: KafkaStreamConfig
   ) {
     this.consumer = consumer;
     this.config = config;
@@ -77,13 +75,13 @@ export class KafkaGraphUpdateStream {
           const update = await this.parseUpdate(payload);
           const snapshot = this.applyUpdate({
             source: this.config.source,
-            ingress: this.config.ingress ?? 'message-broker',
+            ingress: this.config.ingress ?? "message-broker",
             topic: payload.topic,
             ...update,
           });
           await this.config.onApplied?.(snapshot);
         } catch (error) {
-          this.config.logger?.error?.('intelgraph.kg.stream.error', {
+          this.config.logger?.error?.("intelgraph.kg.stream.error", {
             topic: payload.topic,
             reason: error instanceof Error ? error.message : String(error),
           });
@@ -99,9 +97,7 @@ export class KafkaGraphUpdateStream {
     await this.consumer.disconnect();
   }
 
-  private async parseUpdate(
-    payload: KafkaLikeEachMessagePayload,
-  ): Promise<GraphUpdate> {
+  private async parseUpdate(payload: KafkaLikeEachMessagePayload): Promise<GraphUpdate> {
     if (this.config.parseUpdate) {
       return this.config.parseUpdate(payload);
     }
@@ -112,13 +108,13 @@ export class KafkaGraphUpdateStream {
       parsed.source = this.config.source;
     }
     if (!parsed.ingress) {
-      parsed.ingress = this.config.ingress ?? 'message-broker';
+      parsed.ingress = this.config.ingress ?? "message-broker";
     }
     if (!parsed.topic) {
       parsed.topic = payload.topic;
     }
     if (!parsed.correlationId) {
-      const candidateHeader = payload.message.headers?.['correlation-id'];
+      const candidateHeader = payload.message.headers?.["correlation-id"];
       if (candidateHeader) {
         parsed.correlationId = candidateHeader;
       }

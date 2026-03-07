@@ -2,7 +2,7 @@ name: Plan Heatmap & Stability Gate
 on:
   workflow_dispatch: {}
   schedule:
-    - cron: "0 * * * *"   # hourly
+    - cron: "0 * * * *" # hourly
 jobs:
   plan-stability:
     runs-on: ubuntu-latest

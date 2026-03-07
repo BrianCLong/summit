@@ -3,7 +3,6 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-
 # Generates promotion bundles for RC → GA promotion
 # Automatically triggered on RC tag push or manual dispatch
 #

@@ -47,6 +47,7 @@ Advanced graph analytics engine with policy-aware algorithms, pattern mining tem
 ### XAI Integration
 
 All algorithms provide:
+
 - **Explanation Metadata**: Element-level importance scores
 - **Reasoning**: Human-readable explanations
 - **Evidence**: Supporting facts for decisions
@@ -64,24 +65,28 @@ pnpm add @intelgraph/graph-analytics
 ### Pathfinding with Policy Awareness
 
 ```typescript
-import { findShortestPath, type GraphData, type PathfindingOptions } from '@intelgraph/graph-analytics';
+import {
+  findShortestPath,
+  type GraphData,
+  type PathfindingOptions,
+} from "@intelgraph/graph-analytics";
 
 const graph: GraphData = {
   nodes: [
-    { id: 'A', type: 'Person', policyLabels: ['public'] },
-    { id: 'B', type: 'Organization', policyLabels: ['public'] },
-    { id: 'C', type: 'Person', policyLabels: ['public'] },
+    { id: "A", type: "Person", policyLabels: ["public"] },
+    { id: "B", type: "Organization", policyLabels: ["public"] },
+    { id: "C", type: "Person", policyLabels: ["public"] },
   ],
   edges: [
-    { source: 'A', target: 'B', type: 'WORKS_FOR', weight: 1 },
-    { source: 'B', target: 'C', type: 'EMPLOYS', weight: 1 },
+    { source: "A", target: "B", type: "WORKS_FOR", weight: 1 },
+    { source: "B", target: "C", type: "EMPLOYS", weight: 1 },
   ],
 };
 
 const options: PathfindingOptions = {
   policyFilter: {
-    allowedNodeTypes: ['Person', 'Organization'],
-    requiredPolicyLabels: ['public'],
+    allowedNodeTypes: ["Person", "Organization"],
+    requiredPolicyLabels: ["public"],
   },
   scopeFilter: {
     startTime: Date.now() - 86400000, // Last 24 hours
@@ -91,50 +96,50 @@ const options: PathfindingOptions = {
   generateExplanations: true, // Enable XAI
 };
 
-const result = findShortestPath(graph, 'A', 'C', options);
+const result = findShortestPath(graph, "A", "C", options);
 
 if (result.found && result.path) {
-  console.log('Path:', result.path.path);
-  console.log('Distance:', result.path.distance);
-  console.log('Explanations:', result.path.explanations);
+  console.log("Path:", result.path.path);
+  console.log("Distance:", result.path.distance);
+  console.log("Explanations:", result.path.explanations);
 }
 ```
 
 ### K-Shortest Paths
 
 ```typescript
-import { findKShortestPaths } from '@intelgraph/graph-analytics';
+import { findKShortestPaths } from "@intelgraph/graph-analytics";
 
-const result = findKShortestPaths(graph, 'A', 'C', 5, {
+const result = findKShortestPaths(graph, "A", "C", 5, {
   policyFilter: {
-    allowedEdgeTypes: ['WORKS_FOR', 'EMPLOYS', 'COLLABORATES'],
+    allowedEdgeTypes: ["WORKS_FOR", "EMPLOYS", "COLLABORATES"],
   },
   generateExplanations: true,
 });
 
 console.log(`Found ${result.paths.length} paths`);
 result.paths.forEach((path, i) => {
-  console.log(`Path ${i + 1}:`, path.path, 'Distance:', path.distance);
+  console.log(`Path ${i + 1}:`, path.path, "Distance:", path.distance);
 });
 ```
 
 ### Co-Travel Pattern Detection
 
 ```typescript
-import { detectCoTravelPatterns, type CoTravelOptions } from '@intelgraph/graph-analytics';
+import { detectCoTravelPatterns, type CoTravelOptions } from "@intelgraph/graph-analytics";
 
 const graph: GraphData = {
   nodes: [
     {
-      id: 'Person1',
-      type: 'Person',
+      id: "Person1",
+      type: "Person",
       location: { lat: 40.7128, lon: -74.006 },
       timestamp: Date.now(),
     },
     {
-      id: 'Person2',
-      type: 'Person',
-      location: { lat: 40.7130, lon: -74.0062 },
+      id: "Person2",
+      type: "Person",
+      location: { lat: 40.713, lon: -74.0062 },
       timestamp: Date.now() + 1000,
     },
   ],
@@ -145,15 +150,15 @@ const options: CoTravelOptions = {
   timeWindow: 300000, // 5 minutes
   distanceThreshold: 100, // 100 meters
   minCoOccurrences: 3,
-  entityTypes: ['Person'],
+  entityTypes: ["Person"],
 };
 
 const result = detectCoTravelPatterns(graph, options);
 
 result.patterns.forEach((pattern) => {
-  console.log('Co-travel pattern:', pattern.nodes);
-  console.log('Confidence:', pattern.confidence);
-  console.log('Metadata:', pattern.metadata);
+  console.log("Co-travel pattern:", pattern.nodes);
+  console.log("Confidence:", pattern.confidence);
+  console.log("Metadata:", pattern.metadata);
 
   // XAI explanations
   pattern.explanations.forEach((exp) => {
@@ -167,34 +172,37 @@ result.patterns.forEach((pattern) => {
 ### Financial Structuring Detection
 
 ```typescript
-import { detectFinancialStructuring, type FinancialStructuringOptions } from '@intelgraph/graph-analytics';
+import {
+  detectFinancialStructuring,
+  type FinancialStructuringOptions,
+} from "@intelgraph/graph-analytics";
 
 const graph: GraphData = {
   nodes: [
-    { id: 'Account1', type: 'Account' },
-    { id: 'Account2', type: 'Account' },
-    { id: 'Account3', type: 'Account' },
-    { id: 'Account4', type: 'Account' },
+    { id: "Account1", type: "Account" },
+    { id: "Account2", type: "Account" },
+    { id: "Account3", type: "Account" },
+    { id: "Account4", type: "Account" },
   ],
   edges: [
     {
-      source: 'Account1',
-      target: 'Account2',
-      type: 'TRANSFER',
+      source: "Account1",
+      target: "Account2",
+      type: "TRANSFER",
       timestamp: Date.now(),
       properties: { amount: 9500 },
     },
     {
-      source: 'Account1',
-      target: 'Account3',
-      type: 'TRANSFER',
+      source: "Account1",
+      target: "Account3",
+      type: "TRANSFER",
       timestamp: Date.now() + 1000,
       properties: { amount: 9500 },
     },
     {
-      source: 'Account1',
-      target: 'Account4',
-      type: 'TRANSFER',
+      source: "Account1",
+      target: "Account4",
+      type: "TRANSFER",
       timestamp: Date.now() + 2000,
       properties: { amount: 9500 },
     },
@@ -206,17 +214,17 @@ const options: FinancialStructuringOptions = {
   minBranches: 3,
   maxHops: 1,
   amountThreshold: 9000,
-  patternType: 'fan-out',
+  patternType: "fan-out",
 };
 
 const result = detectFinancialStructuring(graph, options);
 
 result.patterns.forEach((pattern) => {
-  console.log('Structuring pattern detected:');
-  console.log('  Type:', pattern.metadata.patternType);
-  console.log('  Center:', pattern.metadata.centerNode);
-  console.log('  Branches:', pattern.metadata.branches);
-  console.log('  Total Amount:', pattern.metadata.totalAmount);
+  console.log("Structuring pattern detected:");
+  console.log("  Type:", pattern.metadata.patternType);
+  console.log("  Center:", pattern.metadata.centerNode);
+  console.log("  Branches:", pattern.metadata.branches);
+  console.log("  Total Amount:", pattern.metadata.totalAmount);
 
   // XAI explanations with feature importances
   pattern.explanations.forEach((exp) => {
@@ -229,17 +237,17 @@ result.patterns.forEach((pattern) => {
 ### Communication Bursts Detection
 
 ```typescript
-import { detectCommunicationBursts, type CommunicationBurstOptions } from '@intelgraph/graph-analytics';
+import {
+  detectCommunicationBursts,
+  type CommunicationBurstOptions,
+} from "@intelgraph/graph-analytics";
 
 const graph: GraphData = {
-  nodes: [
-    { id: 'Person1' },
-    { id: 'Person2' },
-  ],
+  nodes: [{ id: "Person1" }, { id: "Person2" }],
   edges: Array.from({ length: 50 }, (_, i) => ({
-    source: 'Person1',
-    target: 'Person2',
-    type: 'MESSAGE',
+    source: "Person1",
+    target: "Person2",
+    type: "MESSAGE",
     timestamp: Date.now() + i * 1000,
   })),
 };
@@ -248,16 +256,16 @@ const options: CommunicationBurstOptions = {
   timeWindow: 60000, // 1 minute windows
   burstThreshold: 3.0, // 3x baseline
   lullThreshold: 0.3, // 30% of baseline
-  communicationTypes: ['MESSAGE', 'EMAIL'],
+  communicationTypes: ["MESSAGE", "EMAIL"],
 };
 
 const result = detectCommunicationBursts(graph, options);
 
-console.log('Bursts detected:', result.bursts.length);
+console.log("Bursts detected:", result.bursts.length);
 result.bursts.forEach((burst) => {
-  console.log('Burst:', burst.metadata.messageCount, 'messages');
-  console.log('Ratio:', burst.metadata.burstRatio, 'x baseline');
-  console.log('Window:', new Date(burst.metadata.timeWindow.start).toISOString());
+  console.log("Burst:", burst.metadata.messageCount, "messages");
+  console.log("Ratio:", burst.metadata.burstRatio, "x baseline");
+  console.log("Window:", new Date(burst.metadata.timeWindow.start).toISOString());
 
   // XAI explanations
   burst.explanations.forEach((exp) => {
@@ -265,7 +273,7 @@ result.bursts.forEach((burst) => {
   });
 });
 
-console.log('Lulls detected:', result.lulls.length);
+console.log("Lulls detected:", result.lulls.length);
 ```
 
 ### Centrality Measures
@@ -276,16 +284,16 @@ import {
   calculateClosenessCentrality,
   calculateEigenvectorCentrality,
   calculatePageRank,
-} from '@intelgraph/graph-analytics';
+} from "@intelgraph/graph-analytics";
 
 const graph = {
-  nodes: ['A', 'B', 'C', 'D', 'E'],
+  nodes: ["A", "B", "C", "D", "E"],
   edges: [
-    { source: 'A', target: 'B', weight: 1 },
-    { source: 'B', target: 'C', weight: 1 },
-    { source: 'C', target: 'D', weight: 1 },
-    { source: 'D', target: 'E', weight: 1 },
-    { source: 'E', target: 'A', weight: 1 },
+    { source: "A", target: "B", weight: 1 },
+    { source: "B", target: "C", weight: 1 },
+    { source: "C", target: "D", weight: 1 },
+    { source: "D", target: "E", weight: 1 },
+    { source: "E", target: "A", weight: 1 },
   ],
 };
 
@@ -320,15 +328,15 @@ const eigenvector = calculateEigenvectorCentrality(graph, {
 import {
   detectCommunitiesLouvain,
   detectCommunitiesLabelPropagation,
-} from '@intelgraph/graph-analytics';
+} from "@intelgraph/graph-analytics";
 
 const graph = {
-  nodes: ['A', 'B', 'C', 'D', 'E', 'F'],
+  nodes: ["A", "B", "C", "D", "E", "F"],
   edges: [
-    { source: 'A', target: 'B', weight: 1 },
-    { source: 'B', target: 'C', weight: 1 },
-    { source: 'D', target: 'E', weight: 1 },
-    { source: 'E', target: 'F', weight: 1 },
+    { source: "A", target: "B", weight: 1 },
+    { source: "B", target: "C", weight: 1 },
+    { source: "D", target: "E", weight: 1 },
+    { source: "E", target: "F", weight: 1 },
   ],
 };
 
@@ -338,9 +346,9 @@ const louvain = detectCommunitiesLouvain(graph, {
   minModularityGain: 0.0001,
 });
 
-console.log('Communities:', louvain.numCommunities);
-console.log('Modularity:', louvain.modularity);
-console.log('Sizes:', louvain.communitySizes);
+console.log("Communities:", louvain.numCommunities);
+console.log("Modularity:", louvain.modularity);
+console.log("Sizes:", louvain.communitySizes);
 
 // Label Propagation
 const labelProp = detectCommunitiesLabelPropagation(graph, {
@@ -354,7 +362,7 @@ const labelProp = detectCommunitiesLabelPropagation(graph, {
 The analytics layer integrates with the Graph-XAI service by emitting explanation records:
 
 ```typescript
-import { GraphXAIExplainer } from '@intelgraph/server/services/xai/graph-explainer';
+import { GraphXAIExplainer } from "@intelgraph/server/services/xai/graph-explainer";
 
 // After running analytics
 const result = findShortestPath(graph, source, target, {
@@ -368,16 +376,16 @@ if (result.path?.explanations) {
   const xaiResult = await xaiExplainer.generateExplanation({
     query: `Shortest path from ${source} to ${target}`,
     graph_data: { nodes: graph.nodes, edges: graph.edges },
-    explanation_type: 'path_explanation',
+    explanation_type: "path_explanation",
     context: {
       local_explanations: result.path.explanations,
-      algorithm: 'dijkstra',
+      algorithm: "dijkstra",
       distance: result.path.distance,
     },
   });
 
-  console.log('XAI Explanation:', xaiResult.explanations);
-  console.log('Confidence:', xaiResult.confidence);
+  console.log("XAI Explanation:", xaiResult.explanations);
+  console.log("Confidence:", xaiResult.confidence);
 }
 ```
 
@@ -396,8 +404,8 @@ const result = findShortestPath(graph, source, target, {
   },
 });
 
-console.log('Budget exceeded:', result.metadata.budgetExceeded);
-console.log('Nodes explored:', result.nodesExplored);
+console.log("Budget exceeded:", result.metadata.budgetExceeded);
+console.log("Nodes explored:", result.nodesExplored);
 ```
 
 ### Sampling for Large Graphs
@@ -410,7 +418,7 @@ const betweenness = calculateBetweenness(largeGraph, {
   normalized: true,
 });
 
-console.log('Approximate:', betweenness.approximate);
+console.log("Approximate:", betweenness.approximate);
 ```
 
 ### Performance Metrics
@@ -420,9 +428,9 @@ All algorithms return execution time and metadata:
 ```typescript
 const result = detectCoTravelPatterns(graph, options);
 
-console.log('Execution time:', result.executionTime, 'ms');
-console.log('Nodes analyzed:', result.metadata.nodesAnalyzed);
-console.log('Time range:', result.metadata.timeRange);
+console.log("Execution time:", result.executionTime, "ms");
+console.log("Nodes analyzed:", result.metadata.nodesAnalyzed);
+console.log("Time range:", result.metadata.timeRange);
 ```
 
 ## API Reference
@@ -472,7 +480,7 @@ interface PathfindingOptions {
 ```typescript
 interface PatternExplanation {
   elementId: string;
-  elementType: 'node' | 'edge' | 'pattern';
+  elementType: "node" | "edge" | "pattern";
   importanceScore: number; // 0-1
   reasoning: string;
   evidence: string[];

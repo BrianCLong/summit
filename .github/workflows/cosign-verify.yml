@@ -2,8 +2,8 @@ name: cosign-verify
 on:
   workflow_call:
   push:
-    branches: [ main ]
-    paths: [ 'release/**' ]
+    branches: [main]
+    paths: ["release/**"]
 jobs:
   verify:
     runs-on: ubuntu-latest

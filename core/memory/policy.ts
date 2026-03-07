@@ -4,10 +4,7 @@ import { MemoryScope, MemoryRecord, MemoryPolicyDecision } from "./types";
  * Evaluates whether a memory record can be read given a specific request scope.
  * Implements deny-by-default, purpose limitation, and context partitioning.
  */
-export function canRead(
-  request: MemoryScope,
-  record: MemoryRecord
-): MemoryPolicyDecision {
+export function canRead(request: MemoryScope, record: MemoryRecord): MemoryPolicyDecision {
   const now = Date.now();
 
   // 1. Check User ID (Isolation)

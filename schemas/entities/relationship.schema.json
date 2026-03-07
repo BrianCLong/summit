@@ -1,0 +1,39 @@
+{
+  "$id": "https://summit.local/schemas/entities/relationship.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Normalized Relationship",
+  "type": "object",
+  "properties": {
+    "relationship_id": { "type": "string" },
+    "source_entity_id": { "type": "string" },
+    "target_entity_id": { "type": "string" },
+    "relationship_type": { "type": "string" },
+    "attributes": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "source_refs": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+    "valid_time": {
+      "type": "object",
+      "properties": {
+        "start": { "type": ["string", "null"] },
+        "end": { "type": ["string", "null"] }
+      },
+      "required": ["start", "end"]
+    }
+  },
+  "required": [
+    "relationship_id",
+    "source_entity_id",
+    "target_entity_id",
+    "relationship_type",
+    "attributes",
+    "source_refs",
+    "confidence",
+    "valid_time"
+  ]
+}

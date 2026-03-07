@@ -16,14 +16,18 @@ The supply chain security pipeline consists of the following stages:
 ## Workflows
 
 ### 1. `slsa-l3-provenance.yml`
+
 This is the primary CI/CD workflow for security. It:
+
 - Builds `intelgraph-server` and `intelgraph-web` images.
 - Generates attestations for both.
 - Scans for vulnerabilities.
 - Verifies the signatures before "releasing" (conceptually).
 
 ### 2. `slsa-l3-airgap-build.yml`
+
 Designed for high-security environments, this workflow:
+
 - Builds artifacts and packages them into a tarball bundle.
 - Includes standalone verification tools (`cosign`, `slsa-verifier`).
 - Generates a manifest with hashes for all components.
@@ -56,18 +60,19 @@ You can generate SBOMs locally using the helper script:
 
 ## Compliance Checklist (SLSA L3)
 
-| Requirement | Implementation |
-|-------------|----------------|
-| **Verified History** | Git commit signing enforced. |
-| **Retained 18mo** | GitHub Actions logs retained. |
-| **Isolated** | GitHub Hosted Runners + Docker Buildx. |
-| **Provenance** | Generated via `slsa-github-generator` / `build-push-action`. |
-| **Ephemerality** | Fresh VM for every build. |
-| **Parameterless** | Build script defined in repo (Dockerfile). |
+| Requirement          | Implementation                                               |
+| -------------------- | ------------------------------------------------------------ |
+| **Verified History** | Git commit signing enforced.                                 |
+| **Retained 18mo**    | GitHub Actions logs retained.                                |
+| **Isolated**         | GitHub Hosted Runners + Docker Buildx.                       |
+| **Provenance**       | Generated via `slsa-github-generator` / `build-push-action`. |
+| **Ephemerality**     | Fresh VM for every build.                                    |
+| **Parameterless**    | Build script defined in repo (Dockerfile).                   |
 
 ## Air-Gap Deployment
 
 For air-gapped environments:
+
 1. Trigger the `slsa-l3-airgap-build.yml` workflow.
 2. Download the `airgap-bundle` artifact.
 3. Verify hashes matching the manifest.

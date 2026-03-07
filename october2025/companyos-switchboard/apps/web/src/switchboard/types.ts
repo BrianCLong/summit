@@ -1,7 +1,12 @@
-import { z } from 'zod';
+import { z } from "zod";
 
-export type SwitchboardSource = 'client' | 'scheduler' | 'webhook' | 'system';
-export type SwitchboardTarget = 'intelgraph' | 'companyos' | 'activities' | 'agent-gateway' | 'other';
+export type SwitchboardSource = "client" | "scheduler" | "webhook" | "system";
+export type SwitchboardTarget =
+  | "intelgraph"
+  | "companyos"
+  | "activities"
+  | "agent-gateway"
+  | "other";
 
 export interface SwitchboardContext {
   requestId: string;

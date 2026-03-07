@@ -1,6 +1,6 @@
-import { getDistance } from 'geolib';
-import { DateTime } from 'luxon';
-import type { EntityRecord, ERFeatures } from '../types.js';
+import { getDistance } from "geolib";
+import { DateTime } from "luxon";
+import type { EntityRecord, ERFeatures } from "../types.js";
 
 /**
  * Text tokenization for Jaccard similarity
@@ -8,7 +8,7 @@ import type { EntityRecord, ERFeatures } from '../types.js';
 export function tokenize(text: string): string[] {
   return text
     .toLowerCase()
-    .replace(/[^a-z0-9\s]/g, ' ')
+    .replace(/[^a-z0-9\s]/g, " ")
     .split(/\s+/)
     .filter(Boolean);
 }
@@ -28,16 +28,26 @@ export function jaccardSimilarity(a: string[], b: string[]): number {
  * Calculate Levenshtein distance between two strings
  */
 function levenshteinDistance(a: string, b: string): number {
-  if (a === b) {return 0;}
-  if (a.length === 0) {return b.length;}
-  if (b.length === 0) {return a.length;}
+  if (a === b) {
+    return 0;
+  }
+  if (a.length === 0) {
+    return b.length;
+  }
+  if (b.length === 0) {
+    return a.length;
+  }
 
   const matrix: number[][] = Array.from({ length: a.length + 1 }, () =>
-    Array(b.length + 1).fill(0),
+    Array(b.length + 1).fill(0)
   );
 
-  for (let i = 0; i <= a.length; i++) {matrix[i][0] = i;}
-  for (let j = 0; j <= b.length; j++) {matrix[0][j] = j;}
+  for (let i = 0; i <= a.length; i++) {
+    matrix[i][0] = i;
+  }
+  for (let j = 0; j <= b.length; j++) {
+    matrix[0][j] = j;
+  }
 
   for (let i = 1; i <= a.length; i++) {
     for (let j = 1; j <= b.length; j++) {
@@ -45,7 +55,7 @@ function levenshteinDistance(a: string, b: string): number {
       matrix[i][j] = Math.min(
         matrix[i - 1][j] + 1,
         matrix[i][j - 1] + 1,
-        matrix[i - 1][j - 1] + cost,
+        matrix[i - 1][j - 1] + cost
       );
     }
   }
@@ -57,7 +67,9 @@ function levenshteinDistance(a: string, b: string): number {
  * Normalized Levenshtein distance (0 = different, 1 = identical)
  */
 export function normalizedLevenshtein(a: string, b: string): number {
-  if (a === b) {return 1;}
+  if (a === b) {
+    return 1;
+  }
   const distance = levenshteinDistance(a.toLowerCase(), b.toLowerCase());
   return 1 - distance / Math.max(a.length, b.length, 1);
 }
@@ -66,12 +78,14 @@ export function normalizedLevenshtein(a: string, b: string): number {
  * Simplified Soundex-like phonetic encoding
  */
 export function phoneticSignature(text: string): string {
-  const cleaned = text.toLowerCase().replace(/[^a-z]/g, '');
-  if (!cleaned) {return '';}
+  const cleaned = text.toLowerCase().replace(/[^a-z]/g, "");
+  if (!cleaned) {
+    return "";
+  }
 
   const first = cleaned[0];
-  const consonants = cleaned.replace(/[aeiou]/g, '');
-  return `${first}${consonants.slice(0, 3).padEnd(3, '0')}`;
+  const consonants = cleaned.replace(/[aeiou]/g, "");
+  return `${first}${consonants.slice(0, 3).padEnd(3, "0")}`;
 }
 
 /**
@@ -79,7 +93,7 @@ export function phoneticSignature(text: string): string {
  */
 export function calculateNameSimilarity(
   entityA: EntityRecord,
-  entityB: EntityRecord,
+  entityB: EntityRecord
 ): {
   nameSimilarity: number;
   nameJaccard: number;
@@ -102,7 +116,7 @@ export function calculateNameSimilarity(
       for (const aliasB of entityB.aliases) {
         const score = Math.max(
           jaccardSimilarity(tokenize(aliasA), tokenize(aliasB)),
-          normalizedLevenshtein(aliasA, aliasB),
+          normalizedLevenshtein(aliasA, aliasB)
         );
         aliasScores.push(score);
       }
@@ -138,10 +152,7 @@ export function calculateNameSimilarity(
 /**
  * Calculate property overlap between two entities
  */
-export function calculatePropertyOverlap(
-  entityA: EntityRecord,
-  entityB: EntityRecord,
-): number {
+export function calculatePropertyOverlap(entityA: EntityRecord, entityB: EntityRecord): number {
   const keysA = Object.keys(entityA.attributes);
   const keysB = Object.keys(entityB.attributes);
   const overlap = keysA.filter((key) => keysB.includes(key));
@@ -151,14 +162,8 @@ export function calculatePropertyOverlap(
 /**
  * Calculate semantic similarity based on matching attribute values
  */
-export function calculateSemanticSimilarity(
-  entityA: EntityRecord,
-  entityB: EntityRecord,
-): number {
-  const keys = new Set([
-    ...Object.keys(entityA.attributes),
-    ...Object.keys(entityB.attributes),
-  ]);
+export function calculateSemanticSimilarity(entityA: EntityRecord, entityB: EntityRecord): number {
+  const keys = new Set([...Object.keys(entityA.attributes), ...Object.keys(entityB.attributes)]);
 
   let matches = 0;
   for (const key of keys) {
@@ -175,10 +180,7 @@ export function calculateSemanticSimilarity(
 /**
  * Calculate geographic proximity (0 = far apart, 1 = same location)
  */
-export function calculateGeographicProximity(
-  entityA: EntityRecord,
-  entityB: EntityRecord,
-): number {
+export function calculateGeographicProximity(entityA: EntityRecord, entityB: EntityRecord): number {
   if (!entityA.locations?.length || !entityB.locations?.length) {
     return 0;
   }
@@ -189,7 +191,7 @@ export function calculateGeographicProximity(
     for (const locB of entityB.locations) {
       const dist = getDistance(
         { latitude: locA.lat, longitude: locA.lon },
-        { latitude: locB.lat, longitude: locB.lon },
+        { latitude: locB.lat, longitude: locB.lon }
       );
       minDistance = Math.min(minDistance, dist);
     }
@@ -204,10 +206,7 @@ export function calculateGeographicProximity(
 /**
  * Calculate location overlap (shared locations)
  */
-export function calculateLocationOverlap(
-  entityA: EntityRecord,
-  entityB: EntityRecord,
-): number {
+export function calculateLocationOverlap(entityA: EntityRecord, entityB: EntityRecord): number {
   if (!entityA.locations?.length || !entityB.locations?.length) {
     return 0;
   }
@@ -219,7 +218,7 @@ export function calculateLocationOverlap(
     for (const locB of entityB.locations) {
       const dist = getDistance(
         { latitude: locA.lat, longitude: locA.lon },
-        { latitude: locB.lat, longitude: locB.lon },
+        { latitude: locB.lat, longitude: locB.lon }
       );
       if (dist <= threshold) {
         overlaps++;
@@ -236,20 +235,20 @@ export function calculateLocationOverlap(
  */
 export function calculateTemporalCoOccurrence(
   entityA: EntityRecord,
-  entityB: EntityRecord,
+  entityB: EntityRecord
 ): number {
   if (!entityA.timestamps?.length || !entityB.timestamps?.length) {
     return 0;
   }
 
-  const datesA = entityA.timestamps.map(t => DateTime.fromISO(t));
-  const datesB = entityB.timestamps.map(t => DateTime.fromISO(t));
+  const datesA = entityA.timestamps.map((t) => DateTime.fromISO(t));
+  const datesB = entityB.timestamps.map((t) => DateTime.fromISO(t));
 
   // Check for timestamps within 1 hour of each other
   let coOccurrences = 0;
   for (const dateA of datesA) {
     for (const dateB of datesB) {
-      const diffHours = Math.abs(dateA.diff(dateB, 'hours').hours);
+      const diffHours = Math.abs(dateA.diff(dateB, "hours").hours);
       if (diffHours <= 1) {
         coOccurrences++;
       }
@@ -263,17 +262,14 @@ export function calculateTemporalCoOccurrence(
 /**
  * Calculate device ID match (Jaccard similarity of device ID sets)
  */
-export function calculateDeviceIdMatch(
-  entityA: EntityRecord,
-  entityB: EntityRecord,
-): number {
+export function calculateDeviceIdMatch(entityA: EntityRecord, entityB: EntityRecord): number {
   if (!entityA.deviceIds?.length || !entityB.deviceIds?.length) {
     return 0;
   }
 
   const setA = new Set(entityA.deviceIds);
   const setB = new Set(entityB.deviceIds);
-  const intersection = [...setA].filter(id => setB.has(id));
+  const intersection = [...setA].filter((id) => setB.has(id));
   const union = new Set([...setA, ...setB]);
 
   return intersection.length / union.size;
@@ -282,17 +278,14 @@ export function calculateDeviceIdMatch(
 /**
  * Calculate account ID match
  */
-export function calculateAccountIdMatch(
-  entityA: EntityRecord,
-  entityB: EntityRecord,
-): number {
+export function calculateAccountIdMatch(entityA: EntityRecord, entityB: EntityRecord): number {
   if (!entityA.accountIds?.length || !entityB.accountIds?.length) {
     return 0;
   }
 
   const setA = new Set(entityA.accountIds);
   const setB = new Set(entityB.accountIds);
-  const intersection = [...setA].filter(id => setB.has(id));
+  const intersection = [...setA].filter((id) => setB.has(id));
   const union = new Set([...setA, ...setB]);
 
   return intersection.length / union.size;
@@ -301,17 +294,14 @@ export function calculateAccountIdMatch(
 /**
  * Calculate IP address overlap
  */
-export function calculateIpAddressOverlap(
-  entityA: EntityRecord,
-  entityB: EntityRecord,
-): number {
+export function calculateIpAddressOverlap(entityA: EntityRecord, entityB: EntityRecord): number {
   if (!entityA.ipAddresses?.length || !entityB.ipAddresses?.length) {
     return 0;
   }
 
   const setA = new Set(entityA.ipAddresses);
   const setB = new Set(entityB.ipAddresses);
-  const intersection = [...setA].filter(ip => setB.has(ip));
+  const intersection = [...setA].filter((ip) => setB.has(ip));
 
   return intersection.length / Math.max(setA.size, setB.size);
 }
@@ -319,10 +309,7 @@ export function calculateIpAddressOverlap(
 /**
  * Extract all features for a pair of entities
  */
-export function extractFeatures(
-  entityA: EntityRecord,
-  entityB: EntityRecord,
-): ERFeatures {
+export function extractFeatures(entityA: EntityRecord, entityB: EntityRecord): ERFeatures {
   const nameFeatures = calculateNameSimilarity(entityA, entityB);
 
   return {

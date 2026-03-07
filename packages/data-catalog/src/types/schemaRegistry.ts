@@ -3,31 +3,31 @@
  * Types for managing schemas, versioning, and evolution
  */
 
-import { z } from 'zod';
+import { z } from "zod";
 
 /**
  * Schema Type
  */
 export enum SchemaType {
-  CONNECTOR = 'CONNECTOR', // Raw schema from connector
-  CANONICAL = 'CANONICAL', // Canonical/normalized schema
-  MAPPING = 'MAPPING', // Mapping definition schema
-  AVRO = 'AVRO',
-  JSON_SCHEMA = 'JSON_SCHEMA',
-  PROTOBUF = 'PROTOBUF',
-  OPENAPI = 'OPENAPI',
-  GRAPHQL = 'GRAPHQL',
-  CUSTOM = 'CUSTOM',
+  CONNECTOR = "CONNECTOR", // Raw schema from connector
+  CANONICAL = "CANONICAL", // Canonical/normalized schema
+  MAPPING = "MAPPING", // Mapping definition schema
+  AVRO = "AVRO",
+  JSON_SCHEMA = "JSON_SCHEMA",
+  PROTOBUF = "PROTOBUF",
+  OPENAPI = "OPENAPI",
+  GRAPHQL = "GRAPHQL",
+  CUSTOM = "CUSTOM",
 }
 
 /**
  * Schema Status
  */
 export enum SchemaStatus {
-  DRAFT = 'DRAFT',
-  ACTIVE = 'ACTIVE',
-  DEPRECATED = 'DEPRECATED',
-  ARCHIVED = 'ARCHIVED',
+  DRAFT = "DRAFT",
+  ACTIVE = "ACTIVE",
+  DEPRECATED = "DEPRECATED",
+  ARCHIVED = "ARCHIVED",
 }
 
 /**
@@ -35,13 +35,13 @@ export enum SchemaStatus {
  * For schema evolution rules
  */
 export enum CompatibilityMode {
-  NONE = 'NONE', // No compatibility checks
-  BACKWARD = 'BACKWARD', // New schema can read old data
-  FORWARD = 'FORWARD', // Old schema can read new data
-  FULL = 'FULL', // Both backward and forward compatible
-  BACKWARD_TRANSITIVE = 'BACKWARD_TRANSITIVE',
-  FORWARD_TRANSITIVE = 'FORWARD_TRANSITIVE',
-  FULL_TRANSITIVE = 'FULL_TRANSITIVE',
+  NONE = "NONE", // No compatibility checks
+  BACKWARD = "BACKWARD", // New schema can read old data
+  FORWARD = "FORWARD", // Old schema can read new data
+  FULL = "FULL", // Both backward and forward compatible
+  BACKWARD_TRANSITIVE = "BACKWARD_TRANSITIVE",
+  FORWARD_TRANSITIVE = "FORWARD_TRANSITIVE",
+  FULL_TRANSITIVE = "FULL_TRANSITIVE",
 }
 
 /**
@@ -145,14 +145,14 @@ export interface FieldConstraint {
  * Constraint Type
  */
 export enum ConstraintType {
-  REQUIRED = 'REQUIRED',
-  MIN_LENGTH = 'MIN_LENGTH',
-  MAX_LENGTH = 'MAX_LENGTH',
-  MIN_VALUE = 'MIN_VALUE',
-  MAX_VALUE = 'MAX_VALUE',
-  PATTERN = 'PATTERN',
-  ENUM = 'ENUM',
-  CUSTOM = 'CUSTOM',
+  REQUIRED = "REQUIRED",
+  MIN_LENGTH = "MIN_LENGTH",
+  MAX_LENGTH = "MAX_LENGTH",
+  MIN_VALUE = "MIN_VALUE",
+  MAX_VALUE = "MAX_VALUE",
+  PATTERN = "PATTERN",
+  ENUM = "ENUM",
+  CUSTOM = "CUSTOM",
 }
 
 /**
@@ -187,15 +187,15 @@ export interface SchemaChange {
  * Schema Change Type
  */
 export enum SchemaChangeType {
-  FIELD_ADDED = 'FIELD_ADDED',
-  FIELD_REMOVED = 'FIELD_REMOVED',
-  FIELD_RENAMED = 'FIELD_RENAMED',
-  TYPE_CHANGED = 'TYPE_CHANGED',
-  CONSTRAINT_ADDED = 'CONSTRAINT_ADDED',
-  CONSTRAINT_REMOVED = 'CONSTRAINT_REMOVED',
-  DEFAULT_CHANGED = 'DEFAULT_CHANGED',
-  NULLABLE_CHANGED = 'NULLABLE_CHANGED',
-  OTHER = 'OTHER',
+  FIELD_ADDED = "FIELD_ADDED",
+  FIELD_REMOVED = "FIELD_REMOVED",
+  FIELD_RENAMED = "FIELD_RENAMED",
+  TYPE_CHANGED = "TYPE_CHANGED",
+  CONSTRAINT_ADDED = "CONSTRAINT_ADDED",
+  CONSTRAINT_REMOVED = "CONSTRAINT_REMOVED",
+  DEFAULT_CHANGED = "DEFAULT_CHANGED",
+  NULLABLE_CHANGED = "NULLABLE_CHANGED",
+  OTHER = "OTHER",
 }
 
 /**
@@ -216,7 +216,7 @@ export interface CompatibilityError {
   code: string;
   message: string;
   path: string;
-  severity: 'ERROR' | 'WARNING';
+  severity: "ERROR" | "WARNING";
 }
 
 /**
@@ -261,9 +261,9 @@ export interface SchemaEvolutionRequest {
  * Version Type
  */
 export enum VersionType {
-  MAJOR = 'MAJOR',
-  MINOR = 'MINOR',
-  PATCH = 'PATCH',
+  MAJOR = "MAJOR",
+  MINOR = "MINOR",
+  PATCH = "PATCH",
 }
 
 /**
@@ -307,10 +307,10 @@ export interface SchemaDependency {
  * Dependency Type
  */
 export enum DependencyType {
-  IMPORTS = 'IMPORTS',
-  REFERENCES = 'REFERENCES',
-  EXTENDS = 'EXTENDS',
-  IMPLEMENTS = 'IMPLEMENTS',
+  IMPORTS = "IMPORTS",
+  REFERENCES = "REFERENCES",
+  EXTENDS = "EXTENDS",
+  IMPLEMENTS = "IMPLEMENTS",
 }
 
 /**

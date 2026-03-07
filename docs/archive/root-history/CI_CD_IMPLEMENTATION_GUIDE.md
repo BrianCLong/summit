@@ -32,6 +32,7 @@ This implementation delivers **Phase 1 (Quick Wins)** optimizations to the CI/CD
 ### 1. Parallel Lane Architecture (ci.yml)
 
 **Before**: Sequential execution with redundant Node matrix
+
 ```
 build-test (Node 18.x) → golden-path
 build-test (Node 20.x) →
@@ -39,6 +40,7 @@ Total: ~15-20 minutes
 ```
 
 **After**: Parallel lanes with targeted execution
+
 ```
 fast-checks (lint, typecheck) ──┐
 build-test (build, tests)       ├─→ golden-path
@@ -48,6 +50,7 @@ Total: ~8-12 minutes (estimated)
 ```
 
 **Impact**:
+
 - ✅ Faster feedback (lint/typecheck in ~3-4 min)
 - ✅ No blocking on security scans
 - ✅ Compatibility testing doesn't block merge
@@ -63,6 +66,7 @@ concurrency:
 ```
 
 **Impact**:
+
 - ✅ Automatic cancellation of superseded runs
 - ✅ Reduced runner time waste on stale commits
 
@@ -81,6 +85,7 @@ Enabled cross-run cache sharing:
 ```
 
 **Impact**:
+
 - ✅ Build artifacts cached between runs
 - ✅ 2-4 minute savings on repeated builds
 
@@ -89,19 +94,22 @@ Enabled cross-run cache sharing:
 Migrated `server-ci.yml` from npm to pnpm:
 
 **Before**:
+
 ```yaml
-cache: 'npm'
-cache-dependency-path: 'server/package-lock.json'
+cache: "npm"
+cache-dependency-path: "server/package-lock.json"
 run: npm ci
 ```
 
 **After**:
+
 ```yaml
-cache: 'pnpm'
+cache: "pnpm"
 run: pnpm install --frozen-lockfile
 ```
 
 **Impact**:
+
 - ✅ Aligns with project standards (CLAUDE.md)
 - ✅ 1-2 minute faster installs
 - ✅ Better caching efficiency
@@ -110,10 +118,12 @@ run: pnpm install --frozen-lockfile
 
 **Before**: All jobs run on Node 18.x and 20.x
 **After**:
+
 - Core jobs use Node 20.x only
 - Compatibility testing runs separately (non-blocking)
 
 **Impact**:
+
 - ✅ 50% reduction in redundant test runs
 - ✅ 4-6 minute savings
 
@@ -129,6 +139,7 @@ Fixed unbounded cache growth:
 ```
 
 **Impact**:
+
 - ✅ Prevents cache bloat
 - ✅ Consistent cache performance
 
@@ -150,15 +161,12 @@ Added better task configuration:
       "cache": true
     }
   },
-  "globalDependencies": [
-    "tsconfig.json",
-    ".eslintrc.*",
-    "jest.config.*"
-  ]
+  "globalDependencies": ["tsconfig.json", ".eslintrc.*", "jest.config.*"]
 }
 ```
 
 **Impact**:
+
 - ✅ Better cache invalidation
 - ✅ More accurate dependency tracking
 
@@ -167,14 +175,16 @@ Added better task configuration:
 Created `.github/actions/setup-pnpm/action.yml` to centralize setup:
 
 **Usage**:
+
 ```yaml
 - uses: ./.github/actions/setup-pnpm
   with:
-    node-version: '20.x'
+    node-version: "20.x"
     enable-turbo-cache: true
 ```
 
 **Impact**:
+
 - ✅ Reduced workflow duplication
 - ✅ Easier maintenance
 - ✅ Consistent caching across workflows
@@ -239,7 +249,7 @@ jobs:
       # Use composite action instead of manual setup
       - uses: ./.github/actions/setup-pnpm
         with:
-          node-version: '20.x'
+          node-version: "20.x"
           enable-turbo-cache: true
 
       # Your workflow steps here
@@ -254,7 +264,7 @@ All workflows should have:
 ```yaml
 concurrency:
   group: <workflow-name>-${{ github.head_ref || github.sha }}
-  cancel-in-progress: true  # false for releases
+  cancel-in-progress: true # false for releases
 ```
 
 ### Turbo Cache Integration
@@ -273,20 +283,21 @@ For any workflow that builds:
 
 ### Time Savings Breakdown
 
-| Optimization | Time Saved | Status |
-|-------------|-----------|--------|
-| Parallel lanes | 5-7 min | ✅ Implemented |
-| Remove Node matrix | 4-6 min | ✅ Implemented |
-| Concurrency controls | 0-10 min (variable) | ✅ Implemented |
-| Turbo remote cache | 2-4 min | ✅ Implemented |
-| pnpm optimization | 1-2 min | ✅ Implemented |
-| Docker cache rotation | 0-1 min | ✅ Implemented |
+| Optimization          | Time Saved          | Status         |
+| --------------------- | ------------------- | -------------- |
+| Parallel lanes        | 5-7 min             | ✅ Implemented |
+| Remove Node matrix    | 4-6 min             | ✅ Implemented |
+| Concurrency controls  | 0-10 min (variable) | ✅ Implemented |
+| Turbo remote cache    | 2-4 min             | ✅ Implemented |
+| pnpm optimization     | 1-2 min             | ✅ Implemented |
+| Docker cache rotation | 0-1 min             | ✅ Implemented |
 
 **Total Estimated Savings**: 30-40% (12-30 minutes → 8-12 minutes)
 
 ### Before vs After Comparison
 
 #### Before (Current State)
+
 ```
 PR Push → CI Starts
 ├─ build-test (Node 18.x): ~12-15 min
@@ -304,6 +315,7 @@ Total: ~20-25 minutes
 ```
 
 #### After (Optimized)
+
 ```
 PR Push → CI Starts
 ├─ fast-checks: ~3-4 min
@@ -329,6 +341,7 @@ Total Critical Path: ~8-10 minutes
 ### Before Merging
 
 1. **Validate YAML Syntax**
+
    ```bash
    # Install actionlint
    brew install actionlint  # or your package manager
@@ -341,6 +354,7 @@ Total Critical Path: ~8-10 minutes
    ```
 
 2. **Test Composite Action Locally**
+
    ```bash
    # Use act to test workflows locally
    brew install act
@@ -381,6 +395,7 @@ After deployment, monitor:
 If issues arise, rollback is simple:
 
 1. **Revert ci.yml changes**
+
    ```bash
    git checkout main -- .github/workflows/ci.yml
    ```
@@ -425,11 +440,13 @@ If issues arise, rollback is simple:
 ### Implementation Priority
 
 **Phase 2A** (Medium effort, high value):
+
 - Registry Docker caching
 - Test sharding
 - Affected detection
 
 **Phase 2B** (Higher effort, good value):
+
 - Pre-built base images
 - Workflow consolidation
 - Advanced monitoring
@@ -447,6 +464,7 @@ If issues arise, rollback is simple:
 ### When to Update
 
 Update workflows when:
+
 - Node.js version changes (update NODE_VERSION env var)
 - pnpm version changes (update composite action)
 - New critical path added (add to golden-path job)
@@ -459,6 +477,7 @@ Update workflows when:
 ### Common Issues
 
 **Issue**: Cache not being restored
+
 ```yaml
 # Check cache key in logs
 # Verify pnpm-lock.yaml is committed
@@ -466,6 +485,7 @@ Update workflows when:
 ```
 
 **Issue**: Turbo cache misses
+
 ```yaml
 # Verify globalDependencies in turbo.json
 # Check outputs are correctly specified
@@ -473,6 +493,7 @@ Update workflows when:
 ```
 
 **Issue**: Parallel jobs timing out
+
 ```yaml
 # Increase timeout-minutes if needed
 # Check for resource contention

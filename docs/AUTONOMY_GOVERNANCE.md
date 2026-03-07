@@ -14,14 +14,16 @@ This document defines the governance framework for autonomous agents within the 
 ## Enforcement Mechanisms
 
 ### Sandbox Boundaries
-*   **Containerization**: Execution occurs in ephemeral Docker containers (`alpine:3.18`).
-*   **Network**: Default is `none`. Whitelisting supported but guarded.
-*   **Filesystem**: Read-only root, ephemeral `/work` directory.
-*   **System Calls**: Restricted via `seccomp` profiles (default drop, explicit allow).
+
+- **Containerization**: Execution occurs in ephemeral Docker containers (`alpine:3.18`).
+- **Network**: Default is `none`. Whitelisting supported but guarded.
+- **Filesystem**: Read-only root, ephemeral `/work` directory.
+- **System Calls**: Restricted via `seccomp` profiles (default drop, explicit allow).
 
 ### Content Filtering
-*   **Output Scanning**: Real-time regex scanning for secrets and credentials.
-*   **Protocol Validation**: Strict URL scheme validation to prevent SSRF.
+
+- **Output Scanning**: Real-time regex scanning for secrets and credentials.
+- **Protocol Validation**: Strict URL scheme validation to prevent SSRF.
 
 ## Escalation
 

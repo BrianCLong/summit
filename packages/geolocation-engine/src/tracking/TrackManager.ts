@@ -3,13 +3,13 @@
  * TRAINING/SIMULATION ONLY
  */
 
-import { v4 as uuid } from 'uuid';
-import { GeolocationResult } from '../tdoa/TDOALocator';
+import { v4 as uuid } from "uuid";
+import { GeolocationResult } from "../tdoa/TDOALocator";
 
 export interface Track {
   id: string;
   targetId: string;
-  status: 'tentative' | 'confirmed' | 'lost' | 'deleted';
+  status: "tentative" | "confirmed" | "lost" | "deleted";
 
   // Current state
   position: {
@@ -19,9 +19,9 @@ export interface Track {
     accuracy: number;
   };
   velocity: {
-    speed: number;     // m/s
-    heading: number;   // degrees from north
-    climb?: number;    // m/s vertical
+    speed: number; // m/s
+    heading: number; // degrees from north
+    climb?: number; // m/s vertical
   };
 
   // Track history
@@ -49,7 +49,7 @@ export interface TrackPoint {
   longitude: number;
   altitude?: number;
   accuracy: number;
-  source: 'measurement' | 'prediction' | 'interpolation';
+  source: "measurement" | "prediction" | "interpolation";
 }
 
 export interface TrackingConfig {
@@ -63,7 +63,7 @@ export interface TrackingConfig {
 export interface MovementPattern {
   id: string;
   trackId: string;
-  patternType: 'stationary' | 'linear' | 'circular' | 'erratic' | 'unknown';
+  patternType: "stationary" | "linear" | "circular" | "erratic" | "unknown";
   startTime: Date;
   endTime?: Date;
   characteristics: {
@@ -90,7 +90,7 @@ export class TrackManager {
       predictionHorizon: config.predictionHorizon || 60,
       associationThreshold: config.associationThreshold || 500,
       trackTimeout: config.trackTimeout || 300,
-      minUpdatesForConfirmation: config.minUpdatesForConfirmation || 3
+      minUpdatesForConfirmation: config.minUpdatesForConfirmation || 3,
     };
   }
 
@@ -118,31 +118,33 @@ export class TrackManager {
     const track: Track = {
       id: uuid(),
       targetId: targetId || `TARGET-${uuid().slice(0, 8)}`,
-      status: 'tentative',
+      status: "tentative",
       position: {
         latitude: location.latitude,
         longitude: location.longitude,
         altitude: location.altitude,
-        accuracy: location.accuracy.horizontal
+        accuracy: location.accuracy.horizontal,
       },
       velocity: {
         speed: 0,
-        heading: 0
+        heading: 0,
       },
-      history: [{
-        timestamp: location.timestamp,
-        latitude: location.latitude,
-        longitude: location.longitude,
-        altitude: location.altitude,
-        accuracy: location.accuracy.horizontal,
-        source: 'measurement'
-      }],
+      history: [
+        {
+          timestamp: location.timestamp,
+          latitude: location.latitude,
+          longitude: location.longitude,
+          altitude: location.altitude,
+          accuracy: location.accuracy.horizontal,
+          source: "measurement",
+        },
+      ],
       predictions: [],
       firstDetection: location.timestamp,
       lastUpdate: location.timestamp,
       updateCount: 1,
       confidence: location.confidence,
-      isSimulated: true
+      isSimulated: true,
     };
 
     this.tracks.set(track.id, track);
@@ -182,7 +184,7 @@ export class TrackManager {
       latitude: location.latitude,
       longitude: location.longitude,
       altitude: location.altitude,
-      accuracy: location.accuracy.horizontal
+      accuracy: location.accuracy.horizontal,
     };
 
     // Add to history
@@ -192,7 +194,7 @@ export class TrackManager {
       longitude: location.longitude,
       altitude: location.altitude,
       accuracy: location.accuracy.horizontal,
-      source: 'measurement'
+      source: "measurement",
     });
 
     // Trim history
@@ -206,8 +208,11 @@ export class TrackManager {
     track.confidence = (track.confidence + location.confidence) / 2;
 
     // Update status
-    if (track.status === 'tentative' && track.updateCount >= this.config.minUpdatesForConfirmation) {
-      track.status = 'confirmed';
+    if (
+      track.status === "tentative" &&
+      track.updateCount >= this.config.minUpdatesForConfirmation
+    ) {
+      track.status = "confirmed";
     }
 
     // Generate predictions
@@ -233,28 +238,30 @@ export class TrackManager {
 
       // Simple linear prediction
       const distance = track.velocity.speed * t;
-      const bearing = track.velocity.heading * Math.PI / 180;
+      const bearing = (track.velocity.heading * Math.PI) / 180;
 
       const R = 6371000;
-      const lat1 = lat * Math.PI / 180;
-      const lon1 = lon * Math.PI / 180;
+      const lat1 = (lat * Math.PI) / 180;
+      const lon1 = (lon * Math.PI) / 180;
 
       const lat2 = Math.asin(
         Math.sin(lat1) * Math.cos(distance / R) +
-        Math.cos(lat1) * Math.sin(distance / R) * Math.cos(bearing)
+          Math.cos(lat1) * Math.sin(distance / R) * Math.cos(bearing)
       );
-      const lon2 = lon1 + Math.atan2(
-        Math.sin(bearing) * Math.sin(distance / R) * Math.cos(lat1),
-        Math.cos(distance / R) - Math.sin(lat1) * Math.sin(lat2)
-      );
+      const lon2 =
+        lon1 +
+        Math.atan2(
+          Math.sin(bearing) * Math.sin(distance / R) * Math.cos(lat1),
+          Math.cos(distance / R) - Math.sin(lat1) * Math.sin(lat2)
+        );
 
       predictions.push({
         timestamp: new Date(track.lastUpdate.getTime() + t * 1000),
-        latitude: lat2 * 180 / Math.PI,
-        longitude: lon2 * 180 / Math.PI,
+        latitude: (lat2 * 180) / Math.PI,
+        longitude: (lon2 * 180) / Math.PI,
         altitude: alt ? alt + (track.velocity.climb || 0) * t : undefined,
         accuracy: track.position.accuracy * (1 + i * 0.2), // Uncertainty grows
-        source: 'prediction'
+        source: "prediction",
       });
     }
 
@@ -272,22 +279,25 @@ export class TrackManager {
     let totalDistance = 0;
     let headings: number[] = [];
 
-    let minLat = Infinity, maxLat = -Infinity;
-    let minLon = Infinity, maxLon = -Infinity;
+    let minLat = Infinity,
+      maxLat = -Infinity;
+    let minLon = Infinity,
+      maxLon = -Infinity;
 
     for (let i = 1; i < history.length; i++) {
       const prev = history[i - 1];
       const curr = history[i];
 
       totalDistance += this.calculateDistance(
-        prev.latitude, prev.longitude,
-        curr.latitude, curr.longitude
+        prev.latitude,
+        prev.longitude,
+        curr.latitude,
+        curr.longitude
       );
 
-      headings.push(this.calculateBearing(
-        prev.latitude, prev.longitude,
-        curr.latitude, curr.longitude
-      ));
+      headings.push(
+        this.calculateBearing(prev.latitude, prev.longitude, curr.latitude, curr.longitude)
+      );
 
       minLat = Math.min(minLat, curr.latitude);
       maxLat = Math.max(maxLat, curr.latitude);
@@ -297,28 +307,28 @@ export class TrackManager {
 
     const duration = (track.lastUpdate.getTime() - track.firstDetection.getTime()) / 1000;
     const avgSpeed = duration > 0 ? totalDistance / duration : 0;
-    const avgHeading = headings.length > 0
-      ? headings.reduce((a, b) => a + b, 0) / headings.length
-      : 0;
+    const avgHeading =
+      headings.length > 0 ? headings.reduce((a, b) => a + b, 0) / headings.length : 0;
 
     // Calculate heading variance
-    const headingVariance = headings.length > 1
-      ? headings.reduce((sum, h) => sum + Math.pow(h - avgHeading, 2), 0) / headings.length
-      : 0;
+    const headingVariance =
+      headings.length > 1
+        ? headings.reduce((sum, h) => sum + Math.pow(h - avgHeading, 2), 0) / headings.length
+        : 0;
 
     // Classify pattern
-    let patternType: MovementPattern['patternType'] = 'unknown';
+    let patternType: MovementPattern["patternType"] = "unknown";
     if (avgSpeed < 0.5) {
-      patternType = 'stationary';
+      patternType = "stationary";
     } else if (headingVariance < 100) {
-      patternType = 'linear';
+      patternType = "linear";
     } else if (headingVariance > 1000) {
-      patternType = 'erratic';
+      patternType = "erratic";
     } else {
       // Check for circular pattern
       const boxSize = this.calculateDistance(minLat, minLon, maxLat, maxLon);
       if (boxSize < totalDistance * 0.3) {
-        patternType = 'circular';
+        patternType = "circular";
       }
     }
 
@@ -333,8 +343,8 @@ export class TrackManager {
         averageHeading: avgHeading,
         headingVariance,
         distanceTraveled: totalDistance,
-        boundingBox: { minLat, maxLat, minLon, maxLon }
-      }
+        boundingBox: { minLat, maxLat, minLon, maxLon },
+      },
     };
   }
 
@@ -343,7 +353,7 @@ export class TrackManager {
    */
   private findTrackByTarget(targetId: string): Track | undefined {
     for (const track of this.tracks.values()) {
-      if (track.targetId === targetId && track.status !== 'deleted') {
+      if (track.targetId === targetId && track.status !== "deleted") {
         return track;
       }
     }
@@ -358,7 +368,7 @@ export class TrackManager {
     let minDistance = Infinity;
 
     for (const track of this.tracks.values()) {
-      if (track.status === 'deleted' || track.status === 'lost') continue;
+      if (track.status === "deleted" || track.status === "lost") continue;
 
       const distance = this.calculateDistance(
         track.position.latitude,
@@ -403,17 +413,17 @@ export class TrackManager {
   /**
    * Calculate distance between two points (Haversine)
    */
-  private calculateDistance(
-    lat1: number, lon1: number,
-    lat2: number, lon2: number
-  ): number {
+  private calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
     const R = 6371000;
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const dLat = ((lat2 - lat1) * Math.PI) / 180;
+    const dLon = ((lon2 - lon1) * Math.PI) / 180;
 
-    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos((lat1 * Math.PI) / 180) *
+        Math.cos((lat2 * Math.PI) / 180) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
 
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   }
@@ -421,19 +431,17 @@ export class TrackManager {
   /**
    * Calculate bearing between two points
    */
-  private calculateBearing(
-    lat1: number, lon1: number,
-    lat2: number, lon2: number
-  ): number {
-    const dLon = (lon2 - lon1) * Math.PI / 180;
-    const lat1Rad = lat1 * Math.PI / 180;
-    const lat2Rad = lat2 * Math.PI / 180;
+  private calculateBearing(lat1: number, lon1: number, lat2: number, lon2: number): number {
+    const dLon = ((lon2 - lon1) * Math.PI) / 180;
+    const lat1Rad = (lat1 * Math.PI) / 180;
+    const lat2Rad = (lat2 * Math.PI) / 180;
 
     const x = Math.sin(dLon) * Math.cos(lat2Rad);
-    const y = Math.cos(lat1Rad) * Math.sin(lat2Rad) -
+    const y =
+      Math.cos(lat1Rad) * Math.sin(lat2Rad) -
       Math.sin(lat1Rad) * Math.cos(lat2Rad) * Math.cos(dLon);
 
-    let bearing = Math.atan2(x, y) * 180 / Math.PI;
+    let bearing = (Math.atan2(x, y) * 180) / Math.PI;
     return (bearing + 360) % 360;
   }
 
@@ -444,12 +452,12 @@ export class TrackManager {
     const now = Date.now();
 
     for (const track of this.tracks.values()) {
-      if (track.status === 'deleted') continue;
+      if (track.status === "deleted") continue;
 
       const age = (now - track.lastUpdate.getTime()) / 1000;
 
       if (age > this.config.trackTimeout) {
-        track.status = 'lost';
+        track.status = "lost";
       }
     }
   }
@@ -459,8 +467,9 @@ export class TrackManager {
   }
 
   getActiveTracks(): Track[] {
-    return Array.from(this.tracks.values())
-      .filter(t => t.status === 'confirmed' || t.status === 'tentative');
+    return Array.from(this.tracks.values()).filter(
+      (t) => t.status === "confirmed" || t.status === "tentative"
+    );
   }
 
   getTrack(id: string): Track | undefined {
@@ -470,7 +479,7 @@ export class TrackManager {
   deleteTrack(id: string): void {
     const track = this.tracks.get(id);
     if (track) {
-      track.status = 'deleted';
+      track.status = "deleted";
     }
   }
 }

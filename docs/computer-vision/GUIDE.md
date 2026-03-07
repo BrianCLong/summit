@@ -76,17 +76,17 @@ pip install ultralytics mtcnn facenet-pytorch pytesseract opencv-python
 ### Basic Usage
 
 ```typescript
-import { createYOLODetector } from '@intelgraph/object-detection';
+import { createYOLODetector } from "@intelgraph/object-detection";
 
 const detector = createYOLODetector({
-  model_type: 'yolov8',
-  model_size: 'medium',
-  device: 'cuda',
+  model_type: "yolov8",
+  model_size: "medium",
+  device: "cuda",
 });
 
 await detector.initialize();
 
-const result = await detector.detect('/path/to/image.jpg');
+const result = await detector.detect("/path/to/image.jpg");
 console.log(`Found ${result.detections.length} objects`);
 ```
 
@@ -95,26 +95,26 @@ console.log(`Found ${result.detections.length} objects`);
 ### YOLO Detection
 
 ```typescript
-import { createYOLODetector } from '@intelgraph/object-detection';
+import { createYOLODetector } from "@intelgraph/object-detection";
 
 const detector = createYOLODetector({
-  model_type: 'yolov8',
-  model_size: 'medium',
+  model_type: "yolov8",
+  model_size: "medium",
   confidence_threshold: 0.5,
   nms_threshold: 0.4,
-  device: 'auto',
+  device: "auto",
 });
 
 await detector.initialize();
 
 // Single image detection
-const result = await detector.detect('/path/to/image.jpg', {
+const result = await detector.detect("/path/to/image.jpg", {
   confidenceThreshold: 0.6,
-  classes: ['person', 'car', 'truck'],
+  classes: ["person", "car", "truck"],
 });
 
 // Batch processing
-const images = ['img1.jpg', 'img2.jpg', 'img3.jpg'];
+const images = ["img1.jpg", "img2.jpg", "img3.jpg"];
 const results = await detector.processBatch(images);
 
 // Get supported classes
@@ -125,16 +125,16 @@ console.log(`Supports ${classes.length} classes`);
 ### Multi-Object Tracking
 
 ```typescript
-import { createTracker } from '@intelgraph/object-detection';
+import { createTracker } from "@intelgraph/object-detection";
 
-const tracker = createTracker('bytetrack', {
+const tracker = createTracker("bytetrack", {
   iou_threshold: 0.3,
   max_age: 30,
   min_hits: 3,
 });
 
 // Process video frames
-const frames = await loadVideoFrames('/path/to/video.mp4');
+const frames = await loadVideoFrames("/path/to/video.mp4");
 
 for (const frame of frames) {
   const detections = await detector.detect(frame);
@@ -155,7 +155,7 @@ for (const frame of frames) {
 ### Instance Segmentation
 
 ```typescript
-const instances = await detector.segmentInstances('/path/to/image.jpg');
+const instances = await detector.segmentInstances("/path/to/image.jpg");
 
 for (const instance of instances) {
   console.log(`${instance.class_name}: ${instance.confidence}`);
@@ -168,12 +168,12 @@ for (const instance of instances) {
 ### Face Detection
 
 ```typescript
-import { FaceAnalyzer } from '@intelgraph/face-analysis';
+import { FaceAnalyzer } from "@intelgraph/face-analysis";
 
-const analyzer = new FaceAnalyzer({ device: 'cuda' });
+const analyzer = new FaceAnalyzer({ device: "cuda" });
 await analyzer.initialize();
 
-const result = await analyzer.detectFaces('/path/to/image.jpg', {
+const result = await analyzer.detectFaces("/path/to/image.jpg", {
   minFaceSize: 20,
   confidenceThreshold: 0.7,
   extractEmbeddings: true,
@@ -194,16 +194,16 @@ for (const face of result.faces) {
 
 ```typescript
 // Extract face embeddings
-const embeddings1 = await analyzer.extractEmbeddings('/path/to/person1.jpg');
-const embeddings2 = await analyzer.extractEmbeddings('/path/to/person2.jpg');
+const embeddings1 = await analyzer.extractEmbeddings("/path/to/person1.jpg");
+const embeddings2 = await analyzer.extractEmbeddings("/path/to/person2.jpg");
 
 // Compare faces
-const result1 = await analyzer.detectFaces('/path/to/person1.jpg', { extractEmbeddings: true });
-const result2 = await analyzer.detectFaces('/path/to/person2.jpg', { extractEmbeddings: true });
+const result1 = await analyzer.detectFaces("/path/to/person1.jpg", { extractEmbeddings: true });
+const result2 = await analyzer.detectFaces("/path/to/person2.jpg", { extractEmbeddings: true });
 
 const similarity = await analyzer.compareFaces(result1.faces[0], result2.faces[0]);
 console.log(`Face similarity: ${(similarity * 100).toFixed(1)}%`);
-console.log(`Same person: ${similarity > 0.6 ? 'Yes' : 'No'}`);
+console.log(`Same person: ${similarity > 0.6 ? "Yes" : "No"}`);
 ```
 
 ### Face Clustering
@@ -211,7 +211,7 @@ console.log(`Same person: ${similarity > 0.6 ? 'Yes' : 'No'}`);
 ```typescript
 // Detect faces in multiple images
 const allFaces = [];
-const images = ['img1.jpg', 'img2.jpg', 'img3.jpg'];
+const images = ["img1.jpg", "img2.jpg", "img3.jpg"];
 
 for (const img of images) {
   const result = await analyzer.detectFaces(img, { extractEmbeddings: true });
@@ -232,13 +232,13 @@ for (const [clusterId, faces] of clusters) {
 ### Text Extraction
 
 ```typescript
-import { OCREngine } from '@intelgraph/ocr';
+import { OCREngine } from "@intelgraph/ocr";
 
-const ocr = new OCREngine('tesseract', { device: 'cpu' });
+const ocr = new OCREngine("tesseract", { device: "cpu" });
 await ocr.initialize();
 
-const result = await ocr.extractText('/path/to/document.jpg', {
-  languages: ['eng', 'spa', 'fra'],
+const result = await ocr.extractText("/path/to/document.jpg", {
+  languages: ["eng", "spa", "fra"],
   confidenceThreshold: 0.6,
   wordLevel: true,
 });
@@ -253,18 +253,18 @@ console.log(`Blocks: ${result.blocks.length}`);
 
 ```typescript
 // Extract structured data from receipts
-const receipt = await ocr.extractStructuredData('/path/to/receipt.jpg', 'receipt');
+const receipt = await ocr.extractStructuredData("/path/to/receipt.jpg", "receipt");
 console.log(`Merchant: ${receipt.merchant}`);
 console.log(`Total: $${receipt.total}`);
 console.log(`Items: ${receipt.items.length}`);
 
 // Extract structured data from invoices
-const invoice = await ocr.extractStructuredData('/path/to/invoice.jpg', 'invoice');
+const invoice = await ocr.extractStructuredData("/path/to/invoice.jpg", "invoice");
 console.log(`Invoice #: ${invoice.invoice_number}`);
 console.log(`Total: $${invoice.total}`);
 
 // License plate recognition
-const plate = await ocr.extractStructuredData('/path/to/plate.jpg', 'license_plate');
+const plate = await ocr.extractStructuredData("/path/to/plate.jpg", "license_plate");
 console.log(`Plate: ${plate.plate_number}`);
 ```
 
@@ -276,8 +276,8 @@ const languages = ocr.getSupportedLanguages();
 console.log(`Supported languages: ${languages.length}`);
 
 // Example: Chinese + English
-const result = await ocr.extractText('/path/to/chinese-doc.jpg', {
-  languages: ['chi_sim', 'eng'],
+const result = await ocr.extractText("/path/to/chinese-doc.jpg", {
+  languages: ["chi_sim", "eng"],
 });
 ```
 
@@ -286,19 +286,15 @@ const result = await ocr.extractText('/path/to/chinese-doc.jpg', {
 ### Change Detection
 
 ```typescript
-import { SatelliteAnalyzer } from '@intelgraph/satellite-imagery';
+import { SatelliteAnalyzer } from "@intelgraph/satellite-imagery";
 
-const analyzer = new SatelliteAnalyzer({ device: 'cuda' });
+const analyzer = new SatelliteAnalyzer({ device: "cuda" });
 await analyzer.initialize();
 
-const changes = await analyzer.detectChanges(
-  '/path/to/before.tif',
-  '/path/to/after.tif',
-  {
-    threshold: 0.5,
-    minAreaSqm: 100,
-  }
-);
+const changes = await analyzer.detectChanges("/path/to/before.tif", "/path/to/after.tif", {
+  threshold: 0.5,
+  minAreaSqm: 100,
+});
 
 console.log(`Change percentage: ${changes.change_percentage}%`);
 console.log(`Changed regions: ${changes.changed_regions.length}`);
@@ -311,7 +307,7 @@ for (const region of changes.changed_regions) {
 ### Land Use Classification
 
 ```typescript
-const landUse = await analyzer.classifyLandUse('/path/to/satellite.tif');
+const landUse = await analyzer.classifyLandUse("/path/to/satellite.tif");
 
 console.log(`Dominant class: ${landUse.dominant_class}`);
 for (const cls of landUse.classes) {
@@ -322,7 +318,7 @@ for (const cls of landUse.classes) {
 ### Building Detection
 
 ```typescript
-const buildings = await analyzer.detectBuildings('/path/to/urban.tif', {
+const buildings = await analyzer.detectBuildings("/path/to/urban.tif", {
   minAreaSqm: 50,
   confidenceThreshold: 0.7,
 });
@@ -335,12 +331,12 @@ console.log(`Detected ${buildings.length} buildings`);
 ### Video Processing
 
 ```typescript
-import { VideoAnalyzer } from '@intelgraph/video-analysis';
+import { VideoAnalyzer } from "@intelgraph/video-analysis";
 
-const analyzer = new VideoAnalyzer({ device: 'cuda' });
+const analyzer = new VideoAnalyzer({ device: "cuda" });
 await analyzer.initialize();
 
-const result = await analyzer.analyzeVideo('/path/to/video.mp4', {
+const result = await analyzer.analyzeVideo("/path/to/video.mp4", {
   detectActions: true,
   extractKeyFrames: true,
   trackObjects: true,
@@ -357,8 +353,8 @@ console.log(`Key frames: ${result.key_frames?.length}`);
 ### Action Recognition
 
 ```typescript
-const actions = await analyzer.detectActions('/path/to/video.mp4', {
-  actionClasses: ['walking', 'running', 'fighting'],
+const actions = await analyzer.detectActions("/path/to/video.mp4", {
+  actionClasses: ["walking", "running", "fighting"],
 });
 
 for (const action of actions) {
@@ -370,7 +366,7 @@ for (const action of actions) {
 ### Crowd Analysis
 
 ```typescript
-const crowd = await analyzer.analyzeCrowd('/path/to/crowd-video.mp4');
+const crowd = await analyzer.analyzeCrowd("/path/to/crowd-video.mp4");
 
 console.log(`Crowd count: ${crowd.crowd_count}`);
 console.log(`Density: ${crowd.crowd_density}`);
@@ -381,12 +377,12 @@ console.log(`Density: ${crowd.crowd_density}`);
 ### Manipulation Detection
 
 ```typescript
-import { ForensicsAnalyzer } from '@intelgraph/image-forensics';
+import { ForensicsAnalyzer } from "@intelgraph/image-forensics";
 
-const analyzer = new ForensicsAnalyzer({ device: 'cuda' });
+const analyzer = new ForensicsAnalyzer({ device: "cuda" });
 await analyzer.initialize();
 
-const result = await analyzer.detectManipulation('/path/to/image.jpg');
+const result = await analyzer.detectManipulation("/path/to/image.jpg");
 
 console.log(`Authentic: ${result.is_authentic}`);
 console.log(`Confidence: ${(result.confidence * 100).toFixed(1)}%`);
@@ -394,15 +390,15 @@ console.log(`Manipulations found: ${result.manipulations.length}`);
 
 for (const manip of result.manipulations) {
   console.log(`  ${manip.manipulation_type}: ${(manip.confidence * 100).toFixed(1)}%`);
-  console.log(`  Evidence: ${manip.evidence.join(', ')}`);
+  console.log(`  Evidence: ${manip.evidence.join(", ")}`);
 }
 ```
 
 ### Deepfake Detection
 
 ```typescript
-const deepfake = await analyzer.detectDeepfake('/path/to/suspect.jpg', {
-  methods: ['xception', 'efficientnet', 'capsule'],
+const deepfake = await analyzer.detectDeepfake("/path/to/suspect.jpg", {
+  methods: ["xception", "efficientnet", "capsule"],
 });
 
 console.log(`Is deepfake: ${deepfake.is_deepfake}`);
@@ -416,7 +412,7 @@ for (const method of deepfake.detection_methods) {
 ### Metadata Analysis
 
 ```typescript
-const metadata = await analyzer.analyzeMetadata('/path/to/image.jpg', {
+const metadata = await analyzer.analyzeMetadata("/path/to/image.jpg", {
   checkConsistency: true,
 });
 
@@ -458,33 +454,33 @@ CMD ["node", "dist/index.js"]
 ```typescript
 // Enable TensorRT optimization
 const detector = createYOLODetector({
-  model_type: 'yolov8',
-  model_size: 'medium',
-  device: 'cuda',
-  fp16: true,  // Half-precision for faster inference
+  model_type: "yolov8",
+  model_size: "medium",
+  device: "cuda",
+  fp16: true, // Half-precision for faster inference
 });
 
 // Batch processing for throughput
 const results = await detector.processBatch(images, {
-  batchSize: 16,  // Process 16 images at once
+  batchSize: 16, // Process 16 images at once
 });
 ```
 
 ### Performance Monitoring
 
 ```typescript
-import { PerformanceMonitor } from '@intelgraph/computer-vision';
+import { PerformanceMonitor } from "@intelgraph/computer-vision";
 
 const monitor = new PerformanceMonitor();
 
 const timer = monitor.start();
-const result = await detector.detect('/path/to/image.jpg');
+const result = await detector.detect("/path/to/image.jpg");
 const metrics = timer.end();
 
-monitor.record('yolov8m', metrics);
+monitor.record("yolov8m", metrics);
 
 // Get average metrics
-const avgMetrics = monitor.getAverageMetrics('yolov8m');
+const avgMetrics = monitor.getAverageMetrics("yolov8m");
 console.log(`Average inference time: ${avgMetrics?.inference_time_ms}ms`);
 console.log(`Throughput: ${avgMetrics?.throughput_fps} FPS`);
 ```

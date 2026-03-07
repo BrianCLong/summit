@@ -47,7 +47,7 @@ alter table if exists bandit_signals add column if not exists extractor_precisio
 
 ```ts
 // services/web-orchestrator/src/budgetManager.ts
-import { db } from './db';
+import { db } from "./db";
 export async function checkAndIncrement(tenantId: string, bytes: number) {
   const day = new Date().toISOString().slice(0, 10);
   const { rows } = await db.query(
@@ -62,31 +62,30 @@ export async function checkAndIncrement(tenantId: string, bytes: number) {
     ) select up.requests, up.bytes, b.daily_request_limit, b.daily_byte_limit, b.soft_threshold_pct
       from up join tenant_budgets b on b.tenant_id=$1
   `,
-    [tenantId, day, bytes],
+    [tenantId, day, bytes]
   );
   const r = rows[0];
   const reqPct = (r.requests / r.daily_request_limit) * 100;
   const bytePct = (r.bytes / r.daily_byte_limit) * 100;
   const softHit = Math.max(reqPct, bytePct) >= r.soft_threshold_pct;
-  const hardHit =
-    r.requests > r.daily_request_limit || r.bytes > r.daily_byte_limit;
+  const hardHit = r.requests > r.daily_request_limit || r.bytes > r.daily_byte_limit;
   return { softHit, hardHit, reqPct, bytePct };
 }
 ```
 
 ```ts
 // services/web-orchestrator/src/cache.ts
-import Redis from 'ioredis';
-import crypto from 'crypto';
-const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
+import Redis from "ioredis";
+import crypto from "crypto";
+const redis = new Redis(process.env.REDIS_URL || "redis://localhost:6379");
 
 export async function cacheKey(target: string, path: string) {
   return (
-    'wf:' +
+    "wf:" +
     crypto
-      .createHash('sha1')
-      .update(target + '|' + path)
-      .digest('hex')
+      .createHash("sha1")
+      .update(target + "|" + path)
+      .digest("hex")
   );
 }
 
@@ -96,12 +95,7 @@ export async function getCached(target: string, path: string) {
   return data ? JSON.parse(data) : null;
 }
 
-export async function setCached(
-  target: string,
-  path: string,
-  value: any,
-  ttlSec = 3600,
-) {
+export async function setCached(target: string, path: string, value: any, ttlSec = 3600) {
   const key = await cacheKey(target, path);
   await redis.setex(key, ttlSec, JSON.stringify(value));
 }
@@ -109,8 +103,8 @@ export async function setCached(
 
 ```ts
 // services/web-orchestrator/src/resolvers.ts (diffs: cache + budgets + breaker)
-import { getCached, setCached } from './cache';
-import { checkAndIncrement } from './budgetManager';
+import { getCached, setCached } from "./cache";
+import { checkAndIncrement } from "./budgetManager";
 
 const CIRCUIT = new Map<string, { openUntil: number }>();
 
@@ -125,9 +119,8 @@ function tripCircuit(tenantId: string, ms: number) {
 export const resolvers = {
   Mutation: {
     enqueueWebFetch: async (_: any, { job }: any, ctx: any) => {
-      const tenantId = ctx?.tenantId || 't_default';
-      if (circuitOpen(tenantId))
-        throw new Error('Budget circuit open; try later');
+      const tenantId = ctx?.tenantId || "t_default";
+      if (circuitOpen(tenantId)) throw new Error("Budget circuit open; try later");
 
       // cache check
       const cached = await getCached(job.target, job.path);
@@ -137,7 +130,7 @@ export const resolvers = {
       // ...
 
       // publish and optimistic budget increment (bytes estimated small)
-      const id = 'wf_' + require('uuid').v4();
+      const id = "wf_" + require("uuid").v4();
       await publishFetch({ id, ...job });
       await setCached(job.target, job.path, { id }, 60); // de‑dupe burst for 60s
       return id;
@@ -237,31 +230,31 @@ groups:
         for: 5m
         labels: { severity: warning }
         annotations:
-          summary: 'Budget >80% for {{ $labels.tenant }}'
+          summary: "Budget >80% for {{ $labels.tenant }}"
       - alert: MaestroBudgetHard
         expr: max(tenant_budget_usage_pct) by (tenant) >= 100
         for: 1m
         labels: { severity: critical }
         annotations:
-          summary: 'Budget exhausted for {{ $labels.tenant }}'
+          summary: "Budget exhausted for {{ $labels.tenant }}"
       - alert: MaestroWorkerP95High
         expr: histogram_quantile(0.95, sum(rate(worker_fetch_seconds_bucket[5m])) by (le)) > 6
         for: 10m
         labels: { severity: warning }
         annotations:
-          summary: 'Worker p95 latency > 6s'
+          summary: "Worker p95 latency > 6s"
 ```
 
 **Alert webhook (Node)**
 
 ```ts
 // services/web-orchestrator/src/alerts.ts
-import fetch from 'node-fetch';
+import fetch from "node-fetch";
 export async function notify(text: string) {
   if (!process.env.SLACK_WEBHOOK) return;
   await fetch(process.env.SLACK_WEBHOOK, {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
+    method: "POST",
+    headers: { "content-type": "application/json" },
     body: JSON.stringify({ text }),
   });
 }
@@ -274,9 +267,7 @@ if (hardHit) {
   tripCircuit(tenantId, 5 * 60_000);
   notify(`Budget hard limit hit for ${tenantId}`);
 } else if (softHit) {
-  notify(
-    `Budget soft ${reqPct.toFixed(0)}%/${bytePct.toFixed(0)}% for ${tenantId}`,
-  );
+  notify(`Budget soft ${reqPct.toFixed(0)}%/${bytePct.toFixed(0)}% for ${tenantId}`);
 }
 ```
 
@@ -293,15 +284,13 @@ if (hardHit) {
 
 ```ts
 // services/web-orchestrator/src/validateTarget.ts
-import isIp from 'is-ip';
+import isIp from "is-ip";
 export function isPublicHost(host: string) {
   if (isIp(host)) {
     // block private ranges quickly
-    const n = host.split('.').map((x) => +x);
+    const n = host.split(".").map((x) => +x);
     const priv =
-      n[0] === 10 ||
-      (n[0] === 192 && n[1] === 168) ||
-      (n[0] === 172 && n[1] >= 16 && n[1] <= 31);
+      n[0] === 10 || (n[0] === 192 && n[1] === 168) || (n[0] === 172 && n[1] >= 16 && n[1] <= 31);
     return !priv;
   }
   return true;
@@ -343,9 +332,9 @@ export function isPublicHost(host: string) {
 
 ```ts
 // services/web-orchestrator/src/ui-api.ts (add)
-uiapi.get('/maestro/budgets', async (_req, res) => {
+uiapi.get("/maestro/budgets", async (_req, res) => {
   const { rows } = await db.query(
-    'select tenant_id as tenant, requests*100.0/daily_request_limit as reqPct, bytes*100.0/daily_byte_limit as bytePct from usage_counters uc join tenant_budgets tb on tb.tenant_id=uc.tenant_id where day=current_date',
+    "select tenant_id as tenant, requests*100.0/daily_request_limit as reqPct, bytes*100.0/daily_byte_limit as bytePct from usage_counters uc join tenant_budgets tb on tb.tenant_id=uc.tenant_id where day=current_date"
   );
   res.json(rows);
 });
@@ -360,13 +349,13 @@ uiapi.get('/maestro/budgets', async (_req, res) => {
 
 ```js
 // scripts/k6_day4.js
-import http from 'k6/http';
-import { check, sleep } from 'k6';
-export const options = { vus: 50, duration: '1m' };
+import http from "k6/http";
+import { check, sleep } from "k6";
+export const options = { vus: 50, duration: "1m" };
 export default function () {
   const q = `mutation{ enqueueWebFetch(job:{target:"example.com", path:"/", purpose:"docs", authorityId:"a", licenseId:"l", extractor:"article_v1"})}`;
   const res = http.post(__ENV.GQL, JSON.stringify({ query: q }), {
-    headers: { 'content-type': 'application/json' },
+    headers: { "content-type": "application/json" },
   });
   check(res, { 200: (r) => r.status === 200 });
   sleep(0.2);

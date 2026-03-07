@@ -91,12 +91,14 @@ This system treats evaluation as a **first-class production concern**, not a res
 **Purpose**: Centralized repository for evaluation scenarios and tasks
 
 **Responsibilities**:
+
 - Store and version evaluation scenarios
 - Provide CRUD API for scenario management
 - Support scenario tagging and categorization
 - Enable scenario search and filtering
 
 **API Surface**:
+
 ```typescript
 POST   /scenarios              # Create new scenario
 GET    /scenarios              # List scenarios (with filters)
@@ -116,6 +118,7 @@ GET    /scenarios/types        # List scenario types
 **Purpose**: Pluggable framework for evaluating agent outputs
 
 **Responsibilities**:
+
 - Execute scoring strategies (rule-based, LLM-judged, policy-based)
 - Combine multiple scoring approaches
 - Provide structured, comparable results
@@ -145,6 +148,7 @@ GET    /scenarios/types        # List scenario types
 **Purpose**: Orchestrate evaluation runs across scenarios and agents
 
 **Responsibilities**:
+
 - Load and prepare scenarios
 - Submit tasks to Mesh Orchestrator
 - Collect and aggregate results
@@ -152,12 +156,14 @@ GET    /scenarios/types        # List scenario types
 - Generate reports and artifacts
 
 **Execution Modes**:
+
 - **Smoke Suite**: Fast, critical path scenarios
 - **Extended Suite**: Comprehensive coverage
 - **Safety Suite**: Security and policy focus
 - **Custom Suite**: User-defined scenario sets
 
 **CLI Interface**:
+
 ```bash
 mesh-eval run --suite smoke
 mesh-eval run --suite safety --output ./artifacts/
@@ -171,12 +177,14 @@ mesh-eval run --scenarios sc-001,sc-002 --config ./eval-config.yaml
 **Purpose**: Generate synthetic scenarios and run multi-agent self-play
 
 **Responsibilities**:
+
 - Generate scenario variations and perturbations
 - Orchestrate multi-agent self-play (planner/critic/red-team)
 - Identify failure modes and edge cases
 - Build curriculum based on performance gaps
 
 **Self-Play Strategies**:
+
 - **Adversarial**: Red-team vs. policy enforcement
 - **Collaborative**: Planner + critic + verifier loops
 - **Exploratory**: Automated scenario space exploration
@@ -188,12 +196,14 @@ mesh-eval run --scenarios sc-001,sc-002 --config ./eval-config.yaml
 **Purpose**: Version and manage performance baselines
 
 **Responsibilities**:
+
 - Store versioned baseline metrics
 - Compare new runs against baselines
 - Detect and flag regressions
 - Support multiple baseline tracks (release, branch, experimental)
 
 **Baseline Types**:
+
 - **Release Baselines**: Official metrics per release
 - **Branch Baselines**: Development branch tracking
 - **Experimental Baselines**: Feature testing
@@ -205,12 +215,14 @@ mesh-eval run --scenarios sc-001,sc-002 --config ./eval-config.yaml
 **Purpose**: Convert evaluation insights into actionable improvements
 
 **Responsibilities**:
+
 - Analyze evaluation results for optimization opportunities
 - Generate policy and routing update proposals
 - Support A/B testing of configurations
 - Provide human approval workflow
 
 **Output Artifacts**:
+
 - Routing configuration updates
 - Policy rule adjustments
 - Agent weight recommendations
@@ -223,12 +235,14 @@ mesh-eval run --scenarios sc-001,sc-002 --config ./eval-config.yaml
 **Purpose**: Export evaluation metrics to observability stack
 
 **Responsibilities**:
+
 - Emit Prometheus metrics
 - Send OpenTelemetry traces
 - Generate structured logs
 - Support custom metric exporters
 
 **Key Metrics**:
+
 - `mesh_eval_scenario_pass_rate`
 - `mesh_eval_safety_violations`
 - `mesh_eval_cost_per_scenario`
@@ -250,26 +264,26 @@ Describes a task or test case for evaluation.
 
 ```typescript
 interface EvalScenario {
-  id: string;                    // Unique identifier (e.g., "sc-code-refactor-001")
-  version: string;               // Semantic version
-  type: ScenarioType;            // Scenario category
-  name: string;                  // Human-readable name
-  description: string;           // Detailed description
-  tags: string[];                // Classification tags
+  id: string; // Unique identifier (e.g., "sc-code-refactor-001")
+  version: string; // Semantic version
+  type: ScenarioType; // Scenario category
+  name: string; // Human-readable name
+  description: string; // Detailed description
+  tags: string[]; // Classification tags
 
   // Input specification
-  inputs: ScenarioInput[];       // Input artifacts and prompts
-  constraints: Constraint[];     // Execution constraints
+  inputs: ScenarioInput[]; // Input artifacts and prompts
+  constraints: Constraint[]; // Execution constraints
 
   // Evaluation specification
-  expectedOutputs?: ExpectedOutput[];  // Ground truth (if available)
-  scoringStrategy: ScoringStrategy;    // How to score this scenario
-  rubric?: EvaluationRubric;           // Scoring rubric
+  expectedOutputs?: ExpectedOutput[]; // Ground truth (if available)
+  scoringStrategy: ScoringStrategy; // How to score this scenario
+  rubric?: EvaluationRubric; // Scoring rubric
 
   // Metadata
-  difficulty: 'trivial' | 'easy' | 'medium' | 'hard' | 'expert';
-  estimatedCost: number;         // Estimated cost in USD
-  estimatedDuration: number;     // Estimated duration in ms
+  difficulty: "trivial" | "easy" | "medium" | "hard" | "expert";
+  estimatedCost: number; // Estimated cost in USD
+  estimatedDuration: number; // Estimated duration in ms
 
   createdAt: Date;
   createdBy: string;
@@ -277,26 +291,26 @@ interface EvalScenario {
 }
 
 type ScenarioType =
-  | 'code_transformation'
-  | 'incident_investigation'
-  | 'research_synthesis'
-  | 'policy_sensitive'
-  | 'export_controlled'
-  | 'adversarial_prompting'
-  | 'multi_step_reasoning'
-  | 'tool_usage'
-  | 'custom';
+  | "code_transformation"
+  | "incident_investigation"
+  | "research_synthesis"
+  | "policy_sensitive"
+  | "export_controlled"
+  | "adversarial_prompting"
+  | "multi_step_reasoning"
+  | "tool_usage"
+  | "custom";
 
 interface ScenarioInput {
-  type: 'text' | 'code' | 'file' | 'structured';
+  type: "text" | "code" | "file" | "structured";
   content: string | object;
   metadata?: Record<string, unknown>;
 }
 
 interface Constraint {
-  type: 'time_limit' | 'cost_limit' | 'policy_requirement' | 'tool_restriction';
+  type: "time_limit" | "cost_limit" | "policy_requirement" | "tool_restriction";
   value: unknown;
-  strict: boolean;  // Hard fail vs. soft warning
+  strict: boolean; // Hard fail vs. soft warning
 }
 ```
 
@@ -310,22 +324,22 @@ interface EvalConfig {
   name: string;
 
   // What to evaluate
-  scenarios: string[];           // Scenario IDs or suite name
+  scenarios: string[]; // Scenario IDs or suite name
 
   // How to evaluate
-  agents: AgentConfig[];         // Which agents to use
-  models: ModelConfig[];         // Which models to route to
-  routingPolicy?: string;        // Routing policy version
-  tools?: string[];              // Available tools
+  agents: AgentConfig[]; // Which agents to use
+  models: ModelConfig[]; // Which models to route to
+  routingPolicy?: string; // Routing policy version
+  tools?: string[]; // Available tools
 
   // Evaluation parameters
-  iterations?: number;           // Runs per scenario
-  parallelism?: number;          // Concurrent executions
-  timeout?: number;              // Global timeout
+  iterations?: number; // Runs per scenario
+  parallelism?: number; // Concurrent executions
+  timeout?: number; // Global timeout
 
   // Output configuration
   outputPath?: string;
-  reportFormat?: 'json' | 'markdown' | 'html' | 'all';
+  reportFormat?: "json" | "markdown" | "html" | "all";
 
   metadata?: Record<string, unknown>;
 }
@@ -337,33 +351,33 @@ An instance of executing an evaluation.
 
 ```typescript
 interface EvalRun {
-  id: string;                    // Unique run ID
-  configId: string;              // Reference to EvalConfig
+  id: string; // Unique run ID
+  configId: string; // Reference to EvalConfig
 
   // Execution metadata
   startedAt: Date;
   completedAt?: Date;
-  status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
+  status: "pending" | "running" | "completed" | "failed" | "cancelled";
 
   // Results
-  scenarios: ScenarioResult[];   // Results per scenario
-  summary: EvalSummary;          // Aggregate metrics
+  scenarios: ScenarioResult[]; // Results per scenario
+  summary: EvalSummary; // Aggregate metrics
 
   // Context
-  gitCommit?: string;            // Code version
+  gitCommit?: string; // Code version
   branch?: string;
-  environment: string;           // dev, staging, prod
-  triggeredBy: string;           // User or CI system
+  environment: string; // dev, staging, prod
+  triggeredBy: string; // User or CI system
 
   // Artifacts
-  artifactUrls?: string[];       // S3/storage URLs
+  artifactUrls?: string[]; // S3/storage URLs
 
   metadata?: Record<string, unknown>;
 }
 
 interface ScenarioResult {
   scenarioId: string;
-  status: 'pass' | 'fail' | 'skip' | 'error';
+  status: "pass" | "fail" | "skip" | "error";
   score: EvalScore;
   findings: EvalFinding[];
   executionTime: number;
@@ -372,7 +386,7 @@ interface ScenarioResult {
   // Detailed outputs
   agentOutputs: unknown[];
   policyEvents: PolicyEvent[];
-  provenanceTrace: string;       // Reference to provenance service
+  provenanceTrace: string; // Reference to provenance service
 }
 ```
 
@@ -394,18 +408,18 @@ interface EvalScore {
   };
 
   // Categorical assessments
-  passFailStatus: 'pass' | 'fail' | 'partial' | 'uncertain';
-  riskLevel?: 'low' | 'medium' | 'high' | 'critical';
+  passFailStatus: "pass" | "fail" | "partial" | "uncertain";
+  riskLevel?: "low" | "medium" | "high" | "critical";
 
   // Qualitative feedback
-  rationale: string;             // Why this score
-  strengths: string[];           // What went well
-  weaknesses: string[];          // What needs improvement
+  rationale: string; // Why this score
+  strengths: string[]; // What went well
+  weaknesses: string[]; // What needs improvement
 
   // Scoring metadata
-  scoringMethod: 'rule_based' | 'llm_judged' | 'policy_based' | 'hybrid';
-  judgeModel?: string;           // If LLM-judged
-  confidence?: number;           // Judge confidence (0-1)
+  scoringMethod: "rule_based" | "llm_judged" | "policy_based" | "hybrid";
+  judgeModel?: string; // If LLM-judged
+  confidence?: number; // Judge confidence (0-1)
 }
 ```
 
@@ -420,7 +434,7 @@ interface EvalFinding {
   runId: string;
 
   type: FindingType;
-  severity: 'info' | 'warning' | 'error' | 'critical';
+  severity: "info" | "warning" | "error" | "critical";
 
   title: string;
   description: string;
@@ -435,22 +449,22 @@ interface EvalFinding {
 
   // Remediation
   recommendation?: string;
-  relatedFindings?: string[];    // Link to similar issues
+  relatedFindings?: string[]; // Link to similar issues
 
   createdAt: Date;
 }
 
 type FindingType =
-  | 'correctness_issue'
-  | 'safety_violation'
-  | 'policy_breach'
-  | 'performance_regression'
-  | 'cost_anomaly'
-  | 'tool_misuse'
-  | 'reasoning_error'
-  | 'hallucination'
-  | 'prompt_injection'
-  | 'data_leakage';
+  | "correctness_issue"
+  | "safety_violation"
+  | "policy_breach"
+  | "performance_regression"
+  | "cost_anomaly"
+  | "tool_misuse"
+  | "reasoning_error"
+  | "hallucination"
+  | "prompt_injection"
+  | "data_leakage";
 ```
 
 #### BaselineSnapshot
@@ -460,8 +474,8 @@ Versioned performance baseline.
 ```typescript
 interface BaselineSnapshot {
   id: string;
-  version: string;               // Semantic version or git tag
-  track: 'release' | 'branch' | 'experimental';
+  version: string; // Semantic version or git tag
+  track: "release" | "branch" | "experimental";
 
   // Aggregate metrics
   metrics: {
@@ -499,11 +513,11 @@ Proposed changes to routing or policy.
 ```typescript
 interface UpdateProposal {
   id: string;
-  type: 'routing' | 'policy' | 'agent_config';
+  type: "routing" | "policy" | "agent_config";
 
   // What changed
   summary: string;
-  diff: ConfigDiff;              // Structured diff
+  diff: ConfigDiff; // Structured diff
 
   // Why
   rationale: string;
@@ -514,7 +528,7 @@ interface UpdateProposal {
   };
 
   // Approval workflow
-  status: 'pending' | 'approved' | 'rejected' | 'implemented';
+  status: "pending" | "approved" | "rejected" | "implemented";
   requestedAt: Date;
   requestedBy: string;
   reviewedBy?: string;
@@ -569,9 +583,9 @@ All evaluation runs are recorded in the provenance ledger:
 // Record eval run
 await provenanceService.recordEvalRun({
   runId: evalRun.id,
-  scenarios: evalRun.scenarios.map(s => s.scenarioId),
-  scores: evalRun.scenarios.map(s => s.score),
-  findings: evalRun.scenarios.flatMap(s => s.findings),
+  scenarios: evalRun.scenarios.map((s) => s.scenarioId),
+  scores: evalRun.scenarios.map((s) => s.score),
+  findings: evalRun.scenarios.flatMap((s) => s.findings),
 });
 ```
 
@@ -656,11 +670,13 @@ metricsExporter.recordScenarioResult({
 **Goal**: Stress-test policy enforcement and safety guardrails
 
 **Setup**:
+
 - **Red Team Agent**: Attempts to bypass policies, exfiltrate data, or generate harmful outputs
 - **Defense Agent**: Standard agent with policy enforcement
 - **Judge Agent**: Evaluates whether red team succeeded
 
 **Metrics**:
+
 - Attack success rate
 - Policy detection rate
 - False positive rate
@@ -670,12 +686,14 @@ metricsExporter.recordScenarioResult({
 **Goal**: Improve reasoning and tool usage through multi-agent interaction
 
 **Setup**:
+
 - **Planner Agent**: Proposes solution approach
 - **Critic Agent**: Reviews and challenges plan
 - **Verifier Agent**: Tests implementation
 - **Judge Agent**: Scores overall quality
 
 **Metrics**:
+
 - Solution correctness
 - Number of iterations to convergence
 - Inter-agent agreement scores
@@ -685,6 +703,7 @@ metricsExporter.recordScenarioResult({
 **Goal**: Discover novel scenarios and edge cases
 
 **Setup**:
+
 - **Generator Agent**: Creates scenario variations
 - **Solver Agent**: Attempts to solve generated scenarios
 - **Difficulty Estimator**: Scores scenario difficulty based on solver performance
@@ -704,6 +723,7 @@ metricsExporter.recordScenarioResult({
 5. **Feedback**: Propose policy/routing updates to address gaps
 
 **Curriculum Strategies**:
+
 - **Coverage-Based**: Ensure all scenario types are well-represented
 - **Difficulty-Based**: Gradually increase complexity
 - **Error-Driven**: Double down on failure modes
@@ -719,20 +739,21 @@ metricsExporter.recordScenarioResult({
 **Input**: Evaluation results showing which models perform best on which scenario types
 
 **Analysis**:
+
 ```typescript
 // Identify optimal model per scenario type
 const optimalRouting = analyzeModelPerformance({
   evalRuns: recentRuns,
-  dimensions: ['correctness', 'cost', 'latency'],
+  dimensions: ["correctness", "cost", "latency"],
   weights: { correctness: 0.6, cost: 0.2, latency: 0.2 },
 });
 
 // Generate routing update proposal
 const proposal: RoutingUpdateProposal = {
   changes: {
-    'code_transformation': 'claude-sonnet-4',  // High correctness
-    'research_synthesis': 'gpt-4-turbo',       // Good balance
-    'incident_investigation': 'claude-opus-3', // Complex reasoning
+    code_transformation: "claude-sonnet-4", // High correctness
+    research_synthesis: "gpt-4-turbo", // Good balance
+    incident_investigation: "claude-opus-3", // Complex reasoning
   },
   expectedImprovements: {
     overallScore: +0.08,
@@ -749,25 +770,26 @@ const proposal: RoutingUpdateProposal = {
 **Input**: Policy violation patterns and false positive rates
 
 **Analysis**:
+
 ```typescript
 // Identify overly restrictive policies
 const falsePositives = findFalsePositives({
   evalRuns: recentRuns,
-  threshold: 0.1,  // >10% false positive rate
+  threshold: 0.1, // >10% false positive rate
 });
 
 // Propose policy adjustments
 const policyProposal: PolicyUpdateProposal = {
-  policyId: 'data-exfiltration-detect',
+  policyId: "data-exfiltration-detect",
   change: {
-    type: 'threshold_adjustment',
+    type: "threshold_adjustment",
     old: { sensitivity: 0.9 },
     new: { sensitivity: 0.7 },
   },
-  rationale: 'High false positive rate (15%) on research tasks',
+  rationale: "High false positive rate (15%) on research tasks",
   expectedImpact: {
-    falsePositiveRate: -0.10,
-    truePositiveRate: -0.02,  // Acceptable trade-off
+    falsePositiveRate: -0.1,
+    truePositiveRate: -0.02, // Acceptable trade-off
   },
 };
 ```
@@ -777,20 +799,21 @@ const policyProposal: PolicyUpdateProposal = {
 **Input**: Per-agent performance metrics
 
 **Analysis**:
+
 ```typescript
 // Recommend temperature/parameter adjustments
 const agentTuning = optimizeAgentConfigs({
   evalRuns: recentRuns,
-  agents: ['research-agent', 'code-agent'],
-  parameters: ['temperature', 'max_tokens', 'top_p'],
+  agents: ["research-agent", "code-agent"],
+  parameters: ["temperature", "max_tokens", "top_p"],
 });
 
 // Example output
 const agentProposal: AgentConfigProposal = {
-  agentId: 'research-agent',
+  agentId: "research-agent",
   changes: {
-    temperature: 0.3,  // Reduced for consistency (was 0.7)
-    max_tokens: 4096,  // Increased for completeness (was 2048)
+    temperature: 0.3, // Reduced for consistency (was 0.7)
+    max_tokens: 4096, // Increased for completeness (was 2048)
   },
   supportingData: {
     coherenceImprovement: +0.12,
@@ -826,7 +849,7 @@ const redTeamTask = {
 
 // Policy engine allows aggressive testing in eval mode
 const policyContext = {
-  mode: 'evaluation',
+  mode: "evaluation",
   allowRedTeam: true,
   logAllAttempts: true,
 };
@@ -839,8 +862,8 @@ const policyContext = {
 ```typescript
 interface ApprovalWorkflow {
   proposalId: string;
-  status: 'pending' | 'approved' | 'rejected';
-  approvers: string[];           // Required approver roles
+  status: "pending" | "approved" | "rejected";
+  approvers: string[]; // Required approver roles
   approvedBy?: string;
   approvalNotes?: string;
 
@@ -880,18 +903,18 @@ spec:
         app: scenario-registry
     spec:
       containers:
-      - name: scenario-registry
-        image: summit/scenario-registry:latest
-        ports:
-        - containerPort: 3000
-        env:
-        - name: DATABASE_URL
-          valueFrom:
-            secretKeyRef:
-              name: eval-db-credentials
-              key: url
-        - name: NODE_ENV
-          value: production
+        - name: scenario-registry
+          image: summit/scenario-registry:latest
+          ports:
+            - containerPort: 3000
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: eval-db-credentials
+                  key: url
+            - name: NODE_ENV
+              value: production
 ```
 
 ### Database Schema
@@ -996,6 +1019,7 @@ CREATE TABLE update_proposals (
 ```
 
 **Indexes**:
+
 ```sql
 CREATE INDEX idx_scenarios_type ON eval_scenarios(type);
 CREATE INDEX idx_scenarios_tags ON eval_scenarios USING GIN(tags);
@@ -1012,6 +1036,7 @@ CREATE INDEX idx_findings_severity ON eval_findings(severity);
 ### Key Metrics
 
 **Scenario Execution**:
+
 ```
 mesh_eval_scenario_executions_total{scenario_type, status}
 mesh_eval_scenario_duration_seconds{scenario_type, p50, p95, p99}
@@ -1019,6 +1044,7 @@ mesh_eval_scenario_cost_usd{scenario_type}
 ```
 
 **Scoring**:
+
 ```
 mesh_eval_score_overall{scenario_type}
 mesh_eval_score_correctness{scenario_type}
@@ -1026,18 +1052,21 @@ mesh_eval_score_safety{scenario_type}
 ```
 
 **Pass Rates**:
+
 ```
 mesh_eval_pass_rate{scenario_type, suite}
 mesh_eval_regression_detected{baseline_version}
 ```
 
 **Safety**:
+
 ```
 mesh_eval_safety_violations_total{violation_type}
 mesh_eval_policy_denies_total{policy_id}
 ```
 
 **Self-Play**:
+
 ```
 mesh_eval_selfplay_rounds_total{mode}
 mesh_eval_selfplay_attack_success_rate{red_team_agent}
@@ -1111,6 +1140,7 @@ mesh_eval_curriculum_scenarios_generated{difficulty}
 ## Development Roadmap
 
 ### Phase 1: Foundation (Current)
+
 - ✅ Architecture documentation
 - 🔄 Core TypeScript types
 - 🔄 Scenario registry
@@ -1118,18 +1148,21 @@ mesh_eval_curriculum_scenarios_generated{difficulty}
 - 🔄 Basic eval runner
 
 ### Phase 2: Integration
+
 - ⏳ CI/CD integration
 - ⏳ Baseline storage and comparison
 - ⏳ Observability integration
 - ⏳ Initial scenario corpus
 
 ### Phase 3: Intelligence
+
 - ⏳ Self-play coordinator
 - ⏳ Curriculum engine
 - ⏳ Feedback optimizer
 - ⏳ Automated proposal generation
 
 ### Phase 4: Production Hardening
+
 - ⏳ High availability setup
 - ⏳ Performance optimization
 - ⏳ Comprehensive test coverage

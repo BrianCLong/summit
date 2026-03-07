@@ -21,7 +21,7 @@ export class EvidenceTracker {
       overlapCounts: this.overlapCounts,
       uniqueRatio: this.totalParams > 0 ? this.uniqueCount / this.totalParams : 0,
       sharedRatio: this.totalParams > 0 ? this.sharedCount / this.totalParams : 0,
-      totalParams: this.totalParams
+      totalParams: this.totalParams,
     };
   }
 }

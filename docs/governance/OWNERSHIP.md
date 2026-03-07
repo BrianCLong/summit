@@ -3,7 +3,6 @@
 > Evidence-IDs: EVD-PLACEHOLDER
 > Status: active
 
-
 # Governance Ownership
 
 This document defines ownership for Summit governance artifacts and workflows.

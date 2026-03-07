@@ -3,6 +3,7 @@
 This directory contains the final artifacts, ledgers, and stand-down declarations for the Summit GA Program (v1).
 
 **Scope:**
+
 - GA Readiness Snapshots
 - Promotion Ledgers
 - Game-Day Findings

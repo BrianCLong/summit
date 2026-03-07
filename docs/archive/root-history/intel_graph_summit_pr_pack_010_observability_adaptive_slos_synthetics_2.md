@@ -32,7 +32,7 @@ processors:
         string_attribute:
           {
             key: http.target,
-            values: ['/health', '/healthz'],
+            values: ["/health", "/healthz"],
             enabled_regex_matching: true,
             invert_match: true,
           }
@@ -44,12 +44,7 @@ extensions: { health_check: {} }
 service:
   extensions: [health_check]
   pipelines:
-    traces:
-      {
-        receivers: [otlp],
-        processors: [tail_sampling, batch],
-        exporters: [otlphttp],
-      }
+    traces: { receivers: [otlp], processors: [tail_sampling, batch], exporters: [otlphttp] }
     metrics: { receivers: [otlp], processors: [batch], exporters: [prometheus] }
 ```
 
@@ -72,16 +67,16 @@ storage: { exemplars: { max_age: 1h } }
 **`server/metrics/http.ts`**
 
 ```ts
-import client from 'prom-client';
+import client from "prom-client";
 const h = new client.Histogram({
-  name: 'http_request_duration_seconds',
-  help: 'latency',
-  labelNames: ['path', 'method'],
+  name: "http_request_duration_seconds",
+  help: "latency",
+  labelNames: ["path", "method"],
   buckets: [0.05, 0.1, 0.25, 0.5, 1, 2, 5],
 });
 export function record(req, res, next) {
   const start = process.hrtime.bigint();
-  res.on('finish', () => {
+  res.on("finish", () => {
     const secs = Number(process.hrtime.bigint() - start) / 1e9;
     h.labels(req.route?.path || req.path, req.method).observe(secs);
   });
@@ -145,7 +140,7 @@ groups:
 
 ```yaml
 route:
-  group_by: ['alertname', 'service']
+  group_by: ["alertname", "service"]
   group_wait: 30s
   group_interval: 5m
   repeat_interval: 4h
@@ -155,7 +150,7 @@ receivers:
     webhook_configs:
       - url: https://runbook-bot/actions/ingest
 templates:
-  - 'observability/alertmanager/templates/*.tmpl'
+  - "observability/alertmanager/templates/*.tmpl"
 ```
 
 **`observability/alertmanager/templates/slo.tmpl`**
@@ -179,27 +174,27 @@ Runbook: https://docs/runbooks/{{ .CommonLabels.service }}
 **`synthetics/playwright.config.ts`**
 
 ```ts
-import { defineConfig } from '@playwright/test';
+import { defineConfig } from "@playwright/test";
 export default defineConfig({
   retries: 1,
-  use: { trace: 'on', screenshot: 'only-on-failure' },
+  use: { trace: "on", screenshot: "only-on-failure" },
 });
 ```
 
 **`synthetics/journeys/golden.spec.ts`**
 
 ```ts
-import { test, expect } from '@playwright/test';
-test('golden path', async ({ page }) => {
+import { test, expect } from "@playwright/test";
+test("golden path", async ({ page }) => {
   await page.goto(process.env.BASE_URL!);
-  await page.click('text=Login');
-  await page.fill('#email', process.env.E2E_USER!);
-  await page.fill('#password', process.env.E2E_PASS!);
-  await page.click('text=Sign in');
-  await expect(page.locator('text=Welcome')).toBeVisible();
-  await page.fill('#q', 'graph');
-  await page.press('#q', 'Enter');
-  await expect(page.locator('[data-test=result]')).toHaveCountGreaterThan(0);
+  await page.click("text=Login");
+  await page.fill("#email", process.env.E2E_USER!);
+  await page.fill("#password", process.env.E2E_PASS!);
+  await page.click("text=Sign in");
+  await expect(page.locator("text=Welcome")).toBeVisible();
+  await page.fill("#q", "graph");
+  await page.press("#q", "Enter");
+  await expect(page.locator("[data-test=result]")).toHaveCountGreaterThan(0);
 });
 ```
 
@@ -208,7 +203,7 @@ test('golden path', async ({ page }) => {
 ```yaml
 name: synthetics-browser
 on:
-  schedule: [{ cron: '*/10 * * * *' }]
+  schedule: [{ cron: "*/10 * * * *" }]
   workflow_dispatch: {}
 jobs:
   run:
@@ -216,7 +211,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: '20' }
+        with: { node-version: "20" }
       - run: npm ci
       - run: npx playwright install --with-deps
       - run: npx playwright test synthetics/journeys --reporter=line
@@ -305,14 +300,14 @@ paths:
 ```yaml
 name: anomaly
 on: [schedule]
-schedule: [{ cron: '*/15 * * * *' }]
+schedule: [{ cron: "*/15 * * * *" }]
 jobs:
   detect:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-        with: { python-version: '3.11' }
+        with: { python-version: "3.11" }
       - run: pip install pandas statsmodels requests
       - run: python observability/anomaly/detect.py
 ```
@@ -342,9 +337,9 @@ groups:
 **`server/logger.ts`** (append)
 
 ```ts
-let rate = Number(process.env.LOG_SAMPLE_RATE || '1.0');
-export function maybeLog(level: 'info' | 'warn' | 'error', obj: any) {
-  if (level === 'error' || Math.random() < rate) logger[level](obj);
+let rate = Number(process.env.LOG_SAMPLE_RATE || "1.0");
+export function maybeLog(level: "info" | "warn" | "error", obj: any) {
+  if (level === "error" || Math.random() < rate) logger[level](obj);
 }
 ```
 
@@ -387,7 +382,7 @@ jobs:
       - name: Draft PM
         uses: peter-evans/create-issue-from-file@v5
         with:
-          title: 'Postmortem: #${{ github.event.issue.number }}'
+          title: "Postmortem: #${{ github.event.issue.number }}"
           content-file: runbooks/postmortem_template.md
           labels: postmortem
 ```
@@ -441,7 +436,7 @@ services:
 ```yaml
 name: status-publish
 on:
-  schedule: [{ cron: '*/30 * * * *' }]
+  schedule: [{ cron: "*/30 * * * *" }]
   workflow_dispatch: {}
 jobs:
   build:

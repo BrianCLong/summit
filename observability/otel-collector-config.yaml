@@ -2,9 +2,9 @@ receivers:
   otlp:
     protocols:
       http:
-        endpoint: '0.0.0.0:4318' # OTLP/HTTP endpoint
+        endpoint: "0.0.0.0:4318" # OTLP/HTTP endpoint
       grpc:
-        endpoint: '0.0.0.0:4317' # OTLP/gRPC endpoint
+        endpoint: "0.0.0.0:4317" # OTLP/gRPC endpoint
 
 processors:
   batch:
@@ -16,7 +16,7 @@ exporters:
     verbosity: detailed # For debugging
 
   otlp:
-    endpoint: 'tempo:4317' # Tempo endpoint for traces
+    endpoint: "tempo:4317" # Tempo endpoint for traces
     tls:
       insecure: true
 

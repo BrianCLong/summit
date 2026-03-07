@@ -1,63 +1,59 @@
 // src/components/MaestroRunConsole.tsx
 
-import * as React from 'react';
-import { useState, useRef } from 'react';
-import { useMaestroRun } from '@/hooks/useMaestroRun';
-import type { MaestroRunResponse } from '@/types/maestro';
+import * as React from 'react'
+import { useState, useRef } from 'react'
+import { useMaestroRun } from '@/hooks/useMaestroRun'
+import type { MaestroRunResponse } from '@/types/maestro'
 
-import {
-  Play,
-  Loader2,
-  Terminal,
-} from 'lucide-react';
-import { Button } from '@/components/ui/Button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
+import { Play, Loader2, Terminal } from 'lucide-react'
+import { Button } from '@/components/ui/Button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
+import { Textarea } from '@/components/ui/textarea'
+import { Label } from '@/components/ui/label'
 
-import { RunSummary, RunTasks, RunOutputs } from './MaestroRunConsoleParts';
+import { RunSummary, RunTasks, RunOutputs } from './MaestroRunConsoleParts'
 
 interface MaestroRunConsoleProps {
   /** Current user id or workspace/user surrogate */
-  userId: string;
+  userId: string
 }
 
 export const MaestroRunConsole: React.FC<MaestroRunConsoleProps> = ({
   userId,
 }) => {
-  const [input, setInput] = useState('');
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const { state, run, reset } = useMaestroRun(userId);
+  const [input, setInput] = useState('')
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const { state, run, reset } = useMaestroRun(userId)
 
   const QUICK_PROMPTS = [
     'Analyze the last 3 PRs for security risks',
     'Summarize recent deployment failures',
     'Draft a release note for the latest commit',
-  ];
+  ]
 
   const handleSubmit = async (e?: React.FormEvent) => {
     if (e) {
-      e.preventDefault();
+      e.preventDefault()
     }
     if (!input.trim()) {
-      return;
+      return
     }
-    await run(input);
-  };
+    await run(input)
+  }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
-      e.preventDefault();
-      handleSubmit();
+      e.preventDefault()
+      handleSubmit()
     }
-  };
+  }
 
   const handleReset = () => {
-    setInput('');
-    reset();
-  };
+    setInput('')
+    reset()
+  }
 
-  const selectedRun: MaestroRunResponse | null = state.data;
+  const selectedRun: MaestroRunResponse | null = state.data
 
   return (
     <div className="flex flex-col gap-4 md:gap-6">
@@ -94,8 +90,8 @@ export const MaestroRunConsole: React.FC<MaestroRunConsoleProps> = ({
                         key={prompt}
                         type="button"
                         onClick={() => {
-                          setInput(prompt);
-                          textareaRef.current?.focus();
+                          setInput(prompt)
+                          textareaRef.current?.focus()
                         }}
                         aria-label={`Use prompt: ${prompt}`}
                         className="rounded-full border border-slate-700 bg-slate-800 px-2 py-0.5 text-[10px] text-slate-300 transition-colors hover:bg-slate-700 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400"
@@ -165,5 +161,5 @@ export const MaestroRunConsole: React.FC<MaestroRunConsoleProps> = ({
         <RunOutputs selectedRun={selectedRun} />
       </div>
     </div>
-  );
-};
+  )
+}

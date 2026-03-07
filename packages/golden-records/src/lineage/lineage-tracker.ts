@@ -3,14 +3,14 @@
  * Tracks data lineage and provenance for golden records
  */
 
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from "uuid";
 import type {
   RecordLineage,
   LineageOperation,
   TransformationStep,
   MatchingEvent,
-  MergeEvent
-} from '@intelgraph/mdm-core';
+  MergeEvent,
+} from "@intelgraph/mdm-core";
 
 export interface LineageQuery {
   recordId?: string;
@@ -28,7 +28,7 @@ export interface LineageGraph {
 
 export interface LineageNode {
   id: string;
-  type: 'record' | 'operation' | 'source' | 'transformation';
+  type: "record" | "operation" | "source" | "transformation";
   label: string;
   metadata: Record<string, unknown>;
 }
@@ -37,7 +37,7 @@ export interface LineageEdge {
   id: string;
   source: string;
   target: string;
-  type: 'derived_from' | 'transformed_by' | 'merged_from' | 'sourced_from';
+  type: "derived_from" | "transformed_by" | "merged_from" | "sourced_from";
   metadata: Record<string, unknown>;
 }
 
@@ -58,7 +58,7 @@ export class LineageTracker {
       sourceOperations: [],
       transformations: [],
       matchingHistory: [],
-      mergeHistory: []
+      mergeHistory: [],
     };
 
     this.lineages.set(recordId, lineage);
@@ -70,7 +70,7 @@ export class LineageTracker {
    */
   trackSourceOperation(
     recordId: string,
-    operationType: 'create' | 'update' | 'merge' | 'split' | 'delete',
+    operationType: "create" | "update" | "merge" | "split" | "delete",
     user: string,
     sourceSystem?: string,
     changes: Array<{
@@ -87,7 +87,7 @@ export class LineageTracker {
       timestamp: new Date(),
       user,
       sourceSystem,
-      changes
+      changes,
     };
 
     const lineage = this.lineages.get(recordId);
@@ -116,7 +116,7 @@ export class LineageTracker {
       inputData,
       outputData,
       timestamp: new Date(),
-      ruleName
+      ruleName,
     };
 
     const lineage = this.lineages.get(recordId);
@@ -143,7 +143,7 @@ export class LineageTracker {
       matchScore,
       matchAlgorithm,
       timestamp: new Date(),
-      autoApproved
+      autoApproved,
     };
 
     const lineage = this.lineages.get(recordId);
@@ -157,10 +157,7 @@ export class LineageTracker {
   /**
    * Track a merge event
    */
-  trackMergeEvent(
-    recordId: string,
-    mergeEvent: MergeEvent
-  ): void {
+  trackMergeEvent(recordId: string, mergeEvent: MergeEvent): void {
     const lineage = this.lineages.get(recordId);
     if (lineage) {
       lineage.mergeHistory.push(mergeEvent);
@@ -181,23 +178,23 @@ export class LineageTracker {
     let results = Array.from(this.operations.values());
 
     if (query.operationType) {
-      results = results.filter(op => op.operationType === query.operationType);
+      results = results.filter((op) => op.operationType === query.operationType);
     }
 
     if (query.sourceSystem) {
-      results = results.filter(op => op.sourceSystem === query.sourceSystem);
+      results = results.filter((op) => op.sourceSystem === query.sourceSystem);
     }
 
     if (query.user) {
-      results = results.filter(op => op.user === query.user);
+      results = results.filter((op) => op.user === query.user);
     }
 
     if (query.startDate) {
-      results = results.filter(op => op.timestamp >= query.startDate!);
+      results = results.filter((op) => op.timestamp >= query.startDate!);
     }
 
     if (query.endDate) {
-      results = results.filter(op => op.timestamp <= query.endDate!);
+      results = results.filter((op) => op.timestamp <= query.endDate!);
     }
 
     return results.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
@@ -218,41 +215,41 @@ export class LineageTracker {
     // Add record node
     nodes.push({
       id: recordId,
-      type: 'record',
+      type: "record",
       label: `Record ${recordId.substring(0, 8)}`,
-      metadata: {}
+      metadata: {},
     });
 
     // Add source operation nodes
     for (const op of lineage.sourceOperations) {
       nodes.push({
         id: op.operationId,
-        type: 'operation',
+        type: "operation",
         label: `${op.operationType} by ${op.user}`,
         metadata: {
           timestamp: op.timestamp,
-          sourceSystem: op.sourceSystem
-        }
+          sourceSystem: op.sourceSystem,
+        },
       });
 
       edges.push({
         id: uuidv4(),
         source: op.operationId,
         target: recordId,
-        type: 'derived_from',
+        type: "derived_from",
         metadata: {
-          changes: op.changes.length
-        }
+          changes: op.changes.length,
+        },
       });
 
       if (op.sourceSystem) {
         const sourceId = `source-${op.sourceSystem}`;
-        if (!nodes.find(n => n.id === sourceId)) {
+        if (!nodes.find((n) => n.id === sourceId)) {
           nodes.push({
             id: sourceId,
-            type: 'source',
+            type: "source",
             label: op.sourceSystem,
-            metadata: {}
+            metadata: {},
           });
         }
 
@@ -260,8 +257,8 @@ export class LineageTracker {
           id: uuidv4(),
           source: sourceId,
           target: op.operationId,
-          type: 'sourced_from',
-          metadata: {}
+          type: "sourced_from",
+          metadata: {},
         });
       }
     }
@@ -270,20 +267,20 @@ export class LineageTracker {
     for (const transform of lineage.transformations) {
       nodes.push({
         id: transform.stepId,
-        type: 'transformation',
+        type: "transformation",
         label: transform.transformationType,
         metadata: {
           timestamp: transform.timestamp,
-          ruleName: transform.ruleName
-        }
+          ruleName: transform.ruleName,
+        },
       });
 
       edges.push({
         id: uuidv4(),
         source: transform.stepId,
         target: recordId,
-        type: 'transformed_by',
-        metadata: {}
+        type: "transformed_by",
+        metadata: {},
       });
     }
 
@@ -295,11 +292,11 @@ export class LineageTracker {
             id: uuidv4(),
             source: sourceRecordId,
             target: recordId,
-            type: 'merged_from',
+            type: "merged_from",
             metadata: {
               timestamp: merge.timestamp,
-              mergedBy: merge.mergedBy
-            }
+              mergedBy: merge.mergedBy,
+            },
           });
         }
       }
@@ -315,9 +312,7 @@ export class LineageTracker {
     const lineage = this.lineages.get(recordId);
     if (!lineage) return [];
 
-    return lineage.sourceOperations.sort(
-      (a, b) => b.timestamp.getTime() - a.timestamp.getTime()
-    );
+    return lineage.sourceOperations.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
   }
 
   /**
@@ -327,9 +322,7 @@ export class LineageTracker {
     const lineage = this.lineages.get(recordId);
     if (!lineage) return [];
 
-    return lineage.transformations.sort(
-      (a, b) => b.timestamp.getTime() - a.timestamp.getTime()
-    );
+    return lineage.transformations.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
   }
 
   /**
@@ -353,18 +346,16 @@ export class LineageTracker {
     }> = [];
 
     for (const op of lineage.sourceOperations) {
-      const change = op.changes.find(c => c.fieldName === fieldName);
+      const change = op.changes.find((c) => c.fieldName === fieldName);
       if (change) {
         trace.push({
           operation: op,
           value: change.newValue,
-          source: change.source
+          source: change.source,
         });
       }
     }
 
-    return trace.sort(
-      (a, b) => b.operation.timestamp.getTime() - a.operation.timestamp.getTime()
-    );
+    return trace.sort((a, b) => b.operation.timestamp.getTime() - a.operation.timestamp.getTime());
   }
 }

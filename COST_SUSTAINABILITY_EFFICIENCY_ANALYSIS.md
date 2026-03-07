@@ -1,4 +1,5 @@
 # Cost, Sustainability & Long-Term Ops Efficiency Analysis
+
 **Summit/IntelGraph Platform**
 **Analysis Date**: 2026-01-01
 **Scope**: End-to-End TCO, Operational Durability, Economic Sustainability
@@ -20,18 +21,18 @@ Summit is a mission-critical intelligence analysis platform with **388 microserv
 
 ### 1.1 Infrastructure Cost Breakdown
 
-| Component | Technology | Sizing | Est. Monthly Cost |
-|-----------|-----------|--------|-------------------|
-| **Compute (EKS)** | AWS EKS + EC2 | Staging: 3× t3.large<br>Prod: 3-10× m6i.large<br>ML: GPU instances | $2,500-8,000 |
-| **Database (PostgreSQL)** | RDS Aurora | Staging: db.t3.medium, 50GB<br>Prod: db.m6i.large, 200GB<br>Multi-region: db.r6g.large | $800-2,500 |
-| **Graph Database (Neo4j)** | Self-managed on EKS | Causal cluster (3+ nodes)<br>500m-1000m CPU per node | $1,200-3,000 |
-| **Cache (Redis)** | ElastiCache | redis:7-alpine, 2-4 nodes | $300-800 |
-| **Message Queue (Kafka)** | Self-managed/Redpanda | Event streaming, provenance | $500-1,200 |
-| **Object Storage (S3)** | AWS S3 + Glacier | Bundle storage, backups<br>Multi-region replication | $200-600 |
-| **Observability Stack** | Prometheus + Grafana + Jaeger + Loki + Pyroscope | 15s scrape, 30d retention<br>50+ dashboards, full tracing | $800-2,000 |
-| **Networking** | ALB/NLB, CloudFront, VPC | Multi-region, CDN | $400-1,000 |
-| **Secrets Management** | AWS KMS + Vault | Key rotation, tenant grants | $100-300 |
-| **OpenSearch** | AWS OpenSearch | m6g.medium.search | $400-800 |
+| Component                  | Technology                                       | Sizing                                                                                 | Est. Monthly Cost |
+| -------------------------- | ------------------------------------------------ | -------------------------------------------------------------------------------------- | ----------------- |
+| **Compute (EKS)**          | AWS EKS + EC2                                    | Staging: 3× t3.large<br>Prod: 3-10× m6i.large<br>ML: GPU instances                     | $2,500-8,000      |
+| **Database (PostgreSQL)**  | RDS Aurora                                       | Staging: db.t3.medium, 50GB<br>Prod: db.m6i.large, 200GB<br>Multi-region: db.r6g.large | $800-2,500        |
+| **Graph Database (Neo4j)** | Self-managed on EKS                              | Causal cluster (3+ nodes)<br>500m-1000m CPU per node                                   | $1,200-3,000      |
+| **Cache (Redis)**          | ElastiCache                                      | redis:7-alpine, 2-4 nodes                                                              | $300-800          |
+| **Message Queue (Kafka)**  | Self-managed/Redpanda                            | Event streaming, provenance                                                            | $500-1,200        |
+| **Object Storage (S3)**    | AWS S3 + Glacier                                 | Bundle storage, backups<br>Multi-region replication                                    | $200-600          |
+| **Observability Stack**    | Prometheus + Grafana + Jaeger + Loki + Pyroscope | 15s scrape, 30d retention<br>50+ dashboards, full tracing                              | $800-2,000        |
+| **Networking**             | ALB/NLB, CloudFront, VPC                         | Multi-region, CDN                                                                      | $400-1,000        |
+| **Secrets Management**     | AWS KMS + Vault                                  | Key rotation, tenant grants                                                            | $100-300          |
+| **OpenSearch**             | AWS OpenSearch                                   | m6g.medium.search                                                                      | $400-800          |
 
 **Total Infrastructure**: **$7,200-20,200 USD/month**
 
@@ -39,13 +40,13 @@ Summit is a mission-critical intelligence analysis platform with **388 microserv
 
 **Critical Finding**: **518 workflow files** consuming GitHub-hosted runner minutes.
 
-| Metric | Value | Monthly Cost Impact |
-|--------|-------|---------------------|
-| **Workflow Files** | 518 total | Massive duplication |
-| **Workflows per PR** | ~12-15 required checks | 45-60 min/PR |
-| **PRs/month (estimated)** | 100-200 | 4,500-12,000 min |
-| **Runner Type** | ubuntu-latest (GitHub-hosted) | $0.008/min = **$36-96/month** |
-| **Self-hosted Alternative** | t3.medium spot (24/7) | **$15-25/month** |
+| Metric                      | Value                         | Monthly Cost Impact           |
+| --------------------------- | ----------------------------- | ----------------------------- |
+| **Workflow Files**          | 518 total                     | Massive duplication           |
+| **Workflows per PR**        | ~12-15 required checks        | 45-60 min/PR                  |
+| **PRs/month (estimated)**   | 100-200                       | 4,500-12,000 min              |
+| **Runner Type**             | ubuntu-latest (GitHub-hosted) | $0.008/min = **$36-96/month** |
+| **Self-hosted Alternative** | t3.medium spot (24/7)         | **$15-25/month**              |
 
 **Current CI/CD Cost**: $36-96 USD/month
 **Hidden Cost**: Developer wait time = 45-60 min × 150 PRs/month = **7,500 engineering minutes wasted**
@@ -55,16 +56,19 @@ Summit is a mission-critical intelligence analysis platform with **388 microserv
 ### 1.3 AI/LLM Execution Cost
 
 **Providers**:
+
 - **OpenAI**: GPT-4o ($5.00/$15.00 per 1M tokens), GPT-4o-mini ($0.15/$0.60 per 1M tokens)
 - **Anthropic**: Claude Sonnet ($3.00/$15.00 per 1M tokens), Claude Haiku ($0.25/$1.25 per 1M tokens)
 
 **Cost Control Mechanisms Found**:
+
 - ✅ CostMeter implementation tracking usage by tenant/feature
 - ✅ Per-request cost limit: $0.05
 - ✅ Cache enabled (1-hour TTL)
 - ✅ Cost metrics exported to OpenTelemetry
 
 **Cost Drivers Identified** (via code analysis):
+
 1. **Copilot/Chat features**: High-frequency, user-facing LLM calls
 2. **GraphRAG queries**: Embedding generation + retrieval + synthesis
 3. **NL-to-Cypher translation**: Query generation for graph database
@@ -72,6 +76,7 @@ Summit is a mission-critical intelligence analysis platform with **388 microserv
 5. **Entity resolution**: Batch inference operations
 
 **Current Monthly AI Cost** (estimated based on typical usage):
+
 - **Low usage** (1,000 users, 10 queries/day): $500-1,500/month
 - **Medium usage** (5,000 users, 20 queries/day): $5,000-15,000/month
 - **High usage** (20,000 users, 30 queries/day): $50,000-150,000/month
@@ -80,13 +85,13 @@ Summit is a mission-critical intelligence analysis platform with **388 microserv
 
 ### 1.4 Observability Cost
 
-| Component | Configuration | Storage/Retention | Monthly Cost |
-|-----------|---------------|-------------------|--------------|
-| **Prometheus** | 15s scrape interval<br>50+ dashboards | 30d retention (estimated) | $300-600 |
-| **Loki (Logs)** | 30d retention<br>64MB ingestion rate | Filesystem storage | $200-500 |
-| **Jaeger (Traces)** | 100% sampling (dev)<br>OTLP export | In-memory/ElasticSearch | $400-800 |
-| **Grafana** | 50+ dashboards<br>Cost/SLO/Security | Self-hosted | $0 (OSS) |
-| **Pyroscope (Profiling)** | Continuous profiling | N/A | $100-300 |
+| Component                 | Configuration                         | Storage/Retention         | Monthly Cost |
+| ------------------------- | ------------------------------------- | ------------------------- | ------------ |
+| **Prometheus**            | 15s scrape interval<br>50+ dashboards | 30d retention (estimated) | $300-600     |
+| **Loki (Logs)**           | 30d retention<br>64MB ingestion rate  | Filesystem storage        | $200-500     |
+| **Jaeger (Traces)**       | 100% sampling (dev)<br>OTLP export    | In-memory/ElasticSearch   | $400-800     |
+| **Grafana**               | 50+ dashboards<br>Cost/SLO/Security   | Self-hosted               | $0 (OSS)     |
+| **Pyroscope (Profiling)** | Continuous profiling                  | N/A                       | $100-300     |
 
 **Total Observability**: $1,000-2,200 USD/month
 
@@ -95,18 +100,21 @@ Summit is a mission-critical intelligence analysis platform with **388 microserv
 ### 1.5 Human Operational Cost
 
 **Operational Burden Indicators**:
+
 - **76 runbooks** in `/RUNBOOKS` directory
 - **92 instances** of "manual/manually/ssh/kubectl exec" across runbooks
 - **23 files** requiring manual intervention
 - **PagerDuty integration** for on-call rotations
 
 **On-Call Time Estimate**:
+
 - **Incidents/month**: 5-15 (estimated from SEV1-4 levels)
 - **MTTR**: 45-90 minutes per incident
 - **On-call hours/month**: 20-40 hours
 - **Cost** (at $150/hour fully-loaded): **$3,000-6,000/month**
 
 **Toil Analysis**:
+
 - **Repetitive tasks**: Secret rotation, backup verification, schema migrations
 - **Manual scaling**: Neo4j cluster operations, database connection pool tuning
 - **Approval workflows**: Release captain verification (manual gates)
@@ -115,14 +123,14 @@ Summit is a mission-critical intelligence analysis platform with **388 microserv
 
 ### 1.6 Total Cost Surface Summary
 
-| Cost Category | Monthly (Current) | Monthly (at 10× scale) |
-|---------------|-------------------|------------------------|
-| **Infrastructure** | $7,200-20,200 | $25,000-70,000 |
-| **CI/CD** | $36-96 | $240-500 |
-| **AI/LLM** | $500-1,500 | $5,000-15,000 |
-| **Observability** | $1,000-2,200 | $3,000-8,000 |
-| **Human Ops** | $3,000-6,000 | $10,000-25,000 |
-| **TOTAL** | **$11,736-30,000** | **$43,240-118,500** |
+| Cost Category      | Monthly (Current)  | Monthly (at 10× scale) |
+| ------------------ | ------------------ | ---------------------- |
+| **Infrastructure** | $7,200-20,200      | $25,000-70,000         |
+| **CI/CD**          | $36-96             | $240-500               |
+| **AI/LLM**         | $500-1,500         | $5,000-15,000          |
+| **Observability**  | $1,000-2,200       | $3,000-8,000           |
+| **Human Ops**      | $3,000-6,000       | $10,000-25,000         |
+| **TOTAL**          | **$11,736-30,000** | **$43,240-118,500**    |
 
 **Top 10 Cost Drivers** (Ranked):
 
@@ -144,12 +152,14 @@ Summit is a mission-critical intelligence analysis platform with **388 microserv
 ### 2.1 Quick Wins (0-30 Days, High ROI)
 
 #### **A. CI/CD Consolidation**
+
 **Impact**: Save $20-60/month + 5,000 engineering minutes
 **Effort**: 2-3 days
 
 **Problem**: 518 workflow files with massive duplication.
 
 **Solution**:
+
 1. **Consolidate to 10-15 reusable workflows**:
    - `_reusable-lint.yml`, `_reusable-test.yml`, `_reusable-build.yml`
    - Already started: `_reusable-setup.yml`, `_reusable-security.yml` exist
@@ -161,6 +171,7 @@ Summit is a mission-critical intelligence analysis platform with **388 microserv
 **Safety**: No capability regression—consolidation improves consistency.
 
 **Proof**:
+
 ```yaml
 # Before: 518 files, each with full setup
 # After: 15 reusable workflows called from 50 trigger files
@@ -170,12 +181,14 @@ Summit is a mission-critical intelligence analysis platform with **388 microserv
 ---
 
 #### **B. Observability Sampling Reduction**
+
 **Impact**: Save $500-1,200/month
 **Effort**: 1 day
 
 **Problem**: 100% trace sampling in all environments.
 
 **Solution**:
+
 ```yaml
 # charts/_common-values.yaml (line 19)
 sampling:
@@ -196,12 +209,14 @@ sampling:
 ---
 
 #### **C. LLM Model Routing Optimization**
+
 **Impact**: Save $200-1,000/month
 **Effort**: 2-3 days
 
 **Problem**: No intelligent model selection—users may default to expensive models for simple queries.
 
 **Solution**:
+
 1. **Implement tiered routing** in `server/src/llm/router/`:
    - **Simple queries** (< 500 chars, no tool use) → **GPT-4o-mini** or **Claude Haiku** (10× cheaper)
    - **Complex queries** (> 1000 chars, tool use, multi-turn) → **GPT-4o** or **Claude Sonnet**
@@ -217,23 +232,26 @@ sampling:
 ---
 
 #### **D. Kubernetes Resource Right-Sizing**
+
 **Impact**: Save $800-2,000/month
 **Effort**: 3-5 days
 
 **Problem**: Many services have over-provisioned resources.
 
 **Current** (`charts/_common-values.yaml:324`):
+
 ```yaml
 resources:
   requests:
     cpu: 100m
     memory: 128Mi
   limits:
-    cpu: 1000m     # 10× headroom!
-    memory: 512Mi  # 4× headroom!
+    cpu: 1000m # 10× headroom!
+    memory: 512Mi # 4× headroom!
 ```
 
 **Solution**:
+
 1. **Analyze actual usage** from Grafana "Resource Efficiency Metrics" dashboard (already exists)
 2. **Right-size based on p95 usage**:
    ```yaml
@@ -242,7 +260,7 @@ resources:
      cpu: 100m
      memory: 128Mi
    limits:
-     cpu: 300m     # 3× headroom (was 10×)
+     cpu: 300m # 3× headroom (was 10×)
      memory: 256Mi # 2× headroom (was 4×)
    ```
 3. **Use Vertical Pod Autoscaler (VPA)** for automatic tuning
@@ -288,12 +306,14 @@ resources:
 ---
 
 #### **F. Multi-Region Cost Rationalization**
+
 **Impact**: Save $1,000-3,000/month
 **Effort**: 2-3 weeks
 
 **Problem**: Multi-region deployment (`us-east-1` + `us-west-2`) doubles infrastructure costs.
 
 **Solution**:
+
 1. **Audit actual usage by region**:
    - Check CloudWatch metrics for cross-region requests
    - If < 10% traffic from secondary region, **decommission** or downgrade to DR-only
@@ -314,13 +334,14 @@ resources:
 **Current**: Loki 30-day retention for all logs (line 36 of `observability/loki/loki-config.yaml`)
 
 **Solution**:
+
 ```yaml
 # Tiered retention by log level/service:
 retention_period:
-  error_logs: 90d      # Keep errors longer
-  info_logs: 14d       # Reduce info logs to 2 weeks
-  debug_logs: 3d       # Debug logs only 3 days
-  audit_logs: 365d     # Compliance requirement
+  error_logs: 90d # Keep errors longer
+  info_logs: 14d # Reduce info logs to 2 weeks
+  debug_logs: 3d # Debug logs only 3 days
+  audit_logs: 365d # Compliance requirement
 ```
 
 **G2. Metrics Cardinality Reduction**
@@ -338,10 +359,12 @@ retention_period:
 ### 2.3 Long-Term Structural Savings (90+ Days)
 
 #### **H. AI Cost Governance Framework**
+
 **Impact**: Prevent $10,000-50,000/month runaway costs
 **Effort**: 1 month
 
 **Components**:
+
 1. **Global Spend Cap**:
    - Extend `CostMeter` to enforce **platform-wide daily budget** ($500/day = $15k/month)
    - Circuit breaker: Degrade to cached responses when budget exceeded
@@ -356,12 +379,14 @@ retention_period:
 ---
 
 #### **I. Spot Instance Strategy**
+
 **Impact**: Save $1,500-5,000/month
 **Effort**: 2-3 weeks
 
 **Current**: EKS supports spot instances (line 54-62 of `infra/terraform/modules/eks/main.tf`)
 
 **Solution**:
+
 1. **Enable spot for non-critical workloads**:
    - Background jobs (batch entity resolution, report generation)
    - Development/staging environments (100% spot)
@@ -371,10 +396,12 @@ retention_period:
 ---
 
 #### **J. Serverless Offloading**
+
 **Impact**: Save $500-2,000/month
 **Effort**: 1-2 months
 
 **Candidates** (based on usage patterns):
+
 - **Infrequent services** (< 10 requests/hour):
   - Move to **AWS Lambda** (pay-per-invocation)
   - Already have hardened Lambda module: `deploy/terraform/modules/lambda-hardened/`
@@ -385,19 +412,19 @@ retention_period:
 
 ### 2.4 Cost Reduction Summary
 
-| Initiative | Timeframe | Monthly Savings | One-Time Effort |
-|-----------|-----------|----------------|-----------------|
-| **A. CI/CD Consolidation** | 0-30 days | $20-60 + 5,000 eng min | 2-3 days |
-| **B. Observability Sampling** | 0-30 days | $500-1,200 | 1 day |
-| **C. LLM Model Routing** | 0-30 days | $200-1,000 | 2-3 days |
-| **D. K8s Right-Sizing** | 0-30 days | $800-2,000 | 3-5 days |
-| **E. Database Optimization** | 30-90 days | $900-2,300 | 3-4 weeks |
-| **F. Multi-Region Rationalization** | 30-90 days | $1,000-3,000 | 2-3 weeks |
-| **G. Observability Containment** | 30-90 days | $500-1,000 | 2 weeks |
-| **H. AI Cost Governance** | 90+ days | $0 (prevention) | 1 month |
-| **I. Spot Instances** | 90+ days | $1,500-5,000 | 2-3 weeks |
-| **J. Serverless Offloading** | 90+ days | $500-2,000 | 1-2 months |
-| **TOTAL** | — | **$6,920-18,560/month** | — |
+| Initiative                          | Timeframe  | Monthly Savings         | One-Time Effort |
+| ----------------------------------- | ---------- | ----------------------- | --------------- |
+| **A. CI/CD Consolidation**          | 0-30 days  | $20-60 + 5,000 eng min  | 2-3 days        |
+| **B. Observability Sampling**       | 0-30 days  | $500-1,200              | 1 day           |
+| **C. LLM Model Routing**            | 0-30 days  | $200-1,000              | 2-3 days        |
+| **D. K8s Right-Sizing**             | 0-30 days  | $800-2,000              | 3-5 days        |
+| **E. Database Optimization**        | 30-90 days | $900-2,300              | 3-4 weeks       |
+| **F. Multi-Region Rationalization** | 30-90 days | $1,000-3,000            | 2-3 weeks       |
+| **G. Observability Containment**    | 30-90 days | $500-1,000              | 2 weeks         |
+| **H. AI Cost Governance**           | 90+ days   | $0 (prevention)         | 1 month         |
+| **I. Spot Instances**               | 90+ days   | $1,500-5,000            | 2-3 weeks       |
+| **J. Serverless Offloading**        | 90+ days   | $500-2,000              | 1-2 months      |
+| **TOTAL**                           | —          | **$6,920-18,560/month** | —               |
 
 **Net TCO Reduction**: **30-50%** without capability loss.
 
@@ -408,6 +435,7 @@ retention_period:
 ### 3.1 Current Operational Burden
 
 **Manual Intervention Points** (from runbook analysis):
+
 - **92 instances** of manual steps across 23 runbooks
 - **Key toil areas**:
   - Neo4j cluster operations (9 manual steps in `RUNBOOKS/NEO4J_CAUSAL_CLUSTER.md`)
@@ -417,6 +445,7 @@ retention_period:
   - Service mesh operations (8 manual steps in `RUNBOOKS/service-mesh-operations.md`)
 
 **On-Call Load Indicators**:
+
 - **PagerDuty integration** active
 - **SEV1-4 severity levels** defined
 - **15 min response time** for SEV1
@@ -425,6 +454,7 @@ retention_period:
 ### 3.2 Automation Opportunities
 
 #### **A. Incident Auto-Remediation**
+
 **Impact**: Reduce MTTR by 50-70%
 **Effort**: 1 month
 
@@ -438,10 +468,12 @@ retention_period:
 ---
 
 #### **B. Runbook-to-Code Migration**
+
 **Impact**: Reduce tribal knowledge by 60-80%
 **Effort**: 2-3 months (incremental)
 
 **Strategy**:
+
 1. **Identify top 10 most-used runbooks** (based on on-call logs)
 2. **Convert to executable scripts**:
    - Manual: "SSH to Neo4j pod and run MATCH query"
@@ -455,15 +487,18 @@ retention_period:
 ---
 
 #### **C. Self-Service Developer Tools**
+
 **Impact**: Reduce interrupts by 40-60%
 **Effort**: 6 weeks
 
 **Common asks**:
+
 - "Can you add me to tenant X?"
 - "Can you reset my dev environment?"
 - "Can you check why my feature flag isn't working?"
 
 **Solution**:
+
 - **Developer portal** (already have `charts/companyos-console/`)
 - **Self-service tenant access** (approval workflows already exist)
 - **Environment reset CLI**: `make clean && make bootstrap && make up` (already works!)
@@ -471,17 +506,20 @@ retention_period:
 ---
 
 #### **D. Golden Path Hardening**
+
 **Impact**: Reduce CI failures by 30-50%
 **Effort**: 2 weeks
 
 **Problem**: `RUNBOOKS/golden-path-failure.md` has 11 manual debugging steps.
 
 **Root Causes** (from runbook):
+
 1. **Docker Compose timing issues** (services not ready)
 2. **Database migration failures** (schema conflicts)
 3. **Flaky tests** (ESM issues, non-blocking unit tests)
 
 **Solutions**:
+
 1. **Retry logic** in `make up` for service readiness
 2. **Idempotent migrations** (already using Prisma + Knex)
 3. **Quarantine flaky tests**: `test:quarantine` script already exists (line 46 of `package.json`)
@@ -491,16 +529,19 @@ retention_period:
 ### 3.3 Operational Simplification
 
 #### **E. Service Consolidation**
+
 **Impact**: Reduce deployment complexity by 40%
 **Effort**: 3-6 months (strategic)
 
 **Problem**: 388 microservices in `/services/` directory.
 
 **Reality Check**:
+
 - **Active services**: ~50-80 (estimate based on Helm charts)
 - **Unused/experimental**: ~300+ (technical debt)
 
 **Solution**:
+
 1. **Audit service usage** via OpenTelemetry metrics (requests/day)
 2. **Archive services** with < 10 requests/month
 3. **Merge related services**:
@@ -512,12 +553,14 @@ retention_period:
 ---
 
 #### **F. Runbook Simplification & Consolidation**
+
 **Impact**: Reduce cognitive load by 50%
 **Effort**: 2-3 weeks
 
 **Current**: 76 runbooks, many outdated or duplicative.
 
 **Solution**:
+
 1. **Delete outdated runbooks** (reference `.archive/workflows/` as precedent)
 2. **Consolidate related runbooks**:
    - 3 separate backup runbooks → 1 unified backup procedure
@@ -530,14 +573,14 @@ retention_period:
 
 ### 3.4 Operational Load Summary
 
-| Initiative | MTTR Reduction | Toil Reduction | Effort |
-|-----------|----------------|----------------|---------|
-| **A. Incident Auto-Remediation** | 50-70% | High | 1 month |
-| **B. Runbook-to-Code** | 30-50% | Very High | 2-3 months |
-| **C. Self-Service Tools** | N/A | 40-60% interrupts | 6 weeks |
-| **D. Golden Path Hardening** | 30% CI failures | Medium | 2 weeks |
-| **E. Service Consolidation** | N/A | 40% complexity | 3-6 months |
-| **F. Runbook Consolidation** | 20-30% | 50% cognitive load | 2-3 weeks |
+| Initiative                       | MTTR Reduction  | Toil Reduction     | Effort     |
+| -------------------------------- | --------------- | ------------------ | ---------- |
+| **A. Incident Auto-Remediation** | 50-70%          | High               | 1 month    |
+| **B. Runbook-to-Code**           | 30-50%          | Very High          | 2-3 months |
+| **C. Self-Service Tools**        | N/A             | 40-60% interrupts  | 6 weeks    |
+| **D. Golden Path Hardening**     | 30% CI failures | Medium             | 2 weeks    |
+| **E. Service Consolidation**     | N/A             | 40% complexity     | 3-6 months |
+| **F. Runbook Consolidation**     | 20-30%          | 50% cognitive load | 2-3 weeks  |
 
 **Net Operational Efficiency**: Reduce on-call hours by **50-70%**, saving **$1,500-4,200/month** in human cost.
 
@@ -548,6 +591,7 @@ retention_period:
 ### 4.1 Current Failure Modes
 
 **High-Cost Failure Scenarios**:
+
 1. **AI Runaway Query** → Unbounded LLM cost (no global cap)
 2. **Database Overload** → Cascading failures across all services
 3. **Multi-Region Split-Brain** → Data inconsistency requiring manual reconciliation
@@ -557,7 +601,9 @@ retention_period:
 ### 4.2 Blast Radius Containment
 
 #### **A. AI Cost Circuit Breakers**
+
 **Implementation**:
+
 ```typescript
 // Extend server/src/maestro/cost_meter.ts
 class CostMeter {
@@ -572,6 +618,7 @@ class CostMeter {
 ```
 
 **Graceful Degradation**:
+
 - **Fallback 1**: Return cached responses (90% hit rate for common queries)
 - **Fallback 2**: Queue requests for next-day processing
 - **Fallback 3**: Degrade to rule-based analysis (no LLM)
@@ -583,11 +630,13 @@ class CostMeter {
 **Current**: Single PostgreSQL failure = total outage
 
 **Solution**:
+
 1. **Read-only mode**: Serve stale data from Redis cache
 2. **Write buffering**: Queue writes to Kafka, replay when DB recovers
 3. **Service-level circuit breakers**: Prevent cascading failures
 
 **Implementation**:
+
 ```yaml
 # Add to charts/_common-values.yaml
 resilience:
@@ -607,6 +656,7 @@ resilience:
 **Problem**: Split-brain risk during network partition.
 
 **Solution**:
+
 1. **Active-passive failover** (only one region writes at a time)
 2. **Conflict-free replicated data types (CRDTs)** for event sourcing
 3. **Region health checks** with automatic failover (30-second cutover)
@@ -616,9 +666,11 @@ resilience:
 ### 4.3 Degraded Mode Design
 
 #### **Read-Only Mode**
+
 **Triggers**: Database unreachable, RDS failover in progress
 
 **Capabilities**:
+
 - ✅ View existing investigations (from cache)
 - ✅ Search entities (from OpenSearch read replica)
 - ✅ View dashboards (from Grafana)
@@ -631,9 +683,11 @@ resilience:
 ---
 
 #### **Copilot Degraded Mode**
+
 **Triggers**: AI budget exceeded, LLM provider outage
 
 **Fallback Chain**:
+
 1. **Local models** (Llama 3.1 on GPU nodes, if available)
 2. **Cached responses** (semantic similarity search)
 3. **Rule-based suggestions** (hardcoded playbooks)
@@ -643,13 +697,13 @@ resilience:
 
 ### 4.4 Failure Cost Analysis
 
-| Failure Scenario | Blast Radius | Current MTTR | Cost of Outage | With Containment |
-|------------------|-------------|--------------|----------------|------------------|
-| **AI Runaway** | Single tenant | N/A (undetected) | $1,000-10,000 | **$50** (daily cap) |
-| **Database Overload** | Entire platform | 15-30 min | $5,000-15,000 | **$500** (read-only mode) |
-| **Multi-Region Failure** | 50% capacity | 30-60 min | $10,000-30,000 | **$2,000** (auto-failover) |
-| **Neo4j Cluster Failure** | Complete outage | 45-90 min | $15,000-50,000 | **$3,000** (degraded mode) |
-| **Kafka Lag** | Event loss | 60-120 min | $20,000-60,000 | **$5,000** (replay buffer) |
+| Failure Scenario          | Blast Radius    | Current MTTR     | Cost of Outage | With Containment           |
+| ------------------------- | --------------- | ---------------- | -------------- | -------------------------- |
+| **AI Runaway**            | Single tenant   | N/A (undetected) | $1,000-10,000  | **$50** (daily cap)        |
+| **Database Overload**     | Entire platform | 15-30 min        | $5,000-15,000  | **$500** (read-only mode)  |
+| **Multi-Region Failure**  | 50% capacity    | 30-60 min        | $10,000-30,000 | **$2,000** (auto-failover) |
+| **Neo4j Cluster Failure** | Complete outage | 45-90 min        | $15,000-50,000 | **$3,000** (degraded mode) |
+| **Kafka Lag**             | Event loss      | 60-120 min       | $20,000-60,000 | **$5,000** (replay buffer) |
 
 **Net Risk Reduction**: **80-95%** reduction in failure costs.
 
@@ -660,24 +714,26 @@ resilience:
 ### 5.1 Growth Scaling Model
 
 **Current State**:
+
 - **Autoscaling**: HPA enabled (2-10 replicas, 70% CPU target)
 - **Database**: Fixed sizing (manual scaling required)
 - **Neo4j**: Fixed 3-node cluster (no autoscaling)
 
 **Growth Scenarios**:
 
-| Metric | Current | 2× Growth | 5× Growth | 10× Growth |
-|--------|---------|-----------|-----------|------------|
-| **Users** | 1,000 | 2,000 | 5,000 | 10,000 |
-| **Requests/day** | 100K | 200K | 500K | 1M |
-| **EKS Nodes** | 3-6 | 6-12 | 12-25 | 25-50 |
-| **PostgreSQL** | db.m6i.large | db.m6i.xlarge | db.m6i.2xlarge | Aurora Serverless v2 |
-| **Neo4j Cluster** | 3 nodes | 5 nodes | 7 nodes | 10 nodes |
-| **Monthly Cost** | $12K-30K | $20K-50K | $40K-100K | $80K-200K |
+| Metric            | Current      | 2× Growth     | 5× Growth      | 10× Growth           |
+| ----------------- | ------------ | ------------- | -------------- | -------------------- |
+| **Users**         | 1,000        | 2,000         | 5,000          | 10,000               |
+| **Requests/day**  | 100K         | 200K          | 500K           | 1M                   |
+| **EKS Nodes**     | 3-6          | 6-12          | 12-25          | 25-50                |
+| **PostgreSQL**    | db.m6i.large | db.m6i.xlarge | db.m6i.2xlarge | Aurora Serverless v2 |
+| **Neo4j Cluster** | 3 nodes      | 5 nodes       | 7 nodes        | 10 nodes             |
+| **Monthly Cost**  | $12K-30K     | $20K-50K      | $40K-100K      | $80K-200K            |
 
 ### 5.2 Scaling Inflection Points
 
 **Critical Thresholds**:
+
 1. **500K requests/day**: PostgreSQL connection pool exhaustion (need PgBouncer or Aurora Proxy)
 2. **5,000 users**: Neo4j heap pressure (upgrade to 8GB+ RAM per node)
 3. **1M requests/day**: Kafka partition rebalancing (increase from 3 to 9 partitions)
@@ -686,11 +742,13 @@ resilience:
 ### 5.3 Cost Anomaly Detection
 
 **Already Implemented**:
+
 - ✅ Cost Optimization Dashboard (`observability/dashboards/cost-optimization-dashboard.json`)
 - ✅ Daily cost alerts ($1,000 threshold, line 28-56 of dashboard)
 - ✅ Cost-per-request metric (line 424-451)
 
 **Enhancements Needed**:
+
 1. **Weekly cost reports**: Email to finance/engineering
 2. **Anomaly detection**: Machine learning on cost trends (flag 2× deviation)
 3. **Tenant-level cost attribution**: Chargeback for enterprise customers
@@ -698,22 +756,24 @@ resilience:
 ### 5.4 Capacity Runbooks
 
 **Pre-emptive Scaling Triggers**:
+
 - **CPU utilization > 60% for 6 hours** → Scale up nodes
 - **Database connections > 70% pool size** → Add read replicas
 - **AI daily spend > 80% budget** → Notify stakeholders, prepare quota increases
 
 **Automated Scaling Actions**:
+
 ```yaml
 # Add to Kubernetes HPA:
 behavior:
   scaleUp:
     stabilizationWindowSeconds: 60
     policies:
-    - type: Percent
-      value: 50
-      periodSeconds: 60
+      - type: Percent
+        value: 50
+        periodSeconds: 60
   scaleDown:
-    stabilizationWindowSeconds: 300  # 5 min cooldown
+    stabilizationWindowSeconds: 300 # 5 min cooldown
 ```
 
 ---
@@ -722,21 +782,23 @@ behavior:
 
 ### 6.1 Critical Vendor Dependencies
 
-| Vendor | Usage | Criticality | Switching Cost | Lock-In Risk |
-|--------|-------|-------------|----------------|--------------|
-| **AWS** | EKS, RDS, S3, KMS | **Critical** | **Very High** ($50K-200K migration) | **High** |
-| **OpenAI** | GPT-4o, GPT-4o-mini | **Critical** | Medium ($10K-30K prompt re-engineering) | Medium |
-| **Anthropic** | Claude Sonnet, Haiku | **Critical** | Medium (same as OpenAI) | Medium |
-| **GitHub** | CI/CD, source control | **Critical** | High ($30K-100K migration) | Medium |
-| **Neo4j** | Graph database | **Critical** | **Very High** ($100K+ migration) | **High** |
-| **PagerDuty** | On-call management | Medium | Low ($5K-10K) | Low |
-| **HashiCorp Vault** | Secrets management | Medium | Medium ($20K-50K) | Medium |
-| **Prometheus/Grafana** | Observability | Low | Low (OSS alternatives) | **Low** |
+| Vendor                 | Usage                 | Criticality  | Switching Cost                          | Lock-In Risk |
+| ---------------------- | --------------------- | ------------ | --------------------------------------- | ------------ |
+| **AWS**                | EKS, RDS, S3, KMS     | **Critical** | **Very High** ($50K-200K migration)     | **High**     |
+| **OpenAI**             | GPT-4o, GPT-4o-mini   | **Critical** | Medium ($10K-30K prompt re-engineering) | Medium       |
+| **Anthropic**          | Claude Sonnet, Haiku  | **Critical** | Medium (same as OpenAI)                 | Medium       |
+| **GitHub**             | CI/CD, source control | **Critical** | High ($30K-100K migration)              | Medium       |
+| **Neo4j**              | Graph database        | **Critical** | **Very High** ($100K+ migration)        | **High**     |
+| **PagerDuty**          | On-call management    | Medium       | Low ($5K-10K)                           | Low          |
+| **HashiCorp Vault**    | Secrets management    | Medium       | Medium ($20K-50K)                       | Medium       |
+| **Prometheus/Grafana** | Observability         | Low          | Low (OSS alternatives)                  | **Low**      |
 
 ### 6.2 Lock-In Assessment
 
 #### **AWS Lock-In** (Highest Risk)
+
 **Services Used**:
+
 - EKS (Kubernetes orchestration)
 - RDS Aurora (PostgreSQL)
 - S3 (object storage)
@@ -746,6 +808,7 @@ behavior:
 - Secrets Manager
 
 **Mitigation Strategy**:
+
 1. **Multi-cloud exploration** (already started):
    - `/infrastructure/terraform/multi-cloud/` directory exists
    - GCP, Azure, AWS modules defined
@@ -761,15 +824,19 @@ behavior:
 ---
 
 #### **Neo4j Lock-In** (High Risk)
+
 **Problem**: Proprietary graph database with Cypher query language.
 
 **Alternatives**:
+
 - **JanusGraph** (OSS, Gremlin query language, Cassandra/HBase backend)
 - **ArangoDB** (multi-model, supports graphs + documents)
 - **Amazon Neptune** (managed graph DB, Gremlin + OpenCypher)
 
 **Mitigation**:
+
 1. **Abstract queries**: Create **repository pattern** in code:
+
    ```typescript
    interface GraphRepository {
      findEntities(filter): Promise<Entity[]>;
@@ -779,6 +846,7 @@ behavior:
    class Neo4jRepository implements GraphRepository { ... }
    class JanusGraphRepository implements GraphRepository { ... }
    ```
+
 2. **Periodic migration drills**: Export Neo4j data to CSV, import to JanusGraph (quarterly test)
 
 **Exit Cost**: $100K-300K (6-12 months)
@@ -787,9 +855,11 @@ behavior:
 ---
 
 #### **LLM Provider Lock-In** (Medium Risk)
+
 **Current**: OpenAI + Anthropic dual-provider setup (good diversification).
 
 **Mitigation** (already partially implemented):
+
 1. **Provider abstraction**: `server/src/llm/providers/` has OpenAI + Anthropic + Mock
 2. **Add OSS models**:
    - **Llama 3.1** (self-hosted on GPU nodes)
@@ -804,28 +874,26 @@ behavior:
 ### 6.3 Dependency Risk Ledger
 
 **High-Risk Dependencies** (require mitigation):
+
 1. ❌ **Neo4j**: No abstraction layer, Cypher queries scattered across codebase
 2. ❌ **AWS RDS Aurora**: PostgreSQL-compatible, but uses Aurora-specific features (parallel query, global database)
 3. ⚠️ **GitHub Actions**: 518 workflows deeply integrated
 
-**Medium-Risk Dependencies** (monitor):
-4. ⚠️ **OpenAI/Anthropic**: Dual-provider, but no OSS fallback
-5. ⚠️ **Vault**: HashiCorp licensing changes risk (consider migration to AWS Secrets Manager)
+**Medium-Risk Dependencies** (monitor): 4. ⚠️ **OpenAI/Anthropic**: Dual-provider, but no OSS fallback 5. ⚠️ **Vault**: HashiCorp licensing changes risk (consider migration to AWS Secrets Manager)
 
-**Low-Risk Dependencies** (acceptable):
-6. ✅ **Prometheus/Grafana**: OSS, portable
-7. ✅ **Redis**: OSS, multiple providers (ElastiCache, MemoryDB, self-hosted)
-8. ✅ **Kafka**: OSS, already using Redpanda as alternative
+**Low-Risk Dependencies** (acceptable): 6. ✅ **Prometheus/Grafana**: OSS, portable 7. ✅ **Redis**: OSS, multiple providers (ElastiCache, MemoryDB, self-hosted) 8. ✅ **Kafka**: OSS, already using Redpanda as alternative
 
 ### 6.4 Exit Strategy Development
 
 **Quarterly Review Cadence**:
+
 - **Q1**: Review AWS bill, evaluate GCP/Azure cost comparison
 - **Q2**: Test Neo4j → JanusGraph migration (dev environment)
 - **Q3**: Evaluate LLM provider alternatives (Llama 3.2, Gemini 2.0)
 - **Q4**: Chaos drill: Simulate AWS region failure, failover to GCP
 
 **Documentation Requirements**:
+
 - ✅ `/infrastructure/terraform/multi-cloud/` exists
 - ❌ Missing: **"Migration Playbooks"** for each critical vendor
 - ❌ Missing: **Cost comparison spreadsheets** (AWS vs. GCP vs. Azure)
@@ -840,15 +908,16 @@ behavior:
 
 **Bus Factor Analysis** (from codebase inspection):
 
-| Component | Documentation | Runbooks | Tests | Bus Factor | Risk |
-|-----------|---------------|----------|-------|------------|------|
-| **Neo4j Cluster Ops** | ⚠️ Partial | ✅ Yes (9 manual steps) | ❌ No | **1-2** | **Critical** |
-| **Multi-Region Setup** | ✅ Good (Terraform) | ⚠️ Partial | ❌ No | **2-3** | High |
-| **AI/LLM Routing** | ⚠️ Code comments only | ❌ No | ✅ Yes | **2-3** | High |
-| **Incident Response** | ✅ Excellent (playbook) | ✅ Yes | ⚠️ Partial | **3-4** | Medium |
-| **Golden Path CI/CD** | ✅ Good (README) | ✅ Yes (11 steps) | ✅ Yes | **4-5** | Low |
+| Component              | Documentation           | Runbooks                | Tests      | Bus Factor | Risk         |
+| ---------------------- | ----------------------- | ----------------------- | ---------- | ---------- | ------------ |
+| **Neo4j Cluster Ops**  | ⚠️ Partial              | ✅ Yes (9 manual steps) | ❌ No      | **1-2**    | **Critical** |
+| **Multi-Region Setup** | ✅ Good (Terraform)     | ⚠️ Partial              | ❌ No      | **2-3**    | High         |
+| **AI/LLM Routing**     | ⚠️ Code comments only   | ❌ No                   | ✅ Yes     | **2-3**    | High         |
+| **Incident Response**  | ✅ Excellent (playbook) | ✅ Yes                  | ⚠️ Partial | **3-4**    | Medium       |
+| **Golden Path CI/CD**  | ✅ Good (README)        | ✅ Yes (11 steps)       | ✅ Yes     | **4-5**    | Low          |
 
 **High-Risk Knowledge Silos**:
+
 1. **Neo4j cluster operations** (1-2 people know Cypher tuning, replication lag debugging)
 2. **LLM cost optimization** (routing logic, caching strategies)
 3. **Multi-region failover** (split-brain resolution, manual DNS cutover)
@@ -856,9 +925,11 @@ behavior:
 ### 7.2 Knowledge Capture Improvements
 
 #### **A. Automated Documentation Generation**
+
 **Goal**: Make system self-documenting
 
 **Implementations**:
+
 1. **OpenAPI/GraphQL schema as source of truth**:
    - Already using GraphQL (`graphql-inspector` for schema diff)
    - Auto-generate API docs from schema (Swagger UI, GraphQL Playground)
@@ -872,44 +943,54 @@ behavior:
 ---
 
 #### **B. Decision Records (ADRs)**
+
 **Current**: Some ADRs exist (`docs/ADR/0002-agentic-runbooks.md`)
 
 **Expand to**:
+
 - **Why Neo4j over JanusGraph?** (document lock-in decision)
 - **Why OpenAI + Anthropic dual-provider?** (resilience rationale)
 - **Why 518 workflows?** (historical context, tech debt acknowledgment)
 
 **Template**:
+
 ```markdown
 # ADR-XXX: [Title]
+
 Date: YYYY-MM-DD
 Status: Accepted | Deprecated | Superseded
 
 ## Context
+
 [What problem are we solving?]
 
 ## Decision
+
 [What did we choose?]
 
 ## Consequences
+
 [What are the trade-offs?]
 
 ## Alternatives Considered
+
 [What else did we evaluate?]
 ```
 
 ---
 
 #### **C. Runbook Executable Tests**
+
 **Goal**: Prove runbooks work via CI/CD
 
 **Example**:
+
 ```yaml
 # .github/workflows/runbook-validation.yml
 name: Runbook Validation
 on:
   schedule:
-    - cron: '0 2 * * 1'  # Weekly on Monday
+    - cron: "0 2 * * 1" # Weekly on Monday
 jobs:
   test-neo4j-backup:
     runs-on: ubuntu-latest
@@ -927,22 +1008,28 @@ jobs:
 ### 7.3 Onboarding Efficiency
 
 **Current State** (inferred):
+
 - **Time to first commit**: 1-2 weeks (bootstrap, understand architecture)
 - **Time to production confidence**: 3-6 months (learn Neo4j, Cypher, multi-region setup)
 
 **Improvements**:
+
 1. **Onboarding checklist** (see `docs/MVP4_CAPABILITY_FEATURE_MATRIX.md` as template):
+
    ```markdown
    # Week 1
+
    - [ ] Run `make bootstrap && make up && make smoke`
    - [ ] Read ADRs (docs/ADR/)
    - [ ] Deploy to dev environment
 
    # Week 2
+
    - [ ] Fix a "good first issue" (label in GitHub)
    - [ ] Pair with on-call engineer during incident
-   - [ ] Read top 10 runbooks (RUNBOOKS/*)
+   - [ ] Read top 10 runbooks (RUNBOOKS/\*)
    ```
+
 2. **Interactive tutorials**:
    - **Neo4j playground**: Pre-loaded with sample data, Cypher query exercises
    - **AI cost simulator**: Show how different models/caching affect costs
@@ -953,6 +1040,7 @@ jobs:
 ### 7.4 Longevity Risks
 
 **5-Year Projection**:
+
 1. **Technology churn**:
    - **Risk**: Neo4j version upgrades (4.x → 5.x broke APIs)
    - **Mitigation**: Pin major versions, test upgrades in staging for 90 days
@@ -964,17 +1052,19 @@ jobs:
    - **Mitigation**: Exit strategy (see Section 6.4)
 
 **System Half-Life** (without maintenance):
+
 - **Current**: 6-12 months (dependencies outdated, security vulnerabilities)
 - **Goal**: 24-36 months (automated dependency updates, security patching)
 
 **Longevity Improvements**:
+
 1. **Automated dependency updates**: Renovate Bot (already using Dependabot for some packages)
 2. **Quarterly "fire drills"**:
    - Restore from backup (no peeking at runbooks)
    - Failover to secondary region
    - New engineer deploys to production
 3. **"README-Driven Development"**:
-   - Update README *before* writing code
+   - Update README _before_ writing code
    - Enforce in PR reviews: "Does this change update docs?"
 
 ---
@@ -983,15 +1073,15 @@ jobs:
 
 ### 8.1 Cost Efficiency Scorecard
 
-| Dimension | Current State | Target State | Gap |
-|-----------|---------------|--------------|-----|
-| **Infrastructure Cost** | $7.2K-20K/month | $4K-12K/month | **40% reduction** |
-| **CI/CD Efficiency** | 518 workflows, 45-60 min/PR | 15 workflows, 15-20 min/PR | **3× faster** |
-| **AI Cost Predictability** | Unbounded | Daily cap + quotas | **Risk eliminated** |
-| **Operational Burden** | 76 runbooks, 92 manual steps | 30 runbooks, 20 manual steps | **75% automation** |
-| **MTTR** | 45-90 min | 15-30 min | **60% faster** |
-| **Observability Cost** | $1K-2.2K/month | $400-900/month | **50% reduction** |
-| **On-Call Hours** | 20-40 hours/month | 5-15 hours/month | **60% reduction** |
+| Dimension                  | Current State                | Target State                 | Gap                 |
+| -------------------------- | ---------------------------- | ---------------------------- | ------------------- |
+| **Infrastructure Cost**    | $7.2K-20K/month              | $4K-12K/month                | **40% reduction**   |
+| **CI/CD Efficiency**       | 518 workflows, 45-60 min/PR  | 15 workflows, 15-20 min/PR   | **3× faster**       |
+| **AI Cost Predictability** | Unbounded                    | Daily cap + quotas           | **Risk eliminated** |
+| **Operational Burden**     | 76 runbooks, 92 manual steps | 30 runbooks, 20 manual steps | **75% automation**  |
+| **MTTR**                   | 45-90 min                    | 15-30 min                    | **60% faster**      |
+| **Observability Cost**     | $1K-2.2K/month               | $400-900/month               | **50% reduction**   |
+| **On-Call Hours**          | 20-40 hours/month            | 5-15 hours/month             | **60% reduction**   |
 
 **Total Monthly Savings**: **$6,920-18,560** (30-50% TCO reduction)
 **Human Efficiency Gains**: **15-25 hours/month** reclaimed from toil
@@ -1002,6 +1092,7 @@ jobs:
 ### 8.2 Implementation Roadmap
 
 **Phase 1: Quick Wins (0-30 Days)**
+
 - [ ] CI/CD consolidation (518 → 15 workflows)
 - [ ] Observability sampling reduction (100% → 5% in prod)
 - [ ] LLM model routing (10× cost reduction for simple queries)
@@ -1012,6 +1103,7 @@ jobs:
 ---
 
 **Phase 2: Structural Improvements (30-90 Days)**
+
 - [ ] Database optimization (Graviton migration, connection pooling)
 - [ ] Multi-region rationalization (decommission or downgrade secondary)
 - [ ] Observability cost containment (log retention tiering)
@@ -1022,6 +1114,7 @@ jobs:
 ---
 
 **Phase 3: Long-Term Durability (90+ Days)**
+
 - [ ] AI cost governance framework (global spend caps)
 - [ ] Spot instance strategy (60-70% compute savings)
 - [ ] Serverless offloading (batch jobs, infrequent services)
@@ -1035,6 +1128,7 @@ jobs:
 ### 8.3 Success Metrics
 
 **Track Monthly**:
+
 1. **Cost per User**: Target < $10/user/month
 2. **Cost per Request**: Target < $0.005/request
 3. **AI Cost as % of Revenue**: Target < 15%
@@ -1052,6 +1146,7 @@ jobs:
 ### 8.4 Risk Summary
 
 **Biggest Long-Term Cost Risks** (in priority order):
+
 1. ❌ **AI runaway costs**: No global spend cap, could exceed $100K/month
 2. ❌ **Neo4j lock-in**: $100K-300K migration cost if vendor issues arise
 3. ⚠️ **CI/CD waste**: 518 workflows = 5,000 wasted engineering minutes/month
@@ -1059,6 +1154,7 @@ jobs:
 5. ⚠️ **Observability over-collection**: 100% trace sampling = 10× data waste
 
 **Recommendations** (prioritized):
+
 1. **Immediate** (this week): Implement AI daily spend cap ($500/day)
 2. **This month**: Consolidate CI/CD workflows (518 → 15)
 3. **This quarter**: Start Neo4j abstraction layer (repository pattern)
@@ -1071,12 +1167,14 @@ jobs:
 **Summit is economically viable today** but faces **structural cost risks at scale**. The platform demonstrates **strong operational maturity** (observability, security, governance) but **over-engineers** in areas that don't scale (518 workflows, 388 services, 100% trace sampling).
 
 **Path to Sustainability**:
+
 1. **Cut waste** (CI/CD consolidation, observability sampling, right-sizing): **30-40% immediate savings**
 2. **Cap risks** (AI spend limits, circuit breakers): **Prevent runaway costs**
 3. **Automate toil** (runbook-to-code, auto-remediation): **Reduce on-call burden by 60%**
 4. **Plan exits** (Neo4j abstraction, multi-cloud): **Reduce vendor lock-in risk**
 
 **Expected Outcome**:
+
 - **Monthly TCO**: $12K-30K → **$6K-15K** (50% reduction)
 - **Cost at 10× scale**: $80K-200K → **$40K-100K** (economic viability maintained)
 - **On-call hours**: 20-40 hours → **5-15 hours** (sustainable ops)
@@ -1089,6 +1187,7 @@ jobs:
 ## Appendix A: Cost Model Assumptions
 
 **Infrastructure Pricing** (AWS us-west-2, as of 2026-01-01):
+
 - **EKS control plane**: $0.10/hour = $73/month
 - **m6i.large**: $0.096/hour = $70/month per node
 - **db.m6i.large**: $0.192/hour = $140/month
@@ -1097,12 +1196,14 @@ jobs:
 - **GitHub Actions**: $0.008/minute (ubuntu-latest)
 
 **LLM Pricing** (as of 2026-01-01):
+
 - **GPT-4o**: $5.00/$15.00 per 1M input/output tokens
 - **GPT-4o-mini**: $0.15/$0.60 per 1M tokens
 - **Claude Sonnet**: $3.00/$15.00 per 1M tokens
 - **Claude Haiku**: $0.25/$1.25 per 1M tokens
 
 **Human Cost Assumptions**:
+
 - **On-call engineer**: $150/hour fully-loaded (salary + benefits + overhead)
 - **Average incident**: 60 minutes MTTR
 - **Incidents per month**: 10 (based on severity levels)
@@ -1112,24 +1213,29 @@ jobs:
 ## Appendix B: Key Files Referenced
 
 **Cost Tracking**:
+
 - `observability/dashboards/cost-optimization-dashboard.json` (527 lines)
 - `server/src/maestro/cost_meter.ts` (138 lines)
 - `charts/opencost/values.yaml` (40 lines)
 
 **Infrastructure**:
+
 - `infra/terraform/modules/eks/main.tf` (EKS cluster config)
 - `infra/terraform/envs/prod/main.tf` (production sizing)
 - `charts/_common-values.yaml` (resource defaults)
 
 **Observability**:
+
 - `observability/loki/loki-config.yaml` (30d retention)
 - `charts/_common-values.yaml:66-115` (Prometheus config)
 
 **CI/CD**:
+
 - `.github/workflows/ci.yml` (main workflow)
 - 518 total workflow files
 
 **Runbooks**:
+
 - `/RUNBOOKS/` directory (76 files)
 - `RUNBOOKS/NEO4J_CAUSAL_CLUSTER.md` (9 manual steps)
 - `RUNBOOKS/INCIDENT_RESPONSE_PLAYBOOK.md` (6 manual steps)

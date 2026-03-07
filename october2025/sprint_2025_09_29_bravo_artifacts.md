@@ -177,13 +177,13 @@ metrics:
 image:
   tag: latest
 resources:
-  requests: { cpu: '50m', memory: '128Mi' }
-  limits: { cpu: '250m', memory: '512Mi' }
+  requests: { cpu: "50m", memory: "128Mi" }
+  limits: { cpu: "250m", memory: "512Mi" }
 env:
   - name: NODE_ENV
-    value: 'staging'
+    value: "staging"
   - name: FEATURE_FLAGS
-    value: 'safe_defaults'
+    value: "safe_defaults"
 ```
 
 ---
@@ -206,18 +206,18 @@ spec:
           expr: rate(http_requests_total{status=~"5.."}[5m]) / rate(http_requests_total[5m]) > 0.02
           for: 5m
           labels: { severity: critical, signal: error }
-          annotations: { summary: 'Canary error rate > 2%' }
+          annotations: { summary: "Canary error rate > 2%" }
         - alert: CanaryLatencyP95High
           expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le)) > 1.5
           for: 5m
           labels: { severity: critical, signal: latency }
-          annotations: { summary: 'Canary p95 latency > 1.5s' }
+          annotations: { summary: "Canary p95 latency > 1.5s" }
         - alert: ErrorBudgetBurnFast
           expr: (sum(rate(http_requests_total{status=~"5.."}[5m])) by (service)
             / sum(rate(http_requests_total[5m])) by (service)) > 0.02
           for: 2m
           labels: { severity: page, burn: fast }
-          annotations: { summary: 'Fast burn: 2%+ errors' }
+          annotations: { summary: "Fast burn: 2%+ errors" }
 ```
 
 ---
@@ -275,20 +275,18 @@ data:
 **Node/Express middleware snippet** (drop in `services/api-gateway/otel/middleware.ts`):
 
 ```ts
-import { context, trace, SpanStatusCode } from '@opentelemetry/api';
+import { context, trace, SpanStatusCode } from "@opentelemetry/api";
 export function withTrace(name: string, fn: any) {
   return async (req, res, next) => {
-    const tracer = trace.getTracer('api-gateway');
+    const tracer = trace.getTracer("api-gateway");
     await tracer.startActiveSpan(name, async (span) => {
       try {
-        span.setAttribute('http.route', req.path);
+        span.setAttribute("http.route", req.path);
         span.setAttribute(
-          'user.id.hash',
-          req.headers['x-user']
-            ? String(req.headers['x-user']).slice(-8)
-            : 'anon',
+          "user.id.hash",
+          req.headers["x-user"] ? String(req.headers["x-user"]).slice(-8) : "anon"
         );
-        span.setAttribute('feature_flags', process.env.FEATURE_FLAGS || '');
+        span.setAttribute("feature_flags", process.env.FEATURE_FLAGS || "");
         await fn(req, res, next);
         span.setStatus({ code: SpanStatusCode.OK });
       } catch (e: any) {
@@ -314,14 +312,14 @@ apiVersion: constraints.gatekeeper.sh/v1beta1
 kind: K8sRequiredProbes
 metadata: { name: require-probes }
 spec:
-  match: { kinds: [{ apiGroups: ['apps'], kinds: ['Deployment'] }] }
+  match: { kinds: [{ apiGroups: ["apps"], kinds: ["Deployment"] }] }
   parameters: { livenessProbe: true, readinessProbe: true }
 ---
 apiVersion: constraints.gatekeeper.sh/v1beta1
 kind: DisallowLatestTag
 metadata: { name: disallow-latest }
 spec:
-  match: { kinds: [{ apiGroups: ['apps'], kinds: ['Deployment'] }] }
+  match: { kinds: [{ apiGroups: ["apps"], kinds: ["Deployment"] }] }
 ```
 
 ---

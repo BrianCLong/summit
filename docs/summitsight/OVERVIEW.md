@@ -5,6 +5,7 @@
 Summitsight is the "Executive Control Tower" for the Summit platform. It aggregates data from all subsystems (Maestro, IntelGraph, Securiteyes, etc.) into a unified analytics warehouse to provide strategic visibility.
 
 It answers questions like:
+
 - "How is the engineering team performing vs. SLAs?" (CTO)
 - "What is our current security risk posture?" (CISO)
 - "Are we profitable on a per-tenant basis?" (CEO/CFO)
@@ -31,6 +32,7 @@ The system uses a dedicated analytics schema (`summitsight_`) separate from the 
 ### 3. API
 
 Exposed at `/summitsight`:
+
 - `GET /kpi`: List definitions
 - `GET /exec-dashboard/:role`: Role-specific metric bundles
 - `GET /warroom`: Real-time critical telemetry
@@ -39,6 +41,7 @@ Exposed at `/summitsight`:
 ### 4. Frontend
 
 Located in `apps/web/src/summitsight/`:
+
 - **Executive Dashboard:** Tabbed view for C-level personas.
 - **War Room:** High-contrast, real-time crisis management view.
 - **Forecasting View:** Visualizes projected trends.

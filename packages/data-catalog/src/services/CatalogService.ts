@@ -11,7 +11,7 @@ import {
   SearchResponse,
   AssetRelationship,
   RelationshipType,
-} from '../types/catalog.js';
+} from "../types/catalog.js";
 
 export interface ICatalogStore {
   getAsset(id: string): Promise<AssetMetadata | null>;
@@ -37,7 +37,9 @@ export class CatalogService {
   /**
    * Create new asset
    */
-  async createAsset(asset: Omit<AssetMetadata, 'id' | 'createdAt' | 'updatedAt'>): Promise<AssetMetadata> {
+  async createAsset(
+    asset: Omit<AssetMetadata, "id" | "createdAt" | "updatedAt">
+  ): Promise<AssetMetadata> {
     const now = new Date();
     const newAsset: AssetMetadata = {
       ...asset,
@@ -114,7 +116,10 @@ export class CatalogService {
   /**
    * Get related assets
    */
-  async getRelatedAssets(assetId: string, relationshipType?: RelationshipType): Promise<AssetMetadata[]> {
+  async getRelatedAssets(
+    assetId: string,
+    relationshipType?: RelationshipType
+  ): Promise<AssetMetadata[]> {
     const relationships = await this.store.getRelationships(assetId);
     const filteredRelationships = relationshipType
       ? relationships.filter((r) => r.relationshipType === relationshipType)
@@ -124,9 +129,7 @@ export class CatalogService {
       r.fromAssetId === assetId ? r.toAssetId : r.fromAssetId
     );
 
-    const relatedAssets = await Promise.all(
-      relatedAssetIds.map((id) => this.store.getAsset(id))
-    );
+    const relatedAssets = await Promise.all(relatedAssetIds.map((id) => this.store.getAsset(id)));
 
     return relatedAssets.filter((asset): asset is AssetMetadata => asset !== null);
   }
@@ -213,7 +216,7 @@ export class CatalogService {
    */
   private generateAssetId(type: AssetType, name: string): string {
     const timestamp = Date.now();
-    const sanitizedName = name.toLowerCase().replace(/[^a-z0-9]/g, '-');
+    const sanitizedName = name.toLowerCase().replace(/[^a-z0-9]/g, "-");
     return `${type.toLowerCase()}-${sanitizedName}-${timestamp}`;
   }
 

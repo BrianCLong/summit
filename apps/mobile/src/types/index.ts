@@ -1,12 +1,7 @@
 import { z } from 'zod';
 
 // Classification levels
-export const ClassificationLevel = z.enum([
-  'UNCLASSIFIED',
-  'CONFIDENTIAL',
-  'SECRET',
-  'TOP_SECRET',
-]);
+export const ClassificationLevel = z.enum(['UNCLASSIFIED', 'CONFIDENTIAL', 'SECRET', 'TOP_SECRET']);
 export type ClassificationLevel = z.infer<typeof ClassificationLevel>;
 
 // Priority levels
@@ -130,7 +125,14 @@ export const GEOINTFeatureSchema = z.object({
   id: z.string().uuid(),
   type: z.literal('Feature'),
   geometry: z.object({
-    type: z.enum(['Point', 'LineString', 'Polygon', 'MultiPoint', 'MultiLineString', 'MultiPolygon']),
+    type: z.enum([
+      'Point',
+      'LineString',
+      'Polygon',
+      'MultiPoint',
+      'MultiLineString',
+      'MultiPolygon',
+    ]),
     coordinates: z.union([
       z.tuple([z.number(), z.number()]),
       z.array(z.tuple([z.number(), z.number()])),

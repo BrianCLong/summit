@@ -11,48 +11,48 @@ Summit's Master Data Management platform provides enterprise-grade capabilities 
 Create and manage golden records (master records) with advanced survivorship rules:
 
 ```typescript
-import { GoldenRecordManager } from '@intelgraph/golden-records';
+import { GoldenRecordManager } from "@intelgraph/golden-records";
 
 const manager = new GoldenRecordManager({
-  domain: 'customer',
+  domain: "customer",
   survivorshipRules: [
     {
-      id: 'rule1',
-      fieldName: 'email',
-      strategy: 'most_recent',
-      priority: 1
+      id: "rule1",
+      fieldName: "email",
+      strategy: "most_recent",
+      priority: 1,
     },
     {
-      id: 'rule2',
-      fieldName: 'name',
-      strategy: 'most_trusted_source',
-      priority: 2
-    }
+      id: "rule2",
+      fieldName: "name",
+      strategy: "most_trusted_source",
+      priority: 2,
+    },
   ],
   enableVersioning: true,
-  enableLineageTracking: true
+  enableLineageTracking: true,
 });
 
 // Create golden record from multiple sources
 const goldenRecord = await manager.createGoldenRecord([
   {
-    sourceId: 'src1',
-    sourceSystem: 'CRM',
-    sourceRecordId: '123',
-    data: { name: 'John Doe', email: 'john@example.com' },
+    sourceId: "src1",
+    sourceSystem: "CRM",
+    sourceRecordId: "123",
+    data: { name: "John Doe", email: "john@example.com" },
     lastModified: new Date(),
     confidence: 0.95,
-    priority: 1
+    priority: 1,
   },
   {
-    sourceId: 'src2',
-    sourceSystem: 'ERP',
-    sourceRecordId: '456',
-    data: { name: 'J. Doe', email: 'jdoe@example.com' },
+    sourceId: "src2",
+    sourceSystem: "ERP",
+    sourceRecordId: "456",
+    data: { name: "J. Doe", email: "jdoe@example.com" },
     lastModified: new Date(),
     confidence: 0.85,
-    priority: 2
-  }
+    priority: 2,
+  },
 ]);
 ```
 
@@ -61,43 +61,43 @@ const goldenRecord = await manager.createGoldenRecord([
 Match and resolve entities across different systems:
 
 ```typescript
-import { EntityResolver } from '@intelgraph/golden-records';
-import { MatchingEngine } from '@intelgraph/mdm-core';
+import { EntityResolver } from "@intelgraph/golden-records";
+import { MatchingEngine } from "@intelgraph/mdm-core";
 
 const resolver = new EntityResolver({
   matchingConfig: {
-    algorithm: 'hybrid',
+    algorithm: "hybrid",
     threshold: 0.85,
     autoApproveThreshold: 0.95,
     blockingEnabled: true,
     matchingRules: [
       {
-        id: 'rule1',
-        name: 'Name and Email Match',
+        id: "rule1",
+        name: "Name and Email Match",
         fields: [
           {
-            fieldName: 'name',
-            comparator: 'jaro_winkler',
+            fieldName: "name",
+            comparator: "jaro_winkler",
             weight: 0.6,
-            required: true
+            required: true,
           },
           {
-            fieldName: 'email',
-            comparator: 'exact',
+            fieldName: "email",
+            comparator: "exact",
             weight: 0.4,
-            required: false
-          }
+            required: false,
+          },
         ],
         weights: { name: 0.6, email: 0.4 },
         threshold: 0.85,
         priority: 1,
-        active: true
-      }
-    ]
+        active: true,
+      },
+    ],
   },
   autoLinkThreshold: 0.95,
   manualReviewThreshold: 0.7,
-  enableMLMatching: false
+  enableMLMatching: false,
 });
 
 // Resolve entities
@@ -112,42 +112,37 @@ console.log(`Requires review: ${result.manualReviewRequired}`);
 Assess and improve data quality:
 
 ```typescript
-import { QualityEngine } from '@intelgraph/mdm-core';
+import { QualityEngine } from "@intelgraph/mdm-core";
 
 const qualityEngine = new QualityEngine();
 
 // Define quality rules
 const rules = [
   {
-    id: 'rule1',
-    name: 'Email Required',
-    description: 'Email field must be populated',
-    domain: 'customer',
-    dimension: 'completeness',
-    ruleType: 'field_validation',
-    severity: 'high',
+    id: "rule1",
+    name: "Email Required",
+    description: "Email field must be populated",
+    domain: "customer",
+    dimension: "completeness",
+    ruleType: "field_validation",
+    severity: "high",
     threshold: 1.0,
-    expression: 'email required',
+    expression: "email required",
     active: true,
     autoFix: false,
     metadata: {
       createdAt: new Date(),
-      createdBy: 'system',
+      createdBy: "system",
       updatedAt: new Date(),
-      updatedBy: 'system',
+      updatedBy: "system",
       version: 1,
-      executionCount: 0
-    }
-  }
+      executionCount: 0,
+    },
+  },
 ];
 
 // Assess quality
-const profile = await qualityEngine.assessQuality(
-  'record-123',
-  'customer',
-  customerData,
-  rules
-);
+const profile = await qualityEngine.assessQuality("record-123", "customer", customerData, rules);
 
 console.log(`Overall quality score: ${profile.overallScore}`);
 console.log(`Issues found: ${profile.issues.length}`);
@@ -158,25 +153,25 @@ console.log(`Issues found: ${profile.issues.length}`);
 Manage code lists and lookup tables:
 
 ```typescript
-import { ReferenceDataManager } from '@intelgraph/reference-data';
+import { ReferenceDataManager } from "@intelgraph/reference-data";
 
 const refDataManager = new ReferenceDataManager();
 
 // Create code list
 const codeList = await refDataManager.createCodeList(
-  'country_codes',
-  'ISO 3166 Country Codes',
-  'reference',
+  "country_codes",
+  "ISO 3166 Country Codes",
+  "reference",
   [
-    { code: 'US', value: 'United States' },
-    { code: 'CA', value: 'Canada' },
-    { code: 'MX', value: 'Mexico' }
+    { code: "US", value: "United States" },
+    { code: "CA", value: "Canada" },
+    { code: "MX", value: "Mexico" },
   ],
-  'data-steward'
+  "data-steward"
 );
 
 // Lookup code
-const country = await refDataManager.lookupCode('country_codes', 'US');
+const country = await refDataManager.lookupCode("country_codes", "US");
 console.log(country?.value); // 'United States'
 ```
 
@@ -185,33 +180,33 @@ console.log(country?.value); // 'United States'
 Build and manage organizational and product hierarchies:
 
 ```typescript
-import { HierarchyBuilder } from '@intelgraph/hierarchy-management';
+import { HierarchyBuilder } from "@intelgraph/hierarchy-management";
 
 const hierarchyBuilder = new HierarchyBuilder();
 
 // Create hierarchy
 const orgHierarchy = await hierarchyBuilder.createHierarchy(
-  'Corporate Structure',
-  'Company organizational hierarchy',
-  'organization',
-  'organizational'
+  "Corporate Structure",
+  "Company organizational hierarchy",
+  "organization",
+  "organizational"
 );
 
 // Add nodes
 const division = await hierarchyBuilder.addNode(
   orgHierarchy.id,
   orgHierarchy.rootNodeId,
-  'North America Division',
-  'division-001',
-  { region: 'NA' }
+  "North America Division",
+  "division-001",
+  { region: "NA" }
 );
 
 const department = await hierarchyBuilder.addNode(
   orgHierarchy.id,
   division.id,
-  'Sales Department',
-  'dept-sales',
-  { type: 'sales' }
+  "Sales Department",
+  "dept-sales",
+  { type: "sales" }
 );
 
 // Navigate hierarchy
@@ -224,48 +219,52 @@ const descendants = await hierarchyBuilder.getDescendants(division.id);
 Synchronize data across multiple sources:
 
 ```typescript
-import { SyncEngine } from '@intelgraph/mdm-sync';
+import { SyncEngine } from "@intelgraph/mdm-sync";
 
 const syncEngine = new SyncEngine();
 
 // Register sync configuration
 await syncEngine.registerConfiguration({
-  id: 'crm-erp-sync',
-  name: 'CRM to ERP Synchronization',
-  description: 'Sync customer data from CRM to ERP',
-  domain: 'customer',
-  syncType: 'scheduled',
-  direction: 'unidirectional',
-  sources: [/* source configs */],
-  targets: [/* target configs */],
+  id: "crm-erp-sync",
+  name: "CRM to ERP Synchronization",
+  description: "Sync customer data from CRM to ERP",
+  domain: "customer",
+  syncType: "scheduled",
+  direction: "unidirectional",
+  sources: [
+    /* source configs */
+  ],
+  targets: [
+    /* target configs */
+  ],
   schedule: {
-    scheduleType: 'interval',
+    scheduleType: "interval",
     interval: 300,
-    intervalUnit: 'seconds',
-    enabled: true
+    intervalUnit: "seconds",
+    enabled: true,
   },
   conflictResolution: {
-    strategy: 'most_recent',
+    strategy: "most_recent",
     priorityRules: [],
     notifyOnConflict: true,
-    autoResolve: false
+    autoResolve: false,
   },
   transformations: [],
-  status: 'active',
+  status: "active",
   metadata: {
     createdAt: new Date(),
-    createdBy: 'system',
+    createdBy: "system",
     updatedAt: new Date(),
-    updatedBy: 'system',
+    updatedBy: "system",
     version: 1,
     totalSyncs: 0,
     successfulSyncs: 0,
-    failedSyncs: 0
-  }
+    failedSyncs: 0,
+  },
 });
 
 // Start sync job
-const job = await syncEngine.startSync('crm-erp-sync');
+const job = await syncEngine.startSync("crm-erp-sync");
 ```
 
 ### 7. Data Stewardship Workflows
@@ -273,33 +272,33 @@ const job = await syncEngine.startSync('crm-erp-sync');
 Manage data stewardship and approval processes:
 
 ```typescript
-import { StewardshipWorkflowManager } from '@intelgraph/mdm-stewardship';
+import { StewardshipWorkflowManager } from "@intelgraph/mdm-stewardship";
 
 const stewardshipManager = new StewardshipWorkflowManager();
 
 // Create change request
 const changeRequest = await stewardshipManager.createChangeRequest(
-  'customer',
-  'record-123',
-  'update',
-  'john.steward',
+  "customer",
+  "record-123",
+  "update",
+  "john.steward",
   [
     {
-      fieldName: 'email',
-      currentValue: 'old@example.com',
-      proposedValue: 'new@example.com',
-      reason: 'Customer requested email update'
-    }
+      fieldName: "email",
+      currentValue: "old@example.com",
+      proposedValue: "new@example.com",
+      reason: "Customer requested email update",
+    },
   ],
-  'Customer initiated change via support ticket #456'
+  "Customer initiated change via support ticket #456"
 );
 
 // Create certification
 const certification = await stewardshipManager.certifyRecord(
-  'record-123',
-  'customer',
-  'data-steward',
-  'gold',
+  "record-123",
+  "customer",
+  "data-steward",
+  "gold",
   0.95
 );
 ```
@@ -309,53 +308,51 @@ const certification = await stewardshipManager.certifyRecord(
 Enforce governance policies and track compliance:
 
 ```typescript
-import { GovernanceEngine } from '@intelgraph/mdm-governance';
+import { GovernanceEngine } from "@intelgraph/mdm-governance";
 
 const governanceEngine = new GovernanceEngine();
 
 // Register governance policy
-await governanceEngine.registerPolicy('customer', {
-  dataOwner: 'chief-data-officer',
-  stewards: ['data-steward-1', 'data-steward-2'],
+await governanceEngine.registerPolicy("customer", {
+  dataOwner: "chief-data-officer",
+  stewards: ["data-steward-1", "data-steward-2"],
   accessControl: {
     roles: [],
     permissions: [],
-    defaultAccess: 'deny'
+    defaultAccess: "deny",
   },
   changeManagement: {
     approvalRequired: true,
-    approvers: ['manager-1'],
+    approvers: ["manager-1"],
     minApprovals: 1,
-    auditTrail: true
+    auditTrail: true,
   },
   qualityThreshold: 0.85,
   certificationRequired: true,
   retentionPolicy: {
     retentionPeriod: 7,
-    retentionUnit: 'years',
-    archiveStrategy: 'archive',
-    legalHoldEnabled: true
+    retentionUnit: "years",
+    archiveStrategy: "archive",
+    legalHoldEnabled: true,
   },
   privacyPolicy: {
-    piiFields: ['email', 'phone', 'ssn'],
+    piiFields: ["email", "phone", "ssn"],
     encryptionRequired: true,
     maskingRules: [],
     consentRequired: true,
-    rightToErasure: true
-  }
+    rightToErasure: true,
+  },
 });
 
 // Log audit event
-await governanceEngine.logAudit(
-  'user-123',
-  'update',
-  'master_record',
-  'record-456',
-  { field: 'email', oldValue: 'old@example.com', newValue: 'new@example.com' }
-);
+await governanceEngine.logAudit("user-123", "update", "master_record", "record-456", {
+  field: "email",
+  oldValue: "old@example.com",
+  newValue: "new@example.com",
+});
 
 // Generate compliance report
-const report = await governanceEngine.generateComplianceReport('customer', 'Q1-2024');
+const report = await governanceEngine.generateComplianceReport("customer", "Q1-2024");
 ```
 
 ### 9. Analytics & Reporting
@@ -363,40 +360,36 @@ const report = await governanceEngine.generateComplianceReport('customer', 'Q1-2
 Create dashboards and generate reports:
 
 ```typescript
-import { AnalyticsEngine } from '@intelgraph/mdm-analytics';
+import { AnalyticsEngine } from "@intelgraph/mdm-analytics";
 
 const analyticsEngine = new AnalyticsEngine();
 
 // Create dashboard
-const dashboard = await analyticsEngine.createDashboard(
-  'Customer MDM Dashboard',
-  'customer',
-  [
-    {
-      id: 'widget-1',
-      type: 'metric',
-      title: 'Total Master Records',
-      dataSource: 'master_records',
-      configuration: { metric: 'count' },
-      position: { x: 0, y: 0, width: 4, height: 2 }
-    },
-    {
-      id: 'widget-2',
-      type: 'chart',
-      title: 'Quality Score Trend',
-      dataSource: 'quality_scores',
-      configuration: { chartType: 'line', period: '30d' },
-      position: { x: 4, y: 0, width: 8, height: 4 }
-    }
-  ]
-);
+const dashboard = await analyticsEngine.createDashboard("Customer MDM Dashboard", "customer", [
+  {
+    id: "widget-1",
+    type: "metric",
+    title: "Total Master Records",
+    dataSource: "master_records",
+    configuration: { metric: "count" },
+    position: { x: 0, y: 0, width: 4, height: 2 },
+  },
+  {
+    id: "widget-2",
+    type: "chart",
+    title: "Quality Score Trend",
+    dataSource: "quality_scores",
+    configuration: { chartType: "line", period: "30d" },
+    position: { x: 4, y: 0, width: 8, height: 4 },
+  },
+]);
 
 // Generate report
 const report = await analyticsEngine.generateReport(
-  'Monthly MDM Report',
-  'quality_summary',
-  'customer',
-  'monthly'
+  "Monthly MDM Report",
+  "quality_summary",
+  "customer",
+  "monthly"
 );
 ```
 
@@ -409,40 +402,49 @@ The MDM service provides RESTful APIs for all MDM operations:
 **Base URL:** `http://localhost:3100/api/v1`
 
 #### Master Records
+
 - `POST /master-records` - Create golden record
 - `GET /master-records/:id` - Get master record
 - `POST /master-records/:id/certify` - Certify record
 
 #### Matching
+
 - `POST /matching/match` - Match two records
 - `POST /matching/batch` - Batch match records
 
 #### Quality
+
 - `POST /quality/assess` - Assess data quality
 
 #### Reference Data
+
 - `POST /reference-data/code-lists` - Create code list
 - `GET /reference-data/code-lists/:id` - Get code list
 - `GET /reference-data/lookup/:tableName` - Perform lookup
 
 #### Hierarchies
+
 - `POST /hierarchies` - Create hierarchy
 - `GET /hierarchies/:id` - Get hierarchy
 
 #### Sync
+
 - `POST /sync/configurations` - Register sync config
 - `POST /sync/:configId/start` - Start sync job
 - `GET /sync/jobs/:jobId` - Get job status
 
 #### Stewardship
+
 - `POST /stewardship/workflows` - Create workflow
 - `GET /stewardship/workflows/user/:userId` - Get user workflows
 
 #### Governance
+
 - `POST /governance/audit` - Log audit event
 - `GET /governance/compliance/:domain/report` - Get compliance report
 
 #### Analytics
+
 - `POST /analytics/dashboards` - Create dashboard
 - `POST /analytics/reports` - Generate report
 
@@ -516,20 +518,25 @@ SYNC_RETRY_ATTEMPTS=3
 ### Common Issues
 
 **Issue:** Low match rates
+
 - **Solution:** Review and tune matching thresholds and field weights
 
 **Issue:** Poor quality scores
+
 - **Solution:** Review quality rules and data sources, implement data cleansing
 
 **Issue:** Sync failures
+
 - **Solution:** Check source/target connectivity, review transformation logic
 
 **Issue:** Slow API responses
+
 - **Solution:** Enable caching, optimize database queries, increase resources
 
 ## Support
 
 For additional support and documentation:
+
 - GitHub: https://github.com/summit/mdm-platform
 - Documentation: https://docs.summit.io/mdm
 - Support: mdm-support@summit.io

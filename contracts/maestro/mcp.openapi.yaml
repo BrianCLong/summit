@@ -9,11 +9,11 @@ paths:
     get:
       summary: List MCP servers
       responses:
-        '200': { description: OK }
+        "200": { description: OK }
     post:
       summary: Create MCP server
       responses:
-        '201': { description: Created }
+        "201": { description: Created }
   /mcp/servers/{id}:
     get:
       summary: Get MCP server
@@ -23,7 +23,7 @@ paths:
           required: true
           schema: { type: string }
       responses:
-        '200': { description: OK }
+        "200": { description: OK }
     put:
       summary: Update MCP server
       parameters:
@@ -32,7 +32,7 @@ paths:
           required: true
           schema: { type: string }
       responses:
-        '200': { description: OK }
+        "200": { description: OK }
     delete:
       summary: Delete MCP server
       parameters:
@@ -41,7 +41,7 @@ paths:
           required: true
           schema: { type: string }
       responses:
-        '204': { description: No Content }
+        "204": { description: No Content }
   /runs/{id}/mcp/sessions:
     get:
       summary: List sessions for a run
@@ -51,7 +51,7 @@ paths:
           required: true
           schema: { type: string }
       responses:
-        '200': { description: OK }
+        "200": { description: OK }
     post:
       summary: Create a session for a run
       parameters:
@@ -60,7 +60,7 @@ paths:
           required: true
           schema: { type: string }
       responses:
-        '201': { description: Created }
+        "201": { description: Created }
   /runs/{id}/mcp/sessions/{sid}:
     delete:
       summary: Revoke a session
@@ -74,7 +74,7 @@ paths:
           required: true
           schema: { type: string }
       responses:
-        '204': { description: No Content }
+        "204": { description: No Content }
   /runs/{id}/mcp/invoke:
     post:
       summary: Invoke a tool under a session scope
@@ -84,7 +84,7 @@ paths:
           required: true
           schema: { type: string }
       responses:
-        '200': { description: OK }
+        "200": { description: OK }
   /runs/{id}/mcp/invocations:
     get:
       summary: List recent invocations for run
@@ -94,4 +94,4 @@ paths:
           required: true
           schema: { type: string }
       responses:
-        '200': { description: OK }
+        "200": { description: OK }

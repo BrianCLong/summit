@@ -37,11 +37,8 @@ The distributed configuration management service introduces a production-ready c
 ## Usage
 
 ```ts
-import {
-  DistributedConfigService,
-  InMemoryConfigRepository,
-} from '../config/distributed';
-import { z } from 'zod';
+import { DistributedConfigService, InMemoryConfigRepository } from "../config/distributed";
+import { z } from "zod";
 
 const schema = z.object({
   endpoint: z.string().url(),
@@ -55,23 +52,23 @@ const service = new DistributedConfigService(repository, {
   },
 });
 
-service.registerSchema('notification-service', schema);
-await service.createOrUpdate('notification-service', {
-  config: { endpoint: 'https://api', retries: 3 },
-  metadata: { actor: 'deploy-bot', message: 'baseline' },
+service.registerSchema("notification-service", schema);
+await service.createOrUpdate("notification-service", {
+  config: { endpoint: "https://api", retries: 3 },
+  metadata: { actor: "deploy-bot", message: "baseline" },
   overrides: {
     production: { retries: 5 },
   },
   canary: {
-    environment: 'production',
+    environment: "production",
     trafficPercent: 10,
     config: { retries: 6 },
     startAt: new Date(),
   },
 });
 
-const { effectiveConfig } = await service.getConfig('notification-service', {
-  environment: 'production',
+const { effectiveConfig } = await service.getConfig("notification-service", {
+  environment: "production",
   resolveSecrets: true,
   assignmentValue: 0.05,
 });

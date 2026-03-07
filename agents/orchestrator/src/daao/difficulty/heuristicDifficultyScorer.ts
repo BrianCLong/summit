@@ -1,4 +1,4 @@
-import { DifficultyBand, DifficultyEstimator, DifficultySignal } from './difficulty.js';
+import { DifficultyBand, DifficultyEstimator, DifficultySignal } from "./difficulty.js";
 
 export class HeuristicDifficultyScorer implements DifficultyEstimator {
   async estimate(query: string, context?: { userBudgetUsd?: number }): Promise<DifficultySignal> {
@@ -15,7 +15,15 @@ export class HeuristicDifficultyScorer implements DifficultyEstimator {
     }
 
     // Complexity keywords heuristic
-    const complexityKeywords = ["compare", "analyze", "evaluate", "design", "architecture", "strategy", "comprehensive"];
+    const complexityKeywords = [
+      "compare",
+      "analyze",
+      "evaluate",
+      "design",
+      "architecture",
+      "strategy",
+      "comprehensive",
+    ];
     let complexityMatches = 0;
     for (const keyword of complexityKeywords) {
       if (query.toLowerCase().includes(keyword)) {
@@ -57,7 +65,7 @@ export class HeuristicDifficultyScorer implements DifficultyEstimator {
       band,
       domain: "general", // Heuristic doesn't detect domain yet
       recommendedDepth,
-      reasons
+      reasons,
     };
   }
 }

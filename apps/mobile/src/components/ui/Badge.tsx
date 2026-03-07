@@ -4,31 +4,28 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/utils/cn';
 import type { Priority, ClassificationLevel, EntityType } from '@/types';
 
-const badgeVariants = cva(
-  'flex-row items-center justify-center rounded-full px-2.5 py-0.5',
-  {
-    variants: {
-      variant: {
-        default: 'bg-dark-elevated',
-        primary: 'bg-intel-600',
-        secondary: 'bg-dark-muted',
-        success: 'bg-green-600',
-        warning: 'bg-amber-600',
-        destructive: 'bg-red-600',
-        outline: 'border border-dark-border bg-transparent',
-      },
-      size: {
-        default: 'h-6',
-        sm: 'h-5',
-        lg: 'h-7',
-      },
+const badgeVariants = cva('flex-row items-center justify-center rounded-full px-2.5 py-0.5', {
+  variants: {
+    variant: {
+      default: 'bg-dark-elevated',
+      primary: 'bg-intel-600',
+      secondary: 'bg-dark-muted',
+      success: 'bg-green-600',
+      warning: 'bg-amber-600',
+      destructive: 'bg-red-600',
+      outline: 'border border-dark-border bg-transparent',
     },
-    defaultVariants: {
-      variant: 'default',
-      size: 'default',
+    size: {
+      default: 'h-6',
+      sm: 'h-5',
+      lg: 'h-7',
     },
   },
-);
+  defaultVariants: {
+    variant: 'default',
+    size: 'default',
+  },
+});
 
 const badgeTextVariants = cva('font-medium', {
   variants: {
@@ -79,7 +76,10 @@ export const Badge = React.forwardRef<View, BadgeProps>(
 Badge.displayName = 'Badge';
 
 // Priority Badge
-const priorityVariants: Record<Priority, 'destructive' | 'warning' | 'default' | 'success' | 'primary'> = {
+const priorityVariants: Record<
+  Priority,
+  'destructive' | 'warning' | 'default' | 'success' | 'primary'
+> = {
   CRITICAL: 'destructive',
   HIGH: 'warning',
   MEDIUM: 'default',
@@ -109,7 +109,9 @@ export const ClassificationBadge: React.FC<{
   className?: string;
 }> = ({ classification, className }) => (
   <View className={cn('px-2 py-0.5 rounded', classificationColors[classification], className)}>
-    <RNText className={cn('text-xs font-bold', classification === 'SECRET' ? 'text-black' : 'text-white')}>
+    <RNText
+      className={cn('text-xs font-bold', classification === 'SECRET' ? 'text-black' : 'text-white')}
+    >
       {classification.replace('_', ' ')}
     </RNText>
   </View>

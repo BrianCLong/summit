@@ -139,40 +139,40 @@ log "SMOKE: DONE"
 > 2 scenarios: Gateway ping & GraphQL persisted op. Duration short but statistically meaningful.
 
 ```javascript
-import http from 'k6/http';
-import { check, sleep } from 'k6';
+import http from "k6/http";
+import { check, sleep } from "k6";
 
 export let options = {
   thresholds: {
-    http_req_failed: ['rate<0.001'], // <0.1%
-    'http_req_duration{scenario:gateway}': ['p(95)<150'],
-    'http_req_duration{scenario:gql}': ['p(95)<1200'],
+    http_req_failed: ["rate<0.001"], // <0.1%
+    "http_req_duration{scenario:gateway}": ["p(95)<150"],
+    "http_req_duration{scenario:gql}": ["p(95)<1200"],
   },
   scenarios: {
     gateway: {
-      executor: 'constant-arrival-rate',
+      executor: "constant-arrival-rate",
       rate: 50,
-      timeUnit: '1s',
-      duration: '2m',
+      timeUnit: "1s",
+      duration: "2m",
       preAllocatedVUs: 10,
       maxVUs: 50,
-      exec: 'gateway',
+      exec: "gateway",
     },
     gql: {
-      executor: 'constant-arrival-rate',
+      executor: "constant-arrival-rate",
       rate: 20,
-      timeUnit: '1s',
-      duration: '2m',
+      timeUnit: "1s",
+      duration: "2m",
       preAllocatedVUs: 10,
       maxVUs: 30,
-      exec: 'gql',
+      exec: "gql",
     },
   },
 };
 
-const BASE = __ENV.BASE_URL || 'https://green.intelgraph.example.com';
-const TOKEN = __ENV.TOKEN || 'REDACTED_JWT';
-const PERSISTED_ID = __ENV.PERSISTED_ID || 'op:healthQuery:v1';
+const BASE = __ENV.BASE_URL || "https://green.intelgraph.example.com";
+const TOKEN = __ENV.TOKEN || "REDACTED_JWT";
+const PERSISTED_ID = __ENV.PERSISTED_ID || "op:healthQuery:v1";
 
 export function gateway() {
   const res = http.get(`${BASE}/api/ping`, {
@@ -186,7 +186,7 @@ export function gql() {
   const payload = JSON.stringify({ id: PERSISTED_ID, variables: {} });
   const res = http.post(`${BASE}/graphql`, payload, {
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
       Authorization: `Bearer ${TOKEN}`,
     },
   });

@@ -60,7 +60,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: '18', cache: 'pnpm' }
+        with: { node-version: "18", cache: "pnpm" }
       - run: pnpm install --frozen-lockfile
       - name: Compute affected
         run: pnpm turbo run build,test --filter=...[HEAD] --cache-dir=.turbo
@@ -92,12 +92,12 @@ jobs:
 // server/ai/router.ts (budget-aware model pick)
 export function pickModel(
   { tokens, risk }: { tokens: number; risk: number },
-  remainingUSD: number,
+  remainingUSD: number
 ) {
-  if (remainingUSD < 0.1) return 'small';
-  if (risk > 0.7 || tokens > 20_000) return 'large';
-  if (risk > 0.4) return 'medium';
-  return 'small';
+  if (remainingUSD < 0.1) return "small";
+  if (risk > 0.7 || tokens > 20_000) return "large";
+  if (risk > 0.4) return "medium";
+  return "small";
 }
 ```
 
@@ -105,10 +105,10 @@ export function pickModel(
 # prompts/critic.v1.yaml
 meta:
   id: critic@v1
-  purpose: 'Summarize semantic diff, compute risk, and propose tests'
+  purpose: "Summarize semantic diff, compute risk, and propose tests"
 guardrails:
-  - 'Do not approve missing tests for changed logic.'
-  - 'Never include license-incompatible code.'
+  - "Do not approve missing tests for changed logic."
+  - "Never include license-incompatible code."
 outputs:
   - risk_score: float
   - summary: markdown
@@ -204,16 +204,16 @@ export function riskScore(s: {
 ```yaml
 # policy/rules.yaml
 allow:
-  - path: 'server/**'
-    actions: ['read', 'write']
+  - path: "server/**"
+    actions: ["read", "write"]
 deny:
-  - path: 'infra/**'
-    actions: ['write']
-    reason: 'Infra changes require human review.'
+  - path: "infra/**"
+    actions: ["write"]
+    reason: "Infra changes require human review."
 deps:
   deny:
-    - pattern: '/.*GPL.*/i'
-      reason: 'GPL-licensed deps violate distribution policy.'
+    - pattern: "/.*GPL.*/i"
+      reason: "GPL-licensed deps violate distribution policy."
 models:
   max_usd_per_pr: 3.00
   max_prompt_tokens: 60000
@@ -287,10 +287,10 @@ models:
 
 ```ts
 // scripts/allocate-tests.js
-const fs = require('fs');
+const fs = require("fs");
 const idx = +process.argv[2],
   total = +process.argv[3];
-const t = JSON.parse(fs.readFileSync('ci/test-timings.json', 'utf8'));
+const t = JSON.parse(fs.readFileSync("ci/test-timings.json", "utf8"));
 const files = Object.entries(t).sort((a, b) => b[1] - a[1]);
 const buckets = Array.from({ length: total }, () => ({ t: 0, files: [] }));
 for (const [f, s] of files) {
@@ -298,7 +298,7 @@ for (const [f, s] of files) {
   buckets[0].files.push(f);
   buckets[0].t += s || 1;
 }
-console.log(buckets[idx - 1].files.join(' '));
+console.log(buckets[idx - 1].files.join(" "));
 ```
 
 **Cosign attestation gate**

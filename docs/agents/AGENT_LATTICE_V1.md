@@ -17,12 +17,12 @@ In the Summit Lattice, every agent has:
 
 ## The Core Agents
 
-| Agent | Avatar | Role | Rank | Primary Function | Implementation |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **Jules** | 🧑‍✈️ | **Release Captain** | **Strategic** | Strategy, Architecture, Release Decisions. "The Lawmaker". | `ChangeReviewAgent` (Conceptual), `AGENTS.md` Owner. |
-| **Maestro** | 🎼 | **Orchestrator** | **System** | Task dispatch, Dependency management, Safety enforcement. | `EnhancedAutonomousOrchestrator` (`server/src/autonomous/orchestrator.enhanced.ts`). |
-| **Codex** | 💻 | **Engineer** | **Tactical** | Implementation, Coding, Testing. | LLM Interfaces, `Task` Executors. |
-| **Aegis** | 🛡️ | **Guardian** | **Governance** | Policy evaluation, Risk scoring, Blocking. | `PolicyEngine` (`server/src/autonomous/policy-engine.ts`). |
+| Agent       | Avatar | Role                | Rank           | Primary Function                                           | Implementation                                                                       |
+| :---------- | :----- | :------------------ | :------------- | :--------------------------------------------------------- | :----------------------------------------------------------------------------------- |
+| **Jules**   | 🧑‍✈️     | **Release Captain** | **Strategic**  | Strategy, Architecture, Release Decisions. "The Lawmaker". | `ChangeReviewAgent` (Conceptual), `AGENTS.md` Owner.                                 |
+| **Maestro** | 🎼     | **Orchestrator**    | **System**     | Task dispatch, Dependency management, Safety enforcement.  | `EnhancedAutonomousOrchestrator` (`server/src/autonomous/orchestrator.enhanced.ts`). |
+| **Codex**   | 💻     | **Engineer**        | **Tactical**   | Implementation, Coding, Testing.                           | LLM Interfaces, `Task` Executors.                                                    |
+| **Aegis**   | 🛡️     | **Guardian**        | **Governance** | Policy evaluation, Risk scoring, Blocking.                 | `PolicyEngine` (`server/src/autonomous/policy-engine.ts`).                           |
 
 ## The Lattice Protocol
 
@@ -33,11 +33,11 @@ Agents communicate via **Tasks** managed by the Orchestrator. Direct agent-to-ag
 ```typescript
 interface Task {
   id: string;
-  type: string;             // e.g., 'deploy', 'scan_code'
+  type: string; // e.g., 'deploy', 'scan_code'
   params: Record<string, any>;
-  safetyCategory: 'read' | 'write' | 'deploy';
+  safetyCategory: "read" | "write" | "deploy";
   requiresApproval: boolean;
-  idempotencyKey: string;   // PREVENTS DOUBLE EXECUTION
+  idempotencyKey: string; // PREVENTS DOUBLE EXECUTION
 }
 ```
 
@@ -54,8 +54,8 @@ Before **Maestro** dispatches a task to **Codex**:
 
 The Lattice is **aware** of the `ProvenanceLedger`.
 
-* **Jules** signs Release Roots.
-* **Codex** commits code (which is witnessed).
-* **Aegis** signs Policy Decisions.
+- **Jules** signs Release Roots.
+- **Codex** commits code (which is witnessed).
+- **Aegis** signs Policy Decisions.
 
 This ensures that "Robot Work" is just as audited as "Human Work".

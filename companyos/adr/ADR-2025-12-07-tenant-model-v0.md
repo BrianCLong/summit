@@ -58,16 +58,16 @@ We implement a PostgreSQL-based tenant model with the following tables:
 
 ### Standard Feature Flags
 
-| Flag Name | Default | Description |
-|-----------|---------|-------------|
-| ai_copilot_access | false | Enable AI assistant features |
-| billing_enabled | false | Enable billing and invoicing |
-| advanced_analytics | false | Advanced analytics dashboards |
-| export_enabled | true | Data export functionality |
-| api_access | true | REST/GraphQL API access |
-| sso_enabled | false | Single sign-on |
-| custom_branding | false | Custom logos and colors |
-| audit_log_export | false | Audit log exports |
+| Flag Name          | Default | Description                   |
+| ------------------ | ------- | ----------------------------- |
+| ai_copilot_access  | false   | Enable AI assistant features  |
+| billing_enabled    | false   | Enable billing and invoicing  |
+| advanced_analytics | false   | Advanced analytics dashboards |
+| export_enabled     | true    | Data export functionality     |
+| api_access         | true    | REST/GraphQL API access       |
+| sso_enabled        | false   | Single sign-on                |
+| custom_branding    | false   | Custom logos and colors       |
+| audit_log_export   | false   | Audit log exports             |
 
 ## Consequences
 

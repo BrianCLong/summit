@@ -6,14 +6,16 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-  CardDescription
+  CardDescription,
 } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 
 export default function VerifyEmailPage() {
   const [searchParams] = useSearchParams()
   const token = searchParams.get('token')
-  const [status, setStatus] = useState<'verifying' | 'success' | 'error'>('verifying')
+  const [status, setStatus] = useState<'verifying' | 'success' | 'error'>(
+    'verifying'
+  )
   const [message, setMessage] = useState('')
 
   useEffect(() => {
@@ -28,7 +30,7 @@ export default function VerifyEmailPage() {
         const response = await fetch('/auth/verify-email', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ token })
+          body: JSON.stringify({ token }),
         })
 
         const data = await response.json()
@@ -74,9 +76,12 @@ export default function VerifyEmailPage() {
         </CardHeader>
         <CardContent className="text-center space-y-6">
           <p className="text-blue-200">
-            {status === 'verifying' && 'Please wait while we verify your email address.'}
-            {status === 'success' && 'Your account has been successfully verified. You can now access the platform.'}
-            {status === 'error' && (message || 'The verification link is invalid or has expired.')}
+            {status === 'verifying' &&
+              'Please wait while we verify your email address.'}
+            {status === 'success' &&
+              'Your account has been successfully verified. You can now access the platform.'}
+            {status === 'error' &&
+              (message || 'The verification link is invalid or has expired.')}
           </p>
 
           <div className="pt-4">
@@ -90,7 +95,10 @@ export default function VerifyEmailPage() {
             {status === 'error' && (
               <div className="space-y-3">
                 <Link to="/signup">
-                  <Button variant="outline" className="w-full text-white border-white/20 hover:bg-white/10">
+                  <Button
+                    variant="outline"
+                    className="w-full text-white border-white/20 hover:bg-white/10"
+                  >
                     Register Again
                   </Button>
                 </Link>

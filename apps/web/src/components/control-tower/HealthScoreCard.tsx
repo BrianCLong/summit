@@ -2,7 +2,7 @@
  * Health Score Card - Displays operational health score with components
  */
 
-import React from 'react';
+import React from 'react'
 import {
   Box,
   Paper,
@@ -11,25 +11,25 @@ import {
   Chip,
   Skeleton,
   useTheme,
-} from '@mui/material';
+} from '@mui/material'
 import {
   TrendingUp as TrendingUpIcon,
   TrendingDown as TrendingDownIcon,
   TrendingFlat as TrendingFlatIcon,
-} from '@mui/icons-material';
+} from '@mui/icons-material'
 
 export interface HealthScoreComponent {
-  name: string;
-  score: number;
-  status: 'HEALTHY' | 'WARNING' | 'CRITICAL' | 'UNKNOWN';
+  name: string
+  score: number
+  status: 'HEALTHY' | 'WARNING' | 'CRITICAL' | 'UNKNOWN'
 }
 
 export interface HealthScoreCardProps {
-  score: number;
-  trend: 'UP' | 'DOWN' | 'STABLE';
-  change: number;
-  components: HealthScoreComponent[];
-  isLoading?: boolean;
+  score: number
+  trend: 'UP' | 'DOWN' | 'STABLE'
+  change: number
+  components: HealthScoreComponent[]
+  isLoading?: boolean
 }
 
 export const HealthScoreCard: React.FC<HealthScoreCardProps> = ({
@@ -39,50 +39,57 @@ export const HealthScoreCard: React.FC<HealthScoreCardProps> = ({
   components,
   isLoading = false,
 }) => {
-  const theme = useTheme();
+  const theme = useTheme()
 
   const getScoreColor = (value: number): string => {
-    if (value >= 80) return theme.palette.success.main;
-    if (value >= 60) return theme.palette.warning.main;
-    return theme.palette.error.main;
-  };
+    if (value >= 80) return theme.palette.success.main
+    if (value >= 60) return theme.palette.warning.main
+    return theme.palette.error.main
+  }
 
   const getStatusColor = (status: string): string => {
     switch (status) {
       case 'HEALTHY':
-        return theme.palette.success.main;
+        return theme.palette.success.main
       case 'WARNING':
-        return theme.palette.warning.main;
+        return theme.palette.warning.main
       case 'CRITICAL':
-        return theme.palette.error.main;
+        return theme.palette.error.main
       default:
-        return theme.palette.grey[500];
+        return theme.palette.grey[500]
     }
-  };
+  }
 
   const getTrendIcon = () => {
     switch (trend) {
       case 'UP':
-        return <TrendingUpIcon sx={{ color: theme.palette.success.main }} />;
+        return <TrendingUpIcon sx={{ color: theme.palette.success.main }} />
       case 'DOWN':
-        return <TrendingDownIcon sx={{ color: theme.palette.error.main }} />;
+        return <TrendingDownIcon sx={{ color: theme.palette.error.main }} />
       default:
-        return <TrendingFlatIcon sx={{ color: theme.palette.grey[500] }} />;
+        return <TrendingFlatIcon sx={{ color: theme.palette.grey[500] }} />
     }
-  };
+  }
 
   if (isLoading) {
     return (
-      <Paper elevation={0} sx={{ p: 3, border: `1px solid ${theme.palette.divider}` }}>
+      <Paper
+        elevation={0}
+        sx={{ p: 3, border: `1px solid ${theme.palette.divider}` }}
+      >
         <Skeleton variant="text" width="40%" height={32} />
-        <Skeleton variant="rectangular" height={24} sx={{ mt: 2, borderRadius: 1 }} />
+        <Skeleton
+          variant="rectangular"
+          height={24}
+          sx={{ mt: 2, borderRadius: 1 }}
+        />
         <Box display="flex" gap={2} mt={2}>
-          {[1, 2, 3, 4].map((i) => (
+          {[1, 2, 3, 4].map(i => (
             <Skeleton key={i} variant="text" width={80} />
           ))}
         </Box>
       </Paper>
-    );
+    )
   }
 
   return (
@@ -123,7 +130,11 @@ export const HealthScoreCard: React.FC<HealthScoreCardProps> = ({
         </Box>
 
         <Box display="flex" alignItems="center" gap={1}>
-          <Typography variant="h4" fontWeight={700} color={getScoreColor(score)}>
+          <Typography
+            variant="h4"
+            fontWeight={700}
+            color={getScoreColor(score)}
+          >
             {score}
           </Typography>
           <Typography variant="body2" color="textSecondary">
@@ -145,13 +156,8 @@ export const HealthScoreCard: React.FC<HealthScoreCardProps> = ({
 
       {/* Component Scores */}
       <Box display="flex" gap={2} flexWrap="wrap">
-        {components.map((component) => (
-          <Box
-            key={component.name}
-            display="flex"
-            alignItems="center"
-            gap={1}
-          >
+        {components.map(component => (
+          <Box key={component.name} display="flex" alignItems="center" gap={1}>
             <Typography variant="body2" color="textSecondary">
               {component.name}:
             </Typography>
@@ -177,7 +183,7 @@ export const HealthScoreCard: React.FC<HealthScoreCardProps> = ({
         ))}
       </Box>
     </Paper>
-  );
-};
+  )
+}
 
-export default HealthScoreCard;
+export default HealthScoreCard

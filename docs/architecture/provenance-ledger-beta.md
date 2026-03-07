@@ -2,7 +2,7 @@
 
 ## Executive Summary
 
-This document describes the advancement of the Provenance & Claim Ledger service to **beta**, fulfilling the Wishbooks requirement: *"every assertion carries source → transform chain, hashes, confidence, and licenses; exports ship with verifiable manifests."*
+This document describes the advancement of the Provenance & Claim Ledger service to **beta**, fulfilling the Wishbooks requirement: _"every assertion carries source → transform chain, hashes, confidence, and licenses; exports ship with verifiable manifests."_
 
 ## Current State Analysis
 
@@ -11,6 +11,7 @@ This document describes the advancement of the Provenance & Claim Ledger service
 The codebase has substantial provenance infrastructure across multiple implementations:
 
 #### 1. **Node.js/TypeScript Implementation**
+
 - **Location**: `server/src/services/provenance-ledger.ts`
 - **Responsibilities**:
   - Immutable provenance chain recording (ProvenanceChain)
@@ -21,6 +22,7 @@ The codebase has substantial provenance infrastructure across multiple implement
   - Provenance chain verification
 
 #### 2. **Python/FastAPI Implementation**
+
 - **Location**: `prov_ledger/app/`
 - **Responsibilities**:
   - Claim extraction from natural language (`nlp/extractor.py`)
@@ -34,6 +36,7 @@ The codebase has substantial provenance infrastructure across multiple implement
 #### 3. **Database Schema**
 
 **TimescaleDB Tables**:
+
 - `provenance_chain` - Immutable audit trail with SHA256 hashing, HMAC signatures
 - `claims_registry` - Claims with content hash, confidence, evidence references
 - `export_manifests` - Manifests with transformation chains and chain of custody
@@ -44,6 +47,7 @@ The codebase has substantial provenance infrastructure across multiple implement
 - `audit_events` - Immutable audit events log
 
 **Neo4j Graph Schema**:
+
 - `Claim` nodes - Unique ID and content_hash constraints
 - `Evidence` nodes - Unique sha256 constraints
 - `License` nodes - License type tracking
@@ -52,6 +56,7 @@ The codebase has substantial provenance infrastructure across multiple implement
 - Indexes on timestamps, statuses, clearance levels
 
 #### 4. **Export & Verification**
+
 - Merkle tree construction and proof generation
 - Digital signatures (SHA256, HMAC, Ed25519 planned)
 - Export manifest schema (JSON Schema spec)
@@ -118,105 +123,111 @@ The codebase has substantial provenance infrastructure across multiple implement
 ### Core Data Models
 
 #### Source
+
 ```typescript
 interface Source {
-  id: string;                    // UUID
-  source_hash: string;           // SHA256 of original content
-  source_type: 'document' | 'database' | 'api' | 'user_input' | 'sensor';
-  origin_url?: string;           // Original location
+  id: string; // UUID
+  source_hash: string; // SHA256 of original content
+  source_type: "document" | "database" | "api" | "user_input" | "sensor";
+  origin_url?: string; // Original location
   ingestion_timestamp: Date;
   metadata: {
-    format?: string;             // PDF, CSV, JSON, etc.
+    format?: string; // PDF, CSV, JSON, etc.
     size_bytes?: number;
     encoding?: string;
     author?: string;
     created_date?: Date;
   };
-  license: License;              // Associated license
-  custody_chain: string[];       // Actor IDs who handled this source
+  license: License; // Associated license
+  custody_chain: string[]; // Actor IDs who handled this source
   retention_policy: string;
-  created_by: string;            // Actor ID
+  created_by: string; // Actor ID
 }
 ```
 
 #### Transform
+
 ```typescript
 interface Transform {
-  id: string;                    // UUID
-  transform_type: string;        // 'ocr', 'translate', 'extract', 'normalize', 'enrich'
-  input_hash: string;            // SHA256 of input
-  output_hash: string;           // SHA256 of output
-  algorithm: string;             // Specific algorithm/model used
-  version: string;               // Algorithm version
+  id: string; // UUID
+  transform_type: string; // 'ocr', 'translate', 'extract', 'normalize', 'enrich'
+  input_hash: string; // SHA256 of input
+  output_hash: string; // SHA256 of output
+  algorithm: string; // Specific algorithm/model used
+  version: string; // Algorithm version
   parameters: Record<string, any>; // Transform parameters
   execution_timestamp: Date;
   duration_ms: number;
-  executed_by: string;           // Actor ID or system component
-  confidence?: number;           // Confidence in transformation (0-1)
-  parent_transforms: string[];   // Previous transform IDs in chain
+  executed_by: string; // Actor ID or system component
+  confidence?: number; // Confidence in transformation (0-1)
+  parent_transforms: string[]; // Previous transform IDs in chain
 }
 ```
 
 #### Evidence
+
 ```typescript
 interface Evidence {
-  id: string;                    // UUID
-  evidence_hash: string;         // SHA256 of evidence content
-  evidence_type: 'document' | 'image' | 'video' | 'log' | 'testimony' | 'sensor_data';
-  content_preview?: string;      // First N chars or description
-  storage_uri: string;           // S3/WORM storage location
-  source_id: string;             // Reference to Source
-  transform_chain: string[];     // Array of Transform IDs
+  id: string; // UUID
+  evidence_hash: string; // SHA256 of evidence content
+  evidence_type: "document" | "image" | "video" | "log" | "testimony" | "sensor_data";
+  content_preview?: string; // First N chars or description
+  storage_uri: string; // S3/WORM storage location
+  source_id: string; // Reference to Source
+  transform_chain: string[]; // Array of Transform IDs
   license: License;
   classification_level: string;
   collected_at: Date;
-  registered_by: string;         // Actor ID
+  registered_by: string; // Actor ID
   metadata: Record<string, any>;
 }
 ```
 
 #### Claim
+
 ```typescript
 interface Claim {
-  id: string;                    // UUID
-  content_hash: string;          // SHA256 of claim content
-  content: string;               // The assertion/claim text
-  claim_type: 'factual' | 'inferential' | 'predictive' | 'evaluative';
-  confidence: number;            // 0-1
-  evidence_ids: string[];        // References to Evidence
-  source_id: string;             // Primary Source reference
-  transform_chain: string[];     // Transforms applied to derive claim
+  id: string; // UUID
+  content_hash: string; // SHA256 of claim content
+  content: string; // The assertion/claim text
+  claim_type: "factual" | "inferential" | "predictive" | "evaluative";
+  confidence: number; // 0-1
+  evidence_ids: string[]; // References to Evidence
+  source_id: string; // Primary Source reference
+  transform_chain: string[]; // Transforms applied to derive claim
   extracted_at: Date;
-  created_by: string;            // Actor ID or extraction system
+  created_by: string; // Actor ID or extraction system
   investigation_id?: string;
-  license: License;              // Inherited or specific
-  contradicts: string[];         // Other claim IDs this contradicts
-  corroborates: string[];        // Other claim IDs this supports
+  license: License; // Inherited or specific
+  contradicts: string[]; // Other claim IDs this contradicts
+  corroborates: string[]; // Other claim IDs this supports
 }
 ```
 
 #### License
+
 ```typescript
 interface License {
   id: string;
-  license_type: 'public' | 'internal' | 'restricted' | 'classified';
-  license_terms?: string;        // CC-BY-4.0, proprietary, etc.
-  restrictions: string[];        // Usage restrictions
+  license_type: "public" | "internal" | "restricted" | "classified";
+  license_terms?: string; // CC-BY-4.0, proprietary, etc.
+  restrictions: string[]; // Usage restrictions
   attribution_required: boolean;
   expiration_date?: Date;
 }
 ```
 
 #### ExportManifest (Enhanced)
+
 ```typescript
 interface ExportManifest {
   manifest_id: string;
-  manifest_version: string;      // Semantic version
+  manifest_version: string; // Semantic version
   created_at: Date;
   created_by: string;
   bundle_id: string;
-  merkle_root: string;           // Root hash of Merkle tree
-  hash_algorithm: 'SHA-256' | 'SHA3-256';
+  merkle_root: string; // Root hash of Merkle tree
+  hash_algorithm: "SHA-256" | "SHA3-256";
 
   items: ManifestItem[];
 
@@ -229,19 +240,19 @@ interface ExportManifest {
   retention_policy: string;
 
   // Verification
-  signature: string;             // Digital signature of manifest
-  public_key_id: string;         // Key used for signing
+  signature: string; // Digital signature of manifest
+  public_key_id: string; // Key used for signing
 
   // License aggregation
-  licenses: License[];           // All licenses in bundle
-  license_conflicts?: string[];  // Any conflicting license requirements
+  licenses: License[]; // All licenses in bundle
+  license_conflicts?: string[]; // Any conflicting license requirements
 }
 
 interface ManifestItem {
   id: string;
-  item_type: 'claim' | 'evidence' | 'source' | 'transform';
+  item_type: "claim" | "evidence" | "source" | "transform";
   content_hash: string;
-  merkle_proof: string[];        // Path to merkle_root
+  merkle_proof: string[]; // Path to merkle_root
   source_id?: string;
   transform_chain: string[];
   license_id: string;
@@ -366,6 +377,7 @@ CREATE INDEX transform_timestamp_idx IF NOT EXISTS FOR (t:Transform) ON (t.execu
 **Unified ProvenanceLedgerService** (`server/src/services/provenance-ledger-beta.ts`):
 
 Core methods:
+
 - `registerSource(sourceData)` → Source
 - `registerTransform(transformData)` → Transform
 - `registerEvidence(evidenceData, sourceId, transformChain)` → Evidence
@@ -387,55 +399,54 @@ async function ingestDocument(
   userId: string,
   investigationId: string
 ): Promise<{ claims: Claim[]; evidence: Evidence[] }> {
-
   // 1. Register source
   const sourceHash = await computeFileHash(documentPath);
   const source = await provenanceLedger.registerSource({
-    source_type: 'document',
+    source_type: "document",
     source_hash: sourceHash,
     origin_url: documentPath,
     metadata: {
-      format: 'PDF',
-      size_bytes: await getFileSize(documentPath)
+      format: "PDF",
+      size_bytes: await getFileSize(documentPath),
     },
     license: await detectLicense(documentPath),
-    created_by: userId
+    created_by: userId,
   });
 
   // 2. Extract text (Transform 1)
   const extractedText = await extractTextFromPDF(documentPath);
   const extractTransform = await provenanceLedger.registerTransform({
-    transform_type: 'extract',
+    transform_type: "extract",
     input_hash: sourceHash,
     output_hash: computeHash(extractedText),
-    algorithm: 'pdf-extract',
-    version: '1.0.0',
-    parameters: { method: 'pdfplumber' },
-    executed_by: 'system'
+    algorithm: "pdf-extract",
+    version: "1.0.0",
+    parameters: { method: "pdfplumber" },
+    executed_by: "system",
   });
 
   // 3. Normalize text (Transform 2)
   const normalizedText = normalizeText(extractedText);
   const normalizeTransform = await provenanceLedger.registerTransform({
-    transform_type: 'normalize',
+    transform_type: "normalize",
     input_hash: computeHash(extractedText),
     output_hash: computeHash(normalizedText),
-    algorithm: 'text-normalize',
-    version: '1.0.0',
+    algorithm: "text-normalize",
+    version: "1.0.0",
     parameters: { lowercase: true, remove_stopwords: true },
-    executed_by: 'system',
-    parent_transforms: [extractTransform.id]
+    executed_by: "system",
+    parent_transforms: [extractTransform.id],
   });
 
   // 4. Register evidence
   const evidence = await provenanceLedger.registerEvidence({
-    evidence_type: 'document',
+    evidence_type: "document",
     content_preview: normalizedText.substring(0, 500),
     storage_uri: `s3://evidence-bucket/${sourceHash}`,
     source_id: source.id,
     transform_chain: [extractTransform.id, normalizeTransform.id],
     license: source.license,
-    registered_by: userId
+    registered_by: userId,
   });
 
   // 5. Extract claims (Transform 3)
@@ -444,26 +455,26 @@ async function ingestDocument(
 
   for (const claimText of extractedClaims) {
     const claimTransform = await provenanceLedger.registerTransform({
-      transform_type: 'extract_claim',
+      transform_type: "extract_claim",
       input_hash: computeHash(normalizedText),
       output_hash: computeHash(claimText),
-      algorithm: 'nlp-claim-extractor',
-      version: '2.0.0',
-      parameters: { model: 'claim-bert-v2' },
-      executed_by: 'system',
-      parent_transforms: [normalizeTransform.id]
+      algorithm: "nlp-claim-extractor",
+      version: "2.0.0",
+      parameters: { model: "claim-bert-v2" },
+      executed_by: "system",
+      parent_transforms: [normalizeTransform.id],
     });
 
     const claim = await provenanceLedger.registerClaim({
       content: claimText,
-      claim_type: 'factual',
+      claim_type: "factual",
       confidence: 0.85,
       evidence_ids: [evidence.id],
       source_id: source.id,
       transform_chain: [extractTransform.id, normalizeTransform.id, claimTransform.id],
       created_by: userId,
       investigation_id: investigationId,
-      license: source.license
+      license: source.license,
     });
 
     claims.push(claim);
@@ -483,90 +494,94 @@ async function createVerifiableExport(
   investigationId: string,
   userId: string
 ): Promise<{ manifest: ExportManifest; bundle: Buffer }> {
-
   // 1. Gather all claims, evidence, sources, transforms
   const claims = await getClaims({ investigation_id: investigationId });
-  const evidenceIds = [...new Set(claims.flatMap(c => c.evidence_ids))];
+  const evidenceIds = [...new Set(claims.flatMap((c) => c.evidence_ids))];
   const evidence = await getEvidence(evidenceIds);
-  const sourceIds = [...new Set([
-    ...claims.map(c => c.source_id),
-    ...evidence.map(e => e.source_id)
-  ])];
+  const sourceIds = [
+    ...new Set([...claims.map((c) => c.source_id), ...evidence.map((e) => e.source_id)]),
+  ];
   const sources = await getSources(sourceIds);
-  const transformIds = [...new Set([
-    ...claims.flatMap(c => c.transform_chain),
-    ...evidence.flatMap(e => e.transform_chain)
-  ])];
+  const transformIds = [
+    ...new Set([
+      ...claims.flatMap((c) => c.transform_chain),
+      ...evidence.flatMap((e) => e.transform_chain),
+    ]),
+  ];
   const transforms = await getTransforms(transformIds);
 
   // 2. Build Merkle tree
   const items: ManifestItem[] = [
-    ...claims.map(c => ({
+    ...claims.map((c) => ({
       id: c.id,
-      item_type: 'claim' as const,
+      item_type: "claim" as const,
       content_hash: c.content_hash,
       source_id: c.source_id,
       transform_chain: c.transform_chain,
-      license_id: c.license.id
+      license_id: c.license.id,
     })),
-    ...evidence.map(e => ({
+    ...evidence.map((e) => ({
       id: e.id,
-      item_type: 'evidence' as const,
+      item_type: "evidence" as const,
       content_hash: e.evidence_hash,
       source_id: e.source_id,
       transform_chain: e.transform_chain,
-      license_id: e.license.id
+      license_id: e.license.id,
     })),
-    ...sources.map(s => ({
+    ...sources.map((s) => ({
       id: s.id,
-      item_type: 'source' as const,
+      item_type: "source" as const,
       content_hash: s.source_hash,
-      license_id: s.license.id
+      license_id: s.license.id,
     })),
-    ...transforms.map(t => ({
+    ...transforms.map((t) => ({
       id: t.id,
-      item_type: 'transform' as const,
-      content_hash: computeHash(JSON.stringify(t))
-    }))
+      item_type: "transform" as const,
+      content_hash: computeHash(JSON.stringify(t)),
+    })),
   ];
 
   const merkleTree = buildMerkleTree(items);
 
   // 3. Add Merkle proofs to items
-  items.forEach(item => {
+  items.forEach((item) => {
     item.merkle_proof = merkleTree.getProof(item.content_hash);
   });
 
   // 4. Aggregate licenses
-  const licenses = [...new Set([
-    ...claims.map(c => c.license),
-    ...evidence.map(e => e.license),
-    ...sources.map(s => s.license)
-  ])];
+  const licenses = [
+    ...new Set([
+      ...claims.map((c) => c.license),
+      ...evidence.map((e) => e.license),
+      ...sources.map((s) => s.license),
+    ]),
+  ];
 
   // 5. Create manifest
   const manifest: ExportManifest = {
     manifest_id: crypto.randomUUID(),
-    manifest_version: '1.0.0',
+    manifest_version: "1.0.0",
     created_at: new Date(),
     created_by: userId,
     bundle_id: crypto.randomUUID(),
     merkle_root: merkleTree.root,
-    hash_algorithm: 'SHA-256',
+    hash_algorithm: "SHA-256",
     items,
-    custody_chain: [{
-      actor_id: userId,
-      action: 'EXPORT_CREATED',
-      timestamp: new Date(),
-      signature: '',
-      justification: 'Investigation export'
-    }],
-    export_type: 'investigation_bundle',
-    classification_level: 'INTERNAL',
-    retention_policy: 'REGULATORY_STANDARD',
-    signature: '',
-    public_key_id: '',
-    licenses
+    custody_chain: [
+      {
+        actor_id: userId,
+        action: "EXPORT_CREATED",
+        timestamp: new Date(),
+        signature: "",
+        justification: "Investigation export",
+      },
+    ],
+    export_type: "investigation_bundle",
+    classification_level: "INTERNAL",
+    retention_policy: "REGULATORY_STANDARD",
+    signature: "",
+    public_key_id: "",
+    licenses,
   };
 
   // 6. Sign manifest
@@ -585,7 +600,7 @@ async function createVerifiableExport(
     evidence,
     sources,
     transforms,
-    verification_instructions: generateVerificationInstructions(manifest)
+    verification_instructions: generateVerificationInstructions(manifest),
   });
 
   return { manifest, bundle };
@@ -614,7 +629,7 @@ async function verifyBundle(bundlePath: string): Promise<VerificationReport> {
   const merkleValid = recomputedRoot === manifest.merkle_root;
 
   // 4. Verify each item's Merkle proof
-  const itemVerifications = manifest.items.map(item => {
+  const itemVerifications = manifest.items.map((item) => {
     const proofValid = verifyMerkleProof(
       item.content_hash,
       item.merkle_proof,
@@ -624,7 +639,7 @@ async function verifyBundle(bundlePath: string): Promise<VerificationReport> {
   });
 
   // 5. Verify transform chains
-  const chainVerifications = claims.map(claim => {
+  const chainVerifications = claims.map((claim) => {
     return verifyTransformChain(claim.transform_chain, sources, transforms);
   });
 
@@ -632,15 +647,17 @@ async function verifyBundle(bundlePath: string): Promise<VerificationReport> {
   const licenseIssues = checkLicenseCompatibility(manifest.licenses);
 
   return {
-    bundle_valid: signatureValid && merkleValid &&
-                  itemVerifications.every(v => v.valid) &&
-                  chainVerifications.every(v => v.valid),
+    bundle_valid:
+      signatureValid &&
+      merkleValid &&
+      itemVerifications.every((v) => v.valid) &&
+      chainVerifications.every((v) => v.valid),
     signature_valid: signatureValid,
     merkle_valid: merkleValid,
     item_verifications: itemVerifications,
     chain_verifications: chainVerifications,
     license_issues: licenseIssues,
-    verified_at: new Date()
+    verified_at: new Date(),
   };
 }
 ```
@@ -745,13 +762,13 @@ type Mutation {
 ### End-to-End Test Scenario
 
 ```typescript
-describe('Provenance Ledger Beta - End-to-End', () => {
-  it('should track full provenance from ingest to verified export', async () => {
+describe("Provenance Ledger Beta - End-to-End", () => {
+  it("should track full provenance from ingest to verified export", async () => {
     // 1. Ingest document
     const { claims, evidence } = await ingestDocument(
-      './test-data/sample-report.pdf',
-      'user-123',
-      'investigation-456'
+      "./test-data/sample-report.pdf",
+      "user-123",
+      "investigation-456"
     );
 
     expect(claims).toHaveLength(5);
@@ -765,28 +782,25 @@ describe('Provenance Ledger Beta - End-to-End', () => {
     }
 
     // 3. Verify graph relationships
-    const claimNode = await neo4j.findNode('Claim', { id: claims[0].id });
-    const sourceEdge = await neo4j.findRelationship(claimNode, 'DERIVED_FROM');
+    const claimNode = await neo4j.findNode("Claim", { id: claims[0].id });
+    const sourceEdge = await neo4j.findRelationship(claimNode, "DERIVED_FROM");
     expect(sourceEdge).toBeDefined();
 
     // 4. Create export
-    const { manifest, bundle } = await createVerifiableExport(
-      'investigation-456',
-      'user-123'
-    );
+    const { manifest, bundle } = await createVerifiableExport("investigation-456", "user-123");
 
     expect(manifest.merkle_root).toBeDefined();
     expect(manifest.signature).toBeDefined();
     expect(manifest.items.length).toBeGreaterThan(0);
 
     // 5. Verify export offline
-    await fs.writeFile('./test-bundle.tar.gz', bundle);
-    const verification = await verifyBundle('./test-bundle.tar.gz');
+    await fs.writeFile("./test-bundle.tar.gz", bundle);
+    const verification = await verifyBundle("./test-bundle.tar.gz");
 
     expect(verification.bundle_valid).toBe(true);
     expect(verification.signature_valid).toBe(true);
     expect(verification.merkle_valid).toBe(true);
-    expect(verification.item_verifications.every(v => v.valid)).toBe(true);
+    expect(verification.item_verifications.every((v) => v.valid)).toBe(true);
 
     // 6. Verify licenses
     expect(manifest.licenses.length).toBeGreaterThan(0);

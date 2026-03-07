@@ -1,6 +1,7 @@
 # 3-Email Outreach Sequence (Pilot CTA)
 
 ## Email 1 — Outcome + Proof
+
 **Subject:** Provenance-first intelligence workflows in weeks, not quarters
 
 Hi {{FirstName}},
@@ -8,6 +9,7 @@ Hi {{FirstName}},
 You’re likely seeing the same pattern we see across regulated teams: fragmented intelligence workflows create slow decisions, hidden risk, and audit gaps. Summit/IntelGraph fixes that by making provenance and policy enforcement native—so every action is verifiable, not reconstructed later.
 
 **Outcomes we deliver:**
+
 - 3 mission workflows live in 6–8 weeks
 - Verified audit trail + evidence pack
 - Security review passed without rework
@@ -21,11 +23,13 @@ Are you available {{TwoTimes}}?
 ---
 
 ## Email 2 — Security Posture + Readiness
+
 **Subject:** Security can say “yes” faster — here’s how
 
 Hi {{FirstName}},
 
 We designed Summit/IntelGraph so security can approve faster without exceptions:
+
 - Policy-as-code enforcement (OPA/ABAC)
 - Signed artifacts, SBOM attestation, immutable audit logs
 - Offline/air-gap ready with deterministic resync
@@ -39,6 +43,7 @@ If you want the pilot one-pager, I can send it or walk through it live.
 ---
 
 ## Email 3 — Pilot CTA + Scarcity
+
 **Subject:** Locking pilot slots for {{Quarter}}
 
 Hi {{FirstName}},

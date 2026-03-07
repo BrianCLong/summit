@@ -1,5 +1,5 @@
 import '@testing-library/jest-dom'
-import React from 'react';
+import React from 'react'
 import { vi } from 'vitest'
 
 // Mock ResizeObserver
@@ -31,16 +31,40 @@ Object.defineProperty(window, 'matchMedia', {
 
 // Mock Recharts
 vi.mock('recharts', async () => {
-  const Original = await vi.importActual('recharts');
+  const Original = await vi.importActual('recharts')
   return {
     ...Original,
     ResponsiveContainer: ({ children }: { children: React.ReactNode }) =>
-      React.createElement('div', { className: "recharts-responsive-container", style: { width: 800, height: 400 } }, children),
-    BarChart: ({ children }: { children: React.ReactNode }) => React.createElement('div', { className: "recharts-bar-chart" }, children),
-    LineChart: ({ children }: { children: React.ReactNode }) => React.createElement('div', { className: "recharts-line-chart" }, children),
-    PieChart: ({ children }: { children: React.ReactNode }) => React.createElement('div', { className: "recharts-pie-chart" }, children),
-    RadarChart: ({ children }: { children: React.ReactNode }) => React.createElement('div', { className: "recharts-radar-chart" }, children),
-    ScatterChart: ({ children }: { children: React.ReactNode }) => React.createElement('div', { className: "recharts-scatter-chart" }, children),
+      React.createElement(
+        'div',
+        {
+          className: 'recharts-responsive-container',
+          style: { width: 800, height: 400 },
+        },
+        children
+      ),
+    BarChart: ({ children }: { children: React.ReactNode }) =>
+      React.createElement('div', { className: 'recharts-bar-chart' }, children),
+    LineChart: ({ children }: { children: React.ReactNode }) =>
+      React.createElement(
+        'div',
+        { className: 'recharts-line-chart' },
+        children
+      ),
+    PieChart: ({ children }: { children: React.ReactNode }) =>
+      React.createElement('div', { className: 'recharts-pie-chart' }, children),
+    RadarChart: ({ children }: { children: React.ReactNode }) =>
+      React.createElement(
+        'div',
+        { className: 'recharts-radar-chart' },
+        children
+      ),
+    ScatterChart: ({ children }: { children: React.ReactNode }) =>
+      React.createElement(
+        'div',
+        { className: 'recharts-scatter-chart' },
+        children
+      ),
     XAxis: () => null,
     YAxis: () => null,
     Tooltip: () => null,
@@ -56,5 +80,5 @@ vi.mock('recharts', async () => {
     ReferenceDot: () => null,
     ReferenceArea: () => null,
     Brush: () => null,
-  };
-});
+  }
+})

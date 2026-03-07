@@ -34,12 +34,12 @@ This playbook provides structured procedures for responding to application outag
 
 ### Goals
 
-| Metric | Sev-1 Target | Sev-2 Target |
-|--------|--------------|--------------|
-| Time to Detect (TTD) | < 2 minutes | < 5 minutes |
-| Time to Acknowledge (TTA) | < 5 minutes | < 15 minutes |
-| Time to Mitigate (TTM) | < 30 minutes | < 2 hours |
-| Time to Resolve (TTR) | < 4 hours | < 24 hours |
+| Metric                    | Sev-1 Target | Sev-2 Target |
+| ------------------------- | ------------ | ------------ |
+| Time to Detect (TTD)      | < 2 minutes  | < 5 minutes  |
+| Time to Acknowledge (TTA) | < 5 minutes  | < 15 minutes |
+| Time to Mitigate (TTM)    | < 30 minutes | < 2 hours    |
+| Time to Resolve (TTR)     | < 4 hours    | < 24 hours   |
 
 ---
 
@@ -50,6 +50,7 @@ This playbook provides structured procedures for responding to application outag
 **Definition**: Complete service outage or critical functionality unavailable affecting all users.
 
 **Examples**:
+
 - GraphQL API completely unresponsive (HTTP 5xx for all requests)
 - Neo4j database unavailable (no graph queries possible)
 - Authentication system failure (no users can log in)
@@ -66,6 +67,7 @@ This playbook provides structured procedures for responding to application outag
 **Definition**: Major functionality degraded or unavailable affecting significant user population.
 
 **Examples**:
+
 - API latency > 5s (p95) for extended period
 - Copilot AI analysis unavailable
 - Graph visualization not rendering
@@ -82,6 +84,7 @@ This playbook provides structured procedures for responding to application outag
 **Definition**: Minor functionality issues with workarounds available.
 
 **Examples**:
+
 - Non-critical feature unavailable
 - Performance degradation within SLO but trending negative
 - Intermittent errors < 1% of requests
@@ -158,13 +161,13 @@ This playbook provides structured procedures for responding to application outag
 
 ### 3.2 Health Check Endpoints
 
-| Endpoint | Purpose | Check Interval |
-|----------|---------|----------------|
-| `/health` | Basic liveness | 10s |
-| `/health/ready` | Readiness (all deps) | 15s |
-| `/health/live` | Kubernetes liveness | 10s |
-| `/health/detailed` | Full dependency check | 30s |
-| `/metrics` | Prometheus scrape | 15s |
+| Endpoint           | Purpose               | Check Interval |
+| ------------------ | --------------------- | -------------- |
+| `/health`          | Basic liveness        | 10s            |
+| `/health/ready`    | Readiness (all deps)  | 15s            |
+| `/health/live`     | Kubernetes liveness   | 10s            |
+| `/health/detailed` | Full dependency check | 30s            |
+| `/metrics`         | Prometheus scrape     | 15s            |
 
 ### 3.3 Manual Detection Indicators
 
@@ -195,6 +198,7 @@ This playbook provides structured procedures for responding to application outag
 #### Incident Commander (IC)
 
 **Responsibilities**:
+
 - Owns incident resolution end-to-end
 - Makes decisions on mitigation strategies
 - Coordinates between technical teams
@@ -206,6 +210,7 @@ This playbook provides structured procedures for responding to application outag
 #### Technical Lead (TL)
 
 **Responsibilities**:
+
 - Leads technical investigation
 - Directs debugging efforts
 - Implements fixes
@@ -216,6 +221,7 @@ This playbook provides structured procedures for responding to application outag
 #### Communications Lead (Comms)
 
 **Responsibilities**:
+
 - Sends stakeholder updates
 - Manages status page
 - Coordinates with support team
@@ -226,6 +232,7 @@ This playbook provides structured procedures for responding to application outag
 #### Scribe
 
 **Responsibilities**:
+
 - Documents all actions taken
 - Records timeline of events
 - Captures decisions and rationale
@@ -281,13 +288,13 @@ kubectl get events -n intelgraph --sort-by='.lastTimestamp' | tail -20
 
 #### Step 2: Identify Affected Components (5 minutes)
 
-| Component | Health Check | Logs |
-|-----------|--------------|------|
-| API Server | `curl localhost:4000/health` | `docker logs intelgraph-server` |
-| Neo4j | `curl localhost:7474` | `docker logs neo4j` |
-| PostgreSQL | `pg_isready -h localhost -p 5432` | `docker logs postgres` |
-| Redis | `redis-cli ping` | `docker logs redis` |
-| Frontend | `curl localhost:3000` | `docker logs intelgraph-web` |
+| Component  | Health Check                      | Logs                            |
+| ---------- | --------------------------------- | ------------------------------- |
+| API Server | `curl localhost:4000/health`      | `docker logs intelgraph-server` |
+| Neo4j      | `curl localhost:7474`             | `docker logs neo4j`             |
+| PostgreSQL | `pg_isready -h localhost -p 5432` | `docker logs postgres`          |
+| Redis      | `redis-cli ping`                  | `docker logs redis`             |
+| Frontend   | `curl localhost:3000`             | `docker logs intelgraph-web`    |
 
 #### Step 3: Assign Roles
 
@@ -455,13 +462,13 @@ docker compose up -d intelgraph-server
 #### Timeline Reconstruction
 
 ```markdown
-| Time (UTC) | Event | Source | Action Taken |
-|------------|-------|--------|--------------|
-| HH:MM | First alert fired | AlertManager | |
-| HH:MM | IC engaged | On-call | |
-| HH:MM | Root cause identified | Investigation | |
-| HH:MM | Fix deployed | Deployment | |
-| HH:MM | Service restored | Monitoring | |
+| Time (UTC) | Event                 | Source        | Action Taken |
+| ---------- | --------------------- | ------------- | ------------ |
+| HH:MM      | First alert fired     | AlertManager  |              |
+| HH:MM      | IC engaged            | On-call       |              |
+| HH:MM      | Root cause identified | Investigation |              |
+| HH:MM      | Fix deployed          | Deployment    |              |
+| HH:MM      | Service restored      | Monitoring    |              |
 ```
 
 #### 5 Whys Analysis
@@ -487,11 +494,11 @@ docker compose up -d intelgraph-server
 
 ### 6.2 Post-Mortem Schedule
 
-| Severity | Post-Mortem Due | Attendees |
-|----------|-----------------|-----------|
-| Sev-1 | Within 48 hours | IC, TL, Eng Manager, Product |
-| Sev-2 | Within 1 week | IC, TL, Eng Manager |
-| Sev-3 | Within 2 weeks | IC, TL |
+| Severity | Post-Mortem Due | Attendees                    |
+| -------- | --------------- | ---------------------------- |
+| Sev-1    | Within 48 hours | IC, TL, Eng Manager, Product |
+| Sev-2    | Within 1 week   | IC, TL, Eng Manager          |
+| Sev-3    | Within 2 weeks  | IC, TL                       |
 
 ### 6.3 Post-Mortem Meeting Agenda
 
@@ -506,6 +513,7 @@ docker compose up -d intelgraph-server
 ### 6.4 Action Item Tracking
 
 All action items from post-mortems must be:
+
 - Assigned an owner
 - Given a due date
 - Tracked in the project management system
@@ -517,32 +525,33 @@ All action items from post-mortems must be:
 
 ### 7.1 Incident Response RACI
 
-| Activity | On-Call | IC | Tech Lead | Comms | Scribe | Eng Manager | Exec |
-|----------|---------|-----|-----------|-------|--------|-------------|------|
-| **Detection** |
-| Monitor alerts | R | I | I | - | - | - | - |
-| Acknowledge alert | R/A | I | I | - | - | - | - |
-| Initial triage | R | A | C | - | I | I | - |
-| **Response** |
-| Declare incident | C | R/A | C | I | I | I | I |
-| Assign roles | - | R/A | C | I | I | C | - |
-| Technical investigation | C | A | R | - | I | I | - |
-| Implement fix | C | A | R | - | I | I | - |
-| Approve rollback | I | R/A | C | - | I | C | I* |
-| **Communication** |
-| Internal updates | I | A | C | R | I | I | I |
-| Customer updates | I | A | C | R | I | C | I |
-| Exec notification (Sev-1) | - | R | I | A | I | C | I |
-| **Resolution** |
-| Declare resolved | I | R/A | C | I | I | I | I |
-| Document timeline | I | C | C | I | R/A | I | - |
-| **Post-Mortem** |
-| Schedule meeting | - | R | C | I | I | A | I |
-| Write post-mortem | I | A | R | C | C | C | I |
-| Assign action items | - | C | R | - | I | A | I |
-| Track action items | - | I | R | - | - | A | I |
+| Activity                  | On-Call | IC  | Tech Lead | Comms | Scribe | Eng Manager | Exec |
+| ------------------------- | ------- | --- | --------- | ----- | ------ | ----------- | ---- |
+| **Detection**             |
+| Monitor alerts            | R       | I   | I         | -     | -      | -           | -    |
+| Acknowledge alert         | R/A     | I   | I         | -     | -      | -           | -    |
+| Initial triage            | R       | A   | C         | -     | I      | I           | -    |
+| **Response**              |
+| Declare incident          | C       | R/A | C         | I     | I      | I           | I    |
+| Assign roles              | -       | R/A | C         | I     | I      | C           | -    |
+| Technical investigation   | C       | A   | R         | -     | I      | I           | -    |
+| Implement fix             | C       | A   | R         | -     | I      | I           | -    |
+| Approve rollback          | I       | R/A | C         | -     | I      | C           | I\*  |
+| **Communication**         |
+| Internal updates          | I       | A   | C         | R     | I      | I           | I    |
+| Customer updates          | I       | A   | C         | R     | I      | C           | I    |
+| Exec notification (Sev-1) | -       | R   | I         | A     | I      | C           | I    |
+| **Resolution**            |
+| Declare resolved          | I       | R/A | C         | I     | I      | I           | I    |
+| Document timeline         | I       | C   | C         | I     | R/A    | I           | -    |
+| **Post-Mortem**           |
+| Schedule meeting          | -       | R   | C         | I     | I      | A           | I    |
+| Write post-mortem         | I       | A   | R         | C     | C      | C           | I    |
+| Assign action items       | -       | C   | R         | -     | I      | A           | I    |
+| Track action items        | -       | I   | R         | -     | -      | A           | I    |
 
 **Legend**:
+
 - **R** = Responsible (does the work)
 - **A** = Accountable (owns the outcome)
 - **C** = Consulted (provides input)
@@ -551,14 +560,14 @@ All action items from post-mortems must be:
 
 ### 7.2 Escalation Matrix
 
-| Condition | Escalate To | Timeframe |
-|-----------|-------------|-----------|
-| Sev-1 not mitigated in 30 min | Engineering Manager | Immediate |
-| Sev-1 not resolved in 2 hours | Director of Engineering | Immediate |
-| Sev-1 data loss confirmed | CTO + Legal | Immediate |
-| Sev-2 not mitigated in 2 hours | Engineering Manager | Within 15 min |
-| Customer-impacting for >1 hour | Customer Success Lead | Immediate |
-| Security incident suspected | Security Team Lead | Immediate |
+| Condition                      | Escalate To             | Timeframe     |
+| ------------------------------ | ----------------------- | ------------- |
+| Sev-1 not mitigated in 30 min  | Engineering Manager     | Immediate     |
+| Sev-1 not resolved in 2 hours  | Director of Engineering | Immediate     |
+| Sev-1 data loss confirmed      | CTO + Legal             | Immediate     |
+| Sev-2 not mitigated in 2 hours | Engineering Manager     | Within 15 min |
+| Customer-impacting for >1 hour | Customer Success Lead   | Immediate     |
+| Security incident suspected    | Security Team Lead      | Immediate     |
 
 ---
 
@@ -575,28 +584,34 @@ All action items from post-mortems must be:
 **Severity**: [SEV-1 | SEV-2 | SEV-3]
 
 ### Summary
+
 [One-line description of the incident]
 
 ### Impact
+
 - **Users Affected**: [All / Percentage / Specific segment]
 - **Functionality Affected**: [List affected features]
 - **Business Impact**: [Revenue / Reputation / Compliance]
 
 ### Timeline
-| Time (UTC) | Event |
-|------------|-------|
-| HH:MM | [Event description] |
+
+| Time (UTC) | Event               |
+| ---------- | ------------------- |
+| HH:MM      | [Event description] |
 
 ### Current Status
+
 [What is happening right now]
 
 ### Roles Assigned
+
 - **Incident Commander**: @name
 - **Technical Lead**: @name
 - **Communications**: @name
 - **Scribe**: @name
 
 ### Affected Systems
+
 - [ ] GraphQL API
 - [ ] Web Frontend
 - [ ] Neo4j Database
@@ -606,20 +621,24 @@ All action items from post-mortems must be:
 - [ ] AI/ML Services
 
 ### Actions Taken
+
 1. [Action with timestamp]
 2. [Action with timestamp]
 
 ### Next Steps
+
 1. [Planned action]
 2. [Planned action]
 
 ### Related Links
+
 - Slack Channel: #incident-YYYY-MM-DD-NNN
 - Grafana Dashboard: [link]
 - AlertManager: [link]
 - Related PRs: [links]
 
 ### Post-Incident
+
 - [ ] Post-mortem scheduled
 - [ ] Action items created
 - [ ] Documentation updated
@@ -637,18 +656,23 @@ All action items from post-mortems must be:
 **Time**: YYYY-MM-DD HH:MM UTC
 
 ### What's Happening
+
 [Brief description of the issue]
 
 ### Impact
+
 [Who/what is affected]
 
 ### Current Actions
+
 [What the team is doing]
 
 ### Next Update
+
 [Expected time of next update]
 
 ---
+
 Incident Commander: [Name]
 Incident Channel: #incident-YYYY-MM-DD-NNN
 ```
@@ -664,27 +688,34 @@ Incident Channel: #incident-YYYY-MM-DD-NNN
 **Time**: YYYY-MM-DD HH:MM UTC
 
 ### Current Status
+
 [What has changed since last update]
 
 ### Root Cause
+
 [If identified: brief description]
 [If not: "Still investigating"]
 
 ### Actions Taken Since Last Update
+
 - [Action 1]
 - [Action 2]
 
 ### Next Steps
+
 - [Planned action 1]
 - [Planned action 2]
 
 ### Estimated Resolution
+
 [Time estimate if known, or "Unknown at this time"]
 
 ### Next Update
+
 [Expected time of next update]
 
 ---
+
 Incident Commander: [Name]
 ```
 
@@ -699,27 +730,34 @@ Incident Commander: [Name]
 **Time**: YYYY-MM-DD HH:MM UTC
 
 ### Summary
+
 [Brief description of what happened]
 
 ### Impact Duration
+
 - **Start**: YYYY-MM-DD HH:MM UTC
 - **End**: YYYY-MM-DD HH:MM UTC
 - **Total Duration**: [X hours Y minutes]
 
 ### Root Cause
+
 [Brief description of root cause]
 
 ### Resolution
+
 [What was done to resolve]
 
 ### Preventive Measures
+
 [High-level description of what will be done to prevent recurrence]
 
 ### Post-Mortem
+
 Post-mortem meeting scheduled for: [Date/Time]
 Post-mortem document will be shared by: [Date]
 
 ---
+
 Incident Commander: [Name]
 ```
 
@@ -743,15 +781,16 @@ Incident Commander: [Name]
 
 ## Impact
 
-| Metric | Value |
-|--------|-------|
-| Duration | X hours Y minutes |
-| Users Affected | N (X% of total) |
-| Requests Failed | N |
-| Revenue Impact | $X (if applicable) |
-| SLA Impact | X% (if applicable) |
+| Metric          | Value              |
+| --------------- | ------------------ |
+| Duration        | X hours Y minutes  |
+| Users Affected  | N (X% of total)    |
+| Requests Failed | N                  |
+| Revenue Impact  | $X (if applicable) |
+| SLA Impact      | X% (if applicable) |
 
 ### Affected Services
+
 - [Service 1]: [Impact description]
 - [Service 2]: [Impact description]
 
@@ -759,33 +798,37 @@ Incident Commander: [Name]
 
 ## Timeline (All times UTC)
 
-| Time | Event | Source |
-|------|-------|--------|
-| HH:MM | [Triggering event] | [Log/Alert/Report] |
-| HH:MM | First alert fired | AlertManager |
-| HH:MM | On-call acknowledged | PagerDuty |
-| HH:MM | Incident declared | IC |
-| HH:MM | Root cause identified | Investigation |
-| HH:MM | Mitigation applied | Deployment |
-| HH:MM | Service restored | Monitoring |
-| HH:MM | Incident resolved | IC |
+| Time  | Event                 | Source             |
+| ----- | --------------------- | ------------------ |
+| HH:MM | [Triggering event]    | [Log/Alert/Report] |
+| HH:MM | First alert fired     | AlertManager       |
+| HH:MM | On-call acknowledged  | PagerDuty          |
+| HH:MM | Incident declared     | IC                 |
+| HH:MM | Root cause identified | Investigation      |
+| HH:MM | Mitigation applied    | Deployment         |
+| HH:MM | Service restored      | Monitoring         |
+| HH:MM | Incident resolved     | IC                 |
 
 ---
 
 ## Root Cause Analysis
 
 ### Summary
+
 [One paragraph describing the root cause]
 
 ### Technical Details
+
 [Detailed technical explanation with code snippets, logs, metrics if relevant]
 
 ### Contributing Factors
+
 1. [Factor 1]
 2. [Factor 2]
 3. [Factor 3]
 
 ### 5 Whys
+
 1. **Why** did [symptom] occur?
    → [Answer]
 2. **Why** did [answer 1] happen?
@@ -802,12 +845,15 @@ Incident Commander: [Name]
 ## Detection
 
 ### How Was It Detected?
+
 [Alert / Customer report / Internal discovery]
 
 ### Time to Detect
+
 [Duration from incident start to first alert/report]
 
 ### Detection Gaps
+
 [What could have detected this sooner?]
 
 ---
@@ -815,35 +861,38 @@ Incident Commander: [Name]
 ## Response
 
 ### What Went Well
+
 - [Positive aspect 1]
 - [Positive aspect 2]
 - [Positive aspect 3]
 
 ### What Could Be Improved
+
 - [Improvement area 1]
 - [Improvement area 2]
 - [Improvement area 3]
 
 ### Response Metrics
 
-| Metric | Target | Actual | Met? |
-|--------|--------|--------|------|
-| Time to Detect | < 2 min | X min | Y/N |
-| Time to Acknowledge | < 5 min | X min | Y/N |
-| Time to Mitigate | < 30 min | X min | Y/N |
-| Time to Resolve | < 4 hr | X hr | Y/N |
+| Metric              | Target   | Actual | Met? |
+| ------------------- | -------- | ------ | ---- |
+| Time to Detect      | < 2 min  | X min  | Y/N  |
+| Time to Acknowledge | < 5 min  | X min  | Y/N  |
+| Time to Mitigate    | < 30 min | X min  | Y/N  |
+| Time to Resolve     | < 4 hr   | X hr   | Y/N  |
 
 ---
 
 ## Action Items
 
-| ID | Action | Owner | Priority | Due Date | Status |
-|----|--------|-------|----------|----------|--------|
-| 1 | [Action description] | @name | P0/P1/P2 | YYYY-MM-DD | TODO |
-| 2 | [Action description] | @name | P0/P1/P2 | YYYY-MM-DD | TODO |
-| 3 | [Action description] | @name | P0/P1/P2 | YYYY-MM-DD | TODO |
+| ID  | Action               | Owner | Priority | Due Date   | Status |
+| --- | -------------------- | ----- | -------- | ---------- | ------ |
+| 1   | [Action description] | @name | P0/P1/P2 | YYYY-MM-DD | TODO   |
+| 2   | [Action description] | @name | P0/P1/P2 | YYYY-MM-DD | TODO   |
+| 3   | [Action description] | @name | P0/P1/P2 | YYYY-MM-DD | TODO   |
 
 ### Action Item Categories
+
 - **Prevent**: Actions to prevent this specific incident from recurring
 - **Detect**: Actions to detect this type of issue faster
 - **Mitigate**: Actions to reduce impact when similar issues occur
@@ -854,10 +903,12 @@ Incident Commander: [Name]
 ## Lessons Learned
 
 ### Technical Lessons
+
 1. [Lesson 1]
 2. [Lesson 2]
 
 ### Process Lessons
+
 1. [Lesson 1]
 2. [Lesson 2]
 
@@ -866,23 +917,25 @@ Incident Commander: [Name]
 ## Appendix
 
 ### Related Links
+
 - Incident Slack Channel: [link]
 - Grafana Dashboard: [link]
 - Relevant PRs: [links]
 - Related Incidents: [links]
 
 ### Supporting Data
+
 [Graphs, logs, or other supporting information]
 
 ---
 
 ## Sign-Off
 
-| Role | Name | Date |
-|------|------|------|
-| Incident Commander | | |
-| Technical Lead | | |
-| Engineering Manager | | |
+| Role                | Name | Date |
+| ------------------- | ---- | ---- |
+| Incident Commander  |      |      |
+| Technical Lead      |      |      |
+| Engineering Manager |      |      |
 ```
 
 ---
@@ -902,37 +955,37 @@ Based on the existing observability setup, the following improvements are recomm
 
 // Request queue depth
 const requestQueueDepth = new promClient.Gauge({
-  name: 'intelgraph_request_queue_depth',
-  help: 'Number of requests waiting to be processed',
-  labelNames: ['endpoint']
+  name: "intelgraph_request_queue_depth",
+  help: "Number of requests waiting to be processed",
+  labelNames: ["endpoint"],
 });
 
 // Circuit breaker state
 const circuitBreakerState = new promClient.Gauge({
-  name: 'intelgraph_circuit_breaker_state',
-  help: 'Circuit breaker state (0=closed, 1=half-open, 2=open)',
-  labelNames: ['service']
+  name: "intelgraph_circuit_breaker_state",
+  help: "Circuit breaker state (0=closed, 1=half-open, 2=open)",
+  labelNames: ["service"],
 });
 
 // GraphQL operation latency by type
 const graphqlOperationDuration = new promClient.Histogram({
-  name: 'intelgraph_graphql_operation_duration_seconds',
-  help: 'GraphQL operation duration in seconds',
-  labelNames: ['operation_name', 'operation_type'],
-  buckets: [0.01, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10]
+  name: "intelgraph_graphql_operation_duration_seconds",
+  help: "GraphQL operation duration in seconds",
+  labelNames: ["operation_name", "operation_type"],
+  buckets: [0.01, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10],
 });
 
 // Active WebSocket connections
 const activeWebsocketConnections = new promClient.Gauge({
-  name: 'intelgraph_websocket_connections_active',
-  help: 'Number of active WebSocket connections'
+  name: "intelgraph_websocket_connections_active",
+  help: "Number of active WebSocket connections",
 });
 
 // Cache hit ratio
 const cacheHitRatio = new promClient.Gauge({
-  name: 'intelgraph_cache_hit_ratio',
-  help: 'Cache hit ratio for Redis cache',
-  labelNames: ['cache_type']
+  name: "intelgraph_cache_hit_ratio",
+  help: "Cache hit ratio for Redis cache",
+  labelNames: ["cache_type"],
 });
 ```
 
@@ -941,17 +994,17 @@ const cacheHitRatio = new promClient.Gauge({
 ```yaml
 # Add to observability/prometheus.yml
 
-- job_name: 'neo4j-detailed'
+- job_name: "neo4j-detailed"
   static_configs:
-    - targets: ['neo4j:2004']
+    - targets: ["neo4j:2004"]
   metric_relabel_configs:
     - source_labels: [__name__]
-      regex: 'neo4j_bolt_connections_.*|neo4j_transaction_.*|neo4j_page_cache_.*'
+      regex: "neo4j_bolt_connections_.*|neo4j_transaction_.*|neo4j_page_cache_.*"
       action: keep
 
-- job_name: 'postgres-detailed'
+- job_name: "postgres-detailed"
   static_configs:
-    - targets: ['postgres_exporter:9187']
+    - targets: ["postgres_exporter:9187"]
   params:
     collect[]:
       - pg_stat_statements
@@ -1081,43 +1134,52 @@ groups:
       "title": "Service Health Overview",
       "type": "stat",
       "targets": [
-        {"expr": "up{job='intelgraph-server'}", "legendFormat": "API"},
-        {"expr": "neo4j_database_available", "legendFormat": "Neo4j"},
-        {"expr": "pg_up", "legendFormat": "PostgreSQL"},
-        {"expr": "redis_up", "legendFormat": "Redis"}
+        { "expr": "up{job='intelgraph-server'}", "legendFormat": "API" },
+        { "expr": "neo4j_database_available", "legendFormat": "Neo4j" },
+        { "expr": "pg_up", "legendFormat": "PostgreSQL" },
+        { "expr": "redis_up", "legendFormat": "Redis" }
       ]
     },
     {
       "title": "Error Rate (5m)",
       "type": "timeseries",
       "targets": [
-        {"expr": "sum(rate(http_requests_total{status=~'5..'}[5m])) / sum(rate(http_requests_total[5m])) * 100"}
+        {
+          "expr": "sum(rate(http_requests_total{status=~'5..'}[5m])) / sum(rate(http_requests_total[5m])) * 100"
+        }
       ]
     },
     {
       "title": "Latency Percentiles",
       "type": "timeseries",
       "targets": [
-        {"expr": "histogram_quantile(0.50, sum(rate(http_request_duration_seconds_bucket[5m])) by (le))", "legendFormat": "p50"},
-        {"expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le))", "legendFormat": "p95"},
-        {"expr": "histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket[5m])) by (le))", "legendFormat": "p99"}
+        {
+          "expr": "histogram_quantile(0.50, sum(rate(http_request_duration_seconds_bucket[5m])) by (le))",
+          "legendFormat": "p50"
+        },
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le))",
+          "legendFormat": "p95"
+        },
+        {
+          "expr": "histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket[5m])) by (le))",
+          "legendFormat": "p99"
+        }
       ]
     },
     {
       "title": "Active Connections",
       "type": "timeseries",
       "targets": [
-        {"expr": "neo4j_bolt_connections_in_use", "legendFormat": "Neo4j"},
-        {"expr": "pg_stat_activity_count", "legendFormat": "PostgreSQL"},
-        {"expr": "redis_connected_clients", "legendFormat": "Redis"}
+        { "expr": "neo4j_bolt_connections_in_use", "legendFormat": "Neo4j" },
+        { "expr": "pg_stat_activity_count", "legendFormat": "PostgreSQL" },
+        { "expr": "redis_connected_clients", "legendFormat": "Redis" }
       ]
     },
     {
       "title": "Queue Depth",
       "type": "timeseries",
-      "targets": [
-        {"expr": "sum(maestro_queue_depth) by (queue)"}
-      ]
+      "targets": [{ "expr": "sum(maestro_queue_depth) by (queue)" }]
     },
     {
       "title": "Recent Deployments",
@@ -1135,9 +1197,9 @@ groups:
 
 // Add correlation ID to all logs
 const correlationIdMiddleware = (req, res, next) => {
-  const correlationId = req.headers['x-correlation-id'] || uuidv4();
+  const correlationId = req.headers["x-correlation-id"] || uuidv4();
   req.correlationId = correlationId;
-  res.setHeader('x-correlation-id', correlationId);
+  res.setHeader("x-correlation-id", correlationId);
 
   // Attach to async context for automatic inclusion in logs
   asyncLocalStorage.run({ correlationId }, () => next());
@@ -1150,7 +1212,7 @@ const logError = (error: Error, context: Record<string, any> = {}) => {
     stack: error.stack,
     errorName: error.name,
     ...context,
-    correlationId: asyncLocalStorage.getStore()?.correlationId
+    correlationId: asyncLocalStorage.getStore()?.correlationId,
   });
 };
 ```
@@ -1200,16 +1262,16 @@ checks:
 
 ### 9.7 Implementation Priority
 
-| Priority | Improvement | Effort | Impact |
-|----------|-------------|--------|--------|
-| P0 | Error budget burn rate alerts | Low | High |
-| P0 | Incident response dashboard | Medium | High |
-| P1 | Correlation ID in all logs | Low | Medium |
-| P1 | Circuit breaker metrics | Medium | High |
-| P1 | Synthetic monitoring | Medium | High |
-| P2 | GraphQL operation metrics | Low | Medium |
-| P2 | Cache hit ratio tracking | Low | Medium |
-| P3 | Distributed tracing enhancement | High | Medium |
+| Priority | Improvement                     | Effort | Impact |
+| -------- | ------------------------------- | ------ | ------ |
+| P0       | Error budget burn rate alerts   | Low    | High   |
+| P0       | Incident response dashboard     | Medium | High   |
+| P1       | Correlation ID in all logs      | Low    | Medium |
+| P1       | Circuit breaker metrics         | Medium | High   |
+| P1       | Synthetic monitoring            | Medium | High   |
+| P2       | GraphQL operation metrics       | Low    | Medium |
+| P2       | Cache hit ratio tracking        | Low    | Medium |
+| P3       | Distributed tracing enhancement | High   | Medium |
 
 ---
 
@@ -1246,20 +1308,20 @@ kubectl rollout undo deployment/intelgraph-server -n intelgraph
 
 ### 10.2 Contact Information
 
-| Role | Primary | Backup |
-|------|---------|--------|
-| On-Call Engineer | [PagerDuty] | [Backup Contact] |
-| Engineering Manager | [Name] | [Name] |
-| Security Team | [Contact] | [Contact] |
-| Database Admin | [Contact] | [Contact] |
+| Role                | Primary     | Backup           |
+| ------------------- | ----------- | ---------------- |
+| On-Call Engineer    | [PagerDuty] | [Backup Contact] |
+| Engineering Manager | [Name]      | [Name]           |
+| Security Team       | [Contact]   | [Contact]        |
+| Database Admin      | [Contact]   | [Contact]        |
 
 ### 10.3 External Dependencies
 
-| Service | Status Page | Support Contact |
-|---------|-------------|-----------------|
-| AWS | status.aws.amazon.com | AWS Support |
-| GitHub | githubstatus.com | support@github.com |
-| [Others] | [URL] | [Contact] |
+| Service  | Status Page           | Support Contact    |
+| -------- | --------------------- | ------------------ |
+| AWS      | status.aws.amazon.com | AWS Support        |
+| GitHub   | githubstatus.com      | support@github.com |
+| [Others] | [URL]                 | [Contact]          |
 
 ### 10.4 Related Documentation
 
@@ -1273,10 +1335,10 @@ kubectl rollout undo deployment/intelgraph-server -n intelgraph
 
 ## Document History
 
-| Version | Date | Author | Changes |
-|---------|------|--------|---------|
-| 1.0.0 | 2025-11-21 | Platform Engineering | Initial release |
+| Version | Date       | Author               | Changes         |
+| ------- | ---------- | -------------------- | --------------- |
+| 1.0.0   | 2025-11-21 | Platform Engineering | Initial release |
 
 ---
 
-*This playbook should be reviewed and updated quarterly, or after any significant incident that reveals gaps in the process.*
+_This playbook should be reviewed and updated quarterly, or after any significant incident that reveals gaps in the process._

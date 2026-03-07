@@ -11,21 +11,24 @@ This plan defines how Summit validates the efficacy of GraphRAG compared to trad
 
 ## Core Metrics
 
-| Metric | Definition | Target |
-| :--- | :--- | :--- |
-| **Multi-hop Accuracy** | % of queries requiring 2+ hops answered correctly. | > 85% |
-| **Citation Fidelity** | % of LLM citations that correctly link to supporting Evidence IDs. | 100% |
-| **Token Efficiency** | Context size reduction vs. brute-force document retrieval. | > 40% reduction |
-| **Retrieval Latency** | Time to execute Cypher and assemble context. | < 500ms |
-| **Explainability Delta** | Human-rated score of "how easy is it to verify this answer?" | +2 points (1-5 scale) |
+| Metric                   | Definition                                                         | Target                |
+| :----------------------- | :----------------------------------------------------------------- | :-------------------- |
+| **Multi-hop Accuracy**   | % of queries requiring 2+ hops answered correctly.                 | > 85%                 |
+| **Citation Fidelity**    | % of LLM citations that correctly link to supporting Evidence IDs. | 100%                  |
+| **Token Efficiency**     | Context size reduction vs. brute-force document retrieval.         | > 40% reduction       |
+| **Retrieval Latency**    | Time to execute Cypher and assemble context.                       | < 500ms               |
+| **Explainability Delta** | Human-rated score of "how easy is it to verify this answer?"       | +2 points (1-5 scale) |
 
 ## Test Harness Requirements
 
 ### 1. Gold Dataset
+
 A curated set of 500 multi-hop questions with known ground-truth paths in the Knowledge Graph.
+
 - **Example**: "Which campaigns led by Actor Alpha used Malware Beta between June and August?"
 
 ### 2. A/B Evaluation Framework
+
 - **Variant A**: Vector-only RAG (Top-K chunk retrieval).
 - **Variant B**: GraphRAG (Cypher traversal + context assembly).
 - **Evaluation**: Both variants are fed to the same LLM (e.g., GPT-4o) and scored by a "Judge LLM" and human experts.
@@ -41,6 +44,7 @@ GraphRAG improvements must pass the following CI gates:
 ## Reproducibility
 
 Benchmark runs must produce a `benchmark-report-<timestamp>.json` containing:
+
 - Graph version (commit SHA).
 - Cypher queries executed.
 - LLM prompt used.

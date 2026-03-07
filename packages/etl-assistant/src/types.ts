@@ -4,32 +4,32 @@
 
 // Canonical entity types
 export type CanonicalEntityType =
-  | 'Person'
-  | 'Organization'
-  | 'Location'
-  | 'Event'
-  | 'Document'
-  | 'Indicator';
+  | "Person"
+  | "Organization"
+  | "Location"
+  | "Event"
+  | "Document"
+  | "Indicator";
 
 // Field types detected during schema inference
 export type FieldType =
-  | 'string'
-  | 'number'
-  | 'boolean'
-  | 'date'
-  | 'datetime'
-  | 'email'
-  | 'phone'
-  | 'url'
-  | 'array'
-  | 'object'
-  | 'unknown';
+  | "string"
+  | "number"
+  | "boolean"
+  | "date"
+  | "datetime"
+  | "email"
+  | "phone"
+  | "url"
+  | "array"
+  | "object"
+  | "unknown";
 
 // PII risk levels
-export type PIIRiskLevel = 'none' | 'low' | 'medium' | 'high' | 'critical';
+export type PIIRiskLevel = "none" | "low" | "medium" | "high" | "critical";
 
 // Redaction strategies
-export type RedactionStrategy = 'MASK' | 'DROP' | 'HASH';
+export type RedactionStrategy = "MASK" | "DROP" | "HASH";
 
 /**
  * Field mapping from source to target
@@ -86,9 +86,9 @@ export interface SchemaInferenceResult {
  */
 export interface PIIField {
   field: string;
-  piiType: 'email' | 'phone' | 'ssn' | 'credit_card' | 'address' | 'dob' | 'name' | 'other';
+  piiType: "email" | "phone" | "ssn" | "credit_card" | "address" | "dob" | "name" | "other";
   confidence: number;
-  detectionMethod: 'pattern' | 'heuristic' | 'combined';
+  detectionMethod: "pattern" | "heuristic" | "combined";
   sampleMatches: string[];
   recommendedStrategy: RedactionStrategy;
 }

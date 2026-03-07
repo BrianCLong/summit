@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 export type PerfOverlayState = {
   lastDuration: number | null;
@@ -22,12 +22,10 @@ export function usePerfMarkers(label: string, enabled: boolean) {
     const duration = performance.now() - renderStartRef.current;
     renderCountRef.current += 1;
     setLastDuration(duration);
-    setLastPhase('render');
+    setLastPhase("render");
 
     // eslint-disable-next-line no-console
-    console.debug(
-      `[perf][${label}] render #${renderCountRef.current} ${duration.toFixed(2)}ms`,
-    );
+    console.debug(`[perf][${label}] render #${renderCountRef.current} ${duration.toFixed(2)}ms`);
   });
 
   const mark = useCallback(
@@ -45,11 +43,7 @@ export function usePerfMarkers(label: string, enabled: boolean) {
 
         if (performance.mark && performance.measure) {
           performance.mark(`${marker}:end`);
-          performance.measure(
-            `${label}:${phase}`,
-            `${marker}:start`,
-            `${marker}:end`,
-          );
+          performance.measure(`${label}:${phase}`, `${marker}:start`, `${marker}:end`);
         }
 
         setLastDuration(duration);
@@ -57,11 +51,11 @@ export function usePerfMarkers(label: string, enabled: boolean) {
 
         // eslint-disable-next-line no-console
         console.debug(
-          `[perf][${label}] ${phase} ${duration.toFixed(2)}ms (#${renderCountRef.current})`,
+          `[perf][${label}] ${phase} ${duration.toFixed(2)}ms (#${renderCountRef.current})`
         );
       };
     },
-    [enabled, label],
+    [enabled, label]
   );
 
   const overlayState = useMemo(
@@ -70,7 +64,7 @@ export function usePerfMarkers(label: string, enabled: boolean) {
       lastPhase,
       renderCount: renderCountRef.current,
     }),
-    [lastDuration, lastPhase],
+    [lastDuration, lastPhase]
   );
 
   return { mark, overlayState };
@@ -95,7 +89,7 @@ export function PerfMarkOverlay({
     >
       <div className="font-semibold">{label} perf</div>
       <div className="opacity-80">
-        last: {state.lastDuration?.toFixed(1) ?? '—'}ms ({state.lastPhase})
+        last: {state.lastDuration?.toFixed(1) ?? "—"}ms ({state.lastPhase})
       </div>
       <div className="opacity-80">renders: {state.renderCount}</div>
     </div>

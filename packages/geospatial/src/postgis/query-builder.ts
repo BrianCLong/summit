@@ -1,4 +1,4 @@
-import type { BoundingBox, GeoPoint, Geofence, SpatialQueryOptions } from '../types/geospatial.js';
+import type { BoundingBox, GeoPoint, Geofence, SpatialQueryOptions } from "../types/geospatial.js";
 
 export interface QueryConfig {
   text: string;
@@ -24,7 +24,9 @@ export const buildSpatialQuery = (
   if (options.maxDistance && options.filters?.origin) {
     const origin = options.filters.origin as GeoPoint;
     values.push(origin.longitude, origin.latitude, options.maxDistance);
-    clauses.push(`ST_DWithin(${geometryColumn}, ST_SetSRID(ST_Point($${values.length - 1}, $${values.length}), ${srid}), $${values.length + 1})`);
+    clauses.push(
+      `ST_DWithin(${geometryColumn}, ST_SetSRID(ST_Point($${values.length - 1}, $${values.length}), ${srid}), $${values.length + 1})`
+    );
   }
 
   if (options.timeRange) {
@@ -34,15 +36,15 @@ export const buildSpatialQuery = (
 
   if (options.filters) {
     Object.entries(options.filters).forEach(([key, value]) => {
-      if (key === 'origin') return;
+      if (key === "origin") return;
       values.push(value as string | number);
       clauses.push(`${key} = $${values.length}`);
     });
   }
 
-  const where = clauses.length ? `WHERE ${clauses.join(' AND ')}` : '';
-  const limit = options.limit ? `LIMIT ${options.limit}` : '';
-  const offset = options.offset ? `OFFSET ${options.offset}` : '';
+  const where = clauses.length ? `WHERE ${clauses.join(" AND ")}` : "";
+  const limit = options.limit ? `LIMIT ${options.limit}` : "";
+  const offset = options.offset ? `OFFSET ${options.offset}` : "";
 
   return {
     text: `SELECT * FROM ${table} ${where} ${limit} ${offset}`.trim(),
@@ -58,7 +60,7 @@ export const buildGeofenceQuery = (
 ): QueryConfig => {
   const values: Array<string | number | Date> = [JSON.stringify(geofence.geometry)];
   const clause = `ST_Intersects(${geometryColumn}, ST_SetSRID(ST_GeomFromGeoJSON($1), ${srid}))`;
-  const enabled = geofence.enabled ? 'TRUE' : 'FALSE';
+  const enabled = geofence.enabled ? "TRUE" : "FALSE";
   return {
     text: `SELECT * FROM ${table} WHERE ${clause} AND ${enabled}`,
     values,
@@ -73,7 +75,10 @@ export const buildRouteMatchQuery = (
   srid = 4326
 ): QueryConfig => {
   const values: Array<string | number> = [
-    JSON.stringify({ type: 'LineString', coordinates: route.map((p) => [p.longitude, p.latitude]) }),
+    JSON.stringify({
+      type: "LineString",
+      coordinates: route.map((p) => [p.longitude, p.latitude]),
+    }),
     toleranceMeters,
   ];
   const clause = `ST_DWithin(${geometryColumn}, ST_SetSRID(ST_GeomFromGeoJSON($1), ${srid}), $2)`;
@@ -87,7 +92,7 @@ export const buildTemporalHeatmapQuery = (
   table: string,
   geometryColumn: string,
   bboxFilter: BoundingBox,
-  timeBucket: string = '1 hour',
+  timeBucket: string = "1 hour",
   srid = 4326
 ): QueryConfig => {
   const values: Array<string | number> = [];

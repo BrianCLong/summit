@@ -5,11 +5,13 @@ This project is a minimal, IntelGraph-compatible "DeepAgent-style" service that 
 ## Quickstart
 
 1.  **Start the services:**
+
     ```bash
     docker-compose up -d
     ```
 
 2.  **Start the development server:**
+
     ```bash
     npm run dev
     ```
@@ -38,11 +40,7 @@ graph TD
 
 ```graphql
 mutation StartRun {
-  startRun(input: {
-    tenantId: "tenant-a",
-    actor: "admin",
-    task: "do something",
-  }) {
+  startRun(input: { tenantId: "tenant-a", actor: "admin", task: "do something" }) {
     id
     status
   }

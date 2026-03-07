@@ -71,14 +71,7 @@ Creates **fields**, **views**, and **filters** matching the sprint.
     {
       "name": "Status",
       "type": "single_select",
-      "options": [
-        "Backlog",
-        "Ready",
-        "In Progress",
-        "In Review",
-        "Blocked",
-        "Done"
-      ]
+      "options": ["Backlog", "Ready", "In Progress", "In Review", "Blocked", "Done"]
     },
     { "name": "Sprint", "type": "text" },
     { "name": "Epic", "type": "text" },

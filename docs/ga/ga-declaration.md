@@ -15,15 +15,17 @@ Summit v1.0.0 is declared **General Availability**. This designation signifies t
 ## Scope
 
 ### Supported Features
-*   Maestro Orchestration Engine (Core)
-*   Identity & Access Management (OIDC/RBAC)
-*   Provenance Ledger (Immutable Logs)
-*   Summit Web Console
+
+- Maestro Orchestration Engine (Core)
+- Identity & Access Management (OIDC/RBAC)
+- Provenance Ledger (Immutable Logs)
+- Summit Web Console
 
 ### Excluded (Beta/Experimental)
-*   PsyOps / Cognitive Warfare Modules (Beta)
-*   Ultra-Agent Autonomous Mode (Experimental)
-*   "Black Projects" (Internal Only)
+
+- PsyOps / Cognitive Warfare Modules (Beta)
+- Ultra-Agent Autonomous Mode (Experimental)
+- "Black Projects" (Internal Only)
 
 ## Upgrade Path
 

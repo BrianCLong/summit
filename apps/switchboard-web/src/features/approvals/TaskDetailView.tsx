@@ -1,77 +1,83 @@
-import React from 'react';
-import { Approval } from './types';
+import React from "react";
+import { Approval } from "./types";
 
 interface TaskDetailViewProps {
-    approval: Approval;
-    onClose: () => void;
+  approval: Approval;
+  onClose: () => void;
 }
 
 export const TaskDetailView: React.FC<TaskDetailViewProps> = ({ approval, onClose }) => {
-    const payload = approval.payload || {};
-    const riskScore = payload.riskScore || 0;
-    const diff = payload.diff || {};
+  const payload = approval.payload || {};
+  const riskScore = payload.riskScore || 0;
+  const diff = payload.diff || {};
 
-    return (
-        <div className="task-detail-overlay">
-            <div className="task-detail-modal">
-                <header>
-                    <div className="header-titles">
-                        <h3>Task Context</h3>
-                        <code className="action-code">{approval.action}</code>
-                    </div>
-                    <button className="close-btn" onClick={onClose}>&times;</button>
-                </header>
+  return (
+    <div className="task-detail-overlay">
+      <div className="task-detail-modal">
+        <header>
+          <div className="header-titles">
+            <h3>Task Context</h3>
+            <code className="action-code">{approval.action}</code>
+          </div>
+          <button className="close-btn" onClick={onClose}>
+            &times;
+          </button>
+        </header>
 
-                <div className="detail-content">
-                    <section className="risk-summary">
-                        <div className="section-title">Security Analysis</div>
-                        <div className="risk-meter">
-                            <div className="meter-fill" style={{ width: `${riskScore * 100}%`, backgroundColor: riskScore > 0.7 ? '#ff4d4d' : '#ffcc00' }}></div>
-                        </div>
-                        <div className="risk-label">
-                            UEBA Risk Score: <strong>{(riskScore * 100).toFixed(0)}%</strong>
-                        </div>
-                        {payload.riskFactors && payload.riskFactors.length > 0 && (
-                            <ul className="risk-factors">
-                                {payload.riskFactors.map((f: string, i: number) => (
-                                    <li key={i} className="risk-factor-item">
-                                        <span className="warning-icon">⚠️</span> {f}
-                                    </li>
-                                ))}
-                            </ul>
-                        )}
-                    </section>
-
-                    <section className="payload-diff">
-                        <div className="section-title">Proposed State Changes</div>
-                        <div className="diff-container">
-                            <pre className="diff-view">
-                                {JSON.stringify(diff, null, 2)}
-                            </pre>
-                        </div>
-                    </section>
-
-                    <section className="task-metadata">
-                        <div className="section-title">Metadata</div>
-                        <div className="metadata-grid">
-                            <div className="meta-item">
-                                <label>Requester ID</label>
-                                <code>{approval.requester_id}</code>
-                            </div>
-                            <div className="meta-item">
-                                <label>Run ID</label>
-                                <code>{approval.run_id || 'N/A'}</code>
-                            </div>
-                            <div className="meta-item">
-                                <label>Created At</label>
-                                <span>{new Date(approval.created_at).toLocaleString()}</span>
-                            </div>
-                        </div>
-                    </section>
-                </div>
+        <div className="detail-content">
+          <section className="risk-summary">
+            <div className="section-title">Security Analysis</div>
+            <div className="risk-meter">
+              <div
+                className="meter-fill"
+                style={{
+                  width: `${riskScore * 100}%`,
+                  backgroundColor: riskScore > 0.7 ? "#ff4d4d" : "#ffcc00",
+                }}
+              ></div>
             </div>
+            <div className="risk-label">
+              UEBA Risk Score: <strong>{(riskScore * 100).toFixed(0)}%</strong>
+            </div>
+            {payload.riskFactors && payload.riskFactors.length > 0 && (
+              <ul className="risk-factors">
+                {payload.riskFactors.map((f: string, i: number) => (
+                  <li key={i} className="risk-factor-item">
+                    <span className="warning-icon">⚠️</span> {f}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
 
-            <style>{`
+          <section className="payload-diff">
+            <div className="section-title">Proposed State Changes</div>
+            <div className="diff-container">
+              <pre className="diff-view">{JSON.stringify(diff, null, 2)}</pre>
+            </div>
+          </section>
+
+          <section className="task-metadata">
+            <div className="section-title">Metadata</div>
+            <div className="metadata-grid">
+              <div className="meta-item">
+                <label>Requester ID</label>
+                <code>{approval.requester_id}</code>
+              </div>
+              <div className="meta-item">
+                <label>Run ID</label>
+                <code>{approval.run_id || "N/A"}</code>
+              </div>
+              <div className="meta-item">
+                <label>Created At</label>
+                <span>{new Date(approval.created_at).toLocaleString()}</span>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <style>{`
                 .task-detail-overlay {
                     position: fixed;
                     top: 0;
@@ -215,6 +221,6 @@ export const TaskDetailView: React.FC<TaskDetailViewProps> = ({ approval, onClos
                     color: #888;
                 }
             `}</style>
-        </div>
-    );
+    </div>
+  );
 };

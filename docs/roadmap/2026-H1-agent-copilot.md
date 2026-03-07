@@ -4,10 +4,10 @@
 
 ## Objectives (Top-Line)
 
-* Standardize **MCP-first** tool access and context ingestion across all agents.
-* Ship a **production agent runtime** with multi-tool orchestration, streaming, and governance.
-* Elevate from prompt engineering to **deterministic context engineering** with auditable pipelines.
-* Deliver **enterprise-grade tool governance** (registry, approvals, isolation, policy).
+- Standardize **MCP-first** tool access and context ingestion across all agents.
+- Ship a **production agent runtime** with multi-tool orchestration, streaming, and governance.
+- Elevate from prompt engineering to **deterministic context engineering** with auditable pipelines.
+- Deliver **enterprise-grade tool governance** (registry, approvals, isolation, policy).
 
 ---
 
@@ -18,18 +18,18 @@
 **Owner:** Platform Architect
 **Deliverables**
 
-* `packages/mcp/` canonical library (JSON-RPC client/server, schema validation).
-* MCP adapters for: Evidence APIs, IntelGraph read/write, Governance Ledger.
-* MCP spec conformance tests (golden vectors).
+- `packages/mcp/` canonical library (JSON-RPC client/server, schema validation).
+- MCP adapters for: Evidence APIs, IntelGraph read/write, Governance Ledger.
+- MCP spec conformance tests (golden vectors).
 
 **Evidence**
 
-* `evidence/mcp/conformance.json`
-* CI gate: `verify_mcp_contracts.mjs`
+- `evidence/mcp/conformance.json`
+- CI gate: `verify_mcp_contracts.mjs`
 
 **Risks**
 
-* Spec drift across vendors → mitigate with pinned version + compatibility layer.
+- Spec drift across vendors → mitigate with pinned version + compatibility layer.
 
 ---
 
@@ -38,19 +38,19 @@
 **Owner:** Agent Runtime Lead
 **Deliverables**
 
-* Persistent agent lifecycle (stateful context, resumable tasks).
-* Multi-model routing (policy-driven selection).
-* Streaming execution + tool calls.
-* Native MCP server registration.
+- Persistent agent lifecycle (stateful context, resumable tasks).
+- Multi-model routing (policy-driven selection).
+- Streaming execution + tool calls.
+- Native MCP server registration.
 
 **Evidence**
 
-* `runtime/agent_runtime_v1.report.json`
-* Load/soak benchmarks, replay logs.
+- `runtime/agent_runtime_v1.report.json`
+- Load/soak benchmarks, replay logs.
 
 **Risks**
 
-* SDK churn → abstraction boundary + contract tests.
+- SDK churn → abstraction boundary + contract tests.
 
 ---
 
@@ -59,18 +59,18 @@
 **Owner:** Security & Governance Lead
 **Deliverables**
 
-* Tool Registry (approval, versioning, scopes, blast-radius labels).
-* Policy engine: allow/deny, rate limits, sandboxing.
-* Audit hooks into Security Ledger.
+- Tool Registry (approval, versioning, scopes, blast-radius labels).
+- Policy engine: allow/deny, rate limits, sandboxing.
+- Audit hooks into Security Ledger.
 
 **Evidence**
 
-* `governance/tool_registry.yaml`
-* SOC-2 control mappings.
+- `governance/tool_registry.yaml`
+- SOC-2 control mappings.
 
 **Risks**
 
-* Over-permissive defaults → deny-by-default policy.
+- Over-permissive defaults → deny-by-default policy.
 
 ---
 
@@ -79,26 +79,26 @@
 **Owner:** Data Platform Lead
 **Deliverables**
 
-* Structured context pipelines (sources → transforms → envelopes).
-* Context budgets + prioritization.
-* Deterministic context hashing.
+- Structured context pipelines (sources → transforms → envelopes).
+- Context budgets + prioritization.
+- Deterministic context hashing.
 
 **Evidence**
 
-* `context/pipelines/*.yaml`
-* `context/hash_manifest.json`
+- `context/pipelines/*.yaml`
+- `context/hash_manifest.json`
 
 **Risks**
 
-* Context bloat → strict budgets + eviction policy.
+- Context bloat → strict budgets + eviction policy.
 
 ---
 
 **Q1 Exit Criteria**
 
-* All agents consume tools **only via MCP**.
-* Agent Runtime v1 in production behind feature flag.
-* Tool Registry enforced in CI and runtime.
+- All agents consume tools **only via MCP**.
+- Agent Runtime v1 in production behind feature flag.
+- Tool Registry enforced in CI and runtime.
 
 ---
 
@@ -109,18 +109,18 @@
 **Owner:** Agent Runtime Lead
 **Deliverables**
 
-* Tool-graph planning (parallelism, retries, compensation).
-* Secure execution sandboxes (FS, network, secrets).
-* Failure recovery + human-in-the-loop checkpoints.
+- Tool-graph planning (parallelism, retries, compensation).
+- Secure execution sandboxes (FS, network, secrets).
+- Failure recovery + human-in-the-loop checkpoints.
 
 **Evidence**
 
-* `runtime/tool_graph_tests.json`
-* Incident simulations.
+- `runtime/tool_graph_tests.json`
+- Incident simulations.
 
 **Risks**
 
-* Security surface expansion → isolation + least privilege.
+- Security surface expansion → isolation + least privilege.
 
 ---
 
@@ -129,18 +129,18 @@
 **Owner:** Compliance Lead
 **Deliverables**
 
-* Agent roles & permissions (AGENTS.md enforcement).
-* Versioned prompts & contexts registry.
-* Drift detection (prompt/context/tool deltas).
+- Agent roles & permissions (AGENTS.md enforcement).
+- Versioned prompts & contexts registry.
+- Drift detection (prompt/context/tool deltas).
 
 **Evidence**
 
-* `governance/agent_roles.yaml`
-* Drift reports.
+- `governance/agent_roles.yaml`
+- Drift reports.
 
 **Risks**
 
-* Governance friction → self-service approvals with guardrails.
+- Governance friction → self-service approvals with guardrails.
 
 ---
 
@@ -149,18 +149,18 @@
 **Owner:** Observability Lead
 **Deliverables**
 
-* End-to-end traces (context → tool → output).
-* Lineage artifacts aligned with provenance standards.
-* Evidence freshness scoring.
+- End-to-end traces (context → tool → output).
+- Lineage artifacts aligned with provenance standards.
+- Evidence freshness scoring.
 
 **Evidence**
 
-* `observability/traces/*.json`
-* Provenance attestations.
+- `observability/traces/*.json`
+- Provenance attestations.
 
 **Risks**
 
-* Signal overload → sampled traces + tiered retention.
+- Signal overload → sampled traces + tiered retention.
 
 ---
 
@@ -169,26 +169,26 @@
 **Owner:** Product Marketing
 **Deliverables**
 
-* Public announcement: “MCP-Native, Governed Agents.”
-* Technical blog: Context Engineering vs Prompting.
-* Customer demos with live orchestration.
+- Public announcement: “MCP-Native, Governed Agents.”
+- Technical blog: Context Engineering vs Prompting.
+- Customer demos with live orchestration.
 
 **Evidence**
 
-* `docs/marketing/agent_framework.md`
-* Demo recordings + claims checklist.
+- `docs/marketing/agent_framework.md`
+- Demo recordings + claims checklist.
 
 **Risks**
 
-* Over-claiming → CI-validated marketing claims.
+- Over-claiming → CI-validated marketing claims.
 
 ---
 
 **Q2 Exit Criteria**
 
-* Multi-tool agents operating safely at scale.
-* Full auditability from context ingestion to action.
-* External messaging aligned with delivered capabilities.
+- Multi-tool agents operating safely at scale.
+- Full auditability from context ingestion to action.
+- External messaging aligned with delivered capabilities.
 
 ---
 
@@ -207,7 +207,7 @@
 
 ## **KPIs**
 
-* % tools accessed via MCP (target: 100%)
-* Mean agent task success rate (≥99%)
-* Time-to-approve new tool (≤1 day)
-* Evidence completeness score (≥98%)
+- % tools accessed via MCP (target: 100%)
+- Mean agent task success rate (≥99%)
+- Time-to-approve new tool (≤1 day)
+- Evidence completeness score (≥98%)

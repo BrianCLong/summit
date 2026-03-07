@@ -5,7 +5,7 @@
 **This is a convergence moment.**
 Russia is compressing espionage timelines (human + cyber), China and Iran are institutionalizing population-scale information control, and the takedown of a major proxy ecosystem is forcing adversaries to accelerate **sovereign, vertically integrated infrastructure**. The net effect is **less noise, faster burns, and fewer intermediaries**.
 
-If 2023–2025 was about *scale*, 2026 is about *tempo and control*.
+If 2023–2025 was about _scale_, 2026 is about _tempo and control_.
 
 ---
 
@@ -22,9 +22,9 @@ The arrest inside Poland’s Ministry of National Defence confirms a shift NATO 
 
 Key implications:
 
-* This was not tactical intelligence collection; it was **strategic planning access** with NATO adjacency.
-* The abandonment of diplomatic cover means **counterintelligence timelines lengthen**—years, not months.
-* Criminal proxy use is no longer just cyber; it is **logistics, laundering, and cutout management**.
+- This was not tactical intelligence collection; it was **strategic planning access** with NATO adjacency.
+- The abandonment of diplomatic cover means **counterintelligence timelines lengthen**—years, not months.
+- Criminal proxy use is no longer just cyber; it is **logistics, laundering, and cutout management**.
 
 **Assessment:** Expect fewer arrests, but higher impact per mole. CI success metrics based on “cases per year” are now misleading.
 
@@ -42,9 +42,9 @@ APT28’s 24-hour exploitation window should be treated as **baseline doctrine**
 
 What stands out:
 
-* Same-day domain registration + exploitation confirms **pre-built playbooks** awaiting disclosure.
-* Abuse of EU-branded workflows shows **procedural impersonation**, not just technical spoofing.
-* Filen.io usage underscores a trend toward **legitimate-cloud camouflage** post–infrastructure takedowns.
+- Same-day domain registration + exploitation confirms **pre-built playbooks** awaiting disclosure.
+- Abuse of EU-branded workflows shows **procedural impersonation**, not just technical spoofing.
+- Filen.io usage underscores a trend toward **legitimate-cloud camouflage** post–infrastructure takedowns.
 
 **Assessment:**
 Patch SLAs measured in weeks are functionally obsolete for Tier-1 threat models.
@@ -63,13 +63,13 @@ The dismantling of IPIDEA removes a **shared convenience layer**, not a capabili
 
 Short-term effects (30–90 days):
 
-* Temporary friction for credential stuffing and spray attacks.
-* Increased reuse of **second-tier or aging proxy networks** → noisier traffic.
+- Temporary friction for credential stuffing and spray attacks.
+- Increased reuse of **second-tier or aging proxy networks** → noisier traffic.
 
 Medium-term effects:
 
-* Acceleration toward **state-owned or state-shielded proxy infrastructure**.
-* More “gray routing” through cloud, CDN abuse, and friendly jurisdictions.
+- Acceleration toward **state-owned or state-shielded proxy infrastructure**.
+- More “gray routing” through cloud, CDN abuse, and friendly jurisdictions.
 
 **Assessment:** Detection improves briefly—then gets harder than before.
 
@@ -87,9 +87,9 @@ Iran’s “Barracks Internet,” enabled by Chinese technology and expertise, i
 
 Why it matters:
 
-* This is **permanent segmentation**, not crisis throttling.
-* Selective external access creates **elite digital enclaves** while the population is sealed.
-* GPS jamming + fake apps = **physical-digital coercion loop**.
+- This is **permanent segmentation**, not crisis throttling.
+- Selective external access creates **elite digital enclaves** while the population is sealed.
+- GPS jamming + fake apps = **physical-digital coercion loop**.
 
 **Assessment:**
 This model will be copied. Expect it next in fragile states with Chinese infrastructure debt.
@@ -100,15 +100,15 @@ This model will be copied. Expect it next in fragile states with Chinese infrast
 
 No single data point is decisive—but together:
 
-* Uranium mobility
-* Russian mediation posture
-* Chinese infrastructure lock-in
-* U.S. dual-track diplomacy
+- Uranium mobility
+- Russian mediation posture
+- Chinese infrastructure lock-in
+- U.S. dual-track diplomacy
 
 …signal **intentional ambiguity as leverage**.
 
 **Assessment:**
-This is not de-escalation; it is *option preservation*. The risk surface widens even if tensions appear managed.
+This is not de-escalation; it is _option preservation_. The risk surface widens even if tensions appear managed.
 
 ---
 
@@ -116,15 +116,15 @@ This is not de-escalation; it is *option preservation*. The risk surface widens 
 
 ### For Governments / NATO-aligned institutions
 
-* **Counterintelligence:** Assume deep-cover civilians, not diplomats.
-* **Cyber:** Design for *assume-compromise within 24–72 hours of disclosure*.
-* **Policy:** Satellite, mesh, and alternative connectivity monitoring is now a **human rights intelligence function**, not just telecom policy.
+- **Counterintelligence:** Assume deep-cover civilians, not diplomats.
+- **Cyber:** Design for _assume-compromise within 24–72 hours of disclosure_.
+- **Policy:** Satellite, mesh, and alternative connectivity monitoring is now a **human rights intelligence function**, not just telecom policy.
 
 ### For Enterprises / Critical Infrastructure
 
-* **Patching velocity > perimeter depth**
-* **Identity abuse > malware** in the post-proxy era
-* Treat “legitimate cloud + EU branding” as **high-risk, not trusted**
+- **Patching velocity > perimeter depth**
+- **Identity abuse > malware** in the post-proxy era
+- Treat “legitimate cloud + EU branding” as **high-risk, not trusted**
 
 ---
 
@@ -132,10 +132,10 @@ This is not de-escalation; it is *option preservation*. The risk surface widens 
 
 Your assessment is directionally correct and, if anything, conservative:
 
-* Russia is optimizing for **speed and trust penetration**.
-* China is exporting **authoritarian internet architecture**, not just hardware.
-* Cyber operations are entering an era where **disclosure = detonation**.
-* Disruptions like IPIDEA create **short pauses, not degradation**.
+- Russia is optimizing for **speed and trust penetration**.
+- China is exporting **authoritarian internet architecture**, not just hardware.
+- Cyber operations are entering an era where **disclosure = detonation**.
+- Disruptions like IPIDEA create **short pauses, not degradation**.
 
 If 2026 has a defining characteristic so far, it is this:
 
@@ -143,6 +143,6 @@ If 2026 has a defining characteristic so far, it is this:
 
 If you want, next we can:
 
-* Build **warning indicators** to detect proxy-network migration,
-* Map **which sectors will feel this first**, or
-* Translate this into a **90-day defensive posture plan** (state or enterprise).
+- Build **warning indicators** to detect proxy-network migration,
+- Map **which sectors will feel this first**, or
+- Translate this into a **90-day defensive posture plan** (state or enterprise).

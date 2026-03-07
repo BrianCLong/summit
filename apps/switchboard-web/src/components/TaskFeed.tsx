@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import { Approval, getPendingApprovals, approveRequest, rejectRequest } from '../api';
-import { ApprovalCard } from './ApprovalCard';
+import React, { useEffect, useState } from "react";
+import { Approval, getPendingApprovals, approveRequest, rejectRequest } from "../api";
+import { ApprovalCard } from "./ApprovalCard";
 
 export function TaskFeed() {
   const [approvals, setApprovals] = useState<Approval[]>([]);
@@ -13,7 +13,7 @@ export function TaskFeed() {
       setApprovals(data);
       setError(null);
     } catch (err: any) {
-      console.error('Fetch error:', err);
+      console.error("Fetch error:", err);
       setError(err.message);
     } finally {
       setLoading(false);
@@ -36,7 +36,7 @@ export function TaskFeed() {
   };
 
   const handleReject = async (id: string) => {
-    const reason = prompt('Reason for rejection:');
+    const reason = prompt("Reason for rejection:");
     if (reason === null) return;
     try {
       await rejectRequest(id, reason);
@@ -47,15 +47,16 @@ export function TaskFeed() {
   };
 
   if (loading && approvals.length === 0) return <div>Loading approvals...</div>;
-  if (error) return <div style={{ color: 'red', padding: '20px' }}>Error loading approvals: {error}</div>;
+  if (error)
+    return <div style={{ color: "red", padding: "20px" }}>Error loading approvals: {error}</div>;
 
   return (
-    <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+    <div style={{ maxWidth: "800px", margin: "0 auto" }}>
       <h2>Pending Approvals ({approvals.length})</h2>
       {approvals.length === 0 ? (
-        <p style={{ textAlign: 'center', color: '#666' }}>No pending approvals.</p>
+        <p style={{ textAlign: "center", color: "#666" }}>No pending approvals.</p>
       ) : (
-        approvals.map(app => (
+        approvals.map((app) => (
           <ApprovalCard
             key={app.id}
             approval={app}

@@ -8,8 +8,8 @@ permissions:
   contents: read
 
 env:
-  NODE_VERSION: '20.x'
-  PNPM_VERSION: '10.0.0'
+  NODE_VERSION: "20.x"
+  PNPM_VERSION: "10.0.0"
 
 jobs:
   supply-chain:
@@ -23,7 +23,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          cache: 'pnpm'
+          cache: "pnpm"
           node-version: ${{ env.NODE_VERSION }}
 
       - name: Enable Corepack

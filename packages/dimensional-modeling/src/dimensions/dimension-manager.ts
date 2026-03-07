@@ -2,13 +2,13 @@
  * Dimension Manager for creating and managing dimension tables
  */
 
-import { Pool } from 'pg';
+import { Pool } from "pg";
 
 export class DimensionManager {
   constructor(private pool: Pool) {}
 
   async createDimension(name: string, attributes: string[]): Promise<void> {
-    const attrDefs = attributes.map((a) => `${a} VARCHAR(255)`).join(', ');
+    const attrDefs = attributes.map((a) => `${a} VARCHAR(255)`).join(", ");
 
     await this.pool.query(`
       CREATE TABLE dim_${name} (
@@ -22,18 +22,15 @@ export class DimensionManager {
     `);
   }
 
-  async insertDimensionRow(
-    dimensionName: string,
-    data: Record<string, any>,
-  ): Promise<number> {
-    const columns = Object.keys(data).join(', ');
+  async insertDimensionRow(dimensionName: string, data: Record<string, any>): Promise<number> {
+    const columns = Object.keys(data).join(", ");
     const placeholders = Object.keys(data)
       .map((_, idx) => `$${idx + 1}`)
-      .join(', ');
+      .join(", ");
 
     const result = await this.pool.query(
       `INSERT INTO dim_${dimensionName} (${columns}) VALUES (${placeholders}) RETURNING ${dimensionName}_id`,
-      Object.values(data),
+      Object.values(data)
     );
 
     return result.rows[0][`${dimensionName}_id`];

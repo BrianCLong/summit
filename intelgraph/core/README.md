@@ -25,6 +25,7 @@ make intelgraph-api      # Start API server
 ```
 
 API will be available at:
+
 - http://localhost:8000 - API root
 - http://localhost:8000/docs - Interactive API documentation
 - http://localhost:8000/redoc - ReDoc documentation

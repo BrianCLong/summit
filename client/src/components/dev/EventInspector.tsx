@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   Card,
   CardHeader,
@@ -13,13 +13,13 @@ import {
   Box,
   Switch,
   FormControlLabel,
-} from '@mui/material';
-import { ExpandMore, Clear, BugReport } from '@mui/icons-material';
-import { formatDistanceToNow } from 'date-fns';
+} from "@mui/material";
+import { ExpandMore, Clear, BugReport } from "@mui/icons-material";
+import { formatDistanceToNow } from "date-fns";
 
 interface RealtimeEvent {
   id: string;
-  type: 'subscription' | 'mutation' | 'query';
+  type: "subscription" | "mutation" | "query";
   operation: string;
   timestamp: Date;
   data: any;
@@ -33,7 +33,7 @@ export function EventInspector() {
   const [events, setEvents] = useState<RealtimeEvent[]>([]);
   const [expanded, setExpanded] = useState<{ [key: string]: boolean }>({});
   const [enabled, setEnabled] = useState(
-    () => import.meta.env.VITE_SHOW_EVENTS === '1' || import.meta.env.DEV,
+    () => import.meta.env.VITE_SHOW_EVENTS === "1" || import.meta.env.DEV
   );
 
   useEffect(() => {
@@ -44,11 +44,11 @@ export function EventInspector() {
 
     // Intercept Apollo Client logs (basic implementation)
     console.log = (...args: any[]) => {
-      if (args[0]?.includes?.('GraphQL')) {
+      if (args[0]?.includes?.("GraphQL")) {
         const event: RealtimeEvent = {
           id: Math.random().toString(36),
-          type: 'query',
-          operation: 'unknown',
+          type: "query",
+          operation: "unknown",
           timestamp: new Date(),
           data: args,
         };
@@ -62,8 +62,8 @@ export function EventInspector() {
       if (args[0]?.networkError || args[0]?.graphQLErrors) {
         const event: RealtimeEvent = {
           id: Math.random().toString(36),
-          type: 'mutation',
-          operation: 'error',
+          type: "mutation",
+          operation: "error",
           timestamp: new Date(),
           data: null,
           error: args[0],
@@ -88,28 +88,28 @@ export function EventInspector() {
     setEvents([]);
   };
 
-  if (!import.meta.env.DEV && import.meta.env.VITE_SHOW_EVENTS !== '1') {
+  if (!import.meta.env.DEV && import.meta.env.VITE_SHOW_EVENTS !== "1") {
     return null;
   }
 
   return (
     <Card
       sx={{
-        position: 'fixed',
+        position: "fixed",
         top: 80,
         right: 16,
         width: 320,
         maxHeight: 600,
-        overflow: 'auto',
+        overflow: "auto",
         zIndex: 9999,
       }}
     >
       <CardHeader
         avatar={<BugReport />}
         title="Event Inspector"
-        titleTypographyProps={{ variant: 'subtitle2' }}
+        titleTypographyProps={{ variant: "subtitle2" }}
         action={
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Box sx={{ display: "flex", alignItems: "center" }}>
             <FormControlLabel
               control={
                 <Switch
@@ -141,10 +141,10 @@ export function EventInspector() {
                 primary={
                   <Box
                     sx={{
-                      display: 'flex',
-                      alignItems: 'center',
+                      display: "flex",
+                      alignItems: "center",
                       gap: 1,
-                      cursor: 'pointer',
+                      cursor: "pointer",
                     }}
                     onClick={() => toggleExpanded(event.id)}
                   >
@@ -153,12 +153,12 @@ export function EventInspector() {
                       label={event.type}
                       color={
                         event.error
-                          ? 'error'
-                          : event.type === 'subscription'
-                            ? 'success'
-                            : 'primary'
+                          ? "error"
+                          : event.type === "subscription"
+                            ? "success"
+                            : "primary"
                       }
-                      sx={{ fontSize: '0.6rem', height: 16 }}
+                      sx={{ fontSize: "0.6rem", height: 16 }}
                     />
                     <Typography variant="caption" noWrap>
                       {event.operation}
@@ -166,10 +166,8 @@ export function EventInspector() {
                     <ExpandMore
                       sx={{
                         fontSize: 16,
-                        transform: expanded[event.id]
-                          ? 'rotate(180deg)'
-                          : 'rotate(0deg)',
-                        transition: 'transform 0.2s',
+                        transform: expanded[event.id] ? "rotate(180deg)" : "rotate(0deg)",
+                        transition: "transform 0.2s",
                       }}
                     />
                   </Box>
@@ -181,14 +179,12 @@ export function EventInspector() {
                 }
               />
 
-              <Collapse in={expanded[event.id]} sx={{ width: '100%' }}>
-                <Box
-                  sx={{ p: 1, bgcolor: 'grey.50', borderRadius: 1, mt: 0.5 }}
-                >
+              <Collapse in={expanded[event.id]} sx={{ width: "100%" }}>
+                <Box sx={{ p: 1, bgcolor: "grey.50", borderRadius: 1, mt: 0.5 }}>
                   <Typography
                     variant="caption"
                     component="pre"
-                    sx={{ fontSize: '0.6rem', overflow: 'auto' }}
+                    sx={{ fontSize: "0.6rem", overflow: "auto" }}
                   >
                     {JSON.stringify(
                       {
@@ -197,7 +193,7 @@ export function EventInspector() {
                         error: event.error,
                       },
                       null,
-                      2,
+                      2
                     )}
                   </Typography>
                 </Box>

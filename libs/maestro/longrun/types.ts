@@ -1,4 +1,4 @@
-export type LongRunMode = 'advisory' | 'strict';
+export type LongRunMode = "advisory" | "strict";
 
 export interface LongRunBudgets {
   perHourUsd: number;
@@ -86,7 +86,7 @@ export interface IterationInput {
 }
 
 export interface StopDecision {
-  status: 'continue' | 'stop';
+  status: "continue" | "stop";
   reason: string;
   detail?: string;
 }
@@ -120,7 +120,7 @@ export interface EvidenceManifest {
     checkpointPath: string;
   }>;
   completion: {
-    status: 'in-progress' | 'completed' | 'halted';
+    status: "in-progress" | "completed" | "halted";
     reason: string;
     verified: boolean;
     verifiedAt?: string;

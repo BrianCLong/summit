@@ -1,11 +1,11 @@
-import crypto from 'node:crypto';
-import type { Manifest, ManifestSignature, ManifestSignatureFile } from './types.js';
+import crypto from "node:crypto";
+import type { Manifest, ManifestSignature, ManifestSignatureFile } from "./types.js";
 
 function sortObject(value: unknown): unknown {
   if (Array.isArray(value)) {
     return value.map((item) => sortObject(item));
   }
-  if (value && typeof value === 'object') {
+  if (value && typeof value === "object") {
     return Object.keys(value as Record<string, unknown>)
       .sort()
       .reduce<Record<string, unknown>>((acc, key) => {
@@ -23,23 +23,29 @@ export function canonicalizeManifest(manifest: Manifest): string {
 }
 
 export function hashManifest(manifest: Manifest): string {
-  return crypto.createHash('sha256').update(canonicalizeManifest(manifest)).digest('hex');
+  return crypto.createHash("sha256").update(canonicalizeManifest(manifest)).digest("hex");
 }
 
 export function signManifest(
   manifest: Manifest,
-  options: { privateKeyPem: string; publicKeyPem?: string; keyId: string; signedAt?: string },
+  options: { privateKeyPem: string; publicKeyPem?: string; keyId: string; signedAt?: string }
 ): ManifestSignatureFile {
   const payload = Buffer.from(canonicalizeManifest(manifest));
   const signatureBuffer = crypto.sign(null, payload, options.privateKeyPem);
   const publicKey = options.publicKeyPem
-    ? crypto.createPublicKey(options.publicKeyPem).export({ type: 'spki', format: 'pem' }).toString()
-    : crypto.createPublicKey(options.privateKeyPem).export({ type: 'spki', format: 'pem' }).toString();
+    ? crypto
+        .createPublicKey(options.publicKeyPem)
+        .export({ type: "spki", format: "pem" })
+        .toString()
+    : crypto
+        .createPublicKey(options.privateKeyPem)
+        .export({ type: "spki", format: "pem" })
+        .toString();
   const signature: ManifestSignature = {
-    algorithm: 'ed25519',
+    algorithm: "ed25519",
     keyId: options.keyId,
     publicKey,
-    signature: signatureBuffer.toString('base64'),
+    signature: signatureBuffer.toString("base64"),
     signedAt: options.signedAt ?? new Date().toISOString(),
   };
   return {
@@ -51,18 +57,18 @@ export function signManifest(
 export function verifyManifestSignature(
   manifest: Manifest,
   signatureFile: ManifestSignatureFile,
-  publicKeyOverride?: string,
+  publicKeyOverride?: string
 ): { valid: boolean; reason?: string } {
   const payload = Buffer.from(canonicalizeManifest(manifest));
   const expectedHash = hashManifest(manifest);
   if (signatureFile.manifestHash !== expectedHash) {
-    return { valid: false, reason: 'Manifest hash mismatch' };
+    return { valid: false, reason: "Manifest hash mismatch" };
   }
   const publicKey = publicKeyOverride ?? signatureFile.signature.publicKey;
   if (!publicKey) {
-    return { valid: false, reason: 'Public key missing' };
+    return { valid: false, reason: "Public key missing" };
   }
-  const signature = Buffer.from(signatureFile.signature.signature, 'base64');
+  const signature = Buffer.from(signatureFile.signature.signature, "base64");
   const ok = crypto.verify(null, payload, publicKey, signature);
-  return ok ? { valid: true } : { valid: false, reason: 'Signature invalid' };
+  return ok ? { valid: true } : { valid: false, reason: "Signature invalid" };
 }

@@ -3,7 +3,7 @@ name: SOC Controls
 on:
   pull_request:
   push:
-    branches: [ main ]
+    branches: [main]
   merge_group:
 
 concurrency:
@@ -22,8 +22,8 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version-file: '.nvmrc'
-          cache: 'pnpm'
+          node-version-file: ".nvmrc"
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile

@@ -3,7 +3,6 @@
 > Evidence-IDs: EVD-PLACEHOLDER
 > Status: active
 
-
 # Data Classification
 
 This document defines the Data Classification taxonomy and registry for the Summit platform governance system.

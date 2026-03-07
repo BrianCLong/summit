@@ -1,5 +1,5 @@
-import { recordAudit } from './audit';
-import React from 'react';
+import { recordAudit } from './audit'
+import React from 'react'
 
 export type GoldenPathStep =
   | 'signup'
@@ -10,9 +10,9 @@ export type GoldenPathStep =
   | 'entities_viewed'
   | 'relationships_explored'
   | 'copilot_query'
-  | 'results_viewed';
+  | 'results_viewed'
 
-export type ErrorSeverity = 'low' | 'medium' | 'high' | 'critical';
+export type ErrorSeverity = 'low' | 'medium' | 'high' | 'critical'
 
 export type ErrorCategory =
   | 'render'
@@ -21,80 +21,103 @@ export type ErrorCategory =
   | 'mutation'
   | 'auth'
   | 'validation'
-  | 'unknown';
+  | 'unknown'
 
 /**
  * Generates a stable fingerprint for an error to enable grouping and deduplication.
  * Uses error type, message pattern, and sanitized stack trace.
  */
 export const generateErrorFingerprint = (error: Error): string => {
-  const name = error.name || 'UnknownError';
-  const message = (error.message || '').replace(/\d+/g, 'N'); // Replace numbers with N
+  const name = error.name || 'UnknownError'
+  const message = (error.message || '').replace(/\d+/g, 'N') // Replace numbers with N
   const stack = (error.stack || '')
     .split('\n')
     .slice(0, 3) // Take first 3 stack frames
     .map(line => line.replace(/\d+/g, 'N')) // Normalize all numbers including line/col
-    .join('|');
+    .join('|')
 
-  const raw = `${name}:${message}:${stack}`;
+  const raw = `${name}:${message}:${stack}`
 
   // Simple hash function (FNV-1a)
-  let hash = 2166136261;
+  let hash = 2166136261
   for (let i = 0; i < raw.length; i++) {
-    hash ^= raw.charCodeAt(i);
-    hash += (hash << 1) + (hash << 4) + (hash << 7) + (hash << 8) + (hash << 24);
+    hash ^= raw.charCodeAt(i)
+    hash += (hash << 1) + (hash << 4) + (hash << 7) + (hash << 8) + (hash << 24)
   }
-  return (hash >>> 0).toString(16).padStart(8, '0');
-};
+  return (hash >>> 0).toString(16).padStart(8, '0')
+}
 
 /**
  * Categorizes an error based on its properties and context.
  */
-export const categorizeError = (error: Error, errorInfo?: React.ErrorInfo): ErrorCategory => {
-  const message = error.message?.toLowerCase() || '';
-  const name = error.name?.toLowerCase() || '';
+export const categorizeError = (
+  error: Error,
+  errorInfo?: React.ErrorInfo
+): ErrorCategory => {
+  const message = error.message?.toLowerCase() || ''
+  const name = error.name?.toLowerCase() || ''
 
-  if (message.includes('network') || message.includes('fetch') || name.includes('networkerror')) {
-    return 'network';
+  if (
+    message.includes('network') ||
+    message.includes('fetch') ||
+    name.includes('networkerror')
+  ) {
+    return 'network'
   }
-  if (message.includes('graphql') || message.includes('query') || message.includes('loading')) {
-    return 'data_fetch';
+  if (
+    message.includes('graphql') ||
+    message.includes('query') ||
+    message.includes('loading')
+  ) {
+    return 'data_fetch'
   }
-  if (message.includes('mutation') || message.includes('update') || message.includes('save')) {
-    return 'mutation';
+  if (
+    message.includes('mutation') ||
+    message.includes('update') ||
+    message.includes('save')
+  ) {
+    return 'mutation'
   }
-  if (message.includes('auth') || message.includes('unauthorized') || message.includes('forbidden')) {
-    return 'auth';
+  if (
+    message.includes('auth') ||
+    message.includes('unauthorized') ||
+    message.includes('forbidden')
+  ) {
+    return 'auth'
   }
-  if (message.includes('validation') || message.includes('invalid') || message.includes('required')) {
-    return 'validation';
+  if (
+    message.includes('validation') ||
+    message.includes('invalid') ||
+    message.includes('required')
+  ) {
+    return 'validation'
   }
   if (errorInfo?.componentStack) {
-    return 'render';
+    return 'render'
   }
 
-  return 'unknown';
-};
+  return 'unknown'
+}
 
 // Generate or retrieve session correlation ID
 const getSessionId = () => {
-    let sid = sessionStorage.getItem('summit_session_id');
-    if (!sid) {
-        sid = crypto.randomUUID();
-        sessionStorage.setItem('summit_session_id', sid);
-    }
-    return sid;
-};
+  let sid = sessionStorage.getItem('summit_session_id')
+  if (!sid) {
+    sid = crypto.randomUUID()
+    sessionStorage.setItem('summit_session_id', sid)
+  }
+  return sid
+}
 
 // Generate or retrieve device ID
 const getDeviceId = () => {
-    let did = localStorage.getItem('summit_device_id');
-    if (!did) {
-        did = crypto.randomUUID();
-        localStorage.setItem('summit_device_id', did);
-    }
-    return did;
-};
+  let did = localStorage.getItem('summit_device_id')
+  if (!did) {
+    did = crypto.randomUUID()
+    localStorage.setItem('summit_device_id', did)
+  }
+  return did
+}
 
 /**
  * Tracks a step in the Golden Path user journey.
@@ -106,7 +129,7 @@ export const trackGoldenPathStep = async (
 ) => {
   try {
     // Log locally for debug/audit
-    recordAudit('golden_path_step', { step, status });
+    recordAudit('golden_path_step', { step, status })
 
     // Send to backend telemetry endpoint
     await fetch('/api/monitoring/telemetry/events', {
@@ -119,16 +142,16 @@ export const trackGoldenPathStep = async (
         event: 'golden_path_step',
         labels: { step, status },
         context: {
-            sessionId: getSessionId(),
-            deviceId: getDeviceId(),
-            url: window.location.href
-        }
+          sessionId: getSessionId(),
+          deviceId: getDeviceId(),
+          url: window.location.href,
+        },
       }),
-    });
+    })
   } catch (error) {
-    console.error('Failed to track golden path step:', error);
+    console.error('Failed to track golden path step:', error)
   }
-};
+}
 
 /**
  * Reports an error to the backend telemetry service with fingerprinting and categorization.
@@ -140,8 +163,8 @@ export const reportError = async (
   additionalContext?: Record<string, any>
 ) => {
   try {
-    const fingerprint = generateErrorFingerprint(error);
-    const category = categorizeError(error, errorInfo);
+    const fingerprint = generateErrorFingerprint(error)
+    const category = categorizeError(error, errorInfo)
 
     const errorData = {
       message: error.message,
@@ -154,17 +177,17 @@ export const reportError = async (
       url: window.location.href,
       userAgent: navigator.userAgent,
       ...additionalContext,
-    };
+    }
 
     // Log to console in dev
     if (import.meta.env.DEV) {
-      console.group('🚨 Error Reported');
-      console.error(error);
-      console.info('Fingerprint:', fingerprint);
-      console.info('Category:', category);
-      console.info('Severity:', severity);
-      console.info('Context:', errorInfo);
-      console.groupEnd();
+      console.group('🚨 Error Reported')
+      console.error(error)
+      console.info('Fingerprint:', fingerprint)
+      console.info('Category:', category)
+      console.info('Severity:', severity)
+      console.info('Context:', errorInfo)
+      console.groupEnd()
     }
 
     // Send to backend
@@ -184,49 +207,45 @@ export const reportError = async (
         },
         payload: errorData,
         context: {
-            sessionId: getSessionId(),
-            deviceId: getDeviceId(),
-        }
+          sessionId: getSessionId(),
+          deviceId: getDeviceId(),
+        },
       }),
-    });
+    })
   } catch (trackingError) {
     // Fallback to console if reporting fails
-    console.error('Failed to report error:', trackingError);
+    console.error('Failed to report error:', trackingError)
   }
-};
+}
 
 export const getTelemetryContext = () => ({
-    sessionId: getSessionId(),
-    deviceId: getDeviceId(),
-});
-
+  sessionId: getSessionId(),
+  deviceId: getDeviceId(),
+})
 
 // Tri-pane Telemetry
 export const trackTimeWindowChange = async (
-    startMs: number,
-    endMs: number,
-    granularity: string,
-    tzMode: string,
-    source: string
+  startMs: number,
+  endMs: number,
+  granularity: string,
+  tzMode: string,
+  source: string
 ) => {
-    // Implementation for sending triPane.timeWindow.change
-    // console.log('triPane.timeWindow.change', { startMs, endMs, granularity, tzMode, source });
-};
+  // Implementation for sending triPane.timeWindow.change
+  // console.log('triPane.timeWindow.change', { startMs, endMs, granularity, tzMode, source });
+}
 
 export const trackSyncDivergence = async (
-    deltaStartMs: number,
-    deltaEndMs: number,
-    pane: string,
-    granularity: string
+  deltaStartMs: number,
+  deltaEndMs: number,
+  pane: string,
+  granularity: string
 ) => {
-    // Implementation for sending triPane.sync.divergence_detected
-    // console.log('triPane.sync.divergence_detected', { deltaStartMs, deltaEndMs, pane, granularity });
-};
+  // Implementation for sending triPane.sync.divergence_detected
+  // console.log('triPane.sync.divergence_detected', { deltaStartMs, deltaEndMs, pane, granularity });
+}
 
-export const trackQueryLatency = async (
-    pane: string,
-    durationMs: number
-) => {
-    // Implementation for sending triPane.query.latency_ms
-    // console.log('triPane.query.latency_ms', { pane, durationMs });
-};
+export const trackQueryLatency = async (pane: string, durationMs: number) => {
+  // Implementation for sending triPane.query.latency_ms
+  // console.log('triPane.query.latency_ms', { pane, durationMs });
+}

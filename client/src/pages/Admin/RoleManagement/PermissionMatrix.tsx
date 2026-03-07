@@ -9,7 +9,7 @@
  * @module pages/Admin/RoleManagement/PermissionMatrix
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo } from "react";
 import {
   Box,
   Button,
@@ -28,12 +28,9 @@ import {
   TableHead,
   TableRow,
   Typography,
-} from '@mui/material';
-import {
-  Check as CheckIcon,
-  Remove as RemoveIcon,
-} from '@mui/icons-material';
-import { Role, Permission } from '../../../services/admin-api';
+} from "@mui/material";
+import { Check as CheckIcon, Remove as RemoveIcon } from "@mui/icons-material";
+import { Role, Permission } from "../../../services/admin-api";
 
 interface PermissionMatrixProps {
   open: boolean;
@@ -70,9 +67,9 @@ export default function PermissionMatrix({
   );
 
   const getPermissionStatus = (permId: string) => {
-    if (directPermissions.has(permId)) return 'direct';
-    if (inheritedPermissions.has(permId)) return 'inherited';
-    return 'none';
+    if (directPermissions.has(permId)) return "direct";
+    if (inheritedPermissions.has(permId)) return "inherited";
+    return "none";
   };
 
   const countCategoryPermissions = (category: string) => {
@@ -85,9 +82,7 @@ export default function PermissionMatrix({
       <DialogTitle>
         <Stack direction="row" spacing={2} alignItems="center">
           <Typography variant="h6">{role.displayName}</Typography>
-          {role.isBuiltIn && (
-            <Chip label="Built-in" size="small" variant="outlined" />
-          )}
+          {role.isBuiltIn && <Chip label="Built-in" size="small" variant="outlined" />}
           <Chip label={role.scope} size="small" color="primary" />
         </Stack>
       </DialogTitle>
@@ -121,12 +116,7 @@ export default function PermissionMatrix({
               </Typography>
               <Stack direction="row" spacing={1}>
                 {role.inherits.map((inherited) => (
-                  <Chip
-                    key={inherited}
-                    label={inherited}
-                    variant="outlined"
-                    color="secondary"
-                  />
+                  <Chip key={inherited} label={inherited} variant="outlined" color="secondary" />
                 ))}
               </Stack>
             </Box>
@@ -151,7 +141,7 @@ export default function PermissionMatrix({
           </Stack>
 
           {/* Permissions by Category */}
-          <Box sx={{ maxHeight: 500, overflow: 'auto' }}>
+          <Box sx={{ maxHeight: 500, overflow: "auto" }}>
             {permissionCategories.map((category) => {
               const categoryPerms = permissionsByCategory[category] || [];
               const grantedCount = countCategoryPermissions(category);
@@ -167,7 +157,7 @@ export default function PermissionMatrix({
                     <Chip
                       label={`${grantedCount}/${categoryPerms.length}`}
                       size="small"
-                      color={grantedCount === categoryPerms.length ? 'success' : 'default'}
+                      color={grantedCount === categoryPerms.length ? "success" : "default"}
                     />
                   </Stack>
                   <TableContainer component={Paper} variant="outlined">
@@ -187,30 +177,27 @@ export default function PermissionMatrix({
                           return (
                             <TableRow key={perm.id}>
                               <TableCell>
-                                {status === 'direct' && (
+                                {status === "direct" && (
                                   <CheckIcon color="success" fontSize="small" />
                                 )}
-                                {status === 'inherited' && (
+                                {status === "inherited" && (
                                   <CheckIcon color="secondary" fontSize="small" />
                                 )}
-                                {status === 'none' && (
+                                {status === "none" && (
                                   <RemoveIcon color="disabled" fontSize="small" />
                                 )}
                               </TableCell>
                               <TableCell>
                                 <Typography
                                   variant="body2"
-                                  fontWeight={status !== 'none' ? 500 : 400}
-                                  color={status === 'none' ? 'text.secondary' : 'text.primary'}
+                                  fontWeight={status !== "none" ? 500 : 400}
+                                  color={status === "none" ? "text.secondary" : "text.primary"}
                                 >
                                   {perm.displayName}
                                 </Typography>
                               </TableCell>
                               <TableCell>
-                                <Typography
-                                  variant="caption"
-                                  color="textSecondary"
-                                >
+                                <Typography variant="caption" color="textSecondary">
                                   {perm.description}
                                 </Typography>
                               </TableCell>
@@ -219,7 +206,7 @@ export default function PermissionMatrix({
                                   label={perm.resource}
                                   size="small"
                                   variant="outlined"
-                                  sx={{ fontSize: '0.7rem' }}
+                                  sx={{ fontSize: "0.7rem" }}
                                 />
                               </TableCell>
                               <TableCell>
@@ -227,12 +214,15 @@ export default function PermissionMatrix({
                                   label={perm.action}
                                   size="small"
                                   color={
-                                    perm.action === 'create' ? 'success' :
-                                    perm.action === 'update' ? 'info' :
-                                    perm.action === 'delete' ? 'error' :
-                                    'default'
+                                    perm.action === "create"
+                                      ? "success"
+                                      : perm.action === "update"
+                                        ? "info"
+                                        : perm.action === "delete"
+                                          ? "error"
+                                          : "default"
                                   }
-                                  sx={{ fontSize: '0.7rem' }}
+                                  sx={{ fontSize: "0.7rem" }}
                                 />
                               </TableCell>
                             </TableRow>
@@ -252,19 +242,21 @@ export default function PermissionMatrix({
               All Effective Permissions ({effectivePermissions.size})
             </Typography>
             <Stack direction="row" spacing={0.5} flexWrap="wrap" gap={0.5}>
-              {Array.from(effectivePermissions).sort().map((permId) => {
-                const isDirect = directPermissions.has(permId);
-                return (
-                  <Chip
-                    key={permId}
-                    label={permId}
-                    size="small"
-                    color={isDirect ? 'primary' : 'secondary'}
-                    variant={isDirect ? 'filled' : 'outlined'}
-                    sx={{ fontSize: '0.7rem' }}
-                  />
-                );
-              })}
+              {Array.from(effectivePermissions)
+                .sort()
+                .map((permId) => {
+                  const isDirect = directPermissions.has(permId);
+                  return (
+                    <Chip
+                      key={permId}
+                      label={permId}
+                      size="small"
+                      color={isDirect ? "primary" : "secondary"}
+                      variant={isDirect ? "filled" : "outlined"}
+                      sx={{ fontSize: "0.7rem" }}
+                    />
+                  );
+                })}
             </Stack>
           </Box>
         </Stack>

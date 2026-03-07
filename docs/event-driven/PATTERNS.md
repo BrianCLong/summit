@@ -7,11 +7,13 @@
 Events notify interested parties of state changes.
 
 **Use when:**
+
 - Multiple consumers need to react to changes
 - Loose coupling between services is desired
 - You want to build audit trails
 
 **Example:**
+
 ```typescript
 import { EventNotificationService } from '@intelgraph/messaging';
 
@@ -46,11 +48,13 @@ await eventService.subscribe(async (event) => {
 Events carry full state, eliminating need for lookups.
 
 **Use when:**
+
 - Consumers need complete data
 - Reducing coupling is critical
 - Network latency is a concern
 
 **Example:**
+
 ```typescript
 // Include full entity data in event
 await eventBus.publish('entity.enriched', {
@@ -76,31 +80,30 @@ await eventBus.publish('entity.enriched', {
 Synchronous-style communication over async channels.
 
 **Use when:**
+
 - You need a response
 - Timeout handling is required
 - RPC-style communication is needed
 
 **Example:**
+
 ```typescript
-import { RequestReply } from '@intelgraph/messaging';
+import { RequestReply } from "@intelgraph/messaging";
 
 const requestReply = new RequestReply(eventBus);
 
 // Service side
-await requestReply.handleRequests('risk.assess', async (request) => {
+await requestReply.handleRequests("risk.assess", async (request) => {
   const { entityId } = request.payload;
   const assessment = await assessRisk(entityId);
   return assessment;
 });
 
 // Client side
-const reply = await requestReply.request('risk.assess',
-  { entityId: 'entity-123' },
-  5000
-);
+const reply = await requestReply.request("risk.assess", { entityId: "entity-123" }, 5000);
 
 if (reply.success) {
-  console.log('Risk score:', reply.payload.score);
+  console.log("Risk score:", reply.payload.score);
 }
 ```
 
@@ -111,52 +114,48 @@ if (reply.success) {
 Central coordinator manages the saga.
 
 **Use when:**
+
 - Complex workflows with many steps
 - Need centralized monitoring
 - Business logic is complex
 
 **Example:**
+
 ```typescript
-import { SagaOrchestrator } from '@intelgraph/messaging';
+import { SagaOrchestrator } from "@intelgraph/messaging";
 
 const orchestrator = new SagaOrchestrator(redis);
 
 orchestrator.defineSaga({
-  sagaId: 'investigation-workflow',
-  name: 'Investigation Workflow',
+  sagaId: "investigation-workflow",
+  name: "Investigation Workflow",
   steps: [
     {
-      stepId: 'create-case',
+      stepId: "create-case",
       action: async (ctx) => {
-        const caseId = await caseService.create(ctx.data.get('details'));
-        ctx.data.set('caseId', caseId);
+        const caseId = await caseService.create(ctx.data.get("details"));
+        ctx.data.set("caseId", caseId);
       },
       compensation: async (ctx) => {
-        await caseService.delete(ctx.data.get('caseId'));
-      }
+        await caseService.delete(ctx.data.get("caseId"));
+      },
     },
     {
-      stepId: 'assign-analyst',
+      stepId: "assign-analyst",
       action: async (ctx) => {
-        await assignmentService.assign(
-          ctx.data.get('caseId'),
-          ctx.data.get('analystId')
-        );
+        await assignmentService.assign(ctx.data.get("caseId"), ctx.data.get("analystId"));
       },
       compensation: async (ctx) => {
-        await assignmentService.unassign(ctx.data.get('caseId'));
-      }
+        await assignmentService.unassign(ctx.data.get("caseId"));
+      },
     },
     {
-      stepId: 'notify-team',
+      stepId: "notify-team",
       action: async (ctx) => {
-        await notificationService.notify(
-          ctx.data.get('teamId'),
-          ctx.data.get('caseId')
-        );
-      }
-    }
-  ]
+        await notificationService.notify(ctx.data.get("teamId"), ctx.data.get("caseId"));
+      },
+    },
+  ],
 });
 ```
 
@@ -165,11 +164,13 @@ orchestrator.defineSaga({
 Services react to events autonomously.
 
 **Use when:**
+
 - Services are independent
 - Workflow is simple
 - You want loose coupling
 
 **Example:**
+
 ```typescript
 // Service A publishes event
 await eventBus.publish('case.created', {
@@ -200,36 +201,44 @@ await eventBus.subscribe('analyst.assigned', async (msg) => {
 Build optimized read models from events.
 
 **Example:**
+
 ```typescript
-import { ProjectionManager } from '@intelgraph/cqrs';
+import { ProjectionManager } from "@intelgraph/cqrs";
 
 const projectionManager = new ProjectionManager(eventStore, pool);
 await projectionManager.initialize();
 
 // Define projection
 const investigationSummaryProjection: Projection = {
-  name: 'investigation-summary',
+  name: "investigation-summary",
   version: 1,
   eventHandlers: new Map([
-    ['InvestigationCreated', async (event) => {
-      await pool.query(`
+    [
+      "InvestigationCreated",
+      async (event) => {
+        await pool.query(
+          `
         INSERT INTO investigation_summary (id, title, status, created_at)
         VALUES ($1, $2, $3, $4)
-      `, [
-        event.aggregateId,
-        event.payload.title,
-        'active',
-        event.timestamp
-      ]);
-    }],
-    ['InvestigationCompleted', async (event) => {
-      await pool.query(`
+      `,
+          [event.aggregateId, event.payload.title, "active", event.timestamp]
+        );
+      },
+    ],
+    [
+      "InvestigationCompleted",
+      async (event) => {
+        await pool.query(
+          `
         UPDATE investigation_summary
         SET status = 'completed', completed_at = $2
         WHERE id = $1
-      `, [event.aggregateId, event.timestamp]);
-    }]
-  ])
+      `,
+          [event.aggregateId, event.timestamp]
+        );
+      },
+    ],
+  ]),
 };
 
 projectionManager.register(investigationSummaryProjection);
@@ -240,6 +249,7 @@ projectionManager.register(investigationSummaryProjection);
 Validate commands before execution.
 
 **Example:**
+
 ```typescript
 import { CommandBus } from '@intelgraph/cqrs';
 
@@ -290,26 +300,27 @@ commandBus.register({
 Filter and transform events in real-time.
 
 **Example:**
+
 ```typescript
-import { StreamProcessor } from '@intelgraph/event-streaming';
+import { StreamProcessor } from "@intelgraph/event-streaming";
 
 const processor = new StreamProcessor(eventBus);
 
-const pipeline = StreamProcessor.builder('high-priority-threats', 'threats.raw')
+const pipeline = StreamProcessor.builder("high-priority-threats", "threats.raw")
   // Filter high-priority threats
-  .filter(threat => threat.priority >= 8)
+  .filter((threat) => threat.priority >= 8)
   // Enrich with context
   .map(async (threat) => ({
     ...threat,
     context: await fetchContext(threat.id),
-    analyzedAt: new Date()
+    analyzedAt: new Date(),
   }))
   // Send to high-priority queue
-  .to('threats.high-priority')
+  .to("threats.high-priority")
   .build();
 
 processor.definePipeline(pipeline);
-await processor.start('high-priority-threats');
+await processor.start("high-priority-threats");
 ```
 
 ### 2. Windowed Aggregation
@@ -317,37 +328,34 @@ await processor.start('high-priority-threats');
 Aggregate events over time windows.
 
 **Example:**
+
 ```typescript
-import {
-  WindowedAggregator,
-  WindowType,
-  Aggregators
-} from '@intelgraph/event-streaming';
+import { WindowedAggregator, WindowType, Aggregators } from "@intelgraph/event-streaming";
 
 // Count threats per minute
 const threatCounter = new WindowedAggregator(
   {
     type: WindowType.TUMBLING,
-    size: 60000 // 1 minute
+    size: 60000, // 1 minute
   },
   Aggregators.count()
 );
 
-threatCounter.on('window:closed', ({ result, startTime, endTime }) => {
+threatCounter.on("window:closed", ({ result, startTime, endTime }) => {
   console.log(`Threats from ${startTime} to ${endTime}: ${result}`);
 
   if (result > 100) {
     // Alert on anomaly
-    alertService.send('High threat volume detected');
+    alertService.send("High threat volume detected");
   }
 });
 
 // Subscribe to threat events
-await eventBus.subscribe('threats.*', async (msg) => {
+await eventBus.subscribe("threats.*", async (msg) => {
   threatCounter.addEvent({
     key: msg.metadata.messageId,
     value: msg.payload,
-    timestamp: msg.metadata.timestamp
+    timestamp: msg.metadata.timestamp,
   });
 });
 ```
@@ -357,6 +365,7 @@ await eventBus.subscribe('threats.*', async (msg) => {
 Detect patterns across multiple event streams.
 
 **Example:**
+
 ```typescript
 // Detect coordinated attack pattern
 class AttackPatternDetector {
@@ -376,18 +385,18 @@ class AttackPatternDetector {
     const oneHourAgo = Date.now() - 3600000;
     this.events.set(
       targetId,
-      targetEvents.filter(e => e.timestamp.getTime() > oneHourAgo)
+      targetEvents.filter((e) => e.timestamp.getTime() > oneHourAgo)
     );
 
     // Check for pattern: 3+ different attack types in 1 hour
-    const attackTypes = new Set(targetEvents.map(e => e.attackType));
+    const attackTypes = new Set(targetEvents.map((e) => e.attackType));
 
     if (attackTypes.size >= 3) {
       await alertService.send({
-        type: 'coordinated-attack',
+        type: "coordinated-attack",
         target: targetId,
         attackTypes: Array.from(attackTypes),
-        eventCount: targetEvents.length
+        eventCount: targetEvents.length,
       });
 
       return true;
@@ -405,21 +414,17 @@ class AttackPatternDetector {
 Optimize aggregate loading with snapshots.
 
 **Example:**
+
 ```typescript
-import { SnapshotStore, AggregateRepository } from '@intelgraph/event-sourcing';
+import { SnapshotStore, AggregateRepository } from "@intelgraph/event-sourcing";
 
 const snapshotStore = new SnapshotStore(eventStoreConfig);
 
 // Take snapshot every 100 events
-const repo = new AggregateRepository(
-  eventStore,
-  Investigation,
-  snapshotStore,
-  100
-);
+const repo = new AggregateRepository(eventStore, Investigation, snapshotStore, 100);
 
 // Loading will use snapshot if available
-const investigation = await repo.load('inv-123');
+const investigation = await repo.load("inv-123");
 ```
 
 ### 2. Event Upcasting
@@ -427,23 +432,24 @@ const investigation = await repo.load('inv-123');
 Handle schema evolution.
 
 **Example:**
+
 ```typescript
-import { EventUpcasterChain, UpcastHelpers } from '@intelgraph/event-sourcing';
+import { EventUpcasterChain, UpcastHelpers } from "@intelgraph/event-sourcing";
 
 const upcasterChain = new EventUpcasterChain();
 
 // Upcast from v1 to v2: rename field
-upcasterChain.register('InvestigationCreated', {
+upcasterChain.register("InvestigationCreated", {
   fromVersion: 1,
   toVersion: 2,
-  upcast: UpcastHelpers.renameField('assignee', 'assignedTo')
+  upcast: UpcastHelpers.renameField("assignee", "assignedTo"),
 });
 
 // Upcast from v2 to v3: add new field
-upcasterChain.register('InvestigationCreated', {
+upcasterChain.register("InvestigationCreated", {
   fromVersion: 2,
   toVersion: 3,
-  upcast: UpcastHelpers.addField('priority', 3) // default priority
+  upcast: UpcastHelpers.addField("priority", 3), // default priority
 });
 
 // Apply upcasting when loading events
@@ -458,6 +464,7 @@ const upcastedEvents = upcasterChain.upcastMany(events.events);
 Protect domain model from external systems.
 
 **Example:**
+
 ```typescript
 class ExternalSystemAdapter {
   async handleExternalEvent(externalEvent: any): Promise<void> {
@@ -466,12 +473,12 @@ class ExternalSystemAdapter {
 
     // Validate
     if (!this.isValid(domainEvent)) {
-      logger.warn('Invalid external event', externalEvent);
+      logger.warn("Invalid external event", externalEvent);
       return;
     }
 
     // Publish to internal event bus
-    await eventBus.publish('external.events', domainEvent);
+    await eventBus.publish("external.events", domainEvent);
   }
 
   private translateToDomainEvent(external: any): DomainEvent {
@@ -489,19 +496,20 @@ class ExternalSystemAdapter {
 Bridge between different messaging systems.
 
 **Example:**
+
 ```typescript
 class KafkaToRedisbridge {
   async start(): Promise<void> {
     // Consume from Kafka
-    await kafkaConsumer.subscribe(['external-topic']);
+    await kafkaConsumer.subscribe(["external-topic"]);
 
     await kafkaConsumer.run({
       eachMessage: async ({ message }) => {
         const event = JSON.parse(message.value.toString());
 
         // Publish to internal Redis-based event bus
-        await eventBus.publish('bridged.events', event);
-      }
+        await eventBus.publish("bridged.events", event);
+      },
     });
   }
 }
@@ -514,28 +522,29 @@ class KafkaToRedisbridge {
 Track events through the system.
 
 **Example:**
+
 ```typescript
 // Add trace ID to all events
 const traceId = uuidv4();
 
-await eventBus.publish('investigation.started', payload, {
+await eventBus.publish("investigation.started", payload, {
   metadata: {
     traceId,
     spanId: uuidv4(),
-    parentSpanId: undefined
-  }
+    parentSpanId: undefined,
+  },
 });
 
 // Propagate trace ID
-await eventBus.subscribe('investigation.started', async (msg) => {
+await eventBus.subscribe("investigation.started", async (msg) => {
   const { traceId, spanId } = msg.metadata;
 
-  await eventBus.publish('analysis.requested', analysisPayload, {
+  await eventBus.publish("analysis.requested", analysisPayload, {
     metadata: {
       traceId,
       spanId: uuidv4(),
-      parentSpanId: spanId
-    }
+      parentSpanId: spanId,
+    },
   });
 });
 ```
@@ -545,6 +554,7 @@ await eventBus.subscribe('investigation.started', async (msg) => {
 Monitor system health.
 
 **Example:**
+
 ```typescript
 class EventBusHealthCheck {
   async check(): Promise<HealthStatus> {
@@ -553,8 +563,8 @@ class EventBusHealthCheck {
     // Check dead letter queue depth
     if (metrics.messagesDeadLettered > 100) {
       return {
-        status: 'unhealthy',
-        reason: 'Too many dead letters'
+        status: "unhealthy",
+        reason: "Too many dead letters",
       };
     }
 
@@ -562,12 +572,12 @@ class EventBusHealthCheck {
     const lag = await this.calculateLag();
     if (lag > 10000) {
       return {
-        status: 'degraded',
-        reason: 'High consumer lag'
+        status: "degraded",
+        reason: "High consumer lag",
       };
     }
 
-    return { status: 'healthy' };
+    return { status: "healthy" };
   }
 }
 ```

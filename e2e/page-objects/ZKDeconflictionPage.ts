@@ -1,5 +1,5 @@
-import { type Page, type Locator, expect } from '@playwright/test';
-import { BasePage } from './BasePage';
+import { type Page, type Locator, expect } from "@playwright/test";
+import { BasePage } from "./BasePage";
 
 export class ZKDeconflictionPage extends BasePage {
   readonly initiateButton: Locator;
@@ -8,13 +8,13 @@ export class ZKDeconflictionPage extends BasePage {
 
   constructor(page: Page) {
     super(page);
-    this.initiateButton = page.getByRole('button', { name: /start deconfliction|initiate zk/i });
+    this.initiateButton = page.getByRole("button", { name: /start deconfliction|initiate zk/i });
     this.intersectionResult = page.locator('[data-testid="intersection-result"]');
     this.privacyBadge = page.getByText(/zero knowledge|private/i);
   }
 
   async goto() {
-    await super.goto('/admin/consistency');
+    await super.goto("/admin/consistency");
   }
 
   async initiateDeconfliction() {

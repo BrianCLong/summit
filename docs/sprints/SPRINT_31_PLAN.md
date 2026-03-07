@@ -37,9 +37,9 @@
 
 ### E1 — Billing E2E (Limited Tenants) (Must) — 16 pts
 
-* **S1. Adapter live toggle + retries** (5 pts, *Bob*)
-* **S2. Reconciliation dashboard** (5 pts, *Grace*)
-* **S3. Signed export schedule + runbook** (6 pts, *Elena*)
+- **S1. Adapter live toggle + retries** (5 pts, _Bob_)
+- **S2. Reconciliation dashboard** (5 pts, _Grace_)
+- **S3. Signed export schedule + runbook** (6 pts, _Elena_)
 
 **AC**: Two pilot tenants export **daily** signed usage CSV/Parquet; adapter pushes succeed with ≥ 99% success; recon delta ≤ 1% vs. Prom counters; runbook covers backfill & resend.
 
@@ -47,9 +47,9 @@
 
 ### E2 — ER v1.2 (Drift & Eval) (Must) — 14 pts
 
-* **S1. Eval pipeline (precision/recall/F1)** (6 pts, *Elena*)
-* **S2. Drift metrics + alerts** (4 pts, *Grace*)
-* **S3. Threshold auto‑suggest + guardrails** (4 pts, *Ivy*)
+- **S1. Eval pipeline (precision/recall/F1)** (6 pts, _Elena_)
+- **S2. Drift metrics + alerts** (4 pts, _Grace_)
+- **S3. Threshold auto‑suggest + guardrails** (4 pts, _Ivy_)
 
 **AC**: Nightly eval produces metrics; drift alert when F1 drops > 2 pts; auto‑suggest proposes thresholds but gated by approval; rollback restores prior thresholds in < 5 min.
 
@@ -57,9 +57,9 @@
 
 ### E3 — API v1.1 Additive Release (Must) — 12 pts
 
-* **S1. v1.1 schema & docs** (5 pts, *Alice*)
-* **S2. Persisted‑query rewrite hints** (4 pts, *Alice*)
-* **S3. Client sample updates** (3 pts, *Jay*)
+- **S1. v1.1 schema & docs** (5 pts, _Alice_)
+- **S2. Persisted‑query rewrite hints** (4 pts, _Alice_)
+- **S3. Client sample updates** (3 pts, _Jay_)
 
 **AC**: v1.1 opt‑in via header; no server‑side breaking changes; 95% of known queries auto‑rewrite; sample clients pass e2e.
 
@@ -67,9 +67,9 @@
 
 ### E4 — Onboarding & Quota Presets (Should) — 10 pts
 
-* **S1. Tenant bootstrap wizard** (5 pts, *Jay*)
-* **S2. Standard/Premium presets + overrides** (3 pts, *Bob*)
-* **S3. Audit log entries** (2 pts, *Jay*)
+- **S1. Tenant bootstrap wizard** (5 pts, _Jay_)
+- **S2. Standard/Premium presets + overrides** (3 pts, _Bob_)
+- **S3. Audit log entries** (2 pts, _Jay_)
 
 **AC**: New tenant fully provisioned in ≤ 10 min; presets applied (API rpm, ingest eps, egress/day); overrides logged with actor & reason.
 
@@ -77,9 +77,9 @@
 
 ### E5 — Security Hardening (Must) — 10 pts
 
-* **S1. SBOM attestation in CI** (4 pts, *Ivy*)
-* **S2. Secrets scanning + pre‑commit hook** (4 pts, *Ivy*)
-* **S3. Key rotation roll‑forward test** (2 pts, *Elena*)
+- **S1. SBOM attestation in CI** (4 pts, _Ivy_)
+- **S2. Secrets scanning + pre‑commit hook** (4 pts, _Ivy_)
+- **S3. Key rotation roll‑forward test** (2 pts, _Elena_)
 
 **AC**: Build fails on missing attestation or high CVEs; secret leaks blocked in PR; key rotation exercised with zero downtime.
 
@@ -87,9 +87,9 @@
 
 ### E6 — Observability & Cost (Must) — 6 pts
 
-* **S1. Billing recon + spend dashboards** (3 pts, *Grace*)
-* **S2. ER drift panel** (2 pts, *Grace*)
-* **S3. API v1.1 adoption chart** (1 pt, *Grace*)
+- **S1. Billing recon + spend dashboards** (3 pts, _Grace_)
+- **S2. ER drift panel** (2 pts, _Grace_)
+- **S3. API v1.1 adoption chart** (1 pt, _Grace_)
 
 **AC**: Dashboards live with sample data; alerts at 80% budget & drift threshold; links to runbooks.
 
@@ -97,9 +97,9 @@
 
 ### E7 — CI/CD & Policy Gates (Must) — 6 pts
 
-* **S1. Perf profiles (billing overhead)** (2 pts, *Henry*)
-* **S2. Policy sim (billing exports & retention)** (2 pts, *Ivy*)
-* **S3. SBOM/CVE sweep** (2 pts, *Ivy*)
+- **S1. Perf profiles (billing overhead)** (2 pts, _Henry_)
+- **S2. Policy sim (billing exports & retention)** (2 pts, _Ivy_)
+- **S3. SBOM/CVE sweep** (2 pts, _Ivy_)
 
 **AC**: Perf gate enforces SLOs with billing on; policy sim passes; zero High CVEs.
 
@@ -107,7 +107,7 @@
 
 ## Capacity & Forecast
 
-* Team capacity ≈ **64 pts**; committed **~64 pts** (scope valve: E4 can slip).
+- Team capacity ≈ **64 pts**; committed **~64 pts** (scope valve: E4 can slip).
 
 ---
 
@@ -147,29 +147,29 @@ tenant_id, period_start, period_end, api_calls, ingest_events, egress_gb, plan, 
 
 ## Security, Privacy & Policy
 
-* ABAC/OPA; mTLS; field‑level encryption; SBOM attestation; secrets scanning; signed usage exports.
-* ER eval outputs retained under **standard‑365d** (non‑PII), PII short‑30d; purpose tags enforced.
+- ABAC/OPA; mTLS; field‑level encryption; SBOM attestation; secrets scanning; signed usage exports.
+- ER eval outputs retained under **standard‑365d** (non‑PII), PII short‑30d; purpose tags enforced.
 
 ---
 
 ## Observability & SLOs
 
-* Metrics: API p50/95/99, quota rejections, billing adapter success, recon deltas, ER F1/drift, spend, error‑budget.
-* Targets per org defaults; budget alerts @80%.
+- Metrics: API p50/95/99, quota rejections, billing adapter success, recon deltas, ER F1/drift, spend, error‑budget.
+- Targets per org defaults; budget alerts @80%.
 
 ---
 
 ## CI/CD & Release
 
-* Gates: lint/type/tests, e2e, perf (billing on), SBOM/CVE, policy sim.
-* Canary: 10%/15 min; backout disables adapters and reverts API default to v1.
-* Evidence bundle: SLO report, k6 artifacts, SBOM attestation, policy logs, signed usage exports, ER eval report.
+- Gates: lint/type/tests, e2e, perf (billing on), SBOM/CVE, policy sim.
+- Canary: 10%/15 min; backout disables adapters and reverts API default to v1.
+- Evidence bundle: SLO report, k6 artifacts, SBOM attestation, policy logs, signed usage exports, ER eval report.
 
 ---
 
 ## RACI
 
-* **R**: Story owners • **A**: Tech Lead (Alice) • **C**: Security (Ivy), SRE (Grace), Privacy, Finance • **I**: PM.
+- **R**: Story owners • **A**: Tech Lead (Alice) • **C**: Security (Ivy), SRE (Grace), Privacy, Finance • **I**: PM.
 
 ---
 
@@ -177,14 +177,14 @@ tenant_id, period_start, period_end, api_calls, ingest_events, egress_gb, plan, 
 
 **Acceptance Pack**
 
-* [ ] All story ACs green
-* [ ] SLO dashboards 24h green
-* [ ] Perf & e2e gates green
-* [ ] SBOM/CVE clear + attested
-* [ ] Policy sim passes
-* [ ] Finance & Privacy sign‑offs recorded
-* [ ] Evidence bundle attached
+- [ ] All story ACs green
+- [ ] SLO dashboards 24h green
+- [ ] Perf & e2e gates green
+- [ ] SBOM/CVE clear + attested
+- [ ] Policy sim passes
+- [ ] Finance & Privacy sign‑offs recorded
+- [ ] Evidence bundle attached
 
 **Backout Plan**
 
-* Disable billing adapters; revert API default; turn off ER threshold auto‑suggest; invalidate caches; pause eval job.
+- Disable billing adapters; revert API default; turn off ER threshold auto‑suggest; invalidate caches; pause eval job.

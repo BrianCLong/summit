@@ -27,16 +27,16 @@ Use these documents as the canonical references when implementing or reviewing c
 
 The Summit Codex Execution Plan runs eight parallel workstreams with explicit boundaries. Each track owns a branch namespace, consumes its authoritative specs, and adheres to the merge order to keep governance first and prevent drift.
 
-| Track | Branch namespace | Inputs (authoritative specs) | Core deliverables |
-| --- | --- | --- | --- |
-| A — Governance & Agent Ops | `codex/governance-core/*` | `agent-ops.md`, `permission-tiers.md`, `agent-incident-response.md` | Add governance docs verbatim, implement label taxonomy, CODEOWNERS mappings, governance metadata schemas. |
-| B — CI Enforcement | `codex/ci-governance/*` | `ci-enforcement.md` | `governance-check.yml`, label validation, path→tier enforcement, PR annotation output. Depends on Track A. |
-| C — Zero-Knowledge Deconfliction | `codex/zk-deconfliction/*` | `zk-deconfliction.md`, `zk-threat-model.md` | Protocol abstractions, audit artifact schemas, stub enforcement hooks, CI guards for unsafe changes (scaffolding only). |
-| D — Multi-Tenant Isolation | `codex/isolation/*` | `isolation-domains.md`, `blast-radius-model.md` | DB isolation primitives, tenant scoping helpers, CI path protections, chaos tabletop docs. |
-| E — Release Trains & Evidence | `codex/release-system/*` | `release-trains.md`, `evidence-bundles.md` | Evidence bundle generator, release workflow YAML, release metadata manifests, rollback logging hooks. |
-| F — Agent Budgets & Risk | `codex/agent-budgets/*` | `agent-budgets.md`, `risk-scoring.md` | Budget manifest schemas, CI risk scoring checks, agent stop conditions, audit log wiring. |
-| G — Streaming Intelligence Bus | `codex/streaming/*` | `streaming-intelligence.md`, `feature-store.md` | Event log schema, feature definition framework, async processing scaffolds, observability hooks. |
-| H — Documentation & GA Assembly | `codex/ga-docs/*` | Cross-links to all tracks | Cross-link all specs, add GA checklist, publish this `docs/architecture/README.md`, verify internal consistency. |
+| Track                            | Branch namespace           | Inputs (authoritative specs)                                        | Core deliverables                                                                                                       |
+| -------------------------------- | -------------------------- | ------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| A — Governance & Agent Ops       | `codex/governance-core/*`  | `agent-ops.md`, `permission-tiers.md`, `agent-incident-response.md` | Add governance docs verbatim, implement label taxonomy, CODEOWNERS mappings, governance metadata schemas.               |
+| B — CI Enforcement               | `codex/ci-governance/*`    | `ci-enforcement.md`                                                 | `governance-check.yml`, label validation, path→tier enforcement, PR annotation output. Depends on Track A.              |
+| C — Zero-Knowledge Deconfliction | `codex/zk-deconfliction/*` | `zk-deconfliction.md`, `zk-threat-model.md`                         | Protocol abstractions, audit artifact schemas, stub enforcement hooks, CI guards for unsafe changes (scaffolding only). |
+| D — Multi-Tenant Isolation       | `codex/isolation/*`        | `isolation-domains.md`, `blast-radius-model.md`                     | DB isolation primitives, tenant scoping helpers, CI path protections, chaos tabletop docs.                              |
+| E — Release Trains & Evidence    | `codex/release-system/*`   | `release-trains.md`, `evidence-bundles.md`                          | Evidence bundle generator, release workflow YAML, release metadata manifests, rollback logging hooks.                   |
+| F — Agent Budgets & Risk         | `codex/agent-budgets/*`    | `agent-budgets.md`, `risk-scoring.md`                               | Budget manifest schemas, CI risk scoring checks, agent stop conditions, audit log wiring.                               |
+| G — Streaming Intelligence Bus   | `codex/streaming/*`        | `streaming-intelligence.md`, `feature-store.md`                     | Event log schema, feature definition framework, async processing scaffolds, observability hooks.                        |
+| H — Documentation & GA Assembly  | `codex/ga-docs/*`          | Cross-links to all tracks                                           | Cross-link all specs, add GA checklist, publish this `docs/architecture/README.md`, verify internal consistency.        |
 
 ### Merge discipline
 

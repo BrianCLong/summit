@@ -2,14 +2,14 @@ name: Summit Eval Gates
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
     paths:
-      - 'summit/eval_harness/**'
-      - 'summit/evidence/**'
+      - "summit/eval_harness/**"
+      - "summit/evidence/**"
   pull_request:
     paths:
-      - 'summit/eval_harness/**'
-      - 'summit/evidence/**'
+      - "summit/eval_harness/**"
+      - "summit/evidence/**"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -23,7 +23,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.12'
+          python-version: "3.12"
       - name: Install dependencies
         run: pip install jsonschema
       - name: Validate Datasets
@@ -41,7 +41,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.12'
+          python-version: "3.12"
       - name: Run Eval (Mock)
         env:
           PYTHONPATH: .

@@ -1,6 +1,8 @@
-declare module 'recharts' {
-  import * as React from 'react';
-  export const ResponsiveContainer: React.FC<{ width?: string | number; height?: string | number; } & React.HTMLAttributes<HTMLDivElement>>;
+declare module "recharts" {
+  import * as React from "react";
+  export const ResponsiveContainer: React.FC<
+    { width?: string | number; height?: string | number } & React.HTMLAttributes<HTMLDivElement>
+  >;
   export const AreaChart: React.FC<any>;
   export const LineChart: React.FC<any>;
   export const BarChart: React.FC<any>;

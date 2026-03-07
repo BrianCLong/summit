@@ -8,17 +8,18 @@ This PR introduces a **comprehensive prompt library for Claude Code**, providing
 
 ### 📚 11 Production-Ready Prompts
 
-| Category | Prompts | Purpose |
-|----------|---------|---------|
-| **Infrastructure** | 01-03 | Monorepo, GraphQL Gateway, Neo4j Data Model |
-| **Data Ingestion** | 04-05 | Ingest Connectors, Provenance Ledger |
-| **Security** | 06, 11 | OPA ABAC Policies, Threat Model & Privacy |
-| **Operations** | 07-09 | Observability, CI/CD, Testing Strategy |
-| **Cost** | 10 | Usage Metering & Budget Guardrails |
+| Category           | Prompts | Purpose                                     |
+| ------------------ | ------- | ------------------------------------------- |
+| **Infrastructure** | 01-03   | Monorepo, GraphQL Gateway, Neo4j Data Model |
+| **Data Ingestion** | 04-05   | Ingest Connectors, Provenance Ledger        |
+| **Security**       | 06, 11  | OPA ABAC Policies, Threat Model & Privacy   |
+| **Operations**     | 07-09   | Observability, CI/CD, Testing Strategy      |
+| **Cost**           | 10      | Usage Metering & Budget Guardrails          |
 
 ### 🎯 Key Features
 
 Each prompt includes:
+
 - ✅ **Complete context** - Role, background, task description
 - ✅ **SLO targets** - Specific performance guardrails
 - ✅ **Deliverables checklist** - Clear scope and artifacts
@@ -51,6 +52,7 @@ Each prompt includes:
 ### 🚀 Slash Commands
 
 Added `.claude/commands/` with 11 slash commands:
+
 - `/bootstrap-monorepo`
 - `/graphql-gateway`
 - `/neo4j-schema`
@@ -70,15 +72,18 @@ Updated `CLAUDE.md` "Working with AI Assistants" section to prominently feature 
 ## Impact
 
 ### Developer Velocity
+
 - **Before**: 3-5 days to scaffold a new service with tests/monitoring/deployment
 - **After**: 1-2 days using prompts (60-70% time savings)
 
 ### Quality & Consistency
+
 - All prompts enforce IntelGraph's SLO targets
 - Security and privacy by default (ABAC, provenance, threat modeling)
 - Evidence-backed development (tests, SBOMs, attestations)
 
 ### Knowledge Transfer
+
 - New developers can execute complex tasks with guidance
 - Prompts encode best practices and architectural patterns
 - Reduces dependency on senior engineers for scaffolding
@@ -140,6 +145,7 @@ cat docs/claude-code-prompts/02-graphql-gateway.md
 ### Common Workflows
 
 **New Service (End-to-End)**:
+
 ```bash
 /bootstrap-monorepo
 /graphql-gateway
@@ -150,6 +156,7 @@ cat docs/claude-code-prompts/02-graphql-gateway.md
 ```
 
 **Security Hardening Sprint**:
+
 ```bash
 /opa-policies
 /threat-model
@@ -159,17 +166,18 @@ cat docs/claude-code-prompts/02-graphql-gateway.md
 
 ## Alignment with IntelGraph Priorities
 
-| Priority | Addressed By | How |
-|----------|--------------|-----|
-| **SLO Compliance** | 02, 03, 07, 09 | Performance targets, dashboards, load tests |
-| **Provenance** | 04, 05 | Immutable ledger, signed exports |
-| **Policy Enforcement** | 06 | ABAC via OPA, retention tiers |
-| **Security** | 06, 08, 11 | Threat model, SBOM, scanning, ABAC |
-| **Cost Optimization** | 10 | Metering, budgets, alerts |
+| Priority               | Addressed By   | How                                         |
+| ---------------------- | -------------- | ------------------------------------------- |
+| **SLO Compliance**     | 02, 03, 07, 09 | Performance targets, dashboards, load tests |
+| **Provenance**         | 04, 05         | Immutable ledger, signed exports            |
+| **Policy Enforcement** | 06             | ABAC via OPA, retention tiers               |
+| **Security**           | 06, 08, 11     | Threat model, SBOM, scanning, ABAC          |
+| **Cost Optimization**  | 10             | Metering, budgets, alerts                   |
 
 ## Testing
 
 All prompts include:
+
 - **Unit tests** (Jest) for business logic
 - **Integration tests** for database/service interactions
 - **E2E tests** (Playwright) for critical paths
@@ -187,6 +195,7 @@ All prompts include:
 ## Future Enhancements
 
 Potential additions to the library:
+
 - Mobile app development prompt
 - Data warehouse/analytics prompt
 - ML model deployment prompt

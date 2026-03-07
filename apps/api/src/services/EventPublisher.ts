@@ -1,5 +1,5 @@
 export interface ActionExecutedEvent {
-  type: 'action.executed';
+  type: "action.executed";
   preflightId: string;
   correlationId: string;
   action?: string;

@@ -33,5 +33,5 @@ jobs:
 
       - name: Test Normalizer
         env:
-          NODE_OPTIONS: '--experimental-vm-modules'
+          NODE_OPTIONS: "--experimental-vm-modules"
         run: pnpm --filter @intelgraph/summit-lineage-normalizer run test

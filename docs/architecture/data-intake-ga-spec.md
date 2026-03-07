@@ -23,26 +23,27 @@ This document defines the minimal but consistent specification for bringing Data
 
 ### Existing Connectors (15 total)
 
-| Connector | Status | Has Manifest | Has Tests | Golden IO | PII Integration | License Check |
-|-----------|--------|--------------|-----------|-----------|-----------------|---------------|
-| CSV | ✅ Complete | ✅ | ✅ | ❌ | ❌ | ❌ |
-| JSON | ✅ Complete | ✅ | ✅ | ❌ | ❌ | ❌ |
-| DuckDB | ✅ Complete | ✅ | ✅ | ❌ | ❌ | ❌ |
-| Elasticsearch | ✅ Complete | ✅ | ✅ | ❌ | ❌ | ❌ |
-| Splunk | ✅ Complete | ✅ | ✅ | ❌ | ❌ | ❌ |
-| Sentinel | ✅ Complete | ✅ | ✅ | ❌ | ❌ | ❌ |
-| Chronicle | ✅ Complete | ✅ | ✅ | ❌ | ❌ | ❌ |
-| STIX/TAXII | ✅ Complete | ✅ | ✅ | ❌ | ❌ | ❌ |
-| ESRI | ✅ Complete | ✅ | ✅ | ❌ | ❌ | ❌ |
-| Mapbox | ✅ Complete | ✅ | ✅ | ❌ | ❌ | ❌ |
-| OFAC SDN | ✅ Complete | ✅ | ✅ | ❌ | ❌ | ❌ |
-| RSS News | ✅ Complete | ✅ | ✅ | ❌ | ❌ | ❌ |
-| S3 CSV | 🟡 Partial | ✅ | ❌ | ❌ | ❌ | ❌ |
-| MISP (TS) | ✅ Complete | ❌ | ❌ | ❌ | ❌ | ❌ |
+| Connector     | Status      | Has Manifest | Has Tests | Golden IO | PII Integration | License Check |
+| ------------- | ----------- | ------------ | --------- | --------- | --------------- | ------------- |
+| CSV           | ✅ Complete | ✅           | ✅        | ❌        | ❌              | ❌            |
+| JSON          | ✅ Complete | ✅           | ✅        | ❌        | ❌              | ❌            |
+| DuckDB        | ✅ Complete | ✅           | ✅        | ❌        | ❌              | ❌            |
+| Elasticsearch | ✅ Complete | ✅           | ✅        | ❌        | ❌              | ❌            |
+| Splunk        | ✅ Complete | ✅           | ✅        | ❌        | ❌              | ❌            |
+| Sentinel      | ✅ Complete | ✅           | ✅        | ❌        | ❌              | ❌            |
+| Chronicle     | ✅ Complete | ✅           | ✅        | ❌        | ❌              | ❌            |
+| STIX/TAXII    | ✅ Complete | ✅           | ✅        | ❌        | ❌              | ❌            |
+| ESRI          | ✅ Complete | ✅           | ✅        | ❌        | ❌              | ❌            |
+| Mapbox        | ✅ Complete | ✅           | ✅        | ❌        | ❌              | ❌            |
+| OFAC SDN      | ✅ Complete | ✅           | ✅        | ❌        | ❌              | ❌            |
+| RSS News      | ✅ Complete | ✅           | ✅        | ❌        | ❌              | ❌            |
+| S3 CSV        | 🟡 Partial  | ✅           | ❌        | ❌        | ❌              | ❌            |
+| MISP (TS)     | ✅ Complete | ❌           | ❌        | ❌        | ❌              | ❌            |
 
 ### Target GA Connectors (from Wishbook)
 
 **Required for GA:**
+
 1. CSV/Parquet ✅ (CSV exists, needs Parquet support)
 2. STIX/TAXII ✅ (exists, needs GA hardening)
 3. MISP ⚠️ (TypeScript only, needs Python version)
@@ -57,6 +58,7 @@ This document defines the minimal but consistent specification for bringing Data
 ### Gaps to Address
 
 **Missing Capabilities:**
+
 - ❌ Golden IO tests framework
 - ❌ PII detection integration in connectors
 - ❌ License registry enforcement hooks
@@ -66,6 +68,7 @@ This document defines the minimal but consistent specification for bringing Data
 - ❌ Connector versioning/migration support
 
 **Missing Connectors:**
+
 - DNS/WHOIS
 - CISA KEV
 - GDELT
@@ -101,43 +104,43 @@ connectors/{connector-name}/
 
 ```yaml
 # === Core Metadata ===
-name: connector-name                    # Unique identifier (kebab-case)
-display_name: "Connector Display Name"  # Human-readable name
+name: connector-name # Unique identifier (kebab-case)
+display_name: "Connector Display Name" # Human-readable name
 description: "Brief description of the connector"
-version: "1.0.0"                        # SemVer version
+version: "1.0.0" # SemVer version
 author: "Team Name"
-license: "MIT"                          # Connector code license
+license: "MIT" # Connector code license
 
 # === Connector Type ===
-ingestion_type: batch                   # batch | streaming | hybrid
-supported_formats:                      # List of data formats
+ingestion_type: batch # batch | streaming | hybrid
+supported_formats: # List of data formats
   - csv
   - json
   - parquet
 
 # === Data Source Configuration ===
 source:
-  type: file                            # file | api | stream | database
-  authentication:                       # Optional: auth requirements
-    type: none                          # none | api_key | oauth2 | basic | certificate
-    required_credentials: []            # List of required credential fields
-  base_url: null                        # For API connectors
+  type: file # file | api | stream | database
+  authentication: # Optional: auth requirements
+    type: none # none | api_key | oauth2 | basic | certificate
+    required_credentials: [] # List of required credential fields
+  base_url: null # For API connectors
 
 # === Rate Limiting ===
 rate_limit:
   enabled: true
-  type: per_source                      # per_source | global | per_user
+  type: per_source # per_source | global | per_user
   requests_per_second: 10
-  burst_size: 50                        # Max burst tokens
-  backoff_strategy: exponential         # exponential | linear | fixed
+  burst_size: 50 # Max burst tokens
+  backoff_strategy: exponential # exponential | linear | fixed
   max_retries: 3
 
 # === Schema & Mapping ===
 schema_mapping_file: schema_mapping.py
-entity_types:                           # Entity types produced
+entity_types: # Entity types produced
   - Person
   - Organization
-relationship_types:                     # Relationship types produced
+relationship_types: # Relationship types produced
   - AFFILIATED_WITH
   - WORKS_FOR
 
@@ -152,29 +155,29 @@ golden_tests:
 
 # === Compliance & Governance ===
 compliance:
-  pii_detection: true                   # Enable PII scanning
-  pii_fields:                           # Known PII fields
+  pii_detection: true # Enable PII scanning
+  pii_fields: # Known PII fields
     - email
     - phone
-  license_check: true                   # Enforce license registry
-  data_classification: public           # public | internal | confidential | restricted
-  retention_days: 365                   # Data retention policy
+  license_check: true # Enforce license registry
+  data_classification: public # public | internal | confidential | restricted
+  retention_days: 365 # Data retention policy
 
 # === Observability ===
 observability:
   metrics_enabled: true
-  sli_targets:                          # Service Level Indicators
-    availability: 0.99                  # 99% success rate
-    latency_p95_ms: 5000                # 95th percentile < 5s
-    throughput_min: 100                 # Min records/min
-  slo_window_days: 30                   # SLO evaluation window
+  sli_targets: # Service Level Indicators
+    availability: 0.99 # 99% success rate
+    latency_p95_ms: 5000 # 95th percentile < 5s
+    throughput_min: 100 # Min records/min
+  slo_window_days: 30 # SLO evaluation window
   alert_on_slo_breach: true
 
 # === Resource Limits ===
 resources:
   max_concurrent_requests: 10
-  batch_size: 1000                      # Records per batch
-  timeout_seconds: 300                  # Max processing time
+  batch_size: 1000 # Records per batch
+  timeout_seconds: 300 # Max processing time
   memory_limit_mb: 512
 
 # === Dependencies ===
@@ -298,6 +301,7 @@ relationship = {
 Location: `/home/user/summit/server/data-pipelines/connectors/base.py`
 
 **Key Features:**
+
 - ✅ Async/await support
 - ✅ Connection lifecycle (connect, test, extract, disconnect)
 - ✅ Built-in retry logic (tenacity)
@@ -821,6 +825,7 @@ async def extract_with_rate_limit(self):
 ### Priority 1: CISA KEV (Known Exploited Vulnerabilities)
 
 **Rationale:**
+
 - ✅ High security value (CVE vulnerability catalog)
 - ✅ Missing from current connector set
 - ✅ Publicly available API (no auth required)
@@ -830,12 +835,14 @@ async def extract_with_rate_limit(self):
 **Complexity**: ⭐⭐☆☆☆ (Low-Medium)
 
 **Data Source:**
+
 - URL: https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json
 - Format: JSON
 - Update Frequency: Daily
 - License: Public Domain (US Government)
 
 **Entity Model:**
+
 ```yaml
 entities:
   - type: Vulnerability
@@ -852,6 +859,7 @@ entities:
 ```
 
 **Implementation Complexity:**
+
 - Simple HTTP GET request
 - Well-structured JSON response
 - No authentication required
@@ -861,6 +869,7 @@ entities:
 ### Priority 2: DNS/WHOIS Connector
 
 **Rationale:**
+
 - ✅ Missing from current connector set
 - ✅ Essential for infrastructure analysis
 - ✅ Moderate complexity (validates API + batch patterns)
@@ -870,12 +879,14 @@ entities:
 **Complexity**: ⭐⭐⭐☆☆ (Medium)
 
 **Data Sources:**
+
 - DNS: Custom DNS resolver (dnspython)
 - WHOIS: WHOIS API (requires rate limiting)
 - Formats: DNS records, WHOIS text
 - License: Varies by registrar
 
 **Entity Model:**
+
 ```yaml
 entities:
   - type: Domain
@@ -901,6 +912,7 @@ relationships:
 ```
 
 **Implementation Complexity:**
+
 - DNS lookups (A, AAAA, MX, TXT, NS records)
 - WHOIS parsing (varies by registrar)
 - PII detection required (email, phone)
@@ -910,6 +922,7 @@ relationships:
 ### Priority 3: MISP (Python Implementation)
 
 **Rationale:**
+
 - ⚠️ TypeScript version exists, need Python version for consistency
 - ✅ High value for threat intelligence
 - ✅ Complex API (good validation of API connector pattern)
@@ -919,12 +932,14 @@ relationships:
 **Complexity**: ⭐⭐⭐⭐☆ (High)
 
 **Data Source:**
+
 - API: MISP REST API
 - Format: JSON (events, attributes, objects, tags)
 - Authentication: API key
 - Rate Limiting: Server-dependent
 
 **Entity Model:**
+
 ```yaml
 entities:
   - type: Threat
@@ -940,6 +955,7 @@ relationships:
 ```
 
 **Implementation Complexity:**
+
 - Full MISP API coverage (events, attributes, objects, tags)
 - Complex nested data structures
 - IOC enrichment and caching
@@ -962,12 +978,14 @@ relationships:
 ### Phase 1: Directory Structure & Manifest (2 hours)
 
 **Tasks:**
+
 1. Create connector directory structure
 2. Write manifest.yaml with all required fields
 3. Create .dpia.yaml assessment
 4. Write README.md documentation
 
 **Deliverables:**
+
 ```
 connectors/cisa-kev/
 ├── manifest.yaml
@@ -987,6 +1005,7 @@ connectors/cisa-kev/
 ### Phase 2: Schema Mapping Implementation (4 hours)
 
 **Tasks:**
+
 1. Implement `map_cisa_kev_to_intelgraph()` function
 2. Define Vulnerability entity schema
 3. Add metadata enrichment
@@ -994,6 +1013,7 @@ connectors/cisa-kev/
 5. Add error handling
 
 **Mapping Logic:**
+
 ```python
 KEV Entry → Vulnerability Entity
 - cveID → properties.cve_id
@@ -1008,12 +1028,14 @@ KEV Entry → Vulnerability Entity
 ```
 
 **Deliverables:**
+
 - `schema_mapping.py` with complete implementation
 - Sample output entities
 
 ### Phase 3: Connector Implementation (4 hours)
 
 **Tasks:**
+
 1. Extend BaseConnector class
 2. Implement async data fetching from CISA API
 3. Add retry logic with exponential backoff
@@ -1021,6 +1043,7 @@ KEV Entry → Vulnerability Entity
 5. Add observability hooks
 
 **Key Methods:**
+
 ```python
 class CISAKEVConnector(BaseConnector):
     async def connect(self) -> None
@@ -1030,12 +1053,14 @@ class CISAKEVConnector(BaseConnector):
 ```
 
 **Deliverables:**
+
 - `connector.py` with full implementation
 - Integration with BaseConnector
 
 ### Phase 4: Testing Suite (6 hours)
 
 **Tasks:**
+
 1. Write unit tests for schema mapping
 2. Write E2E pipeline tests
 3. Create golden IO test fixtures
@@ -1044,6 +1069,7 @@ class CISAKEVConnector(BaseConnector):
 6. Add license check tests
 
 **Test Coverage:**
+
 - ✅ Schema mapping unit tests
 - ✅ E2E ingestion pipeline
 - ✅ Golden IO validation
@@ -1053,12 +1079,14 @@ class CISAKEVConnector(BaseConnector):
 - ✅ License enforcement
 
 **Deliverables:**
+
 - Complete test suite with >90% coverage
 - Golden test fixtures
 
 ### Phase 5: Compliance Integration (3 hours)
 
 **Tasks:**
+
 1. Integrate PII detection hooks
 2. Add license registry checks
 3. Implement DPIA validation
@@ -1066,6 +1094,7 @@ class CISAKEVConnector(BaseConnector):
 5. Configure observability dashboards
 
 **Deliverables:**
+
 - PII detection integrated
 - License checks enforced
 - DPIA validated
@@ -1074,12 +1103,14 @@ class CISAKEVConnector(BaseConnector):
 ### Phase 6: Documentation (2 hours)
 
 **Tasks:**
+
 1. Complete README with usage examples
 2. Add architecture notes
 3. Document deployment steps
 4. Create troubleshooting guide
 
 **Deliverables:**
+
 - Complete documentation
 - Usage examples
 - Deployment guide
@@ -1208,8 +1239,8 @@ name: Golden IO Tests
 on:
   pull_request:
     paths:
-      - 'connectors/**'
-      - 'tests/golden/**'
+      - "connectors/**"
+      - "tests/golden/**"
 
 jobs:
   golden-tests:
@@ -1220,7 +1251,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.11'
+          python-version: "3.11"
 
       - name: Install dependencies
         run: |

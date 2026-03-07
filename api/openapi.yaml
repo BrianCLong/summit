@@ -12,25 +12,25 @@ paths:
       operationId: getHealth
       summary: Health check endpoint
       responses:
-        '200':
+        "200":
           description: Service is healthy
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Health'
+                $ref: "#/components/schemas/Health"
   /api/v1/graphs:
     get:
       operationId: getGraphs
       summary: List available graphs
       responses:
-        '200':
+        "200":
           description: List of graphs
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Graph'
+                  $ref: "#/components/schemas/Graph"
 components:
   schemas:
     Health:

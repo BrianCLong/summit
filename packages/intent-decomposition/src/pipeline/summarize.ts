@@ -1,9 +1,9 @@
-import { readFile } from 'fs/promises';
-import path from 'path';
-import { StepSummary, TrajectoryInput, UIAction, UIFrame } from '../types.js';
-import { fillTemplate, loadPromptTemplate } from '../utils/prompt.js';
-import { safeJsonParse } from '../utils/json.js';
-import { OpenAICompatibleClient } from '../llm/openai-client.js';
+import { readFile } from "fs/promises";
+import path from "path";
+import { StepSummary, TrajectoryInput, UIAction, UIFrame } from "../types.js";
+import { fillTemplate, loadPromptTemplate } from "../utils/prompt.js";
+import { safeJsonParse } from "../utils/json.js";
+import { OpenAICompatibleClient } from "../llm/openai-client.js";
 
 export interface SummarizeOptions {
   modelId: string;
@@ -15,7 +15,10 @@ export interface SummarizeOptions {
   maxTokens?: number;
 }
 
-function buildWindow(frames: UIFrame[], index: number): {
+function buildWindow(
+  frames: UIFrame[],
+  index: number
+): {
   previous?: UIFrame;
   current: UIFrame;
   next?: UIFrame;
@@ -37,12 +40,12 @@ function actionsForFrame(actions: UIAction[], frame: UIFrame): UIAction[] {
 
 export async function summarizeTrajectory(
   input: TrajectoryInput,
-  options: SummarizeOptions,
+  options: SummarizeOptions
 ): Promise<StepSummary[]> {
   const prompt = await loadPromptTemplate(
     options.promptPath,
     options.promptId,
-    options.promptVersion,
+    options.promptVersion
   );
   const client = new OpenAICompatibleClient(options.baseUrl, options.apiKey);
 
@@ -67,7 +70,7 @@ export async function summarizeTrajectory(
     const parsed = safeJsonParse<StepSummary>(response);
     const summary: StepSummary = {
       ...parsed,
-      schemaVersion: parsed.schemaVersion ?? 'v1',
+      schemaVersion: parsed.schemaVersion ?? "v1",
       locale: parsed.locale ?? window.current.locale,
       provenance: {
         ...parsed.provenance,
@@ -91,6 +94,6 @@ export async function summarizeTrajectory(
 }
 
 export async function loadTrajectory(inputPath: string): Promise<TrajectoryInput> {
-  const payload = await readFile(path.resolve(inputPath), 'utf8');
+  const payload = await readFile(path.resolve(inputPath), "utf8");
   return safeJsonParse<TrajectoryInput>(payload);
 }

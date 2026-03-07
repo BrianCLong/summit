@@ -4,12 +4,12 @@ This guide details the procedure for deploying the Summit Platform (Maestro, Int
 
 ## 1. Prerequisites
 
-*   **AWS CLI** configured with `AdministratorAccess` (or sufficient power to create EKS/VPC/RDS).
-*   **Terraform** (v1.5+).
-*   **Kubectl** (v1.29+).
-*   **Helm** (v3+).
-*   **GitHub Actions Secrets** configured:
-    *   `AWS_ACCOUNT_ID`: Your 12-digit AWS account ID.
+- **AWS CLI** configured with `AdministratorAccess` (or sufficient power to create EKS/VPC/RDS).
+- **Terraform** (v1.5+).
+- **Kubectl** (v1.29+).
+- **Helm** (v3+).
+- **GitHub Actions Secrets** configured:
+  - `AWS_ACCOUNT_ID`: Your 12-digit AWS account ID.
 
 ## 2. Infrastructure Provisioning (One-Time Setup)
 
@@ -29,9 +29,11 @@ terraform apply tfplan
 ```
 
 ### Outputs to Note
+
 After `apply`, Terraform will output:
-*   `cluster_endpoint`: The API URL of the EKS cluster.
-*   `database_endpoint`: The connection string for Aurora PostgreSQL.
+
+- `cluster_endpoint`: The API URL of the EKS cluster.
+- `database_endpoint`: The connection string for Aurora PostgreSQL.
 
 # 3. Cluster Bootstrap (Day 1 Operations)
 
@@ -50,6 +52,7 @@ kubectl config current-context
 Before deploying applications, you must seed the database credentials into AWS Secrets Manager or Kubernetes Secrets.
 
 **Helper Script:**
+
 ```bash
 # Set your DB password
 export DB_PASSWORD="your-strong-password"
@@ -63,6 +66,7 @@ export DB_PASSWORD="your-strong-password"
 Applications are deployed automatically via GitHub Actions on push to `main` (Dev) or Release Tags (Prod).
 
 ### Manual Deployment (Emergency)
+
 If CI/CD is down, you can deploy using Helm locally:
 
 ```bash
@@ -87,13 +91,15 @@ kubectl get pods -l app.kubernetes.io/name=neo4j -o wide
 
 ## 6. Troubleshooting
 
-*   **Pods Pending?** Check if the autoscaler has spun up enough nodes: `kubectl get nodes`.
-*   **Database Connection Errors?** Verify the `db-credentials` secret exists: `kubectl get secret db-credentials`.
-*   **Ingress 404?** Ensure the AWS Load Balancer Controller is installed (Terraform module handles this usually, or requires a separate helm install).
+- **Pods Pending?** Check if the autoscaler has spun up enough nodes: `kubectl get nodes`.
+- **Database Connection Errors?** Verify the `db-credentials` secret exists: `kubectl get secret db-credentials`.
+- **Ingress 404?** Ensure the AWS Load Balancer Controller is installed (Terraform module handles this usually, or requires a separate helm install).
 
 ## 7. Disaster Recovery
 
-*   **RDS:** Aurora has Point-in-Time Recovery enabled by default (7 days).
-*   **Neo4j:** Regular snapshots should be configured to S3 (see `infra/dr/backup-neo4j.cronjob.yaml` if available, or configure via Helm values).
+- **RDS:** Aurora has Point-in-Time Recovery enabled by default (7 days).
+- **Neo4j:** Regular snapshots should be configured to S3 (see `infra/dr/backup-neo4j.cronjob.yaml` if available, or configure via Helm values).
+
+```
 
 ```

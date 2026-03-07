@@ -1,14 +1,19 @@
-import React from 'react';
-import { TextField, Button, Box, CircularProgress } from '@mui/material';
+import React from 'react'
+import { TextField, Button, Box, CircularProgress } from '@mui/material'
 
 interface CypherPreviewProps {
-  cypher: string;
-  onChange: (cypher: string) => void;
-  onRun: (cypher: string) => void;
-  loading: boolean;
+  cypher: string
+  onChange: (cypher: string) => void
+  onRun: (cypher: string) => void
+  loading: boolean
 }
 
-export const CypherPreview: React.FC<CypherPreviewProps> = ({ cypher, onChange, onRun, loading }) => {
+export const CypherPreview: React.FC<CypherPreviewProps> = ({
+  cypher,
+  onChange,
+  onRun,
+  loading,
+}) => {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
       <TextField
@@ -16,10 +21,10 @@ export const CypherPreview: React.FC<CypherPreviewProps> = ({ cypher, onChange, 
         multiline
         rows={6}
         value={cypher}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={e => onChange(e.target.value)}
         fullWidth
         InputProps={{
-            style: { fontFamily: 'monospace' }
+          style: { fontFamily: 'monospace' },
         }}
       />
       <Button
@@ -32,5 +37,5 @@ export const CypherPreview: React.FC<CypherPreviewProps> = ({ cypher, onChange, 
         Run Query
       </Button>
     </Box>
-  );
-};
+  )
+}

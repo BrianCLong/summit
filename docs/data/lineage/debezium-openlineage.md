@@ -16,9 +16,9 @@ debezium.sink.openlineage.url=<your-openlineage-url>
 debezium.sink.openlineage.pipeline.namespace=summit
 ```
 
-*   `debezium.sink.type`: Set to `openlineage` to enable the sink.
-*   `debezium.sink.openlineage.url`: The URL of your OpenLineage backend (e.g., Marquez).
-*   `debezium.sink.openlineage.pipeline.namespace`: A namespace for your pipelines (e.g., `summit`).
+- `debezium.sink.type`: Set to `openlineage` to enable the sink.
+- `debezium.sink.openlineage.url`: The URL of your OpenLineage backend (e.g., Marquez).
+- `debezium.sink.openlineage.pipeline.namespace`: A namespace for your pipelines (e.g., `summit`).
 
 Under the hood, this produces marketplace-standard Run, Job, and Dataset facets for each change event Debezium sees. Table names and columns get translated into OpenLineage datasets, so schema changes (like adding a column or renaming a table) surface as lineage evolutions you can validate and test against your tooling.
 
@@ -26,8 +26,8 @@ Under the hood, this produces marketplace-standard Run, Job, and Dataset facets 
 
 Airflow’s OpenLineage provider has been iterating in lockstep.
 
-*   **Version**: 2.9.2
-*   **Release Date**: January 2, 2026
+- **Version**: 2.9.2
+- **Release Date**: January 2, 2026
 
 Ensure that Airflow DAG runs emit lineage events compatible with the latest OpenLineage API schema by installing the official provider:
 

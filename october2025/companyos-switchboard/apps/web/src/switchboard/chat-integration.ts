@@ -4,32 +4,39 @@
  * routed through Switchboard for message delivery, presence, and moderation.
  */
 
-import { z } from 'zod';
-import { EventEmitter } from 'events';
-import { SwitchboardContext, SwitchboardTarget } from './types';
+import { z } from "zod";
+import { EventEmitter } from "events";
+import { SwitchboardContext, SwitchboardTarget } from "./types";
 
 // Message types
 export const ChatMessageTypeSchema = z.enum([
-  'text',
-  'system',
-  'file',
-  'link',
-  'code',
-  'mention',
-  'reaction',
-  'thread_reply',
-  'edited',
-  'deleted',
+  "text",
+  "system",
+  "file",
+  "link",
+  "code",
+  "mention",
+  "reaction",
+  "thread_reply",
+  "edited",
+  "deleted",
 ]);
 
 export type ChatMessageType = z.infer<typeof ChatMessageTypeSchema>;
 
 // Presence status
-export const PresenceStatusSchema = z.enum(['online', 'away', 'busy', 'offline', 'invisible']);
+export const PresenceStatusSchema = z.enum(["online", "away", "busy", "offline", "invisible"]);
 export type PresenceStatus = z.infer<typeof PresenceStatusSchema>;
 
 // Channel types
-export const ChannelTypeSchema = z.enum(['direct', 'group', 'public', 'private', 'investigation', 'incident']);
+export const ChannelTypeSchema = z.enum([
+  "direct",
+  "group",
+  "public",
+  "private",
+  "investigation",
+  "incident",
+]);
 export type ChannelType = z.infer<typeof ChannelTypeSchema>;
 
 // Chat message schema
@@ -43,26 +50,38 @@ export const ChatMessageSchema = z.object({
   type: ChatMessageTypeSchema,
   content: z.string(),
   formattedContent: z.string().optional(), // HTML/Markdown rendered
-  mentions: z.array(z.object({
-    userId: z.string(),
-    displayName: z.string(),
-    startIndex: z.number(),
-    endIndex: z.number(),
-  })).optional(),
-  attachments: z.array(z.object({
-    id: z.string(),
-    type: z.enum(['image', 'video', 'audio', 'document', 'link']),
-    url: z.string().url(),
-    name: z.string(),
-    size: z.number().optional(),
-    mimeType: z.string().optional(),
-    thumbnailUrl: z.string().url().optional(),
-  })).optional(),
-  reactions: z.array(z.object({
-    emoji: z.string(),
-    count: z.number(),
-    users: z.array(z.string()),
-  })).optional(),
+  mentions: z
+    .array(
+      z.object({
+        userId: z.string(),
+        displayName: z.string(),
+        startIndex: z.number(),
+        endIndex: z.number(),
+      })
+    )
+    .optional(),
+  attachments: z
+    .array(
+      z.object({
+        id: z.string(),
+        type: z.enum(["image", "video", "audio", "document", "link"]),
+        url: z.string().url(),
+        name: z.string(),
+        size: z.number().optional(),
+        mimeType: z.string().optional(),
+        thumbnailUrl: z.string().url().optional(),
+      })
+    )
+    .optional(),
+  reactions: z
+    .array(
+      z.object({
+        emoji: z.string(),
+        count: z.number(),
+        users: z.array(z.string()),
+      })
+    )
+    .optional(),
   replyCount: z.number().default(0),
   isEdited: z.boolean().default(false),
   isDeleted: z.boolean().default(false),
@@ -83,27 +102,33 @@ export const ChannelSchema = z.object({
   description: z.string().optional(),
   tenantId: z.string(),
   creatorId: z.string(),
-  members: z.array(z.object({
-    userId: z.string(),
-    displayName: z.string(),
-    role: z.enum(['owner', 'admin', 'member', 'guest']),
-    joinedAt: z.date(),
-    lastReadAt: z.date().optional(),
-    notificationPreference: z.enum(['all', 'mentions', 'none']).default('all'),
-  })),
-  linkedResource: z.object({
-    type: z.enum(['investigation', 'incident', 'entity', 'task']),
-    id: z.string(),
-    name: z.string(),
-  }).optional(),
-  settings: z.object({
-    isReadOnly: z.boolean().default(false),
-    allowThreads: z.boolean().default(true),
-    allowReactions: z.boolean().default(true),
-    allowFileUpload: z.boolean().default(true),
-    retentionDays: z.number().int().optional(),
-    moderationEnabled: z.boolean().default(false),
-  }).optional(),
+  members: z.array(
+    z.object({
+      userId: z.string(),
+      displayName: z.string(),
+      role: z.enum(["owner", "admin", "member", "guest"]),
+      joinedAt: z.date(),
+      lastReadAt: z.date().optional(),
+      notificationPreference: z.enum(["all", "mentions", "none"]).default("all"),
+    })
+  ),
+  linkedResource: z
+    .object({
+      type: z.enum(["investigation", "incident", "entity", "task"]),
+      id: z.string(),
+      name: z.string(),
+    })
+    .optional(),
+  settings: z
+    .object({
+      isReadOnly: z.boolean().default(false),
+      allowThreads: z.boolean().default(true),
+      allowReactions: z.boolean().default(true),
+      allowFileUpload: z.boolean().default(true),
+      retentionDays: z.number().int().optional(),
+      moderationEnabled: z.boolean().default(false),
+    })
+    .optional(),
   messageCount: z.number().default(0),
   lastMessageAt: z.date().optional(),
   createdAt: z.date(),
@@ -120,7 +145,7 @@ export const PresenceInfoSchema = z.object({
   statusMessage: z.string().optional(),
   lastActiveAt: z.date(),
   currentChannel: z.string().optional(),
-  deviceType: z.enum(['web', 'desktop', 'mobile']).optional(),
+  deviceType: z.enum(["web", "desktop", "mobile"]).optional(),
 });
 
 export type PresenceInfo = z.infer<typeof PresenceInfoSchema>;
@@ -128,7 +153,7 @@ export type PresenceInfo = z.infer<typeof PresenceInfoSchema>;
 // Moderation action
 export const ModerationActionSchema = z.object({
   id: z.string().uuid(),
-  type: z.enum(['warn', 'mute', 'kick', 'ban', 'delete_message', 'flag']),
+  type: z.enum(["warn", "mute", "kick", "ban", "delete_message", "flag"]),
   targetUserId: z.string(),
   moderatorId: z.string(),
   channelId: z.string().optional(),
@@ -151,20 +176,20 @@ interface TypingIndicator {
 
 // Chat service events
 type ChatServiceEvents = {
-  'message:sent': [ChatMessage];
-  'message:received': [ChatMessage];
-  'message:edited': [ChatMessage];
-  'message:deleted': [string, string]; // messageId, channelId
-  'message:reaction': [string, string, string, boolean]; // messageId, emoji, userId, added
-  'channel:created': [Channel];
-  'channel:updated': [Channel];
-  'channel:archived': [string];
-  'member:joined': [string, string]; // channelId, userId
-  'member:left': [string, string];
-  'presence:updated': [PresenceInfo];
-  'typing:started': [TypingIndicator];
-  'typing:stopped': [string, string]; // channelId, userId
-  'moderation:action': [ModerationAction];
+  "message:sent": [ChatMessage];
+  "message:received": [ChatMessage];
+  "message:edited": [ChatMessage];
+  "message:deleted": [string, string]; // messageId, channelId
+  "message:reaction": [string, string, string, boolean]; // messageId, emoji, userId, added
+  "channel:created": [Channel];
+  "channel:updated": [Channel];
+  "channel:archived": [string];
+  "member:joined": [string, string]; // channelId, userId
+  "member:left": [string, string];
+  "presence:updated": [PresenceInfo];
+  "typing:started": [TypingIndicator];
+  "typing:stopped": [string, string]; // channelId, userId
+  "moderation:action": [ModerationAction];
 };
 
 interface ChatServiceConfig {
@@ -214,7 +239,7 @@ export class SwitchboardChatService extends EventEmitter {
       presenceHeartbeatMs: 30000,
       enableModeration: true,
       moderationKeywords: [],
-      logger: config.logger || console as any,
+      logger: config.logger || (console as any),
       metrics: config.metrics || { increment: () => {}, histogram: () => {} },
       ...config,
     };
@@ -225,7 +250,9 @@ export class SwitchboardChatService extends EventEmitter {
   /**
    * Register delivery handler for message distribution
    */
-  setDeliveryHandler(handler: (message: ChatMessage, targetUserIds: string[]) => Promise<void>): void {
+  setDeliveryHandler(
+    handler: (message: ChatMessage, targetUserIds: string[]) => Promise<void>
+  ): void {
     this.deliveryHandler = handler;
   }
 
@@ -240,7 +267,7 @@ export class SwitchboardChatService extends EventEmitter {
    * Create a new channel
    */
   async createChannel(
-    data: Omit<Channel, 'id' | 'messageCount' | 'createdAt' | 'updatedAt'>,
+    data: Omit<Channel, "id" | "messageCount" | "createdAt" | "updatedAt">,
     context: SwitchboardContext
   ): Promise<Channel> {
     const channel: Channel = {
@@ -254,9 +281,9 @@ export class SwitchboardChatService extends EventEmitter {
     this.channels.set(channel.id, channel);
     this.messages.set(channel.id, []);
 
-    this.emit('channel:created', channel);
-    this.config.metrics.increment('chat.channel.created', { type: channel.type });
-    this.config.logger.info('Channel created', { channelId: channel.id, type: channel.type });
+    this.emit("channel:created", channel);
+    this.config.metrics.increment("chat.channel.created", { type: channel.type });
+    this.config.logger.info("Channel created", { channelId: channel.id, type: channel.type });
 
     return channel;
   }
@@ -281,7 +308,10 @@ export class SwitchboardChatService extends EventEmitter {
    * Send a message
    */
   async sendMessage(
-    data: Omit<ChatMessage, 'id' | 'createdAt' | 'updatedAt' | 'replyCount' | 'isEdited' | 'isDeleted' | 'isPinned'>,
+    data: Omit<
+      ChatMessage,
+      "id" | "createdAt" | "updatedAt" | "replyCount" | "isEdited" | "isDeleted" | "isPinned"
+    >,
     context: SwitchboardContext
   ): Promise<ChatMessage> {
     const startTime = performance.now();
@@ -295,12 +325,12 @@ export class SwitchboardChatService extends EventEmitter {
     // Check if user is member
     const member = channel.members.find((m) => m.userId === data.senderId);
     if (!member) {
-      throw new Error('User is not a member of this channel');
+      throw new Error("User is not a member of this channel");
     }
 
     // Check read-only
-    if (channel.settings?.isReadOnly && member.role !== 'owner' && member.role !== 'admin') {
-      throw new Error('Channel is read-only');
+    if (channel.settings?.isReadOnly && member.role !== "owner" && member.role !== "admin") {
+      throw new Error("Channel is read-only");
     }
 
     // Validate message length
@@ -353,7 +383,7 @@ export class SwitchboardChatService extends EventEmitter {
     this.clearTyping(data.channelId, data.senderId);
 
     // Emit events
-    this.emit('message:sent', message);
+    this.emit("message:sent", message);
 
     // Deliver to channel members
     if (this.deliveryHandler) {
@@ -362,20 +392,23 @@ export class SwitchboardChatService extends EventEmitter {
         .map((m) => m.userId);
 
       await this.deliveryHandler(message, targetUserIds).catch((error) => {
-        this.config.logger.error('Message delivery failed', { messageId: message.id, error: error.message });
+        this.config.logger.error("Message delivery failed", {
+          messageId: message.id,
+          error: error.message,
+        });
       });
     }
 
     // Handle mentions
     if (message.mentions?.length) {
       for (const mention of message.mentions) {
-        this.emit('message:received', message); // Trigger notification
+        this.emit("message:received", message); // Trigger notification
       }
     }
 
     const duration = performance.now() - startTime;
-    this.config.metrics.increment('chat.message.sent', { channelType: channel.type });
-    this.config.metrics.histogram('chat.message.send_duration', duration);
+    this.config.metrics.increment("chat.message.sent", { channelType: channel.type });
+    this.config.metrics.histogram("chat.message.send_duration", duration);
 
     return message;
   }
@@ -391,28 +424,28 @@ export class SwitchboardChatService extends EventEmitter {
   ): Promise<ChatMessage> {
     const channelMessages = this.messages.get(channelId);
     if (!channelMessages) {
-      throw new Error('Channel not found');
+      throw new Error("Channel not found");
     }
 
     const message = channelMessages.find((m) => m.id === messageId);
     if (!message) {
-      throw new Error('Message not found');
+      throw new Error("Message not found");
     }
 
     if (message.senderId !== userId) {
-      throw new Error('Cannot edit another user\'s message');
+      throw new Error("Cannot edit another user's message");
     }
 
     if (message.isDeleted) {
-      throw new Error('Cannot edit a deleted message');
+      throw new Error("Cannot edit a deleted message");
     }
 
     message.content = newContent;
     message.isEdited = true;
     message.updatedAt = new Date();
 
-    this.emit('message:edited', message);
-    this.config.metrics.increment('chat.message.edited');
+    this.emit("message:edited", message);
+    this.config.metrics.increment("chat.message.edited");
 
     return message;
   }
@@ -428,24 +461,24 @@ export class SwitchboardChatService extends EventEmitter {
   ): Promise<void> {
     const channelMessages = this.messages.get(channelId);
     if (!channelMessages) {
-      throw new Error('Channel not found');
+      throw new Error("Channel not found");
     }
 
     const message = channelMessages.find((m) => m.id === messageId);
     if (!message) {
-      throw new Error('Message not found');
+      throw new Error("Message not found");
     }
 
     if (message.senderId !== userId && !isAdmin) {
-      throw new Error('Cannot delete another user\'s message');
+      throw new Error("Cannot delete another user's message");
     }
 
     message.isDeleted = true;
-    message.content = '[Message deleted]';
+    message.content = "[Message deleted]";
     message.deletedAt = new Date();
 
-    this.emit('message:deleted', messageId, channelId);
-    this.config.metrics.increment('chat.message.deleted');
+    this.emit("message:deleted", messageId, channelId);
+    this.config.metrics.increment("chat.message.deleted");
   }
 
   /**
@@ -460,7 +493,7 @@ export class SwitchboardChatService extends EventEmitter {
     const channelMessages = this.messages.get(channelId);
     const message = channelMessages?.find((m) => m.id === messageId);
     if (!message) {
-      throw new Error('Message not found');
+      throw new Error("Message not found");
     }
 
     if (!message.reactions) {
@@ -477,8 +510,8 @@ export class SwitchboardChatService extends EventEmitter {
       message.reactions.push({ emoji, count: 1, users: [userId] });
     }
 
-    this.emit('message:reaction', messageId, emoji, userId, true);
-    this.config.metrics.increment('chat.reaction.added');
+    this.emit("message:reaction", messageId, emoji, userId, true);
+    this.config.metrics.increment("chat.reaction.added");
   }
 
   /**
@@ -504,8 +537,8 @@ export class SwitchboardChatService extends EventEmitter {
       }
     }
 
-    this.emit('message:reaction', messageId, emoji, userId, false);
-    this.config.metrics.increment('chat.reaction.removed');
+    this.emit("message:reaction", messageId, emoji, userId, false);
+    this.config.metrics.increment("chat.reaction.removed");
   }
 
   /**
@@ -518,7 +551,9 @@ export class SwitchboardChatService extends EventEmitter {
     let messages = this.messages.get(channelId) || [];
 
     if (options?.threadId) {
-      messages = messages.filter((m) => m.threadId === options.threadId || m.id === options.threadId);
+      messages = messages.filter(
+        (m) => m.threadId === options.threadId || m.id === options.threadId
+      );
     }
 
     if (options?.before) {
@@ -544,15 +579,18 @@ export class SwitchboardChatService extends EventEmitter {
    */
   async updatePresence(info: PresenceInfo): Promise<void> {
     this.presence.set(info.userId, info);
-    this.emit('presence:updated', info);
+    this.emit("presence:updated", info);
 
     if (this.presenceHandler) {
       await this.presenceHandler([info]).catch((error) => {
-        this.config.logger.error('Presence broadcast failed', { userId: info.userId, error: error.message });
+        this.config.logger.error("Presence broadcast failed", {
+          userId: info.userId,
+          error: error.message,
+        });
       });
     }
 
-    this.config.metrics.increment('chat.presence.updated', { status: info.status });
+    this.config.metrics.increment("chat.presence.updated", { status: info.status });
   }
 
   /**
@@ -575,7 +613,7 @@ export class SwitchboardChatService extends EventEmitter {
     const channelTyping = this.typing.get(channelId)!;
     channelTyping.set(userId, Date.now());
 
-    this.emit('typing:started', { channelId, userId, displayName, timestamp: Date.now() });
+    this.emit("typing:started", { channelId, userId, displayName, timestamp: Date.now() });
   }
 
   /**
@@ -583,7 +621,7 @@ export class SwitchboardChatService extends EventEmitter {
    */
   stopTyping(channelId: string, userId: string): void {
     this.clearTyping(channelId, userId);
-    this.emit('typing:stopped', channelId, userId);
+    this.emit("typing:stopped", channelId, userId);
   }
 
   /**
@@ -605,25 +643,25 @@ export class SwitchboardChatService extends EventEmitter {
   async joinChannel(channelId: string, userId: string, displayName: string): Promise<void> {
     const channel = this.channels.get(channelId);
     if (!channel) {
-      throw new Error('Channel not found');
+      throw new Error("Channel not found");
     }
 
     if (channel.members.length >= this.config.maxChannelMembers) {
-      throw new Error('Channel member limit reached');
+      throw new Error("Channel member limit reached");
     }
 
     if (!channel.members.some((m) => m.userId === userId)) {
       channel.members.push({
         userId,
         displayName,
-        role: 'member',
+        role: "member",
         joinedAt: new Date(),
-        notificationPreference: 'all',
+        notificationPreference: "all",
       });
       channel.updatedAt = new Date();
 
-      this.emit('member:joined', channelId, userId);
-      this.config.metrics.increment('chat.member.joined');
+      this.emit("member:joined", channelId, userId);
+      this.config.metrics.increment("chat.member.joined");
     }
   }
 
@@ -637,8 +675,8 @@ export class SwitchboardChatService extends EventEmitter {
     channel.members = channel.members.filter((m) => m.userId !== userId);
     channel.updatedAt = new Date();
 
-    this.emit('member:left', channelId, userId);
-    this.config.metrics.increment('chat.member.left');
+    this.emit("member:left", channelId, userId);
+    this.config.metrics.increment("chat.member.left");
   }
 
   /**
@@ -646,13 +684,13 @@ export class SwitchboardChatService extends EventEmitter {
    */
   async moderate(action: ModerationAction): Promise<void> {
     // Store moderation action (would persist in real implementation)
-    this.emit('moderation:action', action);
-    this.config.logger.info('Moderation action applied', {
+    this.emit("moderation:action", action);
+    this.config.logger.info("Moderation action applied", {
       type: action.type,
       targetUserId: action.targetUserId,
       moderatorId: action.moderatorId,
     });
-    this.config.metrics.increment('chat.moderation.action', { type: action.type });
+    this.config.metrics.increment("chat.moderation.action", { type: action.type });
   }
 
   /**
@@ -697,7 +735,7 @@ export class SwitchboardChatService extends EventEmitter {
         for (const [userId, timestamp] of channelTyping) {
           if (now - timestamp > this.config.typingTimeoutMs) {
             channelTyping.delete(userId);
-            this.emit('typing:stopped', channelId, userId);
+            this.emit("typing:stopped", channelId, userId);
           }
         }
       }
@@ -710,19 +748,19 @@ export class SwitchboardChatService extends EventEmitter {
   async archiveChannel(channelId: string, userId: string): Promise<void> {
     const channel = this.channels.get(channelId);
     if (!channel) {
-      throw new Error('Channel not found');
+      throw new Error("Channel not found");
     }
 
     const member = channel.members.find((m) => m.userId === userId);
-    if (!member || (member.role !== 'owner' && member.role !== 'admin')) {
-      throw new Error('Insufficient permissions to archive channel');
+    if (!member || (member.role !== "owner" && member.role !== "admin")) {
+      throw new Error("Insufficient permissions to archive channel");
     }
 
     channel.archivedAt = new Date();
     channel.updatedAt = new Date();
 
-    this.emit('channel:archived', channelId);
-    this.config.metrics.increment('chat.channel.archived');
+    this.emit("channel:archived", channelId);
+    this.config.metrics.increment("chat.channel.archived");
   }
 
   /**

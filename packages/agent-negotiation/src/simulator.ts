@@ -25,7 +25,11 @@ export class NegotiationSimulator {
     this.agents = agents;
   }
 
-  public negotiate(proposal: Proposal): { approved: boolean; rounds: number; evaluations: Evaluation[] } {
+  public negotiate(proposal: Proposal): {
+    approved: boolean;
+    rounds: number;
+    evaluations: Evaluation[];
+  } {
     console.log(`Starting negotiation for proposal: ${proposal.action} by ${proposal.proposerId}`);
 
     let rounds = 0;
@@ -42,7 +46,9 @@ export class NegotiationSimulator {
       const evaluation = agent.evaluate(proposal);
       evaluations.push(evaluation);
 
-      console.log(`Agent ${agent.id} evaluated: ${evaluation.approved ? 'APPROVED' : 'REJECTED'} (${evaluation.score}) - ${evaluation.reason}`);
+      console.log(
+        `Agent ${agent.id} evaluated: ${evaluation.approved ? "APPROVED" : "REJECTED"} (${evaluation.score}) - ${evaluation.reason}`
+      );
 
       if (!evaluation.approved) {
         approved = false;

@@ -42,14 +42,14 @@ fact_sales ──┬──> dim_product ──> dim_category
 
 ### SCD Type Selection Matrix
 
-| Scenario | SCD Type | Use Case |
-|----------|----------|----------|
-| Overwrite old values | Type 1 | Current state only, history not needed |
-| Track full history | Type 2 | Audit trail, historical reporting |
-| Track current + previous | Type 3 | Limited history, fast queries |
-| Separate history table | Type 4 | High-volume dimensions |
-| Mini-dimension | Type 5 | Rapidly changing attributes |
-| Hybrid approach | Type 6 | Best of Type 1, 2, and 3 |
+| Scenario                 | SCD Type | Use Case                               |
+| ------------------------ | -------- | -------------------------------------- |
+| Overwrite old values     | Type 1   | Current state only, history not needed |
+| Track full history       | Type 2   | Audit trail, historical reporting      |
+| Track current + previous | Type 3   | Limited history, fast queries          |
+| Separate history table   | Type 4   | High-volume dimensions                 |
+| Mini-dimension           | Type 5   | Rapidly changing attributes            |
+| Hybrid approach          | Type 6   | Best of Type 1, 2, and 3               |
 
 ### Implementation Examples
 
@@ -76,32 +76,34 @@ Always define the grain (level of detail) explicitly:
 ### Time-Based Partitioning
 
 Recommended for:
+
 - Time-series data
 - Append-only workloads
 - Regular data archival
 
 ```typescript
 await warehouse.createTable({
-  name: 'fact_sales',
-  partitionStrategy: 'TIME',
-  partitionKey: 'sale_date',
-  partitionInterval: '1 month'
+  name: "fact_sales",
+  partitionStrategy: "TIME",
+  partitionKey: "sale_date",
+  partitionInterval: "1 month",
 });
 ```
 
 ### Hash Partitioning
 
 Recommended for:
+
 - Even data distribution
 - High-cardinality keys
 - Point queries
 
 ```typescript
 await warehouse.createTable({
-  name: 'fact_transactions',
-  partitionStrategy: 'HASH',
-  partitionKey: 'transaction_id',
-  partitionCount: 64
+  name: "fact_transactions",
+  partitionStrategy: "HASH",
+  partitionKey: "transaction_id",
+  partitionCount: 64,
 });
 ```
 
@@ -110,6 +112,7 @@ await warehouse.createTable({
 ### Zone Maps
 
 Automatically created for:
+
 - Partition keys
 - Sort keys
 - Frequently filtered columns
@@ -120,8 +123,8 @@ Define sort keys that match query patterns:
 
 ```typescript
 await warehouse.createTable({
-  name: 'fact_events',
-  sortKeys: ['event_date', 'event_type', 'user_id']
+  name: "fact_events",
+  sortKeys: ["event_date", "event_type", "user_id"],
 });
 ```
 
@@ -130,6 +133,7 @@ await warehouse.createTable({
 ### 1. Denormalization
 
 Denormalize when:
+
 - Join cost > storage cost
 - Dimension changes rarely
 - Query performance is critical
@@ -137,6 +141,7 @@ Denormalize when:
 ### 2. Pre-Aggregation
 
 Create aggregate tables for:
+
 - Common query patterns
 - Dashboard metrics
 - Real-time reporting
@@ -145,13 +150,13 @@ Create aggregate tables for:
 
 Optimal encoding by data type:
 
-| Data Type | Recommended Encoding |
-|-----------|---------------------|
-| Low cardinality strings | Dictionary |
-| Sorted integers | Delta |
-| Boolean/small integers | Bit-packing |
-| High null percentage | Sparse |
-| General purpose | RLE |
+| Data Type               | Recommended Encoding |
+| ----------------------- | -------------------- |
+| Low cardinality strings | Dictionary           |
+| Sorted integers         | Delta                |
+| Boolean/small integers  | Bit-packing          |
+| High null percentage    | Sparse               |
+| General purpose         | RLE                  |
 
 ## Schema Evolution
 
@@ -186,47 +191,47 @@ await modeling.scdHandler.handleType2(...);
 ### Date Dimension
 
 ```typescript
-await modeling.dimensionManager.createDimension('date', [
-  'date_key',
-  'full_date',
-  'day_of_week',
-  'day_of_month',
-  'day_of_year',
-  'week_of_year',
-  'month',
-  'quarter',
-  'year',
-  'is_weekend',
-  'is_holiday'
+await modeling.dimensionManager.createDimension("date", [
+  "date_key",
+  "full_date",
+  "day_of_week",
+  "day_of_month",
+  "day_of_year",
+  "week_of_year",
+  "month",
+  "quarter",
+  "year",
+  "is_weekend",
+  "is_holiday",
 ]);
 ```
 
 ### Customer Dimension
 
 ```typescript
-await modeling.dimensionManager.createDimension('customer', [
-  'customer_key',
-  'customer_id',
-  'customer_name',
-  'email',
-  'segment',
-  'region',
-  'signup_date',
-  'lifetime_value'
+await modeling.dimensionManager.createDimension("customer", [
+  "customer_key",
+  "customer_id",
+  "customer_name",
+  "email",
+  "segment",
+  "region",
+  "signup_date",
+  "lifetime_value",
 ]);
 ```
 
 ### Product Dimension
 
 ```typescript
-await modeling.dimensionManager.createDimension('product', [
-  'product_key',
-  'product_id',
-  'product_name',
-  'category',
-  'subcategory',
-  'brand',
-  'unit_price',
-  'unit_cost'
+await modeling.dimensionManager.createDimension("product", [
+  "product_key",
+  "product_id",
+  "product_name",
+  "category",
+  "subcategory",
+  "brand",
+  "unit_price",
+  "unit_cost",
 ]);
 ```

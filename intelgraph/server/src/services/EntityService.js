@@ -1,13 +1,13 @@
 // ===================================
 // server/src/services/EntityService.js - Entity Management
 // ===================================
-const { v4: uuidv4 } = require('uuid');
-const { getNeo4jDriver } = require('../config/database');
+const { v4: uuidv4 } = require("uuid");
+const { getNeo4jDriver } = require("../config/database");
 // const logger = require('../utils/logger'); // Using console for now
 const logger = {
-    error: console.error,
-    warn: console.warn,
-    info: console.log
+  error: console.error,
+  warn: console.warn,
+  info: console.log,
 };
 
 class EntityService {
@@ -52,7 +52,7 @@ class EntityService {
           y: $positionY
         })
         `
-            : ''
+            : ""
         }
 
         RETURN e, i, u
@@ -68,7 +68,7 @@ class EntityService {
         description: entityData.description || null,
         properties: entityData.properties || {},
         confidence: entityData.confidence || 1.0,
-        source: entityData.source || 'user_input',
+        source: entityData.source || "user_input",
         verified: entityData.verified || false,
         createdAt: now,
         ...(entityData.position && {
@@ -80,39 +80,35 @@ class EntityService {
       const result = await session.run(query, params);
 
       if (result.records.length === 0) {
-        throw new Error('Failed to create entity');
+        throw new Error("Failed to create entity");
       }
 
       return this.formatEntityResult(result.records[0]);
     } catch (error) {
-      logger.error('Error creating entity:', error);
+      logger.error("Error creating entity:", error);
       throw error;
     } finally {
       await session.close();
     }
   }
 
-  async getEntitiesByInvestigation(
-    investigationId,
-    filters = {},
-    pagination = {},
-  ) {
+  async getEntitiesByInvestigation(investigationId, filters = {}, pagination = {}) {
     const session = this.driver.session();
 
     try {
       const { page = 1, limit = 50 } = pagination;
       const skip = (page - 1) * limit;
 
-      let whereClause = '';
+      let whereClause = "";
       const params = { investigationId, skip, limit };
 
       if (filters.types && filters.types.length > 0) {
-        whereClause += ' AND e.type IN $types';
+        whereClause += " AND e.type IN $types";
         params.types = filters.types;
       }
 
       if (filters.verified !== undefined) {
-        whereClause += ' AND e.verified = $verified';
+        whereClause += " AND e.verified = $verified";
         params.verified = filters.verified;
       }
 
@@ -133,7 +129,7 @@ class EntityService {
 
       return result.records.map((record) => this.formatEntityResult(record));
     } catch (error) {
-      logger.error('Error getting entities:', error);
+      logger.error("Error getting entities:", error);
       throw error;
     } finally {
       await session.close();
@@ -150,13 +146,13 @@ class EntityService {
 
       // Build dynamic SET clauses
       Object.entries(updateData).forEach(([key, value]) => {
-        if (key !== 'position' && value !== undefined) {
+        if (key !== "position" && value !== undefined) {
           setClauses.push(`e.${key} = $${key}`);
           params[key] = value;
         }
       });
 
-      let positionQuery = '';
+      let positionQuery = "";
       if (updateData.position) {
         positionQuery = `
           OPTIONAL MATCH (e)-[r:HAS_POSITION]->(oldPos:Position)
@@ -172,7 +168,7 @@ class EntityService {
         MATCH (e)-[:CREATED_BY]->(u:User)
         OPTIONAL MATCH (e)-[:HAS_POSITION]->(pos:Position)
 
-        SET ${setClauses.join(', ')}, e.updatedAt = $updatedAt
+        SET ${setClauses.join(", ")}, e.updatedAt = $updatedAt
 
         ${positionQuery}
 
@@ -182,12 +178,12 @@ class EntityService {
       const result = await session.run(query, params);
 
       if (result.records.length === 0) {
-        throw new Error('Entity not found');
+        throw new Error("Entity not found");
       }
 
       return this.formatEntityResult(result.records[0]);
     } catch (error) {
-      logger.error('Error updating entity:', error);
+      logger.error("Error updating entity:", error);
       throw error;
     } finally {
       await session.close();
@@ -221,9 +217,9 @@ class EntityService {
 
       const result = await session.run(query, { entityId, userId });
 
-      return result.records[0].get('deletedCount').toNumber() > 0;
+      return result.records[0].get("deletedCount").toNumber() > 0;
     } catch (error) {
-      logger.error('Error deleting entity:', error);
+      logger.error("Error deleting entity:", error);
       throw error;
     } finally {
       await session.close();
@@ -261,10 +257,10 @@ class EntityService {
 
       return result.records.map((record) => ({
         ...this.formatEntityResult(record),
-        searchScore: record.get('score'),
+        searchScore: record.get("score"),
       }));
     } catch (error) {
-      logger.error('Error searching entities:', error);
+      logger.error("Error searching entities:", error);
       throw error;
     } finally {
       await session.close();
@@ -272,9 +268,9 @@ class EntityService {
   }
 
   formatEntityResult(record) {
-    const entity = record.get('e').properties;
-    const user = record.get('u').properties;
-    const position = record.has('pos') ? record.get('pos')?.properties : null;
+    const entity = record.get("e").properties;
+    const user = record.get("u").properties;
+    const position = record.has("pos") ? record.get("pos")?.properties : null;
 
     return {
       id: entity.id,

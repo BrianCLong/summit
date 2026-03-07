@@ -1,22 +1,23 @@
-import { ControlDefinition } from './control-registry.js';
-import { EvidenceRecord } from './evidence-store.js';
+import { ControlDefinition } from "./control-registry.js";
+import { EvidenceRecord } from "./evidence-store.js";
 
 export class NarrativeGenerator {
   build(control: ControlDefinition, evidence?: EvidenceRecord): string {
     const lines = [
       `# ${control.title}`,
-      '',
+      "",
       `**Objective:** ${control.objective}`,
-      `**Owner:** ${control.owner.primary}${control.owner.team ? ` (${control.owner.team})` : ''}`,
+      `**Owner:** ${control.owner.primary}${control.owner.team ? ` (${control.owner.team})` : ""}`,
       `**Category:** ${control.category}`,
       `**Check Type:** ${control.check.type}`,
       `**Schedule:** Every ${control.schedule.frequencyMinutes} minutes (tolerance ${control.schedule.toleranceMinutes}m)`,
-      `**Tags:** ${control.tags.join(', ') || 'none'}`,
-      '',
-      '## How it works',
-      control.narrative || 'Control executes according to registry definition with evidence captured to the immutable store.',
-      '',
-      '## Evidence',
+      `**Tags:** ${control.tags.join(", ") || "none"}`,
+      "",
+      "## How it works",
+      control.narrative ||
+        "Control executes according to registry definition with evidence captured to the immutable store.",
+      "",
+      "## Evidence",
     ];
 
     if (evidence) {
@@ -28,9 +29,9 @@ export class NarrativeGenerator {
         `- Expires: ${expiry.toISOString()}`
       );
     } else {
-      lines.push('- No evidence captured yet.');
+      lines.push("- No evidence captured yet.");
     }
 
-    return `${lines.join('\n')}`;
+    return `${lines.join("\n")}`;
   }
 }

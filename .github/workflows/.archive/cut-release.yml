@@ -2,8 +2,8 @@ name: Cut Release Notes
 on:
   workflow_dispatch:
     inputs:
-      tag: { required: true, description: 'git tag' }
-      digest: { required: true, description: 'image digest or sha' }
+      tag: { required: true, description: "git tag" }
+      digest: { required: true, description: "image digest or sha" }
 
 jobs:
   notes:

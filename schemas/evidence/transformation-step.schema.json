@@ -1,0 +1,30 @@
+{
+  "$id": "https://summit.local/schemas/evidence/transformation-step.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Transformation Step",
+  "type": "object",
+  "properties": {
+    "step_id": { "type": "string" },
+    "input_refs": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "output_refs": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "transformer_id": { "type": "string" },
+    "transformer_version": { "type": "number" },
+    "parameters": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  },
+  "required": [
+    "step_id",
+    "input_refs",
+    "output_refs",
+    "transformer_id",
+    "transformer_version"
+  ]
+}

@@ -17,7 +17,7 @@ import {
   isListType,
   GraphQLObjectType,
   GraphQLField,
-} from 'graphql';
+} from "graphql";
 
 export interface ComplexityConfig {
   /**
@@ -51,10 +51,7 @@ export interface ComplexityConfig {
   customComplexity?: Map<string, number | ComplexityCalculator>;
 }
 
-export type ComplexityCalculator = (
-  args: Record<string, any>,
-  childComplexity: number
-) => number;
+export type ComplexityCalculator = (args: Record<string, any>, childComplexity: number) => number;
 
 export interface ComplexityAnalysis {
   complexity: number;
@@ -101,9 +98,9 @@ export class QueryComplexityAnalyzer {
     let totalComplexity = 0;
 
     // Get operation
-    const operation = document.definitions.find(
-      (def) => def.kind === Kind.OPERATION_DEFINITION
-    ) as OperationDefinitionNode | undefined;
+    const operation = document.definitions.find((def) => def.kind === Kind.OPERATION_DEFINITION) as
+      | OperationDefinitionNode
+      | undefined;
 
     if (!operation) {
       return {
@@ -111,7 +108,7 @@ export class QueryComplexityAnalyzer {
         depth: 0,
         breakdown: [],
         violatesLimit: false,
-        errors: ['No operation found in document'],
+        errors: ["No operation found in document"],
       };
     }
 
@@ -150,8 +147,7 @@ export class QueryComplexityAnalyzer {
 
     // Check limits
     const violatesLimit =
-      totalComplexity > this.config.maxComplexity ||
-      maxDepth > this.config.maxDepth;
+      totalComplexity > this.config.maxComplexity || maxDepth > this.config.maxDepth;
 
     if (totalComplexity > this.config.maxComplexity) {
       errors.push(
@@ -160,9 +156,7 @@ export class QueryComplexityAnalyzer {
     }
 
     if (maxDepth > this.config.maxDepth) {
-      errors.push(
-        `Query depth ${maxDepth} exceeds maximum ${this.config.maxDepth}`
-      );
+      errors.push(`Query depth ${maxDepth} exceeds maximum ${this.config.maxDepth}`);
     }
 
     return {
@@ -190,13 +184,7 @@ export class QueryComplexityAnalyzer {
 
     for (const selection of selections) {
       if (selection.kind === Kind.FIELD) {
-        const result = this.analyzeField(
-          selection,
-          parentType,
-          fragments,
-          path,
-          currentDepth
-        );
+        const result = this.analyzeField(selection, parentType, fragments, path, currentDepth);
         totalComplexity += result.complexity;
         maxDepth = Math.max(maxDepth, result.depth);
         breakdown.push(...result.breakdown);
@@ -221,9 +209,7 @@ export class QueryComplexityAnalyzer {
         }
       } else if (selection.kind === Kind.INLINE_FRAGMENT) {
         const fragmentType = selection.typeCondition
-          ? (this.schema.getType(
-              selection.typeCondition.name.value
-            ) as GraphQLObjectType)
+          ? (this.schema.getType(selection.typeCondition.name.value) as GraphQLObjectType)
           : parentType;
         if (fragmentType) {
           const result = this.analyzeSelectionSet(
@@ -257,7 +243,7 @@ export class QueryComplexityAnalyzer {
     const fieldPath = [...path, fieldName];
 
     // Skip introspection fields
-    if (fieldName.startsWith('__')) {
+    if (fieldName.startsWith("__")) {
       return { complexity: 0, depth: currentDepth, breakdown: [] };
     }
 
@@ -304,9 +290,9 @@ export class QueryComplexityAnalyzer {
     const customComplexity = this.config.customComplexity?.get(customKey);
 
     let fieldComplexity: number;
-    if (typeof customComplexity === 'function') {
+    if (typeof customComplexity === "function") {
       fieldComplexity = customComplexity(args, childComplexity);
-    } else if (typeof customComplexity === 'number') {
+    } else if (typeof customComplexity === "number") {
       fieldComplexity = customComplexity;
     } else {
       fieldComplexity = this.config.defaultComplexity;
@@ -341,15 +327,13 @@ export class QueryComplexityAnalyzer {
   /**
    * Get root type for operation
    */
-  private getRootType(
-    operation: 'query' | 'mutation' | 'subscription'
-  ): GraphQLObjectType | null {
+  private getRootType(operation: "query" | "mutation" | "subscription"): GraphQLObjectType | null {
     switch (operation) {
-      case 'query':
+      case "query":
         return this.schema.getQueryType() || null;
-      case 'mutation':
+      case "mutation":
         return this.schema.getMutationType() || null;
-      case 'subscription':
+      case "subscription":
         return this.schema.getSubscriptionType() || null;
       default:
         return null;
@@ -360,16 +344,11 @@ export class QueryComplexityAnalyzer {
 /**
  * Create a validation rule for query complexity
  */
-export function createComplexityLimitRule(
-  config: Partial<ComplexityConfig> = {}
-) {
+export function createComplexityLimitRule(config: Partial<ComplexityConfig> = {}) {
   return function ComplexityLimit(context: ValidationContext) {
     return {
       Document(node: DocumentNode) {
-        const analyzer = new QueryComplexityAnalyzer(
-          context.getSchema(),
-          config
-        );
+        const analyzer = new QueryComplexityAnalyzer(context.getSchema(), config);
         const analysis = analyzer.analyze(node);
 
         if (analysis.violatesLimit && config.throwOnLimit !== false) {
@@ -377,7 +356,7 @@ export function createComplexityLimitRule(
             context.reportError(
               new GraphQLError(error, {
                 extensions: {
-                  code: 'COMPLEXITY_LIMIT_EXCEEDED',
+                  code: "COMPLEXITY_LIMIT_EXCEEDED",
                   complexity: analysis.complexity,
                   maxComplexity: config.maxComplexity,
                   depth: analysis.depth,
@@ -409,16 +388,13 @@ export function createDepthLimitRule(maxDepth: number = 10) {
 
           if (currentDepth > maxDepth) {
             context.reportError(
-              new GraphQLError(
-                `Query depth ${currentDepth} exceeds maximum depth ${maxDepth}`,
-                {
-                  extensions: {
-                    code: 'DEPTH_LIMIT_EXCEEDED',
-                    depth: currentDepth,
-                    maxDepth,
-                  },
-                }
-              )
+              new GraphQLError(`Query depth ${currentDepth} exceeds maximum depth ${maxDepth}`, {
+                extensions: {
+                  code: "DEPTH_LIMIT_EXCEEDED",
+                  depth: currentDepth,
+                  maxDepth,
+                },
+              })
             );
           }
         },
@@ -433,9 +409,7 @@ export function createDepthLimitRule(maxDepth: number = 10) {
 /**
  * Helper to create custom complexity for paginated fields
  */
-export function paginatedComplexity(
-  baseComplexity: number = 1
-): ComplexityCalculator {
+export function paginatedComplexity(baseComplexity: number = 1): ComplexityCalculator {
   return (args: Record<string, any>, childComplexity: number) => {
     const limit = args.limit || args.first || 10;
     return (baseComplexity + childComplexity) * Math.min(limit, 100);
@@ -445,9 +419,7 @@ export function paginatedComplexity(
 /**
  * Helper to create custom complexity for search fields
  */
-export function searchComplexity(
-  baseComplexity: number = 10
-): ComplexityCalculator {
+export function searchComplexity(baseComplexity: number = 10): ComplexityCalculator {
   return (args: Record<string, any>, childComplexity: number) => {
     const multiplier = args.fuzzy ? 2 : 1; // Fuzzy search is more expensive
     return (baseComplexity + childComplexity) * multiplier;
@@ -465,18 +437,18 @@ export const defaultComplexityConfig: ComplexityConfig = {
   throwOnLimit: true,
   customComplexity: new Map([
     // Queries
-    ['Query.entities', paginatedComplexity(2)],
-    ['Query.relationships', paginatedComplexity(2)],
-    ['Query.investigations', paginatedComplexity(1)],
-    ['Query.semanticSearch', searchComplexity(10)],
-    ['Query.extractEntities', 20],
-    ['Query.analyzeRelationships', 15],
-    ['Query.generateEntityInsights', 25],
-    ['Query.graphRagAnswer', 50],
+    ["Query.entities", paginatedComplexity(2)],
+    ["Query.relationships", paginatedComplexity(2)],
+    ["Query.investigations", paginatedComplexity(1)],
+    ["Query.semanticSearch", searchComplexity(10)],
+    ["Query.extractEntities", 20],
+    ["Query.analyzeRelationships", 15],
+    ["Query.generateEntityInsights", 25],
+    ["Query.graphRagAnswer", 50],
 
     // Mutations
-    ['Mutation.generateEntitiesFromText', 30],
-    ['Mutation.enhanceEntitiesWithAI', 40],
-    ['Mutation.applyAISuggestions', 20],
+    ["Mutation.generateEntitiesFromText", 30],
+    ["Mutation.enhanceEntitiesWithAI", 40],
+    ["Mutation.applyAISuggestions", 20],
   ]),
 };

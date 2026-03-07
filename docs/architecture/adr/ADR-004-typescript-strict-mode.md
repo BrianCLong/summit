@@ -13,14 +13,15 @@ The Summit codebase has **TypeScript strict mode disabled**:
 // tsconfig.base.json
 {
   "compilerOptions": {
-    "strict": false,        // ❌ Allows unsafe patterns
-    "skipLibCheck": true,   // ❌ Hides library type errors
-    "noImplicitAny": false  // ❌ Allows implicit any
+    "strict": false, // ❌ Allows unsafe patterns
+    "skipLibCheck": true, // ❌ Hides library type errors
+    "noImplicitAny": false // ❌ Allows implicit any
   }
 }
 ```
 
 **Consequences of non-strict mode:**
+
 - Runtime errors that could be caught at compile time
 - Implicit `any` types hiding bugs
 - Null/undefined reference errors in production
@@ -28,6 +29,7 @@ The Summit codebase has **TypeScript strict mode disabled**:
 - Technical debt accumulation
 
 **Current metrics:**
+
 - **366 TODO/FIXME/HACK comments** across codebase
 - **16,760 deprecated/legacy mentions**
 - Unknown number of latent type errors
@@ -42,14 +44,17 @@ The Summit codebase has **TypeScript strict mode disabled**:
 ## Considered Options
 
 ### Option 1: Gradual Migration (Recommended)
+
 Enable strict mode package-by-package over 8-12 weeks.
 
 ### Option 2: Big Bang Migration
+
 Enable strict mode everywhere at once, fix all errors.
 
 **Rejected**: Too risky, would block development for weeks.
 
 ### Option 3: Strict for New Code Only
+
 Enable strict mode only for new packages.
 
 **Rejected**: Doesn't address existing technical debt.
@@ -90,7 +95,9 @@ Enable strict mode only for new packages.
 ### Migration Strategy
 
 #### Phase 1: Foundation Packages (Week 1-2)
+
 Start with packages that have few dependencies:
+
 - `packages/common-types`
 - `packages/config`
 - `packages/testing`
@@ -100,31 +107,38 @@ Start with packages that have few dependencies:
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "strict": true  // Override base config
+    "strict": true // Override base config
   }
 }
 ```
 
 #### Phase 2: Core Packages (Week 3-4)
+
 Enable strict mode in heavily-used packages:
+
 - `packages/sdk-ts`
 - `packages/graph-utils`
 - `packages/auth-utils`
 
 #### Phase 3: Services (Week 5-8)
+
 Migrate services in order of importance:
+
 1. `services/api` (critical path)
 2. `services/auth`
 3. `services/graph`
 4. Remaining services
 
 #### Phase 4: Applications (Week 9-10)
+
 Enable strict mode in apps:
+
 - `apps/web`
 - `apps/gateway`
 - `server/` and `client/`
 
 #### Phase 5: Global Enable (Week 11-12)
+
 - Enable `strict: true` in `tsconfig.base.json`
 - Remove per-package overrides
 - Enable `skipLibCheck: false`
@@ -132,6 +146,7 @@ Enable strict mode in apps:
 ### Common Error Patterns and Fixes
 
 #### Implicit Any
+
 ```typescript
 // Before (error: Parameter 'data' implicitly has 'any' type)
 function process(data) {
@@ -145,6 +160,7 @@ function process(data: { value: string }): string {
 ```
 
 #### Null Checks
+
 ```typescript
 // Before (error: Object is possibly 'undefined')
 const user = getUser();
@@ -160,6 +176,7 @@ console.log(user?.name);
 ```
 
 #### Strict Property Initialization
+
 ```typescript
 // Before (error: Property 'name' has no initializer)
 class Entity {
@@ -168,12 +185,12 @@ class Entity {
 
 // After (option 1: definite assignment)
 class Entity {
-  name!: string;  // Assert it will be assigned
+  name!: string; // Assert it will be assigned
 }
 
 // After (option 2: default value)
 class Entity {
-  name: string = '';
+  name: string = "";
 }
 
 // After (option 3: optional)
@@ -183,6 +200,7 @@ class Entity {
 ```
 
 #### Unknown in Catch
+
 ```typescript
 // Before (error: 'error' is of type 'unknown')
 try {
@@ -204,6 +222,7 @@ try {
 ### Tooling Support
 
 #### ESLint Rules
+
 ```javascript
 // eslint.config.js
 {
@@ -217,6 +236,7 @@ try {
 ```
 
 #### IDE Configuration
+
 ```json
 // .vscode/settings.json
 {
@@ -235,17 +255,18 @@ Track progress with a simple dashboard:
 ```markdown
 ## Strict Mode Migration Progress
 
-| Package | Status | Errors Fixed | Owner |
-|---------|--------|--------------|-------|
-| common-types | ✅ Complete | 12 | @alice |
-| sdk-ts | 🔄 In Progress | 34/50 | @bob |
-| graph-utils | ⏳ Pending | ~80 est. | @carol |
-| services/api | ⏳ Pending | ~200 est. | @dave |
+| Package      | Status         | Errors Fixed | Owner  |
+| ------------ | -------------- | ------------ | ------ |
+| common-types | ✅ Complete    | 12           | @alice |
+| sdk-ts       | 🔄 In Progress | 34/50        | @bob   |
+| graph-utils  | ⏳ Pending     | ~80 est.     | @carol |
+| services/api | ⏳ Pending     | ~200 est.    | @dave  |
 ```
 
 ## Consequences
 
 ### Positive
+
 - Catch bugs at compile time
 - Better IDE autocomplete and refactoring
 - Reduced runtime errors
@@ -253,26 +274,27 @@ Track progress with a simple dashboard:
 - Easier onboarding (types explain code intent)
 
 ### Negative
+
 - Significant initial effort to fix errors
 - Some patterns require workarounds
 - Third-party libraries may have poor types
 
 ### Risks
 
-| Risk | Likelihood | Impact | Mitigation |
-|------|------------|--------|------------|
-| Breaking changes | Medium | Medium | Gradual migration, testing |
-| Developer frustration | Medium | Low | Training, pair programming |
-| Blocked PRs | Low | Medium | Allow temporary `// @ts-expect-error` |
+| Risk                  | Likelihood | Impact | Mitigation                            |
+| --------------------- | ---------- | ------ | ------------------------------------- |
+| Breaking changes      | Medium     | Medium | Gradual migration, testing            |
+| Developer frustration | Medium     | Low    | Training, pair programming            |
+| Blocked PRs           | Low        | Medium | Allow temporary `// @ts-expect-error` |
 
 ## Success Metrics
 
-| Metric | Current | Target |
-|--------|---------|--------|
-| Packages with strict mode | 0% | 100% |
-| `any` type usage | Unknown | <1% of types |
-| Runtime type errors | Unknown | -50% |
-| TypeScript errors in CI | N/A | 0 |
+| Metric                    | Current | Target       |
+| ------------------------- | ------- | ------------ |
+| Packages with strict mode | 0%      | 100%         |
+| `any` type usage          | Unknown | <1% of types |
+| Runtime type errors       | Unknown | -50%         |
+| TypeScript errors in CI   | N/A     | 0            |
 
 ## Related Documents
 

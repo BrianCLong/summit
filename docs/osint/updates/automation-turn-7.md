@@ -8,26 +8,26 @@ IBOM-Verified: true
 # OSINT Platform Developments — **Automation Turn 7**
 
 **Date:** Monday, 2026‑02‑02
-**Mode:** Target Ingestion • *Manus AI Acquisition*
+**Mode:** Target Ingestion • _Manus AI Acquisition_
 
 ---
 
 ## 🧠 **Manus (Acquired by Meta)**
 
-**High‑signal status (today):** ✅ *Acquisition officially confirmed by Manus and Meta.*
+**High‑signal status (today):** ✅ _Acquisition officially confirmed by Manus and Meta._
 
 **What changed**
 
-* **Meta Acquisition:** Manus is now part of Meta (confirmed Dec 29, 2025).
-* **China Ties Severed:** Meta has clarified that it will "fully sever" Manus' China ties to mitigate regulatory and data access risks.
-* **Operational Continuity:** Singapore-based operations and the Manus subscription brand will continue to operate.
-* **Scale Stats:** Manus reported processing over 147 Trillion tokens and powering 80 Million virtual computers.
+- **Meta Acquisition:** Manus is now part of Meta (confirmed Dec 29, 2025).
+- **China Ties Severed:** Meta has clarified that it will "fully sever" Manus' China ties to mitigate regulatory and data access risks.
+- **Operational Continuity:** Singapore-based operations and the Manus subscription brand will continue to operate.
+- **Scale Stats:** Manus reported processing over 147 Trillion tokens and powering 80 Million virtual computers.
 
 **Strategic implication**
 
-* **Agentic Shift:** Meta's acquisition signals a massive bet on "general-purpose AI agents" that go beyond chat into end-to-end task automation.
-* **Regulatory Precedent:** The explicit focus on severing China ties suggests a standardized playbook for acquiring high-risk AI startups.
-* **Execution Layer:** Manus positions itself as an "execution layer," turning AI models into scalable systems for real-world work.
+- **Agentic Shift:** Meta's acquisition signals a massive bet on "general-purpose AI agents" that go beyond chat into end-to-end task automation.
+- **Regulatory Precedent:** The explicit focus on severing China ties suggests a standardized playbook for acquiring high-risk AI startups.
+- **Execution Layer:** Manus positions itself as an "execution layer," turning AI models into scalable systems for real-world work.
 
 ---
 

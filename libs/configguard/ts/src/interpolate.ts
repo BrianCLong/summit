@@ -1,4 +1,4 @@
-import type { Diagnostic, InterpolationPolicy, Position } from './types';
+import type { Diagnostic, InterpolationPolicy, Position } from "./types";
 
 const VAR_PATTERN = /\$\{([A-Z0-9_]+)(?::-(.*?))?\}/g;
 
@@ -11,15 +11,15 @@ export function interpolateConfig<T>(
   value: T,
   pointer: string,
   ctx: InterpolationContext,
-  diags: Diagnostic[],
+  diags: Diagnostic[]
 ): T {
-  if (value === null || typeof value !== 'object') {
+  if (value === null || typeof value !== "object") {
     return interpolateScalar(value, pointer, ctx, diags);
   }
 
   if (Array.isArray(value)) {
     return value.map((item, index) =>
-      interpolateConfig(item, `${pointer}/${index}`, ctx, diags),
+      interpolateConfig(item, `${pointer}/${index}`, ctx, diags)
     ) as unknown as T;
   }
 
@@ -30,7 +30,7 @@ export function interpolateConfig<T>(
       child,
       pointer ? `${pointer}/${escapedKey}` : `/${escapedKey}`,
       ctx,
-      diags,
+      diags
     );
   }
 
@@ -41,9 +41,9 @@ function interpolateScalar<T>(
   value: T,
   pointer: string,
   ctx: InterpolationContext,
-  diags: Diagnostic[],
+  diags: Diagnostic[]
 ): T {
-  if (typeof value !== 'string') {
+  if (typeof value !== "string") {
     return value;
   }
 
@@ -59,11 +59,11 @@ function interpolateScalar<T>(
     if (ctx.policy.denyList?.includes(name)) {
       diags.push(
         createDiagnostic(
-          'error',
+          "error",
           pointer,
           ctx.pointerMap,
-          `Environment variable "${name}" is blocked by policy.`,
-        ),
+          `Environment variable "${name}" is blocked by policy.`
+        )
       );
       continue;
     }
@@ -71,11 +71,11 @@ function interpolateScalar<T>(
     if (ctx.policy.requireAllowList && !ctx.policy.allowList?.includes(name)) {
       diags.push(
         createDiagnostic(
-          'error',
+          "error",
           pointer,
           ctx.pointerMap,
-          `Environment variable "${name}" is not allowed. Add it to the allow list.`,
-        ),
+          `Environment variable "${name}" is not allowed. Add it to the allow list.`
+        )
       );
       continue;
     }
@@ -92,17 +92,15 @@ function interpolateScalar<T>(
     }
 
     if (replacement === undefined) {
-      const severity = ctx.policy.onMissing ?? 'warn';
+      const severity = ctx.policy.onMissing ?? "warn";
       diags.push(
         createDiagnostic(
           severity,
           pointer,
           ctx.pointerMap,
           `Missing environment variable "${name}" for interpolation.`,
-          severity === 'warn'
-            ? 'define the variable or supply a default'
-            : undefined,
-        ),
+          severity === "warn" ? "define the variable or supply a default" : undefined
+        )
       );
       continue;
     }
@@ -122,13 +120,13 @@ function interpolateScalar<T>(
 }
 
 function createDiagnostic(
-  severity: 'error' | 'warning',
+  severity: "error" | "warning",
   pointer: string,
   pointerMap: Record<string, Position>,
   message: string,
-  hint?: string,
+  hint?: string
 ): Diagnostic {
-  const pos = pointerMap[pointer] ?? pointerMap[''] ?? { line: 0, column: 0 };
+  const pos = pointerMap[pointer] ?? pointerMap[""] ?? { line: 0, column: 0 };
   return {
     severity,
     message,
@@ -140,5 +138,5 @@ function createDiagnostic(
 }
 
 export function escapeJsonPointerSegment(segment: string): string {
-  return segment.replace(/~/g, '~0').replace(/\//g, '~1');
+  return segment.replace(/~/g, "~0").replace(/\//g, "~1");
 }

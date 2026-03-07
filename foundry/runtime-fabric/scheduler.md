@@ -4,10 +4,10 @@ The Runtime Fabric is the execution layer of the Autonomous Research Foundry. It
 
 ## 1. Core Principles
 
-*   **Execution Abstraction:** The Council of Solvers should not need to know *where* an experiment will run. They define *what* the experiment is, and the Fabric figures out the *how* and *where*.
-*   **Heterogeneity by Design:** The scheduler is built from the ground up to support a wide range of backends: local CPU/GPU, containerized environments (Docker/Kubernetes), cloud HPC services, and, critically, future physical robotic laboratories via a standardized API.
-*   **Resource Awareness:** The scheduler actively monitors the state, capacity, and cost of all available resources, making intelligent, real-time decisions to optimize for speed, cost, or other user-defined objectives.
-*   **Scalability & Resilience:** The system is designed as a distributed, fault-tolerant service that can manage thousands of concurrent experiments.
+- **Execution Abstraction:** The Council of Solvers should not need to know _where_ an experiment will run. They define _what_ the experiment is, and the Fabric figures out the _how_ and _where_.
+- **Heterogeneity by Design:** The scheduler is built from the ground up to support a wide range of backends: local CPU/GPU, containerized environments (Docker/Kubernetes), cloud HPC services, and, critically, future physical robotic laboratories via a standardized API.
+- **Resource Awareness:** The scheduler actively monitors the state, capacity, and cost of all available resources, making intelligent, real-time decisions to optimize for speed, cost, or other user-defined objectives.
+- **Scalability & Resilience:** The system is designed as a distributed, fault-tolerant service that can manage thousands of concurrent experiments.
 
 ## 2. High-Level Architecture
 

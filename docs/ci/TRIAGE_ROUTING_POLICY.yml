@@ -57,7 +57,7 @@ teams:
       - "@org/security-team"
     labels:
       - "team:security"
-    priority_boost: true  # Boost priority for security issues
+    priority_boost: true # Boost priority for security issues
     rules:
       - type: label
         patterns:

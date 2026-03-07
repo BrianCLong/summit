@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
 interface LintIssue {
   rule: string;
-  severity: 'error' | 'warning';
+  severity: "error" | "warning";
   path: string;
   message: string;
   quickFix?: string;
@@ -15,22 +15,22 @@ interface PolicySimulation {
 }
 
 export default function CopilotAuthoring() {
-  const [spec, setSpec] = useState('');
-  const [yaml, setYaml] = useState('');
+  const [spec, setSpec] = useState("");
+  const [yaml, setYaml] = useState("");
   const [issues, setIssues] = useState<LintIssue[]>([]);
   const [sim, setSim] = useState<PolicySimulation[]>([]);
   async function gen() {
-    const r = await fetch('/pipelines/copilot/suggest', {
-      method: 'POST',
-      headers: { 'content-type': 'text/plain' },
+    const r = await fetch("/pipelines/copilot/suggest", {
+      method: "POST",
+      headers: { "content-type": "text/plain" },
       body: spec,
     });
     setYaml(await r.text());
   }
   async function runLint() {
-    const r = await fetch('/graphql', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
+    const r = await fetch("/graphql", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
       body: JSON.stringify({
         query: `{ lintRunbook(yaml:${JSON.stringify(yaml)}){rule severity path message quickFix}}`,
       }),
@@ -39,9 +39,9 @@ export default function CopilotAuthoring() {
     setIssues(j.data?.lintRunbook || []);
   }
   async function runSim() {
-    const r = await fetch('/graphql', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
+    const r = await fetch("/graphql", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
       body: JSON.stringify({
         query: `{ simulatePolicy(yaml:${JSON.stringify(yaml)}){stepId decision reason}}`,
       }),
@@ -83,10 +83,9 @@ export default function CopilotAuthoring() {
           {issues.map((it: LintIssue, i: number) => (
             <li
               key={i}
-              className={`p-1 ${it.severity === 'error' ? 'text-red-600' : 'text-yellow-700'}`}
+              className={`p-1 ${it.severity === "error" ? "text-red-600" : "text-yellow-700"}`}
             >
-              {it.rule} • {it.path} — {it.message}{' '}
-              {it.quickFix ? `(fix: ${it.quickFix})` : ''}
+              {it.rule} • {it.path} — {it.message} {it.quickFix ? `(fix: ${it.quickFix})` : ""}
             </li>
           ))}
         </ul>

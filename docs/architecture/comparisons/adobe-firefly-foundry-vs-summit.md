@@ -10,18 +10,18 @@ Summit: governed intelligence production across domains (creative, analytic, com
 
 ## Comparison Table
 
-| Dimension | Adobe Firefly Foundry | Summit Intelligence Foundry |
-| --- | --- | --- |
-| Primary scope | Creative generation (media/marketing workflows) | Cross-domain intelligence production (decisions, actions, artifacts) |
-| Core trust claim | IP-safe training and usage posture | Proof-grade provenance and policy-constrained execution |
-| Tenancy model | Enterprise-focused, private model options | Tenant-isolated by default, cross-tenant only via explicit grants |
-| Governance | Product controls and enterprise assurances | Formal PBAC/PBAC+, policy gateway, deny-by-default tools |
-| Provenance | Workflow metadata and content management | Deterministic execution DAG + signed attestations + offline verification |
-| Reproducibility | Best-effort; dependent on model services | Policy-selectable strict vs best-effort with explicit evidence |
-| Tooling | Creative toolchain integrations | Tool mediation for any external capability (web/db/deploy/export) |
-| Outputs | Media assets | Media + decisions + actions + compliance evidence bundles |
-| Regulated readiness | Media-forward, risk-mitigated | Designed for audit/compliance requirements and admissibility |
-| Moat | Adobe ecosystem + creative workflow dominance | Evidence + governance substrate + graph-native lineage across domains |
+| Dimension           | Adobe Firefly Foundry                           | Summit Intelligence Foundry                                              |
+| ------------------- | ----------------------------------------------- | ------------------------------------------------------------------------ |
+| Primary scope       | Creative generation (media/marketing workflows) | Cross-domain intelligence production (decisions, actions, artifacts)     |
+| Core trust claim    | IP-safe training and usage posture              | Proof-grade provenance and policy-constrained execution                  |
+| Tenancy model       | Enterprise-focused, private model options       | Tenant-isolated by default, cross-tenant only via explicit grants        |
+| Governance          | Product controls and enterprise assurances      | Formal PBAC/PBAC+, policy gateway, deny-by-default tools                 |
+| Provenance          | Workflow metadata and content management        | Deterministic execution DAG + signed attestations + offline verification |
+| Reproducibility     | Best-effort; dependent on model services        | Policy-selectable strict vs best-effort with explicit evidence           |
+| Tooling             | Creative toolchain integrations                 | Tool mediation for any external capability (web/db/deploy/export)        |
+| Outputs             | Media assets                                    | Media + decisions + actions + compliance evidence bundles                |
+| Regulated readiness | Media-forward, risk-mitigated                   | Designed for audit/compliance requirements and admissibility             |
+| Moat                | Adobe ecosystem + creative workflow dominance   | Evidence + governance substrate + graph-native lineage across domains    |
 
 ## Why Summit is structurally broader
 

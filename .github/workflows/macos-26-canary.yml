@@ -3,7 +3,7 @@ name: macOS 26 Canary
 on:
   schedule:
     # Run weekly to catch runner image updates
-    - cron: '0 0 * * 0'
+    - cron: "0 0 * * 0"
   workflow_dispatch:
 
 jobs:

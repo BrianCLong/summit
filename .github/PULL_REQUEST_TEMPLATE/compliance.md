@@ -1,9 +1,9 @@
 ---
 name: Compliance Change
 about: Changes to compliance controls, evidence, or audit requirements
-title: '[COMPLIANCE] '
-labels: 'area/compliance, risk/high'
-assignees: ''
+title: "[COMPLIANCE] "
+labels: "area/compliance, risk/high"
+assignees: ""
 ---
 
 ## Summary
@@ -49,6 +49,7 @@ assignees: ''
 - [ ] Documentation updated (`docs/ga/`, `evidence/`)
 
 **Validation Commands**:
+
 ```bash
 ./scripts/generate-evidence-bundle.sh --version test --output /tmp/evidence-test.tar.gz
 ./scripts/verify-control-coverage.ts
@@ -76,7 +77,6 @@ npm run check:compliance
 <!-- If NOT automatable, explain why and document exception -->
 
 **Exception Reason** (if not automatable):
-
 
 ## Audit Implications
 

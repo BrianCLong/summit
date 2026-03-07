@@ -1,11 +1,5 @@
 import React, { useState } from 'react';
-import {
-  View,
-  ScrollView,
-  TouchableOpacity,
-  KeyboardAvoidingView,
-  Platform,
-} from 'react-native';
+import { View, ScrollView, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { useForm, Controller } from 'react-hook-form';
@@ -13,15 +7,14 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Fingerprint, Scan, Shield } from 'lucide-react-native';
 
-import { login, isBiometricsAvailable, authenticateWithBiometrics, isBiometricEnabled } from '@/services/AuthService';
-import { useAppStore } from '@/stores/appStore';
 import {
-  Text,
-  Input,
-  Button,
-  Card,
-  CardContent,
-} from '@/components/ui';
+  login,
+  isBiometricsAvailable,
+  authenticateWithBiometrics,
+  isBiometricEnabled,
+} from '@/services/AuthService';
+import { useAppStore } from '@/stores/appStore';
+import { Text, Input, Button, Card, CardContent } from '@/components/ui';
 import { useToast } from '@/components/ui/Toast';
 
 const loginSchema = z.object({
@@ -165,11 +158,7 @@ export const LoginScreen: React.FC = () => {
                 )}
               />
 
-              <Button
-                onPress={handleSubmit(handleLogin)}
-                loading={isLoading}
-                className="mb-4"
-              >
+              <Button onPress={handleSubmit(handleLogin)} loading={isLoading} className="mb-4">
                 Sign In
               </Button>
 
@@ -201,8 +190,8 @@ export const LoginScreen: React.FC = () => {
             <View className="flex-row items-start">
               <Shield size={16} color="#71717a" />
               <Text size="xs" variant="muted" className="ml-2 flex-1">
-                This is a secure government system. Unauthorized access is prohibited
-                and may be subject to criminal prosecution.
+                This is a secure government system. Unauthorized access is prohibited and may be
+                subject to criminal prosecution.
               </Text>
             </View>
           </View>
@@ -217,10 +206,7 @@ export const LoginScreen: React.FC = () => {
               <View className="flex-1 h-px bg-dark-border" />
             </View>
 
-            <Button
-              variant="secondary"
-              leftIcon={<Scan size={18} color="#fff" />}
-            >
+            <Button variant="secondary" leftIcon={<Scan size={18} color="#fff" />}>
               CAC / PIV Card
             </Button>
           </View>

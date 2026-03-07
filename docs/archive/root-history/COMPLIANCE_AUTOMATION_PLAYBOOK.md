@@ -1,6 +1,7 @@
 # CompanyOS Risk & Compliance Automation Playbook
 
 ## 1. SBOM & Vulnerability Pipeline
+
 - **Generation:**
   - Use Syft for container/image SBOM (SPDX JSON) and CycloneDX for language ecosystems (npm, Python, Rust). Generate per build and embed artifact digest and build run ID.
   - Store SBOMs as OCI artifacts/attestations alongside images (e.g., `registry/org/app:tag-sbom`) and publish to an internal evidence bucket with retention tags.
@@ -15,6 +16,7 @@
   - Run license scanning (e.g., ORT/ScanCode) using CycloneDX license data. Block if non-approved licenses detected or if notice files are missing; warn if attribution text is stale. Auto-generate `THIRD_PARTY_NOTICES` bundle at build time.
 
 ## 2. Attestations & Provenance
+
 - **What we attest:** builder identity, source repo/ref, commit SHA, build command, inputs (SBOM hash, dependency locks, base image digests), test status, policy evaluations, vuln scan summaries, and release approvals.
 - **Creation & signing:** generate in-toto/SLSA provenance at build; sign with keyless Sigstore (Fulcio) or hardware-backed keys stored in KMS. Attach as OCI attestations and store in evidence bucket with tamper-evident hashes.
 - **Verification:**
@@ -22,6 +24,7 @@
   - Unsigned/unverifiable artifacts are quarantined; promotion blocks until rebuilt with valid attestations. Waiver path requires security approval and short-lived exception.
 
 ## 3. Audit Trails & Exports
+
 - **Essential events:**
   - AuthN/Z (login, MFA challenges), admin actions, role/permission changes.
   - CI/CD: build start/end, provenance hash, SBOM/scan results, gate decisions, waivers, deploy approvals, production changes, and rollbacks.
@@ -35,12 +38,14 @@
   - Redaction pipeline for free-text fields; differential access controls for security vs. customer tenants.
 
 ## 4. Compliance as Code Outline
+
 - **Policies (Rego/CUE):** vulnerability budgets, allowed licenses, required attestations, deploy-time signature verification, required approvals per environment, data export safeguards.
 - **Pipeline checks:** SBOM generation/attachment, vuln + license scans, waiver enforcement, dependency pinning, infra drift detection, secret scanning, approval gates. All checks emit machine-readable results linked to digests.
 - **Catalogs:** centrally managed allow/deny lists (licenses, registries, base images) and per-service CVE budgets in version-controlled config.
 - **Evidence automation:** auto-create tickets for failing gates, store artifacts (SBOMs, scan reports, attestations) in an evidence registry with retention policies; auto-produce audit bundles per release.
 
 ## 5. Example Attestation Record (JSON)
+
 ```json
 {
   "_type": "https://slsa.dev/provenance/v1",
@@ -50,23 +55,43 @@
     "buildType": "companyos/ci/v1",
     "builder": { "id": "https://ci.companyos.internal/runs/1234" },
     "invocation": {
-      "configSource": { "uri": "git@github.com:companyos/app.git", "digest": { "sha1": "<commit-sha>" }, "entryPoint": "ci" },
-      "parameters": { "pipeline": "main", "cve_budget": { "critical": 0, "high": 2, "medium": 10 } },
-      "environment": { "base_images": ["ghcr.io/org/base@sha256:<digest>"], "locks": ["package-lock.json@sha256:<digest>"] }
+      "configSource": {
+        "uri": "git@github.com:companyos/app.git",
+        "digest": { "sha1": "<commit-sha>" },
+        "entryPoint": "ci"
+      },
+      "parameters": {
+        "pipeline": "main",
+        "cve_budget": { "critical": 0, "high": 2, "medium": 10 }
+      },
+      "environment": {
+        "base_images": ["ghcr.io/org/base@sha256:<digest>"],
+        "locks": ["package-lock.json@sha256:<digest>"]
+      }
     },
     "materials": [
       { "uri": "git@github.com:companyos/app.git", "digest": { "sha1": "<commit-sha>" } },
       { "uri": "oci://ghcr.io/org/base", "digest": { "sha256": "<digest>" } },
       { "uri": "sbom:registry.example.com/app:1.0.0-sbom", "digest": { "sha256": "<sbom-digest>" } }
     ],
-    "metadata": { "buildStartedOn": "<timestamp>", "buildFinishedOn": "<timestamp>", "completeness": { "parameters": true, "environment": true, "materials": true } },
-    "companyos": { "tests": { "status": "passed" }, "vuln_scan": { "tool": "grype", "critical": 0, "high": 1, "medium": 4 }, "license_scan": { "non_compliant": [] }, "approvals": ["security", "release"] }
+    "metadata": {
+      "buildStartedOn": "<timestamp>",
+      "buildFinishedOn": "<timestamp>",
+      "completeness": { "parameters": true, "environment": true, "materials": true }
+    },
+    "companyos": {
+      "tests": { "status": "passed" },
+      "vuln_scan": { "tool": "grype", "critical": 0, "high": 1, "medium": 4 },
+      "license_scan": { "non_compliant": [] },
+      "approvals": ["security", "release"]
+    }
   },
   "signature": { "type": "sigstore", "rekorEntry": "<rekor-url>" }
 }
 ```
 
 ## 6. Release is Compliance-Ready Checklist
+
 - SBOMs attached to all artifacts; digests recorded in provenance.
 - Vuln scan results within CVE budget or timeboxed waiver; no Critical; Highs mitigated/waived within 72h.
 - License scan clean or approved exceptions with notices generated.

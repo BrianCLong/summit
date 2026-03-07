@@ -1,6 +1,7 @@
 # Mobile App Modernization (iOS/Android, Offline, Performance, Release Safety)
 
 ## Epic 1 — Platform Foundations & Architecture Hardening (ship faster, safer)
+
 1. Define unified mobile architecture patterns (modularization, feature flags, experiment hooks).
 2. Standardize app shell with navigation, session, theming, and design tokens.
 3. Establish shared core libraries (networking, auth, analytics, error handling) with API stability.
@@ -14,6 +15,7 @@
 11. Document architecture decision records and publish reference implementation app.
 
 ## Epic 2 — Release Safety & Continuous Delivery (no more weekend fire drills)
+
 1. Stand up trunk-based dev with protected branches, required reviews, and pre-commit checks.
 2. Implement parallel CI lanes (lint, unit, snapshot, static analysis, security) with flaky test quarantine.
 3. Add hermetic, reproducible builds with deterministic versioning and provenance attestation.
@@ -27,6 +29,7 @@
 11. Publish on-call runbooks for release captains with dry-run drills each quarter.
 
 ## Epic 3 — Performance & Reliability (blazing fast, never flaky)
+
 1. Instrument startup trace (app launch to first interactive) and set budgeted targets by device tier.
 2. Optimize bundle size (code splitting, R8/ProGuard, dead-code elimination, asset compression).
 3. Implement adaptive prefetching and caching with smart invalidation to reduce latency.
@@ -40,6 +43,7 @@
 11. Publish weekly performance health report tied to OKRs and cost (battery/data) budgets.
 
 ## Epic 4 — Offline & Resilience (works anywhere)
+
 1. Define offline data model (what syncs, conflict strategy, payload diffs vs full) per feature.
 2. Implement reliable local datastore (SQLite/Room/Core Data) with migrations and integrity checks.
 3. Add background sync engine with retries, exponential backoff, and resume-after-fail logic.
@@ -53,6 +57,7 @@
 11. Document offline readiness checklist for every new feature gate.
 
 ## Epic 5 — Security, Privacy & Compliance (trust by design)
+
 1. Enforce secure network stack (TLS pinning, HSTS, cert rotation) and mTLS where needed.
 2. Add sensitive-data minimization, PII tagging, and redaction across logs, analytics, and caches.
 3. Implement robust authN/Z flows (OIDC/OAuth2, biometrics, device binding) with session SLOs.
@@ -66,6 +71,7 @@
 11. Complete compliance matrix (GDPR/CCPA, PCI where applicable) with yearly pen tests.
 
 ## Epic 6 — Developer Experience & Productivity (velocity without drift)
+
 1. Standardize project templates (KMP/Swift/Compose) with sane defaults and guardrails.
 2. Provide fast local dev loops (hot reload, component playgrounds, storybook) and fixture data.
 3. Add module-level ownership, CODEOWNERS, and RFC template for architectural changes.
@@ -79,6 +85,7 @@
 11. Run quarterly developer satisfaction surveys and publish improvement backlog.
 
 ## Epic 7 — UX Quality & Accessibility (delight every user)
+
 1. Establish platform-native UX guidelines and parity checklists across iOS/Android.
 2. Enforce accessibility standards (WCAG 2.2 AA) with automated audits and manual sweeps.
 3. Implement haptics, gestures, and motion standards with user preferences and reductions.
@@ -92,6 +99,7 @@
 11. Publish UX governance with copy guidelines, glossary, and brand tone references.
 
 ## Epic 8 — Analytics, Experimentation & Insights (decisions with evidence)
+
 1. Instrument canonical event taxonomy with intent-focused naming and required fields.
 2. Add client-side quality gates (schema validation, sampling, rate limiting) before emit.
 3. Implement exposure logging for experiments with guardrails against overlapping tests.
@@ -105,6 +113,7 @@
 11. Publish mobile analytics playbook and glossary to avoid metric drift.
 
 ## Epic 9 — Observability, Operations & Supportability (operate like SRE)
+
 1. Define mobile SLOs (crash-free sessions, ANR, cold start) and error budget policies.
 2. Integrate real-time alerting with routing to feature owners and on-call rotations.
 3. Build release-over-release health dashboards with drilldowns by device/OS/version.

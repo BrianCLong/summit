@@ -1,4 +1,4 @@
-import { CRITIC_PROMPT, REFINER_PROMPT } from './prompts.js';
+import { CRITIC_PROMPT, REFINER_PROMPT } from "./prompts.js";
 
 export interface ValidationResult {
   refined: string;
@@ -42,13 +42,14 @@ export class DebateValidator {
         refined: draft,
         critiqueRaw,
         parsedCritique,
-        improved: false
+        improved: false,
       };
     }
 
-    const refinerInput = REFINER_PROMPT
-      .replace('{{draft}}', draft)
-      .replace('{{critique}}', critiqueRaw);
+    const refinerInput = REFINER_PROMPT.replace("{{draft}}", draft).replace(
+      "{{critique}}",
+      critiqueRaw
+    );
 
     const refined = await this.runner.run(refinerInput);
 
@@ -56,7 +57,7 @@ export class DebateValidator {
       refined,
       critiqueRaw,
       parsedCritique,
-      improved: true
+      improved: true,
     };
   }
 }

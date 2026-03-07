@@ -111,7 +111,7 @@ export const getFCMToken = async (): Promise<string | null> => {
   }
 };
 
-export const onTokenRefresh = (callback: (token: string) => void): () => void => {
+export const onTokenRefresh = (callback: (token: string) => void): (() => void) => {
   return messaging().onTokenRefresh(callback);
 };
 
@@ -170,9 +170,7 @@ const handleRemoteMessage = async (
   });
 };
 
-const handleNotificationOpen = (
-  remoteMessage: FirebaseMessagingTypes.RemoteMessage,
-): void => {
+const handleNotificationOpen = (remoteMessage: FirebaseMessagingTypes.RemoteMessage): void => {
   const { data } = remoteMessage;
   if (data?.alertId) {
     // Navigate to alert details

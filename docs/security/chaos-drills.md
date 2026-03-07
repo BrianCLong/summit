@@ -209,9 +209,9 @@ Bearer not-a-valid-jwt-token
 
 ```javascript
 const expiredToken = jwt.sign(
-  { sub: 'user123', exp: Math.floor(Date.now() / 1000) - 3600 },
-  'test-secret',
-  { algorithm: 'HS256' },
+  { sub: "user123", exp: Math.floor(Date.now() / 1000) - 3600 },
+  "test-secret",
+  { algorithm: "HS256" }
 );
 ```
 
@@ -219,9 +219,9 @@ const expiredToken = jwt.sign(
 
 ```javascript
 const wrongAlgToken = jwt.sign(
-  { sub: 'user123' },
-  'test-secret',
-  { algorithm: 'HS256' }, // API expects RS256
+  { sub: "user123" },
+  "test-secret",
+  { algorithm: "HS256" } // API expects RS256
 );
 ```
 

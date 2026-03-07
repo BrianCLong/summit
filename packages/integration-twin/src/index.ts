@@ -1,2 +1,2 @@
-export * from './IntegrationTwin';
-export * from './DiffGenerator';
+export * from "./IntegrationTwin";
+export * from "./DiffGenerator";

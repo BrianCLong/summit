@@ -10,21 +10,21 @@
 
 ### Severity Levels
 
-| Level | Description | Response Time | Example |
-|-------|-------------|---------------|---------|
-| **SEV1** | Complete outage | Immediate | Platform down |
-| **SEV2** | Major degradation | 15 min | Core feature broken |
-| **SEV3** | Minor issue | 1 hour | Non-critical bug |
-| **SEV4** | Cosmetic | Next day | UI glitch |
+| Level    | Description       | Response Time | Example             |
+| -------- | ----------------- | ------------- | ------------------- |
+| **SEV1** | Complete outage   | Immediate     | Platform down       |
+| **SEV2** | Major degradation | 15 min        | Core feature broken |
+| **SEV3** | Minor issue       | 1 hour        | Non-critical bug    |
+| **SEV4** | Cosmetic          | Next day      | UI glitch           |
 
 ### Emergency Contacts
 
-| Role | Contact | Escalation |
-|------|---------|------------|
-| On-Call | PagerDuty | Auto-page |
-| SRE Lead | #sre-oncall | 15 min |
-| Eng Manager | #engineering | 30 min |
-| VP Engineering | Direct | SEV1 only |
+| Role           | Contact      | Escalation |
+| -------------- | ------------ | ---------- |
+| On-Call        | PagerDuty    | Auto-page  |
+| SRE Lead       | #sre-oncall  | 15 min     |
+| Eng Manager    | #engineering | 30 min     |
+| VP Engineering | Direct       | SEV1 only  |
 
 ---
 
@@ -56,6 +56,7 @@ curl -sf https://api.intelgraph.ai/health | jq .
 ### Step 1.2: Assess Impact
 
 **Questions to answer:**
+
 1. What percentage of users are affected?
 2. Is data integrity at risk?
 3. Are SLOs being violated?
@@ -63,12 +64,12 @@ curl -sf https://api.intelgraph.ai/health | jq .
 
 ### Step 1.3: Assign Severity
 
-| Criteria | SEV1 | SEV2 | SEV3 |
-|----------|------|------|------|
-| User impact | >50% | 10-50% | <10% |
-| Data loss risk | Yes | Possible | No |
-| Revenue impact | High | Medium | Low |
-| Workaround | None | Difficult | Available |
+| Criteria       | SEV1 | SEV2      | SEV3      |
+| -------------- | ---- | --------- | --------- |
+| User impact    | >50% | 10-50%    | <10%      |
+| Data loss risk | Yes  | Possible  | No        |
+| Revenue impact | High | Medium    | Low       |
+| Workaround     | None | Difficult | Available |
 
 ### Step 1.4: Open Incident Channel
 
@@ -83,16 +84,17 @@ Zoom: https://zoom.us/j/incident-room
 
 ### 2.1: Establish Roles
 
-| Role | Responsibility |
-|------|----------------|
+| Role                        | Responsibility                        |
+| --------------------------- | ------------------------------------- |
 | **Incident Commander (IC)** | Coordinates response, makes decisions |
-| **Technical Lead** | Diagnoses and implements fixes |
-| **Communications** | Updates stakeholders |
-| **Scribe** | Documents timeline |
+| **Technical Lead**          | Diagnoses and implements fixes        |
+| **Communications**          | Updates stakeholders                  |
+| **Scribe**                  | Documents timeline                    |
 
 ### 2.2: Initial Response Actions
 
 #### For API Issues
+
 ```bash
 # Check API pods
 kubectl get pods -l app=intelgraph-api -n intelgraph
@@ -106,6 +108,7 @@ kubectl rollout undo deployment/intelgraph-api
 ```
 
 #### For Database Issues
+
 ```bash
 # PostgreSQL
 kubectl exec -it postgresql-0 -n intelgraph-db -- \
@@ -120,6 +123,7 @@ kubectl exec -it redis-0 -n intelgraph-db -- redis-cli info clients
 ```
 
 #### For Infrastructure Issues
+
 ```bash
 # Node status
 kubectl get nodes -o wide
@@ -133,6 +137,7 @@ kubectl top pods --all-namespaces --sort-by=cpu | head -20
 ### 2.3: Communication Templates
 
 **Initial Status Update (within 5 min of SEV1/2)**
+
 ```
 INCIDENT: [Brief description]
 Status: Investigating
@@ -144,6 +149,7 @@ IC: [Name]
 ```
 
 **Progress Update (every 15-30 min)**
+
 ```
 INCIDENT UPDATE: [Brief description]
 Status: [Investigating/Mitigating/Monitoring]
@@ -160,6 +166,7 @@ Next update: [Time]
 ### 3.1: Implement Fix
 
 **Rollback Checklist:**
+
 - [ ] Identify last known good state
 - [ ] Notify team of rollback
 - [ ] Execute rollback
@@ -167,6 +174,7 @@ Next update: [Time]
 - [ ] Update status page
 
 **Hotfix Checklist:**
+
 - [ ] Create fix branch
 - [ ] Test fix locally
 - [ ] Deploy to staging
@@ -190,6 +198,7 @@ curl -s http://prometheus:9090/api/v1/query \
 ### 3.3: Close Incident
 
 **Resolution Message:**
+
 ```
 INCIDENT RESOLVED: [Brief description]
 Duration: [X hours Y minutes]
@@ -215,42 +224,50 @@ Follow-up: Postmortem scheduled for [date]
 # Postmortem: [Incident Title]
 
 ## Summary
+
 - **Date**: YYYY-MM-DD
 - **Duration**: X hours Y minutes
 - **Severity**: SEV[X]
 - **Impact**: [User impact summary]
 
 ## Timeline
-| Time (UTC) | Event |
-|------------|-------|
-| HH:MM | Alert fired |
-| HH:MM | Incident declared |
-| HH:MM | Root cause identified |
-| HH:MM | Fix deployed |
-| HH:MM | Incident resolved |
+
+| Time (UTC) | Event                 |
+| ---------- | --------------------- |
+| HH:MM      | Alert fired           |
+| HH:MM      | Incident declared     |
+| HH:MM      | Root cause identified |
+| HH:MM      | Fix deployed          |
+| HH:MM      | Incident resolved     |
 
 ## Root Cause
+
 [Detailed explanation]
 
 ## Impact
+
 - Users affected: X
 - Requests failed: X
 - Data loss: [None/Details]
 
 ## What Went Well
+
 1. [Item]
 2. [Item]
 
 ## What Could Be Improved
+
 1. [Item]
 2. [Item]
 
 ## Action Items
-| Item | Owner | Due Date | Status |
-|------|-------|----------|--------|
-| [Action] | [Name] | [Date] | [Open/Done] |
+
+| Item     | Owner  | Due Date | Status      |
+| -------- | ------ | -------- | ----------- |
+| [Action] | [Name] | [Date]   | [Open/Done] |
 
 ## Lessons Learned
+
 [Key takeaways]
 ```
 
@@ -382,12 +399,12 @@ redis_keyspace_hits_total / (redis_keyspace_hits_total + redis_keyspace_misses_t
 
 ### SLO Targets
 
-| Service | SLI | Target | Burn Rate Alert |
-|---------|-----|--------|-----------------|
-| API | Availability | 99.9% | 14.4x = SEV2, 6x = SEV3 |
-| API | Latency P95 | <500ms | >1s = SEV3 |
-| Database | Availability | 99.95% | Any downtime = SEV2 |
-| Database | Query latency P95 | <100ms | >500ms = SEV3 |
+| Service  | SLI               | Target | Burn Rate Alert         |
+| -------- | ----------------- | ------ | ----------------------- |
+| API      | Availability      | 99.9%  | 14.4x = SEV2, 6x = SEV3 |
+| API      | Latency P95       | <500ms | >1s = SEV3              |
+| Database | Availability      | 99.95% | Any downtime = SEV2     |
+| Database | Query latency P95 | <100ms | >500ms = SEV3           |
 
 ---
 

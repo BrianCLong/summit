@@ -17,7 +17,7 @@ Comprehensive guide for integrating the autotriage engine with your workflows, t
 ### As a Node.js Module
 
 ```typescript
-import { parseBacklog, generateTriageReport } from '@intelgraph/autotriage';
+import { parseBacklog, generateTriageReport } from "@intelgraph/autotriage";
 
 // Use in your existing code
 const items = await parseBacklog();
@@ -64,7 +64,7 @@ name: Auto Triage
 on:
   schedule:
     # Run every Monday at 9 AM UTC
-    - cron: '0 9 * * 1'
+    - cron: "0 9 * * 1"
   workflow_dispatch: # Allow manual trigger
 
 jobs:
@@ -76,7 +76,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18'
+          node-version: "18"
 
       - name: Install dependencies
         run: |
@@ -197,36 +197,36 @@ pipeline {
 ### Post Results to Slack
 
 ```typescript
-import { parseBacklog } from './assistant/autotriage/data/backlog-parser.js';
+import { parseBacklog } from "./assistant/autotriage/data/backlog-parser.js";
 
 async function postToSlack() {
   const items = await parseBacklog();
-  const blockers = items.filter(i => i.impact === 'blocker');
+  const blockers = items.filter((i) => i.impact === "blocker");
 
   const payload = {
     text: `🚨 ${blockers.length} blocker issues need attention`,
     blocks: [
       {
-        type: 'section',
+        type: "section",
         text: {
-          type: 'mrkdwn',
-          text: `*Triage Alert*\n${blockers.length} blocker issues detected:`
-        }
+          type: "mrkdwn",
+          text: `*Triage Alert*\n${blockers.length} blocker issues detected:`,
+        },
       },
-      ...blockers.slice(0, 5).map(item => ({
-        type: 'section',
+      ...blockers.slice(0, 5).map((item) => ({
+        type: "section",
         text: {
-          type: 'mrkdwn',
-          text: `• *${item.title}*\n  _${item.area.join(', ')}_`
-        }
-      }))
-    ]
+          type: "mrkdwn",
+          text: `• *${item.title}*\n  _${item.area.join(", ")}_`,
+        },
+      })),
+    ],
   };
 
   await fetch(process.env.SLACK_WEBHOOK_URL!, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload)
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
   });
 }
 ```
@@ -235,15 +235,15 @@ async function postToSlack() {
 
 ```typescript
 // Slack bot handler
-app.command('/triage', async ({ command, ack, respond }) => {
+app.command("/triage", async ({ command, ack, respond }) => {
   await ack();
 
   const items = await parseBacklog();
   const report = generateTriageReport(items, [], 10, 10);
 
   await respond({
-    response_type: 'in_channel',
-    text: `Triage Summary: ${report.summary.totalItems} items, ${report.topIssues.length} high priority`
+    response_type: "in_channel",
+    text: `Triage Summary: ${report.summary.totalItems} items, ${report.topIssues.length} high priority`,
   });
 });
 ```
@@ -254,32 +254,32 @@ app.command('/triage', async ({ command, ack, respond }) => {
 
 ```typescript
 // .github/scripts/auto-label.ts
-import { Octokit } from '@octokit/rest';
-import { fetchGitHubIssues } from './assistant/autotriage/data/github-fetcher.js';
-import { generateBatchLabels } from './assistant/autotriage/automation/label-generator.js';
+import { Octokit } from "@octokit/rest";
+import { fetchGitHubIssues } from "./assistant/autotriage/data/github-fetcher.js";
+import { generateBatchLabels } from "./assistant/autotriage/automation/label-generator.js";
 
 async function autoLabel() {
   const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
   const items = await fetchGitHubIssues({
-    owner: 'BrianCLong',
-    repo: 'summit',
+    owner: "BrianCLong",
+    repo: "summit",
     token: process.env.GITHUB_TOKEN,
-    state: 'open',
-    maxResults: 100
+    state: "open",
+    maxResults: 100,
   });
 
   const labelSuggestions = generateBatchLabels(items);
 
   for (const suggestion of labelSuggestions) {
     if (suggestion.confidence > 0.7) {
-      const issueNumber = parseInt(suggestion.issueId.replace('github-', ''));
+      const issueNumber = parseInt(suggestion.issueId.replace("github-", ""));
 
       try {
         await octokit.issues.addLabels({
-          owner: 'BrianCLong',
-          repo: 'summit',
+          owner: "BrianCLong",
+          repo: "summit",
           issue_number: issueNumber,
-          labels: suggestion.labels
+          labels: suggestion.labels,
         });
 
         console.log(`✓ Labeled #${issueNumber}`);
@@ -300,7 +300,7 @@ name: Weekly Triage Issue
 
 on:
   schedule:
-    - cron: '0 9 * * 1'
+    - cron: "0 9 * * 1"
 
 jobs:
   create-issue:
@@ -325,12 +325,12 @@ jobs:
 ### Express.js API Endpoint
 
 ```typescript
-import express from 'express';
-import { parseBacklog, generateTriageReport } from '@intelgraph/autotriage';
+import express from "express";
+import { parseBacklog, generateTriageReport } from "@intelgraph/autotriage";
 
 const app = express();
 
-app.get('/api/triage', async (req, res) => {
+app.get("/api/triage", async (req, res) => {
   try {
     const items = await parseBacklog();
     const clusters = clusterIssues(items, defaultConfig.clustering);
@@ -338,12 +338,12 @@ app.get('/api/triage', async (req, res) => {
 
     res.json({
       success: true,
-      data: report
+      data: report,
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message
+      error: error.message,
     });
   }
 });
@@ -354,8 +354,8 @@ app.listen(3000);
 ### GraphQL API
 
 ```typescript
-import { ApolloServer, gql } from 'apollo-server';
-import { parseBacklog } from '@intelgraph/autotriage';
+import { ApolloServer, gql } from "apollo-server";
+import { parseBacklog } from "@intelgraph/autotriage";
 
 const typeDefs = gql`
   type TriageItem {
@@ -375,9 +375,9 @@ const resolvers = {
   Query: {
     triageItems: async (_: any, { impact }: any) => {
       const items = await parseBacklog();
-      return impact ? items.filter(i => i.impact === impact) : items;
-    }
-  }
+      return impact ? items.filter((i) => i.impact === impact) : items;
+    },
+  },
 };
 
 const server = new ApolloServer({ typeDefs, resolvers });
@@ -389,16 +389,16 @@ server.listen().then(({ url }) => console.log(`Server ready at ${url}`));
 ### Prometheus Metrics
 
 ```typescript
-import { TriageMonitor } from './assistant/autotriage/monitoring.js';
-import express from 'express';
+import { TriageMonitor } from "./assistant/autotriage/monitoring.js";
+import express from "express";
 
 const app = express();
 const monitor = TriageMonitor.getInstance();
 
 // Metrics endpoint
-app.get('/metrics', (req, res) => {
-  res.set('Content-Type', 'text/plain');
-  res.send(monitor.export('prometheus'));
+app.get("/metrics", (req, res) => {
+  res.set("Content-Type", "text/plain");
+  res.send(monitor.export("prometheus"));
 });
 
 app.listen(9090);
@@ -407,24 +407,24 @@ app.listen(9090);
 ### DataDog Integration
 
 ```typescript
-import { StatsD } from 'node-dogstatsd';
-import { TriageMonitor } from './assistant/autotriage/monitoring.js';
+import { StatsD } from "node-dogstatsd";
+import { TriageMonitor } from "./assistant/autotriage/monitoring.js";
 
 const statsd = new StatsD();
 
 class DataDogMonitor extends TriageMonitor {
   protected emitMetrics(metrics: TriageMetrics): void {
-    statsd.gauge('autotriage.duration', metrics.duration || 0, {
-      operation: metrics.operation
+    statsd.gauge("autotriage.duration", metrics.duration || 0, {
+      operation: metrics.operation,
     });
-    statsd.increment('autotriage.items_processed', metrics.itemsProcessed);
-    statsd.increment('autotriage.errors', metrics.errorsEncountered);
+    statsd.increment("autotriage.items_processed", metrics.itemsProcessed);
+    statsd.increment("autotriage.errors", metrics.errorsEncountered);
   }
 
   protected emitError(error: ErrorEvent): void {
-    statsd.increment('autotriage.error', 1, {
+    statsd.increment("autotriage.error", 1, {
       operation: error.operation,
-      severity: error.severity
+      severity: error.severity,
     });
   }
 }
@@ -433,22 +433,22 @@ class DataDogMonitor extends TriageMonitor {
 ### Sentry Integration
 
 ```typescript
-import * as Sentry from '@sentry/node';
-import { TriageMonitor } from './assistant/autotriage/monitoring.js';
+import * as Sentry from "@sentry/node";
+import { TriageMonitor } from "./assistant/autotriage/monitoring.js";
 
 Sentry.init({ dsn: process.env.SENTRY_DSN });
 
 class SentryMonitor extends TriageMonitor {
   protected emitError(error: ErrorEvent): void {
     Sentry.captureException(new Error(error.error), {
-      level: error.severity === 'critical' ? 'fatal' : 'error',
+      level: error.severity === "critical" ? "fatal" : "error",
       tags: {
         operation: error.operation,
-        recoverable: error.recoverable.toString()
+        recoverable: error.recoverable.toString(),
       },
       extra: {
-        context: error.context
-      }
+        context: error.context,
+      },
     });
   }
 }
@@ -459,32 +459,32 @@ class SentryMonitor extends TriageMonitor {
 ### Jira Integration
 
 ```typescript
-import JiraApi from 'jira-client';
-import { parseBacklog } from '@intelgraph/autotriage';
+import JiraApi from "jira-client";
+import { parseBacklog } from "@intelgraph/autotriage";
 
 const jira = new JiraApi({
-  protocol: 'https',
-  host: 'your-domain.atlassian.net',
+  protocol: "https",
+  host: "your-domain.atlassian.net",
   username: process.env.JIRA_EMAIL,
   password: process.env.JIRA_API_TOKEN,
-  apiVersion: '2',
-  strictSSL: true
+  apiVersion: "2",
+  strictSSL: true,
 });
 
 async function syncToJira() {
   const items = await parseBacklog();
-  const blockers = items.filter(i => i.impact === 'blocker');
+  const blockers = items.filter((i) => i.impact === "blocker");
 
   for (const item of blockers) {
     await jira.addNewIssue({
       fields: {
-        project: { key: 'PROJ' },
+        project: { key: "PROJ" },
         summary: item.title,
         description: item.description,
-        issuetype: { name: 'Bug' },
-        priority: { name: 'Highest' },
-        labels: item.area
-      }
+        issuetype: { name: "Bug" },
+        priority: { name: "Highest" },
+        labels: item.area,
+      },
     });
   }
 }
@@ -493,8 +493,8 @@ async function syncToJira() {
 ### Linear Integration
 
 ```typescript
-import { LinearClient } from '@linear/sdk';
-import { parseBacklog } from '@intelgraph/autotriage';
+import { LinearClient } from "@linear/sdk";
+import { parseBacklog } from "@intelgraph/autotriage";
 
 const linear = new LinearClient({ apiKey: process.env.LINEAR_API_KEY });
 
@@ -503,11 +503,11 @@ async function syncToLinear() {
 
   for (const item of items) {
     await linear.createIssue({
-      teamId: 'team-id',
+      teamId: "team-id",
       title: item.title,
       description: item.description,
       priority: mapImpactToPriority(item.impact),
-      labelIds: await getOrCreateLabels(item.area)
+      labelIds: await getOrCreateLabels(item.area),
     });
   }
 }
@@ -516,8 +516,8 @@ async function syncToLinear() {
 ### Email Digest
 
 ```typescript
-import nodemailer from 'nodemailer';
-import { parseBacklog, generateTriageReport, formatReportAsMarkdown } from '@intelgraph/autotriage';
+import nodemailer from "nodemailer";
+import { parseBacklog, generateTriageReport, formatReportAsMarkdown } from "@intelgraph/autotriage";
 
 async function sendEmailDigest() {
   const items = await parseBacklog();
@@ -525,19 +525,19 @@ async function sendEmailDigest() {
   const markdown = formatReportAsMarkdown(report);
 
   const transporter = nodemailer.createTransport({
-    service: 'gmail',
+    service: "gmail",
     auth: {
       user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS
-    }
+      pass: process.env.EMAIL_PASS,
+    },
   });
 
   await transporter.sendMail({
-    from: 'autotriage@summit.dev',
-    to: 'team@summit.dev',
-    subject: 'Weekly Triage Report',
+    from: "autotriage@summit.dev",
+    to: "team@summit.dev",
+    subject: "Weekly Triage Report",
     text: markdown,
-    html: markdownToHtml(markdown)
+    html: markdownToHtml(markdown),
   });
 }
 ```
@@ -547,7 +547,7 @@ async function sendEmailDigest() {
 ### Error Handling
 
 ```typescript
-import { TriageMonitor } from './assistant/autotriage/monitoring.js';
+import { TriageMonitor } from "./assistant/autotriage/monitoring.js";
 
 const monitor = TriageMonitor.getInstance();
 
@@ -555,7 +555,7 @@ try {
   const items = await parseBacklog();
   // Process items...
 } catch (error) {
-  monitor.recordError('parseBacklog', error, undefined, 'high', false);
+  monitor.recordError("parseBacklog", error, undefined, "high", false);
   // Fallback behavior...
 }
 ```
@@ -563,32 +563,28 @@ try {
 ### Rate Limiting
 
 ```typescript
-import pLimit from 'p-limit';
+import pLimit from "p-limit";
 
 const limit = pLimit(5); // Max 5 concurrent operations
 
-const items = await Promise.all(
-  sources.map(source =>
-    limit(() => fetchFromSource(source))
-  )
-);
+const items = await Promise.all(sources.map((source) => limit(() => fetchFromSource(source))));
 ```
 
 ### Caching
 
 ```typescript
-import NodeCache from 'node-cache';
+import NodeCache from "node-cache";
 
 const cache = new NodeCache({ stdTTL: 3600 }); // 1 hour TTL
 
 async function getCachedTriageReport() {
-  const cached = cache.get('triage-report');
+  const cached = cache.get("triage-report");
   if (cached) return cached;
 
   const items = await parseBacklog();
   const report = generateTriageReport(items, [], 10, 10);
 
-  cache.set('triage-report', report);
+  cache.set("triage-report", report);
   return report;
 }
 ```
@@ -615,7 +611,7 @@ DEBUG=autotriage:* ./scripts/autotriage.sh triage
 // Check if autotriage is working
 async function healthCheck() {
   try {
-    const items = await parseBacklog('./examples/sample-backlog.json');
+    const items = await parseBacklog("./examples/sample-backlog.json");
     return items.length > 0;
   } catch (error) {
     return false;
@@ -626,6 +622,7 @@ async function healthCheck() {
 ## Support
 
 For integration help:
+
 - Check the [README](./README.md) for basic usage
 - Review [examples](./examples/) for code samples
 - Open an issue on GitHub for bugs

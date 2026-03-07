@@ -65,10 +65,7 @@ The `plugin.json` file defines your plugin's metadata and requirements:
   "category": "analyzer",
   "main": "./dist/index.js",
   "engineVersion": ">=1.0.0",
-  "permissions": [
-    "read:data",
-    "write:data"
-  ],
+  "permissions": ["read:data", "write:data"],
   "resources": {
     "maxMemoryMB": 256,
     "maxCpuPercent": 50,
@@ -81,34 +78,31 @@ The `plugin.json` file defines your plugin's metadata and requirements:
 ### Basic Plugin Structure
 
 ```typescript
-import { createPlugin, PluginPermission } from '@intelgraph/plugin-sdk';
+import { createPlugin, PluginPermission } from "@intelgraph/plugin-sdk";
 
 export default createPlugin()
   .withMetadata({
-    id: 'my-awesome-plugin',
-    name: 'My Awesome Plugin',
-    version: '1.0.0',
-    description: 'An awesome plugin',
-    author: { name: 'Your Name' },
-    license: 'MIT',
-    category: 'analyzer',
+    id: "my-awesome-plugin",
+    name: "My Awesome Plugin",
+    version: "1.0.0",
+    description: "An awesome plugin",
+    author: { name: "Your Name" },
+    license: "MIT",
+    category: "analyzer",
   })
-  .requiresEngine('>=1.0.0')
-  .withMain('./dist/index.js')
-  .requestPermissions(
-    PluginPermission.READ_DATA,
-    PluginPermission.WRITE_DATA
-  )
+  .requiresEngine(">=1.0.0")
+  .withMain("./dist/index.js")
+  .requestPermissions(PluginPermission.READ_DATA, PluginPermission.WRITE_DATA)
   .onInitialize(async (context) => {
-    context.logger.info('Plugin initializing...');
+    context.logger.info("Plugin initializing...");
     // Load configuration
     // Initialize connections
   })
   .onStart(async () => {
-    console.log('Plugin started!');
+    console.log("Plugin started!");
   })
   .onStop(async () => {
-    console.log('Plugin stopping...');
+    console.log("Plugin stopping...");
   })
   .build();
 ```
@@ -134,26 +128,26 @@ interface PluginContext {
 #### Logger
 
 ```typescript
-context.logger.debug('Debug message', { metadata });
-context.logger.info('Info message');
-context.logger.warn('Warning message');
-context.logger.error('Error message', error);
+context.logger.debug("Debug message", { metadata });
+context.logger.info("Info message");
+context.logger.warn("Warning message");
+context.logger.error("Error message", error);
 ```
 
 #### Storage
 
 ```typescript
 // Store data
-await context.storage.set('key', { data: 'value' });
+await context.storage.set("key", { data: "value" });
 
 // Retrieve data
-const value = await context.storage.get('key');
+const value = await context.storage.get("key");
 
 // Check existence
-const exists = await context.storage.has('key');
+const exists = await context.storage.has("key");
 
 // Delete data
-await context.storage.delete('key');
+await context.storage.delete("key");
 
 // List keys
 const keys = await context.storage.keys();
@@ -163,9 +157,9 @@ const keys = await context.storage.keys();
 
 ```typescript
 // Make HTTP request
-const response = await context.api.request('/endpoint', {
-  method: 'POST',
-  body: { data: 'value' },
+const response = await context.api.request("/endpoint", {
+  method: "POST",
+  body: { data: "value" },
 });
 
 // GraphQL query
@@ -183,16 +177,16 @@ const data = await context.api.graphql(`
 
 ```typescript
 // Listen to events
-context.events.on('data:updated', async (data) => {
-  console.log('Data updated:', data);
+context.events.on("data:updated", async (data) => {
+  console.log("Data updated:", data);
 });
 
 // Emit events
-await context.events.emit('custom:event', { payload: 'data' });
+await context.events.emit("custom:event", { payload: "data" });
 
 // One-time listener
-context.events.once('init:complete', () => {
-  console.log('Initialization complete');
+context.events.once("init:complete", () => {
+  console.log("Initialization complete");
 });
 ```
 
@@ -201,12 +195,12 @@ context.events.once('init:complete', () => {
 ### Data Source Extension
 
 ```typescript
-import { BaseDataSourceExtension } from '@intelgraph/extension-api';
+import { BaseDataSourceExtension } from "@intelgraph/extension-api";
 
 export class MyDataSource extends BaseDataSourceExtension {
   constructor() {
-    super('my-datasource', {
-      host: 'localhost',
+    super("my-datasource", {
+      host: "localhost",
       port: 5432,
     });
   }
@@ -237,16 +231,11 @@ export class MyDataSource extends BaseDataSourceExtension {
 ### Analyzer Extension
 
 ```typescript
-import { BaseAnalyzerExtension } from '@intelgraph/extension-api';
+import { BaseAnalyzerExtension } from "@intelgraph/extension-api";
 
 export class MyAnalyzer extends BaseAnalyzerExtension {
   constructor() {
-    super(
-      'my-analyzer',
-      'My Analyzer',
-      'Analyzes data for patterns',
-      ['text', 'json']
-    );
+    super("my-analyzer", "My Analyzer", "Analyzes data for patterns", ["text", "json"]);
   }
 
   async execute(input: AnalyzerInput): Promise<AnalyzerResult> {
@@ -254,8 +243,8 @@ export class MyAnalyzer extends BaseAnalyzerExtension {
     return {
       insights: [
         {
-          type: 'pattern',
-          description: 'Found interesting pattern',
+          type: "pattern",
+          description: "Found interesting pattern",
           confidence: 0.95,
         },
       ],
@@ -268,27 +257,22 @@ export class MyAnalyzer extends BaseAnalyzerExtension {
 ### Visualization Extension
 
 ```typescript
-import { BaseVisualizationExtension } from '@intelgraph/extension-api';
+import { BaseVisualizationExtension } from "@intelgraph/extension-api";
 
 export class MyVisualization extends BaseVisualizationExtension {
   constructor() {
-    super(
-      'my-viz',
-      'My Visualization',
-      'Custom chart visualization',
-      './components/MyChart.tsx'
-    );
+    super("my-viz", "My Visualization", "Custom chart visualization", "./components/MyChart.tsx");
   }
 
   async execute(input: VisualizationData): Promise<VisualizationConfig> {
     return {
-      component: 'MyChart',
+      component: "MyChart",
       props: {
         data: input.data,
         options: input.config,
       },
       layout: {
-        width: '100%',
+        width: "100%",
         height: 400,
       },
     };
@@ -334,15 +318,15 @@ Specify resource limits in your manifest:
 ### Unit Testing
 
 ```typescript
-import { testPluginLifecycle, createMockContext } from '@intelgraph/plugin-sdk';
-import myPlugin from '../src/index';
+import { testPluginLifecycle, createMockContext } from "@intelgraph/plugin-sdk";
+import myPlugin from "../src/index";
 
-describe('My Plugin', () => {
-  test('lifecycle', async () => {
+describe("My Plugin", () => {
+  test("lifecycle", async () => {
     await testPluginLifecycle(myPlugin);
   });
 
-  test('initialization', async () => {
+  test("initialization", async () => {
     const context = createMockContext();
     await myPlugin.initialize(context);
     // Assert initialization

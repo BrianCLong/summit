@@ -16,13 +16,13 @@ MAJOR.MINOR.PATCH[-PRERELEASE][+BUILD]
 
 ### Examples
 
-| Version | Description |
-|---------|-------------|
-| `1.0.0` | Initial stable release |
-| `1.0.1` | Patch release with bug fixes |
-| `1.1.0` | Minor release with new features |
-| `2.0.0` | Major release with breaking changes |
-| `1.2.3-rc.1` | Release candidate 1 for version 1.2.3 |
+| Version      | Description                              |
+| ------------ | ---------------------------------------- |
+| `1.0.0`      | Initial stable release                   |
+| `1.0.1`      | Patch release with bug fixes             |
+| `1.1.0`      | Minor release with new features          |
+| `2.0.0`      | Major release with breaking changes      |
+| `1.2.3-rc.1` | Release candidate 1 for version 1.2.3    |
 | `1.2.3-rc.2` | Release candidate 2 (if rc.1 had issues) |
 
 ## Version Bump Rules
@@ -41,6 +41,7 @@ Use /v2/auth instead.
 ```
 
 Triggers:
+
 - Commits with `!` after the type (e.g., `feat!:`, `fix!:`)
 - Commits with `BREAKING CHANGE:` or `BREAKING-CHANGE:` in the body
 
@@ -57,6 +58,7 @@ feat: implement dark mode toggle
 ```
 
 Triggers:
+
 - Commits with type `feat`
 
 ### Patch Version (X.Y.Z)
@@ -72,6 +74,7 @@ fix: correct date formatting in reports
 ```
 
 Triggers:
+
 - Commits with type `fix`
 - Any other commit types (defaults to patch)
 
@@ -79,19 +82,19 @@ Triggers:
 
 ### Standard Types
 
-| Type | Description | Version Bump |
-|------|-------------|--------------|
-| `feat` | New feature | Minor |
-| `fix` | Bug fix | Patch |
-| `perf` | Performance improvement | Patch |
-| `refactor` | Code refactoring | Patch |
-| `docs` | Documentation only | Patch |
-| `style` | Code style (formatting, etc.) | Patch |
-| `test` | Adding or updating tests | Patch |
-| `build` | Build system changes | Patch |
-| `ci` | CI configuration changes | Patch |
-| `chore` | Other changes | Patch |
-| `revert` | Reverting a commit | Patch |
+| Type       | Description                   | Version Bump |
+| ---------- | ----------------------------- | ------------ |
+| `feat`     | New feature                   | Minor        |
+| `fix`      | Bug fix                       | Patch        |
+| `perf`     | Performance improvement       | Patch        |
+| `refactor` | Code refactoring              | Patch        |
+| `docs`     | Documentation only            | Patch        |
+| `style`    | Code style (formatting, etc.) | Patch        |
+| `test`     | Adding or updating tests      | Patch        |
+| `build`    | Build system changes          | Patch        |
+| `ci`       | CI configuration changes      | Patch        |
+| `chore`    | Other changes                 | Patch        |
+| `revert`   | Reverting a commit            | Patch        |
 
 ### Scopes
 
@@ -117,6 +120,7 @@ X.Y.Z-rc.N
 ```
 
 Where:
+
 - `X.Y.Z` is the target version
 - `N` is the RC number (starts at 1)
 
@@ -150,10 +154,10 @@ v1.2.0 final tag created
 
 Pre-release versions may include additional labels:
 
-| Label | Usage |
-|-------|-------|
-| `rc.N` | Release candidate N |
-| `beta.N` | Beta release (rarely used) |
+| Label     | Usage                         |
+| --------- | ----------------------------- |
+| `rc.N`    | Release candidate N           |
+| `beta.N`  | Beta release (rarely used)    |
 | `alpha.N` | Alpha release (internal only) |
 
 ## Hotfix Versions
@@ -238,19 +242,19 @@ Migration steps:
 
 ### Tag Format
 
-| Tag Pattern | Description |
-|-------------|-------------|
-| `vX.Y.Z` | Production release |
-| `vX.Y.Z-rc.N` | Release candidate |
+| Tag Pattern     | Description               |
+| --------------- | ------------------------- |
+| `vX.Y.Z`        | Production release        |
+| `vX.Y.Z-rc.N`   | Release candidate         |
 | `vX.Y.Z-hotfix` | Hotfix marker (temporary) |
 
 ### Branch Format
 
-| Branch Pattern | Description |
-|----------------|-------------|
-| `release/vX.Y.Z-rc.N` | Release branch |
-| `hotfix/vX.Y.Z` | Hotfix branch |
-| `main` | Development branch |
+| Branch Pattern        | Description        |
+| --------------------- | ------------------ |
+| `release/vX.Y.Z-rc.N` | Release branch     |
+| `hotfix/vX.Y.Z`       | Hotfix branch      |
+| `main`                | Development branch |
 
 ## Version in Code
 

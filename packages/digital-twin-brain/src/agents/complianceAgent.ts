@@ -1,4 +1,4 @@
-import { Constraint, ActionProposal } from '../core/types.js';
+import { Constraint, ActionProposal } from "../core/types.js";
 
 export interface ComplianceReport {
   proposalId: string;

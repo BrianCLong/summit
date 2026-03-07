@@ -5,7 +5,10 @@
   "type": "object",
   "required": ["eventType", "eventTime", "run", "job", "producer"],
   "properties": {
-    "eventType": { "type": "string", "enum": ["START", "RUNNING", "COMPLETE", "ABORT", "FAIL", "OTHER"] },
+    "eventType": {
+      "type": "string",
+      "enum": ["START", "RUNNING", "COMPLETE", "ABORT", "FAIL", "OTHER"]
+    },
     "eventTime": { "type": "string", "format": "date-time" },
     "run": {
       "type": "object",

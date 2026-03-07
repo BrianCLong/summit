@@ -23,6 +23,7 @@ IntelGraph Minimal is a thin, refactor-friendly knowledge graph implementation f
 Represents a node in the knowledge graph (person, organization, event, etc.).
 
 **Fields:**
+
 - `id` (int, auto): Primary key
 - `type` (str): Entity type (e.g., "person", "organization", "event")
 - `labels` (str/JSON): Tags for classification (stored as JSON array string)
@@ -30,6 +31,7 @@ Represents a node in the knowledge graph (person, organization, event, etc.).
 - `updated_at` (datetime): Last update timestamp
 
 **Example:**
+
 ```python
 {
   "id": 1,
@@ -45,6 +47,7 @@ Represents a node in the knowledge graph (person, organization, event, etc.).
 Represents an assertion about an entity with provenance.
 
 **Fields:**
+
 - `id` (int, auto): Primary key
 - `entity_id` (int, FK): References `entities.id`
 - `predicate` (str): The claim relationship (e.g., "works_at", "located_in", "affiliated_with")
@@ -54,6 +57,7 @@ Represents an assertion about an entity with provenance.
 - `created_at` (datetime): Creation timestamp
 
 **Policy Labels Structure:**
+
 ```json
 {
   "origin": "public" | "confidential" | "secret" | "top_secret",
@@ -63,6 +67,7 @@ Represents an assertion about an entity with provenance.
 ```
 
 **Example:**
+
 ```python
 {
   "id": 42,
@@ -84,6 +89,7 @@ Represents an assertion about an entity with provenance.
 Represents a structured decision record following the CEO decision template.
 
 **Fields:**
+
 - `id` (int, auto): Primary key
 - `title` (str): Decision title/summary
 - `context` (str): Background and situation (maps to "Context" in CEO template)
@@ -107,6 +113,7 @@ Represents a structured decision record following the CEO decision template.
 | Checks | `checks` | JSON array (combined with risks) |
 
 **Example:**
+
 ```python
 {
   "id": 10,
@@ -138,6 +145,7 @@ Represents a structured decision record following the CEO decision template.
 Represents provenance for claims and evidence.
 
 **Fields:**
+
 - `id` (int, auto): Primary key
 - `uri_or_hash` (str): URI, content hash, or identifier for source material
 - `origin` (str): Classification origin (public, confidential, secret, top_secret)
@@ -146,6 +154,7 @@ Represents provenance for claims and evidence.
 - `ingested_at` (datetime): Ingestion timestamp
 
 **Example:**
+
 ```python
 {
   "id": 101,
@@ -192,11 +201,13 @@ All endpoints return JSON. Timestamps are in ISO 8601 format (UTC).
 ## Governance
 
 Policy labels are **explicit and required** on Claims and Sources. This ensures:
+
 - **Origin classification**: Track data sensitivity at creation
 - **Legal compliance**: GDPR-aligned legal basis tracking
 - **Access control**: Ready for future RBAC/ABAC integration
 
 **Default policy** (if not specified):
+
 ```json
 {
   "origin": "public",
@@ -207,13 +218,13 @@ Policy labels are **explicit and required** on Claims and Sources. This ensures:
 
 ## Technology Stack
 
-| Layer | Technology | Why |
-|-------|-----------|-----|
-| API | FastAPI | Fast, modern, auto-docs, async-ready |
-| Models | SQLModel (Pydantic + SQLAlchemy) | Type-safe ORM with Pydantic validation |
-| Database | SQLite (dev), PostgreSQL (prod) | Migration-ready, no vendor lock-in |
-| Testing | pytest, httpx | Industry standard, great async support |
-| Types | Python 3.11+ with full type hints | Catch errors early, better IDE support |
+| Layer    | Technology                        | Why                                    |
+| -------- | --------------------------------- | -------------------------------------- |
+| API      | FastAPI                           | Fast, modern, auto-docs, async-ready   |
+| Models   | SQLModel (Pydantic + SQLAlchemy)  | Type-safe ORM with Pydantic validation |
+| Database | SQLite (dev), PostgreSQL (prod)   | Migration-ready, no vendor lock-in     |
+| Testing  | pytest, httpx                     | Industry standard, great async support |
+| Types    | Python 3.11+ with full type hints | Catch errors early, better IDE support |
 
 ## Usage
 
@@ -291,22 +302,26 @@ print(f"Related decisions: {len(context['decisions'])}")
 ## Design Decisions
 
 ### Why SQLite for dev?
+
 - Zero config, portable, fast for development and testing
 - Easy to swap for PostgreSQL in production (same SQLModel code)
 - Simplifies CI/CD and local development
 
 ### Why JSON strings for arrays?
+
 - Simplicity: Works in SQLite and PostgreSQL without migrations
 - Explicit: No hidden serialization magic
 - Trade-off: Manual JSON parsing, but keeps data model transparent
 - Future: Can migrate to proper array columns in PostgreSQL
 
 ### Why separate Source table?
+
 - Provenance is first-class: sources can be reused across claims
 - Governance: Track legal basis and sensitivity at source level
 - Chain-of-custody: Ready for future audit trail integration
 
 ### Why policy_labels on Claim?
+
 - Data-level governance: Each claim can have different sensitivity
 - Flexibility: Source might be public, but derived claim could be confidential
 - Future-proof: Ready for fine-grained access control
@@ -327,6 +342,7 @@ print(f"Related decisions: {len(context['decisions'])}")
 ## Testing
 
 Test suite covers:
+
 - ✅ Round-trip create/fetch for all models
 - ✅ Basic validation (e.g., entity_id must exist)
 - ✅ Pagination
@@ -337,6 +353,7 @@ Test suite covers:
 **Test coverage:** ~95% (core models, database, API)
 
 Run tests with:
+
 ```bash
 make intelgraph-test
 ```

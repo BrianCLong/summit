@@ -273,10 +273,7 @@ rules:
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Verify Us — <Your Org></title>
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css"
-    />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css" />
     <style>
       .card {
         border: 1px solid #e5e7eb;
@@ -304,20 +301,16 @@ rules:
       <h1>Verify Us</h1>
       <p>
         Official updates originate only from
-        <strong>https://yourdomain.tld</strong> and our verified accounts below.
-        Signed assets carry C2PA manifests and PGP signatures.
+        <strong>https://yourdomain.tld</strong> and our verified accounts below. Signed assets carry
+        C2PA manifests and PGP signatures.
       </p>
       <section class="card">
         <h3>Signing Keys</h3>
-        <p class="muted">
-          Rotate quarterly. Publish fingerprints here and in DNS TXT records.
-        </p>
+        <p class="muted">Rotate quarterly. Publish fingerprints here and in DNS TXT records.</p>
         <ul>
           <li>
             PGP Fingerprint:
-            <span class="sig"
-              >3F23 8C8E 9B77 1A2C 0D11 7A2E 1F9A 44E1 DC55 9AAB</span
-            >
+            <span class="sig">3F23 8C8E 9B77 1A2C 0D11 7A2E 1F9A 44E1 DC55 9AAB</span>
           </li>
           <li>X.509 KeyID: <span class="sig">4c:f2:89:ba:1a:77:2c:11</span></li>
         </ul>
@@ -333,31 +326,23 @@ rules:
       <section class="card">
         <h3>Debunk Cards</h3>
         <article class="card">
-          <header>
-            <span class="badge">Election</span> Voting time changed via robocall
-          </header>
+          <header><span class="badge">Election</span> Voting time changed via robocall</header>
           <p>
-            <strong>Verdict:</strong> False. We never call to change voting
-            times. Verify via the hotline above.
+            <strong>Verdict:</strong> False. We never call to change voting times. Verify via the
+            hotline above.
           </p>
           <p>
-            <strong>Evidence:</strong> Audio hash:
-            <span class="sig">f1c2...9a</span> • Case: IO-1423 • Last updated:
-            2025-09-25
+            <strong>Evidence:</strong> Audio hash: <span class="sig">f1c2...9a</span> • Case:
+            IO-1423 • Last updated: 2025-09-25
           </p>
         </article>
         <article class="card">
-          <header>
-            <span class="badge">Disaster</span> Shelters closed due to
-            contamination
-          </header>
+          <header><span class="badge">Disaster</span> Shelters closed due to contamination</header>
           <p>
-            <strong>Verdict:</strong> False. Official shelter status is on this
-            page: <a href="#">/shelters</a>.
+            <strong>Verdict:</strong> False. Official shelter status is on this page:
+            <a href="#">/shelters</a>.
           </p>
-          <p>
-            <strong>Evidence:</strong> Links to EOC bulletins • Case: IO-1567
-          </p>
+          <p><strong>Evidence:</strong> Links to EOC bulletins • Case: IO-1567</p>
         </article>
       </section>
     </main>
@@ -368,39 +353,39 @@ rules:
 ### 4.2 React component (Tailwind ready)
 
 ```tsx
-import React from 'react';
+import React from "react";
 export default function VerifyUs() {
   const keys = [
     {
-      label: 'PGP Fingerprint',
-      value: '3F23 8C8E 9B77 1A2C 0D11  7A2E 1F9A 44E1 DC55 9AAB',
+      label: "PGP Fingerprint",
+      value: "3F23 8C8E 9B77 1A2C 0D11  7A2E 1F9A 44E1 DC55 9AAB",
     },
-    { label: 'X.509 KeyID', value: '4c:f2:89:ba:1a:77:2c:11' },
+    { label: "X.509 KeyID", value: "4c:f2:89:ba:1a:77:2c:11" },
   ];
   const cards = [
     {
-      tag: 'Election',
-      title: 'Voting time changed via robocall',
-      verdict: 'False.',
-      details: 'We never call to change voting times.',
-      caseId: 'IO-1423',
-      updated: '2025-09-25',
+      tag: "Election",
+      title: "Voting time changed via robocall",
+      verdict: "False.",
+      details: "We never call to change voting times.",
+      caseId: "IO-1423",
+      updated: "2025-09-25",
     },
     {
-      tag: 'Disaster',
-      title: 'Shelters closed due to contamination',
-      verdict: 'False.',
-      details: 'See official shelter status.',
-      caseId: 'IO-1567',
-      updated: '2025-09-25',
+      tag: "Disaster",
+      title: "Shelters closed due to contamination",
+      verdict: "False.",
+      details: "See official shelter status.",
+      caseId: "IO-1567",
+      updated: "2025-09-25",
     },
   ];
   return (
     <div className="mx-auto max-w-3xl p-6">
       <h1 className="text-3xl font-bold mb-4">Verify Us</h1>
       <p className="text-gray-600 mb-6">
-        Official updates originate only from <b>https://yourdomain.tld</b>.
-        Assets are signed (C2PA/PGP). Hotline: +1‑800‑YOUR‑ORG.
+        Official updates originate only from <b>https://yourdomain.tld</b>. Assets are signed
+        (C2PA/PGP). Hotline: +1‑800‑YOUR‑ORG.
       </p>
 
       <section className="rounded-2xl border p-4 mb-6">

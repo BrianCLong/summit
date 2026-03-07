@@ -2,12 +2,12 @@ name: CI Governance
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
     paths:
-      - 'src/intelgraph/governance/**'
-      - 'tests/test_redaction.py'
+      - "src/intelgraph/governance/**"
+      - "tests/test_redaction.py"
 
 jobs:
   test-governance:
@@ -24,7 +24,7 @@ jobs:
           version: 10.0.0
       - uses: actions/setup-node@v4
         with:
-          cache: 'pnpm'
+          cache: "pnpm"
           node-version: "20"
       - name: Install pnpm
         run: npm install -g pnpm

@@ -14,40 +14,40 @@ Analogous to traditional computer memory systems (RAM, Cache, Disk), the ACP rou
 
 The "always-on" operating system kernel for Summit agents.
 
-*   **Function:** Defines the foundational identity, ethical bounds, mandatory architectural constraints, and unbreakable repository rules.
-*   **Scale:** Extremely concise (< 1,000 lines). Fully loaded into the LLM context window at the beginning of every interaction.
-*   **Examples in Summit:**
-    *   Strict adherence to `Squash and Merge`.
-    *   Requirement for S-AOS headers in PR bodies (`## Assumption Ledger`, `## Diff Budget`, etc.).
-    *   Mandatory use of the `summit` namespace for metrics/traces (replacing legacy `intelgraph`).
-    *   Core agent roles (Codex, Antigravity, Palette, Jules).
-*   **Location:** Resides in a heavily governed central prompt (e.g., `prompts/sys/CONSTITUTION.md` or the ACP core initializer).
+- **Function:** Defines the foundational identity, ethical bounds, mandatory architectural constraints, and unbreakable repository rules.
+- **Scale:** Extremely concise (< 1,000 lines). Fully loaded into the LLM context window at the beginning of every interaction.
+- **Examples in Summit:**
+  - Strict adherence to `Squash and Merge`.
+  - Requirement for S-AOS headers in PR bodies (`## Assumption Ledger`, `## Diff Budget`, etc.).
+  - Mandatory use of the `summit` namespace for metrics/traces (replacing legacy `intelgraph`).
+  - Core agent roles (Codex, Antigravity, Palette, Jules).
+- **Location:** Resides in a heavily governed central prompt (e.g., `prompts/sys/CONSTITUTION.md` or the ACP core initializer).
 
 ### Tier 2: Domain Memory (Expert Agents)
 
 The "on-demand specialists" invoked based on semantic task classification.
 
-*   **Function:** Implements narrow, deep expertise for specific service boundaries or subsystems. The ACP routes tasks to the appropriate domain expert rather than overloading a generalist.
-*   **Scale:** Moderate size (e.g., 2k-5k lines). Loaded dynamically.
-*   **Examples in Summit:**
-    *   **Evidence & Integrity Domain:** Instructions for cryptographically signed bundles, hash-stable artifacts, and the Lineage Gate (`prompts/agents/domain/evidence-integrity-agent.md`).
-    *   **Merge Governance Domain:** Instructions for the deterministic Merge Engine, lane assignments (`LANE/auto-merge-now`), and CI queue pressure (`prompts/agents/domain/merge-engine-agent.md`).
-    *   **GraphRAG Domain:** Rules for deterministic retriever contracts, NFKC normalization, and stable sorting (`prompts/agents/domain/graphrag-retriever-agent.md`).
-*   **Location:** Categorized prompt files within `prompts/agents/domain/`.
+- **Function:** Implements narrow, deep expertise for specific service boundaries or subsystems. The ACP routes tasks to the appropriate domain expert rather than overloading a generalist.
+- **Scale:** Moderate size (e.g., 2k-5k lines). Loaded dynamically.
+- **Examples in Summit:**
+  - **Evidence & Integrity Domain:** Instructions for cryptographically signed bundles, hash-stable artifacts, and the Lineage Gate (`prompts/agents/domain/evidence-integrity-agent.md`).
+  - **Merge Governance Domain:** Instructions for the deterministic Merge Engine, lane assignments (`LANE/auto-merge-now`), and CI queue pressure (`prompts/agents/domain/merge-engine-agent.md`).
+  - **GraphRAG Domain:** Rules for deterministic retriever contracts, NFKC normalization, and stable sorting (`prompts/agents/domain/graphrag-retriever-agent.md`).
+- **Location:** Categorized prompt files within `prompts/agents/domain/`.
 
 ### Tier 3: Cold Memory (Knowledge Base & Retrieval Layer)
 
 The "persistent storage" queried selectively via MCP (Model Context Protocol) or RAG.
 
-*   **Function:** Holds structured specs, JSON schemas, historical Governance Acceptance Records (GARs), architectural blueprints, and raw telemetry data.
-*   **Scale:** Practically unlimited. Stored entirely out-of-context.
-*   **Access:** The agent actively queries this tier using tools (`read_file`, `grep`, `run_in_bash_session`, or specific MCP integrations) when specific details are required to complete a task.
-*   **Examples in Summit:**
-    *   Retrieving a specific JSON Schema (Draft 2020-12) from `docs/governance/schemas/` to validate an output.
-    *   Querying the latest evaluation benchmarks (`evals/metrics.json`) to check the `provable_actionability_index`.
-    *   Reading an older GAR from `docs/governance/acceptance/` to understand a previous architectural decision.
-    *   Reviewing the exact `EXPLAIN` Cypher plan sampled in `.github/workflows/neo4j-plan-sample.yml`.
-*   **Location:** Scattered across `docs/`, `evals/`, `tools/`, and external systems, retrieved programmatically.
+- **Function:** Holds structured specs, JSON schemas, historical Governance Acceptance Records (GARs), architectural blueprints, and raw telemetry data.
+- **Scale:** Practically unlimited. Stored entirely out-of-context.
+- **Access:** The agent actively queries this tier using tools (`read_file`, `grep`, `run_in_bash_session`, or specific MCP integrations) when specific details are required to complete a task.
+- **Examples in Summit:**
+  - Retrieving a specific JSON Schema (Draft 2020-12) from `docs/governance/schemas/` to validate an output.
+  - Querying the latest evaluation benchmarks (`evals/metrics.json`) to check the `provable_actionability_index`.
+  - Reading an older GAR from `docs/governance/acceptance/` to understand a previous architectural decision.
+  - Reviewing the exact `EXPLAIN` Cypher plan sampled in `.github/workflows/neo4j-plan-sample.yml`.
+- **Location:** Scattered across `docs/`, `evals/`, `tools/`, and external systems, retrieved programmatically.
 
 ## Applied Workflow: Implementing a New Policy
 

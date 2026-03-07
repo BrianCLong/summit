@@ -3,6 +3,7 @@
 > Real-world scenarios showing how to use the prompt library effectively.
 
 ## Table of Contents
+
 - [Scenario 1: Starting a New Microservice](#scenario-1-starting-a-new-microservice)
 - [Scenario 2: Performance Investigation](#scenario-2-performance-investigation)
 - [Scenario 3: Pre-Production Security Review](#scenario-3-pre-production-security-review)
@@ -27,6 +28,7 @@
 ```
 
 **Customization**:
+
 - Add `services/report-processor` to the workspace
 - Configure service-specific Dockerfile
 
@@ -42,6 +44,7 @@
 ```
 
 **Customization**:
+
 ```graphql
 # Add to schema
 type Report {
@@ -76,6 +79,7 @@ type Mutation {
 ```
 
 **Customization**:
+
 - Configure S3 bucket for report uploads
 - Add document parsing logic (PDF, DOCX)
 - Attach provenance: source, upload timestamp, submitter
@@ -92,6 +96,7 @@ type Mutation {
 ```
 
 **Customization**:
+
 - Metrics: `report_processing_duration_seconds`, `report_errors_total`
 - Dashboard: Report processing throughput and error rates
 - Alerts: Processing failures > 5% error rate
@@ -108,6 +113,7 @@ type Mutation {
 ```
 
 **Customization**:
+
 - Unit tests for report parsing logic
 - Integration tests with Neo4j (entity extraction)
 - E2E tests for upload → process → query workflow
@@ -129,6 +135,7 @@ type Mutation {
 ---
 
 ### Timeline
+
 - **Total**: 3 days
 - **Code written by Claude**: ~80%
 - **Your customization**: ~20% (domain logic, business rules)
@@ -148,10 +155,12 @@ type Mutation {
 ```
 
 **Focus**:
+
 - Distributed tracing to identify slow components
 - Metrics for each resolver (database, cache, external API)
 
 **Findings** (example):
+
 ```
 Trace analysis shows:
 - Neo4j relationship query: 600ms (p95)
@@ -170,11 +179,13 @@ Root cause: Missing Neo4j index on relationship.purpose
 ```
 
 **Actions**:
+
 - Add composite index on `(type, purpose, createdAt)`
 - Refactor Cypher to use index hints
 - Profile queries with EXPLAIN
 
 **Code Example**:
+
 ```cypher
 // Before (600ms)
 MATCH (e:Entity)-[r:CONNECTED_TO]->(target)
@@ -208,7 +219,7 @@ RETURN target
 // tests/load/graphql-optimized.js
 export const options = {
   thresholds: {
-    'http_req_duration{type:read}': ['p(95)<350'],  // SLO
+    "http_req_duration{type:read}": ["p(95)<350"], // SLO
   },
 };
 ```
@@ -230,6 +241,7 @@ export const options = {
 ```
 
 **Deliverables**:
+
 - STRIDE analysis for all data flows
 - DFDs (Mermaid diagrams)
 - Abuse cases (insider threat, data exfiltration, etc.)
@@ -246,12 +258,14 @@ export const options = {
 ```
 
 **Deliverables**:
+
 - Rego policies for tenant isolation
 - Purpose-based access control
 - Retention tier enforcement
 - PII redaction rules
 
 **Validation**:
+
 - Policy simulation tests pass
 - Integration tests verify ABAC enforcement
 
@@ -265,6 +279,7 @@ export const options = {
 ```
 
 **Deliverables**:
+
 - SBOM (CycloneDX) attached to release
 - Trivy scan results (no HIGH/CRITICAL vulnerabilities)
 - Provenance ledger with immutable audit trail
@@ -287,6 +302,7 @@ export const options = {
 ```
 
 **Deliverables**:
+
 - Usage metering for all operations
 - Cost dashboard in Grafana
 - Budget alerts at 80% threshold
@@ -296,6 +312,7 @@ export const options = {
 #### Step 2: Analyze Cost Drivers
 
 **Dashboard Analysis**:
+
 ```
 Top Cost Drivers (last 7 days):
 1. Neo4j queries: $8,000 (80% increase from last week)
@@ -314,17 +331,19 @@ Top Cost Drivers (last 7 days):
 #### Step 3: Implement Guardrails
 
 **Actions**:
+
 1. Add query complexity limits in GraphQL
 2. Implement rate limiting for expensive operations
 3. Add tenant-specific quotas
 
 **Code Example**:
+
 ```typescript
 // libs/cost/src/quotas.ts
 export const tenantQuotas = {
-  'acme-corp': {
-    graphQueriesPerDay: 100_000,  // Down from unlimited
-    maxHopCount: 2,                // Down from 3
+  "acme-corp": {
+    graphQueriesPerDay: 100_000, // Down from unlimited
+    maxHopCount: 2, // Down from 3
   },
 };
 ```
@@ -334,6 +353,7 @@ export const tenantQuotas = {
 #### Step 4: Validate Cost Reduction
 
 **Load Test**:
+
 ```bash
 /testing-strategy
 ```
@@ -355,6 +375,7 @@ export const tenantQuotas = {
 ```
 
 **Deliverables**:
+
 - Append-only ledger with hash-chaining
 - CLI for export/verify
 - Signed export bundles
@@ -368,15 +389,16 @@ export const tenantQuotas = {
 ```
 
 **Customization**:
+
 ```typescript
 // Attach provenance to every ingested entity
 interface ProvenanceMetadata {
-  sourceId: 'connector-s3-csv-001',
-  sourceUri: 's3://data-lake/reports/2024-01/report-123.csv',
-  contentHash: 'sha256:abc123...',
-  ingestedAt: '2024-01-15T10:30:00Z',
-  ingestedBy: 'analyst-alice',
-  purpose: 'investigation-456',
+  sourceId: "connector-s3-csv-001";
+  sourceUri: "s3://data-lake/reports/2024-01/report-123.csv";
+  contentHash: "sha256:abc123...";
+  ingestedAt: "2024-01-15T10:30:00Z";
+  ingestedBy: "analyst-alice";
+  purpose: "investigation-456";
 }
 ```
 
@@ -409,6 +431,7 @@ provenance export \
 ```
 
 **Deliverables**:
+
 ```rego
 # policy/tenant-isolation.rego
 package intelgraph.tenant
@@ -433,6 +456,7 @@ deny["Tenant mismatch"] if {
 ```
 
 **Customization**:
+
 ```typescript
 // Add tenant context to all requests
 app.use((req, res, next) => {
@@ -449,7 +473,7 @@ const entityResolvers = {
       await authorizeOPA({
         user: { tenantId: context.tenantId },
         resource: { tenantId: args.tenantId },
-        operation: 'READ',
+        operation: "READ",
       });
 
       return entityService.findByTenant(context.tenantId);
@@ -467,6 +491,7 @@ const entityResolvers = {
 ```
 
 **Tests**:
+
 - Unit test: OPA policy denies cross-tenant access
 - Integration test: Query from tenant A cannot see tenant B's data
 - E2E test: Full user journey with tenant switching
@@ -480,16 +505,19 @@ const entityResolvers = {
 ### Combining Prompts Effectively
 
 **Pattern 1: Bottom-Up (Data → API → UI)**
+
 ```
 /neo4j-schema → /graphql-gateway → /observability
 ```
 
 **Pattern 2: Top-Down (Requirements → Implementation)**
+
 ```
 /threat-model → /opa-policies → /graphql-gateway
 ```
 
 **Pattern 3: Cross-Cutting Concerns**
+
 ```
 /observability + /cost-guardrails + /testing-strategy
 (Run in parallel for all services)
@@ -509,6 +537,7 @@ const entityResolvers = {
 ### Maintaining Context
 
 When using multiple prompts:
+
 ```bash
 # Save context between prompts
 echo "Investigation service: reports → entities → relationships" > .context
@@ -522,6 +551,7 @@ echo "Investigation service: reports → entities → relationships" > .context
 ## Next Steps
 
 After implementing these scenarios:
+
 1. **Document** your customizations in runbooks
 2. **Share** learnings with the team
 3. **Contribute** improvements back to prompt library

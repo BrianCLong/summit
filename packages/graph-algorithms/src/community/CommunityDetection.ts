@@ -3,7 +3,7 @@
  * Louvain, Label Propagation, Connected Components
  */
 
-import type { GraphStorage } from '@intelgraph/graph-database';
+import type { GraphStorage } from "@intelgraph/graph-database";
 
 export interface Community {
   id: string;
@@ -45,7 +45,7 @@ export class CommunityDetection {
 
         // Get neighbor communities
         const neighborCommunities = new Set<string>();
-        const neighbors = this.storage.getNeighbors(node.id, 'both');
+        const neighbors = this.storage.getNeighbors(node.id, "both");
 
         for (const neighbor of neighbors) {
           neighborCommunities.add(nodeToCommunity.get(neighbor.id)!);
@@ -53,7 +53,9 @@ export class CommunityDetection {
 
         // Try moving to each neighbor community
         for (const targetCommunity of neighborCommunities) {
-          if (targetCommunity === currentCommunity) {continue;}
+          if (targetCommunity === currentCommunity) {
+            continue;
+          }
 
           const gain = this.modularityGain(
             node.id,
@@ -103,14 +105,16 @@ export class CommunityDetection {
       for (const node of shuffledNodes) {
         // Count neighbor labels
         const labelCounts = new Map<string, number>();
-        const neighbors = this.storage.getNeighbors(node.id, 'both');
+        const neighbors = this.storage.getNeighbors(node.id, "both");
 
         for (const neighbor of neighbors) {
           const label = labels.get(neighbor.id)!;
           labelCounts.set(label, (labelCounts.get(label) || 0) + 1);
         }
 
-        if (labelCounts.size === 0) {continue;}
+        if (labelCounts.size === 0) {
+          continue;
+        }
 
         // Find most common label
         let maxCount = 0;
@@ -130,7 +134,9 @@ export class CommunityDetection {
         }
       }
 
-      if (!changed) {break;}
+      if (!changed) {
+        break;
+      }
     }
 
     return labels;
@@ -198,7 +204,9 @@ export class CommunityDetection {
       // Calculate edge betweenness
       const edgeBetweenness = this.edgeBetweenness();
 
-      if (edgeBetweenness.size === 0) {break;}
+      if (edgeBetweenness.size === 0) {
+        break;
+      }
 
       // Find edge with highest betweenness
       let maxBetweenness = -Infinity;
@@ -239,7 +247,7 @@ export class CommunityDetection {
       communities.push({
         id,
         nodeIds,
-        size: nodeIds.size
+        size: nodeIds.size,
       });
     }
 
@@ -255,7 +263,9 @@ export class CommunityDetection {
     const edges = exported.edges;
     const m = edges.length;
 
-    if (m === 0) {return 0;}
+    if (m === 0) {
+      return 0;
+    }
 
     let modularity = 0;
 
@@ -296,12 +306,14 @@ export class CommunityDetection {
     const edges = exported.edges;
     const m = edges.length;
 
-    if (m === 0) {return 0;}
+    if (m === 0) {
+      return 0;
+    }
 
     let gain = 0;
 
     // Calculate edges to/from communities
-    const neighbors = this.storage.getNeighbors(nodeId, 'both');
+    const neighbors = this.storage.getNeighbors(nodeId, "both");
 
     let edgesToTarget = 0;
     let edgesFromSource = 0;
@@ -331,7 +343,7 @@ export class CommunityDetection {
     visited.add(nodeId);
     componentMap.set(nodeId, component);
 
-    const neighbors = this.storage.getNeighbors(nodeId, 'out');
+    const neighbors = this.storage.getNeighbors(nodeId, "out");
     for (const neighbor of neighbors) {
       if (!visited.has(neighbor.id)) {
         this.dfsComponent(neighbor.id, component, visited, componentMap);
@@ -351,7 +363,7 @@ export class CommunityDetection {
 
     while (queue.length > 0) {
       const current = queue.shift()!;
-      const neighbors = this.storage.getNeighbors(current, 'both');
+      const neighbors = this.storage.getNeighbors(current, "both");
 
       for (const neighbor of neighbors) {
         if (!visited.has(neighbor.id)) {
@@ -376,7 +388,9 @@ export class CommunityDetection {
     // For each pair of nodes, find shortest paths
     for (const source of nodes) {
       for (const target of nodes) {
-        if (source.id === target.id) {continue;}
+        if (source.id === target.id) {
+          continue;
+        }
 
         // BFS to find shortest paths
         const paths = this.findAllShortestPaths(source.id, target.id);

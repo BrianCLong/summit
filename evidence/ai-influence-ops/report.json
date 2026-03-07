@@ -15,8 +15,6 @@
       "used_for": "threat_model"
     }
   ],
-  "decisions": [
-    "deny-by-default"
-  ],
+  "decisions": ["deny-by-default"],
   "artifacts": []
 }

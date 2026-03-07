@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 export type Action = {
   type: string;
@@ -6,7 +6,7 @@ export type Action = {
 };
 
 export type Observation = {
-  type: 'text' | 'image' | 'json' | 'mixed';
+  type: "text" | "image" | "json" | "mixed";
   content: any;
   timestamp: number;
   screenshot?: string; // base64 or url

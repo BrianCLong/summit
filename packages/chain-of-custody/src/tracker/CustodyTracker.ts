@@ -2,20 +2,20 @@
  * Chain of Custody Tracker - Evidence tracking for legal compliance
  */
 
-import { v4 as uuidv4 } from 'uuid';
-import { Logger } from 'pino';
-import { Transaction, TransactionType } from '@intelgraph/blockchain';
+import { v4 as uuidv4 } from "uuid";
+import { Logger } from "pino";
+import { Transaction, TransactionType } from "@intelgraph/blockchain";
 
 export interface Evidence {
   id: string;
-  type: 'document' | 'file' | 'data' | 'physical' | 'digital';
+  type: "document" | "file" | "data" | "physical" | "digital";
   hash: string;
   description: string;
   collectedBy: string;
   collectedAt: number;
   location: string;
   metadata: Record<string, any>;
-  status: 'collected' | 'sealed' | 'transferred' | 'analyzed' | 'archived';
+  status: "collected" | "sealed" | "transferred" | "analyzed" | "archived";
 }
 
 export interface CustodyTransfer {
@@ -64,12 +64,12 @@ export class CustodyTracker {
   /**
    * Collect evidence
    */
-  async collectEvidence(evidenceData: Omit<Evidence, 'id' | 'status'>): Promise<Evidence> {
+  async collectEvidence(evidenceData: Omit<Evidence, "id" | "status">): Promise<Evidence> {
     try {
       const evidence: Evidence = {
         id: uuidv4(),
         ...evidenceData,
-        status: 'collected',
+        status: "collected",
       };
 
       this.evidence.set(evidence.id, evidence);
@@ -88,12 +88,12 @@ export class CustodyTracker {
 
       this.logger.info(
         { evidenceId: evidence.id, collectedBy: evidence.collectedBy },
-        'Evidence collected'
+        "Evidence collected"
       );
 
       return evidence;
     } catch (error) {
-      this.logger.error({ error }, 'Failed to collect evidence');
+      this.logger.error({ error }, "Failed to collect evidence");
       throw error;
     }
   }
@@ -104,25 +104,22 @@ export class CustodyTracker {
   async sealEvidence(evidenceId: string, sealedBy: string): Promise<void> {
     const evidence = this.evidence.get(evidenceId);
     if (!evidence) {
-      throw new Error('Evidence not found');
+      throw new Error("Evidence not found");
     }
 
     const chain = this.chains.get(evidenceId);
     if (!chain) {
-      throw new Error('Custody chain not found');
+      throw new Error("Custody chain not found");
     }
 
     if (chain.sealed) {
-      throw new Error('Evidence already sealed');
+      throw new Error("Evidence already sealed");
     }
 
-    evidence.status = 'sealed';
+    evidence.status = "sealed";
     chain.sealed = true;
 
-    this.logger.info(
-      { evidenceId, sealedBy },
-      'Evidence sealed'
-    );
+    this.logger.info({ evidenceId, sealedBy }, "Evidence sealed");
   }
 
   /**
@@ -138,20 +135,20 @@ export class CustodyTracker {
   ): Promise<CustodyTransfer> {
     const evidence = this.evidence.get(evidenceId);
     if (!evidence) {
-      throw new Error('Evidence not found');
+      throw new Error("Evidence not found");
     }
 
     const chain = this.chains.get(evidenceId);
     if (!chain) {
-      throw new Error('Custody chain not found');
+      throw new Error("Custody chain not found");
     }
 
     if (chain.currentCustodian !== fromCustodian) {
-      throw new Error('Invalid current custodian');
+      throw new Error("Invalid current custodian");
     }
 
     if (chain.legalHold) {
-      throw new Error('Evidence under legal hold - transfer restricted');
+      throw new Error("Evidence under legal hold - transfer restricted");
     }
 
     const transfer: CustodyTransfer = {
@@ -162,13 +159,13 @@ export class CustodyTracker {
       timestamp: Date.now(),
       reason,
       location,
-      signature: '', // Will be signed
+      signature: "", // Will be signed
       witnesses,
     };
 
     chain.transfers.push(transfer);
     chain.currentCustodian = toCustodian;
-    evidence.status = 'transferred';
+    evidence.status = "transferred";
 
     this.logger.info(
       {
@@ -177,7 +174,7 @@ export class CustodyTracker {
         to: toCustodian,
         transferId: transfer.id,
       },
-      'Custody transferred'
+      "Custody transferred"
     );
 
     return transfer;
@@ -221,7 +218,7 @@ export class CustodyTracker {
         caseNumber,
         evidenceCount: evidenceIds.length,
       },
-      'Legal hold placed'
+      "Legal hold placed"
     );
 
     return hold;
@@ -233,7 +230,7 @@ export class CustodyTracker {
   async releaseLegalHold(holdId: string, releasedBy: string): Promise<void> {
     const hold = this.legalHolds.get(holdId);
     if (!hold) {
-      throw new Error('Legal hold not found');
+      throw new Error("Legal hold not found");
     }
 
     // Release evidence from hold
@@ -246,10 +243,7 @@ export class CustodyTracker {
 
     this.legalHolds.delete(holdId);
 
-    this.logger.info(
-      { holdId, releasedBy },
-      'Legal hold released'
-    );
+    this.logger.info({ holdId, releasedBy }, "Legal hold released");
   }
 
   /**
@@ -258,12 +252,12 @@ export class CustodyTracker {
   async verifyIntegrity(evidenceId: string, currentHash: string): Promise<boolean> {
     const evidence = this.evidence.get(evidenceId);
     if (!evidence) {
-      throw new Error('Evidence not found');
+      throw new Error("Evidence not found");
     }
 
     const chain = this.chains.get(evidenceId);
     if (!chain) {
-      throw new Error('Custody chain not found');
+      throw new Error("Custody chain not found");
     }
 
     const isValid = evidence.hash === currentHash;
@@ -272,7 +266,7 @@ export class CustodyTracker {
     if (!isValid) {
       this.logger.error(
         { evidenceId, expectedHash: evidence.hash, actualHash: currentHash },
-        'Evidence integrity verification failed'
+        "Evidence integrity verification failed"
       );
     }
 
@@ -319,22 +313,28 @@ export class CustodyTracker {
   detectChainGaps(evidenceId: string): Array<{
     type: string;
     description: string;
-    severity: 'low' | 'medium' | 'high' | 'critical';
+    severity: "low" | "medium" | "high" | "critical";
   }> {
     const chain = this.chains.get(evidenceId);
     if (!chain) {
-      return [{ type: 'missing_chain', description: 'Custody chain not found', severity: 'critical' }];
+      return [
+        { type: "missing_chain", description: "Custody chain not found", severity: "critical" },
+      ];
     }
 
-    const gaps: Array<{ type: string; description: string; severity: 'low' | 'medium' | 'high' | 'critical' }> = [];
+    const gaps: Array<{
+      type: string;
+      description: string;
+      severity: "low" | "medium" | "high" | "critical";
+    }> = [];
 
     // Check for missing signatures
-    const unsignedTransfers = chain.transfers.filter(t => !t.signature);
+    const unsignedTransfers = chain.transfers.filter((t) => !t.signature);
     if (unsignedTransfers.length > 0) {
       gaps.push({
-        type: 'unsigned_transfer',
+        type: "unsigned_transfer",
         description: `${unsignedTransfers.length} transfers missing signatures`,
-        severity: 'high',
+        severity: "high",
       });
     }
 
@@ -343,9 +343,9 @@ export class CustodyTracker {
       const timeDiff = chain.transfers[i].timestamp - chain.transfers[i - 1].timestamp;
       if (timeDiff > 24 * 60 * 60 * 1000) {
         gaps.push({
-          type: 'time_gap',
+          type: "time_gap",
           description: `${Math.round(timeDiff / (60 * 60 * 1000))} hour gap between transfers`,
-          severity: 'medium',
+          severity: "medium",
         });
       }
     }
@@ -353,9 +353,9 @@ export class CustodyTracker {
     // Check integrity
     if (!chain.integrityVerified) {
       gaps.push({
-        type: 'integrity_failure',
-        description: 'Evidence integrity verification failed',
-        severity: 'critical',
+        type: "integrity_failure",
+        description: "Evidence integrity verification failed",
+        severity: "critical",
       });
     }
 
@@ -374,12 +374,12 @@ export class CustodyTracker {
   }> {
     const evidence = this.evidence.get(evidenceId);
     if (!evidence) {
-      throw new Error('Evidence not found');
+      throw new Error("Evidence not found");
     }
 
     const chain = this.chains.get(evidenceId);
     if (!chain) {
-      throw new Error('Custody chain not found');
+      throw new Error("Custody chain not found");
     }
 
     const gaps = this.detectChainGaps(evidenceId);
@@ -388,13 +388,13 @@ export class CustodyTracker {
     const timeline = [
       {
         timestamp: evidence.collectedAt,
-        event: 'collected',
+        event: "collected",
         actor: evidence.collectedBy,
         location: evidence.location,
       },
-      ...chain.transfers.map(t => ({
+      ...chain.transfers.map((t) => ({
         timestamp: t.timestamp,
-        event: 'transferred',
+        event: "transferred",
         from: t.fromCustodian,
         to: t.toCustodian,
         reason: t.reason,

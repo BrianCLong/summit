@@ -77,9 +77,9 @@
 
 ```tsx
 // apps/web/src/features/psyops/PsyOpsConsole.tsx
-import { useState } from 'react';
-import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { useState } from "react";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 type Narrative = { id: string; title: string; confidence: number };
 
@@ -102,11 +102,7 @@ export default function PsyOpsConsole() {
       {/* Graph */}
       <Card className="col-span-6 row-span-7 p-3 rounded-2xl shadow">
         <h2 className="font-medium mb-2">Influence Graph</h2>
-        <div
-          id="graph-pane"
-          className="h-full"
-          aria-describedby="provenance-help"
-        />
+        <div id="graph-pane" className="h-full" aria-describedby="provenance-help" />
       </Card>
 
       {/* Timeline */}

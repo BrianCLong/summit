@@ -1,6 +1,7 @@
 # Backup, Archival & Cold Storage Strategy v0
 
 ## 1. Data protection taxonomy
+
 - **Hot (operational)**: Primary OLTP databases, KV stores, message queues, caches with write-through, configuration stores.
   - **RPO/RTO**: RPO ≤ 5 minutes via streaming/CDC; RTO ≤ 30 minutes with automated failover and warm replicas.
   - **Security**: In-flight TLS 1.2+; at-rest encryption with cloud KMS-managed keys (per-tenant keys where supported). Access via least privilege service roles; secrets in HSM/KMS only.
@@ -15,6 +16,7 @@
   - **Security**: Dual-write to two regions with independent KMS keys; WORM policies and integrity proofs (hash chains/merkle roots) stored separately.
 
 ## 2. Backup & restore mechanics
+
 - **Capture methods**
   - **Snapshots**: Block-level snapshots for databases/filesystems; object versioning for buckets. Schedule: hot = every 15m with 7d retention; warm = hourly with 30d retention; cold = daily with 365d retention; immutable logs = hourly plus continuous stream sink.
   - **Streaming/CDC**: Logical replication/CDC to staging buckets for point-in-time recovery (PITR) up to 7d for hot; 3d for warm. Capture tenant identifiers to allow scoped replays.
@@ -29,6 +31,7 @@
   - **Per-tenant restores**: Backups tagged by tenant/org ID; logical exports stored separately to support tenant-scoped replay into clean environment before merging.
 
 ## 3. Archival & deletion
+
 - **Transition criteria**
   - Hot → warm: 14–30 days of inactivity or promotion of derived datasets out of OLTP.
   - Warm → cold: ≥90 days inactivity or policy-based lifecycle rules (e.g., retention policy moving objects to infrequent access/Glacier/Deep Archive).
@@ -40,7 +43,9 @@
   - For cold archives under hold, suspend lifecycle expiration until hold cleared; maintain audit trail of every override.
 
 ## 4. Artifacts
+
 ### Backup & Archival Strategy v0 outline
+
 1. Scope & data classes (hot/warm/cold/immutable).
 2. RPO/RTO & security posture per class.
 3. Backup mechanisms: snapshots vs streaming vs fulls; schedules and retention.
@@ -50,10 +55,11 @@
 7. Operations: monitoring signals, runbooks, SLOs, escalation paths.
 
 ### Example runbook: tenant-level data incident
+
 1. **Trigger**: Incident declares tenant data corruption/loss; identify tenant ID and affected service/datastore.
 2. **Containment**: Freeze writes for tenant via feature flag or routing rule; snapshot current state for forensics.
 3. **Select restore point**: Determine incident onset; choose PITR timestamp or snapshot prior to event.
-4. **Restore to quarantine env**: 
+4. **Restore to quarantine env**:
    - Provision isolated DB/schema using latest full + incremental/CDC replay scoped to tenant.
    - Verify checksums/row counts; run tenant-specific integrity tests.
 5. **Validate with tenant & product owner**: Provide diff summary; obtain approval to promote.
@@ -61,6 +67,7 @@
 7. **Post-incident**: Backfill analytics/search indexes; update incident timeline; add test to detect class of corruption.
 
 ### Checklist: "Data store is backup/restore-ready if…"
+
 - [ ] RPO/RTO documented and mapped to data class; validated in observability dashboards.
 - [ ] Backup jobs scheduled (snapshots + CDC/full) with retention configured and encrypted at rest.
 - [ ] Backups labeled with tenant identifiers and environment metadata; stored in at least two regions.

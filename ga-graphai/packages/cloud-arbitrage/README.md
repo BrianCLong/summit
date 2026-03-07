@@ -19,11 +19,7 @@ pnpm test
 ## Usage Example
 
 ```ts
-import {
-  ArbitrageAgent,
-  CompositeDataFeed,
-  InMemoryDataFeed,
-} from '@ga-graphai/cloud-arbitrage';
+import { ArbitrageAgent, CompositeDataFeed, InMemoryDataFeed } from "@ga-graphai/cloud-arbitrage";
 
 const feed = new CompositeDataFeed([
   new InMemoryDataFeed(financialData, energyData, demandData, regulatoryData),

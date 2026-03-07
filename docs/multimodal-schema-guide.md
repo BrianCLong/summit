@@ -155,11 +155,7 @@ mutation UploadVideo {
       mediaType: VIDEO
       mimeType: "video/mp4"
       filename: "surveillance_video.mp4"
-      metadata: {
-        duration: 3600
-        resolution: "1920x1080"
-        camera_location: "Building A Entrance"
-      }
+      metadata: { duration: 3600, resolution: "1920x1080", camera_location: "Building A Entrance" }
     }
   ) {
     id
@@ -231,10 +227,7 @@ mutation VerifyEntity {
 
 # Merge duplicate entities
 mutation MergeDuplicates {
-  mergeMultimodalEntities(
-    primaryId: "entity789"
-    secondaryIds: ["entity790", "entity791"]
-  ) {
+  mergeMultimodalEntities(primaryId: "entity789", secondaryIds: ["entity790", "entity791"]) {
     id
     label
     crossModalMatches {

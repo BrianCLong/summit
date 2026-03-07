@@ -6,9 +6,6 @@
     "rootDir": "./src",
     "allowImportingTsExtensions": false
   },
-  "include": [
-    "src",
-    "types"
-  ],
+  "include": ["src", "types"],
   "references": []
 }

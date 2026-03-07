@@ -6,7 +6,7 @@ metadata:
   owner: platform@summit
   approvals:
     required: true
-    approvers: ['release-manager']
+    approvers: ["release-manager"]
 spec:
   inputs:
     - name: service

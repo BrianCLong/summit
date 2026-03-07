@@ -1,4 +1,4 @@
-version: '1.0.0'
+version: "1.0.0"
 description: Document classification level definitions
 
 classification_levels:
@@ -6,7 +6,7 @@ classification_levels:
     level: 0
     name: Public
     description: May be exposed externally without NDA.
-    color: '#22c55e'
+    color: "#22c55e"
     handling_requirements:
       - No special handling required
       - Can be shared externally without restrictions
@@ -19,7 +19,7 @@ classification_levels:
     level: 1
     name: Internal
     description: Internal use only, not for external distribution.
-    color: '#3b82f6'
+    color: "#3b82f6"
     handling_requirements:
       - Store on company-managed systems
       - Do not share externally without approval
@@ -33,7 +33,7 @@ classification_levels:
     level: 2
     name: Confidential
     description: Limited internal access; may be shared externally with NDA.
-    color: '#f59e0b'
+    color: "#f59e0b"
     handling_requirements:
       - Access control required
       - NDA required for external sharing
@@ -48,7 +48,7 @@ classification_levels:
     level: 3
     name: Restricted
     description: Strictly limited to specific teams or roles.
-    color: '#ef4444'
+    color: "#ef4444"
     handling_requirements:
       - Need-to-know basis only
       - Access logging required
@@ -63,7 +63,7 @@ classification_levels:
     level: 4
     name: Highly Restricted
     description: Need-to-know only; strong monitoring and access control.
-    color: '#dc2626'
+    color: "#dc2626"
     handling_requirements:
       - Encryption at rest required
       - Strict access controls
@@ -80,7 +80,7 @@ classification_levels:
     level: 5
     name: Classified (Internal)
     description: Internal security-sensitive documents requiring special handling.
-    color: '#7c3aed'
+    color: "#7c3aed"
     handling_requirements:
       - Security clearance required
       - Air-gapped or isolated storage
@@ -96,7 +96,7 @@ classification_levels:
     level: 6
     name: Classified (Regulated)
     description: Governed by external regulations (HIPAA, CJIS, ITAR, etc).
-    color: '#be185d'
+    color: "#be185d"
     handling_requirements:
       - Must comply with applicable regulatory requirements
       - Regulatory-specific access controls

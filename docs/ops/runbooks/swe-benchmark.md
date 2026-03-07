@@ -4,8 +4,8 @@
 
 ## Alert triggers
 
-* task failure rate > 20%
-* docker build failure
+- task failure rate > 20%
+- docker build failure
 
 ## Monitoring job
 

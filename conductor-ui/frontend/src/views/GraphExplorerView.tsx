@@ -1,19 +1,19 @@
 // conductor-ui/frontend/src/views/GraphExplorerView.tsx
 // Appending Server-Saved Views functionality
-import React, { useState, useEffect, useCallback } from 'react';
-import { SloHintBadge } from '../components/graph/SloHintBadge';
+import React, { useState, useEffect, useCallback } from "react";
+import { SloHintBadge } from "../components/graph/SloHintBadge";
 
 type Node = { id: string; label: string; type: string };
 type Edge = { id: string; source: string; target: string };
 type SavedView = { id: string; name: string; nodes: Node[]; edges: Edge[] };
 
 const fetchGraphNeighbors = async (
-  nodeId: string,
+  nodeId: string
 ): Promise<{ nodes: Node[]; edges: Edge[]; latencyMs: number }> => {
   console.log(`Fetching neighbors for ${nodeId}...`);
   await new Promise((res) => setTimeout(res, 350));
   return {
-    nodes: [{ id: `neighbor-${Math.random()}`, label: 'Neighbor', type: 'IP' }],
+    nodes: [{ id: `neighbor-${Math.random()}`, label: "Neighbor", type: "IP" }],
     edges: [
       {
         id: `edge-${Math.random()}`,
@@ -26,15 +26,13 @@ const fetchGraphNeighbors = async (
 };
 
 const fetchSavedViews = async (): Promise<SavedView[]> => {
-  return [
-    { id: 'view-1', name: 'My Saved Investigation', nodes: [], edges: [] },
-  ];
+  return [{ id: "view-1", name: "My Saved Investigation", nodes: [], edges: [] }];
 };
 
 export const GraphExplorerView = () => {
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState("");
   const [nodes, setNodes] = useState<Node[]>([
-    { id: 'start-node', label: 'Start Node', type: 'Domain' },
+    { id: "start-node", label: "Start Node", type: "Domain" },
   ]);
   const [edges, setEdges] = useState<Edge[]>([]);
   const [latency, setLatency] = useState<number | null>(null);
@@ -67,7 +65,7 @@ export const GraphExplorerView = () => {
         <button>Save Current View</button>
       </div>
       <hr />
-      <div style={{ marginBottom: '1rem' }}>
+      <div style={{ marginBottom: "1rem" }}>
         <input
           type="text"
           value={query}
@@ -82,12 +80,12 @@ export const GraphExplorerView = () => {
 
       <div
         style={{
-          border: '1px solid grey',
-          height: '500px',
-          position: 'relative',
+          border: "1px solid grey",
+          height: "500px",
+          position: "relative",
         }}
       >
-        <p style={{ padding: '1rem' }}>Graph visualization area.</p>
+        <p style={{ padding: "1rem" }}>Graph visualization area.</p>
         <ul>
           {nodes.map((n) => (
             <li key={n.id}>

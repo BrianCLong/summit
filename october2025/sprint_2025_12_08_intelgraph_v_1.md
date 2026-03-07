@@ -134,11 +134,11 @@ extend type Mutation {
 ```ts
 // server/src/onboarding/service.ts
 export const defaultItems = [
-  { key: 'import_sample', title: 'Import sample case' },
-  { key: 'create_users', title: 'Invite teammates' },
-  { key: 'run_er', title: 'Run entity resolution' },
-  { key: 'run_analytics', title: 'Run analytics overlays' },
-  { key: 'export_report', title: 'Export first report' },
+  { key: "import_sample", title: "Import sample case" },
+  { key: "create_users", title: "Invite teammates" },
+  { key: "run_er", title: "Run entity resolution" },
+  { key: "run_analytics", title: "Run analytics overlays" },
+  { key: "export_report", title: "Export first report" },
 ];
 ```
 
@@ -150,8 +150,8 @@ export async function dqChecks(rows: any[], rules: any) {
   const issues: any[] = [];
   // null/blank
   for (const f of Object.keys(rows[0] || {})) {
-    const nulls = rows.filter((r) => r[f] == null || r[f] === '').length;
-    if (nulls > 0) issues.push({ field: f, kind: 'nulls', count: nulls });
+    const nulls = rows.filter((r) => r[f] == null || r[f] === "").length;
+    if (nulls > 0) issues.push({ field: f, kind: "nulls", count: nulls });
   }
   // uniqueness
   for (const f of rules.unique || []) {
@@ -165,7 +165,7 @@ export async function dqChecks(rows: any[], rules: any) {
     if (dups.size > 0)
       issues.push({
         field: f,
-        kind: 'duplicates',
+        kind: "duplicates",
         count: Array.from(dups).length,
       });
   }
@@ -174,9 +174,8 @@ export async function dqChecks(rows: any[], rules: any) {
 
 // server/src/dq/remediation.ts
 export function patchMapping(mapping: any, issue: any) {
-  if (issue.kind === 'nulls')
-    mapping.transforms[issue.field] = { fill: 'UNKNOWN' };
-  if (issue.kind === 'duplicates')
+  if (issue.kind === "nulls") mapping.transforms[issue.field] = { fill: "UNKNOWN" };
+  if (issue.kind === "duplicates")
     mapping.keys = Array.from(new Set([...(mapping.keys || []), issue.field]));
   return mapping;
 }
@@ -186,13 +185,13 @@ export function patchMapping(mapping: any, issue: any) {
 
 ```ts
 // server/src/insights/producer.ts
-import { Queue } from 'bullmq';
+import { Queue } from "bullmq";
 export type Card = {
   id: string;
   org: string;
   caseId: string;
-  type: 'community_change' | 'rank_jumper' | 'watchlist_hit' | 'new_entity';
-  severity: 'low' | 'med' | 'high';
+  type: "community_change" | "rank_jumper" | "watchlist_hit" | "new_entity";
+  severity: "low" | "med" | "high";
   summary: string;
   data: any;
   provenance: string[];
@@ -204,12 +203,12 @@ export async function produceDaily(org: string) {
     {
       id: uid(),
       org,
-      caseId: 'c1',
-      type: 'rank_jumper',
-      severity: 'med',
-      summary: 'Node X moved into top‑10 PageRank',
-      data: { id: 'X', delta: +0.12 },
-      provenance: ['overlay:pagerank:2025-12-08'],
+      caseId: "c1",
+      type: "rank_jumper",
+      severity: "med",
+      summary: "Node X moved into top‑10 PageRank",
+      data: { id: "X", delta: +0.12 },
+      provenance: ["overlay:pagerank:2025-12-08"],
       createdAt: new Date().toISOString(),
     },
   ];
@@ -230,7 +229,7 @@ export default {
         after,
         limit,
       }: { caseId: string; type?: string; after?: string; limit?: number },
-      ctx: any,
+      ctx: any
     ) => {
       return ctx.db.listInsights({ caseId, type, after, limit: limit || 50 });
     },
@@ -249,22 +248,22 @@ export default {
 ```js
 // apps/web/src/features/dq/jquery-dq.js
 $(function () {
-  $(document).on('click', '#dq-run', function () {
+  $(document).on("click", "#dq-run", function () {
     $.ajax({
-      url: '/graphql',
-      method: 'POST',
-      contentType: 'application/json',
+      url: "/graphql",
+      method: "POST",
+      contentType: "application/json",
       data: JSON.stringify({
-        query: `mutation{ dqRun(mappingId:"${$('#mapId').val()}"){ issues{ field, kind, count } } }`,
+        query: `mutation{ dqRun(mappingId:"${$("#mapId").val()}"){ issues{ field, kind, count } } }`,
       }),
     });
   });
-  $(document).on('click', '.dq-accept-fix', function () {
-    const issue = $(this).data('issue');
+  $(document).on("click", ".dq-accept-fix", function () {
+    const issue = $(this).data("issue");
     $.ajax({
-      url: '/graphql',
-      method: 'POST',
-      contentType: 'application/json',
+      url: "/graphql",
+      method: "POST",
+      contentType: "application/json",
       data: JSON.stringify({
         query: `mutation{ dqAcceptFix(issue:"${issue}"){ ok } }`,
       }),
@@ -277,10 +276,10 @@ $(function () {
 // apps/web/src/features/insights/jquery-feed.js
 $(function () {
   const socket = io({ auth: { token: window.jwt } });
-  socket.emit('join', { room: `insight:${window.caseId}` });
-  socket.on('insight', function (card) {
-    $('#feed').prepend(
-      `<div class="card ${card.severity}"><h4>${card.type}</h4><p>${card.summary}</p></div>`,
+  socket.emit("join", { room: `insight:${window.caseId}` });
+  socket.on("insight", function (card) {
+    $("#feed").prepend(
+      `<div class="card ${card.severity}"><h4>${card.type}</h4><p>${card.summary}</p></div>`
     );
   });
 });
@@ -291,19 +290,15 @@ $(function () {
 ```ts
 // server/src/reliability/warm.ts
 export async function warmOverlays(caseId: string, driver: any) {
-  await driver.executeQuery(
-    'MATCH (n:Entity { caseId:$caseId }) RETURN n LIMIT 1',
-    { caseId },
-  );
-  await driver.executeQuery('CALL gds.util.asNode(0) YIELD node RETURN 1'); // touch GDS cache
+  await driver.executeQuery("MATCH (n:Entity { caseId:$caseId }) RETURN n LIMIT 1", { caseId });
+  await driver.executeQuery("CALL gds.util.asNode(0) YIELD node RETURN 1"); // touch GDS cache
 }
 
 // server/src/reliability/advisor.ts
 export function hintForQuery(cypher: string) {
-  if (/\*\*/.test(cypher))
-    return 'Avoid cartesian products; add relationship pattern.';
+  if (/\*\*/.test(cypher)) return "Avoid cartesian products; add relationship pattern.";
   if (/-\[:RELATED\*\d+..\d+\]-/.test(cypher))
-    return 'Cap variable‑length expansions (e.g., *1..3) and add filters.';
+    return "Cap variable‑length expansions (e.g., *1..3) and add filters.";
   return null;
 }
 ```
@@ -311,15 +306,15 @@ export function hintForQuery(cypher: string) {
 ### 4.7 k6 — p99 Focus
 
 ```js
-import http from 'k6/http';
-import { Trend } from 'k6/metrics';
-const p99 = new Trend('gql_p99');
-export const options = { vus: 60, duration: '4m' };
+import http from "k6/http";
+import { Trend } from "k6/metrics";
+const p99 = new Trend("gql_p99");
+export const options = { vus: 60, duration: "4m" };
 export default function () {
   const res = http.post(
-    'http://localhost:4000/graphql',
+    "http://localhost:4000/graphql",
     JSON.stringify({ query: '{ searchEntities(q:"acme", limit:50){ type } }' }),
-    { headers: { 'Content-Type': 'application/json' } },
+    { headers: { "Content-Type": "application/json" } }
   );
   p99.add(res.timings.duration);
 }

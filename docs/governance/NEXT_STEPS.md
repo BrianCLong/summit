@@ -3,8 +3,8 @@
 > Evidence-IDs: EVD-PLACEHOLDER
 > Status: active
 
-
 ## 1. High-Leverage Technical Hardening (Claude Code)
+
 **Goal**: Automate the Governance Drift Detection to prevent manual toil.
 
 ```text
@@ -20,6 +20,7 @@ Reference the runbook at `docs/governance/runbooks/ga-ops-drift.md`.
 ```
 
 ## 2. CI Flake Reduction & Gate Repair (Antigravity)
+
 **Goal**: Stabilize the Merge Queue by addressing the most common "False Positive" blockers.
 
 ```text
@@ -31,6 +32,7 @@ Analyze the `check-ga-policy.sh` script and the `ga-risk-gate.yml` workflow.
 ```
 
 ## 3. Evidence Automation & Documentation Enforcement (Qwen)
+
 **Goal**: Eliminate "Evidence Staleness" drift by automating the weekly artifact generation.
 
 ```text

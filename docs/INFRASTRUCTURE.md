@@ -694,8 +694,8 @@ metadata:
 spec:
   encryptedData:
     DATABASE_URL: AgBx7... # encrypted
-    JWT_SECRET: AgBy8...   # encrypted
-    API_KEY: AgCz9...       # encrypted
+    JWT_SECRET: AgBy8... # encrypted
+    API_KEY: AgCz9... # encrypted
   template:
     metadata:
       name: summit-secrets
@@ -717,7 +717,7 @@ metadata:
   name: summit-daily-backup
   namespace: velero
 spec:
-  schedule: "0 2 * * *"  # Daily at 2 AM
+  schedule: "0 2 * * *" # Daily at 2 AM
   template:
     includedNamespaces:
       - intelgraph-prod
@@ -725,7 +725,7 @@ spec:
     storageLocation: aws-s3
     volumeSnapshotLocations:
       - aws-ebs
-    ttl: 720h  # 30 days
+    ttl: 720h # 30 days
 ```
 
 ### Restore Procedure

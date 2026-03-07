@@ -1,10 +1,10 @@
 export type AssetKind =
-  | 'microservice'
-  | 'data-pipeline'
-  | 'job-runner'
-  | 'queue'
-  | 'external-api'
-  | 'infrastructure';
+  | "microservice"
+  | "data-pipeline"
+  | "job-runner"
+  | "queue"
+  | "external-api"
+  | "infrastructure";
 
 export interface AssetEndpoint {
   type: string;
@@ -46,7 +46,7 @@ export interface DiscoveryProvider {
   supportsIncremental?: boolean;
 }
 
-export type DiscoveryEventType = 'registered' | 'updated' | 'removed';
+export type DiscoveryEventType = "registered" | "updated" | "removed";
 
 export interface DiscoveryEvent {
   type: DiscoveryEventType;
@@ -71,9 +71,9 @@ export interface HealthSnapshot {
   annotations: string[];
 }
 
-export type AnomalyTrend = 'spike' | 'drop' | 'drift' | 'oscillation';
+export type AnomalyTrend = "spike" | "drop" | "drift" | "oscillation";
 
-export type AnomalySeverity = 'low' | 'medium' | 'high' | 'critical';
+export type AnomalySeverity = "low" | "medium" | "high" | "critical";
 
 export interface AnomalySignal {
   assetId: string;
@@ -89,7 +89,7 @@ export interface AnomalySignal {
 export interface JobSpec {
   id: string;
   type: string;
-  priority: 'low' | 'normal' | 'high' | 'critical';
+  priority: "low" | "normal" | "high" | "critical";
   requiredCapabilities: string[];
   requirements?: {
     regions?: string[];
@@ -149,7 +149,7 @@ export interface PolicyHook {
   evaluate(input: PolicyInput): PolicyEvaluation | Promise<PolicyEvaluation>;
 }
 
-export type GuardrailSeverity = 'info' | 'warn' | 'block';
+export type GuardrailSeverity = "info" | "warn" | "block";
 
 export interface GuardrailInput {
   guardrailId?: string;
@@ -182,7 +182,7 @@ export interface SelfHealingAction {
   type: string;
   targetAssetId?: string;
   payload?: Record<string, unknown>;
-  estimatedImpact: 'low' | 'medium' | 'high';
+  estimatedImpact: "low" | "medium" | "high";
   runbook?: string;
 }
 
@@ -290,21 +290,14 @@ export interface CiCheck {
 }
 
 export interface TraceEntry {
-  step:
-    | 'discovery'
-    | 'routing'
-    | 'guardrail'
-    | 'ci-check'
-    | 'fallback'
-    | 'complete'
-    | 'error';
-  status: 'success' | 'skipped' | 'failed';
+  step: "discovery" | "routing" | "guardrail" | "ci-check" | "fallback" | "complete" | "error";
+  status: "success" | "skipped" | "failed";
   detail: string;
   metadata?: Record<string, unknown>;
   timestamp?: Date;
 }
 
-export type TraceStatus = 'running' | 'completed' | 'failed';
+export type TraceStatus = "running" | "completed" | "failed";
 
 export interface ExecutionTrace {
   taskId: string;

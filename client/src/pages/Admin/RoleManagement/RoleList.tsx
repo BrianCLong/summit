@@ -9,7 +9,7 @@
  * @module pages/Admin/RoleManagement/RoleList
  */
 
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   Alert,
   Box,
@@ -34,8 +34,8 @@ import {
   TableRow,
   Tooltip,
   Typography,
-} from '@mui/material';
-import type { ChipProps } from '@mui/material';
+} from "@mui/material";
+import type { ChipProps } from "@mui/material";
 import {
   Add as AddIcon,
   Delete as DeleteIcon,
@@ -43,12 +43,12 @@ import {
   Refresh as RefreshIcon,
   Security as SecurityIcon,
   Visibility as ViewIcon,
-} from '@mui/icons-material';
-import { useAuth } from '../../../context/AuthContext.jsx';
-import { useAdminRoles } from '../../../hooks/useAdminRoles';
-import { Role } from '../../../services/admin-api';
-import RoleEditor from './RoleEditor';
-import PermissionMatrix from './PermissionMatrix';
+} from "@mui/icons-material";
+import { useAuth } from "../../../context/AuthContext.jsx";
+import { useAdminRoles } from "../../../hooks/useAdminRoles";
+import { Role } from "../../../services/admin-api";
+import RoleEditor from "./RoleEditor";
+import PermissionMatrix from "./PermissionMatrix";
 
 export default function RoleList() {
   const { hasPermission, hasRole } = useAuth() as {
@@ -76,9 +76,9 @@ export default function RoleList() {
   const [viewingRole, setViewingRole] = useState<Role | null>(null);
 
   // Check permissions
-  const canCreate = hasRole('admin') || hasPermission('role:create');
-  const canEdit = hasRole('admin') || hasPermission('role:update');
-  const canDelete = hasRole('admin') || hasPermission('role:delete');
+  const canCreate = hasRole("admin") || hasPermission("role:create");
+  const canEdit = hasRole("admin") || hasPermission("role:update");
+  const canDelete = hasRole("admin") || hasPermission("role:delete");
 
   const handleCreateRole = () => {
     setEditingRole(null);
@@ -111,7 +111,7 @@ export default function RoleList() {
     description?: string;
     permissions: string[];
     inherits?: string[];
-    scope?: 'full' | 'restricted' | 'readonly';
+    scope?: "full" | "restricted" | "readonly";
   }) => {
     if (editingRole) {
       const result = await updateRole(editingRole.id, {
@@ -141,28 +141,28 @@ export default function RoleList() {
   };
 
   const formatDate = (dateString?: string) => {
-    if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
+    if (!dateString) return "N/A";
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
     });
   };
 
-  const getScopeColor = (scope: Role['scope']): ChipProps['color'] => {
+  const getScopeColor = (scope: Role["scope"]): ChipProps["color"] => {
     switch (scope) {
-      case 'full':
-        return 'error';
-      case 'restricted':
-        return 'warning';
-      case 'readonly':
-        return 'info';
+      case "full":
+        return "error";
+      case "restricted":
+        return "warning";
+      case "readonly":
+        return "info";
       default:
-        return 'default';
+        return "default";
     }
   };
 
-  if (!hasRole('admin') && !hasPermission('role:read')) {
+  if (!hasRole("admin") && !hasPermission("role:read")) {
     return (
       <Box p={3}>
         <Alert severity="error">Access Denied: Role management permission required.</Alert>
@@ -192,11 +192,7 @@ export default function RoleList() {
             Refresh
           </Button>
           {canCreate && (
-            <Button
-              variant="contained"
-              startIcon={<AddIcon />}
-              onClick={handleCreateRole}
-            >
+            <Button variant="contained" startIcon={<AddIcon />} onClick={handleCreateRole}>
               Create Role
             </Button>
           )}
@@ -211,7 +207,7 @@ export default function RoleList() {
       )}
 
       {/* Summary Cards */}
-      <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} mb={3}>
+      <Stack direction={{ xs: "column", md: "row" }} spacing={2} mb={3}>
         <Card variant="outlined" sx={{ flex: 1 }}>
           <CardContent>
             <Typography variant="h3" color="primary">
@@ -309,11 +305,7 @@ export default function RoleList() {
                       )}
                     </TableCell>
                     <TableCell>
-                      <Chip
-                        label={role.scope}
-                        size="small"
-                        color={getScopeColor(role.scope)}
-                      />
+                      <Chip label={role.scope} size="small" color={getScopeColor(role.scope)} />
                     </TableCell>
                     <TableCell>
                       <Stack direction="row" spacing={0.5} flexWrap="wrap" gap={0.5}>
@@ -323,14 +315,11 @@ export default function RoleList() {
                             label={perm}
                             size="small"
                             variant="outlined"
-                            sx={{ fontSize: '0.7rem' }}
+                            sx={{ fontSize: "0.7rem" }}
                           />
                         ))}
                         {role.effectivePermissions.length > 3 && (
-                          <Chip
-                            label={`+${role.effectivePermissions.length - 3}`}
-                            size="small"
-                          />
+                          <Chip label={`+${role.effectivePermissions.length - 3}`} size="small" />
                         )}
                       </Stack>
                     </TableCell>
@@ -354,26 +343,18 @@ export default function RoleList() {
                       )}
                     </TableCell>
                     <TableCell>
-                      <Typography variant="body2">
-                        {formatDate(role.createdAt)}
-                      </Typography>
+                      <Typography variant="body2">{formatDate(role.createdAt)}</Typography>
                     </TableCell>
                     <TableCell align="right">
                       <Stack direction="row" spacing={0.5} justifyContent="flex-end">
                         <Tooltip title="View Permissions">
-                          <IconButton
-                            size="small"
-                            onClick={() => handleViewPermissions(role)}
-                          >
+                          <IconButton size="small" onClick={() => handleViewPermissions(role)}>
                             <ViewIcon fontSize="small" />
                           </IconButton>
                         </Tooltip>
                         {canEdit && !role.isBuiltIn && (
                           <Tooltip title="Edit Role">
-                            <IconButton
-                              size="small"
-                              onClick={() => handleEditRole(role)}
-                            >
+                            <IconButton size="small" onClick={() => handleEditRole(role)}>
                               <EditIcon fontSize="small" />
                             </IconButton>
                           </Tooltip>

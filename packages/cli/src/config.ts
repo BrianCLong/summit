@@ -6,9 +6,9 @@
  * @module @summit/cli/config
  */
 
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
-import { homedir } from 'os';
-import { join } from 'path';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
+import { homedir } from "os";
+import { join } from "path";
 
 /**
  * CLI configuration
@@ -18,11 +18,11 @@ export interface CLIConfig {
   tenantId?: string;
   token?: string;
   apiKey?: string;
-  outputFormat?: 'table' | 'json' | 'yaml';
+  outputFormat?: "table" | "json" | "yaml";
 }
 
-const CONFIG_DIR = join(homedir(), '.summit');
-const CONFIG_FILE = join(CONFIG_DIR, 'config.json');
+const CONFIG_DIR = join(homedir(), ".summit");
+const CONFIG_FILE = join(CONFIG_DIR, "config.json");
 
 let config: CLIConfig = {};
 
@@ -42,7 +42,7 @@ export async function loadConfig(): Promise<CLIConfig> {
   ensureConfigDir();
 
   if (existsSync(CONFIG_FILE)) {
-    const content = readFileSync(CONFIG_FILE, 'utf-8');
+    const content = readFileSync(CONFIG_FILE, "utf-8");
     config = JSON.parse(content);
   }
 
@@ -111,7 +111,7 @@ export function getConfigValue(key: keyof CLIConfig): string | undefined {
 export async function clearConfig(): Promise<void> {
   config = {};
   if (existsSync(CONFIG_FILE)) {
-    writeFileSync(CONFIG_FILE, '{}', { mode: 0o600 });
+    writeFileSync(CONFIG_FILE, "{}", { mode: 0o600 });
   }
 }
 

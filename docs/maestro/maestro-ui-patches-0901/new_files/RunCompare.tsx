@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import React, { useEffect, useState } from "react";
+import { useParams, Link } from "react-router-dom";
 
 type NodeDelta = {
   id: string;
@@ -17,10 +17,9 @@ type CompareResponse = {
 };
 
 async function fetchCompare(runId: string): Promise<CompareResponse> {
-  const base =
-    (window as any).__MAESTRO_CFG__?.gatewayBase ?? '/api/maestro/v1';
+  const base = (window as any).__MAESTRO_CFG__?.gatewayBase ?? "/api/maestro/v1";
   const res = await fetch(`${base}/runs/${runId}/compare/previous`);
-  if (!res.ok) throw new Error('Failed to compare');
+  if (!res.ok) throw new Error("Failed to compare");
   return res.json();
 }
 
@@ -66,10 +65,9 @@ export default function RunComparePage() {
               .map((n) => (
                 <li key={n.id} className="border rounded p-2 mb-2">
                   <div className="font-mono">{n.id}</div>
-                  <div>{n.reason || 'Changed'}</div>
+                  <div>{n.reason || "Changed"}</div>
                   <div>
-                    Duration Δ: {n.durationDeltaMs ?? 0} ms · Cost Δ:{' '}
-                    {n.costDelta ?? 0}
+                    Duration Δ: {n.durationDeltaMs ?? 0} ms · Cost Δ: {n.costDelta ?? 0}
                   </div>
                 </li>
               ))}

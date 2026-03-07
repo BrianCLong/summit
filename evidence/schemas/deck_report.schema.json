@@ -1,10 +1,10 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "type": "object",
-  "required": ["id","status"],
+  "required": ["id", "status"],
   "properties": {
-    "id": {"type":"string"},
-    "status": {"type":"string"},
-    "notes": {"type":"string"}
+    "id": { "type": "string" },
+    "status": { "type": "string" },
+    "notes": { "type": "string" }
   }
 }

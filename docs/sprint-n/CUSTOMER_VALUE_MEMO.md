@@ -25,13 +25,13 @@ This manifests as:
 
 ### Current Workarounds (All Failing)
 
-| Approach | Why It Fails |
-|----------|--------------|
-| Email chains | Can't be verified, incomplete, buried in inboxes |
-| SharePoint folders | Unstructured, no linking, version chaos |
-| Meeting notes | Informal, missing context, often not recorded |
-| GRC tools | Checklist-focused, not decision-focused |
-| Spreadsheets | No provenance, easily modified, no audit trail |
+| Approach           | Why It Fails                                     |
+| ------------------ | ------------------------------------------------ |
+| Email chains       | Can't be verified, incomplete, buried in inboxes |
+| SharePoint folders | Unstructured, no linking, version chaos          |
+| Meeting notes      | Informal, missing context, often not recorded    |
+| GRC tools          | Checklist-focused, not decision-focused          |
+| Spreadsheets       | No provenance, easily modified, no audit trail   |
 
 ### The Cost
 
@@ -58,27 +58,34 @@ Hashed   Confidence   Approval    Merkle Root
 ### Key Capabilities
 
 #### 1. Structured Decision Capture
+
 Not documents—typed, linked data with explicit:
+
 - Decision question
 - Options considered
 - Constraints applied
 - Selected choice with rationale
 
 #### 2. Evidence-Backed Claims
+
 Every assertion about an entity includes:
+
 - Source reference
 - Content hash (proves it hasn't changed)
 - Confidence score
 - Freshness date
 
 #### 3. Approval Workflow
+
 - Role-based approval chains
 - Human-in-the-loop for AI recommendations
 - Timestamp and identity capture
 - Rejection reasons recorded
 
 #### 4. Disclosure Pack Generation
+
 One-click audit-ready documentation:
+
 - Complete decision summary
 - All evidence referenced
 - Full approval chain
@@ -91,6 +98,7 @@ One-click audit-ready documentation:
 ### Ideal Customer Profile (ICP)
 
 **Company Characteristics:**
+
 - Enterprise (1,000+ employees) or regulated mid-market
 - Industries: Financial services, healthcare, technology, government contractors
 - Compliance requirements: SOC2, HIPAA, GDPR, FedRAMP, or industry-specific
@@ -98,12 +106,12 @@ One-click audit-ready documentation:
 
 **Buyer Personas:**
 
-| Role | Pain Point | Value Proposition |
-|------|------------|-------------------|
-| Chief Risk Officer | Can't demonstrate decision governance | Auditable decision framework |
-| VP Compliance | Audit prep consumes team | Self-documenting decisions |
-| CISO | Vendor/tool approvals lack rigor | Evidence-based security decisions |
-| Head of Procurement | Contract decisions questioned | Defensible vendor selections |
+| Role                | Pain Point                            | Value Proposition                 |
+| ------------------- | ------------------------------------- | --------------------------------- |
+| Chief Risk Officer  | Can't demonstrate decision governance | Auditable decision framework      |
+| VP Compliance       | Audit prep consumes team              | Self-documenting decisions        |
+| CISO                | Vendor/tool approvals lack rigor      | Evidence-based security decisions |
+| Head of Procurement | Contract decisions questioned         | Defensible vendor selections      |
 
 ### Anti-Patterns (Not a Fit)
 
@@ -118,12 +126,12 @@ One-click audit-ready documentation:
 
 ### Landscape
 
-| Category | Examples | Gap |
-|----------|----------|-----|
-| GRC Platforms | ServiceNow, Archer, LogicGate | Control-focused, not decision-focused |
-| Document Management | SharePoint, Confluence | No structured decision capture |
-| Workflow Tools | Jira, Monday | Task-focused, not evidence-linked |
-| AI Decision Tools | Various | Black box, no provenance |
+| Category            | Examples                      | Gap                                   |
+| ------------------- | ----------------------------- | ------------------------------------- |
+| GRC Platforms       | ServiceNow, Archer, LogicGate | Control-focused, not decision-focused |
+| Document Management | SharePoint, Confluence        | No structured decision capture        |
+| Workflow Tools      | Jira, Monday                  | Task-focused, not evidence-linked     |
+| AI Decision Tools   | Various                       | Black box, no provenance              |
 
 ### IntelGraph Differentiation
 
@@ -145,12 +153,12 @@ One-click audit-ready documentation:
 
 **For Design Partners:**
 
-| Metric | Target | Measurement |
-|--------|--------|-------------|
-| Audit prep time | -50% | Hours spent on decision documentation |
-| Decision reconstruction | <5 min | Time to explain any past decision |
-| Evidence coverage | >90% | Decisions with linked evidence |
-| Compliance findings | -30% | Decision-related audit findings |
+| Metric                  | Target | Measurement                           |
+| ----------------------- | ------ | ------------------------------------- |
+| Audit prep time         | -50%   | Hours spent on decision documentation |
+| Decision reconstruction | <5 min | Time to explain any past decision     |
+| Evidence coverage       | >90%   | Decisions with linked evidence        |
+| Compliance findings     | -30%   | Decision-related audit findings       |
 
 ### Demo Proof Points
 
@@ -224,14 +232,14 @@ During design partner demos, we demonstrate:
 
 ## Appendix: Feature Comparison
 
-| Capability | IntelGraph | GRC Tools | Doc Management | Spreadsheets |
-|------------|------------|-----------|----------------|--------------|
-| Structured decisions | ✅ | ⚠️ Partial | ❌ | ❌ |
-| Evidence linking | ✅ | ❌ | ❌ | ❌ |
-| Cryptographic integrity | ✅ | ❌ | ❌ | ❌ |
-| Confidence scoring | ✅ | ❌ | ❌ | ⚠️ Manual |
-| Approval workflows | ✅ | ✅ | ⚠️ Basic | ❌ |
-| Disclosure pack export | ✅ | ⚠️ Reports | ❌ | ❌ |
-| AI recommendations | ✅ | ❌ | ❌ | ❌ |
-| Graph queries | ✅ | ❌ | ❌ | ❌ |
-| Audit trail | ✅ | ✅ | ⚠️ Basic | ❌ |
+| Capability              | IntelGraph | GRC Tools  | Doc Management | Spreadsheets |
+| ----------------------- | ---------- | ---------- | -------------- | ------------ |
+| Structured decisions    | ✅         | ⚠️ Partial | ❌             | ❌           |
+| Evidence linking        | ✅         | ❌         | ❌             | ❌           |
+| Cryptographic integrity | ✅         | ❌         | ❌             | ❌           |
+| Confidence scoring      | ✅         | ❌         | ❌             | ⚠️ Manual    |
+| Approval workflows      | ✅         | ✅         | ⚠️ Basic       | ❌           |
+| Disclosure pack export  | ✅         | ⚠️ Reports | ❌             | ❌           |
+| AI recommendations      | ✅         | ❌         | ❌             | ❌           |
+| Graph queries           | ✅         | ❌         | ❌             | ❌           |
+| Audit trail             | ✅         | ✅         | ⚠️ Basic       | ❌           |

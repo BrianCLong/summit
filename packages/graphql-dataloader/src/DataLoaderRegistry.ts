@@ -1,7 +1,7 @@
-import DataLoader from 'dataloader';
-import pino from 'pino';
+import DataLoader from "dataloader";
+import pino from "pino";
 
-const logger = pino({ name: 'DataLoaderRegistry' });
+const logger = pino({ name: "DataLoaderRegistry" });
 
 /**
  * Registry for managing DataLoader instances per request
@@ -14,7 +14,7 @@ export class DataLoaderRegistry {
    */
   register<K, V>(name: string, loader: DataLoader<K, V>): void {
     this.loaders.set(name, loader);
-    logger.debug({ name }, 'Loader registered');
+    logger.debug({ name }, "Loader registered");
   }
 
   /**
@@ -27,10 +27,7 @@ export class DataLoaderRegistry {
   /**
    * Get or create a loader
    */
-  getOrCreate<K, V>(
-    name: string,
-    factory: () => DataLoader<K, V>
-  ): DataLoader<K, V> {
+  getOrCreate<K, V>(name: string, factory: () => DataLoader<K, V>): DataLoader<K, V> {
     if (!this.loaders.has(name)) {
       const loader = factory();
       this.register(name, loader);
@@ -46,7 +43,7 @@ export class DataLoaderRegistry {
       loader.clearAll();
     }
     this.loaders.clear();
-    logger.debug('All loaders cleared');
+    logger.debug("All loaders cleared");
   }
 
   /**
@@ -72,7 +69,7 @@ export class DataLoaderRegistry {
     const loader = this.loaders.get(name);
     if (loader) {
       loader.prime(key, value);
-      logger.debug({ name, key }, 'Loader cache primed');
+      logger.debug({ name, key }, "Loader cache primed");
     }
   }
 
@@ -83,7 +80,7 @@ export class DataLoaderRegistry {
     const loader = this.loaders.get(name);
     if (loader) {
       loader.clearAll();
-      logger.debug({ name }, 'Loader cache cleared');
+      logger.debug({ name }, "Loader cache cleared");
     }
   }
 }

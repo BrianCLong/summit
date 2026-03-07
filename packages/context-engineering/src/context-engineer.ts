@@ -9,25 +9,25 @@ import type {
   ContextStream,
   RetrievalResult,
   RetrievalTrigger,
-} from './types.js';
-import { DEFAULT_CONTEXT_POLICIES } from './policy.js';
-import { estimateTokens, stableStringify } from './token.js';
-import { adaptToolOutput } from './tool-output.js';
-import { applyStreamBudget } from './eviction.js';
-import { compressItemIfNeeded } from './compression.js';
-import { CONTEXT_MANIFEST_SCHEMA_VERSION } from './manifest-schema.js';
+} from "./types.js";
+import { DEFAULT_CONTEXT_POLICIES } from "./policy.js";
+import { estimateTokens, stableStringify } from "./token.js";
+import { adaptToolOutput } from "./tool-output.js";
+import { applyStreamBudget } from "./eviction.js";
+import { compressItemIfNeeded } from "./compression.js";
+import { CONTEXT_MANIFEST_SCHEMA_VERSION } from "./manifest-schema.js";
 
 type StreamBuckets = Record<ContextStream, ContextItem[]>;
 
 const STREAMS: ContextStream[] = [
-  'system',
-  'user',
-  'history',
-  'tools',
-  'toolOutputs',
-  'retrieval',
-  'state',
-  'workingMemory',
+  "system",
+  "user",
+  "history",
+  "tools",
+  "toolOutputs",
+  "retrieval",
+  "state",
+  "workingMemory",
 ];
 
 function nowIso(): string {
@@ -37,7 +37,7 @@ function nowIso(): string {
 function normalizeItems(
   inputs: ContextItemInput[] | undefined,
   stream: ContextStream,
-  offset: number,
+  offset: number
 ): ContextItem[] {
   if (!inputs?.length) return [];
   return inputs.map((input, index) => {
@@ -48,7 +48,7 @@ function normalizeItems(
       throw new Error(`Context item missing provenance for stream ${stream}`);
     }
     const id = input.id ?? `${stream}-${offset + index + 1}`;
-    const content = input.content ?? '';
+    const content = input.content ?? "";
     const addedAt = input.addedAt ?? nowIso();
     return {
       ...input,
@@ -56,18 +56,15 @@ function normalizeItems(
       stream,
       content,
       addedAt,
-      compressionState: input.compressionState ?? 'none',
+      compressionState: input.compressionState ?? "none",
       tokenCost: estimateTokens(content),
     };
   });
 }
 
-function applyToolPolicies(
-  items: ContextItem[],
-  policies: ContextPolicies,
-): ContextItem[] {
-  return items.map(item => {
-    if (item.stream !== 'toolOutputs') {
+function applyToolPolicies(items: ContextItem[], policies: ContextPolicies): ContextItem[] {
+  return items.map((item) => {
+    if (item.stream !== "toolOutputs") {
       return item;
     }
     const adapted = adaptToolOutput(item.content, policies.toolOutput);
@@ -79,11 +76,8 @@ function applyToolPolicies(
   });
 }
 
-function applyCompression(
-  items: ContextItem[],
-  policies: ContextPolicies,
-): ContextItem[] {
-  return items.map(item => {
+function applyCompression(items: ContextItem[], policies: ContextPolicies): ContextItem[] {
+  return items.map((item) => {
     const streamPolicy = policies.budget.perStream[item.stream];
     return compressItemIfNeeded(item, streamPolicy);
   });
@@ -91,7 +85,7 @@ function applyCompression(
 
 function applyBudgets(
   items: ContextItem[],
-  policies: ContextPolicies,
+  policies: ContextPolicies
 ): { kept: ContextItem[]; evicted: ContextItem[] } {
   const perStream: StreamBuckets = {
     system: [],
@@ -122,7 +116,7 @@ function applyBudgets(
 function enforceTotalBudget(
   items: ContextItem[],
   policies: ContextPolicies,
-  totalBudget: number,
+  totalBudget: number
 ): { kept: ContextItem[]; evicted: ContextItem[] } {
   const sorted = [...items].sort((a, b) => {
     const aPriority = policies.budget.perStream[a.stream].priority;
@@ -140,7 +134,7 @@ function enforceTotalBudget(
   for (let i = sorted.length - 1; i >= 0 && total > totalBudget; i -= 1) {
     const item = sorted[i];
     total -= item.tokenCost;
-    evicted.push({ ...item, evictionReason: 'total-budget' });
+    evicted.push({ ...item, evictionReason: "total-budget" });
     sorted.splice(i, 1);
   }
   return { kept: sorted, evicted };
@@ -150,7 +144,7 @@ function buildMetrics(
   kept: ContextItem[],
   evicted: ContextItem[],
   policies: ContextPolicies,
-  input: ContextBuildInput,
+  input: ContextBuildInput
 ): ContextMetrics {
   const totalTokens = kept.reduce((sum, item) => sum + item.tokenCost, 0);
   const totalBudget = policies.budget.totalBudget;
@@ -161,25 +155,22 @@ function buildMetrics(
   const retrievalPrecision =
     retrievedIds.length === 0
       ? 0
-      : retrievedIds.filter(id => referencedIds.has(id)).length /
-        retrievedIds.length;
+      : retrievedIds.filter((id) => referencedIds.has(id)).length / retrievedIds.length;
   const pinnedLabels = new Set(
-    policies.budget.perStream.history.pinnedLabels ?? ['intent', 'commitment'],
+    policies.budget.perStream.history.pinnedLabels ?? ["intent", "commitment"]
   );
-  const pinnedTotal = kept.filter(item =>
-    item.policyLabels?.some(label => pinnedLabels.has(label)),
+  const pinnedTotal = kept.filter((item) =>
+    item.policyLabels?.some((label) => pinnedLabels.has(label))
   ).length;
-  const pinnedEvicted = evicted.filter(item =>
-    item.policyLabels?.some(label => pinnedLabels.has(label)),
+  const pinnedEvicted = evicted.filter((item) =>
+    item.policyLabels?.some((label) => pinnedLabels.has(label))
   ).length;
   const informationPersistence =
-    pinnedTotal + pinnedEvicted === 0
-      ? 1
-      : pinnedTotal / (pinnedTotal + pinnedEvicted);
-  const tokenSinks = STREAMS.map(stream => ({
+    pinnedTotal + pinnedEvicted === 0 ? 1 : pinnedTotal / (pinnedTotal + pinnedEvicted);
+  const tokenSinks = STREAMS.map((stream) => ({
     stream,
     tokens: kept
-      .filter(item => item.stream === stream)
+      .filter((item) => item.stream === stream)
       .reduce((sum, item) => sum + item.tokenCost, 0),
   }))
     .sort((a, b) => b.tokens - a.tokens)
@@ -197,12 +188,12 @@ function buildMetrics(
 function buildManifest(
   kept: ContextItem[],
   evicted: ContextItem[],
-  metrics: ContextMetrics,
+  metrics: ContextMetrics
 ): ContextManifest {
-  const evictions = evicted.map(item => ({
+  const evictions = evicted.map((item) => ({
     itemId: item.id,
     stream: item.stream,
-    reason: item.evictionReason ?? 'budget',
+    reason: item.evictionReason ?? "budget",
     tokenCost: item.tokenCost,
     evictedAt: nowIso(),
   }));
@@ -215,19 +206,12 @@ function buildManifest(
   };
 }
 
-function toMessages(items: ContextItem[]): BuildContextResult['messages'] {
+function toMessages(items: ContextItem[]): BuildContextResult["messages"] {
   return items
     .sort((a, b) => a.addedAt.localeCompare(b.addedAt))
-    .map(item => ({
-      role: item.stream === 'system'
-        ? 'system'
-        : item.stream === 'user'
-          ? 'user'
-          : 'assistant',
-      content:
-        typeof item.content === 'string'
-          ? item.content
-          : stableStringify(item.content),
+    .map((item) => ({
+      role: item.stream === "system" ? "system" : item.stream === "user" ? "user" : "assistant",
+      content: typeof item.content === "string" ? item.content : stableStringify(item.content),
     }));
 }
 
@@ -247,14 +231,14 @@ export function buildContext(input: ContextBuildInput): BuildContextResult {
     },
   };
   const streams: ContextItem[] = [
-    ...normalizeItems(input.system, 'system', 0),
-    ...normalizeItems(input.user, 'user', 1000),
-    ...normalizeItems(input.history, 'history', 2000),
-    ...normalizeItems(input.tools, 'tools', 3000),
-    ...normalizeItems(input.toolOutputs, 'toolOutputs', 4000),
-    ...normalizeItems(input.retrieval, 'retrieval', 5000),
-    ...normalizeItems(input.state, 'state', 6000),
-    ...normalizeItems(input.workingMemory, 'workingMemory', 7000),
+    ...normalizeItems(input.system, "system", 0),
+    ...normalizeItems(input.user, "user", 1000),
+    ...normalizeItems(input.history, "history", 2000),
+    ...normalizeItems(input.tools, "tools", 3000),
+    ...normalizeItems(input.toolOutputs, "toolOutputs", 4000),
+    ...normalizeItems(input.retrieval, "retrieval", 5000),
+    ...normalizeItems(input.state, "state", 6000),
+    ...normalizeItems(input.workingMemory, "workingMemory", 7000),
   ];
   const adapted = applyToolPolicies(streams, policies);
   const compressed = applyCompression(adapted, policies);
@@ -270,16 +254,16 @@ export function buildContext(input: ContextBuildInput): BuildContextResult {
 
 export function updateContextOnToolResult(
   input: ContextBuildInput,
-  result: ContextItemInput,
+  result: ContextItemInput
 ): BuildContextResult {
   const toolOutputs = input.toolOutputs ? [...input.toolOutputs] : [];
-  toolOutputs.push({ ...result, stream: 'toolOutputs' });
+  toolOutputs.push({ ...result, stream: "toolOutputs" });
   return buildContext({ ...input, toolOutputs });
 }
 
 export function compressIfNeeded(
   items: ContextItem[],
-  policies?: Partial<ContextPolicies>,
+  policies?: Partial<ContextPolicies>
 ): ContextItem[] {
   const policy = {
     budget: {
@@ -300,13 +284,13 @@ export function compressIfNeeded(
 
 export async function retrieveIfTriggered(
   trigger: RetrievalTrigger | null,
-  retrieve: (query: string) => Promise<ContextItemInput[]>,
+  retrieve: (query: string) => Promise<ContextItemInput[]>
 ): Promise<RetrievalResult> {
   if (!trigger) {
     return {
       items: [],
-      query: '',
-      summary: 'Retrieval not triggered.',
+      query: "",
+      summary: "Retrieval not triggered.",
       empty: true,
     };
   }

@@ -1,5 +1,5 @@
-import { ActionContractRegistry, applyRedactionRules } from './contracts.js';
-import { TraceEvent } from './types.js';
+import { ActionContractRegistry, applyRedactionRules } from "./contracts.js";
+import { TraceEvent } from "./types.js";
 
 export interface ToolExecutionResult<TResult> {
   toolName: string;
@@ -41,7 +41,7 @@ export class ToolRuntime {
       planId?: string;
       stepId?: string;
       recorder?: TraceRecorder;
-    },
+    }
   ): Promise<ToolExecutionResult<TResult>> {
     const contract = this.registry.get(toolName);
     if (!contract) {
@@ -56,14 +56,14 @@ export class ToolRuntime {
     const parsedArgs = contract.argsSchema.safeParse(args);
     if (!parsedArgs.success) {
       await context.recorder?.record({
-        type: 'tool:validation_failed',
+        type: "tool:validation_failed",
         timestamp: new Date().toISOString(),
         run_id: context.runId,
         plan_id: context.planId,
         step_id: context.stepId,
         tool_name: toolName,
         data: {
-          stage: 'args',
+          stage: "args",
           issues: parsedArgs.error.issues.map((issue) => issue.message),
           args: applyRedactionRules(args, contract.redactionRules),
         },
@@ -76,7 +76,7 @@ export class ToolRuntime {
     }
 
     await context.recorder?.record({
-      type: 'tool:started',
+      type: "tool:started",
       timestamp: new Date().toISOString(),
       run_id: context.runId,
       plan_id: context.planId,
@@ -90,14 +90,14 @@ export class ToolRuntime {
       const parsedOutput = contract.outputSchema.safeParse(output);
       if (!parsedOutput.success) {
         await context.recorder?.record({
-          type: 'tool:validation_failed',
+          type: "tool:validation_failed",
           timestamp: new Date().toISOString(),
           run_id: context.runId,
           plan_id: context.planId,
           step_id: context.stepId,
           tool_name: toolName,
           data: {
-            stage: 'output',
+            stage: "output",
             issues: parsedOutput.error.issues.map((issue) => issue.message),
             output: applyRedactionRules(output, contract.redactionRules),
           },
@@ -113,9 +113,9 @@ export class ToolRuntime {
       if (contract.postcondition) {
         const post = contract.postcondition(parsedOutput.data);
         if (!post.ok) {
-          postconditionIssues = post.issues ?? ['Postcondition failed'];
+          postconditionIssues = post.issues ?? ["Postcondition failed"];
           await context.recorder?.record({
-            type: 'tool:postcondition_failed',
+            type: "tool:postcondition_failed",
             timestamp: new Date().toISOString(),
             run_id: context.runId,
             plan_id: context.planId,
@@ -139,7 +139,7 @@ export class ToolRuntime {
       }
 
       await context.recorder?.record({
-        type: 'tool:completed',
+        type: "tool:completed",
         timestamp: new Date().toISOString(),
         run_id: context.runId,
         plan_id: context.planId,
@@ -153,9 +153,9 @@ export class ToolRuntime {
 
       return { toolName, success: true, output: parsedOutput.data, postconditionIssues };
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Tool execution failed';
+      const message = error instanceof Error ? error.message : "Tool execution failed";
       await context.recorder?.record({
-        type: 'tool:failed',
+        type: "tool:failed",
         timestamp: new Date().toISOString(),
         run_id: context.runId,
         plan_id: context.planId,

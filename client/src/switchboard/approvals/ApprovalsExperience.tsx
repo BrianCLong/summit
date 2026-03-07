@@ -14,7 +14,7 @@ import {
   TextField,
   Tooltip,
   Typography,
-} from '@mui/material';
+} from "@mui/material";
 import {
   CheckCircle as CheckCircleIcon,
   Close as CloseIcon,
@@ -22,27 +22,27 @@ import {
   Gavel as GavelIcon,
   LockClock as LockClockIcon,
   Refresh as RefreshIcon,
-} from '@mui/icons-material';
-import { useEffect, useMemo, useState } from 'react';
-import { AuditTimeline } from './AuditTimeline';
-import { submitDecision, useAbacClaims, useApprovalDetails, useApprovalsData } from './hooks';
+} from "@mui/icons-material";
+import { useEffect, useMemo, useState } from "react";
+import { AuditTimeline } from "./AuditTimeline";
+import { submitDecision, useAbacClaims, useApprovalDetails, useApprovalsData } from "./hooks";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import type { ApprovalRecord, ApprovalStatus } from './types';
+import type { ApprovalRecord, ApprovalStatus } from "./types";
 
-const REQUIRED_CLAIMS = ['approval:review'];
+const REQUIRED_CLAIMS = ["approval:review"];
 
-const statusColor: Record<ApprovalStatus, 'info' | 'success' | 'error' | 'warning'> = {
-  pending: 'info',
-  awaiting_second: 'warning',
-  approved: 'success',
-  denied: 'error',
-  escalated: 'warning',
+const statusColor: Record<ApprovalStatus, "info" | "success" | "error" | "warning"> = {
+  pending: "info",
+  awaiting_second: "warning",
+  approved: "success",
+  denied: "error",
+  escalated: "warning",
 };
 
 export default function ApprovalsExperience() {
   const { approvals, loading, error, refresh } = useApprovalsData();
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [rationale, setRationale] = useState('');
+  const [rationale, setRationale] = useState("");
   const [formError, setFormError] = useState<string | null>(null);
   const [banner, setBanner] = useState<string | null>(null);
   const [optimisticStatuses, setOptimisticStatuses] = useState<Record<string, ApprovalStatus>>({});
@@ -51,11 +51,9 @@ export default function ApprovalsExperience() {
   const displayApprovals = useMemo(
     () =>
       approvals.map((item) =>
-        optimisticStatuses[item.id]
-          ? { ...item, status: optimisticStatuses[item.id] }
-          : item,
+        optimisticStatuses[item.id] ? { ...item, status: optimisticStatuses[item.id] } : item
       ),
-    [approvals, optimisticStatuses],
+    [approvals, optimisticStatuses]
   );
 
   useEffect(() => {
@@ -64,23 +62,24 @@ export default function ApprovalsExperience() {
     }
   }, [displayApprovals, selectedId]);
 
-  const { detail, timeline, loading: detailLoading } = useApprovalDetails(
-    selectedId,
-    displayApprovals,
-  );
+  const {
+    detail,
+    timeline,
+    loading: detailLoading,
+  } = useApprovalDetails(selectedId, displayApprovals);
   const abac = useAbacClaims(REQUIRED_CLAIMS);
   const requiresDualClaim = detail?.requiresDualControl ?? false;
-  const hasDualClaim = abac.claims.includes('approval:dual-control');
+  const hasDualClaim = abac.claims.includes("approval:dual-control");
 
-  const handleDecision = async (action: 'approve' | 'deny') => {
+  const handleDecision = async (action: "approve" | "deny") => {
     if (!detail) return;
     const trimmed = rationale.trim();
     if (trimmed.length < 8) {
-      setFormError('Add a rationale with at least 8 characters to satisfy audit policy.');
+      setFormError("Add a rationale with at least 8 characters to satisfy audit policy.");
       return;
     }
     if (requiresDualClaim && !hasDualClaim) {
-      setFormError('Dual-control is enforced and your ABAC claims do not allow approvals.');
+      setFormError("Dual-control is enforced and your ABAC claims do not allow approvals.");
       return;
     }
 
@@ -93,20 +92,20 @@ export default function ApprovalsExperience() {
         (result.approvalsCompleted || detail.approvalsCompleted || 0);
       const needsPartner = detail.requiresDualControl && approvalsRemaining > 0;
       const nextStatus: ApprovalStatus =
-        needsPartner && action === 'approve'
-          ? 'awaiting_second'
+        needsPartner && action === "approve"
+          ? "awaiting_second"
           : (result.status as ApprovalStatus) || action;
       setOptimisticStatuses((prev) => ({ ...prev, [detail.id]: nextStatus }));
       setBanner(
         needsPartner
-          ? 'Dual-control enforced: awaiting co-signer before execution.'
-          : 'Decision recorded and propagated to the workflow.',
+          ? "Dual-control enforced: awaiting co-signer before execution."
+          : "Decision recorded and propagated to the workflow."
       );
-      setRationale('');
+      setRationale("");
       await refresh();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
-      setFormError(err?.message || 'Unable to submit decision');
+      setFormError(err?.message || "Unable to submit decision");
     } finally {
       setSubmitting(false);
     }
@@ -126,11 +125,10 @@ export default function ApprovalsExperience() {
       <Alert
         severity="warning"
         icon={<ErrorOutlineIcon fontSize="inherit" />}
-        sx={{ borderRadius: 2, border: '1px solid hsl(var(--stroke-strong))' }}
+        sx={{ borderRadius: 2, border: "1px solid hsl(var(--stroke-strong))" }}
       >
-        You are missing the required ABAC claims ({REQUIRED_CLAIMS.join(
-          ', ',
-        )}) to review approvals. Request access or escalate to a privileged reviewer.
+        You are missing the required ABAC claims ({REQUIRED_CLAIMS.join(", ")}) to review approvals.
+        Request access or escalate to a privileged reviewer.
       </Alert>
     );
   }
@@ -138,13 +136,13 @@ export default function ApprovalsExperience() {
   return (
     <Box
       sx={{
-        display: 'grid',
+        display: "grid",
         gap: 2,
-        gridTemplateColumns: { xs: '1fr', md: '360px 1fr' },
-        backgroundColor: 'hsl(var(--surface-subtle))',
+        gridTemplateColumns: { xs: "1fr", md: "360px 1fr" },
+        backgroundColor: "hsl(var(--surface-subtle))",
         p: 2,
         borderRadius: 2,
-        border: '1px solid hsl(var(--stroke-strong))',
+        border: "1px solid hsl(var(--stroke-strong))",
       }}
     >
       <Stack spacing={1.5}>
@@ -184,8 +182,8 @@ export default function ApprovalsExperience() {
         <Card
           variant="outlined"
           sx={{
-            backgroundColor: 'hsl(var(--surface-elevated))',
-            borderColor: 'hsl(var(--stroke-strong))',
+            backgroundColor: "hsl(var(--surface-elevated))",
+            borderColor: "hsl(var(--stroke-strong))",
           }}
         >
           <CardContent sx={{ p: 0 }}>
@@ -193,19 +191,19 @@ export default function ApprovalsExperience() {
               {displayApprovals.map((item) => {
                 const secondary =
                   item.requiresDualControl && !hasDualClaim
-                    ? 'Dual control enforced • approval guarded'
-                    : item.reason || 'No description';
+                    ? "Dual control enforced • approval guarded"
+                    : item.reason || "No description";
                 return (
                   <ListItemButton
                     key={item.id}
                     selected={item.id === selectedId}
                     onClick={() => setSelectedId(item.id)}
-                    sx={{ alignItems: 'flex-start', gap: 1.5, py: 1.5 }}
+                    sx={{ alignItems: "flex-start", gap: 1.5, py: 1.5 }}
                   >
                     <Chip
                       size="small"
-                      label={item.status.replace('_', ' ')}
-                      color={statusColor[item.status] || 'info'}
+                      label={item.status.replace("_", " ")}
+                      color={statusColor[item.status] || "info"}
                     />
                     <ListItemText
                       primary={
@@ -222,8 +220,7 @@ export default function ApprovalsExperience() {
                       }
                       secondary={
                         <Typography variant="body2" color="text.secondary">
-                          Run {item.runId || 'n/a'} • Requested by {item.requester} •{' '}
-                          {secondary}
+                          Run {item.runId || "n/a"} • Requested by {item.requester} • {secondary}
                         </Typography>
                       }
                     />
@@ -245,8 +242,8 @@ export default function ApprovalsExperience() {
       <Card
         variant="outlined"
         sx={{
-          backgroundColor: 'hsl(var(--surface-elevated))',
-          borderColor: 'hsl(var(--stroke-strong))',
+          backgroundColor: "hsl(var(--surface-elevated))",
+          borderColor: "hsl(var(--stroke-strong))",
         }}
       >
         <CardContent>
@@ -261,33 +258,31 @@ export default function ApprovalsExperience() {
               <Stack direction="row" spacing={1} alignItems="center">
                 <Chip
                   size="small"
-                  label={detail.status.replace('_', ' ')}
-                  color={statusColor[detail.status] || 'info'}
+                  label={detail.status.replace("_", " ")}
+                  color={statusColor[detail.status] || "info"}
                 />
-                <Chip
-                  size="small"
-                  variant="outlined"
-                  label={`Run ${detail.runId || 'n/a'}`}
-                />
+                <Chip size="small" variant="outlined" label={`Run ${detail.runId || "n/a"}`} />
                 <Chip size="small" variant="outlined" label={detail.action} />
               </Stack>
-              <Typography variant="h6">{detail.reason || 'Approval detail'}</Typography>
+              <Typography variant="h6">{detail.reason || "Approval detail"}</Typography>
               <Typography variant="body2" color="text.secondary">
-                Requested by <strong>{detail.requester}</strong>{' '}
-                {detail.createdAt ? `on ${new Date(detail.createdAt).toLocaleString()}` : ''}
+                Requested by <strong>{detail.requester}</strong>{" "}
+                {detail.createdAt ? `on ${new Date(detail.createdAt).toLocaleString()}` : ""}
               </Typography>
               <Stack direction="row" spacing={1}>
                 <Chip
                   size="small"
                   label={`Approvals ${detail.approvalsCompleted}/${detail.approvalsRequired}`}
-                  color={detail.approvalsCompleted >= detail.approvalsRequired ? 'success' : 'default'}
+                  color={
+                    detail.approvalsCompleted >= detail.approvalsRequired ? "success" : "default"
+                  }
                 />
                 {detail.requiresDualControl ? (
                   <Chip
                     size="small"
                     icon={<LockClockIcon fontSize="small" />}
                     label="Dual-control"
-                    color={hasDualClaim ? 'warning' : 'default'}
+                    color={hasDualClaim ? "warning" : "default"}
                   />
                 ) : null}
               </Stack>
@@ -304,7 +299,7 @@ export default function ApprovalsExperience() {
                   multiline
                   minRows={3}
                   error={Boolean(formError)}
-                  helperText={formError || 'Required for audit and dual-control workflows'}
+                  helperText={formError || "Required for audit and dual-control workflows"}
                 />
                 <Stack direction="row" spacing={1}>
                   <Button
@@ -312,7 +307,7 @@ export default function ApprovalsExperience() {
                     color="success"
                     startIcon={<CheckCircleIcon />}
                     disabled={submitting}
-                    onClick={() => handleDecision('approve')}
+                    onClick={() => handleDecision("approve")}
                   >
                     Approve
                   </Button>
@@ -321,7 +316,7 @@ export default function ApprovalsExperience() {
                     color="error"
                     startIcon={<CloseIcon />}
                     disabled={submitting}
-                    onClick={() => handleDecision('deny')}
+                    onClick={() => handleDecision("deny")}
                   >
                     Deny
                   </Button>
@@ -332,8 +327,8 @@ export default function ApprovalsExperience() {
                     icon={<LockClockIcon fontSize="inherit" />}
                     sx={{ mt: 1 }}
                   >
-                    Dual-control enforced. A reviewer with <code>approval:dual-control</code>{' '}
-                    must co-sign before execution.
+                    Dual-control enforced. A reviewer with <code>approval:dual-control</code> must
+                    co-sign before execution.
                   </Alert>
                 ) : null}
               </Stack>

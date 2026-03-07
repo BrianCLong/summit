@@ -10,16 +10,19 @@ The Agentic Plan Gate enforces the [On Programming with Agents](../../standards/
 ## 2. Troubleshooting Failures
 
 ### Error: `MISSING_PLAN`
-*   **Cause:** The PR was detected as agentic (or policy requires it for all), but no `PLAN.md` or equivalent was found.
-*   **Fix:** Add a `PLAN.md` file to the root of the PR, following the template in the standard.
+
+- **Cause:** The PR was detected as agentic (or policy requires it for all), but no `PLAN.md` or equivalent was found.
+- **Fix:** Add a `PLAN.md` file to the root of the PR, following the template in the standard.
 
 ### Error: `LEFTOVER_TODO`
-*   **Cause:** The agent left `TODO` or `FIXME` comments in the modified code.
-*   **Fix:** Inspect the code. If the work is incomplete, finish it. If the TODO is legitimate technical debt for later, suppress the rule or reword.
+
+- **Cause:** The agent left `TODO` or `FIXME` comments in the modified code.
+- **Fix:** Inspect the code. If the work is incomplete, finish it. If the TODO is legitimate technical debt for later, suppress the rule or reword.
 
 ### Error: `DRIFT_DETECTED`
-*   **Cause:** The `agentic-policy-drift` workflow found that the gate configuration or workflow file is missing/disabled.
-*   **Fix:** Restore the `.github/workflows/agentic-plan-gate.yml` or `scripts/agentic_policy/config.json`.
+
+- **Cause:** The `agentic-policy-drift` workflow found that the gate configuration or workflow file is missing/disabled.
+- **Fix:** Restore the `.github/workflows/agentic-plan-gate.yml` or `scripts/agentic_policy/config.json`.
 
 ## 3. Configuration
 
@@ -33,12 +36,13 @@ Configuration is located in `scripts/agentic_policy/config.json`.
 }
 ```
 
-*   **To Enable Blocking:** Change `"mode": "warn"` to `"mode": "strict"`.
-*   **To Disable:** Set `"mode": "off"`.
+- **To Enable Blocking:** Change `"mode": "warn"` to `"mode": "strict"`.
+- **To Disable:** Set `"mode": "off"`.
 
 ## 4. Escalation
 
 If the gate is blocking critical releases falsely:
+
 1.  Edit `scripts/agentic_policy/config.json` to set `mode: "warn"`.
 2.  Merge the config change.
 3.  Re-run the PR check.

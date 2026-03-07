@@ -5,4 +5,4 @@
  * alias detection, entity disambiguation, and probabilistic identity graphs.
  */
 
-export * from './types.js';
+export * from "./types.js";

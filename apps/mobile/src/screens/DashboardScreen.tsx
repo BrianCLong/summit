@@ -1,10 +1,5 @@
 import React, { useCallback } from 'react';
-import {
-  View,
-  ScrollView,
-  RefreshControl,
-  TouchableOpacity,
-} from 'react-native';
+import { View, ScrollView, RefreshControl, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import {
@@ -83,12 +78,7 @@ export const DashboardScreen: React.FC = () => {
       {/* Header */}
       <View className="flex-row items-center justify-between px-4 py-3">
         <View className="flex-row items-center">
-          <Avatar
-            src={user?.avatar}
-            fallback={user?.name}
-            size="default"
-            online={!offlineMode}
-          />
+          <Avatar src={user?.avatar} fallback={user?.name} size="default" online={!offlineMode} />
           <View className="ml-3">
             <Text size="sm" variant="muted">
               Welcome back,
@@ -134,11 +124,7 @@ export const DashboardScreen: React.FC = () => {
         className="flex-1"
         contentContainerClassName="px-4 pb-6"
         refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor="#0ea5e9"
-          />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#0ea5e9" />
         }
       >
         {/* Quick Stats */}
@@ -153,8 +139,16 @@ export const DashboardScreen: React.FC = () => {
                 <View key={index} className="w-1/2 px-1 mb-2">
                   <Card className="h-24">
                     <CardContent className="flex-1 justify-between py-3">
-                      <View className={cn('w-8 h-8 rounded-lg items-center justify-center', stat.bgColor)}>
-                        <stat.icon size={18} color={stat.color.replace('text-', '#').replace('-400', '')} />
+                      <View
+                        className={cn(
+                          'w-8 h-8 rounded-lg items-center justify-center',
+                          stat.bgColor,
+                        )}
+                      >
+                        <stat.icon
+                          size={18}
+                          color={stat.color.replace('text-', '#').replace('-400', '')}
+                        />
                       </View>
                       <View>
                         <Text size="2xl" weight="bold">
@@ -200,18 +194,13 @@ export const DashboardScreen: React.FC = () => {
                 <TouchableOpacity
                   key={alert.id}
                   onPress={() => navigation.navigate('AlertDetails', { alertId: alert.id })}
-                  className={cn(
-                    'p-4',
-                    index < alerts.length - 1 && 'border-b border-dark-border',
-                  )}
+                  className={cn('p-4', index < alerts.length - 1 && 'border-b border-dark-border')}
                 >
                   <View className="flex-row items-start">
                     <View className="flex-1">
                       <View className="flex-row items-center gap-2 mb-1">
                         <PriorityBadge priority={alert.priority} />
-                        {!alert.isRead && (
-                          <View className="w-2 h-2 bg-intel-500 rounded-full" />
-                        )}
+                        {!alert.isRead && <View className="w-2 h-2 bg-intel-500 rounded-full" />}
                       </View>
                       <Text weight="medium" numberOfLines={1}>
                         {alert.title}
@@ -285,9 +274,7 @@ export const DashboardScreen: React.FC = () => {
               <CardContent className="flex-row items-center">
                 <Activity size={20} color="#0ea5e9" />
                 <View className="ml-3 flex-1">
-                  <Text size="sm">
-                    {syncStatus.pendingChanges} changes pending sync
-                  </Text>
+                  <Text size="sm">{syncStatus.pendingChanges} changes pending sync</Text>
                   {syncStatus.lastSyncAt && (
                     <Text size="xs" variant="muted">
                       Last synced: {new Date(syncStatus.lastSyncAt).toLocaleTimeString()}

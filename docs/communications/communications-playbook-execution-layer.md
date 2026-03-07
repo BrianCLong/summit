@@ -17,37 +17,37 @@ All sections inherit the Prime Directive and Operating Principles implicitly.
 
 ### Purpose
 
-* Maintain velocity, clarity, and trust
-* Prevent rumor, drift, and misalignment
-* Signal priorities without micromanagement
+- Maintain velocity, clarity, and trust
+- Prevent rumor, drift, and misalignment
+- Signal priorities without micromanagement
 
 ### Tone
 
-* Direct
-* Calm
-* Competent
-* Non-performative
+- Direct
+- Calm
+- Competent
+- Non-performative
 
 ### Allowed Content
 
-* Clear priorities and tradeoffs
-* Honest constraints
-* Directional timelines
-* Decision rationale (succinct)
+- Clear priorities and tradeoffs
+- Honest constraints
+- Directional timelines
+- Decision rationale (succinct)
 
 ### Prohibited Patterns
 
-* Public internal disagreement
-* Speculation about leadership intent
-* Emotional venting
-* Over-detailed future commitments
+- Public internal disagreement
+- Speculation about leadership intent
+- Emotional venting
+- Over-detailed future commitments
 
 ### Canonical Formats
 
-* Weekly leadership update
-* Quarterly direction memo
-* Incident postmortem (blameless, factual)
-* Strategy clarification note
+- Weekly leadership update
+- Quarterly direction memo
+- Incident postmortem (blameless, factual)
+- Strategy clarification note
 
 ---
 
@@ -55,30 +55,30 @@ All sections inherit the Prime Directive and Operating Principles implicitly.
 
 ### Purpose
 
-* Shape first impression and durable narrative
-* Withstand adversarial framing
-* Avoid misquotation risk
+- Shape first impression and durable narrative
+- Withstand adversarial framing
+- Avoid misquotation risk
 
 ### Tone
 
-* Authoritative
-* Reserved
-* Precise
-* Quote-safe
+- Authoritative
+- Reserved
+- Precise
+- Quote-safe
 
 ### Rules
 
-* Speak only on what is true *now*
-* Frame progress without timelines unless necessary
-* Never speculate on competitors, regulation, or hypotheticals
-* Prefer written statements to live commentary
+- Speak only on what is true _now_
+- Frame progress without timelines unless necessary
+- Never speculate on competitors, regulation, or hypotheticals
+- Prefer written statements to live commentary
 
 ### Default Posture
 
-* Calm confidence
-* Willing silence
-* Minimal adjectives
-* High signal density
+- Calm confidence
+- Willing silence
+- Minimal adjectives
+- High signal density
 
 ---
 
@@ -86,29 +86,29 @@ All sections inherit the Prime Directive and Operating Principles implicitly.
 
 ### Purpose
 
-* Establish trust, discipline, and inevitability
-* Align expectations without overspecifying execution
+- Establish trust, discipline, and inevitability
+- Align expectations without overspecifying execution
 
 ### Tone
 
-* Serious
-* Long-term
-* Measured optimism
-* Data-backed where possible
+- Serious
+- Long-term
+- Measured optimism
+- Data-backed where possible
 
 ### Required Elements
 
-* Clear strategic throughline
-* Honest articulation of risk
-* Evidence of learning velocity
-* Capital efficiency narrative
+- Clear strategic throughline
+- Honest articulation of risk
+- Evidence of learning velocity
+- Capital efficiency narrative
 
 ### Forbidden
 
-* Surprise disclosures
-* Overly precise timelines
-* Inflated TAM narratives
-* Reactive defensiveness
+- Surprise disclosures
+- Overly precise timelines
+- Inflated TAM narratives
+- Reactive defensiveness
 
 ---
 
@@ -116,27 +116,27 @@ All sections inherit the Prime Directive and Operating Principles implicitly.
 
 ### Purpose
 
-* Attract high-agency, high-judgment candidates
-* Filter out misaligned profiles implicitly
+- Attract high-agency, high-judgment candidates
+- Filter out misaligned profiles implicitly
 
 ### Tone
 
-* Exacting
-* Purposeful
-* Non-salesy
-* Respectful of candidate intelligence
+- Exacting
+- Purposeful
+- Non-salesy
+- Respectful of candidate intelligence
 
 ### Signaling Strategy
 
-* Standards over perks
-* Mission clarity over culture hype
-* Autonomy paired with accountability
+- Standards over perks
+- Mission clarity over culture hype
+- Autonomy paired with accountability
 
 ### Anti-Patterns
 
-* “Family” language
-* Vague values
-* Overpromised growth paths
+- “Family” language
+- Vague values
+- Overpromised growth paths
 
 ---
 
@@ -144,15 +144,15 @@ All sections inherit the Prime Directive and Operating Principles implicitly.
 
 ### Purpose
 
-* Create momentum without hype
-* Convert curiosity into engagement
-* Reinforce inevitability
+- Create momentum without hype
+- Convert curiosity into engagement
+- Reinforce inevitability
 
 ### Tone
 
-* Confident
-* Clear
-* Outcome-oriented
+- Confident
+- Clear
+- Outcome-oriented
 
 ### Messaging Hierarchy
 
@@ -163,9 +163,9 @@ All sections inherit the Prime Directive and Operating Principles implicitly.
 
 ### Avoid
 
-* Feature dumping
-* Trend chasing
-* Claims that lock roadmap prematurely
+- Feature dumping
+- Trend chasing
+- Claims that lock roadmap prematurely
 
 ---
 
@@ -173,19 +173,19 @@ All sections inherit the Prime Directive and Operating Principles implicitly.
 
 ### Purpose
 
-* Demand generation with trust preservation
+- Demand generation with trust preservation
 
 ### Principles
 
-* Assume audience intelligence
-* Be concise and legible
-* One core message per asset
+- Assume audience intelligence
+- Be concise and legible
+- One core message per asset
 
 ### Preferred Formats
 
-* Clear headline + substantiated claim
-* Minimalist visuals
-* Long-form ads only when depth is justified
+- Clear headline + substantiated claim
+- Minimalist visuals
+- Long-form ads only when depth is justified
 
 ---
 
@@ -193,26 +193,26 @@ All sections inherit the Prime Directive and Operating Principles implicitly.
 
 ### Purpose
 
-* Establish reference authority
-* Advance the field
-* Create long-lived artifacts
+- Establish reference authority
+- Advance the field
+- Create long-lived artifacts
 
 ### Standards
 
-* Technically defensible
-* Citable
-* Durable beyond news cycles
+- Technically defensible
+- Citable
+- Durable beyond news cycles
 
 ### White Paper Requirements
 
-* Clear problem framing
-* Novel contribution
-* Explicit assumptions
-* Reproducible reasoning
+- Clear problem framing
+- Novel contribution
+- Explicit assumptions
+- Reproducible reasoning
 
 ### Tradeoff
 
-* Sacrifice virality for credibility
+- Sacrifice virality for credibility
 
 ---
 
@@ -220,20 +220,20 @@ All sections inherit the Prime Directive and Operating Principles implicitly.
 
 ### Purpose
 
-* Build institutional trust
-* Avoid friction and escalation
+- Build institutional trust
+- Avoid friction and escalation
 
 ### Tone
 
-* Respectful
-* Process-aware
-* Documentation-forward
+- Respectful
+- Process-aware
+- Documentation-forward
 
 ### Strategy
 
-* Over-clarify intent
-* Understate ambition
-* Demonstrate compliance literacy
+- Over-clarify intent
+- Understate ambition
+- Demonstrate compliance literacy
 
 ---
 
@@ -248,15 +248,15 @@ All sections inherit the Prime Directive and Operating Principles implicitly.
 
 ### Tone
 
-* Calm
-* Factual
-* Non-emotional
+- Calm
+- Factual
+- Non-emotional
 
 ### Absolute Rules
 
-* No public blame
-* No speculative causes
-* No rushed statements
+- No public blame
+- No speculative causes
+- No rushed statements
 
 ---
 
@@ -264,10 +264,10 @@ All sections inherit the Prime Directive and Operating Principles implicitly.
 
 Every communication must:
 
-* Be compatible with past statements
-* Allow future evolution
-* Avoid irreversible commitments
-* Preserve optionality
+- Be compatible with past statements
+- Allow future evolution
+- Avoid irreversible commitments
+- Preserve optionality
 
 You speak as **one voice across time**.
 

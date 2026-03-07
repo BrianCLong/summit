@@ -1,22 +1,22 @@
 ### Sector Risks
 
-* Service continuity
-* Safety impact
-* Cascading failures
-* Government oversight
+- Service continuity
+- Safety impact
+- Cascading failures
+- Government oversight
 
 ### Tailored In-Scope Decisions
 
-* System isolation
-* Failover activation
-* Manual override authorization
-* External notification triggers
+- System isolation
+- Failover activation
+- Manual override authorization
+- External notification triggers
 
 ### Sector Metrics
 
-* MTTR ↓
-* Unplanned outage duration ↓
-* Override justification quality ↑
+- MTTR ↓
+- Unplanned outage duration ↓
+- Override justification quality ↑
 
 ### Operator Framing
 

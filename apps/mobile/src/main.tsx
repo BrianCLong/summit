@@ -86,7 +86,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         </NetworkProvider>
       </AuthProvider>
     </ThemeProvider>
-  </React.StrictMode>
+  </React.StrictMode>,
 );
 
 // Register service worker for PWA

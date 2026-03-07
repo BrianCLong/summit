@@ -1,2 +1,2 @@
-export * from './prompts.js';
-export * from './debateValidation.js';
+export * from "./prompts.js";
+export * from "./debateValidation.js";

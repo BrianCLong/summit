@@ -11,7 +11,8 @@ export type CompilerPolicy = {
 };
 
 function nfkc(s: string): string {
-  return s.normalize("NFKC")
+  return s
+    .normalize("NFKC")
     .replace(/\r\n/g, "\n")
     .replace(/\r/g, "\n")
     .replace(/[ \t]+/g, " ")
@@ -29,7 +30,9 @@ function canonicalJson(obj: any): string {
     if (Array.isArray(x)) return x.map(sortKeys);
     if (x && typeof x === "object") {
       const out: any = {};
-      Object.keys(x).sort().forEach(k => (out[k] = sortKeys(x[k])));
+      Object.keys(x)
+        .sort()
+        .forEach((k) => (out[k] = sortKeys(x[k])));
       return out;
     }
     return x;
@@ -60,9 +63,11 @@ export function compileContext(retrieval: any, policy: CompilerPolicy) {
       excerpt,
       uri,
       score,
-      digest: e.digest?.sha256 ? { sha256: String(e.digest.sha256) } : { sha256: sha256Hex(excerpt) },
+      digest: e.digest?.sha256
+        ? { sha256: String(e.digest.sha256) }
+        : { sha256: sha256Hex(excerpt) },
       provenance: e.provenance ?? {},
-      dedupe_key
+      dedupe_key,
     };
   });
 
@@ -73,7 +78,8 @@ export function compileContext(retrieval: any, policy: CompilerPolicy) {
     if (!prev) byKey.set(e.dedupe_key, e);
     else {
       if (e.score > prev.score) byKey.set(e.dedupe_key, e);
-      else if (e.score === prev.score && e.evidence_id < prev.evidence_id) byKey.set(e.dedupe_key, e);
+      else if (e.score === prev.score && e.evidence_id < prev.evidence_id)
+        byKey.set(e.dedupe_key, e);
     }
   }
 
@@ -110,7 +116,7 @@ export function compileContext(retrieval: any, policy: CompilerPolicy) {
       uri: e.uri,
       provenance: e.provenance,
       score: e.score,
-      digest: e.digest
+      digest: e.digest,
     });
   }
 
@@ -120,13 +126,13 @@ export function compileContext(retrieval: any, policy: CompilerPolicy) {
     header: {
       query_hash: retrieval?.request?.query_hash ?? "unknown",
       policy_hash: retrieval?.request?.policy_hash ?? "unknown",
-      graph_ref: retrieval?.request?.graph_ref ?? "unknown"
+      graph_ref: retrieval?.request?.graph_ref ?? "unknown",
     },
     evidence_blocks: blocks,
     edge_refs: (retrieval.edges ?? []).slice(0, 200).map((x: any) => ({
       from: String(x.from),
       to: String(x.to),
-      type: String(x.type)
+      type: String(x.type),
     })),
     compiler_stats: {
       input_count: all.length,
@@ -134,8 +140,8 @@ export function compileContext(retrieval: any, policy: CompilerPolicy) {
       output_count: blocks.length,
       caps_used: capsUsed,
       token_budget: tokenBudget,
-      token_used_est: budgetUsed
-    }
+      token_used_est: budgetUsed,
+    },
   };
 
   const context_digest = sha256Hex(canonicalJson(compiled));

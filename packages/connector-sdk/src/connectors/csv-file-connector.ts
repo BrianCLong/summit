@@ -4,16 +4,16 @@
  * Ingests data from CSV files (local filesystem or stream).
  */
 
-import { createReadStream } from 'fs';
-import { parse } from 'csv-parse';
-import { PullConnector } from '../base-connector';
+import { createReadStream } from "fs";
+import { parse } from "csv-parse";
+import { PullConnector } from "../base-connector";
 import type {
   ConnectorManifest,
   ConnectorConfig,
   ConnectorContext,
   ConnectorResult,
   ConnectorEntity,
-} from '../types';
+} from "../types";
 
 export interface CsvFileConnectorConfig {
   filePath: string;
@@ -30,33 +30,33 @@ export interface CsvFileConnectorConfig {
  */
 export class CsvFileConnector extends PullConnector {
   readonly manifest: ConnectorManifest = {
-    id: 'csv-file-connector',
-    name: 'CSV File Connector',
-    version: '1.0.0',
-    description: 'Ingests data from CSV files',
-    status: 'stable',
-    category: 'file',
-    capabilities: ['pull', 'batch'],
-    entityTypes: ['GenericRecord'],
+    id: "csv-file-connector",
+    name: "CSV File Connector",
+    version: "1.0.0",
+    description: "Ingests data from CSV files",
+    status: "stable",
+    category: "file",
+    capabilities: ["pull", "batch"],
+    entityTypes: ["GenericRecord"],
     relationshipTypes: [],
-    authentication: ['none'],
+    authentication: ["none"],
     requiredSecrets: [],
-    license: 'MIT',
-    maintainer: 'IntelGraph Team',
-    documentationUrl: 'https://docs.intelgraph.io/connectors/csv-file',
-    tags: ['csv', 'file', 'batch'],
+    license: "MIT",
+    maintainer: "IntelGraph Team",
+    documentationUrl: "https://docs.intelgraph.io/connectors/csv-file",
+    tags: ["csv", "file", "batch"],
     configSchema: {
-      type: 'object',
+      type: "object",
       properties: {
-        filePath: { type: 'string' },
-        delimiter: { type: 'string', default: ',' },
-        hasHeader: { type: 'boolean', default: true },
-        encoding: { type: 'string', default: 'utf8' },
-        skipRows: { type: 'number', default: 0 },
-        maxRows: { type: 'number' },
-        entityType: { type: 'string', default: 'GenericRecord' },
+        filePath: { type: "string" },
+        delimiter: { type: "string", default: "," },
+        hasHeader: { type: "boolean", default: true },
+        encoding: { type: "string", default: "utf8" },
+        skipRows: { type: "number", default: 0 },
+        maxRows: { type: "number" },
+        entityType: { type: "string", default: "GenericRecord" },
       },
-      required: ['filePath'],
+      required: ["filePath"],
     },
   };
 
@@ -65,8 +65,8 @@ export class CsvFileConnector extends PullConnector {
   protected async onInitialize(config: ConnectorConfig): Promise<void> {
     // Validate and cast config
     const cfg = config.config as Record<string, unknown>;
-    if (!cfg.filePath || typeof cfg.filePath !== 'string') {
-      throw new Error('filePath is required and must be a string');
+    if (!cfg.filePath || typeof cfg.filePath !== "string") {
+      throw new Error("filePath is required and must be a string");
     }
 
     this.csvConfig = cfg as unknown as CsvFileConnectorConfig;
@@ -76,13 +76,13 @@ export class CsvFileConnector extends PullConnector {
     try {
       // Try to open and read first few bytes
       const stream = createReadStream(this.csvConfig.filePath, {
-        encoding: this.csvConfig.encoding || 'utf8',
+        encoding: this.csvConfig.encoding || "utf8",
         start: 0,
         end: 100,
       });
 
       return new Promise((resolve, reject) => {
-        stream.on('readable', () => {
+        stream.on("readable", () => {
           stream.destroy();
           resolve({
             success: true,
@@ -90,7 +90,7 @@ export class CsvFileConnector extends PullConnector {
           });
         });
 
-        stream.on('error', (error) => {
+        stream.on("error", (error) => {
           reject(error);
         });
       });
@@ -112,15 +112,15 @@ export class CsvFileConnector extends PullConnector {
     try {
       const {
         filePath,
-        delimiter = ',',
+        delimiter = ",",
         hasHeader = true,
-        encoding = 'utf8',
+        encoding = "utf8",
         skipRows = 0,
         maxRows,
-        entityType = 'GenericRecord',
+        entityType = "GenericRecord",
       } = this.csvConfig;
 
-      context.logger.info('Starting CSV ingestion', {
+      context.logger.info("Starting CSV ingestion", {
         filePath,
         delimiter,
         hasHeader,
@@ -149,10 +149,7 @@ export class CsvFileConnector extends PullConnector {
         try {
           const entity: ConnectorEntity = {
             type: entityType,
-            externalId: this.generateExternalId(
-              filePath,
-              `row_${entitiesProcessed + 1}`
-            ),
+            externalId: this.generateExternalId(filePath, `row_${entitiesProcessed + 1}`),
             props: record,
             confidence: 1.0,
             observedAt: new Date(),
@@ -165,16 +162,16 @@ export class CsvFileConnector extends PullConnector {
           await context.emitter.emitEntity(entity);
           entitiesProcessed++;
 
-          context.metrics.increment('csv.rows.processed', 1, {
+          context.metrics.increment("csv.rows.processed", 1, {
             connector: this.manifest.id,
           });
         } catch (error) {
-          context.logger.error('Error processing CSV row', error as Error, {
+          context.logger.error("Error processing CSV row", error as Error, {
             rowNumber: entitiesProcessed + 1,
           });
 
           errors.push({
-            code: 'ROW_PROCESSING_ERROR',
+            code: "ROW_PROCESSING_ERROR",
             message: (error as Error).message,
             recordId: `row_${entitiesProcessed + 1}`,
             retryable: false,
@@ -185,13 +182,13 @@ export class CsvFileConnector extends PullConnector {
       await context.emitter.flush();
 
       const durationMs = Date.now() - startTime;
-      context.logger.info('CSV ingestion completed', {
+      context.logger.info("CSV ingestion completed", {
         entitiesProcessed,
         errorCount: errors.length,
         durationMs,
       });
 
-      context.metrics.timing('csv.ingestion.duration', durationMs, {
+      context.metrics.timing("csv.ingestion.duration", durationMs, {
         connector: this.manifest.id,
       });
 
@@ -209,7 +206,7 @@ export class CsvFileConnector extends PullConnector {
       };
     } catch (error) {
       const durationMs = Date.now() - startTime;
-      context.logger.error('CSV ingestion failed', error as Error);
+      context.logger.error("CSV ingestion failed", error as Error);
 
       return this.failureResult(error as Error, entitiesProcessed, 0, durationMs);
     }

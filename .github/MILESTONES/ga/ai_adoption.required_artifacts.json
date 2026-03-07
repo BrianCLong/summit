@@ -19,11 +19,7 @@
     }
   ],
   "evidence_pack": {
-    "files": [
-      "report.json",
-      "metrics.json",
-      "stamp.json"
-    ],
+    "files": ["report.json", "metrics.json", "stamp.json"],
     "registry": "evidence/index.json"
   }
 }

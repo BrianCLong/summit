@@ -1,6 +1,7 @@
 # Evidence-Gated Supply Chain Releases
 
 ## Summit Readiness Assertion
+
 Refer to `docs/SUMMIT_READINESS_ASSERTION.md` as the governing readiness baseline for this design.
 
 ## Component Diagram

@@ -19,10 +19,7 @@ Every plugin must be accompanied by a `plugin.json` manifest file.
   "category": "analytics",
   "entryPoint": "index.js",
   "minPlatformVersion": "2.0.0",
-  "capabilities": [
-    "read:entities",
-    "access:external"
-  ],
+  "capabilities": ["read:entities", "access:external"],
   "resources": {
     "memory": 128,
     "timeout": 30000,
@@ -42,13 +39,13 @@ Every plugin must be accompanied by a `plugin.json` manifest file.
 
 ### Fields
 
-| Field | Type | Description |
-|---|---|---|
-| `id` | `string` | Unique identifier (reverse domain notation recommended). |
-| `version` | `string` | Semantic version (X.Y.Z). |
-| `capabilities` | `string[]` | List of permissions requested by the plugin. |
-| `resources` | `object` | Resource limits required by the plugin. |
-| `configSchema` | `object` | JSON Schema for user configuration. |
+| Field          | Type       | Description                                              |
+| -------------- | ---------- | -------------------------------------------------------- |
+| `id`           | `string`   | Unique identifier (reverse domain notation recommended). |
+| `version`      | `string`   | Semantic version (X.Y.Z).                                |
+| `capabilities` | `string[]` | List of permissions requested by the plugin.             |
+| `resources`    | `object`   | Resource limits required by the plugin.                  |
+| `configSchema` | `object`   | JSON Schema for user configuration.                      |
 
 ## Plugin Interface
 
@@ -107,17 +104,17 @@ export interface PluginContext {
 
 ## Capabilities
 
-| Capability | Description |
-|---|---|
-| `read:entities` | Read access to the knowledge graph. |
-| `write:entities` | Write access to the knowledge graph. |
+| Capability        | Description                                                    |
+| ----------------- | -------------------------------------------------------------- |
+| `read:entities`   | Read access to the knowledge graph.                            |
+| `write:entities`  | Write access to the knowledge graph.                           |
 | `access:external` | Ability to make outbound network calls (restricted by policy). |
-| `execute:actions` | Ability to trigger other system actions. |
+| `execute:actions` | Ability to trigger other system actions.                       |
 
 ## Resource Limits
 
 Plugins are strictly capped.
 
-*   **Memory**: Default 128MB.
-*   **Time**: Default 30s execution timeout.
-*   **Network**: Allowlist-only domains.
+- **Memory**: Default 128MB.
+- **Time**: Default 30s execution timeout.
+- **Network**: Allowlist-only domains.

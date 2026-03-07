@@ -217,7 +217,9 @@ export function generateMockTimelineEvents(
 /**
  * Generate mock geospatial events
  */
-export function generateMockGeospatialEvents(count: number = 25): GeospatialEvent[] {
+export function generateMockGeospatialEvents(
+  count: number = 25
+): GeospatialEvent[] {
   const cities = [
     { name: 'New York', coords: [-74.006, 40.7128] as [number, number] },
     { name: 'London', coords: [-0.1276, 51.5074] as [number, number] },
@@ -303,23 +305,31 @@ export class MockTriPaneDataProvider implements TriPaneDataProvider {
     return this.entities
   }
 
-  async fetchRelationships(filters?: Record<string, unknown>): Promise<Relationship[]> {
+  async fetchRelationships(
+    filters?: Record<string, unknown>
+  ): Promise<Relationship[]> {
     await new Promise(resolve => setTimeout(resolve, 300))
     return this.relationships
   }
 
-  async fetchTimelineEvents(filters?: Record<string, unknown>): Promise<TimelineEvent[]> {
+  async fetchTimelineEvents(
+    filters?: Record<string, unknown>
+  ): Promise<TimelineEvent[]> {
     await new Promise(resolve => setTimeout(resolve, 300))
     return this.timelineEvents
   }
 
-  async fetchGeospatialEvents(filters?: Record<string, unknown>): Promise<GeospatialEvent[]> {
+  async fetchGeospatialEvents(
+    filters?: Record<string, unknown>
+  ): Promise<GeospatialEvent[]> {
     await new Promise(resolve => setTimeout(resolve, 300))
     return this.geospatialEvents
   }
 
   // Optional: Real-time updates simulation
-  subscribeToUpdates(callback: (data: { type: string; payload: unknown }) => void): () => void {
+  subscribeToUpdates(
+    callback: (data: { type: string; payload: unknown }) => void
+  ): () => void {
     const interval = setInterval(() => {
       // Simulate a new event every 10 seconds
       const newEvent: TimelineEvent = {

@@ -1,4 +1,4 @@
-import { LICENSE_ALLOW_LIST, LICENSE_DENY_LIST } from 'common-types';
+import { LICENSE_ALLOW_LIST, LICENSE_DENY_LIST } from "common-types";
 
 /**
  * Evaluate license compatibility with configured allow/deny lists.
@@ -13,16 +13,16 @@ export function evaluateLicense(license, options = {}, signals = {}) {
   const allowPaid = Boolean(options.allowPaidOverride ?? signals.allowPaid);
 
   if (deny.includes(license)) {
-    return { status: 'deny', reason: 'LICENSE_DENY_LIST' };
+    return { status: "deny", reason: "LICENSE_DENY_LIST" };
   }
 
   if (allow.includes(license)) {
-    return { status: 'allow' };
+    return { status: "allow" };
   }
 
   if (!allowPaid) {
-    return { status: 'deny', reason: 'LICENSE_APPROVAL_REQUIRED' };
+    return { status: "deny", reason: "LICENSE_APPROVAL_REQUIRED" };
   }
 
-  return { status: 'allow' };
+  return { status: "allow" };
 }

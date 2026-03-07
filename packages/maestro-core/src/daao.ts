@@ -5,12 +5,12 @@ import { DebateValidator } from "./collaboration/debate";
 
 const difficultyEstimator = new HeuristicDifficultyEstimator();
 const router = new CostAwareRouter(defaultCatalog(), {
-  easyMax: 0.30,
-  mediumMax: 0.70,
+  easyMax: 0.3,
+  mediumMax: 0.7,
   domainOverrides: {
     legal: { preferModelIds: ["strong"] },
     security: { preferModelIds: ["balanced"] },
-  }
+  },
 });
 
 export async function handleQuery(query: string, llmClient: any) {
@@ -33,7 +33,7 @@ export async function handleQuery(query: string, llmClient: any) {
   const r = await llmClient.complete({
     modelId: decision.model.id,
     maxTokens: decision.model.maxTokens,
-    messages: [{ role: "user", content: query }]
+    messages: [{ role: "user", content: query }],
   });
   return { answer: r.text, route: decision, difficulty: d };
 }

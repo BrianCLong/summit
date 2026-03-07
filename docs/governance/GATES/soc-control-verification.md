@@ -3,7 +3,6 @@
 > Evidence-IDs: soc-compliance-report
 > Status: active
 
-
 # SOC Control Verification Gate
 
 **Job:** SOC Control Verification (primary gate)  

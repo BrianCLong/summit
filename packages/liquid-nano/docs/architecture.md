@@ -34,11 +34,11 @@ Edge Device Sensors ──►│ Liquid Nano Runtime │──► Upstream messa
 
 ### Sample Plugins
 
-| Plugin        | Purpose                                              |
-| ------------- | ---------------------------------------------------- |
-| Telemetry     | Captures payload statistics and triggers warnings.   |
-| Persistence   | Invokes provided callback to persist sanitized data. |
-| Transformer   | Applies optional user-defined event mutation.       |
+| Plugin      | Purpose                                              |
+| ----------- | ---------------------------------------------------- |
+| Telemetry   | Captures payload statistics and triggers warnings.   |
+| Persistence | Invokes provided callback to persist sanitized data. |
+| Transformer | Applies optional user-defined event mutation.        |
 
 ## Extensibility Points
 

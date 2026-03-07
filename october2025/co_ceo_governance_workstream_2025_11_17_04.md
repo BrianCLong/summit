@@ -62,10 +62,10 @@
 **Path:** `.github/actions/compliance-pack/action.yml`
 
 ```yaml
-name: 'Compliance Pack Composer'
-description: 'Bundle disclosure + compliance evidence into compliance-pack.zip'
+name: "Compliance Pack Composer"
+description: "Bundle disclosure + compliance evidence into compliance-pack.zip"
 runs:
-  using: 'composite'
+  using: "composite"
   steps:
     - shell: bash
       run: |
@@ -173,14 +173,12 @@ jq -n --arg backup "$BACKUP_FILE" '{backup:$backup, restore_ok:true, ts:now|toda
 
 ```js
 #!/usr/bin/env node
-import fs from 'node:fs';
+import fs from "node:fs";
 const input = process.argv[2];
-const out = process.argv[3] || 'redacted_' + input;
-let text = fs.readFileSync(input, 'utf8');
-text = text.replace(/\b(SECRET|TOKEN|KEY)\b[^\n]*/g, '[REDACTED]');
-text =
-  `<!-- watermark: export by Topicality — ${new Date().toISOString()} -->\n` +
-  text;
+const out = process.argv[3] || "redacted_" + input;
+let text = fs.readFileSync(input, "utf8");
+text = text.replace(/\b(SECRET|TOKEN|KEY)\b[^\n]*/g, "[REDACTED]");
+text = `<!-- watermark: export by Topicality — ${new Date().toISOString()} -->\n` + text;
 fs.writeFileSync(out, text);
 console.log(JSON.stringify({ input, out }));
 ```
@@ -229,10 +227,10 @@ export default function Status({
   attested: boolean;
   policySha: string;
 }) {
-  const color = !attested || criticals > 0 ? 'red' : 'green';
+  const color = !attested || criticals > 0 ? "red" : "green";
   return (
     <div className={`status ${color}`}>
-      <strong>{attested ? 'Attested' : 'Not attested'}</strong>
+      <strong>{attested ? "Attested" : "Not attested"}</strong>
       <span> | Trivy criticals: {criticals}</span>
       <span> | Policy: {policySha.slice(0, 12)}</span>
     </div>

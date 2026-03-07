@@ -50,11 +50,7 @@
             "description": "Use of API-based posting tools"
           }
         ],
-        "mitigations": [
-          "Rate limiting",
-          "Bot detection heuristics",
-          "Challenge-response (CAPTCHA)"
-        ]
+        "mitigations": ["Rate limiting", "Bot detection heuristics", "Challenge-response (CAPTCHA)"]
       },
       {
         "tactic_id": "TA03",
@@ -72,10 +68,7 @@
             "description": "Extreme use of specific hashtags"
           }
         ],
-        "mitigations": [
-          "Algorithmic downranking of spam",
-          "Content diversity analysis"
-        ]
+        "mitigations": ["Algorithmic downranking of spam", "Content diversity analysis"]
       },
       {
         "tactic_id": "TA05",
@@ -93,11 +86,7 @@
             "description": "Quotes used out of context"
           }
         ],
-        "mitigations": [
-          "Fact-checking integration",
-          "Source verification",
-          "Contextual overlays"
-        ]
+        "mitigations": ["Fact-checking integration", "Source verification", "Contextual overlays"]
       }
     ]
   }

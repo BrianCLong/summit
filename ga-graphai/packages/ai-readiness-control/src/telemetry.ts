@@ -1,4 +1,4 @@
-import { IntentEvent, IntentVerb } from './types.js';
+import { IntentEvent, IntentVerb } from "./types.js";
 
 interface Envelope<T> {
   event: T;
@@ -22,7 +22,13 @@ export class InMemoryEventBus<T = IntentEvent> {
 export class IntentTelemetry {
   private readonly bus: InMemoryEventBus<IntentEvent>;
   private readonly events: IntentEvent[] = [];
-  private readonly allowedIntents: IntentVerb[] = ['request', 'approve', 'escalate', 'undo', 'preview'];
+  private readonly allowedIntents: IntentVerb[] = [
+    "request",
+    "approve",
+    "escalate",
+    "undo",
+    "preview",
+  ];
 
   constructor(bus: InMemoryEventBus<IntentEvent> = new InMemoryEventBus()) {
     this.bus = bus;
@@ -33,7 +39,7 @@ export class IntentTelemetry {
       throw new Error(`Unsupported intent verb: ${event.intent}`);
     }
     if (!event.actor || !event.targetEntity || !event.targetId || !event.tenantId) {
-      throw new Error('Intent events must include actor, targetEntity, targetId, and tenantId');
+      throw new Error("Intent events must include actor, targetEntity, targetId, and tenantId");
     }
     this.events.push(event);
     this.bus.publish(event.intent, { event });

@@ -53,12 +53,12 @@ All Foundry types MUST implement the same governance substrate (Sections 4–12)
 - Cross-tenant training, caching, embeddings, or retrieval MUST be disabled by default.
 - Any cross-tenant sharing MUST require explicit policy grants and be auditable.
 
-4.2 Data Boundaries
+  4.2 Data Boundaries
 
 - Assets MUST carry a rights and jurisdiction profile.
 - Foundry runtime MUST enforce jurisdictional and licensing constraints at access time.
 
-4.3 Execution Isolation
+  4.3 Execution Isolation
 
 - Tool calls MUST be mediated by a policy gateway.
 - Secrets MUST be scoped to work order + tool + tenant and be short-lived.
@@ -70,12 +70,12 @@ All Foundry types MUST implement the same governance substrate (Sections 4–12)
 - All work orders MUST be attributable to a principal (human or service).
 - All agent actions MUST be attributable to a delegated principal.
 
-5.2 Authorization
+  5.2 Authorization
 
 - Foundry MUST implement policy-based access control (PBAC) at minimum.
 - Authorization decisions MUST be logged as first-class provenance nodes.
 
-5.3 Approvals
+  5.3 Approvals
 
 - Policy MAY require approvals for classes of work orders (e.g., publish, deploy, export).
 - Approvals MUST be captured as signed events in the execution graph.
@@ -87,8 +87,8 @@ All Foundry types MUST implement the same governance substrate (Sections 4–12)
 - All access to assets, models, and tools MUST be policy-evaluated.
 - Policies MUST be versioned, immutable once activated, and referenced by hash.
 
-6.2 Policy Scope
-Policy MUST support constraints for:
+  6.2 Policy Scope
+  Policy MUST support constraints for:
 
 - Data sources and asset classes
 - Model selection and version constraints
@@ -98,7 +98,7 @@ Policy MUST support constraints for:
 - Reproducibility mode (strict vs best-effort)
 - Human approvals and quorum requirements
 
-6.3 Deny-by-default
+  6.3 Deny-by-default
 
 - The Foundry MUST support deny-by-default posture for tools and data.
 - Any allow rule MUST be explicit.
@@ -114,12 +114,12 @@ Policy MUST support constraints for:
   - approvals and authorization decisions
   - environment metadata (runtime, container digest, code revision)
 
-7.2 Lineage Integrity
+  7.2 Lineage Integrity
 
 - Each node and edge MUST be content-addressed (hash).
 - Graph serialization MUST be deterministic.
 
-7.3 Retrieval Provenance
+  7.3 Retrieval Provenance
 
 - If retrieval is used, the Foundry MUST record:
   - query, retrieval method, index version
@@ -137,7 +137,7 @@ Policy MUST support constraints for:
   - recorded random seeds
   - deterministic serialization of outputs where feasible
 
-8.2 Best-Effort Reproducibility
+  8.2 Best-Effort Reproducibility
 
 - For non-deterministic models/services, Foundry MUST record:
   - provider, model name/version, request ID
@@ -145,7 +145,7 @@ Policy MUST support constraints for:
   - full prompt and tool call trace
   - response hashes and timestamps
 
-8.3 Policy Selection
+  8.3 Policy Selection
 
 - Reproducibility mode MUST be chosen by policy and recorded in the execution graph.
 
@@ -161,12 +161,12 @@ Each work order MUST produce, at minimum:
 - attestation.json (signed statement binding the output to graph + policy)
 - stamp.json (timestamps, environment identity, build/run metadata)
 
-9.2 Signing and Verification
+  9.2 Signing and Verification
 
 - Attestations MUST be signed using tenant-controlled keys or approved trust anchors.
 - Verification MUST be possible offline with the evidence bundle.
 
-9.3 Retention
+  9.3 Retention
 
 - Evidence retention MUST be policy-driven and enforceable.
 - Evidence MUST be immutable once sealed.
@@ -182,12 +182,12 @@ Each work order MUST produce, at minimum:
   - security scanning and integrity metadata
 - Model versions MUST be immutable and referenced by digest.
 
-10.2 Training / Fine-Tuning
+  10.2 Training / Fine-Tuning
 
 - Training jobs MUST be work orders with the same evidence requirements.
 - Training datasets MUST be represented as assets with rights metadata.
 
-10.3 Deployment
+  10.3 Deployment
 
 - Model deployment MUST require explicit policy allow and may require approvals.
 - Deployed model endpoints MUST be bound to tenant + policy + version.
@@ -203,12 +203,12 @@ Each work order MUST produce, at minimum:
   - output types
 - Agents MUST run under a policy sandbox.
 
-11.2 Tool Mediation
+  11.2 Tool Mediation
 
 - All tool invocations MUST pass through policy gateway.
 - Tool invocation parameters MUST be recorded and hashed.
 
-11.3 Safety and Exfiltration Controls
+  11.3 Safety and Exfiltration Controls
 
 - Foundry MUST support output filtering, watermarking, redaction, and destination control.
 - High-risk tools (browser, export, email) MUST be gated by policy and approvals.

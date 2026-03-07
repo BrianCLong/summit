@@ -17,9 +17,7 @@ describe('Button', () => {
   });
 
   it('shows loading indicator when loading', () => {
-    const { queryByText, UNSAFE_getByType } = render(
-      <Button loading>Click me</Button>
-    );
+    const { queryByText, UNSAFE_getByType } = render(<Button loading>Click me</Button>);
 
     // Text should not be visible when loading
     expect(queryByText('Click me')).toBeNull();
@@ -30,7 +28,7 @@ describe('Button', () => {
     const { getByText } = render(
       <Button onPress={onPress} disabled>
         Click me
-      </Button>
+      </Button>,
     );
 
     fireEvent.press(getByText('Click me'));
@@ -38,9 +36,7 @@ describe('Button', () => {
   });
 
   it('applies variant styles correctly', () => {
-    const { getByText, rerender } = render(
-      <Button variant="default">Default</Button>
-    );
+    const { getByText, rerender } = render(<Button variant="default">Default</Button>);
     expect(getByText('Default')).toBeTruthy();
 
     rerender(<Button variant="destructive">Destructive</Button>);

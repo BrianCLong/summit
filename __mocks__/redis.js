@@ -3,11 +3,11 @@ const mockRedisClient = {
   connect: jest.fn().mockResolvedValue(undefined),
   disconnect: jest.fn().mockResolvedValue(undefined),
   quit: jest.fn().mockResolvedValue(undefined),
-  ping: jest.fn().mockResolvedValue('PONG'),
+  ping: jest.fn().mockResolvedValue("PONG"),
 
   // String operations
   get: jest.fn().mockResolvedValue(null),
-  set: jest.fn().mockResolvedValue('OK'),
+  set: jest.fn().mockResolvedValue("OK"),
   del: jest.fn().mockResolvedValue(1),
   exists: jest.fn().mockResolvedValue(0),
   expire: jest.fn().mockResolvedValue(1),

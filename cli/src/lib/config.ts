@@ -2,12 +2,12 @@
  * CLI Configuration Management
  */
 
-import Conf from 'conf';
-import { z } from 'zod';
-import fs from 'node:fs';
-import path from 'node:path';
-import os from 'node:os';
-import yaml from 'yaml';
+import Conf from "conf";
+import { z } from "zod";
+import fs from "node:fs";
+import path from "node:path";
+import os from "node:os";
+import yaml from "yaml";
 import {
   DEFAULT_NEO4J_URI,
   DEFAULT_NEO4J_USER,
@@ -16,13 +16,13 @@ import {
   DEFAULT_POSTGRES_DB,
   CONFIG_FILE_NAME,
   CONFIG_DIR,
-} from './constants.js';
+} from "./constants.js";
 
 const Neo4jConfigSchema = z.object({
   uri: z.string().default(DEFAULT_NEO4J_URI),
   user: z.string().default(DEFAULT_NEO4J_USER),
   password: z.string().optional(),
-  database: z.string().default('neo4j'),
+  database: z.string().default("neo4j"),
   encrypted: z.boolean().default(false),
 });
 
@@ -43,7 +43,7 @@ const AgentConfigSchema = z.object({
 });
 
 const ExportConfigSchema = z.object({
-  outputDir: z.string().default('./exports'),
+  outputDir: z.string().default("./exports"),
   compression: z.boolean().default(true),
   signExports: z.boolean().default(false),
   privateKeyPath: z.string().optional(),
@@ -57,7 +57,7 @@ const ProfileSchema = z.object({
 });
 
 const CLIConfigSchema = z.object({
-  defaultProfile: z.string().default('default'),
+  defaultProfile: z.string().default("default"),
   profiles: z.record(z.string(), ProfileSchema).default({}),
   telemetry: z.boolean().default(false),
 });
@@ -70,9 +70,9 @@ export type Profile = z.infer<typeof ProfileSchema>;
 export type CLIConfig = z.infer<typeof CLIConfigSchema>;
 
 const configStore = new Conf<CLIConfig>({
-  projectName: 'intelgraph-cli',
+  projectName: "intelgraph-cli",
   defaults: {
-    defaultProfile: 'default',
+    defaultProfile: "default",
     profiles: {
       default: {
         neo4j: Neo4jConfigSchema.parse({}),
@@ -93,18 +93,16 @@ export async function loadConfig(configPath?: string): Promise<CLIConfig> {
     path.join(process.cwd(), CONFIG_FILE_NAME),
     path.join(process.cwd(), `${CONFIG_FILE_NAME}.yaml`),
     path.join(process.cwd(), `${CONFIG_FILE_NAME}.yml`),
-    path.join(os.homedir(), CONFIG_DIR, 'config.yaml'),
-    path.join(os.homedir(), CONFIG_DIR, 'config.yml'),
+    path.join(os.homedir(), CONFIG_DIR, "config.yaml"),
+    path.join(os.homedir(), CONFIG_DIR, "config.yml"),
     path.join(os.homedir(), CONFIG_FILE_NAME),
   ].filter(Boolean) as string[];
 
   for (const filePath of paths) {
     if (fs.existsSync(filePath)) {
       try {
-        const content = fs.readFileSync(filePath, 'utf-8');
-        const parsed = filePath.endsWith('.json')
-          ? JSON.parse(content)
-          : yaml.parse(content);
+        const content = fs.readFileSync(filePath, "utf-8");
+        const parsed = filePath.endsWith(".json") ? JSON.parse(content) : yaml.parse(content);
         return CLIConfigSchema.parse(parsed);
       } catch {
         // Continue to next path
@@ -135,8 +133,8 @@ function loadEnvConfig(): Partial<CLIConfig> {
       uri: process.env.NEO4J_URI || DEFAULT_NEO4J_URI,
       user: process.env.NEO4J_USER || DEFAULT_NEO4J_USER,
       password: process.env.NEO4J_PASSWORD,
-      database: process.env.NEO4J_DATABASE || 'neo4j',
-      encrypted: process.env.NEO4J_ENCRYPTED === 'true',
+      database: process.env.NEO4J_DATABASE || "neo4j",
+      encrypted: process.env.NEO4J_ENCRYPTED === "true",
     };
   }
 
@@ -151,11 +149,11 @@ function loadEnvConfig(): Partial<CLIConfig> {
       const url = new URL(process.env.DATABASE_URL);
       config.profiles!.default.postgres = {
         host: url.hostname,
-        port: parseInt(url.port || '5432'),
+        port: parseInt(url.port || "5432"),
         database: url.pathname.slice(1),
         user: url.username,
         password: url.password,
-        ssl: url.searchParams.get('sslmode') === 'require',
+        ssl: url.searchParams.get("sslmode") === "require",
       };
     } else {
       config.profiles!.default.postgres = {
@@ -164,7 +162,7 @@ function loadEnvConfig(): Partial<CLIConfig> {
         database: process.env.PGDATABASE || DEFAULT_POSTGRES_DB,
         user: process.env.PGUSER,
         password: process.env.PGPASSWORD,
-        ssl: process.env.PGSSLMODE === 'require',
+        ssl: process.env.PGSSLMODE === "require",
       };
     }
   }
@@ -174,8 +172,8 @@ function loadEnvConfig(): Partial<CLIConfig> {
     config.profiles!.default.agent = {
       endpoint: process.env.AGENT_ENDPOINT,
       apiKey: process.env.AGENT_API_KEY,
-      timeout: parseInt(process.env.AGENT_TIMEOUT || '30000'),
-      maxConcurrent: parseInt(process.env.AGENT_MAX_CONCURRENT || '5'),
+      timeout: parseInt(process.env.AGENT_TIMEOUT || "30000"),
+      maxConcurrent: parseInt(process.env.AGENT_MAX_CONCURRENT || "5"),
     };
   }
 
@@ -202,15 +200,11 @@ export function saveConfig(config: CLIConfig): void {
   configStore.set(config);
 }
 
-export function setProfileValue(
-  profileName: string,
-  key: string,
-  value: unknown
-): void {
-  const profiles = configStore.get('profiles') || {};
+export function setProfileValue(profileName: string, key: string, value: unknown): void {
+  const profiles = configStore.get("profiles") || {};
   const profile = profiles[profileName] || {};
 
-  const keys = key.split('.');
+  const keys = key.split(".");
   let current: Record<string, unknown> = profile;
 
   for (let i = 0; i < keys.length - 1; i++) {
@@ -222,7 +216,7 @@ export function setProfileValue(
 
   current[keys[keys.length - 1]] = value;
   profiles[profileName] = profile;
-  configStore.set('profiles', profiles);
+  configStore.set("profiles", profiles);
 }
 
 export function getConfigPath(): string {

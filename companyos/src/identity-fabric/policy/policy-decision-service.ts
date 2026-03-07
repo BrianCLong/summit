@@ -12,7 +12,7 @@
  * @module identity-fabric/policy
  */
 
-import { EventEmitter } from 'events';
+import { EventEmitter } from "events";
 import type {
   Identity,
   UserIdentity,
@@ -20,7 +20,7 @@ import type {
   SessionContext,
   ClassificationLevel,
   ResidencyClass,
-} from '../identity/types.js';
+} from "../identity/types.js";
 
 // ============================================================================
 // POLICY DECISION TYPES
@@ -108,13 +108,13 @@ export interface PolicyDecision {
 }
 
 export interface PolicyObligation {
-  type: 'audit' | 'notify' | 'encrypt' | 'redact' | 'approve' | 'rate_limit';
+  type: "audit" | "notify" | "encrypt" | "redact" | "approve" | "rate_limit";
   parameters: Record<string, unknown>;
 }
 
 export interface RedactionSpec {
   path: string;
-  strategy: 'mask' | 'remove' | 'hash' | 'encrypt' | 'tokenize';
+  strategy: "mask" | "remove" | "hash" | "encrypt" | "tokenize";
   pattern?: string;
 }
 
@@ -123,13 +123,13 @@ export interface RedactionSpec {
 // ============================================================================
 
 export interface PolicyDecisionServiceConfig {
-  mode: 'sidecar' | 'centralized' | 'embedded';
+  mode: "sidecar" | "centralized" | "embedded";
   opaUrl?: string;
   opaPolicy: string;
   timeout: number;
   cacheEnabled: boolean;
   cacheTtlSeconds: number;
-  defaultDecision: 'allow' | 'deny';
+  defaultDecision: "allow" | "deny";
   fallbackOnError: boolean;
   metricsEnabled: boolean;
   tracingEnabled: boolean;
@@ -138,13 +138,13 @@ export interface PolicyDecisionServiceConfig {
 }
 
 const DEFAULT_CONFIG: PolicyDecisionServiceConfig = {
-  mode: 'sidecar',
-  opaUrl: 'http://localhost:8181',
-  opaPolicy: 'companyos/authz',
+  mode: "sidecar",
+  opaUrl: "http://localhost:8181",
+  opaPolicy: "companyos/authz",
   timeout: 100,
   cacheEnabled: true,
   cacheTtlSeconds: 60,
-  defaultDecision: 'deny',
+  defaultDecision: "deny",
   fallbackOnError: false,
   metricsEnabled: true,
   tracingEnabled: true,
@@ -160,7 +160,7 @@ export class PolicyDecisionService extends EventEmitter {
   private config: PolicyDecisionServiceConfig;
   private decisionCache: Map<string, { decision: PolicyDecision; expiresAt: number }>;
   private opaHealthy: boolean = false;
-  private policyVersion: string = 'unknown';
+  private policyVersion: string = "unknown";
   private metrics: PolicyMetrics;
 
   constructor(config: Partial<PolicyDecisionServiceConfig> = {}) {
@@ -169,7 +169,7 @@ export class PolicyDecisionService extends EventEmitter {
     this.decisionCache = new Map();
     this.metrics = new PolicyMetrics();
 
-    if (this.config.mode !== 'embedded') {
+    if (this.config.mode !== "embedded") {
       this.startHealthCheck();
     }
   }
@@ -209,7 +209,7 @@ export class PolicyDecisionService extends EventEmitter {
 
       // Emit for audit
       if (decision.auditRequired) {
-        this.emit('decision', { input, decision });
+        this.emit("decision", { input, decision });
       }
 
       return decision;
@@ -230,7 +230,7 @@ export class PolicyDecisionService extends EventEmitter {
    */
   async evaluateBatch(inputs: PolicyInput[]): Promise<PolicyDecision[]> {
     // For now, evaluate sequentially. Could be optimized to batch OPA calls.
-    return Promise.all(inputs.map(input => this.evaluate(input)));
+    return Promise.all(inputs.map((input) => this.evaluate(input)));
   }
 
   /**
@@ -272,10 +272,10 @@ export class PolicyDecisionService extends EventEmitter {
     const opaInput = this.buildOPAInput(input);
 
     switch (this.config.mode) {
-      case 'sidecar':
-      case 'centralized':
+      case "sidecar":
+      case "centralized":
         return this.evaluateRemoteOPA(opaInput, decisionId, startTime);
-      case 'embedded':
+      case "embedded":
         return this.evaluateEmbeddedOPA(opaInput, decisionId, startTime);
       default:
         throw new Error(`Unknown policy mode: ${this.config.mode}`);
@@ -287,27 +287,24 @@ export class PolicyDecisionService extends EventEmitter {
     decisionId: string,
     startTime: number
   ): Promise<PolicyDecision> {
-    const url = `${this.config.opaUrl}/v1/data/${this.config.opaPolicy.replace(/\./g, '/')}`;
+    const url = `${this.config.opaUrl}/v1/data/${this.config.opaPolicy.replace(/\./g, "/")}`;
 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), this.config.timeout);
 
     try {
       const response = await fetch(url, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'X-Request-ID': decisionId,
+          "Content-Type": "application/json",
+          "X-Request-ID": decisionId,
         },
         body: JSON.stringify({ input: opaInput }),
         signal: controller.signal,
       });
 
       if (!response.ok) {
-        throw new PolicyEvaluationError(
-          `OPA returned status ${response.status}`,
-          decisionId
-        );
+        throw new PolicyEvaluationError(`OPA returned status ${response.status}`, decisionId);
       }
 
       const result = await response.json();
@@ -324,7 +321,7 @@ export class PolicyDecisionService extends EventEmitter {
   ): Promise<PolicyDecision> {
     // Embedded OPA evaluation using @open-policy-agent/opa-wasm
     // This is a placeholder - actual implementation would load and evaluate WASM
-    throw new Error('Embedded OPA not yet implemented');
+    throw new Error("Embedded OPA not yet implemented");
   }
 
   private buildOPAInput(input: PolicyInput): Record<string, unknown> {
@@ -378,23 +375,19 @@ export class PolicyDecisionService extends EventEmitter {
     };
   }
 
-  private parseOPAResult(
-    result: any,
-    decisionId: string,
-    startTime: number
-  ): PolicyDecision {
+  private parseOPAResult(result: any, decisionId: string, startTime: number): PolicyDecision {
     const data = result.result || result;
 
     return {
       allow: data.allow ?? false,
       deny: data.deny ?? !data.allow,
-      reason: data.reason ?? (data.allow ? 'Access granted' : 'Access denied'),
+      reason: data.reason ?? (data.allow ? "Access granted" : "Access denied"),
       obligations: data.obligations ?? [],
       stepUpRequired: data.stepup_required ?? false,
       stepUpPurpose: data.stepup_purpose,
       redactions: data.redactions ?? [],
       auditRequired: data.audit_required ?? true,
-      auditLevel: data.audit_level ?? 'basic',
+      auditLevel: data.audit_level ?? "basic",
       decisionId,
       evaluatedAt: new Date().toISOString(),
       latencyMs: Date.now() - startTime,
@@ -477,7 +470,7 @@ export class PolicyDecisionService extends EventEmitter {
   private async checkHealth(): Promise<void> {
     try {
       const url = `${this.config.opaUrl}/health`;
-      const response = await fetch(url, { method: 'GET' });
+      const response = await fetch(url, { method: "GET" });
       this.opaHealthy = response.ok;
 
       if (response.ok) {
@@ -486,14 +479,14 @@ export class PolicyDecisionService extends EventEmitter {
         const versionResponse = await fetch(versionUrl);
         if (versionResponse.ok) {
           const policies = await versionResponse.json();
-          this.policyVersion = policies.result?.[0]?.id ?? 'unknown';
+          this.policyVersion = policies.result?.[0]?.id ?? "unknown";
         }
       }
     } catch {
       this.opaHealthy = false;
     }
 
-    this.emit('health', { healthy: this.opaHealthy, policyVersion: this.policyVersion });
+    this.emit("health", { healthy: this.opaHealthy, policyVersion: this.policyVersion });
   }
 
   /**
@@ -526,20 +519,20 @@ export class PolicyDecisionService extends EventEmitter {
     startTime: number,
     error: unknown
   ): PolicyDecision {
-    const allow = this.config.defaultDecision === 'allow';
+    const allow = this.config.defaultDecision === "allow";
     return {
       allow,
       deny: !allow,
       reason: `Fallback decision due to error: ${error instanceof Error ? error.message : String(error)}`,
-      obligations: [{ type: 'audit', parameters: { fallback: true, error: String(error) } }],
+      obligations: [{ type: "audit", parameters: { fallback: true, error: String(error) } }],
       stepUpRequired: false,
       redactions: [],
       auditRequired: true,
-      auditLevel: 'full',
+      auditLevel: "full",
       decisionId,
       evaluatedAt: new Date().toISOString(),
       latencyMs: Date.now() - startTime,
-      policyVersion: 'fallback',
+      policyVersion: "fallback",
       matchedPolicies: [],
     };
   }
@@ -616,7 +609,7 @@ export class PolicyEvaluationError extends Error {
     public readonly decisionId: string
   ) {
     super(message);
-    this.name = 'PolicyEvaluationError';
+    this.name = "PolicyEvaluationError";
   }
 }
 
@@ -631,7 +624,7 @@ export class PolicyInputBuilder {
   private input: Partial<PolicyInput> = {};
 
   withSubject(identity: Identity, session?: SessionContext): this {
-    const user = identity.type === 'human' ? identity as UserIdentity : null;
+    const user = identity.type === "human" ? (identity as UserIdentity) : null;
 
     this.input.subject = {
       id: identity.id,
@@ -640,12 +633,12 @@ export class PolicyInputBuilder {
       roles: session?.sessionId ? [] : [], // Roles come from session
       groups: user?.groups ?? [],
       permissions: [],
-      clearance: user?.clearance ?? 'unclassified',
+      clearance: user?.clearance ?? "unclassified",
       attributes: identity.metadata,
       mfaVerified: session?.mfaCompleted ?? false,
       stepUpVerified: session?.stepUpCompleted ?? false,
       stepUpScopes: session?.stepUpScopes ?? [],
-      deviceTrust: session?.deviceTrust ?? 'untrusted',
+      deviceTrust: session?.deviceTrust ?? "untrusted",
       riskScore: session?.riskScore ?? 0,
     };
 
@@ -662,10 +655,10 @@ export class PolicyInputBuilder {
       type,
       id,
       tenantId,
-      classification: options.classification ?? 'unclassified',
+      classification: options.classification ?? "unclassified",
       owner: options.owner,
       tags: options.tags ?? [],
-      region: options.region ?? 'us-east-1',
+      region: options.region ?? "us-east-1",
       attributes: options.attributes ?? {},
     };
     return this;
@@ -698,8 +691,8 @@ export class PolicyInputBuilder {
   withEnvironment(options: Partial<EnvironmentContext> = {}): this {
     this.input.environment = {
       timestamp: options.timestamp ?? new Date().toISOString(),
-      region: options.region ?? process.env.AWS_REGION ?? 'us-east-1',
-      environment: options.environment ?? process.env.NODE_ENV ?? 'development',
+      region: options.region ?? process.env.AWS_REGION ?? "us-east-1",
+      environment: options.environment ?? process.env.NODE_ENV ?? "development",
       ipAddress: options.ipAddress,
       userAgent: options.userAgent,
       requestId: options.requestId ?? this.generateRequestId(),
@@ -709,10 +702,10 @@ export class PolicyInputBuilder {
   }
 
   build(): PolicyInput {
-    if (!this.input.subject) throw new Error('Subject is required');
-    if (!this.input.resource) throw new Error('Resource is required');
-    if (!this.input.action) throw new Error('Action is required');
-    if (!this.input.tenant) throw new Error('Tenant is required');
+    if (!this.input.subject) throw new Error("Subject is required");
+    if (!this.input.resource) throw new Error("Resource is required");
+    if (!this.input.action) throw new Error("Action is required");
+    if (!this.input.tenant) throw new Error("Tenant is required");
     if (!this.input.environment) {
       this.withEnvironment();
     }

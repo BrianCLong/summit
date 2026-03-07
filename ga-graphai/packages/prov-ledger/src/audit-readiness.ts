@@ -4,8 +4,8 @@ import {
   type ControlEvidenceMapping,
   type ControlRequirement,
   type EvidenceArtifact,
-} from 'common-types';
-import { AccessTokenService } from './quantum-safe-ledger.js';
+} from "common-types";
+import { AccessTokenService } from "./quantum-safe-ledger.js";
 
 type ControlRecord = {
   canonicalId: string;
@@ -15,7 +15,9 @@ type ControlRecord = {
   evidence: Map<string, EvidenceArtifact>;
 };
 
-function toFrameworkList(frameworks: ComplianceFramework | ComplianceFramework[]): ComplianceFramework[] {
+function toFrameworkList(
+  frameworks: ComplianceFramework | ComplianceFramework[]
+): ComplianceFramework[] {
   const list = Array.isArray(frameworks) ? frameworks : [frameworks];
   return Array.from(new Set(list)).sort();
 }
@@ -68,7 +70,7 @@ export class ControlCrosswalk {
   }
 
   bundleForFrameworks(
-    frameworks: ComplianceFramework | ComplianceFramework[],
+    frameworks: ComplianceFramework | ComplianceFramework[]
   ): ControlEvidenceBundle {
     const targetFrameworks = toFrameworkList(frameworks);
     let mappedFrameworks = 0;
@@ -136,7 +138,7 @@ export class AuditorPortal {
   constructor(options: AuditorPortalOptions = {}) {
     this.now = options.now ?? (() => new Date());
     this.crosswalk = options.crosswalk ?? new ControlCrosswalk(this.now);
-    this.tokenService = new AccessTokenService(options.tokenSecret ?? 'audit-portal-secret', {
+    this.tokenService = new AccessTokenService(options.tokenSecret ?? "audit-portal-secret", {
       ttlMs: options.tokenTtlMs ?? 10 * 60 * 1000,
       now: this.now,
     });
@@ -149,19 +151,17 @@ export class AuditorPortal {
 
   fetchEvidenceBundle(
     token: string,
-    frameworks?: ComplianceFramework | ComplianceFramework[],
+    frameworks?: ComplianceFramework | ComplianceFramework[]
   ): ControlEvidenceBundle {
     const payload = this.tokenService.verify(token);
     if (!payload) {
-      throw new Error('Invalid or expired auditor token');
+      throw new Error("Invalid or expired auditor token");
     }
     const allowedFrameworks = this.decodeFrameworkScope(payload.scope);
-    const requested = frameworks
-      ? toFrameworkList(frameworks)
-      : [...allowedFrameworks];
+    const requested = frameworks ? toFrameworkList(frameworks) : [...allowedFrameworks];
     const unauthorized = requested.filter((framework) => !allowedFrameworks.includes(framework));
     if (unauthorized.length) {
-      throw new Error(`Token does not permit frameworks: ${unauthorized.join(', ')}`);
+      throw new Error(`Token does not permit frameworks: ${unauthorized.join(", ")}`);
     }
     const bundle = this.crosswalk.bundleForFrameworks(requested);
     return { ...bundle, readOnly: true };
@@ -169,17 +169,17 @@ export class AuditorPortal {
 
   private encodeFrameworkScope(frameworks: ComplianceFramework[]): string {
     const list = toFrameworkList(frameworks);
-    return `auditor:read:${list.join('|')}`;
+    return `auditor:read:${list.join("|")}`;
   }
 
   private decodeFrameworkScope(scope: string): ComplianceFramework[] {
-    const [role, mode, list] = scope.split(':');
-    if (role !== 'auditor' || mode !== 'read') {
-      throw new Error('Token is not read-only auditor scope');
+    const [role, mode, list] = scope.split(":");
+    if (role !== "auditor" || mode !== "read") {
+      throw new Error("Token is not read-only auditor scope");
     }
     if (!list) {
       return [];
     }
-    return list.split('|').filter(Boolean) as ComplianceFramework[];
+    return list.split("|").filter(Boolean) as ComplianceFramework[];
   }
 }

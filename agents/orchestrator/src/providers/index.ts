@@ -5,14 +5,14 @@
  * for creating provider instances.
  */
 
-import { BaseLLMProvider } from './BaseLLMProvider.js';
-import { ClaudeProvider, ClaudeProviderConfig } from './ClaudeProvider.js';
-import { OpenAIProvider, OpenAIProviderConfig } from './OpenAIProvider.js';
-import { LLMProvider, LLMModel, LLMProviderConfig } from '../types/index.js';
+import { BaseLLMProvider } from "./BaseLLMProvider.js";
+import { ClaudeProvider, ClaudeProviderConfig } from "./ClaudeProvider.js";
+import { OpenAIProvider, OpenAIProviderConfig } from "./OpenAIProvider.js";
+import { LLMProvider, LLMModel, LLMProviderConfig } from "../types/index.js";
 
-export { BaseLLMProvider } from './BaseLLMProvider.js';
-export { ClaudeProvider, ClaudeProviderConfig } from './ClaudeProvider.js';
-export { OpenAIProvider, OpenAIProviderConfig } from './OpenAIProvider.js';
+export { BaseLLMProvider } from "./BaseLLMProvider.js";
+export { ClaudeProvider, ClaudeProviderConfig } from "./ClaudeProvider.js";
+export { OpenAIProvider, OpenAIProviderConfig } from "./OpenAIProvider.js";
 
 /**
  * Provider Registry - manages provider instances
@@ -103,13 +103,13 @@ export class ProviderFactory {
    */
   static create(config: LLMProviderConfig): BaseLLMProvider {
     switch (config.provider) {
-      case 'claude':
+      case "claude":
         return new ClaudeProvider(config as ClaudeProviderConfig);
-      case 'gpt':
-      case 'o1':
+      case "gpt":
+      case "o1":
         return new OpenAIProvider(config as OpenAIProviderConfig);
-      case 'local':
-        throw new Error('Local provider not yet implemented');
+      case "local":
+        throw new Error("Local provider not yet implemented");
       default:
         throw new Error(`Unknown provider: ${config.provider}`);
     }
@@ -121,24 +121,24 @@ export class ProviderFactory {
   static createDefaultConfigs(): LLMProviderConfig[] {
     return [
       {
-        provider: 'claude',
-        model: 'claude-3-5-sonnet-20241022',
+        provider: "claude",
+        model: "claude-3-5-sonnet-20241022",
         maxTokens: 4096,
         temperature: 0.7,
         timeout: 60000,
         retries: 3,
       },
       {
-        provider: 'gpt',
-        model: 'gpt-4o',
+        provider: "gpt",
+        model: "gpt-4o",
         maxTokens: 4096,
         temperature: 0.7,
         timeout: 60000,
         retries: 3,
       },
       {
-        provider: 'o1',
-        model: 'o1-preview',
+        provider: "o1",
+        model: "o1-preview",
         maxTokens: 32768,
         temperature: 1, // o1 doesn't support temperature
         timeout: 120000, // o1 needs longer timeout
@@ -157,7 +157,11 @@ export class ProviderFactory {
     for (const config of configs) {
       try {
         const provider = this.create(config);
-        registry.register(`${config.provider}-${config.model}`, provider, config.provider === 'claude');
+        registry.register(
+          `${config.provider}-${config.model}`,
+          provider,
+          config.provider === "claude"
+        );
       } catch {
         // Skip providers that fail to initialize
       }
@@ -170,94 +174,97 @@ export class ProviderFactory {
 /**
  * Model capabilities and metadata
  */
-export const MODEL_CAPABILITIES: Record<LLMModel, {
-  provider: LLMProvider;
-  maxContextTokens: number;
-  maxOutputTokens: number;
-  supportsTools: boolean;
-  supportsStreaming: boolean;
-  supportsVision: boolean;
-  strengths: string[];
-}> = {
-  'claude-3-5-sonnet-20241022': {
-    provider: 'claude',
+export const MODEL_CAPABILITIES: Record<
+  LLMModel,
+  {
+    provider: LLMProvider;
+    maxContextTokens: number;
+    maxOutputTokens: number;
+    supportsTools: boolean;
+    supportsStreaming: boolean;
+    supportsVision: boolean;
+    strengths: string[];
+  }
+> = {
+  "claude-3-5-sonnet-20241022": {
+    provider: "claude",
     maxContextTokens: 200000,
     maxOutputTokens: 8192,
     supportsTools: true,
     supportsStreaming: true,
     supportsVision: true,
-    strengths: ['coding', 'analysis', 'reasoning', 'creativity', 'safety'],
+    strengths: ["coding", "analysis", "reasoning", "creativity", "safety"],
   },
-  'claude-3-opus-20240229': {
-    provider: 'claude',
+  "claude-3-opus-20240229": {
+    provider: "claude",
     maxContextTokens: 200000,
     maxOutputTokens: 4096,
     supportsTools: true,
     supportsStreaming: true,
     supportsVision: true,
-    strengths: ['complex-reasoning', 'nuanced-analysis', 'writing'],
+    strengths: ["complex-reasoning", "nuanced-analysis", "writing"],
   },
-  'claude-3-haiku-20240307': {
-    provider: 'claude',
+  "claude-3-haiku-20240307": {
+    provider: "claude",
     maxContextTokens: 200000,
     maxOutputTokens: 4096,
     supportsTools: true,
     supportsStreaming: true,
     supportsVision: true,
-    strengths: ['speed', 'cost-efficiency', 'simple-tasks'],
+    strengths: ["speed", "cost-efficiency", "simple-tasks"],
   },
-  'gpt-4-turbo': {
-    provider: 'gpt',
+  "gpt-4-turbo": {
+    provider: "gpt",
     maxContextTokens: 128000,
     maxOutputTokens: 4096,
     supportsTools: true,
     supportsStreaming: true,
     supportsVision: true,
-    strengths: ['general-purpose', 'coding', 'analysis'],
+    strengths: ["general-purpose", "coding", "analysis"],
   },
-  'gpt-4o': {
-    provider: 'gpt',
+  "gpt-4o": {
+    provider: "gpt",
     maxContextTokens: 128000,
     maxOutputTokens: 16384,
     supportsTools: true,
     supportsStreaming: true,
     supportsVision: true,
-    strengths: ['multimodal', 'speed', 'general-purpose'],
+    strengths: ["multimodal", "speed", "general-purpose"],
   },
-  'gpt-4o-mini': {
-    provider: 'gpt',
+  "gpt-4o-mini": {
+    provider: "gpt",
     maxContextTokens: 128000,
     maxOutputTokens: 16384,
     supportsTools: true,
     supportsStreaming: true,
     supportsVision: true,
-    strengths: ['cost-efficiency', 'speed', 'simple-tasks'],
+    strengths: ["cost-efficiency", "speed", "simple-tasks"],
   },
-  'o1-preview': {
-    provider: 'o1',
+  "o1-preview": {
+    provider: "o1",
     maxContextTokens: 128000,
     maxOutputTokens: 32768,
     supportsTools: false,
     supportsStreaming: false,
     supportsVision: false,
-    strengths: ['deep-reasoning', 'math', 'science', 'complex-problems'],
+    strengths: ["deep-reasoning", "math", "science", "complex-problems"],
   },
-  'o1-mini': {
-    provider: 'o1',
+  "o1-mini": {
+    provider: "o1",
     maxContextTokens: 128000,
     maxOutputTokens: 65536,
     supportsTools: false,
     supportsStreaming: false,
     supportsVision: false,
-    strengths: ['reasoning', 'coding', 'cost-efficiency'],
+    strengths: ["reasoning", "coding", "cost-efficiency"],
   },
-  'local-llama': {
-    provider: 'local',
+  "local-llama": {
+    provider: "local",
     maxContextTokens: 4096,
     maxOutputTokens: 2048,
     supportsTools: false,
     supportsStreaming: true,
     supportsVision: false,
-    strengths: ['privacy', 'offline', 'cost-free'],
+    strengths: ["privacy", "offline", "cost-free"],
   },
 };

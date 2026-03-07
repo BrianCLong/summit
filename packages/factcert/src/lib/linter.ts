@@ -1,4 +1,4 @@
-export const FORBIDDEN_TERMS = ['admissible', 'compliant', 'fraud', 'guaranteed'];
+export const FORBIDDEN_TERMS = ["admissible", "compliant", "fraud", "guaranteed"];
 
 export function lintContent(content: string): string[] {
   const violations: string[] = [];
@@ -7,7 +7,7 @@ export function lintContent(content: string): string[] {
   const lower = content.toLowerCase();
 
   for (const term of FORBIDDEN_TERMS) {
-    const regex = new RegExp(`\\b${term}\\b`, 'i');
+    const regex = new RegExp(`\\b${term}\\b`, "i");
     if (regex.test(lower)) {
       violations.push(term);
     }

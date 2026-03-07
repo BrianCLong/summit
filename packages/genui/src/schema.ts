@@ -1,34 +1,28 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 export const IntentSchema = z.enum([
-  'investigate',
-  'compare',
-  'plan',
-  'remediate',
-  'onboard',
-  'triage',
+  "investigate",
+  "compare",
+  "plan",
+  "remediate",
+  "onboard",
+  "triage",
 ]);
 
 export const ComponentKindSchema = z.enum([
-  'kpi',
-  'table',
-  'timeline',
-  'graphView',
-  'checklist',
-  'diff',
-  'callout',
-  'form',
-  'stepper',
-  'citationList',
+  "kpi",
+  "table",
+  "timeline",
+  "graphView",
+  "checklist",
+  "diff",
+  "callout",
+  "form",
+  "stepper",
+  "citationList",
 ]);
 
-export const DataRequestTypeSchema = z.enum([
-  'graphql',
-  'sql',
-  'cypher',
-  'search',
-  'rest',
-]);
+export const DataRequestTypeSchema = z.enum(["graphql", "sql", "cypher", "search", "rest"]);
 
 export const DataRequestSchema = z.object({
   id: z.string().min(1),
@@ -89,7 +83,7 @@ export const ConstraintsSchema = z.object({
     prefersReducedMotion: z.boolean().default(false),
   }),
   tenantPolicies: z.array(z.string()).default([]),
-  networkPolicy: z.enum(['no-external', 'allowlisted']).default('no-external'),
+  networkPolicy: z.enum(["no-external", "allowlisted"]).default("no-external"),
 });
 
 export const UiPlanSchema = z.object({

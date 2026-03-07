@@ -13,10 +13,7 @@
   "main": "./dist/index.js",
   "icon": "https://example.com/icons/network.svg",
   "engineVersion": "^1.0.0",
-  "permissions": [
-    "ui:extensions",
-    "read:data"
-  ],
+  "permissions": ["ui:extensions", "read:data"],
   "resources": {
     "maxMemoryMB": 256,
     "maxCpuPercent": 30,

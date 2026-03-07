@@ -152,25 +152,11 @@ allow { sbom_present; license_ok; dpia_ok; tpia_ok; evals_ok; export_ok; claims_
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "DisclosurePack",
   "type": "object",
-  "required": [
-    "release",
-    "privacy",
-    "ai",
-    "oss",
-    "export",
-    "incident",
-    "controls"
-  ],
+  "required": ["release", "privacy", "ai", "oss", "export", "incident", "controls"],
   "properties": {
     "release": {
       "type": "object",
-      "required": [
-        "repo",
-        "commit",
-        "region",
-        "features",
-        "explainability_endpoint"
-      ],
+      "required": ["repo", "commit", "region", "features", "explainability_endpoint"],
       "properties": {
         "repo": { "type": "string" },
         "commit": { "type": "string" },
@@ -201,7 +187,7 @@ name: Claims Diff
 on:
   pull_request:
     paths:
-      - 'disclosure/claims.md'
+      - "disclosure/claims.md"
 jobs:
   claims:
     runs-on: ubuntu-latest

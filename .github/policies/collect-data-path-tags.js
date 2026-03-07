@@ -1,17 +1,17 @@
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
 const targets = [
-  { path: 'schemas/runbook.schema.json', system: 'maestro' },
-  { path: 'schemas/workflow.schema.json', system: 'maestro' },
-  { path: 'server/data-pipelines/contracts/contacts_v1.json', system: 'intelgraph' },
-  { path: 'server/data-pipelines/contracts/twitter_v1.json', system: 'intelgraph' },
-  { path: 'schemas/data-spine/events/base-envelope.schema.json', system: 'companyos' },
+  { path: "schemas/runbook.schema.json", system: "maestro" },
+  { path: "schemas/workflow.schema.json", system: "maestro" },
+  { path: "server/data-pipelines/contracts/contacts_v1.json", system: "intelgraph" },
+  { path: "server/data-pipelines/contracts/twitter_v1.json", system: "intelgraph" },
+  { path: "schemas/data-spine/events/base-envelope.schema.json", system: "companyos" },
 ];
 
 const readJson = (targetPath) => {
   const fullPath = path.join(process.cwd(), targetPath);
-  const raw = fs.readFileSync(fullPath, 'utf8');
+  const raw = fs.readFileSync(fullPath, "utf8");
   return JSON.parse(raw);
 };
 
@@ -20,8 +20,8 @@ const extractTags = (doc) => {
     return doc.metadata.tags;
   }
 
-  if (Array.isArray(doc['x-data-tags'])) {
-    return doc['x-data-tags'];
+  if (Array.isArray(doc["x-data-tags"])) {
+    return doc["x-data-tags"];
   }
 
   if (Array.isArray(doc.data_tags)) {

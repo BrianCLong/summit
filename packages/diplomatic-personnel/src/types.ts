@@ -4,51 +4,51 @@
  */
 
 export enum DiplomaticRank {
-  AMBASSADOR = 'AMBASSADOR',
-  AMBASSADOR_AT_LARGE = 'AMBASSADOR_AT_LARGE',
-  AMBASSADOR_EXTRAORDINARY = 'AMBASSADOR_EXTRAORDINARY',
-  HIGH_COMMISSIONER = 'HIGH_COMMISSIONER',
-  PERMANENT_REPRESENTATIVE = 'PERMANENT_REPRESENTATIVE',
-  CHARGE_D_AFFAIRES = 'CHARGE_D_AFFAIRES',
-  MINISTER = 'MINISTER',
-  MINISTER_COUNSELOR = 'MINISTER_COUNSELOR',
-  COUNSELOR = 'COUNSELOR',
-  FIRST_SECRETARY = 'FIRST_SECRETARY',
-  SECOND_SECRETARY = 'SECOND_SECRETARY',
-  THIRD_SECRETARY = 'THIRD_SECRETARY',
-  ATTACHE = 'ATTACHE',
-  SPECIAL_ENVOY = 'SPECIAL_ENVOY',
-  SPECIAL_REPRESENTATIVE = 'SPECIAL_REPRESENTATIVE',
-  CONSUL_GENERAL = 'CONSUL_GENERAL',
-  CONSUL = 'CONSUL',
-  VICE_CONSUL = 'VICE_CONSUL'
+  AMBASSADOR = "AMBASSADOR",
+  AMBASSADOR_AT_LARGE = "AMBASSADOR_AT_LARGE",
+  AMBASSADOR_EXTRAORDINARY = "AMBASSADOR_EXTRAORDINARY",
+  HIGH_COMMISSIONER = "HIGH_COMMISSIONER",
+  PERMANENT_REPRESENTATIVE = "PERMANENT_REPRESENTATIVE",
+  CHARGE_D_AFFAIRES = "CHARGE_D_AFFAIRES",
+  MINISTER = "MINISTER",
+  MINISTER_COUNSELOR = "MINISTER_COUNSELOR",
+  COUNSELOR = "COUNSELOR",
+  FIRST_SECRETARY = "FIRST_SECRETARY",
+  SECOND_SECRETARY = "SECOND_SECRETARY",
+  THIRD_SECRETARY = "THIRD_SECRETARY",
+  ATTACHE = "ATTACHE",
+  SPECIAL_ENVOY = "SPECIAL_ENVOY",
+  SPECIAL_REPRESENTATIVE = "SPECIAL_REPRESENTATIVE",
+  CONSUL_GENERAL = "CONSUL_GENERAL",
+  CONSUL = "CONSUL",
+  VICE_CONSUL = "VICE_CONSUL",
 }
 
 export enum PostingType {
-  BILATERAL_EMBASSY = 'BILATERAL_EMBASSY',
-  CONSULATE = 'CONSULATE',
-  CONSULATE_GENERAL = 'CONSULATE_GENERAL',
-  PERMANENT_MISSION = 'PERMANENT_MISSION',
-  SPECIAL_MISSION = 'SPECIAL_MISSION',
-  LIAISON_OFFICE = 'LIAISON_OFFICE',
-  INTERESTS_SECTION = 'INTERESTS_SECTION',
-  DELEGATION = 'DELEGATION'
+  BILATERAL_EMBASSY = "BILATERAL_EMBASSY",
+  CONSULATE = "CONSULATE",
+  CONSULATE_GENERAL = "CONSULATE_GENERAL",
+  PERMANENT_MISSION = "PERMANENT_MISSION",
+  SPECIAL_MISSION = "SPECIAL_MISSION",
+  LIAISON_OFFICE = "LIAISON_OFFICE",
+  INTERESTS_SECTION = "INTERESTS_SECTION",
+  DELEGATION = "DELEGATION",
 }
 
 export enum SpecializationArea {
-  POLITICAL_AFFAIRS = 'POLITICAL_AFFAIRS',
-  ECONOMIC_AFFAIRS = 'ECONOMIC_AFFAIRS',
-  CONSULAR_AFFAIRS = 'CONSULAR_AFFAIRS',
-  PUBLIC_DIPLOMACY = 'PUBLIC_DIPLOMACY',
-  TRADE_PROMOTION = 'TRADE_PROMOTION',
-  DEFENSE_ATTACHE = 'DEFENSE_ATTACHE',
-  INTELLIGENCE = 'INTELLIGENCE',
-  CULTURAL_AFFAIRS = 'CULTURAL_AFFAIRS',
-  SCIENCE_TECHNOLOGY = 'SCIENCE_TECHNOLOGY',
-  HUMANITARIAN = 'HUMANITARIAN',
-  ENVIRONMENTAL = 'ENVIRONMENTAL',
-  MULTILATERAL = 'MULTILATERAL',
-  REGIONAL_SECURITY = 'REGIONAL_SECURITY'
+  POLITICAL_AFFAIRS = "POLITICAL_AFFAIRS",
+  ECONOMIC_AFFAIRS = "ECONOMIC_AFFAIRS",
+  CONSULAR_AFFAIRS = "CONSULAR_AFFAIRS",
+  PUBLIC_DIPLOMACY = "PUBLIC_DIPLOMACY",
+  TRADE_PROMOTION = "TRADE_PROMOTION",
+  DEFENSE_ATTACHE = "DEFENSE_ATTACHE",
+  INTELLIGENCE = "INTELLIGENCE",
+  CULTURAL_AFFAIRS = "CULTURAL_AFFAIRS",
+  SCIENCE_TECHNOLOGY = "SCIENCE_TECHNOLOGY",
+  HUMANITARIAN = "HUMANITARIAN",
+  ENVIRONMENTAL = "ENVIRONMENTAL",
+  MULTILATERAL = "MULTILATERAL",
+  REGIONAL_SECURITY = "REGIONAL_SECURITY",
 }
 
 export interface Diplomat {
@@ -78,7 +78,7 @@ export interface Diplomat {
   effectiveness: number; // 0-100
   influence: number; // 0-100
   networkSize: number;
-  profileLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'VERY_HIGH';
+  profileLevel: "LOW" | "MEDIUM" | "HIGH" | "VERY_HIGH";
 
   // Activities
   publicEngagements: PublicEngagement[];
@@ -105,7 +105,7 @@ export interface Diplomat {
 
 export interface Language {
   language: string;
-  proficiency: 'NATIVE' | 'FLUENT' | 'PROFESSIONAL' | 'INTERMEDIATE' | 'BASIC';
+  proficiency: "NATIVE" | "FLUENT" | "PROFESSIONAL" | "INTERMEDIATE" | "BASIC";
   certifications?: string[];
 }
 
@@ -152,7 +152,7 @@ export interface DiplomaticRelationship {
   withDiplomat: string;
   withDiplomatCountry: string;
   withDiplomatRank: DiplomaticRank;
-  relationshipType: 'COUNTERPART' | 'PEER' | 'MENTOR' | 'COLLABORATOR' | 'RIVAL' | 'CONTACT';
+  relationshipType: "COUNTERPART" | "PEER" | "MENTOR" | "COLLABORATOR" | "RIVAL" | "CONTACT";
   strength: number; // 0-100
   since: Date;
   interactions: number;
@@ -163,13 +163,13 @@ export interface DiplomaticRelationship {
 export interface PublicEngagement {
   id: string;
   date: Date;
-  type: 'SPEECH' | 'INTERVIEW' | 'PANEL' | 'CONFERENCE' | 'CEREMONY' | 'MEETING' | 'VISIT';
+  type: "SPEECH" | "INTERVIEW" | "PANEL" | "CONFERENCE" | "CEREMONY" | "MEETING" | "VISIT";
   title: string;
   venue: string;
   audience: string;
   topic: string;
   significance: number; // 1-10
-  mediaAttention: 'NONE' | 'LOW' | 'MEDIUM' | 'HIGH' | 'VERY_HIGH';
+  mediaAttention: "NONE" | "LOW" | "MEDIUM" | "HIGH" | "VERY_HIGH";
   keyMessages?: string[];
   impact?: string;
 }
@@ -177,7 +177,7 @@ export interface PublicEngagement {
 export interface NegotiationParticipation {
   id: string;
   negotiation: string;
-  role: 'LEAD' | 'DEPUTY' | 'ADVISOR' | 'OBSERVER' | 'MEDIATOR' | 'FACILITATOR';
+  role: "LEAD" | "DEPUTY" | "ADVISOR" | "OBSERVER" | "MEDIATOR" | "FACILITATOR";
   startDate: Date;
   endDate?: Date;
   subject: string;
@@ -196,7 +196,7 @@ export interface Speech {
   audience: string;
   content?: string;
   keyThemes: string[];
-  tone: 'CONCILIATORY' | 'FIRM' | 'CELEBRATORY' | 'CRITICAL' | 'NEUTRAL';
+  tone: "CONCILIATORY" | "FIRM" | "CELEBRATORY" | "CRITICAL" | "NEUTRAL";
   significance: number; // 1-10
   mediaPickup: number;
   url?: string;
@@ -205,7 +205,7 @@ export interface Speech {
 export interface Publication {
   id: string;
   title: string;
-  type: 'ARTICLE' | 'BOOK' | 'REPORT' | 'PAPER' | 'COMMENTARY' | 'MEMOIR';
+  type: "ARTICLE" | "BOOK" | "REPORT" | "PAPER" | "COMMENTARY" | "MEMOIR";
   publishedDate: Date;
   publisher: string;
   subject: string;
@@ -216,11 +216,11 @@ export interface Publication {
 }
 
 export interface DiplomaticStyle {
-  approach: 'FORMAL' | 'INFORMAL' | 'PRAGMATIC' | 'IDEOLOGICAL' | 'FLEXIBLE' | 'RIGID';
-  communicationStyle: 'DIRECT' | 'INDIRECT' | 'NUANCED' | 'BLUNT' | 'DIPLOMATIC';
-  negotiationStyle: 'COLLABORATIVE' | 'COMPETITIVE' | 'COMPROMISING' | 'PRINCIPLED' | 'STRATEGIC';
-  conflictApproach: 'CONFRONTATIONAL' | 'CONCILIATORY' | 'AVOIDANT' | 'PROBLEM_SOLVING';
-  riskTolerance: 'HIGH' | 'MODERATE' | 'LOW';
+  approach: "FORMAL" | "INFORMAL" | "PRAGMATIC" | "IDEOLOGICAL" | "FLEXIBLE" | "RIGID";
+  communicationStyle: "DIRECT" | "INDIRECT" | "NUANCED" | "BLUNT" | "DIPLOMATIC";
+  negotiationStyle: "COLLABORATIVE" | "COMPETITIVE" | "COMPROMISING" | "PRINCIPLED" | "STRATEGIC";
+  conflictApproach: "CONFRONTATIONAL" | "CONCILIATORY" | "AVOIDANT" | "PROBLEM_SOLVING";
+  riskTolerance: "HIGH" | "MODERATE" | "LOW";
   innovativeness: number; // 0-100
   culturalSensitivity: number; // 0-100
 }
@@ -237,7 +237,7 @@ export interface Reputation {
 
   perceptionByCountry?: {
     country: string;
-    perception: 'VERY_POSITIVE' | 'POSITIVE' | 'NEUTRAL' | 'NEGATIVE' | 'VERY_NEGATIVE';
+    perception: "VERY_POSITIVE" | "POSITIVE" | "NEUTRAL" | "NEGATIVE" | "VERY_NEGATIVE";
     score: number; // 0-100
   }[];
 
@@ -248,8 +248,8 @@ export interface Reputation {
 export interface Controversy {
   date: Date;
   description: string;
-  type: 'SCANDAL' | 'GAFFE' | 'POLICY_DISAGREEMENT' | 'PERSONAL' | 'OTHER';
-  severity: 'MINOR' | 'MODERATE' | 'MAJOR' | 'SEVERE';
+  type: "SCANDAL" | "GAFFE" | "POLICY_DISAGREEMENT" | "PERSONAL" | "OTHER";
+  severity: "MINOR" | "MODERATE" | "MAJOR" | "SEVERE";
   resolution?: string;
   impact: string;
 }
@@ -266,14 +266,14 @@ export interface Award {
 export interface SignificantEvent {
   date: Date;
   event: string;
-  type: 'ACHIEVEMENT' | 'CHALLENGE' | 'CRISIS' | 'BREAKTHROUGH' | 'SETBACK';
+  type: "ACHIEVEMENT" | "CHALLENGE" | "CRISIS" | "BREAKTHROUGH" | "SETBACK";
   description: string;
   impact: number; // 1-10
   lessons?: string[];
 }
 
 export interface Source {
-  type: 'OFFICIAL' | 'MEDIA' | 'ACADEMIC' | 'DIPLOMATIC' | 'BIOGRAPHY';
+  type: "OFFICIAL" | "MEDIA" | "ACADEMIC" | "DIPLOMATIC" | "BIOGRAPHY";
   name: string;
   url?: string;
   date: Date;
@@ -283,7 +283,7 @@ export interface Source {
 export interface DiplomaticNetwork {
   id: string;
   name: string;
-  type: 'FORMAL' | 'INFORMAL' | 'PROFESSIONAL' | 'ALUMNI' | 'REGIONAL' | 'THEMATIC';
+  type: "FORMAL" | "INFORMAL" | "PROFESSIONAL" | "ALUMNI" | "REGIONAL" | "THEMATIC";
   members: NetworkMember[];
   formed?: Date;
   purpose: string;
@@ -297,7 +297,7 @@ export interface NetworkMember {
   name: string;
   country: string;
   rank: DiplomaticRank;
-  role: 'LEADER' | 'CORE' | 'ACTIVE' | 'PERIPHERAL';
+  role: "LEADER" | "CORE" | "ACTIVE" | "PERIPHERAL";
   joinedDate: Date;
   contributions: string[];
 }
@@ -316,7 +316,7 @@ export interface Embassy {
 
   // Structure
   departments: Department[];
-  size: 'SMALL' | 'MEDIUM' | 'LARGE' | 'VERY_LARGE';
+  size: "SMALL" | "MEDIUM" | "LARGE" | "VERY_LARGE";
   budget?: number;
 
   // Operations
@@ -365,7 +365,12 @@ export interface Department {
 
 export interface Activity {
   id: string;
-  type: 'DIPLOMATIC_ENGAGEMENT' | 'TRADE_PROMOTION' | 'CULTURAL_EVENT' | 'CONSULAR_SERVICE' | 'PUBLIC_DIPLOMACY';
+  type:
+    | "DIPLOMATIC_ENGAGEMENT"
+    | "TRADE_PROMOTION"
+    | "CULTURAL_EVENT"
+    | "CONSULAR_SERVICE"
+    | "PUBLIC_DIPLOMACY";
   description: string;
   date: Date;
   participants?: number;
@@ -375,7 +380,7 @@ export interface Activity {
 
 export interface ConsularPost {
   id: string;
-  type: 'CONSULATE_GENERAL' | 'CONSULATE' | 'VICE_CONSULATE' | 'CONSULAR_AGENCY';
+  type: "CONSULATE_GENERAL" | "CONSULATE" | "VICE_CONSULATE" | "CONSULAR_AGENCY";
   location: Location;
   headOfPost: string; // Diplomat ID
   staff: number;
@@ -395,7 +400,7 @@ export interface DiplomaticCorps {
   }[];
 
   byRelationshipQuality: {
-    quality: 'EXCELLENT' | 'GOOD' | 'FAIR' | 'POOR';
+    quality: "EXCELLENT" | "GOOD" | "FAIR" | "POOR";
     count: number;
   }[];
 
@@ -406,7 +411,7 @@ export interface DiplomaticCorps {
 export interface CareerPath {
   diplomat: string;
   stages: CareerStage[];
-  trajectory: 'ASCENDING' | 'STABLE' | 'DECLINING' | 'LATERAL';
+  trajectory: "ASCENDING" | "STABLE" | "DECLINING" | "LATERAL";
   peakRank: DiplomaticRank;
   peakInfluence: number; // 0-100
 
@@ -533,7 +538,7 @@ export interface InfluenceMetrics {
   negotiatingPower: number; // 0-100
 
   overallInfluence: number; // 0-100
-  trend: 'RISING' | 'STABLE' | 'DECLINING';
+  trend: "RISING" | "STABLE" | "DECLINING";
 
   influenceFactors: string[];
   influenceSpheres: string[];

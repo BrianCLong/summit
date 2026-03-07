@@ -2,13 +2,13 @@ name: 🎯 Master Orchestrator - Supreme Control
 
 on:
   schedule:
-    - cron: '0 * * * *'  # Every hour
+    - cron: "0 * * * *" # Every hour
   workflow_dispatch:
     inputs:
       action:
-        description: 'Action to perform'
+        description: "Action to perform"
         required: false
-        default: 'full-sweep'
+        default: "full-sweep"
         type: choice
         options:
           - full-sweep

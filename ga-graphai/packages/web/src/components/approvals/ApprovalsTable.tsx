@@ -35,7 +35,11 @@ export const ApprovalsTable: React.FC<Props> = ({
         </thead>
         <tbody>
           {approvals.map((a) => (
-            <tr key={a.id} className="hover:bg-gray-50 cursor-pointer" onClick={() => onSelect(a.id)}>
+            <tr
+              key={a.id}
+              className="hover:bg-gray-50 cursor-pointer"
+              onClick={() => onSelect(a.id)}
+            >
               <td className="px-3 py-2">{a.operation}</td>
               <td className="px-3 py-2">{a.requesterId}</td>
               <td className="px-3 py-2">

@@ -3,7 +3,7 @@
   "type": "object",
   "required": ["evidence"],
   "properties": {
-    "evidence": {"type": "object"}
+    "evidence": { "type": "object" }
   },
   "additionalProperties": false
 }

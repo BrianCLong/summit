@@ -3,7 +3,7 @@
  * High-throughput, low-latency detection for live media streams
  */
 
-import { EventEmitter } from 'events';
+import { EventEmitter } from "events";
 
 export interface StreamingConfig {
   bufferSize: number;
@@ -35,7 +35,7 @@ export interface RealTimeDetection {
 }
 
 export interface StreamAlert {
-  level: 'info' | 'warning' | 'critical';
+  level: "info" | "warning" | "critical";
   message: string;
   timestamp: Date;
   detection: RealTimeDetection;
@@ -150,7 +150,7 @@ export class StreamingAnalysisEngine extends EventEmitter {
     if (this.isRunning) return;
 
     this.isRunning = true;
-    this.emit('started');
+    this.emit("started");
 
     // Initialize parallel workers if enabled
     if (this.config.parallelProcessing) {
@@ -173,7 +173,7 @@ export class StreamingAnalysisEngine extends EventEmitter {
     }
     this.workers = [];
 
-    this.emit('stopped');
+    this.emit("stopped");
   }
 
   /**
@@ -222,10 +222,10 @@ export class StreamingAnalysisEngine extends EventEmitter {
       metrics: { ...this.metrics },
     };
 
-    this.emit('frameProcessed', result);
+    this.emit("frameProcessed", result);
 
     if (alerts.length > 0) {
-      this.emit('alert', alerts);
+      this.emit("alert", alerts);
     }
 
     return result;
@@ -264,7 +264,7 @@ export class StreamingAnalysisEngine extends EventEmitter {
 
     return [
       {
-        type: 'face_analysis',
+        type: "face_analysis",
         confidence: 0.3,
         location: { x: 100, y: 100, width: 200, height: 200 },
         metadata: { faceCount: 1, manipulationScore: 0.2 },
@@ -297,7 +297,7 @@ export class StreamingAnalysisEngine extends EventEmitter {
    * Analyze temporal context for multi-frame patterns
    */
   private async analyzeTemporalContext(
-    currentDetections: RealTimeDetection[],
+    currentDetections: RealTimeDetection[]
   ): Promise<RealTimeDetection[]> {
     const temporalDetections: RealTimeDetection[] = [];
 
@@ -305,7 +305,7 @@ export class StreamingAnalysisEngine extends EventEmitter {
     const consistencyScore = this.checkTemporalConsistency();
     if (consistencyScore < 0.5) {
       temporalDetections.push({
-        type: 'temporal_inconsistency',
+        type: "temporal_inconsistency",
         confidence: 1 - consistencyScore,
         metadata: { consistencyScore },
       });
@@ -315,7 +315,7 @@ export class StreamingAnalysisEngine extends EventEmitter {
     const trendAnomaly = this.detectTrendAnomaly();
     if (trendAnomaly) {
       temporalDetections.push({
-        type: 'trend_anomaly',
+        type: "trend_anomaly",
         confidence: trendAnomaly.confidence,
         metadata: trendAnomaly,
       });
@@ -325,7 +325,7 @@ export class StreamingAnalysisEngine extends EventEmitter {
     const suddenChange = this.detectSuddenChange(currentDetections);
     if (suddenChange) {
       temporalDetections.push({
-        type: 'sudden_change',
+        type: "sudden_change",
         confidence: suddenChange.confidence,
         metadata: suddenChange,
       });
@@ -335,7 +335,7 @@ export class StreamingAnalysisEngine extends EventEmitter {
     const periodicPattern = this.detectPeriodicPattern();
     if (periodicPattern) {
       temporalDetections.push({
-        type: 'periodic_pattern',
+        type: "periodic_pattern",
         confidence: periodicPattern.confidence,
         metadata: periodicPattern,
       });
@@ -382,7 +382,7 @@ export class StreamingAnalysisEngine extends EventEmitter {
     if (Math.abs(trend.shortTermTrend - trend.longTermTrend) > 0.3) {
       return {
         confidence: Math.abs(trend.shortTermTrend - trend.longTermTrend),
-        type: 'trend_divergence',
+        type: "trend_divergence",
       };
     }
 
@@ -390,7 +390,7 @@ export class StreamingAnalysisEngine extends EventEmitter {
     if (trend.volatility > 0.5) {
       return {
         confidence: trend.volatility,
-        type: 'high_volatility',
+        type: "high_volatility",
       };
     }
 
@@ -411,7 +411,7 @@ export class StreamingAnalysisEngine extends EventEmitter {
     if (change > 0.3) {
       return {
         confidence: change,
-        type: 'sudden_confidence_change',
+        type: "sudden_confidence_change",
       };
     }
 
@@ -525,8 +525,8 @@ export class StreamingAnalysisEngine extends EventEmitter {
 
     for (const detection of detections) {
       if (detection.confidence > this.adaptiveThreshold) {
-        const level = detection.confidence > 0.9 ? 'critical' :
-                      detection.confidence > 0.7 ? 'warning' : 'info';
+        const level =
+          detection.confidence > 0.9 ? "critical" : detection.confidence > 0.7 ? "warning" : "info";
 
         alerts.push({
           level,

@@ -1,5 +1,5 @@
 apiVersion: 1
 providers:
-  - name: 'companyos'
+  - name: "companyos"
     type: file
     options: { path: /var/lib/grafana/dashboards }

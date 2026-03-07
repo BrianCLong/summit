@@ -170,6 +170,7 @@ This phase must produce differentiators the target does not provide or cannot ea
 - Summit Baseline: <commit/branch>
 
 ## 1) Extraction Summary
+
 - Findings count: <N>
 - Top 5 high-leverage patterns:
   1. ...
@@ -178,11 +179,14 @@ This phase must produce differentiators the target does not provide or cannot ea
   - ...
 
 ## 2) Evidence Map
+
 Each claim references public evidence (link + exact location).
+
 - CI.<target>.ops.<slug>: <evidence>
 - ...
 
 ## 3) Integration Plan
+
 - Target module(s): ...
 - API changes: ...
 - Data model changes: ...
@@ -190,24 +194,28 @@ Each claim references public evidence (link + exact location).
 - Rollback plan: ...
 
 ## 4) PR Stack Plan
+
 PR-01: ...
 PR-02: ...
 PR-03: ...
 Each PR includes tests + measurable outcome.
 
 ## 5) Transcendence Plan
+
 - Differentiators we ship beyond the target:
   - ...
 - Why they’re defensible:
   - ...
 
 ## 6) Gates & Assurance
+
 - New/updated CI gates:
   - ...
 - Evidence artifacts produced:
   - ...
 
 ## 7) Metrics
+
 - Baseline vs after:
   - Latency: <x → y>
   - Cost: <x → y>

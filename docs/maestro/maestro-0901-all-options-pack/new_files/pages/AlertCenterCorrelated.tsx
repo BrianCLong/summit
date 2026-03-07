@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import { getAlertCenterEvents } from '../api';
-import { Link } from 'react-router-dom';
+import React, { useEffect, useState } from "react";
+import { getAlertCenterEvents } from "../api";
+import { Link } from "react-router-dom";
 
 export default function AlertCenterCorrelated() {
   const [filters, setFilters] = useState<{
@@ -27,34 +27,26 @@ export default function AlertCenterCorrelated() {
         <input
           className="border rounded px-2 py-1"
           placeholder="type"
-          value={filters.type || ''}
-          onChange={(e) =>
-            setFilters({ ...filters, type: e.target.value || undefined })
-          }
+          value={filters.type || ""}
+          onChange={(e) => setFilters({ ...filters, type: e.target.value || undefined })}
         />
         <input
           className="border rounded px-2 py-1"
           placeholder="severity"
-          value={filters.severity || ''}
-          onChange={(e) =>
-            setFilters({ ...filters, severity: e.target.value || undefined })
-          }
+          value={filters.severity || ""}
+          onChange={(e) => setFilters({ ...filters, severity: e.target.value || undefined })}
         />
         <input
           className="border rounded px-2 py-1"
           placeholder="tenant"
-          value={filters.tenant || ''}
-          onChange={(e) =>
-            setFilters({ ...filters, tenant: e.target.value || undefined })
-          }
+          value={filters.tenant || ""}
+          onChange={(e) => setFilters({ ...filters, tenant: e.target.value || undefined })}
         />
         <input
           className="border rounded px-2 py-1"
           placeholder="provider"
-          value={filters.provider || ''}
-          onChange={(e) =>
-            setFilters({ ...filters, provider: e.target.value || undefined })
-          }
+          value={filters.provider || ""}
+          onChange={(e) => setFilters({ ...filters, provider: e.target.value || undefined })}
         />
         <button className="border rounded px-3 py-1" onClick={load}>
           Refresh
@@ -79,18 +71,18 @@ export default function AlertCenterCorrelated() {
               <td className="px-2 py-1">{new Date(e.at).toLocaleString()}</td>
               <td className="px-2 py-1">{e.type}</td>
               <td className="px-2 py-1">{e.severity}</td>
-              <td className="px-2 py-1">{e.source || '-'}</td>
+              <td className="px-2 py-1">{e.source || "-"}</td>
               <td className="px-2 py-1">
                 {e.runId ? (
                   <Link className="underline" to={`/maestro/runs/${e.runId}`}>
                     #{e.runId}
                   </Link>
                 ) : (
-                  '-'
+                  "-"
                 )}
               </td>
-              <td className="px-2 py-1">{e.provider || '-'}</td>
-              <td className="px-2 py-1">{e.tenant || '-'}</td>
+              <td className="px-2 py-1">{e.provider || "-"}</td>
+              <td className="px-2 py-1">{e.tenant || "-"}</td>
             </tr>
           ))}
         </tbody>

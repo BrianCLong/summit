@@ -1,12 +1,5 @@
-import React from 'react';
-import {
-  Box,
-  Typography,
-  List,
-  ListItem,
-  ListItemButton,
-  Button,
-} from '@mui/material';
+import React from "react";
+import { Box, Typography, List, ListItem, ListItemButton, Button } from "@mui/material";
 
 interface SavedView {
   id: string;
@@ -26,9 +19,7 @@ const SavedViewsPanel: React.FC<Props> = ({ views, onSelect }) => (
     <List>
       {views.map((v) => (
         <ListItem disablePadding key={v.id}>
-          <ListItemButton onClick={() => onSelect?.(v.id)}>
-            {v.name}
-          </ListItemButton>
+          <ListItemButton onClick={() => onSelect?.(v.id)}>{v.name}</ListItemButton>
         </ListItem>
       ))}
     </List>

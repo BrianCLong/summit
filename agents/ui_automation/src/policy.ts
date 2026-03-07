@@ -11,7 +11,7 @@ export interface Policy {
 
 export const DEFAULT_POLICY: Policy = {
   allowedDomains: [], // Deny all by default
-  allowedActions: ['click', 'type', 'scroll'],
+  allowedActions: ["click", "type", "scroll"],
   maxSteps: 50,
 };
 

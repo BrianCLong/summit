@@ -1,8 +1,8 @@
-import { PromptCase } from './types.js';
+import { PromptCase } from "./types.js";
 
 const splitCsvLine = (line: string): string[] => {
   const values: string[] = [];
-  let current = '';
+  let current = "";
   let inQuotes = false;
   for (let i = 0; i < line.length; i += 1) {
     const char = line[i];
@@ -14,9 +14,9 @@ const splitCsvLine = (line: string): string[] => {
       } else {
         inQuotes = !inQuotes;
       }
-    } else if (char === ',' && !inQuotes) {
+    } else if (char === "," && !inQuotes) {
       values.push(current);
-      current = '';
+      current = "";
     } else {
       current += char;
     }
@@ -34,23 +34,23 @@ export const parsePromptsCsv = (csv: string): PromptCase[] => {
     return [];
   }
   const header = splitCsvLine(lines[0]);
-  const idIndex = header.indexOf('id');
-  const promptIndex = header.indexOf('prompt');
-  const expectedIndex = header.indexOf('expected_trigger');
-  const tagsIndex = header.indexOf('tags');
+  const idIndex = header.indexOf("id");
+  const promptIndex = header.indexOf("prompt");
+  const expectedIndex = header.indexOf("expected_trigger");
+  const tagsIndex = header.indexOf("tags");
 
   return lines.slice(1).map((line) => {
     const values = splitCsvLine(line);
-    const id = values[idIndex] ?? '';
-    const prompt = values[promptIndex] ?? '';
-    const expectedRaw = values[expectedIndex] ?? 'false';
-    const tagsRaw = values[tagsIndex] ?? '';
+    const id = values[idIndex] ?? "";
+    const prompt = values[promptIndex] ?? "";
+    const expectedRaw = values[expectedIndex] ?? "false";
+    const tagsRaw = values[tagsIndex] ?? "";
     return {
       id,
       prompt,
-      expected_trigger: expectedRaw.toLowerCase() === 'true',
+      expected_trigger: expectedRaw.toLowerCase() === "true",
       tags: tagsRaw
-        .split('|')
+        .split("|")
         .map((tag) => tag.trim())
         .filter((tag) => tag.length > 0),
     };

@@ -1,6 +1,6 @@
-import jwt from 'jsonwebtoken';
-import type { SecretRef } from 'common-types';
-import { ZeroTrustSecretsManager } from './manager.js';
+import jwt from "jsonwebtoken";
+import type { SecretRef } from "common-types";
+import { ZeroTrustSecretsManager } from "./manager.js";
 
 export interface RotatingKeyDefinition {
   kid: string;
@@ -34,13 +34,13 @@ export interface BuildKeyRingOptions {
 
 async function resolveSecret(
   definition: RotatingKeyDefinition,
-  manager: ZeroTrustSecretsManager | null,
+  manager: ZeroTrustSecretsManager | null
 ): Promise<string> {
-  if (typeof definition.secret === 'string') {
+  if (typeof definition.secret === "string") {
     return definition.secret;
   }
   if (!manager) {
-    throw new Error('Secret manager is required to resolve external secret references');
+    throw new Error("Secret manager is required to resolve external secret references");
   }
   const resolution = await manager.resolve(definition.secret);
   return resolution.value;
@@ -51,11 +51,7 @@ function normalizeDate(value?: Date | string): Date | undefined {
   return value instanceof Date ? value : new Date(value);
 }
 
-function chooseActiveKey(
-  keys: KeyMaterial[],
-  now: Date,
-  rotationEnabled: boolean,
-): KeyMaterial {
+function chooseActiveKey(keys: KeyMaterial[], now: Date, rotationEnabled: boolean): KeyMaterial {
   if (!rotationEnabled) {
     return keys[0];
   }
@@ -74,15 +70,14 @@ function chooseActiveKey(
 export async function buildKeyRing(
   definitions: RotatingKeyDefinition[],
   manager: ZeroTrustSecretsManager | null,
-  options: BuildKeyRingOptions = {},
+  options: BuildKeyRingOptions = {}
 ): Promise<KeyRing> {
   if (definitions.length === 0) {
-    throw new Error('At least one key definition is required to build a key ring');
+    throw new Error("At least one key definition is required to build a key ring");
   }
 
   const now = options.now ?? new Date();
-  const rotationEnabled =
-    options.rotationEnabled ?? process.env.KEY_ROTATION === '1';
+  const rotationEnabled = options.rotationEnabled ?? process.env.KEY_ROTATION === "1";
   const overlapSeconds = options.overlapSeconds ?? 300;
 
   const materials: KeyMaterial[] = [];
@@ -91,7 +86,7 @@ export async function buildKeyRing(
     materials.push({
       kid: definition.kid,
       secret,
-      algorithm: definition.algorithm ?? 'HS256',
+      algorithm: definition.algorithm ?? "HS256",
       notBefore: normalizeDate(definition.notBefore),
       expiresAt: normalizeDate(definition.expiresAt),
     });
@@ -112,11 +107,7 @@ export function selectSigningKey(ring: KeyRing): KeyMaterial {
   return ring.active;
 }
 
-function withinOverlapWindow(
-  target: KeyMaterial,
-  ring: KeyRing,
-  now: Date,
-): boolean {
+function withinOverlapWindow(target: KeyMaterial, ring: KeyRing, now: Date): boolean {
   if (!ring.rotationEnabled || target.kid === ring.active.kid) {
     return true;
   }
@@ -129,7 +120,7 @@ function withinOverlapWindow(
 export function signTokenWithKeyRing(
   payload: object,
   ring: KeyRing,
-  options: jwt.SignOptions = {},
+  options: jwt.SignOptions = {}
 ): string {
   const key = selectSigningKey(ring);
 
@@ -147,17 +138,17 @@ export interface VerifyOptions extends jwt.VerifyOptions {
 export function verifyTokenWithKeyRing(
   token: string,
   ring: KeyRing,
-  options: VerifyOptions = {},
+  options: VerifyOptions = {}
 ): jwt.JwtPayload | string {
   const decoded = jwt.decode(token, { complete: true });
-  if (!decoded || typeof decoded === 'string') {
-    throw new Error('Token could not be decoded');
+  if (!decoded || typeof decoded === "string") {
+    throw new Error("Token could not be decoded");
   }
 
   const now = options.now ?? new Date();
   const kid = decoded.header.kid;
   if (!kid) {
-    throw new Error('Token missing kid header');
+    throw new Error("Token missing kid header");
   }
 
   const candidate = ring.keys.find((key) => key.kid === kid);

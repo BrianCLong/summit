@@ -7,30 +7,30 @@
  * Risk severity levels for all indicators
  */
 export enum RiskLevel {
-  LOW = 'LOW',
-  MODERATE = 'MODERATE',
-  HIGH = 'HIGH',
-  CRITICAL = 'CRITICAL',
+  LOW = "LOW",
+  MODERATE = "MODERATE",
+  HIGH = "HIGH",
+  CRITICAL = "CRITICAL",
 }
 
 /**
  * Confidence level in the analysis
  */
 export enum ConfidenceLevel {
-  LOW = 'LOW',
-  MEDIUM = 'MEDIUM',
-  HIGH = 'HIGH',
-  VERY_HIGH = 'VERY_HIGH',
+  LOW = "LOW",
+  MEDIUM = "MEDIUM",
+  HIGH = "HIGH",
+  VERY_HIGH = "VERY_HIGH",
 }
 
 /**
  * Time horizon for predictions and analysis
  */
 export enum TimeHorizon {
-  IMMEDIATE = 'IMMEDIATE', // < 30 days
-  SHORT_TERM = 'SHORT_TERM', // 1-6 months
-  MEDIUM_TERM = 'MEDIUM_TERM', // 6-24 months
-  LONG_TERM = 'LONG_TERM', // > 24 months
+  IMMEDIATE = "IMMEDIATE", // < 30 days
+  SHORT_TERM = "SHORT_TERM", // 1-6 months
+  MEDIUM_TERM = "MEDIUM_TERM", // 6-24 months
+  LONG_TERM = "LONG_TERM", // > 24 months
 }
 
 /**
@@ -51,7 +51,7 @@ export interface BaseIndicator {
  * Political stability indicators
  */
 export interface PoliticalStabilityIndicator extends BaseIndicator {
-  type: 'POLITICAL_STABILITY';
+  type: "POLITICAL_STABILITY";
   eliteCohesion: number; // 0-100
   governmentEffectiveness: number; // 0-100
   politicalViolenceRisk: number; // 0-100
@@ -64,7 +64,7 @@ export interface PoliticalStabilityIndicator extends BaseIndicator {
  * Economic stability indicators
  */
 export interface EconomicStabilityIndicator extends BaseIndicator {
-  type: 'ECONOMIC_STABILITY';
+  type: "ECONOMIC_STABILITY";
   gdpGrowthRate: number;
   inflationRate: number;
   unemploymentRate: number;
@@ -78,7 +78,7 @@ export interface EconomicStabilityIndicator extends BaseIndicator {
  * Food security indicators
  */
 export interface FoodSecurityIndicator extends BaseIndicator {
-  type: 'FOOD_SECURITY';
+  type: "FOOD_SECURITY";
   grainReservesDays: number;
   foodPriceInflation: number;
   importDependence: number; // 0-100
@@ -91,7 +91,7 @@ export interface FoodSecurityIndicator extends BaseIndicator {
  * Supply chain risk indicators
  */
 export interface SupplyChainIndicator extends BaseIndicator {
-  type: 'SUPPLY_CHAIN';
+  type: "SUPPLY_CHAIN";
   resourceType: string; // e.g., 'lithium', 'rare-earths', 'oil'
   supplyConcentration: number; // 0-100, higher = more concentrated
   alternativeSourcesAvailable: number; // 0-100
@@ -104,7 +104,7 @@ export interface SupplyChainIndicator extends BaseIndicator {
  * Water security indicators
  */
 export interface WaterSecurityIndicator extends BaseIndicator {
-  type: 'WATER_SECURITY';
+  type: "WATER_SECURITY";
   waterStressLevel: number; // 0-100
   transboundaryDependence: number; // 0-100
   upstreamCountries: string[];
@@ -117,7 +117,7 @@ export interface WaterSecurityIndicator extends BaseIndicator {
  * Alliance stability indicators
  */
 export interface AllianceStabilityIndicator extends BaseIndicator {
-  type: 'ALLIANCE_STABILITY';
+  type: "ALLIANCE_STABILITY";
   allianceName: string;
   memberCountries: string[];
   cohesionScore: number; // 0-100
@@ -131,7 +131,7 @@ export interface AllianceStabilityIndicator extends BaseIndicator {
  * Leadership transition risk
  */
 export interface LeadershipTransitionIndicator extends BaseIndicator {
-  type: 'LEADERSHIP_TRANSITION';
+  type: "LEADERSHIP_TRANSITION";
   leaderName: string;
   ageYears: number;
   healthRiskFactors: number; // 0-100
@@ -145,7 +145,7 @@ export interface LeadershipTransitionIndicator extends BaseIndicator {
  * Military capability indicators
  */
 export interface MilitaryCapabilityIndicator extends BaseIndicator {
-  type: 'MILITARY_CAPABILITY';
+  type: "MILITARY_CAPABILITY";
   militaryExpenditureUsd: number;
   militaryExpenditurePercentGdp: number;
   activePersonnel: number;
@@ -158,7 +158,7 @@ export interface MilitaryCapabilityIndicator extends BaseIndicator {
  * Sanctions impact indicators
  */
 export interface SanctionsImpactIndicator extends BaseIndicator {
-  type: 'SANCTIONS_IMPACT';
+  type: "SANCTIONS_IMPACT";
   sanctioningCountries: string[];
   economicImpact: number; // 0-100
   evasionCapability: number; // 0-100
@@ -171,7 +171,7 @@ export interface SanctionsImpactIndicator extends BaseIndicator {
  * Currency sovereignty indicators
  */
 export interface CurrencySovereigntyIndicator extends BaseIndicator {
-  type: 'CURRENCY_SOVEREIGNTY';
+  type: "CURRENCY_SOVEREIGNTY";
   dollarDependence: number; // 0-100
   alternativeCurrencyUsage: number; // 0-100
   foreignExchangeReserves: number; // USD billions
@@ -183,7 +183,7 @@ export interface CurrencySovereigntyIndicator extends BaseIndicator {
  * Humanitarian crisis early warning
  */
 export interface HumanitarianCrisisIndicator extends BaseIndicator {
-  type: 'HUMANITARIAN_CRISIS';
+  type: "HUMANITARIAN_CRISIS";
   displacedPopulation: number;
   foodInsecurity: number; // 0-100
   healthSystemCollapse: number; // 0-100
@@ -196,7 +196,7 @@ export interface HumanitarianCrisisIndicator extends BaseIndicator {
  * Strategic resource dependency
  */
 export interface StrategyResourceDependencyIndicator extends BaseIndicator {
-  type: 'STRATEGIC_RESOURCE';
+  type: "STRATEGIC_RESOURCE";
   resourceName: string;
   importDependence: number; // 0-100
   domesticProductionCapacity: number; // units per year
@@ -209,7 +209,7 @@ export interface StrategyResourceDependencyIndicator extends BaseIndicator {
  * Arctic territorial control indicators
  */
 export interface ArcticControlIndicator extends BaseIndicator {
-  type: 'ARCTIC_CONTROL';
+  type: "ARCTIC_CONTROL";
   territorialClaims: string[]; // area descriptions
   militaryPresence: number; // 0-100
   icebreakerFleetSize: number;
@@ -221,7 +221,7 @@ export interface ArcticControlIndicator extends BaseIndicator {
  * Energy security indicators
  */
 export interface EnergySecurityIndicator extends BaseIndicator {
-  type: 'ENERGY_SECURITY';
+  type: "ENERGY_SECURITY";
   energyImportDependence: number; // 0-100
   renewableEnergyShare: number; // 0-100
   strategicPetroleumReserveDays: number;
@@ -233,7 +233,7 @@ export interface EnergySecurityIndicator extends BaseIndicator {
  * Diaspora influence indicators
  */
 export interface DiasporaInfluenceIndicator extends BaseIndicator {
-  type: 'DIASPORA_INFLUENCE';
+  type: "DIASPORA_INFLUENCE";
   diasporaPopulation: number;
   remittanceFlowsUsd: number;
   politicalOrganizationLevel: number; // 0-100
@@ -245,7 +245,7 @@ export interface DiasporaInfluenceIndicator extends BaseIndicator {
  * Nuclear capability indicators
  */
 export interface NuclearCapabilityIndicator extends BaseIndicator {
-  type: 'NUCLEAR_CAPABILITY';
+  type: "NUCLEAR_CAPABILITY";
   declaredNuclearState: boolean;
   enrichmentCapability: boolean;
   deliverySystemCapability: boolean;
@@ -258,13 +258,13 @@ export interface NuclearCapabilityIndicator extends BaseIndicator {
  * Global power transition metrics
  */
 export interface PowerTransitionIndicator extends BaseIndicator {
-  type: 'POWER_TRANSITION';
+  type: "POWER_TRANSITION";
   militaryCapabilityIndex: number; // 0-100
   economicCapabilityIndex: number; // 0-100
   technologicalCapabilityIndex: number; // 0-100
   diplomaticInfluenceIndex: number; // 0-100
   overallPowerScore: number; // 0-100
-  trendDirection: 'RISING' | 'STABLE' | 'DECLINING';
+  trendDirection: "RISING" | "STABLE" | "DECLINING";
   yearsToParityWithLeader: number | null;
 }
 
@@ -336,7 +336,7 @@ export type GeopoliticalIndicator =
  */
 export interface AnalysisRequest {
   countries?: string[];
-  indicatorTypes?: GeopoliticalIndicator['type'][];
+  indicatorTypes?: GeopoliticalIndicator["type"][];
   timeHorizon?: TimeHorizon;
   includeScenarios?: boolean;
   confidenceThreshold?: ConfidenceLevel;
@@ -384,8 +384,8 @@ export interface ComplianceCheckResult {
  * Compliance violation
  */
 export interface ComplianceViolation {
-  category: 'PRIVACY' | 'ETHICS' | 'LEGAL' | 'OPERATIONAL';
-  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  category: "PRIVACY" | "ETHICS" | "LEGAL" | "OPERATIONAL";
+  severity: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
   description: string;
   remediation: string;
 }

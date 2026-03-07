@@ -448,9 +448,7 @@
     "/routing/candidates": {
       "get": {
         "summary": "Get routing candidates",
-        "parameters": [
-          { "name": "class", "in": "query", "schema": { "type": "string" } }
-        ],
+        "parameters": [{ "name": "class", "in": "query", "schema": { "type": "string" } }],
         "responses": {
           "200": {
             "description": "Routing candidates with scores",

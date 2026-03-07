@@ -31,24 +31,24 @@ The system provides comprehensive ontology management with support for:
 - **Standard Ontology Import**: Import FOAF, Schema.org, and other standard ontologies
 
 ```typescript
-import { OntologyManager, STANDARD_NAMESPACES } from '@intelgraph/knowledge-graph';
+import { OntologyManager, STANDARD_NAMESPACES } from "@intelgraph/knowledge-graph";
 
 const ontologyManager = new OntologyManager(driver);
 
 // Import FOAF ontology
-const foaf = await ontologyManager.importStandardOntology('FOAF');
+const foaf = await ontologyManager.importStandardOntology("FOAF");
 
 // Create custom entity type
 const entityType = {
-  name: 'IntelligenceReport',
+  name: "IntelligenceReport",
   namespace: STANDARD_NAMESPACES.CUSTOM,
   properties: [
-    { name: 'title', type: 'string', required: true },
-    { name: 'classification', type: 'string', required: true },
-    { name: 'publishedDate', type: 'datetime', required: true },
+    { name: "title", type: "string", required: true },
+    { name: "classification", type: "string", required: true },
+    { name: "publishedDate", type: "datetime", required: true },
   ],
   parentTypes: [],
-  version: '1.0',
+  version: "1.0",
 };
 ```
 
@@ -62,13 +62,13 @@ Advanced entity recognition and linking to external knowledge bases:
 - **Co-reference Resolution**: Identify entities referring to the same real-world object
 
 ```typescript
-import { NamedEntityRecognizer, EntityLinker } from '@intelgraph/entity-linking';
+import { NamedEntityRecognizer, EntityLinker } from "@intelgraph/entity-linking";
 
 // Named Entity Recognition
 const ner = new NamedEntityRecognizer({
-  model: 'gpt-4',
-  modelVersion: '1.0',
-  entityTypes: ['PERSON', 'ORG', 'LOC', 'DATE'],
+  model: "gpt-4",
+  modelVersion: "1.0",
+  entityTypes: ["PERSON", "ORG", "LOC", "DATE"],
   minConfidence: 0.7,
 });
 
@@ -76,8 +76,8 @@ const nerResult = await ner.extractEntities(text);
 
 // Entity Linking
 const linker = new EntityLinker(driver);
-const dbpediaLink = await linker.linkToDBpedia(entityId, 'John Smith', context);
-const wikidataLink = await linker.linkToWikidata(entityId, 'John Smith');
+const dbpediaLink = await linker.linkToDBpedia(entityId, "John Smith", context);
+const wikidataLink = await linker.linkToWikidata(entityId, "John Smith");
 
 // Co-reference Resolution
 const cluster = await linker.resolveCoreferences([entity1Id, entity2Id, entity3Id]);
@@ -93,7 +93,7 @@ Sophisticated relationship and event extraction:
 - **Causal Relationship Detection**: Detect causal links between entities
 
 ```typescript
-import { RelationshipExtractor } from '@intelgraph/semantic-analysis';
+import { RelationshipExtractor } from "@intelgraph/semantic-analysis";
 
 const extractor = new RelationshipExtractor(driver);
 
@@ -117,15 +117,15 @@ Powerful reasoning capabilities with inference and contradiction detection:
 - **Missing Link Prediction**: Predict likely relationships using ML
 
 ```typescript
-import { InferenceEngine, ContradictionDetector, LinkPredictor } from '@intelgraph/graph-reasoning';
+import { InferenceEngine, ContradictionDetector, LinkPredictor } from "@intelgraph/graph-reasoning";
 
 // Create inference rule
 const inferenceEngine = new InferenceEngine(driver);
 const rule = await inferenceEngine.createRule({
-  name: 'Transitive Friendship',
-  ruleType: 'transitive',
-  pattern: '()-[:KNOWS]->()',
-  conclusion: '()-[:KNOWS]->()',
+  name: "Transitive Friendship",
+  ruleType: "transitive",
+  pattern: "()-[:KNOWS]->()",
+  conclusion: "()-[:KNOWS]->()",
   confidence: 0.8,
   enabled: true,
   priority: 10,
@@ -140,7 +140,7 @@ const contradictions = await contradictionDetector.detectContradictions();
 
 // Predict missing links
 const linkPredictor = new LinkPredictor(driver);
-const predictions = await linkPredictor.predictLinks(entityId, 'WORKS_FOR', 0.7);
+const predictions = await linkPredictor.predictLinks(entityId, "WORKS_FOR", 0.7);
 ```
 
 ### 5. Semantic Search
@@ -153,15 +153,15 @@ Natural language queries and SPARQL support:
 - **Similarity Matching**: Find semantically similar entities
 
 ```typescript
-import { SemanticSearch } from '@intelgraph/semantic-analysis';
+import { SemanticSearch } from "@intelgraph/semantic-analysis";
 
 const search = new SemanticSearch(driver);
 
 // Natural language search
 const results = await search.search({
-  text: 'intelligence analysts in Washington',
+  text: "intelligence analysts in Washington",
   filters: {
-    entityTypes: ['PERSON'],
+    entityTypes: ["PERSON"],
     minConfidence: 0.7,
   },
   limit: 20,
@@ -171,7 +171,7 @@ const results = await search.search({
 const conceptResults = await search.searchByConcept(conceptId, 20);
 
 // Compute similarity
-const similarity = await search.computeSimilarity(entity1Id, entity2Id, 'semantic');
+const similarity = await search.computeSimilarity(entity1Id, entity2Id, "semantic");
 
 // Find similar entities
 const similar = await search.findSimilarEntities(entityId, 10, 0.7);
@@ -187,27 +187,22 @@ Cross-source entity resolution and conflict resolution:
 - **Provenance Tracking**: Maintain complete data lineage
 
 ```typescript
-import { KnowledgeFusion } from '@intelgraph/knowledge-graph';
+import { KnowledgeFusion } from "@intelgraph/knowledge-graph";
 
 const fusion = new KnowledgeFusion(driver);
 
 // Resolve entities across sources
-const clusters = await fusion.resolveEntitiesAcrossSources(['source1', 'source2'], 0.8);
+const clusters = await fusion.resolveEntitiesAcrossSources(["source1", "source2"], 0.8);
 
 // Fuse entities with conflict resolution
-const result = await fusion.fuseEntities(
-  [entity1Id, entity2Id, entity3Id],
-  { type: 'highest_confidence' }
-);
+const result = await fusion.fuseEntities([entity1Id, entity2Id, entity3Id], {
+  type: "highest_confidence",
+});
 
 // Track provenance
-await fusion.trackProvenance(
-  entityId,
-  'external-api',
-  'api',
-  new Date().toISOString(),
-  { apiVersion: '2.0' }
-);
+await fusion.trackProvenance(entityId, "external-api", "api", new Date().toISOString(), {
+  apiVersion: "2.0",
+});
 ```
 
 ### 7. Graph Embeddings
@@ -220,7 +215,7 @@ Node embeddings for similarity and machine learning:
 - **Transfer Learning**: Use pre-trained embeddings
 
 ```typescript
-import { GraphEmbeddings } from '@intelgraph/knowledge-graph';
+import { GraphEmbeddings } from "@intelgraph/knowledge-graph";
 
 const embeddings = new GraphEmbeddings(driver);
 
@@ -251,28 +246,28 @@ Time-aware entity states and historical tracking:
 - **Change Tracking**: Track all changes in time ranges
 
 ```typescript
-import { TemporalKnowledgeGraph } from '@intelgraph/knowledge-graph';
+import { TemporalKnowledgeGraph } from "@intelgraph/knowledge-graph";
 
 const temporal = new TemporalKnowledgeGraph(driver);
 
 // Create temporal snapshot
 const snapshot = await temporal.createTemporalSnapshot(
   entityId,
-  '2025-01-01T00:00:00Z',
-  { name: 'John Smith', role: 'Analyst' },
-  '2025-12-31T23:59:59Z'
+  "2025-01-01T00:00:00Z",
+  { name: "John Smith", role: "Analyst" },
+  "2025-12-31T23:59:59Z"
 );
 
 // Query entity at specific time
-const entityAtTime = await temporal.getEntityAtTime(entityId, '2025-06-01T00:00:00Z');
+const entityAtTime = await temporal.getEntityAtTime(entityId, "2025-06-01T00:00:00Z");
 
 // Get full history
 const history = await temporal.getEntityHistory(entityId);
 
 // Query changes in time range
 const changes = await temporal.getChangesInTimeRange(
-  '2025-01-01T00:00:00Z',
-  '2025-12-31T23:59:59Z'
+  "2025-01-01T00:00:00Z",
+  "2025-12-31T23:59:59Z"
 );
 ```
 
@@ -286,7 +281,7 @@ Automated extraction from unstructured data:
 - **Batch Processing**: Process multiple documents efficiently
 
 ```typescript
-import { ExtractionPipeline } from '@intelgraph/knowledge-graph';
+import { ExtractionPipeline } from "@intelgraph/knowledge-graph";
 
 const pipeline = new ExtractionPipeline(driver, {
   enableNER: true,
@@ -298,9 +293,9 @@ const pipeline = new ExtractionPipeline(driver, {
 
 // Process document
 const result = await pipeline.processDocument({
-  id: 'doc-123',
-  content: 'Your document text here...',
-  title: 'Intelligence Report',
+  id: "doc-123",
+  content: "Your document text here...",
+  title: "Intelligence Report",
 });
 
 // Process batch
@@ -320,7 +315,7 @@ Interactive visualization and exploration:
 - **Multiple Export Formats**: Export to JSON, Cytoscape, D3, GraphML
 
 ```typescript
-import { GraphVisualization } from '@intelgraph/knowledge-graph';
+import { GraphVisualization } from "@intelgraph/knowledge-graph";
 
 const viz = new GraphVisualization(driver);
 
@@ -328,18 +323,18 @@ const viz = new GraphVisualization(driver);
 const subgraph = await viz.extractSubgraph(startNodeId, {
   maxNodes: 100,
   maxDepth: 2,
-  layout: 'force',
+  layout: "force",
 });
 
 // Find paths
 const paths = await viz.findPaths(sourceId, targetId, 5);
 
 // Detect clusters
-const clusters = await viz.detectClusters('louvain');
+const clusters = await viz.detectClusters("louvain");
 
 // Export in different formats
-const cytoscapeData = await viz.exportGraph('cytoscape', subgraph);
-const d3Data = await viz.exportGraph('d3', subgraph);
+const cytoscapeData = await viz.exportGraph("cytoscape", subgraph);
+const d3Data = await viz.exportGraph("d3", subgraph);
 ```
 
 ## SPARQL Endpoint

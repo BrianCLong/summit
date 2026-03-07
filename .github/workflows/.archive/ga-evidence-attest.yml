@@ -44,7 +44,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      issues: read  # For evidence collection (release blockers)
+      issues: read # For evidence collection (release blockers)
     outputs:
       evidence_hash: ${{ steps.pack.outputs.evidence_hash }}
       run_timestamp: ${{ steps.pack.outputs.timestamp }}
@@ -53,7 +53,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4 # v6
         with:
-          fetch-depth: 0  # Full history for git metadata
+          fetch-depth: 0 # Full history for git metadata
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -134,7 +134,7 @@ jobs:
     # CRITICAL: Only this job has id-token: write
     permissions:
       contents: read
-      id-token: write  # Required for OIDC keyless signing
+      id-token: write # Required for OIDC keyless signing
     outputs:
       attestation_status: ${{ steps.attest.outputs.status }}
 

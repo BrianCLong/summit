@@ -6,17 +6,17 @@ on:
   workflow_call:
     inputs:
       node-version:
-        description: 'Node.js version'
+        description: "Node.js version"
         required: false
         type: string
-        default: '20.x'
+        default: "20.x"
       cache-enabled:
-        description: 'Enable dependency caching'
+        description: "Enable dependency caching"
         required: false
         type: boolean
         default: true
       timeout-minutes:
-        description: 'Job timeout in minutes'
+        description: "Job timeout in minutes"
         required: false
         type: number
         default: 30
@@ -46,7 +46,7 @@ jobs:
         with:
           node-version: ${{ inputs.node-version }}
           cache: ${{ inputs.cache-enabled && 'npm' || 'npm' }}
-          cache-dependency-path: '**/package-lock.json'
+          cache-dependency-path: "**/package-lock.json"
 
       - name: Restore npm cache (if enabled)
         if: inputs.cache-enabled

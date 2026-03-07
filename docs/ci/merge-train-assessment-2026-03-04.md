@@ -10,12 +10,12 @@ The Summit merge train is experiencing severe congestion with the **exact fan-ou
 
 ### Queue Metrics
 
-| Metric | Value | Target | Status |
-|--------|-------|--------|--------|
-| **Open PRs** | 100+ | <50 | ❌ CRITICAL |
-| **Queued Runs** | 200+ | <50 | ❌ CRITICAL |
-| **In Progress** | 12 | 10-30 | ⚠️ LOW |
-| **MERGE_SURGE** | Enabled (since 07:48 UTC) | - | ✅ ACTIVE |
+| Metric          | Value                     | Target | Status      |
+| --------------- | ------------------------- | ------ | ----------- |
+| **Open PRs**    | 100+                      | <50    | ❌ CRITICAL |
+| **Queued Runs** | 200+                      | <50    | ❌ CRITICAL |
+| **In Progress** | 12                        | 10-30  | ⚠️ LOW      |
+| **MERGE_SURGE** | Enabled (since 07:48 UTC) | -      | ✅ ACTIVE   |
 
 **Health Assessment**: **CRITICAL** - Queue saturated, minimal processing
 
@@ -72,6 +72,7 @@ Backlog: 15,300 - 60 = 15,240 jobs in queue
 ### 2. No Concurrency Guards
 
 Many workflows lack `concurrency` blocks, allowing duplicate runs to queue:
+
 - Same PR pushes → Multiple runs for same workflow
 - No automatic cancellation of stale runs
 - Queue fills with redundant work
@@ -79,6 +80,7 @@ Many workflows lack `concurrency` blocks, allowing duplicate runs to queue:
 ### 3. No Path Filtering
 
 All 153 workflows run on every PR, regardless of files changed:
+
 - Docs-only PR → Triggers server, client, infra tests
 - Infrastructure change → Triggers unrelated evidence checks
 - **Waste**: 70-80% of runs are unnecessary
@@ -86,6 +88,7 @@ All 153 workflows run on every PR, regardless of files changed:
 ### 4. No Deterministic Gate
 
 Without a fast, required gate:
+
 - PRs enter merge queue with unknown quality
 - Many workflows fail late (after queuing)
 - Failed PRs stay in queue, consuming capacity
@@ -97,6 +100,7 @@ Without a fast, required gate:
 ### Required Checks Problem
 
 Current branch protection likely requires **many or all** of the 153 checks:
+
 - Each PR waits for 153 checks to pass
 - With queue saturated, checks never start/complete
 - **Result**: Infinite wait, zero merges
@@ -149,10 +153,12 @@ Cost: Maximum (all runners saturated doing redundant work)
 **MERGE_SURGE enabled**: 2026-03-04 07:48 UTC
 
 **What it does**:
+
 - Skips 60-75% of heavy jobs
 - Reduces load from ~153 → ~50 checks per PR
 
 **Why it's insufficient**:
+
 ```
 Before MERGE_SURGE: 100 PRs × 153 checks = 15,300 jobs
 After MERGE_SURGE: 100 PRs × 50 checks = 5,000 jobs
@@ -167,6 +173,7 @@ Queue: Still saturated (5,000 >> 60)
 ## Comparison: Current vs. Stabilized Architecture
 
 ### Current State
+
 ```
 Architecture:
   - 153 checks per PR
@@ -182,6 +189,7 @@ Result:
 ```
 
 ### After 4-PR Stabilization Stack
+
 ```
 Architecture:
   - 1 required check (pr-gate)
@@ -197,6 +205,7 @@ Expected Result:
 ```
 
 ### After Stabilization + Merge Queue Optimization
+
 ```
 Architecture:
   - 1 required check (pr-gate <20 min)
@@ -223,6 +232,7 @@ Expected Result:
 **Actions**:
 
 1. **Temporarily simplify required checks** (emergency measure):
+
    ```bash
    # In branch protection, require only 1-3 essential checks
    # Examples: "Gates", "Build & Test", "Security"
@@ -230,6 +240,7 @@ Expected Result:
    ```
 
 2. **Cancel stale queued runs**:
+
    ```bash
    bash scripts/ci/cancel-queued-runs.sh
    ```
@@ -260,6 +271,7 @@ Expected Result:
    - Disable "require branches up to date"
 
 3. **Clean workflow registry**:
+
    ```bash
    bash scripts/ci/workflow_registry_cleanup.sh
    ```
@@ -276,6 +288,7 @@ Expected Result:
 **Timeline**: Week 1 after stabilization
 
 **Settings**:
+
 ```
 Build concurrency: 5 (conservative start)
 Merge batch size: 3-5
@@ -341,6 +354,7 @@ Status: HIGH PERFORMANCE
 ## Paradox: Fixing the Gridlock
 
 **The Problem**:
+
 - Stabilization PRs (#19069-19072) are designed to fix the gridlock
 - But they're stuck in the gridlock themselves (153 checks each)
 - Can't merge without passing checks
@@ -449,7 +463,7 @@ Status: HIGH PERFORMANCE
 ### Current Workflow Count
 
 - **Active workflows**: 50 (registered in GitHub)
-- **Workflow files**: 20 (.github/workflows/*.yml)
+- **Workflow files**: 20 (.github/workflows/\*.yml)
 - **Archived workflows**: 243 (.github/workflows/archived/)
 - **Checks per PR**: 153
 
@@ -473,6 +487,7 @@ Status: HIGH PERFORMANCE
 ## Conclusion
 
 The Summit merge train is experiencing **complete gridlock** due to:
+
 1. Fan-out failure (153 checks × 100 PRs = 15,300 jobs)
 2. No concurrency guards (duplicate runs accumulate)
 3. No path filtering (unnecessary runs)
@@ -481,6 +496,7 @@ The Summit merge train is experiencing **complete gridlock** due to:
 **Current state**: 0 PRs/hour (system deadlocked)
 
 **The 4-PR stabilization stack** is ready to deploy and will:
+
 1. Reduce to 1 required check (pr-gate)
 2. Add concurrency guards (prevent duplicates)
 3. Add path filtering (skip unnecessary runs)

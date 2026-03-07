@@ -18,7 +18,7 @@ export interface QuestionAnswerResult {
 
 export interface SummaryResult {
   summary: string;
-  type: 'extractive' | 'abstractive';
+  type: "extractive" | "abstractive";
   compressionRatio: number;
   keyPoints?: string[];
 }
@@ -40,5 +40,5 @@ export interface SemanticSearchResult {
 export interface GenerationResult {
   text: string;
   tokens: number;
-  finishReason: 'completed' | 'max_length' | 'stop_sequence';
+  finishReason: "completed" | "max_length" | "stop_sequence";
 }

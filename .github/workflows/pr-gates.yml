@@ -61,7 +61,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
         with:
-          cache: 'pnpm'
+          cache: "pnpm"
           node-version: "18"
 
       - name: Install dependencies
@@ -95,7 +95,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
         with:
-          cache: 'pnpm'
+          cache: "pnpm"
           node-version: "18"
 
       - name: Install dependencies
@@ -151,7 +151,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
         with:
-          cache: 'pnpm'
+          cache: "pnpm"
           node-version: "18"
 
       - name: Install dependencies

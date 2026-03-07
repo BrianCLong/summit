@@ -1,18 +1,18 @@
-import { randomUUID, createHash } from 'node:crypto';
-import fs from 'node:fs';
-import path from 'node:path';
+import { randomUUID, createHash } from "node:crypto";
+import fs from "node:fs";
+import path from "node:path";
 
 const SENSITIVE_KEYS = [
-  'authorization',
-  'cookie',
-  'set-cookie',
-  'token',
-  'secret',
-  'password',
-  'apiKey',
+  "authorization",
+  "cookie",
+  "set-cookie",
+  "token",
+  "secret",
+  "password",
+  "apiKey",
 ];
 
-export type ReplayOutcomeStatus = 'error' | 'success';
+export type ReplayOutcomeStatus = "error" | "success";
 
 export interface ReplayOutcome {
   status: ReplayOutcomeStatus;
@@ -61,20 +61,20 @@ export interface ReplayDescriptor {
 }
 
 function redactValue(value: unknown): unknown {
-  if (typeof value === 'string') {
+  if (typeof value === "string") {
     return value.length > 1024 ? `${value.slice(0, 1024)}…[truncated]` : value;
   }
   if (Array.isArray(value)) {
     return value.map((entry) => redactValue(entry));
   }
-  if (value && typeof value === 'object') {
+  if (value && typeof value === "object") {
     return sanitizePayload(value);
   }
   return value;
 }
 
 export function sanitizePayload<T>(payload: T): T {
-  if (!payload || typeof payload !== 'object') {
+  if (!payload || typeof payload !== "object") {
     return payload;
   }
   const sanitized: Record<string, unknown> = Array.isArray(payload) ? [] : {};
@@ -88,7 +88,7 @@ export function sanitizePayload<T>(payload: T): T {
 }
 
 export function buildReplayEnvironment(
-  overrides: Partial<ReplayEnvironmentSnapshot> = {},
+  overrides: Partial<ReplayEnvironmentSnapshot> = {}
 ): ReplayEnvironmentSnapshot {
   return {
     commit: process.env.GIT_COMMIT ?? process.env.COMMIT_SHA ?? overrides.commit,
@@ -106,13 +106,13 @@ export function hashIdentifier(value?: string): string | undefined {
   if (!value) {
     return undefined;
   }
-  return createHash('sha256').update(value).digest('hex');
+  return createHash("sha256").update(value).digest("hex");
 }
 
 export function createReplayDescriptor(
-  input: Omit<ReplayDescriptor, 'id' | 'capturedAt' | 'privacy'> & {
-    privacy?: Partial<ReplayDescriptor['privacy']>;
-  },
+  input: Omit<ReplayDescriptor, "id" | "capturedAt" | "privacy"> & {
+    privacy?: Partial<ReplayDescriptor["privacy"]>;
+  }
 ): ReplayDescriptor {
   return {
     ...input,
@@ -124,9 +124,9 @@ export function createReplayDescriptor(
 
 export function persistReplayDescriptor(
   descriptor: ReplayDescriptor,
-  rootDir = process.cwd(),
+  rootDir = process.cwd()
 ): string {
-  const replayDir = path.join(rootDir, 'replays', descriptor.service);
+  const replayDir = path.join(rootDir, "replays", descriptor.service);
   const replayPath = path.join(replayDir, `${descriptor.id}.json`);
   fs.mkdirSync(replayDir, { recursive: true });
   fs.writeFileSync(replayPath, `${JSON.stringify(descriptor, null, 2)}\n`);

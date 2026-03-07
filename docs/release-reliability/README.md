@@ -10,13 +10,13 @@ This directory contains the CompanyOS Release Reliability Framework - everything
 
 ## Quick Links
 
-| Document | Purpose |
-|----------|---------|
-| [Release Reliability Framework](./RELEASE_RELIABILITY_FRAMEWORK.md) | Core framework documentation |
-| [Release Checklist v0](./RELEASE_CHECKLIST_V0.md) | Pre-flight checklist for every release |
-| [Deployment Pipeline](./DEPLOYMENT_PIPELINE.md) | Step-by-step pipeline documentation |
-| [Incident Runbook Template](./INCIDENT_RUNBOOK_TEMPLATE.md) | Template for service runbooks |
-| [Postmortem Template](./POSTMORTEM_TEMPLATE.md) | Blameless postmortem template |
+| Document                                                            | Purpose                                |
+| ------------------------------------------------------------------- | -------------------------------------- |
+| [Release Reliability Framework](./RELEASE_RELIABILITY_FRAMEWORK.md) | Core framework documentation           |
+| [Release Checklist v0](./RELEASE_CHECKLIST_V0.md)                   | Pre-flight checklist for every release |
+| [Deployment Pipeline](./DEPLOYMENT_PIPELINE.md)                     | Step-by-step pipeline documentation    |
+| [Incident Runbook Template](./INCIDENT_RUNBOOK_TEMPLATE.md)         | Template for service runbooks          |
+| [Postmortem Template](./POSTMORTEM_TEMPLATE.md)                     | Blameless postmortem template          |
 
 ---
 
@@ -44,13 +44,13 @@ docs/release-reliability/
 
 ### Deployment Strategies
 
-| Strategy | Use Case | Services |
-|----------|----------|----------|
+| Strategy           | Use Case               | Services                      |
+| ------------------ | ---------------------- | ----------------------------- |
 | Progressive Canary | Critical path services | api, graphql-gateway, copilot |
-| Standard Canary | Supporting services | conductor, audit-svc |
-| Blue-Green | Database migrations | Stateful services |
-| Rolling Update | Internal tools | devtools, sandbox |
-| Feature Flags | Gradual rollout | Any feature |
+| Standard Canary    | Supporting services    | conductor, audit-svc          |
+| Blue-Green         | Database migrations    | Stateful services             |
+| Rolling Update     | Internal tools         | devtools, sandbox             |
+| Feature Flags      | Gradual rollout        | Any feature                   |
 
 ### Release Gates
 
@@ -62,11 +62,11 @@ All gates enforced by OPA policy. See [policies/release_gate.rego](./policies/re
 
 ### MTTR Targets
 
-| Severity | Detection | Mitigation | Recovery | Total |
-|----------|-----------|------------|----------|-------|
-| P1 | 5 min | 15 min | 30 min | 60 min |
-| P2 | 15 min | 30 min | 60 min | 2 hours |
-| P3 | 1 hour | 2 hours | 4 hours | 8 hours |
+| Severity | Detection | Mitigation | Recovery | Total   |
+| -------- | --------- | ---------- | -------- | ------- |
+| P1       | 5 min     | 15 min     | 30 min   | 60 min  |
+| P2       | 15 min    | 30 min     | 60 min   | 2 hours |
+| P3       | 1 hour    | 2 hours    | 4 hours  | 8 hours |
 
 ---
 
@@ -81,11 +81,13 @@ All gates enforced by OPA policy. See [policies/release_gate.rego](./policies/re
 ### For SREs
 
 1. **Evaluate release gates**:
+
    ```bash
    opa eval -d policies/release_gate.rego -i input.json "data.companyos.release.decision"
    ```
 
 2. **Apply analysis templates**:
+
    ```bash
    kubectl apply -f k8s/analysis-templates.yaml
    ```
@@ -150,12 +152,12 @@ helm rollback RELEASE REVISION --cleanup-on-fail
 
 ## Error Budget Policy
 
-| Budget Remaining | Policy |
-|------------------|--------|
-| > 50% | Normal deployments |
-| 20-50% | Cautious mode, extended canary |
-| < 20% | Bug fixes only, SRE approval required |
-| Exhausted | Emergency fixes only, VP approval |
+| Budget Remaining | Policy                                |
+| ---------------- | ------------------------------------- |
+| > 50%            | Normal deployments                    |
+| 20-50%           | Cautious mode, extended canary        |
+| < 20%            | Bug fixes only, SRE approval required |
+| Exhausted        | Emergency fixes only, VP approval     |
 
 ---
 
@@ -170,12 +172,12 @@ helm rollback RELEASE REVISION --cleanup-on-fail
 
 ### Key Alerts
 
-| Alert | Threshold | Action |
-|-------|-----------|--------|
-| ErrorRateSpike | >2% for 2m | Investigate |
-| ErrorRateCritical | >5% for 1m | Auto-rollback |
-| LatencyP95High | >500ms for 3m | Investigate |
-| ErrorBudgetBurnFast | >5x for 5m | Auto-rollback |
+| Alert               | Threshold     | Action        |
+| ------------------- | ------------- | ------------- |
+| ErrorRateSpike      | >2% for 2m    | Investigate   |
+| ErrorRateCritical   | >5% for 1m    | Auto-rollback |
+| LatencyP95High      | >500ms for 3m | Investigate   |
+| ErrorBudgetBurnFast | >5x for 5m    | Auto-rollback |
 
 ---
 
@@ -190,13 +192,13 @@ helm rollback RELEASE REVISION --cleanup-on-fail
 
 ## Support
 
-| Issue | Contact |
-|-------|---------|
-| Release questions | #release-captain |
-| Incident response | #incidents |
-| Framework improvements | #sre-team |
-| Policy changes | @sre-team |
+| Issue                  | Contact          |
+| ---------------------- | ---------------- |
+| Release questions      | #release-captain |
+| Incident response      | #incidents       |
+| Framework improvements | #sre-team        |
+| Policy changes         | @sre-team        |
 
 ---
 
-*Framework maintained by Reliability & Release Team. Last reviewed: 2025-12-06*
+_Framework maintained by Reliability & Release Team. Last reviewed: 2025-12-06_

@@ -12,7 +12,7 @@
  * - Performance metrics monitoring
  */
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import {
   Box,
   Card,
@@ -31,7 +31,7 @@ import {
   Tooltip,
   IconButton,
   Collapse,
-} from '@mui/material';
+} from "@mui/material";
 import {
   Settings as SettingsIcon,
   Speed as SpeedIcon,
@@ -40,54 +40,49 @@ import {
   Timeline as TimelineIcon,
   ExpandMore as ExpandMoreIcon,
   ExpandLess as ExpandLessIcon,
-} from '@mui/icons-material';
+} from "@mui/icons-material";
 
 // Performance configuration constants
 const PERFORMANCE_PRESETS = {
   HIGH_QUALITY: {
-    name: 'High Quality',
+    name: "High Quality",
     lodThreshold: 0.1,
     clusterThreshold: 500,
     maxVisibleNodes: 5000,
     enableCulling: false,
     enableClustering: false,
-    renderQuality: 'high',
+    renderQuality: "high",
   },
   BALANCED: {
-    name: 'Balanced',
+    name: "Balanced",
     lodThreshold: 0.3,
     clusterThreshold: 1000,
     maxVisibleNodes: 2000,
     enableCulling: true,
     enableClustering: true,
-    renderQuality: 'medium',
+    renderQuality: "medium",
   },
   HIGH_PERFORMANCE: {
-    name: 'High Performance',
+    name: "High Performance",
     lodThreshold: 0.5,
     clusterThreshold: 500,
     maxVisibleNodes: 1000,
     enableCulling: true,
     enableClustering: true,
-    renderQuality: 'low',
+    renderQuality: "low",
   },
   MASSIVE_SCALE: {
-    name: 'Massive Scale',
+    name: "Massive Scale",
     lodThreshold: 0.7,
     clusterThreshold: 200,
     maxVisibleNodes: 500,
     enableCulling: true,
     enableClustering: true,
-    renderQuality: 'minimal',
+    renderQuality: "minimal",
   },
 };
 
-const PerformanceMode = ({
-  graph,
-  onConfigChange,
-  performanceMetrics,
-  isProcessing = false,
-}) => {
+const PerformanceMode = ({ graph, onConfigChange, performanceMetrics, isProcessing = false }) => {
   const [config, setConfig] = useState(PERFORMANCE_PRESETS.BALANCED);
   const [customConfig, setCustomConfig] = useState(false);
   const [expanded, setExpanded] = useState(false);
@@ -119,104 +114,99 @@ const PerformanceMode = ({
   }, [graph]);
 
   // Community detection clustering algorithm
-  const performCommunityDetection = useCallback(
-    async (nodes, edges, threshold) => {
-      setClusteringProgress(0);
+  const performCommunityDetection = useCallback(async (nodes, edges, threshold) => {
+    setClusteringProgress(0);
 
-      // Simple Louvain-inspired community detection
-      const communities = new Map();
-      const nodeConnections = new Map();
+    // Simple Louvain-inspired community detection
+    const communities = new Map();
+    const nodeConnections = new Map();
 
-      // Build adjacency information
-      setClusteringProgress(20);
-      edges.forEach((edge) => {
-        if (!nodeConnections.has(edge.source)) {
-          nodeConnections.set(edge.source, new Set());
-        }
-        if (!nodeConnections.has(edge.target)) {
-          nodeConnections.set(edge.target, new Set());
-        }
-        nodeConnections.get(edge.source).add(edge.target);
-        nodeConnections.get(edge.target).add(edge.source);
-      });
+    // Build adjacency information
+    setClusteringProgress(20);
+    edges.forEach((edge) => {
+      if (!nodeConnections.has(edge.source)) {
+        nodeConnections.set(edge.source, new Set());
+      }
+      if (!nodeConnections.has(edge.target)) {
+        nodeConnections.set(edge.target, new Set());
+      }
+      nodeConnections.get(edge.source).add(edge.target);
+      nodeConnections.get(edge.target).add(edge.source);
+    });
 
-      setClusteringProgress(50);
+    setClusteringProgress(50);
 
-      // Initial community assignment (each node in its own community)
-      let communityId = 0;
-      nodes.forEach((node) => {
-        communities.set(node.id, communityId++);
-      });
+    // Initial community assignment (each node in its own community)
+    let communityId = 0;
+    nodes.forEach((node) => {
+      communities.set(node.id, communityId++);
+    });
 
-      setClusteringProgress(70);
+    setClusteringProgress(70);
 
-      // Merge communities based on connections
-      const communityNodes = new Map();
-      communities.forEach((community, nodeId) => {
-        if (!communityNodes.has(community)) {
-          communityNodes.set(community, []);
-        }
-        communityNodes.get(community).push(nodeId);
-      });
+    // Merge communities based on connections
+    const communityNodes = new Map();
+    communities.forEach((community, nodeId) => {
+      if (!communityNodes.has(community)) {
+        communityNodes.set(community, []);
+      }
+      communityNodes.get(community).push(nodeId);
+    });
 
-      setClusteringProgress(90);
+    setClusteringProgress(90);
 
-      // Create cluster representatives for large communities
-      const clusters = [];
-      communityNodes.forEach((nodeIds, communityId) => {
-        if (nodeIds.length >= threshold) {
-          // Create cluster node
-          const cluster = {
-            id: `cluster_${communityId}`,
-            type: 'cluster',
-            size: nodeIds.length,
-            nodes: nodeIds,
-            x:
-              nodeIds.reduce((sum, id) => {
-                const node = nodes.find((n) => n.id === id);
-                return sum + (node?.x || 0);
-              }, 0) / nodeIds.length,
-            y:
-              nodeIds.reduce((sum, id) => {
-                const node = nodes.find((n) => n.id === id);
-                return sum + (node?.y || 0);
-              }, 0) / nodeIds.length,
-            label: `Cluster (${nodeIds.length} nodes)`,
-          };
-          clusters.push(cluster);
-        }
-      });
+    // Create cluster representatives for large communities
+    const clusters = [];
+    communityNodes.forEach((nodeIds, communityId) => {
+      if (nodeIds.length >= threshold) {
+        // Create cluster node
+        const cluster = {
+          id: `cluster_${communityId}`,
+          type: "cluster",
+          size: nodeIds.length,
+          nodes: nodeIds,
+          x:
+            nodeIds.reduce((sum, id) => {
+              const node = nodes.find((n) => n.id === id);
+              return sum + (node?.x || 0);
+            }, 0) / nodeIds.length,
+          y:
+            nodeIds.reduce((sum, id) => {
+              const node = nodes.find((n) => n.id === id);
+              return sum + (node?.y || 0);
+            }, 0) / nodeIds.length,
+          label: `Cluster (${nodeIds.length} nodes)`,
+        };
+        clusters.push(cluster);
+      }
+    });
 
-      setClusteringProgress(100);
+    setClusteringProgress(100);
 
-      return {
-        clusters,
-        communities: communityNodes,
-      };
-    },
-    [],
-  );
+    return {
+      clusters,
+      communities: communityNodes,
+    };
+  }, []);
 
   // Level-of-Detail calculation based on zoom and distance
   const calculateLOD = useCallback(
     (node, zoom, center) => {
-      const distance = Math.sqrt(
-        Math.pow(node.x - center.x, 2) + Math.pow(node.y - center.y, 2),
-      );
+      const distance = Math.sqrt(Math.pow(node.x - center.x, 2) + Math.pow(node.y - center.y, 2));
 
       const normalizedDistance = distance / (zoom * 1000);
 
       if (normalizedDistance < config.lodThreshold * 0.3) {
-        return 'high'; // Full detail
+        return "high"; // Full detail
       } else if (normalizedDistance < config.lodThreshold * 0.7) {
-        return 'medium'; // Reduced detail
+        return "medium"; // Reduced detail
       } else if (normalizedDistance < config.lodThreshold) {
-        return 'low'; // Minimal detail
+        return "low"; // Minimal detail
       } else {
-        return 'culled'; // Not visible
+        return "culled"; // Not visible
       }
     },
-    [config.lodThreshold],
+    [config.lodThreshold]
   );
 
   // Viewport culling
@@ -234,7 +224,7 @@ const PerformanceMode = ({
         );
       });
     },
-    [config.enableCulling],
+    [config.enableCulling]
   );
 
   // Apply performance optimizations
@@ -252,14 +242,11 @@ const PerformanceMode = ({
       }
 
       // Step 2: Clustering for large graphs
-      if (
-        config.enableClustering &&
-        optimizedNodes.length > config.clusterThreshold
-      ) {
+      if (config.enableClustering && optimizedNodes.length > config.clusterThreshold) {
         const clusterResult = await performCommunityDetection(
           optimizedNodes,
           optimizedEdges,
-          Math.min(50, config.clusterThreshold / 10),
+          Math.min(50, config.clusterThreshold / 10)
         );
         clusters = clusterResult.clusters;
 
@@ -267,16 +254,11 @@ const PerformanceMode = ({
         clusterResult.communities.forEach((nodeIds, communityId) => {
           if (nodeIds.length >= 50) {
             // Remove original nodes
-            optimizedNodes = optimizedNodes.filter(
-              (node) => !nodeIds.includes(node.id),
-            );
+            optimizedNodes = optimizedNodes.filter((node) => !nodeIds.includes(node.id));
 
             // Remove edges between clustered nodes
             optimizedEdges = optimizedEdges.filter(
-              (edge) =>
-                !(
-                  nodeIds.includes(edge.source) && nodeIds.includes(edge.target)
-                ),
+              (edge) => !(nodeIds.includes(edge.source) && nodeIds.includes(edge.target))
             );
           }
         });
@@ -293,7 +275,7 @@ const PerformanceMode = ({
       optimizedNodes = optimizedNodes.map((node) => ({
         ...node,
         lod: calculateLOD(node, zoom, center),
-        visible: calculateLOD(node, zoom, center) !== 'culled',
+        visible: calculateLOD(node, zoom, center) !== "culled",
       }));
 
       // Step 4: Limit visible nodes
@@ -314,15 +296,12 @@ const PerformanceMode = ({
         stats: {
           originalNodes: graphData.nodes.length,
           visibleNodes: optimizedNodes.filter((n) => n.visible).length,
-          clusteredNodes: clusters.reduce(
-            (sum, cluster) => sum + cluster.size,
-            0,
-          ),
+          clusteredNodes: clusters.reduce((sum, cluster) => sum + cluster.size, 0),
           culledNodes: graphData.nodes.length - optimizedNodes.length,
         },
       };
     },
-    [config, performCommunityDetection, calculateLOD, performViewportCulling],
+    [config, performCommunityDetection, calculateLOD, performViewportCulling]
   );
 
   // Handle preset change
@@ -347,21 +326,21 @@ const PerformanceMode = ({
 
     if (fps >= 55 && visibleNodes < config.maxVisibleNodes) {
       return {
-        level: 'good',
-        color: 'success',
-        message: 'Optimal performance',
+        level: "good",
+        color: "success",
+        message: "Optimal performance",
       };
     } else if (fps >= 30) {
       return {
-        level: 'warning',
-        color: 'warning',
-        message: 'Acceptable performance',
+        level: "warning",
+        color: "warning",
+        message: "Acceptable performance",
       };
     } else {
       return {
-        level: 'poor',
-        color: 'error',
-        message: 'Performance issues detected',
+        level: "poor",
+        color: "error",
+        message: "Performance issues detected",
       };
     }
   }, [performanceStats, config.maxVisibleNodes]);
@@ -371,7 +350,7 @@ const PerformanceMode = ({
     if (performanceStats.fps < 30 && !customConfig) {
       // Auto-downgrade to higher performance mode
       const currentIndex = Object.values(PERFORMANCE_PRESETS).findIndex(
-        (p) => p.name === config.name,
+        (p) => p.name === config.name
       );
       if (currentIndex < Object.values(PERFORMANCE_PRESETS).length - 1) {
         const nextPreset = Object.values(PERFORMANCE_PRESETS)[currentIndex + 1];
@@ -383,20 +362,11 @@ const PerformanceMode = ({
   return (
     <Card sx={{ mb: 2 }}>
       <CardContent>
-        <Box
-          display="flex"
-          alignItems="center"
-          justifyContent="space-between"
-          mb={2}
-        >
+        <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
           <Box display="flex" alignItems="center" gap={1}>
             <SpeedIcon color="primary" />
             <Typography variant="h6">Performance Mode</Typography>
-            <Chip
-              label={performanceStatus.message}
-              color={performanceStatus.color}
-              size="small"
-            />
+            <Chip label={performanceStatus.message} color={performanceStatus.color} size="small" />
           </Box>
 
           <Box display="flex" alignItems="center" gap={1}>
@@ -455,7 +425,7 @@ const PerformanceMode = ({
               value={config.name}
               onChange={(e) => {
                 const preset = Object.values(PERFORMANCE_PRESETS).find(
-                  (p) => p.name === e.target.value,
+                  (p) => p.name === e.target.value
                 );
                 handlePresetChange(preset);
               }}
@@ -474,9 +444,7 @@ const PerformanceMode = ({
               control={
                 <Switch
                   checked={config.enableCulling}
-                  onChange={(e) =>
-                    handleCustomChange('enableCulling', e.target.checked)
-                  }
+                  onChange={(e) => handleCustomChange("enableCulling", e.target.checked)}
                 />
               }
               label="Viewport Culling"
@@ -486,23 +454,17 @@ const PerformanceMode = ({
               control={
                 <Switch
                   checked={config.enableClustering}
-                  onChange={(e) =>
-                    handleCustomChange('enableClustering', e.target.checked)
-                  }
+                  onChange={(e) => handleCustomChange("enableClustering", e.target.checked)}
                 />
               }
               label="Community Clustering"
             />
 
             <Box>
-              <Typography gutterBottom>
-                LOD Threshold: {config.lodThreshold}
-              </Typography>
+              <Typography gutterBottom>LOD Threshold: {config.lodThreshold}</Typography>
               <Slider
                 value={config.lodThreshold}
-                onChange={(e, value) =>
-                  handleCustomChange('lodThreshold', value)
-                }
+                onChange={(e, value) => handleCustomChange("lodThreshold", value)}
                 min={0.1}
                 max={1.0}
                 step={0.1}
@@ -512,36 +474,28 @@ const PerformanceMode = ({
             </Box>
 
             <Box>
-              <Typography gutterBottom>
-                Max Visible Nodes: {config.maxVisibleNodes}
-              </Typography>
+              <Typography gutterBottom>Max Visible Nodes: {config.maxVisibleNodes}</Typography>
               <Slider
                 value={config.maxVisibleNodes}
-                onChange={(e, value) =>
-                  handleCustomChange('maxVisibleNodes', value)
-                }
+                onChange={(e, value) => handleCustomChange("maxVisibleNodes", value)}
                 min={100}
                 max={10000}
                 step={100}
                 marks={[
-                  { value: 500, label: '500' },
-                  { value: 2000, label: '2K' },
-                  { value: 5000, label: '5K' },
-                  { value: 10000, label: '10K' },
+                  { value: 500, label: "500" },
+                  { value: 2000, label: "2K" },
+                  { value: 5000, label: "5K" },
+                  { value: 10000, label: "10K" },
                 ]}
                 valueLabelDisplay="auto"
               />
             </Box>
 
             <Box>
-              <Typography gutterBottom>
-                Cluster Threshold: {config.clusterThreshold}
-              </Typography>
+              <Typography gutterBottom>Cluster Threshold: {config.clusterThreshold}</Typography>
               <Slider
                 value={config.clusterThreshold}
-                onChange={(e, value) =>
-                  handleCustomChange('clusterThreshold', value)
-                }
+                onChange={(e, value) => handleCustomChange("clusterThreshold", value)}
                 min={100}
                 max={2000}
                 step={50}
@@ -552,7 +506,7 @@ const PerformanceMode = ({
           </Box>
 
           {/* Performance Recommendations */}
-          {performanceStatus.level === 'poor' && (
+          {performanceStatus.level === "poor" && (
             <Alert severity="warning" sx={{ mt: 2 }}>
               <Typography variant="body2">
                 <strong>Performance Recommendations:</strong>
@@ -561,9 +515,7 @@ const PerformanceMode = ({
                 <li>Enable viewport culling to reduce rendered nodes</li>
                 <li>Lower the cluster threshold to group more nodes</li>
                 <li>Reduce max visible nodes limit</li>
-                <li>
-                  Consider using Massive Scale preset for very large graphs
-                </li>
+                <li>Consider using Massive Scale preset for very large graphs</li>
               </ul>
             </Alert>
           )}

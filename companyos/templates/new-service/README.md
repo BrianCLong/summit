@@ -61,15 +61,12 @@ my-new-service/
 Authorization is pre-wired via the `auth` middleware:
 
 ```typescript
-import { requirePermission } from './middleware/auth';
+import { requirePermission } from "./middleware/auth";
 
-router.post('/resource',
-  requirePermission('resource:create'),
-  async (req, res) => {
-    // OPA has already validated permission
-    // ...
-  }
-);
+router.post("/resource", requirePermission("resource:create"), async (req, res) => {
+  // OPA has already validated permission
+  // ...
+});
 ```
 
 ### Tenant Context
@@ -77,15 +74,12 @@ router.post('/resource',
 Tenant context is automatically extracted and validated:
 
 ```typescript
-import { requireTenant } from './middleware/tenant';
+import { requireTenant } from "./middleware/tenant";
 
-router.get('/data',
-  requireTenant(),
-  async (req, res) => {
-    const { tenantId, tier } = req.tenantContext;
-    // ...
-  }
-);
+router.get("/data", requireTenant(), async (req, res) => {
+  const { tenantId, tier } = req.tenantContext;
+  // ...
+});
 ```
 
 ### Metrics
@@ -98,8 +92,8 @@ Prometheus metrics are automatically collected:
 // - http_requests_total
 
 // Custom metrics available:
-import { metrics } from './middleware/metrics';
-metrics.customCounter.inc({ label: 'value' });
+import { metrics } from "./middleware/metrics";
+metrics.customCounter.inc({ label: "value" });
 ```
 
 ### Health Endpoints
@@ -116,26 +110,23 @@ Pre-configured health endpoints:
 Rate limiting integrated with tenant tiers:
 
 ```typescript
-import { rateLimit } from './middleware/rate-limit';
+import { rateLimit } from "./middleware/rate-limit";
 
-router.post('/expensive-operation',
-  rateLimit('expensive:operation'),
-  async (req, res) => {
-    // Rate limited based on tenant tier
-  }
-);
+router.post("/expensive-operation", rateLimit("expensive:operation"), async (req, res) => {
+  // Rate limited based on tenant tier
+});
 ```
 
 ## Configuration
 
 Environment variables:
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `PORT` | 3000 | Server port |
-| `OPA_URL` | http://localhost:8181 | OPA service URL |
-| `LOG_LEVEL` | info | Log level |
-| `METRICS_ENABLED` | true | Enable Prometheus metrics |
+| Variable          | Default               | Description               |
+| ----------------- | --------------------- | ------------------------- |
+| `PORT`            | 3000                  | Server port               |
+| `OPA_URL`         | http://localhost:8181 | OPA service URL           |
+| `LOG_LEVEL`       | info                  | Log level                 |
+| `METRICS_ENABLED` | true                  | Enable Prometheus metrics |
 
 ## Testing
 

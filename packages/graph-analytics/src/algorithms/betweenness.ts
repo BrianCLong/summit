@@ -80,7 +80,7 @@ interface GraphData {
  */
 export function calculateBetweenness(
   graph: GraphData,
-  options: BetweennessOptions = {},
+  options: BetweennessOptions = {}
 ): BetweennessResult {
   const startTime = performance.now();
 
@@ -207,7 +207,7 @@ export function calculateBetweenness(
     // Normalization factor depends on whether graph is directed
     const normFactor = directed
       ? (nodeCount - 1) * (nodeCount - 2)
-      : (nodeCount - 1) * (nodeCount - 2) / 2;
+      : ((nodeCount - 1) * (nodeCount - 2)) / 2;
 
     for (const [node, score] of nodeBetweenness.entries()) {
       nodeBetweenness.set(node, score / normFactor);
@@ -240,7 +240,7 @@ function bfsTraversal(
   distance: Map<string, number>,
   sigma: Map<string, number>,
   predecessors: Map<string, string[]>,
-  stack: string[],
+  stack: string[]
 ): void {
   const queue: string[] = [source];
 
@@ -278,7 +278,7 @@ function dijkstraTraversal(
   distance: Map<string, number>,
   sigma: Map<string, number>,
   predecessors: Map<string, string[]>,
-  stack: string[],
+  stack: string[]
 ): void {
   // Min-heap priority queue (simplified - for production use a proper heap)
   const queue: Array<{ node: string; dist: number }> = [{ node: source, dist: 0 }];
@@ -289,7 +289,9 @@ function dijkstraTraversal(
     queue.sort((a, b) => a.dist - b.dist);
     const { node: v, dist: vDist } = queue.shift()!;
 
-    if (visited.has(v)) {continue;}
+    if (visited.has(v)) {
+      continue;
+    }
     visited.add(v);
     stack.push(v);
 
@@ -333,7 +335,7 @@ function sampleNodes(nodes: string[], sampleSize: number): string[] {
  */
 export function findBridgeNodes(
   result: BetweennessResult,
-  threshold: number = 0.1,
+  threshold: number = 0.1
 ): Array<{ node: string; score: number }> {
   const bridges = Array.from(result.nodeBetweenness.entries())
     .filter(([_, score]) => score >= threshold)
@@ -347,9 +349,7 @@ export function findBridgeNodes(
  * Calculates the vulnerability of the network by identifying critical nodes
  * whose removal would most disrupt shortest paths
  */
-export function calculateNetworkVulnerability(
-  result: BetweennessResult,
-): {
+export function calculateNetworkVulnerability(result: BetweennessResult): {
   maxBetweenness: number;
   vulnerabilityScore: number;
   criticalNodes: string[];

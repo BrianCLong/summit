@@ -1,12 +1,12 @@
-import { renderHook } from '@testing-library/react';
-import { useGraphPersistence } from '../useGraphPersistence';
+import { renderHook } from "@testing-library/react";
+import { useGraphPersistence } from "../useGraphPersistence";
 
-describe('useGraphPersistence', () => {
+describe("useGraphPersistence", () => {
   let setItemSpy;
 
   beforeEach(() => {
     jest.useFakeTimers();
-    setItemSpy = jest.spyOn(Storage.prototype, 'setItem');
+    setItemSpy = jest.spyOn(Storage.prototype, "setItem");
     setItemSpy.mockClear();
   });
 
@@ -15,18 +15,15 @@ describe('useGraphPersistence', () => {
     jest.restoreAllMocks();
   });
 
-  it('debounces localStorage updates', () => {
+  it("debounces localStorage updates", () => {
     const initialProps = {
-      layout: 'cola',
+      layout: "cola",
       layoutOptions: { value: 1 },
       featureToggles: { toggle: true },
-      nodeTypeColors: { type: 'red' },
+      nodeTypeColors: { type: "red" },
     };
 
-    renderHook(
-      (props) => useGraphPersistence(props),
-      { initialProps }
-    );
+    renderHook((props) => useGraphPersistence(props), { initialProps });
 
     // Should not save immediately
     expect(setItemSpy).not.toHaveBeenCalled();
@@ -40,47 +37,44 @@ describe('useGraphPersistence', () => {
     expect(setItemSpy).toHaveBeenCalledTimes(4); // 4 keys are set
 
     // Verify correct values
-    expect(setItemSpy).toHaveBeenCalledWith('graphLayout', 'cola');
-    expect(setItemSpy).toHaveBeenCalledWith('graphLayoutOptions', JSON.stringify({ value: 1 }));
+    expect(setItemSpy).toHaveBeenCalledWith("graphLayout", "cola");
+    expect(setItemSpy).toHaveBeenCalledWith("graphLayoutOptions", JSON.stringify({ value: 1 }));
   });
 
-  it('coalesces rapid updates', () => {
-    renderHook(
-        (props) => useGraphPersistence(props),
-        {
-            initialProps: {
-                layout: 'cola',
-                layoutOptions: { value: 1 },
-                featureToggles: {},
-                nodeTypeColors: {},
-            }
-        }
-      );
-
-      // Update 1
-      rerender({
-        layout: 'cola',
-        layoutOptions: { value: 2 },
+  it("coalesces rapid updates", () => {
+    renderHook((props) => useGraphPersistence(props), {
+      initialProps: {
+        layout: "cola",
+        layoutOptions: { value: 1 },
         featureToggles: {},
         nodeTypeColors: {},
-      });
+      },
+    });
 
-      // Update 2
-      rerender({
-        layout: 'cola',
-        layoutOptions: { value: 3 },
-        featureToggles: {},
-        nodeTypeColors: {},
-      });
+    // Update 1
+    rerender({
+      layout: "cola",
+      layoutOptions: { value: 2 },
+      featureToggles: {},
+      nodeTypeColors: {},
+    });
 
-      // Should not have called yet
-      expect(setItemSpy).not.toHaveBeenCalled();
+    // Update 2
+    rerender({
+      layout: "cola",
+      layoutOptions: { value: 3 },
+      featureToggles: {},
+      nodeTypeColors: {},
+    });
 
-      // Fast forward
-      jest.advanceTimersByTime(1000);
+    // Should not have called yet
+    expect(setItemSpy).not.toHaveBeenCalled();
 
-      // Should have called once (for the last state)
-      expect(setItemSpy).toHaveBeenCalledTimes(4); // 4 keys
-      expect(setItemSpy).toHaveBeenCalledWith('graphLayoutOptions', JSON.stringify({ value: 3 }));
+    // Fast forward
+    jest.advanceTimersByTime(1000);
+
+    // Should have called once (for the last state)
+    expect(setItemSpy).toHaveBeenCalledTimes(4); // 4 keys
+    expect(setItemSpy).toHaveBeenCalledWith("graphLayoutOptions", JSON.stringify({ value: 3 }));
   });
 });

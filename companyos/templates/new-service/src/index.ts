@@ -10,14 +10,14 @@
  * - Rate limiting
  */
 
-import express, { Application, Request, Response, NextFunction } from 'express';
-import { config } from './config.js';
-import { logger } from './utils/logger.js';
-import { authMiddleware } from './middleware/auth.js';
-import { tenantMiddleware } from './middleware/tenant.js';
-import { metricsMiddleware, metricsHandler } from './middleware/metrics.js';
-import { healthRoutes } from './routes/health.js';
-import { exampleRoutes } from './routes/example.js';
+import express, { Application, Request, Response, NextFunction } from "express";
+import { config } from "./config.js";
+import { logger } from "./utils/logger.js";
+import { authMiddleware } from "./middleware/auth.js";
+import { tenantMiddleware } from "./middleware/tenant.js";
+import { metricsMiddleware, metricsHandler } from "./middleware/metrics.js";
+import { healthRoutes } from "./routes/health.js";
+import { exampleRoutes } from "./routes/example.js";
 
 // Create Express app
 const app: Application = express();
@@ -32,8 +32,8 @@ app.use(express.json());
 // Request logging
 app.use((req: Request, res: Response, next: NextFunction) => {
   const start = Date.now();
-  res.on('finish', () => {
-    logger.info('Request completed', {
+  res.on("finish", () => {
+    logger.info("Request completed", {
       method: req.method,
       path: req.path,
       status: res.statusCode,
@@ -48,10 +48,10 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 app.use(metricsMiddleware);
 
 // Health endpoints (no auth required)
-app.use('/health', healthRoutes);
+app.use("/health", healthRoutes);
 
 // Metrics endpoint (no auth required in dev)
-app.get('/metrics', metricsHandler);
+app.get("/metrics", metricsHandler);
 
 // ============================================================================
 // PROTECTED ROUTES
@@ -62,7 +62,7 @@ app.use(authMiddleware);
 app.use(tenantMiddleware);
 
 // Application routes
-app.use('/api/v1', exampleRoutes);
+app.use("/api/v1", exampleRoutes);
 
 // ============================================================================
 // ERROR HANDLING
@@ -71,22 +71,22 @@ app.use('/api/v1', exampleRoutes);
 // 404 handler
 app.use((req: Request, res: Response) => {
   res.status(404).json({
-    error: 'Not Found',
+    error: "Not Found",
     path: req.path,
   });
 });
 
 // Global error handler
 app.use((err: Error, req: Request, res: Response, _next: NextFunction) => {
-  logger.error('Unhandled error', {
+  logger.error("Unhandled error", {
     error: err.message,
     stack: err.stack,
     path: req.path,
   });
 
   res.status(500).json({
-    error: 'Internal Server Error',
-    message: process.env.NODE_ENV === 'development' ? err.message : undefined,
+    error: "Internal Server Error",
+    message: process.env.NODE_ENV === "development" ? err.message : undefined,
   });
 });
 
@@ -97,7 +97,7 @@ app.use((err: Error, req: Request, res: Response, _next: NextFunction) => {
 const PORT = config.port;
 
 app.listen(PORT, () => {
-  logger.info('Server started', {
+  logger.info("Server started", {
     port: PORT,
     environment: config.nodeEnv,
     opaUrl: config.opaUrl,

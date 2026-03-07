@@ -6,10 +6,10 @@ on:
   pull_request:
     branches: [main]
     paths-ignore:
-      - 'docs/**'
-      - '**.md'
-      - 'prompts/**'
-      - 'evidence/**'
+      - "docs/**"
+      - "**.md"
+      - "prompts/**"
+      - "evidence/**"
     paths:
       - "test/fuzz/graphGuardrails/**"
       - "server/src/middleware/cypher-sandbox.ts"

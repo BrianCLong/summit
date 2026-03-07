@@ -5,15 +5,15 @@
  * and verifies byte-identical output across runs.
  */
 
-import { Command } from 'commander';
-import * as path from 'path';
-import { EXIT_CODES } from '../lib/constants.js';
+import { Command } from "commander";
+import * as path from "path";
+import { EXIT_CODES } from "../lib/constants.js";
 import {
   runDeterminismHarness,
   DETERMINISM_EXIT_CODES,
   type DeterminismOptions,
   type HashAlgorithm,
-} from '../lib/determinism.js';
+} from "../lib/determinism.js";
 
 /**
  * Command options
@@ -34,9 +34,9 @@ interface DeterminismCommandOptions {
  */
 function formatResult(
   result: Awaited<ReturnType<typeof runDeterminismHarness>>,
-  format: 'text' | 'json'
+  format: "text" | "json"
 ): string {
-  if (format === 'json') {
+  if (format === "json") {
     return JSON.stringify(
       {
         success: result.success,
@@ -53,30 +53,30 @@ function formatResult(
   }
 
   const lines: string[] = [];
-  lines.push(`Determinism Check: ${result.match ? 'PASS' : 'FAIL'}`);
+  lines.push(`Determinism Check: ${result.match ? "PASS" : "FAIL"}`);
   lines.push(`Runs: ${result.runs.length}`);
-  lines.push('');
-  lines.push('Hashes:');
+  lines.push("");
+  lines.push("Hashes:");
   for (let i = 0; i < result.hashes.length; i++) {
-    const status = i === 0 || result.hashes[i] === result.hashes[0] ? '✓' : '✗';
+    const status = i === 0 || result.hashes[i] === result.hashes[0] ? "✓" : "✗";
     lines.push(`  ${i + 1}. ${result.hashes[i]} ${status}`);
   }
 
   if (!result.match && result.firstMismatchRun !== undefined) {
-    lines.push('');
+    lines.push("");
     lines.push(`First mismatch: Run ${result.firstMismatchRun}`);
   }
 
   if (result.packageTest) {
-    lines.push('');
+    lines.push("");
     lines.push(`Package Tests (${result.packageTest.name}):`);
     lines.push(`  Passes: ${result.packageTest.passes}/${result.packageTest.runs}`);
   }
 
-  lines.push('');
+  lines.push("");
   lines.push(`Evidence: ${result.evidenceDir}`);
 
-  return lines.join('\n');
+  return lines.join("\n");
 }
 
 /**
@@ -84,87 +84,95 @@ function formatResult(
  */
 export function registerDeterminismCommands(program: Command): void {
   const determinism = program
-    .command('determinism')
-    .description('Deterministic test harness for verifying reproducible output');
+    .command("determinism")
+    .description("Deterministic test harness for verifying reproducible output");
 
   // determinism run <command...>
   determinism
-    .command('run <command> [args...]')
-    .description('Run a command multiple times and verify identical output')
-    .option('-n, --runs <n>', 'Number of runs', '3')
-    .option('--output-dir <path>', 'Output directory for evidence')
-    .option('--fail-fast', 'Stop on first mismatch', true)
-    .option('--no-fail-fast', 'Continue all runs even on mismatch')
-    .option('--hash <algo>', 'Hash algorithm (sha256, sha512, md5)', 'sha256')
-    .option('--include-stdout', 'Store full stdout in evidence', false)
-    .option('--package <name>', 'Also run package tests N times')
-    .option('--require-tests-pass', 'Fail if package tests fail', false)
-    .option('--include-timestamps', 'Include timestamps in output', false)
-    .option('-o, --output <format>', 'Output format: text or json', 'text')
-    .action(async (command: string, args: string[], opts: DeterminismCommandOptions & { output: 'text' | 'json' }) => {
-      try {
-        const options: Partial<DeterminismOptions> = {
-          runs: parseInt(opts.runs, 10),
-          outputDir: opts.outputDir,
-          failFast: opts.failFast,
-          hashAlgo: opts.hash,
-          includeStdout: opts.includeStdout,
-          packageName: opts.package,
-          requireTestsPass: opts.requireTestsPass,
-          includeTimestamps: opts.includeTimestamps,
-        };
+    .command("run <command> [args...]")
+    .description("Run a command multiple times and verify identical output")
+    .option("-n, --runs <n>", "Number of runs", "3")
+    .option("--output-dir <path>", "Output directory for evidence")
+    .option("--fail-fast", "Stop on first mismatch", true)
+    .option("--no-fail-fast", "Continue all runs even on mismatch")
+    .option("--hash <algo>", "Hash algorithm (sha256, sha512, md5)", "sha256")
+    .option("--include-stdout", "Store full stdout in evidence", false)
+    .option("--package <name>", "Also run package tests N times")
+    .option("--require-tests-pass", "Fail if package tests fail", false)
+    .option("--include-timestamps", "Include timestamps in output", false)
+    .option("-o, --output <format>", "Output format: text or json", "text")
+    .action(
+      async (
+        command: string,
+        args: string[],
+        opts: DeterminismCommandOptions & { output: "text" | "json" }
+      ) => {
+        try {
+          const options: Partial<DeterminismOptions> = {
+            runs: parseInt(opts.runs, 10),
+            outputDir: opts.outputDir,
+            failFast: opts.failFast,
+            hashAlgo: opts.hash,
+            includeStdout: opts.includeStdout,
+            packageName: opts.package,
+            requireTestsPass: opts.requireTestsPass,
+            includeTimestamps: opts.includeTimestamps,
+          };
 
-        const result = await runDeterminismHarness(command, args, options);
+          const result = await runDeterminismHarness(command, args, options);
 
-        console.log(formatResult(result, opts.output));
+          console.log(formatResult(result, opts.output));
 
-        if (!result.success) {
-          if (!result.match) {
-            process.exit(DETERMINISM_EXIT_CODES.MISMATCH);
+          if (!result.success) {
+            if (!result.match) {
+              process.exit(DETERMINISM_EXIT_CODES.MISMATCH);
+            }
+            if (result.packageTest && result.packageTest.passes < result.packageTest.runs) {
+              process.exit(DETERMINISM_EXIT_CODES.MISMATCH);
+            }
           }
-          if (result.packageTest && result.packageTest.passes < result.packageTest.runs) {
-            process.exit(DETERMINISM_EXIT_CODES.MISMATCH);
-          }
+        } catch (error) {
+          console.error(`Error: ${error instanceof Error ? error.message : String(error)}`);
+          process.exit(DETERMINISM_EXIT_CODES.UNEXPECTED_ERROR);
         }
-      } catch (error) {
-        console.error(`Error: ${error instanceof Error ? error.message : String(error)}`);
-        process.exit(DETERMINISM_EXIT_CODES.UNEXPECTED_ERROR);
       }
-    });
+    );
 
   // determinism verify <evidence-dir>
   determinism
-    .command('verify <evidence-dir>')
-    .description('Verify evidence from a previous determinism run')
-    .option('-o, --output <format>', 'Output format: text or json', 'text')
-    .action(async (evidenceDir: string, opts: { output: 'text' | 'json' }) => {
+    .command("verify <evidence-dir>")
+    .description("Verify evidence from a previous determinism run")
+    .option("-o, --output <format>", "Output format: text or json", "text")
+    .action(async (evidenceDir: string, opts: { output: "text" | "json" }) => {
       try {
-        const fs = await import('fs');
-        const evidencePath = path.join(evidenceDir, 'evidence.json');
+        const fs = await import("fs");
+        const evidencePath = path.join(evidenceDir, "evidence.json");
 
         if (!fs.existsSync(evidencePath)) {
           console.error(`Evidence not found: ${evidencePath}`);
           process.exit(EXIT_CODES.GENERAL_ERROR);
         }
 
-        const evidence = JSON.parse(fs.readFileSync(evidencePath, 'utf-8'));
+        const evidence = JSON.parse(fs.readFileSync(evidencePath, "utf-8"));
 
-        if (opts.output === 'json') {
+        if (opts.output === "json") {
           console.log(JSON.stringify(evidence, null, 2));
         } else {
           console.log(`Command: ${evidence.command}`);
           console.log(`Runs: ${evidence.runs}`);
-          console.log(`Match: ${evidence.match ? 'Yes' : 'No'}`);
+          console.log(`Match: ${evidence.match ? "Yes" : "No"}`);
           console.log(`Hash Algorithm: ${evidence.hash_algo}`);
-          console.log('');
-          console.log('Hashes:');
+          console.log("");
+          console.log("Hashes:");
           for (let i = 0; i < evidence.hashes.length; i++) {
             console.log(`  ${i + 1}. ${evidence.hashes[i]}`);
           }
           if (evidence.package_test) {
-            console.log('');
+            console.log("");
             console.log(`Package: ${evidence.package_test.name}`);
-            console.log(`Test Passes: ${evidence.package_test.passes}/${evidence.package_test.runs}`);
+            console.log(
+              `Test Passes: ${evidence.package_test.passes}/${evidence.package_test.runs}`
+            );
           }
         }
 
@@ -179,16 +187,16 @@ export function registerDeterminismCommands(program: Command): void {
 
   // determinism clean [--max-age-days <days>]
   determinism
-    .command('clean')
-    .description('Clean old determinism evidence directories')
-    .option('--max-age-days <days>', 'Maximum age of evidence to keep', '7')
+    .command("clean")
+    .description("Clean old determinism evidence directories")
+    .option("--max-age-days <days>", "Maximum age of evidence to keep", "7")
     .action(async (opts: { maxAgeDays: string }) => {
       try {
-        const fs = await import('fs');
-        const determinismDir = path.join(process.cwd(), '.claude', 'determinism');
+        const fs = await import("fs");
+        const determinismDir = path.join(process.cwd(), ".claude", "determinism");
 
         if (!fs.existsSync(determinismDir)) {
-          console.log('No determinism evidence found.');
+          console.log("No determinism evidence found.");
           return;
         }
 
@@ -206,7 +214,7 @@ export function registerDeterminismCommands(program: Command): void {
           }
         }
 
-        console.log(`Cleaned ${cleaned} evidence director${cleaned === 1 ? 'y' : 'ies'}.`);
+        console.log(`Cleaned ${cleaned} evidence director${cleaned === 1 ? "y" : "ies"}.`);
       } catch (error) {
         console.error(`Error: ${error instanceof Error ? error.message : String(error)}`);
         process.exit(EXIT_CODES.GENERAL_ERROR);

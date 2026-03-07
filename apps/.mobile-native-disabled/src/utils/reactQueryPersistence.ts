@@ -22,12 +22,12 @@ export const createPersistedQueryClient = (): QueryClient => {
         refetchOnReconnect: true,
         networkMode: 'offlineFirst',
         // Provide cached data immediately while fetching fresh data
-        placeholderData: (previousData) => previousData,
+        placeholderData: previousData => previousData,
       },
       mutations: {
         networkMode: 'offlineFirst',
         retry: 3,
-        retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+        retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
       },
     },
   });
@@ -47,8 +47,8 @@ const setupPersistence = async (queryClient: QueryClient) => {
   const persister = createAsyncStoragePersister({
     storage: AsyncStorage,
     throttleTime: 1000, // Throttle writes to reduce I/O
-    serialize: (data) => JSON.stringify(data),
-    deserialize: (data) => JSON.parse(data),
+    serialize: data => JSON.stringify(data),
+    deserialize: data => JSON.parse(data),
   });
 
   await persistQueryClient({
@@ -66,7 +66,7 @@ const setupPersistence = async (queryClient: QueryClient) => {
     },
     dehydrateOptions: {
       // Only persist successful queries
-      shouldDehydrateQuery: (query) => {
+      shouldDehydrateQuery: query => {
         return query.state.status === 'success';
       },
     },
@@ -82,7 +82,7 @@ const setupPersistence = async (queryClient: QueryClient) => {
 export const clearPersistedQueries = async (): Promise<void> => {
   try {
     const keys = await AsyncStorage.getAllKeys();
-    const queryKeys = keys.filter((key) => key.startsWith('REACT_QUERY_OFFLINE_CACHE'));
+    const queryKeys = keys.filter(key => key.startsWith('REACT_QUERY_OFFLINE_CACHE'));
     await AsyncStorage.multiRemove(queryKeys);
     console.log('[ReactQuery] Cleared all persisted queries');
   } catch (error) {
@@ -96,7 +96,7 @@ export const clearPersistedQueries = async (): Promise<void> => {
 export const getPersistedCacheSize = async (): Promise<number> => {
   try {
     const keys = await AsyncStorage.getAllKeys();
-    const queryKeys = keys.filter((key) => key.startsWith('REACT_QUERY_OFFLINE_CACHE'));
+    const queryKeys = keys.filter(key => key.startsWith('REACT_QUERY_OFFLINE_CACHE'));
 
     let totalSize = 0;
     for (const key of queryKeys) {
@@ -119,7 +119,7 @@ export const getPersistedCacheSize = async (): Promise<number> => {
 export const pruneOldQueries = async (maxAgeMs: number = MAX_AGE): Promise<void> => {
   try {
     const keys = await AsyncStorage.getAllKeys();
-    const queryKeys = keys.filter((key) => key.startsWith('REACT_QUERY_OFFLINE_CACHE'));
+    const queryKeys = keys.filter(key => key.startsWith('REACT_QUERY_OFFLINE_CACHE'));
 
     const now = Date.now();
     const keysToRemove: string[] = [];
@@ -162,7 +162,7 @@ export const createOptimisticUpdate = <TData, TVariables>(
       const previousData = queryClient.getQueryData<TData>(queryKey);
 
       // Optimistically update
-      queryClient.setQueryData<TData>(queryKey, (old) => updater(old, variables));
+      queryClient.setQueryData<TData>(queryKey, old => updater(old, variables));
 
       return {previousData};
     },

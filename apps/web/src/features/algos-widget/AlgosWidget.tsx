@@ -25,8 +25,8 @@ const AlgosWidget: React.FC<Props> = ({ cy, serviceUrl }) => {
   }, [cy])
 
   const runPagerank = async () => {
-    const nodes = cy.nodes().map((n) => n.id())
-    const edges = cy.edges().map((e) => [e.source().id(), e.target().id()])
+    const nodes = cy.nodes().map(n => n.id())
+    const edges = cy.edges().map(e => [e.source().id(), e.target().id()])
     await pagerank(serviceUrl, { nodes, edges })
   }
 

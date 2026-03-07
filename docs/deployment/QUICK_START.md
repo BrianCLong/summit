@@ -33,6 +33,7 @@ gh run watch
 ```
 
 **What just happened?**
+
 - ✅ Semantic-release analyzed your commit
 - ✅ Version bumped from 1.0.0 → 1.1.0 (minor release for `feat`)
 - ✅ Changelog updated automatically
@@ -47,14 +48,14 @@ gh run watch
 
 ```typescript
 // server/src/api/routes/dashboard.ts
-import { getFeatureFlagService } from '../../services/FeatureFlagService';
+import { getFeatureFlagService } from "../../services/FeatureFlagService";
 
 export async function getDashboard(req, res) {
   const user = req.user;
   const flags = getFeatureFlagService();
 
   // Check if new dashboard is enabled
-  const useNewDashboard = await flags.isEnabled('new-ui-dashboard', {
+  const useNewDashboard = await flags.isEnabled("new-ui-dashboard", {
     key: user.id,
     email: user.email,
     organization: user.organization,
@@ -173,12 +174,12 @@ See migration guide: docs/MIGRATION_AUTH.md"
 
 ### Commit Types → Version Bumps
 
-| Commit Type | Example | Version Change |
-|-------------|---------|----------------|
-| `fix:` | `fix: resolve bug` | 1.0.0 → 1.0.1 (patch) |
-| `feat:` | `feat: add feature` | 1.0.0 → 1.1.0 (minor) |
-| `feat!:` or `BREAKING CHANGE:` | `feat!: new API` | 1.0.0 → 2.0.0 (major) |
-| `chore:`, `docs:`, `style:` | `chore: update deps` | No release |
+| Commit Type                    | Example              | Version Change        |
+| ------------------------------ | -------------------- | --------------------- |
+| `fix:`                         | `fix: resolve bug`   | 1.0.0 → 1.0.1 (patch) |
+| `feat:`                        | `feat: add feature`  | 1.0.0 → 1.1.0 (minor) |
+| `feat!:` or `BREAKING CHANGE:` | `feat!: new API`     | 1.0.0 → 2.0.0 (major) |
+| `chore:`, `docs:`, `style:`    | `chore: update deps` | No release            |
 
 ### Useful Commands
 
@@ -212,24 +213,24 @@ kubectl logs -n intelgraph-production -l app=api --tail=100
 
 ```typescript
 // Boolean flag
-const enabled = await flags.isEnabled('feature-name', user);
+const enabled = await flags.isEnabled("feature-name", user);
 
 // String flag (A/B testing)
-const variant = await flags.getValue('ui-variant', user, 'control');
-if (variant === 'treatment') {
+const variant = await flags.getValue("ui-variant", user, "control");
+if (variant === "treatment") {
   // Show variant B
 }
 
 // JSON flag (configuration)
-const config = await flags.getJSONValue('api-config', user, {
+const config = await flags.getJSONValue("api-config", user, {
   rateLimit: 100,
-  timeout: 5000
+  timeout: 5000,
 });
 
 // Kill switch
-const isMaintenanceMode = await flags.isEnabled('maintenance-mode', user);
+const isMaintenanceMode = await flags.isEnabled("maintenance-mode", user);
 if (isMaintenanceMode) {
-  return res.status(503).json({ message: 'Under maintenance' });
+  return res.status(503).json({ message: "Under maintenance" });
 }
 ```
 
@@ -263,6 +264,7 @@ kubectl logs -f deployment/api -n intelgraph-production
 **Problem:** Pushed to main but no release created
 
 **Solution:**
+
 ```bash
 # Check if commits use conventional format
 git log --oneline -5
@@ -277,6 +279,7 @@ git push
 **Problem:** Staging deployment failed
 
 **Solution:**
+
 ```bash
 # Check logs
 gh run view --log-failed
@@ -296,6 +299,7 @@ gh run rerun <run-id>
 **Problem:** Feature flag always returns default value
 
 **Solution:**
+
 ```bash
 # 1. Check flag exists
 curl https://intelgraph.io/api/feature-flags

@@ -27,15 +27,16 @@ A release candidate **cannot** be promoted to Production unless:
 Flaky tests destroy trust. We treat them aggressively.
 
 ### The "Quarantine" Process
+
 1.  **Identification:** If a test fails in CI but passes on retry, it is **Flaky**.
 2.  **Tagging:** Immediately tag the test with `@flaky` (Jest) or `@fixme` (Playwright).
-    *   *Action:* This excludes it from the Blocking PR Gate.
+    - _Action:_ This excludes it from the Blocking PR Gate.
 3.  **Ticket:** A Jira/GitHub Issue is created automatically (or manually) linked to the test.
 4.  **SLA:** The team owning the service has **1 Sprint** to fix or delete the test.
 5.  **Exile:** If not fixed in 1 Sprint, the test is deleted. A test that doesn't run reliably is worse than no test.
 
 ## 4. Error Budgets & Release Decisions
 
-*   **Green State:** Recent releases have low error rates. Deployment is automated.
-*   **Yellow State:** Error budget (SLO) is at risk. Deployments require manual approval.
-*   **Red State:** Error budget depleted. **Feature Freeze**. Only reliability fixes are allowed to merge.
+- **Green State:** Recent releases have low error rates. Deployment is automated.
+- **Yellow State:** Error budget (SLO) is at risk. Deployments require manual approval.
+- **Red State:** Error budget depleted. **Feature Freeze**. Only reliability fixes are allowed to merge.

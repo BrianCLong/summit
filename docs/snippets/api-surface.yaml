@@ -11,9 +11,9 @@ paths:
         content:
           application/json:
             schema:
-              $ref: 'https://schemas.summit.io/viz/observed-signal.json#/$defs/batch'
+              $ref: "https://schemas.summit.io/viz/observed-signal.json#/$defs/batch"
       responses:
-        '207':
+        "207":
           description: Multi-status response with per-record receipts
           content:
             application/json:
@@ -61,7 +61,7 @@ paths:
                   type: string
                   format: date-time
       responses:
-        '202':
+        "202":
           description: Simulation accepted
           content:
             application/json:
@@ -90,7 +90,7 @@ paths:
             type: string
             enum: [pdf, html, zip]
       responses:
-        '200':
+        "200":
           description: Signed artifact
           headers:
             x-summit-sigstore-bundle:

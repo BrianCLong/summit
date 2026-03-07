@@ -45,9 +45,7 @@
         "justifyMode": "auto",
         "orientation": "auto",
         "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
+          "calcs": ["lastNotNull"],
           "fields": "",
           "values": false
         },
@@ -88,9 +86,7 @@
         "justifyMode": "auto",
         "orientation": "auto",
         "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
+          "calcs": ["lastNotNull"],
           "fields": "",
           "values": false
         },
@@ -131,9 +127,7 @@
         "justifyMode": "auto",
         "orientation": "auto",
         "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
+          "calcs": ["lastNotNull"],
           "fields": "",
           "values": false
         },
@@ -174,9 +168,7 @@
         "justifyMode": "auto",
         "orientation": "auto",
         "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
+          "calcs": ["lastNotNull"],
           "fields": "",
           "values": false
         },
@@ -288,7 +280,7 @@
           "range": true,
           "refId": "A"
         },
-         {
+        {
           "datasource": {
             "type": "prometheus",
             "uid": "${datasource}"
@@ -355,7 +347,7 @@
       "title": "Network Traffic",
       "type": "timeseries"
     },
-     {
+    {
       "datasource": {
         "type": "prometheus",
         "uid": "${datasource}"
@@ -410,11 +402,7 @@
   ],
   "schemaVersion": 38,
   "style": "dark",
-  "tags": [
-    "summit",
-    "monitoring",
-    "health"
-  ],
+  "tags": ["summit", "monitoring", "health"],
   "templating": {
     "list": [
       {

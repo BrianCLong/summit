@@ -11,10 +11,10 @@
  * - Fail-open/fail-closed configuration
  */
 
-import { createLogger } from '../utils/logger.js';
-import { TenantTier } from '../types/tenant.js';
+import { createLogger } from "../utils/logger.js";
+import { TenantTier } from "../types/tenant.js";
 
-const logger = createLogger('rate-limiter');
+const logger = createLogger("rate-limiter");
 
 // ============================================================================
 // Types
@@ -91,7 +91,7 @@ export class RateLimiterService {
       failOpen: true,
       defaultWindowMs: 60000, // 1 minute
       defaultMaxRequests: 100,
-      bypassRoles: ['global-admin', 'system'],
+      bypassRoles: ["global-admin", "system"],
       tenantLimits: {
         [TenantTier.STARTER]: { windowMs: 60000, maxRequests: 100 },
         [TenantTier.BRONZE]: { windowMs: 60000, maxRequests: 500 },
@@ -101,21 +101,21 @@ export class RateLimiterService {
       },
       endpointLimits: {
         // Specific endpoint overrides
-        'graphql:mutation': {
+        "graphql:mutation": {
           [TenantTier.STARTER]: { windowMs: 60000, maxRequests: 50 },
           [TenantTier.BRONZE]: { windowMs: 60000, maxRequests: 200 },
           [TenantTier.SILVER]: { windowMs: 60000, maxRequests: 500 },
           [TenantTier.GOLD]: { windowMs: 60000, maxRequests: 2000 },
           [TenantTier.ENTERPRISE]: { windowMs: 60000, maxRequests: 5000 },
         },
-        'export:bulk': {
+        "export:bulk": {
           [TenantTier.STARTER]: { windowMs: 3600000, maxRequests: 5 },
           [TenantTier.BRONZE]: { windowMs: 3600000, maxRequests: 20 },
           [TenantTier.SILVER]: { windowMs: 3600000, maxRequests: 50 },
           [TenantTier.GOLD]: { windowMs: 3600000, maxRequests: 200 },
           [TenantTier.ENTERPRISE]: { windowMs: 3600000, maxRequests: 1000 },
         },
-        'copilot:query': {
+        "copilot:query": {
           [TenantTier.STARTER]: { windowMs: 60000, maxRequests: 10 },
           [TenantTier.BRONZE]: { windowMs: 60000, maxRequests: 50 },
           [TenantTier.SILVER]: { windowMs: 60000, maxRequests: 100 },
@@ -126,7 +126,7 @@ export class RateLimiterService {
       ...config,
     };
 
-    logger.info('RateLimiterService initialized', {
+    logger.info("RateLimiterService initialized", {
       enabled: this.config.enabled,
       failOpen: this.config.failOpen,
     });
@@ -154,7 +154,7 @@ export class RateLimiterService {
 
     // Check for bypass roles
     if (userRoles?.some((role) => this.config.bypassRoles.includes(role))) {
-      logger.debug('Rate limit bypassed due to role', { tenantId, endpoint });
+      logger.debug("Rate limit bypassed due to role", { tenantId, endpoint });
       return this.allowResult(Infinity);
     }
 
@@ -169,7 +169,7 @@ export class RateLimiterService {
       this.updateMetrics(tenantId, endpoint, result.allowed);
 
       if (!result.allowed) {
-        logger.warn('Rate limit exceeded', {
+        logger.warn("Rate limit exceeded", {
           tenantId,
           endpoint,
           remaining: result.remaining,
@@ -183,7 +183,7 @@ export class RateLimiterService {
 
       return result;
     } catch (error) {
-      logger.error('Rate limiter error', {
+      logger.error("Rate limiter error", {
         error: error instanceof Error ? error.message : String(error),
         tenantId,
         endpoint,
@@ -224,7 +224,7 @@ export class RateLimiterService {
     if (endpoint) {
       const key = this.getBucketKey(tenantId, endpoint);
       this.buckets.delete(key);
-      logger.info('Rate limit reset', { tenantId, endpoint });
+      logger.info("Rate limit reset", { tenantId, endpoint });
     } else {
       // Reset all limits for tenant
       for (const key of this.buckets.keys()) {
@@ -232,7 +232,7 @@ export class RateLimiterService {
           this.buckets.delete(key);
         }
       }
-      logger.info('All rate limits reset for tenant', { tenantId });
+      logger.info("All rate limits reset for tenant", { tenantId });
     }
   }
 
@@ -243,11 +243,7 @@ export class RateLimiterService {
   /**
    * Get current rate limit status for a tenant
    */
-  async getStatus(
-    tenantId: string,
-    endpoint: string,
-    tier: TenantTier
-  ): Promise<RateLimitResult> {
+  async getStatus(tenantId: string, endpoint: string, tier: TenantTier): Promise<RateLimitResult> {
     const config = this.getConfigForEndpoint(endpoint, tier);
     const bucketKey = this.getBucketKey(tenantId, endpoint);
     const bucket = this.buckets.get(bucketKey);
@@ -298,32 +294,25 @@ export class RateLimiterService {
    */
   updateConfig(config: Partial<RateLimiterConfig>): void {
     this.config = { ...this.config, ...config };
-    logger.info('Rate limiter config updated', { config });
+    logger.info("Rate limiter config updated", { config });
   }
 
   /**
    * Update endpoint-specific limits
    */
-  updateEndpointLimit(
-    endpoint: string,
-    tier: TenantTier,
-    config: RateLimitConfig
-  ): void {
+  updateEndpointLimit(endpoint: string, tier: TenantTier, config: RateLimitConfig): void {
     if (!this.config.endpointLimits[endpoint]) {
       this.config.endpointLimits[endpoint] = {};
     }
     this.config.endpointLimits[endpoint][tier] = config;
-    logger.info('Endpoint limit updated', { endpoint, tier, config });
+    logger.info("Endpoint limit updated", { endpoint, tier, config });
   }
 
   // ============================================================================
   // Private Methods
   // ============================================================================
 
-  private getConfigForEndpoint(
-    endpoint: string,
-    tier: TenantTier
-  ): RateLimitConfig {
+  private getConfigForEndpoint(endpoint: string, tier: TenantTier): RateLimitConfig {
     // Check for endpoint-specific config
     const endpointConfig = this.config.endpointLimits[endpoint];
     if (endpointConfig && endpointConfig[tier]) {
@@ -331,10 +320,12 @@ export class RateLimiterService {
     }
 
     // Fall back to tier-based config
-    return this.config.tenantLimits[tier] || {
-      windowMs: this.config.defaultWindowMs,
-      maxRequests: this.config.defaultMaxRequests,
-    };
+    return (
+      this.config.tenantLimits[tier] || {
+        windowMs: this.config.defaultWindowMs,
+        maxRequests: this.config.defaultMaxRequests,
+      }
+    );
   }
 
   private getBucketKey(tenantId: string, endpoint: string): string {
@@ -357,10 +348,7 @@ export class RateLimiterService {
     return bucket;
   }
 
-  private tryAcquireToken(
-    bucket: TokenBucket,
-    config: RateLimitConfig
-  ): RateLimitResult {
+  private tryAcquireToken(bucket: TokenBucket, config: RateLimitConfig): RateLimitResult {
     // Refill tokens based on elapsed time
     this.refillTokens(bucket, config);
 
@@ -404,11 +392,7 @@ export class RateLimiterService {
     }
   }
 
-  private updateMetrics(
-    tenantId: string,
-    endpoint: string,
-    allowed: boolean
-  ): void {
+  private updateMetrics(tenantId: string, endpoint: string, allowed: boolean): void {
     const key = this.getBucketKey(tenantId, endpoint);
     let metrics = this.metrics.get(key);
 
@@ -433,7 +417,7 @@ export class RateLimiterService {
   private emitBlockedMetric(tenantId: string, endpoint: string): void {
     // In production, this would emit to Prometheus
     // For now, just log
-    logger.info('METRIC: companyos_rate_limit_blocks_total', {
+    logger.info("METRIC: companyos_rate_limit_blocks_total", {
       labels: { tenant_id: tenantId, endpoint },
     });
   }
@@ -467,7 +451,7 @@ export class RateLimiterService {
       }
     }
 
-    logger.debug('Rate limiter bucket cleanup completed', {
+    logger.debug("Rate limiter bucket cleanup completed", {
       remainingBuckets: this.buckets.size,
     });
   }
@@ -476,9 +460,7 @@ export class RateLimiterService {
 // Export singleton
 let rateLimiterInstance: RateLimiterService | null = null;
 
-export function getRateLimiterService(
-  config?: Partial<RateLimiterConfig>
-): RateLimiterService {
+export function getRateLimiterService(config?: Partial<RateLimiterConfig>): RateLimiterService {
   if (!rateLimiterInstance) {
     rateLimiterInstance = new RateLimiterService(config);
   }

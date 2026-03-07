@@ -2,7 +2,7 @@
  * TechnologyTracker - Advanced Technology Monitoring and Assessment
  */
 
-import { TechnologyTrend, TechnologyBreakthrough, ThreatCategory } from './types.js';
+import { TechnologyTrend, TechnologyBreakthrough, ThreatCategory } from "./types.js";
 
 export interface TechnologyDomain {
   name: string;
@@ -189,7 +189,7 @@ export class TechnologyTracker {
     title: string,
     description: string,
     organization: string,
-    significance: TechnologyBreakthrough['significance']
+    significance: TechnologyBreakthrough["significance"]
   ): TechnologyBreakthrough {
     const breakthrough: TechnologyBreakthrough = {
       id: `breakthrough-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
@@ -211,7 +211,7 @@ export class TechnologyTracker {
     let breakthroughs = Array.from(this.breakthroughs.values());
 
     if (since) {
-      breakthroughs = breakthroughs.filter(b => b.date >= since);
+      breakthroughs = breakthroughs.filter((b) => b.date >= since);
     }
 
     return breakthroughs.sort((a, b) => b.date.getTime() - a.date.getTime());
@@ -220,18 +220,29 @@ export class TechnologyTracker {
   // Private initialization methods
 
   private initializeDomains(): void {
-    this.domains.set('artificial-intelligence', {
-      name: 'Artificial Intelligence',
-      subdomains: ['deep-learning', 'reinforcement-learning', 'natural-language-processing', 'computer-vision', 'robotics'],
-      keyMetrics: ['model-size', 'training-efficiency', 'inference-speed', 'accuracy'],
-      criticalIndicators: ['agi-progress', 'autonomous-weapons', 'deepfake-capability'],
+    this.domains.set("artificial-intelligence", {
+      name: "Artificial Intelligence",
+      subdomains: [
+        "deep-learning",
+        "reinforcement-learning",
+        "natural-language-processing",
+        "computer-vision",
+        "robotics",
+      ],
+      keyMetrics: ["model-size", "training-efficiency", "inference-speed", "accuracy"],
+      criticalIndicators: ["agi-progress", "autonomous-weapons", "deepfake-capability"],
     });
 
-    this.domains.set('quantum-computing', {
-      name: 'Quantum Computing',
-      subdomains: ['quantum-algorithms', 'quantum-hardware', 'quantum-error-correction', 'quantum-cryptography'],
-      keyMetrics: ['qubit-count', 'gate-fidelity', 'coherence-time', 'quantum-volume'],
-      criticalIndicators: ['cryptographic-relevance', 'quantum-supremacy', 'fault-tolerance'],
+    this.domains.set("quantum-computing", {
+      name: "Quantum Computing",
+      subdomains: [
+        "quantum-algorithms",
+        "quantum-hardware",
+        "quantum-error-correction",
+        "quantum-cryptography",
+      ],
+      keyMetrics: ["qubit-count", "gate-fidelity", "coherence-time", "quantum-volume"],
+      criticalIndicators: ["cryptographic-relevance", "quantum-supremacy", "fault-tolerance"],
     });
 
     // Add more domain initializations...
@@ -240,103 +251,103 @@ export class TechnologyTracker {
   // Private tracking methods (stubs for integration)
 
   private async assessAGIProgress(): Promise<TechnologyTrend> {
-    return this.createTrendStub('AGI Progress', 'artificial-intelligence');
+    return this.createTrendStub("AGI Progress", "artificial-intelligence");
   }
 
   private async trackAdversarialAI(): Promise<TechnologyTrend> {
-    return this.createTrendStub('Adversarial AI', 'artificial-intelligence');
+    return this.createTrendStub("Adversarial AI", "artificial-intelligence");
   }
 
   private async monitorAIAlignment(): Promise<TechnologyTrend> {
-    return this.createTrendStub('AI Alignment', 'artificial-intelligence');
+    return this.createTrendStub("AI Alignment", "artificial-intelligence");
   }
 
   private async trackAutonomousSystems(): Promise<TechnologyTrend> {
-    return this.createTrendStub('Autonomous Systems', 'artificial-intelligence');
+    return this.createTrendStub("Autonomous Systems", "artificial-intelligence");
   }
 
   private async monitorQubitScaling(): Promise<TechnologyTrend> {
-    return this.createTrendStub('Qubit Scaling', 'quantum-computing');
+    return this.createTrendStub("Qubit Scaling", "quantum-computing");
   }
 
   private async trackQuantumAlgorithms(): Promise<TechnologyTrend> {
-    return this.createTrendStub('Quantum Algorithms', 'quantum-computing');
+    return this.createTrendStub("Quantum Algorithms", "quantum-computing");
   }
 
   private async monitorQuantumCryptography(): Promise<TechnologyTrend> {
-    return this.createTrendStub('Quantum Cryptography', 'quantum-computing');
+    return this.createTrendStub("Quantum Cryptography", "quantum-computing");
   }
 
   private async trackQuantumSensing(): Promise<TechnologyTrend> {
-    return this.createTrendStub('Quantum Sensing', 'quantum-computing');
+    return this.createTrendStub("Quantum Sensing", "quantum-computing");
   }
 
   private async monitorGeneEditing(): Promise<TechnologyTrend> {
-    return this.createTrendStub('Gene Editing', 'biotechnology');
+    return this.createTrendStub("Gene Editing", "biotechnology");
   }
 
   private async trackSyntheticBiology(): Promise<TechnologyTrend> {
-    return this.createTrendStub('Synthetic Biology', 'biotechnology');
+    return this.createTrendStub("Synthetic Biology", "biotechnology");
   }
 
   private async assessBioweaponRisks(): Promise<TechnologyTrend> {
-    return this.createTrendStub('Bioweapon Risks', 'biotechnology');
+    return this.createTrendStub("Bioweapon Risks", "biotechnology");
   }
 
   private async trackPersonalizedMedicine(): Promise<TechnologyTrend> {
-    return this.createTrendStub('Personalized Medicine', 'biotechnology');
+    return this.createTrendStub("Personalized Medicine", "biotechnology");
   }
 
   private async trackNanomaterials(): Promise<TechnologyTrend> {
-    return this.createTrendStub('Nanomaterials', 'nanotechnology');
+    return this.createTrendStub("Nanomaterials", "nanotechnology");
   }
 
   private async monitorMolecularManufacturing(): Promise<TechnologyTrend> {
-    return this.createTrendStub('Molecular Manufacturing', 'nanotechnology');
+    return this.createTrendStub("Molecular Manufacturing", "nanotechnology");
   }
 
   private async trackNanoSensors(): Promise<TechnologyTrend> {
-    return this.createTrendStub('Nano Sensors', 'nanotechnology');
+    return this.createTrendStub("Nano Sensors", "nanotechnology");
   }
 
   private async monitorSatelliteTech(): Promise<TechnologyTrend> {
-    return this.createTrendStub('Satellite Technologies', 'space-capabilities');
+    return this.createTrendStub("Satellite Technologies", "space-capabilities");
   }
 
   private async trackASATWeapons(): Promise<TechnologyTrend> {
-    return this.createTrendStub('ASAT Weapons', 'space-capabilities');
+    return this.createTrendStub("ASAT Weapons", "space-capabilities");
   }
 
   private async monitorSpaceISR(): Promise<TechnologyTrend> {
-    return this.createTrendStub('Space-based ISR', 'space-capabilities');
+    return this.createTrendStub("Space-based ISR", "space-capabilities");
   }
 
   private async trackOnOrbitServicing(): Promise<TechnologyTrend> {
-    return this.createTrendStub('On-Orbit Servicing', 'space-capabilities');
+    return this.createTrendStub("On-Orbit Servicing", "space-capabilities");
   }
 
   private async trackHighEnergyLasers(): Promise<TechnologyTrend> {
-    return this.createTrendStub('High-Energy Lasers', 'directed-energy-weapons');
+    return this.createTrendStub("High-Energy Lasers", "directed-energy-weapons");
   }
 
   private async monitorHighPowerMicrowaves(): Promise<TechnologyTrend> {
-    return this.createTrendStub('High-Power Microwaves', 'directed-energy-weapons');
+    return this.createTrendStub("High-Power Microwaves", "directed-energy-weapons");
   }
 
   private async trackParticleBeams(): Promise<TechnologyTrend> {
-    return this.createTrendStub('Particle Beams', 'directed-energy-weapons');
+    return this.createTrendStub("Particle Beams", "directed-energy-weapons");
   }
 
   private async monitorHypersonicGlideVehicles(): Promise<TechnologyTrend> {
-    return this.createTrendStub('Hypersonic Glide Vehicles', 'hypersonic-technologies');
+    return this.createTrendStub("Hypersonic Glide Vehicles", "hypersonic-technologies");
   }
 
   private async trackHypersonicCruiseMissiles(): Promise<TechnologyTrend> {
-    return this.createTrendStub('Hypersonic Cruise Missiles', 'hypersonic-technologies');
+    return this.createTrendStub("Hypersonic Cruise Missiles", "hypersonic-technologies");
   }
 
   private async monitorHypersonicDetection(): Promise<TechnologyTrend> {
-    return this.createTrendStub('Hypersonic Detection', 'hypersonic-technologies');
+    return this.createTrendStub("Hypersonic Detection", "hypersonic-technologies");
   }
 
   private createTrendStub(name: string, domain: string): TechnologyTrend {
@@ -344,10 +355,10 @@ export class TechnologyTracker {
       id: `trend-${domain}-${name}-${Date.now()}`,
       name,
       domain,
-      trajectory: 'steady',
+      trajectory: "steady",
       maturityLevel: 5,
       adoptionRate: 0,
-      investmentLevel: 'medium',
+      investmentLevel: "medium",
       keyPlayers: [],
       breakthroughs: [],
       convergencePoints: [],

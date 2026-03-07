@@ -86,21 +86,21 @@ jobs:
 ```tsx
 // webapp/src/app/TestIds.ts
 export const TID = {
-  LOGIN_BTN: 'login-btn',
-  SIGNOUT_BTN: 'signout-btn',
-  NL_INPUT: 'nl-input',
-  NL_PREVIEW_BTN: 'nl-preview-btn',
-  ANALYTICS_RUN_BTN: 'analytics-run-btn',
-  CASE_CREATE_BTN: 'case-create-btn',
-  CASE_NAME_INPUT: 'case-name-input',
-  CASE_SAVE_BTN: 'case-save-btn',
-  REPORT_OPEN_BTN: 'report-open-btn',
-  REPORT_RENDER_BTN: 'report-render-btn',
-  XAI_TAB: 'xai-tab',
-  XAI_EXPLAIN_BTN: 'xai-explain-btn',
-  WALLET_ISSUE_BTN: 'wallet-issue-btn',
-  POLICY_MENU_BTN: 'policy-menu-btn',
-  DSAR_BTN: 'dsar-btn',
+  LOGIN_BTN: "login-btn",
+  SIGNOUT_BTN: "signout-btn",
+  NL_INPUT: "nl-input",
+  NL_PREVIEW_BTN: "nl-preview-btn",
+  ANALYTICS_RUN_BTN: "analytics-run-btn",
+  CASE_CREATE_BTN: "case-create-btn",
+  CASE_NAME_INPUT: "case-name-input",
+  CASE_SAVE_BTN: "case-save-btn",
+  REPORT_OPEN_BTN: "report-open-btn",
+  REPORT_RENDER_BTN: "report-render-btn",
+  XAI_TAB: "xai-tab",
+  XAI_EXPLAIN_BTN: "xai-explain-btn",
+  WALLET_ISSUE_BTN: "wallet-issue-btn",
+  POLICY_MENU_BTN: "policy-menu-btn",
+  DSAR_BTN: "dsar-btn",
 } as const;
 ```
 
@@ -137,13 +137,10 @@ Usage example:
 
 ```ts
 // webapp/tests/stage/fixtures/selectors.ts
-import fs from 'fs';
-import path from 'path';
-const mapPath = path.resolve(__dirname, '..', 'selector-map.json');
-export const SEL = JSON.parse(fs.readFileSync(mapPath, 'utf8')) as Record<
-  string,
-  string
->;
+import fs from "fs";
+import path from "path";
+const mapPath = path.resolve(__dirname, "..", "selector-map.json");
+export const SEL = JSON.parse(fs.readFileSync(mapPath, "utf8")) as Record<string, string>;
 ```
 
 Update tests to import `SEL.loginButton` etc. (minimal changes).
@@ -154,14 +151,14 @@ Update tests to import `SEL.loginButton` etc. (minimal changes).
 // webapp/.eslintrc.cjs (snippet)
 module.exports = {
   rules: {
-    'jsx-a11y/no-static-element-interactions': 'off',
-    'testing-library/await-async-utils': 'off',
+    "jsx-a11y/no-static-element-interactions": "off",
+    "testing-library/await-async-utils": "off",
   },
   overrides: [
     {
-      files: ['src/**/*.tsx'],
-      plugins: ['custom-testid'],
-      rules: { 'custom-testid/require-testid': 'warn' },
+      files: ["src/**/*.tsx"],
+      plugins: ["custom-testid"],
+      rules: { "custom-testid/require-testid": "warn" },
     },
   ],
 };
@@ -188,7 +185,7 @@ Docs (`docs/INDEX.md`) add section: **Staging E2E after Promotion** with links t
 
 ```ts
 // services/gateway-graphql/src/rateLimit.ts
-import rateLimit from 'express-rate-limit';
+import rateLimit from "express-rate-limit";
 export const limiter = rateLimit({
   windowMs: 60_000,
   max: 600,
@@ -201,7 +198,7 @@ export const limiter = rateLimit({
 Add security headers (helmet):
 
 ```ts
-import helmet from 'helmet';
+import helmet from "helmet";
 app.use(helmet({ contentSecurityPolicy: false }));
 ```
 
@@ -232,7 +229,7 @@ spec:
   action: pod-kill
   mode: one
   selector: { labelSelectors: { app: gateway } }
-  duration: '1m'
+  duration: "1m"
 ```
 
 ### 4.4 Cost exporter integration (Kubecost)
@@ -259,8 +256,8 @@ Pre-commit hooks: run ESLint, prettier, jest on changed packages.
 
 ```ts
 // webapp/src/i18n.ts
-import i18next from 'i18next';
-await i18next.init({ lng: 'en', resources: { en: { translation: {} } } });
+import i18next from "i18next";
+await i18next.init({ lng: "en", resources: { en: { translation: {} } } });
 ```
 
 ### 4.8 Status page synthetic

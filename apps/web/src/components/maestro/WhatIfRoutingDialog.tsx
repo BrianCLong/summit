@@ -298,7 +298,7 @@ export default function WhatIfRoutingDialog({
                       <XAxis dataKey="name" tick={{ fontSize: 12 }} />
                       <YAxis />
                       <Tooltip
-                        formatter={(value) => [
+                        formatter={value => [
                           `${Number(value).toFixed(2)}`,
                           'Score',
                         ]}

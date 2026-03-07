@@ -8,37 +8,26 @@
  *  - Any section has empty or placeholder content.
  */
 
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
-const WHITEPAPER_PATH = path.join(
-  process.cwd(),
-  'docs',
-  'whitepaper',
-  'summit-architecture.md',
-);
+const WHITEPAPER_PATH = path.join(process.cwd(), "docs", "whitepaper", "summit-architecture.md");
 
 const REQUIRED_SECTIONS = [
-  'Executive Summary',
-  'System Overview',
-  'Governance by Design',
-  'Security & Supply Chain Integrity',
-  'Multi-Tenant Isolation & Safety',
-  'LLM Governance & Cost Control',
-  'Observability & Reliability',
-  'Auditability & Evidence',
-  'Operational Control Plane',
-  'Threat Model & Limits',
-  'Future Roadmap (Non-Speculative)',
+  "Executive Summary",
+  "System Overview",
+  "Governance by Design",
+  "Security & Supply Chain Integrity",
+  "Multi-Tenant Isolation & Safety",
+  "LLM Governance & Cost Control",
+  "Observability & Reliability",
+  "Auditability & Evidence",
+  "Operational Control Plane",
+  "Threat Model & Limits",
+  "Future Roadmap (Non-Speculative)",
 ];
 
-const PLACEHOLDER_PATTERNS = [
-  /TBD/i,
-  /TODO/i,
-  /lorem ipsum/i,
-  /coming soon/i,
-  /placeholder/i,
-];
+const PLACEHOLDER_PATTERNS = [/TBD/i, /TODO/i, /lorem ipsum/i, /coming soon/i, /placeholder/i];
 
 function fail(message) {
   console.error(`GA whitepaper validation failed: ${message}`);
@@ -46,14 +35,11 @@ function fail(message) {
 }
 
 function escapeRegExp(str) {
-  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 function getSectionContent(markdown, heading) {
-  const headingPattern = new RegExp(
-    `^#{1,6}\\s*${escapeRegExp(heading)}\\s*$`,
-    'im',
-  );
+  const headingPattern = new RegExp(`^#{1,6}\\s*${escapeRegExp(heading)}\\s*$`, "im");
   const match = markdown.match(headingPattern);
   if (!match || match.index === undefined) {
     return null;
@@ -62,8 +48,7 @@ function getSectionContent(markdown, heading) {
   const start = match.index + match[0].length;
   const rest = markdown.slice(start);
   const nextHeadingIndex = rest.search(/^#{1,6}\s+/m);
-  const sectionText =
-    nextHeadingIndex === -1 ? rest : rest.slice(0, nextHeadingIndex);
+  const sectionText = nextHeadingIndex === -1 ? rest : rest.slice(0, nextHeadingIndex);
   return sectionText.trim();
 }
 
@@ -72,13 +57,13 @@ function main() {
     fail(`whitepaper missing at ${WHITEPAPER_PATH}`);
   }
 
-  const content = fs.readFileSync(WHITEPAPER_PATH, 'utf8');
+  const content = fs.readFileSync(WHITEPAPER_PATH, "utf8");
   if (!content.trim()) {
-    fail('whitepaper is empty');
+    fail("whitepaper is empty");
   }
 
   if (content.trim().length < 500) {
-    fail('whitepaper content too short to satisfy GA evidence requirements');
+    fail("whitepaper content too short to satisfy GA evidence requirements");
   }
 
   for (const pattern of PLACEHOLDER_PATTERNS) {
@@ -111,16 +96,14 @@ function main() {
   }
 
   if (missing.length) {
-    fail(`missing required sections: ${missing.join(', ')}`);
+    fail(`missing required sections: ${missing.join(", ")}`);
   }
 
   if (emptySections.length) {
-    fail(
-      `sections lack substantive content: ${emptySections.join(', ')}`,
-    );
+    fail(`sections lack substantive content: ${emptySections.join(", ")}`);
   }
 
-  console.log('GA whitepaper validation passed');
+  console.log("GA whitepaper validation passed");
 }
 
 main();

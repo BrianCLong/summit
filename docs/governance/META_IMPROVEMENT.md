@@ -3,7 +3,6 @@
 > Evidence-IDs: EVD-PLACEHOLDER
 > Status: active
 
-
 # Meta-Improvement Framework
 
 This document defines the process for proposing, evaluating, and implementing systemic improvements to the Summit Platform. This framework is designed to maximize **leverage**—getting more outcome per unit of effort.

@@ -1,5 +1,5 @@
-import React, { useMemo } from 'react';
-import { FixedSizeList as List } from 'react-window';
+import React, { useMemo } from "react";
+import { FixedSizeList as List } from "react-window";
 import {
   Box,
   Paper,
@@ -10,8 +10,8 @@ import {
   ListItemButton,
   ListItemText,
   Divider,
-} from '@mui/material';
-import { MoreVert, OpenInNew } from '@mui/icons-material';
+} from "@mui/material";
+import { MoreVert, OpenInNew } from "@mui/icons-material";
 
 interface GraphEntity {
   id: string;
@@ -55,7 +55,7 @@ function EntityItem({
               size="small"
               onClick={(e) => {
                 e.stopPropagation();
-                data.onAction(entity, 'open');
+                data.onAction(entity, "open");
               }}
             >
               <OpenInNew fontSize="small" />
@@ -64,7 +64,7 @@ function EntityItem({
               size="small"
               onClick={(e) => {
                 e.stopPropagation();
-                data.onAction(entity, 'menu');
+                data.onAction(entity, "menu");
               }}
             >
               <MoreVert fontSize="small" />
@@ -75,7 +75,7 @@ function EntityItem({
         <ListItemButton onClick={() => data.onSelect(entity)} sx={{ px: 0 }}>
           <ListItemText
             primary={
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                 <Typography variant="subtitle2" noWrap>
                   {entity.label}
                 </Typography>
@@ -84,14 +84,14 @@ function EntityItem({
                   label={entity.type}
                   color="primary"
                   variant="outlined"
-                  sx={{ fontSize: '0.7rem', height: 18 }}
+                  sx={{ fontSize: "0.7rem", height: 18 }}
                 />
                 {entity.score && (
                   <Chip
                     size="small"
                     label={`${Math.round(entity.score * 100)}%`}
                     color="secondary"
-                    sx={{ fontSize: '0.7rem', height: 18 }}
+                    sx={{ fontSize: "0.7rem", height: 18 }}
                   />
                 )}
               </Box>
@@ -101,7 +101,7 @@ function EntityItem({
                 {Object.entries(entity.properties)
                   .slice(0, 2)
                   .map(([key, value]) => `${key}: ${value}`)
-                  .join(' • ')}
+                  .join(" • ")}
               </Typography>
             }
           />
@@ -125,15 +125,12 @@ export function VirtualizedDetailPanel({
       onSelect: onEntitySelect,
       onAction: onEntityAction,
     }),
-    [entities, onEntitySelect, onEntityAction],
+    [entities, onEntitySelect, onEntityAction]
   );
 
   return (
-    <Paper
-      elevation={1}
-      sx={{ height, display: 'flex', flexDirection: 'column' }}
-    >
-      <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
+    <Paper elevation={1} sx={{ height, display: "flex", flexDirection: "column" }}>
+      <Box sx={{ p: 2, borderBottom: 1, borderColor: "divider" }}>
         <Typography variant="h6">
           Entity Details
           <Chip size="small" label={entities.length} sx={{ ml: 1 }} />
@@ -141,10 +138,8 @@ export function VirtualizedDetailPanel({
       </Box>
 
       {entities.length === 0 ? (
-        <Box sx={{ p: 2, textAlign: 'center', color: 'text.secondary' }}>
-          <Typography variant="body2">
-            Select entities to view details
-          </Typography>
+        <Box sx={{ p: 2, textAlign: "center", color: "text.secondary" }}>
+          <Typography variant="body2">Select entities to view details</Typography>
         </Box>
       ) : (
         <List
@@ -159,7 +154,7 @@ export function VirtualizedDetailPanel({
       )}
 
       {entities.length > 100 && (
-        <Box sx={{ p: 1, bgcolor: 'grey.50', textAlign: 'center' }}>
+        <Box sx={{ p: 1, bgcolor: "grey.50", textAlign: "center" }}>
           <Typography variant="caption" color="text.secondary">
             Virtualized • {entities.length} entities
           </Typography>

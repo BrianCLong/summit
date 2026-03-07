@@ -16,46 +16,46 @@ export interface ElectionThreatSignal {
 }
 
 export type ThreatType =
-  | 'VOTER_SUPPRESSION'
-  | 'INFRASTRUCTURE_ATTACK'
-  | 'DISINFORMATION_CAMPAIGN'
-  | 'FOREIGN_INTERFERENCE'
-  | 'COORDINATED_HARASSMENT'
-  | 'DEEPFAKE_INJECTION'
-  | 'POLL_WORKER_INTIMIDATION'
-  | 'BALLOT_MANIPULATION'
-  | 'REGISTRATION_ATTACK'
-  | 'RESULTS_MANIPULATION'
-  | 'PERCEPTION_HACK'
-  | 'LEGITIMACY_ATTACK';
+  | "VOTER_SUPPRESSION"
+  | "INFRASTRUCTURE_ATTACK"
+  | "DISINFORMATION_CAMPAIGN"
+  | "FOREIGN_INTERFERENCE"
+  | "COORDINATED_HARASSMENT"
+  | "DEEPFAKE_INJECTION"
+  | "POLL_WORKER_INTIMIDATION"
+  | "BALLOT_MANIPULATION"
+  | "REGISTRATION_ATTACK"
+  | "RESULTS_MANIPULATION"
+  | "PERCEPTION_HACK"
+  | "LEGITIMACY_ATTACK";
 
 export type ThreatVector =
-  | 'SOCIAL_MEDIA'
-  | 'CYBER_INFRASTRUCTURE'
-  | 'PHYSICAL'
-  | 'LEGAL_PROCEDURAL'
-  | 'MEDIA_NARRATIVE'
-  | 'GRASSROOTS_ASTROTURF';
+  | "SOCIAL_MEDIA"
+  | "CYBER_INFRASTRUCTURE"
+  | "PHYSICAL"
+  | "LEGAL_PROCEDURAL"
+  | "MEDIA_NARRATIVE"
+  | "GRASSROOTS_ASTROTURF";
 
-export type SeverityLevel = 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW' | 'INFORMATIONAL';
+export type SeverityLevel = "CRITICAL" | "HIGH" | "MEDIUM" | "LOW" | "INFORMATIONAL";
 
 export interface TemporalContext {
   phase: ElectionPhase;
   daysToElection: number;
   timeWindow: TimeWindow;
-  trendDirection: 'ESCALATING' | 'STABLE' | 'DECLINING';
+  trendDirection: "ESCALATING" | "STABLE" | "DECLINING";
   velocity: number;
 }
 
 export type ElectionPhase =
-  | 'PRE_REGISTRATION'
-  | 'REGISTRATION'
-  | 'EARLY_VOTING'
-  | 'CAMPAIGN'
-  | 'ELECTION_DAY'
-  | 'COUNTING'
-  | 'CERTIFICATION'
-  | 'POST_CERTIFICATION';
+  | "PRE_REGISTRATION"
+  | "REGISTRATION"
+  | "EARLY_VOTING"
+  | "CAMPAIGN"
+  | "ELECTION_DAY"
+  | "COUNTING"
+  | "CERTIFICATION"
+  | "POST_CERTIFICATION";
 
 export interface GeospatialContext {
   jurisdictions: string[];
@@ -81,7 +81,7 @@ export interface AttributionAssessment {
 
 export interface ActorProfile {
   id: string;
-  type: 'STATE' | 'NON_STATE' | 'DOMESTIC' | 'HYBRID' | 'UNKNOWN';
+  type: "STATE" | "NON_STATE" | "DOMESTIC" | "HYBRID" | "UNKNOWN";
   name?: string;
   capabilities: string[];
   historicalTTPs: string[];
@@ -89,12 +89,12 @@ export interface ActorProfile {
 }
 
 export type AttributionMethod =
-  | 'TECHNICAL_FORENSICS'
-  | 'BEHAVIORAL_ANALYSIS'
-  | 'LINGUISTIC_FINGERPRINT'
-  | 'INFRASTRUCTURE_CORRELATION'
-  | 'OPERATIONAL_PATTERN'
-  | 'MULTI_INT_FUSION';
+  | "TECHNICAL_FORENSICS"
+  | "BEHAVIORAL_ANALYSIS"
+  | "LINGUISTIC_FINGERPRINT"
+  | "INFRASTRUCTURE_CORRELATION"
+  | "OPERATIONAL_PATTERN"
+  | "MULTI_INT_FUSION";
 
 export interface AttributionIndicator {
   type: string;
@@ -121,13 +121,13 @@ export interface Evidence {
 }
 
 export type EvidenceType =
-  | 'SOCIAL_POST'
-  | 'NETWORK_TRAFFIC'
-  | 'INFRASTRUCTURE_LOG'
-  | 'WITNESS_REPORT'
-  | 'DOCUMENT'
-  | 'MEDIA_ARTIFACT'
-  | 'TECHNICAL_INDICATOR';
+  | "SOCIAL_POST"
+  | "NETWORK_TRAFFIC"
+  | "INFRASTRUCTURE_LOG"
+  | "WITNESS_REPORT"
+  | "DOCUMENT"
+  | "MEDIA_ARTIFACT"
+  | "TECHNICAL_INDICATOR";
 
 export interface Mitigation {
   action: string;

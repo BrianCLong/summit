@@ -2,7 +2,7 @@ name: Infra Drift Risk
 
 on:
   pull_request:
-    branches: [ main ]
+    branches: [main]
     paths:
       - "infra/**"
       - ".github/workflows/infra-drift.yml"

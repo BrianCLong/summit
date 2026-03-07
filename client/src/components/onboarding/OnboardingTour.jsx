@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from "react";
 import {
   Box,
   Dialog,
@@ -30,7 +30,7 @@ import {
   Checkbox,
   Tooltip,
   Collapse,
-} from '@mui/material';
+} from "@mui/material";
 import {
   Close,
   NavigateNext,
@@ -57,195 +57,188 @@ import {
   TouchApp,
   Visibility,
   VolumeUp,
-} from '@mui/icons-material';
-import { useSelector, useDispatch } from 'react-redux';
+} from "@mui/icons-material";
+import { useSelector, useDispatch } from "react-redux";
 
 const onboardingSteps = [
   {
-    id: 'welcome',
-    title: 'Welcome to IntelGraph',
-    description:
-      'Your intelligent platform for network analysis and investigation.',
+    id: "welcome",
+    title: "Welcome to IntelGraph",
+    description: "Your intelligent platform for network analysis and investigation.",
     content:
-      'IntelGraph is a powerful platform that combines advanced graph visualization, AI-powered insights, and collaborative tools to help you analyze complex networks and conduct thorough investigations.',
+      "IntelGraph is a powerful platform that combines advanced graph visualization, AI-powered insights, and collaborative tools to help you analyze complex networks and conduct thorough investigations.",
     icon: <Star />,
-    actions: ['Take Tour', 'Skip Tour'],
-    estimatedTime: '10 minutes',
+    actions: ["Take Tour", "Skip Tour"],
+    estimatedTime: "10 minutes",
     keyFeatures: [
-      'Interactive graph visualization',
-      'AI-powered analysis and insights',
-      'Real-time collaboration',
-      'Natural language queries',
-      'Advanced analytics dashboard',
+      "Interactive graph visualization",
+      "AI-powered analysis and insights",
+      "Real-time collaboration",
+      "Natural language queries",
+      "Advanced analytics dashboard",
     ],
   },
   {
-    id: 'navigation',
-    title: 'Navigation & Layout',
-    description: 'Learn how to navigate the platform efficiently.',
+    id: "navigation",
+    title: "Navigation & Layout",
+    description: "Learn how to navigate the platform efficiently.",
     content:
-      'The IntelGraph interface is designed for efficiency. Use the sidebar to access different sections, the top bar for quick actions, and customize your workspace.',
+      "The IntelGraph interface is designed for efficiency. Use the sidebar to access different sections, the top bar for quick actions, and customize your workspace.",
     icon: <Dashboard />,
-    highlightSelectors: ['.MuiDrawer-root', '.MuiAppBar-root'],
+    highlightSelectors: [".MuiDrawer-root", ".MuiAppBar-root"],
     interactiveElements: [
       {
         selector: '[data-tour="sidebar"]',
-        title: 'Sidebar Navigation',
-        description:
-          'Access different sections: Dashboard, Graph Explorer, Analytics, and more.',
+        title: "Sidebar Navigation",
+        description: "Access different sections: Dashboard, Graph Explorer, Analytics, and more.",
       },
       {
         selector: '[data-tour="user-menu"]',
-        title: 'User Menu',
-        description: 'Access your profile, settings, and help resources.',
+        title: "User Menu",
+        description: "Access your profile, settings, and help resources.",
       },
     ],
     tips: [
-      'Use Ctrl+/ to open the command palette',
-      'Click the logo to return to dashboard',
-      'Toggle sidebar with the menu button',
+      "Use Ctrl+/ to open the command palette",
+      "Click the logo to return to dashboard",
+      "Toggle sidebar with the menu button",
     ],
   },
   {
-    id: 'graph-explorer',
-    title: 'Graph Explorer',
-    description: 'Explore and interact with network visualizations.',
+    id: "graph-explorer",
+    title: "Graph Explorer",
+    description: "Explore and interact with network visualizations.",
     content:
-      'The Graph Explorer is the heart of IntelGraph. Visualize complex networks, apply different layouts, and discover patterns in your data.',
+      "The Graph Explorer is the heart of IntelGraph. Visualize complex networks, apply different layouts, and discover patterns in your data.",
     icon: <AccountTree />,
     highlightSelectors: ['[data-tour="graph-container"]'],
     interactiveElements: [
       {
         selector: '[data-tour="graph-controls"]',
-        title: 'Graph Controls',
-        description:
-          'Zoom, pan, center, and apply different layouts to your graph.',
+        title: "Graph Controls",
+        description: "Zoom, pan, center, and apply different layouts to your graph.",
       },
       {
         selector: '[data-tour="node-panel"]',
-        title: 'Entity Details',
-        description:
-          'Click any node to view detailed information and connected entities.',
+        title: "Entity Details",
+        description: "Click any node to view detailed information and connected entities.",
       },
     ],
     keyFeatures: [
-      'Drag and drop to reposition nodes',
-      'Right-click for context menus',
-      'Multiple layout algorithms',
-      'Search and filter capabilities',
+      "Drag and drop to reposition nodes",
+      "Right-click for context menus",
+      "Multiple layout algorithms",
+      "Search and filter capabilities",
     ],
   },
   {
-    id: 'ai-features',
-    title: 'AI-Powered Insights',
-    description: 'Leverage artificial intelligence for advanced analysis.',
+    id: "ai-features",
+    title: "AI-Powered Insights",
+    description: "Leverage artificial intelligence for advanced analysis.",
     content:
-      'IntelGraph uses AI to provide intelligent insights, detect anomalies, recommend connections, and answer natural language queries.',
+      "IntelGraph uses AI to provide intelligent insights, detect anomalies, recommend connections, and answer natural language queries.",
     icon: <Psychology />,
     highlightSelectors: ['[data-tour="ai-panel"]'],
     features: [
       {
-        name: 'Natural Language Queries',
-        description:
-          'Ask questions in plain English like "Show all organizations in New York"',
+        name: "Natural Language Queries",
+        description: 'Ask questions in plain English like "Show all organizations in New York"',
         icon: <Search />,
       },
       {
-        name: 'Anomaly Detection',
-        description:
-          'Automatically identify unusual patterns and relationships',
+        name: "Anomaly Detection",
+        description: "Automatically identify unusual patterns and relationships",
         icon: <Security />,
       },
       {
-        name: 'Smart Recommendations',
-        description:
-          'Get suggestions for related entities and potential connections',
+        name: "Smart Recommendations",
+        description: "Get suggestions for related entities and potential connections",
         icon: <Lightbulb />,
       },
       {
-        name: 'Predictive Analytics',
-        description: 'Forecast trends and predict future network evolution',
+        name: "Predictive Analytics",
+        description: "Forecast trends and predict future network evolution",
         icon: <Timeline />,
       },
     ],
   },
   {
-    id: 'collaboration',
-    title: 'Real-time Collaboration',
-    description: 'Work together with your team in real-time.',
+    id: "collaboration",
+    title: "Real-time Collaboration",
+    description: "Work together with your team in real-time.",
     content:
-      'IntelGraph enables seamless collaboration with features like shared cursors, live comments, user presence indicators, and synchronized views.',
+      "IntelGraph enables seamless collaboration with features like shared cursors, live comments, user presence indicators, and synchronized views.",
     icon: <Group />,
     features: [
-      'Live cursor tracking',
-      'Real-time comments and annotations',
-      'User presence indicators',
-      'Shared investigation workspaces',
-      'Version history and change tracking',
+      "Live cursor tracking",
+      "Real-time comments and annotations",
+      "User presence indicators",
+      "Shared investigation workspaces",
+      "Version history and change tracking",
     ],
   },
   {
-    id: 'analytics',
-    title: 'Analytics Dashboard',
-    description: 'Monitor performance and track insights.',
+    id: "analytics",
+    title: "Analytics Dashboard",
+    description: "Monitor performance and track insights.",
     content:
-      'The analytics dashboard provides comprehensive metrics about your investigations, network statistics, and system performance.',
+      "The analytics dashboard provides comprehensive metrics about your investigations, network statistics, and system performance.",
     icon: <Analytics />,
     highlightSelectors: ['[data-tour="dashboard"]'],
     metrics: [
-      'Network structure statistics',
-      'Investigation progress tracking',
-      'AI insight summaries',
-      'User activity metrics',
-      'Performance indicators',
+      "Network structure statistics",
+      "Investigation progress tracking",
+      "AI insight summaries",
+      "User activity metrics",
+      "Performance indicators",
     ],
   },
   {
-    id: 'keyboard-shortcuts',
-    title: 'Keyboard Shortcuts',
-    description: 'Master keyboard shortcuts for efficiency.',
-    content: 'Speed up your workflow with these essential keyboard shortcuts.',
+    id: "keyboard-shortcuts",
+    title: "Keyboard Shortcuts",
+    description: "Master keyboard shortcuts for efficiency.",
+    content: "Speed up your workflow with these essential keyboard shortcuts.",
     icon: <Keyboard />,
     shortcuts: [
-      { keys: 'Ctrl + /', action: 'Open command palette' },
-      { keys: 'Ctrl + K', action: 'Quick search' },
-      { keys: 'Ctrl + N', action: 'New investigation' },
-      { keys: 'Ctrl + S', action: 'Save current view' },
-      { keys: 'Escape', action: 'Clear selection' },
-      { keys: 'Space', action: 'Center graph' },
-      { keys: 'F', action: 'Fit graph to screen' },
-      { keys: '?', action: 'Show help' },
+      { keys: "Ctrl + /", action: "Open command palette" },
+      { keys: "Ctrl + K", action: "Quick search" },
+      { keys: "Ctrl + N", action: "New investigation" },
+      { keys: "Ctrl + S", action: "Save current view" },
+      { keys: "Escape", action: "Clear selection" },
+      { keys: "Space", action: "Center graph" },
+      { keys: "F", action: "Fit graph to screen" },
+      { keys: "?", action: "Show help" },
     ],
   },
   {
-    id: 'accessibility',
-    title: 'Accessibility Features',
-    description: 'Learn about accessibility and customization options.',
+    id: "accessibility",
+    title: "Accessibility Features",
+    description: "Learn about accessibility and customization options.",
     content:
-      'IntelGraph is designed to be accessible to all users with various accessibility features and customization options.',
+      "IntelGraph is designed to be accessible to all users with various accessibility features and customization options.",
     icon: <Visibility />,
     features: [
-      'Screen reader support',
-      'High contrast mode',
-      'Keyboard navigation',
-      'Text size adjustment',
-      'Reduced motion option',
-      'Voice commands (experimental)',
+      "Screen reader support",
+      "High contrast mode",
+      "Keyboard navigation",
+      "Text size adjustment",
+      "Reduced motion option",
+      "Voice commands (experimental)",
     ],
   },
   {
-    id: 'completion',
+    id: "completion",
     title: "You're Ready!",
-    description: 'Start exploring and analyzing with IntelGraph.',
+    description: "Start exploring and analyzing with IntelGraph.",
     content:
       "Congratulations! You've completed the onboarding tour. You're now ready to start using IntelGraph for your investigations and analysis.",
     icon: <CheckCircle />,
-    actions: ['Start Using IntelGraph', 'Retake Tour'],
+    actions: ["Start Using IntelGraph", "Retake Tour"],
     resources: [
-      { title: 'Documentation', url: '/docs', icon: <Help /> },
-      { title: 'Video Tutorials', url: '/tutorials', icon: <PlayArrow /> },
-      { title: 'Community Forum', url: '/community', icon: <Group /> },
-      { title: 'Support Center', url: '/support', icon: <Help /> },
+      { title: "Documentation", url: "/docs", icon: <Help /> },
+      { title: "Video Tutorials", url: "/tutorials", icon: <PlayArrow /> },
+      { title: "Community Forum", url: "/community", icon: <Group /> },
+      { title: "Support Center", url: "/support", icon: <Help /> },
     ],
   },
 ];
@@ -306,21 +299,21 @@ function OnboardingTour({ open, onClose, autoStart = false }) {
     selectors.forEach((selector) => {
       const elements = document.querySelectorAll(selector);
       elements.forEach((element) => {
-        element.classList.add('tour-highlight');
-        element.style.outline = '3px solid #1976d2';
-        element.style.outlineOffset = '2px';
-        element.style.borderRadius = '4px';
-        element.style.transition = 'all 0.3s ease';
+        element.classList.add("tour-highlight");
+        element.style.outline = "3px solid #1976d2";
+        element.style.outlineOffset = "2px";
+        element.style.borderRadius = "4px";
+        element.style.transition = "all 0.3s ease";
       });
     });
   };
 
   const removeHighlights = () => {
-    const highlighted = document.querySelectorAll('.tour-highlight');
+    const highlighted = document.querySelectorAll(".tour-highlight");
     highlighted.forEach((element) => {
-      element.classList.remove('tour-highlight');
-      element.style.outline = '';
-      element.style.outlineOffset = '';
+      element.classList.remove("tour-highlight");
+      element.style.outline = "";
+      element.style.outlineOffset = "";
     });
   };
 
@@ -344,8 +337,8 @@ function OnboardingTour({ open, onClose, autoStart = false }) {
   const handleComplete = () => {
     setCompletedSteps((prev) => new Set([...prev, activeStep]));
     // Save completion status
-    localStorage.setItem('onboarding_completed', 'true');
-    localStorage.setItem('onboarding_date', new Date().toISOString());
+    localStorage.setItem("onboarding_completed", "true");
+    localStorage.setItem("onboarding_date", new Date().toISOString());
 
     // Dispatch completion event
     // dispatch(completeOnboarding());
@@ -355,7 +348,7 @@ function OnboardingTour({ open, onClose, autoStart = false }) {
   };
 
   const handleSkip = () => {
-    localStorage.setItem('onboarding_skipped', 'true');
+    localStorage.setItem("onboarding_skipped", "true");
     removeHighlights();
     onClose();
   };
@@ -364,7 +357,7 @@ function OnboardingTour({ open, onClose, autoStart = false }) {
 
   const StepContentRenderer = ({ step }) => {
     switch (step.id) {
-      case 'welcome':
+      case "welcome":
         return (
           <Box>
             <Typography variant="body1" paragraph>
@@ -389,7 +382,7 @@ function OnboardingTour({ open, onClose, autoStart = false }) {
           </Box>
         );
 
-      case 'ai-features':
+      case "ai-features":
         return (
           <Box>
             <Typography variant="body1" paragraph>
@@ -401,15 +394,13 @@ function OnboardingTour({ open, onClose, autoStart = false }) {
                   <CardContent>
                     <Box
                       sx={{
-                        display: 'flex',
-                        alignItems: 'center',
+                        display: "flex",
+                        alignItems: "center",
                         gap: 2,
                         mb: 1,
                       }}
                     >
-                      <Avatar sx={{ bgcolor: 'primary.main' }}>
-                        {feature.icon}
-                      </Avatar>
+                      <Avatar sx={{ bgcolor: "primary.main" }}>{feature.icon}</Avatar>
                       <Typography variant="h6">{feature.name}</Typography>
                     </Box>
                     <Typography variant="body2" color="text.secondary">
@@ -422,7 +413,7 @@ function OnboardingTour({ open, onClose, autoStart = false }) {
           </Box>
         );
 
-      case 'keyboard-shortcuts':
+      case "keyboard-shortcuts":
         return (
           <Box>
             <Typography variant="body1" paragraph>
@@ -441,15 +432,15 @@ function OnboardingTour({ open, onClose, autoStart = false }) {
           </Box>
         );
 
-      case 'completion':
+      case "completion":
         return (
-          <Box sx={{ textAlign: 'center' }}>
+          <Box sx={{ textAlign: "center" }}>
             <Avatar
               sx={{
-                bgcolor: 'success.main',
+                bgcolor: "success.main",
                 width: 64,
                 height: 64,
-                mx: 'auto',
+                mx: "auto",
                 mb: 2,
               }}
             >
@@ -463,10 +454,10 @@ function OnboardingTour({ open, onClose, autoStart = false }) {
             </Typography>
             <Box
               sx={{
-                display: 'flex',
-                flexWrap: 'wrap',
+                display: "flex",
+                flexWrap: "wrap",
                 gap: 1,
-                justifyContent: 'center',
+                justifyContent: "center",
               }}
             >
               {step.resources.map((resource, index) => (
@@ -476,7 +467,7 @@ function OnboardingTour({ open, onClose, autoStart = false }) {
                   label={resource.title}
                   clickable
                   variant="outlined"
-                  onClick={() => window.open(resource.url, '_blank')}
+                  onClick={() => window.open(resource.url, "_blank")}
                 />
               ))}
             </Box>
@@ -533,18 +524,18 @@ function OnboardingTour({ open, onClose, autoStart = false }) {
         PaperProps={{
           sx: {
             minHeight: 600,
-            overflow: 'hidden',
+            overflow: "hidden",
           },
         }}
       >
-        <Box sx={{ position: 'relative', height: '100%' }}>
+        <Box sx={{ position: "relative", height: "100%" }}>
           {/* Progress Bar */}
           {userPreferences.showProgress && (
             <LinearProgress
               variant="determinate"
               value={tourProgress}
               sx={{
-                position: 'absolute',
+                position: "absolute",
                 top: 0,
                 left: 0,
                 right: 0,
@@ -556,20 +547,18 @@ function OnboardingTour({ open, onClose, autoStart = false }) {
           {/* Header */}
           <Box
             sx={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
               p: 2,
               borderBottom: 1,
-              borderColor: 'divider',
+              borderColor: "divider",
             }}
           >
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              <Avatar sx={{ bgcolor: 'primary.main' }}>
-                {currentStep.icon}
-              </Avatar>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+              <Avatar sx={{ bgcolor: "primary.main" }}>{currentStep.icon}</Avatar>
               <Box>
-                <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                <Typography variant="h6" sx={{ fontWeight: "bold" }}>
                   {currentStep.title}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
@@ -578,14 +567,9 @@ function OnboardingTour({ open, onClose, autoStart = false }) {
               </Box>
             </Box>
 
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Tooltip
-                title={isPlaying ? 'Pause auto-advance' : 'Start auto-advance'}
-              >
-                <IconButton
-                  onClick={() => setIsPlaying(!isPlaying)}
-                  color="primary"
-                >
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+              <Tooltip title={isPlaying ? "Pause auto-advance" : "Start auto-advance"}>
+                <IconButton onClick={() => setIsPlaying(!isPlaying)} color="primary">
                   {isPlaying ? <Pause /> : <PlayArrow />}
                 </IconButton>
               </Tooltip>
@@ -598,11 +582,11 @@ function OnboardingTour({ open, onClose, autoStart = false }) {
           {/* Stepper */}
           <Box
             sx={{
-              display: 'flex',
-              overflow: 'auto',
+              display: "flex",
+              overflow: "auto",
               p: 1,
               borderBottom: 1,
-              borderColor: 'divider',
+              borderColor: "divider",
             }}
           >
             {onboardingSteps.map((step, index) => (
@@ -610,19 +594,14 @@ function OnboardingTour({ open, onClose, autoStart = false }) {
                 key={step.id}
                 sx={{
                   minWidth: 120,
-                  textAlign: 'center',
+                  textAlign: "center",
                   p: 1,
-                  cursor: 'pointer',
+                  cursor: "pointer",
                   borderRadius: 1,
-                  bgcolor:
-                    index === activeStep ? 'primary.main' : 'transparent',
-                  color:
-                    index === activeStep
-                      ? 'primary.contrastText'
-                      : 'text.primary',
-                  '&:hover': {
-                    bgcolor:
-                      index === activeStep ? 'primary.dark' : 'action.hover',
+                  bgcolor: index === activeStep ? "primary.main" : "transparent",
+                  color: index === activeStep ? "primary.contrastText" : "text.primary",
+                  "&:hover": {
+                    bgcolor: index === activeStep ? "primary.dark" : "action.hover",
                   },
                 }}
                 onClick={() => handleStepClick(index)}
@@ -631,23 +610,23 @@ function OnboardingTour({ open, onClose, autoStart = false }) {
                   sx={{
                     width: 32,
                     height: 32,
-                    mx: 'auto',
+                    mx: "auto",
                     mb: 0.5,
                     bgcolor: completedSteps.has(index)
-                      ? 'success.main'
+                      ? "success.main"
                       : index === activeStep
-                        ? 'primary.contrastText'
-                        : 'grey.300',
+                        ? "primary.contrastText"
+                        : "grey.300",
                     color: completedSteps.has(index)
-                      ? 'success.contrastText'
+                      ? "success.contrastText"
                       : index === activeStep
-                        ? 'primary.main'
-                        : 'grey.600',
+                        ? "primary.main"
+                        : "grey.600",
                   }}
                 >
                   {completedSteps.has(index) ? <CheckCircle /> : step.icon}
                 </Avatar>
-                <Typography variant="caption" sx={{ fontSize: '0.7rem' }}>
+                <Typography variant="caption" sx={{ fontSize: "0.7rem" }}>
                   {step.title}
                 </Typography>
               </Box>
@@ -655,7 +634,7 @@ function OnboardingTour({ open, onClose, autoStart = false }) {
           </Box>
 
           {/* Content */}
-          <DialogContent sx={{ flex: 1, overflow: 'auto' }}>
+          <DialogContent sx={{ flex: 1, overflow: "auto" }}>
             <Typography variant="body2" color="text.secondary" gutterBottom>
               {currentStep.description}
             </Typography>
@@ -663,7 +642,7 @@ function OnboardingTour({ open, onClose, autoStart = false }) {
           </DialogContent>
 
           {/* Actions */}
-          <DialogActions sx={{ p: 2, borderTop: 1, borderColor: 'divider' }}>
+          <DialogActions sx={{ p: 2, borderTop: 1, borderColor: "divider" }}>
             <FormControlLabel
               control={
                 <Checkbox
@@ -677,7 +656,7 @@ function OnboardingTour({ open, onClose, autoStart = false }) {
                 />
               }
               label="Disable highlights"
-              sx={{ mr: 'auto' }}
+              sx={{ mr: "auto" }}
             />
 
             <Button onClick={handleSkip} color="inherit">
@@ -685,21 +664,13 @@ function OnboardingTour({ open, onClose, autoStart = false }) {
             </Button>
 
             {activeStep > 0 && (
-              <Button
-                onClick={handleBack}
-                startIcon={<NavigateBefore />}
-                variant="outlined"
-              >
+              <Button onClick={handleBack} startIcon={<NavigateBefore />} variant="outlined">
                 Back
               </Button>
             )}
 
             {activeStep < onboardingSteps.length - 1 ? (
-              <Button
-                onClick={handleNext}
-                endIcon={<NavigateNext />}
-                variant="contained"
-              >
+              <Button onClick={handleNext} endIcon={<NavigateNext />} variant="contained">
                 Next
               </Button>
             ) : (
@@ -721,7 +692,7 @@ function OnboardingTour({ open, onClose, autoStart = false }) {
         <Fab
           color="primary"
           sx={{
-            position: 'fixed',
+            position: "fixed",
             bottom: 80,
             right: 16,
             zIndex: 1000,

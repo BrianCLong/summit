@@ -3,31 +3,31 @@
  * Enhanced types for data sources, datasets, fields, mappings, and licenses
  */
 
-import { z } from 'zod';
+import { z } from "zod";
 
 /**
  * Data Source Types
  */
 export enum DataSourceType {
-  DATABASE = 'DATABASE',
-  API = 'API',
-  FILE = 'FILE',
-  STREAM = 'STREAM',
-  SAAS = 'SAAS',
-  CLOUD_STORAGE = 'CLOUD_STORAGE',
-  MESSAGE_QUEUE = 'MESSAGE_QUEUE',
-  OTHER = 'OTHER',
+  DATABASE = "DATABASE",
+  API = "API",
+  FILE = "FILE",
+  STREAM = "STREAM",
+  SAAS = "SAAS",
+  CLOUD_STORAGE = "CLOUD_STORAGE",
+  MESSAGE_QUEUE = "MESSAGE_QUEUE",
+  OTHER = "OTHER",
 }
 
 /**
  * Connection Status
  */
 export enum ConnectionStatus {
-  ACTIVE = 'ACTIVE',
-  INACTIVE = 'INACTIVE',
-  ERROR = 'ERROR',
-  TESTING = 'TESTING',
-  CONFIGURED = 'CONFIGURED',
+  ACTIVE = "ACTIVE",
+  INACTIVE = "INACTIVE",
+  ERROR = "ERROR",
+  TESTING = "TESTING",
+  CONFIGURED = "CONFIGURED",
 }
 
 /**
@@ -124,13 +124,13 @@ export interface Dataset {
  * Dataset Type
  */
 export enum DatasetType {
-  TABLE = 'TABLE',
-  VIEW = 'VIEW',
-  FILE = 'FILE',
-  TOPIC = 'TOPIC',
-  COLLECTION = 'COLLECTION',
-  API_ENDPOINT = 'API_ENDPOINT',
-  OTHER = 'OTHER',
+  TABLE = "TABLE",
+  VIEW = "VIEW",
+  FILE = "FILE",
+  TOPIC = "TOPIC",
+  COLLECTION = "COLLECTION",
+  API_ENDPOINT = "API_ENDPOINT",
+  OTHER = "OTHER",
 }
 
 /**
@@ -178,11 +178,11 @@ export interface Field {
  * Sensitivity Level
  */
 export enum SensitivityLevel {
-  PUBLIC = 'PUBLIC',
-  INTERNAL = 'INTERNAL',
-  CONFIDENTIAL = 'CONFIDENTIAL',
-  RESTRICTED = 'RESTRICTED',
-  HIGHLY_RESTRICTED = 'HIGHLY_RESTRICTED',
+  PUBLIC = "PUBLIC",
+  INTERNAL = "INTERNAL",
+  CONFIDENTIAL = "CONFIDENTIAL",
+  RESTRICTED = "RESTRICTED",
+  HIGHLY_RESTRICTED = "HIGHLY_RESTRICTED",
 }
 
 /**
@@ -262,14 +262,14 @@ export interface FieldMapping {
  * Transformation Type
  */
 export enum FieldTransformationType {
-  DIRECT = 'DIRECT', // 1:1 copy
-  CAST = 'CAST', // Type conversion
-  CONCAT = 'CONCAT', // Concatenation
-  SPLIT = 'SPLIT', // Split into multiple fields
-  LOOKUP = 'LOOKUP', // Reference data lookup
-  FUNCTION = 'FUNCTION', // Custom function
-  CONSTANT = 'CONSTANT', // Constant value
-  DERIVED = 'DERIVED', // Derived from multiple fields
+  DIRECT = "DIRECT", // 1:1 copy
+  CAST = "CAST", // Type conversion
+  CONCAT = "CONCAT", // Concatenation
+  SPLIT = "SPLIT", // Split into multiple fields
+  LOOKUP = "LOOKUP", // Reference data lookup
+  FUNCTION = "FUNCTION", // Custom function
+  CONSTANT = "CONSTANT", // Constant value
+  DERIVED = "DERIVED", // Derived from multiple fields
 }
 
 /**
@@ -293,10 +293,10 @@ export interface TransformationRule {
  * Mapping Status
  */
 export enum MappingStatus {
-  DRAFT = 'DRAFT',
-  ACTIVE = 'ACTIVE',
-  DEPRECATED = 'DEPRECATED',
-  ARCHIVED = 'ARCHIVED',
+  DRAFT = "DRAFT",
+  ACTIVE = "ACTIVE",
+  DEPRECATED = "DEPRECATED",
+  ARCHIVED = "ARCHIVED",
 }
 
 /**
@@ -354,23 +354,23 @@ export interface License {
  * License Type
  */
 export enum LicenseType {
-  PROPRIETARY = 'PROPRIETARY',
-  OPEN_DATA = 'OPEN_DATA',
-  COMMERCIAL = 'COMMERCIAL',
-  ACADEMIC = 'ACADEMIC',
-  GOVERNMENT = 'GOVERNMENT',
-  CREATIVE_COMMONS = 'CREATIVE_COMMONS',
-  CUSTOM = 'CUSTOM',
+  PROPRIETARY = "PROPRIETARY",
+  OPEN_DATA = "OPEN_DATA",
+  COMMERCIAL = "COMMERCIAL",
+  ACADEMIC = "ACADEMIC",
+  GOVERNMENT = "GOVERNMENT",
+  CREATIVE_COMMONS = "CREATIVE_COMMONS",
+  CUSTOM = "CUSTOM",
 }
 
 /**
  * License Status
  */
 export enum LicenseStatus {
-  ACTIVE = 'ACTIVE',
-  EXPIRED = 'EXPIRED',
-  SUSPENDED = 'SUSPENDED',
-  REVOKED = 'REVOKED',
+  ACTIVE = "ACTIVE",
+  EXPIRED = "EXPIRED",
+  SUSPENDED = "SUSPENDED",
+  REVOKED = "REVOKED",
 }
 
 /**
@@ -379,7 +379,7 @@ export enum LicenseStatus {
  */
 export interface LineageSummary {
   entityId: string;
-  entityType: 'SOURCE' | 'DATASET' | 'FIELD' | 'CANONICAL_ENTITY' | 'CASE';
+  entityType: "SOURCE" | "DATASET" | "FIELD" | "CANONICAL_ENTITY" | "CASE";
 
   // Upstream
   upstreamSources: string[];
@@ -433,24 +433,24 @@ export interface SchemaVersion {
  * Schema Format
  */
 export enum SchemaFormat {
-  JSON_SCHEMA = 'JSON_SCHEMA',
-  AVRO = 'AVRO',
-  PROTOBUF = 'PROTOBUF',
-  PARQUET = 'PARQUET',
-  SQL_DDL = 'SQL_DDL',
-  OPENAPI = 'OPENAPI',
-  GRAPHQL = 'GRAPHQL',
-  CUSTOM = 'CUSTOM',
+  JSON_SCHEMA = "JSON_SCHEMA",
+  AVRO = "AVRO",
+  PROTOBUF = "PROTOBUF",
+  PARQUET = "PARQUET",
+  SQL_DDL = "SQL_DDL",
+  OPENAPI = "OPENAPI",
+  GRAPHQL = "GRAPHQL",
+  CUSTOM = "CUSTOM",
 }
 
 /**
  * Schema Version Status
  */
 export enum SchemaVersionStatus {
-  DRAFT = 'DRAFT',
-  ACTIVE = 'ACTIVE',
-  DEPRECATED = 'DEPRECATED',
-  ARCHIVED = 'ARCHIVED',
+  DRAFT = "DRAFT",
+  ACTIVE = "ACTIVE",
+  DEPRECATED = "DEPRECATED",
+  ARCHIVED = "ARCHIVED",
 }
 
 /**
@@ -499,10 +499,10 @@ export interface ConnectorRegistration {
  * Connector Status
  */
 export enum ConnectorStatus {
-  AVAILABLE = 'AVAILABLE',
-  DEPRECATED = 'DEPRECATED',
-  EXPERIMENTAL = 'EXPERIMENTAL',
-  UNAVAILABLE = 'UNAVAILABLE',
+  AVAILABLE = "AVAILABLE",
+  DEPRECATED = "DEPRECATED",
+  EXPERIMENTAL = "EXPERIMENTAL",
+  UNAVAILABLE = "UNAVAILABLE",
 }
 
 /**

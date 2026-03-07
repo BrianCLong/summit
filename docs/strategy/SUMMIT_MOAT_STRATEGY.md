@@ -11,16 +11,16 @@
 
 This map defines the core capabilities harvested from the Summit platform, their problem space, and their permanent home.
 
-| Capability | Problem Class | Type | Permanent Home |
-| :--- | :--- | :--- | :--- |
-| **Provenance Ledger V2** | Tamper-evidence, Immutable Audit | Detective / Corrective | `server/src/provenance/ledger.ts` |
-| **Policy Engine (OPA)** | Autonomy Safety, Governance | Preventative | `server/src/autonomous/policy-engine.ts` |
-| **Agent Lattice (Maestro)** | Multi-Model Orchestration, Cost Opt. | Accelerative | `server/src/maestro/` |
-| **Capability Registry** | Unauthorized Agent Action | Preventative | `docs/agents/CAPABILITY_MODEL.md` |
-| **Graph-Augmented Gen (GAG)** | Context Loss, Hallucination | Accelerative | `server/src/graph/` |
-| **Chain of Verification (CoVe)** | Trust, Accuracy | Detective | `server/src/verification/` |
-| **Active Measures Portfolio** | Influence Operations, Defense | Accelerative | `active-measures-module/` |
-| **Fail-Closed Gate** | Security Bypass | Preventative | `scripts/ci/provenance_quality_gate.mjs` |
+| Capability                       | Problem Class                        | Type                   | Permanent Home                           |
+| :------------------------------- | :----------------------------------- | :--------------------- | :--------------------------------------- |
+| **Provenance Ledger V2**         | Tamper-evidence, Immutable Audit     | Detective / Corrective | `server/src/provenance/ledger.ts`        |
+| **Policy Engine (OPA)**          | Autonomy Safety, Governance          | Preventative           | `server/src/autonomous/policy-engine.ts` |
+| **Agent Lattice (Maestro)**      | Multi-Model Orchestration, Cost Opt. | Accelerative           | `server/src/maestro/`                    |
+| **Capability Registry**          | Unauthorized Agent Action            | Preventative           | `docs/agents/CAPABILITY_MODEL.md`        |
+| **Graph-Augmented Gen (GAG)**    | Context Loss, Hallucination          | Accelerative           | `server/src/graph/`                      |
+| **Chain of Verification (CoVe)** | Trust, Accuracy                      | Detective              | `server/src/verification/`               |
+| **Active Measures Portfolio**    | Influence Operations, Defense        | Accelerative           | `active-measures-module/`                |
+| **Fail-Closed Gate**             | Security Bypass                      | Preventative           | `scripts/ci/provenance_quality_gate.mjs` |
 
 ---
 
@@ -79,13 +79,13 @@ Why Summit is defensible and hard to replicate.
 ### 3.2 Graph-Augmented Generation (GAG)
 
 **Competitors**: Use Vector RAG (flat similarity search). Loses structural context.
-**Summit**: Uses **Graph RAG**. We traverse the knowledge graph to extract the *topology* of relationships before generation.
+**Summit**: Uses **Graph RAG**. We traverse the knowledge graph to extract the _topology_ of relationships before generation.
 **Advantage**: The LLM understands "First-Order" and "Second-Order" effects, not just keyword matches.
 
 ### 3.3 Chain of Verification (CoVe)
 
 **Competitors**: Trust the output or use simple "critique".
-**Summit**: Implements **Infrastructure-Level CoVe**. High-stakes assertions are automatically routed to a *different* model family (e.g., GPT-4 generates, Claude verifies) for adversarial audit.
+**Summit**: Implements **Infrastructure-Level CoVe**. High-stakes assertions are automatically routed to a _different_ model family (e.g., GPT-4 generates, Claude verifies) for adversarial audit.
 **Advantage**: Drastically reduced hallucination rates in high-stakes intel reports.
 
 ---
@@ -94,13 +94,13 @@ Why Summit is defensible and hard to replicate.
 
 Moving from "Heroics" to "Systems".
 
-| Manual / Brittle Process | Systemization Solution | Owner | Artifact |
-| :--- | :--- | :--- | :--- |
-| **Evidence ID Generation** | Automate via `provenance-integrity-gateway` on every CI run | CI/Ops | `evidence_manifest.json` |
-| **Risk Scoring (Reviews)** | Automate via `PolicyEngine` scoring logic (0-100 scale) | Governance | `risk_ledger.json` |
-| **Agent Approval** | Move from Slack/Jira to `ApprovalService` (API-driven) | Governance | `agent_approvals` table |
-| **Schema Migration** | Automate via `SchemaEvolutionAgent` (with Witness) | DB/Ops | `schema_provenance.log` |
-| **Prompt Optimization** | Automate via `PromptOptimizer` (A/B Testing in Lattice) | AI Ops | `prompt_perf_metrics.json` |
+| Manual / Brittle Process   | Systemization Solution                                      | Owner      | Artifact                   |
+| :------------------------- | :---------------------------------------------------------- | :--------- | :------------------------- |
+| **Evidence ID Generation** | Automate via `provenance-integrity-gateway` on every CI run | CI/Ops     | `evidence_manifest.json`   |
+| **Risk Scoring (Reviews)** | Automate via `PolicyEngine` scoring logic (0-100 scale)     | Governance | `risk_ledger.json`         |
+| **Agent Approval**         | Move from Slack/Jira to `ApprovalService` (API-driven)      | Governance | `agent_approvals` table    |
+| **Schema Migration**       | Automate via `SchemaEvolutionAgent` (with Witness)          | DB/Ops     | `schema_provenance.log`    |
+| **Prompt Optimization**    | Automate via `PromptOptimizer` (A/B Testing in Lattice)     | AI Ops     | `prompt_perf_metrics.json` |
 
 ---
 

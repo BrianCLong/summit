@@ -5,8 +5,8 @@ import {
   FrictionPoint,
   Trajectory,
   RiskFactor,
-  RelationshipComparison
-} from './types.js';
+  RelationshipComparison,
+} from "./types.js";
 
 /**
  * BilateralRelationsMonitor
@@ -43,7 +43,7 @@ export class BilateralRelationsMonitor {
   getCountryRelationships(country: string): BilateralRelationship[] {
     const keys = this.relationshipsByCountry.get(country) || new Set();
     return Array.from(keys)
-      .map(key => this.relationships.get(key))
+      .map((key) => this.relationships.get(key))
       .filter((r): r is BilateralRelationship => r !== undefined);
   }
 
@@ -51,14 +51,16 @@ export class BilateralRelationsMonitor {
    * Get relationships by status
    */
   getRelationshipsByStatus(status: RelationshipStatus): BilateralRelationship[] {
-    return Array.from(this.relationships.values())
-      .filter(r => r.status === status);
+    return Array.from(this.relationships.values()).filter((r) => r.status === status);
   }
 
   /**
    * Assess relationship health
    */
-  assessRelationshipHealth(country1: string, country2: string): {
+  assessRelationshipHealth(
+    country1: string,
+    country2: string
+  ): {
     overallHealth: number;
     strengths: string[];
     weaknesses: string[];
@@ -71,8 +73,8 @@ export class BilateralRelationsMonitor {
         overallHealth: 0,
         strengths: [],
         weaknesses: [],
-        outlook: 'Unknown',
-        recommendations: ['Establish formal relationship tracking']
+        outlook: "Unknown",
+        recommendations: ["Establish formal relationship tracking"],
       };
     }
 
@@ -80,47 +82,46 @@ export class BilateralRelationsMonitor {
     const weaknesses: string[] = [];
 
     // Analyze cooperation areas
-    const strongCooperation = relationship.cooperationAreas.filter(c =>
-      c.level === CooperationLevel.EXTENSIVE || c.level === CooperationLevel.SUBSTANTIAL
+    const strongCooperation = relationship.cooperationAreas.filter(
+      (c) => c.level === CooperationLevel.EXTENSIVE || c.level === CooperationLevel.SUBSTANTIAL
     );
     if (strongCooperation.length > 0) {
       strengths.push(`Strong cooperation in ${strongCooperation.length} areas`);
     }
 
     // Analyze friction points
-    const highFriction = relationship.frictionPoints.filter(f => f.severity >= 7);
+    const highFriction = relationship.frictionPoints.filter((f) => f.severity >= 7);
     if (highFriction.length > 0) {
       weaknesses.push(`${highFriction.length} high-severity friction points`);
     }
 
     // Trade relationship
-    if (relationship.tradeRelationship.trend === 'GROWING') {
-      strengths.push('Growing trade relationship');
-    } else if (relationship.tradeRelationship.trend === 'DECLINING') {
-      weaknesses.push('Declining trade relationship');
+    if (relationship.tradeRelationship.trend === "GROWING") {
+      strengths.push("Growing trade relationship");
+    } else if (relationship.tradeRelationship.trend === "DECLINING") {
+      weaknesses.push("Declining trade relationship");
     }
 
     // Defense cooperation
     if (relationship.defenseCooperation.level === CooperationLevel.EXTENSIVE) {
-      strengths.push('Strong defense cooperation');
+      strengths.push("Strong defense cooperation");
     }
 
-    const overallHealth = (
+    const overallHealth =
       relationship.relationshipQuality * 0.4 +
       relationship.strategicAlignment * 0.3 +
       relationship.trustLevel * 0.2 +
-      relationship.stability * 0.1
-    );
+      relationship.stability * 0.1;
 
     let outlook: string;
-    if (relationship.recentTrend === 'IMPROVING') {
-      outlook = 'Positive - relationship improving';
-    } else if (relationship.recentTrend === 'DETERIORATING') {
-      outlook = 'Concerning - relationship deteriorating';
-    } else if (relationship.recentTrend === 'VOLATILE') {
-      outlook = 'Unstable - high volatility observed';
+    if (relationship.recentTrend === "IMPROVING") {
+      outlook = "Positive - relationship improving";
+    } else if (relationship.recentTrend === "DETERIORATING") {
+      outlook = "Concerning - relationship deteriorating";
+    } else if (relationship.recentTrend === "VOLATILE") {
+      outlook = "Unstable - high volatility observed";
     } else {
-      outlook = 'Stable - no major changes expected';
+      outlook = "Stable - no major changes expected";
     }
 
     const recommendations = this.generateRecommendations(relationship);
@@ -130,7 +131,7 @@ export class BilateralRelationsMonitor {
       strengths,
       weaknesses,
       outlook,
-      recommendations
+      recommendations,
     };
   }
 
@@ -139,12 +140,13 @@ export class BilateralRelationsMonitor {
    */
   identifyCrisisRelationships(): BilateralRelationship[] {
     return Array.from(this.relationships.values())
-      .filter(r =>
-        r.status === RelationshipStatus.HOSTILE ||
-        r.status === RelationshipStatus.SEVERED ||
-        r.status === RelationshipStatus.TENSE ||
-        r.relationshipQuality < 30 ||
-        r.stability < 40
+      .filter(
+        (r) =>
+          r.status === RelationshipStatus.HOSTILE ||
+          r.status === RelationshipStatus.SEVERED ||
+          r.status === RelationshipStatus.TENSE ||
+          r.relationshipQuality < 30 ||
+          r.stability < 40
       )
       .sort((a, b) => a.relationshipQuality - b.relationshipQuality);
   }
@@ -153,11 +155,9 @@ export class BilateralRelationsMonitor {
    * Identify improving relationships
    */
   identifyImprovingRelationships(threshold: number = 20): BilateralRelationship[] {
-    return Array.from(this.relationships.values())
-      .filter(r =>
-        r.recentTrend === 'IMPROVING' &&
-        r.status === RelationshipStatus.NORMALIZING
-      );
+    return Array.from(this.relationships.values()).filter(
+      (r) => r.recentTrend === "IMPROVING" && r.status === RelationshipStatus.NORMALIZING
+    );
   }
 
   /**
@@ -195,24 +195,28 @@ export class BilateralRelationsMonitor {
       }
     }
 
-    const avgQuality = relationships.length > 0
-      ? relationships.reduce((sum, r) => sum + r.relationshipQuality, 0) / relationships.length
-      : 0;
+    const avgQuality =
+      relationships.length > 0
+        ? relationships.reduce((sum, r) => sum + r.relationshipQuality, 0) / relationships.length
+        : 0;
 
     return {
       totalPartners: relationships.length,
       cooperationByDomain,
       strongPartners,
       strategicPartners,
-      averageCooperationLevel: avgQuality
+      averageCooperationLevel: avgQuality,
     };
   }
 
   /**
    * Detect relationship risks
    */
-  detectRelationshipRisks(country1: string, country2: string): {
-    riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  detectRelationshipRisks(
+    country1: string,
+    country2: string
+  ): {
+    riskLevel: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
     risks: RiskFactor[];
     earlyWarningIndicators: string[];
     mitigationOptions: string[];
@@ -220,18 +224,18 @@ export class BilateralRelationsMonitor {
     const relationship = this.getRelationship(country1, country2);
     if (!relationship) {
       return {
-        riskLevel: 'LOW',
+        riskLevel: "LOW",
         risks: [],
         earlyWarningIndicators: [],
-        mitigationOptions: []
+        mitigationOptions: [],
       };
     }
 
     const earlyWarningIndicators: string[] = [];
 
     // Check for escalating friction
-    const escalating = relationship.frictionPoints.filter(f =>
-      f.escalationRisk === 'HIGH' || f.escalationRisk === 'CRITICAL'
+    const escalating = relationship.frictionPoints.filter(
+      (f) => f.escalationRisk === "HIGH" || f.escalationRisk === "CRITICAL"
     );
     if (escalating.length > 0) {
       earlyWarningIndicators.push(`${escalating.length} friction points at high escalation risk`);
@@ -239,15 +243,15 @@ export class BilateralRelationsMonitor {
 
     // Check sanctions
     if (relationship.sanctions && relationship.sanctions.length > 0) {
-      const activeSanctions = relationship.sanctions.filter(s => !s.liftedDate);
+      const activeSanctions = relationship.sanctions.filter((s) => !s.liftedDate);
       if (activeSanctions.length > 0) {
         earlyWarningIndicators.push(`${activeSanctions.length} active sanctions in place`);
       }
     }
 
     // Check recent trend
-    if (relationship.recentTrend === 'DETERIORATING') {
-      earlyWarningIndicators.push('Relationship trend is deteriorating');
+    if (relationship.recentTrend === "DETERIORATING") {
+      earlyWarningIndicators.push("Relationship trend is deteriorating");
     }
 
     // Calculate risk level
@@ -255,13 +259,13 @@ export class BilateralRelationsMonitor {
     if (relationship.relationshipQuality < 30) riskScore += 30;
     if (relationship.stability < 40) riskScore += 25;
     if (escalating.length > 0) riskScore += 20;
-    if (relationship.recentTrend === 'DETERIORATING') riskScore += 15;
+    if (relationship.recentTrend === "DETERIORATING") riskScore += 15;
 
-    let riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-    if (riskScore >= 60) riskLevel = 'CRITICAL';
-    else if (riskScore >= 40) riskLevel = 'HIGH';
-    else if (riskScore >= 20) riskLevel = 'MEDIUM';
-    else riskLevel = 'LOW';
+    let riskLevel: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
+    if (riskScore >= 60) riskLevel = "CRITICAL";
+    else if (riskScore >= 40) riskLevel = "HIGH";
+    else if (riskScore >= 20) riskLevel = "MEDIUM";
+    else riskLevel = "LOW";
 
     const mitigationOptions = this.generateMitigationOptions(relationship);
 
@@ -269,7 +273,7 @@ export class BilateralRelationsMonitor {
       riskLevel,
       risks: relationship.riskFactors,
       earlyWarningIndicators,
-      mitigationOptions
+      mitigationOptions,
     };
   }
 
@@ -284,11 +288,12 @@ export class BilateralRelationsMonitor {
         bestRelationship: { countries: [], quality: 0 },
         worstRelationship: { countries: [], quality: 0 },
         mostImproved: { countries: [], improvement: 0 },
-        mostDeteriorated: { countries: [], deterioration: 0 }
+        mostDeteriorated: { countries: [], deterioration: 0 },
       };
     }
 
-    const averageQuality = relationships.reduce((sum, r) => sum + r.relationshipQuality, 0) / relationships.length;
+    const averageQuality =
+      relationships.reduce((sum, r) => sum + r.relationshipQuality, 0) / relationships.length;
 
     const best = relationships.reduce((best, r) =>
       r.relationshipQuality > best.relationshipQuality ? r : best
@@ -301,15 +306,21 @@ export class BilateralRelationsMonitor {
     return {
       relationships,
       averageQuality,
-      bestRelationship: { countries: [best.country1, best.country2], quality: best.relationshipQuality },
-      worstRelationship: { countries: [worst.country1, worst.country2], quality: worst.relationshipQuality },
+      bestRelationship: {
+        countries: [best.country1, best.country2],
+        quality: best.relationshipQuality,
+      },
+      worstRelationship: {
+        countries: [worst.country1, worst.country2],
+        quality: worst.relationshipQuality,
+      },
       mostImproved: { countries: [], improvement: 0 },
-      mostDeteriorated: { countries: [], deterioration: 0 }
+      mostDeteriorated: { countries: [], deterioration: 0 },
     };
   }
 
   private getRelationshipKey(country1: string, country2: string): string {
-    return [country1, country2].sort().join(':');
+    return [country1, country2].sort().join(":");
   }
 
   private addToCountryIndex(country: string, relationshipKey: string): void {
@@ -323,19 +334,19 @@ export class BilateralRelationsMonitor {
     const recommendations: string[] = [];
 
     if (relationship.relationshipQuality < 50) {
-      recommendations.push('Consider high-level diplomatic engagement to improve relations');
+      recommendations.push("Consider high-level diplomatic engagement to improve relations");
     }
 
     if (relationship.frictionPoints.length > 3) {
-      recommendations.push('Establish working groups to address key friction points');
+      recommendations.push("Establish working groups to address key friction points");
     }
 
     if (relationship.defenseCooperation.level === CooperationLevel.MINIMAL) {
-      recommendations.push('Explore opportunities for defense and security cooperation');
+      recommendations.push("Explore opportunities for defense and security cooperation");
     }
 
-    if (relationship.tradeRelationship.trend === 'DECLINING') {
-      recommendations.push('Review trade policies and explore new economic opportunities');
+    if (relationship.tradeRelationship.trend === "DECLINING") {
+      recommendations.push("Review trade policies and explore new economic opportunities");
     }
 
     return recommendations;
@@ -344,12 +355,12 @@ export class BilateralRelationsMonitor {
   private generateMitigationOptions(relationship: BilateralRelationship): string[] {
     const options: string[] = [];
 
-    options.push('Increase diplomatic dialogue at multiple levels');
-    options.push('Establish confidence-building measures');
-    options.push('Explore areas of mutual interest for cooperation');
+    options.push("Increase diplomatic dialogue at multiple levels");
+    options.push("Establish confidence-building measures");
+    options.push("Explore areas of mutual interest for cooperation");
 
     if (relationship.frictionPoints.length > 0) {
-      options.push('Initiate third-party mediation for key disputes');
+      options.push("Initiate third-party mediation for key disputes");
     }
 
     return options;
@@ -378,7 +389,7 @@ export class BilateralRelationsMonitor {
       totalRelationships: this.relationships.size,
       byStatus,
       averageQuality: this.relationships.size > 0 ? totalQuality / this.relationships.size : 0,
-      crisisCount: crisisRelationships.length
+      crisisCount: crisisRelationships.length,
     };
   }
 }

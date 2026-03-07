@@ -20,73 +20,48 @@
  */
 
 // Core Types
-export * from './core/types';
+export * from "./core/types";
 
 // Signal Normalization
-export { SignalNormalizer } from './core/SignalNormalizer';
+export { SignalNormalizer } from "./core/SignalNormalizer";
 
 // Federation Service
-export {
-  FederationService,
-  type FederationConfig,
-} from './federation/FederationService';
+export { FederationService, type FederationConfig } from "./federation/FederationService";
 
 // Clustering Engine
-export {
-  ClusteringEngine,
-  type ClusteringConfig,
-} from './clustering/ClusteringEngine';
+export { ClusteringEngine, type ClusteringConfig } from "./clustering/ClusteringEngine";
 
 // Alert Engine
-export {
-  AlertEngine,
-  type AlertConfig,
-  type AlertThreshold,
-} from './alerts/AlertEngine';
+export { AlertEngine, type AlertConfig, type AlertThreshold } from "./alerts/AlertEngine";
 
 // Audit Service
-export {
-  AuditService,
-  type AuditConfig,
-  type GovernanceControl,
-} from './audit/AuditService';
+export { AuditService, type AuditConfig, type GovernanceControl } from "./audit/AuditService";
 
 // GraphQL
-export { schema } from './graphql/schema';
-export {
-  resolvers,
-  pubsub,
-  EVENTS,
-  type ResolverContext,
-} from './graphql/resolvers';
+export { schema } from "./graphql/schema";
+export { resolvers, pubsub, EVENTS, type ResolverContext } from "./graphql/resolvers";
 
 // Version
-export const VERSION = '1.0.0';
+export const VERSION = "1.0.0";
 
 // Default configuration factory
 export interface FederatedCampaignRadarConfig {
   participantId: string;
   organizationId: string;
-  privacyLevel: 'strict' | 'balanced' | 'permissive';
+  privacyLevel: "strict" | "balanced" | "permissive";
   enableC2PA: boolean;
   enableAudit: boolean;
-  federation?: Partial<import('./federation/FederationService').FederationConfig>;
-  clustering?: Partial<import('./clustering/ClusteringEngine').ClusteringConfig>;
-  alerts?: Partial<import('./alerts/AlertEngine').AlertConfig>;
-  audit?: Partial<import('./audit/AuditService').AuditConfig>;
+  federation?: Partial<import("./federation/FederationService").FederationConfig>;
+  clustering?: Partial<import("./clustering/ClusteringEngine").ClusteringConfig>;
+  alerts?: Partial<import("./alerts/AlertEngine").AlertConfig>;
+  audit?: Partial<import("./audit/AuditService").AuditConfig>;
 }
 
 /**
  * Create a fully configured Federated Campaign Radar instance
  */
 export function createFederatedCampaignRadar(config: FederatedCampaignRadarConfig) {
-  const {
-    participantId,
-    organizationId,
-    privacyLevel,
-    enableC2PA,
-    enableAudit,
-  } = config;
+  const { participantId, organizationId, privacyLevel, enableC2PA, enableAudit } = config;
 
   // Privacy level presets
   const privacyPresets = {
@@ -100,7 +75,7 @@ export function createFederatedCampaignRadar(config: FederatedCampaignRadarConfi
   // Initialize Signal Normalizer
   const signalNormalizer = new SignalNormalizer({
     enableC2PAValidation: enableC2PA,
-    hashPepper: process.env.SIGNAL_HASH_PEPPER || 'default-pepper-change-in-production',
+    hashPepper: process.env.SIGNAL_HASH_PEPPER || "default-pepper-change-in-production",
     embeddingDimension: 768,
   });
 
@@ -116,27 +91,20 @@ export function createFederatedCampaignRadar(config: FederatedCampaignRadarConfi
   });
 
   // Initialize Clustering Engine
-  const clusteringEngine = new ClusteringEngine(
-    federationService,
-    {
-      similarityThreshold: 0.75,
-      minClusterSize: 3,
-      crossTenantBoostFactor: 1.5,
-      ...config.clustering,
-    },
-  );
+  const clusteringEngine = new ClusteringEngine(federationService, {
+    similarityThreshold: 0.75,
+    minClusterSize: 3,
+    crossTenantBoostFactor: 1.5,
+    ...config.clustering,
+  });
 
   // Initialize Alert Engine
-  const alertEngine = new AlertEngine(
-    clusteringEngine,
-    federationService,
-    {
-      defaultCooldownMs: 3600000, // 1 hour
-      maxActiveAlerts: 100,
-      enableAutoEscalation: true,
-      ...config.alerts,
-    },
-  );
+  const alertEngine = new AlertEngine(clusteringEngine, federationService, {
+    defaultCooldownMs: 3600000, // 1 hour
+    maxActiveAlerts: 100,
+    enableAutoEscalation: true,
+    ...config.alerts,
+  });
 
   // Initialize Audit Service (optional)
   let auditService: AuditService | undefined;
@@ -149,14 +117,14 @@ export function createFederatedCampaignRadar(config: FederatedCampaignRadarConfi
     });
 
     // Wire up audit logging
-    signalNormalizer.on?.('signal:normalized', (signal) => {
+    signalNormalizer.on?.("signal:normalized", (signal) => {
       auditService!.logEvent({
-        eventType: 'SIGNAL_SUBMISSION',
-        category: 'DATA_PROCESSING',
-        action: 'NORMALIZE_SIGNAL',
-        resourceType: 'SIGNAL',
+        eventType: "SIGNAL_SUBMISSION",
+        category: "DATA_PROCESSING",
+        action: "NORMALIZE_SIGNAL",
+        resourceType: "SIGNAL",
         resourceId: signal.id,
-        outcome: 'SUCCESS',
+        outcome: "SUCCESS",
         details: {
           signalType: signal.signalType,
           privacyLevel: signal.privacyLevel,
@@ -166,7 +134,7 @@ export function createFederatedCampaignRadar(config: FederatedCampaignRadarConfi
   }
 
   // Create resolver context
-  const createResolverContext = (): import('./graphql/resolvers').ResolverContext => ({
+  const createResolverContext = (): import("./graphql/resolvers").ResolverContext => ({
     signalNormalizer,
     federationService,
     clusteringEngine,
@@ -202,7 +170,7 @@ export function createFederatedCampaignRadar(config: FederatedCampaignRadarConfi
       return alertEngine.getActiveAlerts();
     },
 
-    getActiveClusters(minThreatLevel?: import('./core/types').ThreatLevel) {
+    getActiveClusters(minThreatLevel?: import("./core/types").ThreatLevel) {
       return clusteringEngine.getActiveClusters(minThreatLevel);
     },
   };

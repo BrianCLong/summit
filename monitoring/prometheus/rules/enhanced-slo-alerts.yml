@@ -21,10 +21,10 @@ groups:
           burn_rate: fast
           service: intelgraph-mc
         annotations:
-          summary: 'Fast burn rate detected for latency SLO'
+          summary: "Fast burn rate detected for latency SLO"
           description: 'P95 latency has exceeded 350ms threshold for 2 minutes, consuming error budget at {{ $value | printf "%.1f" }}x normal rate'
-          runbook_url: 'https://runbooks.intelgraph.com/slo/latency-fast-burn'
-          dashboard_url: 'https://grafana.intelgraph.com/d/slo-dashboard'
+          runbook_url: "https://runbooks.intelgraph.com/slo/latency-fast-burn"
+          dashboard_url: "https://grafana.intelgraph.com/d/slo-dashboard"
 
       - alert: LatencyBurnRateSlow
         expr: >
@@ -40,9 +40,9 @@ groups:
           burn_rate: slow
           service: intelgraph-mc
         annotations:
-          summary: 'Slow burn rate detected for latency SLO'
+          summary: "Slow burn rate detected for latency SLO"
           description: 'P95 latency trending above 350ms over extended period, consuming error budget at {{ $value | printf "%.3f" }}x rate'
-          runbook_url: 'https://runbooks.intelgraph.com/slo/latency-slow-burn'
+          runbook_url: "https://runbooks.intelgraph.com/slo/latency-slow-burn"
 
       # Availability SLO with multi-window burn rates
       - alert: AvailabilityBurnRateFast
@@ -59,9 +59,9 @@ groups:
           burn_rate: fast
           service: intelgraph-mc
         annotations:
-          summary: 'Fast burn rate detected for availability SLO'
+          summary: "Fast burn rate detected for availability SLO"
           description: 'Error rate {{ $value | printf "%.2f" }}% exceeding 2% for 2+ minutes, rapid error budget consumption'
-          runbook_url: 'https://runbooks.intelgraph.com/slo/availability-fast-burn'
+          runbook_url: "https://runbooks.intelgraph.com/slo/availability-fast-burn"
 
       - alert: AvailabilityBurnRateSlow
         expr: >
@@ -77,9 +77,9 @@ groups:
           burn_rate: slow
           service: intelgraph-mc
         annotations:
-          summary: 'Slow burn rate detected for availability SLO'
+          summary: "Slow burn rate detected for availability SLO"
           description: 'Sustained error rate {{ $value | printf "%.3f" }}% above 1% threshold over extended period'
-          runbook_url: 'https://runbooks.intelgraph.com/slo/availability-slow-burn'
+          runbook_url: "https://runbooks.intelgraph.com/slo/availability-slow-burn"
 
       # Throughput SLO monitoring
       - alert: ThroughputBelowBaseline
@@ -90,9 +90,9 @@ groups:
           slo: throughput
           service: intelgraph-mc
         annotations:
-          summary: 'Request throughput below baseline'
+          summary: "Request throughput below baseline"
           description: 'Current RPS {{ $value | printf "%.1f" }} below 50 RPS baseline for 10+ minutes'
-          runbook_url: 'https://runbooks.intelgraph.com/slo/throughput-low'
+          runbook_url: "https://runbooks.intelgraph.com/slo/throughput-low"
 
       # =====================
       # ADVANCED ALERTS
@@ -114,9 +114,9 @@ groups:
           category: database
           service: intelgraph-mc
         annotations:
-          summary: 'Database performance degraded'
-          description: 'Database P95 response times elevated: Postgres={{ $value }}ms, contributing to overall latency'
-          runbook_url: 'https://runbooks.intelgraph.com/database/performance-degraded'
+          summary: "Database performance degraded"
+          description: "Database P95 response times elevated: Postgres={{ $value }}ms, contributing to overall latency"
+          runbook_url: "https://runbooks.intelgraph.com/database/performance-degraded"
 
       # Resource saturation prediction
       - alert: CPUSaturationPredicted
@@ -128,9 +128,9 @@ groups:
           category: capacity
           service: intelgraph-mc
         annotations:
-          summary: 'CPU saturation predicted within 1 hour'
+          summary: "CPU saturation predicted within 1 hour"
           description: 'Current CPU trend {{ $value | printf "%.1f" }}% indicates saturation risk in ~60 minutes'
-          runbook_url: 'https://runbooks.intelgraph.com/capacity/cpu-saturation-predicted'
+          runbook_url: "https://runbooks.intelgraph.com/capacity/cpu-saturation-predicted"
 
       - alert: MemorySaturationPredicted
         expr: >
@@ -141,9 +141,9 @@ groups:
           category: capacity
           service: intelgraph-mc
         annotations:
-          summary: 'Memory saturation predicted within 1 hour'
+          summary: "Memory saturation predicted within 1 hour"
           description: 'Current memory trend {{ $value | printf "%.1f" }}% indicates saturation risk in ~60 minutes'
-          runbook_url: 'https://runbooks.intelgraph.com/capacity/memory-saturation-predicted'
+          runbook_url: "https://runbooks.intelgraph.com/capacity/memory-saturation-predicted"
 
       # =====================
       # COST ALERTS
@@ -162,9 +162,9 @@ groups:
           category: cost
           service: intelgraph-mc
         annotations:
-          summary: 'Weekly cost budget exceeded'
+          summary: "Weekly cost budget exceeded"
           description: 'Weekly cost projection ${{ $value | printf "%.2f" }} exceeds $200 budget'
-          runbook_url: 'https://runbooks.intelgraph.com/cost/budget-exceeded'
+          runbook_url: "https://runbooks.intelgraph.com/cost/budget-exceeded"
 
       - alert: DailyCostSpike
         expr: >
@@ -178,9 +178,9 @@ groups:
           category: cost
           service: intelgraph-mc
         annotations:
-          summary: 'Daily cost spike detected'
+          summary: "Daily cost spike detected"
           description: 'Daily cost ${{ $value | printf "%.2f" }} exceeds $50 daily average'
-          runbook_url: 'https://runbooks.intelgraph.com/cost/daily-spike'
+          runbook_url: "https://runbooks.intelgraph.com/cost/daily-spike"
 
       # Unit cost efficiency alerts
       - alert: IngestCostEfficiencyDegraded
@@ -196,9 +196,9 @@ groups:
           category: cost_efficiency
           service: intelgraph-mc
         annotations:
-          summary: 'Ingest cost efficiency degraded'
+          summary: "Ingest cost efficiency degraded"
           description: 'Ingest unit cost {{ $value | printf "%.6f" }} above $0.00005 target'
-          runbook_url: 'https://runbooks.intelgraph.com/cost/ingest-efficiency'
+          runbook_url: "https://runbooks.intelgraph.com/cost/ingest-efficiency"
 
       # =====================
       # SECURITY ALERTS
@@ -213,9 +213,9 @@ groups:
           category: security
           service: intelgraph-mc
         annotations:
-          summary: 'High policy violation rate detected'
+          summary: "High policy violation rate detected"
           description: '{{ $value | printf "%.1f" }} policy denials/sec indicates potential attack or misconfiguration'
-          runbook_url: 'https://runbooks.intelgraph.com/security/policy-violations-high'
+          runbook_url: "https://runbooks.intelgraph.com/security/policy-violations-high"
 
       # Suspicious GraphQL query patterns
       - alert: GraphQLComplexityAttack
@@ -226,9 +226,9 @@ groups:
           category: security
           service: intelgraph-mc
         annotations:
-          summary: 'GraphQL complexity attack detected'
+          summary: "GraphQL complexity attack detected"
           description: 'P95 query complexity {{ $value | printf "%.0f" }} indicates potential DoS attack via complex queries'
-          runbook_url: 'https://runbooks.intelgraph.com/security/graphql-complexity-attack'
+          runbook_url: "https://runbooks.intelgraph.com/security/graphql-complexity-attack"
 
       # Anomalous authentication patterns
       - alert: AuthenticationAnomalyDetected
@@ -245,9 +245,9 @@ groups:
           category: security
           service: intelgraph-mc
         annotations:
-          summary: 'Authentication anomaly detected'
+          summary: "Authentication anomaly detected"
           description: 'Authentication failure rate {{ $value | printf "%.1f" }}% indicates potential brute force attack'
-          runbook_url: 'https://runbooks.intelgraph.com/security/auth-anomaly'
+          runbook_url: "https://runbooks.intelgraph.com/security/auth-anomaly"
 
       # =====================
       # CANARY ALERTS
@@ -273,9 +273,9 @@ groups:
           category: deployment
           service: intelgraph-mc
         annotations:
-          summary: 'Canary deployment showing elevated errors'
+          summary: "Canary deployment showing elevated errors"
           description: 'Canary error rate {{ $value | printf "%.2f" }}% significantly higher than stable deployment'
-          runbook_url: 'https://runbooks.intelgraph.com/deployment/canary-unhealthy'
+          runbook_url: "https://runbooks.intelgraph.com/deployment/canary-unhealthy"
 
       # Canary performance regression
       - alert: CanaryPerformanceRegression
@@ -292,6 +292,6 @@ groups:
           category: deployment
           service: intelgraph-mc
         annotations:
-          summary: 'Canary deployment performance regression'
+          summary: "Canary deployment performance regression"
           description: 'Canary P95 latency {{ $value | printf "%.0f" }}ms significantly higher than stable'
-          runbook_url: 'https://runbooks.intelgraph.com/deployment/canary-performance-regression'
+          runbook_url: "https://runbooks.intelgraph.com/deployment/canary-performance-regression"

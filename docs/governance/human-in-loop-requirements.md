@@ -22,6 +22,6 @@ The following scenarios require explicit HITL implementation:
 
 ## Implementation Guidelines
 
-*   **Design for Reviewability**: Interfaces must present AI outputs clearly, including confidence scores, identified risks, and the underlying data sources, enabling effective human evaluation.
-*   **Accountability**: The human operator must be definitively identifiable and held accountable for their authorizations.
-*   **Continuous Monitoring**: HITL effectiveness must be periodically reviewed to ensure operators are not merely "rubber-stamping" AI decisions and that the process remains robust against adversarial use.
+- **Design for Reviewability**: Interfaces must present AI outputs clearly, including confidence scores, identified risks, and the underlying data sources, enabling effective human evaluation.
+- **Accountability**: The human operator must be definitively identifiable and held accountable for their authorizations.
+- **Continuous Monitoring**: HITL effectiveness must be periodically reviewed to ensure operators are not merely "rubber-stamping" AI decisions and that the process remains robust against adversarial use.

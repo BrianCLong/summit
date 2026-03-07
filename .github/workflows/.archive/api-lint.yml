@@ -3,19 +3,19 @@ name: API Lint
 on:
   push:
     paths:
-      - 'docs/api-spec.yaml'
-      - 'openapi/**'
-      - '.github/workflows/api-lint.yml'
+      - "docs/api-spec.yaml"
+      - "openapi/**"
+      - ".github/workflows/api-lint.yml"
   pull_request:
     paths-ignore:
-      - 'docs/**'
-      - '**.md'
-      - 'prompts/**'
-      - 'evidence/**'
+      - "docs/**"
+      - "**.md"
+      - "prompts/**"
+      - "evidence/**"
     paths:
-      - 'docs/api-spec.yaml'
-      - 'openapi/**'
-      - '.github/workflows/api-lint.yml'
+      - "docs/api-spec.yaml"
+      - "openapi/**"
+      - ".github/workflows/api-lint.yml"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -34,8 +34,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
         with:
-          cache: 'pnpm'
-          node-version: '20'
+          cache: "pnpm"
+          node-version: "20"
 
       - name: Install Spectral
         run: npm install -g @stoplight/spectral-cli

@@ -4,7 +4,7 @@
  * Prometheus-compatible metrics for observability
  */
 
-import type { Request, Response, NextFunction } from 'express';
+import type { Request, Response, NextFunction } from "express";
 
 // Simple in-memory metrics store
 // TODO: Replace with proper Prometheus client (prom-client) in production
@@ -19,22 +19,14 @@ class MetricsRegistry {
   private histograms: Map<string, MetricValue[]> = new Map();
   private gauges: Map<string, MetricValue> = new Map();
 
-  incrementCounter(
-    name: string,
-    labels: Record<string, string> = {},
-    value: number = 1,
-  ) {
+  incrementCounter(name: string, labels: Record<string, string> = {}, value: number = 1) {
     const key = this.makeKey(name, labels);
     const existing = this.counters.get(key) || [];
     existing.push({ value, labels, timestamp: Date.now() });
     this.counters.set(key, existing);
   }
 
-  observeHistogram(
-    name: string,
-    value: number,
-    labels: Record<string, string> = {},
-  ) {
+  observeHistogram(name: string, value: number, labels: Record<string, string> = {}) {
     const key = this.makeKey(name, labels);
     const existing = this.histograms.get(key) || [];
     existing.push({ value, labels, timestamp: Date.now() });
@@ -50,7 +42,7 @@ class MetricsRegistry {
     const sortedLabels = Object.entries(labels)
       .sort(([a], [b]) => a.localeCompare(b))
       .map(([k, v]) => `${k}="${v}"`)
-      .join(',');
+      .join(",");
     return `${name}{${sortedLabels}}`;
   }
 
@@ -66,7 +58,7 @@ class MetricsRegistry {
     // Histograms (simplified - just count and sum)
     const histogramGroups = new Map<string, MetricValue[]>();
     for (const [key, values] of this.histograms) {
-      const baseName = key.split('{')[0];
+      const baseName = key.split("{")[0];
       const existing = histogramGroups.get(baseName) || [];
       existing.push(...values);
       histogramGroups.set(baseName, existing);
@@ -84,7 +76,7 @@ class MetricsRegistry {
       lines.push(`${key} ${metric.value}`);
     }
 
-    return lines.join('\n');
+    return lines.join("\n");
   }
 }
 
@@ -92,13 +84,13 @@ export const metrics = new MetricsRegistry();
 
 // Predefined metrics
 export const METRICS = {
-  HTTP_REQUESTS_TOTAL: 'companyos_tenant_api_http_requests_total',
-  HTTP_REQUEST_DURATION_SECONDS: 'companyos_tenant_api_http_request_duration_seconds',
-  TENANT_OPERATIONS_TOTAL: 'companyos_tenant_operations_total',
-  FEATURE_FLAG_EVALUATIONS_TOTAL: 'companyos_feature_flag_evaluations_total',
-  ACTIVE_TENANTS: 'companyos_active_tenants',
-  GRAPHQL_REQUESTS_TOTAL: 'companyos_tenant_api_graphql_requests_total',
-  GRAPHQL_ERRORS_TOTAL: 'companyos_tenant_api_graphql_errors_total',
+  HTTP_REQUESTS_TOTAL: "companyos_tenant_api_http_requests_total",
+  HTTP_REQUEST_DURATION_SECONDS: "companyos_tenant_api_http_request_duration_seconds",
+  TENANT_OPERATIONS_TOTAL: "companyos_tenant_operations_total",
+  FEATURE_FLAG_EVALUATIONS_TOTAL: "companyos_feature_flag_evaluations_total",
+  ACTIVE_TENANTS: "companyos_active_tenants",
+  GRAPHQL_REQUESTS_TOTAL: "companyos_tenant_api_graphql_requests_total",
+  GRAPHQL_ERRORS_TOTAL: "companyos_tenant_api_graphql_errors_total",
 };
 
 /**
@@ -108,7 +100,7 @@ export function httpMetrics(req: Request, res: Response, next: NextFunction) {
   const startTime = process.hrtime.bigint();
   const path = req.route?.path || req.path;
 
-  res.on('finish', () => {
+  res.on("finish", () => {
     const durationNs = Number(process.hrtime.bigint() - startTime);
     const durationSeconds = durationNs / 1e9;
 
@@ -129,13 +121,13 @@ export function httpMetrics(req: Request, res: Response, next: NextFunction) {
  * Record tenant operation metric
  */
 export function recordTenantOperation(
-  operation: 'create' | 'read' | 'update' | 'delete' | 'list',
+  operation: "create" | "read" | "update" | "delete" | "list",
   tenantId?: string,
-  success: boolean = true,
+  success: boolean = true
 ) {
   metrics.incrementCounter(METRICS.TENANT_OPERATIONS_TOTAL, {
     operation,
-    tenant_id: tenantId || 'unknown',
+    tenant_id: tenantId || "unknown",
     success: String(success),
   });
 }
@@ -143,11 +135,7 @@ export function recordTenantOperation(
 /**
  * Record feature flag evaluation metric
  */
-export function recordFeatureFlagEvaluation(
-  flagName: string,
-  tenantId: string,
-  enabled: boolean,
-) {
+export function recordFeatureFlagEvaluation(flagName: string, tenantId: string, enabled: boolean) {
   metrics.incrementCounter(METRICS.FEATURE_FLAG_EVALUATIONS_TOTAL, {
     flag_name: flagName,
     tenant_id: tenantId,
@@ -159,6 +147,6 @@ export function recordFeatureFlagEvaluation(
  * Metrics endpoint handler
  */
 export function metricsHandler(req: Request, res: Response) {
-  res.set('Content-Type', 'text/plain; charset=utf-8');
+  res.set("Content-Type", "text/plain; charset=utf-8");
   res.send(metrics.toPrometheusFormat());
 }

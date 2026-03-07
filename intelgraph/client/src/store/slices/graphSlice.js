@@ -1,4 +1,4 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
   nodes: [],
@@ -6,7 +6,7 @@ const initialState = {
   selectedNodes: [],
   selectedEdges: [],
   layout: {
-    name: 'fcose',
+    name: "fcose",
     options: {
       animate: true,
       animationDuration: 1000,
@@ -19,7 +19,7 @@ const initialState = {
 };
 
 const graphSlice = createSlice({
-  name: 'graph',
+  name: "graph",
   initialState,
   reducers: {
     setGraphData: (state, action) => {
@@ -47,13 +47,7 @@ const graphSlice = createSlice({
   },
 });
 
-export const {
-  setGraphData,
-  addNode,
-  addEdge,
-  setSelectedNodes,
-  setSelectedEdges,
-  clearGraph,
-} = graphSlice.actions;
+export const { setGraphData, addNode, addEdge, setSelectedNodes, setSelectedEdges, clearGraph } =
+  graphSlice.actions;
 
 export default graphSlice.reducer;

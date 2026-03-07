@@ -1,9 +1,12 @@
 // maestro-conductor/src/workflows/trial-upsell-dag.ts
-import { evaluateUpsell, trackUpsellConversion } from '../../../../../packages/agents/src/upsell/trial-upsell';
+import {
+  evaluateUpsell,
+  trackUpsellConversion,
+} from "../../../../../packages/agents/src/upsell/trial-upsell";
 
 export interface WorkflowResult {
   tenantId: string;
-  status: 'no-action' | 'upsell-triggered';
+  status: "no-action" | "upsell-triggered";
   signal?: any;
 }
 
@@ -19,25 +22,27 @@ export async function runTrialUpsellWorkflow(tenantId: string): Promise<Workflow
   const signal = await evaluateUpsell(tenantId);
 
   if (signal) {
-    console.log(`[DAG] Upsell Triggered for ${tenantId}: ${signal.msg} (Variant: ${signal.variant})`);
+    console.log(
+      `[DAG] Upsell Triggered for ${tenantId}: ${signal.msg} (Variant: ${signal.variant})`
+    );
 
     // Simulate notification (Email, Dashboard nudge)
     await notifyTenant(tenantId, signal);
 
     // Track that we showed the nudge
-    await trackUpsellConversion(tenantId, signal.variant, 'nudge_shown');
+    await trackUpsellConversion(tenantId, signal.variant, "nudge_shown");
 
     return {
       tenantId,
-      status: 'upsell-triggered',
-      signal
+      status: "upsell-triggered",
+      signal,
     };
   }
 
   console.log(`[DAG] No upsell action needed for tenant: ${tenantId}`);
   return {
     tenantId,
-    status: 'no-action'
+    status: "no-action",
   };
 }
 
@@ -46,5 +51,7 @@ async function notifyTenant(tenantId: string, signal: any) {
   console.log(`[Notification] To Tenant ${tenantId}: ${signal.msg} [Link: ${signal.link}]`);
 
   // Graph annotation simulation
-  console.log(`[Graph] Adding watermark annotation for ${tenantId}: Upsell Nudge ${signal.variant}`);
+  console.log(
+    `[Graph] Adding watermark annotation for ${tenantId}: Upsell Nudge ${signal.variant}`
+  );
 }

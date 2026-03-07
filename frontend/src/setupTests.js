@@ -1,4 +1,4 @@
-import '@testing-library/jest-dom';
+import "@testing-library/jest-dom";
 
 // Mock Worker for JSDOM
 class Worker {
@@ -16,9 +16,9 @@ class Worker {
 global.Worker = Worker;
 
 // Mock URL.createObjectURL/revokeObjectURL if needed (often needed for Workers too)
-if (typeof window.URL.createObjectURL === 'undefined') {
+if (typeof window.URL.createObjectURL === "undefined") {
   window.URL.createObjectURL = () => {};
 }
-if (typeof window.URL.revokeObjectURL === 'undefined') {
+if (typeof window.URL.revokeObjectURL === "undefined") {
   window.URL.revokeObjectURL = () => {};
 }

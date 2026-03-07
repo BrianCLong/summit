@@ -3,6 +3,7 @@
 This plan enumerates the eight scoped, feature-flagged tracks requested in Prompts #97–#104. Each entry supplies a canonical issue title, branch name, feature flag, deliverable summary, CI gates, and open tuning questions to resolve during refinement. All scopes are non-overlapping and advisory where noted.
 
 ## Global conventions
+
 - Branch naming: `feat/<scope>/<short-desc>` (e.g., `feat/mdmb/drift-monitor`).
 - Feature flags: ensure defaults are **disabled**; wire flags through API and UI entry points.
 - CI gates: unit + contract tests, Playwright E2E per prompt, and lint/format in CI. No schema or prod mutations without explicit gates.
@@ -11,6 +12,7 @@ This plan enumerates the eight scoped, feature-flagged tracks requested in Promp
 ## Issue breakdown
 
 ### #97 — Model Drift Monitor & Backtester (MDMB)
+
 - **Issue title:** "MDMB: drift detection + backtest champion/challenger"
 - **Branch:** `feat/mdmb/drift-monitor`
 - **Feature flag:** `MDMB_ENABLED` (default off)
@@ -19,6 +21,7 @@ This plan enumerates the eight scoped, feature-flagged tracks requested in Promp
 - **Tuning questions:** default drift thresholds per task (embeddings/summarization/link-pred); rolling windows (7/30/90 days).
 
 ### #98 — Edge AI Pack & Model Update Service (EAP)
+
 - **Issue title:** "EAP: edge bundle signing + offline inference receipts"
 - **Branch:** `feat/eap/edge-bundles`
 - **Feature flag:** `EAP_ENABLED`
@@ -27,6 +30,7 @@ This plan enumerates the eight scoped, feature-flagged tracks requested in Promp
 - **Tuning questions:** first device targets (Chromebook, Android mid-tier); default bundle set (OCR+ASR only vs. add summarizer).
 
 ### #99 — Argumentation Graph & Claim Debate (AIF)
+
 - **Issue title:** "AIF: argumentation semantics + debate view"
 - **Branch:** `feat/aif/argumentation`
 - **Feature flag:** `AIF_ENABLED`
@@ -35,6 +39,7 @@ This plan enumerates the eight scoped, feature-flagged tracks requested in Promp
 - **Tuning questions:** default semantics (grounded vs. preferred); criticality tiers mapping to acceptance thresholds.
 
 ### #100 — Storyboard & Time-Replay Player (REPLAY)
+
 - **Issue title:** "REPLAY: timeline/graph/map player + diff/export"
 - **Branch:** `feat/replay/time-player`
 - **Feature flag:** `REPLAY_ENABLED`
@@ -43,6 +48,7 @@ This plan enumerates the eight scoped, feature-flagged tracks requested in Promp
 - **Tuning questions:** default playback speeds/keyframe cadence; whether to include provenance popups in v1.
 
 ### #101 — Access Reachability & Blast-Radius Analyzer (ARBA)
+
 - **Issue title:** "ARBA: reachability simulation + blast radius"
 - **Branch:** `feat/arba/reachability`
 - **Feature flag:** `ARBA_ENABLED`
@@ -51,6 +57,7 @@ This plan enumerates the eight scoped, feature-flagged tracks requested in Promp
 - **Tuning questions:** default promotion guard (max Δ nodes/fields); required evidence for exceptions.
 
 ### #102 — Honey Artifacts & Deception Traps (HADT)
+
 - **Issue title:** "HADT: honey artifacts + trigger monitoring"
 - **Branch:** `feat/hadt/deception`
 - **Feature flag:** `HADT_ENABLED`
@@ -59,6 +66,7 @@ This plan enumerates the eight scoped, feature-flagged tracks requested in Promp
 - **Tuning questions:** default stealth profiles (obvious vs. subtle); trigger actions (view, copy, export) to monitor.
 
 ### #103 — Query Interop Bridge (Gremlin/SPARQL) (QIB)
+
 - **Issue title:** "QIB: Gremlin/SPARQL translation to Cypher"
 - **Branch:** `feat/qib/query-bridge`
 - **Feature flag:** `QIB_ENABLED`
@@ -67,6 +75,7 @@ This plan enumerates the eight scoped, feature-flagged tracks requested in Promp
 - **Tuning questions:** prioritize dialect (Gremlin vs. SPARQL); max query complexity before block.
 
 ### #104 — Video Segmenter & Transcript Aligner (ViSTA)
+
 - **Issue title:** "ViSTA: video segmentation + transcript alignment"
 - **Branch:** `feat/vista/video-segmentation`
 - **Feature flag:** `VISTA_ENABLED`
@@ -75,6 +84,7 @@ This plan enumerates the eight scoped, feature-flagged tracks requested in Promp
 - **Tuning questions:** default scene granularity target (avg seconds); supported codecs/containers for v1.
 
 ## Execution notes
+
 - Each branch should include typed API contracts, golden fixtures, and Playwright journeys listed above. PRs must stay under their feature flag and avoid cross-DB coupling.
 - Promotion hooks in MDMB emit advisories only; ARBA/HADT are advisory-only; QIB is read-path only in v1.
 - Capture tuning-question decisions in issue comments before merging to avoid rework across teams.

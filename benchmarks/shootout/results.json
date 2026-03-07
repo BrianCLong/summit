@@ -1,19 +1,11 @@
 [
-  {"lang": "TS", "benchmark": "Fibonacci(30)", "time_ms": 18.6875}
-,
-  {"lang": "TS", "benchmark": "JSON Parse", "time_ms": 102.5325}
-,
-  {"lang": "TS", "benchmark": "String Concat", "time_ms": 11.0789}
-,
-  {"lang": "Python", "benchmark": "Fibonacci(30)", "time_ms": 198.2634}
-,
-  {"lang": "Python", "benchmark": "JSON Parse", "time_ms": 237.9154}
-,
-  {"lang": "Python", "benchmark": "String Concat", "time_ms": 13.1866}
-,
-  {"lang": "Go", "benchmark": "Fibonacci(30)", "time_ms": 5.6000}
-,
-  {"lang": "Go", "benchmark": "JSON Parse", "time_ms": 287.2000}
-,
-  {"lang": "Go", "benchmark": "String Concat", "time_ms": 2.6000}
+  { "lang": "TS", "benchmark": "Fibonacci(30)", "time_ms": 18.6875 },
+  { "lang": "TS", "benchmark": "JSON Parse", "time_ms": 102.5325 },
+  { "lang": "TS", "benchmark": "String Concat", "time_ms": 11.0789 },
+  { "lang": "Python", "benchmark": "Fibonacci(30)", "time_ms": 198.2634 },
+  { "lang": "Python", "benchmark": "JSON Parse", "time_ms": 237.9154 },
+  { "lang": "Python", "benchmark": "String Concat", "time_ms": 13.1866 },
+  { "lang": "Go", "benchmark": "Fibonacci(30)", "time_ms": 5.6 },
+  { "lang": "Go", "benchmark": "JSON Parse", "time_ms": 287.2 },
+  { "lang": "Go", "benchmark": "String Concat", "time_ms": 2.6 }
 ]

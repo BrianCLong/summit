@@ -24,10 +24,7 @@
   "allowed_operations": ["create", "edit"],
   "verification_requirements": {
     "tier": "C",
-    "artifacts": [
-      "ci-council-evidence workflow output",
-      "validator console output"
-    ]
+    "artifacts": ["ci-council-evidence workflow output", "validator console output"]
   },
   "debt_budget": {
     "permitted": 0,

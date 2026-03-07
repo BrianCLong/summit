@@ -1,11 +1,23 @@
 {
-  "consumer": {"name": "gateway"},
-  "provider": {"name": "prov-ledger"},
+  "consumer": { "name": "gateway" },
+  "provider": { "name": "prov-ledger" },
   "interactions": [
     {
       "description": "register a claim",
-      "request": {"method": "POST", "path": "/claim", "body": {"evidenceId": "ev_123", "assertion": "string"}},
-      "response": {"status": 201, "body": {"id": "clm_123", "hash": "sha256:...", "createdAt": "2025-01-01T00:00:00Z", "evidenceId": "ev_123"}}
+      "request": {
+        "method": "POST",
+        "path": "/claim",
+        "body": { "evidenceId": "ev_123", "assertion": "string" }
+      },
+      "response": {
+        "status": 201,
+        "body": {
+          "id": "clm_123",
+          "hash": "sha256:...",
+          "createdAt": "2025-01-01T00:00:00Z",
+          "evidenceId": "ev_123"
+        }
+      }
     }
   ]
 }

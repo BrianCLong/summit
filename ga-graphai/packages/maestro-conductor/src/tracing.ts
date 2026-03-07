@@ -1,4 +1,4 @@
-import type { ExecutionTrace, TraceEntry, TraceStatus } from './types';
+import type { ExecutionTrace, TraceEntry, TraceStatus } from "./types";
 
 export class ExecutionTracer {
   private readonly traces = new Map<string, ExecutionTrace>();
@@ -7,7 +7,7 @@ export class ExecutionTracer {
     const trace: ExecutionTrace = {
       taskId,
       intent,
-      status: 'running',
+      status: "running",
       entries: [],
       startedAt: new Date(),
     };

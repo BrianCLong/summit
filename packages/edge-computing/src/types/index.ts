@@ -1,40 +1,40 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 /**
  * Edge node status enumeration
  */
 export enum EdgeNodeStatus {
-  ONLINE = 'online',
-  OFFLINE = 'offline',
-  DEGRADED = 'degraded',
-  MAINTENANCE = 'maintenance',
-  PROVISIONING = 'provisioning',
-  DECOMMISSIONED = 'decommissioned'
+  ONLINE = "online",
+  OFFLINE = "offline",
+  DEGRADED = "degraded",
+  MAINTENANCE = "maintenance",
+  PROVISIONING = "provisioning",
+  DECOMMISSIONED = "decommissioned",
 }
 
 /**
  * Edge node health status
  */
 export enum HealthStatus {
-  HEALTHY = 'healthy',
-  UNHEALTHY = 'unhealthy',
-  WARNING = 'warning',
-  UNKNOWN = 'unknown'
+  HEALTHY = "healthy",
+  UNHEALTHY = "unhealthy",
+  WARNING = "warning",
+  UNKNOWN = "unknown",
 }
 
 /**
  * Edge device types
  */
 export enum EdgeDeviceType {
-  GATEWAY = 'gateway',
-  COMPUTE_NODE = 'compute_node',
-  IOT_DEVICE = 'iot_device',
-  SENSOR = 'sensor',
-  ACTUATOR = 'actuator',
-  EDGE_SERVER = 'edge_server',
-  JETSON = 'jetson',
-  CORAL = 'coral',
-  CUSTOM = 'custom'
+  GATEWAY = "gateway",
+  COMPUTE_NODE = "compute_node",
+  IOT_DEVICE = "iot_device",
+  SENSOR = "sensor",
+  ACTUATOR = "actuator",
+  EDGE_SERVER = "edge_server",
+  JETSON = "jetson",
+  CORAL = "coral",
+  CUSTOM = "custom",
 }
 
 /**
@@ -114,7 +114,7 @@ export interface EdgeNodeConfig {
     sync: string;
   };
   authentication: {
-    type: 'jwt' | 'mtls' | 'api-key';
+    type: "jwt" | "mtls" | "api-key";
     credentials: Record<string, string>;
   };
   features: {
@@ -130,7 +130,7 @@ export interface EdgeNodeConfig {
   };
   sync: {
     interval: number; // seconds
-    priority: 'high' | 'medium' | 'low';
+    priority: "high" | "medium" | "low";
     bandwidth: number; // bps
   };
 }
@@ -144,7 +144,7 @@ export interface EdgeCluster {
   region: string;
   nodes: string[]; // node IDs
   loadBalancer: {
-    algorithm: 'round-robin' | 'least-connections' | 'ip-hash' | 'weighted';
+    algorithm: "round-robin" | "least-connections" | "ip-hash" | "weighted";
     healthCheckInterval: number;
   };
   autoscaling: {
@@ -165,7 +165,7 @@ export interface EdgeDeployment {
   name: string;
   version: string;
   image: string;
-  runtime: 'docker' | 'k3s' | 'wasm' | 'native';
+  runtime: "docker" | "k3s" | "wasm" | "native";
   resources: {
     cpuRequest: number;
     cpuLimit: number;
@@ -195,18 +195,18 @@ export interface EdgeDeployment {
  */
 export interface EdgeTask {
   id: string;
-  type: 'inference' | 'training' | 'analytics' | 'sync' | 'custom';
-  priority: 'critical' | 'high' | 'medium' | 'low';
+  type: "inference" | "training" | "analytics" | "sync" | "custom";
+  priority: "critical" | "high" | "medium" | "low";
   payload: unknown;
   targetNodes: string[];
   deadline?: Date;
   retryPolicy: {
     maxAttempts: number;
-    backoff: 'exponential' | 'linear' | 'fixed';
+    backoff: "exponential" | "linear" | "fixed";
     initialDelay: number;
   };
   createdAt: Date;
-  status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
+  status: "pending" | "running" | "completed" | "failed" | "cancelled";
   result?: unknown;
   error?: string;
 }
@@ -217,7 +217,7 @@ export interface EdgeTask {
 export interface EdgeMetric {
   nodeId: string;
   timestamp: Date;
-  type: 'cpu' | 'memory' | 'storage' | 'network' | 'latency' | 'custom';
+  type: "cpu" | "memory" | "storage" | "network" | "latency" | "custom";
   value: number;
   unit: string;
   tags?: Record<string, string>;
@@ -229,8 +229,8 @@ export interface EdgeMetric {
 export interface EdgeEvent {
   id: string;
   nodeId: string;
-  type: 'node-online' | 'node-offline' | 'health-change' | 'deployment' | 'error' | 'custom';
-  severity: 'info' | 'warning' | 'error' | 'critical';
+  type: "node-online" | "node-offline" | "health-change" | "deployment" | "error" | "custom";
+  severity: "info" | "warning" | "error" | "critical";
   message: string;
   metadata?: Record<string, unknown>;
   timestamp: Date;
@@ -242,13 +242,13 @@ export interface EdgeEvent {
 export interface SyncQueueItem {
   id: string;
   nodeId: string;
-  operation: 'upload' | 'download' | 'delete';
-  resourceType: 'model' | 'data' | 'config' | 'logs';
+  operation: "upload" | "download" | "delete";
+  resourceType: "model" | "data" | "config" | "logs";
   resourceId: string;
   priority: number;
   size: number; // bytes
   retries: number;
-  status: 'queued' | 'syncing' | 'completed' | 'failed';
+  status: "queued" | "syncing" | "completed" | "failed";
   createdAt: Date;
   completedAt?: Date;
   error?: string;
@@ -266,35 +266,37 @@ export const GeoLocationSchema = z.object({
   region: z.string().optional(),
   city: z.string().optional(),
   datacenter: z.string().optional(),
-  zone: z.string().optional()
+  zone: z.string().optional(),
 });
 
 export const ResourceCapacitySchema = z.object({
   cpu: z.object({
     cores: z.number().int().positive(),
     frequency: z.number().positive(),
-    utilization: z.number().min(0).max(100)
+    utilization: z.number().min(0).max(100),
   }),
   memory: z.object({
     total: z.number().int().positive(),
     available: z.number().int().nonnegative(),
-    utilization: z.number().min(0).max(100)
+    utilization: z.number().min(0).max(100),
   }),
   storage: z.object({
     total: z.number().int().positive(),
     available: z.number().int().nonnegative(),
-    utilization: z.number().min(0).max(100)
+    utilization: z.number().min(0).max(100),
   }),
   network: z.object({
     bandwidth: z.number().nonnegative(),
     latency: z.number().nonnegative(),
-    packetLoss: z.number().min(0).max(100)
+    packetLoss: z.number().min(0).max(100),
   }),
-  gpu: z.object({
-    model: z.string(),
-    memory: z.number().int().positive(),
-    utilization: z.number().min(0).max(100)
-  }).optional()
+  gpu: z
+    .object({
+      model: z.string(),
+      memory: z.number().int().positive(),
+      utilization: z.number().min(0).max(100),
+    })
+    .optional(),
 });
 
 export const EdgeNodeMetadataSchema = z.object({
@@ -310,7 +312,7 @@ export const EdgeNodeMetadataSchema = z.object({
   clusterId: z.string().uuid().optional(),
   registeredAt: z.date(),
   lastHeartbeat: z.date(),
-  uptime: z.number().nonnegative()
+  uptime: z.number().nonnegative(),
 });
 
 export type EdgeNodeMetadataInput = z.infer<typeof EdgeNodeMetadataSchema>;

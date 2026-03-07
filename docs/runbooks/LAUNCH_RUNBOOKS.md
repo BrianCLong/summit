@@ -7,6 +7,7 @@
 **Exec Escalation**: `cto-emergency-line`
 
 **Escalation Policy:**
+
 1.  **ACK** within 15m.
 2.  **Resolve** or **Escalate** to Secondary within 30m.
 3.  **Exec Escalate** if customer impact > 1h.
@@ -20,6 +21,7 @@
 **Trigger**: Prometheus Alert `HighErrorRate` > 1% for 5m.
 
 **Steps**:
+
 1.  Check `SystemHUD` dashboard for specific failing service.
 2.  Check `scripts/launch_day_simulation.ts` logs if running.
 3.  **Rollback**: If caused by recent deployment, execute `make rollback`.
@@ -34,6 +36,7 @@
 **Trigger**: Customer ticket or support escalation.
 
 **Steps**:
+
 1.  Verify usage in `QuotaManager` logs (`server/src/lib/resources/quota-manager.ts`).
 2.  Cross-reference with `ProvenanceLedger`.
 3.  If discrepancy found, issue credit and flag for `post-launch-audit`.
@@ -43,6 +46,7 @@
 **Trigger**: `RegionMismatch` alert from Compliance Service.
 
 **Steps**:
+
 1.  Identify tenant ID.
 2.  Check configured region vs. actual data storage location.
 3.  **Containment**: Suspend tenant write access immediately.
@@ -56,6 +60,7 @@
 **Objective**: Sever all external access in case of catastrophic compromise.
 
 **Steps**:
+
 1.  **Approval**: Requires CEO or CTO verbal confirmation.
 2.  **Execute**:
     ```bash

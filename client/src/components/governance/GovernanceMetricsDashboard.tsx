@@ -4,7 +4,7 @@
  * Implements p95 < 2s latency requirement
  */
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import {
   Box,
   Paper,
@@ -36,8 +36,8 @@ import {
   TableHead,
   TableRow,
   Button,
-} from '@mui/material';
-import Grid from '@mui/material/Grid';
+} from "@mui/material";
+import Grid from "@mui/material/Grid";
 import {
   TrendingUp,
   TrendingDown,
@@ -55,8 +55,8 @@ import {
   Settings,
   Notifications,
   Speed,
-} from '@mui/icons-material';
-import { gql, useQuery, useSubscription } from '@apollo/client';
+} from "@mui/icons-material";
+import { gql, useQuery, useSubscription } from "@apollo/client";
 
 // GraphQL Queries
 const GET_GOVERNANCE_METRICS = gql`
@@ -200,32 +200,23 @@ interface TimeRange {
 
 interface GovernanceMetricsDashboardProps {
   tenantId: string;
-  onExport?: (format: 'csv' | 'json' | 'pdf') => void;
+  onExport?: (format: "csv" | "json" | "pdf") => void;
   realTimeEnabled?: boolean;
 }
 
 type TabValue = 0 | 1 | 2 | 3 | 4;
 
 // Helper Components
-const TrendIndicator: React.FC<{ trend: string; value?: number }> = ({
-  trend,
-  value,
-}) => {
-  const Icon =
-    trend === 'UP'
-      ? TrendingUp
-      : trend === 'DOWN'
-        ? TrendingDown
-        : TrendingFlat;
-  const color =
-    trend === 'UP' ? 'success.main' : trend === 'DOWN' ? 'error.main' : 'grey.500';
+const TrendIndicator: React.FC<{ trend: string; value?: number }> = ({ trend, value }) => {
+  const Icon = trend === "UP" ? TrendingUp : trend === "DOWN" ? TrendingDown : TrendingFlat;
+  const color = trend === "UP" ? "success.main" : trend === "DOWN" ? "error.main" : "grey.500";
 
   return (
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+    <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
       <Icon fontSize="small" sx={{ color }} />
       {value !== undefined && (
         <Typography variant="body2" sx={{ color }}>
-          {value > 0 ? '+' : ''}
+          {value > 0 ? "+" : ""}
           {value.toFixed(1)}%
         </Typography>
       )}
@@ -234,17 +225,17 @@ const TrendIndicator: React.FC<{ trend: string; value?: number }> = ({
 };
 
 const SeverityChip: React.FC<{ severity: string }> = ({ severity }) => {
-  const colorMap: Record<string, 'error' | 'warning' | 'info' | 'success'> = {
-    CRITICAL: 'error',
-    HIGH: 'warning',
-    MEDIUM: 'info',
-    LOW: 'success',
+  const colorMap: Record<string, "error" | "warning" | "info" | "success"> = {
+    CRITICAL: "error",
+    HIGH: "warning",
+    MEDIUM: "info",
+    LOW: "success",
   };
 
   return (
     <Chip
       label={severity}
-      color={colorMap[severity] || 'default'}
+      color={colorMap[severity] || "default"}
       size="small"
       sx={{ fontWeight: 600 }}
     />
@@ -252,17 +243,17 @@ const SeverityChip: React.FC<{ severity: string }> = ({ severity }) => {
 };
 
 const StatusChip: React.FC<{ status: string }> = ({ status }) => {
-  const colorMap: Record<string, 'error' | 'warning' | 'success' | 'default'> = {
-    OPEN: 'error',
-    IN_PROGRESS: 'warning',
-    MITIGATED: 'success',
-    ACCEPTED: 'default',
+  const colorMap: Record<string, "error" | "warning" | "success" | "default"> = {
+    OPEN: "error",
+    IN_PROGRESS: "warning",
+    MITIGATED: "success",
+    ACCEPTED: "default",
   };
 
   return (
     <Chip
-      label={status.replace('_', ' ')}
-      color={colorMap[status] || 'default'}
+      label={status.replace("_", " ")}
+      color={colorMap[status] || "default"}
       size="small"
       variant="outlined"
     />
@@ -270,20 +261,22 @@ const StatusChip: React.FC<{ status: string }> = ({ status }) => {
 };
 
 // Main Dashboard Component
-export const GovernanceMetricsDashboard: React.FC<
-  GovernanceMetricsDashboardProps
-> = ({ tenantId, onExport, realTimeEnabled = true }) => {
+export const GovernanceMetricsDashboard: React.FC<GovernanceMetricsDashboardProps> = ({
+  tenantId,
+  onExport,
+  realTimeEnabled = true,
+}) => {
   const [activeTab, setActiveTab] = useState<TabValue>(0);
-  const [timeRangeLabel, setTimeRangeLabel] = useState<string>('24h');
+  const [timeRangeLabel, setTimeRangeLabel] = useState<string>("24h");
   const [autoRefresh, setAutoRefresh] = useState(realTimeEnabled);
 
   const timeRange: TimeRange = useMemo(() => {
     const now = Date.now();
     const ranges: Record<string, number> = {
-      '1h': 60 * 60 * 1000,
-      '24h': 24 * 60 * 60 * 1000,
-      '7d': 7 * 24 * 60 * 60 * 1000,
-      '30d': 30 * 24 * 60 * 60 * 1000,
+      "1h": 60 * 60 * 1000,
+      "24h": 24 * 60 * 60 * 1000,
+      "7d": 7 * 24 * 60 * 60 * 1000,
+      "30d": 30 * 24 * 60 * 60 * 1000,
     };
     return {
       start: now - ranges[timeRangeLabel],
@@ -322,9 +315,9 @@ export const GovernanceMetricsDashboard: React.FC<
     return (
       <Box
         sx={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
           minHeight: 400,
         }}
       >
@@ -343,13 +336,13 @@ export const GovernanceMetricsDashboard: React.FC<
   }
 
   return (
-    <Box sx={{ p: 3, maxWidth: '100%', overflow: 'hidden' }}>
+    <Box sx={{ p: 3, maxWidth: "100%", overflow: "hidden" }}>
       {/* Header */}
       <Box
         sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
           mb: 3,
         }}
       >
@@ -358,10 +351,8 @@ export const GovernanceMetricsDashboard: React.FC<
             AI Governance Dashboard
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            Last updated:{' '}
-            {metrics?.timestamp
-              ? new Date(metrics.timestamp).toLocaleString()
-              : 'N/A'}
+            Last updated:{" "}
+            {metrics?.timestamp ? new Date(metrics.timestamp).toLocaleString() : "N/A"}
           </Typography>
         </Box>
 
@@ -398,7 +389,7 @@ export const GovernanceMetricsDashboard: React.FC<
           </Tooltip>
 
           <Tooltip title="Export Data">
-            <IconButton onClick={() => onExport?.('csv')}>
+            <IconButton onClick={() => onExport?.("csv")}>
               <Download />
             </IconButton>
           </Tooltip>
@@ -429,14 +420,14 @@ export const GovernanceMetricsDashboard: React.FC<
           <AlertTitle>Compliance Issues Detected</AlertTitle>
           {!metrics.overallCompliance.validationMeetsODNI && (
             <Typography variant="body2">
-              ODNI Validation Rate below 85% target (current:{' '}
+              ODNI Validation Rate below 85% target (current:{" "}
               {metrics.validationRate?.validationRate?.toFixed(1)}%)
             </Typography>
           )}
           {metrics.overallCompliance.criticalGapsCount > 0 && (
             <Typography variant="body2">
-              {metrics.overallCompliance.criticalGapsCount} critical compliance
-              gap(s) require immediate attention
+              {metrics.overallCompliance.criticalGapsCount} critical compliance gap(s) require
+              immediate attention
             </Typography>
           )}
         </Alert>
@@ -451,16 +442,16 @@ export const GovernanceMetricsDashboard: React.FC<
             sx={{
               borderLeft: 4,
               borderColor: metrics?.validationRate?.meetsODNIRequirement
-                ? 'success.main'
-                : 'error.main',
+                ? "success.main"
+                : "error.main",
             }}
           >
             <CardContent>
               <Box
                 sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
                   mb: 1,
                 }}
               >
@@ -470,20 +461,16 @@ export const GovernanceMetricsDashboard: React.FC<
                 <Chip
                   label="85% Target"
                   size="small"
-                  color={
-                    metrics?.validationRate?.meetsODNIRequirement
-                      ? 'success'
-                      : 'error'
-                  }
+                  color={metrics?.validationRate?.meetsODNIRequirement ? "success" : "error"}
                 />
               </Box>
               <Typography variant="h4" sx={{ fontWeight: 600, mb: 1 }}>
                 {metrics?.validationRate?.validationRate?.toFixed(1) || 0}%
               </Typography>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <TrendIndicator trend={metrics?.validationRate?.trend || 'STABLE'} />
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <TrendIndicator trend={metrics?.validationRate?.trend || "STABLE"} />
                 <Typography variant="body2" color="text.secondary">
-                  {metrics?.validationRate?.validatedDecisions || 0} /{' '}
+                  {metrics?.validationRate?.validatedDecisions || 0} /{" "}
                   {metrics?.validationRate?.totalDecisions || 0} decisions
                 </Typography>
               </Box>
@@ -498,32 +485,32 @@ export const GovernanceMetricsDashboard: React.FC<
             sx={{
               borderLeft: 4,
               borderColor:
-                metrics?.riskScore?.riskLevel === 'LOW'
-                  ? 'success.main'
-                  : metrics?.riskScore?.riskLevel === 'MEDIUM'
-                    ? 'warning.main'
-                    : 'error.main',
+                metrics?.riskScore?.riskLevel === "LOW"
+                  ? "success.main"
+                  : metrics?.riskScore?.riskLevel === "MEDIUM"
+                    ? "warning.main"
+                    : "error.main",
             }}
           >
             <CardContent>
               <Box
                 sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
                   mb: 1,
                 }}
               >
                 <Typography variant="body2" color="text.secondary">
                   Risk Score
                 </Typography>
-                <SeverityChip severity={metrics?.riskScore?.riskLevel || 'LOW'} />
+                <SeverityChip severity={metrics?.riskScore?.riskLevel || "LOW"} />
               </Box>
               <Typography variant="h4" sx={{ fontWeight: 600, mb: 1 }}>
                 {metrics?.riskScore?.overall?.toFixed(0) || 0}
               </Typography>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <TrendIndicator trend={metrics?.riskScore?.trend || 'STABLE'} />
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <TrendIndicator trend={metrics?.riskScore?.trend || "STABLE"} />
                 <Typography variant="body2" color="text.secondary">
                   {metrics?.riskScore?.components?.length || 0} components tracked
                 </Typography>
@@ -534,13 +521,13 @@ export const GovernanceMetricsDashboard: React.FC<
 
         {/* Active Incidents Card */}
         <Grid xs={12} sm={6} md={3}>
-          <Card elevation={2} sx={{ borderLeft: 4, borderColor: 'warning.main' }}>
+          <Card elevation={2} sx={{ borderLeft: 4, borderColor: "warning.main" }}>
             <CardContent>
               <Box
                 sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
                   mb: 1,
                 }}
               >
@@ -553,10 +540,8 @@ export const GovernanceMetricsDashboard: React.FC<
                 {(metrics?.incidentTrends?.current?.totalIncidents || 0) -
                   (metrics?.incidentTrends?.current?.resolvedIncidents || 0)}
               </Typography>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <TrendIndicator
-                  trend={metrics?.incidentTrends?.trend || 'STABLE'}
-                />
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <TrendIndicator trend={metrics?.incidentTrends?.trend || "STABLE"} />
                 <Typography variant="body2" color="text.secondary">
                   MTTR: {Math.round((metrics?.incidentTrends?.current?.mttr || 0) / 60)}m
                 </Typography>
@@ -573,16 +558,16 @@ export const GovernanceMetricsDashboard: React.FC<
               borderLeft: 4,
               borderColor:
                 (metrics?.overallCompliance?.criticalGapsCount || 0) > 0
-                  ? 'error.main'
-                  : 'success.main',
+                  ? "error.main"
+                  : "success.main",
             }}
           >
             <CardContent>
               <Box
                 sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
                   mb: 1,
                 }}
               >
@@ -591,16 +576,14 @@ export const GovernanceMetricsDashboard: React.FC<
                 </Typography>
                 <Gavel
                   color={
-                    (metrics?.overallCompliance?.criticalGapsCount || 0) > 0
-                      ? 'error'
-                      : 'success'
+                    (metrics?.overallCompliance?.criticalGapsCount || 0) > 0 ? "error" : "success"
                   }
                 />
               </Box>
               <Typography variant="h4" sx={{ fontWeight: 600, mb: 1 }}>
                 {metrics?.complianceGaps?.length || 0}
               </Typography>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                 <Typography variant="body2" color="error.main">
                   {metrics?.overallCompliance?.criticalGapsCount || 0} critical
                 </Typography>
@@ -627,35 +610,15 @@ export const GovernanceMetricsDashboard: React.FC<
       </Tabs>
 
       {/* Tab Content */}
-      {activeTab === 0 && (
-        <OverviewTab
-          metrics={metrics}
-        />
-      )}
+      {activeTab === 0 && <OverviewTab metrics={metrics} />}
 
-      {activeTab === 1 && (
-        <ValidationTab
-          validationMetrics={metrics?.validationRate}
-        />
-      )}
+      {activeTab === 1 && <ValidationTab validationMetrics={metrics?.validationRate} />}
 
-      {activeTab === 2 && (
-        <IncidentsTab
-          incidentTrends={metrics?.incidentTrends}
-        />
-      )}
+      {activeTab === 2 && <IncidentsTab incidentTrends={metrics?.incidentTrends} />}
 
-      {activeTab === 3 && (
-        <ComplianceGapsTab
-          gaps={metrics?.complianceGaps || []}
-        />
-      )}
+      {activeTab === 3 && <ComplianceGapsTab gaps={metrics?.complianceGaps || []} />}
 
-      {activeTab === 4 && (
-        <ModelGovernanceTab
-          modelGovernance={metrics?.modelGovernance}
-        />
-      )}
+      {activeTab === 4 && <ModelGovernanceTab modelGovernance={metrics?.modelGovernance} />}
     </Box>
   );
 };
@@ -709,8 +672,8 @@ const OverviewTab: React.FC<{ metrics: any }> = ({ metrics }) => (
             <Box key={component.name}>
               <Box
                 sx={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
+                  display: "flex",
+                  justifyContent: "space-between",
                   mb: 0.5,
                 }}
               >
@@ -723,11 +686,11 @@ const OverviewTab: React.FC<{ metrics: any }> = ({ metrics }) => (
                 variant="determinate"
                 value={component.score}
                 color={
-                  component.status === 'HEALTHY'
-                    ? 'success'
-                    : component.status === 'WARNING'
-                      ? 'warning'
-                      : 'error'
+                  component.status === "HEALTHY"
+                    ? "success"
+                    : component.status === "WARNING"
+                      ? "warning"
+                      : "error"
                 }
                 sx={{ height: 8, borderRadius: 4 }}
               />
@@ -759,10 +722,8 @@ const OverviewTab: React.FC<{ metrics: any }> = ({ metrics }) => (
             <TableBody>
               {metrics?.auditTrail?.slice(0, 10).map((event: any) => (
                 <TableRow key={event.id}>
-                  <TableCell>
-                    {new Date(event.timestamp).toLocaleTimeString()}
-                  </TableCell>
-                  <TableCell>{event.eventType.replace(/_/g, ' ')}</TableCell>
+                  <TableCell>{new Date(event.timestamp).toLocaleTimeString()}</TableCell>
+                  <TableCell>{event.eventType.replace(/_/g, " ")}</TableCell>
                   <TableCell>{event.actor}</TableCell>
                   <TableCell>{event.resource}</TableCell>
                   <TableCell>{event.action}</TableCell>
@@ -771,11 +732,11 @@ const OverviewTab: React.FC<{ metrics: any }> = ({ metrics }) => (
                       label={event.outcome}
                       size="small"
                       color={
-                        event.outcome === 'SUCCESS'
-                          ? 'success'
-                          : event.outcome === 'FAILURE'
-                            ? 'error'
-                            : 'warning'
+                        event.outcome === "SUCCESS"
+                          ? "success"
+                          : event.outcome === "FAILURE"
+                            ? "error"
+                            : "warning"
                       }
                     />
                   </TableCell>
@@ -792,27 +753,19 @@ const OverviewTab: React.FC<{ metrics: any }> = ({ metrics }) => (
   </Grid>
 );
 
-const ValidationTab: React.FC<{ validationMetrics: any }> = ({
-  validationMetrics,
-}) => (
+const ValidationTab: React.FC<{ validationMetrics: any }> = ({ validationMetrics }) => (
   <Grid container spacing={3}>
     <Grid xs={12}>
       <Alert
-        severity={validationMetrics?.meetsODNIRequirement ? 'success' : 'error'}
-        icon={
-          validationMetrics?.meetsODNIRequirement ? (
-            <CheckCircle />
-          ) : (
-            <WarningIcon />
-          )
-        }
+        severity={validationMetrics?.meetsODNIRequirement ? "success" : "error"}
+        icon={validationMetrics?.meetsODNIRequirement ? <CheckCircle /> : <WarningIcon />}
       >
         <AlertTitle>
-          ODNI 85% Validation Requirement:{' '}
-          {validationMetrics?.meetsODNIRequirement ? 'Met' : 'Not Met'}
+          ODNI 85% Validation Requirement:{" "}
+          {validationMetrics?.meetsODNIRequirement ? "Met" : "Not Met"}
         </AlertTitle>
-        Current validation rate: {validationMetrics?.validationRate?.toFixed(2)}%
-        (Target: {validationMetrics?.targetRate}%)
+        Current validation rate: {validationMetrics?.validationRate?.toFixed(2)}% (Target:{" "}
+        {validationMetrics?.targetRate}%)
       </Alert>
     </Grid>
 
@@ -822,28 +775,24 @@ const ValidationTab: React.FC<{ validationMetrics: any }> = ({
           Validation Summary
         </Typography>
         <Stack spacing={2}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+          <Box sx={{ display: "flex", justifyContent: "space-between" }}>
             <Typography>Total Decisions</Typography>
             <Typography fontWeight={600}>
               {validationMetrics?.totalDecisions?.toLocaleString()}
             </Typography>
           </Box>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+          <Box sx={{ display: "flex", justifyContent: "space-between" }}>
             <Typography>Validated Decisions</Typography>
             <Typography fontWeight={600}>
               {validationMetrics?.validatedDecisions?.toLocaleString()}
             </Typography>
           </Box>
           <Divider />
-          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+          <Box sx={{ display: "flex", justifyContent: "space-between" }}>
             <Typography>Validation Rate</Typography>
             <Typography
               fontWeight={600}
-              color={
-                validationMetrics?.meetsODNIRequirement
-                  ? 'success.main'
-                  : 'error.main'
-              }
+              color={validationMetrics?.meetsODNIRequirement ? "success.main" : "error.main"}
             >
               {validationMetrics?.validationRate?.toFixed(2)}%
             </Typography>
@@ -900,19 +849,17 @@ const IncidentsTab: React.FC<{ incidentTrends: any }> = ({ incidentTrends }) => 
           Current Period
         </Typography>
         <Stack spacing={2}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+          <Box sx={{ display: "flex", justifyContent: "space-between" }}>
             <Typography>Total Incidents</Typography>
-            <Typography fontWeight={600}>
-              {incidentTrends?.current?.totalIncidents || 0}
-            </Typography>
+            <Typography fontWeight={600}>{incidentTrends?.current?.totalIncidents || 0}</Typography>
           </Box>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+          <Box sx={{ display: "flex", justifyContent: "space-between" }}>
             <Typography>Resolved</Typography>
             <Typography fontWeight={600} color="success.main">
               {incidentTrends?.current?.resolvedIncidents || 0}
             </Typography>
           </Box>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+          <Box sx={{ display: "flex", justifyContent: "space-between" }}>
             <Typography>MTTR</Typography>
             <Typography fontWeight={600}>
               {Math.round((incidentTrends?.current?.mttr || 0) / 60)} min
@@ -929,10 +876,7 @@ const IncidentsTab: React.FC<{ incidentTrends: any }> = ({ incidentTrends }) => 
         </Typography>
         <Stack spacing={2}>
           {incidentTrends?.bySeverity?.map((item: any) => (
-            <Box
-              key={item.severity}
-              sx={{ display: 'flex', justifyContent: 'space-between' }}
-            >
+            <Box key={item.severity} sx={{ display: "flex", justifyContent: "space-between" }}>
               <SeverityChip severity={item.severity} />
               <Typography fontWeight={600}>
                 {item.count} ({item.percentOfTotal?.toFixed(1)}%)
@@ -950,12 +894,9 @@ const IncidentsTab: React.FC<{ incidentTrends: any }> = ({ incidentTrends }) => 
         </Typography>
         <Stack spacing={2}>
           {incidentTrends?.byCategory?.map((item: any) => (
-            <Box
-              key={item.name}
-              sx={{ display: 'flex', justifyContent: 'space-between' }}
-            >
+            <Box key={item.name} sx={{ display: "flex", justifyContent: "space-between" }}>
               <Typography>{item.name}</Typography>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                 <Typography fontWeight={600}>{item.count}</Typography>
                 <TrendIndicator trend={item.trend} />
               </Box>
@@ -973,9 +914,7 @@ const ComplianceGapsTab: React.FC<{ gaps: any[] }> = ({ gaps }) => (
       Open Compliance Gaps ({gaps.length})
     </Typography>
     {gaps.length === 0 ? (
-      <Alert severity="success">
-        No open compliance gaps. All requirements are met.
-      </Alert>
+      <Alert severity="success">No open compliance gaps. All requirements are met.</Alert>
     ) : (
       <TableContainer>
         <Table>
@@ -996,11 +935,11 @@ const ComplianceGapsTab: React.FC<{ gaps: any[] }> = ({ gaps }) => (
                 key={gap.id}
                 sx={{
                   bgcolor:
-                    gap.severity === 'CRITICAL'
-                      ? 'error.light'
-                      : gap.severity === 'HIGH'
-                        ? 'warning.light'
-                        : 'inherit',
+                    gap.severity === "CRITICAL"
+                      ? "error.light"
+                      : gap.severity === "HIGH"
+                        ? "warning.light"
+                        : "inherit",
                 }}
               >
                 <TableCell>{gap.framework}</TableCell>
@@ -1020,7 +959,7 @@ const ComplianceGapsTab: React.FC<{ gaps: any[] }> = ({ gaps }) => (
                   {gap.daysUntilDue !== null && (
                     <Typography
                       variant="body2"
-                      color={gap.daysUntilDue < 0 ? 'error.main' : 'text.secondary'}
+                      color={gap.daysUntilDue < 0 ? "error.main" : "text.secondary"}
                     >
                       {gap.daysUntilDue < 0
                         ? `${Math.abs(gap.daysUntilDue)} days overdue`
@@ -1028,7 +967,7 @@ const ComplianceGapsTab: React.FC<{ gaps: any[] }> = ({ gaps }) => (
                     </Typography>
                   )}
                 </TableCell>
-                <TableCell>{gap.owner || 'Unassigned'}</TableCell>
+                <TableCell>{gap.owner || "Unassigned"}</TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -1038,9 +977,7 @@ const ComplianceGapsTab: React.FC<{ gaps: any[] }> = ({ gaps }) => (
   </Paper>
 );
 
-const ModelGovernanceTab: React.FC<{ modelGovernance: any }> = ({
-  modelGovernance,
-}) => (
+const ModelGovernanceTab: React.FC<{ modelGovernance: any }> = ({ modelGovernance }) => (
   <Grid container spacing={3}>
     <Grid xs={12} md={6}>
       <Paper sx={{ p: 3 }}>
@@ -1048,32 +985,30 @@ const ModelGovernanceTab: React.FC<{ modelGovernance: any }> = ({
           Model Status
         </Typography>
         <Stack spacing={2}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+          <Box sx={{ display: "flex", justifyContent: "space-between" }}>
             <Typography>Total Models</Typography>
-            <Typography fontWeight={600}>
-              {modelGovernance?.totalModels || 0}
-            </Typography>
+            <Typography fontWeight={600}>{modelGovernance?.totalModels || 0}</Typography>
           </Box>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+          <Box sx={{ display: "flex", justifyContent: "space-between" }}>
             <Typography>Approved</Typography>
             <Typography fontWeight={600} color="success.main">
               {modelGovernance?.approvedModels || 0}
             </Typography>
           </Box>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+          <Box sx={{ display: "flex", justifyContent: "space-between" }}>
             <Typography>Pending Review</Typography>
             <Typography fontWeight={600} color="warning.main">
               {modelGovernance?.pendingReview || 0}
             </Typography>
           </Box>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+          <Box sx={{ display: "flex", justifyContent: "space-between" }}>
             <Typography>Rejected</Typography>
             <Typography fontWeight={600} color="error.main">
               {modelGovernance?.rejectedModels || 0}
             </Typography>
           </Box>
           <Divider />
-          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+          <Box sx={{ display: "flex", justifyContent: "space-between" }}>
             <Typography>Approval Rate</Typography>
             <Typography fontWeight={600}>
               {modelGovernance?.approvalRate?.toFixed(1) || 0}%
@@ -1089,26 +1024,26 @@ const ModelGovernanceTab: React.FC<{ modelGovernance: any }> = ({
           Deployment Metrics
         </Typography>
         <Stack spacing={2}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+          <Box sx={{ display: "flex", justifyContent: "space-between" }}>
             <Typography>Total Deployments</Typography>
             <Typography fontWeight={600}>
               {modelGovernance?.deploymentMetrics?.totalDeployments || 0}
             </Typography>
           </Box>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+          <Box sx={{ display: "flex", justifyContent: "space-between" }}>
             <Typography>Successful</Typography>
             <Typography fontWeight={600} color="success.main">
               {modelGovernance?.deploymentMetrics?.successfulDeployments || 0}
             </Typography>
           </Box>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+          <Box sx={{ display: "flex", justifyContent: "space-between" }}>
             <Typography>Failed</Typography>
             <Typography fontWeight={600} color="error.main">
               {modelGovernance?.deploymentMetrics?.failedDeployments || 0}
             </Typography>
           </Box>
           <Divider />
-          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+          <Box sx={{ display: "flex", justifyContent: "space-between" }}>
             <Typography>Success Rate</Typography>
             <Typography fontWeight={600}>
               {modelGovernance?.deploymentMetrics?.successRate?.toFixed(1) || 0}%

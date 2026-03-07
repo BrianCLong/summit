@@ -3,13 +3,13 @@ name: YAML Linting
 on:
   pull_request:
     paths:
-      - '**.yml'
-      - '**.yaml'
+      - "**.yml"
+      - "**.yaml"
   push:
     branches: [main]
     paths:
-      - '**.yml'
-      - '**.yaml'
+      - "**.yml"
+      - "**.yaml"
   workflow_dispatch:
 
 jobs:

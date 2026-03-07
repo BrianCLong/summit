@@ -1,13 +1,13 @@
-import { EventRecord, EventType } from '../types';
+import { EventRecord, EventType } from "../types";
 
 const eventTypes: EventType[] = [
-  'session_start',
-  'step_start',
-  'tool_exec',
-  'file_read',
-  'file_write',
-  'tests_run',
-  'session_end',
+  "session_start",
+  "step_start",
+  "tool_exec",
+  "file_read",
+  "file_write",
+  "tests_run",
+  "session_end",
 ];
 
 export const isEventType = (value: string): value is EventType =>
@@ -20,5 +20,5 @@ export const validateEventRecord = (record: EventRecord): boolean => {
   if (!isEventType(record.type)) {
     return false;
   }
-  return typeof record.data === 'object' && record.data !== null;
+  return typeof record.data === "object" && record.data !== null;
 };

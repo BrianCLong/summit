@@ -76,13 +76,13 @@ This playbook explains how to bring new employees, contractors, and partners int
 
 ### 1. Pre-Start Checklist (7–10 days before start)
 
-| Task | Owner | Notes |
-| --- | --- | --- |
-| Send welcome email with start date, role summary, and point-of-contact list | People Ops | Include links to `docs/DEVELOPER_ONBOARDING.md` and the new-hire FAQ. |
-| Collect required personal information and equipment preferences | People Ops | Record in HRIS and create hardware provisioning ticket. |
-| Issue agreement packet via e-sign provider | Legal / People Ops | Use the templates in [`docs/legal/AGREEMENTS_TEMPLATES.md`](legal/AGREEMENTS_TEMPLATES.md); confirm jurisdiction-specific modifications with counsel. |
-| Confirm background check and employment eligibility requirements | People Ops | Ensure results are logged before Day 1. |
-| Create onboarding tracker entry | Hiring Manager | Track completion status for agreements, hardware, and systems access. |
+| Task                                                                        | Owner              | Notes                                                                                                                                                 |
+| --------------------------------------------------------------------------- | ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Send welcome email with start date, role summary, and point-of-contact list | People Ops         | Include links to `docs/DEVELOPER_ONBOARDING.md` and the new-hire FAQ.                                                                                 |
+| Collect required personal information and equipment preferences             | People Ops         | Record in HRIS and create hardware provisioning ticket.                                                                                               |
+| Issue agreement packet via e-sign provider                                  | Legal / People Ops | Use the templates in [`docs/legal/AGREEMENTS_TEMPLATES.md`](legal/AGREEMENTS_TEMPLATES.md); confirm jurisdiction-specific modifications with counsel. |
+| Confirm background check and employment eligibility requirements            | People Ops         | Ensure results are logged before Day 1.                                                                                                               |
+| Create onboarding tracker entry                                             | Hiring Manager     | Track completion status for agreements, hardware, and systems access.                                                                                 |
 
 ### 2. Day 1 Priorities
 
@@ -102,12 +102,12 @@ This playbook explains how to bring new employees, contractors, and partners int
 
 Use the agreement templates as the source of truth and capture completion in the onboarding tracker:
 
-| Instrument | Required For | Storage Location | Renewal/Review |
-| --- | --- | --- | --- |
-| Mutual NDA | All employees, contractors, strategic partners | `legal/contracts/<year>/<counterparty>/nda.pdf` | Review annually for active partners |
-| Proprietary Information & Inventions Assignment | Full-time and part-time employees | Same repository, suffix `-piaia.pdf` | Update if role changes materially |
-| Contractor/Partner Confidentiality & IP Agreement | Vendors, agencies, fractional specialists | Same repository, suffix `-contractor-ip.pdf` | Review with each new Statement of Work |
-| Non-Compete (jurisdiction-dependent) | Roles with heightened competitive risk where enforceable | Same repository, suffix `-noncompete.pdf` | Validate enforceability annually |
+| Instrument                                        | Required For                                             | Storage Location                                | Renewal/Review                         |
+| ------------------------------------------------- | -------------------------------------------------------- | ----------------------------------------------- | -------------------------------------- |
+| Mutual NDA                                        | All employees, contractors, strategic partners           | `legal/contracts/<year>/<counterparty>/nda.pdf` | Review annually for active partners    |
+| Proprietary Information & Inventions Assignment   | Full-time and part-time employees                        | Same repository, suffix `-piaia.pdf`            | Update if role changes materially      |
+| Contractor/Partner Confidentiality & IP Agreement | Vendors, agencies, fractional specialists                | Same repository, suffix `-contractor-ip.pdf`    | Review with each new Statement of Work |
+| Non-Compete (jurisdiction-dependent)              | Roles with heightened competitive risk where enforceable | Same repository, suffix `-noncompete.pdf`       | Validate enforceability annually       |
 
 If a template requires modification, collaborate with Legal to document the change in the contract record and update the template library so future packets stay consistent.
 

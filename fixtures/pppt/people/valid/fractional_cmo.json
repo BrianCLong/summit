@@ -1,11 +1,7 @@
 {
   "role": "Fractional CMO",
   "type": "fractional",
-  "responsibilities": [
-    "Develop GTM strategy",
-    "Hire marketing manager",
-    "Oversee brand refresh"
-  ],
+  "responsibilities": ["Develop GTM strategy", "Hire marketing manager", "Oversee brand refresh"],
   "outcomes": [
     {
       "metric": "Qualified Leads",

@@ -11,6 +11,7 @@
 This document contains 11 comprehensive implementation prompts covering the full capability spectrum of the IntelGraph platform, from data ingestion to visualization, analytics, governance, and AI-augmented features.
 
 Each prompt is:
+
 - **Self-contained**: Can be executed independently
 - **Production-focused**: Includes testing, security, and compliance requirements
 - **Architecture-aware**: Designed for the Summit/IntelGraph monorepo structure
@@ -21,20 +22,24 @@ Each prompt is:
 ## Table of Contents
 
 ### Core Infrastructure
+
 1. [Universal Data Ingestion + ETL Assistant](#1-universal-data-ingestion--etl-assistant)
 2. [Canonical Graph Schema with Temporal & Policy Labels](#2-canonical-graph-schema-with-temporal--policy-labels)
 3. [Provenance & Claim Ledger Service](#3-provenance--claim-ledger-service)
 
 ### Entity & Analytics
+
 4. [Entity Resolution Service with Explainability](#4-entity-resolution-service-with-explainability)
 5. [Geo-Temporal Graph & Co-Presence Detection](#5-geo-temporal-graph--co-presence-detection)
 6. [Analytics Suite: Link/Path/Community/Centrality + Pattern Miner](#6-analytics-suite-linkpathcommunitycentrality--pattern-miner)
 
 ### AI/ML Capabilities
+
 7. [AI Copilot: Natural-Language → Cypher/SQL with Guardrails](#7-ai-copilot-natural-language--cyphersql-with-guardrails)
 8. [GraphRAG / Evidence-First RAG with Citations](#8-graphrag--evidence-first-rag-with-citations)
 
 ### Governance & UX
+
 9. [Case Spaces, ABAC/RBAC & Immutable Audit](#9-case-spaces-abacrbac--immutable-audit)
 10. [Tri-Pane Analyst UI (Graph + Timeline + Map)](#10-tri-pane-analyst-ui-graph--timeline--map)
 11. [Runbook / Agent Runtime + "Rapid Attribution (CTI)" Runbook](#11-runbook--agent-runtime--rapid-attribution-cti-runbook)
@@ -706,6 +711,7 @@ Emphasize **replayability, auditability, and clear separation between runbook de
 ### Integration with Existing Systems
 
 These prompts are designed to integrate with:
+
 - **Neo4j** graph database
 - **PostgreSQL** for relational data
 - **Kafka/Redpanda** for event streaming
@@ -722,6 +728,7 @@ Refer to the [ARCHITECTURE.md](../ARCHITECTURE.md) and [REPOSITORY_STRUCTURE.md]
 ### Updating These Prompts
 
 As the platform evolves, these prompts should be updated to:
+
 - Reflect new architectural patterns
 - Incorporate lessons learned from implementations
 - Add new capability areas
@@ -730,6 +737,7 @@ As the platform evolves, these prompts should be updated to:
 ### Tracking Implementations
 
 When you implement a feature based on one of these prompts:
+
 1. Create an ADR documenting key decisions
 2. Link back to the prompt that guided development
 3. Note any deviations or adaptations required
@@ -738,6 +746,7 @@ When you implement a feature based on one of these prompts:
 ### Contributing New Prompts
 
 To add new prompts to this collection:
+
 1. Follow the established format (Category, Complexity, Dependencies, Prompt)
 2. Ensure prompts are self-contained and production-ready
 3. Include clear acceptance criteria and testing requirements
@@ -757,14 +766,14 @@ To add new prompts to this collection:
 
 ## Appendix: Prompt Selection Matrix
 
-| Priority Area | Recommended Prompts | Dependencies |
-|--------------|-------------------|--------------|
-| **Data Foundation** | #1, #2, #3 | None - start here |
-| **Analytics Baseline** | #4, #5, #6 | Requires #2 |
-| **AI Augmentation** | #7, #8 | Requires #2, #3; LLM access |
-| **Governance & Compliance** | #9 | Requires #2, #3 |
-| **User Experience** | #10 | Requires #2, #4, #5 |
-| **Automation** | #11 | Requires #1-6 |
+| Priority Area               | Recommended Prompts | Dependencies                |
+| --------------------------- | ------------------- | --------------------------- |
+| **Data Foundation**         | #1, #2, #3          | None - start here           |
+| **Analytics Baseline**      | #4, #5, #6          | Requires #2                 |
+| **AI Augmentation**         | #7, #8              | Requires #2, #3; LLM access |
+| **Governance & Compliance** | #9                  | Requires #2, #3             |
+| **User Experience**         | #10                 | Requires #2, #4, #5         |
+| **Automation**              | #11                 | Requires #1-6               |
 
 ---
 

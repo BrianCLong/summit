@@ -1,45 +1,53 @@
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import { Button } from '@/components/ui/Button';
+import React, { useState } from 'react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
+import { Button } from '@/components/ui/Button'
 
 export const ReportEditor: React.FC = () => {
-  const [content, setContent] = useState('');
-  const [citations, setCitations] = useState<{evidenceId: string, text: string}[]>([]);
-  const [error, setError] = useState<string | null>(null);
-  const [result, setResult] = useState<any>(null);
+  const [content, setContent] = useState('')
+  const [citations, setCitations] = useState<
+    { evidenceId: string; text: string }[]
+  >([])
+  const [error, setError] = useState<string | null>(null)
+  const [result, setResult] = useState<any>(null)
 
   const addCitation = () => {
     // Mock citation addition
-    const id = prompt("Enter Evidence ID:");
+    const id = prompt('Enter Evidence ID:')
     if (id) {
-      setCitations([...citations, { evidenceId: id, text: `Evidence content for ${id}` }]);
+      setCitations([
+        ...citations,
+        { evidenceId: id, text: `Evidence content for ${id}` },
+      ])
     }
-  };
+  }
 
   const handlePublish = async () => {
-    setError(null);
+    setError(null)
     try {
       const res = await fetch('/reporting/publish', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          title: "New Investigation Report",
-          sections: [{ title: "Main Body", content, type: "text" }],
+          title: 'New Investigation Report',
+          sections: [{ title: 'Main Body', content, type: 'text' }],
           citations,
-          ch: ["Hypothesis A: It was a cyberattack", "Hypothesis B: It was an insider"],
-          coi: ["No conflicts declared"]
-        })
-      });
-      const data = await res.json();
+          ch: [
+            'Hypothesis A: It was a cyberattack',
+            'Hypothesis B: It was an insider',
+          ],
+          coi: ['No conflicts declared'],
+        }),
+      })
+      const data = await res.json()
       if (!res.ok) {
-        setError(data.error);
+        setError(data.error)
       } else {
-        setResult(data);
+        setResult(data)
       }
     } catch (e: any) {
-      setError(e.message);
+      setError(e.message)
     }
-  };
+  }
 
   return (
     <div className="p-4 space-y-4">
@@ -47,7 +55,9 @@ export const ReportEditor: React.FC = () => {
 
       <div className="grid grid-cols-2 gap-4">
         <Card>
-          <CardHeader><CardTitle>Editor</CardTitle></CardHeader>
+          <CardHeader>
+            <CardTitle>Editor</CardTitle>
+          </CardHeader>
           <CardContent className="space-y-4">
             <textarea
               className="w-full h-64 p-2 border rounded"
@@ -57,15 +67,21 @@ export const ReportEditor: React.FC = () => {
             />
             <div className="flex gap-2">
               <Button onClick={addCitation}>+ Add Citation</Button>
-              <Button onClick={handlePublish} variant="default">Publish Report</Button>
+              <Button onClick={handlePublish} variant="default">
+                Publish Report
+              </Button>
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader><CardTitle>Citations & Metadata</CardTitle></CardHeader>
+          <CardHeader>
+            <CardTitle>Citations & Metadata</CardTitle>
+          </CardHeader>
           <CardContent>
-            {citations.length === 0 && <p className="text-gray-500">No citations attached.</p>}
+            {citations.length === 0 && (
+              <p className="text-gray-500">No citations attached.</p>
+            )}
             <ul className="list-disc pl-5">
               {citations.map((c, i) => (
                 <li key={i}>{c.evidenceId}</li>
@@ -84,14 +100,16 @@ export const ReportEditor: React.FC = () => {
 
       {result && (
         <Card className="bg-green-50">
-           <CardHeader><CardTitle>Published Successfully</CardTitle></CardHeader>
-           <CardContent>
-             <pre className="text-xs overflow-auto">
-               {JSON.stringify(result.manifest, null, 2)}
-             </pre>
-           </CardContent>
+          <CardHeader>
+            <CardTitle>Published Successfully</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <pre className="text-xs overflow-auto">
+              {JSON.stringify(result.manifest, null, 2)}
+            </pre>
+          </CardContent>
         </Card>
       )}
     </div>
-  );
-};
+  )
+}

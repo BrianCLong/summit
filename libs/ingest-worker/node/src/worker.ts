@@ -10,9 +10,9 @@
  * - DLQ routing
  */
 
-import { EventEmitter } from 'events';
-import { trace, context, SpanStatusCode, type Span } from '@opentelemetry/api';
-import pino from 'pino';
+import { EventEmitter } from "events";
+import { trace, context, SpanStatusCode, type Span } from "@opentelemetry/api";
+import pino from "pino";
 
 import type {
   WorkerConfig,
@@ -24,14 +24,14 @@ import type {
   DLQHandler,
   DLQReasonCode,
   WorkerEvents,
-} from './types.js';
-import { BackpressureController, Semaphore } from './backpressure.js';
-import { MultiTenantRateLimiter } from './rate-limiter.js';
-import { CircuitBreaker, CircuitBreakerError } from './circuit-breaker.js';
-import { retry, classifyError, isRetryable } from './retry.js';
-import type { IdempotencyStore } from './idempotency.js';
+} from "./types.js";
+import { BackpressureController, Semaphore } from "./backpressure.js";
+import { MultiTenantRateLimiter } from "./rate-limiter.js";
+import { CircuitBreaker, CircuitBreakerError } from "./circuit-breaker.js";
+import { retry, classifyError, isRetryable } from "./retry.js";
+import type { IdempotencyStore } from "./idempotency.js";
 
-const tracer = trace.getTracer('@intelgraph/ingest-worker');
+const tracer = trace.getTracer("@intelgraph/ingest-worker");
 
 export interface WorkerDependencies {
   /** Logger instance */
@@ -41,7 +41,7 @@ export interface WorkerDependencies {
 }
 
 export class IngestWorker<T = unknown, R = unknown> extends EventEmitter {
-  private state: WorkerState = 'idle';
+  private state: WorkerState = "idle";
   private backpressure: BackpressureController;
   private rateLimiter: MultiTenantRateLimiter;
   private circuitBreaker: CircuitBreaker;
@@ -64,15 +64,12 @@ export class IngestWorker<T = unknown, R = unknown> extends EventEmitter {
   ) {
     super();
 
-    this.logger = deps.logger ?? pino({ name: config.name, level: 'info' });
+    this.logger = deps.logger ?? pino({ name: config.name, level: "info" });
     this.idempotencyStore = deps.idempotencyStore;
     this.events = events;
 
     // Initialize backpressure controller
-    this.backpressure = new BackpressureController(
-      config.backpressure,
-      config.maxConcurrency
-    );
+    this.backpressure = new BackpressureController(config.backpressure, config.maxConcurrency);
 
     // Initialize rate limiter
     const tenantConfigs: Record<string, { capacity: number; refillRate: number }> = {};
@@ -101,13 +98,13 @@ export class IngestWorker<T = unknown, R = unknown> extends EventEmitter {
     this.semaphore = new Semaphore(config.maxConcurrency);
 
     // Wire up events
-    this.backpressure.on('stateChange', (state: WorkerState, metrics: WorkerMetrics) => {
+    this.backpressure.on("stateChange", (state: WorkerState, metrics: WorkerMetrics) => {
       this.state = state;
       this.events.onStateChange?.(state, this.getMetrics());
       this.events.onBackpressure?.(this.getMetrics());
     });
 
-    this.circuitBreaker.on('stateChange', (state: 'closed' | 'open' | 'half-open') => {
+    this.circuitBreaker.on("stateChange", (state: "closed" | "open" | "half-open") => {
       this.events.onCircuitStateChange?.(state);
     });
   }
@@ -132,7 +129,7 @@ export class IngestWorker<T = unknown, R = unknown> extends EventEmitter {
   async start(): Promise<void> {
     this.backpressure.start();
     this.startProcessLoop();
-    this.logger.info({ name: this.config.name }, 'Worker started');
+    this.logger.info({ name: this.config.name }, "Worker started");
   }
 
   /**
@@ -151,7 +148,7 @@ export class IngestWorker<T = unknown, R = unknown> extends EventEmitter {
       await this.idempotencyStore.close();
     }
 
-    this.logger.info({ name: this.config.name }, 'Worker stopped');
+    this.logger.info({ name: this.config.name }, "Worker stopped");
   }
 
   /**
@@ -159,14 +156,14 @@ export class IngestWorker<T = unknown, R = unknown> extends EventEmitter {
    */
   async drain(): Promise<void> {
     this.backpressure.enableDrain();
-    this.logger.info({ name: this.config.name }, 'Drain mode enabled');
+    this.logger.info({ name: this.config.name }, "Drain mode enabled");
 
     // Wait for drain to complete
     while (!this.backpressure.isDrained()) {
       await this.sleep(100);
     }
 
-    this.logger.info({ name: this.config.name }, 'Drain complete');
+    this.logger.info({ name: this.config.name }, "Drain complete");
   }
 
   /**
@@ -248,22 +245,22 @@ export class IngestWorker<T = unknown, R = unknown> extends EventEmitter {
     };
 
     loop().catch((error) => {
-      this.logger.error({ error }, 'Process loop error');
+      this.logger.error({ error }, "Process loop error");
     });
   }
 
   private async processTask(task: Task<T>): Promise<TaskResult<R>> {
-    return tracer.startActiveSpan('ingest.worker.process', async (span): Promise<TaskResult<R>> => {
-      span.setAttribute('task.id', task.id);
-      span.setAttribute('task.tenant_id', task.tenantId);
-      span.setAttribute('task.priority', task.priority);
+    return tracer.startActiveSpan("ingest.worker.process", async (span): Promise<TaskResult<R>> => {
+      span.setAttribute("task.id", task.id);
+      span.setAttribute("task.tenant_id", task.tenantId);
+      span.setAttribute("task.priority", task.priority);
 
       try {
         // Check idempotency
         if (task.dedupeKey && this.idempotencyStore) {
           const alreadyProcessed = await this.idempotencyStore.has(task.dedupeKey);
           if (alreadyProcessed) {
-            span.addEvent('task_skipped_duplicate');
+            span.addEvent("task_skipped_duplicate");
             return {
               success: true,
               attempts: 0,
@@ -276,14 +273,14 @@ export class IngestWorker<T = unknown, R = unknown> extends EventEmitter {
         const { acquired, waitMs, reason } = await this.backpressure.acquire(task.priority);
 
         if (!acquired) {
-          if (reason === 'brownout' || reason === 'drain_mode') {
-            span.addEvent('task_dropped', { reason });
+          if (reason === "brownout" || reason === "drain_mode") {
+            span.addEvent("task_dropped", { reason });
             this.events.onTaskDrop?.(task, reason);
             return {
               success: false,
               attempts: 0,
               totalDelayMs: 0,
-              reasonCode: 'RATE_LIMITED',
+              reasonCode: "RATE_LIMITED",
             };
           }
 
@@ -296,7 +293,7 @@ export class IngestWorker<T = unknown, R = unknown> extends EventEmitter {
         // Acquire rate limit
         const rateLimitWait = await this.rateLimiter.acquire(task.tenantId);
         if (rateLimitWait > 0) {
-          span.addEvent('rate_limited', { waitMs: rateLimitWait });
+          span.addEvent("rate_limited", { waitMs: rateLimitWait });
         }
 
         // Acquire semaphore
@@ -357,7 +354,7 @@ export class IngestWorker<T = unknown, R = unknown> extends EventEmitter {
 
   private async executeWithRetry(task: Task<T>, parentSpan: Span): Promise<TaskResult<R>> {
     if (!this.taskHandler) {
-      throw new Error('Task handler not set');
+      throw new Error("Task handler not set");
     }
 
     return retry<R>(
@@ -373,13 +370,13 @@ export class IngestWorker<T = unknown, R = unknown> extends EventEmitter {
           this.events.onTaskRetry?.(task, ctx.lastError!, ctx.attempt);
           this.logger.debug(
             { taskId: task.id, attempt: ctx.attempt, delay: ctx.totalDelayMs },
-            'Retrying task'
+            "Retrying task"
           );
         },
         onError: (error, ctx) => {
           this.logger.warn(
             { taskId: task.id, attempt: ctx.attempt, error: error.message },
-            'Task attempt failed'
+            "Task attempt failed"
           );
         },
         shouldRetry: (error, ctx) => {
@@ -400,17 +397,11 @@ export class IngestWorker<T = unknown, R = unknown> extends EventEmitter {
       try {
         await this.dlqHandler(task, reason, error);
       } catch (dlqError) {
-        this.logger.error(
-          { taskId: task.id, reason, dlqError },
-          'Failed to send task to DLQ'
-        );
+        this.logger.error({ taskId: task.id, reason, dlqError }, "Failed to send task to DLQ");
       }
     }
 
-    this.logger.warn(
-      { taskId: task.id, reason, error: error.message },
-      'Task sent to DLQ'
-    );
+    this.logger.warn({ taskId: task.id, reason, error: error.message }, "Task sent to DLQ");
   }
 
   private sleep(ms: number): Promise<void> {

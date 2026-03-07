@@ -4,22 +4,22 @@ on:
   workflow_dispatch:
     inputs:
       base_url:
-        description: 'Base URL of the deployment (e.g., https://api.summit.example.com)'
+        description: "Base URL of the deployment (e.g., https://api.summit.example.com)"
         required: true
         type: string
       prom_url:
-        description: 'Prometheus Base URL (optional)'
+        description: "Prometheus Base URL (optional)"
         required: false
         type: string
       require_prom:
-        description: 'Fail if Prometheus queries fail?'
+        description: "Fail if Prometheus queries fail?"
         required: false
         type: boolean
         default: false
       ref:
-        description: 'Git ref to checkout (default: main)'
+        description: "Git ref to checkout (default: main)"
         required: false
-        default: 'main'
+        default: "main"
         type: string
 
 permissions:
@@ -42,7 +42,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: "18"
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile

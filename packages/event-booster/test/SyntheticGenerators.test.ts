@@ -4,26 +4,26 @@ import {
   generateBurstEvents,
   generateSeasonalEvents,
   generateUniformEvents,
-} from '../src/SyntheticGenerators.js';
+} from "../src/SyntheticGenerators.js";
 
 const constantRandom = () => 0.5;
 
-describe('SyntheticGenerators', () => {
-  it('creates uniformly spaced events with jitter', () => {
+describe("SyntheticGenerators", () => {
+  it("creates uniformly spaced events with jitter", () => {
     const events = generateUniformEvents(3, {
       startTimestamp: 1_000,
       intervalMs: 1_000,
       signal: 2,
       random: constantRandom,
-      tags: ['uniform'],
+      tags: ["uniform"],
     });
     expect(events).toHaveLength(3);
     expect(events[0].payload.signal).toBe(2);
     expect(events[1].timestamp).toBeGreaterThan(events[0].timestamp);
-    expect(events.every((event) => event.tags?.includes('uniform'))).toBe(true);
+    expect(events.every((event) => event.tags?.includes("uniform"))).toBe(true);
   });
 
-  it('builds burst sequences with idle gaps', () => {
+  it("builds burst sequences with idle gaps", () => {
     const events = generateBurstEvents({
       bursts: 2,
       burstSize: 2,
@@ -39,7 +39,7 @@ describe('SyntheticGenerators', () => {
     expect(events[2].timestamp).toBeGreaterThan(2_000);
   });
 
-  it('generates seasonal oscillations', () => {
+  it("generates seasonal oscillations", () => {
     const events = generateSeasonalEvents({
       periods: 1,
       pointsPerPeriod: 4,
@@ -54,7 +54,7 @@ describe('SyntheticGenerators', () => {
     expect(Math.min(...signals)).toBeLessThan(4);
   });
 
-  it('injects anomalies at the configured rate', () => {
+  it("injects anomalies at the configured rate", () => {
     const events = generateAnomalyEvents({
       count: 5,
       anomalyRate: 1,
@@ -64,9 +64,7 @@ describe('SyntheticGenerators', () => {
       intervalMs: 1,
       random: () => 0,
     });
-    expect(events.every((event) => event.payload.isAnomaly === true)).toBe(
-      true,
-    );
+    expect(events.every((event) => event.payload.isAnomaly === true)).toBe(true);
     expect(events[0].payload.signal).toBe(10);
   });
 });

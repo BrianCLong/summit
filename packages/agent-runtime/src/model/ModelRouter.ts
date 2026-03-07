@@ -11,6 +11,10 @@ export interface CostEstimate {
 }
 
 export interface ModelRouter {
-  estimate(input: { route: ModelRoute; promptTokens: number; maxOutputTokens: number }): Promise<CostEstimate>;
+  estimate(input: {
+    route: ModelRoute;
+    promptTokens: number;
+    maxOutputTokens: number;
+  }): Promise<CostEstimate>;
   call(input: { route: ModelRoute; prompt: string }): Promise<{ text: string }>;
 }

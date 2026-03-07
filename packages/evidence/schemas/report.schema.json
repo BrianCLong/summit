@@ -11,9 +11,9 @@
       "items": {
         "type": "object",
         "properties": {
-            "id": { "type": "string" },
-            "text": { "type": "string" },
-            "source_id": { "type": "string" }
+          "id": { "type": "string" },
+          "text": { "type": "string" },
+          "source_id": { "type": "string" }
         }
       }
     }

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Box,
   Button,
@@ -24,32 +24,24 @@ import {
   Tooltip,
   Typography,
   Alert,
-} from '@mui/material';
-import {
-  Add,
-  Delete,
-  Key,
-  PlayArrow,
-  Refresh,
-  Science,
-  Timeline,
-} from '@mui/icons-material';
-import { WebhookAPI } from '../services/api';
+} from "@mui/material";
+import { Add, Delete, Key, PlayArrow, Refresh, Science, Timeline } from "@mui/icons-material";
+import { WebhookAPI } from "../services/api";
 
 const emptyForm = {
-  url: '',
-  event_types: '',
-  secret: '',
+  url: "",
+  event_types: "",
+  secret: "",
 };
 
 function formatDate(dateString) {
-  if (!dateString) return '';
+  if (!dateString) return "";
   return new Date(dateString).toLocaleString();
 }
 
 function StatusChip({ status }) {
-  const color = status === 'success' ? 'success' : status === 'pending' ? 'warning' : 'error';
-  return <Chip label={status} color={color} size="small" sx={{ textTransform: 'capitalize' }} />;
+  const color = status === "success" ? "success" : status === "pending" ? "warning" : "error";
+  return <Chip label={status} color={color} size="small" sx={{ textTransform: "capitalize" }} />;
 }
 
 function WebhookFormDialog({ open, onClose, onSave, initial }) {
@@ -66,8 +58,8 @@ function WebhookFormDialog({ open, onClose, onSave, initial }) {
   const handleSubmit = () => {
     const payload = {
       url: formData.url,
-      event_types: (formData.event_types || '')
-        .split(',')
+      event_types: (formData.event_types || "")
+        .split(",")
         .map((v) => v.trim())
         .filter(Boolean),
     };
@@ -83,27 +75,27 @@ function WebhookFormDialog({ open, onClose, onSave, initial }) {
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-      <DialogTitle>{initial ? 'Edit Webhook' : 'Register Webhook'}</DialogTitle>
+      <DialogTitle>{initial ? "Edit Webhook" : "Register Webhook"}</DialogTitle>
       <DialogContent>
         <Stack spacing={2} sx={{ mt: 1 }}>
           <TextField
             label="Destination URL"
             value={formData.url}
-            onChange={handleChange('url')}
+            onChange={handleChange("url")}
             placeholder="https://example.com/webhook"
             fullWidth
           />
           <TextField
             label="Event Types"
             value={formData.event_types}
-            onChange={handleChange('event_types')}
+            onChange={handleChange("event_types")}
             helperText="Comma-separated list (e.g. incident.created, incident.closed)"
             fullWidth
           />
           <TextField
             label="Signing Secret (optional)"
             value={formData.secret}
-            onChange={handleChange('secret')}
+            onChange={handleChange("secret")}
             helperText="Leave blank to generate a secure random secret"
             fullWidth
           />
@@ -112,7 +104,7 @@ function WebhookFormDialog({ open, onClose, onSave, initial }) {
       <DialogActions>
         <Button onClick={onClose}>Cancel</Button>
         <Button variant="contained" onClick={handleSubmit} disabled={!isValid}>
-          {initial ? 'Save Changes' : 'Create Webhook'}
+          {initial ? "Save Changes" : "Create Webhook"}
         </Button>
       </DialogActions>
     </Dialog>
@@ -145,7 +137,7 @@ function DeliveryTable({ deliveries, onSelectDelivery }) {
               <TableRow
                 key={delivery.id}
                 hover
-                sx={{ cursor: 'pointer' }}
+                sx={{ cursor: "pointer" }}
                 onClick={() => onSelectDelivery(delivery)}
               >
                 <TableCell>{delivery.event_type}</TableCell>
@@ -154,7 +146,9 @@ function DeliveryTable({ deliveries, onSelectDelivery }) {
                 </TableCell>
                 <TableCell>{delivery.attempt_count || 0}</TableCell>
                 <TableCell>{formatDate(delivery.last_attempt_at || delivery.updated_at)}</TableCell>
-                <TableCell>{delivery.next_retry_at ? formatDate(delivery.next_retry_at) : '—'}</TableCell>
+                <TableCell>
+                  {delivery.next_retry_at ? formatDate(delivery.next_retry_at) : "—"}
+                </TableCell>
               </TableRow>
             ))}
             {deliveries.length === 0 && (
@@ -200,12 +194,12 @@ function AttemptTable({ attempts }) {
                 <TableCell>
                   <StatusChip status={attempt.status} />
                 </TableCell>
-                <TableCell>{attempt.response_status || '—'}</TableCell>
-                <TableCell>{attempt.duration_ms || '—'}</TableCell>
+                <TableCell>{attempt.response_status || "—"}</TableCell>
+                <TableCell>{attempt.duration_ms || "—"}</TableCell>
                 <TableCell>{formatDate(attempt.created_at)}</TableCell>
                 <TableCell sx={{ maxWidth: 260 }}>
                   <Typography variant="body2" color="text.secondary" noWrap>
-                    {attempt.error_message || attempt.response_body?.slice(0, 120) || '—'}
+                    {attempt.error_message || attempt.response_body?.slice(0, 120) || "—"}
                   </Typography>
                 </TableCell>
               </TableRow>
@@ -232,10 +226,10 @@ export default function WebhookDashboard() {
   const [attempts, setAttempts] = useState([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingWebhook, setEditingWebhook] = useState(null);
-  const [toast, setToast] = useState({ open: false, message: '', severity: 'success' });
+  const [toast, setToast] = useState({ open: false, message: "", severity: "success" });
   const [actionLoading, setActionLoading] = useState(false);
 
-  const notify = (message, severity = 'success') => setToast({ open: true, message, severity });
+  const notify = (message, severity = "success") => setToast({ open: true, message, severity });
 
   const loadWebhooks = async () => {
     setLoading(true);
@@ -247,7 +241,7 @@ export default function WebhookDashboard() {
         setSelectedWebhook(refreshed || null);
       }
     } catch (error) {
-      notify(`Failed to load webhooks: ${error.message}`, 'error');
+      notify(`Failed to load webhooks: ${error.message}`, "error");
     } finally {
       setLoading(false);
     }
@@ -258,7 +252,7 @@ export default function WebhookDashboard() {
       const data = await WebhookAPI.deliveries(webhookId, { limit: 15 });
       setDeliveries(data);
     } catch (error) {
-      notify(`Failed to load deliveries: ${error.message}`, 'error');
+      notify(`Failed to load deliveries: ${error.message}`, "error");
     }
   };
 
@@ -267,13 +261,13 @@ export default function WebhookDashboard() {
       const data = await WebhookAPI.attempts(webhookId, { deliveryId, limit: 40 });
       setAttempts(data);
     } catch (error) {
-      notify(`Failed to load attempts: ${error.message}`, 'error');
+      notify(`Failed to load attempts: ${error.message}`, "error");
     }
   };
 
   useEffect(() => {
     loadWebhooks();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleSelectWebhook = async (webhook) => {
@@ -287,16 +281,16 @@ export default function WebhookDashboard() {
     try {
       if (editingWebhook) {
         await WebhookAPI.update(editingWebhook.id, payload);
-        notify('Webhook updated');
+        notify("Webhook updated");
       } else {
         await WebhookAPI.create(payload);
-        notify('Webhook registered');
+        notify("Webhook registered");
       }
       setDialogOpen(false);
       setEditingWebhook(null);
       await loadWebhooks();
     } catch (error) {
-      notify(`Save failed: ${error.message}`, 'error');
+      notify(`Save failed: ${error.message}`, "error");
     } finally {
       setActionLoading(false);
     }
@@ -306,11 +300,11 @@ export default function WebhookDashboard() {
     setActionLoading(true);
     try {
       await WebhookAPI.remove(webhook.id);
-      notify('Webhook deleted');
+      notify("Webhook deleted");
       setSelectedWebhook(null);
       await loadWebhooks();
     } catch (error) {
-      notify(`Delete failed: ${error.message}`, 'error');
+      notify(`Delete failed: ${error.message}`, "error");
     } finally {
       setActionLoading(false);
     }
@@ -320,18 +314,18 @@ export default function WebhookDashboard() {
     setActionLoading(true);
     try {
       await WebhookAPI.testSingle(webhook.id, {
-        eventType: 'webhook.test',
+        eventType: "webhook.test",
         payload: {
-          type: 'webhook.test',
+          type: "webhook.test",
           preview: true,
           url: webhook.url,
           event_types: webhook.event_types,
         },
       });
-      notify('Test delivery queued');
+      notify("Test delivery queued");
       await loadDeliveries(webhook.id);
     } catch (error) {
-      notify(`Test failed: ${error.message}`, 'error');
+      notify(`Test failed: ${error.message}`, "error");
     } finally {
       setActionLoading(false);
     }
@@ -340,10 +334,10 @@ export default function WebhookDashboard() {
   const handleBroadcastTest = async () => {
     setActionLoading(true);
     try {
-      await WebhookAPI.triggerTest({ eventType: 'webhook.test' });
-      notify('Broadcast test queued to all active webhooks');
+      await WebhookAPI.triggerTest({ eventType: "webhook.test" });
+      notify("Broadcast test queued to all active webhooks");
     } catch (error) {
-      notify(`Broadcast failed: ${error.message}`, 'error');
+      notify(`Broadcast failed: ${error.message}`, "error");
     } finally {
       setActionLoading(false);
     }
@@ -353,10 +347,10 @@ export default function WebhookDashboard() {
     setActionLoading(true);
     try {
       await WebhookAPI.update(webhook.id, { is_active: isActive });
-      notify(`Webhook ${isActive ? 'enabled' : 'disabled'}`);
+      notify(`Webhook ${isActive ? "enabled" : "disabled"}`);
       await loadWebhooks();
     } catch (error) {
-      notify(`Update failed: ${error.message}`, 'error');
+      notify(`Update failed: ${error.message}`, "error");
     } finally {
       setActionLoading(false);
     }
@@ -365,19 +359,19 @@ export default function WebhookDashboard() {
   const handleRotateSecret = async (webhook) => {
     setActionLoading(true);
     try {
-      const generatedSecret = (crypto?.randomUUID?.() || `${Date.now()}`).replace(/-/g, '');
+      const generatedSecret = (crypto?.randomUUID?.() || `${Date.now()}`).replace(/-/g, "");
       await WebhookAPI.update(webhook.id, { secret: generatedSecret });
-      notify('Signing secret rotated');
+      notify("Signing secret rotated");
       await loadWebhooks();
     } catch (error) {
-      notify(`Secret rotation failed: ${error.message}`, 'error');
+      notify(`Secret rotation failed: ${error.message}`, "error");
     } finally {
       setActionLoading(false);
     }
   };
 
   const selectedEvents = useMemo(
-    () => (selectedWebhook?.event_types || []).join(', '),
+    () => (selectedWebhook?.event_types || []).join(", "),
     [selectedWebhook]
   );
 
@@ -420,7 +414,12 @@ export default function WebhookDashboard() {
         <Grid item xs={12} md={5}>
           <Card>
             <CardContent>
-              <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
+              <Stack
+                direction="row"
+                justifyContent="space-between"
+                alignItems="center"
+                sx={{ mb: 2 }}
+              >
                 <Typography variant="h6">Subscribers</Typography>
                 {loading && <CircularProgress size={20} />}
               </Stack>
@@ -429,22 +428,26 @@ export default function WebhookDashboard() {
                 {webhooks.map((webhook) => (
                   <Card
                     key={webhook.id}
-                    variant={selectedWebhook?.id === webhook.id ? 'outlined' : undefined}
+                    variant={selectedWebhook?.id === webhook.id ? "outlined" : undefined}
                     sx={{
                       p: 1.5,
-                      borderColor:
-                        selectedWebhook?.id === webhook.id ? 'primary.main' : 'divider',
-                      cursor: 'pointer',
+                      borderColor: selectedWebhook?.id === webhook.id ? "primary.main" : "divider",
+                      cursor: "pointer",
                     }}
                     onClick={() => handleSelectWebhook(webhook)}
                   >
-                    <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={1}>
+                    <Stack
+                      direction="row"
+                      alignItems="center"
+                      justifyContent="space-between"
+                      spacing={1}
+                    >
                       <Box>
                         <Typography variant="subtitle1">{webhook.url}</Typography>
                         <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 0.5 }}>
                           <Chip
-                            label={webhook.is_active ? 'Active' : 'Paused'}
-                            color={webhook.is_active ? 'success' : 'default'}
+                            label={webhook.is_active ? "Active" : "Paused"}
+                            color={webhook.is_active ? "success" : "default"}
                             size="small"
                           />
                           <Chip
@@ -477,7 +480,7 @@ export default function WebhookDashboard() {
                             <PlayArrow fontSize="small" />
                           </IconButton>
                         </Tooltip>
-                        <Tooltip title={webhook.is_active ? 'Pause delivery' : 'Resume delivery'}>
+                        <Tooltip title={webhook.is_active ? "Pause delivery" : "Resume delivery"}>
                           <IconButton
                             size="small"
                             onClick={(event) => {
@@ -516,7 +519,12 @@ export default function WebhookDashboard() {
             <>
               <Card>
                 <CardContent>
-                  <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
+                  <Stack
+                    direction="row"
+                    justifyContent="space-between"
+                    alignItems="center"
+                    sx={{ mb: 1 }}
+                  >
                     <Typography variant="h6">Subscriber Details</Typography>
                     <Stack direction="row" spacing={1}>
                       <Button
@@ -546,9 +554,15 @@ export default function WebhookDashboard() {
                   <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
                     {selectedWebhook.url}
                   </Typography>
-                  <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap' }}>
+                  <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }}>
                     {(selectedWebhook.event_types || []).map((event) => (
-                      <Chip key={event} label={event} size="small" color="primary" variant="outlined" />
+                      <Chip
+                        key={event}
+                        label={event}
+                        size="small"
+                        color="primary"
+                        variant="outlined"
+                      />
                     ))}
                   </Stack>
                 </CardContent>
@@ -567,8 +581,8 @@ export default function WebhookDashboard() {
                   Select a webhook to view delivery history
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Use the actions on the left to register subscribers, send signed test events, and inspect delivery attempts
-                  with exponential backoff retries.
+                  Use the actions on the left to register subscribers, send signed test events, and
+                  inspect delivery attempts with exponential backoff retries.
                 </Typography>
               </CardContent>
             </Card>
@@ -587,15 +601,19 @@ export default function WebhookDashboard() {
         open={toast.open}
         autoHideDuration={4000}
         onClose={() => setToast({ ...toast, open: false })}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
       >
-        <Alert severity={toast.severity} onClose={() => setToast({ ...toast, open: false })} sx={{ width: '100%' }}>
+        <Alert
+          severity={toast.severity}
+          onClose={() => setToast({ ...toast, open: false })}
+          sx={{ width: "100%" }}
+        >
           {toast.message}
         </Alert>
       </Snackbar>
 
       {(actionLoading || loading) && (
-        <Box sx={{ position: 'fixed', bottom: 16, right: 16 }}>
+        <Box sx={{ position: "fixed", bottom: 16, right: 16 }}>
           <CircularProgress size={32} />
         </Box>
       )}

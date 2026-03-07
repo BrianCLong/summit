@@ -621,12 +621,7 @@
       "weight": 4,
       "metadata": {
         "occurrences": 4,
-        "sources": [
-          "post:carol-028",
-          "post:carol-029",
-          "post:carol-030",
-          "post:carol-031"
-        ]
+        "sources": ["post:carol-028", "post:carol-029", "post:carol-030", "post:carol-031"]
       }
     },
     {
@@ -636,12 +631,7 @@
       "weight": 4,
       "metadata": {
         "occurrences": 4,
-        "sources": [
-          "post:carol-028",
-          "post:carol-029",
-          "post:carol-030",
-          "post:carol-031"
-        ]
+        "sources": ["post:carol-028", "post:carol-029", "post:carol-030", "post:carol-031"]
       }
     },
     {
@@ -651,12 +641,7 @@
       "weight": 4,
       "metadata": {
         "occurrences": 4,
-        "sources": [
-          "post:carol-032",
-          "post:carol-033",
-          "post:carol-034",
-          "post:carol-035"
-        ]
+        "sources": ["post:carol-032", "post:carol-033", "post:carol-034", "post:carol-035"]
       }
     },
     {
@@ -666,12 +651,7 @@
       "weight": 4,
       "metadata": {
         "occurrences": 4,
-        "sources": [
-          "post:carol-032",
-          "post:carol-033",
-          "post:carol-034",
-          "post:carol-035"
-        ]
+        "sources": ["post:carol-032", "post:carol-033", "post:carol-034", "post:carol-035"]
       }
     },
     {
@@ -681,12 +661,7 @@
       "weight": 4,
       "metadata": {
         "occurrences": 4,
-        "sources": [
-          "post:dave-036",
-          "post:dave-037",
-          "post:dave-038",
-          "post:dave-039"
-        ]
+        "sources": ["post:dave-036", "post:dave-037", "post:dave-038", "post:dave-039"]
       }
     },
     {

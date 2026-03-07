@@ -101,11 +101,11 @@
 
 ```ts
 // server/src/partition/router.ts
-import murmur from 'imurmurhash';
+import murmur from "imurmurhash";
 export type Shard = {
   id: string;
   uri: string;
-  role: 'primary' | 'replica';
+  role: "primary" | "replica";
   region: string;
   healthy: boolean;
 };
@@ -114,7 +114,7 @@ export function register(sh: Shard) {
   registry.push(sh);
 }
 export function pick(key: string) {
-  const healthy = registry.filter((s) => s.healthy && s.role === 'primary');
+  const healthy = registry.filter((s) => s.healthy && s.role === "primary");
   const h = murmur(key).result();
   return healthy[h % healthy.length];
 }
@@ -125,10 +125,10 @@ export function pick(key: string) {
 
 ```ts
 // server/src/graphql/context.ts
-import { pick } from '../partition/router';
+import { pick } from "../partition/router";
 export async function makeContext(req: any) {
-  const tenant = req.headers['x-tenant'] || 'default';
-  const caseId = req.headers['x-case'] || '';
+  const tenant = req.headers["x-tenant"] || "default";
+  const caseId = req.headers["x-case"] || "";
   const shard = pick(`${tenant}|${caseId}`);
   return { tenant, caseId, shard };
 }
@@ -138,22 +138,22 @@ export async function makeContext(req: any) {
 
 ```ts
 // server/src/ingest/cdc.ts
-import { Kafka } from 'kafkajs';
-import Redis from 'ioredis';
-import { upsertEntity } from './merge';
+import { Kafka } from "kafkajs";
+import Redis from "ioredis";
+import { upsertEntity } from "./merge";
 const r = new Redis(process.env.REDIS_URL!);
 export async function startCDC() {
   const kafka = new Kafka({
-    clientId: 'ig-cdc',
-    brokers: process.env.KAFKA_BROKERS!.split(','),
+    clientId: "ig-cdc",
+    brokers: process.env.KAFKA_BROKERS!.split(","),
   });
-  const consumer = kafka.consumer({ groupId: 'ig-cdc-g1' });
-  await consumer.subscribe({ topic: 'db.entities', fromBeginning: false });
+  const consumer = kafka.consumer({ groupId: "ig-cdc-g1" });
+  await consumer.subscribe({ topic: "db.entities", fromBeginning: false });
   await consumer.run({
     eachMessage: async ({ message }) => {
       const evt = JSON.parse(message.value!.toString());
       const key = `idem:${evt.id}:${evt.ts}`;
-      if (await r.setnx(key, '1')) {
+      if (await r.setnx(key, "1")) {
         await upsertEntity(evt);
         await r.expire(key, 86400);
       }
@@ -213,15 +213,15 @@ pr.select('id','pagerank').write.mode('overwrite').parquet('s3://ig/overlays/pag
 
 ```ts
 // server/src/snapshot/reader.ts
-import duckdb from 'duckdb';
+import duckdb from "duckdb";
 export async function querySnapshot(sqlText: string, files: string[]) {
-  const db = new duckdb.Database(':memory:');
+  const db = new duckdb.Database(":memory:");
   const c = db.connect();
   await new Promise((r) =>
-    c.all(`INSTALL httpfs; LOAD httpfs; SET s3_region='auto'`, () => r(null)),
+    c.all(`INSTALL httpfs; LOAD httpfs; SET s3_region='auto'`, () => r(null))
   );
   const rows = await new Promise<any[]>((resolve, reject) =>
-    c.all(sqlText, (e, rows) => (e ? reject(e) : resolve(rows))),
+    c.all(sqlText, (e, rows) => (e ? reject(e) : resolve(rows)))
   );
   c.close();
   return rows;
@@ -246,16 +246,16 @@ allow_cold {
 ```js
 // apps/web/src/features/ingest/jquery-admin.js
 $(function () {
-  $('#replay-dlq').on('click', function () {
-    $.post('/api/dlq/replay');
+  $("#replay-dlq").on("click", function () {
+    $.post("/api/dlq/replay");
   });
-  $('#move-case').on('click', function () {
+  $("#move-case").on("click", function () {
     $.ajax({
-      url: '/graphql',
-      method: 'POST',
-      contentType: 'application/json',
+      url: "/graphql",
+      method: "POST",
+      contentType: "application/json",
       data: JSON.stringify({
-        query: `mutation{ moveCase(caseId:"${$('#cid').val()}", toShard:"${$('#shard').val()}"){ ok } }`,
+        query: `mutation{ moveCase(caseId:"${$("#cid").val()}", toShard:"${$("#shard").val()}"){ ok } }`,
       }),
     });
   });

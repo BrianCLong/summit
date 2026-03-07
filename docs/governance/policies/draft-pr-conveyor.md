@@ -5,31 +5,39 @@
 **Enforcement**: Automated (CI)
 
 ## Objective
+
 To prevent the accumulation of stale work-in-progress (WIP) and ensure the Merge Queue remains fluid and high-velocity.
 
 ## Policy Rules
 
 ### 1. Maximum Draft Age
+
 A Pull Request (PR) may remain in `Draft` state for a maximum of **30 days**.
-*   **Action**: After 30 days, the PR must be either:
-    *   Marked `Ready for Review`.
-    *   Closed.
-    *   Updated with a fresh commit (resetting the timer).
+
+- **Action**: After 30 days, the PR must be either:
+  - Marked `Ready for Review`.
+  - Closed.
+  - Updated with a fresh commit (resetting the timer).
 
 ### 2. Mandatory Classification
+
 All Draft PRs must have one of the following labels to indicate intent:
-*   `status/wip`: Active work in progress.
-*   `status/experimental`: Proof of concept, may not land.
-*   `status/blocked`: Waiting on upstream dependency.
+
+- `status/wip`: Active work in progress.
+- `status/experimental`: Proof of concept, may not land.
+- `status/blocked`: Waiting on upstream dependency.
 
 ### 3. Ownership
+
 Every Draft PR must have a clear **Assignee**. Unassigned drafts are subject to immediate closure after 7 days of inactivity.
 
 ### 4. Promotion Checklist
+
 Before converting from Draft to Ready, the author must complete:
-*   [ ] Self-review of changes.
-*   [ ] CI passing (or known failures documented).
-*   [ ] "What changed" description updated.
+
+- [ ] Self-review of changes.
+- [ ] CI passing (or known failures documented).
+- [ ] "What changed" description updated.
 
 ## Enforcement Plan (CI)
 
@@ -59,5 +67,6 @@ fi
 ```
 
 ## Remediation
-*   **If your PR is closed**: You may reopen it when you are ready to resume active work.
-*   **If you need an exception**: Add the label `exemption/long-running`.
+
+- **If your PR is closed**: You may reopen it when you are ready to resume active work.
+- **If you need an exception**: Add the label `exemption/long-running`.

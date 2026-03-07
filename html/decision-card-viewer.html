@@ -28,43 +28,43 @@
       $(function () {
         var cards = []; // fetch or inject
         function render() {
-          $('#list').empty();
-          var q = $('#q').val().toLowerCase();
+          $("#list").empty();
+          var q = $("#q").val().toLowerCase();
           $.each(cards, function (_, c) {
             if (q && !JSON.stringify(c).toLowerCase().includes(q)) return;
-            $('#list').append(
+            $("#list").append(
               '<div class="card"><div><b>' +
                 c.taskId +
-                '</b> → ' +
+                "</b> → " +
                 c.chosenArm +
-                '</div><div class=meta>eval ' +
+                "</div><div class=meta>eval " +
                 c.predictedEval.toFixed(2) +
-                ' · $' +
+                " · $" +
                 c.predictedCostUSD.toFixed(2) +
-                ' · ±' +
+                " · ±" +
                 c.uncertainty.toFixed(2) +
-                '</div><pre>' +
+                "</div><pre>" +
                 c.rationale +
-                '</pre></div>',
+                "</pre></div>"
             );
           });
         }
-        $('#sortCost').on('click', function () {
+        $("#sortCost").on("click", function () {
           cards.sort(function (a, b) {
             return a.predictedCostUSD - b.predictedCostUSD;
           });
           render();
         });
-        $('#q').on('input', render);
+        $("#q").on("input", render);
         // demo
         cards = [
           {
-            taskId: 't1',
-            chosenArm: 'impl@small',
+            taskId: "t1",
+            chosenArm: "impl@small",
             predictedEval: 0.93,
             predictedCostUSD: 0.21,
             uncertainty: 0.04,
-            rationale: 'Cheapest capable based on low risk & small diff.',
+            rationale: "Cheapest capable based on low risk & small diff.",
           },
         ];
         render();

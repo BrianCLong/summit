@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       test_file:
-        description: 'k6 test file to run (e.g., api-load-test.js or console-load-test.js)'
+        description: "k6 test file to run (e.g., api-load-test.js or console-load-test.js)"
         required: true
-        default: 'api-load-test.js'
+        default: "api-load-test.js"
 
 jobs:
   load_test:

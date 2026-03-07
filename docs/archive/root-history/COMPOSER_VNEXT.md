@@ -289,7 +289,7 @@ COSIGN_EXPERIMENTAL=1
 
 ```typescript
 const config: ComposerConfig = {
-  projectName: 'intelgraph',
+  projectName: "intelgraph",
   cacheEnabled: true,
   parallelExecutionEnabled: true,
   testImpactAnalysisEnabled: true,
@@ -297,7 +297,7 @@ const config: ComposerConfig = {
   telemetryEnabled: true,
   maxParallelTasks: 4,
   cacheConfig: {
-    localDir: '.maestro-cache',
+    localDir: ".maestro-cache",
     ttlDays: 7,
     maxSizeMB: 2000,
   },

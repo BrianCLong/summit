@@ -11,46 +11,55 @@ This module integrates multiple sensing disciplines into a unified intelligence 
 The platform supports the following MASINT disciplines:
 
 ### 1. RF Emissions Analysis
+
 - **Detection**: Frequencies, bandwidths, modulation types.
 - **Analysis**: Identification of emitter types (Radar vs Comms), threat level assessment.
 - **Output**: `RFSignal` analysis with recommendations.
 
 ### 2. Acoustic Signature Processing
+
 - **Detection**: Sound waves, underwater acoustics.
 - **Analysis**: Classification of events (explosions, vehicle movement, speech).
 - **Output**: `AcousticSignal` classification and anomaly detection.
 
 ### 3. Nuclear Detection
+
 - **Detection**: Isotopes, radiation levels (Sv), count rates.
 - **Analysis**: Discrimination between industrial sources and weapons-grade materials.
 - **Output**: `NuclearSignal` with critical alerts for high-threat isotopes.
 
 ### 4. Chemical / Biological Sensors
+
 - **Detection**: Agent names, concentration (ppm).
 - **Analysis**: Immediate threat classification.
 - **Output**: `ChemBioSignal` with containment recommendations.
 
 ### 5. Seismic Monitoring
+
 - **Detection**: P-waves, S-waves, magnitude, depth.
 - **Analysis**: Differentiation between natural earthquakes and underground explosions (nuclear tests).
 - **Output**: `SeismicSignal` event typing.
 
 ### 6. Radar Cross-Section (RCS) Analysis
+
 - **Detection**: RCS values (dBsm), aspect angles.
 - **Analysis**: Identification of stealth characteristics.
 - **Output**: `RadarCrossSection` target classification.
 
 ### 7. Infrared Signature Detection
+
 - **Detection**: Thermal intensity, wavelength.
 - **Analysis**: Launch detection (plumes) vs static heat sources.
 - **Output**: `InfraredSignal` threat assessment.
 
 ### 8. Spectral Analysis
+
 - **Detection**: Multi-spectral band intensity.
 - **Analysis**: Material classification.
 - **Output**: `SpectralSignal` material identification.
 
 ### 9. Atmospheric Monitoring
+
 - **Detection**: Pressure, humidity, trace gases.
 - **Analysis**: Environmental context for other sensor readings.
 - **Output**: `AtmosphericSignal` data.
@@ -62,6 +71,7 @@ The platform supports the following MASINT disciplines:
 **Endpoint:** `POST /api/masint/ingest`
 
 **Headers:**
+
 - `Authorization`: Bearer <token>
 - `Content-Type`: `application/json`
 

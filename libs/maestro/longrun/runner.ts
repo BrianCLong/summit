@@ -1,23 +1,11 @@
-import { spawnSync } from 'node:child_process';
-import fs from 'node:fs';
-import path from 'node:path';
+import { spawnSync } from "node:child_process";
+import fs from "node:fs";
+import path from "node:path";
 
-import { BudgetTracker } from './budget.js';
-import {
-  createEvidenceManifest,
-  recordIteration,
-  writeEvidenceManifest,
-} from './evidence.js';
-import {
-  evaluateStopConditions,
-  initialStopState,
-} from './stop-conditions.js';
-import type {
-  IterationInput,
-  LongRunJobSpec,
-  StopDecision,
-  StopState,
-} from './types.js';
+import { BudgetTracker } from "./budget.js";
+import { createEvidenceManifest, recordIteration, writeEvidenceManifest } from "./evidence.js";
+import { evaluateStopConditions, initialStopState } from "./stop-conditions.js";
+import type { IterationInput, LongRunJobSpec, StopDecision, StopState } from "./types.js";
 
 export class LongRunJobRunner {
   private readonly workspaceRoot: string;
@@ -33,13 +21,8 @@ export class LongRunJobRunner {
     this.job = options.job;
     this.budget = new BudgetTracker(options.job.budgets);
     this.stopState = initialStopState();
-    this.evidenceDir = path.join(this.workspaceRoot, '.maestro', 'evidence');
-    this.checkpointsDir = path.join(
-      this.workspaceRoot,
-      '.maestro',
-      'checkpoints',
-      this.job.job_id,
-    );
+    this.evidenceDir = path.join(this.workspaceRoot, ".maestro", "evidence");
+    this.checkpointsDir = path.join(this.workspaceRoot, ".maestro", "checkpoints", this.job.job_id);
   }
 
   runIteration(iteration: IterationInput): StopDecision {
@@ -74,48 +57,36 @@ export class LongRunJobRunner {
   private writeCheckpoint(iteration: IterationInput): string {
     const checkpointPath = path.join(
       this.checkpointsDir,
-      String(iteration.iteration).padStart(4, '0'),
+      String(iteration.iteration).padStart(4, "0")
     );
     fs.mkdirSync(checkpointPath, { recursive: true });
 
     if (iteration.planDiff) {
-      fs.writeFileSync(
-        path.join(checkpointPath, 'plan-diff.md'),
-        iteration.planDiff,
-        'utf-8',
-      );
+      fs.writeFileSync(path.join(checkpointPath, "plan-diff.md"), iteration.planDiff, "utf-8");
     }
 
     if (iteration.patch) {
-      fs.writeFileSync(
-        path.join(checkpointPath, 'patch.diff'),
-        iteration.patch,
-        'utf-8',
-      );
+      fs.writeFileSync(path.join(checkpointPath, "patch.diff"), iteration.patch, "utf-8");
     }
 
     if (iteration.commandLog) {
       fs.writeFileSync(
-        path.join(checkpointPath, 'command.log'),
-        `${iteration.commandLog.join('\n')}\n`,
-        'utf-8',
+        path.join(checkpointPath, "command.log"),
+        `${iteration.commandLog.join("\n")}\n`,
+        "utf-8"
       );
     }
 
     if (iteration.testReport) {
       fs.writeFileSync(
-        path.join(checkpointPath, 'test-report.json'),
+        path.join(checkpointPath, "test-report.json"),
         `${JSON.stringify(iteration.testReport, null, 2)}\n`,
-        'utf-8',
+        "utf-8"
       );
     }
 
     if (iteration.summary) {
-      fs.writeFileSync(
-        path.join(checkpointPath, 'summary.md'),
-        iteration.summary,
-        'utf-8',
-      );
+      fs.writeFileSync(path.join(checkpointPath, "summary.md"), iteration.summary, "utf-8");
     }
 
     return checkpointPath;
@@ -124,27 +95,24 @@ export class LongRunJobRunner {
   private createEvidenceBundle(): void {
     fs.mkdirSync(this.evidenceDir, { recursive: true });
     const tarPath = path.join(this.evidenceDir, `${this.job.job_id}.tar.gz`);
-    const manifestPath = path.join(
-      this.evidenceDir,
-      `${this.job.job_id}.manifest.json`,
-    );
+    const manifestPath = path.join(this.evidenceDir, `${this.job.job_id}.manifest.json`);
 
     const tarArgs = [
-      '-czf',
+      "-czf",
       tarPath,
-      '-C',
+      "-C",
       this.workspaceRoot,
-      '.maestro/checkpoints',
+      ".maestro/checkpoints",
       `.maestro/evidence/${path.basename(manifestPath)}`,
     ];
 
-    const result = spawnSync('tar', tarArgs, { stdio: 'pipe' });
+    const result = spawnSync("tar", tarArgs, { stdio: "pipe" });
     if (result.status !== 0) {
-      const errorLog = result.stderr?.toString() || 'unknown tar error';
+      const errorLog = result.stderr?.toString() || "unknown tar error";
       fs.writeFileSync(
         path.join(this.evidenceDir, `${this.job.job_id}.tar.error.log`),
         errorLog,
-        'utf-8',
+        "utf-8"
       );
     }
   }

@@ -107,7 +107,7 @@ npm test -- --coverage tenant-isolation.test.ts
 ### For New Repositories
 
 ```typescript
-import { BaseTenantRepository, TenantEntity } from '../repositories/base-tenant-repository.js';
+import { BaseTenantRepository, TenantEntity } from "../repositories/base-tenant-repository.js";
 
 interface MyEntity extends TenantEntity {
   id: string;
@@ -117,7 +117,7 @@ interface MyEntity extends TenantEntity {
 
 class MyRepository extends BaseTenantRepository<MyEntity> {
   constructor() {
-    super('my_table');
+    super("my_table");
   }
 }
 ```
@@ -180,11 +180,13 @@ class MyRepository extends BaseTenantRepository<MyEntity> {
 ## Reviewers
 
 **Required:**
+
 - [ ] @security-team - Security architecture review
 - [ ] @backend-leads - Repository pattern review
 - [ ] @devops - CI/CD integration review
 
 **Optional:**
+
 - [ ] @compliance-team - SOC 2 / GDPR impact review
 
 ## References

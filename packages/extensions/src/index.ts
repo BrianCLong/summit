@@ -1,5 +1,5 @@
 // Extension system for IntelGraph platform
-export const version = '1.0.0';
+export const version = "1.0.0";
 
 export interface Extension {
   id: string;

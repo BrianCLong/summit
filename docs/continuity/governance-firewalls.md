@@ -7,6 +7,7 @@
 Even well-intentioned organizations can be captured when power is concentrated. A single compromised executive, investor, or board can undermine the entire mission.
 
 **Governance firewalls** are structural separations that:
+
 - Prevent any single actor from compromising the mission
 - Create checks and balances within the organization
 - Distribute veto power over mission-critical decisions
@@ -63,19 +64,20 @@ Even well-intentioned organizations can be captured when power is concentrated. 
 
 ### Separated Powers
 
-| Domain | Operational Leadership | Mission Oversight Board |
-|--------|----------------------|------------------------|
-| Daily decisions | ✅ Authority | ❌ No involvement |
-| Scope changes | ❌ Proposal only | ✅ Approval required |
-| Invariant modifications | ❌ Cannot initiate | ✅ Veto power |
-| Evidence standards | ❌ Must follow | ✅ Sets requirements |
-| Resource allocation | ✅ Within scope | ✅ Review if affects mission |
-| Staff hiring | ✅ Authority | ✅ Senior mission roles |
-| Partner agreements | ✅ Negotiate | ✅ Mission clause approval |
+| Domain                  | Operational Leadership | Mission Oversight Board      |
+| ----------------------- | ---------------------- | ---------------------------- |
+| Daily decisions         | ✅ Authority           | ❌ No involvement            |
+| Scope changes           | ❌ Proposal only       | ✅ Approval required         |
+| Invariant modifications | ❌ Cannot initiate     | ✅ Veto power                |
+| Evidence standards      | ❌ Must follow         | ✅ Sets requirements         |
+| Resource allocation     | ✅ Within scope        | ✅ Review if affects mission |
+| Staff hiring            | ✅ Authority           | ✅ Senior mission roles      |
+| Partner agreements      | ✅ Negotiate           | ✅ Mission clause approval   |
 
 ### Implementation Mechanisms
 
 **Bylaws provision**:
+
 ```
 Article [X]: Separation of Operational and Governance Authority
 
@@ -127,6 +129,7 @@ THEN:
 ### The Capture Problem
 
 Traditional boards often fail to preserve mission because:
+
 - Members selected by CEO (loyalty over independence)
 - Compensation tied to metrics that conflict with mission
 - Social dynamics discourage dissent
@@ -138,17 +141,20 @@ Traditional boards often fail to preserve mission because:
 #### 2.1 Composition Requirements
 
 **Majority External**:
+
 - At least 2/3 of members have no operational role
 - No current or recent (5 year) employees
 - No financial relationship beyond board compensation
 - No family relationships with leadership
 
 **Expertise Requirements**:
+
 - Ethics, governance, or relevant domain expertise
 - Demonstrated commitment to evidence-based integrity
 - No conflicts of interest with operational priorities
 
 **Diversity**:
+
 - Not all from same professional background
 - Geographic/cultural diversity where applicable
 - Range of perspectives on mission implementation
@@ -158,12 +164,14 @@ Traditional boards often fail to preserve mission because:
 **NOT selected by CEO or operational leadership**
 
 **Options**:
+
 1. **Nomination Committee**: Independent subset of current board proposes candidates
 2. **External Nomination**: Trusted external organizations propose candidates
 3. **Stakeholder Input**: Partners, regulators, or users provide input
 4. **Sortition Element** (advanced): Random selection from qualified pool
 
 **Approval**:
+
 - Requires supermajority of current board
 - Cannot be blocked by single member
 - Public disclosure of selection rationale
@@ -171,16 +179,19 @@ Traditional boards often fail to preserve mission because:
 #### 2.3 Term Structure
 
 **Staggered Terms**:
+
 - 4-year terms, staggered so only 1/4 rotate annually
 - Prevents sudden board capture via new appointments
 - Ensures institutional continuity
 
 **Term Limits**:
+
 - Maximum 2 consecutive terms (8 years)
 - Prevents entrenchment and ensures fresh perspectives
 - Exception: May serve additional term if critical continuity need
 
 **Removal Constraints**:
+
 - Only "for cause" (malfeasance, incapacity)
 - Requires supermajority (3/4) of other board members
 - Cannot be removed for "performance" or disagreement
@@ -189,11 +200,13 @@ Traditional boards often fail to preserve mission because:
 #### 2.4 Compensation Structure
 
 **Fixed, Not Performance-Based**:
+
 - Set compensation not tied to organizational metrics
 - Prevents incentive to compromise mission for growth
 - Modest but fair (attracts mission-aligned, not profit-driven)
 
 **No Equity/Options**:
+
 - Board members don't benefit from acquisition
 - Removes incentive to maximize sale price over mission
 - Ensures decision-making aligned with purpose, not personal gain
@@ -201,12 +214,14 @@ Traditional boards often fail to preserve mission because:
 #### 2.5 Information Access
 
 **Independent Information Channels**:
+
 - Direct access to operational data without management filter
 - Right to commission independent audits
 - Staff obligation to provide information when requested
 - Whistleblower channel directly to board (bypasses management)
 
 **Regular Unfiltered Briefings**:
+
 - Quarterly deep-dives into decision patterns
 - Direct access to evidence quality metrics
 - Compliance monitoring data
@@ -219,6 +234,7 @@ Traditional boards often fail to preserve mission because:
 ### Problem Patterns
 
 How operational teams compromise oversight:
+
 - Controlling information flow ("board only needs high-level summaries")
 - Stacking board with friendly members
 - Creating social pressure against dissent
@@ -230,6 +246,7 @@ How operational teams compromise oversight:
 #### 3.1 Information Firewall
 
 **Board has independent access to**:
+
 - Audit logs and decision data
 - Compliance monitoring systems
 - Staff concerns and feedback
@@ -237,6 +254,7 @@ How operational teams compromise oversight:
 - Technical systems (read-only)
 
 **Management cannot**:
+
 - Filter what board sees
 - Require "pre-approval" of board briefings
 - Limit board member access to information
@@ -245,12 +263,14 @@ How operational teams compromise oversight:
 #### 3.2 Board Support Infrastructure
 
 **Independent Staff**:
+
 - Board has own legal counsel (not company lawyer)
 - Board can hire independent technical advisors
 - Board can commission audits without management approval
 - Budget for independent analysis
 
 **Physical/Virtual Separation**:
+
 - Board meetings not controlled by management
 - Board can meet without management present
 - Board communications not on company systems management controls
@@ -258,6 +278,7 @@ How operational teams compromise oversight:
 #### 3.3 Veto Power, Not Just Advisory
 
 **Board authority is binding**:
+
 - Management cannot override board on governance matters
 - Board decisions are enforceable (not just recommendations)
 - Clear escalation path if management defies board
@@ -276,18 +297,21 @@ Investors (equity or debt holders) may have economic interests that conflict wit
 #### 4.1 Governance Rights Separation
 
 **Investor Rights** (what they CAN control):
+
 - Economic returns within constraints
 - Board representation (minority, not majority)
 - Information rights for financial performance
 - Consent rights on major financial decisions
 
 **Mission Rights** (what they CANNOT control):
+
 - Scope or invariant changes
 - Governance structure modifications
 - Oversight board composition
 - Mission-related decisions
 
 **Implementation**:
+
 ```
 Investor Agreement Clause:
 
@@ -310,6 +334,7 @@ governance, wherein:
 **Mechanism**: Different share classes with different voting rights
 
 **Structure**:
+
 - Class A (common): Economic rights, standard voting
 - Class B (mission): Held by mission oversight board, voting rights on governance matters
 
@@ -332,17 +357,20 @@ Internal oversight can be captured. External verification provides redundant pro
 **Frequency**: Annual minimum, plus event-triggered
 
 **Scope**:
+
 - Compliance with stated invariants
 - Governance process adherence
 - Decision quality and evidence discipline
 - Drift indicators
 
 **Selection**:
+
 - Auditor selected by oversight board, not management
 - Rotation every 3-5 years (prevents capture)
 - Published criteria for auditor independence
 
 **Reporting**:
+
 - Full report to oversight board
 - Public summary (abstracted for security)
 - Management cannot block publication
@@ -350,6 +378,7 @@ Internal oversight can be captured. External verification provides redundant pro
 #### 5.2 Public Transparency Obligations
 
 **Regular Reporting**:
+
 - Quarterly transparency reports
 - Annual mission adherence assessment
 - Incident disclosures (appropriately abstracted)
@@ -360,6 +389,7 @@ Internal oversight can be captured. External verification provides redundant pro
 #### 5.3 Regulatory Engagement
 
 **Proactive Relationship**:
+
 - Regular briefings to relevant regulators
 - Voluntary submission to regulatory review
 - Regulator as external check on internal capture
@@ -377,6 +407,7 @@ External parties can challenge apparent mission drift
 ### Implementation
 
 **Public Challenge Process**:
+
 1. Any stakeholder can submit formal concern
 2. Oversight board must review within 30 days
 3. Independent investigation if concern substantive
@@ -394,6 +425,7 @@ External parties can challenge apparent mission drift
 **Attack**: New CEO wants to relax evidence standards to increase decision throughput
 
 **Firewall Response**:
+
 - ❌ CEO cannot change invariants (governance reserved)
 - ✅ Oversight board blocks proposed changes
 - ✅ Automated monitoring detects standard erosion
@@ -410,6 +442,7 @@ External parties can challenge apparent mission drift
 **Attack**: Over time, board is stacked with mission-compromising members
 
 **Firewall Response**:
+
 - ⚠️ Staggered terms slow the capture process
 - ✅ Independent auditors detect and report drift
 - ✅ Public transparency reveals divergence
@@ -426,6 +459,7 @@ External parties can challenge apparent mission drift
 **Attack**: Financial pressure drives demand to relax standards
 
 **Firewall Response**:
+
 - ✅ Compensation structure doesn't incentivize compromise
 - ✅ Mission-aligned funding reduces pressure
 - ✅ Charter provisions require scope reduction before standard reduction
@@ -439,30 +473,35 @@ External parties can challenge apparent mission drift
 ## Implementation Checklist
 
 ### Legal Foundation
+
 - [ ] Charter provisions establishing governance separation
 - [ ] Bylaws defining reserved powers
 - [ ] Oversight board formation and independence requirements
 - [ ] Investor agreements with mission protection clauses
 
 ### Structural Independence
+
 - [ ] Oversight board composition meeting independence criteria
 - [ ] Staggered term structure implemented
 - [ ] Removal-for-cause-only protections
 - [ ] Fixed compensation structure (not performance-based)
 
 ### Information Architecture
+
 - [ ] Board independent access to operational data
 - [ ] Whistleblower channel to board
 - [ ] Independent legal counsel for board
 - [ ] Budget for board-commissioned audits
 
 ### External Verification
+
 - [ ] Independent audit firm selected and contracted
 - [ ] Public transparency reporting initiated
 - [ ] Regulatory engagement established
 - [ ] Stakeholder challenge process published
 
 ### Monitoring & Enforcement
+
 - [ ] Automated governance compliance monitoring
 - [ ] Regular firewall stress testing
 - [ ] Violation escalation protocols
@@ -475,6 +514,7 @@ External parties can challenge apparent mission drift
 Monitor for these compromise patterns:
 
 🚨 **Erosion Indicators**:
+
 - Management limiting board information access
 - Proposals to "streamline" governance (reduce oversight)
 - Board members selected for "business expertise" over mission alignment

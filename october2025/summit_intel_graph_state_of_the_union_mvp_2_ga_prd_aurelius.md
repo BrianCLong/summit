@@ -169,7 +169,7 @@ spec:
   max_cost_usd: 0.05
   policy_tags: [pii, export]
   opa_package: tools.extract_entities
-  sandbox: { profile: 'restricted' }
+  sandbox: { profile: "restricted" }
 ```
 
 - **Admission flow**: request → static cost estimate → OPA check → budget check → sandbox exec → signed result.

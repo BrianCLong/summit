@@ -40,7 +40,7 @@ interface CausalHorizonInput {
   interventions?: Array<{
     variable: string;
     value: unknown;
-    type: 'HARD' | 'SOFT';
+    type: "HARD" | "SOFT";
     cost?: number;
   }>;
   constraints?: {
@@ -50,9 +50,9 @@ interface CausalHorizonInput {
     forbiddenVariables?: string[];
   };
   config?: {
-    edgeConfidenceThreshold?: number;  // default: 0.5
-    includeLatentVariables?: boolean;   // default: true
-    temporalOrdering?: boolean;         // default: true
+    edgeConfidenceThreshold?: number; // default: 0.5
+    includeLatentVariables?: boolean; // default: true
+    temporalOrdering?: boolean; // default: true
   };
 }
 ```
@@ -65,7 +65,7 @@ interface CausalHorizonOutput {
   causalGraph: {
     nodes: CausalNode[];
     edges: CausalEdge[];
-    isDAG: boolean;  // Guaranteed acyclic
+    isDAG: boolean; // Guaranteed acyclic
   };
 
   // Present if interventions provided
@@ -73,10 +73,10 @@ interface CausalHorizonOutput {
     outcome: {
       variable: string;
       value: unknown;
-      probability: number;      // Range: [0, 1]
+      probability: number; // Range: [0, 1]
       confidenceInterval: [number, number];
     };
-    causalPaths: CausalPath[];  // Ordered by contribution
+    causalPaths: CausalPath[]; // Ordered by contribution
     comparisonToFactual: {
       factualValue: unknown;
       counterfactualValue: unknown;
@@ -87,14 +87,14 @@ interface CausalHorizonOutput {
   // Present if optimization requested
   optimalInterventions?: Array<{
     interventions: Intervention[];
-    expectedEffect: number;     // Range: [0, 1]
+    expectedEffect: number; // Range: [0, 1]
     totalCost: number;
-    confidence: number;         // Range: [0, 1]
+    confidence: number; // Range: [0, 1]
   }>;
 
   // Metadata
-  executionTime: number;        // Milliseconds
-  identifiability: boolean;     // Whether effect is identifiable
+  executionTime: number; // Milliseconds
+  identifiability: boolean; // Whether effect is identifiable
 }
 ```
 
@@ -177,10 +177,10 @@ interface TemporalFractureInput {
   }>;
 
   // Optional
-  predictionHorizon?: number;      // Hours, default: 24
-  stabilityThreshold?: number;     // default: 0.7
+  predictionHorizon?: number; // Hours, default: 24
+  stabilityThreshold?: number; // default: 0.7
   phaseTransitionSensitivity?: number; // default: 0.8
-  includeRecoveryPlan?: boolean;   // default: true
+  includeRecoveryPlan?: boolean; // default: true
 }
 ```
 
@@ -195,20 +195,20 @@ interface TemporalFractureOutput {
     fracturePoints: Array<{
       id: string;
       predictedTime: Date;
-      confidence: number;        // Range: [0, 1]
-      severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-      type: 'INSTABILITY' | 'DRIFT' | 'COLLAPSE' | 'DIVERGENCE';
+      confidence: number; // Range: [0, 1]
+      severity: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
+      type: "INSTABILITY" | "DRIFT" | "COLLAPSE" | "DIVERGENCE";
       affectedMetrics: string[];
     }>;
-    overallRisk: number;         // Range: [0, 1]
+    overallRisk: number; // Range: [0, 1]
   };
 
   // Current system phase
   currentPhase: {
-    state: 'STABLE' | 'TRANSITIONING' | 'UNSTABLE' | 'CRITICAL';
+    state: "STABLE" | "TRANSITIONING" | "UNSTABLE" | "CRITICAL";
     enteredAt: Date;
-    stabilityScore: number;      // Range: [0, 1]
-    lyapunovExponent: number;    // Negative = stable
+    stabilityScore: number; // Range: [0, 1]
+    lyapunovExponent: number; // Negative = stable
   };
 
   // Present if includeRecoveryPlan = true
@@ -219,8 +219,8 @@ interface TemporalFractureOutput {
       expectedImpact: number;
       deadline: Date;
     }>;
-    estimatedRecoveryTime: number;  // Hours
-    successProbability: number;     // Range: [0, 1]
+    estimatedRecoveryTime: number; // Hours
+    successProbability: number; // Range: [0, 1]
   };
 }
 ```
@@ -296,14 +296,14 @@ interface EntanglementDetectorInput {
   systems: Array<{
     id: string;
     domain: string;
-    metrics: Record<string, number[]>;  // Time series arrays
+    metrics: Record<string, number[]>; // Time series arrays
   }>;
 
   // Optional
-  correlationThreshold?: number;    // default: 0.7
-  synchronizationWindow?: number;   // Minutes, default: 60
-  includeRiskScoring?: boolean;     // default: true
-  detectLatentCouplings?: boolean;  // default: true
+  correlationThreshold?: number; // default: 0.7
+  synchronizationWindow?: number; // Minutes, default: 60
+  includeRiskScoring?: boolean; // default: true
+  detectLatentCouplings?: boolean; // default: true
 }
 ```
 
@@ -317,15 +317,15 @@ interface EntanglementDetectorOutput {
       id: string;
       system1: string;
       system2: string;
-      couplingStrength: number;     // Range: [0, 1]
-      couplingType: 'DIRECT' | 'LATENT' | 'SYNCHRONOUS' | 'DELAYED';
-      lag: number;                   // Minutes (for DELAYED)
+      couplingStrength: number; // Range: [0, 1]
+      couplingType: "DIRECT" | "LATENT" | "SYNCHRONOUS" | "DELAYED";
+      lag: number; // Minutes (for DELAYED)
       sharedFailureProbability: number;
     }>;
     clusters: Array<{
       id: string;
       systems: string[];
-      cohesion: number;              // Range: [0, 1]
+      cohesion: number; // Range: [0, 1]
     }>;
   };
 
@@ -334,14 +334,14 @@ interface EntanglementDetectorOutput {
     timestamp: Date;
     involvedSystems: string[];
     eventType: string;
-    significance: number;            // Range: [0, 1]
+    significance: number; // Range: [0, 1]
   }>;
 
   // Present if includeRiskScoring = true
   riskScores?: Array<{
     systemId: string;
-    entanglementRisk: number;        // Range: [0, 1]
-    cascadeVulnerability: number;    // Range: [0, 1]
+    entanglementRisk: number; // Range: [0, 1]
+    cascadeVulnerability: number; // Range: [0, 1]
     recommendedIsolation: boolean;
   }>;
 }
@@ -414,15 +414,15 @@ interface RecursiveOutcomeInput {
   event: {
     id: string;
     type: string;
-    magnitude: number;           // Range: [0, 1]
+    magnitude: number; // Range: [0, 1]
     affectedNodes: string[];
   };
   graphId: string;
 
   // Optional
-  propagationDepth?: number;     // default: 7
-  dampingFactor?: number;        // default: 0.15
-  thresholdEffect?: number;      // Minimum effect to propagate, default: 0.01
+  propagationDepth?: number; // default: 7
+  dampingFactor?: number; // default: 0.15
+  thresholdEffect?: number; // Minimum effect to propagate, default: 0.01
   identifyLeveragePoints?: boolean; // default: true
 }
 ```
@@ -437,14 +437,14 @@ interface RecursiveOutcomeOutput {
     rootEvent: string;
     totalNodesAffected: number;
     maxDepthReached: number;
-    totalAmplification: number;   // Sum of all effects
+    totalAmplification: number; // Sum of all effects
 
     propagationLayers: Array<{
       depth: number;
       effects: Array<{
         nodeId: string;
-        effectMagnitude: number;  // Range: [0, 1]
-        effectDirection: 'POSITIVE' | 'NEGATIVE' | 'NEUTRAL';
+        effectMagnitude: number; // Range: [0, 1]
+        effectDirection: "POSITIVE" | "NEGATIVE" | "NEUTRAL";
         pathFromRoot: string[];
         dampingApplied: number;
       }>;
@@ -455,10 +455,10 @@ interface RecursiveOutcomeOutput {
   // Present if identifyLeveragePoints = true
   leveragePoints?: Array<{
     nodeId: string;
-    leverageScore: number;        // Higher = more influence
-    upstreamEffects: number;      // Effects if intervened
-    downstreamEffects: number;    // Effects it causes
-    optimalInterventionType: 'AMPLIFY' | 'DAMPEN' | 'REDIRECT';
+    leverageScore: number; // Higher = more influence
+    upstreamEffects: number; // Effects if intervened
+    downstreamEffects: number; // Effects it causes
+    optimalInterventionType: "AMPLIFY" | "DAMPEN" | "REDIRECT";
   }>;
 
   // Critical paths
@@ -552,11 +552,11 @@ interface IntegrityShieldInput {
     timestamp: Date;
   }>;
   thresholds?: {
-    drift: number;              // default: 0.15
-    bias: number;               // default: 0.1
+    drift: number; // default: 0.15
+    bias: number; // default: 0.1
     adversarialSensitivity: number; // default: 0.8
   };
-  autoHealEnabled?: boolean;    // default: true
+  autoHealEnabled?: boolean; // default: true
 }
 ```
 
@@ -565,39 +565,39 @@ interface IntegrityShieldInput {
 ```typescript
 interface IntegrityShieldOutput {
   // Always present
-  reliabilityScore: number;       // Range: [0, 1], >= 0.7 is healthy
-  status: 'HEALTHY' | 'DEGRADED' | 'CRITICAL' | 'COMPROMISED';
+  reliabilityScore: number; // Range: [0, 1], >= 0.7 is healthy
+  status: "HEALTHY" | "DEGRADED" | "CRITICAL" | "COMPROMISED";
 
   // Drift detection
   driftMetrics: Array<{
     dimension: string;
-    driftMagnitude: number;       // Range: [0, 1]
-    driftDirection: 'INCREASING' | 'DECREASING' | 'OSCILLATING';
+    driftMagnitude: number; // Range: [0, 1]
+    driftDirection: "INCREASING" | "DECREASING" | "OSCILLATING";
     detectedAt: Date;
-    severity: 'LOW' | 'MEDIUM' | 'HIGH';
+    severity: "LOW" | "MEDIUM" | "HIGH";
   }>;
 
   // Bias indicators
   biasIndicators: Array<{
     dimension: string;
-    biasType: 'SELECTION' | 'CONFIRMATION' | 'SURVIVORSHIP' | 'ANCHORING';
-    biasStrength: number;         // Range: [0, 1]
+    biasType: "SELECTION" | "CONFIRMATION" | "SURVIVORSHIP" | "ANCHORING";
+    biasStrength: number; // Range: [0, 1]
     affectedOutputs: string[];
   }>;
 
   // Adversarial detection
   adversarialSignals: Array<{
-    signalType: 'INPUT_MANIPULATION' | 'POISONING' | 'EVASION' | 'MODEL_EXTRACTION';
-    confidence: number;           // Range: [0, 1]
+    signalType: "INPUT_MANIPULATION" | "POISONING" | "EVASION" | "MODEL_EXTRACTION";
+    confidence: number; // Range: [0, 1]
     evidence: string[];
     recommendedAction: string;
   }>;
 
   // Present if autoHealEnabled and issues detected
   healingActions?: Array<{
-    actionType: 'RECALIBRATE' | 'RETRAIN' | 'ROLLBACK' | 'QUARANTINE' | 'ESCALATE';
+    actionType: "RECALIBRATE" | "RETRAIN" | "ROLLBACK" | "QUARANTINE" | "ESCALATE";
     target: string;
-    status: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'FAILED';
+    status: "PENDING" | "IN_PROGRESS" | "COMPLETED" | "FAILED";
     expectedImprovement: number;
   }>;
 }
@@ -668,7 +668,7 @@ Summit Integration:
 interface SyntheticPersonaInput {
   // Required
   entityId: string;
-  entityType: 'PERSON' | 'ORGANIZATION' | 'SYSTEM' | 'ASSET';
+  entityType: "PERSON" | "ORGANIZATION" | "SYSTEM" | "ASSET";
   currentProfile: {
     attributes: Record<string, unknown>;
     behaviors: Array<{ type: string; frequency: number }>;
@@ -676,15 +676,15 @@ interface SyntheticPersonaInput {
   };
 
   // Optional
-  simulationHorizon?: number;     // Months, default: 12
-  trajectoryCount?: number;       // Number of futures to simulate, default: 5
+  simulationHorizon?: number; // Months, default: 12
+  trajectoryCount?: number; // Number of futures to simulate, default: 5
   environmentalPressures?: Array<{
     type: string;
-    intensity: number;            // Range: [0, 1]
+    intensity: number; // Range: [0, 1]
     startTime?: Date;
-    duration?: number;            // Months
+    duration?: number; // Months
   }>;
-  evolutionGranularity?: 'DAILY' | 'WEEKLY' | 'MONTHLY'; // default: MONTHLY
+  evolutionGranularity?: "DAILY" | "WEEKLY" | "MONTHLY"; // default: MONTHLY
 }
 ```
 
@@ -703,8 +703,8 @@ interface SyntheticPersonaOutput {
   // Future trajectories
   trajectories: Array<{
     id: string;
-    likelihood: number;           // Range: [0, 1], sum to 1
-    divergencePoint?: Date;       // When this trajectory diverges from others
+    likelihood: number; // Range: [0, 1], sum to 1
+    divergencePoint?: Date; // When this trajectory diverges from others
 
     evolutionSteps: Array<{
       timestamp: Date;
@@ -713,9 +713,9 @@ interface SyntheticPersonaOutput {
         attribute: string;
         from: unknown;
         to: unknown;
-        driver: string;           // What caused the change
+        driver: string; // What caused the change
       }>;
-      stabilityScore: number;     // Range: [0, 1]
+      stabilityScore: number; // Range: [0, 1]
     }>;
 
     finalState: {
@@ -727,8 +727,8 @@ interface SyntheticPersonaOutput {
 
   // Comparative analysis
   trajectoryComparison: {
-    consensusAttributes: Record<string, unknown>;  // Same across all
-    divergentAttributes: string[];                  // Different across trajectories
+    consensusAttributes: Record<string, unknown>; // Same across all
+    divergentAttributes: string[]; // Different across trajectories
     keyDecisionPoints: Array<{
       timestamp: Date;
       decision: string;
@@ -748,13 +748,11 @@ const input = {
   currentProfile: {
     attributes: { skillLevel: 7, resources: "MODERATE", motivation: "FINANCIAL" },
     behaviors: [{ type: "reconnaissance", frequency: 12 }],
-    relationships: [{ targetId: "org-crime-network", type: "MEMBER", strength: 0.8 }]
+    relationships: [{ targetId: "org-crime-network", type: "MEMBER", strength: 0.8 }],
   },
   simulationHorizon: 24,
   trajectoryCount: 3,
-  environmentalPressures: [
-    { type: "LAW_ENFORCEMENT_PRESSURE", intensity: 0.7 }
-  ]
+  environmentalPressures: [{ type: "LAW_ENFORCEMENT_PRESSURE", intensity: 0.7 }],
 };
 
 // Expected: Multiple divergent futures
@@ -765,26 +763,26 @@ const input = {
       likelihood: 0.45,
       finalState: {
         profile: { skillLevel: 9, resources: "HIGH" },
-        riskIndicators: ["ESCALATION", "NETWORK_EXPANSION"]
-      }
+        riskIndicators: ["ESCALATION", "NETWORK_EXPANSION"],
+      },
     },
     {
       id: "traj-2",
       likelihood: 0.35,
       finalState: {
         profile: { skillLevel: 5, resources: "LOW" },
-        riskIndicators: ["DORMANCY"]
-      }
+        riskIndicators: ["DORMANCY"],
+      },
     },
     {
       id: "traj-3",
-      likelihood: 0.20,
+      likelihood: 0.2,
       finalState: {
         profile: { skillLevel: 0, resources: "NONE" },
-        riskIndicators: ["NEUTRALIZED"]
-      }
-    }
-  ]
+        riskIndicators: ["NEUTRALIZED"],
+      },
+    },
+  ];
 }
 ```
 
@@ -827,14 +825,14 @@ interface PredictiveOrchestrationInput {
   // For creating flows
   flow?: {
     name: string;
-    triggerCondition: string;     // Expression language
+    triggerCondition: string; // Expression language
     actions: Array<{
-      type: 'EXECUTE' | 'NOTIFY' | 'UPDATE' | 'ESCALATE';
+      type: "EXECUTE" | "NOTIFY" | "UPDATE" | "ESCALATE";
       target: string;
       parameters: Record<string, unknown>;
     }>;
     priority?: number;
-    timeout?: number;             // Milliseconds
+    timeout?: number; // Milliseconds
   };
 
   // For pathway management
@@ -860,13 +858,13 @@ interface PredictiveOrchestrationOutput {
     nodeId: string;
     predictionId: string;
     boundAt: Date;
-    triggeredFlows: string[];     // Flow IDs triggered by this binding
+    triggeredFlows: string[]; // Flow IDs triggered by this binding
   };
 
   // Flow execution result
   flowExecution?: {
     flowId: string;
-    status: 'SUCCESS' | 'PARTIAL' | 'FAILED' | 'TIMEOUT';
+    status: "SUCCESS" | "PARTIAL" | "FAILED" | "TIMEOUT";
     actionsExecuted: number;
     actionsFailed: number;
     results: Array<{
@@ -875,7 +873,7 @@ interface PredictiveOrchestrationOutput {
       output?: unknown;
       error?: string;
     }>;
-    executionTime: number;        // Milliseconds
+    executionTime: number; // Milliseconds
   };
 
   // Pathway rewiring result
@@ -885,7 +883,7 @@ interface PredictiveOrchestrationOutput {
     newNodes: string[];
     changedTransitions: number;
     reason: string;
-    confidence: number;           // Range: [0, 1]
+    confidence: number; // Range: [0, 1]
   };
 
   // Current orchestration status
@@ -962,19 +960,19 @@ interface UncertaintyFieldInput {
   predictions: Array<{
     id: string;
     domain: string;
-    coordinates: { x: number; y: number; t: number };  // Spatial-temporal
+    coordinates: { x: number; y: number; t: number }; // Spatial-temporal
     value: unknown;
-    uncertainty: number;          // Range: [0, 1]
+    uncertainty: number; // Range: [0, 1]
   }>;
 
   // Optional
   resolution?: {
-    spatial: number;              // Grid resolution
-    temporal: number;             // Time step (hours)
+    spatial: number; // Grid resolution
+    temporal: number; // Time step (hours)
   };
-  interpolationMethod?: 'KRIGING' | 'IDW' | 'SPLINE' | 'NEURAL';
-  identifyTurbulentZones?: boolean;  // default: true
-  stabilizationRecommendations?: boolean;  // default: true
+  interpolationMethod?: "KRIGING" | "IDW" | "SPLINE" | "NEURAL";
+  identifyTurbulentZones?: boolean; // default: true
+  stabilizationRecommendations?: boolean; // default: true
 }
 ```
 
@@ -989,7 +987,7 @@ interface UncertaintyFieldOutput {
     resolution: { spatial: number; temporal: number };
 
     // 3D uncertainty values
-    values: number[][][];         // [x][y][t], Range: [0, 1]
+    values: number[][][]; // [x][y][t], Range: [0, 1]
 
     // Statistics
     statistics: {
@@ -1016,15 +1014,15 @@ interface UncertaintyFieldOutput {
     center: { x: number; y: number; t: number };
     radius: number;
     peakUncertainty: number;
-    volatility: number;           // Rate of uncertainty change
+    volatility: number; // Rate of uncertainty change
     affectedDomains: string[];
   }>;
 
   // Present if stabilizationRecommendations = true
   stabilizationPlan?: Array<{
     zoneId: string;
-    strategy: 'ADD_DATA' | 'REFINE_MODEL' | 'REDUCE_SCOPE' | 'WAIT';
-    expectedReduction: number;    // Range: [0, 1]
+    strategy: "ADD_DATA" | "REFINE_MODEL" | "REDUCE_SCOPE" | "WAIT";
+    expectedReduction: number; // Range: [0, 1]
     cost: number;
     priority: number;
   }>;
@@ -1106,10 +1104,10 @@ interface PatternGenesisInput {
   }>;
 
   // Optional
-  detectionSensitivity?: number;  // Range: [0, 1], default: 0.7
-  evolutionSteps?: number;        // default: 10
-  competitionRounds?: number;     // default: 5
-  horizon?: number;               // Hours, default: 24
+  detectionSensitivity?: number; // Range: [0, 1], default: 0.7
+  evolutionSteps?: number; // default: 10
+  competitionRounds?: number; // default: 5
+  horizon?: number; // Hours, default: 24
 }
 ```
 
@@ -1125,9 +1123,9 @@ interface PatternGenesisOutput {
       features: Record<string, { mean: number; variance: number }>;
       temporalShape: number[];
     };
-    strength: number;             // Range: [0, 1]
-    stability: number;            // Range: [0, 1]
-    growthRate: number;           // Per hour
+    strength: number; // Range: [0, 1]
+    stability: number; // Range: [0, 1]
+    growthRate: number; // Per hour
     firstDetected: Date;
   }>;
 
@@ -1135,12 +1133,12 @@ interface PatternGenesisOutput {
   evolvedMotifs: Array<{
     id: string;
     parentPatternId: string;
-    maturityScore: number;        // Range: [0, 1]
+    maturityScore: number; // Range: [0, 1]
     predictedEmergence: Date;
     fullExpression: {
       features: Record<string, number>;
-      expectedDuration: number;   // Hours
-      impact: number;             // Range: [0, 1]
+      expectedDuration: number; // Hours
+      impact: number; // Range: [0, 1]
     };
     evolutionPath: Array<{
       step: number;
@@ -1152,14 +1150,14 @@ interface PatternGenesisOutput {
   // Pattern competition results
   competitions: Array<{
     id: string;
-    participants: string[];       // Pattern IDs
+    participants: string[]; // Pattern IDs
     winner: string;
-    dominanceScore: number;       // Range: [0, 1]
+    dominanceScore: number; // Range: [0, 1]
     survivalProbabilities: Record<string, number>;
     interactionEffects: Array<{
       pattern1: string;
       pattern2: string;
-      effect: 'SYNERGY' | 'COMPETITION' | 'NEUTRAL';
+      effect: "SYNERGY" | "COMPETITION" | "NEUTRAL";
       strength: number;
     }>;
   }>;
@@ -1167,8 +1165,8 @@ interface PatternGenesisOutput {
   // Dominant future patterns
   dominantPatterns: Array<{
     patternId: string;
-    dominanceScore: number;       // Range: [0, 1]
-    expectedPrevalence: number;   // Percentage of domain
+    dominanceScore: number; // Range: [0, 1]
+    expectedPrevalence: number; // Percentage of domain
     resistanceToDisruption: number;
   }>;
 }
@@ -1247,10 +1245,10 @@ interface TimeWarpInput {
   }>;
 
   // Optional
-  predictionHorizon?: number;     // Hours, default: 24
-  precursorWindow?: number;       // Hours before anomaly, default: 6
-  warpGranularity?: number;       // Minutes, default: 15
-  interventionLeadTime?: number;  // Hours, default: 2
+  predictionHorizon?: number; // Hours, default: 24
+  precursorWindow?: number; // Hours before anomaly, default: 6
+  warpGranularity?: number; // Minutes, default: 15
+  interventionLeadTime?: number; // Hours, default: 2
 }
 ```
 
@@ -1263,11 +1261,11 @@ interface TimeWarpOutput {
     id: string;
     anomalyType: string;
     predictedOnset: Date;
-    detectableAt: Date;           // When it becomes visible
-    probability: number;          // Range: [0, 1]
-    severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+    detectableAt: Date; // When it becomes visible
+    probability: number; // Range: [0, 1]
+    severity: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
     affectedMetrics: string[];
-    confidence: number;           // Range: [0, 1]
+    confidence: number; // Range: [0, 1]
   }>;
 
   // Precursor signals
@@ -1275,11 +1273,11 @@ interface TimeWarpOutput {
     id: string;
     anomalyId: string;
     signalType: string;
-    firstDetectable: Date;        // Earliest possible detection
-    peakTime: Date;               // When signal is strongest
-    reliability: number;          // Range: [0, 1]
+    firstDetectable: Date; // Earliest possible detection
+    peakTime: Date; // When signal is strongest
+    reliability: number; // Range: [0, 1]
     metric: string;
-    pattern: number[];            // Signal shape
+    pattern: number[]; // Signal shape
   }>;
 
   // Time-warped timeline
@@ -1291,7 +1289,7 @@ interface TimeWarpOutput {
     events: Array<{
       originalTime: Date;
       warpedTime: Date;
-      eventType: 'PRECURSOR' | 'TRANSITION' | 'ANOMALY' | 'AFTERMATH';
+      eventType: "PRECURSOR" | "TRANSITION" | "ANOMALY" | "AFTERMATH";
       description: string;
     }>;
   };
@@ -1301,9 +1299,9 @@ interface TimeWarpOutput {
     id: string;
     anomalyId: string;
     actionType: string;
-    deadline: Date;               // Must execute before this
-    successProbability: number;   // Range: [0, 1]
-    impact: number;               // Effect on anomaly probability
+    deadline: Date; // Must execute before this
+    successProbability: number; // Range: [0, 1]
+    impact: number; // Effect on anomaly probability
     resources: string[];
   }>;
 }
@@ -1389,17 +1387,17 @@ interface FutureWeavingInput {
   // For source registration
   registerSource?: {
     name: string;
-    type: 'AGENT' | 'HUMAN' | 'SENSOR' | 'SUBSYSTEM' | 'EXTERNAL_API' | 'ML_MODEL';
+    type: "AGENT" | "HUMAN" | "SENSOR" | "SUBSYSTEM" | "EXTERNAL_API" | "ML_MODEL";
     metadata?: Record<string, unknown>;
-    initialTrust?: number;        // Range: [0, 1], default: 0.5
+    initialTrust?: number; // Range: [0, 1], default: 0.5
   };
 
   // For signal submission
   submitSignal?: {
     sourceId: string;
     prediction: unknown;
-    confidence: number;           // Range: [0, 1]
-    horizon: number;              // Hours
+    confidence: number; // Range: [0, 1]
+    horizon: number; // Hours
     domain: string;
     evidence?: string[];
   };
@@ -1407,9 +1405,14 @@ interface FutureWeavingInput {
   // For weaving request
   weave?: {
     domains: string[];
-    horizon: number;              // Hours
-    minSources?: number;          // default: 1
-    fusionMethod?: 'DEMPSTER_SHAFER' | 'KALMAN_FILTER' | 'BAYESIAN_NETWORK' | 'ENSEMBLE_VOTING' | 'ATTENTION_WEIGHTED';
+    horizon: number; // Hours
+    minSources?: number; // default: 1
+    fusionMethod?:
+      | "DEMPSTER_SHAFER"
+      | "KALMAN_FILTER"
+      | "BAYESIAN_NETWORK"
+      | "ENSEMBLE_VOTING"
+      | "ATTENTION_WEIGHTED";
   };
 }
 ```
@@ -1433,7 +1436,7 @@ interface FutureWeavingOutput {
     sourceId: string;
     domain: string;
     accepted: boolean;
-    adjustedConfidence: number;   // After trust weighting
+    adjustedConfidence: number; // After trust weighting
   };
 
   // Woven future fabric
@@ -1441,20 +1444,20 @@ interface FutureWeavingOutput {
     id: string;
     domains: string[];
     harmonizedPrediction: Record<string, unknown>;
-    overallConfidence: number;    // Range: [0, 1]
-    consensusLevel: number;       // Range: [0, 1]
+    overallConfidence: number; // Range: [0, 1]
+    consensusLevel: number; // Range: [0, 1]
 
     braids: Array<{
       id: string;
       domain: string;
       signalCount: number;
-      coherence: number;          // Range: [0, 1]
+      coherence: number; // Range: [0, 1]
     }>;
 
     divergenceZones: Array<{
       id: string;
       domain: string;
-      divergenceScore: number;    // Range: [0, 1]
+      divergenceScore: number; // Range: [0, 1]
       conflictingSources: string[];
       recommendedAction: string;
     }>;
@@ -1536,19 +1539,19 @@ Summit Integration:
 
 ## Cross-Feature Integration Matrix
 
-| Feature | Integrates With | Integration Type |
-|---------|-----------------|------------------|
-| Causal Horizon | Recursive Outcome | Cascade analysis uses causal paths |
-| Temporal Fracture | Anomaly Time-Warp | Fracture prediction feeds anomaly onset |
-| Entanglement | Uncertainty Field | Coupled systems inform uncertainty zones |
-| Recursive Outcome | Graph Orchestration | Leverage points trigger automated flows |
-| Integrity Shield | All Features | Validates all predictions before use |
-| Synthetic Personas | Causal Horizon | Intervention simulation on personas |
-| Graph Orchestration | Collective Intel | Orchestrates multi-source fusion |
-| Uncertainty Field | All Predictions | Maps uncertainty across all outputs |
-| Pattern Genesis | Temporal Fracture | Emerging patterns precede fractures |
-| Anomaly Time-Warp | Integrity Shield | Monitors prediction reliability |
-| Collective Intel | All Features | Aggregates predictions from all engines |
+| Feature             | Integrates With     | Integration Type                         |
+| ------------------- | ------------------- | ---------------------------------------- |
+| Causal Horizon      | Recursive Outcome   | Cascade analysis uses causal paths       |
+| Temporal Fracture   | Anomaly Time-Warp   | Fracture prediction feeds anomaly onset  |
+| Entanglement        | Uncertainty Field   | Coupled systems inform uncertainty zones |
+| Recursive Outcome   | Graph Orchestration | Leverage points trigger automated flows  |
+| Integrity Shield    | All Features        | Validates all predictions before use     |
+| Synthetic Personas  | Causal Horizon      | Intervention simulation on personas      |
+| Graph Orchestration | Collective Intel    | Orchestrates multi-source fusion         |
+| Uncertainty Field   | All Predictions     | Maps uncertainty across all outputs      |
+| Pattern Genesis     | Temporal Fracture   | Emerging patterns precede fractures      |
+| Anomaly Time-Warp   | Integrity Shield    | Monitors prediction reliability          |
+| Collective Intel    | All Features        | Aggregates predictions from all engines  |
 
 ---
 
@@ -1558,7 +1561,7 @@ All prompts follow this error schema:
 
 ```typescript
 interface PredictiveAnalyticsError {
-  code: string;                   // e.g., 'INSUFFICIENT_DATA', 'MODEL_UNAVAILABLE'
+  code: string; // e.g., 'INSUFFICIENT_DATA', 'MODEL_UNAVAILABLE'
   message: string;
   details?: Record<string, unknown>;
   recoverable: boolean;
@@ -1568,42 +1571,42 @@ interface PredictiveAnalyticsError {
 
 ### Common Error Codes
 
-| Code | Description | Recoverable |
-|------|-------------|-------------|
-| `INSUFFICIENT_DATA` | Not enough data for analysis | Yes |
-| `MODEL_UNAVAILABLE` | Required model offline | Yes |
-| `CONFIDENCE_TOO_LOW` | Prediction below threshold | Yes |
-| `GRAPH_CYCLIC` | Causal graph has cycles | No |
-| `NOT_IDENTIFIABLE` | Causal effect not identifiable | No |
-| `SOURCE_UNTRUSTED` | Source trust below minimum | Yes |
-| `TIMEOUT` | Analysis exceeded time limit | Yes |
-| `INVALID_INPUT` | Schema validation failed | No |
+| Code                 | Description                    | Recoverable |
+| -------------------- | ------------------------------ | ----------- |
+| `INSUFFICIENT_DATA`  | Not enough data for analysis   | Yes         |
+| `MODEL_UNAVAILABLE`  | Required model offline         | Yes         |
+| `CONFIDENCE_TOO_LOW` | Prediction below threshold     | Yes         |
+| `GRAPH_CYCLIC`       | Causal graph has cycles        | No          |
+| `NOT_IDENTIFIABLE`   | Causal effect not identifiable | No          |
+| `SOURCE_UNTRUSTED`   | Source trust below minimum     | Yes         |
+| `TIMEOUT`            | Analysis exceeded time limit   | Yes         |
+| `INVALID_INPUT`      | Schema validation failed       | No          |
 
 ---
 
 ## Performance Guarantees
 
-| Feature | Max Latency | Throughput |
-|---------|-------------|------------|
-| Causal Horizon | 5s (10k nodes) | 100 req/s |
-| Temporal Fracture | 2s (1M datapoints) | 50 req/s |
-| Entanglement | 3s (100 systems) | 100 req/s |
-| Recursive Outcome | 4s (depth=7) | 75 req/s |
-| Integrity Shield | 100ms | 1000 req/s |
-| Synthetic Personas | 10s (5 trajectories) | 20 req/s |
-| Graph Orchestration | 500ms | 500 req/s |
-| Uncertainty Field | 3s (1000x1000 grid) | 50 req/s |
-| Pattern Genesis | 8s (full analysis) | 25 req/s |
-| Anomaly Time-Warp | 2s (48h horizon) | 100 req/s |
-| Collective Intel | 1s | 200 req/s |
+| Feature             | Max Latency          | Throughput |
+| ------------------- | -------------------- | ---------- |
+| Causal Horizon      | 5s (10k nodes)       | 100 req/s  |
+| Temporal Fracture   | 2s (1M datapoints)   | 50 req/s   |
+| Entanglement        | 3s (100 systems)     | 100 req/s  |
+| Recursive Outcome   | 4s (depth=7)         | 75 req/s   |
+| Integrity Shield    | 100ms                | 1000 req/s |
+| Synthetic Personas  | 10s (5 trajectories) | 20 req/s   |
+| Graph Orchestration | 500ms                | 500 req/s  |
+| Uncertainty Field   | 3s (1000x1000 grid)  | 50 req/s   |
+| Pattern Genesis     | 8s (full analysis)   | 25 req/s   |
+| Anomaly Time-Warp   | 2s (48h horizon)     | 100 req/s  |
+| Collective Intel    | 1s                   | 200 req/s  |
 
 ---
 
 ## Version History
 
-| Version | Date | Changes |
-|---------|------|---------|
-| 1.0.0 | 2025-11-28 | Initial release with all 11 prompts |
+| Version | Date       | Changes                             |
+| ------- | ---------- | ----------------------------------- |
+| 1.0.0   | 2025-11-28 | Initial release with all 11 prompts |
 
 ---
 

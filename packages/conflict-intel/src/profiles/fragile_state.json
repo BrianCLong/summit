@@ -16,9 +16,5 @@
     }
   },
   "defaultResponseMode": "LOCKDOWN",
-  "humanitarianOverlays": [
-    "hospital_locations",
-    "aid_corridors",
-    "displacement_camps"
-  ]
+  "humanitarianOverlays": ["hospital_locations", "aid_corridors", "displacement_camps"]
 }

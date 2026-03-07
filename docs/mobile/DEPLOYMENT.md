@@ -34,6 +34,7 @@ IntelGraph uses different deployment strategies for each platform:
 ### Certificates & Provisioning
 
 1. **Development Certificate**:
+
    ```bash
    # Open Xcode
    # Xcode > Preferences > Accounts
@@ -41,6 +42,7 @@ IntelGraph uses different deployment strategies for each platform:
    ```
 
 2. **Distribution Certificate**:
+
    ```bash
    # Xcode > Preferences > Accounts > Manage Certificates
    # + > Apple Distribution
@@ -59,6 +61,7 @@ IntelGraph uses different deployment strategies for each platform:
 ### Build Configuration
 
 1. **Update Version**:
+
    ```bash
    cd ios
    # Edit Info.plist
@@ -97,11 +100,13 @@ xcodebuild -exportArchive \
 ### Upload to App Store Connect
 
 **Option 1: Xcode**
+
 - Xcode > Window > Organizer
 - Select archive > Distribute App
 - Follow wizard
 
 **Option 2: Command Line**
+
 ```bash
 xcrun altool --upload-app \
   -f build/IntelGraph.ipa \
@@ -111,6 +116,7 @@ xcrun altool --upload-app \
 ```
 
 **Option 3: Fastlane**
+
 ```bash
 fastlane ios beta
 ```
@@ -138,7 +144,7 @@ fastlane ios beta
 
 2. **Submit for Review**:
    - App Store Connect > My Apps > IntelGraph
-   - + Version > 1.0.0
+   - - Version > 1.0.0
    - Fill in all required information
    - Select build
    - Submit for review
@@ -186,12 +192,14 @@ keytool -genkeypair -v \
 ### Configure Signing
 
 1. **Store Keystore Securely**:
+
    ```bash
    mkdir -p ~/.android/
    mv intelgraph-release.keystore ~/.android/
    ```
 
 2. **Create gradle.properties**:
+
    ```properties
    MYAPP_UPLOAD_STORE_FILE=~/.android/intelgraph-release.keystore
    MYAPP_UPLOAD_KEY_ALIAS=intelgraph
@@ -364,6 +372,7 @@ pm2 start npm --name "intelgraph-pwa" -- start
 ### PWA Configuration
 
 1. **manifest.json**:
+
    ```json
    {
      "name": "IntelGraph Mobile",
@@ -398,6 +407,7 @@ certbot --nginx -d app.intelgraph.com
 ### Testing PWA
 
 1. **Lighthouse**:
+
    ```bash
    lighthouse https://app.intelgraph.com \
      --view \
@@ -429,6 +439,7 @@ certbot --nginx -d app.intelgraph.com
 ### Build Configuration
 
 1. **Update Version**:
+
    ```json
    // package.json
    {
@@ -476,6 +487,7 @@ pnpm build
    - Create Developer ID Application certificate
 
 2. **Sign App**:
+
    ```bash
    export CSC_LINK=/path/to/certificate.p12
    export CSC_KEY_PASSWORD=certificate_password
@@ -515,6 +527,7 @@ pnpm electron:build --publish always
 #### Direct Download
 
 Host installers on your server:
+
 - Windows: IntelGraph-Setup-1.0.0.exe
 - macOS: IntelGraph-1.0.0.dmg
 - Linux: IntelGraph-1.0.0.AppImage
@@ -522,6 +535,7 @@ Host installers on your server:
 ### Auto-Updates
 
 1. **Configure Update Server**:
+
    ```json
    {
      "publish": {
@@ -546,6 +560,7 @@ See `.github/workflows/mobile-*.yml` for CI/CD configs.
 ### Environment Variables
 
 Required secrets:
+
 - `APPLE_ID`
 - `APPLE_ID_PASSWORD`
 - `APPLE_TEAM_ID`
@@ -576,6 +591,7 @@ Required secrets:
 ### Screenshots
 
 Required sizes:
+
 - iPhone: 6.7", 6.5", 5.5"
 - iPad: 12.9", 11"
 - Android: Phone, 7", 10"
@@ -587,6 +603,7 @@ Required sizes:
 
 **Full**:
 Feature-rich description highlighting:
+
 - Core functionality
 - Key features
 - Use cases
@@ -648,6 +665,7 @@ rm -rf .gradle/
 ## Support
 
 For deployment issues:
+
 - Slack: #mobile-deployment
 - Email: devops@intelgraph.com
 - GitHub: https://github.com/intelgraph/summit/issues

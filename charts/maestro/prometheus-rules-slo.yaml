@@ -36,60 +36,40 @@ spec:
         - alert: GraphQLAvailabilitySLOBreach
           expr: job:graphql_error_ratio:5m > (1 - 0.999) * 14 # 14x budget burn
           for: 2m
-          labels:
-            {
-              severity: critical,
-              slo: graphql-availability,
-              objective: '99.9%',
-            }
+          labels: { severity: critical, slo: graphql-availability, objective: "99.9%" }
           annotations:
-            summary: 'GraphQL availability SLO breach (fast burn)'
-            description: 'GraphQL error rate {{ $value | humanizePercentage }} exceeds SLO budget burn rate'
+            summary: "GraphQL availability SLO breach (fast burn)"
+            description: "GraphQL error rate {{ $value | humanizePercentage }} exceeds SLO budget burn rate"
             runbook_url: https://runbooks.maestro.dev/slo-graphql-availability.md
 
         # Read Latency SLO
         - alert: GraphQLReadLatencySLOBreach
           expr: job:graphql_read_slo_breach:5m
           for: 5m
-          labels:
-            {
-              severity: warning,
-              slo: graphql-read-latency,
-              objective: 'p95-350ms',
-            }
+          labels: { severity: warning, slo: graphql-read-latency, objective: "p95-350ms" }
           annotations:
-            summary: 'GraphQL read latency SLO breach'
-            description: 'GraphQL read p95 latency {{ $value | humanizeDuration }} exceeds 350ms SLO'
+            summary: "GraphQL read latency SLO breach"
+            description: "GraphQL read p95 latency {{ $value | humanizeDuration }} exceeds 350ms SLO"
             runbook_url: https://runbooks.maestro.dev/slo-graphql-read-latency.md
 
         # Write Latency SLO
         - alert: GraphQLWriteLatencySLOBreach
           expr: job:graphql_write_slo_breach:5m
           for: 5m
-          labels:
-            {
-              severity: warning,
-              slo: graphql-write-latency,
-              objective: 'p95-700ms',
-            }
+          labels: { severity: warning, slo: graphql-write-latency, objective: "p95-700ms" }
           annotations:
-            summary: 'GraphQL write latency SLO breach'
-            description: 'GraphQL write p95 latency {{ $value | humanizeDuration }} exceeds 700ms SLO'
+            summary: "GraphQL write latency SLO breach"
+            description: "GraphQL write p95 latency {{ $value | humanizeDuration }} exceeds 700ms SLO"
             runbook_url: https://runbooks.maestro.dev/slo-graphql-write-latency.md
 
         # Subscription Fanout SLO
         - alert: SubscriptionFanoutSLOBreach
           expr: job:subscription_slo_breach:5m
           for: 5m
-          labels:
-            {
-              severity: warning,
-              slo: subscription-fanout,
-              objective: 'p95-250ms',
-            }
+          labels: { severity: warning, slo: subscription-fanout, objective: "p95-250ms" }
           annotations:
-            summary: 'Subscription fanout latency SLO breach'
-            description: 'Subscription fanout p95 latency {{ $value }}ms exceeds 250ms SLO'
+            summary: "Subscription fanout latency SLO breach"
+            description: "Subscription fanout p95 latency {{ $value }}ms exceeds 250ms SLO"
             runbook_url: https://runbooks.maestro.dev/slo-subscription-fanout.md
 
         - alert: BlackboxProbeFailing
@@ -97,8 +77,8 @@ spec:
           for: 1m
           labels: { severity: critical }
           annotations:
-            summary: 'Blackbox probe failed for {{ $labels.instance }}'
-            description: 'Probe to {{ $labels.__param_target }} is failing. Check target availability and Blackbox Exporter logs.'
+            summary: "Blackbox probe failed for {{ $labels.instance }}"
+            description: "Probe to {{ $labels.__param_target }} is failing. Check target availability and Blackbox Exporter logs."
             runbook_url: https://…/runbooks/probe-failing.md
 
         - alert: BlackboxProbeTTFBHigh
@@ -106,8 +86,8 @@ spec:
           for: 5m
           labels: { severity: warning }
           annotations:
-            summary: 'High TTFB for blackbox probe {{ $labels.instance }}'
-            description: 'Time to first byte for {{ $labels.__param_target }} is high ({{ $value | humanizeDuration }}).'
+            summary: "High TTFB for blackbox probe {{ $labels.instance }}"
+            description: "Time to first byte for {{ $labels.__param_target }} is high ({{ $value | humanizeDuration }})."
             runbook_url: https://…/runbooks/probe-ttfb-high.md
 
     - name: tenant-cost-guards
@@ -118,32 +98,32 @@ spec:
         - alert: TenantCostGuardBreaching80Percent
           expr: tenant:monthly_cost:sum / on(tenant) group_left() maestro_budget_limit{type="hard"} > 0.8
           for: 10m
-          labels: { severity: warning, threshold: '80%' }
+          labels: { severity: warning, threshold: "80%" }
           annotations:
-            summary: 'Tenant {{ $labels.tenant }} monthly cost is at 80% of budget'
-            description: 'Tenant {{ $labels.tenant }} has spent {{ $value | humanizePercentage }} of their monthly budget of {{ $labels.budget_limit }}.'
+            summary: "Tenant {{ $labels.tenant }} monthly cost is at 80% of budget"
+            description: "Tenant {{ $labels.tenant }} has spent {{ $value | humanizePercentage }} of their monthly budget of {{ $labels.budget_limit }}."
             runbook_url: https://…/runbooks/tenant-cost-guard.md
-            grafana_dashboard_url: '{{grafanaBase}}/d/maestro-cost?var-tenant={{ $labels.tenant }}'
-            maestro_link: '{{maestroBase}}/maestro/tenants/costs?tenant={{ $labels.tenant }}'
+            grafana_dashboard_url: "{{grafanaBase}}/d/maestro-cost?var-tenant={{ $labels.tenant }}"
+            maestro_link: "{{maestroBase}}/maestro/tenants/costs?tenant={{ $labels.tenant }}"
 
         - alert: TenantCostGuardBreaching90Percent
           expr: tenant:monthly_cost:sum / on(tenant) group_left() maestro_budget_limit{type="hard"} > 0.9
           for: 5m
-          labels: { severity: critical, threshold: '90%' }
+          labels: { severity: critical, threshold: "90%" }
           annotations:
-            summary: 'Tenant {{ $labels.tenant }} monthly cost is at 90% of budget'
-            description: 'Tenant {{ $labels.tenant }} has spent {{ $value | humanizePercentage }} of their monthly budget of {{ $labels.budget_limit }}. Immediate action may be required.'
+            summary: "Tenant {{ $labels.tenant }} monthly cost is at 90% of budget"
+            description: "Tenant {{ $labels.tenant }} has spent {{ $value | humanizePercentage }} of their monthly budget of {{ $labels.budget_limit }}. Immediate action may be required."
             runbook_url: https://…/runbooks/tenant-cost-guard.md
-            grafana_dashboard_url: '{{grafanaBase}}/d/maestro-cost?var-tenant={{ $labels.tenant }}'
-            maestro_link: '{{maestroBase}}/maestro/tenants/costs?tenant={{ $labels.tenant }}'
+            grafana_dashboard_url: "{{grafanaBase}}/d/maestro-cost?var-tenant={{ $labels.tenant }}"
+            maestro_link: "{{maestroBase}}/maestro/tenants/costs?tenant={{ $labels.tenant }}"
 
         - alert: TenantCostGuardBreaching100Percent
           expr: tenant:monthly_cost:sum / on(tenant) group_left() maestro_budget_limit{type="hard"} > 1
           for: 1m
-          labels: { severity: critical, threshold: '100%' }
+          labels: { severity: critical, threshold: "100%" }
           annotations:
-            summary: 'Tenant {{ $labels.tenant }} monthly cost exceeded budget'
-            description: 'Tenant {{ $labels.tenant }} has exceeded their monthly budget of {{ $labels.budget_limit }}. Workloads may be halted.'
+            summary: "Tenant {{ $labels.tenant }} monthly cost exceeded budget"
+            description: "Tenant {{ $labels.tenant }} has exceeded their monthly budget of {{ $labels.budget_limit }}. Workloads may be halted."
             runbook_url: https://…/runbooks/tenant-cost-guard.md
-            grafana_dashboard_url: '{{grafanaBase}}/d/maestro-cost?var-tenant={{ $labels.tenant }}'
-            maestro_link: '{{maestroBase}}/maestro/tenants/costs?tenant={{ $labels.tenant }}'
+            grafana_dashboard_url: "{{grafanaBase}}/d/maestro-cost?var-tenant={{ $labels.tenant }}"
+            maestro_link: "{{maestroBase}}/maestro/tenants/costs?tenant={{ $labels.tenant }}"

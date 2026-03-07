@@ -22,7 +22,7 @@ groups:
           severity: ticket
           service: growth
         annotations:
-          summary: 'User signup volume deviated more than 3σ from the trailing hour baseline'
+          summary: "User signup volume deviated more than 3σ from the trailing hour baseline"
           description: |
             Investigate growth funnels and acquisition partners. Check marketing spend and auth provider status.
       - alert: ApiCallVolumeAnomaly
@@ -37,7 +37,7 @@ groups:
           severity: page
           service: api
         annotations:
-          summary: 'API call volume anomaly detected'
+          summary: "API call volume anomaly detected"
           description: |
             API volume departed from the two hour rolling baseline. Validate rollout status and rate-limiters.
       - alert: RevenueRunRateShortfall
@@ -47,7 +47,7 @@ groups:
           severity: ticket
           service: finance
         annotations:
-          summary: 'Annualized revenue run rate trending below target'
+          summary: "Annualized revenue run rate trending below target"
           description: |
             Annualized revenue run rate dropped below the configured floor ($1M). Review billing pipeline health and churn signals.
       - alert: SignupZeroTraffic
@@ -57,7 +57,7 @@ groups:
           severity: page
           service: growth
         annotations:
-          summary: 'No signups observed in the last six hours'
+          summary: "No signups observed in the last six hours"
           description: |
             No signup events were received in six hours. Inspect auth endpoints, marketing attribution and telemetry ingestion.
 
@@ -75,7 +75,7 @@ groups:
           severity: page
           service: api
         annotations:
-          summary: 'HTTP p95 latency above 1.5s'
+          summary: "HTTP p95 latency above 1.5s"
           description: |
             The control-plane API is breaching the 1.5s p95 latency SLO. Check recent deployments and database health.
       - alert: ApiErrorBudgetBurn
@@ -87,7 +87,7 @@ groups:
           severity: page
           service: api
         annotations:
-          summary: 'HTTP 5xx ratio > 2%'
+          summary: "HTTP 5xx ratio > 2%"
           description: |
             The error budget burn rate exceeded 2% over the last ten minutes. Inspect recent deploys and error logs.
       - alert: JaegerCollectorDown
@@ -97,7 +97,7 @@ groups:
           severity: ticket
           service: tracing
         annotations:
-          summary: 'Jaeger collector offline'
+          summary: "Jaeger collector offline"
           description: |
             Distributed tracing spans are no longer being accepted. Restart the collector or scale up the deployment.
 
@@ -117,7 +117,7 @@ groups:
           severity: ticket
           service: platform
         annotations:
-          summary: 'CPU utilization forecast breaching 80% in <14 days'
+          summary: "CPU utilization forecast breaching 80% in <14 days"
           description: |
             Forecasted cluster CPU usage will exceed 80% within two weeks. Initiate capacity expansion planning.
       - alert: CapacityMemoryForecastCritical
@@ -127,6 +127,6 @@ groups:
           severity: ticket
           service: platform
         annotations:
-          summary: 'Memory utilization forecast breaching 85% in <14 days'
+          summary: "Memory utilization forecast breaching 85% in <14 days"
           description: |
             Forecasted memory demand will exceed 85% of installed capacity inside two weeks. Coordinate with infrastructure.

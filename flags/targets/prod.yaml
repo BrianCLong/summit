@@ -1,9 +1,16 @@
 {
   "environment": "prod",
-  "flags": {
-    "feature.policy-guard": {"value": false, "percentage": 0, "tenants": {"allow": [], "deny": []}},
-    "feature.web.flag-hydration": {"value": true, "percentage": 100},
-    "feature.build.bazel": {"value": false, "percentage": 0},
-    "feature.qos.override-api": {"value": true, "percentage": 50, "tenants": {"allow": ["trusted-alpha"], "deny": ["safety-test"]}}
-  }
+  "flags":
+    {
+      "feature.policy-guard":
+        { "value": false, "percentage": 0, "tenants": { "allow": [], "deny": [] } },
+      "feature.web.flag-hydration": { "value": true, "percentage": 100 },
+      "feature.build.bazel": { "value": false, "percentage": 0 },
+      "feature.qos.override-api":
+        {
+          "value": true,
+          "percentage": 50,
+          "tenants": { "allow": ["trusted-alpha"], "deny": ["safety-test"] },
+        },
+    },
 }

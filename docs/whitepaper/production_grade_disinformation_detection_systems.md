@@ -6,7 +6,7 @@ Moving from research benchmarks to production disinformation systems requires so
 
 The key insight: **production success depends not on marginal accuracy improvements, but on system architecture**—specifically, how you orchestrate modular agents, manage evidence retrieval at scale, cache verification results, detect data drift, and sustain the business model. A 98% accurate classifier that takes 10 seconds per claim will lose to an 85% classifier that responds in 100ms and costs one-tenth as much.
 
-***
+---
 
 ## 1. System Architecture: The Agentic Fact-Checking Pipeline
 
@@ -109,22 +109,22 @@ Lookup flow:
 
 **Drift detection trigger**: If confidence score exists but created_at > 30 days AND updated_at is null, re-run pipeline. Flag if verdict changes (TRUE → FALSE).
 
-***
+---
 
 ## 2. Evidence Retrieval at Scale: Vector Databases & Search
 
 ### 2.1 FAISS vs. Pinecone: Production Trade-Off Analysis
 
-| Criterion | FAISS | Pinecone |
-| :--- | :--- | :--- |
-| **Setup cost** | Hours (local setup) | 5 minutes (cloud) |
-| **Storage scalability** | Limited by disk + RAM | Unlimited (cloud-native) |
-| **Real-time updates** | Requires re-indexing (hours) | Instant (live ingestion) |
-| **Query latency** | 5-50ms locally | 20-100ms (network overhead) |
-| **Cost at 10M vectors** | ~$0 (self-hosted hardware) | $2,000-5,000/month |
-| **SLA uptime** | You're responsible | 99.99% guaranteed |
-| **Customization** | Unlimited (open-source) | Limited to API |
-| **Live metadata filtering** | Manual (complex) | Native support |
+| Criterion                   | FAISS                        | Pinecone                    |
+| :-------------------------- | :--------------------------- | :-------------------------- |
+| **Setup cost**              | Hours (local setup)          | 5 minutes (cloud)           |
+| **Storage scalability**     | Limited by disk + RAM        | Unlimited (cloud-native)    |
+| **Real-time updates**       | Requires re-indexing (hours) | Instant (live ingestion)    |
+| **Query latency**           | 5-50ms locally               | 20-100ms (network overhead) |
+| **Cost at 10M vectors**     | ~$0 (self-hosted hardware)   | $2,000-5,000/month          |
+| **SLA uptime**              | You're responsible           | 99.99% guaranteed           |
+| **Customization**           | Unlimited (open-source)      | Limited to API              |
+| **Live metadata filtering** | Manual (complex)             | Native support              |
 
 **Decision Matrix for startups**:
 
@@ -171,7 +171,7 @@ score(passage) = 0.4 * semantic_similarity +
                  0.1 * keyword_overlap        // BM25 overlap with claim
 ```
 
-***
+---
 
 ## 3. Multimodal Claims: Images, Video, and Composite Evidence
 
@@ -233,7 +233,7 @@ Step 3: Verify extracted text claims
 - Use attention-based fusion layers (cross-modal attention) to assess consistency
 - Example: Video claims "scientist says X"; screenshot shows quote "scientist says Y"; transcripts confirm Y → FLAG as potentially manipulated audio
 
-***
+---
 
 ## 4. Deployment & Operations: From Laptop to Production
 
@@ -366,7 +366,7 @@ Business Level:
 - Top claim categories (election, health, climate, etc.)
 ```
 
-***
+---
 
 ## 5. Business Model & Go-to-Market
 
@@ -463,7 +463,7 @@ Pricing Tier 4: Enterprise (annual contract)
 - Selling point: Reputational risk mitigation ($1M+ potential loss per viral false claim)
 - Contract value: $10-30K/month
 
-***
+---
 
 ## 6. Addressing Production Gotchas
 
@@ -484,7 +484,7 @@ Is this a breaking news claim (election, natural disaster)?
 
 - <2 seconds: Gemini 2.5 Flash (392.8 tok/sec TTFT, 0.29ms first token)
 - 2-5 seconds: Claude Sonnet 4.5 or Gemini 3 Pro (slower but higher accuracy)
-- >10 seconds: Gemini 3 Pro (best accuracy, multimodal reasoning) or o3 (reasoning model for nuanced claims)
+- > 10 seconds: Gemini 3 Pro (best accuracy, multimodal reasoning) or o3 (reasoning model for nuanced claims)
 
 ### 6.2 Evidence Staleness
 
@@ -545,7 +545,7 @@ Return:     {
 - **Multilingual testing**: Spend $1K/month on human review of non-English claims to catch gaps
 - **Adversarial training**: Periodically run FGSM/PGD attacks on your verification model; retrain on misclassified examples
 
-***
+---
 
 ## 7. Timeline: From Prototype to First $100K ARR
 
@@ -583,7 +583,7 @@ Return:     {
 
 **Realistic funding ask**: $500K seed for 12-month runway (team of 8), $50K/month costs.
 
-***
+---
 
 ## Conclusion
 
@@ -591,44 +591,44 @@ Production disinformation systems succeed not through marginal accuracy improvem
 
 The architectures, pricing models, and deployment patterns outlined here are validated by funded startups operating today. The next wave of disinformation defense will be won by teams that optimize simultaneously for speed, scalability, cost, and business sustainability—not by those chasing single-digit accuracy improvements on academic benchmarks.
 
-***
+---
 
 ## References
 
- Synthetic media & deepfakes. *Center for News, Technology and Innovation*, October 5, 2025. [cnti](https://cnti.org/issue-primers/synthetic-media-deepfakes/)
+Synthetic media & deepfakes. _Center for News, Technology and Innovation_, October 5, 2025. [cnti](https://cnti.org/issue-primers/synthetic-media-deepfakes/)
 
- Agentic fact-checking system architecture. *Emergent Mind*, October 14, 2025. [emergentmind](https://www.emergentmind.com/topics/agentic-fact-checking-system-architecture)
+Agentic fact-checking system architecture. _Emergent Mind_, October 14, 2025. [emergentmind](https://www.emergentmind.com/topics/agentic-fact-checking-system-architecture)
 
- TruthTracer: AI-powered misinformation detection platform. *Perplexity*, January 4, 2026. [docs.perplexity](https://docs.perplexity.ai/cookbook/showcase/truth-tracer)
+TruthTracer: AI-powered misinformation detection platform. _Perplexity_, January 4, 2026. [docs.perplexity](https://docs.perplexity.ai/cookbook/showcase/truth-tracer)
 
- Building multi-agent fact-checking systems. *Dev.to*, December 4, 2025. [dev](https://dev.to/nilay_jain_0b154397243bb0_36/from-misinformation-crisis-to-intelligent-solutions-building-a-multi-agent-fact-checking-system-21nk)
+Building multi-agent fact-checking systems. _Dev.to_, December 4, 2025. [dev](https://dev.to/nilay_jain_0b154397243bb0_36/from-misinformation-crisis-to-intelligent-solutions-building-a-multi-agent-fact-checking-system-21nk)
 
- Building, benchmarking customized fact-checking systems. *arXiv*, April 8, 2024. [arxiv](https://arxiv.org/html/2405.05583v2)
+Building, benchmarking customized fact-checking systems. _arXiv_, April 8, 2024. [arxiv](https://arxiv.org/html/2405.05583v2)
 
- Explainable multilingual and multimodal fake-news detection. *Frontiers in AI*, June 26, 2022. [frontiersin](https://www.frontiersin.org/journals/artificial-intelligence/articles/10.3389/frai.2025.1690616/full)
+Explainable multilingual and multimodal fake-news detection. _Frontiers in AI_, June 26, 2022. [frontiersin](https://www.frontiersin.org/journals/artificial-intelligence/articles/10.3389/frai.2025.1690616/full)
 
- FAISS vs Pinecone. *Zilliz*, November 20, 2024. [zilliz](https://zilliz.com/comparison/faiss-vs-pinecone)
+FAISS vs Pinecone. _Zilliz_, November 20, 2024. [zilliz](https://zilliz.com/comparison/faiss-vs-pinecone)
 
- NLP pipeline for automated analysis of factual claims. *Temple University*, December 2025. [cis.temple](https://cis.temple.edu/~pwang/5603-AI/Project/2025F/Nilizadeh/AI_project_report-1.pdf)
+NLP pipeline for automated analysis of factual claims. _Temple University_, December 2025. [cis.temple](https://cis.temple.edu/~pwang/5603-AI/Project/2025F/Nilizadeh/AI_project_report-1.pdf)
 
- Claimify: Towards effective extraction and evaluation of factual claims. *ACL*, July 26, 2025. [aclanthology](https://aclanthology.org/2025.acl-long.348.pdf)
+Claimify: Towards effective extraction and evaluation of factual claims. _ACL_, July 26, 2025. [aclanthology](https://aclanthology.org/2025.acl-long.348.pdf)
 
- Dig raises $14M to help brands fight disinformation. *Business Insider*, August 22, 2025. [businessinsider](https://www.businessinsider.com/pitch-deck-social-intelligence-startup-dig-series-a-2025-8)
+Dig raises $14M to help brands fight disinformation. _Business Insider_, August 22, 2025. [businessinsider](https://www.businessinsider.com/pitch-deck-social-intelligence-startup-dig-series-a-2025-8)
 
- FACTS Benchmark Suite. *Google DeepMind*, December 9, 2025. [deepmind](https://deepmind.google/blog/facts-benchmark-suite-systematically-evaluating-the-factuality-of-large-language-models/)
+FACTS Benchmark Suite. _Google DeepMind_, December 9, 2025. [deepmind](https://deepmind.google/blog/facts-benchmark-suite-systematically-evaluating-the-factuality-of-large-language-models/)
 
- Gemini 2.5 Flash performance analysis. *Galileo AI*, January 26, 2026. [galileo](https://galileo.ai/model-hub/gemini-2-5-flash-lite-overview)
+Gemini 2.5 Flash performance analysis. _Galileo AI_, January 26, 2026. [galileo](https://galileo.ai/model-hub/gemini-2-5-flash-lite-overview)
 
- LLM inference performance engineering. *Databricks*, January 28, 2025. [databricks](https://www.databricks.com/blog/llm-inference-performance-engineering-best-practices)
+LLM inference performance engineering. _Databricks_, January 28, 2025. [databricks](https://www.databricks.com/blog/llm-inference-performance-engineering-best-practices)
 
- Multimodal claim verification. *Emergent Mind*, November 20, 2025. [emergentmind](https://www.emergentmind.com/topics/multimodal-claim-verification-task)
+Multimodal claim verification. _Emergent Mind_, November 20, 2025. [emergentmind](https://www.emergentmind.com/topics/multimodal-claim-verification-task)
 
- Integrating video, text, and images for multimodal disinformation detection. *ACM*, July 13, 2025. [dl.acm](https://dl.acm.org/doi/10.1145/3733567.3735570)
+Integrating video, text, and images for multimodal disinformation detection. _ACM_, July 13, 2025. [dl.acm](https://dl.acm.org/doi/10.1145/3733567.3735570)
 
- Kubernetes in production: Best practices. *Plural.sh*, August 24, 2025. [plural](https://www.plural.sh/blog/kubernetes-in-production-best-practices/)
+Kubernetes in production: Best practices. _Plural.sh_, August 24, 2025. [plural](https://www.plural.sh/blog/kubernetes-in-production-best-practices/)
 
- Data drift detection and monitoring. *Label Your Data*, September 15, 2025. [labelyourdata](https://labelyourdata.com/articles/machine-learning/data-drift)
+Data drift detection and monitoring. _Label Your Data_, September 15, 2025. [labelyourdata](https://labelyourdata.com/articles/machine-learning/data-drift)
 
- Building a job queue with Celery and Redis. *OneUptime*, January 5, 2025. [oneuptime](https://oneuptime.com/blog/post/2025-01-06-python-celery-redis-job-queue/view)
+Building a job queue with Celery and Redis. _OneUptime_, January 5, 2025. [oneuptime](https://oneuptime.com/blog/post/2025-01-06-python-celery-redis-job-queue/view)
 
- Model drift in ML systems. *iMerit*, December 17, 2025. [imerit](https://imerit.net/resources/blog/staying-ahead-of-drift-in-machine-learning-systems-all-una/)
+Model drift in ML systems. _iMerit_, December 17, 2025. [imerit](https://imerit.net/resources/blog/staying-ahead-of-drift-in-machine-learning-systems-all-una/)

@@ -30,23 +30,23 @@ metadata:
   namespace: summit
 spec:
   limits:
-  - max:
-      cpu: "4"
-      memory: 8Gi
-    min:
-      cpu: 100m
-      memory: 128Mi
-    default:
-      cpu: "1"
-      memory: 1Gi
-    defaultRequest:
-      cpu: 500m
-      memory: 512Mi
-    type: Container
-  - max:
-      cpu: "8"
-      memory: 16Gi
-    min:
-      cpu: 100m
-      memory: 128Mi
-    type: Pod
+    - max:
+        cpu: "4"
+        memory: 8Gi
+      min:
+        cpu: 100m
+        memory: 128Mi
+      default:
+        cpu: "1"
+        memory: 1Gi
+      defaultRequest:
+        cpu: 500m
+        memory: 512Mi
+      type: Container
+    - max:
+        cpu: "8"
+        memory: 16Gi
+      min:
+        cpu: 100m
+        memory: 128Mi
+      type: Pod

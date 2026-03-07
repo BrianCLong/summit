@@ -1,5 +1,5 @@
-import * as fs from 'fs';
-import * as path from 'path';
+import * as fs from "fs";
+import * as path from "path";
 
 export interface DecisionRecord {
   id: string;
@@ -22,7 +22,7 @@ export class DecisionLedger {
     }
   }
 
-  public record(decision: Omit<DecisionRecord, 'id' | 'timestamp' | 'reverted'>): DecisionRecord {
+  public record(decision: Omit<DecisionRecord, "id" | "timestamp" | "reverted">): DecisionRecord {
     const record: DecisionRecord = {
       id: Math.random().toString(36).substring(2, 15),
       timestamp: new Date().toISOString(),
@@ -41,12 +41,15 @@ export class DecisionLedger {
     if (!sinceTimestamp) {
       return ledger;
     }
-    return ledger.filter(r => r.timestamp >= sinceTimestamp);
+    return ledger.filter((r) => r.timestamp >= sinceTimestamp);
   }
 
-  public async rollback(decisionId: string, undoAction: (decision: DecisionRecord) => Promise<void>): Promise<void> {
+  public async rollback(
+    decisionId: string,
+    undoAction: (decision: DecisionRecord) => Promise<void>
+  ): Promise<void> {
     const ledger = this.readLedger();
-    const recordIndex = ledger.findIndex(r => r.id === decisionId);
+    const recordIndex = ledger.findIndex((r) => r.id === decisionId);
 
     if (recordIndex === -1) {
       throw new Error(`Decision ${decisionId} not found`);
@@ -67,11 +70,11 @@ export class DecisionLedger {
   }
 
   private readLedger(): DecisionRecord[] {
-    const content = fs.readFileSync(this.ledgerPath, 'utf-8');
+    const content = fs.readFileSync(this.ledgerPath, "utf-8");
     try {
-        return JSON.parse(content);
+      return JSON.parse(content);
     } catch (e) {
-        return [];
+      return [];
     }
   }
 

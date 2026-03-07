@@ -6,9 +6,9 @@ This standard defines Summit's governance-first subsumption of browser-native MC
 
 ## Import / Export Mapping
 
-| Import | Export |
-| --- | --- |
-| WebMCP transcript JSON | Summit Evidence JSON (`SUMMIT-WEBMCP-*`) |
+| Import                  | Export                                                                 |
+| ----------------------- | ---------------------------------------------------------------------- |
+| WebMCP transcript JSON  | Summit Evidence JSON (`SUMMIT-WEBMCP-*`)                               |
 | Browser origin metadata | Policy decision log (`origin_not_allowlisted`, `blocked_action`, etc.) |
 
 ## Minimal Winning Slice

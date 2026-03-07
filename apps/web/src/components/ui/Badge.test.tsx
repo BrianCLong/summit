@@ -22,7 +22,9 @@ describe('Badge Component', () => {
   })
 
   it('applies variant classes correctly', () => {
-    const { container } = render(<Badge variant="destructive">Destructive</Badge>)
+    const { container } = render(
+      <Badge variant="destructive">Destructive</Badge>
+    )
     // Check if the element contains a partial class name from badgeVariants
     // 'bg-destructive' is part of the destructive variant
     expect(container.firstChild?.className).toContain('bg-destructive')

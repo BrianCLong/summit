@@ -17,6 +17,7 @@ Create an ADR when you're making a decision that:
 ### Examples of ADR-Worthy Decisions
 
 ✅ **Should write an ADR:**
+
 - Choosing Neo4j over PostgreSQL for graph queries
 - Adopting GraphQL vs. REST for our API
 - Implementing multi-tenant compartment model
@@ -24,6 +25,7 @@ Create an ADR when you're making a decision that:
 - Copilot architecture (GraphRAG + policy)
 
 ❌ **Don't need an ADR:**
+
 - Adding a new field to an existing table
 - Refactoring a single service
 - Fixing a bug
@@ -53,27 +55,33 @@ Use the next available number (check `adr/README.md` for the current highest num
 The template has many sections, but these are the most critical:
 
 #### Context (Most Important!)
+
 - **Why** are we making this decision?
 - What **problem** are we solving?
 - What **constraints** do we have?
 - What **requirements** must we meet?
 
 **Bad context:**
+
 > We need a database.
 
 **Good context:**
+
 > Summit's intelligence platform requires a native graph database to model complex relationships between entities. Traditional relational databases struggle with deep relationship traversals (N-hops), and our investigation queries often need to find connections 3-5 hops deep in <500ms. We need ACID guarantees, multi-tenant isolation, and integration with our existing Postgres transactional data.
 
 #### Decision
+
 - **What** did we decide?
 - **How** will it work (high-level)?
 
 Be specific and concrete. Avoid "we will use best practices" - say exactly what you'll do.
 
 #### Alternatives Considered
+
 This is critical! Show that you explored options.
 
 For each alternative:
+
 - What is it?
 - Why is it attractive?
 - Why didn't we choose it?
@@ -82,6 +90,7 @@ For each alternative:
 **Pro tip:** Decision-making is about trade-offs. Documenting alternatives shows you understood the trade-offs.
 
 #### Consequences
+
 What becomes easier? What becomes harder?
 
 - **Positive**: What benefits do we get?
@@ -91,18 +100,22 @@ What becomes easier? What becomes harder?
 Be honest about trade-offs. Every decision has downsides.
 
 #### Code References
+
 Link to the actual implementation:
+
 - File paths to core implementation
 - Specific line numbers for critical logic
 - Schema files, GraphQL schemas, policy files
 
 **Example:**
+
 ```
 - `server/src/graph/CypherQueryBuilder.ts:L45-L120` - Query builder
 - `server/src/db/migrations/XXX-neo4j-indexes.sql` - Index definitions
 ```
 
 #### Tests & Validation
+
 How do we enforce this decision?
 
 - Unit tests that validate the approach
@@ -142,6 +155,7 @@ Proposed → Accepted → [Deprecated | Superseded]
 ### When to Update an ADR
 
 ADRs are **append-only**:
+
 - ✅ Add new sections (Migration & Rollout, Lessons Learned)
 - ✅ Update Revision History table
 - ✅ Add links to related ADRs
@@ -156,10 +170,10 @@ If a decision changes significantly, mark the old ADR as "Superseded" and create
 Always update the Revision History table when you modify an ADR:
 
 ```markdown
-| Date | Author | Change |
-|------|--------|--------|
-| 2024-01-15 | Data Guild | Initial version |
-| 2024-03-10 | Data Guild | Updated with production rollout results |
+| Date       | Author     | Change                                          |
+| ---------- | ---------- | ----------------------------------------------- |
+| 2024-01-15 | Data Guild | Initial version                                 |
+| 2024-03-10 | Data Guild | Updated with production rollout results         |
 | 2024-06-15 | Data Guild | Added lessons learned from scaling to 10M nodes |
 ```
 
@@ -220,6 +234,7 @@ git commit -m "feat: add ADR-0013 for my architectural decision"
 ### PRs Should Include ADR Updates
 
 When your PR modifies foundational areas:
+
 - Auth/security code → Update ADR-0002 (ABAC), ADR-0010 (Multi-tenant)
 - Graph queries → Update ADR-0006 (Neo4j)
 - GraphQL schema → Update ADR-0007 (GraphQL API)
@@ -231,6 +246,7 @@ When your PR modifies foundational areas:
 Our CI pipeline (`.github/workflows/adr-check.yml`) watches for changes to foundational code:
 
 If you modify:
+
 - `services/authz-gateway/`
 - `policy/`
 - `**/*.graphql`
@@ -239,6 +255,7 @@ If you modify:
 - ...and other foundational areas
 
 **And** you don't update any ADR files, CI will:
+
 1. Emit a warning (not a failure)
 2. Comment on your PR with relevant ADRs to consider
 3. Suggest using `intelgraph adr:list` to find ADRs
@@ -248,12 +265,14 @@ This is a **gentle reminder**, not a blocker. If no architectural decision chang
 ### When to Update vs. Create New ADR
 
 **Update existing ADR** when:
+
 - Implementation details change (new code paths, optimizations)
 - Lessons learned from production usage
 - Minor refinements to the approach
 - Adding test coverage or validation
 
 **Create new ADR** when:
+
 - Fundamentally different approach/technology
 - Reversing a previous decision
 - New decision in a different area
@@ -264,6 +283,7 @@ This is a **gentle reminder**, not a blocker. If no architectural decision chang
 ### ❌ "Process Documentation Disguised as ADR"
 
 **Bad:**
+
 > ADR-0042: Code Review Process
 >
 > We will require 2 approvals for all PRs.
@@ -273,6 +293,7 @@ This is a **gentle reminder**, not a blocker. If no architectural decision chang
 ### ❌ "Implementation Details Instead of Decisions"
 
 **Bad:**
+
 > ADR-0043: Add Logging
 >
 > We will add logging to the UserService.
@@ -282,6 +303,7 @@ This is a **gentle reminder**, not a blocker. If no architectural decision chang
 ### ❌ "Vague Aspirations Instead of Concrete Decisions"
 
 **Bad:**
+
 > Decision: We will follow best practices for security.
 
 **Why it's bad:** What are "best practices"? Be specific: "We will implement ABAC with OPA for authorization decisions."
@@ -289,6 +311,7 @@ This is a **gentle reminder**, not a blocker. If no architectural decision chang
 ### ❌ "Missing Context and Alternatives"
 
 **Bad:**
+
 > Context: We need a database.
 > Decision: Use PostgreSQL.
 > Consequences: We can store data.
@@ -298,6 +321,7 @@ This is a **gentle reminder**, not a blocker. If no architectural decision chang
 ### ❌ "No Link to Code or Tests"
 
 **Bad:**
+
 > [ADR has no Code References or Tests sections]
 
 **Why it's bad:** ADRs without code references become stale documentation. ADRs are living documents - they should point to the actual implementation and tests that enforce the decision.
@@ -305,23 +329,29 @@ This is a **gentle reminder**, not a blocker. If no architectural decision chang
 ## Tips for Great ADRs
 
 ### 1. Write for Your Future Self
+
 Assume you'll forget why you made this decision in 6 months. What would you want to know?
 
 ### 2. Document the Debate
+
 Include dissenting opinions or concerns raised during the decision process. This context is valuable.
 
 ### 3. Be Specific About Trade-offs
+
 Every decision has costs. Being honest about downsides builds trust and helps future engineers understand the constraints you faced.
 
 ### 4. Link Liberally
+
 - Link to related ADRs
 - Link to external resources (papers, blog posts, docs)
 - Link to internal design docs, RFCs, discussions
 
 ### 5. Update as You Learn
+
 Production usage often reveals insights. Update the ADR with "Lessons Learned" or "Production Experience" sections.
 
 ### 6. Make ADRs Discoverable
+
 - Use consistent tags
 - Update the index in README.md
 - Reference ADRs in code comments: `// See ADR-0006 for rationale`
@@ -345,6 +375,7 @@ Traditional vector-only RAG also misses graph relationships. An analyst asking
 "Who is connected to Person X?" needs graph traversals, not just document similarity.
 
 We need a solution that combines:
+
 - Vector search for semantic similarity
 - Graph traversal for relationship discovery
 - Policy filtering to enforce compartment and authority boundaries
@@ -352,6 +383,7 @@ We need a solution that combines:
 ```
 
 **Why it's great:**
+
 - Explains the specific problem
 - Identifies concrete risks
 - States requirements clearly
@@ -363,6 +395,7 @@ We need a solution that combines:
 ## Alternatives Considered
 
 ### Alternative 1: Standard RAG (Vector-only)
+
 - **Description:** Use pgvector for similarity search, no graph traversal
 - **Pros:**
   - Simple implementation (~200 LOC)
@@ -376,6 +409,7 @@ We need a solution that combines:
 - **Why we didn't choose it:** Our core value prop is graph intelligence; vector-only RAG is insufficient
 
 ### Alternative 2: LLM Function Calling for Tool Selection
+
 - **Description:** Let the LLM decide which tools (graph, vector, keyword) to call
 - **Pros:**
   - Flexible - LLM adapts to query type
@@ -390,6 +424,7 @@ We need a solution that combines:
 ```
 
 **Why it's great:**
+
 - Concrete descriptions
 - Honest pros/cons for each
 - Quantitative trade-offs where possible
@@ -401,28 +436,33 @@ We need a solution that combines:
 ## Consequences
 
 ### Positive
+
 - Graph traversals + vector search provide 90%+ recall vs. 60% for vector-only
 - Policy filtering ensures zero cross-compartment leaks (verified in 10k test queries)
 - Citations enable analysts to verify every AI claim
 - Hybrid retrieval balances precision (graph) and recall (vectors)
 
 ### Negative
+
 - Complex architecture (3 data stores: Postgres, Neo4j, pgvector)
 - Latency sensitive to slowest retrieval path (p95: 3.2s, target: <5s)
 - Policy filtering can over-redact (false positive rate: 5%)
 - Token costs scale with context size (~$0.03/query, budget: $500/month for 15k queries)
 
 ### Neutral
+
 - LLM non-determinism complicates testing (use fixed seeds for eval)
 - Requires ongoing tuning (context ranking, retrieval thresholds)
 
 ### Operational Impact
+
 - **Monitoring**: Track query latency, retrieval precision/recall, LLM token usage, policy violations
 - **Cost**: Current: $450/month for LLM API, $200/month for Neo4j, target: <$1k/month
 - **Compliance**: All copilot queries logged in provenance ledger (7-year retention)
 ```
 
 **Why it's great:**
+
 - Honest about downsides
 - Quantitative where possible
 - Operational considerations included

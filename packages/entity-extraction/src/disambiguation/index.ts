@@ -2,7 +2,7 @@
  * Entity disambiguation
  */
 
-import type { Entity, EntityCluster, DisambiguationOptions } from '../types';
+import type { Entity, EntityCluster, DisambiguationOptions } from "../types";
 
 export class EntityDisambiguator {
   private options: Required<DisambiguationOptions>;
@@ -70,8 +70,12 @@ export class EntityDisambiguator {
   private selectCanonical(entities: Entity[], text: string): Entity {
     // Prefer longer, more complete forms
     return entities.reduce((best, current) => {
-      if (current.text.length > best.text.length) {return current;}
-      if (current.confidence > best.confidence) {return current;}
+      if (current.text.length > best.text.length) {
+        return current;
+      }
+      if (current.confidence > best.confidence) {
+        return current;
+      }
       return best;
     });
   }
@@ -80,10 +84,11 @@ export class EntityDisambiguator {
    * Calculate confidence for entity cluster
    */
   private calculateClusterConfidence(entities: Entity[]): number {
-    if (entities.length === 0) {return 0;}
+    if (entities.length === 0) {
+      return 0;
+    }
 
-    const avgConfidence =
-      entities.reduce((sum, e) => sum + e.confidence, 0) / entities.length;
+    const avgConfidence = entities.reduce((sum, e) => sum + e.confidence, 0) / entities.length;
 
     // Boost confidence if multiple mentions
     const boost = Math.min(entities.length * 0.05, 0.2);
@@ -97,8 +102,8 @@ export class EntityDisambiguator {
   private normalizeEntityText(text: string): string {
     return text
       .toLowerCase()
-      .replace(/\s+/g, ' ')
-      .replace(/[^\w\s]/g, '')
+      .replace(/\s+/g, " ")
+      .replace(/[^\w\s]/g, "")
       .trim();
   }
 
@@ -106,8 +111,12 @@ export class EntityDisambiguator {
    * Resolve entity ambiguity using context
    */
   resolveAmbiguity(entity: Entity, context: string, candidates: Entity[]): Entity {
-    if (candidates.length === 0) {return entity;}
-    if (candidates.length === 1) {return candidates[0];}
+    if (candidates.length === 0) {
+      return entity;
+    }
+    if (candidates.length === 1) {
+      return candidates[0];
+    }
 
     // Score each candidate based on context similarity
     const scores = candidates.map((candidate) => ({

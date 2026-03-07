@@ -10,7 +10,7 @@ backlog:
       - story: Live co-editing of link charts
         priority: P1 - Love
         sprint: Sprint 2
-      - story: '@Mentions with inline entity previews'
+      - story: "@Mentions with inline entity previews"
         priority: P1 - Love
         sprint: Sprint 2
 

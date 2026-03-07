@@ -19,7 +19,7 @@ Comprehensive GraphQL schema governance, validation, and evolution system for In
 ### 1. Initialize Schema Registry
 
 ```typescript
-import { schemaRegistry } from './graphql/schema-registry';
+import { schemaRegistry } from "./graphql/schema-registry";
 
 // Initialize the registry
 await schemaRegistry.initialize();
@@ -27,32 +27,32 @@ await schemaRegistry.initialize();
 // Register initial schema version
 await schemaRegistry.registerSchema(
   schemaString,
-  'v1.0.0',
-  'developer@example.com',
-  'Initial schema version'
+  "v1.0.0",
+  "developer@example.com",
+  "Initial schema version"
 );
 ```
 
 ### 2. Validate Schema
 
 ```typescript
-import { buildSchema } from 'graphql';
-import { validateSchema } from './graphql/validation-rules';
+import { buildSchema } from "graphql";
+import { validateSchema } from "./graphql/validation-rules";
 
 const schema = buildSchema(schemaString);
 const result = validateSchema(schema);
 
 if (!result.valid) {
-  console.error('Schema validation failed:');
-  result.errors.forEach(err => console.error(`- ${err.message}`));
+  console.error("Schema validation failed:");
+  result.errors.forEach((err) => console.error(`- ${err.message}`));
 }
 ```
 
 ### 3. Add Authorization Directives
 
 ```typescript
-import { authDirective, rateLimitDirective } from './graphql/directives/auth';
-import { makeExecutableSchema } from '@graphql-tools/schema';
+import { authDirective, rateLimitDirective } from "./graphql/directives/auth";
+import { makeExecutableSchema } from "@graphql-tools/schema";
 
 const { typeDefs: authTypeDefs, transformer: authTransformer } = authDirective();
 const { typeDefs: rateLimitTypeDefs, transformer: rateLimitTransformer } = rateLimitDirective();
@@ -69,7 +69,7 @@ schema = rateLimitTransformer(schema);
 ### 4. Enable Complexity Limits
 
 ```typescript
-import { createComplexityLimitRule, createDepthLimitRule } from './graphql/complexity-calculator';
+import { createComplexityLimitRule, createDepthLimitRule } from "./graphql/complexity-calculator";
 
 const server = new ApolloServer({
   schema,
@@ -83,24 +83,25 @@ const server = new ApolloServer({
 ### 5. Add Performance Monitoring
 
 ```typescript
-import { globalPerformanceMonitor, createPerformanceMonitoringPlugin } from './graphql/performance-monitor';
+import {
+  globalPerformanceMonitor,
+  createPerformanceMonitoringPlugin,
+} from "./graphql/performance-monitor";
 
 const server = new ApolloServer({
   schema,
-  plugins: [
-    createPerformanceMonitoringPlugin(globalPerformanceMonitor),
-  ],
+  plugins: [createPerformanceMonitoringPlugin(globalPerformanceMonitor)],
 });
 ```
 
 ### 6. Generate Documentation
 
 ```typescript
-import { generateDocumentation } from './graphql/documentation-generator';
+import { generateDocumentation } from "./graphql/documentation-generator";
 
 await generateDocumentation(schema, {
-  outputPath: './docs/graphql/api-docs.md',
-  format: 'markdown',
+  outputPath: "./docs/graphql/api-docs.md",
+  format: "markdown",
   includeExamples: true,
 });
 ```
@@ -155,8 +156,7 @@ Rate limit expensive operations:
 
 ```graphql
 type Mutation {
-  generateInsights(entityId: ID!): EntityInsights!
-    @rateLimit(max: 10, window: 60, scope: USER)
+  generateInsights(entityId: ID!): EntityInsights! @rateLimit(max: 10, window: 60, scope: USER)
 }
 ```
 
@@ -177,11 +177,12 @@ Mark fields for deprecation with migration path:
 
 ```graphql
 type Entity {
-  oldField: String @deprecated(
-    reason: "Use newField instead. Will be removed on 2025-12-31."
-    removeBy: "2025-12-31"
-    replaceWith: "newField"
-  )
+  oldField: String
+    @deprecated(
+      reason: "Use newField instead. Will be removed on 2025-12-31."
+      removeBy: "2025-12-31"
+      replaceWith: "newField"
+    )
   newField: String!
 }
 ```
@@ -191,18 +192,21 @@ type Entity {
 The schema validator checks for:
 
 ### Naming Conventions
+
 - **Types**: PascalCase (e.g., `UserProfile`)
 - **Fields**: camelCase (e.g., `firstName`)
 - **Enums**: UPPER_CASE (e.g., `ACTIVE`)
 - **Inputs**: Must end with `Input`
 
 ### Anti-Patterns
+
 - Generic field names (`data`, `info`, `value`)
 - List fields without pagination
 - Too many fields (>50) or arguments (>10)
 - Deeply nested lists
 
 ### Deprecations
+
 - Must have clear reason (≥10 characters)
 - Should include migration path
 - Should specify removal date
@@ -213,26 +217,26 @@ The schema validator checks for:
 
 ```typescript
 const config = {
-  maxComplexity: 1000,      // Maximum query complexity
-  maxDepth: 10,             // Maximum nesting depth
-  defaultComplexity: 1,     // Default field cost
-  listMultiplier: 10,       // Multiplier for list fields
+  maxComplexity: 1000, // Maximum query complexity
+  maxDepth: 10, // Maximum nesting depth
+  defaultComplexity: 1, // Default field cost
+  listMultiplier: 10, // Multiplier for list fields
 };
 ```
 
 ### Custom Complexity
 
 ```typescript
-import { paginatedComplexity, searchComplexity } from './graphql/complexity-calculator';
+import { paginatedComplexity, searchComplexity } from "./graphql/complexity-calculator";
 
 // Paginated field
-customComplexity.set('Query.entities', paginatedComplexity(2));
+customComplexity.set("Query.entities", paginatedComplexity(2));
 
 // Search field (more expensive)
-customComplexity.set('Query.semanticSearch', searchComplexity(10));
+customComplexity.set("Query.semanticSearch", searchComplexity(10));
 
 // Custom calculator
-customComplexity.set('Query.customField', (args, childComplexity) => {
+customComplexity.set("Query.customField", (args, childComplexity) => {
   const multiplier = args.includeExpensive ? 5 : 1;
   return (baseComplexity + childComplexity) * multiplier;
 });
@@ -266,7 +270,7 @@ console.log(formatPerformanceReport(report));
 Use DataLoader for batching:
 
 ```typescript
-import { createDataLoaderContext } from './graphql/performance-monitor';
+import { createDataLoaderContext } from "./graphql/performance-monitor";
 
 const context = createDataLoaderContext({
   user: req.user,
@@ -282,19 +286,19 @@ const entity = await context.loaders.entity.load(entityId);
 ### Gateway Setup
 
 ```typescript
-import { createFederatedGateway, defaultSubgraphs } from './graphql/federation/gateway';
+import { createFederatedGateway, defaultSubgraphs } from "./graphql/federation/gateway";
 
 const gateway = await createFederatedGateway({
   subgraphs: defaultSubgraphs,
   pollIntervalMs: 30000,
-  debug: process.env.NODE_ENV !== 'production',
+  debug: process.env.NODE_ENV !== "production",
 });
 ```
 
 ### Creating a Subgraph
 
 ```typescript
-import { createSubgraphSchema } from './graphql/federation/subgraph';
+import { createSubgraphSchema } from "./graphql/federation/subgraph";
 
 const schema = createSubgraphSchema(typeDefs, {
   Query: {
@@ -342,6 +346,7 @@ http://localhost:4000/playground
 ```
 
 Features:
+
 - 🔐 Authentication required
 - 📝 Pre-loaded example queries
 - 🎨 Dark theme
@@ -356,8 +361,8 @@ Generate documentation in multiple formats:
 
 ```typescript
 await generateDocumentation(schema, {
-  outputPath: './docs/api-docs.md',
-  format: 'markdown',
+  outputPath: "./docs/api-docs.md",
+  format: "markdown",
   includeExamples: true,
   includeDeprecated: false,
 });
@@ -367,8 +372,8 @@ await generateDocumentation(schema, {
 
 ```typescript
 await generateDocumentation(schema, {
-  outputPath: './docs/api-docs.html',
-  format: 'html',
+  outputPath: "./docs/api-docs.html",
+  format: "html",
   includeExamples: true,
 });
 ```
@@ -377,8 +382,8 @@ await generateDocumentation(schema, {
 
 ```typescript
 await generateDocumentation(schema, {
-  outputPath: './docs/api-docs.json',
-  format: 'json',
+  outputPath: "./docs/api-docs.json",
+  format: "json",
 });
 ```
 
@@ -389,7 +394,7 @@ await generateDocumentation(schema, {
 ```typescript
 const validation = await schemaRegistry.validateCanRegister(newSchema);
 if (!validation.valid) {
-  console.error('Validation failed:', validation.errors);
+  console.error("Validation failed:", validation.errors);
   return;
 }
 ```
@@ -409,7 +414,9 @@ type Query {
 Entity in the knowledge graph.
 """
 type Entity {
-  """Unique identifier"""
+  """
+  Unique identifier
+  """
   id: ID!
 }
 ```
@@ -418,10 +425,7 @@ type Entity {
 
 ```graphql
 type Mutation {
-  expensiveOperation: Result!
-    @auth
-    @rateLimit(max: 5, window: 60)
-    @budget(capUSD: 1.0)
+  expensiveOperation: Result! @auth @rateLimit(max: 5, window: 60) @budget(capUSD: 1.0)
 }
 ```
 
@@ -431,7 +435,7 @@ type Mutation {
 // Check for issues after each request
 const report = globalPerformanceMonitor.generateReport();
 if (report.nPlusOneQueries.length > 0) {
-  logger.warn('N+1 queries detected', { queries: report.nPlusOneQueries });
+  logger.warn("N+1 queries detected", { queries: report.nPlusOneQueries });
 }
 ```
 

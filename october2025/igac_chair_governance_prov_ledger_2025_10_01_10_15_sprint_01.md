@@ -140,12 +140,12 @@ exports:
 // lac/compile.ts
 export function compilePolicy(spec: PolicySpec): Uint8Array {
   const bytecode = new BytecodeWriter()
-    .emit('LOAD_LICENSE', spec.legal_basis)
-    .emit('SET_PURPOSE', spec.purpose)
-    .emit('SET_RETENTION', spec.retention_days)
-    .emit('SET_MINIMIZATION', spec.minimization)
-    .emit('SET_AUDIENCE', spec.audience)
-    .emit('BIND_REASON_FOR_ACCESS')
+    .emit("LOAD_LICENSE", spec.legal_basis)
+    .emit("SET_PURPOSE", spec.purpose)
+    .emit("SET_RETENTION", spec.retention_days)
+    .emit("SET_MINIMIZATION", spec.minimization)
+    .emit("SET_AUDIENCE", spec.audience)
+    .emit("BIND_REASON_FOR_ACCESS")
     .finalize();
   return bytecode.buffer();
 }
@@ -163,7 +163,7 @@ app.use(async (req, res, next) => {
     return res.status(403).json({
       blocked: true,
       reason: verdict.reason,
-      appeal: '/ombuds/appeal/' + req.caseId,
+      appeal: "/ombuds/appeal/" + req.caseId,
     });
   }
   next();

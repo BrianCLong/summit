@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Grid,
@@ -26,7 +26,7 @@ import {
   Paper,
   Tooltip,
   IconButton,
-} from '@mui/material';
+} from "@mui/material";
 import {
   Speed,
   Memory,
@@ -42,7 +42,7 @@ import {
   Refresh,
   Tune,
   BugReport,
-} from '@mui/icons-material';
+} from "@mui/icons-material";
 import {
   LineChart,
   Line,
@@ -54,9 +54,9 @@ import {
   CartesianGrid,
   Tooltip as RechartsTooltip,
   Legend,
-} from 'recharts';
-import { useQuery, useMutation } from '@apollo/client';
-import { gql } from '@apollo/client';
+} from "recharts";
+import { useQuery, useMutation } from "@apollo/client";
+import { gql } from "@apollo/client";
 
 const GET_PERFORMANCE_REPORT = gql`
   query GetPerformanceReport {
@@ -142,7 +142,7 @@ const IMPLEMENT_CACHE_WARMING = gql`
 
 const PerformanceMonitoringPanel = () => {
   const [selectedTab, setSelectedTab] = useState(0);
-  const [timeRange, setTimeRange] = useState('24h');
+  const [timeRange, setTimeRange] = useState("24h");
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [performanceData, setPerformanceData] = useState(null);
   const [metricsData, setMetricsData] = useState([]);
@@ -184,33 +184,32 @@ const PerformanceMonitoringPanel = () => {
       await implementCacheWarming();
       refetchReport();
     } catch (error) {
-      console.error('Cache warming error:', error);
+      console.error("Cache warming error:", error);
     }
   };
 
   const getHealthStatus = () => {
-    if (!performanceData)
-      return { status: 'unknown', color: 'default', message: 'Loading...' };
+    if (!performanceData) return { status: "unknown", color: "default", message: "Loading..." };
 
     const { metrics } = performanceData;
     const issues = [];
 
-    if (metrics.avgResponseTime > 1000) issues.push('High response time');
-    if (metrics.errorRate > 5) issues.push('High error rate');
-    if (metrics.cacheHitRate < 85) issues.push('Low cache hit rate');
+    if (metrics.avgResponseTime > 1000) issues.push("High response time");
+    if (metrics.errorRate > 5) issues.push("High error rate");
+    if (metrics.cacheHitRate < 85) issues.push("Low cache hit rate");
 
     if (issues.length === 0) {
       return {
-        status: 'healthy',
-        color: 'success',
-        message: 'All systems operational',
+        status: "healthy",
+        color: "success",
+        message: "All systems operational",
       };
     } else if (issues.length === 1) {
-      return { status: 'warning', color: 'warning', message: issues[0] };
+      return { status: "warning", color: "warning", message: issues[0] };
     } else {
       return {
-        status: 'critical',
-        color: 'error',
+        status: "critical",
+        color: "error",
         message: `${issues.length} issues detected`,
       };
     }
@@ -228,16 +227,16 @@ const PerformanceMonitoringPanel = () => {
         <Grid item xs={12}>
           <Alert
             severity={
-              health.status === 'healthy'
-                ? 'success'
-                : health.status === 'warning'
-                  ? 'warning'
-                  : 'error'
+              health.status === "healthy"
+                ? "success"
+                : health.status === "warning"
+                  ? "warning"
+                  : "error"
             }
             icon={
-              health.status === 'healthy' ? (
+              health.status === "healthy" ? (
                 <CheckCircle />
-              ) : health.status === 'warning' ? (
+              ) : health.status === "warning" ? (
                 <Warning />
               ) : (
                 <Error />
@@ -258,10 +257,7 @@ const PerformanceMonitoringPanel = () => {
                 <Speed color="primary" sx={{ mr: 1 }} />
                 <Typography variant="h6">Response Time</Typography>
               </Box>
-              <Typography
-                variant="h3"
-                color={metrics.avgResponseTime > 1000 ? 'error' : 'primary'}
-              >
+              <Typography variant="h3" color={metrics.avgResponseTime > 1000 ? "error" : "primary"}>
                 {Math.round(metrics.avgResponseTime)}
               </Typography>
               <Typography variant="caption" color="text.secondary">
@@ -271,17 +267,17 @@ const PerformanceMonitoringPanel = () => {
                 <Chip
                   label={
                     metrics.avgResponseTime > 1000
-                      ? 'Slow'
+                      ? "Slow"
                       : metrics.avgResponseTime > 500
-                        ? 'Fair'
-                        : 'Good'
+                        ? "Fair"
+                        : "Good"
                   }
                   color={
                     metrics.avgResponseTime > 1000
-                      ? 'error'
+                      ? "error"
                       : metrics.avgResponseTime > 500
-                        ? 'warning'
-                        : 'success'
+                        ? "warning"
+                        : "success"
                   }
                   size="small"
                 />
@@ -299,23 +295,17 @@ const PerformanceMonitoringPanel = () => {
               </Box>
               <Typography variant="h3" color="info.main">
                 {Math.round(
-                  (systemHealth.memoryUsage.heapUsed /
-                    systemHealth.memoryUsage.heapTotal) *
-                    100,
+                  (systemHealth.memoryUsage.heapUsed / systemHealth.memoryUsage.heapTotal) * 100
                 )}
                 %
               </Typography>
               <Typography variant="caption" color="text.secondary">
-                of{' '}
-                {Math.round(systemHealth.memoryUsage.heapTotal / 1024 / 1024)}{' '}
-                MB
+                of {Math.round(systemHealth.memoryUsage.heapTotal / 1024 / 1024)} MB
               </Typography>
               <LinearProgress
                 variant="determinate"
                 value={
-                  (systemHealth.memoryUsage.heapUsed /
-                    systemHealth.memoryUsage.heapTotal) *
-                  100
+                  (systemHealth.memoryUsage.heapUsed / systemHealth.memoryUsage.heapTotal) * 100
                 }
                 sx={{ mt: 1 }}
                 color="info"
@@ -331,10 +321,7 @@ const PerformanceMonitoringPanel = () => {
                 <Storage color="success" sx={{ mr: 1 }} />
                 <Typography variant="h6">Cache Hit Rate</Typography>
               </Box>
-              <Typography
-                variant="h3"
-                color={metrics.cacheHitRate < 85 ? 'warning' : 'success'}
-              >
+              <Typography variant="h3" color={metrics.cacheHitRate < 85 ? "warning" : "success"}>
                 {Math.round(metrics.cacheHitRate)}%
               </Typography>
               <Typography variant="caption" color="text.secondary">
@@ -344,12 +331,12 @@ const PerformanceMonitoringPanel = () => {
                 <Chip
                   label={
                     metrics.cacheHitRate < 85
-                      ? 'Low'
+                      ? "Low"
                       : metrics.cacheHitRate < 95
-                        ? 'Good'
-                        : 'Excellent'
+                        ? "Good"
+                        : "Excellent"
                   }
-                  color={metrics.cacheHitRate < 85 ? 'warning' : 'success'}
+                  color={metrics.cacheHitRate < 85 ? "warning" : "success"}
                   size="small"
                 />
               </Box>
@@ -389,24 +376,24 @@ const PerformanceMonitoringPanel = () => {
                 <Box>
                   <Button
                     size="small"
-                    onClick={() => setTimeRange('1h')}
-                    variant={timeRange === '1h' ? 'contained' : 'outlined'}
+                    onClick={() => setTimeRange("1h")}
+                    variant={timeRange === "1h" ? "contained" : "outlined"}
                     sx={{ mr: 1 }}
                   >
                     1h
                   </Button>
                   <Button
                     size="small"
-                    onClick={() => setTimeRange('24h')}
-                    variant={timeRange === '24h' ? 'contained' : 'outlined'}
+                    onClick={() => setTimeRange("24h")}
+                    variant={timeRange === "24h" ? "contained" : "outlined"}
                     sx={{ mr: 1 }}
                   >
                     24h
                   </Button>
                   <Button
                     size="small"
-                    onClick={() => setTimeRange('7d')}
-                    variant={timeRange === '7d' ? 'contained' : 'outlined'}
+                    onClick={() => setTimeRange("7d")}
+                    variant={timeRange === "7d" ? "contained" : "outlined"}
                   >
                     7d
                   </Button>
@@ -420,17 +407,11 @@ const PerformanceMonitoringPanel = () => {
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis
                       dataKey="timestamp"
-                      tickFormatter={(value) =>
-                        new Date(value).toLocaleTimeString()
-                      }
+                      tickFormatter={(value) => new Date(value).toLocaleTimeString()}
                     />
                     <YAxis yAxisId="left" />
                     <YAxis yAxisId="right" orientation="right" />
-                    <RechartsTooltip
-                      labelFormatter={(value) =>
-                        new Date(value).toLocaleString()
-                      }
-                    />
+                    <RechartsTooltip labelFormatter={(value) => new Date(value).toLocaleString()} />
                     <Legend />
                     <Line
                       yAxisId="left"
@@ -459,15 +440,8 @@ const PerformanceMonitoringPanel = () => {
                   </LineChart>
                 </ResponsiveContainer>
               ) : (
-                <Box
-                  display="flex"
-                  justifyContent="center"
-                  alignItems="center"
-                  height={400}
-                >
-                  <Typography color="text.secondary">
-                    Loading metrics data...
-                  </Typography>
+                <Box display="flex" justifyContent="center" alignItems="center" height={400}>
+                  <Typography color="text.secondary">Loading metrics data...</Typography>
                 </Box>
               )}
             </CardContent>
@@ -545,12 +519,7 @@ const PerformanceMonitoringPanel = () => {
                 >
                   Refresh Data
                 </Button>
-                <Button
-                  variant="outlined"
-                  startIcon={<Tune />}
-                  color="info"
-                  disabled
-                >
+                <Button variant="outlined" startIcon={<Tune />} color="info" disabled>
                   Optimize Settings
                 </Button>
                 <FormControlLabel
@@ -593,8 +562,7 @@ const PerformanceMonitoringPanel = () => {
                 </TableHead>
                 <TableBody>
                   {performanceData.connectionPools.map((pool) => {
-                    const utilization =
-                      (pool.activeConnections / pool.maxConnections) * 100;
+                    const utilization = (pool.activeConnections / pool.maxConnections) * 100;
                     const isHealthy = pool.errorRate < 1 && utilization < 80;
 
                     return (
@@ -604,26 +572,16 @@ const PerformanceMonitoringPanel = () => {
                             <Storage
                               sx={{
                                 mr: 1,
-                                color: isHealthy
-                                  ? 'success.main'
-                                  : 'warning.main',
+                                color: isHealthy ? "success.main" : "warning.main",
                               }}
                             />
                             {pool.type.toUpperCase()}
                           </Box>
                         </TableCell>
+                        <TableCell align="right">{pool.activeConnections}</TableCell>
+                        <TableCell align="right">{pool.maxConnections}</TableCell>
                         <TableCell align="right">
-                          {pool.activeConnections}
-                        </TableCell>
-                        <TableCell align="right">
-                          {pool.maxConnections}
-                        </TableCell>
-                        <TableCell align="right">
-                          <Box
-                            display="flex"
-                            alignItems="center"
-                            flexDirection="column"
-                          >
+                          <Box display="flex" alignItems="center" flexDirection="column">
                             {Math.round(utilization)}%
                             <LinearProgress
                               variant="determinate"
@@ -631,24 +589,20 @@ const PerformanceMonitoringPanel = () => {
                               sx={{ width: 60, mt: 0.5 }}
                               color={
                                 utilization > 80
-                                  ? 'error'
+                                  ? "error"
                                   : utilization > 60
-                                    ? 'warning'
-                                    : 'success'
+                                    ? "warning"
+                                    : "success"
                               }
                             />
                           </Box>
                         </TableCell>
-                        <TableCell align="right">
-                          {Math.round(pool.avgResponseTime)}
-                        </TableCell>
-                        <TableCell align="right">
-                          {pool.errorRate.toFixed(2)}%
-                        </TableCell>
+                        <TableCell align="right">{Math.round(pool.avgResponseTime)}</TableCell>
+                        <TableCell align="right">{pool.errorRate.toFixed(2)}%</TableCell>
                         <TableCell align="center">
                           <Chip
-                            label={isHealthy ? 'Healthy' : 'Warning'}
-                            color={isHealthy ? 'success' : 'warning'}
+                            label={isHealthy ? "Healthy" : "Warning"}
+                            color={isHealthy ? "success" : "warning"}
                             size="small"
                             icon={isHealthy ? <CheckCircle /> : <Warning />}
                           />
@@ -693,16 +647,10 @@ const PerformanceMonitoringPanel = () => {
                   {performanceData.cacheStrategies.map((strategy) => (
                     <TableRow key={strategy.id}>
                       <TableCell>
-                        <Typography variant="subtitle2">
-                          {strategy.name}
-                        </Typography>
+                        <Typography variant="subtitle2">{strategy.name}</Typography>
                       </TableCell>
                       <TableCell>
-                        <Typography
-                          variant="body2"
-                          fontFamily="monospace"
-                          color="text.secondary"
-                        >
+                        <Typography variant="body2" fontFamily="monospace" color="text.secondary">
                           {strategy.pattern}
                         </Typography>
                       </TableCell>
@@ -717,28 +665,26 @@ const PerformanceMonitoringPanel = () => {
                         <Chip
                           label={strategy.priority.toUpperCase()}
                           color={
-                            strategy.priority === 'high'
-                              ? 'error'
-                              : strategy.priority === 'medium'
-                                ? 'warning'
-                                : 'default'
+                            strategy.priority === "high"
+                              ? "error"
+                              : strategy.priority === "medium"
+                                ? "warning"
+                                : "default"
                           }
                           size="small"
                         />
                       </TableCell>
                       <TableCell align="center">
                         <Chip
-                          label={strategy.compressionEnabled ? 'On' : 'Off'}
-                          color={
-                            strategy.compressionEnabled ? 'success' : 'default'
-                          }
+                          label={strategy.compressionEnabled ? "On" : "Off"}
+                          color={strategy.compressionEnabled ? "success" : "default"}
                           size="small"
                         />
                       </TableCell>
                       <TableCell align="center">
                         <Chip
-                          label={strategy.prefetchEnabled ? 'On' : 'Off'}
-                          color={strategy.prefetchEnabled ? 'info' : 'default'}
+                          label={strategy.prefetchEnabled ? "On" : "Off"}
+                          color={strategy.prefetchEnabled ? "info" : "default"}
                           size="small"
                         />
                       </TableCell>
@@ -757,18 +703,15 @@ const PerformanceMonitoringPanel = () => {
   };
 
   const tabs = [
-    { label: 'Overview', content: renderOverviewTab() },
-    { label: 'Connections', content: renderConnectionsTab() },
-    { label: 'Cache', content: renderCacheTab() },
+    { label: "Overview", content: renderOverviewTab() },
+    { label: "Connections", content: renderConnectionsTab() },
+    { label: "Cache", content: renderCacheTab() },
   ];
 
   return (
-    <Box sx={{ width: '100%' }}>
+    <Box sx={{ width: "100%" }}>
       <Paper sx={{ mb: 2 }}>
-        <Tabs
-          value={selectedTab}
-          onChange={(e, newValue) => setSelectedTab(newValue)}
-        >
+        <Tabs value={selectedTab} onChange={(e, newValue) => setSelectedTab(newValue)}>
           {tabs.map((tab, index) => (
             <Tab key={index} label={tab.label} />
           ))}

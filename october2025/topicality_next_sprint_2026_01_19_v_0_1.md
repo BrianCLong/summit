@@ -160,15 +160,15 @@ owners:
 
 kpis:
   - name: preview_latency_p95_ms
-    target: '<=190'
+    target: "<=190"
   - name: cache_hit_rate
-    target: '>=0.95'
+    target: ">=0.95"
   - name: mapping_coverage
-    target: '>=0.95'
+    target: ">=0.95"
   - name: billing_drift_pct
-    target: '<=0.5'
+    target: "<=0.5"
   - name: activation_rate
-    target: '>=0.30'
+    target: ">=0.30"
 
 budget:
   cost_per_req_max_usd: 0.0095

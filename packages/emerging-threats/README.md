@@ -5,6 +5,7 @@ Comprehensive emerging threat identification and disruptive threat analysis for 
 ## Features
 
 ### Emerging Technology Monitoring
+
 - Artificial intelligence developments
 - Quantum computing advances
 - Biotechnology breakthroughs
@@ -17,6 +18,7 @@ Comprehensive emerging threat identification and disruptive threat analysis for 
 - Space-based capabilities
 
 ### Disruptive Threat Identification
+
 - Novel attack vectors
 - Unconventional warfare tactics
 - Gray zone operations
@@ -29,6 +31,7 @@ Comprehensive emerging threat identification and disruptive threat analysis for 
 - Cognitive warfare
 
 ### Weak Signal Detection
+
 - Edge source monitoring
 - Anomaly detection
 - Fringe development tracking
@@ -37,26 +40,30 @@ Comprehensive emerging threat identification and disruptive threat analysis for 
 ## Usage
 
 ```typescript
-import { ThreatMonitor, TechnologyTracker, DisruptiveThreatAnalyzer } from '@intelgraph/emerging-threats';
+import {
+  ThreatMonitor,
+  TechnologyTracker,
+  DisruptiveThreatAnalyzer,
+} from "@intelgraph/emerging-threats";
 
 // Initialize threat monitor
 const monitor = new ThreatMonitor({
-  categories: ['artificial-intelligence', 'quantum-computing'],
+  categories: ["artificial-intelligence", "quantum-computing"],
   updateInterval: 3600000,
   confidenceThreshold: 0.7,
   enableRealTimeMonitoring: true,
-  sources: ['academic', 'defense-research', 'commercial'],
+  sources: ["academic", "defense-research", "commercial"],
 });
 
 // Track emerging technologies
-const aiTrends = await monitor.trackEmergingTechnology('artificial-intelligence', [
-  'AGI',
-  'autonomous-weapons',
-  'adversarial-AI',
+const aiTrends = await monitor.trackEmergingTechnology("artificial-intelligence", [
+  "AGI",
+  "autonomous-weapons",
+  "adversarial-AI",
 ]);
 
 // Identify disruptive threats
-const threats = await monitor.identifyDisruptiveThreats('cyber-physical');
+const threats = await monitor.identifyDisruptiveThreats("cyber-physical");
 
 // Detect weak signals
 const weakSignals = await monitor.detectWeakSignals();
@@ -130,6 +137,7 @@ Analyze unconventional and disruptive threats.
 ## Integration
 
 This package integrates with:
+
 - Research databases (arXiv, PubMed, DTIC)
 - Patent databases (USPTO, WIPO, EPO)
 - Intelligence sources

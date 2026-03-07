@@ -75,7 +75,13 @@ export function App() {
                   <SearchIcon />
                 </IconButton>
               </Tooltip>
-              <Tooltip title={mode === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}>
+              <Tooltip
+                title={
+                  mode === 'light'
+                    ? 'Switch to dark mode'
+                    : 'Switch to light mode'
+                }
+              >
                 <IconButton
                   onClick={toggleMode}
                   color="inherit"

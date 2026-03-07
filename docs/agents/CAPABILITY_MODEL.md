@@ -16,28 +16,28 @@ Every agent must have a registered identity before execution:
 
 ```typescript
 interface AgentIdentity {
-  id: string;                    // UUID - immutable
-  name: string;                  // Human-readable identifier
-  version: string;               // Semantic version (e.g., "1.2.3")
-  agent_type: AgentType;         // Classification
-  status: AgentStatus;           // Lifecycle state
-  is_certified: boolean;         // Certification flag
+  id: string; // UUID - immutable
+  name: string; // Human-readable identifier
+  version: string; // Semantic version (e.g., "1.2.3")
+  agent_type: AgentType; // Classification
+  status: AgentStatus; // Lifecycle state
+  is_certified: boolean; // Certification flag
   certification_expires_at?: Date; // Cert expiration
-  owner_id: string;              // Responsible user
-  organization_id: string;       // Owning organization
+  owner_id: string; // Responsible user
+  organization_id: string; // Owning organization
 }
 
 enum AgentType {
-  INTERNAL = 'internal',         // First-party agents
-  EXTERNAL = 'external',         // Third-party agents
-  PARTNER = 'partner'            // Partner-developed agents
+  INTERNAL = "internal", // First-party agents
+  EXTERNAL = "external", // Third-party agents
+  PARTNER = "partner", // Partner-developed agents
 }
 
 enum AgentStatus {
-  ACTIVE = 'active',             // Operational
-  SUSPENDED = 'suspended',       // Temporarily disabled
-  RETIRED = 'retired',           // Permanently disabled
-  REVOKED = 'revoked'            // Security revocation
+  ACTIVE = "active", // Operational
+  SUSPENDED = "suspended", // Temporarily disabled
+  RETIRED = "retired", // Permanently disabled
+  REVOKED = "revoked", // Security revocation
 }
 ```
 
@@ -47,49 +47,49 @@ Capabilities define **what an agent is allowed to do**:
 
 ```typescript
 interface AgentCapability {
-  name: string;                  // e.g., "database:read", "api:github:write"
-  scope: CapabilityScope;        // Access boundaries
-  risk_level: RiskLevel;         // Impact classification
-  requires_approval: boolean;    // Manual approval required
+  name: string; // e.g., "database:read", "api:github:write"
+  scope: CapabilityScope; // Access boundaries
+  risk_level: RiskLevel; // Impact classification
+  requires_approval: boolean; // Manual approval required
   approval_class: ApprovalClass; // Approval workflow
 }
 
 interface CapabilityScope {
   // Data Access Boundaries
-  tenant_scopes: string[];       // Allowed tenant IDs
-  project_scopes: string[];      // Allowed project IDs
+  tenant_scopes: string[]; // Allowed tenant IDs
+  project_scopes: string[]; // Allowed project IDs
   data_classifications: DataClassification[]; // Max data sensitivity
 
   // Resource Access
-  allowed_domains: string[];     // Network access whitelist
-  allowed_apis: string[];        // API endpoint access
-  allowed_tools: string[];       // Tool/function access
+  allowed_domains: string[]; // Network access whitelist
+  allowed_apis: string[]; // API endpoint access
+  allowed_tools: string[]; // Tool/function access
 
   // Operational Boundaries
-  read_only: boolean;            // Write access permitted
-  secrets_access: boolean;       // Secret manager access
-  cross_tenant: boolean;         // Cross-tenant operations
+  read_only: boolean; // Write access permitted
+  secrets_access: boolean; // Secret manager access
+  cross_tenant: boolean; // Cross-tenant operations
 }
 
 enum RiskLevel {
-  LOW = 'low',                   // No approval, standard limits
-  MEDIUM = 'medium',             // May require approval
-  HIGH = 'high',                 // Requires approval
-  CRITICAL = 'critical'          // Requires approval + certification
+  LOW = "low", // No approval, standard limits
+  MEDIUM = "medium", // May require approval
+  HIGH = "high", // Requires approval
+  CRITICAL = "critical", // Requires approval + certification
 }
 
 enum ApprovalClass {
-  AUTO = 'auto',                 // Automatic approval
-  GATED = 'gated',               // Policy-based approval
-  HITL = 'human_in_the_loop'     // Manual human approval required
+  AUTO = "auto", // Automatic approval
+  GATED = "gated", // Policy-based approval
+  HITL = "human_in_the_loop", // Manual human approval required
 }
 
 enum DataClassification {
-  PUBLIC = 'public',
-  INTERNAL = 'internal',
-  CONFIDENTIAL = 'confidential',
-  RESTRICTED = 'restricted',
-  SECRET = 'secret'
+  PUBLIC = "public",
+  INTERNAL = "internal",
+  CONFIDENTIAL = "confidential",
+  RESTRICTED = "restricted",
+  SECRET = "secret",
 }
 ```
 
@@ -100,26 +100,26 @@ Hard limits enforced at runtime, not by agent logic:
 ```typescript
 interface ExecutionLimits {
   // Time Limits
-  max_wall_clock_ms: number;     // Total execution time (default: 300000 = 5min)
-  max_cpu_time_ms: number;       // CPU time limit
+  max_wall_clock_ms: number; // Total execution time (default: 300000 = 5min)
+  max_cpu_time_ms: number; // CPU time limit
 
   // Step Limits
-  max_steps: number;             // Max reasoning/action steps (default: 50)
-  max_tool_calls: number;        // Max tool invocations (default: 100)
+  max_steps: number; // Max reasoning/action steps (default: 50)
+  max_tool_calls: number; // Max tool invocations (default: 100)
 
   // Token Budgets
-  max_tokens_input: number;      // Max input tokens per run
-  max_tokens_output: number;     // Max output tokens per run
-  max_tokens_total: number;      // Total token budget
+  max_tokens_input: number; // Max input tokens per run
+  max_tokens_output: number; // Max output tokens per run
+  max_tokens_total: number; // Total token budget
 
   // Resource Limits
-  max_memory_mb: number;         // Memory limit
+  max_memory_mb: number; // Memory limit
   max_concurrent_requests: number; // Parallel request limit
 
   // Rate Limits
-  max_runs_per_minute: number;   // Per-minute rate limit
-  max_runs_per_hour: number;     // Per-hour rate limit
-  max_runs_per_day: number;      // Per-day rate limit
+  max_runs_per_minute: number; // Per-minute rate limit
+  max_runs_per_hour: number; // Per-hour rate limit
+  max_runs_per_day: number; // Per-day rate limit
 }
 ```
 
@@ -130,34 +130,34 @@ Financial and resource quotas:
 ```typescript
 interface BudgetLimits {
   // Financial Budgets
-  max_cost_per_run_usd: number;  // Per-run cost cap
-  max_cost_per_day_usd: number;  // Daily cost cap
+  max_cost_per_run_usd: number; // Per-run cost cap
+  max_cost_per_day_usd: number; // Daily cost cap
   max_cost_per_month_usd: number; // Monthly cost cap
 
   // Resource Quotas
   quota_type: QuotaType;
-  quota_limit: number;           // Total quota
-  quota_used: number;            // Current usage
-  quota_period_start: Date;      // Period start
-  quota_period_end: Date;        // Period end
+  quota_limit: number; // Total quota
+  quota_used: number; // Current usage
+  quota_period_start: Date; // Period start
+  quota_period_end: Date; // Period end
 
   // Behavior on Breach
   on_limit_breach: LimitBreachAction;
 }
 
 enum QuotaType {
-  DAILY_RUNS = 'daily_runs',
-  MONTHLY_RUNS = 'monthly_runs',
-  TOKENS = 'tokens',
-  API_CALLS = 'api_calls',
-  COST_USD = 'cost_usd'
+  DAILY_RUNS = "daily_runs",
+  MONTHLY_RUNS = "monthly_runs",
+  TOKENS = "tokens",
+  API_CALLS = "api_calls",
+  COST_USD = "cost_usd",
 }
 
 enum LimitBreachAction {
-  DENY = 'deny',                 // Fail-closed
-  THROTTLE = 'throttle',         // Rate limit
-  ESCALATE = 'escalate',         // Human escalation
-  ALERT = 'alert'                // Alert + allow
+  DENY = "deny", // Fail-closed
+  THROTTLE = "throttle", // Rate limit
+  ESCALATE = "escalate", // Human escalation
+  ALERT = "alert", // Alert + allow
 }
 ```
 
@@ -227,7 +227,7 @@ agents:
 
     limits:
       execution:
-        max_wall_clock_ms: 300000     # 5 minutes
+        max_wall_clock_ms: 300000 # 5 minutes
         max_steps: 50
         max_tool_calls: 100
         max_tokens_total: 100000
@@ -313,9 +313,9 @@ interface EnforcementResult {
 }
 
 enum PolicyDecision {
-  ALLOW = 'allow',
-  DENY = 'deny',
-  CONDITIONAL = 'conditional'  // Allow with obligations
+  ALLOW = "allow",
+  DENY = "deny",
+  CONDITIONAL = "conditional", // Allow with obligations
 }
 
 interface Obligation {
@@ -324,11 +324,11 @@ interface Obligation {
 }
 
 enum ObligationType {
-  REQUIRE_APPROVAL = 'require_approval',
-  AUDIT_ENHANCED = 'audit_enhanced',
-  RATE_LIMIT = 'rate_limit',
-  NOTIFY_OWNER = 'notify_owner',
-  RECORD_JUSTIFICATION = 'record_justification'
+  REQUIRE_APPROVAL = "require_approval",
+  AUDIT_ENHANCED = "audit_enhanced",
+  RATE_LIMIT = "rate_limit",
+  NOTIFY_OWNER = "notify_owner",
+  RECORD_JUSTIFICATION = "record_justification",
 }
 ```
 
@@ -382,23 +382,23 @@ Agents are assigned trust levels based on certification and track record:
 
 ```typescript
 enum TrustLevel {
-  UNTRUSTED = 0,       // New/unverified agents - minimal capabilities
-  BASIC = 1,           // Basic certification - standard capabilities
-  ELEVATED = 2,        // Proven track record - expanded capabilities
-  PRIVILEGED = 3,      // High assurance - sensitive operations
-  SOVEREIGN = 4        // Maximum trust - critical operations
+  UNTRUSTED = 0, // New/unverified agents - minimal capabilities
+  BASIC = 1, // Basic certification - standard capabilities
+  ELEVATED = 2, // Proven track record - expanded capabilities
+  PRIVILEGED = 3, // High assurance - sensitive operations
+  SOVEREIGN = 4, // Maximum trust - critical operations
 }
 ```
 
 **Trust Level Mapping to Capabilities:**
 
-| Trust Level | Max Risk Level | Secrets Access | Cross-Tenant | Auto-Approval |
-|-------------|---------------|----------------|--------------|---------------|
-| Untrusted   | Low           | No             | No           | No            |
-| Basic       | Medium        | No             | No           | Low risk only |
-| Elevated    | High          | Read-only      | No           | Low/Medium    |
-| Privileged  | Critical      | Full           | Yes          | Low/Medium/High |
-| Sovereign   | Critical      | Full           | Yes          | All           |
+| Trust Level | Max Risk Level | Secrets Access | Cross-Tenant | Auto-Approval   |
+| ----------- | -------------- | -------------- | ------------ | --------------- |
+| Untrusted   | Low            | No             | No           | No              |
+| Basic       | Medium         | No             | No           | Low risk only   |
+| Elevated    | High           | Read-only      | No           | Low/Medium      |
+| Privileged  | Critical       | Full           | Yes          | Low/Medium/High |
+| Sovereign   | Critical       | Full           | Yes          | All             |
 
 ---
 
@@ -408,9 +408,9 @@ Agents execute in one of three operation modes:
 
 ```typescript
 enum OperationMode {
-  SIMULATION = 'SIMULATION',   // Allow all, no real execution (testing)
-  DRY_RUN = 'DRY_RUN',         // Check permissions, simulate execution
-  ENFORCED = 'ENFORCED'        // Full validation and enforcement
+  SIMULATION = "SIMULATION", // Allow all, no real execution (testing)
+  DRY_RUN = "DRY_RUN", // Check permissions, simulate execution
+  ENFORCED = "ENFORCED", // Full validation and enforcement
 }
 ```
 
@@ -442,6 +442,7 @@ POST /api/v1/agents/{agent_id}/capabilities
 ### 2. Validation
 
 Registry validates:
+
 - Capability name follows taxonomy
 - Scope is well-formed
 - Risk level matches scope
@@ -451,6 +452,7 @@ Registry validates:
 ### 3. Activation
 
 Capability is active only when:
+
 - Agent status is `ACTIVE`
 - Agent is certified (if capability requires)
 - Capability has not been revoked
@@ -459,6 +461,7 @@ Capability is active only when:
 ### 4. Revocation
 
 Capabilities can be revoked:
+
 - Per agent (revoke all capabilities)
 - Per capability (revoke specific capability across agents)
 - Immediate effect (no grace period)
@@ -525,7 +528,7 @@ agent:
 
   limits:
     execution:
-      max_wall_clock_ms: 600000  # 10 minutes for incident response
+      max_wall_clock_ms: 600000 # 10 minutes for incident response
       max_steps: 100
       max_tool_calls: 200
       max_tokens_total: 500000
@@ -549,6 +552,7 @@ agent:
 ### Database Schema
 
 Capabilities are stored in:
+
 - `agents.capabilities[]` - JSONB array of capability objects
 - `agents.restrictions` - JSONB object of restriction rules
 - `agent_policies` - Policy associations
@@ -557,6 +561,7 @@ Capabilities are stored in:
 ### Policy Engine (OPA)
 
 Capabilities are evaluated via:
+
 - `agents/governance/action` - Main action authorization
 - `agents/governance/misuse` - Misuse detection
 - `agents/governance/data_classification` - Data access control
@@ -565,6 +570,7 @@ Capabilities are evaluated via:
 ### Audit System
 
 All capability checks are logged to:
+
 - `agent_runs` - Run-level tracking
 - `agent_actions` - Action-level tracking
 - `agent_audit_log` - Lifecycle events

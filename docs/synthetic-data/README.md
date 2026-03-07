@@ -5,6 +5,7 @@ Enterprise-grade synthetic data generation platform with comprehensive privacy-p
 ## Features
 
 ✨ **Tabular Data Synthesis**
+
 - Statistical methods (Gaussian copula)
 - CTGAN (Conditional Tabular GAN)
 - TVAE (Tabular Variational Autoencoder)
@@ -12,6 +13,7 @@ Enterprise-grade synthetic data generation platform with comprehensive privacy-p
 - Copula-based methods
 
 🔒 **Privacy-Preserving**
+
 - Differential privacy (Laplace, Gaussian mechanisms)
 - K-anonymity, L-diversity, T-closeness
 - Re-identification risk assessment
@@ -19,6 +21,7 @@ Enterprise-grade synthetic data generation platform with comprehensive privacy-p
 - Privacy budget management
 
 📝 **Text Generation**
+
 - GPT-based text synthesis
 - Named entity generation
 - Multi-lingual support
@@ -26,42 +29,49 @@ Enterprise-grade synthetic data generation platform with comprehensive privacy-p
 - Conversational data synthesis
 
 🖼️ **Image & Video**
+
 - StyleGAN, Diffusion models
 - Video frame generation
 - Comprehensive augmentation
 - Resolution upscaling
 
 🎵 **Audio Synthesis**
+
 - Text-to-speech (TTS)
 - Voice cloning
 - Audio augmentation
 - Multi-speaker conversations
 
 🌐 **Graph & Network**
+
 - Erdős-Rényi, Barabási-Albert models
 - Community structure preservation
 - Temporal graph evolution
 - Privacy-preserving graph synthesis
 
 📍 **Geospatial**
+
 - Location trace generation
 - POI synthesis
 - Geo-indistinguishability
 - Mobility patterns
 
 📈 **Time-Series**
+
 - Seasonal pattern preservation
 - Trend and cycle modeling
 - Anomaly injection
 - Multi-variate correlation
 
 🔧 **Data Augmentation**
+
 - Image: rotation, flip, crop, color jitter
 - Text: synonym replacement, back-translation
 - Audio: pitch shift, time stretch, noise
 - AutoAugment and RandAugment
 
 ✅ **Quality Assurance**
+
 - Statistical similarity metrics
 - Distribution comparison tests
 - Correlation analysis
@@ -70,22 +80,22 @@ Enterprise-grade synthetic data generation platform with comprehensive privacy-p
 ## Quick Start
 
 ```typescript
-import { TabularSynthesizer } from '@intelgraph/synthetic-data';
-import { DifferentialPrivacy } from '@intelgraph/privacy-preserving';
+import { TabularSynthesizer } from "@intelgraph/synthetic-data";
+import { DifferentialPrivacy } from "@intelgraph/privacy-preserving";
 
 // Generate synthetic tabular data
 const synthesizer = new TabularSynthesizer({
-  method: 'ctgan',
+  method: "ctgan",
   numSamples: 1000,
   preserveCorrelations: true,
-  privacyBudget: 1.0
+  privacyBudget: 1.0,
 });
 
 await synthesizer.fit(originalData);
 const result = await synthesizer.generate();
 
 // Assess privacy
-const dp = new DifferentialPrivacy({ epsilon: 1.0, mechanism: 'laplace' });
+const dp = new DifferentialPrivacy({ epsilon: 1.0, mechanism: "laplace" });
 const privatized = dp.privatizeQuery(value, sensitivity);
 ```
 
@@ -108,16 +118,16 @@ pnpm add @intelgraph/data-augmentation
 
 ## Packages
 
-| Package | Description |
-|---------|-------------|
-| `@intelgraph/synthetic-data` | Core tabular and time-series synthesis |
-| `@intelgraph/privacy-preserving` | Differential privacy, k-anonymity, validation |
-| `@intelgraph/text-generation` | GPT-based text synthesis and NER |
-| `@intelgraph/image-synthesis` | Image and video generation |
-| `@intelgraph/audio-synthesis` | TTS, voice cloning, audio effects |
-| `@intelgraph/graph-synthesis` | Graph and network generation |
-| `@intelgraph/geospatial-synthesis` | Location and mobility data |
-| `@intelgraph/data-augmentation` | Multi-modal augmentation |
+| Package                            | Description                                   |
+| ---------------------------------- | --------------------------------------------- |
+| `@intelgraph/synthetic-data`       | Core tabular and time-series synthesis        |
+| `@intelgraph/privacy-preserving`   | Differential privacy, k-anonymity, validation |
+| `@intelgraph/text-generation`      | GPT-based text synthesis and NER              |
+| `@intelgraph/image-synthesis`      | Image and video generation                    |
+| `@intelgraph/audio-synthesis`      | TTS, voice cloning, audio effects             |
+| `@intelgraph/graph-synthesis`      | Graph and network generation                  |
+| `@intelgraph/geospatial-synthesis` | Location and mobility data                    |
+| `@intelgraph/data-augmentation`    | Multi-modal augmentation                      |
 
 ## API Service
 
@@ -134,6 +144,7 @@ API runs on `http://localhost:3000`
 ## Documentation
 
 Full documentation available at:
+
 - [User Guide](./GUIDE.md)
 - [API Reference](./API.md)
 - [Examples](../../examples/synthetic-data/)

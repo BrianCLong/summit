@@ -5,21 +5,21 @@ env: []
 envFrom: []
 
 secrets:
-  existingSecret: ''
+  existingSecret: ""
   keys:
     databaseUrl: DATABASE_URL
     redisUrl: REDIS_URL
-  databaseUrl: ''
-  redisUrl: ''
+  databaseUrl: ""
+  redisUrl: ""
 
 priceAware:
   enabled: true
   pricingRefreshEnabled: true
   capacityFuturesEnabled: true
   failOpen: true
-  forcePoolId: ''
+  forcePoolId: ""
   reservedDiscount: 0.8
-  pricingSignalsJson: ''
+  pricingSignalsJson: ""
 
 migrations:
   enabled: false
@@ -34,8 +34,8 @@ configMapEnv:
 
 security:
   allowedPrincipals:
-    - 'spiffe://intelgraph.local/ns/intelgraph/sa/webapp-sa'
-    - 'spiffe://intelgraph.local/ns/intelgraph/sa/batch-jobs-sa'
+    - "spiffe://intelgraph.local/ns/intelgraph/sa/webapp-sa"
+    - "spiffe://intelgraph.local/ns/intelgraph/sa/batch-jobs-sa"
   allowedPorts:
-    - '4000'
-    - '8080'
+    - "4000"
+    - "8080"

@@ -1,0 +1,18 @@
+id: connector.whois
+version: 1
+kind: osint
+license_class: permitted
+collection_mode: api
+source_citation_required: true
+emits:
+  - raw-acquisition
+  - entity
+  - relationship
+entity_types:
+  - domain
+  - registrant
+rate_limits:
+  rpm: 60
+policy_refs:
+  - policies/collection/public_osint.yaml
+deterministic_transform: true

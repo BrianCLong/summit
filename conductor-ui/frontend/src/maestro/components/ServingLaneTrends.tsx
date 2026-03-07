@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Typography,
@@ -24,7 +24,7 @@ import {
   ListItemText,
   Chip,
   LinearProgress,
-} from '@mui/material';
+} from "@mui/material";
 import {
   RefreshOutlined as RefreshIcon,
   InfoOutlined as InfoIcon,
@@ -32,7 +32,7 @@ import {
   TrendingDownOutlined as TrendingDownIcon,
   RemoveOutlined as SteadyIcon,
   WarningAmberOutlined as WarningIcon,
-} from '@mui/icons-material';
+} from "@mui/icons-material";
 import {
   ResponsiveContainer,
   LineChart,
@@ -47,8 +47,8 @@ import {
   Bar,
   ComposedChart,
   CartesianGrid,
-} from 'recharts';
-import { api } from '../api';
+} from "recharts";
+import { api } from "../api";
 
 interface ServingMetric {
   timestamp: number;
@@ -68,8 +68,8 @@ interface ServingMetric {
 
 interface BackendDetail {
   name: string;
-  type: 'vLLM' | 'Ray' | 'Triton' | 'KServe';
-  status: 'healthy' | 'degraded' | 'error';
+  type: "vLLM" | "Ray" | "Triton" | "KServe";
+  status: "healthy" | "degraded" | "error";
   instances: number;
   models: string[];
   utilization: number;
@@ -80,21 +80,19 @@ export default function ServingLaneTrends() {
   const { getServingMetrics } = api();
   const [data, setData] = useState<ServingMetric[]>([]);
   const [backends, setBackends] = useState<BackendDetail[]>([]);
-  const [selectedBackend, setSelectedBackend] = useState<string>('all');
-  const [selectedTimeRange, setSelectedTimeRange] = useState<string>('1h');
+  const [selectedBackend, setSelectedBackend] = useState<string>("all");
+  const [selectedTimeRange, setSelectedTimeRange] = useState<string>("1h");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [tabValue, setTabValue] = useState(0);
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
-  const [refreshInterval, setRefreshInterval] = useState<NodeJS.Timeout | null>(
-    null,
-  );
+  const [refreshInterval, setRefreshInterval] = useState<NodeJS.Timeout | null>(null);
 
   const fetchData = async () => {
     try {
       setError(null);
       const r = await getServingMetrics({
-        backend: selectedBackend === 'all' ? undefined : selectedBackend,
+        backend: selectedBackend === "all" ? undefined : selectedBackend,
         timeRange: selectedTimeRange,
       });
 
@@ -110,8 +108,8 @@ export default function ServingLaneTrends() {
           utilizationCpu: p.utilizationCpu || 0,
           utilizationGpu: p.utilizationGpu || 0,
           memoryUsage: p.memoryUsage || 0,
-          backend: p.backend || 'unknown',
-          model: p.model || 'unknown',
+          backend: p.backend || "unknown",
+          model: p.model || "unknown",
           requestsPerSecond: p.rps || 0,
           errorRate: p.errorRate || 0,
           ...p,
@@ -125,9 +123,7 @@ export default function ServingLaneTrends() {
 
       setLoading(false);
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : 'Failed to fetch serving metrics',
-      );
+      setError(err instanceof Error ? err.message : "Failed to fetch serving metrics");
       setLoading(false);
     }
   };
@@ -146,48 +142,45 @@ export default function ServingLaneTrends() {
 
   const calculateTrend = (
     data: ServingMetric[],
-    key: keyof ServingMetric,
-  ): 'up' | 'down' | 'steady' => {
-    if (data.length < 2) return 'steady';
+    key: keyof ServingMetric
+  ): "up" | "down" | "steady" => {
+    if (data.length < 2) return "steady";
 
     const recent = data.slice(-5);
     const values = recent.map((d) => Number(d[key]) || 0);
     const first = values[0];
     const last = values[values.length - 1];
 
-    if (last > first * 1.1) return 'up';
-    if (last < first * 0.9) return 'down';
-    return 'steady';
+    if (last > first * 1.1) return "up";
+    if (last < first * 0.9) return "down";
+    return "steady";
   };
 
   const getTrendIcon = (trend: string) => {
     switch (trend) {
-      case 'up':
+      case "up":
         return <TrendingUpIcon color="success" />;
-      case 'down':
+      case "down":
         return <TrendingDownIcon color="error" />;
       default:
         return <SteadyIcon color="action" />;
     }
   };
 
-  const getCurrentValue = (
-    data: ServingMetric[],
-    key: keyof ServingMetric,
-  ): number => {
+  const getCurrentValue = (data: ServingMetric[], key: keyof ServingMetric): number => {
     if (data.length === 0) return 0;
     return Number(data[data.length - 1][key]) || 0;
   };
 
   const formatValue = (value: number, type: string): string => {
     switch (type) {
-      case 'percentage':
+      case "percentage":
         return `${value.toFixed(1)}%`;
-      case 'latency':
+      case "latency":
         return `${value.toFixed(0)}ms`;
-      case 'throughput':
+      case "throughput":
         return `${value.toFixed(1)} rps`;
-      case 'memory':
+      case "memory":
         return `${(value / 1024 / 1024).toFixed(1)} MB`;
       default:
         return value.toFixed(0);
@@ -198,7 +191,7 @@ export default function ServingLaneTrends() {
     title: string,
     dataKey: keyof ServingMetric,
     type: string,
-    color: string,
+    color: string
   ) => {
     const currentValue = getCurrentValue(data, dataKey);
     const trend = calculateTrend(data, dataKey);
@@ -208,9 +201,9 @@ export default function ServingLaneTrends() {
         <CardContent>
           <Box
             sx={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
               mb: 1,
             }}
           >
@@ -228,13 +221,7 @@ export default function ServingLaneTrends() {
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={data}>
                 <defs>
-                  <linearGradient
-                    id={`gradient-${dataKey}`}
-                    x1="0"
-                    y1="0"
-                    x2="0"
-                    y2="1"
-                  >
+                  <linearGradient id={`gradient-${dataKey}`} x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor={color} stopOpacity={0.3} />
                     <stop offset="95%" stopColor={color} stopOpacity={0.1} />
                   </linearGradient>
@@ -247,13 +234,8 @@ export default function ServingLaneTrends() {
                   strokeWidth={2}
                 />
                 <RechartsTooltip
-                  labelFormatter={(value) =>
-                    new Date(value).toLocaleTimeString()
-                  }
-                  formatter={(value: number) => [
-                    formatValue(value, type),
-                    title,
-                  ]}
+                  labelFormatter={(value) => new Date(value).toLocaleTimeString()}
+                  formatter={(value: number) => [formatValue(value, type), title]}
                 />
               </AreaChart>
             </ResponsiveContainer>
@@ -266,21 +248,16 @@ export default function ServingLaneTrends() {
   const renderOverviewTab = () => (
     <Grid container spacing={3}>
       <Grid item xs={12} sm={6} md={3}>
-        {renderMetricCard('Queue Depth', 'queueDepth', 'number', '#8884d8')}
+        {renderMetricCard("Queue Depth", "queueDepth", "number", "#8884d8")}
       </Grid>
       <Grid item xs={12} sm={6} md={3}>
-        {renderMetricCard('Batch Size', 'batchSize', 'number', '#82ca9d')}
+        {renderMetricCard("Batch Size", "batchSize", "number", "#82ca9d")}
       </Grid>
       <Grid item xs={12} sm={6} md={3}>
-        {renderMetricCard(
-          'KV Cache Hit Rate',
-          'kvCacheHitRate',
-          'percentage',
-          '#ffc658',
-        )}
+        {renderMetricCard("KV Cache Hit Rate", "kvCacheHitRate", "percentage", "#ffc658")}
       </Grid>
       <Grid item xs={12} sm={6} md={3}>
-        {renderMetricCard('P95 Latency', 'p95Latency', 'latency', '#ff7c7c')}
+        {renderMetricCard("P95 Latency", "p95Latency", "latency", "#ff7c7c")}
       </Grid>
 
       <Grid item xs={12} md={6}>
@@ -298,12 +275,7 @@ export default function ServingLaneTrends() {
                   <YAxis yAxisId="right" orientation="right" />
                   <RechartsTooltip />
                   <Legend />
-                  <Bar
-                    yAxisId="left"
-                    dataKey="throughput"
-                    fill="#8884d8"
-                    name="Throughput (RPS)"
-                  />
+                  <Bar yAxisId="left" dataKey="throughput" fill="#8884d8" name="Throughput (RPS)" />
                   <Line
                     yAxisId="right"
                     type="monotone"
@@ -364,9 +336,9 @@ export default function ServingLaneTrends() {
           <CardContent>
             <Box
               sx={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
                 mb: 2,
               }}
             >
@@ -382,46 +354,30 @@ export default function ServingLaneTrends() {
                   <Paper sx={{ p: 2 }}>
                     <Box
                       sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
                         mb: 1,
                       }}
                     >
-                      <Typography variant="subtitle1">
-                        {backend.name}
-                      </Typography>
+                      <Typography variant="subtitle1">{backend.name}</Typography>
                       <Chip
                         label={backend.status}
-                        color={
-                          backend.status === 'healthy' ? 'success' : 'error'
-                        }
+                        color={backend.status === "healthy" ? "success" : "error"}
                         size="small"
                       />
                     </Box>
 
-                    <Typography
-                      variant="body2"
-                      color="textSecondary"
-                      gutterBottom
-                    >
+                    <Typography variant="body2" color="textSecondary" gutterBottom>
                       Type: {backend.type}
                     </Typography>
 
-                    <Typography
-                      variant="body2"
-                      color="textSecondary"
-                      gutterBottom
-                    >
+                    <Typography variant="body2" color="textSecondary" gutterBottom>
                       Instances: {backend.instances}
                     </Typography>
 
-                    <Typography
-                      variant="body2"
-                      color="textSecondary"
-                      gutterBottom
-                    >
-                      Models: {backend.models.join(', ')}
+                    <Typography variant="body2" color="textSecondary" gutterBottom>
+                      Models: {backend.models.join(", ")}
                     </Typography>
 
                     <Box sx={{ mt: 2 }}>
@@ -431,7 +387,7 @@ export default function ServingLaneTrends() {
                       <LinearProgress
                         variant="determinate"
                         value={backend.utilization}
-                        color={backend.utilization > 80 ? 'warning' : 'primary'}
+                        color={backend.utilization > 80 ? "warning" : "primary"}
                       />
                     </Box>
                   </Paper>
@@ -456,18 +412,8 @@ export default function ServingLaneTrends() {
                   <YAxis />
                   <RechartsTooltip />
                   <Legend />
-                  <Line
-                    type="monotone"
-                    dataKey="queueDepth"
-                    stroke="#8884d8"
-                    name="Queue Depth"
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="batchSize"
-                    stroke="#82ca9d"
-                    name="Batch Size"
-                  />
+                  <Line type="monotone" dataKey="queueDepth" stroke="#8884d8" name="Queue Depth" />
+                  <Line type="monotone" dataKey="batchSize" stroke="#82ca9d" name="Batch Size" />
                   <Line
                     type="monotone"
                     dataKey="kvCacheHitRate"
@@ -500,15 +446,12 @@ export default function ServingLaneTrends() {
                 secondary={
                   <>
                     <Typography variant="body2">
-                      Type: {backend.type} | Status: {backend.status} |
-                      Instances: {backend.instances}
+                      Type: {backend.type} | Status: {backend.status} | Instances:{" "}
+                      {backend.instances}
                     </Typography>
+                    <Typography variant="body2">Models: {backend.models.join(", ")}</Typography>
                     <Typography variant="body2">
-                      Models: {backend.models.join(', ')}
-                    </Typography>
-                    <Typography variant="body2">
-                      Last Updated:{' '}
-                      {new Date(backend.lastUpdate).toLocaleString()}
+                      Last Updated: {new Date(backend.lastUpdate).toLocaleString()}
                     </Typography>
                   </>
                 }
@@ -543,15 +486,15 @@ export default function ServingLaneTrends() {
     <Box sx={{ p: 2 }}>
       <Box
         sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
           mb: 3,
         }}
       >
         <Typography variant="h5">Serving Lane Trends</Typography>
 
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
           <FormControl size="small" sx={{ minWidth: 120 }}>
             <InputLabel>Backend</InputLabel>
             <Select
@@ -587,11 +530,7 @@ export default function ServingLaneTrends() {
         </Box>
       </Box>
 
-      <Tabs
-        value={tabValue}
-        onChange={(_, newValue) => setTabValue(newValue)}
-        sx={{ mb: 3 }}
-      >
+      <Tabs value={tabValue} onChange={(_, newValue) => setTabValue(newValue)} sx={{ mb: 3 }}>
         <Tab label="Overview" />
         <Tab label="Backend Details" />
       </Tabs>

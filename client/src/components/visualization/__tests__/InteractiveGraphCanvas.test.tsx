@@ -3,10 +3,10 @@
  * Tests for Interactive Graph Canvas Component
  */
 
-import React from 'react';
-import { render, screen } from '@testing-library/react';
-import { userEvent } from '@testing-library/user-event';
-import InteractiveGraphCanvas from '../InteractiveGraphCanvas';
+import React from "react";
+import { render, screen } from "@testing-library/react";
+import { userEvent } from "@testing-library/user-event";
+import InteractiveGraphCanvas from "../InteractiveGraphCanvas";
 
 // Mock Canvas API
 const mockCanvas = {
@@ -52,15 +52,14 @@ global.cancelAnimationFrame = jest.fn((id) => clearTimeout(id));
 
 beforeAll(() => {
   (HTMLCanvasElement.prototype as any).getContext = mockCanvas.getContext;
-  (HTMLCanvasElement.prototype as any).getBoundingClientRect =
-    mockCanvas.getBoundingClientRect;
-  Object.defineProperty(HTMLCanvasElement.prototype, 'width', {
+  (HTMLCanvasElement.prototype as any).getBoundingClientRect = mockCanvas.getBoundingClientRect;
+  Object.defineProperty(HTMLCanvasElement.prototype, "width", {
     get: () => mockCanvas.width,
     set: (value) => {
       mockCanvas.width = value;
     },
   });
-  Object.defineProperty(HTMLCanvasElement.prototype, 'height', {
+  Object.defineProperty(HTMLCanvasElement.prototype, "height", {
     get: () => mockCanvas.height,
     set: (value) => {
       mockCanvas.height = value;
@@ -68,12 +67,12 @@ beforeAll(() => {
   });
 });
 
-describe('InteractiveGraphCanvas', () => {
+describe("InteractiveGraphCanvas", () => {
   const defaultProps = {
     data: { nodes: [], edges: [] },
     onNodeClick: jest.fn(),
     onSelectionChange: jest.fn(),
-    layoutAlgorithm: 'force' as const,
+    layoutAlgorithm: "force" as const,
     physics: true,
   };
 
@@ -81,15 +80,15 @@ describe('InteractiveGraphCanvas', () => {
     jest.clearAllMocks();
   });
 
-  it('renders canvas element', () => {
+  it("renders canvas element", () => {
     render(<InteractiveGraphCanvas {...defaultProps} />);
 
-    const canvas = screen.getByTestId('graph-canvas');
+    const canvas = screen.getByTestId("graph-canvas");
     expect(canvas).toBeInTheDocument();
-    expect(canvas.tagName).toBe('CANVAS');
+    expect(canvas.tagName).toBe("CANVAS");
   });
 
-  it('renders control panel', () => {
+  it("renders control panel", () => {
     render(<InteractiveGraphCanvas {...defaultProps} />);
 
     expect(screen.getByText(/Layout Algorithm/)).toBeInTheDocument();
@@ -97,66 +96,49 @@ describe('InteractiveGraphCanvas', () => {
     expect(screen.getByText(/Performance/)).toBeInTheDocument();
   });
 
-  it('renders with physics enabled by default', () => {
-    render(
-      <InteractiveGraphCanvas
-        {...defaultProps}
-        physics={true}
-      />,
-    );
+  it("renders with physics enabled by default", () => {
+    render(<InteractiveGraphCanvas {...defaultProps} physics={true} />);
 
-    const canvas = screen.getByTestId('graph-canvas');
+    const canvas = screen.getByTestId("graph-canvas");
     expect(canvas).toBeInTheDocument();
   });
 
-  it('does not render performance metrics when disabled', () => {
-    render(
-      <InteractiveGraphCanvas
-        {...defaultProps}
-      />,
-    );
+  it("does not render performance metrics when disabled", () => {
+    render(<InteractiveGraphCanvas {...defaultProps} />);
 
-    expect(screen.queryByTestId('performance-metrics')).not.toBeInTheDocument();
+    expect(screen.queryByTestId("performance-metrics")).not.toBeInTheDocument();
   });
 
-  it('handles layout algorithm change', async () => {
+  it("handles layout algorithm change", async () => {
     const user = userEvent.setup();
     render(<InteractiveGraphCanvas {...defaultProps} />);
 
-    const algorithmSelect = screen.getByDisplayValue('Force-directed');
-    await user.selectOptions(algorithmSelect, 'circular');
+    const algorithmSelect = screen.getByDisplayValue("Force-directed");
+    await user.selectOptions(algorithmSelect, "circular");
 
-    expect(algorithmSelect).toHaveValue('circular');
+    expect(algorithmSelect).toHaveValue("circular");
   });
 
-  it('toggles physics simulation', () => {
+  it("toggles physics simulation", () => {
     render(<InteractiveGraphCanvas {...defaultProps} physics={true} />);
 
     // Since controls are internal, we mostly check for no errors
-    expect(screen.getByTestId('graph-canvas')).toBeInTheDocument();
+    expect(screen.getByTestId("graph-canvas")).toBeInTheDocument();
   });
 
-  it('renders with custom width and height', () => {
-    render(
-      <InteractiveGraphCanvas
-        {...defaultProps}
-        width={1000}
-        height={800}
-      />,
-    );
+  it("renders with custom width and height", () => {
+    render(<InteractiveGraphCanvas {...defaultProps} width={1000} height={800} />);
 
-    const canvas = screen.getByTestId('graph-canvas') as HTMLCanvasElement;
+    const canvas = screen.getByTestId("graph-canvas") as HTMLCanvasElement;
     expect(canvas.width).toBe(1000);
     expect(canvas.height).toBe(800);
   });
 
-  it('handles canvas mouse events', async () => {
+  it("handles canvas mouse events", async () => {
     const onNodeSelect = jest.fn();
-    render(
-      <InteractiveGraphCanvas {...defaultProps} onNodeClick={onNodeSelect} />,
-    );
+    render(<InteractiveGraphCanvas {...defaultProps} onNodeClick={onNodeSelect} />);
 
-    const canvas = screen.getByTestId('graph-canvas');
+    const canvas = screen.getByTestId("graph-canvas");
 
     // Test mouse down
     fireEvent.mouseDown(canvas, { clientX: 100, clientY: 100 });
@@ -171,10 +153,10 @@ describe('InteractiveGraphCanvas', () => {
     expect(mockCanvas.getContext).toHaveBeenCalled();
   });
 
-  it('handles wheel events for zooming', () => {
+  it("handles wheel events for zooming", () => {
     render(<InteractiveGraphCanvas {...defaultProps} />);
 
-    const canvas = screen.getByTestId('graph-canvas');
+    const canvas = screen.getByTestId("graph-canvas");
 
     // Test zoom in
     fireEvent.wheel(canvas, { deltaY: -100 });
@@ -186,39 +168,36 @@ describe('InteractiveGraphCanvas', () => {
     expect(mockCanvas.getContext).toHaveBeenCalled();
   });
 
-  it('handles keyboard events', () => {
+  it("handles keyboard events", () => {
     render(<InteractiveGraphCanvas {...defaultProps} />);
 
-    const canvas = screen.getByTestId('graph-canvas');
+    const canvas = screen.getByTestId("graph-canvas");
 
     // Focus the canvas
     canvas.focus();
 
     // Test keyboard events
-    fireEvent.keyDown(canvas, { key: 'Delete' });
-    fireEvent.keyDown(canvas, { key: 'Escape' });
-    fireEvent.keyDown(canvas, { key: 'a', ctrlKey: true });
+    fireEvent.keyDown(canvas, { key: "Delete" });
+    fireEvent.keyDown(canvas, { key: "Escape" });
+    fireEvent.keyDown(canvas, { key: "a", ctrlKey: true });
 
     // Should handle keyboard events without errors
     expect(mockCanvas.getContext).toHaveBeenCalled();
   });
 
-  it('renders with custom investigation ID', () => {
-    render(
-      <InteractiveGraphCanvas {...defaultProps} />,
-    );
+  it("renders with custom investigation ID", () => {
+    render(<InteractiveGraphCanvas {...defaultProps} />);
 
-    const canvas = screen.getByTestId('graph-canvas');
+    const canvas = screen.getByTestId("graph-canvas");
     expect(canvas).toBeInTheDocument();
   });
 
-  it('updates canvas size on container resize', () => {
+  it("updates canvas size on container resize", () => {
     const { rerender } = render(<InteractiveGraphCanvas {...defaultProps} />);
 
     // Simulate resize
     act(() => {
-      const resizeCallback = (global.ResizeObserver as any).mock
-        .calls[0][0];
+      const resizeCallback = (global.ResizeObserver as any).mock.calls[0][0];
       resizeCallback([
         {
           contentRect: { width: 1000, height: 800 },
@@ -232,7 +211,7 @@ describe('InteractiveGraphCanvas', () => {
     expect(global.ResizeObserver).toHaveBeenCalled();
   });
 
-  it('cleans up on unmount', () => {
+  it("cleans up on unmount", () => {
     const { unmount } = render(<InteractiveGraphCanvas {...defaultProps} />);
 
     unmount();
@@ -241,13 +220,11 @@ describe('InteractiveGraphCanvas', () => {
     expect(global.ResizeObserver).toHaveBeenCalled();
   });
 
-  it('handles node selection callback', async () => {
+  it("handles node selection callback", async () => {
     const onNodeSelect = jest.fn();
-    render(
-      <InteractiveGraphCanvas {...defaultProps} onNodeClick={onNodeSelect} />,
-    );
+    render(<InteractiveGraphCanvas {...defaultProps} onNodeClick={onNodeSelect} />);
 
-    const canvas = screen.getByTestId('graph-canvas');
+    const canvas = screen.getByTestId("graph-canvas");
 
     // Simulate clicking on a node position
     fireEvent.mouseDown(canvas, { clientX: 400, clientY: 300 });
@@ -257,13 +234,11 @@ describe('InteractiveGraphCanvas', () => {
     expect(mockCanvas.getContext).toHaveBeenCalled();
   });
 
-  it('handles edge selection callback', async () => {
+  it("handles edge selection callback", async () => {
     const onEdgeSelect = jest.fn();
-    render(
-      <InteractiveGraphCanvas {...defaultProps} onNodeClick={onEdgeSelect} />,
-    );
+    render(<InteractiveGraphCanvas {...defaultProps} onNodeClick={onEdgeSelect} />);
 
-    const canvas = screen.getByTestId('graph-canvas');
+    const canvas = screen.getByTestId("graph-canvas");
 
     // Simulate clicking on an edge position
     fireEvent.mouseDown(canvas, { clientX: 350, clientY: 250 });
@@ -273,48 +248,41 @@ describe('InteractiveGraphCanvas', () => {
     expect(mockCanvas.getContext).toHaveBeenCalled();
   });
 
-  it('applies custom className', () => {
-    render(
-      <InteractiveGraphCanvas {...defaultProps} className="custom-class" />,
-    );
+  it("applies custom className", () => {
+    render(<InteractiveGraphCanvas {...defaultProps} className="custom-class" />);
 
-    const container = screen.getByTestId('graph-canvas').parentElement;
-    expect(container).toHaveClass('custom-class');
+    const container = screen.getByTestId("graph-canvas").parentElement;
+    expect(container).toHaveClass("custom-class");
   });
 
-  it('supports all layout algorithms', async () => {
+  it("supports all layout algorithms", async () => {
     const user = userEvent.setup();
     render(<InteractiveGraphCanvas {...defaultProps} />);
 
-    const algorithmSelect = screen.getByDisplayValue('Force-directed');
+    const algorithmSelect = screen.getByDisplayValue("Force-directed");
 
     // Test each layout algorithm
-    await user.selectOptions(algorithmSelect, 'circular');
-    expect(algorithmSelect).toHaveValue('circular');
+    await user.selectOptions(algorithmSelect, "circular");
+    expect(algorithmSelect).toHaveValue("circular");
 
-    await user.selectOptions(algorithmSelect, 'grid');
-    expect(algorithmSelect).toHaveValue('grid');
+    await user.selectOptions(algorithmSelect, "grid");
+    expect(algorithmSelect).toHaveValue("grid");
 
-    await user.selectOptions(algorithmSelect, 'hierarchical');
-    expect(algorithmSelect).toHaveValue('hierarchical');
+    await user.selectOptions(algorithmSelect, "hierarchical");
+    expect(algorithmSelect).toHaveValue("hierarchical");
 
-    await user.selectOptions(algorithmSelect, 'force');
-    expect(algorithmSelect).toHaveValue('force');
+    await user.selectOptions(algorithmSelect, "force");
+    expect(algorithmSelect).toHaveValue("force");
   });
 
-  it('maintains performance metrics accuracy', async () => {
-    render(
-      <InteractiveGraphCanvas
-        {...defaultProps}
-        physics={true}
-      />,
-    );
+  it("maintains performance metrics accuracy", async () => {
+    render(<InteractiveGraphCanvas {...defaultProps} physics={true} />);
 
-    const canvas = screen.getByTestId('graph-canvas');
+    const canvas = screen.getByTestId("graph-canvas");
     expect(canvas).toBeInTheDocument();
   });
 
-  it('handles animation frame updates', () => {
+  it("handles animation frame updates", () => {
     render(<InteractiveGraphCanvas {...defaultProps} physics={true} />);
 
     // Animation frames should be requested for physics simulation
@@ -322,8 +290,7 @@ describe('InteractiveGraphCanvas', () => {
 
     // Simulate animation frame callback
     act(() => {
-      const animationCallback = (global.requestAnimationFrame as jest.Mock).mock
-        .calls[0][0];
+      const animationCallback = (global.requestAnimationFrame as jest.Mock).mock.calls[0][0];
       animationCallback();
     });
 

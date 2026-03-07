@@ -10,12 +10,12 @@ Summit is transitioning from "design-time" governance to "runtime" enforcement. 
 
 ## Key Metrics
 
-| Metric | Status | Value |
-| :--- | :--- | :--- |
-| **Control Coverage** | 🟢 | 100% of domains mapped |
-| **Automated Enforcement** | 🟡 | 60% of controls CI-enforced |
-| **Data Provenance** | 🟡 | Pilot (Registry Created) |
-| **Runtime Observability** | 🟢 | Full Execution Tracing |
+| Metric                    | Status | Value                       |
+| :------------------------ | :----- | :-------------------------- |
+| **Control Coverage**      | 🟢     | 100% of domains mapped      |
+| **Automated Enforcement** | 🟡     | 60% of controls CI-enforced |
+| **Data Provenance**       | 🟡     | Pilot (Registry Created)    |
+| **Runtime Observability** | 🟢     | Full Execution Tracing      |
 
 ## Operational Wins
 
@@ -27,10 +27,10 @@ Summit is transitioning from "design-time" governance to "runtime" enforcement. 
 
 1.  **Data Inventory Completeness**: The registry is currently a pilot and does not yet contain all production datasets.
 2.  **Role Assignment**: Governance roles are defined in policy but not yet mapped to specific GitHub teams in `CODEOWNERS`.
-3.  **Automated Provenance**: While provenance *validation* exists, automated *generation* for all new data assets is not yet fully strictly enforced.
+3.  **Automated Provenance**: While provenance _validation_ exists, automated _generation_ for all new data assets is not yet fully strictly enforced.
 
 ## Next Steps
 
 1.  Populate `governance/registry.json` with all existing model weights and datasets.
 2.  Update `CODEOWNERS` to align with the Accountability domain.
-3.  Extend `scripts/ci/provenance_quality_gate.mjs` to block builds on missing provenance for *all* registered assets.
+3.  Extend `scripts/ci/provenance_quality_gate.mjs` to block builds on missing provenance for _all_ registered assets.

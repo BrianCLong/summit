@@ -1,4 +1,4 @@
-import { SweRebenchInstance } from './types';
+import { SweRebenchInstance } from "./types";
 
 export class SweRebenchLoader {
   async loadDataset(path: string): Promise<SweRebenchInstance[]> {

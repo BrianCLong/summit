@@ -13,11 +13,11 @@ This document outlines the governance, storage, access control, and lifecycle ma
 
 ## Storage Locations
 
-| Environment | Storage Mechanism | Access Method |
-|-------------|-------------------|---------------|
-| Development | `.env` (git-ignored) | `process.env` / `config` |
-| CI/CD | GitHub Secrets | Env Vars Injection |
-| Production | AWS Secrets Manager / Vault (Planned) | Runtime Injection / Sidecar |
+| Environment | Storage Mechanism                     | Access Method               |
+| ----------- | ------------------------------------- | --------------------------- |
+| Development | `.env` (git-ignored)                  | `process.env` / `config`    |
+| CI/CD       | GitHub Secrets                        | Env Vars Injection          |
+| Production  | AWS Secrets Manager / Vault (Planned) | Runtime Injection / Sidecar |
 
 ## Break-Glass Protocol
 
@@ -30,9 +30,9 @@ In emergency situations where direct access to a secret is required by an admini
 
 ## Secret Rotation Policy
 
-*   **JWT Secrets**: Rotated every 90 days. The system supports a "previous" key to allow for zero-downtime rotation.
-*   **Database Credentials**: Rotated every 90 days.
-*   **API Keys**: Rotated on suspicion of compromise or annually.
+- **JWT Secrets**: Rotated every 90 days. The system supports a "previous" key to allow for zero-downtime rotation.
+- **Database Credentials**: Rotated every 90 days.
+- **API Keys**: Rotated on suspicion of compromise or annually.
 
 ## Development Guidelines
 
@@ -49,7 +49,7 @@ Do NOT use `process.env.MY_SECRET` directly. Instead:
 const key = process.env.OPENAI_API_KEY;
 
 // GOOD
-import config from '../config';
+import config from "../config";
 const key = config.openai.apiKey; // Logged/Audited
 ```
 
@@ -57,8 +57,8 @@ const key = config.openai.apiKey; // Logged/Audited
 
 The application logger (`pino`) is configured to **redact** known sensitive keys automatically.
 
-*   Do not log raw objects that might contain secrets unless necessary (use specific fields).
-*   If you add a new sensitive key, update `server/src/config/logger.ts` to include it in the redaction list.
+- Do not log raw objects that might contain secrets unless necessary (use specific fields).
+- If you add a new sensitive key, update `server/src/config/logger.ts` to include it in the redaction list.
 
 ## Pre-Commit Checks
 

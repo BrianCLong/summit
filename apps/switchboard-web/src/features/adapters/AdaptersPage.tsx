@@ -1,10 +1,10 @@
-import React, { useMemo, useState } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import React, { useMemo, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { fetchAdapters, performAdapterAction } from './api';
-import { Adapter, AdapterActionPayload } from './types';
-import { AdapterAction, AdapterCard } from './components/AdapterCard';
-import { DualControlPrompt } from './components/DualControlPrompt';
+import { fetchAdapters, performAdapterAction } from "./api";
+import { Adapter, AdapterActionPayload } from "./types";
+import { AdapterAction, AdapterCard } from "./components/AdapterCard";
+import { DualControlPrompt } from "./components/DualControlPrompt";
 
 interface AdapterErrorState {
   message?: string;
@@ -19,7 +19,7 @@ interface PendingAction {
 
 export const AdaptersPage: React.FC = () => {
   const queryClient = useQueryClient();
-  const { data, isLoading } = useQuery({ queryKey: ['adapters'], queryFn: fetchAdapters });
+  const { data, isLoading } = useQuery({ queryKey: ["adapters"], queryFn: fetchAdapters });
   const [errorState, setErrorState] = useState<Record<string, AdapterErrorState>>({});
   const [pendingAction, setPendingAction] = useState<PendingAction | null>(null);
   const [receipts, setReceipts] = useState<Record<string, string | undefined>>({});
@@ -27,17 +27,24 @@ export const AdaptersPage: React.FC = () => {
   const adapters = useMemo(() => data?.adapters ?? [], [data]);
 
   const mutation = useMutation({
-    mutationFn: ({ adapterId, action, payload }: { adapterId: string; action: AdapterAction; payload?: AdapterActionPayload }) =>
-      performAdapterAction(adapterId, action, payload),
+    mutationFn: ({
+      adapterId,
+      action,
+      payload,
+    }: {
+      adapterId: string;
+      action: AdapterAction;
+      payload?: AdapterActionPayload;
+    }) => performAdapterAction(adapterId, action, payload),
     onSuccess: (result) => {
-      queryClient.setQueryData(['adapters'], (previous: { adapters: Adapter[] } | undefined) => {
+      queryClient.setQueryData(["adapters"], (previous: { adapters: Adapter[] } | undefined) => {
         if (!previous) {
           return previous;
         }
 
         return {
           adapters: previous.adapters.map((item) =>
-            item.id === result.adapter.id ? result.adapter : item,
+            item.id === result.adapter.id ? result.adapter : item
           ),
         };
       });
@@ -63,7 +70,7 @@ export const AdaptersPage: React.FC = () => {
   });
 
   const triggerAction = (adapter: Adapter, action: AdapterAction) => {
-    if (adapter.highPrivilege && action !== 'verify') {
+    if (adapter.highPrivilege && action !== "verify") {
       setPendingAction({ adapter, action });
       return;
     }
@@ -88,7 +95,9 @@ export const AdaptersPage: React.FC = () => {
       {isLoading ? <div className="loading-row">Loading adapters…</div> : null}
       {!isLoading && adapters.length === 0 ? (
         <div className="empty-state">
-          <p>No adapters installed yet. Install one to start routing workloads through Switchboard.</p>
+          <p>
+            No adapters installed yet. Install one to start routing workloads through Switchboard.
+          </p>
         </div>
       ) : null}
 

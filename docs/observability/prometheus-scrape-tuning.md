@@ -4,13 +4,13 @@ Scrape cadences are set to balance SLO sensitivity with resource cost. The curre
 
 ## Current Cadence
 
-| Job | Interval | Rationale |
-| --- | --- | --- |
-| Global default | 10s | Matches burn-rate alert windows (5m/30m) without overwhelming receivers. |
-| intelgraph-api / intelgraph-gateway | 5s | User-facing paths; faster sampling improves p95 accuracy and reduces alert delay. |
-| Prometheus self-scrape | 15s | Lower cardinality; not SLO-impacting. |
-| Neo4j / Postgres / Redis exporters | 20s | Infra health changes more slowly; reduces scrape pressure on databases. |
-| cAdvisor | 20s | Node/container stats are stable enough for 20s granularity. |
+| Job                                 | Interval | Rationale                                                                         |
+| ----------------------------------- | -------- | --------------------------------------------------------------------------------- |
+| Global default                      | 10s      | Matches burn-rate alert windows (5m/30m) without overwhelming receivers.          |
+| intelgraph-api / intelgraph-gateway | 5s       | User-facing paths; faster sampling improves p95 accuracy and reduces alert delay. |
+| Prometheus self-scrape              | 15s      | Lower cardinality; not SLO-impacting.                                             |
+| Neo4j / Postgres / Redis exporters  | 20s      | Infra health changes more slowly; reduces scrape pressure on databases.           |
+| cAdvisor                            | 20s      | Node/container stats are stable enough for 20s granularity.                       |
 
 ## Trade-offs
 

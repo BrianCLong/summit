@@ -22,6 +22,7 @@ pattern in `pack.yaml`.
 Definition: The time horizon and cadence of the campaign.
 
 Example indicators:
+
 - Persistence across multiple years vs event-shock spikes.
 - Sustained multi-channel operations vs short-lived surges.
 
@@ -30,6 +31,7 @@ Example indicators:
 Definition: The stated or implied strategic objectives of the campaign.
 
 Example indicators:
+
 - Legitimacy shaping and freedom-of-action constraints.
 - Alliance cohesion or elite-splitting pressure.
 
@@ -38,6 +40,7 @@ Example indicators:
 Definition: The dominant storylines, frames, or interpretive lenses applied to the conflict.
 
 Example indicators:
+
 - Parallel-reality construction or competing historical narratives.
 - Delegitimization narratives directed at audiences or institutions.
 
@@ -46,6 +49,7 @@ Example indicators:
 Definition: The delivery mechanisms and operational tactics used to distribute narratives.
 
 Example indicators:
+
 - Social media amplification, coordinated proxy channels.
 - Hostage leverage narratives and staged visual artifacts.
 
@@ -54,6 +58,7 @@ Example indicators:
 Definition: The primary audiences targeted by the campaign.
 
 Example indicators:
+
 - Domestic populations vs international publics.
 - Policy elites, diaspora communities, or undecided segments.
 
@@ -62,6 +67,7 @@ Example indicators:
 Definition: The cognitive biases or psychological levers intentionally invoked.
 
 Example indicators:
+
 - Emotional salience, fear, moral outrage, fatigue.
 - Confusion, ambiguity, or trust erosion patterns.
 
@@ -70,6 +76,7 @@ Example indicators:
 Definition: The measurable or observable outcomes tied to the campaign’s trajectory.
 
 Example indicators:
+
 - Sustained international support vs rapid legitimacy shocks.
 - Narrative drift indicating shifts in campaign emphasis.
 

@@ -4,7 +4,7 @@ import type {
   CorrelatedFinding,
   PatternMatch,
   ThreatIntelIndicator,
-} from './types';
+} from "./types";
 
 interface CorrelationInput {
   event: BehaviorEvent;
@@ -41,14 +41,11 @@ export class CorrelationEngine {
   private calculateStrength(
     behavior?: BehaviorInsight,
     patterns: PatternMatch[] = [],
-    indicators: ThreatIntelIndicator[] = [],
+    indicators: ThreatIntelIndicator[] = []
   ): number {
     const behaviorScore = behavior?.score ?? 0;
     const patternScore = patterns.reduce((sum, pattern) => sum + pattern.weight, 0);
-    const intelConfidence = indicators.reduce(
-      (sum, indicator) => sum + indicator.confidence,
-      0,
-    );
+    const intelConfidence = indicators.reduce((sum, indicator) => sum + indicator.confidence, 0);
     const normalizedIntel = intelConfidence / Math.max(indicators.length, 1);
     return Number(Math.min(behaviorScore + patternScore + normalizedIntel * 0.01, 1).toFixed(2));
   }
@@ -56,7 +53,7 @@ export class CorrelationEngine {
   private buildNotes(
     behavior?: BehaviorInsight,
     patterns: PatternMatch[] = [],
-    indicators: ThreatIntelIndicator[] = [],
+    indicators: ThreatIntelIndicator[] = []
   ): string[] {
     const notes: string[] = [];
     if (behavior) {

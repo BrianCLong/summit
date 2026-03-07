@@ -7,10 +7,10 @@
  * - Emits evidence artifacts for PR documentation
  */
 
-import * as fs from 'fs';
-import * as path from 'path';
-import * as crypto from 'crypto';
-import { spawn, SpawnOptions } from 'child_process';
+import * as fs from "fs";
+import * as path from "path";
+import * as crypto from "crypto";
+import { spawn, SpawnOptions } from "child_process";
 
 /**
  * Exit codes for determinism harness
@@ -24,7 +24,7 @@ export const DETERMINISM_EXIT_CODES = {
 /**
  * Hash algorithms supported
  */
-export type HashAlgorithm = 'sha256' | 'sha512' | 'md5';
+export type HashAlgorithm = "sha256" | "sha512" | "md5";
 
 /**
  * Determinism harness options
@@ -56,7 +56,7 @@ export interface DeterminismOptions {
 export const DEFAULT_DETERMINISM_OPTIONS: DeterminismOptions = {
   runs: 3,
   failFast: true,
-  hashAlgo: 'sha256',
+  hashAlgo: "sha256",
   includeStdout: false,
   requireTestsPass: false,
   includeTimestamps: false,
@@ -127,16 +127,16 @@ export interface DeterminismResult {
  * Generate a deterministic session ID (no timestamps)
  */
 export function generateDeterministicId(command: string, runs: number): string {
-  const hash = crypto.createHash('sha256');
+  const hash = crypto.createHash("sha256");
   hash.update(`${command}:${runs}:${process.pid}`);
-  return `det-${hash.digest('hex').slice(0, 12)}`;
+  return `det-${hash.digest("hex").slice(0, 12)}`;
 }
 
 /**
  * Compute hash of content
  */
 export function computeHash(content: string, algo: HashAlgorithm): string {
-  return crypto.createHash(algo).update(content, 'utf8').digest('hex');
+  return crypto.createHash(algo).update(content, "utf8").digest("hex");
 }
 
 /**
@@ -145,14 +145,14 @@ export function computeHash(content: string, algo: HashAlgorithm): string {
 export function getDeterministicEnv(): Record<string, string> {
   return {
     ...process.env,
-    TZ: 'UTC',
-    LC_ALL: 'C',
-    LANG: 'C',
+    TZ: "UTC",
+    LC_ALL: "C",
+    LANG: "C",
     // Ensure no color codes
-    NO_COLOR: '1',
-    FORCE_COLOR: '0',
+    NO_COLOR: "1",
+    FORCE_COLOR: "0",
     // CI mode for consistent behavior
-    CI: 'true',
+    CI: "true",
   } as Record<string, string>;
 }
 
@@ -172,22 +172,22 @@ export async function runCommand(
       shell: false,
     } as SpawnOptions);
 
-    let stdout = '';
-    let stderr = '';
+    let stdout = "";
+    let stderr = "";
 
-    proc.stdout?.on('data', (data) => {
+    proc.stdout?.on("data", (data) => {
       stdout += data.toString();
     });
 
-    proc.stderr?.on('data', (data) => {
+    proc.stderr?.on("data", (data) => {
       stderr += data.toString();
     });
 
-    proc.on('error', (error) => {
+    proc.on("error", (error) => {
       reject(error);
     });
 
-    proc.on('close', (code) => {
+    proc.on("close", (code) => {
       resolve({
         stdout,
         stderr,
@@ -218,7 +218,7 @@ function sortObjectKeys(obj: unknown): unknown {
   if (Array.isArray(obj)) {
     return obj.map(sortObjectKeys);
   }
-  if (obj !== null && typeof obj === 'object') {
+  if (obj !== null && typeof obj === "object") {
     const sorted: Record<string, unknown> = {};
     const keys = Object.keys(obj as Record<string, unknown>).sort();
     for (const key of keys) {
@@ -239,11 +239,11 @@ export function findFirstDiff(
   try {
     const obj1 = JSON.parse(json1);
     const obj2 = JSON.parse(json2);
-    return findDiffRecursive(obj1, obj2, '');
+    return findDiffRecursive(obj1, obj2, "");
   } catch {
     // Not valid JSON
     if (json1 !== json2) {
-      return { path: '<root>', value1: json1.slice(0, 100), value2: json2.slice(0, 100) };
+      return { path: "<root>", value1: json1.slice(0, 100), value2: json2.slice(0, 100) };
     }
     return null;
   }
@@ -255,7 +255,7 @@ function findDiffRecursive(
   currentPath: string
 ): { path: string; value1: unknown; value2: unknown } | null {
   if (typeof obj1 !== typeof obj2) {
-    return { path: currentPath || '<root>', value1: obj1, value2: obj2 };
+    return { path: currentPath || "<root>", value1: obj1, value2: obj2 };
   }
 
   if (Array.isArray(obj1) && Array.isArray(obj2)) {
@@ -273,7 +273,7 @@ function findDiffRecursive(
     return null;
   }
 
-  if (obj1 !== null && typeof obj1 === 'object' && obj2 !== null && typeof obj2 === 'object') {
+  if (obj1 !== null && typeof obj1 === "object" && obj2 !== null && typeof obj2 === "object") {
     const keys1 = Object.keys(obj1 as Record<string, unknown>).sort();
     const keys2 = Object.keys(obj2 as Record<string, unknown>).sort();
 
@@ -298,7 +298,7 @@ function findDiffRecursive(
   }
 
   if (obj1 !== obj2) {
-    return { path: currentPath || '<root>', value1: obj1, value2: obj2 };
+    return { path: currentPath || "<root>", value1: obj1, value2: obj2 };
   }
 
   return null;
@@ -307,48 +307,45 @@ function findDiffRecursive(
 /**
  * Generate diff.md content for mismatched runs
  */
-export function generateDiffMarkdown(
-  runs: RunResult[],
-  firstMismatchRun: number
-): string {
+export function generateDiffMarkdown(runs: RunResult[], firstMismatchRun: number): string {
   const lines: string[] = [
-    '# Determinism Mismatch Report',
-    '',
+    "# Determinism Mismatch Report",
+    "",
     `## First Mismatch`,
-    '',
+    "",
     `Run ${firstMismatchRun} differs from Run 1.`,
-    '',
+    "",
   ];
 
   const run1 = runs[0];
   const mismatchRun = runs[firstMismatchRun - 1];
 
   if (run1 && mismatchRun) {
-    lines.push('## Hashes');
-    lines.push('');
+    lines.push("## Hashes");
+    lines.push("");
     lines.push(`- Run 1: \`${run1.hash}\``);
     lines.push(`- Run ${firstMismatchRun}: \`${mismatchRun.hash}\``);
-    lines.push('');
+    lines.push("");
 
     const diff = findFirstDiff(run1.stdout, mismatchRun.stdout);
     if (diff) {
-      lines.push('## First Differing Key');
-      lines.push('');
+      lines.push("## First Differing Key");
+      lines.push("");
       lines.push(`Path: \`${diff.path}\``);
-      lines.push('');
-      lines.push('Run 1 value:');
-      lines.push('```json');
+      lines.push("");
+      lines.push("Run 1 value:");
+      lines.push("```json");
       lines.push(JSON.stringify(diff.value1, null, 2));
-      lines.push('```');
-      lines.push('');
+      lines.push("```");
+      lines.push("");
       lines.push(`Run ${firstMismatchRun} value:`);
-      lines.push('```json');
+      lines.push("```json");
       lines.push(JSON.stringify(diff.value2, null, 2));
-      lines.push('```');
+      lines.push("```");
     }
   }
 
-  return lines.join('\n');
+  return lines.join("\n");
 }
 
 /**
@@ -367,8 +364,8 @@ export function generateEvidenceJson(
     hashes: result.hashes,
     match: result.match,
     env: {
-      tz: 'UTC',
-      locale: 'C',
+      tz: "UTC",
+      locale: "C",
     },
     package_test: result.packageTest
       ? {
@@ -389,41 +386,41 @@ export function generateEvidenceMarkdown(
   result: DeterminismResult
 ): string {
   const lines: string[] = [
-    '# Determinism Evidence',
-    '',
-    '## Command',
-    '',
-    '```',
+    "# Determinism Evidence",
+    "",
+    "## Command",
+    "",
+    "```",
     command,
-    '```',
-    '',
-    '## Results',
-    '',
+    "```",
+    "",
+    "## Results",
+    "",
     `- **Runs**: ${options.runs}`,
-    `- **Match**: ${result.match ? 'Yes' : 'No'}`,
+    `- **Match**: ${result.match ? "Yes" : "No"}`,
     `- **Hash Algorithm**: ${options.hashAlgo}`,
-    '',
-    '## Hashes',
-    '',
+    "",
+    "## Hashes",
+    "",
   ];
 
   for (let i = 0; i < result.hashes.length; i++) {
-    const status = i === 0 || result.hashes[i] === result.hashes[0] ? '✓' : '✗';
+    const status = i === 0 || result.hashes[i] === result.hashes[0] ? "✓" : "✗";
     lines.push(`${i + 1}. \`${result.hashes[i]}\` ${status}`);
   }
 
   if (result.packageTest) {
-    lines.push('');
-    lines.push('## Package Tests');
-    lines.push('');
+    lines.push("");
+    lines.push("## Package Tests");
+    lines.push("");
     lines.push(`- **Package**: ${result.packageTest.name}`);
     lines.push(`- **Runs**: ${result.packageTest.runs}`);
     lines.push(`- **Passes**: ${result.packageTest.passes}/${result.packageTest.runs}`);
   }
 
-  lines.push('');
+  lines.push("");
 
-  return lines.join('\n');
+  return lines.join("\n");
 }
 
 /**
@@ -447,29 +444,23 @@ export function writeEvidenceArtifacts(
 
   // Write evidence.json with sorted keys for determinism
   const evidenceJson = generateEvidenceJson(command, options, result);
-  fs.writeFileSync(
-    path.join(outputDir, 'evidence.json'),
-    stableStringify(evidenceJson) + '\n'
-  );
+  fs.writeFileSync(path.join(outputDir, "evidence.json"), stableStringify(evidenceJson) + "\n");
 
   // Write evidence.md
   const evidenceMd = generateEvidenceMarkdown(command, options, result);
-  fs.writeFileSync(path.join(outputDir, 'evidence.md'), evidenceMd);
+  fs.writeFileSync(path.join(outputDir, "evidence.md"), evidenceMd);
 
   // Write diff.md if mismatch
   if (!result.match && result.firstMismatchRun !== undefined) {
     const diffMd = generateDiffMarkdown(result.runs, result.firstMismatchRun);
-    fs.writeFileSync(path.join(outputDir, 'diff.md'), diffMd);
+    fs.writeFileSync(path.join(outputDir, "diff.md"), diffMd);
   }
 
   // Write per-run outputs if requested or on mismatch
   if (options.includeStdout || !result.match) {
     for (const run of result.runs) {
       const canonical = canonicalizeJson(run.stdout);
-      fs.writeFileSync(
-        path.join(outputDir, `run-${run.runNumber}.json`),
-        canonical + '\n'
-      );
+      fs.writeFileSync(path.join(outputDir, `run-${run.runNumber}.json`), canonical + "\n");
     }
   }
 }
@@ -482,15 +473,14 @@ export async function runPackageTests(
   runs: number,
   options: { cwd?: string }
 ): Promise<PackageTestResult> {
-  const results: PackageTestResult['results'] = [];
+  const results: PackageTestResult["results"] = [];
   let passes = 0;
 
   for (let i = 1; i <= runs; i++) {
-    const { exitCode } = await runCommand(
-      'pnpm',
-      ['-w', 'test', '-F', packageName],
-      { cwd: options.cwd, env: getDeterministicEnv() }
-    );
+    const { exitCode } = await runCommand("pnpm", ["-w", "test", "-F", packageName], {
+      cwd: options.cwd,
+      env: getDeterministicEnv(),
+    });
     const passed = exitCode === 0;
     if (passed) passes++;
     results.push({ runNumber: i, passed, exitCode });
@@ -516,16 +506,16 @@ export async function runDeterminismHarness(
   const opts: DeterminismOptions = { ...DEFAULT_DETERMINISM_OPTIONS, ...options };
 
   // Generate output directory
-  const id = generateDeterministicId(`${command} ${args.join(' ')}`, opts.runs);
-  const outputDir = opts.outputDir || path.join(process.cwd(), '.claude', 'determinism', id);
+  const id = generateDeterministicId(`${command} ${args.join(" ")}`, opts.runs);
+  const outputDir = opts.outputDir || path.join(process.cwd(), ".claude", "determinism", id);
 
   // Force deterministic flags
   const deterministicArgs = [...args];
-  if (!deterministicArgs.includes('--output')) {
-    deterministicArgs.push('--output', 'json');
+  if (!deterministicArgs.includes("--output")) {
+    deterministicArgs.push("--output", "json");
   }
-  if (!deterministicArgs.includes('--ci')) {
-    deterministicArgs.push('--ci');
+  if (!deterministicArgs.includes("--ci")) {
+    deterministicArgs.push("--ci");
   }
 
   const runs: RunResult[] = [];
@@ -576,7 +566,8 @@ export async function runDeterminismHarness(
   }
 
   const result: DeterminismResult = {
-    success: match && (!opts.requireTestsPass || !packageTest || packageTest.passes === packageTest.runs),
+    success:
+      match && (!opts.requireTestsPass || !packageTest || packageTest.passes === packageTest.runs),
     match,
     runs,
     hashes,
@@ -586,7 +577,7 @@ export async function runDeterminismHarness(
   };
 
   // Write evidence artifacts
-  writeEvidenceArtifacts(outputDir, `${command} ${deterministicArgs.join(' ')}`, opts, result);
+  writeEvidenceArtifacts(outputDir, `${command} ${deterministicArgs.join(" ")}`, opts, result);
 
   return result;
 }

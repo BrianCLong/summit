@@ -67,19 +67,13 @@
     }
   ],
   "groups": {
-    "runtime": [
-      "docker.io/library/node:20-alpine",
-      "gcr.io/distroless/nodejs20-debian12:nonroot"
-    ],
+    "runtime": ["docker.io/library/node:20-alpine", "gcr.io/distroless/nodejs20-debian12:nonroot"],
     "databases": [
       "docker.io/library/postgres:15-alpine",
       "docker.io/library/redis:7-alpine",
       "neo4j:5.15-community"
     ],
-    "infrastructure": [
-      "docker.io/library/nginx:1.25-alpine",
-      "docker.io/library/alpine:3.19"
-    ]
+    "infrastructure": ["docker.io/library/nginx:1.25-alpine", "docker.io/library/alpine:3.19"]
   },
   "syncSchedule": "0 2 * * 0",
   "retentionPolicy": {

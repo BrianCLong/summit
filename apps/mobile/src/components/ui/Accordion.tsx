@@ -1,10 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
-import Animated, {
-  useAnimatedStyle,
-  withTiming,
-  useSharedValue,
-} from 'react-native-reanimated';
+import Animated, { useAnimatedStyle, withTiming, useSharedValue } from 'react-native-reanimated';
 import { cn } from '@/utils/cn';
 import { ChevronDown } from 'lucide-react-native';
 
@@ -34,9 +30,7 @@ export const Accordion: React.FC<AccordionProps> = ({
     if (type === 'single') {
       setOpenIds((prev) => (prev.includes(id) ? [] : [id]));
     } else {
-      setOpenIds((prev) =>
-        prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id],
-      );
+      setOpenIds((prev) => (prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]));
     }
   };
 
@@ -62,12 +56,7 @@ interface AccordionItemProps {
   isLast: boolean;
 }
 
-export const AccordionItem: React.FC<AccordionItemProps> = ({
-  item,
-  isOpen,
-  onToggle,
-  isLast,
-}) => {
+export const AccordionItem: React.FC<AccordionItemProps> = ({ item, isOpen, onToggle, isLast }) => {
   const rotation = useSharedValue(isOpen ? 180 : 0);
   const height = useSharedValue(isOpen ? 1 : 0);
 
@@ -86,19 +75,11 @@ export const AccordionItem: React.FC<AccordionItemProps> = ({
   }));
 
   return (
-    <View
-      className={cn(
-        'bg-dark-surface',
-        !isLast && 'border-b border-dark-border',
-      )}
-    >
+    <View className={cn('bg-dark-surface', !isLast && 'border-b border-dark-border')}>
       <TouchableOpacity
         onPress={onToggle}
         disabled={item.disabled}
-        className={cn(
-          'flex-row items-center justify-between p-4',
-          item.disabled && 'opacity-50',
-        )}
+        className={cn('flex-row items-center justify-between p-4', item.disabled && 'opacity-50')}
       >
         <Text className="flex-1 text-base font-medium text-white">{item.title}</Text>
         <Animated.View style={iconStyle}>

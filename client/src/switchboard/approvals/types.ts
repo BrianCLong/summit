@@ -1,13 +1,8 @@
-export type ApprovalStatus =
-  | 'pending'
-  | 'approved'
-  | 'denied'
-  | 'awaiting_second'
-  | 'escalated';
+export type ApprovalStatus = "pending" | "approved" | "denied" | "awaiting_second" | "escalated";
 
-export type AuditEventKind = 'preflight' | 'approval' | 'execution' | 'receipt';
+export type AuditEventKind = "preflight" | "approval" | "execution" | "receipt";
 
-export type AuditEventStatus = 'success' | 'warning' | 'error' | 'info';
+export type AuditEventStatus = "success" | "warning" | "error" | "info";
 
 export interface AuditEvent {
   id: string;

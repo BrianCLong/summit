@@ -10,12 +10,13 @@ Critical vulnerability remediation and security hardening completed.
 
 **Status**: FIXED
 
-| Package | Action | PR/Commit |
-|---------|--------|-----------|
-| `@intelgraph/plugin-system` | Removed unused vm2 dependency | Direct to main |
+| Package                       | Action                           | PR/Commit          |
+| ----------------------------- | -------------------------------- | ------------------ |
+| `@intelgraph/plugin-system`   | Removed unused vm2 dependency    | Direct to main     |
 | `@intelgraph/smart-contracts` | Migrated from vm2 to isolated-vm | PR #17514 (merged) |
 
 **Details**:
+
 - vm2 is deprecated with no available patches
 - All versions vulnerable to sandbox escape
 - `isolated-vm` provides proper V8 isolate-based sandboxing
@@ -24,21 +25,22 @@ Critical vulnerability remediation and security hardening completed.
 
 **Status**: FIXED
 
-| Action | Details |
-|--------|---------|
+| Action           | Details                                      |
+| ---------------- | -------------------------------------------- |
 | Override updated | `>=7.19.0` → `>=7.21.0` in root package.json |
-| Patched version | 7.21.0 |
+| Patched version  | 7.21.0                                       |
 
 ## Package Rename Fixes
 
 Workspace references updated for npm scope renames:
 
-| Old Name | New Name |
-|----------|----------|
-| `@maestro/core` | `@intelgraph/maestro-core` |
+| Old Name                       | New Name                       |
+| ------------------------------ | ------------------------------ |
+| `@maestro/core`                | `@intelgraph/maestro-core`     |
 | `@summit/graph-sync-validator` | `@summi7/graph-sync-validator` |
 
 **Files updated**:
+
 - `server/package.json`
 - `apps/validator-worker/package.json`
 - `packages/maestro-cli/*`
@@ -47,11 +49,11 @@ Workspace references updated for npm scope renames:
 
 ## Credential Rotation
 
-| Item | Status |
-|------|--------|
-| npm tokens rotated | DONE |
-| Old tokens revoked | DONE |
-| No tokens in repo | VERIFIED |
+| Item               | Status   |
+| ------------------ | -------- |
+| npm tokens rotated | DONE     |
+| Old tokens revoked | DONE     |
+| No tokens in repo  | VERIFIED |
 
 ## Verification Checklist
 

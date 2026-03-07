@@ -1,9 +1,9 @@
-import { FeatureRecord, FeatureVector, Modality } from './types.js';
+import { FeatureRecord, FeatureVector, Modality } from "./types.js";
 
 export class FeatureStore {
   private records: FeatureRecord[] = [];
 
-  ingest(record: Omit<FeatureRecord, 'version'>): FeatureRecord {
+  ingest(record: Omit<FeatureRecord, "version">): FeatureRecord {
     const latestVersion = this.records
       .filter((r) => r.assetId === record.assetId && r.modality === record.modality)
       .reduce((max, r) => Math.max(max, r.version), 0);

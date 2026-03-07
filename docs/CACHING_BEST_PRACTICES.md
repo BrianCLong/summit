@@ -26,7 +26,7 @@
 const key = `entity:${tenantId}:${entityId}`;
 
 // ✅ Implement cache-aside pattern with fallback
-const data = await cache.get(key) || await database.query();
+const data = (await cache.get(key)) || (await database.query());
 
 // ✅ Set appropriate TTLs
 await cache.set(key, data, 300); // 5 minutes
@@ -35,13 +35,13 @@ await cache.set(key, data, 300); // 5 minutes
 await cache.invalidateEntity(entityId, tenantId);
 
 // ✅ Monitor cache hit rates
-cacheHits.labels('redis', 'entity', tenantId).inc();
+cacheHits.labels("redis", "entity", tenantId).inc();
 
 // ✅ Handle cache failures gracefully
 try {
   await cache.set(key, data);
 } catch (error) {
-  logger.warn('Cache set failed, continuing...', error);
+  logger.warn("Cache set failed, continuing...", error);
 }
 ```
 
@@ -61,7 +61,7 @@ await cache.set(key, data); // Will stay forever
 const key = `entities:all`; // WRONG
 
 // ❌ Caching unbounded result sets
-const allEntities = await cache.get('all-entities'); // WRONG
+const allEntities = await cache.get("all-entities"); // WRONG
 
 // ❌ Ignoring cache misses in hot paths
 const data = await cache.get(key);
@@ -89,6 +89,7 @@ const getCacheKey = (prefix: string, id: string): string => {
 ```
 
 **Why?**
+
 - Prevents cross-tenant data leakage
 - Enables per-tenant cache invalidation
 - Supports multi-tenancy compliance requirements
@@ -127,14 +128,14 @@ async function getEntity(entityId: string, tenantId: string): Promise<Entity> {
 async function cacheWithFallback<T>(
   key: string,
   fetcher: () => Promise<T>,
-  ttl: number,
+  ttl: number
 ): Promise<T> {
   try {
     // Try cache first
     const cached = await cache.get<T>(key);
     if (cached) return cached;
   } catch (error) {
-    logger.warn('Cache read failed, falling back to database', { key, error });
+    logger.warn("Cache read failed, falling back to database", { key, error });
   }
 
   // Fetch from source
@@ -142,7 +143,7 @@ async function cacheWithFallback<T>(
 
   // Try to cache (fire and forget)
   cache.set(key, data, ttl).catch((error) => {
-    logger.warn('Cache write failed, continuing...', { key, error });
+    logger.warn("Cache write failed, continuing...", { key, error });
   });
 
   return data;
@@ -163,9 +164,9 @@ export const updateEntityResolver = async (parent, args, context) => {
   const entity = await entityService.update(id, input, tenantId);
 
   // Invalidate caches (cascading)
-  await cacheInvalidationService.emit('entity:updated', {
-    type: 'entity',
-    operation: 'updated',
+  await cacheInvalidationService.emit("entity:updated", {
+    type: "entity",
+    operation: "updated",
     id,
     tenantId,
   });
@@ -179,7 +180,7 @@ export const updateEntityResolver = async (parent, args, context) => {
 **Always instrument your caches.**
 
 ```typescript
-import { cacheHits, cacheMisses, cacheLatency } from './metrics';
+import { cacheHits, cacheMisses, cacheLatency } from "./metrics";
 
 async function get<T>(key: string): Promise<T | null> {
   const startTime = Date.now();
@@ -261,11 +262,11 @@ const key = `Entity-${tenantId}-${entityId}-NeighborsFullView`;
 For very long keys (e.g., GraphQL queries), use hashing:
 
 ```typescript
-import { createHash } from 'crypto';
+import { createHash } from "crypto";
 
 function hashGraphQLQuery(query: string, variables?: any): string {
   const content = query + JSON.stringify(variables || {});
-  return createHash('sha256').update(content).digest('hex').substring(0, 16);
+  return createHash("sha256").update(content).digest("hex").substring(0, 16);
 }
 
 const cacheKey = `gql:${tenantId}:${hashGraphQLQuery(query, variables)}`;
@@ -277,46 +278,46 @@ const cacheKey = `gql:${tenantId}:${hashGraphQLQuery(query, variables)}`;
 
 ### Decision Matrix
 
-| Data Characteristic | Recommended TTL | Example |
-|---------------------|-----------------|---------|
-| **Immutable** (never changes) | 1 year | Static assets, versioned APIs |
-| **Stable** (changes rarely) | 1-24 hours | User preferences, feature flags |
-| **Semi-dynamic** (changes occasionally) | 10-60 minutes | Entity data, investigation metadata |
-| **Dynamic** (changes frequently) | 1-10 minutes | Dashboard metrics, real-time stats |
-| **Volatile** (changes constantly) | 30-60 seconds | Live cursors, online presence |
-| **Computed** (expensive to generate) | 5-30 minutes | Graph analytics, GraphRAG answers |
+| Data Characteristic                     | Recommended TTL | Example                             |
+| --------------------------------------- | --------------- | ----------------------------------- |
+| **Immutable** (never changes)           | 1 year          | Static assets, versioned APIs       |
+| **Stable** (changes rarely)             | 1-24 hours      | User preferences, feature flags     |
+| **Semi-dynamic** (changes occasionally) | 10-60 minutes   | Entity data, investigation metadata |
+| **Dynamic** (changes frequently)        | 1-10 minutes    | Dashboard metrics, real-time stats  |
+| **Volatile** (changes constantly)       | 30-60 seconds   | Live cursors, online presence       |
+| **Computed** (expensive to generate)    | 5-30 minutes    | Graph analytics, GraphRAG answers   |
 
 ### Implementation
 
 ```typescript
 export const CACHE_TTL = {
   // Immutable data
-  STATIC_ASSET: 31536000,      // 1 year
+  STATIC_ASSET: 31536000, // 1 year
 
   // Stable data
-  USER_SESSION: 86400,         // 24 hours
-  USER_PREFERENCES: 86400,     // 24 hours
-  FEATURE_FLAG: 900,           // 15 minutes
+  USER_SESSION: 86400, // 24 hours
+  USER_PREFERENCES: 86400, // 24 hours
+  FEATURE_FLAG: 900, // 15 minutes
 
   // Semi-dynamic data
-  ENTITY_DATA: 1800,           // 30 minutes
-  RELATIONSHIP_DATA: 1800,     // 30 minutes
-  INVESTIGATION_DATA: 600,     // 10 minutes
+  ENTITY_DATA: 1800, // 30 minutes
+  RELATIONSHIP_DATA: 1800, // 30 minutes
+  INVESTIGATION_DATA: 600, // 10 minutes
 
   // Dynamic data
-  GRAPH_METRICS: 300,          // 5 minutes
-  DASHBOARD_METRICS: 300,      // 5 minutes
+  GRAPH_METRICS: 300, // 5 minutes
+  DASHBOARD_METRICS: 300, // 5 minutes
 
   // Computed data
-  NEIGHBORHOOD: 300,           // 5 minutes
-  GRAPHRAG_ANSWER: 600,        // 10 minutes
-  SIMILARITY_SEARCH: 3600,     // 1 hour
+  NEIGHBORHOOD: 300, // 5 minutes
+  GRAPHRAG_ANSWER: 600, // 10 minutes
+  SIMILARITY_SEARCH: 3600, // 1 hour
 
   // Volatile data
-  ONLINE_PRESENCE: 60,         // 1 minute
+  ONLINE_PRESENCE: 60, // 1 minute
 
   // Audit data
-  AUDIT_LOG: 3600,             // 1 hour (append-only)
+  AUDIT_LOG: 3600, // 1 hour (append-only)
 } as const;
 ```
 
@@ -388,10 +389,10 @@ await cache.deleteByPattern(`entity:${tenantId}:*`);
 
 ```typescript
 // Emit event for cache invalidation
-eventBus.emit('entity:updated', { entityId, tenantId });
+eventBus.emit("entity:updated", { entityId, tenantId });
 
 // Listen and invalidate
-eventBus.on('entity:updated', async ({ entityId, tenantId }) => {
+eventBus.on("entity:updated", async ({ entityId, tenantId }) => {
   await cache.invalidateEntity(entityId, tenantId);
 });
 ```
@@ -440,7 +441,7 @@ async function getEntity(id: string) {
 
 ```typescript
 // ✅ CORRECT: Distributed lock prevents stampede
-import Redlock from 'redlock';
+import Redlock from "redlock";
 
 async function getEntity(id: string, tenantId: string) {
   const cacheKey = `entity:${tenantId}:${id}`;
@@ -472,8 +473,8 @@ async function getEntity(id: string, tenantId: string) {
 
 ```typescript
 // ❌ WRONG: No limit on result set
-const allEntities = await cache.cacheAside('entities:all', async () => {
-  return await database.query('SELECT * FROM entities'); // Could be millions!
+const allEntities = await cache.cacheAside("entities:all", async () => {
+  return await database.query("SELECT * FROM entities"); // Could be millions!
 });
 ```
 
@@ -484,12 +485,16 @@ const allEntities = await cache.cacheAside('entities:all', async () => {
 async function getEntitiesPage(page: number, pageSize: number, tenantId: string) {
   const cacheKey = `entities:${tenantId}:page:${page}:size:${pageSize}`;
 
-  return await cache.cacheAside(cacheKey, async () => {
-    return await database.query(
-      'SELECT * FROM entities WHERE tenant_id = $1 LIMIT $2 OFFSET $3',
-      [tenantId, pageSize, page * pageSize],
-    );
-  }, CACHE_TTL.ENTITY_DATA);
+  return await cache.cacheAside(
+    cacheKey,
+    async () => {
+      return await database.query(
+        "SELECT * FROM entities WHERE tenant_id = $1 LIMIT $2 OFFSET $3",
+        [tenantId, pageSize, page * pageSize]
+      );
+    },
+    CACHE_TTL.ENTITY_DATA
+  );
 }
 ```
 
@@ -500,10 +505,14 @@ async function getEntitiesPage(page: number, pageSize: number, tenantId: string)
 ```typescript
 // ❌ WRONG: Caching null/error values
 async function getEntity(id: string, tenantId: string) {
-  return await cache.cacheAside(key, async () => {
-    const entity = await database.getEntity(id, tenantId);
-    return entity; // Could be null or throw error
-  }, CACHE_TTL.ENTITY_DATA);
+  return await cache.cacheAside(
+    key,
+    async () => {
+      const entity = await database.getEntity(id, tenantId);
+      return entity; // Could be null or throw error
+    },
+    CACHE_TTL.ENTITY_DATA
+  );
 }
 ```
 
@@ -527,7 +536,7 @@ async function getEntity(id: string, tenantId: string) {
     return entity;
   } catch (error) {
     // Don't cache errors
-    logger.error('Failed to fetch entity', { id, error });
+    logger.error("Failed to fetch entity", { id, error });
     throw error;
   }
 }
@@ -539,7 +548,7 @@ async function getEntity(id: string, tenantId: string) {
 
 ```typescript
 // ❌ WRONG: User waits for cache warming
-router.get('/investigation/:id', async (req, res) => {
+router.get("/investigation/:id", async (req, res) => {
   await cacheWarmingService.warmInvestigation(req.params.id); // Blocks!
   const investigation = await getInvestigation(req.params.id);
   res.json(investigation);
@@ -550,10 +559,10 @@ router.get('/investigation/:id', async (req, res) => {
 
 ```typescript
 // ✅ CORRECT: Asynchronous cache warming
-router.get('/investigation/:id', async (req, res) => {
+router.get("/investigation/:id", async (req, res) => {
   // Fire and forget
   cacheWarmingService.warmInvestigation(req.params.id).catch((error) => {
-    logger.warn('Cache warming failed', { error });
+    logger.warn("Cache warming failed", { error });
   });
 
   const investigation = await getInvestigation(req.params.id);
@@ -568,17 +577,17 @@ router.get('/investigation/:id', async (req, res) => {
 ### Unit Tests
 
 ```typescript
-describe('Entity Cache', () => {
+describe("Entity Cache", () => {
   let cache: CacheService;
 
   beforeEach(() => {
     cache = new CacheService();
   });
 
-  it('should cache entity data', async () => {
-    const entityId = 'entity-123';
-    const tenantId = 'tenant-456';
-    const entity = { id: entityId, name: 'Test Entity' };
+  it("should cache entity data", async () => {
+    const entityId = "entity-123";
+    const tenantId = "tenant-456";
+    const entity = { id: entityId, name: "Test Entity" };
 
     // Set cache
     await cache.set(`entity:${tenantId}:${entityId}`, entity, 300);
@@ -589,9 +598,9 @@ describe('Entity Cache', () => {
     expect(cached).toEqual(entity);
   });
 
-  it('should expire after TTL', async () => {
-    const key = 'test:key';
-    await cache.set(key, 'value', 1); // 1 second TTL
+  it("should expire after TTL", async () => {
+    const key = "test:key";
+    await cache.set(key, "value", 1); // 1 second TTL
 
     // Wait for expiration
     await new Promise((resolve) => setTimeout(resolve, 1100));
@@ -600,13 +609,13 @@ describe('Entity Cache', () => {
     expect(cached).toBeNull();
   });
 
-  it('should invalidate related caches on entity update', async () => {
-    const entityId = 'entity-123';
-    const tenantId = 'tenant-456';
+  it("should invalidate related caches on entity update", async () => {
+    const entityId = "entity-123";
+    const tenantId = "tenant-456";
 
     // Set caches
     await cache.set(`entity:${tenantId}:${entityId}`, { id: entityId }, 300);
-    await cache.set(`gql:${tenantId}:query1`, { result: 'data' }, 300);
+    await cache.set(`gql:${tenantId}:query1`, { result: "data" }, 300);
 
     // Invalidate
     await cacheInvalidationService.invalidateEntity(entityId, tenantId);
@@ -621,25 +630,25 @@ describe('Entity Cache', () => {
 ### Integration Tests
 
 ```typescript
-describe('Cache Integration', () => {
-  it('should fall back to database on cache miss', async () => {
-    const entityId = 'entity-123';
-    const tenantId = 'tenant-456';
+describe("Cache Integration", () => {
+  it("should fall back to database on cache miss", async () => {
+    const entityId = "entity-123";
+    const tenantId = "tenant-456";
 
     // Clear cache
     await cache.delete(`entity:${tenantId}:${entityId}`);
 
     // Mock database
-    const dbSpy = jest.spyOn(database, 'getEntity').mockResolvedValue({
+    const dbSpy = jest.spyOn(database, "getEntity").mockResolvedValue({
       id: entityId,
-      name: 'Test',
+      name: "Test",
     });
 
     // Get entity (should hit database)
     const entity = await getEntity(entityId, tenantId);
 
     expect(dbSpy).toHaveBeenCalledWith(entityId, tenantId);
-    expect(entity).toEqual({ id: entityId, name: 'Test' });
+    expect(entity).toEqual({ id: entityId, name: "Test" });
 
     // Second call should hit cache
     dbSpy.mockClear();
@@ -658,6 +667,7 @@ describe('Cache Integration', () => {
 **Symptoms**: High database load, slow response times
 
 **Diagnosis**:
+
 ```bash
 # Check cache hit rate
 curl http://localhost:4000/metrics | grep cache_hits_total
@@ -667,6 +677,7 @@ curl http://localhost:4000/admin/cache/stats
 ```
 
 **Solutions**:
+
 1. Increase TTL for stable data
 2. Implement cache warming for predictable access patterns
 3. Check if invalidation is too aggressive
@@ -677,6 +688,7 @@ curl http://localhost:4000/admin/cache/stats
 **Symptoms**: Slow API responses despite high hit rate
 
 **Diagnosis**:
+
 ```bash
 # Check cache latency
 curl http://localhost:4000/metrics | grep cache_operation_duration
@@ -686,6 +698,7 @@ redis-cli --latency-history
 ```
 
 **Solutions**:
+
 1. Use in-memory L1 cache for hot data
 2. Optimize cache key size (shorter is better)
 3. Use compression for large values
@@ -697,12 +710,14 @@ redis-cli --latency-history
 **Symptoms**: Periodic database spikes, timeouts
 
 **Diagnosis**:
+
 ```bash
 # Monitor database connections during cache expiration
 # Check for simultaneous identical queries
 ```
 
 **Solutions**:
+
 1. Implement distributed locks (see anti-patterns)
 2. Use stale-while-revalidate pattern
 3. Randomize TTL to spread out expirations
@@ -713,12 +728,14 @@ redis-cli --latency-history
 **Symptoms**: Redis OOM errors, evictions
 
 **Diagnosis**:
+
 ```bash
 redis-cli INFO memory
 redis-cli MEMORY STATS
 ```
 
 **Solutions**:
+
 1. Set maxmemory policy: `allkeys-lru`
 2. Implement compression for large values
 3. Reduce TTL for less critical data
@@ -753,6 +770,7 @@ redis-cli MEMORY STATS
 ---
 
 **Questions or Feedback?**
+
 - **Slack**: #platform-caching
 - **Email**: platform-eng@intelgraph.com
 - **On-Call**: PagerDuty rotation

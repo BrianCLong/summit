@@ -13,10 +13,10 @@
  */
 
 module.exports = {
-  preset: 'ts-jest/presets/default-esm',
-  extensionsToTreatAsEsm: ['.ts', '.tsx'],
+  preset: "ts-jest/presets/default-esm",
+  extensionsToTreatAsEsm: [".ts", ".tsx"],
   globals: {
-    'ts-jest': {
+    "ts-jest": {
       useESM: true,
       tsconfig: {
         allowSyntheticDefaultImports: true,
@@ -24,47 +24,44 @@ module.exports = {
       },
     },
   },
-  testEnvironment: 'node',
+  testEnvironment: "node",
 
   // Test Discovery
-  roots: ['<rootDir>/server', '<rootDir>/client', '<rootDir>/packages', '<rootDir>/services'],
-  testMatch: [
-    '**/__tests__/**/*.{ts,tsx,js,jsx}',
-    '**/?(*.)+(spec|test).{ts,tsx,js,jsx}',
-  ],
+  roots: ["<rootDir>/server", "<rootDir>/client", "<rootDir>/packages", "<rootDir>/services"],
+  testMatch: ["**/__tests__/**/*.{ts,tsx,js,jsx}", "**/?(*.)+(spec|test).{ts,tsx,js,jsx}"],
 
   // Coverage Collection
   collectCoverage: true,
   collectCoverageFrom: [
     // Server coverage
-    'server/src/**/*.{ts,tsx,js,jsx}',
+    "server/src/**/*.{ts,tsx,js,jsx}",
 
     // Services coverage
-    'services/*/src/**/*.{ts,tsx,js,jsx}',
+    "services/*/src/**/*.{ts,tsx,js,jsx}",
 
     // Packages coverage
-    'packages/*/src/**/*.{ts,tsx,js,jsx}',
+    "packages/*/src/**/*.{ts,tsx,js,jsx}",
 
     // Client coverage
-    'client/src/**/*.{ts,tsx,js,jsx}',
+    "client/src/**/*.{ts,tsx,js,jsx}",
 
     // Exclusions
-    '!**/*.d.ts',
-    '!**/node_modules/**',
-    '!**/dist/**',
-    '!**/build/**',
-    '!**/coverage/**',
-    '!**/*.config.{js,ts,cjs,mjs}',
-    '!**/tests/**',
-    '!**/__tests__/**',
-    '!**/__mocks__/**',
-    '!**/e2e/**',
-    '!**/archive/**',
-    '!**/salvage/**',
-    '!**/pull/**',
-    '!**/.next/**',
-    '!**/.turbo/**',
-    '!**/generated/**',
+    "!**/*.d.ts",
+    "!**/node_modules/**",
+    "!**/dist/**",
+    "!**/build/**",
+    "!**/coverage/**",
+    "!**/*.config.{js,ts,cjs,mjs}",
+    "!**/tests/**",
+    "!**/__tests__/**",
+    "!**/__mocks__/**",
+    "!**/e2e/**",
+    "!**/archive/**",
+    "!**/salvage/**",
+    "!**/pull/**",
+    "!**/.next/**",
+    "!**/.turbo/**",
+    "!**/generated/**",
   ],
 
   // Coverage Thresholds - minimum CI guardrails
@@ -78,70 +75,62 @@ module.exports = {
   },
 
   // Coverage Reporters
-  coverageReporters: [
-    'text',
-    'text-summary',
-    'html',
-    'lcov',
-    'cobertura',
-    'json-summary',
-    'json',
-  ],
+  coverageReporters: ["text", "text-summary", "html", "lcov", "cobertura", "json-summary", "json"],
 
-  coverageDirectory: '<rootDir>/coverage',
+  coverageDirectory: "<rootDir>/coverage",
 
   // Path Ignore Patterns
   testPathIgnorePatterns: [
-    '/node_modules/',
-    '/dist/',
-    '/build/',
-    '/coverage/',
-    '/archive/',
-    '/salvage/',
-    '/pull/',
-    '/.next/',
-    '/.turbo/',
+    "/node_modules/",
+    "/dist/",
+    "/build/",
+    "/coverage/",
+    "/archive/",
+    "/salvage/",
+    "/pull/",
+    "/.next/",
+    "/.turbo/",
   ],
 
   modulePathIgnorePatterns: [
-    '<rootDir>/dist/',
-    '<rootDir>/build/',
-    '<rootDir>/archive/',
-    '<rootDir>/salvage/',
-    '<rootDir>/pull/',
+    "<rootDir>/dist/",
+    "<rootDir>/build/",
+    "<rootDir>/archive/",
+    "<rootDir>/salvage/",
+    "<rootDir>/pull/",
   ],
 
   watchPathIgnorePatterns: [
-    '/node_modules/',
-    '/dist/',
-    '/build/',
-    '/coverage/',
-    '/archive/',
-    '/salvage/',
-    '/pull/',
+    "/node_modules/",
+    "/dist/",
+    "/build/",
+    "/coverage/",
+    "/archive/",
+    "/salvage/",
+    "/pull/",
   ],
 
   // Module Resolution
   moduleNameMapper: {
-    '^@/(.*)$': '<rootDir>/server/src/$1',
-    '^@client/(.*)$': '<rootDir>/client/src/$1',
-    '^@tests/(.*)$': '<rootDir>/tests/$1',
-    '^@server/(.*)$': '<rootDir>/server/src/$1',
-    '^@services/(.*)$': '<rootDir>/services/$1',
-    '^(\\.{1,2}/.*)\\.js$': '$1',
+    "^@/(.*)$": "<rootDir>/server/src/$1",
+    "^@client/(.*)$": "<rootDir>/client/src/$1",
+    "^@tests/(.*)$": "<rootDir>/tests/$1",
+    "^@server/(.*)$": "<rootDir>/server/src/$1",
+    "^@services/(.*)$": "<rootDir>/services/$1",
+    "^(\\.{1,2}/.*)\\.js$": "$1",
 
     // Mock heavy dependencies
-    '^node-fetch$': '<rootDir>/__mocks__/node-fetch.js',
-    '^pg$': '<rootDir>/__mocks__/pg.js',
-    '^ioredis$': '<rootDir>/__mocks__/ioredis.js',
-    '^puppeteer$': '<rootDir>/__mocks__/puppeteer.js',
-    '^neo4j-driver$': '<rootDir>/__mocks__/neo4j-driver.js',
+    "^node-fetch$": "<rootDir>/__mocks__/node-fetch.js",
+    "^pg$": "<rootDir>/__mocks__/pg.js",
+    "^ioredis$": "<rootDir>/__mocks__/ioredis.js",
+    "^puppeteer$": "<rootDir>/__mocks__/puppeteer.js",
+    "^neo4j-driver$": "<rootDir>/__mocks__/neo4j-driver.js",
   },
 
   // Transform Configuration
   transform: {
-    '^.+\\.[tj]sx?$': [
-      'ts-jest',
+    "^.+\\.[tj]sx?$": [
+      "ts-jest",
       {
         useESM: true,
         tsconfig: {
@@ -152,26 +141,24 @@ module.exports = {
     ],
   },
 
-  transformIgnorePatterns: [
-    'node_modules/(?!(.*\\.mjs$))',
-  ],
+  transformIgnorePatterns: ["node_modules/(?!(.*\\.mjs$))"],
 
   // Test Execution
   testTimeout: 30000,
-  maxWorkers: process.env.CI ? 2 : '50%',
+  maxWorkers: process.env.CI ? 2 : "50%",
   maxConcurrency: 5,
 
   // Reporting
   reporters: [
-    'default',
+    "default",
     [
-      'jest-junit',
+      "jest-junit",
       {
-        outputDirectory: '<rootDir>/test-results',
-        outputName: 'junit-coverage.xml',
-        classNameTemplate: '{classname}',
-        titleTemplate: '{title}',
-        ancestorSeparator: ' › ',
+        outputDirectory: "<rootDir>/test-results",
+        outputName: "junit-coverage.xml",
+        classNameTemplate: "{classname}",
+        titleTemplate: "{title}",
+        ancestorSeparator: " › ",
         usePathForSuiteName: true,
       },
     ],
@@ -186,5 +173,5 @@ module.exports = {
   errorOnDeprecated: true,
 
   // Setup Files
-  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
+  setupFilesAfterEnv: ["<rootDir>/jest.setup.js"],
 };

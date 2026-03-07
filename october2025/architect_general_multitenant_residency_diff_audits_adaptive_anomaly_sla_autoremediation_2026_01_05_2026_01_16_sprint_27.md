@@ -111,12 +111,11 @@ tenants:
 // apps/web/src/middleware/tenant.ts
 export function withTenant(handler: any) {
   return async (req: any, res: any) => {
-    const t =
-      req.cookies['x-tenant-id'] || req.headers['x-tenant-id'] || 'beta';
-    res.setHeader('x-tenant-id', t);
+    const t = req.cookies["x-tenant-id"] || req.headers["x-tenant-id"] || "beta";
+    res.setHeader("x-tenant-id", t);
     // Lookup tenant → set x-region
     const region = lookupTenantRegion(t);
-    res.setHeader('x-region', region);
+    res.setHeader("x-region", region);
     return handler(req, res);
   };
 }
@@ -126,16 +125,10 @@ export function withTenant(handler: any) {
 
 ```tsx
 // apps/web/src/components/TenantPicker.tsx
-export function TenantPicker({
-  tenants,
-}: {
-  tenants: { id: string; name: string }[];
-}) {
+export function TenantPicker({ tenants }: { tenants: { id: string; name: string }[] }) {
   return (
     <select
-      onChange={(e) =>
-        (document.cookie = `x-tenant-id=${e.target.value}; Path=/; Max-Age=604800`)
-      }
+      onChange={(e) => (document.cookie = `x-tenant-id=${e.target.value}; Path=/; Max-Age=604800`)}
     >
       {tenants.map((t) => (
         <option key={t.id} value={t.id}>
@@ -265,7 +258,7 @@ export function mad(arr: number[]) {
   return (
     quantile(
       arr.map((x) => Math.abs(x - med)),
-      0.5,
+      0.5
     ) || 1
   );
 }

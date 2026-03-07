@@ -114,19 +114,19 @@ export async function route(arms: ArmId[], ctx: RewardCtx) {
 **Unit test (Jest)**
 
 ```ts
-import { route, updateArm } from './bandit';
+import { route, updateArm } from "./bandit";
 
-test('bandit learns cheaper equivalent arm', async () => {
-  const arms = ['chainA@small', 'chainB@large'];
+test("bandit learns cheaper equivalent arm", async () => {
+  const arms = ["chainA@small", "chainB@large"];
   const ctx = { lambda: 0.5, evalScore: 0.9, costUSD: 0.2 };
   let picksA = 0,
     picksB = 0;
   for (let i = 0; i < 200; i++) {
     const { pick, report } = await route(arms, ctx);
-    if (pick === 'chainA@small') picksA++;
+    if (pick === "chainA@small") picksA++;
     else picksB++;
     // Simulate outcomes
-    if (pick === 'chainA@small')
+    if (pick === "chainA@small")
       report(0.9, 0.2); // good & cheap
     else report(0.9, 0.8); // same quality, pricier
   }
@@ -171,11 +171,7 @@ export async function callImplementer(...): Promise<ImplementerOut>{
 
 ```ts
 // tools/turbo-remote-s3.ts
-import {
-  S3Client,
-  PutObjectCommand,
-  GetObjectCommand,
-} from '@aws-sdk/client-s3';
+import { S3Client, PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
 const s3 = new S3Client({ region: process.env.AWS_REGION });
 export async function put(key: string, buf: Buffer) {
   await s3.send(
@@ -183,14 +179,12 @@ export async function put(key: string, buf: Buffer) {
       Bucket: process.env.TURBO_BUCKET!,
       Key: key,
       Body: buf,
-    }),
+    })
   );
 }
 export async function get(key: string) {
   try {
-    const r = await s3.send(
-      new GetObjectCommand({ Bucket: process.env.TURBO_BUCKET!, Key: key }),
-    );
+    const r = await s3.send(new GetObjectCommand({ Bucket: process.env.TURBO_BUCKET!, Key: key }));
     return Buffer.from(await r.Body!.transformToByteArray());
   } catch (e) {
     return null;
@@ -240,7 +234,7 @@ spec:
       metadata:
         addressFromEnv: REDIS_ADDR
         listName: bull:maestro:wait
-        listLength: '50' # scale when >50 jobs waiting
+        listLength: "50" # scale when >50 jobs waiting
 ```
 
 ---
@@ -260,29 +254,25 @@ spec:
 **Ingest function (Node → Neo4j)**
 
 ```ts
-import neo4j from 'neo4j-driver';
+import neo4j from "neo4j-driver";
 const driver = neo4j.driver(
   process.env.NEO4J_URI!,
-  neo4j.auth.basic(process.env.NEO4J_USER!, process.env.NEO4J_PASS!),
+  neo4j.auth.basic(process.env.NEO4J_USER!, process.env.NEO4J_PASS!)
 );
-export async function upsertPRGraph(pr: {
-  id: number;
-  files: string[];
-  owner: string;
-}) {
+export async function upsertPRGraph(pr: { id: number; files: string[]; owner: string }) {
   const s = driver.session();
   try {
     await s.executeWrite(async (tx) => {
-      await tx.run('MERGE (p:PR {id:$id}) SET p.updated=timestamp()', {
+      await tx.run("MERGE (p:PR {id:$id}) SET p.updated=timestamp()", {
         id: pr.id,
       });
       for (const f of pr.files) {
-        await tx.run(
-          'MERGE (f:File {path:$p}) MERGE (p:PR {id:$id})-[:TOUCHES]->(f)',
-          { p: f, id: pr.id },
-        );
+        await tx.run("MERGE (f:File {path:$p}) MERGE (p:PR {id:$id})-[:TOUCHES]->(f)", {
+          p: f,
+          id: pr.id,
+        });
       }
-      await tx.run('MERGE (u:Owner {name:$o}) MERGE (u)-[:OWNS]->(p)', {
+      await tx.run("MERGE (u:Owner {name:$o}) MERGE (u)-[:OWNS]->(p)", {
         o: pr.owner,
         id: pr.id,
       });
@@ -329,7 +319,7 @@ dump(model, 'artifacts/risk_v2.joblib')
 **Jest microbench example**
 
 ```ts
-test('parseGraph 1000x', () => {
+test("parseGraph 1000x", () => {
   const t0 = Date.now();
   for (let i = 0; i < 1000; i++) parseGraph(sample);
   const dt = Date.now() - t0;

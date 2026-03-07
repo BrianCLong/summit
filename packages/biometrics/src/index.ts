@@ -6,4 +6,4 @@
  * identity resolution, and multi-modal biometric processing.
  */
 
-export * from './types.js';
+export * from "./types.js";

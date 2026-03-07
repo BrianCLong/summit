@@ -19,25 +19,28 @@ All GA-blocking PRs identified and merged.
 
 ### Merged PRs
 
-| Step | PR | Title | Status | Merged At |
-|------|-----|-------|--------|-----------|
-| 1 | #18037 | fix(ci): repair malformed YAML in 39 workflow files | ✅ Merged | 2026-02-06T14:38:15Z |
-| 2 | #18012 | [CRITICAL] Fix SQL injection in PgVectorSync | ✅ Merged | 2026-02-06T14:39:10Z |
-| 3 | #18008 | fix: pin entities@^4.5.0 to restore Jest compatibility | ✅ Merged | 2026-02-06T14:39:28Z |
+| Step | PR     | Title                                                  | Status    | Merged At            |
+| ---- | ------ | ------------------------------------------------------ | --------- | -------------------- |
+| 1    | #18037 | fix(ci): repair malformed YAML in 39 workflow files    | ✅ Merged | 2026-02-06T14:38:15Z |
+| 2    | #18012 | [CRITICAL] Fix SQL injection in PgVectorSync           | ✅ Merged | 2026-02-06T14:39:10Z |
+| 3    | #18008 | fix: pin entities@^4.5.0 to restore Jest compatibility | ✅ Merged | 2026-02-06T14:39:28Z |
 
 ### Summary of Changes
 
 **PR #18037 - CI Infrastructure Fix**
+
 - Fixed malformed YAML in 39 workflow files (two action steps concatenated on single lines)
 - Added missing "Build & Package" job to ci-core.yml (required by branch protection)
 - Changed ci-core.yml from self-hosted to ubuntu-latest runners
 
 **PR #18012 - Security Fix**
+
 - Fixed SQL injection vulnerability in PgVectorSync class
 - Added Zod regex validation to restrict identifiers to alphanumeric characters
 - Added security test to verify malicious table names are rejected
 
 **PR #18008 - Test Infrastructure Fix**
+
 - Pinned entities@^4.5.0 to restore parse5/Jest compatibility
 - Added maintenance prompt and decision ledger entry for governance
 
@@ -72,16 +75,17 @@ All GA-blocking PRs identified and merged.
 
 #### Verification Status
 
-| Check | Local | CI |
-|-------|-------|-----|
-| Security fixes on main | ✅ Verified (commits `e464891adc`, `dc33c05d12`) | Pending |
-| Core unit tests | ✅ 242 passed / 4 failed (pre-existing failures) | Pending |
-| YAML syntax valid | ✅ All 39 files fixed | Pending |
+| Check                   | Local                                                                                          | CI      |
+| ----------------------- | ---------------------------------------------------------------------------------------------- | ------- |
+| Security fixes on main  | ✅ Verified (commits `e464891adc`, `dc33c05d12`)                                               | Pending |
+| Core unit tests         | ✅ 242 passed / 4 failed (pre-existing failures)                                               | Pending |
+| YAML syntax valid       | ✅ All 39 files fixed                                                                          | Pending |
 | Required checks defined | ✅ Config Preflight, Build & Package, Verification Suite, Governance Checks, Schema Validation | Pending |
 
 ## CI Queue Status
 
 **As of 2026-02-06T16:30:00Z:**
+
 - Queued runs: **12,548**
 - In-progress runs: **31**
 - CI Core run 21754401312 created at 14:39:31Z - **pending for ~2 hours**
@@ -90,12 +94,14 @@ All GA-blocking PRs identified and merged.
 ## Next Steps
 
 ### Option A: Wait for CI (Recommended for full compliance)
+
 1. Wait for CI to complete on main (may take many hours due to queue depth)
 2. Verify all required checks pass
 3. Generate GA evidence bundle
 4. Create GA tag (v5.3.1)
 
 ### Executed: Expedited GA Cut ✅
+
 1. All security fixes verified locally:
    - SQL injection fix (`e464891adc`) ✅
    - YAML fixes (`dc33c05d12`) ✅
@@ -115,4 +121,4 @@ All GA-blocking PRs identified and merged.
 
 **GA Release Complete: v5.5.1**
 
-*This document was auto-generated and updated by Claude Code (Merge Captain) on 2026-02-06.*
+_This document was auto-generated and updated by Claude Code (Merge Captain) on 2026-02-06._

@@ -1,7 +1,7 @@
 name: GA Gates Epic
 description: Track GA hardening for a surface
-title: '[GA] GA Hardening Gates: '
-labels: ['ga', 'epic']
+title: "[GA] GA Hardening Gates: "
+labels: ["ga", "epic"]
 body:
   - type: markdown
     attributes:

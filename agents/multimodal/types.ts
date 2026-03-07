@@ -4,15 +4,15 @@
  */
 
 // Modality Types
-export type ModalityType = 'text' | 'image' | 'video' | 'audio' | 'document';
+export type ModalityType = "text" | "image" | "video" | "audio" | "document";
 
 export type EmbeddingModel =
-  | 'clip-vit-base-patch32'
-  | 'clip-vit-large-patch14'
-  | 'openai-clip'
-  | 'text-embedding-3-small'
-  | 'text-embedding-3-large'
-  | 'all-MiniLM-L6-v2';
+  | "clip-vit-base-patch32"
+  | "clip-vit-large-patch14"
+  | "openai-clip"
+  | "text-embedding-3-small"
+  | "text-embedding-3-large"
+  | "all-MiniLM-L6-v2";
 
 // Base Embedding Types
 export interface BaseEmbedding {
@@ -46,7 +46,7 @@ export interface ProvenanceInfo {
 
 // Text Embeddings
 export interface TextEmbedding extends BaseEmbedding {
-  modality: 'text';
+  modality: "text";
   text: string;
   language?: string;
   entities?: ExtractedEntity[];
@@ -69,7 +69,7 @@ export interface SentimentScore {
 
 // Image Embeddings (CLIP/ViT)
 export interface ImageEmbedding extends BaseEmbedding {
-  modality: 'image';
+  modality: "image";
   imagePath: string;
   width: number;
   height: number;
@@ -112,7 +112,7 @@ export interface FaceLandmarks {
 
 // Video Embeddings
 export interface VideoEmbedding extends BaseEmbedding {
-  modality: 'video';
+  modality: "video";
   videoPath: string;
   duration: number;
   fps: number;
@@ -157,11 +157,11 @@ export interface FusedEmbedding {
 }
 
 export type FusionMethod =
-  | 'concatenation'
-  | 'average'
-  | 'weighted_average'
-  | 'attention'
-  | 'cross_modal_transformer';
+  | "concatenation"
+  | "average"
+  | "weighted_average"
+  | "attention"
+  | "cross_modal_transformer";
 
 export interface ModalityVector {
   modality: ModalityType;
@@ -172,11 +172,11 @@ export interface ModalityVector {
 }
 
 export type VerificationStatus =
-  | 'unverified'
-  | 'auto_verified'
-  | 'human_verified'
-  | 'flagged'
-  | 'rejected';
+  | "unverified"
+  | "auto_verified"
+  | "human_verified"
+  | "flagged"
+  | "rejected";
 
 // Pipeline Configuration
 export interface FusionPipelineConfig {
@@ -205,12 +205,7 @@ export interface PipelineJob {
   errors: PipelineError[];
 }
 
-export type JobStatus =
-  | 'pending'
-  | 'processing'
-  | 'completed'
-  | 'failed'
-  | 'cancelled';
+export type JobStatus = "pending" | "processing" | "completed" | "failed" | "cancelled";
 
 export interface SourceInput {
   type: ModalityType;
@@ -240,22 +235,18 @@ export interface HallucinationReason {
   type: HallucinationType;
   description: string;
   evidence: string;
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  severity: "low" | "medium" | "high" | "critical";
 }
 
 export type HallucinationType =
-  | 'semantic_inconsistency'
-  | 'cross_modal_mismatch'
-  | 'temporal_inconsistency'
-  | 'entity_conflict'
-  | 'confidence_anomaly'
-  | 'embedding_outlier';
+  | "semantic_inconsistency"
+  | "cross_modal_mismatch"
+  | "temporal_inconsistency"
+  | "entity_conflict"
+  | "confidence_anomaly"
+  | "embedding_outlier";
 
-export type HallucinationAction =
-  | 'accept'
-  | 'flag_for_review'
-  | 'auto_correct'
-  | 'reject';
+export type HallucinationAction = "accept" | "flag_for_review" | "auto_correct" | "reject";
 
 // Neo4j Graph Embedding Types
 export interface GraphEmbeddingNode {
@@ -273,7 +264,7 @@ export interface NeighborInfo {
 }
 
 export interface GraphEmbeddingConfig {
-  algorithm: 'node2vec' | 'graphsage' | 'gat' | 'gcn';
+  algorithm: "node2vec" | "graphsage" | "gat" | "gcn";
   dimensions: number;
   walkLength: number;
   numWalks: number;
@@ -285,8 +276,8 @@ export interface GraphEmbeddingConfig {
 export interface VectorStoreConfig {
   tableName: string;
   dimension: number;
-  indexType: 'ivfflat' | 'hnsw';
-  distanceMetric: 'cosine' | 'euclidean' | 'inner_product';
+  indexType: "ivfflat" | "hnsw";
+  distanceMetric: "cosine" | "euclidean" | "inner_product";
   indexParams: IVFFlatParams | HNSWParams;
 }
 
@@ -311,12 +302,12 @@ export interface VectorSearchResult {
 
 // Pipeline Events
 export type PipelineEvent =
-  | { type: 'job_started'; jobId: string; timestamp: Date }
-  | { type: 'modality_processed'; jobId: string; modality: ModalityType; sourceId: string }
-  | { type: 'fusion_completed'; jobId: string; entityId: string; fusedEmbeddingId: string }
-  | { type: 'hallucination_detected'; jobId: string; sourceId: string; score: number }
-  | { type: 'job_completed'; jobId: string; totalEmbeddings: number }
-  | { type: 'job_failed'; jobId: string; error: string };
+  | { type: "job_started"; jobId: string; timestamp: Date }
+  | { type: "modality_processed"; jobId: string; modality: ModalityType; sourceId: string }
+  | { type: "fusion_completed"; jobId: string; entityId: string; fusedEmbeddingId: string }
+  | { type: "hallucination_detected"; jobId: string; sourceId: string; score: number }
+  | { type: "job_completed"; jobId: string; totalEmbeddings: number }
+  | { type: "job_failed"; jobId: string; error: string };
 
 export interface PipelineEventHandler {
   onJobStarted?(jobId: string): void;

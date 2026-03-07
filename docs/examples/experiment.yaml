@@ -1,5 +1,5 @@
 id: homepage-lcp-improvement
-hypothesis: 'Optimizing image lazy-load reduces LCP without harming errors.'
+hypothesis: "Optimizing image lazy-load reduces LCP without harming errors."
 horizon: 7d
 mde: 0.02
 population:

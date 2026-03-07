@@ -1,6 +1,6 @@
-import crypto from 'crypto';
-import fs from 'fs/promises';
-import path from 'path';
+import crypto from "crypto";
+import fs from "fs/promises";
+import path from "path";
 
 export interface EvidenceRecord {
   id: string;
@@ -24,21 +24,26 @@ export class EvidenceStore {
   async storeEvidence(
     controlId: string,
     content: Buffer | string,
-    options: { signer: string; ttlDays: number; retentionDays: number; metadata?: Record<string, unknown> }
+    options: {
+      signer: string;
+      ttlDays: number;
+      retentionDays: number;
+      metadata?: Record<string, unknown>;
+    }
   ): Promise<EvidenceRecord> {
     const controlDir = path.join(this.basePath, controlId);
     await fs.mkdir(controlDir, { recursive: true });
 
     const createdAt = new Date();
-    const buffer = typeof content === 'string' ? Buffer.from(content) : content;
-    const hash = crypto.createHash('sha256').update(buffer).digest('hex');
+    const buffer = typeof content === "string" ? Buffer.from(content) : content;
+    const hash = crypto.createHash("sha256").update(buffer).digest("hex");
     const id = `${createdAt.getTime()}-${hash.slice(0, 8)}`;
     const artifactPath = path.join(controlDir, `${id}.evidence`);
 
     try {
-      await fs.writeFile(artifactPath, buffer, { flag: 'wx' });
+      await fs.writeFile(artifactPath, buffer, { flag: "wx" });
     } catch (error) {
-      if ((error as NodeJS.ErrnoException).code === 'EEXIST') {
+      if ((error as NodeJS.ErrnoException).code === "EEXIST") {
         throw new Error(`Evidence collision detected for control ${controlId}`);
       }
       throw error;
@@ -63,12 +68,12 @@ export class EvidenceStore {
   async listEvidence(controlId: string): Promise<EvidenceRecord[]> {
     const controlDir = path.join(this.basePath, controlId);
     try {
-      const indexPath = path.join(controlDir, 'index.json');
-      const raw = await fs.readFile(indexPath, 'utf-8');
+      const indexPath = path.join(controlDir, "index.json");
+      const raw = await fs.readFile(indexPath, "utf-8");
       const parsed = JSON.parse(raw) as EvidenceRecord[];
-      return parsed.map(entry => ({ ...entry, createdAt: new Date(entry.createdAt) }));
+      return parsed.map((entry) => ({ ...entry, createdAt: new Date(entry.createdAt) }));
     } catch (error) {
-      if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+      if ((error as NodeJS.ErrnoException).code === "ENOENT") {
         return [];
       }
       throw error;
@@ -110,15 +115,15 @@ export class EvidenceStore {
   private async writeIndex(controlDir: string, records: EvidenceRecord[]): Promise<void> {
     await fs.mkdir(controlDir, { recursive: true });
     const serialized = JSON.stringify(records, null, 2);
-    await fs.writeFile(path.join(controlDir, 'index.json'), serialized);
+    await fs.writeFile(path.join(controlDir, "index.json"), serialized);
   }
 
   private async listControlIds(): Promise<string[]> {
     try {
       const entries = await fs.readdir(this.basePath, { withFileTypes: true });
-      return entries.filter(entry => entry.isDirectory()).map(entry => entry.name);
+      return entries.filter((entry) => entry.isDirectory()).map((entry) => entry.name);
     } catch (error) {
-      if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+      if ((error as NodeJS.ErrnoException).code === "ENOENT") {
         return [];
       }
       throw error;

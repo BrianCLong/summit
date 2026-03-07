@@ -2,7 +2,7 @@ name: Model Catalog Staleness Check
 
 on:
   schedule:
-    - cron: '21 08 * * 1' # Mondays 08:21 UTC
+    - cron: "21 08 * * 1" # Mondays 08:21 UTC
   workflow_dispatch:
 
 jobs:
@@ -18,8 +18,8 @@ jobs:
           version: 10.0.0
       - uses: actions/setup-node@v4
         with:
-          cache: 'pnpm'
-          node-version: '20'
+          cache: "pnpm"
+          node-version: "20"
       - run: npm i yaml@2
       - name: Check last_verified freshness and open issue if stale
         uses: actions/github-script@v7

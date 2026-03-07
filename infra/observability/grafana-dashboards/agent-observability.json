@@ -18,29 +18,37 @@
         "fieldConfig": {
           "defaults": {
             "unit": "percent",
-            "thresholds": {"mode": "absolute", "steps": [{"color": "red", "value": null}, {"color": "yellow", "value": 90}, {"color": "green", "value": 97}]}
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "color": "red", "value": null },
+                { "color": "yellow", "value": 90 },
+                { "color": "green", "value": 97 }
+              ]
+            }
           }
         },
-        "gridPos": {"h": 5, "w": 6, "x": 0, "y": 0}
+        "gridPos": { "h": 5, "w": 6, "x": 0, "y": 0 }
       },
       {
         "id": 2,
         "type": "stat",
         "title": "Avg Agent Runtime Cost (5m)",
-        "targets": [
-          {"expr": "sum(rate(agent_runtime_cost_total[5m]))", "refId": "A"}
-        ],
-        "fieldConfig": {"defaults": {"unit": "currencyUSD"}},
-        "gridPos": {"h": 5, "w": 6, "x": 6, "y": 0}
+        "targets": [{ "expr": "sum(rate(agent_runtime_cost_total[5m]))", "refId": "A" }],
+        "fieldConfig": { "defaults": { "unit": "currencyUSD" } },
+        "gridPos": { "h": 5, "w": 6, "x": 6, "y": 0 }
       },
       {
         "id": 3,
         "type": "graph",
         "title": "Agent Latency p95",
         "targets": [
-          {"expr": "histogram_quantile(0.95, sum(rate(agent_latency_seconds_bucket[5m])) by (le))", "refId": "A"}
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(agent_latency_seconds_bucket[5m])) by (le))",
+            "refId": "A"
+          }
         ],
-        "gridPos": {"h": 9, "w": 12, "x": 0, "y": 5},
+        "gridPos": { "h": 9, "w": 12, "x": 0, "y": 5 },
         "lines": true,
         "linewidth": 2
       },
@@ -49,20 +57,29 @@
         "type": "graph",
         "title": "CPU & Memory per Agent Runtime",
         "targets": [
-          {"expr": "sum(rate(container_cpu_usage_seconds_total{container!='',namespace='agents'}[5m])) by (pod)", "refId": "A"},
-          {"expr": "sum(container_memory_working_set_bytes{container!='',namespace='agents'}) by (pod)", "refId": "B"}
+          {
+            "expr": "sum(rate(container_cpu_usage_seconds_total{container!='',namespace='agents'}[5m])) by (pod)",
+            "refId": "A"
+          },
+          {
+            "expr": "sum(container_memory_working_set_bytes{container!='',namespace='agents'}) by (pod)",
+            "refId": "B"
+          }
         ],
-        "gridPos": {"h": 9, "w": 12, "x": 12, "y": 5},
-        "legend": {"show": true}
+        "gridPos": { "h": 9, "w": 12, "x": 12, "y": 5 },
+        "legend": { "show": true }
       },
       {
         "id": 5,
         "type": "table",
         "title": "Correlation Coverage",
         "targets": [
-          {"expr": "sum(rate(otel_span_correlation_links_total[5m])) by (service_name)", "refId": "A"}
+          {
+            "expr": "sum(rate(otel_span_correlation_links_total[5m])) by (service_name)",
+            "refId": "A"
+          }
         ],
-        "gridPos": {"h": 7, "w": 12, "x": 0, "y": 14},
+        "gridPos": { "h": 7, "w": 12, "x": 0, "y": 14 },
         "transformations": []
       },
       {
@@ -70,9 +87,12 @@
         "type": "heatmap",
         "title": "Error Density by Service",
         "targets": [
-          {"expr": "sum(rate(agent_requests_total{status='failed'}[5m])) by (service,reason)", "refId": "A"}
+          {
+            "expr": "sum(rate(agent_requests_total{status='failed'}[5m])) by (service,reason)",
+            "refId": "A"
+          }
         ],
-        "gridPos": {"h": 7, "w": 12, "x": 12, "y": 14}
+        "gridPos": { "h": 7, "w": 12, "x": 12, "y": 14 }
       }
     ]
   }

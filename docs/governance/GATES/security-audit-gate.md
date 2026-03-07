@@ -3,7 +3,6 @@
 > Evidence-IDs: security-audit-gate
 > Status: active
 
-
 # Security Audit Gate
 
 **Command:** `pnpm ci:security-audit-gate`  

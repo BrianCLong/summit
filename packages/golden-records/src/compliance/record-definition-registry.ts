@@ -1,4 +1,4 @@
-import type { RecordDefinition } from '@intelgraph/mdm-core';
+import type { RecordDefinition } from "@intelgraph/mdm-core";
 
 export class RecordDefinitionRegistry {
   private definitions: Map<string, RecordDefinition> = new Map();

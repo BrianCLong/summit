@@ -5,11 +5,13 @@
 We have implemented and verified the following controls:
 
 ### Backpressure & Admission Control
+
 - **Queue Depth Limits**: Enforced by `BackpressureController`.
 - **Priority Handling**: Critical requests bypass normal/best-effort queues.
 - **Fail-Soft**: 503 responses returned when saturated.
 
 ### Cost & Budget
+
 - **Attribution**: Costs now attributed to Agent and Capability.
 - **Hard Stops**: Budgets enforce hard stops when `hardStop: true`.
 - **Forecasts**: Linear extrapolation used for alert thresholds.
@@ -17,7 +19,9 @@ We have implemented and verified the following controls:
 ## 2. Test Execution Results
 
 ### Unit Verification (`node:test`)
+
 **Performance Controls:**
+
 ```
 TAP version 13
 # Subtest: Performance & Scale Controls
@@ -30,6 +34,7 @@ ok 1 - Performance & Scale Controls
 ```
 
 **Cost Controls:**
+
 ```
 TAP version 13
 # Subtest: Cost Controls & Budget Enforcement
@@ -44,7 +49,9 @@ ok 1 - Cost Controls & Budget Enforcement
 ```
 
 ### Load Harness Output
+
 The load generator (`scripts/load/generate-load.ts`) was executed to verify metric emission (dry run without running server target):
+
 ```json
 {
   "config": {
@@ -65,16 +72,19 @@ The load generator (`scripts/load/generate-load.ts`) was executed to verify metr
   }
 }
 ```
-*Note: Success rate is 0% because no local server was running on port 3000 during this evidence generation step, which confirms the harness correctly captures failures.*
+
+_Note: Success rate is 0% because no local server was running on port 3000 during this evidence generation step, which confirms the harness correctly captures failures._
 
 ## 3. How to Reproduce
 
 **Run Load Test:**
+
 ```bash
 npx tsx scripts/load/generate-load.ts steady 10 50
 ```
 
 **Verify Controls:**
+
 ```bash
 npx tsx test/verification/performance.node.test.ts
 npx tsx test/verification/cost.node.test.ts

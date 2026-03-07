@@ -22,12 +22,13 @@ Our Debezium connector must be configured to emit tombstones and handle deletes 
 
 ### Key Configuration Parameters:
 
-*   `tombstones.on.delete=true`: Ensures a tombstone (null value) message is sent after the delete event, allowing Kafka log compaction to eventually remove the record.
-*   `transforms.unwrap.delete.handling.mode=rewrite`: Wraps the delete event so the "before" state is preserved in the value, which is crucial for downstream consumers to know *what* was deleted.
-*   `delete.tombstone.handling.mode=drop`: (Optional depending on sink) Configures how the connector handles the tombstone itself.
-*   `message.key.columns`: Explicitly define the key columns if the table doesn't have a PK or if we want a specific key structure.
+- `tombstones.on.delete=true`: Ensures a tombstone (null value) message is sent after the delete event, allowing Kafka log compaction to eventually remove the record.
+- `transforms.unwrap.delete.handling.mode=rewrite`: Wraps the delete event so the "before" state is preserved in the value, which is crucial for downstream consumers to know _what_ was deleted.
+- `delete.tombstone.handling.mode=drop`: (Optional depending on sink) Configures how the connector handles the tombstone itself.
+- `message.key.columns`: Explicitly define the key columns if the table doesn't have a PK or if we want a specific key structure.
 
 Example Config:
+
 ```json
 {
   "tombstones.on.delete": "true",
@@ -82,7 +83,7 @@ DETACH DELETE n;
 
 ## Implementation Artifacts
 
-*   **Postgres Setup**: `migrations/postgres/safe_delete_setup.sql`
-*   **Debezium Config**: `connect/pg-cdc-safe-delete.json`
-*   **Neo4j Procedure**: `ops/backups/neo4j/safe_delete.cypher`
-*   **Neo4j Cypher Snippet**: `ops/backups/neo4j/safe_delete_pattern.cypher`
+- **Postgres Setup**: `migrations/postgres/safe_delete_setup.sql`
+- **Debezium Config**: `connect/pg-cdc-safe-delete.json`
+- **Neo4j Procedure**: `ops/backups/neo4j/safe_delete.cypher`
+- **Neo4j Cypher Snippet**: `ops/backups/neo4j/safe_delete_pattern.cypher`

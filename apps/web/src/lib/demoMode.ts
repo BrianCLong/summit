@@ -9,4 +9,5 @@ export const isDemoModeEnabled = (): boolean => {
   return flag === '1' || flag.toLowerCase() === 'true'
 }
 
-export const useDemoMode = (): boolean => React.useMemo(() => isDemoModeEnabled(), [])
+export const useDemoMode = (): boolean =>
+  React.useMemo(() => isDemoModeEnabled(), [])

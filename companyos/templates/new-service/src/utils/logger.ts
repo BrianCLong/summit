@@ -3,9 +3,9 @@
  * Provides consistent logging with tenant context
  */
 
-import { config } from '../config.js';
+import { config } from "../config.js";
 
-type LogLevel = 'debug' | 'info' | 'warn' | 'error';
+type LogLevel = "debug" | "info" | "warn" | "error";
 
 interface LogContext {
   [key: string]: unknown;
@@ -52,35 +52,35 @@ class Logger {
     const output = JSON.stringify(logEntry);
 
     switch (level) {
-      case 'debug':
+      case "debug":
         console.debug(output);
         break;
-      case 'info':
+      case "info":
         console.info(output);
         break;
-      case 'warn':
+      case "warn":
         console.warn(output);
         break;
-      case 'error':
+      case "error":
         console.error(output);
         break;
     }
   }
 
   debug(message: string, data?: LogContext): void {
-    this.log('debug', message, data);
+    this.log("debug", message, data);
   }
 
   info(message: string, data?: LogContext): void {
-    this.log('info', message, data);
+    this.log("info", message, data);
   }
 
   warn(message: string, data?: LogContext): void {
-    this.log('warn', message, data);
+    this.log("warn", message, data);
   }
 
   error(message: string, data?: LogContext): void {
-    this.log('error', message, data);
+    this.log("error", message, data);
   }
 }
 

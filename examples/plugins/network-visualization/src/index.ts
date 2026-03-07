@@ -4,7 +4,7 @@ import {
   VisualizationOutput,
   VisualizationMetadata,
   PluginContext,
-} from '@intelgraph/plugin-system';
+} from "@intelgraph/plugin-system";
 
 /**
  * Network Graph Visualization Plugin
@@ -16,12 +16,12 @@ export default class NetworkVisualizationPlugin extends VisualizationExtension {
 
   protected async onInitialize(context: PluginContext): Promise<void> {
     await super.onInitialize(context);
-    this.log.info('Network Visualization Plugin initialized');
+    this.log.info("Network Visualization Plugin initialized");
   }
 
   protected async onStart(): Promise<void> {
     await super.onStart();
-    this.log.info('Network Visualization Plugin started');
+    this.log.info("Network Visualization Plugin started");
   }
 
   protected async onStop(): Promise<void> {
@@ -37,15 +37,15 @@ export default class NetworkVisualizationPlugin extends VisualizationExtension {
    */
   async render(input: VisualizationInput): Promise<VisualizationOutput> {
     this.renderCount++;
-    this.log.info('Rendering network visualization', {
+    this.log.info("Rendering network visualization", {
       renderCount: this.renderCount,
       dataSize: JSON.stringify(input.data).length,
     });
 
     try {
       // Validate data
-      if (!await this.canRender(input.data)) {
-        throw new Error('Invalid data format for network visualization');
+      if (!(await this.canRender(input.data))) {
+        throw new Error("Invalid data format for network visualization");
       }
 
       // Extract nodes and edges from data
@@ -60,7 +60,7 @@ export default class NetworkVisualizationPlugin extends VisualizationExtension {
       const style = this.generateCSS(input.theme);
 
       return {
-        type: 'html',
+        type: "html",
         component: {
           html,
           script,
@@ -73,14 +73,14 @@ export default class NetworkVisualizationPlugin extends VisualizationExtension {
         },
         assets: [
           {
-            type: 'script',
-            url: 'https://d3js.org/d3.v7.min.js',
-            integrity: 'sha384-...',
-            crossOrigin: 'anonymous',
+            type: "script",
+            url: "https://d3js.org/d3.v7.min.js",
+            integrity: "sha384-...",
+            crossOrigin: "anonymous",
           },
         ],
         sandbox: {
-          allow: ['scripts'],
+          allow: ["scripts"],
           csp: "default-src 'self'; script-src 'unsafe-inline' https://d3js.org;",
           featurePolicy: {
             geolocation: [],
@@ -89,18 +89,18 @@ export default class NetworkVisualizationPlugin extends VisualizationExtension {
           },
         },
         accessibility: {
-          ariaLabel: 'Interactive network graph visualization',
+          ariaLabel: "Interactive network graph visualization",
           description: `Network graph with ${nodes.length} nodes and ${edges.length} edges`,
           keyboardShortcuts: {
-            '+': 'Zoom in',
-            '-': 'Zoom out',
-            'r': 'Reset view',
-            'space': 'Pause/resume simulation',
+            "+": "Zoom in",
+            "-": "Zoom out",
+            r: "Reset view",
+            space: "Pause/resume simulation",
           },
         },
       };
     } catch (error) {
-      this.log.error('Failed to render visualization', error as Error);
+      this.log.error("Failed to render visualization", error as Error);
       throw error;
     }
   }
@@ -110,49 +110,49 @@ export default class NetworkVisualizationPlugin extends VisualizationExtension {
    */
   getMetadata(): VisualizationMetadata {
     return {
-      name: 'Network Graph Visualization',
-      description: 'Interactive force-directed network graph with zoom, pan, and filtering',
-      version: '1.0.0',
-      author: 'IntelGraph Team',
-      category: 'graph',
-      icon: 'https://example.com/icons/network.svg',
-      thumbnail: 'https://example.com/thumbnails/network-graph.png',
-      tags: ['network', 'graph', 'force-directed', 'interactive'],
+      name: "Network Graph Visualization",
+      description: "Interactive force-directed network graph with zoom, pan, and filtering",
+      version: "1.0.0",
+      author: "IntelGraph Team",
+      category: "graph",
+      icon: "https://example.com/icons/network.svg",
+      thumbnail: "https://example.com/thumbnails/network-graph.png",
+      tags: ["network", "graph", "force-directed", "interactive"],
       types: [
         {
-          id: 'force-directed',
-          name: 'Force-Directed Graph',
-          description: 'Physics-based layout with attractive and repulsive forces',
-          icon: 'force-icon',
+          id: "force-directed",
+          name: "Force-Directed Graph",
+          description: "Physics-based layout with attractive and repulsive forces",
+          icon: "force-icon",
         },
         {
-          id: 'hierarchical',
-          name: 'Hierarchical Layout',
-          description: 'Tree-like hierarchical arrangement',
-          icon: 'tree-icon',
+          id: "hierarchical",
+          name: "Hierarchical Layout",
+          description: "Tree-like hierarchical arrangement",
+          icon: "tree-icon",
         },
       ],
-      supportedDataTypes: ['graph', 'network', 'entities-relationships'],
+      supportedDataTypes: ["graph", "network", "entities-relationships"],
       configSchema: {
-        type: 'object',
+        type: "object",
         properties: {
           layout: {
-            type: 'string',
-            enum: ['force-directed', 'hierarchical', 'circular'],
-            default: 'force-directed',
+            type: "string",
+            enum: ["force-directed", "hierarchical", "circular"],
+            default: "force-directed",
           },
           showLabels: {
-            type: 'boolean',
+            type: "boolean",
             default: true,
           },
           nodeSize: {
-            type: 'number',
+            type: "number",
             minimum: 5,
             maximum: 50,
             default: 10,
           },
           edgeWidth: {
-            type: 'number',
+            type: "number",
             minimum: 1,
             maximum: 10,
             default: 2,
@@ -161,17 +161,17 @@ export default class NetworkVisualizationPlugin extends VisualizationExtension {
       },
       examples: [
         {
-          name: 'Basic Network',
-          description: 'Simple network with a few nodes',
+          name: "Basic Network",
+          description: "Simple network with a few nodes",
           data: {
             nodes: [
-              { id: '1', label: 'Node 1' },
-              { id: '2', label: 'Node 2' },
-              { id: '3', label: 'Node 3' },
+              { id: "1", label: "Node 1" },
+              { id: "2", label: "Node 2" },
+              { id: "3", label: "Node 3" },
             ],
             edges: [
-              { source: '1', target: '2' },
-              { source: '2', target: '3' },
+              { source: "1", target: "2" },
+              { source: "2", target: "3" },
             ],
           },
         },
@@ -254,11 +254,11 @@ export default class NetworkVisualizationPlugin extends VisualizationExtension {
     return {
       width: input.dimensions?.width || 800,
       height: input.dimensions?.height || 600,
-      layout: config.layout || 'force-directed',
+      layout: config.layout || "force-directed",
       showLabels: config.showLabels !== false,
       nodeSize: config.nodeSize || 10,
       edgeWidth: config.edgeWidth || 2,
-      colorScheme: input.theme?.colorScheme || 'light',
+      colorScheme: input.theme?.colorScheme || "light",
       interactive: config.interactive !== false,
     };
   }
@@ -448,14 +448,14 @@ export default class NetworkVisualizationPlugin extends VisualizationExtension {
    * Generate CSS
    */
   private generateCSS(theme: any): string {
-    const isDark = theme?.colorScheme === 'dark';
+    const isDark = theme?.colorScheme === "dark";
 
     return `
       .network-visualization {
         position: relative;
-        font-family: ${theme?.fontFamily || 'sans-serif'};
-        background: ${isDark ? '#1a1a1a' : '#ffffff'};
-        color: ${isDark ? '#ffffff' : '#000000'};
+        font-family: ${theme?.fontFamily || "sans-serif"};
+        background: ${isDark ? "#1a1a1a" : "#ffffff"};
+        color: ${isDark ? "#ffffff" : "#000000"};
       }
 
       .viz-toolbar {
@@ -470,16 +470,16 @@ export default class NetworkVisualizationPlugin extends VisualizationExtension {
       .viz-toolbar button {
         width: 32px;
         height: 32px;
-        border: 1px solid ${isDark ? '#444' : '#ccc'};
-        background: ${isDark ? '#2a2a2a' : '#ffffff'};
-        color: ${isDark ? '#ffffff' : '#000000'};
+        border: 1px solid ${isDark ? "#444" : "#ccc"};
+        background: ${isDark ? "#2a2a2a" : "#ffffff"};
+        color: ${isDark ? "#ffffff" : "#000000"};
         border-radius: 4px;
         cursor: pointer;
         font-size: 16px;
       }
 
       .viz-toolbar button:hover {
-        background: ${isDark ? '#3a3a3a' : '#f5f5f5'};
+        background: ${isDark ? "#3a3a3a" : "#f5f5f5"};
       }
 
       .viz-legend {
@@ -487,8 +487,8 @@ export default class NetworkVisualizationPlugin extends VisualizationExtension {
         bottom: 10px;
         left: 10px;
         padding: 10px;
-        background: ${isDark ? '#2a2a2a' : '#ffffff'};
-        border: 1px solid ${isDark ? '#444' : '#ccc'};
+        background: ${isDark ? "#2a2a2a" : "#ffffff"};
+        border: 1px solid ${isDark ? "#444" : "#ccc"};
         border-radius: 4px;
         font-size: 12px;
       }
@@ -499,7 +499,7 @@ export default class NetworkVisualizationPlugin extends VisualizationExtension {
       }
 
       #network-svg {
-        border: 1px solid ${isDark ? '#444' : '#ccc'};
+        border: 1px solid ${isDark ? "#444" : "#ccc"};
       }
     `;
   }

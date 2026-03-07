@@ -49,9 +49,9 @@ pnpm --filter @intelgraph/nlp-service dev
 ### Basic Usage
 
 ```typescript
-import { TextPreprocessor, Tokenizer } from '@intelgraph/nlp';
-import { NERExtractor } from '@intelgraph/entity-extraction';
-import { SentimentAnalyzer } from '@intelgraph/text-analytics';
+import { TextPreprocessor, Tokenizer } from "@intelgraph/nlp";
+import { NERExtractor } from "@intelgraph/entity-extraction";
+import { SentimentAnalyzer } from "@intelgraph/text-analytics";
 
 // Preprocess text
 const preprocessor = new TextPreprocessor({
@@ -59,7 +59,7 @@ const preprocessor = new TextPreprocessor({
   removeStopwords: true,
 });
 
-const cleaned = preprocessor.preprocess('Your text here');
+const cleaned = preprocessor.preprocess("Your text here");
 
 // Extract entities
 const nerExtractor = new NERExtractor();
@@ -85,16 +85,16 @@ const sentiment = sentimentAnalyzer.analyze(text);
 #### Example
 
 ```typescript
-import { TextPreprocessor, LanguageDetector, Tokenizer } from '@intelgraph/nlp';
+import { TextPreprocessor, LanguageDetector, Tokenizer } from "@intelgraph/nlp";
 
 // Language detection
 const detector = new LanguageDetector();
-const language = detector.detect('Bonjour le monde');
+const language = detector.detect("Bonjour le monde");
 // { language: 'fr', confidence: 0.95 }
 
 // Tokenization
 const tokenizer = new Tokenizer();
-const tokens = tokenizer.tokenize('Natural language processing');
+const tokens = tokenizer.tokenize("Natural language processing");
 
 // Preprocessing
 const preprocessor = new TextPreprocessor({
@@ -127,11 +127,11 @@ const processed = preprocessor.preprocess(text);
 #### Example
 
 ```typescript
-import { NERExtractor, EntityDisambiguator, EntityLinker } from '@intelgraph/entity-extraction';
+import { NERExtractor, EntityDisambiguator, EntityLinker } from "@intelgraph/entity-extraction";
 
 // Extract entities
 const extractor = new NERExtractor({
-  language: 'en',
+  language: "en",
   minConfidence: 0.7,
   includeNested: true,
 });
@@ -144,7 +144,7 @@ const clusters = disambiguator.disambiguate(entities, text);
 
 // Link to knowledge base
 const linker = new EntityLinker();
-const links = await linker.link(entities[0], ['wikidata']);
+const links = await linker.link(entities[0], ["wikidata"]);
 ```
 
 ### 3. Sentiment Analysis (@intelgraph/text-analytics)
@@ -161,7 +161,7 @@ const links = await linker.link(entities[0], ['wikidata']);
 #### Example
 
 ```typescript
-import { SentimentAnalyzer } from '@intelgraph/text-analytics';
+import { SentimentAnalyzer } from "@intelgraph/text-analytics";
 
 const analyzer = new SentimentAnalyzer();
 
@@ -170,7 +170,7 @@ const sentiment = analyzer.analyze(text);
 // { sentiment: 'positive', score: 0.8, confidence: 0.9 }
 
 // Aspect-based sentiment
-const aspects = analyzer.analyzeAspects(text, ['price', 'quality', 'service']);
+const aspects = analyzer.analyzeAspects(text, ["price", "quality", "service"]);
 
 // Emotion detection
 const emotions = analyzer.detectEmotions(text);
@@ -192,7 +192,7 @@ const sarcasm = analyzer.detectSarcasm(text);
 #### Example
 
 ```typescript
-import { TopicModeler, DocumentClusterer } from '@intelgraph/text-analytics';
+import { TopicModeler, DocumentClusterer } from "@intelgraph/text-analytics";
 
 const modeler = new TopicModeler();
 
@@ -224,21 +224,21 @@ const timeline = modeler.dynamic(documentsWithTimestamps, 10);
 #### Example
 
 ```typescript
-import { TextClassifier, SpamDetector, ToxicityDetector } from '@intelgraph/text-analytics';
+import { TextClassifier, SpamDetector, ToxicityDetector } from "@intelgraph/text-analytics";
 
 const classifier = new TextClassifier();
 
 // Train classifier
 classifier.train([
-  { text: 'I love this product', label: 'positive' },
-  { text: 'This is terrible', label: 'negative' },
+  { text: "I love this product", label: "positive" },
+  { text: "This is terrible", label: "negative" },
 ]);
 
 // Classify text
-const result = classifier.classify(text, ['positive', 'negative', 'neutral']);
+const result = classifier.classify(text, ["positive", "negative", "neutral"]);
 
 // Multi-label classification
-const labels = classifier.classifyMultiLabel(text, ['urgent', 'important', 'actionable']);
+const labels = classifier.classifyMultiLabel(text, ["urgent", "important", "actionable"]);
 
 // Spam detection
 const spamDetector = new SpamDetector();
@@ -263,12 +263,12 @@ import {
   QuestionAnswering,
   Summarizer,
   Translator,
-  SemanticSearch
-} from '@intelgraph/language-models';
+  SemanticSearch,
+} from "@intelgraph/language-models";
 
 // Question answering
 const qa = new QuestionAnswering();
-const answer = await qa.answer('What is NLP?', context);
+const answer = await qa.answer("What is NLP?", context);
 
 // Summarization
 const summarizer = new Summarizer();
@@ -276,7 +276,7 @@ const summary = await summarizer.abstractive(text, 150);
 
 // Translation
 const translator = new Translator();
-const translated = await translator.translate(text, 'en', 'es');
+const translated = await translator.translate(text, "en", "es");
 
 // Semantic search
 const search = new SemanticSearch();
@@ -298,7 +298,7 @@ const results = await search.search(query, documents);
 #### Example
 
 ```typescript
-import { SimilarityEngine, DuplicateDetector } from '@intelgraph/text-analytics';
+import { SimilarityEngine, DuplicateDetector } from "@intelgraph/text-analytics";
 
 const engine = new SimilarityEngine();
 
@@ -375,23 +375,15 @@ Body: { "text": "string", "maxLength": 150 }
 ### Complete NLP Pipeline
 
 ```typescript
-import {
-  TextPreprocessor,
-  Tokenizer,
-  LanguageDetector,
-} from '@intelgraph/nlp';
-import { NERExtractor } from '@intelgraph/entity-extraction';
-import {
-  SentimentAnalyzer,
-  TopicModeler,
-  RelationshipExtractor,
-} from '@intelgraph/text-analytics';
+import { TextPreprocessor, Tokenizer, LanguageDetector } from "@intelgraph/nlp";
+import { NERExtractor } from "@intelgraph/entity-extraction";
+import { SentimentAnalyzer, TopicModeler, RelationshipExtractor } from "@intelgraph/text-analytics";
 
 async function analyzeText(text: string) {
   // 1. Detect language
   const detector = new LanguageDetector();
   const language = detector.detect(text);
-  console.log('Language:', language);
+  console.log("Language:", language);
 
   // 2. Preprocess
   const preprocessor = new TextPreprocessor();
@@ -400,17 +392,17 @@ async function analyzeText(text: string) {
   // 3. Extract entities
   const ner = new NERExtractor();
   const entities = ner.extract(text);
-  console.log('Entities:', entities);
+  console.log("Entities:", entities);
 
   // 4. Analyze sentiment
   const sentiment = new SentimentAnalyzer();
   const sentimentResult = sentiment.analyze(text);
-  console.log('Sentiment:', sentimentResult);
+  console.log("Sentiment:", sentimentResult);
 
   // 5. Extract relationships
   const relationships = new RelationshipExtractor();
   const rels = relationships.extractSVO(text);
-  console.log('Relationships:', rels);
+  console.log("Relationships:", rels);
 
   return {
     language,
@@ -424,7 +416,7 @@ async function analyzeText(text: string) {
 ### Batch Processing
 
 ```typescript
-import { PreprocessingPipeline } from '@intelgraph/nlp';
+import { PreprocessingPipeline } from "@intelgraph/nlp";
 
 async function processBatch(documents: string[]) {
   const pipeline = PreprocessingPipeline.createStandard({
@@ -494,17 +486,17 @@ spec:
         app: nlp-service
     spec:
       containers:
-      - name: nlp-service
-        image: intelgraph/nlp-service:latest
-        ports:
-        - containerPort: 3010
-        resources:
-          requests:
-            memory: "2Gi"
-            cpu: "1000m"
-          limits:
-            memory: "4Gi"
-            cpu: "2000m"
+        - name: nlp-service
+          image: intelgraph/nlp-service:latest
+          ports:
+            - containerPort: 3010
+          resources:
+            requests:
+              memory: "2Gi"
+              cpu: "1000m"
+            limits:
+              memory: "4Gi"
+              cpu: "2000m"
 ```
 
 ## Support

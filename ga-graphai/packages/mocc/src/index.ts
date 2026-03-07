@@ -1,22 +1,22 @@
-import Ajv, { type AnySchema, type ErrorObject, type ValidateFunction } from 'ajv';
+import Ajv, { type AnySchema, type ErrorObject, type ValidateFunction } from "ajv";
 
 const ajv = new Ajv({
   allErrors: true,
   allowUnionTypes: true,
-  strict: false
+  strict: false,
 });
 
 const schemaCache = new WeakMap<object, ValidateFunction>();
 
-export type PiiType = 'email' | 'phone' | 'credit_card' | 'ssn';
+export type PiiType = "email" | "phone" | "credit_card" | "ssn";
 
-const DEFAULT_PII_TYPES: readonly PiiType[] = ['email', 'phone', 'credit_card', 'ssn'];
+const DEFAULT_PII_TYPES: readonly PiiType[] = ["email", "phone", "credit_card", "ssn"];
 
 const PII_PATTERNS: Record<PiiType, RegExp> = {
   email: /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g,
   phone: /\+?\d[\d\s().-]{7,}\d/g,
   credit_card: /\b(?:\d[ -]?){13,16}\b/g,
-  ssn: /\b\d{3}-\d{2}-\d{4}\b/g
+  ssn: /\b\d{3}-\d{2}-\d{4}\b/g,
 };
 
 export interface RegexConstraint {
@@ -103,7 +103,9 @@ export function validateOutput<TValue>(
   contract: OutputContract<TValue>,
   options: ValidationOptions = {}
 ): ValidationResult<TValue> {
-  const sanitization = options.sanitize ? sanitizeOutput(output, contract) : { value: output, actions: [] as SanitizationAction[] };
+  const sanitization = options.sanitize
+    ? sanitizeOutput(output, contract)
+    : { value: output, actions: [] as SanitizationAction[] };
   const value = sanitization.value as TValue;
   const errors: ValidationFailure[] = [];
 
@@ -132,7 +134,10 @@ export function validateOutput<TValue>(
   }
 
   if (contract.forbidsPII) {
-    const piiError = validatePiiConstraint(value, contract.forbidsPII === true ? {} : contract.forbidsPII);
+    const piiError = validatePiiConstraint(
+      value,
+      contract.forbidsPII === true ? {} : contract.forbidsPII
+    );
     if (piiError) {
       errors.push(...piiError);
     }
@@ -173,22 +178,28 @@ export function validateOutput<TValue>(
     value,
     errors,
     sanitized: sanitization.actions.length > 0,
-    sanitizationActions: sanitization.actions
+    sanitizationActions: sanitization.actions,
   };
 }
 
-export function sanitizeOutput<TValue>(value: TValue, contract: OutputContract<TValue>): { value: TValue; actions: SanitizationAction[] } {
+export function sanitizeOutput<TValue>(
+  value: TValue,
+  contract: OutputContract<TValue>
+): { value: TValue; actions: SanitizationAction[] } {
   const actions: SanitizationAction[] = [];
   let currentValue: unknown = value;
 
-  if (typeof currentValue === 'string') {
+  if (typeof currentValue === "string") {
     const sanitizedString = sanitizeStringValue(currentValue, contract, actions);
     currentValue = sanitizedString;
-  } else if (typeof currentValue === 'number' && contract.range) {
+  } else if (typeof currentValue === "number" && contract.range) {
     const { nextValue, changed } = clampNumber(currentValue, contract.range);
     if (changed) {
       currentValue = nextValue;
-      actions.push({ code: 'sanitize.range', message: `Clamped numeric value to range ${describeRange(contract.range)}.` });
+      actions.push({
+        code: "sanitize.range",
+        message: `Clamped numeric value to range ${describeRange(contract.range)}.`,
+      });
     }
   }
 
@@ -196,7 +207,7 @@ export function sanitizeOutput<TValue>(value: TValue, contract: OutputContract<T
     const localeResult = sanitizeLocale(currentValue, contract.locale);
     currentValue = localeResult.value;
     if (localeResult.changed) {
-      actions.push({ code: 'sanitize.locale', message: localeResult.message });
+      actions.push({ code: "sanitize.locale", message: localeResult.message });
     }
   }
 
@@ -208,7 +219,9 @@ export function runCIGate<TValue>(cases: Array<CIGateCase<TValue>>): CIGateRepor
   const failures: Array<{ name: string; errors: ValidationFailure[] }> = [];
 
   for (const testCase of cases) {
-    const result = validateOutput(testCase.output, testCase.contract, { sanitize: testCase.sanitize });
+    const result = validateOutput(testCase.output, testCase.contract, {
+      sanitize: testCase.sanitize,
+    });
     reports.push({ name: testCase.name, result });
     if (!result.valid) {
       failures.push({ name: testCase.name, errors: result.errors });
@@ -217,11 +230,13 @@ export function runCIGate<TValue>(cases: Array<CIGateCase<TValue>>): CIGateRepor
 
   if (failures.length > 0) {
     const messages = failures
-      .map(({ name, errors }) => `- ${name}: ${errors.map((err) => err.message).join('; ')}`)
-      .join('\n');
+      .map(({ name, errors }) => `- ${name}: ${errors.map((err) => err.message).join("; ")}`)
+      .join("\n");
     const aggregate = new AggregateError(
-      failures.map(({ name, errors }) => new Error(`[${name}] ${errors.map((err) => err.message).join('; ')}`)),
-      `MOCC CI gate failed with ${failures.length} violation${failures.length === 1 ? '' : 's'}:\n${messages}`
+      failures.map(
+        ({ name, errors }) => new Error(`[${name}] ${errors.map((err) => err.message).join("; ")}`)
+      ),
+      `MOCC CI gate failed with ${failures.length} violation${failures.length === 1 ? "" : "s"}:\n${messages}`
     );
     throw aggregate;
   }
@@ -231,18 +246,22 @@ export function runCIGate<TValue>(cases: Array<CIGateCase<TValue>>): CIGateRepor
 
 export function explainFailures(errors: ValidationFailure[]): string {
   if (errors.length === 0) {
-    return 'No validation failures.';
+    return "No validation failures.";
   }
 
   return errors
     .map((error) => {
-      const location = error.path ? ` at ${error.path}` : '';
+      const location = error.path ? ` at ${error.path}` : "";
       return `${error.code}${location}: ${error.message}`;
     })
-    .join('\n');
+    .join("\n");
 }
 
-function sanitizeStringValue(value: string, contract: OutputContract<unknown>, actions: SanitizationAction[]): string {
+function sanitizeStringValue(
+  value: string,
+  contract: OutputContract<unknown>,
+  actions: SanitizationAction[]
+): string {
   let nextValue = value;
 
   if (contract.forbidsPII) {
@@ -250,12 +269,12 @@ function sanitizeStringValue(value: string, contract: OutputContract<unknown>, a
     const types = piiOptions?.types ?? DEFAULT_PII_TYPES;
     const matches = detectPii(nextValue, types);
     if (matches.length > 0) {
-      const replacementPattern = piiOptions?.replacement ?? '[redacted:%type%]';
+      const replacementPattern = piiOptions?.replacement ?? "[redacted:%type%]";
       nextValue = maskPii(nextValue, matches, replacementPattern);
       const uniqueTypes = [...new Set(matches.map((match) => match.type))];
       actions.push({
-        code: 'sanitize.pii',
-        message: `Masked ${matches.length} PII occurrence${matches.length === 1 ? '' : 's'} (${uniqueTypes.join(', ')}).`
+        code: "sanitize.pii",
+        message: `Masked ${matches.length} PII occurrence${matches.length === 1 ? "" : "s"} (${uniqueTypes.join(", ")}).`,
       });
     }
   }
@@ -264,15 +283,21 @@ function sanitizeStringValue(value: string, contract: OutputContract<unknown>, a
     const limit = contract.length.max;
     const graphemes = Array.from(nextValue);
     if (graphemes.length > limit) {
-      nextValue = graphemes.slice(0, limit).join('');
-      actions.push({ code: 'sanitize.length', message: `Trimmed output to max length of ${limit} characters.` });
+      nextValue = graphemes.slice(0, limit).join("");
+      actions.push({
+        code: "sanitize.length",
+        message: `Trimmed output to max length of ${limit} characters.`,
+      });
     }
   }
 
   return nextValue;
 }
 
-function clampNumber(value: number, range: RangeConstraint): { nextValue: number; changed: boolean } {
+function clampNumber(
+  value: number,
+  range: RangeConstraint
+): { nextValue: number; changed: boolean } {
   let nextValue = value;
   if (range.min !== undefined && nextValue < range.min) {
     nextValue = range.min;
@@ -283,34 +308,39 @@ function clampNumber(value: number, range: RangeConstraint): { nextValue: number
   return { nextValue, changed: nextValue !== value };
 }
 
-function sanitizeLocale(value: unknown, constraint: LocaleConstraint): { value: unknown; changed: boolean; message: string } {
-  const canonicalAllowed = constraint.canonicalize ? canonicalizeLocales(constraint.allowed) : constraint.allowed;
+function sanitizeLocale(
+  value: unknown,
+  constraint: LocaleConstraint
+): { value: unknown; changed: boolean; message: string } {
+  const canonicalAllowed = constraint.canonicalize
+    ? canonicalizeLocales(constraint.allowed)
+    : constraint.allowed;
 
-  if (typeof value === 'string') {
+  if (typeof value === "string") {
     const canonical = constraint.canonicalize ? canonicalizeLocale(value) : value;
     if (canonical !== value) {
       return {
         value: canonical,
         changed: true,
-        message: `Canonicalized locale from "${value}" to "${canonical}".`
+        message: `Canonicalized locale from "${value}" to "${canonical}".`,
       };
     }
-    return { value, changed: false, message: '' };
+    return { value, changed: false, message: "" };
   }
 
-  if (typeof value !== 'object' || value === null) {
-    return { value, changed: false, message: '' };
+  if (typeof value !== "object" || value === null) {
+    return { value, changed: false, message: "" };
   }
 
-  const path = constraint.path ?? 'locale';
+  const path = constraint.path ?? "locale";
   const localeAccessor = resolvePath(value, path);
   if (!localeAccessor) {
-    return { value, changed: false, message: '' };
+    return { value, changed: false, message: "" };
   }
 
   const currentLocale = localeAccessor.value;
-  if (typeof currentLocale !== 'string') {
-    return { value, changed: false, message: '' };
+  if (typeof currentLocale !== "string") {
+    return { value, changed: false, message: "" };
   }
 
   const canonical = constraint.canonicalize ? canonicalizeLocale(currentLocale) : currentLocale;
@@ -325,19 +355,19 @@ function sanitizeLocale(value: unknown, constraint: LocaleConstraint): { value: 
     return {
       value: cloned,
       changed: true,
-      message: `Canonicalized locale from "${currentLocale}" to "${canonical}".`
+      message: `Canonicalized locale from "${currentLocale}" to "${canonical}".`,
     };
   }
 
   if (allowedMatch.length > 0 && !allowedMatch.includes(canonical)) {
-    return { value, changed: false, message: '' };
+    return { value, changed: false, message: "" };
   }
 
-  return { value, changed: false, message: '' };
+  return { value, changed: false, message: "" };
 }
 
 function getSchemaValidator(schema: AnySchema): ValidateFunction {
-  if (typeof schema !== 'object' || schema === null) {
+  if (typeof schema !== "object" || schema === null) {
     return ajv.compile(schema);
   }
 
@@ -351,54 +381,65 @@ function getSchemaValidator(schema: AnySchema): ValidateFunction {
 }
 
 function convertAjvError(error: ErrorObject): ValidationFailure {
-  const path = error.instancePath ? error.instancePath.replace(/^\//, '').replace(/\//g, '.') : undefined;
-  const message = error.message ?? 'Schema validation error.';
+  const path = error.instancePath
+    ? error.instancePath.replace(/^\//, "").replace(/\//g, ".")
+    : undefined;
+  const message = error.message ?? "Schema validation error.";
   return {
-    code: 'constraint.schema',
-    message: `${message}${error.params && 'allowedValues' in error.params ? ` (${JSON.stringify(error.params.allowedValues)})` : ''}`.trim(),
+    code: "constraint.schema",
+    message:
+      `${message}${error.params && "allowedValues" in error.params ? ` (${JSON.stringify(error.params.allowedValues)})` : ""}`.trim(),
     path,
-    meta: { keyword: error.keyword, params: error.params }
+    meta: { keyword: error.keyword, params: error.params },
   };
 }
 
-function validateRegexConstraint(value: unknown, constraint: RegexConstraint): ValidationFailure | undefined {
-  if (typeof value !== 'string') {
+function validateRegexConstraint(
+  value: unknown,
+  constraint: RegexConstraint
+): ValidationFailure | undefined {
+  if (typeof value !== "string") {
     return {
-      code: 'constraint.regex',
-      message: `Expected string to evaluate regex${constraint.description ? ` (${constraint.description})` : ''}.`,
-      meta: { receivedType: typeof value }
+      code: "constraint.regex",
+      message: `Expected string to evaluate regex${constraint.description ? ` (${constraint.description})` : ""}.`,
+      meta: { receivedType: typeof value },
     };
   }
 
-  const flags = constraint.flags ?? '';
-  const regex = new RegExp(constraint.pattern, flags.includes('g') ? flags : `${flags}g`);
+  const flags = constraint.flags ?? "";
+  const regex = new RegExp(constraint.pattern, flags.includes("g") ? flags : `${flags}g`);
   if (!regex.test(value)) {
     return {
-      code: 'constraint.regex',
+      code: "constraint.regex",
       message: `Value did not match pattern ${constraint.pattern}.`,
-      meta: { pattern: constraint.pattern }
+      meta: { pattern: constraint.pattern },
     };
   }
   return undefined;
 }
 
-function validateEnumConstraint(value: unknown, constraint: EnumConstraint): ValidationFailure | undefined {
-  if (typeof value !== 'string') {
+function validateEnumConstraint(
+  value: unknown,
+  constraint: EnumConstraint
+): ValidationFailure | undefined {
+  if (typeof value !== "string") {
     return {
-      code: 'constraint.enum',
-      message: 'Enum constraint expects a string value.',
-      meta: { receivedType: typeof value }
+      code: "constraint.enum",
+      message: "Enum constraint expects a string value.",
+      meta: { receivedType: typeof value },
     };
   }
 
   const candidate = constraint.caseSensitive ? value : value.toLowerCase();
-  const allowed = constraint.caseSensitive ? constraint.values : constraint.values.map((entry) => entry.toLowerCase());
+  const allowed = constraint.caseSensitive
+    ? constraint.values
+    : constraint.values.map((entry) => entry.toLowerCase());
 
   if (!allowed.includes(candidate)) {
     return {
-      code: 'constraint.enum',
-      message: `Value must be one of: ${constraint.values.join(', ')}.`,
-      meta: { allowed: constraint.values }
+      code: "constraint.enum",
+      message: `Value must be one of: ${constraint.values.join(", ")}.`,
+      meta: { allowed: constraint.values },
     };
   }
   return undefined;
@@ -410,8 +451,11 @@ interface DetectedPii {
   index: number;
 }
 
-function validatePiiConstraint(value: unknown, constraint?: PiiConstraint): ValidationFailure[] | undefined {
-  if (typeof value !== 'string') {
+function validatePiiConstraint(
+  value: unknown,
+  constraint?: PiiConstraint
+): ValidationFailure[] | undefined {
+  if (typeof value !== "string") {
     return undefined;
   }
 
@@ -422,9 +466,9 @@ function validatePiiConstraint(value: unknown, constraint?: PiiConstraint): Vali
   }
 
   return matches.map((match) => ({
-    code: 'constraint.pii',
-    message: `Detected ${match.type.replace('_', ' ')}: "${match.match}".`,
-    meta: { type: match.type, match: match.match, index: match.index }
+    code: "constraint.pii",
+    message: `Detected ${match.type.replace("_", " ")}: "${match.match}".`,
+    meta: { type: match.type, match: match.match, index: match.index },
   }));
 }
 
@@ -432,7 +476,10 @@ function detectPii(value: string, types: readonly PiiType[]): DetectedPii[] {
   const results: DetectedPii[] = [];
   for (const type of types) {
     const pattern = PII_PATTERNS[type];
-    const regex = new RegExp(pattern.source, pattern.flags.includes('g') ? pattern.flags : `${pattern.flags}g`);
+    const regex = new RegExp(
+      pattern.source,
+      pattern.flags.includes("g") ? pattern.flags : `${pattern.flags}g`
+    );
     let match: RegExpExecArray | null;
     while ((match = regex.exec(value)) !== null) {
       results.push({ type, match: match[0], index: match.index });
@@ -446,12 +493,14 @@ function maskPii(value: string, matches: DetectedPii[], replacementPattern: stri
     return value;
   }
 
-  let result = '';
+  let result = "";
   let cursor = 0;
 
   for (const match of matches) {
     result += value.slice(cursor, match.index);
-    const replacement = replacementPattern.replace('%type%', match.type).replace('%original%', match.match);
+    const replacement = replacementPattern
+      .replace("%type%", match.type)
+      .replace("%original%", match.match);
     result += replacement;
     cursor = match.index + match.match.length;
   }
@@ -460,57 +509,68 @@ function maskPii(value: string, matches: DetectedPii[], replacementPattern: stri
   return result;
 }
 
-function validateLengthConstraint(value: unknown, constraint: LengthConstraint): ValidationFailure | undefined {
-  if (typeof value !== 'string') {
+function validateLengthConstraint(
+  value: unknown,
+  constraint: LengthConstraint
+): ValidationFailure | undefined {
+  if (typeof value !== "string") {
     return undefined;
   }
 
   const length = Array.from(value).length;
   if (constraint.min !== undefined && length < constraint.min) {
     return {
-      code: 'constraint.length',
+      code: "constraint.length",
       message: `Value is shorter than minimum length of ${constraint.min}.`,
-      meta: { length, min: constraint.min }
+      meta: { length, min: constraint.min },
     };
   }
   if (constraint.max !== undefined && length > constraint.max) {
     return {
-      code: 'constraint.length',
+      code: "constraint.length",
       message: `Value exceeds maximum length of ${constraint.max}.`,
-      meta: { length, max: constraint.max }
+      meta: { length, max: constraint.max },
     };
   }
   return undefined;
 }
 
-function validateRangeConstraint(value: unknown, constraint: RangeConstraint): ValidationFailure | undefined {
-  if (typeof value !== 'number') {
+function validateRangeConstraint(
+  value: unknown,
+  constraint: RangeConstraint
+): ValidationFailure | undefined {
+  if (typeof value !== "number") {
     return {
-      code: 'constraint.range',
-      message: 'Range constraint expects a numeric value.',
-      meta: { receivedType: typeof value }
+      code: "constraint.range",
+      message: "Range constraint expects a numeric value.",
+      meta: { receivedType: typeof value },
     };
   }
 
   if (constraint.min !== undefined && value < constraint.min) {
     return {
-      code: 'constraint.range',
+      code: "constraint.range",
       message: `Value ${value} is below minimum ${constraint.min}.`,
-      meta: { min: constraint.min, value }
+      meta: { min: constraint.min, value },
     };
   }
   if (constraint.max !== undefined && value > constraint.max) {
     return {
-      code: 'constraint.range',
+      code: "constraint.range",
       message: `Value ${value} exceeds maximum ${constraint.max}.`,
-      meta: { max: constraint.max, value }
+      meta: { max: constraint.max, value },
     };
   }
   return undefined;
 }
 
-function validateLocaleConstraint(value: unknown, constraint: LocaleConstraint): ValidationFailure | undefined {
-  const allowed = constraint.canonicalize ? canonicalizeLocales(constraint.allowed) : constraint.allowed;
+function validateLocaleConstraint(
+  value: unknown,
+  constraint: LocaleConstraint
+): ValidationFailure | undefined {
+  const allowed = constraint.canonicalize
+    ? canonicalizeLocales(constraint.allowed)
+    : constraint.allowed;
   const localeValue = extractLocale(value, constraint.path);
 
   if (!localeValue) {
@@ -520,9 +580,9 @@ function validateLocaleConstraint(value: unknown, constraint: LocaleConstraint):
   const locale = constraint.canonicalize ? canonicalizeLocale(localeValue) : localeValue;
   if (allowed.length > 0 && !allowed.includes(locale)) {
     return {
-      code: 'constraint.locale',
-      message: `Locale "${localeValue}" is not permitted. Allowed locales: ${allowed.join(', ')}.`,
-      meta: { locale: localeValue, allowed }
+      code: "constraint.locale",
+      message: `Locale "${localeValue}" is not permitted. Allowed locales: ${allowed.join(", ")}.`,
+      meta: { locale: localeValue, allowed },
     };
   }
 
@@ -530,41 +590,44 @@ function validateLocaleConstraint(value: unknown, constraint: LocaleConstraint):
 }
 
 function extractLocale(value: unknown, path?: string): string | undefined {
-  if (typeof value === 'string' && !path) {
+  if (typeof value === "string" && !path) {
     return value;
   }
 
-  if (typeof value !== 'object' || value === null) {
+  if (typeof value !== "object" || value === null) {
     return undefined;
   }
 
-  const targetPath = path ?? 'locale';
+  const targetPath = path ?? "locale";
   const accessor = resolvePath(value, targetPath);
   if (!accessor) {
     return undefined;
   }
 
   const localeValue = accessor.value;
-  return typeof localeValue === 'string' ? localeValue : undefined;
+  return typeof localeValue === "string" ? localeValue : undefined;
 }
 
-function resolvePath(value: unknown, path: string): { parent: Record<string, any>; key: string; value: unknown } | undefined {
-  if (typeof value !== 'object' || value === null) {
+function resolvePath(
+  value: unknown,
+  path: string
+): { parent: Record<string, any>; key: string; value: unknown } | undefined {
+  if (typeof value !== "object" || value === null) {
     return undefined;
   }
 
-  const segments = path.split('.');
+  const segments = path.split(".");
   let parent: Record<string, any> | undefined = value as Record<string, any>;
 
   for (let i = 0; i < segments.length - 1; i += 1) {
     const key = segments[i];
-    if (!parent || typeof parent !== 'object') {
+    if (!parent || typeof parent !== "object") {
       return undefined;
     }
     parent = parent[key];
   }
 
-  if (!parent || typeof parent !== 'object') {
+  if (!parent || typeof parent !== "object") {
     return undefined;
   }
 
@@ -572,12 +635,12 @@ function resolvePath(value: unknown, path: string): { parent: Record<string, any
   return {
     parent,
     key,
-    value: parent[key]
+    value: parent[key],
   };
 }
 
 function cloneObject<T>(value: T): T {
-  if (typeof structuredClone === 'function') {
+  if (typeof structuredClone === "function") {
     return structuredClone(value);
   }
   return JSON.parse(JSON.stringify(value));
@@ -604,5 +667,5 @@ function describeRange(range: RangeConstraint): string {
   if (range.max !== undefined) {
     parts.push(`max ${range.max}`);
   }
-  return parts.join(', ');
+  return parts.join(", ");
 }

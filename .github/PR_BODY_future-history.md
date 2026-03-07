@@ -44,6 +44,7 @@ pnpm future-history:check:strict
 ### Entry Structure
 
 Each entry captures:
+
 - Date & change/decision
 - Rationale
 - Short-term effects (0-3 months)
@@ -54,6 +55,7 @@ Each entry captures:
 ## Purpose
 
 This framework provides narrative context for:
+
 - **Strategy**: Understanding why the platform looks the way it does
 - **Investors**: Seeing the strategic trajectory and risk management
 - **Auditors**: Tracing decisions to outcomes for compliance

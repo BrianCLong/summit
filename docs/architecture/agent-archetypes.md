@@ -63,7 +63,7 @@ interface AgentContext {
     policies: PolicySet;
     graph: GraphHandle;
   };
-  mode: 'analysis' | 'recommendation' | 'action' | 'monitor';
+  mode: "analysis" | "recommendation" | "action" | "monitor";
   timestamp: Date;
   requestId: string;
 }
@@ -111,9 +111,11 @@ interface AgentContext {
 ## Agent Archetype 1: AI Chief of Staff
 
 ### Role
+
 Personal AI assistant that helps leaders manage their time, attention, and decision-making.
 
 ### Capabilities
+
 - **Inbox Triage:** Prioritize emails, messages, notifications
 - **Meeting Preparation:** Generate pre-reads, agenda, context
 - **Follow-up Tracking:** Monitor action items, commitments, deadlines
@@ -122,18 +124,21 @@ Personal AI assistant that helps leaders manage their time, attention, and decis
 - **Delegation Recommendation:** Identify tasks to delegate based on priority/skills
 
 ### Graph Entities
+
 ```typescript
 // Chief of Staff creates/queries these entities
-- Task (priority, deadline, owner, dependencies)
-- Meeting (attendees, agenda, pre-read, follow-ups)
-- Decision (options, criteria, recommendation, outcome)
-- ActionItem (owner, due_date, status, source)
-- Message (sender, urgency, category, triage_score)
-- Calendar (events, conflicts, focus_blocks)
+-Task(priority, deadline, owner, dependencies) -
+  Meeting(attendees, agenda, pre - read, follow - ups) -
+  Decision(options, criteria, recommendation, outcome) -
+  ActionItem(owner, due_date, status, source) -
+  Message(sender, urgency, category, triage_score) -
+  Calendar(events, conflicts, focus_blocks);
 ```
 
 ### Key Workflows
+
 1. **Morning Briefing:**
+
    ```
    Input: User's calendar + inbox + pending tasks
    Analysis: Prioritize by urgency × impact
@@ -143,6 +148,7 @@ Personal AI assistant that helps leaders manage their time, attention, and decis
    ```
 
 2. **Meeting Prep:**
+
    ```
    Input: Meeting details + participant history + related docs
    Analysis: Generate context, talking points, questions
@@ -161,6 +167,7 @@ Personal AI assistant that helps leaders manage their time, attention, and decis
    ```
 
 ### Switchboard Integration
+
 - **Command Palette:**
   - `⌘K → "Brief me"` → Morning briefing
   - `⌘K → "Prep meeting: [name]"` → Meeting prep
@@ -176,6 +183,7 @@ Personal AI assistant that helps leaders manage their time, attention, and decis
   - Open Action Items by Owner
 
 ### Metrics
+
 - Messages triaged per day
 - Meeting prep time saved
 - Action items completed on time
@@ -187,9 +195,11 @@ Personal AI assistant that helps leaders manage their time, attention, and decis
 ## Agent Archetype 2: AI COO (Chief Operating Officer)
 
 ### Role
+
 Operations AI that monitors SLAs, incidents, approvals, and process health across the organization.
 
 ### Capabilities
+
 - **SLA Monitoring:** Track service level agreements, alert on breaches
 - **Incident Management:** Triage, route, track incidents to resolution
 - **Approval Tracking:** Monitor approval queues, escalate blockers
@@ -198,18 +208,21 @@ Operations AI that monitors SLAs, incidents, approvals, and process health acros
 - **Operational Metrics:** Real-time dashboards for uptime, throughput, quality
 
 ### Graph Entities
+
 ```typescript
 // COO creates/queries these entities
-- Incident (severity, status, owner, timeline, impact)
-- SLA (target, actual, breach_risk, dependencies)
-- Approval (request, approvers, stage, elapsed_time)
-- Process (definition, executions, drift_score)
-- Resource (utilization, capacity, health_score)
-- Metric (kpi, target, actual, trend)
+-Incident(severity, status, owner, timeline, impact) -
+  SLA(target, actual, breach_risk, dependencies) -
+  Approval(request, approvers, stage, elapsed_time) -
+  Process(definition, executions, drift_score) -
+  Resource(utilization, capacity, health_score) -
+  Metric(kpi, target, actual, trend);
 ```
 
 ### Key Workflows
+
 1. **SLA Burn Rate Monitoring:**
+
    ```
    Input: SLA definitions + current performance
    Analysis: Calculate burn rate, predict breach time
@@ -220,6 +233,7 @@ Operations AI that monitors SLAs, incidents, approvals, and process health acros
    ```
 
 2. **Incident Triage & Routing:**
+
    ```
    Input: Incident report (source, severity, description)
    Analysis: Classify severity, identify owner, suggest runbook
@@ -230,6 +244,7 @@ Operations AI that monitors SLAs, incidents, approvals, and process health acros
    ```
 
 3. **Approval Queue Management:**
+
    ```
    Input: All pending approvals across org
    Analysis: Identify bottlenecks, stale approvals, escalation needs
@@ -250,6 +265,7 @@ Operations AI that monitors SLAs, incidents, approvals, and process health acros
    ```
 
 ### Switchboard Integration
+
 - **Command Palette:**
   - `⌘K → "Ops status"` → System health dashboard
   - `⌘K → "Triage incident"` → Incident creation wizard
@@ -266,6 +282,7 @@ Operations AI that monitors SLAs, incidents, approvals, and process health acros
   - Process Health Score
 
 ### Metrics
+
 - SLA compliance rate
 - Mean time to resolution (MTTR)
 - Incident triage accuracy
@@ -278,9 +295,11 @@ Operations AI that monitors SLAs, incidents, approvals, and process health acros
 ## Agent Archetype 3: AI RevOps (Revenue Operations)
 
 ### Role
+
 Revenue AI that tracks pipeline health, forecast accuracy, attribution, and churn risk.
 
 ### Capabilities
+
 - **Pipeline Sanity Checks:** Identify stale deals, missing data, unrealistic closes
 - **Forecast Deltas:** Track changes in forecast, explain variance
 - **Attribution Analysis:** Multi-touch attribution for marketing/sales
@@ -289,18 +308,21 @@ Revenue AI that tracks pipeline health, forecast accuracy, attribution, and chur
 - **Revenue Analytics:** Dashboards for ARR, pipeline coverage, win rates
 
 ### Graph Entities
+
 ```typescript
 // RevOps creates/queries these entities
-- Opportunity (amount, stage, close_date, health_score)
-- Forecast (period, amount, commit_level, variance)
-- Account (arr, health_score, churn_risk, engagement)
-- Lead (score, source, touches, status)
-- Attribution (touchpoint, influence, revenue_credit)
-- Campaign (spend, leads, pipeline, roi)
+-Opportunity(amount, stage, close_date, health_score) -
+  Forecast(period, amount, commit_level, variance) -
+  Account(arr, health_score, churn_risk, engagement) -
+  Lead(score, source, touches, status) -
+  Attribution(touchpoint, influence, revenue_credit) -
+  Campaign(spend, leads, pipeline, roi);
 ```
 
 ### Key Workflows
+
 1. **Pipeline Sanity Check:**
+
    ```
    Input: All open opportunities
    Analysis: Identify stale (>30d no activity), missing fields, unrealistic timelines
@@ -311,6 +333,7 @@ Revenue AI that tracks pipeline health, forecast accuracy, attribution, and chur
    ```
 
 2. **Forecast Variance Analysis:**
+
    ```
    Input: Current forecast + previous forecast + actual
    Analysis: Calculate delta, attribute to new/moved/won/lost deals
@@ -321,6 +344,7 @@ Revenue AI that tracks pipeline health, forecast accuracy, attribution, and chur
    ```
 
 3. **Churn Risk Prediction:**
+
    ```
    Input: Account engagement, support tickets, usage metrics
    Analysis: Calculate churn risk score using ML model
@@ -341,6 +365,7 @@ Revenue AI that tracks pipeline health, forecast accuracy, attribution, and chur
    ```
 
 ### Switchboard Integration
+
 - **Command Palette:**
   - `⌘K → "Pipeline health"` → Pipeline sanity dashboard
   - `⌘K → "Forecast variance"` → Forecast waterfall
@@ -357,6 +382,7 @@ Revenue AI that tracks pipeline health, forecast accuracy, attribution, and chur
   - Attribution by Channel
 
 ### Metrics
+
 - Pipeline coverage ratio
 - Forecast accuracy (% to plan)
 - Win rate by source/stage
@@ -369,6 +395,7 @@ Revenue AI that tracks pipeline health, forecast accuracy, attribution, and chur
 ## Implementation Plan
 
 ### Phase 1: Core Infrastructure (Week 1)
+
 - [ ] Create `BaseAgentArchetype` abstract class
 - [ ] Implement `AgentRegistry` for managing agent instances
 - [ ] Build `AgentContext` provider with user/org/policy access
@@ -376,6 +403,7 @@ Revenue AI that tracks pipeline health, forecast accuracy, attribution, and chur
 - [ ] Wire into existing `AgentOrchestrator` as "archetype mode"
 
 ### Phase 2: Chief of Staff Agent (Week 1-2)
+
 - [ ] Implement `ChiefOfStaffAgent` class
 - [ ] Build inbox triage logic (priority scoring)
 - [ ] Create meeting prep workflow
@@ -384,6 +412,7 @@ Revenue AI that tracks pipeline health, forecast accuracy, attribution, and chur
 - [ ] Create dashboard tiles for priorities/meetings/action items
 
 ### Phase 3: COO Agent (Week 2)
+
 - [ ] Implement `COOAgent` class
 - [ ] Build SLA burn rate calculator
 - [ ] Create incident triage & routing logic
@@ -393,6 +422,7 @@ Revenue AI that tracks pipeline health, forecast accuracy, attribution, and chur
 - [ ] Create ops dashboard tiles
 
 ### Phase 4: RevOps Agent (Week 2-3)
+
 - [ ] Implement `RevOpsAgent` class
 - [ ] Build pipeline sanity checker
 - [ ] Create forecast variance analyzer
@@ -401,6 +431,7 @@ Revenue AI that tracks pipeline health, forecast accuracy, attribution, and chur
 - [ ] Create RevOps dashboard tiles
 
 ### Phase 5: Integration & Testing (Week 3)
+
 - [ ] Switchboard UI updates (agent roster, command palette)
 - [ ] GraphQL mutations for agent actions
 - [ ] Policy definitions for agent permissions
@@ -413,6 +444,7 @@ Revenue AI that tracks pipeline health, forecast accuracy, attribution, and chur
 ## Security & Compliance
 
 ### Policy Enforcement
+
 All agent actions must pass OPA policy checks:
 
 ```rego
@@ -456,27 +488,29 @@ deny_revops_modify_pipeline {
 ```
 
 ### Audit Trail
+
 Every agent action creates an audit log:
 
 ```typescript
 interface AgentAuditLog {
   timestamp: Date;
   requestId: string;
-  agentType: 'chief_of_staff' | 'coo' | 'revops';
+  agentType: "chief_of_staff" | "coo" | "revops";
   agentInstanceId: string;
   action: string;
   input: any;
   output: any;
   policyResult: PolicyResult;
   approvalRequired: boolean;
-  approvalStatus?: 'pending' | 'approved' | 'rejected';
+  approvalStatus?: "pending" | "approved" | "rejected";
   userId: string;
   organizationId: string;
-  classification: 'UNCLASSIFIED' | 'CONFIDENTIAL' | 'SECRET';
+  classification: "UNCLASSIFIED" | "CONFIDENTIAL" | "SECRET";
 }
 ```
 
 ### Data Privacy
+
 - Agents never store raw sensitive data (PII, credentials)
 - All data access goes through graph API with ABAC
 - Agent insights/recommendations logged separately from source data
@@ -487,17 +521,20 @@ interface AgentAuditLog {
 ## Success Metrics
 
 ### Product Adoption
+
 - Active agents per organization
 - Actions per agent per day
 - User satisfaction score (NPS)
 - Command palette usage rate
 
 ### Business Impact
+
 - **Chief of Staff:** Meeting prep time saved, action item completion rate
 - **COO:** SLA compliance improvement, MTTR reduction, approval cycle time
 - **RevOps:** Forecast accuracy improvement, churn reduction, pipeline health score
 
 ### Technical Performance
+
 - Agent response time (p50, p95, p99)
 - Policy evaluation latency
 - Graph query performance
@@ -508,16 +545,19 @@ interface AgentAuditLog {
 ## Future Agent Archetypes
 
 ### Short-Term (3-6 months)
+
 - **AI CFO:** Budget tracking, spend anomalies, financial planning
 - **AI CISO:** Security posture, threat detection, compliance monitoring
 - **AI People Ops:** Hiring pipeline, performance reviews, engagement signals
 
 ### Long-Term (6-12 months)
+
 - **AI Product Manager:** Feature requests, usage analytics, roadmap prioritization
 - **AI Customer Success:** Onboarding, adoption, expansion opportunities
 - **AI Legal:** Contract review, compliance checks, risk assessment
 
 ### Custom Agents
+
 - Partner/customer-built agents using Summit SDK
 - Agent marketplace for discovering/installing agents
 - Agent templates for common use cases
@@ -565,6 +605,7 @@ interface AgentAuditLog {
 ## API Examples
 
 ### Invoke Chief of Staff
+
 ```typescript
 POST /api/agents/chief-of-staff/brief
 {
@@ -604,6 +645,7 @@ Response:
 ```
 
 ### Invoke COO
+
 ```typescript
 POST /api/agents/coo/triage-incident
 {
@@ -633,6 +675,7 @@ Response:
 ```
 
 ### Invoke RevOps
+
 ```typescript
 POST /api/agents/revops/analyze-pipeline
 {

@@ -1,53 +1,56 @@
-import { Alert, ExpansionTrigger, PlaybookAction, TenantProfile } from './types'
+import { Alert, ExpansionTrigger, PlaybookAction, TenantProfile } from "./types";
 
 export interface ExpansionSignals {
-  seatsUsed: number
-  seatLimit: number
-  advancedFeaturesUsed: string[]
-  newTeamsInvited: number
-  invoicesOverLimit: boolean
+  seatsUsed: number;
+  seatLimit: number;
+  advancedFeaturesUsed: string[];
+  newTeamsInvited: number;
+  invoicesOverLimit: boolean;
 }
 
 export function detectExpansionTriggers(signals: ExpansionSignals): ExpansionTrigger[] {
-  const triggers: ExpansionTrigger[] = []
-  const utilization = signals.seatsUsed / signals.seatLimit
+  const triggers: ExpansionTrigger[] = [];
+  const utilization = signals.seatsUsed / signals.seatLimit;
   if (utilization >= 0.8) {
     triggers.push({
-      trigger: 'seat-capacity',
+      trigger: "seat-capacity",
       detectedAt: new Date(),
-      recommendedPath: 'Offer in-app seat expansion with pricing clarity'
-    })
+      recommendedPath: "Offer in-app seat expansion with pricing clarity",
+    });
   }
   if (signals.advancedFeaturesUsed.length) {
     triggers.push({
-      trigger: 'advanced-feature',
+      trigger: "advanced-feature",
       detectedAt: new Date(),
-      recommendedPath: `Upsell advanced modules: ${signals.advancedFeaturesUsed.join(', ')}`
-    })
+      recommendedPath: `Upsell advanced modules: ${signals.advancedFeaturesUsed.join(", ")}`,
+    });
   }
   if (signals.newTeamsInvited > 0) {
     triggers.push({
-      trigger: 'new-teams',
+      trigger: "new-teams",
       detectedAt: new Date(),
-      recommendedPath: 'Provide multi-team collaboration onboarding and SCIM/SSO rollout'
-    })
+      recommendedPath: "Provide multi-team collaboration onboarding and SCIM/SSO rollout",
+    });
   }
   if (signals.invoicesOverLimit) {
     triggers.push({
-      trigger: 'overage',
+      trigger: "overage",
       detectedAt: new Date(),
-      recommendedPath: 'Align on contract expansion to cover overage and forecast growth'
-    })
+      recommendedPath: "Align on contract expansion to cover overage and forecast growth",
+    });
   }
-  return triggers
+  return triggers;
 }
 
-export function expansionPlaybookFromAlerts(alerts: Alert[], profile: TenantProfile): PlaybookAction[] {
-  const opportunities = alerts.filter((alert) => alert.kind === 'expansion-opportunity')
+export function expansionPlaybookFromAlerts(
+  alerts: Alert[],
+  profile: TenantProfile
+): PlaybookAction[] {
+  const opportunities = alerts.filter((alert) => alert.kind === "expansion-opportunity");
   return opportunities.map((alert) => ({
     id: `${profile.id}-expansion-${alert.occurredAt.getTime()}`,
-    category: 'expansion',
+    category: "expansion",
     description: alert.recommendedPlaybook,
-    requiresApproval: false
-  }))
+    requiresApproval: false,
+  }));
 }

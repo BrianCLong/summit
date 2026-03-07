@@ -64,11 +64,14 @@ curl 'http://localhost:9090/api/v1/query?query=histogram_quantile(0.95,sum(rate(
 ### Scenario 1: Specific Query Slow
 
 **Indicators**:
+
 - Only 1-2 operations have high latency
 - Others are normal
 
 **Actions**:
+
 1. Find slow query in Jaeger:
+
    ```bash
    open "http://localhost:16686/search?service=graphql-gateway&operation=<operation-name>&minDuration=2s"
    ```
@@ -84,6 +87,7 @@ curl 'http://localhost:9090/api/v1/query?query=histogram_quantile(0.95,sum(rate(
    ```
 
 **Mitigation**:
+
 - Enable persisted queries if not already
 - Add caching for expensive resolvers
 - Optimize database queries
@@ -92,11 +96,14 @@ curl 'http://localhost:9090/api/v1/query?query=histogram_quantile(0.95,sum(rate(
 ### Scenario 2: All Queries Slow
 
 **Indicators**:
+
 - p95 latency up across all operations
 - Downstream database latency also high
 
 **Actions**:
+
 1. Check database load:
+
    ```bash
    # Neo4j active queries
    kubectl exec -it neo4j-0 -- cypher-shell "CALL dbms.listQueries() YIELD query, elapsedTimeMillis WHERE elapsedTimeMillis > 1000 RETURN query LIMIT 20;"
@@ -106,6 +113,7 @@ curl 'http://localhost:9090/api/v1/query?query=histogram_quantile(0.95,sum(rate(
    ```
 
 2. Check resource saturation:
+
    ```bash
    # CPU/Memory pressure
    kubectl top pods -l app=graphql-gateway
@@ -120,6 +128,7 @@ curl 'http://localhost:9090/api/v1/query?query=histogram_quantile(0.95,sum(rate(
    ```
 
 **Mitigation**:
+
 - Scale up database resources
 - Add read replicas if applicable
 - Enable connection pooling
@@ -128,11 +137,14 @@ curl 'http://localhost:9090/api/v1/query?query=histogram_quantile(0.95,sum(rate(
 ### Scenario 3: Recent Deployment Caused Regression
 
 **Indicators**:
+
 - Latency spiked after recent deployment
 - Annotation in Grafana shows deployment time
 
 **Actions**:
+
 1. Review deployment changes:
+
    ```bash
    git diff HEAD~1 HEAD -- apps/gateway/
    ```
@@ -142,22 +154,27 @@ curl 'http://localhost:9090/api/v1/query?query=histogram_quantile(0.95,sum(rate(
 3. Review dependency version changes
 
 **Mitigation**:
+
 - Rollback immediately:
-   ```bash
-   kubectl rollout undo deployment/graphql-gateway
-   ```
+
+  ```bash
+  kubectl rollout undo deployment/graphql-gateway
+  ```
 
 - Fix issue and redeploy with proper load testing
 
 ### Scenario 4: Traffic Spike
 
 **Indicators**:
+
 - Request rate 2-3x normal
 - All services showing increased latency
 - Metrics show request rate spike
 
 **Actions**:
+
 1. Check request rate:
+
    ```bash
    curl 'http://localhost:9090/api/v1/query?query=sum(rate(graphql_requests_total[5m]))'
    ```
@@ -168,10 +185,12 @@ curl 'http://localhost:9090/api/v1/query?query=histogram_quantile(0.95,sum(rate(
    - Check for potential DDoS
 
 **Mitigation**:
+
 - Scale horizontally:
-   ```bash
-   kubectl scale deployment graphql-gateway --replicas=5
-   ```
+
+  ```bash
+  kubectl scale deployment graphql-gateway --replicas=5
+  ```
 
 - Enable rate limiting per user/IP
 - Activate CDN caching if applicable

@@ -1,14 +1,11 @@
-import fetch, { HeadersInit, RequestInit, Response } from 'node-fetch';
-import { createAuditEntry, AuditLogger } from './logger.js';
-import { JiraIntegrationConfig } from './types.js';
+import fetch, { HeadersInit, RequestInit, Response } from "node-fetch";
+import { createAuditEntry, AuditLogger } from "./logger.js";
+import { JiraIntegrationConfig } from "./types.js";
 
 const DEFAULT_MAX_RETRIES = 3;
 const DEFAULT_RETRY_DELAY_MS = 500;
 
-export type FetchImplementation = (
-  url: string,
-  init?: RequestInit,
-) => Promise<Response>;
+export type FetchImplementation = (url: string, init?: RequestInit) => Promise<Response>;
 
 const sleep = async (delayMs: number): Promise<void> =>
   new Promise((resolve) => {
@@ -19,10 +16,10 @@ export class JiraApiError extends Error {
   constructor(
     message: string,
     public readonly status?: number,
-    public readonly body?: unknown,
+    public readonly body?: unknown
   ) {
     super(message);
-    this.name = 'JiraApiError';
+    this.name = "JiraApiError";
   }
 }
 
@@ -32,16 +29,18 @@ export class JiraApiClient {
   constructor(
     private readonly config: JiraIntegrationConfig,
     private readonly auditLogger: AuditLogger,
-    fetchImplementation?: FetchImplementation,
+    fetchImplementation?: FetchImplementation
   ) {
     this.fetchImpl =
-      fetchImplementation ?? (globalThis.fetch as unknown as FetchImplementation) ?? (fetch as unknown as FetchImplementation);
+      fetchImplementation ??
+      (globalThis.fetch as unknown as FetchImplementation) ??
+      (fetch as unknown as FetchImplementation);
   }
 
   private get authHeader(): string {
-    const authToken = Buffer.from(
-      `${this.config.email}:${this.config.apiToken}`,
-    ).toString('base64');
+    const authToken = Buffer.from(`${this.config.email}:${this.config.apiToken}`).toString(
+      "base64"
+    );
     return `Basic ${authToken}`;
   }
 
@@ -52,15 +51,12 @@ export class JiraApiClient {
     };
   }
 
-  async request<T>(
-    path: string,
-    init: RequestInit & { retryable?: boolean } = {},
-  ): Promise<T> {
+  async request<T>(path: string, init: RequestInit & { retryable?: boolean } = {}): Promise<T> {
     const url = `${this.config.baseUrl}${path}`;
     const { attempts, delay } = this.retryConfig;
     const headers: HeadersInit = {
       Authorization: this.authHeader,
-      Accept: 'application/json',
+      Accept: "application/json",
       ...init.headers,
     };
 
@@ -82,15 +78,15 @@ export class JiraApiClient {
           throw new JiraApiError(
             `Jira API responded with ${response.status}`,
             response.status,
-            bodyText,
+            bodyText
           );
         }
 
         this.auditLogger.record(
-          createAuditEntry('jira_api_request', 'success', {
+          createAuditEntry("jira_api_request", "success", {
             entityId: url,
-            payload: { method: init.method ?? 'GET', attempt },
-          }),
+            payload: { method: init.method ?? "GET", attempt },
+          })
         );
 
         if (response.status === 204) {
@@ -103,11 +99,11 @@ export class JiraApiClient {
         const shouldRetry = attempt < attempts && (init.retryable ?? true);
 
         this.auditLogger.record(
-          createAuditEntry('jira_api_request', 'error', {
+          createAuditEntry("jira_api_request", "error", {
             entityId: url,
-            message: error instanceof Error ? error.message : 'Unknown error',
-            payload: { method: init.method ?? 'GET', attempt },
-          }),
+            message: error instanceof Error ? error.message : "Unknown error",
+            payload: { method: init.method ?? "GET", attempt },
+          })
         );
 
         if (!shouldRetry) {
@@ -122,10 +118,6 @@ export class JiraApiClient {
       throw lastError;
     }
 
-    throw new JiraApiError(
-      'Failed to execute Jira API request',
-      undefined,
-      lastError,
-    );
+    throw new JiraApiError("Failed to execute Jira API request", undefined, lastError);
   }
 }

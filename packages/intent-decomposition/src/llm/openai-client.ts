@@ -13,15 +13,15 @@ export class OpenAICompatibleClient {
   private readonly apiKey?: string;
 
   constructor(baseUrl: string, apiKey?: string) {
-    this.baseUrl = baseUrl.replace(/\/$/, '');
+    this.baseUrl = baseUrl.replace(/\/$/, "");
     this.apiKey = apiKey;
   }
 
   async complete(prompt: string, options: ChatCompletionOptions): Promise<string> {
     const response = await fetch(`${this.baseUrl}/v1/chat/completions`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         ...(this.apiKey ? { Authorization: `Bearer ${this.apiKey}` } : {}),
       },
       body: JSON.stringify({
@@ -30,7 +30,7 @@ export class OpenAICompatibleClient {
         max_tokens: options.maxTokens ?? 512,
         messages: [
           {
-            role: 'user',
+            role: "user",
             content: prompt,
           },
         ],
@@ -47,7 +47,7 @@ export class OpenAICompatibleClient {
     };
     const content = payload.choices?.[0]?.message?.content;
     if (!content) {
-      throw new Error('LLM response missing content');
+      throw new Error("LLM response missing content");
     }
     return content;
   }

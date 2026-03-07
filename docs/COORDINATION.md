@@ -4,9 +4,9 @@ This document defines the canonical coordination model for multi-agent systems i
 
 ## Roles
 
-*   **COORDINATOR**: The agent responsible for decomposing the high-level goal and delegating tasks.
-*   **WORKER**: An agent that executes a specific task and reports back.
-*   **REVIEWER**: An agent that validates the output of a Worker.
+- **COORDINATOR**: The agent responsible for decomposing the high-level goal and delegating tasks.
+- **WORKER**: An agent that executes a specific task and reports back.
+- **REVIEWER**: An agent that validates the output of a Worker.
 
 ## Schema Versioning
 

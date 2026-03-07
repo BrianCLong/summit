@@ -249,7 +249,7 @@ spec:
                       ${COSIGN_PUBLIC_KEY}
                       -----END PUBLIC KEY-----
                     rekor:
-                      ignoreTlog: true  # Air-gapped environment
+                      ignoreTlog: true # Air-gapped environment
           attestations:
             - type: https://slsa.dev/provenance/v1
               name: slsa-provenance

@@ -1,4 +1,4 @@
-import { randomUUID } from 'node:crypto';
+import { randomUUID } from "node:crypto";
 
 export type Capability = string;
 
@@ -59,7 +59,7 @@ export interface CommunicationMessage {
 export interface AgentOutcome<T = unknown> {
   taskId: string;
   agentId: string;
-  status: 'success' | 'failed';
+  status: "success" | "failed";
   cost: number;
   confidence?: number;
   consensus?: ConsensusResult<T>;
@@ -97,10 +97,10 @@ export class AgentMarketplace {
 
   register(agent: AgentProfile): void {
     if (agent.reliability < 0 || agent.reliability > 1) {
-      throw new Error('reliability must be between 0 and 1');
+      throw new Error("reliability must be between 0 and 1");
     }
     if (agent.reputation < 0 || agent.reputation > 1) {
-      throw new Error('reputation must be between 0 and 1');
+      throw new Error("reputation must be between 0 and 1");
     }
     this.agents.set(agent.id, { ...agent, maxConcurrency: agent.maxConcurrency ?? 2 });
   }
@@ -121,7 +121,7 @@ export class AgentMarketplace {
 
   placeBids(task: TaskDefinition): AgentBid[] {
     const candidates = this.list().filter((agent) =>
-      task.requiredCapabilities.every((capability) => agent.capabilities.includes(capability)),
+      task.requiredCapabilities.every((capability) => agent.capabilities.includes(capability))
     );
     return candidates.map((agent) => {
       const capabilityBonus = task.requiredCapabilities.length / (agent.capabilities.length || 1);
@@ -130,7 +130,14 @@ export class AgentMarketplace {
       const confidence = clamp(agent.reliability * 0.5 + agent.reputation * 0.5, 0, 1);
       const priorityBoost = 1 + task.priority * 0.05;
       const score = confidence * priorityBoost - price * 0.01;
-      return { taskId: task.id, agentId: agent.id, price, estimatedDurationMinutes, confidence, score };
+      return {
+        taskId: task.id,
+        agentId: agent.id,
+        price,
+        estimatedDurationMinutes,
+        confidence,
+        score,
+      };
     });
   }
 }
@@ -202,7 +209,7 @@ export class SwarmOrchestrator {
     return [...this.transcript];
   }
 
-  private publish(message: Omit<CommunicationMessage, 'id' | 'timestamp'>): void {
+  private publish(message: Omit<CommunicationMessage, "id" | "timestamp">): void {
     const entry: CommunicationMessage = {
       ...message,
       id: randomUUID(),
@@ -214,9 +221,7 @@ export class SwarmOrchestrator {
 
   private sortedBids(task: TaskDefinition): AgentBid[] {
     const bids = this.marketplace.placeBids(task);
-    return bids
-      .filter((bid) => bid.price <= task.budget)
-      .sort((a, b) => b.score - a.score);
+    return bids.filter((bid) => bid.price <= task.budget).sort((a, b) => b.score - a.score);
   }
 
   private nextAgent(task: TaskDefinition): string | undefined {
@@ -236,15 +241,15 @@ export class SwarmOrchestrator {
     rootTasks: TaskDefinition[],
     executor: (
       task: TaskDefinition,
-      agentId: string,
-    ) => Promise<{ status: 'success' | 'failed'; cost: number; result?: T; confidence?: number }>,
+      agentId: string
+    ) => Promise<{ status: "success" | "failed"; cost: number; result?: T; confidence?: number }>
   ): Promise<{ outcomes: AgentOutcome<T>[]; telemetry: SwarmExecutionTelemetry }> {
     const tasks = rootTasks.flatMap((task) => {
       const decomposed = TaskDecomposer.decompose(task);
       return [decomposed, ...(decomposed.children ?? [])];
     });
-    const consensus = new ConsensusProtocol(() =>
-      new Map(this.marketplace.list().map((agent) => [agent.id, agent.reputation])),
+    const consensus = new ConsensusProtocol(
+      () => new Map(this.marketplace.list().map((agent) => [agent.id, agent.reputation]))
     );
     const start = performance.now();
     const outcomes: AgentOutcome<T>[] = [];
@@ -265,19 +270,15 @@ export class SwarmOrchestrator {
     }
 
     await Promise.all(running);
-    const completed = outcomes.filter((outcome) => outcome.status === 'success');
-    const failed = outcomes.filter((outcome) => outcome.status === 'failed');
+    const completed = outcomes.filter((outcome) => outcome.status === "success");
+    const failed = outcomes.filter((outcome) => outcome.status === "failed");
     const telemetry: SwarmExecutionTelemetry = {
       completed: completed.length,
       failed: failed.length,
       averageCost: mean(outcomes.map((outcome) => outcome.cost)),
-      averageConfidence: mean(
-        completed.map((outcome) => outcome.confidence ?? 0.5),
-      ),
+      averageConfidence: mean(completed.map((outcome) => outcome.confidence ?? 0.5)),
       wallClockMs: performance.now() - start,
-      consensusAgreement: mean(
-        completed.map((outcome) => outcome.consensus?.agreement ?? 0),
-      ),
+      consensusAgreement: mean(completed.map((outcome) => outcome.consensus?.agreement ?? 0)),
     };
     return { outcomes, telemetry };
   }
@@ -286,16 +287,16 @@ export class SwarmOrchestrator {
     task: TaskDefinition,
     executor: (
       task: TaskDefinition,
-      agentId: string,
-    ) => Promise<{ status: 'success' | 'failed'; cost: number; result?: T; confidence?: number }>,
-    consensus: ConsensusProtocol,
+      agentId: string
+    ) => Promise<{ status: "success" | "failed"; cost: number; result?: T; confidence?: number }>,
+    consensus: ConsensusProtocol
   ): Promise<AgentOutcome<T>> {
     const assignedAgent = this.nextAgent(task);
     if (!assignedAgent) {
       return {
         taskId: task.id,
-        agentId: 'unassigned',
-        status: 'failed',
+        agentId: "unassigned",
+        status: "failed",
         cost: 0,
         retries: 0,
         fallbackChain: [],
@@ -310,10 +311,10 @@ export class SwarmOrchestrator {
       attempts += 1;
       this.activeAssignments.set(
         selectedAgent,
-        (this.activeAssignments.get(selectedAgent) ?? 0) + 1,
+        (this.activeAssignments.get(selectedAgent) ?? 0) + 1
       );
       this.publish({
-        from: 'orchestrator',
+        from: "orchestrator",
         to: selectedAgent,
         taskId: task.id,
         content: `Dispatching task ${task.id} attempt ${attempts}`,
@@ -321,13 +322,13 @@ export class SwarmOrchestrator {
 
       try {
         const result = await executor(task, selectedAgent);
-        if (result.status === 'success') {
+        if (result.status === "success") {
           this.marketplace.updateReputation(selectedAgent, 0.05);
           if (fallbackChain.length > 0) {
             this.publish({
               from: selectedAgent,
               taskId: task.id,
-              content: `Recovered after fallback from ${fallbackChain.join(' -> ')}`,
+              content: `Recovered after fallback from ${fallbackChain.join(" -> ")}`,
             });
           }
           candidates.push({
@@ -341,7 +342,7 @@ export class SwarmOrchestrator {
           return {
             taskId: task.id,
             agentId: selectedAgent,
-            status: 'success',
+            status: "success",
             cost: result.cost,
             confidence: result.confidence ?? 0.7,
             consensus: consensusResult,
@@ -361,18 +362,20 @@ export class SwarmOrchestrator {
       } finally {
         this.activeAssignments.set(
           selectedAgent,
-          Math.max((this.activeAssignments.get(selectedAgent) ?? 1) - 1, 0),
+          Math.max((this.activeAssignments.get(selectedAgent) ?? 1) - 1, 0)
         );
       }
 
-      const next = this.sortedBids(task).find((bid) => !fallbackChain.includes(bid.agentId))?.agentId;
+      const next = this.sortedBids(task).find(
+        (bid) => !fallbackChain.includes(bid.agentId)
+      )?.agentId;
       if (!next || next === selectedAgent) {
         break;
       }
       fallbackChain.push(selectedAgent);
       selectedAgent = next;
       this.publish({
-        from: 'orchestrator',
+        from: "orchestrator",
         to: selectedAgent,
         taskId: task.id,
         content: `Attempting fallback with ${selectedAgent}`,
@@ -382,7 +385,7 @@ export class SwarmOrchestrator {
     return {
       taskId: task.id,
       agentId: selectedAgent,
-      status: 'failed',
+      status: "failed",
       cost: 0,
       retries: attempts - 1,
       fallbackChain,
@@ -390,17 +393,42 @@ export class SwarmOrchestrator {
   }
 }
 
-export function buildDefaultSwarm(goal: string): { marketplace: AgentMarketplace; orchestrator: SwarmOrchestrator; task: TaskDefinition } {
+export function buildDefaultSwarm(goal: string): {
+  marketplace: AgentMarketplace;
+  orchestrator: SwarmOrchestrator;
+  task: TaskDefinition;
+} {
   const marketplace = new AgentMarketplace([
-    { id: 'analyst', capabilities: ['analysis', 'summarization'], costPerTask: 1, reliability: 0.8, throughput: 30, reputation: 0.7 },
-    { id: 'executor', capabilities: ['action', 'retrieval'], costPerTask: 1.2, reliability: 0.75, throughput: 25, reputation: 0.65 },
-    { id: 'validator', capabilities: ['validation', 'analysis'], costPerTask: 0.9, reliability: 0.82, throughput: 28, reputation: 0.72 },
+    {
+      id: "analyst",
+      capabilities: ["analysis", "summarization"],
+      costPerTask: 1,
+      reliability: 0.8,
+      throughput: 30,
+      reputation: 0.7,
+    },
+    {
+      id: "executor",
+      capabilities: ["action", "retrieval"],
+      costPerTask: 1.2,
+      reliability: 0.75,
+      throughput: 25,
+      reputation: 0.65,
+    },
+    {
+      id: "validator",
+      capabilities: ["validation", "analysis"],
+      costPerTask: 0.9,
+      reliability: 0.82,
+      throughput: 28,
+      reputation: 0.72,
+    },
   ]);
   const orchestrator = new SwarmOrchestrator({ marketplace });
   const task: TaskDefinition = {
     id: `task-${goal}`,
     goal,
-    requiredCapabilities: ['analysis', 'action', 'validation'],
+    requiredCapabilities: ["analysis", "action", "validation"],
     priority: 5,
     budget: 10,
   };

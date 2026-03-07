@@ -132,7 +132,7 @@ Deliver a **Unified Data Foundation**: **Federation v1** (governed, licensed sou
 
 ```ts
 // server/src/graphql/federation.ts — compile NL→Federated plan with policy
-import { gql } from 'graphql-tag';
+import { gql } from "graphql-tag";
 export const typeDefs = gql`
   type SourcePolicy {
     source: String!
@@ -159,7 +159,7 @@ export const resolvers = {
         sources.map(async (s) => {
           const v = await ctx.policy.checkSource(s, ctx.user, plan);
           return { source: s, allow: v.allow, reason: v.reason };
-        }),
+        })
       );
       const cost = await ctx.cost.estimate(cypher);
       return { steps: plan.steps, cypher, cost, perSourcePolicy };
@@ -215,14 +215,10 @@ type StepLog = {
   policy: string;
   counterfactual: string;
 };
-export async function runAgenticPlan(
-  steps: string[],
-  ctx: any,
-): Promise<StepLog[]> {
+export async function runAgenticPlan(steps: string[], ctx: any): Promise<StepLog[]> {
   const logs: StepLog[] = [];
   for (const name of steps) {
-    const { prompt, cypher, policy, counterfactual } =
-      await ctx.agent.run(name);
+    const { prompt, cypher, policy, counterfactual } = await ctx.agent.run(name);
     logs.push({ name, prompt, cypher, policy: policy.reason, counterfactual });
   }
   return logs;

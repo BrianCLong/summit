@@ -3,14 +3,7 @@
   "$id": "https://summit.example.com/schemas/intent/intent-statement.schema.json",
   "title": "IntentStatement",
   "type": "object",
-  "required": [
-    "schemaVersion",
-    "intent",
-    "atomicFacts",
-    "confidence",
-    "policy",
-    "provenance"
-  ],
+  "required": ["schemaVersion", "intent", "atomicFacts", "confidence", "policy", "provenance"],
   "additionalProperties": false,
   "properties": {
     "schemaVersion": { "type": "string" },

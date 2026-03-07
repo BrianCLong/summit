@@ -9,15 +9,15 @@ The IntelGraph Platform provides comprehensive API documentation through both **
 
 ## Quick Links
 
-| Documentation | URL (Development) | Description |
-|--------------|-------------------|-------------|
-| **Swagger UI** | http://localhost:4000/api/docs | Interactive REST API documentation |
-| **ReDoc** | http://localhost:4000/api/docs/redoc | Alternative REST API documentation |
-| **GraphQL Playground** | http://localhost:4000/api/docs/graphql-playground | Interactive GraphQL IDE |
-| **OpenAPI Spec (JSON)** | http://localhost:4000/api/docs/openapi.json | OpenAPI 3.0 specification |
-| **OpenAPI Spec (YAML)** | http://localhost:4000/api/docs/openapi.yaml | OpenAPI 3.0 specification |
-| **GraphQL Schema** | http://localhost:4000/api/docs/graphql-schema | GraphQL SDL |
-| **GraphQL Docs** | http://localhost:4000/api/docs/graphql-docs | GraphQL examples & best practices |
+| Documentation           | URL (Development)                                 | Description                        |
+| ----------------------- | ------------------------------------------------- | ---------------------------------- |
+| **Swagger UI**          | http://localhost:4000/api/docs                    | Interactive REST API documentation |
+| **ReDoc**               | http://localhost:4000/api/docs/redoc              | Alternative REST API documentation |
+| **GraphQL Playground**  | http://localhost:4000/api/docs/graphql-playground | Interactive GraphQL IDE            |
+| **OpenAPI Spec (JSON)** | http://localhost:4000/api/docs/openapi.json       | OpenAPI 3.0 specification          |
+| **OpenAPI Spec (YAML)** | http://localhost:4000/api/docs/openapi.yaml       | OpenAPI 3.0 specification          |
+| **GraphQL Schema**      | http://localhost:4000/api/docs/graphql-schema     | GraphQL SDL                        |
+| **GraphQL Docs**        | http://localhost:4000/api/docs/graphql-docs       | GraphQL examples & best practices  |
 
 ## Keeping the Docs in Sync
 
@@ -30,6 +30,7 @@ The IntelGraph Platform provides comprehensive API documentation through both **
 ### Accessing Swagger UI
 
 1. Start the API server:
+
    ```bash
    make up
    # or
@@ -50,31 +51,37 @@ The IntelGraph Platform provides comprehensive API documentation through both **
 The REST API is organized into the following categories:
 
 #### 1. Cases API (`/api/cases/*`)
+
 - Create and manage investigation cases
 - Approve cases
 - Export case data with watermarks
 
 **Key Endpoints:**
+
 - `POST /api/cases` - Create new case
 - `GET /api/cases/{id}` - Get case by ID
 - `POST /api/cases/{id}/approve` - Approve case
 - `GET /api/cases/{id}/export` - Export case data
 
 #### 2. Evidence API (`/api/evidence/*`)
+
 - Manage evidence annotations
 - Export evidence as PDF
 
 **Key Endpoints:**
+
 - `GET /api/evidence/{id}/annotations` - List annotations
 - `POST /api/evidence/{id}/annotations` - Create annotation
 - `GET /api/evidence/{id}/pdf` - Export as PDF
 
 #### 3. Ingest API (`/api/ingest/*`)
+
 - Connect to external data sources (Twitter, GitHub, S3, etc.)
 - Manage ingestion jobs
 - Validate connector configurations
 
 **Key Endpoints:**
+
 - `GET /api/ingest/connectors` - List available connectors
 - `POST /api/ingest/start` - Start ingestion job
 - `GET /api/ingest/progress/{id}` - Check job progress
@@ -83,39 +90,47 @@ The REST API is organized into the following categories:
 - `POST /api/ingest/dry-run/{id}` - Validate configuration
 
 #### 4. Triage API (`/api/triage/*`)
+
 - AI-powered triage suggestions
 - Approve and materialize suggestions
 
 **Key Endpoints:**
+
 - `GET /api/triage/suggestions` - List suggestions
 - `POST /api/triage/suggestions` - Create suggestion
 - `POST /api/triage/suggestions/{id}/approve` - Approve
 - `POST /api/triage/suggestions/{id}/materialize` - Materialize into graph
 
 #### 5. Analytics API (`/api/analytics/*`)
+
 - Link prediction
 - Advanced graph analytics
 
 **Key Endpoints:**
+
 - `GET /api/analytics/link-prediction` - Predict potential links
 
 #### 6. Copilot API (`/api/copilot/*`)
+
 - Query cost estimation
 - Prompt safety classification
 - Query templates
 
 **Key Endpoints:**
+
 - `POST /api/copilot/estimate` - Estimate query cost
 - `POST /api/copilot/classify` - Classify prompt safety
 - `POST /api/copilot/cookbook` - Get query templates
 
 #### 7. Admin API (`/api/admin/*`)
+
 - User and tenant management
 - Audit logs
 - Feature flags
 - OPA policy management
 
 **Key Endpoints:**
+
 - `GET /api/admin/tenants` - List tenants
 - `GET /api/admin/users` - List users
 - `GET /api/admin/audit` - Query audit logs
@@ -125,12 +140,14 @@ The REST API is organized into the following categories:
 - `PUT /api/admin/policy` - Update OPA policy
 
 #### 8. Versioning API (`/api/versioning/*`) ✨ NEW
+
 - API version information
 - Compatibility checking
 - Changelogs and migration guides
 - Breaking changes documentation
 
 **Key Endpoints:**
+
 - `GET /api/versioning/versions` - List all API versions
 - `GET /api/versioning/versions/{version}` - Get version details
 - `GET /api/versioning/compatibility` - Get compatibility matrix
@@ -144,10 +161,12 @@ The REST API is organized into the following categories:
 - `GET /api/versioning/status` - Get versioning status
 
 #### 9. Health & Monitoring
+
 - Health checks
 - Basic metrics
 
 **Key Endpoints:**
+
 - `GET /health` - Health check (no auth required)
 - `GET /metrics` - Basic metrics (no auth required)
 
@@ -160,6 +179,7 @@ Authorization: Bearer <your-jwt-token>
 ```
 
 **Exceptions (no auth required):**
+
 - `/health`
 - `/metrics`
 - `/api/docs/*` (documentation endpoints)
@@ -241,6 +261,7 @@ curl http://localhost:4000/api/docs/graphql-docs | jq
 ```
 
 This returns:
+
 - **Overview** - GraphQL API description
 - **Examples** - Query, mutation, and subscription examples
 - **Best Practices** - Security and performance tips
@@ -256,6 +277,7 @@ curl http://localhost:4000/api/docs/graphql-schema
 ### Key GraphQL Operations
 
 #### Queries
+
 - `entity(id: ID!)` - Get entity by ID
 - `searchEntities(query: String!, filter: EntityFilter)` - Search entities
 - `findPaths(input: PathfindingInput!)` - Find paths between entities
@@ -264,6 +286,7 @@ curl http://localhost:4000/api/docs/graphql-schema
 - `investigation(id: ID!)` - Get investigation details
 
 #### Mutations
+
 - `createEntity(input: CreateEntityInput!)` - Create new entity
 - `createRelationship(input: CreateRelationshipInput!)` - Create relationship
 - `createInvestigation(input: CreateInvestigationInput!)` - Start investigation
@@ -272,6 +295,7 @@ curl http://localhost:4000/api/docs/graphql-schema
 - `mergeEntities(sourceId: ID!, targetId: ID!)` - Merge duplicates
 
 #### Subscriptions
+
 - `entityUpdated(investigationId: ID)` - Subscribe to entity changes
 - `relationshipUpdated(investigationId: ID)` - Subscribe to relationship changes
 - `investigationUpdated(id: ID!)` - Subscribe to investigation changes
@@ -293,13 +317,16 @@ The IntelGraph Platform supports multiple API versions simultaneously.
 ### Specifying API Version
 
 #### REST API
+
 Use version in the Accept header:
+
 ```bash
 curl -H "Accept: application/vnd.intelgraph.v2+json" \
      http://localhost:4000/api/cases
 ```
 
 Or use versioned GraphQL endpoints:
+
 - `/graphql` - Default/latest version
 - `/v1/graphql` - Version 1.x
 - `/v2/graphql` - Version 2.x
@@ -371,17 +398,16 @@ curl http://localhost:4000/api/ingest/progress/<jobId> \
 
 ```graphql
 mutation CreateEntity {
-  createEntity(input: {
-    type: PERSON
-    name: "John Doe"
-    description: "Subject of investigation"
-    properties: {
-      dateOfBirth: "1980-01-01"
-      nationality: "US"
+  createEntity(
+    input: {
+      type: PERSON
+      name: "John Doe"
+      description: "Subject of investigation"
+      properties: { dateOfBirth: "1980-01-01", nationality: "US" }
+      confidence: 0.95
+      sourceIds: ["source1"]
     }
-    confidence: 0.95
-    sourceIds: ["source1"]
-  }) {
+  ) {
     id
     type
     name
@@ -401,7 +427,7 @@ mutation CreateEntity {
 ```graphql
 # Query: find recent entities containing a keyword
 query SearchEntities {
-  searchEntities(query: "ransomware", filter: {limit: 5}) {
+  searchEntities(query: "ransomware", filter: { limit: 5 }) {
     id
     name
     type
@@ -421,7 +447,7 @@ mutation LinkEntities {
       sourceId: "entity-123"
       targetId: "entity-456"
       type: "ASSOCIATED_WITH"
-      properties: {confidence: 0.82, discoveredBy: "copilot"}
+      properties: { confidence: 0.82, discoveredBy: "copilot" }
     }
   ) {
     id
@@ -462,6 +488,7 @@ curl -I http://localhost:4000/api/docs/graphql-playground
 ### When to Update OpenAPI Spec
 
 Update `/home/user/summit/openapi/spec.yaml` when:
+
 1. Adding new REST endpoints
 2. Changing request/response schemas
 3. Adding new error codes
@@ -486,10 +513,12 @@ Update `/home/user/summit/openapi/spec.yaml` when:
 ### GraphQL Schema Updates
 
 GraphQL schema documentation is auto-generated from:
+
 - `services/api/src/graphql/schema.js` - Schema definition
 - `services/api/src/docs/graphql-docs.ts` - Examples and descriptions
 
 Update examples when adding new:
+
 - Queries
 - Mutations
 - Subscriptions
@@ -563,6 +592,7 @@ When adding new API endpoints:
 ---
 
 **Questions or Issues?**
+
 - File an issue at: https://github.com/BrianCLong/summit/issues
 - Contact: IntelGraph Team
 

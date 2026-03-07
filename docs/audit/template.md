@@ -5,39 +5,39 @@
 
 ## Agent Information
 
-- **Agent Name:** (e.g., codex-rag-engineer)  
+- **Agent Name:** (e.g., codex-rag-engineer)
 - **Agent Tier:** (0–3)
 
 ## Human Sponsor
 
-- **GitHub Handle:** @username  
+- **GitHub Handle:** @username
 - **Role:** (Architect, Security Lead, Engineer)
 
 ## Scope
 
-- **Domains:** (backend / rag / graph / security / docs)  
+- **Domains:** (backend / rag / graph / security / docs)
 - **Paths Touched:** (explicit list)
 
 ## PR Information
 
-- **PR Number:** #  
+- **PR Number:** #
 - **PR Link:** URL
 
 ## Risk Classification
 
-- **Risk Level:** low / medium / high  
+- **Risk Level:** low / medium / high
 - **Security Impact:** none / reviewed / material
 
 ## Outcome
 
-- ☐ Merged  
-- ☐ Rejected  
+- ☐ Merged
+- ☐ Rejected
 - ☐ Reverted
 
 ## Notes
 
-- Summary of change  
-- Any deviations from plan  
+- Summary of change
+- Any deviations from plan
 - Review findings
 
 **Attestation:**  

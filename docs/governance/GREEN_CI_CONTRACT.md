@@ -3,7 +3,6 @@
 > Evidence-IDs: EVD-PLACEHOLDER
 > Status: active
 
-
 # Green CI Contract
 
 **Purpose:** Define the non-negotiable standards for code stability and test determinism.

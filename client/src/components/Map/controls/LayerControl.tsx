@@ -2,7 +2,7 @@
  * Layer Control Component for managing map layers
  */
 
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   Box,
   Paper,
@@ -16,28 +16,28 @@ import {
   Typography,
   IconButton,
   Collapse,
-} from '@mui/material';
+} from "@mui/material";
 import {
   Layers as LayersIcon,
   ExpandLess,
   ExpandMore,
   Visibility,
   VisibilityOff,
-} from '@mui/icons-material';
+} from "@mui/icons-material";
 
 export interface LayerConfig {
   id: string;
   name: string;
   visible: boolean;
   opacity: number;
-  type: 'base' | 'overlay';
+  type: "base" | "overlay";
 }
 
 export interface LayerControlProps {
   layers: LayerConfig[];
   onLayerToggle: (layerId: string, visible: boolean) => void;
   onOpacityChange: (layerId: string, opacity: number) => void;
-  position?: 'topright' | 'topleft' | 'bottomright' | 'bottomleft';
+  position?: "topright" | "topleft" | "bottomright" | "bottomleft";
 }
 
 /**
@@ -47,16 +47,16 @@ export const LayerControl: React.FC<LayerControlProps> = ({
   layers,
   onLayerToggle,
   onOpacityChange,
-  position = 'topright',
+  position = "topright",
 }) => {
   const [open, setOpen] = useState(true);
   const [expandedLayers, setExpandedLayers] = useState<Set<string>>(new Set());
 
   const positionStyles: Record<string, React.CSSProperties> = {
-    topright: { position: 'absolute', top: 10, right: 10, zIndex: 1000 },
-    topleft: { position: 'absolute', top: 10, left: 10, zIndex: 1000 },
-    bottomright: { position: 'absolute', bottom: 10, right: 10, zIndex: 1000 },
-    bottomleft: { position: 'absolute', bottom: 10, left: 10, zIndex: 1000 },
+    topright: { position: "absolute", top: 10, right: 10, zIndex: 1000 },
+    topleft: { position: "absolute", top: 10, left: 10, zIndex: 1000 },
+    bottomright: { position: "absolute", bottom: 10, right: 10, zIndex: 1000 },
+    bottomleft: { position: "absolute", bottom: 10, left: 10, zIndex: 1000 },
   };
 
   const toggleLayerExpanded = (layerId: string) => {
@@ -81,15 +81,15 @@ export const LayerControl: React.FC<LayerControlProps> = ({
       <Box
         sx={{
           p: 1,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          borderBottom: '1px solid #e0e0e0',
-          cursor: 'pointer',
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          borderBottom: "1px solid #e0e0e0",
+          cursor: "pointer",
         }}
         onClick={() => setOpen(!open)}
       >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           <LayersIcon fontSize="small" />
           <Typography variant="subtitle2">Layers</Typography>
         </Box>
@@ -99,7 +99,7 @@ export const LayerControl: React.FC<LayerControlProps> = ({
       </Box>
 
       <Collapse in={open}>
-        <List dense sx={{ maxHeight: 400, overflow: 'auto' }}>
+        <List dense sx={{ maxHeight: 400, overflow: "auto" }}>
           {layers.map((layer) => (
             <Box key={layer.id}>
               <ListItem
@@ -113,10 +113,7 @@ export const LayerControl: React.FC<LayerControlProps> = ({
                   />
                 }
               >
-                <ListItemButton
-                  onClick={() => toggleLayerExpanded(layer.id)}
-                  dense
-                >
+                <ListItemButton onClick={() => toggleLayerExpanded(layer.id)} dense>
                   <ListItemIcon sx={{ minWidth: 36 }}>
                     {layer.visible ? (
                       <Visibility fontSize="small" />
@@ -127,8 +124,8 @@ export const LayerControl: React.FC<LayerControlProps> = ({
                   <ListItemText
                     primary={layer.name}
                     secondary={layer.type}
-                    primaryTypographyProps={{ variant: 'body2' }}
-                    secondaryTypographyProps={{ variant: 'caption' }}
+                    primaryTypographyProps={{ variant: "body2" }}
+                    secondaryTypographyProps={{ variant: "caption" }}
                   />
                   {expandedLayers.has(layer.id) ? (
                     <ExpandLess fontSize="small" />
@@ -145,9 +142,7 @@ export const LayerControl: React.FC<LayerControlProps> = ({
                   </Typography>
                   <Slider
                     value={layer.opacity}
-                    onChange={(_, value) =>
-                      onOpacityChange(layer.id, value as number)
-                    }
+                    onChange={(_, value) => onOpacityChange(layer.id, value as number)}
                     min={0}
                     max={1}
                     step={0.1}

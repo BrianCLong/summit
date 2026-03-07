@@ -1,20 +1,20 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from "vitest";
 import {
   MultiRegionReadiness,
   type MultiRegionConfig,
   type RegionAccessRequest,
-} from '../src/multi-region-readiness.js';
+} from "../src/multi-region-readiness.js";
 
 const baseConfig: MultiRegionConfig = {
   regions: [
     {
-      name: 'us-east',
-      tier: 'gold',
+      name: "us-east",
+      tier: "gold",
       primaryWrite: true,
       followerReads: true,
       dnsWeight: 60,
-      failoverTargets: ['eu-west'],
-      capacityBuffer: 'N+2',
+      failoverTargets: ["eu-west"],
+      capacityBuffer: "N+2",
       clockSkewMs: 20,
       slo: {
         readP95Ms: 320,
@@ -26,19 +26,19 @@ const baseConfig: MultiRegionConfig = {
         ingestLatencyP95Ms: 80,
       },
       costCaps: { infra: 18000, llm: 5000, alertPercent: 80 },
-      residencyTags: ['federal', 'financial'],
+      residencyTags: ["federal", "financial"],
       kmsRoot: true,
       opaEnabled: true,
       mtlsEnabled: true,
     },
     {
-      name: 'eu-west',
-      tier: 'gold',
+      name: "eu-west",
+      tier: "gold",
       primaryWrite: false,
       followerReads: true,
       dnsWeight: 40,
-      failoverTargets: ['us-east'],
-      capacityBuffer: 'N+1',
+      failoverTargets: ["us-east"],
+      capacityBuffer: "N+1",
       clockSkewMs: 15,
       slo: {
         readP95Ms: 330,
@@ -50,7 +50,7 @@ const baseConfig: MultiRegionConfig = {
         ingestLatencyP95Ms: 90,
       },
       costCaps: { infra: 18000, llm: 5000, alertPercent: 80 },
-      residencyTags: ['eu'],
+      residencyTags: ["eu"],
       kmsRoot: true,
       opaEnabled: true,
       mtlsEnabled: true,
@@ -58,27 +58,27 @@ const baseConfig: MultiRegionConfig = {
   ],
   residencyRules: [
     {
-      residencyLabel: 'federal',
-      allowedRegions: ['us-east'],
-      primaryWriteRegion: 'us-east',
-      purposes: ['analysis', 'storage'],
+      residencyLabel: "federal",
+      allowedRegions: ["us-east"],
+      primaryWriteRegion: "us-east",
+      purposes: ["analysis", "storage"],
     },
     {
-      residencyLabel: 'eu',
-      allowedRegions: ['eu-west'],
-      primaryWriteRegion: 'eu-west',
-      purposes: ['analysis', 'storage'],
+      residencyLabel: "eu",
+      allowedRegions: ["eu-west"],
+      primaryWriteRegion: "eu-west",
+      purposes: ["analysis", "storage"],
     },
   ],
   replication: {
-    strategy: 'async-streams',
-    conflictResolution: 'crdt',
+    strategy: "async-streams",
+    conflictResolution: "crdt",
     signedLedger: true,
-    deletionSemantics: 'region-scoped',
+    deletionSemantics: "region-scoped",
     backoutSupported: true,
   },
   ingest: {
-    adapters: ['object', 'http', 'bus'],
+    adapters: ["object", "http", "bus"],
     privacyFilters: true,
     residencyGatekeeper: true,
     dlqEnabled: true,
@@ -139,8 +139,8 @@ const baseConfig: MultiRegionConfig = {
   },
 };
 
-describe('MultiRegionReadiness', () => {
-  it('validates configuration against blueprint controls', () => {
+describe("MultiRegionReadiness", () => {
+  it("validates configuration against blueprint controls", () => {
     const readiness = new MultiRegionReadiness({
       ...baseConfig,
       regions: [
@@ -152,59 +152,59 @@ describe('MultiRegionReadiness', () => {
     });
 
     const issues = readiness.validateConfig();
-    expect(issues.some((issue) => issue.code === 'slo.read.us-east')).toBe(true);
-    expect(issues.some((issue) => issue.severity === 'error')).toBe(true);
+    expect(issues.some((issue) => issue.code === "slo.read.us-east")).toBe(true);
+    expect(issues.some((issue) => issue.severity === "error")).toBe(true);
   });
 
-  it('denies out-of-residency writes and requires failover targets', () => {
+  it("denies out-of-residency writes and requires failover targets", () => {
     const readiness = new MultiRegionReadiness(baseConfig);
     const request: RegionAccessRequest = {
-      action: 'write',
-      region: 'eu-west',
-      residencyLabel: 'federal',
-      purpose: 'analysis',
-      environment: 'prod',
+      action: "write",
+      region: "eu-west",
+      residencyLabel: "federal",
+      purpose: "analysis",
+      environment: "prod",
     };
 
     const decision = readiness.evaluateRequest(request);
     expect(decision.allowed).toBe(false);
-    expect(decision.reasons).toContain('deny:residency-block');
-    expect(decision.reasons).toContain('deny:primary-write-only');
+    expect(decision.reasons).toContain("deny:residency-block");
+    expect(decision.reasons).toContain("deny:primary-write-only");
   });
 
-  it('permits compliant reads and emits obligations for sensitive data', () => {
+  it("permits compliant reads and emits obligations for sensitive data", () => {
     const readiness = new MultiRegionReadiness(baseConfig);
     const request: RegionAccessRequest = {
-      action: 'read',
-      region: 'us-east',
-      residencyLabel: 'federal',
-      purpose: 'analysis',
-      environment: 'prod',
-      dataClasses: ['production-PII'],
+      action: "read",
+      region: "us-east",
+      residencyLabel: "federal",
+      purpose: "analysis",
+      environment: "prod",
+      dataClasses: ["production-PII"],
       latencyMs: 200,
     };
 
     const decision = readiness.evaluateRequest(request);
     expect(decision.allowed).toBe(true);
-    expect(decision.obligations).toContain('apply-privacy-filter');
-    expect(decision.reasons).toEqual(['allow:compliant']);
+    expect(decision.obligations).toContain("apply-privacy-filter");
+    expect(decision.reasons).toEqual(["allow:compliant"]);
   });
 
-  it('raises cost guardrails when nearing caps', () => {
+  it("raises cost guardrails when nearing caps", () => {
     const readiness = new MultiRegionReadiness(baseConfig);
     const request: RegionAccessRequest = {
-      action: 'read',
-      region: 'us-east',
-      residencyLabel: 'federal',
-      purpose: 'analysis',
-      environment: 'prod',
+      action: "read",
+      region: "us-east",
+      residencyLabel: "federal",
+      purpose: "analysis",
+      environment: "prod",
       estimatedInfraCost: 15000,
       latencyMs: 200,
     };
 
     const decision = readiness.evaluateRequest(request);
     expect(decision.allowed).toBe(true);
-    expect(decision.reasons.some((reason) => reason.includes('cost'))).toBe(true);
-    expect(decision.obligations).toContain('emit-finops-alert');
+    expect(decision.reasons.some((reason) => reason.includes("cost"))).toBe(true);
+    expect(decision.obligations).toContain("emit-finops-alert");
   });
 });

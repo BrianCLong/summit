@@ -2,18 +2,18 @@
  * Switchboard Capsule Runner
  */
 
-import * as fs from 'fs';
-import * as path from 'path';
-import { spawnSync } from 'child_process';
-import * as crypto from 'crypto';
+import * as fs from "fs";
+import * as path from "path";
+import { spawnSync } from "child_process";
+import * as crypto from "crypto";
 import {
   CapsuleManifest,
   CapsuleStep,
   loadCapsuleManifest,
   normalizeRelativePath,
-} from './switchboard-capsule.js';
-import { CapsuleLedger } from './switchboard-ledger.js';
-import { CapsulePolicyGate, CapsulePolicyAction } from './switchboard-policy.js';
+} from "./switchboard-capsule.js";
+import { CapsuleLedger } from "./switchboard-ledger.js";
+import { CapsulePolicyGate, CapsulePolicyAction } from "./switchboard-policy.js";
 
 export interface CapsuleRunOptions {
   manifestPath: string;
@@ -25,7 +25,7 @@ export interface CapsuleRunOptions {
 export interface CapsuleRunResult {
   sessionId: string;
   sessionDir: string;
-  status: 'completed' | 'failed';
+  status: "completed" | "failed";
   diffPath: string;
   outputsDir: string;
   ledgerPath: string;
@@ -63,12 +63,12 @@ function bootstrapWritePath(baseDir: string, normalizedPath: string, isDirHint: 
     return;
   }
   ensureDir(path.dirname(targetPath));
-  fs.writeFileSync(targetPath, '', 'utf8');
+  fs.writeFileSync(targetPath, "", "utf8");
 }
 
 function buildEnv(manifest: CapsuleManifest, secrets: Record<string, string>): NodeJS.ProcessEnv {
   const env: NodeJS.ProcessEnv = {
-    PATH: process.env.PATH ?? '',
+    PATH: process.env.PATH ?? "",
   };
   for (const key of manifest.env_allowlist) {
     if (process.env[key]) {
@@ -103,19 +103,19 @@ function normalizeCapsulePaths(
     if (!normalized) {
       throw new Error(`Invalid capsule path: ${entry}`);
     }
-    return { original: entry, normalized, isDirHint: entry.endsWith('/') };
+    return { original: entry, normalized, isDirHint: entry.endsWith("/") };
   });
 }
 
 function parseDiffFiles(diffText: string): string[] {
   const files = new Set<string>();
-  const lines = diffText.split('\n');
+  const lines = diffText.split("\n");
   for (const line of lines) {
-    if (line.startsWith('+++ b/')) {
-      const filePath = line.slice('+++ b/'.length).trim();
-      if (filePath && filePath !== '/dev/null') {
-        const normalized = filePath.startsWith('workspace/')
-          ? filePath.slice('workspace/'.length)
+    if (line.startsWith("+++ b/")) {
+      const filePath = line.slice("+++ b/".length).trim();
+      if (filePath && filePath !== "/dev/null") {
+        const normalized = filePath.startsWith("workspace/")
+          ? filePath.slice("workspace/".length)
           : filePath;
         files.add(normalized);
       }
@@ -125,7 +125,7 @@ function parseDiffFiles(diffText: string): string[] {
 }
 
 function computeHash(content: string): string {
-  return crypto.createHash('sha256').update(content).digest('hex');
+  return crypto.createHash("sha256").update(content).digest("hex");
 }
 
 function evaluatePolicy(
@@ -135,7 +135,7 @@ function evaluatePolicy(
   target: string
 ): void {
   const decision = gate.evaluate(action);
-  ledger.append('policy_decision', {
+  ledger.append("policy_decision", {
     action: action.type,
     target,
     allow: decision.allow,
@@ -148,10 +148,14 @@ function evaluatePolicy(
   }
 }
 
-function loadSecrets(step: CapsuleStep, gate: CapsulePolicyGate, ledger: CapsuleLedger): Record<string, string> {
+function loadSecrets(
+  step: CapsuleStep,
+  gate: CapsulePolicyGate,
+  ledger: CapsuleLedger
+): Record<string, string> {
   const secrets: Record<string, string> = {};
   for (const handle of step.secrets) {
-    evaluatePolicy(ledger, gate, { type: 'secret', secret_handle: handle }, handle);
+    evaluatePolicy(ledger, gate, { type: "secret", secret_handle: handle }, handle);
     const value = process.env[`SWITCHBOARD_SECRET_${handle}`];
     if (!value) {
       throw new Error(`Secret handle missing in environment: ${handle}`);
@@ -161,25 +165,29 @@ function loadSecrets(step: CapsuleStep, gate: CapsulePolicyGate, ledger: Capsule
   return secrets;
 }
 
-function evaluatePathActions(step: CapsuleStep, gate: CapsulePolicyGate, ledger: CapsuleLedger): void {
+function evaluatePathActions(
+  step: CapsuleStep,
+  gate: CapsulePolicyGate,
+  ledger: CapsuleLedger
+): void {
   for (const filePath of step.reads) {
-    evaluatePolicy(ledger, gate, { type: 'read', path: filePath }, filePath);
+    evaluatePolicy(ledger, gate, { type: "read", path: filePath }, filePath);
   }
   for (const filePath of step.writes) {
-    evaluatePolicy(ledger, gate, { type: 'write', path: filePath }, filePath);
+    evaluatePolicy(ledger, gate, { type: "write", path: filePath }, filePath);
   }
 }
 
 export async function runCapsule(options: CapsuleRunOptions): Promise<CapsuleRunResult> {
   const manifest = loadCapsuleManifest(options.manifestPath);
   const repoRoot = path.resolve(options.repoRoot);
-  const sessionsRoot = options.sessionsRoot ?? path.join(repoRoot, '.switchboard', 'capsules');
+  const sessionsRoot = options.sessionsRoot ?? path.join(repoRoot, ".switchboard", "capsules");
   const sessionId = createSessionId();
   const sessionDir = path.join(sessionsRoot, sessionId);
-  const snapshotDir = path.join(sessionDir, 'snapshot');
-  const workspaceDir = path.join(sessionDir, 'workspace');
-  const outputsDir = path.join(sessionDir, 'outputs');
-  const diffPath = path.join(sessionDir, 'diff.patch');
+  const snapshotDir = path.join(sessionDir, "snapshot");
+  const workspaceDir = path.join(sessionDir, "workspace");
+  const outputsDir = path.join(sessionDir, "outputs");
+  const diffPath = path.join(sessionDir, "diff.patch");
 
   ensureDir(sessionDir);
   ensureDir(snapshotDir);
@@ -187,13 +195,13 @@ export async function runCapsule(options: CapsuleRunOptions): Promise<CapsuleRun
   ensureDir(outputsDir);
 
   fs.writeFileSync(
-    path.join(sessionDir, 'manifest.json'),
+    path.join(sessionDir, "manifest.json"),
     `${JSON.stringify(manifest, null, 2)}\n`,
-    'utf8'
+    "utf8"
   );
 
   const ledger = new CapsuleLedger(sessionDir, sessionId);
-  ledger.append('capsule_start', {
+  ledger.append("capsule_start", {
     manifest_path: path.resolve(options.manifestPath),
     network_mode: manifest.network_mode,
     step_count: manifest.steps.length,
@@ -232,7 +240,7 @@ export async function runCapsule(options: CapsuleRunOptions): Promise<CapsuleRun
     bootstrapWritePath(workspaceDir, capsulePath.normalized, capsulePath.isDirHint);
   }
 
-  let status: CapsuleRunResult['status'] = 'completed';
+  let status: CapsuleRunResult["status"] = "completed";
   let failure: Error | null = null;
 
   try {
@@ -241,8 +249,13 @@ export async function runCapsule(options: CapsuleRunOptions): Promise<CapsuleRun
       const stepId = step.id ?? `step-${index + 1}`;
       const stepLabel = step.name ?? stepId;
 
-      evaluatePolicy(ledger, gate, { type: 'exec', command: step.command }, step.command);
-      evaluatePolicy(ledger, gate, { type: 'network', allow_network: step.allow_network }, 'network');
+      evaluatePolicy(ledger, gate, { type: "exec", command: step.command }, step.command);
+      evaluatePolicy(
+        ledger,
+        gate,
+        { type: "network", allow_network: step.allow_network },
+        "network"
+      );
       evaluatePathActions(step, gate, ledger);
 
       const secrets = loadSecrets(step, gate, ledger);
@@ -252,16 +265,16 @@ export async function runCapsule(options: CapsuleRunOptions): Promise<CapsuleRun
       const result = spawnSync(step.command, step.args, {
         cwd: workspaceDir,
         env,
-        encoding: 'utf8',
+        encoding: "utf8",
       });
       const durationMs = Date.now() - start;
 
       const stdoutPath = path.join(outputsDir, `${stepId}.stdout.log`);
       const stderrPath = path.join(outputsDir, `${stepId}.stderr.log`);
-      fs.writeFileSync(stdoutPath, result.stdout ?? '', 'utf8');
-      fs.writeFileSync(stderrPath, result.stderr ?? '', 'utf8');
+      fs.writeFileSync(stdoutPath, result.stdout ?? "", "utf8");
+      fs.writeFileSync(stderrPath, result.stderr ?? "", "utf8");
 
-      ledger.append('tool_exec', {
+      ledger.append("tool_exec", {
         step_id: stepId,
         step_name: stepLabel,
         command: step.command,
@@ -272,10 +285,10 @@ export async function runCapsule(options: CapsuleRunOptions): Promise<CapsuleRun
         stderr_path: path.relative(sessionDir, stderrPath),
       });
 
-      if (step.category === 'test') {
-        ledger.append('test_result', {
+      if (step.category === "test") {
+        ledger.append("test_result", {
           step_id: stepId,
-          status: result.status === 0 ? 'passed' : 'failed',
+          status: result.status === 0 ? "passed" : "failed",
           exit_code: result.status ?? 0,
         });
       }
@@ -285,37 +298,37 @@ export async function runCapsule(options: CapsuleRunOptions): Promise<CapsuleRun
       }
     }
   } catch (error) {
-    status = 'failed';
+    status = "failed";
     const message = error instanceof Error ? error.message : String(error);
-    ledger.append('capsule_error', { message });
+    ledger.append("capsule_error", { message });
     failure = error instanceof Error ? error : new Error(message);
   } finally {
-    const diffResult = spawnSync('git', ['diff', '--no-index', '--', 'snapshot', 'workspace'], {
-      encoding: 'utf8',
+    const diffResult = spawnSync("git", ["diff", "--no-index", "--", "snapshot", "workspace"], {
+      encoding: "utf8",
       cwd: sessionDir,
     });
-    const diffText = diffResult.stdout ?? '';
-    fs.writeFileSync(diffPath, diffText, 'utf8');
+    const diffText = diffResult.stdout ?? "";
+    fs.writeFileSync(diffPath, diffText, "utf8");
     const diffHash = computeHash(diffText);
 
-    ledger.append('diff_hash', {
+    ledger.append("diff_hash", {
       diff_path: path.relative(sessionDir, diffPath),
       hash: diffHash,
     });
 
     const changedFiles = parseDiffFiles(diffText);
     for (const filePath of changedFiles) {
-      ledger.append('file_write', {
+      ledger.append("file_write", {
         path: filePath,
       });
     }
 
     const policyViolations: string[] = [];
     for (const filePath of changedFiles) {
-      const decision = gate.evaluate({ type: 'write', path: filePath });
+      const decision = gate.evaluate({ type: "write", path: filePath });
       if (!decision.allow) {
-        ledger.append('policy_decision', {
-          action: 'write',
+        ledger.append("policy_decision", {
+          action: "write",
           target: filePath,
           allow: false,
           reason: decision.reason,
@@ -323,18 +336,18 @@ export async function runCapsule(options: CapsuleRunOptions): Promise<CapsuleRun
           waiver_reason: decision.waiver_reason ?? null,
         });
         policyViolations.push(filePath);
-        status = 'failed';
+        status = "failed";
       }
     }
 
-    ledger.append('capsule_end', {
+    ledger.append("capsule_end", {
       status,
       diff_hash: diffHash,
       outputs_dir: path.relative(sessionDir, outputsDir),
     });
 
     if (policyViolations.length > 0 && !failure) {
-      failure = new Error(`Capsule write policy violations: ${policyViolations.join(', ')}`);
+      failure = new Error(`Capsule write policy violations: ${policyViolations.join(", ")}`);
     }
   }
 

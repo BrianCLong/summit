@@ -14,22 +14,22 @@ export interface AdversarialAnalysis {
 }
 
 export enum AdversarialAttackType {
-  FGSM = 'fgsm',
-  PGD = 'pgd',
-  C_AND_W = 'c_and_w',
-  DEEPFOOL = 'deepfool',
-  JSMA = 'jsma',
-  SQUARE = 'square',
-  AUTOATTACK = 'autoattack',
-  PATCH = 'patch',
-  SPATIAL = 'spatial',
-  SEMANTIC = 'semantic',
-  UNIVERSAL = 'universal',
-  BACKDOOR = 'backdoor',
-  POISONING = 'poisoning',
-  MODEL_EXTRACTION = 'model_extraction',
-  MEMBERSHIP_INFERENCE = 'membership_inference',
-  UNKNOWN = 'unknown',
+  FGSM = "fgsm",
+  PGD = "pgd",
+  C_AND_W = "c_and_w",
+  DEEPFOOL = "deepfool",
+  JSMA = "jsma",
+  SQUARE = "square",
+  AUTOATTACK = "autoattack",
+  PATCH = "patch",
+  SPATIAL = "spatial",
+  SEMANTIC = "semantic",
+  UNIVERSAL = "universal",
+  BACKDOOR = "backdoor",
+  POISONING = "poisoning",
+  MODEL_EXTRACTION = "model_extraction",
+  MEMBERSHIP_INFERENCE = "membership_inference",
+  UNKNOWN = "unknown",
 }
 
 export interface PerturbationAnalysis {
@@ -42,7 +42,7 @@ export interface PerturbationAnalysis {
 }
 
 export interface PerturbationDistribution {
-  type: 'gaussian' | 'uniform' | 'sparse' | 'structured' | 'adaptive';
+  type: "gaussian" | "uniform" | "sparse" | "structured" | "adaptive";
   parameters: Record<string, number>;
   entropy: number;
 }
@@ -101,16 +101,16 @@ export class AdversarialDetector {
   private initializeDetectors(): void {
     // Initialize ensemble of diverse detection models
     this.ensembleModels = [
-      { name: 'robust_cnn', type: 'vision', robustness: 'adversarial_training' },
-      { name: 'certified_defense', type: 'vision', robustness: 'randomized_smoothing' },
-      { name: 'feature_squeezing', type: 'preprocessing', robustness: 'input_transformation' },
-      { name: 'statistical_detector', type: 'statistical', robustness: 'density_estimation' },
+      { name: "robust_cnn", type: "vision", robustness: "adversarial_training" },
+      { name: "certified_defense", type: "vision", robustness: "randomized_smoothing" },
+      { name: "feature_squeezing", type: "preprocessing", robustness: "input_transformation" },
+      { name: "statistical_detector", type: "statistical", robustness: "density_estimation" },
     ];
 
     this.perturbationDetectors = [
-      { name: 'noise_detector', sensitivity: 'high', domain: 'spatial' },
-      { name: 'frequency_detector', sensitivity: 'medium', domain: 'frequency' },
-      { name: 'semantic_detector', sensitivity: 'low', domain: 'semantic' },
+      { name: "noise_detector", sensitivity: "high", domain: "spatial" },
+      { name: "frequency_detector", sensitivity: "medium", domain: "frequency" },
+      { name: "semantic_detector", sensitivity: "low", domain: "semantic" },
     ];
   }
 
@@ -118,7 +118,7 @@ export class AdversarialDetector {
    * Comprehensive adversarial attack detection
    */
   async detectAdversarial(media: {
-    type: 'image' | 'audio' | 'text';
+    type: "image" | "audio" | "text";
     data: Buffer | string;
     originalPrediction?: any;
   }): Promise<AdversarialAnalysis> {
@@ -145,19 +145,19 @@ export class AdversarialDetector {
       perturbationAnalysis,
       attackType,
       evasionTechniques,
-      ensembleConsistency,
+      ensembleConsistency
     );
 
     const confidence = this.calculateConfidence(
       perturbationAnalysis,
       evasionTechniques,
-      ensembleConsistency,
+      ensembleConsistency
     );
 
     if (isAdversarial) {
-      recommendations.push('Content shows signs of adversarial manipulation');
-      recommendations.push('Apply input preprocessing before analysis');
-      recommendations.push('Use ensemble methods for verification');
+      recommendations.push("Content shows signs of adversarial manipulation");
+      recommendations.push("Apply input preprocessing before analysis");
+      recommendations.push("Use ensemble methods for verification");
       if (attackType) {
         recommendations.push(`Specific countermeasures for ${attackType} attack recommended`);
       }
@@ -279,7 +279,7 @@ export class AdversarialDetector {
 
   private classifyPerturbationDistribution(stats: any): PerturbationDistribution {
     return {
-      type: 'gaussian',
+      type: "gaussian",
       parameters: { mean: 0, std: 0.05 },
       entropy: 0.8,
     };
@@ -290,7 +290,7 @@ export class AdversarialDetector {
    */
   private async identifyAttackType(
     media: any,
-    perturbation: PerturbationAnalysis,
+    perturbation: PerturbationAnalysis
   ): Promise<AdversarialAttackType | null> {
     // Classify attack based on perturbation characteristics
 
@@ -331,17 +331,17 @@ export class AdversarialDetector {
 
   private checkFGSMSignature(perturbation: PerturbationAnalysis): boolean {
     // FGSM: uniform perturbation magnitude in gradient direction
-    return perturbation.distribution.type === 'uniform' && perturbation.magnitude > 0.03;
+    return perturbation.distribution.type === "uniform" && perturbation.magnitude > 0.03;
   }
 
   private checkPGDSignature(perturbation: PerturbationAnalysis): boolean {
     // PGD: bounded perturbation with iterative refinement
-    return perturbation.distribution.type === 'uniform' && perturbation.magnitude < 0.06;
+    return perturbation.distribution.type === "uniform" && perturbation.magnitude < 0.06;
   }
 
   private checkCWSignature(perturbation: PerturbationAnalysis): boolean {
     // C&W: minimal L2 perturbation
-    return perturbation.distribution.type === 'gaussian' && perturbation.magnitude < 0.03;
+    return perturbation.distribution.type === "gaussian" && perturbation.magnitude < 0.03;
   }
 
   private checkPatchSignature(perturbation: PerturbationAnalysis): boolean {
@@ -351,7 +351,7 @@ export class AdversarialDetector {
 
   private checkUniversalSignature(perturbation: PerturbationAnalysis): boolean {
     // Universal perturbation: image-agnostic pattern
-    return perturbation.distribution.type === 'structured';
+    return perturbation.distribution.type === "structured";
   }
 
   /**
@@ -375,7 +375,7 @@ export class AdversarialDetector {
     const overallRobustness = this.calculateOverallRobustness(
       certifiedRadius,
       worstCaseMargin,
-      vulnerabilities,
+      vulnerabilities
     );
 
     return {
@@ -405,10 +405,10 @@ export class AdversarialDetector {
   private async identifyVulnerabilities(media: any): Promise<Vulnerability[]> {
     return [
       {
-        type: 'gradient_masking',
+        type: "gradient_masking",
         severity: 0.3,
         exploitDifficulty: 0.7,
-        description: 'Model may be susceptible to gradient-based attacks',
+        description: "Model may be susceptible to gradient-based attacks",
       },
     ];
   }
@@ -416,7 +416,7 @@ export class AdversarialDetector {
   private calculateOverallRobustness(
     certifiedRadius: number,
     worstCaseMargin: number,
-    vulnerabilities: Vulnerability[],
+    vulnerabilities: Vulnerability[]
   ): number {
     const baseRobustness = (certifiedRadius + worstCaseMargin) / 2;
     const vulnerabilityPenalty = vulnerabilities.reduce((sum, v) => sum + v.severity * 0.1, 0);
@@ -450,50 +450,50 @@ export class AdversarialDetector {
   private async detectInputTransformationEvasion(media: any): Promise<EvasionTechnique> {
     // Detect attempts to evade input preprocessing defenses
     return {
-      technique: 'input_transformation_evasion',
+      technique: "input_transformation_evasion",
       detected: false,
       confidence: 0.3,
-      countermeasure: 'Apply multiple diverse transformations',
+      countermeasure: "Apply multiple diverse transformations",
     };
   }
 
   private async detectFeatureSpaceEvasion(media: any): Promise<EvasionTechnique> {
     // Detect attacks targeting specific feature representations
     return {
-      technique: 'feature_space_attack',
+      technique: "feature_space_attack",
       detected: false,
       confidence: 0.2,
-      countermeasure: 'Use diverse feature extractors',
+      countermeasure: "Use diverse feature extractors",
     };
   }
 
   private async detectModelSpecificEvasion(media: any): Promise<EvasionTechnique> {
     // Detect attacks targeting specific model architectures
     return {
-      technique: 'model_specific_attack',
+      technique: "model_specific_attack",
       detected: false,
       confidence: 0.25,
-      countermeasure: 'Employ ensemble of diverse architectures',
+      countermeasure: "Employ ensemble of diverse architectures",
     };
   }
 
   private async detectEnsembleEvasion(media: any): Promise<EvasionTechnique> {
     // Detect attacks designed to fool multiple models simultaneously
     return {
-      technique: 'ensemble_evasion',
+      technique: "ensemble_evasion",
       detected: false,
       confidence: 0.15,
-      countermeasure: 'Increase ensemble diversity',
+      countermeasure: "Increase ensemble diversity",
     };
   }
 
   private async detectBackdoorTriggers(media: any): Promise<EvasionTechnique> {
     // Detect potential backdoor triggers in input
     return {
-      technique: 'backdoor_trigger',
+      technique: "backdoor_trigger",
       detected: false,
       confidence: 0.1,
-      countermeasure: 'Apply trigger detection and removal',
+      countermeasure: "Apply trigger detection and removal",
     };
   }
 
@@ -516,7 +516,8 @@ export class AdversarialDetector {
       predictions.push(prediction);
     }
 
-    const agreementRate = predictions.filter((p) => p === predictions[0]).length / predictions.length;
+    const agreementRate =
+      predictions.filter((p) => p === predictions[0]).length / predictions.length;
 
     return {
       consistent: agreementRate > 0.8,
@@ -537,7 +538,7 @@ export class AdversarialDetector {
     perturbation: PerturbationAnalysis,
     attackType: AdversarialAttackType | null,
     evasionTechniques: EvasionTechnique[],
-    ensembleConsistency: { consistent: boolean; agreementRate: number },
+    ensembleConsistency: { consistent: boolean; agreementRate: number }
   ): boolean {
     let score = 0;
 
@@ -552,7 +553,7 @@ export class AdversarialDetector {
   private calculateConfidence(
     perturbation: PerturbationAnalysis,
     evasionTechniques: EvasionTechnique[],
-    ensembleConsistency: { consistent: boolean; agreementRate: number },
+    ensembleConsistency: { consistent: boolean; agreementRate: number }
   ): number {
     let confidence = 0.5;
 

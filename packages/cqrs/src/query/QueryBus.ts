@@ -4,16 +4,11 @@
  * Query bus with automatic caching and optimization
  */
 
-import { EventEmitter } from 'events';
-import { v4 as uuidv4 } from 'uuid';
-import Redis from 'ioredis';
-import pino from 'pino';
-import type {
-  Query,
-  QueryHandler,
-  QueryResult,
-  QueryHandlerRegistration
-} from './types.js';
+import { EventEmitter } from "events";
+import { v4 as uuidv4 } from "uuid";
+import Redis from "ioredis";
+import pino from "pino";
+import type { Query, QueryHandler, QueryResult, QueryHandlerRegistration } from "./types.js";
 
 export class QueryBus extends EventEmitter {
   private handlers: Map<string, QueryHandlerRegistration> = new Map();
@@ -24,7 +19,7 @@ export class QueryBus extends EventEmitter {
   constructor(redis?: Redis) {
     super();
     this.redis = redis;
-    this.logger = pino({ name: 'QueryBus' });
+    this.logger = pino({ name: "QueryBus" });
   }
 
   /**
@@ -32,17 +27,12 @@ export class QueryBus extends EventEmitter {
    */
   register(registration: QueryHandlerRegistration): void {
     if (this.handlers.has(registration.queryType)) {
-      throw new Error(
-        `Handler already registered for query type: ${registration.queryType}`
-      );
+      throw new Error(`Handler already registered for query type: ${registration.queryType}`);
     }
 
     this.handlers.set(registration.queryType, registration);
 
-    this.logger.debug(
-      { queryType: registration.queryType },
-      'Query handler registered'
-    );
+    this.logger.debug({ queryType: registration.queryType }, "Query handler registered");
   }
 
   /**
@@ -58,7 +48,7 @@ export class QueryBus extends EventEmitter {
       queryType,
       parameters,
       metadata,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     return this.send(query);
@@ -68,12 +58,9 @@ export class QueryBus extends EventEmitter {
    * Send a query for processing
    */
   async send<T = any>(query: Query): Promise<QueryResult<T>> {
-    this.logger.debug(
-      { queryId: query.queryId, queryType: query.queryType },
-      'Processing query'
-    );
+    this.logger.debug({ queryId: query.queryId, queryType: query.queryType }, "Processing query");
 
-    this.emit('query:received', query);
+    this.emit("query:received", query);
 
     const startTime = Date.now();
 
@@ -82,12 +69,12 @@ export class QueryBus extends EventEmitter {
       const registration = this.handlers.get(query.queryType);
       if (!registration) {
         const error = `No handler registered for query type: ${query.queryType}`;
-        this.emit('query:no-handler', query);
+        this.emit("query:no-handler", query);
 
         return {
           success: false,
           error,
-          executionTime: Date.now() - startTime
+          executionTime: Date.now() - startTime,
         };
       }
 
@@ -97,15 +84,15 @@ export class QueryBus extends EventEmitter {
         const cached = await this.redis.get(cacheKey);
 
         if (cached) {
-          this.logger.debug({ queryId: query.queryId }, 'Cache hit');
-          this.emit('query:cache-hit', query);
+          this.logger.debug({ queryId: query.queryId }, "Cache hit");
+          this.emit("query:cache-hit", query);
 
           return {
             success: true,
             data: JSON.parse(cached),
             cached: true,
             fromCache: true,
-            executionTime: Date.now() - startTime
+            executionTime: Date.now() - startTime,
           };
         }
       }
@@ -115,46 +102,31 @@ export class QueryBus extends EventEmitter {
       result.executionTime = Date.now() - startTime;
 
       // Cache result if cacheable
-      if (
-        registration.cacheable &&
-        this.redis &&
-        result.success &&
-        result.data
-      ) {
+      if (registration.cacheable && this.redis && result.success && result.data) {
         const cacheKey = this.getCacheKey(query);
         const ttl = registration.cacheTTL || this.defaultCacheTTL;
 
-        await this.redis.setex(
-          cacheKey,
-          ttl,
-          JSON.stringify(result.data)
-        );
+        await this.redis.setex(cacheKey, ttl, JSON.stringify(result.data));
 
-        this.logger.debug(
-          { queryId: query.queryId, ttl },
-          'Result cached'
-        );
+        this.logger.debug({ queryId: query.queryId, ttl }, "Result cached");
       }
 
       if (result.success) {
-        this.emit('query:succeeded', { query, result });
+        this.emit("query:succeeded", { query, result });
       } else {
-        this.emit('query:failed', { query, result });
+        this.emit("query:failed", { query, result });
       }
 
       return result;
     } catch (err: any) {
-      this.logger.error(
-        { err, queryId: query.queryId },
-        'Query execution error'
-      );
+      this.logger.error({ err, queryId: query.queryId }, "Query execution error");
 
-      this.emit('query:error', { query, error: err });
+      this.emit("query:error", { query, error: err });
 
       return {
         success: false,
-        error: err.message || 'Query execution failed',
-        executionTime: Date.now() - startTime
+        error: err.message || "Query execution failed",
+        executionTime: Date.now() - startTime,
       };
     }
   }
@@ -164,15 +136,17 @@ export class QueryBus extends EventEmitter {
    */
   async invalidateCache(queryType: string, parameters?: any): Promise<void> {
     if (!this.redis) return;
-    if (!this.redis) {return;}
+    if (!this.redis) {
+      return;
+    }
 
     if (parameters) {
       // Invalidate specific query
       const query: Query = {
-        queryId: '',
+        queryId: "",
         queryType,
         parameters,
-        timestamp: new Date()
+        timestamp: new Date(),
       };
 
       const cacheKey = this.getCacheKey(query);
@@ -187,7 +161,7 @@ export class QueryBus extends EventEmitter {
       }
     }
 
-    this.logger.debug({ queryType }, 'Cache invalidated');
+    this.logger.debug({ queryType }, "Cache invalidated");
   }
 
   /**

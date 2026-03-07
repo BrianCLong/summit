@@ -9,6 +9,7 @@
 ## Context
 
 Current policy engines (including Summit's OPA integration) enforce policies at **action time**:
+
 - Block dangerous tool calls
 - Prevent unauthorized writes
 - Rate-limit API usage
@@ -16,16 +17,19 @@ Current policy engines (including Summit's OPA integration) enforce policies at 
 **Gap:** No enforcement at **context assembly time**.
 
 **Attack scenario:**
+
 - Load customer PII (allowed individually)
 - Load competitor pricing (allowed individually)
 - Reason: "Generate personalized offers to undercut competitors" (combined = forbidden)
 
 **Technical limitation:**
+
 - Policies check individual data access, not combinations
-- Actions are blocked *after* reasoning occurs (contamination already happened)
+- Actions are blocked _after_ reasoning occurs (contamination already happened)
 - No information flow control at LLM context granularity
 
 **Business impact:**
+
 - Compliance violations (mixing PII with marketing data)
 - Cross-domain contamination (HIGH + LOW security classifications)
 - IP leakage (trade secrets + external API data)
@@ -39,30 +43,35 @@ Implement **compositional safety lattice** for context assembly with pre-executi
 ### Key Components
 
 #### 1. Information Flow Labels
+
 - Every context fragment has security lattice label: `{confidentiality, integrity, purpose}`
 - **Confidentiality:** `PUBLIC < INTERNAL < CONFIDENTIAL < SECRET`
 - **Integrity:** `UNTRUSTED < VERIFIED < SIGNED < IMMUTABLE`
 - **Purpose:** `{allowed_purposes: ["marketing", "analytics"], forbidden: ["legal"]}`
 
 #### 2. Lattice Join Operation
+
 - When combining contexts A + B, compute **least upper bound** (LUB):
   - `CONFIDENTIAL ⊔ PUBLIC = CONFIDENTIAL` (confidentiality monotonically increases)
   - `{marketing} ⊔ {analytics} = {marketing, analytics}` (purposes union)
 - **Policy check:** Is resulting label allowed for this agent's mandate?
 
 #### 3. Non-Interference Validation
+
 - Before execution, check: "Could agent A infer forbidden data from context B given context C?"
 - Information-theoretic measure: `I(A; B | C) < threshold`
 - If mutual information too high → reject context combination
 
 #### 4. Purpose-Bound Computation
+
 - Context labeled with **allowed transformations**: `{compute: true, store: false, transmit: false}`
-- Agent can *reason* about PII but not *save* or *send* it
+- Agent can _reason_ about PII but not _save_ or _send_ it
 - Enforced by policy gates on tool calls, DB writes, API calls
 
 ### Implementation Details
 
 **Policy Language (Rego Extension):**
+
 ```rego
 package context_assembly
 
@@ -84,13 +93,14 @@ deny[msg] {
 ```
 
 **API:**
+
 ```json
 {
   "method": "mcp.context.checkAssembly",
   "params": {
     "contexts": [
-      {"id": "ctx-1", "label": {"confidentiality": "SECRET", "purpose": ["defense"]}},
-      {"id": "ctx-2", "label": {"confidentiality": "PUBLIC", "purpose": ["research"]}}
+      { "id": "ctx-1", "label": { "confidentiality": "SECRET", "purpose": ["defense"] } },
+      { "id": "ctx-2", "label": { "confidentiality": "PUBLIC", "purpose": ["research"] } }
     ],
     "agent_mandate": {
       "max_confidentiality": "SECRET",
@@ -111,16 +121,19 @@ deny[msg] {
 ## Alternatives Considered
 
 ### Alternative 1: Database-Level Access Control Only
+
 - **Pros:** Existing infrastructure (PostgreSQL RLS)
-- **Cons:** Checks *access* (can I read?), not *combination* (can I mix these?)
+- **Cons:** Checks _access_ (can I read?), not _combination_ (can I mix these?)
 - **Rejected:** Doesn't prevent information flow violations in LLM context
 
 ### Alternative 2: Post-Execution Output Scanning
+
 - **Pros:** Simpler (check output, not input)
 - **Cons:** Contamination already occurred (can't un-poison LLM context)
 - **Rejected:** Prevention > detection for irreversible operations
 
 ### Alternative 3: Hardware MLS (Multi-Level Security)
+
 - **Pros:** Military-grade isolation (Trusted Solaris, SELinux)
 - **Cons:** OS-level, not applicable to in-memory LLM context
 - **Rejected:** Need software-only solution for cloud deployments
@@ -128,19 +141,22 @@ deny[msg] {
 ## Consequences
 
 ### Positive
+
 - **Information flow control:** Formal verification that context assemblies obey security policies
 - **Purpose-bound computation:** "Use but don't store" policies (GDPR compliance)
-- **Proactive defense:** Block violations *before* reasoning occurs
+- **Proactive defense:** Block violations _before_ reasoning occurs
 - **Compliance:** Federal cross-domain solutions (ICD 710, EO 13526)
 - **Defensive moat:** Extremely difficult to replicate (requires formal methods expertise)
 
 ### Negative
+
 - **Complexity:** Lattice theory, non-interference computation (PhD-level computer science)
 - **Performance:** Non-interference check may be expensive (NP-hard in general; approximations needed)
 - **False rejections:** Legitimate multi-source queries rejected if policy too restrictive
 - **Engineering effort:** 6-12 months (formal methods collaboration)
 
 ### Operational Impact
+
 - **Monitoring:** Metrics: `context_assembly_rejections`, `lattice_join_latency`
 - **Compliance:** ICD 710 (Classification), EO 13526 (Classified National Security Information)
 - **Policy authoring:** Requires security architects with lattice theory knowledge
@@ -148,11 +164,13 @@ deny[msg] {
 ## Code References
 
 ### Core Implementation
+
 - `server/src/conductor/policy/context-assembly-engine.ts` (~800 lines) - Lattice operations
 - `server/src/conductor/policy/lattice-definitions.ts` (~200 lines) - Label schemas
 - `server/src/conductor/mcp/orchestrator.ts:L201-L245` - Pre-execution check
 
 ### Data Models
+
 - Agent mandates schema extension:
   ```yaml
   agents:
@@ -165,22 +183,26 @@ deny[msg] {
   ```
 
 ### Policies
+
 - `.ci/policies/context_assembly.rego` - OPA policy for lattice checks
 
 ## Tests & Validation
 
 ### Evaluation Criteria
+
 - **Correctness:** 100% of forbidden combinations blocked (no false negatives on test suite)
 - **Performance:** Lattice join + policy check <20ms p99
 - **Expressiveness:** Can encode 90% of enterprise information flow policies
 
 ### CI Enforcement
+
 - Golden path test: "Context assembly policy blocks forbidden combinations"
 - Policy test: `context_assembly_test.rego` (unit tests for policy rules)
 
 ## Migration & Rollout
 
 ### Timeline
+
 - Phase 1: Lattice formalism + research (Months 1-3)
 - Phase 2: Policy engine implementation (Months 4-6)
 - Phase 3: Integration + validation (Months 7-9)
@@ -188,6 +210,7 @@ deny[msg] {
 - Completion: GA (Month 12)
 
 ### Rollback Plan
+
 - Feature flag: `ENABLE_CONTEXT_ASSEMBLY_POLICY=false`
 - Fallback: Action-time policies only (existing OPA)
 - No data migration (policy enforcement is stateless)
@@ -195,11 +218,13 @@ deny[msg] {
 ## References
 
 ### Related ADRs
+
 - ADR-0002: ABAC Step-Up (attribute-based access control foundation)
 - ADR-0023: Cryptographic Context Confinement (complementary cryptographic isolation)
 - ADR-0024: Semantic Context Integrity (complementary adversarial defense)
 
 ### External Resources
+
 - [Information Flow Control](https://www.cs.cornell.edu/andru/papers/csfw03.pdf) - Academic foundations
 - [Lattice-Based Access Control](https://en.wikipedia.org/wiki/Lattice-based_access_control)
 - [Non-Interference](https://www.cse.chalmers.se/~andrei/sabelfeld-sands-jcs.pdf) - Sabelfeld & Sands survey
@@ -209,6 +234,6 @@ deny[msg] {
 
 ## Revision History
 
-| Date | Author | Change |
-|------|--------|--------|
+| Date       | Author      | Change                                         |
+| ---------- | ----------- | ---------------------------------------------- |
 | 2026-01-01 | Policy Team | Initial version (patent defensive publication) |

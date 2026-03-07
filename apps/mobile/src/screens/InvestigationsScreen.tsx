@@ -1,20 +1,8 @@
 import React, { useCallback, useState } from 'react';
-import {
-  View,
-  FlatList,
-  TouchableOpacity,
-  RefreshControl,
-} from 'react-native';
+import { View, FlatList, TouchableOpacity, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
-import {
-  Plus,
-  Filter,
-  FileText,
-  Users,
-  Calendar,
-  Link2,
-} from 'lucide-react-native';
+import { Plus, Filter, FileText, Users, Calendar, Link2 } from 'lucide-react-native';
 import { formatDistanceToNow } from 'date-fns';
 
 import { useInvestigations } from '@/graphql/hooks';
@@ -217,9 +205,7 @@ export const InvestigationsScreen: React.FC = () => {
                 : 'bg-dark-elevated',
             )}
           >
-            <Text size="sm">
-              {status === 'All' ? 'All' : status.replace('_', ' ')}
-            </Text>
+            <Text size="sm">{status === 'All' ? 'All' : status.replace('_', ' ')}</Text>
           </TouchableOpacity>
         ))}
       </View>
@@ -243,11 +229,7 @@ export const InvestigationsScreen: React.FC = () => {
         onEndReached={hasNextPage ? loadMore : undefined}
         onEndReachedThreshold={0.5}
         refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor="#0ea5e9"
-          />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#0ea5e9" />
         }
       />
     </SafeAreaView>

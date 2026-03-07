@@ -1,10 +1,10 @@
-import React from 'react';
+import React from 'react'
 
 type PageHeaderProps = {
-  title: string;
-  description?: string;
-  className?: string;
-};
+  title: string
+  description?: string
+  className?: string
+}
 
 export function PageHeader({
   title,
@@ -20,5 +20,5 @@ export function PageHeader({
         <p className="mt-1 text-sm text-muted-foreground">{description}</p>
       ) : null}
     </header>
-  );
+  )
 }

@@ -62,5 +62,5 @@ Perform this **dry run** locally or in staging before merge:
     - Database schema matches `vS25-pre-merge` state (if applicable).
 
 **Drill Result**: [ ] PASS / [ ] FAIL
-**Drill Operator**: __________________
-**Timestamp**: __________________
+**Drill Operator**: ********\_\_********
+**Timestamp**: ********\_\_********

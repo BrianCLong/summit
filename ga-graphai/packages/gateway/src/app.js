@@ -1,38 +1,38 @@
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath } from "node:url";
 
-import express from 'express';
-import { graphqlHTTP } from 'express-graphql';
-import { GraphQLError } from 'graphql';
+import express from "express";
+import { graphqlHTTP } from "express-graphql";
+import { GraphQLError } from "graphql";
 
-import { normalizeCaps } from 'common-types';
-import { PolicyEngine } from 'policy';
-import { ModelRegistry } from './adapters/registry.js';
-import { schema, buildRoot } from './graphql/schema.js';
-import { GraphQLCostAnalyzer } from './graphql-cost.js';
+import { normalizeCaps } from "common-types";
+import { PolicyEngine } from "policy";
+import { ModelRegistry } from "./adapters/registry.js";
+import { schema, buildRoot } from "./graphql/schema.js";
+import { GraphQLCostAnalyzer } from "./graphql-cost.js";
 import {
   observePolicyDeny,
   observeSuccess,
   registry as metricsRegistry,
   timeGraphqlRequest,
-} from './metrics.js';
-import { InMemoryLedger, buildEvidencePayload } from 'prov-ledger';
-import { ChaosEngine, ChaosError } from './chaos.js';
-import { buildSearchService, handleSearchRoute } from './search/unified.js';
-import { buildPrivacyEnforcement } from './privacy/privacyBudget.js';
-import { correlationIdMiddleware } from './middleware/correlationId.js';
+} from "./metrics.js";
+import { InMemoryLedger, buildEvidencePayload } from "prov-ledger";
+import { ChaosEngine, ChaosError } from "./chaos.js";
+import { buildSearchService, handleSearchRoute } from "./search/unified.js";
+import { buildPrivacyEnforcement } from "./privacy/privacyBudget.js";
+import { correlationIdMiddleware } from "./middleware/correlationId.js";
 
 const ALLOWED_PURPOSES = new Set([
-  'investigation',
-  'threat-intel',
-  'fraud-risk',
-  't&s',
-  'benchmarking',
-  'training',
-  'demo',
+  "investigation",
+  "threat-intel",
+  "fraud-risk",
+  "t&s",
+  "benchmarking",
+  "training",
+  "demo",
 ]);
 
 const defaultPolicyPath = fileURLToPath(
-  new URL('../../policy/config/router.yaml', import.meta.url),
+  new URL("../../policy/config/router.yaml", import.meta.url)
 );
 
 class PolicyError extends Error {
@@ -55,16 +55,16 @@ function mergeCaps(baseCaps, overrideCaps) {
 function buildPlanArtifacts(input, decision, evaluation) {
   const summary = `Plan for "${input.objective}" routed to ${decision.model.id} (license: ${decision.model.license}).`;
   const backlog = [
-    '1. Finalize policy router & OPA gate aligned to tenant guardrails.',
-    '2. Wire adapters, cost meter, and provenance ledger for the selected model.',
-    '3. Publish dashboards, alerts, and rollback playbook with evidence bundle.',
-  ].join('\n');
+    "1. Finalize policy router & OPA gate aligned to tenant guardrails.",
+    "2. Wire adapters, cost meter, and provenance ledger for the selected model.",
+    "3. Publish dashboards, alerts, and rollback playbook with evidence bundle.",
+  ].join("\n");
   const adr = decision.appliedRule
     ? `ADR: Policy rule "${decision.appliedRule}" triggered ${decision.model.id}.`
     : `ADR: Defaulted to ${decision.model.id} via local-first strategy.`;
   const policy =
     `Caps → hard: ${decision.caps.hardUsd.toFixed(2)}, soft: ${decision.caps.softPct}%` +
-    (evaluation?.softHit ? ' (soft cap reached)' : '') +
+    (evaluation?.softHit ? " (soft cap reached)" : "") +
     `. Token cap: ${decision.caps.tokenCap}.`;
   return { summary, backlog, adr, policy };
 }
@@ -72,33 +72,31 @@ function buildPlanArtifacts(input, decision, evaluation) {
 function buildGenerateArtifacts(input, adapterResult, decision, evaluation) {
   const content =
     `${adapterResult.text}\nSelected model: ${decision.model.id}.` +
-    (evaluation?.softHit ? '\n[Soft cap notice: response truncated]' : '');
+    (evaluation?.softHit ? "\n[Soft cap notice: response truncated]" : "");
   return { content, citations: adapterResult.citations ?? [] };
 }
 
 function createContextMiddleware(options = {}) {
   return function contextMiddleware(req, res, next) {
-    const tenant = req.header('x-tenant') ?? options.defaultTenant;
+    const tenant = req.header("x-tenant") ?? options.defaultTenant;
     if (!tenant) {
-      return res.status(400).json({ error: 'TENANT_REQUIRED' });
+      return res.status(400).json({ error: "TENANT_REQUIRED" });
     }
-    const purpose =
-      req.header('x-purpose') ?? options.defaultPurpose ?? 'investigation';
+    const purpose = req.header("x-purpose") ?? options.defaultPurpose ?? "investigation";
     if (!ALLOWED_PURPOSES.has(purpose)) {
-      return res.status(403).json({ error: 'PURPOSE_NOT_ALLOWED', purpose });
+      return res.status(403).json({ error: "PURPOSE_NOT_ALLOWED", purpose });
     }
-    const caseId = req.header('x-case') ?? 'unspecified-case';
-    const environment = req.header('x-env') ?? options.defaultEnv ?? 'staging';
-    const retention = req.header('x-retention') ?? 'standard-365d';
-    const allowPaidHeader = req.header('x-allow-paid');
-    const allowPaid = allowPaidHeader === 'true' || allowPaidHeader === '1';
-    const acceptanceBlockedHeader = req.header('x-acceptance-blocked');
-    const acceptanceBlocked =
-      acceptanceBlockedHeader === 'true' || acceptanceBlockedHeader === '1';
-    const gpuBusy = Number.parseFloat(req.header('x-gpu-busy') ?? '0');
+    const caseId = req.header("x-case") ?? "unspecified-case";
+    const environment = req.header("x-env") ?? options.defaultEnv ?? "staging";
+    const retention = req.header("x-retention") ?? "standard-365d";
+    const allowPaidHeader = req.header("x-allow-paid");
+    const allowPaid = allowPaidHeader === "true" || allowPaidHeader === "1";
+    const acceptanceBlockedHeader = req.header("x-acceptance-blocked");
+    const acceptanceBlocked = acceptanceBlockedHeader === "true" || acceptanceBlockedHeader === "1";
+    const gpuBusy = Number.parseFloat(req.header("x-gpu-busy") ?? "0");
     const correlationId = req.correlationId;
     const caps = {};
-    const costCapHeader = req.header('x-cost-cap-usd');
+    const costCapHeader = req.header("x-cost-cap-usd");
     if (costCapHeader && !Number.isNaN(Number(costCapHeader))) {
       caps.hardUsd = Number(costCapHeader);
     }
@@ -125,18 +123,13 @@ function parseToolSchema(toolSchemaJson) {
   try {
     return JSON.parse(toolSchemaJson);
   } catch (error) {
-    throw new PolicyError(
-      400,
-      'INVALID_TOOL_SCHEMA',
-      'toolSchemaJson is not valid JSON',
-    );
+    throw new PolicyError(400, "INVALID_TOOL_SCHEMA", "toolSchemaJson is not valid JSON");
   }
 }
 
 export function createApp(options = {}) {
   const policyPath = options.policyPath ?? defaultPolicyPath;
-  const policyEngine =
-    options.policyEngine ?? PolicyEngine.fromFile(policyPath);
+  const policyEngine = options.policyEngine ?? PolicyEngine.fromFile(policyPath);
   const modelRegistry = options.modelRegistry ?? new ModelRegistry();
   const ledger = options.ledger ?? new InMemoryLedger();
   const costAnalyzer = new GraphQLCostAnalyzer(schema);
@@ -145,10 +138,7 @@ export function createApp(options = {}) {
     options.chaos ??
     new ChaosEngine({
       environment:
-        options.environment ??
-        process.env.APP_ENV ??
-        process.env.NODE_ENV ??
-        'development',
+        options.environment ?? process.env.APP_ENV ?? process.env.NODE_ENV ?? "development",
     });
   const searchService = options.searchService ?? buildSearchService(options.searchOptions);
   if (options.searchDatasetPath) {
@@ -167,44 +157,41 @@ export function createApp(options = {}) {
         },
       };
     }
-    if (error.extensions?.code === 'QUERY_COST_EXCEEDED') {
+    if (error.extensions?.code === "QUERY_COST_EXCEEDED") {
       res.statusCode = 422;
     }
     return {
       message: error.message,
-      extensions: { code: error.extensions?.code ?? 'INTERNAL_ERROR', ...error.extensions },
+      extensions: { code: error.extensions?.code ?? "INTERNAL_ERROR", ...error.extensions },
     };
   }
 
   const app = express();
   app.use(correlationIdMiddleware());
-  app.use(express.json({ limit: '1mb' }));
+  app.use(express.json({ limit: "1mb" }));
   app.use(createContextMiddleware(options));
   app.use(chaos.middleware());
 
-  app.get(
-    '/api/search/unified',
-    handleSearchRoute(searchService, privacy),
-  );
+  app.get("/api/search/unified", handleSearchRoute(searchService, privacy));
 
   if (chaos.safeEnvironment) {
-    app.get('/internal/chaos', (req, res) => {
+    app.get("/internal/chaos", (req, res) => {
       res.json(chaos.snapshot());
     });
 
-    app.post('/internal/chaos', (req, res) => {
+    app.post("/internal/chaos", (req, res) => {
       const snapshot = chaos.updateConfig(req.body ?? {});
       res.json(snapshot);
     });
   } else {
-    app.all('/internal/chaos', (_req, res) => {
-      res.status(404).json({ error: 'NOT_FOUND' });
+    app.all("/internal/chaos", (_req, res) => {
+      res.status(404).json({ error: "NOT_FOUND" });
     });
   }
 
-  app.use('/graphql', (req, res, next) => {
+  app.use("/graphql", (req, res, next) => {
     const stopTimer = timeGraphqlRequest();
-    res.once('finish', () => {
+    res.once("finish", () => {
       stopTimer(res.statusCode);
     });
     next();
@@ -212,7 +199,7 @@ export function createApp(options = {}) {
 
   async function executePlan(input, context) {
     if (!input?.objective) {
-      throw new PolicyError(400, 'OBJECTIVE_REQUIRED', 'Objective is required');
+      throw new PolicyError(400, "OBJECTIVE_REQUIRED", "Objective is required");
     }
     const caps = mergeCaps(context.caps, { hardUsd: input.costCapUsd });
     const tenantKey = buildTenantKey(context);
@@ -228,53 +215,39 @@ export function createApp(options = {}) {
       attachments: input.sources?.map((uri) => ({ uri })) ?? [],
     });
 
-    if (decision.status !== 'allow') {
-      observePolicyDeny(decision.reason ?? 'UNKNOWN');
-      throw new PolicyError(
-        403,
-        decision.reason ?? 'POLICY_DENY',
-        'Policy blocked request',
-        {
-          decision,
-        },
-      );
+    if (decision.status !== "allow") {
+      observePolicyDeny(decision.reason ?? "UNKNOWN");
+      throw new PolicyError(403, decision.reason ?? "POLICY_DENY", "Policy blocked request", {
+        decision,
+      });
     }
 
-    const adapterResult = await chaos.apply('llm', () =>
+    const adapterResult = await chaos.apply("llm", () =>
       modelRegistry.generate(decision.model.id, {
-        mode: 'plan',
+        mode: "plan",
         objective: input.objective,
         language: input.language,
         attachments: input.sources?.map((uri) => ({ uri })) ?? [],
         context: context.purpose,
-      }),
+      })
     );
 
-    const evaluation = policyEngine.enforceCost(
-      tenantKey,
-      adapterResult,
-      decision.caps,
-    );
-    if (evaluation.status !== 'allow') {
-      observePolicyDeny(evaluation.reason ?? 'CAP_DENY');
-      throw new PolicyError(
-        403,
-        evaluation.reason ?? 'CAP_DENY',
-        'Cost cap exceeded',
-        {
-          evaluation,
-        },
-      );
+    const evaluation = policyEngine.enforceCost(tenantKey, adapterResult, decision.caps);
+    if (evaluation.status !== "allow") {
+      observePolicyDeny(evaluation.reason ?? "CAP_DENY");
+      throw new PolicyError(403, evaluation.reason ?? "CAP_DENY", "Cost cap exceeded", {
+        evaluation,
+      });
     }
 
     const planArtifacts = buildPlanArtifacts(input, decision, evaluation);
-    const evidence = await chaos.apply('neo4j', () =>
+    const evidence = await chaos.apply("neo4j", () =>
       ledger.record(
         buildEvidencePayload({
           tenant: context.tenant,
           caseId: context.caseId,
           environment: context.environment,
-          operation: 'plan',
+          operation: "plan",
           request: { input, headers: { purpose: context.purpose } },
           policy: policyEngine.describe(),
           decision,
@@ -287,18 +260,18 @@ export function createApp(options = {}) {
           },
           output: planArtifacts,
           correlationId: req.correlationId,
-        }),
-      ),
+        })
+      )
     );
 
-    observeSuccess('plan', decision.model.id, adapterResult);
+    observeSuccess("plan", decision.model.id, adapterResult);
 
     return { ...planArtifacts, evidenceId: evidence.id };
   }
 
   async function executeGenerate(input, context) {
     if (!input?.objective) {
-      throw new PolicyError(400, 'OBJECTIVE_REQUIRED', 'Objective is required');
+      throw new PolicyError(400, "OBJECTIVE_REQUIRED", "Objective is required");
     }
     const caps = mergeCaps(context.caps, input.caps);
     const tenantKey = buildTenantKey(context);
@@ -315,59 +288,40 @@ export function createApp(options = {}) {
       attachments,
     });
 
-    if (decision.status !== 'allow') {
-      observePolicyDeny(decision.reason ?? 'POLICY_DENY');
-      throw new PolicyError(
-        403,
-        decision.reason ?? 'POLICY_DENY',
-        'Policy blocked request',
-        {
-          decision,
-        },
-      );
+    if (decision.status !== "allow") {
+      observePolicyDeny(decision.reason ?? "POLICY_DENY");
+      throw new PolicyError(403, decision.reason ?? "POLICY_DENY", "Policy blocked request", {
+        decision,
+      });
     }
 
     const toolSchema = parseToolSchema(input.toolSchemaJson);
-    const adapterResult = await chaos.apply('llm', () =>
+    const adapterResult = await chaos.apply("llm", () =>
       modelRegistry.generate(decision.model.id, {
-        mode: 'generate',
+        mode: "generate",
         objective: input.objective,
         language: input.language,
         attachments,
         tools: Array.isArray(toolSchema?.tools) ? toolSchema.tools : undefined,
-      }),
+      })
     );
 
-    const evaluation = policyEngine.enforceCost(
-      tenantKey,
-      adapterResult,
-      decision.caps,
-    );
-    if (evaluation.status !== 'allow') {
-      observePolicyDeny(evaluation.reason ?? 'CAP_DENY');
-      throw new PolicyError(
-        403,
-        evaluation.reason ?? 'CAP_DENY',
-        'Cost cap exceeded',
-        {
-          evaluation,
-        },
-      );
+    const evaluation = policyEngine.enforceCost(tenantKey, adapterResult, decision.caps);
+    if (evaluation.status !== "allow") {
+      observePolicyDeny(evaluation.reason ?? "CAP_DENY");
+      throw new PolicyError(403, evaluation.reason ?? "CAP_DENY", "Cost cap exceeded", {
+        evaluation,
+      });
     }
 
-    const artifacts = buildGenerateArtifacts(
-      input,
-      adapterResult,
-      decision,
-      evaluation,
-    );
-    const evidence = await chaos.apply('neo4j', () =>
+    const artifacts = buildGenerateArtifacts(input, adapterResult, decision, evaluation);
+    const evidence = await chaos.apply("neo4j", () =>
       ledger.record(
         buildEvidencePayload({
           tenant: context.tenant,
           caseId: context.caseId,
           environment: context.environment,
-          operation: 'generate',
+          operation: "generate",
           request: { input, headers: { purpose: context.purpose } },
           policy: policyEngine.describe(),
           decision,
@@ -380,11 +334,11 @@ export function createApp(options = {}) {
           },
           output: artifacts,
           correlationId: req.correlationId,
-        }),
-      ),
+        })
+      )
     );
 
-    observeSuccess('generate', decision.model.id, adapterResult);
+    observeSuccess("generate", decision.model.id, adapterResult);
 
     return {
       content: artifacts.content,
@@ -403,7 +357,7 @@ export function createApp(options = {}) {
   function listModels(filter = {}) {
     const models = modelRegistry.list();
     return models.filter((model) => {
-      if (typeof filter.local === 'boolean' && model.local !== filter.local) {
+      if (typeof filter.local === "boolean" && model.local !== filter.local) {
         return false;
       }
       if (filter.modality && !model.modality.includes(filter.modality)) {
@@ -420,10 +374,9 @@ export function createApp(options = {}) {
   }
 
   app.use(
-    '/graphql',
+    "/graphql",
     graphqlHTTP((req, res) => {
-      const querySource =
-        typeof req.body?.query === 'string' ? req.body.query : undefined;
+      const querySource = typeof req.body?.query === "string" ? req.body.query : undefined;
       const plan = querySource ? costAnalyzer.analyze(querySource) : undefined;
 
       if (plan && plan.estimatedRru > maxGraphqlCost) {
@@ -432,8 +385,8 @@ export function createApp(options = {}) {
           schema,
           customExecuteFn: async () => ({
             errors: [
-              new GraphQLError('QUERY_COST_EXCEEDED', {
-                extensions: { code: 'QUERY_COST_EXCEEDED', limit: maxGraphqlCost, plan },
+              new GraphQLError("QUERY_COST_EXCEEDED", {
+                extensions: { code: "QUERY_COST_EXCEEDED", limit: maxGraphqlCost, plan },
               }),
             ],
           }),
@@ -453,18 +406,16 @@ export function createApp(options = {}) {
         customFormatErrorFn: (error) => formatGraphqlError(error, res),
         extensions: () => (plan ? { costPlan: plan } : undefined),
       };
-    }),
+    })
   );
 
-  app.post('/v1/plan', async (req, res) => {
+  app.post("/v1/plan", async (req, res) => {
     try {
       const result = await executePlan(req.body, req.aiContext);
       res.json(result);
     } catch (error) {
       if (error instanceof PolicyError) {
-        return res
-          .status(error.statusCode)
-          .json({ error: error.code, details: error.details });
+        return res.status(error.statusCode).json({ error: error.code, details: error.details });
       }
       if (error instanceof ChaosError) {
         return res.status(error.statusCode).json({
@@ -473,19 +424,17 @@ export function createApp(options = {}) {
           service: error.service,
         });
       }
-      res.status(500).json({ error: 'UNEXPECTED_ERROR' });
+      res.status(500).json({ error: "UNEXPECTED_ERROR" });
     }
   });
 
-  app.post('/v1/generate', async (req, res) => {
+  app.post("/v1/generate", async (req, res) => {
     try {
       const result = await executeGenerate(req.body, req.aiContext);
       res.json(result);
     } catch (error) {
       if (error instanceof PolicyError) {
-        return res
-          .status(error.statusCode)
-          .json({ error: error.code, details: error.details });
+        return res.status(error.statusCode).json({ error: error.code, details: error.details });
       }
       if (error instanceof ChaosError) {
         return res.status(error.statusCode).json({
@@ -494,18 +443,13 @@ export function createApp(options = {}) {
           service: error.service,
         });
       }
-      res.status(500).json({ error: 'UNEXPECTED_ERROR' });
+      res.status(500).json({ error: "UNEXPECTED_ERROR" });
     }
   });
 
-  app.get('/v1/models', (req, res) => {
+  app.get("/v1/models", (req, res) => {
     const filter = {
-      local:
-        req.query.local === 'true'
-          ? true
-          : req.query.local === 'false'
-            ? false
-            : undefined,
+      local: req.query.local === "true" ? true : req.query.local === "false" ? false : undefined,
       modality: req.query.modality,
       family: req.query.family,
       license: req.query.license,
@@ -513,13 +457,13 @@ export function createApp(options = {}) {
     res.json({ models: listModels(filter) });
   });
 
-  app.get('/metrics', async (req, res) => {
-    res.set('Content-Type', metricsRegistry.contentType);
+  app.get("/metrics", async (req, res) => {
+    res.set("Content-Type", metricsRegistry.contentType);
     res.send(await metricsRegistry.metrics());
   });
 
-  app.get('/healthz', (req, res) => {
-    res.json({ status: 'ok', policy: policyEngine.describe() });
+  app.get("/healthz", (req, res) => {
+    res.json({ status: "ok", policy: policyEngine.describe() });
   });
 
   return { app, policyEngine, modelRegistry, ledger };

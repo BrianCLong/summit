@@ -8,17 +8,17 @@
 
 A control is assurance-ready if **ALL** of the following are true:
 
-| # | Criterion | Verification |
-|---|-----------|--------------|
-| 1 | **Documented** | Control has a written description in the control catalog |
-| 2 | **Mapped** | Control is mapped to at least one compliance framework |
-| 3 | **Implemented** | Technical implementation exists and is referenced |
-| 4 | **Evidence Sources Defined** | At least one automated evidence source is configured |
-| 5 | **Tests Defined** | At least one automated test validates control effectiveness |
-| 6 | **Tests Passing** | Most recent test execution passed |
-| 7 | **Evidence Fresh** | Evidence is within staleness threshold |
-| 8 | **Owner Assigned** | Control has a designated owner |
-| 9 | **Reviewed** | Control was reviewed within the review cycle |
+| #   | Criterion                    | Verification                                                |
+| --- | ---------------------------- | ----------------------------------------------------------- |
+| 1   | **Documented**               | Control has a written description in the control catalog    |
+| 2   | **Mapped**                   | Control is mapped to at least one compliance framework      |
+| 3   | **Implemented**              | Technical implementation exists and is referenced           |
+| 4   | **Evidence Sources Defined** | At least one automated evidence source is configured        |
+| 5   | **Tests Defined**            | At least one automated test validates control effectiveness |
+| 6   | **Tests Passing**            | Most recent test execution passed                           |
+| 7   | **Evidence Fresh**           | Evidence is within staleness threshold                      |
+| 8   | **Owner Assigned**           | Control has a designated owner                              |
+| 9   | **Reviewed**                 | Control was reviewed within the review cycle                |
 
 ---
 
@@ -82,6 +82,7 @@ A control is assurance-ready if **ALL** of the following are true:
   - Collection process is reliable and monitored
 
 - [ ] **Source Configuration**
+
   ```yaml
   # Example evidence source configuration
   evidenceSource:
@@ -114,6 +115,7 @@ A control is assurance-ready if **ALL** of the following are true:
   - Test can run without manual intervention
 
 - [ ] **Test Coverage**
+
   ```yaml
   # Example test configuration
   test:
@@ -229,7 +231,7 @@ controlAssessment:
 
   criteria:
     documented:
-      status: "met"  # met | partial | not_met | n/a
+      status: "met" # met | partial | not_met | n/a
       evidence: "Control description in /docs/compliance/..."
       notes: ""
 
@@ -273,7 +275,7 @@ controlAssessment:
       evidence: "Last review: 2025-10-15"
       notes: "Next review due: 2026-01-15"
 
-  overallStatus: "ready"  # ready | partial | not_ready
+  overallStatus: "ready" # ready | partial | not_ready
 
   recommendations: []
 
@@ -343,12 +345,12 @@ controlAssessment:
 
 When a control is not assurance-ready, prioritize remediation:
 
-| Priority | Condition | Action |
-|----------|-----------|--------|
-| **P0 - Critical** | Control not implemented | Implement immediately |
-| **P1 - High** | Tests failing | Fix and verify within 48 hours |
-| **P2 - Medium** | Evidence stale | Restore collection within 1 week |
-| **P3 - Low** | Documentation incomplete | Complete within 30 days |
+| Priority          | Condition                | Action                           |
+| ----------------- | ------------------------ | -------------------------------- |
+| **P0 - Critical** | Control not implemented  | Implement immediately            |
+| **P1 - High**     | Tests failing            | Fix and verify within 48 hours   |
+| **P2 - Medium**   | Evidence stale           | Restore collection within 1 week |
+| **P3 - Low**      | Documentation incomplete | Complete within 30 days          |
 
 ---
 
@@ -361,7 +363,7 @@ When a control is not assurance-ready, prioritize remediation:
 interface EvidenceCollectionJob {
   controlId: string;
   sources: EvidenceSource[];
-  schedule: string;  // Cron expression
+  schedule: string; // Cron expression
   retryPolicy: {
     maxRetries: number;
     backoffMs: number;
@@ -381,7 +383,7 @@ interface ComplianceTest {
   schedule: string;
   timeout: number;
   expectedResult: string;
-  onFailure: 'alert' | 'alert_and_block' | 'log';
+  onFailure: "alert" | "alert_and_block" | "log";
 }
 ```
 
@@ -391,9 +393,9 @@ interface ComplianceTest {
 // Example: Automated compliance report
 interface ComplianceReport {
   framework: ComplianceFramework;
-  schedule: string;  // "monthly" | "quarterly"
+  schedule: string; // "monthly" | "quarterly"
   recipients: string[];
-  format: 'pdf' | 'json' | 'csv';
+  format: "pdf" | "json" | "csv";
   includeEvidence: boolean;
 }
 ```
@@ -434,6 +436,6 @@ interface ComplianceReport {
 
 ## Version History
 
-| Version | Date | Changes |
-|---------|------|---------|
-| 1.0 | 2025-12-07 | Initial release |
+| Version | Date       | Changes         |
+| ------- | ---------- | --------------- |
+| 1.0     | 2025-12-07 | Initial release |

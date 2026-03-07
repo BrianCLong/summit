@@ -19,6 +19,7 @@
 ## 2) Scope (What Ships)
 
 ### Epic A — Customer Health & Renewal Engine v1 (CompanyOS + Switchboard)
+
 - **A1. Health score model (transparent + auditable)**
   - Inputs (tenant-scoped): WAU/MAU, receipt volume, policy denial rate, incident count, SLO compliance, onboarding completeness, export frequency, quota pressure.
   - Outputs: Health score + “why” breakdown + recommended actions.
@@ -30,6 +31,7 @@
   - Export is selective-disclosure + receipt-backed.
 
 ### Epic B — Customer Success Playbooks + Agent Assist (bounded)
+
 - **B1. CS Playbooks (5–7)**
   - “Onboarding stuck” rescue
   - “High denial rate” policy tuning workshop pack
@@ -42,6 +44,7 @@
   - Generates a “Customer Success Evidence Bundle” per engagement.
 
 ### Epic C — Expansion Recommendations (revenue ops)
+
 - **C1. Entitlement-aware upsell suggestions**
   - Recommend add-ons only if tenant qualifies (usage pattern/compliance needs) and improves outcomes (latency, isolation, residency, audit).
   - Each recommendation includes expected impact, cost estimate, and “proof” links (metrics + incidents + receipts).
@@ -49,6 +52,7 @@
   - 14-day trials for selected add-ons (feature flags + metering); auto-expire with receipts + notifications.
 
 ### Epic D — Marketplace GTM mechanics (from platform to channel)
+
 - **D1. Marketplace analytics**
   - Track installs → activations → WAU → churn per adapter.
   - Publisher dashboard (internal first): top adapters, failure rates, revenue share reporting.
@@ -60,12 +64,14 @@
 ---
 
 ## 3) Explicit Non-goals
+
 - Full ML-based churn prediction (stick to strong heuristics + explainability).
 - Full CRM replacement (export events + reports; integrate later).
 
 ---
 
 ## 4) Definition of Done (Hard Gates)
+
 - Health score is tenant-scoped, explainable, and exportable.
 - Renewal risk dashboard live with alerts + runbooks.
 - QBR export is customer-sendable and evidence-backed.
@@ -76,6 +82,7 @@
 ---
 
 ## 5) Sprint Demo (Live Scenario)
+
 1. Health score flags risk → drivers shown.
 2. Run CS playbook (agent-assisted) → approve → execute → evidence bundle.
 3. Generate QBR export → show value + governance proofs.
@@ -85,4 +92,5 @@
 ---
 
 ## 6) Notes
+
 - If you say “next” again, Sprint 20 will be **“Operational Excellence Loop”**: fully closed-loop cost controls, automated SLA credits (where appropriate), advanced incident learning, and scaling the “trust report” program into a differentiator that directly drives renewals.

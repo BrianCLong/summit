@@ -76,169 +76,163 @@ e2e-demo:
  * 10) Federation push‑down + revoke
  * 11) Issue a Selective Disclosure wallet; verify & revoke
  */
-import fetch from 'node-fetch';
+import fetch from "node-fetch";
 const gql = (q: string, v: any = {}) =>
-  fetch('http://localhost:7000/graphql', {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
+  fetch("http://localhost:7000/graphql", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
     body: JSON.stringify({ query: q, variables: v }),
   }).then((r) => r.json());
 
 async function main() {
-  console.log('1) LAC compile');
-  await fetch('http://localhost:7001/compile', {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
+  console.log("1) LAC compile");
+  await fetch("http://localhost:7001/compile", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
     body: JSON.stringify({
-      version: '1',
+      version: "1",
       rules: [
         {
-          id: 'allow-analyst-read',
+          id: "allow-analyst-read",
           when: {
-            subject: { roleIn: ['analyst'] },
-            actionIn: ['READ'],
-            resource: { sensitivityAtMost: 'restricted' },
-            context: { purposeIn: ['investigation'] },
+            subject: { roleIn: ["analyst"] },
+            actionIn: ["READ"],
+            resource: { sensitivityAtMost: "restricted" },
+            context: { purposeIn: ["investigation"] },
           },
-          effect: 'allow',
-          reason: 'analyst read',
+          effect: "allow",
+          reason: "analyst read",
         },
         {
-          id: 'deny-export',
-          when: { actionIn: ['EXPORT'] },
-          effect: 'deny',
-          reason: 'no export in demo',
+          id: "deny-export",
+          when: { actionIn: ["EXPORT"] },
+          effect: "deny",
+          reason: "no export in demo",
         },
       ],
     }),
   });
 
-  console.log('2) Claims + manifest');
-  const c1 = await fetch('http://localhost:7002/claims', {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
+  console.log("2) Claims + manifest");
+  const c1 = await fetch("http://localhost:7002/claims", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
     body: JSON.stringify({
-      kind: 'doc',
-      subjectId: 's1',
-      source: 'upload',
-      content: 'a',
+      kind: "doc",
+      subjectId: "s1",
+      source: "upload",
+      content: "a",
     }),
   }).then((r) => r.json());
-  const c2 = await fetch('http://localhost:7002/claims', {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
+  const c2 = await fetch("http://localhost:7002/claims", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
     body: JSON.stringify({
-      kind: 'img',
-      subjectId: 's2',
-      source: 'upload',
-      content: 'b',
+      kind: "img",
+      subjectId: "s2",
+      source: "upload",
+      content: "b",
     }),
   }).then((r) => r.json());
-  const m = await fetch('http://localhost:7002/manifests', {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
+  const m = await fetch("http://localhost:7002/manifests", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
     body: JSON.stringify({ claimIds: [c1.id, c2.id] }),
   }).then((r) => r.json());
-  console.log('Manifest root', m.rootHash);
+  console.log("Manifest root", m.rootHash);
 
-  console.log('3) NL→Cypher');
+  console.log("3) NL→Cypher");
   const gen = await gql(
-    'mutation($i:NLQueryInput!){ generateCypher(input:$i){ cypher estimateMs estimateRows warnings }}',
-    { i: { text: 'top 10 nodes by pagerank' } },
+    "mutation($i:NLQueryInput!){ generateCypher(input:$i){ cypher estimateMs estimateRows warnings }}",
+    { i: { text: "top 10 nodes by pagerank" } }
   );
-  console.log('NL→Cypher', gen.data.generateCypher);
+  console.log("NL→Cypher", gen.data.generateCypher);
 
-  console.log('4) Analytics & Pattern');
-  const pr = await gql(
-    'mutation{ runAnalytics(name:"pagerank"){ name payload }}',
-  );
+  console.log("4) Analytics & Pattern");
+  const pr = await gql('mutation{ runAnalytics(name:"pagerank"){ name payload }}');
   const ct = await gql(
-    'mutation{ runPattern(template:"cotravel", params:{withinHours:6}){ name payload }}',
+    'mutation{ runPattern(template:"cotravel", params:{withinHours:6}){ name payload }}'
   );
-  console.log('PageRank', pr.data.runAnalytics.payload.length, 'rows');
-  console.log('Co‑travel', ct.data.runPattern.payload.length, 'rows');
+  console.log("PageRank", pr.data.runAnalytics.payload.length, "rows");
+  console.log("Co‑travel", ct.data.runPattern.payload.length, "rows");
 
-  console.log('5) Case & Report');
-  const caseRes = await fetch('http://localhost:7006/cases', {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ name: 'Op GA', owner: 'lead' }),
+  console.log("5) Case & Report");
+  const caseRes = await fetch("http://localhost:7006/cases", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ name: "Op GA", owner: "lead" }),
   }).then((r) => r.json());
-  const rep = await fetch('http://localhost:7007/render', {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
+  const rep = await fetch("http://localhost:7007/render", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
     body: JSON.stringify({
-      title: 'IntelGraph Brief',
-      sections: [{ h: 'Summary', p: 'Built with proofs.' }],
+      title: "IntelGraph Brief",
+      sections: [{ h: "Summary", p: "Built with proofs." }],
     }),
   });
-  console.log('Report status', rep.status);
+  console.log("Report status", rep.status);
 
-  console.log('6) Runbook');
-  const rb = await fetch('http://localhost:7008/run', {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
+  console.log("6) Runbook");
+  const rb = await fetch("http://localhost:7008/run", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
     body: JSON.stringify({
-      id: 'R3',
-      name: 'Fan‑In',
+      id: "R3",
+      name: "Fan‑In",
       nodes: [
         {
-          id: 'nl',
-          type: 'nl2cypher',
-          params: { text: 'community detection' },
+          id: "nl",
+          type: "nl2cypher",
+          params: { text: "community detection" },
         },
-        { id: 'an', type: 'analytics', params: { name: 'pagerank' } },
+        { id: "an", type: "analytics", params: { name: "pagerank" } },
       ],
     }),
   }).then((r) => r.json());
-  console.log('Proofs', rb.proofs.length);
+  console.log("Proofs", rb.proofs.length);
 
-  console.log('7) Budget guard (soft)');
+  console.log("7) Budget guard (soft)");
   try {
     const heavy = await gql(
-      'mutation($i:NLQueryInput!){ generateCypher(input:$i){ cypher estimateMs estimateRows }}',
-      { i: { text: 'shortest path from A to Z' } },
+      "mutation($i:NLQueryInput!){ generateCypher(input:$i){ cypher estimateMs estimateRows }}",
+      { i: { text: "shortest path from A to Z" } }
     );
-    console.log('Heavy est', heavy.data.generateCypher);
+    console.log("Heavy est", heavy.data.generateCypher);
   } catch (e) {
-    console.warn('Budget block (expected demo):', (e as Error).message);
+    console.warn("Budget block (expected demo):", (e as Error).message);
   }
 
-  console.log('8) Archive to MinIO');
-  await fetch('http://localhost:7010/archive', {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
+  console.log("8) Archive to MinIO");
+  await fetch("http://localhost:7010/archive", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
     body: JSON.stringify({
-      bucket: 'intelgraph',
-      key: 'cases/op-ga/brief.json',
+      bucket: "intelgraph",
+      key: "cases/op-ga/brief.json",
       payload: { ok: true },
     }),
   });
 
-  console.log('9) XAI');
+  console.log("9) XAI");
   const cf = await gql(
     'mutation($n:String!){ xaiCounterfactual(node:$n, objective:"flag"){ explanation delta changedEdges }}',
-    { n: 'A' },
+    { n: "A" }
   );
-  console.log('CF', cf.data.xaiCounterfactual.length);
+  console.log("CF", cf.data.xaiCounterfactual.length);
 
-  console.log('10) Federation');
-  const fed = await gql(
-    'mutation($i:FedQueryInput!){ fedQuery(input:$i){ claimHashes proof }}',
-    { i: { selectorHash: 'abc', predicate: 'n.flag=true', limit: 10 } },
-  );
-  console.log('Fed claims', fed.data.fedQuery.claimHashes.length);
+  console.log("10) Federation");
+  const fed = await gql("mutation($i:FedQueryInput!){ fedQuery(input:$i){ claimHashes proof }}", {
+    i: { selectorHash: "abc", predicate: "n.flag=true", limit: 10 },
+  });
+  console.log("Fed claims", fed.data.fedQuery.claimHashes.length);
 
-  console.log('11) Wallet issue + verify');
-  const w = await gql(
-    'mutation($i:WalletRequest!){ walletIssue(input:$i){ id audience url }}',
-    { i: { audience: 'press', ttlSeconds: 120, claims: ['c1', 'c2'] } },
-  );
+  console.log("11) Wallet issue + verify");
+  const w = await gql("mutation($i:WalletRequest!){ walletIssue(input:$i){ id audience url }}", {
+    i: { audience: "press", ttlSeconds: 120, claims: ["c1", "c2"] },
+  });
   const wid = w.data.walletIssue.id;
-  const vr = await fetch(`http://localhost:7014/verify/${wid}`).then((r) =>
-    r.json(),
-  );
-  console.log('Verified', vr.ok);
+  const vr = await fetch(`http://localhost:7014/verify/${wid}`).then((r) => r.json());
+  console.log("Verified", vr.ok);
 }
 main().catch((e) => {
   console.error(e);
@@ -288,22 +282,22 @@ done
 
 ```js
 // ops/k6/e2e-waves.js
-import http from 'k6/http';
-import { sleep } from 'k6';
+import http from "k6/http";
+import { sleep } from "k6";
 export const options = {
   stages: [
-    { duration: '1m', target: 20 },
-    { duration: '3m', target: 20 },
-    { duration: '1m', target: 0 },
+    { duration: "1m", target: 20 },
+    { duration: "3m", target: 20 },
+    { duration: "1m", target: 0 },
   ],
 };
 export default function () {
   http.post(
-    'http://localhost:7000/graphql',
+    "http://localhost:7000/graphql",
     JSON.stringify({
       query: 'mutation{ runAnalytics(name:"pagerank"){ name }}',
     }),
-    { headers: { 'content-type': 'application/json' } },
+    { headers: { "content-type": "application/json" } }
   );
   sleep(1);
 }

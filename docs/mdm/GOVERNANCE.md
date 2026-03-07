@@ -7,26 +7,31 @@ This document defines the governance framework for Summit's Master Data Manageme
 ## Governance Principles
 
 ### 1. Data Ownership
+
 - Each data domain must have a designated Data Owner
 - Data Owners are accountable for data quality and compliance
 - Ownership is at the executive or senior management level
 
 ### 2. Data Stewardship
+
 - Data Stewards execute day-to-day data management
 - Stewards are subject matter experts in their domains
 - Multiple stewards may be assigned to complex domains
 
 ### 3. Data Quality
+
 - Quality requirements defined for each domain
 - Continuous monitoring and improvement
 - Quality metrics reported regularly
 
 ### 4. Compliance
+
 - Adherence to regulatory requirements (GDPR, CCPA, etc.)
 - Industry standards compliance
 - Internal policy enforcement
 
 ### 5. Change Management
+
 - Controlled process for data changes
 - Impact assessment required
 - Approval workflows enforced
@@ -38,6 +43,7 @@ This document defines the governance framework for Summit's Master Data Manageme
 **Purpose**: Strategic oversight of data governance program
 
 **Members**:
+
 - Chief Data Officer (Chair)
 - Domain Data Owners
 - IT Leadership
@@ -45,6 +51,7 @@ This document defines the governance framework for Summit's Master Data Manageme
 - Security Representative
 
 **Responsibilities**:
+
 - Approve governance policies
 - Resolve escalated issues
 - Review quarterly metrics
@@ -57,6 +64,7 @@ This document defines the governance framework for Summit's Master Data Manageme
 **Purpose**: Operational management of specific data domains
 
 **Structure** (per domain):
+
 ```
 Data Owner (Executive Level)
   ├── Domain Steward (Lead)
@@ -67,6 +75,7 @@ Data Owner (Executive Level)
 ```
 
 **Responsibilities**:
+
 - Define domain data standards
 - Execute quality improvement
 - Manage change requests
@@ -80,6 +89,7 @@ Data Owner (Executive Level)
 **Accountability**: Overall data governance program
 
 **Responsibilities**:
+
 - Define governance strategy
 - Chair Governance Council
 - Approve major policies
@@ -91,6 +101,7 @@ Data Owner (Executive Level)
 **Accountability**: Domain-specific data quality and compliance
 
 **Responsibilities**:
+
 - Define domain policies
 - Approve domain changes
 - Assign stewards
@@ -98,6 +109,7 @@ Data Owner (Executive Level)
 - Handle escalations
 
 **Required Skills**:
+
 - Business domain expertise
 - Strategic thinking
 - Stakeholder management
@@ -108,6 +120,7 @@ Data Owner (Executive Level)
 **Accountability**: Day-to-day domain data management
 
 **Responsibilities**:
+
 - Implement governance policies
 - Review and approve data changes
 - Monitor quality metrics
@@ -115,6 +128,7 @@ Data Owner (Executive Level)
 - Document decisions
 
 **Required Skills**:
+
 - Deep domain knowledge
 - Data management expertise
 - Process discipline
@@ -125,6 +139,7 @@ Data Owner (Executive Level)
 **Accountability**: Data quality within domain
 
 **Responsibilities**:
+
 - Define quality rules
 - Monitor quality scores
 - Investigate quality issues
@@ -132,6 +147,7 @@ Data Owner (Executive Level)
 - Report on quality trends
 
 **Required Skills**:
+
 - Data quality methodology
 - Statistical analysis
 - Root cause analysis
@@ -142,6 +158,7 @@ Data Owner (Executive Level)
 **Accountability**: Data integration and synchronization
 
 **Responsibilities**:
+
 - Define integration requirements
 - Configure sync processes
 - Resolve integration issues
@@ -149,6 +166,7 @@ Data Owner (Executive Level)
 - Coordinate with technical teams
 
 **Required Skills**:
+
 - Integration architecture
 - Data mapping
 - Troubleshooting
@@ -159,6 +177,7 @@ Data Owner (Executive Level)
 **Accountability**: Regulatory compliance for domain data
 
 **Responsibilities**:
+
 - Ensure regulatory compliance
 - Implement privacy controls
 - Conduct compliance audits
@@ -166,6 +185,7 @@ Data Owner (Executive Level)
 - Report violations
 
 **Required Skills**:
+
 - Regulatory knowledge
 - Risk assessment
 - Audit procedures
@@ -200,6 +220,7 @@ Data Owner (Executive Level)
    - Example: PII, PHI, PCI data
 
 **Application**:
+
 ```typescript
 metadata: {
   sensitivity: 'confidential',  // or 'restricted', 'internal', 'public'
@@ -214,6 +235,7 @@ metadata: {
 **Principle**: Least privilege access
 
 **Requirements**:
+
 - Role-based access control (RBAC)
 - Segregation of duties
 - Regular access reviews
@@ -228,6 +250,7 @@ metadata: {
 5. **Certify**: Certify data quality
 
 **Implementation**:
+
 ```typescript
 accessControl: {
   roles: [
@@ -258,6 +281,7 @@ accessControl: {
    - Approval before implementation
 
 2. **Approval Workflow**:
+
    ```
    Requestor → Steward → Owner → Implementation
    ```
@@ -270,14 +294,14 @@ accessControl: {
 
 **Change Types**:
 
-| Change Type | Approval Required | Auto-Approve Threshold |
-|-------------|-------------------|------------------------|
-| Create | Yes | N/A |
-| Update - Low Risk | Conditional | Quality Score > 0.90 |
-| Update - High Risk | Yes | N/A |
-| Merge | Yes | Match Score > 0.95 |
-| Delete | Yes | N/A |
-| Certify | Yes | N/A |
+| Change Type        | Approval Required | Auto-Approve Threshold |
+| ------------------ | ----------------- | ---------------------- |
+| Create             | Yes               | N/A                    |
+| Update - Low Risk  | Conditional       | Quality Score > 0.90   |
+| Update - High Risk | Yes               | N/A                    |
+| Merge              | Yes               | Match Score > 0.95     |
+| Delete             | Yes               | N/A                    |
+| Certify            | Yes               | N/A                    |
 
 ### Data Quality Policy
 
@@ -294,14 +318,15 @@ accessControl: {
 
 **Minimum Thresholds**:
 
-| Domain | Overall Quality | Completeness | Accuracy | Consistency |
-|--------|----------------|--------------|----------|-------------|
-| Customer | 0.90 | 0.95 | 0.90 | 0.85 |
-| Product | 0.85 | 0.90 | 0.85 | 0.80 |
-| Supplier | 0.85 | 0.90 | 0.85 | 0.80 |
-| Location | 0.90 | 0.95 | 0.90 | 0.85 |
+| Domain   | Overall Quality | Completeness | Accuracy | Consistency |
+| -------- | --------------- | ------------ | -------- | ----------- |
+| Customer | 0.90            | 0.95         | 0.90     | 0.85        |
+| Product  | 0.85            | 0.90         | 0.85     | 0.80        |
+| Supplier | 0.85            | 0.90         | 0.85     | 0.80        |
+| Location | 0.90            | 0.95         | 0.90     | 0.85        |
 
 **Enforcement**:
+
 ```typescript
 governancePolicy: {
   qualityThreshold: 0.90,
@@ -316,16 +341,17 @@ governancePolicy: {
 
 **Retention Periods** (examples):
 
-| Data Type | Active Retention | Archive Retention | Disposal Method |
-|-----------|------------------|-------------------|-----------------|
-| Customer | 7 years | 10 years | Secure deletion |
-| Transaction | 7 years | 10 years | Secure deletion |
-| Audit Log | 2 years | 7 years | Archive |
-| Quality Metrics | 1 year | 3 years | Archive |
+| Data Type       | Active Retention | Archive Retention | Disposal Method |
+| --------------- | ---------------- | ----------------- | --------------- |
+| Customer        | 7 years          | 10 years          | Secure deletion |
+| Transaction     | 7 years          | 10 years          | Secure deletion |
+| Audit Log       | 2 years          | 7 years           | Archive         |
+| Quality Metrics | 1 year           | 3 years           | Archive         |
 
 **Legal Hold**: Override retention for legal proceedings
 
 **Implementation**:
+
 ```typescript
 retentionPolicy: {
   retentionPeriod: 7,
@@ -349,11 +375,13 @@ retentionPolicy: {
 6. **Data Minimization**: Collect only necessary data
 
 **PII Categories**:
+
 - Direct Identifiers: SSN, email, phone
 - Quasi-Identifiers: ZIP code, birth date
 - Sensitive: Health info, financial info
 
 **Implementation**:
+
 ```typescript
 privacyPolicy: {
   piiFields: ['ssn', 'email', 'phone', 'address'],
@@ -423,6 +451,7 @@ privacyPolicy: {
 ```
 
 **SLAs**:
+
 - Low Priority: 5 business days
 - Medium Priority: 2 business days
 - High Priority: 1 business day
@@ -456,6 +485,7 @@ privacyPolicy: {
 ```
 
 **Escalation**:
+
 - Level 1: Steward (24 hours)
 - Level 2: Owner (48 hours)
 - Level 3: Governance Council (72 hours)
@@ -465,12 +495,14 @@ privacyPolicy: {
 ### Key Performance Indicators (KPIs)
 
 **Quality KPIs**:
+
 - Overall quality score by domain
 - Quality trend (improving/declining)
 - Issues by severity
 - Time to resolve issues
 
 **Operational KPIs**:
+
 - Master records created
 - Match rate
 - Certification rate
@@ -478,6 +510,7 @@ privacyPolicy: {
 - SLA compliance
 
 **Compliance KPIs**:
+
 - Audit trail completeness
 - Privacy incidents
 - Policy violations
@@ -486,21 +519,25 @@ privacyPolicy: {
 ### Reporting Schedule
 
 **Daily**:
+
 - Critical quality alerts
 - Sync failures
 - System health
 
 **Weekly**:
+
 - Quality score summary
 - Open issues
 - Change requests pending
 
 **Monthly**:
+
 - Domain quality scorecards
 - Operational metrics
 - Compliance summary
 
 **Quarterly**:
+
 - Executive dashboard
 - Trend analysis
 - Governance Council report
@@ -510,6 +547,7 @@ privacyPolicy: {
 ### Regulatory Requirements
 
 **GDPR Compliance**:
+
 - Right to access
 - Right to rectification
 - Right to erasure
@@ -518,12 +556,14 @@ privacyPolicy: {
 - Consent management
 
 **CCPA Compliance**:
+
 - Consumer rights
 - Data inventory
 - Privacy notice
 - Opt-out mechanisms
 
 **Industry Standards**:
+
 - ISO 8000 (Data Quality)
 - DAMA-DMBOK (Data Management)
 - DCAM (Data Management Capability Assessment)
@@ -531,12 +571,14 @@ privacyPolicy: {
 ### Audit Procedures
 
 **Internal Audits**: Quarterly
+
 - Access review
 - Quality validation
 - Process compliance
 - Documentation review
 
 **External Audits**: Annual
+
 - Regulatory compliance
 - Third-party certification
 - SOC 2 attestation
@@ -546,17 +588,20 @@ privacyPolicy: {
 ### Required Training
 
 **All Users**:
+
 - Data governance overview
 - Data classification
 - Privacy awareness
 
 **Stewards**:
+
 - Advanced data governance
 - Quality management
 - Tool training
 - Process certification
 
 **Owners**:
+
 - Strategic governance
 - Executive oversight
 - Risk management

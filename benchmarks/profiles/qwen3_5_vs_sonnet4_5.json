@@ -19,9 +19,5 @@
       "weight": 1.0
     }
   ],
-  "metrics": [
-    "latency_ms",
-    "tokens_used",
-    "keyword_match_accuracy"
-  ]
+  "metrics": ["latency_ms", "tokens_used", "keyword_match_accuracy"]
 }

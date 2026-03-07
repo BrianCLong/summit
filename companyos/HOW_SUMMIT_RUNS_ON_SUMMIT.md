@@ -123,11 +123,13 @@ React dashboard showing real-time operational status:
 ### 1. GitHub Integration
 
 **Automatic Incident Tracking:**
+
 - Issues labeled `incident` automatically create incidents in CompanyOS
 - Issue closure resolves corresponding incidents
 - Links maintained between GitHub issues and internal incidents
 
 **Deployment Tracking:**
+
 - GitHub Actions workflow runs automatically create deployment records
 - Deployment success/failure automatically updates status
 - Commit SHAs, run URLs, and release URLs tracked
@@ -135,6 +137,7 @@ React dashboard showing real-time operational status:
 **Webhook Endpoint:** `POST /api/companyos/github-webhook`
 
 **Configuration:**
+
 ```bash
 # Set in GitHub repository webhooks
 URL: https://summit.example.com/api/companyos/github-webhook
@@ -147,16 +150,19 @@ Events: issues, workflow_run, deployment, deployment_status
 ### 2. Prometheus/Alertmanager Integration
 
 **Automatic Alert Ingestion:**
+
 - Alertmanager forwards all alerts to CompanyOS
 - Alerts deduplicated using fingerprints
 - Alert resolution tracked automatically
 
 **SLO Violation Detection:**
+
 - Alerts with `slo_name` label create SLO violation records
 - Error budget impact calculated
 - Historical violation tracking for compliance reporting
 
 **Auto-Incident Creation:**
+
 - Critical alerts automatically create SEV1/SEV2 incidents
 - Alerts grouped by fingerprint to prevent duplicate incidents
 - Customer-facing services flagged for immediate attention
@@ -164,12 +170,13 @@ Events: issues, workflow_run, deployment, deployment_status
 **Webhook Endpoint:** `POST /api/companyos/prometheus-webhook`
 
 **Configuration:**
+
 ```yaml
 # alerting/alertmanager.yml
 receivers:
-  - name: 'companyos'
+  - name: "companyos"
     webhook_configs:
-      - url: 'https://summit.example.com/api/companyos/prometheus-webhook'
+      - url: "https://summit.example.com/api/companyos/prometheus-webhook"
         send_resolved: true
 ```
 
@@ -178,11 +185,13 @@ receivers:
 ### 3. CI/CD Integration
 
 **Deployment Tracking:**
+
 - CI/CD systems can POST to `/api/companyos/deployments`
 - Tracks: service name, version, environment, deployer, commit SHA
 - Automatically calculates deployment frequency (DORA metric)
 
 **Example GitHub Actions Integration:**
+
 ```yaml
 # .github/workflows/deploy.yml
 - name: Record Deployment
@@ -202,16 +211,19 @@ receivers:
 ### 4. AI Copilot Integration
 
 **Incident Analysis:**
+
 - Summarize incident timeline
 - Suggest similar past incidents
 - Recommend runbooks based on alert patterns
 
 **Postmortem Generation:**
+
 - Auto-draft postmortems from incident data
 - Extract root cause patterns
 - Suggest action items based on similar incidents
 
 **Runbook Suggestions:**
+
 - Match alerts to relevant runbooks
 - Surface ADRs related to affected services
 - Recommend mitigation steps
@@ -223,6 +235,7 @@ receivers:
 ### Creating an Incident
 
 **Via API:**
+
 ```bash
 curl -X POST https://summit.example.com/api/companyos/incidents \
   -H "Content-Type: application/json" \
@@ -237,6 +250,7 @@ curl -X POST https://summit.example.com/api/companyos/incidents \
 ```
 
 **Via GitHub:**
+
 1. Create issue with `incident` label
 2. Add severity label: `sev1`, `sev2`, `sev3`, or `sev4`
 3. Issue automatically syncs to CompanyOS
@@ -244,11 +258,13 @@ curl -X POST https://summit.example.com/api/companyos/incidents \
 ### Tracking a Deployment
 
 **Automatic (via GitHub Actions):**
+
 - Push to `main` branch triggers deployment workflow
 - Workflow run automatically creates deployment record
 - Success/failure updates deployment status
 
 **Manual (via API):**
+
 ```bash
 # Start deployment
 curl -X POST https://summit.example.com/api/companyos/deployments \
@@ -267,6 +283,7 @@ curl -X POST https://summit.example.com/api/companyos/deployments/{id}/succeeded
 ### Responding to Alerts
 
 **Automatic Flow:**
+
 1. Prometheus detects SLO violation
 2. Alertmanager sends webhook to CompanyOS
 3. Alert created, SLO violation recorded
@@ -274,6 +291,7 @@ curl -X POST https://summit.example.com/api/companyos/deployments/{id}/succeeded
 5. On-call engineer notified via PagerDuty
 
 **Manual Response:**
+
 ```bash
 # Acknowledge alert
 curl -X POST https://summit.example.com/api/companyos/alerts/{id}/acknowledge
@@ -291,21 +309,25 @@ curl -X POST https://summit.example.com/api/companyos/alerts/{id}/resolve
 CompanyOS automatically calculates the four DORA metrics:
 
 ### 1. Deployment Frequency
+
 - Tracked: Number of deployments per service per environment
 - Aggregation: Daily, weekly, monthly
 - Query: `GET /api/companyos/deployments/stats`
 
 ### 2. Lead Time for Changes
+
 - Tracked: Time from commit to production deployment
 - Calculation: `deployment.started_at - commit.authored_at`
 - View: DORA metrics dashboard
 
 ### 3. Mean Time to Recovery (MTTR)
+
 - Tracked: Time from incident start to resolution
 - Calculation: `incident.resolved_at - incident.started_at`
 - Query: View `maestro.active_incidents_view`
 
 ### 4. Change Failure Rate
+
 - Tracked: Percentage of deployments that fail or require rollback
 - Calculation: `(failed + rolled_back) / total_deployments`
 - Query: `GET /api/companyos/deployments/stats`
@@ -333,6 +355,7 @@ curl -X POST https://summit.example.com/api/companyos/runbooks/sync
 ```
 
 This parses YAML runbooks and creates database records for:
+
 - Runbook metadata (title, category, estimated duration)
 - Related services
 - Execution history
@@ -372,10 +395,7 @@ curl -X POST https://summit.example.com/api/companyos/adrs/sync
 
 ```graphql
 mutation LinkADRToRoadmap {
-  updateRoadmapItem(
-    id: "epic-uuid"
-    input: { relatedAdrIds: ["adr-uuid-1", "adr-uuid-2"] }
-  ) {
+  updateRoadmapItem(id: "epic-uuid", input: { relatedAdrIds: ["adr-uuid-1", "adr-uuid-2"] }) {
     id
     title
     relatedAdrs {
@@ -512,20 +532,20 @@ COMPANYOS_API_URL=https://summit.example.com/api/companyos
 ```yaml
 # alerting/alertmanager.yml
 route:
-  receiver: 'companyos'
-  group_by: ['alertname', 'service']
+  receiver: "companyos"
+  group_by: ["alertname", "service"]
   group_wait: 10s
   group_interval: 10s
   repeat_interval: 12h
   routes:
     - match:
         severity: critical
-      receiver: 'pagerduty-and-companyos'
+      receiver: "pagerduty-and-companyos"
 
 receivers:
-  - name: 'companyos'
+  - name: "companyos"
     webhook_configs:
-      - url: 'https://summit.example.com/api/companyos/prometheus-webhook'
+      - url: "https://summit.example.com/api/companyos/prometheus-webhook"
         send_resolved: true
 ```
 

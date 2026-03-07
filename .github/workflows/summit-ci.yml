@@ -3,16 +3,16 @@ name: Summit CI
 on:
   push:
     paths:
-      - 'summit/**'
-      - 'client/**'
-      - '.github/workflows/summit-ci.yml'
-      - 'requirements.in'
+      - "summit/**"
+      - "client/**"
+      - ".github/workflows/summit-ci.yml"
+      - "requirements.in"
   pull_request:
     paths:
-      - 'summit/**'
-      - 'client/**'
-      - '.github/workflows/summit-ci.yml'
-      - 'requirements.in'
+      - "summit/**"
+      - "client/**"
+      - ".github/workflows/summit-ci.yml"
+      - "requirements.in"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -27,7 +27,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: "3.12"
 
       - name: Install dependencies
         run: |
@@ -96,7 +96,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "20"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile

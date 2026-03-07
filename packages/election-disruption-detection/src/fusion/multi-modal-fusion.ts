@@ -10,7 +10,7 @@
  * - Platform transparency reports
  */
 
-import { ElectionThreatSignal, Evidence } from '../index.js';
+import { ElectionThreatSignal, Evidence } from "../index.js";
 
 export interface FusionConfig {
   modalityWeights: Record<string, number>;
@@ -71,14 +71,18 @@ export class MultiModalFusionEngine {
     const assigned = new Set<string>();
 
     for (const threat of threats) {
-      if (assigned.has(threat.id)) {continue;}
+      if (assigned.has(threat.id)) {
+        continue;
+      }
 
       const group = [threat];
       assigned.add(threat.id);
 
       // Find correlated threats
       for (const other of threats) {
-        if (assigned.has(other.id)) {continue;}
+        if (assigned.has(other.id)) {
+          continue;
+        }
         if (this.areCorrelated(threat, other)) {
           group.push(other);
           assigned.add(other.id);
@@ -94,26 +98,31 @@ export class MultiModalFusionEngine {
   private areCorrelated(a: ElectionThreatSignal, b: ElectionThreatSignal): boolean {
     // Temporal correlation
     const temporalDiff = Math.abs(
-      a.temporalContext.timeWindow.start.getTime() -
-        b.temporalContext.timeWindow.start.getTime()
+      a.temporalContext.timeWindow.start.getTime() - b.temporalContext.timeWindow.start.getTime()
     );
-    if (temporalDiff > this.config.temporalWindow) {return false;}
+    if (temporalDiff > this.config.temporalWindow) {
+      return false;
+    }
 
     // Spatial correlation
     const spatialOverlap = this.calculateSpatialOverlap(
       a.geospatialContext.jurisdictions,
       b.geospatialContext.jurisdictions
     );
-    if (spatialOverlap === 0) {return false;}
+    if (spatialOverlap === 0) {
+      return false;
+    }
 
     // Type correlation
-    if (a.type === b.type) {return true;}
+    if (a.type === b.type) {
+      return true;
+    }
 
     // Related types
     const relatedTypes: Record<string, string[]> = {
-      DISINFORMATION_CAMPAIGN: ['PERCEPTION_HACK', 'LEGITIMACY_ATTACK'],
-      FOREIGN_INTERFERENCE: ['DISINFORMATION_CAMPAIGN', 'INFRASTRUCTURE_ATTACK'],
-      VOTER_SUPPRESSION: ['COORDINATED_HARASSMENT', 'DISINFORMATION_CAMPAIGN'],
+      DISINFORMATION_CAMPAIGN: ["PERCEPTION_HACK", "LEGITIMACY_ATTACK"],
+      FOREIGN_INTERFERENCE: ["DISINFORMATION_CAMPAIGN", "INFRASTRUCTURE_ATTACK"],
+      VOTER_SUPPRESSION: ["COORDINATED_HARASSMENT", "DISINFORMATION_CAMPAIGN"],
     };
 
     return relatedTypes[a.type]?.includes(b.type) || false;
@@ -176,26 +185,27 @@ export class MultiModalFusionEngine {
     return Math.min(0.99, combined);
   }
 
-  private selectPrimaryType(threats: ElectionThreatSignal[]): ElectionThreatSignal['type'] {
+  private selectPrimaryType(threats: ElectionThreatSignal[]): ElectionThreatSignal["type"] {
     // Select highest severity/confidence type
-    return threats.sort(
-      (a, b) => b.confidence - a.confidence
-    )[0].type;
+    return threats.sort((a, b) => b.confidence - a.confidence)[0].type;
   }
 
-  private fuseSeverity(threats: ElectionThreatSignal[]): ElectionThreatSignal['severity'] {
-    const severityOrder = ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW', 'INFORMATIONAL'];
-    const highest = threats.reduce((max, t) => {
-      const maxIdx = severityOrder.indexOf(max);
-      const tIdx = severityOrder.indexOf(t.severity);
-      return tIdx < maxIdx ? t.severity : max;
-    }, 'INFORMATIONAL' as ElectionThreatSignal['severity']);
+  private fuseSeverity(threats: ElectionThreatSignal[]): ElectionThreatSignal["severity"] {
+    const severityOrder = ["CRITICAL", "HIGH", "MEDIUM", "LOW", "INFORMATIONAL"];
+    const highest = threats.reduce(
+      (max, t) => {
+        const maxIdx = severityOrder.indexOf(max);
+        const tIdx = severityOrder.indexOf(t.severity);
+        return tIdx < maxIdx ? t.severity : max;
+      },
+      "INFORMATIONAL" as ElectionThreatSignal["severity"]
+    );
     return highest;
   }
 
   private fuseGeospatial(
     threats: ElectionThreatSignal[]
-  ): ElectionThreatSignal['geospatialContext'] {
+  ): ElectionThreatSignal["geospatialContext"] {
     return {
       jurisdictions: [...new Set(threats.flatMap((t) => t.geospatialContext.jurisdictions))],
       precincts: [...new Set(threats.flatMap((t) => t.geospatialContext.precincts))],
@@ -207,30 +217,29 @@ export class MultiModalFusionEngine {
     };
   }
 
-  private fuseAttribution(
-    threats: ElectionThreatSignal[]
-  ): ElectionThreatSignal['attribution'] {
+  private fuseAttribution(threats: ElectionThreatSignal[]): ElectionThreatSignal["attribution"] {
     // Use highest confidence attribution
-    return threats.sort(
-      (a, b) => b.attribution.confidence - a.attribution.confidence
-    )[0].attribution;
+    return threats.sort((a, b) => b.attribution.confidence - a.attribution.confidence)[0]
+      .attribution;
   }
 
   private fuseMitigations(
     threats: ElectionThreatSignal[]
-  ): ElectionThreatSignal['mitigationRecommendations'] {
+  ): ElectionThreatSignal["mitigationRecommendations"] {
     const all = threats.flatMap((t) => t.mitigationRecommendations);
     // Deduplicate by action
     const seen = new Set<string>();
     return all.filter((m) => {
-      if (seen.has(m.action)) {return false;}
+      if (seen.has(m.action)) {
+        return false;
+      }
       seen.add(m.action);
       return true;
     });
   }
 
   private getModality(threat: ElectionThreatSignal): string {
-    return threat.vectors[0] || 'UNKNOWN';
+    return threat.vectors[0] || "UNKNOWN";
   }
 
   private calculateCrossModalEvidence(threats: ElectionThreatSignal[]): CrossModalEvidence[] {
@@ -241,7 +250,7 @@ export class MultiModalFusionEngine {
         crossModal.push({
           modality1: this.getModality(threats[i]),
           modality2: this.getModality(threats[j]),
-          correlationType: 'TEMPORAL_SPATIAL',
+          correlationType: "TEMPORAL_SPATIAL",
           strength: 0.8,
           temporalAlignment: 0.9,
         });

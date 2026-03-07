@@ -158,8 +158,8 @@ kind: Namespace
 metadata:
   name: mc-platform
   labels:
-    security.compliance/level: 'high'
-    observability.prometheus.io/scrape: 'true'
+    security.compliance/level: "high"
+    observability.prometheus.io/scrape: "true"
 ```
 
 #### Resource Limits
@@ -183,12 +183,12 @@ npm install mc-admin-client
 ### Configuration
 
 ```typescript
-import { McAdminClient } from 'mc-admin-client';
+import { McAdminClient } from "mc-admin-client";
 
-const mc = new McAdminClient('https://api.mc-platform.com/graphql', {
-  'x-actor-id': 'ops-admin-001',
-  'x-actor-role': 'platform-admin',
-  'x-actor-tenant': 'ALL',
+const mc = new McAdminClient("https://api.mc-platform.com/graphql", {
+  "x-actor-id": "ops-admin-001",
+  "x-actor-role": "platform-admin",
+  "x-actor-tenant": "ALL",
 });
 ```
 
@@ -198,7 +198,7 @@ const mc = new McAdminClient('https://api.mc-platform.com/graphql', {
 
 ```typescript
 await mc.setFeatureFlags({
-  tenant: 'TENANT_001',
+  tenant: "TENANT_001",
   flags: {
     quantumReadyMode: true,
     enhancedAuditing: true,
@@ -211,7 +211,7 @@ await mc.setFeatureFlags({
 
 ```typescript
 await mc.setSloThresholds({
-  tenant: 'ALL',
+  tenant: "ALL",
   thresholds: {
     composite: 0.87,
     jwsFail: 0.001,
@@ -226,23 +226,23 @@ await mc.setSloThresholds({
 
 ```typescript
 const evidence = await mc.evidencePack({
-  version: 'v0.3.9',
+  version: "v0.3.9",
 });
 
-console.log('Evidence artifacts:', evidence.artifacts.length);
-console.log('Cryptographic signature:', evidence.signature);
+console.log("Evidence artifacts:", evidence.artifacts.length);
+console.log("Cryptographic signature:", evidence.signature);
 ```
 
 #### Disaster Recovery Validation
 
 ```typescript
 const drResult = await mc.podrRun({
-  tenant: 'TENANT_001',
+  tenant: "TENANT_001",
 });
 
-console.log('DR drill result:', drResult.success);
-console.log('RTO achieved:', drResult.rto_seconds, 'seconds');
-console.log('RPO achieved:', drResult.rpo_seconds, 'seconds');
+console.log("DR drill result:", drResult.success);
+console.log("RTO achieved:", drResult.rto_seconds, "seconds");
+console.log("RPO achieved:", drResult.rpo_seconds, "seconds");
 ```
 
 ## Monitoring and Observability
@@ -281,8 +281,8 @@ histogram_quantile(0.95, rate(podr_drill_duration_seconds_bucket[5m]))
   labels:
     severity: critical
   annotations:
-    summary: 'MC Platform experiencing high error rate'
-    runbook_url: 'https://docs.mc-platform.com/runbooks/high-error-rate'
+    summary: "MC Platform experiencing high error rate"
+    runbook_url: "https://docs.mc-platform.com/runbooks/high-error-rate"
 
 - alert: QuantumReadinessCompromised
   expr: rate(pqa_verification_failures_total[5m]) > 0.05
@@ -290,7 +290,7 @@ histogram_quantile(0.95, rate(podr_drill_duration_seconds_bucket[5m]))
   labels:
     severity: warning
   annotations:
-    summary: 'Post-quantum attestation verification failures detected'
+    summary: "Post-quantum attestation verification failures detected"
 ```
 
 ### Grafana Dashboards
@@ -322,12 +322,12 @@ metadata:
   namespace: mc-platform
   name: mc-platform-operator
 rules:
-  - apiGroups: ['']
-    resources: ['pods', 'services', 'configmaps']
-    verbs: ['get', 'list', 'watch']
-  - apiGroups: ['apps']
-    resources: ['deployments']
-    verbs: ['get', 'list', 'watch', 'patch']
+  - apiGroups: [""]
+    resources: ["pods", "services", "configmaps"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    verbs: ["get", "list", "watch", "patch"]
 ```
 
 #### OPA Policy Examples

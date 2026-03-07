@@ -4,16 +4,16 @@ on:
   push:
     branches: ["main"]
     paths:
-      - '.github/workflows/**'
+      - ".github/workflows/**"
   pull_request:
     branches: ["main"]
     paths-ignore:
-      - 'docs/**'
-      - '**.md'
-      - 'prompts/**'
-      - 'evidence/**'
+      - "docs/**"
+      - "**.md"
+      - "prompts/**"
+      - "evidence/**"
     paths:
-      - '.github/workflows/**'
+      - ".github/workflows/**"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

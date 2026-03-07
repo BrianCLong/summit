@@ -162,14 +162,14 @@ estimatedDuration: 5000
 ### Creating a Scenario via API
 
 ```typescript
-import { ScenarioRepository } from '@intelgraph/scenario-registry';
-import type { EvalScenario } from '@intelgraph/mesh-eval-sdk';
+import { ScenarioRepository } from "@intelgraph/scenario-registry";
+import type { EvalScenario } from "@intelgraph/mesh-eval-sdk";
 
 const scenario: EvalScenario = {
-  id: 'sc-custom-001',
-  version: '1.0.0',
-  type: 'custom',
-  name: 'My Custom Scenario',
+  id: "sc-custom-001",
+  version: "1.0.0",
+  type: "custom",
+  name: "My Custom Scenario",
   // ... rest of scenario definition
 };
 
@@ -196,8 +196,8 @@ The system supports several scenario types:
 ### Basic Evaluation Run
 
 ```typescript
-import { ScoringEngine } from '@intelgraph/scoring-engine';
-import type { ScoringContext } from '@intelgraph/scoring-engine';
+import { ScoringEngine } from "@intelgraph/scoring-engine";
+import type { ScoringContext } from "@intelgraph/scoring-engine";
 
 const engine = new ScoringEngine();
 
@@ -231,7 +231,7 @@ scoringStrategy:
       - type: not_contains
         value: "forbidden text"
         weight: 1.0
-    aggregation: all  # or 'any' or 'weighted_average'
+    aggregation: all # or 'any' or 'weighted_average'
 ```
 
 #### 2. LLM-Judged Scoring
@@ -295,15 +295,15 @@ scoringStrategy:
 
 ```typescript
 interface EvalScore {
-  overall: number;              // 0-1 normalized score
-  dimensions: Record<string, number>;  // Dimension-specific scores
-  passFailStatus: 'pass' | 'fail' | 'partial' | 'uncertain';
-  rationale: string;            // Explanation
-  strengths: string[];          // What went well
-  weaknesses: string[];         // What needs improvement
-  scoringMethod: string;        // How it was scored
-  judgeModel?: string;          // Judge model if applicable
-  confidence?: number;          // Confidence in the score
+  overall: number; // 0-1 normalized score
+  dimensions: Record<string, number>; // Dimension-specific scores
+  passFailStatus: "pass" | "fail" | "partial" | "uncertain";
+  rationale: string; // Explanation
+  strengths: string[]; // What went well
+  weaknesses: string[]; // What needs improvement
+  scoringMethod: string; // How it was scored
+  judgeModel?: string; // Judge model if applicable
+  confidence?: number; // Confidence in the score
 }
 ```
 
@@ -359,16 +359,16 @@ const baseline: BaselineSnapshot = {
 ### Comparing to Baseline
 
 ```typescript
-import { compareToBaseline } from '@intelgraph/mesh-eval-sdk';
+import { compareToBaseline } from "@intelgraph/mesh-eval-sdk";
 
 const comparison = compareToBaseline(evalRun, baselineSnapshot);
 
-console.log('Regressions:', comparison.regressions);
-console.log('Improvements:', comparison.improvements);
+console.log("Regressions:", comparison.regressions);
+console.log("Improvements:", comparison.improvements);
 
 if (comparison.regressions.length > 0) {
-  console.error('REGRESSION DETECTED');
-  comparison.regressions.forEach(r => {
+  console.error("REGRESSION DETECTED");
+  comparison.regressions.forEach((r) => {
     console.error(`- ${r.subject}: ${r.metric} dropped by ${r.delta}`);
   });
 }
@@ -418,7 +418,7 @@ cat ./artifacts/eval-results.json
 
 ```typescript
 // Run evaluation across multiple scenarios
-const scenarios = await scenarioRepo.list({ type: 'code_transformation' });
+const scenarios = await scenarioRepo.list({ type: "code_transformation" });
 
 const results = [];
 for (const scenario of scenarios.scenarios) {
@@ -430,11 +430,13 @@ for (const scenario of scenarios.scenarios) {
 }
 
 // Aggregate and report
-const summary = aggregateScores(results.map(r => ({
-  scenarioId: r.scenario,
-  score: r.score,
-  // ...
-})));
+const summary = aggregateScores(
+  results.map((r) => ({
+    scenarioId: r.scenario,
+    score: r.score,
+    // ...
+  }))
+);
 
 console.log(`Pass rate: ${summary.passRate * 100}%`);
 ```
@@ -469,7 +471,7 @@ const modelClient = {
   async generateCompletion(params) {
     // Call your model gateway/router
     return await modelGateway.complete(params);
-  }
+  },
 };
 
 const engine = new ScoringEngine(modelClient);
@@ -483,12 +485,12 @@ const engine = new ScoringEngine(modelClient);
 // Verify strategy has required fields
 const strategy = scenario.scoringStrategy;
 
-if (strategy.method === 'rule_based' && !strategy.rules) {
-  console.error('Rule-based strategy requires rules configuration');
+if (strategy.method === "rule_based" && !strategy.rules) {
+  console.error("Rule-based strategy requires rules configuration");
 }
 
-if (strategy.method === 'llm_judged' && !strategy.llmJudge) {
-  console.error('LLM-judged strategy requires llmJudge configuration');
+if (strategy.method === "llm_judged" && !strategy.llmJudge) {
+  console.error("LLM-judged strategy requires llmJudge configuration");
 }
 ```
 
@@ -499,7 +501,7 @@ if (strategy.method === 'llm_judged' && !strategy.llmJudge) {
 ```yaml
 # Use cheaper models for simple scenarios
 llmJudge:
-  model: claude-haiku  # Instead of opus
+  model: claude-haiku # Instead of opus
 
 # Add cost constraints
 constraints:

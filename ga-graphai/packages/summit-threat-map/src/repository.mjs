@@ -11,8 +11,8 @@ INSERT INTO threat_event (
 ON CONFLICT (source, source_event_id) DO NOTHING;
 `;
 
-export function hexCellRiskSql(bucket = '1m') {
-  const bucketCol = bucket === '5m' ? 'bucket_5m' : 'bucket_1m';
+export function hexCellRiskSql(bucket = "1m") {
+  const bucketCol = bucket === "5m" ? "bucket_5m" : "bucket_1m";
   return `
 SELECT h3_index, event_count, exposed_count, compromised_count,
   (0.4 * exposed_count + 0.6 * compromised_count + 0.1 * max_severity) AS risk_score

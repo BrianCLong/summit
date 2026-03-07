@@ -94,13 +94,13 @@ flowchart TD
 
 ## Failure Modes and Required Controls
 
-| Failure Mode | Required MCP Control |
-| --- | --- |
-| Agents overwrite each other | File-scope locks + conflict retries |
-| Work halts on blockers | Typed blocker protocol + resume tokens |
-| Requires human decisions | Explicit decision boundary model |
-| Context drift | Shared state snapshots + per-task context budget |
-| "Looks done" but is unsafe | Mandatory verification gates + evidence bundle |
+| Failure Mode                | Required MCP Control                             |
+| --------------------------- | ------------------------------------------------ |
+| Agents overwrite each other | File-scope locks + conflict retries              |
+| Work halts on blockers      | Typed blocker protocol + resume tokens           |
+| Requires human decisions    | Explicit decision boundary model                 |
+| Context drift               | Shared state snapshots + per-task context budget |
+| "Looks done" but is unsafe  | Mandatory verification gates + evidence bundle   |
 
 ## MAESTRO Alignment
 

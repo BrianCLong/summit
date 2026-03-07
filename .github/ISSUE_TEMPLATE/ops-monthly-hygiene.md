@@ -1,8 +1,8 @@
 ---
-name: 'Ops: Monthly Hygiene (Chaos/DR, Backups, Cost)'
+name: "Ops: Monthly Hygiene (Chaos/DR, Backups, Cost)"
 about: Recurring operational resilience & compliance checklist
-title: 'Ops: Monthly Hygiene — {{month}} {{year}}'
-labels: ['ops', 'hygiene', 'cadence:monthly', 'priority:high']
+title: "Ops: Monthly Hygiene — {{month}} {{year}}"
+labels: ["ops", "hygiene", "cadence:monthly", "priority:high"]
 assignees: []
 ---
 

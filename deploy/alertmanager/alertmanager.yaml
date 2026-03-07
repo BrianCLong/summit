@@ -2,24 +2,24 @@ global:
   resolve_timeout: 5m
 
 route:
-  receiver: 'pagerduty'
+  receiver: "pagerduty"
   routes:
     - matchers:
         - severity = critical
-      receiver: 'pagerduty'
+      receiver: "pagerduty"
     - matchers:
         - severity = warning
-      receiver: 'pagerduty'
+      receiver: "pagerduty"
 
 receivers:
-  - name: 'pagerduty'
+  - name: "pagerduty"
     pagerduty_configs:
       - routing_key_file: /etc/alertmanager/secrets/pagerduty-routing-key
-        description: 'Maestro Alert'
+        description: "Maestro Alert"
         severity: '{{ if eq .CommonLabels.severity "critical" }}critical{{ else }}warning{{ end }}'
-        class: 'maestro'
+        class: "maestro"
         details:
-          alertname: '{{ .CommonLabels.alertname }}'
-          summary: '{{ .CommonAnnotations.summary }}'
-          instance: '{{ .CommonLabels.instance }}'
-          route: '{{ .CommonLabels.route }}'
+          alertname: "{{ .CommonLabels.alertname }}"
+          summary: "{{ .CommonAnnotations.summary }}"
+          instance: "{{ .CommonLabels.instance }}"
+          route: "{{ .CommonLabels.route }}"

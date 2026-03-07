@@ -5,7 +5,7 @@
 
 ## Map Content
 
-*(To be filled)*
+_(To be filled)_
 
 ## Choke Points
 

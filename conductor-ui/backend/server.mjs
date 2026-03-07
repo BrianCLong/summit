@@ -1,5 +1,5 @@
-import { ApolloServer } from '@apollo/server';
-import { startStandaloneServer } from '@apollo/server/standalone';
+import { ApolloServer } from "@apollo/server";
+import { startStandaloneServer } from "@apollo/server/standalone";
 
 const PORT = Number(process.env.PORT || 4310);
 
@@ -33,27 +33,27 @@ const typeDefs = /* GraphQL */ `
 
 const resolvers = {
   Query: {
-    _health: () => 'ok',
+    _health: () => "ok",
     previewRouting: (_p, { input }) => {
-      const t = String(input.task || '').toLowerCase();
+      const t = String(input.task || "").toLowerCase();
       if (/(cypher|graph|pagerank|betweenness|neighbors|neo4j)/.test(t))
         return {
-          expert: 'G  PH_TOOL',
-          reason: 'graph keywords',
+          expert: "G  PH_TOOL",
+          reason: "graph keywords",
           confidence: 0.92,
         };
       if (input.maxLatencyMs < 1500)
         return {
-          expert: 'LLM_LIGHT',
-          reason: 'tight latency',
+          expert: "LLM_LIGHT",
+          reason: "tight latency",
           confidence: 0.78,
         };
-      return { expert: 'RAG_TOOL', reason: 'default', confidence: 0.6 };
+      return { expert: "RAG_TOOL", reason: "default", confidence: 0.6 };
     },
   },
   Mutation: {
     conduct: (_p, { input }) => ({
-      expertId: 'RAG_TOOL',
+      expertId: "RAG_TOOL",
       output: { echoedTask: input.task },
       cost: 0.001,
       latencyMs: 120,
@@ -64,6 +64,6 @@ const resolvers = {
 
 const apollo = new ApolloServer({ typeDefs, resolvers, introspection: true });
 const { url } = await startStandaloneServer(apollo, {
-  listen: { port: PORT, host: '0.0.0.0' },
+  listen: { port: PORT, host: "0.0.0.0" },
 });
 console.log(`[conductor] listening on ${url} (standalone; GraphQL is at "/")`);

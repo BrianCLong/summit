@@ -4,8 +4,8 @@
  * Core type definitions for the Tenant Control Plane
  */
 
-export type TenantStatus = 'pending' | 'active' | 'suspended' | 'archived';
-export type DataClassification = 'unclassified' | 'cui' | 'secret' | 'top-secret';
+export type TenantStatus = "pending" | "active" | "suspended" | "archived";
+export type DataClassification = "unclassified" | "cui" | "secret" | "top-secret";
 
 export interface Tenant {
   id: string;
@@ -60,14 +60,14 @@ export interface TenantAuditEvent {
 }
 
 export type AuditAction =
-  | 'create'
-  | 'read'
-  | 'update'
-  | 'delete'
-  | 'enable'
-  | 'disable'
-  | 'login'
-  | 'logout';
+  | "create"
+  | "read"
+  | "update"
+  | "delete"
+  | "enable"
+  | "disable"
+  | "login"
+  | "logout";
 
 // GraphQL Input types
 export interface CreateTenantInput {
@@ -97,14 +97,14 @@ export interface SetFeatureFlagInput {
 
 // Standard feature flags available for tenants
 export const TENANT_FEATURE_FLAGS = {
-  AI_COPILOT_ACCESS: 'ai_copilot_access',
-  BILLING_ENABLED: 'billing_enabled',
-  ADVANCED_ANALYTICS: 'advanced_analytics',
-  EXPORT_ENABLED: 'export_enabled',
-  API_ACCESS: 'api_access',
-  SSO_ENABLED: 'sso_enabled',
-  CUSTOM_BRANDING: 'custom_branding',
-  AUDIT_LOG_EXPORT: 'audit_log_export',
+  AI_COPILOT_ACCESS: "ai_copilot_access",
+  BILLING_ENABLED: "billing_enabled",
+  ADVANCED_ANALYTICS: "advanced_analytics",
+  EXPORT_ENABLED: "export_enabled",
+  API_ACCESS: "api_access",
+  SSO_ENABLED: "sso_enabled",
+  CUSTOM_BRANDING: "custom_branding",
+  AUDIT_LOG_EXPORT: "audit_log_export",
 } as const;
 
 export type TenantFeatureFlagName =

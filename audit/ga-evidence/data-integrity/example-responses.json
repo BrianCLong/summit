@@ -127,9 +127,7 @@
         "isSimulated": true,
         "classification": "INTERNAL",
         "dataHash": "9f8e7d6c5b4a3f2e1d0c9b8a7f6e5d4c3b2a1f0e9d8c7b6a5f4e3d2c1b0a9f8",
-        "warnings": [
-          "This is simulated data - do not use for production decisions"
-        ]
+        "warnings": ["This is simulated data - do not use for production decisions"]
       }
     },
     "export_bundle_response": {
@@ -244,9 +242,7 @@
         },
         "classification": "RESTRICTED",
         "dataHash": "fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210",
-        "warnings": [
-          "This data is subject to additional governance controls"
-        ]
+        "warnings": ["This data is subject to additional governance controls"]
       }
     }
   },

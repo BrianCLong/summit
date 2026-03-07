@@ -1,12 +1,12 @@
-import { Orchestrator } from './core/Orchestrator';
-import { Omniscience } from './modules/Omniscience';
-import { Multiverse } from './modules/Multiverse';
-import { Void } from './modules/Void';
-import { Creator } from './modules/Creator';
-import { fileURLToPath } from 'url';
+import { Orchestrator } from "./core/Orchestrator";
+import { Omniscience } from "./modules/Omniscience";
+import { Multiverse } from "./modules/Multiverse";
+import { Void } from "./modules/Void";
+import { Creator } from "./modules/Creator";
+import { fileURLToPath } from "url";
 
 async function main() {
-  console.log('🔮 SUMMIT AGENTIC CONTROL PLANE INITIALIZING...');
+  console.log("🔮 SUMMIT AGENTIC CONTROL PLANE INITIALIZING...");
 
   // Initialize Modules
   const omniscience = new Omniscience();
@@ -21,12 +21,12 @@ async function main() {
   await orchestrator.start();
 
   // Demonstrate Capabilities
-  omniscience.log('info', 'System Awake');
-  multiverse.spawnUniverse('optimization-timeline-alpha');
-  theVoid.scanForDeadCode('./src');
-  creator.manifest('Create a new Auth Service', './src/services/auth');
+  omniscience.log("info", "System Awake");
+  multiverse.spawnUniverse("optimization-timeline-alpha");
+  theVoid.scanForDeadCode("./src");
+  creator.manifest("Create a new Auth Service", "./src/services/auth");
 
-  console.log('🔮 SYSTEM SHUTDOWN.');
+  console.log("🔮 SYSTEM SHUTDOWN.");
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {

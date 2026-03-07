@@ -1,14 +1,6 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import {
-  Box,
-  Button,
-  Divider,
-  Slider,
-  Stack,
-  Typography,
-  Chip,
-} from '@mui/material';
+import React from "react";
+import PropTypes from "prop-types";
+import { Box, Button, Divider, Slider, Stack, Typography, Chip } from "@mui/material";
 
 const clampSliderValue = (value, fallback) => {
   if (Array.isArray(value)) {
@@ -33,14 +25,12 @@ const GraphStylePanel = ({
   lastSavedAt,
   status,
 }) => {
-  const formattedTimestamp = lastSavedAt
-    ? new Date(lastSavedAt).toLocaleString()
-    : null;
+  const formattedTimestamp = lastSavedAt ? new Date(lastSavedAt).toLocaleString() : null;
 
   const statusLabel = (() => {
-    if (status === 'loading') return 'Loading saved styles…';
-    if (status === 'saving') return 'Saving changes…';
-    if (status === 'failed') return 'Unable to sync preferences';
+    if (status === "loading") return "Loading saved styles…";
+    if (status === "saving") return "Saving changes…";
+    if (status === "failed") return "Unable to sync preferences";
     return null;
   })();
 
@@ -50,36 +40,24 @@ const GraphStylePanel = ({
         <Box>
           <Typography variant="subtitle1">Graph Appearance</Typography>
           <Typography variant="body2" color="text.secondary">
-            Customize default styling for nodes and edges. Saved preferences are
-            shared across sessions.
+            Customize default styling for nodes and edges. Saved preferences are shared across
+            sessions.
           </Typography>
         </Box>
 
         <Divider light />
 
         <Box>
-          <Stack
-            direction="row"
-            alignItems="center"
-            justifyContent="space-between"
-            sx={{ mb: 1 }}
-          >
+          <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
             <Typography variant="subtitle2">Node Size</Typography>
-            <Chip
-              label={`${nodeSize}px`}
-              size="small"
-              color="primary"
-              variant="outlined"
-            />
+            <Chip label={`${nodeSize}px`} size="small" color="primary" variant="outlined" />
           </Stack>
           <Slider
             value={nodeSize}
             min={16}
             max={160}
             step={2}
-            onChange={(_, value) =>
-              onNodeSizeChange(clampSliderValue(value, nodeSize))
-            }
+            onChange={(_, value) => onNodeSizeChange(clampSliderValue(value, nodeSize))}
             aria-label="Node size"
             valueLabelDisplay="auto"
           />
@@ -98,21 +76,17 @@ const GraphStylePanel = ({
                 alignItems="center"
                 justifyContent="space-between"
               >
-                <Typography sx={{ textTransform: 'capitalize' }}>
-                  {type}
-                </Typography>
+                <Typography sx={{ textTransform: "capitalize" }}>{type}</Typography>
                 <input
                   type="color"
                   value={color}
-                  onChange={(event) =>
-                    onNodeColorChange(type, event.target.value)
-                  }
+                  onChange={(event) => onNodeColorChange(type, event.target.value)}
                   aria-label={`${type} color`}
                   style={{
                     width: 48,
                     height: 28,
-                    border: 'none',
-                    background: 'transparent',
+                    border: "none",
+                    background: "transparent",
                   }}
                 />
               </Stack>
@@ -125,12 +99,7 @@ const GraphStylePanel = ({
             Edge Style
           </Typography>
           <Stack spacing={2}>
-            <Stack
-              direction="row"
-              spacing={2}
-              alignItems="center"
-              justifyContent="space-between"
-            >
+            <Stack direction="row" spacing={2} alignItems="center" justifyContent="space-between">
               <Typography>Default Color</Typography>
               <input
                 type="color"
@@ -140,8 +109,8 @@ const GraphStylePanel = ({
                 style={{
                   width: 48,
                   height: 28,
-                  border: 'none',
-                  background: 'transparent',
+                  border: "none",
+                  background: "transparent",
                 }}
               />
             </Stack>
@@ -159,9 +128,7 @@ const GraphStylePanel = ({
               min={1}
               max={16}
               step={1}
-              onChange={(_, value) =>
-                onEdgeWidthChange(clampSliderValue(value, edgeWidth))
-              }
+              onChange={(_, value) => onEdgeWidthChange(clampSliderValue(value, edgeWidth))}
               aria-label="Edge width"
               valueLabelDisplay="auto"
             />
@@ -177,14 +144,9 @@ const GraphStylePanel = ({
             onClick={onSave}
             disabled={!isDirty || isSaving}
           >
-            {isSaving ? 'Saving…' : 'Save Changes'}
+            {isSaving ? "Saving…" : "Save Changes"}
           </Button>
-          <Button
-            variant="text"
-            color="inherit"
-            onClick={onReset}
-            disabled={isSaving}
-          >
+          <Button variant="text" color="inherit" onClick={onReset} disabled={isSaving}>
             Reset to Defaults
           </Button>
           {isDirty && !isSaving && (

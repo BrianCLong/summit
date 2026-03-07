@@ -3,7 +3,6 @@
 > Evidence-IDs: EVD-PLACEHOLDER
 > Status: active
 
-
 # Model Governance
 
 | Model ID | Version | Provenance  | Ethical Check | Status |

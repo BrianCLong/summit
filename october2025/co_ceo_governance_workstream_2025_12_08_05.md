@@ -91,10 +91,10 @@ verify_release:
 **Path:** `.github/actions/evidence-ledger/action.yml`
 
 ```yaml
-name: 'Evidence Ledger'
-description: 'Generate append-only ledger of evidence files with hashes and tag anchors'
+name: "Evidence Ledger"
+description: "Generate append-only ledger of evidence files with hashes and tag anchors"
 runs:
-  using: 'composite'
+  using: "composite"
   steps:
     - shell: bash
       run: |
@@ -194,7 +194,7 @@ export function PartnerCard({
   attested: boolean;
   policy: string;
 }) {
-  const color = !attested || vulns > 0 ? 'bg-red-100' : 'bg-green-100';
+  const color = !attested || vulns > 0 ? "bg-red-100" : "bg-green-100";
   return (
     <div className={`p-4 rounded-2xl ${color}`}>
       <h3 className="font-semibold">
@@ -204,7 +204,7 @@ export function PartnerCard({
         Evidence: <code>{hash.slice(0, 12)}</code> • Policy {policy}
       </p>
       <p>
-        Trivy criticals: {vulns} • Attested: {attested ? 'yes' : 'no'}
+        Trivy criticals: {vulns} • Attested: {attested ? "yes" : "no"}
       </p>
     </div>
   );

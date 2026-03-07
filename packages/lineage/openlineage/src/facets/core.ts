@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 export const BaseFacetSchema = z.object({
   _producer: z.string().url(),

@@ -83,6 +83,7 @@ A new microservice that handles export/import of data bundles:
 - **API:** REST/JSON
 
 **Key Endpoints:**
+
 - `POST /export` - Create export bundle
 - `POST /import` - Import bundle
 - `POST /verify` - Verify bundle integrity
@@ -128,6 +129,7 @@ Air-gapped deployment configuration:
 ### Scope Options
 
 Export bundles can include:
+
 - **Specific cases** - by ID
 - **Time ranges** - all data created/modified in period
 - **Tenants** - all data for specific tenants
@@ -147,6 +149,7 @@ Export bundles can include:
 ### Audit Logging
 
 Every sync operation logged with:
+
 - Who (actor)
 - What (data scope)
 - When (timestamp)
@@ -166,12 +169,12 @@ Every sync operation logged with:
 
 When importing data that already exists:
 
-| Strategy | Behavior | Use Case |
-|----------|----------|----------|
-| `abort` | Stop on first conflict | Strict data integrity |
-| `skip` | Skip conflicting items | Prefer existing data |
-| `overwrite` | Replace with incoming | Trust source deployment |
-| `merge` | Combine metadata | Best-effort reconciliation |
+| Strategy    | Behavior               | Use Case                   |
+| ----------- | ---------------------- | -------------------------- |
+| `abort`     | Stop on first conflict | Strict data integrity      |
+| `skip`      | Skip conflicting items | Prefer existing data       |
+| `overwrite` | Replace with incoming  | Trust source deployment    |
+| `merge`     | Combine metadata       | Best-effort reconciliation |
 
 ## Documentation
 
@@ -207,6 +210,7 @@ pnpm test
 ## Deployment Checklist
 
 **Pre-Deployment:**
+
 - [ ] Internal container registry populated
 - [ ] Network policies reviewed
 - [ ] Cryptographic keys generated
@@ -214,6 +218,7 @@ pnpm test
 - [ ] Compliance requirements verified
 
 **Post-Deployment:**
+
 - [ ] All pods running
 - [ ] Network isolation verified
 - [ ] FIPS mode enabled

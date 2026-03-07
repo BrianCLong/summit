@@ -17,16 +17,16 @@ Before merging any PR, verify:
 The following checks are enforced by CI:
 
 1.  **Supply Chain**:
-    *   No unpinned dependencies (`npm run audit:deps`).
-    *   Trivy scan for container vulnerabilities.
-    *   SLSA provenance generation.
+    - No unpinned dependencies (`npm run audit:deps`).
+    - Trivy scan for container vulnerabilities.
+    - SLSA provenance generation.
 
 2.  **Code Security**:
-    *   Static Analysis (SAST) via CodeQL (planned).
-    *   Secret scanning.
+    - Static Analysis (SAST) via CodeQL (planned).
+    - Secret scanning.
 
 3.  **Policy Enforcement**:
-    *   OPA policy checks for Kubernetes manifests and Terraform.
+    - OPA policy checks for Kubernetes manifests and Terraform.
 
 ## Usage
 

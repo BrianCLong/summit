@@ -17,7 +17,10 @@
   "assessments": [
     {
       "pattern": "insider",
-      "recommended_controls": ["hardware-control bypass intent classifier", "sensitive-doc access telemetry"]
+      "recommended_controls": [
+        "hardware-control bypass intent classifier",
+        "sensitive-doc access telemetry"
+      ]
     }
   ]
 }

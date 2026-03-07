@@ -37,7 +37,7 @@
         {
           "name": "int4",
           "latency_ms": 70,
-          "accuracy": 0.90,
+          "accuracy": 0.9,
           "qps_capacity": 14.0,
           "cost_per_replica": 2.6
         }

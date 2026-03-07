@@ -3,13 +3,13 @@ name: Chronos Intent Engine CI
 on:
   push:
     paths:
-      - 'orchestration/packages/intent-engine/**'
-      - 'orchestration/examples/**'
-      - 'orchestration/.github/workflows/ci-intent-engine.yml'
+      - "orchestration/packages/intent-engine/**"
+      - "orchestration/examples/**"
+      - "orchestration/.github/workflows/ci-intent-engine.yml"
   pull_request:
     paths:
-      - 'orchestration/packages/intent-engine/**'
-      - 'orchestration/examples/**'
+      - "orchestration/packages/intent-engine/**"
+      - "orchestration/examples/**"
 
 jobs:
   build:

@@ -1,6 +1,7 @@
 # SLOs and Dashboards
 
 ## Purpose
+
 The Governed OS exposes auditor-facing and operator-facing SLOs that are continuously validated
 and observable. These SLOs are the operational moat: they transform governance posture into a
 measurable, enforceable, and auditable guarantee.

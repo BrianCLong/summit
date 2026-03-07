@@ -5,32 +5,37 @@
 ## 🧠 Embed Intelligence, Don't Replace It
 
 CompanyOS provides the SDKs and patterns to build:
-*   **Agentic Workflows**: Autonomous agents that reason, plan, and execute.
-*   **Knowledge Graphs**: GraphRAG-powered insights using Neo4j and GQL.
-*   **Sovereign Governance**: Policy-as-code enforcement with full auditability.
+
+- **Agentic Workflows**: Autonomous agents that reason, plan, and execute.
+- **Knowledge Graphs**: GraphRAG-powered insights using Neo4j and GQL.
+- **Sovereign Governance**: Policy-as-code enforcement with full auditability.
 
 ## 📦 SDK Entrypoints
 
 The **CompanyOS SDK** is composed of modular packages designed for specific intelligence capabilities:
 
 ### 1. @intelgraph/sdk (Core Client)
+
 The foundational client for interacting with the Summit Intelligence Graph.
-*   **Use for**: Querying the Knowledge Graph, ingesting data, and managing entities.
-*   **Location**: `packages/sdk`
+
+- **Use for**: Querying the Knowledge Graph, ingesting data, and managing entities.
+- **Location**: `packages/sdk`
 
 ### 2. @intelgraph/maestro-sdk (Agent Orchestration)
+
 The engine for defining and running multi-agent workflows.
-*   **Use for**: Defining agent roles, creating task graphs, and orchestrating complex multi-hop reasoning.
-*   **Location**: `packages/maestro-sdk`
+
+- **Use for**: Defining agent roles, creating task graphs, and orchestrating complex multi-hop reasoning.
+- **Location**: `packages/maestro-sdk`
 
 ## Structure
 
-*   **`blueprint/`**: The organizational design and high-level architecture.
-*   **`agents/`**: Definitions and system prompts for the Agent Mesh.
-*   **`workflows/`**: Maestro Task Graph templates for standard flows.
-*   **`governance/`**: Integration of the Governance Layer into the mesh.
-*   **`backlog/`**: Initial backlog and sprint plans (Sprint 0-3).
-*   **`toolchain/`**: Specifications for tool interoperability.
+- **`blueprint/`**: The organizational design and high-level architecture.
+- **`agents/`**: Definitions and system prompts for the Agent Mesh.
+- **`workflows/`**: Maestro Task Graph templates for standard flows.
+- **`governance/`**: Integration of the Governance Layer into the mesh.
+- **`backlog/`**: Initial backlog and sprint plans (Sprint 0-3).
+- **`toolchain/`**: Specifications for tool interoperability.
 
 ## Quick Start (Sprint 0)
 

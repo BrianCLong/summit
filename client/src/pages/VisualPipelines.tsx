@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Button,
@@ -11,8 +11,8 @@ import {
   List,
   ListItem,
   ListItemText,
-} from '@mui/material';
-import Grid from '@mui/material/Grid';
+} from "@mui/material";
+import Grid from "@mui/material/Grid";
 
 type Pipeline = { id: string; name: string; spec: unknown };
 type HintResponse = { hints?: string[] } | { error?: string };
@@ -20,15 +20,15 @@ type CopilotSuggestion = Record<string, unknown> | string | null;
 
 export default function VisualPipelines() {
   const [pipelines, setPipelines] = useState<Pipeline[]>([]);
-  const [name, setName] = useState('My Pipeline');
+  const [name, setName] = useState("My Pipeline");
   const [specText, setSpecText] = useState('{"nodes":[],"edges":[]}');
   const [hints, setHints] = useState<string[]>([]);
   const [suggestion, setSuggestion] = useState<CopilotSuggestion>(null);
-  const [error, setError] = useState<string>('');
+  const [error, setError] = useState<string>("");
 
   const load = async () => {
     try {
-      const r = await fetch('/api/maestro/v1/pipelines');
+      const r = await fetch("/api/maestro/v1/pipelines");
       setPipelines(await r.json());
     } catch {
       /* noop */
@@ -39,18 +39,18 @@ export default function VisualPipelines() {
   }, []);
 
   const create = async () => {
-    setError('');
+    setError("");
     try {
       const spec = JSON.parse(specText);
-      const r = await fetch('/api/maestro/v1/pipelines', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const r = await fetch("/api/maestro/v1/pipelines", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, spec }),
       });
-      if (!r.ok) throw new Error('create failed');
+      if (!r.ok) throw new Error("create failed");
       await load();
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : 'create failed');
+      setError(e instanceof Error ? e.message : "create failed");
     }
   };
 
@@ -58,23 +58,23 @@ export default function VisualPipelines() {
     setHints([]);
     try {
       const spec = JSON.parse(specText);
-      const r = await fetch('/api/maestro/v1/pipelines/hints', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const r = await fetch("/api/maestro/v1/pipelines/hints", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(spec),
       });
       const data: HintResponse = await r.json();
-      setHints('hints' in data && Array.isArray(data.hints) ? data.hints : []);
+      setHints("hints" in data && Array.isArray(data.hints) ? data.hints : []);
     } catch {
-      setHints(['Invalid JSON']);
+      setHints(["Invalid JSON"]);
     }
   };
 
   const copilot = async () => {
     setSuggestion(null);
-    const r = await fetch('/api/maestro/v1/pipelines/copilot/suggest', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+    const r = await fetch("/api/maestro/v1/pipelines/copilot/suggest", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ prompt: name }),
     });
     const data = await r.json();
@@ -127,10 +127,8 @@ export default function VisualPipelines() {
               )}
               {suggestion && (
                 <Paper sx={{ p: 1, mt: 2 }}>
-                  <Typography variant="subtitle1">
-                    Copilot Suggestion
-                  </Typography>
-                  <pre style={{ whiteSpace: 'pre-wrap' }}>
+                  <Typography variant="subtitle1">Copilot Suggestion</Typography>
+                  <pre style={{ whiteSpace: "pre-wrap" }}>
                     {JSON.stringify(suggestion, null, 2)}
                   </pre>
                 </Paper>

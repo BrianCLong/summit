@@ -27,29 +27,29 @@ The fundamental unit in the catalog. Represents a deployable, independently-rele
 
 ```yaml
 Service:
-  id: string                    # Unique identifier (kebab-case, e.g., "graph-core")
-  name: string                  # Human-readable name
-  description: string           # What the service does (2-3 sentences)
-  type: ServiceType             # api | worker | cron | data-pipeline | gateway | ui
-  tier: ServiceTier             # critical | high | medium | low
-  lifecycle: LifecycleState     # experimental | beta | ga | deprecated | sunset
+  id: string # Unique identifier (kebab-case, e.g., "graph-core")
+  name: string # Human-readable name
+  description: string # What the service does (2-3 sentences)
+  type: ServiceType # api | worker | cron | data-pipeline | gateway | ui
+  tier: ServiceTier # critical | high | medium | low
+  lifecycle: LifecycleState # experimental | beta | ga | deprecated | sunset
 
   # Technical metadata
-  language: string              # Primary language (typescript | python | go | rust)
-  runtime: string               # Runtime version (node-20 | python-3.11 | go-1.21)
-  repository: string            # Git repository path
-  entry_point: string           # Main entry file path
+  language: string # Primary language (typescript | python | go | rust)
+  runtime: string # Runtime version (node-20 | python-3.11 | go-1.21)
+  repository: string # Git repository path
+  entry_point: string # Main entry file path
 
   # Deployment
-  deployment_status: DeploymentStatus  # production | staging | development | disabled
-  namespace: string             # Kubernetes namespace
-  helm_chart: string            # Helm chart path (optional)
+  deployment_status: DeploymentStatus # production | staging | development | disabled
+  namespace: string # Kubernetes namespace
+  helm_chart: string # Helm chart path (optional)
 
   # Links
-  documentation_url: string     # Primary docs URL
-  runbook_url: string           # Runbook location
-  dashboard_url: string         # Grafana/observability dashboard
-  api_spec_url: string          # OpenAPI/GraphQL schema URL
+  documentation_url: string # Primary docs URL
+  runbook_url: string # Runbook location
+  dashboard_url: string # Grafana/observability dashboard
+  api_spec_url: string # OpenAPI/GraphQL schema URL
 ```
 
 ### 2. Capability
@@ -58,18 +58,18 @@ A business capability that one or more services implement. Provides the "what" a
 
 ```yaml
 Capability:
-  id: string                    # Unique identifier (e.g., "authentication")
-  name: string                  # Human-readable name (e.g., "Authentication & Identity")
-  description: string           # Business description
-  domain: CapabilityDomain      # security | data | intelligence | platform | operations
+  id: string # Unique identifier (e.g., "authentication")
+  name: string # Human-readable name (e.g., "Authentication & Identity")
+  description: string # Business description
+  domain: CapabilityDomain # security | data | intelligence | platform | operations
 
   # Mapping
-  primary_service: ServiceRef   # The main service implementing this capability
-  supporting_services: ServiceRef[]  # Additional services that contribute
+  primary_service: ServiceRef # The main service implementing this capability
+  supporting_services: ServiceRef[] # Additional services that contribute
 
   # Classification
-  maturity: MaturityLevel       # emerging | established | strategic | commodity
-  business_criticality: string  # How critical to business operations
+  maturity: MaturityLevel # emerging | established | strategic | commodity
+  business_criticality: string # How critical to business operations
 ```
 
 ### 3. Dependency
@@ -78,18 +78,18 @@ Represents a runtime dependency between services.
 
 ```yaml
 Dependency:
-  id: string                    # Auto-generated (source_id + target_id)
-  source_service: ServiceRef    # The service that depends
-  target_service: ServiceRef    # The service being depended upon
-  dependency_type: DependencyType  # sync | async | data | configuration
+  id: string # Auto-generated (source_id + target_id)
+  source_service: ServiceRef # The service that depends
+  target_service: ServiceRef # The service being depended upon
+  dependency_type: DependencyType # sync | async | data | configuration
 
   # Characteristics
-  is_critical: boolean          # Is this a hard dependency?
-  fallback_behavior: string     # What happens when target unavailable
+  is_critical: boolean # Is this a hard dependency?
+  fallback_behavior: string # What happens when target unavailable
 
   # Health
-  slo_dependency: boolean       # Does target's SLO affect source's SLO?
-  circuit_breaker: boolean      # Is circuit breaker implemented?
+  slo_dependency: boolean # Does target's SLO affect source's SLO?
+  circuit_breaker: boolean # Is circuit breaker implemented?
 ```
 
 ### 4. Interface
@@ -98,23 +98,23 @@ Represents an API or interface exposed by a service.
 
 ```yaml
 Interface:
-  id: string                    # Unique identifier
-  service: ServiceRef           # Owning service
-  type: InterfaceType           # graphql | rest | grpc | event | websocket
+  id: string # Unique identifier
+  service: ServiceRef # Owning service
+  type: InterfaceType # graphql | rest | grpc | event | websocket
 
   # Specification
-  version: string               # API version (v1, v2, etc.)
-  spec_url: string              # OpenAPI/GraphQL/Proto URL
-  base_path: string             # Base URL path
+  version: string # API version (v1, v2, etc.)
+  spec_url: string # OpenAPI/GraphQL/Proto URL
+  base_path: string # Base URL path
 
   # Access
-  authentication: AuthType[]    # jwt | api-key | mtls | none
-  authorization: string         # OPA policy path
-  rate_limit: RateLimit         # Rate limiting configuration
+  authentication: AuthType[] # jwt | api-key | mtls | none
+  authorization: string # OPA policy path
+  rate_limit: RateLimit # Rate limiting configuration
 
   # Health
-  health_endpoint: string       # Health check URL
-  metrics_endpoint: string      # Prometheus metrics URL
+  health_endpoint: string # Health check URL
+  metrics_endpoint: string # Prometheus metrics URL
 ```
 
 ### 5. OwnerGroup
@@ -123,20 +123,20 @@ Represents a team or individual responsible for services.
 
 ```yaml
 OwnerGroup:
-  id: string                    # Unique identifier (e.g., "platform-engineering")
-  name: string                  # Team name
-  type: OwnerType               # team | individual | squad | guild
+  id: string # Unique identifier (e.g., "platform-engineering")
+  name: string # Team name
+  type: OwnerType # team | individual | squad | guild
 
   # Contact
-  slack_channel: string         # Primary Slack channel
-  email: string                 # Team email/distribution list
-  pagerduty_schedule: string    # PagerDuty schedule ID
+  slack_channel: string # Primary Slack channel
+  email: string # Team email/distribution list
+  pagerduty_schedule: string # PagerDuty schedule ID
 
   # Members
-  members: TeamMember[]         # Team members with roles
+  members: TeamMember[] # Team members with roles
 
   # Hierarchy
-  parent_group: OwnerGroupRef   # Parent org (optional)
+  parent_group: OwnerGroupRef # Parent org (optional)
   child_groups: OwnerGroupRef[] # Sub-teams (optional)
 ```
 
@@ -146,11 +146,11 @@ Individual team member with role.
 
 ```yaml
 TeamMember:
-  id: string                    # GitHub username or employee ID
-  name: string                  # Full name
-  email: string                 # Email address
-  role: MemberRole              # lead | engineer | oncall | stakeholder
-  primary: boolean              # Is this their primary team?
+  id: string # GitHub username or employee ID
+  name: string # Full name
+  email: string # Email address
+  role: MemberRole # lead | engineer | oncall | stakeholder
+  primary: boolean # Is this their primary team?
 ```
 
 ---
@@ -185,14 +185,14 @@ TeamMember:
 
 ### Relationship Cardinalities
 
-| Relationship | From | To | Cardinality |
-|-------------|------|-----|-------------|
-| owns | OwnerGroup | Service | 1:N |
-| depends_on | Service | Service | N:M |
-| exposes | Service | Interface | 1:N |
-| implements | Service | Capability | N:M |
-| accountable_for | OwnerGroup | Capability | 1:N |
-| member_of | TeamMember | OwnerGroup | N:M |
+| Relationship    | From       | To         | Cardinality |
+| --------------- | ---------- | ---------- | ----------- |
+| owns            | OwnerGroup | Service    | 1:N         |
+| depends_on      | Service    | Service    | N:M         |
+| exposes         | Service    | Interface  | 1:N         |
+| implements      | Service    | Capability | N:M         |
+| accountable_for | OwnerGroup | Capability | 1:N         |
+| member_of       | TeamMember | OwnerGroup | N:M         |
 
 ---
 
@@ -203,19 +203,19 @@ TeamMember:
 ```yaml
 SLOMetadata:
   availability:
-    target: float               # e.g., 99.9 (percent)
-    measurement_window: string  # 30d, 7d, etc.
+    target: float # e.g., 99.9 (percent)
+    measurement_window: string # 30d, 7d, etc.
 
   latency:
-    p50_ms: integer            # P50 latency target
-    p95_ms: integer            # P95 latency target
-    p99_ms: integer            # P99 latency target
+    p50_ms: integer # P50 latency target
+    p95_ms: integer # P95 latency target
+    p99_ms: integer # P99 latency target
 
   error_rate:
-    target: float              # e.g., 0.1 (percent)
+    target: float # e.g., 0.1 (percent)
     measurement_window: string
 
-  freshness:                    # For data services
+  freshness: # For data services
     max_staleness_seconds: integer
 ```
 
@@ -223,9 +223,9 @@ SLOMetadata:
 
 ```yaml
 DataClassification:
-  data_classes: DataClass[]     # pii | phi | financial | confidential | public
-  data_residency: string[]      # us | eu | apac | global
-  retention_policy: string      # Policy identifier
+  data_classes: DataClass[] # pii | phi | financial | confidential | public
+  data_residency: string[] # us | eu | apac | global
+  retention_policy: string # Policy identifier
   encryption_at_rest: boolean
   encryption_in_transit: boolean
 ```
@@ -234,20 +234,20 @@ DataClassification:
 
 ```yaml
 TenancyMetadata:
-  model: TenancyModel           # single | multi-tenant | hybrid
-  tenant_isolation: IsolationType  # logical | physical | none
-  tenants_served: string[]      # List of tenant IDs or "all"
+  model: TenancyModel # single | multi-tenant | hybrid
+  tenant_isolation: IsolationType # logical | physical | none
+  tenants_served: string[] # List of tenant IDs or "all"
 ```
 
 ### Runbook Metadata (Required for Tier: critical, high)
 
 ```yaml
 RunbookMetadata:
-  runbook_path: string          # Path to runbook
+  runbook_path: string # Path to runbook
   playbooks:
     - name: string
       path: string
-      trigger: string           # When to use
+      trigger: string # When to use
 
   escalation:
     - level: integer
@@ -259,13 +259,13 @@ RunbookMetadata:
 
 ```yaml
 DashboardMetadata:
-  grafana_uid: string           # Grafana dashboard UID
-  prometheus_job: string        # Prometheus job name
+  grafana_uid: string # Grafana dashboard UID
+  prometheus_job: string # Prometheus job name
 
   key_metrics:
     - name: string
-      query: string             # PromQL query
-      threshold: string         # Alert threshold
+      query: string # PromQL query
+      threshold: string # Alert threshold
 ```
 
 ---
@@ -328,111 +328,111 @@ allow {
 
 ```yaml
 ServiceType:
-  - api              # REST/GraphQL API service
-  - worker           # Background worker/consumer
-  - cron             # Scheduled job
-  - data-pipeline    # Data processing pipeline
-  - gateway          # API gateway/proxy
-  - ui               # Frontend application
+  - api # REST/GraphQL API service
+  - worker # Background worker/consumer
+  - cron # Scheduled job
+  - data-pipeline # Data processing pipeline
+  - gateway # API gateway/proxy
+  - ui # Frontend application
 
 ServiceTier:
-  - critical         # Business-critical, highest SLOs
-  - high             # Important, strict SLOs
-  - medium           # Standard SLOs
-  - low              # Best-effort
+  - critical # Business-critical, highest SLOs
+  - high # Important, strict SLOs
+  - medium # Standard SLOs
+  - low # Best-effort
 
 LifecycleState:
-  - experimental     # Early development, no SLO guarantees
-  - beta             # Pre-release, limited SLO
-  - ga               # General availability, full SLOs
-  - deprecated       # Scheduled for removal
-  - sunset           # No longer supported
+  - experimental # Early development, no SLO guarantees
+  - beta # Pre-release, limited SLO
+  - ga # General availability, full SLOs
+  - deprecated # Scheduled for removal
+  - sunset # No longer supported
 
 DeploymentStatus:
-  - production       # Running in production
-  - staging          # Running in staging only
-  - development      # Local development only
-  - disabled         # Temporarily disabled
+  - production # Running in production
+  - staging # Running in staging only
+  - development # Local development only
+  - disabled # Temporarily disabled
 
 DependencyType:
-  - sync             # Synchronous HTTP/gRPC call
-  - async            # Asynchronous message/event
-  - data             # Database or storage dependency
-  - configuration    # Configuration/secrets dependency
+  - sync # Synchronous HTTP/gRPC call
+  - async # Asynchronous message/event
+  - data # Database or storage dependency
+  - configuration # Configuration/secrets dependency
 
 InterfaceType:
-  - graphql          # GraphQL API
-  - rest             # REST API
-  - grpc             # gRPC service
-  - event            # Event/message interface
-  - websocket        # WebSocket connection
+  - graphql # GraphQL API
+  - rest # REST API
+  - grpc # gRPC service
+  - event # Event/message interface
+  - websocket # WebSocket connection
 
 AuthType:
-  - jwt              # JWT bearer token
-  - api-key          # API key authentication
-  - mtls             # Mutual TLS
-  - oidc             # OpenID Connect
-  - none             # No authentication (internal only)
+  - jwt # JWT bearer token
+  - api-key # API key authentication
+  - mtls # Mutual TLS
+  - oidc # OpenID Connect
+  - none # No authentication (internal only)
 
 OwnerType:
-  - team             # Persistent team
-  - individual       # Single owner
-  - squad            # Cross-functional squad
-  - guild            # Community of practice
+  - team # Persistent team
+  - individual # Single owner
+  - squad # Cross-functional squad
+  - guild # Community of practice
 
 MemberRole:
-  - lead             # Technical lead
-  - engineer         # Team member
-  - oncall           # On-call rotation member
-  - stakeholder      # Business stakeholder
+  - lead # Technical lead
+  - engineer # Team member
+  - oncall # On-call rotation member
+  - stakeholder # Business stakeholder
 
 CapabilityDomain:
-  - security         # Security & compliance
-  - data             # Data management & storage
-  - intelligence     # Analytics & ML
-  - platform         # Platform infrastructure
-  - operations       # Operations & observability
+  - security # Security & compliance
+  - data # Data management & storage
+  - intelligence # Analytics & ML
+  - platform # Platform infrastructure
+  - operations # Operations & observability
 
 MaturityLevel:
-  - emerging         # New capability, actively developing
-  - established      # Stable, well-defined
-  - strategic        # Core differentiator
-  - commodity        # Standard capability, consider buy vs build
+  - emerging # New capability, actively developing
+  - established # Stable, well-defined
+  - strategic # Core differentiator
+  - commodity # Standard capability, consider buy vs build
 
 TenancyModel:
-  - single           # Single tenant
-  - multi-tenant     # Multi-tenant with logical isolation
-  - hybrid           # Mix of single and multi-tenant
+  - single # Single tenant
+  - multi-tenant # Multi-tenant with logical isolation
+  - hybrid # Mix of single and multi-tenant
 
 IsolationType:
-  - logical          # Logical separation (same infra)
-  - physical         # Physical separation (dedicated infra)
-  - none             # No tenant isolation
+  - logical # Logical separation (same infra)
+  - physical # Physical separation (dedicated infra)
+  - none # No tenant isolation
 
 DataClass:
-  - pii              # Personally Identifiable Information
-  - phi              # Protected Health Information
-  - financial        # Financial data
-  - confidential     # Confidential business data
-  - public           # Public data
+  - pii # Personally Identifiable Information
+  - phi # Protected Health Information
+  - financial # Financial data
+  - confidential # Confidential business data
+  - public # Public data
 ```
 
 ### Reference Types
 
 ```yaml
 ServiceRef:
-  id: string                    # Service ID
+  id: string # Service ID
 
 OwnerGroupRef:
-  id: string                    # Owner group ID
+  id: string # Owner group ID
 
 CapabilityRef:
-  id: string                    # Capability ID
+  id: string # Capability ID
 
 RateLimit:
   requests_per_second: integer
   burst_size: integer
-  scope: string                 # per-tenant | per-user | global
+  scope: string # per-tenant | per-user | global
 ```
 
 ---

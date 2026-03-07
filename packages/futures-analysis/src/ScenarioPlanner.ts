@@ -10,7 +10,7 @@ import {
   Uncertainty,
   AlternativeFuture,
   BranchingPoint,
-} from './types.js';
+} from "./types.js";
 
 export interface ScenarioPlannerConfig {
   timeHorizons: TimeHorizon[];
@@ -41,7 +41,7 @@ export class ScenarioPlanner {
 
     // Identify driving forces
     const forces = await this.identifyDrivingForces(topic);
-    forces.forEach(force => this.drivingForces.set(force.id, force));
+    forces.forEach((force) => this.drivingForces.set(force.id, force));
 
     // Identify critical uncertainties
     const uncertainties = await this.identifyCriticalUncertainties(forces);
@@ -68,15 +68,13 @@ export class ScenarioPlanner {
   /**
    * Create alternative futures
    */
-  async createAlternativeFutures(
-    scenarioIds: string[]
-  ): Promise<AlternativeFuture> {
+  async createAlternativeFutures(scenarioIds: string[]): Promise<AlternativeFuture> {
     const scenarios = scenarioIds
-      .map(id => this.scenarios.get(id))
+      .map((id) => this.scenarios.get(id))
       .filter(Boolean) as FutureScenario[];
 
     if (scenarios.length === 0) {
-      throw new Error('No valid scenarios provided');
+      throw new Error("No valid scenarios provided");
     }
 
     // Identify pathways between scenarios
@@ -91,7 +89,7 @@ export class ScenarioPlanner {
     const alternative: AlternativeFuture = {
       id: `alt-future-${Date.now()}`,
       name: `Alternative Future: ${scenarios[0].title}`,
-      description: 'Multiple pathway analysis',
+      description: "Multiple pathway analysis",
       scenarios: scenarioIds,
       pathways,
       branchingPoints,
@@ -135,10 +133,7 @@ export class ScenarioPlanner {
   /**
    * Update scenario with new information
    */
-  updateScenario(
-    scenarioId: string,
-    updates: Partial<FutureScenario>
-  ): FutureScenario | null {
+  updateScenario(scenarioId: string, updates: Partial<FutureScenario>): FutureScenario | null {
     const scenario = this.scenarios.get(scenarioId);
     if (!scenario) return null;
 
@@ -180,7 +175,7 @@ export class ScenarioPlanner {
     let scenarios = Array.from(this.scenarios.values());
 
     if (filter) {
-      scenarios = scenarios.filter(scenario => {
+      scenarios = scenarios.filter((scenario) => {
         return Object.entries(filter).every(([key, value]) => {
           return scenario[key as keyof FutureScenario] === value;
         });
@@ -204,9 +199,7 @@ export class ScenarioPlanner {
     return [];
   }
 
-  private async identifyCriticalUncertainties(
-    forces: DrivingForce[]
-  ): Promise<Uncertainty[]> {
+  private async identifyCriticalUncertainties(forces: DrivingForce[]): Promise<Uncertainty[]> {
     // TODO: Identify high-impact, high-uncertainty factors
     return [];
   }
@@ -251,7 +244,7 @@ export class ScenarioPlanner {
     uncertainties: Uncertainty[]
   ): ScenarioType {
     // TODO: Determine scenario type based on forces and uncertainties
-    return 'baseline';
+    return "baseline";
   }
 
   private async generateNarrative(
@@ -263,10 +256,7 @@ export class ScenarioPlanner {
     return `Future scenario narrative for ${topic}`;
   }
 
-  private extractAssumptions(
-    forces: DrivingForce[],
-    uncertainties: Uncertainty[]
-  ): string[] {
+  private extractAssumptions(forces: DrivingForce[], uncertainties: Uncertainty[]): string[] {
     // TODO: Extract key assumptions
     return [];
   }
@@ -287,8 +277,7 @@ export class ScenarioPlanner {
   }
 
   private calculateAggregateProbability(scenarios: FutureScenario[]): number {
-    const avgProbability =
-      scenarios.reduce((sum, s) => sum + s.probability, 0) / scenarios.length;
+    const avgProbability = scenarios.reduce((sum, s) => sum + s.probability, 0) / scenarios.length;
     return Math.round(avgProbability);
   }
 

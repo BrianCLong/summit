@@ -1,14 +1,14 @@
-import { CommunityStore } from '../store.js';
-import { ActivityFeedService } from './activityFeedService.js';
-import { ContributionTracker } from './contributionTracker.js';
-import { GamificationService } from './gamificationService.js';
-import { DiscussionForumService } from './discussionForumService.js';
-import { NotificationService } from './notificationService.js';
-import { UserProfileService } from './userProfileService.js';
-import { ModerationService } from './moderationService.js';
-import { SearchService } from './searchService.js';
-import { AnalyticsService } from './analyticsService.js';
-import { DashboardService } from './dashboardService.js';
+import { CommunityStore } from "../store.js";
+import { ActivityFeedService } from "./activityFeedService.js";
+import { ContributionTracker } from "./contributionTracker.js";
+import { GamificationService } from "./gamificationService.js";
+import { DiscussionForumService } from "./discussionForumService.js";
+import { NotificationService } from "./notificationService.js";
+import { UserProfileService } from "./userProfileService.js";
+import { ModerationService } from "./moderationService.js";
+import { SearchService } from "./searchService.js";
+import { AnalyticsService } from "./analyticsService.js";
+import { DashboardService } from "./dashboardService.js";
 
 export class CommunityHub {
   public readonly store: CommunityStore;
@@ -34,18 +34,10 @@ export class CommunityHub {
       this.activity,
       this.contributions,
       this.gamification,
-      this.notifications,
+      this.notifications
     );
-    this.profiles = new UserProfileService(
-      this.store,
-      this.activity,
-      this.contributions,
-    );
-    this.moderation = new ModerationService(
-      this.store,
-      this.activity,
-      this.notifications,
-    );
+    this.profiles = new UserProfileService(this.store, this.activity, this.contributions);
+    this.moderation = new ModerationService(this.store, this.activity, this.notifications);
     this.search = new SearchService(this.store);
     this.analytics = new AnalyticsService(this.store);
     this.dashboard = new DashboardService(this.analytics, this.contributions);

@@ -1,5 +1,5 @@
-import networkx from 'networkx';
-import torch from 'torch';
+import networkx from "networkx";
+import torch from "torch";
 
 export function networkStabilizer(config) {
   const stability = networkx.stabilize({ resilience: torch.optimize() });

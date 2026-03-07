@@ -201,12 +201,14 @@ cosign verify-blob-attestation \
 ### What Attestations Guarantee
 
 ✅ **Guaranteed:**
+
 - Attestations were signed with GitHub OIDC (keyless)
 - Signatures are bound to specific artifact digests
 - Signing workflow identity is verified
 - All signatures are logged in Rekor (public transparency log)
 
 ❌ **NOT Guaranteed:**
+
 - Correctness of the workflow itself (requires code review)
 - Completeness of evidence collection (requires policy enforcement)
 - Protection against compromised repository or workflow
@@ -214,6 +216,7 @@ cosign verify-blob-attestation \
 ### Trust Anchor
 
 All attestations are verified against:
+
 - **OIDC Issuer**: `https://token.actions.githubusercontent.com`
 - **Repository**: `BrianCLong/summit`
 - **Workflow**: `.github/workflows/ga-evidence-attest.yml`

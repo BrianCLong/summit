@@ -42,7 +42,8 @@ interface SimulationMessage {
 let simulation: any // Type: Simulation<WorkerNode, WorkerLink>
 
 self.onmessage = (event: MessageEvent<SimulationMessage>) => {
-  const { type, nodes, links, width, height, layoutType, nodeId, x, y } = event.data
+  const { type, nodes, links, width, height, layoutType, nodeId, x, y } =
+    event.data
 
   switch (type) {
     case 'init':
@@ -54,7 +55,12 @@ self.onmessage = (event: MessageEvent<SimulationMessage>) => {
       switch (layoutType) {
         case 'force':
           simulation = forceSimulation(nodes)
-            .force('link', forceLink(links).id((d: any) => d.id).distance(100))
+            .force(
+              'link',
+              forceLink(links)
+                .id((d: any) => d.id)
+                .distance(100)
+            )
             .force('charge', forceManyBody().strength(-300))
             .force('center', forceCenter(width / 2, height / 2))
             .force('collision', forceCollide().radius(30))
@@ -62,22 +68,38 @@ self.onmessage = (event: MessageEvent<SimulationMessage>) => {
 
         case 'radial':
           simulation = forceSimulation(nodes)
-            .force('link', forceLink(links).id((d: any) => d.id).distance(80))
+            .force(
+              'link',
+              forceLink(links)
+                .id((d: any) => d.id)
+                .distance(80)
+            )
             .force('charge', forceManyBody().strength(-200))
             .force('radial', forceRadial(150, width / 2, height / 2))
           break
 
         case 'hierarchic':
           simulation = forceSimulation(nodes)
-            .force('link', forceLink(links).id((d: any) => d.id).distance(60))
+            .force(
+              'link',
+              forceLink(links)
+                .id((d: any) => d.id)
+                .distance(60)
+            )
             .force('charge', forceManyBody().strength(-100))
-            .force('y', forceY<WorkerNode>().y(d => (d.index || 0) * 80 + 100))
+            .force(
+              'y',
+              forceY<WorkerNode>().y(d => (d.index || 0) * 80 + 100)
+            )
             .force('x', forceX(width / 2))
           break
 
         default:
           simulation = forceSimulation(nodes)
-            .force('link', forceLink(links).id((d: any) => d.id))
+            .force(
+              'link',
+              forceLink(links).id((d: any) => d.id)
+            )
             .force('charge', forceManyBody())
             .force('center', forceCenter(width / 2, height / 2))
       }

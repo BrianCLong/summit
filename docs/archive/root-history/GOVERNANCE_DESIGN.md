@@ -13,6 +13,7 @@ This document outlines the design for enhancing Summit's security, governance, a
 ## Current State Analysis
 
 ### Strengths
+
 - ✅ OPA/ABAC integration with field-level authorization
 - ✅ Advanced audit system with 20+ event types, hash chains, signatures
 - ✅ JWT rotation with RS256/HS256 dual algorithm support
@@ -23,6 +24,7 @@ This document outlines the design for enhancing Summit's security, governance, a
 - ✅ Compliance tracking (SOX, GDPR, HIPAA, SOC2, NIST, ISO27001)
 
 ### Critical Gaps
+
 - ❌ No policy tags on graph entities/edges
 - ❌ OIDC issuer verification incomplete (TODO at opa-abac.ts:161)
 - ❌ Immutable audit log not enforced (database is mutable)
@@ -285,7 +287,6 @@ export async function up(driver: Driver): Promise<void> {
       FOR (n:Entity)
       ON (n.policy_purpose)
     `);
-
   } finally {
     await session.close();
   }
@@ -558,18 +559,18 @@ The existing audit system (advanced-audit-system.ts) already has most of what we
 
 export interface EnhancedAuditEvent extends AuditEvent {
   // NEW: Governance fields
-  purpose: string;                    // "investigation" | "threat_intel" | etc.
-  legal_basis: string[];             // ["court_order", "consent"]
-  warrant_id?: string;               // Associated warrant
-  reason_for_access: string;         // User-provided justification
+  purpose: string; // "investigation" | "threat_intel" | etc.
+  legal_basis: string[]; // ["court_order", "consent"]
+  warrant_id?: string; // Associated warrant
+  reason_for_access: string; // User-provided justification
 
   // NEW: Policy enforcement
   policy_decision: {
     allowed: boolean;
-    deny_reasons?: string[];         // If denied, why?
-    redacted_fields?: string[];      // Fields that were redacted
-    applied_policies: string[];      // OPA policies that were evaluated
-    evaluation_time_ms: number;      // Policy evaluation duration
+    deny_reasons?: string[]; // If denied, why?
+    redacted_fields?: string[]; // Fields that were redacted
+    applied_policies: string[]; // OPA policies that were evaluated
+    evaluation_time_ms: number; // Policy evaluation duration
   };
 
   // NEW: Resource policy tags (snapshot at time of access)
@@ -639,14 +640,14 @@ GRANT SELECT ON audit_events TO audit_reader;
 ```typescript
 // server/src/services/WarrantService.ts
 
-import { Pool } from 'pg';
-import { Logger } from 'pino';
-import { randomUUID } from 'crypto';
+import { Pool } from "pg";
+import { Logger } from "pino";
+import { randomUUID } from "crypto";
 
 export interface Warrant {
   id: string;
   warrantNumber: string;
-  warrantType: 'search_warrant' | 'subpoena' | 'court_order' | 'consent';
+  warrantType: "search_warrant" | "subpoena" | "court_order" | "consent";
   issuingAuthority: string;
   issuedDate: Date;
   expiryDate?: Date;
@@ -662,7 +663,7 @@ export interface Warrant {
     purposes?: string[];
   };
   tenantId: string;
-  status: 'active' | 'expired' | 'revoked' | 'superseded';
+  status: "active" | "expired" | "revoked" | "superseded";
   createdBy: string;
   createdAt: Date;
   updatedAt: Date;
@@ -684,13 +685,13 @@ export interface WarrantUsage {
 export class WarrantService {
   constructor(
     private db: Pool,
-    private logger: Logger,
+    private logger: Logger
   ) {}
 
   /**
    * Create a new warrant
    */
-  async createWarrant(warrant: Omit<Warrant, 'id' | 'createdAt' | 'updatedAt'>): Promise<Warrant> {
+  async createWarrant(warrant: Omit<Warrant, "id" | "createdAt" | "updatedAt">): Promise<Warrant> {
     const id = randomUUID();
     const now = new Date();
 
@@ -718,14 +719,17 @@ export class WarrantService {
         warrant.createdBy,
         now,
         now,
-      ],
+      ]
     );
 
-    this.logger.info({
-      warrantId: id,
-      warrantNumber: warrant.warrantNumber,
-      tenantId: warrant.tenantId,
-    }, 'Warrant created');
+    this.logger.info(
+      {
+        warrantId: id,
+        warrantNumber: warrant.warrantNumber,
+        tenantId: warrant.tenantId,
+      },
+      "Warrant created"
+    );
 
     return this.deserializeWarrant(result.rows[0]);
   }
@@ -734,10 +738,7 @@ export class WarrantService {
    * Get warrant by ID
    */
   async getWarrant(id: string): Promise<Warrant | null> {
-    const result = await this.db.query(
-      'SELECT * FROM warrants WHERE id = $1',
-      [id],
-    );
+    const result = await this.db.query("SELECT * FROM warrants WHERE id = $1", [id]);
 
     if (result.rows.length === 0) {
       return null;
@@ -753,7 +754,7 @@ export class WarrantService {
     warrantId: string,
     resourceType: string,
     operation: string,
-    purpose: string,
+    purpose: string
   ): Promise<{
     valid: boolean;
     reason?: string;
@@ -761,15 +762,15 @@ export class WarrantService {
     const warrant = await this.getWarrant(warrantId);
 
     if (!warrant) {
-      return { valid: false, reason: 'Warrant not found' };
+      return { valid: false, reason: "Warrant not found" };
     }
 
-    if (warrant.status !== 'active') {
+    if (warrant.status !== "active") {
       return { valid: false, reason: `Warrant is ${warrant.status}` };
     }
 
     if (warrant.expiryDate && new Date() > warrant.expiryDate) {
-      return { valid: false, reason: 'Warrant has expired' };
+      return { valid: false, reason: "Warrant has expired" };
     }
 
     // Check resource type constraints
@@ -817,7 +818,7 @@ export class WarrantService {
       ) {
         return {
           valid: false,
-          reason: 'Current time outside warrant time range',
+          reason: "Current time outside warrant time range",
         };
       }
     }
@@ -848,7 +849,7 @@ export class WarrantService {
         usage.timestamp,
         usage.auditEventId,
         null, // ip_address to be added from request context
-      ],
+      ]
     );
   }
 
@@ -863,10 +864,10 @@ export class WarrantService {
       ORDER BY timestamp DESC
       LIMIT $2
       `,
-      [warrantId, limit],
+      [warrantId, limit]
     );
 
-    return result.rows.map(row => ({
+    return result.rows.map((row) => ({
       warrantId: row.warrant_id,
       userId: row.user_id,
       tenantId: row.tenant_id,
@@ -890,10 +891,10 @@ export class WarrantService {
       WHERE tenant_id = $1 AND status = 'active'
       ORDER BY issued_date DESC
       `,
-      [tenantId],
+      [tenantId]
     );
 
-    return result.rows.map(row => this.deserializeWarrant(row));
+    return result.rows.map((row) => this.deserializeWarrant(row));
   }
 
   /**
@@ -906,13 +907,16 @@ export class WarrantService {
       SET status = 'revoked', updated_at = NOW()
       WHERE id = $1
       `,
-      [warrantId],
+      [warrantId]
     );
 
-    this.logger.warn({
-      warrantId,
-      revokedBy,
-    }, 'Warrant revoked');
+    this.logger.warn(
+      {
+        warrantId,
+        revokedBy,
+      },
+      "Warrant revoked"
+    );
   }
 
   private deserializeWarrant(row: any): Warrant {
@@ -999,50 +1003,47 @@ User Request: View Investigation Case Graph
 ```typescript
 // server/src/graphql/resolvers/investigation.ts
 
-import { AuthenticationError, ForbiddenError } from 'apollo-server-express';
-import { withTenant } from '../../middleware/withTenant';
-import { OPAClient } from '../../middleware/opa-abac';
-import { WarrantService } from '../../services/WarrantService';
-import { AdvancedAuditSystem } from '../../audit/advanced-audit-system';
+import { AuthenticationError, ForbiddenError } from "apollo-server-express";
+import { withTenant } from "../../middleware/withTenant";
+import { OPAClient } from "../../middleware/opa-abac";
+import { WarrantService } from "../../services/WarrantService";
+import { AdvancedAuditSystem } from "../../audit/advanced-audit-system";
 
 export const investigationResolvers = {
   Query: {
     /**
      * Get investigation case graph with full governance
      */
-    investigationCaseGraph: withTenant(async (
-      _parent,
-      args: { investigationId: string },
-      context,
-    ) => {
-      const { investigationId } = args;
-      const { user, opa, neo4j, warrantService, auditSystem, requestId } = context;
+    investigationCaseGraph: withTenant(
+      async (_parent, args: { investigationId: string }, context) => {
+        const { investigationId } = args;
+        const { user, opa, neo4j, warrantService, auditSystem, requestId } = context;
 
-      // [1] Validate authentication
-      if (!user) {
-        throw new AuthenticationError('Authentication required');
-      }
+        // [1] Validate authentication
+        if (!user) {
+          throw new AuthenticationError("Authentication required");
+        }
 
-      // [2] Extract governance context from headers
-      const purpose = context.req.headers['x-purpose'] as string;
-      const legalBasis = (context.req.headers['x-legal-basis'] as string)?.split(',') || [];
-      const warrantId = context.req.headers['x-warrant-id'] as string;
-      const reasonForAccess = context.req.headers['x-reason-for-access'] as string;
+        // [2] Extract governance context from headers
+        const purpose = context.req.headers["x-purpose"] as string;
+        const legalBasis = (context.req.headers["x-legal-basis"] as string)?.split(",") || [];
+        const warrantId = context.req.headers["x-warrant-id"] as string;
+        const reasonForAccess = context.req.headers["x-reason-for-access"] as string;
 
-      if (!purpose) {
-        throw new ForbiddenError('Purpose header (X-Purpose) is required');
-      }
+        if (!purpose) {
+          throw new ForbiddenError("Purpose header (X-Purpose) is required");
+        }
 
-      if (!reasonForAccess) {
-        throw new ForbiddenError('Reason for access (X-Reason-For-Access) is required');
-      }
+        if (!reasonForAccess) {
+          throw new ForbiddenError("Reason for access (X-Reason-For-Access) is required");
+        }
 
-      const correlationId = requestId;
+        const correlationId = requestId;
 
-      try {
-        // [3] Fetch investigation with policy tags
-        const investigationResult = await neo4j.run(
-          `
+        try {
+          // [3] Fetch investigation with policy tags
+          const investigationResult = await neo4j.run(
+            `
           MATCH (i:Investigation {id: $investigationId, tenantId: $tenantId})
           RETURN i {
             .*,
@@ -1057,187 +1058,187 @@ export const investigationResolvers = {
             }
           } as investigation
           `,
-          {
-            investigationId,
-            tenantId: user.tenant,
-          },
-        );
-
-        if (investigationResult.records.length === 0) {
-          await auditSystem.recordEvent({
-            eventType: 'resource_access',
-            level: 'warn',
-            correlationId,
-            sessionId: context.sessionId,
-            requestId,
-            userId: user.id,
-            tenantId: user.tenant,
-            serviceId: 'intelgraph-api',
-            resourceType: 'investigation',
-            resourceId: investigationId,
-            action: 'view_case_graph',
-            outcome: 'failure',
-            message: 'Investigation not found',
-            details: {
-              purpose,
-              legalBasis,
-              warrantId,
-              reasonForAccess,
-              denyReason: 'not_found',
-            },
-            ipAddress: context.req.ip,
-            userAgent: context.req.headers['user-agent'],
-            complianceRelevant: true,
-            complianceFrameworks: ['SOX', 'SOC2'],
-          });
-
-          throw new ForbiddenError('Investigation not found or access denied');
-        }
-
-        const investigation = investigationResult.records[0].get('investigation');
-        const policyTags = investigation.policy_tags;
-
-        // [4] Validate warrant if required
-        if (warrantId) {
-          const warrantValidation = await warrantService.validateWarrant(
-            warrantId,
-            'investigation',
-            'view',
-            purpose,
+            {
+              investigationId,
+              tenantId: user.tenant,
+            }
           );
 
-          if (!warrantValidation.valid) {
+          if (investigationResult.records.length === 0) {
             await auditSystem.recordEvent({
-              eventType: 'policy_violation',
-              level: 'error',
+              eventType: "resource_access",
+              level: "warn",
               correlationId,
               sessionId: context.sessionId,
               requestId,
               userId: user.id,
               tenantId: user.tenant,
-              serviceId: 'intelgraph-api',
-              resourceType: 'investigation',
+              serviceId: "intelgraph-api",
+              resourceType: "investigation",
               resourceId: investigationId,
-              action: 'view_case_graph',
-              outcome: 'failure',
-              message: 'Invalid warrant',
+              action: "view_case_graph",
+              outcome: "failure",
+              message: "Investigation not found",
               details: {
                 purpose,
                 legalBasis,
                 warrantId,
                 reasonForAccess,
-                denyReason: warrantValidation.reason,
+                denyReason: "not_found",
               },
               ipAddress: context.req.ip,
-              userAgent: context.req.headers['user-agent'],
+              userAgent: context.req.headers["user-agent"],
               complianceRelevant: true,
-              complianceFrameworks: ['SOX', 'SOC2', 'GDPR'],
+              complianceFrameworks: ["SOX", "SOC2"],
+            });
+
+            throw new ForbiddenError("Investigation not found or access denied");
+          }
+
+          const investigation = investigationResult.records[0].get("investigation");
+          const policyTags = investigation.policy_tags;
+
+          // [4] Validate warrant if required
+          if (warrantId) {
+            const warrantValidation = await warrantService.validateWarrant(
+              warrantId,
+              "investigation",
+              "view",
+              purpose
+            );
+
+            if (!warrantValidation.valid) {
+              await auditSystem.recordEvent({
+                eventType: "policy_violation",
+                level: "error",
+                correlationId,
+                sessionId: context.sessionId,
+                requestId,
+                userId: user.id,
+                tenantId: user.tenant,
+                serviceId: "intelgraph-api",
+                resourceType: "investigation",
+                resourceId: investigationId,
+                action: "view_case_graph",
+                outcome: "failure",
+                message: "Invalid warrant",
+                details: {
+                  purpose,
+                  legalBasis,
+                  warrantId,
+                  reasonForAccess,
+                  denyReason: warrantValidation.reason,
+                },
+                ipAddress: context.req.ip,
+                userAgent: context.req.headers["user-agent"],
+                complianceRelevant: true,
+                complianceFrameworks: ["SOX", "SOC2", "GDPR"],
+              });
+
+              throw new ForbiddenError(
+                `Warrant validation failed: ${warrantValidation.reason}. ` +
+                  `To request access, contact your compliance officer.`
+              );
+            }
+          }
+
+          // [5] OPA authorization
+          const policyInput = {
+            user: {
+              id: user.id,
+              tenant: user.tenant,
+              roles: user.roles || [],
+              scopes: user.scopes || [],
+              clearance_levels: user.clearanceLevels || ["internal"],
+              residency: user.residency || "US",
+            },
+            resource: {
+              type: "investigation",
+              id: investigationId,
+              tenant: user.tenant,
+              ...policyTags,
+            },
+            context: {
+              purpose,
+              legal_basis: legalBasis,
+              warrant_id: warrantId,
+              reason: reasonForAccess,
+              purposes: [purpose], // For purpose_alignment_valid check
+            },
+            operation_type: "query",
+          };
+
+          const policyStartTime = Date.now();
+          const opaResult = await opa.evaluate("intelgraph.abac", policyInput);
+          const policyEvaluationTime = Date.now() - policyStartTime;
+
+          const allowed = opaResult?.allow || false;
+          const denyReasons = opaResult?.deny_reason || [];
+          const redactedFields = opaResult?.redact_fields || [];
+
+          if (!allowed) {
+            // Access denied - log and provide appeal path
+            await auditSystem.recordEvent({
+              eventType: "policy_decision",
+              level: "warn",
+              correlationId,
+              sessionId: context.sessionId,
+              requestId,
+              userId: user.id,
+              tenantId: user.tenant,
+              serviceId: "intelgraph-api",
+              resourceType: "investigation",
+              resourceId: investigationId,
+              action: "view_case_graph",
+              outcome: "failure",
+              message: "Access denied by authorization policy",
+              details: {
+                purpose,
+                legalBasis,
+                warrantId,
+                reasonForAccess,
+                policyDecision: {
+                  allowed: false,
+                  denyReasons,
+                  appliedPolicies: ["intelgraph.abac.allow"],
+                  evaluationTimeMs: policyEvaluationTime,
+                },
+                resourcePolicyTags: policyTags,
+                appealAvailable: true,
+                appealContact: "compliance@example.com",
+                appealProcess: "Submit access request via /api/access-requests",
+              },
+              ipAddress: context.req.ip,
+              userAgent: context.req.headers["user-agent"],
+              complianceRelevant: true,
+              complianceFrameworks: ["SOX", "SOC2", "GDPR"],
             });
 
             throw new ForbiddenError(
-              `Warrant validation failed: ${warrantValidation.reason}. ` +
-              `To request access, contact your compliance officer.`
+              `Access denied: ${denyReasons.join(", ")}. ` +
+                `You can appeal this decision by contacting compliance@example.com or ` +
+                `submitting an access request at /api/access-requests.`
             );
           }
-        }
 
-        // [5] OPA authorization
-        const policyInput = {
-          user: {
-            id: user.id,
-            tenant: user.tenant,
-            roles: user.roles || [],
-            scopes: user.scopes || [],
-            clearance_levels: user.clearanceLevels || ['internal'],
-            residency: user.residency || 'US',
-          },
-          resource: {
-            type: 'investigation',
-            id: investigationId,
-            tenant: user.tenant,
-            ...policyTags,
-          },
-          context: {
-            purpose,
-            legal_basis: legalBasis,
-            warrant_id: warrantId,
-            reason: reasonForAccess,
-            purposes: [purpose], // For purpose_alignment_valid check
-          },
-          operation_type: 'query',
-        };
-
-        const policyStartTime = Date.now();
-        const opaResult = await opa.evaluate('intelgraph.abac', policyInput);
-        const policyEvaluationTime = Date.now() - policyStartTime;
-
-        const allowed = opaResult?.allow || false;
-        const denyReasons = opaResult?.deny_reason || [];
-        const redactedFields = opaResult?.redact_fields || [];
-
-        if (!allowed) {
-          // Access denied - log and provide appeal path
-          await auditSystem.recordEvent({
-            eventType: 'policy_decision',
-            level: 'warn',
-            correlationId,
-            sessionId: context.sessionId,
-            requestId,
-            userId: user.id,
-            tenantId: user.tenant,
-            serviceId: 'intelgraph-api',
-            resourceType: 'investigation',
-            resourceId: investigationId,
-            action: 'view_case_graph',
-            outcome: 'failure',
-            message: 'Access denied by authorization policy',
-            details: {
-              purpose,
-              legalBasis,
+          // [6] Record warrant usage
+          if (warrantId) {
+            await warrantService.recordWarrantUsage({
               warrantId,
+              userId: user.id,
+              tenantId: user.tenant,
+              resourceType: "investigation",
+              resourceId: investigationId,
+              operation: "view",
+              purpose,
               reasonForAccess,
-              policyDecision: {
-                allowed: false,
-                denyReasons,
-                appliedPolicies: ['intelgraph.abac.allow'],
-                evaluationTimeMs: policyEvaluationTime,
-              },
-              resourcePolicyTags: policyTags,
-              appealAvailable: true,
-              appealContact: 'compliance@example.com',
-              appealProcess: 'Submit access request via /api/access-requests',
-            },
-            ipAddress: context.req.ip,
-            userAgent: context.req.headers['user-agent'],
-            complianceRelevant: true,
-            complianceFrameworks: ['SOX', 'SOC2', 'GDPR'],
-          });
+              timestamp: new Date(),
+            });
+          }
 
-          throw new ForbiddenError(
-            `Access denied: ${denyReasons.join(', ')}. ` +
-            `You can appeal this decision by contacting compliance@example.com or ` +
-            `submitting an access request at /api/access-requests.`
-          );
-        }
-
-        // [6] Record warrant usage
-        if (warrantId) {
-          await warrantService.recordWarrantUsage({
-            warrantId,
-            userId: user.id,
-            tenantId: user.tenant,
-            resourceType: 'investigation',
-            resourceId: investigationId,
-            operation: 'view',
-            purpose,
-            reasonForAccess,
-            timestamp: new Date(),
-          });
-        }
-
-        // [7] Fetch case graph with policy constraints
-        const caseGraphResult = await neo4j.run(
-          `
+          // [7] Fetch case graph with policy constraints
+          const caseGraphResult = await neo4j.run(
+            `
           MATCH (i:Investigation {id: $investigationId, tenantId: $tenantId})
           MATCH (i)-[r*0..3]-(e)
           WHERE e.tenantId = $tenantId
@@ -1262,94 +1263,98 @@ export const investigationResolvers = {
           } as entity,
           collect(DISTINCT r) as relationships
           `,
-          {
-            investigationId,
-            tenantId: user.tenant,
-            userClearance: user.clearanceLevels?.[0] || 'internal',
-            purpose,
-          },
-        );
-
-        const entities = caseGraphResult.records.map(r => r.get('entity'));
-        const relationships = caseGraphResult.records.flatMap(r => r.get('relationships'));
-
-        // [8] Apply field-level redactions
-        const redactedEntities = entities.map(entity => {
-          const redacted = { ...entity };
-          redactedFields.forEach(field => {
-            if (redacted[field]) {
-              redacted[field] = '[REDACTED]';
+            {
+              investigationId,
+              tenantId: user.tenant,
+              userClearance: user.clearanceLevels?.[0] || "internal",
+              purpose,
             }
+          );
+
+          const entities = caseGraphResult.records.map((r) => r.get("entity"));
+          const relationships = caseGraphResult.records.flatMap((r) => r.get("relationships"));
+
+          // [8] Apply field-level redactions
+          const redactedEntities = entities.map((entity) => {
+            const redacted = { ...entity };
+            redactedFields.forEach((field) => {
+              if (redacted[field]) {
+                redacted[field] = "[REDACTED]";
+              }
+            });
+            return redacted;
           });
-          return redacted;
-        });
 
-        // [9] Success audit log
-        await auditSystem.recordEvent({
-          eventType: 'resource_access',
-          level: 'info',
-          correlationId,
-          sessionId: context.sessionId,
-          requestId,
-          userId: user.id,
-          tenantId: user.tenant,
-          serviceId: 'intelgraph-api',
-          resourceType: 'investigation',
-          resourceId: investigationId,
-          action: 'view_case_graph',
-          outcome: 'success',
-          message: 'Case graph accessed successfully',
-          details: {
-            purpose,
-            legalBasis,
-            warrantId,
-            reasonForAccess,
-            policyDecision: {
-              allowed: true,
-              denyReasons: [],
-              redactedFields,
-              appliedPolicies: ['intelgraph.abac.allow'],
-              evaluationTimeMs: policyEvaluationTime,
+          // [9] Success audit log
+          await auditSystem.recordEvent({
+            eventType: "resource_access",
+            level: "info",
+            correlationId,
+            sessionId: context.sessionId,
+            requestId,
+            userId: user.id,
+            tenantId: user.tenant,
+            serviceId: "intelgraph-api",
+            resourceType: "investigation",
+            resourceId: investigationId,
+            action: "view_case_graph",
+            outcome: "success",
+            message: "Case graph accessed successfully",
+            details: {
+              purpose,
+              legalBasis,
+              warrantId,
+              reasonForAccess,
+              policyDecision: {
+                allowed: true,
+                denyReasons: [],
+                redactedFields,
+                appliedPolicies: ["intelgraph.abac.allow"],
+                evaluationTimeMs: policyEvaluationTime,
+              },
+              resourcePolicyTags: policyTags,
+              entityCount: entities.length,
+              relationshipCount: relationships.length,
             },
-            resourcePolicyTags: policyTags,
-            entityCount: entities.length,
-            relationshipCount: relationships.length,
-          },
-          ipAddress: context.req.ip,
-          userAgent: context.req.headers['user-agent'],
-          complianceRelevant: true,
-          complianceFrameworks: ['SOX', 'SOC2', 'GDPR'],
-          dataClassification: policyTags.data_classification,
-        });
+            ipAddress: context.req.ip,
+            userAgent: context.req.headers["user-agent"],
+            complianceRelevant: true,
+            complianceFrameworks: ["SOX", "SOC2", "GDPR"],
+            dataClassification: policyTags.data_classification,
+          });
 
-        // [10] Return results with governance metadata
-        return {
-          investigation,
-          entities: redactedEntities,
-          relationships,
-          governanceMetadata: {
-            policyTags,
-            warrantId,
-            purpose,
-            legalBasis,
-            reasonForAccess,
-            redactedFields,
-            accessGrantedAt: new Date().toISOString(),
-            auditTrailId: correlationId,
-          },
-        };
-      } catch (error) {
-        // Log error for debugging
-        context.logger.error({
-          error: error.message,
-          investigationId,
-          userId: user.id,
-          tenantId: user.tenant,
-        }, 'Failed to fetch investigation case graph');
+          // [10] Return results with governance metadata
+          return {
+            investigation,
+            entities: redactedEntities,
+            relationships,
+            governanceMetadata: {
+              policyTags,
+              warrantId,
+              purpose,
+              legalBasis,
+              reasonForAccess,
+              redactedFields,
+              accessGrantedAt: new Date().toISOString(),
+              auditTrailId: correlationId,
+            },
+          };
+        } catch (error) {
+          // Log error for debugging
+          context.logger.error(
+            {
+              error: error.message,
+              investigationId,
+              userId: user.id,
+              tenantId: user.tenant,
+            },
+            "Failed to fetch investigation case graph"
+          );
 
-        throw error;
+          throw error;
+        }
       }
-    }),
+    ),
   },
 };
 ```
@@ -1361,6 +1366,7 @@ export const investigationResolvers = {
 ### 6.1 Phased Rollout
 
 **Phase 1: Foundation (Week 1-2)**
+
 - ✅ Database migrations: Add policy tag columns to Neo4j
 - ✅ Create warrant tables in PostgreSQL
 - ✅ Enhance audit schema
@@ -1368,6 +1374,7 @@ export const investigationResolvers = {
 - ✅ Backward compatibility: All fields optional, defaults applied
 
 **Phase 2: Pilot (Week 3-4)**
+
 - ✅ Enable for 1-2 tenants (opt-in)
 - ✅ Implement warrant service
 - ✅ Add governance headers to API
@@ -1375,12 +1382,14 @@ export const investigationResolvers = {
 - ✅ Gather feedback from pilot users
 
 **Phase 3: Gradual Rollout (Week 5-8)**
+
 - ✅ Enable for all new investigations
 - ✅ Backfill policy tags for existing data (asynchronous)
 - ✅ Make governance headers required for sensitive operations
 - ✅ Train users on new access request process
 
 **Phase 4: Full Enforcement (Week 9-12)**
+
 - ✅ Enforce warrant requirements for restricted data
 - ✅ Make reason-for-access mandatory
 - ✅ Enable immutable audit log
@@ -1397,25 +1406,28 @@ export const investigationResolvers = {
  */
 export function governanceCompatibilityMiddleware(req, res, next) {
   // If governance headers are missing, inject defaults for non-restricted resources
-  if (!req.headers['x-purpose']) {
-    req.headers['x-purpose'] = 'general_access';
+  if (!req.headers["x-purpose"]) {
+    req.headers["x-purpose"] = "general_access";
   }
 
-  if (!req.headers['x-legal-basis']) {
-    req.headers['x-legal-basis'] = 'legitimate_interest';
+  if (!req.headers["x-legal-basis"]) {
+    req.headers["x-legal-basis"] = "legitimate_interest";
   }
 
-  if (!req.headers['x-reason-for-access']) {
-    req.headers['x-reason-for-access'] = 'Normal system access (auto-generated)';
+  if (!req.headers["x-reason-for-access"]) {
+    req.headers["x-reason-for-access"] = "Normal system access (auto-generated)";
   }
 
   // Log that defaults were applied
   if (req.user) {
-    logger.debug({
-      userId: req.user.id,
-      path: req.path,
-      defaultsApplied: true,
-    }, 'Governance headers defaulted for backward compatibility');
+    logger.debug(
+      {
+        userId: req.user.id,
+        path: req.path,
+        defaultsApplied: true,
+      },
+      "Governance headers defaulted for backward compatibility"
+    );
   }
 
   next();
@@ -1429,17 +1441,17 @@ export function governanceCompatibilityMiddleware(req, res, next) {
 
 export const governanceFeatureFlags = {
   // Phase 1
-  policyTagsEnabled: process.env.FEATURE_POLICY_TAGS === 'true',
-  warrantsEnabled: process.env.FEATURE_WARRANTS === 'true',
+  policyTagsEnabled: process.env.FEATURE_POLICY_TAGS === "true",
+  warrantsEnabled: process.env.FEATURE_WARRANTS === "true",
 
   // Phase 2
-  governanceHeadersRequired: process.env.FEATURE_GOVERNANCE_HEADERS === 'true',
+  governanceHeadersRequired: process.env.FEATURE_GOVERNANCE_HEADERS === "true",
 
   // Phase 3
-  warrantEnforcementEnabled: process.env.FEATURE_WARRANT_ENFORCEMENT === 'true',
+  warrantEnforcementEnabled: process.env.FEATURE_WARRANT_ENFORCEMENT === "true",
 
   // Phase 4
-  immutableAuditEnabled: process.env.FEATURE_IMMUTABLE_AUDIT === 'true',
+  immutableAuditEnabled: process.env.FEATURE_IMMUTABLE_AUDIT === "true",
 };
 ```
 
@@ -1452,13 +1464,13 @@ export const governanceFeatureFlags = {
 ```typescript
 // server/tests/governance-acceptance.test.ts
 
-describe('Governance Acceptance Tests', () => {
-  describe('1. Tenant Isolation', () => {
-    it('should deny access to resources from different tenant', async () => {
+describe("Governance Acceptance Tests", () => {
+  describe("1. Tenant Isolation", () => {
+    it("should deny access to resources from different tenant", async () => {
       const response = await request(app)
-        .post('/graphql')
-        .set('Authorization', `Bearer ${tenantAToken}`)
-        .set('X-Tenant-Id', 'tenant-b')
+        .post("/graphql")
+        .set("Authorization", `Bearer ${tenantAToken}`)
+        .set("X-Tenant-Id", "tenant-b")
         .send({
           query: `
             query {
@@ -1468,15 +1480,15 @@ describe('Governance Acceptance Tests', () => {
         });
 
       expect(response.status).toBe(403);
-      expect(response.body.errors[0].message).toContain('tenant_isolation_violation');
+      expect(response.body.errors[0].message).toContain("tenant_isolation_violation");
     });
   });
 
-  describe('2. RBAC Enforcement', () => {
-    it('should deny viewer role from creating investigations', async () => {
+  describe("2. RBAC Enforcement", () => {
+    it("should deny viewer role from creating investigations", async () => {
       const response = await request(app)
-        .post('/graphql')
-        .set('Authorization', `Bearer ${viewerToken}`)
+        .post("/graphql")
+        .set("Authorization", `Bearer ${viewerToken}`)
         .send({
           query: `
             mutation {
@@ -1486,24 +1498,24 @@ describe('Governance Acceptance Tests', () => {
         });
 
       expect(response.status).toBe(403);
-      expect(response.body.errors[0].message).toContain('insufficient_rbac_permissions');
+      expect(response.body.errors[0].message).toContain("insufficient_rbac_permissions");
     });
   });
 
-  describe('3. Policy Tag Enforcement', () => {
-    it('should deny access to restricted data without clearance', async () => {
+  describe("3. Policy Tag Enforcement", () => {
+    it("should deny access to restricted data without clearance", async () => {
       // Create entity with "restricted" sensitivity
       await createEntity({
-        id: 'entity-restricted',
-        tenantId: 'tenant-a',
-        policy_sensitivity: 'restricted',
+        id: "entity-restricted",
+        tenantId: "tenant-a",
+        policy_sensitivity: "restricted",
       });
 
       const response = await request(app)
-        .post('/graphql')
-        .set('Authorization', `Bearer ${normalUserToken}`) // User with "internal" clearance
-        .set('X-Purpose', 'investigation')
-        .set('X-Reason-For-Access', 'Testing')
+        .post("/graphql")
+        .set("Authorization", `Bearer ${normalUserToken}`) // User with "internal" clearance
+        .set("X-Purpose", "investigation")
+        .set("X-Reason-For-Access", "Testing")
         .send({
           query: `
             query {
@@ -1513,18 +1525,18 @@ describe('Governance Acceptance Tests', () => {
         });
 
       expect(response.status).toBe(403);
-      expect(response.body.errors[0].message).toContain('insufficient_clearance');
-      expect(response.body.errors[0].message).toContain('appeal');
+      expect(response.body.errors[0].message).toContain("insufficient_clearance");
+      expect(response.body.errors[0].message).toContain("appeal");
     });
   });
 
-  describe('4. Warrant Validation', () => {
-    it('should require warrant for restricted data', async () => {
+  describe("4. Warrant Validation", () => {
+    it("should require warrant for restricted data", async () => {
       const response = await request(app)
-        .post('/graphql')
-        .set('Authorization', `Bearer ${adminToken}`)
-        .set('X-Purpose', 'investigation')
-        .set('X-Reason-For-Access', 'Criminal investigation')
+        .post("/graphql")
+        .set("Authorization", `Bearer ${adminToken}`)
+        .set("X-Purpose", "investigation")
+        .set("X-Reason-For-Access", "Criminal investigation")
         // Missing X-Warrant-Id
         .send({
           query: `
@@ -1537,34 +1549,34 @@ describe('Governance Acceptance Tests', () => {
         });
 
       expect(response.status).toBe(403);
-      expect(response.body.errors[0].message).toContain('warrant_required');
+      expect(response.body.errors[0].message).toContain("warrant_required");
     });
 
-    it('should allow access with valid warrant', async () => {
+    it("should allow access with valid warrant", async () => {
       const warrant = await warrantService.createWarrant({
-        warrantNumber: 'SW-2025-001',
-        warrantType: 'search_warrant',
-        issuingAuthority: 'District Court',
+        warrantNumber: "SW-2025-001",
+        warrantType: "search_warrant",
+        issuingAuthority: "District Court",
         issuedDate: new Date(),
-        jurisdiction: 'US',
-        scopeDescription: 'Investigation into case XYZ',
+        jurisdiction: "US",
+        scopeDescription: "Investigation into case XYZ",
         scopeConstraints: {
-          resourceTypes: ['investigation'],
-          allowedOperations: ['view', 'export'],
-          purposes: ['investigation'],
+          resourceTypes: ["investigation"],
+          allowedOperations: ["view", "export"],
+          purposes: ["investigation"],
         },
-        tenantId: 'tenant-a',
-        status: 'active',
-        createdBy: 'judge@court.gov',
+        tenantId: "tenant-a",
+        status: "active",
+        createdBy: "judge@court.gov",
       });
 
       const response = await request(app)
-        .post('/graphql')
-        .set('Authorization', `Bearer ${adminToken}`)
-        .set('X-Purpose', 'investigation')
-        .set('X-Legal-Basis', 'court_order')
-        .set('X-Warrant-Id', warrant.id)
-        .set('X-Reason-For-Access', 'Executing search warrant SW-2025-001')
+        .post("/graphql")
+        .set("Authorization", `Bearer ${adminToken}`)
+        .set("X-Purpose", "investigation")
+        .set("X-Legal-Basis", "court_order")
+        .set("X-Warrant-Id", warrant.id)
+        .set("X-Reason-For-Access", "Executing search warrant SW-2025-001")
         .send({
           query: `
             query {
@@ -1580,12 +1592,12 @@ describe('Governance Acceptance Tests', () => {
     });
   });
 
-  describe('5. Reason for Access', () => {
-    it('should require reason for access header', async () => {
+  describe("5. Reason for Access", () => {
+    it("should require reason for access header", async () => {
       const response = await request(app)
-        .post('/graphql')
-        .set('Authorization', `Bearer ${adminToken}`)
-        .set('X-Purpose', 'investigation')
+        .post("/graphql")
+        .set("Authorization", `Bearer ${adminToken}`)
+        .set("X-Purpose", "investigation")
         // Missing X-Reason-For-Access
         .send({
           query: `
@@ -1596,22 +1608,22 @@ describe('Governance Acceptance Tests', () => {
         });
 
       expect(response.status).toBe(403);
-      expect(response.body.errors[0].message).toContain('Reason for access');
+      expect(response.body.errors[0].message).toContain("Reason for access");
     });
   });
 
-  describe('6. Audit Trail', () => {
-    it('should record who/what/why/when for all access', async () => {
+  describe("6. Audit Trail", () => {
+    it("should record who/what/why/when for all access", async () => {
       const correlationId = randomUUID();
 
       await request(app)
-        .post('/graphql')
-        .set('Authorization', `Bearer ${adminToken}`)
-        .set('X-Request-Id', correlationId)
-        .set('X-Purpose', 'investigation')
-        .set('X-Legal-Basis', 'court_order')
-        .set('X-Warrant-Id', warrantId)
-        .set('X-Reason-For-Access', 'Reviewing evidence for case')
+        .post("/graphql")
+        .set("Authorization", `Bearer ${adminToken}`)
+        .set("X-Request-Id", correlationId)
+        .set("X-Purpose", "investigation")
+        .set("X-Legal-Basis", "court_order")
+        .set("X-Warrant-Id", warrantId)
+        .set("X-Reason-For-Access", "Reviewing evidence for case")
         .send({
           query: `
             query {
@@ -1629,20 +1641,20 @@ describe('Governance Acceptance Tests', () => {
       const event = auditEvents[0];
 
       // WHO
-      expect(event.userId).toBe('admin-user-id');
-      expect(event.tenantId).toBe('tenant-a');
+      expect(event.userId).toBe("admin-user-id");
+      expect(event.tenantId).toBe("tenant-a");
       expect(event.ipAddress).toBeDefined();
 
       // WHAT
-      expect(event.resourceType).toBe('investigation');
-      expect(event.resourceId).toBe('inv-123');
-      expect(event.action).toBe('view_case_graph');
+      expect(event.resourceType).toBe("investigation");
+      expect(event.resourceId).toBe("inv-123");
+      expect(event.action).toBe("view_case_graph");
 
       // WHY
-      expect(event.details.purpose).toBe('investigation');
-      expect(event.details.legalBasis).toContain('court_order');
+      expect(event.details.purpose).toBe("investigation");
+      expect(event.details.legalBasis).toContain("court_order");
       expect(event.details.warrantId).toBe(warrantId);
-      expect(event.details.reasonForAccess).toBe('Reviewing evidence for case');
+      expect(event.details.reasonForAccess).toBe("Reviewing evidence for case");
 
       // WHEN
       expect(event.timestamp).toBeInstanceOf(Date);
@@ -1655,13 +1667,13 @@ describe('Governance Acceptance Tests', () => {
     });
   });
 
-  describe('7. Appeal System', () => {
-    it('should provide appeal path when access is denied', async () => {
+  describe("7. Appeal System", () => {
+    it("should provide appeal path when access is denied", async () => {
       const response = await request(app)
-        .post('/graphql')
-        .set('Authorization', `Bearer ${normalUserToken}`)
-        .set('X-Purpose', 'investigation')
-        .set('X-Reason-For-Access', 'Need to review case')
+        .post("/graphql")
+        .set("Authorization", `Bearer ${normalUserToken}`)
+        .set("X-Purpose", "investigation")
+        .set("X-Reason-For-Access", "Need to review case")
         .send({
           query: `
             query {
@@ -1671,25 +1683,24 @@ describe('Governance Acceptance Tests', () => {
         });
 
       expect(response.status).toBe(403);
-      expect(response.body.errors[0].message).toContain('appeal');
-      expect(response.body.errors[0].message).toContain('compliance@example.com');
-      expect(response.body.errors[0].message).toContain('/api/access-requests');
+      expect(response.body.errors[0].message).toContain("appeal");
+      expect(response.body.errors[0].message).toContain("compliance@example.com");
+      expect(response.body.errors[0].message).toContain("/api/access-requests");
     });
   });
 
-  describe('8. Immutable Audit Log', () => {
-    it('should prevent modification of audit events', async () => {
+  describe("8. Immutable Audit Log", () => {
+    it("should prevent modification of audit events", async () => {
       // Attempt to update an audit event directly via SQL
-      const result = await db.query(
-        `UPDATE audit_events SET message = 'tampered' WHERE id = $1`,
-        [auditEventId],
-      );
+      const result = await db.query(`UPDATE audit_events SET message = 'tampered' WHERE id = $1`, [
+        auditEventId,
+      ]);
 
       // Should fail due to trigger
-      expect(result).toThrow('Audit events are immutable');
+      expect(result).toThrow("Audit events are immutable");
     });
 
-    it('should verify audit trail integrity', async () => {
+    it("should verify audit trail integrity", async () => {
       const verification = await auditSystem.verifyIntegrity();
 
       expect(verification.valid).toBe(true);
@@ -1704,6 +1715,7 @@ describe('Governance Acceptance Tests', () => {
 ## 8. Implementation Checklist
 
 ### Database & Schema
+
 - [ ] Create warrant tables in PostgreSQL
 - [ ] Add policy tag properties to Neo4j entities
 - [ ] Create Neo4j indexes for policy tags
@@ -1712,6 +1724,7 @@ describe('Governance Acceptance Tests', () => {
 - [ ] Database migration scripts tested
 
 ### OPA Policies
+
 - [ ] Implement main allow policy
 - [ ] Implement policy tag validation
 - [ ] Implement warrant validation policy
@@ -1721,6 +1734,7 @@ describe('Governance Acceptance Tests', () => {
 - [ ] Deploy OPA server with policies
 
 ### Services & Middleware
+
 - [ ] Implement WarrantService
 - [ ] Enhance AuditSystem with governance fields
 - [ ] Create governance context middleware
@@ -1729,6 +1743,7 @@ describe('Governance Acceptance Tests', () => {
 - [ ] Add feature flags for gradual rollout
 
 ### API & Resolvers
+
 - [ ] Update GraphQL schema with governance types
 - [ ] Implement investigationCaseGraph resolver with full governance
 - [ ] Add warrant management API endpoints
@@ -1737,6 +1752,7 @@ describe('Governance Acceptance Tests', () => {
 - [ ] Add governance metadata to responses
 
 ### Testing
+
 - [ ] Write unit tests for WarrantService
 - [ ] Write unit tests for policy tag queries
 - [ ] Write integration tests for OPA policies
@@ -1745,6 +1761,7 @@ describe('Governance Acceptance Tests', () => {
 - [ ] Load test with 1000+ concurrent users
 
 ### Documentation
+
 - [ ] Update API documentation with governance headers
 - [ ] Create warrant creation guide
 - [ ] Write access request workflow guide
@@ -1753,6 +1770,7 @@ describe('Governance Acceptance Tests', () => {
 - [ ] Update developer onboarding docs
 
 ### Deployment
+
 - [ ] Deploy database migrations to dev
 - [ ] Deploy OPA server to dev
 - [ ] Deploy application changes to dev
@@ -1765,6 +1783,7 @@ describe('Governance Acceptance Tests', () => {
 - [ ] Iterate based on feedback
 
 ### Compliance & Audit
+
 - [ ] Generate initial compliance report
 - [ ] Review audit trail completeness
 - [ ] Test audit trail integrity verification
@@ -1777,12 +1796,14 @@ describe('Governance Acceptance Tests', () => {
 ## 9. Performance Considerations
 
 ### Expected Overhead
+
 - **OPA Policy Evaluation**: 5-15ms per request
 - **Audit Logging**: 2-5ms (buffered writes)
 - **Neo4j Policy Tag Filtering**: 10-20ms additional (indexed)
 - **Total Expected Overhead**: 20-40ms per request
 
 ### Optimization Strategies
+
 1. **OPA Caching**: Cache policy decisions for 60 seconds with same input
 2. **Audit Batching**: Buffer audit events and flush every 5 seconds
 3. **Neo4j Indexes**: Index all policy tag properties
@@ -1794,6 +1815,7 @@ describe('Governance Acceptance Tests', () => {
 ## 10. Monitoring & Alerts
 
 ### Key Metrics
+
 - Policy evaluation time (p50, p95, p99)
 - Policy denial rate by reason
 - Warrant validation failures
@@ -1802,6 +1824,7 @@ describe('Governance Acceptance Tests', () => {
 - Compliance score trends
 
 ### Critical Alerts
+
 - OPA server down (fails closed - all access denied)
 - Audit log write failures
 - Warrant validation rate > 10% failures
@@ -1815,6 +1838,7 @@ describe('Governance Acceptance Tests', () => {
 This design provides a comprehensive governance framework that builds on Summit's existing security infrastructure. The incremental migration plan ensures minimal disruption while enabling powerful new capabilities for ABAC, warrant binding, and comprehensive audit trails.
 
 **Key Success Metrics:**
+
 - ✅ 100% of resource access logged with who/what/why/when
 - ✅ Warrant validation for all restricted data access
 - ✅ Policy denial rate < 5% (proper training and access requests)

@@ -37,4 +37,3 @@ score = gwde.detect(result["watermarked"]).score
 
 See `tests/test_gwde.py` for laundering regression coverage and the `gwde.roc`
 module for ROC/AUC utilities.
-

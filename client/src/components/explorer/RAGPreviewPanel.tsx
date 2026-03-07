@@ -3,13 +3,13 @@
  * Panel for displaying RAG (Retrieval-Augmented Generation) previews
  */
 
-import React, { useState, useEffect } from 'react';
-import { cn } from '@/lib/utils';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { GraphNode, RAGPreview, RAGSource, NODE_TYPE_COLORS } from './types';
+import React, { useState, useEffect } from "react";
+import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { GraphNode, RAGPreview, RAGSource, NODE_TYPE_COLORS } from "./types";
 
 interface RAGPreviewPanelProps {
   node: GraphNode | null;
@@ -27,7 +27,7 @@ interface RAGPreviewPanelProps {
 export function RAGPreviewPanel({ node, enrichment }: RAGPreviewPanelProps) {
   const [ragData, setRagData] = useState<RAGPreview | null>(null);
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState('summary');
+  const [activeTab, setActiveTab] = useState("summary");
 
   // Simulate RAG data generation based on node and enrichment
   useEffect(() => {
@@ -86,9 +86,7 @@ export function RAGPreviewPanel({ node, enrichment }: RAGPreviewPanelProps) {
     return (
       <div className="flex flex-col items-center justify-center h-full p-6">
         <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4" />
-        <p className="text-sm text-muted-foreground">
-          Generating RAG preview...
-        </p>
+        <p className="text-sm text-muted-foreground">Generating RAG preview...</p>
       </div>
     );
   }
@@ -104,8 +102,7 @@ export function RAGPreviewPanel({ node, enrichment }: RAGPreviewPanelProps) {
         <div className="flex items-center gap-2 mb-2">
           <Badge
             style={{
-              backgroundColor:
-                NODE_TYPE_COLORS[node.type] ?? NODE_TYPE_COLORS.DEFAULT,
+              backgroundColor: NODE_TYPE_COLORS[node.type] ?? NODE_TYPE_COLORS.DEFAULT,
             }}
           >
             {node.type}
@@ -152,9 +149,7 @@ export function RAGPreviewPanel({ node, enrichment }: RAGPreviewPanelProps) {
           <TabsContent value="summary" className="p-4 m-0 space-y-4">
             <div>
               <h4 className="text-sm font-medium mb-2">AI Summary</h4>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                {ragData.summary}
-              </p>
+              <p className="text-sm text-muted-foreground leading-relaxed">{ragData.summary}</p>
             </div>
 
             <Separator />
@@ -174,33 +169,23 @@ export function RAGPreviewPanel({ node, enrichment }: RAGPreviewPanelProps) {
           <TabsContent value="context" className="p-4 m-0 space-y-3">
             <h4 className="text-sm font-medium">Contextual Information</h4>
             {ragData.context.map((ctx, i) => (
-              <div
-                key={i}
-                className="p-3 bg-muted/50 rounded-lg text-sm leading-relaxed"
-              >
+              <div key={i} className="p-3 bg-muted/50 rounded-lg text-sm leading-relaxed">
                 {ctx}
               </div>
             ))}
           </TabsContent>
 
           <TabsContent value="sources" className="p-4 m-0 space-y-3">
-            <h4 className="text-sm font-medium">
-              Sources ({ragData.sources.length})
-            </h4>
+            <h4 className="text-sm font-medium">Sources ({ragData.sources.length})</h4>
             {ragData.sources.map((source) => (
-              <div
-                key={source.id}
-                className="p-3 border rounded-lg space-y-2"
-              >
+              <div key={source.id} className="p-3 border rounded-lg space-y-2">
                 <div className="flex items-start justify-between">
                   <h5 className="font-medium text-sm">{source.title}</h5>
                   <Badge variant="outline" className="text-xs shrink-0 ml-2">
                     {Math.round(source.relevance * 100)}%
                   </Badge>
                 </div>
-                <p className="text-xs text-muted-foreground line-clamp-3">
-                  {source.snippet}
-                </p>
+                <p className="text-xs text-muted-foreground line-clamp-3">{source.snippet}</p>
                 {source.url && (
                   <a
                     href={source.url}
@@ -235,10 +220,10 @@ function generateSummary(node: GraphNode): string {
 
 function generateContext(
   node: GraphNode,
-  enrichment: RAGPreviewPanelProps['enrichment'],
+  enrichment: RAGPreviewPanelProps["enrichment"]
 ): string[] {
   const contexts: string[] = [
-    `Entity "${node.label}" was first identified on ${node.createdAt ? new Date(node.createdAt).toLocaleDateString() : 'an unknown date'}.`,
+    `Entity "${node.label}" was first identified on ${node.createdAt ? new Date(node.createdAt).toLocaleDateString() : "an unknown date"}.`,
   ];
 
   if (node.description) {
@@ -247,13 +232,13 @@ function generateContext(
 
   if (enrichment?.relatedEntities.length) {
     contexts.push(
-      `This entity is directly connected to ${enrichment.relatedEntities.length} other entities in the knowledge graph.`,
+      `This entity is directly connected to ${enrichment.relatedEntities.length} other entities in the knowledge graph.`
     );
   }
 
   if (node.confidence) {
     contexts.push(
-      `The confidence score of ${Math.round(node.confidence * 100)}% indicates ${node.confidence > 0.7 ? 'high' : node.confidence > 0.4 ? 'moderate' : 'low'} reliability of the source data.`,
+      `The confidence score of ${Math.round(node.confidence * 100)}% indicates ${node.confidence > 0.7 ? "high" : node.confidence > 0.4 ? "moderate" : "low"} reliability of the source data.`
     );
   }
 
@@ -262,14 +247,14 @@ function generateContext(
 
 function generateRelatedConcepts(node: GraphNode): string[] {
   const baseConcepts: Record<string, string[]> = {
-    PERSON: ['Identity', 'Network Analysis', 'Behavioral Pattern', 'Communications'],
-    ORGANIZATION: ['Corporate Structure', 'Operations', 'Financial Activity', 'Partnerships'],
-    LOCATION: ['Geography', 'Jurisdiction', 'Activity Zone', 'Movement Pattern'],
-    DOCUMENT: ['Evidence', 'Classification', 'Chain of Custody', 'Content Analysis'],
-    EVENT: ['Timeline', 'Incident', 'Causation', 'Impact Assessment'],
-    THREAT: ['Risk Assessment', 'Attack Vector', 'Mitigation', 'Indicators'],
-    INDICATOR: ['Detection', 'Signature', 'IOC', 'Threat Intel'],
-    DEFAULT: ['Entity Analysis', 'Relationship Mapping', 'Intelligence'],
+    PERSON: ["Identity", "Network Analysis", "Behavioral Pattern", "Communications"],
+    ORGANIZATION: ["Corporate Structure", "Operations", "Financial Activity", "Partnerships"],
+    LOCATION: ["Geography", "Jurisdiction", "Activity Zone", "Movement Pattern"],
+    DOCUMENT: ["Evidence", "Classification", "Chain of Custody", "Content Analysis"],
+    EVENT: ["Timeline", "Incident", "Causation", "Impact Assessment"],
+    THREAT: ["Risk Assessment", "Attack Vector", "Mitigation", "Indicators"],
+    INDICATOR: ["Detection", "Signature", "IOC", "Threat Intel"],
+    DEFAULT: ["Entity Analysis", "Relationship Mapping", "Intelligence"],
   };
 
   return baseConcepts[node.type] ?? baseConcepts.DEFAULT;
@@ -277,7 +262,7 @@ function generateRelatedConcepts(node: GraphNode): string[] {
 
 function generateSources(
   node: GraphNode,
-  enrichment: RAGPreviewPanelProps['enrichment'],
+  enrichment: RAGPreviewPanelProps["enrichment"]
 ): RAGSource[] {
   const sources: RAGSource[] = [];
 
@@ -295,15 +280,15 @@ function generateSources(
 
   // Add mock internal sources
   sources.push({
-    id: 'internal-1',
-    title: 'Investigation Notes',
+    id: "internal-1",
+    title: "Investigation Notes",
     snippet: `Internal notes and observations regarding ${node.label} collected during the investigation process.`,
     relevance: 0.9,
   });
 
   if (node.source) {
     sources.push({
-      id: 'origin-1',
+      id: "origin-1",
       title: `Original Source: ${node.source}`,
       snippet: `Primary source data that first identified ${node.label} as an entity of interest.`,
       relevance: 0.95,

@@ -61,10 +61,10 @@
 **Path:** `.github/actions/auditor-signoff/action.yml`
 
 ```yaml
-name: 'Auditor Sign-off Composer'
-description: 'Curate Compliance Pack subset for auditor sign-off with manifest & hashes'
+name: "Auditor Sign-off Composer"
+description: "Curate Compliance Pack subset for auditor sign-off with manifest & hashes"
 runs:
-  using: 'composite'
+  using: "composite"
   steps:
     - shell: bash
       run: |
@@ -91,14 +91,14 @@ runs:
 **Path:** `tools/privacy/generate.mjs`
 
 ```js
-import fs from 'fs';
-const policy = JSON.parse(fs.readFileSync('policies/data.json', 'utf8'));
-const proc = JSON.parse(fs.readFileSync('privacy/processors.json', 'utf8'));
-const dpa = `# Data Processing Addendum\nProcessor regions: ${policy.residency.allowed.join(', ')}\nSub-processors: ${proc.items.map((x) => x.name).join(', ')}`;
-const dpia = `# DPIA\nLawful basis: ${policy.legal?.basis || 'legitimate_interest'}\nRetention (days): ${policy.retention.days}`;
-fs.mkdirSync('privacy', { recursive: true });
-fs.writeFileSync('privacy/DPA.md', dpa);
-fs.writeFileSync('privacy/DPIA.md', dpia);
+import fs from "fs";
+const policy = JSON.parse(fs.readFileSync("policies/data.json", "utf8"));
+const proc = JSON.parse(fs.readFileSync("privacy/processors.json", "utf8"));
+const dpa = `# Data Processing Addendum\nProcessor regions: ${policy.residency.allowed.join(", ")}\nSub-processors: ${proc.items.map((x) => x.name).join(", ")}`;
+const dpia = `# DPIA\nLawful basis: ${policy.legal?.basis || "legitimate_interest"}\nRetention (days): ${policy.retention.days}`;
+fs.mkdirSync("privacy", { recursive: true });
+fs.writeFileSync("privacy/DPA.md", dpa);
+fs.writeFileSync("privacy/DPIA.md", dpia);
 ```
 
 **OPA checks** `policies/incident_sla.rego`
@@ -140,11 +140,11 @@ privacy:
 **Path:** `tools/contracts/diff.mjs`
 
 ```js
-import fs from 'fs';
-const a = fs.readFileSync(process.argv[2], 'utf8');
-const b = fs.readFileSync(process.argv[3], 'utf8');
-const diff = require('diff').createTwoFilesPatch('old', 'new', a, b);
-fs.writeFileSync('contracts/redline.diff', diff);
+import fs from "fs";
+const a = fs.readFileSync(process.argv[2], "utf8");
+const b = fs.readFileSync(process.argv[3], "utf8");
+const diff = require("diff").createTwoFilesPatch("old", "new", a, b);
+fs.writeFileSync("contracts/redline.diff", diff);
 ```
 
 **CI hooks:**
@@ -167,10 +167,10 @@ contracts:
 **Path:** `tools/board/brief.mjs`
 
 ```js
-import fs from 'fs';
-const metrics = JSON.parse(fs.readFileSync('metrics/summary.json', 'utf8'));
+import fs from "fs";
+const metrics = JSON.parse(fs.readFileSync("metrics/summary.json", "utf8"));
 const brief = `# Board Brief — Q1 2026\n\n- North Star: ${metrics.north_star}\n- Evidence coverage: ${metrics.evidence_coverage}%\n- Uptime: ${metrics.uptime}\n- API p95: ${metrics.p95} ms\n- Design partners: ${metrics.design_partners}\n\n## Links\n- Latest tag: ${metrics.latest_tag}\n- Disclosure Portal: ${metrics.portal_url}\n- Maestro runs: ${metrics.maestro_run}\n`;
-fs.writeFileSync('board-brief-Q1-2026.md', brief);
+fs.writeFileSync("board-brief-Q1-2026.md", brief);
 ```
 
 **CI to PDF:**
@@ -194,26 +194,20 @@ board_brief:
 
 ```tsx
 export function Tabs() {
-  const [tab, setTab] = React.useState<'auditor' | 'contracts' | 'board'>(
-    'auditor',
-  );
+  const [tab, setTab] = React.useState<"auditor" | "contracts" | "board">("auditor");
   return (
     <div>
       <nav className="flex gap-2">
-        {['auditor', 'contracts', 'board'].map((t) => (
-          <button
-            key={t}
-            onClick={() => setTab(t as any)}
-            className="px-3 py-2 rounded-2xl shadow"
-          >
+        {["auditor", "contracts", "board"].map((t) => (
+          <button key={t} onClick={() => setTab(t as any)} className="px-3 py-2 rounded-2xl shadow">
             {t}
           </button>
         ))}
       </nav>
       <section className="mt-4">
-        {tab === 'auditor' && <AuditorView />}
-        {tab === 'contracts' && <ContractsView />}
-        {tab === 'board' && <BoardView />}
+        {tab === "auditor" && <AuditorView />}
+        {tab === "contracts" && <ContractsView />}
+        {tab === "board" && <BoardView />}
       </section>
     </div>
   );
@@ -224,17 +218,8 @@ export function Tabs() {
 
 ```tsx
 export function BoardBadge({ coverage }: { coverage: number }) {
-  const color =
-    coverage === 100
-      ? 'bg-green-100'
-      : coverage > 80
-        ? 'bg-yellow-100'
-        : 'bg-red-100';
-  return (
-    <span className={`px-2 py-1 rounded-2xl ${color}`}>
-      Evidence {coverage}%
-    </span>
-  );
+  const color = coverage === 100 ? "bg-green-100" : coverage > 80 ? "bg-yellow-100" : "bg-red-100";
+  return <span className={`px-2 py-1 rounded-2xl ${color}`}>Evidence {coverage}%</span>;
 }
 ```
 

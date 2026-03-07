@@ -3,7 +3,7 @@ name: CI Preflight Validation
 on:
   workflow_dispatch:
   pull_request:
-    branches: [ main ]
+    branches: [main]
     paths:
       - "server/**"
       - "apps/gateway/**"
@@ -11,7 +11,7 @@ on:
       - "services/opa/**"
       - ".github/workflows/ci-preflight.yml"
   push:
-    branches: [ main ]
+    branches: [main]
     paths:
       - "server/**"
       - "apps/gateway/**"

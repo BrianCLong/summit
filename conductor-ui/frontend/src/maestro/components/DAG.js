@@ -1,16 +1,16 @@
-import { jsx as _jsx, jsxs as _jsxs } from 'react/jsx-runtime';
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 function stateColor(s) {
   switch (s) {
-    case 'running':
-      return '#2563eb';
-    case 'succeeded':
-      return '#16a34a';
-    case 'failed':
-      return '#dc2626';
-    case 'cancelled':
-      return '#6b7280';
+    case "running":
+      return "#2563eb";
+    case "succeeded":
+      return "#16a34a";
+    case "failed":
+      return "#dc2626";
+    case "cancelled":
+      return "#6b7280";
     default:
-      return '#f59e0b';
+      return "#f59e0b";
   }
 }
 // Simple layered layout without external deps
@@ -53,9 +53,9 @@ export default function DAG({ nodes, edges, onSelect }) {
       pos.set(id, { x: 120 + idx * 200, y: 80 + i * laneH });
     });
   });
-  return _jsx('div', {
-    className: 'overflow-auto rounded border bg-white',
-    children: _jsxs('svg', {
+  return _jsx("div", {
+    className: "overflow-auto rounded border bg-white",
+    children: _jsxs("svg", {
       width: width,
       height: Math.max(400, nodes.length * laneH),
       children: [
@@ -64,27 +64,27 @@ export default function DAG({ nodes, edges, onSelect }) {
           const b = pos.get(e.to);
           const midX = (a.x + b.x) / 2;
           return _jsx(
-            'path',
+            "path",
             {
               d: `M ${a.x + 60} ${a.y + 20} C ${midX} ${a.y + 20}, ${midX} ${b.y + 20}, ${b.x - 20} ${b.y + 20}`,
-              stroke: '#cbd5e1',
-              fill: 'none',
+              stroke: "#cbd5e1",
+              fill: "none",
               strokeWidth: 2,
             },
-            i,
+            i
           );
         }),
         nodes.map((n) => {
           const p = pos.get(n.id);
           const color = stateColor(n.state);
           return _jsxs(
-            'g',
+            "g",
             {
               transform: `translate(${p.x},${p.y})`,
               children: [
-                _jsx('rect', {
-                  role: 'button',
-                  'aria-label': `Node ${n.label} ${n.state}`,
+                _jsx("rect", {
+                  role: "button",
+                  "aria-label": `Node ${n.label} ${n.state}`,
                   rx: 8,
                   width: 140,
                   height: 48,
@@ -93,67 +93,67 @@ export default function DAG({ nodes, edges, onSelect }) {
                   stroke: color,
                   onClick: () => onSelect?.(n.id),
                 }),
-                _jsx('text', {
+                _jsx("text", {
                   x: 10,
                   y: 22,
                   fontSize: 12,
-                  fill: '#0f172a',
+                  fill: "#0f172a",
                   children: n.label,
                 }),
-                _jsx('text', {
+                _jsx("text", {
                   x: 10,
                   y: 38,
                   fontSize: 11,
-                  fill: '#475569',
+                  fill: "#475569",
                   children: n.state,
                 }),
                 n?.retries
-                  ? _jsxs('g', {
+                  ? _jsxs("g", {
                       children: [
-                        _jsx('rect', {
+                        _jsx("rect", {
                           x: 100,
                           y: 6,
                           rx: 4,
                           width: 30,
                           height: 16,
-                          fill: '#0f172a',
+                          fill: "#0f172a",
                           opacity: 0.06,
                         }),
-                        _jsxs('text', {
+                        _jsxs("text", {
                           x: 104,
                           y: 18,
                           fontSize: 11,
-                          fill: '#334155',
-                          children: ['r', n.retries],
+                          fill: "#334155",
+                          children: ["r", n.retries],
                         }),
                       ],
                     })
                   : null,
                 n?.compensated
-                  ? _jsxs('g', {
+                  ? _jsxs("g", {
                       children: [
-                        _jsx('rect', {
+                        _jsx("rect", {
                           x: 70,
                           y: 6,
                           rx: 4,
                           width: 24,
                           height: 16,
-                          fill: '#dc2626',
+                          fill: "#dc2626",
                           opacity: 0.12,
                         }),
-                        _jsx('text', {
+                        _jsx("text", {
                           x: 74,
                           y: 18,
                           fontSize: 11,
-                          fill: '#b91c1c',
-                          children: 'C',
+                          fill: "#b91c1c",
+                          children: "C",
                         }),
                       ],
                     })
                   : null,
               ],
             },
-            n.id,
+            n.id
           );
         }),
       ],

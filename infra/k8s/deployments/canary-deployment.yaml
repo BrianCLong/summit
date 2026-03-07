@@ -163,9 +163,9 @@ spec:
         app.kubernetes.io/component: orchestrator
         app.kubernetes.io/part-of: intelgraph
       annotations:
-        prometheus.io/scrape: 'true'
-        prometheus.io/port: '9090'
-        prometheus.io/path: '/metrics'
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9090"
+        prometheus.io/path: "/metrics"
     spec:
       serviceAccountName: maestro-conductor
       securityContext:

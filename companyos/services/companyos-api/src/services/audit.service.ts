@@ -4,17 +4,17 @@
  * Implements A3: Tenant & Role-Aware Audit Log Viewer
  */
 
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from "uuid";
 import {
   AuditEvent,
   AuditEventCategory,
   AuditEventOutcome,
   AuditEventFilter,
   PaginatedAuditEvents,
-} from '../types/tenant.js';
-import { createLogger } from '../utils/logger.js';
+} from "../types/tenant.js";
+import { createLogger } from "../utils/logger.js";
 
-const logger = createLogger('audit-service');
+const logger = createLogger("audit-service");
 
 export interface AuditEventInput {
   eventType: string;
@@ -60,7 +60,7 @@ export class AuditService {
 
   constructor(retentionDays = 365) {
     this.retentionDays = retentionDays;
-    logger.info('AuditService initialized', { retentionDays });
+    logger.info("AuditService initialized", { retentionDays });
   }
 
   // ============================================================================
@@ -80,7 +80,7 @@ export class AuditService {
       eventAction: input.eventAction || action,
       actorId: input.actorId,
       actorEmail: input.actorEmail,
-      actorType: input.actorType || 'user',
+      actorType: input.actorType || "user",
       actorRoles: input.actorRoles,
       tenantId: input.tenantId,
       resourceType: input.resourceType,
@@ -101,7 +101,7 @@ export class AuditService {
 
     this.events.push(event);
 
-    logger.debug('Audit event recorded', {
+    logger.debug("Audit event recorded", {
       eventType: event.eventType,
       actorId: event.actorId,
       tenantId: event.tenantId,
@@ -117,7 +117,7 @@ export class AuditService {
       eventCategory: AuditEventCategory.TENANT_LIFECYCLE,
       tenantId: input.tenantId,
       actorId: input.actorId,
-      resourceType: 'tenant',
+      resourceType: "tenant",
       resourceId: input.tenantId,
       details: input.details,
       context: input.context,
@@ -129,7 +129,7 @@ export class AuditService {
     actorId: string,
     details: Record<string, unknown>,
     outcome: AuditEventOutcome = AuditEventOutcome.SUCCESS,
-    context?: AuditEventInput['context']
+    context?: AuditEventInput["context"]
   ): Promise<AuditEvent> {
     return this.logEvent({
       eventType,
@@ -147,14 +147,14 @@ export class AuditService {
     oldValue: unknown,
     newValue: unknown,
     actorId: string,
-    context?: AuditEventInput['context']
+    context?: AuditEventInput["context"]
   ): Promise<AuditEvent> {
     return this.logEvent({
-      eventType: 'feature_flag.changed',
+      eventType: "feature_flag.changed",
       eventCategory: AuditEventCategory.FEATURE_FLAGS,
       tenantId,
       actorId,
-      resourceType: 'feature_flag',
+      resourceType: "feature_flag",
       resourceId: flagName,
       resourceName: flagName,
       details: { flagName, oldValue, newValue },
@@ -234,21 +234,14 @@ export class AuditService {
     return this.events.filter((e) => e.correlationId === correlationId);
   }
 
-  async getRecentEventsByTenant(
-    tenantId: string,
-    limit = 100
-  ): Promise<AuditEvent[]> {
+  async getRecentEventsByTenant(tenantId: string, limit = 100): Promise<AuditEvent[]> {
     return this.events
       .filter((e) => e.tenantId === tenantId)
       .sort((a, b) => b.occurredAt.getTime() - a.occurredAt.getTime())
       .slice(0, limit);
   }
 
-  async getEventsByActor(
-    actorId: string,
-    fromDate?: Date,
-    toDate?: Date
-  ): Promise<AuditEvent[]> {
+  async getEventsByActor(actorId: string, fromDate?: Date, toDate?: Date): Promise<AuditEvent[]> {
     let events = this.events.filter((e) => e.actorId === actorId);
 
     if (fromDate) {
@@ -290,9 +283,7 @@ export class AuditService {
     return counts;
   }
 
-  async getCategoryBreakdown(
-    tenantId?: string
-  ): Promise<Record<AuditEventCategory, number>> {
+  async getCategoryBreakdown(tenantId?: string): Promise<Record<AuditEventCategory, number>> {
     let events = [...this.events];
 
     if (tenantId) {
@@ -312,7 +303,7 @@ export class AuditService {
   // ============================================================================
 
   private parseEventType(eventType: string): [AuditEventCategory, string] {
-    const parts = eventType.split('.');
+    const parts = eventType.split(".");
     const categoryMap: Record<string, AuditEventCategory> = {
       tenant: AuditEventCategory.TENANT_LIFECYCLE,
       user: AuditEventCategory.USER_MANAGEMENT,
@@ -324,14 +315,14 @@ export class AuditService {
     };
 
     const category = categoryMap[parts[0]] || AuditEventCategory.TENANT_LIFECYCLE;
-    const action = parts.slice(1).join('_') || 'unknown';
+    const action = parts.slice(1).join("_") || "unknown";
 
     return [category, action];
   }
 
   private generateDescription(input: AuditEventInput): string {
-    const parts = input.eventType.split('.');
-    const action = parts[parts.length - 1].replace(/_/g, ' ');
+    const parts = input.eventType.split(".");
+    const action = parts[parts.length - 1].replace(/_/g, " ");
     const resource = input.resourceType || parts[0];
 
     let description = `${action} ${resource}`;
@@ -365,7 +356,7 @@ export class AuditService {
 
     const deletedCount = initialCount - this.events.length;
     if (deletedCount > 0) {
-      logger.info('Cleaned up expired audit events', { deletedCount });
+      logger.info("Cleaned up expired audit events", { deletedCount });
     }
 
     return deletedCount;

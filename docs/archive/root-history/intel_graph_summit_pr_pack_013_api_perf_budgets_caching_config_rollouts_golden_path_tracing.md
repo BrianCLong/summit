@@ -25,18 +25,16 @@ groups:
 **`scripts/route_slo_check.ts`**
 
 ```ts
-import fetch from 'node-fetch';
+import fetch from "node-fetch";
 const PROM = process.env.PROM_URL!;
 const SLO = {
-  '/search': { p95: 1.2, err: 0.02 },
-  '/login': { p95: 0.5, err: 0.01 },
-  '/export': { p95: 2.0, err: 0.03 },
+  "/search": { p95: 1.2, err: 0.02 },
+  "/login": { p95: 0.5, err: 0.01 },
+  "/export": { p95: 2.0, err: 0.03 },
 };
 async function q(expr: string) {
-  const r = await fetch(
-    `${PROM}/api/v1/query?query=${encodeURIComponent(expr)}`,
-  );
-  return Number((await r.json()).data.result?.[0]?.value?.[1] || '0');
+  const r = await fetch(`${PROM}/api/v1/query?query=${encodeURIComponent(expr)}`);
+  return Number((await r.json()).data.result?.[0]?.value?.[1] || "0");
 }
 (async () => {
   let bad: string[] = [];
@@ -47,10 +45,10 @@ async function q(expr: string) {
       bad.push(`${path} p95=${p95.toFixed(2)}s err=${(er * 100).toFixed(2)}%`);
   }
   if (bad.length) {
-    console.error('❌ Route budgets breached:\n' + bad.join('\n'));
+    console.error("❌ Route budgets breached:\n" + bad.join("\n"));
     process.exit(1);
   }
-  console.log('✅ All route budgets healthy');
+  console.log("✅ All route budgets healthy");
 })().catch((e) => {
   console.error(e);
   process.exit(1);
@@ -137,9 +135,9 @@ export function withETag(ttl=60, swr=300){
 ```yaml
 metadata:
   annotations:
-    nginx.ingress.kubernetes.io/cache-enable: 'true'
-    nginx.ingress.kubernetes.io/cache-key: '$host$request_uri$http_x_tenant_id'
-    nginx.ingress.kubernetes.io/cache-zone: 'api-cache'
+    nginx.ingress.kubernetes.io/cache-enable: "true"
+    nginx.ingress.kubernetes.io/cache-key: "$host$request_uri$http_x_tenant_id"
+    nginx.ingress.kubernetes.io/cache-zone: "api-cache"
 ```
 
 **Rollback:** Remove headers/annotations; origin serves uncached.
@@ -155,14 +153,10 @@ metadata:
 **`server/cache/index.ts`**
 
 ```ts
-import { createClient } from 'redis';
+import { createClient } from "redis";
 const r = createClient({ url: process.env.REDIS_URL });
 const inflight = new Map<string, Promise<any>>();
-export async function cached<T>(
-  key: string,
-  ttlSec: number,
-  fn: () => Promise<T>,
-): Promise<T> {
+export async function cached<T>(key: string, ttlSec: number, fn: () => Promise<T>): Promise<T> {
   const cached = await r.get(key);
   if (cached) return JSON.parse(cached);
   if (inflight.has(key)) return inflight.get(key)! as Promise<T>;
@@ -178,12 +172,7 @@ export async function cached<T>(
     inflight.delete(key);
   }
 }
-export async function cachedSWR<T>(
-  key: string,
-  ttl: number,
-  swr: number,
-  fn: () => Promise<T>,
-) {
+export async function cachedSWR<T>(key: string, ttl: number, swr: number, fn: () => Promise<T>) {
   const v = await r.get(key);
   if (v) {
     const t = await r.ttl(key);
@@ -256,19 +245,19 @@ limits: { maxResults: 100 }
 **`server/config.ts`**
 
 ```ts
-import fs from 'fs';
-import yaml from 'js-yaml';
-import Ajv from 'ajv';
+import fs from "fs";
+import yaml from "js-yaml";
+import Ajv from "ajv";
 const ajv = new Ajv();
-const validate = ajv.compile(require('../config/app.schema.json'));
-let cfg: any = yaml.load(fs.readFileSync('config/app.yaml', 'utf8'));
-if (!validate(cfg)) throw new Error('Invalid config');
-fs.watch('config/app.yaml', { persistent: false }, () => {
+const validate = ajv.compile(require("../config/app.schema.json"));
+let cfg: any = yaml.load(fs.readFileSync("config/app.yaml", "utf8"));
+if (!validate(cfg)) throw new Error("Invalid config");
+fs.watch("config/app.yaml", { persistent: false }, () => {
   try {
-    const n = yaml.load(fs.readFileSync('config/app.yaml', 'utf8'));
+    const n = yaml.load(fs.readFileSync("config/app.yaml", "utf8"));
     if (validate(n)) cfg = n;
   } catch (e) {
-    console.error('cfg reload failed', e);
+    console.error("cfg reload failed", e);
   }
 });
 export const getConfig = () => cfg;
@@ -289,18 +278,18 @@ export const getConfig = () => cfg;
 **`server/tracing/golden.ts`**
 
 ```ts
-import { context, trace, SpanKind, propagation } from '@opentelemetry/api';
+import { context, trace, SpanKind, propagation } from "@opentelemetry/api";
 export async function goldenSearch(req, res, next) {
-  const tracer = trace.getTracer('web');
-  const span = tracer.startSpan('golden.search', {
+  const tracer = trace.getTracer("web");
+  const span = tracer.startSpan("golden.search", {
     kind: SpanKind.SERVER,
     attributes: {
-      'app.tenant': req.headers['x-tenant-id'] || 'unknown',
-      'app.user': req.user?.id || 'anon',
+      "app.tenant": req.headers["x-tenant-id"] || "unknown",
+      "app.user": req.user?.id || "anon",
     },
   });
   return await context.with(trace.setSpan(context.active(), span), async () => {
-    res.on('finish', () => span.end());
+    res.on("finish", () => span.end());
     next();
   });
 }
@@ -309,7 +298,7 @@ export async function goldenSearch(req, res, next) {
 **`web/public/trace-init.js`** (inject W3C `traceparent` + tenant in baggage)
 
 ```js
-import { context, propagation } from '@opentelemetry/api';
+import { context, propagation } from "@opentelemetry/api";
 // ensure fetch adds trace headers + baggage=tenant
 ```
 
@@ -332,11 +321,11 @@ export function limit(path: string, max = 100) {
   return (req, res, next) => {
     const s = limits.get(path)!;
     if (s.in >= s.max) {
-      res.setHeader('Retry-After', '2');
-      return res.status(429).json({ error: 'over_capacity' });
+      res.setHeader("Retry-After", "2");
+      return res.status(429).json({ error: "over_capacity" });
     }
     s.in++;
-    res.on('finish', () => s.in--);
+    res.on("finish", () => s.in--);
     next();
   };
 }
@@ -355,12 +344,12 @@ export function limit(path: string, max = 100) {
 **`load/k6/api.js`**
 
 ```js
-import http from 'k6/http';
-import { check, sleep } from 'k6';
-export const options = { vus: 50, duration: '2m' };
+import http from "k6/http";
+import { check, sleep } from "k6";
+export const options = { vus: 50, duration: "2m" };
 export default function () {
   const res = http.get(`${__ENV.BASE_URL}/search?q=graph`, {
-    headers: { 'x-tenant-id': 'demo' },
+    headers: { "x-tenant-id": "demo" },
   });
   check(res, { 200: (r) => r.status === 200 });
   sleep(1);
@@ -408,9 +397,9 @@ server_tls_sslmode: require
 **`server/db/pool.ts`**
 
 ```ts
-import { Pool } from 'pg';
+import { Pool } from "pg";
 export const pool = new Pool({
-  max: Number(process.env.DB_POOL_MAX || '20'),
+  max: Number(process.env.DB_POOL_MAX || "20"),
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 2000,
 });
@@ -455,21 +444,18 @@ CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_users_email ON users (email);
 **`server/degrade/auto.ts`**
 
 ```ts
-import fetch from 'node-fetch';
+import fetch from "node-fetch";
 export async function autoshed() {
   const prom = process.env.PROM_URL!;
   const q = 'route:latency:p95{path="/search"}';
   const v = Number(
-    (
-      await (
-        await fetch(`${prom}/api/v1/query?query=${encodeURIComponent(q)}`)
-      ).json()
-    ).data.result?.[0]?.value?.[1] || '0',
+    (await (await fetch(`${prom}/api/v1/query?query=${encodeURIComponent(q)}`)).json()).data
+      .result?.[0]?.value?.[1] || "0"
   );
   if (v > 1.5)
     await fetch(process.env.FLAG_API!, {
-      method: 'POST',
-      body: JSON.stringify({ flag: 'ranker_v2', value: false }),
+      method: "POST",
+      body: JSON.stringify({ flag: "ranker_v2", value: false }),
     });
 }
 ```

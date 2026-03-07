@@ -1,7 +1,9 @@
-import { ProvenanceManifest } from '../types';
-import { canonicalize } from './canonical';
+import { ProvenanceManifest } from "../types";
+import { canonicalize } from "./canonical";
 
-export function unsignedManifest(manifest: ProvenanceManifest): Omit<ProvenanceManifest, 'signature'> {
+export function unsignedManifest(
+  manifest: ProvenanceManifest
+): Omit<ProvenanceManifest, "signature"> {
   const { signature: _signature, ...rest } = manifest;
   return rest;
 }

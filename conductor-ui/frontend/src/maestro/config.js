@@ -5,9 +5,9 @@ export function getMaestroConfig() {
     gatewayBase: g.gatewayBase,
     grafanaBase: g.grafanaBase,
     grafanaDashboards: g.grafanaDashboards || {
-      slo: 'maestro-slo',
-      overview: 'maestro-overview',
-      cost: 'maestro-cost',
+      slo: "maestro-slo",
+      overview: "maestro-overview",
+      cost: "maestro-cost",
     },
     authToken: g.authToken,
   };

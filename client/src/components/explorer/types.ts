@@ -3,7 +3,7 @@
  * Type definitions for the Knowledge Graph Explorer component
  */
 
-import type { Node, Edge } from '../../generated/graphql';
+import type { Node, Edge } from "../../generated/graphql";
 
 export interface GraphNode {
   id: string;
@@ -58,7 +58,7 @@ export interface TraversalStep {
   nodeId: string;
   nodeLabel: string;
   nodeType: string;
-  direction: 'incoming' | 'outgoing' | 'both';
+  direction: "incoming" | "outgoing" | "both";
   edgeType?: string;
   depth: number;
 }
@@ -110,47 +110,47 @@ export interface ExplorerFilters {
 }
 
 export const NODE_TYPE_COLORS: Record<string, string> = {
-  PERSON: '#22c55e',
-  ORGANIZATION: '#3b82f6',
-  LOCATION: '#f59e0b',
-  DOCUMENT: '#a855f7',
-  EVENT: '#ef4444',
-  ASSET: '#06b6d4',
-  THREAT: '#dc2626',
-  INDICATOR: '#eab308',
-  DEFAULT: '#6b7280',
+  PERSON: "#22c55e",
+  ORGANIZATION: "#3b82f6",
+  LOCATION: "#f59e0b",
+  DOCUMENT: "#a855f7",
+  EVENT: "#ef4444",
+  ASSET: "#06b6d4",
+  THREAT: "#dc2626",
+  INDICATOR: "#eab308",
+  DEFAULT: "#6b7280",
 };
 
 export const LAYOUT_OPTIONS: LayoutOption[] = [
   {
-    name: 'fcose',
-    label: 'Force-Directed',
-    icon: 'scatter',
-    description: 'Physics-based layout for organic graph visualization',
+    name: "fcose",
+    label: "Force-Directed",
+    icon: "scatter",
+    description: "Physics-based layout for organic graph visualization",
   },
   {
-    name: 'dagre',
-    label: 'Hierarchical',
-    icon: 'hierarchy',
-    description: 'Top-down tree-like layout for directed graphs',
+    name: "dagre",
+    label: "Hierarchical",
+    icon: "hierarchy",
+    description: "Top-down tree-like layout for directed graphs",
   },
   {
-    name: 'cola',
-    label: 'Constraint-Based',
-    icon: 'grid',
-    description: 'Layout with constraints for clean graph visualization',
+    name: "cola",
+    label: "Constraint-Based",
+    icon: "grid",
+    description: "Layout with constraints for clean graph visualization",
   },
   {
-    name: 'circle',
-    label: 'Circular',
-    icon: 'circle',
-    description: 'Nodes arranged in a circle',
+    name: "circle",
+    label: "Circular",
+    icon: "circle",
+    description: "Nodes arranged in a circle",
   },
   {
-    name: 'concentric',
-    label: 'Concentric',
-    icon: 'target',
-    description: 'Nodes arranged in concentric circles by centrality',
+    name: "concentric",
+    label: "Concentric",
+    icon: "target",
+    description: "Nodes arranged in concentric circles by centrality",
   },
 ];
 
@@ -180,10 +180,7 @@ export function transformToGraphEdge(edge: Edge): GraphEdge {
   };
 }
 
-export function toCytoscapeElements(
-  nodes: GraphNode[],
-  edges: GraphEdge[],
-): CytoscapeElement[] {
+export function toCytoscapeElements(nodes: GraphNode[], edges: GraphEdge[]): CytoscapeElement[] {
   const cyNodes: CytoscapeNode[] = nodes.map((node) => ({
     data: {
       id: node.id,

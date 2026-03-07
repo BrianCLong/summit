@@ -16,7 +16,10 @@
           "edge_type": { "type": "string" },
           "weight": { "type": "number", "minimum": 0, "maximum": 1 },
           "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
-          "privacy_class": { "type": "string", "enum": ["public", "internal", "confidential", "restricted"] }
+          "privacy_class": {
+            "type": "string",
+            "enum": ["public", "internal", "confidential", "restricted"]
+          }
         }
       }
     }

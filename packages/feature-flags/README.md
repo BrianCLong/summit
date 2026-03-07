@@ -1,6 +1,7 @@
 # @intelgraph/feature-flags
 
 Comprehensive feature flag system for Summit/IntelGraph with provider abstraction, caching, analytics, and A/B testing support.
+
 <!-- Verified by Epic 1 Task 1.5 -->
 
 ## Features
@@ -32,8 +33,8 @@ import {
   LaunchDarklyProvider,
   RedisCache,
   PrometheusMetrics,
-} from '@intelgraph/feature-flags';
-import Redis from 'ioredis';
+} from "@intelgraph/feature-flags";
+import Redis from "ioredis";
 
 // Initialize provider
 const provider = new LaunchDarklyProvider({
@@ -60,11 +61,7 @@ const featureFlags = new FeatureFlagService({
 await featureFlags.initialize();
 
 // Check a flag
-const isEnabled = await featureFlags.getBooleanFlag(
-  'new-dashboard',
-  false,
-  { userId: 'user-123' }
-);
+const isEnabled = await featureFlags.getBooleanFlag("new-dashboard", false, { userId: "user-123" });
 
 if (isEnabled) {
   // Show new dashboard
@@ -74,26 +71,28 @@ if (isEnabled) {
 ### Express Middleware
 
 ```typescript
-import { createFeatureFlagMiddleware } from '@intelgraph/feature-flags/middleware';
+import { createFeatureFlagMiddleware } from "@intelgraph/feature-flags/middleware";
 
 // Add middleware
-app.use(createFeatureFlagMiddleware({
-  service: featureFlags,
-  contextBuilder: (req) => ({
-    userId: req.user?.id,
-    userEmail: req.user?.email,
-    tenantId: req.user?.tenantId,
-  }),
-}));
+app.use(
+  createFeatureFlagMiddleware({
+    service: featureFlags,
+    contextBuilder: (req) => ({
+      userId: req.user?.id,
+      userEmail: req.user?.email,
+      tenantId: req.user?.tenantId,
+    }),
+  })
+);
 
 // Use in routes
-app.get('/dashboard', async (req, res) => {
-  const useNewDashboard = await req.featureFlags.isEnabled('new-dashboard');
+app.get("/dashboard", async (req, res) => {
+  const useNewDashboard = await req.featureFlags.isEnabled("new-dashboard");
 
   if (useNewDashboard) {
-    res.json({ version: 'v2' });
+    res.json({ version: "v2" });
   } else {
-    res.json({ version: 'v1' });
+    res.json({ version: "v1" });
   }
 });
 ```
@@ -101,11 +100,7 @@ app.get('/dashboard', async (req, res) => {
 ### Frontend (React)
 
 ```tsx
-import {
-  FeatureFlagProvider,
-  useFeatureFlag,
-  FeatureFlag,
-} from '@intelgraph/feature-flags/react';
+import { FeatureFlagProvider, useFeatureFlag, FeatureFlag } from "@intelgraph/feature-flags/react";
 
 // Wrap app with provider
 function App() {
@@ -124,13 +119,9 @@ function App() {
 
 // Use hook
 function Dashboard() {
-  const showNewFeature = useFeatureFlag('new-feature', false);
+  const showNewFeature = useFeatureFlag("new-feature", false);
 
-  return (
-    <div>
-      {showNewFeature && <NewFeatureComponent />}
-    </div>
-  );
+  return <div>{showNewFeature && <NewFeatureComponent />}</div>;
 }
 
 // Use component
@@ -148,7 +139,7 @@ function Settings() {
 ### LaunchDarkly
 
 ```typescript
-import { LaunchDarklyProvider } from '@intelgraph/feature-flags';
+import { LaunchDarklyProvider } from "@intelgraph/feature-flags";
 
 const provider = new LaunchDarklyProvider({
   sdkKey: process.env.LAUNCHDARKLY_SDK_KEY!,
@@ -164,13 +155,13 @@ const provider = new LaunchDarklyProvider({
 ### Unleash
 
 ```typescript
-import { UnleashProvider } from '@intelgraph/feature-flags';
+import { UnleashProvider } from "@intelgraph/feature-flags";
 
 const provider = new UnleashProvider({
   url: process.env.UNLEASH_URL!,
-  appName: 'summit',
+  appName: "summit",
   apiToken: process.env.UNLEASH_API_TOKEN,
-  instanceId: 'server-1',
+  instanceId: "server-1",
 });
 ```
 
@@ -179,12 +170,12 @@ const provider = new UnleashProvider({
 ### Redis Cache
 
 ```typescript
-import { RedisCache } from '@intelgraph/feature-flags';
-import Redis from 'ioredis';
+import { RedisCache } from "@intelgraph/feature-flags";
+import Redis from "ioredis";
 
 const cache = new RedisCache({
   redis: new Redis(process.env.REDIS_URL),
-  keyPrefix: 'ff:',
+  keyPrefix: "ff:",
   defaultTTL: 300, // 5 minutes
   enableStats: true,
 });
@@ -199,8 +190,8 @@ console.log(`Hit rate: ${stats.hitRate * 100}%`);
 ### Prometheus Integration
 
 ```typescript
-import { PrometheusMetrics } from '@intelgraph/feature-flags';
-import { Registry } from 'prom-client';
+import { PrometheusMetrics } from "@intelgraph/feature-flags";
+import { Registry } from "prom-client";
 
 const registry = new Registry();
 const metrics = new PrometheusMetrics({ registry });
@@ -208,13 +199,14 @@ const metrics = new PrometheusMetrics({ registry });
 featureFlags.setMetrics(metrics);
 
 // Expose metrics endpoint
-app.get('/metrics', async (req, res) => {
-  res.set('Content-Type', registry.contentType);
+app.get("/metrics", async (req, res) => {
+  res.set("Content-Type", registry.contentType);
   res.end(await metrics.getMetrics());
 });
 ```
 
 Available metrics:
+
 - `feature_flags_evaluations_total` - Total flag evaluations
 - `feature_flags_evaluation_duration_ms` - Evaluation duration
 - `feature_flags_cache_hits_total` - Cache hits
@@ -226,33 +218,33 @@ Available metrics:
 ### Percentage Rollout
 
 ```typescript
-import { createGradualRollout, evaluateRollout } from '@intelgraph/feature-flags';
+import { createGradualRollout, evaluateRollout } from "@intelgraph/feature-flags";
 
 // Create 20% rollout
 const rollout = createGradualRollout(
-  'enabled',
-  'disabled',
+  "enabled",
+  "disabled",
   20, // 20% enabled
-  'userId'
+  "userId"
 );
 
 // Evaluate for user
-const variation = evaluateRollout(rollout, { userId: 'user-123' });
+const variation = evaluateRollout(rollout, { userId: "user-123" });
 ```
 
 ### A/B Test
 
 ```typescript
-import { createABTest } from '@intelgraph/feature-flags';
+import { createABTest } from "@intelgraph/feature-flags";
 
 // 50/50 A/B test
-const abTest = createABTest('variant-a', 'variant-b', 50);
+const abTest = createABTest("variant-a", "variant-b", 50);
 
 // Multivariate test
 const mvTest = createMultivariateTest([
-  { id: 'control', percentage: 33.3 },
-  { id: 'variant-a', percentage: 33.3 },
-  { id: 'variant-b', percentage: 33.4 },
+  { id: "control", percentage: 33.3 },
+  { id: "variant-a", percentage: 33.3 },
+  { id: "variant-b", percentage: 33.4 },
 ]);
 ```
 
@@ -266,36 +258,32 @@ import {
   targetRole,
   targetEnvironment,
   targetAttribute,
-} from '@intelgraph/feature-flags';
+} from "@intelgraph/feature-flags";
 
 // Target specific users
 const userRule = {
-  id: 'beta-users',
-  description: 'Beta testing users',
-  conditions: [
-    targetUserId(['user-1', 'user-2', 'user-3']),
-  ],
-  variation: 'enabled',
+  id: "beta-users",
+  description: "Beta testing users",
+  conditions: [targetUserId(["user-1", "user-2", "user-3"])],
+  variation: "enabled",
 };
 
 // Target by role
 const adminRule = {
-  id: 'admins-only',
-  conditions: [
-    targetRole(['admin', 'superadmin']),
-  ],
-  variation: 'enabled',
+  id: "admins-only",
+  conditions: [targetRole(["admin", "superadmin"])],
+  variation: "enabled",
 };
 
 // Complex targeting
 const complexRule = {
-  id: 'enterprise-prod',
+  id: "enterprise-prod",
   conditions: [
-    targetEnvironment(['production']),
-    targetAttribute('plan', 'in', ['enterprise', 'premium']),
-    targetAttribute('accountAge', 'greater_than', 30),
+    targetEnvironment(["production"]),
+    targetAttribute("plan", "in", ["enterprise", "premium"]),
+    targetAttribute("accountAge", "greater_than", 30),
   ],
-  variation: 'enabled',
+  variation: "enabled",
 };
 ```
 
@@ -317,30 +305,31 @@ const complexRule = {
 ```typescript
 // Create a kill switch for emergency disabling
 const killSwitch = await featureFlags.getBooleanFlag(
-  'payments-enabled',
+  "payments-enabled",
   true, // Default enabled
-  { environment: 'production' }
+  { environment: "production" }
 );
 
 if (!killSwitch) {
-  throw new Error('Payments are currently disabled');
+  throw new Error("Payments are currently disabled");
 }
 ```
 
 ### Feature Flag Guard Middleware
 
 ```typescript
-import { createFlagGuard } from '@intelgraph/feature-flags/middleware';
+import { createFlagGuard } from "@intelgraph/feature-flags/middleware";
 
 // Protect route with feature flag
-app.get('/beta/new-feature',
-  createFlagGuard('beta-features', {
+app.get(
+  "/beta/new-feature",
+  createFlagGuard("beta-features", {
     service: featureFlags,
     statusCode: 404,
-    errorMessage: 'Feature not available',
+    errorMessage: "Feature not available",
   }),
   (req, res) => {
-    res.json({ message: 'Beta feature!' });
+    res.json({ message: "Beta feature!" });
   }
 );
 ```
@@ -348,7 +337,7 @@ app.get('/beta/new-feature',
 ### React Variation Component
 
 ```tsx
-import { FeatureVariation } from '@intelgraph/feature-flags/react';
+import { FeatureVariation } from "@intelgraph/feature-flags/react";
 
 function PricingPage() {
   return (
@@ -357,8 +346,8 @@ function PricingPage() {
       defaultVariation="control"
       variations={{
         control: <OldPricing />,
-        'test-a': <NewPricingA />,
-        'test-b': <NewPricingB />,
+        "test-a": <NewPricingA />,
+        "test-b": <NewPricingB />,
       }}
       fallback={<LoadingPricing />}
     />
@@ -397,14 +386,14 @@ function CheckoutButton() {
 
 ```typescript
 // ✅ Good
-'enable-new-dashboard'
-'checkout-redesign-v2'
-'beta-ai-features'
+"enable-new-dashboard";
+"checkout-redesign-v2";
+"beta-ai-features";
 
 // ❌ Bad
-'flag1'
-'test'
-'new'
+"flag1";
+"test";
+"new";
 ```
 
 ### 2. Set Appropriate Defaults
@@ -412,14 +401,14 @@ function CheckoutButton() {
 ```typescript
 // For new features, default to false
 const showNewFeature = await featureFlags.getBooleanFlag(
-  'new-feature',
+  "new-feature",
   false, // Safe default
   context
 );
 
 // For kill switches, default to true
 const serviceEnabled = await featureFlags.getBooleanFlag(
-  'payment-service-enabled',
+  "payment-service-enabled",
   true, // Service should be enabled by default
   context
 );
@@ -458,14 +447,14 @@ const stableFlags = new FeatureFlagService({
 
 ```typescript
 // Set up alerts for flag evaluation errors
-featureFlags.on('error', (error) => {
-  logger.error('Feature flag error', { error });
-  alerting.notify('feature-flag-error', error);
+featureFlags.on("error", (error) => {
+  logger.error("Feature flag error", { error });
+  alerting.notify("feature-flag-error", error);
 });
 
 // Track flag evaluation events
-featureFlags.on('evaluation', (event) => {
-  analytics.track('flag-evaluated', {
+featureFlags.on("evaluation", (event) => {
+  analytics.track("flag-evaluated", {
     flagKey: event.flagKey,
     variation: event.variation,
     reason: event.reason,

@@ -1,1 +1,1 @@
-export * from './forensics-analyzer.js';
+export * from "./forensics-analyzer.js";

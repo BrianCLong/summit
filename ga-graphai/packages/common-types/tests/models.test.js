@@ -1,5 +1,5 @@
-import test from 'node:test';
-import assert from 'node:assert/strict';
+import test from "node:test";
+import assert from "node:assert/strict";
 
 import {
   calculateCost,
@@ -8,15 +8,15 @@ import {
   getModelById,
   listModels,
   normalizeCaps,
-} from '../src/index.js';
+} from "../src/index.js";
 
-test('estimateTokens provides deterministic output', () => {
-  assert.equal(estimateTokens(''), 0);
-  assert.equal(estimateTokens('word'), 1);
-  assert.equal(estimateTokens('four score and seven years ago'), 8);
+test("estimateTokens provides deterministic output", () => {
+  assert.equal(estimateTokens(""), 0);
+  assert.equal(estimateTokens("word"), 1);
+  assert.equal(estimateTokens("four score and seven years ago"), 8);
 });
 
-test('normalizeCaps merges defaults correctly', () => {
+test("normalizeCaps merges defaults correctly", () => {
   assert.deepEqual(normalizeCaps(undefined), DEFAULT_CAPS);
   assert.deepEqual(normalizeCaps({ hardUsd: 2, tokenCap: 1000 }), {
     hardUsd: 2,
@@ -26,17 +26,17 @@ test('normalizeCaps merges defaults correctly', () => {
   });
 });
 
-test('models can be filtered and cost calculated', () => {
+test("models can be filtered and cost calculated", () => {
   const localModels = listModels({ local: true });
   assert.ok(localModels.length > 0);
   assert.ok(localModels.every((model) => model.local === true));
 
-  const mixtral = getModelById('mixtral-8x22b-instruct');
+  const mixtral = getModelById("mixtral-8x22b-instruct");
   assert.ok(mixtral);
   const cost = calculateCost(mixtral, 1200, 800);
   assert.equal(cost.usd, 0);
 
-  const paid = getModelById('gpt-4o-mini');
+  const paid = getModelById("gpt-4o-mini");
   const paidCost = calculateCost(paid, 1500, 500);
   assert.equal(paidCost.tokensIn, 1500);
   assert.equal(paidCost.tokensOut, 500);

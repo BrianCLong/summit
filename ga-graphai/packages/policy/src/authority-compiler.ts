@@ -1,6 +1,6 @@
-import { parse } from 'yaml';
-import type { PolicyEffect, PolicyObligation } from 'common-types';
-import { evaluateLicense } from './license.js';
+import { parse } from "yaml";
+import type { PolicyEffect, PolicyObligation } from "common-types";
+import { evaluateLicense } from "./license.js";
 
 export interface AuthorityPolicySelector {
   actions?: string[];
@@ -31,7 +31,7 @@ export interface PolicyBundleDocument {
 
 export interface LicenseVerdict {
   license: string;
-  status: 'allow' | 'deny';
+  status: "allow" | "deny";
   reason?: string;
 }
 
@@ -77,7 +77,9 @@ function dedupe(values: string[] = []): string[] {
   return Array.from(new Set(values)).sort();
 }
 
-function countSelectors(selector: AuthorityPolicySelector | Required<AuthorityPolicySelector>): number {
+function countSelectors(
+  selector: AuthorityPolicySelector | Required<AuthorityPolicySelector>
+): number {
   return (
     (selector.actions?.length ?? 0) +
     (selector.resources?.length ?? 0) +
@@ -87,33 +89,33 @@ function countSelectors(selector: AuthorityPolicySelector | Required<AuthorityPo
 }
 
 function toRegoSet(values: string[]): string {
-  return `{${values.map((value) => `"${value}"`).join(', ')}}`;
+  return `{${values.map((value) => `"${value}"`).join(", ")}}`;
 }
 
 function sanitizeRuleName(id: string): string {
-  return id.replace(/[^A-Za-z0-9_]/g, '_');
+  return id.replace(/[^A-Za-z0-9_]/g, "_");
 }
 
 export class AuthorityLicenseCompiler {
   private readonly defaultPackage: string;
-  private readonly auditSink?: AuthorityCompilerOptions['auditSink'];
+  private readonly auditSink?: AuthorityCompilerOptions["auditSink"];
 
   constructor(options: AuthorityCompilerOptions = {}) {
-    this.defaultPackage = options.defaultPackage ?? 'policy.guard';
+    this.defaultPackage = options.defaultPackage ?? "policy.guard";
     this.auditSink = options.auditSink;
   }
 
   compileFromYaml(yamlBundle: string, source?: string): CompiledGuardBundle {
     const parsed = parse(yamlBundle) as PolicyBundleDocument;
-    if (!parsed || typeof parsed !== 'object') {
-      throw new Error('Invalid YAML policy bundle');
+    if (!parsed || typeof parsed !== "object") {
+      throw new Error("Invalid YAML policy bundle");
     }
     return this.compile(parsed, source ?? parsed.source);
   }
 
   compile(bundle: PolicyBundleDocument, source?: string): CompiledGuardBundle {
     if (!Array.isArray(bundle.policies)) {
-      throw new Error('Policy bundle must include a policies array');
+      throw new Error("Policy bundle must include a policies array");
     }
 
     const auditTrail: GuardAuditRecord[] = [];
@@ -135,7 +137,7 @@ export class AuthorityLicenseCompiler {
       }
     };
 
-    emit('parsed-bundle', `Loaded ${bundle.policies.length} policies`);
+    emit("parsed-bundle", `Loaded ${bundle.policies.length} policies`);
 
     const guards = bundle.policies.map((policy) => {
       originalSelectors += countSelectors(policy.selectors);
@@ -144,15 +146,17 @@ export class AuthorityLicenseCompiler {
 
       const licenseVerdicts = selector.licenses.map((license) => {
         const verdict = evaluateLicense(license, bundle.licenses);
-        if (verdict.status === 'deny') {
+        if (verdict.status === "deny") {
           deniedLicenses.push(license);
-          emit('license-denied', verdict.reason, policy.id);
+          emit("license-denied", verdict.reason, policy.id);
         }
         return { license, status: verdict.status, reason: verdict.reason } satisfies LicenseVerdict;
       });
 
-      const effectiveEffect: PolicyEffect = licenseVerdicts.some((verdict) => verdict.status === 'deny')
-        ? 'deny'
+      const effectiveEffect: PolicyEffect = licenseVerdicts.some(
+        (verdict) => verdict.status === "deny"
+      )
+        ? "deny"
         : policy.effect;
 
       const guard: OpaGuard = {
@@ -167,7 +171,7 @@ export class AuthorityLicenseCompiler {
         reason: policy.reason,
       };
 
-      emit('compiled-guard', guard.query, policy.id);
+      emit("compiled-guard", guard.query, policy.id);
       return guard;
     });
 
@@ -180,7 +184,7 @@ export class AuthorityLicenseCompiler {
       deniedLicenses: Array.from(new Set(deniedLicenses)),
     };
 
-    emit('completed', `Minimized selectors from ${originalSelectors} to ${minimizedSelectors}`);
+    emit("completed", `Minimized selectors from ${originalSelectors} to ${minimizedSelectors}`);
 
     return { guards, auditTrail, summary };
   }
@@ -203,11 +207,13 @@ export class AuthorityLicenseCompiler {
       clauses.push(`input.resource in ${toRegoSet(selector.resources)}`);
     }
     if (selector.authorities.length > 0) {
-      clauses.push(`some role; role in input.context.roles; role in ${toRegoSet(selector.authorities)}`);
+      clauses.push(
+        `some role; role in input.context.roles; role in ${toRegoSet(selector.authorities)}`
+      );
     }
     if (selector.licenses.length > 0) {
       clauses.push(`input.license in ${toRegoSet(selector.licenses)}`);
     }
-    return clauses.length > 0 ? clauses.join(' ; ') : 'true';
+    return clauses.length > 0 ? clauses.join(" ; ") : "true";
   }
 }

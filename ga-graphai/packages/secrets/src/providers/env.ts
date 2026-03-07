@@ -1,10 +1,6 @@
-import type { EnvSecretRef, SecretRef } from 'common-types';
-import { rotationStatusForRef } from '../rotation.js';
-import type {
-  SecretResolution,
-  SecretRotationResult,
-  SecretsProvider,
-} from '../types.js';
+import type { EnvSecretRef, SecretRef } from "common-types";
+import { rotationStatusForRef } from "../rotation.js";
+import type { SecretResolution, SecretRotationResult, SecretsProvider } from "../types.js";
 
 interface EnvironmentSecretsProviderOptions {
   prefix?: string;
@@ -16,7 +12,7 @@ function buildEnvKey(ref: EnvSecretRef, prefix?: string): string {
 }
 
 export class EnvironmentSecretsProvider implements SecretsProvider {
-  readonly name = 'env';
+  readonly name = "env";
   private readonly options: EnvironmentSecretsProviderOptions;
 
   constructor(options: EnvironmentSecretsProviderOptions = {}) {
@@ -24,12 +20,12 @@ export class EnvironmentSecretsProvider implements SecretsProvider {
   }
 
   supports(ref: SecretRef): boolean {
-    return (ref as EnvSecretRef).env !== undefined || (ref as EnvSecretRef).provider === 'env';
+    return (ref as EnvSecretRef).env !== undefined || (ref as EnvSecretRef).provider === "env";
   }
 
   private assertEnvRef(ref: SecretRef): EnvSecretRef {
     if (!this.supports(ref)) {
-      throw new Error('EnvironmentSecretsProvider only handles env references');
+      throw new Error("EnvironmentSecretsProvider only handles env references");
     }
     return ref as EnvSecretRef;
   }
@@ -52,7 +48,7 @@ export class EnvironmentSecretsProvider implements SecretsProvider {
     const envKey = buildEnvKey(envRef, this.options.prefix);
     const value = process.env[envKey];
 
-    if (value !== undefined && value !== '') {
+    if (value !== undefined && value !== "") {
       return {
         provider: this.name,
         value,

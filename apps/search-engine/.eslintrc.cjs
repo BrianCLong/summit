@@ -1,6 +1,6 @@
 module.exports = {
-  extends: ['../../.eslintrc.cjs'],
+  extends: ["../../.eslintrc.cjs"],
   rules: {
-    '@typescript-eslint/no-require-imports': 'off',
+    "@typescript-eslint/no-require-imports": "off",
   },
 };

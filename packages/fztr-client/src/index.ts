@@ -1,5 +1,5 @@
-import axios from 'axios';
-import { createHash } from 'crypto';
+import axios from "axios";
+import { createHash } from "crypto";
 
 export interface VerifiableCredential {
   id: string;
@@ -21,7 +21,7 @@ export class FZTRClient {
 
   async submitCredential(id: string, payload: unknown): Promise<VerifiableCredential> {
     const payloadString = JSON.stringify(payload);
-    const payloadHash = createHash('sha256').update(payloadString).digest('hex');
+    const payloadHash = createHash("sha256").update(payloadString).digest("hex");
     // Mock signature for MVP
     const signature = `mock-sig-${payloadHash}`;
 

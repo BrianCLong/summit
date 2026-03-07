@@ -5,9 +5,9 @@ import type {
   WorkspacePresence,
   WorkspaceSyncState,
   WorkspaceUpdate,
-} from '@ga-graphai/common-types';
-import type { TokenEstimator } from './utils.js';
-import { defaultTokenEstimator } from './utils.js';
+} from "@ga-graphai/common-types";
+import type { TokenEstimator } from "./utils.js";
+import { defaultTokenEstimator } from "./utils.js";
 
 export interface ContextState {
   id: string;
@@ -95,7 +95,7 @@ export class CollaborativeWorkspace {
 
   constructor(
     private readonly workspaceId: string,
-    options: CollaborativeWorkspaceOptions = {},
+    options: CollaborativeWorkspaceOptions = {}
   ) {
     this.activityLimit = options.activityLimit ?? 50;
   }
@@ -113,7 +113,7 @@ export class CollaborativeWorkspace {
           key,
           localVersion: local.version,
           incomingVersion: targetVersion,
-          resolvedWith: 'local',
+          resolvedWith: "local",
           note: `local edit from ${local.updatedBy.displayName} is newer`,
           lastKnownBy: local.updatedBy,
           incomingAuthor: update.author,
@@ -137,7 +137,7 @@ export class CollaborativeWorkspace {
     if (appliedKeys.length > 0) {
       this.appendActivity({
         id: `${this.workspaceId}:update:${targetVersion}:${appliedAt}`,
-        type: 'update',
+        type: "update",
         actor: update.author,
         timestamp: appliedAt,
         description: update.summary,
@@ -149,7 +149,7 @@ export class CollaborativeWorkspace {
     if (conflicts.length > 0) {
       this.appendActivity({
         id: `${this.workspaceId}:conflict:${targetVersion}:${conflicts.length}`,
-        type: 'conflict',
+        type: "conflict",
         actor: update.author,
         timestamp: Date.now(),
         description: `Conflicts detected for ${conflicts.length} keys`,
@@ -179,7 +179,7 @@ export class CollaborativeWorkspace {
     ) {
       this.appendActivity({
         id: `${this.workspaceId}:presence:${presence.analyst.id}:${merged.lastSeen}`,
-        type: 'presence',
+        type: "presence",
         actor: presence.analyst,
         timestamp: merged.lastSeen,
         description: `${presence.analyst.displayName} is ${merged.status}`,
@@ -202,8 +202,8 @@ export class CollaborativeWorkspace {
           key: entry.key,
           localVersion: local.version,
           incomingVersion: entry.version,
-          resolvedWith: 'local',
-          note: 'local state is newer than synced entry',
+          resolvedWith: "local",
+          note: "local state is newer than synced entry",
           lastKnownBy: local.updatedBy,
           incomingAuthor: entry.updatedBy,
         });
@@ -228,7 +228,7 @@ export class CollaborativeWorkspace {
     if (conflicts.length > 0) {
       this.appendActivity({
         id: `${this.workspaceId}:sync:${this.version}:conflicts`,
-        type: 'conflict',
+        type: "conflict",
         actor: conflicts[0].incomingAuthor,
         timestamp: Date.now(),
         description: `Sync resolved ${conflicts.length} conflicts`,
@@ -238,13 +238,14 @@ export class CollaborativeWorkspace {
     } else {
       this.appendActivity({
         id: `${this.workspaceId}:sync:${this.version}`,
-        type: 'sync',
-        actor: state.activities[0]?.actor ?? state.presences[0]?.analyst ?? {
-          id: 'system',
-          displayName: 'System',
-        },
+        type: "sync",
+        actor: state.activities[0]?.actor ??
+          state.presences[0]?.analyst ?? {
+            id: "system",
+            displayName: "System",
+          },
         timestamp: Date.now(),
-        description: 'Workspace synchronized',
+        description: "Workspace synchronized",
         version: this.version,
       });
     }
@@ -259,9 +260,7 @@ export class CollaborativeWorkspace {
   private appendActivity(activity: WorkspaceActivity): void {
     this.activities.set(activity.id, activity);
 
-    const ordered = [...this.activities.values()].sort(
-      (a, b) => b.timestamp - a.timestamp,
-    );
+    const ordered = [...this.activities.values()].sort((a, b) => b.timestamp - a.timestamp);
     if (ordered.length > this.activityLimit) {
       const trimmed = ordered.slice(0, this.activityLimit);
       this.activities.clear();
@@ -272,18 +271,14 @@ export class CollaborativeWorkspace {
   }
 
   private snapshot(conflicts: WorkspaceConflict[] = []): WorkspaceSyncState {
-    const activities = [...this.activities.values()].sort(
-      (a, b) => b.timestamp - a.timestamp,
-    );
+    const activities = [...this.activities.values()].sort((a, b) => b.timestamp - a.timestamp);
 
     return {
       workspaceId: this.workspaceId,
       version: this.version,
-      entries: [...this.entries.values()].sort((a, b) =>
-        a.key.localeCompare(b.key),
-      ),
+      entries: [...this.entries.values()].sort((a, b) => a.key.localeCompare(b.key)),
       presences: [...this.presences.values()].sort((a, b) =>
-        a.analyst.displayName.localeCompare(b.analyst.displayName),
+        a.analyst.displayName.localeCompare(b.analyst.displayName)
       ),
       activities,
       conflicts: conflicts.length > 0 ? conflicts : undefined,

@@ -36,6 +36,7 @@
 **Status**: ✅ Implemented
 
 **Deliverables**:
+
 - ✅ TypeScript type definitions (`types/Report.ts`, `types/Template.ts`)
 - ✅ Validation layer (`validators/ReportRequestValidator.ts`, `validators/TemplateValidator.ts`)
 - ✅ Test fixtures (`fixtures/reporting/mock-*.ts`)
@@ -43,6 +44,7 @@
 - ✅ Unit tests for validators (comprehensive coverage)
 
 **Benefits**:
+
 - Type safety prevents runtime errors
 - Request validation catches issues before processing
 - Reusable test fixtures reduce duplication
@@ -54,6 +56,7 @@
 **Status**: ✅ Implemented
 
 **Deliverables**:
+
 - ✅ `ReportTemplateRegistry.ts` - Template management (140 LOC vs 259 LOC in original)
 - ✅ `templates/template-definitions.ts` - Centralized template config
 - ✅ `exporters/` - Strategy pattern for exports
@@ -68,6 +71,7 @@
 - ✅ `index.ts` - Public API facade
 
 **Benefits**:
+
 - Each class has single responsibility (SRP)
 - Easy to add new export formats (Open/Closed Principle)
 - HTML/CSS separated from logic (SoC)
@@ -80,6 +84,7 @@
 **Status**: 📋 Planned
 
 **Tasks**:
+
 1. Create `ReportGenerator.ts` - Main orchestrator
 2. Create `ReportRepository.ts` - Neo4j data access layer
 3. Create section generators (executives_summary, timeline, etc.)
@@ -170,6 +175,7 @@ server/src/
 ```
 
 **Legend**:
+
 - ✅ Completed
 - 🔄 In Progress
 - 📋 Planned
@@ -183,8 +189,8 @@ server/src/
 **File**: `server/src/services/reporting/types/Report.ts`
 
 ```typescript
-export type ReportStatus = 'QUEUED' | 'GENERATING' | 'PROCESSING' | 'COMPLETED' | 'FAILED';
-export type ReportFormat = 'PDF' | 'HTML' | 'DOCX' | 'JSON' | 'CSV' | 'EXCEL' | 'PPT' | 'GEPHI';
+export type ReportStatus = "QUEUED" | "GENERATING" | "PROCESSING" | "COMPLETED" | "FAILED";
+export type ReportFormat = "PDF" | "HTML" | "DOCX" | "JSON" | "CSV" | "EXCEL" | "PPT" | "GEPHI";
 
 export interface Report {
   id: string;
@@ -202,6 +208,7 @@ export interface Report {
 ```
 
 **Benefits**:
+
 - Compile-time type checking
 - IntelliSense support
 - Self-documenting code
@@ -212,6 +219,7 @@ export interface Report {
 **File**: `server/src/services/reporting/validators/ReportRequestValidator.ts`
 
 **Key Features**:
+
 - Parameter validation against template requirements
 - Type checking (string, boolean, integer, float, enum, daterange)
 - Range validation (min/max)
@@ -220,6 +228,7 @@ export interface Report {
 - Custom error messages with field names and error codes
 
 **Example Usage**:
+
 ```typescript
 ReportRequestValidator.validate(request, template);
 // Throws ValidationError with specific field and code if invalid
@@ -230,11 +239,13 @@ ReportRequestValidator.validate(request, template);
 ### 3.3 Test Fixtures
 
 **Files**:
+
 - `mock-investigation-data.ts` - Sample investigation, entities, relationships
 - `mock-templates.ts` - Template definitions for testing
 - `test-helpers.ts` - Reusable mocks and utilities
 
 **Benefits**:
+
 - Consistent test data across test suites
 - Easy to create realistic scenarios
 - Reduces test setup boilerplate
@@ -248,12 +259,14 @@ ReportRequestValidator.validate(request, template);
 **File**: `ReportTemplateRegistry.ts` (140 LOC)
 
 **Responsibilities**:
+
 - Manage system and custom templates
 - Template CRUD operations
 - Template filtering by category/access level
 - Template extension/inheritance
 
 **Before** (in ReportingService.js):
+
 ```javascript
 // 260+ lines of template initialization
 // Mixed with other concerns
@@ -264,6 +277,7 @@ initializeReportTemplates() {
 ```
 
 **After**:
+
 ```typescript
 export class ReportTemplateRegistry {
   constructor() {
@@ -274,12 +288,15 @@ export class ReportTemplateRegistry {
     return this.templates.get(id);
   }
 
-  getAllTemplates(): ReportTemplate[] { /* clean implementation */ }
+  getAllTemplates(): ReportTemplate[] {
+    /* clean implementation */
+  }
   // ... focused methods
 }
 ```
 
 **Benefits**:
+
 - Single Responsibility: only manages templates
 - Easy to test in isolation
 - Clear API
@@ -302,12 +319,14 @@ export interface IReportExporter {
 ```
 
 **Implementations**:
+
 1. **HTMLExporter** (90 LOC) - Clean HTML generation
 2. **PDFExporter** (110 LOC) - Puppeteer-based PDF
 3. **JSONExporter** (80 LOC) - Structured JSON
 4. **CSVExporter** (130 LOC) - Proper CSV escaping
 
 **Before** (embedded in ReportingService.js):
+
 ```javascript
 async generateHTMLReport(report, template) {
   const htmlContent = `
@@ -321,17 +340,19 @@ async generateHTMLReport(report, template) {
 ```
 
 **After**:
+
 ```typescript
 export class HTMLExporter extends BaseReportExporter {
   async export(report: Report, template: ReportTemplate): Promise<ExportResult> {
     const htmlContent = await this.renderer.render(report, template);
     await fs.writeFile(filepath, htmlContent);
-    return { format: 'html', path: filepath, /* ... */ };
+    return { format: "html", path: filepath /* ... */ };
   }
 }
 ```
 
 **Benefits**:
+
 - Easy to add new formats (just implement interface)
 - Each exporter fully testable in isolation
 - HTML/CSS separated into HTMLRenderer
@@ -342,12 +363,14 @@ export class HTMLExporter extends BaseReportExporter {
 **File**: `utils/HTMLRenderer.ts` (300 LOC)
 
 **Responsibilities**:
+
 - Render reports to HTML
 - XSS prevention (escapeHtml)
 - Responsive CSS styles
 - Section-specific rendering
 
 **Key Method**:
+
 ```typescript
 render(report: Report, template: ReportTemplate): string {
   return `
@@ -362,6 +385,7 @@ render(report: Report, template: ReportTemplate): string {
 ```
 
 **Security Features**:
+
 - All user data HTML-escaped
 - Prevents XSS attacks
 - Safe rendering of dynamic content
@@ -371,6 +395,7 @@ render(report: Report, template: ReportTemplate): string {
 **File**: `ReportMetrics.ts` (90 LOC)
 
 **Before** (in ReportingService.js):
+
 ```javascript
 this.metrics = { /* scattered updates throughout */ };
 updateExecutionTimeMetric(time) {
@@ -379,6 +404,7 @@ updateExecutionTimeMetric(time) {
 ```
 
 **After**:
+
 ```typescript
 export class ReportMetrics {
   recordReportCompleted(executionTime: number): void {
@@ -393,6 +419,7 @@ export class ReportMetrics {
 ```
 
 **Benefits**:
+
 - Single source of truth for metrics
 - Rolling average (last 100 executions)
 - Clear API
@@ -403,6 +430,7 @@ export class ReportMetrics {
 ## Section 5: Suggested Commit Sequence
 
 ### **Commit 1**: Add TypeScript types and validation layer
+
 ```
 feat(reporting): add TypeScript types and validation layer
 
@@ -425,6 +453,7 @@ Files:
 ```
 
 ### **Commit 2**: Add test fixtures and helpers
+
 ```
 test(reporting): add comprehensive test fixtures and helpers
 
@@ -446,6 +475,7 @@ Files:
 ```
 
 ### **Commit 3**: Extract template management to ReportTemplateRegistry
+
 ```
 refactor(reporting): extract template management to dedicated registry
 
@@ -466,6 +496,7 @@ Files:
 ```
 
 ### **Commit 4**: Implement exporter strategy pattern
+
 ```
 refactor(reporting): implement strategy pattern for export formats
 
@@ -492,6 +523,7 @@ Files:
 ```
 
 ### **Commit 5**: Extract HTML rendering and metrics tracking
+
 ```
 refactor(reporting): separate HTML rendering and metrics tracking
 
@@ -511,6 +543,7 @@ Files:
 ```
 
 ### **Commit 6**: Create public API facade and documentation
+
 ```
 feat(reporting): create public API facade and add documentation
 
@@ -543,22 +576,23 @@ The old `ReportingService.js` remains functional during migration. New code can 
 import {
   ReportTemplateRegistry,
   ReportRequestValidator,
-  ExporterFactory
-} from './services/reporting/index.js';
+  ExporterFactory,
+} from "./services/reporting/index.js";
 
 const registry = new ReportTemplateRegistry();
-const template = registry.getTemplate('INVESTIGATION_SUMMARY');
+const template = registry.getTemplate("INVESTIGATION_SUMMARY");
 
 ReportRequestValidator.validate(request, template);
 
 const factory = new ExporterFactory();
-const exporter = factory.getExporter('PDF');
+const exporter = factory.getExporter("PDF");
 const result = await exporter.export(report, template);
 ```
 
 ### Full Migration (Phase 3)
 
 In Phase 3, we'll:
+
 1. Create new `ReportingService.ts` orchestrator using refactored components
 2. Migrate all existing tests to use new service
 3. Add integration tests
@@ -587,15 +621,15 @@ In Phase 3, we'll:
 
 ## Test Coverage Goals
 
-| Component | Target Coverage | Status |
-|-----------|----------------|--------|
-| Validators | 100% | ✅ Achieved |
-| Template Registry | 95% | 📋 Planned |
-| Exporters | 90% | 📋 Planned |
-| HTML Renderer | 85% | 📋 Planned |
-| Metrics | 95% | 📋 Planned |
-| Integration | 80% | 📋 Planned |
-| **Overall** | **≥85%** | **🔄 In Progress** |
+| Component         | Target Coverage | Status             |
+| ----------------- | --------------- | ------------------ |
+| Validators        | 100%            | ✅ Achieved        |
+| Template Registry | 95%             | 📋 Planned         |
+| Exporters         | 90%             | 📋 Planned         |
+| HTML Renderer     | 85%             | 📋 Planned         |
+| Metrics           | 95%             | 📋 Planned         |
+| Integration       | 80%             | 📋 Planned         |
+| **Overall**       | **≥85%**        | **🔄 In Progress** |
 
 ---
 

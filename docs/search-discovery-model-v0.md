@@ -1,6 +1,7 @@
 # Search & Discovery Model v0
 
 ## Domain model
+
 - **Indexable entities**: tenants, users, services, incidents, policies, docs, runbooks, events, configs. Additional derived objects include alerts, dashboards, and tasks when linked to core entities.
 - **Core fields** (shared schema envelope):
   - `id` (global, stable), `type` (enum), `name`/`title`, `description`/`summary`
@@ -18,6 +19,7 @@
   - **Provenance + audit**: every result includes `why-visible` payload (policy, grant, decision trace, timestamp) for transparency.
 
 ## Search experiences
+
 - **Global search (spotlight)**: command palette (⌘K/CTRL+K) with type-ahead; shows top intents (navigate, run action, open doc). Results blended across entities with chips for type, tenant, environment, recency, confidence, and access reason. Supports keyboard-first navigation and quick actions (open, copy link, create incident, message owner).
 - **Scoped search**: module-aware (e.g., within Incidents, Policies, Services). Defaults to the module entity type and pre-applies contextual filters (tenant, environment, severity). Allows switching scope inline and pivoting to global.
 - **Filtering & facets**: left-rail or inline chips. Multi-select facets, date histogram brushing, saved filter sets, and organization-wide “pinned” views curated by admins.
@@ -26,18 +28,21 @@
 - **Ranking signals**: textual match (BM25/semantic), structured boosts (severity, freshness, owner/team affinity), behavior (clickthrough, dwell), graph-based proximity (service ↔ incidents ↔ runbooks), and trust signals (source quality, verification). Diversify results to avoid over-representation of one type.
 
 ## Indexing & performance
+
 - **Data sources**: service catalog, incident mgmt, policy store, doc/rubnbok repos, config mgmt DB, event streams, audit logs, ticketing, and chat/decision logs where permitted.
 - **Ingestion**: hybrid pipeline: change-data-capture + webhooks for low-latency updates (<1m target); scheduled backfills for slow sources (hourly/daily); bulk bootstraps for new tenants. Normalize tags and identities via central directory.
 - **Update handling**: version documents; soft-delete tombstones with TTL; propagate redactions immediately (PII delete/RTBF). Maintain `last_seen` heartbeat; purge stale entries beyond SLA.
 - **Privacy constraints**: field-level classification; redact or hash sensitive fields at ingest; maintain consent flags and retention policies per tenant. Keep audit trail of indexing actions.
-- **Query performance**: 
+- **Query performance**:
   - Pre-filter by tenant/access bitmap; cache query plans and hot facet counts per scope.
   - Use tiered storage: hot index for last 30 days; warm for older, with federated query fallback.
   - Semantic expansion (synonyms/embeddings) constrained by type; degrade gracefully to lexical if embedding service unavailable.
   - Response SLA: p95 < 250ms for hot tier. Cache results by (query, facets, principal, tenant) with short TTL; invalidate on updates.
 
 ## Artifacts
+
 ### “Search & Discovery Model v0” outline
+
 1. Purpose & scope
 2. Entity schema envelope (core fields, required vs optional)
 3. Type-specific extensions (incident, service, policy, doc, runbook, event, config)
@@ -50,6 +55,7 @@
 10. Governance (data retention, privacy, access approvals)
 
 ### Example search flows
+
 - **Ops persona**
   1. Hits ⌘K, types “checkout latency” → top results: active incident INC-123 (Recent, High severity), related service `checkout-api`, pinned runbook.
   2. Applies facet `env:prod`, `severity>=high`; saves as “Checkout hot issues” and pins to Ops nav.
@@ -64,6 +70,7 @@
   3. Confidence badges explain why items ranked (freshness, popularity, ownership).
 
 ### “Search-ready” checklist
+
 - Entity has global `id`, `type`, tenant tag, owner/team, status/state, severity/priority, timestamps.
 - Normalized tags/labels applied; environment/region provided.
 - Source of truth for ACL/RBAC mapped; tenant isolation verified; redaction policy defined for sensitive fields.

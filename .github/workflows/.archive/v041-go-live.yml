@@ -3,17 +3,17 @@ on:
   workflow_dispatch:
     inputs:
       graphQLUrl:
-        description: 'GraphQL endpoint'
+        description: "GraphQL endpoint"
         required: true
-        default: 'https://staging.mc-platform.com/graphql'
+        default: "https://staging.mc-platform.com/graphql"
       slack:
-        description: 'Slack webhook secret name'
+        description: "Slack webhook secret name"
         required: false
-        default: 'SLACK_WEBHOOK_URL'
+        default: "SLACK_WEBHOOK_URL"
       environment:
-        description: 'Deployment environment'
+        description: "Deployment environment"
         required: true
-        default: 'staging'
+        default: "staging"
         type: choice
         options:
           - staging
@@ -47,7 +47,7 @@ jobs:
       - name: Setup Kubernetes CLI
         uses: azure/setup-kubectl@v3
         with:
-          version: 'v1.28.0'
+          version: "v1.28.0"
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -91,16 +91,16 @@ jobs:
         env:
           GRAPHQL_URL: ${{ github.event.inputs.graphQLUrl }}
           SLACK_WEBHOOK_URL: ${{ secrets[github.event.inputs.slack] }}
-          GATE_ATTESTOR_OK: 'true'
-          GATE_CONTAINMENT: 'true'
-          GATE_SCOPE: 'true'
-          GATE_PQ: 'true'
-          GATE_CSE: 'true'
-          GATE_FAIRNESS: 'true'
-          GATE_BUDGET: 'true'
-          GATE_PODR: 'true'
-          GATE_RESIDENCY: 'true'
-          GATE_AUDIT: 'true'
+          GATE_ATTESTOR_OK: "true"
+          GATE_CONTAINMENT: "true"
+          GATE_SCOPE: "true"
+          GATE_PQ: "true"
+          GATE_CSE: "true"
+          GATE_FAIRNESS: "true"
+          GATE_BUDGET: "true"
+          GATE_PODR: "true"
+          GATE_RESIDENCY: "true"
+          GATE_AUDIT: "true"
         run: |
           echo "🚀 Starting v0.4.1 Sovereign Safeguards Go-Live..."
           bash scripts/execute-v041-go-live.sh

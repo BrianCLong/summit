@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Paper,
@@ -12,10 +12,10 @@ import {
   Typography,
   Toolbar,
   Button,
-} from '@mui/material';
-import { AdminAPI } from '../../services/api';
+} from "@mui/material";
+import { AdminAPI } from "../../services/api";
 
-const ROLES = ['ADMIN', 'EDITOR', 'ANALYST', 'VIEWER'];
+const ROLES = ["ADMIN", "EDITOR", "ANALYST", "VIEWER"];
 
 export default function AdminRoles() {
   const [users, setUsers] = useState([]);
@@ -81,9 +81,7 @@ export default function AdminRoles() {
                   </Select>
                 </TableCell>
                 <TableCell>{String(u.isActive ?? true)}</TableCell>
-                <TableCell>
-                  {u.lastLogin ? new Date(u.lastLogin).toLocaleString() : '-'}
-                </TableCell>
+                <TableCell>{u.lastLogin ? new Date(u.lastLogin).toLocaleString() : "-"}</TableCell>
               </TableRow>
             ))}
           </TableBody>

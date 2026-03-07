@@ -1,6 +1,7 @@
 # Investigation Readiness Program (subpoenas, warrants, and cross-border matters)
 
 ## Epic 1 — Investigation Readiness Charter (treat subpoenas like incidents)
+
 1. Define what counts as a “government matter” (subpoena, CID, warrant, informal request).
 2. Establish decision authority: Legal lead + Security lead + Exec sponsor thresholds.
 3. Create matter severity rubric (legal risk × operational impact × PR risk).
@@ -14,6 +15,7 @@
 11. Delete ad-hoc “helpful” replies from employees—everything routes to Legal.
 
 ## Epic 2 — Intake & Triage Factory (fast, accurate, controlled)
+
 1. Build standardized intake form: agency, authority, scope, deadline, service method.
 2. Verify validity and jurisdiction (service defects, scope overreach, authority).
 3. Identify legal basis and response options (comply, narrow, object, move to quash).
@@ -27,6 +29,7 @@
 11. Produce a one-page “triage memo” within 24 hours for serious matters.
 
 ## Epic 3 — Legal Hold & Preservation (destroy nothing, bloat nothing)
+
 1. Define hold triggers by matter type (subpoena vs warrant vs civil demand).
 2. Implement targeted legal holds (custodians + systems + date ranges).
 3. Automate hold notices and acknowledgments (tracked, auditable).
@@ -40,6 +43,7 @@
 11. Delete informal “archive” practices that create uncontrolled copies.
 
 ## Epic 4 — eDiscovery & Collection Pipeline (produce defensibly, repeatably)
+
 1. Create a data source map for discovery: SaaS, DBs, object stores, logs, email, chat.
 2. Standardize collection methods per source (API export, snapshots, vendor tools).
 3. Build a collection toolkit with hashing, manifests, and access controls.
@@ -53,6 +57,7 @@
 11. Eliminate ad-hoc exports from engineers’ machines—gateway or nothing.
 
 ## Epic 5 — Law Enforcement Request Handling (warrants, exigent, and “informal” asks)
+
 1. Create playbook by request type: subpoena, 2703(d), warrant, emergency request, MLAT.
 2. Define strict verification steps (agency identity, legal authority, scope).
 3. Build “exigent request” policy (who approves, what evidence required).
@@ -66,6 +71,7 @@
 11. Delete informal contact paths with agents—one controlled interface only.
 
 ## Epic 6 — Cross-Border & Conflict-of-Laws Engine (residency meets reality)
+
 1. Tag data by region/tenant “home” and enforce locality in access tools.
 2. Build decision tree for cross-border demands (local order, foreign request, MLAT).
 3. Implement transfer safeguards (SCCs, DPA positions, minimization, redaction).
@@ -79,6 +85,7 @@
 11. Remove tools that allow cross-region exports without policy enforcement.
 
 ## Epic 7 — Internal Investigation Protocol (when the call is coming from inside)
+
 1. Define triggers for internal investigations (whistleblower, fraud, data misuse, harassment).
 2. Establish investigation roles: Legal lead, HR lead, Security lead, scribe.
 3. Implement intake triage and retaliation safeguards.
@@ -92,6 +99,7 @@
 11. Delete shadow investigations by managers outside the protocol.
 
 ## Epic 8 — External Messaging & Narrative Control (silence is a strategy, not default)
+
 1. Create comms playbooks: regulator inquiry, raid/warrant, leak, litigation filing.
 2. Pre-approve holding statements (truthful, minimal, non-speculative).
 3. Define who can speak: spokesperson list + training.
@@ -105,6 +113,7 @@
 11. Delete improvisational Slack speculation via enforced war-room etiquette.
 
 ## Epic 9 — Program Governance & Auditability (make readiness measurable)
+
 1. Publish the investigations policy suite (requests, holds, productions, comms).
 2. Maintain KPIs: time-to-triage, time-to-preserve, time-to-produce, defects rate.
 3. Track costs per matter and optimize with early case assessment.

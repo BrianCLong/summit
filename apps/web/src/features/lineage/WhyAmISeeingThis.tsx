@@ -25,7 +25,7 @@ export function WhyAmISeeingThis({
     if (initialGraph) return undefined
 
     fetchLineageGraph(entityId)
-      .then((data) => {
+      .then(data => {
         if (mounted) {
           setGraph(data)
           setError(null)
@@ -46,7 +46,9 @@ export function WhyAmISeeingThis({
 
   if (error) {
     return (
-      <div className={`rounded-md border border-red-200 bg-red-50 p-3 text-xs text-red-700 ${className ?? ''}`}>
+      <div
+        className={`rounded-md border border-red-200 bg-red-50 p-3 text-xs text-red-700 ${className ?? ''}`}
+      >
         {error}
       </div>
     )
@@ -54,18 +56,20 @@ export function WhyAmISeeingThis({
 
   if (!graph) {
     return (
-      <div className={`rounded-md border border-slate-200 bg-white p-3 text-xs text-slate-600 ${className ?? ''}`}>
+      <div
+        className={`rounded-md border border-slate-200 bg-white p-3 text-xs text-slate-600 ${className ?? ''}`}
+      >
         Loading lineage…
       </div>
     )
   }
 
   const upstreamSummary = graph.upstream
-    .map((item) => `${item.label}${item.restricted ? ' (restricted)' : ''}`)
+    .map(item => `${item.label}${item.restricted ? ' (restricted)' : ''}`)
     .join(', ')
 
   const downstreamSummary = graph.downstream
-    .map((item) => `${item.label}${item.restricted ? ' (restricted)' : ''}`)
+    .map(item => `${item.label}${item.restricted ? ' (restricted)' : ''}`)
     .join(', ')
 
   return (
@@ -75,27 +79,41 @@ export function WhyAmISeeingThis({
     >
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-[11px] uppercase tracking-wide text-slate-500">Why am I seeing this?</p>
-          <p className="text-xs text-slate-600">{contextLabel ?? 'Lineage context'}</p>
+          <p className="text-[11px] uppercase tracking-wide text-slate-500">
+            Why am I seeing this?
+          </p>
+          <p className="text-xs text-slate-600">
+            {contextLabel ?? 'Lineage context'}
+          </p>
         </div>
         {graph.restricted && (
-          <span className="rounded bg-amber-100 px-2 py-1 text-[10px] font-semibold text-amber-700">Limited</span>
+          <span className="rounded bg-amber-100 px-2 py-1 text-[10px] font-semibold text-amber-700">
+            Limited
+          </span>
         )}
       </div>
 
       {graph.restricted ? (
         <p className="mt-2 text-xs text-amber-800" role="status">
-          {graph.restrictionReason || 'Some lineage paths are redacted for this viewer.'}
+          {graph.restrictionReason ||
+            'Some lineage paths are redacted for this viewer.'}
         </p>
       ) : (
         <div className="mt-2 space-y-1 text-xs">
-          <p data-testid="upstream-summary">Upstream: {upstreamSummary || 'None'}</p>
-          <p data-testid="downstream-summary">Downstream: {downstreamSummary || 'None'}</p>
+          <p data-testid="upstream-summary">
+            Upstream: {upstreamSummary || 'None'}
+          </p>
+          <p data-testid="downstream-summary">
+            Downstream: {downstreamSummary || 'None'}
+          </p>
         </div>
       )}
 
-      <div className="mt-3 flex flex-wrap gap-2" aria-label="policy-tags-inline">
-        {graph.policyTags.map((tag) => (
+      <div
+        className="mt-3 flex flex-wrap gap-2"
+        aria-label="policy-tags-inline"
+      >
+        {graph.policyTags.map(tag => (
           <span
             key={tag}
             className="rounded-full bg-slate-200 px-2 py-0.5 text-[11px] font-medium text-slate-800"

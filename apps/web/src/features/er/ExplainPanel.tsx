@@ -53,8 +53,15 @@ export const ExplainPanel: React.FC<ExplainPanelProps> = ({ details }) => {
       <CardContent className="space-y-3">
         <div className="flex items-center justify-between">
           <span>Score:</span>
-          <Badge variant={details.score && details.score > 0.8 ? 'default' : 'secondary'}>
-            {details.score !== undefined ? Math.round(details.score * 100) : '—'}%
+          <Badge
+            variant={
+              details.score && details.score > 0.8 ? 'default' : 'secondary'
+            }
+          >
+            {details.score !== undefined
+              ? Math.round(details.score * 100)
+              : '—'}
+            %
           </Badge>
         </div>
         <div className="flex items-center justify-between text-sm text-muted-foreground">
@@ -86,60 +93,69 @@ export const ExplainPanel: React.FC<ExplainPanelProps> = ({ details }) => {
               ))}
             </ul>
           ) : (
-            <div className="text-sm text-muted-foreground">No rationale provided.</div>
+            <div className="text-sm text-muted-foreground">
+              No rationale provided.
+            </div>
           )}
         </div>
-        {details.featureContributions && details.featureContributions.length > 0 && (
-          <div className="space-y-2">
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={() => setShowContributions(prev => !prev)}
-            >
-              {showContributions ? (
-                <>
-                  <ChevronUp className="mr-2 h-4 w-4" /> Hide feature contributions
-                </>
-              ) : (
-                <>
-                  <ChevronDown className="mr-2 h-4 w-4" /> Show feature contributions
-                </>
-              )}
-            </Button>
-            {showContributions && (
-              <div className="rounded-md border">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Feature</TableHead>
-                      <TableHead>Value</TableHead>
-                      <TableHead>Weight</TableHead>
-                      <TableHead>Contribution</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {details.featureContributions.map(row => (
-                      <TableRow key={row.feature}>
-                        <TableCell className="font-medium">{row.feature}</TableCell>
-                        <TableCell>
-                          {typeof row.value === 'boolean'
-                            ? row.value
-                              ? 'true'
-                              : 'false'
-                            : row.value.toFixed(3)}
-                        </TableCell>
-                        <TableCell>{(row.weight * 100).toFixed(0)}%</TableCell>
-                        <TableCell>
-                          {(row.normalizedContribution * 100).toFixed(1)}%
-                        </TableCell>
+        {details.featureContributions &&
+          details.featureContributions.length > 0 && (
+            <div className="space-y-2">
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => setShowContributions(prev => !prev)}
+              >
+                {showContributions ? (
+                  <>
+                    <ChevronUp className="mr-2 h-4 w-4" /> Hide feature
+                    contributions
+                  </>
+                ) : (
+                  <>
+                    <ChevronDown className="mr-2 h-4 w-4" /> Show feature
+                    contributions
+                  </>
+                )}
+              </Button>
+              {showContributions && (
+                <div className="rounded-md border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Feature</TableHead>
+                        <TableHead>Value</TableHead>
+                        <TableHead>Weight</TableHead>
+                        <TableHead>Contribution</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            )}
-          </div>
-        )}
+                    </TableHeader>
+                    <TableBody>
+                      {details.featureContributions.map(row => (
+                        <TableRow key={row.feature}>
+                          <TableCell className="font-medium">
+                            {row.feature}
+                          </TableCell>
+                          <TableCell>
+                            {typeof row.value === 'boolean'
+                              ? row.value
+                                ? 'true'
+                                : 'false'
+                              : row.value.toFixed(3)}
+                          </TableCell>
+                          <TableCell>
+                            {(row.weight * 100).toFixed(0)}%
+                          </TableCell>
+                          <TableCell>
+                            {(row.normalizedContribution * 100).toFixed(1)}%
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+            </div>
+          )}
       </CardContent>
     </Card>
   )

@@ -3,7 +3,7 @@
  * Common neighbors, Adamic-Adar, Jaccard, Preferential Attachment
  */
 
-import type { GraphStorage, Node } from '@intelgraph/graph-database';
+import type { GraphStorage, Node } from "@intelgraph/graph-database";
 
 export interface LinkPrediction {
   sourceId: string;
@@ -28,14 +28,10 @@ export class LinkPredictor {
    * Score based on number of shared neighbors
    */
   commonNeighbors(sourceId: string, targetId: string): number {
-    const sourceNeighbors = new Set(
-      this.storage.getNeighbors(sourceId, 'both').map(n => n.id)
-    );
-    const targetNeighbors = new Set(
-      this.storage.getNeighbors(targetId, 'both').map(n => n.id)
-    );
+    const sourceNeighbors = new Set(this.storage.getNeighbors(sourceId, "both").map((n) => n.id));
+    const targetNeighbors = new Set(this.storage.getNeighbors(targetId, "both").map((n) => n.id));
 
-    const common = Array.from(sourceNeighbors).filter(n => targetNeighbors.has(n));
+    const common = Array.from(sourceNeighbors).filter((n) => targetNeighbors.has(n));
     return common.length;
   }
 
@@ -44,14 +40,10 @@ export class LinkPredictor {
    * Normalized common neighbors
    */
   jaccardCoefficient(sourceId: string, targetId: string): number {
-    const sourceNeighbors = new Set(
-      this.storage.getNeighbors(sourceId, 'both').map(n => n.id)
-    );
-    const targetNeighbors = new Set(
-      this.storage.getNeighbors(targetId, 'both').map(n => n.id)
-    );
+    const sourceNeighbors = new Set(this.storage.getNeighbors(sourceId, "both").map((n) => n.id));
+    const targetNeighbors = new Set(this.storage.getNeighbors(targetId, "both").map((n) => n.id));
 
-    const intersection = Array.from(sourceNeighbors).filter(n => targetNeighbors.has(n));
+    const intersection = Array.from(sourceNeighbors).filter((n) => targetNeighbors.has(n));
     const union = new Set([...sourceNeighbors, ...targetNeighbors]);
 
     return union.size > 0 ? intersection.length / union.size : 0;
@@ -62,18 +54,14 @@ export class LinkPredictor {
    * Weighted common neighbors based on neighbor degree
    */
   adamicAdar(sourceId: string, targetId: string): number {
-    const sourceNeighbors = new Set(
-      this.storage.getNeighbors(sourceId, 'both').map(n => n.id)
-    );
-    const targetNeighbors = new Set(
-      this.storage.getNeighbors(targetId, 'both').map(n => n.id)
-    );
+    const sourceNeighbors = new Set(this.storage.getNeighbors(sourceId, "both").map((n) => n.id));
+    const targetNeighbors = new Set(this.storage.getNeighbors(targetId, "both").map((n) => n.id));
 
-    const common = Array.from(sourceNeighbors).filter(n => targetNeighbors.has(n));
+    const common = Array.from(sourceNeighbors).filter((n) => targetNeighbors.has(n));
 
     let score = 0;
     for (const neighborId of common) {
-      const degree = this.storage.getDegree(neighborId, 'both');
+      const degree = this.storage.getDegree(neighborId, "both");
       if (degree > 1) {
         score += 1 / Math.log(degree);
       }
@@ -87,8 +75,8 @@ export class LinkPredictor {
    * Product of node degrees
    */
   preferentialAttachment(sourceId: string, targetId: string): number {
-    const sourceDegree = this.storage.getDegree(sourceId, 'both');
-    const targetDegree = this.storage.getDegree(targetId, 'both');
+    const sourceDegree = this.storage.getDegree(sourceId, "both");
+    const targetDegree = this.storage.getDegree(targetId, "both");
     return sourceDegree * targetDegree;
   }
 
@@ -97,18 +85,14 @@ export class LinkPredictor {
    * Similar to Adamic-Adar but different weighting
    */
   resourceAllocation(sourceId: string, targetId: string): number {
-    const sourceNeighbors = new Set(
-      this.storage.getNeighbors(sourceId, 'both').map(n => n.id)
-    );
-    const targetNeighbors = new Set(
-      this.storage.getNeighbors(targetId, 'both').map(n => n.id)
-    );
+    const sourceNeighbors = new Set(this.storage.getNeighbors(sourceId, "both").map((n) => n.id));
+    const targetNeighbors = new Set(this.storage.getNeighbors(targetId, "both").map((n) => n.id));
 
-    const common = Array.from(sourceNeighbors).filter(n => targetNeighbors.has(n));
+    const common = Array.from(sourceNeighbors).filter((n) => targetNeighbors.has(n));
 
     let score = 0;
     for (const neighborId of common) {
-      const degree = this.storage.getDegree(neighborId, 'both');
+      const degree = this.storage.getDegree(neighborId, "both");
       if (degree > 0) {
         score += 1 / degree;
       }
@@ -121,7 +105,12 @@ export class LinkPredictor {
    * Katz centrality-based link prediction
    * Considers all paths between nodes with exponential decay
    */
-  katzScore(sourceId: string, targetId: string, beta: number = 0.005, maxLength: number = 3): number {
+  katzScore(
+    sourceId: string,
+    targetId: string,
+    beta: number = 0.005,
+    maxLength: number = 3
+  ): number {
     let score = 0;
 
     // Find paths up to maxLength
@@ -146,23 +135,19 @@ export class LinkPredictor {
     let score = 0;
 
     // Find common interaction patterns
-    const sourceTargets = new Set(sourceEdges.map(e => e.targetId));
-    const targetSources = new Set(targetEdges.map(e => e.sourceId));
+    const sourceTargets = new Set(sourceEdges.map((e) => e.targetId));
+    const targetSources = new Set(targetEdges.map((e) => e.sourceId));
 
     // Time-decayed common neighbors
-    const sourceNeighbors = this.storage.getNeighbors(sourceId, 'both');
+    const sourceNeighbors = this.storage.getNeighbors(sourceId, "both");
 
     for (const neighbor of sourceNeighbors) {
       const neighborEdges = this.storage.getAllEdges(neighbor.id);
-      const targetNeighbors = new Set(
-        this.storage.getNeighbors(targetId, 'both').map(n => n.id)
-      );
+      const targetNeighbors = new Set(this.storage.getNeighbors(targetId, "both").map((n) => n.id));
 
       if (targetNeighbors.has(neighbor.id)) {
         // Calculate time decay
-        const maxAge = Math.max(
-          ...neighborEdges.map(e => now - e.createdAt)
-        );
+        const maxAge = Math.max(...neighborEdges.map((e) => now - e.createdAt));
 
         const decay = Math.pow(decayFactor, maxAge / (365 * 24 * 60 * 60 * 1000));
         score += decay;
@@ -204,11 +189,15 @@ export class LinkPredictor {
    */
   ensemblePrediction(sourceId: string, targetId: string): LinkPrediction {
     const methods = [
-      { name: 'common_neighbors', weight: 0.2, score: this.commonNeighbors(sourceId, targetId) },
-      { name: 'jaccard', weight: 0.2, score: this.jaccardCoefficient(sourceId, targetId) },
-      { name: 'adamic_adar', weight: 0.25, score: this.adamicAdar(sourceId, targetId) },
-      { name: 'resource_allocation', weight: 0.2, score: this.resourceAllocation(sourceId, targetId) },
-      { name: 'katz', weight: 0.15, score: this.katzScore(sourceId, targetId) }
+      { name: "common_neighbors", weight: 0.2, score: this.commonNeighbors(sourceId, targetId) },
+      { name: "jaccard", weight: 0.2, score: this.jaccardCoefficient(sourceId, targetId) },
+      { name: "adamic_adar", weight: 0.25, score: this.adamicAdar(sourceId, targetId) },
+      {
+        name: "resource_allocation",
+        weight: 0.2,
+        score: this.resourceAllocation(sourceId, targetId),
+      },
+      { name: "katz", weight: 0.15, score: this.katzScore(sourceId, targetId) },
     ];
 
     // Normalize scores
@@ -217,14 +206,15 @@ export class LinkPredictor {
       jaccard: 1,
       adamic_adar: 10,
       resource_allocation: 5,
-      katz: 1
+      katz: 1,
     };
 
     let totalScore = 0;
     let totalWeight = 0;
 
     for (const method of methods) {
-      const normalizedScore = method.score / (maxScores[method.name as keyof typeof maxScores] || 1);
+      const normalizedScore =
+        method.score / (maxScores[method.name as keyof typeof maxScores] || 1);
       totalScore += normalizedScore * method.weight;
       totalWeight += method.weight;
     }
@@ -236,8 +226,8 @@ export class LinkPredictor {
       targetId,
       score: finalScore,
       confidence: this.calculateConfidence(methods),
-      method: 'ensemble',
-      explanation: this.generateExplanation(sourceId, targetId, methods)
+      method: "ensemble",
+      explanation: this.generateExplanation(sourceId, targetId, methods),
     };
   }
 
@@ -251,8 +241,9 @@ export class LinkPredictor {
 
     // Get existing neighbors
     const existingNeighbors = new Set(
-      [...this.storage.getNeighbors(nodeId, 'out'), ...this.storage.getNeighbors(nodeId, 'in')]
-        .map(n => n.id)
+      [...this.storage.getNeighbors(nodeId, "out"), ...this.storage.getNeighbors(nodeId, "in")].map(
+        (n) => n.id
+      )
     );
 
     // Calculate scores for non-connected nodes
@@ -279,8 +270,8 @@ export class LinkPredictor {
 
     return {
       predictions,
-      method: 'ensemble',
-      timestamp: Date.now()
+      method: "ensemble",
+      timestamp: Date.now(),
     };
   }
 
@@ -302,8 +293,9 @@ export class LinkPredictor {
         const target = sampledNodes[j];
 
         // Check if edge already exists
-        const existingEdge = this.storage.getOutgoingEdges(source.id)
-          .some(e => e.targetId === target.id);
+        const existingEdge = this.storage
+          .getOutgoingEdges(source.id)
+          .some((e) => e.targetId === target.id);
 
         if (!existingEdge) {
           const prediction = this.ensemblePrediction(source.id, target.id);
@@ -328,7 +320,7 @@ export class LinkPredictor {
 
     if (length === 1) {
       const edges = this.storage.getOutgoingEdges(sourceId);
-      return edges.filter(e => e.targetId === targetId).length;
+      return edges.filter((e) => e.targetId === targetId).length;
     }
 
     // Use BFS with depth tracking
@@ -346,7 +338,7 @@ export class LinkPredictor {
         continue;
       }
 
-      const neighbors = this.storage.getNeighbors(nodeId, 'out');
+      const neighbors = this.storage.getNeighbors(nodeId, "out");
       for (const neighbor of neighbors) {
         queue.push({ nodeId: neighbor.id, depth: depth + 1 });
       }
@@ -357,23 +349,21 @@ export class LinkPredictor {
 
   private calculateTypeSpecificScore(sourceId: string, targetId: string, edgeType: string): number {
     // Filter neighbors by edge type
-    const sourceEdges = this.storage.getOutgoingEdges(sourceId)
-      .filter(e => e.type === edgeType);
-    const targetEdges = this.storage.getIncomingEdges(targetId)
-      .filter(e => e.type === edgeType);
+    const sourceEdges = this.storage.getOutgoingEdges(sourceId).filter((e) => e.type === edgeType);
+    const targetEdges = this.storage.getIncomingEdges(targetId).filter((e) => e.type === edgeType);
 
-    const sourceTargets = new Set(sourceEdges.map(e => e.targetId));
-    const targetSources = new Set(targetEdges.map(e => e.sourceId));
+    const sourceTargets = new Set(sourceEdges.map((e) => e.targetId));
+    const targetSources = new Set(targetEdges.map((e) => e.sourceId));
 
     // Common neighbors with same edge type
-    const intersection = Array.from(sourceTargets).filter(t => targetSources.has(t));
+    const intersection = Array.from(sourceTargets).filter((t) => targetSources.has(t));
 
     return intersection.length;
   }
 
   private calculateConfidence(methods: Array<{ name: string; score: number }>): number {
     // Confidence based on agreement between methods
-    const nonZeroScores = methods.filter(m => m.score > 0);
+    const nonZeroScores = methods.filter((m) => m.score > 0);
 
     if (nonZeroScores.length === 0) return 0;
 
@@ -385,12 +375,12 @@ export class LinkPredictor {
     targetId: string,
     methods: Array<{ name: string; score: number }>
   ): string {
-    const topMethod = methods.reduce((max, m) => m.score > max.score ? m : max);
+    const topMethod = methods.reduce((max, m) => (m.score > max.score ? m : max));
 
     const source = this.storage.getNode(sourceId);
     const target = this.storage.getNode(targetId);
 
-    if (!source || !target) return 'Unable to generate explanation';
+    if (!source || !target) return "Unable to generate explanation";
 
     const commonNeighbors = this.commonNeighbors(sourceId, targetId);
 

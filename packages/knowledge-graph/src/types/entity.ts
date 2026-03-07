@@ -2,7 +2,7 @@
  * Entity and Relationship Types for Knowledge Graph
  */
 
-import { z } from 'zod';
+import { z } from "zod";
 
 // Knowledge Graph Entity
 export const KGEntitySchema = z.object({
@@ -14,7 +14,7 @@ export const KGEntitySchema = z.object({
   confidence: z.number().min(0).max(1).default(1.0),
   provenance: z.object({
     sourceId: z.string(),
-    sourceType: z.enum(['document', 'database', 'api', 'manual', 'inferred']),
+    sourceType: z.enum(["document", "database", "api", "manual", "inferred"]),
     extractedAt: z.string().datetime(),
     extractorVersion: z.string().optional(),
     verifiedBy: z.string().optional(),
@@ -46,7 +46,7 @@ export const KGRelationshipSchema = z.object({
   weight: z.number().optional(), // For weighted graphs
   provenance: z.object({
     sourceId: z.string(),
-    sourceType: z.enum(['document', 'database', 'api', 'manual', 'inferred']),
+    sourceType: z.enum(["document", "database", "api", "manual", "inferred"]),
     extractedAt: z.string().datetime(),
     extractorVersion: z.string().optional(),
   }),
@@ -68,9 +68,9 @@ export type KGRelationship = z.infer<typeof KGRelationshipSchema>;
 export const EntityLinkSchema = z.object({
   entityId: z.string(),
   externalId: z.string(),
-  externalSource: z.enum(['dbpedia', 'wikidata', 'freebase', 'yago', 'custom']),
+  externalSource: z.enum(["dbpedia", "wikidata", "freebase", "yago", "custom"]),
   externalUri: z.string().url(),
-  linkType: z.enum(['same_as', 'related_to', 'subclass_of', 'instance_of']),
+  linkType: z.enum(["same_as", "related_to", "subclass_of", "instance_of"]),
   confidence: z.number().min(0).max(1),
   disambiguationContext: z.record(z.string(), z.any()).optional(),
   createdAt: z.string().datetime(),
@@ -84,13 +84,7 @@ export const CoreferenceClusterSchema = z.object({
   entities: z.array(z.string()), // Entity IDs that refer to the same real-world entity
   canonicalEntityId: z.string(), // The canonical/preferred entity
   confidence: z.number().min(0).max(1),
-  resolutionMethod: z.enum([
-    'exact_match',
-    'fuzzy_match',
-    'ml_model',
-    'rule_based',
-    'manual',
-  ]),
+  resolutionMethod: z.enum(["exact_match", "fuzzy_match", "ml_model", "rule_based", "manual"]),
   metadata: z.record(z.string(), z.any()).optional(),
   createdAt: z.string().datetime(),
 });
@@ -108,7 +102,7 @@ export const NERResultSchema = z.object({
       endOffset: z.number(),
       confidence: z.number().min(0).max(1),
       metadata: z.record(z.string(), z.any()).optional(),
-    }),
+    })
   ),
   model: z.string(),
   modelVersion: z.string(),

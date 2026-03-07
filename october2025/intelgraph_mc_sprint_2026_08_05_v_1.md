@@ -223,7 +223,7 @@ allow {
 
 ```yaml
 allocations:
-  shared_overhead: { method: 'ratio', keys: ['graphql_calls', 'ingest_events'] }
+  shared_overhead: { method: "ratio", keys: ["graphql_calls", "ingest_events"] }
 ```
 
 **SOC2 Evidence Index (JSON)**
@@ -258,14 +258,12 @@ input ExperimentSpec {
 }
 
 type Mutation {
-  createExperiment(id: String!, spec: ExperimentSpec!): Boolean
-    @auth(abac: "admin.write")
+  createExperiment(id: String!, spec: ExperimentSpec!): Boolean @auth(abac: "admin.write")
   recordExperimentResult(id: String!, arm: String!, metrics: JSON!): Boolean
     @auth(abac: "admin.write")
 
   # Tenant lifecycle
-  createTenant(name: String!, blueprint: String!): ID!
-    @auth(abac: "admin.write")
+  createTenant(name: String!, blueprint: String!): ID! @auth(abac: "admin.write")
   suspendTenant(id: ID!): Boolean @auth(abac: "admin.write")
   deprovisionTenant(id: ID!): Boolean @auth(abac: "admin.write")
 

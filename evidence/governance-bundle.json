@@ -110,10 +110,7 @@
               },
               "Article 15": {
                 "title": "Accuracy, Robustness, Cybersecurity",
-                "internal_controls": [
-                  "server/src/governance/drift.ts",
-                  "policy/supply_chain.rego"
-                ]
+                "internal_controls": ["server/src/governance/drift.ts", "policy/supply_chain.rego"]
               }
             }
           }
@@ -134,9 +131,7 @@
               },
               "MAP-1": {
                 "title": "Context is established and understood",
-                "internal_controls": [
-                  "server/src/autonomous/orchestrator.enhanced.ts#RunConfig"
-                ]
+                "internal_controls": ["server/src/autonomous/orchestrator.enhanced.ts#RunConfig"]
               },
               "MEASURE-1": {
                 "title": "AI system performance is measured",
@@ -147,9 +142,7 @@
               },
               "MANAGE-1": {
                 "title": "AI system risks are prioritized and acted upon",
-                "internal_controls": [
-                  "server/src/autonomous/policy-engine.ts"
-                ]
+                "internal_controls": ["server/src/autonomous/policy-engine.ts"]
               }
             }
           }
@@ -179,10 +172,7 @@
           "durationMs": 0
         },
         "schema_version": "1.0.0",
-        "compliance_tags": [
-          "traceability",
-          "eu_ai_act_art_12"
-        ]
+        "compliance_tags": ["traceability", "eu_ai_act_art_12"]
       }
     ],
     "policy_cards": [

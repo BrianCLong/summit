@@ -1,5 +1,5 @@
-import { Page, Locator, expect } from '@playwright/test';
-import { BasePage } from './base.page';
+import { Page, Locator, expect } from "@playwright/test";
+import { BasePage } from "./base.page";
 
 export class MultiAgentPage extends BasePage {
   readonly routingTab: Locator;
@@ -9,46 +9,46 @@ export class MultiAgentPage extends BasePage {
 
   constructor(page: Page) {
     super(page);
-    this.routingTab = page.getByRole('button', { name: 'Routing' });
-    this.webTab = page.getByRole('button', { name: 'Web' });
-    this.budgetsTab = page.getByRole('button', { name: 'Budgets' });
-    this.logsTab = page.getByRole('button', { name: 'Logs' });
+    this.routingTab = page.getByRole("button", { name: "Routing" });
+    this.webTab = page.getByRole("button", { name: "Web" });
+    this.budgetsTab = page.getByRole("button", { name: "Budgets" });
+    this.logsTab = page.getByRole("button", { name: "Logs" });
   }
 
   async navigate() {
-    await this.goto('/maestro');
+    await this.goto("/maestro");
   }
 
-  async selectTab(tab: 'routing' | 'web' | 'budgets' | 'logs') {
+  async selectTab(tab: "routing" | "web" | "budgets" | "logs") {
     switch (tab) {
-      case 'routing':
+      case "routing":
         await this.routingTab.click();
         break;
-      case 'web':
+      case "web":
         await this.webTab.click();
         break;
-      case 'budgets':
+      case "budgets":
         await this.budgetsTab.click();
         break;
-      case 'logs':
+      case "logs":
         await this.logsTab.click();
         break;
     }
   }
 
-  async verifyTabActive(tab: 'routing' | 'web' | 'budgets' | 'logs') {
+  async verifyTabActive(tab: "routing" | "web" | "budgets" | "logs") {
     let locator;
     switch (tab) {
-      case 'routing':
+      case "routing":
         locator = this.routingTab;
         break;
-      case 'web':
+      case "web":
         locator = this.webTab;
         break;
-      case 'budgets':
+      case "budgets":
         locator = this.budgetsTab;
         break;
-      case 'logs':
+      case "logs":
         locator = this.logsTab;
         break;
     }

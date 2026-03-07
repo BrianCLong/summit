@@ -189,8 +189,8 @@ services:
     version: "5.8"
     compose_service: neo4j
     ports:
-      - 7474  # HTTP
-      - 7687  # Bolt
+      - 7474 # HTTP
+      - 7687 # Bolt
     description: >-
       Graph database for entity relationships, graph analytics,
       community detection, and network analysis with APOC and GDS plugins
@@ -268,9 +268,9 @@ services:
     version: "0.110.0"
     compose_service: otel-collector
     ports:
-      - 4317  # OTLP gRPC
-      - 4318  # OTLP HTTP
-      - 9464  # Prometheus exporter
+      - 4317 # OTLP gRPC
+      - 4318 # OTLP HTTP
+      - 9464 # Prometheus exporter
     config_path: ops/devkit/otel-collector.yaml
     description: Telemetry data collection and export to observability backends
     referenced_in:
@@ -390,8 +390,8 @@ services:
     version: "3.7"
     compose_service: kafka
     ports:
-      - 9092   # Internal
-      - 29092  # External
+      - 9092 # Internal
+      - 29092 # External
     profile: kafka
     description: Distributed event streaming platform for data pipelines
     referenced_in:

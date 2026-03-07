@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Box,
   Card,
@@ -24,7 +24,7 @@ import {
   TableRow,
   Paper,
   Snackbar,
-} from '@mui/material';
+} from "@mui/material";
 import {
   ExpandMore as ExpandMoreIcon,
   CheckCircle as CheckCircleIcon,
@@ -34,13 +34,13 @@ import {
   Refresh as RefreshIcon,
   ContentCopy as ContentCopyIcon,
   CloudOff as CloudOffIcon,
-} from '@mui/icons-material';
-import { useAuth } from '../context/AuthContext';
+} from "@mui/icons-material";
+import { useAuth } from "../context/AuthContext";
 
 interface ReadinessCheck {
   id: string;
   name: string;
-  status: 'pass' | 'fail' | 'warn' | 'unknown';
+  status: "pass" | "fail" | "warn" | "unknown";
   lastRunAt?: string;
   evidenceLinks?: string[];
 }
@@ -72,14 +72,14 @@ interface EvidenceIndex {
   evidence: EvidenceItem[];
 }
 
-const CACHE_KEY_SUMMARY = 'release-readiness-summary';
-const CACHE_KEY_EVIDENCE = 'release-readiness-evidence';
-const CACHE_KEY_TIMESTAMP = 'release-readiness-timestamp';
+const CACHE_KEY_SUMMARY = "release-readiness-summary";
+const CACHE_KEY_EVIDENCE = "release-readiness-evidence";
+const CACHE_KEY_TIMESTAMP = "release-readiness-timestamp";
 const CACHE_EXPIRY = 5 * 60 * 1000; // 5 minutes
 
 const getErrorMessage = (err: unknown): string => {
   if (err instanceof Error) return err.message;
-  return 'Failed to load data';
+  return "Failed to load data";
 };
 
 function ReleaseReadinessRoute() {
@@ -92,9 +92,9 @@ function ReleaseReadinessRoute() {
   const [isOffline, setIsOffline] = useState(false);
   const [isStale, setIsStale] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarMessage, setSnackbarMessage] = useState("");
 
-  const hasAccess = Boolean(hasRole && (hasRole('ADMIN') || hasRole('OPERATOR')));
+  const hasAccess = Boolean(hasRole && (hasRole("ADMIN") || hasRole("OPERATOR")));
 
   // Load from cache
   const loadFromCache = useCallback(() => {
@@ -117,7 +117,7 @@ function ReleaseReadinessRoute() {
         return true;
       }
     } catch (err) {
-      console.error('Failed to load from cache:', err);
+      console.error("Failed to load from cache:", err);
     }
     return false;
   }, []);
@@ -129,7 +129,7 @@ function ReleaseReadinessRoute() {
       localStorage.setItem(CACHE_KEY_EVIDENCE, JSON.stringify(evidenceData));
       localStorage.setItem(CACHE_KEY_TIMESTAMP, Date.now().toString());
     } catch (err) {
-      console.error('Failed to save to cache:', err);
+      console.error("Failed to save to cache:", err);
     }
   }, []);
 
@@ -142,22 +142,22 @@ function ReleaseReadinessRoute() {
     try {
       // Fetch summary and evidence index in parallel
       const [summaryRes, evidenceRes] = await Promise.all([
-        fetch('/api/ops/release-readiness/summary', {
+        fetch("/api/ops/release-readiness/summary", {
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`,
-            'Content-Type': 'application/json',
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            "Content-Type": "application/json",
           },
         }),
-        fetch('/api/ops/release-readiness/evidence-index', {
+        fetch("/api/ops/release-readiness/evidence-index", {
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`,
-            'Content-Type': 'application/json',
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            "Content-Type": "application/json",
           },
         }),
       ]);
 
       if (!summaryRes.ok || !evidenceRes.ok) {
-        throw new Error('Failed to fetch release readiness data');
+        throw new Error("Failed to fetch release readiness data");
       }
 
       const summaryData = await summaryRes.json();
@@ -173,7 +173,7 @@ function ReleaseReadinessRoute() {
 
       // Try loading from cache on error
       if (!loadFromCache()) {
-        setError('Failed to load data and no cached data available');
+        setError("Failed to load data and no cached data available");
       }
     } finally {
       setLoading(false);
@@ -201,26 +201,29 @@ function ReleaseReadinessRoute() {
 
   // Copy to clipboard helper
   const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text).then(() => {
-      setSnackbarMessage('Copied to clipboard');
-      setSnackbarOpen(true);
-    }).catch(() => {
-      setSnackbarMessage('Failed to copy');
-      setSnackbarOpen(true);
-    });
+    navigator.clipboard
+      .writeText(text)
+      .then(() => {
+        setSnackbarMessage("Copied to clipboard");
+        setSnackbarOpen(true);
+      })
+      .catch(() => {
+        setSnackbarMessage("Failed to copy");
+        setSnackbarOpen(true);
+      });
   };
 
   // Get status icon and color
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'pass':
-        return <CheckCircleIcon sx={{ color: 'success.main' }} />;
-      case 'fail':
-        return <ErrorIcon sx={{ color: 'error.main' }} />;
-      case 'warn':
-        return <WarningIcon sx={{ color: 'warning.main' }} />;
+      case "pass":
+        return <CheckCircleIcon sx={{ color: "success.main" }} />;
+      case "fail":
+        return <ErrorIcon sx={{ color: "error.main" }} />;
+      case "warn":
+        return <WarningIcon sx={{ color: "warning.main" }} />;
       default:
-        return <HelpIcon sx={{ color: 'grey.500' }} />;
+        return <HelpIcon sx={{ color: "grey.500" }} />;
     }
   };
 
@@ -234,28 +237,28 @@ function ReleaseReadinessRoute() {
     );
   }
 
-  const getStatusColor = (status: string): 'success' | 'error' | 'warning' | 'default' => {
+  const getStatusColor = (status: string): "success" | "error" | "warning" | "default" => {
     switch (status) {
-      case 'pass':
-        return 'success';
-      case 'fail':
-        return 'error';
-      case 'warn':
-        return 'warning';
+      case "pass":
+        return "success";
+      case "fail":
+        return "error";
+      case "warn":
+        return "warning";
       default:
-        return 'default';
+        return "default";
     }
   };
 
   // Calculate overall status
   const getOverallStatus = () => {
-    if (!summary) return 'unknown';
-    const failCount = summary.checks.filter(c => c.status === 'fail').length;
-    const warnCount = summary.checks.filter(c => c.status === 'warn').length;
+    if (!summary) return "unknown";
+    const failCount = summary.checks.filter((c) => c.status === "fail").length;
+    const warnCount = summary.checks.filter((c) => c.status === "warn").length;
 
-    if (failCount > 0) return 'fail';
-    if (warnCount > 0) return 'warn';
-    return 'pass';
+    if (failCount > 0) return "fail";
+    if (warnCount > 0) return "warn";
+    return "pass";
   };
 
   // Loading state
@@ -274,11 +277,14 @@ function ReleaseReadinessRoute() {
   if (error && !summary) {
     return (
       <Box p={3}>
-        <Alert severity="error" action={
-          <Button color="inherit" size="small" onClick={fetchData}>
-            Retry
-          </Button>
-        }>
+        <Alert
+          severity="error"
+          action={
+            <Button color="inherit" size="small" onClick={fetchData}>
+              Retry
+            </Button>
+          }
+        >
           {error}
         </Alert>
       </Box>
@@ -302,12 +308,7 @@ function ReleaseReadinessRoute() {
               </Tooltip>
             )}
             {isStale && !isOffline && (
-              <Chip
-                label="Stale"
-                size="small"
-                color="warning"
-                icon={<WarningIcon />}
-              />
+              <Chip label="Stale" size="small" color="warning" icon={<WarningIcon />} />
             )}
             <IconButton onClick={fetchData} disabled={loading} aria-label="Refresh data">
               <RefreshIcon />
@@ -318,7 +319,7 @@ function ReleaseReadinessRoute() {
         {/* Offline/Stale Warning */}
         {(isOffline || isStale) && (
           <Alert
-            severity={isOffline ? 'warning' : 'info'}
+            severity={isOffline ? "warning" : "info"}
             action={
               <Button color="inherit" size="small" onClick={fetchData}>
                 Refresh
@@ -326,9 +327,8 @@ function ReleaseReadinessRoute() {
             }
           >
             {isOffline
-              ? 'Showing cached data - unable to connect to server'
-              : `Data is stale (last updated: ${summary ? new Date(summary.generatedAt).toLocaleString() : 'unknown'})`
-            }
+              ? "Showing cached data - unable to connect to server"
+              : `Data is stale (last updated: ${summary ? new Date(summary.generatedAt).toLocaleString() : "unknown"})`}
           </Alert>
         )}
 
@@ -350,25 +350,21 @@ function ReleaseReadinessRoute() {
                   <Typography variant="caption" color="text.secondary">
                     Version/Commit
                   </Typography>
-                  <Typography variant="body2">
-                    {summary?.versionOrCommit || 'unknown'}
-                  </Typography>
+                  <Typography variant="body2">{summary?.versionOrCommit || "unknown"}</Typography>
                 </Box>
                 <Box>
                   <Typography variant="caption" color="text.secondary">
                     Generated At
                   </Typography>
                   <Typography variant="body2">
-                    {summary ? new Date(summary.generatedAt).toLocaleString() : 'unknown'}
+                    {summary ? new Date(summary.generatedAt).toLocaleString() : "unknown"}
                   </Typography>
                 </Box>
                 <Box>
                   <Typography variant="caption" color="text.secondary">
                     Total Checks
                   </Typography>
-                  <Typography variant="body2">
-                    {summary?.checks.length || 0}
-                  </Typography>
+                  <Typography variant="body2">{summary?.checks.length || 0}</Typography>
                 </Box>
               </Stack>
             </Stack>
@@ -376,7 +372,11 @@ function ReleaseReadinessRoute() {
         </Card>
 
         {/* Tabs */}
-        <Tabs value={activeTab} onChange={(e, v) => setActiveTab(v)} aria-label="Release readiness tabs">
+        <Tabs
+          value={activeTab}
+          onChange={(e, v) => setActiveTab(v)}
+          aria-label="Release readiness tabs"
+        >
           <Tab label="Checks" />
           <Tab label="Evidence Explorer" />
         </Tabs>
@@ -416,7 +416,12 @@ function ReleaseReadinessRoute() {
                         <Box>
                           <Typography variant="subtitle2">Evidence:</Typography>
                           {check.evidenceLinks.map((link, i) => (
-                            <Typography key={i} variant="body2" component="code" sx={{ display: 'block', fontFamily: 'monospace' }}>
+                            <Typography
+                              key={i}
+                              variant="body2"
+                              component="code"
+                              sx={{ display: "block", fontFamily: "monospace" }}
+                            >
                               {link}
                             </Typography>
                           ))}
@@ -455,7 +460,11 @@ function ReleaseReadinessRoute() {
                       {evidenceIndex.controls.map((control) => (
                         <TableRow key={control.id}>
                           <TableCell>
-                            <Typography variant="body2" component="code" sx={{ fontFamily: 'monospace', fontWeight: 'bold' }}>
+                            <Typography
+                              variant="body2"
+                              component="code"
+                              sx={{ fontFamily: "monospace", fontWeight: "bold" }}
+                            >
                               {control.id}
                             </Typography>
                           </TableCell>
@@ -499,27 +508,27 @@ function ReleaseReadinessRoute() {
                             </Typography>
                             <Box
                               sx={{
-                                backgroundColor: 'grey.900',
-                                color: 'grey.100',
+                                backgroundColor: "grey.900",
+                                color: "grey.100",
                                 p: 1,
                                 borderRadius: 1,
-                                fontFamily: 'monospace',
-                                fontSize: '0.875rem',
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                alignItems: 'center',
+                                fontFamily: "monospace",
+                                fontSize: "0.875rem",
+                                display: "flex",
+                                justifyContent: "space-between",
+                                alignItems: "center",
                               }}
                             >
                               <Typography
                                 component="code"
-                                sx={{ fontFamily: 'monospace', color: 'inherit' }}
+                                sx={{ fontFamily: "monospace", color: "inherit" }}
                               >
                                 {item.verificationCommand}
                               </Typography>
                               <IconButton
                                 size="small"
                                 onClick={() => copyToClipboard(item.verificationCommand)}
-                                sx={{ color: 'grey.100' }}
+                                sx={{ color: "grey.100" }}
                                 aria-label="Copy verification command"
                               >
                                 <ContentCopyIcon fontSize="small" />
@@ -534,7 +543,8 @@ function ReleaseReadinessRoute() {
               </Box>
             )}
 
-            {(!evidenceIndex || (evidenceIndex.controls.length === 0 && evidenceIndex.evidence.length === 0)) && (
+            {(!evidenceIndex ||
+              (evidenceIndex.controls.length === 0 && evidenceIndex.evidence.length === 0)) && (
               <Alert severity="info">No evidence data available</Alert>
             )}
           </Stack>

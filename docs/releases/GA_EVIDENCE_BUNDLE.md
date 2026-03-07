@@ -35,6 +35,7 @@ node scripts/release/ga_evidence_pack.mjs
 ```
 
 This will:
+
 1. Run `pnpm ga:verify` and fail fast if any gate fails
 2. Generate SBOM (CycloneDX 1.5)
 3. Collect verification reports
@@ -51,6 +52,7 @@ node scripts/release/ga_evidence_pack.mjs --check-determinism
 ```
 
 This runs the evidence pack generation **twice** and verifies that:
+
 - Hash ledgers are identical
 - All artifacts are deterministic
 - No timestamps, random UUIDs, or locale-dependent sorting
@@ -72,13 +74,13 @@ dist/ga-evidence/
 
 ### Artifact Descriptions
 
-| File | Description | Role | Required |
-|------|-------------|------|----------|
-| `GA_EVIDENCE_MANIFEST.yml` | Evidence manifest describing bundle contents | metadata | Yes |
-| `sbom.cdx.json` | Software Bill of Materials (CycloneDX 1.5) | sbom | Yes |
-| `ga_verify_report.json` | GA verification gate results (JSON format) | verification | Yes |
-| `ga_verify_report.md` | GA verification gate results (Markdown format) | verification | No |
-| `evidence.sha256` | SHA-256 hash ledger for integrity verification | integrity | Yes |
+| File                       | Description                                    | Role         | Required |
+| -------------------------- | ---------------------------------------------- | ------------ | -------- |
+| `GA_EVIDENCE_MANIFEST.yml` | Evidence manifest describing bundle contents   | metadata     | Yes      |
+| `sbom.cdx.json`            | Software Bill of Materials (CycloneDX 1.5)     | sbom         | Yes      |
+| `ga_verify_report.json`    | GA verification gate results (JSON format)     | verification | Yes      |
+| `ga_verify_report.md`      | GA verification gate results (Markdown format) | verification | No       |
+| `evidence.sha256`          | SHA-256 hash ledger for integrity verification | integrity    | Yes      |
 
 ---
 
@@ -211,18 +213,21 @@ The evidence bundle does NOT include:
 To add cryptographic attestations:
 
 1. **Install cosign**:
+
    ```bash
    # See: https://docs.sigstore.dev/cosign/installation/
    ```
 
 2. **Configure OIDC in CI**:
+
    ```yaml
    permissions:
-     id-token: write  # Required for OIDC
+     id-token: write # Required for OIDC
      contents: read
    ```
 
 3. **Sign artifacts**:
+
    ```bash
    cosign sign-blob \
      --bundle evidence.bundle \
@@ -280,6 +285,7 @@ node scripts/release/ga_evidence_pack.mjs
 ```
 
 **Options:**
+
 - `--output-dir DIR` - Custom output directory (default: `dist/ga-evidence`)
 - `--check-determinism` - Run twice and verify outputs match
 - `--help` - Show help message
@@ -309,6 +315,7 @@ node scripts/release/ga_evidence_pack.mjs --help
 If the evidence pack generation fails with `ga:verify failed`, it means the codebase does not pass GA gates.
 
 **Fix:**
+
 1. Run `pnpm ga:verify` directly to see which gate failed
 2. Fix the issue (typecheck, lint, build, test, or smoke)
 3. Re-run evidence pack generation
@@ -318,11 +325,13 @@ If the evidence pack generation fails with `ga:verify failed`, it means the code
 If SBOM generation fails:
 
 1. Install a supported SBOM tool:
+
    ```bash
    pnpm add -D @cyclonedx/cyclonedx-npm
    ```
 
 2. Verify installation:
+
    ```bash
    npx @cyclonedx/cyclonedx-npm --version
    ```
@@ -364,8 +373,8 @@ Planned improvements:
 
 ## Change Log
 
-| Date | Change | Author |
-|------|--------|--------|
+| Date       | Change                                    | Author               |
+| ---------- | ----------------------------------------- | -------------------- |
 | 2026-01-23 | Initial GA Evidence Bundle implementation | Platform Engineering |
 
 ---

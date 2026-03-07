@@ -4,7 +4,7 @@
  * Content-based routing, topic patterns, and message filtering
  */
 
-import type { Message, MessageFilter } from '../core/types.js';
+import type { Message, MessageFilter } from "../core/types.js";
 
 export interface RoutingRule {
   id: string;
@@ -46,13 +46,11 @@ export class MessageRouter {
 
     for (const rule of sortedRules) {
       if (this.matchesRule(message, rule)) {
-        const routedMessage = rule.transform
-          ? rule.transform(message)
-          : message;
+        const routedMessage = rule.transform ? rule.transform(message) : message;
 
         routes.push({
           destination: rule.destination,
-          message: routedMessage
+          message: routedMessage,
         });
       }
     }
@@ -91,7 +89,9 @@ export class MessageRouter {
       for (const [key, value] of Object.entries(filter.headers)) {
         const headerValue = message.metadata.headers?.[key];
         if (!headerValue) return false;
-        if (!headerValue) {return false;}
+        if (!headerValue) {
+          return false;
+        }
 
         const allowedValues = Array.isArray(value) ? value : [value];
         if (!allowedValues.includes(headerValue)) {
@@ -110,10 +110,7 @@ export class MessageRouter {
     }
 
     // Check source
-    if (
-      filter.source &&
-      !filter.source.includes(message.metadata.source)
-    ) {
+    if (filter.source && !filter.source.includes(message.metadata.source)) {
       return false;
     }
 
@@ -146,34 +143,35 @@ export class TopicMatcher {
     if (topic === pattern) return true;
 
     // Multi-level wildcard
-    if (pattern === '#') return true;
-    if (topic === pattern) {return true;}
+    if (pattern === "#") return true;
+    if (topic === pattern) {
+      return true;
+    }
 
     // Multi-level wildcard
-    if (pattern === '#') {return true;}
+    if (pattern === "#") {
+      return true;
+    }
 
-    const topicParts = topic.split('.');
-    const patternParts = pattern.split('.');
+    const topicParts = topic.split(".");
+    const patternParts = pattern.split(".");
 
     return this.matchParts(topicParts, patternParts);
   }
 
-  private static matchParts(
-    topicParts: string[],
-    patternParts: string[]
-  ): boolean {
+  private static matchParts(topicParts: string[], patternParts: string[]): boolean {
     let ti = 0;
     let pi = 0;
 
     while (ti < topicParts.length && pi < patternParts.length) {
       const pattern = patternParts[pi];
 
-      if (pattern === '#') {
+      if (pattern === "#") {
         // Multi-level wildcard matches rest of topic
         return true;
       }
 
-      if (pattern === '*') {
+      if (pattern === "*") {
         // Single-level wildcard
         ti++;
         pi++;

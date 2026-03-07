@@ -23,7 +23,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Install deps
         run: pnpm install --frozen-lockfile
@@ -65,7 +65,6 @@ jobs:
 
       - name: Report separation gate
         run: pnpm gate:report
-
 
       - name: Schema validation gate
         run: pnpm gate:schema

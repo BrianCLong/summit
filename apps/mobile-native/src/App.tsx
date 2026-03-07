@@ -1,27 +1,24 @@
-import React, { useEffect } from 'react';
-import { StatusBar, LogBox } from 'react-native';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { PaperProvider } from 'react-native-paper';
+import React, {useEffect} from 'react';
+import {StatusBar, LogBox} from 'react-native';
+import {GestureHandlerRootView} from 'react-native-gesture-handler';
+import {SafeAreaProvider} from 'react-native-safe-area-context';
+import {PaperProvider} from 'react-native-paper';
 import Toast from 'react-native-toast-message';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ApolloProvider } from '@apollo/client/react';
+import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
+import {ApolloProvider} from '@apollo/client/react';
 
-import { apolloClient } from './services/GraphQLClient';
-import { AuthProvider } from './contexts/AuthContext';
-import { OfflineProvider } from './contexts/OfflineContext';
-import { LocationProvider } from './contexts/LocationContext';
-import { AppNavigator } from './navigation/AppNavigator';
-import { theme } from './theme';
-import { initializeApp } from './services/AppInitializer';
-import { ErrorBoundary } from './components/ErrorBoundary';
-import { SplashScreen } from './screens/SplashScreen';
+import {apolloClient} from './services/GraphQLClient';
+import {AuthProvider} from './contexts/AuthContext';
+import {OfflineProvider} from './contexts/OfflineContext';
+import {LocationProvider} from './contexts/LocationContext';
+import {AppNavigator} from './navigation/AppNavigator';
+import {theme} from './theme';
+import {initializeApp} from './services/AppInitializer';
+import {ErrorBoundary} from './components/ErrorBoundary';
+import {SplashScreen} from './screens/SplashScreen';
 
 // Ignore specific warnings
-LogBox.ignoreLogs([
-  'Non-serializable values were found in the navigation state',
-  'Require cycle:',
-]);
+LogBox.ignoreLogs(['Non-serializable values were found in the navigation state', 'Require cycle:']);
 
 // Create React Query client
 const queryClient = new QueryClient({
@@ -62,7 +59,7 @@ const App: React.FC = () => {
 
   return (
     <ErrorBoundary>
-      <GestureHandlerRootView style={{ flex: 1 }}>
+      <GestureHandlerRootView style={{flex: 1}}>
         <SafeAreaProvider>
           <PaperProvider theme={theme}>
             <QueryClientProvider client={queryClient}>

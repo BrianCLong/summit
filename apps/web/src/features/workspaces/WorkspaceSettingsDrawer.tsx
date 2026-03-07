@@ -1,5 +1,10 @@
 import React, { useMemo } from 'react'
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/Drawer'
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+} from '@/components/ui/Drawer'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
 import { Switch } from '@/components/ui/switch'
@@ -60,7 +65,8 @@ export function WorkspaceSettingsDrawer() {
                 <div className="space-y-1">
                   <div className="font-medium capitalize">{key}</div>
                   <div className="text-xs text-muted-foreground">
-                    {config.visible ? 'Visible' : 'Hidden'} · Weight {config.size}
+                    {config.visible ? 'Visible' : 'Hidden'} · Weight{' '}
+                    {config.size}
                   </div>
                   <div className="flex items-center gap-3">
                     <span className="text-xs text-muted-foreground">Size</span>

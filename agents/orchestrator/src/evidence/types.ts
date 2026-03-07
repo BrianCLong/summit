@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 export const PlanStepSchema = z.object({
   step_id: z.string(),
@@ -33,29 +33,29 @@ export type PlanStepIR = z.infer<typeof PlanStepSchema>;
 export type PlanIR = z.infer<typeof PlanIRSchema>;
 
 export type TraceEventType =
-  | 'run:started'
-  | 'run:completed'
-  | 'run:failed'
-  | 'chain:started'
-  | 'chain:completed'
-  | 'chain:failed'
-  | 'step:started'
-  | 'step:completed'
-  | 'step:failed'
-  | 'step:fallback'
-  | 'tool:started'
-  | 'tool:completed'
-  | 'tool:failed'
-  | 'tool:validation_failed'
-  | 'tool:postcondition_failed'
-  | 'governance:blocked'
-  | 'governance:violation'
-  | 'budget:exceeded'
-  | 'budget:warning'
-  | 'hallucination:detected'
-  | 'circuit:opened'
-  | 'circuit:closed'
-  | 'circuit:half-open';
+  | "run:started"
+  | "run:completed"
+  | "run:failed"
+  | "chain:started"
+  | "chain:completed"
+  | "chain:failed"
+  | "step:started"
+  | "step:completed"
+  | "step:failed"
+  | "step:fallback"
+  | "tool:started"
+  | "tool:completed"
+  | "tool:failed"
+  | "tool:validation_failed"
+  | "tool:postcondition_failed"
+  | "governance:blocked"
+  | "governance:violation"
+  | "budget:exceeded"
+  | "budget:warning"
+  | "hallucination:detected"
+  | "circuit:opened"
+  | "circuit:closed"
+  | "circuit:half-open";
 
 export interface TraceEvent {
   type: TraceEventType;

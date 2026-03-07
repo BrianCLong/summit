@@ -2,7 +2,7 @@
  * Computer Vision Utility Functions
  */
 
-import { BoundingBox, BoundingBoxXYXY, Point, Detection } from './types.js';
+import { BoundingBox, BoundingBoxXYXY, Point, Detection } from "./types.js";
 
 /**
  * Convert XYWH bbox to XYXY format
@@ -127,11 +127,7 @@ export function isPointInBbox(point: Point, bbox: BoundingBox): boolean {
 /**
  * Scale bounding box
  */
-export function scaleBbox(
-  bbox: BoundingBox,
-  scaleX: number,
-  scaleY: number
-): BoundingBox {
+export function scaleBbox(bbox: BoundingBox, scaleX: number, scaleY: number): BoundingBox {
   return {
     x: bbox.x * scaleX,
     y: bbox.y * scaleY,
@@ -144,8 +140,8 @@ export function scaleBbox(
  * Expand bounding box by a factor
  */
 export function expandBbox(bbox: BoundingBox, factor: number): BoundingBox {
-  const expandX = bbox.width * (factor - 1) / 2;
-  const expandY = bbox.height * (factor - 1) / 2;
+  const expandX = (bbox.width * (factor - 1)) / 2;
+  const expandY = (bbox.height * (factor - 1)) / 2;
 
   return {
     x: bbox.x - expandX,
@@ -158,11 +154,7 @@ export function expandBbox(bbox: BoundingBox, factor: number): BoundingBox {
 /**
  * Clip bounding box to image dimensions
  */
-export function clipBbox(
-  bbox: BoundingBox,
-  imageWidth: number,
-  imageHeight: number
-): BoundingBox {
+export function clipBbox(bbox: BoundingBox, imageWidth: number, imageHeight: number): BoundingBox {
   const x = Math.max(0, Math.min(bbox.x, imageWidth));
   const y = Math.max(0, Math.min(bbox.y, imageHeight));
   const x2 = Math.max(0, Math.min(bbox.x + bbox.width, imageWidth));
@@ -213,7 +205,7 @@ export function denormalizeBbox(
  */
 export function cosineSimilarity(vec1: number[], vec2: number[]): number {
   if (vec1.length !== vec2.length) {
-    throw new Error('Vectors must have the same length');
+    throw new Error("Vectors must have the same length");
   }
 
   let dotProduct = 0;
@@ -235,7 +227,7 @@ export function cosineSimilarity(vec1: number[], vec2: number[]): number {
  */
 export function euclideanDistance(vec1: number[], vec2: number[]): number {
   if (vec1.length !== vec2.length) {
-    throw new Error('Vectors must have the same length');
+    throw new Error("Vectors must have the same length");
   }
 
   let sum = 0;
@@ -258,20 +250,14 @@ export function normalizeVector(vector: number[]): number[] {
 /**
  * Filter detections by confidence threshold
  */
-export function filterByConfidence(
-  detections: Detection[],
-  threshold: number
-): Detection[] {
+export function filterByConfidence(detections: Detection[], threshold: number): Detection[] {
   return detections.filter((d) => d.confidence >= threshold);
 }
 
 /**
  * Filter detections by class names
  */
-export function filterByClasses(
-  detections: Detection[],
-  classNames: string[]
-): Detection[] {
+export function filterByClasses(detections: Detection[], classNames: string[]): Detection[] {
   const classSet = new Set(classNames);
   return detections.filter((d) => classSet.has(d.class_name));
 }
@@ -317,19 +303,17 @@ export function bboxesOverlap(bbox1: BoundingBox, bbox2: BoundingBox): boolean {
 /**
  * Generate color map for classes
  */
-export function generateColorMap(
-  classNames: string[]
-): Map<string, [number, number, number]> {
+export function generateColorMap(classNames: string[]): Map<string, [number, number, number]> {
   const colors = new Map<string, [number, number, number]>();
   const predefinedColors: [number, number, number][] = [
-    [255, 0, 0],     // Red
-    [0, 255, 0],     // Green
-    [0, 0, 255],     // Blue
-    [255, 255, 0],   // Yellow
-    [255, 0, 255],   // Magenta
-    [0, 255, 255],   // Cyan
-    [128, 0, 128],   // Purple
-    [255, 165, 0],   // Orange
+    [255, 0, 0], // Red
+    [0, 255, 0], // Green
+    [0, 0, 255], // Blue
+    [255, 255, 0], // Yellow
+    [255, 0, 255], // Magenta
+    [0, 255, 255], // Cyan
+    [128, 0, 128], // Purple
+    [255, 165, 0], // Orange
     [255, 192, 203], // Pink
     [128, 128, 128], // Gray
   ];
@@ -459,7 +443,9 @@ export function hsvToRgb(h: number, s: number, v: number): [number, number, numb
   const x = c * (1 - Math.abs(((h * 6) % 2) - 1));
   const m = v - c;
 
-  let r = 0, g = 0, b = 0;
+  let r = 0,
+    g = 0,
+    b = 0;
 
   if (h < 1 / 6) {
     [r, g, b] = [c, x, 0];
@@ -475,9 +461,5 @@ export function hsvToRgb(h: number, s: number, v: number): [number, number, numb
     [r, g, b] = [c, 0, x];
   }
 
-  return [
-    Math.round((r + m) * 255),
-    Math.round((g + m) * 255),
-    Math.round((b + m) * 255),
-  ];
+  return [Math.round((r + m) * 255), Math.round((g + m) * 255), Math.round((b + m) * 255)];
 }

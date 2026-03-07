@@ -1,21 +1,15 @@
-import {
-  Session,
-  InvokeArgs,
-  ToolDescriptor,
-  ResourceDescriptor,
-  PromptDescriptor,
-} from './types';
-import { sse, SseMessage } from './sse';
+import { Session, InvokeArgs, ToolDescriptor, ResourceDescriptor, PromptDescriptor } from "./types";
+import { sse, SseMessage } from "./sse";
 
 export class McpClient {
   constructor(
     private readonly baseUrl: string,
-    private readonly token: string,
+    private readonly token: string
   ) {}
 
   async connect(toolClass: string): Promise<Session> {
     const res = await fetch(`${this.baseUrl}/v1/session`, {
-      method: 'POST',
+      method: "POST",
       headers: this.jsonHeaders(),
       body: JSON.stringify({ toolClass }),
     });
@@ -25,7 +19,7 @@ export class McpClient {
 
   async invoke(session: Session, input: InvokeArgs) {
     const res = await fetch(`${this.baseUrl}/v1/session/${session.id}/invoke`, {
-      method: 'POST',
+      method: "POST",
       headers: this.jsonHeaders(),
       body: JSON.stringify(input),
     });
@@ -35,23 +29,22 @@ export class McpClient {
 
   async release(session: Session) {
     const res = await fetch(`${this.baseUrl}/v1/session/${session.id}`, {
-      method: 'DELETE',
+      method: "DELETE",
       headers: this.authHeaders(),
     });
-    if (!res.ok && res.status !== 404)
-      throw new Error(`release failed: ${res.status}`);
+    if (!res.ok && res.status !== 404) throw new Error(`release failed: ${res.status}`);
   }
 
   listTools(): Promise<ToolDescriptor[]> {
-    return this.getTyped('/.well-known/mcp-tools');
+    return this.getTyped("/.well-known/mcp-tools");
   }
 
   listResources(): Promise<ResourceDescriptor[]> {
-    return this.getTyped('/.well-known/mcp-resources');
+    return this.getTyped("/.well-known/mcp-resources");
   }
 
   listPrompts(): Promise<PromptDescriptor[]> {
-    return this.getTyped('/.well-known/mcp-prompts');
+    return this.getTyped("/.well-known/mcp-prompts");
   }
 
   stream(session: Session): AsyncGenerator<SseMessage> {
@@ -74,7 +67,7 @@ export class McpClient {
 
   private jsonHeaders() {
     return {
-      'content-type': 'application/json',
+      "content-type": "application/json",
       ...this.authHeaders(),
     };
   }

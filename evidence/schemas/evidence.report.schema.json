@@ -15,10 +15,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "name",
-          "path"
-        ],
+        "required": ["name", "path"],
         "type": "object"
       },
       "type": "array"
@@ -31,10 +28,6 @@
       "type": "string"
     }
   },
-  "required": [
-    "evidence_id",
-    "summary",
-    "artifacts"
-  ],
+  "required": ["evidence_id", "summary", "artifacts"],
   "type": "object"
 }

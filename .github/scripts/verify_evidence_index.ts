@@ -1,5 +1,5 @@
-import * as fs from 'node:fs';
-import * as path from 'node:path';
+import * as fs from "node:fs";
+import * as path from "node:path";
 
 type EvidenceEntry = {
   id: string;
@@ -21,12 +21,12 @@ function mustExist(filePath: string) {
 }
 
 function readText(filePath: string): string {
-  return fs.readFileSync(filePath, 'utf8');
+  return fs.readFileSync(filePath, "utf8");
 }
 
 function main() {
-  const baseDir = path.join(process.cwd(), 'evidence', 'pidm');
-  const indexPath = path.join(baseDir, 'index.json');
+  const baseDir = path.join(process.cwd(), "evidence", "pidm");
+  const indexPath = path.join(baseDir, "index.json");
 
   mustExist(indexPath);
 
@@ -41,18 +41,12 @@ function main() {
     mustExist(path.join(baseDir, entry.stamp));
   }
 
-  const reports = index.evidence.map((entry) =>
-    readText(path.join(baseDir, entry.report)),
-  );
-  const metrics = index.evidence.map((entry) =>
-    readText(path.join(baseDir, entry.metrics)),
-  );
+  const reports = index.evidence.map((entry) => readText(path.join(baseDir, entry.report)));
+  const metrics = index.evidence.map((entry) => readText(path.join(baseDir, entry.metrics)));
 
   for (const text of [...reports, ...metrics]) {
-    if (text.includes('generated_at')) {
-      throw new Error(
-        'report.json and metrics.json must not include timestamps (use stamp.json).',
-      );
+    if (text.includes("generated_at")) {
+      throw new Error("report.json and metrics.json must not include timestamps (use stamp.json).");
     }
   }
 }

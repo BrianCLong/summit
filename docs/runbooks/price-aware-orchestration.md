@@ -32,27 +32,32 @@
 ## Common Incidents & Actions
 
 ### Pricing refresh failing (auth, parse, DB errors)
+
 1. Check Grafana panel “Pricing refresh success vs error” and alert annotations.
 2. Inspect Conductor logs for correlation ID on failed refresh.
 3. Manually trigger `POST /api/pools/pricing/refresh` with service account token.
 4. If DB write errors persist: switch refresh into cache-only mode (set feature flag `PAO_REFRESH_DISABLE_PERSIST=true`) and open a ticket for DB health.
 
 ### Stale pricing (no refresh for N minutes)
+
 1. Validate `pao_pricing_last_success_timestamp_seconds` < 30m.
 2. If stale, run manual refresh; verify Postgres `pool_pricing` rows updated.
 3. If upstream API unreachable, freeze last-good cache and enable alert suppression window; plan backoff retries.
 
 ### Pool selection returning “none” / “unknown”
+
 1. Check `pao_selector_no_eligible_total` and `pao_unknown_pool_selections_total`.
 2. Confirm residency filter in request; relax residency/labels if policy allows.
 3. Ensure `pool_pricing` has entries for all `pool_registry` IDs; reseed from `db/seeds/pool_pricing_v1.sql` if missing.
 
 ### Residency filter causing no eligible pools
+
 1. Compare request residency to `pool_registry.region` values.
 2. If misaligned, add matching regional label or adjust request filter (with approval).
 3. If policy forbids override, route via baseline selector (see Degraded Mode).
 
 ### Capacity reservations stuck active / not released
+
 1. List reservations via `GET /api/pools/capacity/status`; note `expiresAt`.
 2. Manually release via `POST /api/pools/capacity/release`.
 3. If repeated, reduce reservation TTL defaults; review worker heartbeats emitting release events.

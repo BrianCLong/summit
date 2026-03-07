@@ -117,16 +117,16 @@ global:
   evaluation_interval: 15s
 
 rule_files:
-  - 'maestro_alerts.yml'
+  - "maestro_alerts.yml"
 
 scrape_configs:
-  - job_name: 'maestro-api'
+  - job_name: "maestro-api"
     static_configs:
-      - targets: ['api:3000']
-    metrics_path: '/metrics'
+      - targets: ["api:3000"]
+    metrics_path: "/metrics"
     scrape_interval: 30s
 
-  - job_name: 'maestro-executors'
+  - job_name: "maestro-executors"
     kubernetes_sd_configs:
       - role: pod
     relabel_configs:
@@ -134,13 +134,13 @@ scrape_configs:
         action: keep
         regex: maestro-executor
 
-  - job_name: 'postgres-exporter'
+  - job_name: "postgres-exporter"
     static_configs:
-      - targets: ['postgres-exporter:9187']
+      - targets: ["postgres-exporter:9187"]
 
-  - job_name: 'redis-exporter'
+  - job_name: "redis-exporter"
     static_configs:
-      - targets: ['redis-exporter:9121']
+      - targets: ["redis-exporter:9121"]
 ```
 
 ### Grafana Dashboards
@@ -186,8 +186,8 @@ groups:
         labels:
           severity: critical
         annotations:
-          summary: 'Maestro API is down'
-          description: 'The Maestro API has been down for more than 1 minute'
+          summary: "Maestro API is down"
+          description: "The Maestro API has been down for more than 1 minute"
 
       - alert: HighWorkflowFailureRate
         expr: rate(maestro_workflow_failures_total[5m]) / rate(maestro_workflow_runs_total[5m]) > 0.1
@@ -195,8 +195,8 @@ groups:
         labels:
           severity: critical
         annotations:
-          summary: 'High workflow failure rate'
-          description: 'Workflow failure rate is {{ $value | humanizePercentage }} over the last 5 minutes'
+          summary: "High workflow failure rate"
+          description: "Workflow failure rate is {{ $value | humanizePercentage }} over the last 5 minutes"
 
       - alert: DatabaseConnectionsExhausted
         expr: pg_stat_activity_count / pg_settings_max_connections > 0.9
@@ -204,8 +204,8 @@ groups:
         labels:
           severity: critical
         annotations:
-          summary: 'Database connections nearly exhausted'
-          description: 'Database is using {{ $value | humanizePercentage }} of available connections'
+          summary: "Database connections nearly exhausted"
+          description: "Database is using {{ $value | humanizePercentage }} of available connections"
 
       - alert: ExecutorPoolSaturated
         expr: maestro_executor_queue_length > 1000
@@ -213,8 +213,8 @@ groups:
         labels:
           severity: critical
         annotations:
-          summary: 'Executor pool is saturated'
-          description: 'Executor queue length is {{ $value }}, indicating overload'
+          summary: "Executor pool is saturated"
+          description: "Executor queue length is {{ $value }}, indicating overload"
 ```
 
 ### Warning Alerts
@@ -228,8 +228,8 @@ groups:
       labels:
         severity: warning
       annotations:
-        summary: 'High API latency'
-        description: '95th percentile latency is {{ $value }}s'
+        summary: "High API latency"
+        description: "95th percentile latency is {{ $value }}s"
 
     - alert: MemoryUsageHigh
       expr: maestro_memory_usage_percent > 80
@@ -237,8 +237,8 @@ groups:
       labels:
         severity: warning
       annotations:
-        summary: 'High memory usage'
-        description: 'Memory usage is {{ $value }}% on {{ $labels.instance }}'
+        summary: "High memory usage"
+        description: "Memory usage is {{ $value }}% on {{ $labels.instance }}"
 
     - alert: DiskSpaceLow
       expr: (1 - maestro_disk_free_bytes / maestro_disk_total_bytes) > 0.85
@@ -246,8 +246,8 @@ groups:
       labels:
         severity: warning
       annotations:
-        summary: 'Low disk space'
-        description: 'Disk usage is {{ $value | humanizePercentage }} on {{ $labels.instance }}'
+        summary: "Low disk space"
+        description: "Disk usage is {{ $value | humanizePercentage }} on {{ $labels.instance }}"
 ```
 
 ### PagerDuty Integration
@@ -255,34 +255,34 @@ groups:
 ```yaml
 # alertmanager.yml
 global:
-  pagerduty_url: 'https://events.pagerduty.com/v2/enqueue'
+  pagerduty_url: "https://events.pagerduty.com/v2/enqueue"
 
 route:
-  group_by: ['alertname']
+  group_by: ["alertname"]
   group_wait: 10s
   group_interval: 10s
   repeat_interval: 1h
-  receiver: 'pagerduty-critical'
+  receiver: "pagerduty-critical"
   routes:
     - match:
         severity: warning
-      receiver: 'slack-warnings'
+      receiver: "slack-warnings"
     - match:
         severity: critical
-      receiver: 'pagerduty-critical'
+      receiver: "pagerduty-critical"
 
 receivers:
-  - name: 'pagerduty-critical'
+  - name: "pagerduty-critical"
     pagerduty_configs:
-      - service_key: 'YOUR_PAGERDUTY_SERVICE_KEY'
-        description: '{{ range .Alerts }}{{ .Annotations.summary }}{{ end }}'
+      - service_key: "YOUR_PAGERDUTY_SERVICE_KEY"
+        description: "{{ range .Alerts }}{{ .Annotations.summary }}{{ end }}"
 
-  - name: 'slack-warnings'
+  - name: "slack-warnings"
     slack_configs:
-      - api_url: 'YOUR_SLACK_WEBHOOK_URL'
-        channel: '#maestro-alerts'
-        title: 'Maestro Warning Alert'
-        text: '{{ range .Alerts }}{{ .Annotations.description }}{{ end }}'
+      - api_url: "YOUR_SLACK_WEBHOOK_URL"
+        channel: "#maestro-alerts"
+        title: "Maestro Warning Alert"
+        text: "{{ range .Alerts }}{{ .Annotations.description }}{{ end }}"
 ```
 
 ## Troubleshooting
@@ -561,14 +561,14 @@ cluster-node-timeout 15000
 
 ```typescript
 // Application-level caching
-import Redis from 'ioredis';
+import Redis from "ioredis";
 
 class CacheManager {
   private redis: Redis;
 
   constructor() {
     this.redis = new Redis({
-      host: 'redis',
+      host: "redis",
       port: 6379,
       retryDelayOnFailover: 100,
       maxRetriesPerRequest: 3,
@@ -867,7 +867,7 @@ kind: CronJob
 metadata:
   name: security-scan
 spec:
-  schedule: '0 2 * * *' # Daily at 2 AM
+  schedule: "0 2 * * *" # Daily at 2 AM
   jobTemplate:
     spec:
       template:
@@ -879,9 +879,9 @@ spec:
                 - trivy
                 - image
                 - --exit-code
-                - '1'
+                - "1"
                 - --severity
-                - 'HIGH,CRITICAL'
+                - "HIGH,CRITICAL"
                 - maestro/api:latest
           restartPolicy: OnFailure
 ```
@@ -897,12 +897,12 @@ kind: Role
 metadata:
   name: maestro-operator
 rules:
-  - apiGroups: ['']
-    resources: ['pods', 'services', 'configmaps']
-    verbs: ['get', 'list', 'watch', 'create', 'update', 'patch']
-  - apiGroups: ['apps']
-    resources: ['deployments', 'replicasets']
-    verbs: ['get', 'list', 'watch', 'create', 'update', 'patch']
+  - apiGroups: [""]
+    resources: ["pods", "services", "configmaps"]
+    verbs: ["get", "list", "watch", "create", "update", "patch"]
+  - apiGroups: ["apps"]
+    resources: ["deployments", "replicasets"]
+    verbs: ["get", "list", "watch", "create", "update", "patch"]
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1

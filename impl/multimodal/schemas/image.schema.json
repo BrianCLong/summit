@@ -5,13 +5,16 @@
   "type": "object",
   "required": ["id", "uri", "modality", "mime_type"],
   "properties": {
-    "id": {"type": "string", "description": "Stable image identifier"},
-    "tenant_id": {"type": "string", "description": "Owning tenant for isolation"},
-    "uri": {"type": "string", "description": "Location of the image (path, URL, or object storage)"},
-    "modality": {"const": "image"},
-    "mime_type": {"type": "string", "description": "MIME type such as image/png"},
-    "width": {"type": "integer", "minimum": 1},
-    "height": {"type": "integer", "minimum": 1},
+    "id": { "type": "string", "description": "Stable image identifier" },
+    "tenant_id": { "type": "string", "description": "Owning tenant for isolation" },
+    "uri": {
+      "type": "string",
+      "description": "Location of the image (path, URL, or object storage)"
+    },
+    "modality": { "const": "image" },
+    "mime_type": { "type": "string", "description": "MIME type such as image/png" },
+    "width": { "type": "integer", "minimum": 1 },
+    "height": { "type": "integer", "minimum": 1 },
     "captions": {
       "type": "array",
       "description": "Optional captions or scene descriptions",
@@ -19,9 +22,9 @@
         "type": "object",
         "required": ["text"],
         "properties": {
-          "text": {"type": "string"},
-          "source": {"type": "string", "description": "detector|human|model"},
-          "confidence": {"type": "number", "minimum": 0, "maximum": 1}
+          "text": { "type": "string" },
+          "source": { "type": "string", "description": "detector|human|model" },
+          "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
         }
       }
     },
@@ -32,22 +35,22 @@
         "type": "object",
         "required": ["id", "bbox"],
         "properties": {
-          "id": {"type": "string"},
-          "label": {"type": "string", "description": "Object/category label"},
+          "id": { "type": "string" },
+          "label": { "type": "string", "description": "Object/category label" },
           "bbox": {
             "type": "object",
             "required": ["x", "y", "w", "h"],
             "properties": {
-              "x": {"type": "number", "minimum": 0},
-              "y": {"type": "number", "minimum": 0},
-              "w": {"type": "number", "exclusiveMinimum": 0},
-              "h": {"type": "number", "exclusiveMinimum": 0}
+              "x": { "type": "number", "minimum": 0 },
+              "y": { "type": "number", "minimum": 0 },
+              "w": { "type": "number", "exclusiveMinimum": 0 },
+              "h": { "type": "number", "exclusiveMinimum": 0 }
             }
           },
-          "text": {"type": "string", "description": "OCR text if available"},
+          "text": { "type": "string", "description": "OCR text if available" },
           "embeddings": {
             "type": "array",
-            "items": {"type": "number"},
+            "items": { "type": "number" },
             "description": "Visual embedding vector for the region"
           },
           "relations": {
@@ -57,9 +60,9 @@
               "type": "object",
               "required": ["target_id", "type"],
               "properties": {
-                "target_id": {"type": "string"},
-                "type": {"type": "string"},
-                "confidence": {"type": "number", "minimum": 0, "maximum": 1}
+                "target_id": { "type": "string" },
+                "type": { "type": "string" },
+                "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
               }
             }
           }
@@ -68,7 +71,7 @@
     },
     "embeddings": {
       "type": "array",
-      "items": {"type": "number"},
+      "items": { "type": "number" },
       "description": "Global image embedding for retrieval"
     },
     "metadata": {
@@ -78,7 +81,7 @@
     },
     "security_tags": {
       "type": "array",
-      "items": {"type": "string"},
+      "items": { "type": "string" },
       "description": "Redaction or classification tags applied to the image"
     }
   },

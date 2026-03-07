@@ -107,13 +107,7 @@ verify:
       with: { sbom: sbom.json, output: osv.json }
     - name: Trivy SBOM scan
       uses: aquasecurity/trivy-action@0.22.0
-      with:
-        {
-          scan-type: 'sbom',
-          input: 'sbom.json',
-          format: 'json',
-          output: 'trivy.json',
-        }
+      with: { scan-type: "sbom", input: "sbom.json", format: "json", output: "trivy.json" }
     - name: Cosign sign attestations
       run: |
         cosign attest --predicate sbom.json --type cyclonedx $GITHUB_REF_NAME --yes

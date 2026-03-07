@@ -15,12 +15,12 @@ pnpm add @intelgraph/sdk
 Initialize the SDK with your API key. This provides access to both the core intelligence graph and the governance layer.
 
 ```typescript
-import { createSummitSDK, IntelGraphCoreClient } from '@intelgraph/sdk';
+import { createSummitSDK, IntelGraphCoreClient } from "@intelgraph/sdk";
 
 // Initialize the Governance Layer (Policy, Compliance, Evidence)
 const sdk = createSummitSDK({
   apiKey: process.env.SUMMIT_API_KEY,
-  baseUrl: 'https://api.summit.intelgraph.ai'
+  baseUrl: "https://api.summit.intelgraph.ai",
 });
 
 // Initialize the Core Intelligence Layer (Entities, Graphs, Analytics)
@@ -36,19 +36,19 @@ const core = new IntelGraphCoreClient({
 Feed an entity into the graph to start an investigation. Summit agents will enrich it and map relationships.
 
 ```typescript
-const graphId = 'investigation-2024-001';
+const graphId = "investigation-2024-001";
 
 // 1. Create an entity in the graph
 const target = await core.entities.postGraphsEntities({
   graphId,
   requestBody: {
-    name: 'Suspicious Corp Ltd',
-    type: 'organization',
+    name: "Suspicious Corp Ltd",
+    type: "organization",
     properties: {
-      registration_number: '12345678',
-      jurisdiction: 'offshore-haven'
-    }
-  }
+      registration_number: "12345678",
+      jurisdiction: "offshore-haven",
+    },
+  },
 });
 
 console.log(`Tracked target: ${target.id}`);
@@ -62,12 +62,15 @@ Set up a monitor to detect specific patterns (e.g., sanction evasion, money laun
 // 2. Analyze the graph for risk patterns
 const insights = await core.graphAnalytics.getGraphsInsights({
   graphId,
-  severity: 'high'
+  severity: "high",
 });
 
-const risks = insights.insights?.filter(i => i.type === 'risk') || [];
+const risks = insights.insights?.filter((i) => i.type === "risk") || [];
 if (risks.length > 0) {
-  console.log('High risk detected:', risks.map(r => r.description));
+  console.log(
+    "High risk detected:",
+    risks.map((r) => r.description)
+  );
 }
 ```
 
@@ -78,15 +81,15 @@ Every automated decision must be explainable. Generate an evidence bundle that i
 ```typescript
 // 3. Create an immutable evidence record
 const evidence = await sdk.compliance.createEvidence({
-  type: 'investigation_report',
+  type: "investigation_report",
   title: `Risk Report for ${target.name}`,
   content: {
     targetId: target.id,
     riskCount: risks.length,
     topology: insights.coverage, // The subgraph coverage
-    policyVersion: 'v2.1.0'
+    policyVersion: "v2.1.0",
   },
-  tags: ['compliance', 'pci-dss']
+  tags: ["compliance", "pci-dss"],
 });
 
 console.log(`Evidence created: ${evidence.id}`);
@@ -95,5 +98,5 @@ console.log(`Audit Trail: ${evidence.provenanceChainId}`); // If available in Ev
 
 ## Next Steps
 
-*   **[Governance API Reference](./GOVERNANCE.md)**: Deep dive into Policy and Evidence.
-*   **[Agent Mesh](./AGENTS.md)**: How to define custom agent behaviors.
+- **[Governance API Reference](./GOVERNANCE.md)**: Deep dive into Policy and Evidence.
+- **[Agent Mesh](./AGENTS.md)**: How to define custom agent behaviors.

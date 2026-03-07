@@ -134,39 +134,43 @@ curl -X GET "https://summit.example.com/api/v1/siem/export/signals" \
 
 ```javascript
 // splunk-summit-forwarder.js
-import axios from 'axios';
+import axios from "axios";
 
-const SUMMIT_API = 'https://summit.example.com/api/v1';
-const SPLUNK_HEC = 'https://splunk.example.com:8088/services/collector/event';
+const SUMMIT_API = "https://summit.example.com/api/v1";
+const SPLUNK_HEC = "https://splunk.example.com:8088/services/collector/event";
 
 async function forwardToSplunk() {
   // Fetch signals from Summit
   const response = await axios.get(`${SUMMIT_API}/siem/export/signals`, {
     headers: {
-      'Authorization': `Bearer ${process.env.SUMMIT_API_TOKEN}`,
-      'X-Tenant-ID': process.env.SUMMIT_TENANT_ID
+      Authorization: `Bearer ${process.env.SUMMIT_API_TOKEN}`,
+      "X-Tenant-ID": process.env.SUMMIT_TENANT_ID,
     },
     params: {
       startTime: new Date(Date.now() - 3600000).toISOString(), // Last hour
       endTime: new Date().toISOString(),
-      minSeverity: 'low'
-    }
+      minSeverity: "low",
+    },
   });
 
   // Forward to Splunk
   for (const signal of response.data.signals) {
-    await axios.post(SPLUNK_HEC, {
-      time: new Date(signal.timestamp).getTime() / 1000,
-      host: 'summit',
-      source: 'summit-api',
-      sourcetype: 'summit:security:signal',
-      index: 'security',
-      event: signal
-    }, {
-      headers: {
-        'Authorization': `Splunk ${process.env.SPLUNK_HEC_TOKEN}`
+    await axios.post(
+      SPLUNK_HEC,
+      {
+        time: new Date(signal.timestamp).getTime() / 1000,
+        host: "summit",
+        source: "summit-api",
+        sourcetype: "summit:security:signal",
+        index: "security",
+        event: signal,
+      },
+      {
+        headers: {
+          Authorization: `Splunk ${process.env.SPLUNK_HEC_TOKEN}`,
+        },
       }
-    });
+    );
   }
 
   console.log(`Forwarded ${response.data.signals.length} signals to Splunk`);
@@ -180,37 +184,37 @@ setInterval(forwardToSplunk, 5 * 60 * 1000);
 
 ```javascript
 // elasticsearch-summit-forwarder.js
-import { Client } from '@elastic/elasticsearch';
-import axios from 'axios';
+import { Client } from "@elastic/elasticsearch";
+import axios from "axios";
 
 const client = new Client({
-  node: 'https://elasticsearch.example.com:9200',
+  node: "https://elasticsearch.example.com:9200",
   auth: {
-    apiKey: process.env.ELASTIC_API_KEY
-  }
+    apiKey: process.env.ELASTIC_API_KEY,
+  },
 });
 
 async function forwardToElasticsearch() {
   const response = await axios.get(`${SUMMIT_API}/siem/export/signals`, {
     headers: {
-      'Authorization': `Bearer ${process.env.SUMMIT_API_TOKEN}`,
-      'X-Tenant-ID': process.env.SUMMIT_TENANT_ID
+      Authorization: `Bearer ${process.env.SUMMIT_API_TOKEN}`,
+      "X-Tenant-ID": process.env.SUMMIT_TENANT_ID,
     },
     params: {
       startTime: new Date(Date.now() - 3600000).toISOString(),
-      endTime: new Date().toISOString()
-    }
+      endTime: new Date().toISOString(),
+    },
   });
 
-  const operations = response.data.signals.flatMap(signal => [
-    { index: { _index: 'summit-security-signals' } },
-    signal
+  const operations = response.data.signals.flatMap((signal) => [
+    { index: { _index: "summit-security-signals" } },
+    signal,
   ]);
 
   const bulkResponse = await client.bulk({ operations });
 
   if (bulkResponse.errors) {
-    console.error('Bulk indexing errors:', bulkResponse.items);
+    console.error("Bulk indexing errors:", bulkResponse.items);
   } else {
     console.log(`Indexed ${response.data.signals.length} signals`);
   }
@@ -421,6 +425,7 @@ See `transparency-report-sample.md` below:
 **Summary:** Summit processes data exclusively for agent orchestration, policy enforcement, and compliance monitoring.
 
 **Purposes:**
+
 - Agent execution and orchestration
 - Security policy enforcement
 - Compliance monitoring and reporting
@@ -444,11 +449,13 @@ See `transparency-report-sample.md` below:
 ## 3. Security Posture
 
 ### Authentication Events
+
 - **Total:** 3,456
 - **Successful:** 3,401
 - **Failed:** 55
 
 ### Authorization Decisions
+
 - **Total:** 12,789
 - **Allowed:** 12,234
 - **Denied:** 555
@@ -597,4 +604,4 @@ Complete sample payloads are available in:
 
 ---
 
-*Last updated: 2025-12-31 | Version: 1.0.0*
+_Last updated: 2025-12-31 | Version: 1.0.0_

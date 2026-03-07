@@ -1,7 +1,7 @@
-import type { AttributionResult, DigitalFootprint } from '../index.js';
-import { EmailAnalyzer } from '../analyzers/EmailAnalyzer.js';
-import { UsernameAnalyzer } from '../analyzers/UsernameAnalyzer.js';
-import { PhoneAnalyzer } from '../analyzers/PhoneAnalyzer.js';
+import type { AttributionResult, DigitalFootprint } from "../index.js";
+import { EmailAnalyzer } from "../analyzers/EmailAnalyzer.js";
+import { UsernameAnalyzer } from "../analyzers/UsernameAnalyzer.js";
+import { PhoneAnalyzer } from "../analyzers/PhoneAnalyzer.js";
 
 export class AttributionEngine {
   private emailAnalyzer = new EmailAnalyzer();
@@ -18,7 +18,7 @@ export class AttributionEngine {
       accounts: footprint.accounts,
       confidence: footprint.confidence,
       evidence: [`Found ${footprint.accounts.length} accounts`],
-      digitalFootprint: footprint
+      digitalFootprint: footprint,
     };
   }
 
@@ -30,16 +30,18 @@ export class AttributionEngine {
       type,
       accounts: [],
       related: {},
-      confidence: 0.7
+      confidence: 0.7,
     };
   }
 
-  private detectIdentifierType(id: string): 'email' | 'username' | 'phone' | 'domain' | 'ip' | 'crypto' {
-    if (id.includes('@')) return 'email';
-    if (/^\+?\d{10,}$/.test(id)) return 'phone';
-    if (/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(id)) return 'ip';
-    if (/^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$/.test(id)) return 'crypto';
-    return 'username';
+  private detectIdentifierType(
+    id: string
+  ): "email" | "username" | "phone" | "domain" | "ip" | "crypto" {
+    if (id.includes("@")) return "email";
+    if (/^\+?\d{10,}$/.test(id)) return "phone";
+    if (/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(id)) return "ip";
+    if (/^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$/.test(id)) return "crypto";
+    return "username";
   }
 
   private async findRelatedIdentifiers(footprint: DigitalFootprint): Promise<string[]> {

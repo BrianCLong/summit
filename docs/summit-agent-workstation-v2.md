@@ -20,14 +20,14 @@ This is not a chatbot shell. It is a governed execution plane for persistent aut
 
 Compared with contemporary workstation stacks, SAW-V2 introduces a stricter operating model:
 
-| Capability | Typical workstation baseline | SAW-V2 target state |
-| --- | --- | --- |
-| Memory | Session + vector recall | Multi-tier memory (episodic/semantic/policy), conflict resolution, and signed memory events |
-| Automation | Triggered flows with weak controls | Policy-gated task graphs with deterministic scheduling and rollback checkpoints |
-| Channels | Multiple connectors | Unified channel contracts with identity binding, rate safety, and trust tiers |
-| Skills | Plugin execution | Sandboxed skills with capability manifests, budget controls, and evidence receipts |
-| Security | Best-effort hardening | MAESTRO-aligned threat model, tool allowlists, runtime abuse detection |
-| Explainability | Logs and traces | Reproducible decision ledger + evidence bundle for each agent action |
+| Capability     | Typical workstation baseline       | SAW-V2 target state                                                                         |
+| -------------- | ---------------------------------- | ------------------------------------------------------------------------------------------- |
+| Memory         | Session + vector recall            | Multi-tier memory (episodic/semantic/policy), conflict resolution, and signed memory events |
+| Automation     | Triggered flows with weak controls | Policy-gated task graphs with deterministic scheduling and rollback checkpoints             |
+| Channels       | Multiple connectors                | Unified channel contracts with identity binding, rate safety, and trust tiers               |
+| Skills         | Plugin execution                   | Sandboxed skills with capability manifests, budget controls, and evidence receipts          |
+| Security       | Best-effort hardening              | MAESTRO-aligned threat model, tool allowlists, runtime abuse detection                      |
+| Explainability | Logs and traces                    | Reproducible decision ledger + evidence bundle for each agent action                        |
 
 ## Product Objectives
 
@@ -101,21 +101,25 @@ SAW-V2 enforces governed execution rather than optional governance overlays:
 ## Delivery Plan (90 Days)
 
 ### Phase A (Weeks 1-3): Foundations
+
 - Define canonical workstation contracts (intent, skill, memory, channel).
 - Ship baseline Decision Ledger schema and evidence bundle format.
 - Deliver deterministic workflow runner with checkpointing.
 
 ### Phase B (Weeks 4-7): Core Capability
+
 - Implement memory governor with provenance and conflict arbitration.
 - Launch channel federation adapters with trust tiers.
 - Add skill capability manifests and sandbox enforcement.
 
 ### Phase C (Weeks 8-10): Hardening
+
 - Complete threat-model test suite for injection and tool misuse.
 - Add anomaly-driven kill-switches and rollback drills.
 - Publish SLO dashboards (time-to-green, action success, rollback success).
 
 ### Phase D (Weeks 11-13): GA Readiness
+
 - Run full gate suite with evidence completeness checks.
 - Execute incident tabletop + replay validation.
 - Freeze APIs and publish migration guides.

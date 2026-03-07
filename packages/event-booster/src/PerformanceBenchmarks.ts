@@ -1,7 +1,7 @@
 // @ts-nocheck
-import { performance } from 'node:perf_hooks';
-import EventBooster from './EventBooster.js';
-import { BoostRunResult, EventRecord } from './types.js';
+import { performance } from "node:perf_hooks";
+import EventBooster from "./EventBooster.js";
+import { BoostRunResult, EventRecord } from "./types.js";
 
 export interface BenchmarkConfig {
   iterations?: number;
@@ -39,7 +39,7 @@ const computePercentile = (samples: number[], percentile: number): number => {
 const ensureIterations = (value: number | undefined): number => {
   const iterations = value ?? 10;
   if (!Number.isFinite(iterations) || iterations <= 0) {
-    throw new Error('Benchmark iterations must be greater than zero.');
+    throw new Error("Benchmark iterations must be greater than zero.");
   }
   return Math.floor(iterations);
 };
@@ -51,12 +51,12 @@ export const runPatternBenchmark = (
   booster: EventBooster,
   patternName: string,
   events: readonly EventRecord[],
-  config: BenchmarkConfig = {},
+  config: BenchmarkConfig = {}
 ): BenchmarkResult => {
   const iterations = ensureIterations(config.iterations);
   const warmupIterations = Math.max(
     0,
-    Math.floor(config.warmupIterations ?? Math.min(2, iterations)),
+    Math.floor(config.warmupIterations ?? Math.min(2, iterations))
   );
   const now = config.now ?? (() => performance.now());
   const options = config.patternOptions ?? {};
@@ -80,8 +80,7 @@ export const runPatternBenchmark = (
   const minMs = durations.length > 0 ? Math.min(...durations) : 0;
   const maxMs = durations.length > 0 ? Math.max(...durations) : 0;
   const p95Ms = computePercentile(durations, 95);
-  const throughputPerSecond =
-    averageMs > 0 ? (events.length * 1000) / averageMs : 0;
+  const throughputPerSecond = averageMs > 0 ? (events.length * 1000) / averageMs : 0;
 
   return {
     patternName,
@@ -102,9 +101,9 @@ export const benchmarkPatterns = (
   booster: EventBooster,
   events: readonly EventRecord[],
   patternNames: readonly string[],
-  config: BenchmarkConfig = {},
+  config: BenchmarkConfig = {}
 ): BenchmarkResult[] => {
   return patternNames.map((patternName) =>
-    runPatternBenchmark(booster, patternName, events, config),
+    runPatternBenchmark(booster, patternName, events, config)
   );
 };

@@ -160,7 +160,10 @@ export type TriPaneAction =
   | { type: 'SET_TIME_WINDOW'; payload: TimeWindow }
   | { type: 'RESET_FILTERS' }
   | { type: 'UPDATE_GRAPH_LAYOUT'; payload: GraphLayout }
-  | { type: 'SET_MAP_VIEW'; payload: { center: [number, number]; zoom: number } }
+  | {
+      type: 'SET_MAP_VIEW'
+      payload: { center: [number, number]; zoom: number }
+    }
 
 /**
  * Keyboard shortcuts for tri-pane navigation

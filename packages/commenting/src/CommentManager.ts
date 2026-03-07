@@ -1,5 +1,5 @@
-import { nanoid } from 'nanoid';
-import { EventEmitter } from 'events';
+import { nanoid } from "nanoid";
+import { EventEmitter } from "events";
 import {
   CommentThread,
   Comment,
@@ -12,12 +12,14 @@ import {
   ReactionType,
   CommentFilter,
   CommentSearchResult,
-  RichTextContent
-} from './types';
+  RichTextContent,
+} from "./types";
 
 export interface CommentStore {
   // Thread operations
-  createThread(thread: Omit<CommentThread, 'id' | 'createdAt' | 'updatedAt'>): Promise<CommentThread>;
+  createThread(
+    thread: Omit<CommentThread, "id" | "createdAt" | "updatedAt">
+  ): Promise<CommentThread>;
   getThread(id: string): Promise<CommentThread | null>;
   updateThread(id: string, updates: Partial<CommentThread>): Promise<CommentThread>;
   deleteThread(id: string): Promise<void>;
@@ -25,38 +27,42 @@ export interface CommentStore {
   searchThreads(query: string, filter: CommentFilter): Promise<CommentSearchResult>;
 
   // Comment operations
-  createComment(comment: Omit<Comment, 'id' | 'createdAt'>): Promise<Comment>;
+  createComment(comment: Omit<Comment, "id" | "createdAt">): Promise<Comment>;
   getComment(id: string): Promise<Comment | null>;
   updateComment(id: string, updates: Partial<Comment>): Promise<Comment>;
   deleteComment(id: string): Promise<void>;
   listComments(threadId: string): Promise<Comment[]>;
 
   // Reaction operations
-  addReaction(reaction: Omit<CommentReaction, 'id' | 'createdAt'>): Promise<CommentReaction>;
+  addReaction(reaction: Omit<CommentReaction, "id" | "createdAt">): Promise<CommentReaction>;
   removeReaction(commentId: string, userId: string, type: ReactionType): Promise<void>;
   getReactions(commentId: string): Promise<CommentReaction[]>;
 
   // Vote operations
-  addVote(vote: Omit<CommentVote, 'id' | 'createdAt'>): Promise<CommentVote>;
+  addVote(vote: Omit<CommentVote, "id" | "createdAt">): Promise<CommentVote>;
   removeVote(commentId: string, userId: string): Promise<void>;
   getVotes(commentId: string): Promise<CommentVote[]>;
 
   // Annotation operations
-  createAnnotation(annotation: Omit<Annotation, 'id' | 'createdAt' | 'updatedAt'>): Promise<Annotation>;
+  createAnnotation(
+    annotation: Omit<Annotation, "id" | "createdAt" | "updatedAt">
+  ): Promise<Annotation>;
   getAnnotation(id: string): Promise<Annotation | null>;
   updateAnnotation(id: string, updates: Partial<Annotation>): Promise<Annotation>;
   deleteAnnotation(id: string): Promise<void>;
   listAnnotations(resourceId: string, layerId?: string): Promise<Annotation[]>;
 
   // Layer operations
-  createLayer(layer: Omit<AnnotationLayer, 'id' | 'createdAt'>): Promise<AnnotationLayer>;
+  createLayer(layer: Omit<AnnotationLayer, "id" | "createdAt">): Promise<AnnotationLayer>;
   getLayer(id: string): Promise<AnnotationLayer | null>;
   updateLayer(id: string, updates: Partial<AnnotationLayer>): Promise<AnnotationLayer>;
   deleteLayer(id: string): Promise<void>;
   listLayers(resourceId: string): Promise<AnnotationLayer[]>;
 
   // Notification operations
-  createNotification(notification: Omit<CommentNotification, 'id' | 'createdAt'>): Promise<CommentNotification>;
+  createNotification(
+    notification: Omit<CommentNotification, "id" | "createdAt">
+  ): Promise<CommentNotification>;
   getNotifications(userId: string, unreadOnly?: boolean): Promise<CommentNotification[]>;
   markAsRead(notificationId: string): Promise<void>;
 }
@@ -72,7 +78,7 @@ export class CommentManager extends EventEmitter {
     resourceType: string,
     resourceId: string,
     createdBy: string,
-    anchor: CommentThread['anchor'],
+    anchor: CommentThread["anchor"],
     options?: {
       projectId?: string;
       metadata?: Record<string, any>;
@@ -87,10 +93,10 @@ export class CommentManager extends EventEmitter {
       anchor,
       status: CommentStatus.OPEN,
       createdBy,
-      metadata: options?.metadata
+      metadata: options?.metadata,
     });
 
-    this.emit('thread:created', { thread });
+    this.emit("thread:created", { thread });
 
     return thread;
   }
@@ -99,15 +105,15 @@ export class CommentManager extends EventEmitter {
     const thread = await this.store.updateThread(threadId, {
       status: CommentStatus.RESOLVED,
       resolvedBy,
-      resolvedAt: new Date()
+      resolvedAt: new Date(),
     });
 
-    this.emit('thread:resolved', { thread, resolvedBy });
+    this.emit("thread:resolved", { thread, resolvedBy });
 
     // Notify participants
     const comments = await this.store.listComments(threadId);
-    const participants = [...new Set(comments.map(c => c.authorId))];
-    await this.notifyUsers(participants, threadId, 'resolution');
+    const participants = [...new Set(comments.map((c) => c.authorId))];
+    await this.notifyUsers(participants, threadId, "resolution");
 
     return thread;
   }
@@ -116,10 +122,10 @@ export class CommentManager extends EventEmitter {
     const thread = await this.store.updateThread(threadId, {
       status: CommentStatus.OPEN,
       resolvedBy: undefined,
-      resolvedAt: undefined
+      resolvedAt: undefined,
     });
 
-    this.emit('thread:reopened', { thread });
+    this.emit("thread:reopened", { thread });
 
     return thread;
   }
@@ -131,14 +137,14 @@ export class CommentManager extends EventEmitter {
     content: RichTextContent[],
     options?: {
       parentCommentId?: string;
-      attachments?: Comment['attachments'];
+      attachments?: Comment["attachments"];
     }
   ): Promise<Comment> {
     // Extract mentions
     const mentions = this.extractMentions(content);
 
     // Generate plain text for search
-    const plainText = content.map(c => c.content).join(' ');
+    const plainText = content.map((c) => c.content).join(" ");
 
     const comment = await this.store.createComment({
       threadId,
@@ -148,43 +154,42 @@ export class CommentManager extends EventEmitter {
       attachments: options?.attachments || [],
       mentions,
       isEdited: false,
-      parentCommentId: options?.parentCommentId
+      parentCommentId: options?.parentCommentId,
     });
 
-    this.emit('comment:created', { comment });
+    this.emit("comment:created", { comment });
 
     // Send notifications to mentioned users
     if (mentions.length > 0) {
-      await this.notifyUsers(mentions, comment.id, 'mention');
+      await this.notifyUsers(mentions, comment.id, "mention");
     }
 
     // Notify thread participants
     const thread = await this.store.getThread(threadId);
     if (thread) {
       const comments = await this.store.listComments(threadId);
-      const participants = [...new Set(comments.map(c => c.authorId).filter(id => id !== authorId))];
-      await this.notifyUsers(participants, comment.id, 'reply');
+      const participants = [
+        ...new Set(comments.map((c) => c.authorId).filter((id) => id !== authorId)),
+      ];
+      await this.notifyUsers(participants, comment.id, "reply");
     }
 
     return comment;
   }
 
-  async editComment(
-    commentId: string,
-    content: RichTextContent[]
-  ): Promise<Comment> {
+  async editComment(commentId: string, content: RichTextContent[]): Promise<Comment> {
     const mentions = this.extractMentions(content);
-    const plainText = content.map(c => c.content).join(' ');
+    const plainText = content.map((c) => c.content).join(" ");
 
     const comment = await this.store.updateComment(commentId, {
       content,
       plainText,
       mentions,
       isEdited: true,
-      editedAt: new Date()
+      editedAt: new Date(),
     });
 
-    this.emit('comment:edited', { comment });
+    this.emit("comment:edited", { comment });
 
     return comment;
   }
@@ -192,16 +197,16 @@ export class CommentManager extends EventEmitter {
   async deleteComment(commentId: string, userId: string): Promise<void> {
     const comment = await this.store.getComment(commentId);
     if (!comment) {
-      throw new Error('Comment not found');
+      throw new Error("Comment not found");
     }
 
     if (comment.authorId !== userId) {
-      throw new Error('Only the author can delete a comment');
+      throw new Error("Only the author can delete a comment");
     }
 
     await this.store.deleteComment(commentId);
 
-    this.emit('comment:deleted', { commentId, threadId: comment.threadId });
+    this.emit("comment:deleted", { commentId, threadId: comment.threadId });
   }
 
   // Reaction management
@@ -213,28 +218,24 @@ export class CommentManager extends EventEmitter {
     const reaction = await this.store.addReaction({
       commentId,
       userId,
-      type
+      type,
     });
 
-    this.emit('reaction:added', { reaction });
+    this.emit("reaction:added", { reaction });
 
     // Notify comment author
     const comment = await this.store.getComment(commentId);
     if (comment && comment.authorId !== userId) {
-      await this.notifyUsers([comment.authorId], commentId, 'reaction');
+      await this.notifyUsers([comment.authorId], commentId, "reaction");
     }
 
     return reaction;
   }
 
-  async removeReaction(
-    commentId: string,
-    userId: string,
-    type: ReactionType
-  ): Promise<void> {
+  async removeReaction(commentId: string, userId: string, type: ReactionType): Promise<void> {
     await this.store.removeReaction(commentId, userId, type);
 
-    this.emit('reaction:removed', { commentId, userId, type });
+    this.emit("reaction:removed", { commentId, userId, type });
   }
 
   async getReactionsSummary(commentId: string): Promise<Record<ReactionType, number>> {
@@ -257,11 +258,13 @@ export class CommentManager extends EventEmitter {
     return this.store.addVote({ commentId, userId, value: -1 });
   }
 
-  async getVoteScore(commentId: string): Promise<{ score: number; upvotes: number; downvotes: number }> {
+  async getVoteScore(
+    commentId: string
+  ): Promise<{ score: number; upvotes: number; downvotes: number }> {
     const votes = await this.store.getVotes(commentId);
 
-    const upvotes = votes.filter(v => v.value > 0).length;
-    const downvotes = votes.filter(v => v.value < 0).length;
+    const upvotes = votes.filter((v) => v.value > 0).length;
+    const downvotes = votes.filter((v) => v.value < 0).length;
     const score = upvotes - downvotes;
 
     return { score, upvotes, downvotes };
@@ -273,11 +276,11 @@ export class CommentManager extends EventEmitter {
     resourceType: string,
     resourceId: string,
     createdBy: string,
-    type: Annotation['type'],
-    geometry: Annotation['geometry'],
+    type: Annotation["type"],
+    geometry: Annotation["geometry"],
     options?: {
       layerId?: string;
-      style?: Annotation['style'];
+      style?: Annotation["style"];
       content?: string;
       linkedCommentId?: string;
     }
@@ -289,35 +292,35 @@ export class CommentManager extends EventEmitter {
       layerId: options?.layerId,
       type,
       geometry,
-      style: options?.style || { color: '#FFFF00', opacity: 0.5 },
+      style: options?.style || { color: "#FFFF00", opacity: 0.5 },
       content: options?.content,
       linkedCommentId: options?.linkedCommentId,
       createdBy,
-      metadata: {}
+      metadata: {},
     });
 
-    this.emit('annotation:created', { annotation });
+    this.emit("annotation:created", { annotation });
 
     return annotation;
   }
 
   async updateAnnotation(
     annotationId: string,
-    updates: Partial<Pick<Annotation, 'geometry' | 'style' | 'content'>>
+    updates: Partial<Pick<Annotation, "geometry" | "style" | "content">>
   ): Promise<Annotation> {
     const annotation = await this.store.updateAnnotation(annotationId, {
       ...updates,
-      updatedAt: new Date()
+      updatedAt: new Date(),
     });
 
-    this.emit('annotation:updated', { annotation });
+    this.emit("annotation:updated", { annotation });
 
     return annotation;
   }
 
   async deleteAnnotation(annotationId: string): Promise<void> {
     await this.store.deleteAnnotation(annotationId);
-    this.emit('annotation:deleted', { annotationId });
+    this.emit("annotation:deleted", { annotationId });
   }
 
   // Layer management
@@ -343,10 +346,10 @@ export class CommentManager extends EventEmitter {
       isLocked: false,
       opacity: 1.0,
       order,
-      createdBy
+      createdBy,
     });
 
-    this.emit('layer:created', { layer });
+    this.emit("layer:created", { layer });
 
     return layer;
   }
@@ -354,19 +357,16 @@ export class CommentManager extends EventEmitter {
   async toggleLayerVisibility(layerId: string): Promise<AnnotationLayer> {
     const layer = await this.store.getLayer(layerId);
     if (!layer) {
-      throw new Error('Layer not found');
+      throw new Error("Layer not found");
     }
 
     return this.store.updateLayer(layerId, {
-      isVisible: !layer.isVisible
+      isVisible: !layer.isVisible,
     });
   }
 
   // Search and filter
-  async searchComments(
-    query: string,
-    filter: CommentFilter
-  ): Promise<CommentSearchResult> {
+  async searchComments(query: string, filter: CommentFilter): Promise<CommentSearchResult> {
     return this.store.searchThreads(query, filter);
   }
 
@@ -378,7 +378,7 @@ export class CommentManager extends EventEmitter {
     const threads = await this.store.listThreads({
       resourceType,
       resourceId,
-      status
+      status,
     });
 
     const comments: Comment[] = [];
@@ -397,7 +397,7 @@ export class CommentManager extends EventEmitter {
 
   async markNotificationAsRead(notificationId: string): Promise<void> {
     await this.store.markAsRead(notificationId);
-    this.emit('notification:read', { notificationId });
+    this.emit("notification:read", { notificationId });
   }
 
   // Helper methods
@@ -405,23 +405,23 @@ export class CommentManager extends EventEmitter {
     const mentions: string[] = [];
     for (const block of content) {
       if (block.mentions) {
-        mentions.push(...block.mentions.map(m => m.userId));
+        mentions.push(...block.mentions.map((m) => m.userId));
       }
     }
     return [...new Set(mentions)];
   }
 
-  private determineAnchorType(anchor: CommentThread['anchor']): CommentThread['anchorType'] {
-    if (anchor.textPosition) return 'text';
-    if (anchor.elementId) return 'element';
-    if (anchor.coordinates) return 'coordinate';
-    return 'global';
+  private determineAnchorType(anchor: CommentThread["anchor"]): CommentThread["anchorType"] {
+    if (anchor.textPosition) return "text";
+    if (anchor.elementId) return "element";
+    if (anchor.coordinates) return "coordinate";
+    return "global";
   }
 
   private async notifyUsers(
     userIds: string[],
     commentId: string,
-    type: CommentNotification['type']
+    type: CommentNotification["type"]
   ): Promise<void> {
     const comment = await this.store.getComment(commentId);
     if (!comment) return;
@@ -432,11 +432,11 @@ export class CommentManager extends EventEmitter {
         commentId,
         threadId: comment.threadId,
         type,
-        read: false
+        read: false,
       });
     }
 
-    this.emit('notifications:sent', { userIds, commentId, type });
+    this.emit("notifications:sent", { userIds, commentId, type });
   }
 
   // Analytics
@@ -444,7 +444,7 @@ export class CommentManager extends EventEmitter {
     const filter: CommentFilter = {
       workspaceId,
       dateFrom,
-      dateTo
+      dateTo,
     };
 
     const threads = await this.store.listThreads(filter);
@@ -457,14 +457,14 @@ export class CommentManager extends EventEmitter {
 
     return {
       totalThreads: threads.length,
-      openThreads: threads.filter(t => t.status === CommentStatus.OPEN).length,
-      resolvedThreads: threads.filter(t => t.status === CommentStatus.RESOLVED).length,
+      openThreads: threads.filter((t) => t.status === CommentStatus.OPEN).length,
+      resolvedThreads: threads.filter((t) => t.status === CommentStatus.RESOLVED).length,
       totalComments: allComments.length,
-      uniqueAuthors: new Set(allComments.map(c => c.authorId)).size,
+      uniqueAuthors: new Set(allComments.map((c) => c.authorId)).size,
       averageCommentsPerThread: allComments.length / threads.length,
-      threadsWithAttachments: threads.filter(t =>
-        allComments.some(c => c.threadId === t.id && c.attachments.length > 0)
-      ).length
+      threadsWithAttachments: threads.filter((t) =>
+        allComments.some((c) => c.threadId === t.id && c.attachments.length > 0)
+      ).length,
     };
   }
 }

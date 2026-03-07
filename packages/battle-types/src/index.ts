@@ -8,42 +8,42 @@
 // =============================================================================
 
 export type DataDomain =
-  | 'SENSOR_GRID'
-  | 'SATELLITE'
-  | 'COMMS'
-  | 'CYBER'
-  | 'HUMINT'
-  | 'SIGINT'
-  | 'IMINT'
-  | 'GEOINT'
-  | 'OSINT'
-  | 'ELINT'
-  | 'MASINT'
-  | 'EXTERNAL';
+  | "SENSOR_GRID"
+  | "SATELLITE"
+  | "COMMS"
+  | "CYBER"
+  | "HUMINT"
+  | "SIGINT"
+  | "IMINT"
+  | "GEOINT"
+  | "OSINT"
+  | "ELINT"
+  | "MASINT"
+  | "EXTERNAL";
 
-export type ForceType = 'BLUE' | 'RED' | 'NEUTRAL' | 'UNKNOWN';
+export type ForceType = "BLUE" | "RED" | "NEUTRAL" | "UNKNOWN";
 
 export type UnitType =
-  | 'INFANTRY'
-  | 'ARMOR'
-  | 'ARTILLERY'
-  | 'AIR'
-  | 'NAVAL'
-  | 'CYBER'
-  | 'LOGISTICS'
-  | 'COMMAND'
-  | 'RECON'
-  | 'SPECIAL_OPS';
+  | "INFANTRY"
+  | "ARMOR"
+  | "ARTILLERY"
+  | "AIR"
+  | "NAVAL"
+  | "CYBER"
+  | "LOGISTICS"
+  | "COMMAND"
+  | "RECON"
+  | "SPECIAL_OPS";
 
-export type ThreatLevel = 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW' | 'MINIMAL';
+export type ThreatLevel = "CRITICAL" | "HIGH" | "MEDIUM" | "LOW" | "MINIMAL";
 
 export type OperationalStatus =
-  | 'ACTIVE'
-  | 'STANDBY'
-  | 'ENGAGED'
-  | 'RETREATING'
-  | 'DESTROYED'
-  | 'UNKNOWN';
+  | "ACTIVE"
+  | "STANDBY"
+  | "ENGAGED"
+  | "RETREATING"
+  | "DESTROYED"
+  | "UNKNOWN";
 
 // =============================================================================
 // GEOGRAPHIC AND TEMPORAL
@@ -54,7 +54,7 @@ export interface GeoLocation {
   longitude: number;
   altitude?: number;
   accuracy?: number;
-  coordinateSystem?: 'WGS84' | 'MGRS' | 'UTM';
+  coordinateSystem?: "WGS84" | "MGRS" | "UTM";
 }
 
 export interface BoundingBox {
@@ -76,7 +76,7 @@ export interface DataSource {
   id: string;
   name: string;
   domain: DataDomain;
-  reliability: 'A' | 'B' | 'C' | 'D' | 'E' | 'F'; // NATO reliability scale
+  reliability: "A" | "B" | "C" | "D" | "E" | "F"; // NATO reliability scale
   credibility: 1 | 2 | 3 | 4 | 5 | 6; // NATO credibility scale
   lastContact: Date;
   metadata?: Record<string, unknown>;
@@ -173,7 +173,7 @@ export interface SensorReading {
 
 export interface Detection {
   id: string;
-  type: 'CONTACT' | 'SIGNAL' | 'ANOMALY' | 'TRACK';
+  type: "CONTACT" | "SIGNAL" | "ANOMALY" | "TRACK";
   classification?: string;
   location: GeoLocation;
   bearing?: number;
@@ -183,7 +183,7 @@ export interface Detection {
 }
 
 export interface SignatureData {
-  type: 'RADAR' | 'IR' | 'ACOUSTIC' | 'EM' | 'VISUAL';
+  type: "RADAR" | "IR" | "ACOUSTIC" | "EM" | "VISUAL";
   strength: number;
   frequency?: number;
   characteristics?: Record<string, unknown>;
@@ -228,7 +228,7 @@ export interface CommsIntercept {
   protocol?: string;
   sourceLocation?: GeoLocation;
   targetLocation?: GeoLocation;
-  contentType: 'VOICE' | 'DATA' | 'VIDEO' | 'ENCRYPTED';
+  contentType: "VOICE" | "DATA" | "VIDEO" | "ENCRYPTED";
   classification?: string;
   metadata?: Record<string, unknown>;
 }
@@ -236,13 +236,7 @@ export interface CommsIntercept {
 export interface CyberEvent {
   eventId: string;
   timestamp: Date;
-  eventType:
-    | 'INTRUSION'
-    | 'MALWARE'
-    | 'DOS'
-    | 'DATA_EXFIL'
-    | 'RECONNAISSANCE'
-    | 'LATERAL_MOVEMENT';
+  eventType: "INTRUSION" | "MALWARE" | "DOS" | "DATA_EXFIL" | "RECONNAISSANCE" | "LATERAL_MOVEMENT";
   severity: ThreatLevel;
   sourceIp?: string;
   targetIp?: string;
@@ -294,14 +288,14 @@ export interface DataConflict {
   }>;
   resolution?: {
     selectedValue: unknown;
-    method: 'HIGHEST_CONFIDENCE' | 'MOST_RECENT' | 'WEIGHTED_AVERAGE' | 'MANUAL';
+    method: "HIGHEST_CONFIDENCE" | "MOST_RECENT" | "WEIGHTED_AVERAGE" | "MANUAL";
   };
 }
 
 export interface EntityCorrelation {
   entityId1: string;
   entityId2: string;
-  correlationType: 'SAME_ENTITY' | 'RELATED' | 'COMMANDING' | 'SUPPORTING';
+  correlationType: "SAME_ENTITY" | "RELATED" | "COMMANDING" | "SUPPORTING";
   confidence: number;
   evidence: string[];
 }
@@ -327,7 +321,7 @@ export interface ThreatAssessment {
   threatLevel: ThreatLevel;
   threatType: string;
   capabilities: string[];
-  intent?: 'OFFENSIVE' | 'DEFENSIVE' | 'UNKNOWN';
+  intent?: "OFFENSIVE" | "DEFENSIVE" | "UNKNOWN";
   targetAssets?: string[];
   timeToImpact?: number; // seconds
   confidence: number;
@@ -350,7 +344,7 @@ export interface SupplyLine {
   id: string;
   startPoint: GeoLocation;
   endPoint: GeoLocation;
-  status: 'OPEN' | 'CONTESTED' | 'BLOCKED' | 'DAMAGED';
+  status: "OPEN" | "CONTESTED" | "BLOCKED" | "DAMAGED";
   capacity: number;
   currentLoad: number;
   threats?: string[];
@@ -360,7 +354,7 @@ export interface LogisticsDepot {
   id: string;
   name: string;
   location: GeoLocation;
-  type: 'AMMUNITION' | 'FUEL' | 'FOOD' | 'MEDICAL' | 'EQUIPMENT' | 'MIXED';
+  type: "AMMUNITION" | "FUEL" | "FOOD" | "MEDICAL" | "EQUIPMENT" | "MIXED";
   stockLevel: number; // 0-100%
   resupplyEta?: Date;
 }
@@ -386,7 +380,7 @@ export interface Scenario {
   description?: string;
   createdAt: Date;
   createdBy: string;
-  status: 'DRAFT' | 'ACTIVE' | 'PAUSED' | 'COMPLETED';
+  status: "DRAFT" | "ACTIVE" | "PAUSED" | "COMPLETED";
   timeScale: number; // 1 = real-time, >1 = accelerated
   startTime: Date;
   currentTime: Date;
@@ -407,7 +401,7 @@ export interface ScenarioEvent {
 export interface ScenarioOutcome {
   metric: string;
   value: number;
-  comparison?: 'BETTER' | 'WORSE' | 'SAME';
+  comparison?: "BETTER" | "WORSE" | "SAME";
   notes?: string;
 }
 
@@ -419,7 +413,7 @@ export interface OperationalPlan {
   id: string;
   name: string;
   classification: string;
-  status: 'DRAFT' | 'APPROVED' | 'ACTIVE' | 'COMPLETED' | 'CANCELLED';
+  status: "DRAFT" | "APPROVED" | "ACTIVE" | "COMPLETED" | "CANCELLED";
   commander: string;
   createdAt: Date;
   approvedAt?: Date;
@@ -466,8 +460,8 @@ export interface Command {
   targetUnitId: string;
   commandType: string;
   parameters: Record<string, unknown>;
-  priority: 'IMMEDIATE' | 'PRIORITY' | 'ROUTINE';
-  status: 'PENDING' | 'ACKNOWLEDGED' | 'EXECUTING' | 'COMPLETED' | 'FAILED';
+  priority: "IMMEDIATE" | "PRIORITY" | "ROUTINE";
+  status: "PENDING" | "ACKNOWLEDGED" | "EXECUTING" | "COMPLETED" | "FAILED";
   acknowledgedAt?: Date;
   completedAt?: Date;
   result?: CommandResult;
@@ -514,20 +508,20 @@ export interface BattleEvent {
 }
 
 export type BattleEventType =
-  | 'ENTITY_DETECTED'
-  | 'ENTITY_UPDATED'
-  | 'ENTITY_LOST'
-  | 'FUSION_COMPLETED'
-  | 'THREAT_IDENTIFIED'
-  | 'COMMAND_ISSUED'
-  | 'COMMAND_ACKNOWLEDGED'
-  | 'COMMAND_COMPLETED'
-  | 'COMMAND_FAILED'
-  | 'DECISION_MADE'
-  | 'POSITION_UPDATE'
-  | 'LOGISTICS_UPDATE'
-  | 'SCENARIO_EVENT'
-  | 'ALERT';
+  | "ENTITY_DETECTED"
+  | "ENTITY_UPDATED"
+  | "ENTITY_LOST"
+  | "FUSION_COMPLETED"
+  | "THREAT_IDENTIFIED"
+  | "COMMAND_ISSUED"
+  | "COMMAND_ACKNOWLEDGED"
+  | "COMMAND_COMPLETED"
+  | "COMMAND_FAILED"
+  | "DECISION_MADE"
+  | "POSITION_UPDATE"
+  | "LOGISTICS_UPDATE"
+  | "SCENARIO_EVENT"
+  | "ALERT";
 
 export interface EventMetadata {
   sourceService: string;
@@ -543,11 +537,11 @@ export interface EventMetadata {
 export const DOMAIN_WEIGHTS: Record<DataDomain, number> = {
   SENSOR_GRID: 0.15,
   SATELLITE: 0.15,
-  COMMS: 0.10,
+  COMMS: 0.1,
   CYBER: 0.08,
   HUMINT: 0.12,
   SIGINT: 0.12,
-  IMINT: 0.10,
+  IMINT: 0.1,
   GEOINT: 0.08,
   OSINT: 0.04,
   ELINT: 0.03,

@@ -1,5 +1,10 @@
 import React, {createContext, useState, useEffect, ReactNode} from 'react';
-import {getCurrentLocation, watchLocation, clearLocationWatch, Location} from '../services/LocationService';
+import {
+  getCurrentLocation,
+  watchLocation,
+  clearLocationWatch,
+  Location,
+} from '../services/LocationService';
 
 interface LocationContextType {
   location: Location | null;
@@ -29,9 +34,11 @@ export const LocationProvider: React.FC<{children: ReactNode}> = ({children}) =>
   }, [watchId]);
 
   const startTracking = () => {
-    if (isTracking) {return;}
+    if (isTracking) {
+      return;
+    }
 
-    const id = watchLocation((loc) => {
+    const id = watchLocation(loc => {
       setLocation(loc);
     });
 

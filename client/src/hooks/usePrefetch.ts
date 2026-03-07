@@ -1,10 +1,10 @@
-import { useEffect } from 'react';
-import { useApolloClient } from '@apollo/client';
+import { useEffect } from "react";
+import { useApolloClient } from "@apollo/client";
 import {
   DB_ServerStatsDocument,
   DB_InvestigationsDocument,
   GW_GraphDataDocument,
-} from '../generated/graphql.ts';
+} from "../generated/graphql.ts";
 
 /**
  * Hook to prefetch critical dashboard data on route enter
@@ -15,14 +15,14 @@ export function useDashboardPrefetch() {
 
   useEffect(() => {
     void client
-      .query({ query: DB_ServerStatsDocument, fetchPolicy: 'cache-first' })
+      .query({ query: DB_ServerStatsDocument, fetchPolicy: "cache-first" })
       .catch((error) => {
-        console.warn('Dashboard prefetch failed: server stats', error);
+        console.warn("Dashboard prefetch failed: server stats", error);
       });
     void client
-      .query({ query: DB_InvestigationsDocument, fetchPolicy: 'cache-first' })
+      .query({ query: DB_InvestigationsDocument, fetchPolicy: "cache-first" })
       .catch((error) => {
-        console.warn('Dashboard prefetch failed: investigations', error);
+        console.warn("Dashboard prefetch failed: investigations", error);
       });
   }, [client]);
 }
@@ -39,10 +39,10 @@ export function useGraphWorkbenchPrefetch(investigationId?: string) {
       .query({
         query: GW_GraphDataDocument,
         variables: { investigationId },
-        fetchPolicy: 'cache-first',
+        fetchPolicy: "cache-first",
       })
       .catch((error) => {
-        console.warn('Graph workbench prefetch failed', error);
+        console.warn("Graph workbench prefetch failed", error);
       });
   }, [client, investigationId]);
 }
@@ -58,17 +58,19 @@ export function useIntelligentPrefetch() {
     const schedule = () => {
       if (cancelled) return;
       void client
-        .query({ query: DB_InvestigationsDocument, fetchPolicy: 'cache-first' })
+        .query({ query: DB_InvestigationsDocument, fetchPolicy: "cache-first" })
         .catch((error) => {
-          console.warn('Intelligent prefetch failed', error);
+          console.warn("Intelligent prefetch failed", error);
         });
     };
 
-    if (typeof window !== 'undefined') {
-      const requestIdleCallback = (window as any)
-        .requestIdleCallback as ((cb: () => void, opts?: { timeout?: number }) => number) | undefined;
-      const cancelIdleCallback = (window as any)
-        .cancelIdleCallback as ((id: number) => void) | undefined;
+    if (typeof window !== "undefined") {
+      const requestIdleCallback = (window as any).requestIdleCallback as
+        | ((cb: () => void, opts?: { timeout?: number }) => number)
+        | undefined;
+      const cancelIdleCallback = (window as any).cancelIdleCallback as
+        | ((id: number) => void)
+        | undefined;
       if (requestIdleCallback) {
         const id = requestIdleCallback(schedule, { timeout: 2000 });
         return () => {

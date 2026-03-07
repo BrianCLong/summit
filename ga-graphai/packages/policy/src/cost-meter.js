@@ -47,22 +47,22 @@ export class CostMeter {
     };
 
     if (caps.tokenCap > 0 && projected.tokens > caps.tokenCap) {
-      return { status: 'deny', reason: 'TOKEN_CAP_EXCEEDED', projected };
+      return { status: "deny", reason: "TOKEN_CAP_EXCEEDED", projected };
     }
 
-    if (typeof caps.hardUsd === 'number' && caps.hardUsd > 0) {
+    if (typeof caps.hardUsd === "number" && caps.hardUsd > 0) {
       if (projected.usd > caps.hardUsd) {
-        return { status: 'deny', reason: 'HARD_CAP_EXCEEDED', projected };
+        return { status: "deny", reason: "HARD_CAP_EXCEEDED", projected };
       }
       const pct = (projected.usd / caps.hardUsd) * 100;
       if (caps.softPct > 0 && pct >= caps.softPct) {
-        return { status: 'allow', softHit: true, projected };
+        return { status: "allow", softHit: true, projected };
       }
     } else if (delta.usd > 0) {
-      return { status: 'deny', reason: 'PAID_MODEL_BLOCKED', projected };
+      return { status: "deny", reason: "PAID_MODEL_BLOCKED", projected };
     }
 
-    return { status: 'allow', projected };
+    return { status: "allow", projected };
   }
 
   /**

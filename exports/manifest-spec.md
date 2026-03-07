@@ -26,14 +26,14 @@ exports/
 
 Field descriptions:
 
-| Field | Description |
-| --- | --- |
-| `version` | Semantic version of the manifest schema. Always `"1.0"` for this iteration. |
-| `bundle` | Metadata describing the export batch (ID, generated timestamp, environment, filters). |
-| `claims` | Array of claim objects with linked evidence. |
-| `artifacts` | Checksummed payload descriptors stored in the bundle. |
-| `ledger` | Pointer to the immutable ledger snapshot plus the sequences referenced by the manifest. |
-| `integrity` | Canonical manifest hash and Ed25519 signature. |
+| Field       | Description                                                                             |
+| ----------- | --------------------------------------------------------------------------------------- |
+| `version`   | Semantic version of the manifest schema. Always `"1.0"` for this iteration.             |
+| `bundle`    | Metadata describing the export batch (ID, generated timestamp, environment, filters).   |
+| `claims`    | Array of claim objects with linked evidence.                                            |
+| `artifacts` | Checksummed payload descriptors stored in the bundle.                                   |
+| `ledger`    | Pointer to the immutable ledger snapshot plus the sequences referenced by the manifest. |
+| `integrity` | Canonical manifest hash and Ed25519 signature.                                          |
 
 ## Claim & Evidence Model
 

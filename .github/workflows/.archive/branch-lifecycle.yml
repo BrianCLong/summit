@@ -3,7 +3,6 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-
 # Automatically clean up stale branches to prevent merge conflicts and repo hygiene issues
 # Current state: 409 remote branches (234 AI-generated)
 # Target: <100 active branches
@@ -17,7 +16,7 @@ concurrency:
 on:
   schedule:
     # Run daily at 02:00 UTC
-    - cron: '0 2 * * *'
+    - cron: "0 2 * * *"
   workflow_dispatch: # Allow manual triggering
 
 permissions:

@@ -4,14 +4,14 @@
  * Provides health endpoint and status checks for the synthetic monitoring service.
  */
 
-import http from 'http';
-import { URL } from 'url';
-import axios from 'axios';
+import http from "http";
+import { URL } from "url";
+import axios from "axios";
 
 const config = {
-  port: parseInt(process.env.PORT || '3000'),
-  baseUrl: process.env.BASE_URL || 'http://intelgraph-server:3000',
-  timeout: parseInt(process.env.TIMEOUT || '5000'),
+  port: parseInt(process.env.PORT || "3000"),
+  baseUrl: process.env.BASE_URL || "http://intelgraph-server:3000",
+  timeout: parseInt(process.env.TIMEOUT || "5000"),
 };
 
 class HealthCheckServer {
@@ -35,9 +35,9 @@ class HealthCheckServer {
 
   async runHealthChecks() {
     const checks = [
-      { name: 'api_health', url: `${config.baseUrl}/health` },
+      { name: "api_health", url: `${config.baseUrl}/health` },
       {
-        name: 'graphql_health',
+        name: "graphql_health",
         url: `${config.baseUrl}/graphql?query={__typename}`,
       },
     ];
@@ -85,12 +85,10 @@ class HealthCheckServer {
   }
 
   getHealthStatus() {
-    const checksArray = Array.from(this.checks.entries()).map(
-      ([name, check]) => ({
-        name,
-        ...check,
-      }),
-    );
+    const checksArray = Array.from(this.checks.entries()).map(([name, check]) => ({
+      name,
+      ...check,
+    }));
 
     return {
       healthy: this.isHealthy,
@@ -109,39 +107,39 @@ class HealthCheckServer {
 
     // Health status metric
     metrics.push(
-      `synthetic_monitor_healthy{environment="${process.env.ENVIRONMENT || 'production'}"} ${healthStatus.healthy ? 1 : 0}`,
+      `synthetic_monitor_healthy{environment="${process.env.ENVIRONMENT || "production"}"} ${healthStatus.healthy ? 1 : 0}`
     );
 
     // Uptime metric
     metrics.push(
-      `synthetic_monitor_uptime_seconds{environment="${process.env.ENVIRONMENT || 'production'}"} ${healthStatus.uptime}`,
+      `synthetic_monitor_uptime_seconds{environment="${process.env.ENVIRONMENT || "production"}"} ${healthStatus.uptime}`
     );
 
     // Memory metrics
     metrics.push(
-      `synthetic_monitor_memory_used_bytes{type="rss",environment="${process.env.ENVIRONMENT || 'production'}"} ${healthStatus.memory.rss}`,
+      `synthetic_monitor_memory_used_bytes{type="rss",environment="${process.env.ENVIRONMENT || "production"}"} ${healthStatus.memory.rss}`
     );
     metrics.push(
-      `synthetic_monitor_memory_used_bytes{type="heapUsed",environment="${process.env.ENVIRONMENT || 'production'}"} ${healthStatus.memory.heapUsed}`,
+      `synthetic_monitor_memory_used_bytes{type="heapUsed",environment="${process.env.ENVIRONMENT || "production"}"} ${healthStatus.memory.heapUsed}`
     );
     metrics.push(
-      `synthetic_monitor_memory_used_bytes{type="heapTotal",environment="${process.env.ENVIRONMENT || 'production'}"} ${healthStatus.memory.heapTotal}`,
+      `synthetic_monitor_memory_used_bytes{type="heapTotal",environment="${process.env.ENVIRONMENT || "production"}"} ${healthStatus.memory.heapTotal}`
     );
 
     // Individual check metrics
     for (const check of healthStatus.checks) {
       metrics.push(
-        `synthetic_monitor_check_healthy{check="${check.name}",environment="${process.env.ENVIRONMENT || 'production'}"} ${check.healthy ? 1 : 0}`,
+        `synthetic_monitor_check_healthy{check="${check.name}",environment="${process.env.ENVIRONMENT || "production"}"} ${check.healthy ? 1 : 0}`
       );
       metrics.push(
-        `synthetic_monitor_check_duration_seconds{check="${check.name}",environment="${process.env.ENVIRONMENT || 'production'}"} ${check.duration / 1000}`,
+        `synthetic_monitor_check_duration_seconds{check="${check.name}",environment="${process.env.ENVIRONMENT || "production"}"} ${check.duration / 1000}`
       );
       metrics.push(
-        `synthetic_monitor_check_status_code{check="${check.name}",environment="${process.env.ENVIRONMENT || 'production'}"} ${check.status}`,
+        `synthetic_monitor_check_status_code{check="${check.name}",environment="${process.env.ENVIRONMENT || "production"}"} ${check.status}`
       );
     }
 
-    return metrics.join('\n') + '\n';
+    return metrics.join("\n") + "\n";
   }
 
   start() {
@@ -149,11 +147,11 @@ class HealthCheckServer {
       const url = new URL(req.url, `http://localhost:${config.port}`);
 
       // Enable CORS
-      res.setHeader('Access-Control-Allow-Origin', '*');
-      res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-      res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+      res.setHeader("Access-Control-Allow-Origin", "*");
+      res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+      res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
-      if (req.method === 'OPTIONS') {
+      if (req.method === "OPTIONS") {
         res.writeHead(200);
         res.end();
         return;
@@ -161,72 +159,71 @@ class HealthCheckServer {
 
       try {
         switch (url.pathname) {
-          case '/health':
+          case "/health":
             const healthStatus = this.getHealthStatus();
             res.writeHead(healthStatus.healthy ? 200 : 503, {
-              'Content-Type': 'application/json',
+              "Content-Type": "application/json",
             });
             res.end(JSON.stringify(healthStatus, null, 2));
             break;
 
-          case '/metrics':
+          case "/metrics":
             const metrics = this.getMetrics();
             res.writeHead(200, {
-              'Content-Type': 'text/plain',
+              "Content-Type": "text/plain",
             });
             res.end(metrics);
             break;
 
-          case '/ready':
+          case "/ready":
             // Readiness probe - check if we've had at least one successful check
             const ready = this.lastSuccessfulCheck !== null;
             res.writeHead(ready ? 200 : 503, {
-              'Content-Type': 'application/json',
+              "Content-Type": "application/json",
             });
             res.end(
               JSON.stringify({
                 ready,
-                lastSuccessfulCheck:
-                  this.lastSuccessfulCheck?.toISOString() || null,
-              }),
+                lastSuccessfulCheck: this.lastSuccessfulCheck?.toISOString() || null,
+              })
             );
             break;
 
-          case '/live':
+          case "/live":
             // Liveness probe - basic service responsiveness
             res.writeHead(200, {
-              'Content-Type': 'application/json',
+              "Content-Type": "application/json",
             });
             res.end(
               JSON.stringify({
                 alive: true,
                 uptime: process.uptime(),
                 timestamp: new Date().toISOString(),
-              }),
+              })
             );
             break;
 
           default:
             res.writeHead(404, {
-              'Content-Type': 'application/json',
+              "Content-Type": "application/json",
             });
             res.end(
               JSON.stringify({
-                error: 'Not Found',
-                endpoints: ['/health', '/metrics', '/ready', '/live'],
-              }),
+                error: "Not Found",
+                endpoints: ["/health", "/metrics", "/ready", "/live"],
+              })
             );
         }
       } catch (error) {
-        console.error('Health check server error:', error);
+        console.error("Health check server error:", error);
         res.writeHead(500, {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         });
         res.end(
           JSON.stringify({
-            error: 'Internal Server Error',
+            error: "Internal Server Error",
             message: error.message,
-          }),
+          })
         );
       }
     });
@@ -240,15 +237,15 @@ class HealthCheckServer {
     });
 
     // Graceful shutdown
-    process.on('SIGTERM', () => {
-      console.log('Received SIGTERM, shutting down gracefully');
+    process.on("SIGTERM", () => {
+      console.log("Received SIGTERM, shutting down gracefully");
       server.close(() => {
         process.exit(0);
       });
     });
 
-    process.on('SIGINT', () => {
-      console.log('Received SIGINT, shutting down gracefully');
+    process.on("SIGINT", () => {
+      console.log("Received SIGINT, shutting down gracefully");
       server.close(() => {
         process.exit(0);
       });

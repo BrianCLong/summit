@@ -83,7 +83,10 @@ export class MaestroApi {
 
   constructor(opts: MaestroApiOptions = {}) {
     this.baseUrl =
-      opts.baseUrl || (import.meta.env as { VITE_MAESTRO_BASE_URL?: string })?.VITE_MAESTRO_BASE_URL || ''
+      opts.baseUrl ||
+      (import.meta.env as { VITE_MAESTRO_BASE_URL?: string })
+        ?.VITE_MAESTRO_BASE_URL ||
+      ''
     this.mock = Boolean(opts.mock ?? !this.baseUrl)
   }
 
@@ -301,7 +304,9 @@ export class MaestroApi {
       }
     }
     src.addEventListener('message', listener)
-    if (onError) {src.addEventListener('error', onError)}
+    if (onError) {
+      src.addEventListener('error', onError)
+    }
     return () => {
       src.removeEventListener('message', listener)
       src.close()

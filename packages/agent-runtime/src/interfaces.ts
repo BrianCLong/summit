@@ -5,7 +5,7 @@ export enum AgentStatus {
   RUNNING = "RUNNING",
   PAUSED = "PAUSED",
   COMPLETED = "COMPLETED",
-  FAILED = "FAILED"
+  FAILED = "FAILED",
 }
 
 export interface AgentLifecycle {
@@ -28,5 +28,5 @@ export interface ToolGraph {
 export const RuntimeConfigSchema = z.object({
   persistence: z.boolean(),
   streaming: z.boolean(),
-  routingPolicy: z.enum(["static", "dynamic"])
+  routingPolicy: z.enum(["static", "dynamic"]),
 });

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -9,9 +9,9 @@ import {
   Box,
   Divider,
   CircularProgress,
-} from '@mui/material';
-import { useLazyQuery } from '@apollo/client';
-import { RELATIONSHIP_BY_ID } from '../../graphql/relationship.gql';
+} from "@mui/material";
+import { useLazyQuery } from "@apollo/client";
+import { RELATIONSHIP_BY_ID } from "../../graphql/relationship.gql";
 
 export default function EdgeInspectorDialog({ open, onClose, edge }) {
   const [meta, setMeta] = useState(null);
@@ -23,13 +23,13 @@ export default function EdgeInspectorDialog({ open, onClose, edge }) {
       if (!open || !edge?.id) return;
       setLoading(true);
       try {
-        if (import.meta?.env?.VITE_RELATIONSHIP_GQL === '1') {
+        if (import.meta?.env?.VITE_RELATIONSHIP_GQL === "1") {
           // Prefer GraphQL if enabled
           const res = await runQuery({ variables: { id: edge.id } });
           const data = res?.data?.relationship;
           if (!cancelled) setMeta(data || {});
         } else {
-          const base = import.meta?.env?.VITE_API_URL || '';
+          const base = import.meta?.env?.VITE_API_URL || "";
           const res = await fetch(`${base}/dev/relationship/${edge.id}`);
           if (!res.ok) throw new Error(`HTTP ${res.status}`);
           const data = await res.json();
@@ -48,7 +48,7 @@ export default function EdgeInspectorDialog({ open, onClose, edge }) {
   }, [open, edge]);
 
   const [runQuery] = useLazyQuery(RELATIONSHIP_BY_ID, {
-    fetchPolicy: 'network-only',
+    fetchPolicy: "network-only",
   });
 
   if (!edge) return null;
@@ -59,7 +59,7 @@ export default function EdgeInspectorDialog({ open, onClose, edge }) {
       <DialogTitle>Relationship Inspector</DialogTitle>
       <DialogContent>
         {loading && (
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
             <CircularProgress size={16} />
             <Typography variant="body2" color="text.secondary">
               Loading…
@@ -73,8 +73,8 @@ export default function EdgeInspectorDialog({ open, onClose, edge }) {
         )}
         <Box
           sx={{
-            display: 'grid',
-            gridTemplateColumns: '120px 1fr',
+            display: "grid",
+            gridTemplateColumns: "120px 1fr",
             rowGap: 1,
             columnGap: 2,
           }}
@@ -87,12 +87,12 @@ export default function EdgeInspectorDialog({ open, onClose, edge }) {
           <Typography variant="body2" color="text.secondary">
             Type
           </Typography>
-          <Typography variant="body2">{type || '—'}</Typography>
+          <Typography variant="body2">{type || "—"}</Typography>
 
           <Typography variant="body2" color="text.secondary">
             Label
           </Typography>
-          <Typography variant="body2">{label || '—'}</Typography>
+          <Typography variant="body2">{label || "—"}</Typography>
 
           <Typography variant="body2" color="text.secondary">
             Source
@@ -112,9 +112,9 @@ export default function EdgeInspectorDialog({ open, onClose, edge }) {
           component="pre"
           sx={{
             p: 1,
-            bgcolor: 'grey.100',
+            bgcolor: "grey.100",
             borderRadius: 1,
-            overflow: 'auto',
+            overflow: "auto",
             maxHeight: 220,
           }}
         >

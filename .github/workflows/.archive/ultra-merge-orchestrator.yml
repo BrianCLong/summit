@@ -2,17 +2,17 @@ name: 🚀 Ultra Merge Orchestrator
 
 on:
   schedule:
-    - cron: '*/30 * * * *'  # Run every 30 minutes
+    - cron: "*/30 * * * *" # Run every 30 minutes
   workflow_dispatch:
     inputs:
       batch_size:
-        description: 'Number of PRs to process'
+        description: "Number of PRs to process"
         required: false
-        default: '20'
+        default: "20"
       aggressive_mode:
-        description: 'Enable aggressive merge mode'
+        description: "Enable aggressive merge mode"
         required: false
-        default: 'true'
+        default: "true"
 
 concurrency:
   group: ultra-merge-orchestrator

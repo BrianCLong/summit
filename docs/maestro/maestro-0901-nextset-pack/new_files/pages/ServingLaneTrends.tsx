@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import LineTimeseries from '../components/charts/LineTimeseries';
-import { getServingMetrics } from '../api';
+import React, { useEffect, useState } from "react";
+import LineTimeseries from "../components/charts/LineTimeseries";
+import { getServingMetrics } from "../api";
 
 export default function ServingLaneTrends() {
   const [seriesQ, setSeriesQ] = useState<{ x: string; y: number }[]>([]);

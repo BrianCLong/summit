@@ -1,5 +1,5 @@
-import { randomUUID } from 'node:crypto';
-import type { RequestHandler } from 'express';
+import { randomUUID } from "node:crypto";
+import type { RequestHandler } from "express";
 
 type CorrelationAugmentedRequest = {
   correlationId?: string;
@@ -10,7 +10,7 @@ type ResponseLocals = {
   correlationId?: string;
 };
 
-export const correlationIdHeader = 'x-correlation-id';
+export const correlationIdHeader = "x-correlation-id";
 
 export function correlationIdMiddleware(): RequestHandler {
   return (req, res, next) => {
@@ -21,7 +21,7 @@ export function correlationIdMiddleware(): RequestHandler {
 
     augmentedReq.correlationId = correlationId;
     locals.correlationId = correlationId;
-    res.setHeader('X-Correlation-Id', correlationId);
+    res.setHeader("X-Correlation-Id", correlationId);
 
     if (!augmentedReq.aiContext) {
       augmentedReq.aiContext = {};

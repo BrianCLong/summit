@@ -16,6 +16,7 @@ All software components produced by Summit must be accompanied by a CycloneDX v1
 ### 2.1 Cryptographic Bill of Materials (CBOM)
 
 SBOMs must include a `cryptography` section for all cryptographic assets. This is critical for:
+
 - Auditing cryptographic strength.
 - Compliance with post-quantum security standards.
 - Identifying vulnerable algorithm families.
@@ -23,6 +24,7 @@ SBOMs must include a `cryptography` section for all cryptographic assets. This i
 ### 2.2 Intellectual Property & Evidence
 
 SBOMs must leverage the v1.7 `evidence` and `ip` metadata fields to document:
+
 - Licenses and copyrights.
 - Data provenance (where data/code came from).
 - Structured citations for every bit of BOM data.
@@ -41,6 +43,7 @@ Summit uses native GitHub Artifact Attestations to anchor build evidence.
 ### 3.1 Build Provenance Attestations
 
 Generated using `actions/attest-build-provenance`.
+
 - **Format**: SLSA v1.0 / in-toto.
 - **Signing**: Keyless Sigstore signatures.
 - **Scope**: Must cover all released binaries, containers, and installers.
@@ -48,6 +51,7 @@ Generated using `actions/attest-build-provenance`.
 ### 3.2 SBOM Attestations
 
 Generated using `actions/attest-sbom`.
+
 - Binds the artifact identity to its validated SBOM.
 - Stored and verifiable via GitHub CLI (`gh attestation verify`).
 
@@ -68,4 +72,5 @@ gh attestation verify <artifact-path> --repo <repo-name> --type sbom
 Failure to produce valid v1.7 SBOMs or signed attestations will block General Availability (GA) releases.
 
 ---
-*End of Standard*
+
+_End of Standard_

@@ -17,9 +17,15 @@ vi.mock('@/components/common/DemoIndicator', () => ({
 // Mock UI components to simplify testing
 vi.mock('@/components/ui/Card', () => ({
   Card: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-  CardHeader: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-  CardTitle: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-  CardContent: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  CardHeader: ({ children }: { children: React.ReactNode }) => (
+    <div>{children}</div>
+  ),
+  CardTitle: ({ children }: { children: React.ReactNode }) => (
+    <div>{children}</div>
+  ),
+  CardContent: ({ children }: { children: React.ReactNode }) => (
+    <div>{children}</div>
+  ),
 }))
 
 vi.mock('@/components/ui/Button', () => ({
@@ -31,11 +37,15 @@ vi.mock('@/components/ui/Button', () => ({
 }))
 
 vi.mock('@/components/ui/Badge', () => ({
-  Badge: ({ children }: { children: React.ReactNode }) => <span>{children}</span>,
+  Badge: ({ children }: { children: React.ReactNode }) => (
+    <span>{children}</span>
+  ),
 }))
 
 vi.mock('@/components/ui/Table', () => ({
-  Table: ({ children }: { children: React.ReactNode }) => <table>{children}</table>,
+  Table: ({ children }: { children: React.ReactNode }) => (
+    <table>{children}</table>
+  ),
 }))
 
 vi.mock('@/components/ui/Skeleton', () => ({
@@ -50,7 +60,7 @@ vi.mock('@/components/ui/SearchBar', () => ({
   SearchBar: ({ value, onChange, placeholder }: any) => (
     <input
       value={value}
-      onChange={(e) => onChange(e.target.value)}
+      onChange={e => onChange(e.target.value)}
       placeholder={placeholder}
       data-testid="search-bar"
     />
@@ -60,7 +70,7 @@ vi.mock('@/components/ui/SearchBar', () => ({
 vi.mock('@/components/panels/KPIStrip', () => ({
   KPIStrip: ({ data }: { data: any[] }) => (
     <div data-testid="kpi-strip">
-      {data.map((kpi) => (
+      {data.map(kpi => (
         <div key={kpi.id} data-testid={`kpi-${kpi.id}`}>
           {kpi.title}: {kpi.value}
         </div>
@@ -77,7 +87,11 @@ vi.mock('@/components/common/DataIntegrityNotice', () => ({
   DataIntegrityNotice: () => null,
 }))
 
-import { useAlerts, useAlertUpdates, useUpdateAlertStatus } from '@/hooks/useGraphQL'
+import {
+  useAlerts,
+  useAlertUpdates,
+  useUpdateAlertStatus,
+} from '@/hooks/useGraphQL'
 
 describe('AlertsPage', () => {
   const mockAlertsData: Alert[] = [
@@ -136,9 +150,15 @@ describe('AlertsPage', () => {
     expect(screen.getByText('Login Failure')).toBeInTheDocument()
 
     // Check KPIs
-    expect(screen.getByTestId('kpi-critical')).toHaveTextContent('Critical Alerts: 1')
-    expect(screen.getByTestId('kpi-active')).toHaveTextContent('Active Alerts: 1') // Only 'open' status
-    expect(screen.getByTestId('kpi-resolved')).toHaveTextContent('Resolved Today: 1')
+    expect(screen.getByTestId('kpi-critical')).toHaveTextContent(
+      'Critical Alerts: 1'
+    )
+    expect(screen.getByTestId('kpi-active')).toHaveTextContent(
+      'Active Alerts: 1'
+    ) // Only 'open' status
+    expect(screen.getByTestId('kpi-resolved')).toHaveTextContent(
+      'Resolved Today: 1'
+    )
   })
 
   it('filters alerts by search query', async () => {
@@ -148,7 +168,9 @@ describe('AlertsPage', () => {
     fireEvent.change(searchInput, { target: { value: 'CPU' } })
 
     await waitFor(() => {
-      expect(screen.queryByText('Critical Database Error')).not.toBeInTheDocument()
+      expect(
+        screen.queryByText('Critical Database Error')
+      ).not.toBeInTheDocument()
       expect(screen.getByText('High CPU Usage')).toBeInTheDocument()
     })
   })
@@ -179,7 +201,9 @@ describe('AlertsPage', () => {
     fireEvent.change(statusSelect, { target: { value: 'resolved' } })
 
     await waitFor(() => {
-      expect(screen.queryByText('Critical Database Error')).not.toBeInTheDocument() // status: open
+      expect(
+        screen.queryByText('Critical Database Error')
+      ).not.toBeInTheDocument() // status: open
       expect(screen.getByText('Login Failure')).toBeInTheDocument() // status: resolved
     })
   })

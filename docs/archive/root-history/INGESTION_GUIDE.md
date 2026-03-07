@@ -14,6 +14,7 @@ python3 wizard.py
 ```
 
 The wizard will guide you through:
+
 1. Selecting a connector
 2. Validating the connector manifest
 3. Reviewing proposed field mappings
@@ -88,6 +89,7 @@ asyncio.run(main())
 Connectors fetch data from external sources and map it to canonical entities.
 
 **Available Connectors:**
+
 - **File-based:** CSV, Parquet, JSON
 - **Threat Intel:** STIX/TAXII
 - **SIEM:** Splunk, Sentinel, Chronicle
@@ -149,14 +151,14 @@ Enrichers augment data as it flows through the pipeline.
 
 **Available Enrichers:**
 
-| Enricher | Purpose | Performance |
-|----------|---------|-------------|
-| GeoIP | IP → location | <10ms |
-| Language | Text → language | <10ms |
-| Hashing | Content → hash | <10ms |
-| EXIF Scrub | Image → scrubbed | <10ms |
-| OCR | Image → text | <500ms |
-| STT | Audio → transcript | <5s |
+| Enricher   | Purpose            | Performance |
+| ---------- | ------------------ | ----------- |
+| GeoIP      | IP → location      | <10ms       |
+| Language   | Text → language    | <10ms       |
+| Hashing    | Content → hash     | <10ms       |
+| EXIF Scrub | Image → scrubbed   | <10ms       |
+| OCR        | Image → text       | <500ms      |
+| STT        | Audio → transcript | <5s         |
 
 **Configure Enrichers:**
 
@@ -183,6 +185,7 @@ enricher_config = {
 The streaming pipeline processes records asynchronously with backpressure handling.
 
 **Features:**
+
 - Async batch processing
 - Configurable batch size and workers
 - Pluggable enrichers
@@ -254,12 +257,14 @@ External Source
 ### Add a New Connector
 
 1. **Create connector directory:**
+
    ```bash
    mkdir -p connectors/my_connector
    cd connectors/my_connector
    ```
 
 2. **Create manifest.yaml:**
+
    ```yaml
    name: my-connector
    version: 1.0.0
@@ -278,6 +283,7 @@ External Source
    ```
 
 3. **Create connector.py:**
+
    ```python
    from sdk.base import BaseConnector
 
@@ -302,12 +308,14 @@ External Source
 ### Add a New Enricher
 
 1. **Create enricher file:**
+
    ```bash
    cd data-pipelines/etl-assistant/src/enrichers
    touch my_enricher.py
    ```
 
 2. **Implement enricher:**
+
    ```python
    from .base import BaseEnricher, EnricherResult, EnrichmentContext
 
@@ -339,6 +347,7 @@ External Source
 ### Ingest a CSV File
 
 1. **Prepare data:**
+
    ```csv
    name,email,ip
    John Doe,john@example.com,8.8.8.8
@@ -346,18 +355,21 @@ External Source
    ```
 
 2. **Create manifest (if needed):**
+
    ```yaml
    name: my-csv-import
    sample_data_file: data.csv
    ```
 
 3. **Run wizard:**
+
    ```bash
    cd ingestion
    python3 wizard.py
    ```
 
 4. **Or use programmatically:**
+
    ```python
    from connectors.csv_connector.connector import CSVConnector
 
@@ -369,6 +381,7 @@ External Source
 ### Ingest a Parquet File
 
 1. **Prepare data:**
+
    ```python
    import pyarrow as pa
    import pyarrow.parquet as pq
@@ -384,6 +397,7 @@ External Source
    ```
 
 2. **Use connector:**
+
    ```python
    from connectors.parquet_connector.connector import ParquetConnector
 
@@ -394,6 +408,7 @@ External Source
 ### Monitor Ingestion
 
 1. **Check metrics:**
+
    ```python
    # Pipeline metrics
    print(f"Records processed: {metrics.records_processed}")
@@ -407,6 +422,7 @@ External Source
    ```
 
 2. **View provenance:**
+
    ```bash
    # Query provenance ledger
    curl http://localhost:4030/provenance/events?source=my_source
@@ -424,14 +440,14 @@ The system automatically detects and handles PII:
 
 ### PII Categories
 
-| Category | Severity | Default Strategy |
-|----------|----------|------------------|
-| SSN | Critical | Hash |
-| Credit Card | Critical | Hash |
-| Email | Medium | Tokenize |
-| Phone | Medium | Mask |
-| Name | Medium | Tokenize |
-| IP Address | Low | Mask |
+| Category    | Severity | Default Strategy |
+| ----------- | -------- | ---------------- |
+| SSN         | Critical | Hash             |
+| Credit Card | Critical | Hash             |
+| Email       | Medium   | Tokenize         |
+| Phone       | Medium   | Mask             |
+| Name        | Medium   | Tokenize         |
+| IP Address  | Low      | Mask             |
 
 ### Redaction Strategies
 
@@ -448,7 +464,7 @@ The system automatically detects and handles PII:
 pii_flags:
   - field_name: ssn
     severity: critical
-    redaction_policy: block  # allow, redact, block, prompt
+    redaction_policy: block # allow, redact, block, prompt
     pattern: "^\\d{3}-\\d{2}-\\d{4}$"
 
   - field_name: email
@@ -534,6 +550,7 @@ pytest --cov=data-pipelines/etl-assistant/src --cov-report=html
 ### Test Data
 
 Golden fixtures are in `data-pipelines/etl-assistant/tests/fixtures/`:
+
 - `sample_person_data.json`
 - `sample_org_data.json`
 - `expected_person_mappings.json`
@@ -598,6 +615,7 @@ enricher_config = {
 #### Issue: Connector fails to connect
 
 **Solution:**
+
 1. Check connector manifest is valid
 2. Verify credentials/API keys
 3. Check network connectivity
@@ -606,6 +624,7 @@ enricher_config = {
 #### Issue: PII detection false positives
 
 **Solution:**
+
 1. Adjust confidence threshold in `pii_detector.py`
 2. Add field to whitelist in manifest
 3. Use custom PII patterns
@@ -613,6 +632,7 @@ enricher_config = {
 #### Issue: License check blocks ingestion
 
 **Solution:**
+
 1. Register data source in license registry
 2. Update license terms
 3. File appeal if needed
@@ -621,6 +641,7 @@ enricher_config = {
 #### Issue: Pipeline is slow
 
 **Solution:**
+
 1. Increase batch size
 2. Increase max workers
 3. Disable slow enrichers
@@ -630,6 +651,7 @@ enricher_config = {
 #### Issue: Out of memory
 
 **Solution:**
+
 1. Reduce batch size
 2. Reduce max workers
 3. Use streaming instead of batch
@@ -671,6 +693,7 @@ pipeline.set_error_handler(debug_error_handler)
 ## Support
 
 For issues and questions:
+
 - File issues at: https://github.com/BrianCLong/summit/issues
 - Slack: #data-platform
 - Email: data-platform@intelgraph.com

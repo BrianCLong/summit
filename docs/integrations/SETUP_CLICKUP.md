@@ -1,9 +1,11 @@
 # ClickUp Integration Setup
 
 ## Overview
+
 This guide covers the complete setup process for integrating ClickUp with Summit, including OAuth configuration, API access, webhook setup, and data synchronization.
 
 ## Prerequisites
+
 - ClickUp account (Free, Unlimited, Business, or Enterprise)
 - Admin access to ClickUp workspace
 - Summit deployment with webhook endpoint capability
@@ -12,6 +14,7 @@ This guide covers the complete setup process for integrating ClickUp with Summit
 ## Phase 1: Initial Setup
 
 ### 1.1 Create ClickUp App
+
 1. Navigate to https://app.clickup.com/settings/apps
 2. Click "Create an App"
 3. Fill in app details:
@@ -21,6 +24,7 @@ This guide covers the complete setup process for integrating ClickUp with Summit
    - **Webhook URL**: `https://your-domain.com/webhooks/clickup`
 
 ### 1.2 OAuth 2.0 Configuration
+
 1. Note your credentials:
    ```
    CLIENT_ID: [Your Client ID]
@@ -37,7 +41,9 @@ This guide covers the complete setup process for integrating ClickUp with Summit
    - `webhooks:read` - Manage webhooks
 
 ### 1.3 API Token Setup (Alternative)
+
 For server-to-server integration:
+
 1. Go to Settings → Apps → API Token
 2. Click "Generate"
 3. Store securely: `CLICKUP_API_TOKEN=pk_[your_token]`
@@ -45,7 +51,9 @@ For server-to-server integration:
 ## Phase 2: Environment Configuration
 
 ### 2.1 Environment Variables
+
 Add to your `.env` file:
+
 ```bash
 # ClickUp OAuth
 CLICKUP_CLIENT_ID=your_client_id
@@ -64,6 +72,7 @@ CLICKUP_SYNC_INTERVAL=300
 ```
 
 ### 2.2 Webhook Configuration
+
 ```json
 {
   "endpoint": "https://your-domain.com/webhooks/clickup",
@@ -84,6 +93,7 @@ CLICKUP_SYNC_INTERVAL=300
 ## Phase 3: Integration Implementation
 
 ### 3.1 Authentication Flow
+
 ```python
 import requests
 from urllib.parse import urlencode
@@ -94,7 +104,7 @@ class ClickUpAuth:
         self.client_secret = client_secret
         self.redirect_uri = redirect_uri
         self.auth_url = "https://app.clickup.com/api"
-    
+
     def get_authorization_url(self, state=None):
         params = {
             "client_id": self.client_id,
@@ -102,7 +112,7 @@ class ClickUpAuth:
             "state": state or ""
         }
         return f"{self.auth_url}?{urlencode(params)}"
-    
+
     def exchange_code(self, code):
         response = requests.post(
             f"{self.auth_url}/oauth/token",
@@ -116,6 +126,7 @@ class ClickUpAuth:
 ```
 
 ### 3.2 API Client Implementation
+
 ```python
 class ClickUpClient:
     def __init__(self, api_token):
@@ -125,21 +136,21 @@ class ClickUpClient:
             "Authorization": api_token,
             "Content-Type": "application/json"
         }
-    
+
     def get_workspaces(self):
         response = requests.get(
             f"{self.base_url}/team",
             headers=self.headers
         )
         return response.json()
-    
+
     def get_spaces(self, team_id):
         response = requests.get(
             f"{self.base_url}/team/{team_id}/space",
             headers=self.headers
         )
         return response.json()
-    
+
     def create_task(self, list_id, task_data):
         response = requests.post(
             f"{self.base_url}/list/{list_id}/task",
@@ -147,7 +158,7 @@ class ClickUpClient:
             json=task_data
         )
         return response.json()
-    
+
     def update_task(self, task_id, updates):
         response = requests.put(
             f"{self.base_url}/task/{task_id}",
@@ -158,6 +169,7 @@ class ClickUpClient:
 ```
 
 ### 3.3 Webhook Handler
+
 ```python
 from fastapi import Request, HTTPException
 import hmac
@@ -166,41 +178,43 @@ import hashlib
 async def verify_clickup_webhook(request: Request, secret: str):
     signature = request.headers.get("X-Signature")
     body = await request.body()
-    
+
     computed = hmac.new(
         secret.encode(),
         body,
         hashlib.sha256
     ).hexdigest()
-    
+
     if not hmac.compare_digest(signature, computed):
         raise HTTPException(status_code=401, detail="Invalid signature")
-    
+
     return await request.json()
 
 @app.post("/webhooks/clickup")
 async def clickup_webhook(request: Request):
     payload = await verify_clickup_webhook(request, WEBHOOK_SECRET)
     event_type = payload.get("event")
-    
+
     if event_type == "taskCreated":
         await handle_task_created(payload)
     elif event_type == "taskUpdated":
         await handle_task_updated(payload)
     elif event_type == "taskStatusUpdated":
         await handle_status_updated(payload)
-    
+
     return {"status": "received"}
 ```
 
 ## Phase 4: Data Synchronization
 
 ### 4.1 Sync Strategy
+
 - **Real-time**: Use webhooks for immediate updates
 - **Batch**: Periodic sync every 5 minutes for reliability
 - **On-demand**: Manual sync trigger for specific entities
 
 ### 4.2 Data Mapping
+
 ```python
 CLICKUP_SUMMIT_MAPPING = {
     "task": {
@@ -218,17 +232,18 @@ CLICKUP_SUMMIT_MAPPING = {
 ```
 
 ### 4.3 Bi-directional Sync
+
 ```python
 class ClickUpSync:
     def __init__(self, client):
         self.client = client
         self.last_sync = None
-    
+
     async def sync_tasks(self, list_id):
         tasks = self.client.get_tasks(list_id)
         for task in tasks:
             await self.sync_task_to_summit(task)
-    
+
     async def sync_from_summit(self, summit_task):
         clickup_data = self.map_summit_to_clickup(summit_task)
         if summit_task.external_id:
@@ -248,17 +263,20 @@ class ClickUpSync:
 ## Phase 5: Testing
 
 ### 5.1 Test OAuth Flow
+
 ```bash
 curl -X GET "https://app.clickup.com/api?client_id=YOUR_CLIENT_ID&redirect_uri=YOUR_REDIRECT_URI"
 ```
 
 ### 5.2 Test API Access
+
 ```bash
 curl -H "Authorization: YOUR_API_TOKEN" \
      https://api.clickup.com/api/v2/team
 ```
 
 ### 5.3 Test Webhook
+
 ```bash
 curl -X POST https://your-domain.com/webhooks/clickup \
   -H "Content-Type: application/json" \
@@ -269,6 +287,7 @@ curl -X POST https://your-domain.com/webhooks/clickup \
 ## Phase 6: Production Deployment
 
 ### 6.1 Security Checklist
+
 - [ ] Store credentials in secure vault
 - [ ] Enable webhook signature verification
 - [ ] Implement rate limiting
@@ -278,6 +297,7 @@ curl -X POST https://your-domain.com/webhooks/clickup \
 - [ ] Add audit logging
 
 ### 6.2 Monitoring
+
 - API call volume and latency
 - Webhook delivery success rate
 - Sync lag and failures
@@ -285,6 +305,7 @@ curl -X POST https://your-domain.com/webhooks/clickup \
 - Error rates by endpoint
 
 ### 6.3 Rate Limits
+
 - **Free**: 100 requests/minute
 - **Unlimited**: 100 requests/minute
 - **Business**: 100 requests/minute
@@ -293,6 +314,7 @@ curl -X POST https://your-domain.com/webhooks/clickup \
 ## Phase 7: Advanced Features
 
 ### 7.1 Custom Fields
+
 ```python
 def create_custom_field_value(task_id, field_id, value):
     return client.post(
@@ -302,6 +324,7 @@ def create_custom_field_value(task_id, field_id, value):
 ```
 
 ### 7.2 Time Tracking
+
 ```python
 def add_time_entry(task_id, duration, description):
     return client.post(
@@ -314,6 +337,7 @@ def add_time_entry(task_id, duration, description):
 ```
 
 ### 7.3 Dependencies
+
 ```python
 def add_dependency(task_id, depends_on_task_id):
     return client.post(
@@ -326,6 +350,7 @@ def add_dependency(task_id, depends_on_task_id):
 ```
 
 ## Resources
+
 - [ClickUp API Documentation](https://clickup.com/api)
 - [ClickUp Webhooks Guide](https://clickup.com/api/developer-portal/webhooks/)
 - [OAuth 2.0 Flow](https://clickup.com/api/developer-portal/authentication/)
@@ -334,12 +359,14 @@ def add_dependency(task_id, depends_on_task_id):
 ## Troubleshooting
 
 ### Common Issues
+
 1. **401 Unauthorized**: Check API token validity
 2. **Rate Limited**: Implement exponential backoff
 3. **Webhook Not Receiving**: Verify endpoint accessibility and SSL
 4. **Sync Conflicts**: Implement last-write-wins or manual resolution
 
 ## Status
+
 - [x] Documentation created
 - [ ] OAuth implementation
 - [ ] API client development

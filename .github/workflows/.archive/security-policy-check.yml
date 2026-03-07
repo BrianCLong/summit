@@ -5,8 +5,8 @@ on:
     branches: [main]
   pull_request:
     paths:
-      - '**/package.json'
-      - 'security/POLICY.md'
+      - "**/package.json"
+      - "security/POLICY.md"
 
 jobs:
   check-denylist:

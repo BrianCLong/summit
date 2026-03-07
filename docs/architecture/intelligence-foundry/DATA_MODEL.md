@@ -125,18 +125,18 @@ This document defines canonical entities and their minimal required fields. Stor
 ## Relationship Graph (High Level)
 
 Tenant
-  ├─ owns Assets, Policies, Models, Agents
-  ├─ submits WorkOrders
-  └─ seals EvidenceBundles
+├─ owns Assets, Policies, Models, Agents
+├─ submits WorkOrders
+└─ seals EvidenceBundles
 
 WorkOrder
-  ├─ references Policy + optionally Agent
-  ├─ consumes Assets / prompts
-  ├─ triggers Execution
-  ├─ produces Artifacts
-  └─ results in EvidenceBundle
+├─ references Policy + optionally Agent
+├─ consumes Assets / prompts
+├─ triggers Execution
+├─ produces Artifacts
+└─ results in EvidenceBundle
 
 Execution
-  └─ emits Runs forming an Execution Graph
+└─ emits Runs forming an Execution Graph
 
 All nodes and edges MUST be content-addressed and versioned.

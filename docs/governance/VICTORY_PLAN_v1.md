@@ -5,6 +5,7 @@
 Summit is activating the Continuous Victory Loop under Directorate K++ Victory Doctrine. The primary objective is to establish an audit-ready operational reality with measurable, defensible advantages against critical security and operational risks.
 
 **Key Objectives:**
+
 - Reduce top 10 risks below defined thresholds.
 - Meet TTD (Time To Detect) / TTR (Time To Respond) / MTTR (Mean Time To Recovery) targets.
 - Achieve 100% control coverage for defined chokepoints with automated testing (Policy-as-Code).
@@ -12,6 +13,7 @@ Summit is activating the Continuous Victory Loop under Directorate K++ Victory D
 - Implement explicit rollbacks and minimal necessary access for all changes.
 
 **Core Directives applied:**
+
 - Risk Reduction > Speed > Cost > Elegance
 - Systemic choke points over local fixes
 - Policy-as-code and telemetry first
@@ -21,29 +23,31 @@ Summit is activating the Continuous Victory Loop under Directorate K++ Victory D
 
 ## 2. Top 10 Risk Table
 
-| ID | Risk | Likelihood | Impact | Owner | Current Controls | Gaps | Win Condition | Target Threshold | Acceptable Residual Risk |
-|---|---|---|---|---|---|---|---|---|---|
-| R01 | Credential Stuffing & ATO | High | Critical | IAM Lead | Basic MFA, standard WAF | No dynamic rate limiting, incomplete IdP logging | TTD < 5m, TTR < 15m | <0.1% ATO success rate | Routine brute force blocked automatically |
-| R02 | Rogue Admin / Insider Threat | Low | Critical | Security Lead | Basic RBAC | Missing ABAC, unlogged emergency access | 100% audited actions | Zero unlogged administrative actions | Accidental misconfig quickly reverted |
-| R03 | Third-Party Component Compromise | Med | High | AppSec Lead | SCA scanning | Missing SBOM enforcement, untrusted registries | Build fails on critical CVEs | <24h remediation for zero-days | Managed via auto-patching |
-| R04 | Data Exfiltration (PII/PHI) | Low | Critical | Privacy Lead | TLS, encryption at rest | Lack of egress filtering, broad DB access | Alert on anomalous egress | 0 unapproved data dumps | Negligible leakage via authorized channels |
-| R05 | Deployment Pipeline Hijacking | Low | High | DevSecOps Lead | Branch protection | Commits unsigned, overprivileged CI tokens | 100% signed commits, SLSA L3 | Zero unauthorized merges/deploys | Minor delays from strict checks |
-| R06 | Misconfigured Cloud Storage (Public Exposure) | Med | High | CloudSec Lead | CSPM checks | Reactive alerts, no auto-remediation | Auto-revert public buckets | <5m window of exposure | Temporary read-only misconfigurations |
-| R07 | Financial/Fraud Abuse of Resources | High | Med | Fraud Ops | Basic anomaly detection | High false positive rate | TTD < 15m | Fraud loss < 0.05% of revenue | Small-scale distributed abuse |
-| R08 | Unpatched External Facing Services | Med | High | IT/Infra Lead | Vulnerability scanning | Manual patch management | Patch SLA met | 100% criticals patched < 48h | Non-critical systems patched within 14d |
-| R09 | Inadequate Log/Telemetry Coverage | High | Med | SecOps Lead | Central SIEM | Missing critical system logs, retention issues | 100% critical systems logged | 90 days hot, 1 year cold retention | Occasional log format parsing errors |
-| R10 | API Abuse (Business Logic Flaws) | Med | High | AppSec Lead | API Gateway | Lack of behavioral analysis | Alert on anomalous patterns | 0 unauthorized bulk data access | Standard API throttling |
+| ID  | Risk                                          | Likelihood | Impact   | Owner          | Current Controls        | Gaps                                             | Win Condition                | Target Threshold                     | Acceptable Residual Risk                   |
+| --- | --------------------------------------------- | ---------- | -------- | -------------- | ----------------------- | ------------------------------------------------ | ---------------------------- | ------------------------------------ | ------------------------------------------ |
+| R01 | Credential Stuffing & ATO                     | High       | Critical | IAM Lead       | Basic MFA, standard WAF | No dynamic rate limiting, incomplete IdP logging | TTD < 5m, TTR < 15m          | <0.1% ATO success rate               | Routine brute force blocked automatically  |
+| R02 | Rogue Admin / Insider Threat                  | Low        | Critical | Security Lead  | Basic RBAC              | Missing ABAC, unlogged emergency access          | 100% audited actions         | Zero unlogged administrative actions | Accidental misconfig quickly reverted      |
+| R03 | Third-Party Component Compromise              | Med        | High     | AppSec Lead    | SCA scanning            | Missing SBOM enforcement, untrusted registries   | Build fails on critical CVEs | <24h remediation for zero-days       | Managed via auto-patching                  |
+| R04 | Data Exfiltration (PII/PHI)                   | Low        | Critical | Privacy Lead   | TLS, encryption at rest | Lack of egress filtering, broad DB access        | Alert on anomalous egress    | 0 unapproved data dumps              | Negligible leakage via authorized channels |
+| R05 | Deployment Pipeline Hijacking                 | Low        | High     | DevSecOps Lead | Branch protection       | Commits unsigned, overprivileged CI tokens       | 100% signed commits, SLSA L3 | Zero unauthorized merges/deploys     | Minor delays from strict checks            |
+| R06 | Misconfigured Cloud Storage (Public Exposure) | Med        | High     | CloudSec Lead  | CSPM checks             | Reactive alerts, no auto-remediation             | Auto-revert public buckets   | <5m window of exposure               | Temporary read-only misconfigurations      |
+| R07 | Financial/Fraud Abuse of Resources            | High       | Med      | Fraud Ops      | Basic anomaly detection | High false positive rate                         | TTD < 15m                    | Fraud loss < 0.05% of revenue        | Small-scale distributed abuse              |
+| R08 | Unpatched External Facing Services            | Med        | High     | IT/Infra Lead  | Vulnerability scanning  | Manual patch management                          | Patch SLA met                | 100% criticals patched < 48h         | Non-critical systems patched within 14d    |
+| R09 | Inadequate Log/Telemetry Coverage             | High       | Med      | SecOps Lead    | Central SIEM            | Missing critical system logs, retention issues   | 100% critical systems logged | 90 days hot, 1 year cold retention   | Occasional log format parsing errors       |
+| R10 | API Abuse (Business Logic Flaws)              | Med        | High     | AppSec Lead    | API Gateway             | Lack of behavioral analysis                      | Alert on anomalous patterns  | 0 unauthorized bulk data access      | Standard API throttling                    |
 
 ---
 
 ## 3. 30/60/90 Day Execution Timeline
 
 **Phase 1: Define the War (Days 1-2) - COMPLETED**
+
 - Enumerate top 10 risks.
 - Define win conditions and metrics.
 - Output Victory Scorecard v1 schema.
 
 **Phase 2: Choke Point Hardening (Days 3-17)**
+
 - Identity: Enforce SSO/RBAC, audit emergency access.
 - Logging: Identify and close telemetry gaps.
 - Pipelines: Implement commit signing and CI token restriction.
@@ -51,6 +55,7 @@ Summit is activating the Continuous Victory Loop under Directorate K++ Victory D
 - Experiments: Run tabletop exercises to validate controls.
 
 **Phase 3: Proof & Attestation (Days 18-48)**
+
 - Finalize Victory Ledgers and attestations.
 - Launch live Scorecard dashboard.
 - Conduct simulated incident response tabletop.
@@ -58,6 +63,7 @@ Summit is activating the Continuous Victory Loop under Directorate K++ Victory D
 - Achieve DoD-V.
 
 **Phase 4: Continuous Victory Loop (Day 49+)**
+
 - Quarterly risk threshold re-baselining.
 - Continuous tracking of FP/FN rates.
 - Policy test coverage expansion.
@@ -66,19 +72,20 @@ Summit is activating the Continuous Victory Loop under Directorate K++ Victory D
 
 ## 4. Control Hardening Map
 
-| Choke Point | Required Control Set | Current State | Target State | Minimal Experiment | Rollback Mechanism |
-|---|---|---|---|---|---|
-| Identity (SSO/RBAC) | Strict MFA, Just-in-Time (JIT) access | Broad standing access | JIT enabled, MFA enforced | Tabletop: Simulate compromised credential | Revert to standard IAM roles |
-| Telemetry & Logging | 100% coverage of auth, network, API | Partial coverage | Full coverage, central SIEM | Inject synthetic failed logins | Disable verbose logging on specific nodes |
-| Deployment Pipeline | Commit signing, least-privilege tokens | Overprivileged tokens | SLSA L3 compliance | Submit unsigned test commit | Disable strict commit signing rule |
-| Data Exfiltration | Egress filtering, anomaly detection | Unrestricted egress | Deny-by-default egress | Synthetic large file transfer | Disable specific egress block rule |
-| Fraud/Financial | Transaction anomaly alerting | Basic thresholds | ML-based anomaly detection | Simulate anomalous transaction burst | Revert to basic threshold rules |
+| Choke Point         | Required Control Set                   | Current State         | Target State                | Minimal Experiment                        | Rollback Mechanism                        |
+| ------------------- | -------------------------------------- | --------------------- | --------------------------- | ----------------------------------------- | ----------------------------------------- |
+| Identity (SSO/RBAC) | Strict MFA, Just-in-Time (JIT) access  | Broad standing access | JIT enabled, MFA enforced   | Tabletop: Simulate compromised credential | Revert to standard IAM roles              |
+| Telemetry & Logging | 100% coverage of auth, network, API    | Partial coverage      | Full coverage, central SIEM | Inject synthetic failed logins            | Disable verbose logging on specific nodes |
+| Deployment Pipeline | Commit signing, least-privilege tokens | Overprivileged tokens | SLSA L3 compliance          | Submit unsigned test commit               | Disable strict commit signing rule        |
+| Data Exfiltration   | Egress filtering, anomaly detection    | Unrestricted egress   | Deny-by-default egress      | Synthetic large file transfer             | Disable specific egress block rule        |
+| Fraud/Financial     | Transaction anomaly alerting           | Basic thresholds      | ML-based anomaly detection  | Simulate anomalous transaction burst      | Revert to basic threshold rules           |
 
 ---
 
 ## 5. Dashboard Schema
 
 **Scorecard KPIs:**
+
 - **Risk Threshold Status:** Red/Yellow/Green per Top 10 Risk.
 - **Incident Response Metrics:**
   - TTD (Time To Detect) Target: < 15m | Actual: [Value]
@@ -96,12 +103,14 @@ Summit is activating the Continuous Victory Loop under Directorate K++ Victory D
 **Objective:** Shift security left by codifying controls and evaluating them continuously via OPA (Open Policy Agent) and CI/CD pipelines.
 
 **Implementation Steps:**
+
 1. **Define Policies:** Map required controls from the Control Hardening Map to OPA Rego policies (e.g., deny public S3 buckets, require specific IAM tags).
 2. **Integrate:** Implement Conftest in the CI pipeline to evaluate Terraform/Kubernetes manifests against policies.
 3. **Enforce:** Block merges/deployments that violate policies.
 4. **Audit:** Regularly scan existing infrastructure to detect drift.
 
 **Example Policies:**
+
 - `policy/aws/s3/enforce_private.rego`
 - `policy/iam/enforce_mfa.rego`
 - `policy/k8s/deny_privileged_pods.rego`
@@ -118,10 +127,12 @@ Summit is activating the Continuous Victory Loop under Directorate K++ Victory D
 **Risk Addressed:** [RXX]
 
 **Decisions Made:**
+
 - [Decision 1: Implement OPA policy enforcing private ACLs]
 - [Decision 2: Run automated remediation script on existing buckets]
 
 **Evidence (Timestamped & Hashed):**
+
 - CI Test Results: [Link/Hash]
 - Infrastructure Scan Report: [Link/Hash]
 - Remediation Logs: [Link/Hash]

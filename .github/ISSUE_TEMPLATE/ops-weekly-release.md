@@ -1,8 +1,8 @@
 ---
-name: 'Ops: Weekly Release Train'
+name: "Ops: Weekly Release Train"
 about: Cadenced checklist for safe weekly promotions
-title: 'Ops: Weekly Release Train — week of {{date}}'
-labels: ['ops', 'release-train', 'cadence:weekly', 'priority:normal']
+title: "Ops: Weekly Release Train — week of {{date}}"
+labels: ["ops", "release-train", "cadence:weekly", "priority:normal"]
 assignees: []
 ---
 

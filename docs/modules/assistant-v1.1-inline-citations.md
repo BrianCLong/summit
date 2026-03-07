@@ -1,9 +1,9 @@
 ---
 name: Assistant v1.1 — Inline Citation Highlighting
 about: Track token-level citation rendering with provenance + pivot
-title: 'Assistant v1.1: Inline Citation Highlighting'
-labels: ['release: v1.1', 'theme: citations', 'area: client', 'area: graphql']
-milestone: 'Assistant v1.1'
+title: "Assistant v1.1: Inline Citation Highlighting"
+labels: ["release: v1.1", "theme: citations", "area: client", "area: graphql"]
+milestone: "Assistant v1.1"
 ---
 
 ## Scope

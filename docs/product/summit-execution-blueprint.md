@@ -5,7 +5,7 @@
 We have **[X days]** until Summit. Assume Summit is a strategic inflection point — not an event.
 
 1. **The 30-Day Measurable Shift:**
-   If Summit were wildly successful, what *measurable shift* would exist 30 days after?
+   If Summit were wildly successful, what _measurable shift_ would exist 30 days after?
    - Revenue shift?
    - Partnership shift?
    - Narrative shift?
@@ -13,10 +13,10 @@ We have **[X days]** until Summit. Assume Summit is a strategic inflection point
 
 2. **Irreversible Advantages:**
    What 3 irreversible advantages must we lock in during Summit itself?
-   *(Think: Moat, Coalition, Distribution, Standard, Proof, Signal.)*
+   _(Think: Moat, Coalition, Distribution, Standard, Proof, Signal.)_
 
 3. **The Wasted Opportunity:**
-   What would make Summit a *wasted opportunity* even if attendance looks good?
+   What would make Summit a _wasted opportunity_ even if attendance looks good?
 
 4. **Areas of Under-Preparation:**
    Where are we currently under-prepared in:
@@ -41,6 +41,7 @@ We have **[X days]** until Summit. Assume Summit is a strategic inflection point
 ## Tactical Add-On (Execution Layer)
 
 **Force these deliverables before Summit:**
+
 - [ ] 1-page narrative positioning sheet
 - [ ] Pre-drafted follow-up emails (3 variants: investor / partner / client)
 - [ ] Offer clarity (clear CTA with deadline)

@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   Box,
   Typography,
@@ -10,8 +10,8 @@ import {
   ListItem,
   ListItemText,
   LinearProgress,
-} from '@mui/material';
-import { useQuery, gql } from '@apollo/client';
+} from "@mui/material";
+import { useQuery, gql } from "@apollo/client";
 
 const GET_ADVERSARY_INTENT_ESTIMATES = gql`
   query GetAdversaryIntentEstimates($scenarioId: ID!) {
@@ -30,21 +30,14 @@ interface AdversaryIntentDisplayProps {
   scenarioId: string;
 }
 
-const AdversaryIntentDisplay: React.FC<AdversaryIntentDisplayProps> = ({
-  scenarioId,
-}) => {
+const AdversaryIntentDisplay: React.FC<AdversaryIntentDisplayProps> = ({ scenarioId }) => {
   const { loading, error, data } = useQuery(GET_ADVERSARY_INTENT_ESTIMATES, {
     variables: { scenarioId },
     pollInterval: 10000, // Poll every 10 seconds
   });
 
   if (loading) return <CircularProgress />;
-  if (error)
-    return (
-      <Alert severity="error">
-        Error loading adversary intent: {error.message}
-      </Alert>
-    );
+  if (error) return <Alert severity="error">Error loading adversary intent: {error.message}</Alert>;
 
   const estimates = data?.getAdversaryIntentEstimates || [];
 
@@ -54,14 +47,13 @@ const AdversaryIntentDisplay: React.FC<AdversaryIntentDisplayProps> = ({
         Adversary Intent Estimation
       </Typography>
       <Alert severity="info" sx={{ mb: 2 }}>
-        WAR-GAMED SIMULATION - Intent estimates are hypothetical and for
-        decision support only.
+        WAR-GAMED SIMULATION - Intent estimates are hypothetical and for decision support only.
       </Alert>
 
       {estimates.length === 0 ? (
         <Typography variant="body1" color="text.secondary">
-          No adversary intent estimates available for this scenario yet. Run a
-          simulation to generate data.
+          No adversary intent estimates available for this scenario yet. Run a simulation to
+          generate data.
         </Typography>
       ) : (
         <List>
@@ -74,7 +66,7 @@ const AdversaryIntentDisplay: React.FC<AdversaryIntentDisplayProps> = ({
                 <Typography variant="body2" color="text.secondary">
                   Estimated: {new Date(estimate.timestamp).toLocaleString()}
                 </Typography>
-                <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
+                <Box sx={{ display: "flex", alignItems: "center", mt: 1 }}>
                   <Typography variant="body2" sx={{ mr: 1 }}>
                     Likelihood: {(estimate.likelihood * 100).toFixed(1)}%
                   </Typography>
@@ -84,10 +76,10 @@ const AdversaryIntentDisplay: React.FC<AdversaryIntentDisplayProps> = ({
                     sx={{ flexGrow: 1, height: 10, borderRadius: 5 }}
                     color={
                       estimate.likelihood > 0.7
-                        ? 'error'
+                        ? "error"
                         : estimate.likelihood > 0.4
-                          ? 'warning'
-                          : 'success'
+                          ? "warning"
+                          : "success"
                     }
                   />
                 </Box>

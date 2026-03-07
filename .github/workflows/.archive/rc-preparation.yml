@@ -3,7 +3,6 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-
 # Deterministic RC Preparation Pipeline
 # Prepares an MVP-4 stabilization release candidate with full artifact bundle.
 #
@@ -90,7 +89,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
         with:
-          cache: 'pnpm'
+          cache: "pnpm"
           node-version: "20"
 
       - name: Install Dependencies

@@ -33,7 +33,7 @@ sections:
   collapse_in_sanitized:
     - heading: "Top Blockers"
       replacement: "_{count} blocker(s) - see internal report for details_"
-      max_visible: 0  # Show heading + replacement only
+      max_visible: 0 # Show heading + replacement only
 
     - heading: "Escalation Status"
       replacement: "_{count} escalation(s) in progress_"
@@ -170,14 +170,14 @@ replacements:
 
   # How to handle forbidden links
   link:
-    strategy: "text_only"  # Convert to plain text, or "remove" entirely
+    strategy: "text_only" # Convert to plain text, or "remove" entirely
 
 # --- Verification ---
 # Post-redaction verification requirements
 verification:
   # Must pass all checks for sanitized mode
   fail_on_forbidden_pattern: true
-  fail_on_unlisted_link: false  # Warn only
+  fail_on_unlisted_link: false # Warn only
   require_section_markers: true
 
   # Patterns that indicate incomplete redaction

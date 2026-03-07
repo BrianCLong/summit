@@ -12,7 +12,7 @@ import type {
   FieldMapping,
   FieldStatistics,
   SampleStatistics,
-} from './types';
+} from "./types";
 
 /**
  * Schema Inference Engine
@@ -21,12 +21,9 @@ export class SchemaInference {
   /**
    * Infer schema from sample records
    */
-  inferSchema(
-    samples: SampleRecord[],
-    schemaHint?: string
-  ): SchemaInferenceResult {
+  inferSchema(samples: SampleRecord[], schemaHint?: string): SchemaInferenceResult {
     if (samples.length === 0) {
-      throw new Error('No sample records provided');
+      throw new Error("No sample records provided");
     }
 
     // Calculate field statistics
@@ -36,11 +33,7 @@ export class SchemaInference {
     const entityType = this.inferEntityType(samples, statistics, schemaHint);
 
     // Generate field mappings
-    const fieldMappings = this.generateFieldMappings(
-      samples,
-      statistics,
-      entityType
-    );
+    const fieldMappings = this.generateFieldMappings(samples, statistics, entityType);
 
     // Calculate confidence
     const confidence = this.calculateConfidence(fieldMappings, statistics);
@@ -77,10 +70,7 @@ export class SchemaInference {
   /**
    * Calculate statistics for a single field
    */
-  private calculateFieldStatistics(
-    field: string,
-    samples: SampleRecord[]
-  ): FieldStatistics {
+  private calculateFieldStatistics(field: string, samples: SampleRecord[]): FieldStatistics {
     const values = samples.map((s) => s[field]).filter((v) => v !== null && v !== undefined);
     const uniqueValues = new Set(values);
 
@@ -93,10 +83,8 @@ export class SchemaInference {
     };
 
     // String statistics
-    if (stats.type === 'string' || stats.type === 'email' || stats.type === 'url') {
-      const lengths = values
-        .filter((v) => typeof v === 'string')
-        .map((v) => (v as string).length);
+    if (stats.type === "string" || stats.type === "email" || stats.type === "url") {
+      const lengths = values.filter((v) => typeof v === "string").map((v) => (v as string).length);
 
       if (lengths.length > 0) {
         stats.minLength = Math.min(...lengths);
@@ -106,8 +94,8 @@ export class SchemaInference {
     }
 
     // Number statistics
-    if (stats.type === 'number') {
-      const numbers = values.filter((v) => typeof v === 'number') as number[];
+    if (stats.type === "number") {
+      const numbers = values.filter((v) => typeof v === "number") as number[];
 
       if (numbers.length > 0) {
         stats.min = Math.min(...numbers);
@@ -123,56 +111,56 @@ export class SchemaInference {
    * Infer field type from sample values
    */
   private inferFieldType(values: unknown[]): FieldType {
-    if (values.length === 0) return 'unknown';
+    if (values.length === 0) return "unknown";
 
     const firstValue = values[0];
 
     // Check for email
-    if (typeof firstValue === 'string' && this.isEmail(firstValue)) {
-      return 'email';
+    if (typeof firstValue === "string" && this.isEmail(firstValue)) {
+      return "email";
     }
 
     // Check for phone
-    if (typeof firstValue === 'string' && this.isPhone(firstValue)) {
-      return 'phone';
+    if (typeof firstValue === "string" && this.isPhone(firstValue)) {
+      return "phone";
     }
 
     // Check for URL
-    if (typeof firstValue === 'string' && this.isURL(firstValue)) {
-      return 'url';
+    if (typeof firstValue === "string" && this.isURL(firstValue)) {
+      return "url";
     }
 
     // Check for date/datetime
-    if (typeof firstValue === 'string' && this.isDate(firstValue)) {
-      return this.isDateTime(firstValue) ? 'datetime' : 'date';
+    if (typeof firstValue === "string" && this.isDate(firstValue)) {
+      return this.isDateTime(firstValue) ? "datetime" : "date";
     }
 
     // Check for array
     if (Array.isArray(firstValue)) {
-      return 'array';
+      return "array";
     }
 
     // Check for object
-    if (typeof firstValue === 'object' && firstValue !== null) {
-      return 'object';
+    if (typeof firstValue === "object" && firstValue !== null) {
+      return "object";
     }
 
     // Check for boolean
-    if (typeof firstValue === 'boolean') {
-      return 'boolean';
+    if (typeof firstValue === "boolean") {
+      return "boolean";
     }
 
     // Check for number
-    if (typeof firstValue === 'number') {
-      return 'number';
+    if (typeof firstValue === "number") {
+      return "number";
     }
 
     // Check for string
-    if (typeof firstValue === 'string') {
-      return 'string';
+    if (typeof firstValue === "string") {
+      return "string";
     }
 
-    return 'unknown';
+    return "unknown";
   }
 
   /**
@@ -195,55 +183,83 @@ export class SchemaInference {
     const fieldNames = statistics.fields.map((f) => f.field.toLowerCase());
 
     // Person indicators
-    const personIndicators = ['name', 'firstname', 'lastname', 'email', 'phone', 'age', 'dob', 'ssn'];
+    const personIndicators = [
+      "name",
+      "firstname",
+      "lastname",
+      "email",
+      "phone",
+      "age",
+      "dob",
+      "ssn",
+    ];
     const personScore = personIndicators.filter((indicator) =>
       fieldNames.some((field) => field.includes(indicator))
     ).length;
 
     // Organization indicators
-    const orgIndicators = ['company', 'organization', 'org', 'business', 'corporation', 'industry'];
+    const orgIndicators = ["company", "organization", "org", "business", "corporation", "industry"];
     const orgScore = orgIndicators.filter((indicator) =>
       fieldNames.some((field) => field.includes(indicator))
     ).length;
 
     // Location indicators
-    const locationIndicators = ['address', 'city', 'state', 'country', 'zip', 'postal', 'latitude', 'longitude', 'coordinates'];
+    const locationIndicators = [
+      "address",
+      "city",
+      "state",
+      "country",
+      "zip",
+      "postal",
+      "latitude",
+      "longitude",
+      "coordinates",
+    ];
     const locationScore = locationIndicators.filter((indicator) =>
       fieldNames.some((field) => field.includes(indicator))
     ).length;
 
     // Event indicators
-    const eventIndicators = ['event', 'date', 'time', 'timestamp', 'occurred', 'happened'];
+    const eventIndicators = ["event", "date", "time", "timestamp", "occurred", "happened"];
     const eventScore = eventIndicators.filter((indicator) =>
       fieldNames.some((field) => field.includes(indicator))
     ).length;
 
     // Document indicators
-    const documentIndicators = ['content', 'body', 'text', 'document', 'file', 'title', 'author'];
+    const documentIndicators = ["content", "body", "text", "document", "file", "title", "author"];
     const documentScore = documentIndicators.filter((indicator) =>
       fieldNames.some((field) => field.includes(indicator))
     ).length;
 
     // Indicator indicators
-    const indicatorIndicators = ['indicator', 'ioc', 'ip', 'domain', 'hash', 'md5', 'sha256', 'malware'];
+    const indicatorIndicators = [
+      "indicator",
+      "ioc",
+      "ip",
+      "domain",
+      "hash",
+      "md5",
+      "sha256",
+      "malware",
+    ];
     const indicatorScore = indicatorIndicators.filter((indicator) =>
       fieldNames.some((field) => field.includes(indicator))
     ).length;
 
     // Find highest score
     const scores = [
-      { type: 'Person' as CanonicalEntityType, score: personScore },
-      { type: 'Organization' as CanonicalEntityType, score: orgScore },
-      { type: 'Location' as CanonicalEntityType, score: locationScore },
-      { type: 'Event' as CanonicalEntityType, score: eventScore },
-      { type: 'Document' as CanonicalEntityType, score: documentScore },
-      { type: 'Indicator' as CanonicalEntityType, score: indicatorScore },
+      { type: "Person" as CanonicalEntityType, score: personScore },
+      { type: "Organization" as CanonicalEntityType, score: orgScore },
+      { type: "Location" as CanonicalEntityType, score: locationScore },
+      { type: "Event" as CanonicalEntityType, score: eventScore },
+      { type: "Document" as CanonicalEntityType, score: documentScore },
+      { type: "Indicator" as CanonicalEntityType, score: indicatorScore },
     ];
 
     scores.sort((a, b) => b.score - a.score);
 
     // Default to Document if no clear winner
-    return scores[0].score > 0 ? scores[0].type : 'Document';
+    return scores[0].score > 0 ? scores[0].type : "Document";
   }
 
   /**
@@ -295,44 +311,122 @@ export class SchemaInference {
     required: boolean;
     aliases: string[];
   }> {
-    const fieldMaps: Record<CanonicalEntityType, Array<{ field: string; type: FieldType; required: boolean; aliases: string[] }>> = {
+    const fieldMaps: Record<
+      CanonicalEntityType,
+      Array<{ field: string; type: FieldType; required: boolean; aliases: string[] }>
+    > = {
       Person: [
-        { field: 'name', type: 'string', required: true, aliases: ['fullname', 'full_name', 'person_name', 'firstname', 'lastname'] },
-        { field: 'email', type: 'email', required: false, aliases: ['mail', 'e_mail', 'email_address'] },
-        { field: 'phone', type: 'phone', required: false, aliases: ['telephone', 'mobile', 'tel', 'phone_number'] },
-        { field: 'dateOfBirth', type: 'date', required: false, aliases: ['dob', 'birth_date', 'birthdate'] },
-        { field: 'address', type: 'string', required: false, aliases: ['street', 'location'] },
+        {
+          field: "name",
+          type: "string",
+          required: true,
+          aliases: ["fullname", "full_name", "person_name", "firstname", "lastname"],
+        },
+        {
+          field: "email",
+          type: "email",
+          required: false,
+          aliases: ["mail", "e_mail", "email_address"],
+        },
+        {
+          field: "phone",
+          type: "phone",
+          required: false,
+          aliases: ["telephone", "mobile", "tel", "phone_number"],
+        },
+        {
+          field: "dateOfBirth",
+          type: "date",
+          required: false,
+          aliases: ["dob", "birth_date", "birthdate"],
+        },
+        { field: "address", type: "string", required: false, aliases: ["street", "location"] },
       ],
       Organization: [
-        { field: 'name', type: 'string', required: true, aliases: ['company', 'organization', 'org_name', 'business_name'] },
-        { field: 'industry', type: 'string', required: false, aliases: ['sector', 'business_type'] },
-        { field: 'website', type: 'url', required: false, aliases: ['url', 'homepage', 'web_site'] },
-        { field: 'address', type: 'string', required: false, aliases: ['location', 'headquarters'] },
+        {
+          field: "name",
+          type: "string",
+          required: true,
+          aliases: ["company", "organization", "org_name", "business_name"],
+        },
+        {
+          field: "industry",
+          type: "string",
+          required: false,
+          aliases: ["sector", "business_type"],
+        },
+        {
+          field: "website",
+          type: "url",
+          required: false,
+          aliases: ["url", "homepage", "web_site"],
+        },
+        {
+          field: "address",
+          type: "string",
+          required: false,
+          aliases: ["location", "headquarters"],
+        },
       ],
       Location: [
-        { field: 'name', type: 'string', required: true, aliases: ['place', 'location_name'] },
-        { field: 'address', type: 'string', required: false, aliases: ['street', 'full_address'] },
-        { field: 'city', type: 'string', required: false, aliases: [] },
-        { field: 'state', type: 'string', required: false, aliases: ['province', 'region'] },
-        { field: 'country', type: 'string', required: false, aliases: [] },
-        { field: 'coordinates', type: 'string', required: false, aliases: ['latlng', 'lat_long', 'geo'] },
+        { field: "name", type: "string", required: true, aliases: ["place", "location_name"] },
+        { field: "address", type: "string", required: false, aliases: ["street", "full_address"] },
+        { field: "city", type: "string", required: false, aliases: [] },
+        { field: "state", type: "string", required: false, aliases: ["province", "region"] },
+        { field: "country", type: "string", required: false, aliases: [] },
+        {
+          field: "coordinates",
+          type: "string",
+          required: false,
+          aliases: ["latlng", "lat_long", "geo"],
+        },
       ],
       Event: [
-        { field: 'name', type: 'string', required: true, aliases: ['event_name', 'title'] },
-        { field: 'timestamp', type: 'datetime', required: true, aliases: ['date', 'occurred_at', 'event_time'] },
-        { field: 'location', type: 'string', required: false, aliases: ['place', 'venue'] },
-        { field: 'description', type: 'string', required: false, aliases: ['details', 'notes'] },
+        { field: "name", type: "string", required: true, aliases: ["event_name", "title"] },
+        {
+          field: "timestamp",
+          type: "datetime",
+          required: true,
+          aliases: ["date", "occurred_at", "event_time"],
+        },
+        { field: "location", type: "string", required: false, aliases: ["place", "venue"] },
+        { field: "description", type: "string", required: false, aliases: ["details", "notes"] },
       ],
       Document: [
-        { field: 'title', type: 'string', required: true, aliases: ['name', 'document_title', 'filename'] },
-        { field: 'content', type: 'string', required: false, aliases: ['body', 'text', 'document_content'] },
-        { field: 'author', type: 'string', required: false, aliases: ['creator', 'author_name'] },
-        { field: 'createdAt', type: 'datetime', required: false, aliases: ['created', 'date_created', 'timestamp'] },
+        {
+          field: "title",
+          type: "string",
+          required: true,
+          aliases: ["name", "document_title", "filename"],
+        },
+        {
+          field: "content",
+          type: "string",
+          required: false,
+          aliases: ["body", "text", "document_content"],
+        },
+        { field: "author", type: "string", required: false, aliases: ["creator", "author_name"] },
+        {
+          field: "createdAt",
+          type: "datetime",
+          required: false,
+          aliases: ["created", "date_created", "timestamp"],
+        },
       ],
       Indicator: [
-        { field: 'value', type: 'string', required: true, aliases: ['indicator', 'ioc', 'observable'] },
-        { field: 'type', type: 'string', required: true, aliases: ['indicator_type', 'ioc_type'] },
-        { field: 'confidence', type: 'number', required: false, aliases: ['score', 'confidence_score'] },
+        {
+          field: "value",
+          type: "string",
+          required: true,
+          aliases: ["indicator", "ioc", "observable"],
+        },
+        { field: "type", type: "string", required: true, aliases: ["indicator_type", "ioc_type"] },
+        {
+          field: "confidence",
+          type: "number",
+          required: false,
+          aliases: ["score", "confidence_score"],
+        },
       ],
     };
 
@@ -351,7 +445,13 @@ export class SchemaInference {
       required: boolean;
       aliases: string[];
     }>
-  ): { field: string; type: FieldType; confidence: number; transformation?: string; required: boolean } | null {
+  ): {
+    field: string;
+    type: FieldType;
+    confidence: number;
+    transformation?: string;
+    required: boolean;
+  } | null {
     const sourceLower = sourceField.toLowerCase();
 
     for (const canonical of canonicalFields) {
@@ -376,7 +476,10 @@ export class SchemaInference {
       }
 
       // Partial match
-      if (sourceLower.includes(canonical.field.toLowerCase()) || canonical.field.toLowerCase().includes(sourceLower)) {
+      if (
+        sourceLower.includes(canonical.field.toLowerCase()) ||
+        canonical.field.toLowerCase().includes(sourceLower)
+      ) {
         return {
           field: canonical.field,
           type: canonical.type,
@@ -392,16 +495,16 @@ export class SchemaInference {
   /**
    * Calculate overall confidence
    */
-  private calculateConfidence(
-    mappings: FieldMapping[],
-    statistics: SampleStatistics
-  ): number {
+  private calculateConfidence(mappings: FieldMapping[], statistics: SampleStatistics): number {
     if (mappings.length === 0) return 0;
 
-    const avgMappingConfidence = mappings.reduce((sum, m) => sum + m.confidence, 0) / mappings.length;
+    const avgMappingConfidence =
+      mappings.reduce((sum, m) => sum + m.confidence, 0) / mappings.length;
 
     // Penalize if too many nulls
-    const nullRate = statistics.fields.reduce((sum, f) => sum + f.nullCount, 0) / (statistics.recordCount * statistics.fieldCount);
+    const nullRate =
+      statistics.fields.reduce((sum, f) => sum + f.nullCount, 0) /
+      (statistics.recordCount * statistics.fieldCount);
     const nullPenalty = Math.max(0, 1 - nullRate);
 
     return Math.min(1.0, avgMappingConfidence * nullPenalty);
@@ -426,7 +529,14 @@ export class SchemaInference {
   }
 
   private isValidEntityType(type: string): boolean {
-    const valid: CanonicalEntityType[] = ['Person', 'Organization', 'Location', 'Event', 'Document', 'Indicator'];
+    const valid: CanonicalEntityType[] = [
+      "Person",
+      "Organization",
+      "Location",
+      "Event",
+      "Document",
+      "Indicator",
+    ];
     return valid.includes(type as CanonicalEntityType);
   }
 
@@ -453,6 +563,6 @@ export class SchemaInference {
   }
 
   private isDateTime(value: string): boolean {
-    return value.includes('T') || value.includes(':');
+    return value.includes("T") || value.includes(":");
   }
 }

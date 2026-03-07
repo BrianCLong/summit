@@ -1,15 +1,15 @@
-export type ProviderId = 'claude' | 'codex' | 'gemini' | 'fake';
+export type ProviderId = "claude" | "codex" | "gemini" | "fake";
 
 export type EventType =
-  | 'session_start'
-  | 'step_start'
-  | 'tool_exec'
-  | 'file_read'
-  | 'file_write'
-  | 'tests_run'
-  | 'session_end';
+  | "session_start"
+  | "step_start"
+  | "tool_exec"
+  | "file_read"
+  | "file_write"
+  | "tests_run"
+  | "session_end";
 
-export type ToolActionType = 'tool_exec' | 'file_read' | 'file_write';
+export type ToolActionType = "tool_exec" | "file_read" | "file_write";
 
 export interface ToolAction {
   type: ToolActionType;
@@ -29,7 +29,7 @@ export interface EventRecord {
 export interface PolicyDecision {
   allowed: boolean;
   reason: string;
-  mode: 'deny-by-default' | 'allow-all' | 'allowlist';
+  mode: "deny-by-default" | "allow-all" | "allowlist";
 }
 
 export interface Skillset {
@@ -44,7 +44,7 @@ export interface ProviderSession {
     handlers: {
       onToken: (token: string) => void;
       onToolAction?: (action: ToolAction) => void;
-    },
+    }
   ): Promise<void>;
   stop(): Promise<void>;
 }
@@ -53,8 +53,5 @@ export interface ProviderAdapter {
   id: ProviderId;
   displayName: string;
   isAvailable(): Promise<boolean>;
-  startSession(options: {
-    sessionId: string;
-    systemPrompt: string;
-  }): Promise<ProviderSession>;
+  startSession(options: { sessionId: string; systemPrompt: string }): Promise<ProviderSession>;
 }

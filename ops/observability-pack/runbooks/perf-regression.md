@@ -1,9 +1,11 @@
 # Performance Regression Runbook
 
 ## Overview
+
 This runbook covers investigation and remediation of performance regressions in IntelGraph services.
 
 ## Symptoms
+
 - P99 latency exceeds SLO targets
 - Increased error rates
 - User complaints about slow responses
@@ -12,6 +14,7 @@ This runbook covers investigation and remediation of performance regressions in 
 ## Investigation Steps
 
 ### 1. Identify Affected Services
+
 ```bash
 # Check which services are affected
 kubectl top pods -n intelgraph --sort-by=cpu
@@ -21,6 +24,7 @@ curl -s "http://prometheus:9090/api/v1/query?query=histogram_quantile(0.99,sum(r
 ```
 
 ### 2. Check Recent Deployments
+
 ```bash
 # List recent deployments
 kubectl rollout history deployment -n intelgraph
@@ -30,6 +34,7 @@ kubectl describe deployment <service-name> -n intelgraph | grep -A5 "Events"
 ```
 
 ### 3. Analyze Query Patterns
+
 ```sql
 -- Check slow queries in PostgreSQL
 SELECT pid, now() - pg_stat_activity.query_start AS duration, query
@@ -49,6 +54,7 @@ ORDER BY elapsedTimeMillis DESC
 ```
 
 ### 4. Check Resource Utilization
+
 ```bash
 # Memory usage
 kubectl top pods -n intelgraph --sort-by=memory
@@ -61,6 +67,7 @@ kubectl exec -it <pod> -- iostat -x 1 5
 ```
 
 ### 5. Review Logs
+
 ```bash
 # Get error logs
 kubectl logs -n intelgraph deployment/<service> --since=1h | grep -i error
@@ -74,20 +81,24 @@ kubectl logs -n intelgraph deployment/<service> --since=1h | grep -i timeout
 ### Immediate Actions
 
 1. **Rollback if deployment-related**
+
    ```bash
    kubectl rollout undo deployment/<service-name> -n intelgraph
    ```
 
 2. **Scale up if resource constrained**
+
    ```bash
    kubectl scale deployment/<service-name> --replicas=<new-count> -n intelgraph
    ```
 
 3. **Kill runaway queries**
+
    ```sql
    -- PostgreSQL
    SELECT pg_terminate_backend(<pid>);
    ```
+
    ```cypher
    // Neo4j
    CALL dbms.killQuery('<queryId>')
@@ -107,6 +118,7 @@ kubectl logs -n intelgraph deployment/<service> --since=1h | grep -i timeout
    - Analyze hot paths
 
 2. **Check database indexes**
+
    ```sql
    -- Missing indexes
    SELECT schemaname, tablename, indexname

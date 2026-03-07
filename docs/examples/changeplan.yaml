@@ -1,6 +1,6 @@
-version: '1'
-name: 'upgrade-typescript-5.6'
-description: 'Batch upgrade TS to 5.6 with compat gates and codemods'
+version: "1"
+name: "upgrade-typescript-5.6"
+description: "Batch upgrade TS to 5.6 with compat gates and codemods"
 targets:
   include:
     - org/*

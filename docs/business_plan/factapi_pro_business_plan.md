@@ -20,7 +20,7 @@ While FactFlow, FactLaw, and FactMarkets drive revenue through direct SaaS, **th
 
 **Revenue potential**: $10-50M ARR with virtually no incremental cost per customer.
 
-***
+---
 
 ## 1. The Insight: Who Wants Your Verification API?
 
@@ -64,7 +64,7 @@ Your verification system is incredibly valuable, but you're only selling directl
    - Need fact-checking as a service
    - Your API becomes a Stripe-like commodity
 
-***
+---
 
 ## 2. FactAPI Pro: Three Distribution Models
 
@@ -107,7 +107,7 @@ Professional: $99/month for 50K = $0.002 per verification
 
 **Margin**: 98% (AWS API Gateway costs ~$0.00001 per request)
 
-***
+---
 
 ### 2.2 Model 2: Concurrent Licensing (Enterprise, High Stickiness)
 
@@ -153,7 +153,7 @@ Zendesk's margin: 70%+ (because infrastructure is free)
 
 **Margin**: 95% (you pay for API infrastructure; customers host integrations)
 
-***
+---
 
 ### 2.3 Model 3: White-Label Embedding (Platform Partners)
 
@@ -191,7 +191,7 @@ Total from 3 partnerships: $931K/year
 Scale to 10 partnerships: $3-5M ARR
 ```
 
-***
+---
 
 ## 3. Business Model: Unified Pricing Strategy
 
@@ -226,19 +226,19 @@ Platform Revenue Share:
 
 **Year 1 Projections**:
 
-| Channel | Customers | Avg Revenue | Total ARR |
-| :--- | :--- | :--- | :--- |
-| API Marketplace | 5K | $50/year | $250K |
-| Concurrent Licensing | 50 | $30K/year | $1.5M |
-| Platform Partnerships | 3 | $1M/year | $3M |
-| **Total** | — | — | **$4.75M ARR** |
+| Channel               | Customers | Avg Revenue | Total ARR      |
+| :-------------------- | :-------- | :---------- | :------------- |
+| API Marketplace       | 5K        | $50/year    | $250K          |
+| Concurrent Licensing  | 50        | $30K/year   | $1.5M          |
+| Platform Partnerships | 3         | $1M/year    | $3M            |
+| **Total**             | —         | —           | **$4.75M ARR** |
 
 **Gross Margin**: 95% (minimal COGS)
 **Net Margin**: 85% (small ops + billing team)
 
 **Year 2-3**: Scale to $15-30M ARR with 3-5 major platform partnerships.
 
-***
+---
 
 ## 4. Operational Roadmap: 8-12 Weeks to Revenue
 
@@ -304,16 +304,16 @@ Platform Revenue Share:
 
 **Revenue**: $15-30K MRR by week 12
 
-***
+---
 
 ## 5. Why This Is The Highest-Margin Business
 
-| Business | Year 1 ARR | COGS | Gross Margin | Net Margin |
-| :--- | :--- | :--- | :--- | :--- |
-| FactFlow | $1.5M | $225K | 85% | 60% |
-| FactLaw | $2M | $300K | 85% | 60% |
-| FactMarkets | $15M | $2.25M | 85% | 65% |
-| **FactAPI Pro** | **$5M** | **$50K** | **99%** | **85%** |
+| Business        | Year 1 ARR | COGS     | Gross Margin | Net Margin |
+| :-------------- | :--------- | :------- | :----------- | :--------- |
+| FactFlow        | $1.5M      | $225K    | 85%          | 60%        |
+| FactLaw         | $2M        | $300K    | 85%          | 60%        |
+| FactMarkets     | $15M       | $2.25M   | 85%          | 65%        |
+| **FactAPI Pro** | **$5M**    | **$50K** | **99%**      | **85%**    |
 
 **FactAPI Pro dominates on margin because**:
 
@@ -323,19 +323,19 @@ Platform Revenue Share:
 4. **Automated billing** (Stripe handles it; no manual invoicing)
 5. **No CAC** (marketplace is inbound; partnerships are strategic)
 
-***
+---
 
 ## 6. The Portfolio by End of 2026
 
 By December 2026, you operate **five parallel businesses**, all leveraging your core verification infrastructure:
 
-| Business | Model | Year 1 ARR | Year 2 Projection |
-| :--- | :--- | :--- | :--- |
-| **FactFlow** | Newsroom SaaS | $1.5M | $5-8M |
-| **FactLaw** | Legal eDiscovery | $2M | $10-15M |
-| **FactMarkets** | Financial fraud detection | $15M | $50-100M |
-| **FactAPI Pro** | White-label marketplace | $5M | $20-30M |
-| **FactDatasets** | Synthetic data licensing | $500K | $5-10M |
+| Business         | Model                     | Year 1 ARR | Year 2 Projection |
+| :--------------- | :------------------------ | :--------- | :---------------- |
+| **FactFlow**     | Newsroom SaaS             | $1.5M      | $5-8M             |
+| **FactLaw**      | Legal eDiscovery          | $2M        | $10-15M           |
+| **FactMarkets**  | Financial fraud detection | $15M       | $50-100M          |
+| **FactAPI Pro**  | White-label marketplace   | $5M        | $20-30M           |
+| **FactDatasets** | Synthetic data licensing  | $500K      | $5-10M            |
 
 **Combined Year 1 ARR: $24M**
 **Combined Year 2 ARR: $90-160M**
@@ -343,7 +343,7 @@ By December 2026, you operate **five parallel businesses**, all leveraging your 
 **Gross Margin Weighted Average**: 87%
 **Net Profit**: $15-20M+ in Year 2
 
-***
+---
 
 ## 7. Defensibility & Lock-In
 
@@ -354,7 +354,7 @@ By December 2026, you operate **five parallel businesses**, all leveraging your 
 3. **Data advantage**: Every verification call = labeled training data → Continuously improve your models
 4. **Platform control**: You own the marketplace; you set pricing, terms, features
 
-***
+---
 
 ## Conclusion
 

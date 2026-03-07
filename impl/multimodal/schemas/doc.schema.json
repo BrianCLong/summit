@@ -5,15 +5,18 @@
   "type": "object",
   "required": ["id", "uri", "modality", "mime_type", "layout"],
   "properties": {
-    "id": {"type": "string"},
-    "tenant_id": {"type": "string"},
-    "uri": {"type": "string", "description": "Location of the document"},
-    "modality": {"const": "document"},
-    "mime_type": {"type": "string", "description": "application/pdf|application/pptx|application/vnd.ms-powerpoint"},
-    "title": {"type": "string"},
-    "language": {"type": "string"},
-    "pages": {"type": "integer", "minimum": 1},
-    "layout": {"$ref": "layout.schema.json"},
+    "id": { "type": "string" },
+    "tenant_id": { "type": "string" },
+    "uri": { "type": "string", "description": "Location of the document" },
+    "modality": { "const": "document" },
+    "mime_type": {
+      "type": "string",
+      "description": "application/pdf|application/pptx|application/vnd.ms-powerpoint"
+    },
+    "title": { "type": "string" },
+    "language": { "type": "string" },
+    "pages": { "type": "integer", "minimum": 1 },
+    "layout": { "$ref": "layout.schema.json" },
     "text": {
       "type": "string",
       "description": "Full extracted text for fallback text-only processing"
@@ -25,17 +28,17 @@
         "type": "object",
         "required": ["root_id", "nodes", "edges"],
         "properties": {
-          "root_id": {"type": "string"},
+          "root_id": { "type": "string" },
           "nodes": {
             "type": "array",
             "items": {
               "type": "object",
               "required": ["id", "type"],
               "properties": {
-                "id": {"type": "string"},
-                "type": {"type": "string"},
-                "ref": {"type": "string", "description": "Reference to layout element id"},
-                "metadata": {"type": "object", "additionalProperties": true}
+                "id": { "type": "string" },
+                "type": { "type": "string" },
+                "ref": { "type": "string", "description": "Reference to layout element id" },
+                "metadata": { "type": "object", "additionalProperties": true }
               }
             }
           },
@@ -45,10 +48,10 @@
               "type": "object",
               "required": ["source", "target", "type"],
               "properties": {
-                "source": {"type": "string"},
-                "target": {"type": "string"},
-                "type": {"type": "string"},
-                "weight": {"type": "number"}
+                "source": { "type": "string" },
+                "target": { "type": "string" },
+                "type": { "type": "string" },
+                "weight": { "type": "number" }
               }
             }
           }
@@ -62,7 +65,7 @@
     },
     "security_tags": {
       "type": "array",
-      "items": {"type": "string"},
+      "items": { "type": "string" },
       "description": "Redaction/classification tags by document"
     }
   },

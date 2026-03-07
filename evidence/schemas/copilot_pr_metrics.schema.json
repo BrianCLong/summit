@@ -4,13 +4,7 @@
   "title": "Copilot PR Metrics Evidence",
   "type": "object",
   "additionalProperties": false,
-  "required": [
-    "evidence_id",
-    "item",
-    "metrics",
-    "schema_version",
-    "source"
-  ],
+  "required": ["evidence_id", "item", "metrics", "schema_version", "source"],
   "properties": {
     "evidence_id": {
       "type": "string",
@@ -31,22 +25,13 @@
     "metrics": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "pr_throughput",
-        "time_to_merge_hours"
-      ],
+      "required": ["pr_throughput", "time_to_merge_hours"],
       "properties": {
         "pr_throughput": {
-          "type": [
-            "number",
-            "null"
-          ]
+          "type": ["number", "null"]
         },
         "time_to_merge_hours": {
-          "type": [
-            "number",
-            "null"
-          ]
+          "type": ["number", "null"]
         }
       }
     }

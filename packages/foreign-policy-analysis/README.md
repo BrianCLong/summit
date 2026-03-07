@@ -14,33 +14,33 @@ Comprehensive analysis of foreign policy positions, strategic doctrines, policy 
 ## Usage
 
 ```typescript
-import { ForeignPolicyAnalyzer, PolicyDomain } from '@intelgraph/foreign-policy-analysis';
+import { ForeignPolicyAnalyzer, PolicyDomain } from "@intelgraph/foreign-policy-analysis";
 
 const analyzer = new ForeignPolicyAnalyzer();
 
 // Track policy
 analyzer.trackPolicy({
-  id: 'policy-001',
-  country: 'USA',
+  id: "policy-001",
+  country: "USA",
   domain: PolicyDomain.SECURITY,
-  topic: 'Nuclear deterrence',
+  topic: "Nuclear deterrence",
   position: PolicyPosition.STRONGLY_SUPPORT,
   // ... other details
 });
 
 // Detect policy shifts
-const shifts = analyzer.detectPolicyShifts('USA', 365);
+const shifts = analyzer.detectPolicyShifts("USA", 365);
 
 // Calculate alignment
-const alignment = analyzer.calculatePolicyAlignment('USA', 'UK');
+const alignment = analyzer.calculatePolicyAlignment("USA", "UK");
 
 // Compare policies
 const comparison = analyzer.comparePolicies(
-  ['USA', 'China', 'Russia'],
+  ["USA", "China", "Russia"],
   PolicyDomain.SECURITY,
-  'Cyber warfare'
+  "Cyber warfare"
 );
 
 // Predict evolution
-const prediction = analyzer.predictPolicyEvolution('USA', PolicyDomain.TRADE);
+const prediction = analyzer.predictPolicyEvolution("USA", PolicyDomain.TRADE);
 ```

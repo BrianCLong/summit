@@ -19,11 +19,11 @@ make smoke       # Validate everything works
 
 The CompanyOS development stack includes:
 
-| Service | Port | Description |
-|---------|------|-------------|
-| companyos-api | 4100 | Main CompanyOS API |
+| Service       | Port | Description               |
+| ------------- | ---- | ------------------------- |
+| companyos-api | 4100 | Main CompanyOS API        |
 | companyos-opa | 8181 | OPA policy decision point |
-| companyos-db | 5432 | PostgreSQL database |
+| companyos-db  | 5432 | PostgreSQL database       |
 
 ## Common Commands
 
@@ -81,6 +81,7 @@ companyos/
 ### Tenant Lifecycle Management (A1)
 
 Tenants can be in one of these states:
+
 - `PENDING` - Created but not yet activated
 - `ACTIVE` - Normal operation
 - `SUSPENDED` - Read-only or blocked
@@ -90,6 +91,7 @@ Tenants can be in one of these states:
 ### Tenant Onboarding (A2)
 
 New tenants go through a structured onboarding:
+
 1. Create tenant record
 2. Assign admin users
 3. Configure features and quotas
@@ -99,6 +101,7 @@ New tenants go through a structured onboarding:
 ### Audit Log Viewer (A3)
 
 All operations are logged and can be queried:
+
 - Filter by tenant, actor, time range
 - Search by event type or description
 - Export for compliance
@@ -106,6 +109,7 @@ All operations are logged and can be queried:
 ### OPA Authorization (B1)
 
 Policy-based authorization using OPA:
+
 - Tenant lifecycle operations gated by policy
 - Role-based access control
 - Hot-reloadable policies
@@ -113,6 +117,7 @@ Policy-based authorization using OPA:
 ### Rate Limiting (B2)
 
 Per-tenant rate limits:
+
 - Configurable by tier
 - Per-endpoint overrides
 - Metrics for monitoring
@@ -164,13 +169,13 @@ docker logs $(docker ps -qf "name=companyos-opa")
 
 Key environment variables (set in `.env`):
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `PORT` | 4100 | API server port |
-| `OPA_URL` | http://localhost:8181 | OPA service URL |
-| `DATABASE_URL` | postgresql://... | PostgreSQL connection |
-| `LOG_LEVEL` | info | Logging level |
-| `NODE_ENV` | development | Environment |
+| Variable       | Default               | Description           |
+| -------------- | --------------------- | --------------------- |
+| `PORT`         | 4100                  | API server port       |
+| `OPA_URL`      | http://localhost:8181 | OPA service URL       |
+| `DATABASE_URL` | postgresql://...      | PostgreSQL connection |
+| `LOG_LEVEL`    | info                  | Logging level         |
+| `NODE_ENV`     | development           | Environment           |
 
 ## Next Steps
 

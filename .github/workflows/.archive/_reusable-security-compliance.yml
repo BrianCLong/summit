@@ -3,7 +3,6 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-
 # Unified Security and Governance gate.
 # Authoritative check for:
 # 1. Antigravity Governance Artifacts
@@ -52,7 +51,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v4
         with:
-          cache: 'pnpm'
+          cache: "pnpm"
           node-version-file: .nvmrc
 
       - name: Setup Python

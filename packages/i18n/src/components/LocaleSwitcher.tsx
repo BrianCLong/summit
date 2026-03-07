@@ -1,14 +1,11 @@
-import React, { useState } from 'react';
-import { useI18n } from '../hooks/useI18n.js';
-import type { Locale, LocaleConfig } from '../types/index.js';
-import {
-  getAvailableLocales,
-  getLocalesByRegion,
-} from '../config/locales.js';
+import React, { useState } from "react";
+import { useI18n } from "../hooks/useI18n.js";
+import type { Locale, LocaleConfig } from "../types/index.js";
+import { getAvailableLocales, getLocalesByRegion } from "../config/locales.js";
 
 export interface LocaleSwitcherProps {
   /** Display mode */
-  mode?: 'dropdown' | 'list' | 'grid';
+  mode?: "dropdown" | "list" | "grid";
   /** Show language names in native language */
   showNativeNames?: boolean;
   /** Show flags */
@@ -25,11 +22,11 @@ export interface LocaleSwitcherProps {
  * Locale switcher component with dropdown/list/grid modes
  */
 export function LocaleSwitcher({
-  mode = 'dropdown',
+  mode = "dropdown",
   showNativeNames = true,
   showFlags = true,
   groupByRegion = false,
-  className = '',
+  className = "",
   onChange,
 }: LocaleSwitcherProps) {
   const { locale, setLocale, availableLocales } = useI18n();
@@ -46,12 +43,12 @@ export function LocaleSwitcher({
   const renderLocaleOption = (localeConfig: LocaleConfig) => (
     <div
       key={localeConfig.code}
-      className={`locale-option ${locale === localeConfig.code ? 'active' : ''}`}
+      className={`locale-option ${locale === localeConfig.code ? "active" : ""}`}
       onClick={() => handleLocaleChange(localeConfig.code)}
       role="button"
       tabIndex={0}
       onKeyPress={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
+        if (e.key === "Enter" || e.key === " ") {
           handleLocaleChange(localeConfig.code);
         }
       }}
@@ -64,7 +61,7 @@ export function LocaleSwitcher({
     </div>
   );
 
-  if (mode === 'dropdown') {
+  if (mode === "dropdown") {
     return (
       <div className={`locale-switcher locale-switcher-dropdown ${className}`}>
         <button
@@ -73,36 +70,29 @@ export function LocaleSwitcher({
           aria-expanded={isOpen}
           aria-haspopup="true"
         >
-          {showFlags && currentLocale && (
-            <span className="locale-flag">{currentLocale.flag}</span>
-          )}
+          {showFlags && currentLocale && <span className="locale-flag">{currentLocale.flag}</span>}
           <span className="locale-name">
             {currentLocale
               ? showNativeNames
                 ? currentLocale.name
                 : currentLocale.englishName
-              : 'Select Language'}
+              : "Select Language"}
           </span>
-          <span className="dropdown-arrow">{isOpen ? '▲' : '▼'}</span>
+          <span className="dropdown-arrow">{isOpen ? "▲" : "▼"}</span>
         </button>
 
         {isOpen && (
           <>
-            <div
-              className="locale-switcher-overlay"
-              onClick={() => setIsOpen(false)}
-            />
+            <div className="locale-switcher-overlay" onClick={() => setIsOpen(false)} />
             <div className="locale-switcher-dropdown-menu">
-              {groupByRegion ? (
-                Object.entries(getLocalesByRegion()).map(([region, locales]) => (
-                  <div key={region} className="locale-region-group">
-                    <div className="locale-region-header">{region}</div>
-                    {locales.map(renderLocaleOption)}
-                  </div>
-                ))
-              ) : (
-                availableLocales.map(renderLocaleOption)
-              )}
+              {groupByRegion
+                ? Object.entries(getLocalesByRegion()).map(([region, locales]) => (
+                    <div key={region} className="locale-region-group">
+                      <div className="locale-region-header">{region}</div>
+                      {locales.map(renderLocaleOption)}
+                    </div>
+                  ))
+                : availableLocales.map(renderLocaleOption)}
             </div>
           </>
         )}
@@ -110,43 +100,35 @@ export function LocaleSwitcher({
     );
   }
 
-  if (mode === 'list') {
+  if (mode === "list") {
     return (
       <div className={`locale-switcher locale-switcher-list ${className}`}>
         {groupByRegion ? (
           Object.entries(getLocalesByRegion()).map(([region, locales]) => (
             <div key={region} className="locale-region-group">
               <h3 className="locale-region-header">{region}</h3>
-              <div className="locale-list">
-                {locales.map(renderLocaleOption)}
-              </div>
+              <div className="locale-list">{locales.map(renderLocaleOption)}</div>
             </div>
           ))
         ) : (
-          <div className="locale-list">
-            {availableLocales.map(renderLocaleOption)}
-          </div>
+          <div className="locale-list">{availableLocales.map(renderLocaleOption)}</div>
         )}
       </div>
     );
   }
 
-  if (mode === 'grid') {
+  if (mode === "grid") {
     return (
       <div className={`locale-switcher locale-switcher-grid ${className}`}>
         {groupByRegion ? (
           Object.entries(getLocalesByRegion()).map(([region, locales]) => (
             <div key={region} className="locale-region-group">
               <h3 className="locale-region-header">{region}</h3>
-              <div className="locale-grid">
-                {locales.map(renderLocaleOption)}
-              </div>
+              <div className="locale-grid">{locales.map(renderLocaleOption)}</div>
             </div>
           ))
         ) : (
-          <div className="locale-grid">
-            {availableLocales.map(renderLocaleOption)}
-          </div>
+          <div className="locale-grid">{availableLocales.map(renderLocaleOption)}</div>
         )}
       </div>
     );

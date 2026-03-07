@@ -8,8 +8,8 @@ This architecture is aligned to the Summit readiness baseline and inherits the c
 
 1. **All calls enter via gateway** (OIDC/JWT + mTLS; centralized rate limits).
 2. **Every run has** `run_id`, `trace_id`, `correlation_id`, `receipt_id`.
-3. **OPA policy preflight** gates *both* plan selection and every privileged tool call.
-4. **HITL** is mandatory for high-impact actions; agent defaults to *propose*, not *execute*.
+3. **OPA policy preflight** gates _both_ plan selection and every privileged tool call.
+4. **HITL** is mandatory for high-impact actions; agent defaults to _propose_, not _execute_.
 5. **Hash-chained audit**: inputs → decisions → tool calls → outputs (append-only).
 
 ## Canonical APIs (OpenAPI-shaped)
@@ -31,7 +31,7 @@ Use when upstream provides the object already (alert JSON, ticket JSON).
   },
   "tenant_id": "acme-prod",
   "mode": "assist",
-  "budgets": { "max_seconds": 120, "max_tool_calls": 25, "max_cost_usd": 1.50 },
+  "budgets": { "max_seconds": 120, "max_tool_calls": 25, "max_cost_usd": 1.5 },
   "idempotency_key": "evt_8f3c…"
 }
 ```
@@ -59,7 +59,7 @@ Use when the control plane requires strict determinism.
   "params": { "alert_ref": "splunk:alert:8f3c…", "ticket_ref": "sn:INC00123" },
   "tenant_id": "acme-prod",
   "mode": "assist",
-  "budgets": { "max_seconds": 300, "max_tool_calls": 60, "max_cost_usd": 4.00 },
+  "budgets": { "max_seconds": 300, "max_tool_calls": 60, "max_cost_usd": 4.0 },
   "idempotency_key": "sn:INC00123:soc.phishing_triage.v2"
 }
 ```
@@ -136,7 +136,7 @@ Use when the control plane requires strict determinism.
     "workflow": "alert_triage",
     "input_ref": "ledger://artifacts/sha256:…",
     "mode": "assist",
-    "budgets": { "max_seconds": 120, "max_tool_calls": 25, "max_cost_usd": 1.50 }
+    "budgets": { "max_seconds": 120, "max_tool_calls": 25, "max_cost_usd": 1.5 }
   }
 }
 ```
@@ -208,7 +208,7 @@ Every privileged call is preceded by:
     "mode": "assist",
     "severity": "high",
     "workflow": "alert_triage",
-    "budgets": { "remaining_cost_usd": 1.10 }
+    "budgets": { "remaining_cost_usd": 1.1 }
   }
 }
 ```

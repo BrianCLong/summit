@@ -3,23 +3,23 @@
  * Comprehensive deepfake detection across facial, voice, video, and audio modalities
  */
 
-export * from './types';
-export * from './facial/facial-detector';
-export * from './voice/voice-detector';
-export * from './video/video-analyzer';
-export * from './neural/fingerprinting-engine';
-export * from './adversarial/adversarial-detector';
-export * from './streaming/streaming-engine';
-export * from './explainable/explainable-ai';
-export * from './ensemble/meta-learner';
-export * from './multimodal/fusion-engine';
-export * from './zero-shot/zero-shot-detector';
-export * from './active-learning/active-learner';
-export * from './federated/federated-learning';
+export * from "./types";
+export * from "./facial/facial-detector";
+export * from "./voice/voice-detector";
+export * from "./video/video-analyzer";
+export * from "./neural/fingerprinting-engine";
+export * from "./adversarial/adversarial-detector";
+export * from "./streaming/streaming-engine";
+export * from "./explainable/explainable-ai";
+export * from "./ensemble/meta-learner";
+export * from "./multimodal/fusion-engine";
+export * from "./zero-shot/zero-shot-detector";
+export * from "./active-learning/active-learner";
+export * from "./federated/federated-learning";
 
-import { FacialDeepfakeDetector } from './facial/facial-detector';
-import { VoiceDeepfakeDetector } from './voice/voice-detector';
-import { VideoDeepfakeAnalyzer } from './video/video-analyzer';
+import { FacialDeepfakeDetector } from "./facial/facial-detector";
+import { VoiceDeepfakeDetector } from "./voice/voice-detector";
+import { VideoDeepfakeAnalyzer } from "./video/video-analyzer";
 import type {
   DeepfakeDetectionResult,
   DetectionMethod,
@@ -27,7 +27,7 @@ import type {
   BiometricAnalysis,
   BiometricType,
   GANDetectionResult,
-} from './types';
+} from "./types";
 
 export class DeepfakeDetector {
   private facialDetector: FacialDeepfakeDetector;
@@ -44,7 +44,7 @@ export class DeepfakeDetector {
    * Comprehensive deepfake detection across all modalities
    */
   async detectDeepfake(media: {
-    type: 'image' | 'video' | 'audio';
+    type: "image" | "video" | "audio";
     buffer: Buffer | Buffer[];
     metadata?: any;
   }): Promise<DeepfakeDetectionResult> {
@@ -58,7 +58,7 @@ export class DeepfakeDetector {
     let detectionMethod: DetectionMethod;
 
     switch (media.type) {
-      case 'image':
+      case "image":
         const imageResult = await this.detectImageDeepfake(media.buffer as Buffer);
         isDeepfake = imageResult.isDeepfake;
         confidence = imageResult.confidence;
@@ -68,10 +68,10 @@ export class DeepfakeDetector {
         recommendations.push(...imageResult.recommendations);
         break;
 
-      case 'video':
+      case "video":
         const videoResult = await this.detectVideoDeepfake(
           media.buffer as Buffer[],
-          media.metadata,
+          media.metadata
         );
         isDeepfake = videoResult.isDeepfake;
         confidence = videoResult.confidence;
@@ -81,7 +81,7 @@ export class DeepfakeDetector {
         recommendations.push(...videoResult.recommendations);
         break;
 
-      case 'audio':
+      case "audio":
         const audioResult = await this.detectAudioDeepfake(media.buffer as Buffer);
         isDeepfake = audioResult.isDeepfake;
         confidence = audioResult.confidence;
@@ -103,9 +103,9 @@ export class DeepfakeDetector {
         timestamp: new Date(),
         processingTime,
         modelVersions: [
-          { name: 'facial-detector', version: '3.0.0', accuracy: 0.95 },
-          { name: 'voice-detector', version: '2.5.0', accuracy: 0.92 },
-          { name: 'video-analyzer', version: '2.0.0', accuracy: 0.93 },
+          { name: "facial-detector", version: "3.0.0", accuracy: 0.95 },
+          { name: "voice-detector", version: "2.5.0", accuracy: 0.92 },
+          { name: "video-analyzer", version: "2.0.0", accuracy: 0.93 },
         ],
         inputMetadata: {
           format: media.type,
@@ -160,27 +160,27 @@ export class DeepfakeDetector {
     if (facialAnalysis.manipulationScore > 0.6) {
       isDeepfake = true;
       confidence = facialAnalysis.manipulationScore;
-      warnings.push('High manipulation score detected in facial analysis');
+      warnings.push("High manipulation score detected in facial analysis");
     }
 
     if (faceSwapDetection.isSwapped) {
       isDeepfake = true;
       confidence = Math.max(confidence, faceSwapDetection.confidence);
-      warnings.push('Face swap detected');
+      warnings.push("Face swap detected");
       warnings.push(...faceSwapDetection.evidence);
     }
 
     if (ganDetection.isGANGenerated) {
       isDeepfake = true;
       confidence = Math.max(confidence, ganDetection.confidence);
-      warnings.push('GAN-generated content detected');
+      warnings.push("GAN-generated content detected");
     }
 
     // Recommendations
     if (isDeepfake) {
-      recommendations.push('Perform additional verification using multiple detection methods');
-      recommendations.push('Check original source and provenance');
-      recommendations.push('Consider forensic analysis of metadata');
+      recommendations.push("Perform additional verification using multiple detection methods");
+      recommendations.push("Check original source and provenance");
+      recommendations.push("Consider forensic analysis of metadata");
     }
 
     return {
@@ -198,7 +198,7 @@ export class DeepfakeDetector {
    */
   private async detectVideoDeepfake(
     frames: Buffer[],
-    metadata: any,
+    metadata: any
   ): Promise<{
     isDeepfake: boolean;
     confidence: number;
@@ -218,7 +218,7 @@ export class DeepfakeDetector {
     // Temporal discontinuities
     for (const disc of videoAnalysis.temporalConsistency.discontinuities) {
       artifacts.push({
-        type: 'TEMPORAL_DISCONTINUITY' as any,
+        type: "TEMPORAL_DISCONTINUITY" as any,
         location: { frame: disc.frameStart },
         severity: disc.severity,
         description: `Temporal discontinuity between frames ${disc.frameStart}-${disc.frameEnd}`,
@@ -237,9 +237,9 @@ export class DeepfakeDetector {
     }
 
     if (isDeepfake) {
-      recommendations.push('Analyze individual frames for consistency');
-      recommendations.push('Check audio-visual synchronization');
-      recommendations.push('Verify video source and chain of custody');
+      recommendations.push("Analyze individual frames for consistency");
+      recommendations.push("Check audio-visual synchronization");
+      recommendations.push("Verify video source and chain of custody");
     }
 
     return {
@@ -287,7 +287,7 @@ export class DeepfakeDetector {
     if (voiceCloning.isCloned) {
       isDeepfake = true;
       confidence = Math.max(confidence, voiceCloning.confidence);
-      warnings.push('Voice cloning detected');
+      warnings.push("Voice cloning detected");
       warnings.push(...voiceCloning.evidence);
     }
 
@@ -296,9 +296,9 @@ export class DeepfakeDetector {
     }
 
     if (isDeepfake) {
-      recommendations.push('Compare with known authentic voice samples');
-      recommendations.push('Analyze spectral characteristics in detail');
-      recommendations.push('Check for background consistency');
+      recommendations.push("Compare with known authentic voice samples");
+      recommendations.push("Analyze spectral characteristics in detail");
+      recommendations.push("Check for background consistency");
     }
 
     return {
@@ -366,7 +366,8 @@ export class DeepfakeDetector {
         break;
     }
 
-    const verificationScore = anomalies.length === 0 ? 0.95 : Math.max(0, 0.95 - anomalies.length * 0.15);
+    const verificationScore =
+      anomalies.length === 0 ? 0.95 : Math.max(0, 0.95 - anomalies.length * 0.15);
 
     return {
       isAuthentic: verificationScore > 0.7,

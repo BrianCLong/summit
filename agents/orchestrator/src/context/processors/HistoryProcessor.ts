@@ -1,5 +1,5 @@
-import { ContextProcessor, Session, WorkingContext, CompilationOptions, Event } from '../types.js';
-import { LLMMessage } from '../../types/index.js';
+import { ContextProcessor, Session, WorkingContext, CompilationOptions, Event } from "../types.js";
+import { LLMMessage } from "../../types/index.js";
 
 /**
  * HistoryProcessor
@@ -8,7 +8,7 @@ import { LLMMessage } from '../../types/index.js';
  * Handles compaction, filtering, and role mapping.
  */
 export class HistoryProcessor implements ContextProcessor {
-  name = 'HistoryProcessor';
+  name = "HistoryProcessor";
 
   async process(
     context: WorkingContext,
@@ -19,15 +19,17 @@ export class HistoryProcessor implements ContextProcessor {
 
     // Select relevant events (messages, tool calls)
     // Filter out internal control events unless debug mode
-    const relevantEvents = session.events.filter(e =>
-      ['message', 'tool_call', 'tool_result'].includes(e.type)
+    const relevantEvents = session.events.filter((e) =>
+      ["message", "tool_call", "tool_result"].includes(e.type)
     );
 
     // Apply sliding window (take last N)
     const selectedEvents = relevantEvents.slice(-limit);
 
     // Transform to LLMMessage
-    const messages: LLMMessage[] = selectedEvents.map(event => this.transformEventToMessage(event));
+    const messages: LLMMessage[] = selectedEvents.map((event) =>
+      this.transformEventToMessage(event)
+    );
 
     context.history.push(...messages);
 

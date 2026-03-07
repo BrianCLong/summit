@@ -28,7 +28,11 @@
             "items": { "type": "string" }
           }
         },
-        "anyOf": [{ "required": ["files"] }, { "required": ["artifacts"] }, { "required": ["report", "metrics", "stamp"] }],
+        "anyOf": [
+          { "required": ["files"] },
+          { "required": ["artifacts"] },
+          { "required": ["report", "metrics", "stamp"] }
+        ],
         "additionalProperties": true
       }
     }

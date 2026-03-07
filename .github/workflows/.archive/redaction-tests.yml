@@ -9,10 +9,10 @@ name: Redaction Layer Tests
 on:
   pull_request:
     paths-ignore:
-      - 'docs/**'
-      - '**.md'
-      - 'prompts/**'
-      - 'evidence/**'
+      - "docs/**"
+      - "**.md"
+      - "prompts/**"
+      - "evidence/**"
     paths:
       # Redaction policy and scripts
       - "docs/ci/REDACTION_POLICY.yml"
@@ -48,7 +48,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v4
         with:
-          cache: 'pnpm'
+          cache: "pnpm"
           node-version: "20"
 
       - name: Install marked (for HTML rendering)

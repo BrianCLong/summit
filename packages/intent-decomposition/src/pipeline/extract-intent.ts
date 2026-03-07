@@ -1,7 +1,7 @@
-import { IntentStatement, StepSummary, StepSummaryFactual } from '../types.js';
-import { fillTemplate, loadPromptTemplate } from '../utils/prompt.js';
-import { safeJsonParse } from '../utils/json.js';
-import { OpenAICompatibleClient } from '../llm/openai-client.js';
+import { IntentStatement, StepSummary, StepSummaryFactual } from "../types.js";
+import { fillTemplate, loadPromptTemplate } from "../utils/prompt.js";
+import { safeJsonParse } from "../utils/json.js";
+import { OpenAICompatibleClient } from "../llm/openai-client.js";
 
 export interface ExtractIntentOptions {
   modelId: string;
@@ -13,9 +13,7 @@ export interface ExtractIntentOptions {
   maxTokens?: number;
 }
 
-export function stripSpeculation(
-  summaries: StepSummary[],
-): StepSummaryFactual[] {
+export function stripSpeculation(summaries: StepSummary[]): StepSummaryFactual[] {
   return summaries.map((summary) => ({
     schemaVersion: summary.schemaVersion,
     screenContext: summary.screenContext,
@@ -27,12 +25,12 @@ export function stripSpeculation(
 
 export async function extractIntent(
   summaries: StepSummaryFactual[],
-  options: ExtractIntentOptions,
+  options: ExtractIntentOptions
 ): Promise<IntentStatement> {
   const prompt = await loadPromptTemplate(
     options.promptPath,
     options.promptId,
-    options.promptVersion,
+    options.promptVersion
   );
   const client = new OpenAICompatibleClient(options.baseUrl, options.apiKey);
 
@@ -49,7 +47,7 @@ export async function extractIntent(
   const parsed = safeJsonParse<IntentStatement>(response);
   return {
     ...parsed,
-    schemaVersion: parsed.schemaVersion ?? 'v1',
+    schemaVersion: parsed.schemaVersion ?? "v1",
     provenance: {
       ...parsed.provenance,
       modelId: options.modelId,

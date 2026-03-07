@@ -6,10 +6,10 @@ The Transform Search feature provides an efficient way for analysts to discover 
 
 ## Features
 
--   **Keyboard-first UX:** Invoked via Run Panel or shortcut (future).
--   **Instant Filtering:** filters by name, description, and input/output types.
--   **Grouped Results:** Transforms are presented in a flat list (grouped view in roadmap).
--   **Empty State:** Clear feedback when no transforms match the query.
+- **Keyboard-first UX:** Invoked via Run Panel or shortcut (future).
+- **Instant Filtering:** filters by name, description, and input/output types.
+- **Grouped Results:** Transforms are presented in a flat list (grouped view in roadmap).
+- **Empty State:** Clear feedback when no transforms match the query.
 
 ## Usage
 
@@ -42,6 +42,6 @@ The frontend consumes the `/api/transforms` endpoint from the Enrichment Service
 
 ## Future Improvements
 
--   **Ranking:** Implement usage-based ranking (most used transforms appear first).
--   **Favorites:** Allow pinning frequently used transforms.
--   **Shortcuts:** `Ctrl+T` to quick-open transform search.
+- **Ranking:** Implement usage-based ranking (most used transforms appear first).
+- **Favorites:** Allow pinning frequently used transforms.
+- **Shortcuts:** `Ctrl+T` to quick-open transform search.

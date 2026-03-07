@@ -1,4 +1,4 @@
-import prom from 'prom-client';
+import prom from "prom-client";
 export declare const queueDepth: prom.Gauge<string>;
 export declare const queueProcessed: prom.Counter<"status" | "type">;
 export declare const queueProcessingDuration: prom.Histogram<"type">;

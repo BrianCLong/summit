@@ -7,6 +7,7 @@ This checklist ensures the 4-PR CI stabilization stack is properly activated and
 ## Prerequisites
 
 All 4 PRs must be merged:
+
 - [ ] PR #19069: Minimal deterministic PR gate
 - [ ] PR #19070: Path-filtered workflows
 - [ ] PR #19071: Main branch validation + cleanup
@@ -21,6 +22,7 @@ gh workflow list --all
 ```
 
 **Expected active workflows** (non-reusable):
+
 - `pr-gate.yml`
 - `main-validation.yml`
 - `server-ci.yml`
@@ -29,6 +31,7 @@ gh workflow list --all
 - `docs-ci.yml`
 
 **Expected reusable workflows** (supporting):
+
 - `_*.yml` (various reusable workflows)
 
 ### Count Workflow Files
@@ -54,6 +57,7 @@ bash scripts/ci/workflow_registry_cleanup.sh
 ```
 
 This will:
+
 1. List all workflows registered in GitHub
 2. Identify "ghost" workflows (registered but file doesn't exist)
 3. Prompt to disable them
@@ -78,6 +82,7 @@ Find: `main` branch → Click **Edit**
 ### Required Status Checks
 
 **Current (before)**:
+
 ```
 ✓ comprehensive-test-suite
 ✓ e2e-tests
@@ -87,11 +92,13 @@ Find: `main` branch → Click **Edit**
 ```
 
 **Target (after)**:
+
 ```
 ✓ pr-gate   ← ONLY THIS
 ```
 
 **Steps**:
+
 1. Scroll to "Require status checks to pass before merging"
 2. Click **X** on ALL existing checks
 3. Search for `pr-gate`
@@ -101,11 +108,13 @@ Find: `main` branch → Click **Edit**
 ### Merge Queue Settings
 
 Enable:
+
 ```
 ☑ Require merge queue
 ```
 
 Configure:
+
 ```
 Merge method: Squash
 Build concurrency: 5
@@ -117,6 +126,7 @@ Maximum time in queue: 60 minutes
 ### Other Protection Settings
 
 Enable:
+
 ```
 ☑ Require linear history
 ☑ Require conversation resolution before merging
@@ -125,11 +135,13 @@ Enable:
 ```
 
 Disable:
+
 ```
 ☐ Require branches to be up to date before merging
 ```
 
 **⚠️ CRITICAL**: Must disable "require up to date" or merge queue will force rebases on every merge, causing:
+
 - Invalidated approvals
 - Retriggered CI
 - Stalled merge train
@@ -272,6 +284,7 @@ node scripts/ci/ci_metrics.mjs
 ```
 
 **Healthy metrics**:
+
 - Queue depth: <50
 - PR gate duration: <20 min
 - PR gate pass rate: >95%
@@ -312,6 +325,7 @@ node scripts/ci/ci_metrics.mjs --save
 ```
 
 This creates:
+
 - `docs/ci/metrics/ci-metrics-<timestamp>.json`
 - `docs/ci/metrics/latest.json`
 
@@ -322,6 +336,7 @@ cat docs/ci/metrics/latest.json
 ```
 
 **Target metrics**:
+
 - Queue health: `HEALTHY` or `NORMAL`
 - PR gate health: `HEALTHY`
 - PR gate avg duration: <20 min
@@ -338,7 +353,7 @@ name: CI Metrics Collection
 
 on:
   schedule:
-    - cron: '0 * * * *'  # Every hour
+    - cron: "0 * * * *" # Every hour
   workflow_dispatch:
 
 jobs:
@@ -384,6 +399,7 @@ gh pr create --title "[TEST] Verify full CI flow" \
    - client-ci: ✓ <15 min
 
 3. **Enable Auto-Merge**
+
    ```bash
    gh pr merge test/verify-full-flow --auto --squash
    ```
@@ -398,6 +414,7 @@ gh pr create --title "[TEST] Verify full CI flow" \
 ### Cleanup
 
 After verification:
+
 ```bash
 git revert HEAD
 git push origin main
@@ -408,27 +425,32 @@ git push origin main
 ## Success Criteria
 
 ### Workflow Topology
+
 - [x] Only 6-8 active workflows
 - [x] 200+ workflows archived
 - [x] No ghost workflows in registry
 
 ### Branch Protection
+
 - [x] Only `pr-gate` required
 - [x] Merge queue enabled
 - [x] "Require up to date" disabled
 
 ### Path Filtering
+
 - [x] Docs PR only runs docs-ci
 - [x] Server PR only runs server-ci
 - [x] Client PR only runs client-ci
 - [x] Full-stack PR runs relevant workflows
 
 ### Drift Sentinel
+
 - [x] Blocks PRs with missing concurrency
 - [x] Enforces workflow count <25
 - [x] Prevents duplicate names
 
 ### Performance
+
 - [x] Queue depth <50
 - [x] PR gate <20 min
 - [x] PR gate pass rate >95%
@@ -436,6 +458,7 @@ git push origin main
 - [x] Time to merge <30 min
 
 ### Monitoring
+
 - [x] CI metrics collecting
 - [x] Metrics show healthy status
 - [x] Alerts configured (if applicable)
@@ -472,6 +495,7 @@ git push
 ### Issue: pr-gate not in status checks dropdown
 
 **Solution**:
+
 ```bash
 gh workflow run pr-gate.yml
 # Wait 2 minutes, then check again
@@ -480,6 +504,7 @@ gh workflow run pr-gate.yml
 ### Issue: PRs stuck in merge queue
 
 **Solution**:
+
 ```bash
 # Check if "require up to date" is disabled
 # If enabled, disable it and restart queue
@@ -488,6 +513,7 @@ gh workflow run pr-gate.yml
 ### Issue: Old workflows still running
 
 **Solution**:
+
 ```bash
 # Run registry cleanup
 bash scripts/ci/workflow_registry_cleanup.sh
@@ -496,6 +522,7 @@ bash scripts/ci/workflow_registry_cleanup.sh
 ### Issue: Queue saturation returning
 
 **Solution**:
+
 ```bash
 # Check metrics
 node scripts/ci/ci_metrics.mjs

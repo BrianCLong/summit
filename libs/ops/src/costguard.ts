@@ -1,4 +1,4 @@
-let ENFORCE = process.env.COST_GUARD_ENFORCE === '1';
+let ENFORCE = process.env.COST_GUARD_ENFORCE === "1";
 
 export function setEnforce(enabled: boolean) {
   ENFORCE = enabled;
@@ -13,6 +13,6 @@ export function killIfSlow(start: number, res: any) {
 
 export function guard(req: any, res: any, next: any) {
   const t = Date.now();
-  res.on('finish', () => killIfSlow(t, res));
+  res.on("finish", () => killIfSlow(t, res));
   next();
 }

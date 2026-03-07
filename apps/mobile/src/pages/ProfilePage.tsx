@@ -128,9 +128,7 @@ export function ProfilePage() {
         <Card>
           <CardContent>
             <Box display="flex" alignItems="center" gap={2}>
-              <Avatar
-                sx={{ width: 64, height: 64, bgcolor: 'primary.main' }}
-              >
+              <Avatar sx={{ width: 64, height: 64, bgcolor: 'primary.main' }}>
                 {user?.name.charAt(0).toUpperCase() || 'U'}
               </Avatar>
               <Box>
@@ -160,10 +158,7 @@ export function ProfilePage() {
               <ListItemIcon>
                 {isOnline ? <CloudDone color="success" /> : <CloudOff color="error" />}
               </ListItemIcon>
-              <ListItemText
-                primary="Connection"
-                secondary={isOnline ? 'Online' : 'Offline'}
-              />
+              <ListItemText primary="Connection" secondary={isOnline ? 'Online' : 'Offline'} />
             </ListItem>
             <Divider />
             <ListItem>
@@ -176,8 +171,8 @@ export function ProfilePage() {
                   syncState.isSyncing
                     ? 'Syncing...'
                     : syncState.pendingCount > 0
-                    ? `${syncState.pendingCount} pending changes`
-                    : 'All synced'
+                      ? `${syncState.pendingCount} pending changes`
+                      : 'All synced'
                 }
               />
               <ListItemSecondaryAction>
@@ -205,10 +200,7 @@ export function ProfilePage() {
               <ListItemIcon>
                 <Security />
               </ListItemIcon>
-              <ListItemText
-                primary="PIN Lock"
-                secondary="Require PIN to access app"
-              />
+              <ListItemText primary="PIN Lock" secondary="Require PIN to access app" />
               <ListItemSecondaryAction>
                 <Switch
                   checked={securityConfig.requirePin}
@@ -247,9 +239,7 @@ export function ProfilePage() {
             {storageEstimate && (
               <Box mb={2}>
                 <Box display="flex" justifyContent="space-between" mb={0.5}>
-                  <Typography variant="body2">
-                    {formatBytes(storageEstimate.usage)} used
-                  </Typography>
+                  <Typography variant="body2">{formatBytes(storageEstimate.usage)} used</Typography>
                   <Typography variant="body2" color="text.secondary">
                     {formatBytes(storageEstimate.quota)} total
                   </Typography>
@@ -323,8 +313,8 @@ export function ProfilePage() {
         <DialogTitle>Clear Cached Data?</DialogTitle>
         <DialogContent>
           <Typography>
-            This will remove all locally cached cases, alerts, tasks, and entities.
-            Your notes and observations will remain until synced.
+            This will remove all locally cached cases, alerts, tasks, and entities. Your notes and
+            observations will remain until synced.
           </Typography>
         </DialogContent>
         <DialogActions>

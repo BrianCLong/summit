@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 export type RedactionRule = {
   path: string;
@@ -37,8 +37,8 @@ export function applyRedactionRules<T>(value: T, rules: RedactionRule[] = []): T
   const cloned = JSON.parse(JSON.stringify(value)) as T;
 
   for (const rule of rules) {
-    const replacement = rule.replacement ?? '[REDACTED]';
-    const segments = rule.path.split('.').filter(Boolean);
+    const replacement = rule.replacement ?? "[REDACTED]";
+    const segments = rule.path.split(".").filter(Boolean);
     if (segments.length === 0) {
       continue;
     }
@@ -47,7 +47,7 @@ export function applyRedactionRules<T>(value: T, rules: RedactionRule[] = []): T
     for (let i = 0; i < segments.length - 1; i += 1) {
       const key = segments[i];
       const next = target?.[key];
-      if (next && typeof next === 'object') {
+      if (next && typeof next === "object") {
         target = next as Record<string, unknown>;
       } else {
         target = undefined;

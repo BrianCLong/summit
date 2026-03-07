@@ -20,7 +20,7 @@ export class MetaRouterTelemetry {
 
   recordNode(kind: string, layer: string): void {
     this.counters.nodesRegistered += 1;
-    emit('meta_router_node_registered', {
+    emit("meta_router_node_registered", {
       kind,
       layer,
       nodesRegistered: this.counters.nodesRegistered,
@@ -29,7 +29,7 @@ export class MetaRouterTelemetry {
 
   recordDelta(kind: string): void {
     this.counters.deltasRecorded += 1;
-    emit('meta_router_delta_recorded', {
+    emit("meta_router_delta_recorded", {
       kind,
       deltasRecorded: this.counters.deltasRecorded,
     });
@@ -38,7 +38,7 @@ export class MetaRouterTelemetry {
   recordAssembly(goal: string, nodeCount: number, deltaCount: number, durationMs: number): void {
     this.counters.assembliesCompleted += 1;
     this.counters.lastAssemblyDurationMs = durationMs;
-    emit('meta_router_assembly_completed', {
+    emit("meta_router_assembly_completed", {
       goal,
       nodeCount,
       deltaCount,

@@ -36,8 +36,5 @@
     "Context compression scaffolding added without behavior changes.",
     "Evidence schemas and placeholders registered for context management."
   ],
-  "stop_conditions": [
-    "Missing required prompt registry entry.",
-    "Scope exceeds declared paths."
-  ]
+  "stop_conditions": ["Missing required prompt registry entry.", "Scope exceeds declared paths."]
 }

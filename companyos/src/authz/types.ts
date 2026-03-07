@@ -1,6 +1,6 @@
 export interface Subject {
   id: string;
-  type: 'human' | 'service';
+  type: "human" | "service";
   tenant_id: string;
   roles: string[];
   groups: string[];
@@ -13,7 +13,7 @@ export interface Subject {
 
 export interface DisclosurePackResource {
   id: string;
-  type: 'disclosure_pack';
+  type: "disclosure_pack";
   name?: string;
   tenant_id: string;
   residency_region: string;

@@ -8,14 +8,8 @@
  * - Progressive loading with confidence-based filtering
  */
 
-import React, {
-  useEffect,
-  useRef,
-  useState,
-  useCallback,
-  useMemo,
-} from 'react';
-import { useQuery, useMutation } from '@apollo/client';
+import React, { useEffect, useRef, useState, useCallback, useMemo } from "react";
+import { useQuery, useMutation } from "@apollo/client";
 import {
   Box,
   Paper,
@@ -29,7 +23,7 @@ import {
   MenuItem,
   Alert,
   CircularProgress,
-} from '@mui/material';
+} from "@mui/material";
 import {
   ZoomIn,
   ZoomOut,
@@ -38,11 +32,11 @@ import {
   Speed,
   Memory,
   Timeline,
-} from '@mui/icons-material';
-import Cytoscape from 'cytoscape';
-import coseBilkent from 'cytoscape-cose-bilkent';
-import fcose from 'cytoscape-fcose';
-import { gql } from '@apollo/client';
+} from "@mui/icons-material";
+import Cytoscape from "cytoscape";
+import coseBilkent from "cytoscape-cose-bilkent";
+import fcose from "cytoscape-fcose";
+import { gql } from "@apollo/client";
 
 // Register Cytoscape extensions
 Cytoscape.use(coseBilkent);
@@ -150,21 +144,15 @@ const usePerformanceMonitor = () => {
   return { metrics, updateMetrics };
 };
 
-const MVP0Canvas = ({
-  investigationId,
-  onNodeSelect,
-  onEdgeSelect,
-  selectedNode,
-  className,
-}) => {
+const MVP0Canvas = ({ investigationId, onNodeSelect, onEdgeSelect, selectedNode, className }) => {
   // Refs and state
   const cyRef = useRef(null);
   const containerRef = useRef(null);
   const performanceRef = useRef({ frameCount: 0, lastTime: Date.now() });
 
-  const [lodLevel, setLodLevel] = useState('FOCUSED');
+  const [lodLevel, setLodLevel] = useState("FOCUSED");
   const [confidenceFilter, setConfidenceFilter] = useState(0.5);
-  const [layoutName, setLayoutName] = useState('fcose');
+  const [layoutName, setLayoutName] = useState("fcose");
   const [isLayoutRunning, setIsLayoutRunning] = useState(false);
   const [showPerformanceOverlay, setShowPerformanceOverlay] = useState(true);
 
@@ -179,9 +167,9 @@ const MVP0Canvas = ({
       maxEdges: LOD_CONFIGS[lodLevel].maxEdges,
       minConfidence: confidenceFilter,
     },
-    fetchPolicy: 'cache-and-network',
+    fetchPolicy: "cache-and-network",
     notifyOnNetworkStatusChange: true,
-    errorPolicy: 'partial',
+    errorPolicy: "partial",
   });
 
   // Memoized Cytoscape configuration
@@ -195,98 +183,98 @@ const MVP0Canvas = ({
       maxZoom: 3.0,
       style: [
         {
-          selector: 'node',
+          selector: "node",
           style: {
             width: config.nodeSize,
             height: config.nodeSize,
-            label: config.labels ? 'data(label)' : '',
-            'font-size': '12px',
-            'text-valign': 'center',
-            'text-halign': 'center',
-            color: '#000',
-            'text-outline-color': '#fff',
-            'text-outline-width': 1,
-            'background-opacity': 0.8,
-            'border-width': 2,
-            'border-opacity': 1,
-            shape: 'ellipse',
+            label: config.labels ? "data(label)" : "",
+            "font-size": "12px",
+            "text-valign": "center",
+            "text-halign": "center",
+            color: "#000",
+            "text-outline-color": "#fff",
+            "text-outline-width": 1,
+            "background-opacity": 0.8,
+            "border-width": 2,
+            "border-opacity": 1,
+            shape: "ellipse",
           },
         },
         {
           selector: 'node[type="PERSON"]',
           style: {
-            'background-color': '#4CAF50',
-            'border-color': '#388E3C',
+            "background-color": "#4CAF50",
+            "border-color": "#388E3C",
           },
         },
         {
           selector: 'node[type="ORGANIZATION"]',
           style: {
-            'background-color': '#2196F3',
-            'border-color': '#1976D2',
+            "background-color": "#2196F3",
+            "border-color": "#1976D2",
           },
         },
         {
           selector: 'node[type="LOCATION"]',
           style: {
-            'background-color': '#FF9800',
-            'border-color': '#F57C00',
+            "background-color": "#FF9800",
+            "border-color": "#F57C00",
           },
         },
         {
           selector: 'node[type="EMAIL"]',
           style: {
-            'background-color': '#9C27B0',
-            'border-color': '#7B1FA2',
+            "background-color": "#9C27B0",
+            "border-color": "#7B1FA2",
           },
         },
         {
           selector: 'node[type="PHONE"]',
           style: {
-            'background-color': '#E91E63',
-            'border-color': '#C2185B',
+            "background-color": "#E91E63",
+            "border-color": "#C2185B",
           },
         },
         {
-          selector: 'node:selected',
+          selector: "node:selected",
           style: {
-            'border-width': 4,
-            'border-color': '#FF5722',
-            'background-opacity': 1,
+            "border-width": 4,
+            "border-color": "#FF5722",
+            "background-opacity": 1,
           },
         },
         {
-          selector: 'edge',
+          selector: "edge",
           style: {
             width: config.edgeWidth,
-            'line-color': '#666',
-            'target-arrow-color': '#666',
-            'target-arrow-shape': 'triangle',
-            'curve-style': 'bezier',
+            "line-color": "#666",
+            "target-arrow-color": "#666",
+            "target-arrow-shape": "triangle",
+            "curve-style": "bezier",
             opacity: 0.7,
           },
         },
         {
-          selector: 'edge:selected',
+          selector: "edge:selected",
           style: {
             width: config.edgeWidth + 1,
-            'line-color': '#FF5722',
-            'target-arrow-color': '#FF5722',
+            "line-color": "#FF5722",
+            "target-arrow-color": "#FF5722",
             opacity: 1,
           },
         },
         {
-          selector: 'node[confidence < 0.5]',
+          selector: "node[confidence < 0.5]",
           style: {
             opacity: 0.6,
-            'border-style': 'dashed',
+            "border-style": "dashed",
           },
         },
         {
-          selector: 'edge[confidence < 0.5]',
+          selector: "edge[confidence < 0.5]",
           style: {
             opacity: 0.4,
-            'line-style': 'dashed',
+            "line-style": "dashed",
           },
         },
       ],
@@ -302,9 +290,7 @@ const MVP0Canvas = ({
 
         if (delta >= 1000) {
           // Update every second
-          const fps = Math.round(
-            (performanceRef.current.frameCount * 1000) / delta,
-          );
+          const fps = Math.round((performanceRef.current.frameCount * 1000) / delta);
           performanceRef.current.frameCount = 0;
           performanceRef.current.lastTime = now;
 
@@ -322,9 +308,7 @@ const MVP0Canvas = ({
 
           // Performance warning if below target
           if (fps < 55) {
-            console.warn(
-              `Canvas performance below target: ${fps} fps < 55 fps`,
-            );
+            console.warn(`Canvas performance below target: ${fps} fps < 55 fps`);
           }
         }
 
@@ -344,19 +328,19 @@ const MVP0Canvas = ({
       cyRef.current = Cytoscape(cytoscapeConfig);
 
       // Event handlers
-      cyRef.current.on('tap', 'node', (evt) => {
+      cyRef.current.on("tap", "node", (evt) => {
         const node = evt.target;
         onNodeSelect?.(node.data());
       });
 
-      cyRef.current.on('tap', 'edge', (evt) => {
+      cyRef.current.on("tap", "edge", (evt) => {
         const edge = evt.target;
         onEdgeSelect?.(edge.data());
       });
 
       // Layout events
-      cyRef.current.on('layoutstart', () => setIsLayoutRunning(true));
-      cyRef.current.on('layoutstop', () => setIsLayoutRunning(false));
+      cyRef.current.on("layoutstart", () => setIsLayoutRunning(true));
+      cyRef.current.on("layoutstop", () => setIsLayoutRunning(false));
     }
 
     return () => {
@@ -413,7 +397,7 @@ const MVP0Canvas = ({
 
       // Log performance info
       console.log(
-        `Canvas updated: ${cyNodes.length} nodes, ${cyEdges.length} edges, ${renderTime.toFixed(1)}ms`,
+        `Canvas updated: ${cyNodes.length} nodes, ${cyEdges.length} edges, ${renderTime.toFixed(1)}ms`
       );
     }
   }, [data, updateMetrics]);
@@ -424,8 +408,8 @@ const MVP0Canvas = ({
 
     const layoutOptions = {
       fcose: {
-        name: 'fcose',
-        quality: 'default',
+        name: "fcose",
+        quality: "default",
         randomize: false,
         animate: true,
         animationDuration: 1000,
@@ -441,9 +425,9 @@ const MVP0Canvas = ({
         piTol: 0.0001,
         numIter: 2500,
       },
-      'cose-bilkent': {
-        name: 'cose-bilkent',
-        quality: 'default',
+      "cose-bilkent": {
+        name: "cose-bilkent",
+        quality: "default",
         animate: true,
         animationDuration: 1000,
         fit: true,
@@ -462,9 +446,7 @@ const MVP0Canvas = ({
       },
     };
 
-    const layout = cyRef.current.layout(
-      layoutOptions[layoutName] || layoutOptions.fcose,
-    );
+    const layout = cyRef.current.layout(layoutOptions[layoutName] || layoutOptions.fcose);
     layout.run();
   }, [layoutName]);
 
@@ -496,9 +478,9 @@ const MVP0Canvas = ({
 
   // Performance status color
   const getPerformanceColor = (fps) => {
-    if (fps >= 55) return 'success';
-    if (fps >= 45) return 'warning';
-    return 'error';
+    if (fps >= 55) return "success";
+    if (fps >= 45) return "warning";
+    return "error";
   };
 
   if (error) {
@@ -513,20 +495,20 @@ const MVP0Canvas = ({
     <Box
       className={className}
       sx={{
-        height: '100%',
-        position: 'relative',
-        display: 'flex',
-        flexDirection: 'column',
+        height: "100%",
+        position: "relative",
+        display: "flex",
+        flexDirection: "column",
       }}
     >
       {/* Controls */}
       <Paper sx={{ p: 2, mb: 1 }}>
         <Box
           sx={{
-            display: 'flex',
+            display: "flex",
             gap: 2,
-            alignItems: 'center',
-            flexWrap: 'wrap',
+            alignItems: "center",
+            flexWrap: "wrap",
           }}
         >
           <FormControl size="small" sx={{ minWidth: 120 }}>
@@ -549,8 +531,8 @@ const MVP0Canvas = ({
 
           <Box
             sx={{
-              display: 'flex',
-              alignItems: 'center',
+              display: "flex",
+              alignItems: "center",
               gap: 1,
               minWidth: 200,
             }}
@@ -568,7 +550,7 @@ const MVP0Canvas = ({
             />
           </Box>
 
-          <Box sx={{ display: 'flex', gap: 1 }}>
+          <Box sx={{ display: "flex", gap: 1 }}>
             <Button size="small" onClick={handleZoomIn}>
               <ZoomIn />
             </Button>
@@ -578,10 +560,7 @@ const MVP0Canvas = ({
             <Button size="small" onClick={handleCenter}>
               <CenterFocusStrong />
             </Button>
-            <Button
-              size="small"
-              onClick={() => setShowPerformanceOverlay(!showPerformanceOverlay)}
-            >
+            <Button size="small" onClick={() => setShowPerformanceOverlay(!showPerformanceOverlay)}>
               <Speed />
             </Button>
           </Box>
@@ -591,14 +570,14 @@ const MVP0Canvas = ({
       </Paper>
 
       {/* Canvas Container */}
-      <Box sx={{ flex: 1, position: 'relative', minHeight: 400 }}>
+      <Box sx={{ flex: 1, position: "relative", minHeight: 400 }}>
         <div
           ref={containerRef}
           style={{
-            width: '100%',
-            height: '100%',
-            background: '#fafafa',
-            border: '1px solid #e0e0e0',
+            width: "100%",
+            height: "100%",
+            background: "#fafafa",
+            border: "1px solid #e0e0e0",
           }}
         />
 
@@ -606,28 +585,24 @@ const MVP0Canvas = ({
         {showPerformanceOverlay && (
           <Paper
             sx={{
-              position: 'absolute',
+              position: "absolute",
               top: 10,
               right: 10,
               p: 1.5,
-              bgcolor: 'rgba(255,255,255,0.95)',
+              bgcolor: "rgba(255,255,255,0.95)",
               minWidth: 200,
             }}
           >
-            <Typography
-              variant="h6"
-              gutterBottom
-              sx={{ fontSize: '0.9rem', fontWeight: 600 }}
-            >
+            <Typography variant="h6" gutterBottom sx={{ fontSize: "0.9rem", fontWeight: 600 }}>
               Performance Monitor
             </Typography>
 
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
               <Box
                 sx={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
                 }}
               >
                 <Typography variant="body2">FPS:</Typography>
@@ -641,46 +616,42 @@ const MVP0Canvas = ({
 
               <Box
                 sx={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
                 }}
               >
                 <Typography variant="body2">Memory:</Typography>
-                <Chip
-                  size="small"
-                  label={`${metrics.memoryUsage}MB`}
-                  icon={<Memory />}
-                />
+                <Chip size="small" label={`${metrics.memoryUsage}MB`} icon={<Memory />} />
               </Box>
 
               <Box
                 sx={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
                 }}
               >
                 <Typography variant="body2">Nodes:</Typography>
                 <Chip
                   size="small"
                   label={metrics.nodeCount}
-                  color={metrics.nodeCount > 3000 ? 'warning' : 'default'}
+                  color={metrics.nodeCount > 3000 ? "warning" : "default"}
                 />
               </Box>
 
               <Box
                 sx={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
                 }}
               >
                 <Typography variant="body2">Edges:</Typography>
                 <Chip
                   size="small"
                   label={metrics.edgeCount}
-                  color={metrics.edgeCount > 6000 ? 'warning' : 'default'}
+                  color={metrics.edgeCount > 6000 ? "warning" : "default"}
                 />
               </Box>
 
@@ -688,33 +659,31 @@ const MVP0Canvas = ({
                 <>
                   <Box
                     sx={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
                     }}
                   >
                     <Typography variant="body2">Query Time:</Typography>
                     <Chip
                       size="small"
                       label={`${(data.graphCanvas.queryTime * 1000).toFixed(0)}ms`}
-                      color={
-                        data.graphCanvas.queryTime > 0.5 ? 'warning' : 'success'
-                      }
+                      color={data.graphCanvas.queryTime > 0.5 ? "warning" : "success"}
                     />
                   </Box>
 
                   <Box
                     sx={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
                     }}
                   >
                     <Typography variant="body2">Cache:</Typography>
                     <Chip
                       size="small"
-                      label={data.graphCanvas.cacheHit ? 'HIT' : 'MISS'}
-                      color={data.graphCanvas.cacheHit ? 'success' : 'default'}
+                      label={data.graphCanvas.cacheHit ? "HIT" : "MISS"}
+                      color={data.graphCanvas.cacheHit ? "success" : "default"}
                       icon={<Visibility />}
                     />
                   </Box>
@@ -728,15 +697,15 @@ const MVP0Canvas = ({
         {isLayoutRunning && (
           <Box
             sx={{
-              position: 'absolute',
+              position: "absolute",
               bottom: 10,
-              left: '50%',
-              transform: 'translateX(-50%)',
-              display: 'flex',
-              alignItems: 'center',
+              left: "50%",
+              transform: "translateX(-50%)",
+              display: "flex",
+              alignItems: "center",
               gap: 1,
-              bgcolor: 'primary.main',
-              color: 'primary.contrastText',
+              bgcolor: "primary.main",
+              color: "primary.contrastText",
               px: 2,
               py: 1,
               borderRadius: 1,
@@ -753,35 +722,25 @@ const MVP0Canvas = ({
         <Paper sx={{ p: 1, mt: 1 }}>
           <Box
             sx={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
             }}
           >
-            <Box sx={{ display: 'flex', gap: 2 }}>
+            <Box sx={{ display: "flex", gap: 2 }}>
               <Typography variant="body2">
-                Displaying: {data.graphCanvas.nodes.length} nodes,{' '}
-                {data.graphCanvas.edges.length} edges
+                Displaying: {data.graphCanvas.nodes.length} nodes, {data.graphCanvas.edges.length}{" "}
+                edges
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Total: {data.graphCanvas.totalNodes} nodes,{' '}
-                {data.graphCanvas.totalEdges} edges
+                Total: {data.graphCanvas.totalNodes} nodes, {data.graphCanvas.totalEdges} edges
               </Typography>
             </Box>
 
-            <Box sx={{ display: 'flex', gap: 1 }}>
-              <Chip
-                size="small"
-                label={data.graphCanvas.displayLevel}
-                variant="outlined"
-              />
+            <Box sx={{ display: "flex", gap: 1 }}>
+              <Chip size="small" label={data.graphCanvas.displayLevel} variant="outlined" />
               {data.graphCanvas.hasMore && (
-                <Chip
-                  size="small"
-                  label="More Available"
-                  color="info"
-                  variant="outlined"
-                />
+                <Chip size="small" label="More Available" color="info" variant="outlined" />
               )}
             </Box>
           </Box>

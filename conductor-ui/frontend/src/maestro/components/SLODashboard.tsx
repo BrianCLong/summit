@@ -1,22 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import { useSLO, ErrorBudget, AlertSeverity, SLO } from '../utils/sloUtils';
+import React, { useState, useEffect } from "react";
+import { useSLO, ErrorBudget, AlertSeverity, SLO } from "../utils/sloUtils";
 
 interface SLODashboardProps {
   service?: string;
   className?: string;
 }
 
-export default function SLODashboard({
-  service,
-  className = '',
-}: SLODashboardProps) {
+export default function SLODashboard({ service, className = "" }: SLODashboardProps) {
   const { slos, loading, error, fetchSLOs, generateReport } = useSLO();
   const [selectedSLO, setSelectedSLO] = useState<string | null>(null);
   const [reportData, setReportData] = useState<object | null>(null);
-  const [timeRange, setTimeRange] = useState('24h');
-  const [refreshInterval, setRefreshInterval] = useState<NodeJS.Timeout | null>(
-    null,
-  );
+  const [timeRange, setTimeRange] = useState("24h");
+  const [refreshInterval, setRefreshInterval] = useState<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     fetchSLOs(service ? { service } : undefined);
@@ -48,48 +43,41 @@ export default function SLODashboard({
 
     try {
       const timeRangeMap: Record<string, { from: string; to: string }> = {
-        '1h': { from: 'now-1h', to: 'now' },
-        '24h': { from: 'now-24h', to: 'now' },
-        '7d': { from: 'now-7d', to: 'now' },
-        '30d': { from: 'now-30d', to: 'now' },
+        "1h": { from: "now-1h", to: "now" },
+        "24h": { from: "now-24h", to: "now" },
+        "7d": { from: "now-7d", to: "now" },
+        "30d": { from: "now-30d", to: "now" },
       };
 
       const report = await generateReport(
         slos.map((slo) => slo.id),
-        timeRangeMap[timeRange] || timeRangeMap['24h'],
+        timeRangeMap[timeRange] || timeRangeMap["24h"]
       );
 
       setReportData(report);
     } catch (err) {
-      console.error('Failed to generate SLO report:', err);
+      console.error("Failed to generate SLO report:", err);
     }
   };
 
-  const getStatusColor = (
-    status: string,
-    compliance?: number,
-    objective?: number,
-  ) => {
-    if (status === 'critical') return 'text-red-600 bg-red-50 border-red-200';
-    if (status === 'warning')
-      return 'text-yellow-600 bg-yellow-50 border-yellow-200';
+  const getStatusColor = (status: string, compliance?: number, objective?: number) => {
+    if (status === "critical") return "text-red-600 bg-red-50 border-red-200";
+    if (status === "warning") return "text-yellow-600 bg-yellow-50 border-yellow-200";
     if (compliance !== undefined && objective !== undefined) {
-      if (compliance >= objective)
-        return 'text-green-600 bg-green-50 border-green-200';
-      if (compliance >= objective - 5)
-        return 'text-yellow-600 bg-yellow-50 border-yellow-200';
-      return 'text-red-600 bg-red-50 border-red-200';
+      if (compliance >= objective) return "text-green-600 bg-green-50 border-green-200";
+      if (compliance >= objective - 5) return "text-yellow-600 bg-yellow-50 border-yellow-200";
+      return "text-red-600 bg-red-50 border-red-200";
     }
-    return 'text-gray-600 bg-gray-50 border-gray-200';
+    return "text-gray-600 bg-gray-50 border-gray-200";
   };
 
   const formatPercentage = (value: number) => `${value.toFixed(2)}%`;
 
-  const getTrendIcon = (trend: 'improving' | 'degrading' | 'stable') => {
+  const getTrendIcon = (trend: "improving" | "degrading" | "stable") => {
     switch (trend) {
-      case 'improving':
+      case "improving":
         return <span className="text-green-500">↗</span>;
-      case 'degrading':
+      case "degrading":
         return <span className="text-red-500">↘</span>;
       default:
         return <span className="text-gray-500">→</span>;
@@ -99,11 +87,7 @@ export default function SLODashboard({
   const renderErrorBudgetBar = (errorBudget: ErrorBudget) => {
     const percentage = Math.min(100, errorBudget.consumedPercentage);
     const color =
-      percentage > 90
-        ? 'bg-red-500'
-        : percentage > 70
-          ? 'bg-yellow-500'
-          : 'bg-green-500';
+      percentage > 90 ? "bg-red-500" : percentage > 70 ? "bg-yellow-500" : "bg-green-500";
 
     return (
       <div className="w-full bg-gray-200 rounded-full h-2">
@@ -119,25 +103,25 @@ export default function SLODashboard({
     slo: SLO;
     compliance: number;
     errorBudget: ErrorBudget;
-    trend: 'improving' | 'degrading' | 'stable';
+    trend: "improving" | "degrading" | "stable";
   }) => {
     const { slo, compliance, errorBudget, trend } = sloData;
     const isSelected = selectedSLO === slo.id;
     const statusColor = getStatusColor(
       errorBudget.consumedPercentage > 90
-        ? 'critical'
+        ? "critical"
         : errorBudget.consumedPercentage > 70
-          ? 'warning'
-          : 'healthy',
+          ? "warning"
+          : "healthy",
       compliance,
-      slo.objective,
+      slo.objective
     );
 
     return (
       <div
         key={slo.id}
         className={`bg-white border rounded-lg p-4 cursor-pointer transition-all duration-200 hover:shadow-md ${
-          isSelected ? 'ring-2 ring-blue-500 border-blue-200' : ''
+          isSelected ? "ring-2 ring-blue-500 border-blue-200" : ""
         }`}
         onClick={() => setSelectedSLO(isSelected ? null : slo.id)}
       >
@@ -149,10 +133,8 @@ export default function SLODashboard({
 
           <div className="flex items-center space-x-2 ml-4">
             {getTrendIcon(trend)}
-            <div
-              className={`px-2 py-1 rounded-full text-xs font-medium border ${statusColor}`}
-            >
-              {compliance >= slo.objective ? 'Compliant' : 'At Risk'}
+            <div className={`px-2 py-1 rounded-full text-xs font-medium border ${statusColor}`}>
+              {compliance >= slo.objective ? "Compliant" : "At Risk"}
             </div>
           </div>
         </div>
@@ -160,32 +142,25 @@ export default function SLODashboard({
         <div className="grid grid-cols-2 gap-4 mb-3">
           <div>
             <div className="text-xs text-gray-500">Current SLI</div>
-            <div className="text-lg font-bold text-gray-900">
-              {formatPercentage(compliance)}
-            </div>
+            <div className="text-lg font-bold text-gray-900">{formatPercentage(compliance)}</div>
           </div>
           <div>
             <div className="text-xs text-gray-500">Objective</div>
-            <div className="text-lg font-bold text-gray-600">
-              {formatPercentage(slo.objective)}
-            </div>
+            <div className="text-lg font-bold text-gray-600">{formatPercentage(slo.objective)}</div>
           </div>
         </div>
 
         <div className="mb-3">
           <div className="flex justify-between text-xs text-gray-500 mb-1">
             <span>Error Budget</span>
-            <span>
-              {formatPercentage(errorBudget.consumedPercentage)} consumed
-            </span>
+            <span>{formatPercentage(errorBudget.consumedPercentage)} consumed</span>
           </div>
           {renderErrorBudgetBar(errorBudget)}
         </div>
 
         {errorBudget.exhaustionDate && (
           <div className="text-xs text-gray-500">
-            Budget exhaustion:{' '}
-            {new Date(errorBudget.exhaustionDate).toLocaleDateString()}
+            Budget exhaustion: {new Date(errorBudget.exhaustionDate).toLocaleDateString()}
           </div>
         )}
 
@@ -198,15 +173,11 @@ export default function SLODashboard({
               </div>
               <div>
                 <span className="text-gray-500">Burn Rate:</span>
-                <span className="ml-1 font-medium">
-                  {errorBudget.burnRate.toFixed(2)}/hr
-                </span>
+                <span className="ml-1 font-medium">{errorBudget.burnRate.toFixed(2)}/hr</span>
               </div>
               <div>
                 <span className="text-gray-500">Remaining:</span>
-                <span className="ml-1 font-medium">
-                  {errorBudget.remaining} errors
-                </span>
+                <span className="ml-1 font-medium">{errorBudget.remaining} errors</span>
               </div>
               <div>
                 <span className="ml-1 font-medium">{slo.sli.type}</span>
@@ -253,12 +224,8 @@ export default function SLODashboard({
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-xl font-bold text-gray-900">
-            Service Level Objectives
-          </h2>
-          {service && (
-            <p className="text-sm text-gray-600 mt-1">Service: {service}</p>
-          )}
+          <h2 className="text-xl font-bold text-gray-900">Service Level Objectives</h2>
+          {service && <p className="text-sm text-gray-600 mt-1">Service: {service}</p>}
         </div>
 
         <div className="flex items-center space-x-3">
@@ -309,9 +276,7 @@ export default function SLODashboard({
         <div className="grid grid-cols-4 gap-4 mb-6">
           <div className="bg-white border rounded-lg p-4">
             <div className="text-sm text-gray-500">Total SLOs</div>
-            <div className="text-2xl font-bold text-gray-900">
-              {reportData.summary.totalSLOs}
-            </div>
+            <div className="text-2xl font-bold text-gray-900">{reportData.summary.totalSLOs}</div>
           </div>
           <div className="bg-white border rounded-lg p-4">
             <div className="text-sm text-gray-500">Compliant</div>
@@ -321,9 +286,7 @@ export default function SLODashboard({
           </div>
           <div className="bg-white border rounded-lg p-4">
             <div className="text-sm text-gray-500">At Risk</div>
-            <div className="text-2xl font-bold text-red-600">
-              {reportData.summary.atRiskSLOs}
-            </div>
+            <div className="text-2xl font-bold text-red-600">{reportData.summary.atRiskSLOs}</div>
           </div>
           <div className="bg-white border rounded-lg p-4">
             <div className="text-sm text-gray-500">Avg Compliance</div>
@@ -356,7 +319,7 @@ export default function SLODashboard({
           <p className="text-sm mt-1">
             {service
               ? `No SLOs configured for service "${service}"`
-              : 'No SLOs have been configured yet'}
+              : "No SLOs have been configured yet"}
           </p>
           <button className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
             Create SLO
@@ -370,8 +333,8 @@ export default function SLODashboard({
                   slo: SLO;
                   compliance: number;
                   errorBudget: ErrorBudget;
-                  trend: 'improving' | 'degrading' | 'stable';
-                }) => renderSLOCard(sloData),
+                  trend: "improving" | "degrading" | "stable";
+                }) => renderSLOCard(sloData)
               )
             : slos.map((slo) =>
                 renderSLOCard({
@@ -385,8 +348,8 @@ export default function SLODashboard({
                     burnRate: 0,
                     isHealthy: true,
                   },
-                  trend: 'stable' as const,
-                }),
+                  trend: "stable" as const,
+                })
               )}
         </div>
       )}
@@ -399,17 +362,17 @@ export default function SLODashboard({
             {[
               {
                 id: 1,
-                slo: 'API Response Time',
+                slo: "API Response Time",
                 severity: AlertSeverity.WARNING,
-                message: 'SLI below target for 5 minutes',
-                timestamp: '2 minutes ago',
+                message: "SLI below target for 5 minutes",
+                timestamp: "2 minutes ago",
               },
               {
                 id: 2,
-                slo: 'Database Availability',
+                slo: "Database Availability",
                 severity: AlertSeverity.CRITICAL,
-                message: 'Error budget 90% consumed',
-                timestamp: '15 minutes ago',
+                message: "Error budget 90% consumed",
+                timestamp: "15 minutes ago",
               },
             ].map((alert) => (
               <div
@@ -420,10 +383,10 @@ export default function SLODashboard({
                   <div
                     className={`w-2 h-2 rounded-full ${
                       alert.severity === AlertSeverity.CRITICAL
-                        ? 'bg-red-500'
+                        ? "bg-red-500"
                         : alert.severity === AlertSeverity.WARNING
-                          ? 'bg-yellow-500'
-                          : 'bg-blue-500'
+                          ? "bg-yellow-500"
+                          : "bg-blue-500"
                     }`}
                   ></div>
                   <div>

@@ -3,59 +3,59 @@
  * Comprehensive type definitions for the data catalog platform
  */
 
-import { z } from 'zod';
+import { z } from "zod";
 
 /**
  * Asset Types
  */
 export enum AssetType {
-  DATABASE = 'DATABASE',
-  TABLE = 'TABLE',
-  VIEW = 'VIEW',
-  COLUMN = 'COLUMN',
-  DASHBOARD = 'DASHBOARD',
-  REPORT = 'REPORT',
-  API = 'API',
-  FILE = 'FILE',
-  STREAM = 'STREAM',
-  MODEL = 'MODEL',
-  NOTEBOOK = 'NOTEBOOK',
-  QUERY = 'QUERY',
-  PROCEDURE = 'PROCEDURE',
-  FUNCTION = 'FUNCTION',
+  DATABASE = "DATABASE",
+  TABLE = "TABLE",
+  VIEW = "VIEW",
+  COLUMN = "COLUMN",
+  DASHBOARD = "DASHBOARD",
+  REPORT = "REPORT",
+  API = "API",
+  FILE = "FILE",
+  STREAM = "STREAM",
+  MODEL = "MODEL",
+  NOTEBOOK = "NOTEBOOK",
+  QUERY = "QUERY",
+  PROCEDURE = "PROCEDURE",
+  FUNCTION = "FUNCTION",
 }
 
 /**
  * Asset Status
  */
 export enum AssetStatus {
-  ACTIVE = 'ACTIVE',
-  DEPRECATED = 'DEPRECATED',
-  ARCHIVED = 'ARCHIVED',
-  DRAFT = 'DRAFT',
-  PENDING_APPROVAL = 'PENDING_APPROVAL',
+  ACTIVE = "ACTIVE",
+  DEPRECATED = "DEPRECATED",
+  ARCHIVED = "ARCHIVED",
+  DRAFT = "DRAFT",
+  PENDING_APPROVAL = "PENDING_APPROVAL",
 }
 
 /**
  * Certification Level
  */
 export enum CertificationLevel {
-  NONE = 'NONE',
-  BRONZE = 'BRONZE',
-  SILVER = 'SILVER',
-  GOLD = 'GOLD',
-  PLATINUM = 'PLATINUM',
+  NONE = "NONE",
+  BRONZE = "BRONZE",
+  SILVER = "SILVER",
+  GOLD = "GOLD",
+  PLATINUM = "PLATINUM",
 }
 
 /**
  * Data Classification
  */
 export enum DataClassification {
-  PUBLIC = 'PUBLIC',
-  INTERNAL = 'INTERNAL',
-  CONFIDENTIAL = 'CONFIDENTIAL',
-  RESTRICTED = 'RESTRICTED',
-  TOP_SECRET = 'TOP_SECRET',
+  PUBLIC = "PUBLIC",
+  INTERNAL = "INTERNAL",
+  CONFIDENTIAL = "CONFIDENTIAL",
+  RESTRICTED = "RESTRICTED",
+  TOP_SECRET = "TOP_SECRET",
 }
 
 /**
@@ -137,7 +137,7 @@ export interface AssetMetadata {
  */
 export interface AccessControlEntry {
   principal: string;
-  principalType: 'USER' | 'GROUP' | 'ROLE';
+  principalType: "USER" | "GROUP" | "ROLE";
   permissions: Permission[];
   grantedBy: string;
   grantedAt: Date;
@@ -148,12 +148,12 @@ export interface AccessControlEntry {
  * Permissions
  */
 export enum Permission {
-  VIEW = 'VIEW',
-  EDIT = 'EDIT',
-  DELETE = 'DELETE',
-  SHARE = 'SHARE',
-  CERTIFY = 'CERTIFY',
-  MANAGE_ACCESS = 'MANAGE_ACCESS',
+  VIEW = "VIEW",
+  EDIT = "EDIT",
+  DELETE = "DELETE",
+  SHARE = "SHARE",
+  CERTIFY = "CERTIFY",
+  MANAGE_ACCESS = "MANAGE_ACCESS",
 }
 
 /**
@@ -201,12 +201,12 @@ export interface AssetRelationship {
  * Relationship Types
  */
 export enum RelationshipType {
-  CONTAINS = 'CONTAINS',
-  DEPENDS_ON = 'DEPENDS_ON',
-  DERIVES_FROM = 'DERIVES_FROM',
-  REFERENCES = 'REFERENCES',
-  SIMILAR_TO = 'SIMILAR_TO',
-  REPLACES = 'REPLACES',
+  CONTAINS = "CONTAINS",
+  DEPENDS_ON = "DEPENDS_ON",
+  DERIVES_FROM = "DERIVES_FROM",
+  REFERENCES = "REFERENCES",
+  SIMILAR_TO = "SIMILAR_TO",
+  REPLACES = "REPLACES",
 }
 
 /**
@@ -251,16 +251,16 @@ export interface SearchFilter {
  * Filter Operators
  */
 export enum FilterOperator {
-  EQUALS = 'EQUALS',
-  NOT_EQUALS = 'NOT_EQUALS',
-  CONTAINS = 'CONTAINS',
-  STARTS_WITH = 'STARTS_WITH',
-  ENDS_WITH = 'ENDS_WITH',
-  IN = 'IN',
-  NOT_IN = 'NOT_IN',
-  GREATER_THAN = 'GREATER_THAN',
-  LESS_THAN = 'LESS_THAN',
-  BETWEEN = 'BETWEEN',
+  EQUALS = "EQUALS",
+  NOT_EQUALS = "NOT_EQUALS",
+  CONTAINS = "CONTAINS",
+  STARTS_WITH = "STARTS_WITH",
+  ENDS_WITH = "ENDS_WITH",
+  IN = "IN",
+  NOT_IN = "NOT_IN",
+  GREATER_THAN = "GREATER_THAN",
+  LESS_THAN = "LESS_THAN",
+  BETWEEN = "BETWEEN",
 }
 
 /**
@@ -268,7 +268,7 @@ export enum FilterOperator {
  */
 export interface SortOption {
   field: string;
-  direction: 'ASC' | 'DESC';
+  direction: "ASC" | "DESC";
 }
 
 /**
@@ -305,16 +305,20 @@ export const AssetMetadataSchema = z.object({
 
 export const SearchRequestSchema = z.object({
   query: z.string(),
-  filters: z.array(z.object({
-    field: z.string(),
-    operator: z.nativeEnum(FilterOperator),
-    value: z.any(),
-  })),
+  filters: z.array(
+    z.object({
+      field: z.string(),
+      operator: z.nativeEnum(FilterOperator),
+      value: z.any(),
+    })
+  ),
   facets: z.array(z.string()),
-  sort: z.array(z.object({
-    field: z.string(),
-    direction: z.enum(['ASC', 'DESC']),
-  })),
+  sort: z.array(
+    z.object({
+      field: z.string(),
+      direction: z.enum(["ASC", "DESC"]),
+    })
+  ),
   offset: z.number().min(0),
   limit: z.number().min(1).max(1000),
 });

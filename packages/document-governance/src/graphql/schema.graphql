@@ -442,7 +442,15 @@ type Mutation {
 
   # Compliance
   runComplianceCheck(documentId: ID!): ComplianceCheckResult!
-  createAuditFinding(documentId: ID!, findingType: String!, severity: String!, title: String!, description: String!, recommendation: String!, complianceStandard: String): AuditFinding!
+  createAuditFinding(
+    documentId: ID!
+    findingType: String!
+    severity: String!
+    title: String!
+    description: String!
+    recommendation: String!
+    complianceStandard: String
+  ): AuditFinding!
   resolveAuditFinding(findingId: ID!, resolutionNotes: String!): AuditFinding!
 
   # Provenance

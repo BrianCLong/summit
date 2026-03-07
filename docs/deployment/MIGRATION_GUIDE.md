@@ -85,6 +85,7 @@ git commit -m "fix: resolve authentication timeout issue"
 **New:** Automated versioning via semantic-release
 
 **Migration Action:**
+
 1. Remove any manual version management scripts
 2. Update CI/CD workflows to use new release pipeline
 3. Train team on conventional commits
@@ -96,6 +97,7 @@ git commit -m "fix: resolve authentication timeout issue"
 **New:** Multi-stage pipeline (staging → approval → production)
 
 **Migration Action:**
+
 1. Set up staging environment if not exists
 2. Configure GitHub Environments with protection rules
 3. Update deployment scripts
@@ -105,6 +107,7 @@ git commit -m "fix: resolve authentication timeout issue"
 **New Addition:** Feature flags for gradual rollouts
 
 **Migration Action:**
+
 1. Install feature flag dependencies
 2. Integrate FeatureFlagService in your application
 3. Wrap new features with feature flags
@@ -153,14 +156,14 @@ curl -X POST https://app.launchdarkly.com/api/v2/flags/default \
 
 ```typescript
 // server/src/app.ts
-import { FeatureFlagService } from './services/FeatureFlagService';
+import { FeatureFlagService } from "./services/FeatureFlagService";
 
 // Initialize feature flag service
 const flagService = new FeatureFlagService({
-  provider: process.env.NODE_ENV === 'production' ? 'launchdarkly' : 'local',
+  provider: process.env.NODE_ENV === "production" ? "launchdarkly" : "local",
   config: {
     sdkKey: process.env.LAUNCHDARKLY_SDK_KEY,
-    file: './config/feature-flags.json',
+    file: "./config/feature-flags.json",
   },
 });
 
@@ -171,16 +174,16 @@ await flagService.initialize();
 
 ```typescript
 // server/src/routes/metrics.ts
-import { Router } from 'express';
-import { getMetrics } from '../middleware/deployment-metrics';
+import { Router } from "express";
+import { getMetrics } from "../middleware/deployment-metrics";
 
 const router = Router();
 
-router.get('/metrics', async (req, res) => {
+router.get("/metrics", async (req, res) => {
   const metrics = getMetrics();
   const data = await metrics.getMetrics();
 
-  res.set('Content-Type', 'text/plain');
+  res.set("Content-Type", "text/plain");
   res.send(data);
 });
 
@@ -265,10 +268,10 @@ Add scrape config:
 ```yaml
 # prometheus.yml
 scrape_configs:
-  - job_name: 'intelgraph'
+  - job_name: "intelgraph"
     static_configs:
-      - targets: ['api.intelgraph.io:4000']
-    metrics_path: '/metrics'
+      - targets: ["api.intelgraph.io:4000"]
+    metrics_path: "/metrics"
 ```
 
 #### Grafana
@@ -314,7 +317,7 @@ Update `helm/intelgraph/values.yaml`:
 deployment:
   annotations:
     deployment.intelgraph.io/version: "{{ .Values.image.tag }}"
-    deployment.intelgraph.io/timestamp: "{{ now | date \"2006-01-02T15:04:05Z07:00\" }}"
+    deployment.intelgraph.io/timestamp: '{{ now | date "2006-01-02T15:04:05Z07:00" }}'
 
 # Add feature flags configuration
 featureFlags:
@@ -434,6 +437,7 @@ git commit -m "hotfix: <description>"
 ### Q: Do I need to migrate all at once?
 
 **A:** No. You can migrate incrementally:
+
 1. Start with semantic-release only
 2. Add staging deployment
 3. Add feature flags
@@ -468,6 +472,7 @@ git push origin hotfix/critical-bug
 ### Q: Can I customize the release process?
 
 **A:** Yes! Edit `.releaserc.json` to customize:
+
 - Release rules
 - Changelog format
 - Git tag format

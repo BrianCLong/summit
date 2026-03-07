@@ -23,5 +23,6 @@
 | CI artifacts      | JSON   |
 
 Non-goals:
-* training new foundation models
-* code synthesis model training
+
+- training new foundation models
+- code synthesis model training

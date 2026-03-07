@@ -1,13 +1,21 @@
 import React, { useMemo } from 'react'
 import { Entity, Relationship } from '@/types'
 import { cn } from '@/lib/utils'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/Tooltip'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/Tooltip'
 
 interface RelationshipMatrixWidgetProps {
   entities: Entity[]
   relationships: Relationship[]
   className?: string
-  onCellClick?: (source: Entity, target: Entity, relationships: Relationship[]) => void
+  onCellClick?: (
+    source: Entity,
+    target: Entity,
+    relationships: Relationship[]
+  ) => void
 }
 
 export function RelationshipMatrixWidget({
@@ -69,7 +77,7 @@ export function RelationshipMatrixWidget({
           <div className="sticky top-0 left-0 z-20 bg-background p-2 font-semibold text-xs border-b border-r">
             Matrix
           </div>
-          {sortedEntities.map((entity) => (
+          {sortedEntities.map(entity => (
             <div
               key={`col-${entity.id}`}
               className="sticky top-0 z-10 bg-background p-2 text-xs font-medium border-b rotate-180 [writing-mode:vertical-lr] h-32 flex items-center justify-start truncate"
@@ -80,7 +88,7 @@ export function RelationshipMatrixWidget({
           ))}
 
           {/* Rows */}
-          {sortedEntities.map((sourceEntity) => (
+          {sortedEntities.map(sourceEntity => (
             <React.Fragment key={`row-${sourceEntity.id}`}>
               {/* Row Header */}
               <div
@@ -91,7 +99,7 @@ export function RelationshipMatrixWidget({
               </div>
 
               {/* Cells */}
-              {sortedEntities.map((targetEntity) => {
+              {sortedEntities.map(targetEntity => {
                 const key = `${sourceEntity.id}-${targetEntity.id}`
                 const rels = matrix.get(key)
                 const isSelf = sourceEntity.id === targetEntity.id
@@ -103,16 +111,25 @@ export function RelationshipMatrixWidget({
                       'h-10 w-full flex items-center justify-center border border-muted/20 relative group transition-colors',
                       isSelf ? 'bg-muted/30' : 'bg-background hover:bg-muted/50'
                     )}
-                    onClick={() => rels && onCellClick?.(sourceEntity, targetEntity, rels)}
+                    onClick={() =>
+                      rels && onCellClick?.(sourceEntity, targetEntity, rels)
+                    }
                   >
                     {rels && (
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <div className={cn('w-6 h-6 rounded-sm cursor-pointer', getCellColor(rels))} />
+                          <div
+                            className={cn(
+                              'w-6 h-6 rounded-sm cursor-pointer',
+                              getCellColor(rels)
+                            )}
+                          />
                         </TooltipTrigger>
                         <TooltipContent>
                           <div className="text-xs">
-                            <p className="font-semibold">{sourceEntity.name} → {targetEntity.name}</p>
+                            <p className="font-semibold">
+                              {sourceEntity.name} → {targetEntity.name}
+                            </p>
                             <p>{rels.length} relationship(s)</p>
                             <ul className="list-disc pl-3 mt-1 text-muted-foreground">
                               {rels.map(r => (

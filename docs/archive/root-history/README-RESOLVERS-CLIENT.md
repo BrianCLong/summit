@@ -12,14 +12,14 @@
 - Update `client-v039/src/manifest.ts` with hashes from `out/persisted-manifest.resolved.json` (CI artifact).
 - Usage:
   ```ts
-  import { McAdminClient } from 'mc-admin-client';
-  const mc = new McAdminClient('https://api.example.com/graphql', {
-    'x-actor-id': 'ops-123',
-    'x-actor-role': 'platform-admin',
-    'x-actor-tenant': 'ALL',
+  import { McAdminClient } from "mc-admin-client";
+  const mc = new McAdminClient("https://api.example.com/graphql", {
+    "x-actor-id": "ops-123",
+    "x-actor-role": "platform-admin",
+    "x-actor-tenant": "ALL",
   });
   await mc.setSloThresholds({
-    tenant: 'ALL',
+    tenant: "ALL",
     thresholds: {
       composite: 0.87,
       jwsFail: 0.001,

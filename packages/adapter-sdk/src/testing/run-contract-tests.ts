@@ -1,10 +1,10 @@
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { runContractTests } from './harness.js';
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { runContractTests } from "./harness.js";
 
 async function main(): Promise<void> {
   const currentDir = path.dirname(fileURLToPath(import.meta.url));
-  const fixtureAdapter = path.resolve(currentDir, 'fixtures/sample-adapter.js');
+  const fixtureAdapter = path.resolve(currentDir, "fixtures/sample-adapter.js");
   const result = await runContractTests(fixtureAdapter);
 
   if (!result.passed) {
@@ -16,7 +16,7 @@ async function main(): Promise<void> {
   }
 
   // eslint-disable-next-line no-console
-  console.log('✔ Contract harness passed using fixture adapter');
+  console.log("✔ Contract harness passed using fixture adapter");
   // eslint-disable-next-line no-console
   console.log(JSON.stringify(result.response, null, 2));
 }

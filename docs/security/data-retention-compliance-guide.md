@@ -13,7 +13,7 @@ control evidence, the platform now ships a unified retention toolchain:
 - **OPA policy** that blocks misconfigured CronJobs before deployment
   (`policy/opa/retention.rego`).
 
-The solution separates *policy* (retention rules) from *execution*
+The solution separates _policy_ (retention rules) from _execution_
 (CronJobs) so compliance teams can adjust retention horizons without code
 changes while SRE teams keep deterministic automation.
 
@@ -28,7 +28,6 @@ changes while SRE teams keep deterministic automation.
 
 2. Register retention rules in `compliance.retention_rules` for every
    table that contains personal data. Each rule specifies:
-
    - fully qualified table name (`table_fqn`)
    - primary key and timestamp tracking columns
    - retention window (for example `INTERVAL '365 days'`)

@@ -44,27 +44,27 @@ Summit/IntelGraph implements a **5-layer caching architecture** optimized for in
 
 ### Existing Cache Infrastructure
 
-| Layer | Technology | Location | Purpose | Hit Rate |
-|-------|-----------|----------|---------|----------|
-| **Client** | Apollo InMemoryCache + localStorage | Browser | GraphQL query results, offline support | 85% |
-| **CDN** | (Not implemented) | Edge | Static assets, public API responses | N/A |
-| **API Gateway** | Response cache middleware | `gateway/src/cache.ts` | HTTP response caching with ETag | 60% |
-| **Application** | Redis (distributed) + In-Memory (local) | `config/redis.ts`, `server/src/services/cacheService.ts` | GraphQL queries, sessions, metrics | 78% |
-| **Database** | Neo4j query cache, PG connection pooling | `config/neo4j.ts`, `config/postgresql.ts` | Query result caching, connection reuse | 82% |
+| Layer           | Technology                               | Location                                                 | Purpose                                | Hit Rate |
+| --------------- | ---------------------------------------- | -------------------------------------------------------- | -------------------------------------- | -------- |
+| **Client**      | Apollo InMemoryCache + localStorage      | Browser                                                  | GraphQL query results, offline support | 85%      |
+| **CDN**         | (Not implemented)                        | Edge                                                     | Static assets, public API responses    | N/A      |
+| **API Gateway** | Response cache middleware                | `gateway/src/cache.ts`                                   | HTTP response caching with ETag        | 60%      |
+| **Application** | Redis (distributed) + In-Memory (local)  | `config/redis.ts`, `server/src/services/cacheService.ts` | GraphQL queries, sessions, metrics     | 78%      |
+| **Database**    | Neo4j query cache, PG connection pooling | `config/neo4j.ts`, `config/postgresql.ts`                | Query result caching, connection reuse | 82%      |
 
 ### Current TTL Values
 
 ```typescript
 CACHE_TTL = {
-  GRAPHQL_QUERY: 300,      // 5 minutes
-  USER_SESSION: 86400,     // 24 hours
-  GRAPH_METRICS: 3600,     // 1 hour
-  ENTITY_DATA: 1800,       // 30 minutes
+  GRAPHQL_QUERY: 300, // 5 minutes
+  USER_SESSION: 86400, // 24 hours
+  GRAPH_METRICS: 3600, // 1 hour
+  ENTITY_DATA: 1800, // 30 minutes
   RELATIONSHIP_DATA: 1800, // 30 minutes
   INVESTIGATION_DATA: 600, // 10 minutes
-  SHORT_LIVED: 60,         // 1 minute
-  LONG_LIVED: 604800,      // 7 days
-}
+  SHORT_LIVED: 60, // 1 minute
+  LONG_LIVED: 604800, // 7 days
+};
 ```
 
 ### Pain Points Identified
@@ -90,10 +90,10 @@ CACHE_TTL = {
 const cache = new InMemoryCache({
   typePolicies: {
     Entity: {
-      keyFields: ['id', 'tenantId'],
+      keyFields: ["id", "tenantId"],
     },
     Relationship: {
-      keyFields: ['id'],
+      keyFields: ["id"],
     },
   },
 });
@@ -107,6 +107,7 @@ const persistor = new CachePersistor({
 ```
 
 **Use Cases**:
+
 - Frequently accessed entity details
 - Investigation metadata
 - User preferences
@@ -129,6 +130,7 @@ Vary: Accept-Encoding, Authorization
 ```
 
 **Cacheable Resources**:
+
 - Static assets (JS, CSS, images): `Cache-Control: immutable, max-age=31536000`
 - Public API responses: `Cache-Control: public, max-age=3600`
 - GraphQL persisted queries: `Cache-Control: public, max-age=300`
@@ -145,11 +147,11 @@ Vary: Accept-Encoding, Authorization
 
 ```typescript
 // gateway/src/cache.ts (ENHANCED)
-import { createHash } from 'crypto';
+import { createHash } from "crypto";
 
 const cacheMiddleware = async (req, res, next) => {
   // Only cache GET requests and GraphQL queries
-  if (req.method !== 'GET' && !isGraphQLQuery(req)) {
+  if (req.method !== "GET" && !isGraphQLQuery(req)) {
     return next();
   }
 
@@ -160,27 +162,27 @@ const cacheMiddleware = async (req, res, next) => {
     const { body, headers, etag } = JSON.parse(cached);
 
     // ETag validation
-    if (req.headers['if-none-match'] === etag) {
+    if (req.headers["if-none-match"] === etag) {
       return res.status(304).send();
     }
 
     res.set(headers);
-    res.set('X-Cache-Status', 'HIT');
+    res.set("X-Cache-Status", "HIT");
     return res.send(body);
   }
 
   // Cache miss - store response
   const originalSend = res.send;
-  res.send = function(body) {
+  res.send = function (body) {
     const etag = generateETag(body);
     const headers = {
-      'Cache-Control': 'public, max-age=300',
-      'ETag': etag,
+      "Cache-Control": "public, max-age=300",
+      ETag: etag,
     };
 
     redisClient.setex(cacheKey, 300, JSON.stringify({ body, headers, etag }));
     res.set(headers);
-    res.set('X-Cache-Status', 'MISS');
+    res.set("X-Cache-Status", "MISS");
     return originalSend.call(this, body);
   };
 
@@ -189,6 +191,7 @@ const cacheMiddleware = async (req, res, next) => {
 ```
 
 **Use Cases**:
+
 - Public API endpoints
 - GraphQL persisted queries
 - Health check endpoints
@@ -218,7 +221,7 @@ export class RedisCacheManager {
     key: string,
     fetcher: () => Promise<T>,
     ttl: number,
-    tenantId?: string,
+    tenantId?: string
   ): Promise<T> {
     const cached = await this.get<T>(prefix, key, tenantId);
     if (cached !== null) return cached;
@@ -231,6 +234,7 @@ export class RedisCacheManager {
 ```
 
 **Cache Key Patterns**:
+
 ```
 gql:{tenantId}:{queryHash}              # GraphQL queries
 session:{sessionId}                     # User sessions
@@ -275,6 +279,7 @@ export class CacheService {
 ```
 
 **Use Cases**:
+
 - GraphQL query results
 - Frequently accessed entities
 - User session data
@@ -337,6 +342,7 @@ export const defaultPostgresConfig = {
 ```
 
 **Use Cases**:
+
 - Repeated Cypher queries
 - Common graph patterns
 - Aggregation queries
@@ -348,18 +354,18 @@ export const defaultPostgresConfig = {
 
 ### Critical Path Endpoints (Top 10)
 
-| Endpoint | Avg Response Time | Queries/Sec | Cache Hit Target | Priority |
-|----------|------------------|-------------|------------------|----------|
-| **`graphRagAnswer`** | 2.3s | 45 | 60% | 🔴 CRITICAL |
-| **Neighborhood expansion** | 1.8s | 120 | 85% | 🔴 CRITICAL |
-| **`semanticSearch`** | 1.2s | 80 | 70% | 🟠 HIGH |
-| **`similarEntities`** | 950ms | 60 | 75% | 🟠 HIGH |
-| **`entities` list** | 450ms | 200 | 90% | 🟠 HIGH |
-| **`investigation` detail** | 380ms | 150 | 95% | 🟡 MEDIUM |
-| **Dashboard metrics** | 620ms | 90 | 85% | 🟡 MEDIUM |
-| **`relationships` query** | 290ms | 180 | 88% | 🟡 MEDIUM |
-| **`auditTrace`** | 510ms | 40 | 70% | 🟢 LOW |
-| **`extractEntities`** | 1.5s | 25 | 50% | 🟢 LOW |
+| Endpoint                   | Avg Response Time | Queries/Sec | Cache Hit Target | Priority    |
+| -------------------------- | ----------------- | ----------- | ---------------- | ----------- |
+| **`graphRagAnswer`**       | 2.3s              | 45          | 60%              | 🔴 CRITICAL |
+| **Neighborhood expansion** | 1.8s              | 120         | 85%              | 🔴 CRITICAL |
+| **`semanticSearch`**       | 1.2s              | 80          | 70%              | 🟠 HIGH     |
+| **`similarEntities`**      | 950ms             | 60          | 75%              | 🟠 HIGH     |
+| **`entities` list**        | 450ms             | 200         | 90%              | 🟠 HIGH     |
+| **`investigation` detail** | 380ms             | 150         | 95%              | 🟡 MEDIUM   |
+| **Dashboard metrics**      | 620ms             | 90          | 85%              | 🟡 MEDIUM   |
+| **`relationships` query**  | 290ms             | 180         | 88%              | 🟡 MEDIUM   |
+| **`auditTrace`**           | 510ms             | 40          | 70%              | 🟢 LOW      |
+| **`extractEntities`**      | 1.5s              | 25          | 50%              | 🟢 LOW      |
 
 ### Expensive Query Patterns
 
@@ -378,6 +384,7 @@ LIMIT 100
 ```
 
 **Caching Strategy**:
+
 - **Cache Key**: `nbhd:{tenantId}:{investigationId}:{entityId}:{radius}`
 - **TTL**: 300 seconds (5 minutes)
 - **Warming**: Hourly pre-warm top 10 entities per investigation
@@ -386,7 +393,12 @@ LIMIT 100
 ```typescript
 // server/src/services/neighborhood-cache.ts
 export class NeighborhoodCache {
-  async get(tenantId: string, investigationId: string, entityId: string, radius: number): Promise<Graph | null> {
+  async get(
+    tenantId: string,
+    investigationId: string,
+    entityId: string,
+    radius: number
+  ): Promise<Graph | null> {
     const key = this.key(tenantId, investigationId, entityId, radius);
     const cached = await this.redis.get(key);
     if (cached) return JSON.parse(cached);
@@ -438,6 +450,7 @@ export class GraphRAGQueryService {
 ```
 
 **Caching Strategy**:
+
 - **Cache Key**: `graphrag:{tenantId}:{investigationId}:{questionHash}`
 - **TTL**: 600 seconds (10 minutes)
 - **Warming**: Pre-cache common questions (WHO, WHAT, WHEN, WHERE)
@@ -472,6 +485,7 @@ export const similarEntitiesResolver = async (parent, args, context) => {
 ```
 
 **Caching Strategy**:
+
 - **Cache Key**: `similarity:{tenantId}:{entityId}:{topK}`
 - **TTL**: 3600 seconds (1 hour)
 - **Warming**: Pre-compute for entities with >10 relationships
@@ -492,7 +506,7 @@ export class AnalystDashboardService {
     const cacheKey = `metrics:${tenantId}:dashboard:${investigationId}`;
 
     return await this.cache.cacheAside(
-      'metrics',
+      "metrics",
       `dashboard:${investigationId}`,
       async () => {
         // Expensive aggregations
@@ -510,6 +524,7 @@ export class AnalystDashboardService {
 ```
 
 **Caching Strategy**:
+
 - **Cache Key**: `metrics:{tenantId}:dashboard:{investigationId}`
 - **TTL**: 300 seconds (5 minutes)
 - **Warming**: On investigation open
@@ -543,7 +558,7 @@ export class AnalystDashboardService {
 
 ```typescript
 // server/src/services/CacheWarmingService.ts
-import cron from 'node-cron';
+import cron from "node-cron";
 
 export class CacheWarmingService {
   private neighborhoodCache: NeighborhoodCache;
@@ -556,20 +571,20 @@ export class CacheWarmingService {
 
   private setupCronJobs(): void {
     // Hourly: Warm top neighborhoods
-    cron.schedule('0 * * * *', async () => {
-      console.log('[CACHE WARM] Starting hourly neighborhood warming');
+    cron.schedule("0 * * * *", async () => {
+      console.log("[CACHE WARM] Starting hourly neighborhood warming");
       await this.warmTopNeighborhoods();
     });
 
     // Daily at 2 AM: Warm GraphRAG common questions
-    cron.schedule('0 2 * * *', async () => {
-      console.log('[CACHE WARM] Starting daily GraphRAG warming');
+    cron.schedule("0 2 * * *", async () => {
+      console.log("[CACHE WARM] Starting daily GraphRAG warming");
       await this.warmCommonGraphRAGQuestions();
     });
 
     // Every 5 minutes: Warm active investigation metrics
-    cron.schedule('*/5 * * * *', async () => {
-      console.log('[CACHE WARM] Starting investigation metrics warming');
+    cron.schedule("*/5 * * * *", async () => {
+      console.log("[CACHE WARM] Starting investigation metrics warming");
       await this.warmActiveInvestigationMetrics();
     });
   }
@@ -579,15 +594,18 @@ export class CacheWarmingService {
 
     for (const inv of investigations) {
       // Get top 10 entities by degree centrality
-      const topEntities = await this.neo4j.run(`
+      const topEntities = await this.neo4j.run(
+        `
         MATCH (e:Entity {investigationId: $investigationId, tenantId: $tenantId})-[r]-(m:Entity)
         RETURN e.id AS id, count(r) AS degree
         ORDER BY degree DESC
         LIMIT 10
-      `, { investigationId: inv.id, tenantId: inv.tenantId });
+      `,
+        { investigationId: inv.id, tenantId: inv.tenantId }
+      );
 
       for (const record of topEntities.records) {
-        const entityId = record.get('id');
+        const entityId = record.get("id");
 
         // Warm 2-hop neighborhood
         const graph = await expandNeighborhood(entityId, 2, {
@@ -603,11 +621,11 @@ export class CacheWarmingService {
 
   private async warmCommonGraphRAGQuestions(): Promise<void> {
     const commonQuestions = [
-      'Who are the key entities in this investigation?',
-      'What are the main relationships?',
-      'When was this entity created?',
-      'Where are the geographic connections?',
-      'Why are these entities connected?',
+      "Who are the key entities in this investigation?",
+      "What are the main relationships?",
+      "When was this entity created?",
+      "Where are the geographic connections?",
+      "Why are these entities connected?",
     ];
 
     const investigations = await this.getActiveInvestigations();
@@ -667,15 +685,15 @@ export class CacheWarmingService {
 
 ```typescript
 // server/src/routes/cache.ts
-router.post('/cache/warm/:investigationId', async (req, res) => {
+router.post("/cache/warm/:investigationId", async (req, res) => {
   const { investigationId } = req.params;
   const { tenantId } = req.user;
 
   try {
     await cacheWarmingService.warmInvestigation(investigationId, tenantId);
-    res.json({ success: true, message: 'Cache warming initiated' });
+    res.json({ success: true, message: "Cache warming initiated" });
   } catch (error) {
-    res.status(500).json({ error: 'Cache warming failed' });
+    res.status(500).json({ error: "Cache warming failed" });
   }
 });
 ```
@@ -686,13 +704,13 @@ router.post('/cache/warm/:investigationId', async (req, res) => {
 
 ### Invalidation Strategies
 
-| Strategy | Use Case | Pros | Cons |
-|----------|----------|------|------|
-| **TTL Expiration** | All caches | Simple, predictable | May serve stale data |
+| Strategy               | Use Case                | Pros                  | Cons                        |
+| ---------------------- | ----------------------- | --------------------- | --------------------------- |
+| **TTL Expiration**     | All caches              | Simple, predictable   | May serve stale data        |
 | **Mutation-Triggered** | Entities, relationships | Immediate consistency | Complex dependency tracking |
-| **Pattern-Based** | Bulk invalidation | Flexible | Can over-invalidate |
-| **Event-Driven** | Real-time updates | Precise, scalable | Requires event bus |
-| **Manual** | Admin operations | Full control | Error-prone |
+| **Pattern-Based**      | Bulk invalidation       | Flexible              | Can over-invalidate         |
+| **Event-Driven**       | Real-time updates       | Precise, scalable     | Requires event bus          |
+| **Manual**             | Admin operations        | Full control          | Error-prone                 |
 
 ### Implementation
 
@@ -725,24 +743,18 @@ export class RedisCacheManager {
    * Pattern-based invalidation using Redis SCAN
    */
   async deleteByPattern(pattern: string): Promise<number> {
-    let cursor = '0';
+    let cursor = "0";
     let deletedCount = 0;
 
     do {
-      const [newCursor, keys] = await this.client.scan(
-        cursor,
-        'MATCH',
-        pattern,
-        'COUNT',
-        100,
-      );
+      const [newCursor, keys] = await this.client.scan(cursor, "MATCH", pattern, "COUNT", 100);
       cursor = newCursor;
 
       if (keys.length > 0) {
         await this.client.del(...keys);
         deletedCount += keys.length;
       }
-    } while (cursor !== '0');
+    } while (cursor !== "0");
 
     return deletedCount;
   }
@@ -751,9 +763,7 @@ export class RedisCacheManager {
    * Invalidate neighborhoods containing an entity
    */
   private async invalidateNeighborhoods(entityId: string, tenantId?: string): Promise<void> {
-    const pattern = tenantId
-      ? `nbhd:${tenantId}:*:${entityId}:*`
-      : `nbhd:*:*:${entityId}:*`;
+    const pattern = tenantId ? `nbhd:${tenantId}:*:${entityId}:*` : `nbhd:*:*:${entityId}:*`;
 
     await this.deleteByPattern(pattern);
   }
@@ -787,7 +797,7 @@ export const createEntityResolver = async (parent, args, context) => {
   await cacheManager.invalidateGraphQLQueries(tenantId);
 
   // Publish real-time update
-  pubsub.publish('ENTITY_CREATED', { entityCreated: entity });
+  pubsub.publish("ENTITY_CREATED", { entityCreated: entity });
 
   return entity;
 };
@@ -806,7 +816,7 @@ export const updateEntityResolver = async (parent, args, context) => {
   await cacheManager.invalidateGraphMetrics(tenantId);
 
   // Publish real-time update
-  pubsub.publish('ENTITY_UPDATED', { entityUpdated: entity });
+  pubsub.publish("ENTITY_UPDATED", { entityUpdated: entity });
 
   return entity;
 };
@@ -816,7 +826,7 @@ export const updateEntityResolver = async (parent, args, context) => {
 
 ```typescript
 // server/src/events/cacheInvalidationHandler.ts
-import { EventEmitter } from 'events';
+import { EventEmitter } from "events";
 
 export class CacheInvalidationHandler extends EventEmitter {
   constructor(private cacheManager: RedisCacheManager) {
@@ -826,21 +836,21 @@ export class CacheInvalidationHandler extends EventEmitter {
 
   private setupListeners(): void {
     // Entity events
-    this.on('entity:created', async ({ entityId, tenantId }) => {
+    this.on("entity:created", async ({ entityId, tenantId }) => {
       await this.cacheManager.invalidateEntity(entityId, tenantId);
     });
 
-    this.on('entity:updated', async ({ entityId, tenantId }) => {
+    this.on("entity:updated", async ({ entityId, tenantId }) => {
       await this.cacheManager.invalidateEntity(entityId, tenantId);
       await this.cacheManager.invalidateNeighborhoods(entityId, tenantId);
     });
 
-    this.on('entity:deleted', async ({ entityId, tenantId }) => {
+    this.on("entity:deleted", async ({ entityId, tenantId }) => {
       await this.cacheManager.deleteByPattern(`*:${entityId}:*`);
     });
 
     // Relationship events
-    this.on('relationship:created', async ({ relationship, tenantId }) => {
+    this.on("relationship:created", async ({ relationship, tenantId }) => {
       await this.cacheManager.invalidateEntity(relationship.from, tenantId);
       await this.cacheManager.invalidateEntity(relationship.to, tenantId);
       await this.cacheManager.invalidateNeighborhoods(relationship.from, tenantId);
@@ -848,7 +858,7 @@ export class CacheInvalidationHandler extends EventEmitter {
     });
 
     // Investigation events
-    this.on('investigation:updated', async ({ investigationId, tenantId }) => {
+    this.on("investigation:updated", async ({ investigationId, tenantId }) => {
       await this.cacheManager.deleteByPattern(`*:${investigationId}:*`);
     });
   }
@@ -861,23 +871,23 @@ export class CacheInvalidationHandler extends EventEmitter {
 
 ### Recommended TTL Values by Data Type
 
-| Data Type | TTL | Rationale | Invalidation |
-|-----------|-----|-----------|--------------|
-| **User Session** | 24 hours | Balance security and UX | On logout / password change |
-| **Entity Data** | 30 minutes | Moderate update frequency | On entity mutation |
-| **Relationship Data** | 30 minutes | Moderate update frequency | On relationship mutation |
-| **Investigation Metadata** | 10 minutes | Frequently updated | On investigation mutation |
-| **GraphQL Query Results** | 5 minutes | General queries | On related mutation |
-| **Neighborhood Graphs** | 5 minutes | Expensive to compute, frequently accessed | On entity/rel mutation |
-| **GraphRAG Answers** | 10 minutes | Expensive LLM calls | Manual or mutation |
-| **Entity Similarity** | 1 hour | Stable embeddings | On entity update |
-| **Dashboard Metrics** | 5 minutes | Near real-time | On investigation mutation |
-| **Audit Logs** | 1 hour | Append-only, rarely queried | Never (TTL only) |
-| **User Preferences** | 1 day | Infrequent changes | On preference update |
-| **Feature Flags** | 15 minutes | Controlled rollout | On flag update |
-| **OPA Policy Decisions** | 5 minutes | Security-critical | On policy update |
-| **Static Assets** | 1 year | Immutable (versioned URLs) | On deployment |
-| **API Schema** | 1 hour | Infrequent changes | On schema update |
+| Data Type                  | TTL        | Rationale                                 | Invalidation                |
+| -------------------------- | ---------- | ----------------------------------------- | --------------------------- |
+| **User Session**           | 24 hours   | Balance security and UX                   | On logout / password change |
+| **Entity Data**            | 30 minutes | Moderate update frequency                 | On entity mutation          |
+| **Relationship Data**      | 30 minutes | Moderate update frequency                 | On relationship mutation    |
+| **Investigation Metadata** | 10 minutes | Frequently updated                        | On investigation mutation   |
+| **GraphQL Query Results**  | 5 minutes  | General queries                           | On related mutation         |
+| **Neighborhood Graphs**    | 5 minutes  | Expensive to compute, frequently accessed | On entity/rel mutation      |
+| **GraphRAG Answers**       | 10 minutes | Expensive LLM calls                       | Manual or mutation          |
+| **Entity Similarity**      | 1 hour     | Stable embeddings                         | On entity update            |
+| **Dashboard Metrics**      | 5 minutes  | Near real-time                            | On investigation mutation   |
+| **Audit Logs**             | 1 hour     | Append-only, rarely queried               | Never (TTL only)            |
+| **User Preferences**       | 1 day      | Infrequent changes                        | On preference update        |
+| **Feature Flags**          | 15 minutes | Controlled rollout                        | On flag update              |
+| **OPA Policy Decisions**   | 5 minutes  | Security-critical                         | On policy update            |
+| **Static Assets**          | 1 year     | Immutable (versioned URLs)                | On deployment               |
+| **API Schema**             | 1 hour     | Infrequent changes                        | On schema update            |
 
 ### TTL Tuning Heuristics
 
@@ -892,8 +902,8 @@ export class AdaptiveTTLManager {
 
     // High-frequency access → longer TTL
     if (accessCount > 100) return this.baseTTL * 4; // 20 minutes
-    if (accessCount > 50) return this.baseTTL * 2;  // 10 minutes
-    if (accessCount > 10) return this.baseTTL;      // 5 minutes
+    if (accessCount > 50) return this.baseTTL * 2; // 10 minutes
+    if (accessCount > 10) return this.baseTTL; // 5 minutes
 
     // Low-frequency access → shorter TTL
     return this.baseTTL / 2; // 2.5 minutes
@@ -1010,12 +1020,12 @@ server {
 
 ```typescript
 // server/src/routes/admin/cache.ts
-import { Router } from 'express';
+import { Router } from "express";
 
 const router = Router();
 
 // Get cache statistics
-router.get('/cache/stats', async (req, res) => {
+router.get("/cache/stats", async (req, res) => {
   const stats = await cacheManager.getAllStats();
   const hitRate = await cacheManager.getCacheHitRateSummary();
 
@@ -1023,7 +1033,7 @@ router.get('/cache/stats', async (req, res) => {
 });
 
 // Clear cache by pattern
-router.delete('/cache/pattern/:pattern', async (req, res) => {
+router.delete("/cache/pattern/:pattern", async (req, res) => {
   const { pattern } = req.params;
   const deletedCount = await cacheManager.deleteByPattern(pattern);
 
@@ -1031,7 +1041,7 @@ router.delete('/cache/pattern/:pattern', async (req, res) => {
 });
 
 // Warm cache for investigation
-router.post('/cache/warm/:investigationId', async (req, res) => {
+router.post("/cache/warm/:investigationId", async (req, res) => {
   const { investigationId } = req.params;
   const { tenantId } = req.user;
 
@@ -1051,37 +1061,37 @@ export default router;
 
 ```typescript
 // server/src/metrics/cacheMetrics.ts
-import { Counter, Gauge, Histogram } from 'prom-client';
+import { Counter, Gauge, Histogram } from "prom-client";
 
 export const cacheHits = new Counter({
-  name: 'cache_hits_total',
-  help: 'Total cache hits',
-  labelNames: ['store', 'op', 'tenant'],
+  name: "cache_hits_total",
+  help: "Total cache hits",
+  labelNames: ["store", "op", "tenant"],
 });
 
 export const cacheMisses = new Counter({
-  name: 'cache_misses_total',
-  help: 'Total cache misses',
-  labelNames: ['store', 'op', 'tenant'],
+  name: "cache_misses_total",
+  help: "Total cache misses",
+  labelNames: ["store", "op", "tenant"],
 });
 
 export const cacheOperationDuration = new Histogram({
-  name: 'cache_operation_duration_seconds',
-  help: 'Cache operation duration',
-  labelNames: ['store', 'op'],
+  name: "cache_operation_duration_seconds",
+  help: "Cache operation duration",
+  labelNames: ["store", "op"],
   buckets: [0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1],
 });
 
 export const cacheSize = new Gauge({
-  name: 'cache_size_bytes',
-  help: 'Total cache size in bytes',
-  labelNames: ['store'],
+  name: "cache_size_bytes",
+  help: "Total cache size in bytes",
+  labelNames: ["store"],
 });
 
 export const cacheEvictions = new Counter({
-  name: 'cache_evictions_total',
-  help: 'Total cache evictions (LRU)',
-  labelNames: ['store'],
+  name: "cache_evictions_total",
+  help: "Total cache evictions (LRU)",
+  labelNames: ["store"],
 });
 ```
 
@@ -1131,6 +1141,7 @@ groups:
 ### Do's ✅
 
 1. **Always use tenant-isolated cache keys**
+
    ```typescript
    const key = `${prefix}:${tenantId}:${resourceId}`;
    ```
@@ -1141,19 +1152,22 @@ groups:
    - Cold data: 1-24 hours
 
 3. **Implement cache-aside pattern for resilience**
+
    ```typescript
-   const data = await cache.get(key) || await database.query();
+   const data = (await cache.get(key)) || (await database.query());
    ```
 
 4. **Monitor cache hit rates and adjust strategy**
    - Target: >80% hit rate for critical paths
 
 5. **Invalidate caches on mutations**
+
    ```typescript
    await cache.invalidateEntity(entityId, tenantId);
    ```
 
 6. **Use compression for large cached values**
+
    ```typescript
    await redis.set(key, zlib.gzipSync(JSON.stringify(data)));
    ```
@@ -1164,7 +1178,7 @@ groups:
 8. **Use Redis pipelining for bulk operations**
    ```typescript
    const pipeline = redis.pipeline();
-   keys.forEach(key => pipeline.get(key));
+   keys.forEach((key) => pipeline.get(key));
    await pipeline.exec();
    ```
 
@@ -1178,6 +1192,7 @@ groups:
    - Paginate large datasets
 
 3. **Avoid cache stampedes with distributed locks**
+
    ```typescript
    const lock = await redlock.lock(key, 5000);
    try {
@@ -1188,11 +1203,12 @@ groups:
    ```
 
 4. **Don't ignore cache failures**
+
    ```typescript
    try {
      await cache.set(key, value);
    } catch (error) {
-     logger.warn('Cache set failed, continuing...', error);
+     logger.warn("Cache set failed, continuing...", error);
    }
    ```
 
@@ -1211,33 +1227,33 @@ groups:
 
 ### Before Caching Strategy
 
-| Operation | Avg Latency | p95 Latency | p99 Latency |
-|-----------|------------|-------------|-------------|
-| Neighborhood (2-hop) | 1.8s | 2.6s | 3.2s |
-| GraphRAG Answer | 2.3s | 3.5s | 4.1s |
-| Entity Similarity | 950ms | 1.4s | 1.6s |
-| Dashboard Metrics | 620ms | 890ms | 1.1s |
-| Entity List | 450ms | 680ms | 820ms |
+| Operation            | Avg Latency | p95 Latency | p99 Latency |
+| -------------------- | ----------- | ----------- | ----------- |
+| Neighborhood (2-hop) | 1.8s        | 2.6s        | 3.2s        |
+| GraphRAG Answer      | 2.3s        | 3.5s        | 4.1s        |
+| Entity Similarity    | 950ms       | 1.4s        | 1.6s        |
+| Dashboard Metrics    | 620ms       | 890ms       | 1.1s        |
+| Entity List          | 450ms       | 680ms       | 820ms       |
 
 ### After Caching Strategy (Projected)
 
-| Operation | Avg Latency (Cached) | Avg Latency (Uncached) | Cache Hit Rate | Improvement |
-|-----------|---------------------|----------------------|----------------|-------------|
-| Neighborhood (2-hop) | **180ms** | 750ms | 85% | **90% faster** |
-| GraphRAG Answer | **420ms** | 1.5s | 60% | **82% faster** |
-| Entity Similarity | **95ms** | 580ms | 75% | **90% faster** |
-| Dashboard Metrics | **45ms** | 520ms | 90% | **93% faster** |
-| Entity List | **80ms** | 380ms | 92% | **82% faster** |
+| Operation            | Avg Latency (Cached) | Avg Latency (Uncached) | Cache Hit Rate | Improvement    |
+| -------------------- | -------------------- | ---------------------- | -------------- | -------------- |
+| Neighborhood (2-hop) | **180ms**            | 750ms                  | 85%            | **90% faster** |
+| GraphRAG Answer      | **420ms**            | 1.5s                   | 60%            | **82% faster** |
+| Entity Similarity    | **95ms**             | 580ms                  | 75%            | **90% faster** |
+| Dashboard Metrics    | **45ms**             | 520ms                  | 90%            | **93% faster** |
+| Entity List          | **80ms**             | 380ms                  | 92%            | **82% faster** |
 
 ### Resource Utilization
 
-| Metric | Before | After | Change |
-|--------|--------|-------|--------|
-| Neo4j Query Load | 1200 q/s | 360 q/s | **-70%** |
-| PostgreSQL Query Load | 800 q/s | 480 q/s | **-40%** |
-| Redis Memory Usage | 200 MB | 1.2 GB | +1 GB |
-| API Response Time (p95) | 1.2s | 380ms | **-68%** |
-| Server CPU Usage | 65% | 45% | **-20%** |
+| Metric                  | Before   | After   | Change   |
+| ----------------------- | -------- | ------- | -------- |
+| Neo4j Query Load        | 1200 q/s | 360 q/s | **-70%** |
+| PostgreSQL Query Load   | 800 q/s  | 480 q/s | **-40%** |
+| Redis Memory Usage      | 200 MB   | 1.2 GB  | +1 GB    |
+| API Response Time (p95) | 1.2s     | 380ms   | **-68%** |
+| Server CPU Usage        | 65%      | 45%     | **-20%** |
 
 ---
 
@@ -1313,6 +1329,7 @@ This caching strategy provides Summit/IntelGraph with:
 6. **Full observability** with Prometheus metrics and Grafana dashboards
 
 **Next Steps**:
+
 1. Implement `CacheWarmingService` with cron jobs
 2. Add CDN layer with CloudFlare/Fastly
 3. Deploy cache monitoring dashboards
@@ -1320,6 +1337,7 @@ This caching strategy provides Summit/IntelGraph with:
 5. Document cache key conventions in API docs
 
 **Contacts**:
+
 - **Owner**: Platform Engineering
 - **Slack**: #platform-caching
 - **On-Call**: PagerDuty rotation

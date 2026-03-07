@@ -1,55 +1,42 @@
 #!/usr/bin/env node
 
-const http = require('http');
+const http = require("http");
 
-console.log('🚀 Running IntelGraph Platform Integration Tests...\n');
+console.log("🚀 Running IntelGraph Platform Integration Tests...\n");
 
 const tests = [
   {
-    name: '🌐 Frontend Health Check',
-    test: () => testEndpoint('http://localhost:3001/', 'Frontend'),
+    name: "🌐 Frontend Health Check",
+    test: () => testEndpoint("http://localhost:3001/", "Frontend"),
   },
   {
-    name: '⚙️  Backend Health Check',
-    test: () => testEndpoint('http://localhost:4000/', 'Backend', false),
+    name: "⚙️  Backend Health Check",
+    test: () => testEndpoint("http://localhost:4000/", "Backend", false),
   },
   {
-    name: '🔍 GraphQL Introspection',
+    name: "🔍 GraphQL Introspection",
+    test: () => testGraphQL("{ __schema { queryType { name } } }", "Schema introspection"),
+  },
+  {
+    name: "📊 Entities Query",
+    test: () => testGraphQL("{ entities(limit: 2) { id type props } }", "Entities query"),
+  },
+  {
+    name: "👤 Users Query",
+    test: () => testGraphQL("{ users(limit: 2) { id email username } }", "Users query"),
+  },
+  {
+    name: "🎯 Single Entity Query",
     test: () =>
-      testGraphQL(
-        '{ __schema { queryType { name } } }',
-        'Schema introspection',
-      ),
+      testGraphQL('{ entity(id: "mock-entity-1") { id type props } }', "Single entity query"),
   },
   {
-    name: '📊 Entities Query',
-    test: () =>
-      testGraphQL('{ entities(limit: 2) { id type props } }', 'Entities query'),
+    name: "🔍 Filtered Entities Query",
+    test: () => testGraphQL('{ entities(type: "PERSON") { id type } }', "Filtered entities query"),
   },
   {
-    name: '👤 Users Query',
-    test: () =>
-      testGraphQL('{ users(limit: 2) { id email username } }', 'Users query'),
-  },
-  {
-    name: '🎯 Single Entity Query',
-    test: () =>
-      testGraphQL(
-        '{ entity(id: "mock-entity-1") { id type props } }',
-        'Single entity query',
-      ),
-  },
-  {
-    name: '🔍 Filtered Entities Query',
-    test: () =>
-      testGraphQL(
-        '{ entities(type: "PERSON") { id type } }',
-        'Filtered entities query',
-      ),
-  },
-  {
-    name: '📱 Frontend Asset Loading',
-    test: () => testEndpoint('http://localhost:3001/vite.svg', 'Vite assets'),
+    name: "📱 Frontend Asset Loading",
+    test: () => testEndpoint("http://localhost:3001/vite.svg", "Vite assets"),
   },
 ];
 
@@ -57,11 +44,11 @@ async function testEndpoint(url, name, expectOK = true) {
   return new Promise((resolve) => {
     const req = http.get(url, (res) => {
       const success = expectOK ? res.statusCode === 200 : res.statusCode < 500;
-      console.log(`${success ? '✅' : '❌'} ${name}: ${res.statusCode}`);
+      console.log(`${success ? "✅" : "❌"} ${name}: ${res.statusCode}`);
       resolve(success);
     });
 
-    req.on('error', (err) => {
+    req.on("error", (err) => {
       console.log(`❌ ${name}: ${err.message}`);
       resolve(false);
     });
@@ -79,25 +66,25 @@ async function testGraphQL(query, name) {
     const data = JSON.stringify({ query });
 
     const options = {
-      hostname: 'localhost',
+      hostname: "localhost",
       port: 4000,
-      path: '/graphql',
-      method: 'POST',
+      path: "/graphql",
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        'Content-Length': Buffer.byteLength(data),
+        "Content-Type": "application/json",
+        "Content-Length": Buffer.byteLength(data),
       },
     };
 
     const req = http.request(options, (res) => {
-      let responseData = '';
-      res.on('data', (chunk) => (responseData += chunk));
-      res.on('end', () => {
+      let responseData = "";
+      res.on("data", (chunk) => (responseData += chunk));
+      res.on("end", () => {
         try {
           const parsed = JSON.parse(responseData);
           const success = !parsed.errors && parsed.data;
           console.log(
-            `${success ? '✅' : '❌'} ${name}: ${success ? 'Success' : parsed.errors?.[0]?.message || 'Failed'}`,
+            `${success ? "✅" : "❌"} ${name}: ${success ? "Success" : parsed.errors?.[0]?.message || "Failed"}`
           );
           resolve(success);
         } catch (e) {
@@ -107,7 +94,7 @@ async function testGraphQL(query, name) {
       });
     });
 
-    req.on('error', (err) => {
+    req.on("error", (err) => {
       console.log(`❌ ${name}: ${err.message}`);
       resolve(false);
     });
@@ -141,16 +128,14 @@ async function runAllTests() {
   console.log(`❌ Failed: ${total - passed}/${total}`);
 
   if (passed === total) {
-    console.log('\n🎉 ALL INTEGRATION TESTS PASSED!');
-    console.log(
-      '🚀 IntelGraph Platform is fully functional and ready for use.',
-    );
+    console.log("\n🎉 ALL INTEGRATION TESTS PASSED!");
+    console.log("🚀 IntelGraph Platform is fully functional and ready for use.");
     console.log(`\n🌐 Frontend: http://localhost:3001`);
     console.log(`🔗 GraphQL: http://localhost:4000/graphql`);
     process.exit(0);
   } else {
-    console.log('\n⚠️  Some tests failed. See details above.');
-    console.log('\nFailed tests:');
+    console.log("\n⚠️  Some tests failed. See details above.");
+    console.log("\nFailed tests:");
     results
       .filter((r) => !r.success)
       .forEach((r) => {

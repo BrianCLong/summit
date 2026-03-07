@@ -1,12 +1,12 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 export const TacticSchema = z.enum([
-  'SURVEILLANCE_CLAIM',
-  'TIME_PRESSURE',
-  'LEGAL_LIABILITY_FRAMING',
-  'PUBLIC_SHAMING',
-  'DATA_DISCLOSURE_THREAT',
-  'DOWNTIME_EMPHASIS',
+  "SURVEILLANCE_CLAIM",
+  "TIME_PRESSURE",
+  "LEGAL_LIABILITY_FRAMING",
+  "PUBLIC_SHAMING",
+  "DATA_DISCLOSURE_THREAT",
+  "DOWNTIME_EMPHASIS",
 ]);
 
 export type Tactic = z.infer<typeof TacticSchema>;
@@ -17,7 +17,10 @@ export const LeakSiteRecordSchema = z.object({
   country: z.string().optional(),
   sector: z.string().optional(),
   source: z.string(),
-  first_seen_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+  first_seen_date: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .optional(),
   dataset_tags: z.array(z.string()).default([]),
 });
 
@@ -27,7 +30,7 @@ export const ExposureFindingSchema = z.object({
   evidence_id: z.string(),
   finding_type: z.string(),
   description: z.string(),
-  severity: z.enum(['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']),
+  severity: z.enum(["LOW", "MEDIUM", "HIGH", "CRITICAL"]),
   affected_asset: z.string(),
 });
 

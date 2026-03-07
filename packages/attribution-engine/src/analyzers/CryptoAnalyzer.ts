@@ -1,5 +1,5 @@
 export class CryptoAnalyzer {
   async analyzeAddress(address: string) {
-    return { address, blockchain: 'bitcoin' };
+    return { address, blockchain: "bitcoin" };
   }
 }

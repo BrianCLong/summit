@@ -1,4 +1,4 @@
-import type { BehaviorEvent, EntityProfile } from './types';
+import type { BehaviorEvent, EntityProfile } from "./types";
 
 export class EntityResolver {
   private readonly canonicalByAlias = new Map<string, string>();
@@ -29,7 +29,7 @@ export class EntityResolver {
     };
   }
 
-  enrichEntity(id: string, attributes: EntityProfile['attributes']): EntityProfile | undefined {
+  enrichEntity(id: string, attributes: EntityProfile["attributes"]): EntityProfile | undefined {
     const profile = this.profiles.get(id);
     if (!profile) {
       return undefined;

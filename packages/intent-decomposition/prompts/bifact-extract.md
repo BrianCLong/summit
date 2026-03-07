@@ -6,11 +6,12 @@ Intent:
 """
 
 Rules:
+
 - Split into minimal, independent facts.
 - Do not infer beyond the text.
 - Output ONLY valid JSON.
 
 JSON schema:
 {
-  "facts": ["string"]
+"facts": ["string"]
 }

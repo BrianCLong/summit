@@ -1,19 +1,19 @@
-import EventEmitter from 'eventemitter3';
-import { pino, type Logger } from 'pino';
+import EventEmitter from "eventemitter3";
+import { pino, type Logger } from "pino";
 
 export enum ModelFormat {
-  ONNX = 'onnx',
-  TENSORFLOW_LITE = 'tflite',
-  TENSORFLOW_JS = 'tfjs',
-  PYTORCH = 'pytorch',
-  CUSTOM = 'custom'
+  ONNX = "onnx",
+  TENSORFLOW_LITE = "tflite",
+  TENSORFLOW_JS = "tfjs",
+  PYTORCH = "pytorch",
+  CUSTOM = "custom",
 }
 
 export enum Precision {
-  FP32 = 'fp32',
-  FP16 = 'fp16',
-  INT8 = 'int8',
-  MIXED = 'mixed'
+  FP32 = "fp32",
+  FP16 = "fp16",
+  INT8 = "int8",
+  MIXED = "mixed",
 }
 
 export interface ModelMetadata {
@@ -25,7 +25,7 @@ export interface ModelMetadata {
   inputShape: number[];
   outputShape: number[];
   size: number; // bytes
-  accelerator?: 'cpu' | 'gpu' | 'tpu' | 'npu';
+  accelerator?: "cpu" | "gpu" | "tpu" | "npu";
   tags?: Record<string, string>;
 }
 
@@ -36,7 +36,7 @@ export interface InferenceRequest {
   options?: {
     batchSize?: number;
     timeout?: number;
-    priority?: 'high' | 'medium' | 'low';
+    priority?: "high" | "medium" | "low";
   };
   timestamp: Date;
 }
@@ -76,15 +76,11 @@ export class InferenceEngine extends EventEmitter {
   private maxCacheSize: number;
   private maxBatchSize: number;
 
-  constructor(options?: {
-    maxCacheSize?: number;
-    maxBatchSize?: number;
-    logger?: Logger;
-  }) {
+  constructor(options?: { maxCacheSize?: number; maxBatchSize?: number; logger?: Logger }) {
     super();
     this.maxCacheSize = options?.maxCacheSize || 1024 * 1024 * 1024; // 1GB default
     this.maxBatchSize = options?.maxBatchSize || 32;
-    this.logger = options?.logger || pino({ name: 'InferenceEngine' });
+    this.logger = options?.logger || pino({ name: "InferenceEngine" });
   }
 
   /**
@@ -97,8 +93,8 @@ export class InferenceEngine extends EventEmitter {
       await this.loadModel(metadata.id, modelData);
     }
 
-    this.logger.info({ modelId: metadata.id, name: metadata.name }, 'Model registered');
-    this.emit('model-registered', { modelId: metadata.id, metadata });
+    this.logger.info({ modelId: metadata.id, name: metadata.name }, "Model registered");
+    this.emit("model-registered", { modelId: metadata.id, metadata });
   }
 
   /**
@@ -117,8 +113,8 @@ export class InferenceEngine extends EventEmitter {
     }
 
     this.modelCache.set(modelId, modelData);
-    this.logger.info({ modelId }, 'Model loaded into cache');
-    this.emit('model-loaded', { modelId });
+    this.logger.info({ modelId }, "Model loaded into cache");
+    this.emit("model-loaded", { modelId });
   }
 
   /**
@@ -126,8 +122,8 @@ export class InferenceEngine extends EventEmitter {
    */
   async unloadModel(modelId: string): Promise<void> {
     this.modelCache.delete(modelId);
-    this.logger.info({ modelId }, 'Model unloaded from cache');
-    this.emit('model-unloaded', { modelId });
+    this.logger.info({ modelId }, "Model unloaded from cache");
+    this.emit("model-unloaded", { modelId });
   }
 
   /**
@@ -136,14 +132,14 @@ export class InferenceEngine extends EventEmitter {
   async infer(
     modelId: string,
     input: unknown,
-    options?: InferenceRequest['options']
+    options?: InferenceRequest["options"]
   ): Promise<InferenceResult> {
     const request: InferenceRequest = {
       id: this.generateRequestId(),
       modelId,
       input,
       options,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     return new Promise((resolve, reject) => {
@@ -152,22 +148,22 @@ export class InferenceEngine extends EventEmitter {
       // Set up listeners for this request
       const onResult = (result: InferenceResult) => {
         if (result.requestId === request.id) {
-          this.off('inference-result', onResult);
-          this.off('inference-error', onError);
+          this.off("inference-result", onResult);
+          this.off("inference-error", onError);
           resolve(result);
         }
       };
 
       const onError = (error: { requestId: string; error: Error }) => {
         if (error.requestId === request.id) {
-          this.off('inference-result', onResult);
-          this.off('inference-error', onError);
+          this.off("inference-result", onResult);
+          this.off("inference-error", onError);
           reject(error.error);
         }
       };
 
-      this.on('inference-result', onResult);
-      this.on('inference-error', onError);
+      this.on("inference-result", onResult);
+      this.on("inference-error", onError);
 
       // Start processing if not already running
       if (!this.isProcessing) {
@@ -191,8 +187,8 @@ export class InferenceEngine extends EventEmitter {
         // Sort by priority
         this.inferenceQueue.sort((a, b) => {
           const priorityOrder = { high: 3, medium: 2, low: 1 };
-          const aPriority = priorityOrder[a.options?.priority || 'medium'];
-          const bPriority = priorityOrder[b.options?.priority || 'medium'];
+          const aPriority = priorityOrder[a.options?.priority || "medium"];
+          const bPriority = priorityOrder[b.options?.priority || "medium"];
           return bPriority - aPriority;
         });
 
@@ -200,13 +196,13 @@ export class InferenceEngine extends EventEmitter {
 
         try {
           const result = await this.executeInference(request);
-          this.emit('inference-result', result);
+          this.emit("inference-result", result);
 
           // Track stats
           this.recordInferenceStats(request.modelId, result.latency);
         } catch (error) {
-          this.logger.error({ error, requestId: request.id }, 'Inference failed');
-          this.emit('inference-error', { requestId: request.id, error });
+          this.logger.error({ error, requestId: request.id }, "Inference failed");
+          this.emit("inference-error", { requestId: request.id, error });
         }
       }
     } finally {
@@ -244,12 +240,12 @@ export class InferenceEngine extends EventEmitter {
       modelId: request.modelId,
       output,
       latency,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     this.logger.debug(
       { requestId: request.id, modelId: request.modelId, latency },
-      'Inference completed'
+      "Inference completed"
     );
 
     return result;
@@ -270,12 +266,12 @@ export class InferenceEngine extends EventEmitter {
     // 4. Handle input preprocessing and output postprocessing
 
     return {
-      prediction: 'placeholder_result',
+      prediction: "placeholder_result",
       confidence: 0.95,
       metadata: {
         format: metadata.format,
-        precision: metadata.precision
-      }
+        precision: metadata.precision,
+      },
     };
   }
 
@@ -285,7 +281,7 @@ export class InferenceEngine extends EventEmitter {
   async batchInfer(
     modelId: string,
     inputs: unknown[],
-    options?: InferenceRequest['options']
+    options?: InferenceRequest["options"]
   ): Promise<InferenceResult[]> {
     const batchSize = Math.min(inputs.length, this.maxBatchSize);
     const results: InferenceResult[] = [];
@@ -293,7 +289,7 @@ export class InferenceEngine extends EventEmitter {
     for (let i = 0; i < inputs.length; i += batchSize) {
       const batch = inputs.slice(i, i + batchSize);
       const batchResults = await Promise.all(
-        batch.map(input => this.infer(modelId, input, options))
+        batch.map((input) => this.infer(modelId, input, options))
       );
       results.push(...batchResults);
     }
@@ -316,7 +312,7 @@ export class InferenceEngine extends EventEmitter {
         p50Latency: 0,
         p95Latency: 0,
         p99Latency: 0,
-        throughput: 0
+        throughput: 0,
       };
     }
 
@@ -331,7 +327,7 @@ export class InferenceEngine extends EventEmitter {
       p50Latency: sorted[Math.floor(sorted.length * 0.5)],
       p95Latency: sorted[Math.floor(sorted.length * 0.95)],
       p99Latency: sorted[Math.floor(sorted.length * 0.99)],
-      throughput: latencies.length / (sum / 1000) // inferences per second
+      throughput: latencies.length / (sum / 1000), // inferences per second
     };
   }
 
@@ -354,8 +350,8 @@ export class InferenceEngine extends EventEmitter {
    */
   clearCache(): void {
     this.modelCache.clear();
-    this.logger.info('Model cache cleared');
-    this.emit('cache-cleared');
+    this.logger.info("Model cache cleared");
+    this.emit("cache-cleared");
   }
 
   /**
@@ -414,6 +410,6 @@ export class InferenceEngine extends EventEmitter {
     this.inferenceQueue = [];
     this.clearCache();
     this.removeAllListeners();
-    this.logger.info('InferenceEngine shut down');
+    this.logger.info("InferenceEngine shut down");
   }
 }

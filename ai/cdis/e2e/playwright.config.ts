@@ -1,10 +1,10 @@
-import { defineConfig } from '@playwright/test';
+import { defineConfig } from "@playwright/test";
 
 export default defineConfig({
-  testDir: '.',
+  testDir: ".",
   timeout: 60_000,
   use: {
-    baseURL: 'http://localhost:8080',
+    baseURL: "http://localhost:8080",
     headless: true,
   },
 });

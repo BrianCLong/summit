@@ -3,7 +3,7 @@ name: Infra Diff Check
 on:
   pull_request:
     paths:
-      - 'terraform/**'
+      - "terraform/**"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

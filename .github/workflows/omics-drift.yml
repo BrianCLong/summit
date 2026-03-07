@@ -2,7 +2,7 @@ name: Omics Deconvolution Drift Detection
 
 on:
   schedule:
-    - cron: '0 0 * * 0' # Run weekly
+    - cron: "0 0 * * 0" # Run weekly
 
 jobs:
   check-drift:
@@ -14,7 +14,7 @@ jobs:
           run_install: false
       - uses: actions/setup-node@v4
         with:
-          node-version-file: 'package.json'
+          node-version-file: "package.json"
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Run drift detection

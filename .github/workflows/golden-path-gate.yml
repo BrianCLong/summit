@@ -29,7 +29,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
@@ -40,8 +40,8 @@ jobs:
       - name: Run Golden Path E2E
         env:
           BASE_URL: http://localhost:3000
-          PLAYWRIGHT_USE_WEBSERVER: 'true'
-          CI: 'true'
+          PLAYWRIGHT_USE_WEBSERVER: "true"
+          CI: "true"
         run: pnpm test:e2e:golden-path
 
       - name: Upload Test Results

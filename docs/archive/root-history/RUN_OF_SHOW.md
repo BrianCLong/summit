@@ -390,8 +390,8 @@ gh workflow run evidence-bundle-release.yml -f release_tag=v1.0.0-GA
 ### Platform Performance
 
 - [ ] **Tenant mix stable**: No single tenant > 20% of traffic
-- [ ] **Regional latency**: US: **_ms, EU: _**ms, APAC: \_\_\_ms
-- [ ] **Graph traversal performance**: 2-hop: **_ms, 3-hop: _**ms, 4-hop: \_\_\_ms
+- [ ] **Regional latency**: US: ***ms, EU: ***ms, APAC: \_\_\_ms
+- [ ] **Graph traversal performance**: 2-hop: ***ms, 3-hop: ***ms, 4-hop: \_\_\_ms
 
 ### Cost & Resource Monitoring
 

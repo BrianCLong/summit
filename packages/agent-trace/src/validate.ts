@@ -1,13 +1,13 @@
-import Ajv2020 from 'ajv/dist/2020.js';
-import addFormats from 'ajv-formats';
-import { readFileSync } from 'fs';
-import { join, dirname } from 'path';
-import { fileURLToPath } from 'url';
-import type { TraceRecord } from './trace_record.js';
+import Ajv2020 from "ajv/dist/2020.js";
+import addFormats from "ajv-formats";
+import { readFileSync } from "fs";
+import { join, dirname } from "path";
+import { fileURLToPath } from "url";
+import type { TraceRecord } from "./trace_record.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const schemaPath = join(__dirname, '../schemas/agent_trace_record.schema.json');
-const schema = JSON.parse(readFileSync(schemaPath, 'utf8'));
+const schemaPath = join(__dirname, "../schemas/agent_trace_record.schema.json");
+const schema = JSON.parse(readFileSync(schemaPath, "utf8"));
 
 const ajv = new Ajv2020({ allErrors: true });
 addFormats(ajv);
@@ -29,13 +29,15 @@ export function validateTraceRecord(record: unknown): { valid: boolean; errors?:
   for (const f of r.files) {
     for (const c of f.conversations) {
       if (c.url) {
-        if (c.url.includes('?') || c.url.includes('#')) {
+        if (c.url.includes("?") || c.url.includes("#")) {
           semanticErrors.push(`file ${f.path}: conversation URL contains query or fragment`);
         }
       }
       for (const rg of c.ranges) {
         if (rg.start_line > rg.end_line) {
-          semanticErrors.push(`file ${f.path}: start_line (${rg.start_line}) > end_line (${rg.end_line})`);
+          semanticErrors.push(
+            `file ${f.path}: start_line (${rg.start_line}) > end_line (${rg.end_line})`
+          );
         }
       }
     }

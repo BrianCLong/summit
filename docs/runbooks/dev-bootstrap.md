@@ -19,31 +19,39 @@ Use this runbook to bring up the Summit stack on a fresh workstation or CI runne
    cd summit
    ```
 2. **Install dependencies and seed env**
+
    ```bash
    make bootstrap
    ```
 
    - Seeds `.env` from `.env.example` if absent.
    - Installs pnpm workspace packages and Python tooling.
+
 3. **Start core services**
+
    ```bash
    make up
    ```
 
    - Launches API, UI, Postgres, Neo4j, Redis, and observability via `docker-compose.dev.yml`.
    - Waits for health/readiness via `scripts/wait-for-stack.sh`.
+
 4. **Optional AI/Kafka profile**
+
    ```bash
    make up-ai
    ```
 
    - Adds Kafka + ai-worker stack defined in `docker-compose.ai.yml`.
+
 5. **Run golden path smoke test**
+
    ```bash
    make smoke
    ```
 
    - Executes the same dataset-driven flow as CI using `scripts/smoke-test.js`.
+
 6. **Access the UI**
    - Frontend: http://localhost:3000
    - GraphQL: http://localhost:4000/graphql

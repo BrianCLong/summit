@@ -56,7 +56,7 @@ export interface ScoreThresholds {
   review: number;
 }
 
-export type ScoreDecision = 'auto-merge' | 'review' | 'reject';
+export type ScoreDecision = "auto-merge" | "review" | "reject";
 
 export interface ScoringModel {
   id: string;
@@ -119,7 +119,7 @@ export interface ResolutionCluster {
 
 export interface ExplainResponse {
   mergeId: string;
-  features: CandidateScore['features'];
+  features: CandidateScore["features"];
   rationale: string[];
   policyTags: string[];
   createdAt: string;
@@ -136,7 +136,7 @@ export interface TemporalEvent {
 
 export interface TemporalPattern {
   entityId: string;
-  trend: 'spike' | 'increasing' | 'stable';
+  trend: "spike" | "increasing" | "stable";
   support: number;
   windowDays: number;
   confidence: number;
@@ -158,7 +158,7 @@ export interface AuditEntry {
   id: string;
   tenantId: string;
   actor: string;
-  event: 'merge' | 'revert';
+  event: "merge" | "revert";
   target: string;
   reason: string;
   createdAt: string;

@@ -3,9 +3,6 @@
   "title": "CogWar Metrics",
   "type": "object",
   "additionalProperties": {
-    "anyOf": [
-      { "type": "number" },
-      { "$ref": "resilience_metric.schema.json" }
-    ]
+    "anyOf": [{ "type": "number" }, { "$ref": "resilience_metric.schema.json" }]
   }
 }

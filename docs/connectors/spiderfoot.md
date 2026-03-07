@@ -5,11 +5,13 @@ This connector imports SpiderFoot JSON exports into Summit's normalized OSINT ev
 ## Usage
 
 ### 1. Export from SpiderFoot
+
 - Run SpiderFoot scan.
 - Go to "Scan" -> "Export" -> "JSON".
 - Save as `spiderfoot_export.json`.
 
 ### 2. Import into Summit
+
 Use the `connectors.spiderfoot.import_spiderfoot` module.
 
 ```python
@@ -21,5 +23,6 @@ write_normalized(events, "normalized_events.json")
 ```
 
 ## Safety
+
 - Ensure targets are authorized.
 - Use passive scan modes by default.

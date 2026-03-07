@@ -7,6 +7,6 @@
  * encryption breaking capabilities.
  */
 
-export * from './analysis/CryptoAnalyzer';
-export * from './patterns/TrafficPatternAnalyzer';
-export * from './training/CryptoTrainer';
+export * from "./analysis/CryptoAnalyzer";
+export * from "./patterns/TrafficPatternAnalyzer";
+export * from "./training/CryptoTrainer";

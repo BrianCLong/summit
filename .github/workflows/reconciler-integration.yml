@@ -2,11 +2,11 @@ name: reconciler-integration
 on:
   pull_request:
     paths:
-      - 'reconciler/**'
-      - 'tests/integration/**'
-      - 'tests/data/**'
-      - 'observability/**'
-      - '.github/workflows/reconciler-integration.yml'
+      - "reconciler/**"
+      - "tests/integration/**"
+      - "tests/data/**"
+      - "observability/**"
+      - ".github/workflows/reconciler-integration.yml"
 
 jobs:
   canary:
@@ -15,7 +15,7 @@ jobs:
     services:
       neo4j:
         image: neo4j:5.22
-        ports: ['7687:7687']
+        ports: ["7687:7687"]
         env:
           NEO4J_AUTH: neo4j/password
         options: >-
@@ -29,7 +29,7 @@ jobs:
 
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: "3.11"
 
       - name: Install deps
         run: |

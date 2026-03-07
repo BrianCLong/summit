@@ -1,6 +1,6 @@
-import crypto from 'crypto';
-import yaml from 'js-yaml';
-import { z } from 'zod';
+import crypto from "crypto";
+import yaml from "js-yaml";
+import { z } from "zod";
 
 export const TaskSchema = z.object({
   id: z.string().min(1),
@@ -10,8 +10,8 @@ export const TaskSchema = z.object({
 });
 
 export const WorkflowSpecSchema = z.object({
-  apiVersion: z.literal('chronos.v1'),
-  kind: z.literal('Workflow'),
+  apiVersion: z.literal("chronos.v1"),
+  kind: z.literal("Workflow"),
   metadata: z.object({
     name: z.string().min(1),
     namespace: z.string().min(1),
@@ -22,7 +22,7 @@ export const WorkflowSpecSchema = z.object({
     retries: z
       .object({
         default: z.object({
-          strategy: z.enum(['none', 'fixed', 'exponential']).default('exponential'),
+          strategy: z.enum(["none", "fixed", "exponential"]).default("exponential"),
           maxAttempts: z.number().int().positive().default(3),
           baseMs: z.number().int().positive().default(250),
         }),
@@ -52,7 +52,7 @@ export interface IRDag {
   nodes: IRNode[];
   edges: IREdge[];
   retry: {
-    strategy: 'none' | 'fixed' | 'exponential';
+    strategy: "none" | "fixed" | "exponential";
     maxAttempts: number;
     baseMs: number;
   };
@@ -77,15 +77,12 @@ export function compileToIR(spec: WorkflowSpec): IRDag {
   edges.sort((a, b) => `${a.from}:${a.to}`.localeCompare(`${b.from}:${b.to}`));
 
   const retry = spec.spec.retries?.default ?? {
-    strategy: 'exponential',
+    strategy: "exponential",
     maxAttempts: 3,
     baseMs: 250,
   };
 
-  const specHash = crypto
-    .createHash('sha256')
-    .update(JSON.stringify(spec))
-    .digest('hex');
+  const specHash = crypto.createHash("sha256").update(JSON.stringify(spec)).digest("hex");
 
   return {
     name: spec.metadata.name,

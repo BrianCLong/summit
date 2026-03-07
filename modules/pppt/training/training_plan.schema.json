@@ -4,8 +4,8 @@
   "type": "object",
   "required": ["role", "stages", "trainer_model"],
   "properties": {
-    "role": {"type": "string"},
-    "trainer_model": {"enum": ["dedicated_trainer", "manager_led", "hybrid"]},
+    "role": { "type": "string" },
+    "trainer_model": { "enum": ["dedicated_trainer", "manager_led", "hybrid"] },
     "stages": {
       "type": "array",
       "minItems": 2,
@@ -13,9 +13,9 @@
         "type": "object",
         "required": ["name", "duration_days", "mode"],
         "properties": {
-          "name": {"type": "string"},
-          "duration_days": {"type": "integer", "minimum": 1},
-          "mode": {"enum": ["classroom", "on_the_job", "blended"]}
+          "name": { "type": "string" },
+          "duration_days": { "type": "integer", "minimum": 1 },
+          "mode": { "enum": ["classroom", "on_the_job", "blended"] }
         },
         "additionalProperties": false
       }

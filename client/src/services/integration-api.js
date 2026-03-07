@@ -8,15 +8,15 @@
  * @module services/integration-api
  */
 
-const API_BASE = '/api/integrations';
+const API_BASE = "/api/integrations";
 
 /**
  * Get auth headers
  */
 const getHeaders = () => {
-  const token = localStorage.getItem('auth_token');
+  const token = localStorage.getItem("auth_token");
   return {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
   };
 };
@@ -26,7 +26,7 @@ const getHeaders = () => {
  */
 const handleResponse = async (response) => {
   if (!response.ok) {
-    const error = await response.json().catch(() => ({ error: 'Unknown error' }));
+    const error = await response.json().catch(() => ({ error: "Unknown error" }));
     throw new Error(error.error || error.message || `HTTP ${response.status}`);
   }
   return response.json();
@@ -56,8 +56,8 @@ export const IntegrationAPI = {
    */
   async list(params = {}) {
     const queryParams = new URLSearchParams();
-    if (params.status) queryParams.set('status', params.status);
-    if (params.category) queryParams.set('category', params.category);
+    if (params.status) queryParams.set("status", params.status);
+    if (params.category) queryParams.set("category", params.category);
 
     const response = await fetch(`${API_BASE}?${queryParams}`, {
       headers: getHeaders(),
@@ -80,7 +80,7 @@ export const IntegrationAPI = {
    */
   async setup(manifestId, name, config = {}) {
     const response = await fetch(API_BASE, {
-      method: 'POST',
+      method: "POST",
       headers: getHeaders(),
       body: JSON.stringify({ manifestId, name, config }),
     });
@@ -92,7 +92,7 @@ export const IntegrationAPI = {
    */
   async connect(id) {
     const response = await fetch(`${API_BASE}/${id}/connect`, {
-      method: 'POST',
+      method: "POST",
       headers: getHeaders(),
     });
     return handleResponse(response);
@@ -103,7 +103,7 @@ export const IntegrationAPI = {
    */
   async disconnect(id) {
     const response = await fetch(`${API_BASE}/${id}/disconnect`, {
-      method: 'POST',
+      method: "POST",
       headers: getHeaders(),
     });
     return handleResponse(response);
@@ -114,7 +114,7 @@ export const IntegrationAPI = {
    */
   async execute(id, capability, params = {}, simulation = false) {
     const response = await fetch(`${API_BASE}/${id}/execute`, {
-      method: 'POST',
+      method: "POST",
       headers: getHeaders(),
       body: JSON.stringify({ capability, params, simulation }),
     });
@@ -141,7 +141,7 @@ export const IntegrationApprovalAPI = {
    */
   async approve(id, comment) {
     const response = await fetch(`${API_BASE}/approvals/${id}/approve`, {
-      method: 'POST',
+      method: "POST",
       headers: getHeaders(),
       body: JSON.stringify({ comment }),
     });
@@ -153,7 +153,7 @@ export const IntegrationApprovalAPI = {
    */
   async reject(id, comment) {
     const response = await fetch(`${API_BASE}/approvals/${id}/reject`, {
-      method: 'POST',
+      method: "POST",
       headers: getHeaders(),
       body: JSON.stringify({ comment }),
     });
@@ -170,9 +170,9 @@ export const IntegrationAuditAPI = {
    */
   async getLog(params = {}) {
     const queryParams = new URLSearchParams();
-    if (params.integrationId) queryParams.set('integrationId', params.integrationId);
-    if (params.from) queryParams.set('from', params.from);
-    if (params.to) queryParams.set('to', params.to);
+    if (params.integrationId) queryParams.set("integrationId", params.integrationId);
+    if (params.from) queryParams.set("from", params.from);
+    if (params.to) queryParams.set("to", params.to);
 
     const response = await fetch(`${API_BASE}/audit?${queryParams}`, {
       headers: getHeaders(),

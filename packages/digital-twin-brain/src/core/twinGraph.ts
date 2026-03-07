@@ -1,4 +1,4 @@
-import { TwinEdge, TwinNode } from './types.js';
+import { TwinEdge, TwinNode } from "./types.js";
 
 export class TwinGraph {
   private nodes: Map<string, TwinNode> = new Map();

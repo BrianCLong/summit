@@ -2,8 +2,8 @@
  * Transaction Pool (Mempool) implementation
  */
 
-import { Logger } from 'pino';
-import { Transaction } from './types.js';
+import { Logger } from "pino";
+import { Transaction } from "./types.js";
 
 export class TransactionPool {
   private transactions: Map<string, Transaction> = new Map();
@@ -19,15 +19,15 @@ export class TransactionPool {
    */
   async addTransaction(tx: Transaction): Promise<void> {
     if (this.transactions.has(tx.id)) {
-      throw new Error('Transaction already in pool');
+      throw new Error("Transaction already in pool");
     }
 
     if (this.transactions.size >= this.maxPoolSize) {
-      throw new Error('Transaction pool is full');
+      throw new Error("Transaction pool is full");
     }
 
     this.transactions.set(tx.id, tx);
-    this.logger.debug({ txId: tx.id }, 'Transaction added to pool');
+    this.logger.debug({ txId: tx.id }, "Transaction added to pool");
   }
 
   /**

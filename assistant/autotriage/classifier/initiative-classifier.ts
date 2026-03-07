@@ -1,5 +1,5 @@
-import { TriageItem } from '../types.js';
-import { InitiativeRule } from '../config.js';
+import { TriageItem } from "../types.js";
+import { InitiativeRule } from "../config.js";
 
 export function classifyInitiative(item: TriageItem, rules: InitiativeRule[]): string | undefined {
   const text = `${item.title} ${item.description}`.toLowerCase();

@@ -34,7 +34,7 @@ export class DocumentationFederationHub {
 
     this.repositories.set(source.id, source);
 
-    this.logger.info('Repository registered', {
+    this.logger.info("Repository registered", {
       id: source.id,
       url: source.url,
       team: source.team,
@@ -53,7 +53,7 @@ export class DocumentationFederationHub {
         this.logger.error(`Sync failed for repository ${id}:`, error);
         results.push({
           repositoryId: id,
-          status: 'failed',
+          status: "failed",
           error: error.message,
           timestamp: new Date(),
         });
@@ -73,21 +73,18 @@ export class DocumentationFederationHub {
     const repo = await this.syncManager.cloneOrUpdate(source);
 
     // Discover content based on patterns
-    const content = await this.contentAggregator.discoverContent(
-      repo,
-      source.patterns,
-    );
+    const content = await this.contentAggregator.discoverContent(repo, source.patterns);
 
     // Process and transform content
     const processedContent = await this.contentAggregator.processContent(
       content,
-      source.transforms,
+      source.transforms
     );
 
     // Apply access controls
     const authorizedContent = await this.accessController.filterContent(
       processedContent,
-      source.permissions,
+      source.permissions
     );
 
     // Index content for federation
@@ -95,7 +92,7 @@ export class DocumentationFederationHub {
 
     return {
       repositoryId: source.id,
-      status: 'success',
+      status: "success",
       contentCount: authorizedContent.length,
       duration: Date.now() - startTime,
       timestamp: new Date(),
@@ -120,47 +117,38 @@ export class FederatedContentDiscovery {
   private setupDefaultPatterns(): void {
     const patterns = [
       {
-        name: 'api-documentation',
-        paths: [
-          'docs/api/**/*.md',
-          'api-docs/**/*.md',
-          'swagger.yaml',
-          'openapi.yaml',
-        ],
-        type: 'api',
-        schema: 'openapi-3.0',
+        name: "api-documentation",
+        paths: ["docs/api/**/*.md", "api-docs/**/*.md", "swagger.yaml", "openapi.yaml"],
+        type: "api",
+        schema: "openapi-3.0",
         priority: 10,
       },
       {
-        name: 'user-guides',
-        paths: ['docs/**/*.md', 'documentation/**/*.md', 'guides/**/*.md'],
-        type: 'guide',
-        schema: 'markdown-extended',
+        name: "user-guides",
+        paths: ["docs/**/*.md", "documentation/**/*.md", "guides/**/*.md"],
+        type: "guide",
+        schema: "markdown-extended",
         priority: 8,
       },
       {
-        name: 'architectural-docs',
-        paths: ['docs/architecture/**/*.md', 'arch/**/*.md', 'ADR/**/*.md'],
-        type: 'architecture',
-        schema: 'adr-schema',
+        name: "architectural-docs",
+        paths: ["docs/architecture/**/*.md", "arch/**/*.md", "ADR/**/*.md"],
+        type: "architecture",
+        schema: "adr-schema",
         priority: 9,
       },
       {
-        name: 'runbooks',
-        paths: ['runbooks/**/*.md', 'docs/operations/**/*.md', 'ops/**/*.md'],
-        type: 'operational',
-        schema: 'runbook-schema',
+        name: "runbooks",
+        paths: ["runbooks/**/*.md", "docs/operations/**/*.md", "ops/**/*.md"],
+        type: "operational",
+        schema: "runbook-schema",
         priority: 7,
       },
       {
-        name: 'tutorials',
-        paths: [
-          'tutorials/**/*.md',
-          'docs/tutorials/**/*.md',
-          'examples/**/*.md',
-        ],
-        type: 'tutorial',
-        schema: 'tutorial-schema',
+        name: "tutorials",
+        paths: ["tutorials/**/*.md", "docs/tutorials/**/*.md", "examples/**/*.md"],
+        type: "tutorial",
+        schema: "tutorial-schema",
         priority: 6,
       },
     ];
@@ -184,7 +172,7 @@ export class FederatedContentDiscovery {
 
   private async discoverByPattern(
     repository: Repository,
-    patterns: ContentPattern[],
+    patterns: ContentPattern[]
   ): Promise<DiscoveredContent[]> {
     const content: DiscoveredContent[] = [];
 
@@ -222,7 +210,7 @@ export class FederatedContentDiscovery {
 
   private async extractMetadata(
     content: string,
-    pattern: ContentPattern,
+    pattern: ContentPattern
   ): Promise<ContentMetadata> {
     const frontMatter = this.parseFrontMatter(content);
     const autoMetadata = await this.generateAutoMetadata(content, pattern);
@@ -258,7 +246,7 @@ export class FederatedSyncManager {
     // Setup repository webhooks
     for (const repo of this.config.repositories) {
       await this.webhookManager.setupWebhook(repo, {
-        events: ['push', 'pull_request', 'release'],
+        events: ["push", "pull_request", "release"],
         url: `${this.config.baseUrl}/webhooks/sync/${repo.id}`,
         secret: await this.generateWebhookSecret(repo.id),
       });
@@ -271,16 +259,13 @@ export class FederatedSyncManager {
     this.setupRealtimeSync();
   }
 
-  async handleWebhookSync(
-    repositoryId: string,
-    event: WebhookEvent,
-  ): Promise<void> {
+  async handleWebhookSync(repositoryId: string, event: WebhookEvent): Promise<void> {
     const repository = this.repositories.get(repositoryId);
     if (!repository) {
       throw new Error(`Unknown repository: ${repositoryId}`);
     }
 
-    this.logger.info('Processing webhook sync', {
+    this.logger.info("Processing webhook sync", {
       repository: repositoryId,
       event: event.type,
       commit: event.after,
@@ -288,13 +273,10 @@ export class FederatedSyncManager {
 
     try {
       // Detect changes
-      const changes = await this.changeDetector.detectChanges(
-        repository,
-        event,
-      );
+      const changes = await this.changeDetector.detectChanges(repository, event);
 
       if (changes.length === 0) {
-        this.logger.debug('No relevant changes detected');
+        this.logger.debug("No relevant changes detected");
         return;
       }
 
@@ -307,34 +289,28 @@ export class FederatedSyncManager {
       // Update federation index
       await this.updateFederationIndex(repository, changes);
     } catch (error) {
-      this.logger.error('Webhook sync failed:', error);
+      this.logger.error("Webhook sync failed:", error);
       await this.notifyFailure(repository, event, error);
     }
   }
 
-  private async processChanges(
-    repository: Repository,
-    changes: ContentChange[],
-  ): Promise<void> {
+  private async processChanges(repository: Repository, changes: ContentChange[]): Promise<void> {
     for (const change of changes) {
       switch (change.type) {
-        case 'content':
+        case "content":
           await this.processContentChange(repository, change);
           break;
-        case 'structure':
+        case "structure":
           await this.processStructureChange(repository, change);
           break;
-        case 'metadata':
+        case "metadata":
           await this.processMetadataChange(repository, change);
           break;
       }
     }
   }
 
-  private async processContentChange(
-    repository: Repository,
-    change: ContentChange,
-  ): Promise<void> {
+  private async processContentChange(repository: Repository, change: ContentChange): Promise<void> {
     // Check for conflicts with other repositories
     const conflicts = await this.conflictResolver.detectConflicts(change);
 
@@ -352,7 +328,7 @@ export class FederatedSyncManager {
   async resolveConflicts(
     repository: Repository,
     change: ContentChange,
-    conflicts: Conflict[],
+    conflicts: Conflict[]
   ): Promise<void> {
     for (const conflict of conflicts) {
       const resolution = await this.conflictResolver.resolve(conflict, {
@@ -363,7 +339,7 @@ export class FederatedSyncManager {
 
       await this.applyResolution(conflict, resolution);
 
-      this.logger.info('Conflict resolved', {
+      this.logger.info("Conflict resolved", {
         conflict: conflict.id,
         strategy: resolution.strategy,
         repository: repository.id,
@@ -396,10 +372,7 @@ export class TeamGovernanceManager {
     await this.initializeContentOwnership();
   }
 
-  async validateContentChange(
-    change: ContentChange,
-    user: User,
-  ): Promise<ValidationResult> {
+  async validateContentChange(change: ContentChange, user: User): Promise<ValidationResult> {
     const content = await this.getContent(change.path);
     const ownership = await this.getContentOwnership(change.path);
 
@@ -407,22 +380,18 @@ export class TeamGovernanceManager {
     if (!this.isTeamMember(user, ownership.team)) {
       return {
         valid: false,
-        reason: 'User not member of content owning team',
+        reason: "User not member of content owning team",
         requiredApprovals: await this.getRequiredApprovals(change, ownership),
       };
     }
 
     // Check content permissions
-    const hasPermission = await this.checkContentPermission(
-      user,
-      change.operation,
-      content,
-    );
+    const hasPermission = await this.checkContentPermission(user, change.operation, content);
 
     if (!hasPermission) {
       return {
         valid: false,
-        reason: 'Insufficient permissions for operation',
+        reason: "Insufficient permissions for operation",
         requiredApprovals: await this.getRequiredApprovals(change, ownership),
       };
     }
@@ -432,7 +401,7 @@ export class TeamGovernanceManager {
     if (dependencies.length > 0) {
       return {
         valid: false,
-        reason: 'Cross-team approval required',
+        reason: "Cross-team approval required",
         requiredApprovals: dependencies.map((d) => d.requiredApproval),
       };
     }
@@ -443,14 +412,14 @@ export class TeamGovernanceManager {
   async requestApproval(
     change: ContentChange,
     requester: User,
-    approvers: string[],
+    approvers: string[]
   ): Promise<ApprovalRequest> {
     const request: ApprovalRequest = {
       id: this.generateRequestId(),
       change,
       requester,
       approvers,
-      status: 'pending',
+      status: "pending",
       createdAt: new Date(),
       deadline: this.calculateApprovalDeadline(change),
     };
@@ -468,7 +437,7 @@ export class TeamGovernanceManager {
   }
 
   private async analyzeCrossTeamDependencies(
-    change: ContentChange,
+    change: ContentChange
   ): Promise<CrossTeamDependency[]> {
     const dependencies: CrossTeamDependency[] = [];
 
@@ -481,7 +450,7 @@ export class TeamGovernanceManager {
 
       if (refOwnership.team !== changeOwnership.team) {
         dependencies.push({
-          type: 'content-reference',
+          type: "content-reference",
           targetTeam: refOwnership.team,
           path: ref.path,
           requiredApproval: {
@@ -514,46 +483,44 @@ export class FederatedContentAggregator {
 
   private setupContentProcessors(): void {
     this.processors.set(
-      'markdown',
+      "markdown",
       new MarkdownProcessor({
         frontMatterParser: true,
         linkResolver: true,
         imageOptimization: true,
         codeHighlighting: true,
-      }),
+      })
     );
 
     this.processors.set(
-      'openapi',
+      "openapi",
       new OpenAPIProcessor({
         validator: true,
         mockGenerator: true,
         docGenerator: true,
-      }),
+      })
     );
 
     this.processors.set(
-      'asyncapi',
+      "asyncapi",
       new AsyncAPIProcessor({
         validator: true,
         docGenerator: true,
         codeGenerator: true,
-      }),
+      })
     );
 
     this.processors.set(
-      'json-schema',
+      "json-schema",
       new JSONSchemaProcessor({
         validator: true,
         docGenerator: true,
         exampleGenerator: true,
-      }),
+      })
     );
   }
 
-  async aggregateContent(
-    sources: RepositorySource[],
-  ): Promise<AggregatedContent> {
+  async aggregateContent(sources: RepositorySource[]): Promise<AggregatedContent> {
     const aggregated: AggregatedContent = {
       content: new Map(),
       metadata: new Map(),
@@ -579,9 +546,7 @@ export class FederatedContentAggregator {
     return aggregated;
   }
 
-  private async processSource(
-    source: RepositorySource,
-  ): Promise<SourceContent> {
+  private async processSource(source: RepositorySource): Promise<SourceContent> {
     const content: SourceContent = {
       source: source.id,
       documents: new Map(),
@@ -621,9 +586,7 @@ export class FederatedContentAggregator {
     return content;
   }
 
-  private async buildCrossReferences(
-    content: AggregatedContent,
-  ): Promise<void> {
+  private async buildCrossReferences(content: AggregatedContent): Promise<void> {
     const linkAnalyzer = new CrossReferenceAnalyzer();
 
     for (const [path, document] of content.content) {
@@ -640,13 +603,13 @@ export class FederatedContentAggregator {
 
   private async resolveReference(
     reference: ContentReference,
-    content: AggregatedContent,
+    content: AggregatedContent
   ): Promise<ResolvedReference | null> {
     // Try direct path resolution
     if (content.content.has(reference.path)) {
       return {
         path: reference.path,
-        type: 'direct',
+        type: "direct",
         confidence: 1.0,
       };
     }
@@ -677,25 +640,20 @@ export class FederationDashboard {
   }
 
   async getDashboardData(): Promise<DashboardData> {
-    const [
-      repositories,
-      syncStatus,
-      healthMetrics,
-      contentStats,
-      teamActivity,
-    ] = await Promise.all([
-      this.getRepositoryOverview(),
-      this.getSyncStatus(),
-      this.getHealthMetrics(),
-      this.getContentStatistics(),
-      this.getTeamActivity(),
-    ]);
+    const [repositories, syncStatus, healthMetrics, contentStats, teamActivity] = await Promise.all(
+      [
+        this.getRepositoryOverview(),
+        this.getSyncStatus(),
+        this.getHealthMetrics(),
+        this.getContentStatistics(),
+        this.getTeamActivity(),
+      ]
+    );
 
     return {
       overview: {
         totalRepositories: repositories.length,
-        activeRepositories: repositories.filter((r) => r.status === 'active')
-          .length,
+        activeRepositories: repositories.filter((r) => r.status === "active").length,
         totalContent: contentStats.totalDocuments,
         lastSync: syncStatus.lastSuccessfulSync,
       },
@@ -756,41 +714,39 @@ export class FederationDashboard {
 
 ```typescript
 // src/api/federation-api.ts
-@Controller('/api/federation')
+@Controller("/api/federation")
 export class FederationAPIController {
   constructor(
     private federationHub: DocumentationFederationHub,
-    private governanceManager: TeamGovernanceManager,
+    private governanceManager: TeamGovernanceManager
   ) {}
 
-  @Post('/repositories')
+  @Post("/repositories")
   async registerRepository(@Body() source: RepositorySource): Promise<void> {
     await this.federationHub.registerRepository(source);
   }
 
-  @Get('/repositories')
+  @Get("/repositories")
   async listRepositories(): Promise<RepositorySource[]> {
     return this.federationHub.listRepositories();
   }
 
-  @Post('/repositories/:id/sync')
-  async triggerSync(@Param('id') id: string): Promise<SyncResult> {
+  @Post("/repositories/:id/sync")
+  async triggerSync(@Param("id") id: string): Promise<SyncResult> {
     return await this.federationHub.syncRepository(id);
   }
 
-  @Get('/repositories/:id/status')
-  async getRepositoryStatus(
-    @Param('id') id: string,
-  ): Promise<RepositoryStatus> {
+  @Get("/repositories/:id/status")
+  async getRepositoryStatus(@Param("id") id: string): Promise<RepositoryStatus> {
     return await this.federationHub.getRepositoryStatus(id);
   }
 
-  @Post('/content/approve')
+  @Post("/content/approve")
   async approveContent(@Body() approval: ApprovalRequest): Promise<void> {
     await this.governanceManager.processApproval(approval);
   }
 
-  @Get('/dashboard')
+  @Get("/dashboard")
   async getDashboard(): Promise<DashboardData> {
     return await this.federationHub.getDashboardData();
   }

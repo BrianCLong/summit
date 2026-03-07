@@ -1,0 +1,44 @@
+{
+  "$id": "https://summit.local/schemas/connectors/connector-manifest.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Connector Manifest",
+  "type": "object",
+  "properties": {
+    "id": { "type": "string" },
+    "version": { "type": "number" },
+    "kind": { "type": "string" },
+    "license_class": { "type": "string" },
+    "collection_mode": { "type": "string" },
+    "source_citation_required": { "type": "boolean" },
+    "emits": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "entity_types": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "rate_limits": {
+      "type": "object",
+      "properties": {
+        "rpm": { "type": "number" },
+        "rpd": { "type": "number" }
+      }
+    },
+    "policy_refs": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "deterministic_transform": { "type": "boolean" }
+  },
+  "required": [
+    "id",
+    "version",
+    "kind",
+    "license_class",
+    "collection_mode",
+    "policy_refs",
+    "emits"
+  ],
+  "additionalProperties": false
+}

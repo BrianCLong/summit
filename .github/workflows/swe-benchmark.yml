@@ -2,7 +2,7 @@ name: SWE Benchmark
 
 on:
   schedule:
-    - cron: '0 0 * * *' # Nightly
+    - cron: "0 0 * * *" # Nightly
   workflow_dispatch:
 
 jobs:
@@ -13,4 +13,4 @@ jobs:
       - name: Run SWE Benchmark
         run: pnpm summit:swe:run all
         env:
-          SUMMIT_SWE_REBENCH_ENABLED: 'true'
+          SUMMIT_SWE_REBENCH_ENABLED: "true"

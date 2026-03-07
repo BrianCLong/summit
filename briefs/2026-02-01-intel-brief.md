@@ -1,4 +1,5 @@
 # Intelligence Brief: Global Threat Landscape & Operational Updates
+
 **Date:** February 1, 2026
 **Classification:** OPEN SOURCE / AUDITED
 
@@ -7,59 +8,67 @@
 ## A) Last 30 days—confirmed events
 
 ### Venezuela: Operation Absolute Resolve
-*   **Status:** **Confirmed**
-*   **Date:** Jan 3, 2026
-*   **Details:** Capture of Nicolás Maduro involving ~150 aircraft. Senior U.S. officials emphasized the role of a "non-kinetic effects cell" in integrating cyber capabilities with kinetic operations to achieve "overwhelming force" without solely relying on traditional firepower.
-*   **Source:** [DefenseScoop][1]
+
+- **Status:** **Confirmed**
+- **Date:** Jan 3, 2026
+- **Details:** Capture of Nicolás Maduro involving ~150 aircraft. Senior U.S. officials emphasized the role of a "non-kinetic effects cell" in integrating cyber capabilities with kinetic operations to achieve "overwhelming force" without solely relying on traditional firepower.
+- **Source:** [DefenseScoop][1]
 
 ### Poland: Renewable Energy Sabotage
-*   **Status:** **Confirmed** (Event) / **Contested** (Attribution)
-*   **Date:** Dec 29, 2025
-*   **Details:** Destructive cyber activity targeted approximately 30 renewable energy sites and related facilities. Polish officials and CERT attributed the tooling to Federal Security Service-associated actors (Berserk Bear/Dragonfly), while ESET analysis suggests possible Sandworm linkage. The attribution remains contested.
-*   **Source:** [Reuters][2]
+
+- **Status:** **Confirmed** (Event) / **Contested** (Attribution)
+- **Date:** Dec 29, 2025
+- **Details:** Destructive cyber activity targeted approximately 30 renewable energy sites and related facilities. Polish officials and CERT attributed the tooling to Federal Security Service-associated actors (Berserk Bear/Dragonfly), while ESET analysis suggests possible Sandworm linkage. The attribution remains contested.
+- **Source:** [Reuters][2]
 
 ### China: PLA Leadership Shake-up
-*   **Status:** **Confirmed** (Dismissal) / **Analytic Judgment** (Impact)
-*   **Date:** Jan 30, 2026
-*   **Details:** Gen. Zhang Youxia is reported dismissed/under investigation amid a senior PLA discipline crackdown.
-*   **Assessment:** This leadership churn removes a key veteran figure and may affect decision velocity, increasing miscalculation risk at the margins during this transition period.
-*   **Source:** [Reuters][6], [AP News][8]
+
+- **Status:** **Confirmed** (Dismissal) / **Analytic Judgment** (Impact)
+- **Date:** Jan 30, 2026
+- **Details:** Gen. Zhang Youxia is reported dismissed/under investigation amid a senior PLA discipline crackdown.
+- **Assessment:** This leadership churn removes a key veteran figure and may affect decision velocity, increasing miscalculation risk at the margins during this transition period.
+- **Source:** [Reuters][6], [AP News][8]
 
 ---
 
 ## B) Persistent campaigns—known operations
 
 ### AI-Orchestrated Espionage (Claude Code)
-*   **Status:** **Confirmed**
-*   **Details:** Anthropic published a threat report detailing an AI-assisted espionage campaign detected in September 2025, where threat actors utilized "Claude Code" capabilities to orchestrate complex intrusion sequences.
-*   **Source:** [Anthropic][5]
+
+- **Status:** **Confirmed**
+- **Details:** Anthropic published a threat report detailing an AI-assisted espionage campaign detected in September 2025, where threat actors utilized "Claude Code" capabilities to orchestrate complex intrusion sequences.
+- **Source:** [Anthropic][5]
 
 ### LLM Infrastructure Targeting ("LLMjacking")
-*   **Status:** **Confirmed**
-*   **Details:** Recent reporting indicates a shift in tactics towards probing exposed Large Language Model (LLM) infrastructure. Attackers are actively scanning for misconfigured proxies and endpoints to monetize compute or extract proprietary data ("LLMjacking").
-*   **Source:** [IT Brew][9]
+
+- **Status:** **Confirmed**
+- **Details:** Recent reporting indicates a shift in tactics towards probing exposed Large Language Model (LLM) infrastructure. Attackers are actively scanning for misconfigured proxies and endpoints to monetize compute or extract proprietary data ("LLMjacking").
+- **Source:** [IT Brew][9]
 
 ### Russian Disinformation & Influence Operations
-*   **Status:** **Confirmed**
-*   **Details:**
-    *   **Doppelgänger:** USCYBERCOM has exposed the "Doppelgänger" campaign, a persistent Russian disinformation network designed to mimic legitimate news outlets. ([USCYBERCOM][10])
-    *   **RT / Tenet Funding:** The DoJ has indicted actors involved in a $10M covert funding scheme linking RT employees to U.S. media companies (Tenet Media). ([DoJ][11])
+
+- **Status:** **Confirmed**
+- **Details:**
+  - **Doppelgänger:** USCYBERCOM has exposed the "Doppelgänger" campaign, a persistent Russian disinformation network designed to mimic legitimate news outlets. ([USCYBERCOM][10])
+  - **RT / Tenet Funding:** The DoJ has indicted actors involved in a $10M covert funding scheme linking RT employees to U.S. media companies (Tenet Media). ([DoJ][11])
 
 ---
 
 ## C) Assessment (Olympics window)
 
 ### Milano-Cortina 2026 Winter Olympics
-*   **Status:** **Confirmed** (Dates/Posture)
-*   **Dates:** Feb 6–22, 2026
-*   **Security Posture:** Italy has established a 24/7 cyber command center specifically for the Games. Authorities are maintaining a heightened defensive posture against AI-amplified threats, incorporating lessons learned from the high incident volume at Paris 2024.
-*   **Source:** [Reuters][3], [Olympics][4]
+
+- **Status:** **Confirmed** (Dates/Posture)
+- **Dates:** Feb 6–22, 2026
+- **Security Posture:** Italy has established a 24/7 cyber command center specifically for the Games. Authorities are maintaining a heightened defensive posture against AI-amplified threats, incorporating lessons learned from the high incident volume at Paris 2024.
+- **Source:** [Reuters][3], [Olympics][4]
 
 ### Taiwan: 2026 Electoral Cycle
-*   **Status:** **Analytic Judgment** (Timeline Impact)
-*   **Key Date:** Nov 28, 2026 (Local Elections)
-*   **Assessment:** The Central Election Commission has set the date for the 2026 local elections. This defines a "compressed window" for influence operations, with expected intensification of gray-zone activity leading up to November.
-*   **Source:** [Focus Taiwan][7]
+
+- **Status:** **Analytic Judgment** (Timeline Impact)
+- **Key Date:** Nov 28, 2026 (Local Elections)
+- **Assessment:** The Central Election Commission has set the date for the 2026 local elections. This defines a "compressed window" for influence operations, with expected intensification of gray-zone activity leading up to November.
+- **Source:** [Focus Taiwan][7]
 
 ---
 

@@ -59,7 +59,7 @@ targets:
   # Maximum acceptable FAIL rate
   fail_rate_max_pct: 1.0
   # Target MTBR (hours) - higher is better
-  mtbr_target_hours: 168  # 1 week
+  mtbr_target_hours: 168 # 1 week
   # Target OK streak (consecutive successful deploys)
   ok_streak_target: 20
 

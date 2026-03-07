@@ -30,36 +30,36 @@ groups:
         for: 2m
         labels: { severity: page, phase: day0 }
         annotations:
-          summary: 'Error rate > 2% (day-0 sensitive)'
-          runbook: 'https://runbooks/error-spike'
+          summary: "Error rate > 2% (day-0 sensitive)"
+          runbook: "https://runbooks/error-spike"
 
       - alert: MaestroLatencyRegression
         expr: histogram_quantile(0.95, sum(rate(maestro_step_latency_bucket[2m])) by (le)) > 1.8
         for: 3m
         labels: { severity: page, phase: day0 }
         annotations:
-          summary: 'p95 latency > 1.8s (relaxed from 1.5s for day-0)'
+          summary: "p95 latency > 1.8s (relaxed from 1.5s for day-0)"
 
       - alert: MaestroBudgetBurnSpike
         expr: sum(rate(maestro_cost_usd_total[1m])) > 2.0
         for: 1m
         labels: { severity: page, phase: day0 }
         annotations:
-          summary: 'Budget burn > $2/min (day-0 aggressive)'
+          summary: "Budget burn > $2/min (day-0 aggressive)"
 
       - alert: MaestroSagaCompensationStorm
         expr: sum(rate(maestro_saga_compensations_total[5m])) > 10
         for: 2m
         labels: { severity: critical, phase: day0 }
         annotations:
-          summary: 'High SAGA compensation rate - investigate failures'
+          summary: "High SAGA compensation rate - investigate failures"
 
       - alert: MaestroSafetyGuardianOverload
         expr: sum(rate(maestro_safety_blocks_total[1m])) > 50
         for: 1m
         labels: { severity: warning, phase: day0 }
         annotations:
-          summary: 'Safety Guardian blocking > 50/min - check for attack'
+          summary: "Safety Guardian blocking > 50/min - check for attack"
 ```
 
 ### Day 0-3 Grafana Dashboards
@@ -280,7 +280,7 @@ groups:
         for: 10m
         labels: { severity: warning, phase: day4 }
         annotations:
-          summary: 'Error rate above p95 baseline * 1.5'
+          summary: "Error rate above p95 baseline * 1.5"
 
       - alert: MaestroLatencyAnomaly
         expr: |
@@ -294,7 +294,7 @@ groups:
         for: 15m
         labels: { severity: warning, phase: day4 }
         annotations:
-          summary: 'p95 latency anomaly under normal load'
+          summary: "p95 latency anomaly under normal load"
 
       - alert: MaestroCostAnomalyDetection
         expr: |
@@ -310,7 +310,7 @@ groups:
         for: 5m
         labels: { severity: critical, phase: day4 }
         annotations:
-          summary: 'Cost burn anomaly detected'
+          summary: "Cost burn anomaly detected"
 ```
 
 ### Business Metrics Dashboard
@@ -412,8 +412,8 @@ groups:
         for: 5m
         labels: { severity: critical, slo: availability }
         annotations:
-          summary: 'SLO error budget burning too fast'
-          description: 'At this rate, monthly SLO will be breached in {{ $value }} hours'
+          summary: "SLO error budget burning too fast"
+          description: "At this rate, monthly SLO will be breached in {{ $value }} hours"
 
       - alert: MaestroSLOLatencyBudgetBurn
         expr: |
@@ -430,7 +430,7 @@ groups:
         for: 30m
         labels: { severity: warning, slo: latency }
         annotations:
-          summary: 'SLO latency budget burning'
+          summary: "SLO latency budget burning"
 
       # Predictive alerts
       - alert: MaestroPredictiveCapacity
@@ -441,7 +441,7 @@ groups:
         for: 15m
         labels: { severity: warning, type: predictive }
         annotations:
-          summary: 'Predicted capacity breach in 24h'
+          summary: "Predicted capacity breach in 24h"
 
       # Business impact alerts
       - alert: MaestroRevenueImpactingOutage
@@ -452,7 +452,7 @@ groups:
         for: 5m
         labels: { severity: critical, impact: revenue }
         annotations:
-          summary: 'Premium tenant {{ $labels.tenant }} experiencing errors'
+          summary: "Premium tenant {{ $labels.tenant }} experiencing errors"
 ```
 
 ### Advanced Observability Features
@@ -723,24 +723,24 @@ echo "✅ Optimization complete"
 ```yaml
 # Day 0-3 Targets
 launch_window_kpis:
-  health_score: '>95%'
-  alert_response_time: '<15min'
-  incident_detection_rate: '>90%'
-  false_positive_rate: '<20%' # Acceptable during launch
+  health_score: ">95%"
+  alert_response_time: "<15min"
+  incident_detection_rate: ">90%"
+  false_positive_rate: "<20%" # Acceptable during launch
 
 # Day 4-7 Targets
 pattern_learning_kpis:
-  baseline_coverage: '>80%'
-  alert_noise_reduction: '>30%'
-  slo_tracking_accuracy: '>95%'
-  business_metric_visibility: '100%'
+  baseline_coverage: ">80%"
+  alert_noise_reduction: ">30%"
+  slo_tracking_accuracy: ">95%"
+  business_metric_visibility: "100%"
 
 # Day 8-14 Targets
 optimization_kpis:
-  false_positive_rate: '<5%'
-  alert_fatigue_score: '<3/10'
-  mttr_improvement: '>25%'
-  predictive_accuracy: '>70%'
+  false_positive_rate: "<5%"
+  alert_fatigue_score: "<3/10"
+  mttr_improvement: ">25%"
+  predictive_accuracy: ">70%"
 ```
 
 ### Business Impact Tracking

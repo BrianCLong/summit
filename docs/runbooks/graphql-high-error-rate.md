@@ -54,17 +54,21 @@ curl -G -s "http://localhost:3100/loki/api/v1/query_range" \
 ### 1. INTERNAL_SERVER_ERROR (5xx)
 
 **Indicators**:
+
 - Errors with code `INTERNAL_SERVER_ERROR`
 - Stack traces in logs
 - Unhandled exceptions
 
 **Actions**:
+
 1. Find exception in logs:
+
    ```bash
    kubectl logs -l app=graphql-gateway --tail=500 | grep -A 10 "INTERNAL_SERVER_ERROR"
    ```
 
 2. Check if error is in gateway or downstream service:
+
    ```bash
    # Check Neo4j errors
    kubectl logs -l app=neo4j --tail=100 | grep -i error
@@ -79,6 +83,7 @@ curl -G -s "http://localhost:3100/loki/api/v1/query_range" \
    ```
 
 **Mitigation**:
+
 - If single resolver failing: Disable resolver or add fallback
 - If database connection issue: Check connection pool, restart pods
 - If recent deployment: Rollback immediately
@@ -89,18 +94,22 @@ curl -G -s "http://localhost:3100/loki/api/v1/query_range" \
 ### 2. UNAUTHENTICATED / FORBIDDEN
 
 **Indicators**:
+
 - Errors with code `UNAUTHENTICATED` or `FORBIDDEN`
 - Auth service errors
 - JWT validation failures
 
 **Actions**:
+
 1. Check auth service health:
+
    ```bash
    curl http://localhost:4000/health
    kubectl logs -l app=auth-service --tail=100
    ```
 
 2. Verify JWT secret configuration:
+
    ```bash
    kubectl get secret graphql-gateway-secrets -o yaml | grep JWT_SECRET
    ```
@@ -108,6 +117,7 @@ curl -G -s "http://localhost:3100/loki/api/v1/query_range" \
 3. Check for expired or malformed tokens in logs
 
 **Mitigation**:
+
 - If auth service down: Scale up or restart
 - If JWT secret misconfigured: Fix and redeploy
 - If mass token expiry: Investigate client token refresh logic
@@ -115,17 +125,21 @@ curl -G -s "http://localhost:3100/loki/api/v1/query_range" \
 ### 3. GRAPHQL_VALIDATION_FAILED
 
 **Indicators**:
+
 - Errors with code `GRAPHQL_VALIDATION_FAILED`
 - Schema validation errors
 - Client sending invalid queries
 
 **Actions**:
+
 1. Check recent schema changes:
+
    ```bash
    git log --oneline --since="1 day ago" -- packages/graphql/schema.graphql
    ```
 
 2. Identify invalid queries:
+
    ```bash
    kubectl logs -l app=graphql-gateway | grep "GRAPHQL_VALIDATION_FAILED" | head -20
    ```
@@ -133,6 +147,7 @@ curl -G -s "http://localhost:3100/loki/api/v1/query_range" \
 3. Check if specific client version affected
 
 **Mitigation**:
+
 - If schema change broke clients: Rollback schema change
 - If client bug: Contact client teams to update
 - Add schema deprecation warnings before breaking changes
@@ -140,12 +155,15 @@ curl -G -s "http://localhost:3100/loki/api/v1/query_range" \
 ### 4. PERSISTED_QUERY_NOT_FOUND
 
 **Indicators**:
+
 - Errors with code `PERSISTED_QUERY_NOT_FOUND`
 - Clients using persisted queries
 - Recent gateway deployment
 
 **Actions**:
+
 1. Check persisted query manifest:
+
    ```bash
    cat packages/graphql/persisted-queries.json | jq 'length'
    ```
@@ -156,22 +174,26 @@ curl -G -s "http://localhost:3100/loki/api/v1/query_range" \
    ```
 
 **Mitigation**:
+
 - Rebuild persisted queries:
-   ```bash
-   pnpm persisted:build
-   ```
+  ```bash
+  pnpm persisted:build
+  ```
 - Redeploy gateway with updated manifest
 - Consider allowing non-persisted queries temporarily
 
 ### 5. BAD_USER_INPUT
 
 **Indicators**:
+
 - Errors with code `BAD_USER_INPUT`
 - Validation errors from resolvers
 - User-submitted data issues
 
 **Actions**:
+
 1. Check which fields failing validation:
+
    ```bash
    kubectl logs -l app=graphql-gateway | grep "BAD_USER_INPUT" | jq '.context'
    ```
@@ -179,6 +201,7 @@ curl -G -s "http://localhost:3100/loki/api/v1/query_range" \
 2. Identify if recent validation rule change
 
 **Mitigation**:
+
 - If overly strict validation: Relax rules
 - If data quality issue: Add better client-side validation
 - Provide clearer error messages to users
@@ -190,16 +213,19 @@ curl -G -s "http://localhost:3100/loki/api/v1/query_range" \
 ### Pattern 1: Cascading Failures
 
 **Indicators**:
+
 - Error rate starts in one service, spreads to others
 - Multiple services showing errors
 - Circuit breaker metrics spiking
 
 **Actions**:
+
 1. Identify origin service
 2. Check service mesh/circuit breaker status
 3. Isolate failing service
 
 **Mitigation**:
+
 - Enable circuit breakers if not active
 - Fail fast instead of cascading
 - Add fallback responses for degraded dependencies
@@ -207,11 +233,14 @@ curl -G -s "http://localhost:3100/loki/api/v1/query_range" \
 ### Pattern 2: Deployment-Related Errors
 
 **Indicators**:
+
 - Error spike coincides with deployment
 - Grafana deployment annotation matches error spike
 
 **Actions**:
+
 1. Immediate rollback:
+
    ```bash
    kubectl rollout undo deployment/graphql-gateway
    kubectl rollout status deployment/graphql-gateway
@@ -223,12 +252,15 @@ curl -G -s "http://localhost:3100/loki/api/v1/query_range" \
 ### Pattern 3: Resource Exhaustion
 
 **Indicators**:
+
 - OOM errors in logs
 - Pod restarts
 - Resource limits reached
 
 **Actions**:
+
 1. Check resource usage:
+
    ```bash
    kubectl top pods -l app=graphql-gateway
    kubectl describe pod <pod-name> | grep -A 5 "Conditions:"
@@ -237,6 +269,7 @@ curl -G -s "http://localhost:3100/loki/api/v1/query_range" \
 2. Check for memory leaks in recent changes
 
 **Mitigation**:
+
 - Increase resource limits temporarily
 - Scale horizontally
 - Investigate and fix memory leak

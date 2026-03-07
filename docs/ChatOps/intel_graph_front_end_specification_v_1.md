@@ -308,12 +308,11 @@ subscription OnJobUpdate($caseId: ID!) {
 ```tsx
 // Example: Explainable NL→Cypher execution hook
 export function useExplainAndRun(nlQuery: string) {
-  const { data: preview, isLoading: explaining } = useQuery(
-    ['explain', nlQuery],
-    () => api.explain(nlQuery),
+  const { data: preview, isLoading: explaining } = useQuery(["explain", nlQuery], () =>
+    api.explain(nlQuery)
   );
   const run = useMutation(() => api.run(preview.cypher), {
-    onSuccess: cache.invalidateQueries(['view']),
+    onSuccess: cache.invalidateQueries(["view"]),
   });
   return { preview, explaining, run };
 }

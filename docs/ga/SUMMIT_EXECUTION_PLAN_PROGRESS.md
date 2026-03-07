@@ -18,22 +18,22 @@ This document tracks progress on the **Summit Execution Plan (2026)** - the cont
 
 ### 1. Core Governance Documents
 
-| Document | Status | Purpose |
-|----------|--------|---------|
-| `docs/ga/GA_DEFINITION.md` | ✅ **COMPLETE** | Immutable GA control document (single source of truth) |
-| `docs/autonomy/AUTONOMY_MODEL.md` | ✅ **COMPLETE** | Autonomy tier framework (5 tiers, agent contracts) |
-| `docs/ga/CI_CONSOLIDATION_PLAN.md` | ✅ **COMPLETE** | CI workflow consolidation (51 → 3 workflows) |
-| `test/infra/README.md` | ✅ **COMPLETE** | Test infrastructure standards (deterministic, isolated) |
+| Document                           | Status          | Purpose                                                 |
+| ---------------------------------- | --------------- | ------------------------------------------------------- |
+| `docs/ga/GA_DEFINITION.md`         | ✅ **COMPLETE** | Immutable GA control document (single source of truth)  |
+| `docs/autonomy/AUTONOMY_MODEL.md`  | ✅ **COMPLETE** | Autonomy tier framework (5 tiers, agent contracts)      |
+| `docs/ga/CI_CONSOLIDATION_PLAN.md` | ✅ **COMPLETE** | CI workflow consolidation (51 → 3 workflows)            |
+| `test/infra/README.md`             | ✅ **COMPLETE** | Test infrastructure standards (deterministic, isolated) |
 
 ### 2. PR Templates (Governance Surface)
 
-| Template | Status | Purpose |
-|----------|--------|---------|
-| `.github/PULL_REQUEST_TEMPLATE.md` | ✅ **COMPLETE** | Default template with type selection |
-| `.github/PULL_REQUEST_TEMPLATE/code.md` | ✅ **COMPLETE** | Code changes (features, fixes, refactors) |
-| `.github/PULL_REQUEST_TEMPLATE/governance.md` | ✅ **COMPLETE** | Governance/policy changes (requires security council) |
-| `.github/PULL_REQUEST_TEMPLATE/compliance.md` | ✅ **COMPLETE** | Compliance/evidence changes (requires compliance officer) |
-| `.github/PULL_REQUEST_TEMPLATE/documentation.md` | ✅ **COMPLETE** | Documentation-only changes |
+| Template                                         | Status          | Purpose                                                   |
+| ------------------------------------------------ | --------------- | --------------------------------------------------------- |
+| `.github/PULL_REQUEST_TEMPLATE.md`               | ✅ **COMPLETE** | Default template with type selection                      |
+| `.github/PULL_REQUEST_TEMPLATE/code.md`          | ✅ **COMPLETE** | Code changes (features, fixes, refactors)                 |
+| `.github/PULL_REQUEST_TEMPLATE/governance.md`    | ✅ **COMPLETE** | Governance/policy changes (requires security council)     |
+| `.github/PULL_REQUEST_TEMPLATE/compliance.md`    | ✅ **COMPLETE** | Compliance/evidence changes (requires compliance officer) |
+| `.github/PULL_REQUEST_TEMPLATE/documentation.md` | ✅ **COMPLETE** | Documentation-only changes                                |
 
 ---
 
@@ -180,13 +180,13 @@ This document tracks progress on the **Summit Execution Plan (2026)** - the cont
 
 ### Phase 1 Success Criteria
 
-| Metric | Target | Current Status |
-|--------|--------|---------------|
-| GA definition frozen | Yes | ✅ Created, pending freeze |
-| CI workflows consolidated | 51 → ≤10 | ⏳ Plan complete, implementation pending |
-| Test determinism | 100% pass rate | ⏳ Standards defined, migration pending |
-| PR templates by class | 4 templates | ✅ **COMPLETE** |
-| Locked governance docs | 3 files locked | ⏳ Pending CI enforcement |
+| Metric                    | Target         | Current Status                           |
+| ------------------------- | -------------- | ---------------------------------------- |
+| GA definition frozen      | Yes            | ✅ Created, pending freeze               |
+| CI workflows consolidated | 51 → ≤10       | ⏳ Plan complete, implementation pending |
+| Test determinism          | 100% pass rate | ⏳ Standards defined, migration pending  |
+| PR templates by class     | 4 templates    | ✅ **COMPLETE**                          |
+| Locked governance docs    | 3 files locked | ⏳ Pending CI enforcement                |
 
 **Phase 1 Completion**: **60%** (3/5 criteria met)
 
@@ -254,12 +254,12 @@ This document tracks progress on the **Summit Execution Plan (2026)** - the cont
 
 ## Risks & Mitigations
 
-| Risk | Likelihood | Impact | Mitigation |
-|------|-----------|--------|------------|
-| **CI consolidation breaks existing workflows** | Low | High | Parallel operation, rollback plan |
-| **Test migration disrupts velocity** | Medium | Medium | Incremental migration, non-blocking initially |
-| **Autonomy model too restrictive** | Low | Medium | Tier escalation process defined |
-| **GA definition drift from reality** | Low | High | Frozen doc, amendment process enforced |
+| Risk                                           | Likelihood | Impact | Mitigation                                    |
+| ---------------------------------------------- | ---------- | ------ | --------------------------------------------- |
+| **CI consolidation breaks existing workflows** | Low        | High   | Parallel operation, rollback plan             |
+| **Test migration disrupts velocity**           | Medium     | Medium | Incremental migration, non-blocking initially |
+| **Autonomy model too restrictive**             | Low        | Medium | Tier escalation process defined               |
+| **GA definition drift from reality**           | Low        | High   | Frozen doc, amendment process enforced        |
 
 ---
 
@@ -303,6 +303,7 @@ This document tracks progress on the **Summit Execution Plan (2026)** - the cont
 **Phase 1 Foundation: 60% Complete**
 
 **Today's Wins**:
+
 - ✅ GA definition created (immutable control document)
 - ✅ Autonomy model defined (5 tiers, agent contracts)
 - ✅ CI consolidation plan approved (51 → 3 workflows)
@@ -310,6 +311,7 @@ This document tracks progress on the **Summit Execution Plan (2026)** - the cont
 - ✅ PR templates by class created
 
 **This Week's Priorities**:
+
 1. Implement CI workflows
 2. Implement test infrastructure helpers
 3. Lock governance documents

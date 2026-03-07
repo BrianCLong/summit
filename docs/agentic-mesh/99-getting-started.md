@@ -28,20 +28,15 @@ cd packages/mesh-sdk && pnpm build
 ### Basic Usage
 
 ```typescript
-import {
-  PlannerAgent,
-  CoderAgent,
-  CriticAgent,
-  AgentFactory,
-} from '@intelgraph/mesh-sdk';
+import { PlannerAgent, CoderAgent, CriticAgent, AgentFactory } from "@intelgraph/mesh-sdk";
 
 // Register agents with the factory
-AgentFactory.register('planner', PlannerAgent);
-AgentFactory.register('coder', CoderAgent);
-AgentFactory.register('critic', CriticAgent);
+AgentFactory.register("planner", PlannerAgent);
+AgentFactory.register("coder", CoderAgent);
+AgentFactory.register("critic", CriticAgent);
 
 // Create an agent instance
-const planner = AgentFactory.create('planner');
+const planner = AgentFactory.create("planner");
 console.log(planner.getFullDescriptor());
 ```
 
@@ -64,6 +59,7 @@ console.log(planner.getFullDescriptor());
 ### 1. Agents
 
 Agents are the primary workers in the mesh. Each agent:
+
 - Has a specific role (planner, coder, critic, etc.)
 - Declares capabilities
 - Specifies model preferences
@@ -72,20 +68,25 @@ Agents are the primary workers in the mesh. Each agent:
 #### Creating a Custom Agent
 
 ```typescript
-import { BaseAgent, type AgentServices, type TaskInput, type TaskOutput } from '@intelgraph/mesh-sdk';
+import {
+  BaseAgent,
+  type AgentServices,
+  type TaskInput,
+  type TaskOutput,
+} from "@intelgraph/mesh-sdk";
 
 class MyCustomAgent extends BaseAgent {
   getDescriptor() {
     return {
-      name: 'my-custom-agent',
-      version: '1.0.0',
-      role: 'custom',
-      riskTier: 'low',
-      capabilities: ['my-capability'],
+      name: "my-custom-agent",
+      version: "1.0.0",
+      role: "custom",
+      riskTier: "low",
+      capabilities: ["my-capability"],
       requiredTools: [],
       modelPreference: {
-        provider: 'anthropic',
-        model: 'claude-sonnet-4-5-20250929',
+        provider: "anthropic",
+        model: "claude-sonnet-4-5-20250929",
       },
     };
   }
@@ -101,15 +102,15 @@ class MyCustomAgent extends BaseAgent {
 
     // Log provenance
     await services.provenance.record({
-      type: 'model_call',
+      type: "model_call",
       taskId: task.id,
       agentId: this.getId(),
       payload: {
-        type: 'model_call',
-        provider: 'anthropic',
-        model: 'claude-sonnet-4-5-20250929',
-        promptHash: 'xxx',
-        responseHash: 'yyy',
+        type: "model_call",
+        provider: "anthropic",
+        model: "claude-sonnet-4-5-20250929",
+        promptHash: "xxx",
+        responseHash: "yyy",
         tokensIn: response.tokensIn,
         tokensOut: response.tokensOut,
         latencyMs: response.latencyMs,
@@ -127,32 +128,32 @@ class MyCustomAgent extends BaseAgent {
 Tools provide agents with capabilities to interact with external systems.
 
 ```typescript
-import type { ToolDescriptor } from '@intelgraph/mesh-sdk';
+import type { ToolDescriptor } from "@intelgraph/mesh-sdk";
 
 const gitTool: ToolDescriptor = {
   id: crypto.randomUUID(),
-  name: 'git',
-  version: '1.0.0',
-  description: 'Git operations (diff, branch, commit)',
+  name: "git",
+  version: "1.0.0",
+  description: "Git operations (diff, branch, commit)",
   inputSchema: {
-    type: 'object',
+    type: "object",
     properties: {
-      action: { type: 'string', enum: ['diff', 'branch', 'commit'] },
-      args: { type: 'object' },
+      action: { type: "string", enum: ["diff", "branch", "commit"] },
+      args: { type: "object" },
     },
-    required: ['action'],
+    required: ["action"],
   },
   outputSchema: {
-    type: 'object',
+    type: "object",
     properties: {
-      success: { type: 'boolean' },
-      output: { type: 'string' },
+      success: { type: "boolean" },
+      output: { type: "string" },
     },
   },
-  riskTier: 'medium',
+  riskTier: "medium",
   rateLimit: 60,
-  requiredRoles: ['developer'],
-  status: 'active',
+  requiredRoles: ["developer"],
+  status: "active",
 };
 ```
 
@@ -189,29 +190,29 @@ policies:
 Every action in the mesh is recorded for auditability.
 
 ```typescript
-import { InMemoryProvenanceStore, ProvenanceAPI } from '@intelgraph/services/provenance-service';
+import { InMemoryProvenanceStore, ProvenanceAPI } from "@intelgraph/services/provenance-service";
 
 const store = new InMemoryProvenanceStore();
 const api = new ProvenanceAPI(store);
 
 // Record an event
 const recordId = await api.createRecord({
-  type: 'task_created',
-  taskId: 'task-123',
+  type: "task_created",
+  taskId: "task-123",
   payload: {
-    type: 'task_created',
-    taskType: 'code_review',
-    inputSummary: 'Review PR #456',
+    type: "task_created",
+    taskType: "code_review",
+    inputSummary: "Review PR #456",
     priority: 1,
   },
   traceContext: {
-    traceId: 'trace-abc',
-    spanId: 'span-def',
+    traceId: "trace-abc",
+    spanId: "span-def",
   },
 });
 
 // Query provenance chain
-const chain = await api.getTaskProvenance('task-123');
+const chain = await api.getTaskProvenance("task-123");
 console.log(chain.summary);
 ```
 
@@ -252,11 +253,11 @@ cd services/provenance-service && pnpm dev
 
 ### Service Endpoints
 
-| Service | Port | Endpoint |
-|---------|------|----------|
-| Mesh Orchestrator | 5000 | POST /api/v1/tasks |
-| Routing Gateway | 5001 | POST /api/v1/route/task |
-| Policy Enforcer | 5002 | POST /api/v1/evaluate |
+| Service            | Port | Endpoint                |
+| ------------------ | ---- | ----------------------- |
+| Mesh Orchestrator  | 5000 | POST /api/v1/tasks      |
+| Routing Gateway    | 5001 | POST /api/v1/route/task |
+| Policy Enforcer    | 5002 | POST /api/v1/evaluate   |
 | Provenance Service | 5003 | POST /api/v1/provenance |
 
 ## Example Workflows
@@ -265,14 +266,14 @@ cd services/provenance-service && pnpm dev
 
 ```typescript
 // Submit a code refactoring task
-const response = await fetch('http://localhost:5000/api/v1/tasks', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
+const response = await fetch("http://localhost:5000/api/v1/tasks", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
   body: JSON.stringify({
-    type: 'code_refactor',
+    type: "code_refactor",
     input: {
-      specification: 'Extract the authentication logic into a separate service',
-      targetFiles: ['src/api/auth.ts', 'src/api/users.ts'],
+      specification: "Extract the authentication logic into a separate service",
+      targetFiles: ["src/api/auth.ts", "src/api/users.ts"],
     },
     priority: 1,
   }),
@@ -287,15 +288,15 @@ const task = await fetch(`http://localhost:5000/api/v1/tasks/${taskId}`);
 ### 2. Incident Investigation
 
 ```typescript
-const response = await fetch('http://localhost:5000/api/v1/tasks', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
+const response = await fetch("http://localhost:5000/api/v1/tasks", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
   body: JSON.stringify({
-    type: 'incident_investigation',
+    type: "incident_investigation",
     input: {
-      description: 'API latency spike at 14:00 UTC',
-      logs: ['service-a', 'service-b'],
-      timeRange: { start: '2025-11-21T13:50:00Z', end: '2025-11-21T14:30:00Z' },
+      description: "API latency spike at 14:00 UTC",
+      logs: ["service-a", "service-b"],
+      timeRange: { start: "2025-11-21T13:50:00Z", end: "2025-11-21T14:30:00Z" },
     },
     priority: 2,
   }),
@@ -313,6 +314,7 @@ curl http://localhost:5000/metrics
 ```
 
 Key metrics:
+
 - `mesh_tasks_total` - Total tasks by type and status
 - `mesh_agent_invocations_total` - Agent invocation counts
 - `mesh_model_calls_total` - Model call counts by provider
@@ -342,11 +344,11 @@ All services use structured JSON logging:
 Distributed tracing is available via OpenTelemetry:
 
 ```typescript
-import { createLogger } from '@intelgraph/mesh-observability';
+import { createLogger } from "@intelgraph/mesh-observability";
 
-const logger = createLogger('my-service');
-const childLogger = logger.child({ traceId: 'abc-123', spanId: 'def-456' });
-childLogger.info('Processing task');
+const logger = createLogger("my-service");
+const childLogger = logger.child({ traceId: "abc-123", spanId: "def-456" });
+childLogger.info("Processing task");
 ```
 
 ## Security Best Practices

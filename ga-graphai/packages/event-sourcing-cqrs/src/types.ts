@@ -37,7 +37,7 @@ export interface ProjectionState<TState = unknown> {
 
 export interface SagaState<TData = Record<string, unknown>> {
   id: string;
-  status: 'pending' | 'completed' | 'failed';
+  status: "pending" | "completed" | "failed";
   data: TData;
   updatedAt: string;
   lastEventId?: string;
@@ -45,7 +45,4 @@ export interface SagaState<TData = Record<string, unknown>> {
 
 export type EventHandler = (envelope: EventEnvelope) => void | Promise<void>;
 
-export type ProjectionHandler<TState> = (
-  state: TState,
-  envelope: EventEnvelope,
-) => TState;
+export type ProjectionHandler<TState> = (state: TState, envelope: EventEnvelope) => TState;

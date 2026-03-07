@@ -16,7 +16,7 @@ export type SkillpackManifest = SkillpackFrontmatter & {
 };
 
 export type McpServerConfig = {
-  transport?: 'stdio' | 'http';
+  transport?: "stdio" | "http";
   url?: string;
   command?: string;
   args?: string[];
@@ -36,7 +36,7 @@ export type SkillpackPolicy = {
     required?: boolean;
     waivers?: BreakGlassWaiver[];
   };
-  defaultBehavior?: 'allow' | 'deny';
+  defaultBehavior?: "allow" | "deny";
 };
 
 export type BreakGlassWaiver = {
@@ -54,10 +54,10 @@ export type TriggerContext = {
 };
 
 export type ShardRoutingContext = {
-  taskType?: 'plan' | 'implement' | 'review';
-  governanceMode?: 'pr' | 'ci' | 'release';
+  taskType?: "plan" | "implement" | "review";
+  governanceMode?: "pr" | "ci" | "release";
   contextBudgetTokens?: number;
-  repoArea?: 'frontend' | 'backend' | 'security' | 'docs' | 'other';
+  repoArea?: "frontend" | "backend" | "security" | "docs" | "other";
   intentDepthOrder?: number;
 };
 
@@ -82,7 +82,7 @@ export type DistilledToolSchema = {
   params: string[];
   safetyNotes: string[];
   tokenEstimate: number;
-  source: 'cache' | 'provided' | 'placeholder';
+  source: "cache" | "provided" | "placeholder";
 };
 
 export type ToolAccessDecision = {
@@ -95,7 +95,7 @@ export type ToolAccessDecision = {
 export type ToolInjectionRecord = {
   toolName: string;
   serverName: string;
-  mode: 'distilled' | 'full';
+  mode: "distilled" | "full";
   tokenEstimate: number;
   decision: ToolAccessDecision;
   justification: {

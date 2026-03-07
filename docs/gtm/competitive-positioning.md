@@ -1,4 +1,5 @@
 <!-- markdownlint-disable -->
+
 # Summit Competitive Positioning
 
 **Version:** 1.0
@@ -488,7 +489,6 @@ For regulated industries, self-hosted is **non-negotiable** (Notion doesn't offe
 - **Industry:** SaaS, fintech, healthtech, enterprise software
 
 - **Pain Points:**
-
   - Scaling operations without scaling headcount
 
   - Tools scattered (Notion, Jira, Slack, GitHub, Salesforce, etc.)
@@ -510,7 +510,6 @@ For regulated industries, self-hosted is **non-negotiable** (Notion doesn't offe
 - **Industry:** Finance, healthcare, government, defense
 
 - **Pain Points:**
-
   - Compliance burden (SOC 2, HIPAA, FedRAMP)
 
   - Data sovereignty requirements
@@ -532,7 +531,6 @@ For regulated industries, self-hosted is **non-negotiable** (Notion doesn't offe
 - **Industry:** Management consulting, systems integration, VARs
 
 - **Pain Points:**
-
   - Need white-label solution to resell to clients
 
   - Multi-tenant architecture required

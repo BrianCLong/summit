@@ -107,13 +107,13 @@ The authoritative board specification is `docs/runbooks/linear/board-spec.yaml`.
 
 ## Automation matrix
 
-| Trigger | Condition | Action | Evidence |
-| --- | --- | --- | --- |
-| Issue created | Always | Add `triage-needed` | Issue audit trail |
-| Issue created | Source = automated | Add `automated` | Issue audit trail |
-| PR opened | Issue not linked to roadmap | Add `governance-link-missing`, set **Blocked** | PR check + issue event |
-| PR opened | Issue linked to roadmap | Set **In Review** | PR check + issue event |
-| PR merged | Issue linked + checks green | Set **Done** | PR merge event |
+| Trigger       | Condition                   | Action                                         | Evidence               |
+| ------------- | --------------------------- | ---------------------------------------------- | ---------------------- |
+| Issue created | Always                      | Add `triage-needed`                            | Issue audit trail      |
+| Issue created | Source = automated          | Add `automated`                                | Issue audit trail      |
+| PR opened     | Issue not linked to roadmap | Add `governance-link-missing`, set **Blocked** | PR check + issue event |
+| PR opened     | Issue linked to roadmap     | Set **In Review**                              | PR check + issue event |
+| PR merged     | Issue linked + checks green | Set **Done**                                   | PR merge event         |
 
 ## Evidence checklist (minimum)
 

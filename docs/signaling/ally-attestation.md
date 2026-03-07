@@ -7,6 +7,7 @@
 Partners, integrators, and institutional allies need **confidence in Summit's operation** without requiring **deep technical access** or **exposure to internal decision logic**.
 
 This document defines how Summit enables trust through:
+
 - **Verifiable attestations** (cryptographic or third-party)
 - **Observable invariants** (behavioral commitments)
 - **Structured transparency** (enough to integrate safely, not enough to exploit)
@@ -27,11 +28,13 @@ Different ally types have different trust requirements:
 **Need**: Confidence that APIs behave as documented
 
 **Trust Mechanism**:
+
 - **Spec compliance attestation**: Automated testing against published API contracts
 - **Behavioral consistency**: Integration tests run continuously and results published
 - **Versioning discipline**: Clear deprecation and migration policies
 
 **What They Don't Need**:
+
 - Internal implementation details
 - Decision algorithm access
 - Detection heuristic disclosure
@@ -43,11 +46,13 @@ Different ally types have different trust requirements:
 **Need**: Confidence that governance commitments are maintained
 
 **Trust Mechanism**:
+
 - **Governance audit reports**: Third-party review of invariant compliance
 - **Incident transparency**: Disclosure of when invariants were tested/maintained under stress
 - **Executive attestation**: Leadership certification of governance adherence
 
 **What They Don't Need**:
+
 - Operational metrics that reveal detection boundaries
 - Internal security protocols
 - Specific threshold values
@@ -59,11 +64,13 @@ Different ally types have different trust requirements:
 **Need**: Confidence that oversight mechanisms function as claimed
 
 **Trust Mechanism**:
+
 - **Audit trail attestation**: Cryptographic proof of log integrity
 - **Independent oversight verification**: Third-party confirmation of review processes
 - **Compliance certification**: SOC 2, ISO 27001, or equivalent where applicable
 
 **What They Don't Need**:
+
 - Real-time access to decision logs
 - Unredacted internal communications
 - Tactical security details
@@ -75,11 +82,13 @@ Different ally types have different trust requirements:
 **Need**: Confidence to trust Summit by proxy through their provider
 
 **Trust Mechanism**:
+
 - **Public invariants** (see public-invariants.md)
 - **Transparency reports**: Aggregated metrics on decision patterns
 - **Incident disclosure**: Clear communication when issues affect their users
 
 **What They Don't Need**:
+
 - Individual decision explanations (their provider handles that)
 - Integration architecture details
 - Partnership-specific terms
@@ -93,16 +102,19 @@ Different ally types have different trust requirements:
 **Use Case**: Proving that logs/records haven't been tampered with
 
 **Implementation**:
+
 - Immutable audit logs with cryptographic hashing
 - Merkle tree structures for efficient verification
 - Optional blockchain anchoring for high-stakes contexts
 
 **Disclosure**:
+
 - ✅ "Audit logs are cryptographically immutable and can be independently verified"
 - ✅ Provide verification tools to partners
 - ❌ Don't disclose internal signing keys or specific hash algorithms (standard cryptographic practice applies)
 
 **Partner Value**:
+
 - Can verify that Summit's records are authentic
 - Can prove compliance in their own audits
 - Can trust historical data hasn't been altered
@@ -114,11 +126,13 @@ Different ally types have different trust requirements:
 **Use Case**: Independent verification of governance and operational claims
 
 **Implementation**:
+
 - Regular audits by credentialed third parties
 - Published audit summaries (appropriately redacted)
 - Clear scope definition for what audits covered
 
 **Disclosure Template**:
+
 ```
 Summit undergoes [frequency] independent audits by [credentialed firm/org].
 
@@ -133,6 +147,7 @@ Summary findings: [high-level outcomes]
 ```
 
 **Partner Value**:
+
 - Confirms claims aren't just marketing
 - Provides independent verification
 - Reduces due diligence burden
@@ -144,23 +159,27 @@ Summary findings: [high-level outcomes]
 **Use Case**: Proving that Summit behaves according to stated invariants
 
 **Implementation**:
+
 - Continuous monitoring of invariant compliance
 - Automated detection of invariant violations
 - Public dashboards showing compliance metrics (appropriately abstracted)
 
 **Example Metrics** (safe to publish):
+
 - % of decisions with evidence citations → Should be 100% for high-stakes
 - Average time to appeal review → Should meet stated commitments
 - Oversight review completion rate → Should meet governance requirements
 - Incident response time → Should meet stated protocols
 
 **Anti-Example Metrics** (reveal too much):
+
 - ❌ Average confidence scores
 - ❌ Detection rates by category
 - ❌ Threshold adjustments over time
 - ❌ Specific source credibility scores
 
 **Partner Value**:
+
 - Real-time evidence of commitment adherence
 - Early warning if degradation occurs
 - Quantitative foundation for trust
@@ -172,11 +191,13 @@ Summary findings: [high-level outcomes]
 **Use Case**: Allowing partners to verify that decisions are consistent and evidence-based
 
 **Implementation**:
+
 - Provide decision justifications with evidence references
 - Allow partners to independently verify evidence sources where possible
 - Demonstrate consistent decision-making for similar inputs
 
 **Disclosure Approach**:
+
 ```
 For decision ID [X]:
 - Evidence sources: [A, B, C]
@@ -189,6 +210,7 @@ Consistency verification:
 ```
 
 **Partner Value**:
+
 - Can spot-check decision quality
 - Can explain to their stakeholders why Summit is trustworthy
 - Can verify claims without needing full system access
@@ -211,17 +233,20 @@ For partners requiring comprehensive assurance, Summit provides:
 ### Access Tiers
 
 **Tier 1 - Public**:
+
 - Invariants charter
 - Public transparency reports
 - Published compliance certifications
 
 **Tier 2 - NDA Partners**:
+
 - Full audit summaries (redacted for security)
 - Detailed governance documentation
 - Integration architecture guidance
 - Incident retrospectives (abstracted)
 
 **Tier 3 - Strategic Partners** (additional agreements):
+
 - Enhanced audit access
 - Direct oversight engagement
 - Custom attestation requirements
@@ -287,6 +312,7 @@ Partners can verify Summit's trustworthiness through:
 **Frequency**: Ad-hoc or continuous, partner's choice
 
 **Disclosure Commitment**:
+
 - Summit will not penalize good-faith testing
 - Test inputs treated like production (no special handling)
 - Partners can share test results (with appropriate context)
@@ -300,6 +326,7 @@ Partners can verify Summit's trustworthiness through:
 **Access**: Available to Tier 2+ partners under NDA
 
 **Commitment**:
+
 - Logs are comprehensive and immutable
 - Redactions are documented and justified
 - Partners can request specific case reviews
@@ -313,6 +340,7 @@ Partners can verify Summit's trustworthiness through:
 **Access**: Public sources can be checked by anyone; restricted sources require appropriate access
 
 **Commitment**:
+
 - Evidence citations are verifiable (not fabricated)
 - Sources are accurately represented
 - Conflicts/limitations in evidence are disclosed
@@ -326,6 +354,7 @@ Partners can verify Summit's trustworthiness through:
 **Tools**: Provided by Summit (anonymized pattern analysis)
 
 **Commitment**:
+
 - Similar cases yield consistent outcomes
 - Changes in decision patterns are due to evidence/policy, not drift
 - Inconsistencies trigger internal review
@@ -337,16 +366,19 @@ Partners can verify Summit's trustworthiness through:
 ### Regular Touchpoints
 
 **Quarterly**:
+
 - Attestation pack refresh
 - Updated compliance certifications
 - Transparency report publication
 
 **Event-Driven**:
+
 - Significant incidents (within 24 hours)
 - Governance changes (30 day advance notice)
 - Major capability updates (with migration guidance)
 
 **On-Request**:
+
 - Specific case reviews (within SLA)
 - Custom attestation needs
 - Integration support
@@ -363,6 +395,7 @@ Partners have clear escalation routes:
 ### Feedback Loops
 
 Partners can influence Summit through:
+
 - **Advisory boards**: Strategic partner input on governance
 - **Feature requests**: Structured process for capability requests
 - **Incident feedback**: Post-incident partner retrospectives

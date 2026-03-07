@@ -28,21 +28,21 @@ Summit/IntelGraph uses a multi-database architecture to support its intelligence
 
 ### Critical State Components
 
-| Component | Technology | Purpose | Criticality |
-|-----------|------------|---------|-------------|
-| **Relational Data** | PostgreSQL 16 | Users, investigations, metadata, audit logs | **Critical** |
-| **Graph Data** | Neo4j 5.x | Entities, relationships, intelligence graph | **Critical** |
-| **Cache/Queue** | Redis 7 | Sessions, rate limiting, pub/sub | **Important** (Ephemeral) |
-| **Time-Series** | TimescaleDB | Analytics events, temporal patterns | **Important** |
-| **Search** | Elasticsearch | Full-text search indexes | **Recoverable** (Re-indexable) |
+| Component           | Technology    | Purpose                                     | Criticality                    |
+| ------------------- | ------------- | ------------------------------------------- | ------------------------------ |
+| **Relational Data** | PostgreSQL 16 | Users, investigations, metadata, audit logs | **Critical**                   |
+| **Graph Data**      | Neo4j 5.x     | Entities, relationships, intelligence graph | **Critical**                   |
+| **Cache/Queue**     | Redis 7       | Sessions, rate limiting, pub/sub            | **Important** (Ephemeral)      |
+| **Time-Series**     | TimescaleDB   | Analytics events, temporal patterns         | **Important**                  |
+| **Search**          | Elasticsearch | Full-text search indexes                    | **Recoverable** (Re-indexable) |
 
 ### Backup Storage Locations
 
-| Environment | Storage | Encryption | Retention |
-|-------------|---------|------------|-----------|
-| Development | Local `./backups/` | None | Manual cleanup |
-| Staging | S3: `summit-staging-backups` | AES256 | 14 days |
-| Production | S3: `summit-prod-backups` | KMS | 30 days (90 days GLACIER) |
+| Environment | Storage                      | Encryption | Retention                 |
+| ----------- | ---------------------------- | ---------- | ------------------------- |
+| Development | Local `./backups/`           | None       | Manual cleanup            |
+| Staging     | S3: `summit-staging-backups` | AES256     | 14 days                   |
+| Production  | S3: `summit-prod-backups`    | KMS        | 30 days (90 days GLACIER) |
 
 ---
 
@@ -56,6 +56,7 @@ Summit/IntelGraph uses a multi-database architecture to support its intelligence
 - **Key Tables**: `users`, `investigations`, `entities`, `runs`, `tasks`, `audit_logs`
 
 **Backup Methods**:
+
 - `pg_dump` for logical backups (dev/staging)
 - WAL-G PITR for continuous archival (production)
 - RDS automated snapshots (production)
@@ -67,6 +68,7 @@ Summit/IntelGraph uses a multi-database architecture to support its intelligence
 - **Key Data**: Entity nodes, relationship edges, graph properties
 
 **Backup Methods**:
+
 - `neo4j-admin database dump` (Community Edition - offline)
 - `neo4j-admin backup` (Enterprise Edition - online)
 - APOC export for selective data
@@ -80,6 +82,7 @@ Summit/IntelGraph uses a multi-database architecture to support its intelligence
 - **Key Data**: Sessions, rate limits, temporary queues
 
 **Backup Methods**:
+
 - RDB snapshots (`BGSAVE`)
 - AOF (Append-Only File) for durability
 
@@ -91,20 +94,20 @@ Summit/IntelGraph uses a multi-database architecture to support its intelligence
 
 ### By Environment
 
-| Environment | RPO (Recovery Point Objective) | RTO (Recovery Time Objective) |
-|-------------|--------------------------------|-------------------------------|
-| **Production** | 5 minutes (WAL archiving) | 4 hours |
-| **Staging** | 1 hour | 8 hours |
-| **Development** | Manual backup interval | 30 minutes |
+| Environment     | RPO (Recovery Point Objective) | RTO (Recovery Time Objective) |
+| --------------- | ------------------------------ | ----------------------------- |
+| **Production**  | 5 minutes (WAL archiving)      | 4 hours                       |
+| **Staging**     | 1 hour                         | 8 hours                       |
+| **Development** | Manual backup interval         | 30 minutes                    |
 
 ### By Datastore
 
-| Datastore | RPO Target | RTO Target | Backup Frequency |
-|-----------|------------|------------|------------------|
-| PostgreSQL | 5 min (prod), 1 hour (staging) | 1 hour | Continuous WAL + Daily full |
-| Neo4j | 1 hour | 2 hours | Hourly |
-| Redis | N/A (ephemeral) | 15 minutes | Hourly RDB snapshot |
-| TimescaleDB | 1 hour | 2 hours | Daily |
+| Datastore   | RPO Target                     | RTO Target | Backup Frequency            |
+| ----------- | ------------------------------ | ---------- | --------------------------- |
+| PostgreSQL  | 5 min (prod), 1 hour (staging) | 1 hour     | Continuous WAL + Daily full |
+| Neo4j       | 1 hour                         | 2 hours    | Hourly                      |
+| Redis       | N/A (ephemeral)                | 15 minutes | Hourly RDB snapshot         |
+| TimescaleDB | 1 hour                         | 2 hours    | Daily                       |
 
 ---
 
@@ -346,6 +349,7 @@ docker start redis
 After any restore operation:
 
 1. **Check service health**:
+
    ```bash
    # All services
    docker ps
@@ -362,6 +366,7 @@ After any restore operation:
    ```
 
 2. **Verify data integrity**:
+
    ```bash
    # PostgreSQL - check tables exist
    docker exec postgres psql -U summit -d summit_dev -c "\dt"
@@ -418,12 +423,12 @@ After any restore operation:
 
 ### DR Drill Schedule
 
-| Drill Type | Frequency | Duration | Scope |
-|------------|-----------|----------|-------|
-| Backup Validation | Weekly (CI/CD) | 30 min | Automated |
-| Single DB Restore | Monthly | 2 hours | One datastore |
-| Full DR Simulation | Quarterly | 4 hours | All datastores |
-| Multi-Region Failover | Semi-annually | 8 hours | Cross-region |
+| Drill Type            | Frequency      | Duration | Scope          |
+| --------------------- | -------------- | -------- | -------------- |
+| Backup Validation     | Weekly (CI/CD) | 30 min   | Automated      |
+| Single DB Restore     | Monthly        | 2 hours  | One datastore  |
+| Full DR Simulation    | Quarterly      | 4 hours  | All datastores |
+| Multi-Region Failover | Semi-annually  | 8 hours  | Cross-region   |
 
 ### DR Drill Procedure
 
@@ -486,11 +491,11 @@ When restoring production data to non-production environments:
 
 ### Credential Management
 
-| Environment | Credential Source | Notes |
-|-------------|------------------|-------|
-| Development | `.env` file | Default passwords acceptable |
-| Staging | AWS Secrets Manager | Rotated monthly |
-| Production | AWS Secrets Manager + KMS | Rotated weekly, encrypted at rest |
+| Environment | Credential Source         | Notes                             |
+| ----------- | ------------------------- | --------------------------------- |
+| Development | `.env` file               | Default passwords acceptable      |
+| Staging     | AWS Secrets Manager       | Rotated monthly                   |
+| Production  | AWS Secrets Manager + KMS | Rotated weekly, encrypted at rest |
 
 ---
 
@@ -578,9 +583,9 @@ redis-cli -h localhost -p 6379 INFO server
 
 ## Version History
 
-| Date | Version | Author | Changes |
-|------|---------|--------|---------|
-| 2025-12-06 | 1.0 | Platform Engineering | Initial creation |
+| Date       | Version | Author               | Changes          |
+| ---------- | ------- | -------------------- | ---------------- |
+| 2025-12-06 | 1.0     | Platform Engineering | Initial creation |
 
 ---
 

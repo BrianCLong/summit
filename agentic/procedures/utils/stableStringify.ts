@@ -1,17 +1,11 @@
-type JsonValue =
-  | string
-  | number
-  | boolean
-  | null
-  | JsonValue[]
-  | { [key: string]: JsonValue };
+type JsonValue = string | number | boolean | null | JsonValue[] | { [key: string]: JsonValue };
 
 function sortValue(value: JsonValue): JsonValue {
   if (Array.isArray(value)) {
     return value.map(sortValue);
   }
 
-  if (value && typeof value === 'object') {
+  if (value && typeof value === "object") {
     const entries = Object.entries(value)
       .sort(([left], [right]) => left.localeCompare(right))
       .map(([key, child]) => [key, sortValue(child)]);

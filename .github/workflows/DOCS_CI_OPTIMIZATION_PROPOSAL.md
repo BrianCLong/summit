@@ -9,6 +9,7 @@
 Current state: **200+ open PRs × 127 required checks = 25,400+ queued check runs**
 
 **Symptoms**:
+
 - All PRs blocked in QUEUED state for 2+ hours
 - Zero GitHub Actions runner capacity available
 - Docs-only PRs triggering full test suites unnecessarily
@@ -17,6 +18,7 @@ Current state: **200+ open PRs × 127 required checks = 25,400+ queued check run
 ## Root Cause
 
 **No path-based filtering** in CI workflows. Example:
+
 - PR changes 1 markdown file
 - Triggers: CodeQL, full test suite, Docker builds, integration tests, etc.
 - Reality: Only markdown lint needed
@@ -32,11 +34,11 @@ Add `paths-ignore` to computationally expensive workflows that don't need to run
 on:
   pull_request:
     paths-ignore:
-      - 'docs/**'
-      - '**.md'
-      - 'prompts/**'
-      - '.github/workflows/**'  # Workflow changes don't need tests
-      - 'evidence/**'
+      - "docs/**"
+      - "**.md"
+      - "prompts/**"
+      - ".github/workflows/**" # Workflow changes don't need tests
+      - "evidence/**"
 ```
 
 **Impact**: Reduces check runs by ~40% for docs/prompt PRs
@@ -50,12 +52,12 @@ Make code-heavy checks run ONLY when code changes:
 on:
   pull_request:
     paths:
-      - 'server/**/*.ts'
-      - 'client/**/*.tsx'
-      - 'packages/**/*.ts'
-      - 'services/**/*.ts'
-      - 'package.json'
-      - 'pnpm-lock.yaml'
+      - "server/**/*.ts"
+      - "client/**/*.tsx"
+      - "packages/**/*.ts"
+      - "services/**/*.ts"
+      - "package.json"
+      - "pnpm-lock.yaml"
 ```
 
 **Impact**: Reduces unnecessary test runs by ~60%
@@ -65,12 +67,14 @@ on:
 Define **3 tiers** of required checks:
 
 **Tier 1: Universal (ALL PRs)**
+
 - Security scan (gitleaks)
 - Governance check
 - Workflow lint
 - Basic markdown lint
 
 **Tier 2: Code Changes**
+
 - Full test suite
 - TypeScript check
 - Build verification
@@ -78,6 +82,7 @@ Define **3 tiers** of required checks:
 - CodeQL
 
 **Tier 3: Infrastructure/Deployment**
+
 - Docker builds
 - SLSA attestation
 - Supply chain checks
@@ -123,9 +128,9 @@ name: Docs Fast Track
 on:
   pull_request:
     paths:
-      - 'docs/**'
-      - '**.md'
-      - 'prompts/**'
+      - "docs/**"
+      - "**.md"
+      - "prompts/**"
 
 jobs:
   docs-validation:
@@ -153,6 +158,7 @@ jobs:
 Modify required checks to be path-conditional:
 
 **For docs-only PRs**: Require only:
+
 - `Docs Fast Track`
 - `Workflow Lint`
 - `Gitleaks baseline scan`
@@ -164,16 +170,19 @@ Modify required checks to be path-conditional:
 ## Expected Impact
 
 **Before**:
+
 - Docs PR: 127 checks, 2+ hour queue time
 - Code PR: 127 checks, 2+ hour queue time
 - Total capacity: Exhausted
 
 **After**:
+
 - Docs PR: 3-5 checks, <5 min completion
 - Code PR: 40-50 checks (relevant only), <30 min completion
 - Total capacity: 60-70% reduction in check runs
 
 **Math**:
+
 - 200 PRs × 127 checks = 25,400 check runs (current)
 - Assume 40% are docs/config PRs: 80 PRs × 5 checks = 400 check runs
 - Assume 60% are code PRs: 120 PRs × 50 checks = 6,000 check runs
@@ -182,6 +191,7 @@ Modify required checks to be path-conditional:
 ## Rollout Plan
 
 **Week 1**:
+
 - ✅ Day 1: Audit workflows, identify heaviest
 - ✅ Day 2: Add path-ignore to top 10 heavy workflows
 - ✅ Day 3: Create docs fast-track workflow
@@ -189,12 +199,14 @@ Modify required checks to be path-conditional:
 - ✅ Day 5: Deploy to main
 
 **Week 2**:
+
 - Day 1-3: Add path filters to remaining 70 workflows
 - Day 4-5: Monitor queue depth, adjust as needed
 
 ## Success Metrics
 
 **Target SLOs**:
+
 - Docs PR → merge: <15 minutes (from approval to merge complete)
 - Code PR → merge: <2 hours (from approval to all checks pass)
 - Queue depth: <1,000 runs (down from 25,000+)
@@ -265,5 +277,6 @@ paths:
 ---
 
 **Related Documents**:
+
 - `docs/ci/MERGE-QUEUE-BLOCKER-MATRIX-2026-03-01.md`
 - `.github/workflows/README.md` (to be created)

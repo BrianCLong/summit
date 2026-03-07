@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import $ from 'jquery';
+import React, { useEffect, useState } from "react";
+import $ from "jquery";
 
 interface ComplianceControl {
   id: string;
@@ -10,22 +10,22 @@ interface ComplianceControl {
 export default function ComplianceBoard() {
   const [rows, setRows] = useState<ComplianceControl[]>([]);
   useEffect(() => {
-    fetch('/api/compliance/controls')
+    fetch("/api/compliance/controls")
       .then((r) => r.json())
       .then(setRows)
       .catch(() => setRows([]));
   }, []);
   useEffect(() => {
     const handler = function (this: HTMLInputElement) {
-      const v = this.value?.toString().toLowerCase() || '';
+      const v = this.value?.toString().toLowerCase() || "";
       ($(this) as JQuery<HTMLElement>).each(function () {
         const $row = $(this);
         $row.toggle($row.text().toLowerCase().indexOf(v) >= 0);
       });
     };
-    $('#ctrlFilter').on('input', handler);
+    $("#ctrlFilter").on("input", handler);
     return () => {
-      $('#ctrlFilter').off('input', handler);
+      $("#ctrlFilter").off("input", handler);
     };
   }, [rows.length]);
 
@@ -33,11 +33,7 @@ export default function ComplianceBoard() {
     <div className="p-4 rounded-2xl shadow">
       <div className="flex gap-2 mb-2">
         <h3 className="text-lg font-semibold">Compliance Controls</h3>
-        <input
-          id="ctrlFilter"
-          className="border rounded px-2 py-1"
-          placeholder="filter…"
-        />
+        <input id="ctrlFilter" className="border rounded px-2 py-1" placeholder="filter…" />
       </div>
       <table className="w-full text-sm">
         <thead>

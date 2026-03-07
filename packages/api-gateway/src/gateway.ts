@@ -4,14 +4,14 @@
  * API Gateway - Main Gateway Class
  */
 
-import { EventEmitter } from 'events';
-import { Router, Route } from './routing/router.js';
-import { LoadBalancer, LoadBalancingStrategy } from './routing/load-balancer.js';
-import { CircuitBreaker, CircuitStats } from './routing/circuit-breaker.js';
-import { createLogger } from './utils/logger.js';
-import type { IncomingMessage, ServerResponse } from 'http';
+import { EventEmitter } from "events";
+import { Router, Route } from "./routing/router.js";
+import { LoadBalancer, LoadBalancingStrategy } from "./routing/load-balancer.js";
+import { CircuitBreaker, CircuitStats } from "./routing/circuit-breaker.js";
+import { createLogger } from "./utils/logger.js";
+import type { IncomingMessage, ServerResponse } from "http";
 
-const logger = createLogger('gateway');
+const logger = createLogger("gateway");
 
 export interface GatewayConfig {
   port?: number;
@@ -46,7 +46,7 @@ export class APIGateway extends EventEmitter {
     this.router = new Router(config.routes);
 
     this.loadBalancer = new LoadBalancer(
-      config.loadBalancing?.strategy || 'round-robin',
+      config.loadBalancing?.strategy || "round-robin",
       config.loadBalancing?.healthCheckInterval
     );
 
@@ -56,9 +56,9 @@ export class APIGateway extends EventEmitter {
       resetTimeout: config.circuitBreaker?.resetTimeout || 30000,
     });
 
-    logger.info('API Gateway initialized', {
+    logger.info("API Gateway initialized", {
       routes: config.routes.length,
-      strategy: config.loadBalancing?.strategy || 'round-robin',
+      strategy: config.loadBalancing?.strategy || "round-robin",
     });
   }
 
@@ -68,10 +68,10 @@ export class APIGateway extends EventEmitter {
 
     try {
       // Route matching
-      const route = this.router.match(req.url || '/', req.method || 'GET');
+      const route = this.router.match(req.url || "/", req.method || "GET");
 
       if (!route) {
-        this.sendError(res, 404, 'Route not found');
+        this.sendError(res, 404, "Route not found");
         return;
       }
 
@@ -79,13 +79,13 @@ export class APIGateway extends EventEmitter {
       const backend = await this.loadBalancer.selectBackend(route.backends);
 
       if (!backend) {
-        this.sendError(res, 503, 'No available backends');
+        this.sendError(res, 503, "No available backends");
         return;
       }
 
       // Check circuit breaker
       if (!this.circuitBreaker.canRequest(backend.url)) {
-        this.sendError(res, 503, 'Service temporarily unavailable');
+        this.sendError(res, 503, "Service temporarily unavailable");
         return;
       }
 
@@ -95,7 +95,7 @@ export class APIGateway extends EventEmitter {
       const duration = Date.now() - startTime;
       this.circuitBreaker.recordSuccess(backend.url);
 
-      logger.info('Request completed', {
+      logger.info("Request completed", {
         requestId,
         method: req.method,
         url: req.url,
@@ -103,20 +103,19 @@ export class APIGateway extends EventEmitter {
         duration,
       });
 
-      this.emit('request:success', { requestId, duration, backend });
-
+      this.emit("request:success", { requestId, duration, backend });
     } catch (error) {
       const duration = Date.now() - startTime;
-      logger.error('Request failed', {
+      logger.error("Request failed", {
         requestId,
         error: error instanceof Error ? error.message : String(error),
         duration,
       });
 
-      this.emit('request:error', { requestId, error, duration });
+      this.emit("request:error", { requestId, error, duration });
 
       if (!res.headersSent) {
-        this.sendError(res, 500, 'Internal server error');
+        this.sendError(res, 500, "Internal server error");
       }
     }
   }
@@ -140,13 +139,13 @@ export class APIGateway extends EventEmitter {
         if (attempt < maxRetries) {
           const delay = this.calculateRetryDelay(attempt);
           await this.sleep(delay);
-          logger.warn('Retrying request', { attempt: attempt + 1, delay });
+          logger.warn("Retrying request", { attempt: attempt + 1, delay });
         }
       }
     }
 
     this.circuitBreaker.recordFailure(backendUrl);
-    throw lastError || new Error('Request failed');
+    throw lastError || new Error("Request failed");
   }
 
   private async executeRequest(
@@ -159,7 +158,7 @@ export class APIGateway extends EventEmitter {
       // This is a simplified implementation
       // In production, use http-proxy or similar library
       const timeout = setTimeout(() => {
-        reject(new Error('Request timeout'));
+        reject(new Error("Request timeout"));
       }, this.config.timeout || 30000);
 
       // Proxy logic would go here
@@ -180,11 +179,11 @@ export class APIGateway extends EventEmitter {
   }
 
   private sleep(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   private sendError(res: ServerResponse, statusCode: number, message: string): void {
-    res.writeHead(statusCode, { 'Content-Type': 'application/json' });
+    res.writeHead(statusCode, { "Content-Type": "application/json" });
     res.end(JSON.stringify({ error: message, statusCode }));
   }
 
@@ -195,7 +194,7 @@ export class APIGateway extends EventEmitter {
   getMetrics(): {
     routes: number;
     circuitBreakerStatus: { [url: string]: CircuitStats } | CircuitStats | null;
-    loadBalancerStats: ReturnType<LoadBalancer['getStats']>;
+    loadBalancerStats: ReturnType<LoadBalancer["getStats"]>;
   } {
     return {
       routes: this.router.getRoutes().length,

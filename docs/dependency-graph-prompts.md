@@ -1,17 +1,21 @@
 # Dependency Graph for the 24-Prompt Roadmap
 
 ## Layered Execution Model
+
 - **Foundation (Prompts 1–8)** — CI/CD, testing, dependencies, refactoring, documentation, performance, security, deployment. These create the baseline standards, pipelines, and guardrails that every later prompt relies on.
 - **Expansion (Prompts 9–16)** — Observability, databases, APIs, modularity, internationalization, compliance, frontend quality, release management. These extend product capabilities and operational coverage while inheriting Foundation guardrails.
 - **Resilience & Scale (Prompts 17–24)** — Stress testing, distributed readiness, developer tooling, data pipelines, accessibility, error handling, analytics, and chaos engineering. These assume the prior two layers are in place so results are actionable and safe to automate.
 
 ## Dependency Graph (Who Must Precede Whom)
+
 ```
 Foundation (1–8)
   └─ enables Expansion (9–16)
         └─ enables Resilience & Scale (17–24)
 ```
+
 Within the **Resilience & Scale** layer, the critical ordering is:
+
 ```
 17 Stress Testing ─┬─> 18 Distributed Readiness ─┬─> 24 Chaos Engineering
                    │                             └─> 22 Error Handling & Resilience
@@ -20,6 +24,7 @@ Within the **Resilience & Scale** layer, the critical ordering is:
 19 Dev Tooling ──┬─> 21 Accessibility
                  └─> 23 Analytics
 ```
+
 - **Prompt 17 (CI Stress Testing)**: anchor prerequisite for later resilience work so that heavy-load regressions are caught before distributed or chaos exercises.
 - **Prompt 18 (Distributed Readiness)**: depends on 17’s load baselines; informs 22 and 24 for consistent retry/backoff and failure envelopes.
 - **Prompt 19 (Developer Tooling & Productivity)**: can start in parallel with 17 but should land before prompts that rely on standardized code quality and generation (20, 21, 23).
@@ -30,6 +35,7 @@ Within the **Resilience & Scale** layer, the critical ordering is:
 - **Prompt 24 (Chaos Engineering & Fault Injection)**: last in chain—relies on 17 for load gates, 18 for distributed behaviors, and 22 for hardened error paths so injected failures are observable and contained.
 
 ## Parallelizable Workstreams (Safe to Run Together)
+
 - **Foundation prompts** can mostly run in parallel, except security hardening should finalize before deployment automation.
 - **Within Resilience & Scale:**
   - Start **17** and **19** together.
@@ -39,6 +45,7 @@ Within the **Resilience & Scale** layer, the critical ordering is:
   - **24** begins only after 17, 18, and 22 are complete and guardrails are monitored.
 
 ## Gating & Exit Criteria
+
 - **Load/Stress (17):** documented throughput/latency/error budgets with CI fail-fast thresholds for regression.
 - **Distributed Readiness (18):** service discovery configs, retry/backoff defaults, and idempotent workflow proof-points validated in staging.
 - **Dev Tooling (19):** pre-commit + static analysis mandatory in CI; local setup script verified on a clean machine.

@@ -6,7 +6,7 @@ import { pollUntilTerminal } from "@intelgraph/mcp/src/tasks/poll";
 
 interface McpTaskJobData {
   taskId: string;
-  pollConfig?: { defaultPollMs?: number; maxMs?: number; };
+  pollConfig?: { defaultPollMs?: number; maxMs?: number };
 }
 
 export class McpTaskJobHandler implements JobHandler {
@@ -26,9 +26,9 @@ export class McpTaskJobHandler implements JobHandler {
     if (terminalState.status === "completed") {
       return await this.tasks.result(data.taskId);
     } else if (terminalState.status === "failed") {
-        throw new Error(terminalState.error || "Task failed");
+      throw new Error(terminalState.error || "Task failed");
     } else if (terminalState.status === "cancelled") {
-        throw new Error("Task cancelled");
+      throw new Error("Task cancelled");
     }
     return terminalState;
   }

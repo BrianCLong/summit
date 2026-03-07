@@ -2,9 +2,9 @@ name: Prompt Repetition Hygiene
 on:
   pull_request:
     paths:
-      - 'summit/policies/**'
-      - 'summit/evaluators/**'
-      - 'scripts/bench_repetition.py'
+      - "summit/policies/**"
+      - "summit/evaluators/**"
+      - "scripts/bench_repetition.py"
 
 jobs:
   hygiene-check:
@@ -13,7 +13,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: "3.11"
 
       - name: Run benchmark
         run: |

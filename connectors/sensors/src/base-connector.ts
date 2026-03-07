@@ -11,15 +11,20 @@
  * @module base-connector
  */
 
-import { EventEmitter } from 'eventemitter3';
-import type { Logger } from 'pino';
+import { EventEmitter } from "eventemitter3";
+import type { Logger } from "pino";
 
-import type { RawSignalInput, SignalTypeIdType } from '@intelgraph/signal-contracts';
+import type { RawSignalInput, SignalTypeIdType } from "@intelgraph/signal-contracts";
 
 /**
  * Connector status
  */
-export type ConnectorStatus = 'disconnected' | 'connecting' | 'connected' | 'error' | 'reconnecting';
+export type ConnectorStatus =
+  | "disconnected"
+  | "connecting"
+  | "connected"
+  | "error"
+  | "reconnecting";
 
 /**
  * Connector events
@@ -90,7 +95,7 @@ const defaultConfig: Partial<BaseConnectorConfig> = {
 export abstract class BaseConnector extends EventEmitter<ConnectorEvents> {
   protected config: BaseConnectorConfig;
   protected logger: Logger;
-  protected status: ConnectorStatus = 'disconnected';
+  protected status: ConnectorStatus = "disconnected";
   protected metrics: ConnectorMetrics;
   protected signalBuffer: RawSignalInput[] = [];
   protected batchTimer: NodeJS.Timeout | null = null;
@@ -98,11 +103,15 @@ export abstract class BaseConnector extends EventEmitter<ConnectorEvents> {
   protected reconnectAttempts = 0;
   protected connectedAt: number | null = null;
 
-  constructor(config: Partial<BaseConnectorConfig> & Pick<BaseConnectorConfig, 'connectorId' | 'name' | 'tenantId' | 'signalTypes'>, logger: Logger) {
+  constructor(
+    config: Partial<BaseConnectorConfig> &
+      Pick<BaseConnectorConfig, "connectorId" | "name" | "tenantId" | "signalTypes">,
+    logger: Logger
+  ) {
     super();
     this.config = { ...defaultConfig, ...config } as BaseConnectorConfig;
     this.logger = logger.child({
-      component: 'connector',
+      component: "connector",
       connectorId: this.config.connectorId,
       connectorName: this.config.name,
     });
@@ -129,22 +138,22 @@ export abstract class BaseConnector extends EventEmitter<ConnectorEvents> {
    * Connect to the data source
    */
   async connect(): Promise<void> {
-    if (this.status === 'connected' || this.status === 'connecting') {
-      this.logger.warn('Already connected or connecting');
+    if (this.status === "connected" || this.status === "connecting") {
+      this.logger.warn("Already connected or connecting");
       return;
     }
 
-    this.setStatus('connecting');
-    this.logger.info('Connecting...');
+    this.setStatus("connecting");
+    this.logger.info("Connecting...");
 
     try {
       await this.doConnect();
       this.connectedAt = Date.now();
       this.reconnectAttempts = 0;
-      this.setStatus('connected');
-      this.emit('connected');
+      this.setStatus("connected");
+      this.emit("connected");
       this.startHealthCheck();
-      this.logger.info('Connected successfully');
+      this.logger.info("Connected successfully");
     } catch (error) {
       this.handleConnectionError(error as Error);
     }
@@ -154,25 +163,25 @@ export abstract class BaseConnector extends EventEmitter<ConnectorEvents> {
    * Disconnect from the data source
    */
   async disconnect(): Promise<void> {
-    if (this.status === 'disconnected') {
-      this.logger.warn('Already disconnected');
+    if (this.status === "disconnected") {
+      this.logger.warn("Already disconnected");
       return;
     }
 
-    this.logger.info('Disconnecting...');
+    this.logger.info("Disconnecting...");
     this.stopHealthCheck();
     this.flushBuffer();
 
     try {
       await this.doDisconnect();
     } catch (error) {
-      this.logger.error({ error }, 'Error during disconnect');
+      this.logger.error({ error }, "Error during disconnect");
     }
 
     this.connectedAt = null;
-    this.setStatus('disconnected');
-    this.emit('disconnected', 'Manual disconnect');
-    this.logger.info('Disconnected');
+    this.setStatus("disconnected");
+    this.emit("disconnected", "Manual disconnect");
+    this.logger.info("Disconnected");
   }
 
   /**
@@ -181,9 +190,9 @@ export abstract class BaseConnector extends EventEmitter<ConnectorEvents> {
   private handleConnectionError(error: Error): void {
     this.metrics.errorsCount++;
     this.metrics.lastErrorAt = Date.now();
-    this.setStatus('error');
-    this.emit('error', error);
-    this.logger.error({ error }, 'Connection error');
+    this.setStatus("error");
+    this.emit("error", error);
+    this.logger.error({ error }, "Connection error");
 
     if (this.config.autoReconnect && this.reconnectAttempts < this.config.maxReconnectAttempts) {
       this.scheduleReconnect();
@@ -199,17 +208,24 @@ export abstract class BaseConnector extends EventEmitter<ConnectorEvents> {
     const delay = this.config.reconnectDelayMs * Math.pow(2, this.reconnectAttempts - 1);
 
     this.logger.info(
-      { attempt: this.reconnectAttempts, maxAttempts: this.config.maxReconnectAttempts, delayMs: delay },
-      'Scheduling reconnect',
+      {
+        attempt: this.reconnectAttempts,
+        maxAttempts: this.config.maxReconnectAttempts,
+        delayMs: delay,
+      },
+      "Scheduling reconnect"
     );
 
-    this.setStatus('reconnecting');
+    this.setStatus("reconnecting");
 
-    setTimeout(() => {
-      this.connect().catch((error) => {
-        this.logger.error({ error }, 'Reconnect failed');
-      });
-    }, Math.min(delay, 60000)); // Cap at 1 minute
+    setTimeout(
+      () => {
+        this.connect().catch((error) => {
+          this.logger.error({ error }, "Reconnect failed");
+        });
+      },
+      Math.min(delay, 60000)
+    ); // Cap at 1 minute
   }
 
   /**
@@ -218,7 +234,7 @@ export abstract class BaseConnector extends EventEmitter<ConnectorEvents> {
   protected setStatus(status: ConnectorStatus): void {
     if (this.status !== status) {
       this.status = status;
-      this.emit('statusChange', status);
+      this.emit("statusChange", status);
     }
   }
 
@@ -256,11 +272,11 @@ export abstract class BaseConnector extends EventEmitter<ConnectorEvents> {
     const signals = this.signalBuffer.splice(0);
 
     for (const signal of signals) {
-      this.emit('signal', signal);
+      this.emit("signal", signal);
       this.metrics.signalsEmitted++;
     }
 
-    this.logger.debug({ count: signals.length }, 'Flushed signal buffer');
+    this.logger.debug({ count: signals.length }, "Flushed signal buffer");
   }
 
   /**
@@ -270,7 +286,7 @@ export abstract class BaseConnector extends EventEmitter<ConnectorEvents> {
     this.stopHealthCheck();
     this.healthCheckTimer = setInterval(
       () => this.performHealthCheck(),
-      this.config.healthCheckIntervalMs,
+      this.config.healthCheckIntervalMs
     );
   }
 
@@ -291,11 +307,11 @@ export abstract class BaseConnector extends EventEmitter<ConnectorEvents> {
     try {
       const healthy = await this.checkHealth();
       if (!healthy) {
-        this.logger.warn('Health check failed');
-        this.handleConnectionError(new Error('Health check failed'));
+        this.logger.warn("Health check failed");
+        this.handleConnectionError(new Error("Health check failed"));
       }
     } catch (error) {
-      this.logger.error({ error }, 'Health check error');
+      this.logger.error({ error }, "Health check error");
     }
   }
 

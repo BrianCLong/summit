@@ -3,14 +3,7 @@
   "title": "GovernanceVerdict",
   "description": "Mandatory governance verdict for all AI/agent outputs. SOC 2 Controls: CC6.1, CC7.2, PI1.3",
   "type": "object",
-  "required": [
-    "verdict",
-    "policy",
-    "rationale",
-    "timestamp",
-    "evaluatedBy",
-    "confidence"
-  ],
+  "required": ["verdict", "policy", "rationale", "timestamp", "evaluatedBy", "confidence"],
   "properties": {
     "verdict": {
       "type": "string",
@@ -94,11 +87,7 @@
         "policyVersion": "1.0.0",
         "riskLevel": "low",
         "soc2Controls": ["CC6.1", "CC7.2", "PI1.3"],
-        "evidence": [
-          "Citations: 5",
-          "Provenance chain confidence: 0.9",
-          "Guardrails: PASSED"
-        ]
+        "evidence": ["Citations: 5", "Provenance chain confidence: 0.9", "Guardrails: PASSED"]
       }
     },
     {
@@ -113,10 +102,7 @@
         "riskLevel": "critical",
         "soc2Controls": ["CC6.1", "PI1.3"],
         "evidence": ["Critical security violation detected"],
-        "remediationSuggestions": [
-          "Contact security team immediately",
-          "Review system logs"
-        ]
+        "remediationSuggestions": ["Contact security team immediately", "Review system logs"]
       }
     },
     {

@@ -1,4 +1,4 @@
-import { getMaestroConfig, authHeaders } from '../config';
+import { getMaestroConfig, authHeaders } from "../config";
 import type {
   ControlHubSummary,
   Run,
@@ -9,7 +9,7 @@ import type {
   EvidenceBundle,
   RoutingCandidate,
   ApiResponse,
-} from '../types/maestro-api';
+} from "../types/maestro-api";
 
 /**
  * Production-ready Maestro API Client
@@ -23,18 +23,14 @@ export class MaestroApiClient {
   constructor() {
     const config = getMaestroConfig();
     this.baseUrl =
-      config.gatewayBase?.replace(/\/$/, '') ||
-      'https://maestro-dev.topicality.co/api/maestro/v1';
+      config.gatewayBase?.replace(/\/$/, "") || "https://maestro-dev.topicality.co/api/maestro/v1";
     this.defaultHeaders = {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
       ...authHeaders(config),
     };
   }
 
-  private async request<T>(
-    endpoint: string,
-    options: RequestInit = {},
-  ): Promise<ApiResponse<T>> {
+  private async request<T>(endpoint: string, options: RequestInit = {}): Promise<ApiResponse<T>> {
     const url = `${this.baseUrl}${endpoint}`;
 
     try {
@@ -63,12 +59,12 @@ export class MaestroApiClient {
       const data = await response.json();
       return {
         data,
-        traceId: response.headers.get('x-trace-id') || undefined,
+        traceId: response.headers.get("x-trace-id") || undefined,
       };
     } catch (error) {
       console.error(`API request failed: ${url}`, error);
       return {
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : "Unknown error",
         traceId: undefined,
       };
     }
@@ -76,7 +72,7 @@ export class MaestroApiClient {
 
   // Control Hub API
   async getSummary(): Promise<ApiResponse<ControlHubSummary>> {
-    return this.request<ControlHubSummary>('/summary');
+    return this.request<ControlHubSummary>("/summary");
   }
 
   // Runs API
@@ -88,7 +84,7 @@ export class MaestroApiClient {
       q?: string;
       limit?: number;
       cursor?: string;
-    } = {},
+    } = {}
   ): Promise<ApiResponse<RunsListResponse>> {
     const searchParams = new URLSearchParams();
     Object.entries(params).forEach(([key, value]) => {
@@ -98,7 +94,7 @@ export class MaestroApiClient {
     });
 
     const query = searchParams.toString();
-    return this.request<RunsListResponse>(`/runs${query ? `?${query}` : ''}`);
+    return this.request<RunsListResponse>(`/runs${query ? `?${query}` : ""}`);
   }
 
   async getRun(id: string): Promise<ApiResponse<Run>> {
@@ -108,12 +104,12 @@ export class MaestroApiClient {
   async executeRunAction(
     id: string,
     action: {
-      action: 'promote' | 'pause' | 'resume' | 'rerun' | 'rollback';
+      action: "promote" | "pause" | "resume" | "rerun" | "rollback";
       reason?: string;
-    },
+    }
   ): Promise<ApiResponse<{ success: boolean }>> {
     return this.request(`/runs/${encodeURIComponent(id)}/actions`, {
-      method: 'POST',
+      method: "POST",
       body: JSON.stringify(action),
     });
   }
@@ -129,7 +125,7 @@ export class MaestroApiClient {
 
   // Pipelines API
   async getPipelines(): Promise<ApiResponse<Pipeline[]>> {
-    return this.request<Pipeline[]>('/pipelines');
+    return this.request<Pipeline[]>("/pipelines");
   }
 
   async getPipeline(id: string): Promise<ApiResponse<Pipeline>> {
@@ -141,7 +137,7 @@ export class MaestroApiClient {
     changes: {
       changes: Record<string, unknown>;
       policies: string[];
-    },
+    }
   ): Promise<
     ApiResponse<{
       diff: Record<string, unknown>;
@@ -149,7 +145,7 @@ export class MaestroApiClient {
     }>
   > {
     return this.request(`/pipelines/${encodeURIComponent(id)}/simulate`, {
-      method: 'POST',
+      method: "POST",
       body: JSON.stringify(changes),
     });
   }
@@ -160,9 +156,7 @@ export class MaestroApiClient {
       candidates: RoutingCandidate[];
     }>
   > {
-    const params = requestClass
-      ? `?class=${encodeURIComponent(requestClass)}`
-      : '';
+    const params = requestClass ? `?class=${encodeURIComponent(requestClass)}` : "";
     return this.request(`/routing/candidates${params}`);
   }
 
@@ -172,19 +166,19 @@ export class MaestroApiClient {
     model: string;
     ttl?: number;
   }): Promise<ApiResponse<{ success: boolean }>> {
-    return this.request('/routing/pin', {
-      method: 'POST',
+    return this.request("/routing/pin", {
+      method: "POST",
       body: JSON.stringify(pin),
     });
   }
 
   // SLO & Observability API
   async getSLOs(): Promise<ApiResponse<SLO[]>> {
-    return this.request<SLO[]>('/slo');
+    return this.request<SLO[]>("/slo");
   }
 
   async getAlerts(): Promise<ApiResponse<Alert[]>> {
-    return this.request<Alert[]>('/alerts');
+    return this.request<Alert[]>("/alerts");
   }
 
   async acknowledgeAlert(
@@ -192,24 +186,19 @@ export class MaestroApiClient {
     ack: {
       assignee: string;
       note?: string;
-    },
+    }
   ): Promise<ApiResponse<{ success: boolean }>> {
     return this.request(`/alerts/${encodeURIComponent(id)}/ack`, {
-      method: 'POST',
+      method: "POST",
       body: JSON.stringify(ack),
     });
   }
 
   // Evidence & Attestations API
-  async generateEvidenceBundle(
-    runId: string,
-  ): Promise<ApiResponse<EvidenceBundle>> {
-    return this.request<EvidenceBundle>(
-      `/evidence/run/${encodeURIComponent(runId)}`,
-      {
-        method: 'POST',
-      },
-    );
+  async generateEvidenceBundle(runId: string): Promise<ApiResponse<EvidenceBundle>> {
+    return this.request<EvidenceBundle>(`/evidence/run/${encodeURIComponent(runId)}`, {
+      method: "POST",
+    });
   }
 
   // Budget & FinOps API
@@ -222,22 +211,22 @@ export class MaestroApiClient {
       alerts: string[];
     }>
   > {
-    return this.request('/budgets');
+    return this.request("/budgets");
   }
 
   async updateBudget(budget: {
     id: string;
     caps: Record<string, unknown>;
   }): Promise<ApiResponse<{ success: boolean }>> {
-    return this.request('/budgets', {
-      method: 'POST',
+    return this.request("/budgets", {
+      method: "POST",
       body: JSON.stringify(budget),
     });
   }
 
   async freezeBudget(id: string): Promise<ApiResponse<{ success: boolean }>> {
     return this.request(`/budgets/${encodeURIComponent(id)}/freeze`, {
-      method: 'POST',
+      method: "POST",
     });
   }
 
@@ -254,7 +243,7 @@ export class MaestroApiClient {
       }[]
     >
   > {
-    return this.request('/recipes');
+    return this.request("/recipes");
   }
 
   async instantiateRecipe(
@@ -262,10 +251,10 @@ export class MaestroApiClient {
     params: {
       params: Record<string, unknown>;
       name: string;
-    },
+    }
   ): Promise<ApiResponse<{ pipelineId: string }>> {
     return this.request(`/recipes/${encodeURIComponent(id)}/instantiate`, {
-      method: 'POST',
+      method: "POST",
       body: JSON.stringify(params),
     });
   }
@@ -275,7 +264,7 @@ export class MaestroApiClient {
     params: {
       since?: string;
       limit?: number;
-    } = {},
+    } = {}
   ): Promise<
     ApiResponse<
       {
@@ -295,7 +284,7 @@ export class MaestroApiClient {
     });
 
     const query = searchParams.toString();
-    return this.request(`/audit${query ? `?${query}` : ''}`);
+    return this.request(`/audit${query ? `?${query}` : ""}`);
   }
 
   // Server-Sent Events connections
@@ -305,10 +294,8 @@ export class MaestroApiClient {
   }
 
   // Health check
-  async healthCheck(): Promise<
-    ApiResponse<{ status: 'healthy' | 'degraded' | 'unhealthy' }>
-  > {
-    return this.request('/health');
+  async healthCheck(): Promise<ApiResponse<{ status: "healthy" | "degraded" | "unhealthy" }>> {
+    return this.request("/health");
   }
 }
 

@@ -1,0 +1,42 @@
+{
+  "$id": "https://summit.local/schemas/entities/entity.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Normalized Entity",
+  "type": "object",
+  "properties": {
+    "entity_id": { "type": "string" },
+    "entity_type": { "type": "string" },
+    "canonical_name": { "type": "string" },
+    "aliases": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "attributes": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "source_refs": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+    "valid_time": {
+      "type": "object",
+      "properties": {
+        "start": { "type": ["string", "null"] },
+        "end": { "type": ["string", "null"] }
+      },
+      "required": ["start", "end"]
+    }
+  },
+  "required": [
+    "entity_id",
+    "entity_type",
+    "canonical_name",
+    "aliases",
+    "attributes",
+    "source_refs",
+    "confidence",
+    "valid_time"
+  ]
+}

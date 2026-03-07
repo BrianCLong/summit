@@ -1,4 +1,4 @@
-export type WorkItemStatus = 'ready' | 'in_progress' | 'review' | 'blocked' | 'done';
+export type WorkItemStatus = "ready" | "in_progress" | "review" | "blocked" | "done";
 
 export interface ReadyChecklist {
   specProvided: boolean;
@@ -60,7 +60,7 @@ export interface Alert {
   id: string;
   dedupKey: string;
   service: string;
-  severity: 'info' | 'warning' | 'critical';
+  severity: "info" | "warning" | "critical";
   noiseScore: number;
   createdAt: Date;
 }
@@ -93,7 +93,7 @@ export interface WipLimitEnforcement {
 export interface GuardrailResult {
   ok: boolean;
   message?: string;
-  severity?: 'info' | 'warning' | 'block';
+  severity?: "info" | "warning" | "block";
 }
 
 export interface CostEntry {

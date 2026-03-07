@@ -10,11 +10,11 @@
 
 ## 1. Today at a Glance
 
-| State | Description | Action |
-| :--- | :--- | :--- |
-| **🟢 GREEN** | CI is passing, queue is moving. | **Merge freely** following the Shipping Checklist. |
-| **🟡 YELLOW** | CI has flakes or non-blocking failures. | **Merge with caution**. Verify locally. Prioritize fixes. |
-| **🔴 RED** | CI is hard failing. | **STOP**. Only "Allowed Merge Categories" (Docs/Metadata). Trigger [Unblocking Runbook](../runbooks/CI_RELEASE_GATE_RUNBOOK.md). |
+| State         | Description                             | Action                                                                                                                           |
+| :------------ | :-------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------- |
+| **🟢 GREEN**  | CI is passing, queue is moving.         | **Merge freely** following the Shipping Checklist.                                                                               |
+| **🟡 YELLOW** | CI has flakes or non-blocking failures. | **Merge with caution**. Verify locally. Prioritize fixes.                                                                        |
+| **🔴 RED**    | CI is hard failing.                     | **STOP**. Only "Allowed Merge Categories" (Docs/Metadata). Trigger [Unblocking Runbook](../runbooks/CI_RELEASE_GATE_RUNBOOK.md). |
 
 ---
 
@@ -22,10 +22,10 @@
 
 Before any merge, verify these gates are clear.
 
-*   [ ] **CI Status**: GitHub Actions are green (or known flakes).
-*   [ ] **Security**: No *new* Critical/High vulnerabilities. See [Security Backlog](../SECURITY_PHASE1_STARTER_PACK_BACKLOG.md).
-*   [ ] **Evidence**: Evidence bundle can be generated and is valid.
-*   [ ] **Governance**: Prompt hash registry is in sync (if prompts changed).
+- [ ] **CI Status**: GitHub Actions are green (or known flakes).
+- [ ] **Security**: No _new_ Critical/High vulnerabilities. See [Security Backlog](../SECURITY_PHASE1_STARTER_PACK_BACKLOG.md).
+- [ ] **Evidence**: Evidence bundle can be generated and is valid.
+- [ ] **Governance**: Prompt hash registry is in sync (if prompts changed).
 
 ---
 
@@ -38,7 +38,7 @@ When **CI is RED** (🔴), only the following PR types may be merged:
 3.  **Emergency Fixes**: PRs explicitly labeled `emergency-fix` with approval from Engineering Lead.
 4.  **Reverts**: Clean reverts of broken commits.
 
-> **Strict Rule**: No behavior-changing code merges during RED state unless it is the *fix* for the RED state.
+> **Strict Rule**: No behavior-changing code merges during RED state unless it is the _fix_ for the RED state.
 
 ---
 
@@ -59,6 +59,7 @@ For **every** PR, before clicking Merge:
 Copy-paste these commands to verify state locally.
 
 ### A. Local Health Check
+
 ```bash
 # Check for uncommitted changes or dirty state
 git status
@@ -68,7 +69,9 @@ find . -type f -size +1M
 ```
 
 ### B. Generate Evidence Bundle
+
 Use this to verify that the PR artifacts are compliant.
+
 ```bash
 # Run the evidence generator
 ./scripts/generate-evidence-bundle.sh
@@ -78,15 +81,20 @@ ls -l evidence-bundle.zip
 ```
 
 ### C. Case Collision Scan
+
 Prevent "works on Mac, breaks on Linux" issues.
+
 ```bash
 # Find files with potential case collisions
 git ls-files | tr '[:upper:]' '[:lower:]' | sort | uniq -d
 ```
-*If output is empty, you are safe.*
+
+_If output is empty, you are safe._
 
 ### D. Prompt Hash Verification
+
 If the PR touches `prompts/`, verify the registry.
+
 ```bash
 # Check prompt registry consistency (if script exists)
 # Or manually inspect:
@@ -112,32 +120,36 @@ If CI is **stuck** or **failing**:
 
 If you are blocked for > 1 hour:
 
-*   **Slack**: `#release-engineering` or `#oncall`
-*   **Repo Owner**: `@BrianCLong`
-*   **Security**: `#security`
+- **Slack**: `#release-engineering` or `#oncall`
+- **Repo Owner**: `@BrianCLong`
+- **Security**: `#security`
 
 ---
 
 ## 8. Daily Note Template
 
-*Copy/paste this into your daily log or the `#release-updates` channel.*
+_Copy/paste this into your daily log or the `#release-updates` channel._
 
 ```markdown
 **release-captain daily log: [DATE]**
 
 **Status**: 🟢 / 🟡 / 🔴
 **Blockers**:
+
 - [ ] Issue #...
 
 **Priorities**:
+
 1. Unblock CI (if red)
 2. Merge PR #... (High Priority)
 3. Triage Security Backlog
 
 **Merge Queue**:
+
 - [ ] PR #... (Ready)
 - [ ] PR #... (Waiting on Evidence)
 
 **End of Day Handoff**:
+
 - ...
 ```

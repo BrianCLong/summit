@@ -77,8 +77,8 @@ export class WFQ {
 
 ```ts
 // server/qos/budget.ts
-export function shouldPreempt(remainingUSD: number, priority: 'hi' | 'lo') {
-  return remainingUSD < 0.1 && priority === 'lo';
+export function shouldPreempt(remainingUSD: number, priority: "hi" | "lo") {
+  return remainingUSD < 0.1 && priority === "lo";
 }
 ```
 
@@ -104,7 +104,7 @@ export function shouldPreempt(remainingUSD: number, priority: 'hi' | 'lo') {
 
 ```ts
 // server/plugins/wasm.ts
-import fs from 'fs';
+import fs from "fs";
 export async function runWasm(path: string, input: Uint8Array) {
   const wasm = await WebAssembly.instantiate(fs.readFileSync(path), {
     env: {
@@ -128,10 +128,10 @@ export async function runWasm(path: string, input: Uint8Array) {
 ```yaml
 id: plugin.codesearch@v1
 capabilities:
-  inputs: ['repo/fs']
-  outputs: ['matches:list']
+  inputs: ["repo/fs"]
+  outputs: ["matches:list"]
 permissions:
-  fs_read: ['server/**', 'web/**']
+  fs_read: ["server/**", "web/**"]
 license: MIT
 ```
 
@@ -152,11 +152,7 @@ license: MIT
 **DP Laplace mechanism (TS)**
 
 ```ts
-export function laplace(mech: {
-  value: number;
-  sensitivity: number;
-  epsilon: number;
-}) {
+export function laplace(mech: { value: number; sensitivity: number; epsilon: number }) {
   const { value, sensitivity, epsilon } = mech;
   const b = sensitivity / epsilon;
   const u = Math.random() - 0.5;
@@ -196,7 +192,7 @@ export function laplace(mech: {
 
 ```ts
 // tools/merge/semantic.ts
-import { Project } from 'ts-morph';
+import { Project } from "ts-morph";
 export function renameAPI(dir: string, from: string, to: string) {
   const p = new Project();
   p.addSourceFilesAtPaths(`${dir}/**/*.ts`);
@@ -204,7 +200,7 @@ export function renameAPI(dir: string, from: string, to: string) {
     f
       .getDescendantsOfKind(ts.SyntaxKind.Identifier)
       .filter((i) => i.getText() === from)
-      .forEach((i) => i.replaceWithText(to)),
+      .forEach((i) => i.replaceWithText(to))
   );
   p.saveSync();
 }
@@ -232,7 +228,7 @@ const seen = new Map<string, number>();
 export function track(querySig: string) {
   const n = (seen.get(querySig) || 0) + 1;
   seen.set(querySig, n);
-  if (n > 50) console.warn('N+1 suspected for', querySig);
+  if (n > 50) console.warn("N+1 suspected for", querySig);
 }
 ```
 
@@ -254,19 +250,19 @@ export function track(querySig: string) {
 
 ```ts
 #!/usr/bin/env node
-import execa from 'execa';
+import execa from "execa";
 (async function () {
   const checks = [
-    ['node', ['-v']],
-    ['docker', ['version']],
-    ['git', ['--version']],
+    ["node", ["-v"]],
+    ["docker", ["version"]],
+    ["git", ["--version"]],
   ];
   for (const [cmd, args] of checks) {
     try {
       await execa(cmd, args);
-      console.log('ok', cmd);
+      console.log("ok", cmd);
     } catch {
-      console.log('fail', cmd);
+      console.log("fail", cmd);
     }
   }
 })();

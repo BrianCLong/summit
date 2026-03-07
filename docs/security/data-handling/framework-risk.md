@@ -1,6 +1,7 @@
 # Framework Risk Data Handling Policy
 
 ## Core Directives
+
 When executing framework risk evaluations:
 
 1. **No Outbound Traffic**: The evaluation engine MUST NOT make outbound HTTP/network calls. All risk scoring must be based on static, internal heuristics and detected dependencies.

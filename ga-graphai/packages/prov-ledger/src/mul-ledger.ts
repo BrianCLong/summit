@@ -1,7 +1,7 @@
-import Database from 'better-sqlite3';
-import { createHash, createHmac, randomUUID } from 'node:crypto';
-import { performance } from 'node:perf_hooks';
-import express, { Router } from 'express';
+import Database from "better-sqlite3";
+import { createHash, createHmac, randomUUID } from "node:crypto";
+import { performance } from "node:perf_hooks";
+import express, { Router } from "express";
 
 export interface ModelUsageEventInput {
   model: string;
@@ -34,7 +34,7 @@ export interface LedgerQueryOptions {
 export interface IntegrityCheckFailure {
   index: number;
   eventId: string;
-  reason: 'PREVIOUS_HASH_MISMATCH' | 'HASH_MISMATCH';
+  reason: "PREVIOUS_HASH_MISMATCH" | "HASH_MISMATCH";
 }
 
 export interface IntegrityCheckResult {
@@ -71,7 +71,7 @@ export interface SignedCompliancePack {
 export interface CompliancePackSigner {
   keyId: string;
   secret: string | Buffer;
-  algorithm?: 'HS256' | 'SHA256';
+  algorithm?: "HS256" | "SHA256";
 }
 
 export interface LedgerServerOptions {
@@ -84,9 +84,9 @@ export class ModelUsageLedger {
   private readonly headStatement: Database.Statement;
   private readonly monthStatement: Database.Statement;
 
-  constructor(path: string = ':memory:') {
+  constructor(path: string = ":memory:") {
     this.db = new Database(path);
-    this.db.pragma('journal_mode = WAL');
+    this.db.pragma("journal_mode = WAL");
     this.initialize();
     this.insertStatement = this.db.prepare(`
       INSERT INTO ledger_entries (
@@ -104,7 +104,7 @@ export class ModelUsageLedger {
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
     this.headStatement = this.db.prepare(
-      'SELECT entry_hash AS hash FROM ledger_entries ORDER BY sequence DESC LIMIT 1'
+      "SELECT entry_hash AS hash FROM ledger_entries ORDER BY sequence DESC LIMIT 1"
     );
     this.monthStatement = this.db.prepare(`
       SELECT
@@ -159,7 +159,7 @@ export class ModelUsageLedger {
       dpBudgetSpend: event.dpBudgetSpend,
       policyHash: event.policyHash,
       outputArtifactIds: event.outputArtifactIds,
-      previousHash: previousHash ?? undefined
+      previousHash: previousHash ?? undefined,
     });
 
     const payloadJson = JSON.stringify(event.outputArtifactIds ?? []);
@@ -189,7 +189,7 @@ export class ModelUsageLedger {
       timestamp,
       previousHash: previousHash ?? null,
       hash,
-      sequence: Number(info.lastInsertRowid)
+      sequence: Number(info.lastInsertRowid),
     };
   }
 
@@ -202,22 +202,22 @@ export class ModelUsageLedger {
     const clauses: string[] = [];
     const params: any[] = [];
     if (options.model) {
-      clauses.push('model = ?');
+      clauses.push("model = ?");
       params.push(options.model);
     }
     if (options.datasetLineageId) {
-      clauses.push('dataset_lineage_id = ?');
+      clauses.push("dataset_lineage_id = ?");
       params.push(options.datasetLineageId);
     }
     if (options.policyHash) {
-      clauses.push('policy_hash = ?');
+      clauses.push("policy_hash = ?");
       params.push(options.policyHash);
     }
     if (options.after) {
-      clauses.push('timestamp > ?');
+      clauses.push("timestamp > ?");
       params.push(options.after);
     }
-    const where = clauses.length ? `WHERE ${clauses.join(' AND ')}` : '';
+    const where = clauses.length ? `WHERE ${clauses.join(" AND ")}` : "";
     const limit = options.limit && options.limit > 0 ? options.limit : 200;
     const statement = this.db.prepare(
       `SELECT sequence, event_id, timestamp, model, version, dataset_lineage_id, consent_scope, dp_budget_spend, policy_hash, output_artifact_ids, previous_hash, entry_hash FROM ledger_entries ${where} ORDER BY sequence DESC LIMIT ?`
@@ -242,8 +242,8 @@ export class ModelUsageLedger {
           failure: {
             index,
             eventId: row.event_id,
-            reason: 'PREVIOUS_HASH_MISMATCH'
-          }
+            reason: "PREVIOUS_HASH_MISMATCH",
+          },
         };
       }
       const recalculated = computeHash({
@@ -256,7 +256,7 @@ export class ModelUsageLedger {
         dpBudgetSpend: row.dp_budget_spend,
         policyHash: row.policy_hash,
         outputArtifactIds: JSON.parse(row.output_artifact_ids),
-        previousHash: row.previous_hash ?? undefined
+        previousHash: row.previous_hash ?? undefined,
       });
       if (recalculated !== row.entry_hash) {
         return {
@@ -264,8 +264,8 @@ export class ModelUsageLedger {
           failure: {
             index,
             eventId: row.event_id,
-            reason: 'HASH_MISMATCH'
-          }
+            reason: "HASH_MISMATCH",
+          },
         };
       }
       previousHash = row.entry_hash;
@@ -281,7 +281,7 @@ export class ModelUsageLedger {
     const totals = events.reduce<CompliancePackTotals>(
       (agg, row) => ({
         events: agg.events + 1,
-        dpBudgetSpend: agg.dpBudgetSpend + row.dpBudgetSpend
+        dpBudgetSpend: agg.dpBudgetSpend + row.dpBudgetSpend,
       }),
       { events: 0, dpBudgetSpend: 0 }
     );
@@ -293,7 +293,7 @@ export class ModelUsageLedger {
       headHash: events.at(-1)?.hash ?? this.getHeadHash(),
       totals,
       digest,
-      events
+      events,
     };
 
     const payload = JSON.stringify(pack);
@@ -302,7 +302,7 @@ export class ModelUsageLedger {
     return {
       pack,
       signature,
-      payload
+      payload,
     };
   }
 }
@@ -326,30 +326,27 @@ export class MulLedgerSdk {
   }
 }
 
-export function createLedgerRouter(
-  ledger: ModelUsageLedger,
-  options: LedgerServerOptions
-): Router {
+export function createLedgerRouter(ledger: ModelUsageLedger, options: LedgerServerOptions): Router {
   const router = express.Router();
   router.use(express.json());
 
-  router.post('/events', (req, res) => {
+  router.post("/events", (req, res) => {
     const record = ledger.appendEvent(req.body as ModelUsageEventInput);
     res.status(201).json(record);
   });
 
-  router.get('/events', (req, res) => {
+  router.get("/events", (req, res) => {
     const events = ledger.queryEvents({
       model: req.query.model as string | undefined,
       datasetLineageId: req.query.datasetLineageId as string | undefined,
       policyHash: req.query.policyHash as string | undefined,
       limit: req.query.limit ? Number(req.query.limit) : undefined,
-      after: req.query.after as string | undefined
+      after: req.query.after as string | undefined,
     });
     res.json({ events });
   });
 
-  router.get('/integrity', (req, res) => {
+  router.get("/integrity", (req, res) => {
     const result = ledger.verifyIntegrity();
     if (result.ok) {
       res.json({ ok: true });
@@ -358,10 +355,10 @@ export function createLedgerRouter(
     res.status(409).json(result);
   });
 
-  router.get('/compliance-pack', (req, res) => {
+  router.get("/compliance-pack", (req, res) => {
     const { month } = req.query;
-    if (!month || typeof month !== 'string') {
-      res.status(400).json({ error: 'month query param required' });
+    if (!month || typeof month !== "string") {
+      res.status(400).json({ error: "month query param required" });
       return;
     }
     const pack = ledger.exportMonthlyCompliancePack(month, options.signer);
@@ -379,9 +376,9 @@ function normaliseTimestamp(value?: string): string {
 }
 
 function computeHash(
-  data: Omit<ModelUsageEventRecord, 'sequence'> & { previousHash?: string | null }
+  data: Omit<ModelUsageEventRecord, "sequence"> & { previousHash?: string | null }
 ): string {
-  const hash = createHash('sha256');
+  const hash = createHash("sha256");
   hash.update(data.eventId);
   hash.update(data.timestamp);
   hash.update(data.model);
@@ -394,7 +391,7 @@ function computeHash(
   if (data.previousHash) {
     hash.update(data.previousHash);
   }
-  return hash.digest('hex');
+  return hash.digest("hex");
 }
 
 function mapRow(row: any): ModelUsageEventRecord {
@@ -409,15 +406,15 @@ function mapRow(row: any): ModelUsageEventRecord {
     policyHash: row.policyHash ?? row.policy_hash,
     outputArtifactIds: Array.isArray(row.outputArtifactIds)
       ? row.outputArtifactIds
-      : JSON.parse(row.output_artifact_ids ?? row.outputArtifactIds ?? '[]'),
+      : JSON.parse(row.output_artifact_ids ?? row.outputArtifactIds ?? "[]"),
     previousHash: row.previousHash ?? row.previous_hash ?? null,
     hash: row.hash ?? row.entry_hash,
-    sequence: Number(row.sequence)
+    sequence: Number(row.sequence),
   };
 }
 
 function monthRange(month: string): { start: string; end: string } {
-  const [year, monthPart] = month.split('-').map(Number);
+  const [year, monthPart] = month.split("-").map(Number);
   if (!year || !monthPart || monthPart < 1 || monthPart > 12) {
     throw new Error(`Invalid month format: ${month}`);
   }
@@ -427,37 +424,37 @@ function monthRange(month: string): { start: string; end: string } {
 }
 
 function hashEvents(events: ModelUsageEventRecord[]): string {
-  const hash = createHash('sha256');
+  const hash = createHash("sha256");
   hash.update(JSON.stringify(events));
-  return hash.digest('hex');
+  return hash.digest("hex");
 }
 
 function signPayload(payload: string, signer: CompliancePackSigner): CompliancePackSignature {
-  const algorithm = signer.algorithm ?? 'HS256';
-  if (algorithm === 'HS256') {
-    const value = createHmac('sha256', signer.secret).update(payload).digest('hex');
+  const algorithm = signer.algorithm ?? "HS256";
+  if (algorithm === "HS256") {
+    const value = createHmac("sha256", signer.secret).update(payload).digest("hex");
     return {
       algorithm,
       keyId: signer.keyId,
-      value
+      value,
     };
   }
-  const value = createHash('sha256').update(payload).digest('hex');
+  const value = createHash("sha256").update(payload).digest("hex");
   return {
     algorithm,
     keyId: signer.keyId,
-    value
+    value,
   };
 }
 
 function defaultEvent(): ModelUsageEventInput {
   return {
-    model: 'default-model',
-    version: '1.0.0',
-    datasetLineageId: 'ds-1',
-    consentScope: 'general',
+    model: "default-model",
+    version: "1.0.0",
+    datasetLineageId: "ds-1",
+    consentScope: "general",
     dpBudgetSpend: 0,
-    policyHash: 'policy',
-    outputArtifactIds: []
+    policyHash: "policy",
+    outputArtifactIds: [],
   };
 }

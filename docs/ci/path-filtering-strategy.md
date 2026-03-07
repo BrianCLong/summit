@@ -7,12 +7,14 @@ Path filtering ensures CI workflows only run when relevant files change, dramati
 ## Problem
 
 Without path filtering:
+
 ```
 Docs-only PR → Triggers server tests, client tests, infra tests
 Result: Wasted CI resources, longer queue times
 ```
 
 With path filtering:
+
 ```
 Docs-only PR → Only docs-ci runs
 Result: 90% fewer CI jobs for this PR
@@ -23,6 +25,7 @@ Result: 90% fewer CI jobs for this PR
 ### 1. server-ci.yml
 
 **Triggers when**:
+
 - `server/**` - Server code changes
 - `packages/**` - Shared packages (may affect server)
 - `package.json` - Dependency changes
@@ -30,6 +33,7 @@ Result: 90% fewer CI jobs for this PR
 - `.github/workflows/server-ci.yml` - Workflow itself
 
 **Runs**:
+
 - Server typecheck
 - Server unit tests
 - Server smoke tests
@@ -39,6 +43,7 @@ Result: 90% fewer CI jobs for this PR
 ### 2. client-ci.yml
 
 **Triggers when**:
+
 - `client/**` - Client code changes
 - `apps/**` - Frontend apps
 - `packages/**` - Shared packages (may affect client)
@@ -47,6 +52,7 @@ Result: 90% fewer CI jobs for this PR
 - `.github/workflows/client-ci.yml` - Workflow itself
 
 **Runs**:
+
 - Client typecheck
 - Client unit tests
 - Client smoke tests
@@ -57,6 +63,7 @@ Result: 90% fewer CI jobs for this PR
 ### 3. infra-ci.yml
 
 **Triggers when**:
+
 - `infra/**` - Infrastructure code
 - `terraform/**` - Terraform configs
 - `docker/**` - Docker configs
@@ -67,6 +74,7 @@ Result: 90% fewer CI jobs for this PR
 - `.github/workflows/infra-ci.yml` - Workflow itself
 
 **Runs**:
+
 - Docker validation
 - docker-compose validation
 - Terraform fmt check
@@ -78,12 +86,14 @@ Result: 90% fewer CI jobs for this PR
 ### 4. docs-ci.yml
 
 **Triggers when**:
+
 - `docs/**` - Documentation
 - `*.md` - Root-level markdown files
 - `adr/**` - Architecture Decision Records
 - `.github/workflows/docs-ci.yml` - Workflow itself
 
 **Runs**:
+
 - Markdown linting
 - Broken link checking
 - Governance docs validation
@@ -93,6 +103,7 @@ Result: 90% fewer CI jobs for this PR
 ## Combined Impact
 
 ### Before Path Filtering
+
 ```
 Typical PR: Runs ALL workflows
 Server CI: 100% of PRs
@@ -103,6 +114,7 @@ Total: 4 workflows × 900 PRs = 3,600 runs
 ```
 
 ### After Path Filtering
+
 ```
 Server-only PR: Only server-ci runs
 Typical PR: Runs 1-2 relevant workflows

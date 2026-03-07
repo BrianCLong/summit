@@ -46,7 +46,7 @@ The Geo-Temporal Analytics module provides advanced spatial-temporal analysis ca
 interface GeoObservation {
   id: string;
   entityId: string;
-  entityType: 'PERSON' | 'DEVICE' | 'VEHICLE' | 'VESSEL' | 'AIRCRAFT' | 'OTHER';
+  entityType: "PERSON" | "DEVICE" | "VEHICLE" | "VESSEL" | "AIRCRAFT" | "OTHER";
   location: Location;
   startTime: string; // ISO 8601
   endTime: string;
@@ -114,13 +114,15 @@ Constructs ordered movement paths from geo-observations.
 **Output**: Time-sorted trajectory points
 
 **Algorithm**:
+
 1. Sort observations by `startTime` (ascending), then `endTime`
 2. Extract lat/lon for each observation
 3. Return ordered sequence of trajectory points
 
 **Usage**:
+
 ```typescript
-import { buildTrajectory } from '@intelgraph/geospatial';
+import { buildTrajectory } from "@intelgraph/geospatial";
 
 const trajectory = buildTrajectory(observations);
 ```
@@ -130,10 +132,12 @@ const trajectory = buildTrajectory(observations);
 Identifies locations where an entity remained stationary.
 
 **Parameters**:
+
 - `radiusMeters` (R): Maximum radius to consider a stay
 - `minDurationMinutes` (D): Minimum time to qualify as a stay
 
 **Algorithm**:
+
 1. For each starting point `i` in trajectory:
    - Find longest consecutive window where all points are within `R` meters
    - Calculate time span of window
@@ -144,8 +148,9 @@ Identifies locations where an entity remained stationary.
 2. Advance `i` past detected stay window
 
 **Usage**:
+
 ```typescript
-import { detectStayPoints } from '@intelgraph/geospatial';
+import { detectStayPoints } from "@intelgraph/geospatial";
 
 const stayPoints = detectStayPoints(trajectory, {
   radiusMeters: 100,
@@ -160,10 +165,12 @@ const stayPoints = detectStayPoints(trajectory, {
 Finds when multiple entities were co-located in space and time.
 
 **Parameters**:
+
 - `maxDistanceMeters` (R): Maximum distance between entities
 - `minOverlapMinutes` (W): Minimum temporal overlap
 
 **Algorithm** (pairwise):
+
 1. Group observations by entity
 2. For each entity pair (A, B):
    - For each observation pair (obsA, obsB):
@@ -174,8 +181,9 @@ Finds when multiple entities were co-located in space and time.
 3. Merge overlapping/adjacent intervals for same entity pair
 
 **Usage**:
+
 ```typescript
-import { detectCoPresence } from '@intelgraph/geospatial';
+import { detectCoPresence } from "@intelgraph/geospatial";
 
 const intervals = detectCoPresence(observations, {
   maxDistanceMeters: 100,
@@ -190,12 +198,14 @@ const intervals = detectCoPresence(observations, {
 Discovers groups of entities moving together over multiple time steps.
 
 **Parameters**:
+
 - `maxDistanceMeters` (R): Maximum distance between group members
 - `minGroupSize`: Minimum entities to form a convoy
 - `minSteps` (K): Minimum consecutive time steps
 - `stepDurationMinutes`: Time discretization interval (default: 15)
 
 **Algorithm**:
+
 1. Discretize time into fixed-duration steps
 2. For each time step:
    - Cluster entities by spatial proximity (≤ R meters)
@@ -205,8 +215,9 @@ Discovers groups of entities moving together over multiple time steps.
    - Persists for ≥ `minSteps` consecutive steps
 
 **Usage**:
+
 ```typescript
-import { detectConvoys } from '@intelgraph/geospatial';
+import { detectConvoys } from "@intelgraph/geospatial";
 
 const convoys = detectConvoys(observations, {
   maxDistanceMeters: 300,
@@ -227,10 +238,12 @@ Base URL: `http://localhost:4100/api/geotemporal`
 Get trajectory for an entity.
 
 **Query Parameters**:
+
 - `from` (optional): ISO 8601 start time
 - `to` (optional): ISO 8601 end time
 
 **Response**:
+
 ```json
 {
   "entityId": "E1",
@@ -239,7 +252,7 @@ Get trajectory for an entity.
       "observationId": "obs-1",
       "entityId": "E1",
       "latitude": 40.7128,
-      "longitude": -74.0060,
+      "longitude": -74.006,
       "startTime": "2025-01-01T10:00:00Z",
       "endTime": "2025-01-01T10:15:00Z"
     }
@@ -255,6 +268,7 @@ Get trajectory with computed metrics (distance, speed).
 **Query Parameters**: Same as `/trajectory`
 
 **Response**:
+
 ```json
 {
   "entityId": "E1",
@@ -272,12 +286,14 @@ Get trajectory with computed metrics (distance, speed).
 Detect stay points for an entity.
 
 **Query Parameters**:
+
 - `from` (required): ISO 8601 start time
 - `to` (required): ISO 8601 end time
 - `radiusMeters` (required): Numeric, e.g., `100`
 - `minDurationMinutes` (required): Numeric, e.g., `30`
 
 **Response**:
+
 ```json
 {
   "entityId": "E1",
@@ -286,7 +302,7 @@ Detect stay points for an entity.
       "id": "sp-1",
       "entityId": "E1",
       "latitude": 40.7128,
-      "longitude": -74.0060,
+      "longitude": -74.006,
       "startTime": "2025-01-01T10:00:00Z",
       "endTime": "2025-01-01T11:00:00Z",
       "radiusMeters": 100,
@@ -307,6 +323,7 @@ Detect stay points for an entity.
 Detect co-presence intervals between entities.
 
 **Request Body**:
+
 ```json
 {
   "entityIds": ["E1", "E2", "E3"],
@@ -322,6 +339,7 @@ Detect co-presence intervals between entities.
 ```
 
 **Response**:
+
 ```json
 {
   "entityIds": ["E1", "E2", "E3"],
@@ -348,6 +366,7 @@ Detect co-presence intervals between entities.
 Detect convoys (groups moving together).
 
 **Request Body**:
+
 ```json
 {
   "entityIds": ["E1", "E2", "E3"], // optional, empty = all entities in timeRange
@@ -365,6 +384,7 @@ Detect convoys (groups moving together).
 ```
 
 **Response**:
+
 ```json
 {
   "entityIds": ["E1", "E2", "E3"],
@@ -401,32 +421,32 @@ import {
   Neo4jGeoGraphRepository,
   GeoTemporalService,
   InMemoryGeoGraphRepository,
-} from '@intelgraph/geospatial';
-import neo4j from 'neo4j-driver';
+} from "@intelgraph/geospatial";
+import neo4j from "neo4j-driver";
 
 // With Neo4j
-const driver = neo4j.driver('bolt://localhost:7687', neo4j.auth.basic('neo4j', 'password'));
-const repository = new Neo4jGeoGraphRepository(driver, 'neo4j');
+const driver = neo4j.driver("bolt://localhost:7687", neo4j.auth.basic("neo4j", "password"));
+const repository = new Neo4jGeoGraphRepository(driver, "neo4j");
 const service = new GeoTemporalService(repository);
 
 // Get trajectory
-const trajectory = await service.getTrajectory('E1', {
-  from: '2025-01-01T00:00:00Z',
-  to: '2025-01-02T00:00:00Z',
+const trajectory = await service.getTrajectory("E1", {
+  from: "2025-01-01T00:00:00Z",
+  to: "2025-01-02T00:00:00Z",
 });
 
 // Detect stay points
 const stayPoints = await service.getStayPoints(
-  'E1',
-  { from: '2025-01-01T00:00:00Z', to: '2025-01-02T00:00:00Z' },
-  { radiusMeters: 100, minDurationMinutes: 30 },
+  "E1",
+  { from: "2025-01-01T00:00:00Z", to: "2025-01-02T00:00:00Z" },
+  { radiusMeters: 100, minDurationMinutes: 30 }
 );
 
 // Detect co-presence
 const copresence = await service.getCoPresence(
-  ['E1', 'E2'],
-  { from: '2025-01-01T00:00:00Z', to: '2025-01-02T00:00:00Z' },
-  { maxDistanceMeters: 100, minOverlapMinutes: 15 },
+  ["E1", "E2"],
+  { from: "2025-01-01T00:00:00Z", to: "2025-01-02T00:00:00Z" },
+  { maxDistanceMeters: 100, minOverlapMinutes: 15 }
 );
 ```
 
@@ -460,6 +480,7 @@ curl -X POST http://localhost:4100/api/geotemporal/copresence \
 ### Indexing
 
 For Neo4j, create indexes on:
+
 ```cypher
 CREATE INDEX entity_id IF NOT EXISTS FOR (e:Entity) ON (e.entityId);
 CREATE INDEX obs_time IF NOT EXISTS FOR (obs:Observation) ON (obs.startTime, obs.endTime);
@@ -482,13 +503,13 @@ CREATE INDEX location_coords IF NOT EXISTS FOR (loc:Location) ON (loc.latitude, 
 
 ### Recommended Configurations
 
-| Use Case | radiusMeters | minDurationMinutes | maxDistanceMeters | minSteps |
-|----------|--------------|-------------------|-------------------|----------|
-| Pedestrian stay-points | 50-100 | 10-30 | - | - |
-| Vehicle stops | 100-500 | 5-15 | - | - |
-| Person-to-person rendezvous | 50-200 | 10-30 | - | - |
-| Vehicle convoys | 500-1000 | - | - | 3-5 |
-| Pedestrian group movement | 100-300 | - | - | 3-5 |
+| Use Case                    | radiusMeters | minDurationMinutes | maxDistanceMeters | minSteps |
+| --------------------------- | ------------ | ------------------ | ----------------- | -------- |
+| Pedestrian stay-points      | 50-100       | 10-30              | -                 | -        |
+| Vehicle stops               | 100-500      | 5-15               | -                 | -        |
+| Person-to-person rendezvous | 50-200       | 10-30              | -                 | -        |
+| Vehicle convoys             | 500-1000     | -                  | -                 | 3-5      |
+| Pedestrian group movement   | 100-300      | -                  | -                 | 3-5      |
 
 ## Security & Access Control
 

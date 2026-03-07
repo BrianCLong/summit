@@ -16,24 +16,24 @@
  */
 
 // Core algorithms
-export * from './algorithms/pagerank';
-export * from './algorithms/betweenness';
-export * from './algorithms/centrality';
-export * from './algorithms/community-detection';
-export * from './algorithms/link-prediction';
-export * from './algorithms/pathfinding';
+export * from "./algorithms/pagerank";
+export * from "./algorithms/betweenness";
+export * from "./algorithms/centrality";
+export * from "./algorithms/community-detection";
+export * from "./algorithms/link-prediction";
+export * from "./algorithms/pathfinding";
 
 // Temporal analysis
-export * from './temporal/temporal-analysis';
+export * from "./temporal/temporal-analysis";
 
 // Pattern matching
-export * from './pattern-matching/subgraph-matching';
+export * from "./pattern-matching/subgraph-matching";
 
 // Pattern mining templates
-export * from './pattern-mining/pattern-templates';
+export * from "./pattern-mining/pattern-templates";
 
 // Export formats
-export * from './export/export-formats';
+export * from "./export/export-formats";
 
 // Re-export common types
 export interface GraphData {

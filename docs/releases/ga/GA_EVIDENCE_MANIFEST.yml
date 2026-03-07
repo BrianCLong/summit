@@ -30,7 +30,6 @@ required_checks:
 
 # Evidence artifacts and regeneration instructions
 evidence_artifacts:
-
   # CI Evidence
   ci_evidence:
     category: "ci"

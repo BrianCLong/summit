@@ -1,13 +1,13 @@
 name: Infra Parity
 on:
   pull_request:
-    branches: [ main ]
+    branches: [main]
     paths-ignore:
-      - 'docs/**'
-      - '**.md'
-      - 'prompts/**'
-      - 'evidence/**'
-    paths: [ "infra/**", ".github/workflows/infra-parity.yml" ]
+      - "docs/**"
+      - "**.md"
+      - "prompts/**"
+      - "evidence/**"
+    paths: ["infra/**", ".github/workflows/infra-parity.yml"]
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true

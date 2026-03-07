@@ -2,30 +2,30 @@
 # Multi-window burn-rate alert deduplication and escalation
 
 global:
-  smtp_smarthost: 'localhost:587'
-  smtp_from: 'alertmanager@intelgraph.com'
+  smtp_smarthost: "localhost:587"
+  smtp_from: "alertmanager@intelgraph.com"
 
 route:
-  group_by: ['alertname', 'cluster', 'service']
+  group_by: ["alertname", "cluster", "service"]
   group_wait: 30s
   group_interval: 5m
   repeat_interval: 12h
-  receiver: 'default'
+  receiver: "default"
   routes:
     # Critical SLO burn-rate alerts (< 15m RTO)
     - match:
         severity: critical
         component: error_budget
-      receiver: 'slo-critical'
+      receiver: "slo-critical"
       group_wait: 15s
       group_interval: 1m
       repeat_interval: 5m
       routes:
         # Auto-rollback ack bypass for sustained burns
         - match:
-            burn_rate: '14.4'
-            window: '5m'
-          receiver: 'auto-rollback-ack'
+            burn_rate: "14.4"
+            window: "5m"
+          receiver: "auto-rollback-ack"
           group_wait: 5s
           repeat_interval: 1m
 
@@ -33,7 +33,7 @@ route:
     - match:
         severity: high
         component: error_budget
-      receiver: 'slo-high'
+      receiver: "slo-high"
       group_wait: 5m
       group_interval: 15m
       repeat_interval: 1h
@@ -42,7 +42,7 @@ route:
     - match:
         severity: medium
         component: error_budget
-      receiver: 'slo-medium'
+      receiver: "slo-medium"
       group_wait: 15m
       group_interval: 1h
       repeat_interval: 6h
@@ -50,7 +50,7 @@ route:
     # FinOps budget violations
     - match:
         component: finops
-      receiver: 'finops-alerts'
+      receiver: "finops-alerts"
       group_wait: 5m
       group_interval: 30m
       repeat_interval: 4h
@@ -58,7 +58,7 @@ route:
     # Chaos engineering alerts
     - match:
         component: chaos-engineering
-      receiver: 'chaos-alerts'
+      receiver: "chaos-alerts"
       group_wait: 2m
       group_interval: 10m
       repeat_interval: 2h
@@ -66,7 +66,7 @@ route:
     # AI Insights alerts
     - match:
         component: ai-insights
-      receiver: 'ai-ops'
+      receiver: "ai-ops"
       group_wait: 5m
       group_interval: 15m
       repeat_interval: 2h
@@ -74,32 +74,32 @@ route:
     # ML observability alerts routed to PagerDuty + ML Ops channel
     - match:
         component: ml-observability
-      receiver: 'ml-pagerduty'
+      receiver: "ml-pagerduty"
       group_wait: 30s
       group_interval: 5m
       repeat_interval: 2h
 
 receivers:
-  - name: 'default'
+  - name: "default"
     slack_configs:
-      - api_url: '{{ .SlackWebhookURL }}'
-        channel: '#alerts'
-        title: 'IntelGraph Alert'
-        text: '{{ range .Alerts }}{{ .Annotations.summary }}{{ end }}'
+      - api_url: "{{ .SlackWebhookURL }}"
+        channel: "#alerts"
+        title: "IntelGraph Alert"
+        text: "{{ range .Alerts }}{{ .Annotations.summary }}{{ end }}"
 
-  - name: 'slo-critical'
+  - name: "slo-critical"
     pagerduty_configs:
-      - service_key: '{{ .PagerDutyServiceKey }}'
-        description: 'Critical SLO Burn Rate Alert'
-        severity: 'critical'
+      - service_key: "{{ .PagerDutyServiceKey }}"
+        description: "Critical SLO Burn Rate Alert"
+        severity: "critical"
         details:
-          burn_rate: '{{ .CommonAnnotations.burn_rate }}'
-          window: '{{ .CommonAnnotations.window }}'
-          runbook: '{{ .CommonAnnotations.runbook_url }}'
+          burn_rate: "{{ .CommonAnnotations.burn_rate }}"
+          window: "{{ .CommonAnnotations.window }}"
+          runbook: "{{ .CommonAnnotations.runbook_url }}"
     slack_configs:
-      - api_url: '{{ .SlackWebhookURL }}'
-        channel: '#sre-alerts'
-        title: '🚨 CRITICAL SLO BREACH'
+      - api_url: "{{ .SlackWebhookURL }}"
+        channel: "#sre-alerts"
+        title: "🚨 CRITICAL SLO BREACH"
         text: |
           *Service*: {{ .CommonLabels.service }}
           *Burn Rate*: {{ .CommonAnnotations.burn_rate }}x normal
@@ -108,78 +108,78 @@ receivers:
 
           Auto-rollback may be triggered if sustained >2 evaluation cycles.
 
-  - name: 'auto-rollback-ack'
+  - name: "auto-rollback-ack"
     webhook_configs:
-      - url: 'http://auto-rollback-controller:8080/api/v1/ack'
+      - url: "http://auto-rollback-controller:8080/api/v1/ack"
         send_resolved: true
         http_config:
           basic_auth:
-            username: 'alertmanager'
-            password: '{{ .AutoRollbackToken }}'
+            username: "alertmanager"
+            password: "{{ .AutoRollbackToken }}"
 
-  - name: 'slo-high'
+  - name: "slo-high"
     slack_configs:
-      - api_url: '{{ .SlackWebhookURL }}'
-        channel: '#sre-alerts'
-        title: '⚠️ High SLO Burn Rate'
+      - api_url: "{{ .SlackWebhookURL }}"
+        channel: "#sre-alerts"
+        title: "⚠️ High SLO Burn Rate"
         text: |
           *Service*: {{ .CommonLabels.service }}
           *Burn Rate*: {{ .CommonAnnotations.burn_rate }}x normal
           *Action Required*: Within 1 hour
 
-  - name: 'slo-medium'
+  - name: "slo-medium"
     slack_configs:
-      - api_url: '{{ .SlackWebhookURL }}'
-        channel: '#alerts'
-        title: '📊 Medium SLO Burn Rate'
+      - api_url: "{{ .SlackWebhookURL }}"
+        channel: "#alerts"
+        title: "📊 Medium SLO Burn Rate"
         text: |
           *Service*: {{ .CommonLabels.service }}
           *Burn Rate*: {{ .CommonAnnotations.burn_rate }}x normal
           *Action Required*: Within 6 hours
 
-  - name: 'finops-alerts'
+  - name: "finops-alerts"
     slack_configs:
-      - api_url: '{{ .SlackWebhookURL }}'
-        channel: '#finops-alerts'
-        title: '💰 FinOps Budget Alert'
+      - api_url: "{{ .SlackWebhookURL }}"
+        channel: "#finops-alerts"
+        title: "💰 FinOps Budget Alert"
         text: |
           *Environment*: {{ .CommonLabels.environment }}
           *Budget Utilization*: {{ .CommonAnnotations.budget_percent }}%
           *Projected Overspend*: ${{ .CommonAnnotations.overspend_amount }}
 
-  - name: 'chaos-alerts'
+  - name: "chaos-alerts"
     slack_configs:
-      - api_url: '{{ .SlackWebhookURL }}'
-        channel: '#chaos-engineering'
-        title: '🌪️ Chaos Engineering Alert'
+      - api_url: "{{ .SlackWebhookURL }}"
+        channel: "#chaos-engineering"
+        title: "🌪️ Chaos Engineering Alert"
         text: |
           *Experiment*: {{ .CommonLabels.experiment }}
           *Status*: {{ .CommonAnnotations.status }}
           *SLO Impact*: {{ .CommonAnnotations.slo_impact }}
 
-  - name: 'ai-ops'
+  - name: "ai-ops"
     slack_configs:
-      - api_url: '{{ .SlackWebhookURL }}'
-        channel: '#ml-ops'
-        title: '🤖 AI Insights Alert'
+      - api_url: "{{ .SlackWebhookURL }}"
+        channel: "#ml-ops"
+        title: "🤖 AI Insights Alert"
         text: |
           *Model*: {{ .CommonLabels.model }}
           *Issue*: {{ .CommonAnnotations.summary }}
           *Drift Score*: {{ .CommonAnnotations.drift_score }}
 
-  - name: 'ml-pagerduty'
+  - name: "ml-pagerduty"
     pagerduty_configs:
-      - service_key: '{{ .PagerDutyServiceKey }}'
-        description: 'ML Observability Alert: {{ .CommonAnnotations.summary }}'
+      - service_key: "{{ .PagerDutyServiceKey }}"
+        description: "ML Observability Alert: {{ .CommonAnnotations.summary }}"
         severity: '{{ if eq .CommonLabels.severity "page" }}critical{{ else }}warning{{ end }}'
         details:
-          service: '{{ .CommonLabels.service }}'
-          model: '{{ .CommonLabels.model }}'
-          runbook: '{{ .CommonAnnotations.runbook_url }}'
+          service: "{{ .CommonLabels.service }}"
+          model: "{{ .CommonLabels.model }}"
+          runbook: "{{ .CommonAnnotations.runbook_url }}"
     slack_configs:
-      - api_url: '{{ .SlackWebhookURL }}'
-        channel: '#ml-ops'
-        title: '🤖 ML Observability Alert'
+      - api_url: "{{ .SlackWebhookURL }}"
+        channel: "#ml-ops"
+        title: "🤖 ML Observability Alert"
         text: |
           *Alert*: {{ .CommonLabels.alertname }}
           *Model*: {{ .CommonLabels.model }}
@@ -196,7 +196,7 @@ inhibit_rules:
     target_match:
       severity: medium
       component: error_budget
-    equal: ['service', 'cluster']
+    equal: ["service", "cluster"]
 
   - source_match:
       severity: high
@@ -204,15 +204,15 @@ inhibit_rules:
     target_match:
       severity: medium
       component: error_budget
-    equal: ['service', 'cluster']
+    equal: ["service", "cluster"]
 
   # Don't alert on individual service issues during chaos experiments
   - source_match:
       alertname: ChaosExperimentActive
     target_match_re:
-      alertname: '(ServiceDown|HighLatency|ErrorRate)'
-    equal: ['cluster', 'namespace']
+      alertname: "(ServiceDown|HighLatency|ErrorRate)"
+    equal: ["cluster", "namespace"]
 
 # Silence rules for maintenance windows
 templates:
-  - '/etc/alertmanager/templates/*.tmpl'
+  - "/etc/alertmanager/templates/*.tmpl"

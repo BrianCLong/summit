@@ -126,13 +126,13 @@ export function validateCypher(q: string): Validation {
   const reasons: string[] = [];
   if (
     !/^\s*(MATCH|WITH|RETURN|UNWIND|CALL|OPTIONAL MATCH|CREATE|MERGE|SET|DELETE|DETACH|LIMIT|WHERE)/i.test(
-      q,
+      q
     )
   ) {
-    reasons.push('Unexpected leading token');
+    reasons.push("Unexpected leading token");
   }
   if (/\b(DETACH\s+DELETE|DELETE\s+\w+)/i.test(q)) {
-    reasons.push('Potentially destructive operation');
+    reasons.push("Potentially destructive operation");
   }
   return { ok: reasons.length === 0, reasons };
 }
@@ -148,9 +148,7 @@ export function estimateCostRows(q: string): {
   // naive: penalize patterns, functions, and limits
   const patterns = (q.match(/MATCH/gi) || []).length;
   const hasLimit = /LIMIT\s+(\d+)/i.exec(q);
-  const estRows = hasLimit
-    ? Math.min(parseInt(hasLimit[1], 10), 1000)
-    : 5000 / (patterns + 1);
+  const estRows = hasLimit ? Math.min(parseInt(hasLimit[1], 10), 1000) : 5000 / (patterns + 1);
   const costUsd = 0.000001 * estRows * Math.max(1, patterns);
   return { costUsd: Number(costUsd.toFixed(6)), estRows: Math.ceil(estRows) };
 }
@@ -159,8 +157,8 @@ export function estimateCostRows(q: string): {
 **Path:** `apps/copilot/src/index.ts`
 
 ```ts
-export { validateCypher } from './validator';
-export { estimateCostRows } from './cost';
+export { validateCypher } from "./validator";
+export { estimateCostRows } from "./cost";
 ```
 
 ---
@@ -170,14 +168,14 @@ export { estimateCostRows } from './cost';
 **Path:** `services/api/src/middleware/costBudget.ts`
 
 ```ts
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response, NextFunction } from "express";
 
 export function costBudget(budgetUsdDefault = 0.01) {
   return (req: Request, res: Response, next: NextFunction) => {
-    const hdr = req.header('x-cost-budget-usd');
+    const hdr = req.header("x-cost-budget-usd");
     const budget = hdr ? Number(hdr) : budgetUsdDefault;
     if (!(budget > 0 && budget < 1))
-      return res.status(400).json({ error: 'invalid cost budget header' });
+      return res.status(400).json({ error: "invalid cost budget header" });
     (req as any).costBudgetUsd = budget;
     next();
   };
@@ -187,8 +185,8 @@ export function costBudget(budgetUsdDefault = 0.01) {
 **Path:** `services/api/src/index.ts` (excerpt)
 
 ```ts
-import express from 'express';
-import { costBudget } from './middleware/costBudget';
+import express from "express";
+import { costBudget } from "./middleware/costBudget";
 const app = express();
 app.use(costBudget());
 ```
@@ -320,12 +318,12 @@ jobs:
 **Path:** `tests/k6/preview_latency.js`
 
 ```javascript
-import http from 'k6/http';
-import { check, sleep } from 'k6';
-export const options = { vus: 5, duration: '1m' };
+import http from "k6/http";
+import { check, sleep } from "k6";
+export const options = { vus: 5, duration: "1m" };
 export default function () {
   const res = http.get(`${__ENV.BASE_URL}/copilot/preview?q=show%20emails`);
-  check(res, { 'status 200': (r) => r.status === 200 });
+  check(res, { "status 200": (r) => r.status === 200 });
   sleep(1);
 }
 ```

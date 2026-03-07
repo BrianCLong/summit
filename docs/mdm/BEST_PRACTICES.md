@@ -9,20 +9,22 @@
 #### Best Practices:
 
 1. **Field-Level Rules**: Define survivorship at the field level, not record level
+
    ```typescript
    const rules = [
-     { fieldName: 'email', strategy: 'most_recent' },
-     { fieldName: 'address', strategy: 'most_trusted_source' },
-     { fieldName: 'phone', strategy: 'highest_quality' }
+     { fieldName: "email", strategy: "most_recent" },
+     { fieldName: "address", strategy: "most_trusted_source" },
+     { fieldName: "phone", strategy: "highest_quality" },
    ];
    ```
 
 2. **Source Prioritization**: Rank sources based on reliability
+
    ```typescript
    const sources = [
-     { system: 'CRM', priority: 1, confidence: 0.95 },
-     { system: 'ERP', priority: 2, confidence: 0.85 },
-     { system: 'Legacy', priority: 3, confidence: 0.70 }
+     { system: "CRM", priority: 1, confidence: 0.95 },
+     { system: "ERP", priority: 2, confidence: 0.85 },
+     { system: "Legacy", priority: 3, confidence: 0.7 },
    ];
    ```
 
@@ -37,12 +39,14 @@
 ### Merge Strategy
 
 **DO:**
+
 - Review match results before merging
 - Document merge decisions
 - Maintain lineage of merged records
 - Implement undo capability
 
 **DON'T:**
+
 - Auto-merge without validation
 - Lose source record history
 - Merge across different entity types
@@ -53,21 +57,25 @@
 ### Algorithm Selection
 
 **Exact Matching**: Use for unique identifiers
+
 ```typescript
 { fieldName: 'ssn', comparator: 'exact', weight: 1.0 }
 ```
 
 **Fuzzy Matching**: Use for names and addresses
+
 ```typescript
 { fieldName: 'name', comparator: 'jaro_winkler', weight: 0.6 }
 ```
 
 **Phonetic Matching**: Use for names with spelling variations
+
 ```typescript
 { fieldName: 'lastName', comparator: 'soundex', weight: 0.5 }
 ```
 
 **Token-Based**: Use for multi-word fields
+
 ```typescript
 { fieldName: 'companyName', comparator: 'token_set', weight: 0.7 }
 ```
@@ -98,6 +106,7 @@ Implement blocking to improve performance:
 ```
 
 **Best Practices:**
+
 - Use selective blocking keys
 - Monitor block size distribution
 - Implement multi-pass blocking for comprehensive coverage
@@ -115,6 +124,7 @@ Implement blocking to improve performance:
    - Timeliness
 
 2. **Business Context**: Align rules with business requirements
+
    ```typescript
    {
      id: 'customer-email-required',
@@ -132,15 +142,17 @@ Implement blocking to improve performance:
 ### Quality Monitoring
 
 **Continuous Assessment:**
+
 ```typescript
 // Run quality checks on data ingestion
 await qualityEngine.assessQuality(recordId, domain, data, rules);
 
 // Track quality metrics over time
-const trends = await analyticsEngine.getQualityTrends('customer', '30d');
+const trends = await analyticsEngine.getQualityTrends("customer", "30d");
 ```
 
 **Alerting:**
+
 - Set up alerts for quality score drops
 - Notify stewards of critical issues
 - Implement escalation procedures
@@ -148,6 +160,7 @@ const trends = await analyticsEngine.getQualityTrends('customer', '30d');
 ### Auto-Fix Implementation
 
 **Safe Auto-Fix:**
+
 ```typescript
 {
   ruleType: 'invalid_format',
@@ -157,6 +170,7 @@ const trends = await analyticsEngine.getQualityTrends('customer', '30d');
 ```
 
 **Guidelines:**
+
 - Only auto-fix deterministic issues
 - Log all auto-fix actions
 - Allow manual override
@@ -175,12 +189,12 @@ const trends = await analyticsEngine.getQualityTrends('customer', '30d');
 
 ```typescript
 // Good
-const codeListName = 'iso_country_codes';
-const code = { code: 'US', value: 'United States' };
+const codeListName = "iso_country_codes";
+const code = { code: "US", value: "United States" };
 
 // Bad
-const codeListName = 'countries';
-const code = { code: 'USA', value: 'US' };
+const codeListName = "countries";
+const code = { code: "USA", value: "US" };
 ```
 
 ### Distribution
@@ -204,6 +218,7 @@ const code = { code: 'USA', value: 'US' };
 ### Validation
 
 Implement validation rules:
+
 ```typescript
 {
   maxDepth: 10,
@@ -305,22 +320,18 @@ Implement validation rules:
 ### Audit Trail
 
 **Comprehensive Logging:**
+
 ```typescript
-await governanceEngine.logAudit(
-  userId,
-  action,
-  resourceType,
-  resourceId,
-  {
-    before: oldValue,
-    after: newValue,
-    reason: justification,
-    approver: approverId
-  }
-);
+await governanceEngine.logAudit(userId, action, resourceType, resourceId, {
+  before: oldValue,
+  after: newValue,
+  reason: justification,
+  approver: approverId,
+});
 ```
 
 **What to Log:**
+
 - All data modifications
 - Access to sensitive data
 - Configuration changes
@@ -330,6 +341,7 @@ await governanceEngine.logAudit(
 ### Compliance Reporting
 
 **Regular Reports:**
+
 - Weekly: Exception reports
 - Monthly: Compliance metrics
 - Quarterly: Executive summaries
@@ -384,10 +396,10 @@ for (const record of records) {
 
 ```typescript
 // Authentication required
-app.use('/api', authenticate);
+app.use("/api", authenticate);
 
 // Authorization checks
-app.post('/api/master-records', authorize('mdm:write'), handler);
+app.post("/api/master-records", authorize("mdm:write"), handler);
 
 // Rate limiting
 app.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 100 }));
@@ -407,10 +419,10 @@ app.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 100 }));
 
 ```typescript
 const alerts = {
-  qualityScoreDrop: { threshold: 0.10, severity: 'high' },
-  syncFailureRate: { threshold: 0.05, severity: 'critical' },
-  apiLatency: { threshold: 1000, severity: 'medium' },
-  matchRateDrop: { threshold: 0.15, severity: 'high' }
+  qualityScoreDrop: { threshold: 0.1, severity: "high" },
+  syncFailureRate: { threshold: 0.05, severity: "critical" },
+  apiLatency: { threshold: 1000, severity: "medium" },
+  matchRateDrop: { threshold: 0.15, severity: "high" },
 };
 ```
 

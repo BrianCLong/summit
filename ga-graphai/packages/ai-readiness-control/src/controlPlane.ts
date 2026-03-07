@@ -1,10 +1,10 @@
-import { DataQualityGate, DataQualityReport } from './dataQuality.js';
-import { FeatureStore } from './featureStore.js';
-import { ModelRegistry } from './modelRegistry.js';
-import { PiiGuard } from './pii.js';
-import { ProvenanceTracker } from './provenance.js';
-import { RetrievalIndex } from './retrievalIndex.js';
-import { InMemoryEventBus, IntentTelemetry } from './telemetry.js';
+import { DataQualityGate, DataQualityReport } from "./dataQuality.js";
+import { FeatureStore } from "./featureStore.js";
+import { ModelRegistry } from "./modelRegistry.js";
+import { PiiGuard } from "./pii.js";
+import { ProvenanceTracker } from "./provenance.js";
+import { RetrievalIndex } from "./retrievalIndex.js";
+import { InMemoryEventBus, IntentTelemetry } from "./telemetry.js";
 import {
   AlertSink,
   CanonicalEntityName,
@@ -17,9 +17,9 @@ import {
   SchemaDefinition,
   PolicyDecisionInput,
   PolicyProfileName,
-} from './types.js';
-import { SchemaRegistry } from './schemaRegistry.js';
-import { defaultPolicyProfiles, PolicyEngine } from './policyEngine.js';
+} from "./types.js";
+import { SchemaRegistry } from "./schemaRegistry.js";
+import { defaultPolicyProfiles, PolicyEngine } from "./policyEngine.js";
 
 export interface ControlPlaneConfig {
   piiRules: PiiRule[];
@@ -37,7 +37,10 @@ export class AIReadinessControlPlane {
   private readonly models = new ModelRegistry();
   private readonly policyEngine = new PolicyEngine(defaultPolicyProfiles);
 
-  constructor(config: ControlPlaneConfig, bus: InMemoryEventBus<IntentEvent> = new InMemoryEventBus()) {
+  constructor(
+    config: ControlPlaneConfig,
+    bus: InMemoryEventBus<IntentEvent> = new InMemoryEventBus()
+  ) {
     this.telemetry = new IntentTelemetry(bus);
     this.gate = new DataQualityGate(config.alertSink);
     this.piiGuard = new PiiGuard(config.piiRules);
@@ -53,19 +56,35 @@ export class AIReadinessControlPlane {
 
   validateAndSanitize(
     entity: CanonicalEntityName,
-    record: Record<string, unknown>,
-  ): { validated: boolean; redacted: Record<string, unknown>; errors: string[]; piiTags: string[] } {
+    record: Record<string, unknown>
+  ): {
+    validated: boolean;
+    redacted: Record<string, unknown>;
+    errors: string[];
+    piiTags: string[];
+  } {
     const validation = this.schemas.validate(entity, record);
     const piiTags = this.piiGuard.tag(record);
     const redacted = this.piiGuard.redact(record);
     return { validated: validation.valid, redacted, errors: validation.errors, piiTags };
   }
 
-  enforceDataQuality(table: string, records: DataQualityRecord[], options: DataQualityOptions): DataQualityReport {
+  enforceDataQuality(
+    table: string,
+    records: DataQualityRecord[],
+    options: DataQualityOptions
+  ): DataQualityReport {
     return this.gate.evaluate(table, records, options);
   }
 
-  indexDocument(doc: { id: string; title: string; owner: string; tags: string[]; refreshIntervalMinutes: number; link: string }): void {
+  indexDocument(doc: {
+    id: string;
+    title: string;
+    owner: string;
+    tags: string[];
+    refreshIntervalMinutes: number;
+    link: string;
+  }): void {
     this.retrieval.add({ ...doc });
   }
 
@@ -94,18 +113,22 @@ export class AIReadinessControlPlane {
     this.provenance.record(record);
   }
 
-  attachFeedback(outputId: string, feedback: ProvenanceRecord['feedback']): void {
+  attachFeedback(outputId: string, feedback: ProvenanceRecord["feedback"]): void {
     this.provenance.attachFeedback(outputId, feedback);
   }
 
-  recordModel(model: { modelId: string; version: string; release: string; metrics: Record<string, number> }): void {
+  recordModel(model: {
+    modelId: string;
+    version: string;
+    release: string;
+    metrics: Record<string, number>;
+  }): void {
     this.models.register(model);
   }
 
   rollbackModel(modelId: string, version: string, reason: string): void {
     this.models.rollback(modelId, version, reason);
   }
-
 
   evaluatePolicy(input: PolicyDecisionInput) {
     return this.policyEngine.evaluate(input);
@@ -117,15 +140,15 @@ export class AIReadinessControlPlane {
 
   updatePolicyProfile(
     name: PolicyProfileName,
-    updater: Parameters<PolicyEngine['updateProfile']>[1],
+    updater: Parameters<PolicyEngine["updateProfile"]>[1]
   ) {
     return this.policyEngine.updateProfile(name, updater);
   }
 
   snapshot(): {
-    models: ReturnType<ModelRegistry['list']>;
-    provenance: ReturnType<ProvenanceTracker['list']>;
-    pendingFeatures: ReturnType<FeatureStore['pendingExpiry']>;
+    models: ReturnType<ModelRegistry["list"]>;
+    provenance: ReturnType<ProvenanceTracker["list"]>;
+    pendingFeatures: ReturnType<FeatureStore["pendingExpiry"]>;
   } {
     return {
       models: this.models.list(),

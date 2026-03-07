@@ -38,18 +38,18 @@
 
 ## 4) Work Plan & Owners
 
-| Date   | Work Item                          | Owner           | Exit Criteria                                              |
-| ------ | ---------------------------------- | --------------- | ---------------------------------------------------------- |
-| Jan 5  | Kickoff; tenant configs; keys      | Co‑CEO + SecOps | Two tenant configs; API gateway keys issued                |
-| Jan 6  | Controls Mapper                    | DevEx           | `controls.json` generated from existing packs              |
-| Jan 7  | Attestation API scaffold + OpenAPI | DevEx           | OpenAPI doc committed; mock server green                   |
-| Jan 8  | OPA v1.4 (tenant + API guards)     | SecOps          | `opa test` green; bundle hash pinned                       |
-| Jan 9  | Trust Portal theming + verify      | PM + Co‑CEO     | Two themes load; cosign verify --use-signed-timestamps shown                       |
-| Jan 12 | Budget Gate in CI                  | DevEx           | Failing budgets block release; pack includes budget report |
-| Jan 13 | Tenant deploys (2x)                | DevEx           | Two branded portals published (staging)                    |
-| Jan 14 | API prod preview + logs            | DevEx           | Read‑only endpoints live behind key; logs visible          |
-| Jan 15 | Partner dry‑run                    | Co‑CEO          | Both partners access; evidence downloads verified          |
-| Jan 16 | Sprint demo + retro                | Co‑CEO          | OKRs measured; risks updated                               |
+| Date   | Work Item                          | Owner           | Exit Criteria                                                |
+| ------ | ---------------------------------- | --------------- | ------------------------------------------------------------ |
+| Jan 5  | Kickoff; tenant configs; keys      | Co‑CEO + SecOps | Two tenant configs; API gateway keys issued                  |
+| Jan 6  | Controls Mapper                    | DevEx           | `controls.json` generated from existing packs                |
+| Jan 7  | Attestation API scaffold + OpenAPI | DevEx           | OpenAPI doc committed; mock server green                     |
+| Jan 8  | OPA v1.4 (tenant + API guards)     | SecOps          | `opa test` green; bundle hash pinned                         |
+| Jan 9  | Trust Portal theming + verify      | PM + Co‑CEO     | Two themes load; cosign verify --use-signed-timestamps shown |
+| Jan 12 | Budget Gate in CI                  | DevEx           | Failing budgets block release; pack includes budget report   |
+| Jan 13 | Tenant deploys (2x)                | DevEx           | Two branded portals published (staging)                      |
+| Jan 14 | API prod preview + logs            | DevEx           | Read‑only endpoints live behind key; logs visible            |
+| Jan 15 | Partner dry‑run                    | Co‑CEO          | Both partners access; evidence downloads verified            |
+| Jan 16 | Sprint demo + retro                | Co‑CEO          | OKRs measured; risks updated                                 |
 
 ---
 
@@ -61,23 +61,18 @@
 
 ```js
 #!/usr/bin/env node
-import fs from 'node:fs';
-const pack = JSON.parse(
-  fs.readFileSync(process.argv[2] || 'compliance/manifest.json', 'utf8'),
-);
+import fs from "node:fs";
+const pack = JSON.parse(fs.readFileSync(process.argv[2] || "compliance/manifest.json", "utf8"));
 const controls = [];
 function add(id, ev) {
   controls.push({ id, evidence: ev });
 }
 // Examples
-add('SOC2.CC2.2', ['sbom.json', 'provenance.intoto.jsonl', 'cosign:verify']);
-add('SOC2.CC7.2', ['ops/runbooks/rollback.md', 'evidence/dr_metrics.json']);
-add('ASVS.1.2.1', ['policies/policy.bundle.rego', 'policy.json']);
-fs.writeFileSync(
-  'controls.json',
-  JSON.stringify({ version: 'v1', controls }, null, 2),
-);
-console.log('wrote controls.json');
+add("SOC2.CC2.2", ["sbom.json", "provenance.intoto.jsonl", "cosign:verify"]);
+add("SOC2.CC7.2", ["ops/runbooks/rollback.md", "evidence/dr_metrics.json"]);
+add("ASVS.1.2.1", ["policies/policy.bundle.rego", "policy.json"]);
+fs.writeFileSync("controls.json", JSON.stringify({ version: "v1", controls }, null, 2));
+console.log("wrote controls.json");
 ```
 
 **CI step:**
@@ -107,17 +102,16 @@ paths:
       summary: List attestations for latest releases
       parameters: [{ name: repo, in: query, schema: { type: string } }]
       responses:
-        '200': { description: OK }
+        "200": { description: OK }
   /releases/{tag}:
     get:
       summary: Get evidence for a release tag
-      parameters:
-        [{ name: tag, in: path, required: true, schema: { type: string } }]
-      responses: { '200': { description: OK } }
+      parameters: [{ name: tag, in: path, required: true, schema: { type: string } }]
+      responses: { "200": { description: OK } }
   /controls:
     get:
       summary: Control mapping for latest pack
-      responses: { '200': { description: OK } }
+      responses: { "200": { description: OK } }
 components:
   securitySchemes: { ApiKeyAuth: { type: apiKey, in: header, name: X-API-Key } }
 security: [{ ApiKeyAuth: [] }]
@@ -126,15 +120,13 @@ security: [{ ApiKeyAuth: [] }]
 **Gateway Skeleton (Node):** `apis/attestation/server.js`
 
 ```js
-import express from 'express';
-import rateLimit from 'express-rate-limit';
+import express from "express";
+import rateLimit from "express-rate-limit";
 const app = express();
 app.use(rateLimit({ windowMs: 60_000, max: 60 }));
-app.get('/attestations', (req, res) => res.json({ items: [] }));
-app.get('/releases/:tag', (req, res) =>
-  res.json({ tag: req.params.tag, evidence: [] }),
-);
-app.get('/controls', (req, res) => res.json({ version: 'v1', controls: [] }));
+app.get("/attestations", (req, res) => res.json({ items: [] }));
+app.get("/releases/:tag", (req, res) => res.json({ tag: req.params.tag, evidence: [] }));
+app.get("/controls", (req, res) => res.json({ version: "v1", controls: [] }));
 app.listen(8080);
 ```
 
@@ -181,18 +173,10 @@ allow_field { data.presentation[input.legal_basis][input.purpose][_]==input.fiel
 **Branding Hook (React):** `tools/trust-portal/components/BrandShell.tsx`
 
 ```tsx
-export default function BrandShell({
-  cfg,
-  children,
-}: {
-  cfg: any;
-  children: any;
-}) {
+export default function BrandShell({ cfg, children }: { cfg: any; children: any }) {
   return (
     <div style={{ borderRadius: 16, padding: 16 }}>
-      <header style={{ fontWeight: 700 }}>
-        {cfg.branding.name} Trust Portal
-      </header>
+      <header style={{ fontWeight: 700 }}>{cfg.branding.name} Trust Portal</header>
       <main>{children}</main>
     </div>
   );

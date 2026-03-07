@@ -1,5 +1,5 @@
-import { StructuredEventEmitter } from '@ga-graphai/common-types';
-import type { HealthSignal } from './types';
+import { StructuredEventEmitter } from "@ga-graphai/common-types";
+import type { HealthSignal } from "./types";
 
 export interface TrialConfig {
   durationDays: number;
@@ -12,7 +12,7 @@ export interface TenantInfo {
   orgId: string;
   createdAt: Date;
   trialExpiresAt: Date;
-  status: 'active' | 'expired' | 'converted';
+  status: "active" | "expired" | "converted";
 }
 
 export class TrialManager {
@@ -38,11 +38,11 @@ export class TrialManager {
       orgId,
       createdAt,
       trialExpiresAt,
-      status: 'active',
+      status: "active",
     };
 
     this.trials.set(tenantId, info);
-    this.events.emitEvent('summit.trial.registered', {
+    this.events.emitEvent("summit.trial.registered", {
       tenantId,
       orgId,
       expiresAt: trialExpiresAt.toISOString(),
@@ -53,15 +53,15 @@ export class TrialManager {
 
   recordScan(tenantId: string): void {
     const info = this.trials.get(tenantId);
-    if (!info || info.status !== 'active') return;
+    if (!info || info.status !== "active") return;
 
-    const dateKey = new Date().toISOString().split('T')[0];
+    const dateKey = new Date().toISOString().split("T")[0];
     const tenantScans = this.scanCounts.get(tenantId) ?? new Map<string, number>();
     const count = (tenantScans.get(dateKey) ?? 0) + 1;
     tenantScans.set(dateKey, count);
     this.scanCounts.set(tenantId, tenantScans);
 
-    this.events.emitEvent('summit.trial.scan_recorded', {
+    this.events.emitEvent("summit.trial.scan_recorded", {
       tenantId,
       count,
       date: dateKey,
@@ -69,7 +69,7 @@ export class TrialManager {
 
     // Check for upsell signal (e.g., more than 5 scans in a day)
     if (count >= 5) {
-      this.emitUpsellSignal(tenantId, 'high_usage');
+      this.emitUpsellSignal(tenantId, "high_usage");
     }
   }
 
@@ -78,7 +78,7 @@ export class TrialManager {
     const expiredIds: string[] = [];
 
     for (const [id, info] of this.trials.entries()) {
-      if (info.status === 'active' && now > info.trialExpiresAt) {
+      if (info.status === "active" && now > info.trialExpiresAt) {
         this.expireTrial(id);
         expiredIds.push(id);
       }
@@ -91,10 +91,10 @@ export class TrialManager {
     const info = this.trials.get(tenantId);
     if (!info) return;
 
-    info.status = 'expired';
+    info.status = "expired";
     this.trials.set(tenantId, info);
 
-    this.events.emitEvent('summit.trial.expired', {
+    this.events.emitEvent("summit.trial.expired", {
       tenantId,
       orgId: info.orgId,
       expiredAt: new Date().toISOString(),
@@ -123,7 +123,7 @@ export class TrialManager {
     const info = this.trials.get(tenantId);
     if (!info) return;
 
-    this.events.emitEvent('summit.trial.upsell_signal', {
+    this.events.emitEvent("summit.trial.upsell_signal", {
       tenantId,
       orgId: info.orgId,
       reason,

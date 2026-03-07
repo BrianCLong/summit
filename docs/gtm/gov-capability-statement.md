@@ -20,21 +20,21 @@ Summit delivers a unified intelligence analysis platform that fuses OSINT and al
 
 ## Differentiators
 
-| Capability | What It Means for Your Mission |
-|------------|-------------------------------|
-| **Provenance & Audit** | Every fact traced to source; exportable chain-of-custody; stands up to oversight and FOIA |
-| **Policy-Gated AI** | ABAC/OPA enforcement, DLP hooks, redaction modes; AI assists within guardrails—no black-box risk |
-| **Tri-Pane Workbench** | Graph + Timeline + Map in one interface; reduces swivel-chair across tools |
-| **NL-to-Cypher** | Natural-language queries against the graph; analysts ask questions, not write code |
-| **Deploy Anywhere** | Cloud, on-prem, air-gapped; containerized (K8s/Helm); FedRAMP path |
-| **Open & Interoperable** | STIX/TAXII, REST/GraphQL APIs, SDKs; connects to your existing ecosystem |
+| Capability               | What It Means for Your Mission                                                                   |
+| ------------------------ | ------------------------------------------------------------------------------------------------ |
+| **Provenance & Audit**   | Every fact traced to source; exportable chain-of-custody; stands up to oversight and FOIA        |
+| **Policy-Gated AI**      | ABAC/OPA enforcement, DLP hooks, redaction modes; AI assists within guardrails—no black-box risk |
+| **Tri-Pane Workbench**   | Graph + Timeline + Map in one interface; reduces swivel-chair across tools                       |
+| **NL-to-Cypher**         | Natural-language queries against the graph; analysts ask questions, not write code               |
+| **Deploy Anywhere**      | Cloud, on-prem, air-gapped; containerized (K8s/Helm); FedRAMP path                               |
+| **Open & Interoperable** | STIX/TAXII, REST/GraphQL APIs, SDKs; connects to your existing ecosystem                         |
 
 ---
 
 ## Past Performance / References
 
-| Customer | Mission Area | Period | Summary |
-|----------|--------------|--------|---------|
+| Customer                        | Mission Area | Period       | Summary                                                              |
+| ------------------------------- | ------------ | ------------ | -------------------------------------------------------------------- |
 | [Reference A - Details Pending] | OSINT Fusion | 2024–Present | Cut time-to-insight by 45%; full provenance on 98% of ingested items |
 | [Reference B - Details Pending] | Threat Intel | 2024–Present | Consolidated 6 feeds into unified graph; reduced analyst duplication |
 
@@ -77,11 +77,11 @@ Summit delivers a unified intelligence analysis platform that fuses OSINT and al
 
 **Objective:** Prove analyst velocity and compliance outcomes on a constrained mission thread.
 
-| Tier | Users | Data Sources | Price |
-|------|-------|--------------|-------|
-| Tier 1 | Up to 10 | Up to 3 | $75,000 |
-| Tier 2 | Up to 25 | Up to 6 | $125,000 |
-| Strategic Mission (by approval) | Varies | Varies | $40,000–$60,000 |
+| Tier                            | Users    | Data Sources | Price           |
+| ------------------------------- | -------- | ------------ | --------------- |
+| Tier 1                          | Up to 10 | Up to 3      | $75,000         |
+| Tier 2                          | Up to 25 | Up to 6      | $125,000        |
+| Strategic Mission (by approval) | Varies   | Varies       | $40,000–$60,000 |
 
 **Includes:**
 
@@ -131,14 +131,14 @@ Summit delivers a unified intelligence analysis platform that fuses OSINT and al
 
 ## Compliance & Governance
 
-| Requirement | Summit Posture |
-|-------------|----------------|
-| **FedRAMP** | High baseline path; SSP in development |
-| **CMMC** | Level 2 controls mapped; CUI handling ready |
-| **FISMA** | Control inheritance documentation available |
-| **IL4/IL5** | Architecture supports; deployment in authorized environments |
-| **ITAR/EAR** | Export control screening; US-only deployment options |
-| **Privacy** | DPIA templates; privacy modes; redaction presets |
+| Requirement  | Summit Posture                                               |
+| ------------ | ------------------------------------------------------------ |
+| **FedRAMP**  | High baseline path; SSP in development                       |
+| **CMMC**     | Level 2 controls mapped; CUI handling ready                  |
+| **FISMA**    | Control inheritance documentation available                  |
+| **IL4/IL5**  | Architecture supports; deployment in authorized environments |
+| **ITAR/EAR** | Export control screening; US-only deployment options         |
+| **Privacy**  | DPIA templates; privacy modes; redaction presets             |
 
 ---
 
@@ -169,12 +169,12 @@ Summit delivers a unified intelligence analysis platform that fuses OSINT and al
 
 ## Key Personnel
 
-| Role | Name | Clearance | Expertise |
-|------|------|-----------|-----------|
-| CEO | [Name] | [Level] | Strategy, Government Programs |
-| CTO | [Name] | [Level] | Platform Architecture, Security |
-| VP Engineering | [Name] | [Level] | Delivery, DevSecOps |
-| VP Sales/BizDev | Felix | [Level] | Government Sales, Partnerships |
+| Role            | Name   | Clearance | Expertise                       |
+| --------------- | ------ | --------- | ------------------------------- |
+| CEO             | [Name] | [Level]   | Strategy, Government Programs   |
+| CTO             | [Name] | [Level]   | Platform Architecture, Security |
+| VP Engineering  | [Name] | [Level]   | Delivery, DevSecOps             |
+| VP Sales/BizDev | Felix  | [Level]   | Government Sales, Partnerships  |
 
 ---
 

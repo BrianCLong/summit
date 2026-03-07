@@ -1,2 +1,2 @@
-export * from './AdaptersPage';
-export * from './types';
+export * from "./AdaptersPage";
+export * from "./types";

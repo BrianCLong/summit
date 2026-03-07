@@ -16,7 +16,7 @@ Meta just **ended third-party fact-checking partnerships** (January 2025), elimi
 4. **Controls standards**: You set what "verified" means; competitors must follow your rules
 5. **Captures network effects**: More validators → more trustworthy verifications → more demand for your API
 
-***
+---
 
 ## 1. The Threat: Why This Is Existential
 
@@ -62,7 +62,7 @@ Meta just **ended third-party fact-checking partnerships** (January 2025), elimi
 
 **You should own the validator certification.**
 
-***
+---
 
 ## 2. FactCert: Three Revenue Streams
 
@@ -176,22 +176,22 @@ Revenue Model:
 - **Stream 3 Year 1: $2M ARR**
 ```
 
-***
+---
 
 ## 3. Why This Is Your Defensible Moat
 
 ### 3.1 Competitive Advantage vs. IFCN (Your Threat)
 
-| Dimension | IFCN (Non-Profit) | FactCert (For-Profit) |
-| :--- | :--- | :--- |
-| **Funding model** | Grants, Meta subsidies | Revenue from customers |
-| **Enforcement** | Weak (reputational) | Strong (contractual, SLA-based) |
-| **Validation quality** | Community-driven | Professional, AI-assisted |
-| **Tech integration** | Standalone | Integrated with FactFlow, FactLaw, FactMarkets |
-| **Speed to certification** | 6-12 months | 8-12 weeks |
-| **Digital badging** | Basic | NFT-based, verifiable on blockchain |
-| **Scope** | Global/general | Specialized by domain (health, finance, legal) |
-| **Customer lock-in** | Low | High (network effects, standards control) |
+| Dimension                  | IFCN (Non-Profit)      | FactCert (For-Profit)                          |
+| :------------------------- | :--------------------- | :--------------------------------------------- |
+| **Funding model**          | Grants, Meta subsidies | Revenue from customers                         |
+| **Enforcement**            | Weak (reputational)    | Strong (contractual, SLA-based)                |
+| **Validation quality**     | Community-driven       | Professional, AI-assisted                      |
+| **Tech integration**       | Standalone             | Integrated with FactFlow, FactLaw, FactMarkets |
+| **Speed to certification** | 6-12 months            | 8-12 weeks                                     |
+| **Digital badging**        | Basic                  | NFT-based, verifiable on blockchain            |
+| **Scope**                  | Global/general         | Specialized by domain (health, finance, legal) |
+| **Customer lock-in**       | Low                    | High (network effects, standards control)      |
 
 ### 3.2 Network Effects & Lock-In
 
@@ -219,7 +219,7 @@ Once you certify validators:
 - Certify validators through FactCert (certification revenue)
 - Use FactCert-certified methodology (compliance revenue)
 
-***
+---
 
 ## 4. Operational Roadmap: 16 Weeks to Launch
 
@@ -274,27 +274,27 @@ Once you certify validators:
 - 5 compliance packages sold: $250K
 - **Total Month 4: $850K MRR run rate**
 
-***
+---
 
 ## 5. The Portfolio: Six Businesses, Defensive Moat
 
 By end of 2026:
 
-| Business | Primary Revenue | Role | Defensive Function |
-| :--- | :--- | :--- | :--- |
-| **FactFlow** | Newsroom SaaS ($2M) | Direct customer | ✓ Validators trained on FactFlow standards |
-| **FactLaw** | Legal eDiscovery ($3M) | Direct customer | ✓ Certified validators audit legal evidence |
-| **FactMarkets** | Financial fraud ($20M) | Direct customer | ✓ Financial validators certified via FactCert |
-| **FactAPI Pro** | Marketplace/licensing ($5M) | API distribution | ✓ Certified validators only use FactAPI |
-| **FactDatasets** | Data licensing ($500K) | Training data | ✓ Validated by FactCert validators |
-| **FactCert** | Certification/network ($3M) | **MOAT** | ✓ Controls validator standards, lock-in |
+| Business         | Primary Revenue             | Role             | Defensive Function                            |
+| :--------------- | :-------------------------- | :--------------- | :-------------------------------------------- |
+| **FactFlow**     | Newsroom SaaS ($2M)         | Direct customer  | ✓ Validators trained on FactFlow standards    |
+| **FactLaw**      | Legal eDiscovery ($3M)      | Direct customer  | ✓ Certified validators audit legal evidence   |
+| **FactMarkets**  | Financial fraud ($20M)      | Direct customer  | ✓ Financial validators certified via FactCert |
+| **FactAPI Pro**  | Marketplace/licensing ($5M) | API distribution | ✓ Certified validators only use FactAPI       |
+| **FactDatasets** | Data licensing ($500K)      | Training data    | ✓ Validated by FactCert validators            |
+| **FactCert**     | Certification/network ($3M) | **MOAT**         | ✓ Controls validator standards, lock-in       |
 
 **Combined Year 1: $33.5M ARR**
 **Combined Year 2: $60-100M ARR**
 
 **The moat**: All six businesses reinforce each other. FactCert validators use FactFlow, FactLaw, FactMarkets. Platforms can't abandon your ecosystem without losing certified validators.
 
-***
+---
 
 ## 6. Why Meta/Google Can't Compete
 
@@ -304,7 +304,7 @@ By end of 2026:
 4. **Cost**: Building validator certification from scratch = $100M+ effort; easier to license from you
 5. **Network effects**: First-mover advantage; by the time they try, FactCert owns 10K+ validators
 
-***
+---
 
 ## Conclusion
 

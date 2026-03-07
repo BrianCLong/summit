@@ -13,6 +13,6 @@ export class ModelCatalog {
   }
 
   byId(id: string): ModelConfig | undefined {
-    return this.models.find(m => m.id === id);
+    return this.models.find((m) => m.id === id);
   }
 }

@@ -27,14 +27,14 @@ API Layer                src/api/graphql/world_model_resolver.ts
 
 ## Module Map
 
-| Architecture Layer | Summit Module | Path |
-|---|---|---|
-| Observation | connectors | `src/connectors/` |
-| Representation | graphrag | `src/graphrag/world_model/` |
-| State model | graphrag + agents | `src/graphrag/world_model/` |
-| Dynamics model | agents | `src/agents/world_model/` |
-| Planning engine | agents | `src/agents/planning/` |
-| Execution | API layer | `src/api/graphql/` |
+| Architecture Layer | Summit Module     | Path                        |
+| ------------------ | ----------------- | --------------------------- |
+| Observation        | connectors        | `src/connectors/`           |
+| Representation     | graphrag          | `src/graphrag/world_model/` |
+| State model        | graphrag + agents | `src/graphrag/world_model/` |
+| Dynamics model     | agents            | `src/agents/world_model/`   |
+| Planning engine    | agents            | `src/agents/planning/`      |
+| Execution          | API layer         | `src/api/graphql/`          |
 
 ## Key Types
 
@@ -46,11 +46,11 @@ API Layer                src/api/graphql/world_model_resolver.ts
 
 ## Eval Targets
 
-| Metric | Target |
-|---|---|
-| Prediction accuracy | +25% vs baseline |
+| Metric                | Target           |
+| --------------------- | ---------------- |
+| Prediction accuracy   | +25% vs baseline |
 | Planning success rate | +30% vs baseline |
-| RAG grounding | +20% vs baseline |
+| RAG grounding         | +20% vs baseline |
 
 ## Rollback
 

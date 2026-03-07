@@ -176,15 +176,15 @@ owners:
 
 kpis:
   - name: manifest_fnr
-    target: '<=0.001'
+    target: "<=0.001"
   - name: copilot_semantic_accuracy
-    target: '>=0.90'
+    target: ">=0.90"
   - name: preview_latency_p95_ms
-    target: '<=250'
+    target: "<=250"
   - name: availability
-    target: '>=0.999'
+    target: ">=0.999"
   - name: metering_accuracy
-    target: '>=0.99'
+    target: ">=0.99"
 
 budget:
   cost_per_req_max_usd: 0.01
@@ -354,7 +354,7 @@ body:
 name: metering-export
 on: [schedule]
 schedule:
-  - cron: '0 * * * *'
+  - cron: "0 * * * *"
 jobs:
   export:
     runs-on: ubuntu-latest

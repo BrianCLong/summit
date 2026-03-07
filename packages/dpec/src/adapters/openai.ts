@@ -1,9 +1,9 @@
-import { DeterministicPromptExecutionCache } from '../cache.js';
-import { canonicalDigest, sha256, stableStringify } from '../hash.js';
-import type { AdapterResolution, CacheKeyComponents } from '../types.js';
+import { DeterministicPromptExecutionCache } from "../cache.js";
+import { canonicalDigest, sha256, stableStringify } from "../hash.js";
+import type { AdapterResolution, CacheKeyComponents } from "../types.js";
 
 export interface OpenAIChatMessage {
-  role: 'system' | 'user' | 'assistant' | 'tool';
+  role: "system" | "user" | "assistant" | "tool";
   content: unknown;
   name?: string;
 }
@@ -35,7 +35,7 @@ export interface OpenAIChatCompletionRequest {
 export interface OpenAIChatChoice {
   index: number;
   message: {
-    role: 'assistant' | 'tool';
+    role: "assistant" | "tool";
     content: unknown;
     refusal?: unknown;
   };
@@ -72,21 +72,21 @@ function defaultKey(request: OpenAIChatCompletionRequest): CacheKeyComponents {
     tokenizerHash: sha256(tokenizerSource),
     params,
     toolsGraphHash: sha256(stableStringify(request.tools ?? [])),
-    promptHash: sha256(stableStringify(request.messages))
+    promptHash: sha256(stableStringify(request.messages)),
   };
 }
 
 function buildParams(request: OpenAIChatCompletionRequest): Record<string, unknown> {
   const params: Record<string, unknown> = {};
   const candidate: Array<[keyof OpenAIChatCompletionRequest, string]> = [
-    ['temperature', 'temperature'],
-    ['top_p', 'top_p'],
-    ['max_tokens', 'max_tokens'],
-    ['frequency_penalty', 'frequency_penalty'],
-    ['presence_penalty', 'presence_penalty'],
-    ['stop', 'stop'],
-    ['seed', 'seed'],
-    ['response_format', 'response_format']
+    ["temperature", "temperature"],
+    ["top_p", "top_p"],
+    ["max_tokens", "max_tokens"],
+    ["frequency_penalty", "frequency_penalty"],
+    ["presence_penalty", "presence_penalty"],
+    ["stop", "stop"],
+    ["seed", "seed"],
+    ["response_format", "response_format"],
   ];
   for (const [key, alias] of candidate) {
     const value = request[key];
@@ -99,7 +99,9 @@ function buildParams(request: OpenAIChatCompletionRequest): Record<string, unkno
 
 export function createOpenAIChatAdapter(
   options: OpenAIAdapterOptions
-): (request: OpenAIChatCompletionRequest) => Promise<AdapterResolution<OpenAIChatCompletionResponse>> {
+): (
+  request: OpenAIChatCompletionRequest
+) => Promise<AdapterResolution<OpenAIChatCompletionResponse>> {
   const derive = options.deriveKey ?? defaultKey;
   return async (request: OpenAIChatCompletionRequest) => {
     const key = derive(request);
@@ -108,18 +110,18 @@ export function createOpenAIChatAdapter(
       return {
         artifact: JSON.stringify(response),
         metadata: {
-          adapter: 'openai.chat.completions',
-          requestDigest: canonicalDigest(request)
-        }
+          adapter: "openai.chat.completions",
+          requestDigest: canonicalDigest(request),
+        },
       };
     });
-    const response = JSON.parse(result.artifact.toString('utf8')) as OpenAIChatCompletionResponse;
-    if (result.type === 'hit') {
+    const response = JSON.parse(result.artifact.toString("utf8")) as OpenAIChatCompletionResponse;
+    if (result.type === "hit") {
       return {
         response,
         hit: true,
         proof: result.proof,
-        entry: result.entry
+        entry: result.entry,
       };
     }
     return {
@@ -127,7 +129,7 @@ export function createOpenAIChatAdapter(
       hit: false,
       trace: result.trace,
       evictionProofs: result.evictionProofs,
-      entry: result.entry
+      entry: result.entry,
     };
   };
 }

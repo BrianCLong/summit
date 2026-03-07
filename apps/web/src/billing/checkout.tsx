@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState } from 'react'
 
 const CheckoutPage: React.FC = () => {
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false)
 
   const handleCheckout = async (plan: 'pro' | 'ent') => {
-    setLoading(true);
+    setLoading(true)
     try {
       const response = await fetch('/api/stripe/checkout', {
         method: 'POST',
@@ -12,20 +12,20 @@ const CheckoutPage: React.FC = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ plan }),
-      });
-      const data = await response.json();
+      })
+      const data = await response.json()
       if (data.url) {
-        window.location.href = data.url;
+        window.location.href = data.url
       } else {
-        alert('Failed to initiate checkout');
+        alert('Failed to initiate checkout')
       }
     } catch (error) {
-      console.error('Checkout error:', error);
-      alert('An error occurred');
+      console.error('Checkout error:', error)
+      alert('An error occurred')
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   return (
     <div className="max-w-4xl mx-auto p-8">
@@ -35,7 +35,9 @@ const CheckoutPage: React.FC = () => {
         {/* Pro Plan */}
         <div className="border rounded-lg p-6 shadow-sm hover:shadow-md transition">
           <h2 className="text-2xl font-bold mb-2">Pro Plan</h2>
-          <p className="text-4xl font-bold mb-4">$99<span className="text-lg font-normal text-gray-500">/mo</span></p>
+          <p className="text-4xl font-bold mb-4">
+            $99<span className="text-lg font-normal text-gray-500">/mo</span>
+          </p>
           <ul className="mb-8 space-y-2">
             <li>✅ Scan unlimited</li>
             <li>✅ 5 agents</li>
@@ -53,7 +55,9 @@ const CheckoutPage: React.FC = () => {
         {/* Enterprise Plan */}
         <div className="border rounded-lg p-6 shadow-sm hover:shadow-md transition bg-blue-50 border-blue-200">
           <h2 className="text-2xl font-bold mb-2">Enterprise Plan</h2>
-          <p className="text-4xl font-bold mb-4">$499<span className="text-lg font-normal text-gray-500">/mo</span></p>
+          <p className="text-4xl font-bold mb-4">
+            $499<span className="text-lg font-normal text-gray-500">/mo</span>
+          </p>
           <ul className="mb-8 space-y-2">
             <li>✅ Multi-tenant</li>
             <li>✅ Custom agents</li>
@@ -79,7 +83,10 @@ const CheckoutPage: React.FC = () => {
               <span>3 / 5</span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2">
-              <div className="bg-blue-600 h-2 rounded-full" style={{ width: '60%' }}></div>
+              <div
+                className="bg-blue-600 h-2 rounded-full"
+                style={{ width: '60%' }}
+              ></div>
             </div>
           </div>
           <div>
@@ -88,13 +95,16 @@ const CheckoutPage: React.FC = () => {
               <span>12GB / 100GB</span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2">
-              <div className="bg-green-600 h-2 rounded-full" style={{ width: '12%' }}></div>
+              <div
+                className="bg-green-600 h-2 rounded-full"
+                style={{ width: '12%' }}
+              ></div>
             </div>
           </div>
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default CheckoutPage;
+export default CheckoutPage

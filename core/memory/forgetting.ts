@@ -1,11 +1,11 @@
-import { MemoryRecord } from './types';
+import { MemoryRecord } from "./types";
 
 /**
  * Implements "Mutual Forgetting" via a decay-based scoring.
  * Memories lose relevance over time unless reinforced.
  */
 export function calculateRelevance(record: MemoryRecord): number {
-  if (process.env.MEMORY_FORGETTING_ENABLED !== 'true') {
+  if (process.env.MEMORY_FORGETTING_ENABLED !== "true") {
     return 1.0;
   }
 

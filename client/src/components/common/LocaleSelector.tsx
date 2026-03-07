@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   FormControl,
   InputLabel,
@@ -8,18 +8,18 @@ import {
   ListItemText,
   Box,
   Typography,
-} from '@mui/material';
-import { useI18n, Locale } from '../../hooks/useI18n';
+} from "@mui/material";
+import { useI18n, Locale } from "../../hooks/useI18n";
 
 interface LocaleSelectorProps {
-  variant?: 'standard' | 'outlined' | 'filled';
-  size?: 'small' | 'medium';
+  variant?: "standard" | "outlined" | "filled";
+  size?: "small" | "medium";
   showLabel?: boolean;
 }
 
 export function LocaleSelector({
-  variant = 'outlined',
-  size = 'small',
+  variant = "outlined",
+  size = "small",
   showLabel = true,
 }: LocaleSelectorProps) {
   const { locale, setLocale, availableLocales, t } = useI18n();
@@ -30,11 +30,11 @@ export function LocaleSelector({
       <Select
         value={locale}
         onChange={(e) => setLocale(e.target.value as Locale)}
-        label={showLabel ? 'Language' : undefined}
+        label={showLabel ? "Language" : undefined}
         renderValue={(value) => {
           const selected = availableLocales.find((l) => l.code === value);
           return (
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
               <span>{selected?.flag}</span>
               <Typography variant="body2">{selected?.name}</Typography>
             </Box>
@@ -44,7 +44,7 @@ export function LocaleSelector({
         {availableLocales.map((localeOption) => (
           <MenuItem key={localeOption.code} value={localeOption.code}>
             <ListItemIcon sx={{ minWidth: 36 }}>
-              <span style={{ fontSize: '1.2em' }}>{localeOption.flag}</span>
+              <span style={{ fontSize: "1.2em" }}>{localeOption.flag}</span>
             </ListItemIcon>
             <ListItemText>
               <Typography variant="body2">{localeOption.name}</Typography>

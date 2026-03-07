@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       ui_url:
-        description: 'UI URL to capture (e.g., http://localhost:3000)'
+        description: "UI URL to capture (e.g., http://localhost:3000)"
         required: true
-        default: 'http://localhost:3000'
+        default: "http://localhost:3000"
 
 jobs:
   capture:
@@ -15,7 +15,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          cache: 'pnpm'
+          cache: "pnpm"
           node-version: 20
       - name: Install dependencies
         run: npm ci

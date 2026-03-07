@@ -21,6 +21,7 @@
 ## Base Claims
 
 S1. A simulation apparatus for evaluating adversarial misinformation defense actions, comprising:
+
 - a memory storing instructions and a narrative operating graph representing narrative states derived from source records;
 - one or more processors configured to execute the instructions to:
   - receive a plurality of candidate defense actions;
@@ -346,6 +347,7 @@ S420. The apparatus of claim S411, wherein the apparatus excludes external publi
 ## Cluster 25: Higher-order reconciliation + audit log binding (S421-S423)
 
 S421. A simulation apparatus comprising a processor and a memory storing instructions that, when executed by the processor, cause the apparatus to perform operations for enforcing graph integrity for simulation inputs, the operations comprising:
+
 1. Maintaining a versioned snapshot of a narrative operating graph;
 2. Enforcing a plurality of graph invariants on the versioned snapshot prior to executing a counterfactual simulation;
 3. Generating a reconciliation proof artifact indicating pass or fail status for each of the plurality of graph invariants;
@@ -353,6 +355,7 @@ S421. A simulation apparatus comprising a processor and a memory storing instruc
 5. Excluding defense actions from a ranking operation when any of the plurality of graph invariants fails and outputting monitoring-only actions.
 
 S422. A simulation apparatus comprising a processor and a memory storing instructions that, when executed by the processor, cause the apparatus to perform operations for managing appeals of ranked outputs, the operations comprising:
+
 1. Providing an appeals workflow enabling a human operator to challenge a policy decision used in ranking a candidate defense action;
 2. Receiving an appeal artifact comprising an appealed decision identifier, an objection category, and supporting references to audit entries or proof artifacts;
 3. Re-evaluating the candidate defense action by re-running policy evaluation using a stored structured defense action object and a policy bundle hash;
@@ -360,6 +363,7 @@ S422. A simulation apparatus comprising a processor and a memory storing instruc
 5. Recording the appeal artifact and the appeal resolution decision in an append-only audit log linked to a replay manifest identifier.
 
 S423. A simulation apparatus comprising a processor and a memory storing instructions that, when executed by the processor, cause the apparatus to perform operations for causal lift guardrails in simulation calibration, the operations comprising:
+
 1. Estimating a causal lift of an executed defense action on at least one outcome metric;
 2. Generating a causal assumptions artifact comprising at least one of a covariate set, a matching rule, or an identification strategy;
 3. Using the causal lift to calibrate a transition function for counterfactual simulation when the causal lift estimate satisfies a data quality policy;
@@ -419,14 +423,17 @@ S480. The apparatus of claim S471, wherein the apparatus generates a blast radiu
 ## CI VERIFIER SPEC
 
 ### Geofence Tests
+
 - **forbidden jurisdiction** → deny; log geofence rule IDs.
 - **permitted jurisdiction** → allow; log geofence rule IDs.
 
 ### Forecast Drift Tests
+
 - **drift detected** → triggers monitoring-only mode; log drift artifact.
 - **no drift** → allow simulation output (subject to other policies).
 
 ### Partner Overlay Tests
+
 - **overlay conflict** → deny; log conflict resolution failure.
 - **overlay permission expansion** → block (overlays never increase permissions).
 - **valid overlay** → allow; log partner overlay hashes.

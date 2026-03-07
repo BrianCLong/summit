@@ -2,8 +2,8 @@
  * Type declarations for csv-parse
  * This package is an optional dependency and dynamically imported
  */
-declare module 'csv-parse' {
-  import { Transform } from 'stream';
+declare module "csv-parse" {
+  import { Transform } from "stream";
 
   export interface Options {
     delimiter?: string;

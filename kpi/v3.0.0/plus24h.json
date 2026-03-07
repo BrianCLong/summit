@@ -1,7 +1,14 @@
 {
   "version": "v3.0.0",
-  "readiness": {"P0": "pass", "P1":"pass", "P2":"pass", "P3":"pass", "P4":"pass", "P5":"pass"},
-  "kpi_headroom": {"web": 0.35, "api": 0.28},
+  "readiness": {
+    "P0": "pass",
+    "P1": "pass",
+    "P2": "pass",
+    "P3": "pass",
+    "P4": "pass",
+    "P5": "pass"
+  },
+  "kpi_headroom": { "web": 0.35, "api": 0.28 },
   "alerts_noise_reduction": 0.52,
   "regressions": []
 }

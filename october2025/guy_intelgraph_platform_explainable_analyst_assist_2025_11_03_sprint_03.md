@@ -113,7 +113,7 @@ Neo4j (temporal scans) · Redis (Socket rooms + caches) · OTEL/Prom/Grafana
 ```yaml
 # server/src/ai/nl2cypher/templates/contacts_in_window.yaml
 id: contacts_in_window
-intent: 'people who contacted each other in <days> days'
+intent: "people who contacted each other in <days> days"
 params:
   days: { type: integer, min: 1, max: 30 }
 cypher: |
@@ -121,14 +121,14 @@ cypher: |
   WHERE r.when >= datetime() - duration({days: $days})
   RETURN a,b,r LIMIT 200
 notes:
-  safety: ['bounded time window', 'no write clauses', 'LIMIT present']
+  safety: ["bounded time window", "no write clauses", "LIMIT present"]
 ```
 
 ```ts
 // server/src/ai/nl2cypher/templates/index.ts
-import fs from 'fs';
-import path from 'path';
-import yaml from 'js-yaml';
+import fs from "fs";
+import path from "path";
+import yaml from "js-yaml";
 export type Template = {
   id: string;
   intent: string;
@@ -137,20 +137,18 @@ export type Template = {
   notes?: any;
 };
 export function loadTemplates(
-  dir = path.join(process.cwd(), 'server/src/ai/nl2cypher/templates'),
+  dir = path.join(process.cwd(), "server/src/ai/nl2cypher/templates")
 ): Template[] {
   return fs
     .readdirSync(dir)
-    .filter((f) => f.endsWith('.yaml'))
-    .map(
-      (f) => yaml.load(fs.readFileSync(path.join(dir, f), 'utf8')) as Template,
-    );
+    .filter((f) => f.endsWith(".yaml"))
+    .map((f) => yaml.load(fs.readFileSync(path.join(dir, f), "utf8")) as Template);
 }
 export function verify(template: Template) {
-  if (!/\bRETURN\b/i.test(template.cypher)) throw new Error('Missing RETURN');
-  if (!/\bLIMIT\b/i.test(template.cypher)) throw new Error('Missing LIMIT');
+  if (!/\bRETURN\b/i.test(template.cypher)) throw new Error("Missing RETURN");
+  if (!/\bLIMIT\b/i.test(template.cypher)) throw new Error("Missing LIMIT");
   if (/\bCREATE|MERGE|DELETE|SET\b/i.test(template.cypher))
-    throw new Error('Write clause not allowed');
+    throw new Error("Write clause not allowed");
 }
 ```
 
@@ -160,14 +158,14 @@ export function verify(template: Template) {
 // server/src/ai/nl2cypher/rationale.ts
 export function acceptanceRationale(tplId: string, slots: Record<string, any>) {
   return {
-    status: 'accepted',
+    status: "accepted",
     template: tplId,
     slots,
-    why: [`matched template '${tplId}'`, 'safety checks passed'],
+    why: [`matched template '${tplId}'`, "safety checks passed"],
   };
 }
 export function denialRationale(reasons: string[], snippet: string) {
-  return { status: 'denied', reasons, snippet: snippet.slice(0, 120) };
+  return { status: "denied", reasons, snippet: snippet.slice(0, 120) };
 }
 ```
 
@@ -196,7 +194,7 @@ export function recordLineage(fields: Lineage[]) {
 
 ```ts
 // server/src/analytics/motifs/temporal.ts
-import dayjs from 'dayjs';
+import dayjs from "dayjs";
 export type Motif = {
   name: string;
   windowDays: number;
@@ -205,14 +203,14 @@ export type Motif = {
 };
 export async function findBursts(
   events: { when: string; src: string; dst: string }[],
-  days: number,
+  days: number
 ): Promise<Motif[]> {
-  const cutoff = dayjs().subtract(days, 'day');
+  const cutoff = dayjs().subtract(days, "day");
   const windowed = events.filter((e) => dayjs(e.when).isAfter(cutoff));
   const score = Math.min(1, windowed.length / 100);
   return [
     {
-      name: 'bursty-contacts',
+      name: "bursty-contacts",
       windowDays: days,
       score,
       explanation: `${windowed.length} contacts in last ${days} days`,
@@ -225,22 +223,18 @@ export async function findBursts(
 
 ```ts
 // server/src/case-space/index.ts
-import { Server } from 'socket.io';
-import { abac } from '../policy/opa/abac';
+import { Server } from "socket.io";
+import { abac } from "../policy/opa/abac";
 export function attachCaseSpaces(httpServer: any) {
-  const io = new Server(httpServer, { path: '/ws/case' });
+  const io = new Server(httpServer, { path: "/ws/case" });
   io.use(async (socket, next) => {
     // TODO: call OPA for join permission using abac() logic or explicit policy fn
     next();
   });
-  io.on('connection', (socket) => {
-    socket.on('join', ({ caseId }) => socket.join(`case:${caseId}`));
-    socket.on('note:update', (msg) =>
-      io.to(`case:${msg.caseId}`).emit('note:update', msg),
-    );
-    socket.on('pin:set', (msg) =>
-      io.to(`case:${msg.caseId}`).emit('pin:set', msg),
-    );
+  io.on("connection", (socket) => {
+    socket.on("join", ({ caseId }) => socket.join(`case:${caseId}`));
+    socket.on("note:update", (msg) => io.to(`case:${msg.caseId}`).emit("note:update", msg));
+    socket.on("pin:set", (msg) => io.to(`case:${msg.caseId}`).emit("pin:set", msg));
   });
   return io;
 }
@@ -250,26 +244,22 @@ export function attachCaseSpaces(httpServer: any) {
 
 ```tsx
 // apps/web/src/features/tri-pane/explain-cards.tsx
-import React, { useEffect, useState } from 'react';
-import $ from 'jquery';
+import React, { useEffect, useState } from "react";
+import $ from "jquery";
 export default function ExplainCards() {
   const [card, setCard] = useState<any>(null);
   useEffect(() => {
-    $(document).on('ig:cluster:select', (_e, payload) => setCard(payload));
-    return () => $(document).off('ig:cluster:select');
+    $(document).on("ig:cluster:select", (_e, payload) => setCard(payload));
+    return () => $(document).off("ig:cluster:select");
   }, []);
   if (!card) return null;
   return (
     <div className="fixed bottom-4 right-4 rounded-2xl shadow p-3 bg-white">
       <div className="font-bold">{card.title}</div>
-      <div className="text-sm">PR top‑k: {card.prTop?.join(', ')}</div>
+      <div className="text-sm">PR top‑k: {card.prTop?.join(", ")}</div>
       <div className="text-sm">Anomalies: {card.anomalyCount}</div>
-      <div className="text-sm">
-        Motifs: {card.motifs?.map((m: any) => m.name).join(', ')}
-      </div>
-      <div className="text-xs mt-2 opacity-70">
-        Why this matters: {card.why}
-      </div>
+      <div className="text-sm">Motifs: {card.motifs?.map((m: any) => m.name).join(", ")}</div>
+      <div className="text-xs mt-2 opacity-70">Why this matters: {card.why}</div>
     </div>
   );
 }

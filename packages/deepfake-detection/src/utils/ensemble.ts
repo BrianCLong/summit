@@ -2,13 +2,13 @@
  * Ensemble scoring utilities
  */
 
-import { ENSEMBLE_WEIGHTS } from '../constants/index.js';
+import { ENSEMBLE_WEIGHTS } from "../constants/index.js";
 import type {
   DeepfakeDetection,
   DetectorType,
   EnsembleResult,
   VotingMethod,
-} from '../types/index.js';
+} from "../types/index.js";
 
 export interface EnsembleInput {
   detections: DeepfakeDetection[];
@@ -21,10 +21,10 @@ export interface EnsembleInput {
  * Calculate ensemble score from multiple detections
  */
 export function calculateEnsembleScore(input: EnsembleInput): EnsembleResult {
-  const { detections, method = 'WEIGHTED_AVERAGE', customWeights, threshold = 0.5 } = input;
+  const { detections, method = "WEIGHTED_AVERAGE", customWeights, threshold = 0.5 } = input;
 
   if (detections.length === 0) {
-    throw new Error('No detections provided for ensemble');
+    throw new Error("No detections provided for ensemble");
   }
 
   // Extract scores by detector type
@@ -37,19 +37,19 @@ export function calculateEnsembleScore(input: EnsembleInput): EnsembleResult {
   let finalConfidence: number;
 
   switch (method) {
-    case 'WEIGHTED_AVERAGE':
+    case "WEIGHTED_AVERAGE":
       finalConfidence = weightedAverage(scoresByType, customWeights);
       break;
 
-    case 'MAJORITY_VOTE':
+    case "MAJORITY_VOTE":
       finalConfidence = majorityVote(scoresByType, threshold);
       break;
 
-    case 'MAX_CONFIDENCE':
+    case "MAX_CONFIDENCE":
       finalConfidence = maxConfidence(scoresByType);
       break;
 
-    case 'UNANIMOUS':
+    case "UNANIMOUS":
       finalConfidence = unanimous(scoresByType, threshold);
       break;
 
@@ -61,18 +61,9 @@ export function calculateEnsembleScore(input: EnsembleInput): EnsembleResult {
   const isSynthetic = finalConfidence >= threshold;
 
   // Extract individual modality scores
-  const videoConfidence = getModalityScore(scoresByType, [
-    'VIDEO_FACE',
-    'VIDEO_GENERIC',
-  ]);
-  const audioConfidence = getModalityScore(scoresByType, [
-    'AUDIO_SPECTROGRAM',
-    'AUDIO_WAVEFORM',
-  ]);
-  const imageConfidence = getModalityScore(scoresByType, [
-    'IMAGE_MANIPULATION',
-    'IMAGE_GAN',
-  ]);
+  const videoConfidence = getModalityScore(scoresByType, ["VIDEO_FACE", "VIDEO_GENERIC"]);
+  const audioConfidence = getModalityScore(scoresByType, ["AUDIO_SPECTROGRAM", "AUDIO_WAVEFORM"]);
+  const imageConfidence = getModalityScore(scoresByType, ["IMAGE_MANIPULATION", "IMAGE_GAN"]);
 
   return {
     id: generateEnsembleId(detections[0].mediaId),
@@ -94,7 +85,7 @@ export function calculateEnsembleScore(input: EnsembleInput): EnsembleResult {
  */
 function weightedAverage(
   scores: Record<string, number>,
-  customWeights?: Record<string, number>,
+  customWeights?: Record<string, number>
 ): number {
   const weights = customWeights || ENSEMBLE_WEIGHTS;
 
@@ -108,7 +99,7 @@ function weightedAverage(
   }
 
   if (totalWeight === 0) {
-    throw new Error('Total weight is zero, cannot calculate weighted average');
+    throw new Error("Total weight is zero, cannot calculate weighted average");
   }
 
   return weightedSum / totalWeight;
@@ -144,11 +135,9 @@ function unanimous(scores: Record<string, number>, threshold: number): number {
  */
 function getModalityScore(
   scores: Record<string, number>,
-  detectorTypes: string[],
+  detectorTypes: string[]
 ): number | undefined {
-  const modalityScores = detectorTypes
-    .map((type) => scores[type])
-    .filter((s) => s !== undefined);
+  const modalityScores = detectorTypes.map((type) => scores[type]).filter((s) => s !== undefined);
 
   if (modalityScores.length === 0) {
     return undefined;
@@ -178,7 +167,7 @@ function generateEnsembleId(mediaId: string): string {
 export function calculateConfidenceInterval(
   scores: number[],
   confidenceLevel: number = 0.95,
-  numBootstrap: number = 1000,
+  numBootstrap: number = 1000
 ): { lower: number; upper: number; mean: number } {
   const bootstrapMeans: number[] = [];
 
@@ -191,7 +180,7 @@ export function calculateConfidenceInterval(
   bootstrapMeans.sort((a, b) => a - b);
 
   const alpha = 1 - confidenceLevel;
-  const lowerIndex = Math.floor(alpha / 2 * numBootstrap);
+  const lowerIndex = Math.floor((alpha / 2) * numBootstrap);
   const upperIndex = Math.floor((1 - alpha / 2) * numBootstrap);
 
   return {
@@ -216,12 +205,9 @@ function bootstrapSample<T>(arr: T[]): T[] {
 /**
  * Calibrate confidence scores using temperature scaling
  */
-export function temperatureScale(
-  confidence: number,
-  temperature: number = 1.0,
-): number {
+export function temperatureScale(confidence: number, temperature: number = 1.0): number {
   if (temperature <= 0) {
-    throw new Error('Temperature must be positive');
+    throw new Error("Temperature must be positive");
   }
 
   // Apply temperature scaling to logits

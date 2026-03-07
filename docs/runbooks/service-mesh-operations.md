@@ -49,21 +49,21 @@ kubectl exec -it <pod-name> -n summit -c istio-proxy -- curl localhost:15000/sta
 
 ### Important URLs
 
-| Service | URL | Purpose |
-|---------|-----|---------|
-| Jaeger UI | http://jaeger.summit.example.com | Distributed tracing |
-| Grafana | http://grafana.summit.example.com | Service mesh dashboards |
-| Prometheus | http://prometheus.summit.example.com | Metrics |
-| Kiali | http://kiali.summit.example.com | Service mesh visualization |
+| Service    | URL                                  | Purpose                    |
+| ---------- | ------------------------------------ | -------------------------- |
+| Jaeger UI  | http://jaeger.summit.example.com     | Distributed tracing        |
+| Grafana    | http://grafana.summit.example.com    | Service mesh dashboards    |
+| Prometheus | http://prometheus.summit.example.com | Metrics                    |
+| Kiali      | http://kiali.summit.example.com      | Service mesh visualization |
 
 ### Key Metrics to Watch
 
-| Metric | Threshold | Action |
-|--------|-----------|--------|
-| `istio_requests_total{response_code="5xx"}` | >1% | Investigate failing services |
-| `istio_request_duration_milliseconds{quantile="0.95"}` | >2000ms | Check for slow services |
-| `pilot_xds_pushes{type="eds"}` | Increasing rapidly | Control plane issue |
-| `envoy_cluster_upstream_cx_connect_fail` | >5% | Network or service issue |
+| Metric                                                 | Threshold          | Action                       |
+| ------------------------------------------------------ | ------------------ | ---------------------------- |
+| `istio_requests_total{response_code="5xx"}`            | >1%                | Investigate failing services |
+| `istio_request_duration_milliseconds{quantile="0.95"}` | >2000ms            | Check for slow services      |
+| `pilot_xds_pushes{type="eds"}`                         | Increasing rapidly | Control plane issue          |
+| `envoy_cluster_upstream_cx_connect_fail`               | >5%                | Network or service issue     |
 
 ---
 
@@ -350,6 +350,7 @@ kubectl autoscale deployment istio-ingressgateway -n istio-system \
 ### Scenario 1: Service Returns 503 (Circuit Breaker Tripped)
 
 **Symptoms:**
+
 - Service returns 503 errors
 - Envoy logs show: `upstream_reset_before_response_started{overflow}`
 
@@ -389,6 +390,7 @@ kubectl rollout restart deployment <deployment-name> -n summit
 ### Scenario 2: High Latency
 
 **Symptoms:**
+
 - P95 latency >2s
 - Prometheus alerts firing
 
@@ -436,6 +438,7 @@ kubectl scale deployment <service-name> -n summit --replicas=10
 ### Scenario 3: mTLS Handshake Failures
 
 **Symptoms:**
+
 - Connection refused errors
 - Envoy logs: `SSL error: sslv3 alert certificate unknown`
 
@@ -491,6 +494,7 @@ kubectl rollout restart deployment <deployment-name> -n summit
 ### Scenario 4: Control Plane Unavailable
 
 **Symptoms:**
+
 - Sidecars cannot reach istiod
 - Logs: `connection refused 15012`
 
@@ -532,6 +536,7 @@ kubectl rollout restart deployment <deployment-name> -n summit
 ### Scenario 5: Memory Leak in Sidecar
 
 **Symptoms:**
+
 - Sidecar memory increasing over time
 - OOMKilled events
 
@@ -605,56 +610,56 @@ metadata:
   namespace: observability
 spec:
   groups:
-  - name: istio
-    interval: 30s
-    rules:
-    # High error rate
-    - alert: IstioHighErrorRate
-      expr: |
-        sum(rate(istio_requests_total{response_code=~"5.."}[5m]))
-        /
-        sum(rate(istio_requests_total[5m]))
-        > 0.01
-      for: 5m
-      labels:
-        severity: critical
-      annotations:
-        summary: "High error rate in service mesh"
-        description: "Error rate is {{ $value | humanizePercentage }}"
+    - name: istio
+      interval: 30s
+      rules:
+        # High error rate
+        - alert: IstioHighErrorRate
+          expr: |
+            sum(rate(istio_requests_total{response_code=~"5.."}[5m]))
+            /
+            sum(rate(istio_requests_total[5m]))
+            > 0.01
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "High error rate in service mesh"
+            description: "Error rate is {{ $value | humanizePercentage }}"
 
-    # High latency
-    - alert: IstioHighLatency
-      expr: |
-        histogram_quantile(0.95,
-          sum(rate(istio_request_duration_milliseconds_bucket[5m])) by (le, destination_service)
-        ) > 2000
-      for: 5m
-      labels:
-        severity: warning
-      annotations:
-        summary: "High P95 latency for {{ $labels.destination_service }}"
-        description: "P95 latency is {{ $value }}ms"
+        # High latency
+        - alert: IstioHighLatency
+          expr: |
+            histogram_quantile(0.95,
+              sum(rate(istio_request_duration_milliseconds_bucket[5m])) by (le, destination_service)
+            ) > 2000
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "High P95 latency for {{ $labels.destination_service }}"
+            description: "P95 latency is {{ $value }}ms"
 
-    # Control plane down
-    - alert: IstioControlPlaneDown
-      expr: up{job="istiod"} == 0
-      for: 1m
-      labels:
-        severity: critical
-      annotations:
-        summary: "Istio control plane is down"
-        description: "Istiod instance {{ $labels.instance }} is down"
+        # Control plane down
+        - alert: IstioControlPlaneDown
+          expr: up{job="istiod"} == 0
+          for: 1m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Istio control plane is down"
+            description: "Istiod instance {{ $labels.instance }} is down"
 
-    # Certificate expiring soon
-    - alert: IstioCertificateExpiringSoon
-      expr: |
-        (pilot_cert_expiry_seconds - time()) / 86400 < 7
-      for: 1h
-      labels:
-        severity: warning
-      annotations:
-        summary: "Istio certificate expiring soon"
-        description: "Certificate expires in {{ $value }} days"
+        # Certificate expiring soon
+        - alert: IstioCertificateExpiringSoon
+          expr: |
+            (pilot_cert_expiry_seconds - time()) / 86400 < 7
+          for: 1h
+          labels:
+            severity: warning
+          annotations:
+            summary: "Istio certificate expiring soon"
+            description: "Certificate expires in {{ $value }} days"
 ```
 
 ---
@@ -756,11 +761,11 @@ kubectl delete service istiod-1-20-0 -n istio-system
 
 ## Emergency Contacts
 
-| Role | Name | Contact |
-|------|------|---------|
-| SRE On-Call | Pagerduty | +1-XXX-XXX-XXXX |
-| Platform Lead | TBD | email@example.com |
-| Security Team | TBD | security@example.com |
+| Role          | Name      | Contact              |
+| ------------- | --------- | -------------------- |
+| SRE On-Call   | Pagerduty | +1-XXX-XXX-XXXX      |
+| Platform Lead | TBD       | email@example.com    |
+| Security Team | TBD       | security@example.com |
 
 ---
 

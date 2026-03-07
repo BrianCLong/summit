@@ -1,5 +1,5 @@
-import type { TokenEstimator } from './utils.js';
-import { clampValue, cosineSimilarity, defaultTokenEstimator } from './utils.js';
+import type { TokenEstimator } from "./utils.js";
+import { clampValue, cosineSimilarity, defaultTokenEstimator } from "./utils.js";
 
 export interface RetrievableDocument {
   id: string;
@@ -27,7 +27,7 @@ export interface RetrievedContext {
 const DEFAULT_MIN_RELEVANCE = 0.5;
 
 export class TokenAwareRetriever {
-  private readonly embed: TokenAwareRetrievalOptions['embed'];
+  private readonly embed: TokenAwareRetrievalOptions["embed"];
   private readonly tokenBudget: number;
   private readonly tokenEstimator: TokenEstimator;
   private readonly minimumRelevance: number;

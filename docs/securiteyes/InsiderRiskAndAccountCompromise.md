@@ -6,19 +6,19 @@ The Insider Risk module tracks risk scores for all principals (users, service ac
 
 Each principal has an `InsiderRiskProfile` node in IntelGraph.
 
-*   **Risk Score**: 0-100.
-*   **Risk Factors**: JSON map of timestamped reasons for score increases.
+- **Risk Score**: 0-100.
+- **Risk Factors**: JSON map of timestamped reasons for score increases.
 
 ## Calculation Logic
 
 Risk is updated incrementally when `SuspiciousEvent` nodes are linked to a principal.
 
-*   **Critical Severity**: +50
-*   **High Severity**: +20
-*   **Medium Severity**: +10
-*   **Low Severity**: +2
+- **Critical Severity**: +50
+- **High Severity**: +20
+- **Medium Severity**: +10
+- **Low Severity**: +2
 
-*Note: This is a simplified additive model. Production systems should implement temporal decay.*
+_Note: This is a simplified additive model. Production systems should implement temporal decay._
 
 ## High Risk Detection
 

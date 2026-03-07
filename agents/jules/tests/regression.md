@@ -8,6 +8,7 @@ out migrations when they are unavoidable.
 ## Regression Check 2 – Test Integrity
 
 Jules should never remove or skip tests without:
+
 - Stating the rationale
 - Providing a replacement or mitigation plan
 

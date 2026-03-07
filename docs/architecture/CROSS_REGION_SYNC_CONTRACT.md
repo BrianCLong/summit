@@ -9,21 +9,24 @@ This document defines the **guarantees** and **limitations** of the cross-region
 ## 1. Guarantees
 
 ### Ordering
-*   **No Global Ordering:** Messages are **NOT** guaranteed to arrive in the same order across all regions.
-*   **Resolution Strategy:** We rely strictly on **CRDTs (Conflict-Free Replicated Data Types)** which are commutative and associative. The order of merge operations does not affect the final state (`A + B = B + A`).
+
+- **No Global Ordering:** Messages are **NOT** guaranteed to arrive in the same order across all regions.
+- **Resolution Strategy:** We rely strictly on **CRDTs (Conflict-Free Replicated Data Types)** which are commutative and associative. The order of merge operations does not affect the final state (`A + B = B + A`).
 
 ### Delivery Semantics
-*   **At-Least-Once Delivery:** AWS SNS+SQS guarantees messages will be delivered at least once.
-*   **Idempotency:** The `CrossRegionSyncService` and underlying CRDTs must handle duplicate messages safely.
-    *   *Evidence:* `GCounter.merge` uses `Math.max` for counters, ensuring re-processing the same update does not double-count.
-    *   *Evidence:* `LWWRegister` uses timestamps; receiving an old message again is a no-op if a newer timestamp exists.
+
+- **At-Least-Once Delivery:** AWS SNS+SQS guarantees messages will be delivered at least once.
+- **Idempotency:** The `CrossRegionSyncService` and underlying CRDTs must handle duplicate messages safely.
+  - _Evidence:_ `GCounter.merge` uses `Math.max` for counters, ensuring re-processing the same update does not double-count.
+  - _Evidence:_ `LWWRegister` uses timestamps; receiving an old message again is a no-op if a newer timestamp exists.
 
 ### Convergence
-*   **Strong Eventual Consistency:** All regions that have received the same set of updates (in any order) will reach the exact same state.
-*   **Conflict Resolution:**
-    *   **Counters:** Max-value merge.
-    *   **Registers:** Last-Writer-Wins (LWW) based on client-generated timestamps.
-    *   **Sets:** Observed-Remove (OR-Set) logic with unique tag tracking.
+
+- **Strong Eventual Consistency:** All regions that have received the same set of updates (in any order) will reach the exact same state.
+- **Conflict Resolution:**
+  - **Counters:** Max-value merge.
+  - **Registers:** Last-Writer-Wins (LWW) based on client-generated timestamps.
+  - **Sets:** Observed-Remove (OR-Set) logic with unique tag tracking.
 
 ## 2. Failure Modes & Handling
 
@@ -59,6 +62,7 @@ This document defines the **guarantees** and **limitations** of the cross-region
 ## 4. Dual-Write Safety
 
 The system is safe under active-active write scenarios because:
+
 1.  **Unique Node IDs:** Each `GCounter`/`ORSet` tracks updates per `nodeId` (Region ID).
 2.  **No Central Authority:** There is no single "Master" for CRDT state. Any region can originate an update.
 3.  **Merge Logic:** The merge logic preserves the "highest knowledge" from all nodes.

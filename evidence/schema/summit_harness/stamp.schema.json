@@ -3,8 +3,8 @@
   "type": "object",
   "required": ["run_id", "timestamp"],
   "properties": {
-    "run_id": {"type": "string"},
-    "timestamp": {"type": "string", "format": "date-time"}
+    "run_id": { "type": "string" },
+    "timestamp": { "type": "string", "format": "date-time" }
   },
   "additionalProperties": false
 }

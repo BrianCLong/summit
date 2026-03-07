@@ -4,7 +4,7 @@ import type {
   StrategyInput,
   StrategyRecommendation,
   WorkloadProfile,
-} from './types.js';
+} from "./types.js";
 
 interface Strategy {
   readonly name: string;
@@ -15,39 +15,29 @@ function getDemand(
   demand: DemandForecastDatum[],
   provider: string,
   region: string,
-  resource: string,
+  resource: string
 ): DemandForecastDatum | undefined {
   return demand.find(
-    (datum) =>
-      datum.provider === provider &&
-      datum.region === region &&
-      datum.resource === resource,
+    (datum) => datum.provider === provider && datum.region === region && datum.resource === resource
   );
 }
 
-function getEnergyScore(
-  snapshot: CompositeMarketSnapshot,
-  region: string,
-  weight: number,
-): number {
+function getEnergyScore(snapshot: CompositeMarketSnapshot, region: string, weight: number): number {
   const energy = snapshot.energy.find((entry) => entry.region === region);
   if (!energy) {
     return 0.5 * weight;
   }
-  const normalizedCarbon = Math.max(
-    0,
-    1 - energy.carbonIntensityGramsPerKwh / 600,
-  );
+  const normalizedCarbon = Math.max(0, 1 - energy.carbonIntensityGramsPerKwh / 600);
   return normalizedCarbon * weight;
 }
 
 function getRegulatoryScore(
   snapshot: CompositeMarketSnapshot,
   provider: string,
-  region: string,
+  region: string
 ): number {
   const entry = snapshot.regulation.find(
-    (datum) => datum.provider === provider && datum.region === region,
+    (datum) => datum.provider === provider && datum.region === region
   );
   if (!entry) {
     return 0.25;
@@ -57,15 +47,14 @@ function getRegulatoryScore(
 
 function basePerformanceScore(
   demand: DemandForecastDatum | undefined,
-  profile: WorkloadProfile,
+  profile: WorkloadProfile
 ): number {
   if (!demand) {
-    return profile.availabilityTier === 'mission-critical' ? 0.6 : 0.5;
+    return profile.availabilityTier === "mission-critical" ? 0.6 : 0.5;
   }
   const utilizationFactor = 1 - Math.min(0.95, demand.predictedUtilization);
   const confidenceBoost = demand.confidence * 0.2;
-  const tierWeight =
-    profile.availabilityTier === 'mission-critical' ? 0.7 : 0.5;
+  const tierWeight = profile.availabilityTier === "mission-critical" ? 0.7 : 0.5;
   return Math.max(0.3, tierWeight + utilizationFactor * 0.3 + confidenceBoost);
 }
 
@@ -79,33 +68,18 @@ function buildRecommendations(
     profile: WorkloadProfile;
   }) => number,
   label: string,
-  modifier: (
-    recommendation: StrategyRecommendation,
-  ) => StrategyRecommendation = (rec) => rec,
+  modifier: (recommendation: StrategyRecommendation) => StrategyRecommendation = (rec) => rec
 ): StrategyRecommendation[] {
   return snapshot.financial.flatMap((financial) => {
-    const demand = getDemand(
-      snapshot.demand,
-      financial.provider,
-      financial.region,
-      'compute',
-    );
+    const demand = getDemand(snapshot.demand, financial.provider, financial.region, "compute");
     const basePrice = priceSelector({
       spot: financial.spotPricePerUnit,
       reserved: financial.reservedPricePerUnit,
       demand,
       profile,
     });
-    const energyScore = getEnergyScore(
-      snapshot,
-      financial.region,
-      profile.sustainabilityWeight,
-    );
-    const regulatoryScore = getRegulatoryScore(
-      snapshot,
-      financial.provider,
-      financial.region,
-    );
+    const energyScore = getEnergyScore(snapshot, financial.region, profile.sustainabilityWeight);
+    const regulatoryScore = getRegulatoryScore(snapshot, financial.provider, financial.region);
     const performanceScore = basePerformanceScore(demand, profile);
     const totalScore = performanceScore + energyScore + regulatoryScore;
 
@@ -113,7 +87,7 @@ function buildRecommendations(
       strategy: label,
       provider: financial.provider,
       region: financial.region,
-      resource: 'compute',
+      resource: "compute",
       expectedUnitPrice: basePrice,
       expectedPerformanceScore: performanceScore,
       sustainabilityScore: energyScore,
@@ -126,15 +100,14 @@ function buildRecommendations(
 }
 
 export class ServerlessFirstStrategy implements Strategy {
-  readonly name = 'serverless';
+  readonly name = "serverless";
 
   evaluate(input: StrategyInput): StrategyRecommendation[] {
     return buildRecommendations(
       input.snapshot,
       input.workloadProfile,
       ({ reserved, profile }) => {
-        const availabilityPremium =
-          profile.availabilityTier === 'mission-critical' ? 1.25 : 1.1;
+        const availabilityPremium = profile.availabilityTier === "mission-critical" ? 1.25 : 1.1;
         return reserved * availabilityPremium;
       },
       this.name,
@@ -142,13 +115,13 @@ export class ServerlessFirstStrategy implements Strategy {
         ...recommendation,
         expectedPerformanceScore: recommendation.expectedPerformanceScore + 0.1,
         totalScore: recommendation.totalScore + 0.1,
-      }),
+      })
     );
   }
 }
 
 export class BurstBufferStrategy implements Strategy {
-  readonly name = 'burst';
+  readonly name = "burst";
 
   evaluate(input: StrategyInput): StrategyRecommendation[] {
     return buildRecommendations(
@@ -159,13 +132,13 @@ export class BurstBufferStrategy implements Strategy {
         const multiplier = profile.burstable ? 0.95 : 1.05;
         return spot * (1 + burstRisk * 0.2) * multiplier;
       },
-      this.name,
+      this.name
     );
   }
 }
 
 export class ReservedRightsStrategy implements Strategy {
-  readonly name = 'reserved';
+  readonly name = "reserved";
 
   evaluate(input: StrategyInput): StrategyRecommendation[] {
     return buildRecommendations(
@@ -178,16 +151,15 @@ export class ReservedRightsStrategy implements Strategy {
       this.name,
       (recommendation) => ({
         ...recommendation,
-        expectedPerformanceScore:
-          recommendation.expectedPerformanceScore + 0.05,
+        expectedPerformanceScore: recommendation.expectedPerformanceScore + 0.05,
         totalScore: recommendation.totalScore + 0.05,
-      }),
+      })
     );
   }
 }
 
 export class SpotRebalanceStrategy implements Strategy {
-  readonly name = 'spot';
+  readonly name = "spot";
 
   evaluate(input: StrategyInput): StrategyRecommendation[] {
     return buildRecommendations(
@@ -202,23 +174,23 @@ export class SpotRebalanceStrategy implements Strategy {
         ...recommendation,
         expectedPerformanceScore: recommendation.expectedPerformanceScore - 0.1,
         totalScore: recommendation.totalScore - 0.05,
-      }),
+      })
     );
   }
 }
 
 export class FederatedMultiCloudStrategy implements Strategy {
-  readonly name = 'federated';
+  readonly name = "federated";
 
   evaluate(input: StrategyInput): StrategyRecommendation[] {
     const base = buildRecommendations(
       input.snapshot,
       input.workloadProfile,
       ({ spot, reserved, profile }) => {
-        const mix = profile.availabilityTier === 'mission-critical' ? 0.7 : 0.5;
+        const mix = profile.availabilityTier === "mission-critical" ? 0.7 : 0.5;
         return spot * (1 - mix * 0.2) + reserved * mix * 0.8;
       },
-      this.name,
+      this.name
     );
 
     const sorted = [...base].sort((a, b) => a.totalScore - b.totalScore);
@@ -226,9 +198,7 @@ export class FederatedMultiCloudStrategy implements Strategy {
 
     return base.map((recommendation) => ({
       ...recommendation,
-      totalScore:
-        recommendation.totalScore +
-        (recommendation.totalScore - lowestScore) * 0.05,
+      totalScore: recommendation.totalScore + (recommendation.totalScore - lowestScore) * 0.05,
       expectedPerformanceScore: recommendation.expectedPerformanceScore + 0.05,
     }));
   }

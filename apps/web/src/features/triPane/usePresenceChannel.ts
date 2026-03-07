@@ -88,10 +88,7 @@ export const usePresenceChannel = ({
       channel: string
       members: PresenceChannelMember[]
     }) => {
-      if (
-        payload.workspaceId !== workspaceId ||
-        payload.channel !== channel
-      ) {
+      if (payload.workspaceId !== workspaceId || payload.channel !== channel) {
         return
       }
       const next = new Map<string, PresenceChannelMember>()

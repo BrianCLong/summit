@@ -2,7 +2,7 @@ name: RDP Security Gates
 
 on:
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -24,7 +24,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@65d7f2d534ac1bc67fcd62888c5f4f3d2cb2b236 # v5.0.2
         with:
-          python-version: '3.11'
+          python-version: "3.11"
 
       - name: Run RDP Gates
         run: ./security/gates/run_all_gates.sh

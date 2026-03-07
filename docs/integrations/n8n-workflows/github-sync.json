@@ -161,11 +161,7 @@
         "table": "Issues",
         "columns": {
           "mappingMode": "autoMapInputData",
-          "matchingColumns": [
-            "platform",
-            "platform_id",
-            "repository"
-          ],
+          "matchingColumns": ["platform", "platform_id", "repository"],
           "schema": [
             {
               "id": "platform",

@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo } from "react";
 import {
   MapContainer,
   TileLayer,
@@ -8,9 +8,9 @@ import {
   Polygon,
   Circle,
   useMap,
-} from 'react-leaflet';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
+} from "react-leaflet";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
 
 function HeatLayer({ points = [] }) {
   const map = useMap();
@@ -18,14 +18,9 @@ function HeatLayer({ points = [] }) {
     let layer;
     try {
       const heat =
-        (L && L.heatLayer) ||
-        (typeof window !== 'undefined' && window.L && window.L.heatLayer);
+        (L && L.heatLayer) || (typeof window !== "undefined" && window.L && window.L.heatLayer);
       if (heat) {
-        const latlngs = points.map((p) => [
-          p.properties.latitude,
-          p.properties.longitude,
-          0.6,
-        ]);
+        const latlngs = points.map((p) => [p.properties.latitude, p.properties.longitude, 0.6]);
         layer = heat(latlngs, { radius: 20, blur: 15 });
         layer.addTo(map);
       }
@@ -48,34 +43,22 @@ function GeoMapPanel({
     () =>
       (nodes || [])
         .map((n) => n.data || n)
-        .filter(
-          (n) =>
-            n.type === 'LOCATION' &&
-            n.properties?.latitude &&
-            n.properties?.longitude,
-        ),
-    [nodes],
+        .filter((n) => n.type === "LOCATION" && n.properties?.latitude && n.properties?.longitude),
+    [nodes]
   );
   const center = locs.length
     ? [locs[0].properties.latitude, locs[0].properties.longitude]
     : [20, 0];
   const zoom = locs.length ? 5 : 2;
   return (
-    <div style={{ width: '100%', height: '100%' }}>
-      <MapContainer
-        center={center}
-        zoom={zoom}
-        style={{ width: '100%', height: '100%' }}
-      >
+    <div style={{ width: "100%", height: "100%" }}>
+      <MapContainer center={center} zoom={zoom} style={{ width: "100%", height: "100%" }}>
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           attribution="&copy; OpenStreetMap contributors"
         />
         {locs.map((n) => (
-          <Marker
-            key={n.id}
-            position={[n.properties.latitude, n.properties.longitude]}
-          >
+          <Marker key={n.id} position={[n.properties.latitude, n.properties.longitude]}>
             <Popup>
               <b>{n.label}</b>
             </Popup>
@@ -90,8 +73,8 @@ function GeoMapPanel({
               center={[n.properties.latitude, n.properties.longitude]}
               radius={6}
               pathOptions={{
-                color: 'rgba(255,99,71,0.4)',
-                fillColor: 'rgba(255,99,71,0.25)',
+                color: "rgba(255,99,71,0.4)",
+                fillColor: "rgba(255,99,71,0.25)",
                 fillOpacity: 0.25,
               }}
             />
@@ -103,8 +86,8 @@ function GeoMapPanel({
             center={[c.centroid.latitude, c.centroid.longitude]}
             radius={Math.min(30, 6 + (c.size || 1))}
             pathOptions={{
-              color: '#1976d2',
-              fillColor: '#64b5f6',
+              color: "#1976d2",
+              fillColor: "#64b5f6",
               fillOpacity: 0.35,
             }}
           >
@@ -117,20 +100,20 @@ function GeoMapPanel({
               key={`poly-${i}-a`}
               positions={poly}
               pathOptions={{
-                color: '#1976d2',
+                color: "#1976d2",
                 weight: 1,
                 fillOpacity: 0.18,
-                fillColor: '#64b5f6',
+                fillColor: "#64b5f6",
               }}
             />
             <Polygon
               key={`poly-${i}-b`}
               positions={poly}
               pathOptions={{
-                color: '#1976d2',
+                color: "#1976d2",
                 weight: 0,
                 fillOpacity: 0.08,
-                fillColor: '#90caf9',
+                fillColor: "#90caf9",
               }}
             />
           </>
@@ -143,10 +126,10 @@ function GeoMapPanel({
                 center={[ring.lat, ring.lon]}
                 radius={ring.radiusM}
                 pathOptions={{
-                  color: '#ff8f00',
+                  color: "#ff8f00",
                   weight: 1,
                   fillOpacity: 0.04 * (3 - j),
-                  fillColor: '#ffa000',
+                  fillColor: "#ffa000",
                 }}
               />
             ))}

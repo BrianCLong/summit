@@ -6,17 +6,17 @@ on:
       - main
       - develop
     paths:
-      - 'server/**'
-      - 'client/**'
-      - 'Dockerfile*' # Catch any Dockerfile changes in root
+      - "server/**"
+      - "client/**"
+      - "Dockerfile*" # Catch any Dockerfile changes in root
   pull_request:
     branches:
       - main
       - develop
     paths:
-      - 'server/**'
-      - 'client/**'
-      - 'Dockerfile*'
+      - "server/**"
+      - "client/**"
+      - "Dockerfile*"
 
 jobs:
   build-and-scan:
@@ -32,10 +32,10 @@ jobs:
       - name: Scan Server Image with Trivy
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: 'intelgraph-server:latest'
-          format: 'table'
-          exit-code: '1' # Fail CI if vulnerabilities are found
-          severity: 'HIGH,CRITICAL'
+          image-ref: "intelgraph-server:latest"
+          format: "table"
+          exit-code: "1" # Fail CI if vulnerabilities are found
+          severity: "HIGH,CRITICAL"
 
       - name: Build Client Docker Image
         run: docker build -t intelgraph-client:latest -f client/Dockerfile.prod ./client
@@ -43,10 +43,10 @@ jobs:
       - name: Scan Client Image with Trivy
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: 'intelgraph-client:latest'
-          format: 'table'
-          exit-code: '1' # Fail CI if vulnerabilities are found
-          severity: 'HIGH,CRITICAL'
+          image-ref: "intelgraph-client:latest"
+          format: "table"
+          exit-code: "1" # Fail CI if vulnerabilities are found
+          severity: "HIGH,CRITICAL"
 
       - name: Sign Server Image with Cosign (Placeholder)
         run: echo "Cosign image signing for server would run here"

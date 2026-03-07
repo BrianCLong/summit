@@ -44,14 +44,14 @@ This guide describes the comprehensive cost optimization and resource efficiency
 
 Based on our implementation, you can expect:
 
-| Optimization | Est. Savings | Implementation |
-|-------------|--------------|----------------|
-| Spot Instances | 60-80% | Kubernetes spot node groups |
-| Auto-scaling | 30-50% | HPA + KEDA with smart policies |
-| Connection Pooling | 20-40% | Optimized DB connections |
-| Rate Limiting | 15-25% | Prevent abuse and overuse |
-| Waste Detection | 10-20% | Identify idle resources |
-| **Total Potential** | **70-90%** | Combined implementation |
+| Optimization        | Est. Savings | Implementation                 |
+| ------------------- | ------------ | ------------------------------ |
+| Spot Instances      | 60-80%       | Kubernetes spot node groups    |
+| Auto-scaling        | 30-50%       | HPA + KEDA with smart policies |
+| Connection Pooling  | 20-40%       | Optimized DB connections       |
+| Rate Limiting       | 15-25%       | Prevent abuse and overuse      |
+| Waste Detection     | 10-20%       | Identify idle resources        |
+| **Total Potential** | **70-90%**   | Combined implementation        |
 
 ---
 
@@ -107,38 +107,38 @@ Located at: `server/src/services/ResourceTaggingService.ts`
 
 ### Standard Tag Categories
 
-| Category | Description | Required | Example |
-|----------|-------------|----------|---------|
-| `environment` | Deployment environment | ✅ | `production`, `staging`, `dev` |
-| `service` | Service name | ✅ | `api-server`, `analytics-engine` |
-| `cost_center` | Billing cost center | ✅ | `engineering`, `operations` |
-| `team` | Team responsible | ❌ | `platform`, `data-science` |
-| `project` | Project name | ❌ | `graph-optimization`, `ml-inference` |
-| `owner` | Resource owner | ❌ | `john.doe@company.com` |
+| Category      | Description            | Required | Example                              |
+| ------------- | ---------------------- | -------- | ------------------------------------ |
+| `environment` | Deployment environment | ✅       | `production`, `staging`, `dev`       |
+| `service`     | Service name           | ✅       | `api-server`, `analytics-engine`     |
+| `cost_center` | Billing cost center    | ✅       | `engineering`, `operations`          |
+| `team`        | Team responsible       | ❌       | `platform`, `data-science`           |
+| `project`     | Project name           | ❌       | `graph-optimization`, `ml-inference` |
+| `owner`       | Resource owner         | ❌       | `john.doe@company.com`               |
 
 ### Usage Example
 
 ```typescript
-import { resourceTagging, createStandardTags, ResourceType } from './services/ResourceTaggingService';
+import {
+  resourceTagging,
+  createStandardTags,
+  ResourceType,
+} from "./services/ResourceTaggingService";
 
 // Tag a resource
 const tags = createStandardTags({
-  environment: 'production',
-  service: 'api-server',
-  costCenter: 'engineering',
-  team: 'platform',
-  project: 'api-optimization',
+  environment: "production",
+  service: "api-server",
+  costCenter: "engineering",
+  team: "platform",
+  project: "api-optimization",
 });
 
-await resourceTagging.tagResource(
-  'api-request-12345',
-  ResourceType.API_REQUEST,
-  tags,
-);
+await resourceTagging.tagResource("api-request-12345", ResourceType.API_REQUEST, tags);
 
 // Record cost
 await resourceTagging.recordResourceCost({
-  resourceId: 'api-request-12345',
+  resourceId: "api-request-12345",
   resourceType: ResourceType.API_REQUEST,
   tags,
   cost: 0.05,
@@ -148,13 +148,13 @@ await resourceTagging.recordResourceCost({
 
 // Get cost allocation report
 const report = await resourceTagging.generateCostAllocationReport(
-  new Date('2025-01-01'),
-  new Date('2025-01-31'),
+  new Date("2025-01-01"),
+  new Date("2025-01-31")
 );
 
 console.log(`Total cost: $${report.totalCost}`);
-console.log('By team:', report.byTeam);
-console.log('By environment:', report.byEnvironment);
+console.log("By team:", report.byTeam);
+console.log("By environment:", report.byEnvironment);
 ```
 
 ### Cost Allocation Reports
@@ -187,6 +187,7 @@ Located at: `k8s/autoscaling/comprehensive-autoscaling.yaml`
 ### Scaling Policies
 
 #### API Server (HPA)
+
 - **Min replicas**: 3
 - **Max replicas**: 20
 - **Scale-up**: Aggressive (100% or 4 pods per 30s)
@@ -198,6 +199,7 @@ Located at: `k8s/autoscaling/comprehensive-autoscaling.yaml`
   - GraphQL query rate: 30/pod
 
 #### Workers (KEDA)
+
 - **Queue-based scaling**: Redis queue depth
 - **Idle replica count**: Scale to 0 or 1
 - **Triggers**: Queue depth, CPU, custom metrics
@@ -262,26 +264,26 @@ DATABASE_READ_REPLICAS=postgres-read-1:5432,postgres-read-2:5432
 #### Usage
 
 ```typescript
-import { getPostgresPool } from './db/postgres';
+import { getPostgresPool } from "./db/postgres";
 
 const pool = getPostgresPool();
 
 // Explicit read query
-const results = await pool.read('SELECT * FROM users WHERE active = $1', [true]);
+const results = await pool.read("SELECT * FROM users WHERE active = $1", [true]);
 
 // Explicit write query
-await pool.write('UPDATE users SET last_login = NOW() WHERE id = $1', [userId]);
+await pool.write("UPDATE users SET last_login = NOW() WHERE id = $1", [userId]);
 
 // Auto-detect (read vs write)
-await pool.query('SELECT * FROM orders WHERE user_id = $1', [userId]);
+await pool.query("SELECT * FROM orders WHERE user_id = $1", [userId]);
 
 // Get health status
 const health = await pool.healthCheck();
-console.log('Pool health:', health);
+console.log("Pool health:", health);
 
 // Get slow query insights
 const slowQueries = pool.slowQueryInsights();
-console.log('Slow queries:', slowQueries);
+console.log("Slow queries:", slowQueries);
 ```
 
 ### Neo4j Connection Optimization
@@ -309,32 +311,31 @@ NEO4J_MAX_TRANSACTION_RETRY_TIME=30000
 #### Usage
 
 ```typescript
-import { getNeo4jConnectionManager } from './db/Neo4jConnectionManager';
+import { getNeo4jConnectionManager } from "./db/Neo4jConnectionManager";
 
 const neo4j = getNeo4jConnectionManager();
 
 // Read query
-const users = await neo4j.executeRead(
-  'MATCH (u:User) WHERE u.active = $active RETURN u',
-  { active: true },
-);
+const users = await neo4j.executeRead("MATCH (u:User) WHERE u.active = $active RETURN u", {
+  active: true,
+});
 
 // Write query
-await neo4j.executeWrite(
-  'CREATE (u:User {name: $name, email: $email})',
-  { name: 'John Doe', email: 'john@example.com' },
-);
+await neo4j.executeWrite("CREATE (u:User {name: $name, email: $email})", {
+  name: "John Doe",
+  email: "john@example.com",
+});
 
 // Transaction
 await neo4j.executeTransaction(async (tx) => {
-  await tx.run('CREATE (u:User {name: $name})', { name: 'Jane' });
-  await tx.run('CREATE (p:Profile {userId: $id})', { id: 'jane-id' });
+  await tx.run("CREATE (u:User {name: $name})", { name: "Jane" });
+  await tx.run("CREATE (p:Profile {userId: $id})", { id: "jane-id" });
   return { success: true };
 });
 
 // Health check
 const health = await neo4j.getHealth();
-console.log('Neo4j health:', health);
+console.log("Neo4j health:", health);
 ```
 
 ---
@@ -349,18 +350,18 @@ Tiered rate limiting with cost tracking to prevent resource abuse and optimize c
 
 ### Rate Limit Tiers
 
-| Tier | Req/Min | Req/Hour | Req/Day | Concurrent | Cost/Day |
-|------|---------|----------|---------|------------|----------|
-| **FREE** | 10 | 100 | 1,000 | 2 | $1 |
-| **BASIC** | 60 | 1,000 | 10,000 | 10 | $10 |
-| **PREMIUM** | 300 | 10,000 | 100,000 | 50 | $100 |
-| **ENTERPRISE** | 1,000 | 50,000 | 500,000 | 200 | $1,000 |
-| **INTERNAL** | 10,000 | 500,000 | 5,000,000 | 1,000 | $10,000 |
+| Tier           | Req/Min | Req/Hour | Req/Day   | Concurrent | Cost/Day |
+| -------------- | ------- | -------- | --------- | ---------- | -------- |
+| **FREE**       | 10      | 100      | 1,000     | 2          | $1       |
+| **BASIC**      | 60      | 1,000    | 10,000    | 10         | $10      |
+| **PREMIUM**    | 300     | 10,000   | 100,000   | 50         | $100     |
+| **ENTERPRISE** | 1,000   | 50,000   | 500,000   | 200        | $1,000   |
+| **INTERNAL**   | 10,000  | 500,000  | 5,000,000 | 1,000      | $10,000  |
 
 ### Usage
 
 ```typescript
-import { createTieredRateLimiter, RateLimitTier } from './middleware/TieredRateLimitMiddleware';
+import { createTieredRateLimiter, RateLimitTier } from "./middleware/TieredRateLimitMiddleware";
 
 // Create rate limiter
 const rateLimiter = createTieredRateLimiter();
@@ -369,9 +370,9 @@ const rateLimiter = createTieredRateLimiter();
 app.use(rateLimiter.middleware());
 
 // Check status for a user
-const status = await rateLimiter.getStatus('user:12345', RateLimitTier.PREMIUM);
-console.log('Usage:', status.usage);
-console.log('Limits:', status.limits);
+const status = await rateLimiter.getStatus("user:12345", RateLimitTier.PREMIUM);
+console.log("Usage:", status.usage);
+console.log("Limits:", status.limits);
 ```
 
 ### Custom Configuration
@@ -391,7 +392,7 @@ const rateLimiter = createTieredRateLimiter({
   },
   redis: {
     host: process.env.REDIS_HOST,
-    port: parseInt(process.env.REDIS_PORT || '6379'),
+    port: parseInt(process.env.REDIS_PORT || "6379"),
   },
   costTracking: true,
   adaptiveThrottling: true,
@@ -435,18 +436,18 @@ const rateLimiter = createTieredRateLimiter({
 Export custom metrics from your application:
 
 ```typescript
-import { businessMetrics, costTracker } from './observability/telemetry';
+import { businessMetrics, costTracker } from "./observability/telemetry";
 
 // Record cost
-costTracker.track('graphql_query', 0.05, {
-  tenantId: 'tenant-123',
-  userId: 'user-456',
+costTracker.track("graphql_query", 0.05, {
+  tenantId: "tenant-123",
+  userId: "user-456",
   complexity: 10,
 });
 
 // Record budget utilization
 businessMetrics.costBudgetUtilization.record(0.75, {
-  tenant_id: 'tenant-123',
+  tenant_id: "tenant-123",
 });
 ```
 
@@ -472,22 +473,22 @@ Automatic budget monitoring and cost anomaly detection with configurable thresho
 ### Setting Budget Thresholds
 
 ```typescript
-import { costAnomalyDetection } from './services/CostAnomalyDetectionService';
+import { costAnomalyDetection } from "./services/CostAnomalyDetectionService";
 
 // Set budget for a team
 await costAnomalyDetection.setBudgetThreshold({
-  dimension: 'team',
-  dimensionValue: 'platform',
+  dimension: "team",
+  dimensionValue: "platform",
   dailyLimit: 100.0,
   monthlyLimit: 2500.0,
-  warningThreshold: 80,   // Alert at 80% usage
-  criticalThreshold: 95,  // Critical alert at 95%
+  warningThreshold: 80, // Alert at 80% usage
+  criticalThreshold: 95, // Critical alert at 95%
 });
 
 // Set budget for an environment
 await costAnomalyDetection.setBudgetThreshold({
-  dimension: 'environment',
-  dimensionValue: 'production',
+  dimension: "environment",
+  dimensionValue: "production",
   dailyLimit: 500.0,
   monthlyLimit: 12000.0,
   warningThreshold: 85,
@@ -499,33 +500,28 @@ await costAnomalyDetection.setBudgetThreshold({
 
 ```typescript
 // Check budget compliance
-const alerts = await costAnomalyDetection.checkBudgetCompliance(
-  'team',
-  'platform',
-);
+const alerts = await costAnomalyDetection.checkBudgetCompliance("team", "platform");
 
-console.log('Budget alerts:', alerts);
+console.log("Budget alerts:", alerts);
 
 // Detect anomalies
-const anomalies = await costAnomalyDetection.detectCostAnomalies(
-  'environment',
-  'production',
-);
+const anomalies = await costAnomalyDetection.detectCostAnomalies("environment", "production");
 
-console.log('Cost anomalies:', anomalies);
+console.log("Cost anomalies:", anomalies);
 
 // Check for waste
 const wasteAlerts = await costAnomalyDetection.detectWaste();
-console.log('Wasted resources:', wasteAlerts);
+console.log("Wasted resources:", wasteAlerts);
 
 // Get recent alerts
 const recentAlerts = await costAnomalyDetection.getRecentAlerts(50);
-console.log('Recent alerts:', recentAlerts);
+console.log("Recent alerts:", recentAlerts);
 ```
 
 ### Automatic Monitoring
 
 The service runs periodic checks every 15 minutes for:
+
 - Budget compliance (all configured thresholds)
 - Cost anomaly detection
 - Waste detection
@@ -540,6 +536,7 @@ The service runs periodic checks every 15 minutes for:
 ### Notifications
 
 Alerts are:
+
 - Logged to application logs (searchable in dashboards)
 - Stored in database (queryable via API)
 - Can be sent to external systems (Slack, email, PagerDuty)
@@ -557,6 +554,7 @@ Kubernetes spot/preemptible instance support for 60-80% cost savings on fault-to
 ### Suitable Workloads
 
 ✅ **Good for Spot Instances:**
+
 - Batch processing jobs
 - Analytics workers
 - Report generation
@@ -565,6 +563,7 @@ Kubernetes spot/preemptible instance support for 60-80% cost savings on fault-to
 - Cache layers (with replication)
 
 ❌ **Not Recommended:**
+
 - Databases (primary instances)
 - Stateful services without redundancy
 - Real-time critical services
@@ -630,6 +629,7 @@ spec:
 ### Spot Interruption Handling
 
 The spot termination handler automatically:
+
 1. Detects spot instance interruption warnings
 2. Drains pods gracefully (120s grace period)
 3. Reschedules pods to other nodes
@@ -694,6 +694,7 @@ The spot termination handler automatically:
 **Symptom**: Costs are higher than expected
 
 **Diagnosis**:
+
 ```bash
 # Check resource usage
 kubectl top nodes
@@ -707,6 +708,7 @@ curl http://localhost:4000/api/cost-allocation?dimension=service&start=2025-01-0
 ```
 
 **Solutions**:
+
 1. Identify top cost drivers in dashboard
 2. Check for idle resources
 3. Review auto-scaling min replicas
@@ -718,13 +720,15 @@ curl http://localhost:4000/api/cost-allocation?dimension=service&start=2025-01-0
 **Symptom**: Users hitting rate limits
 
 **Diagnosis**:
+
 ```typescript
 const status = await rateLimiter.getStatus(userId, tier);
-console.log('Usage:', status.usage);
-console.log('Limits:', status.limits);
+console.log("Usage:", status.usage);
+console.log("Limits:", status.limits);
 ```
 
 **Solutions**:
+
 1. Review user tier assignment
 2. Check if legitimate burst traffic
 3. Adjust tier limits if needed
@@ -736,13 +740,15 @@ console.log('Limits:', status.limits);
 **Symptom**: Connection pool exhaustion
 
 **Diagnosis**:
+
 ```typescript
 const health = await pool.healthCheck();
-console.log('Active connections:', health[0].activeConnections);
-console.log('Queued requests:', health[0].queuedRequests);
+console.log("Active connections:", health[0].activeConnections);
+console.log("Queued requests:", health[0].queuedRequests);
 ```
 
 **Solutions**:
+
 1. Increase pool size if needed
 2. Check for connection leaks
 3. Review slow queries
@@ -754,13 +760,15 @@ console.log('Queued requests:', health[0].queuedRequests);
 **Symptom**: Not receiving budget alerts
 
 **Diagnosis**:
+
 ```typescript
 // Check if thresholds are set
 const alerts = await costAnomalyDetection.getRecentAlerts(10);
-console.log('Recent alerts:', alerts);
+console.log("Recent alerts:", alerts);
 ```
 
 **Solutions**:
+
 1. Verify budget thresholds are configured
 2. Check alert cooldown period
 3. Review notification configuration

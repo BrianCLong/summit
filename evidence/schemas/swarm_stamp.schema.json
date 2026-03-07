@@ -4,8 +4,8 @@
   "type": "object",
   "required": ["run_id", "generated_at"],
   "properties": {
-    "run_id": {"type": "string"},
-    "generated_at": {"type": "string"}
+    "run_id": { "type": "string" },
+    "generated_at": { "type": "string" }
   },
   "additionalProperties": true
 }

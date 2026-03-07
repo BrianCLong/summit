@@ -34,20 +34,20 @@ This connector serves as a **reference implementation** demonstrating all GA-lev
 ```yaml
 type: Vulnerability
 properties:
-  id: "{cve_id}"                          # CVE-2023-12345
-  cve_id: "CVE-YYYY-NNNNN"                # Official CVE identifier
-  name: "Vulnerability short name"         # e.g., "Apache Log4j RCE"
-  vendor_project: "Vendor/Project name"    # e.g., "Apache"
-  product: "Product name"                  # e.g., "Log4j"
+  id: "{cve_id}" # CVE-2023-12345
+  cve_id: "CVE-YYYY-NNNNN" # Official CVE identifier
+  name: "Vulnerability short name" # e.g., "Apache Log4j RCE"
+  vendor_project: "Vendor/Project name" # e.g., "Apache"
+  product: "Product name" # e.g., "Log4j"
   vulnerability_name: "Official CVE name"
-  date_added: "YYYY-MM-DD"                # Date added to KEV catalog
+  date_added: "YYYY-MM-DD" # Date added to KEV catalog
   short_description: "Brief description"
-  required_action: "CISA required action"  # Remediation guidance
-  due_date: "YYYY-MM-DD"                  # Remediation deadline (if applicable)
-  known_ransomware_use: true|false        # Flag for ransomware association
+  required_action: "CISA required action" # Remediation guidance
+  due_date: "YYYY-MM-DD" # Remediation deadline (if applicable)
+  known_ransomware_use: true|false # Flag for ransomware association
   source: "cisa-kev"
-  confidence: 1.0                         # High confidence (authoritative source)
-  severity: "critical|high|medium|low"    # Inferred from context
+  confidence: 1.0 # High confidence (authoritative source)
+  severity: "critical|high|medium|low" # Inferred from context
 
   # Additional metadata
   catalog_version: "2025.11.20"
@@ -165,6 +165,7 @@ pytest connectors/cisa-kev/__tests__/test_golden.py::TestGoldenIO::test_golden_b
 ```
 
 Test fixtures are located in `__tests__/golden/`:
+
 - `input/` - Sample input data
 - `expected/` - Expected output entities/relationships
 
@@ -213,6 +214,7 @@ connector_cisa_kev_last_successful_ingest_timestamp
 ### SLI/SLO
 
 Configured SLIs:
+
 - **Availability**: 99% success rate over 30 days
 - **Latency**: 95th percentile < 10 seconds
 - **Throughput**: Minimum 1000 records/minute
@@ -243,6 +245,7 @@ curl http://localhost:8000/connectors/cisa-kev/health
 ```
 
 Response:
+
 ```json
 {
   "status": "healthy",
@@ -334,12 +337,15 @@ def map_with_cvss(file_path: str = None):
 Maps CISA KEV data to IntelGraph entities.
 
 **Args**:
+
 - `file_path` (str, optional): Path to local KEV JSON file. If None, fetches from CISA API.
 
 **Returns**:
+
 - Tuple of (entities, relationships)
 
 **Raises**:
+
 - `ValueError`: If JSON format is invalid
 - `httpx.HTTPError`: If API request fails
 
@@ -350,6 +356,7 @@ Maps CISA KEV data to IntelGraph entities.
 Production connector implementation.
 
 **Methods**:
+
 - `connect() -> None`: Establish connection
 - `disconnect() -> None`: Close connection
 - `test_connection() -> bool`: Test connectivity
@@ -359,12 +366,14 @@ Production connector implementation.
 ## Performance
 
 **Typical Performance**:
+
 - Full catalog ingestion: ~5-10 seconds
 - Average throughput: ~200 vulnerabilities/second
 - Memory usage: ~50MB for full catalog
 - API latency: 1-3 seconds (depends on CISA infrastructure)
 
 **Optimization Tips**:
+
 - Enable caching for repeated ingests
 - Use batch processing (default: 100 records/batch)
 - Consider daily scheduled ingests vs real-time

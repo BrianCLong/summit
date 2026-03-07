@@ -5,6 +5,7 @@ section spells out scope, data boundaries, events, acceptance criteria, and deci
 backchannel context.
 
 ## Prompt #41 — Audit Correlator & Forensics Timeline (ACF)
+
 - **Mission:** Correlate traces, logs, and webhook receipts into tamper-evident, case-scoped forensic timelines with chain-of-custody proofs.
 - **Scope & Data Boundaries:**
   - Build signed event DAGs from OTEL traces, app logs, and webhook receipts; include only hashes + metadata with redact reasons.
@@ -19,6 +20,7 @@ backchannel context.
 - **Open Decisions:** Required retention defaults for audit artifacts? Correlation grain: trace span vs. logical action vs. user-initiated session boundary?
 
 ## Prompt #42 — Sovereignty Router & Partitioning (SRP)
+
 - **Mission:** Enforce regional data residency and tenant isolation with policy-driven routing and cross-region federation.
 - **Scope & Data Boundaries:**
   - Region policy DSL governs reads/writes for GraphQL/Cypher; cross-region PII blocked unless policy allows; KMS per region.
@@ -33,6 +35,7 @@ backchannel context.
 - **Open Decisions:** Initial supported regions and default fallback behavior? Partitioning strategy (hash by tenant vs. by case)?
 
 ## Prompt #43 — Field Capture PWA & Safe Uploads (FC-PWA)
+
 - **Mission:** Mobile/PWA for field teams to capture photo/audio/notes with on-device redaction preview and offline manifests.
 - **Scope & Data Boundaries:**
   - Capture, redact, tag, GPS/timebox; offline vault with CRDT notes; signed capture manifests stored locally until sync.
@@ -46,6 +49,7 @@ backchannel context.
 - **Open Decisions:** Minimum viable offline set (photo+audio vs. include notes)? Default location fuzz radius and floor for low-precision devices?
 
 ## Prompt #44 — Ontology & Vocabulary Studio (OVS)
+
 - **Mission:** Manage types/properties/synonyms/taxonomies and map external vocabularies (e.g., ATT&CK, STIX) to IntelGraph schema—versioned and explainable.
 - **Scope & Data Boundaries:**
   - SKOS-like model with synonym sets, deprecations, mapping packs, and GraphQL SDL emitters; provenance captured for every mapping.
@@ -60,6 +64,7 @@ backchannel context.
 - **Open Decisions:** Which external vocabularies to preload? Policy for auto-accepting non-breaking synonyms and how to mark disputed mappings?
 
 ## Prompt #45 — Multilingual & Transliteration Layer (I18N/TL)
+
 - **Mission:** Provide end-to-end language detection, transliteration (Arabic, Cyrillic, CJK), diacritic-insensitive search, and full UI localization with RTL support.
 - **Scope & Data Boundaries:**
   - `/services/i18n` (Python 3.12 + FastAPI) exposes language ID, script detection, transliteration, and normalization APIs; originals never overwritten and license tags propagated.
@@ -72,6 +77,7 @@ backchannel context.
 - **Open Decisions:** Initial locales to ship? Preferred transliteration schemes (ALA-LC vs. ISO 9 vs. Pinyin) and fallback rules per script?
 
 ## Prompt #46 — Live Subscriptions & Push Updates (SUBS)
+
 - **Mission:** Deliver reliable GraphQL subscriptions for live updates (graph deltas, case events, audit alerts) with cost/backpressure controls.
 - **Scope & Data Boundaries:**
   - `/services/subscriptions` (Node + WebSocket/SSE) with topic fan-out, replay cursors, at-least-once delivery, and per-tenant backpressure/rate caps.
@@ -84,6 +90,7 @@ backchannel context.
 - **Open Decisions:** Default replay window length? Preferred transport default (WS vs. SSE) and throttle caps per tenant tier?
 
 ## Prompt #47 — Hypothesis Sandbox & Counterfactual Lab (HSCL)
+
 - **Mission:** Allow analysts to run “what-if” simulations by toggling proposed facts/edges in an ephemeral branch to see analytic impacts, proof debt, and risk deltas without prod writes.
 - **Scope & Data Boundaries:**
   - `/services/hypothesis-lab` (Node/TS) runs ephemeral branches via GBDM (#25); read-only to prod; auto-GC idle scenarios.
@@ -97,6 +104,7 @@ backchannel context.
 - **Open Decisions:** Default TTL for ephemeral scenarios? Metrics for sensitivity chart (centrality, path count, risk) and scoring weights per metric?
 
 ## Prompt #48 — Watermarking & Canary Tokens (LeakTrace)
+
 - **Mission:** Embed robust per-audience watermarks in exports and issue canary identifiers to trace leaks; verify suspect artifacts.
 - **Scope & Data Boundaries:**
   - `/services/leaktrace` (Python + workers) handles PDF/image watermarking (visible + invisible), CSV canary fields, and hash beacons; originals never modified—only exports.
@@ -110,6 +118,7 @@ backchannel context.
 - **Open Decisions:** Default watermark strength profiles (press/court/partner)? CSV canary fields acceptable per audience and masking rules for high-sensitivity exports?
 
 ## Parallelization Map
+
 - #41 ACF reads telemetry and emits proofs—no shared DB; safe with all others.
 - #42 SRP is a routing layer with gateway-only integration; policy-driven and additive.
 - #43 FC-PWA runs at the edge with manifest-based sync; offline-first and decoupled.
@@ -120,11 +129,13 @@ backchannel context.
 - #48 LeakTrace is export-time only with Disclosure/Brief hooks; no runtime coupling.
 
 ## Meta-Prompt
+
 “Implement exactly to the acceptance criteria above, hide behind the specified feature flag, depend on other teams only via typed APIs/events, and ship with unit + contract + E2E tests and golden fixtures. Use React 18 + jQuery for DOM glue on the client, Node/Apollo/Express on the gateway, Neo4j/Postgres/Redis on data, and never log PII. Each PR spins a preview environment, enforces schema via SRE (#17), runs Jest/Playwright/k6, supports canary + auto-rollback, and targets p95 ≤ 1.5s for typical reads.”
 
 ## Delivery Response (Structured to 7th-Order Expansion)
 
 ### 1) Requirements Expansion
+
 - **Explicit requirements:**
   - Ship eight feature-flagged capabilities (#41–#48) with independent deployability, typed interfaces, events, and UI hooks; each must meet its listed missions, deliverables, constraints, and DoD/CI gates with preview environments and no PII logging.
   - Provide verifiable provenance (hashbooks, manifests, attestations) and strict data boundaries (append-only audit, residency-aware routing, normalized i18n storage, export-only watermarking) with failure-safe behaviors (fail-closed routing, kill-switches, offline-first safety).
@@ -140,6 +151,7 @@ backchannel context.
   - Changing upstream schema registries or base auth; rewriting unrelated services; persisting raw PII/payloads; speculative ML beyond listed light OCR/ASR; altering existing routing outside feature flags; bypassing CI/test gates or performance targets.
 
 ### 2) Design
+
 - **Selected design and rationale:**
   - Use service-per-feature isolation with feature flags gating runtime paths and events. Favor append-only, manifest-driven provenance (Merkle hashbooks, residency attestations, snapshot manifests) to enable replay, proofs, and offline/edge operation while minimizing coupling.
 - **Data structures and interfaces:**
@@ -157,6 +169,7 @@ backchannel context.
   - **LeakTrace:** Generate watermarked exports (PDF/image/CSV) with per-audience seeds → log manifests → verifier API for uploads → deny-list on revocation.
 
 ### 3) Implementation Plan
+
 - Land iterative commits (docs, schema/contracts, service scaffolds, UI glue, fixtures/tests, CLIs/verifiers) per feature flag, preserving zero-downtime.
 - Wire event schemas and manifest formats; add typed SDK stubs for router, i18n, subscriptions, and provenance verifiers.
 - Implement guard rails: feature flags, policy DSL validation, backpressure thresholds, TTL/GC settings, and denial explainers.
@@ -164,16 +177,20 @@ backchannel context.
 - Expand CI to run unit + contract + Playwright + k6 slices where applicable; enforce coverage and performance budgets.
 
 ### 4) Code
+
 - This blueprint supplements implementation by specifying the cross-service interfaces, flags, manifests, and control flows required for production readiness; code generation and scaffolds must align to these structures when built.
 
 ### 5) Tests
+
 - **Test plan:** Unit (hashbook/Merkle integrity, policy parsing, normalization transforms), contract (event schemas, manifest verifiers, planner hashes), integration/E2E (Playwright flows per prompt, offline/online sync, replay cursors), performance (p95 targets, soak at 50k conns), robustness (watermark recompress/crop/re-scan, chaos drills for region loss).
 - **Execution:** Standard commands per service (`npm test`, `npm run test:e2e`, `pytest`, `k6 run`), with seeded fixtures and deterministic expectations; replay/export verifiers must round-trip proofs.
 
 ### 6) Documentation
+
 - Keep this file as the authoritative tranche blueprint; add service-level READMEs (ingest contracts, policy DSL grammar, normalization schemes, replay cursor semantics, watermark strength profiles) and operator runbooks (dual-control redaction, residency simulator, GC/TTL tuning, deny-list propagation).
 
 ### 7) PR Package
+
 - **Title:** “Expand tranche #41–#48 blueprint to full implementation guide.”
 - **Description:** Summarizes requirements expansion, chosen design, implementation plan, test strategy, docs expectations, and rollout safety for all eight feature-flagged initiatives.
 - **Reviewer checklist:** Feature flags present; manifests/proofs defined; policy/normalization/GC rules explicit; denial explainers and PII guards in place; fixtures deterministic; performance budgets stated; rollback/canary paths documented.

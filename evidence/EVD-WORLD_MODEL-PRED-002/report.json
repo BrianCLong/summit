@@ -10,10 +10,5 @@
     "Dynamics model emits confidence score alongside predicted state"
   ],
   "status": "scaffolded",
-  "benchmark_datasets": [
-    "Summit enterprise corpus",
-    "MSR-VTT",
-    "ImageNet",
-    "AudioSet"
-  ]
+  "benchmark_datasets": ["Summit enterprise corpus", "MSR-VTT", "ImageNet", "AudioSet"]
 }

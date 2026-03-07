@@ -1,5 +1,5 @@
-import { io } from 'socket.io-client';
-import { getSocketBaseUrl } from '../config/urls';
+import { io } from "socket.io-client";
+import { getSocketBaseUrl } from "../config/urls";
 
 let socket = null;
 let reconnectTimer = null;
@@ -18,12 +18,12 @@ const DEFAULT_BACKOFF = {
 };
 
 function getToken() {
-  return localStorage.getItem('token');
+  return localStorage.getItem("token");
 }
 
 export function calculateBackoffDelay(
   attempt,
-  { baseMs, maxMs, factor, jitter } = DEFAULT_BACKOFF,
+  { baseMs, maxMs, factor, jitter } = DEFAULT_BACKOFF
 ) {
   const rawDelay = Math.min(maxMs, baseMs * Math.pow(factor, attempt));
   if (!jitter) return rawDelay;
@@ -33,7 +33,7 @@ export function calculateBackoffDelay(
 
 function flushPendingOps() {
   if (socket && pendingOps.length) {
-    socket.emit('collab:batch', pendingOps);
+    socket.emit("collab:batch", pendingOps);
     pendingOps = [];
   }
 }
@@ -71,7 +71,7 @@ function scheduleReconnect(reason) {
       socket.connect();
     } catch (err) {
       // eslint-disable-next-line no-console
-      console.warn('WebSocket reconnect failed, retrying', err);
+      console.warn("WebSocket reconnect failed, retrying", err);
       scheduleReconnect(err);
     }
   }, delay);
@@ -79,35 +79,35 @@ function scheduleReconnect(reason) {
   // eslint-disable-next-line no-console
   console.warn(
     `WebSocket reconnect scheduled in ${delay}ms (attempt ${reconnectAttempts})`,
-    reason,
+    reason
   );
 }
 
 function attachLifecycleHandlers() {
-  socket.on('connect', () => {
+  socket.on("connect", () => {
     reconnectAttempts = 0;
     manuallyClosed = false;
     clearReconnectTimer();
     flushPendingOps();
     // eslint-disable-next-line no-console
-    console.log('WebSocket connected', socket.id);
+    console.log("WebSocket connected", socket.id);
   });
 
-  socket.on('disconnect', (reason) => {
+  socket.on("disconnect", (reason) => {
     // eslint-disable-next-line no-console
-    console.log('WebSocket disconnected', reason);
+    console.log("WebSocket disconnected", reason);
     scheduleReconnect(reason);
   });
 
-  socket.on('connect_error', (err) => {
+  socket.on("connect_error", (err) => {
     // eslint-disable-next-line no-console
-    console.warn('WebSocket connection error:', err?.message || err);
+    console.warn("WebSocket connection error:", err?.message || err);
     scheduleReconnect(err);
   });
 
-  socket.on('op:ack', (ack) => {
+  socket.on("op:ack", (ack) => {
     // eslint-disable-next-line no-console
-    console.debug('ack', ack);
+    console.debug("ack", ack);
   });
 }
 
@@ -119,7 +119,7 @@ function buildSocket() {
   if (!url) return null;
 
   socket = io(url, {
-    transports: ['websocket', 'polling'],
+    transports: ["websocket", "polling"],
     auth: { token },
     autoConnect: false,
     reconnection: false,
@@ -153,7 +153,7 @@ function scheduleFlush() {
   if (flushTimer || pendingOps.length === 0) return;
   flushTimer = setTimeout(() => {
     if (socket && pendingOps.length) {
-      socket.emit('collab:batch', pendingOps);
+      socket.emit("collab:batch", pendingOps);
       pendingOps = [];
     }
     flushTimer = null;

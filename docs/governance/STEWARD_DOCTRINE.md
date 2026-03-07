@@ -3,7 +3,6 @@
 > Evidence-IDs: EVD-PLACEHOLDER
 > Status: active
 
-
 # Summit Stewardship Doctrine
 
 > **PRIME DIRECTIVE**

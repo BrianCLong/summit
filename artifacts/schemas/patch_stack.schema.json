@@ -4,17 +4,20 @@
   "type": "object",
   "required": ["run_id", "stage", "patches"],
   "properties": {
-    "run_id": {"type": "string"},
-    "stage": {"type": "string"},
+    "run_id": { "type": "string" },
+    "stage": { "type": "string" },
     "patches": {
       "type": "array",
       "items": {
         "type": "object",
         "required": ["evidence_id", "path", "diff"],
         "properties": {
-          "evidence_id": {"type": "string", "pattern": "^EV-[A-Za-z0-9_-]+-[a-z0-9_-]+-[0-9]{3}$"},
-          "path": {"type": "string"},
-          "diff": {"type": "string"}
+          "evidence_id": {
+            "type": "string",
+            "pattern": "^EV-[A-Za-z0-9_-]+-[a-z0-9_-]+-[0-9]{3}$"
+          },
+          "path": { "type": "string" },
+          "diff": { "type": "string" }
         },
         "additionalProperties": false
       }

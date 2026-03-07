@@ -67,5 +67,5 @@ failure_modes:
 versioning:
   changelog:
     - version: 0.1.0
-      date: '2026-02-21'
+      date: "2026-02-21"
       changes: Initial spec

@@ -52,7 +52,7 @@ spec:
         - protocol: TCP
           port: 8080
         - protocol: TCP
-          port: 9090  # gRPC
+          port: 9090 # gRPC
 
     # From agent runtimes in data plane (for task results, status updates)
     - from:
@@ -64,7 +64,7 @@ spec:
               app: agent-runtime
       ports:
         - protocol: TCP
-          port: 9090  # gRPC
+          port: 9090 # gRPC
 
     # From ops zone for monitoring
     - from:
@@ -73,7 +73,7 @@ spec:
               name: mesh-ops
       ports:
         - protocol: TCP
-          port: 9091  # Metrics endpoint
+          port: 9091 # Metrics endpoint
 
 ---
 # Allow routing-gateway ingress from mesh-orchestrator and edge

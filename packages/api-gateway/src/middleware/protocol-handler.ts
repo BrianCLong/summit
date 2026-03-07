@@ -5,17 +5,17 @@
  * Handles multiple protocols: HTTP/HTTPS, WebSocket, gRPC
  */
 
-import type { IncomingMessage, ServerResponse } from 'http';
-import { createLogger } from '../utils/logger.js';
+import type { IncomingMessage, ServerResponse } from "http";
+import { createLogger } from "../utils/logger.js";
 
-const logger = createLogger('protocol-handler');
+const logger = createLogger("protocol-handler");
 
 export enum Protocol {
-  HTTP = 'HTTP',
-  HTTPS = 'HTTPS',
-  WEBSOCKET = 'WEBSOCKET',
-  GRPC = 'GRPC',
-  HTTP2 = 'HTTP2',
+  HTTP = "HTTP",
+  HTTPS = "HTTPS",
+  WEBSOCKET = "WEBSOCKET",
+  GRPC = "GRPC",
+  HTTP2 = "HTTP2",
 }
 
 export interface ProtocolHandlerConfig {
@@ -49,13 +49,13 @@ export class ProtocolHandler {
     }
 
     // Check for gRPC (content-type: application/grpc)
-    const contentType = req.headers['content-type'];
-    if (contentType?.includes('application/grpc')) {
+    const contentType = req.headers["content-type"];
+    if (contentType?.includes("application/grpc")) {
       return Protocol.GRPC;
     }
 
     // Check for HTTP/2
-    if (req.httpVersion === '2.0') {
+    if (req.httpVersion === "2.0") {
       return Protocol.HTTP2;
     }
 
@@ -69,8 +69,8 @@ export class ProtocolHandler {
 
   private isWebSocketUpgrade(req: IncomingMessage): boolean {
     return (
-      req.headers.upgrade?.toLowerCase() === 'websocket' &&
-      req.headers.connection?.toLowerCase().includes('upgrade')
+      req.headers.upgrade?.toLowerCase() === "websocket" &&
+      req.headers.connection?.toLowerCase().includes("upgrade")
     );
   }
 
@@ -80,12 +80,12 @@ export class ProtocolHandler {
     protocol: Protocol
   ): Promise<void> {
     if (!this.isSupported(protocol)) {
-      res.writeHead(400, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ error: 'Protocol not supported' }));
+      res.writeHead(400, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: "Protocol not supported" }));
       return;
     }
 
-    logger.debug('Handling protocol', { protocol, url: req.url });
+    logger.debug("Handling protocol", { protocol, url: req.url });
 
     switch (protocol) {
       case Protocol.HTTP:
@@ -102,23 +102,23 @@ export class ProtocolHandler {
 
   private async handleHTTP(req: IncomingMessage, res: ServerResponse): Promise<void> {
     // HTTP handling is done by the main gateway
-    logger.debug('HTTP request', { method: req.method, url: req.url });
+    logger.debug("HTTP request", { method: req.method, url: req.url });
   }
 
   private async handleWebSocket(req: IncomingMessage, res: ServerResponse): Promise<void> {
-    logger.info('WebSocket upgrade requested', { url: req.url });
+    logger.info("WebSocket upgrade requested", { url: req.url });
     // WebSocket upgrade handling would be implemented here
     // This would typically use the 'ws' library
   }
 
   private async handleGRPC(req: IncomingMessage, res: ServerResponse): Promise<void> {
-    logger.info('gRPC request', { url: req.url });
+    logger.info("gRPC request", { url: req.url });
     // gRPC handling would be implemented here
     // This would typically use @grpc/grpc-js
   }
 
   private async handleHTTP2(req: IncomingMessage, res: ServerResponse): Promise<void> {
-    logger.debug('HTTP/2 request', { method: req.method, url: req.url });
+    logger.debug("HTTP/2 request", { method: req.method, url: req.url });
     // HTTP/2 specific handling
   }
 }

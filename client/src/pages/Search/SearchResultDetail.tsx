@@ -1,8 +1,8 @@
-import React from 'react';
-import { Card, CardContent, Typography, Box, Stack, IconButton } from '@mui/material';
-import { useParams, useNavigate } from 'react-router-dom';
-import { useSafeQuery } from '../../hooks/useSafeQuery';
-import { ArrowBack } from '@mui/icons-material';
+import React from "react";
+import { Card, CardContent, Typography, Box, Stack, IconButton } from "@mui/material";
+import { useParams, useNavigate } from "react-router-dom";
+import { useSafeQuery } from "../../hooks/useSafeQuery";
+import { ArrowBack } from "@mui/icons-material";
 
 interface SearchResult {
   id: string;
@@ -19,10 +19,10 @@ export default function SearchResultDetail() {
   const { data } = useSafeQuery<SearchResult>({
     queryKey: `search_result_${id}`,
     mock: {
-      id: id || 'result1',
-      title: 'Sample Search Result',
-      type: 'entity',
-      snippet: 'This is a sample search result snippet...',
+      id: id || "result1",
+      title: "Sample Search Result",
+      type: "entity",
+      snippet: "This is a sample search result snippet...",
       score: 0.95,
       timestamp: new Date().toISOString(),
     },
@@ -32,7 +32,7 @@ export default function SearchResultDetail() {
   return (
     <Box sx={{ p: 2 }}>
       <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 2 }}>
-        <IconButton onClick={() => navigate('/search')}>
+        <IconButton onClick={() => navigate("/search")}>
           <ArrowBack />
         </IconButton>
         <Typography variant="h5">Search Result</Typography>
@@ -52,7 +52,7 @@ export default function SearchResultDetail() {
             Relevance Score: {((data?.score || 0) * 100).toFixed(1)}%
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            Found: {data?.timestamp ? new Date(data.timestamp).toLocaleString() : 'N/A'}
+            Found: {data?.timestamp ? new Date(data.timestamp).toLocaleString() : "N/A"}
           </Typography>
         </CardContent>
       </Card>

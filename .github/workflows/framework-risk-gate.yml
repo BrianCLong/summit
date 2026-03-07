@@ -3,9 +3,9 @@ name: Framework Governance Risk Gate
 on:
   pull_request:
     paths:
-      - 'package.json'
-      - '**/package.json'
-      - '.github/workflows/framework-risk-gate.yml'
+      - "package.json"
+      - "**/package.json"
+      - ".github/workflows/framework-risk-gate.yml"
 
 jobs:
   evaluate-framework-risk:
@@ -17,7 +17,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.22'
+          go-version: "1.22"
 
       - name: Run Framework Risk Evaluation
         run: |

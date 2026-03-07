@@ -1,23 +1,23 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from "@playwright/test";
 
-test.describe('Summit Dashboard Navigation', () => {
+test.describe("Summit Dashboard Navigation", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/');
+    await page.goto("/");
   });
 
-  test('should navigate to Search page', async ({ page }) => {
+  test("should navigate to Search page", async ({ page }) => {
     // Open drawer if not already open (assuming mobile/tablet or collapsed by default, but existing test implies it needs opening)
     // However, existing test says "Check for menu button... Click to open drawer".
 
-    const menuButton = page.getByLabel('Open navigation menu');
+    const menuButton = page.getByLabel("Open navigation menu");
     if (await menuButton.isVisible()) {
-        await menuButton.click();
+      await menuButton.click();
     }
 
-    const drawer = page.locator('.MuiDrawer-paper');
+    const drawer = page.locator(".MuiDrawer-paper");
     await expect(drawer).toBeVisible();
 
-    const searchLink = drawer.getByText('Search');
+    const searchLink = drawer.getByText("Search");
     await expect(searchLink).toBeVisible();
     await searchLink.click();
 
@@ -27,16 +27,16 @@ test.describe('Summit Dashboard Navigation', () => {
     // await expect(page.locator('h1')).toContainText('Search');
   });
 
-  test('should navigate to Graph Explorer page', async ({ page }) => {
-    const menuButton = page.getByLabel('Open navigation menu');
+  test("should navigate to Graph Explorer page", async ({ page }) => {
+    const menuButton = page.getByLabel("Open navigation menu");
     if (await menuButton.isVisible()) {
-        await menuButton.click();
+      await menuButton.click();
     }
 
-    const drawer = page.locator('.MuiDrawer-paper');
+    const drawer = page.locator(".MuiDrawer-paper");
     await expect(drawer).toBeVisible();
 
-    const graphLink = drawer.getByText('Graph Explorer');
+    const graphLink = drawer.getByText("Graph Explorer");
     await expect(graphLink).toBeVisible();
     await graphLink.click();
 

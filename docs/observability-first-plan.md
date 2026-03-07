@@ -13,7 +13,7 @@
 | SDK        | Deliverables                                                                                                                                             | Notes                                                                                                                   |
 | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
 | Go         | HTTP and gRPC middleware, RED/USE metrics, structured error taxonomy, trace/span propagation helpers, OTEL exporter with Prometheus bridge.              | Embed `context.Context` helpers for request/trace IDs; default sampling policy documented in `docs/sdk/go/sampling.md`. |
-| TypeScript | Express/Fastify middleware, RED/USE metrics decorators, structured error classes, OTEL exporter via OTLP/HTTP, Winston transport with trace correlation. | Provide `@intelgraph/telemetry` package with `configureTelemetry()` bootstrap that wires logging + metrics.                 |
+| TypeScript | Express/Fastify middleware, RED/USE metrics decorators, structured error classes, OTEL exporter via OTLP/HTTP, Winston transport with trace correlation. | Provide `@intelgraph/telemetry` package with `configureTelemetry()` bootstrap that wires logging + metrics.             |
 
 ### Shared SDK Requirements
 

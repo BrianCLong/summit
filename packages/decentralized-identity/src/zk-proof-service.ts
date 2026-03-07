@@ -2,12 +2,8 @@
  * Zero-Knowledge Proof Service - Privacy-preserving credential verification
  */
 
-import crypto from 'crypto';
-import type {
-  VerifiableCredential,
-  ProofRequest,
-  ZKProof,
-} from './types.js';
+import crypto from "crypto";
+import type { VerifiableCredential, ProofRequest, ZKProof } from "./types.js";
 
 export class ZKProofService {
   private proofRequests: Map<string, ProofRequest> = new Map();
@@ -15,13 +11,13 @@ export class ZKProofService {
 
   async createProofRequest(
     name: string,
-    requestedAttributes: ProofRequest['requestedAttributes'],
-    requestedPredicates?: ProofRequest['requestedPredicates'],
+    requestedAttributes: ProofRequest["requestedAttributes"],
+    requestedPredicates?: ProofRequest["requestedPredicates"]
   ): Promise<ProofRequest> {
     const request: ProofRequest = {
       id: crypto.randomUUID(),
       name,
-      version: '1.0',
+      version: "1.0",
       requestedAttributes,
       requestedPredicates,
     };
@@ -33,7 +29,7 @@ export class ZKProofService {
   async generateProof(
     requestId: string,
     credentials: VerifiableCredential[],
-    revealedAttributeNames: string[],
+    revealedAttributeNames: string[]
   ): Promise<ZKProof> {
     const request = this.proofRequests.get(requestId);
     if (!request) {
@@ -46,7 +42,9 @@ export class ZKProofService {
     // Separate revealed and hidden attributes
     for (const credential of credentials) {
       for (const [key, value] of Object.entries(credential.credentialSubject)) {
-        if (key === 'id') {continue;}
+        if (key === "id") {
+          continue;
+        }
         if (revealedAttributeNames.includes(key)) {
           revealedAttributes[key] = String(value);
         } else {
@@ -59,13 +57,13 @@ export class ZKProofService {
     const proofData = {
       revealed: revealedAttributes,
       hiddenCommitments: this.createCommitments(hiddenAttributes),
-      nonce: crypto.randomBytes(16).toString('hex'),
+      nonce: crypto.randomBytes(16).toString("hex"),
     };
 
     const proof: ZKProof = {
       proofId: crypto.randomUUID(),
       requestId,
-      proof: Buffer.from(JSON.stringify(proofData)).toString('base64'),
+      proof: Buffer.from(JSON.stringify(proofData)).toString("base64"),
       revealedAttributes,
       timestamp: new Date(),
     };
@@ -76,10 +74,12 @@ export class ZKProofService {
 
   async verifyProof(
     proofId: string,
-    expectedAttributes?: Record<string, string>,
+    expectedAttributes?: Record<string, string>
   ): Promise<boolean> {
     const proof = this.generatedProofs.get(proofId);
-    if (!proof) {return false;}
+    if (!proof) {
+      return false;
+    }
 
     // Verify revealed attributes match expectations
     if (expectedAttributes) {
@@ -92,7 +92,7 @@ export class ZKProofService {
 
     // Verify ZK proof structure (simplified)
     try {
-      const proofData = JSON.parse(Buffer.from(proof.proof, 'base64').toString());
+      const proofData = JSON.parse(Buffer.from(proof.proof, "base64").toString());
       if (!proofData.nonce || !proofData.hiddenCommitments) {
         return false;
       }
@@ -104,13 +104,10 @@ export class ZKProofService {
     return true;
   }
 
-  async generateAgeProof(
-    credential: VerifiableCredential,
-    minimumAge: number,
-  ): Promise<ZKProof> {
-    const birthDate = credential.credentialSubject['birthDate'] as string;
+  async generateAgeProof(credential: VerifiableCredential, minimumAge: number): Promise<ZKProof> {
+    const birthDate = credential.credentialSubject["birthDate"] as string;
     if (!birthDate) {
-      throw new Error('Credential does not contain birthDate');
+      throw new Error("Credential does not contain birthDate");
     }
 
     const age = this.calculateAge(new Date(birthDate));
@@ -119,19 +116,19 @@ export class ZKProofService {
     // Generate range proof that proves age >= minimumAge without revealing actual age
     const proofData = {
       predicate: {
-        attribute: 'age',
-        operator: '>=',
+        attribute: "age",
+        operator: ">=",
         value: minimumAge,
         satisfied: meetsRequirement,
       },
-      commitment: crypto.createHash('sha256').update(birthDate).digest('hex'),
-      nonce: crypto.randomBytes(16).toString('hex'),
+      commitment: crypto.createHash("sha256").update(birthDate).digest("hex"),
+      nonce: crypto.randomBytes(16).toString("hex"),
     };
 
     const proof: ZKProof = {
       proofId: crypto.randomUUID(),
-      requestId: 'age-verification',
-      proof: Buffer.from(JSON.stringify(proofData)).toString('base64'),
+      requestId: "age-verification",
+      proof: Buffer.from(JSON.stringify(proofData)).toString("base64"),
       revealedAttributes: { meetsAgeRequirement: String(meetsRequirement) },
       timestamp: new Date(),
     };
@@ -143,7 +140,7 @@ export class ZKProofService {
   async generateMembershipProof(
     credential: VerifiableCredential,
     allowedValues: string[],
-    attributeName: string,
+    attributeName: string
   ): Promise<ZKProof> {
     const value = credential.credentialSubject[attributeName] as string;
     const isMember = allowedValues.includes(value);
@@ -152,19 +149,16 @@ export class ZKProofService {
     const proofData = {
       setMembership: {
         attribute: attributeName,
-        setCommitment: crypto
-          .createHash('sha256')
-          .update(allowedValues.join(','))
-          .digest('hex'),
+        setCommitment: crypto.createHash("sha256").update(allowedValues.join(",")).digest("hex"),
         isMember,
       },
-      nonce: crypto.randomBytes(16).toString('hex'),
+      nonce: crypto.randomBytes(16).toString("hex"),
     };
 
     const proof: ZKProof = {
       proofId: crypto.randomUUID(),
-      requestId: 'membership-verification',
-      proof: Buffer.from(JSON.stringify(proofData)).toString('base64'),
+      requestId: "membership-verification",
+      proof: Buffer.from(JSON.stringify(proofData)).toString("base64"),
       revealedAttributes: { isMember: String(isMember) },
       timestamp: new Date(),
     };
@@ -176,11 +170,11 @@ export class ZKProofService {
   private createCommitments(attributes: Record<string, string>): Record<string, string> {
     const commitments: Record<string, string> = {};
     for (const [key, value] of Object.entries(attributes)) {
-      const salt = crypto.randomBytes(16).toString('hex');
+      const salt = crypto.randomBytes(16).toString("hex");
       commitments[key] = crypto
-        .createHash('sha256')
+        .createHash("sha256")
         .update(value + salt)
-        .digest('hex');
+        .digest("hex");
     }
     return commitments;
   }

@@ -73,7 +73,7 @@ spec:
     metadata:
       labels:
         app: summit
-        version: "v1"  # Updated by CI/CD
+        version: "v1" # Updated by CI/CD
       annotations:
         prometheus.io/scrape: "true"
         prometheus.io/port: "9090"
@@ -89,7 +89,7 @@ spec:
 
       containers:
         - name: summit
-          image: ghcr.io/brianclong/summit:latest  # Updated by CI/CD
+          image: ghcr.io/brianclong/summit:latest # Updated by CI/CD
           imagePullPolicy: Always
 
           ports:
@@ -258,7 +258,7 @@ spec:
             value: summit-canary
           - name: stable-service
             value: summit-stable
-        startingStep: 1  # Start after first weight step
+        startingStep: 1 # Start after first weight step
 
       # Anti-affinity for canary pods
       antiAffinity:
@@ -300,7 +300,7 @@ spec:
     - name: error-rate
       interval: 1m
       count: 5
-      successCondition: result < 0.02  # Less than 2% error rate
+      successCondition: result < 0.02 # Less than 2% error rate
       failureLimit: 2
       provider:
         prometheus:
@@ -323,7 +323,7 @@ spec:
     - name: p95-latency
       interval: 1m
       count: 5
-      successCondition: result < 500  # Less than 500ms
+      successCondition: result < 500 # Less than 500ms
       failureLimit: 2
       provider:
         prometheus:
@@ -335,7 +335,7 @@ spec:
     - name: p99-latency
       interval: 1m
       count: 5
-      successCondition: result < 1000  # Less than 1s
+      successCondition: result < 1000 # Less than 1s
       failureLimit: 2
       provider:
         prometheus:
@@ -406,7 +406,7 @@ spec:
     - name: api-success-rate
       interval: 2m
       count: 5
-      successCondition: result > 0.98  # 98% success rate
+      successCondition: result > 0.98 # 98% success rate
       failureLimit: 2
       provider:
         prometheus:
@@ -418,7 +418,7 @@ spec:
     - name: database-connection-errors
       interval: 1m
       count: 5
-      successCondition: result < 5  # Less than 5 connection errors per minute
+      successCondition: result < 5 # Less than 5 connection errors per minute
       failureLimit: 2
       provider:
         prometheus:
@@ -440,7 +440,7 @@ spec:
   metrics:
     - name: memory-usage
       interval: 1m
-      successCondition: result < 3.5  # Less than 3.5GB (4GB limit)
+      successCondition: result < 3.5 # Less than 3.5GB (4GB limit)
       failureLimit: 3
       provider:
         prometheus:
@@ -450,7 +450,7 @@ spec:
 
     - name: cpu-usage
       interval: 1m
-      successCondition: result < 1.8  # Less than 1.8 cores (2 core limit)
+      successCondition: result < 1.8 # Less than 1.8 cores (2 core limit)
       failureLimit: 3
       provider:
         prometheus:

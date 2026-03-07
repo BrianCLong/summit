@@ -2,10 +2,6 @@
   "name": "Employee Onboarding",
   "maturity": "optimized",
   "owner": "HR",
-  "steps": [
-    "Send offer letter",
-    "Provision IT access",
-    "Schedule orientation"
-  ],
+  "steps": ["Send offer letter", "Provision IT access", "Schedule orientation"],
   "automation_required": true
 }

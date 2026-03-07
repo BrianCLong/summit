@@ -43,60 +43,57 @@ pnpm -F @intelgraph/speaker-identification build
 #### Speech-to-Text Transcription
 
 ```typescript
-import { WhisperProvider, STTConfig } from '@intelgraph/speech-recognition';
-import { AudioBuffer } from '@intelgraph/audio-processing';
+import { WhisperProvider, STTConfig } from "@intelgraph/speech-recognition";
+import { AudioBuffer } from "@intelgraph/audio-processing";
 
 // Initialize provider
 const whisper = new WhisperProvider({
   apiKey: process.env.OPENAI_API_KEY,
-  model: 'large-v3'
+  model: "large-v3",
 });
 
 // Configure transcription
 const config: STTConfig = {
-  provider: 'whisper',
-  language: 'en-US',
+  provider: "whisper",
+  language: "en-US",
   enableWordTimestamps: true,
-  enableAutomaticPunctuation: true
+  enableAutomaticPunctuation: true,
 };
 
 // Transcribe audio
 const result = await whisper.transcribe(audioBuffer, config);
 
-console.log('Transcription:', result.text);
-console.log('Segments:', result.segments);
+console.log("Transcription:", result.text);
+console.log("Segments:", result.segments);
 ```
 
 #### Speaker Identification
 
 ```typescript
-import {
-  IVoiceBiometricEnroller,
-  ISpeakerIdentifier
-} from '@intelgraph/speaker-identification';
+import { IVoiceBiometricEnroller, ISpeakerIdentifier } from "@intelgraph/speaker-identification";
 
 // Enroll a speaker
-const enrollment = await enroller.enroll('John Doe', audioSamples);
+const enrollment = await enroller.enroll("John Doe", audioSamples);
 
 // Identify speaker from audio
 const identifications = await identifier.identify(unknownAudio, 5);
 
-console.log('Top match:', identifications[0]);
-console.log('Speaker ID:', identifications[0].speakerId);
-console.log('Confidence:', identifications[0].confidence);
+console.log("Top match:", identifications[0]);
+console.log("Speaker ID:", identifications[0].speakerId);
+console.log("Confidence:", identifications[0].confidence);
 ```
 
 #### Audio Feature Extraction
 
 ```typescript
-import { IFeatureExtractor } from '@intelgraph/audio-analytics';
+import { IFeatureExtractor } from "@intelgraph/audio-analytics";
 
 // Extract audio features
 const features = await extractor.extract(audioBuffer);
 
-console.log('MFCCs:', features.mfcc);
-console.log('Spectrogram:', features.spectrogram);
-console.log('Pitch:', features.pitch);
+console.log("MFCCs:", features.mfcc);
+console.log("Spectrogram:", features.spectrogram);
+console.log("Pitch:", features.pitch);
 ```
 
 ## Speech Recognition
@@ -113,7 +110,7 @@ console.log('Pitch:', features.pitch);
 ```typescript
 const whisper = new WhisperProvider({
   apiKey: process.env.OPENAI_API_KEY,
-  model: 'large-v3'
+  model: "large-v3",
 });
 ```
 
@@ -127,7 +124,7 @@ const whisper = new WhisperProvider({
 ```typescript
 const google = new GoogleSTTProvider({
   projectId: process.env.GOOGLE_PROJECT_ID,
-  keyFilename: './service-account-key.json'
+  keyFilename: "./service-account-key.json",
 });
 ```
 
@@ -139,8 +136,8 @@ const google = new GoogleSTTProvider({
 
 ```typescript
 const aws = new AWSTranscribeProvider({
-  region: 'us-east-1',
-  bucketName: process.env.AWS_TRANSCRIBE_BUCKET
+  region: "us-east-1",
+  bucketName: process.env.AWS_TRANSCRIBE_BUCKET,
 });
 ```
 
@@ -153,29 +150,29 @@ const aws = new AWSTranscribeProvider({
 ```typescript
 const azure = new AzureSTTProvider({
   subscriptionKey: process.env.AZURE_SPEECH_KEY,
-  region: 'eastus'
+  region: "eastus",
 });
 ```
 
 ### Streaming Recognition
 
 ```typescript
-import { IStreamingSTTProvider } from '@intelgraph/speech-recognition';
+import { IStreamingSTTProvider } from "@intelgraph/speech-recognition";
 
 const stream = await provider.startStream({
-  provider: 'google',
-  language: 'en-US',
+  provider: "google",
+  language: "en-US",
   interimResults: true,
-  vadEnabled: true
+  vadEnabled: true,
 });
 
 // Listen for results
 stream.onInterimResult((result) => {
-  console.log('Interim:', result.text);
+  console.log("Interim:", result.text);
 });
 
 stream.onFinalResult((result) => {
-  console.log('Final:', result.text);
+  console.log("Final:", result.text);
 });
 
 // Write audio chunks
@@ -189,12 +186,12 @@ await stream.end();
 ### Speaker Diarization
 
 ```typescript
-import { ISpeakerDiarizer } from '@intelgraph/speech-recognition';
+import { ISpeakerDiarizer } from "@intelgraph/speech-recognition";
 
 const segments = await diarizer.diarize(audioBuffer, {
   minSpeakers: 2,
   maxSpeakers: 5,
-  algorithm: 'neural'
+  algorithm: "neural",
 });
 
 for (const segment of segments) {
@@ -208,70 +205,71 @@ for (const segment of segments) {
 ### Voice Biometric Enrollment
 
 ```typescript
-import { IVoiceBiometricEnroller } from '@intelgraph/speaker-identification';
+import { IVoiceBiometricEnroller } from "@intelgraph/speaker-identification";
 
 // Enroll with multiple audio samples for better accuracy
 const audioSamples = [sample1, sample2, sample3];
 
-const biometric = await enroller.enroll('Jane Smith', audioSamples);
+const biometric = await enroller.enroll("Jane Smith", audioSamples);
 
-console.log('Speaker ID:', biometric.speakerId);
-console.log('Enrollment quality:', biometric.quality);
-console.log('Voiceprint dimension:', biometric.voiceprint.length);
+console.log("Speaker ID:", biometric.speakerId);
+console.log("Enrollment quality:", biometric.quality);
+console.log("Voiceprint dimension:", biometric.voiceprint.length);
 ```
 
 ### Speaker Verification (1:1)
 
 ```typescript
-import { ISpeakerVerifier } from '@intelgraph/speaker-identification';
+import { ISpeakerVerifier } from "@intelgraph/speaker-identification";
 
 // Verify claimed identity
 const result = await verifier.verify(audioBuffer, claimedSpeakerId);
 
-console.log('Verified:', result.verified);
-console.log('Confidence:', result.confidence);
-console.log('Decision:', result.decision); // accept, reject, uncertain
+console.log("Verified:", result.verified);
+console.log("Confidence:", result.confidence);
+console.log("Decision:", result.decision); // accept, reject, uncertain
 ```
 
 ### Speaker Identification (1:N)
 
 ```typescript
-import { ISpeakerIdentifier } from '@intelgraph/speaker-identification';
+import { ISpeakerIdentifier } from "@intelgraph/speaker-identification";
 
 // Identify from entire database
 const matches = await identifier.identify(audioBuffer, 10);
 
 // Or from specific candidates
-const candidateMatches = await identifier.identifyFromCandidates(
-  audioBuffer,
-  ['speaker-1', 'speaker-2', 'speaker-3']
-);
+const candidateMatches = await identifier.identifyFromCandidates(audioBuffer, [
+  "speaker-1",
+  "speaker-2",
+  "speaker-3",
+]);
 ```
 
 ### Deepfake Detection
 
 ```typescript
-import { IDeepfakeDetector } from '@intelgraph/speaker-identification';
+import { IDeepfakeDetector } from "@intelgraph/speaker-identification";
 
 const result = await detector.detect(audioBuffer);
 
-console.log('Is deepfake:', result.isDeepfake);
-console.log('Confidence:', result.confidence);
-console.log('Indicators:', result.indicators);
+console.log("Is deepfake:", result.isDeepfake);
+console.log("Confidence:", result.confidence);
+console.log("Indicators:", result.indicators);
 ```
 
 ### Voice Characteristics Analysis
 
 ```typescript
-import { IVoiceAnalyzer } from '@intelgraph/speaker-identification';
+import { IVoiceAnalyzer } from "@intelgraph/speaker-identification";
 
 const characteristics = await analyzer.analyze(audioBuffer);
 
-console.log('Fundamental frequency:', characteristics.fundamentalFrequency);
-console.log('Speaking rate:', characteristics.speakingRate);
-console.log('Age estimate:', characteristics.age?.estimated);
-console.log('Gender:', characteristics.gender?.estimated);
-console.log('Emotion:', characteristics.emotion?.detected);
+console.log("Fundamental frequency:", characteristics.fundamentalFrequency);
+console.log("Speaking rate:", characteristics.speakingRate);
+console.log("Age estimate:", characteristics.age?.estimated);
+console.log("Gender:", characteristics.gender?.estimated);
+console.log("Emotion:", characteristics.emotion?.detected);
 ```
 
 ## Audio Analytics
@@ -279,42 +277,42 @@ console.log('Emotion:', characteristics.emotion?.detected);
 ### Feature Extraction
 
 ```typescript
-import { IFeatureExtractor } from '@intelgraph/audio-analytics';
+import { IFeatureExtractor } from "@intelgraph/audio-analytics";
 
 // Extract all features
 const features = await extractor.extract(audioBuffer);
 
 // Extract specific features
 const specificFeatures = await extractor.extractSpecific(audioBuffer, [
-  'mfcc',
-  'spectrogram',
-  'pitch'
+  "mfcc",
+  "spectrogram",
+  "pitch",
 ]);
 ```
 
 ### Voice Activity Detection (VAD)
 
 ```typescript
-import { IVADDetector } from '@intelgraph/audio-analytics';
+import { IVADDetector } from "@intelgraph/audio-analytics";
 
 const vadResult = await vadDetector.detect(audioBuffer, {
   aggressiveness: 2, // 0-3
   minSpeechDuration: 0.3,
   minSilenceDuration: 0.5,
-  algorithm: 'neural'
+  algorithm: "neural",
 });
 
-console.log('Speech ratio:', vadResult.speechRatio);
-console.log('Speech duration:', vadResult.totalSpeechDuration);
-console.log('Segments:', vadResult.segments);
+console.log("Speech ratio:", vadResult.speechRatio);
+console.log("Speech duration:", vadResult.totalSpeechDuration);
+console.log("Segments:", vadResult.segments);
 ```
 
 ### Keyword Spotting
 
 ```typescript
-import { IKeywordSpotter } from '@intelgraph/audio-analytics';
+import { IKeywordSpotter } from "@intelgraph/audio-analytics";
 
-const keywords = ['urgent', 'emergency', 'classified', 'threat'];
+const keywords = ["urgent", "emergency", "classified", "threat"];
 const results = await spotter.spot(audioBuffer, keywords);
 
 for (const result of results) {
@@ -328,27 +326,27 @@ for (const result of results) {
 ### Speech Analytics
 
 ```typescript
-import { ISpeechAnalyzer } from '@intelgraph/audio-analytics';
+import { ISpeechAnalyzer } from "@intelgraph/audio-analytics";
 
 const analytics = await analyzer.analyze(audioBuffer, transcript);
 
-console.log('Speaking rate:', analytics.speakingRate, 'WPM');
-console.log('Filler words:', analytics.fillerWordCount);
-console.log('Articulation score:', analytics.articulation);
-console.log('Average pause duration:', analytics.averagePauseDuration);
+console.log("Speaking rate:", analytics.speakingRate, "WPM");
+console.log("Filler words:", analytics.fillerWordCount);
+console.log("Articulation score:", analytics.articulation);
+console.log("Average pause duration:", analytics.averagePauseDuration);
 ```
 
 ### Sentiment Analysis
 
 ```typescript
-import { ISpeechSentimentAnalyzer } from '@intelgraph/audio-analytics';
+import { ISpeechSentimentAnalyzer } from "@intelgraph/audio-analytics";
 
 const sentiment = await sentimentAnalyzer.analyze(audioBuffer);
 
-console.log('Sentiment:', sentiment.sentiment);
-console.log('Confidence:', sentiment.confidence);
-console.log('Valence:', sentiment.valence);
-console.log('Arousal:', sentiment.arousal);
+console.log("Sentiment:", sentiment.sentiment);
+console.log("Confidence:", sentiment.confidence);
+console.log("Valence:", sentiment.valence);
+console.log("Arousal:", sentiment.arousal);
 ```
 
 ## Audio Enhancement
@@ -356,23 +354,23 @@ console.log('Arousal:', sentiment.arousal);
 ### Noise Reduction
 
 ```typescript
-import { INoiseReducer } from '@intelgraph/audio-enhancement';
+import { INoiseReducer } from "@intelgraph/audio-enhancement";
 
 const result = await noiseReducer.reduce(audioBuffer, {
-  algorithm: 'rnn',
+  algorithm: "rnn",
   strength: 0.7,
-  adaptiveMode: true
+  adaptiveMode: true,
 });
 
-console.log('Enhanced audio:', result.enhancedAudio);
-console.log('SNR improvement:', result.metrics.snrImprovement, 'dB');
-console.log('Quality score:', result.metrics.qualityScore);
+console.log("Enhanced audio:", result.enhancedAudio);
+console.log("SNR improvement:", result.metrics.snrImprovement, "dB");
+console.log("Quality score:", result.metrics.qualityScore);
 ```
 
 ### Echo Cancellation
 
 ```typescript
-import { IEchoCanceller } from '@intelgraph/audio-enhancement';
+import { IEchoCanceller } from "@intelgraph/audio-enhancement";
 
 const cleanAudio = await echoCanceller.cancel(audioBuffer);
 ```
@@ -380,7 +378,7 @@ const cleanAudio = await echoCanceller.cancel(audioBuffer);
 ### Audio Super-Resolution
 
 ```typescript
-import { IAudioSuperResolution } from '@intelgraph/audio-enhancement';
+import { IAudioSuperResolution } from "@intelgraph/audio-enhancement";
 
 // Enhance 8kHz audio to 48kHz
 const enhanced = await superRes.enhance(audioBuffer, 48000);
@@ -391,15 +389,15 @@ const enhanced = await superRes.enhance(audioBuffer, 48000);
 ### Authenticity Verification
 
 ```typescript
-import { IAuthenticityVerifier } from '@intelgraph/audio-forensics';
+import { IAuthenticityVerifier } from "@intelgraph/audio-forensics";
 
 const result = await verifier.verify(audioBuffer);
 
-console.log('Is authentic:', result.isAuthentic);
-console.log('Confidence:', result.confidence);
+console.log("Is authentic:", result.isAuthentic);
+console.log("Confidence:", result.confidence);
 
 if (result.tampering.length > 0) {
-  console.log('Detected tampering:');
+  console.log("Detected tampering:");
   for (const tamper of result.tampering) {
     console.log(`  Type: ${tamper.type}`);
     console.log(`  Location: ${tamper.startTime}s - ${tamper.endTime}s`);
@@ -412,27 +410,27 @@ if (result.tampering.length > 0) {
 ```typescript
 const edits = await verifier.detectEdits(audioBuffer);
 
-console.log('Number of edits:', edits.editCount);
-console.log('Continuity score:', edits.continuityScore);
+console.log("Number of edits:", edits.editCount);
+console.log("Continuity score:", edits.continuityScore);
 ```
 
 ### Chain of Custody
 
 ```typescript
-import { IChainOfCustodyManager } from '@intelgraph/audio-forensics';
+import { IChainOfCustodyManager } from "@intelgraph/audio-forensics";
 
 // Initiate chain of custody
 const custody = await custodyManager.initiate(audioBuffer, {
-  caseId: 'CASE-2024-001',
-  investigator: 'Agent Smith',
-  location: 'Evidence Locker A'
+  caseId: "CASE-2024-001",
+  investigator: "Agent Smith",
+  location: "Evidence Locker A",
 });
 
 // Add events
 await custodyManager.addEvent(custody.recordId, {
-  actor: 'Forensic Analyst',
-  action: 'analyzed',
-  location: 'Lab 3'
+  actor: "Forensic Analyst",
+  action: "analyzed",
+  location: "Lab 3",
 });
 
 // Verify integrity
@@ -444,30 +442,27 @@ const isValid = await custodyManager.verify(custody.recordId);
 ### Gunshot Detection
 
 ```typescript
-import { IGunshotDetector } from '@intelgraph/audio-intelligence';
+import { IGunshotDetector } from "@intelgraph/audio-intelligence";
 
 const result = await gunshotDetector.detect(audioBuffer);
 
-console.log('Gunshots detected:', result.detected);
-console.log('Number of shots:', result.numberOfShots);
+console.log("Gunshots detected:", result.detected);
+console.log("Number of shots:", result.numberOfShots);
 if (result.weaponType) {
-  console.log('Weapon type:', result.weaponType);
+  console.log("Weapon type:", result.weaponType);
 }
 ```
 
 ### Acoustic Event Detection
 
 ```typescript
-import {
-  IAcousticEventDetector,
-  AcousticEventType
-} from '@intelgraph/audio-intelligence';
+import { IAcousticEventDetector, AcousticEventType } from "@intelgraph/audio-intelligence";
 
 const events = await eventDetector.detect(audioBuffer, [
   AcousticEventType.GUNSHOT,
   AcousticEventType.GLASS_BREAK,
   AcousticEventType.SCREAM,
-  AcousticEventType.ALARM
+  AcousticEventType.ALARM,
 ]);
 
 for (const event of events) {
@@ -479,7 +474,7 @@ for (const event of events) {
 ### Sound Source Localization
 
 ```typescript
-import { ISoundSourceLocalizer } from '@intelgraph/audio-intelligence';
+import { ISoundSourceLocalizer } from "@intelgraph/audio-intelligence";
 
 const sources = await localizer.localize(audioBuffer, 4); // 4 microphones
 
@@ -498,15 +493,15 @@ for (const source of sources) {
 ### Call Recording
 
 ```typescript
-import { ICallRecorder, IPBXIntegration } from '@intelgraph/telephony';
+import { ICallRecorder, IPBXIntegration } from "@intelgraph/telephony";
 
 // Connect to PBX
 await pbx.connect({
-  host: 'pbx.example.com',
+  host: "pbx.example.com",
   port: 5060,
-  username: 'admin',
+  username: "admin",
   password: process.env.PBX_PASSWORD,
-  protocol: 'sip'
+  protocol: "sip",
 });
 
 // Start recording
@@ -522,20 +517,20 @@ const audioBuffer = await recorder.stopRecording(callId);
 ### Call Quality Monitoring
 
 ```typescript
-import { ICallQualityAnalyzer } from '@intelgraph/telephony';
+import { ICallQualityAnalyzer } from "@intelgraph/telephony";
 
 const metrics = await qualityAnalyzer.analyze(audioBuffer, callMetadata);
 
-console.log('MOS Score:', metrics.mos);
-console.log('Jitter:', metrics.jitter, 'ms');
-console.log('Packet Loss:', metrics.packetLoss, '%');
-console.log('Latency:', metrics.latency, 'ms');
+console.log("MOS Score:", metrics.mos);
+console.log("Jitter:", metrics.jitter, "ms");
+console.log("Packet Loss:", metrics.packetLoss, "%");
+console.log("Latency:", metrics.latency, "ms");
 ```
 
 ### DTMF Detection
 
 ```typescript
-import { IDTMFDetector } from '@intelgraph/telephony';
+import { IDTMFDetector } from "@intelgraph/telephony";
 
 const dtmfEvents = await dtmfDetector.detect(audioBuffer);
 

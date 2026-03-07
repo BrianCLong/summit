@@ -24,7 +24,7 @@
             "type": "string"
           },
           "max_cost": {
-              "type": "number"
+            "type": "number"
           }
         },
         "required": ["condition", "action"]

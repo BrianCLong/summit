@@ -4,14 +4,7 @@
   "title": "EvidenceReport",
   "type": "object",
   "additionalProperties": false,
-  "required": [
-    "evidenceId",
-    "runId",
-    "agent",
-    "inputSummary",
-    "decisions",
-    "outputs"
-  ],
+  "required": ["evidenceId", "runId", "agent", "inputSummary", "decisions", "outputs"],
   "properties": {
     "evidenceId": {
       "type": "string",

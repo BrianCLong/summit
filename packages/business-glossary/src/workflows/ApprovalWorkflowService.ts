@@ -9,7 +9,7 @@ import {
   ApprovalComment,
   ApprovalAction,
   GlossaryTerm,
-} from '@intelgraph/data-catalog';
+} from "@intelgraph/data-catalog";
 
 export interface IApprovalWorkflowStore {
   getWorkflow(id: string): Promise<ApprovalWorkflow | null>;
@@ -55,18 +55,22 @@ export class ApprovalWorkflowService {
   /**
    * Approve term
    */
-  async approve(workflowId: string, approverId: string, comment: string = ''): Promise<ApprovalWorkflow> {
+  async approve(
+    workflowId: string,
+    approverId: string,
+    comment: string = ""
+  ): Promise<ApprovalWorkflow> {
     const workflow = await this.workflowStore.getWorkflow(workflowId);
     if (!workflow) {
       throw new Error(`Workflow ${workflowId} not found`);
     }
 
     if (workflow.status !== ApprovalStatus.PENDING) {
-      throw new Error('Workflow is not pending');
+      throw new Error("Workflow is not pending");
     }
 
     if (!workflow.approvers.includes(approverId)) {
-      throw new Error('User is not an approver');
+      throw new Error("User is not an approver");
     }
 
     // Add approval comment
@@ -105,11 +109,11 @@ export class ApprovalWorkflowService {
     }
 
     if (workflow.status !== ApprovalStatus.PENDING) {
-      throw new Error('Workflow is not pending');
+      throw new Error("Workflow is not pending");
     }
 
     if (!workflow.approvers.includes(approverId)) {
-      throw new Error('User is not an approver');
+      throw new Error("User is not an approver");
     }
 
     // Add rejection comment
@@ -139,18 +143,22 @@ export class ApprovalWorkflowService {
   /**
    * Request changes
    */
-  async requestChanges(workflowId: string, approverId: string, changes: string): Promise<ApprovalWorkflow> {
+  async requestChanges(
+    workflowId: string,
+    approverId: string,
+    changes: string
+  ): Promise<ApprovalWorkflow> {
     const workflow = await this.workflowStore.getWorkflow(workflowId);
     if (!workflow) {
       throw new Error(`Workflow ${workflowId} not found`);
     }
 
     if (workflow.status !== ApprovalStatus.PENDING) {
-      throw new Error('Workflow is not pending');
+      throw new Error("Workflow is not pending");
     }
 
     if (!workflow.approvers.includes(approverId)) {
-      throw new Error('User is not an approver');
+      throw new Error("User is not an approver");
     }
 
     // Add changes request comment

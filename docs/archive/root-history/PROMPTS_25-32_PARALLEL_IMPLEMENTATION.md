@@ -3,11 +3,13 @@
 This blueprint decomposes prompts #25–#32 into parallelizable work packets with explicit APIs, data models, validation gates, and rollout guardrails. Each prompt is self-contained to minimize merge contention and is shaped for deterministic testing.
 
 ## Global execution rules
+
 - Branch per prompt; flags default **off** where applicable.
 - Deterministic fixtures for validation/audit. Avoid shared mutable schemas; prefer versioned contracts per prompt.
 - Observability: emit per-feature metrics, trace IDs, and audit logs for state changes and reversals.
 
 ## 25) Case Templates + Field-Level Schema Registry (versioned)
+
 - **Goal:** Expose `POST /case-templates`, `GET /case-templates/:id`, and enforce template version pinning for `POST /cases`.
 - **Architecture:**
   - Template store with `{templateId, version, jsonSchema, owner, permissions}` and status (`active`, `deprecated`).
@@ -22,6 +24,7 @@ This blueprint decomposes prompts #25–#32 into parallelizable work packets wit
 - **Rollout:** Backfill existing cases with default version map; OpenAPI/GraphQL schema updated with template references.
 
 ## 26) “Evidence-to-Entity” Auto-Linker (rules + confidence) with Safe Undo
+
 - **Goal:** Background job proposes evidence↔entity edges with confidence + rationale; never auto-applies without explicit flag.
 - **Architecture:**
   - Rule engine consuming evidence metadata (hash, filename patterns, extracted entities, source classifier).
@@ -36,6 +39,7 @@ This blueprint decomposes prompts #25–#32 into parallelizable work packets wit
 - **Interfaces:** `POST /evidence-linker/run` (optional dry-run) and `GET /evidence-linker/suggestions?entityId=`.
 
 ## 27) Collaboration: Optimistic Locking + Conflict Resolution for Edits
+
 - **Goal:** Prevent silent overwrites for entities/notes/playbooks via ETag/`If-Match`.
 - **Architecture:**
   - Resources include `version` (incrementing) + `etag` hash of content.
@@ -47,6 +51,7 @@ This blueprint decomposes prompts #25–#32 into parallelizable work packets wit
 - **Docs:** Examples of request/response; guidance for client retries.
 
 ## 28) Keyboard Command Palette (frontend) Behind Feature Flag
+
 - **Goal:** `Ctrl/Cmd+K` opens palette for investigator actions (open case, jump to entity, run playbook, export, toggle panes).
 - **Architecture:**
   - React component with keyboard-only navigation, ARIA labels, and localStorage for recent commands.
@@ -55,6 +60,7 @@ This blueprint decomposes prompts #25–#32 into parallelizable work packets wit
 - **Accessibility:** Focus trapping, role="dialog", announce selection; ensure ESC closes.
 
 ## 29) Graph Performance: Query Plan Cache + Prepared Statements
+
 - **Goal:** Reduce repeated planning via canonicalized query string + param signature cached per tenant/case with TTL.
 - **Architecture:**
   - Prepared plan cache keyed by `{tenant, caseId, canonicalQueryHash, paramSignature}` with bounded size + TTL.
@@ -66,6 +72,7 @@ This blueprint decomposes prompts #25–#32 into parallelizable work packets wit
   - Benchmark shows latency reduction for repeated queries.
 
 ## 30) Security Hardening: CSRF/CORS + Session Binding + Rate Limits
+
 - **Goal:** Harden gateway middleware.
 - **Architecture:**
   - CORS allowlist from env; reject others with explicit error codes.
@@ -79,6 +86,7 @@ This blueprint decomposes prompts #25–#32 into parallelizable work packets wit
 - **Docs:** Config envs + exemption list.
 
 ## 31) Data Quality Gates: Validation Rules + “Quarantine” Bucket
+
 - **Goal:** Validate ingests; quarantine failures with reason and retry/drop flows.
 - **Architecture:**
   - Validation pipeline enforcing required fields, type constraints, referential checks.
@@ -91,6 +99,7 @@ This blueprint decomposes prompts #25–#32 into parallelizable work packets wit
   - Drop removes safely without side effects.
 
 ## 32) Reproducible Builds: Lockfile Enforcement + Dependency Audit Gate
+
 - **Goal:** CI gate enforcing lockfile integrity, license allowlist, and `npm audit` threshold.
 - **Architecture:**
   - CI step verifying lockfile unchanged relative to manifest edits; fail with guidance.
@@ -101,11 +110,13 @@ This blueprint decomposes prompts #25–#32 into parallelizable work packets wit
   - Fast execution path; cache dependencies where possible.
 
 ## Parallelization map
+
 - Backend-heavy: 25, 26, 27, 29, 30, 31.
 - Frontend: 28 (flagged isolated UI).
 - Tooling/CI: 32.
 
 ## Suggested reviewer checklist
+
 - Contract completeness (APIs/flags documented).
 - Deterministic tests cover specified error codes and migrations.
 - Isolation: no shared mutable state beyond scoped stores.

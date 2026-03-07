@@ -141,9 +141,9 @@ metadata:
     app.kubernetes.io/name: maestro-conductor
     app.kubernetes.io/component: orchestrator
     app.kubernetes.io/part-of: intelgraph
-    app.kubernetes.io/version: '3.15.0'
+    app.kubernetes.io/version: "3.15.0"
   annotations:
-    deployment.kubernetes.io/revision: '1'
+    deployment.kubernetes.io/revision: "1"
 spec:
   replicas: 2
   strategy:
@@ -160,15 +160,15 @@ spec:
         app.kubernetes.io/name: maestro-conductor
         app.kubernetes.io/component: orchestrator
         app.kubernetes.io/part-of: intelgraph
-        app.kubernetes.io/version: '3.15.0'
+        app.kubernetes.io/version: "3.15.0"
       annotations:
-        prometheus.io/scrape: 'true'
-        prometheus.io/port: '9090'
-        prometheus.io/path: '/metrics'
-        co.elastic.logs/enabled: 'true'
-        co.elastic.logs/json.keys_under_root: 'true'
-        co.elastic.logs/json.add_error_key: 'true'
-        co.elastic.logs/json.message_key: 'message'
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9090"
+        prometheus.io/path: "/metrics"
+        co.elastic.logs/enabled: "true"
+        co.elastic.logs/json.keys_under_root: "true"
+        co.elastic.logs/json.add_error_key: "true"
+        co.elastic.logs/json.message_key: "message"
     spec:
       serviceAccountName: maestro-conductor
       securityContext:
@@ -371,9 +371,9 @@ metadata:
     app.kubernetes.io/component: orchestrator
     app.kubernetes.io/part-of: intelgraph
   annotations:
-    prometheus.io/scrape: 'true'
-    prometheus.io/port: '9090'
-    prometheus.io/path: '/metrics'
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "9090"
+    prometheus.io/path: "/metrics"
 spec:
   type: ClusterIP
   ports:

@@ -1,6 +1,7 @@
 # Bootstrap a New Service in <15 Minutes
 
 1. **Copy Template**:
+
    ```bash
    cp -r templates/golden-service-ts services/my-new-service
    ```
@@ -11,6 +12,7 @@
    - Move `ci.template.yml` to `.github/workflows/my-new-service.yml`.
 
 3. **Install & Run**:
+
    ```bash
    cd services/my-new-service
    npm install

@@ -1,5 +1,5 @@
-import Redis from 'ioredis';
-import { v4 as uuidv4 } from 'uuid';
+import Redis from "ioredis";
+import { v4 as uuidv4 } from "uuid";
 
 export interface EventEnvelope {
   v: string;
@@ -31,7 +31,7 @@ export class EventProducer {
     revision: number = 1
   ): Promise<string> {
     const event: EventEnvelope = {
-      v: '1',
+      v: "1",
       event_id: uuidv4(),
       ts: new Date().toISOString(),
       tenant,
@@ -64,17 +64,17 @@ export class EventProducer {
     // I will use `events:{topic}` and assume the consumer uses a mechanism to ensure tenant ordering (e.g., single consumer or sticky load balancing).
     // Or, simpler for this MVP: Just publish to `events:{topic}`.
 
-    let topic = 'events.other';
-    if (type.startsWith('graph.node')) topic = 'events.graph.node';
-    else if (type.startsWith('graph.edge')) topic = 'events.graph.edge';
-    else if (type.startsWith('search')) topic = 'events.search';
-    else if (type.startsWith('workflow')) topic = 'events.workflow';
+    let topic = "events.other";
+    if (type.startsWith("graph.node")) topic = "events.graph.node";
+    else if (type.startsWith("graph.edge")) topic = "events.graph.edge";
+    else if (type.startsWith("search")) topic = "events.search";
+    else if (type.startsWith("workflow")) topic = "events.workflow";
 
     const streamKey = `${topic}`;
     // We strictly put tenant in the message body.
     // To enforcing ordering per tenant in a shared stream, we need a consumer that processes serially or sharded by tenant.
 
-    await this.redis.xadd(streamKey, '*', 'event', JSON.stringify(event));
+    await this.redis.xadd(streamKey, "*", "event", JSON.stringify(event));
 
     return event.event_id;
   }

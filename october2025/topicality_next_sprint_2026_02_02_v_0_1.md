@@ -162,17 +162,17 @@ owners:
 
 kpis:
   - name: preview_latency_p95_ms
-    target: '<=180'
+    target: "<=180"
   - name: cache_hit_rate
-    target: '>=0.96'
+    target: ">=0.96"
   - name: mapping_coverage
-    target: '>=0.95'
+    target: ">=0.95"
   - name: sso_green_tenants
-    target: '>=0.90'
+    target: ">=0.90"
   - name: reconciliation_delta_pct
-    target: '<=0.4'
+    target: "<=0.4"
   - name: habit_7d_rate
-    target: '>=0.22'
+    target: ">=0.22"
 
 budget:
   cost_per_req_max_usd: 0.0095
@@ -288,10 +288,10 @@ jobs:
 console.log(
   JSON.stringify({
     ts: Date.now(),
-    actor: 'system',
-    action: 'export_sample',
+    actor: "system",
+    action: "export_sample",
     ok: true,
-  }),
+  })
 );
 ```
 

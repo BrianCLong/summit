@@ -20,7 +20,7 @@ spec:
     http:
       requestTimeout: 60s
       idleTimeout: 3600s
-      maxConnectionDuration: 0s  # No limit
+      maxConnectionDuration: 0s # No limit
   retry:
     numRetries: 2
     retryOn:
@@ -57,10 +57,10 @@ spec:
     tcp:
       connectTimeout: 30s
     http:
-      requestTimeout: 300s  # 5 minutes for uploads
+      requestTimeout: 300s # 5 minutes for uploads
       idleTimeout: 600s
   retry:
-    numRetries: 1  # Limited retries for large uploads
+    numRetries: 1 # Limited retries for large uploads
     retryOn:
       - connect-failure
     perRetry:
@@ -85,7 +85,7 @@ spec:
     tcp:
       connectTimeout: 10s
     http:
-      requestTimeout: 120s  # 2 minutes for complex queries
+      requestTimeout: 120s # 2 minutes for complex queries
       idleTimeout: 300s
   retry:
     numRetries: 1
@@ -117,7 +117,7 @@ spec:
       requestTimeout: 5s
       idleTimeout: 10s
   retry:
-    numRetries: 0  # No retries for health checks
+    numRetries: 0 # No retries for health checks
 ---
 # Circuit breaker for backend protection
 apiVersion: gateway.envoyproxy.io/v1alpha1

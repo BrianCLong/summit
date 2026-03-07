@@ -2,12 +2,7 @@ import React, { useCallback, useState } from 'react';
 import { View, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
-import {
-  Maximize2,
-  Filter,
-  Layers,
-  Target,
-} from 'lucide-react-native';
+import { Maximize2, Filter, Layers, Target } from 'lucide-react-native';
 
 import { GEOINTMap } from '@/components/geoint';
 import { useEntity } from '@/graphql/hooks';
@@ -31,12 +26,15 @@ export const MapScreen: React.FC = () => {
 
   const { entity: selectedEntity } = useEntity(selectedEntityId || '');
 
-  const handleFeaturePress = useCallback((feature: GEOINTFeature) => {
-    setSelectedFeature(feature);
-    if (feature.properties.entityId) {
-      setSelectedEntity(feature.properties.entityId);
-    }
-  }, [setSelectedEntity]);
+  const handleFeaturePress = useCallback(
+    (feature: GEOINTFeature) => {
+      setSelectedFeature(feature);
+      if (feature.properties.entityId) {
+        setSelectedEntity(feature.properties.entityId);
+      }
+    },
+    [setSelectedEntity],
+  );
 
   const handleFullScreen = useCallback(() => {
     navigation.navigate('MapFullScreen');
@@ -61,9 +59,7 @@ export const MapScreen: React.FC = () => {
             </Text>
           </View>
           <View className="flex-row items-center gap-2">
-            <TouchableOpacity
-              className="w-10 h-10 rounded-full bg-dark-surface/90 border border-dark-border items-center justify-center"
-            >
+            <TouchableOpacity className="w-10 h-10 rounded-full bg-dark-surface/90 border border-dark-border items-center justify-center">
               <Filter size={18} color="#fff" />
             </TouchableOpacity>
             <TouchableOpacity
@@ -77,11 +73,7 @@ export const MapScreen: React.FC = () => {
       </View>
 
       {/* Map */}
-      <GEOINTMap
-        onFeaturePress={handleFeaturePress}
-        showControls={true}
-        showLayers={true}
-      />
+      <GEOINTMap onFeaturePress={handleFeaturePress} showControls={true} showLayers={true} />
 
       {/* Feature Details Bottom Sheet */}
       <BottomSheet
@@ -148,10 +140,7 @@ export const MapScreen: React.FC = () => {
             {/* Actions */}
             <View className="flex-row mt-6 gap-3">
               {selectedFeature.properties.entityId && (
-                <Button
-                  className="flex-1"
-                  onPress={handleEntityDetails}
-                >
+                <Button className="flex-1" onPress={handleEntityDetails}>
                   View Entity Details
                 </Button>
               )}

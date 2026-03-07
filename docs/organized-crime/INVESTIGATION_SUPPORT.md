@@ -5,12 +5,14 @@
 ### Opening an Investigation
 
 **Prerequisites**:
+
 - Legal authority (predication for investigation)
 - Supervisory approval
 - Case number assignment
 - Proper classification
 
 **Required Documentation**:
+
 ```json
 {
   "caseNumber": "FBI-2025-OC-12345",
@@ -29,6 +31,7 @@
 ```
 
 **Steps**:
+
 1. Document predication (reason to investigate)
 2. Obtain supervisory approval
 3. Secure legal authority as needed
@@ -41,6 +44,7 @@
 **Chain of Custody**:
 
 Every piece of evidence requires:
+
 - Collection date, time, location
 - Collecting officer/agent
 - Detailed description
@@ -48,6 +52,7 @@ Every piece of evidence requires:
 - Transfer documentation
 
 **Digital Evidence**:
+
 - Forensic imaging required
 - Hash values (MD5, SHA-256)
 - Write-blockers for collection
@@ -55,12 +60,14 @@ Every piece of evidence requires:
 - Expert examination
 
 **Physical Evidence**:
+
 - Proper packaging and sealing
 - Evidence tags and labels
 - Climate-controlled storage
 - Limited access
 
 **Documentary Evidence**:
+
 - Original + copies
 - Authenticity verification
 - Proper Bates numbering
@@ -109,15 +116,17 @@ const surveillanceOp = {
     reportingRequirements: [
       "7-day progress reports",
       "30-day renewal application",
-      "Immediate sealing of intercepts"
-    ]
+      "Immediate sealing of intercepts",
+    ],
   },
   methods: ["WIRETAP"],
-  targets: [{
-    entityId: "entity-123",
-    targetType: "PHONE",
-    justification: "Subject is using phone to coordinate drug trafficking..."
-  }]
+  targets: [
+    {
+      entityId: "entity-123",
+      targetType: "PHONE",
+      justification: "Subject is using phone to coordinate drug trafficking...",
+    },
+  ],
 };
 ```
 
@@ -150,6 +159,7 @@ const surveillanceOp = {
    - Protect source methods
 
 **Access Restrictions**:
+
 - Requires highest level authorization
 - Supervisor approval for each access
 - Extra audit logging
@@ -197,6 +207,7 @@ const surveillanceOp = {
 **Human Trafficking Victims**:
 
 **DO**:
+
 - Treat as victims, not criminals
 - Provide immediate safety
 - Connect with victim services
@@ -206,6 +217,7 @@ const surveillanceOp = {
 - Ensure interpreter if needed
 
 **DO NOT**:
+
 - Interview without proper training
 - Separate families unnecessarily
 - Make promises you can't keep
@@ -213,6 +225,7 @@ const surveillanceOp = {
 - Photograph without necessity and consent
 
 **Victim Services**:
+
 - Shelter and housing
 - Medical care
 - Mental health services
@@ -222,6 +235,7 @@ const surveillanceOp = {
 - Witness protection (if needed)
 
 **Data Protection**:
+
 - Anonymous victim IDs only
 - Extreme access restrictions
 - Victim consent for data use
@@ -232,6 +246,7 @@ const surveillanceOp = {
 **Task Force Operations**:
 
 **Structure**:
+
 - Lead agency designated
 - Memorandum of Understanding (MOU)
 - Resource commitments
@@ -239,6 +254,7 @@ const surveillanceOp = {
 - Communication protocols
 
 **Deconfliction**:
+
 - Check RISSafe or equivalent
 - Coordinate operations
 - Avoid compromising other investigations
@@ -266,12 +282,14 @@ const surveillanceOp = {
 ### Undercover Operations
 
 **Authorization Requirements**:
+
 - Supervisory approval
 - Undercover Review Committee (for sensitive ops)
 - Legal counsel review
 - Otherwise Illegal Activity (OIA) approval if needed
 
 **Safety Protocols**:
+
 - Cover story development
 - Backup teams
 - Communication plans
@@ -279,12 +297,14 @@ const surveillanceOp = {
 - Psychological support
 
 **Legal Considerations**:
+
 - Entrapment defense prevention
 - Predisposition to commit crime
 - Proportionality of inducements
 - Recording of interactions
 
 **Operational Guidelines**:
+
 - Maintain cover
 - Document all contacts
 - Regular debriefs
@@ -294,6 +314,7 @@ const surveillanceOp = {
 ### Prosecution Coordination
 
 **Early Coordination**:
+
 - Identify prosecutor early
 - Regular case updates
 - Search warrant review
@@ -301,12 +322,14 @@ const surveillanceOp = {
 - Discovery planning
 
 **Grand Jury**:
+
 - Secrecy requirements (Rule 6(e))
 - Witness preparation
 - Evidence presentation
 - Indictment strategy
 
 **Trial Preparation**:
+
 - Witness coordination
 - Evidence organization
 - Expert witnesses
@@ -316,24 +339,28 @@ const surveillanceOp = {
 ### Intelligence Analysis
 
 **Link Analysis**:
+
 - Identify relationships
 - Map organization structure
 - Find key nodes
 - Predict associations
 
 **Financial Analysis**:
+
 - Follow the money
 - Identify beneficial owners
 - Track asset movement
 - Quantify proceeds
 
 **Communication Analysis**:
+
 - Call pattern analysis
 - Network diagrams
 - Timeline development
 - Code/slang interpretation
 
 **Pattern Recognition**:
+
 - Modus operandi
 - Geographic patterns
 - Temporal patterns
@@ -342,6 +369,7 @@ const surveillanceOp = {
 ### Technology Tools
 
 **Database Systems**:
+
 - Criminal history (NCIC)
 - Financial (FinCEN)
 - Immigration (TECS)
@@ -349,6 +377,7 @@ const surveillanceOp = {
 - Intelligence databases
 
 **Analytical Tools**:
+
 - i2 Analyst's Notebook
 - Palantir
 - Link analysis software
@@ -356,6 +385,7 @@ const surveillanceOp = {
 - Social network analysis
 
 **Digital Forensics**:
+
 - EnCase
 - FTK (Forensic Toolkit)
 - Cellebrite (mobile)
@@ -363,6 +393,7 @@ const surveillanceOp = {
 - Magnet AXIOM
 
 **Open Source Intelligence (OSINT)**:
+
 - Social media monitoring
 - Public records
 - News and media
@@ -406,6 +437,7 @@ const surveillanceOp = {
 ## Common Pitfalls
 
 ❌ **Avoid**:
+
 - Expired legal authority
 - Inadequate predication
 - Poor documentation
@@ -416,6 +448,7 @@ const surveillanceOp = {
 - Inadequate source documentation
 
 ✅ **Always**:
+
 - Verify legal authority is current
 - Document thoroughly
 - Coordinate with other agencies
@@ -427,6 +460,7 @@ const surveillanceOp = {
 ## Emergency Procedures
 
 ### Officer Safety Emergency
+
 1. Call for backup
 2. Ensure officer safety
 3. Secure scene
@@ -435,6 +469,7 @@ const surveillanceOp = {
 6. Document incident
 
 ### Source Compromise
+
 1. Immediate safety assessment
 2. Emergency relocation if needed
 3. Notify supervisor and source unit
@@ -443,6 +478,7 @@ const surveillanceOp = {
 6. Document and report
 
 ### Legal Authority Invalidation
+
 1. Cease affected activities immediately
 2. Notify supervisor and legal counsel
 3. Assess admissibility of evidence
@@ -451,6 +487,7 @@ const surveillanceOp = {
 6. Prosecutorial notification
 
 ### Data Breach
+
 1. Contain breach immediately
 2. Notify security officer
 3. Assess compromised information

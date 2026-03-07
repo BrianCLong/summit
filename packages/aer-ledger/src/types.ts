@@ -4,5 +4,5 @@ export interface AER {
   subjectToken: string;
   signer: string;
   signature: string;
-  algo: 'RSA-SHA256';
+  algo: "RSA-SHA256";
 }

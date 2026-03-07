@@ -8,9 +8,11 @@
 ## Deliverables
 
 ### 1. RBAC Policy Documentation
+
 **File:** `/docs/security/rbac_policy.md`
 
 **Content:**
+
 - Complete role definitions (VIEWER, ANALYST, LEAD, ADMIN, SUPERADMIN)
 - Permission matrices for:
   - Investigation management (view, create, update, close, archive, delete)
@@ -23,6 +25,7 @@
 - Compliance mappings (SOC 2, NIST 800-53, GDPR, FedRAMP)
 
 **Key Features:**
+
 - Least privilege principle enforced
 - Separation of duties between roles
 - K-anonymity requirements for exports (k≥5)
@@ -31,9 +34,11 @@
 - Immutable audit trail requirements
 
 ### 2. RBAC Verification Tests
+
 **File:** `/server/__tests__/rbac/investigation-export-rbac.test.ts`
 
 **Coverage:**
+
 - 45+ test cases with `@rbac_critical` tags
 - ~150+ individual assertions
 - Role × Action matrix validation
@@ -43,6 +48,7 @@
 - End-to-end workflow scenarios
 
 **Test Structure:**
+
 ```
 Investigation Management RBAC Tests
 ├── View Permissions (4 tests)
@@ -69,9 +75,11 @@ Integration Tests
 ```
 
 ### 3. Test Job Configuration
+
 **File:** `/docs/security/rbac-test-job.md`
 
 **Content:**
+
 - Complete CI/CD job configuration
 - GitHub Actions workflow example
 - Test execution commands
@@ -85,31 +93,35 @@ Integration Tests
 ## Existing RBAC Infrastructure Found
 
 ### Core Permission System
+
 **Location:** `/server/src/authz/permissions.ts`
 
 **Discovered:**
+
 ```typescript
 export enum Role {
-  SUPERADMIN = 'superadmin',
-  ADMIN = 'admin',
-  ANALYST = 'analyst',
-  VIEWER = 'viewer',
+  SUPERADMIN = "superadmin",
+  ADMIN = "admin",
+  ANALYST = "analyst",
+  VIEWER = "viewer",
 }
 
 export enum Permission {
-  MANAGE_USERS = 'manage_users',
-  READ_TENANT_DATA = 'read_tenant_data',
-  WRITE_TENANT_DATA = 'write_tenant_data',
-  EXECUTE_DANGEROUS_ACTION = 'execute_dangerous_action',
+  MANAGE_USERS = "manage_users",
+  READ_TENANT_DATA = "read_tenant_data",
+  WRITE_TENANT_DATA = "write_tenant_data",
+  EXECUTE_DANGEROUS_ACTION = "execute_dangerous_action",
 }
 ```
 
 **Analysis:** Foundation in place but needs extension for investigation-specific permissions.
 
 ### Enhanced Governance Service
+
 **Location:** `/server/src/services/EnhancedGovernanceRBACService.ts`
 
 **Key Features Found:**
+
 - Purpose-based access control
 - Legal basis requirement
 - Clearance level enforcement
@@ -122,33 +134,52 @@ export enum Permission {
 **Analysis:** Sophisticated RBAC/ABAC hybrid system ready for investigation workflows.
 
 ### Investigation Workflow Service
+
 **Location:** `/server/src/services/investigationWorkflowService.ts`
 
 **Discovered Types:**
+
 ```typescript
-export type InvestigationRole = 'LEAD' | 'ANALYST' | 'REVIEWER' | 'OBSERVER' | 'STAKEHOLDER'
-export type PermissionType = 'READ' | 'write' | 'delete' | 'assign' | 'close' | 'archive' | 'manage_evidence' | 'manage_permissions'
-export type SecurityClassification = 'PUBLIC' | 'INTERNAL' | 'CONFIDENTIAL' | 'SECRET' | 'TOP_SECRET'
+export type InvestigationRole = "LEAD" | "ANALYST" | "REVIEWER" | "OBSERVER" | "STAKEHOLDER";
+export type PermissionType =
+  | "READ"
+  | "write"
+  | "delete"
+  | "assign"
+  | "close"
+  | "archive"
+  | "manage_evidence"
+  | "manage_permissions";
+export type SecurityClassification =
+  | "PUBLIC"
+  | "INTERNAL"
+  | "CONFIDENTIAL"
+  | "SECRET"
+  | "TOP_SECRET";
 ```
 
 **Analysis:** Investigation-specific roles and permissions already defined, need RBAC enforcement.
 
 ### Export Service
+
 **Location:** `/server/src/analytics/exports/ExportService.ts`
 
 **Found:**
+
 ```typescript
 export interface ExportConfig {
-    kAnonymityThreshold: number; // e.g., 5
+  kAnonymityThreshold: number; // e.g., 5
 }
 ```
 
 **Analysis:** K-anonymity enforcement already implemented, needs RBAC integration.
 
 ### Case Management System
+
 **Location:** `/server/src/cases/`
 
 **Key Features:**
+
 - Immutable audit logging with reason and legal basis
 - Chain of custody tracking
 - Compartment-based access control
@@ -158,11 +189,14 @@ export interface ExportConfig {
 **Analysis:** Enterprise-grade case management with governance controls ready for RBAC integration.
 
 ### Existing Test Patterns
+
 **Locations:**
+
 - `/server/src/middleware/__tests__/rbac.test.ts`
 - `/server/src/auth/__tests__/multi-tenant-rbac.test.ts`
 
 **Patterns Identified:**
+
 - Jest test framework with ESM module mocking
 - Factory functions for users, requests, responses
 - Permission matrix testing approach
@@ -173,17 +207,18 @@ export interface ExportConfig {
 
 ## RBAC Policy Matrix Summary
 
-| Role | Investigation Ops | Export Ops | Config Ops | Special Requirements |
-|------|------------------|------------|------------|---------------------|
-| **VIEWER** | View only | None | None | Clearance: Public-Confidential |
-| **ANALYST** | Create, Update (assigned) | JSON/CSV/PDF (assigned, k-anon) | View | Clearance: Public-Secret |
-| **LEAD** | All except delete | All formats including full | View, Audit | Clearance: Public-Secret |
-| **ADMIN** | All except delete | All formats | All config ops | Clearance: All levels |
-| **SUPERADMIN** | All including delete | All formats | All config ops | Clearance: All levels + TS/SCI |
+| Role           | Investigation Ops         | Export Ops                      | Config Ops     | Special Requirements           |
+| -------------- | ------------------------- | ------------------------------- | -------------- | ------------------------------ |
+| **VIEWER**     | View only                 | None                            | None           | Clearance: Public-Confidential |
+| **ANALYST**    | Create, Update (assigned) | JSON/CSV/PDF (assigned, k-anon) | View           | Clearance: Public-Secret       |
+| **LEAD**       | All except delete         | All formats including full      | View, Audit    | Clearance: Public-Secret       |
+| **ADMIN**      | All except delete         | All formats                     | All config ops | Clearance: All levels          |
+| **SUPERADMIN** | All including delete      | All formats                     | All config ops | Clearance: All levels + TS/SCI |
 
 ## Key Governance Controls
 
 ### Export Controls
+
 1. **K-Anonymity:** Minimum k=5 for aggregate data exports (configurable)
 2. **Reason Required:** All exports require `reasonForAccess` field
 3. **Legal Basis Required:** All exports require valid `legalBasis` enum value
@@ -191,6 +226,7 @@ export interface ExportConfig {
 5. **MFA Step-Up:** SECRET+ classifications require fresh MFA verification (<15 min)
 
 ### Access Controls
+
 1. **Tenant Isolation:** Strict boundaries enforced (admin+ can cross)
 2. **Clearance Levels:** 5-tier classification system enforced
 3. **Compartmentation:** Explicit compartment access required
@@ -199,15 +235,15 @@ export interface ExportConfig {
 
 ### Compliance Mappings
 
-| Framework | Control | Implementation |
-|-----------|---------|----------------|
-| SOC 2 CC6.1 | Logical access | RBAC policy + middleware enforcement |
-| SOC 2 CC6.2 | Prior authorization | Pre-flight permission checks |
-| SOC 2 CC6.3 | Provisioning | Role assignment audit trail |
-| NIST 800-53 AC-3 | Access enforcement | GraphQL resolver + REST middleware |
-| NIST 800-53 AC-6 | Least privilege | Role-based permission sets |
-| GDPR Art 32 | Data protection | K-anonymity + classification controls |
-| FedRAMP AC-2 | Account management | Multi-tenant RBAC + clearance |
+| Framework        | Control             | Implementation                        |
+| ---------------- | ------------------- | ------------------------------------- |
+| SOC 2 CC6.1      | Logical access      | RBAC policy + middleware enforcement  |
+| SOC 2 CC6.2      | Prior authorization | Pre-flight permission checks          |
+| SOC 2 CC6.3      | Provisioning        | Role assignment audit trail           |
+| NIST 800-53 AC-3 | Access enforcement  | GraphQL resolver + REST middleware    |
+| NIST 800-53 AC-6 | Least privilege     | Role-based permission sets            |
+| GDPR Art 32      | Data protection     | K-anonymity + classification controls |
+| FedRAMP AC-2     | Account management  | Multi-tenant RBAC + clearance         |
 
 ## Test Execution Guidance
 
@@ -228,6 +264,7 @@ npm test -- --watch --testPathPattern=rbac
 ```
 
 ### Expected Results
+
 - **Test Count:** 45+ test cases
 - **Assertion Count:** ~150+ assertions
 - **Execution Time:** < 5 seconds
@@ -235,6 +272,7 @@ npm test -- --watch --testPathPattern=rbac
 - **Success Rate:** 100% required (no flaky tests)
 
 ### CI/CD Integration
+
 - Run on every PR affecting auth/RBAC code
 - Run nightly as part of compliance suite
 - Block merges on failure (no bypass without security approval)
@@ -243,12 +281,14 @@ npm test -- --watch --testPathPattern=rbac
 ## Recommendations
 
 ### Immediate Actions
+
 1. **Integrate tests into CI pipeline** - Add GitHub Actions workflow from `/docs/security/rbac-test-job.md`
 2. **Review policy with stakeholders** - Get approval from Security, Compliance, Engineering
 3. **Extend permission enum** - Add investigation-specific permissions to `/server/src/authz/permissions.ts`
 4. **Wire up RBAC checks** - Add permission checks to investigation resolvers and export endpoints
 
 ### Future Enhancements
+
 1. **OPA Policy Integration** - Externalize complex policies to Open Policy Agent
 2. **Dynamic Permissions** - Support runtime permission grants for emergency access
 3. **ABAC Attributes** - Expand attribute-based controls (department, location, time)
@@ -256,6 +296,7 @@ npm test -- --watch --testPathPattern=rbac
 5. **Audit Dashboards** - Real-time monitoring of RBAC violations and access patterns
 
 ### Testing Enhancements
+
 1. **Mutation Testing** - Add Stryker for mutation coverage of permission logic
 2. **Property-Based Testing** - Use fast-check for permission matrix invariants
 3. **Performance Testing** - Verify RBAC checks don't degrade API performance
@@ -264,18 +305,21 @@ npm test -- --watch --testPathPattern=rbac
 ## Issues and Ambiguities
 
 ### Resolved During Research
+
 1. **Role definitions:** Found existing Role enum, extended with investigation-specific roles
 2. **Test framework:** Confirmed Jest with ESM modules, followed existing patterns
 3. **Audit requirements:** Found comprehensive audit system in case management
 4. **Export controls:** Found k-anonymity implementation, extended with RBAC
 
 ### Remaining Questions
+
 1. **Issue #11565 status:** Could not locate specific issue in codebase or GitHub
 2. **Export template ownership:** Unclear which role should own export config templates
 3. **Emergency access:** No policy defined for break-glass scenarios
 4. **Cross-tenant user roles:** Multi-tenant users need role mapping per tenant
 
 ### Assumptions Made
+
 1. Issue #11565 relates to investigation export permissions (referenced in policy)
 2. K-anonymity threshold of 5 is appropriate (configurable in ExportConfig)
 3. MFA verification TTL of 15 minutes is acceptable for SECRET+ operations
@@ -284,12 +328,14 @@ npm test -- --watch --testPathPattern=rbac
 ## Evidence Bundle
 
 ### Created Files
+
 1. `/docs/security/rbac_policy.md` (policy specification)
 2. `/server/__tests__/rbac/investigation-export-rbac.test.ts` (test implementation)
 3. `/docs/security/rbac-test-job.md` (CI/CD configuration)
 4. `/docs/security/rbac-verification-summary.md` (this file)
 
 ### Referenced Existing Files
+
 1. `/server/src/authz/permissions.ts` (core permissions)
 2. `/server/src/services/EnhancedGovernanceRBACService.ts` (RBAC service)
 3. `/server/src/services/investigationWorkflowService.ts` (investigation types)
@@ -299,6 +345,7 @@ npm test -- --watch --testPathPattern=rbac
 7. `/server/src/auth/__tests__/multi-tenant-rbac.test.ts` (multi-tenant patterns)
 
 ### Compliance Evidence
+
 - RBAC policy document with control mappings
 - Comprehensive test suite with 100% role×action coverage
 - CI/CD configuration for continuous verification
@@ -308,6 +355,7 @@ npm test -- --watch --testPathPattern=rbac
 ## Sign-off
 
 **Work Completed:**
+
 - ✅ Researched existing RBAC infrastructure
 - ✅ Created comprehensive RBAC policy document
 - ✅ Implemented 45+ verification tests with `@rbac_critical` tags
@@ -316,6 +364,7 @@ npm test -- --watch --testPathPattern=rbac
 - ✅ Mapped compliance requirements to controls
 
 **Scope Adherence:**
+
 - ✅ Only touched files in allowlist (new files in docs/ and tests/)
 - ✅ Read-only access to server/src/ for research
 - ✅ No modifications to Track A (governance) or Track B (transparency) work

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -7,50 +7,44 @@ import {
   ListItemButton,
   ListItemText,
   Typography,
-} from '@mui/material';
-import { useNavigate } from 'react-router-dom';
+} from "@mui/material";
+import { useNavigate } from "react-router-dom";
 
 type Command = { id: string; title: string; hint?: string; action: () => void };
 
-export function CommandPalette({
-  open,
-  onClose,
-}: {
-  open: boolean;
-  onClose: () => void;
-}) {
+export function CommandPalette({ open, onClose }: { open: boolean; onClose: () => void }) {
   const navigate = useNavigate();
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState("");
 
   const commands: Command[] = useMemo(
     () => [
       {
-        id: 'runbooks',
-        title: 'Open Runbooks',
-        action: () => navigate('/conductor'),
+        id: "runbooks",
+        title: "Open Runbooks",
+        action: () => navigate("/conductor"),
       },
       {
-        id: 'rollouts',
-        title: 'View Rollouts',
-        action: () => navigate('/conductor'),
+        id: "rollouts",
+        title: "View Rollouts",
+        action: () => navigate("/conductor"),
       },
       {
-        id: 'slo',
-        title: 'Open SLO Dashboard',
-        action: () => navigate('/conductor'),
+        id: "slo",
+        title: "Open SLO Dashboard",
+        action: () => navigate("/conductor"),
       },
       {
-        id: 'entities',
-        title: 'Search Entities',
-        action: () => navigate('/search'),
+        id: "entities",
+        title: "Search Entities",
+        action: () => navigate("/search"),
       },
       {
-        id: 'graph',
-        title: 'Open Graph Explorer',
-        action: () => navigate('/graph'),
+        id: "graph",
+        title: "Open Graph Explorer",
+        action: () => navigate("/graph"),
       },
     ],
-    [navigate],
+    [navigate]
   );
 
   const filtered = useMemo(() => {
@@ -61,13 +55,13 @@ export function CommandPalette({
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
         if (!open) onClose(); // ensure re-render to open from parent
       }
     }
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
   }, [open, onClose]);
 
   return (

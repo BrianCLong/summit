@@ -102,8 +102,8 @@ paths:
 
 ```ts
 // packages/sdk-ts/src/index.ts
-export * from './client';
-export * from './types';
+export * from "./client";
+export * from "./types";
 // Receipts helper
 export async function withReceipt<T>(fn: () => Promise<T>) {
   const res = await fn();
@@ -163,7 +163,7 @@ companyos:
   image.tag: 0.27.0
   residency:
     enforce: true
-    regions: ['us-east-1', 'eu-west-1']
+    regions: ["us-east-1", "eu-west-1"]
   evidence:
     compaction:
       tiering: v2
@@ -193,9 +193,7 @@ switchboard:
     {
       "type": "graph",
       "title": "Storage Cost — Pilots",
-      "targets": [
-        { "expr": "sum(tenant_storage_cost_estimate_usd) by (tenant)" }
-      ]
+      "targets": [{ "expr": "sum(tenant_storage_cost_estimate_usd) by (tenant)" }]
     },
     {
       "type": "stat",

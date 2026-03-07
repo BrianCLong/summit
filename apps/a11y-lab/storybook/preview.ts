@@ -1,15 +1,15 @@
-import type { Preview } from '@storybook/react';
-import { withA11y } from '@storybook/addon-a11y';
-import { toggleA11yHeatmap } from '../src/heatmap-overlay';
+import type { Preview } from "@storybook/react";
+import { withA11y } from "@storybook/addon-a11y";
+import { toggleA11yHeatmap } from "../src/heatmap-overlay";
 
 const preview: Preview = {
   parameters: {
     controls: { expanded: true },
-    actions: { argTypesRegex: '^on[A-Z].*' },
+    actions: { argTypesRegex: "^on[A-Z].*" },
     a11y: {
       disable: false,
       config: {},
-      element: '#root',
+      element: "#root",
       manual: false,
     },
     backgrounds: { disable: true },
@@ -17,14 +17,14 @@ const preview: Preview = {
   decorators: [withA11y],
   globalTypes: {
     a11yHeatmap: {
-      name: 'A11y Heatmap',
-      description: 'Toggle runtime accessibility heatmap overlay',
+      name: "A11y Heatmap",
+      description: "Toggle runtime accessibility heatmap overlay",
       defaultValue: false,
       toolbar: {
-        icon: 'paintbrush',
+        icon: "paintbrush",
         items: [
-          { value: false, title: 'Off' },
-          { value: true, title: 'On' },
+          { value: false, title: "Off" },
+          { value: true, title: "On" },
         ],
       },
     },

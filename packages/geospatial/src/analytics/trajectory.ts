@@ -1,5 +1,5 @@
-import { haversineDistance } from '../utils/distance.js';
-import type { GeoPoint, MovementTrack } from '../types/geospatial.js';
+import { haversineDistance } from "../utils/distance.js";
+import type { GeoPoint, MovementTrack } from "../types/geospatial.js";
 
 export interface MovementStats {
   totalDistance: number;
@@ -8,7 +8,11 @@ export interface MovementStats {
   maxSpeed: number;
 }
 
-export const analyzeTrack = (track: MovementTrack, stopSpeedThreshold = 0.5, dwellTimeMs = 120000): MovementStats => {
+export const analyzeTrack = (
+  track: MovementTrack,
+  stopSpeedThreshold = 0.5,
+  dwellTimeMs = 120000
+): MovementStats => {
   let totalDistance = 0;
   let totalTime = 0;
   let maxSpeed = 0;
@@ -18,7 +22,8 @@ export const analyzeTrack = (track: MovementTrack, stopSpeedThreshold = 0.5, dwe
     const prev = track.points[i - 1];
     const current = track.points[i];
     const distance = haversineDistance(prev, current);
-    const timeDelta = Math.max(1, (current.timestamp?.getTime() ?? 0) - (prev.timestamp?.getTime() ?? 0)) / 1000;
+    const timeDelta =
+      Math.max(1, (current.timestamp?.getTime() ?? 0) - (prev.timestamp?.getTime() ?? 0)) / 1000;
     const speed = distance / timeDelta;
 
     totalDistance += distance;

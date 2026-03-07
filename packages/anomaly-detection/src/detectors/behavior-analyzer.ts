@@ -2,10 +2,10 @@
  * User and Entity Behavior Analytics (UBA/EBA)
  */
 
-import { IBehaviorAnalyzer } from '@intelgraph/threat-detection-core';
-import { AnomalyScore, BehaviorProfile } from '@intelgraph/threat-detection-core';
-import { calculateZScore, ensembleAnomalyScore } from '@intelgraph/threat-detection-core';
-import Redis from 'ioredis';
+import { IBehaviorAnalyzer } from "@intelgraph/threat-detection-core";
+import { AnomalyScore, BehaviorProfile } from "@intelgraph/threat-detection-core";
+import { calculateZScore, ensembleAnomalyScore } from "@intelgraph/threat-detection-core";
+import Redis from "ioredis";
 
 export interface BehaviorAnalyzerConfig {
   redis: {
@@ -23,8 +23,8 @@ export interface BehaviorAnalyzerConfig {
 export class BehaviorAnalyzer implements IBehaviorAnalyzer {
   private redis: Redis;
   private config: BehaviorAnalyzerConfig;
-  private readonly PROFILE_PREFIX = 'behavior:profile:';
-  private readonly ACTIVITY_PREFIX = 'behavior:activity:';
+  private readonly PROFILE_PREFIX = "behavior:profile:";
+  private readonly ACTIVITY_PREFIX = "behavior:activity:";
 
   constructor(config: BehaviorAnalyzerConfig) {
     this.config = config;
@@ -32,7 +32,7 @@ export class BehaviorAnalyzer implements IBehaviorAnalyzer {
       host: config.redis.host,
       port: config.redis.port,
       password: config.redis.password,
-      db: config.redis.db || 0
+      db: config.redis.db || 0,
     });
   }
 
@@ -45,9 +45,9 @@ export class BehaviorAnalyzer implements IBehaviorAnalyzer {
       await this.createProfile(entityId, event);
       return {
         score: 0,
-        method: 'behavioral',
+        method: "behavioral",
         features: {},
-        explanation: 'Learning phase: establishing baseline behavior'
+        explanation: "Learning phase: establishing baseline behavior",
       };
     }
 
@@ -57,9 +57,9 @@ export class BehaviorAnalyzer implements IBehaviorAnalyzer {
       await this.updateProfile(entityId, event);
       return {
         score: 0,
-        method: 'behavioral',
+        method: "behavioral",
         features: {},
-        explanation: 'Learning phase: collecting behavior data'
+        explanation: "Learning phase: collecting behavior data",
       };
     }
 
@@ -101,14 +101,12 @@ export class BehaviorAnalyzer implements IBehaviorAnalyzer {
 
     if (metrics.requestRate !== undefined) {
       profile.baselineMetrics.avgRequestsPerHour =
-        profile.baselineMetrics.avgRequestsPerHour * (1 - alpha) +
-        metrics.requestRate * alpha;
+        profile.baselineMetrics.avgRequestsPerHour * (1 - alpha) + metrics.requestRate * alpha;
     }
 
     if (metrics.dataTransferred !== undefined) {
       profile.baselineMetrics.avgDataTransferred =
-        profile.baselineMetrics.avgDataTransferred * (1 - alpha) +
-        metrics.dataTransferred * alpha;
+        profile.baselineMetrics.avgDataTransferred * (1 - alpha) + metrics.dataTransferred * alpha;
     }
 
     // Update access patterns
@@ -165,7 +163,7 @@ export class BehaviorAnalyzer implements IBehaviorAnalyzer {
 
     // Save updated profile
     const key = `${this.PROFILE_PREFIX}${entityId}`;
-    await this.redis.set(key, JSON.stringify(profile), 'EX', 90 * 24 * 3600); // 90 days TTL
+    await this.redis.set(key, JSON.stringify(profile), "EX", 90 * 24 * 3600); // 90 days TTL
   }
 
   async isLearningPhase(entityId: string): Promise<boolean> {
@@ -175,10 +173,7 @@ export class BehaviorAnalyzer implements IBehaviorAnalyzer {
     const learningPeriodMs = this.config.learningPeriodDays * 24 * 3600 * 1000;
     const elapsedTime = Date.now() - profile.learningStartDate.getTime();
 
-    return (
-      elapsedTime < learningPeriodMs ||
-      profile.sampleSize < this.config.minSamplesForBaseline
-    );
+    return elapsedTime < learningPeriodMs || profile.sampleSize < this.config.minSamplesForBaseline;
   }
 
   private async createProfile(entityId: string, event: any): Promise<void> {
@@ -186,7 +181,7 @@ export class BehaviorAnalyzer implements IBehaviorAnalyzer {
 
     const profile: BehaviorProfile = {
       entityId,
-      entityType: event.entityType || 'user',
+      entityType: event.entityType || "user",
       baselineMetrics: {
         avgRequestsPerHour: metrics.requestRate || 0,
         avgDataTransferred: metrics.dataTransferred || 0,
@@ -194,12 +189,12 @@ export class BehaviorAnalyzer implements IBehaviorAnalyzer {
         typicalAccessTimes: [],
         geographicLocations: metrics.location ? [metrics.location] : [],
         commonUserAgents: metrics.userAgent ? [metrics.userAgent] : [],
-        commonEndpoints: metrics.endpoint ? [metrics.endpoint] : []
+        commonEndpoints: metrics.endpoint ? [metrics.endpoint] : [],
       },
       activityPattern: {
         hourly: new Array(24).fill(0),
         daily: new Array(7).fill(0),
-        weekly: []
+        weekly: [],
       },
       learningStartDate: new Date(),
       lastUpdated: new Date(),
@@ -208,12 +203,12 @@ export class BehaviorAnalyzer implements IBehaviorAnalyzer {
         requestRateThreshold: 100, // Initial threshold
         dataTransferThreshold: 10 * 1024 * 1024, // 10MB
         locationChangeThreshold: 3,
-        anomalyScoreThreshold: 0.7
-      }
+        anomalyScoreThreshold: 0.7,
+      },
     };
 
     const key = `${this.PROFILE_PREFIX}${entityId}`;
-    await this.redis.set(key, JSON.stringify(profile), 'EX', 90 * 24 * 3600);
+    await this.redis.set(key, JSON.stringify(profile), "EX", 90 * 24 * 3600);
   }
 
   private async detectBehavioralAnomalies(
@@ -232,7 +227,7 @@ export class BehaviorAnalyzer implements IBehaviorAnalyzer {
         profile.baselineMetrics.avgRequestsPerHour * 0.5 // Assume 50% std dev
       );
       const requestAnomalyScore = Math.min(1, Math.abs(zScore) / 3);
-      anomalyScores['requestRate'] = requestAnomalyScore;
+      anomalyScores["requestRate"] = requestAnomalyScore;
       scores.push(requestAnomalyScore);
     }
 
@@ -244,7 +239,7 @@ export class BehaviorAnalyzer implements IBehaviorAnalyzer {
         profile.baselineMetrics.avgDataTransferred * 0.5
       );
       const dataAnomalyScore = Math.min(1, Math.abs(zScore) / 3);
-      anomalyScores['dataTransfer'] = dataAnomalyScore;
+      anomalyScores["dataTransfer"] = dataAnomalyScore;
       scores.push(dataAnomalyScore);
     }
 
@@ -253,7 +248,7 @@ export class BehaviorAnalyzer implements IBehaviorAnalyzer {
       const hour = new Date(event.timestamp).getHours();
       const typicalActivity = profile.activityPattern.hourly[hour] || 0;
       const temporalScore = typicalActivity < 0.1 ? 0.8 : 0; // High anomaly if unusual time
-      anomalyScores['temporal'] = temporalScore;
+      anomalyScores["temporal"] = temporalScore;
       scores.push(temporalScore);
     }
 
@@ -263,7 +258,7 @@ export class BehaviorAnalyzer implements IBehaviorAnalyzer {
         metrics.location
       );
       const locationScore = isKnownLocation ? 0 : 0.7;
-      anomalyScores['location'] = locationScore;
+      anomalyScores["location"] = locationScore;
       scores.push(locationScore);
     }
 
@@ -272,7 +267,7 @@ export class BehaviorAnalyzer implements IBehaviorAnalyzer {
       const knownAgents = profile.baselineMetrics.commonUserAgents || [];
       const isKnownAgent = knownAgents.includes(metrics.userAgent);
       const agentScore = isKnownAgent ? 0 : 0.5;
-      anomalyScores['userAgent'] = agentScore;
+      anomalyScores["userAgent"] = agentScore;
       scores.push(agentScore);
     }
 
@@ -282,25 +277,25 @@ export class BehaviorAnalyzer implements IBehaviorAnalyzer {
         metrics.accessPattern
       );
       const patternScore = isKnownPattern ? 0 : 0.6;
-      anomalyScores['accessPattern'] = patternScore;
+      anomalyScores["accessPattern"] = patternScore;
       scores.push(patternScore);
     }
 
     // Combine scores
-    const overallScore = ensembleAnomalyScore(scores, 'weighted', [
+    const overallScore = ensembleAnomalyScore(scores, "weighted", [
       0.25, // requestRate
       0.25, // dataTransfer
       0.15, // temporal
-      0.20, // location
-      0.10, // userAgent
-      0.05  // accessPattern
+      0.2, // location
+      0.1, // userAgent
+      0.05, // accessPattern
     ]);
 
     return {
       score: overallScore,
-      method: 'behavioral',
+      method: "behavioral",
       features: anomalyScores,
-      explanation: this.generateBehavioralExplanation(anomalyScores, overallScore)
+      explanation: this.generateBehavioralExplanation(anomalyScores, overallScore),
     };
   }
 
@@ -318,7 +313,7 @@ export class BehaviorAnalyzer implements IBehaviorAnalyzer {
       accessPattern: event.endpoint || event.action,
       location: event.geoLocation || event.country || event.city,
       userAgent: event.userAgent,
-      endpoint: event.endpoint || event.resource
+      endpoint: event.endpoint || event.resource,
     };
   }
 
@@ -350,21 +345,21 @@ export class BehaviorAnalyzer implements IBehaviorAnalyzer {
       .sort(([_, a], [__, b]) => b - a);
 
     if (anomalies.length === 0) {
-      return 'Behavior within normal parameters';
+      return "Behavior within normal parameters";
     }
 
     const descriptions = {
-      requestRate: 'unusual request frequency',
-      dataTransfer: 'abnormal data transfer volume',
-      temporal: 'access at unusual time',
-      location: 'new geographic location',
-      userAgent: 'unknown user agent/device',
-      accessPattern: 'unusual access pattern'
+      requestRate: "unusual request frequency",
+      dataTransfer: "abnormal data transfer volume",
+      temporal: "access at unusual time",
+      location: "new geographic location",
+      userAgent: "unknown user agent/device",
+      accessPattern: "unusual access pattern",
     };
 
     const anomalyList = anomalies
       .map(([key, score]) => descriptions[key as keyof typeof descriptions] || key)
-      .join(', ');
+      .join(", ");
 
     return `Behavioral anomalies detected: ${anomalyList}`;
   }

@@ -9,15 +9,15 @@
     <pre data-testid="sandbox-result" id="result"></pre>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script>
-      $(function(){
-        $('#gen').on('click', function(){
-          $('#cypher').text('MATCH (a)-[:FOLLOWS]->(b) RETURN a,b');
-          $('#plan').text('rows ~ 42');
-        });
-        $('#approve').on('click', function(){
-          $('#result').text('rows: 0');
-        });
-      });
+      $(function () {
+        $('#gen').on('click', function () {
+          $('#cypher').text('MATCH (a)-[:FOLLOWS]->(b) RETURN a,b')
+          $('#plan').text('rows ~ 42')
+        })
+        $('#approve').on('click', function () {
+          $('#result').text('rows: 0')
+        })
+      })
     </script>
   </body>
 </html>

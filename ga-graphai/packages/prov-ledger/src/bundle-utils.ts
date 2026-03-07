@@ -1,5 +1,5 @@
-import { createHash, createVerify } from 'node:crypto';
-import { stableHash } from '@ga-graphai/data-integrity';
+import { createHash, createVerify } from "node:crypto";
+import { stableHash } from "@ga-graphai/data-integrity";
 import type {
   EvidenceBundle,
   ExecutionAttestation,
@@ -7,12 +7,12 @@ import type {
   MerkleProofStep,
   PolicyDecisionToken,
   SnapshotCommitment,
-} from 'common-types';
+} from "common-types";
 
-const MERKLE_ALGORITHM = 'sha256-merkle-v1';
+const MERKLE_ALGORITHM = "sha256-merkle-v1";
 
 function sha256Hex(input: string): string {
-  return createHash('sha256').update(input).digest('hex');
+  return createHash("sha256").update(input).digest("hex");
 }
 
 function hashPair(left: string, right: string): string {
@@ -49,7 +49,7 @@ function buildProof(leaves: string[], index: number): MerkleProofStep[] {
     const isRightNode = cursorIndex % 2 === 1;
     const siblingIndex = isRightNode ? cursorIndex - 1 : cursorIndex + 1;
     const sibling = layer[siblingIndex] ?? layer[cursorIndex];
-    proof.push({ position: isRightNode ? 'left' : 'right', hash: sibling });
+    proof.push({ position: isRightNode ? "left" : "right", hash: sibling });
 
     const next: string[] = [];
     for (let i = 0; i < layer.length; i += 2) {
@@ -87,7 +87,7 @@ export function buildMerkleArtifacts(entries: readonly LedgerEntry[]): {
   });
 
   if (leaves.length === 0) {
-    return { atomIds, contentHashes, metadataHashes, inclusionProofs: {}, merkleRoot: '' };
+    return { atomIds, contentHashes, metadataHashes, inclusionProofs: {}, merkleRoot: "" };
   }
 
   let layer = [...leaves];
@@ -121,7 +121,7 @@ export function buildSnapshotCommitment(options: {
   redacted?: boolean;
 }): SnapshotCommitment {
   const issuedAt = (options.issuedAt ?? new Date()).toISOString();
-  const bundleHash = sha256Hex(`${options.merkleRoot}|${options.headHash ?? ''}`);
+  const bundleHash = sha256Hex(`${options.merkleRoot}|${options.headHash ?? ""}`);
   return {
     merkleRoot: options.merkleRoot,
     headHash: options.headHash,
@@ -138,17 +138,17 @@ export function buildSnapshotCommitment(options: {
 export function derivePolicyDecisionTokens(
   entries: readonly LedgerEntry[],
   merkleRoot: string,
-  issuedAt: Date = new Date(),
+  issuedAt: Date = new Date()
 ): PolicyDecisionToken[] {
   const issuedAtIso = issuedAt.toISOString();
   const tokens: PolicyDecisionToken[] = [];
 
   entries.forEach((entry) => {
     const maybePolicyId =
-      typeof entry.payload === 'object' && entry.payload && 'policyId' in entry.payload
+      typeof entry.payload === "object" && entry.payload && "policyId" in entry.payload
         ? String((entry.payload as Record<string, unknown>).policyId)
         : undefined;
-    if (entry.category === 'policy' || maybePolicyId) {
+    if (entry.category === "policy" || maybePolicyId) {
       tokens.push({
         token: sha256Hex(`${entry.hash}|${merkleRoot}`),
         policyId: maybePolicyId,
@@ -169,10 +169,10 @@ export function buildExecutionAttestation(
   report: string,
   verified: boolean,
   issuedAt: Date,
-  verifier?: string,
+  verifier?: string
 ): ExecutionAttestation {
   return {
-    format: 'verifiable-execution',
+    format: "verifiable-execution",
     report,
     verified,
     issuedAt: issuedAt.toISOString(),
@@ -183,12 +183,11 @@ export function buildExecutionAttestation(
 export function verifyMerkleProof(
   leaf: string,
   proof: MerkleProofStep[],
-  expectedRoot: string,
+  expectedRoot: string
 ): boolean {
   let cursor = leaf;
   proof.forEach((step) => {
-    cursor =
-      step.position === 'left' ? hashPair(step.hash, cursor) : hashPair(cursor, step.hash);
+    cursor = step.position === "left" ? hashPair(step.hash, cursor) : hashPair(cursor, step.hash);
   });
   return cursor === expectedRoot;
 }
@@ -197,10 +196,10 @@ export function verifySnapshotSignature(commitment: SnapshotCommitment): boolean
   if (!commitment.signature || !commitment.publicKey) {
     return true;
   }
-  const verifier = createVerify('SHA256');
+  const verifier = createVerify("SHA256");
   verifier.update(commitment.bundleHash ?? commitment.merkleRoot);
   verifier.end();
-  return verifier.verify(commitment.publicKey, Buffer.from(commitment.signature, 'base64'));
+  return verifier.verify(commitment.publicKey, Buffer.from(commitment.signature, "base64"));
 }
 
 export function augmentEvidenceBundle(
@@ -212,7 +211,7 @@ export function augmentEvidenceBundle(
     signature?: string;
     issuedAt?: Date;
     redacted?: boolean;
-  } = {},
+  } = {}
 ): EvidenceBundle {
   const { atomIds, contentHashes, metadataHashes, inclusionProofs, merkleRoot } =
     buildMerkleArtifacts(entries);
@@ -230,7 +229,7 @@ export function augmentEvidenceBundle(
   const policyDecisionTokens = derivePolicyDecisionTokens(
     entries,
     snapshotCommitment.merkleRoot,
-    options.issuedAt ?? new Date(),
+    options.issuedAt ?? new Date()
   );
 
   return {

@@ -23,5 +23,5 @@ if not breaker.check_budget_limit(current_spend, budget_limit):
 
 ## Logic
 
-*   **Disabled (Default):** `check_budget_limit` always returns `True`.
-*   **Enabled:** `check_budget_limit` returns `False` if `current_spend > budget_limit`.
+- **Disabled (Default):** `check_budget_limit` always returns `True`.
+- **Enabled:** `check_budget_limit` returns `False` if `current_spend > budget_limit`.

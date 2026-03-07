@@ -5,10 +5,10 @@
  * Handles JWT token generation, validation, and lifecycle management
  */
 
-import jwt from 'jsonwebtoken';
-import { createLogger } from '../utils/logger.js';
+import jwt from "jsonwebtoken";
+import { createLogger } from "../utils/logger.js";
 
-const logger = createLogger('jwt-manager');
+const logger = createLogger("jwt-manager");
 
 export interface JWTConfig {
   secret: string;
@@ -40,9 +40,9 @@ export class JWTManager {
 
   constructor(config: JWTConfig) {
     this.config = {
-      algorithm: 'HS256',
-      expiresIn: '15m',
-      refreshExpiresIn: '7d',
+      algorithm: "HS256",
+      expiresIn: "15m",
+      refreshExpiresIn: "7d",
       ...config,
     };
   }
@@ -54,7 +54,7 @@ export class JWTManager {
     const decoded = jwt.decode(accessToken) as jwt.JwtPayload;
     const expiresIn = decoded.exp! - Math.floor(Date.now() / 1000);
 
-    logger.info('Token pair generated', { sub: payload.sub });
+    logger.info("Token pair generated", { sub: payload.sub });
 
     return {
       accessToken,
@@ -85,7 +85,7 @@ export class JWTManager {
   generateRefreshToken(payload: TokenPayload): string {
     const refreshPayload = {
       sub: payload.sub,
-      type: 'refresh',
+      type: "refresh",
     };
 
     return jwt.sign(refreshPayload, this.config.secret, {
@@ -105,10 +105,10 @@ export class JWTManager {
 
       return decoded;
     } catch (error) {
-      logger.error('Token verification failed', {
+      logger.error("Token verification failed", {
         error: error instanceof Error ? error.message : String(error),
       });
-      throw new Error('Invalid token');
+      throw new Error("Invalid token");
     }
   }
 
@@ -116,16 +116,16 @@ export class JWTManager {
     try {
       const decoded = jwt.verify(token, this.config.secret) as { sub: string; type: string };
 
-      if (decoded.type !== 'refresh') {
-        throw new Error('Invalid refresh token');
+      if (decoded.type !== "refresh") {
+        throw new Error("Invalid refresh token");
       }
 
       return { sub: decoded.sub };
     } catch (error) {
-      logger.error('Refresh token verification failed', {
+      logger.error("Refresh token verification failed", {
         error: error instanceof Error ? error.message : String(error),
       });
-      throw new Error('Invalid refresh token');
+      throw new Error("Invalid refresh token");
     }
   }
 
@@ -147,7 +147,7 @@ export class JWTManager {
 
   isTokenExpired(token: string): boolean {
     const decoded = this.decodeToken(token);
-    if (!decoded || typeof decoded !== 'object' || !('exp' in decoded)) {
+    if (!decoded || typeof decoded !== "object" || !("exp" in decoded)) {
       return true;
     }
 

@@ -16,9 +16,9 @@ async function fetchJson(url) {
 (async () => {
   // Define the endpoints we want to call.
   const endpoints = {
-    post: 'https://jsonplaceholder.typicode.com/posts/1',
-    todo: 'https://jsonplaceholder.typicode.com/todos/1',
-    user: 'https://jsonplaceholder.typicode.com/users/1'
+    post: "https://jsonplaceholder.typicode.com/posts/1",
+    todo: "https://jsonplaceholder.typicode.com/todos/1",
+    user: "https://jsonplaceholder.typicode.com/users/1",
   };
 
   try {
@@ -26,7 +26,7 @@ async function fetchJson(url) {
     const [post, todo, user] = await Promise.all([
       fetchJson(endpoints.post),
       fetchJson(endpoints.todo),
-      fetchJson(endpoints.user)
+      fetchJson(endpoints.user),
     ]);
 
     // Combine the responses and print them as formatted JSON.
@@ -34,7 +34,7 @@ async function fetchJson(url) {
     console.log(JSON.stringify(combined, null, 2));
   } catch (error) {
     // Gracefully handle any error from the API calls.
-    console.error('Failed to fetch data from all APIs:', error.message);
+    console.error("Failed to fetch data from all APIs:", error.message);
     process.exitCode = 1;
   }
 })();

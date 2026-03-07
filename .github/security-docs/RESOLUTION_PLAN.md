@@ -28,13 +28,13 @@ Eliminate the most severe, actively exploited vulnerabilities that pose immediat
 
 ### Tasks
 
-| # | Task | Ecosystem | CVE/Advisory | Action | Effort |
-|---|------|-----------|--------------|--------|--------|
-| 1.1 | Supply chain audit | npm | September 2025 attack | Audit transitive dependencies for malicious code in `debug`, `chalk`, `color`, `ansi-regex` | 16h |
-| 1.2 | Update axios | npm | Multiple CVEs | Update to latest secure version; test HTTP client functionality | 8h |
-| 1.3 | Update express | npm | Security advisories | Update to 4.21.0+; audit middleware and routing | 8h |
-| 1.4 | Python RCE fixes | Python | CVE-2025-27607, CVE-2025-4517 | Patch JSON logger and tarfile handling | 12h |
-| 1.5 | Re-evaluate ignored CVEs | npm | CVE-2024-22363, CVE-2023-30533, CVE-2022-24434, CVE-2023-28155 | Document risk assessment and justification | 8h |
+| #   | Task                     | Ecosystem | CVE/Advisory                                                   | Action                                                                                      | Effort |
+| --- | ------------------------ | --------- | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------- | ------ |
+| 1.1 | Supply chain audit       | npm       | September 2025 attack                                          | Audit transitive dependencies for malicious code in `debug`, `chalk`, `color`, `ansi-regex` | 16h    |
+| 1.2 | Update axios             | npm       | Multiple CVEs                                                  | Update to latest secure version; test HTTP client functionality                             | 8h     |
+| 1.3 | Update express           | npm       | Security advisories                                            | Update to 4.21.0+; audit middleware and routing                                             | 8h     |
+| 1.4 | Python RCE fixes         | Python    | CVE-2025-27607, CVE-2025-4517                                  | Patch JSON logger and tarfile handling                                                      | 12h    |
+| 1.5 | Re-evaluate ignored CVEs | npm       | CVE-2024-22363, CVE-2023-30533, CVE-2022-24434, CVE-2023-28155 | Document risk assessment and justification                                                  | 8h     |
 
 ### Deliverables
 
@@ -74,12 +74,12 @@ Address high-severity vulnerabilities in Go standard library and npm core depend
 
 ### Tasks
 
-| # | Task | Ecosystem | CVE/Advisory | Action | Effort |
-|---|------|-----------|--------------|--------|--------|
-| 2.1 | Upgrade Go versions | Go | CVE-2025-4674 | Update all go.mod files to Go 1.24.5+ | 12h |
-| 2.2 | Update containerd | Go | GO-2025-3528 | Patch integer overflow in User ID handling | 8h |
-| 2.3 | Update npm core deps | npm | Multiple advisories | Update `apollo-server-express`, `neo4j-driver`, `pg`, `redis` | 16h |
-| 2.4 | Test database connections | npm | Integration tests | Verify neo4j-driver and pg updates don't break connections | 8h |
+| #   | Task                      | Ecosystem | CVE/Advisory        | Action                                                        | Effort |
+| --- | ------------------------- | --------- | ------------------- | ------------------------------------------------------------- | ------ |
+| 2.1 | Upgrade Go versions       | Go        | CVE-2025-4674       | Update all go.mod files to Go 1.24.5+                         | 12h    |
+| 2.2 | Update containerd         | Go        | GO-2025-3528        | Patch integer overflow in User ID handling                    | 8h     |
+| 2.3 | Update npm core deps      | npm       | Multiple advisories | Update `apollo-server-express`, `neo4j-driver`, `pg`, `redis` | 16h    |
+| 2.4 | Test database connections | npm       | Integration tests   | Verify neo4j-driver and pg updates don't break connections    | 8h     |
 
 ### Deliverables
 
@@ -114,12 +114,12 @@ Conduct broad cleanup of medium-severity vulnerabilities across all ecosystems t
 
 ### Tasks
 
-| # | Task | Ecosystem | Focus Area | Action | Effort |
-|---|------|-----------|-----------|--------|--------|
-| 3.1 | Rust audit | Rust | Memory safety | Run `cargo audit`; address RUSTSEC advisories | 16h |
-| 3.2 | npm transitive deps | npm | Dependency tree | Run `npm audit`; update transitive dependencies | 20h |
-| 3.3 | Python consolidation | Python | Version management | Consolidate dependency versions across 58 requirements files | 16h |
-| 3.4 | Add security tests | All | Test coverage | Add unit tests for patched code | 18h |
+| #   | Task                 | Ecosystem | Focus Area         | Action                                                       | Effort |
+| --- | -------------------- | --------- | ------------------ | ------------------------------------------------------------ | ------ |
+| 3.1 | Rust audit           | Rust      | Memory safety      | Run `cargo audit`; address RUSTSEC advisories                | 16h    |
+| 3.2 | npm transitive deps  | npm       | Dependency tree    | Run `npm audit`; update transitive dependencies              | 20h    |
+| 3.3 | Python consolidation | Python    | Version management | Consolidate dependency versions across 58 requirements files | 16h    |
+| 3.4 | Add security tests   | All       | Test coverage      | Add unit tests for patched code                              | 18h    |
 
 ### Deliverables
 
@@ -159,11 +159,11 @@ Improve CI/CD security posture by hardening GitHub Actions workflows and optimiz
 
 ### Tasks
 
-| # | Task | Focus Area | Action | Effort |
-|---|------|-----------|--------|--------|
-| 4.1 | Pin action versions | GitHub Actions | Pin all actions to commit SHAs in 100+ workflow files | 20h |
-| 4.2 | Restrict token permissions | GitHub Actions | Review and restrict GITHUB_TOKEN permissions | 10h |
-| 4.3 | Enable auto-merge | Dependabot | Configure auto-merge for patch updates | 5h |
+| #   | Task                       | Focus Area     | Action                                                | Effort |
+| --- | -------------------------- | -------------- | ----------------------------------------------------- | ------ |
+| 4.1 | Pin action versions        | GitHub Actions | Pin all actions to commit SHAs in 100+ workflow files | 20h    |
+| 4.2 | Restrict token permissions | GitHub Actions | Review and restrict GITHUB_TOKEN permissions          | 10h    |
+| 4.3 | Enable auto-merge          | Dependabot     | Configure auto-merge for patch updates                | 5h     |
 
 ### Deliverables
 
@@ -203,11 +203,11 @@ Address remaining low-severity vulnerabilities and clean up code that is no long
 
 ### Tasks
 
-| # | Task | Focus Area | Action | Effort |
-|---|------|-----------|--------|--------|
-| 5.1 | Low-severity cleanup | All ecosystems | Address all remaining low-severity vulnerabilities | 30h |
-| 5.2 | Archive code review | `.archive/` and `.disabled/` | Remove or update vulnerable dependencies in archived code | 20h |
-| 5.3 | Gradle review | Gradle | Review build.gradle files if Android app is re-activated | 10h |
+| #   | Task                 | Focus Area                   | Action                                                    | Effort |
+| --- | -------------------- | ---------------------------- | --------------------------------------------------------- | ------ |
+| 5.1 | Low-severity cleanup | All ecosystems               | Address all remaining low-severity vulnerabilities        | 30h    |
+| 5.2 | Archive code review  | `.archive/` and `.disabled/` | Remove or update vulnerable dependencies in archived code | 20h    |
+| 5.3 | Gradle review        | Gradle                       | Review build.gradle files if Android app is re-activated  | 10h    |
 
 ### Deliverables
 
@@ -276,13 +276,13 @@ grype .
 
 ## Timeline & Milestones
 
-| Week | Batch | Deliverables | Status |
-|------|-------|--------------|--------|
-| 1-2 | Batch 1 | 3 PRs (npm supply chain, Python RCE, CVE evaluation) | Not Started |
-| 2-3 | Batch 2 | 2 PRs (Go updates, npm core deps) | Not Started |
-| 3-4 | Batch 3 | 3 PRs (Rust, npm transitive, Python consolidation) | Not Started |
-| 4 | Batch 4 | 3 PRs (Actions pinning, token permissions, auto-merge) | Not Started |
-| 5+ | Batch 5 | 2 PRs (Low-severity cleanup, archive cleanup) | Not Started |
+| Week | Batch   | Deliverables                                           | Status      |
+| ---- | ------- | ------------------------------------------------------ | ----------- |
+| 1-2  | Batch 1 | 3 PRs (npm supply chain, Python RCE, CVE evaluation)   | Not Started |
+| 2-3  | Batch 2 | 2 PRs (Go updates, npm core deps)                      | Not Started |
+| 3-4  | Batch 3 | 3 PRs (Rust, npm transitive, Python consolidation)     | Not Started |
+| 4    | Batch 4 | 3 PRs (Actions pinning, token permissions, auto-merge) | Not Started |
+| 5+   | Batch 5 | 2 PRs (Low-severity cleanup, archive cleanup)          | Not Started |
 
 **Total Estimated Timeline:** 5-6 weeks  
 **Total Estimated Effort:** 185-260 hours

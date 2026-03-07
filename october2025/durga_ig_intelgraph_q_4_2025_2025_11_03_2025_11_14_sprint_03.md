@@ -148,16 +148,16 @@ paths:
   /label:
     post:
       requestBody: { required: true }
-      responses: { '201': { description: created } }
+      responses: { "201": { description: created } }
   /label/{id}:
     get:
-      responses: { '200': { description: ok } }
+      responses: { "200": { description: ok } }
   /lineage/{id}:
     get:
-      responses: { '200': { description: ok } }
+      responses: { "200": { description: ok } }
   /policy/evaluate:
     post:
-      responses: { '200': { description: ok } }
+      responses: { "200": { description: ok } }
 ```
 
 ### 3) Rollback Daemon — `services/rollbackd/main.py`

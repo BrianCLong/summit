@@ -4,8 +4,8 @@ import {
   WorkflowTrigger,
   StepConnection,
   ConditionExpression,
-} from './WorkflowService';
-import { v4 as uuidv4 } from 'uuid';
+} from "./WorkflowService";
+import { v4 as uuidv4 } from "uuid";
 
 export interface WorkflowTemplate {
   id: string;
@@ -13,10 +13,7 @@ export interface WorkflowTemplate {
   description: string;
   category: string;
   tags: string[];
-  definition: Omit<
-    WorkflowDefinition,
-    'id' | 'createdBy' | 'createdAt' | 'updatedAt'
-  >;
+  definition: Omit<WorkflowDefinition, "id" | "createdBy" | "createdAt" | "updatedAt">;
   isBuiltIn: boolean;
   preview?: string;
 }
@@ -26,14 +23,14 @@ export class WorkflowBuilder {
 
   constructor(name?: string) {
     this.workflow = {
-      name: name || 'New Workflow',
-      version: '1.0.0',
+      name: name || "New Workflow",
+      version: "1.0.0",
       isActive: false,
       triggers: [],
       steps: [],
       settings: {
-        errorHandling: 'stop',
-        logging: 'minimal',
+        errorHandling: "stop",
+        logging: "minimal",
         concurrency: 1,
         variables: {},
         notifications: {},
@@ -61,7 +58,7 @@ export class WorkflowBuilder {
     return this;
   }
 
-  addTrigger(trigger: Omit<WorkflowTrigger, 'id'>): WorkflowBuilder {
+  addTrigger(trigger: Omit<WorkflowTrigger, "id">): WorkflowBuilder {
     if (!this.workflow.triggers) {
       this.workflow.triggers = [];
     }
@@ -76,10 +73,10 @@ export class WorkflowBuilder {
 
   addEventTrigger(
     eventType: string,
-    config?: Partial<Omit<WorkflowTrigger['config'], 'eventType'>>,
+    config?: Partial<Omit<WorkflowTrigger["config"], "eventType">>
   ): WorkflowBuilder {
     return this.addTrigger({
-      type: 'event',
+      type: "event",
       config: {
         eventType,
         ...config,
@@ -90,10 +87,10 @@ export class WorkflowBuilder {
 
   addScheduleTrigger(
     schedule: string,
-    config?: Partial<Omit<WorkflowTrigger['config'], 'schedule'>>,
+    config?: Partial<Omit<WorkflowTrigger["config"], "schedule">>
   ): WorkflowBuilder {
     return this.addTrigger({
-      type: 'schedule',
+      type: "schedule",
       config: {
         schedule,
         ...config,
@@ -104,10 +101,10 @@ export class WorkflowBuilder {
 
   addWebhookTrigger(
     webhookPath: string,
-    config?: Partial<Omit<WorkflowTrigger['config'], 'webhookPath'>>,
+    config?: Partial<Omit<WorkflowTrigger["config"], "webhookPath">>
   ): WorkflowBuilder {
     return this.addTrigger({
-      type: 'webhook',
+      type: "webhook",
       config: {
         webhookPath,
         ...config,
@@ -116,7 +113,7 @@ export class WorkflowBuilder {
     });
   }
 
-  addStep(step: Omit<WorkflowStep, 'id'>): WorkflowBuilder {
+  addStep(step: Omit<WorkflowStep, "id">): WorkflowBuilder {
     if (!this.workflow.steps) {
       this.workflow.steps = [];
     }
@@ -133,11 +130,11 @@ export class WorkflowBuilder {
     name: string,
     actionType: string,
     actionConfig: Record<string, any>,
-    position?: { x: number; y: number },
+    position?: { x: number; y: number }
   ): WorkflowBuilder {
     return this.addStep({
       name,
-      type: 'action',
+      type: "action",
       config: {
         actionType,
         actionConfig,
@@ -151,11 +148,11 @@ export class WorkflowBuilder {
   addConditionStep(
     name: string,
     condition: ConditionExpression,
-    position?: { x: number; y: number },
+    position?: { x: number; y: number }
   ): WorkflowBuilder {
     return this.addStep({
       name,
-      type: 'condition',
+      type: "condition",
       config: {
         condition,
       },
@@ -168,11 +165,11 @@ export class WorkflowBuilder {
   addDelayStep(
     name: string,
     delayMs: number,
-    position?: { x: number; y: number },
+    position?: { x: number; y: number }
   ): WorkflowBuilder {
     return this.addStep({
       name,
-      type: 'delay',
+      type: "delay",
       config: {
         delayMs,
       },
@@ -185,12 +182,12 @@ export class WorkflowBuilder {
   addHumanStep(
     name: string,
     assignees: string[],
-    config?: Partial<WorkflowStep['config']>,
-    position?: { x: number; y: number },
+    config?: Partial<WorkflowStep["config"]>,
+    position?: { x: number; y: number }
   ): WorkflowBuilder {
     return this.addStep({
       name,
-      type: 'human',
+      type: "human",
       config: {
         assignees,
         ...config,
@@ -205,11 +202,11 @@ export class WorkflowBuilder {
     name: string,
     iterateOver: string,
     maxIterations?: number,
-    position?: { x: number; y: number },
+    position?: { x: number; y: number }
   ): WorkflowBuilder {
     return this.addStep({
       name,
-      type: 'loop',
+      type: "loop",
       config: {
         iterateOver,
         maxIterations,
@@ -223,8 +220,8 @@ export class WorkflowBuilder {
   connectSteps(
     fromStepIndex: number,
     toStepIndex: number,
-    condition?: StepConnection['condition'],
-    customCondition?: ConditionExpression,
+    condition?: StepConnection["condition"],
+    customCondition?: ConditionExpression
   ): WorkflowBuilder {
     if (
       !this.workflow.steps ||
@@ -233,7 +230,7 @@ export class WorkflowBuilder {
       toStepIndex < 0 ||
       toStepIndex >= this.workflow.steps.length
     ) {
-      throw new Error('Invalid step indices for connection');
+      throw new Error("Invalid step indices for connection");
     }
 
     const fromStep = this.workflow.steps[fromStepIndex];
@@ -241,7 +238,7 @@ export class WorkflowBuilder {
 
     fromStep.connections.push({
       targetStepId: toStep.id!,
-      condition: condition || 'always',
+      condition: condition || "always",
       customCondition,
     });
 
@@ -251,8 +248,8 @@ export class WorkflowBuilder {
   setGlobalVariable(key: string, value: any): WorkflowBuilder {
     if (!this.workflow.settings) {
       this.workflow.settings = {
-        errorHandling: 'stop',
-        logging: 'minimal',
+        errorHandling: "stop",
+        logging: "minimal",
         concurrency: 1,
         variables: {},
         notifications: {},
@@ -267,13 +264,11 @@ export class WorkflowBuilder {
     return this;
   }
 
-  setErrorHandling(
-    errorHandling: 'stop' | 'continue' | 'retry',
-  ): WorkflowBuilder {
+  setErrorHandling(errorHandling: "stop" | "continue" | "retry"): WorkflowBuilder {
     if (!this.workflow.settings) {
       this.workflow.settings = {
-        errorHandling: 'stop',
-        logging: 'minimal',
+        errorHandling: "stop",
+        logging: "minimal",
         concurrency: 1,
         variables: {},
         notifications: {},
@@ -284,11 +279,11 @@ export class WorkflowBuilder {
     return this;
   }
 
-  setLogging(logging: 'minimal' | 'detailed' | 'debug'): WorkflowBuilder {
+  setLogging(logging: "minimal" | "detailed" | "debug"): WorkflowBuilder {
     if (!this.workflow.settings) {
       this.workflow.settings = {
-        errorHandling: 'stop',
-        logging: 'minimal',
+        errorHandling: "stop",
+        logging: "minimal",
         concurrency: 1,
         variables: {},
         notifications: {},
@@ -302,8 +297,8 @@ export class WorkflowBuilder {
   setConcurrency(concurrency: number): WorkflowBuilder {
     if (!this.workflow.settings) {
       this.workflow.settings = {
-        errorHandling: 'stop',
-        logging: 'minimal',
+        errorHandling: "stop",
+        logging: "minimal",
         concurrency: 1,
         variables: {},
         notifications: {},
@@ -317,8 +312,8 @@ export class WorkflowBuilder {
   setTimeout(timeout: number): WorkflowBuilder {
     if (!this.workflow.settings) {
       this.workflow.settings = {
-        errorHandling: 'stop',
-        logging: 'minimal',
+        errorHandling: "stop",
+        logging: "minimal",
         concurrency: 1,
         variables: {},
         notifications: {},
@@ -329,20 +324,17 @@ export class WorkflowBuilder {
     return this;
   }
 
-  build(): Omit<
-    WorkflowDefinition,
-    'id' | 'createdBy' | 'createdAt' | 'updatedAt'
-  > {
+  build(): Omit<WorkflowDefinition, "id" | "createdBy" | "createdAt" | "updatedAt"> {
     if (!this.workflow.name) {
-      throw new Error('Workflow name is required');
+      throw new Error("Workflow name is required");
     }
 
     if (!this.workflow.steps || this.workflow.steps.length === 0) {
-      throw new Error('Workflow must have at least one step');
+      throw new Error("Workflow must have at least one step");
     }
 
     if (!this.workflow.triggers || this.workflow.triggers.length === 0) {
-      throw new Error('Workflow must have at least one trigger');
+      throw new Error("Workflow must have at least one trigger");
     }
 
     // Validate step connections
@@ -360,7 +352,9 @@ export class WorkflowBuilder {
   }
 
   private validateConnections(): void {
-    if (!this.workflow.steps) {return;}
+    if (!this.workflow.steps) {
+      return;
+    }
 
     const stepIds = new Set(this.workflow.steps.map((step) => step.id));
 
@@ -368,7 +362,7 @@ export class WorkflowBuilder {
       for (const connection of step.connections) {
         if (!stepIds.has(connection.targetStepId)) {
           throw new Error(
-            `Invalid connection: step ${step.name} connects to non-existent step ${connection.targetStepId}`,
+            `Invalid connection: step ${step.name} connects to non-existent step ${connection.targetStepId}`
           );
         }
       }
@@ -401,7 +395,7 @@ export class WorkflowBuilder {
 
     for (const step of this.workflow.steps) {
       if (!visited.has(step.id!) && hasCycle(step.id!)) {
-        throw new Error('Workflow contains circular dependencies');
+        throw new Error("Workflow contains circular dependencies");
       }
     }
   }
@@ -409,271 +403,264 @@ export class WorkflowBuilder {
   // Static methods for common workflow patterns
   static createDataProcessingWorkflow(name: string): WorkflowBuilder {
     return new WorkflowBuilder(name)
-      .setDescription('Data processing and analysis workflow')
-      .addEventTrigger('data.received')
+      .setDescription("Data processing and analysis workflow")
+      .addEventTrigger("data.received")
       .addActionStep(
-        'Validate Data',
-        'validation',
+        "Validate Data",
+        "validation",
         {
-          schema: 'data_schema',
+          schema: "data_schema",
           strict: true,
         },
-        { x: 100, y: 100 },
+        { x: 100, y: 100 }
       )
       .addConditionStep(
-        'Check Quality',
+        "Check Quality",
         {
-          field: 'validation.errors',
-          operator: 'eq',
+          field: "validation.errors",
+          operator: "eq",
           value: 0,
         },
-        { x: 100, y: 200 },
+        { x: 100, y: 200 }
       )
       .addActionStep(
-        'Process Data',
-        'data_processing',
+        "Process Data",
+        "data_processing",
         {
-          algorithm: 'ml_analysis',
+          algorithm: "ml_analysis",
           confidence_threshold: 0.8,
         },
-        { x: 200, y: 300 },
+        { x: 200, y: 300 }
       )
       .addActionStep(
-        'Store Results',
-        'database',
+        "Store Results",
+        "database",
         {
-          table: 'processed_data',
-          operation: 'insert',
+          table: "processed_data",
+          operation: "insert",
         },
-        { x: 200, y: 400 },
+        { x: 200, y: 400 }
       )
       .connectSteps(0, 1) // Validate -> Check Quality
-      .connectSteps(1, 2, 'success') // Check Quality -> Process Data (on success)
+      .connectSteps(1, 2, "success") // Check Quality -> Process Data (on success)
       .connectSteps(2, 3) // Process Data -> Store Results
-      .setErrorHandling('retry')
-      .setLogging('detailed');
+      .setErrorHandling("retry")
+      .setLogging("detailed");
   }
 
   static createIncidentResponseWorkflow(name: string): WorkflowBuilder {
     return new WorkflowBuilder(name)
-      .setDescription('Automated incident response workflow')
-      .addEventTrigger('incident.detected')
+      .setDescription("Automated incident response workflow")
+      .addEventTrigger("incident.detected")
       .addActionStep(
-        'Create Ticket',
-        'jira',
+        "Create Ticket",
+        "jira",
         {
-          project: 'INCIDENT',
-          issueType: 'Incident',
-          priority: 'High',
+          project: "INCIDENT",
+          issueType: "Incident",
+          priority: "High",
         },
-        { x: 100, y: 100 },
+        { x: 100, y: 100 }
       )
       .addActionStep(
-        'Notify Team',
-        'slack',
+        "Notify Team",
+        "slack",
         {
-          channel: '#incidents',
-          message: 'New incident detected: {{incident.title}}',
+          channel: "#incidents",
+          message: "New incident detected: {{incident.title}}",
         },
-        { x: 200, y: 100 },
+        { x: 200, y: 100 }
       )
       .addHumanStep(
-        'Assess Severity',
-        ['incident-manager', 'security-team'],
+        "Assess Severity",
+        ["incident-manager", "security-team"],
         {
           formConfig: {
             fields: [
               {
-                name: 'severity',
-                type: 'select',
-                options: ['Low', 'Medium', 'High', 'Critical'],
+                name: "severity",
+                type: "select",
+                options: ["Low", "Medium", "High", "Critical"],
               },
-              { name: 'impact', type: 'text', required: true },
-              { name: 'next_steps', type: 'textarea', required: true },
+              { name: "impact", type: "text", required: true },
+              { name: "next_steps", type: "textarea", required: true },
             ],
           },
           dueDate: new Date(Date.now() + 30 * 60 * 1000), // 30 minutes
         },
-        { x: 150, y: 200 },
+        { x: 150, y: 200 }
       )
       .addConditionStep(
-        'Check Severity',
+        "Check Severity",
         {
-          field: 'assessment.severity',
-          operator: 'in',
-          value: ['High', 'Critical'],
+          field: "assessment.severity",
+          operator: "in",
+          value: ["High", "Critical"],
         },
-        { x: 150, y: 300 },
+        { x: 150, y: 300 }
       )
       .addActionStep(
-        'Escalate',
-        'email',
+        "Escalate",
+        "email",
         {
-          to: ['cto@company.com', 'security-lead@company.com'],
-          subject: 'Critical Incident: {{incident.title}}',
-          template: 'incident_escalation',
+          to: ["cto@company.com", "security-lead@company.com"],
+          subject: "Critical Incident: {{incident.title}}",
+          template: "incident_escalation",
         },
-        { x: 250, y: 400 },
+        { x: 250, y: 400 }
       )
       .addActionStep(
-        'Standard Response',
-        'api',
+        "Standard Response",
+        "api",
         {
-          endpoint: '/api/incident/standard-response',
-          method: 'POST',
+          endpoint: "/api/incident/standard-response",
+          method: "POST",
           data: {
-            incidentId: '{{incident.id}}',
-            assessment: '{{assessment}}',
+            incidentId: "{{incident.id}}",
+            assessment: "{{assessment}}",
           },
         },
-        { x: 50, y: 400 },
+        { x: 50, y: 400 }
       )
       .connectSteps(0, 1) // Create Ticket -> Notify Team (parallel)
       .connectSteps(0, 2) // Create Ticket -> Assess Severity
       .connectSteps(2, 3) // Assess Severity -> Check Severity
-      .connectSteps(3, 4, 'success') // Check Severity -> Escalate (if high/critical)
-      .connectSteps(3, 5, 'failure') // Check Severity -> Standard Response (if not high/critical)
-      .setErrorHandling('continue')
-      .setLogging('detailed')
+      .connectSteps(3, 4, "success") // Check Severity -> Escalate (if high/critical)
+      .connectSteps(3, 5, "failure") // Check Severity -> Standard Response (if not high/critical)
+      .setErrorHandling("continue")
+      .setLogging("detailed")
       .setConcurrency(2);
   }
 
   static createApprovalWorkflow(name: string): WorkflowBuilder {
     return new WorkflowBuilder(name)
-      .setDescription('Multi-stage approval workflow')
-      .addEventTrigger('approval.requested')
+      .setDescription("Multi-stage approval workflow")
+      .addEventTrigger("approval.requested")
       .addConditionStep(
-        'Check Amount',
+        "Check Amount",
         {
-          field: 'request.amount',
-          operator: 'gt',
+          field: "request.amount",
+          operator: "gt",
           value: 10000,
         },
-        { x: 100, y: 100 },
+        { x: 100, y: 100 }
       )
       .addHumanStep(
-        'Manager Approval',
-        ['manager'],
+        "Manager Approval",
+        ["manager"],
         {
           formConfig: {
             fields: [
               {
-                name: 'decision',
-                type: 'select',
-                options: ['Approve', 'Reject', 'Request Changes'],
+                name: "decision",
+                type: "select",
+                options: ["Approve", "Reject", "Request Changes"],
               },
-              { name: 'comments', type: 'textarea' },
+              { name: "comments", type: "textarea" },
             ],
           },
         },
-        { x: 50, y: 200 },
+        { x: 50, y: 200 }
       )
       .addHumanStep(
-        'Director Approval',
-        ['director'],
+        "Director Approval",
+        ["director"],
         {
           formConfig: {
             fields: [
               {
-                name: 'decision',
-                type: 'select',
-                options: ['Approve', 'Reject'],
+                name: "decision",
+                type: "select",
+                options: ["Approve", "Reject"],
               },
-              { name: 'comments', type: 'textarea' },
+              { name: "comments", type: "textarea" },
             ],
           },
         },
-        { x: 150, y: 200 },
+        { x: 150, y: 200 }
       )
       .addConditionStep(
-        'Check Manager Decision',
+        "Check Manager Decision",
         {
-          field: 'manager_approval.decision',
-          operator: 'eq',
-          value: 'Approve',
+          field: "manager_approval.decision",
+          operator: "eq",
+          value: "Approve",
         },
-        { x: 50, y: 300 },
+        { x: 50, y: 300 }
       )
       .addConditionStep(
-        'Check Director Decision',
+        "Check Director Decision",
         {
-          field: 'director_approval.decision',
-          operator: 'eq',
-          value: 'Approve',
+          field: "director_approval.decision",
+          operator: "eq",
+          value: "Approve",
         },
-        { x: 150, y: 300 },
+        { x: 150, y: 300 }
       )
       .addActionStep(
-        'Final Approval',
-        'api',
+        "Final Approval",
+        "api",
         {
-          endpoint: '/api/requests/approve',
-          method: 'POST',
+          endpoint: "/api/requests/approve",
+          method: "POST",
           data: {
-            requestId: '{{request.id}}',
-            approvedBy: [
-              '{{manager_approval.user}}',
-              '{{director_approval.user}}',
-            ],
+            requestId: "{{request.id}}",
+            approvedBy: ["{{manager_approval.user}}", "{{director_approval.user}}"],
           },
         },
-        { x: 100, y: 400 },
+        { x: 100, y: 400 }
       )
       .addActionStep(
-        'Rejection Notice',
-        'email',
+        "Rejection Notice",
+        "email",
         {
-          to: '{{request.submitter}}',
-          subject: 'Request Rejected: {{request.title}}',
-          template: 'request_rejected',
+          to: "{{request.submitter}}",
+          subject: "Request Rejected: {{request.title}}",
+          template: "request_rejected",
         },
-        { x: 250, y: 400 },
+        { x: 250, y: 400 }
       )
-      .connectSteps(0, 1, 'failure') // Check Amount -> Manager Approval (if <= 10000)
-      .connectSteps(0, 2, 'success') // Check Amount -> Director Approval (if > 10000)
+      .connectSteps(0, 1, "failure") // Check Amount -> Manager Approval (if <= 10000)
+      .connectSteps(0, 2, "success") // Check Amount -> Director Approval (if > 10000)
       .connectSteps(1, 3) // Manager Approval -> Check Manager Decision
       .connectSteps(2, 4) // Director Approval -> Check Director Decision
-      .connectSteps(3, 5, 'success') // Check Manager -> Final Approval (if approved)
-      .connectSteps(4, 5, 'success') // Check Director -> Final Approval (if approved)
-      .connectSteps(3, 6, 'failure') // Check Manager -> Rejection (if not approved)
-      .connectSteps(4, 6, 'failure') // Check Director -> Rejection (if not approved)
-      .setErrorHandling('stop')
-      .setLogging('detailed');
+      .connectSteps(3, 5, "success") // Check Manager -> Final Approval (if approved)
+      .connectSteps(4, 5, "success") // Check Director -> Final Approval (if approved)
+      .connectSteps(3, 6, "failure") // Check Manager -> Rejection (if not approved)
+      .connectSteps(4, 6, "failure") // Check Director -> Rejection (if not approved)
+      .setErrorHandling("stop")
+      .setLogging("detailed");
   }
 }
 
 export const BuiltInWorkflowTemplates: WorkflowTemplate[] = [
   {
-    id: '550e8400-e29b-41d4-a716-446655440010',
-    name: 'Entity Processing Pipeline',
-    description: 'Automated pipeline for processing and analyzing new entities',
-    category: 'data-processing',
-    tags: ['entities', 'ml', 'automation'],
-    definition: WorkflowBuilder.createDataProcessingWorkflow(
-      'Entity Processing Pipeline',
-    ).build(),
+    id: "550e8400-e29b-41d4-a716-446655440010",
+    name: "Entity Processing Pipeline",
+    description: "Automated pipeline for processing and analyzing new entities",
+    category: "data-processing",
+    tags: ["entities", "ml", "automation"],
+    definition: WorkflowBuilder.createDataProcessingWorkflow("Entity Processing Pipeline").build(),
     isBuiltIn: true,
   },
   {
-    id: '550e8400-e29b-41d4-a716-446655440011',
-    name: 'Security Incident Response',
-    description: 'Automated response workflow for security incidents',
-    category: 'security',
-    tags: ['security', 'incident', 'escalation'],
+    id: "550e8400-e29b-41d4-a716-446655440011",
+    name: "Security Incident Response",
+    description: "Automated response workflow for security incidents",
+    category: "security",
+    tags: ["security", "incident", "escalation"],
     definition: WorkflowBuilder.createIncidentResponseWorkflow(
-      'Security Incident Response',
+      "Security Incident Response"
     ).build(),
     isBuiltIn: true,
   },
   {
-    id: '550e8400-e29b-41d4-a716-446655440012',
-    name: 'Case Approval Process',
-    description: 'Multi-stage approval workflow for case actions',
-    category: 'approval',
-    tags: ['approval', 'case-management', 'governance'],
-    definition: WorkflowBuilder.createApprovalWorkflow(
-      'Case Approval Process',
-    ).build(),
+    id: "550e8400-e29b-41d4-a716-446655440012",
+    name: "Case Approval Process",
+    description: "Multi-stage approval workflow for case actions",
+    category: "approval",
+    tags: ["approval", "case-management", "governance"],
+    definition: WorkflowBuilder.createApprovalWorkflow("Case Approval Process").build(),
     isBuiltIn: true,
   },
 ];

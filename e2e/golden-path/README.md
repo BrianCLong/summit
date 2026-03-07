@@ -5,9 +5,9 @@ These tests cover the critical user journeys for the consolidated frontend.
 
 ## Structure
 
-*   `tests/`: Test specs
-*   `pages/`: Page Objects (POM)
-*   `fixtures/`: Test data
+- `tests/`: Test specs
+- `pages/`: Page Objects (POM)
+- `fixtures/`: Test data
 
 ## Running Locally
 
@@ -16,6 +16,7 @@ These tests cover the critical user journeys for the consolidated frontend.
     ../../scripts/ci/start_consolidated_frontend.sh
     ```
 2.  Run tests:
+
     ```bash
     # Smoke test (minimal)
     GOLDEN_PATH_E2E_ENABLED=1 npx playwright test
@@ -26,6 +27,6 @@ These tests cover the critical user journeys for the consolidated frontend.
 
 ## Configuration
 
-*   `GOLDEN_PATH_E2E_ENABLED`: Set to `1` to run tests.
-*   `GOLDEN_PATH_JOURNEY`: Set to `full` to run the full journey, or `basic` (default) for just dashboard load.
-*   `BASE_URL`: Target URL (default `http://localhost:3000`).
+- `GOLDEN_PATH_E2E_ENABLED`: Set to `1` to run tests.
+- `GOLDEN_PATH_JOURNEY`: Set to `full` to run the full journey, or `basic` (default) for just dashboard load.
+- `BASE_URL`: Target URL (default `http://localhost:3000`).

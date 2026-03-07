@@ -10,8 +10,8 @@ import {
   TradeRelationship,
   EconomicCoercion,
   StickingPoint,
-  CriticalIssue
-} from './types.js';
+  CriticalIssue,
+} from "./types.js";
 
 /**
  * EconomicDiplomacyMonitor
@@ -61,11 +61,12 @@ export class EconomicDiplomacyMonitor {
    */
   getActiveNegotiations(): TradeNegotiation[] {
     return Array.from(this.negotiations.values())
-      .filter(n =>
-        n.phase !== NegotiationPhase.CONCLUDED &&
-        n.phase !== NegotiationPhase.FAILED &&
-        n.phase !== NegotiationPhase.SUSPENDED &&
-        n.monitoring
+      .filter(
+        (n) =>
+          n.phase !== NegotiationPhase.CONCLUDED &&
+          n.phase !== NegotiationPhase.FAILED &&
+          n.phase !== NegotiationPhase.SUSPENDED &&
+          n.monitoring
       )
       .sort((a, b) => b.stakes.economicStakes - a.stakes.economicStakes);
   }
@@ -76,7 +77,7 @@ export class EconomicDiplomacyMonitor {
   getNegotiationsByType(type: NegotiationType): TradeNegotiation[] {
     const negotiationIds = this.negotiationsByType.get(type) || new Set();
     return Array.from(negotiationIds)
-      .map(id => this.negotiations.get(id))
+      .map((id) => this.negotiations.get(id))
       .filter((n): n is TradeNegotiation => n !== undefined);
   }
 
@@ -98,20 +99,17 @@ export class EconomicDiplomacyMonitor {
       return {
         negotiation: undefined,
         overallProgress: 0,
-        momentum: 'Unknown',
+        momentum: "Unknown",
         criticalPath: [],
         bottlenecks: [],
         successLikelihood: 0,
-        recommendations: []
+        recommendations: [],
       };
     }
 
     // Calculate overall progress
     const chapterProgress = (negotiation.chaptersAgreed / negotiation.chaptersTotal) * 100;
-    const overallProgress = (
-      negotiation.progress * 0.6 +
-      chapterProgress * 0.4
-    );
+    const overallProgress = negotiation.progress * 0.6 + chapterProgress * 0.4;
 
     // Identify critical path (chapters and issues)
     const criticalPath: string[] = [];
@@ -124,7 +122,7 @@ export class EconomicDiplomacyMonitor {
     // Identify bottlenecks
     const bottlenecks: string[] = [];
     for (const stickingPoint of negotiation.keyStickingPoints) {
-      if (stickingPoint.severity === 'CRITICAL' || stickingPoint.severity === 'MAJOR') {
+      if (stickingPoint.severity === "CRITICAL" || stickingPoint.severity === "MAJOR") {
         bottlenecks.push(stickingPoint.issue);
       }
     }
@@ -134,8 +132,8 @@ export class EconomicDiplomacyMonitor {
     if (negotiation.targetDate) {
       estimatedCompletion = negotiation.targetDate;
     } else if (negotiation.progress > 0) {
-      const monthsElapsed = (new Date().getTime() - negotiation.launchDate.getTime()) /
-        (1000 * 60 * 60 * 24 * 30);
+      const monthsElapsed =
+        (new Date().getTime() - negotiation.launchDate.getTime()) / (1000 * 60 * 60 * 24 * 30);
       const monthsRemaining = (monthsElapsed / negotiation.progress) * (100 - negotiation.progress);
       estimatedCompletion = new Date();
       estimatedCompletion.setMonth(estimatedCompletion.getMonth() + monthsRemaining);
@@ -152,7 +150,7 @@ export class EconomicDiplomacyMonitor {
       bottlenecks,
       successLikelihood: negotiation.successLikelihood,
       estimatedCompletion,
-      recommendations
+      recommendations,
     };
   }
 
@@ -173,16 +171,16 @@ export class EconomicDiplomacyMonitor {
       return {
         dealBreakers: [],
         resolutionStrategies: [],
-        ministerialIntervention: false
+        ministerialIntervention: false,
       };
     }
 
-    const dealBreakers = negotiation.criticalIssues.filter(i => i.dealBreaker);
+    const dealBreakers = negotiation.criticalIssues.filter((i) => i.dealBreaker);
 
-    const resolutionStrategies = dealBreakers.map(issue => {
+    const resolutionStrategies = dealBreakers.map((issue) => {
       const strategies: string[] = [];
       const relatedStickingPoint = negotiation.keyStickingPoints.find(
-        sp => sp.issue === issue.issue
+        (sp) => sp.issue === issue.issue
       );
 
       if (relatedStickingPoint?.potentialSolutions) {
@@ -191,28 +189,33 @@ export class EconomicDiplomacyMonitor {
 
       // Generic strategies
       if (issue.requiresMinisterialIntervention) {
-        strategies.push('Elevate to ministerial level');
+        strategies.push("Elevate to ministerial level");
       }
 
-      strategies.push('Explore creative compromises');
-      strategies.push('Consider phased approach');
-      strategies.push('Seek third-party facilitation');
+      strategies.push("Explore creative compromises");
+      strategies.push("Consider phased approach");
+      strategies.push("Seek third-party facilitation");
 
       return {
         issue: issue.issue,
         strategies,
-        feasibility: relatedStickingPoint?.resolutionProspects === 'LIKELY' ? 80 :
-                     relatedStickingPoint?.resolutionProspects === 'POSSIBLE' ? 60 :
-                     relatedStickingPoint?.resolutionProspects === 'DIFFICULT' ? 40 : 20
+        feasibility:
+          relatedStickingPoint?.resolutionProspects === "LIKELY"
+            ? 80
+            : relatedStickingPoint?.resolutionProspects === "POSSIBLE"
+              ? 60
+              : relatedStickingPoint?.resolutionProspects === "DIFFICULT"
+                ? 40
+                : 20,
       };
     });
 
-    const ministerialIntervention = dealBreakers.some(db => db.requiresMinisterialIntervention);
+    const ministerialIntervention = dealBreakers.some((db) => db.requiresMinisterialIntervention);
 
     return {
       dealBreakers,
       resolutionStrategies,
-      ministerialIntervention
+      ministerialIntervention,
     };
   }
 
@@ -234,8 +237,8 @@ export class EconomicDiplomacyMonitor {
         totalImpact: 0,
         beneficiaries: [],
         losers: [],
-        netBenefit: 'Unknown',
-        distributionalEffects: 'Unknown'
+        netBenefit: "Unknown",
+        distributionalEffects: "Unknown",
       };
     }
 
@@ -249,17 +252,19 @@ export class EconomicDiplomacyMonitor {
     const jobsDisplaced = negotiation.expectedImpact.jobsDisplaced || 0;
     const netJobs = jobsCreated - jobsDisplaced;
 
-    const netBenefit = netJobs > 0
-      ? `Net positive: ${netJobs} jobs created`
-      : netJobs < 0
-      ? `Net negative: ${Math.abs(netJobs)} jobs lost`
-      : 'Neutral job impact';
+    const netBenefit =
+      netJobs > 0
+        ? `Net positive: ${netJobs} jobs created`
+        : netJobs < 0
+          ? `Net negative: ${Math.abs(netJobs)} jobs lost`
+          : "Neutral job impact";
 
-    const distributionalEffects = beneficiaries.length > losers.length
-      ? 'Benefits widely distributed'
-      : losers.length > beneficiaries.length
-      ? 'Costs concentrated in specific sectors'
-      : 'Mixed distributional effects';
+    const distributionalEffects =
+      beneficiaries.length > losers.length
+        ? "Benefits widely distributed"
+        : losers.length > beneficiaries.length
+          ? "Costs concentrated in specific sectors"
+          : "Mixed distributional effects";
 
     return {
       negotiation,
@@ -267,7 +272,7 @@ export class EconomicDiplomacyMonitor {
       beneficiaries,
       losers,
       netBenefit,
-      distributionalEffects
+      distributionalEffects,
     };
   }
 
@@ -301,7 +306,7 @@ export class EconomicDiplomacyMonitor {
         strategicValue: 0,
         strengthAreas: [],
         weaknesses: [],
-        recommendations: []
+        recommendations: [],
       };
     }
 
@@ -310,33 +315,32 @@ export class EconomicDiplomacyMonitor {
 
     // Calculate achievement rate
     const completedProjects = partnership.projects.filter(
-      p => p.status === 'COMPLETED' || p.status === 'OPERATIONAL'
+      (p) => p.status === "COMPLETED" || p.status === "OPERATIONAL"
     ).length;
-    const achievementRate = partnership.projects.length > 0
-      ? (completedProjects / partnership.projects.length) * 100
-      : 0;
+    const achievementRate =
+      partnership.projects.length > 0 ? (completedProjects / partnership.projects.length) * 100 : 0;
 
     // Analyze strengths and weaknesses
     if (partnership.effectiveness > 80) {
-      strengthAreas.push('High overall effectiveness');
+      strengthAreas.push("High overall effectiveness");
     } else if (partnership.effectiveness < 60) {
-      weaknesses.push('Below-target effectiveness');
+      weaknesses.push("Below-target effectiveness");
     }
 
     if (partnership.sustainability > 75) {
-      strengthAreas.push('Strong sustainability');
+      strengthAreas.push("Strong sustainability");
     } else if (partnership.sustainability < 50) {
-      weaknesses.push('Sustainability concerns');
+      weaknesses.push("Sustainability concerns");
     }
 
     if (achievementRate > 70) {
-      strengthAreas.push('Strong project delivery');
+      strengthAreas.push("Strong project delivery");
     } else if (achievementRate < 40) {
-      weaknesses.push('Poor project completion rate');
+      weaknesses.push("Poor project completion rate");
     }
 
     if (partnership.challenges.length > 5) {
-      weaknesses.push('Multiple concurrent challenges');
+      weaknesses.push("Multiple concurrent challenges");
     }
 
     const recommendations = this.generatePartnershipRecommendations(partnership);
@@ -349,7 +353,7 @@ export class EconomicDiplomacyMonitor {
       strategicValue: partnership.strategicValue,
       strengthAreas,
       weaknesses,
-      recommendations
+      recommendations,
     };
   }
 
@@ -383,7 +387,7 @@ export class EconomicDiplomacyMonitor {
         objectivesAchieved: 0,
         unintendedConsequences: [],
         reliefProspects: 0,
-        recommendations: []
+        recommendations: [],
       };
     }
 
@@ -396,15 +400,19 @@ export class EconomicDiplomacyMonitor {
     // Identify unintended consequences
     const unintendedConsequences: string[] = [];
     if (sanction.humanitarianImpact) {
-      if (sanction.humanitarianImpact.severity === 'SEVERE' ||
-          sanction.humanitarianImpact.severity === 'SIGNIFICANT') {
-        unintendedConsequences.push('Significant humanitarian impact');
+      if (
+        sanction.humanitarianImpact.severity === "SEVERE" ||
+        sanction.humanitarianImpact.severity === "SIGNIFICANT"
+      ) {
+        unintendedConsequences.push("Significant humanitarian impact");
       }
     }
 
-    if (sanction.economicImpact.spilloverEffects &&
-        sanction.economicImpact.spilloverEffects.length > 0) {
-      unintendedConsequences.push('Negative spillover to third countries');
+    if (
+      sanction.economicImpact.spilloverEffects &&
+      sanction.economicImpact.spilloverEffects.length > 0
+    ) {
+      unintendedConsequences.push("Negative spillover to third countries");
     }
 
     const recommendations = this.generateSanctionRecommendations(sanction);
@@ -417,7 +425,7 @@ export class EconomicDiplomacyMonitor {
       objectivesAchieved,
       unintendedConsequences,
       reliefProspects: sanction.liftingProspects,
-      recommendations
+      recommendations,
     };
   }
 
@@ -450,44 +458,44 @@ export class EconomicDiplomacyMonitor {
     let disputes = Array.from(this.disputes.values());
 
     if (country) {
-      disputes = disputes.filter(d =>
-        d.complainant === country || d.respondent === country
-      );
+      disputes = disputes.filter((d) => d.complainant === country || d.respondent === country);
     }
 
-    const asComplainant = disputes.filter(d => d.complainant === country).length;
-    const asRespondent = disputes.filter(d => d.respondent === country).length;
+    const asComplainant = disputes.filter((d) => d.complainant === country).length;
+    const asRespondent = disputes.filter((d) => d.respondent === country).length;
 
     // Calculate win rate (simplified)
-    const resolved = disputes.filter(d => d.status === 'RESOLVED');
-    const won = resolved.filter(d =>
-      (d.complainant === country && d.resolution?.includes('favor')) ||
-      (d.respondent === country && d.resolution?.includes('dismissed'))
+    const resolved = disputes.filter((d) => d.status === "RESOLVED");
+    const won = resolved.filter(
+      (d) =>
+        (d.complainant === country && d.resolution?.includes("favor")) ||
+        (d.respondent === country && d.resolution?.includes("dismissed"))
     ).length;
     const winRate = resolved.length > 0 ? (won / resolved.length) * 100 : 0;
 
     // Common issues
-    const allSubjects = disputes.map(d => d.subject);
+    const allSubjects = disputes.map((d) => d.subject);
     const subjectCounts = new Map<string, number>();
-    allSubjects.forEach(s => subjectCounts.set(s, (subjectCounts.get(s) || 0) + 1));
+    allSubjects.forEach((s) => subjectCounts.set(s, (subjectCounts.get(s) || 0) + 1));
     const commonIssues = Array.from(subjectCounts.entries())
       .sort((a, b) => b[1] - a[1])
       .slice(0, 5)
       .map(([subject]) => subject);
 
     // Average value
-    const avgValue = disputes.length > 0
-      ? disputes.reduce((sum, d) => sum + d.tradeValue, 0) / disputes.length
-      : 0;
+    const avgValue =
+      disputes.length > 0
+        ? disputes.reduce((sum, d) => sum + d.tradeValue, 0) / disputes.length
+        : 0;
 
     // Trends
     const trends: string[] = [];
-    const recentDisputes = disputes.filter(d =>
-      d.filedDate.getTime() > Date.now() - 365 * 24 * 60 * 60 * 1000
+    const recentDisputes = disputes.filter(
+      (d) => d.filedDate.getTime() > Date.now() - 365 * 24 * 60 * 60 * 1000
     );
 
     if (recentDisputes.length > disputes.length * 0.4) {
-      trends.push('Increasing dispute activity');
+      trends.push("Increasing dispute activity");
     }
 
     return {
@@ -497,7 +505,7 @@ export class EconomicDiplomacyMonitor {
       winRate,
       commonIssues,
       averageValue: avgValue,
-      trends
+      trends,
     };
   }
 
@@ -512,7 +520,10 @@ export class EconomicDiplomacyMonitor {
   /**
    * Analyze bilateral trade
    */
-  analyzeBilateralTrade(country1: string, country2: string): {
+  analyzeBilateralTrade(
+    country1: string,
+    country2: string
+  ): {
     relationship: TradeRelationship | undefined;
     tradeIntensity: number;
     balanceAssessment: string;
@@ -528,11 +539,11 @@ export class EconomicDiplomacyMonitor {
       return {
         relationship: undefined,
         tradeIntensity: 0,
-        balanceAssessment: 'Unknown',
-        growth: 'Unknown',
+        balanceAssessment: "Unknown",
+        growth: "Unknown",
         opportunities: [],
         barriers: [],
-        recommendations: []
+        recommendations: [],
       };
     }
 
@@ -541,33 +552,35 @@ export class EconomicDiplomacyMonitor {
 
     // Balance assessment
     const balancePct = (relationship.tradeBalance / relationship.bilateralTradeVolume) * 100;
-    const balanceAssessment = Math.abs(balancePct) < 10
-      ? 'Balanced'
-      : balancePct > 10
-      ? `${relationship.country1} has surplus of ${balancePct.toFixed(1)}%`
-      : `${relationship.country2} has surplus of ${Math.abs(balancePct).toFixed(1)}%`;
+    const balanceAssessment =
+      Math.abs(balancePct) < 10
+        ? "Balanced"
+        : balancePct > 10
+          ? `${relationship.country1} has surplus of ${balancePct.toFixed(1)}%`
+          : `${relationship.country2} has surplus of ${Math.abs(balancePct).toFixed(1)}%`;
 
     // Growth assessment
-    const growth = relationship.historicalTrend === 'GROWING'
-      ? `Growing at ${relationship.tradeGrowthRate.toFixed(1)}% annually`
-      : relationship.historicalTrend === 'DECLINING'
-      ? `Declining at ${Math.abs(relationship.tradeGrowthRate).toFixed(1)}% annually`
-      : 'Stable';
+    const growth =
+      relationship.historicalTrend === "GROWING"
+        ? `Growing at ${relationship.tradeGrowthRate.toFixed(1)}% annually`
+        : relationship.historicalTrend === "DECLINING"
+          ? `Declining at ${Math.abs(relationship.tradeGrowthRate).toFixed(1)}% annually`
+          : "Stable";
 
     const opportunities = relationship.growthOpportunities;
     const barriers = relationship.barriers;
 
     const recommendations: string[] = [];
     if (relationship.unrealizedPotential > relationship.bilateralTradeVolume * 0.2) {
-      recommendations.push('Significant unrealized trade potential - explore new markets');
+      recommendations.push("Significant unrealized trade potential - explore new markets");
     }
 
     if (relationship.tradeFrictions.length > 3) {
-      recommendations.push('Address trade frictions through dialogue');
+      recommendations.push("Address trade frictions through dialogue");
     }
 
     if (relationship.tradeAgreements.length === 0) {
-      recommendations.push('Consider negotiating trade agreement');
+      recommendations.push("Consider negotiating trade agreement");
     }
 
     return {
@@ -577,7 +590,7 @@ export class EconomicDiplomacyMonitor {
       growth,
       opportunities,
       barriers,
-      recommendations
+      recommendations,
     };
   }
 
@@ -608,35 +621,37 @@ export class EconomicDiplomacyMonitor {
         economicDamage: 0,
         objectivesAchieved: false,
         retaliation: false,
-        internationalBacklash: 'Unknown',
-        recommendations: []
+        internationalBacklash: "Unknown",
+        recommendations: [],
       };
     }
 
-    const retaliation = coercion.retaliationMeasures !== undefined &&
-                        coercion.retaliationMeasures.length > 0;
+    const retaliation =
+      coercion.retaliationMeasures !== undefined && coercion.retaliationMeasures.length > 0;
 
-    const negativeReactions = coercion.internationalReaction.filter(r =>
-      r.toLowerCase().includes('condemn') ||
-      r.toLowerCase().includes('criticize') ||
-      r.toLowerCase().includes('concern')
+    const negativeReactions = coercion.internationalReaction.filter(
+      (r) =>
+        r.toLowerCase().includes("condemn") ||
+        r.toLowerCase().includes("criticize") ||
+        r.toLowerCase().includes("concern")
     ).length;
 
-    const internationalBacklash = negativeReactions > 5
-      ? 'Significant international criticism'
-      : negativeReactions > 2
-      ? 'Moderate international concern'
-      : 'Limited international reaction';
+    const internationalBacklash =
+      negativeReactions > 5
+        ? "Significant international criticism"
+        : negativeReactions > 2
+          ? "Moderate international concern"
+          : "Limited international reaction";
 
     const objectivesAchieved = coercion.effectiveness > 70;
 
     const recommendations: string[] = [];
     if (retaliation) {
-      recommendations.push('Consider de-escalation to prevent trade war');
+      recommendations.push("Consider de-escalation to prevent trade war");
     }
 
     if (!objectivesAchieved && coercion.effectiveness < 50) {
-      recommendations.push('Reevaluate strategy - low effectiveness');
+      recommendations.push("Reevaluate strategy - low effectiveness");
     }
 
     return {
@@ -646,7 +661,7 @@ export class EconomicDiplomacyMonitor {
       objectivesAchieved,
       retaliation,
       internationalBacklash,
-      recommendations
+      recommendations,
     };
   }
 
@@ -662,24 +677,22 @@ export class EconomicDiplomacyMonitor {
     insights: string[];
   } {
     const negotiations = negotiationIds
-      .map(id => this.negotiations.get(id))
+      .map((id) => this.negotiations.get(id))
       .filter((n): n is TradeNegotiation => n !== undefined);
 
     if (negotiations.length === 0) {
       return {
         negotiations: [],
-        mostAdvanced: '',
-        mostComprehensive: '',
-        highestStakes: '',
-        fastestProgress: '',
-        insights: []
+        mostAdvanced: "",
+        mostComprehensive: "",
+        highestStakes: "",
+        fastestProgress: "",
+        insights: [],
       };
     }
 
     // Most advanced (highest progress)
-    const mostAdvanced = negotiations.reduce((max, n) =>
-      n.progress > max.progress ? n : max
-    );
+    const mostAdvanced = negotiations.reduce((max, n) => (n.progress > max.progress ? n : max));
 
     // Most comprehensive (most chapters)
     const mostComprehensive = negotiations.reduce((max, n) =>
@@ -692,21 +705,22 @@ export class EconomicDiplomacyMonitor {
     );
 
     // Fastest progress (progress / duration)
-    const withDuration = negotiations.filter(n => n.duration && n.duration > 0);
-    const fastestProgress = withDuration.length > 0
-      ? withDuration.reduce((max, n) => {
-          const rate = n.progress / (n.duration || 1);
-          const maxRate = max.progress / (max.duration || 1);
-          return rate > maxRate ? n : max;
-        })
-      : negotiations[0];
+    const withDuration = negotiations.filter((n) => n.duration && n.duration > 0);
+    const fastestProgress =
+      withDuration.length > 0
+        ? withDuration.reduce((max, n) => {
+            const rate = n.progress / (n.duration || 1);
+            const maxRate = max.progress / (max.duration || 1);
+            return rate > maxRate ? n : max;
+          })
+        : negotiations[0];
 
     // Generate insights
     const insights: string[] = [];
     const avgProgress = negotiations.reduce((sum, n) => sum + n.progress, 0) / negotiations.length;
     insights.push(`Average progress across agreements: ${avgProgress.toFixed(1)}%`);
 
-    const stalled = negotiations.filter(n => n.momentum === 'STALLED').length;
+    const stalled = negotiations.filter((n) => n.momentum === "STALLED").length;
     if (stalled > 0) {
       insights.push(`${stalled} agreement(s) currently stalled`);
     }
@@ -717,27 +731,27 @@ export class EconomicDiplomacyMonitor {
       mostComprehensive: mostComprehensive.name,
       highestStakes: highestStakes.name,
       fastestProgress: fastestProgress.name,
-      insights
+      insights,
     };
   }
 
   private generateNegotiationRecommendations(negotiation: TradeNegotiation): string[] {
     const recommendations: string[] = [];
 
-    if (negotiation.momentum === 'STALLED') {
-      recommendations.push('Inject political momentum through high-level engagement');
+    if (negotiation.momentum === "STALLED") {
+      recommendations.push("Inject political momentum through high-level engagement");
     }
 
     if (negotiation.keyStickingPoints.length > 5) {
-      recommendations.push('Prioritize and sequence issue resolution');
+      recommendations.push("Prioritize and sequence issue resolution");
     }
 
     if (negotiation.businessSupport < 60) {
-      recommendations.push('Enhance stakeholder engagement and communication');
+      recommendations.push("Enhance stakeholder engagement and communication");
     }
 
     if (negotiation.successLikelihood < 50) {
-      recommendations.push('Reassess negotiation strategy and feasibility');
+      recommendations.push("Reassess negotiation strategy and feasibility");
     }
 
     return recommendations;
@@ -747,16 +761,16 @@ export class EconomicDiplomacyMonitor {
     const recommendations: string[] = [];
 
     if (partnership.effectiveness < 70) {
-      recommendations.push('Review partnership structure and mechanisms');
+      recommendations.push("Review partnership structure and mechanisms");
     }
 
-    const delayedProjects = partnership.projects.filter(p => p.status === 'DELAYED');
+    const delayedProjects = partnership.projects.filter((p) => p.status === "DELAYED");
     if (delayedProjects.length > 0) {
-      recommendations.push('Address project implementation bottlenecks');
+      recommendations.push("Address project implementation bottlenecks");
     }
 
     if (partnership.sustainability < 60) {
-      recommendations.push('Strengthen sustainability measures');
+      recommendations.push("Strengthen sustainability measures");
     }
 
     return recommendations;
@@ -766,23 +780,22 @@ export class EconomicDiplomacyMonitor {
     const recommendations: string[] = [];
 
     if (sanction.effectiveness < 50) {
-      recommendations.push('Review sanction design and enforcement');
+      recommendations.push("Review sanction design and enforcement");
     }
 
-    if (sanction.humanitarianImpact &&
-        sanction.humanitarianImpact.severity === 'SEVERE') {
-      recommendations.push('Strengthen humanitarian exemptions');
+    if (sanction.humanitarianImpact && sanction.humanitarianImpact.severity === "SEVERE") {
+      recommendations.push("Strengthen humanitarian exemptions");
     }
 
     if (sanction.compliance.complianceRate < 70) {
-      recommendations.push('Enhance enforcement and compliance mechanisms');
+      recommendations.push("Enhance enforcement and compliance mechanisms");
     }
 
     return recommendations;
   }
 
   private getRelationshipKey(country1: string, country2: string): string {
-    return [country1, country2].sort().join(':');
+    return [country1, country2].sort().join(":");
   }
 
   /**
@@ -804,9 +817,9 @@ export class EconomicDiplomacyMonitor {
 
     const activeNegotiations = this.getActiveNegotiations();
 
-    const activeSanctions = Array.from(this.sanctions.values())
-      .filter(s => !s.endDate || s.endDate > new Date())
-      .length;
+    const activeSanctions = Array.from(this.sanctions.values()).filter(
+      (s) => !s.endDate || s.endDate > new Date()
+    ).length;
 
     return {
       totalNegotiations: this.negotiations.size,
@@ -814,7 +827,7 @@ export class EconomicDiplomacyMonitor {
       byPhase,
       totalPartnerships: this.partnerships.size,
       activeSanctions,
-      totalDisputes: this.disputes.size
+      totalDisputes: this.disputes.size,
     };
   }
 }

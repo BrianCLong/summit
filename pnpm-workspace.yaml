@@ -3,6 +3,7 @@ packages:
   - 'services/*'
   - 'apps/*'
   - 'libs/*'
+  - 'libs/context-shell/node'
   - 'tools/*'
   - 'platform/*'
   - 'agents/*'

@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState } from "react";
 import {
   Box,
   Typography,
@@ -17,10 +17,10 @@ import {
   TextField,
   Alert,
   CircularProgress,
-} from '@mui/material';
-import { TrendingUp, Insights, Sync } from '@mui/icons-material';
-import { useMutation } from '@apollo/client';
-import { DEPLOY_COLLABORATIVE } from '../../graphql/mutations';
+} from "@mui/material";
+import { TrendingUp, Insights, Sync } from "@mui/icons-material";
+import { useMutation } from "@apollo/client";
+import { DEPLOY_COLLABORATIVE } from "../../graphql/mutations";
 
 const DEFAULT_CONFIG = {
   collaborationIntensity: 1.0,
@@ -37,9 +37,8 @@ const DEFAULT_CONFIG = {
 
 function ActivitiesPage() {
   const [config, setConfig] = useState(DEFAULT_CONFIG);
-  const [idsInput, setIdsInput] = useState('ops-001, ops-014, ops-237');
-  const [deployCollaborative, { data, loading, error }] =
-    useMutation(DEPLOY_COLLABORATIVE);
+  const [idsInput, setIdsInput] = useState("ops-001, ops-014, ops-237");
+  const [deployCollaborative, { data, loading, error }] = useMutation(DEPLOY_COLLABORATIVE);
 
   const handleSliderChange = (field) => (_, value) => {
     setConfig((current) => ({ ...current, [field]: value }));
@@ -58,7 +57,7 @@ function ActivitiesPage() {
 
   const handleGeneratePlan = () => {
     const ids = idsInput
-      .split(',')
+      .split(",")
       .map((id) => id.trim())
       .filter(Boolean);
 
@@ -80,12 +79,12 @@ function ActivitiesPage() {
   const recommendedActions = plan?.recommendedActions ?? [];
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
       <Box
         sx={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
         }}
       >
         <Box>
@@ -93,32 +92,24 @@ function ActivitiesPage() {
             Engagement Studio
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            Configure collaborative missions and synthesize cross-domain
-            engagement plans in real time.
+            Configure collaborative missions and synthesize cross-domain engagement plans in real
+            time.
           </Typography>
         </Box>
         <Button
           variant="contained"
-          startIcon={
-            loading ? (
-              <CircularProgress size={16} color="inherit" />
-            ) : (
-              <Insights />
-            )
-          }
+          startIcon={loading ? <CircularProgress size={16} color="inherit" /> : <Insights />}
           onClick={handleGeneratePlan}
           disabled={loading}
         >
-          {loading ? 'Generating…' : 'Generate Engagement Plan'}
+          {loading ? "Generating…" : "Generate Engagement Plan"}
         </Button>
       </Box>
 
       <Grid container spacing={3}>
         <Grid item xs={12} md={5}>
           <Card>
-            <CardContent
-              sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}
-            >
+            <CardContent sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
               <Box>
                 <Typography variant="h6" fontWeight="bold" gutterBottom>
                   Mission Scope
@@ -138,7 +129,7 @@ function ActivitiesPage() {
                 </Typography>
                 <Slider
                   value={config.collaborationIntensity}
-                  onChange={handleSliderChange('collaborationIntensity')}
+                  onChange={handleSliderChange("collaborationIntensity")}
                   min={0}
                   max={5}
                   step={0.1}
@@ -152,7 +143,7 @@ function ActivitiesPage() {
                 </Typography>
                 <Slider
                   value={config.engagementAmplification}
-                  onChange={handleSliderChange('engagementAmplification')}
+                  onChange={handleSliderChange("engagementAmplification")}
                   min={10}
                   max={100}
                   step={1}
@@ -166,7 +157,7 @@ function ActivitiesPage() {
                 </Typography>
                 <Slider
                   value={config.engagementIntensity}
-                  onChange={handleSliderChange('engagementIntensity')}
+                  onChange={handleSliderChange("engagementIntensity")}
                   min={0}
                   max={5}
                   step={0.1}
@@ -180,7 +171,7 @@ function ActivitiesPage() {
                 </Typography>
                 <Slider
                   value={config.stabilizationNexus}
-                  onChange={handleSliderChange('stabilizationNexus')}
+                  onChange={handleSliderChange("stabilizationNexus")}
                   min={0}
                   max={5}
                   step={0.1}
@@ -195,7 +186,7 @@ function ActivitiesPage() {
                 <TextField
                   type="number"
                   fullWidth
-                  inputProps={{ step: '0.0000000001', min: 0, max: 1 }}
+                  inputProps={{ step: "0.0000000001", min: 0, max: 1 }}
                   value={config.opportunityPrecision}
                   onChange={handlePrecisionChange}
                 />
@@ -205,7 +196,7 @@ function ActivitiesPage() {
                 control={
                   <Switch
                     checked={config.globalDataSync}
-                    onChange={handleSwitchChange('globalDataSync')}
+                    onChange={handleSwitchChange("globalDataSync")}
                   />
                 }
                 label="Global Data Synchronization"
@@ -214,7 +205,7 @@ function ActivitiesPage() {
                 control={
                   <Switch
                     checked={config.hybridCoordination}
-                    onChange={handleSwitchChange('hybridCoordination')}
+                    onChange={handleSwitchChange("hybridCoordination")}
                   />
                 }
                 label="Hybrid Coordination"
@@ -223,7 +214,7 @@ function ActivitiesPage() {
                 control={
                   <Switch
                     checked={config.complianceStandard}
-                    onChange={handleSwitchChange('complianceStandard')}
+                    onChange={handleSwitchChange("complianceStandard")}
                   />
                 }
                 label="Compliance Guardrails"
@@ -235,13 +226,13 @@ function ActivitiesPage() {
         <Grid item xs={12} md={7}>
           <Grid container spacing={3}>
             <Grid item xs={12}>
-              <Card sx={{ height: '100%' }}>
+              <Card sx={{ height: "100%" }}>
                 <CardContent>
                   <Box
                     sx={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
                       mb: 2,
                     }}
                   >
@@ -265,8 +256,7 @@ function ActivitiesPage() {
 
                   {!plan && !loading && (
                     <Alert severity="info">
-                      Configure parameters and run the generator to synthesize a
-                      plan.
+                      Configure parameters and run the generator to synthesize a plan.
                     </Alert>
                   )}
 
@@ -296,9 +286,9 @@ function ActivitiesPage() {
                           <CardContent>
                             <Box
                               sx={{
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                alignItems: 'center',
+                                display: "flex",
+                                justifyContent: "space-between",
+                                alignItems: "center",
                               }}
                             >
                               <Typography variant="subtitle1" fontWeight="bold">
@@ -306,18 +296,12 @@ function ActivitiesPage() {
                               </Typography>
                               <Chip
                                 icon={<TrendingUp />}
-                                color={
-                                  metric.trend >= 0 ? 'success' : 'warning'
-                                }
-                                label={`${metric.score.toFixed(2)} • ${metric.trend >= 0 ? '+' : ''}${metric.trend.toFixed(2)}%`}
+                                color={metric.trend >= 0 ? "success" : "warning"}
+                                label={`${metric.score.toFixed(2)} • ${metric.trend >= 0 ? "+" : ""}${metric.trend.toFixed(2)}%`}
                                 size="small"
                               />
                             </Box>
-                            <Typography
-                              variant="body2"
-                              color="text.secondary"
-                              sx={{ mt: 1 }}
-                            >
+                            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
                               {metric.summary}
                             </Typography>
                           </CardContent>
@@ -340,14 +324,9 @@ function ActivitiesPage() {
                       {recommendedActions.map((action, index) => (
                         <React.Fragment key={action}>
                           <ListItem alignItems="flex-start">
-                            <ListItemText
-                              primary={action}
-                              secondary={`Priority ${index + 1}`}
-                            />
+                            <ListItemText primary={action} secondary={`Priority ${index + 1}`} />
                           </ListItem>
-                          {index < recommendedActions.length - 1 && (
-                            <Divider component="li" />
-                          )}
+                          {index < recommendedActions.length - 1 && <Divider component="li" />}
                         </React.Fragment>
                       ))}
                     </List>

@@ -1,10 +1,13 @@
 # Prompt 8: CI/CD (GitHub Actions) + Security Gates
 
 ## Role
+
 DevEx/SecOps Engineer
 
 ## Context
+
 IntelGraph uses trunk-based development with:
+
 - **Weekly release cuts** - Tagged releases every week
 - **Biweekly production deployments** - Controlled rollouts every 2 weeks
 - **Security gates** - SBOM, dependency scanning, policy validation
@@ -14,9 +17,11 @@ IntelGraph uses trunk-based development with:
 All changes must pass security and quality gates before merging.
 
 ## Task
+
 Author GitHub Actions workflows for:
 
 ### 1. PR Checks (Continuous Integration)
+
 - Lint, typecheck, unit tests
 - SBOM generation (CycloneDX)
 - Dependency vulnerability scanning (Trivy, Snyk, etc.)
@@ -25,6 +30,7 @@ Author GitHub Actions workflows for:
 - Container build and push (on merge)
 
 ### 2. Deployment Pipeline (Continuous Delivery)
+
 - Helm dry-run validation
 - Canary deployment to staging
 - Smoke tests against canary
@@ -32,6 +38,7 @@ Author GitHub Actions workflows for:
 - Production deployment (manual approval or scheduled)
 
 ### 3. Security Gates
+
 - Required PR reviews
 - Environment protections (prod requires approval)
 - Provenance artifacts uploaded to GHCR
@@ -40,12 +47,14 @@ Author GitHub Actions workflows for:
 ## Guardrails
 
 ### Security
+
 - All container images signed and attested
 - SBOM attached to all releases
 - No secrets in code (gitleaks pre-commit + CI)
 - Dependency vulnerabilities blocked (HIGH/CRITICAL)
 
 ### Quality
+
 - Minimum test coverage enforced
 - TypeScript strict mode (gradual migration)
 - No focused tests (`.only()`, `.skip()`)
@@ -54,6 +63,7 @@ Author GitHub Actions workflows for:
 ## Deliverables
 
 ### 1. GitHub Actions Workflows
+
 - [ ] `.github/workflows/ci.yml` - PR checks:
   - [ ] Checkout with LFS
   - [ ] pnpm install with caching
@@ -91,12 +101,14 @@ Author GitHub Actions workflows for:
   - [ ] Auto-rollback on failure
 
 ### 2. Caching Strategy
+
 - [ ] pnpm store cache (actions/cache)
 - [ ] Turbo cache (remote or local)
 - [ ] Docker layer cache (buildx with registry cache)
 - [ ] Playwright browser cache
 
 ### 3. Artifacts & Evidence
+
 - [ ] Upload test results and coverage
 - [ ] Upload SBOM artifacts
 - [ ] Upload vulnerability scan results
@@ -104,12 +116,14 @@ Author GitHub Actions workflows for:
 - [ ] Upload deployment manifests
 
 ### 4. Documentation
+
 - [ ] CI/CD pipeline overview
 - [ ] Workflow trigger conditions
 - [ ] Security gate requirements
 - [ ] Rollback procedures
 
 ## Acceptance Criteria
+
 - ✅ PRs blocked on failing lint/tests/security checks
 - ✅ Tagged vX.Y.Z triggers release workflow
 - ✅ Release notes auto-generated from commits
@@ -150,8 +164,8 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'pnpm'
+          node-version: "20"
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -173,8 +187,8 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'pnpm'
+          node-version: "20"
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -197,15 +211,15 @@ jobs:
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
         with:
-          scan-type: 'fs'
-          scan-ref: '.'
-          format: 'sarif'
-          output: 'trivy-results.sarif'
+          scan-type: "fs"
+          scan-ref: "."
+          format: "sarif"
+          output: "trivy-results.sarif"
 
       - name: Upload Trivy results to GitHub Security
         uses: github/codeql-action/upload-sarif@v3
         with:
-          sarif_file: 'trivy-results.sarif'
+          sarif_file: "trivy-results.sarif"
 
       - name: Run Semgrep
         uses: returntocorp/semgrep-action@v1
@@ -262,7 +276,7 @@ name: Release
 on:
   push:
     tags:
-      - 'v*.*.*'
+      - "v*.*.*"
 
 permissions:
   contents: write
@@ -325,7 +339,7 @@ on:
   workflow_dispatch:
     inputs:
       environment:
-        description: 'Environment to deploy'
+        description: "Environment to deploy"
         required: true
         type: choice
         options:
@@ -372,6 +386,7 @@ jobs:
 ```
 
 ## Related Files
+
 - `/home/user/summit/.github/workflows/` - Existing workflows
 - `/home/user/summit/docs/CICD_BEST_PRACTICES.md` - CI/CD guidelines
 - `/home/user/summit/scripts/ci/` - CI scripts
@@ -387,6 +402,7 @@ claude "Execute prompt 8: CI/CD pipeline implementation"
 ```
 
 ## Notes
+
 - Use GitHub's built-in dependency graph and Dependabot
 - Consider GitHub Advanced Security for CodeQL
 - Use reusable workflows for common patterns

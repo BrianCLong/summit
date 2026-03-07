@@ -59,10 +59,19 @@
         "required": ["name", "type", "location"],
         "properties": {
           "name": { "type": "string" },
-          "type": { "type": "string", "description": "artifact type (image, helm-chart, binary, manifest)" },
-          "location": { "type": "string", "description": "URI or path where the artifact can be retrieved." },
+          "type": {
+            "type": "string",
+            "description": "artifact type (image, helm-chart, binary, manifest)"
+          },
+          "location": {
+            "type": "string",
+            "description": "URI or path where the artifact can be retrieved."
+          },
           "digest": { "type": "string", "description": "SHA or other digest for integrity." },
-          "signature": { "type": "string", "description": "Path or URI to signature or attestation." }
+          "signature": {
+            "type": "string",
+            "description": "Path or URI to signature or attestation."
+          }
         }
       }
     },

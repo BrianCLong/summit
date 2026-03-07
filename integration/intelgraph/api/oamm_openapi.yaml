@@ -7,7 +7,7 @@ paths:
     get:
       summary: List versioned interfaces and insertion points
       responses:
-        '200':
+        "200":
           description: Interface policy
           content:
             application/json:

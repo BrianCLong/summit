@@ -2,7 +2,7 @@
 
 The content below is the master implementation prompt for Maestro, aligned to IntelGraph’s principles and the requested ecosystem (LangChain/LangGraph/Comfy + agentic SDLC). Keep this as a living specification.
 
-```
+````
 # IntelGraph Maestro Conductor (MC) — “Traycer++” Master Prompt
 
 ## Prime Directive
@@ -148,7 +148,7 @@ flowchart LR
   Redis[(Redis)]<-->SvcB
   OPA[[OPA/ABAC]]-->GraphQL
   OTel[[OpenTelemetry]]-->Grafana[(Dashboards)]
-```
+````
 
 **GraphQL SDL (snippet)**
 
@@ -161,9 +161,14 @@ type Query {
 **k6 Load Test (snippet)**
 
 ```javascript
-import http from 'k6/http'; import { check, sleep } from 'k6';
-export const options = { thresholds: { http_req_duration: ['p(95)<350'] } };
-export default function() { const res = http.get(__ENV.API+'/query'); check(res,{ 'p95 OK': r=>r.timings.duration<350 }); sleep(1); }
+import http from "k6/http";
+import { check, sleep } from "k6";
+export const options = { thresholds: { http_req_duration: ["p(95)<350"] } };
+export default function () {
+  const res = http.get(__ENV.API + "/query");
+  check(res, { "p95 OK": (r) => r.timings.duration < 350 });
+  sleep(1);
+}
 ```
 
 **OPA Policy (snippet)**
@@ -185,16 +190,17 @@ outputs: [backlog.csv, api.graphql, charts.json]
 
 ## Command Set (natural language)
 
-* “MC, **orchestrate** an end-to-end slice for <feature> with IntelGraph guardrails.”
-* “MC, **analyze** SLO burn & propose mitigations without breaching error budgets.”
-* “MC, **generate** GraphQL SDL + persisted queries + contract tests for <entity>.”
-* “MC, **design** entity resolution for <domain> with privacy & retention controls.”
-* “MC, **prepare** a canary/rollback plan and runbook for <service> upgrade.”
-* “MC, **produce** a release evidence bundle with provenance & cost impact.”
+- “MC, **orchestrate** an end-to-end slice for <feature> with IntelGraph guardrails.”
+- “MC, **analyze** SLO burn & propose mitigations without breaching error budgets.”
+- “MC, **generate** GraphQL SDL + persisted queries + contract tests for <entity>.”
+- “MC, **design** entity resolution for <domain> with privacy & retention controls.”
+- “MC, **prepare** a canary/rollback plan and runbook for <service> upgrade.”
+- “MC, **produce** a release evidence bundle with provenance & cost impact.”
 
 ## Completion Criteria
 
 A response is **Done** when the Deliverable Pack is present, runnable slices execute as documented, SLO/cost impacts are quantified, risks/assumptions are explicit with next steps, and all outputs include provenance and verification hooks.
+
 ```
 
 Notes
@@ -202,3 +208,4 @@ Notes
 - Use Safe Mutations rails for all external calls.
 - Enforce @budget and Redis rate buckets when REQUIRE_BUDGET_PLUGIN=true.
 - Keep provider choice pluggable and compartmentalized per-tenant.
+```

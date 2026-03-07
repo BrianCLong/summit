@@ -3,7 +3,6 @@
 > Evidence-IDs: EVD-PLACEHOLDER
 > Status: active
 
-
 # Ops Evidence Retention Policy
 
 **Scope**: Weekly ops evidence packs, release-adjunct packs, and export receipts.

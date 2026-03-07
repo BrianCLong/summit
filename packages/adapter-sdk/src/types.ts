@@ -20,7 +20,7 @@ export interface AdapterEvent {
 }
 
 export interface AdapterResponse {
-  status: 'ok' | 'error';
+  status: "ok" | "error";
   message: string;
   data?: unknown;
   durationMs?: number;
@@ -32,9 +32,7 @@ export interface AdapterRuntime {
     event: AdapterEvent,
     context: AdapterContext
   ): Promise<AdapterResponse> | AdapterResponse;
-  healthCheck?(
-    context: AdapterContext
-  ): Promise<AdapterResponse> | AdapterResponse;
+  healthCheck?(context: AdapterContext): Promise<AdapterResponse> | AdapterResponse;
 }
 
 export interface ContractTestResult {

@@ -3,10 +3,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-
 on:
   schedule:
-    - cron: '0 8 * * *' # Daily at 08:00 UTC
+    - cron: "0 8 * * *" # Daily at 08:00 UTC
   workflow_dispatch:
 
 permissions:

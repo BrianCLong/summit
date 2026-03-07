@@ -4,8 +4,8 @@
  * Prometheus metrics for feature flag operations
  */
 
-import { Registry, Counter, Histogram } from 'prom-client';
-import type { FlagMetrics } from '../types.js';
+import { Registry, Counter, Histogram } from "prom-client";
+import type { FlagMetrics } from "../types.js";
 
 /**
  * Prometheus metrics configuration
@@ -35,49 +35,49 @@ export class PrometheusMetrics implements FlagMetrics {
 
   constructor(config: PrometheusMetricsConfig = {}) {
     this.registry = config.registry ?? new Registry();
-    this.prefix = config.prefix ?? 'feature_flags_';
+    this.prefix = config.prefix ?? "feature_flags_";
 
     // Initialize metrics
     this.evaluationCounter = new Counter({
       name: `${this.prefix}evaluations_total`,
-      help: 'Total number of feature flag evaluations',
-      labelNames: ['flag_key', 'variation'],
+      help: "Total number of feature flag evaluations",
+      labelNames: ["flag_key", "variation"],
       registers: [this.registry],
     });
 
     this.evaluationDuration = new Histogram({
       name: `${this.prefix}evaluation_duration_ms`,
-      help: 'Duration of feature flag evaluations in milliseconds',
-      labelNames: ['flag_key'],
+      help: "Duration of feature flag evaluations in milliseconds",
+      labelNames: ["flag_key"],
       buckets: [1, 5, 10, 25, 50, 100, 250, 500, 1000],
       registers: [this.registry],
     });
 
     this.cacheHitCounter = new Counter({
       name: `${this.prefix}cache_hits_total`,
-      help: 'Total number of cache hits',
-      labelNames: ['flag_key'],
+      help: "Total number of cache hits",
+      labelNames: ["flag_key"],
       registers: [this.registry],
     });
 
     this.cacheMissCounter = new Counter({
       name: `${this.prefix}cache_misses_total`,
-      help: 'Total number of cache misses',
-      labelNames: ['flag_key'],
+      help: "Total number of cache misses",
+      labelNames: ["flag_key"],
       registers: [this.registry],
     });
 
     this.errorCounter = new Counter({
       name: `${this.prefix}errors_total`,
-      help: 'Total number of errors during flag evaluation',
-      labelNames: ['flag_key', 'error_type'],
+      help: "Total number of errors during flag evaluation",
+      labelNames: ["flag_key", "error_type"],
       registers: [this.registry],
     });
 
     // Enable default metrics if requested
     if (config.enableDefaultMetrics) {
       this.registry.setDefaultLabels({
-        service: 'feature-flags',
+        service: "feature-flags",
       });
     }
   }
@@ -85,11 +85,7 @@ export class PrometheusMetrics implements FlagMetrics {
   /**
    * Record flag evaluation
    */
-  recordEvaluation(
-    flagKey: string,
-    variation: string,
-    duration: number,
-  ): void {
+  recordEvaluation(flagKey: string, variation: string, duration: number): void {
     this.evaluationCounter.inc({ flag_key: flagKey, variation });
     this.evaluationDuration.observe({ flag_key: flagKey }, duration);
   }

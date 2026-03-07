@@ -4,18 +4,18 @@ on:
   workflow_dispatch:
     inputs:
       dry_run:
-        description: 'Run in dry-run mode (no actual PRs created)'
+        description: "Run in dry-run mode (no actual PRs created)"
         required: false
         default: true
         type: boolean
       test_scenarios:
-        description: 'Comma-separated list of test scenarios to run'
+        description: "Comma-separated list of test scenarios to run"
         required: false
-        default: 'all'
+        default: "all"
         type: string
   schedule:
     # Run weekly to validate Release Captain functionality
-    - cron: '0 6 * * 1' # Monday 6 AM UTC
+    - cron: "0 6 * * 1" # Monday 6 AM UTC
 
 # Prevent concurrent golden PR test runs
 concurrency:
@@ -23,8 +23,8 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  NODE_VERSION: '20.11.1'
-  PNPM_VERSION: '9.6.0'
+  NODE_VERSION: "20.11.1"
+  PNPM_VERSION: "9.6.0"
 
 permissions:
   contents: read
@@ -48,7 +48,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v2

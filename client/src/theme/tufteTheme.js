@@ -1,20 +1,20 @@
-import { createTheme } from '@mui/material/styles';
+import { createTheme } from "@mui/material/styles";
 
-export function createTufteTheme(mode = 'light', direction = 'ltr') {
-  const isDark = mode === 'dark';
+export function createTufteTheme(mode = "light", direction = "ltr") {
+  const isDark = mode === "dark";
   const palette = {
     mode,
     background: {
-      default: isDark ? '#0f1112' : '#fafbfc',
-      paper: isDark ? '#141618' : '#ffffff',
+      default: isDark ? "#0f1112" : "#fafbfc",
+      paper: isDark ? "#141618" : "#ffffff",
     },
-    primary: { main: isDark ? '#89a7ff' : '#1d4ed8' },
-    secondary: { main: isDark ? '#a8f0e6' : '#0f766e' },
+    primary: { main: isDark ? "#89a7ff" : "#1d4ed8" },
+    secondary: { main: isDark ? "#a8f0e6" : "#0f766e" },
     text: {
-      primary: isDark ? '#e9eef2' : '#0c0d0e',
-      secondary: isDark ? '#b5bdc4' : '#5d646b',
+      primary: isDark ? "#e9eef2" : "#0c0d0e",
+      secondary: isDark ? "#b5bdc4" : "#5d646b",
     },
-    divider: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(12,13,14,0.08)',
+    divider: isDark ? "rgba(255,255,255,0.08)" : "rgba(12,13,14,0.08)",
   };
 
   return createTheme({
@@ -37,17 +37,17 @@ export function createTufteTheme(mode = 'light', direction = 'ltr') {
       MuiCssBaseline: {
         styleOverrides: {
           body: {
-            WebkitFontSmoothing: 'antialiased',
-            MozOsxFontSmoothing: 'grayscale',
+            WebkitFontSmoothing: "antialiased",
+            MozOsxFontSmoothing: "grayscale",
           },
-          '*, *::before, *::after': { boxSizing: 'border-box' },
+          "*, *::before, *::after": { boxSizing: "border-box" },
         },
       },
       MuiAppBar: {
         styleOverrides: {
           root: {
-            backgroundImage: 'none',
-            boxShadow: 'none',
+            backgroundImage: "none",
+            boxShadow: "none",
             borderBottom: `1px solid ${palette.divider}`,
           },
         },
@@ -69,7 +69,7 @@ export function createTufteTheme(mode = 'light', direction = 'ltr') {
       },
       MuiButton: {
         styleOverrides: {
-          root: { textTransform: 'none', borderRadius: 6 },
+          root: { textTransform: "none", borderRadius: 6 },
         },
       },
       MuiChip: {

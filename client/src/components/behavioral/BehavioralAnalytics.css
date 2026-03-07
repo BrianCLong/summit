@@ -5,8 +5,7 @@
   display: flex;
   flex-direction: column;
   background: #f8f9fa;
-  font-family:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 /* Header Styles */
@@ -854,7 +853,7 @@
   color: #495057;
 }
 
-.config-item input[type='range'] {
+.config-item input[type="range"] {
   flex: 1;
   max-width: 200px;
 }
@@ -1065,7 +1064,7 @@
 }
 
 .trend-line.stable::before {
-  content: '→';
+  content: "→";
   font-size: 1.2rem;
   color: #28a745;
 }

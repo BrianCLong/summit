@@ -1,7 +1,7 @@
-import { UiPlan } from './schema.js';
+import { UiPlan } from "./schema.js";
 
-const SUMMARY_PANEL_ID = 'summary-panel';
-const CITATION_PANEL_ID = 'citations-panel';
+const SUMMARY_PANEL_ID = "summary-panel";
+const CITATION_PANEL_ID = "citations-panel";
 
 export function repairPlan(plan: UiPlan): UiPlan {
   const updatedPlan = structuredClone(plan);
@@ -9,18 +9,16 @@ export function repairPlan(plan: UiPlan): UiPlan {
   const firstSection = firstPage.sections[0];
 
   const hasSummary = updatedPlan.layout.pages.some((page) =>
-    page.sections.some((section) =>
-      section.panels.some((panel) => panel.id === SUMMARY_PANEL_ID),
-    ),
+    page.sections.some((section) => section.panels.some((panel) => panel.id === SUMMARY_PANEL_ID))
   );
 
   if (!hasSummary) {
     firstSection.panels.unshift({
       id: SUMMARY_PANEL_ID,
-      title: 'Summary',
-      component: 'callout',
+      title: "Summary",
+      component: "callout",
       props: {
-        tone: 'informational',
+        tone: "informational",
       },
       dataRequestIds: [],
       actionIds: [],
@@ -29,9 +27,7 @@ export function repairPlan(plan: UiPlan): UiPlan {
   }
 
   const hasCitationsPanel = updatedPlan.layout.pages.some((page) =>
-    page.sections.some((section) =>
-      section.panels.some((panel) => panel.id === CITATION_PANEL_ID),
-    ),
+    page.sections.some((section) => section.panels.some((panel) => panel.id === CITATION_PANEL_ID))
   );
 
   if (!hasCitationsPanel) {
@@ -41,10 +37,10 @@ export function repairPlan(plan: UiPlan): UiPlan {
     if (lastSection) {
       lastSection.panels.push({
         id: CITATION_PANEL_ID,
-        title: 'Citations',
-        component: 'citationList',
+        title: "Citations",
+        component: "citationList",
         props: {
-          display: 'expanded',
+          display: "expanded",
         },
         dataRequestIds: [],
         actionIds: [],

@@ -48,7 +48,7 @@ lawful_basis:
   description: "Processing publicly available vulnerability data for security and threat intelligence purposes"
   documentation: "CISA KEV catalog is public domain US Government data, freely available for security research and protection"
   consent_required: false
-  data_subject_rights: n/a  # No personal data
+  data_subject_rights: n/a # No personal data
 
 # === Purpose & Use ===
 purpose:
@@ -112,10 +112,10 @@ security_controls:
 retention:
   default_days: 365
   justification: "Retain for historical vulnerability trend analysis"
-  legal_hold_supported: false  # No legal hold needed for public data
+  legal_hold_supported: false # No legal hold needed for public data
   deletion_method: secure_wipe
   backup_retention_days: 90
-  anonymization_required: false  # No personal data
+  anonymization_required: false # No personal data
 
 # === Cross-Border Transfers ===
 cross_border_transfers:
@@ -126,7 +126,7 @@ cross_border_transfers:
 
 # === Data Subject Rights ===
 data_subject_rights:
-  applicable: false  # No personal data
+  applicable: false # No personal data
   right_to_access: n/a
   right_to_rectification: n/a
   right_to_erasure: n/a

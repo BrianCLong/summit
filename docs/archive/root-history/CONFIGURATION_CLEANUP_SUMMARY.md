@@ -15,9 +15,11 @@ This cleanup addresses **legacy configuration fragmentation** in the Summit plat
 ## Deliverables
 
 ### 1. Detection Approach & Analysis
+
 **File:** `docs/CONFIG_CLEANUP_GUIDE.md`
 
 **Key Findings:**
+
 - ❌ **4 different config loaders** in `server/` directory
 - ❌ **23 duplicate config keys** across multiple files
 - ❌ **14 unused config keys** cluttering configuration
@@ -26,6 +28,7 @@ This cleanup addresses **legacy configuration fragmentation** in the Summit plat
 - ❌ **Inconsistent validation** (Zod, AJV, none)
 
 **Configuration Formats Identified:**
+
 - `.env` files (multiple locations with unclear precedence)
 - YAML configuration files (`config/*.yaml`)
 - JSON configuration files (`config/*.json`)
@@ -33,6 +36,7 @@ This cleanup addresses **legacy configuration fragmentation** in the Summit plat
 - Runtime window globals (frontend)
 
 **Critical Issues:**
+
 1. **Multiple Config Loading Files:**
    - `server/config.ts` → YAML + AJV validation
    - `server/src/config.ts` → Zod + dotenv ✅ **RECOMMENDED**
@@ -51,9 +55,11 @@ This cleanup addresses **legacy configuration fragmentation** in the Summit plat
 ---
 
 ### 2. Automated Detection Script
+
 **File:** `scripts/config-analyzer.py`
 
 **Features:**
+
 - ✅ Scans all configuration files (`.env`, `.yaml`, `.json`, TypeScript)
 - ✅ Detects **unused keys** (defined but never referenced)
 - ✅ Detects **missing keys** (referenced in code but not defined)
@@ -63,6 +69,7 @@ This cleanup addresses **legacy configuration fragmentation** in the Summit plat
 - ✅ Provides **actionable recommendations**
 
 **Usage:**
+
 ```bash
 # Install dependencies
 pip3 install pyyaml
@@ -78,6 +85,7 @@ python3 scripts/config-analyzer.py --format json --output config-report.json
 ```
 
 **Output Example:**
+
 ```
 📈 SUMMARY
 ─────────────────────────────────────────
@@ -108,9 +116,11 @@ Deprecated patterns:        3
 ---
 
 ### 3. Cleaned Configuration Template
+
 **File:** `.env.example.cleaned`
 
 **Improvements:**
+
 - ✅ **Comprehensive documentation** for every configuration key
 - ✅ **Grouped by category** (Database, Auth, AI Providers, etc.)
 - ✅ **Security annotations** (`<REQUIRED>`, password requirements)
@@ -120,6 +130,7 @@ Deprecated patterns:        3
 - ✅ **Default values** specified where appropriate
 
 **Configuration Categories:**
+
 1. Application Core (NODE_ENV, PORT, logging)
 2. Database Configuration (PostgreSQL, TimescaleDB, Redis, Neo4j)
 3. Authentication & Security (JWT, sessions, CORS)
@@ -135,6 +146,7 @@ Deprecated patterns:        3
 13. Performance & Optimization
 
 **Key Structure:**
+
 ```bash
 # Each section includes:
 # - Clear section headers
@@ -156,21 +168,25 @@ NEO4J_USER=neo4j
 ---
 
 ### 4. Comprehensive Migration Guide
+
 **File:** `docs/CONFIG_CLEANUP_GUIDE.md` (27KB, ~850 lines)
 
 **Contents:**
 
 #### Section 1: Current State Analysis
+
 - Detailed inventory of all configuration files
 - Issue identification and risk assessment
 - Validation approach comparison
 
 #### Section 2: Detection Approach
+
 - Static code analysis methodology
 - Cross-reference strategy
 - Automated detection script usage
 
 #### Section 3: Cleanup Strategy (5 Phases)
+
 - **Phase 1:** Consolidate config loaders → Single Zod-based loader
 - **Phase 2:** Standardize environment variables → Remove duplicates
 - **Phase 3:** Consolidate .env files → Clear hierarchy
@@ -178,7 +194,9 @@ NEO4J_USER=neo4j
 - **Phase 5:** Feature flag consolidation → Single system
 
 #### Section 4: Step-by-Step Migration
+
 8 detailed implementation steps with commands:
+
 1. Backup current configuration
 2. Run detection script (baseline)
 3. Consolidate config loaders
@@ -189,16 +207,19 @@ NEO4J_USER=neo4j
 8. Verify improvements
 
 #### Section 5: Testing Plan
+
 - Unit test examples
 - Integration test examples
 - Manual testing checklist
 
 #### Section 6: Rollback Plan
+
 - Three rollback options (full revert, selective revert, feature flag)
 - Monitoring strategy
 - Staged rollout approach
 
 #### Appendices
+
 - Configuration loading order diagram
 - Recommended file structure
 - Key dependencies
@@ -211,6 +232,7 @@ NEO4J_USER=neo4j
 ### Immediate Actions (Week 1)
 
 1. **Run Detection Script:**
+
    ```bash
    python3 scripts/config-analyzer.py --format markdown --output docs/config-baseline.md
    ```
@@ -245,6 +267,7 @@ NEO4J_USER=neo4j
 ### Long-Term Actions (Week 4+)
 
 7. **Remove Deprecated Files:**
+
    ```bash
    git rm server/config.ts server/src/config/index.{ts,js}
    git rm server/.env server/.env.production
@@ -259,24 +282,26 @@ NEO4J_USER=neo4j
 
 ## Success Metrics
 
-| Metric | Before | Target | Status |
-|--------|--------|--------|--------|
-| Config loaders | 4 | 1 | 🟡 Pending |
-| Duplicate keys | 23 | 0 | 🟡 Pending |
-| Unused keys | 14 | 0 | 🟡 Pending |
-| Missing keys | 8 | 0 | 🟡 Pending |
-| Deprecated patterns | 3 | 0 | 🟡 Pending |
-| Type safety | Partial | Full | 🟡 Pending |
-| Documentation | Minimal | Complete | ✅ Done |
+| Metric              | Before  | Target   | Status     |
+| ------------------- | ------- | -------- | ---------- |
+| Config loaders      | 4       | 1        | 🟡 Pending |
+| Duplicate keys      | 23      | 0        | 🟡 Pending |
+| Unused keys         | 14      | 0        | 🟡 Pending |
+| Missing keys        | 8       | 0        | 🟡 Pending |
+| Deprecated patterns | 3       | 0        | 🟡 Pending |
+| Type safety         | Partial | Full     | 🟡 Pending |
+| Documentation       | Minimal | Complete | ✅ Done    |
 
 ---
 
 ## Risk Assessment
 
 ### High Risk
+
 - ❌ None identified (changes are backward-compatible with deprecation warnings)
 
 ### Medium Risk
+
 - ⚠️ **Migration complexity:** Multiple teams need to update their local `.env` files
   - **Mitigation:** Provide automated migration script and clear documentation
 
@@ -284,6 +309,7 @@ NEO4J_USER=neo4j
   - **Mitigation:** Staged rollout (dev → staging → production) with rollback plan
 
 ### Low Risk
+
 - ✅ **Test coverage:** Extensive unit and integration tests planned
 - ✅ **Backward compatibility:** Deprecation warnings instead of immediate removal
 - ✅ **Documentation:** Comprehensive migration guide provided
@@ -298,6 +324,7 @@ NEO4J_USER=neo4j
    - Check migration guide for clarity
 
 2. **Run detection script on main branch:**
+
    ```bash
    git checkout main
    python3 scripts/config-analyzer.py --format text > baseline-report.txt
@@ -350,5 +377,5 @@ Total: 4 new files, 2,180 lines of documentation and tooling
 
 ---
 
-*Generated: 2025-11-20*
-*Ready for review and implementation*
+_Generated: 2025-11-20_
+_Ready for review and implementation_

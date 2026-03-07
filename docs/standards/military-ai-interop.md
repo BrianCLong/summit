@@ -6,5 +6,6 @@
 | NIST AI RMF        | Risk crosswalk | score translation |
 
 Non-goals:
-* Operational weapons integration
-* Classified compliance certification
+
+- Operational weapons integration
+- Classified compliance certification

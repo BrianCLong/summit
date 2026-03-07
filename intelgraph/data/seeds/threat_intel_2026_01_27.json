@@ -55,28 +55,28 @@
       "predicate": "is_actively_exploited",
       "value": "true",
       "source_ids": ["src_001"],
-      "policy_labels": {"origin": "public", "sensitivity": "high"}
+      "policy_labels": { "origin": "public", "sensitivity": "high" }
     },
     {
       "entity_id": "ent_cve_2026_22709",
       "predicate": "affects_component",
       "value": "ent_vm2_lib",
       "source_ids": ["src_002"],
-      "policy_labels": {"origin": "public", "sensitivity": "high"}
+      "policy_labels": { "origin": "public", "sensitivity": "high" }
     },
     {
       "entity_id": "ent_cve_2026_22709",
       "predicate": "min_patched_version",
       "value": "3.10.2",
       "source_ids": ["src_002"],
-      "policy_labels": {"origin": "public", "sensitivity": "high"}
+      "policy_labels": { "origin": "public", "sensitivity": "high" }
     },
     {
       "entity_id": "ent_peckbirdy",
       "predicate": "uses_technique",
       "value": "certificate_theft",
       "source_ids": ["src_003"],
-      "policy_labels": {"origin": "public", "sensitivity": "medium"}
+      "policy_labels": { "origin": "public", "sensitivity": "medium" }
     }
   ],
   "risk_assessments": [

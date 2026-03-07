@@ -1,5 +1,10 @@
 import type { DifficultyEstimator, DifficultySignal } from "./types";
-import { detectDomain, extractDifficultyFeatures, scoreDifficultyFromFeatures, recommendedDepth } from "./heuristics";
+import {
+  detectDomain,
+  extractDifficultyFeatures,
+  scoreDifficultyFromFeatures,
+  recommendedDepth,
+} from "./heuristics";
 
 export class HeuristicDifficultyEstimator implements DifficultyEstimator {
   async estimate(query: string, opts?: { contextHint?: string }): Promise<DifficultySignal> {

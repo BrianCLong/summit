@@ -31,8 +31,5 @@
     "Stage 1 and stage 2 prompts enforce factuality and speculation separation.",
     "Bi-Fact evaluation harness emits precision/recall/F1 with error propagation."
   ],
-  "stop_conditions": [
-    "PII detected in outputs",
-    "Prompt hash mismatch or unregistered prompt"
-  ]
+  "stop_conditions": ["PII detected in outputs", "Prompt hash mismatch or unregistered prompt"]
 }

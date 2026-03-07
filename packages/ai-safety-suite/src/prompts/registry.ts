@@ -1,4 +1,4 @@
-import crypto from 'crypto';
+import crypto from "crypto";
 
 export interface AllowedVar {
   name: string;
@@ -11,7 +11,7 @@ export interface PromptAsset {
   version: string;
   owner: string;
   purpose: string;
-  riskLevel: 'low' | 'medium' | 'high';
+  riskLevel: "low" | "medium" | "high";
   template: string;
   allowedVars: AllowedVar[];
   maxTokens: number;
@@ -35,11 +35,11 @@ const VARIABLE_PATTERN = /{{\s*([a-zA-Z0-9_]+)\s*}}/g;
 
 function escapeValue(value: string): string {
   return value
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }
 
 export function lintPrompt(asset: PromptAsset): LintResult {
@@ -86,7 +86,7 @@ export class PromptRegistry {
   register(asset: PromptAsset): void {
     const lint = lintPrompt(asset);
     if (!lint.ok) {
-      throw new Error(`Prompt failed lint: ${lint.errors.join('; ')}`);
+      throw new Error(`Prompt failed lint: ${lint.errors.join("; ")}`);
     }
     const key = this.key(asset.name, asset.version);
     this.assets.set(key, asset);
@@ -105,7 +105,12 @@ export class PromptRegistry {
     return asset;
   }
 
-  render(assetName: string, version: string, vars: Record<string, string>, options: RenderOptions = {}): string {
+  render(
+    assetName: string,
+    version: string,
+    vars: Record<string, string>,
+    options: RenderOptions = {}
+  ): string {
     const asset = this.get(assetName, version);
     const allowed = new Map(asset.allowedVars.map((v) => [v.name, v]));
 
@@ -118,26 +123,26 @@ export class PromptRegistry {
     for (const [key, value] of Object.entries(vars)) {
       if (!allowed.has(key)) {
         if (options.redactUnknown) {
-          replacements[key] = '[REDACTED]';
+          replacements[key] = "[REDACTED]";
         } else {
           throw new Error(`Variable ${key} is not allowlisted for prompt ${assetName}`);
         }
       } else {
         const meta = allowed.get(key)!;
         const capped = value.slice(0, meta.maxLength ?? 256);
-        replacements[key] = meta.redact ? '[REDACTED]' : escapeValue(capped);
+        replacements[key] = meta.redact ? "[REDACTED]" : escapeValue(capped);
       }
     }
 
     return asset.template.replace(VARIABLE_PATTERN, (_, varName: string) => {
       if (!allowed.has(varName)) {
-        return '[REDACTED]';
+        return "[REDACTED]";
       }
       const meta = allowed.get(varName)!;
       if (meta.redact) {
-        return '[REDACTED]';
+        return "[REDACTED]";
       }
-      const provided = replacements[varName] ?? '';
+      const provided = replacements[varName] ?? "";
       return provided;
     });
   }
@@ -148,5 +153,5 @@ export class PromptRegistry {
 }
 
 export function deterministicVersion(content: string): string {
-  return crypto.createHash('sha256').update(content).digest('hex').slice(0, 8);
+  return crypto.createHash("sha256").update(content).digest("hex").slice(0, 8);
 }

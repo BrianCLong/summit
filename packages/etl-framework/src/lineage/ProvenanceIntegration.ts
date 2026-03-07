@@ -3,10 +3,10 @@
  * Provides complete lineage tracking and audit trail integration
  */
 
-import { Logger } from 'winston';
-import { EventEmitter } from 'events';
-import { PipelineRun, LineageInfo } from '@intelgraph/data-integration/src/types';
-import { CDCRecord } from '../cdc/CDCEngine.js';
+import { Logger } from "winston";
+import { EventEmitter } from "events";
+import { PipelineRun, LineageInfo } from "@intelgraph/data-integration/src/types";
+import { CDCRecord } from "../cdc/CDCEngine.js";
 
 export interface ProvenanceLedgerConfig {
   baseURL: string;
@@ -57,7 +57,7 @@ export class ProvenanceIntegration extends EventEmitter {
    */
   async registerPipelineRun(pipelineRun: PipelineRun, caseId: string): Promise<string | null> {
     if (!this.config.enabled) {
-      this.logger.debug('Provenance integration disabled, skipping registration');
+      this.logger.debug("Provenance integration disabled, skipping registration");
       return null;
     }
 
@@ -66,10 +66,10 @@ export class ProvenanceIntegration extends EventEmitter {
         caseId,
         sourceRef: `etl://pipeline/${pipelineRun.pipelineId}/run/${pipelineRun.id}`,
         checksum: this.calculatePipelineChecksum(pipelineRun),
-        checksumAlgorithm: 'sha256',
-        contentType: 'application/json',
+        checksumAlgorithm: "sha256",
+        contentType: "application/json",
         transformChain: this.buildTransformChain(pipelineRun),
-        policyLabels: ['etl', 'pipeline', 'automated'],
+        policyLabels: ["etl", "pipeline", "automated"],
         metadata: {
           pipelineId: pipelineRun.pipelineId,
           runId: pipelineRun.id,
@@ -80,8 +80,8 @@ export class ProvenanceIntegration extends EventEmitter {
           recordsFailed: pipelineRun.recordsFailed,
           startTime: pipelineRun.startTime.toISOString(),
           endTime: pipelineRun.endTime?.toISOString(),
-          durationMs: pipelineRun.metrics.totalDurationMs
-        }
+          durationMs: pipelineRun.metrics.totalDurationMs,
+        },
       };
 
       const evidenceId = await this.postEvidence(evidence);
@@ -89,19 +89,19 @@ export class ProvenanceIntegration extends EventEmitter {
       this.logger.info(`Registered pipeline run in provenance ledger`, {
         pipelineId: pipelineRun.pipelineId,
         runId: pipelineRun.id,
-        evidenceId
+        evidenceId,
       });
 
-      this.emit('evidence:registered', { pipelineRun, evidenceId });
+      this.emit("evidence:registered", { pipelineRun, evidenceId });
 
       return evidenceId;
     } catch (error) {
-      this.logger.error('Failed to register pipeline run in provenance ledger', {
+      this.logger.error("Failed to register pipeline run in provenance ledger", {
         pipelineRunId: pipelineRun.id,
-        error
+        error,
       });
 
-      this.emit('evidence:error', { pipelineRun, error });
+      this.emit("evidence:error", { pipelineRun, error });
 
       return null;
     }
@@ -124,25 +124,25 @@ export class ProvenanceIntegration extends EventEmitter {
         caseId,
         sourceRef: `cdc://pipeline/${pipelineId}/changes/${Date.now()}`,
         checksum: this.calculateCDCChecksum(cdcRecords),
-        checksumAlgorithm: 'sha256',
-        contentType: 'application/json',
+        checksumAlgorithm: "sha256",
+        contentType: "application/json",
         transformChain: [
           {
-            transformType: 'cdc_capture',
+            transformType: "cdc_capture",
             timestamp: new Date().toISOString(),
-            actorId: 'system',
+            actorId: "system",
             config: {
               recordCount: cdcRecords.length,
-              changeTypes: this.getChangeTypeCounts(cdcRecords)
-            }
-          }
+              changeTypes: this.getChangeTypeCounts(cdcRecords),
+            },
+          },
         ],
-        policyLabels: ['cdc', 'change-tracking', 'automated'],
+        policyLabels: ["cdc", "change-tracking", "automated"],
         metadata: {
           pipelineId,
           recordCount: cdcRecords.length,
-          captureTimestamp: new Date().toISOString()
-        }
+          captureTimestamp: new Date().toISOString(),
+        },
       };
 
       const evidenceId = await this.postEvidence(evidence);
@@ -150,14 +150,14 @@ export class ProvenanceIntegration extends EventEmitter {
       this.logger.info(`Registered CDC changes in provenance ledger`, {
         pipelineId,
         recordCount: cdcRecords.length,
-        evidenceId
+        evidenceId,
       });
 
       return evidenceId;
     } catch (error) {
-      this.logger.error('Failed to register CDC changes in provenance ledger', {
+      this.logger.error("Failed to register CDC changes in provenance ledger", {
         pipelineId,
-        error
+        error,
       });
 
       return null;
@@ -179,20 +179,20 @@ export class ProvenanceIntegration extends EventEmitter {
     try {
       const provenanceChain = {
         claimId: claimId || `pipeline_${pipelineRun.id}`,
-        transforms: pipelineRun.lineage.flatMap(l => l.transformations),
+        transforms: pipelineRun.lineage.flatMap((l) => l.transformations),
         sources: sourceEvidenceIds,
         lineage: {
           pipelineId: pipelineRun.pipelineId,
           runId: pipelineRun.id,
-          methodology: 'etl_pipeline',
-          steps: pipelineRun.lineage.map(l => ({
+          methodology: "etl_pipeline",
+          steps: pipelineRun.lineage.map((l) => ({
             source: l.sourceEntity,
             target: l.targetEntity,
             transformations: l.transformations,
             timestamp: l.timestamp.toISOString(),
-            metadata: l.metadata
-          }))
-        }
+            metadata: l.metadata,
+          })),
+        },
       };
 
       const chainId = await this.postProvenanceChain(provenanceChain);
@@ -200,14 +200,14 @@ export class ProvenanceIntegration extends EventEmitter {
       this.logger.info(`Created provenance chain`, {
         pipelineId: pipelineRun.pipelineId,
         runId: pipelineRun.id,
-        chainId
+        chainId,
       });
 
       return chainId;
     } catch (error) {
-      this.logger.error('Failed to create provenance chain', {
+      this.logger.error("Failed to create provenance chain", {
         pipelineRunId: pipelineRun.id,
-        error
+        error,
       });
 
       return null;
@@ -224,8 +224,8 @@ export class ProvenanceIntegration extends EventEmitter {
 
     try {
       const response = await fetch(`${this.config.baseURL}/bundles/${caseId}`, {
-        method: 'GET',
-        headers: this.getHeaders()
+        method: "GET",
+        headers: this.getHeaders(),
       });
 
       if (!response.ok) {
@@ -235,12 +235,12 @@ export class ProvenanceIntegration extends EventEmitter {
       const bundle = await response.json();
 
       this.logger.info(`Generated disclosure bundle for case: ${caseId}`, {
-        merkleRoot: bundle.merkleRoot
+        merkleRoot: bundle.merkleRoot,
       });
 
       return bundle;
     } catch (error) {
-      this.logger.error('Failed to generate disclosure bundle', { caseId, error });
+      this.logger.error("Failed to generate disclosure bundle", { caseId, error });
       return null;
     }
   }
@@ -257,12 +257,12 @@ export class ProvenanceIntegration extends EventEmitter {
       const actualHash = this.calculatePipelineChecksum(pipelineRun);
 
       const response = await fetch(`${this.config.baseURL}/hash/verify`, {
-        method: 'POST',
+        method: "POST",
         headers: this.getHeaders(),
         body: JSON.stringify({
           content: pipelineRun,
-          expectedHash
-        })
+          expectedHash,
+        }),
       });
 
       if (!response.ok) {
@@ -274,14 +274,14 @@ export class ProvenanceIntegration extends EventEmitter {
       this.logger.info(`Pipeline run verification result`, {
         pipelineId: pipelineRun.pipelineId,
         runId: pipelineRun.id,
-        valid: result.valid
+        valid: result.valid,
       });
 
       return result.valid;
     } catch (error) {
-      this.logger.error('Failed to verify pipeline run', {
+      this.logger.error("Failed to verify pipeline run", {
         pipelineRunId: pipelineRun.id,
-        error
+        error,
       });
 
       return false;
@@ -300,8 +300,8 @@ export class ProvenanceIntegration extends EventEmitter {
       const response = await fetch(
         `${this.config.baseURL}/provenance?claimId=pipeline_${pipelineRunId}`,
         {
-          method: 'GET',
-          headers: this.getHeaders()
+          method: "GET",
+          headers: this.getHeaders(),
         }
       );
 
@@ -322,7 +322,7 @@ export class ProvenanceIntegration extends EventEmitter {
               targetEntity: step.target,
               transformations: step.transformations,
               timestamp: new Date(step.timestamp),
-              metadata: step.metadata
+              metadata: step.metadata,
             });
           }
         }
@@ -330,7 +330,7 @@ export class ProvenanceIntegration extends EventEmitter {
 
       return lineage;
     } catch (error) {
-      this.logger.error('Failed to get lineage', { pipelineRunId, error });
+      this.logger.error("Failed to get lineage", { pipelineRunId, error });
       return [];
     }
   }
@@ -341,34 +341,34 @@ export class ProvenanceIntegration extends EventEmitter {
   private buildTransformChain(pipelineRun: PipelineRun): TransformStep[] {
     const chain: TransformStep[] = [
       {
-        transformType: 'extraction',
+        transformType: "extraction",
         timestamp: pipelineRun.startTime.toISOString(),
-        actorId: 'etl-pipeline',
+        actorId: "etl-pipeline",
         config: {
-          recordsExtracted: pipelineRun.recordsExtracted
-        }
-      }
+          recordsExtracted: pipelineRun.recordsExtracted,
+        },
+      },
     ];
 
     if (pipelineRun.recordsTransformed > 0) {
       chain.push({
-        transformType: 'transformation',
+        transformType: "transformation",
         timestamp: pipelineRun.startTime.toISOString(),
-        actorId: 'etl-pipeline',
+        actorId: "etl-pipeline",
         config: {
-          recordsTransformed: pipelineRun.recordsTransformed
-        }
+          recordsTransformed: pipelineRun.recordsTransformed,
+        },
       });
     }
 
     chain.push({
-      transformType: 'loading',
+      transformType: "loading",
       timestamp: pipelineRun.endTime?.toISOString() || new Date().toISOString(),
-      actorId: 'etl-pipeline',
+      actorId: "etl-pipeline",
       config: {
         recordsLoaded: pipelineRun.recordsLoaded,
-        recordsFailed: pipelineRun.recordsFailed
-      }
+        recordsFailed: pipelineRun.recordsFailed,
+      },
     });
 
     return chain;
@@ -385,11 +385,11 @@ export class ProvenanceIntegration extends EventEmitter {
       recordsExtracted: pipelineRun.recordsExtracted,
       recordsLoaded: pipelineRun.recordsLoaded,
       startTime: pipelineRun.startTime.toISOString(),
-      endTime: pipelineRun.endTime?.toISOString()
+      endTime: pipelineRun.endTime?.toISOString(),
     });
 
     // Simple hash (in production, use crypto.createHash)
-    return Buffer.from(content).toString('base64');
+    return Buffer.from(content).toString("base64");
   }
 
   /**
@@ -397,15 +397,15 @@ export class ProvenanceIntegration extends EventEmitter {
    */
   private calculateCDCChecksum(cdcRecords: CDCRecord[]): string {
     const content = JSON.stringify(
-      cdcRecords.map(r => ({
+      cdcRecords.map((r) => ({
         changeType: r.changeType,
         tableName: r.tableName,
         primaryKeyValues: r.primaryKeyValues,
-        changeTimestamp: r.changeTimestamp.toISOString()
+        changeTimestamp: r.changeTimestamp.toISOString(),
       }))
     );
 
-    return Buffer.from(content).toString('base64');
+    return Buffer.from(content).toString("base64");
   }
 
   /**
@@ -426,9 +426,9 @@ export class ProvenanceIntegration extends EventEmitter {
    */
   private async postEvidence(evidence: EvidenceRegistration): Promise<string> {
     const response = await fetch(`${this.config.baseURL}/evidence`, {
-      method: 'POST',
+      method: "POST",
       headers: this.getHeaders(),
-      body: JSON.stringify(evidence)
+      body: JSON.stringify(evidence),
     });
 
     if (!response.ok) {
@@ -444,9 +444,9 @@ export class ProvenanceIntegration extends EventEmitter {
    */
   private async postProvenanceChain(chain: any): Promise<string> {
     const response = await fetch(`${this.config.baseURL}/provenance`, {
-      method: 'POST',
+      method: "POST",
       headers: this.getHeaders(),
-      body: JSON.stringify(chain)
+      body: JSON.stringify(chain),
     });
 
     if (!response.ok) {
@@ -462,9 +462,9 @@ export class ProvenanceIntegration extends EventEmitter {
    */
   private getHeaders(): Record<string, string> {
     return {
-      'Content-Type': 'application/json',
-      'x-authority-id': this.config.authorityId,
-      'x-reason-for-access': this.config.reasonForAccess
+      "Content-Type": "application/json",
+      "x-authority-id": this.config.authorityId,
+      "x-reason-for-access": this.config.reasonForAccess,
     };
   }
 }

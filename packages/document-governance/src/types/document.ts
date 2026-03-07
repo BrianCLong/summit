@@ -2,53 +2,53 @@
  * Document Type Definitions for Business Document Governance
  */
 
-import { z } from 'zod';
+import { z } from "zod";
 
 // Classification levels
 export const ClassificationLevelSchema = z.enum([
-  'Public',
-  'Internal',
-  'Confidential',
-  'Restricted',
-  'HighlyRestricted',
-  'Classified_Internal',
-  'Classified_Regulated',
+  "Public",
+  "Internal",
+  "Confidential",
+  "Restricted",
+  "HighlyRestricted",
+  "Classified_Internal",
+  "Classified_Regulated",
 ]);
 
 export type ClassificationLevel = z.infer<typeof ClassificationLevelSchema>;
 
 // Risk levels
-export const RiskLevelSchema = z.enum(['Low', 'Medium', 'High', 'Critical']);
+export const RiskLevelSchema = z.enum(["Low", "Medium", "High", "Critical"]);
 
 export type RiskLevel = z.infer<typeof RiskLevelSchema>;
 
 // Lifecycle types
 export const LifecycleTypeSchema = z.enum([
-  'Contract',
-  'Policy',
-  'Record',
-  'Versioned',
-  'GovernanceCore',
-  'GovernanceRecord',
-  'GovernanceVersioned',
-  'ExternalPolicy',
-  'GeneratedArtifact',
+  "Contract",
+  "Policy",
+  "Record",
+  "Versioned",
+  "GovernanceCore",
+  "GovernanceRecord",
+  "GovernanceVersioned",
+  "ExternalPolicy",
+  "GeneratedArtifact",
 ]);
 
 export type LifecycleType = z.infer<typeof LifecycleTypeSchema>;
 
 // Document categories
 export const DocumentCategorySchema = z.enum([
-  'Corporate Governance',
-  'Finance',
-  'HR',
-  'Legal',
-  'Product',
-  'Engineering',
-  'Operations',
-  'Security',
-  'AI_ML',
-  'Compliance',
+  "Corporate Governance",
+  "Finance",
+  "HR",
+  "Legal",
+  "Product",
+  "Engineering",
+  "Operations",
+  "Security",
+  "AI_ML",
+  "Compliance",
 ]);
 
 export type DocumentCategory = z.infer<typeof DocumentCategorySchema>;
@@ -77,7 +77,7 @@ export const DocumentInstanceSchema = z.object({
   document_type_id: z.string().regex(/^doc\.[a-z_]+$/),
   title: z.string().min(1).max(500),
   description: z.string().optional(),
-  version: z.string().default('1.0.0'),
+  version: z.string().default("1.0.0"),
   status: z.string(),
   classification: ClassificationLevelSchema,
   owner_id: z.string(),
@@ -122,7 +122,7 @@ export const SignatureSchema = z.object({
   signer_id: z.string(),
   signer_name: z.string(),
   signer_role: z.string(),
-  signature_type: z.enum(['digital', 'electronic', 'wet_ink', 'docusign', 'adobe_sign']),
+  signature_type: z.enum(["digital", "electronic", "wet_ink", "docusign", "adobe_sign"]),
   signed_at: z.string().datetime(),
   ip_address: z.string().optional(),
   certificate_id: z.string().optional(),
@@ -153,7 +153,7 @@ export const DocumentAccessLogSchema = z.object({
   id: z.string().uuid(),
   document_id: z.string().uuid(),
   user_id: z.string(),
-  action: z.enum(['view', 'download', 'edit', 'delete', 'share', 'print', 'export']),
+  action: z.enum(["view", "download", "edit", "delete", "share", "print", "export"]),
   timestamp: z.string().datetime(),
   ip_address: z.string().optional(),
   user_agent: z.string().optional(),
@@ -183,8 +183,8 @@ export const DocumentSearchQuerySchema = z.object({
   compliance_standards: z.array(z.string()).optional(),
   limit: z.number().min(1).max(100).default(20),
   offset: z.number().min(0).default(0),
-  sort_by: z.string().default('updated_at'),
-  sort_order: z.enum(['asc', 'desc']).default('desc'),
+  sort_by: z.string().default("updated_at"),
+  sort_order: z.enum(["asc", "desc"]).default("desc"),
 });
 
 export type DocumentSearchQuery = z.infer<typeof DocumentSearchQuerySchema>;

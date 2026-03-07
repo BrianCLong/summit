@@ -1,4 +1,4 @@
-import stringify from 'fast-json-stable-stringify';
+import stringify from "fast-json-stable-stringify";
 
 /**
  * Deterministically stringify a JSON object.
@@ -8,7 +8,7 @@ import stringify from 'fast-json-stable-stringify';
  */
 export function stableJson(data: unknown): string {
   if (data === undefined) {
-    return ''; // Or throw error? For now empty string seems safe for hashing empty.
+    return ""; // Or throw error? For now empty string seems safe for hashing empty.
   }
   return stringify(data);
 }

@@ -163,7 +163,6 @@ claude code "Generate integration tests for copilot service"
 
 ---
 
-
 ## Convergent Hierarchical Control Loop (Summit + Maestro)
 
 Summit now standardizes on the same control-loop architecture used by modern autonomous coding systems and BMAD-style workflows:

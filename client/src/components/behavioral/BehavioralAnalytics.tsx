@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import './BehavioralAnalytics.css';
+import React, { useState, useEffect, useCallback, useMemo } from "react";
+import "./BehavioralAnalytics.css";
 
 // Behavioral Analytics Interfaces
 interface BehavioralProfile {
   id: string;
   entityId: string;
-  entityType: 'person' | 'organization' | 'device' | 'location' | 'account';
+  entityType: "person" | "organization" | "device" | "location" | "account";
   name: string;
   timeWindow: {
     start: Date;
@@ -32,7 +32,7 @@ interface BehavioralProfile {
 }
 
 interface TemporalPattern {
-  type: 'daily' | 'weekly' | 'monthly' | 'seasonal' | 'event_driven';
+  type: "daily" | "weekly" | "monthly" | "seasonal" | "event_driven";
   schedule: {
     peaks: Array<{ time: string; intensity: number; confidence: number }>;
     quietPeriods: Array<{ start: string; end: string; intensity: number }>;
@@ -48,13 +48,13 @@ interface TemporalPattern {
   anomalies: Array<{
     timestamp: Date;
     description: string;
-    severity: 'low' | 'medium' | 'high';
+    severity: "low" | "medium" | "high";
     confidence: number;
   }>;
 }
 
 interface SpatialPattern {
-  type: 'location_frequency' | 'movement_path' | 'territory' | 'proximity';
+  type: "location_frequency" | "movement_path" | "territory" | "proximity";
   locations: Array<{
     id: string;
     name: string;
@@ -82,7 +82,7 @@ interface SpatialPattern {
 }
 
 interface CommunicationPattern {
-  type: 'frequency' | 'timing' | 'network' | 'content';
+  type: "frequency" | "timing" | "network" | "content";
   contacts: Array<{
     id: string;
     name: string;
@@ -109,7 +109,7 @@ interface CommunicationPattern {
 }
 
 interface TransactionPattern {
-  type: 'spending' | 'earning' | 'transfer' | 'investment';
+  type: "spending" | "earning" | "transfer" | "investment";
   categories: Array<{
     name: string;
     frequency: number;
@@ -132,15 +132,11 @@ interface TransactionPattern {
     balance: {
       average: number;
       volatility: number;
-      trend: 'increasing' | 'decreasing' | 'stable';
+      trend: "increasing" | "decreasing" | "stable";
     };
   };
   anomalies: Array<{
-    type:
-      | 'unusual_amount'
-      | 'unusual_frequency'
-      | 'new_vendor'
-      | 'suspicious_pattern';
+    type: "unusual_amount" | "unusual_frequency" | "new_vendor" | "suspicious_pattern";
     description: string;
     amount?: number;
     timestamp: Date;
@@ -149,7 +145,7 @@ interface TransactionPattern {
 }
 
 interface DigitalBehaviorPattern {
-  type: 'web_browsing' | 'app_usage' | 'device_interaction' | 'security';
+  type: "web_browsing" | "app_usage" | "device_interaction" | "security";
   webActivity: {
     categories: Record<string, number>; // category -> time spent
     timeDistribution: Record<string, number>; // hour -> activity
@@ -190,11 +186,11 @@ interface DigitalBehaviorPattern {
 interface AnomalyDetection {
   id: string;
   profileId: string;
-  type: 'statistical' | 'pattern_break' | 'contextual' | 'collective';
-  category: 'temporal' | 'spatial' | 'behavioral' | 'social' | 'financial';
+  type: "statistical" | "pattern_break" | "contextual" | "collective";
+  category: "temporal" | "spatial" | "behavioral" | "social" | "financial";
   anomaly: {
     description: string;
-    severity: 'low' | 'medium' | 'high' | 'critical';
+    severity: "low" | "medium" | "high" | "critical";
     confidence: number; // 0-1
     timestamp: Date;
     duration?: number; // minutes
@@ -216,7 +212,7 @@ interface AnomalyDetection {
   };
   recommendations: Array<{
     action: string;
-    priority: 'low' | 'medium' | 'high';
+    priority: "low" | "medium" | "high";
     rationale: string;
   }>;
 }
@@ -243,22 +239,20 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
   onAnalysisComplete,
 }) => {
   // State Management
-  const [profiles, setProfiles] =
-    useState<BehavioralProfile[]>(initialProfiles);
-  const [selectedProfile, setSelectedProfile] =
-    useState<BehavioralProfile | null>(null);
+  const [profiles, setProfiles] = useState<BehavioralProfile[]>(initialProfiles);
+  const [selectedProfile, setSelectedProfile] = useState<BehavioralProfile | null>(null);
   const [anomalies, setAnomalies] = useState<AnomalyDetection[]>([]);
   const [analysisResults, setAnalysisResults] = useState<any>(null);
 
   // UI State
   const [activeTab, setActiveTab] = useState<
-    'profiles' | 'patterns' | 'anomalies' | 'analysis' | 'insights'
-  >('profiles');
+    "profiles" | "patterns" | "anomalies" | "analysis" | "insights"
+  >("profiles");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [filterSeverity, setFilterSeverity] = useState<string>('all');
-  const [filterType, setFilterType] = useState<string>('all');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedTimeframe, setSelectedTimeframe] = useState<string>('7d');
+  const [filterSeverity, setFilterSeverity] = useState<string>("all");
+  const [filterType, setFilterType] = useState<string>("all");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedTimeframe, setSelectedTimeframe] = useState<string>("7d");
 
   // Analysis Configuration
   const [analysisConfig, setAnalysisConfig] = useState({
@@ -266,7 +260,7 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
     includeContextual: true,
     includeCollective: true,
     minConfidence: 0.6,
-    aggregationWindow: '1h',
+    aggregationWindow: "1h",
   });
 
   // Generate Mock Behavioral Data
@@ -276,47 +270,47 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
 
     const mockProfiles: BehavioralProfile[] = [
       {
-        id: 'profile-1',
-        entityId: 'user-001',
-        entityType: 'person',
-        name: 'John Smith - Digital Behavior',
+        id: "profile-1",
+        entityId: "user-001",
+        entityType: "person",
+        name: "John Smith - Digital Behavior",
         timeWindow: {
           start: startDate,
           end: now,
-          duration: '30 days',
+          duration: "30 days",
         },
         patterns: {
           temporal: [
             {
-              type: 'daily',
+              type: "daily",
               schedule: {
                 peaks: [
-                  { time: '09:00', intensity: 0.8, confidence: 0.92 },
-                  { time: '14:00', intensity: 0.6, confidence: 0.85 },
-                  { time: '20:00', intensity: 0.9, confidence: 0.88 },
+                  { time: "09:00", intensity: 0.8, confidence: 0.92 },
+                  { time: "14:00", intensity: 0.6, confidence: 0.85 },
+                  { time: "20:00", intensity: 0.9, confidence: 0.88 },
                 ],
                 quietPeriods: [
-                  { start: '23:00', end: '06:00', intensity: 0.1 },
-                  { start: '12:00', end: '13:00', intensity: 0.3 },
+                  { start: "23:00", end: "06:00", intensity: 0.1 },
+                  { start: "12:00", end: "13:00", intensity: 0.3 },
                 ],
                 cyclicity: 0.85,
                 stability: 0.78,
               },
               activities: [
                 {
-                  type: 'email_check',
+                  type: "email_check",
                   frequency: 45,
                   averageDuration: 3,
                   variance: 0.4,
                 },
                 {
-                  type: 'web_browsing',
+                  type: "web_browsing",
                   frequency: 120,
                   averageDuration: 12,
                   variance: 0.6,
                 },
                 {
-                  type: 'document_work',
+                  type: "document_work",
                   frequency: 15,
                   averageDuration: 45,
                   variance: 0.3,
@@ -324,9 +318,9 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
               ],
               anomalies: [
                 {
-                  timestamp: new Date('2024-01-15T03:30:00'),
-                  description: 'Unusual late-night activity spike',
-                  severity: 'medium',
+                  timestamp: new Date("2024-01-15T03:30:00"),
+                  description: "Unusual late-night activity spike",
+                  severity: "medium",
                   confidence: 0.75,
                 },
               ],
@@ -334,44 +328,44 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
           ],
           spatial: [
             {
-              type: 'location_frequency',
+              type: "location_frequency",
               locations: [
                 {
-                  id: 'loc-1',
-                  name: 'Home Office',
+                  id: "loc-1",
+                  name: "Home Office",
                   visits: 180,
                   averageDuration: 480,
                   timeDistribution: {
-                    '9': 0.2,
-                    '10': 0.3,
-                    '11': 0.25,
-                    '14': 0.15,
-                    '15': 0.1,
+                    "9": 0.2,
+                    "10": 0.3,
+                    "11": 0.25,
+                    "14": 0.15,
+                    "15": 0.1,
                   },
-                  purpose: 'Work',
+                  purpose: "Work",
                 },
                 {
-                  id: 'loc-2',
-                  name: 'Downtown Café',
+                  id: "loc-2",
+                  name: "Downtown Café",
                   visits: 25,
                   averageDuration: 90,
-                  timeDistribution: { '8': 0.4, '16': 0.6 },
-                  purpose: 'Meetings',
+                  timeDistribution: { "8": 0.4, "16": 0.6 },
+                  purpose: "Meetings",
                 },
               ],
               routes: [
                 {
-                  from: 'Home',
-                  to: 'Downtown Café',
+                  from: "Home",
+                  to: "Downtown Café",
                   frequency: 25,
                   averageTime: 20,
-                  preferredTimes: ['8:00', '16:00'],
-                  method: 'drive',
+                  preferredTimes: ["8:00", "16:00"],
+                  method: "drive",
                 },
               ],
               territories: [
                 {
-                  id: 'territory-1',
+                  id: "territory-1",
                   center: { lat: 37.7749, lng: -122.4194 },
                   radius: 2000,
                   confidence: 0.85,
@@ -382,23 +376,23 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
           ],
           communication: [
             {
-              type: 'frequency',
+              type: "frequency",
               contacts: [
                 {
-                  id: 'contact-1',
-                  name: 'Jane Doe',
-                  relationship: 'colleague',
+                  id: "contact-1",
+                  name: "Jane Doe",
+                  relationship: "colleague",
                   frequency: 15,
                   averageResponseTime: 45,
-                  preferredChannels: ['email', 'slack'],
+                  preferredChannels: ["email", "slack"],
                   topicDistribution: { work: 0.8, personal: 0.2 },
                 },
               ],
               channels: [
                 {
-                  type: 'email',
+                  type: "email",
                   usage: 85,
-                  timing: { '9': 0.3, '14': 0.4, '17': 0.3 },
+                  timing: { "9": 0.3, "14": 0.4, "17": 0.3 },
                   avgMessageLength: 156,
                   networkSize: 45,
                 },
@@ -414,23 +408,23 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
           ],
           transaction: [
             {
-              type: 'spending',
+              type: "spending",
               categories: [
                 {
-                  name: 'Office Supplies',
+                  name: "Office Supplies",
                   frequency: 12,
                   averageAmount: 85,
-                  timeDistribution: { '10': 0.6, '15': 0.4 },
+                  timeDistribution: { "10": 0.6, "15": 0.4 },
                   vendorDiversity: 3,
-                  riskLevel: 'low',
+                  riskLevel: "low",
                 },
                 {
-                  name: 'Software Services',
+                  name: "Software Services",
                   frequency: 4,
                   averageAmount: 299,
-                  timeDistribution: { '9': 1.0 },
+                  timeDistribution: { "9": 1.0 },
                   vendorDiversity: 2,
-                  riskLevel: 'low',
+                  riskLevel: "low",
                 },
               ],
               cashFlow: {
@@ -447,7 +441,7 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
                 balance: {
                   average: 12500,
                   volatility: 0.15,
-                  trend: 'increasing',
+                  trend: "increasing",
                 },
               },
               anomalies: [],
@@ -455,7 +449,7 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
           ],
           digital: [
             {
-              type: 'web_browsing',
+              type: "web_browsing",
               webActivity: {
                 categories: {
                   productivity: 0.4,
@@ -463,24 +457,24 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
                   social: 0.1,
                   research: 0.3,
                 },
-                timeDistribution: { '9': 0.3, '14': 0.4, '20': 0.3 },
+                timeDistribution: { "9": 0.3, "14": 0.4, "20": 0.3 },
                 searchPatterns: [
-                  'project management tools',
-                  'data visualization',
-                  'security best practices',
+                  "project management tools",
+                  "data visualization",
+                  "security best practices",
                 ],
                 siteFrequency: {
-                  'github.com': 85,
-                  'stackoverflow.com': 67,
-                  'linkedin.com': 23,
+                  "github.com": 85,
+                  "stackoverflow.com": 67,
+                  "linkedin.com": 23,
                 },
               },
               deviceUsage: {
                 devices: [
                   {
-                    type: 'laptop',
+                    type: "laptop",
                     usage: 0.8,
-                    location: 'home',
+                    location: "home",
                     security: {
                       updates: true,
                       encryption: true,
@@ -488,9 +482,9 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
                     },
                   },
                   {
-                    type: 'phone',
+                    type: "phone",
                     usage: 0.6,
-                    location: 'mobile',
+                    location: "mobile",
                     security: {
                       updates: true,
                       encryption: true,
@@ -500,18 +494,18 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
                 ],
                 apps: [
                   {
-                    name: 'VS Code',
-                    category: 'development',
+                    name: "VS Code",
+                    category: "development",
                     usage: 0.5,
-                    permissions: ['filesystem'],
-                    riskLevel: 'low',
+                    permissions: ["filesystem"],
+                    riskLevel: "low",
                   },
                   {
-                    name: 'Slack',
-                    category: 'communication',
+                    name: "Slack",
+                    category: "communication",
                     usage: 0.3,
-                    permissions: ['notifications'],
-                    riskLevel: 'low',
+                    permissions: ["notifications"],
+                    riskLevel: "low",
                   },
                 ],
               },
@@ -525,42 +519,42 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
           ],
         },
         baseline: {
-          established: new Date('2024-01-01'),
+          established: new Date("2024-01-01"),
           confidence: 0.87,
           stability: 0.82,
           sampleSize: 2400,
         },
         riskScore: 25,
         anomalyScore: 15,
-        tags: ['low-risk', 'stable-pattern', 'regular-schedule'],
+        tags: ["low-risk", "stable-pattern", "regular-schedule"],
         metadata: {
-          occupation: 'Software Engineer',
-          department: 'Engineering',
+          occupation: "Software Engineer",
+          department: "Engineering",
         },
       },
       {
-        id: 'profile-2',
-        entityId: 'user-002',
-        entityType: 'person',
-        name: 'Maria Rodriguez - Financial Behavior',
+        id: "profile-2",
+        entityId: "user-002",
+        entityType: "person",
+        name: "Maria Rodriguez - Financial Behavior",
         timeWindow: {
           start: startDate,
           end: now,
-          duration: '30 days',
+          duration: "30 days",
         },
         patterns: {
           temporal: [
             {
-              type: 'weekly',
+              type: "weekly",
               schedule: {
                 peaks: [
-                  { time: 'Monday 10:00', intensity: 0.9, confidence: 0.95 },
-                  { time: 'Friday 16:00', intensity: 0.7, confidence: 0.88 },
+                  { time: "Monday 10:00", intensity: 0.9, confidence: 0.95 },
+                  { time: "Friday 16:00", intensity: 0.7, confidence: 0.88 },
                 ],
                 quietPeriods: [
                   {
-                    start: 'Saturday 18:00',
-                    end: 'Sunday 10:00',
+                    start: "Saturday 18:00",
+                    end: "Sunday 10:00",
                     intensity: 0.2,
                   },
                 ],
@@ -569,13 +563,13 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
               },
               activities: [
                 {
-                  type: 'trading',
+                  type: "trading",
                   frequency: 35,
                   averageDuration: 25,
                   variance: 0.5,
                 },
                 {
-                  type: 'research',
+                  type: "research",
                   frequency: 45,
                   averageDuration: 35,
                   variance: 0.3,
@@ -583,9 +577,9 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
               ],
               anomalies: [
                 {
-                  timestamp: new Date('2024-01-20T22:15:00'),
-                  description: 'Unusual weekend trading activity',
-                  severity: 'high',
+                  timestamp: new Date("2024-01-20T22:15:00"),
+                  description: "Unusual weekend trading activity",
+                  severity: "high",
                   confidence: 0.88,
                 },
               ],
@@ -593,21 +587,21 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
           ],
           spatial: [
             {
-              type: 'territory',
+              type: "territory",
               locations: [
                 {
-                  id: 'loc-3',
-                  name: 'Trading Floor',
+                  id: "loc-3",
+                  name: "Trading Floor",
                   visits: 95,
                   averageDuration: 420,
-                  timeDistribution: { '9': 0.5, '10': 0.3, '11': 0.2 },
-                  purpose: 'Trading',
+                  timeDistribution: { "9": 0.5, "10": 0.3, "11": 0.2 },
+                  purpose: "Trading",
                 },
               ],
               routes: [],
               territories: [
                 {
-                  id: 'territory-2',
+                  id: "territory-2",
                   center: { lat: 40.7128, lng: -74.006 },
                   radius: 500,
                   confidence: 0.95,
@@ -618,23 +612,23 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
           ],
           communication: [
             {
-              type: 'network',
+              type: "network",
               contacts: [
                 {
-                  id: 'contact-2',
-                  name: 'Trading Team',
-                  relationship: 'team',
+                  id: "contact-2",
+                  name: "Trading Team",
+                  relationship: "team",
                   frequency: 85,
                   averageResponseTime: 12,
-                  preferredChannels: ['bloomberg', 'phone'],
+                  preferredChannels: ["bloomberg", "phone"],
                   topicDistribution: { markets: 0.9, strategy: 0.1 },
                 },
               ],
               channels: [
                 {
-                  type: 'bloomberg_terminal',
+                  type: "bloomberg_terminal",
                   usage: 95,
-                  timing: { '9': 0.4, '10': 0.3, '11': 0.3 },
+                  timing: { "9": 0.4, "10": 0.3, "11": 0.3 },
                   avgMessageLength: 45,
                   networkSize: 23,
                 },
@@ -650,15 +644,15 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
           ],
           transaction: [
             {
-              type: 'investment',
+              type: "investment",
               categories: [
                 {
-                  name: 'Equity Trading',
+                  name: "Equity Trading",
                   frequency: 145,
                   averageAmount: 25000,
-                  timeDistribution: { '9': 0.3, '10': 0.4, '11': 0.3 },
+                  timeDistribution: { "9": 0.3, "10": 0.4, "11": 0.3 },
                   vendorDiversity: 8,
-                  riskLevel: 'medium',
+                  riskLevel: "medium",
                 },
               ],
               cashFlow: {
@@ -672,14 +666,14 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
                   categories: { investments: 280000 },
                   predictability: 0.65,
                 },
-                balance: { average: 750000, volatility: 0.45, trend: 'stable' },
+                balance: { average: 750000, volatility: 0.45, trend: "stable" },
               },
               anomalies: [
                 {
-                  type: 'unusual_amount',
-                  description: 'Single trade 5x larger than average',
+                  type: "unusual_amount",
+                  description: "Single trade 5x larger than average",
                   amount: 125000,
-                  timestamp: new Date('2024-01-20T22:30:00'),
+                  timestamp: new Date("2024-01-20T22:30:00"),
                   riskScore: 75,
                 },
               ],
@@ -687,27 +681,23 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
           ],
           digital: [
             {
-              type: 'app_usage',
+              type: "app_usage",
               webActivity: {
                 categories: { financial: 0.8, news: 0.15, social: 0.05 },
-                timeDistribution: { '9': 0.4, '10': 0.3, '14': 0.3 },
-                searchPatterns: [
-                  'market analysis',
-                  'economic indicators',
-                  'trading strategies',
-                ],
+                timeDistribution: { "9": 0.4, "10": 0.3, "14": 0.3 },
+                searchPatterns: ["market analysis", "economic indicators", "trading strategies"],
                 siteFrequency: {
-                  'bloomberg.com': 195,
-                  'reuters.com': 87,
-                  'wsj.com': 45,
+                  "bloomberg.com": 195,
+                  "reuters.com": 87,
+                  "wsj.com": 45,
                 },
               },
               deviceUsage: {
                 devices: [
                   {
-                    type: 'trading_workstation',
+                    type: "trading_workstation",
                     usage: 0.95,
-                    location: 'office',
+                    location: "office",
                     security: {
                       updates: true,
                       encryption: true,
@@ -717,18 +707,18 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
                 ],
                 apps: [
                   {
-                    name: 'Bloomberg Terminal',
-                    category: 'financial',
+                    name: "Bloomberg Terminal",
+                    category: "financial",
                     usage: 0.8,
-                    permissions: ['market_data'],
-                    riskLevel: 'low',
+                    permissions: ["market_data"],
+                    riskLevel: "low",
                   },
                   {
-                    name: 'TradingView',
-                    category: 'analysis',
+                    name: "TradingView",
+                    category: "analysis",
                     usage: 0.4,
-                    permissions: ['charts'],
-                    riskLevel: 'low',
+                    permissions: ["charts"],
+                    riskLevel: "low",
                   },
                 ],
               },
@@ -742,107 +732,103 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
           ],
         },
         baseline: {
-          established: new Date('2023-10-01'),
+          established: new Date("2023-10-01"),
           confidence: 0.94,
           stability: 0.91,
           sampleSize: 8760,
         },
         riskScore: 65,
         anomalyScore: 45,
-        tags: ['medium-risk', 'financial-professional', 'anomaly-detected'],
-        metadata: { occupation: 'Senior Trader', department: 'Trading' },
+        tags: ["medium-risk", "financial-professional", "anomaly-detected"],
+        metadata: { occupation: "Senior Trader", department: "Trading" },
       },
     ];
 
     const mockAnomalies: AnomalyDetection[] = [
       {
-        id: 'anomaly-1',
-        profileId: 'profile-1',
-        type: 'pattern_break',
-        category: 'temporal',
+        id: "anomaly-1",
+        profileId: "profile-1",
+        type: "pattern_break",
+        category: "temporal",
         anomaly: {
-          description:
-            'Significant deviation from normal sleep pattern - active at 3:30 AM',
-          severity: 'medium',
+          description: "Significant deviation from normal sleep pattern - active at 3:30 AM",
+          severity: "medium",
           confidence: 0.75,
-          timestamp: new Date('2024-01-15T03:30:00'),
+          timestamp: new Date("2024-01-15T03:30:00"),
           duration: 45,
           deviationScore: 2.8,
         },
         context: {
           baseline: {
-            averageActivityStart: '08:30',
-            averageActivityEnd: '22:45',
+            averageActivityStart: "08:30",
+            averageActivityEnd: "22:45",
           },
-          observed: { activityTime: '03:30', duration: 45 },
+          observed: { activityTime: "03:30", duration: 45 },
           expectedRange: { min: 0, max: 0.1 },
           historicalComparisons: [
-            { period: 'last_week', similarity: 0.15 },
-            { period: 'last_month', similarity: 0.08 },
+            { period: "last_week", similarity: 0.15 },
+            { period: "last_month", similarity: 0.08 },
           ],
         },
         impact: {
           riskIncrease: 15,
-          affectedPatterns: ['sleep_schedule', 'work_productivity'],
-          cascadingEffects: ['next_day_fatigue', 'irregular_schedule'],
+          affectedPatterns: ["sleep_schedule", "work_productivity"],
+          cascadingEffects: ["next_day_fatigue", "irregular_schedule"],
         },
         recommendations: [
           {
-            action: 'Monitor for recurring pattern',
-            priority: 'medium',
-            rationale:
-              'Single occurrence may indicate stress or urgent deadline',
+            action: "Monitor for recurring pattern",
+            priority: "medium",
+            rationale: "Single occurrence may indicate stress or urgent deadline",
           },
           {
-            action: 'Check for correlation with project deadlines',
-            priority: 'low',
-            rationale: 'Work pressure could explain the deviation',
+            action: "Check for correlation with project deadlines",
+            priority: "low",
+            rationale: "Work pressure could explain the deviation",
           },
         ],
       },
       {
-        id: 'anomaly-2',
-        profileId: 'profile-2',
-        type: 'statistical',
-        category: 'financial',
+        id: "anomaly-2",
+        profileId: "profile-2",
+        type: "statistical",
+        category: "financial",
         anomaly: {
-          description:
-            'Trade size 500% above normal - $125,000 vs typical $25,000',
-          severity: 'high',
+          description: "Trade size 500% above normal - $125,000 vs typical $25,000",
+          severity: "high",
           confidence: 0.88,
-          timestamp: new Date('2024-01-20T22:30:00'),
+          timestamp: new Date("2024-01-20T22:30:00"),
           deviationScore: 5.2,
         },
         context: {
           baseline: { averageTradeSize: 25000, maxTradeSize: 50000 },
-          observed: { tradeSize: 125000, timeOfDay: '22:30' },
+          observed: { tradeSize: 125000, timeOfDay: "22:30" },
           expectedRange: { min: 10000, max: 50000 },
           historicalComparisons: [
-            { period: 'last_quarter', similarity: 0.02 },
-            { period: 'last_year', similarity: 0.01 },
+            { period: "last_quarter", similarity: 0.02 },
+            { period: "last_year", similarity: 0.01 },
           ],
         },
         impact: {
           riskIncrease: 35,
-          affectedPatterns: ['risk_management', 'position_sizing'],
-          cascadingEffects: ['portfolio_exposure', 'compliance_review'],
+          affectedPatterns: ["risk_management", "position_sizing"],
+          cascadingEffects: ["portfolio_exposure", "compliance_review"],
         },
         recommendations: [
           {
-            action: 'Immediate compliance review',
-            priority: 'high',
-            rationale: 'Trade size exceeds normal risk parameters',
+            action: "Immediate compliance review",
+            priority: "high",
+            rationale: "Trade size exceeds normal risk parameters",
           },
           {
-            action: 'Verify authorization for large trade',
-            priority: 'high',
-            rationale: 'Outside normal trading hours and size limits',
+            action: "Verify authorization for large trade",
+            priority: "high",
+            rationale: "Outside normal trading hours and size limits",
           },
           {
-            action: 'Monitor account for additional unusual activity',
-            priority: 'medium',
-            rationale:
-              'May indicate compromised account or insider information',
+            action: "Monitor account for additional unusual activity",
+            priority: "medium",
+            rationale: "May indicate compromised account or insider information",
           },
         ],
       },
@@ -870,36 +856,22 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
       const results = {
         timestamp: new Date(),
         profilesAnalyzed: profileId ? 1 : profiles.length,
-        anomaliesDetected: anomalies.filter(
-          (a) => !profileId || a.profileId === profileId,
-        ).length,
+        anomaliesDetected: anomalies.filter((a) => !profileId || a.profileId === profileId).length,
         riskAssessment: {
           overall: profileId
             ? profiles.find((p) => p.id === profileId)?.riskScore || 0
-            : Math.round(
-                profiles.reduce((acc, p) => acc + p.riskScore, 0) /
-                  profiles.length,
-              ),
-          trending: 'stable',
+            : Math.round(profiles.reduce((acc, p) => acc + p.riskScore, 0) / profiles.length),
+          trending: "stable",
           criticalFindings: anomalies.filter(
-            (a) =>
-              a.anomaly.severity === 'high' ||
-              a.anomaly.severity === 'critical',
+            (a) => a.anomaly.severity === "high" || a.anomaly.severity === "critical"
           ).length,
         },
         patternSummary: {
-          temporalPatterns: profiles.reduce(
-            (acc, p) => acc + p.patterns.temporal.length,
-            0,
-          ),
-          spatialPatterns: profiles.reduce(
-            (acc, p) => acc + p.patterns.spatial.length,
-            0,
-          ),
+          temporalPatterns: profiles.reduce((acc, p) => acc + p.patterns.temporal.length, 0),
+          spatialPatterns: profiles.reduce((acc, p) => acc + p.patterns.spatial.length, 0),
           behavioralAnomalies: anomalies.length,
           stabilityScore:
-            profiles.reduce((acc, p) => acc + p.baseline.stability, 0) /
-            profiles.length,
+            profiles.reduce((acc, p) => acc + p.baseline.stability, 0) / profiles.length,
         },
       };
 
@@ -907,7 +879,7 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
       setIsAnalyzing(false);
       onAnalysisComplete?.(results);
     },
-    [profiles, anomalies, onAnalysisComplete],
+    [profiles, anomalies, onAnalysisComplete]
   );
 
   // Handle Profile Selection
@@ -916,20 +888,18 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
       setSelectedProfile(profile);
       onProfileSelect?.(profile);
     },
-    [onProfileSelect],
+    [onProfileSelect]
   );
 
   // Filtered Data
   const filteredAnomalies = useMemo(() => {
     return anomalies.filter((anomaly) => {
       const matchesSeverity =
-        filterSeverity === 'all' || anomaly.anomaly.severity === filterSeverity;
-      const matchesType = filterType === 'all' || anomaly.type === filterType;
+        filterSeverity === "all" || anomaly.anomaly.severity === filterSeverity;
+      const matchesType = filterType === "all" || anomaly.type === filterType;
       const matchesSearch =
-        searchTerm === '' ||
-        anomaly.anomaly.description
-          .toLowerCase()
-          .includes(searchTerm.toLowerCase());
+        searchTerm === "" ||
+        anomaly.anomaly.description.toLowerCase().includes(searchTerm.toLowerCase());
       return matchesSeverity && matchesType && matchesSearch;
     });
   }, [anomalies, filterSeverity, filterType, searchTerm]);
@@ -937,11 +907,9 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
   const filteredProfiles = useMemo(() => {
     return profiles.filter((profile) => {
       const matchesSearch =
-        searchTerm === '' ||
+        searchTerm === "" ||
         profile.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        profile.tags.some((tag) =>
-          tag.toLowerCase().includes(searchTerm.toLowerCase()),
-        );
+        profile.tags.some((tag) => tag.toLowerCase().includes(searchTerm.toLowerCase()));
       return matchesSearch;
     });
   }, [profiles, searchTerm]);
@@ -960,12 +928,7 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
               <strong>{filteredAnomalies.length}</strong> Anomalies
             </span>
             <span className="stat">
-              <strong>
-                {profiles.reduce(
-                  (acc, p) => acc + (p.anomalyScore > 50 ? 1 : 0),
-                  0,
-                )}
-              </strong>{' '}
+              <strong>{profiles.reduce((acc, p) => acc + (p.anomalyScore > 50 ? 1 : 0), 0)}</strong>{" "}
               High Risk
             </span>
           </div>
@@ -994,7 +957,7 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
             disabled={isAnalyzing}
             className="analyze-button"
           >
-            {isAnalyzing ? '🔍 Analyzing...' : '🔍 Run Analysis'}
+            {isAnalyzing ? "🔍 Analyzing..." : "🔍 Run Analysis"}
           </button>
         </div>
       </div>
@@ -1002,32 +965,32 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
       {/* Tab Navigation */}
       <div className="ba-tabs">
         <button
-          className={`tab-button ${activeTab === 'profiles' ? 'active' : ''}`}
-          onClick={() => setActiveTab('profiles')}
+          className={`tab-button ${activeTab === "profiles" ? "active" : ""}`}
+          onClick={() => setActiveTab("profiles")}
         >
           👤 Profiles
         </button>
         <button
-          className={`tab-button ${activeTab === 'patterns' ? 'active' : ''}`}
-          onClick={() => setActiveTab('patterns')}
+          className={`tab-button ${activeTab === "patterns" ? "active" : ""}`}
+          onClick={() => setActiveTab("patterns")}
         >
           📊 Patterns
         </button>
         <button
-          className={`tab-button ${activeTab === 'anomalies' ? 'active' : ''}`}
-          onClick={() => setActiveTab('anomalies')}
+          className={`tab-button ${activeTab === "anomalies" ? "active" : ""}`}
+          onClick={() => setActiveTab("anomalies")}
         >
           🚨 Anomalies
         </button>
         <button
-          className={`tab-button ${activeTab === 'analysis' ? 'active' : ''}`}
-          onClick={() => setActiveTab('analysis')}
+          className={`tab-button ${activeTab === "analysis" ? "active" : ""}`}
+          onClick={() => setActiveTab("analysis")}
         >
           🔬 Analysis
         </button>
         <button
-          className={`tab-button ${activeTab === 'insights' ? 'active' : ''}`}
-          onClick={() => setActiveTab('insights')}
+          className={`tab-button ${activeTab === "insights" ? "active" : ""}`}
+          onClick={() => setActiveTab("insights")}
         >
           💡 Insights
         </button>
@@ -1035,13 +998,13 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
 
       <div className="ba-content">
         {/* Profiles Tab */}
-        {activeTab === 'profiles' && (
+        {activeTab === "profiles" && (
           <div className="profiles-tab">
             <div className="profiles-grid">
               {filteredProfiles.map((profile) => (
                 <div
                   key={profile.id}
-                  className={`profile-card ${selectedProfile?.id === profile.id ? 'selected' : ''}`}
+                  className={`profile-card ${selectedProfile?.id === profile.id ? "selected" : ""}`}
                   onClick={() => handleProfileSelect(profile)}
                 >
                   <div className="profile-header">
@@ -1053,10 +1016,10 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
                       <span
                         className={`risk-score ${
                           profile.riskScore > 70
-                            ? 'high'
+                            ? "high"
                             : profile.riskScore > 40
-                              ? 'medium'
-                              : 'low'
+                              ? "medium"
+                              : "low"
                         }`}
                       >
                         Risk: {profile.riskScore}
@@ -1064,10 +1027,10 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
                       <span
                         className={`anomaly-score ${
                           profile.anomalyScore > 60
-                            ? 'high'
+                            ? "high"
                             : profile.anomalyScore > 30
-                              ? 'medium'
-                              : 'low'
+                              ? "medium"
+                              : "low"
                         }`}
                       >
                         Anomaly: {profile.anomalyScore}
@@ -1141,7 +1104,7 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
                     className="analyze-profile-button"
                     disabled={isAnalyzing}
                   >
-                    {isAnalyzing ? 'Analyzing...' : 'Analyze Profile'}
+                    {isAnalyzing ? "Analyzing..." : "Analyze Profile"}
                   </button>
                 </div>
 
@@ -1150,16 +1113,14 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
                     <h4>Time Window</h4>
                     <div className="time-info">
                       <div>
-                        <strong>Duration:</strong>{' '}
-                        {selectedProfile.timeWindow.duration}
+                        <strong>Duration:</strong> {selectedProfile.timeWindow.duration}
                       </div>
                       <div>
-                        <strong>Start:</strong>{' '}
+                        <strong>Start:</strong>{" "}
                         {selectedProfile.timeWindow.start.toLocaleDateString()}
                       </div>
                       <div>
-                        <strong>End:</strong>{' '}
-                        {selectedProfile.timeWindow.end.toLocaleDateString()}
+                        <strong>End:</strong> {selectedProfile.timeWindow.end.toLocaleDateString()}
                       </div>
                     </div>
                   </div>
@@ -1168,20 +1129,19 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
                     <h4>Baseline Metrics</h4>
                     <div className="baseline-info">
                       <div>
-                        <strong>Established:</strong>{' '}
+                        <strong>Established:</strong>{" "}
                         {selectedProfile.baseline.established.toLocaleDateString()}
                       </div>
                       <div>
-                        <strong>Sample Size:</strong>{' '}
+                        <strong>Sample Size:</strong>{" "}
                         {selectedProfile.baseline.sampleSize.toLocaleString()}
                       </div>
                       <div>
-                        <strong>Confidence:</strong>{' '}
-                        {(selectedProfile.baseline.confidence * 100).toFixed(1)}
-                        %
+                        <strong>Confidence:</strong>{" "}
+                        {(selectedProfile.baseline.confidence * 100).toFixed(1)}%
                       </div>
                       <div>
-                        <strong>Stability:</strong>{' '}
+                        <strong>Stability:</strong>{" "}
                         {(selectedProfile.baseline.stability * 100).toFixed(1)}%
                       </div>
                     </div>
@@ -1193,7 +1153,7 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
         )}
 
         {/* Patterns Tab */}
-        {activeTab === 'patterns' && selectedProfile && (
+        {activeTab === "patterns" && selectedProfile && (
           <div className="patterns-tab">
             <div className="pattern-categories">
               <div className="pattern-category">
@@ -1203,8 +1163,7 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
                     <div className="pattern-header">
                       <span className="pattern-type">{pattern.type}</span>
                       <span className="pattern-cyclicity">
-                        Cyclicity:{' '}
-                        {(pattern.schedule.cyclicity * 100).toFixed(0)}%
+                        Cyclicity: {(pattern.schedule.cyclicity * 100).toFixed(0)}%
                       </span>
                     </div>
 
@@ -1227,16 +1186,9 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
                       <div className="pattern-anomalies">
                         <h5>Pattern Anomalies</h5>
                         {pattern.anomalies.map((anomaly, i) => (
-                          <div
-                            key={i}
-                            className={`anomaly-item ${anomaly.severity}`}
-                          >
-                            <div className="anomaly-time">
-                              {anomaly.timestamp.toLocaleString()}
-                            </div>
-                            <div className="anomaly-desc">
-                              {anomaly.description}
-                            </div>
+                          <div key={i} className={`anomaly-item ${anomaly.severity}`}>
+                            <div className="anomaly-time">{anomaly.timestamp.toLocaleString()}</div>
+                            <div className="anomaly-desc">{anomaly.description}</div>
                           </div>
                         ))}
                       </div>
@@ -1260,13 +1212,8 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
                           <div className="location-name">{location.name}</div>
                           <div className="location-stats">
                             <span>Visits: {location.visits}</span>
-                            <span>
-                              Avg Duration:{' '}
-                              {Math.round(location.averageDuration / 60)}h
-                            </span>
-                            {location.purpose && (
-                              <span>Purpose: {location.purpose}</span>
-                            )}
+                            <span>Avg Duration: {Math.round(location.averageDuration / 60)}h</span>
+                            {location.purpose && <span>Purpose: {location.purpose}</span>}
                           </div>
                         </div>
                       ))}
@@ -1279,15 +1226,9 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
                           <div key={i} className="territory-item">
                             <div>
                               <strong>Territory {i + 1}</strong>
-                              <span>
-                                Confidence:{' '}
-                                {(territory.confidence * 100).toFixed(0)}%
-                              </span>
+                              <span>Confidence: {(territory.confidence * 100).toFixed(0)}%</span>
                             </div>
-                            <div>
-                              Activity Level:{' '}
-                              {(territory.activityLevel * 100).toFixed(0)}%
-                            </div>
+                            <div>Activity Level: {(territory.activityLevel * 100).toFixed(0)}%</div>
                           </div>
                         ))}
                       </div>
@@ -1311,13 +1252,8 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
                           <div className="category-name">{category.name}</div>
                           <div className="category-stats">
                             <span>Frequency: {category.frequency}/month</span>
-                            <span>
-                              Avg Amount: $
-                              {category.averageAmount.toLocaleString()}
-                            </span>
-                            <span
-                              className={`risk-level ${category.riskLevel}`}
-                            >
+                            <span>Avg Amount: ${category.averageAmount.toLocaleString()}</span>
+                            <span className={`risk-level ${category.riskLevel}`}>
                               {category.riskLevel} risk
                             </span>
                           </div>
@@ -1328,33 +1264,24 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
                     <div className="cashflow-summary">
                       <h5>Cash Flow Analysis</h5>
                       <div className="cashflow-item">
-                        <strong>Inflow:</strong> $
-                        {pattern.cashFlow.inflow.total.toLocaleString()}
+                        <strong>Inflow:</strong> ${pattern.cashFlow.inflow.total.toLocaleString()}
                         <span>
-                          (Regularity:{' '}
-                          {(pattern.cashFlow.inflow.regularity * 100).toFixed(
-                            0,
-                          )}
+                          (Regularity: {(pattern.cashFlow.inflow.regularity * 100).toFixed(0)}
                           %)
                         </span>
                       </div>
                       <div className="cashflow-item">
-                        <strong>Outflow:</strong> $
-                        {pattern.cashFlow.outflow.total.toLocaleString()}
+                        <strong>Outflow:</strong> ${pattern.cashFlow.outflow.total.toLocaleString()}
                         <span>
-                          (Predictability:{' '}
-                          {(
-                            pattern.cashFlow.outflow.predictability * 100
-                          ).toFixed(0)}
+                          (Predictability:{" "}
+                          {(pattern.cashFlow.outflow.predictability * 100).toFixed(0)}
                           %)
                         </span>
                       </div>
                       <div className="cashflow-item">
                         <strong>Average Balance:</strong> $
                         {pattern.cashFlow.balance.average.toLocaleString()}
-                        <span
-                          className={`trend ${pattern.cashFlow.balance.trend}`}
-                        >
+                        <span className={`trend ${pattern.cashFlow.balance.trend}`}>
                           ({pattern.cashFlow.balance.trend})
                         </span>
                       </div>
@@ -1367,7 +1294,7 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
         )}
 
         {/* Anomalies Tab */}
-        {activeTab === 'anomalies' && (
+        {activeTab === "anomalies" && (
           <div className="anomalies-tab">
             <div className="anomalies-controls">
               <div className="filter-controls">
@@ -1398,32 +1325,24 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
 
             <div className="anomalies-list">
               {filteredAnomalies.map((anomaly) => (
-                <div
-                  key={anomaly.id}
-                  className={`anomaly-card ${anomaly.anomaly.severity}`}
-                >
+                <div key={anomaly.id} className={`anomaly-card ${anomaly.anomaly.severity}`}>
                   <div className="anomaly-header">
                     <div className="anomaly-main">
                       <h4>{anomaly.anomaly.description}</h4>
                       <div className="anomaly-meta">
                         <span className="anomaly-type">{anomaly.type}</span>
-                        <span className="anomaly-category">
-                          {anomaly.category}
-                        </span>
+                        <span className="anomaly-category">{anomaly.category}</span>
                         <span className="anomaly-time">
                           {anomaly.anomaly.timestamp.toLocaleString()}
                         </span>
                       </div>
                     </div>
                     <div className="anomaly-scores">
-                      <span
-                        className={`severity-badge ${anomaly.anomaly.severity}`}
-                      >
+                      <span className={`severity-badge ${anomaly.anomaly.severity}`}>
                         {anomaly.anomaly.severity}
                       </span>
                       <span className="confidence-score">
-                        {(anomaly.anomaly.confidence * 100).toFixed(0)}%
-                        confidence
+                        {(anomaly.anomaly.confidence * 100).toFixed(0)}% confidence
                       </span>
                       <span className="deviation-score">
                         {anomaly.anomaly.deviationScore.toFixed(1)}σ
@@ -1437,20 +1356,16 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
                       <div className="context-comparison">
                         <div className="comparison-item">
                           <strong>Baseline:</strong>
-                          <span>
-                            {JSON.stringify(anomaly.context.baseline)}
-                          </span>
+                          <span>{JSON.stringify(anomaly.context.baseline)}</span>
                         </div>
                         <div className="comparison-item">
                           <strong>Observed:</strong>
-                          <span>
-                            {JSON.stringify(anomaly.context.observed)}
-                          </span>
+                          <span>{JSON.stringify(anomaly.context.observed)}</span>
                         </div>
                         <div className="comparison-item">
                           <strong>Expected Range:</strong>
                           <span>
-                            {anomaly.context.expectedRange.min} -{' '}
+                            {anomaly.context.expectedRange.min} -{" "}
                             {anomaly.context.expectedRange.max}
                           </span>
                         </div>
@@ -1461,19 +1376,16 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
                       <h5>Impact Assessment</h5>
                       <div className="impact-details">
                         <div>
-                          <strong>Risk Increase:</strong> +
-                          {anomaly.impact.riskIncrease}%
+                          <strong>Risk Increase:</strong> +{anomaly.impact.riskIncrease}%
                         </div>
                         <div>
                           <strong>Affected Patterns:</strong>
                           <div className="affected-patterns">
-                            {anomaly.impact.affectedPatterns.map(
-                              (pattern, i) => (
-                                <span key={i} className="pattern-tag">
-                                  {pattern}
-                                </span>
-                              ),
-                            )}
+                            {anomaly.impact.affectedPatterns.map((pattern, i) => (
+                              <span key={i} className="pattern-tag">
+                                {pattern}
+                              </span>
+                            ))}
                           </div>
                         </div>
                       </div>
@@ -1484,15 +1396,10 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
                     <h5>Recommendations</h5>
                     <div className="recommendations-list">
                       {anomaly.recommendations.map((rec, i) => (
-                        <div
-                          key={i}
-                          className={`recommendation-item ${rec.priority}`}
-                        >
+                        <div key={i} className={`recommendation-item ${rec.priority}`}>
                           <div className="rec-header">
                             <span className="rec-action">{rec.action}</span>
-                            <span className={`priority-badge ${rec.priority}`}>
-                              {rec.priority}
-                            </span>
+                            <span className={`priority-badge ${rec.priority}`}>{rec.priority}</span>
                           </div>
                           <div className="rec-rationale">{rec.rationale}</div>
                         </div>
@@ -1506,7 +1413,7 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
         )}
 
         {/* Analysis Tab */}
-        {activeTab === 'analysis' && (
+        {activeTab === "analysis" && (
           <div className="analysis-tab">
             <div className="analysis-controls">
               <div className="analysis-config">
@@ -1544,9 +1451,7 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
                         })
                       }
                     />
-                    <span>
-                      {(analysisConfig.minConfidence * 100).toFixed(0)}%
-                    </span>
+                    <span>{(analysisConfig.minConfidence * 100).toFixed(0)}%</span>
                   </div>
                   <div className="config-checkboxes">
                     <label>
@@ -1585,21 +1490,15 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
                 <h3>Analysis Results</h3>
                 <div className="results-overview">
                   <div className="result-card">
-                    <div className="result-value">
-                      {analysisResults.profilesAnalyzed}
-                    </div>
+                    <div className="result-value">{analysisResults.profilesAnalyzed}</div>
                     <div className="result-label">Profiles Analyzed</div>
                   </div>
                   <div className="result-card">
-                    <div className="result-value">
-                      {analysisResults.anomaliesDetected}
-                    </div>
+                    <div className="result-value">{analysisResults.anomaliesDetected}</div>
                     <div className="result-label">Anomalies Detected</div>
                   </div>
                   <div className="result-card">
-                    <div className="result-value">
-                      {analysisResults.riskAssessment.overall}
-                    </div>
+                    <div className="result-value">{analysisResults.riskAssessment.overall}</div>
                     <div className="result-label">Overall Risk Score</div>
                   </div>
                   <div className="result-card">
@@ -1614,23 +1513,20 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
                   <h4>Pattern Analysis Summary</h4>
                   <div className="summary-metrics">
                     <div className="summary-item">
-                      <strong>Temporal Patterns:</strong>{' '}
+                      <strong>Temporal Patterns:</strong>{" "}
                       {analysisResults.patternSummary.temporalPatterns}
                     </div>
                     <div className="summary-item">
-                      <strong>Spatial Patterns:</strong>{' '}
+                      <strong>Spatial Patterns:</strong>{" "}
                       {analysisResults.patternSummary.spatialPatterns}
                     </div>
                     <div className="summary-item">
-                      <strong>Behavioral Anomalies:</strong>{' '}
+                      <strong>Behavioral Anomalies:</strong>{" "}
                       {analysisResults.patternSummary.behavioralAnomalies}
                     </div>
                     <div className="summary-item">
-                      <strong>Average Stability Score:</strong>{' '}
-                      {(
-                        analysisResults.patternSummary.stabilityScore * 100
-                      ).toFixed(1)}
-                      %
+                      <strong>Average Stability Score:</strong>{" "}
+                      {(analysisResults.patternSummary.stabilityScore * 100).toFixed(1)}%
                     </div>
                   </div>
                 </div>
@@ -1647,7 +1543,7 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
         )}
 
         {/* Insights Tab */}
-        {activeTab === 'insights' && (
+        {activeTab === "insights" && (
           <div className="insights-tab">
             <div className="insights-dashboard">
               <div className="insight-card">
@@ -1658,9 +1554,8 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
                     <div className="insight-content">
                       <h4>Pattern Stability Analysis</h4>
                       <p>
-                        87% of analyzed profiles show stable behavioral patterns
-                        over the last 30 days, indicating predictable behavior
-                        for most entities.
+                        87% of analyzed profiles show stable behavioral patterns over the last 30
+                        days, indicating predictable behavior for most entities.
                       </p>
                     </div>
                   </div>
@@ -1669,9 +1564,8 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
                     <div className="insight-content">
                       <h4>Anomaly Concentration</h4>
                       <p>
-                        68% of detected anomalies occur during off-hours (6 PM -
-                        6 AM), suggesting either deliberate evasion or
-                        legitimate urgent work.
+                        68% of detected anomalies occur during off-hours (6 PM - 6 AM), suggesting
+                        either deliberate evasion or legitimate urgent work.
                       </p>
                     </div>
                   </div>
@@ -1680,9 +1574,8 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
                     <div className="insight-content">
                       <h4>Financial Risk Correlation</h4>
                       <p>
-                        High-value transactions show 3.2x higher anomaly rates,
-                        indicating increased scrutiny needed for financial
-                        patterns above $50K.
+                        High-value transactions show 3.2x higher anomaly rates, indicating increased
+                        scrutiny needed for financial patterns above $50K.
                       </p>
                     </div>
                   </div>
@@ -1696,10 +1589,7 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
                     <h4>Risk Trend Forecast</h4>
                     <div className="prediction-chart">
                       <div className="trend-line stable">
-                        <span>
-                          Overall risk levels expected to remain stable over
-                          next 7 days
-                        </span>
+                        <span>Overall risk levels expected to remain stable over next 7 days</span>
                       </div>
                     </div>
                   </div>
@@ -1709,20 +1599,14 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
                       <div className="likelihood-bar">
                         <span>Weekend Activity</span>
                         <div className="bar-container">
-                          <div
-                            className="bar-fill"
-                            style={{ width: '75%' }}
-                          ></div>
+                          <div className="bar-fill" style={{ width: "75%" }}></div>
                         </div>
                         <span>75%</span>
                       </div>
                       <div className="likelihood-bar">
                         <span>Large Transactions</span>
                         <div className="bar-container">
-                          <div
-                            className="bar-fill"
-                            style={{ width: '45%' }}
-                          ></div>
+                          <div className="bar-fill" style={{ width: "45%" }}></div>
                         </div>
                         <span>45%</span>
                       </div>
@@ -1738,23 +1622,15 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
                     <div className="action-priority">HIGH</div>
                     <div className="action-content">
                       <h4>Review Large Transaction Anomaly</h4>
-                      <p>
-                        Maria Rodriguez profile shows $125K trade outside normal
-                        parameters
-                      </p>
-                      <div className="action-deadline">
-                        Due: Within 24 hours
-                      </div>
+                      <p>Maria Rodriguez profile shows $125K trade outside normal parameters</p>
+                      <div className="action-deadline">Due: Within 24 hours</div>
                     </div>
                   </div>
                   <div className="action-item medium">
                     <div className="action-priority">MEDIUM</div>
                     <div className="action-content">
                       <h4>Monitor Off-Hours Activity Patterns</h4>
-                      <p>
-                        Increase monitoring sensitivity for activities between
-                        10 PM - 6 AM
-                      </p>
+                      <p>Increase monitoring sensitivity for activities between 10 PM - 6 AM</p>
                       <div className="action-deadline">Due: Within 3 days</div>
                     </div>
                   </div>
@@ -1762,10 +1638,7 @@ const BehavioralAnalytics: React.FC<BehavioralAnalyticsProps> = ({
                     <div className="action-priority">LOW</div>
                     <div className="action-content">
                       <h4>Update Baseline Models</h4>
-                      <p>
-                        Refresh behavioral baselines for profiles with stability
-                        &lt; 80%
-                      </p>
+                      <p>Refresh behavioral baselines for profiles with stability &lt; 80%</p>
                       <div className="action-deadline">Due: Within 1 week</div>
                     </div>
                   </div>

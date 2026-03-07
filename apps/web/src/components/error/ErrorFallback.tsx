@@ -1,5 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Button } from '@/components/ui/Button';
+import React, { useEffect, useRef, useState } from 'react'
+import { Button } from '@/components/ui/Button'
 import {
   Card,
   CardHeader,
@@ -7,24 +7,31 @@ import {
   CardDescription,
   CardContent,
   CardFooter,
-} from '@/components/ui/Card';
-import { AlertTriangle, RefreshCw, Home, Loader2, ExternalLink, Bot } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import { useResilience } from '@/contexts/ResilienceContext';
-import { logErrorEvidence } from '@/lib/evidenceLogger';
+} from '@/components/ui/Card'
+import {
+  AlertTriangle,
+  RefreshCw,
+  Home,
+  Loader2,
+  ExternalLink,
+  Bot,
+} from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { useResilience } from '@/contexts/ResilienceContext'
+import { logErrorEvidence } from '@/lib/evidenceLogger'
 
 interface ErrorFallbackProps {
-  error: Error | null;
-  resetErrorBoundary?: () => void;
-  title?: string;
-  description?: string;
-  showHomeButton?: boolean;
-  showRetry?: boolean;
-  isRetrying?: boolean;
-  retryCount?: number;
-  maxRetries?: number;
-  errorCode?: string;
-  supportLink?: string;
+  error: Error | null
+  resetErrorBoundary?: () => void
+  title?: string
+  description?: string
+  showHomeButton?: boolean
+  showRetry?: boolean
+  isRetrying?: boolean
+  retryCount?: number
+  maxRetries?: number
+  errorCode?: string
+  supportLink?: string
 }
 
 export const ErrorFallback: React.FC<ErrorFallbackProps> = ({
@@ -40,60 +47,67 @@ export const ErrorFallback: React.FC<ErrorFallbackProps> = ({
   errorCode,
   supportLink = '/help',
 }) => {
-  const navigate = useNavigate();
-  const headingRef = useRef<HTMLHeadingElement>(null);
+  const navigate = useNavigate()
+  const headingRef = useRef<HTMLHeadingElement>(null)
 
   // Safely attempt to use resilience context, fallback to default if missing
-  let resilienceContext;
+  let resilienceContext
   try {
-    resilienceContext = useResilience();
+    resilienceContext = useResilience()
   } catch (e) {
     // Context missing, use defaults
     resilienceContext = {
-      policy: { maxRetries: 3, retryBackoffMs: 2000, fallbackStrategy: 'simple', reportErrors: true },
-      agenticRecoveryEnabled: false
-    };
+      policy: {
+        maxRetries: 3,
+        retryBackoffMs: 2000,
+        fallbackStrategy: 'simple',
+        reportErrors: true,
+      },
+      agenticRecoveryEnabled: false,
+    }
   }
-  const { agenticRecoveryEnabled, policy } = resilienceContext;
+  const { agenticRecoveryEnabled, policy } = resilienceContext
 
-  const [isDiagnosing, setIsDiagnosing] = useState(false);
-  const [diagnosis, setDiagnosis] = useState<string | null>(null);
+  const [isDiagnosing, setIsDiagnosing] = useState(false)
+  const [diagnosis, setDiagnosis] = useState<string | null>(null)
 
   useEffect(() => {
     // Focus the heading for accessibility
     if (headingRef.current) {
-      headingRef.current.focus();
+      headingRef.current.focus()
     }
 
     // Log evidence if enabled
     if (error && policy.reportErrors) {
-      logErrorEvidence(error);
+      logErrorEvidence(error)
     }
-  }, [error, policy.reportErrors]);
+  }, [error, policy.reportErrors])
 
   const handleHome = () => {
-    navigate('/');
+    navigate('/')
     if (resetErrorBoundary) {
-      resetErrorBoundary();
+      resetErrorBoundary()
     }
-  };
+  }
 
   const handleAgentDiagnosis = () => {
-    setIsDiagnosing(true);
+    setIsDiagnosing(true)
     // Stub for Agentic Recovery
     setTimeout(() => {
-      setIsDiagnosing(false);
-      setDiagnosis("Copilot Diagnosis: This appears to be a transient network failure. A retry is recommended.");
-    }, 1500);
-  };
+      setIsDiagnosing(false)
+      setDiagnosis(
+        'Copilot Diagnosis: This appears to be a transient network failure. A retry is recommended.'
+      )
+    }, 1500)
+  }
 
-  const effectiveMaxRetries = maxRetries || policy.maxRetries;
-  const canRetry = showRetry && retryCount < effectiveMaxRetries;
+  const effectiveMaxRetries = maxRetries || policy.maxRetries
+  const canRetry = showRetry && retryCount < effectiveMaxRetries
   const retryButtonText = isRetrying
     ? `Retrying (${retryCount}/${effectiveMaxRetries})...`
     : canRetry
-    ? `Try Again (${retryCount}/${effectiveMaxRetries})`
-    : 'Retry limit reached';
+      ? `Try Again (${retryCount}/${effectiveMaxRetries})`
+      : 'Retry limit reached'
 
   return (
     <div
@@ -121,9 +135,7 @@ export const ErrorFallback: React.FC<ErrorFallbackProps> = ({
               <p className="font-semibold mb-1 text-destructive">
                 {error.name}: {error.message}
               </p>
-              {error.stack && (
-                <pre className="opacity-70">{error.stack}</pre>
-              )}
+              {error.stack && <pre className="opacity-70">{error.stack}</pre>}
             </div>
           )}
 
@@ -154,13 +166,17 @@ export const ErrorFallback: React.FC<ErrorFallbackProps> = ({
         </CardContent>
         <CardFooter className="flex flex-col gap-3">
           <div className="flex gap-3 w-full justify-end flex-wrap">
-             {agenticRecoveryEnabled && !diagnosis && (
+            {agenticRecoveryEnabled && !diagnosis && (
               <Button
                 variant="secondary"
                 onClick={handleAgentDiagnosis}
                 disabled={isDiagnosing}
               >
-                {isDiagnosing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Bot className="mr-2 h-4 w-4" />}
+                {isDiagnosing ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <Bot className="mr-2 h-4 w-4" />
+                )}
                 {isDiagnosing ? 'Analyzing...' : 'Ask Copilot'}
               </Button>
             )}
@@ -172,25 +188,26 @@ export const ErrorFallback: React.FC<ErrorFallbackProps> = ({
               </Button>
             )}
 
-            {(showRetry || (!showRetry && resetErrorBoundary)) && resetErrorBoundary && (
-               <Button
-                onClick={resetErrorBoundary}
-                variant="default"
-                disabled={!canRetry && showRetry && !isRetrying}
-              >
-                {isRetrying ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    {retryButtonText}
-                  </>
-                ) : (
-                  <>
-                    <RefreshCw className="mr-2 h-4 w-4" />
-                    {showRetry ? retryButtonText : 'Try Again'}
-                  </>
-                )}
-              </Button>
-            )}
+            {(showRetry || (!showRetry && resetErrorBoundary)) &&
+              resetErrorBoundary && (
+                <Button
+                  onClick={resetErrorBoundary}
+                  variant="default"
+                  disabled={!canRetry && showRetry && !isRetrying}
+                >
+                  {isRetrying ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      {retryButtonText}
+                    </>
+                  ) : (
+                    <>
+                      <RefreshCw className="mr-2 h-4 w-4" />
+                      {showRetry ? retryButtonText : 'Try Again'}
+                    </>
+                  )}
+                </Button>
+              )}
           </div>
           {supportLink && (
             <a
@@ -204,5 +221,5 @@ export const ErrorFallback: React.FC<ErrorFallbackProps> = ({
         </CardFooter>
       </Card>
     </div>
-  );
-};
+  )
+}

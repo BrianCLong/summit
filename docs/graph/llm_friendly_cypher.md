@@ -6,7 +6,7 @@
 
 ## 1. Core Philosophy
 
-When writing Cypher for GraphRAG, the consumer is not a human analyst or a dashboard—it is an LLM. This shifts the optimization target from *latency* to **context determinism** and **token efficiency**.
+When writing Cypher for GraphRAG, the consumer is not a human analyst or a dashboard—it is an LLM. This shifts the optimization target from _latency_ to **context determinism** and **token efficiency**.
 
 > **Guideline:** Query shape affects model reasoning quality.
 
@@ -15,12 +15,14 @@ When writing Cypher for GraphRAG, the consumer is not a human analyst or a dashb
 ### 2.1 Projection-Only Returns (No Raw Nodes)
 
 **Bad:** Returning full nodes bloats the context with internal metadata (schema versions, internal IDs) that confuse the LLM.
+
 ```cypher
 MATCH (p:Person)-[r:KNOWS]->(f:Person)
 RETURN p, r, f
 ```
 
 **Good:** Explicitly project only semantically relevant properties.
+
 ```cypher
 MATCH (p:Person)-[r:KNOWS]->(f:Person)
 RETURN {
@@ -55,11 +57,13 @@ LIMIT 10
 Unlimited traversals (`*..`) create unpredictable token usage and can introduce "semantic drift" (irrelevant nodes).
 
 **Bad:**
+
 ```cypher
 MATCH (a)-[*]->(b) ...
 ```
 
 **Good:**
+
 ```cypher
 MATCH (a)-[*1..3]->(b) ...
 ```
@@ -70,16 +74,17 @@ Every node passed to the LLM **MUST** carry an `evidence_id` if available. This 
 
 ## 3. Anti-Patterns
 
-| Pattern | Why Avoid |
-| :--- | :--- |
-| `RETURN *` | Returns massive amounts of noise; wastes tokens. |
-| `shortestPath` (without context) | Often skips semantically vital intermediate nodes (the "why"). |
-| Filtering in Post-Processing | Filter in Cypher! Sending 100 nodes to code to keep 10 is inefficient and risks non-deterministic truncation. |
-| Ignoring Direction | `(a)--(b)` is ambiguous. Use `(a)-[]->(b)` or `(a)-[]-(b)` explicitly based on semantics. |
+| Pattern                          | Why Avoid                                                                                                     |
+| :------------------------------- | :------------------------------------------------------------------------------------------------------------ |
+| `RETURN *`                       | Returns massive amounts of noise; wastes tokens.                                                              |
+| `shortestPath` (without context) | Often skips semantically vital intermediate nodes (the "why").                                                |
+| Filtering in Post-Processing     | Filter in Cypher! Sending 100 nodes to code to keep 10 is inefficient and risks non-deterministic truncation. |
+| Ignoring Direction               | `(a)--(b)` is ambiguous. Use `(a)-[]->(b)` or `(a)-[]-(b)` explicitly based on semantics.                     |
 
 ## 4. Testing
 
 A Cypher query is "LLM-Ready" if:
+
 1.  Running it twice returns the exact same bytes (order preserved).
 2.  It returns < 2000 tokens of JSON/Text for a standard question.
 3.  Every entity has a citation handle.

@@ -32,6 +32,7 @@ The tool outputs a JSON summary of the simulation run:
 ## Simulation Logic
 
 The simulator maintains an in-memory "database" of persisted receipt IDs for the duration of the run.
+
 1.  On the first encounter of a receipt ID, it "persists" it (increments `persistedCount`).
 2.  On subsequent encounters, it detects a duplicate and increments `dedupedCount`.
 3.  The `--seed` argument ensures that any random jitter or simulated network failures (if enabled) are deterministic across runs.

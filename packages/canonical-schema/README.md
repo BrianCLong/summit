@@ -36,66 +36,73 @@ import {
   ERMatchScore,
   ERDecision,
   ResolutionCluster,
-} from '@intelgraph/canonical-schema';
+} from "@intelgraph/canonical-schema";
 ```
 
 ### Create a Person Entity
 
 ```typescript
-import { PersonEntity, CanonicalEntityType, SensitivityLevel, ClearanceLevel, RetentionClass, VerificationStatus } from '@intelgraph/canonical-schema';
+import {
+  PersonEntity,
+  CanonicalEntityType,
+  SensitivityLevel,
+  ClearanceLevel,
+  RetentionClass,
+  VerificationStatus,
+} from "@intelgraph/canonical-schema";
 
 const person: PersonEntity = {
-  id: 'person-001',
-  tenantId: 'tenant-acme',
+  id: "person-001",
+  tenantId: "tenant-acme",
   type: CanonicalEntityType.PERSON,
-  label: 'John Doe',
-  description: 'Software Engineer',
+  label: "John Doe",
+  description: "Software Engineer",
   properties: {},
   confidence: 0.95,
-  source: 'hrms',
+  source: "hrms",
   provenance: {
-    sourceId: 'hrms-connector',
+    sourceId: "hrms-connector",
     assertions: [],
     verificationStatus: VerificationStatus.VERIFIED,
     trustScore: 0.95,
   },
   policyLabels: {
-    origin: 'hrms',
+    origin: "hrms",
     sensitivity: SensitivityLevel.INTERNAL,
     clearance: ClearanceLevel.AUTHORIZED,
-    legalBasis: 'employee-data-processing',
-    needToKnow: ['hr', 'management'],
-    purposeLimitation: ['hr-operations'],
+    legalBasis: "employee-data-processing",
+    needToKnow: ["hr", "management"],
+    purposeLimitation: ["hr-operations"],
     retentionClass: RetentionClass.LONG_TERM,
   },
-  validFrom: new Date('2020-01-01'),
+  validFrom: new Date("2020-01-01"),
   validTo: undefined, // Still valid
-  observedAt: new Date('2020-01-02'),
+  observedAt: new Date("2020-01-02"),
   recordedAt: new Date(),
   createdAt: new Date(),
   updatedAt: new Date(),
-  createdBy: 'system',
+  createdBy: "system",
   version: 1,
 
   // Person-specific fields
   names: [
-    { value: 'John Doe', type: 'legal', confidence: 1.0 },
-    { value: 'Johnny', type: 'nickname', confidence: 0.8 },
+    { value: "John Doe", type: "legal", confidence: 1.0 },
+    { value: "Johnny", type: "nickname", confidence: 0.8 },
   ],
   identifiers: [
-    { type: 'ssn', value: '123-45-6789', country: 'US', confidence: 1.0 },
-    { type: 'employee_id', value: 'EMP-12345', confidence: 1.0 },
+    { type: "ssn", value: "123-45-6789", country: "US", confidence: 1.0 },
+    { type: "employee_id", value: "EMP-12345", confidence: 1.0 },
   ],
   contactInfo: [
-    { type: 'email', value: 'john.doe@acme.com', primary: true, confidence: 1.0 },
-    { type: 'phone', value: '+1-555-0123', primary: true, confidence: 0.9 },
+    { type: "email", value: "john.doe@acme.com", primary: true, confidence: 1.0 },
+    { type: "phone", value: "+1-555-0123", primary: true, confidence: 0.9 },
   ],
   demographics: {
-    dateOfBirth: new Date('1985-06-15'),
-    dateOfBirthPrecision: 'day',
-    gender: 'M',
-    nationality: ['US'],
-    occupation: 'Software Engineer',
+    dateOfBirth: new Date("1985-06-15"),
+    dateOfBirthPrecision: "day",
+    gender: "M",
+    nationality: ["US"],
+    occupation: "Software Engineer",
   },
 };
 ```
@@ -103,7 +110,7 @@ const person: PersonEntity = {
 ### Entity Resolution Workflow
 
 ```typescript
-import { ERScoringService, ERDecisionService } from '@intelgraph/canonical-schema';
+import { ERScoringService, ERDecisionService } from "@intelgraph/canonical-schema";
 
 const scoringService = new ERScoringService();
 const decisionService = new ERDecisionService();
@@ -114,18 +121,22 @@ const matchScore = scoringService.computeWeightedScore({
   entityAId: personA.id,
   entityBId: personB.id,
   features,
-  method: 'hybrid',
-  modelVersion: 'person-er-v1.0',
+  method: "hybrid",
+  modelVersion: "person-er-v1.0",
 });
 
 // Route decision based on thresholds
 const thresholds = decisionService.getDefaultThresholds(CanonicalEntityType.PERSON);
-const decision = await decisionService.routeDecision(matchScore, thresholds, CanonicalEntityType.PERSON);
+const decision = await decisionService.routeDecision(
+  matchScore,
+  thresholds,
+  CanonicalEntityType.PERSON
+);
 
-if (decision.decision === 'MERGE') {
-  console.log('Auto-merge approved');
+if (decision.decision === "MERGE") {
+  console.log("Auto-merge approved");
 } else if (decision.reviewRequired) {
-  console.log('Manual review required');
+  console.log("Manual review required");
 }
 ```
 
@@ -155,49 +166,54 @@ if (decision.decision === 'MERGE') {
 
 All 23 Wishbook entity types:
 
-| Type | Description | Example Use Cases |
-|------|-------------|-------------------|
-| PERSON | Individual person | HUMINT, HR records, suspects |
-| ORGANIZATION | Company, government entity | Corporate intelligence, partners |
-| LOCATION | Physical location | Geospatial analysis, assets |
-| ASSET | Physical/digital asset | Equipment, data, IP |
-| ACCOUNT | User/financial account | Banking, system access |
-| EVENT | Temporal event | Incidents, meetings, transactions |
-| DOCUMENT | Document/file | Evidence, reports, contracts |
-| COMMUNICATION | Message/call | Email, phone, chat |
-| DEVICE | Hardware device | IoT, servers, endpoints |
-| VEHICLE | Vehicle/vessel | Transportation, logistics |
-| INFRASTRUCTURE | Critical infrastructure | Power, telecom, transport |
-| FINANCIAL_INSTRUMENT | Financial product | Securities, derivatives |
-| INDICATOR | IOC/TTP | Threat intelligence |
-| CLAIM | Assertion/finding | Intelligence claims |
-| CASE | Investigation case | Case management |
-| NARRATIVE | Analytical narrative | Reports, briefings |
-| CAMPAIGN | Operation/campaign | Threat campaigns, ops |
-| LICENSE | License/warrant | Legal authorization |
-| AUTHORITY | Legal authority | Regulations, policies |
-| SENSOR | Data source/sensor | Telemetry, collectors |
-| RUNBOOK | Operational procedure | Playbooks, SOPs |
-| EVIDENCE | Evidence artifact | Court exhibits |
-| HYPOTHESIS | Hypothesis/theory | ACH analysis |
+| Type                 | Description                | Example Use Cases                 |
+| -------------------- | -------------------------- | --------------------------------- |
+| PERSON               | Individual person          | HUMINT, HR records, suspects      |
+| ORGANIZATION         | Company, government entity | Corporate intelligence, partners  |
+| LOCATION             | Physical location          | Geospatial analysis, assets       |
+| ASSET                | Physical/digital asset     | Equipment, data, IP               |
+| ACCOUNT              | User/financial account     | Banking, system access            |
+| EVENT                | Temporal event             | Incidents, meetings, transactions |
+| DOCUMENT             | Document/file              | Evidence, reports, contracts      |
+| COMMUNICATION        | Message/call               | Email, phone, chat                |
+| DEVICE               | Hardware device            | IoT, servers, endpoints           |
+| VEHICLE              | Vehicle/vessel             | Transportation, logistics         |
+| INFRASTRUCTURE       | Critical infrastructure    | Power, telecom, transport         |
+| FINANCIAL_INSTRUMENT | Financial product          | Securities, derivatives           |
+| INDICATOR            | IOC/TTP                    | Threat intelligence               |
+| CLAIM                | Assertion/finding          | Intelligence claims               |
+| CASE                 | Investigation case         | Case management                   |
+| NARRATIVE            | Analytical narrative       | Reports, briefings                |
+| CAMPAIGN             | Operation/campaign         | Threat campaigns, ops             |
+| LICENSE              | License/warrant            | Legal authorization               |
+| AUTHORITY            | Legal authority            | Regulations, policies             |
+| SENSOR               | Data source/sensor         | Telemetry, collectors             |
+| RUNBOOK              | Operational procedure      | Playbooks, SOPs                   |
+| EVIDENCE             | Evidence artifact          | Court exhibits                    |
+| HYPOTHESIS           | Hypothesis/theory          | ACH analysis                      |
 
 ## Relationship Types
 
 30+ relationship types including:
 
 ### Core Relationships
+
 - CONNECTED_TO, OWNS, WORKS_FOR, LOCATED_AT, MENTIONS, COMMUNICATES_WITH, TRANSACTED_WITH, ACCESSED, CREATED, MODIFIED, RELATED_TO, MEMBER_OF, MANAGES, REPORTS_TO, SUBSIDIARY_OF, PARTNER_OF, COMPETITOR_OF, SIMILAR_TO
 
 ### Evidence & Provenance (NEW)
+
 - SUPPORTS, CONTRADICTS, DERIVED_FROM, CITES
 
 ### Authority & Governance (NEW)
+
 - AUTHORIZED_BY, GOVERNED_BY, REQUIRES
 
 ### Temporal Sequences (NEW)
+
 - PRECEDES, FOLLOWS, CONCURRENT_WITH
 
 ### Hypothesis Relationships (NEW)
+
 - EXPLAINS, ALTERNATIVE_TO, REFUTES
 
 ## ER Pipeline
@@ -213,12 +229,12 @@ All 23 Wishbook entity types:
 
 ### GA Precision Requirements
 
-| Entity Type | Target Precision | Auto-Merge Threshold |
-|-------------|------------------|----------------------|
-| PERSON | 90% | 0.90 |
-| ORGANIZATION | 88% | 0.88 |
-| LOCATION | 85% | 0.85 |
-| ASSET | 82% | 0.82 |
+| Entity Type  | Target Precision | Auto-Merge Threshold |
+| ------------ | ---------------- | -------------------- |
+| PERSON       | 90%              | 0.90                 |
+| ORGANIZATION | 88%              | 0.88                 |
+| LOCATION     | 85%              | 0.85                 |
+| ASSET        | 82%              | 0.82                 |
 
 ## Development
 

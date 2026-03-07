@@ -24,6 +24,7 @@ Primary schema additions are constrained to one zone (`docs/`) and intended to d
 ## Canonical Node Types
 
 ### 1) `SourceArtifact`
+
 Represents an ingestible evidence unit.
 
 Required properties:
@@ -39,6 +40,7 @@ Required properties:
 - `jurisdiction: string`
 
 ### 2) `Narrative`
+
 Represents a claim frame tracked across media and entities.
 
 Required properties:
@@ -51,6 +53,7 @@ Required properties:
 - `status: enum(emerging|accelerating|plateau|degrading)`
 
 ### 3) `PropertyAsset`
+
 Physical real-estate object with proximity-sensitive risk context.
 
 Required properties:
@@ -63,6 +66,7 @@ Required properties:
 - `ownership_opacity_score: float` (0.0-1.0)
 
 ### 4) `ToolingCluster`
+
 Capability bundle observed across multiple actors.
 
 Required properties:
@@ -74,6 +78,7 @@ Required properties:
 - `migration_risk_score: float` (0.0-1.0)
 
 ### 5) `RelationshipSequence`
+
 A bounded sequence describing multi-channel trust-building or process-bypass behavior.
 
 Required properties:

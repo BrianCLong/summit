@@ -139,7 +139,7 @@ DATABASE_URL=postgresql://user:pass@localhost:5432/supply_chain
 #### Network Topology Analysis
 
 ```typescript
-import { NetworkAnalyzer } from '@intelgraph/supply-chain-mapper';
+import { NetworkAnalyzer } from "@intelgraph/supply-chain-mapper";
 
 const analyzer = new NetworkAnalyzer();
 
@@ -151,6 +151,7 @@ console.log(`Average path length: ${topology.averagePathLength}`);
 ```
 
 **API Endpoint:**
+
 ```bash
 GET /api/network/topology
 ```
@@ -160,19 +161,20 @@ GET /api/network/topology
 ```typescript
 // Find critical paths between suppliers
 const criticalPath = analyzer.findCriticalPaths(
-  'supplier-a-id',
-  'manufacturer-id',
+  "supplier-a-id",
+  "manufacturer-id",
   nodes,
   relationships
 );
 
-console.log(`Path: ${criticalPath.path.join(' -> ')}`);
+console.log(`Path: ${criticalPath.path.join(" -> ")}`);
 console.log(`Total lead time: ${criticalPath.totalLeadTime} days`);
 console.log(`Bottlenecks: ${criticalPath.bottlenecks.length}`);
 console.log(`Single points of failure: ${criticalPath.singlePointsOfFailure.length}`);
 ```
 
 **API Endpoint:**
+
 ```bash
 POST /api/network/critical-path
 {
@@ -184,7 +186,7 @@ POST /api/network/critical-path
 #### Interactive Visualization
 
 ```typescript
-import { VisualizationService } from '@intelgraph/supply-chain-mapper';
+import { VisualizationService } from "@intelgraph/supply-chain-mapper";
 
 const visService = new VisualizationService();
 
@@ -192,13 +194,14 @@ const visService = new VisualizationService();
 const graph = visService.toVisualizationGraph(
   nodes,
   relationships,
-  'hierarchical' // or 'force', 'geographic', 'circular'
+  "hierarchical" // or 'force', 'geographic', 'circular'
 );
 
 // Use with D3.js, Cytoscape.js, or vis.js
 ```
 
 **API Endpoint:**
+
 ```bash
 GET /api/network/visualization?layout=hierarchical
 ```
@@ -208,7 +211,7 @@ GET /api/network/visualization?layout=hierarchical
 #### Comprehensive Risk Assessment
 
 ```typescript
-import { SupplierRiskAssessor } from '@intelgraph/supplier-risk';
+import { SupplierRiskAssessor } from "@intelgraph/supplier-risk";
 
 const assessor = new SupplierRiskAssessor();
 
@@ -223,7 +226,7 @@ console.log(`Overall Risk Score: ${assessment.overallRiskScore}/100`);
 console.log(`Risk Level: ${assessment.overallRiskLevel}`);
 
 // Review recommendations
-assessment.recommendations.forEach(rec => {
+assessment.recommendations.forEach((rec) => {
   console.log(`- ${rec}`);
 });
 
@@ -234,6 +237,7 @@ assessment.mitigationPriorities.forEach(({ category, priority, action }) => {
 ```
 
 **API Endpoint:**
+
 ```bash
 POST /api/risk/supplier/:nodeId/assess
 {
@@ -294,20 +298,21 @@ POST /api/risk/supplier/:nodeId/assess
 #### Vendor Onboarding
 
 ```typescript
-import { ThirdPartyRiskManager } from '@intelgraph/third-party-risk';
+import { ThirdPartyRiskManager } from "@intelgraph/third-party-risk";
 
 const manager = new ThirdPartyRiskManager();
 
 // Initiate onboarding
-const onboarding = manager.initiateOnboarding(vendorId, 'ACME Corporation');
+const onboarding = manager.initiateOnboarding(vendorId, "ACME Corporation");
 
 // Track onboarding progress
-onboarding.checklist.forEach(item => {
+onboarding.checklist.forEach((item) => {
   console.log(`${item.item}: ${item.status}`);
 });
 ```
 
 **API Endpoint:**
+
 ```bash
 POST /api/vendor/onboard
 {
@@ -320,7 +325,7 @@ POST /api/vendor/onboard
 
 ```typescript
 const monitoring = await manager.monitorVendor(vendorId, {
-  assessmentFrequency: 'quarterly',
+  assessmentFrequency: "quarterly",
   securityMonitoring: true,
   financialMonitoring: true,
   complianceMonitoring: true,
@@ -339,6 +344,7 @@ console.log(`Trend: ${monitoring.metrics.trend}`);
 ```
 
 **API Endpoint:**
+
 ```bash
 POST /api/vendor/:vendorId/monitor
 {
@@ -355,7 +361,7 @@ POST /api/vendor/:vendorId/monitor
 #### Component Availability
 
 ```typescript
-import { ComponentTracker } from '@intelgraph/component-tracker';
+import { ComponentTracker } from "@intelgraph/component-tracker";
 
 const tracker = new ComponentTracker();
 
@@ -371,12 +377,13 @@ console.log(`Lead Time: ${availability.leadTimeDays} days`);
 console.log(`Risk Level: ${availability.riskLevel}`);
 
 // Check alternatives
-availability.alternatives.forEach(alt => {
+availability.alternatives.forEach((alt) => {
   console.log(`Alternative: ${alt.partNumber} (${alt.substitutionRisk} risk)`);
 });
 ```
 
 **API Endpoint:**
+
 ```bash
 GET /api/components/:id/availability?quantity=1000
 ```
@@ -393,22 +400,20 @@ console.log(`30-day change: ${volatility.priceChangePercent30Days.toFixed(2)}%`)
 
 // Review forecast
 volatility.forecast.forEach(({ date, predictedPrice, confidence }) => {
-  console.log(`${date.toLocaleDateString()}: $${predictedPrice.toFixed(2)} (${confidence}% confidence)`);
+  console.log(
+    `${date.toLocaleDateString()}: $${predictedPrice.toFixed(2)} (${confidence}% confidence)`
+  );
 });
 ```
 
 #### Counterfeit Detection
 
 ```typescript
-const authCheck = await tracker.detectCounterfeit(
-  componentId,
-  serialNumber,
-  {
-    manufacturerCode: 'ABC123',
-    batchNumber: 'BATCH-2024-01',
-    rfidData: '0123456789ABCDEF',
-  }
-);
+const authCheck = await tracker.detectCounterfeit(componentId, serialNumber, {
+  manufacturerCode: "ABC123",
+  batchNumber: "BATCH-2024-01",
+  rfidData: "0123456789ABCDEF",
+});
 
 console.log(`Authentic: ${authCheck.authentic}`);
 console.log(`Confidence: ${authCheck.confidence}%`);
@@ -420,27 +425,30 @@ console.log(`Recommendation: ${authCheck.recommendation}`);
 #### Real-Time Shipment Tracking
 
 ```typescript
-import { LogisticsTracker } from '@intelgraph/logistics-intel';
+import { LogisticsTracker } from "@intelgraph/logistics-intel";
 
 const tracker = new LogisticsTracker();
 
 const tracking = await tracker.trackShipment(trackingNumber);
 
 console.log(`Status: ${tracking.currentStatus}`);
-console.log(`Current Location: ${tracking.currentLocation.city}, ${tracking.currentLocation.country}`);
+console.log(
+  `Current Location: ${tracking.currentLocation.city}, ${tracking.currentLocation.country}`
+);
 console.log(`ETA: ${tracking.estimatedArrival}`);
 
 // Check for delays and alerts
-tracking.delays.forEach(delay => {
+tracking.delays.forEach((delay) => {
   console.log(`Delay: ${delay.reason} (${delay.delayHours} hours)`);
 });
 
-tracking.alerts.forEach(alert => {
+tracking.alerts.forEach((alert) => {
   console.log(`[${alert.severity}] ${alert.message}`);
 });
 ```
 
 **API Endpoint:**
+
 ```bash
 GET /api/shipments/:trackingNumber/track
 ```
@@ -460,13 +468,14 @@ console.log(`Days: ${optimization.recommendedRoute.estimatedDays}`);
 console.log(`CO2: ${optimization.recommendedRoute.carbonEmissions} kg`);
 
 // Review alternatives
-optimization.alternativeRoutes.forEach(route => {
+optimization.alternativeRoutes.forEach((route) => {
   console.log(`\nAlternative: ${route.mode}`);
-  route.tradeoffs.forEach(tradeoff => console.log(`  ${tradeoff}`));
+  route.tradeoffs.forEach((tradeoff) => console.log(`  ${tradeoff}`));
 });
 ```
 
 **API Endpoint:**
+
 ```bash
 POST /api/logistics/optimize-route
 {
@@ -481,32 +490,29 @@ POST /api/logistics/optimize-route
 #### Export Control Screening
 
 ```typescript
-import { ComplianceMonitor } from '@intelgraph/compliance-monitor';
+import { ComplianceMonitor } from "@intelgraph/compliance-monitor";
 
 const monitor = new ComplianceMonitor();
 
-const screening = await monitor.screenExportControl(
-  entityId,
-  'Supplier Name',
-  'China'
-);
+const screening = await monitor.screenExportControl(entityId, "Supplier Name", "China");
 
 console.log(`Result: ${screening.result}`);
-console.log(`Screened against: ${screening.screenedAgainst.join(', ')}`);
+console.log(`Screened against: ${screening.screenedAgainst.join(", ")}`);
 
 // Review matches
-screening.matches.forEach(match => {
+screening.matches.forEach((match) => {
   console.log(`Match: ${match.listName} (${match.confidence * 100}% confidence)`);
   console.log(`Details: ${match.details}`);
 });
 
 // Follow recommendations
-screening.recommendations.forEach(rec => {
+screening.recommendations.forEach((rec) => {
   console.log(`- ${rec}`);
 });
 ```
 
 **API Endpoint:**
+
 ```bash
 POST /api/compliance/export-control/screen
 {
@@ -521,20 +527,21 @@ POST /api/compliance/export-control/screen
 ```typescript
 const assessment = await monitor.assessConflictMinerals(componentId, {
   materials: [
-    { name: 'Tin', source: 'Rwanda' },
-    { name: 'Gold', source: 'DRC' },
+    { name: "Tin", source: "Rwanda" },
+    { name: "Gold", source: "DRC" },
   ],
 });
 
 console.log(`Contains Conflict Minerals: ${assessment.containsConflictMinerals}`);
 console.log(`DRC Compliant: ${assessment.drcCompliant}`);
 
-assessment.minerals.forEach(mineral => {
-  console.log(`${mineral.mineral}: ${mineral.conflictFree ? 'Conflict-Free' : 'Not Certified'}`);
+assessment.minerals.forEach((mineral) => {
+  console.log(`${mineral.mineral}: ${mineral.conflictFree ? "Conflict-Free" : "Not Certified"}`);
 });
 ```
 
 **API Endpoint:**
+
 ```bash
 POST /api/compliance/conflict-minerals/:componentId
 {
@@ -601,6 +608,7 @@ POST /api/alerts/:id/resolve
 **Steps:**
 
 1. **Initiate Onboarding**
+
    ```bash
    POST /api/vendor/onboard
    {
@@ -610,6 +618,7 @@ POST /api/alerts/:id/resolve
    ```
 
 2. **Conduct Risk Assessment**
+
    ```bash
    POST /api/risk/supplier/new-supplier-id/assess
    {
@@ -620,6 +629,7 @@ POST /api/alerts/:id/resolve
    ```
 
 3. **Screen Against Export Controls**
+
    ```bash
    POST /api/compliance/export-control/screen
    {
@@ -646,11 +656,13 @@ POST /api/alerts/:id/resolve
 **Steps:**
 
 1. **Detect Disruption**
+
    ```bash
    GET /api/logistics/ports/Shanghai/congestion
    ```
 
 2. **Create Incident**
+
    ```bash
    POST /api/incidents
    {
@@ -662,6 +674,7 @@ POST /api/alerts/:id/resolve
    ```
 
 3. **Generate Alerts**
+
    ```bash
    POST /api/alerts
    {
@@ -672,6 +685,7 @@ POST /api/alerts/:id/resolve
    ```
 
 4. **Find Alternative Routes**
+
    ```bash
    POST /api/logistics/optimize-route
    {
@@ -703,11 +717,13 @@ POST /api/alerts/:id/resolve
 **Steps:**
 
 1. **Assess Obsolescence Risk**
+
    ```bash
    GET /api/components/:componentId/obsolescence
    ```
 
 2. **Check Current Availability**
+
    ```bash
    GET /api/components/:componentId/availability?quantity=10000
    ```
@@ -772,6 +788,7 @@ POST /api/alerts/:id/resolve
 **Cause**: Node ID doesn't exist in the database
 
 **Solution**:
+
 ```bash
 # Verify node exists
 GET /api/nodes/:id
@@ -792,6 +809,7 @@ POST /api/nodes
 **Cause**: Large network (>10,000 nodes)
 
 **Solution**:
+
 - Use pagination for node retrieval
 - Implement caching with Redis
 - Use Neo4j for graph queries (faster than in-memory)
@@ -802,6 +820,7 @@ POST /api/nodes
 **Cause**: Loading entire network into memory
 
 **Solution**:
+
 - Implement database persistence
 - Use streaming for large datasets
 - Implement pagination on API endpoints
@@ -812,6 +831,7 @@ POST /api/nodes
 **Cause**: Missing or outdated assessment data
 
 **Solution**:
+
 - Ensure all required metrics are provided
 - Set up regular assessment schedules
 - Implement data validation
@@ -872,10 +892,7 @@ POST /api/nodes
       "impact": "negative"
     }
   ],
-  "mitigations": [
-    "Quarterly financial reviews",
-    "Request updated financial statements"
-  ],
+  "mitigations": ["Quarterly financial reviews", "Request updated financial statements"],
   "assessedAt": "2024-01-15T10:00:00Z"
 }
 ```

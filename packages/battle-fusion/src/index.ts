@@ -21,10 +21,10 @@ import type {
   SourceContribution,
   ThreatAssessment,
   ThreatLevel,
-} from '@intelgraph/battle-types';
+} from "@intelgraph/battle-types";
 
 // Re-export types
-export * from '@intelgraph/battle-types';
+export * from "@intelgraph/battle-types";
 
 // =============================================================================
 // FUSION ENGINE
@@ -32,14 +32,14 @@ export * from '@intelgraph/battle-types';
 
 export interface FusionEngineConfig {
   domainWeights?: Partial<Record<DataDomain, number>>;
-  conflictResolution?: 'HIGHEST_CONFIDENCE' | 'MOST_RECENT' | 'WEIGHTED_AVERAGE';
+  conflictResolution?: "HIGHEST_CONFIDENCE" | "MOST_RECENT" | "WEIGHTED_AVERAGE";
   correlationThreshold?: number;
   maxEntityAge?: number; // milliseconds
   enablePrediction?: boolean;
 }
 
 const DEFAULT_CONFIG: FusionEngineConfig = {
-  conflictResolution: 'HIGHEST_CONFIDENCE',
+  conflictResolution: "HIGHEST_CONFIDENCE",
   correlationThreshold: 0.7,
   maxEntityAge: 300000, // 5 minutes
   enablePrediction: true,
@@ -48,11 +48,11 @@ const DEFAULT_CONFIG: FusionEngineConfig = {
 const DOMAIN_WEIGHTS_DEFAULT: Record<DataDomain, number> = {
   SENSOR_GRID: 0.15,
   SATELLITE: 0.15,
-  COMMS: 0.10,
+  COMMS: 0.1,
   CYBER: 0.08,
   HUMINT: 0.12,
   SIGINT: 0.12,
-  IMINT: 0.10,
+  IMINT: 0.1,
   GEOINT: 0.08,
   OSINT: 0.04,
   ELINT: 0.03,
@@ -147,7 +147,7 @@ export class FusionEngine {
    * Group events by their likely entity match
    */
   private groupEventsByEntity(
-    events: NormalizedIngestEvent[],
+    events: NormalizedIngestEvent[]
   ): Map<string, NormalizedIngestEvent[]> {
     const groups = new Map<string, NormalizedIngestEvent[]>();
 
@@ -183,10 +183,7 @@ export class FusionEngine {
   /**
    * Fuse a group of events into a single entity
    */
-  private fuseEntityGroup(
-    entityKey: string,
-    events: NormalizedIngestEvent[],
-  ): FusedEntity | null {
+  private fuseEntityGroup(entityKey: string, events: NormalizedIngestEvent[]): FusedEntity | null {
     if (events.length === 0) return null;
 
     // Get existing entity if any
@@ -227,19 +224,15 @@ export class FusionEngine {
    */
   private calculateSourceWeight(event: NormalizedIngestEvent): number {
     const domainWeight =
-      this.config.domainWeights?.[event.domain] ??
-      DOMAIN_WEIGHTS_DEFAULT[event.domain] ??
-      0.05;
+      this.config.domainWeights?.[event.domain] ?? DOMAIN_WEIGHTS_DEFAULT[event.domain] ?? 0.05;
 
     const source = this.sourceRegistry.get(event.sourceId);
     if (!source) {
       return domainWeight * event.confidence;
     }
 
-    const reliabilityScore =
-      RELIABILITY_SCORES_DEFAULT[source.reliability] ?? 0.5;
-    const credibilityScore =
-      CREDIBILITY_SCORES_DEFAULT[source.credibility] ?? 0.5;
+    const reliabilityScore = RELIABILITY_SCORES_DEFAULT[source.reliability] ?? 0.5;
+    const credibilityScore = CREDIBILITY_SCORES_DEFAULT[source.credibility] ?? 0.5;
 
     return domainWeight * reliabilityScore * credibilityScore * event.confidence;
   }
@@ -249,11 +242,10 @@ export class FusionEngine {
    */
   private mergeEntityData(
     events: NormalizedIngestEvent[],
-    contributions: SourceContribution[],
+    contributions: SourceContribution[]
   ): Record<string, unknown> {
     const merged: Record<string, unknown> = {};
-    const fieldWeights: Record<string, Array<{ value: unknown; weight: number }>> =
-      {};
+    const fieldWeights: Record<string, Array<{ value: unknown; weight: number }>> = {};
 
     // Collect all field values with their weights
     for (let i = 0; i < events.length; i++) {
@@ -279,30 +271,23 @@ export class FusionEngine {
   /**
    * Resolve field value based on conflict resolution strategy
    */
-  private resolveFieldValue(
-    values: Array<{ value: unknown; weight: number }>,
-  ): unknown {
+  private resolveFieldValue(values: Array<{ value: unknown; weight: number }>): unknown {
     if (values.length === 0) return undefined;
     if (values.length === 1) return values[0].value;
 
     switch (this.config.conflictResolution) {
-      case 'HIGHEST_CONFIDENCE':
+      case "HIGHEST_CONFIDENCE":
         return values.reduce((a, b) => (a.weight > b.weight ? a : b)).value;
 
-      case 'WEIGHTED_AVERAGE':
+      case "WEIGHTED_AVERAGE":
         // Only works for numeric values
-        if (typeof values[0].value === 'number') {
+        if (typeof values[0].value === "number") {
           const totalWeight = values.reduce((sum, v) => sum + v.weight, 0);
-          return (
-            values.reduce(
-              (sum, v) => sum + (v.value as number) * v.weight,
-              0,
-            ) / totalWeight
-          );
+          return values.reduce((sum, v) => sum + (v.value as number) * v.weight, 0) / totalWeight;
         }
         return values.reduce((a, b) => (a.weight > b.weight ? a : b)).value;
 
-      case 'MOST_RECENT':
+      case "MOST_RECENT":
       default:
         return values[values.length - 1].value;
     }
@@ -339,9 +324,9 @@ export class FusionEngine {
           values,
           resolution: {
             selectedValue: this.resolveFieldValue(
-              values.map((v) => ({ value: v.value, weight: v.confidence })),
+              values.map((v) => ({ value: v.value, weight: v.confidence }))
             ),
-            method: this.config.conflictResolution || 'HIGHEST_CONFIDENCE',
+            method: this.config.conflictResolution || "HIGHEST_CONFIDENCE",
           },
         });
       }
@@ -356,7 +341,7 @@ export class FusionEngine {
   private buildBattlefieldEntity(
     entityKey: string,
     data: Record<string, unknown>,
-    events: NormalizedIngestEvent[],
+    events: NormalizedIngestEvent[]
   ): BattlefieldEntity {
     // Get most recent location
     const latestWithLocation = events
@@ -372,17 +357,15 @@ export class FusionEngine {
       id: entityKey,
       name: (data.name as string) || (data.designation as string) || entityKey,
       designation: data.designation as string,
-      forceType: (data.forceType as any) || 'UNKNOWN',
-      unitType: (data.unitType as any) || 'INFANTRY',
-      status: (data.status as any) || 'UNKNOWN',
+      forceType: (data.forceType as any) || "UNKNOWN",
+      unitType: (data.unitType as any) || "INFANTRY",
+      status: (data.status as any) || "UNKNOWN",
       location,
       heading: data.heading as number,
       speed: data.speed as number,
       strength: data.strength as number,
       confidence: this.calculateEntityConfidence(events),
-      lastUpdated: new Date(
-        Math.max(...events.map((e) => e.timestamp.getTime())),
-      ),
+      lastUpdated: new Date(Math.max(...events.map((e) => e.timestamp.getTime()))),
       sources: [...new Set(events.map((e) => e.sourceId))],
       metadata: data,
     };
@@ -420,10 +403,9 @@ export class FusionEngine {
     // Average weighted confidence
     const totalWeight = contributions.reduce((sum, c) => sum + c.weight, 0);
     const avgConfidence =
-      contributions.reduce((sum, c) => sum + c.confidence * c.weight, 0) /
-      totalWeight;
+      contributions.reduce((sum, c) => sum + c.confidence * c.weight, 0) / totalWeight;
 
-    return (domainDiversity * 0.3 + avgConfidence * 0.7);
+    return domainDiversity * 0.3 + avgConfidence * 0.7;
   }
 
   /**
@@ -438,41 +420,33 @@ export class FusionEngine {
         const e2 = entities[j];
 
         // Check spatial proximity
-        const distance = this.calculateDistance(
-          e1.entity.location,
-          e2.entity.location,
-        );
+        const distance = this.calculateDistance(e1.entity.location, e2.entity.location);
 
         if (distance < 1) {
           // Within 1km
           correlations.push({
             entityId1: e1.canonicalId,
             entityId2: e2.canonicalId,
-            correlationType: 'RELATED',
+            correlationType: "RELATED",
             confidence: 0.8 - distance * 0.3,
             evidence: [`Spatial proximity: ${distance.toFixed(2)}km`],
           });
         }
 
         // Check command relationships
-        if (
-          e1.entity.unitType === 'COMMAND' &&
-          e1.entity.forceType === e2.entity.forceType
-        ) {
+        if (e1.entity.unitType === "COMMAND" && e1.entity.forceType === e2.entity.forceType) {
           correlations.push({
             entityId1: e1.canonicalId,
             entityId2: e2.canonicalId,
-            correlationType: 'COMMANDING',
+            correlationType: "COMMANDING",
             confidence: 0.6,
-            evidence: ['Unit type relationship'],
+            evidence: ["Unit type relationship"],
           });
         }
       }
     }
 
-    return correlations.filter(
-      (c) => c.confidence >= (this.config.correlationThreshold || 0.7),
-    );
+    return correlations.filter((c) => c.confidence >= (this.config.correlationThreshold || 0.7));
   }
 
   /**
@@ -499,25 +473,19 @@ export class FusionEngine {
   /**
    * Generate situational picture from fused entities
    */
-  private generateSituationalPicture(
-    entities: FusedEntity[],
-  ): SituationalPicture {
-    const blueForces = entities
-      .filter((e) => e.entity.forceType === 'BLUE')
-      .map((e) => e.entity);
-    const redForces = entities
-      .filter((e) => e.entity.forceType === 'RED')
-      .map((e) => e.entity);
+  private generateSituationalPicture(entities: FusedEntity[]): SituationalPicture {
+    const blueForces = entities.filter((e) => e.entity.forceType === "BLUE").map((e) => e.entity);
+    const redForces = entities.filter((e) => e.entity.forceType === "RED").map((e) => e.entity);
     const neutralForces = entities
-      .filter((e) => e.entity.forceType === 'NEUTRAL')
+      .filter((e) => e.entity.forceType === "NEUTRAL")
       .map((e) => e.entity);
     const unknownContacts = entities
-      .filter((e) => e.entity.forceType === 'UNKNOWN')
+      .filter((e) => e.entity.forceType === "UNKNOWN")
       .map((e) => e.entity);
 
     // Generate threat assessments for red forces
     const threats: ThreatAssessment[] = redForces.map((entity) =>
-      this.assessThreat(entity, blueForces),
+      this.assessThreat(entity, blueForces)
     );
 
     return {
@@ -543,21 +511,21 @@ export class FusionEngine {
    */
   private assessThreat(
     entity: BattlefieldEntity,
-    friendlyForces: BattlefieldEntity[],
+    friendlyForces: BattlefieldEntity[]
   ): ThreatAssessment {
     // Calculate threat level based on proximity and capability
-    let threatLevel: ThreatLevel = 'LOW';
+    let threatLevel: ThreatLevel = "LOW";
 
     const nearestFriendly = friendlyForces.reduce((nearest, friendly) => {
       const dist = this.calculateDistance(entity.location, friendly.location);
       return dist < nearest ? dist : nearest;
     }, Infinity);
 
-    if (nearestFriendly < 5) threatLevel = 'CRITICAL';
-    else if (nearestFriendly < 20) threatLevel = 'HIGH';
-    else if (nearestFriendly < 50) threatLevel = 'MEDIUM';
-    else if (nearestFriendly < 100) threatLevel = 'LOW';
-    else threatLevel = 'MINIMAL';
+    if (nearestFriendly < 5) threatLevel = "CRITICAL";
+    else if (nearestFriendly < 20) threatLevel = "HIGH";
+    else if (nearestFriendly < 50) threatLevel = "MEDIUM";
+    else if (nearestFriendly < 100) threatLevel = "LOW";
+    else threatLevel = "MINIMAL";
 
     return {
       id: `threat-${entity.id}`,
@@ -565,7 +533,7 @@ export class FusionEngine {
       threatLevel,
       threatType: entity.unitType,
       capabilities: this.inferCapabilities(entity),
-      intent: entity.status === 'ENGAGED' ? 'OFFENSIVE' : 'UNKNOWN',
+      intent: entity.status === "ENGAGED" ? "OFFENSIVE" : "UNKNOWN",
       confidence: entity.confidence,
     };
   }
@@ -575,16 +543,16 @@ export class FusionEngine {
    */
   private inferCapabilities(entity: BattlefieldEntity): string[] {
     const capabilities: Record<string, string[]> = {
-      INFANTRY: ['Ground assault', 'Area denial'],
-      ARMOR: ['Breakthrough', 'Direct fire support'],
-      ARTILLERY: ['Indirect fire', 'Area suppression'],
-      AIR: ['Air superiority', 'Close air support', 'Reconnaissance'],
-      NAVAL: ['Sea control', 'Power projection'],
-      CYBER: ['Network disruption', 'Information warfare'],
-      LOGISTICS: ['Supply', 'Transport'],
-      COMMAND: ['Command and control', 'Coordination'],
-      RECON: ['Intelligence gathering', 'Target acquisition'],
-      SPECIAL_OPS: ['Precision strike', 'Sabotage', 'Infiltration'],
+      INFANTRY: ["Ground assault", "Area denial"],
+      ARMOR: ["Breakthrough", "Direct fire support"],
+      ARTILLERY: ["Indirect fire", "Area suppression"],
+      AIR: ["Air superiority", "Close air support", "Reconnaissance"],
+      NAVAL: ["Sea control", "Power projection"],
+      CYBER: ["Network disruption", "Information warfare"],
+      LOGISTICS: ["Supply", "Transport"],
+      COMMAND: ["Command and control", "Coordination"],
+      RECON: ["Intelligence gathering", "Target acquisition"],
+      SPECIAL_OPS: ["Precision strike", "Sabotage", "Infiltration"],
     };
 
     return capabilities[entity.unitType] || [];
@@ -593,9 +561,10 @@ export class FusionEngine {
   /**
    * Calculate bounding box for all entities
    */
-  private calculateBoundingBox(
-    entities: BattlefieldEntity[],
-  ): { northWest: GeoLocation; southEast: GeoLocation } {
+  private calculateBoundingBox(entities: BattlefieldEntity[]): {
+    northWest: GeoLocation;
+    southEast: GeoLocation;
+  } {
     if (entities.length === 0) {
       return {
         northWest: { latitude: 0, longitude: 0 },
@@ -626,9 +595,7 @@ export class FusionEngine {
    */
   private calculateOverallConfidence(entities: FusedEntity[]): number {
     if (entities.length === 0) return 0;
-    return (
-      entities.reduce((sum, e) => sum + e.fusionScore, 0) / entities.length
-    );
+    return entities.reduce((sum, e) => sum + e.fusionScore, 0) / entities.length;
   }
 
   /**
@@ -661,10 +628,7 @@ export class FusionEngine {
 // DATA NORMALIZERS
 // =============================================================================
 
-export function normalizeSensorReading(
-  raw: unknown,
-  sourceId: string,
-): NormalizedIngestEvent[] {
+export function normalizeSensorReading(raw: unknown, sourceId: string): NormalizedIngestEvent[] {
   const reading = raw as any;
   const events: NormalizedIngestEvent[] = [];
 
@@ -672,10 +636,10 @@ export function normalizeSensorReading(
     events.push({
       eventId: `sensor-${Date.now()}-${detection.id}`,
       sourceId,
-      domain: 'SENSOR_GRID',
+      domain: "SENSOR_GRID",
       timestamp: new Date(reading.timestamp),
       normalizedAt: new Date(),
-      entityType: detection.classification || 'CONTACT',
+      entityType: detection.classification || "CONTACT",
       entityId: detection.id,
       location: detection.location,
       confidence: detection.confidence,
@@ -687,10 +651,10 @@ export function normalizeSensorReading(
       },
       provenance: {
         sourceId,
-        sourceDomain: 'SENSOR_GRID',
-        reliability: 'B',
+        sourceDomain: "SENSOR_GRID",
+        reliability: "B",
         credibility: 2,
-        transformations: ['normalizeSensorReading'],
+        transformations: ["normalizeSensorReading"],
         correlationIds: [reading.sensorId],
       },
     });
@@ -699,10 +663,7 @@ export function normalizeSensorReading(
   return events;
 }
 
-export function normalizeSatelliteImagery(
-  raw: unknown,
-  sourceId: string,
-): NormalizedIngestEvent[] {
+export function normalizeSatelliteImagery(raw: unknown, sourceId: string): NormalizedIngestEvent[] {
   const imagery = raw as any;
   const events: NormalizedIngestEvent[] = [];
 
@@ -710,7 +671,7 @@ export function normalizeSatelliteImagery(
     events.push({
       eventId: `sat-${Date.now()}-${result.type}`,
       sourceId,
-      domain: 'SATELLITE',
+      domain: "SATELLITE",
       timestamp: new Date(imagery.captureTime),
       normalizedAt: new Date(),
       entityType: result.classification || result.type,
@@ -725,10 +686,10 @@ export function normalizeSatelliteImagery(
       },
       provenance: {
         sourceId,
-        sourceDomain: 'SATELLITE',
-        reliability: 'A',
+        sourceDomain: "SATELLITE",
+        reliability: "A",
         credibility: 1,
-        transformations: ['normalizeSatelliteImagery'],
+        transformations: ["normalizeSatelliteImagery"],
         correlationIds: [imagery.imageId],
       },
     });
@@ -737,19 +698,16 @@ export function normalizeSatelliteImagery(
   return events;
 }
 
-export function normalizeCommsIntercept(
-  raw: unknown,
-  sourceId: string,
-): NormalizedIngestEvent {
+export function normalizeCommsIntercept(raw: unknown, sourceId: string): NormalizedIngestEvent {
   const intercept = raw as any;
 
   return {
     eventId: `comms-${intercept.interceptId}`,
     sourceId,
-    domain: 'COMMS',
+    domain: "COMMS",
     timestamp: new Date(intercept.timestamp),
     normalizedAt: new Date(),
-    entityType: 'COMMS_INTERCEPT',
+    entityType: "COMMS_INTERCEPT",
     location: intercept.sourceLocation,
     confidence: 0.7,
     data: {
@@ -760,29 +718,26 @@ export function normalizeCommsIntercept(
     },
     provenance: {
       sourceId,
-      sourceDomain: 'COMMS',
-      reliability: 'C',
+      sourceDomain: "COMMS",
+      reliability: "C",
       credibility: 3,
-      transformations: ['normalizeCommsIntercept'],
+      transformations: ["normalizeCommsIntercept"],
       correlationIds: [intercept.interceptId],
     },
   };
 }
 
-export function normalizeCyberEvent(
-  raw: unknown,
-  sourceId: string,
-): NormalizedIngestEvent {
+export function normalizeCyberEvent(raw: unknown, sourceId: string): NormalizedIngestEvent {
   const event = raw as any;
 
   return {
     eventId: `cyber-${event.eventId}`,
     sourceId,
-    domain: 'CYBER',
+    domain: "CYBER",
     timestamp: new Date(event.timestamp),
     normalizedAt: new Date(),
-    entityType: 'CYBER_THREAT',
-    confidence: event.severity === 'CRITICAL' ? 0.9 : 0.6,
+    entityType: "CYBER_THREAT",
+    confidence: event.severity === "CRITICAL" ? 0.9 : 0.6,
     data: {
       eventType: event.eventType,
       severity: event.severity,
@@ -795,10 +750,10 @@ export function normalizeCyberEvent(
     },
     provenance: {
       sourceId,
-      sourceDomain: 'CYBER',
-      reliability: 'B',
+      sourceDomain: "CYBER",
+      reliability: "B",
       credibility: 2,
-      transformations: ['normalizeCyberEvent'],
+      transformations: ["normalizeCyberEvent"],
       correlationIds: [event.eventId],
     },
   };

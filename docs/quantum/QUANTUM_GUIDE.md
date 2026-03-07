@@ -28,8 +28,9 @@ Summit implements NIST-standardized post-quantum cryptographic algorithms to pro
 #### Key Encapsulation
 
 **CRYSTALS-Kyber**
+
 ```typescript
-import { createKyberKEM, SecurityLevel } from '@intelgraph/post-quantum-crypto';
+import { createKyberKEM, SecurityLevel } from "@intelgraph/post-quantum-crypto";
 
 // Create Kyber KEM with security level 3 (recommended)
 const kem = createKyberKEM(SecurityLevel.LEVEL_3);
@@ -47,11 +48,12 @@ console.assert(recoveredSecret.equals(sharedSecret));
 ```
 
 **Hybrid KEM (Recommended)**
+
 ```typescript
-import { createHybridKEM } from '@intelgraph/post-quantum-crypto';
+import { createHybridKEM } from "@intelgraph/post-quantum-crypto";
 
 // Combines X25519 with Kyber-768 for defense-in-depth
-const hybridKEM = createHybridKEM('x25519');
+const hybridKEM = createHybridKEM("x25519");
 
 const keyPair = await hybridKEM.generateKeyPair();
 const { ciphertext, sharedSecret } = await hybridKEM.encapsulate(keyPair.publicKey);
@@ -60,8 +62,9 @@ const { ciphertext, sharedSecret } = await hybridKEM.encapsulate(keyPair.publicK
 #### Digital Signatures
 
 **CRYSTALS-Dilithium**
+
 ```typescript
-import { createDilithiumSignature, SecurityLevel } from '@intelgraph/post-quantum-crypto';
+import { createDilithiumSignature, SecurityLevel } from "@intelgraph/post-quantum-crypto";
 
 const dss = createDilithiumSignature(SecurityLevel.LEVEL_3);
 
@@ -69,17 +72,18 @@ const dss = createDilithiumSignature(SecurityLevel.LEVEL_3);
 const keyPair = await dss.generateKeyPair();
 
 // Sign message
-const message = new TextEncoder().encode('Hello, Quantum World!');
+const message = new TextEncoder().encode("Hello, Quantum World!");
 const { signature } = await dss.sign(message, keyPair.privateKey);
 
 // Verify signature
 const isValid = await dss.verify(message, signature, keyPair.publicKey);
-console.log('Signature valid:', isValid);
+console.log("Signature valid:", isValid);
 ```
 
 **FALCON (Compact Signatures)**
+
 ```typescript
-import { createFalconSignature } from '@intelgraph/post-quantum-crypto';
+import { createFalconSignature } from "@intelgraph/post-quantum-crypto";
 
 const falcon = createFalconSignature(SecurityLevel.LEVEL_1);
 
@@ -87,12 +91,13 @@ const keyPair = await falcon.generateKeyPair();
 const { signature } = await falcon.sign(message, keyPair.privateKey);
 
 // FALCON signatures are ~40% smaller than Dilithium
-console.log('Signature size:', signature.length);
+console.log("Signature size:", signature.length);
 ```
 
 **SPHINCS+ (Hash-based, Stateless)**
+
 ```typescript
-import { createSphincsSignature } from '@intelgraph/post-quantum-crypto';
+import { createSphincsSignature } from "@intelgraph/post-quantum-crypto";
 
 // Use 'fast' variant for better performance, 's' for smaller signatures
 const sphincs = createSphincsSignature(SecurityLevel.LEVEL_5, true);
@@ -104,7 +109,7 @@ const { signature } = await sphincs.sign(message, keyPair.privateKey);
 ### Performance Benchmarking
 
 ```typescript
-import { createBenchmarker } from '@intelgraph/post-quantum-crypto';
+import { createBenchmarker } from "@intelgraph/post-quantum-crypto";
 
 const benchmarker = createBenchmarker(100);
 
@@ -121,17 +126,17 @@ console.log(benchmarker.formatResults([...kemResults, ...sigResults]));
 ### Validation
 
 ```typescript
-import { createValidator } from '@intelgraph/post-quantum-crypto';
+import { createValidator } from "@intelgraph/post-quantum-crypto";
 
 const validator = createValidator();
 
 // Validate KEM correctness
 const kemValid = await validator.validateKEM(kem, 100);
-console.log('KEM validation:', kemValid ? 'PASS' : 'FAIL');
+console.log("KEM validation:", kemValid ? "PASS" : "FAIL");
 
 // Validate signature scheme
 const sigValid = await validator.validateSignature(dss, 100);
-console.log('Signature validation:', sigValid ? 'PASS' : 'FAIL');
+console.log("Signature validation:", sigValid ? "PASS" : "FAIL");
 
 // Test non-repudiation
 const nonRepudiationPass = await validator.testNonRepudiation(dss);
@@ -148,57 +153,51 @@ Summit provides a complete quantum circuit simulation framework with support for
 ### Building Quantum Circuits
 
 ```typescript
-import { createCircuit } from '@intelgraph/quantum-simulation';
+import { createCircuit } from "@intelgraph/quantum-simulation";
 
 // Create a 3-qubit circuit
 const circuit = createCircuit(3)
-  .h(0)                    // Hadamard on qubit 0
-  .cnot(0, 1)              // CNOT from qubit 0 to 1
-  .cnot(1, 2)              // CNOT from qubit 1 to 2
-  .measure()               // Measure all qubits
+  .h(0) // Hadamard on qubit 0
+  .cnot(0, 1) // CNOT from qubit 0 to 1
+  .cnot(1, 2) // CNOT from qubit 1 to 2
+  .measure() // Measure all qubits
   .build();
 
-console.log('Created GHZ state circuit');
+console.log("Created GHZ state circuit");
 ```
 
 ### Simulating Circuits
 
 ```typescript
-import { createStatevectorSimulator } from '@intelgraph/quantum-simulation';
+import { createStatevectorSimulator } from "@intelgraph/quantum-simulation";
 
 const simulator = createStatevectorSimulator();
 
 // Simulate with 1024 shots
 const result = await simulator.simulate(circuit, 1024);
 
-console.log('Measurement counts:', result.counts);
-console.log('Execution time:', result.executionTime, 'ms');
+console.log("Measurement counts:", result.counts);
+console.log("Execution time:", result.executionTime, "ms");
 ```
 
 ### Common Quantum States
 
 **Bell State**
+
 ```typescript
-const bellCircuit = createCircuit(2)
-  .createBellState(0, 1)
-  .measure()
-  .build();
+const bellCircuit = createCircuit(2).createBellState(0, 1).measure().build();
 ```
 
 **GHZ State**
+
 ```typescript
-const ghzCircuit = createCircuit(4)
-  .createGHZState([0, 1, 2, 3])
-  .measure()
-  .build();
+const ghzCircuit = createCircuit(4).createGHZState([0, 1, 2, 3]).measure().build();
 ```
 
 **Quantum Fourier Transform**
+
 ```typescript
-const qftCircuit = createCircuit(4)
-  .qft([0, 1, 2, 3])
-  .measure()
-  .build();
+const qftCircuit = createCircuit(4).qft([0, 1, 2, 3]).measure().build();
 ```
 
 ### Custom Gate Sequences
@@ -235,8 +234,8 @@ Summit implements quantum-inspired optimization algorithms for solving combinato
 ### QAOA (Quantum Approximate Optimization Algorithm)
 
 ```typescript
-import { createQAOAOptimizer } from '@intelgraph/quantum-optimization';
-import { createStatevectorSimulator } from '@intelgraph/quantum-simulation';
+import { createQAOAOptimizer } from "@intelgraph/quantum-optimization";
+import { createStatevectorSimulator } from "@intelgraph/quantum-simulation";
 
 const simulator = createStatevectorSimulator();
 
@@ -248,25 +247,28 @@ const edges = [
   { i: 3, j: 0, weight: 1 },
 ];
 
-const qaoa = createQAOAOptimizer({
-  numQubits: 4,
-  p: 2,  // Number of QAOA layers
-  costHamiltonian: { edges },
-  mixer: 'x',
-}, simulator);
+const qaoa = createQAOAOptimizer(
+  {
+    numQubits: 4,
+    p: 2, // Number of QAOA layers
+    costHamiltonian: { edges },
+    mixer: "x",
+  },
+  simulator
+);
 
 // Run optimization
 const result = await qaoa.optimize(100);
 
-console.log('Optimal solution:', result.optimalSolution);
-console.log('Optimal value:', result.optimalValue);
-console.log('Convergence:', result.convergence);
+console.log("Optimal solution:", result.optimalSolution);
+console.log("Optimal value:", result.optimalValue);
+console.log("Convergence:", result.convergence);
 ```
 
 ### Quantum Annealing
 
 ```typescript
-import { createQuantumAnnealer } from '@intelgraph/quantum-optimization';
+import { createQuantumAnnealer } from "@intelgraph/quantum-optimization";
 
 const annealer = createQuantumAnnealer();
 
@@ -277,40 +279,46 @@ const qubo = [
   [0, -1, 1],
 ];
 
-const result = await annealer.anneal({
-  numVars: 3,
-  qubo,
-}, 10000);
+const result = await annealer.anneal(
+  {
+    numVars: 3,
+    qubo,
+  },
+  10000
+);
 
-console.log('Solution:', result.solution);
-console.log('Energy:', result.energy);
+console.log("Solution:", result.solution);
+console.log("Energy:", result.energy);
 ```
 
 ### VQE (Variational Quantum Eigensolver)
 
 ```typescript
-import { createVQESolver } from '@intelgraph/quantum-optimization';
+import { createVQESolver } from "@intelgraph/quantum-optimization";
 
 // Define Hamiltonian (e.g., H2 molecule)
 const hamiltonian = {
   terms: [
-    { coefficient: 0.2, pauliString: 'ZIII' },
-    { coefficient: 0.1, pauliString: 'IZII' },
-    { coefficient: -0.3, pauliString: 'ZZII' },
-    { coefficient: 0.05, pauliString: 'XXII' },
+    { coefficient: 0.2, pauliString: "ZIII" },
+    { coefficient: 0.1, pauliString: "IZII" },
+    { coefficient: -0.3, pauliString: "ZZII" },
+    { coefficient: 0.05, pauliString: "XXII" },
   ],
 };
 
-const vqe = createVQESolver({
-  numQubits: 4,
-  hamiltonian,
-  ansatz: 'hardware-efficient',
-  layers: 3,
-}, simulator);
+const vqe = createVQESolver(
+  {
+    numQubits: 4,
+    hamiltonian,
+    ansatz: "hardware-efficient",
+    layers: 3,
+  },
+  simulator
+);
 
 const result = await vqe.solve(100);
 
-console.log('Ground state energy:', result.groundStateEnergy);
+console.log("Ground state energy:", result.groundStateEnergy);
 ```
 
 ---
@@ -324,13 +332,16 @@ Summit provides quantum machine learning capabilities including quantum kernels,
 ### Quantum Kernel Methods
 
 ```typescript
-import { createQuantumKernel } from '@intelgraph/quantum-ml';
+import { createQuantumKernel } from "@intelgraph/quantum-ml";
 
-const qkernel = createQuantumKernel({
-  numQubits: 4,
-  featureMap: 'zz',
-  reps: 2,
-}, simulator);
+const qkernel = createQuantumKernel(
+  {
+    numQubits: 4,
+    featureMap: "zz",
+    reps: 2,
+  },
+  simulator
+);
 
 // Training data
 const X = [
@@ -342,62 +353,82 @@ const X = [
 // Compute kernel matrix for classification
 const kernelMatrix = await qkernel.computeKernelMatrix(X);
 
-console.log('Kernel matrix:', kernelMatrix);
+console.log("Kernel matrix:", kernelMatrix);
 ```
 
 ### Quantum Neural Networks
 
 ```typescript
-import { createQNN } from '@intelgraph/quantum-ml';
+import { createQNN } from "@intelgraph/quantum-ml";
 
-const qnn = createQNN({
-  numQubits: 4,
-  layers: 3,
-  entangling: 'circular',
-}, simulator);
+const qnn = createQNN(
+  {
+    numQubits: 4,
+    layers: 3,
+    entangling: "circular",
+  },
+  simulator
+);
 
 // Training data
-const X = [[0.1, 0.2], [0.3, 0.4], [0.5, 0.6]];
-const y = [0, 1, 0];  // Binary labels
+const X = [
+  [0.1, 0.2],
+  [0.3, 0.4],
+  [0.5, 0.6],
+];
+const y = [0, 1, 0]; // Binary labels
 
 // Train QNN
 await qnn.train(X, y, {
   learningRate: 0.01,
   epochs: 100,
   batchSize: 1,
-  optimizer: 'sgd',
+  optimizer: "sgd",
 });
 
 // Inference
 const input = [0.2, 0.3];
 const output = await qnn.forward(input);
-console.log('QNN output:', output);
+console.log("QNN output:", output);
 ```
 
 ### Hybrid Quantum-Classical Models
 
 ```typescript
-import { createHybridModel } from '@intelgraph/quantum-ml';
+import { createHybridModel } from "@intelgraph/quantum-ml";
 
-const hybridModel = createHybridModel({
-  quantumParams: {
-    numQubits: 4,
-    layers: 2,
-    entangling: 'linear',
+const hybridModel = createHybridModel(
+  {
+    quantumParams: {
+      numQubits: 4,
+      layers: 2,
+      entangling: "linear",
+    },
+    classicalLayers: [8, 4, 2], // Classical neural network layers
+    activation: "relu",
   },
-  classicalLayers: [8, 4, 2],  // Classical neural network layers
-  activation: 'relu',
-}, simulator);
+  simulator
+);
 
 // Training data (multiclass)
-const X = [[0.1, 0.2], [0.3, 0.4], [0.5, 0.6], [0.7, 0.8]];
-const y = [[1, 0], [0, 1], [1, 0], [0, 1]];  // One-hot encoded
+const X = [
+  [0.1, 0.2],
+  [0.3, 0.4],
+  [0.5, 0.6],
+  [0.7, 0.8],
+];
+const y = [
+  [1, 0],
+  [0, 1],
+  [1, 0],
+  [0, 1],
+]; // One-hot encoded
 
 await hybridModel.train(X, y, 50, 0.01);
 
 // Prediction
 const prediction = await hybridModel.forward([0.25, 0.35]);
-console.log('Prediction:', prediction);
+console.log("Prediction:", prediction);
 ```
 
 ---
@@ -411,8 +442,8 @@ Summit supports hybrid workflows that combine classical preprocessing with quant
 ### Example: Portfolio Optimization
 
 ```typescript
-import { createQAOAOptimizer } from '@intelgraph/quantum-optimization';
-import { createStatevectorSimulator } from '@intelgraph/quantum-simulation';
+import { createQAOAOptimizer } from "@intelgraph/quantum-optimization";
+import { createStatevectorSimulator } from "@intelgraph/quantum-simulation";
 
 async function optimizePortfolio(assets: number[], returns: number[][], riskTolerance: number) {
   // Classical preprocessing: compute covariance matrix
@@ -422,11 +453,14 @@ async function optimizePortfolio(assets: number[], returns: number[][], riskTole
   const qubo = portfolioToQUBO(assets, covariance, riskTolerance);
 
   // Quantum optimization
-  const qaoa = createQAOAOptimizer({
-    numQubits: assets.length,
-    p: 3,
-    costHamiltonian: quboToHamiltonian(qubo),
-  }, createStatevectorSimulator());
+  const qaoa = createQAOAOptimizer(
+    {
+      numQubits: assets.length,
+      p: 3,
+      costHamiltonian: quboToHamiltonian(qubo),
+    },
+    createStatevectorSimulator()
+  );
 
   const result = await qaoa.optimize(200);
 
@@ -445,12 +479,15 @@ async function simulateMolecule(molecule: string) {
   const hamiltonian = moleculeToHamiltonian(molecule);
 
   // Quantum: Find ground state energy
-  const vqe = createVQESolver({
-    numQubits: hamiltonian.numQubits,
-    hamiltonian,
-    ansatz: 'uccsd',
-    layers: 2,
-  }, simulator);
+  const vqe = createVQESolver(
+    {
+      numQubits: hamiltonian.numQubits,
+      hamiltonian,
+      ansatz: "uccsd",
+      layers: 2,
+    },
+    simulator
+  );
 
   const result = await vqe.solve(100);
 
@@ -479,18 +516,15 @@ Summit can integrate with cloud quantum computing providers for access to real q
 ### Example: IBM Quantum
 
 ```typescript
-import { createIBMBackend } from '@intelgraph/quantum-simulation';
+import { createIBMBackend } from "@intelgraph/quantum-simulation";
 
 const backend = createIBMBackend({
   apiKey: process.env.IBM_QUANTUM_API_KEY!,
-  backend: 'ibm_osaka',  // 127-qubit quantum processor
+  backend: "ibm_osaka", // 127-qubit quantum processor
 });
 
 // Submit circuit to quantum hardware
-const circuit = createCircuit(5)
-  .createGHZState([0, 1, 2, 3, 4])
-  .measure()
-  .build();
+const circuit = createCircuit(5).createGHZState([0, 1, 2, 3, 4]).measure().build();
 
 const jobId = await backend.submit(circuit);
 
@@ -498,13 +532,13 @@ const jobId = await backend.submit(circuit);
 while (true) {
   const status = await backend.getStatus(jobId);
 
-  if (status === 'completed') {
+  if (status === "completed") {
     const result = await backend.getResult(jobId);
-    console.log('Quantum hardware result:', result.counts);
+    console.log("Quantum hardware result:", result.counts);
     break;
   }
 
-  await new Promise(resolve => setTimeout(resolve, 5000));
+  await new Promise((resolve) => setTimeout(resolve, 5000));
 }
 ```
 
@@ -551,37 +585,51 @@ while (true) {
 ### Common Issues
 
 #### Issue: "Circuit too large for simulator"
+
 **Solution**: Reduce number of qubits or use tensor network simulator
+
 ```typescript
 // Use approximate simulation for large circuits
 const backend = createApproximateBackend({ maxQubits: 50 });
 ```
 
 #### Issue: "PQC key generation is slow"
+
 **Solution**: Use hardware acceleration or lower security level for non-critical applications
+
 ```typescript
 // Use Level 1 for faster performance
 const kem = createKyberKEM(SecurityLevel.LEVEL_1);
 ```
 
 #### Issue: "QAOA not converging"
+
 **Solution**: Increase layers, adjust learning rate, or try different initialization
+
 ```typescript
-const qaoa = createQAOAOptimizer({
-  numQubits: 6,
-  p: 4,  // Increase layers
-  // ... other params
-}, simulator);
+const qaoa = createQAOAOptimizer(
+  {
+    numQubits: 6,
+    p: 4, // Increase layers
+    // ... other params
+  },
+  simulator
+);
 ```
 
 #### Issue: "Quantum kernel computation timeout"
+
 **Solution**: Reduce feature map repetitions or use classical kernels for preprocessing
+
 ```typescript
-const qkernel = createQuantumKernel({
-  numQubits: 4,
-  featureMap: 'zz',
-  reps: 1,  // Reduce from 2 to 1
-}, simulator);
+const qkernel = createQuantumKernel(
+  {
+    numQubits: 4,
+    featureMap: "zz",
+    reps: 1, // Reduce from 2 to 1
+  },
+  simulator
+);
 ```
 
 ### Performance Optimization
@@ -595,15 +643,17 @@ const qkernel = createQuantumKernel({
 ### Debugging
 
 Enable debug logging:
-```typescript
-import { setQuantumLogLevel } from '@intelgraph/quantum-simulation';
 
-setQuantumLogLevel('debug');
+```typescript
+import { setQuantumLogLevel } from "@intelgraph/quantum-simulation";
+
+setQuantumLogLevel("debug");
 ```
 
 Visualize circuits:
+
 ```typescript
-import { visualizeCircuit } from '@intelgraph/quantum-simulation';
+import { visualizeCircuit } from "@intelgraph/quantum-simulation";
 
 const circuit = createCircuit(3).h(0).cnot(0, 1).build();
 console.log(visualizeCircuit(circuit));

@@ -1,4 +1,4 @@
-import { RetrievalDocument } from './types.js';
+import { RetrievalDocument } from "./types.js";
 
 export class RetrievalIndex {
   private readonly documents = new Map<string, RetrievalDocument>();

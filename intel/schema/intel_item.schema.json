@@ -2,16 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Summit Intelligence Item",
   "type": "object",
-  "required": [
-    "id",
-    "date",
-    "title",
-    "classification",
-    "sources",
-    "actors",
-    "tags",
-    "claims"
-  ],
+  "required": ["id", "date", "title", "classification", "sources", "actors", "tags", "claims"],
   "properties": {
     "id": {
       "type": "string",
@@ -38,19 +29,19 @@
         "type": "object",
         "required": ["label", "url"],
         "properties": {
-          "label": {"type": "string"},
-          "url": {"type": "string", "format": "uri"}
+          "label": { "type": "string" },
+          "url": { "type": "string", "format": "uri" }
         },
         "additionalProperties": false
       }
     },
     "actors": {
       "type": "array",
-      "items": {"type": "string"}
+      "items": { "type": "string" }
     },
     "tags": {
       "type": "array",
-      "items": {"type": "string"}
+      "items": { "type": "string" }
     },
     "claims": {
       "type": "array",
@@ -58,8 +49,8 @@
         "type": "object",
         "required": ["claim_id", "summary", "confidence"],
         "properties": {
-          "claim_id": {"type": "string"},
-          "summary": {"type": "string"},
+          "claim_id": { "type": "string" },
+          "summary": { "type": "string" },
           "confidence": {
             "type": "string",
             "enum": ["low", "medium", "high", "very_high"]
@@ -70,7 +61,7 @@
     },
     "ttps": {
       "type": "array",
-      "items": {"type": "string"},
+      "items": { "type": "string" },
       "description": "List of Tactics, Techniques, and Procedures observed"
     }
   },

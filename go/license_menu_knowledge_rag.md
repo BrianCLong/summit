@@ -1,6 +1,7 @@
 # License Menu: Summit Knowledge & RAG Offerings
 
 ## Licensing Options
+
 - **Community (Source-Available)**
   - Core schemas, reference ingestion/retrieval pipelines, and SDK adapters.
   - Non-commercial clause; attribution required; excludes managed services and domain packs.
@@ -16,11 +17,13 @@
   - Volume-based pricing with white-label options.
 
 ## Usage Policies
+
 - Data residency and retention options configurable per tenant; encryption in transit and at rest mandated.
 - Telemetry collection is opt-in per tenant with configurable redaction and retention windows.
 - Prohibit use for disallowed categories (e.g., surveillance, discriminatory decisioning) as defined in governance policy.
 
 ## IP & Compliance Notes
+
 - Patents pending around unified graph+doc+tool RAG and telemetry-driven knowledge shaping.
 - Ensure third-party connectors and IntelGraph dependencies are licensed for commercial use.
 - Provide audit artifacts on ingestion pipelines, retrieval policies, and telemetry handling for enterprise reviews.

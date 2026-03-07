@@ -14,11 +14,11 @@
  */
 
 // Types
-export * from './types';
+export * from "./types";
 
 // Policy Engine
-export { AgentPolicyEngine, agentPolicyEngine } from './policy-engine/AgentPolicyEngine';
-export type { PolicyEngineConfig } from './policy-engine/AgentPolicyEngine';
+export { AgentPolicyEngine, agentPolicyEngine } from "./policy-engine/AgentPolicyEngine";
+export type { PolicyEngineConfig } from "./policy-engine/AgentPolicyEngine";
 
 // Orchestration
 export {
@@ -30,7 +30,7 @@ export {
   type LLMProviderAdapter,
   type LLMExecutionOptions,
   type LLMExecutionResult,
-} from './orchestration/PromptChainOrchestrator';
+} from "./orchestration/PromptChainOrchestrator";
 
 // Incident Response
 export {
@@ -40,7 +40,7 @@ export {
   type NotificationChannel,
   type MitigationPolicy,
   type MitigationAction,
-} from './incident-response/IncidentResponseManager';
+} from "./incident-response/IncidentResponseManager";
 
 // Hallucination Audit
 export {
@@ -49,23 +49,20 @@ export {
   type DetectionMethod,
   type DetectionContext,
   type DetectionResult,
-} from './hallucination-audit/HallucinationAuditor';
+} from "./hallucination-audit/HallucinationAuditor";
 
 // Rollback
-export {
-  RollbackManager,
-  rollbackManager,
-} from './rollback/RollbackManager';
+export { RollbackManager, rollbackManager } from "./rollback/RollbackManager";
 
 // Provenance
 export {
   AIProvenanceManager,
   aiProvenanceManager,
   type ProvenanceConfig,
-} from './provenance/AIProvenanceManager';
+} from "./provenance/AIProvenanceManager";
 
 // Compliance
-export { ICFY28ComplianceValidator } from './compliance/ICFY28ComplianceValidator';
+export { ICFY28ComplianceValidator } from "./compliance/ICFY28ComplianceValidator";
 
 // Dashboard
 export {
@@ -73,27 +70,29 @@ export {
   type DashboardAPIResponse,
   type DashboardChartData,
   type DashboardTimeSeriesData,
-} from './dashboard/GovernanceDashboardService';
+} from "./dashboard/GovernanceDashboardService";
 
 // ============================================================================
 // Factory Function
 // ============================================================================
 
-import { AgentPolicyEngine } from './policy-engine/AgentPolicyEngine';
-import { PromptChainOrchestrator } from './orchestration/PromptChainOrchestrator';
-import { IncidentResponseManager } from './incident-response/IncidentResponseManager';
-import { HallucinationAuditor } from './hallucination-audit/HallucinationAuditor';
-import { RollbackManager } from './rollback/RollbackManager';
-import { AIProvenanceManager } from './provenance/AIProvenanceManager';
-import { ICFY28ComplianceValidator } from './compliance/ICFY28ComplianceValidator';
-import { GovernanceDashboardService } from './dashboard/GovernanceDashboardService';
+import { AgentPolicyEngine } from "./policy-engine/AgentPolicyEngine";
+import { PromptChainOrchestrator } from "./orchestration/PromptChainOrchestrator";
+import { IncidentResponseManager } from "./incident-response/IncidentResponseManager";
+import { HallucinationAuditor } from "./hallucination-audit/HallucinationAuditor";
+import { RollbackManager } from "./rollback/RollbackManager";
+import { AIProvenanceManager } from "./provenance/AIProvenanceManager";
+import { ICFY28ComplianceValidator } from "./compliance/ICFY28ComplianceValidator";
+import { GovernanceDashboardService } from "./dashboard/GovernanceDashboardService";
 
 export interface GovernanceFrameworkConfig {
-  policy?: Partial<import('./policy-engine/AgentPolicyEngine').PolicyEngineConfig>;
-  orchestrator?: Partial<import('./orchestration/PromptChainOrchestrator').OrchestratorConfig>;
-  incidentResponse?: Partial<import('./incident-response/IncidentResponseManager').IncidentResponseConfig>;
-  provenance?: Partial<import('./provenance/AIProvenanceManager').ProvenanceConfig>;
-  compliance?: Partial<import('./types').ICFY28ComplianceConfig>;
+  policy?: Partial<import("./policy-engine/AgentPolicyEngine").PolicyEngineConfig>;
+  orchestrator?: Partial<import("./orchestration/PromptChainOrchestrator").OrchestratorConfig>;
+  incidentResponse?: Partial<
+    import("./incident-response/IncidentResponseManager").IncidentResponseConfig
+  >;
+  provenance?: Partial<import("./provenance/AIProvenanceManager").ProvenanceConfig>;
+  compliance?: Partial<import("./types").ICFY28ComplianceConfig>;
 }
 
 export interface GovernanceFramework {
@@ -111,7 +110,7 @@ export interface GovernanceFramework {
  * Create a fully configured governance framework
  */
 export function createGovernanceFramework(
-  config: GovernanceFrameworkConfig = {},
+  config: GovernanceFrameworkConfig = {}
 ): GovernanceFramework {
   // Create core components
   const policyEngine = new AgentPolicyEngine(config.policy);
@@ -141,23 +140,23 @@ export function createGovernanceFramework(
 
   // Wire up cross-component event handling
   policyEngine.onEvent((event) => {
-    if (event.type === 'policy_violation') {
+    if (event.type === "policy_violation") {
       incidentManager.processEvent(event);
     }
   });
 
   hallucinationAuditor.onEvent((event) => {
-    if (event.type === 'hallucination_detected') {
+    if (event.type === "hallucination_detected") {
       incidentManager.processEvent(event);
     }
   });
 
   incidentManager.onEvent(async (event) => {
-    if (event.type === 'incident_detected') {
+    if (event.type === "incident_detected") {
       const details = event.details as { severity?: string };
-      if (details?.severity === 'critical') {
+      if (details?.severity === "critical") {
         // Trigger rollback check
-        await rollbackManager.checkTrigger('safety_breach', {
+        await rollbackManager.checkTrigger("safety_breach", {
           agentId: event.agentId,
           fleetId: event.fleetId,
         });

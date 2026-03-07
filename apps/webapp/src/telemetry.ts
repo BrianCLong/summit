@@ -21,7 +21,7 @@ function sendMetric(metric: Metric) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       keepalive: true,
-    }).catch(e => console.error('Failed to send web vital', e));
+    }).catch((e) => console.error('Failed to send web vital', e));
   }
 }
 
@@ -52,7 +52,9 @@ export function trackGoldenPathStep(step: string, status: string = 'success') {
   tracer.startActiveSpan('golden_path_step', (span) => {
     span.setAttribute('app.step', step);
     span.setAttribute('app.status', status);
-    span.setStatus({ code: status === 'success' ? SpanStatusCode.OK : SpanStatusCode.ERROR });
+    span.setStatus({
+      code: status === 'success' ? SpanStatusCode.OK : SpanStatusCode.ERROR,
+    });
     span.end();
   });
 }

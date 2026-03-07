@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { api } from '../api';
+import React, { useEffect, useState } from "react";
+import { api } from "../api";
 
 export default function TenantSLO({ tenant }: { tenant: string }) {
   const { getSLOSummaryByTenant } = api();
@@ -10,8 +10,7 @@ export default function TenantSLO({ tenant }: { tenant: string }) {
       .catch(() => setS(null));
   }, [tenant]);
   if (!s) return <div className="rounded-2xl border p-4 text-sm">No data</div>;
-  const badge = (x: number) =>
-    x >= 2 ? 'bg-red-600' : x >= 1 ? 'bg-amber-500' : 'bg-emerald-600';
+  const badge = (x: number) => (x >= 2 ? "bg-red-600" : x >= 1 ? "bg-amber-500" : "bg-emerald-600");
   return (
     <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
       <Card
@@ -24,23 +23,11 @@ export default function TenantSLO({ tenant }: { tenant: string }) {
         value={`${s.slowBurn.toFixed(2)}x`}
         cls={badge(s.slowBurn)}
       />
-      <Card
-        title="SLO"
-        value={`${(s.slo * 100).toFixed(2)}%`}
-        cls="bg-slate-600"
-      />
+      <Card title="SLO" value={`${(s.slo * 100).toFixed(2)}%`} cls="bg-slate-600" />
     </div>
   );
 }
-function Card({
-  title,
-  value,
-  cls,
-}: {
-  title: string;
-  value: string;
-  cls: string;
-}) {
+function Card({ title, value, cls }: { title: string; value: string; cls: string }) {
   return (
     <div className="rounded-2xl border p-4">
       <div className="mb-1 text-sm text-gray-500">{title}</div>
@@ -49,11 +36,7 @@ function Card({
         className={`mt-2 inline-block rounded px-2 py-0.5 text-xs text-white ${cls}`}
         aria-live="polite"
       >
-        {cls.includes('emerald')
-          ? 'HEALTHY'
-          : cls.includes('amber')
-            ? 'ALERT'
-            : 'PAGE'}
+        {cls.includes("emerald") ? "HEALTHY" : cls.includes("amber") ? "ALERT" : "PAGE"}
       </span>
     </div>
   );

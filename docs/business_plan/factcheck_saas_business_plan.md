@@ -8,7 +8,7 @@ This business launches in **3-4 months**, reaches profitability in **8-12 months
 
 The insight: Traditional SaaS pricing ($50-500/month) is too small; newsroom software sells at **$5-30K/month enterprise pricing** (Cision: $7,200-25,000/year; Onclusive: $4,999/year; Meltwater: $22,800-30,000/year). You're not selling a tool; you're selling **editorial staff cost reduction**.
 
-***
+---
 
 ## 1. The Product: "FactFlow" (Live + Embedded Verification)
 
@@ -17,6 +17,7 @@ The insight: Traditional SaaS pricing ($50-500/month) is too small; newsroom sof
 **FactFlow** = Your verification API + three distribution layers:
 
 **Layer 1: Live Event Fact-Checking Dashboard**
+
 ```
 Input: Live video/audio stream (debate, press conference, campaign rally)
 Process:
@@ -39,6 +40,7 @@ Output: Real-time dashboard showing:
 **Use case**: Journalists covering live events can flag claims in real-time instead of waiting for post-broadcast fact-checks. Reduces fact-check turnaround from 24 hours to minutes.
 
 **Layer 2: Embedded Fact-Check Widget (for articles)**
+
 ```
 Place a small code snippet in CMS: <script src="factflow.com/embed"></script>
 
@@ -60,6 +62,7 @@ Widget displays inline:
 **Use case**: Publishers add fact-check credibility to articles; readers see verification inline; improves SEO (platforms trust fact-checked content).
 
 **Layer 3: Fact-Check Archive API**
+
 ```
 Newsrooms query: GET /api/claims?topic=election&date=2026-01-01
 
@@ -69,23 +72,24 @@ Enables personalized content: "You mentioned Trump; here are 47 related fact-che
 
 ### 1.2 Defensibility vs. Competitors
 
-| Competitor | Offering | Gap |
-|-----------|----------|-----|
-| **CheckMate** (BBC/DPA) | Live transcription + claim ID | No real-time verdict; No embedded widget; No SaaS (open research) |
-| **LiveFC** (Factiverse) | Live fact-checking tool | Academic; No commercial SaaS; No newsroom workflow integration |
-| **NewsAsset PLUS** | Newsroom editorial platform + fact-checking | Generic; you specialize in disinformation/live events; cheaper ($xxx vs $30K+) |
-| **Share the Facts** | Embedded widget | Old (2016); no live events; no verification tied to widget |
-| **VeriScope News** | News verification system | Passive (submit claims); not live event focused; no newsroom integration |
+| Competitor              | Offering                                    | Gap                                                                            |
+| ----------------------- | ------------------------------------------- | ------------------------------------------------------------------------------ |
+| **CheckMate** (BBC/DPA) | Live transcription + claim ID               | No real-time verdict; No embedded widget; No SaaS (open research)              |
+| **LiveFC** (Factiverse) | Live fact-checking tool                     | Academic; No commercial SaaS; No newsroom workflow integration                 |
+| **NewsAsset PLUS**      | Newsroom editorial platform + fact-checking | Generic; you specialize in disinformation/live events; cheaper ($xxx vs $30K+) |
+| **Share the Facts**     | Embedded widget                             | Old (2016); no live events; no verification tied to widget                     |
+| **VeriScope News**      | News verification system                    | Passive (submit claims); not live event focused; no newsroom integration       |
 
 **Your advantage**: Only system combining (1) live event real-time transcription + verification, (2) embedded widget, (3) newsroom workflow integration, (4) competitive pricing.
 
-***
+---
 
 ## 2. Business Model: SaaS for Newsrooms
 
 ### 2.1 Pricing Tiers (Validated by Newsroom Market Benchmarks)
 
 **Tier 1: "Starter" ($2,500/month)**
+
 - Live fact-checking dashboard for up to 5 events/month
 - Basic analytics (claims detected, verdicts, reach)
 - Up to 2 users
@@ -94,6 +98,7 @@ Enables personalized content: "You mentioned Trump; here are 47 related fact-che
 - Target: Regional newspapers, small publications
 
 **Tier 2: "Professional" ($7,500/month)**
+
 - Unlimited live fact-checking events
 - Embedded widget + custom branding (logo, colors)
 - Up to 10 users
@@ -105,6 +110,7 @@ Enables personalized content: "You mentioned Trump; here are 47 related fact-che
 - Target: Major regional papers, national news agencies
 
 **Tier 3: "Enterprise" ($25,000-50,000/month, annual contract)**
+
 - Dedicated infrastructure + white-label option
 - Unlimited users, unlimited API requests
 - Real-time account manager + technical support
@@ -118,6 +124,7 @@ Enables personalized content: "You mentioned Trump; here are 47 related fact-che
 ### 2.2 Financial Model
 
 **Customer Acquisition:**
+
 - Sales cycle: 4-8 weeks (demos, trials, contracts)
 - CAC (Customer Acquisition Cost): $5K-15K (including sales time, demos)
 - LTV at Tier 2 ($7.5K/month, 24-month average tenure): $180K
@@ -125,14 +132,15 @@ Enables personalized content: "You mentioned Trump; here are 47 related fact-che
 
 **Unit Economics:**
 
-| Tier | Monthly Customers (Y1) | Monthly Revenue | COGS | Gross Margin |
-|------|----------------------|-----------------|------|--------------|
-| Starter | 10 | $25K | $2K | 92% |
-| Professional | 20 | $150K | $15K | 90% |
-| Enterprise | 3 | $75K | $10K | 87% |
-| **Total** | **33** | **$250K/month** | **$27K** | **89%** |
+| Tier         | Monthly Customers (Y1) | Monthly Revenue | COGS     | Gross Margin |
+| ------------ | ---------------------- | --------------- | -------- | ------------ |
+| Starter      | 10                     | $25K            | $2K      | 92%          |
+| Professional | 20                     | $150K           | $15K     | 90%          |
+| Enterprise   | 3                      | $75K            | $10K     | 87%          |
+| **Total**    | **33**                 | **$250K/month** | **$27K** | **89%**      |
 
 **Annual Financials (Year 1)**:
+
 - MRR by month 12: $250K
 - Year 1 ARR: $1.5M (conservative, accounting for ramp)
 - COGS (API, transcription, hosting): $324K
@@ -146,24 +154,28 @@ Enables personalized content: "You mentioned Trump; here are 47 related fact-che
 ### 2.3 Go-to-Market: Channels
 
 **Channel 1: Direct Sales to Newsrooms (Primary)**
+
 - Target: AP (news wire), regional newspapers (100+ newsrooms), national broadcasters
 - Sales angle: "Fact-check 10-50 claims per day automatically. Reduce fact-checking team workload by 60%."
 - Messaging: Cost replacement (1 full-time fact-checker = $80-120K salary; FactFlow = $30K/year = 75% savings)
 - Sales motion: Cold outreach + product demo (free trial for 2 weeks on specific event)
 
 **Channel 2: Publishing Platforms (Partner)**
+
 - Pitch to Arc XP, Contentful, WordPress (major newsroom CMS platforms)
 - Bundle FactFlow as add-on for their customers
 - Revenue share: You get 60%, platform gets 40%
 - Reach: 500+ publications using these platforms
 
 **Channel 3: Fact-Checking Network (Partnership)**
+
 - Partner with PolitiFact, FactCheck.org, Snopes
 - They use your live dashboard during debates/elections
 - You provide free tier; they provide case studies + referrals
 - Cross-sell: "Fact-checkers love FactFlow; newsrooms should too"
 
 **Channel 4: Government + Public Broadcasters (Institutional)**
+
 - Target: EU Digital Services Coordinators (DSA compliance), public broadcasters (BBC, Deutsche Welle)
 - Pitch: "Meet DSA requirements. Document fact-checking efforts with transparency reports."
 - Deal size: $50-100K/year, multi-year contracts
@@ -171,30 +183,35 @@ Enables personalized content: "You mentioned Trump; here are 47 related fact-che
 ### 2.4 Realistic Traction (Y1-Y2)
 
 **Month 6 (after launch)**:
+
 - 5 beta customers (2 Professional, 3 Starter)
 - $35K MRR
 - Churn: 0% (beta locked in)
 
 **Month 12**:
+
 - 25-35 customers
 - $200-250K MRR
 - Churn: <5% (newsrooms sticky; switching cost high)
 - NPS: 45-55 (very good for B2B SaaS)
 
 **Month 18**:
+
 - 60-80 customers
 - $400-500K MRR
 - Churn: 5-8%
 - **$1-1.5M ARR** (conservative)
 
-***
+---
 
 ## 3. Operational Roadmap: 16 Weeks to Launch
 
 ### Weeks 1-4: MVP Build
+
 **Goal**: Functional live dashboard + basic widget
 
 **Tech Stack**:
+
 - Backend: Your existing verification API (Gemini 2.5 Flash) + Celery workers
 - Transcription: Whisper Live (OpenAI, real-time)
 - Diarization: Diart (open-source, <2 sec latency)
@@ -206,9 +223,11 @@ Enables personalized content: "You mentioned Trump; here are 47 related fact-che
 **Output**: Alpha product, internal testing on test live event
 
 ### Weeks 5-8: Polish + Beta Onboarding
+
 **Goal**: 3-5 beta customers
 
 **Work**:
+
 - UI/UX refinement (make dashboard journalist-friendly)
 - CMS integrations (WordPress plugin, Arc XP connector)
 - API documentation + SDK (Python, JavaScript)
@@ -219,9 +238,11 @@ Enables personalized content: "You mentioned Trump; here are 47 related fact-che
 **Output**: 3-5 paying beta customers ($5-10K MRR)
 
 ### Weeks 9-12: Launch + Scale Sales
+
 **Goal**: 15-20 customers, $75-100K MRR
 
 **Work**:
+
 - Product stabilization (bug fixes, performance tuning)
 - Sales playbook development (discovery call, demo, trial, close)
 - Marketing: Blog posts ("How to fact-check live events in 2026"), webinars
@@ -232,9 +253,11 @@ Enables personalized content: "You mentioned Trump; here are 47 related fact-che
 **Output**: 15-20 customers, $75-100K MRR, $900K-1.2M ARR run rate
 
 ### Weeks 13-16: Consolidate + Plan Scale
+
 **Goal**: Process optimized, customer success framework
 
 **Work**:
+
 - Customer onboarding automation (reduce 2 weeks → 3 days)
 - Customer success team (1 person managing renewals, upsells)
 - Advanced features (multilingual support, custom rules, integrations)
@@ -243,23 +266,23 @@ Enables personalized content: "You mentioned Trump; here are 47 related fact-che
 **Team**: 4 engineers + 2 sales + 1 CS
 **Output**: Ready to scale; hitting $150K MRR by month 16
 
-***
+---
 
 ## 4. Comparison: Rapid Traction vs. Datasets Business
 
-| Dimension | FactFlow SaaS | Dataset Licensing |
-|-----------|---------------|-------------------|
-| **Time to first customer** | 12-16 weeks | 6-12 months |
-| **Time to profitability** | 10-12 months | 24+ months |
-| **Year 1 revenue potential** | $1-1.5M | $200-500K (slow ramp) |
-| **Customer concentration risk** | Lower (many small customers) | Higher (3-5 Tier-1 deals) |
-| **Sales cycle** | 4-8 weeks | 6-18 months (enterprise) |
-| **Operational complexity** | Moderate (24/7 uptime required) | Low (batch delivery) |
-| **Defensibility** | Moderate (can be commoditized) | High (data moat) |
+| Dimension                       | FactFlow SaaS                   | Dataset Licensing         |
+| ------------------------------- | ------------------------------- | ------------------------- |
+| **Time to first customer**      | 12-16 weeks                     | 6-12 months               |
+| **Time to profitability**       | 10-12 months                    | 24+ months                |
+| **Year 1 revenue potential**    | $1-1.5M                         | $200-500K (slow ramp)     |
+| **Customer concentration risk** | Lower (many small customers)    | Higher (3-5 Tier-1 deals) |
+| **Sales cycle**                 | 4-8 weeks                       | 6-18 months (enterprise)  |
+| **Operational complexity**      | Moderate (24/7 uptime required) | Low (batch delivery)      |
+| **Defensibility**               | Moderate (can be commoditized)  | High (data moat)          |
 
 **Verdict**: FactFlow wins on **speed and cash generation**. Dataset licensing wins on **long-term value**.
 
-***
+---
 
 ## 5. Why This Works (and Why Competitors Haven't Done It)
 
@@ -275,19 +298,19 @@ Enables personalized content: "You mentioned Trump; here are 47 related fact-che
 
 6. **Regulatory tailwind**: DSA requires platforms/newsrooms to document fact-checking. FactFlow = compliance tool.
 
-***
+---
 
 ## 6. Risks & Mitigations
 
-| Risk | Likelihood | Mitigation |
-|------|-----------|-----------|
-| **Transcription errors** reduce claim accuracy | Medium | Test extensively; manual review for critical events; confidence scoring |
-| **Newsroom churn** if tool doesn't integrate smoothly | Medium | Deep CMS integrations; customer success team; free trial extension |
-| **Competitors copy** (Google/Meta build their own) | Low-medium | Move fast (6-month head start); focus on UX/newsroom workflows (their strength is scale, not newsroom workflows) |
-| **Live event liability** (verify false claim live) | Low | Clear disclaimers; human editor required for publishing; no automated takedown |
-| **Real-time performance** (high latency breaks UX) | Medium | Load testing; cached verdicts; fallback to async verification |
+| Risk                                                  | Likelihood | Mitigation                                                                                                       |
+| ----------------------------------------------------- | ---------- | ---------------------------------------------------------------------------------------------------------------- |
+| **Transcription errors** reduce claim accuracy        | Medium     | Test extensively; manual review for critical events; confidence scoring                                          |
+| **Newsroom churn** if tool doesn't integrate smoothly | Medium     | Deep CMS integrations; customer success team; free trial extension                                               |
+| **Competitors copy** (Google/Meta build their own)    | Low-medium | Move fast (6-month head start); focus on UX/newsroom workflows (their strength is scale, not newsroom workflows) |
+| **Live event liability** (verify false claim live)    | Low        | Clear disclaimers; human editor required for publishing; no automated takedown                                   |
+| **Real-time performance** (high latency breaks UX)    | Medium     | Load testing; cached verdicts; fallback to async verification                                                    |
 
-***
+---
 
 ## 7. Path to $130M (Combining All Three Businesses)
 
@@ -301,7 +324,7 @@ Enables personalized content: "You mentioned Trump; here are 47 related fact-che
 
 **Exit timeline**: Year 3-4 at 10-15x revenue multiple (SaaS category average) = **$450M-$1.95B valuation**.
 
-***
+---
 
 ## Conclusion
 

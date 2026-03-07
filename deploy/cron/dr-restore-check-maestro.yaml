@@ -4,7 +4,7 @@ metadata:
   name: dr-restore-check
   namespace: maestro-system
 spec:
-  schedule: '0 3 * * *'
+  schedule: "0 3 * * *"
   successfulJobsHistoryLimit: 3
   failedJobsHistoryLimit: 3
   jobTemplate:
@@ -25,7 +25,7 @@ spec:
               volumeMounts:
                 - name: dr-scripts
                   mountPath: /opt/dr
-              command: ['/bin/sh', '-lc']
+              command: ["/bin/sh", "-lc"]
               args:
                 - |
                   set -euo pipefail

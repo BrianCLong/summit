@@ -61,7 +61,9 @@ export function GraphCanvas({
 }: GraphCanvasProps) {
   // Auth & RBAC
   const { user } = useAuth()
-  const { hasPermission: canEdit } = useRbac('investigations', 'write', { user })
+  const { hasPermission: canEdit } = useRbac('investigations', 'write', {
+    user,
+  })
 
   // Use canvas renderer for large graphs
   const PERFORMANCE_THRESHOLD = 500
@@ -102,7 +104,9 @@ export function GraphCanvas({
       frameCountRef.current++
       if (time - lastTimeRef.current >= 1000) {
         setFps(
-          Math.round((frameCountRef.current * 1000) / (time - lastTimeRef.current))
+          Math.round(
+            (frameCountRef.current * 1000) / (time - lastTimeRef.current)
+          )
         )
         frameCountRef.current = 0
         lastTimeRef.current = time
@@ -129,7 +133,9 @@ export function GraphCanvas({
   }, [])
 
   useEffect(() => {
-    if (!svgRef.current || entities.length === 0) {return}
+    if (!svgRef.current || entities.length === 0) {
+      return
+    }
 
     const svg = select(svgRef.current)
     svg.selectAll('*').remove()
@@ -247,35 +253,42 @@ export function GraphCanvas({
 
     // Add interactions for links (guardrails)
     link
-      .style('cursor', d => d.relationship.confidence < 0.8 ? 'pointer' : 'default')
+      .style('cursor', d =>
+        d.relationship.confidence < 0.8 ? 'pointer' : 'default'
+      )
       .on('mouseenter', (event, d) => {
         if (d.relationship.confidence < 0.8) {
-          select(event.currentTarget).attr('stroke-width', Math.sqrt(d.relationship.confidence * 3) + 2)
+          select(event.currentTarget).attr(
+            'stroke-width',
+            Math.sqrt(d.relationship.confidence * 3) + 2
+          )
 
           if (!canEdit) {
             setTooltip({
               show: true,
               x: event.clientX,
               y: event.clientY,
-              content: "Upgrade to propose fixes"
+              content: 'Upgrade to propose fixes',
             })
           }
         }
       })
       .on('mouseleave', (event, d) => {
-        select(event.currentTarget).attr('stroke-width', Math.sqrt(d.relationship.confidence * 3))
+        select(event.currentTarget).attr(
+          'stroke-width',
+          Math.sqrt(d.relationship.confidence * 3)
+        )
         if (!canEdit) {
           setTooltip(prev => ({ ...prev, show: false }))
         }
       })
       .on('click', (event, d) => {
         if (d.relationship.confidence < 0.8 && canEdit) {
-           // Simulate fix action
-           console.log(`Fixing drift for relationship ${d.id}`)
-           // In real app, this would open a dialog or trigger an action
+          // Simulate fix action
+          console.log(`Fixing drift for relationship ${d.id}`)
+          // In real app, this would open a dialog or trigger an action
         }
       })
-
 
     // Draw link labels
     const linkLabel = linksGroup
@@ -332,7 +345,9 @@ export function GraphCanvas({
       .call(
         drag<SVGGElement, GraphNode>()
           .on('start', (event, d) => {
-            if (!event.active) {simulation.alphaTarget(0.3).restart()}
+            if (!event.active) {
+              simulation.alphaTarget(0.3).restart()
+            }
             d.fx = d.x
             d.fy = d.y
           })
@@ -341,7 +356,9 @@ export function GraphCanvas({
             d.fy = event.y
           })
           .on('end', (event, d) => {
-            if (!event.active) {simulation.alphaTarget(0)}
+            if (!event.active) {
+              simulation.alphaTarget(0)
+            }
             d.fx = null
             d.fy = null
           })
@@ -381,7 +398,7 @@ export function GraphCanvas({
       .style('pointer-events', 'none')
       .text(d =>
         d.entity.name.length > 15
-          ? `${d.entity.name.slice(0, 15)  }...`
+          ? `${d.entity.name.slice(0, 15)}...`
           : d.entity.name
       )
 
@@ -458,7 +475,7 @@ export function GraphCanvas({
     dimensions,
     selectedEntityId,
     onEntitySelect,
-    canEdit
+    canEdit,
   ])
 
   return (
@@ -479,7 +496,7 @@ export function GraphCanvas({
           style={{
             left: tooltip.x + 10,
             top: tooltip.y + 10,
-            transform: 'translate(0, 0)' // Ensure no offset issues
+            transform: 'translate(0, 0)', // Ensure no offset issues
           }}
         >
           {tooltip.content}
@@ -509,23 +526,33 @@ export function GraphCanvas({
             <div className="border-t my-1 pt-1 border-muted" />
             <div className="flex items-center gap-1">
               <span className="text-muted-foreground">Role:</span>
-              <span className="font-medium capitalize">{user?.role || 'Guest'}</span>
+              <span className="font-medium capitalize">
+                {user?.role || 'Guest'}
+              </span>
             </div>
             <div className="flex items-center gap-1">
-               <span className="text-muted-foreground">Access:</span>
-               <span className={cn("font-medium", canEdit ? "text-green-600" : "text-amber-600")}>
-                 {canEdit ? 'Full Edit' : 'Read Only'}
-               </span>
+              <span className="text-muted-foreground">Access:</span>
+              <span
+                className={cn(
+                  'font-medium',
+                  canEdit ? 'text-green-600' : 'text-amber-600'
+                )}
+              >
+                {canEdit ? 'Full Edit' : 'Read Only'}
+              </span>
             </div>
             {/* Permission Matrix Tooltip Trigger */}
-            <FlagGuard required={[{ resource: 'investigations', action: 'write' }]} fallback={
-                 <div className="text-[10px] text-amber-600 mt-1 italic">
-                   Upgrade to edit graph
-                 </div>
-            }>
-               <div className="text-[10px] text-green-600 mt-1 italic">
-                 You can edit graph
-               </div>
+            <FlagGuard
+              required={[{ resource: 'investigations', action: 'write' }]}
+              fallback={
+                <div className="text-[10px] text-amber-600 mt-1 italic">
+                  Upgrade to edit graph
+                </div>
+              }
+            >
+              <div className="text-[10px] text-green-600 mt-1 italic">
+                You can edit graph
+              </div>
             </FlagGuard>
 
             {debugMode && (
@@ -582,10 +609,10 @@ export function GraphCanvas({
         {/* Guardrail Legend Item */}
         <div className="border-t my-2 pt-2 border-muted" />
         <div className="grid grid-cols-1 gap-2 text-xs">
-           <div className="flex items-center gap-2">
-              <div className="w-6 h-0 border-t-2 border-dashed border-red-500" />
-              <span>Low Confidence (Drift)</span>
-           </div>
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-0 border-t-2 border-dashed border-red-500" />
+            <span>Low Confidence (Drift)</span>
+          </div>
         </div>
       </div>
     </div>

@@ -1,4 +1,4 @@
-import { randomUUID } from 'node:crypto';
+import { randomUUID } from "node:crypto";
 
 import {
   CooperationMode,
@@ -6,10 +6,10 @@ import {
   RouterBid,
   RoutingDecision,
   TaskSpec,
-} from '@ga-graphai/common-types';
+} from "@ga-graphai/common-types";
 
-import { CapabilityRegistry, ResourceAdapter } from './capabilityRegistry.js';
-import { scoreSkillOverlap } from './utils.js';
+import { CapabilityRegistry, ResourceAdapter } from "./capabilityRegistry.js";
+import { scoreSkillOverlap } from "./utils.js";
 
 interface RouterOptions {
   qualityFloor?: number;
@@ -23,52 +23,36 @@ interface AnnotatedBid {
   density: number;
 }
 
-function computeCoverage(
-  bid: RouterBid,
-  resource: ResourceAdapter,
-  tags: PolicyTag[],
-): number {
-  const tagSkills = tags.map((tag) => tag.split(':')[1] ?? tag);
+function computeCoverage(bid: RouterBid, resource: ResourceAdapter, tags: PolicyTag[]): number {
+  const tagSkills = tags.map((tag) => tag.split(":")[1] ?? tag);
   const fitTags = bid.fitTags ?? [];
-  const matches = fitTags.filter((tag) =>
-    tagSkills.includes(tag.toLowerCase()),
-  );
+  const matches = fitTags.filter((tag) => tagSkills.includes(tag.toLowerCase()));
   const skillOverlap = scoreSkillOverlap(resource.profile.skills, tagSkills);
   return matches.length + skillOverlap;
 }
 
-function computeDensity(
-  bid: RouterBid,
-  coverage: number,
-  task: TaskSpec,
-): number {
-  const latencyPenalty = Math.max(
-    bid.est.latencyMs / task.constraints.latencyP95Ms,
-    0.5,
-  );
-  const costPenalty = Math.max(
-    bid.est.costUSD / Math.max(task.constraints.budgetUSD, 0.01),
-    0.1,
-  );
+function computeDensity(bid: RouterBid, coverage: number, task: TaskSpec): number {
+  const latencyPenalty = Math.max(bid.est.latencyMs / task.constraints.latencyP95Ms, 0.5);
+  const costPenalty = Math.max(bid.est.costUSD / Math.max(task.constraints.budgetUSD, 0.01), 0.1);
   return (bid.est.quality * (1 + coverage)) / (latencyPenalty * costPenalty);
 }
 
 function chooseMode(task: TaskSpec): CooperationMode {
-  const hasHighRisk = task.risks.some((risk) => risk.severity === 'high');
+  const hasHighRisk = task.risks.some((risk) => risk.severity === "high");
   const highAC = task.acceptanceCriteria.length >= 3;
   if (hasHighRisk && task.policy.pii) {
-    return 'counterfactual-shadowing';
+    return "counterfactual-shadowing";
   }
   if (hasHighRisk) {
-    return 'causal-challenge-games';
+    return "causal-challenge-games";
   }
   if (highAC) {
-    return 'semantic-braid';
+    return "semantic-braid";
   }
-  if (task.policyTags.includes('license:restricted')) {
-    return 'federated-deliberation';
+  if (task.policyTags.includes("license:restricted")) {
+    return "federated-deliberation";
   }
-  return 'auction-of-experts';
+  return "auction-of-experts";
 }
 
 export class PolicyRouter {
@@ -77,7 +61,7 @@ export class PolicyRouter {
 
   constructor(
     private readonly registry: CapabilityRegistry,
-    options: RouterOptions = {},
+    options: RouterOptions = {}
   ) {
     this.qualityFloor = options.qualityFloor ?? 0.6;
     this.costAlertFraction = options.costAlertFraction ?? 0.8;
@@ -110,12 +94,8 @@ export class PolicyRouter {
       latency = fallback.bid.est.latencyMs;
     }
 
-    const primaryAssignments = selected
-      .slice(0, 1)
-      .map((entry) => entry.resource.profile.id);
-    const supportAssignments = selected
-      .slice(1)
-      .map((entry) => entry.resource.profile.id);
+    const primaryAssignments = selected.slice(0, 1).map((entry) => entry.resource.profile.id);
+    const supportAssignments = selected.slice(1).map((entry) => entry.resource.profile.id);
 
     const mode = chooseMode(task);
     const provenanceRef = `router-${task.taskId}-${randomUUID()}`;
@@ -134,10 +114,7 @@ export class PolicyRouter {
     };
   }
 
-  private collectBids(
-    task: TaskSpec,
-    resources: ResourceAdapter[],
-  ): AnnotatedBid[] {
+  private collectBids(task: TaskSpec, resources: ResourceAdapter[]): AnnotatedBid[] {
     return resources.map((resource) => {
       const bid = resource.bid(task);
       const coverage = computeCoverage(bid, resource, task.policyTags);

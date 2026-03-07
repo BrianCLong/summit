@@ -9,31 +9,28 @@ import {
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/utils/cn';
 
-const buttonVariants = cva(
-  'flex-row items-center justify-center rounded-lg active:opacity-80',
-  {
-    variants: {
-      variant: {
-        default: 'bg-intel-600',
-        destructive: 'bg-red-600',
-        outline: 'border border-dark-border bg-transparent',
-        secondary: 'bg-dark-elevated',
-        ghost: 'bg-transparent',
-        link: 'bg-transparent',
-      },
-      size: {
-        default: 'h-12 px-6',
-        sm: 'h-9 px-4',
-        lg: 'h-14 px-8',
-        icon: 'h-12 w-12',
-      },
+const buttonVariants = cva('flex-row items-center justify-center rounded-lg active:opacity-80', {
+  variants: {
+    variant: {
+      default: 'bg-intel-600',
+      destructive: 'bg-red-600',
+      outline: 'border border-dark-border bg-transparent',
+      secondary: 'bg-dark-elevated',
+      ghost: 'bg-transparent',
+      link: 'bg-transparent',
     },
-    defaultVariants: {
-      variant: 'default',
-      size: 'default',
+    size: {
+      default: 'h-12 px-6',
+      sm: 'h-9 px-4',
+      lg: 'h-14 px-8',
+      icon: 'h-12 w-12',
     },
   },
-);
+  defaultVariants: {
+    variant: 'default',
+    size: 'default',
+  },
+});
 
 const buttonTextVariants = cva('font-semibold text-center', {
   variants: {
@@ -59,8 +56,7 @@ const buttonTextVariants = cva('font-semibold text-center', {
 });
 
 export interface ButtonProps
-  extends Omit<TouchableOpacityProps, 'children'>,
-    VariantProps<typeof buttonVariants> {
+  extends Omit<TouchableOpacityProps, 'children'>, VariantProps<typeof buttonVariants> {
   children?: React.ReactNode;
   loading?: boolean;
   leftIcon?: React.ReactNode;
@@ -90,11 +86,7 @@ export const Button = React.forwardRef<View, ButtonProps>(
     return (
       <TouchableOpacity
         ref={ref}
-        className={cn(
-          buttonVariants({ variant, size }),
-          isDisabled && 'opacity-50',
-          className,
-        )}
+        className={cn(buttonVariants({ variant, size }), isDisabled && 'opacity-50', className)}
         disabled={isDisabled}
         {...props}
       >
@@ -107,9 +99,7 @@ export const Button = React.forwardRef<View, ButtonProps>(
           <>
             {leftIcon && <View className="mr-2">{leftIcon}</View>}
             {typeof children === 'string' ? (
-              <Text
-                className={cn(buttonTextVariants({ variant, size }), textClassName)}
-              >
+              <Text className={cn(buttonTextVariants({ variant, size }), textClassName)}>
                 {children}
               </Text>
             ) : (

@@ -1,5 +1,5 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import React from "react";
+import { useNavigate } from "react-router-dom";
 
 type Shortcut = {
   combo: string;
@@ -9,23 +9,23 @@ type Shortcut = {
 export function useKeyboardShortcuts(shortcuts: Shortcut[]) {
   React.useEffect(() => {
     function onKey(event: KeyboardEvent) {
-      const combo = `${event.metaKey || event.ctrlKey ? 'ctrl+' : ''}${event.shiftKey ? 'shift+' : ''}${event.key.toLowerCase()}`;
+      const combo = `${event.metaKey || event.ctrlKey ? "ctrl+" : ""}${event.shiftKey ? "shift+" : ""}${event.key.toLowerCase()}`;
       const match = shortcuts.find((shortcut) => shortcut.combo === combo);
       if (match) {
         event.preventDefault();
         match.handler();
       }
     }
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
   }, [shortcuts]);
 }
 
-export function useNavigationShortcuts(basePath = '/') {
+export function useNavigationShortcuts(basePath = "/") {
   const navigate = useNavigate();
   React.useEffect(() => {
     function onSequence(event: KeyboardEvent) {
-      if (event.key.toLowerCase() === 'g') {
+      if (event.key.toLowerCase() === "g") {
         const handler = (next: KeyboardEvent) => {
           const map: Record<string, string> = {
             d: `${basePath}dashboard`,
@@ -40,13 +40,13 @@ export function useNavigationShortcuts(basePath = '/') {
             next.preventDefault();
             navigate(dest);
           }
-          window.removeEventListener('keydown', handler, true);
+          window.removeEventListener("keydown", handler, true);
         };
-        window.addEventListener('keydown', handler, true);
+        window.addEventListener("keydown", handler, true);
       }
     }
-    window.addEventListener('keydown', onSequence);
-    return () => window.removeEventListener('keydown', onSequence);
+    window.addEventListener("keydown", onSequence);
+    return () => window.removeEventListener("keydown", onSequence);
   }, [basePath, navigate]);
 }
 
@@ -61,7 +61,7 @@ export function useDebouncedValue<T>(value: T, delayMs: number) {
 
 export function useLiveLogFeed(
   lines: string[],
-  opts: { followTail: boolean; intervalMs?: number },
+  opts: { followTail: boolean; intervalMs?: number }
 ) {
   const { followTail, intervalMs = 300 } = opts;
   const [visible, setVisible] = React.useState<string[]>(lines.slice(0, 200));

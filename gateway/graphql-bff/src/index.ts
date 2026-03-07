@@ -1,39 +1,33 @@
-import { readFileSync } from 'fs';
-import path from 'path';
-import express from 'express';
-import rateLimit from 'express-rate-limit';
-import { ApolloServer } from '@apollo/server';
-import { expressMiddleware } from '@apollo/server/express4';
-import { ApolloGateway, RemoteGraphQLDataSource } from '@apollo/gateway';
-import { createServer } from 'http';
-import { IncomingHttpHeaders } from 'http';
+import { readFileSync } from "fs";
+import path from "path";
+import express from "express";
+import rateLimit from "express-rate-limit";
+import { ApolloServer } from "@apollo/server";
+import { expressMiddleware } from "@apollo/server/express4";
+import { ApolloGateway, RemoteGraphQLDataSource } from "@apollo/gateway";
+import { createServer } from "http";
+import { IncomingHttpHeaders } from "http";
 // @ts-ignore - no types available
-import depthLimit from 'graphql-depth-limit';
+import depthLimit from "graphql-depth-limit";
 // @ts-ignore - no types available
-import { createComplexityLimitRule } from 'graphql-validation-complexity';
-import yaml from 'yaml';
-import { trace } from '@opentelemetry/api';
+import { createComplexityLimitRule } from "graphql-validation-complexity";
+import yaml from "yaml";
+import { trace } from "@opentelemetry/api";
 
 const PORT = process.env.PORT || 4000;
 const PERSISTED_ONLY =
-  process.env.NODE_ENV === 'production' &&
-  process.env.ALLOW_PERSISTED === 'true'
+  process.env.NODE_ENV === "production" && process.env.ALLOW_PERSISTED === "true"
     ? false
-    : process.env.NODE_ENV === 'production';
+    : process.env.NODE_ENV === "production";
 
 const subgraphConfig = yaml.parse(
-  readFileSync(path.join(process.cwd(), 'subgraphs.yaml')).toString(),
+  readFileSync(path.join(process.cwd(), "subgraphs.yaml")).toString()
 );
 
 class HeaderForwardingDataSource extends RemoteGraphQLDataSource {
   willSendRequest({ request, context }: any) {
     const headers = context?.headers as IncomingHttpHeaders;
-    const forwardHeaders = [
-      'x-request-id',
-      'x-tenant-id',
-      'x-authority-id',
-      'traceparent',
-    ];
+    const forwardHeaders = ["x-request-id", "x-tenant-id", "x-authority-id", "traceparent"];
     forwardHeaders.forEach((h) => {
       const value = headers?.[h];
       if (value) {
@@ -44,12 +38,10 @@ class HeaderForwardingDataSource extends RemoteGraphQLDataSource {
 }
 
 const gateway = new ApolloGateway({
-  serviceList: Object.entries(subgraphConfig.subgraphs).map(
-    ([name, { url }]: any) => ({
-      name,
-      url,
-    }),
-  ),
+  serviceList: Object.entries(subgraphConfig.subgraphs).map(([name, { url }]: any) => ({
+    name,
+    url,
+  })),
   buildService({ url }) {
     return new HeaderForwardingDataSource({ url });
   },
@@ -60,8 +52,7 @@ export const server = new ApolloServer({
   validationRules: [
     depthLimit(10),
     createComplexityLimitRule(1000, {
-      createError: (type: unknown) =>
-        new Error(`Query is too complex: ${type}`),
+      createError: (type: unknown) => new Error(`Query is too complex: ${type}`),
     }),
   ],
 });
@@ -70,25 +61,25 @@ export const app = express();
 
 const limiter = rateLimit({
   windowMs: 60 * 1000,
-  max: (req) => (req.headers['x-tenant-id'] ? 100 : 50),
-  keyGenerator: (req) => String(req.headers['x-tenant-id'] || req.ip),
+  max: (req) => (req.headers["x-tenant-id"] ? 100 : 50),
+  keyGenerator: (req) => String(req.headers["x-tenant-id"] || req.ip),
 });
 
 app.use(limiter);
 
 const persistedQueries = new Map<string, string>();
 
-app.get('/health/federation', async (_req, res) => {
+app.get("/health/federation", async (_req, res) => {
   const results: Record<string, any> = {};
   await Promise.all(
     (gateway as any).serviceList.map(async (s: any) => {
       try {
-        const r = await fetch(`${s.url.replace(/\/graphql$/, '')}/health`);
+        const r = await fetch(`${s.url.replace(/\/graphql$/, "")}/health`);
         results[s.name] = r.ok;
       } catch {
         results[s.name] = false;
       }
-    }),
+    })
   );
   res.json(results);
 });
@@ -98,7 +89,7 @@ export async function start() {
   if (started) return;
   await server.start();
   app.use(
-    '/graphql',
+    "/graphql",
     async (req, res, next) => {
       await express.json()(req, res, () => {});
       const hash = req.body?.extensions?.persistedQuery?.sha256Hash;
@@ -108,16 +99,16 @@ export async function start() {
       } else if (hash && persistedQueries.has(hash)) {
         req.body.query = persistedQueries.get(hash);
       } else if (PERSISTED_ONLY) {
-        res.status(400).json({ error: 'Persisted query required' });
+        res.status(400).json({ error: "Persisted query required" });
         return;
       }
-      const span = trace.getTracer('gateway').startSpan('request');
-      res.on('finish', () => span.end());
+      const span = trace.getTracer("gateway").startSpan("request");
+      res.on("finish", () => span.end());
       next();
     },
     expressMiddleware(server, {
       context: async ({ req }) => ({ headers: req.headers }),
-    }),
+    })
   );
   const httpServer = createServer(app);
   await new Promise<void>((resolve) => {
@@ -129,6 +120,6 @@ export async function start() {
   started = true;
 }
 
-if (process.env.NODE_ENV !== 'test') {
+if (process.env.NODE_ENV !== "test") {
   start();
 }

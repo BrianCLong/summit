@@ -25,87 +25,87 @@ export class DocumentationDataWarehouse {
 
   private setupDataModels(): void {
     // User engagement model
-    this.dataModels.set('user_engagement', {
-      name: 'user_engagement',
+    this.dataModels.set("user_engagement", {
+      name: "user_engagement",
       schema: {
-        user_id: 'string',
-        session_id: 'string',
-        page_path: 'string',
-        timestamp: 'datetime',
-        duration: 'integer',
-        scroll_depth: 'float',
-        interactions: 'json',
-        source: 'string',
-        device: 'string',
-        location: 'string',
+        user_id: "string",
+        session_id: "string",
+        page_path: "string",
+        timestamp: "datetime",
+        duration: "integer",
+        scroll_depth: "float",
+        interactions: "json",
+        source: "string",
+        device: "string",
+        location: "string",
       },
-      partitions: ['date', 'source'],
-      indexes: ['user_id', 'page_path', 'timestamp'],
+      partitions: ["date", "source"],
+      indexes: ["user_id", "page_path", "timestamp"],
     });
 
     // Content performance model
-    this.dataModels.set('content_performance', {
-      name: 'content_performance',
+    this.dataModels.set("content_performance", {
+      name: "content_performance",
       schema: {
-        content_id: 'string',
-        path: 'string',
-        title: 'string',
-        author: 'string',
-        team: 'string',
-        created_at: 'datetime',
-        updated_at: 'datetime',
-        views: 'integer',
-        unique_views: 'integer',
-        bounce_rate: 'float',
-        avg_time_on_page: 'integer',
-        feedback_score: 'float',
-        search_rankings: 'json',
+        content_id: "string",
+        path: "string",
+        title: "string",
+        author: "string",
+        team: "string",
+        created_at: "datetime",
+        updated_at: "datetime",
+        views: "integer",
+        unique_views: "integer",
+        bounce_rate: "float",
+        avg_time_on_page: "integer",
+        feedback_score: "float",
+        search_rankings: "json",
       },
-      partitions: ['team', 'date'],
-      indexes: ['content_id', 'path', 'author'],
+      partitions: ["team", "date"],
+      indexes: ["content_id", "path", "author"],
     });
 
     // Team productivity model
-    this.dataModels.set('team_productivity', {
-      name: 'team_productivity',
+    this.dataModels.set("team_productivity", {
+      name: "team_productivity",
       schema: {
-        team_id: 'string',
-        date: 'date',
-        content_created: 'integer',
-        content_updated: 'integer',
-        reviews_completed: 'integer',
-        collaboration_score: 'float',
-        quality_score: 'float',
-        velocity: 'float',
+        team_id: "string",
+        date: "date",
+        content_created: "integer",
+        content_updated: "integer",
+        reviews_completed: "integer",
+        collaboration_score: "float",
+        quality_score: "float",
+        velocity: "float",
       },
-      partitions: ['team_id', 'date'],
-      indexes: ['team_id', 'date'],
+      partitions: ["team_id", "date"],
+      indexes: ["team_id", "date"],
     });
 
     // Business impact model
-    this.dataModels.set('business_impact', {
-      name: 'business_impact',
+    this.dataModels.set("business_impact", {
+      name: "business_impact",
       schema: {
-        metric_name: 'string',
-        date: 'date',
-        value: 'float',
-        source: 'string',
-        category: 'string',
-        correlation_factors: 'json',
+        metric_name: "string",
+        date: "date",
+        value: "float",
+        source: "string",
+        category: "string",
+        correlation_factors: "json",
       },
-      partitions: ['category', 'date'],
-      indexes: ['metric_name', 'date'],
+      partitions: ["category", "date"],
+      indexes: ["metric_name", "date"],
     });
   }
 
   async runETLPipeline(): Promise<ETLResult> {
     const sources = [
-      'user_analytics',
-      'content_metrics',
-      'team_activities',
-      'support_tickets',
-      'business_metrics',
-      'external_apis',
+      "user_analytics",
+      "content_metrics",
+      "team_activities",
+      "support_tickets",
+      "business_metrics",
+      "external_apis",
     ];
 
     const results: ETLResult = {
@@ -188,47 +188,37 @@ export class AdvancedAnalyticsEngine {
   private initializePredictiveModels(): void {
     // Content popularity prediction
     this.predictiveModels.set(
-      'content_popularity',
+      "content_popularity",
       new ContentPopularityModel({
-        features: [
-          'historical_views',
-          'author_reputation',
-          'topic_trend',
-          'seasonal_factors',
-        ],
-        algorithm: 'gradient_boosting',
-        trainingData: 'content_performance_historical',
-      }),
+        features: ["historical_views", "author_reputation", "topic_trend", "seasonal_factors"],
+        algorithm: "gradient_boosting",
+        trainingData: "content_performance_historical",
+      })
     );
 
     // User churn prediction
     this.predictiveModels.set(
-      'user_churn',
+      "user_churn",
       new UserChurnModel({
         features: [
-          'engagement_trend',
-          'session_frequency',
-          'content_interaction',
-          'feedback_sentiment',
+          "engagement_trend",
+          "session_frequency",
+          "content_interaction",
+          "feedback_sentiment",
         ],
-        algorithm: 'random_forest',
-        trainingData: 'user_engagement_historical',
-      }),
+        algorithm: "random_forest",
+        trainingData: "user_engagement_historical",
+      })
     );
 
     // Content gap analysis
     this.predictiveModels.set(
-      'content_gaps',
+      "content_gaps",
       new ContentGapModel({
-        features: [
-          'search_queries',
-          'support_tickets',
-          'user_requests',
-          'competitor_analysis',
-        ],
-        algorithm: 'clustering',
-        trainingData: 'content_requests_analysis',
-      }),
+        features: ["search_queries", "support_tickets", "user_requests", "competitor_analysis"],
+        algorithm: "clustering",
+        trainingData: "content_requests_analysis",
+      })
     );
   }
 
@@ -295,12 +285,8 @@ export class AdvancedAnalyticsEngine {
       patterns,
       metrics: {
         totalUsers: data.length,
-        averageSessionDuration: this.statisticsEngine.mean(
-          data.map((d) => d.avg_session_duration),
-        ),
-        averageScrollDepth: this.statisticsEngine.mean(
-          data.map((d) => d.avg_scroll_depth),
-        ),
+        averageSessionDuration: this.statisticsEngine.mean(data.map((d) => d.avg_session_duration)),
+        averageScrollDepth: this.statisticsEngine.mean(data.map((d) => d.avg_scroll_depth)),
         bounceRate: await this.calculateBounceRate(),
         retentionRate: await this.calculateRetentionRate(),
       },
@@ -340,29 +326,29 @@ export class AdvancedAnalyticsEngine {
     };
 
     // Content popularity predictions
-    const popularityModel = this.predictiveModels.get('content_popularity');
+    const popularityModel = this.predictiveModels.get("content_popularity");
     if (popularityModel) {
       insights.contentPopularity = await popularityModel.predict({
-        timeframe: '30_days',
+        timeframe: "30_days",
         confidence: 0.8,
       });
     }
 
     // User churn predictions
-    const churnModel = this.predictiveModels.get('user_churn');
+    const churnModel = this.predictiveModels.get("user_churn");
     if (churnModel) {
       insights.userChurn = await churnModel.predict({
-        timeframe: '90_days',
+        timeframe: "90_days",
         threshold: 0.7,
       });
     }
 
     // Content gap predictions
-    const gapModel = this.predictiveModels.get('content_gaps');
+    const gapModel = this.predictiveModels.get("content_gaps");
     if (gapModel) {
       insights.contentGaps = await gapModel.predict({
-        categories: ['technical', 'user_guides', 'tutorials'],
-        priority: 'high',
+        categories: ["technical", "user_guides", "tutorials"],
+        priority: "high",
       });
     }
 
@@ -394,57 +380,55 @@ export class BusinessIntelligenceDashboard {
 
   private registerStandardWidgets(): void {
     // Executive summary widget
-    this.widgetRegistry.register('executive_summary', {
+    this.widgetRegistry.register("executive_summary", {
       component: ExecutiveSummaryWidget,
-      dataSource: 'executive_metrics',
+      dataSource: "executive_metrics",
       refreshInterval: 300000, // 5 minutes
-      permissions: ['executive', 'admin'],
+      permissions: ["executive", "admin"],
     });
 
     // User engagement widget
-    this.widgetRegistry.register('user_engagement', {
+    this.widgetRegistry.register("user_engagement", {
       component: UserEngagementWidget,
-      dataSource: 'user_analytics',
+      dataSource: "user_analytics",
       refreshInterval: 60000, // 1 minute
-      permissions: ['analyst', 'admin', 'manager'],
+      permissions: ["analyst", "admin", "manager"],
     });
 
     // Content performance widget
-    this.widgetRegistry.register('content_performance', {
+    this.widgetRegistry.register("content_performance", {
       component: ContentPerformanceWidget,
-      dataSource: 'content_metrics',
+      dataSource: "content_metrics",
       refreshInterval: 300000, // 5 minutes
-      permissions: ['content_manager', 'admin', 'analyst'],
+      permissions: ["content_manager", "admin", "analyst"],
     });
 
     // Team productivity widget
-    this.widgetRegistry.register('team_productivity', {
+    this.widgetRegistry.register("team_productivity", {
       component: TeamProductivityWidget,
-      dataSource: 'team_metrics',
+      dataSource: "team_metrics",
       refreshInterval: 3600000, // 1 hour
-      permissions: ['team_lead', 'admin', 'hr'],
+      permissions: ["team_lead", "admin", "hr"],
     });
 
     // Real-time alerts widget
-    this.widgetRegistry.register('realtime_alerts', {
+    this.widgetRegistry.register("realtime_alerts", {
       component: RealtimeAlertsWidget,
-      dataSource: 'alert_stream',
+      dataSource: "alert_stream",
       refreshInterval: 10000, // 10 seconds
-      permissions: ['admin', 'ops'],
+      permissions: ["admin", "ops"],
     });
 
     // Predictive insights widget
-    this.widgetRegistry.register('predictive_insights', {
+    this.widgetRegistry.register("predictive_insights", {
       component: PredictiveInsightsWidget,
-      dataSource: 'ml_predictions',
+      dataSource: "ml_predictions",
       refreshInterval: 1800000, // 30 minutes
-      permissions: ['analyst', 'admin', 'strategy'],
+      permissions: ["analyst", "admin", "strategy"],
     });
   }
 
-  async createCustomDashboard(
-    config: CustomDashboardConfig,
-  ): Promise<Dashboard> {
+  async createCustomDashboard(config: CustomDashboardConfig): Promise<Dashboard> {
     const dashboard: Dashboard = {
       id: this.generateDashboardId(),
       name: config.name,
@@ -515,14 +499,14 @@ export class BusinessIntelligenceDashboard {
 
   private async getExecutiveMetrics(): Promise<ExecutiveMetrics> {
     return {
-      totalUsers: await this.queryMetric('total_active_users'),
+      totalUsers: await this.queryMetric("total_active_users"),
       documentationROI: await this.calculateDocumentationROI(),
-      userSatisfaction: await this.queryMetric('user_satisfaction_score'),
-      teamProductivity: await this.queryMetric('team_productivity_index'),
+      userSatisfaction: await this.queryMetric("user_satisfaction_score"),
+      teamProductivity: await this.queryMetric("team_productivity_index"),
       costSavings: await this.calculateCostSavings(),
       timeToValue: await this.calculateTimeToValue(),
-      complianceScore: await this.queryMetric('compliance_score'),
-      securityIncidents: await this.queryMetric('security_incidents'),
+      complianceScore: await this.queryMetric("compliance_score"),
+      securityIncidents: await this.queryMetric("security_incidents"),
     };
   }
 }
@@ -732,23 +716,21 @@ export class AutomatedReportingSystem {
   constructor(config: ReportingConfig) {
     this.reportScheduler = new ReportScheduler();
     this.reportGenerator = new ReportGenerator(config);
-    this.distributionManager = new ReportDistributionManager(
-      config.distribution,
-    );
+    this.distributionManager = new ReportDistributionManager(config.distribution);
   }
 
   async setupAutomatedReports(): Promise<void> {
     // Executive weekly report
     await this.reportScheduler.schedule({
-      id: 'executive-weekly',
-      name: 'Executive Weekly Report',
-      type: 'executive',
-      schedule: '0 9 * * MON', // Every Monday at 9 AM
-      recipients: ['executives', 'senior-management'],
-      template: 'executive-summary',
+      id: "executive-weekly",
+      name: "Executive Weekly Report",
+      type: "executive",
+      schedule: "0 9 * * MON", // Every Monday at 9 AM
+      recipients: ["executives", "senior-management"],
+      template: "executive-summary",
       data: {
-        metrics: ['roi', 'user_growth', 'satisfaction', 'productivity'],
-        charts: ['trend_analysis', 'comparative_metrics'],
+        metrics: ["roi", "user_growth", "satisfaction", "productivity"],
+        charts: ["trend_analysis", "comparative_metrics"],
         insights: true,
         recommendations: true,
       },
@@ -756,15 +738,15 @@ export class AutomatedReportingSystem {
 
     // Team productivity monthly report
     await this.reportScheduler.schedule({
-      id: 'team-productivity-monthly',
-      name: 'Team Productivity Monthly Report',
-      type: 'team_productivity',
-      schedule: '0 10 1 * *', // First day of month at 10 AM
-      recipients: ['team-leads', 'hr-managers'],
-      template: 'team-analysis',
+      id: "team-productivity-monthly",
+      name: "Team Productivity Monthly Report",
+      type: "team_productivity",
+      schedule: "0 10 1 * *", // First day of month at 10 AM
+      recipients: ["team-leads", "hr-managers"],
+      template: "team-analysis",
       data: {
-        metrics: ['velocity', 'quality', 'collaboration'],
-        comparisons: 'previous_month',
+        metrics: ["velocity", "quality", "collaboration"],
+        comparisons: "previous_month",
         goals: true,
         action_items: true,
       },
@@ -772,14 +754,14 @@ export class AutomatedReportingSystem {
 
     // Content performance quarterly report
     await this.reportScheduler.schedule({
-      id: 'content-performance-quarterly',
-      name: 'Content Performance Quarterly Report',
-      type: 'content_analysis',
-      schedule: '0 11 1 1,4,7,10 *', // First day of quarter at 11 AM
-      recipients: ['content-managers', 'marketing'],
-      template: 'content-detailed',
+      id: "content-performance-quarterly",
+      name: "Content Performance Quarterly Report",
+      type: "content_analysis",
+      schedule: "0 11 1 1,4,7,10 *", // First day of quarter at 11 AM
+      recipients: ["content-managers", "marketing"],
+      template: "content-detailed",
       data: {
-        metrics: ['engagement', 'conversion', 'search_performance'],
+        metrics: ["engagement", "conversion", "search_performance"],
         content_audit: true,
         gap_analysis: true,
         optimization_recommendations: true,
@@ -803,16 +785,13 @@ export class AutomatedReportingSystem {
     // Generate insights and recommendations
     if (config.includeInsights) {
       report.insights = await this.generateInsights(processedData);
-      report.recommendations =
-        await this.generateRecommendations(processedData);
+      report.recommendations = await this.generateRecommendations(processedData);
     }
 
     return report;
   }
 
-  private async collectReportData(
-    config: CustomReportConfig,
-  ): Promise<ReportData> {
+  private async collectReportData(config: CustomReportConfig): Promise<ReportData> {
     const dataCollectors = {
       user_metrics: () => this.collectUserMetrics(config.dateRange),
       content_metrics: () => this.collectContentMetrics(config.dateRange),
@@ -852,10 +831,8 @@ export class BusinessImpactAnalytics {
   async calculateDocumentationROI(): Promise<ROIAnalysis> {
     // Direct cost savings
     const supportTicketReduction = await this.calculateSupportTicketReduction();
-    const onboardingTimeReduction =
-      await this.calculateOnboardingTimeReduction();
-    const developmentTimeReduction =
-      await this.calculateDevelopmentTimeReduction();
+    const onboardingTimeReduction = await this.calculateOnboardingTimeReduction();
+    const developmentTimeReduction = await this.calculateDevelopmentTimeReduction();
 
     // Revenue impact
     const customerRetention = await this.calculateCustomerRetentionImpact();
@@ -873,8 +850,7 @@ export class BusinessImpactAnalytics {
       salesEnablement.revenueImpact +
       productAdoption.revenueImpact;
 
-    const roi =
-      (totalBenefits - documentationCosts.total) / documentationCosts.total;
+    const roi = (totalBenefits - documentationCosts.total) / documentationCosts.total;
 
     return {
       roi: roi * 100, // Convert to percentage
@@ -918,9 +894,9 @@ export class BusinessImpactAnalytics {
     const annualSavings = monthlySavings * 12;
 
     return {
-      metric: 'Support Ticket Reduction',
+      metric: "Support Ticket Reduction",
       value: reduction,
-      unit: 'tickets/month',
+      unit: "tickets/month",
       savings: annualSavings,
       confidence: 0.85,
       dataPoints: ticketData.length,

@@ -1,5 +1,5 @@
-import { type Page, type Locator, expect } from '@playwright/test';
-import { BasePage } from './BasePage';
+import { type Page, type Locator, expect } from "@playwright/test";
+import { BasePage } from "./BasePage";
 
 export class AgentSessionPage extends BasePage {
   readonly createSessionButton: Locator;
@@ -14,18 +14,18 @@ export class AgentSessionPage extends BasePage {
   constructor(page: Page) {
     super(page);
     // Using loose selectors that are likely to exist or be easily added
-    this.createSessionButton = page.getByRole('button', { name: /new session|create session/i });
+    this.createSessionButton = page.getByRole("button", { name: /new session|create session/i });
     this.sessionList = page.locator('[data-testid="session-list"], .session-list');
-    this.taskInput = page.getByRole('textbox', { name: /task|prompt/i });
-    this.executeButton = page.getByRole('button', { name: /execute|run/i });
+    this.taskInput = page.getByRole("textbox", { name: /task|prompt/i });
+    this.executeButton = page.getByRole("button", { name: /execute|run/i });
     this.resultArea = page.locator('[data-testid="result-area"], .results');
-    this.feedbackInput = page.getByRole('textbox', { name: /feedback/i });
-    this.submitFeedbackButton = page.getByRole('button', { name: /submit/i });
-    this.createPRButton = page.getByRole('button', { name: /create pr|pull request/i });
+    this.feedbackInput = page.getByRole("textbox", { name: /feedback/i });
+    this.submitFeedbackButton = page.getByRole("button", { name: /submit/i });
+    this.createPRButton = page.getByRole("button", { name: /create pr|pull request/i });
   }
 
   async goto() {
-    await super.goto('/dashboards/command-center');
+    await super.goto("/dashboards/command-center");
   }
 
   async createSession() {

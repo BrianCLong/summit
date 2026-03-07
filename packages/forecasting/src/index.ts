@@ -4,18 +4,21 @@
  */
 
 // Types
-export * from './types/index.js';
+export * from "./types/index.js";
 
 // Core models
-export { ARIMAForecaster, AutoARIMA } from './core/arima.js';
-export { ExponentialSmoothingForecaster, SimpleExponentialSmoothing } from './core/exponential-smoothing.js';
-export { ProphetForecaster } from './core/prophet.js';
+export { ARIMAForecaster, AutoARIMA } from "./core/arima.js";
+export {
+  ExponentialSmoothingForecaster,
+  SimpleExponentialSmoothing,
+} from "./core/exponential-smoothing.js";
+export { ProphetForecaster } from "./core/prophet.js";
 
 // Ensemble methods
-export { EnsembleForecaster, OptimalEnsemble } from './models/ensemble.js';
+export { EnsembleForecaster, OptimalEnsemble } from "./models/ensemble.js";
 
 // Anomaly forecasting
-export { AnomalyForecaster } from './models/anomaly-forecast.js';
+export { AnomalyForecaster } from "./models/anomaly-forecast.js";
 
 // Scenario analysis and simulation
 export {
@@ -24,4 +27,4 @@ export {
   Backtester,
   type ScenarioConfig,
   type SimulationResult,
-} from './utils/scenario-simulation.js';
+} from "./utils/scenario-simulation.js";

@@ -1,16 +1,9 @@
 // @ts-nocheck - API client type compatibility
-import {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  ReactNode,
-  useCallback,
-} from 'react';
-import type { FC } from 'react';
-import { useRouter } from 'next/router';
-import { apiClient } from '@/services/api';
-import toast from 'react-hot-toast';
+import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from "react";
+import type { FC } from "react";
+import { useRouter } from "next/router";
+import { apiClient } from "@/services/api";
+import toast from "react-hot-toast";
 
 interface User {
   id: string;
@@ -23,7 +16,7 @@ interface User {
   tenantId: string;
   permissions: string[];
   preferences: {
-    theme: 'light' | 'dark' | 'system';
+    theme: "light" | "dark" | "system";
     language: string;
     timezone: string;
     notifications: {
@@ -60,7 +53,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const initializeAuth = async () => {
     try {
-      const token = localStorage.getItem('auth_token');
+      const token = localStorage.getItem("auth_token");
       if (!token) {
         setIsLoading(false);
         return;
@@ -70,9 +63,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const userData = await apiClient.getCurrentUser();
       setUser(userData);
     } catch (error) {
-      console.error('Auth initialization failed:', error);
-      localStorage.removeItem('auth_token');
-      localStorage.removeItem('refresh_token');
+      console.error("Auth initialization failed:", error);
+      localStorage.removeItem("auth_token");
+      localStorage.removeItem("refresh_token");
     } finally {
       setIsLoading(false);
     }
@@ -85,8 +78,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       const { user: userData, token, refreshToken } = response;
 
-      localStorage.setItem('auth_token', token);
-      localStorage.setItem('refresh_token', refreshToken);
+      localStorage.setItem("auth_token", token);
+      localStorage.setItem("refresh_token", refreshToken);
       apiClient.setAuthToken(token);
 
       setUser(userData);
@@ -95,11 +88,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       // Redirect to intended page or dashboard
       const returnUrl = router.query.returnUrl as string;
-      await router.push(returnUrl || '/');
+      await router.push(returnUrl || "/");
     } catch (error) {
       const message =
-        (error as { response?: { data?: { message?: string } } }).response
-          ?.data?.message || 'Sign in failed';
+        (error as { response?: { data?: { message?: string } } }).response?.data?.message ||
+        "Sign in failed";
       toast.error(message);
       throw error;
     } finally {
@@ -112,14 +105,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setIsLoading(true);
       await apiClient.signOut();
     } catch (error) {
-      console.error('Sign out error:', error);
+      console.error("Sign out error:", error);
     } finally {
-      localStorage.removeItem('auth_token');
-      localStorage.removeItem('refresh_token');
+      localStorage.removeItem("auth_token");
+      localStorage.removeItem("refresh_token");
       apiClient.setAuthToken(null);
       setUser(null);
       setIsLoading(false);
-      router.push('/auth/signin');
+      router.push("/auth/signin");
     }
   }, [router]);
 
@@ -127,11 +120,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const updatedUser = await apiClient.updateProfile(data);
       setUser(updatedUser);
-      toast.success('Profile updated successfully');
+      toast.success("Profile updated successfully");
     } catch (error) {
       const message =
-        (error as { response?: { data?: { message?: string } } }).response
-          ?.data?.message || 'Profile update failed';
+        (error as { response?: { data?: { message?: string } } }).response?.data?.message ||
+        "Profile update failed";
       toast.error(message);
       throw error;
     }
@@ -139,19 +132,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const refreshToken = useCallback(async () => {
     try {
-      const refreshTokenValue = localStorage.getItem('refresh_token');
+      const refreshTokenValue = localStorage.getItem("refresh_token");
       if (!refreshTokenValue) {
-        throw new Error('No refresh token available');
+        throw new Error("No refresh token available");
       }
 
       const response = await apiClient.refreshToken(refreshTokenValue);
       const { token, refreshToken: newRefreshToken } = response;
 
-      localStorage.setItem('auth_token', token);
-      localStorage.setItem('refresh_token', newRefreshToken);
+      localStorage.setItem("auth_token", token);
+      localStorage.setItem("refresh_token", newRefreshToken);
       apiClient.setAuthToken(token);
     } catch (error) {
-      console.error('Token refresh failed:', error);
+      console.error("Token refresh failed:", error);
       await signOut();
       throw error;
     }
@@ -166,10 +159,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         try {
           await refreshToken();
         } catch (error) {
-          console.error('Auto refresh failed:', error);
+          console.error("Auto refresh failed:", error);
         }
       },
-      14 * 60 * 1000,
+      14 * 60 * 1000
     ); // Refresh every 14 minutes (assuming 15 min token expiry)
 
     return () => clearInterval(refreshInterval);
@@ -183,8 +176,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     };
 
-    window.addEventListener('online', handleOnline);
-    return () => window.removeEventListener('online', handleOnline);
+    window.addEventListener("online", handleOnline);
+    return () => window.removeEventListener("online", handleOnline);
   }, [user, refreshToken]);
 
   const value = {
@@ -203,24 +196,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 }
 
 // HOC for protected routes
-export function withAuth<P extends object>(
-  WrappedComponent: FC<P>,
-): FC<P> {
+export function withAuth<P extends object>(WrappedComponent: FC<P>): FC<P> {
   const AuthenticatedComponent: FC<P> = (props: P) => {
     const { isAuthenticated, isLoading } = useAuth();
     const router = useRouter();
 
     useEffect(() => {
       if (!isLoading && !isAuthenticated) {
-        void router.push(
-          `/auth/signin?returnUrl=${encodeURIComponent(router.asPath)}`,
-        );
+        void router.push(`/auth/signin?returnUrl=${encodeURIComponent(router.asPath)}`);
       }
     }, [isAuthenticated, isLoading, router]);
 
@@ -242,7 +231,7 @@ export function withAuth<P extends object>(
     return <WrappedComponent {...props} />;
   };
 
-  AuthenticatedComponent.displayName = `withAuth(${WrappedComponent.displayName || WrappedComponent.name || 'Component'})`;
+  AuthenticatedComponent.displayName = `withAuth(${WrappedComponent.displayName || WrappedComponent.name || "Component"})`;
   return AuthenticatedComponent;
 }
 
@@ -252,7 +241,7 @@ export function usePermissions() {
 
   const hasPermission = (permission: string): boolean => {
     if (!user) return false;
-    return user.permissions.includes(permission) || user.role === 'admin';
+    return user.permissions.includes(permission) || user.role === "admin";
   };
 
   const hasRole = (role: string): boolean => {

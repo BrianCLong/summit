@@ -3,8 +3,8 @@
  * Automatic extraction from unstructured data
  */
 
-import { Driver } from 'neo4j-driver';
-import { v4 as uuidv4 } from 'uuid';
+import { Driver } from "neo4j-driver";
+import { v4 as uuidv4 } from "uuid";
 
 export interface Document {
   id: string;
@@ -39,7 +39,7 @@ export class ExtractionPipeline {
       enableEventExtraction: true,
       enableEntityLinking: true,
       minConfidence: 0.5,
-    },
+    }
   ) {}
 
   /**
@@ -118,7 +118,7 @@ export class ExtractionPipeline {
       entities.push({
         id: uuidv4(),
         text: match[1],
-        type: 'PERSON',
+        type: "PERSON",
         startOffset: match.index,
         endOffset: match.index + match[0].length,
         confidence: 0.7,
@@ -143,7 +143,7 @@ export class ExtractionPipeline {
     while ((match = workForPattern.exec(document.content)) !== null) {
       relationships.push({
         id: uuidv4(),
-        type: 'WORKS_FOR',
+        type: "WORKS_FOR",
         source: match[1],
         target: match[2],
         confidence: 0.75,
@@ -196,7 +196,7 @@ export class ExtractionPipeline {
           type: entity.type,
           confidence: entity.confidence,
           documentId,
-        },
+        }
       );
     } finally {
       await session.close();
@@ -229,7 +229,7 @@ export class ExtractionPipeline {
           target: relationship.target,
           confidence: relationship.confidence,
           documentId,
-        },
+        }
       );
     } finally {
       await session.close();
@@ -255,7 +255,7 @@ export class ExtractionPipeline {
           id: event.id,
           type: event.type,
           documentId,
-        },
+        }
       );
     } finally {
       await session.close();
@@ -290,8 +290,8 @@ export class ExtractionPipeline {
       `);
 
       const entityTypes = result.records.map((record) => ({
-        type: record.get('entityType'),
-        count: record.get('count').toNumber(),
+        type: record.get("entityType"),
+        count: record.get("count").toNumber(),
       }));
 
       const relResult = await session.run(`
@@ -301,8 +301,8 @@ export class ExtractionPipeline {
       `);
 
       const relationshipTypes = relResult.records.map((record) => ({
-        type: record.get('relType'),
-        count: record.get('count').toNumber(),
+        type: record.get("relType"),
+        count: record.get("count").toNumber(),
       }));
 
       return {

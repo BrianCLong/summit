@@ -5,6 +5,7 @@
 This document describes the comprehensive observability, disaster recovery, and cost management infrastructure implemented for the IntelGraph platform.
 
 **Acceptance Criteria Met:**
+
 - ✅ **P95 query latency**: < 1.5s (validated via benchmark suite)
 - ✅ **Monthly chaos drills**: Automated and passing
 - ✅ **Autoscaling policies**: Documented and implemented
@@ -33,9 +34,11 @@ This document describes the comprehensive observability, disaster recovery, and 
 ## 1. OpenTelemetry Tracing
 
 ### Implementation
+
 **File**: `server/src/observability/otel-full.ts`
 
 ### Features
+
 - ✅ Distributed tracing across all services
 - ✅ Auto-instrumentation for HTTP, GraphQL, PostgreSQL, Redis
 - ✅ Custom span creation for business operations
@@ -45,17 +48,17 @@ This document describes the comprehensive observability, disaster recovery, and 
 ### Usage
 
 ```typescript
-import { withSpan, traceDbOperation } from './observability/otel-full.js';
+import { withSpan, traceDbOperation } from "./observability/otel-full.js";
 
 // Trace a custom operation
-await withSpan('user.login', async (span) => {
+await withSpan("user.login", async (span) => {
   span.setAttributes({ userId, email });
   // ... operation logic
 });
 
 // Trace database operations
-await traceDbOperation('query', 'postgres', 'SELECT * FROM users', async () => {
-  return await pool.query('SELECT * FROM users');
+await traceDbOperation("query", "postgres", "SELECT * FROM users", async () => {
+  return await pool.query("SELECT * FROM users");
 });
 ```
 
@@ -72,11 +75,13 @@ OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318/v1/traces
 ## 2. Prometheus Metrics & Heatmaps
 
 ### Implementation
+
 **File**: `server/src/observability/metrics-enhanced.ts`
 
 ### Key Metrics
 
 #### Query Latency Heatmap
+
 ```promql
 # Histogram with fine-grained buckets for heatmap visualization
 intelgraph_query_latency_seconds_bucket{database, operation, query_type}
@@ -86,6 +91,7 @@ intelgraph_query_latency_summary_seconds{database, operation}
 ```
 
 #### Cost Metrics
+
 ```promql
 # Remaining budget
 intelgraph_cost_budget_remaining_usd{tenant_id, budget_type}
@@ -98,6 +104,7 @@ intelgraph_cost_accrued_usd_total{tenant_id, resource_type}
 ```
 
 #### DR Metrics
+
 ```promql
 # Replication lag
 intelgraph_dr_replication_lag_seconds{database, primary_region, dr_region}
@@ -110,22 +117,22 @@ intelgraph_dr_rto_actual_seconds{database}
 ### Usage
 
 ```typescript
-import { recordQueryExecution } from './observability/metrics-enhanced.js';
+import { recordQueryExecution } from "./observability/metrics-enhanced.js";
 
 const start = Date.now();
 try {
   const result = await query();
   const duration = (Date.now() - start) / 1000;
-  
-  recordQueryExecution('postgres', 'select', duration, {
-    queryType: 'entity_fetch',
-    tenantId: 'customer-123',
+
+  recordQueryExecution("postgres", "select", duration, {
+    queryType: "entity_fetch",
+    tenantId: "customer-123",
     slowThresholdMs: 1500, // Alert if > 1.5s
   });
 } catch (error) {
-  recordQueryExecution('postgres', 'select', duration, {
+  recordQueryExecution("postgres", "select", duration, {
     error,
-    tenantId: 'customer-123',
+    tenantId: "customer-123",
   });
 }
 ```
@@ -135,9 +142,11 @@ try {
 ## 3. Slow Query Killer
 
 ### Implementation
+
 **File**: `server/src/observability/slow-query-killer.ts`
 
 ### Features
+
 - ✅ Automatic termination of queries exceeding thresholds
 - ✅ PostgreSQL and Neo4j support
 - ✅ Configurable thresholds per database
@@ -158,16 +167,16 @@ SLOW_QUERY_KILLER_DRY_RUN=false    # Set to true for testing
 ### Usage
 
 ```typescript
-import { slowQueryKiller } from './observability/slow-query-killer.js';
+import { slowQueryKiller } from "./observability/slow-query-killer.js";
 
 // Initialize with database connections
 slowQueryKiller.initialize(pgPool, neo4jDriver);
 
 // Register a query for monitoring
 const queryId = uuid();
-slowQueryKiller.registerQuery(queryId, query, 'postgres', {
-  tenantId: 'customer-123',
-  user: 'analyst@example.com',
+slowQueryKiller.registerQuery(queryId, query, "postgres", {
+  tenantId: "customer-123",
+  user: "analyst@example.com",
 });
 
 try {
@@ -184,9 +193,11 @@ try {
 ## 4. Cost Guards
 
 ### Implementation
+
 **File**: `server/src/observability/cost-guards.ts`
 
 ### Features
+
 - ✅ Budget tracking (daily, monthly, per-tenant)
 - ✅ Automatic alerts at configurable thresholds (50%, 75%, 90%, 95%)
 - ✅ Throttling at 90% budget utilization
@@ -205,13 +216,13 @@ PER_TENANT_BUDGET_USD=500
 ### Usage
 
 ```typescript
-import { costGuardService } from './observability/cost-guards.js';
+import { costGuardService } from "./observability/cost-guards.js";
 
 // Check budget before expensive operation
 const estimatedCost = 0.05; // $0.05
 const { allowed, reason, status } = await costGuardService.checkBudgetLimit(
   estimatedCost,
-  'customer-123'
+  "customer-123"
 );
 
 if (!allowed) {
@@ -219,10 +230,10 @@ if (!allowed) {
 }
 
 // Record actual cost
-costGuardService.recordQueryCost('postgres', durationMs, 'customer-123');
+costGuardService.recordQueryCost("postgres", durationMs, "customer-123");
 
 // Get budget status
-const status = costGuardService.getBudgetStatus('customer-123', 'monthly');
+const status = costGuardService.getBudgetStatus("customer-123", "monthly");
 console.log(`Budget: ${status.used}/${status.limit} (${status.utilization * 100}%)`);
 ```
 
@@ -231,16 +242,17 @@ console.log(`Budget: ${status.used}/${status.limit} (${status.utilization * 100}
 ## 5. Data Archival Tiering
 
 ### Implementation
+
 **File**: `server/src/services/archival-tiering.ts`
 
 ### Archival Rules
 
-| Data Type | Age Threshold | Target Tier | Compression |
-|-----------|---------------|-------------|-------------|
-| Events | 90 days | S3 Standard-IA | ✅ |
-| Events | 365 days | Glacier | ✅ |
-| Analytics Traces | 180 days | S3 Standard-IA | ✅ |
-| Audit Logs | 730 days | Glacier Deep Archive | ✅ |
+| Data Type        | Age Threshold | Target Tier          | Compression |
+| ---------------- | ------------- | -------------------- | ----------- |
+| Events           | 90 days       | S3 Standard-IA       | ✅          |
+| Events           | 365 days      | Glacier              | ✅          |
+| Analytics Traces | 180 days      | S3 Standard-IA       | ✅          |
+| Audit Logs       | 730 days      | Glacier Deep Archive | ✅          |
 
 ### Configuration
 
@@ -255,7 +267,7 @@ ARCHIVAL_CHECK_INTERVAL_HOURS=24
 ### Usage
 
 ```typescript
-import { archivalTieringService } from './services/archival-tiering.ts';
+import { archivalTieringService } from "./services/archival-tiering.ts";
 
 // Initialize with database connection
 archivalTieringService.initialize(pgPool);
@@ -265,9 +277,9 @@ await archivalTieringService.runArchivalCycle();
 
 // Restore archived data
 const rowsRestored = await archivalTieringService.restoreArchivedData(
-  'events',
-  'job-id-123',
-  'events_restored'
+  "events",
+  "job-id-123",
+  "events_restored"
 );
 ```
 
@@ -276,6 +288,7 @@ const rowsRestored = await archivalTieringService.restoreArchivedData(
 ## 6. Chaos Engineering
 
 ### Implementation
+
 - **Chaos Experiments**: `infra/chaos/chaos-experiments.yaml`
 - **Chaos Drill Script**: `scripts/chaos-drill.sh`
 - **Monthly CronJob**: `deploy/k8s/cron/chaos-drill-monthly.yaml`
@@ -309,6 +322,7 @@ DRY_RUN=true ./scripts/chaos-drill.sh all
 Chaos drills run automatically on the **1st of every month at 2 AM UTC** via Kubernetes CronJob.
 
 **Alerts**:
+
 - `ChaosDrillFailed` - Triggered if drill fails
 - `ChaosDrillNotRun` - Triggered if drill hasn't run in 35+ days
 
@@ -317,6 +331,7 @@ Chaos drills run automatically on the **1st of every month at 2 AM UTC** via Kub
 ## 7. Disaster Recovery
 
 ### Implementation
+
 - **DR Verification**: `scripts/dr-verify.sh`
 - **Runbook**: `docs/ops/dr-bcp-playbook.md`
 - **Terraform**: `infra/dr/postgres-replica.tf`, `infra/dr/route53-failover.tf`
@@ -327,6 +342,7 @@ Chaos drills run automatically on the **1st of every month at 2 AM UTC** via Kub
 **DR Region**: us-west-2
 
 **Components**:
+
 - ✅ PostgreSQL read replica in DR region
 - ✅ Neo4j backup replication to S3
 - ✅ Redis RDB snapshots
@@ -335,10 +351,10 @@ Chaos drills run automatically on the **1st of every month at 2 AM UTC** via Kub
 
 ### RTO/RPO Targets
 
-| Metric | Target | Actual |
-|--------|--------|--------|
-| **RTO** | ≤ 1 hour | ~15 minutes |
-| **RPO** | ≤ 5 minutes | ~2 minutes |
+| Metric  | Target      | Actual      |
+| ------- | ----------- | ----------- |
+| **RTO** | ≤ 1 hour    | ~15 minutes |
+| **RPO** | ≤ 5 minutes | ~2 minutes  |
 
 ### Running DR Verification
 
@@ -366,9 +382,11 @@ export SLACK_WEBHOOK=https://hooks.slack.com/services/...
 ## 8. Point-in-Time Recovery (PITR)
 
 ### Implementation
+
 **File**: `scripts/pitr-automated.sh`
 
 ### Features
+
 - ✅ Continuous WAL archival (RPO ≤ 5 minutes)
 - ✅ S3-backed WAL storage
 - ✅ Automated base backups
@@ -410,22 +428,27 @@ RETENTION_DAYS=30
 ## 9. Autoscaling
 
 ### Documentation
+
 **File**: `docs/autoscaling-policies.md`
 
 ### Policies Implemented
 
 #### Horizontal Pod Autoscaling (HPA)
+
 - **API Server**: CPU (70%), Memory (80%), Query Latency (1.2s), Request Rate (100/s)
 - **Workers**: Redis queue length (10 jobs/worker)
 
 #### Vertical Pod Autoscaling (VPA)
+
 - **API Server**: Auto-adjust CPU/memory requests based on usage
 
 #### Cluster Autoscaling
+
 - **Node Autoscaling**: Scale nodes based on pod scheduling failures
 - **Instance Types**: m5.xlarge, m5.2xlarge, c5.xlarge, c5.2xlarge
 
 #### KEDA Event-Driven Autoscaling
+
 - **Workers**: Scale based on Redis queue length
 - **Scale to zero**: When queue is empty
 
@@ -463,11 +486,13 @@ scaleDownStabilization: 300s
 ### Prometheus Alerts
 
 **Critical**:
+
 - `RPOViolated` - Replication lag > 5 minutes
 - `RTOViolated` - Recovery time > 1 hour
 - `ChaosDrillFailed` - Monthly drill failed
 
 **Warning**:
+
 - `P95LatencyHigh` - Query latency > 1.5s
 - `HPAMaxedOut` - HPA at max replicas
 - `ChaosDrillNotRun` - No drill in 35+ days
@@ -477,6 +502,7 @@ scaleDownStabilization: 300s
 ## 11. Benchmark Suite
 
 ### Implementation
+
 **File**: `scripts/benchmark-suite.sh`
 
 ### Benchmarks
@@ -598,34 +624,34 @@ curl http://localhost:4000/api/observability/cost-status
 
 ## Key Files Reference
 
-| Component | Files |
-|-----------|-------|
-| **OTEL Tracing** | `server/src/observability/otel-full.ts` |
-| **Metrics** | `server/src/observability/metrics-enhanced.ts` |
+| Component             | Files                                           |
+| --------------------- | ----------------------------------------------- |
+| **OTEL Tracing**      | `server/src/observability/otel-full.ts`         |
+| **Metrics**           | `server/src/observability/metrics-enhanced.ts`  |
 | **Slow Query Killer** | `server/src/observability/slow-query-killer.ts` |
-| **Cost Guards** | `server/src/observability/cost-guards.ts` |
-| **Archival** | `server/src/services/archival-tiering.ts` |
-| **Chaos Experiments** | `infra/chaos/chaos-experiments.yaml` |
-| **Chaos Drill** | `scripts/chaos-drill.sh` |
-| **DR Verification** | `scripts/dr-verify.sh` |
-| **PITR** | `scripts/pitr-automated.sh` |
-| **Benchmark** | `scripts/benchmark-suite.sh` |
-| **Runbooks** | `docs/runbooks/chaos-drill-runbooks.md` |
-| **Autoscaling Docs** | `docs/autoscaling-policies.md` |
-| **Dashboards** | `infra/observability/grafana-dashboards/*.json` |
-| **Monthly CronJob** | `deploy/k8s/cron/chaos-drill-monthly.yaml` |
+| **Cost Guards**       | `server/src/observability/cost-guards.ts`       |
+| **Archival**          | `server/src/services/archival-tiering.ts`       |
+| **Chaos Experiments** | `infra/chaos/chaos-experiments.yaml`            |
+| **Chaos Drill**       | `scripts/chaos-drill.sh`                        |
+| **DR Verification**   | `scripts/dr-verify.sh`                          |
+| **PITR**              | `scripts/pitr-automated.sh`                     |
+| **Benchmark**         | `scripts/benchmark-suite.sh`                    |
+| **Runbooks**          | `docs/runbooks/chaos-drill-runbooks.md`         |
+| **Autoscaling Docs**  | `docs/autoscaling-policies.md`                  |
+| **Dashboards**        | `infra/observability/grafana-dashboards/*.json` |
+| **Monthly CronJob**   | `deploy/k8s/cron/chaos-drill-monthly.yaml`      |
 
 ---
 
 ## Acceptance Criteria Validation
 
-| Requirement | Status | Evidence |
-|-------------|--------|----------|
-| **P95 query latency < 1.5s** | ✅ PASS | `scripts/benchmark-suite.sh` validates via Prometheus |
-| **Monthly chaos drills passing** | ✅ PASS | Automated via `deploy/k8s/cron/chaos-drill-monthly.yaml` |
-| **Autoscaling policies documented** | ✅ PASS | `docs/autoscaling-policies.md` |
-| **RTO ≤ 1 hour** | ✅ PASS | Measured at ~15min via `scripts/dr-verify.sh` |
-| **RPO ≤ 5 minutes** | ✅ PASS | Continuous WAL archival every 60s |
+| Requirement                         | Status  | Evidence                                                 |
+| ----------------------------------- | ------- | -------------------------------------------------------- |
+| **P95 query latency < 1.5s**        | ✅ PASS | `scripts/benchmark-suite.sh` validates via Prometheus    |
+| **Monthly chaos drills passing**    | ✅ PASS | Automated via `deploy/k8s/cron/chaos-drill-monthly.yaml` |
+| **Autoscaling policies documented** | ✅ PASS | `docs/autoscaling-policies.md`                           |
+| **RTO ≤ 1 hour**                    | ✅ PASS | Measured at ~15min via `scripts/dr-verify.sh`            |
+| **RPO ≤ 5 minutes**                 | ✅ PASS | Continuous WAL archival every 60s                        |
 
 ---
 
@@ -634,4 +660,3 @@ curl http://localhost:4000/api/observability/cost-status
 - **Runbooks**: `docs/runbooks/chaos-drill-runbooks.md`
 - **Alerts**: Configured in `deploy/k8s/cron/chaos-drill-monthly.yaml`
 - **Dashboards**: `infra/observability/grafana-dashboards/`
-

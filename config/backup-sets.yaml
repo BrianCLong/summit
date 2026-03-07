@@ -3,8 +3,8 @@
 
 # Recovery Objectives
 recovery_objectives:
-  rto: "4 hours"  # Recovery Time Objective
-  rpo: "15 minutes"  # Recovery Point Objective
+  rto: "4 hours" # Recovery Time Objective
+  rpo: "15 minutes" # Recovery Point Objective
   description: "Maximum acceptable downtime: 4 hours. Maximum acceptable data loss: 15 minutes."
 
 # Backup Set Definitions
@@ -527,7 +527,7 @@ restore_environments:
       - pii_fields
       - sensitive_data
       - production_credentials
-    data_reduction: 0.1  # 10% of production data
+    data_reduction: 0.1 # 10% of production data
 
   test:
     name: "Testing"
@@ -539,7 +539,7 @@ restore_environments:
       - sensitive_data
       - production_credentials
       - financial_data
-    data_reduction: 0.2  # 20% of production data
+    data_reduction: 0.2 # 20% of production data
     synthetic_data: true
 
 # Sanitization Rules
@@ -585,7 +585,7 @@ validation:
       required: true
     - check: "size_verification"
       required: false
-      tolerance: 0.1  # 10% variance allowed
+      tolerance: 0.1 # 10% variance allowed
 
   database:
     - check: "connection_test"
@@ -608,34 +608,34 @@ validation:
     - check: "smoke_tests"
       required: true
     - check: "golden_path_tests"
-      required: false  # Required for DR rehearsal
+      required: false # Required for DR rehearsal
 
 # Scheduling
 schedules:
   full_backup:
-    cron: "0 2 * * *"  # Daily at 2 AM
+    cron: "0 2 * * *" # Daily at 2 AM
     backup_set: "full"
     enabled: true
 
   minimal_backup:
-    cron: "0 * * * *"  # Hourly
+    cron: "0 * * * *" # Hourly
     backup_set: "minimal"
     enabled: true
 
   dr_snapshot:
-    cron: "0 */6 * * *"  # Every 6 hours
+    cron: "0 */6 * * *" # Every 6 hours
     backup_set: "disaster_recovery"
     enabled: true
 
   config_backup:
-    cron: "0 */4 * * *"  # Every 4 hours
+    cron: "0 */4 * * *" # Every 4 hours
     backup_set: "config_only"
     enabled: true
 
 # Monitoring and Alerting
 monitoring:
   backup_success_rate:
-    threshold: 0.98  # 98% success rate
+    threshold: 0.98 # 98% success rate
     window: "24h"
     alert: true
 
@@ -648,7 +648,7 @@ monitoring:
     alert: true
 
   backup_size:
-    growth_rate_threshold: 1.5  # Alert if backup grows >50% unexpectedly
+    growth_rate_threshold: 1.5 # Alert if backup grows >50% unexpectedly
     alert: true
 
   restore_test_frequency:

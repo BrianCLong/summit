@@ -1,6 +1,7 @@
 # Interop & Standards Mapping
 
 ## Mapping
+
 | Summit          | External Standard    |
 | --------------- | -------------------- |
 | GenUI schema    | MCP-UI               |
@@ -8,5 +9,6 @@
 | Workflow blocks | A2UI cards           |
 
 ## Non-goals
-* Fully autonomous UI coding
-* Arbitrary HTML generation
+
+- Fully autonomous UI coding
+- Arbitrary HTML generation

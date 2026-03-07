@@ -5,7 +5,7 @@
  * Multi-step form for conducting and documenting debrief sessions.
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback } from "react";
 import type {
   CreateDebriefInput,
   UpdateDebriefInput,
@@ -14,14 +14,14 @@ import type {
   IntelligenceItem,
   DebriefTasking,
   SecurityAssessment,
-} from '../debrief.js';
-import type { ClassificationLevel, RiskLevel } from '../constants.js';
-import { DEBRIEF_TYPES, CLASSIFICATION_LEVELS, RISK_LEVELS } from '../constants.js';
+} from "../debrief.js";
+import type { ClassificationLevel, RiskLevel } from "../constants.js";
+import { DEBRIEF_TYPES, CLASSIFICATION_LEVELS, RISK_LEVELS } from "../constants.js";
 
 export interface DebriefFormProps {
   sourceId: string;
   sourceCryptonym: string;
-  mode: 'schedule' | 'conduct' | 'complete' | 'review';
+  mode: "schedule" | "conduct" | "complete" | "review";
   initialData?: Partial<CreateDebriefInput & UpdateDebriefInput & CompleteDebriefInput>;
   onSubmit: (data: unknown) => Promise<void>;
   onCancel: () => void;
@@ -29,12 +29,12 @@ export interface DebriefFormProps {
   error?: string | null;
 }
 
-type DebriefStep = 'schedule' | 'objectives' | 'notes' | 'intelligence' | 'security' | 'review';
+type DebriefStep = "schedule" | "objectives" | "notes" | "intelligence" | "security" | "review";
 
 interface ScheduleFormState {
   debriefType: DebriefType;
   scheduledAt: string;
-  locationType: 'SAFE_HOUSE' | 'NEUTRAL' | 'VEHICLE' | 'VIRTUAL' | 'OTHER';
+  locationType: "SAFE_HOUSE" | "NEUTRAL" | "VEHICLE" | "VIRTUAL" | "OTHER";
   locationId: string;
   securityVerified: boolean;
   objectives: string[];
@@ -66,53 +66,50 @@ export const DebriefForm: React.FC<DebriefFormProps> = ({
   error = null,
 }) => {
   const [currentStep, setCurrentStep] = useState<DebriefStep>(
-    mode === 'schedule' ? 'schedule' : mode === 'conduct' ? 'notes' : 'intelligence',
+    mode === "schedule" ? "schedule" : mode === "conduct" ? "notes" : "intelligence"
   );
 
   const [scheduleForm, setScheduleForm] = useState<ScheduleFormState>({
-    debriefType: (initialData?.debriefType as DebriefType) || 'SCHEDULED',
+    debriefType: (initialData?.debriefType as DebriefType) || "SCHEDULED",
     scheduledAt: initialData?.scheduledAt
       ? new Date(initialData.scheduledAt).toISOString().slice(0, 16)
       : new Date().toISOString().slice(0, 16),
-    locationType: 'SAFE_HOUSE',
-    locationId: '',
+    locationType: "SAFE_HOUSE",
+    locationId: "",
     securityVerified: false,
     objectives: [],
-    classification: 'SECRET',
+    classification: "SECRET",
   });
 
   const [conductForm, setConductForm] = useState<ConductFormState>({
     topicsCovered: (initialData?.topicsCovered as string[]) || [],
-    rawNotes: (initialData?.rawNotes as string) || '',
-    sourceDemeanor: '',
-    credibilityObservations: '',
+    rawNotes: (initialData?.rawNotes as string) || "",
+    sourceDemeanor: "",
+    credibilityObservations: "",
   });
 
   const [completeForm, setCompleteForm] = useState<CompleteFormState>({
-    processedNotes: (initialData?.processedNotes as string) || '',
+    processedNotes: (initialData?.processedNotes as string) || "",
     intelligenceItems: [],
     taskings: [],
     securityAssessment: {
-      sourceCompromiseRisk: 'NONE',
+      sourceCompromiseRisk: "NONE",
       operationalSecurityIssues: [],
       counterintelligenceIndicators: [],
       recommendedMitigations: [],
-      evaluatorNotes: '',
+      evaluatorNotes: "",
     },
   });
 
-  const [objectiveInput, setObjectiveInput] = useState('');
-  const [topicInput, setTopicInput] = useState('');
+  const [objectiveInput, setObjectiveInput] = useState("");
+  const [topicInput, setTopicInput] = useState("");
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
   // Schedule form handlers
-  const handleScheduleChange = useCallback(
-    (field: keyof ScheduleFormState, value: unknown) => {
-      setScheduleForm((prev) => ({ ...prev, [field]: value }));
-      setValidationErrors((prev) => ({ ...prev, [field]: '' }));
-    },
-    [],
-  );
+  const handleScheduleChange = useCallback((field: keyof ScheduleFormState, value: unknown) => {
+    setScheduleForm((prev) => ({ ...prev, [field]: value }));
+    setValidationErrors((prev) => ({ ...prev, [field]: "" }));
+  }, []);
 
   const addObjective = useCallback(() => {
     if (objectiveInput.trim()) {
@@ -120,7 +117,7 @@ export const DebriefForm: React.FC<DebriefFormProps> = ({
         ...prev,
         objectives: [...prev.objectives, objectiveInput.trim()],
       }));
-      setObjectiveInput('');
+      setObjectiveInput("");
     }
   }, [objectiveInput]);
 
@@ -132,12 +129,9 @@ export const DebriefForm: React.FC<DebriefFormProps> = ({
   }, []);
 
   // Conduct form handlers
-  const handleConductChange = useCallback(
-    (field: keyof ConductFormState, value: unknown) => {
-      setConductForm((prev) => ({ ...prev, [field]: value }));
-    },
-    [],
-  );
+  const handleConductChange = useCallback((field: keyof ConductFormState, value: unknown) => {
+    setConductForm((prev) => ({ ...prev, [field]: value }));
+  }, []);
 
   const addTopic = useCallback(() => {
     if (topicInput.trim()) {
@@ -145,17 +139,14 @@ export const DebriefForm: React.FC<DebriefFormProps> = ({
         ...prev,
         topicsCovered: [...prev.topicsCovered, topicInput.trim()],
       }));
-      setTopicInput('');
+      setTopicInput("");
     }
   }, [topicInput]);
 
   // Complete form handlers
-  const handleCompleteChange = useCallback(
-    (field: keyof CompleteFormState, value: unknown) => {
-      setCompleteForm((prev) => ({ ...prev, [field]: value }));
-    },
-    [],
-  );
+  const handleCompleteChange = useCallback((field: keyof CompleteFormState, value: unknown) => {
+    setCompleteForm((prev) => ({ ...prev, [field]: value }));
+  }, []);
 
   const addIntelligenceItem = useCallback(() => {
     setCompleteForm((prev) => ({
@@ -164,14 +155,14 @@ export const DebriefForm: React.FC<DebriefFormProps> = ({
         ...prev.intelligenceItems,
         {
           id: `temp-${Date.now()}`,
-          topic: '',
-          content: '',
-          informationRating: '3',
-          classification: 'SECRET',
+          topic: "",
+          content: "",
+          informationRating: "3",
+          classification: "SECRET",
           requiresCorroboration: true,
           corroboratedBy: [],
           linkedEntities: [],
-          actionability: 'BACKGROUND',
+          actionability: "BACKGROUND",
           disseminationRestrictions: [],
         },
       ],
@@ -183,11 +174,11 @@ export const DebriefForm: React.FC<DebriefFormProps> = ({
       setCompleteForm((prev) => ({
         ...prev,
         intelligenceItems: prev.intelligenceItems.map((item, i) =>
-          i === index ? { ...item, [field]: value } : item,
+          i === index ? { ...item, [field]: value } : item
         ),
       }));
     },
-    [],
+    []
   );
 
   const removeIntelligenceItem = useCallback((index: number) => {
@@ -204,9 +195,9 @@ export const DebriefForm: React.FC<DebriefFormProps> = ({
         ...prev.taskings,
         {
           id: `temp-${Date.now()}`,
-          description: '',
-          priority: 'MEDIUM',
-          status: 'PENDING',
+          description: "",
+          priority: "MEDIUM",
+          status: "PENDING",
         },
       ],
     }));
@@ -217,11 +208,11 @@ export const DebriefForm: React.FC<DebriefFormProps> = ({
       setCompleteForm((prev) => ({
         ...prev,
         taskings: prev.taskings.map((item, i) =>
-          i === index ? { ...item, [field]: value } : item,
+          i === index ? { ...item, [field]: value } : item
         ),
       }));
     },
-    [],
+    []
   );
 
   const handleSecurityAssessmentChange = useCallback(
@@ -231,7 +222,7 @@ export const DebriefForm: React.FC<DebriefFormProps> = ({
         securityAssessment: { ...prev.securityAssessment, [field]: value },
       }));
     },
-    [],
+    []
   );
 
   // Navigation
@@ -243,9 +234,9 @@ export const DebriefForm: React.FC<DebriefFormProps> = ({
   const handleSubmit = useCallback(async () => {
     let data: unknown;
 
-    if (mode === 'schedule') {
+    if (mode === "schedule") {
       if (scheduleForm.objectives.length === 0) {
-        setValidationErrors({ objectives: 'At least one objective required' });
+        setValidationErrors({ objectives: "At least one objective required" });
         return;
       }
 
@@ -264,12 +255,12 @@ export const DebriefForm: React.FC<DebriefFormProps> = ({
           caveats: [],
           releasableTo: [],
           originatorControl: false,
-          legalBasis: 'EO 12333',
+          legalBasis: "EO 12333",
           needToKnow: [],
           retentionPeriod: 365,
         },
       } as CreateDebriefInput;
-    } else if (mode === 'conduct') {
+    } else if (mode === "conduct") {
       data = {
         topicsCovered: conductForm.topicsCovered,
         rawNotes: conductForm.rawNotes,
@@ -280,9 +271,7 @@ export const DebriefForm: React.FC<DebriefFormProps> = ({
       data = {
         endedAt: new Date(),
         processedNotes: completeForm.processedNotes,
-        intelligenceItems: completeForm.intelligenceItems.filter(
-          (i) => i.topic && i.content,
-        ),
+        intelligenceItems: completeForm.intelligenceItems.filter((i) => i.topic && i.content),
         taskings: completeForm.taskings.filter((t) => t.description),
         securityAssessment: completeForm.securityAssessment,
       } as CompleteDebriefInput;
@@ -302,11 +291,11 @@ export const DebriefForm: React.FC<DebriefFormProps> = ({
           <select
             id="debriefType"
             value={scheduleForm.debriefType}
-            onChange={(e) => handleScheduleChange('debriefType', e.target.value)}
+            onChange={(e) => handleScheduleChange("debriefType", e.target.value)}
           >
             {Object.entries(DEBRIEF_TYPES).map(([key, value]) => (
               <option key={key} value={value}>
-                {key.replace(/_/g, ' ')}
+                {key.replace(/_/g, " ")}
               </option>
             ))}
           </select>
@@ -318,7 +307,7 @@ export const DebriefForm: React.FC<DebriefFormProps> = ({
             id="scheduledAt"
             type="datetime-local"
             value={scheduleForm.scheduledAt}
-            onChange={(e) => handleScheduleChange('scheduledAt', e.target.value)}
+            onChange={(e) => handleScheduleChange("scheduledAt", e.target.value)}
           />
         </div>
       </div>
@@ -329,7 +318,7 @@ export const DebriefForm: React.FC<DebriefFormProps> = ({
           <select
             id="locationType"
             value={scheduleForm.locationType}
-            onChange={(e) => handleScheduleChange('locationType', e.target.value)}
+            onChange={(e) => handleScheduleChange("locationType", e.target.value)}
           >
             <option value="SAFE_HOUSE">Safe House</option>
             <option value="NEUTRAL">Neutral Location</option>
@@ -345,7 +334,7 @@ export const DebriefForm: React.FC<DebriefFormProps> = ({
             id="locationId"
             type="text"
             value={scheduleForm.locationId}
-            onChange={(e) => handleScheduleChange('locationId', e.target.value)}
+            onChange={(e) => handleScheduleChange("locationId", e.target.value)}
             placeholder="Location code or address"
           />
         </div>
@@ -356,7 +345,7 @@ export const DebriefForm: React.FC<DebriefFormProps> = ({
           <input
             type="checkbox"
             checked={scheduleForm.securityVerified}
-            onChange={(e) => handleScheduleChange('securityVerified', e.target.checked)}
+            onChange={(e) => handleScheduleChange("securityVerified", e.target.checked)}
           />
           Location Security Verified
         </label>
@@ -367,21 +356,17 @@ export const DebriefForm: React.FC<DebriefFormProps> = ({
         <select
           id="classification"
           value={scheduleForm.classification}
-          onChange={(e) => handleScheduleChange('classification', e.target.value)}
+          onChange={(e) => handleScheduleChange("classification", e.target.value)}
         >
           {Object.entries(CLASSIFICATION_LEVELS).map(([key, value]) => (
             <option key={key} value={value}>
-              {key.replace(/_/g, ' ')}
+              {key.replace(/_/g, " ")}
             </option>
           ))}
         </select>
       </div>
 
-      <button
-        type="button"
-        className="btn-secondary"
-        onClick={() => goToStep('objectives')}
-      >
+      <button type="button" className="btn-secondary" onClick={() => goToStep("objectives")}>
         Next: Set Objectives
       </button>
     </div>
@@ -399,7 +384,7 @@ export const DebriefForm: React.FC<DebriefFormProps> = ({
             value={objectiveInput}
             onChange={(e) => setObjectiveInput(e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === 'Enter') {
+              if (e.key === "Enter") {
                 e.preventDefault();
                 addObjective();
               }
@@ -426,11 +411,11 @@ export const DebriefForm: React.FC<DebriefFormProps> = ({
       </div>
 
       <div className="step-navigation">
-        <button type="button" className="btn-secondary" onClick={() => goToStep('schedule')}>
+        <button type="button" className="btn-secondary" onClick={() => goToStep("schedule")}>
           Back
         </button>
         <button type="button" className="btn-primary" onClick={handleSubmit} disabled={isLoading}>
-          {isLoading ? 'Scheduling...' : 'Schedule Debrief'}
+          {isLoading ? "Scheduling..." : "Schedule Debrief"}
         </button>
       </div>
     </div>
@@ -448,7 +433,7 @@ export const DebriefForm: React.FC<DebriefFormProps> = ({
             value={topicInput}
             onChange={(e) => setTopicInput(e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === 'Enter') {
+              if (e.key === "Enter") {
                 e.preventDefault();
                 addTopic();
               }
@@ -470,7 +455,7 @@ export const DebriefForm: React.FC<DebriefFormProps> = ({
         <textarea
           id="rawNotes"
           value={conductForm.rawNotes}
-          onChange={(e) => handleConductChange('rawNotes', e.target.value)}
+          onChange={(e) => handleConductChange("rawNotes", e.target.value)}
           rows={10}
           placeholder="Document the debrief session in detail..."
         />
@@ -482,7 +467,7 @@ export const DebriefForm: React.FC<DebriefFormProps> = ({
           <textarea
             id="sourceDemeanor"
             value={conductForm.sourceDemeanor}
-            onChange={(e) => handleConductChange('sourceDemeanor', e.target.value)}
+            onChange={(e) => handleConductChange("sourceDemeanor", e.target.value)}
             rows={3}
             placeholder="Describe source behavior, body language, emotional state..."
           />
@@ -493,7 +478,7 @@ export const DebriefForm: React.FC<DebriefFormProps> = ({
           <textarea
             id="credibilityObservations"
             value={conductForm.credibilityObservations}
-            onChange={(e) => handleConductChange('credibilityObservations', e.target.value)}
+            onChange={(e) => handleConductChange("credibilityObservations", e.target.value)}
             rows={3}
             placeholder="Note any credibility concerns or confirmations..."
           />
@@ -505,7 +490,7 @@ export const DebriefForm: React.FC<DebriefFormProps> = ({
           Save & Exit
         </button>
         <button type="button" className="btn-primary" onClick={handleSubmit} disabled={isLoading}>
-          {isLoading ? 'Saving...' : 'Save Notes'}
+          {isLoading ? "Saving..." : "Save Notes"}
         </button>
       </div>
     </div>
@@ -520,7 +505,7 @@ export const DebriefForm: React.FC<DebriefFormProps> = ({
         <textarea
           id="processedNotes"
           value={completeForm.processedNotes}
-          onChange={(e) => handleCompleteChange('processedNotes', e.target.value)}
+          onChange={(e) => handleCompleteChange("processedNotes", e.target.value)}
           rows={6}
           placeholder="Summarize and structure the raw notes..."
         />
@@ -535,17 +520,17 @@ export const DebriefForm: React.FC<DebriefFormProps> = ({
                 <label>Topic</label>
                 <input
                   type="text"
-                  value={item.topic || ''}
-                  onChange={(e) => updateIntelligenceItem(index, 'topic', e.target.value)}
+                  value={item.topic || ""}
+                  onChange={(e) => updateIntelligenceItem(index, "topic", e.target.value)}
                   placeholder="Intelligence topic"
                 />
               </div>
               <div className="form-field">
                 <label>Info Rating</label>
                 <select
-                  value={item.informationRating || '3'}
+                  value={item.informationRating || "3"}
                   onChange={(e) =>
-                    updateIntelligenceItem(index, 'informationRating', e.target.value)
+                    updateIntelligenceItem(index, "informationRating", e.target.value)
                   }
                 >
                   <option value="1">1 - Confirmed</option>
@@ -559,10 +544,8 @@ export const DebriefForm: React.FC<DebriefFormProps> = ({
               <div className="form-field">
                 <label>Actionability</label>
                 <select
-                  value={item.actionability || 'BACKGROUND'}
-                  onChange={(e) =>
-                    updateIntelligenceItem(index, 'actionability', e.target.value)
-                  }
+                  value={item.actionability || "BACKGROUND"}
+                  onChange={(e) => updateIntelligenceItem(index, "actionability", e.target.value)}
                 >
                   <option value="IMMEDIATE">Immediate</option>
                   <option value="SHORT_TERM">Short Term</option>
@@ -574,8 +557,8 @@ export const DebriefForm: React.FC<DebriefFormProps> = ({
             <div className="form-field">
               <label>Content</label>
               <textarea
-                value={item.content || ''}
-                onChange={(e) => updateIntelligenceItem(index, 'content', e.target.value)}
+                value={item.content || ""}
+                onChange={(e) => updateIntelligenceItem(index, "content", e.target.value)}
                 rows={3}
                 placeholder="Detailed intelligence content..."
               />
@@ -600,13 +583,13 @@ export const DebriefForm: React.FC<DebriefFormProps> = ({
           <div key={tasking.id || index} className="tasking-row">
             <input
               type="text"
-              value={tasking.description || ''}
-              onChange={(e) => updateTasking(index, 'description', e.target.value)}
+              value={tasking.description || ""}
+              onChange={(e) => updateTasking(index, "description", e.target.value)}
               placeholder="Tasking description"
             />
             <select
-              value={tasking.priority || 'MEDIUM'}
-              onChange={(e) => updateTasking(index, 'priority', e.target.value)}
+              value={tasking.priority || "MEDIUM"}
+              onChange={(e) => updateTasking(index, "priority", e.target.value)}
             >
               <option value="CRITICAL">Critical</option>
               <option value="HIGH">High</option>
@@ -621,7 +604,7 @@ export const DebriefForm: React.FC<DebriefFormProps> = ({
       </div>
 
       <div className="step-navigation">
-        <button type="button" className="btn-secondary" onClick={() => goToStep('security')}>
+        <button type="button" className="btn-secondary" onClick={() => goToStep("security")}>
           Next: Security Assessment
         </button>
       </div>
@@ -636,10 +619,8 @@ export const DebriefForm: React.FC<DebriefFormProps> = ({
         <label htmlFor="compromiseRisk">Source Compromise Risk</label>
         <select
           id="compromiseRisk"
-          value={completeForm.securityAssessment.sourceCompromiseRisk || 'NONE'}
-          onChange={(e) =>
-            handleSecurityAssessmentChange('sourceCompromiseRisk', e.target.value)
-          }
+          value={completeForm.securityAssessment.sourceCompromiseRisk || "NONE"}
+          onChange={(e) => handleSecurityAssessmentChange("sourceCompromiseRisk", e.target.value)}
         >
           <option value="NONE">None</option>
           <option value="LOW">Low</option>
@@ -653,19 +634,19 @@ export const DebriefForm: React.FC<DebriefFormProps> = ({
         <label htmlFor="evaluatorNotes">Security Evaluator Notes</label>
         <textarea
           id="evaluatorNotes"
-          value={completeForm.securityAssessment.evaluatorNotes || ''}
-          onChange={(e) => handleSecurityAssessmentChange('evaluatorNotes', e.target.value)}
+          value={completeForm.securityAssessment.evaluatorNotes || ""}
+          onChange={(e) => handleSecurityAssessmentChange("evaluatorNotes", e.target.value)}
           rows={4}
           placeholder="Document any security concerns, CI indicators, or recommended actions..."
         />
       </div>
 
       <div className="step-navigation">
-        <button type="button" className="btn-secondary" onClick={() => goToStep('intelligence')}>
+        <button type="button" className="btn-secondary" onClick={() => goToStep("intelligence")}>
           Back
         </button>
         <button type="button" className="btn-primary" onClick={handleSubmit} disabled={isLoading}>
-          {isLoading ? 'Completing...' : 'Complete Debrief'}
+          {isLoading ? "Completing..." : "Complete Debrief"}
         </button>
       </div>
     </div>
@@ -678,11 +659,11 @@ export const DebriefForm: React.FC<DebriefFormProps> = ({
         {error && <div className="form-error-banner">{error}</div>}
       </div>
 
-      {mode === 'schedule' && currentStep === 'schedule' && renderScheduleStep()}
-      {mode === 'schedule' && currentStep === 'objectives' && renderObjectivesStep()}
-      {mode === 'conduct' && renderNotesStep()}
-      {mode === 'complete' && currentStep === 'intelligence' && renderIntelligenceStep()}
-      {mode === 'complete' && currentStep === 'security' && renderSecurityStep()}
+      {mode === "schedule" && currentStep === "schedule" && renderScheduleStep()}
+      {mode === "schedule" && currentStep === "objectives" && renderObjectivesStep()}
+      {mode === "conduct" && renderNotesStep()}
+      {mode === "complete" && currentStep === "intelligence" && renderIntelligenceStep()}
+      {mode === "complete" && currentStep === "security" && renderSecurityStep()}
 
       <div className="form-footer">
         <button type="button" className="btn-cancel" onClick={onCancel}>

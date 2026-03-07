@@ -18,8 +18,8 @@ The `Security Scans` GitHub Actions workflow builds the Summit Docker image, run
 
 ### Required Secrets
 
-| Secret | Purpose |
-| ------ | ------- |
+| Secret           | Purpose                                                                                                                     |
+| ---------------- | --------------------------------------------------------------------------------------------------------------------------- |
 | `ZAP_TARGET_URL` | Publicly reachable base URL for the OWASP ZAP baseline scan. Leave unset to skip the API scan (the workflow logs the skip). |
 
 ## Local Execution

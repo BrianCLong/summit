@@ -15,12 +15,14 @@ The implementation follows a clean-room approach based on the behaviors describe
 ### Candidate Generation
 
 At each step, SIPL takes a prefix and an original suffix, then generates:
+
 - A rewritten suffix (using a teacher model).
 - Multiple rollouts (samples) from the current policy.
 
 ### Judging and Update
 
 A judge model scores all candidates. The model is then updated using either:
+
 - **Online DPO**: Pairing the best and worst candidates for preference training.
 - **RF-NLL**: Applying a negative log-likelihood update on the best candidate.
 
@@ -28,5 +30,6 @@ A judge model scores all candidates. The model is then updated using either:
 
 SIPL is gated by the `SIPL_ENABLED` environment variable.
 Additional flags control specific features:
+
 - `SIPL_ROLLOUTS`: Number of rollouts to generate.
 - `SIPL_CURRICULUM`: Enables adaptive curriculum for shifting from rewrites to rollouts.

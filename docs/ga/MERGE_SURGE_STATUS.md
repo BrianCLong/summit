@@ -10,8 +10,8 @@
 ## Recent Cohorts
 
 | Date | Cohort | Size | Outcome |
-|------|--------|------|---------|
-| - | - | - | - |
+| ---- | ------ | ---- | ------- |
+| -    | -      | -    | -       |
 
 ## Blocker History
 

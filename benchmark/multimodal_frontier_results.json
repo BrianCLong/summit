@@ -2,8 +2,8 @@
   "model": "summit-multimodal-1.3b-v0.1",
   "date": "2025-11-27",
   "datasets": {
-    "vqa": {"accuracy": 0.71, "baseline_text_only": 0.61},
-    "doc_qa": {"accuracy": 0.68, "baseline_text_only": 0.55},
+    "vqa": { "accuracy": 0.71, "baseline_text_only": 0.61 },
+    "doc_qa": { "accuracy": 0.68, "baseline_text_only": 0.55 },
     "chart_qa": {
       "accuracy": 0.64,
       "baseline_text_only": 0.48,

@@ -4,13 +4,13 @@
  * High-level API for managing the entire extension system.
  */
 
-import { ExtensionLoader, LoaderOptions } from './loader.js';
-import { ExtensionRegistry } from './registry.js';
-import { PolicyEnforcer } from './policy/enforcer.js';
-import { CopilotIntegration } from './integrations/copilot.js';
-import { CommandPaletteIntegration } from './integrations/command-palette.js';
-import { CLIIntegration } from './integrations/cli.js';
-import { ExtensionAPI } from './types.js';
+import { ExtensionLoader, LoaderOptions } from "./loader.js";
+import { ExtensionRegistry } from "./registry.js";
+import { PolicyEnforcer } from "./policy/enforcer.js";
+import { CopilotIntegration } from "./integrations/copilot.js";
+import { CommandPaletteIntegration } from "./integrations/command-palette.js";
+import { CLIIntegration } from "./integrations/cli.js";
+import { ExtensionAPI } from "./types.js";
 
 export interface ExtensionManagerOptions {
   extensionDirs: string[];
@@ -66,11 +66,11 @@ export class ExtensionManager {
    */
   async initialize(): Promise<void> {
     if (this.initialized) {
-      console.warn('Extension manager already initialized');
+      console.warn("Extension manager already initialized");
       return;
     }
 
-    console.info('Initializing extension system...');
+    console.info("Initializing extension system...");
 
     // Discover extensions
     await this.loader.discover();
@@ -86,16 +86,14 @@ export class ExtensionManager {
     this.initialized = true;
 
     const stats = this.registry.getStats();
-    console.info(
-      `Extension system initialized: ${stats.loaded}/${stats.total} extensions loaded`
-    );
+    console.info(`Extension system initialized: ${stats.loaded}/${stats.total} extensions loaded`);
   }
 
   /**
    * Reload all extensions
    */
   async reload(): Promise<void> {
-    console.info('Reloading extension system...');
+    console.info("Reloading extension system...");
 
     // Clear integrations
     this.copilot.clear();
@@ -110,7 +108,7 @@ export class ExtensionManager {
     await this.commandPalette.registerAll();
     await this.cli.registerAll();
 
-    console.info('Extension system reloaded');
+    console.info("Extension system reloaded");
   }
 
   /**
@@ -121,7 +119,7 @@ export class ExtensionManager {
       return;
     }
 
-    console.info('Shutting down extension system...');
+    console.info("Shutting down extension system...");
 
     // Unload all extensions
     await this.loader.unloadAll();
@@ -132,7 +130,7 @@ export class ExtensionManager {
     this.cli.clear();
 
     this.initialized = false;
-    console.info('Extension system shut down');
+    console.info("Extension system shut down");
   }
 
   /**
@@ -174,7 +172,7 @@ export class ExtensionManager {
    */
   async loadPolicy(policyRego: string): Promise<void> {
     if (!this.policyEnforcer) {
-      throw new Error('Policy enforcement is not enabled');
+      throw new Error("Policy enforcement is not enabled");
     }
     await this.policyEnforcer.loadPolicy(policyRego);
   }

@@ -3,10 +3,10 @@ name: VM Workbench CI
 on:
   pull_request:
     paths:
-      - 'vmworkbench/**'
-      - 'tests/vmworkbench/**'
-      - 'bundle/manifest.vmworkbench.json'
-      - 'ci/verify_bundle.py'
+      - "vmworkbench/**"
+      - "tests/vmworkbench/**"
+      - "bundle/manifest.vmworkbench.json"
+      - "ci/verify_bundle.py"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -21,6 +21,6 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: "3.11"
       - name: Run Bundle Verifier
         run: python3 ci/verify_bundle.py

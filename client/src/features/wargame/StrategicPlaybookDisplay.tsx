@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   Box,
   Typography,
@@ -13,10 +13,10 @@ import {
   ListItemText,
   Chip,
   Stack,
-} from '@mui/material';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
-import { useQuery, gql } from '@apollo/client';
+} from "@mui/material";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+import { useQuery, gql } from "@apollo/client";
 
 const GET_STRATEGIC_PLAYBOOKS = gql`
   query GetStrategicPlaybooks($scenarioId: ID!) {
@@ -36,19 +36,14 @@ interface StrategicPlaybookDisplayProps {
   scenarioId: string;
 }
 
-const StrategicPlaybookDisplay: React.FC<StrategicPlaybookDisplayProps> = ({
-  scenarioId,
-}) => {
+const StrategicPlaybookDisplay: React.FC<StrategicPlaybookDisplayProps> = ({ scenarioId }) => {
   const { loading, error, data } = useQuery(GET_STRATEGIC_PLAYBOOKS, {
     variables: { scenarioId },
     pollInterval: 20000, // Poll every 20 seconds
   });
 
   if (loading) return <CircularProgress />;
-  if (error)
-    return (
-      <Alert severity="error">Error loading playbooks: {error.message}</Alert>
-    );
+  if (error) return <Alert severity="error">Error loading playbooks: {error.message}</Alert>;
 
   const playbooks = data?.getStrategicResponsePlaybooks || [];
 
@@ -58,14 +53,13 @@ const StrategicPlaybookDisplay: React.FC<StrategicPlaybookDisplayProps> = ({
         Strategic Response Playbooks
       </Typography>
       <Alert severity="info" sx={{ mb: 2 }}>
-        WAR-GAMED SIMULATION - Playbooks are theoretical and for
-        training/simulation purposes only.
+        WAR-GAMED SIMULATION - Playbooks are theoretical and for training/simulation purposes only.
       </Alert>
 
       {playbooks.length === 0 ? (
         <Typography variant="body1" color="text.secondary">
-          No strategic response playbooks available for this scenario yet. Run a
-          simulation to generate data.
+          No strategic response playbooks available for this scenario yet. Run a simulation to
+          generate data.
         </Typography>
       ) : (
         <Box>
@@ -79,13 +73,8 @@ const StrategicPlaybookDisplay: React.FC<StrategicPlaybookDisplayProps> = ({
                 <Typography variant="h6">{playbook.name}</Typography>
               </AccordionSummary>
               <AccordionDetails>
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                  sx={{ mb: 1 }}
-                >
-                  <strong>Doctrine Reference:</strong>{' '}
-                  {playbook.doctrineReference}
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                  <strong>Doctrine Reference:</strong> {playbook.doctrineReference}
                 </Typography>
                 <Typography variant="body1" sx={{ mb: 2 }}>
                   {playbook.description}
@@ -108,28 +97,18 @@ const StrategicPlaybookDisplay: React.FC<StrategicPlaybookDisplayProps> = ({
                 <Typography variant="subtitle1" sx={{ mt: 2, mb: 1 }}>
                   Metrics of Effectiveness (MOEs):
                 </Typography>
-                <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap' }}>
+                <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }}>
                   {playbook.metricsOfEffectiveness.map((moe: any, index: any) => (
-                    <Chip
-                      key={index}
-                      label={moe}
-                      variant="outlined"
-                      color="success"
-                    />
+                    <Chip key={index} label={moe} variant="outlined" color="success" />
                   ))}
                 </Stack>
 
                 <Typography variant="subtitle1" sx={{ mt: 2, mb: 1 }}>
                   Metrics of Performance (MOPs):
                 </Typography>
-                <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap' }}>
+                <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }}>
                   {playbook.metricsOfPerformance.map((mop: any, index: any) => (
-                    <Chip
-                      key={index}
-                      label={mop}
-                      variant="outlined"
-                      color="info"
-                    />
+                    <Chip key={index} label={mop} variant="outlined" color="info" />
                   ))}
                 </Stack>
               </AccordionDetails>

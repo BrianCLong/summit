@@ -106,12 +106,9 @@
 **Correlator (`ops/provmon/correlate.ts`)**
 
 ```ts
-import { groupBy } from 'lodash-es';
+import { groupBy } from "lodash-es";
 export function correlate(events: any[]) {
-  const byRel = groupBy(
-    events,
-    (e) => e.release_sha || e.bundle_digest || 'orphan',
-  );
+  const byRel = groupBy(events, (e) => e.release_sha || e.bundle_digest || "orphan");
   const chains = [] as any[];
   for (const rel in byRel) {
     const es = byRel[rel];
@@ -133,11 +130,11 @@ export function correlate(events: any[]) {
 rules:
   - id: missing-rekor
     description: Bundle signed but no Rekor entry within 5m
-    when: 'sign -> (no rekor within 5m)'
+    when: "sign -> (no rekor within 5m)"
     severity: high
   - id: runtime-verify-fail
     description: Startup verify failed for deployed digest
-    when: 'deploy -> runtime_verify(status=fail)'
+    when: "deploy -> runtime_verify(status=fail)"
     severity: critical
 ```
 
@@ -146,7 +143,7 @@ rules:
 ```yaml
 name: provmon
 on:
-  schedule: [{ cron: '*/5 * * * *' }]
+  schedule: [{ cron: "*/5 * * * *" }]
   workflow_dispatch:
 jobs:
   run:
@@ -177,18 +174,18 @@ create table if not exists audit_events_us (like audit_events including all);
 **Router (`apps/server/lib/audit-router.ts`)**
 
 ```ts
-export async function auditInsert(ev: any, region: 'US' | 'EU', db: any) {
-  const tbl = region === 'EU' ? 'audit_events_eu' : 'audit_events_us';
+export async function auditInsert(ev: any, region: "US" | "EU", db: any) {
+  const tbl = region === "EU" ? "audit_events_eu" : "audit_events_us";
   await db.insert(tbl, { ...ev, region });
 }
-export async function auditQuery(q: any, region: 'US' | 'EU', db: any) {
-  const tbl = region === 'EU' ? 'audit_events_eu' : 'audit_events_us';
+export async function auditQuery(q: any, region: "US" | "EU", db: any) {
+  const tbl = region === "EU" ? "audit_events_eu" : "audit_events_us";
   if (q.crossRegion && q.export_only === true) {
     /* read from both with union all */
   }
   return db.query(
     `select * from ${tbl} where ts between $1 and $2 order by ts desc limit $3 offset $4`,
-    [q.from, q.to, q.limit, q.offset],
+    [q.from, q.to, q.limit, q.offset]
   );
 }
 ```
@@ -204,17 +201,17 @@ export async function auditQuery(q: any, region: 'US' | 'EU', db: any) {
 **Signed Session Envelope (`apps/server/lib/session.ts`)**
 
 ```ts
-import { createHmac } from 'crypto';
+import { createHmac } from "crypto";
 export function pack(session: any, key: Buffer) {
-  const payload = Buffer.from(JSON.stringify(session)).toString('base64url');
-  const mac = createHmac('sha256', key).update(payload).digest('base64url');
+  const payload = Buffer.from(JSON.stringify(session)).toString("base64url");
+  const mac = createHmac("sha256", key).update(payload).digest("base64url");
   return `${payload}.${mac}`;
 }
 export function unpack(tok: string, key: Buffer) {
-  const [p, mac] = tok.split('.');
-  const exp = createHmac('sha256', key).update(p).digest('base64url');
-  if (exp !== mac) throw new Error('bad-mac');
-  return JSON.parse(Buffer.from(p, 'base64url').toString());
+  const [p, mac] = tok.split(".");
+  const exp = createHmac("sha256", key).update(p).digest("base64url");
+  if (exp !== mac) throw new Error("bad-mac");
+  return JSON.parse(Buffer.from(p, "base64url").toString());
 }
 ```
 
@@ -222,15 +219,15 @@ export function unpack(tok: string, key: Buffer) {
 
 ```ts
 // apps/web/src/middleware.ts
-res.headers.set('Cache-Key', `${route}:${region}`);
+res.headers.set("Cache-Key", `${route}:${region}`);
 ```
 
 **Client Revalidation**
 
 ```ts
 // apps/web/src/lib/useRegionSWR.ts
-import useSWR from 'swr';
-export function useRegionData(key: string, region: 'US' | 'EU') {
+import useSWR from "swr";
+export function useRegionData(key: string, region: "US" | "EU") {
   return useSWR([key, region], fetcher, { revalidateOnFocus: true });
 }
 ```
@@ -292,9 +289,9 @@ rules:
 
 ```yaml
 # okta.yaml
-role: '${assertion.attributes.role}'
-residency: '${assertion.attributes.region}'
-classification_cap: '${assertion.attributes.clearance}'
+role: "${assertion.attributes.role}"
+residency: "${assertion.attributes.region}"
+classification_cap: "${assertion.attributes.clearance}"
 ```
 
 **CI Harness**

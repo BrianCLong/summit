@@ -1,16 +1,16 @@
-import fs from 'fs';
-import path from 'path';
-import { parse } from 'yaml';
-import { v4 as uuidv4 } from 'uuid';
-import { AgentEvidenceBundleSchema } from './schemas.js';
-import { fileURLToPath } from 'url';
+import fs from "fs";
+import path from "path";
+import { parse } from "yaml";
+import { v4 as uuidv4 } from "uuid";
+import { AgentEvidenceBundleSchema } from "./schemas.js";
+import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const SEED_FILE = path.join(__dirname, '../seeds/initial_ecosystem.yaml');
+const SEED_FILE = path.join(__dirname, "../seeds/initial_ecosystem.yaml");
 // We'll write to root/evidence/ecosystem, so we need to go up from packages/agent-ecosystem/src
-const OUTPUT_DIR = path.join(__dirname, '../../../evidence/ecosystem');
+const OUTPUT_DIR = path.join(__dirname, "../../../evidence/ecosystem");
 
 async function main() {
   console.log(`Reading seed file from ${SEED_FILE}...`);
@@ -19,11 +19,11 @@ async function main() {
     process.exit(1);
   }
 
-  const fileContent = fs.readFileSync(SEED_FILE, 'utf-8');
+  const fileContent = fs.readFileSync(SEED_FILE, "utf-8");
   const seeds = parse(fileContent);
 
   if (!Array.isArray(seeds)) {
-    throw new Error('Seed file must contain an array of resources');
+    throw new Error("Seed file must contain an array of resources");
   }
 
   console.log(`Found ${seeds.length} entries.`);
@@ -41,8 +41,8 @@ async function main() {
 
     // Assign ID to resource
     const resource = {
-        ...seed,
-        id: resourceId
+      ...seed,
+      id: resourceId,
     };
 
     // Construct Bundle
@@ -52,33 +52,33 @@ async function main() {
       timestamp: now,
       primaryArtifact: resource,
       provenance: {
-        source: 'initial_ecosystem.yaml',
-        method: 'seed',
-        actor: 'summit-agent-indexer'
+        source: "initial_ecosystem.yaml",
+        method: "seed",
+        actor: "summit-agent-indexer",
       },
       verification: {
-        status: 'unverified',
+        status: "unverified",
         tests_run: [],
-        results: {}
+        results: {},
       },
-      claims: []
+      claims: [],
     };
 
     // Validate
     try {
-        const validBundle = AgentEvidenceBundleSchema.parse(bundle);
-        const fileName = `${resource.name.toLowerCase().replace(/[^a-z0-9]/g, '-')}.json`;
-        const filePath = path.join(OUTPUT_DIR, fileName);
+      const validBundle = AgentEvidenceBundleSchema.parse(bundle);
+      const fileName = `${resource.name.toLowerCase().replace(/[^a-z0-9]/g, "-")}.json`;
+      const filePath = path.join(OUTPUT_DIR, fileName);
 
-        fs.writeFileSync(filePath, JSON.stringify(validBundle, null, 2));
-        console.log(`Generated bundle for ${resource.name} at ${filePath}`);
+      fs.writeFileSync(filePath, JSON.stringify(validBundle, null, 2));
+      console.log(`Generated bundle for ${resource.name} at ${filePath}`);
     } catch (error) {
-        console.error(`Validation failed for ${resource.name}:`, error);
-        // Log detailed Zod error
-        if (error && typeof error === 'object' && 'issues' in error) {
-             console.error(JSON.stringify((error as any).issues, null, 2));
-        }
-        process.exit(1);
+      console.error(`Validation failed for ${resource.name}:`, error);
+      // Log detailed Zod error
+      if (error && typeof error === "object" && "issues" in error) {
+        console.error(JSON.stringify((error as any).issues, null, 2));
+      }
+      process.exit(1);
     }
   }
 }

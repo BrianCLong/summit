@@ -4,11 +4,11 @@ This directory contains the immutable records of release parity scorecards and d
 
 ## Structure
 
-*   `<release-tag>/`: Directory for a specific release.
-    *   `parity-scorecard.json`: Machine-readable evidence of preview vs prod parity.
-    *   `plan.json`: Terraform plan for the preview environment.
-    *   `flags.json`: Feature flags export.
-    *   `images.json`: Image digests list.
+- `<release-tag>/`: Directory for a specific release.
+  - `parity-scorecard.json`: Machine-readable evidence of preview vs prod parity.
+  - `plan.json`: Terraform plan for the preview environment.
+  - `flags.json`: Feature flags export.
+  - `images.json`: Image digests list.
 
 ## Usage
 

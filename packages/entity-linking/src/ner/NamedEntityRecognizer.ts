@@ -2,7 +2,7 @@
  * Named Entity Recognition (NER) System
  */
 
-import { NERResult, NERResultSchema } from '@intelgraph/knowledge-graph';
+import { NERResult, NERResultSchema } from "@intelgraph/knowledge-graph";
 
 export interface NERConfig {
   model: string;
@@ -48,30 +48,30 @@ export class NamedEntityRecognizer {
   /**
    * Perform NER using rule-based or ML approach
    */
-  private async performNER(text: string): Promise<NERResult['entities']> {
-    const entities: NERResult['entities'] = [];
+  private async performNER(text: string): Promise<NERResult["entities"]> {
+    const entities: NERResult["entities"] = [];
 
     // Example: Simple pattern-based NER (for demonstration)
     // In production, use proper NER models
     const patterns = [
       {
         pattern: /\b([A-Z][a-z]+ [A-Z][a-z]+)\b/g,
-        type: 'PERSON',
+        type: "PERSON",
         confidence: 0.7,
       },
       {
         pattern: /\b([A-Z][a-z]+ (Inc|Corp|LLC|Ltd)\.?)\b/g,
-        type: 'ORG',
+        type: "ORG",
         confidence: 0.8,
       },
       {
         pattern: /\b(\d{1,2}\/\d{1,2}\/\d{2,4})\b/g,
-        type: 'DATE',
+        type: "DATE",
         confidence: 0.9,
       },
       {
         pattern: /\$(\d+(?:,\d{3})*(?:\.\d{2})?)/g,
-        type: 'MONEY',
+        type: "MONEY",
         confidence: 0.9,
       },
     ];
@@ -106,7 +106,7 @@ export class NamedEntityRecognizer {
    * Fine-tune NER for domain-specific entity types
    */
   async fineTune(
-    trainingData: Array<{ text: string; annotations: NERResult['entities'] }>,
+    trainingData: Array<{ text: string; annotations: NERResult["entities"] }>
   ): Promise<void> {
     // Placeholder for model fine-tuning
     // In production, implement training pipeline

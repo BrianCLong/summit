@@ -2,13 +2,13 @@
 
 ## Threat Table
 
-| Threat | Risk | Mitigation | CI/Runtime Gate |
-| :--- | :--- | :--- | :--- |
-| PII Re-identification | High | Strict feature allowlist (GraphBuilder) | `tests/privacy_graph/test_graph_builder_pii_safe.py` |
-| Linkage Attacks | Medium | Anonymized IDs (upstream) + Backend checks | `PrivacyGraphPolicy` |
-| Rare Node Inference | Medium | Degree Capping (DP Hooks) | `cap_degree` |
-| Dependency Supply Chain | Medium | Dependency Delta Gate | `tools/ci/dependency_delta_gate.py` |
-| Policy Bypass | High | Deny-by-default config | `test_policy_denies_by_default.py` |
+| Threat                  | Risk   | Mitigation                                 | CI/Runtime Gate                                      |
+| :---------------------- | :----- | :----------------------------------------- | :--------------------------------------------------- |
+| PII Re-identification   | High   | Strict feature allowlist (GraphBuilder)    | `tests/privacy_graph/test_graph_builder_pii_safe.py` |
+| Linkage Attacks         | Medium | Anonymized IDs (upstream) + Backend checks | `PrivacyGraphPolicy`                                 |
+| Rare Node Inference     | Medium | Degree Capping (DP Hooks)                  | `cap_degree`                                         |
+| Dependency Supply Chain | Medium | Dependency Delta Gate                      | `tools/ci/dependency_delta_gate.py`                  |
+| Policy Bypass           | High   | Deny-by-default config                     | `test_policy_denies_by_default.py`                   |
 
 ## Residual Risks
 

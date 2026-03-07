@@ -7,7 +7,7 @@
  * @see docs/adr/ADR-009_context_provenance_graph.md
  */
 
-import { createHash } from 'crypto';
+import { createHash } from "crypto";
 import {
   ProvenanceGraph as IProvenanceGraph,
   ProvenanceNode,
@@ -17,8 +17,8 @@ import {
   RevocationRequest,
   RevocationResult,
   ProvenanceQuery,
-  ProvenanceSnapshot
-} from './types.js';
+  ProvenanceSnapshot,
+} from "./types.js";
 
 /**
  * ProvenanceGraph
@@ -59,7 +59,7 @@ export class ProvenanceGraph implements IProvenanceGraph {
       segment,
       incomingEdges: [],
       outgoingEdges: [],
-      revoked: false
+      revoked: false,
     };
 
     this.nodes.set(node.id, node);
@@ -67,8 +67,8 @@ export class ProvenanceGraph implements IProvenanceGraph {
     // Add derivation edges if parents specified
     if (parentIds && parentIds.length > 0) {
       for (const parentId of parentIds) {
-        this.addEdge(parentId, node.id, 'DERIVED_FROM', {
-          derivedAt: new Date().toISOString()
+        this.addEdge(parentId, node.id, "DERIVED_FROM", {
+          derivedAt: new Date().toISOString(),
         });
       }
     } else {
@@ -104,7 +104,7 @@ export class ProvenanceGraph implements IProvenanceGraph {
       to: toId,
       type,
       metadata,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     this.edges.push(edge);
@@ -149,7 +149,7 @@ export class ProvenanceGraph implements IProvenanceGraph {
       revokedSegments,
       cascadeCount: revokedSegments.length - 1, // Exclude the original segment
       affectedSessions: Array.from(affectedSessions),
-      timestamp: request.timestamp || new Date()
+      timestamp: request.timestamp || new Date(),
     };
   }
 
@@ -188,13 +188,13 @@ export class ProvenanceGraph implements IProvenanceGraph {
     node.revocationMetadata = {
       revokedAt: request.timestamp || new Date(),
       revokedBy: request.requestedBy,
-      reason: request.reason
+      reason: request.reason,
     };
 
     // Add revocation edge for audit trail
-    this.addEdge(node.id, node.id, 'VIOLATES_INVARIANT', {
+    this.addEdge(node.id, node.id, "VIOLATES_INVARIANT", {
       revocationReason: request.reason,
-      revokedBy: request.requestedBy
+      revokedBy: request.requestedBy,
     });
   }
 
@@ -270,7 +270,7 @@ export class ProvenanceGraph implements IProvenanceGraph {
       id: `${this.id}-snapshot-${timestamp.getTime()}`,
       graph: this, // In production, this would be a deep clone
       timestamp,
-      activeSegments
+      activeSegments,
     };
   }
 
@@ -284,11 +284,11 @@ export class ProvenanceGraph implements IProvenanceGraph {
       metadata: {
         ...segment.metadata,
         // Exclude signature from hash computation
-        signature: undefined
-      }
+        signature: undefined,
+      },
     });
 
-    return createHash('sha256').update(payload).digest('hex');
+    return createHash("sha256").update(payload).digest("hex");
   }
 
   /**
@@ -296,7 +296,7 @@ export class ProvenanceGraph implements IProvenanceGraph {
    */
   private computeEdgeHash(from: string, to: string, type: EdgeType): string {
     const payload = `${from}-${type}-${to}`;
-    return createHash('sha256').update(payload).digest('hex');
+    return createHash("sha256").update(payload).digest("hex");
   }
 
   /**
@@ -332,21 +332,21 @@ export class ProvenanceGraph implements IProvenanceGraph {
       id: this.id,
       sessionId: this.sessionId,
       createdAt: this.createdAt.toISOString(),
-      nodes: Array.from(this.nodes.values()).map(node => ({
+      nodes: Array.from(this.nodes.values()).map((node) => ({
         id: node.id,
         segment: node.segment,
         revoked: node.revoked,
-        revocationMetadata: node.revocationMetadata
+        revocationMetadata: node.revocationMetadata,
       })),
-      edges: this.edges.map(edge => ({
+      edges: this.edges.map((edge) => ({
         id: edge.id,
         from: edge.from,
         to: edge.to,
         type: edge.type,
         metadata: edge.metadata,
-        timestamp: edge.timestamp.toISOString()
+        timestamp: edge.timestamp.toISOString(),
       })),
-      roots: Array.from(this.roots)
+      roots: Array.from(this.roots),
     };
   }
 }
@@ -360,5 +360,5 @@ export function createSegmentId(
   metadata: Record<string, unknown>
 ): string {
   const payload = JSON.stringify({ type, content, metadata });
-  return createHash('sha256').update(payload).digest('hex');
+  return createHash("sha256").update(payload).digest("hex");
 }

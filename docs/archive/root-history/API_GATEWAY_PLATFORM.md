@@ -7,6 +7,7 @@ The Summit API Gateway Platform is an enterprise-grade API management solution s
 ## ✨ Key Features
 
 ### 1. API Gateway & Routing
+
 - ✅ **Intelligent request routing** with path-based and header-based routing
 - ✅ **Multiple load balancing strategies**: Round Robin, Weighted Round Robin, Least Connections, Random, IP Hash
 - ✅ **Circuit breaker pattern** to prevent cascading failures
@@ -15,6 +16,7 @@ The Summit API Gateway Platform is an enterprise-grade API management solution s
 - ✅ **API versioning management** (URL, header, query parameter)
 
 ### 2. Authentication & Authorization
+
 - ✅ **OAuth 2.0 and OpenID Connect** with PKCE support
 - ✅ **JWT token validation** and lifecycle management
 - ✅ **API key management** with self-service portal
@@ -24,6 +26,7 @@ The Summit API Gateway Platform is an enterprise-grade API management solution s
 - ✅ **Token refresh and revocation**
 
 ### 3. Rate Limiting & Throttling
+
 - ✅ **Multiple strategies**: Fixed Window, Sliding Window, Token Bucket, Leaky Bucket
 - ✅ **Distributed rate limiting** with Redis
 - ✅ **Per-client and per-route throttling**
@@ -33,6 +36,7 @@ The Summit API Gateway Platform is an enterprise-grade API management solution s
 - ✅ **Rate limit headers** (standard and legacy)
 
 ### 4. API Monitoring & Analytics
+
 - ✅ **Real-time metrics collection**
 - ✅ **Request/response logging** with structured logs
 - ✅ **Performance tracking** (latency, throughput, error rates)
@@ -41,6 +45,7 @@ The Summit API Gateway Platform is an enterprise-grade API management solution s
 - ✅ **Traffic pattern analysis**
 
 ### 5. Security & Compliance
+
 - ✅ **DDoS protection** with rate limiting
 - ✅ **Input validation** and sanitization
 - ✅ **CORS handling** with configurable policies
@@ -50,6 +55,7 @@ The Summit API Gateway Platform is an enterprise-grade API management solution s
 - ✅ **mTLS** for service-to-service communication
 
 ### 6. API Lifecycle Management
+
 - ✅ **API versioning** strategies
 - ✅ **Deprecation policies** and sunset headers
 - ✅ **Migration strategies** with backward compatibility
@@ -118,20 +124,20 @@ pnpm run dev
 ### Basic Usage
 
 ```typescript
-import { APIGateway } from '@intelgraph/api-gateway';
-import { JWTManager } from '@intelgraph/authentication';
-import { RedisRateLimiter } from '@intelgraph/rate-limiting';
+import { APIGateway } from "@intelgraph/api-gateway";
+import { JWTManager } from "@intelgraph/authentication";
+import { RedisRateLimiter } from "@intelgraph/rate-limiting";
 
 // Setup JWT authentication
 const jwtManager = new JWTManager({
   secret: process.env.JWT_SECRET!,
-  issuer: 'summit-api',
-  expiresIn: '15m',
+  issuer: "summit-api",
+  expiresIn: "15m",
 });
 
 // Setup rate limiting
 const rateLimiter = new RedisRateLimiter({
-  redis: { host: 'localhost', port: 6379 },
+  redis: { host: "localhost", port: 6379 },
   windowMs: 60 * 1000,
   maxRequests: 100,
 });
@@ -140,15 +146,15 @@ const rateLimiter = new RedisRateLimiter({
 const gateway = new APIGateway({
   routes: [
     {
-      path: '/api/v1/investigations',
+      path: "/api/v1/investigations",
       backends: [
-        { url: 'http://backend1:3000', weight: 2 },
-        { url: 'http://backend2:3000', weight: 1 },
+        { url: "http://backend1:3000", weight: 2 },
+        { url: "http://backend2:3000", weight: 1 },
       ],
     },
   ],
   loadBalancing: {
-    strategy: 'weighted-round-robin',
+    strategy: "weighted-round-robin",
   },
   circuitBreaker: {
     threshold: 5,
@@ -258,6 +264,7 @@ const gateway = new APIGateway({
 ### Logging
 
 Structured JSON logging with:
+
 - Request ID for distributed tracing
 - User/API key identification
 - Timestamp and duration
@@ -275,6 +282,7 @@ Structured JSON logging with:
 ### 1. Intelligence Operations API
 
 Secure API gateway for intelligence analysis tools:
+
 - Authentication with OAuth 2.0 + mTLS
 - Rate limiting by clearance level
 - Audit logging for compliance
@@ -283,6 +291,7 @@ Secure API gateway for intelligence analysis tools:
 ### 2. Third-Party Integrations
 
 API access for partner organizations:
+
 - API key management
 - Per-partner rate limiting
 - Usage analytics and billing
@@ -291,6 +300,7 @@ API access for partner organizations:
 ### 3. Microservices Architecture
 
 Internal service mesh gateway:
+
 - Service discovery and routing
 - Load balancing across instances
 - Circuit breaking for fault tolerance
@@ -299,6 +309,7 @@ Internal service mesh gateway:
 ### 4. Developer Platform
 
 Public API platform with self-service:
+
 - Developer portal
 - API documentation
 - Sandbox environment
@@ -334,18 +345,18 @@ spec:
         app: gateway-service
     spec:
       containers:
-      - name: gateway
-        image: summit/gateway-service:latest
-        ports:
-        - containerPort: 8080
-        env:
-        - name: REDIS_HOST
-          value: redis-service
-        - name: JWT_SECRET
-          valueFrom:
-            secretKeyRef:
-              name: gateway-secrets
-              key: jwt-secret
+        - name: gateway
+          image: summit/gateway-service:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: REDIS_HOST
+              value: redis-service
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: gateway-secrets
+                  key: jwt-secret
 ```
 
 ### Environment Variables
@@ -430,6 +441,7 @@ This API Gateway Platform provides:
 ✅ **Extensive Documentation** with guides, examples, and best practices
 
 The platform is designed specifically for intelligence operations with:
+
 - High security standards (mTLS, RBAC, audit logging)
 - Resilience patterns (circuit breakers, retries, failover)
 - Scalability (distributed architecture, connection pooling)
@@ -437,6 +449,7 @@ The platform is designed specifically for intelligence operations with:
 - Intelligence-focused integration capabilities
 
 This surpasses specialized API management tools by providing:
+
 1. **Intelligence-specific security** (clearance levels, classification handling)
 2. **Advanced resilience** (circuit breakers, automatic failover)
 3. **Distributed architecture** (Redis-backed, multi-instance)

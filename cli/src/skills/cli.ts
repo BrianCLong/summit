@@ -1,26 +1,22 @@
-import fs from 'node:fs';
-import path from 'node:path';
-import { Command } from 'commander';
-import {
-  ingestOpenClawRepo,
-  loadSkillIndex,
-  OpenClawSkillIndexEntry,
-} from './openclaw.js';
+import fs from "node:fs";
+import path from "node:path";
+import { Command } from "commander";
+import { ingestOpenClawRepo, loadSkillIndex, OpenClawSkillIndexEntry } from "./openclaw.js";
 
-const DEFAULT_INDEX_DIR = 'artifacts/openclaw-skills';
-const DEFAULT_INDEX_FILE = 'skill-index.json';
-const APPROVALS_ROOT = path.join('approvals', 'skills');
+const DEFAULT_INDEX_DIR = "artifacts/openclaw-skills";
+const DEFAULT_INDEX_FILE = "skill-index.json";
+const APPROVALS_ROOT = path.join("approvals", "skills");
 
 export function registerOpenClawCommands(program: Command): void {
-  const skills = program.command('skills').description('Manage OpenClaw skills');
+  const skills = program.command("skills").description("Manage OpenClaw skills");
 
   skills
-    .command('ingest')
-    .description('Ingest an OpenClaw skill repository and build deterministic indexes')
-    .requiredOption('--repo <urlOrPath>', 'OpenClaw skill repo URL or local path')
-    .option('--provider <provider>', 'Filter by provider directory')
-    .option('--skill <skill>', 'Filter by skill directory')
-    .option('--out <dir>', 'Output directory for artifacts', DEFAULT_INDEX_DIR)
+    .command("ingest")
+    .description("Ingest an OpenClaw skill repository and build deterministic indexes")
+    .requiredOption("--repo <urlOrPath>", "OpenClaw skill repo URL or local path")
+    .option("--provider <provider>", "Filter by provider directory")
+    .option("--skill <skill>", "Filter by skill directory")
+    .option("--out <dir>", "Output directory for artifacts", DEFAULT_INDEX_DIR)
     .action((options) => {
       const index = ingestOpenClawRepo({
         repo: options.repo,
@@ -32,13 +28,13 @@ export function registerOpenClawCommands(program: Command): void {
     });
 
   skills
-    .command('show')
-    .description('Show a skill entry from the OpenClaw skill index')
-    .argument('<slug>', 'Skill slug in provider/skill format')
+    .command("show")
+    .description("Show a skill entry from the OpenClaw skill index")
+    .argument("<slug>", "Skill slug in provider/skill format")
     .option(
-      '--index <path>',
-      'Path to skill-index.json',
-      path.join(DEFAULT_INDEX_DIR, DEFAULT_INDEX_FILE),
+      "--index <path>",
+      "Path to skill-index.json",
+      path.join(DEFAULT_INDEX_DIR, DEFAULT_INDEX_FILE)
     )
     .action((slug: string, options) => {
       const entry = findSkillEntry(options.index, slug);
@@ -51,13 +47,13 @@ export function registerOpenClawCommands(program: Command): void {
     });
 
   skills
-    .command('run')
-    .description('Validate approvals for OpenClaw skill execution (execution is deferred)')
-    .argument('<slug>', 'Skill slug in provider/skill format')
+    .command("run")
+    .description("Validate approvals for OpenClaw skill execution (execution is deferred)")
+    .argument("<slug>", "Skill slug in provider/skill format")
     .option(
-      '--index <path>',
-      'Path to skill-index.json',
-      path.join(DEFAULT_INDEX_DIR, DEFAULT_INDEX_FILE),
+      "--index <path>",
+      "Path to skill-index.json",
+      path.join(DEFAULT_INDEX_DIR, DEFAULT_INDEX_FILE)
     )
     .action((slug: string, options) => {
       const entry = findSkillEntry(options.index, slug);
@@ -73,7 +69,7 @@ export function registerOpenClawCommands(program: Command): void {
         return;
       }
       console.error(
-        '❌ Execution deferred pending sandbox runtime. Approval recorded but execution remains disabled.',
+        "❌ Execution deferred pending sandbox runtime. Approval recorded but execution remains disabled."
       );
       process.exitCode = 1;
     });

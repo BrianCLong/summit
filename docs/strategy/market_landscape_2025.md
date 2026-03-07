@@ -8,7 +8,7 @@
 
 Summit sits at the intersection of four overlapping markets: **OSINT & investigations platforms, threat‑intel / espionage tooling, agentic AI platforms, and knowledge‑graph/enterprise‑intelligence platforms.** This document details these sectors and Summit's unique positioning within them.
 
-***
+---
 
 ## 1. OSINT and investigations platforms (closest functional neighbors)
 
@@ -52,7 +52,7 @@ This is the tightest cluster around “Summit as an OSINT + investigation workbe
   - Few explicitly position on **espionage / cognitive warfare** or deepfake threats to financial markets; they tilt cyber, fraud, or general corporate risk.
   - Most are tools; you are explicitly building a **platform** with CI, policy, and graph‑native data model.
 
-***
+---
 
 ## 2. Threat‑intel, espionage, and cognitive‑warfare tooling
 
@@ -79,7 +79,7 @@ This is the part of the landscape that lines up most with your “espionage and 
   - **Enterprise espionage + deepfake risk** in finance and corporate environments (e.g., synthetic CEO voice/video, manipulated OSINT as part of an operation).
   - Tight coupling of agents that run **counter‑espionage playbooks** instead of static dashboards and alerts.
 
-***
+---
 
 ## 3. Agentic AI platforms (horizontal but converging on your use case)
 
@@ -124,7 +124,7 @@ This gives you three “edges” where others can collide with you:
   - **Data plane**: they are mostly “bring your own data/APIs”; you are bundling an **OSINT/intel data layer + graph model** as part of the product.
   - **Outcome**: they market cost savings on generic workflows; you go straight at **intelligence, investigations, and espionage defense** as the outcome.
 
-***
+---
 
 ## 4. Knowledge‑graph and enterprise‑intelligence platforms
 
@@ -171,7 +171,7 @@ Core insights from that report:
 - Your twist:
   - Extremely **domain‑specific schema** and playbooks for OSINT, espionage, and information operations, rather than generic enterprise search.
 
-***
+---
 
 ## 5. OSINT tool ecosystems and building blocks (your integration surface)
 
@@ -186,7 +186,7 @@ These are not full competitors so much as **components you can orchestrate**.
 
 These are ideal **data feeds and tool adapters** for autonomous agents in Summit: you call them as tools, then fuse and reason in your own graph and policy layer.
 
-***
+---
 
 ## 6. Agentic‑AI infra, development shops, and “build‑you‑a‑Summit” consultancies
 
@@ -203,7 +203,7 @@ These matter because:
 - They demonstrate **demand for “agentic in regulated environments”**, which aligns with your finance‑sector espionage focus.
 - They also represent “build vs buy” competition—internal or SI‑led builds that mimic your positioning without the product depth.
 
-***
+---
 
 ## 7. Putting it all together: where Summit sits in this universe
 
@@ -222,24 +222,24 @@ But the **exact overlap**—“agentic OSINT/espionage investigations over a kno
 
 That “multi‑agent OSINT/espionage intelligence graph with strong governance” is the wedge where Summit is nearest to everything you asked about—but not actually duplicated.
 
-***
+---
 
 ## 8. Competitive Feature Matrix
 
 This matrix compares Summit against 5 key players from the clusters above, highlighting the structural gaps Summit fills.
 
-| Feature | **Summit Intelligence Foundry** | **ShadowDragon** (OSINT) | **Maltego** (Analysis) | **Recorded Future** (Threat Intel) | **Glean** (Ent. Search) | **Aisera** (Agent Platform) |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Core Value** | **Governed Autonomous Counter-Intel** | Law Enforcement OSINT Suite | Graph Visualization & Transforms | Threat Intelligence Feed & Risk | Enterprise Knowledge Search | IT/Ops/CS Workflow Automation |
-| **Data Model** | **Native Graph + Evidence Ledger** | Aggregated Feeds / Case Files | Visual Entity Graph (Mutable) | Proprietary Threat Graph (Closed) | Vector Index / Enterprise Graph | Integration Connectors / APIs |
-| **Agent Autonomy** | **Goal-Seeking Swarms (Maestro)** | Scripted Monitors / Alerts | Manual Transforms / Macros | AI-Assisted Query / Alerting | RAG / Copilot Chat | Workflow Bots / Ticket Resolution |
-| **Governance** | **Policy-as-Code (OPA) / Immutable** | Role-Based Access (RBAC) | Desktop Logs / Basic Audit | RBAC / Portal Logs | Document ACLs / Permissioning | Workflow Approvals / Audit Logs |
-| **Espionage Focus** | **High (Primary Mission)** | Medium (Criminal focus) | Medium (Analyst dependent) | High (Cyber focus) | Low (General enterprise) | Low (Operational focus) |
-| **Deployment** | **Hybrid / Air-Gapped Capable** | SaaS / Cloud | Desktop / Enterprise Server | SaaS | SaaS | SaaS |
-| **Primary User** | **Intel Analyst + Autonomous Agent** | Investigator | Analyst | SOC Analyst / CISO | Knowledge Worker | Support Agent / Employee |
+| Feature             | **Summit Intelligence Foundry**       | **ShadowDragon** (OSINT)      | **Maltego** (Analysis)           | **Recorded Future** (Threat Intel) | **Glean** (Ent. Search)         | **Aisera** (Agent Platform)       |
+| :------------------ | :------------------------------------ | :---------------------------- | :------------------------------- | :--------------------------------- | :------------------------------ | :-------------------------------- |
+| **Core Value**      | **Governed Autonomous Counter-Intel** | Law Enforcement OSINT Suite   | Graph Visualization & Transforms | Threat Intelligence Feed & Risk    | Enterprise Knowledge Search     | IT/Ops/CS Workflow Automation     |
+| **Data Model**      | **Native Graph + Evidence Ledger**    | Aggregated Feeds / Case Files | Visual Entity Graph (Mutable)    | Proprietary Threat Graph (Closed)  | Vector Index / Enterprise Graph | Integration Connectors / APIs     |
+| **Agent Autonomy**  | **Goal-Seeking Swarms (Maestro)**     | Scripted Monitors / Alerts    | Manual Transforms / Macros       | AI-Assisted Query / Alerting       | RAG / Copilot Chat              | Workflow Bots / Ticket Resolution |
+| **Governance**      | **Policy-as-Code (OPA) / Immutable**  | Role-Based Access (RBAC)      | Desktop Logs / Basic Audit       | RBAC / Portal Logs                 | Document ACLs / Permissioning   | Workflow Approvals / Audit Logs   |
+| **Espionage Focus** | **High (Primary Mission)**            | Medium (Criminal focus)       | Medium (Analyst dependent)       | High (Cyber focus)                 | Low (General enterprise)        | Low (Operational focus)           |
+| **Deployment**      | **Hybrid / Air-Gapped Capable**       | SaaS / Cloud                  | Desktop / Enterprise Server      | SaaS                               | SaaS                            | SaaS                              |
+| **Primary User**    | **Intel Analyst + Autonomous Agent**  | Investigator                  | Analyst                          | SOC Analyst / CISO                 | Knowledge Worker                | Support Agent / Employee          |
 
 ### Key Differentiators:
 
-1.  **Goal-Seeking vs. Searching:** Unlike Glean or Recorded Future which excel at *retrieving* information, Summit's agents *act* to uncover it, following multi-step investigative plans.
+1.  **Goal-Seeking vs. Searching:** Unlike Glean or Recorded Future which excel at _retrieving_ information, Summit's agents _act_ to uncover it, following multi-step investigative plans.
 2.  **Policy-as-Code:** Unlike ShadowDragon or Maltego where governance is often post-hoc or RBAC-based, Summit embeds OPA policies into every agent action, enabling safe autonomous operations.
 3.  **The "Espionage" Wedge:** While others focus on cyber-threats (Recorded Future) or criminal investigations (ShadowDragon), Summit specifically targets the high-stakes domain of corporate espionage, influence operations, and deepfake defense.

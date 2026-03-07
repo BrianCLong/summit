@@ -56,7 +56,10 @@ describe('TenantAdminPanel', () => {
                 id: 'baseline',
                 name: 'Baseline',
                 description: 'Baseline',
-                guardrails: { requirePurpose: false, requireJustification: false },
+                guardrails: {
+                  requirePurpose: false,
+                  requireJustification: false,
+                },
               },
             ],
           })
@@ -67,7 +70,7 @@ describe('TenantAdminPanel', () => {
     render(<TenantAdminPanel />)
 
     expect(
-      await screen.findByText('Create tenant (Switchboard)'),
+      await screen.findByText('Create tenant (Switchboard)')
     ).toBeInTheDocument()
 
     await waitFor(() => {

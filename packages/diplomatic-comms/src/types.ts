@@ -4,65 +4,65 @@
  */
 
 export enum CommunicationType {
-  DIPLOMATIC_CABLE = 'DIPLOMATIC_CABLE',
-  OFFICIAL_STATEMENT = 'OFFICIAL_STATEMENT',
-  PRESS_RELEASE = 'PRESS_RELEASE',
-  SPEECH = 'SPEECH',
-  JOINT_STATEMENT = 'JOINT_STATEMENT',
-  COMMUNIQUE = 'COMMUNIQUE',
-  DEMARCHE = 'DEMARCHE',
-  NOTE_VERBALE = 'NOTE_VERBALE',
-  AIDE_MEMOIRE = 'AIDE_MEMOIRE',
-  MEMORANDUM = 'MEMORANDUM',
-  PROTEST_NOTE = 'PROTEST_NOTE',
-  DIPLOMATIC_NOTE = 'DIPLOMATIC_NOTE',
-  TALKING_POINTS = 'TALKING_POINTS',
-  READOUT = 'READOUT',
-  BRIEFING = 'BRIEFING',
-  INTERVIEW = 'INTERVIEW',
-  SOCIAL_MEDIA = 'SOCIAL_MEDIA'
+  DIPLOMATIC_CABLE = "DIPLOMATIC_CABLE",
+  OFFICIAL_STATEMENT = "OFFICIAL_STATEMENT",
+  PRESS_RELEASE = "PRESS_RELEASE",
+  SPEECH = "SPEECH",
+  JOINT_STATEMENT = "JOINT_STATEMENT",
+  COMMUNIQUE = "COMMUNIQUE",
+  DEMARCHE = "DEMARCHE",
+  NOTE_VERBALE = "NOTE_VERBALE",
+  AIDE_MEMOIRE = "AIDE_MEMOIRE",
+  MEMORANDUM = "MEMORANDUM",
+  PROTEST_NOTE = "PROTEST_NOTE",
+  DIPLOMATIC_NOTE = "DIPLOMATIC_NOTE",
+  TALKING_POINTS = "TALKING_POINTS",
+  READOUT = "READOUT",
+  BRIEFING = "BRIEFING",
+  INTERVIEW = "INTERVIEW",
+  SOCIAL_MEDIA = "SOCIAL_MEDIA",
 }
 
 export enum Tone {
-  DIPLOMATIC = 'DIPLOMATIC',
-  CONCILIATORY = 'CONCILIATORY',
-  FRIENDLY = 'FRIENDLY',
-  NEUTRAL = 'NEUTRAL',
-  FIRM = 'FIRM',
-  STERN = 'STERN',
-  WARNING = 'WARNING',
-  THREATENING = 'THREATENING',
-  CONFRONTATIONAL = 'CONFRONTATIONAL',
-  APOLOGETIC = 'APOLOGETIC',
-  DEFENSIVE = 'DEFENSIVE',
-  CELEBRATORY = 'CELEBRATORY'
+  DIPLOMATIC = "DIPLOMATIC",
+  CONCILIATORY = "CONCILIATORY",
+  FRIENDLY = "FRIENDLY",
+  NEUTRAL = "NEUTRAL",
+  FIRM = "FIRM",
+  STERN = "STERN",
+  WARNING = "WARNING",
+  THREATENING = "THREATENING",
+  CONFRONTATIONAL = "CONFRONTATIONAL",
+  APOLOGETIC = "APOLOGETIC",
+  DEFENSIVE = "DEFENSIVE",
+  CELEBRATORY = "CELEBRATORY",
 }
 
 export enum Sentiment {
-  VERY_POSITIVE = 'VERY_POSITIVE',
-  POSITIVE = 'POSITIVE',
-  SLIGHTLY_POSITIVE = 'SLIGHTLY_POSITIVE',
-  NEUTRAL = 'NEUTRAL',
-  SLIGHTLY_NEGATIVE = 'SLIGHTLY_NEGATIVE',
-  NEGATIVE = 'NEGATIVE',
-  VERY_NEGATIVE = 'VERY_NEGATIVE'
+  VERY_POSITIVE = "VERY_POSITIVE",
+  POSITIVE = "POSITIVE",
+  SLIGHTLY_POSITIVE = "SLIGHTLY_POSITIVE",
+  NEUTRAL = "NEUTRAL",
+  SLIGHTLY_NEGATIVE = "SLIGHTLY_NEGATIVE",
+  NEGATIVE = "NEGATIVE",
+  VERY_NEGATIVE = "VERY_NEGATIVE",
 }
 
 export enum Urgency {
-  ROUTINE = 'ROUTINE',
-  PRIORITY = 'PRIORITY',
-  IMMEDIATE = 'IMMEDIATE',
-  FLASH = 'FLASH',
-  EMERGENCY = 'EMERGENCY'
+  ROUTINE = "ROUTINE",
+  PRIORITY = "PRIORITY",
+  IMMEDIATE = "IMMEDIATE",
+  FLASH = "FLASH",
+  EMERGENCY = "EMERGENCY",
 }
 
 export enum Classification {
-  UNCLASSIFIED = 'UNCLASSIFIED',
-  OFFICIAL_USE_ONLY = 'OFFICIAL_USE_ONLY',
-  CONFIDENTIAL = 'CONFIDENTIAL',
-  SECRET = 'SECRET',
-  TOP_SECRET = 'TOP_SECRET',
-  SENSITIVE = 'SENSITIVE'
+  UNCLASSIFIED = "UNCLASSIFIED",
+  OFFICIAL_USE_ONLY = "OFFICIAL_USE_ONLY",
+  CONFIDENTIAL = "CONFIDENTIAL",
+  SECRET = "SECRET",
+  TOP_SECRET = "TOP_SECRET",
+  SENSITIVE = "SENSITIVE",
 }
 
 export interface DiplomaticCommunication {
@@ -75,7 +75,7 @@ export interface DiplomaticCommunication {
   sender: Party;
   recipient?: Party;
   recipients?: Party[];
-  audience: 'BILATERAL' | 'MULTILATERAL' | 'PUBLIC' | 'INTERNAL' | 'TARGETED';
+  audience: "BILATERAL" | "MULTILATERAL" | "PUBLIC" | "INTERNAL" | "TARGETED";
 
   // Content
   content: string;
@@ -119,7 +119,7 @@ export interface DiplomaticCommunication {
   culturalReferences?: string[];
 
   // Impact and reach
-  visibility: 'PUBLIC' | 'LEAKED' | 'RESTRICTED' | 'CLASSIFIED';
+  visibility: "PUBLIC" | "LEAKED" | "RESTRICTED" | "CLASSIFIED";
   mediaPickup?: MediaPickup[];
   publicReaction?: PublicReaction;
   diplomaticReaction?: DiplomaticReaction[];
@@ -139,7 +139,7 @@ export interface DiplomaticCommunication {
 }
 
 export interface Party {
-  type: 'COUNTRY' | 'ORGANIZATION' | 'INDIVIDUAL' | 'GROUP';
+  type: "COUNTRY" | "ORGANIZATION" | "INDIVIDUAL" | "GROUP";
   name: string;
   country?: string;
   title?: string;
@@ -178,7 +178,7 @@ export interface Theme {
 }
 
 export interface Entity {
-  type: 'PERSON' | 'ORGANIZATION' | 'LOCATION' | 'EVENT' | 'TREATY' | 'POLICY' | 'CONCEPT';
+  type: "PERSON" | "ORGANIZATION" | "LOCATION" | "EVENT" | "TREATY" | "POLICY" | "CONCEPT";
   name: string;
   mentions: number;
   sentiment?: number;
@@ -244,14 +244,28 @@ export interface PublicReaction {
 export interface DiplomaticReaction {
   country: string;
   official: string;
-  reactionType: 'ENDORSEMENT' | 'AGREEMENT' | 'ACKNOWLEDGMENT' | 'SILENCE' | 'DISAGREEMENT' | 'CONDEMNATION' | 'REBUTTAL';
+  reactionType:
+    | "ENDORSEMENT"
+    | "AGREEMENT"
+    | "ACKNOWLEDGMENT"
+    | "SILENCE"
+    | "DISAGREEMENT"
+    | "CONDEMNATION"
+    | "REBUTTAL";
   statement?: string;
   date: Date;
   significance: number; // 1-10
 }
 
 export interface Signal {
-  type: 'POLICY_SHIFT' | 'WARNING' | 'REASSURANCE' | 'THREAT' | 'COMMITMENT' | 'AMBIGUITY' | 'DEFLECTION';
+  type:
+    | "POLICY_SHIFT"
+    | "WARNING"
+    | "REASSURANCE"
+    | "THREAT"
+    | "COMMITMENT"
+    | "AMBIGUITY"
+    | "DEFLECTION";
   description: string;
   strength: number; // 0-100
   clarity: number; // 0-100
@@ -261,7 +275,7 @@ export interface Signal {
 }
 
 export interface MessagingStrategy {
-  approach: 'DIRECT' | 'INDIRECT' | 'AMBIGUOUS' | 'LAYERED' | 'COORDINATED';
+  approach: "DIRECT" | "INDIRECT" | "AMBIGUOUS" | "LAYERED" | "COORDINATED";
   objectives: string[];
   targetAudiences: string[];
   tactics: string[];
@@ -272,13 +286,13 @@ export interface MessagingStrategy {
 
 export interface CoordinationPattern {
   coordinatedWith: string[];
-  timing: 'SIMULTANEOUS' | 'SEQUENTIAL' | 'STAGGERED';
+  timing: "SIMULTANEOUS" | "SEQUENTIAL" | "STAGGERED";
   messageAlignment: number; // 0-100
   evidenceOfCoordination: string[];
 }
 
 export interface Source {
-  type: 'OFFICIAL' | 'LEAKED' | 'DECLASSIFIED' | 'MEDIA' | 'INTERCEPTED' | 'THIRD_PARTY';
+  type: "OFFICIAL" | "LEAKED" | "DECLASSIFIED" | "MEDIA" | "INTERCEPTED" | "THIRD_PARTY";
   name: string;
   url?: string;
   reliability: number; // 0-1
@@ -304,17 +318,17 @@ export interface Cable {
 
 export interface ActionItem {
   description: string;
-  priority: 'HIGH' | 'MEDIUM' | 'LOW';
+  priority: "HIGH" | "MEDIUM" | "LOW";
   deadline?: Date;
   responsibleParty: string;
-  status: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
+  status: "PENDING" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED";
 }
 
 export interface Assessment {
   subject: string;
   analysis: string;
   conclusion: string;
-  confidence: 'HIGH' | 'MEDIUM' | 'LOW';
+  confidence: "HIGH" | "MEDIUM" | "LOW";
   sources: string[];
   implications: string[];
 }
@@ -357,7 +371,7 @@ export interface CommunicationPattern {
 
 export interface PatternShift {
   date: Date;
-  type: 'TONE' | 'TOPIC' | 'FREQUENCY' | 'TARGET' | 'STRATEGY';
+  type: "TONE" | "TOPIC" | "FREQUENCY" | "TARGET" | "STRATEGY";
   description: string;
   significance: number; // 1-10
   likelyReason?: string;
@@ -370,7 +384,7 @@ export interface NarrativeTracking {
   initiator: string;
   startDate: Date;
   endDate?: Date;
-  status: 'EMERGING' | 'ACTIVE' | 'DOMINANT' | 'FADING' | 'DORMANT';
+  status: "EMERGING" | "ACTIVE" | "DOMINANT" | "FADING" | "DORMANT";
 
   communications: string[]; // Communication IDs
   keyMessages: string[];
@@ -378,7 +392,7 @@ export interface NarrativeTracking {
 
   adoption: {
     country: string;
-    level: 'FULL' | 'PARTIAL' | 'ADAPTED' | 'REJECTED';
+    level: "FULL" | "PARTIAL" | "ADAPTED" | "REJECTED";
     adaptations?: string[];
   }[];
 

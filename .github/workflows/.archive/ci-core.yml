@@ -10,10 +10,10 @@ on:
     # SAFETY: Conservative paths-ignore to prevent skipping required checks
     # This is the PRIMARY CI GATE - it MUST run on any code/config/dependency changes
     paths-ignore:
-      - 'docs/**'
-      - '**.md'
-      - 'prompts/**'
-      - 'evidence/**'
+      - "docs/**"
+      - "**.md"
+      - "prompts/**"
+      - "evidence/**"
       - ".github/ISSUE_TEMPLATE/**"
       - ".github/PULL_REQUEST_TEMPLATE/**"
       # NOTE: We do NOT ignore:

@@ -3,6 +3,7 @@
 ## Existing Artifacts
 
 ### Scripts
+
 - **`scripts/generate-sbom.sh`**:
   - Generates SBOMs for npm, Python, and Java.
   - Uses `syft` and `cyclonedx-npm`.
@@ -22,6 +23,7 @@
   - Uses `cosign` (key or keyless).
 
 ### CI Workflows
+
 - **`.github/workflows/_reusable-slsa-build.yml`**:
   - A comprehensive reusable workflow for building and pushing Docker images.
   - Generates SLSA provenance using `slsa-framework/slsa-github-generator`.
@@ -32,16 +34,18 @@
 - **`.github/workflows/ci-verify.yml`**:
   - The primary gate for PRs.
   - Contains a `provenance` job that checks for `scripts/generate-sbom.sh` and `scripts/attest-slsa.sh`.
-  - **CRITICAL GAP**: It executes `scripts/generate-sbom.sh` if it exists, but falls back to placeholders. It does *not* seem to use `scripts/sbom-attest.sh`.
+  - **CRITICAL GAP**: It executes `scripts/generate-sbom.sh` if it exists, but falls back to placeholders. It does _not_ seem to use `scripts/sbom-attest.sh`.
   - It has a placeholder for `scripts/attest-slsa.sh` which generates a dummy `provenance.json`.
 
 ## Gaps & Disconnects
+
 1.  **Fragmentation**: SBOM generation logic exists in multiple places (`generate-sbom.sh`, `sbom-attest.sh`, `_reusable-slsa-build.yml`).
 2.  **Missing Link**: `ci-verify.yml` does not use the robust `_reusable-slsa-build.yml` or the `sbom-attest.sh` script effectively. It relies on `generate-sbom.sh` which handles source dependencies but not container images or SLSA provenance for the build artifacts.
 3.  **Placeholder Reliance**: `ci-verify.yml` explicitly creates placeholder SBOM/Provenance if scripts fail or are missing, which might mask actual failures.
 4.  **Signing**: `sign-artifacts.sh` is a standalone script not clearly invoked by `ci-verify.yml`.
 
 ## Recommendations
+
 - **Consolidate**: Use `scripts/generate-sbom.sh` as the single source of truth for source-level SBOMs.
 - **Integrate**: Make `ci-verify.yml` call `_reusable-slsa-build.yml` for container builds or integrate `sbom-attest.sh` logic.
 - **Enforce**: Remove placeholders in `ci-verify.yml` and fail if SBOM/Provenance generation fails.

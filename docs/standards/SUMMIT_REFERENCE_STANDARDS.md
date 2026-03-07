@@ -39,8 +39,8 @@ Summit defines the reference implementation for **Governed Agentic Systems**. To
 
 **Compliance:**
 
-* Must form a hash chain (`currentHash` depends on `previousHash`).
-* Must include a detached signature from a registered authority.
+- Must form a hash chain (`currentHash` depends on `previousHash`).
+- Must include a detached signature from a registered authority.
 
 ## 2. Policy Exchange Schema (PES)
 
@@ -56,9 +56,9 @@ Summit defines the reference implementation for **Governed Agentic Systems**. To
     "maxBudgetUsd": 50
   },
   "autonomyMatrix": {
-    "read": 5,   // Full autonomy
-    "write": 2,  // Assisted
-    "deploy": 0  // Manual only
+    "read": 5, // Full autonomy
+    "write": 2, // Assisted
+    "deploy": 0 // Manual only
   }
 }
 ```
@@ -84,6 +84,7 @@ Summit defines the reference implementation for **Governed Agentic Systems**. To
 **Key Definitions:**
 
 1.  **Context Frame:** A bounded, immutable unit of knowledge provided to an agent. It must be versioned and source-traceable.
+
     ```json
     {
       "frameId": "ctx_8823",
@@ -99,13 +100,13 @@ Summit defines the reference implementation for **Governed Agentic Systems**. To
     ```
 
 2.  **Context Resolution Protocol (CRP):** The deterministic method used to hydrate a frame.
-    *   **Static:** Direct inclusion of immutable strings.
-    *   **RAG:** Retrieval-augmented generation with citation enforcement.
-    *   **MCP:** Live context fetched via Model Context Protocol servers.
+    - **Static:** Direct inclusion of immutable strings.
+    - **RAG:** Retrieval-augmented generation with citation enforcement.
+    - **MCP:** Live context fetched via Model Context Protocol servers.
 
 3.  **Governance:**
-    *   **Leakage Prevention:** All context frames must pass a PII/Secret scan before injection.
-    *   **Attribution:** Every assertion in a context frame must trace back to a `ProvenanceEntry`.
+    - **Leakage Prevention:** All context frames must pass a PII/Secret scan before injection.
+    - **Attribution:** Every assertion in a context frame must trace back to a `ProvenanceEntry`.
 
 ## 5. Evidence Contract Standard (ECS)
 

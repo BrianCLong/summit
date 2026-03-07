@@ -1,21 +1,16 @@
-import fs from 'node:fs';
-import path from 'node:path';
+import fs from "node:fs";
+import path from "node:path";
 
-import type {
-  EvidenceManifest,
-  IterationInput,
-  LongRunJobSpec,
-  StopDecision,
-} from './types.js';
-import { isCompletionVerified } from './stop-conditions.js';
+import type { EvidenceManifest, IterationInput, LongRunJobSpec, StopDecision } from "./types.js";
+import { isCompletionVerified } from "./stop-conditions.js";
 
 export const createEvidenceManifest = (
   job: LongRunJobSpec,
-  createdAt: string,
+  createdAt: string
 ): EvidenceManifest => ({
   jobId: job.job_id,
   goal: job.goal,
-  mode: job.mode ?? 'advisory',
+  mode: job.mode ?? "advisory",
   createdAt,
   updatedAt: createdAt,
   budgets: job.budgets,
@@ -24,8 +19,8 @@ export const createEvidenceManifest = (
   stopConditions: job.stop_conditions,
   iterations: [],
   completion: {
-    status: 'in-progress',
-    reason: 'not-complete',
+    status: "in-progress",
+    reason: "not-complete",
     verified: false,
   },
 });
@@ -51,10 +46,10 @@ export const recordIteration = (options: {
 
   manifest.updatedAt = timestamp;
 
-  if (stopDecision.status === 'stop') {
+  if (stopDecision.status === "stop") {
     const verified = isCompletionVerified(iteration);
     manifest.completion = {
-      status: verified ? 'completed' : 'halted',
+      status: verified ? "completed" : "halted",
       reason: stopDecision.reason,
       verified,
       verifiedAt: verified ? timestamp : undefined,
@@ -72,6 +67,6 @@ export const writeEvidenceManifest = (options: {
   const { manifest, outputDir, jobId } = options;
   fs.mkdirSync(outputDir, { recursive: true });
   const target = path.join(outputDir, `${jobId}.manifest.json`);
-  fs.writeFileSync(target, `${JSON.stringify(manifest, null, 2)}\n`, 'utf-8');
+  fs.writeFileSync(target, `${JSON.stringify(manifest, null, 2)}\n`, "utf-8");
   return target;
 };

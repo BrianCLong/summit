@@ -1,5 +1,5 @@
-import { v4 as uuidv4 } from 'uuid';
-import type { LegalHold } from '@intelgraph/mdm-core';
+import { v4 as uuidv4 } from "uuid";
+import type { LegalHold } from "@intelgraph/mdm-core";
 
 export class LegalHoldService {
   private holds: Map<string, LegalHold> = new Map();
@@ -9,7 +9,7 @@ export class LegalHoldService {
     tenantId: string,
     appliedBy: string,
     reason: string,
-    scope: LegalHold['scope'] = 'record',
+    scope: LegalHold["scope"] = "record",
     recordIds?: string[]
   ): LegalHold {
     const hold: LegalHold = {
@@ -39,13 +39,14 @@ export class LegalHoldService {
   }
 
   listActive(): LegalHold[] {
-    return Array.from(this.holds.values()).filter(hold => !hold.releasedAt);
+    return Array.from(this.holds.values()).filter((hold) => !hold.releasedAt);
   }
 
   holdsForRecord(recordId: string, recordType: string, tenantId: string): LegalHold[] {
-    return this.listActive().filter(hold => {
-      if (hold.scope === 'tenant') return hold.tenantId === tenantId;
-      if (hold.scope === 'type') return hold.recordType === recordType && hold.tenantId === tenantId;
+    return this.listActive().filter((hold) => {
+      if (hold.scope === "tenant") return hold.tenantId === tenantId;
+      if (hold.scope === "type")
+        return hold.recordType === recordType && hold.tenantId === tenantId;
       return hold.recordIds?.includes(recordId) ?? false;
     });
   }

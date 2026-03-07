@@ -15,4 +15,4 @@ As of Automation Turn #5, the methodology expands to include:
 5. **Claim-Centric Validation** – Evaluate assertions independently of source reputation.
 6. **Stateful Collection** – Preserve session state and interaction paths during ingestion.
 7. **Contradiction Detection** – Explicitly surface conflicts rather than synthesizing a single narrative.
-8. **Blind Spot Logging** – Record what could *not* be observed as a high-fidelity signal.
+8. **Blind Spot Logging** – Record what could _not_ be observed as a high-fidelity signal.

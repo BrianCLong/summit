@@ -1,32 +1,32 @@
-import { createHash } from 'crypto';
-import { promises as fs } from 'fs';
-import path from 'path';
-import mime from 'mime-types';
-import { canonicalize } from '../common/canonical';
-import { ProvenanceManifest } from '../types';
-import { manifestCanonicalString } from '../common/manifest';
+import { createHash } from "crypto";
+import { promises as fs } from "fs";
+import path from "path";
+import mime from "mime-types";
+import { canonicalize } from "../common/canonical";
+import { ProvenanceManifest } from "../types";
+import { manifestCanonicalString } from "../common/manifest";
 
 export async function hashFile(filePath: string): Promise<string> {
   const file = await fs.readFile(filePath);
-  const hash = createHash('sha256');
+  const hash = createHash("sha256");
   hash.update(file);
-  return hash.digest('hex');
+  return hash.digest("hex");
 }
 
 export function hashCanonical(value: unknown): string {
-  const hash = createHash('sha256');
-  if (typeof value === 'string') {
+  const hash = createHash("sha256");
+  if (typeof value === "string") {
     hash.update(value);
   } else {
     hash.update(canonicalize(value));
   }
-  return hash.digest('hex');
+  return hash.digest("hex");
 }
 
 export function fingerprintPublicKey(publicKey: string): string {
-  const hash = createHash('sha256');
+  const hash = createHash("sha256");
   hash.update(publicKey.trim());
-  return hash.digest('hex');
+  return hash.digest("hex");
 }
 
 export function determineMime(assetPath: string, explicit?: string): string | undefined {

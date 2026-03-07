@@ -1,5 +1,5 @@
-export type SensitivityLevel = 'GREEN' | 'AMBER' | 'RED';
-export type LicenseType = 'USGOV' | 'OSINT' | 'COMMERCIAL';
+export type SensitivityLevel = "GREEN" | "AMBER" | "RED";
+export type LicenseType = "USGOV" | "OSINT" | "COMMERCIAL";
 
 export interface FieldEntity {
   id: string;
@@ -20,14 +20,14 @@ export interface FieldNote {
   tags: string[]; // IDs of FieldEntity
   sensitivity: SensitivityLevel;
   license: LicenseType;
-  syncStatus: 'pending' | 'synced' | 'error';
+  syncStatus: "pending" | "synced" | "error";
   syncError?: string;
 }
 
 export interface FieldMediaCapture {
   id: string;
   caseId: string;
-  type: 'photo' | 'video' | 'audio';
+  type: "photo" | "video" | "audio";
   blob: Blob; // Stored locally
   mimeType: string;
   timestamp: string;
@@ -39,7 +39,7 @@ export interface FieldMediaCapture {
   sensitivity: SensitivityLevel;
   license: LicenseType;
   metadata: Record<string, any>;
-  syncStatus: 'pending' | 'synced' | 'error';
+  syncStatus: "pending" | "synced" | "error";
   remoteId?: string; // ID after sync
 }
 
@@ -56,8 +56,8 @@ export interface FieldCaseSnapshot {
 
 export interface SyncQueueItem {
   id: string;
-  type: 'note' | 'media';
-  action: 'create' | 'update' | 'delete';
+  type: "note" | "media";
+  action: "create" | "update" | "delete";
   payload: any;
   timestamp: number;
   retries: number;

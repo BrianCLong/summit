@@ -1,7 +1,7 @@
-import { describe, it, expect, jest, beforeEach } from '@jest/globals';
-import { MaestroEngine, StateStore, ArtifactStore, PolicyEngine, RunContext } from '../engine';
+import { describe, it, expect, jest, beforeEach } from "@jest/globals";
+import { MaestroEngine, StateStore, ArtifactStore, PolicyEngine, RunContext } from "../engine";
 
-describe('MaestroEngine Recovery', () => {
+describe("MaestroEngine Recovery", () => {
   let engine: MaestroEngine;
   let mockStateStore: jest.Mocked<StateStore>;
   let mockArtifactStore: jest.Mocked<ArtifactStore>;
@@ -32,16 +32,16 @@ describe('MaestroEngine Recovery', () => {
     engine = new MaestroEngine(mockStateStore, mockArtifactStore, mockPolicyEngine);
   });
 
-  it('should resume active runs on recover()', async () => {
-    const runId = 'recovered-run-1';
+  it("should resume active runs on recover()", async () => {
+    const runId = "recovered-run-1";
     const workflow = {
-      name: 'recovery-wf',
-      version: '1.0',
-      steps: [{ id: 'step-1', name: 'Step 1', plugin: 'test-plugin', config: {} }]
+      name: "recovery-wf",
+      version: "1.0",
+      steps: [{ id: "step-1", name: "Step 1", plugin: "test-plugin", config: {} }],
     };
 
     mockStateStore.getActiveExecutions.mockResolvedValue([
-      { run_id: runId, step_id: 'step-1', status: 'running', attempt: 1, metadata: {} } as any
+      { run_id: runId, step_id: "step-1", status: "running", attempt: 1, metadata: {} } as any,
     ]);
 
     mockStateStore.getRunDetails.mockResolvedValue({
@@ -49,14 +49,14 @@ describe('MaestroEngine Recovery', () => {
       workflow_name: workflow.name,
       workflow_version: workflow.version,
       workflow_definition: workflow,
-      tenant_id: 't1',
-      triggered_by: 'u1',
-      environment: 'p',
+      tenant_id: "t1",
+      triggered_by: "u1",
+      environment: "p",
       parameters: {},
-      budget: {}
+      budget: {},
     });
 
-    mockStateStore.getRunStatus.mockResolvedValue('running');
+    mockStateStore.getRunStatus.mockResolvedValue("running");
 
     await engine.recover();
 
@@ -64,27 +64,30 @@ describe('MaestroEngine Recovery', () => {
     expect(mockStateStore.getRunDetails).toHaveBeenCalledWith(runId);
   });
 
-  it('should skip already succeeded steps on resume', async () => {
+  it("should skip already succeeded steps on resume", async () => {
     const context: RunContext = {
-      run_id: 'run-resume',
+      run_id: "run-resume",
       workflow: {
-        name: 'wf',
-        version: '1',
+        name: "wf",
+        version: "1",
         steps: [
-          { id: 'step-1', name: 'S1', plugin: 'p1', config: {} },
-          { id: 'step-2', name: 'S2', plugin: 'p2', config: {}, depends_on: ['step-1'] }
-        ]
+          { id: "step-1", name: "S1", plugin: "p1", config: {} },
+          { id: "step-2", name: "S2", plugin: "p2", config: {}, depends_on: ["step-1"] },
+        ],
       },
-      tenant_id: 't', triggered_by: 'u', environment: 'e', parameters: {}
+      tenant_id: "t",
+      triggered_by: "u",
+      environment: "e",
+      parameters: {},
     };
 
     mockStateStore.getStepExecution.mockImplementation((runId, stepId) => {
-      if (stepId === 'step-1') return Promise.resolve({ status: 'succeeded' } as any);
+      if (stepId === "step-1") return Promise.resolve({ status: "succeeded" } as any);
       return Promise.resolve(null);
     });
 
     const plugin = {
-      name: 'p1',
+      name: "p1",
       validate: jest.fn(),
       execute: jest.fn<any>().mockResolvedValue({ output: {} }),
     } as any;

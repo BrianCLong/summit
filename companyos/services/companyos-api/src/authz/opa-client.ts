@@ -1,8 +1,7 @@
 import axios from "axios";
 import type { AuthzInput, AuthzResult } from "./types";
 
-const DEFAULT_OPA_URL =
-  "http://companyos-opa:8181/v1/data/companyos/authz/customer/decision";
+const DEFAULT_OPA_URL = "http://companyos-opa:8181/v1/data/companyos/authz/customer/decision";
 
 export async function evaluateCustomerRead(input: AuthzInput): Promise<AuthzResult> {
   const opaUrl = process.env.OPA_URL ?? DEFAULT_OPA_URL;

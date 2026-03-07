@@ -1,4 +1,4 @@
-import { fetchAndVerify } from '../../../clients/cos-policy-fetcher/src/index';
+import { fetchAndVerify } from "../../../clients/cos-policy-fetcher/src/index";
 
 export async function loadPolicyPack(url: string) {
   const dir = await fetchAndVerify({ url });

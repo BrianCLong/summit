@@ -1,6 +1,6 @@
 # The Summit Mandate — Jules Prompt
 
-**Prompt Title:** *“From Presence to Leverage: Converting Summit Optics into Structural Advantage”*
+**Prompt Title:** _“From Presence to Leverage: Converting Summit Optics into Structural Advantage”_
 
 > We are not attending the Summit to participate.
 > We are attending to alter trajectory.
@@ -13,15 +13,15 @@
 >
 > Then:
 >
-> * Draft one private commitment we secure behind closed doors.
-> * Draft one public position that signals leadership without assuming liability.
-> * Draft one contingency maneuver if a rival attempts to box us into a reactive stance.
+> - Draft one private commitment we secure behind closed doors.
+> - Draft one public position that signals leadership without assuming liability.
+> - Draft one contingency maneuver if a rival attempts to box us into a reactive stance.
 >
 > Deliver in:
 >
-> * A 1-page strategic brief
-> * A 30-second press line
-> * A 10-minute closed-door talking outline
+> - A 1-page strategic brief
+> - A 30-second press line
+> - A 10-minute closed-door talking outline
 >
 > Constraint:
 > Everything must preserve optionality, expand influence, and incur zero regulatory exposure.

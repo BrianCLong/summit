@@ -1,2 +1,2 @@
 // Benchmark run implementation
-console.log('Running benchmark harness...');
+console.log("Running benchmark harness...");

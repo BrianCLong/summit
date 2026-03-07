@@ -1,36 +1,36 @@
-import React from 'react';
-import { ExplainDrawer } from '../../components/cognitive-battlespace/ExplainDrawer';
-import { LayerToggle, type Layer } from '../../components/cognitive-battlespace/LayerToggle';
-import { MetricsPanel } from '../../components/cognitive-battlespace/MetricsPanel';
+import React from "react";
+import { ExplainDrawer } from "../../components/cognitive-battlespace/ExplainDrawer";
+import { LayerToggle, type Layer } from "../../components/cognitive-battlespace/LayerToggle";
+import { MetricsPanel } from "../../components/cognitive-battlespace/MetricsPanel";
 import {
   RejectionReportPanel,
   type RejectionReport,
-} from '../../components/cognitive-battlespace/RejectionReportPanel';
+} from "../../components/cognitive-battlespace/RejectionReportPanel";
 
 const stubNarratives = [
   {
-    id: 'narrative_sanctions',
-    label: 'Sanctions collapsing EU economy',
-    summary: 'Velocity and amplification are rising in Telegram and repost channels.',
+    id: "narrative_sanctions",
+    label: "Sanctions collapsing EU economy",
+    summary: "Velocity and amplification are rising in Telegram and repost channels.",
     metrics: { velocity: 0.31 },
   },
 ];
 
 const stubDivergence = [
-  { narrativeId: 'narrative_sanctions', claimId: 'claim_gdp', divergenceScore: 0.82 },
+  { narrativeId: "narrative_sanctions", claimId: "claim_gdp", divergenceScore: 0.82 },
 ];
 
 const stubReport: RejectionReport = {
   ok: false,
-  writesetId: 'ws_demo_20260305',
+  writesetId: "ws_demo_20260305",
   summary: { receivedOps: 3, acceptedOps: 2, rejectedOps: 1 },
   items: [
-    { opId: 'op1', status: 'ACCEPTED', domain: 'NG' },
+    { opId: "op1", status: "ACCEPTED", domain: "NG" },
     {
-      opId: 'op2',
-      status: 'REJECTED',
-      domain: 'NG',
-      errors: [{ code: 'DOMAIN_MISMATCH', message: 'Belief must be BG' }],
+      opId: "op2",
+      status: "REJECTED",
+      domain: "NG",
+      errors: [{ code: "DOMAIN_MISMATCH", message: "Belief must be BG" }],
     },
   ],
 };
@@ -54,11 +54,11 @@ export function CognitiveBattlespacePage() {
       </div>
 
       <div className="rounded-xl border border-sand/20 p-4 text-sm text-sand/70">
-        Canvas placeholder for graph + map overlays. Current layers:{' '}
+        Canvas placeholder for graph + map overlays. Current layers:{" "}
         {Object.entries(layers)
           .filter(([, enabled]) => enabled)
           .map(([layer]) => layer)
-          .join(', ')}
+          .join(", ")}
       </div>
 
       <MetricsPanel
@@ -75,9 +75,9 @@ export function CognitiveBattlespacePage() {
         title="Defensive explanation"
         body="This panel explains why a narrative diverges from an evidence-backed claim."
         disclaimers={[
-          'Analytic and defensive use only.',
-          'No persuasion or targeting guidance is generated.',
-          'Association does not imply causation.',
+          "Analytic and defensive use only.",
+          "No persuasion or targeting guidance is generated.",
+          "Association does not imply causation.",
         ]}
       />
     </section>

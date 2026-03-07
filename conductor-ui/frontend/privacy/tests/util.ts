@@ -1,5 +1,5 @@
-import * as fs from 'fs';
-import * as path from 'path';
+import * as fs from "fs";
+import * as path from "path";
 
 export interface LogEntry {
   timestamp: string;
@@ -9,8 +9,8 @@ export interface LogEntry {
 }
 
 export async function getLogs(
-  logPath: string = process.env.LOG_PATH || './logs',
-  maxLines: number = 10000,
+  logPath: string = process.env.LOG_PATH || "./logs",
+  maxLines: number = 10000
 ): Promise<string> {
   try {
     // In production, this would connect to your logging infrastructure
@@ -19,21 +19,21 @@ export async function getLogs(
     if (fs.existsSync(logPath)) {
       const files = fs
         .readdirSync(logPath)
-        .filter((f) => f.endsWith('.log'))
+        .filter((f) => f.endsWith(".log"))
         .sort()
         .reverse(); // Most recent first
 
-      let allLogs = '';
+      let allLogs = "";
       let lineCount = 0;
 
       for (const file of files) {
         if (lineCount >= maxLines) break;
 
         const filePath = path.join(logPath, file);
-        const content = fs.readFileSync(filePath, 'utf-8');
-        const lines = content.split('\n').slice(0, maxLines - lineCount);
+        const content = fs.readFileSync(filePath, "utf-8");
+        const lines = content.split("\n").slice(0, maxLines - lineCount);
 
-        allLogs += lines.join('\n') + '\n';
+        allLogs += lines.join("\n") + "\n";
         lineCount += lines.length;
       }
 
@@ -43,7 +43,7 @@ export async function getLogs(
       return generateMockLogs();
     }
   } catch (error) {
-    console.warn('Failed to read logs, using mock data:', error);
+    console.warn("Failed to read logs, using mock data:", error);
     return generateMockLogs();
   }
 }
@@ -52,49 +52,49 @@ function generateMockLogs(): string {
   const mockEntries: LogEntry[] = [
     {
       timestamp: new Date().toISOString(),
-      level: 'INFO',
-      message: 'User authenticated successfully',
+      level: "INFO",
+      message: "User authenticated successfully",
       metadata: {
-        userId: 'user-123',
-        tenantId: 'tenant-456',
+        userId: "user-123",
+        tenantId: "tenant-456",
         // Note: email should be scrubbed from actual logs
-        ipAddress: '10.0.0.1',
+        ipAddress: "10.0.0.1",
       },
     },
     {
       timestamp: new Date().toISOString(),
-      level: 'DEBUG',
-      message: 'Database query executed',
+      level: "DEBUG",
+      message: "Database query executed",
       metadata: {
-        query: 'SELECT * FROM events WHERE tenant_id = ?',
-        duration: '45ms',
+        query: "SELECT * FROM events WHERE tenant_id = ?",
+        duration: "45ms",
         // Note: parameters should be scrubbed
       },
     },
     {
       timestamp: new Date().toISOString(),
-      level: 'ERROR',
-      message: 'Authentication failed',
+      level: "ERROR",
+      message: "Authentication failed",
       metadata: {
-        reason: 'invalid_token',
+        reason: "invalid_token",
         // Note: no sensitive token data should appear
-        ipAddress: '192.168.1.100',
+        ipAddress: "192.168.1.100",
       },
     },
   ];
 
-  return mockEntries.map((entry) => JSON.stringify(entry)).join('\n');
+  return mockEntries.map((entry) => JSON.stringify(entry)).join("\n");
 }
 
 export async function getMetrics(
-  metricsEndpoint: string = 'http://localhost:9090/metrics',
+  metricsEndpoint: string = "http://localhost:9090/metrics"
 ): Promise<string> {
   try {
     // In production, this would fetch from Prometheus
     const response = await fetch(metricsEndpoint);
     return await response.text();
   } catch (error) {
-    console.warn('Failed to fetch metrics, using mock data:', error);
+    console.warn("Failed to fetch metrics, using mock data:", error);
     return generateMockMetrics();
   }
 }
@@ -135,11 +135,7 @@ export class PrivacyValidator {
     for (const pattern of this.PII_PATTERNS) {
       const matches = content.match(pattern);
       if (matches) {
-        violations.push(
-          ...matches.map(
-            (match) => `PII detected: ${match.substring(0, 20)}...`,
-          ),
-        );
+        violations.push(...matches.map((match) => `PII detected: ${match.substring(0, 20)}...`));
       }
     }
 
@@ -155,22 +151,19 @@ export class PrivacyValidator {
     // Replace emails with [EMAIL_REDACTED]
     scrubbed = scrubbed.replace(
       /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g,
-      '[EMAIL_REDACTED]',
+      "[EMAIL_REDACTED]"
     );
 
     // Replace SSNs with [SSN_REDACTED]
-    scrubbed = scrubbed.replace(/\b\d{3}-\d{2}-\d{4}\b/g, '[SSN_REDACTED]');
+    scrubbed = scrubbed.replace(/\b\d{3}-\d{2}-\d{4}\b/g, "[SSN_REDACTED]");
 
     // Replace credit cards with [CC_REDACTED]
-    scrubbed = scrubbed.replace(
-      /\b\d{4}[-\s]?\d{4}[-\s]?\d{4}[-\s]?\d{4}\b/g,
-      '[CC_REDACTED]',
-    );
+    scrubbed = scrubbed.replace(/\b\d{4}[-\s]?\d{4}[-\s]?\d{4}[-\s]?\d{4}\b/g, "[CC_REDACTED]");
 
     // Replace passwords/secrets
     scrubbed = scrubbed.replace(
       /\b(?:password|pwd|secret|token|key)[:=]\s*[\w\d\-_.@$#!%^&*()]+/gi,
-      (match) => match.split(/[:=]/)[0] + '=[REDACTED]',
+      (match) => match.split(/[:=]/)[0] + "=[REDACTED]"
     );
 
     return scrubbed;

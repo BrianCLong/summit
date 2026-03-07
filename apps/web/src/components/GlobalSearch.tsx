@@ -202,7 +202,10 @@ export function GlobalSearch() {
           label="Global Search"
         >
           <div className="flex items-center border-b px-3">
-            <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" aria-hidden="true" />
+            <Search
+              className="mr-2 h-4 w-4 shrink-0 opacity-50"
+              aria-hidden="true"
+            />
             <Command.Input
               aria-label="Search query"
               placeholder="Search entities, investigations, alerts..."
@@ -215,7 +218,8 @@ export function GlobalSearch() {
           <Command.List className="max-h-96 overflow-y-auto p-2">
             {!isDemoMode && (
               <div className="m-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-400">
-                Live search is unavailable until a backend connection is configured.
+                Live search is unavailable until a backend connection is
+                configured.
               </div>
             )}
             {loading && (

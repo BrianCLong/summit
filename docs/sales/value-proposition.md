@@ -268,8 +268,7 @@ function calculateROI(profile: CustomerProfile): ROIAnalysis {
   const implementationCost = 150000; // Typical implementation
 
   const netBenefit = annualSavings - maestroCost - implementationCost;
-  const paybackMonths =
-    (implementationCost / (annualSavings - maestroCost)) * 12;
+  const paybackMonths = (implementationCost / (annualSavings - maestroCost)) * 12;
 
   return {
     annualSavings,

@@ -4,18 +4,19 @@ This atlas maps the prompt ecosystem, organizing system prompts, agent definitio
 
 ## 🧭 Navigation Summary
 
-| Layer | Description | Key Prompts |
-|-------|-------------|-------------|
-| **Core Identity** | Base personas and agent definitions | `jules-gemini`, `claude-code`, `codex` |
-| **Orchestration** | Meta-routing and system governance | `meta-router`, `enterprise-4th-order` |
-| **Functional Roles** | Specific capability implementations | `architect`, `ci-cd`, `summit-intelgraph` |
-| **Workflows** | Structured task executions | `plan.feature-request`, `implement.fix-test` |
-| **Specialists** | Domain-specific expert agents | `aegis`, `hermes`, `orion`, `elara` |
+| Layer                | Description                         | Key Prompts                                  |
+| -------------------- | ----------------------------------- | -------------------------------------------- |
+| **Core Identity**    | Base personas and agent definitions | `jules-gemini`, `claude-code`, `codex`       |
+| **Orchestration**    | Meta-routing and system governance  | `meta-router`, `enterprise-4th-order`        |
+| **Functional Roles** | Specific capability implementations | `architect`, `ci-cd`, `summit-intelgraph`    |
+| **Workflows**        | Structured task executions          | `plan.feature-request`, `implement.fix-test` |
+| **Specialists**      | Domain-specific expert agents       | `aegis`, `hermes`, `orion`, `elara`          |
 
 ---
 
 ## 1. Core Identity Layer
-*The foundational personas that drive the ecosystem.*
+
+_The foundational personas that drive the ecosystem._
 
 - **`jules-gemini.md`**
   - **Role:** Holistic Ecosystem Cartographer & Primary Interface.
@@ -35,7 +36,8 @@ This atlas maps the prompt ecosystem, organizing system prompts, agent definitio
 ---
 
 ## 2. Orchestration Layer
-*The nervous system connecting agents and enforcing consistency.*
+
+_The nervous system connecting agents and enforcing consistency._
 
 - **`meta-router.md`**
   - **Function:** Analyzes user requests to select the optimal agent or prompt.
@@ -46,7 +48,7 @@ This atlas maps the prompt ecosystem, organizing system prompts, agent definitio
   - **Scope:** Ensures alignment with business goals and architectural purity.
 
 - **`capability-matrix.md`**
-  - **Function:** A registry of what each agent *can* do, used by the router.
+  - **Function:** A registry of what each agent _can_ do, used by the router.
 
 - **`pmi-charter.md`**
   - **Function:** Project Management Institute charter, defining project standards.
@@ -54,7 +56,8 @@ This atlas maps the prompt ecosystem, organizing system prompts, agent definitio
 ---
 
 ## 3. Specialist Agents
-*Domain experts deployed for specific subsystems.*
+
+_Domain experts deployed for specific subsystems._
 
 - **`aegis.md`** (Security & Defense)
   - Focus: Security hardening, threat modeling, vulnerability scanning.
@@ -68,7 +71,8 @@ This atlas maps the prompt ecosystem, organizing system prompts, agent definitio
 ---
 
 ## 4. Functional Roles
-*Task-oriented prompts that can be assumed by any capable agent.*
+
+_Task-oriented prompts that can be assumed by any capable agent._
 
 - **`architect.md`**: For designing new systems or refactoring old ones.
 - **`ci-cd.md`**: For pipeline configuration and release automation.
@@ -79,7 +83,8 @@ This atlas maps the prompt ecosystem, organizing system prompts, agent definitio
 ---
 
 ## 5. Workflow Prompts (YAML)
-*Structured, deterministic procedures for common tasks.*
+
+_Structured, deterministic procedures for common tasks._
 
 - **`plan.feature-request@v1.yaml`**: Standard procedure for scoping a new feature.
 - **`implement.fix-test@v1.yaml`**: TDD loop for fixing bugs.

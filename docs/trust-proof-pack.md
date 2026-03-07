@@ -4,11 +4,11 @@ A productized bundle that proves Summit operates with governed, auditable eviden
 
 ## Purpose and audiences
 
-| Audience | Questions it answers | Proof points |
-| --- | --- | --- |
+| Audience                        | Questions it answers                                                                                           | Proof points                                                                                                                      |
+| ------------------------------- | -------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
 | Enterprise buyer (CISO/CIO/COO) | Can I trust you with data and processes? How are agents/workflows audited? What happens when something breaks? | Governance dashboards, high-risk operations evidence bundles, disaster-recovery drill reports, policy simulation + audit exports. |
-| CFO / FinOps / Procurement | Is pricing predictable and reconcilable? Can invoices map to usage? Do you understand COGS/margins? | Billing & FinOps dashboards, usage → rating → invoice evidence bundles, unit economics reports. |
-| Investor / Board | Is this a real, governable platform that scales with discipline? Can we trust TAM/ARPU/margin claims? | Summit-as-tenant dashboards, redacted RevOps and high-risk evidence from internal usage, SBOM/SLSA/DR artifacts. |
+| CFO / FinOps / Procurement      | Is pricing predictable and reconcilable? Can invoices map to usage? Do you understand COGS/margins?            | Billing & FinOps dashboards, usage → rating → invoice evidence bundles, unit economics reports.                                   |
+| Investor / Board                | Is this a real, governable platform that scales with discipline? Can we trust TAM/ARPU/margin claims?          | Summit-as-tenant dashboards, redacted RevOps and high-risk evidence from internal usage, SBOM/SLSA/DR artifacts.                  |
 
 ## Pack contents (SKU definition)
 

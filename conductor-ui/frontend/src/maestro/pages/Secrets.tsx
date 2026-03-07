@@ -1,7 +1,7 @@
-import React from 'react';
-import { api } from '../api';
-import SecretField from '../components/SecretField';
-import { redactSensitive, sanitizeLogs } from '../utils/secretUtils';
+import React from "react";
+import { api } from "../api";
+import SecretField from "../components/SecretField";
+import { redactSensitive, sanitizeLogs } from "../utils/secretUtils";
 
 export default function Secrets() {
   const { getSecrets, rotateSecret, getProviders, testProvider } = api();
@@ -9,9 +9,9 @@ export default function Secrets() {
   const [providers, setProviders] = React.useState<any[]>([]);
   const [msg, setMsg] = React.useState<string | null>(null);
   const [newSecret, setNewSecret] = React.useState({
-    name: '',
-    value: '',
-    provider: 'vault',
+    name: "",
+    value: "",
+    provider: "vault",
   });
   const [auditLogs, setAuditLogs] = React.useState<string[]>([]);
   const [showNewSecretForm, setShowNewSecretForm] = React.useState(false);
@@ -39,22 +39,20 @@ export default function Secrets() {
         ref: `${newSecret.provider}/${newSecret.name}`,
         provider: newSecret.provider.toUpperCase(),
         lastAccess: new Date().toISOString(),
-        rotationDue: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000)
-          .toISOString()
-          .split('T')[0],
+        rotationDue: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
       };
 
       setItems([...items, mockSecret]);
-      setNewSecret({ name: '', value: '', provider: 'vault' });
+      setNewSecret({ name: "", value: "", provider: "vault" });
       setShowNewSecretForm(false);
-      setMsg('Secret created successfully');
+      setMsg("Secret created successfully");
       setTimeout(() => setMsg(null), 3000);
 
       // Add to audit log (redacted)
       const logEntry = `Secret created: ${redactSensitive(`${newSecret.name}=${newSecret.value}`)}`;
       setAuditLogs([...auditLogs, logEntry]);
     } catch (error) {
-      setMsg('Failed to create secret');
+      setMsg("Failed to create secret");
     }
   };
   return (
@@ -75,29 +73,21 @@ export default function Secrets() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700">
-                Name
-              </label>
+              <label className="block text-sm font-medium text-slate-700">Name</label>
               <input
                 type="text"
                 value={newSecret.name}
-                onChange={(e) =>
-                  setNewSecret({ ...newSecret, name: e.target.value })
-                }
+                onChange={(e) => setNewSecret({ ...newSecret, name: e.target.value })}
                 className="mt-1 w-full px-3 py-2 border border-slate-200 rounded-md"
                 placeholder="e.g., api-key-prod"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-700">
-                Provider
-              </label>
+              <label className="block text-sm font-medium text-slate-700">Provider</label>
               <select
                 value={newSecret.provider}
-                onChange={(e) =>
-                  setNewSecret({ ...newSecret, provider: e.target.value })
-                }
+                onChange={(e) => setNewSecret({ ...newSecret, provider: e.target.value })}
                 className="mt-1 w-full px-3 py-2 border border-slate-200 rounded-md"
               >
                 <option value="vault">HashiCorp Vault</option>
@@ -128,7 +118,7 @@ export default function Secrets() {
             <button
               onClick={() => {
                 setShowNewSecretForm(false);
-                setNewSecret({ name: '', value: '', provider: 'vault' });
+                setNewSecret({ name: "", value: "", provider: "vault" });
               }}
               className="border border-slate-200 px-4 py-2 rounded-md text-sm hover:bg-slate-50"
             >
@@ -161,16 +151,13 @@ export default function Secrets() {
                     {s.provider}
                   </span>
                 </td>
-                <td className="px-4 py-3 text-xs text-slate-500">
-                  {s.lastAccess}
-                </td>
+                <td className="px-4 py-3 text-xs text-slate-500">{s.lastAccess}</td>
                 <td className="px-4 py-3 text-xs">
                   <span
                     className={`inline-flex items-center px-2 py-1 rounded-full text-xs ${
-                      new Date(s.rotationDue) <
-                      new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
-                        ? 'bg-red-100 text-red-800'
-                        : 'bg-green-100 text-green-800'
+                      new Date(s.rotationDue) < new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+                        ? "bg-red-100 text-red-800"
+                        : "bg-green-100 text-green-800"
                     }`}
                   >
                     {s.rotationDue}
@@ -184,15 +171,12 @@ export default function Secrets() {
                       onClick={async () => {
                         try {
                           await rotateSecret(s.id);
-                          setMsg('Rotation triggered');
+                          setMsg("Rotation triggered");
                           setTimeout(() => setMsg(null), 1500);
                           // Add to audit log
-                          setAuditLogs([
-                            ...auditLogs,
-                            `Secret rotated: ${s.ref}`,
-                          ]);
+                          setAuditLogs([...auditLogs, `Secret rotated: ${s.ref}`]);
                         } catch (e: any) {
-                          setMsg(e?.message || 'Failed');
+                          setMsg(e?.message || "Failed");
                         }
                       }}
                     >
@@ -208,9 +192,7 @@ export default function Secrets() {
 
       <section className="rounded-lg border bg-white">
         <div className="flex items-center justify-between border-b p-4">
-          <div className="font-semibold text-slate-700">
-            Provider Connections
-          </div>
+          <div className="font-semibold text-slate-700">Provider Connections</div>
           <button
             className="text-indigo-600 hover:text-indigo-800 text-sm"
             onClick={async () => {
@@ -239,9 +221,7 @@ export default function Secrets() {
                 <td className="px-4 py-3">
                   <span
                     className={`inline-flex items-center px-2 py-1 rounded-full text-xs ${
-                      p.status === 'UP'
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-red-100 text-red-800'
+                      p.status === "UP" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
                     }`}
                   >
                     {p.status}
@@ -256,10 +236,7 @@ export default function Secrets() {
                         await testProvider(p.id);
                         const r = await getProviders();
                         setProviders(r.items || []);
-                        setAuditLogs([
-                          ...auditLogs,
-                          `Connection tested: ${p.name}`,
-                        ]);
+                        setAuditLogs([...auditLogs, `Connection tested: ${p.name}`]);
                       } catch {}
                     }}
                   >
@@ -281,9 +258,7 @@ export default function Secrets() {
             <div className="bg-slate-900 text-green-400 p-3 rounded-md font-mono text-xs max-h-48 overflow-y-auto">
               {sanitizeLogs(auditLogs).map((log, index) => (
                 <div key={index} className="flex items-start gap-2">
-                  <span className="text-slate-500">
-                    {new Date().toISOString()}
-                  </span>
+                  <span className="text-slate-500">{new Date().toISOString()}</span>
                   <span>{log}</span>
                 </div>
               ))}
@@ -295,9 +270,9 @@ export default function Secrets() {
       {msg && (
         <div
           className={`p-3 rounded-md text-sm ${
-            msg.includes('success') || msg.includes('triggered')
-              ? 'bg-green-50 text-green-800 border border-green-200'
-              : 'bg-red-50 text-red-800 border border-red-200'
+            msg.includes("success") || msg.includes("triggered")
+              ? "bg-green-50 text-green-800 border border-green-200"
+              : "bg-red-50 text-red-800 border border-red-200"
           }`}
         >
           {msg}
@@ -307,11 +282,7 @@ export default function Secrets() {
       <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
         <div className="flex">
           <div className="flex-shrink-0">
-            <svg
-              className="h-5 w-5 text-blue-400"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
+            <svg className="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
               <path
                 fillRule="evenodd"
                 d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
@@ -321,9 +292,9 @@ export default function Secrets() {
           </div>
           <div className="ml-3 text-sm text-blue-800">
             <p>
-              <strong>Security Note:</strong> Secret values are never displayed
-              in plaintext. All operations are logged and audited. Secrets are
-              automatically encrypted at rest and in transit.
+              <strong>Security Note:</strong> Secret values are never displayed in plaintext. All
+              operations are logged and audited. Secrets are automatically encrypted at rest and in
+              transit.
             </p>
           </div>
         </div>

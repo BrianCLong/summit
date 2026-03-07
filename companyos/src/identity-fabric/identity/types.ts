@@ -16,40 +16,40 @@
  * Every entity that can authenticate or be authorized is a Principal.
  */
 export type PrincipalType =
-  | 'human'           // Human user with interactive session
-  | 'service'         // Service account (machine-to-machine)
-  | 'agent'           // AI agent or automated process
-  | 'workload';       // SPIFFE-identified workload
+  | "human" // Human user with interactive session
+  | "service" // Service account (machine-to-machine)
+  | "agent" // AI agent or automated process
+  | "workload"; // SPIFFE-identified workload
 
 /**
  * Data classification levels for IC-grade access control.
  * Follows common intelligence community classification schemes.
  */
 export type ClassificationLevel =
-  | 'unclassified'
-  | 'cui'              // Controlled Unclassified Information
-  | 'confidential'
-  | 'secret'
-  | 'top-secret'
-  | 'top-secret-sci';  // Top Secret / Sensitive Compartmented Information
+  | "unclassified"
+  | "cui" // Controlled Unclassified Information
+  | "confidential"
+  | "secret"
+  | "top-secret"
+  | "top-secret-sci"; // Top Secret / Sensitive Compartmented Information
 
 /**
  * Trust levels for device and session verification.
  */
 export type TrustLevel =
-  | 'untrusted'        // Unknown or unverified device
-  | 'basic'            // Password-only authentication
-  | 'standard'         // MFA verified
-  | 'high'             // Hardware token or biometric
-  | 'maximum';         // Hardware token + biometric + trusted device
+  | "untrusted" // Unknown or unverified device
+  | "basic" // Password-only authentication
+  | "standard" // MFA verified
+  | "high" // Hardware token or biometric
+  | "maximum"; // Hardware token + biometric + trusted device
 
 /**
  * Residency classes for data sovereignty compliance.
  */
 export type ResidencyClass =
-  | 'standard'         // No special restrictions
-  | 'restricted'       // Requires export approval
-  | 'sovereign';       // Strict geographic restrictions
+  | "standard" // No special restrictions
+  | "restricted" // Requires export approval
+  | "sovereign"; // Strict geographic restrictions
 
 // ============================================================================
 // IDENTITY ENTITY DEFINITIONS
@@ -72,7 +72,7 @@ export interface Identity {
  * Human user identity with full ABAC attribute support.
  */
 export interface UserIdentity extends Identity {
-  type: 'human';
+  type: "human";
   email: string;
   displayName: string;
   department?: string;
@@ -80,19 +80,19 @@ export interface UserIdentity extends Identity {
   location?: string;
   manager?: string;
   clearance: ClassificationLevel;
-  caveats: string[];              // SCI compartments, SAPs, etc.
-  needToKnow: string[];           // Program/project access
-  specialAccess: string[];        // Special access programs
-  certifications: string[];       // Required certifications
-  otAuthorization: boolean;       // Operational Technology access
+  caveats: string[]; // SCI compartments, SAPs, etc.
+  needToKnow: string[]; // Program/project access
+  specialAccess: string[]; // Special access programs
+  certifications: string[]; // Required certifications
+  otAuthorization: boolean; // Operational Technology access
   groups: string[];
-  organizationIds: string[];      // Multi-org membership
+  organizationIds: string[]; // Multi-org membership
   primaryOrganizationId: string;
   lastAuthenticated?: Date;
   mfaEnabled: boolean;
   mfaVerified: boolean;
   deviceTrust: TrustLevel;
-  riskScore?: number;             // Continuous risk assessment
+  riskScore?: number; // Continuous risk assessment
   sessionContext?: SessionContext;
 }
 
@@ -100,12 +100,12 @@ export interface UserIdentity extends Identity {
  * Service account identity for machine-to-machine auth.
  */
 export interface ServiceIdentity extends Identity {
-  type: 'service';
+  type: "service";
   name: string;
   description: string;
-  owner: string;                  // Human owner responsible for service
+  owner: string; // Human owner responsible for service
   ownerEmail: string;
-  scopes: string[];               // Authorized API scopes
+  scopes: string[]; // Authorized API scopes
   allowedOperations: string[];
   maxConcurrentConnections: number;
   rateLimitTier: RateLimitTier;
@@ -113,16 +113,16 @@ export interface ServiceIdentity extends Identity {
   rotationPolicy: CredentialRotationPolicy;
   lastRotated?: Date;
   auditLevel: AuditLevel;
-  spiffeId?: string;              // SPIFFE identity if applicable
+  spiffeId?: string; // SPIFFE identity if applicable
 }
 
 /**
  * AI Agent identity with additional guardrails.
  */
 export interface AgentIdentity extends Identity {
-  type: 'agent';
+  type: "agent";
   name: string;
-  modelId: string;                // Underlying AI model
+  modelId: string; // Underlying AI model
   version: string;
   owner: string;
   capabilities: AgentCapability[];
@@ -140,8 +140,8 @@ export interface AgentIdentity extends Identity {
  * SPIFFE workload identity for zero-trust networking.
  */
 export interface WorkloadIdentity extends Identity {
-  type: 'workload';
-  spiffeId: string;               // spiffe://trust-domain/workload/...
+  type: "workload";
+  spiffeId: string; // spiffe://trust-domain/workload/...
   trustDomain: string;
   workloadName: string;
   namespace: string;
@@ -165,12 +165,12 @@ export interface Tenant {
   id: string;
   name: string;
   displayName: string;
-  slug: string;                   // URL-safe identifier
+  slug: string; // URL-safe identifier
   type: TenantType;
-  parentTenantId?: string;        // For hierarchical tenants
+  parentTenantId?: string; // For hierarchical tenants
   classification: ClassificationLevel;
   residency: TenantResidency;
-  features: string[];             // Enabled feature flags
+  features: string[]; // Enabled feature flags
   quotas: TenantQuotas;
   settings: TenantSettings;
   whiteLabel?: WhiteLabelConfig;
@@ -190,10 +190,10 @@ export interface Organization {
   tenantId: string;
   name: string;
   displayName: string;
-  parentId?: string;              // For org hierarchy
+  parentId?: string; // For org hierarchy
   type: OrganizationType;
   classification: ClassificationLevel;
-  regionTags: string[];           // Geographic presence
+  regionTags: string[]; // Geographic presence
   costCenter?: string;
   metadata: Record<string, unknown>;
   createdAt: Date;
@@ -233,7 +233,7 @@ export interface RoleBinding {
   scope: RoleScope;
   tenantId: string;
   organizationId?: string;
-  resourceId?: string;            // For resource-scoped roles
+  resourceId?: string; // For resource-scoped roles
   grantedBy: string;
   grantedAt: Date;
   expiresAt?: Date;
@@ -248,17 +248,17 @@ export interface RoleBinding {
  */
 export interface Role {
   id: string;
-  tenantId: string;               // null for global roles
+  tenantId: string; // null for global roles
   name: string;
   displayName: string;
   description: string;
   permissions: string[];
-  inheritsFrom: string[];         // Role hierarchy
+  inheritsFrom: string[]; // Role hierarchy
   isBuiltIn: boolean;
   isAdmin: boolean;
   requiresMfa: boolean;
   requiresJustification: boolean;
-  maxDuration?: number;           // Max assignment duration in seconds
+  maxDuration?: number; // Max assignment duration in seconds
   metadata: Record<string, unknown>;
 }
 
@@ -266,7 +266,7 @@ export interface Role {
  * Scope where a role applies.
  */
 export interface RoleScope {
-  type: 'global' | 'tenant' | 'organization' | 'environment' | 'resource';
+  type: "global" | "tenant" | "organization" | "environment" | "resource";
   tenantId?: string;
   organizationId?: string;
   environmentId?: string;
@@ -278,8 +278,8 @@ export interface RoleScope {
  * Conditional role activation.
  */
 export interface RoleCondition {
-  type: 'time' | 'location' | 'risk' | 'approval' | 'custom';
-  expression: string;             // CEL or Rego expression
+  type: "time" | "location" | "risk" | "approval" | "custom";
+  expression: string; // CEL or Rego expression
   parameters: Record<string, unknown>;
 }
 
@@ -311,7 +311,7 @@ export interface SessionContext {
   geoLocation?: GeoLocation;
   riskScore: number;
   riskFactors: string[];
-  impersonatedBy?: string;        // For admin impersonation
+  impersonatedBy?: string; // For admin impersonation
   impersonationJustification?: string;
 }
 
@@ -331,83 +331,57 @@ export interface GeoLocation {
 // SUPPORTING TYPES
 // ============================================================================
 
-export type TenantType =
-  | 'standard'
-  | 'enterprise'
-  | 'government'
-  | 'sovereign'
-  | 'internal';
+export type TenantType = "standard" | "enterprise" | "government" | "sovereign" | "internal";
 
-export type OrganizationType =
-  | 'business_unit'
-  | 'department'
-  | 'team'
-  | 'project'
-  | 'cost_center';
+export type OrganizationType = "business_unit" | "department" | "team" | "project" | "cost_center";
 
 export type EnvironmentType =
-  | 'development'
-  | 'staging'
-  | 'production'
-  | 'sandbox'
-  | 'disaster_recovery';
+  | "development"
+  | "staging"
+  | "production"
+  | "sandbox"
+  | "disaster_recovery";
 
-export type RateLimitTier =
-  | 'free'
-  | 'standard'
-  | 'premium'
-  | 'enterprise'
-  | 'unlimited';
+export type RateLimitTier = "free" | "standard" | "premium" | "enterprise" | "unlimited";
 
-export type AuditLevel =
-  | 'none'
-  | 'basic'
-  | 'detailed'
-  | 'full'
-  | 'forensic';
+export type AuditLevel = "none" | "basic" | "detailed" | "full" | "forensic";
 
 export type AgentCapability =
-  | 'read'
-  | 'write'
-  | 'delete'
-  | 'execute'
-  | 'analyze'
-  | 'export'
-  | 'admin';
+  | "read"
+  | "write"
+  | "delete"
+  | "execute"
+  | "analyze"
+  | "export"
+  | "admin";
 
 export type AgentRestriction =
-  | 'no_pii'
-  | 'no_secrets'
-  | 'no_external_calls'
-  | 'rate_limited'
-  | 'human_in_loop';
+  | "no_pii"
+  | "no_secrets"
+  | "no_external_calls"
+  | "rate_limited"
+  | "human_in_loop";
 
 export type AttestationType =
-  | 'k8s_sat'           // Kubernetes service account token
-  | 'k8s_psat'          // Projected service account token
-  | 'aws_iid'           // AWS instance identity document
-  | 'gcp_iit'           // GCP instance identity token
-  | 'azure_msi'         // Azure managed service identity
-  | 'unix'              // Unix process attestation
-  | 'docker'            // Docker container attestation
-  | 'tpm';              // TPM-based attestation
+  | "k8s_sat" // Kubernetes service account token
+  | "k8s_psat" // Projected service account token
+  | "aws_iid" // AWS instance identity document
+  | "gcp_iit" // GCP instance identity token
+  | "azure_msi" // Azure managed service identity
+  | "unix" // Unix process attestation
+  | "docker" // Docker container attestation
+  | "tpm"; // TPM-based attestation
 
 export type AuthenticationMethod =
-  | 'password'
-  | 'sso_oidc'
-  | 'sso_saml'
-  | 'api_key'
-  | 'client_certificate'
-  | 'spiffe_svid'
-  | 'workload_identity';
+  | "password"
+  | "sso_oidc"
+  | "sso_saml"
+  | "api_key"
+  | "client_certificate"
+  | "spiffe_svid"
+  | "workload_identity";
 
-export type MfaMethod =
-  | 'totp'
-  | 'webauthn'
-  | 'sms'
-  | 'email'
-  | 'push'
-  | 'hardware_token';
+export type MfaMethod = "totp" | "webauthn" | "sms" | "email" | "push" | "hardware_token";
 
 export interface CredentialRotationPolicy {
   enabled: boolean;

@@ -1,8 +1,5 @@
 {
-  "artifacts": [
-    "metrics.json",
-    "stamp.json"
-  ],
+  "artifacts": ["metrics.json", "stamp.json"],
   "evidence_id": "EVD-AGENT-foundry-evals-a1b2c3d",
   "results": [
     {

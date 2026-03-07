@@ -86,11 +86,11 @@ sweet — here’s a tight, high-leverage set of **AURELIUS conversation starter
 # “Fill & Fire” Kickoffs
 
 ```yaml
-mission: 'Reduce hallucinations via retrieval-calibrated decoding'
-constraints: ['p95<120ms', 'no GPL', 'edge ready']
-target_products: ['IntelGraph', 'Summit']
-success_metrics: ['>=5pt factuality gain on {bench}', 'cost/query ≤ ${x}']
-deliverable_emphasis: ['patent', 'benchmark', 'runtime']
+mission: "Reduce hallucinations via retrieval-calibrated decoding"
+constraints: ["p95<120ms", "no GPL", "edge ready"]
+target_products: ["IntelGraph", "Summit"]
+success_metrics: [">=5pt factuality gain on {bench}", "cost/query ≤ ${x}"]
+deliverable_emphasis: ["patent", "benchmark", "runtime"]
 timebox_days: 7
 ```
 

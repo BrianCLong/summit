@@ -1,9 +1,7 @@
 <!doctype html>
 <html>
   <head>
-    <title>
-      IntelGraph Live Command Center - Real-Time Intelligence Operations
-    </title>
+    <title>IntelGraph Live Command Center - Real-Time Intelligence Operations</title>
     <script src="https://unpkg.com/graphql-ws@5.14.0/umd/graphql-ws.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -13,7 +11,7 @@
         box-sizing: border-box;
       }
       body {
-        font-family: 'Consolas', 'Monaco', monospace;
+        font-family: "Consolas", "Monaco", monospace;
         background: #000;
         color: #00ff00;
         overflow: hidden;
@@ -24,12 +22,7 @@
         height: 100vh;
         display: grid;
         grid-template-rows: 60px 1fr;
-        background: linear-gradient(
-          135deg,
-          #000000 0%,
-          #001a00 50%,
-          #000000 100%
-        );
+        background: linear-gradient(135deg, #000000 0%, #001a00 50%, #000000 100%);
       }
       .header {
         background: rgba(0, 255, 0, 0.1);
@@ -85,7 +78,7 @@
         position: relative;
       }
       .panel::before {
-        content: '';
+        content: "";
         position: absolute;
         top: 0;
         left: 0;
@@ -351,22 +344,14 @@
       <div class="main-grid">
         <!-- System Status Panel -->
         <div class="panel panel-1">
-          <div class="websocket-status" id="ws-status">
-            WebSocket: Connecting...
-          </div>
+          <div class="websocket-status" id="ws-status">WebSocket: Connecting...</div>
           <h3>📊 SYSTEM STATUS</h3>
           <div class="metrics-stream" id="system-metrics">
-            <div class="metric-line">
-              Initializing live system monitoring...
-            </div>
+            <div class="metric-line">Initializing live system monitoring...</div>
           </div>
           <div class="controls">
-            <button class="control-btn" onclick="runSystemCheck()">
-              HEALTH CHECK
-            </button>
-            <button class="control-btn" onclick="toggleLiveMode()">
-              LIVE MODE
-            </button>
+            <button class="control-btn" onclick="runSystemCheck()">HEALTH CHECK</button>
+            <button class="control-btn" onclick="toggleLiveMode()">LIVE MODE</button>
           </div>
         </div>
 
@@ -384,19 +369,13 @@
         <!-- Threat Monitor Panel -->
         <div class="panel panel-3">
           <h3>🚨 THREAT MONITOR</h3>
-          <div class="threat-level threat-low" id="threat-display">
-            THREAT LEVEL: LOW
-          </div>
+          <div class="threat-level threat-low" id="threat-display">THREAT LEVEL: LOW</div>
           <div class="metrics-stream" id="threat-metrics">
             <div class="metric-line">Threat detection systems online...</div>
           </div>
           <div class="controls">
-            <button class="control-btn" onclick="runThreatScan()">
-              SCAN NOW
-            </button>
-            <button class="control-btn" onclick="analyzeThreats()">
-              AI ANALYZE
-            </button>
+            <button class="control-btn" onclick="runThreatScan()">SCAN NOW</button>
+            <button class="control-btn" onclick="analyzeThreats()">AI ANALYZE</button>
           </div>
         </div>
 
@@ -416,15 +395,9 @@
             <div class="metric-line">AI pipeline initialized and ready...</div>
           </div>
           <div class="controls">
-            <button class="control-btn" onclick="runLiveAI()">
-              ANALYZE NOW
-            </button>
-            <button class="control-btn" onclick="predictThreats()">
-              PREDICT
-            </button>
-            <button class="control-btn" onclick="generateIntel()">
-              GENERATE INTEL
-            </button>
+            <button class="control-btn" onclick="runLiveAI()">ANALYZE NOW</button>
+            <button class="control-btn" onclick="predictThreats()">PREDICT</button>
+            <button class="control-btn" onclick="generateIntel()">GENERATE INTEL</button>
           </div>
         </div>
 
@@ -442,15 +415,9 @@
             </div>
           </div>
           <div class="controls">
-            <button class="control-btn" onclick="executeCommand('status')">
-              STATUS
-            </button>
-            <button class="control-btn" onclick="executeCommand('scan')">
-              SCAN
-            </button>
-            <button class="control-btn" onclick="executeCommand('analyze')">
-              ANALYZE
-            </button>
+            <button class="control-btn" onclick="executeCommand('status')">STATUS</button>
+            <button class="control-btn" onclick="executeCommand('scan')">SCAN</button>
+            <button class="control-btn" onclick="executeCommand('analyze')">ANALYZE</button>
           </div>
         </div>
       </div>
@@ -460,7 +427,7 @@
     <canvas class="matrix-rain" id="matrix-canvas"></canvas>
 
     <script>
-      const SERVER_URL = 'http://localhost:4001';
+      const SERVER_URL = "http://localhost:4001";
       let websocket = null;
       let isLiveMode = true;
       let metricsChart = null;
@@ -476,15 +443,8 @@
         initWebSocket();
         startLiveStreams();
 
-        logActivity(
-          'SYSTEM',
-          'Command Center initialization complete',
-          'system',
-        );
-        logTerminal(
-          'system',
-          'IntelGraph Live Command Center v2.0 - OPERATIONAL',
-        );
+        logActivity("SYSTEM", "Command Center initialization complete", "system");
+        logTerminal("system", "IntelGraph Live Command Center v2.0 - OPERATIONAL");
       }
 
       // WebSocket Connection
@@ -492,27 +452,19 @@
         try {
           // Note: For a full WebSocket implementation, you would use graphql-ws
           // For now, we'll simulate the connection
-          updateWebSocketStatus('CONNECTED', 'ws-connected');
-          updateStatusDot('ws-dot', 'green');
-          logActivity(
-            'WEBSOCKET',
-            'Real-time data stream established',
-            'system',
-          );
-          logTerminal('websocket', 'GraphQL subscription channel active');
+          updateWebSocketStatus("CONNECTED", "ws-connected");
+          updateStatusDot("ws-dot", "green");
+          logActivity("WEBSOCKET", "Real-time data stream established", "system");
+          logTerminal("websocket", "GraphQL subscription channel active");
 
           // Simulate live data updates
           setInterval(simulateLiveData, 2000);
           setInterval(simulateThreatData, 5000);
           setInterval(simulateAIAnalysis, 8000);
         } catch (error) {
-          updateWebSocketStatus('DISCONNECTED', 'ws-disconnected');
-          updateStatusDot('ws-dot', 'red');
-          logActivity(
-            'ERROR',
-            `WebSocket connection failed: ${error.message}`,
-            'system',
-          );
+          updateWebSocketStatus("DISCONNECTED", "ws-disconnected");
+          updateStatusDot("ws-dot", "red");
+          logActivity("ERROR", `WebSocket connection failed: ${error.message}`, "system");
         }
       }
 
@@ -532,78 +484,77 @@
 
         // Random system events
         const events = [
-          'New investigation created',
-          'Entity relationship discovered',
-          'GraphQL query executed',
-          'Database connection established',
-          'Security scan completed',
-          'AI model inference completed',
+          "New investigation created",
+          "Entity relationship discovered",
+          "GraphQL query executed",
+          "Database connection established",
+          "Security scan completed",
+          "AI model inference completed",
         ];
 
         if (Math.random() > 0.7) {
           const event = events[Math.floor(Math.random() * events.length)];
-          logActivity('SYSTEM', event, 'system');
+          logActivity("SYSTEM", event, "system");
         }
       }
 
       function simulateThreatData() {
         const threatEvents = [
           {
-            level: 'LOW',
-            event: 'Normal access pattern detected',
-            type: 'info',
+            level: "LOW",
+            event: "Normal access pattern detected",
+            type: "info",
           },
           {
-            level: 'MEDIUM',
-            event: 'Unusual login time detected',
-            type: 'warning',
+            level: "MEDIUM",
+            event: "Unusual login time detected",
+            type: "warning",
           },
           {
-            level: 'HIGH',
-            event: 'Suspicious file access pattern',
-            type: 'threat',
+            level: "HIGH",
+            event: "Suspicious file access pattern",
+            type: "threat",
           },
           {
-            level: 'MEDIUM',
-            event: 'Multiple failed login attempts',
-            type: 'warning',
+            level: "MEDIUM",
+            event: "Multiple failed login attempts",
+            type: "warning",
           },
           {
-            level: 'LOW',
-            event: 'Regular security scan completed',
-            type: 'info',
+            level: "LOW",
+            event: "Regular security scan completed",
+            type: "info",
           },
         ];
 
-        const threat =
-          threatEvents[Math.floor(Math.random() * threatEvents.length)];
+        const threat = threatEvents[Math.floor(Math.random() * threatEvents.length)];
         updateThreatLevel(threat.level);
-        logActivity('THREAT', threat.event, threat.type);
+        logActivity("THREAT", threat.event, threat.type);
         addThreatMetric(threat);
 
-        if (threat.level === 'HIGH') {
-          logTerminal('alert', `HIGH THREAT DETECTED: ${threat.event}`);
+        if (threat.level === "HIGH") {
+          logTerminal("alert", `HIGH THREAT DETECTED: ${threat.event}`);
         }
       }
 
       function simulateAIAnalysis() {
         const aiEvents = [
-          'Entity extraction completed - 95% confidence',
-          'Relationship inference in progress',
-          'Anomaly detection scan finished',
-          'Threat assessment updated',
-          'Natural language processing active',
-          'Graph neural network analysis complete',
+          "Entity extraction completed - 95% confidence",
+          "Relationship inference in progress",
+          "Anomaly detection scan finished",
+          "Threat assessment updated",
+          "Natural language processing active",
+          "Graph neural network analysis complete",
         ];
 
         const event = aiEvents[Math.floor(Math.random() * aiEvents.length)];
-        logActivity('AI', event, 'ai');
+        logActivity("AI", event, "ai");
         addAIMetric(event);
 
         // Simulate AI processing
         if (Math.random() > 0.8) {
           setTimeout(() => {
-            logTerminal('ai', `AI Analysis: ${event}`);
+            logTerminal("ai", `AI Analysis: ${event}`);
           }, 1000);
         }
       }
@@ -611,12 +562,11 @@
       // UI Update Functions
       function updateTime() {
         const now = new Date();
-        document.getElementById('live-time').textContent =
-          now.toLocaleTimeString();
+        document.getElementById("live-time").textContent = now.toLocaleTimeString();
       }
 
       function updateWebSocketStatus(status, className) {
-        const wsStatus = document.getElementById('ws-status');
+        const wsStatus = document.getElementById("ws-status");
         wsStatus.textContent = `WebSocket: ${status}`;
         wsStatus.className = `websocket-status ${className}`;
       }
@@ -627,12 +577,12 @@
       }
 
       function updateSystemMetrics(metrics) {
-        const container = document.getElementById('system-metrics');
+        const container = document.getElementById("system-metrics");
         const html = `
                 <div class="metric-line">Response Time: <span class="metric-value">${metrics.responseTime.toFixed(1)}ms</span></div>
                 <div class="metric-line">Queries/Second: <span class="metric-value">${metrics.qps.toFixed(0)}</span></div>
                 <div class="metric-line">Memory Usage: <span class="metric-value">${metrics.memory.toFixed(0)}MB</span></div>
-                <div class="metric-line ${metrics.cpu > 80 ? 'metric-critical' : metrics.cpu > 50 ? 'metric-warning' : ''}">CPU Usage: <span class="metric-value">${metrics.cpu.toFixed(1)}%</span></div>
+                <div class="metric-line ${metrics.cpu > 80 ? "metric-critical" : metrics.cpu > 50 ? "metric-warning" : ""}">CPU Usage: <span class="metric-value">${metrics.cpu.toFixed(1)}%</span></div>
                 <div class="metric-line">Active Connections: <span class="metric-value">${metrics.connections}</span></div>
                 <div class="metric-line">Status: <span class="metric-value">OPERATIONAL</span></div>
                 <div class="metric-line">Uptime: <span class="metric-value">${Math.floor(performance.now() / 1000)}s</span></div>
@@ -641,14 +591,14 @@
       }
 
       function updatePerformanceMetrics(metrics) {
-        const container = document.getElementById('performance-metrics');
+        const container = document.getElementById("performance-metrics");
         const timestamp = new Date().toLocaleTimeString();
         const newMetric = `<div class="metric-line">[${timestamp}] Performance: ${metrics.responseTime.toFixed(1)}ms | ${metrics.qps.toFixed(0)} QPS | ${metrics.cpu.toFixed(1)}% CPU</div>`;
 
         container.innerHTML = newMetric + container.innerHTML;
 
         // Keep only last 10 entries
-        const lines = container.querySelectorAll('.metric-line');
+        const lines = container.querySelectorAll(".metric-line");
         if (lines.length > 10) {
           for (let i = 10; i < lines.length; i++) {
             lines[i].remove();
@@ -657,31 +607,31 @@
       }
 
       function updateThreatLevel(level) {
-        const display = document.getElementById('threat-display');
+        const display = document.getElementById("threat-display");
         display.textContent = `THREAT LEVEL: ${level}`;
         display.className = `threat-level threat-${level.toLowerCase()}`;
 
         updateStatusDot(
-          'ai-dot',
-          level === 'HIGH' ? 'red' : level === 'MEDIUM' ? 'yellow' : 'green',
+          "ai-dot",
+          level === "HIGH" ? "red" : level === "MEDIUM" ? "yellow" : "green"
         );
       }
 
       function addThreatMetric(threat) {
-        const container = document.getElementById('threat-metrics');
+        const container = document.getElementById("threat-metrics");
         const timestamp = new Date().toLocaleTimeString();
         const className =
-          threat.level === 'HIGH'
-            ? 'metric-critical'
-            : threat.level === 'MEDIUM'
-              ? 'metric-warning'
-              : '';
+          threat.level === "HIGH"
+            ? "metric-critical"
+            : threat.level === "MEDIUM"
+              ? "metric-warning"
+              : "";
         const newMetric = `<div class="metric-line ${className}">[${timestamp}] ${threat.level}: ${threat.event}</div>`;
 
         container.innerHTML = newMetric + container.innerHTML;
 
         // Keep only last 8 entries
-        const lines = container.querySelectorAll('.metric-line');
+        const lines = container.querySelectorAll(".metric-line");
         if (lines.length > 8) {
           for (let i = 8; i < lines.length; i++) {
             lines[i].remove();
@@ -690,14 +640,14 @@
       }
 
       function addAIMetric(event) {
-        const container = document.getElementById('ai-metrics');
+        const container = document.getElementById("ai-metrics");
         const timestamp = new Date().toLocaleTimeString();
         const newMetric = `<div class="metric-line">[${timestamp}] ${event}</div>`;
 
         container.innerHTML = newMetric + container.innerHTML;
 
         // Keep only last 8 entries
-        const lines = container.querySelectorAll('.metric-line');
+        const lines = container.querySelectorAll(".metric-line");
         if (lines.length > 8) {
           for (let i = 8; i < lines.length; i++) {
             lines[i].remove();
@@ -705,10 +655,10 @@
         }
       }
 
-      function logActivity(type, message, category = 'system') {
-        const feed = document.getElementById('activity-feed');
+      function logActivity(type, message, category = "system") {
+        const feed = document.getElementById("activity-feed");
         const timestamp = new Date().toLocaleTimeString();
-        const activity = document.createElement('div');
+        const activity = document.createElement("div");
         activity.className = `activity-item activity-${category}`;
         activity.innerHTML = `[${timestamp}] ${type}: ${message}`;
 
@@ -721,16 +671,16 @@
       }
 
       function logTerminal(type, message) {
-        const terminal = document.getElementById('terminal');
-        const line = document.createElement('div');
-        line.className = 'terminal-line';
+        const terminal = document.getElementById("terminal");
+        const line = document.createElement("div");
+        line.className = "terminal-line";
 
         const className =
-          type === 'error'
-            ? 'terminal-error'
-            : type === 'ai'
-              ? 'terminal-output'
-              : 'terminal-output';
+          type === "error"
+            ? "terminal-error"
+            : type === "ai"
+              ? "terminal-output"
+              : "terminal-output";
         line.innerHTML = `<span class="terminal-prompt">${type}:</span> <span class="${className}">${message}</span>`;
 
         terminal.appendChild(line);
@@ -744,65 +694,54 @@
 
       // Interactive Functions
       async function runSystemCheck() {
-        logActivity('COMMAND', 'System health check initiated', 'user');
-        logTerminal('command', 'Running comprehensive system check...');
+        logActivity("COMMAND", "System health check initiated", "user");
+        logTerminal("command", "Running comprehensive system check...");
 
         try {
           const response = await fetch(`${SERVER_URL}/health`);
           const data = await response.json();
 
-          logTerminal(
-            'system',
-            `Health check result: ${data.status.toUpperCase()}`,
-          );
-          logActivity(
-            'SYSTEM',
-            `Health check completed: ${data.status}`,
-            'system',
-          );
+          logTerminal("system", `Health check result: ${data.status.toUpperCase()}`);
+          logActivity("SYSTEM", `Health check completed: ${data.status}`, "system");
 
-          if (data.status === 'healthy') {
-            updateStatusDot('server-dot', 'green');
+          if (data.status === "healthy") {
+            updateStatusDot("server-dot", "green");
           } else {
-            updateStatusDot('server-dot', 'red');
+            updateStatusDot("server-dot", "red");
           }
         } catch (error) {
-          logTerminal('error', `Health check failed: ${error.message}`);
-          updateStatusDot('server-dot', 'red');
+          logTerminal("error", `Health check failed: ${error.message}`);
+          updateStatusDot("server-dot", "red");
         }
       }
 
       async function runThreatScan() {
-        logActivity('COMMAND', 'Threat scan initiated', 'user');
-        logTerminal('command', 'Initiating comprehensive threat analysis...');
+        logActivity("COMMAND", "Threat scan initiated", "user");
+        logTerminal("command", "Initiating comprehensive threat analysis...");
 
         // Simulate threat scanning
         setTimeout(() => {
           const threats = Math.floor(Math.random() * 3);
-          const level =
-            threats === 0 ? 'LOW' : threats === 1 ? 'MEDIUM' : 'HIGH';
+          const level = threats === 0 ? "LOW" : threats === 1 ? "MEDIUM" : "HIGH";
 
           updateThreatLevel(level);
-          logTerminal(
-            'security',
-            `Threat scan complete: ${threats} potential threats detected`,
-          );
+          logTerminal("security", `Threat scan complete: ${threats} potential threats detected`);
           logActivity(
-            'SECURITY',
+            "SECURITY",
             `Threat scan completed: Risk level ${level}`,
-            threats > 1 ? 'threat' : 'system',
+            threats > 1 ? "threat" : "system"
           );
         }, 2000);
       }
 
       async function runLiveAI() {
-        logActivity('COMMAND', 'AI analysis initiated', 'user');
-        logTerminal('command', 'Starting AI-powered intelligence analysis...');
+        logActivity("COMMAND", "AI analysis initiated", "user");
+        logTerminal("command", "Starting AI-powered intelligence analysis...");
 
         try {
           const response = await fetch(`${SERVER_URL}/graphql`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               query: `query { aiAnalysis(text: "Live command center threat analysis scan") { 
                             status confidence threatAssessment { riskLevel probability } 
@@ -813,112 +752,83 @@
           const data = await response.json();
           const analysis = data.data.aiAnalysis;
 
-          logTerminal('ai', `AI Analysis complete: ${analysis.status}`);
+          logTerminal("ai", `AI Analysis complete: ${analysis.status}`);
           logTerminal(
-            'ai',
-            `Confidence: ${(analysis.confidence * 100).toFixed(1)}% | Risk: ${analysis.threatAssessment.riskLevel}`,
+            "ai",
+            `Confidence: ${(analysis.confidence * 100).toFixed(1)}% | Risk: ${analysis.threatAssessment.riskLevel}`
           );
           logActivity(
-            'AI',
+            "AI",
             `Analysis completed: ${analysis.threatAssessment.riskLevel} risk (${(analysis.confidence * 100).toFixed(0)}% confidence)`,
-            'ai',
+            "ai"
           );
         } catch (error) {
-          logTerminal('error', `AI analysis failed: ${error.message}`);
+          logTerminal("error", `AI analysis failed: ${error.message}`);
         }
       }
 
       function analyzeThreats() {
-        logActivity('COMMAND', 'Advanced threat analysis started', 'user');
-        logTerminal(
-          'command',
-          'Running advanced threat correlation analysis...',
-        );
+        logActivity("COMMAND", "Advanced threat analysis started", "user");
+        logTerminal("command", "Running advanced threat correlation analysis...");
 
         setTimeout(() => {
-          logTerminal('ai', 'Analyzing entity relationship patterns...');
+          logTerminal("ai", "Analyzing entity relationship patterns...");
           setTimeout(() => {
-            logTerminal('ai', 'Cross-referencing threat intelligence feeds...');
+            logTerminal("ai", "Cross-referencing threat intelligence feeds...");
             setTimeout(() => {
-              logTerminal(
-                'ai',
-                'Advanced analysis complete: 2 anomalies detected',
-              );
-              logActivity(
-                'AI',
-                'Advanced threat analysis completed: 2 anomalies found',
-                'ai',
-              );
+              logTerminal("ai", "Advanced analysis complete: 2 anomalies detected");
+              logActivity("AI", "Advanced threat analysis completed: 2 anomalies found", "ai");
             }, 1500);
           }, 1000);
         }, 1000);
       }
 
       function predictThreats() {
-        logActivity('COMMAND', 'Threat prediction model activated', 'user');
-        logTerminal('command', 'Activating predictive threat modeling...');
+        logActivity("COMMAND", "Threat prediction model activated", "user");
+        logTerminal("command", "Activating predictive threat modeling...");
 
         setTimeout(() => {
           const predictions = [
-            'Predicted threat escalation in 24-48 hours',
-            'Low probability of insider threat activity',
-            'Network intrusion attempts likely to increase',
-            'Anomalous behavior patterns suggest monitoring required',
+            "Predicted threat escalation in 24-48 hours",
+            "Low probability of insider threat activity",
+            "Network intrusion attempts likely to increase",
+            "Anomalous behavior patterns suggest monitoring required",
           ];
 
-          const prediction =
-            predictions[Math.floor(Math.random() * predictions.length)];
-          logTerminal('ai', `Prediction: ${prediction}`);
-          logActivity('AI', `Threat prediction: ${prediction}`, 'ai');
+          const prediction = predictions[Math.floor(Math.random() * predictions.length)];
+          logTerminal("ai", `Prediction: ${prediction}`);
+          logActivity("AI", `Threat prediction: ${prediction}`, "ai");
         }, 2500);
       }
 
       function generateIntel() {
-        logActivity(
-          'COMMAND',
-          'Intelligence report generation started',
-          'user',
-        );
-        logTerminal(
-          'command',
-          'Generating comprehensive intelligence report...',
-        );
+        logActivity("COMMAND", "Intelligence report generation started", "user");
+        logTerminal("command", "Generating comprehensive intelligence report...");
 
         setTimeout(() => {
-          logTerminal('ai', 'Compiling threat indicators...');
+          logTerminal("ai", "Compiling threat indicators...");
           setTimeout(() => {
-            logTerminal('ai', 'Correlating entity relationships...');
+            logTerminal("ai", "Correlating entity relationships...");
             setTimeout(() => {
-              logTerminal(
-                'ai',
-                'Intelligence report generated: INTEL-' + Date.now(),
-              );
-              logActivity(
-                'AI',
-                'Intelligence report completed and archived',
-                'ai',
-              );
+              logTerminal("ai", "Intelligence report generated: INTEL-" + Date.now());
+              logActivity("AI", "Intelligence report completed and archived", "ai");
             }, 1000);
           }, 1500);
         }, 1000);
       }
 
       function executeCommand(cmd) {
-        logActivity('COMMAND', `Terminal command: ${cmd}`, 'user');
-        logTerminal('command', `Executing: ${cmd}`);
+        logActivity("COMMAND", `Terminal command: ${cmd}`, "user");
+        logTerminal("command", `Executing: ${cmd}`);
 
         switch (cmd) {
-          case 'status':
-            setTimeout(
-              () =>
-                logTerminal('system', 'All systems operational - GREEN status'),
-              500,
-            );
+          case "status":
+            setTimeout(() => logTerminal("system", "All systems operational - GREEN status"), 500);
             break;
-          case 'scan':
+          case "scan":
             runThreatScan();
             break;
-          case 'analyze':
+          case "analyze":
             runLiveAI();
             break;
         }
@@ -927,32 +837,25 @@
       function toggleLiveMode() {
         isLiveMode = !isLiveMode;
         const btn = event.target;
-        btn.textContent = isLiveMode ? 'LIVE MODE' : 'STATIC MODE';
+        btn.textContent = isLiveMode ? "LIVE MODE" : "STATIC MODE";
 
-        logActivity(
-          'SYSTEM',
-          `Switched to ${isLiveMode ? 'LIVE' : 'STATIC'} mode`,
-          'system',
-        );
-        logTerminal(
-          'system',
-          `Live mode ${isLiveMode ? 'enabled' : 'disabled'}`,
-        );
+        logActivity("SYSTEM", `Switched to ${isLiveMode ? "LIVE" : "STATIC"} mode`, "system");
+        logTerminal("system", `Live mode ${isLiveMode ? "enabled" : "disabled"}`);
       }
 
       // Metrics Chart
       function initMetricsChart() {
-        const ctx = document.getElementById('metricsChart').getContext('2d');
+        const ctx = document.getElementById("metricsChart").getContext("2d");
         metricsChart = new Chart(ctx, {
-          type: 'line',
+          type: "line",
           data: {
             labels: [],
             datasets: [
               {
-                label: 'Response Time',
+                label: "Response Time",
                 data: [],
-                borderColor: '#00ff00',
-                backgroundColor: 'rgba(0, 255, 0, 0.1)',
+                borderColor: "#00ff00",
+                backgroundColor: "rgba(0, 255, 0, 0.1)",
                 tension: 0.4,
                 fill: true,
               },
@@ -966,8 +869,8 @@
               x: { display: false },
               y: {
                 beginAtZero: true,
-                grid: { color: 'rgba(0, 255, 0, 0.3)' },
-                ticks: { color: '#00ff00', font: { size: 10 } },
+                grid: { color: "rgba(0, 255, 0, 0.3)" },
+                ticks: { color: "#00ff00", font: { size: 10 } },
               },
             },
           },
@@ -987,18 +890,18 @@
           metricsChart.data.datasets[0].data.shift();
         }
 
-        metricsChart.update('none');
+        metricsChart.update("none");
       }
 
       // Matrix Rain Effect
       function initMatrixRain() {
-        const canvas = document.getElementById('matrix-canvas');
-        const ctx = canvas.getContext('2d');
+        const canvas = document.getElementById("matrix-canvas");
+        const ctx = canvas.getContext("2d");
 
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
 
-        const chars = '0123456789ABCDEF';
+        const chars = "0123456789ABCDEF";
         const drops = [];
         const fontSize = 12;
         const columns = canvas.width / fontSize;
@@ -1008,11 +911,11 @@
         }
 
         function draw() {
-          ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+          ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
           ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-          ctx.fillStyle = '#00ff00';
-          ctx.font = fontSize + 'px monospace';
+          ctx.fillStyle = "#00ff00";
+          ctx.font = fontSize + "px monospace";
 
           for (let i = 0; i < drops.length; i++) {
             const char = chars[Math.floor(Math.random() * chars.length)];
@@ -1034,15 +937,15 @@
         setTimeout(() => simulateThreatData(), 2000);
         setTimeout(() => simulateAIAnalysis(), 3000);
 
-        logActivity('SYSTEM', 'All live data streams initialized', 'system');
+        logActivity("SYSTEM", "All live data streams initialized", "system");
       }
 
       // Initialize on page load
-      window.addEventListener('load', initCommandCenter);
+      window.addEventListener("load", initCommandCenter);
 
       // Handle window resize for matrix rain
-      window.addEventListener('resize', () => {
-        const canvas = document.getElementById('matrix-canvas');
+      window.addEventListener("resize", () => {
+        const canvas = document.getElementById("matrix-canvas");
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
       });

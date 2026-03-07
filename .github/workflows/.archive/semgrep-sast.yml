@@ -7,7 +7,7 @@ on:
     branches: [main, develop]
   schedule:
     # Run Semgrep weekly on Sunday at 2 AM UTC
-    - cron: '0 2 * * 0'
+    - cron: "0 2 * * 0"
   workflow_dispatch:
 
 # Prevent concurrent Semgrep runs
@@ -25,16 +25,16 @@ jobs:
     name: Semgrep Static Analysis
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    
+
     container:
       image: semgrep/semgrep:latest
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      
+
       - name: Run Semgrep with custom config
         run: |
           semgrep scan \
@@ -45,14 +45,14 @@ jobs:
             --verbose
         env:
           SEMGREP_RULES: auto
-      
+
       - name: Upload Semgrep SARIF results
         if: always()
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: semgrep-results.sarif
           category: semgrep
-      
+
       - name: Upload Semgrep artifacts
         if: always()
         uses: actions/upload-artifact@v4
@@ -60,31 +60,31 @@ jobs:
           name: semgrep-results-${{ github.sha }}
           path: semgrep-results.sarif
           retention-days: 30
-  
+
   semgrep-supply-chain:
     name: Semgrep Supply Chain Analysis
     runs-on: ubuntu-latest
     timeout-minutes: 20
     if: github.event_name == 'push' || github.event_name == 'schedule'
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20.11.1'
-          cache: 'pnpm'
-      
+          node-version: "20.11.1"
+          cache: "pnpm"
+
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
         with:
           version: latest
-      
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-      
+
       - name: Run Semgrep Supply Chain
         run: |
           npx semgrep@latest \
@@ -92,20 +92,20 @@ jobs:
             --json \
             --output semgrep-supply-chain.json
         continue-on-error: true
-      
+
       - name: Upload supply chain results
         uses: actions/upload-artifact@v4
         with:
           name: semgrep-supply-chain-${{ github.sha }}
           path: semgrep-supply-chain.json
           retention-days: 30
-  
+
   semgrep-summary:
     name: Semgrep Results Summary
     runs-on: ubuntu-latest
     needs: [semgrep, semgrep-supply-chain]
     if: always()
-    
+
     steps:
       - name: Generate security summary
         run: |

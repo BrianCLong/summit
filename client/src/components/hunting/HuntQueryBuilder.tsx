@@ -3,7 +3,7 @@
  * Visual query builder for creating custom threat hunting queries
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback } from "react";
 import {
   Box,
   Card,
@@ -19,19 +19,19 @@ import {
   Alert,
   Tabs,
   Tab,
-} from '@mui/material';
-import Grid from '@mui/material/Grid';
+} from "@mui/material";
+import Grid from "@mui/material/Grid";
 import {
   Add as AddIcon,
   PlayArrow as RunIcon,
   Code as CodeIcon,
   Save as SaveIcon,
   ContentCopy as CopyIcon,
-} from '@mui/icons-material';
+} from "@mui/icons-material";
 
 interface QueryParameter {
   name: string;
-  type: 'string' | 'number' | 'boolean' | 'array';
+  type: "string" | "number" | "boolean" | "array";
   value: string | number | boolean | string[];
   description: string;
 }
@@ -52,48 +52,48 @@ interface HypothesisInput {
 }
 
 const TEMPLATE_CATEGORIES = [
-  { id: 'lateral_movement', label: 'Lateral Movement' },
-  { id: 'credential_access', label: 'Credential Access' },
-  { id: 'data_exfiltration', label: 'Data Exfiltration' },
-  { id: 'persistence', label: 'Persistence' },
-  { id: 'command_and_control', label: 'Command & Control' },
-  { id: 'insider_threat', label: 'Insider Threat' },
-  { id: 'ioc_hunting', label: 'IOC Hunting' },
+  { id: "lateral_movement", label: "Lateral Movement" },
+  { id: "credential_access", label: "Credential Access" },
+  { id: "data_exfiltration", label: "Data Exfiltration" },
+  { id: "persistence", label: "Persistence" },
+  { id: "command_and_control", label: "Command & Control" },
+  { id: "insider_threat", label: "Insider Threat" },
+  { id: "ioc_hunting", label: "IOC Hunting" },
 ];
 
 const MITRE_TECHNIQUES = [
-  { id: 'T1021.001', name: 'Remote Desktop Protocol', tactic: 'Lateral Movement' },
-  { id: 'T1021.002', name: 'SMB/Windows Admin Shares', tactic: 'Lateral Movement' },
-  { id: 'T1110.001', name: 'Password Guessing', tactic: 'Credential Access' },
-  { id: 'T1110.003', name: 'Password Spraying', tactic: 'Credential Access' },
-  { id: 'T1078', name: 'Valid Accounts', tactic: 'Defense Evasion' },
-  { id: 'T1071.001', name: 'Web Protocols', tactic: 'Command and Control' },
-  { id: 'T1053.005', name: 'Scheduled Task', tactic: 'Persistence' },
-  { id: 'T1048', name: 'Exfiltration Over Alternative Protocol', tactic: 'Exfiltration' },
+  { id: "T1021.001", name: "Remote Desktop Protocol", tactic: "Lateral Movement" },
+  { id: "T1021.002", name: "SMB/Windows Admin Shares", tactic: "Lateral Movement" },
+  { id: "T1110.001", name: "Password Guessing", tactic: "Credential Access" },
+  { id: "T1110.003", name: "Password Spraying", tactic: "Credential Access" },
+  { id: "T1078", name: "Valid Accounts", tactic: "Defense Evasion" },
+  { id: "T1071.001", name: "Web Protocols", tactic: "Command and Control" },
+  { id: "T1053.005", name: "Scheduled Task", tactic: "Persistence" },
+  { id: "T1048", name: "Exfiltration Over Alternative Protocol", tactic: "Exfiltration" },
 ];
 
 const SAMPLE_TEMPLATES: QueryTemplate[] = [
   {
-    id: 'lateral_movement_chain',
-    name: 'Lateral Movement Chain Detection',
-    category: 'lateral_movement',
-    description: 'Detects multi-hop lateral movement patterns through the network',
+    id: "lateral_movement_chain",
+    name: "Lateral Movement Chain Detection",
+    category: "lateral_movement",
+    description: "Detects multi-hop lateral movement patterns through the network",
     query: `MATCH path = (source:Entity {id: $start_entity})-[:CONNECTED_TO|ACCESSED*1..$max_hops]->(target:Entity)
 WHERE source <> target
   AND ALL(r IN relationships(path) WHERE r.timestamp > datetime() - duration({hours: $time_window_hours}))
 RETURN source, target, length(path) as hops
 LIMIT 100`,
     parameters: [
-      { name: 'start_entity', type: 'string', value: '', description: 'Starting entity ID' },
-      { name: 'max_hops', type: 'number', value: 3, description: 'Maximum hops to traverse' },
-      { name: 'time_window_hours', type: 'number', value: 24, description: 'Time window in hours' },
+      { name: "start_entity", type: "string", value: "", description: "Starting entity ID" },
+      { name: "max_hops", type: "number", value: 3, description: "Maximum hops to traverse" },
+      { name: "time_window_hours", type: "number", value: 24, description: "Time window in hours" },
     ],
   },
   {
-    id: 'credential_spray',
-    name: 'Credential Spraying Detection',
-    category: 'credential_access',
-    description: 'Identifies potential credential spraying attacks',
+    id: "credential_spray",
+    name: "Credential Spraying Detection",
+    category: "credential_access",
+    description: "Identifies potential credential spraying attacks",
     query: `MATCH (actor:Entity)-[auth:AUTHENTICATED]->(target:Entity)
 WHERE auth.timestamp > datetime() - duration({minutes: $time_window_minutes})
   AND auth.status = 'FAILED'
@@ -103,16 +103,31 @@ WHERE total_attempts >= $threshold_failures
 RETURN actor, unique_targets, total_attempts
 LIMIT 50`,
     parameters: [
-      { name: 'time_window_minutes', type: 'number', value: 30, description: 'Time window in minutes' },
-      { name: 'threshold_failures', type: 'number', value: 10, description: 'Minimum failed attempts' },
-      { name: 'unique_target_threshold', type: 'number', value: 5, description: 'Minimum unique targets' },
+      {
+        name: "time_window_minutes",
+        type: "number",
+        value: 30,
+        description: "Time window in minutes",
+      },
+      {
+        name: "threshold_failures",
+        type: "number",
+        value: 10,
+        description: "Minimum failed attempts",
+      },
+      {
+        name: "unique_target_threshold",
+        type: "number",
+        value: 5,
+        description: "Minimum unique targets",
+      },
     ],
   },
   {
-    id: 'beaconing_detection',
-    name: 'C2 Beaconing Pattern Detection',
-    category: 'command_and_control',
-    description: 'Identifies C2 beaconing patterns through network traffic analysis',
+    id: "beaconing_detection",
+    name: "C2 Beaconing Pattern Detection",
+    category: "command_and_control",
+    description: "Identifies C2 beaconing patterns through network traffic analysis",
     query: `MATCH (internal:Entity)-[conn:CONNECTED_TO]->(external:Entity {is_external: true})
 WHERE conn.timestamp > datetime() - duration({hours: $time_window_hours})
 WITH internal, external, count(*) as connection_count
@@ -121,8 +136,8 @@ RETURN internal, external, connection_count
 ORDER BY connection_count DESC
 LIMIT 50`,
     parameters: [
-      { name: 'time_window_hours', type: 'number', value: 24, description: 'Time window in hours' },
-      { name: 'min_beacon_count', type: 'number', value: 100, description: 'Minimum beacon count' },
+      { name: "time_window_hours", type: "number", value: 24, description: "Time window in hours" },
+      { name: "min_beacon_count", type: "number", value: 100, description: "Minimum beacon count" },
     ],
   },
 ];
@@ -131,13 +146,13 @@ export const HuntQueryBuilder: React.FC = () => {
   const [activeTab, setActiveTab] = useState(0);
   const [selectedTemplate, setSelectedTemplate] = useState<QueryTemplate | null>(null);
   const [parameters, setParameters] = useState<QueryParameter[]>([]);
-  const [customQuery, setCustomQuery] = useState('');
+  const [customQuery, setCustomQuery] = useState("");
   const [hypothesis, setHypothesis] = useState<HypothesisInput>({
-    statement: '',
+    statement: "",
     techniques: [],
     expectedIndicators: [],
   });
-  const [newIndicator, setNewIndicator] = useState('');
+  const [newIndicator, setNewIndicator] = useState("");
   const [queryResult, setQueryResult] = useState<string | null>(null);
   const [isRunning, setIsRunning] = useState(false);
 
@@ -161,7 +176,7 @@ export const HuntQueryBuilder: React.FC = () => {
         ...prev,
         expectedIndicators: [...prev.expectedIndicators, newIndicator.trim()],
       }));
-      setNewIndicator('');
+      setNewIndicator("");
     }
   }, [newIndicator]);
 
@@ -180,15 +195,15 @@ export const HuntQueryBuilder: React.FC = () => {
       const placeholder = `$${param.name}`;
       let value: string;
 
-      if (param.type === 'string') {
+      if (param.type === "string") {
         value = `'${param.value}'`;
-      } else if (param.type === 'array') {
+      } else if (param.type === "array") {
         value = JSON.stringify(param.value);
       } else {
         value = String(param.value);
       }
 
-      query = query.replace(new RegExp(`\\${placeholder}\\b`, 'g'), value);
+      query = query.replace(new RegExp(`\\${placeholder}\\b`, "g"), value);
     }
 
     return query;
@@ -202,9 +217,9 @@ export const HuntQueryBuilder: React.FC = () => {
       const finalQuery = buildFinalQuery();
 
       // In production, this would call the actual API
-      const response = await fetch('/api/v1/hunt/query', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/api/v1/hunt/query", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           query: finalQuery,
           hypothesis: hypothesis.statement ? hypothesis : undefined,
@@ -230,7 +245,7 @@ export const HuntQueryBuilder: React.FC = () => {
 
   return (
     <Box sx={{ p: 3 }}>
-      <Typography variant="h5" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+      <Typography variant="h5" gutterBottom sx={{ display: "flex", alignItems: "center", gap: 1 }}>
         <CodeIcon />
         Hunt Query Builder
       </Typography>
@@ -259,7 +274,7 @@ export const HuntQueryBuilder: React.FC = () => {
                 ))}
               </Tabs>
 
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+              <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
                 {SAMPLE_TEMPLATES.filter(
                   (t) => t.category === TEMPLATE_CATEGORIES[activeTab]?.id
                 ).map((template) => (
@@ -267,11 +282,11 @@ export const HuntQueryBuilder: React.FC = () => {
                     key={template.id}
                     sx={{
                       p: 2,
-                      cursor: 'pointer',
+                      cursor: "pointer",
                       border: selectedTemplate?.id === template.id ? 2 : 1,
                       borderColor:
-                        selectedTemplate?.id === template.id ? 'primary.main' : 'divider',
-                      '&:hover': { borderColor: 'primary.light' },
+                        selectedTemplate?.id === template.id ? "primary.main" : "divider",
+                      "&:hover": { borderColor: "primary.light" },
                     }}
                     onClick={() => handleTemplateSelect(template)}
                   >
@@ -295,19 +310,17 @@ export const HuntQueryBuilder: React.FC = () => {
                   Parameters
                 </Typography>
 
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
                   {parameters.map((param, index) => (
                     <TextField
                       key={param.name}
                       label={param.name}
-                      type={param.type === 'number' ? 'number' : 'text'}
+                      type={param.type === "number" ? "number" : "text"}
                       value={param.value}
                       onChange={(e) =>
                         handleParameterChange(
                           index,
-                          param.type === 'number'
-                            ? parseFloat(e.target.value) || 0
-                            : e.target.value
+                          param.type === "number" ? parseFloat(e.target.value) || 0 : e.target.value
                         )
                       }
                       helperText={param.description}
@@ -327,13 +340,11 @@ export const HuntQueryBuilder: React.FC = () => {
                 Hypothesis (Optional)
               </Typography>
 
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
                 <TextField
                   label="Hypothesis Statement"
                   value={hypothesis.statement}
-                  onChange={(e) =>
-                    setHypothesis({ ...hypothesis, statement: e.target.value })
-                  }
+                  onChange={(e) => setHypothesis({ ...hypothesis, statement: e.target.value })}
                   multiline
                   rows={2}
                   fullWidth
@@ -344,9 +355,7 @@ export const HuntQueryBuilder: React.FC = () => {
                   multiple
                   options={MITRE_TECHNIQUES}
                   getOptionLabel={(option) => `${option.id}: ${option.name}`}
-                  value={MITRE_TECHNIQUES.filter((t) =>
-                    hypothesis.techniques.includes(t.id)
-                  )}
+                  value={MITRE_TECHNIQUES.filter((t) => hypothesis.techniques.includes(t.id))}
                   onChange={(_, values) =>
                     setHypothesis({
                       ...hypothesis,
@@ -373,20 +382,20 @@ export const HuntQueryBuilder: React.FC = () => {
                   <Typography variant="subtitle2" gutterBottom>
                     Expected Indicators
                   </Typography>
-                  <Box sx={{ display: 'flex', gap: 1, mb: 1 }}>
+                  <Box sx={{ display: "flex", gap: 1, mb: 1 }}>
                     <TextField
                       value={newIndicator}
                       onChange={(e) => setNewIndicator(e.target.value)}
                       placeholder="Add indicator..."
                       size="small"
                       fullWidth
-                      onKeyPress={(e) => e.key === 'Enter' && handleAddIndicator()}
+                      onKeyPress={(e) => e.key === "Enter" && handleAddIndicator()}
                     />
                     <IconButton onClick={handleAddIndicator} color="primary">
                       <AddIcon />
                     </IconButton>
                   </Box>
-                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                  <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
                     {hypothesis.expectedIndicators.map((indicator, index) => (
                       <Chip
                         key={index}
@@ -406,9 +415,16 @@ export const HuntQueryBuilder: React.FC = () => {
         <Grid item xs={12} md={7}>
           <Card sx={{ mb: 2 }}>
             <CardContent>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  mb: 2,
+                }}
+              >
                 <Typography variant="h6">Query Editor</Typography>
-                <Box sx={{ display: 'flex', gap: 1 }}>
+                <Box sx={{ display: "flex", gap: 1 }}>
                   <Tooltip title="Copy Query">
                     <IconButton onClick={handleCopyQuery} size="small">
                       <CopyIcon />
@@ -429,15 +445,15 @@ export const HuntQueryBuilder: React.FC = () => {
                 rows={12}
                 fullWidth
                 sx={{
-                  fontFamily: 'monospace',
-                  '& .MuiInputBase-input': {
-                    fontFamily: 'monospace',
-                    fontSize: '0.875rem',
+                  fontFamily: "monospace",
+                  "& .MuiInputBase-input": {
+                    fontFamily: "monospace",
+                    fontSize: "0.875rem",
                   },
                 }}
               />
 
-              <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
+              <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}>
                 <Button
                   variant="contained"
                   color="primary"
@@ -445,7 +461,7 @@ export const HuntQueryBuilder: React.FC = () => {
                   onClick={handleRunQuery}
                   disabled={isRunning || !customQuery.trim()}
                 >
-                  {isRunning ? 'Running...' : 'Run Query'}
+                  {isRunning ? "Running..." : "Run Query"}
                 </Button>
               </Box>
             </CardContent>
@@ -462,20 +478,18 @@ export const HuntQueryBuilder: React.FC = () => {
                 <Paper
                   sx={{
                     p: 2,
-                    bgcolor: 'grey.900',
-                    color: 'grey.100',
+                    bgcolor: "grey.900",
+                    color: "grey.100",
                     maxHeight: 400,
-                    overflow: 'auto',
+                    overflow: "auto",
                   }}
                 >
-                  <pre style={{ margin: 0, fontFamily: 'monospace', fontSize: '0.875rem' }}>
+                  <pre style={{ margin: 0, fontFamily: "monospace", fontSize: "0.875rem" }}>
                     {queryResult}
                   </pre>
                 </Paper>
               ) : (
-                <Alert severity="info">
-                  Run a query to see results here
-                </Alert>
+                <Alert severity="info">Run a query to see results here</Alert>
               )}
             </CardContent>
           </Card>

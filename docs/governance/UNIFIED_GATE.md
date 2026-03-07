@@ -3,7 +3,6 @@
 > Evidence-IDs: EVD-PLACEHOLDER
 > Status: planned
 
-
 # Unified Governance Gate
 
 This gate is intentionally constrained pending consolidation of governance checks.

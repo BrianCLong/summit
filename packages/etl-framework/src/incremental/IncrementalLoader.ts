@@ -3,13 +3,13 @@
  * Manages state and watermarks for incremental data loading patterns
  */
 
-import { Pool, PoolClient } from 'pg';
-import { Logger } from 'winston';
+import { Pool, PoolClient } from "pg";
+import { Logger } from "winston";
 
 export interface WatermarkConfig {
   watermarkTable?: string;
   watermarkColumn: string;
-  watermarkType: 'timestamp' | 'numeric' | 'string';
+  watermarkType: "timestamp" | "numeric" | "string";
   initialValue?: any;
   lookbackWindow?: number; // For timestamp watermarks, lookback in seconds
 }
@@ -31,7 +31,7 @@ export interface LoadState {
   lastLoadedValue: any;
   lastLoadTime: Date;
   recordsLoaded: number;
-  status: 'success' | 'failed' | 'partial';
+  status: "success" | "failed" | "partial";
   errorMessage?: string;
   metadata?: Record<string, any>;
 }
@@ -53,7 +53,7 @@ export class IncrementalLoader {
 
     await this.ensureWatermarkTable();
 
-    this.logger.info('Incremental loader connected to source and target databases');
+    this.logger.info("Incremental loader connected to source and target databases");
   }
 
   async disconnect(): Promise<void> {
@@ -67,7 +67,7 @@ export class IncrementalLoader {
       this.targetPool = null;
     }
 
-    this.logger.info('Incremental loader disconnected');
+    this.logger.info("Incremental loader disconnected");
   }
 
   /**
@@ -75,7 +75,7 @@ export class IncrementalLoader {
    */
   async load(): Promise<LoadState> {
     if (!this.sourcePool || !this.targetPool) {
-      throw new Error('Not connected. Call connect() first.');
+      throw new Error("Not connected. Call connect() first.");
     }
 
     const startTime = Date.now();
@@ -84,7 +84,7 @@ export class IncrementalLoader {
       lastLoadedValue: null,
       lastLoadTime: new Date(),
       recordsLoaded: 0,
-      status: 'success'
+      status: "success",
     };
 
     try {
@@ -96,7 +96,7 @@ export class IncrementalLoader {
       const data = await this.extractIncrementalData(watermark);
 
       if (data.length === 0) {
-        this.logger.info('No new data to load');
+        this.logger.info("No new data to load");
         return loadState;
       }
 
@@ -124,10 +124,10 @@ export class IncrementalLoader {
 
       return loadState;
     } catch (error) {
-      loadState.status = 'failed';
-      loadState.errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      loadState.status = "failed";
+      loadState.errorMessage = error instanceof Error ? error.message : "Unknown error";
 
-      this.logger.error('Incremental load failed', { error });
+      this.logger.error("Incremental load failed", { error });
 
       throw error;
     }
@@ -137,7 +137,9 @@ export class IncrementalLoader {
    * Extract data that has changed since last watermark
    */
   private async extractIncrementalData(watermark: any): Promise<any[]> {
-    if (!this.sourcePool) {throw new Error('Source pool not initialized');}
+    if (!this.sourcePool) {
+      throw new Error("Source pool not initialized");
+    }
 
     const client = await this.sourcePool.connect();
 
@@ -149,13 +151,18 @@ export class IncrementalLoader {
       // Apply lookback window for timestamp watermarks
       let adjustedWatermark = watermark;
 
-      if (this.config.watermark.watermarkType === 'timestamp' && this.config.watermark.lookbackWindow) {
+      if (
+        this.config.watermark.watermarkType === "timestamp" &&
+        this.config.watermark.lookbackWindow
+      ) {
         const lookbackSeconds = this.config.watermark.lookbackWindow;
         const watermarkDate = new Date(watermark);
         watermarkDate.setSeconds(watermarkDate.getSeconds() - lookbackSeconds);
         adjustedWatermark = watermarkDate.toISOString();
 
-        this.logger.debug(`Applied lookback window: ${lookbackSeconds}s, adjusted watermark: ${adjustedWatermark}`);
+        this.logger.debug(
+          `Applied lookback window: ${lookbackSeconds}s, adjusted watermark: ${adjustedWatermark}`
+        );
       }
 
       const query = `
@@ -178,12 +185,14 @@ export class IncrementalLoader {
    * Load a batch of data to target
    */
   private async loadBatch(batch: any[]): Promise<void> {
-    if (!this.targetPool) {throw new Error('Target pool not initialized');}
+    if (!this.targetPool) {
+      throw new Error("Target pool not initialized");
+    }
 
     const client = await this.targetPool.connect();
 
     try {
-      await client.query('BEGIN');
+      await client.query("BEGIN");
 
       const targetTable = this.getFullTargetTableName();
       const primaryKeys = this.config.primaryKeys;
@@ -192,17 +201,17 @@ export class IncrementalLoader {
         // Use upsert strategy (INSERT ... ON CONFLICT DO UPDATE)
         const columns = Object.keys(record);
         const values = Object.values(record);
-        const placeholders = columns.map((_, idx) => `$${idx + 1}`).join(', ');
+        const placeholders = columns.map((_, idx) => `$${idx + 1}`).join(", ");
 
         const updateSet = columns
-          .filter(col => !primaryKeys.includes(col))
-          .map(col => `${col} = EXCLUDED.${col}`)
-          .join(', ');
+          .filter((col) => !primaryKeys.includes(col))
+          .map((col) => `${col} = EXCLUDED.${col}`)
+          .join(", ");
 
-        const conflictColumns = primaryKeys.join(', ');
+        const conflictColumns = primaryKeys.join(", ");
 
         const query = `
-          INSERT INTO ${targetTable} (${columns.join(', ')})
+          INSERT INTO ${targetTable} (${columns.join(", ")})
           VALUES (${placeholders})
           ON CONFLICT (${conflictColumns})
           DO UPDATE SET ${updateSet}
@@ -211,9 +220,9 @@ export class IncrementalLoader {
         await client.query(query, values);
       }
 
-      await client.query('COMMIT');
+      await client.query("COMMIT");
     } catch (error) {
-      await client.query('ROLLBACK');
+      await client.query("ROLLBACK");
       throw error;
     } finally {
       client.release();
@@ -224,12 +233,14 @@ export class IncrementalLoader {
    * Get current watermark value
    */
   private async getWatermark(): Promise<any> {
-    if (!this.targetPool) {throw new Error('Target pool not initialized');}
+    if (!this.targetPool) {
+      throw new Error("Target pool not initialized");
+    }
 
     const client = await this.targetPool.connect();
 
     try {
-      const watermarkTable = this.config.watermark.watermarkTable || 'etl_watermarks';
+      const watermarkTable = this.config.watermark.watermarkTable || "etl_watermarks";
 
       const result = await client.query(
         `SELECT last_loaded_value FROM ${watermarkTable}
@@ -254,12 +265,14 @@ export class IncrementalLoader {
    * Update watermark after successful load
    */
   private async updateWatermark(newValue: any, loadState: LoadState): Promise<void> {
-    if (!this.targetPool) {throw new Error('Target pool not initialized');}
+    if (!this.targetPool) {
+      throw new Error("Target pool not initialized");
+    }
 
     const client = await this.targetPool.connect();
 
     try {
-      const watermarkTable = this.config.watermark.watermarkTable || 'etl_watermarks';
+      const watermarkTable = this.config.watermark.watermarkTable || "etl_watermarks";
 
       await client.query(
         `INSERT INTO ${watermarkTable}
@@ -272,7 +285,7 @@ export class IncrementalLoader {
           loadState.recordsLoaded,
           loadState.status,
           loadState.errorMessage,
-          JSON.stringify(loadState.metadata || {})
+          JSON.stringify(loadState.metadata || {}),
         ]
       );
 
@@ -286,12 +299,14 @@ export class IncrementalLoader {
    * Ensure watermark tracking table exists
    */
   private async ensureWatermarkTable(): Promise<void> {
-    if (!this.targetPool) {return;}
+    if (!this.targetPool) {
+      return;
+    }
 
     const client = await this.targetPool.connect();
 
     try {
-      const watermarkTable = this.config.watermark.watermarkTable || 'etl_watermarks';
+      const watermarkTable = this.config.watermark.watermarkTable || "etl_watermarks";
 
       await client.query(`
         CREATE TABLE IF NOT EXISTS ${watermarkTable} (
@@ -312,7 +327,7 @@ export class IncrementalLoader {
         ON ${watermarkTable}(source_table, last_load_time DESC)
       `);
 
-      this.logger.debug('Watermark table ensured');
+      this.logger.debug("Watermark table ensured");
     } finally {
       client.release();
     }
@@ -327,12 +342,12 @@ export class IncrementalLoader {
     }
 
     switch (this.config.watermark.watermarkType) {
-      case 'timestamp':
-        return new Date('1970-01-01').toISOString();
-      case 'numeric':
+      case "timestamp":
+        return new Date("1970-01-01").toISOString();
+      case "numeric":
         return 0;
-      case 'string':
-        return '';
+      case "string":
+        return "";
       default:
         return null;
     }
@@ -343,18 +358,18 @@ export class IncrementalLoader {
    */
   private getMaxWatermarkValue(data: any[]): any {
     const watermarkColumn = this.config.watermark.watermarkColumn;
-    const values = data.map(record => record[watermarkColumn]).filter(val => val != null);
+    const values = data.map((record) => record[watermarkColumn]).filter((val) => val != null);
 
     if (values.length === 0) {
       return this.getInitialWatermark();
     }
 
     switch (this.config.watermark.watermarkType) {
-      case 'timestamp':
-        return new Date(Math.max(...values.map(v => new Date(v).getTime()))).toISOString();
-      case 'numeric':
+      case "timestamp":
+        return new Date(Math.max(...values.map((v) => new Date(v).getTime()))).toISOString();
+      case "numeric":
         return Math.max(...values.map(Number));
-      case 'string':
+      case "string":
         return values.sort().pop();
       default:
         return values[values.length - 1];
@@ -365,12 +380,14 @@ export class IncrementalLoader {
    * Get load history
    */
   async getLoadHistory(limit: number = 10): Promise<LoadState[]> {
-    if (!this.targetPool) {throw new Error('Target pool not initialized');}
+    if (!this.targetPool) {
+      throw new Error("Target pool not initialized");
+    }
 
     const client = await this.targetPool.connect();
 
     try {
-      const watermarkTable = this.config.watermark.watermarkTable || 'etl_watermarks';
+      const watermarkTable = this.config.watermark.watermarkTable || "etl_watermarks";
 
       const result = await client.query(
         `SELECT * FROM ${watermarkTable}
@@ -380,14 +397,14 @@ export class IncrementalLoader {
         [this.config.sourceTable, limit]
       );
 
-      return result.rows.map(row => ({
+      return result.rows.map((row) => ({
         sourceTable: row.source_table,
         lastLoadedValue: row.last_loaded_value,
         lastLoadTime: row.last_load_time,
         recordsLoaded: row.records_loaded,
         status: row.status,
         errorMessage: row.error_message,
-        metadata: row.metadata
+        metadata: row.metadata,
       }));
     } finally {
       client.release();
@@ -398,12 +415,14 @@ export class IncrementalLoader {
    * Reset watermark (useful for full reloads)
    */
   async resetWatermark(): Promise<void> {
-    if (!this.targetPool) {throw new Error('Target pool not initialized');}
+    if (!this.targetPool) {
+      throw new Error("Target pool not initialized");
+    }
 
     const client = await this.targetPool.connect();
 
     try {
-      const watermarkTable = this.config.watermark.watermarkTable || 'etl_watermarks';
+      const watermarkTable = this.config.watermark.watermarkTable || "etl_watermarks";
       const initialValue = this.getInitialWatermark();
 
       await client.query(

@@ -6,29 +6,35 @@
 ## 1. Shipped Assets
 
 ### Architecture & Runtime
+
 - [x] **Agent Runtime Semantics:** `docs/architecture/agent-runtime-semantics.md`
 - [x] **Interruptible Orchestrator:** `server/src/autonomous/orchestrator.enhanced.ts` (Added PAUSE/RESUME)
 - [x] **Async HITL Strategy:** `docs/governance/async-hitl.md`
 
 ### New Packages
+
 - [x] **FinOps:** `packages/finops/agent-cost-estimator` (Cost forecasting & optimization)
 - [x] **Evaluation:** `packages/eval/trajectory-metrics` (Health scoring)
 - [x] **Governance:** `packages/governance/runtime-gates` (Charter enforcement)
 
 ### Documentation & Narrative
+
 - [x] **Strategy:** `docs/strategy/agent-runtime-frontier.md`
 - [x] **Positioning:** `docs/strategy/positioning_agent_os.md`
 - [x] **Public Assets:** Blog outlines & Talk abstracts in `docs/public/`
 - [x] **Evidence Map:** `docs/ga/EVIDENCE_SIGNAL_MAP_vNext.json`
 
 ## 2. Verified Capabilities (Experiments)
+
 Artifacts stored in `docs/evidence/automation-turn-5/`:
+
 - **Exp 1 (FinOps):** Forecast vs Optimized cost (Model downgrading works).
 - **Exp 2 (Runtime):** Pause/Resume signal handling verified.
 - **Exp 3 (Eval):** Trajectory Health Score calculation validated.
 - **Exp 4 (Governance):** Charter policy gates enforcing allowlists.
 
 ## 3. Measurable Leadership
+
 - **Cost Predictability:** We can now forecast run costs before execution.
 - **System Health:** We have a single 0-1 score for agent reliability.
 - **Governance:** We have code-level enforcement of "Agent Charters".

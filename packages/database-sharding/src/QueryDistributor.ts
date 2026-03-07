@@ -1,16 +1,11 @@
-import { trace } from '@opentelemetry/api';
-import pino from 'pino';
-import { ShardManager } from './ShardManager';
-import { ShardRouter } from './ShardRouter';
-import {
-  ShardedQuery,
-  ShardedQueryResult,
-  CrossShardQueryResult,
-  ShardConfig,
-} from './types';
+import { trace } from "@opentelemetry/api";
+import pino from "pino";
+import { ShardManager } from "./ShardManager";
+import { ShardRouter } from "./ShardRouter";
+import { ShardedQuery, ShardedQueryResult, CrossShardQueryResult, ShardConfig } from "./types";
 
-const logger = pino({ name: 'QueryDistributor' });
-const tracer = trace.getTracer('database-sharding');
+const logger = pino({ name: "QueryDistributor" });
+const tracer = trace.getTracer("database-sharding");
 
 /**
  * Distributes and executes queries across shards
@@ -24,10 +19,8 @@ export class QueryDistributor {
   /**
    * Execute a query on a single shard
    */
-  async executeOnShard<T = any>(
-    query: ShardedQuery
-  ): Promise<ShardedQueryResult<T>> {
-    const span = tracer.startSpan('QueryDistributor.executeOnShard');
+  async executeOnShard<T = any>(query: ShardedQuery): Promise<ShardedQueryResult<T>> {
+    const span = tracer.startSpan("QueryDistributor.executeOnShard");
     const startTime = Date.now();
 
     try {
@@ -56,16 +49,15 @@ export class QueryDistributor {
         this.shardManager.updateMetrics(shard.id, {
           queryCount: metrics.queryCount + 1,
           avgLatency:
-            (metrics.avgLatency * metrics.queryCount + executionTime) /
-            (metrics.queryCount + 1),
+            (metrics.avgLatency * metrics.queryCount + executionTime) / (metrics.queryCount + 1),
         });
       }
 
       span.setAttributes({
-        'shard.id': shard.id,
-        'query.rows': result.rowCount || 0,
-        'query.duration': executionTime,
-        'query.replica': useReplica,
+        "shard.id": shard.id,
+        "query.rows": result.rowCount || 0,
+        "query.duration": executionTime,
+        "query.replica": useReplica,
       });
 
       return {
@@ -77,7 +69,7 @@ export class QueryDistributor {
       };
     } catch (error) {
       span.recordException(error as Error);
-      logger.error({ error, query: query.sql }, 'Query execution failed');
+      logger.error({ error, query: query.sql }, "Query execution failed");
       throw error;
     } finally {
       span.end();
@@ -90,9 +82,9 @@ export class QueryDistributor {
   async executeAcrossShards<T = any>(
     shards: ShardConfig[],
     query: ShardedQuery,
-    mergeStrategy: 'union' | 'intersect' | 'custom' = 'union'
+    mergeStrategy: "union" | "intersect" | "custom" = "union"
   ): Promise<CrossShardQueryResult<T>> {
-    const span = tracer.startSpan('QueryDistributor.executeAcrossShards');
+    const span = tracer.startSpan("QueryDistributor.executeAcrossShards");
     const startTime = Date.now();
 
     try {
@@ -127,10 +119,10 @@ export class QueryDistributor {
       const executionTime = Date.now() - startTime;
 
       span.setAttributes({
-        'shard.count': shards.length,
-        'query.totalRows': mergedRows.length,
-        'query.duration': executionTime,
-        'merge.strategy': mergeStrategy,
+        "shard.count": shards.length,
+        "query.totalRows": mergedRows.length,
+        "query.duration": executionTime,
+        "merge.strategy": mergeStrategy,
       });
 
       return {
@@ -142,7 +134,7 @@ export class QueryDistributor {
       };
     } catch (error) {
       span.recordException(error as Error);
-      logger.error({ error, query: query.sql }, 'Cross-shard query failed');
+      logger.error({ error, query: query.sql }, "Cross-shard query failed");
       throw error;
     } finally {
       span.end();
@@ -152,9 +144,7 @@ export class QueryDistributor {
   /**
    * Execute a query on all shards (broadcast)
    */
-  async broadcast<T = any>(
-    query: ShardedQuery
-  ): Promise<CrossShardQueryResult<T>> {
+  async broadcast<T = any>(query: ShardedQuery): Promise<CrossShardQueryResult<T>> {
     const shards = this.shardRouter.routeBroadcastQuery();
     return this.executeAcrossShards<T>(shards, query);
   }
@@ -167,11 +157,7 @@ export class QueryDistributor {
     endKey: any,
     query: ShardedQuery
   ): Promise<CrossShardQueryResult<T>> {
-    const shards = this.shardRouter.routeRangeQuery(
-      startKey,
-      endKey,
-      query.context
-    );
+    const shards = this.shardRouter.routeRangeQuery(startKey, endKey, query.context);
     return this.executeAcrossShards<T>(shards, query);
   }
 
@@ -180,28 +166,30 @@ export class QueryDistributor {
    */
   private mergeResults<T>(
     results: ShardedQueryResult<T>[],
-    strategy: 'union' | 'intersect' | 'custom'
+    strategy: "union" | "intersect" | "custom"
   ): T[] {
-    if (strategy === 'union') {
+    if (strategy === "union") {
       // Simple concatenation
       return results.flatMap((r) => r.rows);
     }
 
-    if (strategy === 'intersect') {
+    if (strategy === "intersect") {
       // Find common rows (requires comparison logic)
       // This is a simplified version
       if (results.length === 0) return [];
       if (results.length === 1) return results[0].rows;
-      if (results.length === 0) {return [];}
-      if (results.length === 1) {return results[0].rows;}
+      if (results.length === 0) {
+        return [];
+      }
+      if (results.length === 1) {
+        return results[0].rows;
+      }
 
       // Intersect all result sets
       let intersection = results[0].rows;
       for (let i = 1; i < results.length; i++) {
         intersection = intersection.filter((row) =>
-          results[i].rows.some(
-            (r) => JSON.stringify(r) === JSON.stringify(row)
-          )
+          results[i].rows.some((r) => JSON.stringify(r) === JSON.stringify(row))
         );
       }
       return intersection;
@@ -225,21 +213,16 @@ export class QueryDistributor {
         return await this.executeOnShard<T>(query);
       } catch (error) {
         lastError = error as Error;
-        logger.warn(
-          { attempt, maxRetries, error },
-          'Query failed, retrying...'
-        );
+        logger.warn({ attempt, maxRetries, error }, "Query failed, retrying...");
 
         if (attempt < maxRetries) {
           // Exponential backoff
-          await new Promise((resolve) =>
-            setTimeout(resolve, Math.pow(2, attempt) * 100)
-          );
+          await new Promise((resolve) => setTimeout(resolve, Math.pow(2, attempt) * 100));
         }
       }
     }
 
-    throw lastError || new Error('Query failed after retries');
+    throw lastError || new Error("Query failed after retries");
   }
 
   /**

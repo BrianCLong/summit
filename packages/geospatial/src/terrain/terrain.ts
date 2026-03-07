@@ -1,4 +1,4 @@
-import type { BoundingBox, FeatureCollection, PolygonGeometry } from '../types/geospatial.js';
+import type { BoundingBox, FeatureCollection, PolygonGeometry } from "../types/geospatial.js";
 
 export interface TerrainOptions {
   verticalExaggeration?: number;
@@ -15,7 +15,7 @@ export const generateTerrainMesh = (
   const lonStep = (bounds.maxLon - bounds.minLon) / Math.max(cols - 1, 1);
   const latStep = (bounds.maxLat - bounds.minLat) / Math.max(rows - 1, 1);
 
-  const features: FeatureCollection['features'] = [];
+  const features: FeatureCollection["features"] = [];
 
   for (let r = 0; r < rows - 1; r += 1) {
     for (let c = 0; c < cols - 1; c += 1) {
@@ -31,9 +31,9 @@ export const generateTerrainMesh = (
       ];
 
       features.push({
-        type: 'Feature',
+        type: "Feature",
         geometry: {
-          type: 'Polygon',
+          type: "Polygon",
           coordinates: [corners],
         } as PolygonGeometry,
         properties: {
@@ -55,7 +55,7 @@ export const generateTerrainMesh = (
   }
 
   return {
-    type: 'FeatureCollection',
+    type: "FeatureCollection",
     features,
   };
 };

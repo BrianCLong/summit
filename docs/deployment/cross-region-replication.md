@@ -4,16 +4,16 @@
 
 This guide documents how Summit operates PostgreSQL and Neo4j in a highly available, cross-region topology. The configuration aligns with Workstream 90 requirements and complements the manifests in `ops/dr/` plus the Helm charts in `ga-graphai/infra/helm`.
 
-* **PostgreSQL** – Aurora-compatible streaming replication with one writer in `us-east-1` and read replicas in `us-west-2` and `eu-central-1`.
-* **Neo4j** – Causal Cluster cores and read replicas distributed across the same three regions for low-latency queries.
-* **Chaos Mesh** – Failure drills that validate regional failover and replication lag budgets.
+- **PostgreSQL** – Aurora-compatible streaming replication with one writer in `us-east-1` and read replicas in `us-west-2` and `eu-central-1`.
+- **Neo4j** – Causal Cluster cores and read replicas distributed across the same three regions for low-latency queries.
+- **Chaos Mesh** – Failure drills that validate regional failover and replication lag budgets.
 
 ## Architecture Summary
 
-| Component | Primary Region | Secondary Regions | Notes |
-|-----------|----------------|-------------------|-------|
-| PostgreSQL | `us-east-1` writer | `us-west-2`, `eu-central-1` async replicas | Shared WAL archive in S3, Prometheus exporter, WAL replay guardrails |
-| Neo4j | `us-east-1` cores (3 pods) | `us-west-2` core (1 pod), read replicas in both regions | Backups streamed to S3, discovery via headless Service |
+| Component  | Primary Region             | Secondary Regions                                       | Notes                                                                |
+| ---------- | -------------------------- | ------------------------------------------------------- | -------------------------------------------------------------------- |
+| PostgreSQL | `us-east-1` writer         | `us-west-2`, `eu-central-1` async replicas              | Shared WAL archive in S3, Prometheus exporter, WAL replay guardrails |
+| Neo4j      | `us-east-1` cores (3 pods) | `us-west-2` core (1 pod), read replicas in both regions | Backups streamed to S3, discovery via headless Service               |
 
 ## Helm Configuration
 

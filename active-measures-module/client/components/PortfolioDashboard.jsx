@@ -1,7 +1,7 @@
-import React from 'react';
-import { useQuery } from '@apollo/client';
+import React from "react";
+import { useQuery } from "@apollo/client";
 // import CytoscapeComponent from 'react-cytoscapejs'; // Placeholder
-import { GET_PORTFOLIO } from '../queries';
+import { GET_PORTFOLIO } from "../queries";
 
 const PortfolioDashboard = ({ tuners }) => {
   const { data, loading } = useQuery(GET_PORTFOLIO, { variables: { tuners } });

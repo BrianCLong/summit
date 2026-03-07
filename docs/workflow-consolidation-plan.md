@@ -41,8 +41,8 @@ jobs:
     name: Build
     uses: ./.github/workflows/_reusable-node-pnpm-setup.yml
     with:
-      node-version: '20.x'
-      pnpm-version: '9.12.0'
+      node-version: "20.x"
+      pnpm-version: "9.12.0"
       install-deps: true
 
   # Continue with build steps...

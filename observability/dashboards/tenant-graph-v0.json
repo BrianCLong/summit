@@ -22,9 +22,7 @@
             "legendFormat": "p99"
           }
         ],
-        "yaxes": [
-          { "format": "ms", "label": "Latency" }
-        ],
+        "yaxes": [{ "format": "ms", "label": "Latency" }],
         "gridPos": { "x": 0, "y": 0, "w": 12, "h": 8 }
       },
       {
@@ -73,9 +71,7 @@
             "legendFormat": "SLO Violations"
           }
         ],
-        "yaxes": [
-          { "format": "percentunit", "max": 0.01 }
-        ],
+        "yaxes": [{ "format": "percentunit", "max": 0.01 }],
         "gridPos": { "x": 12, "y": 8, "w": 12, "h": 8 }
       },
       {

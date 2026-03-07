@@ -1,11 +1,11 @@
-import { createHash } from 'node:crypto';
-import type { EvidenceBundle, MerkleProofStep } from 'common-types';
+import { createHash } from "node:crypto";
+import type { EvidenceBundle, MerkleProofStep } from "common-types";
 import {
   augmentEvidenceBundle,
   buildMerkleArtifacts,
   verifyMerkleProof,
   verifySnapshotSignature,
-} from './bundle-utils.js';
+} from "./bundle-utils.js";
 
 export interface BundleVerificationResult {
   valid: boolean;
@@ -17,18 +17,18 @@ function computeLeafFromStoredHashes(
   atomId: string,
   bundle: EvidenceBundle,
   fallbackContent: Record<string, string>,
-  fallbackMetadata: Record<string, string>,
+  fallbackMetadata: Record<string, string>
 ): string {
   const contentHash = bundle.contentHashes?.[atomId];
   const metadataHash = bundle.metadataHashes?.[atomId];
   if (contentHash && metadataHash) {
-    return createHash('sha256').update(`${contentHash}${metadataHash}`).digest('hex');
+    return createHash("sha256").update(`${contentHash}${metadataHash}`).digest("hex");
   }
   const fallbackContentHash = fallbackContent[atomId];
   const fallbackMetadataHash = fallbackMetadata[atomId];
-  return createHash('sha256')
-    .update(`${fallbackContentHash ?? ''}${fallbackMetadataHash ?? ''}`)
-    .digest('hex');
+  return createHash("sha256")
+    .update(`${fallbackContentHash ?? ""}${fallbackMetadataHash ?? ""}`)
+    .digest("hex");
 }
 
 function normalizeProofs(bundle: EvidenceBundle): Record<string, MerkleProofStep[]> {
@@ -41,7 +41,7 @@ export class EvidenceBundleVerifier {
     const warnings: string[] = [];
 
     if (!bundle.entries.length) {
-      return { valid: false, errors: ['Bundle contains no entries'], warnings };
+      return { valid: false, errors: ["Bundle contains no entries"], warnings };
     }
 
     const computedArtifacts = buildMerkleArtifacts(bundle.entries);
@@ -55,7 +55,7 @@ export class EvidenceBundleVerifier {
     });
 
     if (!bundle.snapshotCommitment) {
-      errors.push('Snapshot commitment is missing');
+      errors.push("Snapshot commitment is missing");
     }
 
     const merkleRoot = bundle.snapshotCommitment?.merkleRoot ?? computedArtifacts.merkleRoot;
@@ -65,7 +65,7 @@ export class EvidenceBundleVerifier {
         atomId,
         bundle,
         computedArtifacts.contentHashes,
-        computedArtifacts.metadataHashes,
+        computedArtifacts.metadataHashes
       );
       const proof = proofs[atomId];
       if (!proof) {
@@ -82,33 +82,37 @@ export class EvidenceBundleVerifier {
     });
 
     if (!merkleRoot) {
-      errors.push('Merkle root is empty');
+      errors.push("Merkle root is empty");
     } else if (computedArtifacts.merkleRoot && merkleRoot !== computedArtifacts.merkleRoot) {
-      errors.push('Merkle root mismatch with recomputed tree');
+      errors.push("Merkle root mismatch with recomputed tree");
     }
 
     if (bundle.snapshotCommitment && !verifySnapshotSignature(bundle.snapshotCommitment)) {
-      errors.push('Snapshot signature verification failed');
+      errors.push("Snapshot signature verification failed");
     }
 
     if (bundle.policyDecisionTokens && bundle.policyDecisionTokens.length > 0) {
       const derived = augmentEvidenceBundle(
         { ...bundle, policyDecisionTokens: undefined },
         bundle.entries,
-        { issuedAt: bundle.snapshotCommitment ? new Date(bundle.snapshotCommitment.issuedAt) : undefined },
+        {
+          issuedAt: bundle.snapshotCommitment
+            ? new Date(bundle.snapshotCommitment.issuedAt)
+            : undefined,
+        }
       ).policyDecisionTokens;
       const derivedTokens = (derived ?? []).map((token) => token.token).sort();
       const providedTokens = bundle.policyDecisionTokens.map((token) => token.token).sort();
-      if (derivedTokens.join('|') !== providedTokens.join('|')) {
-        errors.push('Policy decision tokens do not match derived tokens');
+      if (derivedTokens.join("|") !== providedTokens.join("|")) {
+        errors.push("Policy decision tokens do not match derived tokens");
       }
     } else {
-      warnings.push('No policy decision tokens supplied');
+      warnings.push("No policy decision tokens supplied");
     }
 
     if (bundle.executionAttestation) {
       if (!bundle.executionAttestation.report) {
-        errors.push('Execution attestation report missing');
+        errors.push("Execution attestation report missing");
       }
     }
 

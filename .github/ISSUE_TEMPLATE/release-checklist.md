@@ -1,9 +1,9 @@
 ---
-name: 'Release Checklist'
-about: 'Final acceptance checklist and go-live mini-runbook'
-title: 'Release: v2025.08.21'
+name: "Release Checklist"
+about: "Final acceptance checklist and go-live mini-runbook"
+title: "Release: v2025.08.21"
 labels: release
-assignees: ''
+assignees: ""
 ---
 
 ## Final acceptance checklist (go/no-go)

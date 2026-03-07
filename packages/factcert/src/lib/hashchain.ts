@@ -1,5 +1,5 @@
-import { createHash } from 'node:crypto';
-import { stableJson } from './stable_json.js';
+import { createHash } from "node:crypto";
+import { stableJson } from "./stable_json.js";
 
 export interface ChainEvent<T = unknown> {
   index: number;
@@ -26,7 +26,7 @@ export class HashChain {
   get lastHash(): string {
     return this.events.length > 0
       ? this.events[this.events.length - 1].hash
-      : '0000000000000000000000000000000000000000000000000000000000000000'; // Genesis hash (32 bytes hex)
+      : "0000000000000000000000000000000000000000000000000000000000000000"; // Genesis hash (32 bytes hex)
   }
 
   /**
@@ -43,16 +43,16 @@ export class HashChain {
     const payload = {
       index,
       prev_hash,
-      data
+      data,
     };
 
-    const hash = createHash('sha256').update(stableJson(payload)).digest('hex');
+    const hash = createHash("sha256").update(stableJson(payload)).digest("hex");
 
     const event: ChainEvent<T> = {
       index,
       prev_hash,
       data,
-      hash
+      hash,
     };
 
     this.events.push(event as ChainEvent);
@@ -66,7 +66,7 @@ export class HashChain {
   verify(): boolean {
     if (this.events.length === 0) return true;
 
-    let expectedPrevHash = '0000000000000000000000000000000000000000000000000000000000000000';
+    let expectedPrevHash = "0000000000000000000000000000000000000000000000000000000000000000";
 
     for (let i = 0; i < this.events.length; i++) {
       const event = this.events[i];
@@ -81,9 +81,9 @@ export class HashChain {
       const payload = {
         index: event.index,
         prev_hash: event.prev_hash,
-        data: event.data
+        data: event.data,
       };
-      const calculatedHash = createHash('sha256').update(stableJson(payload)).digest('hex');
+      const calculatedHash = createHash("sha256").update(stableJson(payload)).digest("hex");
 
       if (calculatedHash !== event.hash) return false;
 

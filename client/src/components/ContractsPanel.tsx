@@ -1,17 +1,17 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import $ from 'jquery';
+import $ from "jquery";
 export default function ContractsPanel() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [c, setC] = useState<any | null>(null);
   useEffect(() => {
     const controller = new AbortController();
-    fetch('/api/contracts/current', { signal: controller.signal })
+    fetch("/api/contracts/current", { signal: controller.signal })
       .then((r) => r.json())
       .then(setC)
       .catch((err) => {
-        if (err.name !== 'AbortError') {
-          console.error('Fetch error:', err);
+        if (err.name !== "AbortError") {
+          console.error("Fetch error:", err);
         }
       });
     return () => controller.abort();

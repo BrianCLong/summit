@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from "vitest";
 import {
   MetaOrchestrator,
   type AuditEntry,
@@ -6,12 +6,12 @@ import {
   type PricingFeed,
   type StageExecutionRequest,
   type StageExecutionResult,
-} from '../src/index.js';
+} from "../src/index.js";
 import type {
   CloudProviderDescriptor,
   PipelineStageDefinition,
   PricingSignal,
-} from '@ga-graphai/common-types';
+} from "@ga-graphai/common-types";
 
 class LocalPricingFeed implements PricingFeed {
   constructor(private signals: PricingSignal[]) {}
@@ -25,7 +25,7 @@ class LocalPricingFeed implements PricingFeed {
   }
 }
 
-describe('MetaOrchestrator resilience middleware', () => {
+describe("MetaOrchestrator resilience middleware", () => {
   let providers: CloudProviderDescriptor[];
   let stage: PipelineStageDefinition;
   let pricing: PricingSignal[];
@@ -34,60 +34,58 @@ describe('MetaOrchestrator resilience middleware', () => {
   beforeEach(() => {
     providers = [
       {
-        name: 'azure',
-        regions: ['eastus'],
-        services: ['compute'],
+        name: "azure",
+        regions: ["eastus"],
+        services: ["compute"],
         reliabilityScore: 0.97,
-        securityCertifications: ['fedramp'],
+        securityCertifications: ["fedramp"],
         maxThroughputPerMinute: 120,
         baseLatencyMs: 50,
-        policyTags: ['fedramp'],
+        policyTags: ["fedramp"],
       },
       {
-        name: 'aws',
-        regions: ['us-east-1'],
-        services: ['compute'],
+        name: "aws",
+        regions: ["us-east-1"],
+        services: ["compute"],
         reliabilityScore: 0.95,
-        securityCertifications: ['fedramp'],
+        securityCertifications: ["fedramp"],
         maxThroughputPerMinute: 110,
         baseLatencyMs: 60,
-        policyTags: ['fedramp'],
+        policyTags: ["fedramp"],
       },
     ];
 
     stage = {
-      id: 'resilience-stage',
-      name: 'Resilience Stage',
-      requiredCapabilities: ['compute'],
-      complianceTags: ['fedramp'],
+      id: "resilience-stage",
+      name: "Resilience Stage",
+      requiredCapabilities: ["compute"],
+      complianceTags: ["fedramp"],
       minThroughputPerMinute: 80,
       slaSeconds: 120,
       guardrail: {
         maxErrorRate: 0.1,
         recoveryTimeoutSeconds: 10,
       },
-      fallbackStrategies: [
-        { provider: 'aws', region: 'us-east-1', trigger: 'execution-failure' },
-      ],
+      fallbackStrategies: [{ provider: "aws", region: "us-east-1", trigger: "execution-failure" }],
     };
 
     pricing = [
       {
-        provider: 'azure',
-        region: 'eastus',
-        service: 'compute',
+        provider: "azure",
+        region: "eastus",
+        service: "compute",
         pricePerUnit: 1,
-        currency: 'USD',
-        unit: 'per-minute',
+        currency: "USD",
+        unit: "per-minute",
         effectiveAt: new Date().toISOString(),
       },
       {
-        provider: 'aws',
-        region: 'us-east-1',
-        service: 'compute',
+        provider: "aws",
+        region: "us-east-1",
+        service: "compute",
         pricePerUnit: 1.2,
-        currency: 'USD',
-        unit: 'per-minute',
+        currency: "USD",
+        unit: "per-minute",
         effectiveAt: new Date().toISOString(),
       },
     ];
@@ -95,7 +93,7 @@ describe('MetaOrchestrator resilience middleware', () => {
     auditTrail = [];
   });
 
-  it('retries with timeout and succeeds on a subsequent attempt', async () => {
+  it("retries with timeout and succeeds on a subsequent attempt", async () => {
     class TimeoutThenSuccessAdapter implements ExecutionAdapter {
       public calls = 0;
 
@@ -105,7 +103,7 @@ describe('MetaOrchestrator resilience middleware', () => {
           await new Promise((resolve) => setTimeout(resolve, 15));
         }
         return {
-          status: 'success',
+          status: "success",
           throughputPerMinute: request.stage.minThroughputPerMinute,
           cost: request.decision.expectedCost ?? 0.5,
           errorRate: 0.05,
@@ -116,7 +114,7 @@ describe('MetaOrchestrator resilience middleware', () => {
 
     const execution = new TimeoutThenSuccessAdapter();
     const orchestrator = new MetaOrchestrator({
-      pipelineId: 'resilience-pipeline',
+      pipelineId: "resilience-pipeline",
       providers,
       pricingFeed: new LocalPricingFeed(pricing),
       execution,
@@ -127,19 +125,19 @@ describe('MetaOrchestrator resilience middleware', () => {
 
     const outcome = await orchestrator.executePlan([stage]);
 
-    expect(outcome.trace[0].status).toBe('success');
-    expect(outcome.trace[0].fallbackTriggered).toBe('timeout');
+    expect(outcome.trace[0].status).toBe("success");
+    expect(outcome.trace[0].fallbackTriggered).toBe("timeout");
     expect(execution.calls).toBe(2);
   });
 
-  it('opens the circuit breaker and gracefully degrades when failures persist', async () => {
+  it("opens the circuit breaker and gracefully degrades when failures persist", async () => {
     class AlwaysFailingAdapter implements ExecutionAdapter {
       public calls = 0;
 
       async execute(): Promise<StageExecutionResult> {
         this.calls += 1;
         return {
-          status: 'failure',
+          status: "failure",
           throughputPerMinute: 0,
           cost: 0,
           errorRate: 1,
@@ -150,7 +148,7 @@ describe('MetaOrchestrator resilience middleware', () => {
 
     const execution = new AlwaysFailingAdapter();
     const orchestrator = new MetaOrchestrator({
-      pipelineId: 'resilience-pipeline',
+      pipelineId: "resilience-pipeline",
       providers,
       pricingFeed: new LocalPricingFeed(pricing),
       execution,
@@ -168,18 +166,18 @@ describe('MetaOrchestrator resilience middleware', () => {
     const secondOutcome = await orchestrator.executePlan([stage]);
 
     expect(firstOutcome.trace[0].degraded).toBe(true);
-    expect(secondOutcome.trace[0].featureFlags).toContain('circuit-breaker');
-    expect(secondOutcome.trace[0].fallbackTriggered).toBe('graceful-degradation');
+    expect(secondOutcome.trace[0].featureFlags).toContain("circuit-breaker");
+    expect(secondOutcome.trace[0].fallbackTriggered).toBe("graceful-degradation");
   });
 
-  it('enables deterministic mode with seeded logging', async () => {
+  it("enables deterministic mode with seeded logging", async () => {
     class DeterministicAdapter implements ExecutionAdapter {
       public calls = 0;
 
       async execute(request: StageExecutionRequest): Promise<StageExecutionResult> {
         this.calls += 1;
         return {
-          status: 'success',
+          status: "success",
           throughputPerMinute: request.stage.minThroughputPerMinute,
           cost: request.decision.expectedCost ?? 1,
           errorRate: 0.02,
@@ -190,22 +188,22 @@ describe('MetaOrchestrator resilience middleware', () => {
 
     const execution = new DeterministicAdapter();
     const orchestrator = new MetaOrchestrator({
-      pipelineId: 'deterministic-pipeline',
+      pipelineId: "deterministic-pipeline",
       providers,
       pricingFeed: new LocalPricingFeed(pricing),
       execution,
       auditSink: { record: (entry) => auditTrail.push(entry) },
       featureFlags: { deterministicLogging: true },
-      mode: 'deterministic',
+      mode: "deterministic",
       deterministicSeed: 123,
     });
 
     const outcome = await orchestrator.executePlan([stage]);
     const traceEntry = outcome.trace[0];
 
-    expect(outcome.plan.metadata.executionMode).toBe('deterministic');
+    expect(outcome.plan.metadata.executionMode).toBe("deterministic");
     expect(outcome.plan.metadata.deterministicSeed).toBe(123);
-    expect(traceEntry.logs[0]).toContain('deterministic seed=123');
-    expect(traceEntry.featureFlags).toContain('deterministic');
+    expect(traceEntry.logs[0]).toContain("deterministic seed=123");
+    expect(traceEntry.featureFlags).toContain("deterministic");
   });
 });

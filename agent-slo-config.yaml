@@ -6,81 +6,81 @@ kind: ServiceLevelObjective
 metadata:
   name: agent-workloads
 spec:
-  description: 'Reliability targets for Agent Planning, Execution, and Coordination'
+  description: "Reliability targets for Agent Planning, Execution, and Coordination"
 
   objectives:
-    - name: 'Read-Only Query Availability'
-      description: 'Agent read operations (GraphQL queries) must succeed.'
+    - name: "Read-Only Query Availability"
+      description: "Agent read operations (GraphQL queries) must succeed."
       target: 99.9
       window: 28d
       sli:
-        type: 'prometheus'
+        type: "prometheus"
         query: |
           sum(rate(graphql_requests_total{operation_type="query", status!~"5.."}[5m]))
           /
           sum(rate(graphql_requests_total{operation_type="query"}[5m]))
 
-    - name: 'Read-Only Query Latency'
-      description: '95% of agent read queries complete in under 250ms.'
+    - name: "Read-Only Query Latency"
+      description: "95% of agent read queries complete in under 250ms."
       target: 99.0
       window: 28d
       sli:
-        type: 'prometheus'
+        type: "prometheus"
         query: |
           sum(rate(graphql_request_duration_seconds_bucket{operation_type="query",le="0.25"}[5m]))
           /
           sum(rate(graphql_request_duration_seconds_count{operation_type="query"}[5m]))
 
-    - name: 'Planning Success Rate'
-      description: 'Agent planning jobs complete successfully.'
+    - name: "Planning Success Rate"
+      description: "Agent planning jobs complete successfully."
       target: 99.5
       window: 28d
       sli:
-        type: 'prometheus'
+        type: "prometheus"
         query: |
           sum(rate(maestro_jobs_processed_total{job_type="planning", status="completed"}[5m]))
           /
           sum(rate(maestro_jobs_processed_total{job_type="planning"}[5m]))
 
-    - name: 'Planning Latency'
-      description: '95% of planning jobs complete in under 5 seconds.'
+    - name: "Planning Latency"
+      description: "95% of planning jobs complete in under 5 seconds."
       target: 99.0
       window: 28d
       sli:
-        type: 'prometheus'
+        type: "prometheus"
         query: |
           sum(rate(maestro_job_execution_duration_seconds_bucket{job_type="planning",le="5.0"}[5m]))
           /
           sum(rate(maestro_job_execution_duration_seconds_count{job_type="planning"}[5m]))
 
-    - name: 'Evaluation Success Rate'
-      description: 'Self-reflection and eval jobs must succeed.'
+    - name: "Evaluation Success Rate"
+      description: "Self-reflection and eval jobs must succeed."
       target: 99.0
       window: 28d
       sli:
-        type: 'prometheus'
+        type: "prometheus"
         query: |
           sum(rate(maestro_jobs_processed_total{job_type="evaluation", status="completed"}[5m]))
           /
           sum(rate(maestro_jobs_processed_total{job_type="evaluation"}[5m]))
 
-    - name: 'Write Action Success'
-      description: 'Opt-in write actions (mutations) must succeed.'
+    - name: "Write Action Success"
+      description: "Opt-in write actions (mutations) must succeed."
       target: 99.9
       window: 28d
       sli:
-        type: 'prometheus'
+        type: "prometheus"
         query: |
           sum(rate(graphql_requests_total{operation_type="mutation", status!~"5.."}[5m]))
           /
           sum(rate(graphql_requests_total{operation_type="mutation"}[5m]))
 
-    - name: 'Multi-Agent Coordination Availability'
-      description: 'Coordination messages are processed successfully.'
+    - name: "Multi-Agent Coordination Availability"
+      description: "Coordination messages are processed successfully."
       target: 99.0
       window: 28d
       sli:
-        type: 'prometheus'
+        type: "prometheus"
         query: |
           sum(rate(ai_jobs_total{status="completed"}[5m]))
           /

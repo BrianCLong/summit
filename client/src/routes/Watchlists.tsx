@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { gql, useQuery, useMutation } from '@apollo/client';
+import React, { useState } from "react";
+import { gql, useQuery, useMutation } from "@apollo/client";
 import {
   Dialog,
   DialogTitle,
@@ -8,7 +8,7 @@ import {
   Select,
   MenuItem,
   Button,
-} from '@mui/material';
+} from "@mui/material";
 
 const WL_Q = gql`
   query {
@@ -55,12 +55,12 @@ export default function Watchlists() {
   const { data: cases } = useQuery(CASES_Q);
   const [addItem] = useMutation(ADD_ITEM_M);
   const [caseOpen, setCaseOpen] = useState(false);
-  const [caseId, setCaseId] = useState('');
+  const [caseId, setCaseId] = useState("");
   const [pendingAlert, setPendingAlert] = useState<any>(null);
   return (
     <div className="p-4">
       <h2>Watchlists</h2>
-      <div style={{ display: 'flex', gap: 16 }}>
+      <div style={{ display: "flex", gap: 16 }}>
         <div style={{ width: 320 }}>
           <ul>
             {(data?.myWatchlists || []).map((w: any) => (
@@ -74,10 +74,7 @@ export default function Watchlists() {
           <h3>Alerts</h3>
           <ul>
             {(alerts?.alerts || []).map((a: any) => (
-              <li
-                key={a.id}
-                style={{ display: 'flex', gap: 8, alignItems: 'center' }}
-              >
+              <li key={a.id} style={{ display: "flex", gap: 8, alignItems: "center" }}>
                 <span>
                   {a.status} • {a.docHash} • {a.createdAt}
                 </span>
@@ -119,10 +116,10 @@ export default function Watchlists() {
             onClick={async () => {
               if (!caseId || !pendingAlert) return;
               await addItem({
-                variables: { caseId, kind: 'ALERT', refId: pendingAlert.id },
+                variables: { caseId, kind: "ALERT", refId: pendingAlert.id },
               });
               setCaseOpen(false);
-              setCaseId('');
+              setCaseId("");
               setPendingAlert(null);
             }}
           >

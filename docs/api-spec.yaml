@@ -17,7 +17,7 @@ paths:
       summary: Prometheus metrics
       tags: [Observability]
       responses:
-        '200':
+        "200":
           description: Prometheus metrics text
           content:
             text/plain:
@@ -30,18 +30,18 @@ paths:
       summary: System health check
       tags: [Observability]
       responses:
-        '200':
+        "200":
           description: Healthy
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/HealthStatus'
-        '503':
+                $ref: "#/components/schemas/HealthStatus"
+        "503":
           description: Unhealthy
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/HealthStatus'
+                $ref: "#/components/schemas/HealthStatus"
 
   /api/tenants:
     post:
@@ -52,27 +52,27 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateTenantRequest'
+              $ref: "#/components/schemas/CreateTenantRequest"
       responses:
-        '201':
+        "201":
           description: Tenant created
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Tenant'
+                $ref: "#/components/schemas/Tenant"
 
     get:
       summary: List tenants (Admin only)
       tags: [Tenancy]
       responses:
-        '200':
+        "200":
           description: List of tenants
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Tenant'
+                  $ref: "#/components/schemas/Tenant"
 
   /api/policy/simulate:
     post:
@@ -83,14 +83,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PolicySimulationInput'
+              $ref: "#/components/schemas/PolicySimulationInput"
       responses:
-        '200':
+        "200":
           description: Simulation result
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PolicySimulationResult'
+                $ref: "#/components/schemas/PolicySimulationResult"
 
   /api/export/bundles:
     post:
@@ -101,14 +101,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateBundleRequest'
+              $ref: "#/components/schemas/CreateBundleRequest"
       responses:
-        '202':
+        "202":
           description: Bundle generation started
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/JobStatus'
+                $ref: "#/components/schemas/JobStatus"
 
   /api/receipts/{id}:
     get:
@@ -121,12 +121,12 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        "200":
           description: Signed receipt
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Receipt'
+                $ref: "#/components/schemas/Receipt"
 
   /api/maestro/route/preview:
     post:
@@ -145,12 +145,12 @@ paths:
                 context:
                   type: object
       responses:
-        '200':
+        "200":
           description: List of candidates
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RoutePreviewResponse'
+                $ref: "#/components/schemas/RoutePreviewResponse"
 
   /api/maestro/route/execute:
     post:
@@ -171,12 +171,12 @@ paths:
                   items:
                     type: string
       responses:
-        '200':
+        "200":
           description: Execution results
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RouteExecuteResponse'
+                $ref: "#/components/schemas/RouteExecuteResponse"
 
   /api/maestro/web/interfaces:
     get:
@@ -184,12 +184,12 @@ paths:
       summary: Get available web interfaces
       tags: [Maestro]
       responses:
-        '200':
+        "200":
           description: List of web interfaces
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/WebInterfacesResponse'
+                $ref: "#/components/schemas/WebInterfacesResponse"
 
   /api/maestro/web/run:
     post:
@@ -210,12 +210,12 @@ paths:
                   items:
                     type: string
       responses:
-        '200':
+        "200":
           description: Orchestration results
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OrchestrateWebResponse'
+                $ref: "#/components/schemas/OrchestrateWebResponse"
 
   /api/maestro/budgets:
     get:
@@ -223,12 +223,12 @@ paths:
       summary: Get budget and usage information
       tags: [Maestro]
       responses:
-        '200':
+        "200":
           description: Budget info
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BudgetsResponse'
+                $ref: "#/components/schemas/BudgetsResponse"
 
   /api/maestro/policy/check:
     post:
@@ -247,12 +247,12 @@ paths:
                 payload:
                   type: object
       responses:
-        '200':
+        "200":
           description: Policy check result
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PolicyCheckResponse'
+                $ref: "#/components/schemas/PolicyCheckResponse"
 
   /api/maestro/runs:
     post:
@@ -271,7 +271,7 @@ paths:
                 requestText:
                   type: string
       responses:
-        '200':
+        "200":
           description: Run created
           content:
             application/json:
@@ -294,14 +294,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/WorkflowDefinitionInput'
+              $ref: "#/components/schemas/WorkflowDefinitionInput"
       responses:
-        '201':
+        "201":
           description: Workflow definition created
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/WorkflowDefinition'
+                $ref: "#/components/schemas/WorkflowDefinition"
 
   /api/tenants/{tenantId}/runs:
     post:
@@ -319,14 +319,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/StartRunInput'
+              $ref: "#/components/schemas/StartRunInput"
       responses:
-        '201':
+        "201":
           description: Run started
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Run'
+                $ref: "#/components/schemas/Run"
 
   /api/tenants/{tenantId}/runs/{runId}:
     get:
@@ -345,12 +345,12 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        "200":
           description: Run details
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Run'
+                $ref: "#/components/schemas/Run"
 
   /api/tenants/{tenantId}/runs/{runId}/approve:
     post:
@@ -373,14 +373,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ApprovalInput'
+              $ref: "#/components/schemas/ApprovalInput"
       responses:
-        '200':
+        "200":
           description: Approval processed
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApprovalResult'
+                $ref: "#/components/schemas/ApprovalResult"
 
   /api/tenants/{tenantId}/runs/{runId}/events:
     get:
@@ -399,14 +399,14 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        "200":
           description: List of events
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/RunEvent'
+                  $ref: "#/components/schemas/RunEvent"
 
 components:
   schemas:
@@ -557,7 +557,7 @@ components:
         candidates:
           type: array
           items:
-            $ref: '#/components/schemas/Candidate'
+            $ref: "#/components/schemas/Candidate"
 
     RouteExecuteStep:
       type: object
@@ -593,7 +593,7 @@ components:
         steps:
           type: array
           items:
-            $ref: '#/components/schemas/RouteExecuteStep'
+            $ref: "#/components/schemas/RouteExecuteStep"
 
     WebInterface:
       type: object
@@ -615,7 +615,7 @@ components:
         items:
           type: array
           items:
-            $ref: '#/components/schemas/WebInterface'
+            $ref: "#/components/schemas/WebInterface"
 
     OrchestrateWebResponse:
       type: object
@@ -716,7 +716,7 @@ components:
 
     WorkflowDefinition:
       allOf:
-        - $ref: '#/components/schemas/WorkflowDefinitionInput'
+        - $ref: "#/components/schemas/WorkflowDefinitionInput"
         - type: object
           properties:
             id:
@@ -762,7 +762,7 @@ components:
         receipts:
           type: array
           items:
-            $ref: '#/components/schemas/Receipt'
+            $ref: "#/components/schemas/Receipt"
 
     ApprovalInput:
       type: object

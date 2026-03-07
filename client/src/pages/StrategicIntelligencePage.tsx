@@ -1,5 +1,5 @@
-import React from 'react';
-import StrategicIntelligenceDashboard from '../components/StrategicIntelligenceDashboard';
+import React from "react";
+import StrategicIntelligenceDashboard from "../components/StrategicIntelligenceDashboard";
 
 const StrategicIntelligencePage: React.FC = () => {
   return (

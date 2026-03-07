@@ -3,26 +3,26 @@
  * GDPR, CCPA, and other compliance frameworks
  */
 
-import pino from 'pino';
+import pino from "pino";
 
-const logger = pino({ name: 'compliance' });
+const logger = pino({ name: "compliance" });
 
 export enum ComplianceFramework {
-  GDPR = 'gdpr',
-  CCPA = 'ccpa',
-  HIPAA = 'hipaa',
-  SOC2 = 'soc2'
+  GDPR = "gdpr",
+  CCPA = "ccpa",
+  HIPAA = "hipaa",
+  SOC2 = "soc2",
 }
 
 export interface ComplianceReport {
   framework: ComplianceFramework;
-  status: 'compliant' | 'non-compliant' | 'partial';
+  status: "compliant" | "non-compliant" | "partial";
   findings: ComplianceFinding[];
   generatedAt: Date;
 }
 
 export interface ComplianceFinding {
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  severity: "low" | "medium" | "high" | "critical";
   requirement: string;
   description: string;
   recommendation: string;
@@ -30,7 +30,7 @@ export interface ComplianceFinding {
 
 export class ComplianceManager {
   async generateReport(framework: ComplianceFramework): Promise<ComplianceReport> {
-    logger.info({ framework }, 'Generating compliance report');
+    logger.info({ framework }, "Generating compliance report");
 
     const findings: ComplianceFinding[] = [];
 
@@ -39,18 +39,18 @@ export class ComplianceManager {
 
     return {
       framework,
-      status: 'compliant',
+      status: "compliant",
       findings,
-      generatedAt: new Date()
+      generatedAt: new Date(),
     };
   }
 
   async validateDataRetention(resource: string): Promise<boolean> {
-    logger.info({ resource }, 'Validating data retention policy');
+    logger.info({ resource }, "Validating data retention policy");
     return true;
   }
 
   async enforceRightToDelete(userId: string): Promise<void> {
-    logger.info({ userId }, 'Enforcing right to delete');
+    logger.info({ userId }, "Enforcing right to delete");
   }
 }

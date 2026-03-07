@@ -86,10 +86,7 @@ This pack scaffolds starter artifacts for the 8 parallel workstreams. Copy files
           "title": "",
           "owner": "",
           "depends_on": [],
-          "acceptance_criteria": [
-            "Given X when Y then Z",
-            "Evidence: test IDs, metrics, logs"
-          ],
+          "acceptance_criteria": ["Given X when Y then Z", "Evidence: test IDs, metrics, logs"],
           "verification": [
             { "type": "unit", "ref": "tests/unit/..." },
             { "type": "load", "ref": "load/k6/..." },
@@ -326,15 +323,15 @@ type UserEvent {
 ### `services/api/src/resolvers/user.ts`
 
 ```ts
-import { Context } from '../types';
+import { Context } from "../types";
 
 export const Query = {
   async user(_: unknown, { id }: { id: string }, ctx: Context) {
-    ctx.auth.require('tenant:user:read', { id });
+    ctx.auth.require("tenant:user:read", { id });
     const res = await ctx.neo.run(`MATCH (u:User {id:$id}) RETURN u LIMIT 1`, {
       id,
     });
-    return res.records[0]?.get('u');
+    return res.records[0]?.get("u");
   },
 };
 ```
@@ -342,8 +339,8 @@ export const Query = {
 ### `tests/contract/api/user.spec.ts`
 
 ```ts
-describe('contract:GetUserById', () => {
-  it('returns shape and honors auth', async () => {
+describe("contract:GetUserById", () => {
+  it("returns shape and honors auth", async () => {
     // TODO: implement
   });
 });
@@ -461,21 +458,21 @@ Commands: hash, sign, verify
 ### `load/k6/smoke.js`
 
 ```js
-import http from 'k6/http';
-import { sleep, check } from 'k6';
+import http from "k6/http";
+import { sleep, check } from "k6";
 
-export const options = { vus: 10, duration: '1m' };
+export const options = { vus: 10, duration: "1m" };
 
 export default function () {
   const res = http.post(
     __ENV.API_URL,
     JSON.stringify({
-      query: 'query($id:ID!){user(id:$id){id}}',
-      variables: { id: 'u1' },
+      query: "query($id:ID!){user(id:$id){id}}",
+      variables: { id: "u1" },
     }),
-    { headers: { 'Content-Type': 'application/json' } },
+    { headers: { "Content-Type": "application/json" } }
   );
-  check(res, { 'status is 200': (r) => r.status === 200 });
+  check(res, { "status is 200": (r) => r.status === 200 });
   sleep(1);
 }
 ```
@@ -527,7 +524,7 @@ groups:
         expr: predict_linear(api_errors_total[30m], 1*60*60) > (0.001 * api_requests_total)
         for: 5m
         labels: { severity: page }
-        annotations: { summary: 'API error budget burn > 0.1%' }
+        annotations: { summary: "API error budget burn > 0.1%" }
 ```
 
 ### `runbooks/api-5xx-burst.md`

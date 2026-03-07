@@ -1,14 +1,19 @@
-import React from 'react';
-import { ErrorBoundary } from './ErrorBoundary';
-import { useFeatureFlags } from '@/contexts/FeatureFlagContext';
+import React from 'react'
+import { ErrorBoundary } from './ErrorBoundary'
+import { useFeatureFlags } from '@/contexts/FeatureFlagContext'
 
 interface FeatureFlaggedErrorBoundaryProps {
-  children: React.ReactNode;
-  flagKey?: string;
-  fallback?: React.ReactNode | ((props: { error: Error; resetErrorBoundary: () => void }) => React.ReactNode);
-  onError?: (error: Error, errorInfo: React.ErrorInfo) => void;
-  context?: Record<string, any>;
-  boundaryName?: string;
+  children: React.ReactNode
+  flagKey?: string
+  fallback?:
+    | React.ReactNode
+    | ((props: {
+        error: Error
+        resetErrorBoundary: () => void
+      }) => React.ReactNode)
+  onError?: (error: Error, errorInfo: React.ErrorInfo) => void
+  context?: Record<string, any>
+  boundaryName?: string
 }
 
 /**
@@ -34,7 +39,9 @@ interface FeatureFlaggedErrorBoundaryProps {
  * </FeatureFlaggedErrorBoundary>
  * ```
  */
-export const FeatureFlaggedErrorBoundary: React.FC<FeatureFlaggedErrorBoundaryProps> = ({
+export const FeatureFlaggedErrorBoundary: React.FC<
+  FeatureFlaggedErrorBoundaryProps
+> = ({
   children,
   flagKey = 'error_boundaries.retry_enabled',
   fallback,
@@ -42,11 +49,11 @@ export const FeatureFlaggedErrorBoundary: React.FC<FeatureFlaggedErrorBoundaryPr
   context,
   boundaryName,
 }) => {
-  const { isEnabled, getVariant } = useFeatureFlags();
+  const { isEnabled, getVariant } = useFeatureFlags()
 
   // Check feature flags
-  const retryEnabled = isEnabled(flagKey, false);
-  const maxRetries = getVariant<number>('error_boundaries.max_retries', 3);
+  const retryEnabled = isEnabled(flagKey, false)
+  const maxRetries = getVariant<number>('error_boundaries.max_retries', 3)
 
   return (
     <ErrorBoundary
@@ -67,19 +74,19 @@ export const FeatureFlaggedErrorBoundary: React.FC<FeatureFlaggedErrorBoundaryPr
     >
       {children}
     </ErrorBoundary>
-  );
-};
+  )
+}
 
 /**
  * Hook to check if enhanced error boundaries are enabled for a specific context.
  * Useful for conditional rendering or feature detection.
  */
 export const useEnhancedErrorBoundaries = () => {
-  const { isEnabled, getVariant } = useFeatureFlags();
+  const { isEnabled, getVariant } = useFeatureFlags()
 
   return {
     retryEnabled: isEnabled('error_boundaries.retry_enabled', false),
     maxRetries: getVariant<number>('error_boundaries.max_retries', 3),
     telemetryEnhanced: isEnabled('error_boundaries.telemetry_enhanced', true),
-  };
-};
+  }
+}

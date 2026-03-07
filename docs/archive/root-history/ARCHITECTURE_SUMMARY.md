@@ -1,6 +1,7 @@
 # IntelGraph Summit Codebase Architecture Summary
 
 ## Overview
+
 This is a large-scale, enterprise intelligence platform with a sophisticated multi-service architecture supporting real-time graph visualization, AI-powered analysis, and complex intelligence workflows.
 
 ---
@@ -8,9 +9,11 @@ This is a large-scale, enterprise intelligence platform with a sophisticated mul
 ## 1. PACKAGE ORGANIZATION
 
 ### Primary Package Structure (`/packages/`)
+
 The codebase uses a monorepo structure with curated packages:
 
 **Core Packages:**
+
 - **common-types**: Shared TypeScript types and Zod schemas for cross-platform validation
   - Entity/Edge/Connector schemas
   - Envelope pattern for data interchange
@@ -24,6 +27,7 @@ The codebase uses a monorepo structure with curated packages:
 - **narrative-engine**: Natural language narrative generation
 
 **Domain Packages:**
+
 - **prov-ledger**: Provenance tracking and ledger
 - **event-booster**: Event processing enhancement
 - **influence-mining**: Influence network mining
@@ -34,6 +38,7 @@ The codebase uses a monorepo structure with curated packages:
 - **workflow-js**: Workflow execution library
 
 **Specialized Packages:**
+
 - **liquid-nano**: Micro-service framework
 - **canary-lattice**: Resilience patterns
 - **hit-protocol**: Intelligence transport protocol
@@ -41,6 +46,7 @@ The codebase uses a monorepo structure with curated packages:
 - **policy-audit**: Policy enforcement and auditing
 
 ### Key Pattern
+
 - Packages follow feature-oriented organization
 - Each package has `src/`, `test/`, and configuration files
 - All use TypeScript with strict typing
@@ -51,6 +57,7 @@ The codebase uses a monorepo structure with curated packages:
 ## 2. FRONTEND ARCHITECTURE
 
 ### Tech Stack
+
 ```
 Framework:      React 18.3.1 (TSX/JSX)
 State:          Redux Toolkit 2.8.2 + React-Redux 9.2.0
@@ -58,7 +65,7 @@ Styling:        Emotion 11.14, MUI 7.3.1, Tailwind
 Bundler:        Vite 7.2.2
 GraphQL Client: Apollo Client 3.13.9
 Real-time:      Socket.io-client 4.8.1 + graphql-ws 5.16.2
-Visualization:  
+Visualization:
   - Cytoscape.js 3.33.1 (with cola, fcose, dagre, cose-bilkent layouts)
   - D3.js 7.9.0 + D3-force 3.0.0
   - Leaflet 1.9.4 + react-leaflet 5.0.0
@@ -134,7 +141,9 @@ client/src/
 ```
 
 ### State Management Pattern
+
 Redux Toolkit slices for:
+
 - **Graph State**: Nodes, edges, layout, selection, interactions
 - **AI Insights**: AI analysis results and recommendations
 - **Timeline State**: Time-based filtering and display
@@ -142,11 +151,12 @@ Redux Toolkit slices for:
 - **UI State**: Modals, panels, visibility toggles
 
 ### Real-time Architecture
+
 ```javascript
 // Socket.io client with custom event handling
-socket.on('graph:op', payload)      // Graph operations
-socket.on('ai:insight', payload)    // AI insights
-socket.emit('graph:op', {graphId, op})
+socket.on("graph:op", payload); // Graph operations
+socket.on("ai:insight", payload); // AI insights
+socket.emit("graph:op", { graphId, op });
 ```
 
 ---
@@ -154,6 +164,7 @@ socket.emit('graph:op', {graphId, op})
 ## 3. BACKEND/SERVER ARCHITECTURE
 
 ### Tech Stack
+
 ```
 Framework:      Express 5.1.0
 GraphQL:        Apollo Server 5.1.0 + Apollo Plugins
@@ -269,6 +280,7 @@ server/src/
 ```
 
 ### GraphQL Schema Architecture
+
 - **Modular schemas**: `schema.core.js`, `schema.ai.js`, `schema.copilot.gql`, etc.
 - **Resolver organization**: Separated by domain (ai, annotations, copilot, graphops, er)
 - **Subscriptions**: Real-time updates via graphql-ws
@@ -278,6 +290,7 @@ server/src/
 ### Database Architecture
 
 **Neo4j** (Graph Database)
+
 - Entity nodes with properties
 - Relationship edges with types
 - Graph algorithms (GDS plugin)
@@ -285,29 +298,35 @@ server/src/
 - Enterprise license (5.15+)
 
 **PostgreSQL** (Relational)
+
 - Audit logs, user data, metadata
 - pg_stat_statements for performance monitoring
 - Vector extensions (pgvector 0.2.1) for embeddings
 - Connection pooling with optimized parameters
 
 **Redis**
+
 - Session management
 - Real-time subscriptions
 - Message pub/sub
 - Socket.io adapter
 
 **TimescaleDB**
+
 - Time-series metrics
 - Performance data collection
 
 ### Service Architecture Pattern
+
 Each service file typically contains:
+
 - Domain-specific business logic
 - Data transformation
 - Integration with databases
 - Event emission for real-time updates
 
 ### Real-time WebSocket Implementation
+
 ```typescript
 // uWebSockets.js server
 // Features:
@@ -324,6 +343,7 @@ Each service file typically contains:
 ## 4. EXISTING DATA VISUALIZATION IMPLEMENTATIONS
 
 ### Graph Visualization
+
 **Location**: `/client/src/components/graph/`
 
 1. **Cytoscape.js Based**
@@ -351,6 +371,7 @@ Each service file typically contains:
    - Virtualized detail panels
 
 ### Advanced Visualizations
+
 **Location**: `/client/src/components/visualization/`
 
 1. **DataVisualizationStudio.tsx** (28.8KB)
@@ -366,6 +387,7 @@ Each service file typically contains:
    - Performance-optimized
 
 ### Dashboard Widgets
+
 **Location**: `/client/src/components/dashboard/`
 
 1. **AnalyticsDashboard.jsx** (23.6KB)
@@ -384,19 +406,25 @@ Each service file typically contains:
    - LiveActivityFeed.tsx - Real-time activity stream
 
 ### Timeline Visualization
+
 **Location**: `/client/src/components/timeline/`
+
 - vis-timeline integration
 - Temporal filtering and navigation
 - Event correlation display
 
 ### Map/Geospatial
+
 **Location**: `/client/src/components/geospatial/`
+
 - Leaflet-based maps
 - Location-based intelligence visualization
 - Geographic filtering
 
 ### Features Using Visualization
+
 **Location**: `/client/src/features/`
+
 - **graph**: Graph workbench with full exploration
 - **timeline**: Temporal analysis and visualization
 - **link-analysis**: Relationship discovery visualization
@@ -407,6 +435,7 @@ Each service file typically contains:
 ## 5. REAL-TIME FEATURES
 
 ### WebSocket Stack
+
 1. **Client Side** (`socket.js`)
    - Socket.io client 4.8.1
    - Event types: `socket:connect`, `socket:disconnect`, `graph:op`, `ai:insight`
@@ -422,12 +451,14 @@ Each service file typically contains:
    - Topic-based subscriptions with `maestro:` prefix
 
 ### GraphQL Subscriptions
+
 - Defined in `/server/src/graphql/subscriptions.ts`
 - Uses graphql-ws protocol
 - Real-time mutations trigger subscriptions
 - WebSocket connection upgrade via Apollo Server plugin
 
 ### Event Streaming
+
 1. **Graph Operations** (`graph:op`)
    - Create, update, delete entities/relationships
    - Broadcast to connected clients
@@ -444,6 +475,7 @@ Each service file typically contains:
    - Alert notifications
 
 ### Message Ordering
+
 - Client-side clock (`let clock = 0`) for ordering
 - Server adds timestamp to operations
 - Ensures causal ordering of graph operations
@@ -453,6 +485,7 @@ Each service file typically contains:
 ## 6. API PATTERNS
 
 ### GraphQL API
+
 ```typescript
 // Query Pattern
 Query {
@@ -479,6 +512,7 @@ Subscription {
 ```
 
 ### REST API Routes
+
 ```
 /metrics                          # Prometheus metrics
 /api/ai                          # AI endpoints
@@ -491,6 +525,7 @@ Subscription {
 ```
 
 ### Common Data Structures
+
 - **Envelope Pattern** (from common-types)
   - Source metadata
   - Kind (ENTITY/EDGE)
@@ -508,6 +543,7 @@ Subscription {
   - Same metadata as Entity
 
 ### Authentication
+
 - JWT tokens stored in localStorage (client)
 - Token passed in `auth` parameter for Socket.io
 - RBAC via JWT claims: tenantId, userId, roles, permissions
@@ -520,6 +556,7 @@ Subscription {
 ### Multi-Database Strategy
 
 **Neo4j (Primary Graph Store)**
+
 - Graph DB for entities and relationships
 - GDS plugin for algorithm execution
 - APOC for complex procedures
@@ -527,6 +564,7 @@ Subscription {
 - Backup strategy with persistent volumes
 
 **PostgreSQL (Operational Data)**
+
 - Audit trails
 - User management
 - Metadata
@@ -535,12 +573,14 @@ Subscription {
 - Connection limit: 200
 
 **Redis (Caching & Real-time)**
+
 - Session management
 - Socket.io pub/sub adapter
 - Cache layer for frequent queries
 - Expiration policies
 
 **TimescaleDB (Metrics)**
+
 - Time-series metric collection
 - Query optimization for temporal data
 - Retention policies
@@ -562,6 +602,7 @@ Subscription {
    - Schema versioning in code
 
 ### Seeding
+
 - Demo data seeding: `seed-demo.ts`
 - Configurable entity/relationship counts
 - Development seeds: `seed.ts`, `seed-users.js`
@@ -571,7 +612,9 @@ Subscription {
 ## 8. SHARED LIBRARIES & UTILITIES
 
 ### Common Types Package
+
 **Location**: `/packages/common-types`
+
 - Zod schemas for validation
 - Runtime type checking
 - JSON schema generation
@@ -579,6 +622,7 @@ Subscription {
 - Exports: Entity, Edge, Connector, Run, Secret, Envelope types
 
 ### Client Utilities
+
 - **apolloClient**: GraphQL client setup with persisted queries
 - **graphql.ts**: GraphQL utilities
 - **toastBus.ts**: Toast notification system
@@ -586,13 +630,16 @@ Subscription {
 - **assistant/**: AI assistant utilities
 
 ### Server Utilities
+
 - **lib/auth.ts**: JWT context extraction
 - **lib/apollo.ts**: Apollo server utilities
 - **middleware/**: Authentication, logging, error handling
 - **config.ts**: Centralized configuration management
 
 ### UI Component Library
+
 **Location**: `/client/src/ui/`
+
 - Reusable component set
 - Built on MUI + Emotion
 - Custom themed components
@@ -603,6 +650,7 @@ Subscription {
 ## 9. ARCHITECTURAL PATTERNS & CONVENTIONS
 
 ### Feature Module Pattern
+
 ```
 features/[feature-name]/
 ├── index.ts
@@ -614,6 +662,7 @@ features/[feature-name]/
 ```
 
 ### Service Class Pattern
+
 - Domain-focused service classes
 - Single responsibility
 - Database/API integration
@@ -621,33 +670,36 @@ features/[feature-name]/
 - Named exports matching class name
 
 ### GraphQL Resolver Pattern
+
 ```typescript
 const resolvers = {
   Query: {
-    fieldName: (parent, args, context, info) => { }
+    fieldName: (parent, args, context, info) => {},
   },
   Mutation: {
-    actionName: (parent, args, context, info) => { }
+    actionName: (parent, args, context, info) => {},
   },
   Subscription: {
     streamName: {
-      subscribe: (parent, args, context) => { }
-    }
-  }
-}
+      subscribe: (parent, args, context) => {},
+    },
+  },
+};
 ```
 
 ### Redux Slice Pattern
+
 ```typescript
 const slice = createSlice({
-  name: 'domain',
+  name: "domain",
   initialState,
-  reducers: { },
-  extraReducers: { }
-})
+  reducers: {},
+  extraReducers: {},
+});
 ```
 
 ### Component Organization
+
 - Feature components in `components/`
 - Domain-specific subdirectories
 - Page templates in `pages/`
@@ -658,12 +710,14 @@ const slice = createSlice({
 ## 10. OBSERVABILITY & MONITORING
 
 ### OpenTelemetry Integration
+
 - Jaeger exporter for distributed tracing
 - Prometheus exporter for metrics
 - Span context propagation
 - Automatic instrumentation of Node.js
 
 ### Metrics Collection
+
 - Prometheus format export at `/metrics`
 - Active connection metrics
 - Request latency tracking
@@ -671,6 +725,7 @@ const slice = createSlice({
 - Business metrics (entity count, relationship count, etc.)
 
 ### Logging
+
 - Pino logger for performance
 - Structured JSON logging
 - Request/response logging via pino-http
@@ -678,7 +733,9 @@ const slice = createSlice({
 - Redacted authorization headers
 
 ### Monitoring Infrastructure
+
 **Location**: `/observability/`
+
 - Prometheus configuration
 - Alert rules
 - Grafana dashboards
@@ -690,6 +747,7 @@ const slice = createSlice({
 ## 11. DEPLOYMENT & INFRASTRUCTURE
 
 ### Docker Compose Services
+
 - **Neo4j**: Graph database (enterprise)
 - **PostgreSQL**: Relational data
 - **Redis**: Caching and pub/sub
@@ -698,11 +756,13 @@ const slice = createSlice({
 - **Monitoring**: Prometheus, Grafana, Jaeger
 
 ### Build & Deploy
+
 - **Client**: Vite build → static assets
 - **Server**: TypeScript compilation → Node.js runtime
 - **Tests**: Jest (server), Vitest + Playwright (client)
 
 ### Configuration
+
 - `.env` files with sensible defaults
 - Environment-specific configs
 - Docker environment variables
@@ -751,6 +811,7 @@ Based on the current architecture, a new visualization system should:
 ## Key Technologies Summary
 
 ### Frontend Stack
+
 - React 18 + TypeScript
 - Redux Toolkit for state
 - Apollo Client for GraphQL
@@ -760,6 +821,7 @@ Based on the current architecture, a new visualization system should:
 - MUI + Emotion for styling
 
 ### Backend Stack
+
 - Express 5 + TypeScript
 - Apollo Server for GraphQL
 - Neo4j + PostgreSQL + Redis databases
@@ -768,12 +830,14 @@ Based on the current architecture, a new visualization system should:
 - OpenTelemetry for observability
 
 ### Databases
+
 - Neo4j 5.15 (graph)
 - PostgreSQL 15 (relational)
 - Redis 7 (cache)
 - TimescaleDB (metrics)
 
 ### DevOps
+
 - Docker & Docker Compose
 - Prometheus & Grafana
 - Jaeger distributed tracing
@@ -789,4 +853,3 @@ Based on the current architecture, a new visualization system should:
 - **Packages**: 60+ reusable packages
 - **Tests**: Jest + Vitest + Playwright suites
 - **Configuration**: Multi-environment support
-

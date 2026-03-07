@@ -5,6 +5,7 @@
 ## Overview
 
 Summit's mission is vulnerable to:
+
 - **Leadership changes**: New executives with different priorities
 - **Economic pressure**: Demands to relax standards for growth or profit
 - **Acquisition**: New ownership wanting to repurpose the system
@@ -45,6 +46,7 @@ Failure at any single layer is recoverable. The stack provides **defense in dept
 **Mechanism**: Legal entity structure that requires consideration of stakeholders beyond shareholders
 
 **Protection**:
+
 - Directors legally obligated to consider mission alongside profit
 - Creates fiduciary duty to purpose, not just returns
 - Protects against shareholder pressure to maximize short-term value
@@ -52,6 +54,7 @@ Failure at any single layer is recoverable. The stack provides **defense in dept
 **Limitation**: Only available in certain jurisdictions; requires ongoing compliance
 
 **Implementation**:
+
 - Incorporate or convert to B-Corp/PBC status
 - Define public benefit in charter as "evidence-based decision support with integrity"
 - Include specific measurable goals (evidence discipline, refusal under uncertainty, etc.)
@@ -63,6 +66,7 @@ Failure at any single layer is recoverable. The stack provides **defense in dept
 **Mechanism**: Organizational charter that defines immutable purpose
 
 **Protection**:
+
 - Requires supermajority (2/3 or 3/4) to modify
 - Creates legal constraint on what the organization can do
 - Provides basis for stakeholder challenges to mission drift
@@ -95,17 +99,20 @@ Modification of this Article requires:
 **Mechanism**: Separate board with veto power over mission-critical changes
 
 **Protection**:
+
 - Insulated from economic pressure (fixed compensation, term limits)
 - Authority to block changes that compromise mission
 - Public reporting obligation (creates accountability)
 
 **Composition**:
+
 - Majority external members (no operational role)
 - Expertise in ethics, governance, relevant domain
 - Staggered terms (prevent sudden capture)
 - Removal only for cause (not performance/disagreement)
 
 **Powers**:
+
 - Veto changes to scope, invariants, or governance structure
 - Trigger audits and investigations
 - Require remediation of drift
@@ -118,6 +125,7 @@ Modification of this Article requires:
 **Mechanism**: Legally binding public commitments that create enforceable obligations
 
 **Protection**:
+
 - Creates third-party standing to challenge violations
 - Generates reputational and legal cost for betrayal
 - Provides regulators and partners with enforcement hook
@@ -148,12 +156,14 @@ This commitment is:
 **Solution**: Align compensation with mission adherence, not just metrics
 
 **Implementation**:
+
 - Executive compensation tied to **audit outcomes** (evidence discipline maintained)
 - Bonuses reduced or eliminated if **invariants violated**
 - Long-term vesting dependent on **sustained mission compliance**
 - Penalties for **drift incidents** (documented erosion of standards)
 
 **Example Metrics**:
+
 - ✅ % decisions with adequate evidence (target: 100%)
 - ✅ Oversight audit pass rate (target: clean audit)
 - ✅ Stakeholder trust scores (measured independently)
@@ -169,12 +179,14 @@ This commitment is:
 **Solution**: Seek funding that explicitly supports the mission
 
 **Options**:
+
 - **Mission-aligned investors**: VCs/PE with stated commitment to impact
 - **Debt over equity**: Reduces governance control by investors
 - **Donor/grant funding**: For non-profit or research components
 - **Earned revenue with constraints**: Commercial with mission guardrails
 
 **Contract Provisions**:
+
 - Investor agreements acknowledge **mission primacy**
 - Board seats for investors **do not override oversight board**
 - Exit scenarios **require mission continuity verification**
@@ -187,6 +199,7 @@ This commitment is:
 **Mechanism**: Make mission abandonment economically painful
 
 **Implementation**:
+
 - **Brand value tied to mission**: Reputation loss from drift is expensive
 - **Customer contracts reference invariants**: Violation triggers renegotiation
 - **Partnership agreements with mission clauses**: Termination rights if mission abandoned
@@ -201,12 +214,14 @@ This commitment is:
 **Mechanism**: Technical systems that detect and flag potential violations
 
 **Implementation**:
+
 - Real-time monitoring of decision patterns against stated invariants
 - Automated alerts when behavior diverges from commitments
 - Immutable audit logs that can't be altered retroactively
 - Cryptographic attestation of compliance (tamper-evident)
 
 **Example**:
+
 ```
 Alert: Evidence discipline threshold breach detected
 - Last 30 decisions: 12% approved without minimum evidence citations
@@ -222,6 +237,7 @@ Alert: Evidence discipline threshold breach detected
 **Mechanism**: Technical interfaces that allow independent verification
 
 **Implementation**:
+
 - Public APIs for compliance checking (abstracted for security)
 - Third-party audit access to decision logs (appropriately scoped)
 - Cryptographic proof of log integrity
@@ -236,6 +252,7 @@ Alert: Evidence discipline threshold breach detected
 **Mechanism**: Automated shutdown or constraint if mission compromise detected
 
 **Implementation** (use cautiously):
+
 - System automatically escalates to **human-only review** if invariant violations detected
 - **Scope restrictions** activate if drift patterns emerge
 - **Public notification** triggered if certain red lines crossed
@@ -258,6 +275,7 @@ Alert: Evidence discipline threshold breach detected
 **Mechanism**: Every team member understands mission and constraints
 
 **Implementation**:
+
 - Mandatory mission training for all staff
 - Case studies of drift scenarios and responses
 - Regular refreshers and discussion
@@ -274,6 +292,7 @@ Alert: Evidence discipline threshold breach detected
 **Protection**: Creates external scrutiny and accountability pressure
 
 **Content**:
+
 - Compliance with invariants (verified by third party)
 - Governance changes and rationale
 - Incident reports (appropriately abstracted)
@@ -286,6 +305,7 @@ Alert: Evidence discipline threshold breach detected
 **Mechanism**: Process for external parties to challenge drift
 
 **Implementation**:
+
 - Public portal for reporting concerns
 - Obligation to investigate and respond
 - Independent review of substantive challenges
@@ -300,6 +320,7 @@ Alert: Evidence discipline threshold breach detected
 **Protection**: Regulators become external monitors of mission integrity
 
 **Implementation**:
+
 - Regular briefings on governance and operation
 - Regulatory approval tied to mission adherence
 - Whistle-blower paths to regulators if internal capture suspected
@@ -313,6 +334,7 @@ Alert: Evidence discipline threshold breach detected
 **Risk**: New leadership wants to "modernize" or "scale" by relaxing constraints
 
 **Protections**:
+
 - **Mission oversight board** veto over mission-critical changes
 - **Successor approval process** includes mission alignment assessment
 - **Transition period** with founder advisory role and oversight
@@ -326,6 +348,7 @@ Alert: Evidence discipline threshold breach detected
 **Risk**: Acquirer wants to repurpose Summit or loosen standards for integration
 
 **Protections**:
+
 - **Charter provisions** that survive acquisition
 - **Mission continuity covenant** in acquisition agreement
 - **Oversight board consent** required for acquisition
@@ -342,6 +365,7 @@ Alert: Evidence discipline threshold breach detected
 **Risk**: Government or institutional pressure to weaken constraints
 
 **Protections**:
+
 - **Public commitments** create political cost for forced compromise
 - **Oversight board independence** (can resist even if management caves)
 - **Legal provisions** that limit government authority over mission
@@ -355,6 +379,7 @@ Alert: Evidence discipline threshold breach detected
 **Risk**: Financial pressure leads to cutting corners on evidence discipline
 
 **Protections**:
+
 - **Scope reduction** before standard reduction (do less, do it right)
 - **Overhead reserve** to weather temporary downturns
 - **Mission-aligned funding** that understands value of constraints
@@ -366,30 +391,35 @@ Alert: Evidence discipline threshold breach detected
 ## Implementation Roadmap
 
 ### Phase 1: Legal Foundation (Month 1-3)
+
 - Review and update organizational charter
 - Establish or formalize oversight board
 - Draft irrevocable public commitments
 - Legal review of all mission-lock provisions
 
 ### Phase 2: Economic Alignment (Month 2-4)
+
 - Redesign executive compensation
 - Review investor/funder agreements
 - Establish mission-aligned funding strategy
 - Create cost-of-betrayal mechanisms
 
 ### Phase 3: Technical Enforcement (Month 3-6)
+
 - Build automated invariant monitoring
 - Implement external verification hooks
 - Deploy audit log infrastructure
 - Create compliance dashboards
 
 ### Phase 4: Cultural Embedding (Ongoing)
+
 - Develop mission education programs
 - Document institutional memory
 - Train staff on drift detection
 - Build culture of principled refusal
 
 ### Phase 5: External Accountability (Month 6+)
+
 - Launch transparency reporting
 - Establish stakeholder challenge process
 - Engage regulators proactively
@@ -402,6 +432,7 @@ Alert: Evidence discipline threshold breach detected
 Monitor for these drift indicators:
 
 🚨 **Erosion signals**:
+
 - "Just this once" exceptions to invariants
 - "Market demands" justifying standard reduction
 - "Temporary" relaxation of oversight

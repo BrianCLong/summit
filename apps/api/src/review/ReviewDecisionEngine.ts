@@ -5,13 +5,19 @@ import {
   ReviewItem,
   ReviewStatus,
   ReviewType,
-} from './models.js';
+} from "./models.js";
 
 const DEFAULT_RULES: DecisionRulesByType = {
-  entity: { allowed: ['approve', 'reject', 'needs-more-info', 'escalate'], requireReason: true },
-  relationship: { allowed: ['approve', 'reject', 'needs-more-info', 'escalate'], requireReason: true },
-  event: { allowed: ['approve', 'reject', 'needs-more-info', 'escalate'], requireReason: true },
-  quarantine: { allowed: ['approve', 'reject', 'needs-more-info', 'escalate'], requireReason: true },
+  entity: { allowed: ["approve", "reject", "needs-more-info", "escalate"], requireReason: true },
+  relationship: {
+    allowed: ["approve", "reject", "needs-more-info", "escalate"],
+    requireReason: true,
+  },
+  event: { allowed: ["approve", "reject", "needs-more-info", "escalate"], requireReason: true },
+  quarantine: {
+    allowed: ["approve", "reject", "needs-more-info", "escalate"],
+    requireReason: true,
+  },
 };
 
 export interface DecisionResult {
@@ -29,7 +35,7 @@ export class ReviewDecisionEngine {
       throw new Error(`action_not_allowed:${action}`);
     }
     if (rule?.requireReason && !reasonCode) {
-      throw new Error('reason_required');
+      throw new Error("reason_required");
     }
   }
 
@@ -40,13 +46,13 @@ export class ReviewDecisionEngine {
       if (item.lastDecision.correlationId === decision.correlationId) {
         return { item, decision: item.lastDecision, idempotent: true };
       }
-      throw new Error('decision_already_recorded');
+      throw new Error("decision_already_recorded");
     }
 
     const decidedAt = decision.decidedAt ?? new Date().toISOString();
     const resolved: ReviewItem = {
       ...item,
-      status: 'decided' satisfies ReviewStatus,
+      status: "decided" satisfies ReviewStatus,
       lastDecision: { ...decision, decidedAt },
     };
 

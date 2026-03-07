@@ -10,6 +10,7 @@ exceptions as governed exceptions under policy enforcement. Reference: `docs/SUM
 ## Scope
 
 **In scope**
+
 - Defensive analytics only: detection, measurement, correlation, and reporting.
 - Adaptive narrative operations (closed-loop testing, variant proliferation).
 - Cognitive infrastructure targeting signals (attention load, trust shock, cohesion fracture).
@@ -17,6 +18,7 @@ exceptions as governed exceptions under policy enforcement. Reference: `docs/SUM
 - Agent-swarm coordination indicators (timing coherence, identity persistence).
 
 **Out of scope (intentionally constrained)**
+
 - Automated takedown or counter-influence operations.
 - Persona generation or content amplification.
 - Definitive attribution to specific state actors.
@@ -24,11 +26,13 @@ exceptions as governed exceptions under policy enforcement. Reference: `docs/SUM
 ## Core Artifacts
 
 ### Campaign Object
+
 A normalized representation of a suspected influence operation.
 
 Schema: `src/cogwar/schema/campaign-object.schema.json`
 
 Required fields:
+
 - `schema_version` (`cogwar.campaign.v1`)
 - `campaign_id`
 - `narratives[]`
@@ -36,11 +40,13 @@ Required fields:
 - `evidence[]`
 
 ### Evidence Bundle
+
 A deterministic, immutable record of detector outputs and attributions.
 
 Schema: `src/cogwar/schema/evidence-bundle.schema.json`
 
 Required fields:
+
 - `schema_version` (`cogwar.evidence.v1`)
 - `evidence_id` (format enforced below)
 - `detector`
@@ -64,18 +70,21 @@ Required fields:
 ## Import / Export Matrix
 
 **Imports**
+
 - JSONL posts/comments
 - Incident timelines
 - Optional platform metadata
 - Summit KG entities
 
 **Exports**
+
 - Campaign Object JSON
 - Evidence Bundle JSON
 - Optional graph edges (Neo4j)
 - Optional dashboard-ready metrics
 
 **Non-goals**
+
 - Automated moderation
 - Narrative generation or optimization
 - Personal data enrichment beyond defensive analytics
@@ -95,13 +104,13 @@ Required fields:
 
 ## Threat-Informed Requirements
 
-| Threat | Mitigation | Gate | Test Case |
-| --- | --- | --- | --- |
-| Adaptive influence evasion | Detect pivot patterns + variant proliferation | Fixture regression | `adaptivity_pivot.test.ts` |
+| Threat                     | Mitigation                                      | Gate                       | Test Case                       |
+| -------------------------- | ----------------------------------------------- | -------------------------- | ------------------------------- |
+| Adaptive influence evasion | Detect pivot patterns + variant proliferation   | Fixture regression         | `adaptivity_pivot.test.ts`      |
 | False positives weaponized | Evidence-backed explanations + confidence bands | Explainability schema gate | `explainability_schema.test.ts` |
-| Data poisoning | Input validation + anomaly flags | Schema + fuzz tests | `ingest_fuzz.test.ts` |
-| PII leakage | Never-log policy + redaction | PII log scan | `ci-security.yml` step |
-| Model drift | Trend thresholds | Scheduled drift check | Drift artifact gate |
+| Data poisoning             | Input validation + anomaly flags                | Schema + fuzz tests        | `ingest_fuzz.test.ts`           |
+| PII leakage                | Never-log policy + redaction                    | PII log scan               | `ci-security.yml` step          |
+| Model drift                | Trend thresholds                                | Scheduled drift check      | Drift artifact gate             |
 
 ## Change Control
 

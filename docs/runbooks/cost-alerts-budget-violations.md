@@ -36,11 +36,13 @@ severity: critical
 ```
 
 **Symptoms**:
+
 - Tenant's daily spending exceeded configured limit
 - Budget utilization > 95%
 - Potential service degradation for tenant
 
 **Immediate Actions**:
+
 1. Check budget utilization in Admin Studio
 2. Review recent spending patterns
 3. Identify cost drivers (operations, resources)
@@ -59,10 +61,12 @@ severity: warning
 ```
 
 **Symptoms**:
+
 - Tenant approaching 80% of monthly budget
 - Projected to exceed budget before month end
 
 **Immediate Actions**:
+
 1. Generate spending forecast
 2. Send tenant notification
 3. Review recent usage trends
@@ -81,11 +85,13 @@ severity: warning
 ```
 
 **Symptoms**:
+
 - High rate of query kills
 - Potential performance issues
 - Tenant complaints about query failures
 
 **Immediate Actions**:
+
 1. Review killed queries in Admin Studio
 2. Identify common patterns (tenant, query type)
 3. Check if legitimate or abuse
@@ -104,10 +110,12 @@ severity: warning
 ```
 
 **Symptoms**:
+
 - Unexpected cost spike (3σ from mean)
 - Sudden change in usage patterns
 
 **Immediate Actions**:
+
 1. Investigate source of anomaly
 2. Check for runaway queries
 3. Review recent deployments
@@ -130,6 +138,7 @@ curl -X POST http://admin-api:4100/graphql \
 ```
 
 **Severity Levels**:
+
 - **P0 (Critical)**: > 100% utilization, service disruption
 - **P1 (High)**: 95-100% utilization, imminent exhaustion
 - **P2 (Medium)**: 80-95% utilization, warning threshold
@@ -147,6 +156,7 @@ curl -X POST http://admin-api:4100/graphql \
 ```
 
 **Key Questions**:
+
 - Which operations are most expensive?
 - Which resources consuming most cost?
 - Is this expected or anomalous?
@@ -164,6 +174,7 @@ curl -X POST http://admin-api:4100/graphql \
 ```
 
 Look for:
+
 - Sudden spikes in spending
 - Repeated expensive operations
 - Cost estimation vs. actual cost gaps
@@ -180,6 +191,7 @@ curl -X POST http://admin-api:4100/graphql \
 ```
 
 Look for:
+
 - Long-running expensive queries
 - High complexity queries
 - Queries approaching kill threshold
@@ -250,6 +262,7 @@ curl -X POST http://admin-api:4100/graphql \
 ### Step 7: Document Incident
 
 Create incident record with:
+
 - Timestamp of alert
 - Budget utilization at time of alert
 - Root cause analysis
@@ -276,6 +289,7 @@ curl -X POST http://admin-api:4100/graphql \
 2. **Check Query Patterns**
 
 Review `killsByReason` to identify:
+
 - Time limit violations
 - Cost limit violations
 - Complexity violations
@@ -351,8 +365,8 @@ return result;
 
 ```typescript
 // In services/common/cost/throttling.ts
-costGuardrails.setBudget('minute', 10.0); // $10/minute max
-costGuardrails.setBudget('hour', 100.0); // $100/hour max
+costGuardrails.setBudget("minute", 10.0); // $10/minute max
+costGuardrails.setBudget("hour", 100.0); // $100/hour max
 ```
 
 2. **Rate Limit API**
@@ -431,12 +445,14 @@ watch -n 60 'curl -s -X POST http://admin-api:4100/graphql \
 ### Level 1: On-Call Engineer (15 minutes)
 
 **Actions**:
+
 - Acknowledge alert
 - Assess severity
 - Apply immediate mitigation
 - Document findings
 
 **Escalate if**:
+
 - Cause unclear after 15 minutes
 - Mitigation not effective
 - Potential security incident
@@ -445,12 +461,14 @@ watch -n 60 'curl -s -X POST http://admin-api:4100/graphql \
 ### Level 2: SRE Lead (30 minutes)
 
 **Actions**:
+
 - Review Level 1 analysis
 - Engage relevant teams
 - Implement advanced mitigation
 - Update incident status
 
 **Escalate if**:
+
 - Platform-wide impact
 - Database performance issues
 - Requires code changes
@@ -459,6 +477,7 @@ watch -n 60 'curl -s -X POST http://admin-api:4100/graphql \
 ### Level 3: Engineering Manager (1 hour)
 
 **Actions**:
+
 - Coordinate cross-team response
 - Make architectural decisions
 - Approve emergency changes
@@ -467,6 +486,7 @@ watch -n 60 'curl -s -X POST http://admin-api:4100/graphql \
 ### Level 4: VP Engineering / CTO (Immediate)
 
 **Escalate if**:
+
 - Customer data at risk
 - Major financial loss
 - Legal/compliance implications
@@ -483,25 +503,25 @@ watch -n 60 'curl -s -X POST http://admin-api:4100/graphql \
 ```typescript
 // Default budgets for new tenants
 const DEFAULT_BUDGETS = {
-  minute: 1.0,   // $1/minute
-  hour: 10.0,    // $10/hour
-  day: 50.0,     // $50/day
+  minute: 1.0, // $1/minute
+  hour: 10.0, // $10/hour
+  day: 50.0, // $50/day
   month: 1000.0, // $1000/month
 };
 
 // Default query budgets
 const DEFAULT_QUERY_BUDGET = {
-  maxExecutionTimeMs: 5000,      // 5 seconds
-  maxCostDollars: 0.10,          // $0.10
-  maxConcurrentQueries: 10,      // 10 concurrent
-  maxComplexity: 50,             // Complexity score
+  maxExecutionTimeMs: 5000, // 5 seconds
+  maxCostDollars: 0.1, // $0.10
+  maxConcurrentQueries: 10, // 10 concurrent
+  maxComplexity: 50, // Complexity score
 };
 ```
 
 2. **Implement Cost Estimation**
 
 ```typescript
-import { QueryCostEstimator } from '@intelgraph/slow-query-killer';
+import { QueryCostEstimator } from "@intelgraph/slow-query-killer";
 
 // Before executing query
 const estimatedCost = QueryCostEstimator.estimateNeo4jCost(cypher, 100);
@@ -534,7 +554,7 @@ kubectl apply -f observability/grafana/dashboards/finops-cost-guard.json
 
 ```typescript
 // Cache expensive queries
-import Redis from 'ioredis';
+import Redis from "ioredis";
 const redis = new Redis(process.env.REDIS_URL);
 
 const CACHE_TTL = 3600; // 1 hour
@@ -557,18 +577,21 @@ async function cachedQuery(cypher: string, params: any) {
 ### Regular Maintenance
 
 **Daily**:
+
 - Review budget utilization reports
 - Check for anomalies
 - Review killed query statistics
 - Update tenant notices
 
 **Weekly**:
+
 - Analyze cost trends
 - Identify optimization opportunities
 - Review slow query patterns
 - Update cost models
 
 **Monthly**:
+
 - Budget reconciliation
 - Cost allocation review
 - Tenant cost reports
@@ -649,6 +672,6 @@ rate(intelgraph_query_warnings_total[5m])
 
 ## Revision History
 
-| Date | Author | Changes |
-|------|--------|---------|
+| Date       | Author   | Changes          |
+| ---------- | -------- | ---------------- |
 | 2025-11-24 | Ops Team | Initial creation |

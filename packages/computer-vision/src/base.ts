@@ -2,12 +2,7 @@
  * Base Classes for Computer Vision Models
  */
 
-import {
-  ModelConfig,
-  ProcessingResult,
-  PerformanceMetrics,
-  ImageDimensions,
-} from './types.js';
+import { ModelConfig, ProcessingResult, PerformanceMetrics, ImageDimensions } from "./types.js";
 
 /**
  * Base Computer Vision Model Interface
@@ -70,10 +65,7 @@ export abstract class BaseComputerVisionModel implements IComputerVisionModel {
    * Process multiple images in batch
    * Default implementation processes sequentially
    */
-  async processBatch(
-    imagePaths: string[],
-    options?: Record<string, any>
-  ): Promise<any[]> {
+  async processBatch(imagePaths: string[], options?: Record<string, any>): Promise<any[]> {
     const results: any[] = [];
 
     for (const imagePath of imagePaths) {
@@ -109,7 +101,7 @@ export abstract class BaseComputerVisionModel implements IComputerVisionModel {
    */
   protected ensureInitialized(): void {
     if (!this.initialized) {
-      throw new Error('Model not initialized. Call initialize() first.');
+      throw new Error("Model not initialized. Call initialize() first.");
     }
   }
 
@@ -137,7 +129,7 @@ export abstract class BaseComputerVisionModel implements IComputerVisionModel {
       processing_time_ms: processingTime,
       model_info: {
         name: this.config.model_name,
-        version: this.config.model_version || 'unknown',
+        version: this.config.model_version || "unknown",
         device: this.config.device,
       },
       error,
@@ -166,10 +158,7 @@ export interface IObjectDetector extends IComputerVisionModel {
   /**
    * Track objects across frames
    */
-  track?(
-    imagePaths: string[],
-    options?: Record<string, any>
-  ): Promise<any>;
+  track?(imagePaths: string[], options?: Record<string, any>): Promise<any>;
 }
 
 /**

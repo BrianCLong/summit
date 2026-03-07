@@ -1,23 +1,23 @@
 /**
  * OPA ABAC Enforcement Middleware for Apollo Gateway
- * 
+ *
  * Integrates Open Policy Agent (OPA) for attribute-based access control:
  * - Cross-tenant isolation enforcement
  * - Field-level redaction for sensitive data
  * - Purpose/retention metadata tagging
  * - Audit logging for all policy decisions
- * 
+ *
  * Performance: < 50ms p95 for policy evaluation
  * Security: Fail-closed (default deny)
  */
 
-import { ApolloServerPlugin } from '@apollo/server';
-import { GraphQLRequestContext } from '@apollo/server/types';
-import axios from 'axios';
+import { ApolloServerPlugin } from "@apollo/server";
+import { GraphQLRequestContext } from "@apollo/server/types";
+import axios from "axios";
 
 interface OPAConfig {
-  endpoint: string;  // OPA server URL
-  timeout: number;   // Request timeout (ms)
+  endpoint: string; // OPA server URL
+  timeout: number; // Request timeout (ms)
   policyPath: string; // Path to policy in OPA
 }
 
@@ -36,7 +36,7 @@ interface AuditLog {
   tenantId: string;
   userId: string;
   operation: string;
-  decision: 'allow' | 'deny';
+  decision: "allow" | "deny";
   reason?: string;
   policyVersion?: string;
 }
@@ -45,10 +45,7 @@ export class OPAMiddleware implements ApolloServerPlugin {
   private config: OPAConfig;
   private auditLogger: (log: AuditLog) => void;
 
-  constructor(
-    config: OPAConfig,
-    auditLogger?: (log: AuditLog) => void
-  ) {
+  constructor(config: OPAConfig, auditLogger?: (log: AuditLog) => void) {
     this.config = {
       timeout: 50, // Default 50ms to meet p95 requirement
       ...config,
@@ -56,9 +53,7 @@ export class OPAMiddleware implements ApolloServerPlugin {
     this.auditLogger = auditLogger || this.defaultAuditLogger;
   }
 
-  async requestDidStart(
-    requestContext: GraphQLRequestContext<any>
-  ): Promise<any> {
+  async requestDidStart(requestContext: GraphQLRequestContext<any>): Promise<any> {
     const { request, contextValue } = requestContext;
 
     // Extract authentication context
@@ -69,13 +64,13 @@ export class OPAMiddleware implements ApolloServerPlugin {
     if (!tenantId || !userId) {
       this.audit({
         timestamp: new Date().toISOString(),
-        tenantId: tenantId || 'unknown',
-        userId: userId || 'unknown',
-        operation: request.operationName || 'unknown',
-        decision: 'deny',
-        reason: 'Missing authentication context',
+        tenantId: tenantId || "unknown",
+        userId: userId || "unknown",
+        operation: request.operationName || "unknown",
+        decision: "deny",
+        reason: "Missing authentication context",
       });
-      throw new Error('Unauthorized: Missing authentication context');
+      throw new Error("Unauthorized: Missing authentication context");
     }
 
     // Prepare OPA input
@@ -114,13 +109,15 @@ export class OPAMiddleware implements ApolloServerPlugin {
           timestamp: new Date().toISOString(),
           tenantId,
           userId,
-          operation: request.operationName || 'unknown',
-          decision: 'deny',
-          reason: decision.auditMetadata?.reason || 'Policy denied',
+          operation: request.operationName || "unknown",
+          decision: "deny",
+          reason: decision.auditMetadata?.reason || "Policy denied",
         });
 
         // Return 403 with audit metadata
-        throw new Error(`Forbidden: ${decision.auditMetadata?.reason || 'Access denied by policy'}`);
+        throw new Error(
+          `Forbidden: ${decision.auditMetadata?.reason || "Access denied by policy"}`
+        );
       }
 
       // Apply field-level redaction
@@ -133,8 +130,8 @@ export class OPAMiddleware implements ApolloServerPlugin {
         timestamp: new Date().toISOString(),
         tenantId,
         userId,
-        operation: request.operationName || 'unknown',
-        decision: 'allow',
+        operation: request.operationName || "unknown",
+        decision: "allow",
       });
 
       return {
@@ -154,8 +151,8 @@ export class OPAMiddleware implements ApolloServerPlugin {
         timestamp: new Date().toISOString(),
         tenantId,
         userId,
-        operation: request.operationName || 'unknown',
-        decision: 'deny',
+        operation: request.operationName || "unknown",
+        decision: "deny",
         reason: `Policy evaluation error: ${error.message}`,
       });
 
@@ -168,14 +165,10 @@ export class OPAMiddleware implements ApolloServerPlugin {
    */
   private async evaluatePolicy(input: any): Promise<PolicyDecision> {
     try {
-      const response = await axios.post(
-        `${this.config.endpoint}${this.config.policyPath}`,
-        input,
-        {
-          timeout: this.config.timeout,
-          headers: { 'Content-Type': 'application/json' },
-        }
-      );
+      const response = await axios.post(`${this.config.endpoint}${this.config.policyPath}`, input, {
+        timeout: this.config.timeout,
+        headers: { "Content-Type": "application/json" },
+      });
 
       return {
         allowed: response.data.result?.allowed || false,
@@ -184,8 +177,8 @@ export class OPAMiddleware implements ApolloServerPlugin {
       };
     } catch (error: any) {
       // Fail-closed on error
-      console.error('OPA policy evaluation failed:', error.message);
-      throw new Error('Policy evaluation unavailable');
+      console.error("OPA policy evaluation failed:", error.message);
+      throw new Error("Policy evaluation unavailable");
     }
   }
 
@@ -209,7 +202,7 @@ export class OPAMiddleware implements ApolloServerPlugin {
       decision: log.decision,
       reason: log.reason,
     };
-    console.log('[OPA-AUDIT]', JSON.stringify(sanitizedLog));
+    console.log("[OPA-AUDIT]", JSON.stringify(sanitizedLog));
   }
 }
 
@@ -217,7 +210,7 @@ export class OPAMiddleware implements ApolloServerPlugin {
  * Redact sensitive fields from response
  */
 function redactFields(data: any, fieldsToRedact: string[]): any {
-  if (!data || typeof data !== 'object') return data;
+  if (!data || typeof data !== "object") return data;
 
   if (Array.isArray(data)) {
     return data.map((item) => redactFields(item, fieldsToRedact));
@@ -226,13 +219,13 @@ function redactFields(data: any, fieldsToRedact: string[]): any {
   const redacted = { ...data };
   for (const field of fieldsToRedact) {
     if (field in redacted) {
-      redacted[field] = '[REDACTED]';
+      redacted[field] = "[REDACTED]";
     }
   }
 
   // Recursively redact nested objects
   for (const key in redacted) {
-    if (typeof redacted[key] === 'object') {
+    if (typeof redacted[key] === "object") {
       redacted[key] = redactFields(redacted[key], fieldsToRedact);
     }
   }
@@ -269,23 +262,19 @@ export function validateCrossTenantAccess(
  * Purpose/retention tag applier
  */
 export interface RetentionMetadata {
-  purpose: string[];   // e.g., ['analytics', 'compliance']
+  purpose: string[]; // e.g., ['analytics', 'compliance']
   retentionDays: number;
   createdAt: string;
 }
 
-export function applyRetentionTags(
-  data: any,
-  metadata: RetentionMetadata
-): any {
+export function applyRetentionTags(data: any, metadata: RetentionMetadata): any {
   return {
     ...data,
     _metadata: {
       purpose: metadata.purpose,
       retentionDays: metadata.retentionDays,
       expiresAt: new Date(
-        new Date(metadata.createdAt).getTime() +
-          metadata.retentionDays * 24 * 60 * 60 * 1000
+        new Date(metadata.createdAt).getTime() + metadata.retentionDays * 24 * 60 * 60 * 1000
       ).toISOString(),
     },
   };

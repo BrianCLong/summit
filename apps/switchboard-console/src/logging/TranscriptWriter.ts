@@ -1,11 +1,11 @@
-import { appendFile, mkdir } from 'node:fs/promises';
-import path from 'node:path';
+import { appendFile, mkdir } from "node:fs/promises";
+import path from "node:path";
 
 export class TranscriptWriter {
   private readonly transcriptPath: string;
 
   constructor(private readonly sessionDir: string) {
-    this.transcriptPath = path.join(this.sessionDir, 'transcript.log');
+    this.transcriptPath = path.join(this.sessionDir, "transcript.log");
   }
 
   async init(): Promise<void> {

@@ -8,7 +8,7 @@
  * - Deterministic diagnostics
  */
 
-import { EXIT_CODES } from './constants.js';
+import { EXIT_CODES } from "./constants.js";
 
 // Exit code for provider errors after retries exhausted
 export const PROVIDER_EXIT_CODE = 3;
@@ -17,11 +17,11 @@ export const PROVIDER_EXIT_CODE = 3;
  * Error categories for provider errors
  */
 export type ErrorCategory =
-  | 'transient'        // Retryable: network errors, 429, 5xx, timeouts
-  | 'permanent'        // Non-retryable: 4xx (except 429), invalid auth, malformed request
-  | 'user_cancelled'   // User cancelled the operation
-  | 'budget_exceeded'  // Budget limits reached
-  | 'network_denied';  // Network access not allowed
+  | "transient" // Retryable: network errors, 429, 5xx, timeouts
+  | "permanent" // Non-retryable: 4xx (except 429), invalid auth, malformed request
+  | "user_cancelled" // User cancelled the operation
+  | "budget_exceeded" // Budget limits reached
+  | "network_denied"; // Network access not allowed
 
 /**
  * Provider error classification
@@ -42,11 +42,11 @@ export interface ProviderOptions {
   initialBackoffMs: number;
   maxBackoffMs: number;
   timeoutMs: number;
-  budgetMs: number | null;      // null = unlimited
-  maxRequests: number | null;   // null = unlimited
-  tokenBudget: number | null;   // null = unlimited (not enforced if unavailable)
+  budgetMs: number | null; // null = unlimited
+  maxRequests: number | null; // null = unlimited
+  tokenBudget: number | null; // null = unlimited (not enforced if unavailable)
   ci: boolean;
-  sessionId?: string;           // For deterministic jitter seed in CI
+  sessionId?: string; // For deterministic jitter seed in CI
   allowNetwork: boolean;
 }
 
@@ -83,7 +83,7 @@ export interface RequestHistoryEntry {
   attempt: number;
   timestamp: string;
   duration_ms: number;
-  status: 'success' | 'error' | 'timeout' | 'cancelled';
+  status: "success" | "error" | "timeout" | "cancelled";
   status_code?: number;
   error_category?: ErrorCategory;
   retry_after_ms?: number;
@@ -100,14 +100,14 @@ export class ProviderError extends Error {
     public exitCode: number = PROVIDER_EXIT_CODE
   ) {
     super(message);
-    this.name = 'ProviderError';
+    this.name = "ProviderError";
   }
 
   format(): string {
     const sortedDetails = Object.entries(this.diagnostics)
       .sort(([a], [b]) => a.localeCompare(b))
       .map(([k, v]) => `${k}: ${JSON.stringify(v)}`)
-      .join('\n  ');
+      .join("\n  ");
     return `Provider Error (${this.category}): ${this.message}\nDiagnostics:\n  ${sortedDetails}`;
   }
 }
@@ -118,13 +118,13 @@ export class ProviderError extends Error {
 export class BudgetExceededError extends Error {
   constructor(
     message: string,
-    public budgetType: 'time' | 'requests' | 'tokens',
+    public budgetType: "time" | "requests" | "tokens",
     public limit: number,
     public used: number,
     public exitCode: number = EXIT_CODES.POLICY_ERROR
   ) {
     super(message);
-    this.name = 'BudgetExceededError';
+    this.name = "BudgetExceededError";
   }
 
   format(): string {
@@ -135,13 +135,10 @@ export class BudgetExceededError extends Error {
 /**
  * Classify an error into a category
  */
-export function classifyError(
-  error: unknown,
-  statusCode?: number
-): ClassifiedError {
+export function classifyError(error: unknown, statusCode?: number): ClassifiedError {
   const details: string[] = [];
-  let category: ErrorCategory = 'permanent';
-  let message = 'Unknown error';
+  let category: ErrorCategory = "permanent";
+  let message = "Unknown error";
   let retryAfterMs: number | undefined;
 
   if (error instanceof Error) {
@@ -150,27 +147,27 @@ export function classifyError(
 
     // Network errors are transient
     if (
-      error.message.includes('ECONNRESET') ||
-      error.message.includes('ECONNREFUSED') ||
-      error.message.includes('ETIMEDOUT') ||
-      error.message.includes('ENOTFOUND') ||
-      error.message.includes('socket hang up') ||
-      error.message.includes('network')
+      error.message.includes("ECONNRESET") ||
+      error.message.includes("ECONNREFUSED") ||
+      error.message.includes("ETIMEDOUT") ||
+      error.message.includes("ENOTFOUND") ||
+      error.message.includes("socket hang up") ||
+      error.message.includes("network")
     ) {
-      category = 'transient';
-      details.push('reason: network_error');
+      category = "transient";
+      details.push("reason: network_error");
     }
 
     // Timeout errors are transient
-    if (error.message.includes('timeout') || error.name === 'TimeoutError') {
-      category = 'transient';
-      details.push('reason: timeout');
+    if (error.message.includes("timeout") || error.name === "TimeoutError") {
+      category = "transient";
+      details.push("reason: timeout");
     }
 
     // User cancellation
-    if (error.message.includes('cancelled') || error.message.includes('aborted')) {
-      category = 'user_cancelled';
-      details.push('reason: user_cancelled');
+    if (error.message.includes("cancelled") || error.message.includes("aborted")) {
+      category = "user_cancelled";
+      details.push("reason: user_cancelled");
     }
   }
 
@@ -179,14 +176,14 @@ export function classifyError(
     details.push(`status_code: ${statusCode}`);
 
     if (statusCode === 429) {
-      category = 'transient';
-      details.push('reason: rate_limited');
+      category = "transient";
+      details.push("reason: rate_limited");
     } else if (statusCode >= 500) {
-      category = 'transient';
-      details.push('reason: server_error');
+      category = "transient";
+      details.push("reason: server_error");
     } else if (statusCode >= 400 && statusCode < 500) {
-      category = 'permanent';
-      details.push('reason: client_error');
+      category = "permanent";
+      details.push("reason: client_error");
     }
   }
 
@@ -216,7 +213,8 @@ export function calculateBackoff(
   // In CI mode, use deterministic jitter based on seed
   if (ci && seed !== undefined) {
     // Simple deterministic pseudo-random based on seed and attempt
-    const deterministicFactor = ((seed * (attempt + 1) * 1103515245 + 12345) % 2147483648) / 2147483648;
+    const deterministicFactor =
+      ((seed * (attempt + 1) * 1103515245 + 12345) % 2147483648) / 2147483648;
     const jitter = cappedDelay * 0.5 * deterministicFactor;
     return Math.floor(cappedDelay + jitter);
   }
@@ -232,7 +230,7 @@ export function calculateBackoff(
 export function parseRetryAfter(retryAfter: string | number | undefined): number | undefined {
   if (retryAfter === undefined) return undefined;
 
-  if (typeof retryAfter === 'number') {
+  if (typeof retryAfter === "number") {
     return retryAfter * 1000; // Convert seconds to milliseconds
   }
 
@@ -285,9 +283,7 @@ export class ProviderWrapper {
     this.startTime = Date.now();
 
     // Generate deterministic seed from session ID or use current time
-    this.seed = options.sessionId
-      ? this.hashString(options.sessionId)
-      : Date.now();
+    this.seed = options.sessionId ? this.hashString(options.sessionId) : Date.now();
   }
 
   /**
@@ -297,7 +293,7 @@ export class ProviderWrapper {
     let hash = 0;
     for (let i = 0; i < str.length; i++) {
       const char = str.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
+      hash = (hash << 5) - hash + char;
       hash = hash & hash; // Convert to 32-bit integer
     }
     return Math.abs(hash);
@@ -327,8 +323,8 @@ export class ProviderWrapper {
       const remaining = this.getRemainingBudgetMs();
       if (remaining !== null && remaining <= 0) {
         throw new BudgetExceededError(
-          'Time budget exceeded',
-          'time',
+          "Time budget exceeded",
+          "time",
           this.options.budgetMs,
           this.getElapsedMs()
         );
@@ -338,8 +334,8 @@ export class ProviderWrapper {
     // Check request budget
     if (this.options.maxRequests !== null && this.requestsMade >= this.options.maxRequests) {
       throw new BudgetExceededError(
-        'Request budget exceeded',
-        'requests',
+        "Request budget exceeded",
+        "requests",
         this.options.maxRequests,
         this.requestsMade
       );
@@ -348,8 +344,8 @@ export class ProviderWrapper {
     // Check token budget
     if (this.options.tokenBudget !== null && this.tokensUsed >= this.options.tokenBudget) {
       throw new BudgetExceededError(
-        'Token budget exceeded',
-        'tokens',
+        "Token budget exceeded",
+        "tokens",
         this.options.tokenBudget,
         this.tokensUsed
       );
@@ -362,9 +358,9 @@ export class ProviderWrapper {
   private checkNetworkAccess(): void {
     if (!this.options.allowNetwork) {
       throw new ProviderError(
-        'Network access not allowed',
-        'network_denied',
-        this.getDiagnostics('network_denied'),
+        "Network access not allowed",
+        "network_denied",
+        this.getDiagnostics("network_denied"),
         EXIT_CODES.POLICY_ERROR
       );
     }
@@ -429,11 +425,15 @@ export class ProviderWrapper {
           return {
             success: false,
             error: {
-              category: 'budget_exceeded',
+              category: "budget_exceeded",
               message: error.message,
-              details: [`budget_type: ${error.budgetType}`, `limit: ${error.limit}`, `used: ${error.used}`].sort(),
+              details: [
+                `budget_type: ${error.budgetType}`,
+                `limit: ${error.limit}`,
+                `used: ${error.used}`,
+              ].sort(),
             },
-            diagnostics: this.getDiagnostics('budget_exceeded'),
+            diagnostics: this.getDiagnostics("budget_exceeded"),
           };
         }
         throw error;
@@ -444,7 +444,7 @@ export class ProviderWrapper {
         attempt,
         timestamp: new Date().toISOString(),
         duration_ms: 0,
-        status: 'success',
+        status: "success",
       };
 
       try {
@@ -464,7 +464,7 @@ export class ProviderWrapper {
         }
 
         historyEntry.duration_ms = Date.now() - requestStart;
-        historyEntry.status = 'success';
+        historyEntry.status = "success";
         this.requestHistory.push(historyEntry);
 
         return {
@@ -493,8 +493,8 @@ export class ProviderWrapper {
         }
 
         // Determine if we should retry
-        if (classified.category === 'transient' && attempt < this.options.maxRetries) {
-          historyEntry.status = classified.message.includes('timeout') ? 'timeout' : 'error';
+        if (classified.category === "transient" && attempt < this.options.maxRetries) {
+          historyEntry.status = classified.message.includes("timeout") ? "timeout" : "error";
           this.requestHistory.push(historyEntry);
           this.retriesTotal++;
 
@@ -519,10 +519,10 @@ export class ProviderWrapper {
         }
 
         // Non-retryable error or max retries exceeded
-        if (classified.category === 'user_cancelled') {
-          historyEntry.status = 'cancelled';
+        if (classified.category === "user_cancelled") {
+          historyEntry.status = "cancelled";
         } else {
-          historyEntry.status = 'error';
+          historyEntry.status = "error";
         }
         this.requestHistory.push(historyEntry);
 
@@ -538,11 +538,11 @@ export class ProviderWrapper {
     return {
       success: false,
       error: lastError || {
-        category: 'permanent',
-        message: 'Max retries exceeded',
-        details: ['reason: max_retries_exceeded'],
+        category: "permanent",
+        message: "Max retries exceeded",
+        details: ["reason: max_retries_exceeded"],
       },
-      diagnostics: this.getDiagnostics(lastError?.category || 'permanent'),
+      diagnostics: this.getDiagnostics(lastError?.category || "permanent"),
     };
   }
 

@@ -3,7 +3,6 @@
 > Evidence-IDs: EVD-PLACEHOLDER
 > Status: active
 
-
 ## 1) Readiness Assertion & Governance Alignment
 
 This contract enforces the Summit Readiness Assertion and its CI/CD invariants. Any deviation is a
@@ -11,6 +10,7 @@ This contract enforces the Summit Readiness Assertion and its CI/CD invariants. 
 files below; conflicting guidance is invalid.
 
 **Authority Files (Law of Consistency):**
+
 - `docs/SUMMIT_READINESS_ASSERTION.md`
 - `docs/governance/CONSTITUTION.md`
 - `docs/governance/META_GOVERNANCE.md`
@@ -51,6 +51,7 @@ Governed Exception:
 - Behavioral tests fail or are missing for modified logic.
 
 **Required Verifier Inputs:**
+
 - `git diff --name-only origin/main...HEAD`
 - `agent-contract.json`
 - Repository authority files (see Section 1)

@@ -98,27 +98,44 @@ interface AuditEventExport {
 ```typescript
 type AuditEventType =
   // Authentication & Authorization
-  | "auth_login" | "auth_logout" | "auth_failed"
-  | "authz_decision" | "authz_denied"
+  | "auth_login"
+  | "auth_logout"
+  | "auth_failed"
+  | "authz_decision"
+  | "authz_denied"
 
   // Data Access
-  | "data_read" | "data_write" | "data_delete" | "data_export"
+  | "data_read"
+  | "data_write"
+  | "data_delete"
+  | "data_export"
 
   // Policy & Compliance
-  | "policy_decision" | "policy_violation"
-  | "compliance_check" | "compliance_violation"
+  | "policy_decision"
+  | "policy_violation"
+  | "compliance_check"
+  | "compliance_violation"
 
   // Agent Operations
-  | "agent_run_started" | "agent_run_completed" | "agent_run_failed"
-  | "agent_action" | "agent_policy_decision"
+  | "agent_run_started"
+  | "agent_run_completed"
+  | "agent_run_failed"
+  | "agent_action"
+  | "agent_policy_decision"
 
   // System Events
-  | "system_start" | "system_shutdown" | "system_error"
-  | "config_change" | "user_created" | "user_deleted"
+  | "system_start"
+  | "system_shutdown"
+  | "system_error"
+  | "config_change"
+  | "user_created"
+  | "user_deleted"
 
   // Security Events
-  | "rate_limit_exceeded" | "suspicious_activity"
-  | "privilege_escalation" | "unauthorized_access";
+  | "rate_limit_exceeded"
+  | "suspicious_activity"
+  | "privilege_escalation"
+  | "unauthorized_access";
 ```
 
 ### Redaction Rules
@@ -187,11 +204,11 @@ interface SecuritySignalExport {
 ```typescript
 type SecurityCategory =
   | "Authentication" // Login attempts, MFA, session mgmt
-  | "Authorization"  // Access decisions, privilege escalation
-  | "DataAccess"     // Read/write/delete operations
+  | "Authorization" // Access decisions, privilege escalation
+  | "DataAccess" // Read/write/delete operations
   | "PolicyViolation" // Policy enforcement failures
-  | "RateLimiting"   // Quota/rate limit events
-  | "Anomaly"        // Behavioral anomalies
+  | "RateLimiting" // Quota/rate limit events
+  | "Anomaly" // Behavioral anomalies
   | "SystemIntegrity"; // Config changes, system events
 ```
 
@@ -495,11 +512,11 @@ All exports include `tenantId` and enforce row-level security. Cross-tenant data
 Redacted fields use the following markers:
 
 ```typescript
-"[REDACTED]"          // PII or sensitive data
-"[REDACTED:PII]"      // Explicitly PII
-"[REDACTED:XTENENT]"  // Cross-tenant data
-"[REDACTED:CLASS]"    // Classification-based
-"XXX.XXX.XXX.XXX"     // IP anonymization
+"[REDACTED]"; // PII or sensitive data
+"[REDACTED:PII]"; // Explicitly PII
+"[REDACTED:XTENENT]"; // Cross-tenant data
+"[REDACTED:CLASS]"; // Classification-based
+"XXX.XXX.XXX.XXX"; // IP anonymization
 ```
 
 ### Pagination
@@ -532,6 +549,7 @@ interface PaginatedExport<T> {
 ### Optional Field Policy
 
 Optional fields (marked with `?`) may be:
+
 - Added in minor versions
 - Deprecated (but not removed) with notice
 - Removed only in major versions
@@ -549,12 +567,12 @@ Optional fields (marked with `?`) may be:
 
 All exports support the following serialization formats:
 
-| Format | MIME Type | Use Case |
-|--------|-----------|----------|
-| JSON | `application/json` | API consumption, SIEM |
-| JSON Lines | `application/x-ndjson` | Streaming, bulk import |
-| CSV | `text/csv` | Analytics, spreadsheets |
-| Parquet | `application/vnd.apache.parquet` | Data warehouses |
+| Format     | MIME Type                        | Use Case                |
+| ---------- | -------------------------------- | ----------------------- |
+| JSON       | `application/json`               | API consumption, SIEM   |
+| JSON Lines | `application/x-ndjson`           | Streaming, bulk import  |
+| CSV        | `text/csv`                       | Analytics, spreadsheets |
+| Parquet    | `application/vnd.apache.parquet` | Data warehouses         |
 
 ---
 
@@ -567,6 +585,7 @@ All exports conform to JSON Schema definitions. Schemas are available at:
 ```
 
 Example:
+
 ```
 GET /api/v1/schemas/exports/audit-event/1.0.0.json
 ```

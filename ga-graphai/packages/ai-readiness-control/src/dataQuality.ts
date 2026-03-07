@@ -1,4 +1,4 @@
-import { AlertSink, DataQualityOptions, DataQualityRecord, QualityAlert } from './types.js';
+import { AlertSink, DataQualityOptions, DataQualityRecord, QualityAlert } from "./types.js";
 
 export interface DataQualityReport {
   table: string;
@@ -15,7 +15,11 @@ export class DataQualityGate {
     this.sink = sink;
   }
 
-  evaluate(table: string, records: DataQualityRecord[], options: DataQualityOptions): DataQualityReport {
+  evaluate(
+    table: string,
+    records: DataQualityRecord[],
+    options: DataQualityOptions
+  ): DataQualityReport {
     const report: DataQualityReport = {
       table,
       nullViolations: [],
@@ -30,7 +34,7 @@ export class DataQualityGate {
         this.notify({
           table,
           reason: report.freshnessViolation,
-          severity: 'critical',
+          severity: "critical",
           records,
         });
       }
@@ -38,14 +42,16 @@ export class DataQualityGate {
 
     if (options.requiredFields?.length) {
       for (const field of options.requiredFields) {
-        const missing = records.filter((record) => record[field] === null || record[field] === undefined);
+        const missing = records.filter(
+          (record) => record[field] === null || record[field] === undefined
+        );
         if (missing.length) {
           report.nullViolations.push(`Field ${field} has ${missing.length} nulls`);
           report.quarantined.push(...missing);
           this.notify({
             table,
             reason: `Field ${field} missing on ${missing.length} records`,
-            severity: 'warning',
+            severity: "warning",
             records: missing,
           });
         }
@@ -55,12 +61,16 @@ export class DataQualityGate {
     if (options.dedupeKey) {
       const duplicates = this.findDuplicates(records, options.dedupeKey);
       if (duplicates.length) {
-        report.duplicateViolations.push(`Duplicate ${options.dedupeKey} values: ${duplicates.join(', ')}`);
-        report.quarantined.push(...records.filter((record) => duplicates.includes(String(record[options.dedupeKey!]))));
+        report.duplicateViolations.push(
+          `Duplicate ${options.dedupeKey} values: ${duplicates.join(", ")}`
+        );
+        report.quarantined.push(
+          ...records.filter((record) => duplicates.includes(String(record[options.dedupeKey!])))
+        );
         this.notify({
           table,
           reason: `Duplicate ${options.dedupeKey} detected`,
-          severity: 'warning',
+          severity: "warning",
           records: report.quarantined,
         });
       }

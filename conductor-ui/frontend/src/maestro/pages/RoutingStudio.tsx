@@ -1,5 +1,5 @@
-import React from 'react';
-import { api } from '../api';
+import React from "react";
+import { api } from "../api";
 
 export default function RoutingStudio() {
   const {
@@ -14,14 +14,14 @@ export default function RoutingStudio() {
     putWatchdogConfigs,
     getWatchdogEvents,
   } = api();
-  const [task, setTask] = React.useState('Build and package IntelGraph');
+  const [task, setTask] = React.useState("Build and package IntelGraph");
   const [latency, setLatency] = React.useState(3000);
   const [resp, setResp] = React.useState<any | null>(null);
   const [err, setErr] = React.useState<string | null>(null);
   const [pins, setPins] = React.useState<Record<string, string>>({});
-  const [route, setRoute] = React.useState('');
-  const [model, setModel] = React.useState('');
-  const [note, setNote] = React.useState('');
+  const [route, setRoute] = React.useState("");
+  const [model, setModel] = React.useState("");
+  const [note, setNote] = React.useState("");
   const refreshPins = React.useCallback(() => {
     getRoutingPins()
       .then(setPins)
@@ -34,9 +34,7 @@ export default function RoutingStudio() {
     <div className="space-y-3">
       <h2 className="text-lg font-semibold">Routing Studio</h2>
       <section className="rounded border bg-white p-3">
-        <div className="mb-2 text-sm font-semibold text-slate-700">
-          Dry-run simulation
-        </div>
+        <div className="mb-2 text-sm font-semibold text-slate-700">Dry-run simulation</div>
         <div className="mb-2 flex items-center gap-2">
           <textarea
             className="h-24 w-full rounded border p-2"
@@ -61,7 +59,7 @@ export default function RoutingStudio() {
                 const r = await routingPreview({ task, maxLatencyMs: latency });
                 setResp(r);
               } catch (e: any) {
-                setErr(e?.message || 'Failed');
+                setErr(e?.message || "Failed");
               }
             }}
           >
@@ -72,11 +70,11 @@ export default function RoutingStudio() {
         {resp && (
           <div className="text-sm">
             <div>
-              Decision:{' '}
+              Decision:{" "}
               <span className="font-semibold">
-                {resp.decision?.model || resp.decision?.expert || 'unknown'}
-              </span>{' '}
-              • conf {resp.decision?.confidence ?? '—'}
+                {resp.decision?.model || resp.decision?.expert || "unknown"}
+              </span>{" "}
+              • conf {resp.decision?.confidence ?? "—"}
             </div>
             <div className="mt-2 text-slate-700">Candidates</div>
             <ul className="list-disc pl-5">
@@ -89,13 +87,8 @@ export default function RoutingStudio() {
           </div>
         )}
       </section>
-      <section
-        className="rounded border bg-white p-3"
-        aria-label="Routing pins"
-      >
-        <div className="mb-2 text-sm font-semibold text-slate-700">
-          Pin route to model
-        </div>
+      <section className="rounded border bg-white p-3" aria-label="Routing pins">
+        <div className="mb-2 text-sm font-semibold text-slate-700">Pin route to model</div>
         <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
           <input
             className="rounded border px-2 py-1"
@@ -124,19 +117,19 @@ export default function RoutingStudio() {
             className="rounded border px-2 py-1 text-sm"
             onClick={async () => {
               const ex = await postPolicyExplain({
-                input: { action: 'route.pin', route, model, note },
+                input: { action: "route.pin", route, model, note },
               });
               const allow = !!ex?.allowed || !!ex?.result?.allow;
               if (!allow) {
                 const proceed = window.confirm(
-                  'Policy would DENY. Proceed anyway (will be audited)?',
+                  "Policy would DENY. Proceed anyway (will be audited)?"
                 );
                 if (!proceed) return;
               }
               await putRoutingPin({ route, model, note });
-              setRoute('');
-              setModel('');
-              setNote('');
+              setRoute("");
+              setModel("");
+              setNote("");
               refreshPins();
             }}
             disabled={!route || !model}
@@ -196,7 +189,7 @@ export default function RoutingStudio() {
 }
 
 function AutoRollbackSection({ apiFns }: { apiFns: any }) {
-  const [route, setRoute] = React.useState('codegen');
+  const [route, setRoute] = React.useState("codegen");
   const [cfg, setCfg] = React.useState<any>({ enabled: false, routes: {} });
   const [events, setEvents] = React.useState<any[]>([]);
   const cur = cfg.routes?.[route] || {
@@ -236,10 +229,8 @@ function AutoRollbackSection({ apiFns }: { apiFns: any }) {
         <input
           type="checkbox"
           checked={!!cfg.enabled}
-          onChange={(e) =>
-            setCfg((x: any) => ({ ...x, enabled: e.target.checked }))
-          }
-        />{' '}
+          onChange={(e) => setCfg((x: any) => ({ ...x, enabled: e.target.checked }))}
+        />{" "}
         Enable watchdog
       </label>
       <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
@@ -286,15 +277,12 @@ function AutoRollbackSection({ apiFns }: { apiFns: any }) {
         </label>
       </div>
       <div className="flex gap-2">
-        <button
-          className="rounded bg-blue-600 px-3 py-2 text-white"
-          onClick={save}
-        >
+        <button className="rounded bg-blue-600 px-3 py-2 text-white" onClick={save}>
           Save
         </button>
         <button
           className="rounded border px-3 py-2"
-          onClick={() => apiFns.postRollback(route, 'manual rollback')}
+          onClick={() => apiFns.postRollback(route, "manual rollback")}
         >
           Rollback now
         </button>
@@ -316,9 +304,9 @@ function AutoRollbackSection({ apiFns }: { apiFns: any }) {
               <tr key={h.ts}>
                 <td>{new Date(h.ts).toLocaleString()}</td>
                 <td>{h.action}</td>
-                <td>{h.prevModel || '-'}</td>
+                <td>{h.prevModel || "-"}</td>
                 <td>{h.newModel}</td>
-                <td>{h.note || '-'}</td>
+                <td>{h.note || "-"}</td>
               </tr>
             ))}
             {!history.length && (

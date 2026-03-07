@@ -162,15 +162,15 @@ owners:
 
 kpis:
   - name: preview_latency_p95_ms
-    target: '<=165'
+    target: "<=165"
   - name: cache_hit_rate
-    target: '>=0.975'
+    target: ">=0.975"
   - name: mapping_coverage
-    target: '>=0.95'
+    target: ">=0.95"
   - name: sso_green_tenants
-    target: '>=0.96'
+    target: ">=0.96"
   - name: export_latency_p95_ms
-    target: '<=240'
+    target: "<=240"
 
 budget:
   cost_per_req_max_usd: 0.0095
@@ -200,11 +200,7 @@ Freeze window:
 
 ```yaml
 freeze_windows:
-  - {
-      start: '2026-03-29T00:00:00Z',
-      end: '2026-03-30T23:59:00Z',
-      reason: 'pre-release freeze',
-    }
+  - { start: "2026-03-29T00:00:00Z", end: "2026-03-30T23:59:00Z", reason: "pre-release freeze" }
 ```
 
 ---

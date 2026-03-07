@@ -43,7 +43,7 @@ intelgraph/
 
 ```ts
 // data/generators/faker.ts
-import { faker } from '@faker-js/faker';
+import { faker } from "@faker-js/faker";
 export function seeded(seed: number) {
   faker.seed(seed);
   return faker;
@@ -58,11 +58,11 @@ export function id(prefix: string) {
 
 ```ts
 // data/generators/gen-entities.ts
-import { seeded, id } from './faker';
+import { seeded, id } from "./faker";
 export type Entity = {
   id: string;
   label: string;
-  type: 'Person' | 'Org' | 'Account' | 'Device' | 'Location';
+  type: "Person" | "Org" | "Account" | "Device" | "Location";
   attrs: Record<string, any>;
 };
 export function genEntities(n = 200, seed = 42): Entity[] {
@@ -70,22 +70,22 @@ export function genEntities(n = 200, seed = 42): Entity[] {
   const out: Entity[] = [];
   for (let i = 0; i < n; i++) {
     const t = f.helpers.arrayElement([
-      'Person',
-      'Org',
-      'Account',
-      'Device',
-      'Location',
-    ]) as Entity['type'];
+      "Person",
+      "Org",
+      "Account",
+      "Device",
+      "Location",
+    ]) as Entity["type"];
     const ent: Entity = {
-      id: id('E'),
+      id: id("E"),
       label:
-        t === 'Person'
+        t === "Person"
           ? f.person.fullName()
-          : t === 'Org'
+          : t === "Org"
             ? f.company.name()
-            : t === 'Account'
+            : t === "Account"
               ? `ACCT-${f.number.int({ min: 100000, max: 999999 })}`
-              : t === 'Device'
+              : t === "Device"
                 ? `IMEI-${f.number.int({ min: 1e13, max: 9e14 })}`
                 : `${f.location.city()}`,
       type: t,
@@ -102,21 +102,21 @@ export function genEntities(n = 200, seed = 42): Entity[] {
 
 ```ts
 // data/generators/gen-relations.ts
-import { Entity } from './gen-entities';
-import { seeded } from './faker';
+import { Entity } from "./gen-entities";
+import { seeded } from "./faker";
 export type Edge = {
   src: string;
   dst: string;
-  type: 'RELATES' | 'TRANSFER' | 'PRESENT_AT' | 'CONTACTED';
+  type: "RELATES" | "TRANSFER" | "PRESENT_AT" | "CONTACTED";
   weight?: number;
   when?: string;
 };
 export function genEdges(entities: Entity[], seed = 43) {
   const f = seeded(seed);
   const edges: Edge[] = [];
-  const people = entities.filter((e) => e.type === 'Person');
-  const accounts = entities.filter((e) => e.type === 'Account');
-  const locations = entities.filter((e) => e.type === 'Location');
+  const people = entities.filter((e) => e.type === "Person");
+  const accounts = entities.filter((e) => e.type === "Account");
+  const locations = entities.filter((e) => e.type === "Location");
   // Social/comms
   for (const p of people) {
     for (let i = 0; i < f.number.int({ min: 1, max: 3 }); i++) {
@@ -124,13 +124,13 @@ export function genEdges(entities: Entity[], seed = 43) {
       edges.push({
         src: p.id,
         dst: q.id,
-        type: 'RELATES',
+        type: "RELATES",
         weight: f.number.float({ min: 0.1, max: 1.5 }),
       });
       edges.push({
         src: p.id,
         dst: q.id,
-        type: 'CONTACTED',
+        type: "CONTACTED",
         when: f.date.recent({ days: 30 }).toISOString(),
       });
     }
@@ -142,7 +142,7 @@ export function genEdges(entities: Entity[], seed = 43) {
     edges.push({
       src: a.id,
       dst: b.id,
-      type: 'TRANSFER',
+      type: "TRANSFER",
       weight: f.number.int({ min: 50, max: 50000 }),
       when: f.date.recent({ days: 90 }).toISOString(),
     });
@@ -153,7 +153,7 @@ export function genEdges(entities: Entity[], seed = 43) {
     edges.push({
       src: p.id,
       dst: loc.id,
-      type: 'PRESENT_AT',
+      type: "PRESENT_AT",
       when: f.date.recent({ days: 60 }).toISOString(),
     });
   }
@@ -163,10 +163,10 @@ export function genEdges(entities: Entity[], seed = 43) {
 
 ```ts
 // data/generators/gen-events.ts
-import { seeded } from './faker';
+import { seeded } from "./faker";
 export type Event = {
   id: string;
-  kind: 'meeting' | 'flight' | 'transfer';
+  kind: "meeting" | "flight" | "transfer";
   who: string[];
   where?: string;
   amount?: number;
@@ -181,79 +181,68 @@ export function genEvents(seed = 44) {
 
 ```ts
 // data/generators/index.ts
-import fs from 'fs';
-import path from 'path';
-import { genEntities } from './gen-entities';
-import { genEdges } from './gen-relations';
-const out = path.resolve(__dirname, '..', 'fixtures');
+import fs from "fs";
+import path from "path";
+import { genEntities } from "./gen-entities";
+import { genEdges } from "./gen-relations";
+const out = path.resolve(__dirname, "..", "fixtures");
 const ents = genEntities(400);
 const edges = genEdges(ents);
 fs.writeFileSync(
-  path.join(out, 'graph.csv'),
-  'id,label,type,country,createdAt\n' +
+  path.join(out, "graph.csv"),
+  "id,label,type,country,createdAt\n" +
     ents
-      .map(
-        (e) =>
-          `${e.id},"${e.label}",${e.type},${e.attrs.country},${e.attrs.createdAt}`,
-      )
-      .join('\n'),
+      .map((e) => `${e.id},"${e.label}",${e.type},${e.attrs.country},${e.attrs.createdAt}`)
+      .join("\n")
 );
 fs.writeFileSync(
-  path.join(out, 'edges.csv'),
-  'src,dst,type,weight,when\n' +
-    edges
-      .map(
-        (e) => `${e.src},${e.dst},${e.type},${e.weight || ''},${e.when || ''}`,
-      )
-      .join('\n'),
+  path.join(out, "edges.csv"),
+  "src,dst,type,weight,when\n" +
+    edges.map((e) => `${e.src},${e.dst},${e.type},${e.weight || ""},${e.when || ""}`).join("\n")
 );
 fs.writeFileSync(
-  path.join(out, 'transactions.csv'),
-  'from,to,amount,at\n' +
+  path.join(out, "transactions.csv"),
+  "from,to,amount,at\n" +
     edges
-      .filter((e) => e.type === 'TRANSFER')
+      .filter((e) => e.type === "TRANSFER")
       .map((e) => `${e.src},${e.dst},${e.weight},${e.when}`)
-      .join('\n'),
+      .join("\n")
 );
 fs.writeFileSync(
-  path.join(out, 'presence.csv'),
-  'who,where,at\n' +
+  path.join(out, "presence.csv"),
+  "who,where,at\n" +
     edges
-      .filter((e) => e.type === 'PRESENT_AT')
+      .filter((e) => e.type === "PRESENT_AT")
       .map((e) => `${e.src},${e.dst},${e.when}`)
-      .join('\n'),
+      .join("\n")
 );
 fs.writeFileSync(
-  path.join(out, 'comms.csv'),
-  'from,to,at\n' +
+  path.join(out, "comms.csv"),
+  "from,to,at\n" +
     edges
-      .filter((e) => e.type === 'CONTACTED')
+      .filter((e) => e.type === "CONTACTED")
       .map((e) => `${e.src},${e.dst},${e.when}`)
-      .join('\n'),
+      .join("\n")
 );
 // Provenance claims (inputs that ledger service will hash)
 fs.writeFileSync(
-  path.join(out, 'claims.jsonl'),
+  path.join(out, "claims.jsonl"),
   edges
     .map((e) =>
       JSON.stringify({
         kind: e.type.toLowerCase(),
         subjectId: e.src,
-        source: 'synthetic',
+        source: "synthetic",
         content: JSON.stringify(e),
-      }),
+      })
     )
-    .join('\n'),
+    .join("\n")
 );
 fs.writeFileSync(
-  path.join(out, 'redactions.json'),
-  JSON.stringify(
-    { partner: ['SSN', 'DOB'], court: [], press: ['SSN', 'DOB', 'Address'] },
-    null,
-    2,
-  ),
+  path.join(out, "redactions.json"),
+  JSON.stringify({ partner: ["SSN", "DOB"], court: [], press: ["SSN", "DOB", "Address"] }, null, 2)
 );
-console.log('Synthetic fixtures written to', out);
+console.log("Synthetic fixtures written to", out);
 ```
 
 ---
@@ -318,36 +307,29 @@ cypher-shell -a $NEO -u neo4j -p $PASS < data/import/import.cypher
 
 ```ts
 // tools/scripts/seed-synthetic.ts
-import fs from 'fs';
-import path from 'path';
-import fetch from 'node-fetch';
+import fs from "fs";
+import path from "path";
+import fetch from "node-fetch";
 async function main() {
-  require('../../data/generators');
+  require("../../data/generators");
   // Load claims into ledger service
-  const p = path.resolve(
-    __dirname,
-    '..',
-    '..',
-    'data',
-    'fixtures',
-    'claims.jsonl',
-  );
-  const lines = fs.readFileSync(p, 'utf8').trim().split('\n');
+  const p = path.resolve(__dirname, "..", "..", "data", "fixtures", "claims.jsonl");
+  const lines = fs.readFileSync(p, "utf8").trim().split("\n");
   const ids: string[] = [];
   for (const line of lines) {
-    const r = await fetch('http://localhost:7002/claims', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
+    const r = await fetch("http://localhost:7002/claims", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
       body: line,
     }).then((r) => r.json());
     ids.push(r.id);
   }
-  const m = await fetch('http://localhost:7002/manifests', {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
+  const m = await fetch("http://localhost:7002/manifests", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
     body: JSON.stringify({ claimIds: ids.slice(0, 50) }),
   }).then((r) => r.json());
-  console.log('Manifest', m);
+  console.log("Manifest", m);
 }
 main();
 ```
@@ -388,25 +370,25 @@ main();
 
 ```ts
 // data/generators/__tests__/fixtures.spec.ts
-import fs from 'fs';
-import path from 'path';
-const p = (f: string) => path.resolve(__dirname, '..', '..', 'fixtures', f);
+import fs from "fs";
+import path from "path";
+const p = (f: string) => path.resolve(__dirname, "..", "..", "fixtures", f);
 
-test('edges reference existing nodes', () => {
+test("edges reference existing nodes", () => {
   const nodes = new Set(
     fs
-      .readFileSync(p('graph.csv'), 'utf8')
-      .split('\n')
+      .readFileSync(p("graph.csv"), "utf8")
+      .split("\n")
       .slice(1)
       .filter(Boolean)
-      .map((l) => l.split(',')[0]),
+      .map((l) => l.split(",")[0])
   );
   const bad = fs
-    .readFileSync(p('edges.csv'), 'utf8')
-    .split('\n')
+    .readFileSync(p("edges.csv"), "utf8")
+    .split("\n")
     .slice(1)
     .filter(Boolean)
-    .map((l) => ({ src: l.split(',')[0], dst: l.split(',')[1] }))
+    .map((l) => ({ src: l.split(",")[0], dst: l.split(",")[1] }))
     .filter((e) => !nodes.has(e.src) || !nodes.has(e.dst));
   expect(bad.length).toBe(0);
 });

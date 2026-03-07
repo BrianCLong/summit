@@ -7,5 +7,5 @@ export function logAudit(actor, action, details) {
     timestamp: new Date().toISOString(),
   };
   // Insert to DB (placeholder)
-  console.log('Logging audit entry:', entry);
+  console.log("Logging audit entry:", entry);
 }

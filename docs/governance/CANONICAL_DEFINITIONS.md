@@ -3,7 +3,6 @@
 > Evidence-IDs: EVD-PLACEHOLDER
 > Status: active
 
-
 This document defines the non-negotiable standards for "Done", "Secure", and "Compliant" within the Summit ecosystem.
 Any deviation from these standards must be explicitly recorded in the `EXCEPTION_REGISTER.md`.
 

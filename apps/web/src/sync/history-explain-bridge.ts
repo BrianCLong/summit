@@ -3,10 +3,9 @@
 // import { AppDispatch } from '../store'
 // import { open, setPolicy } from '../features/explain/explainSlice'
 
-export function attachHistoryExplainBridge(
-  // $root: any, // JQuery
-  // dispatch: AppDispatch
-) {
+export function attachHistoryExplainBridge() {
+// $root: any, // JQuery
+// dispatch: AppDispatch
   // TODO: Replace with React-based event system
   // $root.on('intelgraph:explain:open', (_e, policy) => {
   //   dispatch(setPolicy(policy || []))

@@ -27,13 +27,13 @@ For now, the foundation supports local validation only.
 
 ## Structure
 
-*   `environments/`: Environment-specific variable definitions (e.g., `dev.tfvars`).
-*   `modules/`: Reusable Terraform modules (to be implemented).
-*   `*.tf`: Root module configuration.
+- `environments/`: Environment-specific variable definitions (e.g., `dev.tfvars`).
+- `modules/`: Reusable Terraform modules (to be implemented).
+- `*.tf`: Root module configuration.
 
 ## Requirements
 
 See `versions.tf` for specific version constraints.
 
-*   Terraform >= 1.5.0
-*   AWS Provider ~> 5.0
+- Terraform >= 1.5.0
+- AWS Provider ~> 5.0

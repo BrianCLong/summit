@@ -3,14 +3,14 @@
  * Business logic for incident management
  */
 
-import { Pool } from 'pg';
+import { Pool } from "pg";
 import {
   Incident,
   CreateIncidentInput,
   UpdateIncidentInput,
   IncidentFilter,
   IncidentStatus,
-} from '../models/incident';
+} from "../models/incident";
 
 export class IncidentService {
   constructor(private db: Pool) {}
@@ -49,11 +49,7 @@ export class IncidentService {
     return result.rows[0] ? this.mapRowToIncident(result.rows[0]) : null;
   }
 
-  async listIncidents(
-    filter?: IncidentFilter,
-    limit = 25,
-    offset = 0
-  ): Promise<Incident[]> {
+  async listIncidents(filter?: IncidentFilter, limit = 25, offset = 0): Promise<Incident[]> {
     let query = `SELECT * FROM maestro.incidents WHERE 1=1`;
     const values: any[] = [];
     let paramIndex = 1;
@@ -101,10 +97,7 @@ export class IncidentService {
     return result.rows.map((row) => this.mapRowToIncident(row));
   }
 
-  async updateIncident(
-    id: string,
-    input: UpdateIncidentInput
-  ): Promise<Incident | null> {
+  async updateIncident(id: string, input: UpdateIncidentInput): Promise<Incident | null> {
     const updates: string[] = [];
     const values: any[] = [];
     let paramIndex = 1;
@@ -164,7 +157,7 @@ export class IncidentService {
 
     const query = `
       UPDATE maestro.incidents
-      SET ${updates.join(', ')}, updated_at = NOW()
+      SET ${updates.join(", ")}, updated_at = NOW()
       WHERE id = $${paramIndex}
       RETURNING *
     `;
@@ -174,10 +167,7 @@ export class IncidentService {
     return result.rows[0] ? this.mapRowToIncident(result.rows[0]) : null;
   }
 
-  async acknowledgeIncident(
-    id: string,
-    acknowledgedBy: string
-  ): Promise<Incident | null> {
+  async acknowledgeIncident(id: string, acknowledgedBy: string): Promise<Incident | null> {
     const query = `
       UPDATE maestro.incidents
       SET acknowledged_at = NOW(), status = 'investigating', updated_at = NOW()
@@ -188,10 +178,7 @@ export class IncidentService {
     return result.rows[0] ? this.mapRowToIncident(result.rows[0]) : null;
   }
 
-  async resolveIncident(
-    id: string,
-    rootCause?: string
-  ): Promise<Incident | null> {
+  async resolveIncident(id: string, rootCause?: string): Promise<Incident | null> {
     const query = `
       UPDATE maestro.incidents
       SET resolved_at = NOW(), status = 'resolved', root_cause = COALESCE($2, root_cause), updated_at = NOW()
@@ -224,11 +211,7 @@ export class IncidentService {
       WHERE id = $1
       RETURNING *
     `;
-    const result = await this.db.query(query, [
-      id,
-      githubIssueUrl,
-      githubIssueNumber,
-    ]);
+    const result = await this.db.query(query, [id, githubIssueUrl, githubIssueNumber]);
     return result.rows[0] ? this.mapRowToIncident(result.rows[0]) : null;
   }
 

@@ -12,12 +12,7 @@
     "deterministic",
     "security regression"
   ],
-  "gaBlockerKeywords": [
-    "ga blocker",
-    "release blocker",
-    "ci gate",
-    "security regression"
-  ],
+  "gaBlockerKeywords": ["ga blocker", "release blocker", "ci gate", "security regression"],
   "categoryRules": [
     { "category": "integrity", "keywords": ["manifest", "run_id"] },
     { "category": "reproducibility", "keywords": ["deterministic", "reproducibility"] },

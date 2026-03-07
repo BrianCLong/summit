@@ -4,7 +4,7 @@ This playbook provides a step-by-step method for migrating existing legacy APIs 
 
 ## The Migration Method
 
-1. **Identify Top User Intents**: Analyze logs or user stories to find the most common *outcomes* users want, not just the endpoints they hit.
+1. **Identify Top User Intents**: Analyze logs or user stories to find the most common _outcomes_ users want, not just the endpoints they hit.
 2. **Map to Outcome Tools**: Group multiple endpoints into a single tool that accomplishes the intent.
 3. **Collapse State Orchestration**: Move "if-this-then-that" logic from the LLM prompt into the MCP server code.
 4. **Flatten Arguments**: Convert nested JSON request bodies into flat, typed primitives with narrow Enums and sane defaults.
@@ -18,13 +18,15 @@ This playbook provides a step-by-step method for migrating existing legacy APIs 
 ### Example 1: Search + Read + Summarize (Intelligence Gathering)
 
 **Before (REST Primitives):**
+
 1. `GET /api/v1/search?q=topic` -> Returns 100 results.
 2. `GET /api/v1/document/{id}` (called 5 times by LLM) -> Returns full text.
 3. LLM summarizes in context.
-*Problem: High token usage, slow, LLM might miss key details.*
+   _Problem: High token usage, slow, LLM might miss key details._
 
 **After (Summit Outcome Tool):**
 `intel_research_topic(query: string, limit: number = 5)`
+
 - **Internal Logic**: Searches, scores results by relevance, fetches top 5 documents, and generates a structured brief.
 - **Return**: A `research_brief` object with key findings and `source_ids` for deeper dives.
 
@@ -33,13 +35,15 @@ This playbook provides a step-by-step method for migrating existing legacy APIs 
 ### Example 2: Create + Update (Resource Provisioning)
 
 **Before (REST Primitives):**
+
 1. `POST /api/v1/projects` -> `{ "id": "p1" }`
 2. `POST /api/v1/projects/p1/members` (called 3 times)
 3. `PATCH /api/v1/projects/p1` -> set status to "active"
-*Problem: Brittle, many round-trips, LLM often forgets the 3rd step.*
+   _Problem: Brittle, many round-trips, LLM often forgets the 3rd step._
 
 **After (Summit Outcome Tool):**
 `project_setup_workspace(name: string, members: string[], visibility: "public" | "private" = "private")`
+
 - **Internal Logic**: Atomically creates the project, adds members, and sets initial configuration.
 - **Return**: `{ "project_id": "p1", "status": "active", "access_url": "..." }`
 
@@ -48,13 +52,16 @@ This playbook provides a step-by-step method for migrating existing legacy APIs 
 ### Example 3: Audit Large Datasets (Governance & Compliance)
 
 **Before (REST Primitives):**
+
 1. `GET /api/v1/audit-logs` -> Returns massive JSON array.
-*Problem: Hits context limit immediately; LLM tries to process 1MB of JSON.*
+   _Problem: Hits context limit immediately; LLM tries to process 1MB of JSON._
 
 **After (Summit Outcome Tool):**
 `governance_list_audit_logs(filter_type?: string, limit: number = 20, offset: number = 0)`
+
 - **Internal Logic**: Paginates at the DB level; adds a `_summit_meta` size estimate.
 - **Return Envelope**:
+
 ```json
 {
   "logs": [...],

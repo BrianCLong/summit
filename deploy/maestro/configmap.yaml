@@ -7,8 +7,8 @@ metadata:
     app.kubernetes.io/name: maestro
     app.kubernetes.io/component: config
 data:
-  LOG_LEVEL: 'info'
-  PUBLIC_URL: 'https://maestro.dev.intelgraph.local'
+  LOG_LEVEL: "info"
+  PUBLIC_URL: "https://maestro.dev.intelgraph.local"
   FEATURE_FLAGS.json: |
     {
       "enableCanary": true,

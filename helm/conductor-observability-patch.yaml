@@ -3,10 +3,10 @@ kind: ConfigMap
 metadata:
   name: conductor-slo-burn-dashboard
   labels:
-    grafana_dashboard: '1'
+    grafana_dashboard: "1"
   annotations:
     helm.sh/hook: post-install,post-upgrade
-    helm.sh/hook-weight: '5'
+    helm.sh/hook-weight: "5"
 data:
   conductor-slo-burn.json: |
     {
@@ -75,10 +75,10 @@ kind: ConfigMap
 metadata:
   name: conductor-routing-quality-dashboard
   labels:
-    grafana_dashboard: '1'
+    grafana_dashboard: "1"
   annotations:
     helm.sh/hook: post-install,post-upgrade
-    helm.sh/hook-weight: '5'
+    helm.sh/hook-weight: "5"
 data:
   conductor-routing-quality.json: |
     {
@@ -124,7 +124,7 @@ metadata:
   name: conductor-alertmanager-routes
   annotations:
     helm.sh/hook: post-install,post-upgrade
-    helm.sh/hook-weight: '5'
+    helm.sh/hook-weight: "5"
 data:
   alertmanager-routes.yaml: |
     route:

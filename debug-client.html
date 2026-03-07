@@ -33,132 +33,122 @@
     <div id="status"></div>
 
     <script>
-      const statusDiv = document.getElementById('status');
+      const statusDiv = document.getElementById("status");
 
-      function addStatus(message, type = 'info') {
-        const div = document.createElement('div');
+      function addStatus(message, type = "info") {
+        const div = document.createElement("div");
         div.className = type;
         div.innerHTML = message;
         statusDiv.appendChild(div);
       }
 
       // Check if main page loads
-      addStatus('Testing main page fetch...');
+      addStatus("Testing main page fetch...");
 
-      fetch('http://localhost:3000/')
+      fetch("http://localhost:3000/")
         .then((response) => {
           if (response.ok) {
-            addStatus('✅ Main page loads successfully', 'success');
+            addStatus("✅ Main page loads successfully", "success");
             return response.text();
           } else {
-            addStatus(`❌ Main page failed: ${response.status}`, 'error');
+            addStatus(`❌ Main page failed: ${response.status}`, "error");
           }
         })
         .then((html) => {
           if (html) {
             if (html.includes('<div id="root">')) {
-              addStatus('✅ Root div found in HTML', 'success');
+              addStatus("✅ Root div found in HTML", "success");
             } else {
-              addStatus('❌ Root div not found in HTML', 'error');
+              addStatus("❌ Root div not found in HTML", "error");
             }
           }
         })
         .catch((err) => {
-          addStatus(`❌ Failed to fetch main page: ${err.message}`, 'error');
+          addStatus(`❌ Failed to fetch main page: ${err.message}`, "error");
         });
 
       // Check if main.jsx loads
-      addStatus('Testing main.jsx fetch...');
+      addStatus("Testing main.jsx fetch...");
 
-      fetch('http://localhost:3000/src/main.jsx')
+      fetch("http://localhost:3000/src/main.jsx")
         .then((response) => {
           if (response.ok) {
-            addStatus('✅ main.jsx loads successfully', 'success');
+            addStatus("✅ main.jsx loads successfully", "success");
             return response.text();
           } else {
-            addStatus(`❌ main.jsx failed: ${response.status}`, 'error');
+            addStatus(`❌ main.jsx failed: ${response.status}`, "error");
           }
         })
         .then((js) => {
           if (js) {
-            if (js.includes('ReactDOM.createRoot')) {
-              addStatus('✅ ReactDOM.createRoot found in main.jsx', 'success');
+            if (js.includes("ReactDOM.createRoot")) {
+              addStatus("✅ ReactDOM.createRoot found in main.jsx", "success");
             } else {
-              addStatus(
-                '❌ ReactDOM.createRoot not found in main.jsx',
-                'error',
-              );
+              addStatus("❌ ReactDOM.createRoot not found in main.jsx", "error");
             }
           }
         })
         .catch((err) => {
-          addStatus(`❌ Failed to fetch main.jsx: ${err.message}`, 'error');
+          addStatus(`❌ Failed to fetch main.jsx: ${err.message}`, "error");
         });
 
       // Check backend API
-      addStatus('Testing GraphQL API...');
+      addStatus("Testing GraphQL API...");
 
-      fetch('http://localhost:4000/graphql', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query: '{ __typename }' }),
+      fetch("http://localhost:4000/graphql", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query: "{ __typename }" }),
       })
         .then((response) => {
           if (response.ok) {
-            addStatus('✅ GraphQL API responds', 'success');
+            addStatus("✅ GraphQL API responds", "success");
             return response.json();
           } else {
-            addStatus(`❌ GraphQL API failed: ${response.status}`, 'error');
+            addStatus(`❌ GraphQL API failed: ${response.status}`, "error");
           }
         })
         .then((data) => {
-          if (data && data.data && data.data.__typename === 'Query') {
-            addStatus('✅ GraphQL API returns valid data', 'success');
+          if (data && data.data && data.data.__typename === "Query") {
+            addStatus("✅ GraphQL API returns valid data", "success");
           } else {
-            addStatus(
-              `❌ GraphQL API returned invalid data: ${JSON.stringify(data)}`,
-              'error',
-            );
+            addStatus(`❌ GraphQL API returned invalid data: ${JSON.stringify(data)}`, "error");
           }
         })
         .catch((err) => {
-          addStatus(
-            `❌ Failed to connect to GraphQL API: ${err.message}`,
-            'error',
-          );
+          addStatus(`❌ Failed to connect to GraphQL API: ${err.message}`, "error");
         });
 
       // Monitor console errors
       const originalConsoleError = console.error;
       console.error = function (...args) {
-        addStatus(`🚨 Console Error: ${args.join(' ')}`, 'error');
+        addStatus(`🚨 Console Error: ${args.join(" ")}`, "error");
         originalConsoleError.apply(console, args);
       };
 
       const originalConsoleWarn = console.warn;
       console.warn = function (...args) {
-        addStatus(`⚠️ Console Warning: ${args.join(' ')}`, 'error');
+        addStatus(`⚠️ Console Warning: ${args.join(" ")}`, "error");
         originalConsoleWarn.apply(console, args);
       };
 
       // Load the main React app to see what happens
-      addStatus('Attempting to load React app...');
+      addStatus("Attempting to load React app...");
 
-      const script = document.createElement('script');
-      script.type = 'module';
-      script.src = 'http://localhost:3000/src/main.jsx';
-      script.onload = () => addStatus('✅ main.jsx script loaded', 'success');
-      script.onerror = (err) =>
-        addStatus(`❌ main.jsx script failed to load: ${err}`, 'error');
+      const script = document.createElement("script");
+      script.type = "module";
+      script.src = "http://localhost:3000/src/main.jsx";
+      script.onload = () => addStatus("✅ main.jsx script loaded", "success");
+      script.onerror = (err) => addStatus(`❌ main.jsx script failed to load: ${err}`, "error");
       document.head.appendChild(script);
 
       // Check if React mounted after a delay
       setTimeout(() => {
-        const root = document.getElementById('root');
+        const root = document.getElementById("root");
         if (root && root.children.length > 0) {
-          addStatus('✅ React app mounted successfully!', 'success');
+          addStatus("✅ React app mounted successfully!", "success");
         } else {
-          addStatus('❌ React app did not mount - root div is empty', 'error');
+          addStatus("❌ React app did not mount - root div is empty", "error");
         }
       }, 3000);
     </script>

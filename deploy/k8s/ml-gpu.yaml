@@ -17,7 +17,7 @@ spec:
         app: intelgraph-ml-gpu
         component: ml-service
       annotations:
-        sidecar.istio.io/inject: 'true'
+        sidecar.istio.io/inject: "true"
     spec:
       affinity:
         nodeAffinity:
@@ -39,9 +39,9 @@ spec:
             - containerPort: 8081
           env:
             - name: UVICORN_HOST
-              value: '0.0.0.0'
+              value: "0.0.0.0"
             - name: UVICORN_PORT
-              value: '8081'
+              value: "8081"
             - name: REDIS_URL
               valueFrom:
                 secretKeyRef:
@@ -58,15 +58,15 @@ spec:
                   name: intelgraph-secrets
                   key: ml-webhook-secret
             - name: USE_SPACY
-              value: 'true'
+              value: "true"
           resources:
             requests:
-              memory: '2Gi'
-              cpu: '1'
+              memory: "2Gi"
+              cpu: "1"
               nvidia.com/gpu: 1
             limits:
-              memory: '8Gi'
-              cpu: '4'
+              memory: "8Gi"
+              cpu: "4"
               nvidia.com/gpu: 1
           livenessProbe:
             httpGet:
@@ -118,7 +118,7 @@ spec:
         app: intelgraph-ml-worker-gpu
         component: ml-worker
       annotations:
-        sidecar.istio.io/inject: 'true'
+        sidecar.istio.io/inject: "true"
     spec:
       affinity:
         nodeAffinity:
@@ -137,14 +137,7 @@ spec:
         - name: ml-worker
           image: intelgraph/ml:latest-gpu
           command:
-            [
-              'celery',
-              '-A',
-              'app.celery_app',
-              'worker',
-              '--loglevel=INFO',
-              '--concurrency=1',
-            ]
+            ["celery", "-A", "app.celery_app", "worker", "--loglevel=INFO", "--concurrency=1"]
           env:
             - name: REDIS_URL
               valueFrom:
@@ -157,15 +150,15 @@ spec:
                   name: intelgraph-secrets
                   key: ml-webhook-secret
             - name: USE_SPACY
-              value: 'true'
+              value: "true"
           resources:
             requests:
-              memory: '1Gi'
-              cpu: '0.5'
+              memory: "1Gi"
+              cpu: "0.5"
               nvidia.com/gpu: 1
       limits:
-        memory: '4Gi'
-        cpu: '2'
+        memory: "4Gi"
+        cpu: "2"
         nvidia.com/gpu: 1
 
 ---

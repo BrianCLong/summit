@@ -17,7 +17,7 @@ Summit uses a microservices architecture that allows independent scaling of comp
 
 We recommend using HPA for the API server and Worker nodes.
 
-```yaml
+````yaml
 # deploy/k8s/hpa-api.yaml
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
@@ -57,7 +57,7 @@ spec:
       target:
         type: Utilization
         averageUtilization: 70
-```
+````
 
 ### Redis Clustering
 
@@ -92,12 +92,12 @@ k6 run scripts/load-testing/load-test.js
 ### Benchmarks
 
 | Component | Replicas | Requests/sec | p95 Latency |
-|-----------|----------|--------------|-------------|
+| --------- | -------- | ------------ | ----------- |
 | API       | 1        | 500          | 200ms       |
 | API       | 3        | 1400         | 210ms       |
 | API       | 5        | 2200         | 220ms       |
 
-*Benchmarks run on AWS c5.large instances.*
+_Benchmarks run on AWS c5.large instances._
 
 ## Database Optimization
 
@@ -106,23 +106,24 @@ k6 run scripts/load-testing/load-test.js
 - **Caching**: Aggressively cache GraphQL resolvers using `@cacheControl` directives.
   maxReplicas: 12
   behavior:
-    scaleDown:
-      stabilizationWindowSeconds: 300
+  scaleDown:
+  stabilizationWindowSeconds: 300
   metrics:
-    - type: Resource
-      resource:
-        name: cpu
-        target:
-          type: Utilization
-          averageUtilization: 65
-    - type: Pods
-      pods:
-        metric:
-          name: http_requests_per_second
-        target:
-          type: AverageValue
-          averageValue: 20
-```
+  - type: Resource
+    resource:
+    name: cpu
+    target:
+    type: Utilization
+    averageUtilization: 65
+  - type: Pods
+    pods:
+    metric:
+    name: http_requests_per_second
+    target:
+    type: AverageValue
+    averageValue: 20
+
+````
 
 Repeat the pattern for `summit-web` (based on CPU + RPS) and for worker pools (based on queue depth exported via Prometheus).
 
@@ -152,7 +153,7 @@ spec:
   securityContext:
     runAsNonRoot: true
     fsGroup: 999
-```
+````
 
 Use `redis.conf` tuned for `maxmemory-policy allkeys-lru` and enable TLS via cert-manager secrets mounted into Pods.
 

@@ -10,11 +10,11 @@ The Liquid Nano pilot enforces strict automated quality gates to guarantee >80% 
 
 ## Test Suites
 
-| Suite         | Scope                                                    |
-| ------------- | -------------------------------------------------------- |
-| Unit          | Runtime primitives (metrics registry, config loader).    |
-| Integration   | HTTP bridge ingest path, plugin orchestration.           |
-| E2E           | Example apps emitting telemetry and validating persistence.
+| Suite       | Scope                                                       |
+| ----------- | ----------------------------------------------------------- |
+| Unit        | Runtime primitives (metrics registry, config loader).       |
+| Integration | HTTP bridge ingest path, plugin orchestration.              |
+| E2E         | Example apps emitting telemetry and validating persistence. |
 
 Run the suites with:
 

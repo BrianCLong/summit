@@ -1,15 +1,8 @@
-import React from 'react';
-import {
-  Box,
-  Typography,
-  CircularProgress,
-  Alert,
-  Card,
-  CardContent,
-} from '@mui/material';
-import Grid from '@mui/material/Grid';
-import { useQuery, gql } from '@apollo/client';
-import { DataGrid, GridColDef } from '@mui/x-data-grid';
+import React from "react";
+import { Box, Typography, CircularProgress, Alert, Card, CardContent } from "@mui/material";
+import Grid from "@mui/material/Grid";
+import { useQuery, gql } from "@apollo/client";
+import { DataGrid, GridColDef } from "@mui/x-data-grid";
 
 const GET_CRISIS_TELEMETRY = gql`
   query GetCrisisTelemetry($scenarioId: ID!) {
@@ -34,30 +27,30 @@ interface TelemetryDisplayProps {
 
 const columns: GridColDef[] = [
   {
-    field: 'timestamp',
-    headerName: 'Time',
+    field: "timestamp",
+    headerName: "Time",
     width: 180,
     valueFormatter: (params: any) => new Date(params.value).toLocaleString(),
   },
-  { field: 'platform', headerName: 'Platform', width: 100 },
-  { field: 'author', headerName: 'Author', width: 150 },
-  { field: 'content', headerName: 'Content', flex: 1 },
+  { field: "platform", headerName: "Platform", width: 100 },
+  { field: "author", headerName: "Author", width: 150 },
+  { field: "content", headerName: "Content", flex: 1 },
   {
-    field: 'sentiment',
-    headerName: 'Sentiment',
+    field: "sentiment",
+    headerName: "Sentiment",
     width: 100,
-    type: 'number',
+    type: "number",
     renderCell: (params) => Number(params.value ?? 0).toFixed(2),
   },
   {
-    field: 'viralityScore',
-    headerName: 'Virality',
+    field: "viralityScore",
+    headerName: "Virality",
     width: 100,
-    type: 'number',
+    type: "number",
     renderCell: (params) => Number(params.value ?? 0).toFixed(1),
   },
-  { field: 'volume', headerName: 'Volume', width: 80, type: 'number' },
-  { field: 'narrativeDetected', headerName: 'Narrative', width: 150 },
+  { field: "volume", headerName: "Volume", width: 80, type: "number" },
+  { field: "narrativeDetected", headerName: "Narrative", width: 150 },
 ];
 
 const TelemetryDisplay: React.FC<TelemetryDisplayProps> = ({ scenarioId }) => {
@@ -67,30 +60,27 @@ const TelemetryDisplay: React.FC<TelemetryDisplayProps> = ({ scenarioId }) => {
   });
 
   if (loading) return <CircularProgress />;
-  if (error)
-    return (
-      <Alert severity="error">Error loading telemetry: {error.message}</Alert>
-    );
+  if (error) return <Alert severity="error">Error loading telemetry: {error.message}</Alert>;
 
   const telemetry = data?.getCrisisTelemetry || [];
 
   const totalVolume = telemetry.reduce(
     (sum: number, item: { volume?: number }) => sum + Number(item.volume ?? 0),
-    0,
+    0
   );
   const avgSentiment =
     telemetry.length > 0
       ? telemetry.reduce(
-        (sum: number, item: { sentiment?: number }) =>
-          sum + Number(item.sentiment ?? 0),
-        0,
-      ) /
-      telemetry.length
+          (sum: number, item: { sentiment?: number }) => sum + Number(item.sentiment ?? 0),
+          0
+        ) / telemetry.length
       : 0;
   const avgVirality =
     telemetry.length > 0
-      ? telemetry.reduce((sum: number, item: { viralityScore?: number }) => sum + Number(item.viralityScore ?? 0), 0) /
-      telemetry.length
+      ? telemetry.reduce(
+          (sum: number, item: { viralityScore?: number }) => sum + Number(item.viralityScore ?? 0),
+          0
+        ) / telemetry.length
       : 0;
 
   return (
@@ -99,8 +89,7 @@ const TelemetryDisplay: React.FC<TelemetryDisplayProps> = ({ scenarioId }) => {
         Live Social Media Telemetry
       </Typography>
       <Alert severity="info" sx={{ mb: 2 }}>
-        WAR-GAMED SIMULATION - Data displayed here is simulated and for decision
-        support only.
+        WAR-GAMED SIMULATION - Data displayed here is simulated and for decision support only.
       </Alert>
 
       <Grid container spacing={2} sx={{ mb: 3 }}>
@@ -108,9 +97,7 @@ const TelemetryDisplay: React.FC<TelemetryDisplayProps> = ({ scenarioId }) => {
           <Card>
             <CardContent>
               <Typography variant="h6">Total Volume</Typography>
-              <Typography variant="h4">
-                {totalVolume.toLocaleString()}
-              </Typography>
+              <Typography variant="h4">{totalVolume.toLocaleString()}</Typography>
             </CardContent>
           </Card>
         </Grid>
@@ -132,7 +119,7 @@ const TelemetryDisplay: React.FC<TelemetryDisplayProps> = ({ scenarioId }) => {
         </Grid>
       </Grid>
 
-      <Box sx={{ height: 400, width: '100%' }}>
+      <Box sx={{ height: 400, width: "100%" }}>
         <DataGrid
           rows={telemetry}
           columns={columns}

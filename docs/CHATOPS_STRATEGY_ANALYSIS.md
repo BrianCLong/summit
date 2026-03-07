@@ -23,38 +23,38 @@ This document provides a comprehensive audit of Summit's current architecture ag
 
 ### 1.1 Existing Capabilities (Production-Ready)
 
-| Capability | Location | Maturity | Notes |
-|------------|----------|----------|-------|
-| **Maestro DAG Orchestration** | `packages/maestro-core/` | Production | Workflow execution, retry, compensation |
-| **Agent Gateway** | `services/agent-gateway/` | Production | Auth, quota, approval workflow, observability |
-| **Multi-Agent Bus** | `services/agents/src/bus.ts` | Production | Redis Streams, plan→deploy→review flow |
-| **NLU Service** | `services/citizen-ai/src/nlu-service.ts` | Production | Intent classification, entity extraction |
-| **NL2Cypher** | `services/nlq/`, `services/gateway/src/nl2cypher/` | Production | NL→graph queries with guardrails |
-| **Copilot Service** | `services/copilot/` | Production | GraphRAG, citations, confidence scoring |
-| **WebSocket Server** | `services/websocket-server/` | Production | Real-time streaming, rooms, presence |
-| **Plugin Registry** | `services/conductor/src/plugins/registry.ts` | Production | Cosign verification, SBOM, capabilities |
-| **Capability Registry** | `services/conductor/src/fabric/registry.ts` | Production | Model skills, cost, latency tracking |
-| **Policy Router (AoE)** | `services/conductor/src/fabric/modes/auctionOfExperts.ts` | Production | Multi-model selection, Pareto-optimal |
-| **OPA/ABAC** | `packages/authority-compiler/`, `SECURITY/policy/opa/` | Production | Multi-tenant, clearance levels, DLP |
-| **Audit Logging** | `services/audit-log/` | Production | SHA-256 hash chains, merkle roots |
-| **Provenance Ledger** | `services/prov-ledger/` | Production | Claims, evidence, disclosure bundles |
-| **JWS Attestation** | `services/provenance/jws.ts` | Production | Ed25519 signing, tampering detection |
-| **Neo4j Integration** | `services/api/src/db/neo4j.ts` | Production | Path finding, centrality, full-text |
-| **Knowledge Graph** | `packages/knowledge-graph/` | Production | Temporal, provenance, confidence |
-| **Entity Extraction** | `packages/entity-extraction/` | Production | NER, linking, coreference |
-| **Intelligence Correlation** | `services/intel/src/correlation/` | Production | SIGINT/MASINT, ODNI gaps |
-| **Graph Reasoning** | `packages/graph-reasoning/` | Production | Inference engine, transitive rules |
+| Capability                    | Location                                                  | Maturity   | Notes                                         |
+| ----------------------------- | --------------------------------------------------------- | ---------- | --------------------------------------------- |
+| **Maestro DAG Orchestration** | `packages/maestro-core/`                                  | Production | Workflow execution, retry, compensation       |
+| **Agent Gateway**             | `services/agent-gateway/`                                 | Production | Auth, quota, approval workflow, observability |
+| **Multi-Agent Bus**           | `services/agents/src/bus.ts`                              | Production | Redis Streams, plan→deploy→review flow        |
+| **NLU Service**               | `services/citizen-ai/src/nlu-service.ts`                  | Production | Intent classification, entity extraction      |
+| **NL2Cypher**                 | `services/nlq/`, `services/gateway/src/nl2cypher/`        | Production | NL→graph queries with guardrails              |
+| **Copilot Service**           | `services/copilot/`                                       | Production | GraphRAG, citations, confidence scoring       |
+| **WebSocket Server**          | `services/websocket-server/`                              | Production | Real-time streaming, rooms, presence          |
+| **Plugin Registry**           | `services/conductor/src/plugins/registry.ts`              | Production | Cosign verification, SBOM, capabilities       |
+| **Capability Registry**       | `services/conductor/src/fabric/registry.ts`               | Production | Model skills, cost, latency tracking          |
+| **Policy Router (AoE)**       | `services/conductor/src/fabric/modes/auctionOfExperts.ts` | Production | Multi-model selection, Pareto-optimal         |
+| **OPA/ABAC**                  | `packages/authority-compiler/`, `SECURITY/policy/opa/`    | Production | Multi-tenant, clearance levels, DLP           |
+| **Audit Logging**             | `services/audit-log/`                                     | Production | SHA-256 hash chains, merkle roots             |
+| **Provenance Ledger**         | `services/prov-ledger/`                                   | Production | Claims, evidence, disclosure bundles          |
+| **JWS Attestation**           | `services/provenance/jws.ts`                              | Production | Ed25519 signing, tampering detection          |
+| **Neo4j Integration**         | `services/api/src/db/neo4j.ts`                            | Production | Path finding, centrality, full-text           |
+| **Knowledge Graph**           | `packages/knowledge-graph/`                               | Production | Temporal, provenance, confidence              |
+| **Entity Extraction**         | `packages/entity-extraction/`                             | Production | NER, linking, coreference                     |
+| **Intelligence Correlation**  | `services/intel/src/correlation/`                         | Production | SIGINT/MASINT, ODNI gaps                      |
+| **Graph Reasoning**           | `packages/graph-reasoning/`                               | Production | Inference engine, transitive rules            |
 
 ### 1.2 Critical Gaps
 
-| Gap | Impact | Current State | Required State |
-|-----|--------|---------------|----------------|
-| **No ChatOps Integration** | Cannot deploy to analysts | No Slack/Teams bots | Production Slack/Teams + Web |
-| **No Hierarchical Memory** | Limited to ~5 turn conversations | Basic history array | 3-tier (short/med/long) with semantic selection |
-| **No ReAct Framework** | Limited explainability | Similar patterns scattered | Formalized Thought→Action→Observation traces |
-| **No Multi-Model Consensus** | Single-model routing | AoE (sequential selection) | Parallel execution + confidence voting |
-| **No Risk-Tiered Autonomy** | Binary approval workflow | approve/deny gates | autonomous/HITL/prohibited tiers |
-| **No OSINT Entity Fusion** | Intent lacks threat context | Basic NER | Threat actor/infrastructure/narrative extraction |
+| Gap                          | Impact                           | Current State              | Required State                                   |
+| ---------------------------- | -------------------------------- | -------------------------- | ------------------------------------------------ |
+| **No ChatOps Integration**   | Cannot deploy to analysts        | No Slack/Teams bots        | Production Slack/Teams + Web                     |
+| **No Hierarchical Memory**   | Limited to ~5 turn conversations | Basic history array        | 3-tier (short/med/long) with semantic selection  |
+| **No ReAct Framework**       | Limited explainability           | Similar patterns scattered | Formalized Thought→Action→Observation traces     |
+| **No Multi-Model Consensus** | Single-model routing             | AoE (sequential selection) | Parallel execution + confidence voting           |
+| **No Risk-Tiered Autonomy**  | Binary approval workflow         | approve/deny gates         | autonomous/HITL/prohibited tiers                 |
+| **No OSINT Entity Fusion**   | Intent lacks threat context      | Basic NER                  | Threat actor/infrastructure/narrative extraction |
 
 ---
 
@@ -133,21 +133,28 @@ interface IntentResult {
 interface AggregatedIntent {
   primaryIntent: string;
   confidence: number;
-  consensusScore: number;        // Agreement ratio (0-1)
-  dissent: IntentResult[];       // Models that disagreed
+  consensusScore: number; // Agreement ratio (0-1)
+  dissent: IntentResult[]; // Models that disagreed
   osintEntities: OSINTEntity[];
   rankedContext: ContextChunk[];
   guardrailFlags: GuardrailFlag[];
 }
 
 interface OSINTEntity {
-  type: 'THREAT_ACTOR' | 'INFRASTRUCTURE' | 'MALWARE' | 'CAMPAIGN' |
-        'TTP' | 'INDICATOR' | 'VULNERABILITY' | 'NARRATIVE';
+  type:
+    | "THREAT_ACTOR"
+    | "INFRASTRUCTURE"
+    | "MALWARE"
+    | "CAMPAIGN"
+    | "TTP"
+    | "INDICATOR"
+    | "VULNERABILITY"
+    | "NARRATIVE";
   value: string;
   confidence: number;
-  source: string;               // Which model extracted this
-  linkedGraphId?: string;       // If matched to existing KG entity
-  mitreId?: string;             // MITRE ATT&CK reference
+  source: string; // Which model extracted this
+  linkedGraphId?: string; // If matched to existing KG entity
+  mitreId?: string; // MITRE ATT&CK reference
 }
 
 interface ContextChunk {
@@ -155,7 +162,7 @@ interface ContextChunk {
   content: string;
   relevanceScore: number;
   tokenCount: number;
-  tier: 'short' | 'medium' | 'long';
+  tier: "short" | "medium" | "long";
 }
 ```
 
@@ -225,8 +232,8 @@ interface ContextChunk {
 // services/chatops/src/memory/hierarchical-memory.ts
 
 interface MemoryTier {
-  tier: 'short' | 'medium' | 'long';
-  storage: 'redis' | 'postgres' | 'neo4j';
+  tier: "short" | "medium" | "long";
+  storage: "redis" | "postgres" | "neo4j";
   maxTokens: number;
   retention: Duration;
 }
@@ -243,12 +250,12 @@ interface ConversationMemory {
 }
 
 interface ShortTermMemory {
-  turns: ConversationTurn[];      // Last 5 turns, full content
+  turns: ConversationTurn[]; // Last 5 turns, full content
   totalTokens: number;
 }
 
 interface MediumTermMemory {
-  summaries: TurnSummary[];       // Turns 6-20, compressed
+  summaries: TurnSummary[]; // Turns 6-20, compressed
   keyFacts: ExtractedFact[];
   decisions: Decision[];
   openQuestions: string[];
@@ -263,11 +270,11 @@ interface LongTermMemory {
 }
 
 interface TurnSummary {
-  turnIds: string[];              // Which turns this summarizes
-  summary: string;                // Compressed content
-  entities: string[];             // Entity IDs mentioned
-  intent: string;                 // What user was trying to do
-  outcome: 'success' | 'partial' | 'failed';
+  turnIds: string[]; // Which turns this summarizes
+  summary: string; // Compressed content
+  entities: string[]; // Entity IDs mentioned
+  intent: string; // What user was trying to do
+  outcome: "success" | "partial" | "failed";
   tokenCount: number;
 }
 
@@ -275,8 +282,8 @@ interface TurnSummary {
 interface MemoryManager {
   addTurn(turn: ConversationTurn): Promise<void>;
   getContextWindow(query: string, maxTokens: number): Promise<ContextWindow>;
-  compressTier(from: 'short', to: 'medium'): Promise<void>;
-  extractToGraph(from: 'medium', to: 'long'): Promise<void>;
+  compressTier(from: "short", to: "medium"): Promise<void>;
+  extractToGraph(from: "medium", to: "long"): Promise<void>;
   pruneExpired(): Promise<void>;
 }
 ```
@@ -369,13 +376,13 @@ interface MemoryManager {
 ```typescript
 // services/chatops/src/autonomy/bounded-autonomy.ts
 
-type RiskLevel = 'autonomous' | 'hitl' | 'prohibited';
+type RiskLevel = "autonomous" | "hitl" | "prohibited";
 
 interface RiskClassification {
   level: RiskLevel;
   reason: string;
-  requiredApprovals?: number;     // For HITL: how many approvers
-  requiredRoles?: string[];       // For HITL: who can approve
+  requiredApprovals?: number; // For HITL: how many approvers
+  requiredRoles?: string[]; // For HITL: who can approve
   auditRequirements?: AuditRequirement[];
 }
 
@@ -383,7 +390,7 @@ interface ToolOperation {
   toolId: string;
   operation: string;
   input: Record<string, unknown>;
-  riskOverride?: RiskLevel;       // Policy can override default
+  riskOverride?: RiskLevel; // Policy can override default
 }
 
 interface ReActStep {
@@ -412,7 +419,7 @@ interface ReActTrace {
   startTime: Date;
   endTime?: Date;
   steps: ReActStep[];
-  finalOutcome: 'success' | 'partial' | 'failed' | 'blocked';
+  finalOutcome: "success" | "partial" | "failed" | "blocked";
   totalTokens: number;
   totalLatencyMs: number;
   hitlEscalations: number;
@@ -436,17 +443,9 @@ interface ApprovalWorkflow {
 
   checkApprovalStatus(requestId: string): Promise<ApprovalStatus>;
 
-  approveOperation(
-    requestId: string,
-    approverId: string,
-    reason: string
-  ): Promise<void>;
+  approveOperation(requestId: string, approverId: string, reason: string): Promise<void>;
 
-  denyOperation(
-    requestId: string,
-    approverId: string,
-    reason: string
-  ): Promise<void>;
+  denyOperation(requestId: string, approverId: string, reason: string): Promise<void>;
 }
 ```
 
@@ -527,13 +526,13 @@ interface SlackAdapter {
 
 // Slash commands
 const SLASH_COMMANDS = {
-  '/intel': 'Query intelligence graph',
-  '/investigate': 'Start new investigation',
-  '/entity': 'Look up entity details',
-  '/paths': 'Find paths between entities',
-  '/threats': 'Get threat assessment',
-  '/approve': 'Approve pending operation',
-  '/trace': 'View ReAct trace for operation',
+  "/intel": "Query intelligence graph",
+  "/investigate": "Start new investigation",
+  "/entity": "Look up entity details",
+  "/paths": "Find paths between entities",
+  "/threats": "Get threat assessment",
+  "/approve": "Approve pending operation",
+  "/trace": "View ReAct trace for operation",
 };
 ```
 
@@ -545,21 +544,22 @@ const SLASH_COMMANDS = {
 
 ### Phase 1: Foundation (Months 1-6)
 
-| Sprint | Deliverable | Owner | Dependencies |
-|--------|-------------|-------|--------------|
-| 1-2 | Intent Router (single model) | Core AI | NLU service |
-| 3-4 | Intent Router (multi-model + voting) | Core AI | Phase 1-2 |
-| 5-6 | OSINT Entity Fusion | Core AI | Entity extraction |
-| 7-8 | Hierarchical Memory (Tier 1-2) | Platform | Redis, Postgres |
-| 9-10 | Hierarchical Memory (Tier 3 + selector) | Platform | Neo4j, Phase 7-8 |
-| 11-12 | Bounded Autonomy (Risk tiers) | Security | OPA, Policy |
-| 13-14 | ReAct Trace Framework | Platform | Audit logging |
-| 15-16 | Slack Adapter (basic) | Integration | WebSocket |
-| 17-18 | Slack Adapter (interactive) | Integration | Phase 15-16 |
-| 19-20 | Web Adapter | Frontend | WebSocket |
-| 21-24 | Integration testing + hardening | QA | All |
+| Sprint | Deliverable                             | Owner       | Dependencies      |
+| ------ | --------------------------------------- | ----------- | ----------------- |
+| 1-2    | Intent Router (single model)            | Core AI     | NLU service       |
+| 3-4    | Intent Router (multi-model + voting)    | Core AI     | Phase 1-2         |
+| 5-6    | OSINT Entity Fusion                     | Core AI     | Entity extraction |
+| 7-8    | Hierarchical Memory (Tier 1-2)          | Platform    | Redis, Postgres   |
+| 9-10   | Hierarchical Memory (Tier 3 + selector) | Platform    | Neo4j, Phase 7-8  |
+| 11-12  | Bounded Autonomy (Risk tiers)           | Security    | OPA, Policy       |
+| 13-14  | ReAct Trace Framework                   | Platform    | Audit logging     |
+| 15-16  | Slack Adapter (basic)                   | Integration | WebSocket         |
+| 17-18  | Slack Adapter (interactive)             | Integration | Phase 15-16       |
+| 19-20  | Web Adapter                             | Frontend    | WebSocket         |
+| 21-24  | Integration testing + hardening         | QA          | All               |
 
 **Phase 1 Success Criteria**:
+
 - [ ] 3-turn threat actor demo working in Slack
 - [ ] 80% test coverage on new components
 - [ ] p95 latency < 500ms for intent routing
@@ -567,19 +567,20 @@ const SLASH_COMMANDS = {
 
 ### Phase 2: Safety & Scale (Months 7-12)
 
-| Sprint | Deliverable | Owner | Dependencies |
-|--------|-------------|-------|--------------|
-| 25-26 | Jailbreak detection | Security | Intent Router |
-| 27-28 | Tool supply chain attestation | Security | Plugin Registry |
-| 29-30 | Multi-tenant namespace isolation | Platform | OPA |
-| 31-32 | Advanced ReAct (self-correction) | Core AI | ReAct Framework |
-| 33-34 | Teams Adapter | Integration | Slack Adapter |
-| 35-36 | Load testing (1k concurrent) | QA | All |
-| 37-40 | FedRAMP certification prep | Compliance | Security |
-| 41-44 | Pilot deployments (3-5 IC orgs) | Sales | All |
-| 45-48 | Production hardening | Platform | Pilots |
+| Sprint | Deliverable                      | Owner       | Dependencies    |
+| ------ | -------------------------------- | ----------- | --------------- |
+| 25-26  | Jailbreak detection              | Security    | Intent Router   |
+| 27-28  | Tool supply chain attestation    | Security    | Plugin Registry |
+| 29-30  | Multi-tenant namespace isolation | Platform    | OPA             |
+| 31-32  | Advanced ReAct (self-correction) | Core AI     | ReAct Framework |
+| 33-34  | Teams Adapter                    | Integration | Slack Adapter   |
+| 35-36  | Load testing (1k concurrent)     | QA          | All             |
+| 37-40  | FedRAMP certification prep       | Compliance  | Security        |
+| 41-44  | Pilot deployments (3-5 IC orgs)  | Sales       | All             |
+| 45-48  | Production hardening             | Platform    | Pilots          |
 
 **Phase 2 Success Criteria**:
+
 - [ ] FedRAMP High certification in progress
 - [ ] 5 IC pilot deployments ($250-500k MRR)
 - [ ] p95 latency < 200ms GraphQL
@@ -587,16 +588,17 @@ const SLASH_COMMANDS = {
 
 ### Phase 3: Competitive Dominance (Months 13-18)
 
-| Sprint | Deliverable | Owner | Dependencies |
-|--------|-------------|-------|--------------|
-| 49-52 | Multi-hop NL reasoning | Core AI | Intent Router v2 |
-| 53-56 | Federated graphs (zero-knowledge) | Platform | Neo4j, Security |
-| 57-60 | Autonomous threat tracking | Core AI | Bounded Autonomy |
-| 61-64 | 20+ OSINT transforms | Integration | Plugin Registry |
-| 65-68 | Sales enablement | Sales | All |
-| 69-72 | Partnership integrations | BD | All |
+| Sprint | Deliverable                       | Owner       | Dependencies     |
+| ------ | --------------------------------- | ----------- | ---------------- |
+| 49-52  | Multi-hop NL reasoning            | Core AI     | Intent Router v2 |
+| 53-56  | Federated graphs (zero-knowledge) | Platform    | Neo4j, Security  |
+| 57-60  | Autonomous threat tracking        | Core AI     | Bounded Autonomy |
+| 61-64  | 20+ OSINT transforms              | Integration | Plugin Registry  |
+| 65-68  | Sales enablement                  | Sales       | All              |
+| 69-72  | Partnership integrations          | BD          | All              |
 
 **Phase 3 Success Criteria**:
+
 - [ ] 15+ IC contracts
 - [ ] $2-5M ARR
 - [ ] 500 daily active users
@@ -608,17 +610,17 @@ const SLASH_COMMANDS = {
 
 ### 4.1 Leveraging Existing Infrastructure
 
-| New Component | Existing Service | Integration Pattern |
-|---------------|------------------|---------------------|
-| Intent Router | NLU Service (`citizen-ai`) | Extend with multi-model + voting |
-| Intent Router | Entity Extraction (`entity-extraction`) | Add OSINT-specific types |
-| Memory System | WebSocket Server | Use for session state |
-| Memory System | Knowledge Graph (`knowledge-graph`) | Tier 3 storage |
-| Autonomy Engine | Agent Gateway | Extend risk classification |
-| Autonomy Engine | Audit Log | ReAct trace storage |
-| Autonomy Engine | OPA/ABAC | Risk tier policies |
-| ChatOps Layer | WebSocket Server | Real-time streaming |
-| ChatOps Layer | Copilot Service | GraphRAG backend |
+| New Component   | Existing Service                        | Integration Pattern              |
+| --------------- | --------------------------------------- | -------------------------------- |
+| Intent Router   | NLU Service (`citizen-ai`)              | Extend with multi-model + voting |
+| Intent Router   | Entity Extraction (`entity-extraction`) | Add OSINT-specific types         |
+| Memory System   | WebSocket Server                        | Use for session state            |
+| Memory System   | Knowledge Graph (`knowledge-graph`)     | Tier 3 storage                   |
+| Autonomy Engine | Agent Gateway                           | Extend risk classification       |
+| Autonomy Engine | Audit Log                               | ReAct trace storage              |
+| Autonomy Engine | OPA/ABAC                                | Risk tier policies               |
+| ChatOps Layer   | WebSocket Server                        | Real-time streaming              |
+| ChatOps Layer   | Copilot Service                         | GraphRAG backend                 |
 
 ### 4.2 New Service Structure
 
@@ -664,17 +666,17 @@ services/chatops/
 
 ### 5.1 Feature Comparison Matrix
 
-| Capability | Summit (Target) | Palantir Gotham | Recorded Future | Maltego | Graphika |
-|------------|-----------------|-----------------|-----------------|---------|----------|
-| **Multi-Model Consensus** | ✅ Full | ❌ None | ❌ None | ❌ None | ❌ None |
-| **OSINT Entity Fusion** | ✅ Full | ⚠️ Partial | ⚠️ Partial | ✅ Full | ⚠️ Partial |
-| **Hierarchical Memory** | ✅ 3-tier | ⚠️ Session | ❌ Stateless | ❌ None | ❌ None |
-| **Bounded Autonomy** | ✅ Risk-tiered | ⚠️ Binary | ❌ External | ❌ Manual | ❌ Manual |
-| **ReAct Traces** | ✅ Full | ❌ None | ❌ None | ❌ None | ❌ None |
-| **Graph-Native NL** | ✅ Full | ⚠️ Limited | ❌ API-only | ✅ Transforms | ⚠️ Limited |
-| **Real-Time Streaming** | ✅ WebSocket | ⚠️ Polling | ⚠️ Polling | ❌ Batch | ❌ Batch |
-| **ChatOps Integration** | ✅ Native | ⚠️ Plugin | ⚠️ Plugin | ❌ None | ❌ None |
-| **FedRAMP Ready** | ✅ Target | ✅ Yes | ⚠️ Partial | ❌ No | ❌ No |
+| Capability                | Summit (Target) | Palantir Gotham | Recorded Future | Maltego       | Graphika   |
+| ------------------------- | --------------- | --------------- | --------------- | ------------- | ---------- |
+| **Multi-Model Consensus** | ✅ Full         | ❌ None         | ❌ None         | ❌ None       | ❌ None    |
+| **OSINT Entity Fusion**   | ✅ Full         | ⚠️ Partial      | ⚠️ Partial      | ✅ Full       | ⚠️ Partial |
+| **Hierarchical Memory**   | ✅ 3-tier       | ⚠️ Session      | ❌ Stateless    | ❌ None       | ❌ None    |
+| **Bounded Autonomy**      | ✅ Risk-tiered  | ⚠️ Binary       | ❌ External     | ❌ Manual     | ❌ Manual  |
+| **ReAct Traces**          | ✅ Full         | ❌ None         | ❌ None         | ❌ None       | ❌ None    |
+| **Graph-Native NL**       | ✅ Full         | ⚠️ Limited      | ❌ API-only     | ✅ Transforms | ⚠️ Limited |
+| **Real-Time Streaming**   | ✅ WebSocket    | ⚠️ Polling      | ⚠️ Polling      | ❌ Batch      | ❌ Batch   |
+| **ChatOps Integration**   | ✅ Native       | ⚠️ Plugin       | ⚠️ Plugin       | ❌ None       | ❌ None    |
+| **FedRAMP Ready**         | ✅ Target       | ✅ Yes          | ⚠️ Partial      | ❌ No         | ❌ No      |
 
 ### 5.2 Defensible Moats
 
@@ -689,24 +691,24 @@ services/chatops/
 
 ### 6.1 Technical KPIs
 
-| Metric | Phase 1 Target | Phase 2 Target | Phase 3 Target |
-|--------|----------------|----------------|----------------|
-| Intent Routing Latency (p95) | < 500ms | < 300ms | < 200ms |
-| Memory Retrieval Latency (p95) | < 100ms | < 50ms | < 30ms |
-| ReAct Trace Coverage | 90% | 98% | 99.5% |
-| HITL Escalation Rate | < 20% | < 10% | < 5% |
-| Tool Safety Coverage | 80% | 100% | 100% |
-| Concurrent Users | 100 | 1,000 | 5,000 |
-| Uptime SLA | 99.5% | 99.9% | 99.95% |
+| Metric                         | Phase 1 Target | Phase 2 Target | Phase 3 Target |
+| ------------------------------ | -------------- | -------------- | -------------- |
+| Intent Routing Latency (p95)   | < 500ms        | < 300ms        | < 200ms        |
+| Memory Retrieval Latency (p95) | < 100ms        | < 50ms         | < 30ms         |
+| ReAct Trace Coverage           | 90%            | 98%            | 99.5%          |
+| HITL Escalation Rate           | < 20%          | < 10%          | < 5%           |
+| Tool Safety Coverage           | 80%            | 100%           | 100%           |
+| Concurrent Users               | 100            | 1,000          | 5,000          |
+| Uptime SLA                     | 99.5%          | 99.9%          | 99.95%         |
 
 ### 6.2 Business KPIs
 
-| Metric | Phase 1 Target | Phase 2 Target | Phase 3 Target |
-|--------|----------------|----------------|----------------|
-| IC Pilot Customers | 1-2 | 5 | 15+ |
-| MRR | $50k | $500k | $2-5M |
-| Daily Active Users | 50 | 200 | 500 |
-| NPS | 30 | 50 | 70 |
+| Metric             | Phase 1 Target | Phase 2 Target | Phase 3 Target |
+| ------------------ | -------------- | -------------- | -------------- |
+| IC Pilot Customers | 1-2            | 5              | 15+            |
+| MRR                | $50k           | $500k          | $2-5M          |
+| Daily Active Users | 50             | 200            | 500            |
+| NPS                | 30             | 50             | 70             |
 
 ---
 
@@ -754,6 +756,7 @@ risk_level = "prohibited" {
 ## Appendix B: File References
 
 **Existing Services to Extend**:
+
 - `services/agent-gateway/src/AgentGateway.ts` - Add risk classification
 - `services/citizen-ai/src/nlu-service.ts` - Extend with multi-model
 - `services/copilot/src/` - Backend for GraphRAG
@@ -762,11 +765,13 @@ risk_level = "prohibited" {
 - `services/audit-log/src/index.ts` - ReAct trace storage
 
 **Security Infrastructure**:
+
 - `packages/authority-compiler/src/opa-client.ts` - OPA integration
 - `SECURITY/policy/opa/multi-tenant-abac.rego` - Base policies
 - `services/prov-ledger/src/index.ts` - Provenance tracking
 
 **Graph Infrastructure**:
+
 - `services/api/src/db/neo4j.ts` - Neo4j driver
 - `packages/knowledge-graph/src/core/KnowledgeGraphManager.ts` - KG operations
 - `services/nlq/src/index.ts` - NL2Cypher compilation
@@ -775,6 +780,6 @@ risk_level = "prohibited" {
 
 ## Document Revision History
 
-| Version | Date | Author | Changes |
-|---------|------|--------|---------|
-| 1.0 | 2025-12-04 | Claude | Initial creation from strategy analysis |
+| Version | Date       | Author | Changes                                 |
+| ------- | ---------- | ------ | --------------------------------------- |
+| 1.0     | 2025-12-04 | Claude | Initial creation from strategy analysis |

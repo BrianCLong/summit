@@ -21,12 +21,12 @@ spec:
               kinds:
                 - Pod
       validate:
-        message: 'Privilege escalation is disallowed. Set `allowPrivilegeEscalation` to `false`.'
+        message: "Privilege escalation is disallowed. Set `allowPrivilegeEscalation` to `false`."
         pattern:
           spec:
             containers:
               - securityContext:
-                  allowPrivilegeEscalation: 'false'
+                  allowPrivilegeEscalation: "false"
             initContainers:
               - securityContext:
-                  allowPrivilegeEscalation: 'false'
+                  allowPrivilegeEscalation: "false"

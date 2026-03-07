@@ -52,7 +52,9 @@ function AnalystConsoleInner({
   const { state, resetSelection, resetFilters, resetAll } = useAnalystView()
   const [showExplainPanel, setShowExplainPanel] = useState(true)
   const [showProvenance, setShowProvenance] = useState(false)
-  const [focusedPane, setFocusedPane] = useState<'graph' | 'timeline' | 'map' | null>(null)
+  const [focusedPane, setFocusedPane] = useState<
+    'graph' | 'timeline' | 'map' | null
+  >(null)
 
   // Calculate visible counts for header badges
   const visibleCounts = useMemo(() => {
@@ -66,7 +68,9 @@ function AnalystConsoleInner({
     })
 
     // Get entity IDs involved in visible events
-    const entityIdsInTimeWindow = new Set(visibleEvents.flatMap(e => e.entityIds))
+    const entityIdsInTimeWindow = new Set(
+      visibleEvents.flatMap(e => e.entityIds)
+    )
 
     // Filter entities (could be more sophisticated)
     let visibleEntities = entities
@@ -90,7 +94,8 @@ function AnalystConsoleInner({
     const visibleEntityIds = new Set(visibleEntities.map(e => e.id))
     const visibleLinks = links.filter(
       link =>
-        visibleEntityIds.has(link.sourceId) && visibleEntityIds.has(link.targetId)
+        visibleEntityIds.has(link.sourceId) &&
+        visibleEntityIds.has(link.targetId)
     )
 
     return {
@@ -174,7 +179,11 @@ function AnalystConsoleInner({
           </h1>
 
           {/* Status badges */}
-          <div className="flex items-center gap-2" role="status" aria-live="polite">
+          <div
+            className="flex items-center gap-2"
+            role="status"
+            aria-live="polite"
+          >
             <Badge variant="outline" className="flex items-center gap-1">
               <Network className="h-3 w-3" />
               {visibleCounts.entities} entities
@@ -237,7 +246,12 @@ function AnalystConsoleInner({
 
           {onExport && (
             <Tooltip content="Export current view">
-              <Button variant="outline" size="sm" onClick={onExport} aria-label="Export">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onExport}
+                aria-label="Export"
+              >
                 <Download className="h-4 w-4" />
                 <span className="ml-1 hidden sm:inline">Export</span>
               </Button>
@@ -270,11 +284,18 @@ function AnalystConsoleInner({
                     <CardTitle className="text-sm flex items-center gap-2">
                       <Network className="h-4 w-4" />
                       Graph
-                      <Kbd keys={['mod', '1']} className="ml-auto bg-slate-800" />
+                      <Kbd
+                        keys={['mod', '1']}
+                        className="ml-auto bg-slate-800"
+                      />
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="p-0 h-[calc(100%-3rem)]">
-                    <GraphPane entities={entities} links={links} events={events} />
+                    <GraphPane
+                      entities={entities}
+                      links={links}
+                      events={events}
+                    />
                   </CardContent>
                 </Card>
               </div>
@@ -283,7 +304,8 @@ function AnalystConsoleInner({
               <div
                 className={cn(
                   'h-48 min-h-[12rem] transition-all',
-                  focusedPane === 'timeline' && 'ring-2 ring-blue-500 ring-inset'
+                  focusedPane === 'timeline' &&
+                    'ring-2 ring-blue-500 ring-inset'
                 )}
               >
                 <Card className="h-full rounded-none border-0">
@@ -291,7 +313,10 @@ function AnalystConsoleInner({
                     <CardTitle className="text-sm flex items-center gap-2">
                       <Clock className="h-4 w-4" />
                       Timeline
-                      <Kbd keys={['mod', '2']} className="ml-auto bg-slate-800" />
+                      <Kbd
+                        keys={['mod', '2']}
+                        className="ml-auto bg-slate-800"
+                      />
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="p-0 h-[calc(100%-3rem)]">

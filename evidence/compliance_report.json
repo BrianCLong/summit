@@ -17,30 +17,19 @@
           },
           "Article 10": {
             "title": "Data and Governance",
-            "internal_controls": [
-              "governance/registry.json",
-              "server/src/governance/fairness.ts"
-            ]
+            "internal_controls": ["governance/registry.json", "server/src/governance/fairness.ts"]
           },
           "Article 12": {
             "title": "Record-Keeping (Logging)",
-            "internal_controls": [
-              "server/src/governance/execution-trace.ts",
-              "evidence/traces/"
-            ]
+            "internal_controls": ["server/src/governance/execution-trace.ts", "evidence/traces/"]
           },
           "Article 14": {
             "title": "Human Oversight",
-            "internal_controls": [
-              "server/src/autonomous/orchestrator.enhanced.ts#checkApproval"
-            ]
+            "internal_controls": ["server/src/autonomous/orchestrator.enhanced.ts#checkApproval"]
           },
           "Article 15": {
             "title": "Accuracy, Robustness, Cybersecurity",
-            "internal_controls": [
-              "server/src/governance/drift.ts",
-              "policy/supply_chain.rego"
-            ]
+            "internal_controls": ["server/src/governance/drift.ts", "policy/supply_chain.rego"]
           }
         }
       }
@@ -61,9 +50,7 @@
           },
           "MAP-1": {
             "title": "Context is established and understood",
-            "internal_controls": [
-              "server/src/autonomous/orchestrator.enhanced.ts#RunConfig"
-            ]
+            "internal_controls": ["server/src/autonomous/orchestrator.enhanced.ts#RunConfig"]
           },
           "MEASURE-1": {
             "title": "AI system performance is measured",
@@ -74,9 +61,7 @@
           },
           "MANAGE-1": {
             "title": "AI system risks are prioritized and acted upon",
-            "internal_controls": [
-              "server/src/autonomous/policy-engine.ts"
-            ]
+            "internal_controls": ["server/src/autonomous/policy-engine.ts"]
           }
         }
       }

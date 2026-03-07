@@ -1,5 +1,5 @@
-import pg from 'pg';
-import { createHash, createSign } from 'crypto';
+import pg from "pg";
+import { createHash, createSign } from "crypto";
 import type {
   BitemporalRecord,
   TemporalSnapshot,
@@ -7,12 +7,12 @@ import type {
   TemporalQueryOptions,
   UpsertOptions,
   SignedAudit,
-} from './types.js';
-import type { Logger } from 'pino';
+} from "./types.js";
+import type { Logger } from "pino";
 
 const { Pool } = pg;
 
-const MAX_DATE = new Date('9999-12-31T23:59:59Z');
+const MAX_DATE = new Date("9999-12-31T23:59:59Z");
 
 export class BitemporalStore<T = any> {
   private pool: pg.Pool;
@@ -21,7 +21,7 @@ export class BitemporalStore<T = any> {
 
   constructor(
     connectionString: string,
-    tableName: string = 'bitemporal_entities',
+    tableName: string = "bitemporal_entities",
     logger?: Logger
   ) {
     this.pool = new Pool({ connectionString, max: 20 });
@@ -74,7 +74,7 @@ export class BitemporalStore<T = any> {
         CREATE INDEX IF NOT EXISTS idx_audit_timestamp ON bitemporal_audit_log(timestamp);
       `);
 
-      this.logger?.info({ tableName: this.tableName }, 'Bitemporal schema initialized');
+      this.logger?.info({ tableName: this.tableName }, "Bitemporal schema initialized");
     } finally {
       client.release();
     }
@@ -83,14 +83,10 @@ export class BitemporalStore<T = any> {
   /**
    * Upsert a record with temporal semantics
    */
-  async upsert(
-    entityKey: string,
-    data: T,
-    options: UpsertOptions
-  ): Promise<string> {
+  async upsert(entityKey: string, data: T, options: UpsertOptions): Promise<string> {
     const client = await this.pool.connect();
     try {
-      await client.query('BEGIN');
+      await client.query("BEGIN");
 
       const now = new Date();
       const validTo = options.validTo || MAX_DATE;
@@ -133,16 +129,16 @@ export class BitemporalStore<T = any> {
         `INSERT INTO bitemporal_audit_log (
           entity_key, operation, valid_time, tx_time, user_id, data, hash
         ) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-        [entityKey, 'UPDATE', options.validFrom, now, options.userId, JSON.stringify(data), hash]
+        [entityKey, "UPDATE", options.validFrom, now, options.userId, JSON.stringify(data), hash]
       );
 
-      await client.query('COMMIT');
+      await client.query("COMMIT");
 
-      this.logger?.debug({ entityKey, id: newId }, 'Bitemporal upsert completed');
+      this.logger?.debug({ entityKey, id: newId }, "Bitemporal upsert completed");
 
       return newId;
     } catch (error) {
-      await client.query('ROLLBACK');
+      await client.query("ROLLBACK");
       throw error;
     } finally {
       client.release();
@@ -212,7 +208,7 @@ export class BitemporalStore<T = any> {
       paramIndex++;
     }
 
-    query += ' ORDER BY entity_key, valid_from DESC';
+    query += " ORDER BY entity_key, valid_from DESC";
 
     if (options.limit) {
       query += ` LIMIT $${paramIndex}`;
@@ -231,7 +227,7 @@ export class BitemporalStore<T = any> {
     return {
       asOfValidTime: validTime,
       asOfTxTime: txTime,
-      records: result.rows.map(row => this.mapRow(row)),
+      records: result.rows.map((row) => this.mapRow(row)),
       totalCount: result.rowCount || 0,
     };
   }
@@ -257,8 +253,8 @@ export class BitemporalStore<T = any> {
     });
 
     // Build maps for comparison
-    const fromMap = new Map(fromSnapshot.records.map(r => [r.entityKey, r]));
-    const toMap = new Map(toSnapshot.records.map(r => [r.entityKey, r]));
+    const fromMap = new Map(fromSnapshot.records.map((r) => [r.entityKey, r]));
+    const toMap = new Map(toSnapshot.records.map((r) => [r.entityKey, r]));
 
     const added: BitemporalRecord<T>[] = [];
     const removed: BitemporalRecord<T>[] = [];
@@ -300,10 +296,7 @@ export class BitemporalStore<T = any> {
   /**
    * Export signed audit trail
    */
-  async exportAudit(
-    entityKey: string,
-    privateKey?: string
-  ): Promise<SignedAudit[]> {
+  async exportAudit(entityKey: string, privateKey?: string): Promise<SignedAudit[]> {
     const result = await this.pool.query(
       `SELECT * FROM bitemporal_audit_log
        WHERE entity_key = $1
@@ -311,7 +304,7 @@ export class BitemporalStore<T = any> {
       [entityKey]
     );
 
-    const audits: SignedAudit[] = result.rows.map(row => ({
+    const audits: SignedAudit[] = result.rows.map((row) => ({
       id: row.id,
       entityKey: row.entity_key,
       operation: row.operation,
@@ -345,31 +338,31 @@ export class BitemporalStore<T = any> {
       [entityKey]
     );
 
-    return result.rows.map(row => this.mapRow(row));
+    return result.rows.map((row) => this.mapRow(row));
   }
 
   /**
    * Calculate hash of data
    */
   private calculateHash(data: any): string {
-    return createHash('sha256')
-      .update(JSON.stringify(data))
-      .digest('hex');
+    return createHash("sha256").update(JSON.stringify(data)).digest("hex");
   }
 
   /**
    * Sign audit record
    */
   private signAudit(audit: SignedAudit, privateKey: string): string {
-    const sign = createSign('SHA256');
-    sign.update(JSON.stringify({
-      entityKey: audit.entityKey,
-      operation: audit.operation,
-      validTime: audit.validTime,
-      txTime: audit.txTime,
-      hash: audit.hash,
-    }));
-    return sign.sign(privateKey, 'hex');
+    const sign = createSign("SHA256");
+    sign.update(
+      JSON.stringify({
+        entityKey: audit.entityKey,
+        operation: audit.operation,
+        validTime: audit.validTime,
+        txTime: audit.txTime,
+        hash: audit.hash,
+      })
+    );
+    return sign.sign(privateKey, "hex");
   }
 
   /**
@@ -381,10 +374,7 @@ export class BitemporalStore<T = any> {
   ): Array<{ field: string; oldValue: any; newValue: any }> {
     const changes: Array<{ field: string; oldValue: any; newValue: any }> = [];
 
-    const allKeys = new Set([
-      ...Object.keys(oldData || {}),
-      ...Object.keys(newData || {}),
-    ]);
+    const allKeys = new Set([...Object.keys(oldData || {}), ...Object.keys(newData || {})]);
 
     for (const key of allKeys) {
       const oldValue = oldData?.[key];
@@ -421,6 +411,6 @@ export class BitemporalStore<T = any> {
    */
   async close(): Promise<void> {
     await this.pool.end();
-    this.logger?.info('Bitemporal store connections closed');
+    this.logger?.info("Bitemporal store connections closed");
   }
 }

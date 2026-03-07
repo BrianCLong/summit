@@ -1,13 +1,16 @@
 # Audit Integrity Runbook
 
 ## Purpose
+
 Restore audit trail ingestion and storage when gaps, corruption, or PII handling regressions are detected.
 
 ## Preconditions
+
 - Pager alert `AuditTrailIngestionStall` or checksum mismatch from weekly export.
 - Access to observability cluster kubeconfig and S3/object storage credentials (read-only).
 
 ## Steps
+
 1. **Triage ingestion path**
    - Check collector health: `kubectl -n observability logs deploy/otel-collector | tail -n 50` for exporter errors.
    - Validate pipeline: ensure `audit_events_ingested_total` increasing via Prometheus query `rate(audit_events_ingested_total[5m])`.
@@ -27,5 +30,6 @@ Restore audit trail ingestion and storage when gaps, corruption, or PII handling
    - Close incident only after 2x successive 15-minute windows show healthy ingestion and checksums match.
 
 ## Communications
+
 - Incident commander: Security on-call.
 - Postmortem required within 48h; attach Grafana snapshots and checksum report artifacts.

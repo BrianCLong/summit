@@ -1,20 +1,16 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { api } from '../api';
-import { canonSig } from '../utils/canonSig';
-import PlaybookDialog from '../components/PlaybookDialog';
+import React, { useEffect, useMemo, useState } from "react";
+import { api } from "../api";
+import { canonSig } from "../utils/canonSig";
+import PlaybookDialog from "../components/PlaybookDialog";
 
 export default function AlertCenter() {
   const { getAlertCenterEvents, getIncidents } = api();
   const [since, setSince] = useState(6 * 3600 * 1000);
-  const [filterType, setFilterType] = useState<
-    'all' | 'ci' | 'slo' | 'forecast'
-  >('all');
-  const [filterSev, setFilterSev] = useState<'all' | 'info' | 'warn' | 'page'>(
-    'all',
-  );
+  const [filterType, setFilterType] = useState<"all" | "ci" | "slo" | "forecast">("all");
+  const [filterSev, setFilterSev] = useState<"all" | "info" | "warn" | "page">("all");
   const [rows, setRows] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-  const [mode, setMode] = useState<'events' | 'incidents'>('events');
+  const [mode, setMode] = useState<"events" | "incidents">("events");
   const [inc, setInc] = useState<any[]>([]);
   const [pb, setPb] = useState<{
     open: boolean;
@@ -32,7 +28,7 @@ export default function AlertCenter() {
     refresh();
   }, [since]);
   useEffect(() => {
-    if (mode === 'incidents') {
+    if (mode === "incidents") {
       getIncidents({ sinceMs: since }).then((r) => setInc(r.incidents || []));
     }
   }, [mode, since]);
@@ -41,10 +37,10 @@ export default function AlertCenter() {
     () =>
       rows.filter(
         (e: any) =>
-          (filterType === 'all' || e.type === filterType) &&
-          (filterSev === 'all' || e.severity === filterSev),
+          (filterType === "all" || e.type === filterType) &&
+          (filterSev === "all" || e.severity === filterSev)
       ),
-    [rows, filterType, filterSev],
+    [rows, filterType, filterSev]
   );
 
   return (
@@ -53,22 +49,18 @@ export default function AlertCenter() {
         <h1 className="text-xl font-semibold">Alert Center</h1>
         <div className="flex gap-2">
           <button
-            className={`rounded px-2 py-1 text-sm ${mode === 'events' ? 'bg-slate-800 text-white' : 'border'}`}
-            onClick={() => setMode('events')}
+            className={`rounded px-2 py-1 text-sm ${mode === "events" ? "bg-slate-800 text-white" : "border"}`}
+            onClick={() => setMode("events")}
           >
             Events
           </button>
           <button
-            className={`rounded px-2 py-1 text-sm ${mode === 'incidents' ? 'bg-slate-800 text-white' : 'border'}`}
-            onClick={() => setMode('incidents')}
+            className={`rounded px-2 py-1 text-sm ${mode === "incidents" ? "bg-slate-800 text-white" : "border"}`}
+            onClick={() => setMode("incidents")}
           >
             Incidents
           </button>
-          <button
-            className="rounded border px-2 py-1 text-sm"
-            onClick={refresh}
-            disabled={loading}
-          >
+          <button className="rounded border px-2 py-1 text-sm" onClick={refresh} disabled={loading}>
             Refresh
           </button>
         </div>
@@ -116,7 +108,7 @@ export default function AlertCenter() {
         </label>
       </div>
 
-      {mode === 'events' ? (
+      {mode === "events" ? (
         <div role="region" aria-live="polite" className="rounded-2xl border">
           <table className="w-full text-sm">
             <thead>
@@ -134,15 +126,13 @@ export default function AlertCenter() {
                   <td>{new Date(e.ts).toLocaleString()}</td>
                   <td>
                     <span
-                      className={`rounded px-2 py-0.5 text-white text-xs ${e.severity === 'page' ? 'bg-red-600' : e.severity === 'warn' ? 'bg-amber-500' : 'bg-slate-500'}`}
+                      className={`rounded px-2 py-0.5 text-white text-xs ${e.severity === "page" ? "bg-red-600" : e.severity === "warn" ? "bg-amber-500" : "bg-slate-500"}`}
                     >
                       {String(e.severity).toUpperCase()}
                     </span>
                   </td>
                   <td>
-                    <span className="rounded border px-2 py-0.5 text-xs">
-                      {e.type}
-                    </span>
+                    <span className="rounded border px-2 py-0.5 text-xs">{e.type}</span>
                   </td>
                   <td>
                     {e.title}
@@ -150,14 +140,10 @@ export default function AlertCenter() {
                       className="ml-2 text-blue-600 underline"
                       onClick={() => {
                         const provider =
-                          e.type === 'forecast'
-                            ? 'llm'
-                            : e.type === 'ci'
-                              ? 'ci'
-                              : 'other';
+                          e.type === "forecast" ? "llm" : e.type === "ci" ? "ci" : "other";
                         setPb({
                           open: true,
-                          sig: canonSig(e.title || ''),
+                          sig: canonSig(e.title || ""),
                           provider,
                         });
                       }}
@@ -176,7 +162,7 @@ export default function AlertCenter() {
                         open
                       </a>
                     ) : (
-                      '-'
+                      "-"
                     )}
                   </td>
                 </tr>
@@ -184,7 +170,7 @@ export default function AlertCenter() {
               {!filtered.length && (
                 <tr>
                   <td colSpan={5} className="p-3 text-center text-gray-500">
-                    {loading ? 'Loading…' : 'No events'}
+                    {loading ? "Loading…" : "No events"}
                   </td>
                 </tr>
               )}
@@ -213,7 +199,7 @@ export default function AlertCenter() {
                   <td>{g.tenant}</td>
                   <td>
                     <span
-                      className={`rounded px-2 py-0.5 text-white text-xs ${g.severity === 'page' ? 'bg-red-600' : g.severity === 'warn' ? 'bg-amber-500' : 'bg-slate-500'}`}
+                      className={`rounded px-2 py-0.5 text-white text-xs ${g.severity === "page" ? "bg-red-600" : g.severity === "warn" ? "bg-amber-500" : "bg-slate-500"}`}
                     >
                       {String(g.severity).toUpperCase()}
                     </span>
@@ -221,13 +207,11 @@ export default function AlertCenter() {
                   <td>{g.count}</td>
                   <td>
                     <details>
-                      <summary className="cursor-pointer text-blue-600 underline">
-                        view
-                      </summary>
+                      <summary className="cursor-pointer text-blue-600 underline">view</summary>
                       <ul className="ml-6 list-disc">
                         {g.events.map((e: any) => (
                           <li key={e.id}>
-                            {String(e.type).toUpperCase()} — {e.title}{' '}
+                            {String(e.type).toUpperCase()} — {e.title}{" "}
                             {e.link ? (
                               <a
                                 className="text-blue-600 underline"
@@ -257,12 +241,7 @@ export default function AlertCenter() {
         </div>
       )}
       {pb?.open && (
-        <PlaybookDialog
-          open
-          onClose={() => setPb(null)}
-          sig={pb.sig}
-          providerGuess={pb.provider}
-        />
+        <PlaybookDialog open onClose={() => setPb(null)} sig={pb.sig} providerGuess={pb.provider} />
       )}
     </section>
   );

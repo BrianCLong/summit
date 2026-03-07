@@ -32,6 +32,7 @@ make up
 Copy `.env.example` to `.env`. The defaults are configured for local development with Docker.
 
 **Key Variables:**
+
 - `PORT`: API server port (default: 4000)
 - `NEO4J_URI`: Neo4j connection string (default: bolt://localhost:7687)
 - `POSTGRES_URL`: PostgreSQL connection string
@@ -47,6 +48,7 @@ We use Docker Compose to run infrastructure dependencies:
 - **Adminer**: Database management UI (Port 8080)
 
 To start only infrastructure (without the app):
+
 ```bash
 docker compose up -d neo4j postgres redis
 ```
@@ -54,9 +56,11 @@ docker compose up -d neo4j postgres redis
 ### 3. Running the Application
 
 **Option A: Full Stack via Docker (Recommended)**
+
 ```bash
 make up
 ```
+
 This runs both the server and client in containers with hot-reloading enabled for `server/src` and `client/src`.
 
 **Option B: Hybrid (Local Node + Docker Infra)**
@@ -88,21 +92,22 @@ make smoke
 ```
 
 Or run the simple script:
+
 ```bash
 node scripts/smoke-test-simple.js
 ```
 
 ## Common Commands
 
-| Command | Description |
-| :--- | :--- |
-| `make up` | Start all services |
-| `make down` | Stop all services |
-| `make restart` | Restart services |
-| `make logs` | Follow logs |
-| `make clean` | Remove containers and volumes (resets data) |
-| `make seed` | Seed the database with demo data |
-| `make test` | Run unit tests |
+| Command        | Description                                 |
+| :------------- | :------------------------------------------ |
+| `make up`      | Start all services                          |
+| `make down`    | Stop all services                           |
+| `make restart` | Restart services                            |
+| `make logs`    | Follow logs                                 |
+| `make clean`   | Remove containers and volumes (resets data) |
+| `make seed`    | Seed the database with demo data            |
+| `make test`    | Run unit tests                              |
 
 ## IDE Setup
 

@@ -68,7 +68,7 @@ This statement covers the public IntelGraph Docs site and versioned snapshots.
 
 ```yaml
 extends: existence
-message: 'Avoid using real customer names or domains; use synthetic examples.'
+message: "Avoid using real customer names or domains; use synthetic examples."
 level: error
 # Basic heuristic examples (expand with your own allow/deny lists)
 tokens:
@@ -117,7 +117,7 @@ jobs:
         run: cosign sign-blob --yes --output-signature docs-site.tar.gz.sig docs-site.tar.gz
       - name: Upload signatures
         uses: actions/upload-artifact@v4
-        with: { name: docs-signature, path: 'docs-site.tar.gz*' }
+        with: { name: docs-signature, path: "docs-site.tar.gz*" }
 ```
 
 ## B2) SLSA provenance attestation (GitHub Attestations)
@@ -145,18 +145,18 @@ jobs:
 
 ```yaml
 # Map areas of code to the docs that must be updated
-- code: ['packages/sdk-js/src/**', 'packages/sdk-py/intelgraph/**']
+- code: ["packages/sdk-js/src/**", "packages/sdk-py/intelgraph/**"]
   docs:
-    - 'docs/reference/sdk-js/index.md'
-    - 'docs/reference/sdk-py/index.md'
-- code: ['api/intelgraph-core-api.yaml']
+    - "docs/reference/sdk-js/index.md"
+    - "docs/reference/sdk-py/index.md"
+- code: ["api/intelgraph-core-api.yaml"]
   docs:
-    - 'docs/reference/api/error-catalog.md'
-    - 'docs/tutorials/first-ingest.md'
-- code: ['services/maestro/**']
+    - "docs/reference/api/error-catalog.md"
+    - "docs/tutorials/first-ingest.md"
+- code: ["services/maestro/**"]
   docs:
-    - 'docs/concepts/maestro/ARCHITECTURE.md'
-    - 'docs/how-to/maestro/canary-rollback.md'
+    - "docs/concepts/maestro/ARCHITECTURE.md"
+    - "docs/how-to/maestro/canary-rollback.md"
 ```
 
 ## C2) Drift detection script
@@ -164,38 +164,34 @@ jobs:
 **`scripts/docs/drift-watcher.js`**
 
 ```js
-const fs = require('fs');
-const path = require('path');
-const yaml = require('js-yaml');
-const { execSync } = require('child_process');
-const map = yaml.load(fs.readFileSync('docs/_meta/code-to-docs.yml', 'utf8'));
-const base = process.env.GITHUB_BASE_REF || 'origin/main';
+const fs = require("fs");
+const path = require("path");
+const yaml = require("js-yaml");
+const { execSync } = require("child_process");
+const map = yaml.load(fs.readFileSync("docs/_meta/code-to-docs.yml", "utf8"));
+const base = process.env.GITHUB_BASE_REF || "origin/main";
 const changed = execSync(`git diff --name-only ${base}...`, {
-  encoding: 'utf8',
+  encoding: "utf8",
 })
   .trim()
-  .split('\n');
+  .split("\n");
 let missing = [];
 for (const rule of map) {
   const codeChanged = changed.some((f) =>
-    rule.code.some((glob) =>
-      new RegExp(glob.replace('**', '.*').replace('*', '[^/]*')).test(f),
-    ),
+    rule.code.some((glob) => new RegExp(glob.replace("**", ".*").replace("*", "[^/]*")).test(f))
   );
   if (codeChanged) {
     const docsTouched = changed.some((f) =>
-      rule.docs.some((d) => f === d || f.endsWith(d.replace(/^docs\//, ''))),
+      rule.docs.some((d) => f === d || f.endsWith(d.replace(/^docs\//, "")))
     );
     if (!docsTouched) {
-      missing.push(rule.docs.join(', '));
+      missing.push(rule.docs.join(", "));
     }
   }
 }
 if (missing.length) {
-  console.error(
-    'Code changed without corresponding docs updates. Expected updates to:',
-  );
-  missing.forEach((m) => console.error(' -', m));
+  console.error("Code changed without corresponding docs updates. Expected updates to:");
+  missing.forEach((m) => console.error(" -", m));
   process.exit(1);
 }
 ```
@@ -267,8 +263,8 @@ printf "%s,%s,%s\n" "$(date -u +%FT%TZ)" "$1" "$2" >> docs/ops/metrics/$1.csv
 **`scripts/docs/screenshot-freshness.js`**
 
 ```js
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 const rx = /!\[(.*?)\]\((.*?)\)/g;
 const cutoff = Date.now() - 1000 * 60 * 60 * 24 * 180;
 let stale = [];
@@ -278,7 +274,7 @@ let stale = [];
     const s = fs.statSync(p);
     if (s.isDirectory()) walk(p);
     else if (/\.mdx?$/.test(f)) {
-      const md = fs.readFileSync(p, 'utf8');
+      const md = fs.readFileSync(p, "utf8");
       for (const m of md.matchAll(rx)) {
         const img = path.join(path.dirname(p), m[2]);
         if (fs.existsSync(img)) {
@@ -288,12 +284,9 @@ let stale = [];
       }
     }
   }
-})('docs');
-fs.writeFileSync(
-  'docs/ops/screenshot-stale.json',
-  JSON.stringify(stale, null, 2),
-);
-console.log('Stale screenshots:', stale.length);
+})("docs");
+fs.writeFileSync("docs/ops/screenshot-stale.json", JSON.stringify(stale, null, 2));
+console.log("Stale screenshots:", stale.length);
 ```
 
 **CI**: Upload artifact and create an issue when `stale.length > 0`.
@@ -317,9 +310,9 @@ console.log('Stale screenshots:', stale.length);
 **`src/components/RenderSla.tsx`**
 
 ```tsx
-import React from 'react';
+import React from "react";
 export default function RenderSla() {
-  const Sla = require('@site/docs/ops/docs-slas.md');
+  const Sla = require("@site/docs/ops/docs-slas.md");
   return <Sla.default />;
 }
 ```

@@ -1,6 +1,8 @@
-declare module 'lucide-react' {
-  import * as React from 'react';
-  export interface IconProps extends React.SVGProps<SVGSVGElement> { size?: number | string }
+declare module "lucide-react" {
+  import * as React from "react";
+  export interface IconProps extends React.SVGProps<SVGSVGElement> {
+    size?: number | string;
+  }
   export const Activity: React.FC<IconProps>;
   export const AlertCircle: React.FC<IconProps>;
   export const AlertTriangle: React.FC<IconProps>;

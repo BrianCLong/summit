@@ -12,38 +12,38 @@ This document establishes clear ownership patterns, autonomy levels, and collabo
 
 ### H = Human-Led (Humans design/decide; AI generates boilerplate)
 
-| Activity | Human Role | AI Role |
-|----------|-----------|---------|
+| Activity               | Human Role                          | AI Role                              |
+| ---------------------- | ----------------------------------- | ------------------------------------ |
 | Architecture decisions | Design, evaluate trade-offs, decide | Research options, document decisions |
-| Policy semantics | Define rules, acceptance criteria | Generate Rego/YAML, test cases |
-| UX/UI flows | Sketch wireframes, user stories | Implement components, accessibility |
-| Risk acceptance | Evaluate security implications | Generate threat models, mitigations |
-| Customer narratives | Define use cases, priorities | Generate documentation, examples |
-| Data model design | Entity relationships, cardinality | Generate schemas, migrations |
-| SLO definitions | Define targets, thresholds | Implement dashboards, alerts |
+| Policy semantics       | Define rules, acceptance criteria   | Generate Rego/YAML, test cases       |
+| UX/UI flows            | Sketch wireframes, user stories     | Implement components, accessibility  |
+| Risk acceptance        | Evaluate security implications      | Generate threat models, mitigations  |
+| Customer narratives    | Define use cases, priorities        | Generate documentation, examples     |
+| Data model design      | Entity relationships, cardinality   | Generate schemas, migrations         |
+| SLO definitions        | Define targets, thresholds          | Implement dashboards, alerts         |
 
 ### A = AI-Heavy (AI drafts/maintains; humans validate)
 
-| Activity | AI Role | Human Role |
-|----------|---------|-----------|
-| Test generation | Write unit/integration/E2E tests | Review coverage, edge cases |
-| Documentation | Generate docs, ADRs, runbooks | Review accuracy, approve |
-| Error messages | Draft user-friendly messages | Review tone, completeness |
-| Refactoring | Identify opportunities, implement | Review changes, approve merge |
-| Config generation | Generate YAML, JSON, Terraform | Validate correctness |
-| Code formatting | Apply linting, formatting | N/A (auto-merge) |
-| Dependency updates | Generate PRs for patches | Review breaking changes |
-| Boilerplate code | Generate scaffolding | Review patterns |
+| Activity           | AI Role                           | Human Role                    |
+| ------------------ | --------------------------------- | ----------------------------- |
+| Test generation    | Write unit/integration/E2E tests  | Review coverage, edge cases   |
+| Documentation      | Generate docs, ADRs, runbooks     | Review accuracy, approve      |
+| Error messages     | Draft user-friendly messages      | Review tone, completeness     |
+| Refactoring        | Identify opportunities, implement | Review changes, approve merge |
+| Config generation  | Generate YAML, JSON, Terraform    | Validate correctness          |
+| Code formatting    | Apply linting, formatting         | N/A (auto-merge)              |
+| Dependency updates | Generate PRs for patches          | Review breaking changes       |
+| Boilerplate code   | Generate scaffolding              | Review patterns               |
 
 ### M = Mixed (AI scaffolds; humans define semantics)
 
-| Activity | Collaboration Model |
-|----------|---------------------|
-| Schema migrations | Human defines fields/constraints; AI generates SQL/Cypher |
-| Connector manifests | Human defines capabilities; AI implements SDK integration |
-| DAG workflows | Human defines steps/gates; AI generates orchestration code |
-| Telemetry setup | Human defines metrics/SLOs; AI instruments code |
-| API contracts | Human defines endpoints; AI generates types, validation |
+| Activity            | Collaboration Model                                        |
+| ------------------- | ---------------------------------------------------------- |
+| Schema migrations   | Human defines fields/constraints; AI generates SQL/Cypher  |
+| Connector manifests | Human defines capabilities; AI implements SDK integration  |
+| DAG workflows       | Human defines steps/gates; AI generates orchestration code |
+| Telemetry setup     | Human defines metrics/SLOs; AI instruments code            |
+| API contracts       | Human defines endpoints; AI generates types, validation    |
 
 ---
 
@@ -103,7 +103,7 @@ Human drives with AI support:
 
 ### Wave 0: Baseline Stabilization
 
-```text
+````text
 ┌─────────────────────────────────────────────────────────────┐
 │                     WAVE 0 WORKFLOW                         │
 ├─────────────────────────────────────────────────────────────┤
@@ -364,3 +364,4 @@ Human drives with AI support:
 - [Strategic Implementation Roadmap](./STRATEGIC_IMPLEMENTATION_ROADMAP.md)
 - [Governance Integration Points](./governance/INTEGRATION_POINTS.md)
 - [ADR Template](../adr/ADR-template.md)
+````

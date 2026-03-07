@@ -1,4 +1,4 @@
-jest.mock('socket.io-client', () => {
+jest.mock("socket.io-client", () => {
   const mockState = {
     listeners: {},
     socket: null,
@@ -22,9 +22,8 @@ jest.mock('socket.io-client', () => {
   };
 });
 
-
 const buildLocalStorage = () => ({
-  store: { token: 'test-token' },
+  store: { token: "test-token" },
   getItem(key) {
     return this.store[key];
   },
@@ -36,13 +35,13 @@ const buildLocalStorage = () => ({
   },
 });
 
-describe('socket service reconnection', () => {
+describe("socket service reconnection", () => {
   beforeEach(() => {
     jest.resetModules();
     global.localStorage = buildLocalStorage();
-    jest.spyOn(Math, 'random').mockReturnValue(0);
-    jest.spyOn(console, 'warn').mockImplementation(() => {});
-    jest.spyOn(console, 'log').mockImplementation(() => {});
+    jest.spyOn(Math, "random").mockReturnValue(0);
+    jest.spyOn(console, "warn").mockImplementation(() => {});
+    jest.spyOn(console, "log").mockImplementation(() => {});
     jest.useFakeTimers();
   });
 
@@ -52,12 +51,12 @@ describe('socket service reconnection', () => {
     jest.restoreAllMocks();
   });
 
-  test('uses exponential backoff calculation without jitter when disabled', async () => {
+  test("uses exponential backoff calculation without jitter when disabled", async () => {
     jest.isolateModules(() => {
-      jest.doMock('../config/urls', () => ({
-        getSocketBaseUrl: () => 'ws://test',
+      jest.doMock("../config/urls", () => ({
+        getSocketBaseUrl: () => "ws://test",
       }));
-      const { calculateBackoffDelay } = require('./socket');
+      const { calculateBackoffDelay } = require("./socket");
       const delay = calculateBackoffDelay(3, {
         baseMs: 100,
         factor: 2,
@@ -75,43 +74,43 @@ describe('socket service reconnection', () => {
     });
   });
 
-  test('schedules reconnect with exponential backoff after disconnect', async () => {
+  test("schedules reconnect with exponential backoff after disconnect", async () => {
     jest.isolateModules(() => {
-      jest.doMock('../config/urls', () => ({
-        getSocketBaseUrl: () => 'ws://test',
+      jest.doMock("../config/urls", () => ({
+        getSocketBaseUrl: () => "ws://test",
       }));
       global.localStorage = buildLocalStorage();
-      const socketClient = require('./socket');
-      const { __mockState } = require('socket.io-client');
-      const { getSocketBaseUrl } = require('../config/urls');
+      const socketClient = require("./socket");
+      const { __mockState } = require("socket.io-client");
+      const { getSocketBaseUrl } = require("../config/urls");
 
-      expect(getSocketBaseUrl()).toBe('ws://test');
-      expect(global.localStorage.getItem('token')).toBe('test-token');
+      expect(getSocketBaseUrl()).toBe("ws://test");
+      expect(global.localStorage.getItem("token")).toBe("test-token");
 
       const s = socketClient.getSocket();
       expect(s).toBe(__mockState.socket);
       expect(__mockState.socket.connect).toHaveBeenCalledTimes(1);
 
       const listeners = __mockState.listeners;
-      listeners.disconnect?.('transport close');
+      listeners.disconnect?.("transport close");
 
       jest.advanceTimersByTime(700);
       expect(__mockState.socket.connect).toHaveBeenCalledTimes(2);
     });
   });
 
-  test('manual disconnect clears reconnection attempts', async () => {
+  test("manual disconnect clears reconnection attempts", async () => {
     jest.isolateModules(() => {
-      jest.doMock('../config/urls', () => ({
-        getSocketBaseUrl: () => 'ws://test',
+      jest.doMock("../config/urls", () => ({
+        getSocketBaseUrl: () => "ws://test",
       }));
       global.localStorage = buildLocalStorage();
-      const socketClient = require('./socket');
-      const { __mockState } = require('socket.io-client');
-      const { getSocketBaseUrl } = require('../config/urls');
+      const socketClient = require("./socket");
+      const { __mockState } = require("socket.io-client");
+      const { getSocketBaseUrl } = require("../config/urls");
 
-      expect(getSocketBaseUrl()).toBe('ws://test');
-      expect(global.localStorage.getItem('token')).toBe('test-token');
+      expect(getSocketBaseUrl()).toBe("ws://test");
+      expect(global.localStorage.getItem("token")).toBe("test-token");
 
       socketClient.getSocket();
       const initialConnects = __mockState.socket.connect.mock.calls.length;
@@ -119,12 +118,10 @@ describe('socket service reconnection', () => {
       socketClient.disconnectSocket();
 
       const listeners = __mockState.listeners;
-      listeners.disconnect?.('transport close');
+      listeners.disconnect?.("transport close");
       jest.runOnlyPendingTimers();
 
-      expect(__mockState.socket.connect).toHaveBeenCalledTimes(
-        initialConnects,
-      );
+      expect(__mockState.socket.connect).toHaveBeenCalledTimes(initialConnects);
     });
   });
 });

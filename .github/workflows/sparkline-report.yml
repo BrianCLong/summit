@@ -1,6 +1,6 @@
 name: Generate release sparkline
 on:
-  schedule: [{ cron: '0 2 * * *' }]
+  schedule: [{ cron: "0 2 * * *" }]
   workflow_dispatch: {}
 jobs:
   generate:
@@ -23,7 +23,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "20"
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4

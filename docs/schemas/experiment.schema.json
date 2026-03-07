@@ -31,15 +31,7 @@
       "type": "array",
       "items": {
         "type": "string",
-        "enum": [
-          "lcp",
-          "ttfb",
-          "inp",
-          "api_p95",
-          "error_rate",
-          "conversion",
-          "cost_per_req"
-        ]
+        "enum": ["lcp", "ttfb", "inp", "api_p95", "error_rate", "conversion", "cost_per_req"]
       }
     },
     "guardrails": {

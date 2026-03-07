@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -7,7 +7,7 @@
     <style>
       :root {
         color-scheme: light;
-        font-family: 'Inter', system-ui, sans-serif;
+        font-family: "Inter", system-ui, sans-serif;
         background: #f8f8fb;
       }
       body {
@@ -155,18 +155,11 @@
     </section>
 
     <script type="module">
-      const board = document.getElementById('board');
-      const evidence = document.getElementById('evidence');
-      const eventsPane = document.getElementById('events');
-      const profileSelect = document.getElementById('profile');
-      const STATUS_ORDER = [
-        'Backlog',
-        'Ready',
-        'Running',
-        'Needs Review',
-        'Done',
-        'Blocked',
-      ];
+      const board = document.getElementById("board");
+      const evidence = document.getElementById("evidence");
+      const eventsPane = document.getElementById("events");
+      const profileSelect = document.getElementById("profile");
+      const STATUS_ORDER = ["Backlog", "Ready", "Running", "Needs Review", "Done", "Blocked"];
 
       let currentEventSource = null;
 
@@ -180,15 +173,16 @@
 
       const renderEvidence = (run) => {
         if (!run?.evidence) {
-          evidence.textContent = 'No evidence bundle available.';
+          evidence.textContent = "No evidence bundle available.";
           return;
         }
         const items = Object.entries(run.evidence)
-          .map(([label, path]) =>
-            `<a href="${path.replace(/^.*\.maestro-workboard/, '/artifacts')}" target="_blank">${label}</a>`
+          .map(
+            ([label, path]) =>
+              `<a href="${path.replace(/^.*\.maestro-workboard/, "/artifacts")}" target="_blank">${label}</a>`
           )
-          .join('');
-        evidence.innerHTML = items || 'No artifacts.';
+          .join("");
+        evidence.innerHTML = items || "No artifacts.";
       };
 
       const renderEvents = (events) => {
@@ -199,9 +193,7 @@
         if (currentEventSource) {
           currentEventSource.close();
         }
-        currentEventSource = new EventSource(
-          `/api/runs/${runId}/events/stream`
-        );
+        currentEventSource = new EventSource(`/api/runs/${runId}/events/stream`);
         const events = [];
         currentEventSource.onmessage = (event) => {
           events.push(JSON.parse(event.data));
@@ -210,7 +202,7 @@
       };
 
       const renderBoard = async () => {
-        const { workItems } = await fetchJson('/api/work-items');
+        const { workItems } = await fetchJson("/api/work-items");
         const columns = STATUS_ORDER.reduce((acc, status) => {
           acc[status] = [];
           return acc;
@@ -229,23 +221,23 @@
                   <h3>${item.title}</h3>
                   <p>${item.description}</p>
                   <button data-run="${item.id}" ${
-                  status === 'Running' ? 'disabled' : ''
-                }>Run</button>
+                    status === "Running" ? "disabled" : ""
+                  }>Run</button>
                 </div>
               `
               )
-              .join('')}
+              .join("")}
           </div>
         `
-        ).join('');
+        ).join("");
 
-        board.querySelectorAll('button[data-run]').forEach((button) => {
-          button.addEventListener('click', async () => {
+        board.querySelectorAll("button[data-run]").forEach((button) => {
+          button.addEventListener("click", async () => {
             const workItemId = button.dataset.run;
             const capabilityProfile = profileSelect.value;
             const { run } = await fetchJson(`/api/work-items/${workItemId}/runs`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ capabilityProfile }),
             });
             renderEvidence(run);
@@ -256,13 +248,10 @@
       };
 
       const loadProfiles = async () => {
-        const { profiles } = await fetchJson('/api/capability-profiles');
+        const { profiles } = await fetchJson("/api/capability-profiles");
         profileSelect.innerHTML = profiles
-          .map(
-            (profile) =>
-              `<option value="${profile.id}">${profile.label}</option>`
-          )
-          .join('');
+          .map((profile) => `<option value="${profile.id}">${profile.label}</option>`)
+          .join("");
       };
 
       await loadProfiles();

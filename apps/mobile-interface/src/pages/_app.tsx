@@ -1,17 +1,17 @@
 // @ts-nocheck - Placeholder components compatibility
-import '@/styles/globals.css';
-import type { AppProps } from 'next/app';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useState, useEffect } from 'react';
-import { Toaster } from 'react-hot-toast';
-import { AuthProvider } from '@/hooks/useAuth';
-import { ThemeProvider } from '@/hooks/useTheme';
-import { OfflineProvider } from '@/hooks/useOffline';
-import { WebSocketProvider } from '@/hooks/useWebSocket';
-import { ErrorBoundary } from '@/components/ErrorBoundary';
-import { LoadingSpinner } from '@/components/LoadingSpinner';
-import { PWAPrompt } from '@/components/PWAPrompt';
-import Head from 'next/head';
+import "@/styles/globals.css";
+import type { AppProps } from "next/app";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
+import { Toaster } from "react-hot-toast";
+import { AuthProvider } from "@/hooks/useAuth";
+import { ThemeProvider } from "@/hooks/useTheme";
+import { OfflineProvider } from "@/hooks/useOffline";
+import { WebSocketProvider } from "@/hooks/useWebSocket";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
+import { PWAPrompt } from "@/components/PWAPrompt";
+import Head from "next/head";
 
 function MyApp({ Component, pageProps }: AppProps) {
   const [queryClient] = useState(
@@ -21,10 +21,7 @@ function MyApp({ Component, pageProps }: AppProps) {
           queries: {
             staleTime: 1000 * 60 * 5, // 5 minutes
             gcTime: 1000 * 60 * 30, // 30 minutes (renamed from cacheTime)
-            retry: (
-              failureCount: number,
-              error: unknown,
-            ): boolean => {
+            retry: (failureCount: number, error: unknown): boolean => {
               const err = error as { status?: number };
               if (err?.status === 404) return false;
               return failureCount < 3;
@@ -35,7 +32,7 @@ function MyApp({ Component, pageProps }: AppProps) {
             retry: 1,
           },
         },
-      }),
+      })
   );
 
   const [isLoading, setIsLoading] = useState(true);
@@ -55,11 +52,7 @@ function MyApp({ Component, pageProps }: AppProps) {
         <div className="text-center">
           <div className="mb-8">
             <div className="w-16 h-16 mx-auto bg-primary-600 rounded-xl flex items-center justify-center">
-              <svg
-                className="w-8 h-8 text-white"
-                fill="currentColor"
-                viewBox="0 0 24 24"
-              >
+              <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M12 2L2 7v10c0 5.55 3.84 9.74 9 11 5.16-1.26 9-5.45 9-11V7l-10-5z" />
               </svg>
             </div>
@@ -99,11 +92,11 @@ function MyApp({ Component, pageProps }: AppProps) {
                     toastOptions={{
                       duration: 4000,
                       style: {
-                        background: '#1f2937',
-                        color: '#f9fafb',
-                        fontSize: '14px',
-                        borderRadius: '8px',
-                        boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)',
+                        background: "#1f2937",
+                        color: "#f9fafb",
+                        fontSize: "14px",
+                        borderRadius: "8px",
+                        boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1)",
                       },
                     }}
                   />

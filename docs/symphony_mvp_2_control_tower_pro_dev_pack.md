@@ -29,92 +29,44 @@ timezone: America/Denver
 models:
   chatgpt_plus:
     schedule:
-      - {
-          days: [Mon, Tue, Wed, Thu, Fri, Sat, Sun],
-          at: '06:05',
-          duration: '00:25',
-        }
-      - {
-          days: [Mon, Tue, Wed, Thu, Fri, Sat, Sun],
-          at: '09:05',
-          duration: '00:25',
-        }
-      - {
-          days: [Mon, Tue, Wed, Thu, Fri, Sat, Sun],
-          at: '12:05',
-          duration: '00:25',
-        }
-      - {
-          days: [Mon, Tue, Wed, Thu, Fri, Sat, Sun],
-          at: '15:05',
-          duration: '00:25',
-        }
-      - {
-          days: [Mon, Tue, Wed, Thu, Fri, Sat, Sun],
-          at: '18:05',
-          duration: '00:25',
-        }
-      - {
-          days: [Mon, Tue, Wed, Thu, Fri, Sat, Sun],
-          at: '21:05',
-          duration: '00:25',
-        }
+      - { days: [Mon, Tue, Wed, Thu, Fri, Sat, Sun], at: "06:05", duration: "00:25" }
+      - { days: [Mon, Tue, Wed, Thu, Fri, Sat, Sun], at: "09:05", duration: "00:25" }
+      - { days: [Mon, Tue, Wed, Thu, Fri, Sat, Sun], at: "12:05", duration: "00:25" }
+      - { days: [Mon, Tue, Wed, Thu, Fri, Sat, Sun], at: "15:05", duration: "00:25" }
+      - { days: [Mon, Tue, Wed, Thu, Fri, Sat, Sun], at: "18:05", duration: "00:25" }
+      - { days: [Mon, Tue, Wed, Thu, Fri, Sat, Sun], at: "21:05", duration: "00:25" }
     dynamic: { detector: chatgpt_ui, action: shift_to_next_reset }
 
   claude_pro:
     schedule:
-      - {
-          days: [Mon, Tue, Wed, Thu, Fri, Sat, Sun],
-          at: '05:00',
-          duration: '00:55',
-        }
-      - {
-          days: [Mon, Tue, Wed, Thu, Fri, Sat, Sun],
-          at: '10:00',
-          duration: '00:55',
-        }
-      - {
-          days: [Mon, Tue, Wed, Thu, Fri, Sat, Sun],
-          at: '15:00',
-          duration: '00:55',
-        }
-      - {
-          days: [Mon, Tue, Wed, Thu, Fri, Sat, Sun],
-          at: '20:00',
-          duration: '00:55',
-        }
+      - { days: [Mon, Tue, Wed, Thu, Fri, Sat, Sun], at: "05:00", duration: "00:55" }
+      - { days: [Mon, Tue, Wed, Thu, Fri, Sat, Sun], at: "10:00", duration: "00:55" }
+      - { days: [Mon, Tue, Wed, Thu, Fri, Sat, Sun], at: "15:00", duration: "00:55" }
+      - { days: [Mon, Tue, Wed, Thu, Fri, Sat, Sun], at: "20:00", duration: "00:55" }
     dynamic: { detector: claude_ui, action: phase_lock }
 
   gemini_api:
     schedule:
-      - {
-          days: [Mon, Tue, Wed, Thu, Fri, Sat, Sun],
-          at: '01:05',
-          duration: '01:30',
-        }
-      - {
-          days: [Mon, Tue, Wed, Thu, Fri, Sat, Sun],
-          at: '13:00',
-          duration: '00:30',
-        }
+      - { days: [Mon, Tue, Wed, Thu, Fri, Sat, Sun], at: "01:05", duration: "01:30" }
+      - { days: [Mon, Tue, Wed, Thu, Fri, Sat, Sun], at: "13:00", duration: "00:30" }
 
   grok_live_search:
     schedule:
-      - { days: [Mon, Tue, Wed, Thu, Fri], at: '08:30', duration: '00:20' }
-      - { days: [Mon, Tue, Wed, Thu, Fri], at: '16:30', duration: '00:20' }
+      - { days: [Mon, Tue, Wed, Thu, Fri], at: "08:30", duration: "00:20" }
+      - { days: [Mon, Tue, Wed, Thu, Fri], at: "16:30", duration: "00:20" }
 
   perplexity_sonar:
     schedule:
-      - { days: [Mon, Tue, Wed, Thu, Fri], at: '08:00', duration: '00:30' }
-      - { days: [Mon, Tue, Wed, Thu, Fri], at: '13:30', duration: '00:20' }
+      - { days: [Mon, Tue, Wed, Thu, Fri], at: "08:00", duration: "00:30" }
+      - { days: [Mon, Tue, Wed, Thu, Fri], at: "13:30", duration: "00:20" }
 
   deepseek_api:
     schedule:
-      - { days: [Mon, Tue, Wed, Thu, Fri], at: '11:00', duration: '00:30' }
+      - { days: [Mon, Tue, Wed, Thu, Fri], at: "11:00", duration: "00:30" }
 
   venice_api:
     schedule:
-      - { days: [Mon, Tue, Wed, Thu, Fri], at: '14:00', duration: '00:20' }
+      - { days: [Mon, Tue, Wed, Thu, Fri], at: "14:00", duration: "00:20" }
 ```
 
 **UI expectations**
@@ -250,13 +202,7 @@ policy:
 
     - name: xai/grok
       class: hosted
-      quota:
-        {
-          type: rolling,
-          window: header_driven,
-          unit: requests,
-          cap: from_headers,
-        }
+      quota: { type: rolling, window: header_driven, unit: requests, cap: from_headers }
       loa_max: 1
 
     - name: perplexity/api
@@ -271,13 +217,7 @@ policy:
 
     - name: venice/api
       class: hosted
-      quota:
-        {
-          type: rolling,
-          window: header_driven,
-          unit: requests,
-          cap: from_headers,
-        }
+      quota: { type: rolling, window: header_driven, unit: requests, cap: from_headers }
       loa_max: 0
 
   routing_rules:
@@ -304,13 +244,13 @@ work_unit_overrides_schema:
 ```yaml
 # alerting/alertmanager.yml
 route:
-  receiver: 'slack_and_pd'
+  receiver: "slack_and_pd"
 receivers:
-  - name: 'slack_and_pd'
+  - name: "slack_and_pd"
     slack_configs:
       - api_url: ${SLACK_WEBHOOK_URL}
-        channel: '#symphony-alerts'
-        title: '[SLO] {{ .CommonLabels.alertname }} {{ .CommonLabels.severity }}'
+        channel: "#symphony-alerts"
+        title: "[SLO] {{ .CommonLabels.alertname }} {{ .CommonLabels.severity }}"
         text: |-
           *Firing:* {{ .CommonAnnotations.summary }}
           *Model:* {{ index .CommonLabels "model" | default "n/a" }}
@@ -320,7 +260,7 @@ receivers:
     pagerduty_configs:
       - routing_key: ${PAGERDUTY_ROUTING_KEY}
         severity: '{{ .CommonLabels.severity | default "warning" }}'
-        description: '{{ .CommonAnnotations.summary }}'
+        description: "{{ .CommonAnnotations.summary }}"
 ```
 
 ### 3) VS Code extension (matured) + Copilot context
@@ -356,15 +296,15 @@ receivers:
 **`extensions/symphony-ops/src/extension.ts`**
 
 ```ts
-import * as vscode from 'vscode';
+import * as vscode from "vscode";
 
 export function activate(ctx: vscode.ExtensionContext) {
-  const BASE = process.env.SYMPHONY_BASE || 'http://127.0.0.1:8787';
+  const BASE = process.env.SYMPHONY_BASE || "http://127.0.0.1:8787";
 
   async function post(path: string, body: any) {
     const r = await fetch(`${BASE}${path}`, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
+      method: "POST",
+      headers: { "content-type": "application/json" },
       body: JSON.stringify(body),
     });
     if (!r.ok) throw new Error(`${r.status} ${r.statusText}`);
@@ -372,26 +312,21 @@ export function activate(ctx: vscode.ExtensionContext) {
   }
 
   ctx.subscriptions.push(
-    vscode.commands.registerCommand('symphony.execute', async () => {
+    vscode.commands.registerCommand("symphony.execute", async () => {
       const ed = vscode.window.activeTextEditor;
-      const input =
-        ed?.document.getText(ed.selection) || ed?.document.getText() || '';
-      const j = await post('/route/execute', {
-        task: 'qa',
+      const input = ed?.document.getText(ed.selection) || ed?.document.getText() || "";
+      const j = await post("/route/execute", {
+        task: "qa",
         loa: 1,
         input,
         stream: true,
       });
-      vscode.window.showInformationMessage(
-        `Audit ${j.audit_id} • ${j.latency_ms}ms`,
-      );
+      vscode.window.showInformationMessage(`Audit ${j.audit_id} • ${j.latency_ms}ms`);
     }),
-    vscode.commands.registerCommand('symphony.explain', async () => {
-      const j = await post('/route/plan', { task: 'qa', loa: 1 });
-      vscode.window.showInformationMessage(
-        `Decision: ${j.decision?.primary?.model || 'n/a'}`,
-      );
-    }),
+    vscode.commands.registerCommand("symphony.explain", async () => {
+      const j = await post("/route/plan", { task: "qa", loa: 1 });
+      vscode.window.showInformationMessage(`Decision: ${j.decision?.primary?.model || "n/a"}`);
+    })
   );
 }
 ```
@@ -421,45 +356,45 @@ export function activate(ctx: vscode.ExtensionContext) {
 **`services/web-ingest/src/ingest.ts`**
 
 ```ts
-import { chromium } from 'playwright';
-import robotsParser from 'robots-parser';
-import { Readability } from '@mozilla/readability';
-import { JSDOM } from 'jsdom';
-import crypto from 'crypto';
-import * as http from 'node:http';
+import { chromium } from "playwright";
+import robotsParser from "robots-parser";
+import { Readability } from "@mozilla/readability";
+import { JSDOM } from "jsdom";
+import crypto from "crypto";
+import * as http from "node:http";
 
 async function allowedByRobots(targetUrl: string): Promise<boolean> {
-  const robotsUrl = new URL('/robots.txt', targetUrl).toString();
+  const robotsUrl = new URL("/robots.txt", targetUrl).toString();
   return new Promise<boolean>((resolve) => {
     http
       .get(robotsUrl, (res) => {
-        let data = '';
-        res.on('data', (c) => (data += c));
-        res.on('end', () => {
+        let data = "";
+        res.on("data", (c) => (data += c));
+        res.on("end", () => {
           try {
             const parser = robotsParser(robotsUrl, data);
-            resolve(parser.isAllowed(targetUrl, 'IntelGraph-Symphony/1.0'));
+            resolve(parser.isAllowed(targetUrl, "IntelGraph-Symphony/1.0"));
           } catch {
             resolve(true); // be permissive if robots.txt is malformed
           }
         });
       })
-      .on('error', () => resolve(true));
+      .on("error", () => resolve(true));
   });
 }
 
 export async function snapshot(url: string) {
-  if (!(await allowedByRobots(url))) throw new Error('robots.txt disallows');
+  if (!(await allowedByRobots(url))) throw new Error("robots.txt disallows");
   const b = await chromium.launch();
   const p = await b.newPage({
-    userAgent: 'IntelGraph-Symphony/1.0 (+contact@example.com)',
+    userAgent: "IntelGraph-Symphony/1.0 (+contact@example.com)",
   });
-  await p.goto(url, { waitUntil: 'networkidle' });
+  await p.goto(url, { waitUntil: "networkidle" });
   const html = await p.content();
   const dom = new JSDOM(html, { url });
   const article = new Readability(dom.window.document).parse();
   await b.close();
-  const hash = crypto.createHash('sha256').update(html).digest('hex');
+  const hash = crypto.createHash("sha256").update(html).digest("hex");
   return {
     url,
     title: article?.title,

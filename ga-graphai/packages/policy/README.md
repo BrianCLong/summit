@@ -11,18 +11,21 @@ latency-aware verdict metadata, and exposes an adversarial probe harness to
 continuously test for bypass attempts.
 
 ```ts
-import { GovernanceOrchestrator, PolicyEngine } from 'policy';
+import { GovernanceOrchestrator, PolicyEngine } from "policy";
 
-const orchestrator = new GovernanceOrchestrator(
-  new PolicyEngine(myRules),
-  { evaluatedBy: 'governance-mesh', engineFactory: (rules) => new PolicyEngine(rules) },
+const orchestrator = new GovernanceOrchestrator(new PolicyEngine(myRules), {
+  evaluatedBy: "governance-mesh",
+  engineFactory: (rules) => new PolicyEngine(rules),
+});
+
+const envelope = orchestrator.evaluateUserAction(
+  {
+    action: "dataset:delete",
+    resource: "dataset",
+    context: { tenantId: "t-1", userId: "u-1", roles: ["analyst"] },
+  },
+  { dynamicRules: myOverrideRules }
 );
-
-const envelope = orchestrator.evaluateUserAction({
-  action: 'dataset:delete',
-  resource: 'dataset',
-  context: { tenantId: 't-1', userId: 'u-1', roles: ['analyst'] },
-}, { dynamicRules: myOverrideRules });
 
 // envelope.governance contains the immutable GovernanceVerdict
 ```
@@ -52,26 +55,22 @@ governance policies against historical activity. The `PolicyBacktestEngine` prov
 ### Getting Started
 
 ```ts
-import {
-  PolicyBacktestEngine,
-  type PolicyHistory,
-  type HistoricalPolicyEvent,
-} from 'policy';
+import { PolicyBacktestEngine, type PolicyHistory, type HistoricalPolicyEvent } from "policy";
 
 const history: PolicyHistory[] = [
   {
-    policyId: 'governance',
+    policyId: "governance",
     snapshots: [
       {
-        policyId: 'governance',
-        version: '1.0.0',
-        capturedAt: '2024-01-01T00:00:00Z',
+        policyId: "governance",
+        version: "1.0.0",
+        capturedAt: "2024-01-01T00:00:00Z",
         rules: [],
       },
       {
-        policyId: 'governance',
-        version: '1.1.0',
-        capturedAt: '2024-02-01T00:00:00Z',
+        policyId: "governance",
+        version: "1.1.0",
+        capturedAt: "2024-02-01T00:00:00Z",
         rules: [],
       },
     ],
@@ -80,8 +79,8 @@ const history: PolicyHistory[] = [
 
 const events: HistoricalPolicyEvent[] = [
   {
-    id: 'evt-1',
-    occurredAt: '2024-02-10T12:00:00Z',
+    id: "evt-1",
+    occurredAt: "2024-02-10T12:00:00Z",
     request: {
       /* policy evaluation input */
     },
@@ -89,9 +88,9 @@ const events: HistoricalPolicyEvent[] = [
 ];
 
 const engine = new PolicyBacktestEngine(history);
-const compliance = engine.retroactiveComplianceCheck('governance', events);
-const rollback = engine.simulateRollback('governance', '1.0.0', events);
-const audit = engine.getAuditTrail({ policyId: 'governance' });
+const compliance = engine.retroactiveComplianceCheck("governance", events);
+const rollback = engine.simulateRollback("governance", "1.0.0", events);
+const audit = engine.getAuditTrail({ policyId: "governance" });
 ```
 
 Configure the engine with `{ missingSnapshotStrategy: 'skip' }` to skip events that

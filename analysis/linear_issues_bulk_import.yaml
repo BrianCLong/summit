@@ -850,8 +850,8 @@ issues:
 summary:
   total_initiatives: 6
   total_epics: 24
-  total_issues_defined: 45  # Sample in this file
-  total_issues_in_backlog: 645  # Full backlog
+  total_issues_defined: 45 # Sample in this file
+  total_issues_in_backlog: 645 # Full backlog
   issues_by_priority:
     P0: 10
     P1: 20

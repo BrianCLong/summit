@@ -17,8 +17,8 @@ name: policy-pack-v0
 on:
   push:
     paths:
-      - 'contracts/policy-pack/v0/**'
-      - '.github/workflows/policy-pack.yml'
+      - "contracts/policy-pack/v0/**"
+      - ".github/workflows/policy-pack.yml"
   workflow_dispatch: {}
 
 jobs:
@@ -40,7 +40,7 @@ jobs:
       - name: Setup Cosign
         uses: sigstore/cosign-installer@v3
         with:
-          cosign-release: 'v2.2.4'
+          cosign-release: "v2.2.4"
 
       - name: Make dist dir
         run: |
@@ -140,32 +140,24 @@ cosign verify-blob --bundle "$BUNDLE" "$BLOB"
 
 ```ts
 // add near existing imports
-import path from 'node:path';
-import fs from 'node:fs';
+import path from "node:path";
+import fs from "node:fs";
 
 // inside router definition
-router.get('/policy/packs/:packId', async (req, res) => {
+router.get("/policy/packs/:packId", async (req, res) => {
   const { packId } = req.params; // expect 'policy-pack-v0'
-  if (packId !== 'policy-pack-v0')
-    return res.status(404).json({ error: 'unknown pack' });
-  const packTar = path.resolve(
-    process.cwd(),
-    'dist/policy-pack/v0/policy-pack-v0.tar',
-  );
+  if (packId !== "policy-pack-v0") return res.status(404).json({ error: "unknown pack" });
+  const packTar = path.resolve(process.cwd(), "dist/policy-pack/v0/policy-pack-v0.tar");
   const bundleJson = path.resolve(
     process.cwd(),
-    'contracts/policy-pack/v0/signing/cosign.bundle.json',
+    "contracts/policy-pack/v0/signing/cosign.bundle.json"
   );
-  const manifestPath = path.resolve(
-    process.cwd(),
-    'contracts/policy-pack/v0/manifest.json',
-  );
-  if (!fs.existsSync(packTar))
-    return res.status(503).json({ error: 'pack not built yet' });
-  const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
-  res.setHeader('Content-Type', 'application/vnd.intelgraph.policy+tar');
-  res.setHeader('Digest', `sha-256=${manifest.manifest.digest.value}`);
-  res.setHeader('X-Cosign-Bundle', fs.readFileSync(bundleJson, 'utf8'));
+  const manifestPath = path.resolve(process.cwd(), "contracts/policy-pack/v0/manifest.json");
+  if (!fs.existsSync(packTar)) return res.status(503).json({ error: "pack not built yet" });
+  const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
+  res.setHeader("Content-Type", "application/vnd.intelgraph.policy+tar");
+  res.setHeader("Digest", `sha-256=${manifest.manifest.digest.value}`);
+  res.setHeader("X-Cosign-Bundle", fs.readFileSync(bundleJson, "utf8"));
   fs.createReadStream(packTar).pipe(res);
 });
 ```
@@ -222,78 +214,76 @@ router.get('/policy/packs/:packId', async (req, res) => {
 **File:** `clients/cos-policy-fetcher/src/index.ts`
 
 ```ts
-import { createWriteStream, promises as fs } from 'node:fs';
-import os from 'node:os';
-import path from 'node:path';
-import { request } from 'undici';
-import { extract } from 'tar';
-import { spawn } from 'node:child_process';
+import { createWriteStream, promises as fs } from "node:fs";
+import os from "node:os";
+import path from "node:path";
+import { request } from "undici";
+import { extract } from "tar";
+import { spawn } from "node:child_process";
 
 export type FetchOptions = { url: string; cosignPath?: string };
 
 function sh(
   cmd: string,
   args: string[],
-  input?: string,
+  input?: string
 ): Promise<{ code: number; stdout: string; stderr: string }> {
   return new Promise((resolve) => {
-    const p = spawn(cmd, args, { stdio: ['pipe', 'pipe', 'pipe'] });
-    let stdout = '',
-      stderr = '';
-    p.stdout.on('data', (d) => (stdout += d.toString()));
-    p.stderr.on('data', (d) => (stderr += d.toString()));
-    p.on('close', (code) => resolve({ code: code ?? 1, stdout, stderr }));
+    const p = spawn(cmd, args, { stdio: ["pipe", "pipe", "pipe"] });
+    let stdout = "",
+      stderr = "";
+    p.stdout.on("data", (d) => (stdout += d.toString()));
+    p.stderr.on("data", (d) => (stderr += d.toString()));
+    p.on("close", (code) => resolve({ code: code ?? 1, stdout, stderr }));
     if (input) p.stdin.end(input);
   });
 }
 
 export async function fetchAndVerify({
   url,
-  cosignPath = 'cosign',
+  cosignPath = "cosign",
 }: FetchOptions): Promise<string> {
-  const tmpdir = await fs.mkdtemp(path.join(os.tmpdir(), 'policy-pack-'));
-  const tarPath = path.join(tmpdir, 'pack.tar');
-  const { body, headers, statusCode } = await request(url, { method: 'GET' });
+  const tmpdir = await fs.mkdtemp(path.join(os.tmpdir(), "policy-pack-"));
+  const tarPath = path.join(tmpdir, "pack.tar");
+  const { body, headers, statusCode } = await request(url, { method: "GET" });
   if (statusCode !== 200) throw new Error(`HTTP ${statusCode}`);
-  const digestHeader = headers['digest'];
-  const bundleHeader = headers['x-cosign-bundle'];
-  if (!digestHeader || !bundleHeader)
-    throw new Error('missing verification headers');
+  const digestHeader = headers["digest"];
+  const bundleHeader = headers["x-cosign-bundle"];
+  if (!digestHeader || !bundleHeader) throw new Error("missing verification headers");
 
   const file = createWriteStream(tarPath);
   await new Promise<void>((res, rej) => {
     body.pipe(file);
-    body.on('error', rej);
-    file.on('finish', () => res());
+    body.on("error", rej);
+    file.on("finish", () => res());
   });
 
   // Verify SHA-256
-  const { stdout: shaOut } = await sh('sha256sum', [tarPath]);
-  const sha = shaOut.trim().split(' ')[0];
-  const expected = String(digestHeader).replace('sha-256=', '').trim();
-  if (sha !== expected)
-    throw new Error(`digest mismatch: ${sha} != ${expected}`);
+  const { stdout: shaOut } = await sh("sha256sum", [tarPath]);
+  const sha = shaOut.trim().split(" ")[0];
+  const expected = String(digestHeader).replace("sha-256=", "").trim();
+  if (sha !== expected) throw new Error(`digest mismatch: ${sha} != ${expected}`);
 
   // Verify cosign bundle (offline)
-  process.env.COSIGN_EXPERIMENTAL = '1';
+  process.env.COSIGN_EXPERIMENTAL = "1";
   const { code, stderr } = await sh(
     cosignPath,
-    ['verify-blob', '--bundle', '-', tarPath],
-    String(bundleHeader),
+    ["verify-blob", "--bundle", "-", tarPath],
+    String(bundleHeader)
   );
   if (code !== 0) throw new Error(`cosign verify failed: ${stderr}`);
 
   // Extract to a directory and return path
-  const extractDir = path.join(tmpdir, 'unpacked');
+  const extractDir = path.join(tmpdir, "unpacked");
   await fs.mkdir(extractDir, { recursive: true });
   await extract({ file: tarPath, cwd: extractDir });
   return extractDir;
 }
 
 // Example usage when run directly
-if (process.env.NODE_ENV !== 'test' && process.argv[2]) {
+if (process.env.NODE_ENV !== "test" && process.argv[2]) {
   fetchAndVerify({ url: process.argv[2] })
-    .then((dir) => console.log('verified pack at:', dir))
+    .then((dir) => console.log("verified pack at:", dir))
     .catch((e) => {
       console.error(e);
       process.exit(1);
@@ -311,41 +301,35 @@ if (process.env.NODE_ENV !== 'test' && process.argv[2]) {
 
 ```js
 module.exports = {
-  testEnvironment: 'node',
-  transform: { '^.+\\.(ts|tsx)$': ['ts-jest', { tsconfig: 'tsconfig.json' }] },
+  testEnvironment: "node",
+  transform: { "^.+\\.(ts|tsx)$": ["ts-jest", { tsconfig: "tsconfig.json" }] },
 };
 ```
 
 **File:** `tests/contract/policy_pack.contract.test.ts`
 
 ```ts
-import http from 'node:http';
-import path from 'node:path';
-import fs from 'node:fs';
-import { fetchAndVerify } from '../../clients/cos-policy-fetcher/src/index';
-import { spawnSync } from 'node:child_process';
+import http from "node:http";
+import path from "node:path";
+import fs from "node:fs";
+import { fetchAndVerify } from "../../clients/cos-policy-fetcher/src/index";
+import { spawnSync } from "node:child_process";
 
-const PACK_TAR = path.resolve(
-  process.cwd(),
-  'dist/policy-pack/v0/policy-pack-v0.tar',
-);
+const PACK_TAR = path.resolve(process.cwd(), "dist/policy-pack/v0/policy-pack-v0.tar");
 const BUNDLE_JSON = path.resolve(
   process.cwd(),
-  'contracts/policy-pack/v0/signing/cosign.bundle.json',
+  "contracts/policy-pack/v0/signing/cosign.bundle.json"
 );
-const MANIFEST = path.resolve(
-  process.cwd(),
-  'contracts/policy-pack/v0/manifest.json',
-);
+const MANIFEST = path.resolve(process.cwd(), "contracts/policy-pack/v0/manifest.json");
 
 function startStubServer(): Promise<{ url: string; close: () => void }> {
   return new Promise((resolve) => {
     const srv = http.createServer((req, res) => {
-      if (req.url?.includes('/v1/policy/packs/policy-pack-v0')) {
-        const manifest = JSON.parse(fs.readFileSync(MANIFEST, 'utf8'));
-        res.setHeader('Content-Type', 'application/vnd.intelgraph.policy+tar');
-        res.setHeader('Digest', `sha-256=${manifest.manifest.digest.value}`);
-        res.setHeader('X-Cosign-Bundle', fs.readFileSync(BUNDLE_JSON, 'utf8'));
+      if (req.url?.includes("/v1/policy/packs/policy-pack-v0")) {
+        const manifest = JSON.parse(fs.readFileSync(MANIFEST, "utf8"));
+        res.setHeader("Content-Type", "application/vnd.intelgraph.policy+tar");
+        res.setHeader("Digest", `sha-256=${manifest.manifest.digest.value}`);
+        res.setHeader("X-Cosign-Bundle", fs.readFileSync(BUNDLE_JSON, "utf8"));
         fs.createReadStream(PACK_TAR).pipe(res);
       } else {
         res.statusCode = 404;
@@ -354,7 +338,7 @@ function startStubServer(): Promise<{ url: string; close: () => void }> {
     });
     srv.listen(0, () => {
       const addr = srv.address();
-      const port = typeof addr === 'object' && addr ? addr.port : 0;
+      const port = typeof addr === "object" && addr ? addr.port : 0;
       resolve({
         url: `http://127.0.0.1:${port}/v1/policy/packs/policy-pack-v0`,
         close: () => srv.close(),
@@ -366,28 +350,19 @@ function startStubServer(): Promise<{ url: string; close: () => void }> {
 // Utility: opa eval via CLI to confirm policy semantics did not drift
 function opaEval(query: string, input: object, policyDir: string) {
   const r = spawnSync(
-    'opa',
-    [
-      'eval',
-      query,
-      '--format',
-      'values',
-      '--data',
-      path.join(policyDir, 'opa'),
-      '--input',
-      '-',
-    ],
+    "opa",
+    ["eval", query, "--format", "values", "--data", path.join(policyDir, "opa"), "--input", "-"],
     {
       input: JSON.stringify(input),
-      encoding: 'utf8',
-    },
+      encoding: "utf8",
+    }
   );
   if (r.status !== 0) throw new Error(r.stderr.toString());
   return r.stdout.toString().trim();
 }
 
-describe('Policy Pack contract', () => {
-  it('verifies signature and enforces ABAC allow for same-tenant', async () => {
+describe("Policy Pack contract", () => {
+  it("verifies signature and enforces ABAC allow for same-tenant", async () => {
     // Precondition: artifacts exist (built + signed)
     expect(fs.existsSync(PACK_TAR)).toBe(true);
     expect(fs.existsSync(BUNDLE_JSON)).toBe(true);
@@ -396,32 +371,32 @@ describe('Policy Pack contract', () => {
     try {
       const unpacked = await fetchAndVerify({ url });
       const decision = opaEval(
-        'data.cos.abac.allow',
+        "data.cos.abac.allow",
         {
-          subject: { tenant: 't1', purpose: 'investigation' },
-          resource: { tenant: 't1', retention_until: '2099-01-01T00:00:00Z' },
+          subject: { tenant: "t1", purpose: "investigation" },
+          resource: { tenant: "t1", retention_until: "2099-01-01T00:00:00Z" },
         },
-        unpacked,
+        unpacked
       );
-      expect(decision).toEqual('true');
+      expect(decision).toEqual("true");
     } finally {
       close();
     }
   });
 
-  it('denies cross-tenant access', async () => {
+  it("denies cross-tenant access", async () => {
     const { url, close } = await startStubServer();
     try {
       const unpacked = await fetchAndVerify({ url });
       const decision = opaEval(
-        'data.cos.abac.allow',
+        "data.cos.abac.allow",
         {
-          subject: { tenant: 'tA', purpose: 'investigation' },
-          resource: { tenant: 'tB', retention_until: '2099-01-01T00:00:00Z' },
+          subject: { tenant: "tA", purpose: "investigation" },
+          resource: { tenant: "tB", retention_until: "2099-01-01T00:00:00Z" },
         },
-        unpacked,
+        unpacked
       );
-      expect(decision).toEqual('false');
+      expect(decision).toEqual("false");
     } finally {
       close();
     }
@@ -448,15 +423,15 @@ name: contract-tests
 on:
   push:
     paths:
-      - 'contracts/policy-pack/v0/**'
-      - 'clients/cos-policy-fetcher/**'
-      - 'tests/contract/**'
-      - '.github/workflows/contract-tests.yml'
+      - "contracts/policy-pack/v0/**"
+      - "clients/cos-policy-fetcher/**"
+      - "tests/contract/**"
+      - ".github/workflows/contract-tests.yml"
   pull_request:
     paths:
-      - 'contracts/policy-pack/v0/**'
-      - 'clients/cos-policy-fetcher/**'
-      - 'tests/contract/**'
+      - "contracts/policy-pack/v0/**"
+      - "clients/cos-policy-fetcher/**"
+      - "tests/contract/**"
 
 jobs:
   run:
@@ -464,7 +439,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: sigstore/cosign-installer@v3
-        with: { cosign-release: 'v2.2.4' }
+        with: { cosign-release: "v2.2.4" }
       - name: Install OPA
         run: |
           curl -L -o opa https://openpolicyagent.org/downloads/latest/opa_linux_amd64
@@ -473,7 +448,7 @@ jobs:
       - name: Node setup
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "20"
       - name: Build pack (if not present)
         run: |
           bash scripts/build_policy_pack.sh
@@ -494,7 +469,7 @@ jobs:
 **File:** `companyos/src/policy/loader.ts`
 
 ```ts
-import { fetchAndVerify } from '../../../clients/cos-policy-fetcher/src/index';
+import { fetchAndVerify } from "../../../clients/cos-policy-fetcher/src/index";
 
 export async function loadPolicyPack(url: string) {
   const dir = await fetchAndVerify({ url });

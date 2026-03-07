@@ -9,7 +9,7 @@
  * @module pages/Admin/RoleManagement/RoleEditor
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Accordion,
   AccordionDetails,
@@ -32,11 +32,9 @@ import {
   TextField,
   Typography,
   Alert,
-} from '@mui/material';
-import {
-  ExpandMore as ExpandMoreIcon,
-} from '@mui/icons-material';
-import { Role, Permission } from '../../../services/admin-api';
+} from "@mui/material";
+import { ExpandMore as ExpandMoreIcon } from "@mui/icons-material";
+import { Role, Permission } from "../../../services/admin-api";
 
 interface RoleEditorProps {
   open: boolean;
@@ -55,7 +53,7 @@ interface RoleFormData {
   description?: string;
   permissions: string[];
   inherits?: string[];
-  scope?: 'full' | 'restricted' | 'readonly';
+  scope?: "full" | "restricted" | "readonly";
 }
 
 export default function RoleEditor({
@@ -71,12 +69,12 @@ export default function RoleEditor({
   const isEditing = !!role;
 
   const [formData, setFormData] = useState<RoleFormData>({
-    name: '',
-    displayName: '',
-    description: '',
+    name: "",
+    displayName: "",
+    description: "",
     permissions: [],
     inherits: [],
-    scope: 'restricted',
+    scope: "restricted",
   });
 
   const [errors, setErrors] = useState<Partial<Record<keyof RoleFormData, string>>>({});
@@ -112,19 +110,19 @@ export default function RoleEditor({
         setFormData({
           name: role.name,
           displayName: role.displayName,
-          description: role.description || '',
+          description: role.description || "",
           permissions: role.permissions,
           inherits: role.inherits,
           scope: role.scope,
         });
       } else {
         setFormData({
-          name: '',
-          displayName: '',
-          description: '',
+          name: "",
+          displayName: "",
+          description: "",
           permissions: [],
           inherits: [],
-          scope: 'restricted',
+          scope: "restricted",
         });
       }
       setErrors({});
@@ -136,35 +134,39 @@ export default function RoleEditor({
     const newErrors: Partial<Record<keyof RoleFormData, string>> = {};
 
     if (!formData.name.trim()) {
-      newErrors.name = 'Name is required';
+      newErrors.name = "Name is required";
     } else if (!/^[a-z0-9-]+$/.test(formData.name)) {
-      newErrors.name = 'Name must be lowercase alphanumeric with hyphens only';
+      newErrors.name = "Name must be lowercase alphanumeric with hyphens only";
     }
 
     if (!formData.displayName.trim()) {
-      newErrors.displayName = 'Display name is required';
+      newErrors.displayName = "Display name is required";
     }
 
     if (formData.permissions.length === 0 && (formData.inherits?.length || 0) === 0) {
-      newErrors.permissions = 'At least one permission or inherited role is required';
+      newErrors.permissions = "At least one permission or inherited role is required";
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleChange = (field: keyof RoleFormData) => (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | { target: { value: string | string[] } }
-  ) => {
-    const value = e.target.value;
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
-    if (errors[field]) {
-      setErrors((prev) => ({ ...prev, [field]: undefined }));
-    }
-  };
+  const handleChange =
+    (field: keyof RoleFormData) =>
+    (
+      e:
+        | React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+        | { target: { value: string | string[] } }
+    ) => {
+      const value = e.target.value;
+      setFormData((prev) => ({
+        ...prev,
+        [field]: value,
+      }));
+      if (errors[field]) {
+        setErrors((prev) => ({ ...prev, [field]: undefined }));
+      }
+    };
 
   const handlePermissionToggle = (permissionId: string) => {
     setFormData((prev) => ({
@@ -192,9 +194,7 @@ export default function RoleEditor({
 
   const handleAccordionChange = (category: string) => {
     setExpandedCategories((prev) =>
-      prev.includes(category)
-        ? prev.filter((c) => c !== category)
-        : [...prev, category]
+      prev.includes(category) ? prev.filter((c) => c !== category) : [...prev, category]
     );
   };
 
@@ -221,24 +221,22 @@ export default function RoleEditor({
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
-      <DialogTitle>
-        {isEditing ? 'Edit Role' : 'Create Custom Role'}
-      </DialogTitle>
+      <DialogTitle>{isEditing ? "Edit Role" : "Create Custom Role"}</DialogTitle>
       <DialogContent>
         <Stack spacing={3} sx={{ mt: 1 }}>
           <Typography variant="body2" color="textSecondary">
             {isEditing
-              ? 'Update role details and permissions.'
-              : 'Create a new custom role with specific permissions.'}
+              ? "Update role details and permissions."
+              : "Create a new custom role with specific permissions."}
           </Typography>
 
-          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+          <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
             <TextField
               label="Role Name"
               value={formData.name}
-              onChange={handleChange('name')}
+              onChange={handleChange("name")}
               error={!!errors.name}
-              helperText={errors.name || 'Lowercase, alphanumeric, hyphens only'}
+              helperText={errors.name || "Lowercase, alphanumeric, hyphens only"}
               fullWidth
               required
               disabled={isEditing}
@@ -246,7 +244,7 @@ export default function RoleEditor({
             <TextField
               label="Display Name"
               value={formData.displayName}
-              onChange={handleChange('displayName')}
+              onChange={handleChange("displayName")}
               error={!!errors.displayName}
               helperText={errors.displayName}
               fullWidth
@@ -257,19 +255,19 @@ export default function RoleEditor({
           <TextField
             label="Description"
             value={formData.description}
-            onChange={handleChange('description')}
+            onChange={handleChange("description")}
             multiline
             rows={2}
             fullWidth
           />
 
-          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+          <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
             <FormControl fullWidth>
               <InputLabel>Scope</InputLabel>
               <Select
                 value={formData.scope}
                 label="Scope"
-                onChange={(e) => handleChange('scope')(e as { target: { value: string } })}
+                onChange={(e) => handleChange("scope")(e as { target: { value: string } })}
               >
                 <MenuItem value="full">Full Access</MenuItem>
                 <MenuItem value="restricted">Restricted</MenuItem>
@@ -283,17 +281,13 @@ export default function RoleEditor({
                 multiple
                 value={formData.inherits || []}
                 label="Inherits From"
-                onChange={(e) => handleChange('inherits')(e as { target: { value: string[] } })}
+                onChange={(e) => handleChange("inherits")(e as { target: { value: string[] } })}
                 renderValue={(selected) => (
                   <Stack direction="row" spacing={0.5} flexWrap="wrap">
                     {(selected as string[]).map((roleId) => {
                       const parentRole = availableRoles.find((r) => r.id === roleId);
                       return (
-                        <Chip
-                          key={roleId}
-                          label={parentRole?.displayName || roleId}
-                          size="small"
-                        />
+                        <Chip key={roleId} label={parentRole?.displayName || roleId} size="small" />
                       );
                     })}
                   </Stack>
@@ -302,9 +296,7 @@ export default function RoleEditor({
                 {availableRoles.map((r) => (
                   <MenuItem key={r.id} value={r.id}>
                     {r.displayName}
-                    {r.isBuiltIn && (
-                      <Chip label="Built-in" size="small" sx={{ ml: 1 }} />
-                    )}
+                    {r.isBuiltIn && <Chip label="Built-in" size="small" sx={{ ml: 1 }} />}
                   </MenuItem>
                 ))}
               </Select>
@@ -320,13 +312,14 @@ export default function RoleEditor({
           {/* Permissions Selection */}
           <Box>
             <Typography variant="subtitle2" gutterBottom>
-              Permissions {errors.permissions && (
+              Permissions{" "}
+              {errors.permissions && (
                 <Typography component="span" color="error" variant="caption">
                   - {errors.permissions}
                 </Typography>
               )}
             </Typography>
-            <Box sx={{ maxHeight: 400, overflow: 'auto' }}>
+            <Box sx={{ maxHeight: 400, overflow: "auto" }}>
               {permissionCategories.map((category) => {
                 const categoryPerms = permissionsByCategory[category] || [];
                 const isFullySelected = isCategoryFullySelected(category);
@@ -339,7 +332,7 @@ export default function RoleEditor({
                     onChange={() => handleAccordionChange(category)}
                     disableGutters
                     elevation={0}
-                    sx={{ border: '1px solid', borderColor: 'divider', mb: 1 }}
+                    sx={{ border: "1px solid", borderColor: "divider", mb: 1 }}
                   >
                     <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                       <FormControlLabel
@@ -400,7 +393,7 @@ export default function RoleEditor({
                                   </Typography>
                                 </Box>
                               }
-                              sx={{ alignItems: 'flex-start', mb: 1 }}
+                              sx={{ alignItems: "flex-start", mb: 1 }}
                             />
                           );
                         })}
@@ -413,7 +406,7 @@ export default function RoleEditor({
           </Box>
 
           {/* Selected Permissions Summary */}
-          <Box sx={{ bgcolor: 'action.hover', p: 2, borderRadius: 1 }}>
+          <Box sx={{ bgcolor: "action.hover", p: 2, borderRadius: 1 }}>
             <Typography variant="subtitle2" gutterBottom>
               Selected Permissions Summary
             </Typography>
@@ -449,12 +442,8 @@ export default function RoleEditor({
         <Button onClick={onClose} disabled={loading}>
           Cancel
         </Button>
-        <Button
-          onClick={handleSubmit}
-          variant="contained"
-          disabled={loading}
-        >
-          {loading ? 'Saving...' : isEditing ? 'Save Changes' : 'Create Role'}
+        <Button onClick={handleSubmit} variant="contained" disabled={loading}>
+          {loading ? "Saving..." : isEditing ? "Save Changes" : "Create Role"}
         </Button>
       </DialogActions>
     </Dialog>

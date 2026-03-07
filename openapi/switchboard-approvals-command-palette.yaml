@@ -34,7 +34,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CommandExecuteRequest'
+              $ref: "#/components/schemas/CommandExecuteRequest"
             examples:
               requestAccess:
                 summary: Request elevated access
@@ -55,24 +55,24 @@ paths:
                   context:
                     trace_id: 7ff0f9ab
       responses:
-        '202':
+        "202":
           description: Command accepted
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CommandExecuteResponse'
-        '400':
+                $ref: "#/components/schemas/CommandExecuteResponse"
+        "400":
           description: Validation error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '409':
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
           description: Idempotency conflict
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
   /approvals/{id}:decide:
     post:
       tags: [Approvals]
@@ -89,20 +89,20 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ApprovalDecisionRequest'
+              $ref: "#/components/schemas/ApprovalDecisionRequest"
       responses:
-        '200':
+        "200":
           description: Approval decision recorded
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApprovalDecisionResponse'
-        '404':
+                $ref: "#/components/schemas/ApprovalDecisionResponse"
+        "404":
           description: Approval not found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
   /timeline:
     get:
       tags: [Timeline]
@@ -133,12 +133,12 @@ paths:
             maximum: 200
             default: 50
       responses:
-        '200':
+        "200":
           description: Timeline entries
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TimelineResponse'
+                $ref: "#/components/schemas/TimelineResponse"
   /receipts/{id}:
     get:
       tags: [Receipts]
@@ -151,18 +151,18 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        "200":
           description: Receipt
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Receipt'
-        '404':
+                $ref: "#/components/schemas/Receipt"
+        "404":
           description: Receipt not found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
   /receipts:verify:
     post:
       tags: [Receipts]
@@ -173,14 +173,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ReceiptVerifyRequest'
+              $ref: "#/components/schemas/ReceiptVerifyRequest"
       responses:
-        '200':
+        "200":
           description: Verification result
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ReceiptVerifyResponse'
+                $ref: "#/components/schemas/ReceiptVerifyResponse"
   /policy/simulate:
     post:
       tags: [Policy]
@@ -191,14 +191,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PolicySimulationRequest'
+              $ref: "#/components/schemas/PolicySimulationRequest"
       responses:
-        '200':
+        "200":
           description: Policy simulation result
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PolicySimulationResponse'
+                $ref: "#/components/schemas/PolicySimulationResponse"
 
 components:
   securitySchemes:
@@ -216,9 +216,9 @@ components:
         tenant_id:
           type: string
         actor:
-          $ref: '#/components/schemas/Actor'
+          $ref: "#/components/schemas/Actor"
         command:
-          $ref: '#/components/schemas/Command'
+          $ref: "#/components/schemas/Command"
         context:
           type: object
           additionalProperties: true
@@ -232,7 +232,7 @@ components:
           type: string
           enum: [queued, requires_approval, denied]
         policy_decision:
-          $ref: '#/components/schemas/PolicyDecision'
+          $ref: "#/components/schemas/PolicyDecision"
         receipt_id:
           type: string
     ApprovalDecisionRequest:
@@ -247,7 +247,7 @@ components:
         rationale:
           type: string
         actor:
-          $ref: '#/components/schemas/Actor'
+          $ref: "#/components/schemas/Actor"
     ApprovalDecisionResponse:
       type: object
       required: [approval_id, status]
@@ -266,7 +266,7 @@ components:
         entries:
           type: array
           items:
-            $ref: '#/components/schemas/TimelineEntry'
+            $ref: "#/components/schemas/TimelineEntry"
     TimelineEntry:
       type: object
       required: [id, timestamp, type, summary]
@@ -296,27 +296,27 @@ components:
         correlation_id:
           type: string
         actor:
-          $ref: '#/components/schemas/Actor'
+          $ref: "#/components/schemas/Actor"
         command:
-          $ref: '#/components/schemas/Command'
+          $ref: "#/components/schemas/Command"
         policy:
-          $ref: '#/components/schemas/PolicyDecision'
+          $ref: "#/components/schemas/PolicyDecision"
         approvals:
           type: array
           items:
-            $ref: '#/components/schemas/ApprovalSummary'
+            $ref: "#/components/schemas/ApprovalSummary"
         result:
-          $ref: '#/components/schemas/CommandResult'
+          $ref: "#/components/schemas/CommandResult"
         signatures:
           type: array
           items:
-            $ref: '#/components/schemas/Signature'
+            $ref: "#/components/schemas/Signature"
     ReceiptVerifyRequest:
       type: object
       required: [receipt]
       properties:
         receipt:
-          $ref: '#/components/schemas/Receipt'
+          $ref: "#/components/schemas/Receipt"
     ReceiptVerifyResponse:
       type: object
       required: [valid]
@@ -332,9 +332,9 @@ components:
         tenant_id:
           type: string
         actor:
-          $ref: '#/components/schemas/Actor'
+          $ref: "#/components/schemas/Actor"
         command:
-          $ref: '#/components/schemas/Command'
+          $ref: "#/components/schemas/Command"
         context:
           type: object
           additionalProperties: true
@@ -343,7 +343,7 @@ components:
       required: [decision]
       properties:
         decision:
-          $ref: '#/components/schemas/PolicyDecision'
+          $ref: "#/components/schemas/PolicyDecision"
         rationale:
           type: string
     Actor:

@@ -2,21 +2,21 @@
   "title": "IntelGraph Platform SRE Overview",
   "description": "Golden signals for API, ingest, database, and cost guardrails",
   "tags": ["sre", "platform"],
-  "time": {"from": "now-6h", "to": "now"},
+  "time": { "from": "now-6h", "to": "now" },
   "panels": [
     {
       "type": "timeseries",
       "title": "API Availability (99.9% target)",
-      "gridPos": {"x": 0, "y": 0, "w": 12, "h": 8},
+      "gridPos": { "x": 0, "y": 0, "w": 12, "h": 8 },
       "fieldConfig": {
         "defaults": {
           "unit": "percentunit",
           "thresholds": {
             "mode": "percentage",
             "steps": [
-              {"color": "red", "value": 0.998},
-              {"color": "orange", "value": 0.999},
-              {"color": "green", "value": null}
+              { "color": "red", "value": 0.998 },
+              { "color": "orange", "value": 0.999 },
+              { "color": "green", "value": null }
             ]
           }
         }
@@ -31,16 +31,16 @@
     {
       "type": "timeseries",
       "title": "Ingest Success (99.5% target)",
-      "gridPos": {"x": 12, "y": 0, "w": 12, "h": 8},
+      "gridPos": { "x": 12, "y": 0, "w": 12, "h": 8 },
       "fieldConfig": {
         "defaults": {
           "unit": "percentunit",
           "thresholds": {
             "mode": "percentage",
             "steps": [
-              {"color": "red", "value": 0.985},
-              {"color": "orange", "value": 0.995},
-              {"color": "green", "value": null}
+              { "color": "red", "value": 0.985 },
+              { "color": "orange", "value": 0.995 },
+              { "color": "green", "value": null }
             ]
           }
         }
@@ -55,16 +55,16 @@
     {
       "type": "timeseries",
       "title": "Database p95 Latency",
-      "gridPos": {"x": 0, "y": 8, "w": 12, "h": 8},
+      "gridPos": { "x": 0, "y": 8, "w": 12, "h": 8 },
       "fieldConfig": {
         "defaults": {
           "unit": "ms",
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              {"color": "green", "value": null},
-              {"color": "orange", "value": 120},
-              {"color": "red", "value": 200}
+              { "color": "green", "value": null },
+              { "color": "orange", "value": 120 },
+              { "color": "red", "value": 200 }
             ]
           }
         }
@@ -83,16 +83,16 @@
     {
       "type": "stat",
       "title": "Monthly Spend vs Budget",
-      "gridPos": {"x": 12, "y": 8, "w": 12, "h": 8},
+      "gridPos": { "x": 12, "y": 8, "w": 12, "h": 8 },
       "fieldConfig": {
         "defaults": {
           "unit": "percent",
           "thresholds": {
             "mode": "percentage",
             "steps": [
-              {"color": "green", "value": null},
-              {"color": "orange", "value": 0.8},
-              {"color": "red", "value": 0.9}
+              { "color": "green", "value": null },
+              { "color": "orange", "value": 0.8 },
+              { "color": "red", "value": 0.9 }
             ]
           }
         }
@@ -115,16 +115,16 @@
     {
       "type": "timeseries",
       "title": "Agent Queue Cost Pressure",
-      "gridPos": {"x": 0, "y": 16, "w": 12, "h": 8},
+      "gridPos": { "x": 0, "y": 16, "w": 12, "h": 8 },
       "fieldConfig": {
         "defaults": {
           "unit": "none",
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              {"color": "green", "value": null},
-              {"color": "orange", "value": 0.9},
-              {"color": "red", "value": 1}
+              { "color": "green", "value": null },
+              { "color": "orange", "value": 0.9 },
+              { "color": "red", "value": 1 }
             ]
           }
         }
@@ -139,16 +139,16 @@
     {
       "type": "timeseries",
       "title": "Agent Queue SLO Pressure (Latency + Backlog)",
-      "gridPos": {"x": 12, "y": 16, "w": 12, "h": 8},
+      "gridPos": { "x": 12, "y": 16, "w": 12, "h": 8 },
       "fieldConfig": {
         "defaults": {
           "unit": "none",
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              {"color": "green", "value": null},
-              {"color": "orange", "value": 0.95},
-              {"color": "red", "value": 1}
+              { "color": "green", "value": null },
+              { "color": "orange", "value": 0.95 },
+              { "color": "red", "value": 1 }
             ]
           }
         }
@@ -163,16 +163,16 @@
     {
       "type": "timeseries",
       "title": "Agent Queue Latency + Cost vs Scaling",
-      "gridPos": {"x": 0, "y": 24, "w": 12, "h": 8},
+      "gridPos": { "x": 0, "y": 24, "w": 12, "h": 8 },
       "fieldConfig": {
         "defaults": {
           "unit": "none",
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              {"color": "green", "value": null},
-              {"color": "orange", "value": 1},
-              {"color": "red", "value": 1.5}
+              { "color": "green", "value": null },
+              { "color": "orange", "value": 1 },
+              { "color": "red", "value": 1.5 }
             ]
           }
         }
@@ -199,16 +199,16 @@
     {
       "type": "stat",
       "title": "Adaptive Scaling Composite",
-      "gridPos": {"x": 12, "y": 24, "w": 12, "h": 8},
+      "gridPos": { "x": 12, "y": 24, "w": 12, "h": 8 },
       "fieldConfig": {
         "defaults": {
           "unit": "none",
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              {"color": "green", "value": null},
-              {"color": "yellow", "value": 2},
-              {"color": "red", "value": 2.5}
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 2 },
+              { "color": "red", "value": 2.5 }
             ]
           }
         }

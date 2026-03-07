@@ -32,17 +32,20 @@ This PR implements **tenant isolation for Neo4j graph database** by providing a 
 ### Creating a Tenant-Safe Session
 
 ```typescript
-import { createTenantSession } from '../neo4j/tenant-session-wrapper.js';
-import { TenantContext } from '../security/tenant-context.js';
+import { createTenantSession } from "../neo4j/tenant-session-wrapper.js";
+import { TenantContext } from "../security/tenant-context.js";
 
 async function queryGraph(context: TenantContext) {
   const session = createTenantSession(driver, context);
   try {
-    const result = await session.run(`
+    const result = await session.run(
+      `
       MATCH (n:Entity {tenant_id: $tenantId})
       WHERE n.id = $entityId
       RETURN n
-    `, { entityId: '123' });
+    `,
+      { entityId: "123" }
+    );
 
     return result.records;
   } finally {
@@ -54,7 +57,7 @@ async function queryGraph(context: TenantContext) {
 ### One-Shot Query (Auto Session Management)
 
 ```typescript
-import { executeTenantQuery } from '../neo4j/tenant-session-wrapper.js';
+import { executeTenantQuery } from "../neo4j/tenant-session-wrapper.js";
 
 const result = await executeTenantQuery(
   driver,
@@ -62,34 +65,27 @@ const result = await executeTenantQuery(
   `MATCH (n:Person {tenant_id: $tenantId})
    WHERE n.email = $email
    RETURN n`,
-  { email: 'user@example.com' }
+  { email: "user@example.com" }
 );
 ```
 
 ### Creating Nodes with Auto Tenant Injection
 
 ```typescript
-import { createTenantNode } from '../neo4j/tenant-session-wrapper.js';
+import { createTenantNode } from "../neo4j/tenant-session-wrapper.js";
 
-await createTenantNode(
-  driver,
-  tenantContext,
-  'Person',
-  { name: 'John Doe', email: 'john@example.com' }
-);
+await createTenantNode(driver, tenantContext, "Person", {
+  name: "John Doe",
+  email: "john@example.com",
+});
 ```
 
 ### Finding Tenant-Scoped Nodes
 
 ```typescript
-import { findTenantNodes } from '../neo4j/tenant-session-wrapper.js';
+import { findTenantNodes } from "../neo4j/tenant-session-wrapper.js";
 
-const users = await findTenantNodes(
-  driver,
-  tenantContext,
-  'User',
-  { role: 'admin' }
-);
+const users = await findTenantNodes(driver, tenantContext, "User", { role: "admin" });
 ```
 
 ---
@@ -101,11 +97,14 @@ const users = await findTenantNodes(
 ```typescript
 const session = driver.session();
 try {
-  const result = await session.run(`
+  const result = await session.run(
+    `
     MATCH (n:Entity)
     WHERE n.id = $entityId
     RETURN n
-  `, { entityId: '123' });
+  `,
+    { entityId: "123" }
+  );
   // ❌ NO TENANT FILTERING - Cross-tenant access possible!
 } finally {
   await session.close();
@@ -115,15 +114,18 @@ try {
 ### After (Safe)
 
 ```typescript
-import { createTenantSession } from '../neo4j/tenant-session-wrapper.js';
+import { createTenantSession } from "../neo4j/tenant-session-wrapper.js";
 
 const session = createTenantSession(driver, tenantContext);
 try {
-  const result = await session.run(`
+  const result = await session.run(
+    `
     MATCH (n:Entity {tenant_id: $tenantId})
     WHERE n.id = $entityId
     RETURN n
-  `, { entityId: '123' });
+  `,
+    { entityId: "123" }
+  );
   // ✅ TENANT FILTERING ENFORCED
 } finally {
   await session.close();
@@ -182,6 +184,7 @@ npx ts-node scripts/audit-neo4j-tenant-queries.ts ./src
 ### ✅ Safe Patterns (Accepted)
 
 #### Pattern 1: Property Match with tenant_id
+
 ```cypher
 MATCH (n:Entity {tenant_id: $tenantId})
 WHERE n.id = $id
@@ -189,6 +192,7 @@ RETURN n
 ```
 
 #### Pattern 2: WHERE Clause with tenant_id
+
 ```cypher
 MATCH (n:Entity)
 WHERE n.tenant_id = $tenantId AND n.id = $id
@@ -196,6 +200,7 @@ RETURN n
 ```
 
 #### Pattern 3: Tenant Node Relationship
+
 ```cypher
 MATCH (t:Tenant {tenant_id: $tenantId})-[:OWNS]->(n:Entity)
 WHERE n.id = $id
@@ -203,6 +208,7 @@ RETURN n
 ```
 
 #### Pattern 4: System Queries (No tenant_id needed)
+
 ```cypher
 CALL db.labels()
 CREATE INDEX entity_tenant_id FOR (n:Entity) ON (n.tenant_id)
@@ -211,6 +217,7 @@ CREATE INDEX entity_tenant_id FOR (n:Entity) ON (n.tenant_id)
 ### ❌ Unsafe Patterns (Rejected)
 
 #### Missing tenant_id Filter
+
 ```cypher
 MATCH (n:Entity)  // ❌ NO TENANT FILTERING
 WHERE n.id = $id
@@ -218,12 +225,14 @@ RETURN n
 ```
 
 #### Typo in Parameter Name
+
 ```cypher
 MATCH (n:Entity {tenant_id: $teantId})  // ❌ TYPO: teantId instead of tenantId
 RETURN n
 ```
 
 #### Using Wrong Parameter
+
 ```cypher
 MATCH (n:Entity {tenant_id: $userId})  // ❌ WRONG PARAMETER
 RETURN n
@@ -245,7 +254,7 @@ const result = await session.executeRead(async (tx) => {
     RETURN count(n) as count
   `);
 
-  return queryResult.records[0].get('count');
+  return queryResult.records[0].get("count");
 });
 
 await session.close();
@@ -258,16 +267,22 @@ const session = createTenantSession(driver, tenantContext);
 
 await session.executeWrite(async (tx) => {
   // Create entity
-  await tx.run(`
+  await tx.run(
+    `
     CREATE (n:Entity {tenant_id: $tenantId, name: $name, createdAt: datetime()})
-  `, { name: 'New Entity' });
+  `,
+    { name: "New Entity" }
+  );
 
   // Create relationship
-  await tx.run(`
+  await tx.run(
+    `
     MATCH (a:Entity {tenant_id: $tenantId, name: 'New Entity'})
     MATCH (b:Entity {tenant_id: $tenantId, id: $targetId})
     CREATE (a)-[:RELATED_TO]->(b)
-  `, { targetId: 'target-123' });
+  `,
+    { targetId: "target-123" }
+  );
 });
 
 await session.close();
@@ -344,6 +359,7 @@ DETACH DELETE n;
 ### Query Performance
 
 **Before Tenant Filtering**:
+
 ```cypher
 MATCH (n:Entity)
 WHERE n.id = $id
@@ -352,6 +368,7 @@ RETURN n
 ```
 
 **After Tenant Filtering**:
+
 ```cypher
 MATCH (n:Entity {tenant_id: $tenantId})
 WHERE n.id = $id
@@ -376,12 +393,13 @@ RETURN n
 **Cause**: Query doesn't include `{tenant_id: $tenantId}` pattern
 
 **Solution**:
+
 ```typescript
 // ❌ Before
-await session.run('MATCH (n:Entity) WHERE n.id = $id RETURN n', { id });
+await session.run("MATCH (n:Entity) WHERE n.id = $id RETURN n", { id });
 
 // ✅ After
-await session.run('MATCH (n:Entity {tenant_id: $tenantId}) WHERE n.id = $id RETURN n', { id });
+await session.run("MATCH (n:Entity {tenant_id: $tenantId}) WHERE n.id = $id RETURN n", { id });
 ```
 
 ### Issue 2: Parameter Name Mismatch

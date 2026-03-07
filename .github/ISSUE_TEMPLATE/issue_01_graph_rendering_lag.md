@@ -1,9 +1,9 @@
 ---
-name: 'Issue #1: Graph Rendering Lag on Large Datasets'
+name: "Issue #1: Graph Rendering Lag on Large Datasets"
 about: Optimize Cytoscape.js rendering for large graphs
-title: 'Issue #1: Graph Rendering Lag on Large Datasets'
-labels: 'bug, performance, frontend'
-assignees: ''
+title: "Issue #1: Graph Rendering Lag on Large Datasets"
+labels: "bug, performance, frontend"
+assignees: ""
 ---
 
 **Branch**: `feature/graph-render-optim`
@@ -33,19 +33,19 @@ tests/
 
 ```js
 // frontend/graph/render-optim.js
-import { runLayoutInWorker } from './layout-worker.js';
+import { runLayoutInWorker } from "./layout-worker.js";
 
 function initializeOptimizedGraph(containerId, elements) {
   const cy = cytoscape({
     container: document.getElementById(containerId),
     elements: elements,
     // Initial minimal config
-    layout: { name: 'preset' },
+    layout: { name: "preset" },
     style: [
       /* ... your existing styles ... */
     ],
     // Further optimizations
-    pixelRatio: 'auto',
+    pixelRatio: "auto",
     textureOnViewport: true,
     wheelSensitivity: 0.1,
     motionBlur: true,
@@ -93,18 +93,18 @@ function initializeOptimizedGraph(containerId, elements) {
 
 export function runLayoutInWorker(cy, elements) {
   return new Promise((resolve, reject) => {
-    if (typeof Worker === 'undefined') {
-      console.warn('Web Workers not supported. Running layout on main thread.');
+    if (typeof Worker === "undefined") {
+      console.warn("Web Workers not supported. Running layout on main thread.");
       // Fallback to main thread layout if workers not supported
-      cy.layout({ name: 'cose', animate: true }).run();
+      cy.layout({ name: "cose", animate: true }).run();
       const positions = {};
       cy.nodes().forEach((node) => (positions[node.id()] = node.position()));
       resolve(positions);
       return;
     }
 
-    const worker = new Worker('./layout.worker.js'); // Path to your actual worker file
-    worker.postMessage({ elements: elements, layoutOptions: { name: 'cose' } }); // Example layout
+    const worker = new Worker("./layout.worker.js"); // Path to your actual worker file
+    worker.postMessage({ elements: elements, layoutOptions: { name: "cose" } }); // Example layout
 
     worker.onmessage = function (e) {
       resolve(e.data);
@@ -112,7 +112,7 @@ export function runLayoutInWorker(cy, elements) {
     };
 
     worker.onerror = function (e) {
-      console.error('Web Worker error:', e);
+      console.error("Web Worker error:", e);
       reject(e);
     };
   });

@@ -1,12 +1,12 @@
-import 'dotenv/config';
-import express from 'express';
-import cors from 'cors';
-import bodyParser from 'body-parser';
-import { ApolloServer } from '@apollo/server';
-import { expressMiddleware } from '@apollo/server/express4';
-import { typeDefs } from './schema';
-import { resolvers } from './resolvers';
-import { getContextFromReq } from './auth';
+import "dotenv/config";
+import express from "express";
+import cors from "cors";
+import bodyParser from "body-parser";
+import { ApolloServer } from "@apollo/server";
+import { expressMiddleware } from "@apollo/server/express4";
+import { typeDefs } from "./schema";
+import { resolvers } from "./resolvers";
+import { getContextFromReq } from "./auth";
 
 const app = express();
 app.use(cors());
@@ -16,16 +16,16 @@ const server = new ApolloServer({ typeDefs, resolvers });
 await server.start();
 
 app.use(
-  '/graphql',
+  "/graphql",
   expressMiddleware(server, {
     context: async ({ req }) => getContextFromReq(req),
-  }),
+  })
 );
 
 // test-only Cypher proxy used by k6 load script
-app.post('/test/cypher', async (req, res) => {
-  if (process.env.NODE_ENV === 'production') return res.status(404).end();
-  const { getSession } = await import('./db/neo4j');
+app.post("/test/cypher", async (req, res) => {
+  if (process.env.NODE_ENV === "production") return res.status(404).end();
+  const { getSession } = await import("./db/neo4j");
   const s = getSession();
   try {
     const r = await s.run(req.body.cypher);
@@ -37,4 +37,4 @@ app.post('/test/cypher', async (req, res) => {
   }
 });
 
-app.listen(4000, () => console.log('API on http://localhost:4000/graphql'));
+app.listen(4000, () => console.log("API on http://localhost:4000/graphql"));

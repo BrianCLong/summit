@@ -14,8 +14,8 @@ import {
   ImpactedAsset,
   ImpactLevel,
   ColumnLineage,
-} from '../types/lineage.js';
-import { AssetMetadata } from '../types/catalog.js';
+} from "../types/lineage.js";
+import { AssetMetadata } from "../types/catalog.js";
 
 export interface ILineageStore {
   getLineage(request: LineageRequest): Promise<LineageGraph>;
@@ -101,7 +101,7 @@ export class LineageService {
   /**
    * Add lineage relationship
    */
-  async addLineage(edge: Omit<LineageEdge, 'id'>): Promise<LineageEdge> {
+  async addLineage(edge: Omit<LineageEdge, "id">): Promise<LineageEdge> {
     const newEdge: LineageEdge = {
       ...edge,
       id: this.generateLineageId(edge.fromNodeId, edge.toNodeId),
@@ -134,7 +134,8 @@ export class LineageService {
       }));
 
     const criticalImpacts = impactedAssets.filter(
-      (asset) => asset.impactLevel === ImpactLevel.CRITICAL || asset.impactLevel === ImpactLevel.HIGH
+      (asset) =>
+        asset.impactLevel === ImpactLevel.CRITICAL || asset.impactLevel === ImpactLevel.HIGH
     ).length;
 
     return {
@@ -194,7 +195,9 @@ export class LineageService {
    */
   private findPath(fromAssetId: string, toAssetId: string, lineage: LineageGraph): string[] {
     const visited = new Set<string>();
-    const queue: { assetId: string; path: string[] }[] = [{ assetId: fromAssetId, path: [fromAssetId] }];
+    const queue: { assetId: string; path: string[] }[] = [
+      { assetId: fromAssetId, path: [fromAssetId] },
+    ];
 
     while (queue.length > 0) {
       const { assetId, path } = queue.shift()!;

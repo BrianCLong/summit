@@ -1,4 +1,3 @@
-
 ## Billing Cycle Runbook
 
 1.  **Trigger**: 1st of every month.

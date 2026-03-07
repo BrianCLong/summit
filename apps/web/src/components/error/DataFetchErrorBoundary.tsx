@@ -1,6 +1,6 @@
-import React from 'react';
-import { ErrorBoundary } from './ErrorBoundary';
-import { Button } from '@/components/ui/Button';
+import React from 'react'
+import { ErrorBoundary } from './ErrorBoundary'
+import { Button } from '@/components/ui/Button'
 import {
   Card,
   CardHeader,
@@ -8,16 +8,16 @@ import {
   CardDescription,
   CardContent,
   CardFooter,
-} from '@/components/ui/Card';
-import { Database, RefreshCw, Loader2 } from 'lucide-react';
+} from '@/components/ui/Card'
+import { Database, RefreshCw, Loader2 } from 'lucide-react'
 
 interface DataFetchErrorFallbackProps {
-  error: Error;
-  resetErrorBoundary: () => void;
-  retryCount: number;
-  isRetrying?: boolean;
-  maxRetries?: number;
-  dataSourceName?: string;
+  error: Error
+  resetErrorBoundary: () => void
+  retryCount: number
+  isRetrying?: boolean
+  maxRetries?: number
+  dataSourceName?: string
 }
 
 const DataFetchErrorFallback: React.FC<DataFetchErrorFallbackProps> = ({
@@ -28,7 +28,7 @@ const DataFetchErrorFallback: React.FC<DataFetchErrorFallbackProps> = ({
   maxRetries = 3,
   dataSourceName = 'data source',
 }) => {
-  const canRetry = retryCount < maxRetries;
+  const canRetry = retryCount < maxRetries
 
   return (
     <div className="flex min-h-[300px] w-full items-center justify-center p-4">
@@ -39,8 +39,8 @@ const DataFetchErrorFallback: React.FC<DataFetchErrorFallbackProps> = ({
             <CardTitle className="text-xl">Data Loading Failed</CardTitle>
           </div>
           <CardDescription className="text-base">
-            We couldn't load data from {dataSourceName}. This might be a temporary network
-            issue or the service may be unavailable.
+            We couldn't load data from {dataSourceName}. This might be a
+            temporary network issue or the service may be unavailable.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
@@ -86,14 +86,14 @@ const DataFetchErrorFallback: React.FC<DataFetchErrorFallbackProps> = ({
         </CardFooter>
       </Card>
     </div>
-  );
-};
+  )
+}
 
 interface DataFetchErrorBoundaryProps {
-  children: React.ReactNode;
-  dataSourceName?: string;
-  onError?: (error: Error, errorInfo: React.ErrorInfo) => void;
-  context?: Record<string, any>;
+  children: React.ReactNode
+  dataSourceName?: string
+  onError?: (error: Error, errorInfo: React.ErrorInfo) => void
+  context?: Record<string, any>
 }
 
 /**
@@ -131,11 +131,11 @@ export const DataFetchErrorBoundary: React.FC<DataFetchErrorBoundaryProps> = ({
         dataSourceName,
         boundaryType: 'data_fetch',
       }}
-      fallback={(props) => (
+      fallback={props => (
         <DataFetchErrorFallback {...props} dataSourceName={dataSourceName} />
       )}
     >
       {children}
     </ErrorBoundary>
-  );
-};
+  )
+}

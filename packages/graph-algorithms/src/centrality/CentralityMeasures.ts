@@ -3,7 +3,7 @@
  * PageRank, Betweenness, Closeness, Eigenvector centrality
  */
 
-import type { GraphStorage } from '@intelgraph/graph-database';
+import type { GraphStorage } from "@intelgraph/graph-database";
 
 export interface CentralityResult {
   nodeId: string;
@@ -16,12 +16,18 @@ export class CentralityMeasures {
   /**
    * PageRank algorithm
    */
-  pageRank(dampingFactor: number = 0.85, maxIterations: number = 100, tolerance: number = 1e-6): Map<string, number> {
+  pageRank(
+    dampingFactor: number = 0.85,
+    maxIterations: number = 100,
+    tolerance: number = 1e-6
+  ): Map<string, number> {
     const exported = this.storage.exportGraph();
     const nodes = exported.nodes;
     const n = nodes.length;
 
-    if (n === 0) {return new Map();}
+    if (n === 0) {
+      return new Map();
+    }
 
     // Initialize PageRank values
     const pageRank = new Map<string, number>();
@@ -42,7 +48,7 @@ export class CentralityMeasures {
         const incoming = this.storage.getIncomingEdges(node.id);
         for (const edge of incoming) {
           const sourceRank = pageRank.get(edge.sourceId) ?? 0;
-          const outDegree = this.storage.getDegree(edge.sourceId, 'out');
+          const outDegree = this.storage.getDegree(edge.sourceId, "out");
           if (outDegree > 0) {
             sum += sourceRank / outDegree;
           }
@@ -108,7 +114,7 @@ export class CentralityMeasures {
         const v = queue.shift()!;
         stack.push(v);
 
-        const neighbors = this.storage.getNeighbors(v, 'out');
+        const neighbors = this.storage.getNeighbors(v, "out");
         for (const neighbor of neighbors) {
           const w = neighbor.id;
 
@@ -189,12 +195,17 @@ export class CentralityMeasures {
    * Eigenvector Centrality
    * Centrality proportional to the sum of centralities of neighbors
    */
-  eigenvectorCentrality(maxIterations: number = 100, tolerance: number = 1e-6): Map<string, number> {
+  eigenvectorCentrality(
+    maxIterations: number = 100,
+    tolerance: number = 1e-6
+  ): Map<string, number> {
     const exported = this.storage.exportGraph();
     const nodes = exported.nodes;
     const n = nodes.length;
 
-    if (n === 0) {return new Map();}
+    if (n === 0) {
+      return new Map();
+    }
 
     // Initialize
     const centrality = new Map<string, number>();
@@ -245,7 +256,7 @@ export class CentralityMeasures {
    * Degree Centrality
    * Simply the degree of each node
    */
-  degreeCentrality(direction: 'in' | 'out' | 'both' = 'both'): Map<string, number> {
+  degreeCentrality(direction: "in" | "out" | "both" = "both"): Map<string, number> {
     const exported = this.storage.exportGraph();
     const nodes = exported.nodes;
     const centrality = new Map<string, number>();
@@ -299,7 +310,7 @@ export class CentralityMeasures {
   getTopK(centrality: Map<string, number>, k: number): CentralityResult[] {
     const results: CentralityResult[] = Array.from(centrality.entries()).map(([nodeId, score]) => ({
       nodeId,
-      score
+      score,
     }));
 
     results.sort((a, b) => b.score - a.score);
@@ -318,7 +329,7 @@ export class CentralityMeasures {
       const current = queue.shift()!;
       const currentDistance = distances.get(current)!;
 
-      const neighbors = this.storage.getNeighbors(current, 'out');
+      const neighbors = this.storage.getNeighbors(current, "out");
       for (const neighbor of neighbors) {
         if (!distances.has(neighbor.id)) {
           distances.set(neighbor.id, currentDistance + 1);

@@ -83,7 +83,10 @@
           "color": { "mode": "thresholds" },
           "mappings": [
             { "options": { "0": { "color": "red", "index": 0, "text": "DOWN" } }, "type": "value" },
-            { "options": { "1": { "color": "green", "index": 1, "text": "HEALTHY" } }, "type": "value" }
+            {
+              "options": { "1": { "color": "green", "index": 1, "text": "HEALTHY" } },
+              "type": "value"
+            }
           ],
           "thresholds": {
             "mode": "absolute",
@@ -193,9 +196,7 @@
           "color": { "mode": "thresholds" },
           "thresholds": {
             "mode": "absolute",
-            "steps": [
-              { "color": "green", "value": null }
-            ]
+            "steps": [{ "color": "green", "value": null }]
           },
           "unit": "none"
         }
@@ -394,7 +395,12 @@
       "gridPos": { "h": 8, "w": 10, "x": 14, "y": 8 },
       "id": 7,
       "options": {
-        "legend": { "calcs": ["lastNotNull"], "displayMode": "table", "placement": "bottom", "showLegend": true },
+        "legend": {
+          "calcs": ["lastNotNull"],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
         "tooltip": { "mode": "multi", "sort": "desc" }
       },
       "targets": [
@@ -811,7 +817,12 @@
       "gridPos": { "h": 8, "w": 12, "x": 0, "y": 32 },
       "id": 17,
       "options": {
-        "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true },
+        "legend": {
+          "calcs": ["mean", "max"],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
         "tooltip": { "mode": "multi", "sort": "desc" }
       },
       "targets": [
@@ -864,7 +875,12 @@
       "gridPos": { "h": 8, "w": 12, "x": 12, "y": 32 },
       "id": 18,
       "options": {
-        "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true },
+        "legend": {
+          "calcs": ["mean", "max"],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
         "tooltip": { "mode": "multi", "sort": "desc" }
       },
       "targets": [
@@ -911,7 +927,10 @@
         "multi": true,
         "name": "team",
         "options": [],
-        "query": { "query": "label_values(deployment_total, team)", "refId": "StandardVariableQuery" },
+        "query": {
+          "query": "label_values(deployment_total, team)",
+          "refId": "StandardVariableQuery"
+        },
         "refresh": 2,
         "regex": "",
         "skipUrlSync": false,

@@ -3,8 +3,8 @@
  * Meta-view showing how Summit operates itself
  */
 
-import React, { useEffect, useState } from 'react';
-import { AlertCircle, CheckCircle, Clock, GitBranch, Activity, ArrowUpRight } from 'lucide-react';
+import React, { useEffect, useState } from "react";
+import { AlertCircle, CheckCircle, Clock, GitBranch, Activity, ArrowUpRight } from "lucide-react";
 // Note: TrendingUp was renamed to ArrowUpRight in newer versions of lucide-react
 const TrendingUp = ArrowUpRight;
 
@@ -14,12 +14,43 @@ interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
 }
 
-const Card = ({ className = '', children, ...props }: CardProps) => <div className={`rounded-lg border bg-card text-card-foreground shadow-sm ${className}`} {...props}>{children}</div>;
-const CardHeader = ({ className = '', children, ...props }: CardProps) => <div className={`flex flex-col space-y-1.5 p-6 ${className}`} {...props}>{children}</div>;
-const CardTitle = ({ className = '', children, ...props }: CardProps) => <h3 className={`text-2xl font-semibold leading-none tracking-tight ${className}`} {...props}>{children}</h3>;
-const CardContent = ({ className = '', children, ...props }: CardProps) => <div className={`p-6 pt-0 ${className}`} {...props}>{children}</div>;
+const Card = ({ className = "", children, ...props }: CardProps) => (
+  <div
+    className={`rounded-lg border bg-card text-card-foreground shadow-sm ${className}`}
+    {...props}
+  >
+    {children}
+  </div>
+);
+const CardHeader = ({ className = "", children, ...props }: CardProps) => (
+  <div className={`flex flex-col space-y-1.5 p-6 ${className}`} {...props}>
+    {children}
+  </div>
+);
+const CardTitle = ({ className = "", children, ...props }: CardProps) => (
+  <h3 className={`text-2xl font-semibold leading-none tracking-tight ${className}`} {...props}>
+    {children}
+  </h3>
+);
+const CardContent = ({ className = "", children, ...props }: CardProps) => (
+  <div className={`p-6 pt-0 ${className}`} {...props}>
+    {children}
+  </div>
+);
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const Badge = ({ variant = 'default', className = '', children, ...props }: CardProps & { variant?: string }) => <div className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold ${className}`} {...props}>{children}</div>;
+const Badge = ({
+  variant = "default",
+  className = "",
+  children,
+  ...props
+}: CardProps & { variant?: string }) => (
+  <div
+    className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold ${className}`}
+    {...props}
+  >
+    {children}
+  </div>
+);
 
 interface Incident {
   id: string;
@@ -82,55 +113,55 @@ export function OperationsDashboard() {
 
   const fetchDashboardData = async () => {
     try {
-      const response = await fetch('/api/companyos/dashboard');
+      const response = await fetch("/api/companyos/dashboard");
       if (!response.ok) {
-        throw new Error('Failed to fetch dashboard data');
+        throw new Error("Failed to fetch dashboard data");
       }
       const data = await response.json();
       setData(data);
       setLoading(false);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
+      setError(err instanceof Error ? err.message : "Unknown error");
       setLoading(false);
     }
   };
 
   const getSeverityColor = (severity: string) => {
     switch (severity.toLowerCase()) {
-      case 'sev1':
-      case 'critical':
-        return 'bg-red-500';
-      case 'sev2':
-      case 'warning':
-        return 'bg-orange-500';
-      case 'sev3':
-        return 'bg-yellow-500';
-      case 'sev4':
-      case 'info':
-        return 'bg-blue-500';
+      case "sev1":
+      case "critical":
+        return "bg-red-500";
+      case "sev2":
+      case "warning":
+        return "bg-orange-500";
+      case "sev3":
+        return "bg-yellow-500";
+      case "sev4":
+      case "info":
+        return "bg-blue-500";
       default:
-        return 'bg-gray-500';
+        return "bg-gray-500";
     }
   };
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
-      case 'open':
-      case 'firing':
-      case 'in_progress':
-        return 'bg-red-500';
-      case 'investigating':
-      case 'acknowledged':
-        return 'bg-orange-500';
-      case 'monitoring':
-        return 'bg-yellow-500';
-      case 'resolved':
-      case 'succeeded':
-        return 'bg-green-500';
-      case 'closed':
-        return 'bg-gray-500';
+      case "open":
+      case "firing":
+      case "in_progress":
+        return "bg-red-500";
+      case "investigating":
+      case "acknowledged":
+        return "bg-orange-500";
+      case "monitoring":
+        return "bg-yellow-500";
+      case "resolved":
+      case "succeeded":
+        return "bg-green-500";
+      case "closed":
+        return "bg-gray-500";
       default:
-        return 'bg-blue-500';
+        return "bg-blue-500";
     }
   };
 
@@ -142,7 +173,7 @@ export function OperationsDashboard() {
     const diffHours = Math.floor(diffMins / 60);
     const diffDays = Math.floor(diffHours / 24);
 
-    if (diffMins < 1) return 'just now';
+    if (diffMins < 1) return "just now";
     if (diffMins < 60) return `${diffMins}m ago`;
     if (diffHours < 24) return `${diffHours}h ago`;
     return `${diffDays}d ago`;
@@ -190,32 +221,28 @@ export function OperationsDashboard() {
 
       {/* Status Overview Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className={data.activeIncidents.length > 0 ? 'border-red-500' : ''}>
+        <Card className={data.activeIncidents.length > 0 ? "border-red-500" : ""}>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Active Incidents</CardTitle>
             <AlertCircle className="w-4 h-4 text-red-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">
-              {data.activeIncidents.length}
-            </div>
+            <div className="text-3xl font-bold">{data.activeIncidents.length}</div>
             <p className="text-xs text-gray-500 mt-1">
               {data.activeIncidents.filter((i) => i.customer_impact).length} with customer impact
             </p>
           </CardContent>
         </Card>
 
-        <Card className={data.firingAlerts.length > 0 ? 'border-orange-500' : ''}>
+        <Card className={data.firingAlerts.length > 0 ? "border-orange-500" : ""}>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Firing Alerts</CardTitle>
             <Activity className="w-4 h-4 text-orange-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">
-              {data.firingAlerts.length}
-            </div>
+            <div className="text-3xl font-bold">{data.firingAlerts.length}</div>
             <p className="text-xs text-gray-500 mt-1">
-              {data.firingAlerts.filter((a) => a.severity === 'critical').length} critical
+              {data.firingAlerts.filter((a) => a.severity === "critical").length} critical
             </p>
           </CardContent>
         </Card>
@@ -227,29 +254,31 @@ export function OperationsDashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">
-              {data.recentDeployments.filter((d) => d.status === 'succeeded').length}/
+              {data.recentDeployments.filter((d) => d.status === "succeeded").length}/
               {data.recentDeployments.length}
             </div>
             <p className="text-xs text-gray-500 mt-1">
-              Success rate: {data.recentDeployments.length > 0
-                ? Math.round((data.recentDeployments.filter((d) => d.status === 'succeeded').length / data.recentDeployments.length) * 100)
-                : 0}%
+              Success rate:{" "}
+              {data.recentDeployments.length > 0
+                ? Math.round(
+                    (data.recentDeployments.filter((d) => d.status === "succeeded").length /
+                      data.recentDeployments.length) *
+                      100
+                  )
+                : 0}
+              %
             </p>
           </CardContent>
         </Card>
 
-        <Card className={data.sloViolations.length > 0 ? 'border-yellow-500' : ''}>
+        <Card className={data.sloViolations.length > 0 ? "border-yellow-500" : ""}>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">SLO Violations</CardTitle>
             <TrendingUp className="w-4 h-4 text-yellow-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">
-              {data.sloViolations.length}
-            </div>
-            <p className="text-xs text-gray-500 mt-1">
-              Unresolved violations
-            </p>
+            <div className="text-3xl font-bold">{data.sloViolations.length}</div>
+            <p className="text-xs text-gray-500 mt-1">Unresolved violations</p>
           </CardContent>
         </Card>
       </div>
@@ -289,7 +318,8 @@ export function OperationsDashboard() {
                     </div>
                     <h4 className="font-semibold text-gray-900">{incident.title}</h4>
                     <p className="text-sm text-gray-600 mt-1">
-                      Commander: {incident.commander || 'Unassigned'} · Started {formatRelativeTime(incident.started_at)}
+                      Commander: {incident.commander || "Unassigned"} · Started{" "}
+                      {formatRelativeTime(incident.started_at)}
                     </p>
                   </div>
                   <a
@@ -329,16 +359,16 @@ export function OperationsDashboard() {
                     className="p-3 border rounded-lg hover:bg-gray-50 transition-colors"
                   >
                     <div className="flex items-center gap-2 mb-1">
-                      <Badge className={getSeverityColor(alert.severity)}>
-                        {alert.severity}
-                      </Badge>
+                      <Badge className={getSeverityColor(alert.severity)}>{alert.severity}</Badge>
                       {alert.service_name && (
                         <span className="text-xs text-gray-600">{alert.service_name}</span>
                       )}
                     </div>
                     <h5 className="font-medium text-sm text-gray-900">{alert.alert_name}</h5>
                     <p className="text-xs text-gray-600 mt-1 truncate">{alert.summary}</p>
-                    <p className="text-xs text-gray-500 mt-1">{formatRelativeTime(alert.triggered_at)}</p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      {formatRelativeTime(alert.triggered_at)}
+                    </p>
                   </div>
                 ))}
               </div>
@@ -373,10 +403,13 @@ export function OperationsDashboard() {
                         </Badge>
                         <Badge variant="outline">{deployment.environment}</Badge>
                       </div>
-                      <span className="text-xs text-gray-500">{formatRelativeTime(deployment.started_at)}</span>
+                      <span className="text-xs text-gray-500">
+                        {formatRelativeTime(deployment.started_at)}
+                      </span>
                     </div>
                     <h5 className="font-medium text-sm text-gray-900">
-                      {deployment.service_name} <span className="text-gray-600">v{deployment.version}</span>
+                      {deployment.service_name}{" "}
+                      <span className="text-gray-600">v{deployment.version}</span>
                     </h5>
                     <p className="text-xs text-gray-600 mt-1">
                       Deployed by {deployment.deployed_by}
@@ -409,7 +442,8 @@ export function OperationsDashboard() {
                     <div>
                       <h5 className="font-medium text-gray-900">{violation.slo_name}</h5>
                       <p className="text-sm text-gray-600 mt-1">
-                        {violation.service_name} · Actual: {violation.actual_value.toFixed(2)} (Threshold: {violation.threshold_value.toFixed(2)})
+                        {violation.service_name} · Actual: {violation.actual_value.toFixed(2)}{" "}
+                        (Threshold: {violation.threshold_value.toFixed(2)})
                       </p>
                       <p className="text-xs text-gray-500 mt-1">
                         Triggered {formatRelativeTime(violation.triggered_at)}
@@ -428,7 +462,8 @@ export function OperationsDashboard() {
       <div className="text-center text-sm text-gray-500 pt-4">
         <p>CompanyOS: Summit's internal operational intelligence platform</p>
         <p className="mt-1">
-          This dashboard demonstrates Summit using itself for incident management, deployment tracking, and operational metrics
+          This dashboard demonstrates Summit using itself for incident management, deployment
+          tracking, and operational metrics
         </p>
       </div>
     </div>

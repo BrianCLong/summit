@@ -25,20 +25,20 @@ The embedded agent loop consists of three components:
 
 ## Security
 
-*   **Identity**: The agent operates with a specific `agentId` and `capabilities`.
-*   **Sandboxing**: All execution happens within the boundaries defined by the MCP Gateway policy.
-*   **Audit**: Every step is logged with a `trace_id`.
+- **Identity**: The agent operates with a specific `agentId` and `capabilities`.
+- **Sandboxing**: All execution happens within the boundaries defined by the MCP Gateway policy.
+- **Audit**: Every step is logged with a `trace_id`.
 
 ## Usage Example
 
 ```typescript
-import { AgentRuntime } from '@intelgraph/copilot-agent-runtime';
+import { AgentRuntime } from "@intelgraph/copilot-agent-runtime";
 
 const agent = new AgentRuntime({
-  agentId: 'ci-fixer-bot',
-  capabilities: ['code_edit', 'lint_check']
+  agentId: "ci-fixer-bot",
+  capabilities: ["code_edit", "lint_check"],
 });
 
 await agent.initialize();
-await agent.runGoal('Fix lint errors in server/src/index.ts');
+await agent.runGoal("Fix lint errors in server/src/index.ts");
 ```

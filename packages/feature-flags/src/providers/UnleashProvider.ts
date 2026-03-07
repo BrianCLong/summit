@@ -4,14 +4,14 @@
  * Unleash integration for feature flags
  */
 
-import { Unleash, UnleashConfig, Context as UnleashContext } from 'unleash-client';
+import { Unleash, UnleashConfig, Context as UnleashContext } from "unleash-client";
 import type {
   FeatureFlagProvider,
   FlagContext,
   FlagEvaluation,
   FlagDefinition,
   EvaluationReason,
-} from '../types.js';
+} from "../types.js";
 
 /**
  * Unleash provider configuration
@@ -35,7 +35,7 @@ export interface UnleashProviderConfig {
  * Unleash feature flag provider
  */
 export class UnleashProvider implements FeatureFlagProvider {
-  readonly name = 'Unleash';
+  readonly name = "Unleash";
   private unleash: Unleash;
   private ready = false;
   private config: UnleashProviderConfig;
@@ -63,16 +63,16 @@ export class UnleashProvider implements FeatureFlagProvider {
   async initialize(): Promise<void> {
     return new Promise((resolve, reject) => {
       const timeout = setTimeout(() => {
-        reject(new Error('Unleash initialization timeout'));
+        reject(new Error("Unleash initialization timeout"));
       }, 10000);
 
-      this.unleash.on('ready', () => {
+      this.unleash.on("ready", () => {
         clearTimeout(timeout);
         this.ready = true;
         resolve();
       });
 
-      this.unleash.on('error', (error) => {
+      this.unleash.on("error", (error) => {
         clearTimeout(timeout);
         reject(error);
       });
@@ -100,7 +100,7 @@ export class UnleashProvider implements FeatureFlagProvider {
   async getBooleanFlag(
     key: string,
     defaultValue: boolean,
-    context: FlagContext,
+    context: FlagContext
   ): Promise<FlagEvaluation<boolean>> {
     const unleashContext = this.buildUnleashContext(context);
     const value = this.unleash.isEnabled(key, unleashContext, defaultValue);
@@ -122,12 +122,12 @@ export class UnleashProvider implements FeatureFlagProvider {
   async getStringFlag(
     key: string,
     defaultValue: string,
-    context: FlagContext,
+    context: FlagContext
   ): Promise<FlagEvaluation<string>> {
     const unleashContext = this.buildUnleashContext(context);
     const variant = this.unleash.getVariant(key, unleashContext);
 
-    const value = variant?.enabled ? variant.payload?.value ?? defaultValue : defaultValue;
+    const value = variant?.enabled ? (variant.payload?.value ?? defaultValue) : defaultValue;
 
     return {
       key,
@@ -145,7 +145,7 @@ export class UnleashProvider implements FeatureFlagProvider {
   async getNumberFlag(
     key: string,
     defaultValue: number,
-    context: FlagContext,
+    context: FlagContext
   ): Promise<FlagEvaluation<number>> {
     const unleashContext = this.buildUnleashContext(context);
     const variant = this.unleash.getVariant(key, unleashContext);
@@ -172,7 +172,7 @@ export class UnleashProvider implements FeatureFlagProvider {
   async getJSONFlag<T = any>(
     key: string,
     defaultValue: T,
-    context: FlagContext,
+    context: FlagContext
   ): Promise<FlagEvaluation<T>> {
     const unleashContext = this.buildUnleashContext(context);
     const variant = this.unleash.getVariant(key, unleashContext);
@@ -199,9 +199,7 @@ export class UnleashProvider implements FeatureFlagProvider {
   /**
    * Get all flag values for context
    */
-  async getAllFlags(
-    context: FlagContext,
-  ): Promise<Record<string, FlagEvaluation>> {
+  async getAllFlags(context: FlagContext): Promise<Record<string, FlagEvaluation>> {
     // Unleash doesn't provide a built-in method to get all flags
     // This would require tracking all flag keys separately
     return {};
@@ -228,11 +226,7 @@ export class UnleashProvider implements FeatureFlagProvider {
   /**
    * Track an event/metric
    */
-  async track(
-    eventName: string,
-    context: FlagContext,
-    data?: Record<string, any>,
-  ): Promise<void> {
+  async track(eventName: string, context: FlagContext, data?: Record<string, any>): Promise<void> {
     // Unleash doesn't have built-in custom event tracking
     // Events would need to be sent to a separate analytics service
   }
@@ -262,7 +256,7 @@ export class UnleashProvider implements FeatureFlagProvider {
 
     if (context.userRole) {
       unleashContext.properties!.role = Array.isArray(context.userRole)
-        ? context.userRole.join(',')
+        ? context.userRole.join(",")
         : context.userRole;
     }
 
@@ -293,6 +287,6 @@ export class UnleashProvider implements FeatureFlagProvider {
    * Determine evaluation reason
    */
   private determineReason(enabled: boolean): EvaluationReason {
-    return enabled ? 'RULE_MATCH' : 'DEFAULT';
+    return enabled ? "RULE_MATCH" : "DEFAULT";
   }
 }

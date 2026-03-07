@@ -2,7 +2,7 @@ name: cypher-plan-heatmap
 on:
   pull_request:
   push:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   cypher_heatmap:

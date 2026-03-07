@@ -11,7 +11,7 @@ kind: ConstraintTemplate
 metadata:
   name: intelgraphsecuritypolicy
   annotations:
-    description: 'IntelGraph security policy enforcement'
+    description: "IntelGraph security policy enforcement"
 spec:
   crd:
     spec:
@@ -86,22 +86,22 @@ metadata:
 spec:
   match:
     kinds:
-      - apiGroups: ['apps']
-        kinds: ['Deployment']
-    namespaces: ['intelgraph-production']
+      - apiGroups: ["apps"]
+        kinds: ["Deployment"]
+    namespaces: ["intelgraph-production"]
   parameters:
     requiredLabels:
-      - 'app.kubernetes.io/name'
-      - 'app.kubernetes.io/version'
-      - 'security.intelgraph.ai/level'
+      - "app.kubernetes.io/name"
+      - "app.kubernetes.io/version"
+      - "security.intelgraph.ai/level"
     allowedRegistries:
-      - 'ghcr.io/brianlong/intelgraph/'
-      - 'gcr.io/distroless/'
-      - 'registry.k8s.io/'
+      - "ghcr.io/brianlong/intelgraph/"
+      - "gcr.io/distroless/"
+      - "registry.k8s.io/"
     forbiddenImages:
-      - 'latest'
-      - 'debug'
-      - 'alpine'
+      - "latest"
+      - "debug"
+      - "alpine"
     maxReplicas: 50
 
 ---
@@ -177,15 +177,15 @@ metadata:
 spec:
   match:
     kinds:
-      - apiGroups: ['apps']
-        kinds: ['Deployment', 'StatefulSet', 'DaemonSet']
-    namespaces: ['intelgraph-production']
+      - apiGroups: ["apps"]
+        kinds: ["Deployment", "StatefulSet", "DaemonSet"]
+    namespaces: ["intelgraph-production"]
   parameters:
     runAsNonRoot: true
     readOnlyRootFilesystem: true
     allowPrivilegeEscalation: false
     requiredDropCapabilities:
-      - 'ALL'
+      - "ALL"
 
 ---
 # ===================================================================
@@ -214,7 +214,7 @@ spec:
                 - Pod
       verifyImages:
         - imageReferences:
-            - 'ghcr.io/brianlong/intelgraph/*'
+            - "ghcr.io/brianlong/intelgraph/*"
           attestors:
             - count: 1
               entries:
@@ -242,14 +242,14 @@ spec:
                 - Pod
       verifyImages:
         - imageReferences:
-            - 'ghcr.io/brianlong/intelgraph/*'
+            - "ghcr.io/brianlong/intelgraph/*"
           attestations:
             - predicateType: https://spdx.dev/Document
               conditions:
                 - all:
-                    - key: '{{ creationInfo.created }}'
+                    - key: "{{ creationInfo.created }}"
                       operator: DurationSinceNow
-                      value: '24h'
+                      value: "24h"
 
     - name: block-unsigned-images
       match:
@@ -258,7 +258,7 @@ spec:
               kinds:
                 - Pod
       validate:
-        message: 'All images must be signed and have attestations'
+        message: "All images must be signed and have attestations"
         fail:
           conditions:
             - key: "{{ request.object.spec.containers[?contains(image, 'ghcr.io/brianlong/intelgraph')] | length(@) }}"
@@ -291,14 +291,14 @@ spec:
         patchStrategicMerge:
           metadata:
             annotations:
-              security.intelgraph.ai/scan-required: 'true'
-              security.intelgraph.ai/scan-time: '{{ time_now_utc() }}'
+              security.intelgraph.ai/scan-required: "true"
+              security.intelgraph.ai/scan-time: "{{ time_now_utc() }}"
       validate:
-        message: 'Images must pass vulnerability scanning'
+        message: "Images must pass vulnerability scanning"
         pattern:
           metadata:
             annotations:
-              security.intelgraph.ai/scan-status: 'passed'
+              security.intelgraph.ai/scan-status: "passed"
 
 ---
 # ===================================================================
@@ -382,20 +382,20 @@ spec:
     service:
       name: intelgraph-admission-webhook
       namespace: security
-      path: '/validate'
+      path: "/validate"
   rules:
-    - operations: ['CREATE', 'UPDATE']
-      apiGroups: ['apps']
-      apiVersions: ['v1']
-      resources: ['deployments', 'statefulsets', 'daemonsets']
-    - operations: ['CREATE', 'UPDATE']
-      apiGroups: ['']
-      apiVersions: ['v1']
-      resources: ['pods']
+    - operations: ["CREATE", "UPDATE"]
+      apiGroups: ["apps"]
+      apiVersions: ["v1"]
+      resources: ["deployments", "statefulsets", "daemonsets"]
+    - operations: ["CREATE", "UPDATE"]
+      apiGroups: [""]
+      apiVersions: ["v1"]
+      resources: ["pods"]
   namespaceSelector:
     matchLabels:
-      security.intelgraph.ai/admission-webhook: 'enabled'
-  admissionReviewVersions: ['v1', 'v1beta1']
+      security.intelgraph.ai/admission-webhook: "enabled"
+  admissionReviewVersions: ["v1", "v1beta1"]
   sideEffects: None
   failurePolicy: Fail
 
@@ -409,16 +409,16 @@ spec:
     service:
       name: intelgraph-admission-webhook
       namespace: security
-      path: '/mutate'
+      path: "/mutate"
   rules:
-    - operations: ['CREATE']
-      apiGroups: ['']
-      apiVersions: ['v1']
-      resources: ['pods']
+    - operations: ["CREATE"]
+      apiGroups: [""]
+      apiVersions: ["v1"]
+      resources: ["pods"]
   namespaceSelector:
     matchLabels:
-      security.intelgraph.ai/admission-webhook: 'enabled'
-  admissionReviewVersions: ['v1', 'v1beta1']
+      security.intelgraph.ai/admission-webhook: "enabled"
+  admissionReviewVersions: ["v1", "v1beta1"]
   sideEffects: None
   failurePolicy: Fail
 
@@ -471,9 +471,9 @@ spec:
             - name: TLS_PRIVATE_KEY_FILE
               value: /etc/certs/tls.key
             - name: LOG_LEVEL
-              value: 'info'
+              value: "info"
             - name: PORT
-              value: '8443'
+              value: "8443"
           volumeMounts:
             - name: tls-certs
               mountPath: /etc/certs
@@ -482,11 +482,11 @@ spec:
               mountPath: /tmp
           resources:
             requests:
-              memory: '128Mi'
-              cpu: '100m'
+              memory: "128Mi"
+              cpu: "100m"
             limits:
-              memory: '256Mi'
-              cpu: '200m'
+              memory: "256Mi"
+              cpu: "200m"
           livenessProbe:
             httpGet:
               path: /health
@@ -546,8 +546,8 @@ spec:
           labels:
             severity: warning
           annotations:
-            summary: 'Security policy violation detected'
-            description: 'Gatekeeper detected {{ $value }} policy violations in the last 5 minutes'
+            summary: "Security policy violation detected"
+            description: "Gatekeeper detected {{ $value }} policy violations in the last 5 minutes"
 
         - alert: AdmissionWebhookFailure
           expr: increase(apiserver_admission_webhook_admission_duration_seconds_count{name="intelgraph-security-validator",rejected="true"}[5m]) > 5
@@ -555,8 +555,8 @@ spec:
           labels:
             severity: critical
           annotations:
-            summary: 'High admission webhook rejection rate'
-            description: 'Admission webhook rejecting too many requests: {{ $value }} rejections in 5 minutes'
+            summary: "High admission webhook rejection rate"
+            description: "Admission webhook rejecting too many requests: {{ $value }} rejections in 5 minutes"
 
         - alert: UnsignedImageDetected
           expr: increase(kyverno_policy_violations_total{policy_name="intelgraph-supply-chain-security"}[5m]) > 0
@@ -564,8 +564,8 @@ spec:
           labels:
             severity: critical
           annotations:
-            summary: 'Unsigned container image detected'
-            description: 'Attempt to deploy unsigned container image blocked'
+            summary: "Unsigned container image detected"
+            description: "Attempt to deploy unsigned container image blocked"
 
 ---
 # ===================================================================

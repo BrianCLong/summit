@@ -1,54 +1,49 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Box, Avatar, Tooltip, Typography, Fade, Paper } from '@mui/material';
-import { styled } from '@mui/material/styles';
+import React, { useState, useEffect, useRef } from "react";
+import { Box, Avatar, Tooltip, Typography, Fade, Paper } from "@mui/material";
+import { styled } from "@mui/material/styles";
 
 const CursorContainer = styled(Box)(({ theme }) => ({
-  position: 'absolute',
-  pointerEvents: 'none',
+  position: "absolute",
+  pointerEvents: "none",
   zIndex: 1000,
-  transition: 'all 0.1s ease-out',
+  transition: "all 0.1s ease-out",
 }));
 
-const CursorPointer = styled('div')(({ theme, color }) => ({
+const CursorPointer = styled("div")(({ theme, color }) => ({
   width: 0,
   height: 0,
-  borderLeft: '8px solid transparent',
-  borderRight: '8px solid transparent',
+  borderLeft: "8px solid transparent",
+  borderRight: "8px solid transparent",
   borderBottom: `12px solid ${color}`,
-  position: 'relative',
-  '&::after': {
+  position: "relative",
+  "&::after": {
     content: '""',
-    position: 'absolute',
-    left: '-6px',
-    top: '12px',
+    position: "absolute",
+    left: "-6px",
+    top: "12px",
     width: 0,
     height: 0,
-    borderLeft: '6px solid transparent',
-    borderRight: '6px solid transparent',
+    borderLeft: "6px solid transparent",
+    borderRight: "6px solid transparent",
     borderTop: `6px solid ${color}`,
   },
 }));
 
 const UserLabel = styled(Paper)(({ theme, color }) => ({
-  position: 'absolute',
-  left: '16px',
-  top: '-8px',
-  padding: '2px 6px',
-  borderRadius: '4px',
+  position: "absolute",
+  left: "16px",
+  top: "-8px",
+  padding: "2px 6px",
+  borderRadius: "4px",
   backgroundColor: color,
-  color: '#fff',
-  fontSize: '0.75rem',
+  color: "#fff",
+  fontSize: "0.75rem",
   fontWeight: 500,
-  whiteSpace: 'nowrap',
+  whiteSpace: "nowrap",
   boxShadow: theme.shadows[2],
 }));
 
-function SharedCursors({
-  websocketService,
-  currentUser,
-  containerRef,
-  onUserActivity,
-}) {
+function SharedCursors({ websocketService, currentUser, containerRef, onUserActivity }) {
   const [cursors, setCursors] = useState(new Map());
   const [isActive, setIsActive] = useState(true);
   const throttleRef = useRef(null);
@@ -56,24 +51,22 @@ function SharedCursors({
 
   // User colors for cursor display
   const userColors = [
-    '#1976d2',
-    '#dc004e',
-    '#2e7d32',
-    '#f57c00',
-    '#7b1fa2',
-    '#d32f2f',
-    '#0288d1',
-    '#388e3c',
-    '#f9a825',
-    '#7cb342',
-    '#00acc1',
-    '#5e35b1',
+    "#1976d2",
+    "#dc004e",
+    "#2e7d32",
+    "#f57c00",
+    "#7b1fa2",
+    "#d32f2f",
+    "#0288d1",
+    "#388e3c",
+    "#f9a825",
+    "#7cb342",
+    "#00acc1",
+    "#5e35b1",
   ];
 
   const getUserColor = (userId) => {
-    const index = userId
-      .split('')
-      .reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    const index = userId.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
     return userColors[index % userColors.length];
   };
 
@@ -98,7 +91,7 @@ function SharedCursors({
           onUserActivity({
             userId: data.userId,
             userName: data.userName,
-            action: 'cursor_move',
+            action: "cursor_move",
             position: { x: data.x, y: data.y },
           });
         }
@@ -114,12 +107,12 @@ function SharedCursors({
     };
 
     // Register event listeners
-    websocketService.on('cursor_update', handleCursorUpdate);
-    websocketService.on('user_disconnected', handleUserDisconnected);
+    websocketService.on("cursor_update", handleCursorUpdate);
+    websocketService.on("user_disconnected", handleUserDisconnected);
 
     return () => {
-      websocketService.off('cursor_update', handleCursorUpdate);
-      websocketService.off('user_disconnected', handleUserDisconnected);
+      websocketService.off("cursor_update", handleCursorUpdate);
+      websocketService.off("user_disconnected", handleUserDisconnected);
     };
   }, [websocketService, currentUser, onUserActivity]);
 
@@ -142,15 +135,13 @@ function SharedCursors({
 
       throttleRef.current = setTimeout(() => {
         const lastPos = lastPositionRef.current;
-        const distance = Math.sqrt(
-          Math.pow(x - lastPos.x, 2) + Math.pow(y - lastPos.y, 2),
-        );
+        const distance = Math.sqrt(Math.pow(x - lastPos.x, 2) + Math.pow(y - lastPos.y, 2));
 
         // Only send update if cursor moved significantly
         if (distance > 5) {
-          websocketService.emit('cursor_update', {
+          websocketService.emit("cursor_update", {
             userId: currentUser.id,
-            userName: currentUser.firstName || currentUser.name || 'User',
+            userName: currentUser.firstName || currentUser.name || "User",
             x,
             y,
             containerWidth: rect.width,
@@ -169,19 +160,19 @@ function SharedCursors({
     const handleMouseLeave = () => {
       setIsActive(false);
       // Send cursor leave event
-      websocketService.emit('cursor_leave', {
+      websocketService.emit("cursor_leave", {
         userId: currentUser.id,
       });
     };
 
-    container.addEventListener('mousemove', handleMouseMove);
-    container.addEventListener('mouseenter', handleMouseEnter);
-    container.addEventListener('mouseleave', handleMouseLeave);
+    container.addEventListener("mousemove", handleMouseMove);
+    container.addEventListener("mouseenter", handleMouseEnter);
+    container.addEventListener("mouseleave", handleMouseLeave);
 
     return () => {
-      container.removeEventListener('mousemove', handleMouseMove);
-      container.removeEventListener('mouseenter', handleMouseEnter);
-      container.removeEventListener('mouseleave', handleMouseLeave);
+      container.removeEventListener("mousemove", handleMouseMove);
+      container.removeEventListener("mouseenter", handleMouseEnter);
+      container.removeEventListener("mouseleave", handleMouseLeave);
 
       if (throttleRef.current) {
         clearTimeout(throttleRef.current);
@@ -218,14 +209,14 @@ function SharedCursors({
           sx={{
             left: cursor.x,
             top: cursor.y,
-            transform: 'translate(-4px, -2px)',
+            transform: "translate(-4px, -2px)",
           }}
         >
           <Fade in timeout={200}>
             <Box>
               <CursorPointer color={cursor.color} />
               <UserLabel color={cursor.color}>
-                <Typography variant="caption" sx={{ color: 'white' }}>
+                <Typography variant="caption" sx={{ color: "white" }}>
                   {cursor.userName}
                 </Typography>
               </UserLabel>

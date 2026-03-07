@@ -3,8 +3,8 @@ name: Benchmark Workloads
 on:
   pull_request:
     paths:
-      - 'packages/**'
-      - 'benchmarks/**'
+      - "packages/**"
+      - "benchmarks/**"
 jobs:
   run-bench:
     runs-on: ubuntu-latest

@@ -2,10 +2,10 @@
  * REST API connector with authentication support
  */
 
-import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
-import { BaseConnector } from '../core/BaseConnector';
-import { ConnectorCapabilities, DataSourceConfig } from '../types';
-import { Logger } from 'winston';
+import axios, { AxiosInstance, AxiosRequestConfig } from "axios";
+import { BaseConnector } from "../core/BaseConnector";
+import { ConnectorCapabilities, DataSourceConfig } from "../types";
+import { Logger } from "winston";
 
 export class RESTAPIConnector extends BaseConnector {
   private client: AxiosInstance | null = null;
@@ -23,9 +23,9 @@ export class RESTAPIConnector extends BaseConnector {
         baseURL: this.config.connectionConfig.host,
         timeout: this.config.connectionConfig.timeout || 30000,
         headers: {
-          'Content-Type': 'application/json',
-          'User-Agent': 'IntelGraph-DataIntegration/1.0'
-        }
+          "Content-Type": "application/json",
+          "User-Agent": "IntelGraph-DataIntegration/1.0",
+        },
       });
 
       // Setup authentication
@@ -34,7 +34,7 @@ export class RESTAPIConnector extends BaseConnector {
       this.isConnected = true;
       this.logger.info(`Connected to REST API: ${this.config.connectionConfig.host}`);
     } catch (error) {
-      this.logger.error('Failed to connect to REST API', { error });
+      this.logger.error("Failed to connect to REST API", { error });
       throw error;
     }
   }
@@ -43,16 +43,16 @@ export class RESTAPIConnector extends BaseConnector {
     this.client = null;
     this.accessToken = null;
     this.isConnected = false;
-    this.logger.info('Disconnected from REST API');
+    this.logger.info("Disconnected from REST API");
   }
 
   async testConnection(): Promise<boolean> {
     try {
-      const healthEndpoint = this.config.metadata.healthEndpoint || '/health';
+      const healthEndpoint = this.config.metadata.healthEndpoint || "/health";
       await this.client!.get(healthEndpoint);
       return true;
     } catch (error) {
-      this.logger.error('Connection test failed', { error });
+      this.logger.error("Connection test failed", { error });
       return false;
     }
   }
@@ -64,13 +64,13 @@ export class RESTAPIConnector extends BaseConnector {
       supportsCDC: false,
       supportsSchema: false,
       supportsPartitioning: true,
-      maxConcurrentConnections: 10
+      maxConcurrentConnections: 10,
     };
   }
 
   async *extract(): AsyncGenerator<any[], void, unknown> {
     if (!this.isConnected || !this.client) {
-      throw new Error('Not connected to REST API');
+      throw new Error("Not connected to REST API");
     }
 
     const endpoint = this.config.extractionConfig.query || this.config.metadata.endpoint;
@@ -87,13 +87,13 @@ export class RESTAPIConnector extends BaseConnector {
 
     // Handle pagination
     switch (paginationConfig.type) {
-      case 'offset':
+      case "offset":
         yield* this.extractWithOffsetPagination(endpoint, paginationConfig);
         break;
-      case 'cursor':
+      case "cursor":
         yield* this.extractWithCursorPagination(endpoint, paginationConfig);
         break;
-      case 'page':
+      case "page":
         yield* this.extractWithPagePagination(endpoint, paginationConfig);
         break;
     }
@@ -103,9 +103,9 @@ export class RESTAPIConnector extends BaseConnector {
     // REST APIs typically don't have a formal schema
     // Could implement OpenAPI/Swagger schema parsing
     return {
-      type: 'rest_api',
+      type: "rest_api",
       endpoint: this.config.metadata.endpoint,
-      schema: 'dynamic'
+      schema: "dynamic",
     };
   }
 
@@ -114,12 +114,12 @@ export class RESTAPIConnector extends BaseConnector {
 
     if (apiKey) {
       // API Key authentication
-      this.client!.defaults.headers.common['Authorization'] = `Bearer ${apiKey}`;
-      this.logger.info('Using API Key authentication');
+      this.client!.defaults.headers.common["Authorization"] = `Bearer ${apiKey}`;
+      this.logger.info("Using API Key authentication");
     } else if (oauth) {
       // OAuth 2.0 authentication
       await this.refreshOAuthToken();
-      this.logger.info('Using OAuth 2.0 authentication');
+      this.logger.info("Using OAuth 2.0 authentication");
     }
   }
 
@@ -128,19 +128,19 @@ export class RESTAPIConnector extends BaseConnector {
 
     try {
       const response = await axios.post(oauth.tokenUrl, {
-        grant_type: 'refresh_token',
+        grant_type: "refresh_token",
         client_id: oauth.clientId,
         client_secret: oauth.clientSecret,
         refresh_token: oauth.refreshToken,
-        scope: oauth.scope?.join(' ')
+        scope: oauth.scope?.join(" "),
       });
 
       this.accessToken = response.data.access_token;
-      this.client!.defaults.headers.common['Authorization'] = `Bearer ${this.accessToken}`;
+      this.client!.defaults.headers.common["Authorization"] = `Bearer ${this.accessToken}`;
 
-      this.logger.info('OAuth token refreshed successfully');
+      this.logger.info("OAuth token refreshed successfully");
     } catch (error) {
-      this.logger.error('Failed to refresh OAuth token', { error });
+      this.logger.error("Failed to refresh OAuth token", { error });
       throw error;
     }
   }
@@ -151,7 +151,7 @@ export class RESTAPIConnector extends BaseConnector {
 
       const response = await this.client!.get(url, { params });
       return response.data;
-    }, 'Fetch page');
+    }, "Fetch page");
   }
 
   private async *extractWithOffsetPagination(
@@ -165,7 +165,7 @@ export class RESTAPIConnector extends BaseConnector {
     while (hasMore && (!config.maxPages || pageCount < config.maxPages)) {
       const params = {
         limit: config.pageSize,
-        offset: offset
+        offset: offset,
       };
 
       const data = await this.fetchPage(endpoint, params);
@@ -191,7 +191,7 @@ export class RESTAPIConnector extends BaseConnector {
 
     while (hasMore && (!config.maxPages || pageCount < config.maxPages)) {
       const params: any = {
-        limit: config.pageSize
+        limit: config.pageSize,
       };
 
       if (cursor) {
@@ -223,7 +223,7 @@ export class RESTAPIConnector extends BaseConnector {
     while (hasMore && (!config.maxPages || page <= config.maxPages)) {
       const params = {
         page: page,
-        per_page: config.pageSize
+        per_page: config.pageSize,
       };
 
       const data = await this.fetchPage(endpoint, params);

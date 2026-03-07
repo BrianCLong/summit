@@ -10,10 +10,10 @@ on:
   pull_request:
     branches: [main, release/*]
     paths-ignore:
-      - 'docs/**'
-      - '**.md'
-      - 'prompts/**'
-      - 'evidence/**'
+      - "docs/**"
+      - "**.md"
+      - "prompts/**"
+      - "evidence/**"
     paths:
       - "pnpm-lock.yaml"
       - "package.json"

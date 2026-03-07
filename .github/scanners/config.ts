@@ -3,36 +3,31 @@
  * @module .github/scanners/config
  */
 
-import type { ScannerConfig, AirGapConfig, VulnerabilityPolicy } from './types.js';
+import type { ScannerConfig, AirGapConfig, VulnerabilityPolicy } from "./types.js";
 
 export const DEFAULT_SCANNER_CONFIG: ScannerConfig = {
   syft: {
-    outputFormat: 'cyclonedx-json',
-    scope: 'all-layers',
-    excludePatterns: [
-      '**/node_modules/.cache/**',
-      '**/dist/**',
-      '**/.git/**',
-      '**/coverage/**',
-    ],
+    outputFormat: "cyclonedx-json",
+    scope: "all-layers",
+    excludePatterns: ["**/node_modules/.cache/**", "**/dist/**", "**/.git/**", "**/coverage/**"],
   },
   trivy: {
-    severity: ['critical', 'high', 'medium'],
+    severity: ["critical", "high", "medium"],
     ignoreUnfixed: false,
-    timeout: '15m',
-    scanners: ['vuln', 'secret'],
+    timeout: "15m",
+    scanners: ["vuln", "secret"],
     offlineDb: process.env.TRIVY_DB_PATH,
   },
   cosign: {
     keylessEnabled: true,
-    rekorUrl: 'https://rekor.sigstore.dev',
-    fulcioUrl: 'https://fulcio.sigstore.dev',
+    rekorUrl: "https://rekor.sigstore.dev",
+    fulcioUrl: "https://fulcio.sigstore.dev",
   },
   slsa: {
     builderIdAllowlist: [
-      'https://github.com/slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml',
-      'https://github.com/intelgraph/build-system/.github/workflows/federal-build.yml',
-      'https://cloudbuild.googleapis.com/GoogleHostedWorker',
+      "https://github.com/slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml",
+      "https://github.com/intelgraph/build-system/.github/workflows/federal-build.yml",
+      "https://cloudbuild.googleapis.com/GoogleHostedWorker",
     ],
     requireHermetic: true,
     maxProvenanceAge: 30 * 24 * 60 * 60, // 30 days in seconds
@@ -40,71 +35,71 @@ export const DEFAULT_SCANNER_CONFIG: ScannerConfig = {
 };
 
 export const DEFAULT_AIRGAP_CONFIG: AirGapConfig = {
-  enabled: process.env.AIRGAP_MODE === 'true',
-  vulnDbPath: process.env.VULN_DB_PATH || '/var/lib/trivy/db',
-  sbomStorePath: process.env.SBOM_STORE_PATH || '/var/lib/sbom',
-  attestationStorePath: process.env.ATTESTATION_STORE_PATH || '/var/lib/attestations',
-  syncSchedule: process.env.VULN_DB_SYNC_SCHEDULE || '0 2 * * *',
-  offlineMode: process.env.OFFLINE_MODE === 'true',
+  enabled: process.env.AIRGAP_MODE === "true",
+  vulnDbPath: process.env.VULN_DB_PATH || "/var/lib/trivy/db",
+  sbomStorePath: process.env.SBOM_STORE_PATH || "/var/lib/sbom",
+  attestationStorePath: process.env.ATTESTATION_STORE_PATH || "/var/lib/attestations",
+  syncSchedule: process.env.VULN_DB_SYNC_SCHEDULE || "0 2 * * *",
+  offlineMode: process.env.OFFLINE_MODE === "true",
 };
 
 export const DEFAULT_VULNERABILITY_POLICY: VulnerabilityPolicy = {
-  version: '2.0',
+  version: "2.0",
   global: {
     defaultSeverityThresholds: {
-      critical: 'block',
-      high: 'block',
-      medium: 'warn',
-      low: 'ignore',
+      critical: "block",
+      high: "block",
+      medium: "warn",
+      low: "ignore",
     },
-    emergencyBypassEnabled: process.env.EMERGENCY_BYPASS === 'true',
+    emergencyBypassEnabled: process.env.EMERGENCY_BYPASS === "true",
     waiverExpiryDays: 30,
-    notificationChannels: ['#security-alerts', '#platform-ops'],
+    notificationChannels: ["#security-alerts", "#platform-ops"],
   },
   services: {
-    'intelgraph-server': {
-      exposure: 'internet-facing',
+    "intelgraph-server": {
+      exposure: "internet-facing",
       severityThresholds: {
-        critical: 'block',
-        high: 'block',
-        medium: 'block',
-        low: 'warn',
+        critical: "block",
+        high: "block",
+        medium: "block",
+        low: "warn",
       },
       allowedVulnerabilities: [],
-      scanSchedule: 'on_push',
+      scanSchedule: "on_push",
     },
-    'intelgraph-api': {
-      exposure: 'internet-facing',
+    "intelgraph-api": {
+      exposure: "internet-facing",
       severityThresholds: {
-        critical: 'block',
-        high: 'block',
-        medium: 'block',
-        low: 'warn',
+        critical: "block",
+        high: "block",
+        medium: "block",
+        low: "warn",
       },
       allowedVulnerabilities: [],
-      scanSchedule: 'on_push',
+      scanSchedule: "on_push",
     },
-    'analytics-engine': {
-      exposure: 'internal',
+    "analytics-engine": {
+      exposure: "internal",
       severityThresholds: {
-        critical: 'block',
-        high: 'block',
-        medium: 'warn',
-        low: 'ignore',
+        critical: "block",
+        high: "block",
+        medium: "warn",
+        low: "ignore",
       },
       allowedVulnerabilities: [],
-      scanSchedule: 'daily',
+      scanSchedule: "daily",
     },
-    'copilot-service': {
-      exposure: 'internal',
+    "copilot-service": {
+      exposure: "internal",
       severityThresholds: {
-        critical: 'block',
-        high: 'block',
-        medium: 'warn',
-        low: 'ignore',
+        critical: "block",
+        high: "block",
+        medium: "warn",
+        low: "ignore",
       },
       allowedVulnerabilities: [],
-      scanSchedule: 'daily',
+      scanSchedule: "daily",
     },
   },
 };
@@ -125,13 +120,13 @@ export function loadConfig(): {
       cosign: {
         ...DEFAULT_SCANNER_CONFIG.cosign,
         keyPath: process.env.COSIGN_KEY_PATH,
-        keylessEnabled: process.env.COSIGN_KEYLESS !== 'false',
+        keylessEnabled: process.env.COSIGN_KEYLESS !== "false",
       },
     },
     airgap: {
       ...DEFAULT_AIRGAP_CONFIG,
-      enabled: process.env.AIRGAP_MODE === 'true',
-      offlineMode: process.env.OFFLINE_MODE === 'true',
+      enabled: process.env.AIRGAP_MODE === "true",
+      offlineMode: process.env.OFFLINE_MODE === "true",
     },
     policy: DEFAULT_VULNERABILITY_POLICY,
   };
@@ -147,18 +142,18 @@ export const CVSS_THRESHOLDS = {
 
 // Supported package ecosystems for auto-fix
 export const SUPPORTED_ECOSYSTEMS = [
-  'npm',
-  'yarn',
-  'pnpm',
-  'pip',
-  'poetry',
-  'go',
-  'cargo',
-  'maven',
-  'gradle',
-  'nuget',
-  'composer',
-  'rubygems',
+  "npm",
+  "yarn",
+  "pnpm",
+  "pip",
+  "poetry",
+  "go",
+  "cargo",
+  "maven",
+  "gradle",
+  "nuget",
+  "composer",
+  "rubygems",
 ] as const;
 
 export type SupportedEcosystem = (typeof SUPPORTED_ECOSYSTEMS)[number];

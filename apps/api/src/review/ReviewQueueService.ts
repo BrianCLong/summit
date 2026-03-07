@@ -1,17 +1,17 @@
-import { ReviewAuditLog } from './ReviewAuditLog.js';
-import { ReviewDecisionEngine } from './ReviewDecisionEngine.js';
+import { ReviewAuditLog } from "./ReviewAuditLog.js";
+import { ReviewDecisionEngine } from "./ReviewDecisionEngine.js";
 import {
   DecisionRulesByType,
   ReviewDecision,
   ReviewItem,
   ReviewStatus,
   ReviewType,
-} from './models.js';
+} from "./models.js";
 
 interface QueueQuery {
   types?: ReviewType[];
   statuses?: ReviewStatus[];
-  sort?: 'createdAt:asc' | 'createdAt:desc';
+  sort?: "createdAt:asc" | "createdAt:desc";
   cursor?: string;
   limit?: number;
 }
@@ -24,7 +24,7 @@ export class ReviewQueueService {
   constructor(
     rules: DecisionRulesByType = {},
     auditLog: ReviewAuditLog = new ReviewAuditLog(),
-    engine?: ReviewDecisionEngine,
+    engine?: ReviewDecisionEngine
   ) {
     this.audit = auditLog;
     this.decisionEngine = engine ?? new ReviewDecisionEngine(rules);
@@ -60,7 +60,7 @@ export class ReviewQueueService {
 
     const sorted = filtered.sort((a, b) => {
       const diff = a.createdAt.localeCompare(b.createdAt);
-      if (query.sort === 'createdAt:desc') {
+      if (query.sort === "createdAt:desc") {
         return diff * -1;
       }
       if (diff !== 0) return diff;
@@ -68,7 +68,8 @@ export class ReviewQueueService {
     });
 
     const page = sorted.slice(cursorIndex, cursorIndex + limit);
-    const nextCursor = cursorIndex + limit < sorted.length ? String(cursorIndex + limit) : undefined;
+    const nextCursor =
+      cursorIndex + limit < sorted.length ? String(cursorIndex + limit) : undefined;
 
     return { items: page, nextCursor };
   }
@@ -76,7 +77,7 @@ export class ReviewQueueService {
   decide(itemId: string, decision: ReviewDecision) {
     const existing = this.items.get(itemId);
     if (!existing) {
-      throw new Error('item_not_found');
+      throw new Error("item_not_found");
     }
 
     const result = this.decisionEngine.applyDecision(existing, decision);

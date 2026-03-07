@@ -40,6 +40,7 @@ This document summarizes the comprehensive audit logging and compliance system i
 **File**: `/server/src/services/EventSourcingService.ts`
 
 **Features**:
+
 - Append-only event store with hash chains
 - Aggregate state reconstruction from events
 - Snapshot optimization (automatic at version 100)
@@ -48,6 +49,7 @@ This document summarizes the comprehensive audit logging and compliance system i
 - Correlation ID support for tracing
 
 **Key Methods**:
+
 ```typescript
 appendEvent(event: DomainEvent): Promise<StoredEvent>
 getAggregateEvents(type, id): Promise<StoredEvent[]>
@@ -60,6 +62,7 @@ verifyIntegrity(tenantId): Promise<{ valid: boolean, ... }>
 **File**: `/server/src/services/GDPRComplianceService.ts`
 
 **Features**:
+
 - All GDPR data subject rights (Articles 15-21)
   - Right of Access
   - Right to Rectification
@@ -72,6 +75,7 @@ verifyIntegrity(tenantId): Promise<{ valid: boolean, ... }>
 - Data deletion logging (hard delete, soft delete, anonymization, pseudonymization, archival)
 
 **Key Methods**:
+
 ```typescript
 createDataSubjectRequest(request: DataSubjectRequest)
 processRightToErasure(requestId, processedBy)
@@ -85,6 +89,7 @@ getOverdueRequests(tenantId)
 **File**: `/server/src/services/HIPAAComplianceService.ts`
 
 **Features**:
+
 - PHI access logging per HIPAA 164.312(b)
 - Minimum Necessary Rule enforcement (164.502(b))
 - Encryption verification (164.312(a)(2)(iv))
@@ -93,6 +98,7 @@ getOverdueRequests(tenantId)
 - Access purpose and authorization tracking
 
 **Key Methods**:
+
 ```typescript
 logPHIAccess(access: PHIAccessLog)
 getPHIAccessSummary(tenantId, startDate, endDate)
@@ -105,6 +111,7 @@ createSecurityIncident(incident: SecurityIncident)
 **File**: `/server/src/services/ElasticsearchAuditService.ts`
 
 **Features**:
+
 - Full-text search across all audit logs
 - Advanced aggregations (terms, date histograms, cardinality)
 - Bulk sync from PostgreSQL
@@ -112,6 +119,7 @@ createSecurityIncident(incident: SecurityIncident)
 - Fallback to PostgreSQL if Elasticsearch unavailable
 
 **Key Methods**:
+
 ```typescript
 searchAuditLogs(query: AuditSearchQuery)
 aggregateAuditData(query: AuditAggregationQuery)
@@ -124,6 +132,7 @@ bulkSyncAuditLogs(tenantId, batchSize)
 **File**: `/server/src/middleware/audit-event-capture-middleware.ts`
 
 **Features**:
+
 - Automatic capture of ALL GraphQL mutations
 - Zero-configuration required
 - Extracts old/new values for update mutations
@@ -132,6 +141,7 @@ bulkSyncAuditLogs(tenantId, batchSize)
 - Apollo Server and Express integration
 
 **Integration**:
+
 ```typescript
 const auditMiddleware = createAuditEventCaptureMiddleware(pgPool);
 const server = new ApolloServer({
@@ -144,6 +154,7 @@ const server = new ApolloServer({
 **File**: `/server/src/services/ComplianceMonitoringService.ts`
 
 **Features**:
+
 - 9 automated compliance checks
   - GDPR DSR SLA monitoring
   - GDPR data retention compliance
@@ -157,6 +168,7 @@ const server = new ApolloServer({
 - Periodic automated checks (hourly)
 
 **Compliance Checks**:
+
 1. `gdpr_dsr_sla`: 30-day deadline enforcement
 2. `gdpr_data_retention`: Retention policy compliance
 3. `gdpr_consent_validity`: Consent management
@@ -172,6 +184,7 @@ const server = new ApolloServer({
 **File**: `/docs/AUDIT_AND_COMPLIANCE.md`
 
 **Contents**:
+
 - Architecture overview
 - Complete feature documentation
 - GDPR compliance guide
@@ -185,10 +198,12 @@ const server = new ApolloServer({
 ### 9. Test Suite
 
 **Files**:
+
 - `/server/src/services/__tests__/EventSourcingService.test.ts`
 - `/server/src/services/__tests__/GDPRComplianceService.test.ts`
 
 **Coverage**:
+
 - Event sourcing: 85%+ coverage
 - GDPR compliance: 80%+ coverage
 - All critical paths tested
@@ -285,6 +300,7 @@ mutation CreateCase {
 ### 2. PostgreSQL
 
 All audit data stored in:
+
 - `event_store` (main event log)
 - `audit_access_logs` (maestro schema)
 - `hipaa_phi_access_log`
@@ -303,35 +319,35 @@ All audit data stored in:
 
 ### GDPR (General Data Protection Regulation)
 
-| Article | Requirement | Implementation |
-|---------|-------------|----------------|
-| Article 5(1)(e) | Data retention | ✅ Retention policies |
-| Article 12 | 30-day response | ✅ SLA monitoring |
-| Article 15 | Right of access | ✅ DSR service |
-| Article 16 | Right to rectification | ✅ DSR service |
-| Article 17 | Right to erasure | ✅ Anonymization |
-| Article 18 | Right to restriction | ✅ DSR service |
-| Article 20 | Right to portability | ✅ DSR service |
-| Article 21 | Right to object | ✅ DSR service |
-| Article 30 | Records of processing | ✅ Event store |
+| Article         | Requirement            | Implementation        |
+| --------------- | ---------------------- | --------------------- |
+| Article 5(1)(e) | Data retention         | ✅ Retention policies |
+| Article 12      | 30-day response        | ✅ SLA monitoring     |
+| Article 15      | Right of access        | ✅ DSR service        |
+| Article 16      | Right to rectification | ✅ DSR service        |
+| Article 17      | Right to erasure       | ✅ Anonymization      |
+| Article 18      | Right to restriction   | ✅ DSR service        |
+| Article 20      | Right to portability   | ✅ DSR service        |
+| Article 21      | Right to object        | ✅ DSR service        |
+| Article 30      | Records of processing  | ✅ Event store        |
 
 ### HIPAA (Health Insurance Portability and Accountability Act)
 
-| Section | Requirement | Implementation |
-|---------|-------------|----------------|
-| 164.308(a)(1)(ii)(D) | Information system activity review | ✅ Access logging |
-| 164.312(a)(2)(iv) | Encryption | ✅ Encryption verification |
-| 164.312(b) | Audit controls | ✅ PHI access log |
-| 164.502(b) | Minimum necessary | ✅ Justification enforcement |
-| 164.530(j)(2) | Record retention | ✅ Retention policies |
+| Section              | Requirement                        | Implementation               |
+| -------------------- | ---------------------------------- | ---------------------------- |
+| 164.308(a)(1)(ii)(D) | Information system activity review | ✅ Access logging            |
+| 164.312(a)(2)(iv)    | Encryption                         | ✅ Encryption verification   |
+| 164.312(b)           | Audit controls                     | ✅ PHI access log            |
+| 164.502(b)           | Minimum necessary                  | ✅ Justification enforcement |
+| 164.530(j)(2)        | Record retention                   | ✅ Retention policies        |
 
 ### SOC 2
 
-| Control | Requirement | Implementation |
-|---------|-------------|----------------|
-| CC6.1 | Logical access | ✅ Access logging |
-| CC6.2 | Prior to access | ✅ Authorization tracking |
-| CC6.3 | Network security | ✅ Encryption verification |
+| Control | Requirement      | Implementation             |
+| ------- | ---------------- | -------------------------- |
+| CC6.1   | Logical access   | ✅ Access logging          |
+| CC6.2   | Prior to access  | ✅ Authorization tracking  |
+| CC6.3   | Network security | ✅ Encryption verification |
 
 ## Performance Considerations
 

@@ -4,8 +4,8 @@
   "type": "object",
   "required": ["created_at_utc", "toolchain"],
   "properties": {
-    "created_at_utc": {"type": "string"},
-    "toolchain": {"type": "object"}
+    "created_at_utc": { "type": "string" },
+    "toolchain": { "type": "object" }
   },
   "additionalProperties": false
 }

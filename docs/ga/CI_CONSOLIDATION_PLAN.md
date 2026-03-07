@@ -27,6 +27,7 @@
 **Total Workflows**: 51
 
 **Categories**:
+
 - **Core CI** (6): `ci.yml`, `mvp4-gate.yml`, `hello-service-ci.yml`, `intelgraph-ci.yml`, `unit-test-coverage.yml`, `pr-quality-gate.yml`
 - **Security** (6): `ci-security.yml`, `secret-scan-warn.yml`, `sbom-scan.yml`, `slsa-provenance.yml`, `compliance.yml`, `governance-check.yml`
 - **Release** (5): `ga-release.yml`, `release-ga.yml`, `release-train.yml`, `release-reliability.yml`, `post-release-canary.yml`
@@ -38,13 +39,13 @@
 
 ### 1.2 Key Issues
 
-| Issue | Impact | Affected Workflows |
-|-------|--------|-------------------|
-| **Duplication** | Maintenance burden, drift risk | `ci.yml` vs `mvp4-gate.yml` vs `pr-quality-gate.yml` |
-| **Inconsistent Gates** | Unclear merge requirements | Multiple workflows define overlapping checks |
-| **Non-Blocking Tests** | False sense of green | `continue-on-error: true` scattered across 8+ workflows |
-| **No Clear Entry Point** | Developer confusion | Which workflow is authoritative? |
-| **Legacy Debt** | Dead code | Workflows referencing deprecated scripts |
+| Issue                    | Impact                         | Affected Workflows                                      |
+| ------------------------ | ------------------------------ | ------------------------------------------------------- |
+| **Duplication**          | Maintenance burden, drift risk | `ci.yml` vs `mvp4-gate.yml` vs `pr-quality-gate.yml`    |
+| **Inconsistent Gates**   | Unclear merge requirements     | Multiple workflows define overlapping checks            |
+| **Non-Blocking Tests**   | False sense of green           | `continue-on-error: true` scattered across 8+ workflows |
+| **No Clear Entry Point** | Developer confusion            | Which workflow is authoritative?                        |
+| **Legacy Debt**          | Dead code                      | Workflows referencing deprecated scripts                |
 
 ---
 
@@ -88,10 +89,12 @@
 **Purpose**: Core build, lint, typecheck, unit tests, deterministic build.
 
 **Triggers**:
+
 - `pull_request` → `main`
 - `push` → `main`
 
 **Jobs**:
+
 1. **Setup** (reusable: `_reusable-setup.yml`)
    - Checkout
    - Install deps (`--frozen-lockfile`)
@@ -112,10 +115,12 @@
    - **BLOCKING**
 
 **Branch Protection**:
+
 - All jobs **required**
 - No `continue-on-error` allowed
 
 **Exit Criteria**:
+
 - All jobs green → PR mergeable
 
 ---
@@ -125,11 +130,13 @@
 **Purpose**: Security scans, provenance, governance, compliance checks.
 
 **Triggers**:
+
 - `pull_request` → `main`
 - `push` → `main`
 - `workflow_dispatch` (manual trigger)
 
 **Jobs**:
+
 1. **Security Scan**
    - Gitleaks (`fetch-depth: 0`)
    - `pnpm audit --audit-level critical`
@@ -151,11 +158,13 @@
    - Secret scanning
 
 **Branch Protection**:
+
 - **Security Scan**: Required
 - **Policy Compliance**: Required (post-MVP4)
 - **Provenance**: Informational (required for release)
 
 **Exit Criteria**:
+
 - No secrets detected
 - No critical CVEs (or documented exceptions)
 - All policies pass
@@ -167,10 +176,12 @@
 **Purpose**: Flaky tests, deprecated checks, experimental features.
 
 **Triggers**:
+
 - `pull_request` → `main`
 - `push` → `main`
 
 **Jobs**:
+
 1. **Quarantine Tests**
    - `pnpm test:quarantine`
    - `continue-on-error: true`
@@ -186,10 +197,12 @@
    - Old governance checks
 
 **Branch Protection**:
+
 - **NOT required** for merge
 - Failures logged, do not block
 
 **Exit Criteria**:
+
 - Informational only
 - Tracked for future stabilization
 
@@ -197,29 +210,29 @@
 
 ### 2.3 Workflow Consolidation Mapping
 
-| Current Workflow | Consolidates Into | Notes |
-|------------------|-------------------|-------|
-| `ci.yml` | `ci-core.yml` | Keep structure, remove non-core jobs |
-| `mvp4-gate.yml` | `ci-core.yml` + `ci-verify.yml` | Split security/compliance into ci-verify |
-| `pr-quality-gate.yml` | `ci-core.yml` | Merge quality checks into core |
-| `ci-security.yml` | `ci-verify.yml` | Rename, add governance |
-| `slsa-provenance.yml` | `ci-verify.yml` | Job within ci-verify |
-| `sbom-scan.yml` | `ci-verify.yml` | Job within ci-verify |
-| `compliance.yml` | `ci-verify.yml` | Job within ci-verify |
-| `governance-check.yml` | `ci-verify.yml` | Job within ci-verify |
-| `unit-test-coverage.yml` | `ci-core.yml` | Job within ci-core |
-| `intelgraph-ci.yml` | `ci-core.yml` | Merge into core test suite |
-| `hello-service-ci.yml` | `ci-core.yml` | Merge into core test suite |
-| `repro-build-check.yml` | `ci-core.yml` | Deterministic build job |
-| `graph-guardrail-fuzz.yml` | `ci-legacy.yml` | Experimental, non-blocking |
-| `ai-copilot-canary.yml` | `ci-legacy.yml` | Canary, non-blocking |
-| `schema-diff.yml` | `ci-legacy.yml` → `ci-verify.yml` | Migrate after fixing loader issues |
-| `schema-compat.yml` | `ci-verify.yml` | Schema validation job |
-| `secret-scan-warn.yml` | `ci-verify.yml` | Merge into security scan |
-| `weekly-assurance.yml` | **KEEP** (scheduled) | Not part of PR workflow |
-| `release-*.yml` | **KEEP** (release only) | Not part of PR workflow |
-| `deploy-*.yml` | **KEEP** (deployment) | Not part of PR workflow |
-| `_reusable-*.yml` | **KEEP** (refactor) | Shared by new workflows |
+| Current Workflow           | Consolidates Into                 | Notes                                    |
+| -------------------------- | --------------------------------- | ---------------------------------------- |
+| `ci.yml`                   | `ci-core.yml`                     | Keep structure, remove non-core jobs     |
+| `mvp4-gate.yml`            | `ci-core.yml` + `ci-verify.yml`   | Split security/compliance into ci-verify |
+| `pr-quality-gate.yml`      | `ci-core.yml`                     | Merge quality checks into core           |
+| `ci-security.yml`          | `ci-verify.yml`                   | Rename, add governance                   |
+| `slsa-provenance.yml`      | `ci-verify.yml`                   | Job within ci-verify                     |
+| `sbom-scan.yml`            | `ci-verify.yml`                   | Job within ci-verify                     |
+| `compliance.yml`           | `ci-verify.yml`                   | Job within ci-verify                     |
+| `governance-check.yml`     | `ci-verify.yml`                   | Job within ci-verify                     |
+| `unit-test-coverage.yml`   | `ci-core.yml`                     | Job within ci-core                       |
+| `intelgraph-ci.yml`        | `ci-core.yml`                     | Merge into core test suite               |
+| `hello-service-ci.yml`     | `ci-core.yml`                     | Merge into core test suite               |
+| `repro-build-check.yml`    | `ci-core.yml`                     | Deterministic build job                  |
+| `graph-guardrail-fuzz.yml` | `ci-legacy.yml`                   | Experimental, non-blocking               |
+| `ai-copilot-canary.yml`    | `ci-legacy.yml`                   | Canary, non-blocking                     |
+| `schema-diff.yml`          | `ci-legacy.yml` → `ci-verify.yml` | Migrate after fixing loader issues       |
+| `schema-compat.yml`        | `ci-verify.yml`                   | Schema validation job                    |
+| `secret-scan-warn.yml`     | `ci-verify.yml`                   | Merge into security scan                 |
+| `weekly-assurance.yml`     | **KEEP** (scheduled)              | Not part of PR workflow                  |
+| `release-*.yml`            | **KEEP** (release only)           | Not part of PR workflow                  |
+| `deploy-*.yml`             | **KEEP** (deployment)             | Not part of PR workflow                  |
+| `_reusable-*.yml`          | **KEEP** (refactor)               | Shared by new workflows                  |
 
 ---
 
@@ -228,6 +241,7 @@
 ### 3.1 Phase 1: Create New Workflows (Week 1)
 
 **Tasks**:
+
 1. ✅ Create `ci-core.yml` (this plan)
 2. ✅ Create `ci-verify.yml` (this plan)
 3. ✅ Create `ci-legacy.yml` (this plan)
@@ -235,6 +249,7 @@
 5. Validate branch protection rules
 
 **Success Criteria**:
+
 - New workflows pass on feature branch
 - No duplicate jobs across workflows
 - All existing gates covered
@@ -242,12 +257,14 @@
 ### 3.2 Phase 2: Parallel Operation (Week 2)
 
 **Tasks**:
+
 1. Enable new workflows alongside old workflows
 2. Monitor for parity (new == old results)
 3. Fix any gaps or regressions
 4. Update branch protection to require new workflows
 
 **Success Criteria**:
+
 - New workflows achieve 100% parity with old workflows
 - Zero false negatives (new workflow passes when old fails)
 - Zero false positives (new workflow fails when old passes)
@@ -255,12 +272,14 @@
 ### 3.3 Phase 3: Deprecation (Week 3)
 
 **Tasks**:
+
 1. Add deprecation notice to old workflows
 2. Redirect developers to new workflows (PR template)
 3. Remove old workflows from branch protection
 4. Archive old workflows to `.github/workflows/archive/`
 
 **Success Criteria**:
+
 - All PRs use new workflows
 - Branch protection references only new workflows
 - Old workflows removed from active use
@@ -268,11 +287,13 @@
 ### 3.4 Phase 4: Cleanup (Week 4)
 
 **Tasks**:
+
 1. Delete archived workflows (after 30-day grace period)
 2. Update documentation (CONTRIBUTING.md, CI docs)
 3. Announce consolidation completion
 
 **Success Criteria**:
+
 - <10 total workflows (down from 51)
 - Documentation updated
 - Team trained on new structure
@@ -321,21 +342,21 @@ allow_deletions: false
 
 ### 5.1 Keep (Refactor)
 
-| Reusable Workflow | Used By | Changes |
-|-------------------|---------|---------|
-| `_reusable-setup.yml` | ci-core, ci-verify | Refactor: add Node/pnpm caching |
-| `_reusable-test-suite.yml` | ci-core | Refactor: parameterize test type |
-| `_reusable-security.yml` | ci-verify | Refactor: add SBOM/SLSA |
-| `_reusable-build.yml` | ci-core | Refactor: deterministic mode |
+| Reusable Workflow          | Used By            | Changes                          |
+| -------------------------- | ------------------ | -------------------------------- |
+| `_reusable-setup.yml`      | ci-core, ci-verify | Refactor: add Node/pnpm caching  |
+| `_reusable-test-suite.yml` | ci-core            | Refactor: parameterize test type |
+| `_reusable-security.yml`   | ci-verify          | Refactor: add SBOM/SLSA          |
+| `_reusable-build.yml`      | ci-core            | Refactor: deterministic mode     |
 
 ### 5.2 Deprecate (Merge)
 
-| Reusable Workflow | Action |
-|-------------------|--------|
-| `_reusable-ci-fast.yml` | Merge into `_reusable-test-suite.yml` |
-| `_reusable-ci-perf.yml` | Move to `ci-legacy.yml` (non-blocking) |
-| `_reusable-node-pnpm-setup.yml` | Merge into `_reusable-setup.yml` |
-| `_reusable-toolchain-setup.yml` | Merge into `_reusable-setup.yml` |
+| Reusable Workflow               | Action                                 |
+| ------------------------------- | -------------------------------------- |
+| `_reusable-ci-fast.yml`         | Merge into `_reusable-test-suite.yml`  |
+| `_reusable-ci-perf.yml`         | Move to `ci-legacy.yml` (non-blocking) |
+| `_reusable-node-pnpm-setup.yml` | Merge into `_reusable-setup.yml`       |
+| `_reusable-toolchain-setup.yml` | Merge into `_reusable-setup.yml`       |
 
 ---
 
@@ -344,6 +365,7 @@ allow_deletions: false
 ### 6.1 Validation Tests
 
 **Pre-Merge Checklist**:
+
 - [ ] New workflows pass on feature branch
 - [ ] All existing tests pass under new workflows
 - [ ] Deterministic build passes twice
@@ -352,6 +374,7 @@ allow_deletions: false
 - [ ] Golden path passes (`make smoke`)
 
 **Regression Tests**:
+
 - [ ] Compare old vs new workflow results (100% parity)
 - [ ] Test on multiple PRs (sample size: 10+)
 - [ ] Test on hotfix branch
@@ -362,6 +385,7 @@ allow_deletions: false
 **Trigger**: New workflows cause false positives or false negatives.
 
 **Action**:
+
 1. Disable new workflows (comment out triggers)
 2. Re-enable old workflows in branch protection
 3. Investigate root cause
@@ -376,12 +400,12 @@ allow_deletions: false
 
 ### 7.1 Required Updates
 
-| Document | Section | Update |
-|----------|---------|--------|
-| `CONTRIBUTING.md` | CI/CD | Replace workflow references with new workflows |
-| `docs/ga/GA_DEFINITION.md` | Part 7 | Update workflow names |
-| `docs/ga/TESTING-STRATEGY.md` | CI Gates | Reference new workflows |
-| `README.md` | Development | Update CI badge URLs |
+| Document                      | Section     | Update                                         |
+| ----------------------------- | ----------- | ---------------------------------------------- |
+| `CONTRIBUTING.md`             | CI/CD       | Replace workflow references with new workflows |
+| `docs/ga/GA_DEFINITION.md`    | Part 7      | Update workflow names                          |
+| `docs/ga/TESTING-STRATEGY.md` | CI Gates    | Reference new workflows                        |
+| `README.md`                   | Development | Update CI badge URLs                           |
 
 ### 7.2 New Documentation
 
@@ -395,23 +419,25 @@ allow_deletions: false
 
 ### 8.1 Success Metrics
 
-| Metric | Baseline (Current) | Target (Post-Consolidation) |
-|--------|-------------------|----------------------------|
-| **Total Workflows** | 51 | ≤10 |
-| **Required Checks (Branch Protection)** | 15 | 10 |
-| **Workflow Execution Time (P50)** | ~8 min | ≤6 min |
-| **Workflow Execution Time (P95)** | ~15 min | ≤10 min |
-| **False Positive Rate** | ~5% (flaky tests) | <1% |
-| **Developer Confusion (Survey)** | N/A | <10% report confusion |
+| Metric                                  | Baseline (Current) | Target (Post-Consolidation) |
+| --------------------------------------- | ------------------ | --------------------------- |
+| **Total Workflows**                     | 51                 | ≤10                         |
+| **Required Checks (Branch Protection)** | 15                 | 10                          |
+| **Workflow Execution Time (P50)**       | ~8 min             | ≤6 min                      |
+| **Workflow Execution Time (P95)**       | ~15 min            | ≤10 min                     |
+| **False Positive Rate**                 | ~5% (flaky tests)  | <1%                         |
+| **Developer Confusion (Survey)**        | N/A                | <10% report confusion       |
 
 ### 8.2 Monitoring
 
 **Dashboards**:
+
 - GitHub Actions usage (cost, duration)
 - Workflow success rate (per workflow)
 - Time to merge (PR creation → merge)
 
 **Alerts**:
+
 - Workflow failure rate >5% (P2)
 - Workflow duration >20 min (P3)
 - Deterministic build mismatch (P0)
@@ -420,13 +446,13 @@ allow_deletions: false
 
 ## 9. RISK ASSESSMENT
 
-| Risk | Likelihood | Impact | Mitigation |
-|------|-----------|--------|------------|
-| **New workflows break CI** | Low | High | Parallel operation, rollback plan |
-| **Parity gap (missing checks)** | Medium | High | Comprehensive mapping, validation tests |
-| **Performance regression** | Low | Medium | Optimize reusable workflows, caching |
-| **Developer disruption** | Medium | Low | Clear communication, migration guide |
-| **False positives** | Low | Medium | Thorough testing, canary rollout |
+| Risk                            | Likelihood | Impact | Mitigation                              |
+| ------------------------------- | ---------- | ------ | --------------------------------------- |
+| **New workflows break CI**      | Low        | High   | Parallel operation, rollback plan       |
+| **Parity gap (missing checks)** | Medium     | High   | Comprehensive mapping, validation tests |
+| **Performance regression**      | Low        | Medium | Optimize reusable workflows, caching    |
+| **Developer disruption**        | Medium     | Low    | Clear communication, migration guide    |
+| **False positives**             | Low        | Medium | Thorough testing, canary rollout        |
 
 ---
 
@@ -477,6 +503,7 @@ See Section 14 below (full implementation).
 **Status**: Ready for implementation.
 
 **Template**:
+
 ```yaml
 name: CI Core (Primary Gate)
 
@@ -649,6 +676,7 @@ jobs:
 **Status**: Ready for implementation.
 
 **Template**:
+
 ```yaml
 name: CI Verify (Security & Compliance)
 
@@ -670,7 +698,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Full history for Gitleaks
+          fetch-depth: 0 # Full history for Gitleaks
       - name: Gitleaks
         uses: gitleaks/gitleaks-action@v2
         env:
@@ -795,6 +823,7 @@ jobs:
 **Status**: Ready for implementation.
 
 **Template**:
+
 ```yaml
 name: CI Legacy (Non-Blocking)
 
@@ -881,6 +910,7 @@ jobs:
 **Decision**: PROCEED with consolidation.
 
 **Next Steps**:
+
 1. Implement workflows (this week)
 2. Test on feature branch
 3. Enable parallel operation

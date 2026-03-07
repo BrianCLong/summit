@@ -8,19 +8,19 @@
  * @module services/compliance-api
  */
 
-const API_BASE = '/api/compliance';
+const API_BASE = "/api/compliance";
 
 const getHeaders = () => {
-  const token = localStorage.getItem('auth_token');
+  const token = localStorage.getItem("auth_token");
   return {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
   };
 };
 
 const handleResponse = async (response) => {
   if (!response.ok) {
-    const error = await response.json().catch(() => ({ error: 'Unknown error' }));
+    const error = await response.json().catch(() => ({ error: "Unknown error" }));
     throw new Error(error.error || error.message || `HTTP ${response.status}`);
   }
   return response.json();
@@ -34,7 +34,7 @@ export const ComplianceAPI = {
 
   async getControls(framework, category) {
     const params = new URLSearchParams();
-    if (category) params.set('category', category);
+    if (category) params.set("category", category);
     const response = await fetch(`${API_BASE}/frameworks/${framework}/controls?${params}`, {
       headers: getHeaders(),
     });
@@ -43,7 +43,7 @@ export const ComplianceAPI = {
 
   async assessControl(framework, controlId) {
     const response = await fetch(`${API_BASE}/frameworks/${framework}/assess/${controlId}`, {
-      method: 'POST',
+      method: "POST",
       headers: getHeaders(),
     });
     return handleResponse(response);
@@ -81,7 +81,7 @@ export const ComplianceAPI = {
 
   async collectEvidence(data) {
     const response = await fetch(`${API_BASE}/evidence`, {
-      method: 'POST',
+      method: "POST",
       headers: getHeaders(),
       body: JSON.stringify(data),
     });
@@ -89,7 +89,7 @@ export const ComplianceAPI = {
   },
 
   async getEvidenceStatus(framework) {
-    const params = framework ? `?framework=${framework}` : '';
+    const params = framework ? `?framework=${framework}` : "";
     const response = await fetch(`${API_BASE}/evidence/status${params}`, {
       headers: getHeaders(),
     });

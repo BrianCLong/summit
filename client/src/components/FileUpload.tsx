@@ -1,5 +1,5 @@
-import React, { useState, useCallback, useRef } from 'react';
-import { useMutation, gql } from '@apollo/client';
+import React, { useState, useCallback, useRef } from "react";
+import { useMutation, gql } from "@apollo/client";
 
 const UPLOAD_FILE = gql`
   mutation UploadAttachment($file: Upload!) {
@@ -56,23 +56,23 @@ interface FileUploadProps {
 }
 
 const defaultAcceptedTypes = [
-  'image/*',
-  'video/*',
-  'audio/*',
-  'application/pdf',
-  'text/*',
-  'application/json',
-  '.csv',
-  '.xlsx',
-  '.docx',
+  "image/*",
+  "video/*",
+  "audio/*",
+  "application/pdf",
+  "text/*",
+  "application/json",
+  ".csv",
+  ".xlsx",
+  ".docx",
 ];
 
 const formatFileSize = (bytes: number): string => {
-  if (bytes === 0) return '0 Bytes';
+  if (bytes === 0) return "0 Bytes";
   const k = 1024;
-  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const sizes = ["Bytes", "KB", "MB", "GB"];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
 };
 
 export function FileUpload({
@@ -124,13 +124,13 @@ export function FileUpload({
       }
 
       const fileType = file.type;
-      const fileExt = '.' + file.name.split('.').pop()?.toLowerCase();
+      const fileExt = "." + file.name.split(".").pop()?.toLowerCase();
       const isAccepted = acceptedTypes.some((type) => {
-        if (type.startsWith('.')) {
+        if (type.startsWith(".")) {
           return fileExt === type.toLowerCase();
         }
-        if (type.endsWith('/*')) {
-          return fileType.startsWith(type.replace('/*', '/'));
+        if (type.endsWith("/*")) {
+          return fileType.startsWith(type.replace("/*", "/"));
         }
         return fileType === type;
       });
@@ -141,7 +141,7 @@ export function FileUpload({
 
       return null;
     },
-    [acceptedTypes, maxSize],
+    [acceptedTypes, maxSize]
   );
 
   const handleUpload = useCallback(
@@ -187,7 +187,7 @@ export function FileUpload({
 
       setErrors(newErrors);
     },
-    [validateFile, uploadAttachment, uploadMedia, useMediaUpload, onUploadComplete, onUploadError],
+    [validateFile, uploadAttachment, uploadMedia, useMediaUpload, onUploadComplete, onUploadError]
   );
 
   const handleDragEnter = useCallback((e: React.DragEvent) => {
@@ -216,13 +216,13 @@ export function FileUpload({
       const files = e.dataTransfer.files;
       if (files.length > 0) {
         if (!multiple && files.length > 1) {
-          setErrors(['Only one file can be uploaded at a time']);
+          setErrors(["Only one file can be uploaded at a time"]);
           return;
         }
         handleUpload(files);
       }
     },
-    [handleUpload, multiple],
+    [handleUpload, multiple]
   );
 
   const handleFileSelect = useCallback(
@@ -233,10 +233,10 @@ export function FileUpload({
       }
       // Reset input to allow re-selecting same file
       if (fileInputRef.current) {
-        fileInputRef.current.value = '';
+        fileInputRef.current.value = "";
       }
     },
-    [handleUpload],
+    [handleUpload]
   );
 
   const handleClick = useCallback(() => {
@@ -370,7 +370,7 @@ export function FileUpload({
       `}</style>
 
       <div
-        className={`dropzone ${isDragging ? 'dragging' : ''} ${loading ? 'loading' : ''}`}
+        className={`dropzone ${isDragging ? "dragging" : ""} ${loading ? "loading" : ""}`}
         onDragEnter={handleDragEnter}
         onDragLeave={handleDragLeave}
         onDragOver={handleDragOver}
@@ -382,19 +382,16 @@ export function FileUpload({
       >
         <div className="dropzone-icon">📁</div>
         <div className="dropzone-text">
-          {loading ? 'Uploading...' : 'Drag and drop files here, or click to browse'}
+          {loading ? "Uploading..." : "Drag and drop files here, or click to browse"}
         </div>
         <div className="dropzone-subtext">
-          {multiple ? 'You can upload multiple files' : 'Upload one file at a time'}
-          {' • '}
+          {multiple ? "You can upload multiple files" : "Upload one file at a time"}
+          {" • "}
           Max size: {formatFileSize(maxSize)}
         </div>
         {loading && (
           <div className="progress-bar">
-            <div
-              className="progress-fill"
-              style={{ width: `${uploadProgress.current || 0}%` }}
-            />
+            <div className="progress-fill" style={{ width: `${uploadProgress.current || 0}%` }} />
           </div>
         )}
       </div>
@@ -403,7 +400,7 @@ export function FileUpload({
         ref={fileInputRef}
         type="file"
         className="file-input"
-        accept={acceptedTypes.join(',')}
+        accept={acceptedTypes.join(",")}
         multiple={multiple}
         onChange={handleFileSelect}
       />

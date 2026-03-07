@@ -1,5 +1,5 @@
-import { useEffect, useMemo } from 'react';
-import { debounce } from 'lodash';
+import { useEffect, useMemo } from "react";
+import { debounce } from "lodash";
 
 /**
  * Hook to persist graph state to localStorage with debouncing.
@@ -18,15 +18,15 @@ export const useGraphPersistence = (graphState, delay = 1000) => {
     () =>
       debounce((layout, layoutOptions, featureToggles, nodeTypeColors) => {
         try {
-          localStorage.setItem('graphLayout', layout);
-          localStorage.setItem('graphLayoutOptions', JSON.stringify(layoutOptions));
-          localStorage.setItem('graphFeatureToggles', JSON.stringify(featureToggles));
-          localStorage.setItem('graphNodeTypeColors', JSON.stringify(nodeTypeColors));
+          localStorage.setItem("graphLayout", layout);
+          localStorage.setItem("graphLayoutOptions", JSON.stringify(layoutOptions));
+          localStorage.setItem("graphFeatureToggles", JSON.stringify(featureToggles));
+          localStorage.setItem("graphNodeTypeColors", JSON.stringify(nodeTypeColors));
         } catch (e) {
-          console.warn('Failed to save graph preferences to localStorage', e);
+          console.warn("Failed to save graph preferences to localStorage", e);
         }
       }, delay),
-    [delay],
+    [delay]
   );
 
   useEffect(() => {

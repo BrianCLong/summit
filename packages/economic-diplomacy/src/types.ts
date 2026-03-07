@@ -4,44 +4,44 @@
  */
 
 export enum NegotiationType {
-  BILATERAL_TRADE = 'BILATERAL_TRADE',
-  MULTILATERAL_TRADE = 'MULTILATERAL_TRADE',
-  FREE_TRADE_AGREEMENT = 'FREE_TRADE_AGREEMENT',
-  INVESTMENT_TREATY = 'INVESTMENT_TREATY',
-  TAX_TREATY = 'TAX_TREATY',
-  ECONOMIC_PARTNERSHIP = 'ECONOMIC_PARTNERSHIP',
-  CUSTOMS_UNION = 'CUSTOMS_UNION',
-  SINGLE_MARKET = 'SINGLE_MARKET',
-  PREFERENTIAL_TRADE = 'PREFERENTIAL_TRADE',
-  SECTOR_SPECIFIC = 'SECTOR_SPECIFIC'
+  BILATERAL_TRADE = "BILATERAL_TRADE",
+  MULTILATERAL_TRADE = "MULTILATERAL_TRADE",
+  FREE_TRADE_AGREEMENT = "FREE_TRADE_AGREEMENT",
+  INVESTMENT_TREATY = "INVESTMENT_TREATY",
+  TAX_TREATY = "TAX_TREATY",
+  ECONOMIC_PARTNERSHIP = "ECONOMIC_PARTNERSHIP",
+  CUSTOMS_UNION = "CUSTOMS_UNION",
+  SINGLE_MARKET = "SINGLE_MARKET",
+  PREFERENTIAL_TRADE = "PREFERENTIAL_TRADE",
+  SECTOR_SPECIFIC = "SECTOR_SPECIFIC",
 }
 
 export enum NegotiationPhase {
-  PRELIMINARY = 'PRELIMINARY',
-  EXPLORATORY = 'EXPLORATORY',
-  SCOPING = 'SCOPING',
-  FORMAL_NEGOTIATION = 'FORMAL_NEGOTIATION',
-  TECHNICAL_TALKS = 'TECHNICAL_TALKS',
-  FINALIZATION = 'FINALIZATION',
-  LEGAL_SCRUBBING = 'LEGAL_SCRUBBING',
-  SIGNATURE = 'SIGNATURE',
-  RATIFICATION = 'RATIFICATION',
-  IMPLEMENTATION = 'IMPLEMENTATION',
-  SUSPENDED = 'SUSPENDED',
-  CONCLUDED = 'CONCLUDED',
-  FAILED = 'FAILED'
+  PRELIMINARY = "PRELIMINARY",
+  EXPLORATORY = "EXPLORATORY",
+  SCOPING = "SCOPING",
+  FORMAL_NEGOTIATION = "FORMAL_NEGOTIATION",
+  TECHNICAL_TALKS = "TECHNICAL_TALKS",
+  FINALIZATION = "FINALIZATION",
+  LEGAL_SCRUBBING = "LEGAL_SCRUBBING",
+  SIGNATURE = "SIGNATURE",
+  RATIFICATION = "RATIFICATION",
+  IMPLEMENTATION = "IMPLEMENTATION",
+  SUSPENDED = "SUSPENDED",
+  CONCLUDED = "CONCLUDED",
+  FAILED = "FAILED",
 }
 
 export enum PartnershipType {
-  STRATEGIC_ECONOMIC_PARTNERSHIP = 'STRATEGIC_ECONOMIC_PARTNERSHIP',
-  COMPREHENSIVE_PARTNERSHIP = 'COMPREHENSIVE_PARTNERSHIP',
-  DEVELOPMENT_PARTNERSHIP = 'DEVELOPMENT_PARTNERSHIP',
-  INVESTMENT_PARTNERSHIP = 'INVESTMENT_PARTNERSHIP',
-  TECHNOLOGY_PARTNERSHIP = 'TECHNOLOGY_PARTNERSHIP',
-  ENERGY_PARTNERSHIP = 'ENERGY_PARTNERSHIP',
-  INFRASTRUCTURE_PARTNERSHIP = 'INFRASTRUCTURE_PARTNERSHIP',
-  DIGITAL_PARTNERSHIP = 'DIGITAL_PARTNERSHIP',
-  GREEN_PARTNERSHIP = 'GREEN_PARTNERSHIP'
+  STRATEGIC_ECONOMIC_PARTNERSHIP = "STRATEGIC_ECONOMIC_PARTNERSHIP",
+  COMPREHENSIVE_PARTNERSHIP = "COMPREHENSIVE_PARTNERSHIP",
+  DEVELOPMENT_PARTNERSHIP = "DEVELOPMENT_PARTNERSHIP",
+  INVESTMENT_PARTNERSHIP = "INVESTMENT_PARTNERSHIP",
+  TECHNOLOGY_PARTNERSHIP = "TECHNOLOGY_PARTNERSHIP",
+  ENERGY_PARTNERSHIP = "ENERGY_PARTNERSHIP",
+  INFRASTRUCTURE_PARTNERSHIP = "INFRASTRUCTURE_PARTNERSHIP",
+  DIGITAL_PARTNERSHIP = "DIGITAL_PARTNERSHIP",
+  GREEN_PARTNERSHIP = "GREEN_PARTNERSHIP",
 }
 
 export interface TradeNegotiation {
@@ -74,7 +74,7 @@ export interface TradeNegotiation {
   progress: number; // 0-100
   chaptersAgreed: number;
   chaptersTotal: number;
-  momentum: 'STRONG' | 'MODERATE' | 'WEAK' | 'STALLED';
+  momentum: "STRONG" | "MODERATE" | "WEAK" | "STALLED";
 
   // Issues
   keyStickingPoints: StickingPoint[];
@@ -110,7 +110,7 @@ export interface TradeNegotiation {
 export interface Party {
   id: string;
   name: string;
-  type: 'COUNTRY' | 'ECONOMIC_BLOC' | 'CUSTOMS_UNION';
+  type: "COUNTRY" | "ECONOMIC_BLOC" | "CUSTOMS_UNION";
   gdp: number;
   tradeVolume: number;
   population: number;
@@ -127,7 +127,7 @@ export interface Negotiator {
   country: string;
   experience: number; // years
   expertise: string[];
-  negotiationStyle: 'FLEXIBLE' | 'RIGID' | 'CREATIVE' | 'TECHNICAL' | 'POLITICAL';
+  negotiationStyle: "FLEXIBLE" | "RIGID" | "CREATIVE" | "TECHNICAL" | "POLITICAL";
   effectiveness: number; // 0-100
 }
 
@@ -149,9 +149,9 @@ export interface NegotiationScope {
 
 export interface Sector {
   name: string;
-  importance: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
+  importance: "CRITICAL" | "HIGH" | "MEDIUM" | "LOW";
   sensitivity: number; // 0-100
-  currentStatus: 'INCLUDED' | 'EXCLUDED' | 'UNDER_NEGOTIATION' | 'PARTIAL';
+  currentStatus: "INCLUDED" | "EXCLUDED" | "UNDER_NEGOTIATION" | "PARTIAL";
   liberalizationLevel?: number; // 0-100
   carveOuts?: string[];
   transitionPeriod?: number; // years
@@ -165,7 +165,7 @@ export interface NegotiationRound {
   participants: string[];
   agenda: string[];
   outcomes: RoundOutcome[];
-  progress: 'BREAKTHROUGH' | 'PROGRESS' | 'MINIMAL' | 'STALEMATE' | 'REGRESSION';
+  progress: "BREAKTHROUGH" | "PROGRESS" | "MINIMAL" | "STALEMATE" | "REGRESSION";
   nextRound?: Date;
   significantDevelopments?: string[];
 }
@@ -174,7 +174,7 @@ export interface RoundOutcome {
   area: string;
   achievement: string;
   significance: number; // 1-10
-  type: 'AGREEMENT' | 'COMPROMISE' | 'DEADLOCK' | 'POSTPONEMENT';
+  type: "AGREEMENT" | "COMPROMISE" | "DEADLOCK" | "POSTPONEMENT";
 }
 
 export interface WorkingGroup {
@@ -184,7 +184,7 @@ export interface WorkingGroup {
   chair: string;
   members: string[];
   meetings: number;
-  status: 'ACTIVE' | 'COMPLETED' | 'SUSPENDED';
+  status: "ACTIVE" | "COMPLETED" | "SUSPENDED";
   progress: number; // 0-100
   deliverables: string[];
 }
@@ -193,9 +193,14 @@ export interface Chapter {
   number: number;
   title: string;
   description: string;
-  status: 'NOT_STARTED' | 'UNDER_NEGOTIATION' | 'AGREED_IN_PRINCIPLE' | 'FINALIZED' | 'PENDING_LEGAL_REVIEW';
+  status:
+    | "NOT_STARTED"
+    | "UNDER_NEGOTIATION"
+    | "AGREED_IN_PRINCIPLE"
+    | "FINALIZED"
+    | "PENDING_LEGAL_REVIEW";
   progress: number; // 0-100
-  complexity: 'LOW' | 'MEDIUM' | 'HIGH' | 'VERY_HIGH';
+  complexity: "LOW" | "MEDIUM" | "HIGH" | "VERY_HIGH";
   controversiality: number; // 0-100
   keyIssues: string[];
   agreements?: string[];
@@ -205,7 +210,7 @@ export interface Chapter {
 export interface StickingPoint {
   issue: string;
   chapter: string;
-  severity: 'MINOR' | 'MODERATE' | 'MAJOR' | 'CRITICAL';
+  severity: "MINOR" | "MODERATE" | "MAJOR" | "CRITICAL";
   parties: string[];
   positions: {
     party: string;
@@ -213,7 +218,7 @@ export interface StickingPoint {
     flexibility: number; // 0-100
   }[];
   potentialSolutions?: string[];
-  resolutionProspects: 'UNLIKELY' | 'DIFFICULT' | 'POSSIBLE' | 'LIKELY';
+  resolutionProspects: "UNLIKELY" | "DIFFICULT" | "POSSIBLE" | "LIKELY";
 }
 
 export interface ResolvedIssue {
@@ -237,7 +242,7 @@ export interface CriticalIssue {
 
 export interface Priority {
   area: string;
-  level: 'TOP' | 'HIGH' | 'MEDIUM' | 'LOW';
+  level: "TOP" | "HIGH" | "MEDIUM" | "LOW";
   rationale: string;
   progress: number; // 0-100
 }
@@ -269,13 +274,13 @@ export interface PoliticalContext {
   domesticPoliticalCycle: string;
   upcomingElections?: Date;
   governmentStability: number; // 0-100
-  publicSentiment: 'SUPPORTIVE' | 'DIVIDED' | 'OPPOSED' | 'INDIFFERENT';
-  mediaAttention: 'VERY_HIGH' | 'HIGH' | 'MODERATE' | 'LOW';
+  publicSentiment: "SUPPORTIVE" | "DIVIDED" | "OPPOSED" | "INDIFFERENT";
+  mediaAttention: "VERY_HIGH" | "HIGH" | "MODERATE" | "LOW";
   parliamentarySupport?: number; // 0-100
 }
 
 export interface DomesticConstraint {
-  type: 'POLITICAL' | 'LEGAL' | 'INSTITUTIONAL' | 'ECONOMIC' | 'SOCIAL';
+  type: "POLITICAL" | "LEGAL" | "INSTITUTIONAL" | "ECONOMIC" | "SOCIAL";
   description: string;
   severity: number; // 0-100
   workarounds?: string[];
@@ -284,15 +289,15 @@ export interface DomesticConstraint {
 
 export interface LobbyingActivity {
   actor: string;
-  type: 'BUSINESS' | 'LABOR' | 'NGO' | 'AGRICULTURE' | 'CONSUMER' | 'OTHER';
-  position: 'SUPPORT' | 'OPPOSE' | 'CONDITIONAL';
+  type: "BUSINESS" | "LABOR" | "NGO" | "AGRICULTURE" | "CONSUMER" | "OTHER";
+  position: "SUPPORT" | "OPPOSE" | "CONDITIONAL";
   intensity: number; // 0-100
   influence: number; // 0-100
   demands: string[];
 }
 
 export interface Risk {
-  type: 'POLITICAL' | 'ECONOMIC' | 'LEGAL' | 'TIMING' | 'EXTERNAL';
+  type: "POLITICAL" | "ECONOMIC" | "LEGAL" | "TIMING" | "EXTERNAL";
   description: string;
   probability: number; // 0-100
   impact: number; // 1-10
@@ -303,11 +308,11 @@ export interface Opportunity {
   description: string;
   potential: number; // 0-100
   requirements: string[];
-  timeframe: 'SHORT_TERM' | 'MEDIUM_TERM' | 'LONG_TERM';
+  timeframe: "SHORT_TERM" | "MEDIUM_TERM" | "LONG_TERM";
 }
 
 export interface Source {
-  type: 'OFFICIAL' | 'GOVERNMENT' | 'MEDIA' | 'INDUSTRY' | 'ACADEMIC';
+  type: "OFFICIAL" | "GOVERNMENT" | "MEDIA" | "INDUSTRY" | "ACADEMIC";
   name: string;
   url?: string;
   date: Date;
@@ -361,7 +366,7 @@ export interface EconomicPartnership {
 
 export interface Institution {
   name: string;
-  type: 'COUNCIL' | 'COMMITTEE' | 'WORKING_GROUP' | 'SECRETARIAT' | 'FORUM';
+  type: "COUNCIL" | "COMMITTEE" | "WORKING_GROUP" | "SECRETARIAT" | "FORUM";
   role: string;
   frequency: string;
   members: string[];
@@ -372,7 +377,7 @@ export interface Institution {
 export interface Mechanism {
   name: string;
   purpose: string;
-  type: 'DIALOGUE' | 'COOPERATION' | 'COORDINATION' | 'CONSULTATION';
+  type: "DIALOGUE" | "COOPERATION" | "COORDINATION" | "CONSULTATION";
   frequency: string;
   participants: string[];
   outputs: string[];
@@ -380,7 +385,7 @@ export interface Mechanism {
 
 export interface KeyArea {
   area: string;
-  priority: 'TOP' | 'HIGH' | 'MEDIUM' | 'LOW';
+  priority: "TOP" | "HIGH" | "MEDIUM" | "LOW";
   investment: number; // USD
   progress: number; // 0-100
   impact: string;
@@ -395,7 +400,7 @@ export interface Project {
   value: number; // USD
   startDate: Date;
   expectedCompletion?: Date;
-  status: 'PLANNED' | 'UNDER_CONSTRUCTION' | 'OPERATIONAL' | 'COMPLETED' | 'DELAYED' | 'CANCELLED';
+  status: "PLANNED" | "UNDER_CONSTRUCTION" | "OPERATIONAL" | "COMPLETED" | "DELAYED" | "CANCELLED";
   progress: number; // 0-100
   jobs?: number;
   economicImpact?: number; // USD
@@ -405,11 +410,11 @@ export interface Project {
 export interface Program {
   id: string;
   name: string;
-  type: 'CAPACITY_BUILDING' | 'TECHNICAL_ASSISTANCE' | 'FINANCING' | 'RESEARCH' | 'EDUCATION';
+  type: "CAPACITY_BUILDING" | "TECHNICAL_ASSISTANCE" | "FINANCING" | "RESEARCH" | "EDUCATION";
   budget: number; // USD
   duration: number; // months
   beneficiaries: string[];
-  status: 'ACTIVE' | 'COMPLETED' | 'SUSPENDED';
+  status: "ACTIVE" | "COMPLETED" | "SUSPENDED";
   outcomes: string[];
 }
 
@@ -419,7 +424,7 @@ export interface InvestmentFlow {
   amount: number; // USD
   sector: string;
   year: number;
-  type: 'FDI' | 'PORTFOLIO' | 'LOAN' | 'GRANT' | 'OTHER';
+  type: "FDI" | "PORTFOLIO" | "LOAN" | "GRANT" | "OTHER";
 }
 
 export interface Achievement {
@@ -432,7 +437,7 @@ export interface Achievement {
 
 export interface Challenge {
   issue: string;
-  severity: 'MINOR' | 'MODERATE' | 'SERIOUS' | 'CRITICAL';
+  severity: "MINOR" | "MODERATE" | "SERIOUS" | "CRITICAL";
   impact: string;
   mitigationEfforts?: string[];
   resolution?: string;
@@ -471,7 +476,7 @@ export interface SanctionRegime {
   endDate?: Date;
 
   // Type and scope
-  type: 'COMPREHENSIVE' | 'TARGETED' | 'SECTORAL' | 'FINANCIAL' | 'TECHNOLOGY' | 'ARMS';
+  type: "COMPREHENSIVE" | "TARGETED" | "SECTORAL" | "FINANCIAL" | "TECHNOLOGY" | "ARMS";
   scope: SanctionScope;
   measures: Measure[];
 
@@ -536,7 +541,7 @@ export interface SanctionImpact {
 
 export interface HumanitarianImpact {
   populationAffected: number;
-  severity: 'MINIMAL' | 'MODERATE' | 'SIGNIFICANT' | 'SEVERE';
+  severity: "MINIMAL" | "MODERATE" | "SIGNIFICANT" | "SEVERE";
   areas: string[];
   mitigationMeasures: string[];
 }
@@ -570,7 +575,7 @@ export interface EnforcementAction {
 
 export interface Amendment {
   date: Date;
-  type: 'EXPANSION' | 'REDUCTION' | 'MODIFICATION';
+  type: "EXPANSION" | "REDUCTION" | "MODIFICATION";
   description: string;
   rationale: string;
   impact: string;
@@ -588,7 +593,7 @@ export interface Waiver {
 export interface InvestmentTreaty {
   id: string;
   name: string;
-  type: 'BIT' | 'FTA_INVESTMENT_CHAPTER' | 'MULTILATERAL';
+  type: "BIT" | "FTA_INVESTMENT_CHAPTER" | "MULTILATERAL";
   parties: string[];
   signedDate: Date;
   effectiveDate?: Date;
@@ -611,26 +616,26 @@ export interface InvestmentTreaty {
   environmentalProvisions: boolean;
   anticorruptionProvisions: boolean;
 
-  status: 'IN_FORCE' | 'SIGNED' | 'TERMINATED' | 'RENEGOTIATING';
+  status: "IN_FORCE" | "SIGNED" | "TERMINATED" | "RENEGOTIATING";
   lastUpdated: Date;
 }
 
 export interface Protection {
-  type: 'EXPROPRIATION' | 'FAIR_EQUITABLE_TREATMENT' | 'FULL_PROTECTION' | 'FREE_TRANSFER';
+  type: "EXPROPRIATION" | "FAIR_EQUITABLE_TREATMENT" | "FULL_PROTECTION" | "FREE_TRANSFER";
   description: string;
   scope: string;
   limitations?: string[];
 }
 
 export interface StandardOfTreatment {
-  standard: 'NATIONAL_TREATMENT' | 'MFN' | 'MINIMUM_STANDARD';
+  standard: "NATIONAL_TREATMENT" | "MFN" | "MINIMUM_STANDARD";
   scope: string;
   exceptions?: string[];
 }
 
 export interface DisputeResolution {
   mechanisms: string[];
-  forum: 'ICSID' | 'UNCITRAL' | 'ICC' | 'AD_HOC' | 'MULTIPLE';
+  forum: "ICSID" | "UNCITRAL" | "ICC" | "AD_HOC" | "MULTIPLE";
   investorState: boolean;
   stateState: boolean;
   procedures: string[];
@@ -638,7 +643,7 @@ export interface DisputeResolution {
 }
 
 export interface Exception {
-  type: 'NATIONAL_SECURITY' | 'PUBLIC_ORDER' | 'PRUDENTIAL' | 'TAXATION' | 'OTHER';
+  type: "NATIONAL_SECURITY" | "PUBLIC_ORDER" | "PRUDENTIAL" | "TAXATION" | "OTHER";
   description: string;
   scope: string;
 }
@@ -650,7 +655,7 @@ export interface InvestmentDispute {
   filedDate: Date;
   amount: number; // USD
   basis: string;
-  status: 'PENDING' | 'HEARING' | 'DECIDED' | 'SETTLED' | 'DISCONTINUED';
+  status: "PENDING" | "HEARING" | "DECIDED" | "SETTLED" | "DISCONTINUED";
   outcome?: string;
   award?: number; // USD
   significance: number; // 1-10
@@ -662,7 +667,7 @@ export interface TradeDispute {
   respondent: string;
   thirdParties?: string[];
   filedDate: Date;
-  forum: 'WTO' | 'BILATERAL' | 'REGIONAL' | 'OTHER';
+  forum: "WTO" | "BILATERAL" | "REGIONAL" | "OTHER";
 
   // Subject
   subject: string;
@@ -671,7 +676,7 @@ export interface TradeDispute {
   tradeValue: number; // USD
 
   // Process
-  status: 'CONSULTATION' | 'PANEL' | 'APPEAL' | 'IMPLEMENTATION' | 'COMPLIANCE' | 'RESOLVED';
+  status: "CONSULTATION" | "PANEL" | "APPEAL" | "IMPLEMENTATION" | "COMPLIANCE" | "RESOLVED";
   rulings: Ruling[];
   compliance: string;
 
@@ -710,7 +715,7 @@ export interface TradeRelationship {
 
   // Growth and trends
   tradeGrowthRate: number; // Percentage
-  historicalTrend: 'GROWING' | 'STABLE' | 'DECLINING' | 'VOLATILE';
+  historicalTrend: "GROWING" | "STABLE" | "DECLINING" | "VOLATILE";
 
   // Framework
   tradeAgreements: string[];
@@ -741,9 +746,9 @@ export interface TradeProduct {
 
 export interface TradeFriction {
   issue: string;
-  type: 'TARIFF' | 'NTB' | 'REGULATORY' | 'STANDARDS' | 'SPS' | 'SUBSIDY' | 'OTHER';
+  type: "TARIFF" | "NTB" | "REGULATORY" | "STANDARDS" | "SPS" | "SUBSIDY" | "OTHER";
   affectedTrade: number; // USD
-  resolution: 'RESOLVED' | 'NEGOTIATING' | 'ESCALATED' | 'UNRESOLVED';
+  resolution: "RESOLVED" | "NEGOTIATING" | "ESCALATED" | "UNRESOLVED";
   impact: string;
 }
 
@@ -754,7 +759,7 @@ export interface EconomicCoercion {
   startDate: Date;
   endDate?: Date;
 
-  type: 'TRADE_RESTRICTION' | 'INVESTMENT_BAN' | 'BOYCOTT' | 'EMBARGO' | 'ECONOMIC_PRESSURE';
+  type: "TRADE_RESTRICTION" | "INVESTMENT_BAN" | "BOYCOTT" | "EMBARGO" | "ECONOMIC_PRESSURE";
   measures: string[];
 
   // Objectives and context

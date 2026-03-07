@@ -5,33 +5,33 @@
 
 ## Quick Reference Table
 
-| nginx-ingress Annotation | Gateway API Resource | Field/Configuration |
-|-------------------------|---------------------|---------------------|
-| `kubernetes.io/ingress.class: nginx` | Gateway | `spec.gatewayClassName` |
-| `nginx.ingress.kubernetes.io/ssl-redirect` | Gateway | Listener redirect or HTTPRoute filter |
-| `nginx.ingress.kubernetes.io/force-ssl-redirect` | HTTPRoute | RequestRedirect filter |
-| `nginx.ingress.kubernetes.io/backend-protocol` | HTTPRoute | `backendRefs[].protocol` (GRPCRoute for gRPC) |
-| `nginx.ingress.kubernetes.io/rewrite-target` | HTTPRoute | URLRewrite filter |
-| `nginx.ingress.kubernetes.io/use-regex` | HTTPRoute | `matches[].path.type: RegularExpression` |
-| `nginx.ingress.kubernetes.io/canary` | HTTPRoute | Multiple `backendRefs` with weights |
-| `nginx.ingress.kubernetes.io/canary-weight` | HTTPRoute | `backendRefs[].weight` |
-| `nginx.ingress.kubernetes.io/canary-by-header` | HTTPRoute | `matches[].headers` |
-| `nginx.ingress.kubernetes.io/limit-rps` | BackendTrafficPolicy | `rateLimit.local.rules` |
-| `nginx.ingress.kubernetes.io/limit-rpm` | BackendTrafficPolicy | `rateLimit.local.rules` |
-| `nginx.ingress.kubernetes.io/limit-connections` | BackendTrafficPolicy | `connectionLimit` |
-| `nginx.ingress.kubernetes.io/proxy-connect-timeout` | BackendTrafficPolicy | `timeout.tcp.connectTimeout` |
-| `nginx.ingress.kubernetes.io/proxy-read-timeout` | BackendTrafficPolicy | `timeout.http.requestTimeout` |
-| `nginx.ingress.kubernetes.io/proxy-send-timeout` | BackendTrafficPolicy | `timeout.http.requestTimeout` |
-| `nginx.ingress.kubernetes.io/proxy-body-size` | BackendTrafficPolicy | `clientTrafficPolicy.clientMaxBodySize` |
-| `nginx.ingress.kubernetes.io/whitelist-source-range` | SecurityPolicy | `authorization.rules` |
-| `nginx.ingress.kubernetes.io/enable-cors` | SecurityPolicy | `cors` |
-| `nginx.ingress.kubernetes.io/cors-allow-origin` | SecurityPolicy | `cors.allowOrigins` |
-| `nginx.ingress.kubernetes.io/cors-allow-methods` | SecurityPolicy | `cors.allowMethods` |
-| `nginx.ingress.kubernetes.io/cors-allow-headers` | SecurityPolicy | `cors.allowHeaders` |
-| `nginx.ingress.kubernetes.io/cors-max-age` | SecurityPolicy | `cors.maxAge` |
-| `nginx.ingress.kubernetes.io/auth-url` | SecurityPolicy | `extAuth.http.url` |
-| `nginx.ingress.kubernetes.io/auth-signin` | SecurityPolicy | `extAuth.http.headersToBackend` |
-| `nginx.ingress.kubernetes.io/enable-modsecurity` | SecurityPolicy | WAF policy (implementation-specific) |
+| nginx-ingress Annotation                             | Gateway API Resource | Field/Configuration                           |
+| ---------------------------------------------------- | -------------------- | --------------------------------------------- |
+| `kubernetes.io/ingress.class: nginx`                 | Gateway              | `spec.gatewayClassName`                       |
+| `nginx.ingress.kubernetes.io/ssl-redirect`           | Gateway              | Listener redirect or HTTPRoute filter         |
+| `nginx.ingress.kubernetes.io/force-ssl-redirect`     | HTTPRoute            | RequestRedirect filter                        |
+| `nginx.ingress.kubernetes.io/backend-protocol`       | HTTPRoute            | `backendRefs[].protocol` (GRPCRoute for gRPC) |
+| `nginx.ingress.kubernetes.io/rewrite-target`         | HTTPRoute            | URLRewrite filter                             |
+| `nginx.ingress.kubernetes.io/use-regex`              | HTTPRoute            | `matches[].path.type: RegularExpression`      |
+| `nginx.ingress.kubernetes.io/canary`                 | HTTPRoute            | Multiple `backendRefs` with weights           |
+| `nginx.ingress.kubernetes.io/canary-weight`          | HTTPRoute            | `backendRefs[].weight`                        |
+| `nginx.ingress.kubernetes.io/canary-by-header`       | HTTPRoute            | `matches[].headers`                           |
+| `nginx.ingress.kubernetes.io/limit-rps`              | BackendTrafficPolicy | `rateLimit.local.rules`                       |
+| `nginx.ingress.kubernetes.io/limit-rpm`              | BackendTrafficPolicy | `rateLimit.local.rules`                       |
+| `nginx.ingress.kubernetes.io/limit-connections`      | BackendTrafficPolicy | `connectionLimit`                             |
+| `nginx.ingress.kubernetes.io/proxy-connect-timeout`  | BackendTrafficPolicy | `timeout.tcp.connectTimeout`                  |
+| `nginx.ingress.kubernetes.io/proxy-read-timeout`     | BackendTrafficPolicy | `timeout.http.requestTimeout`                 |
+| `nginx.ingress.kubernetes.io/proxy-send-timeout`     | BackendTrafficPolicy | `timeout.http.requestTimeout`                 |
+| `nginx.ingress.kubernetes.io/proxy-body-size`        | BackendTrafficPolicy | `clientTrafficPolicy.clientMaxBodySize`       |
+| `nginx.ingress.kubernetes.io/whitelist-source-range` | SecurityPolicy       | `authorization.rules`                         |
+| `nginx.ingress.kubernetes.io/enable-cors`            | SecurityPolicy       | `cors`                                        |
+| `nginx.ingress.kubernetes.io/cors-allow-origin`      | SecurityPolicy       | `cors.allowOrigins`                           |
+| `nginx.ingress.kubernetes.io/cors-allow-methods`     | SecurityPolicy       | `cors.allowMethods`                           |
+| `nginx.ingress.kubernetes.io/cors-allow-headers`     | SecurityPolicy       | `cors.allowHeaders`                           |
+| `nginx.ingress.kubernetes.io/cors-max-age`           | SecurityPolicy       | `cors.maxAge`                                 |
+| `nginx.ingress.kubernetes.io/auth-url`               | SecurityPolicy       | `extAuth.http.url`                            |
+| `nginx.ingress.kubernetes.io/auth-signin`            | SecurityPolicy       | `extAuth.http.headersToBackend`               |
+| `nginx.ingress.kubernetes.io/enable-modsecurity`     | SecurityPolicy       | WAF policy (implementation-specific)          |
 
 ---
 
@@ -40,6 +40,7 @@
 ### 1. Basic Ingress → HTTPRoute
 
 **Before:**
+
 ```yaml
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -62,6 +63,7 @@ spec:
 ```
 
 **After:**
+
 ```yaml
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
@@ -88,6 +90,7 @@ spec:
 ### 2. Rate Limiting
 
 **Before:**
+
 ```yaml
 annotations:
   nginx.ingress.kubernetes.io/limit-rps: "10"
@@ -95,6 +98,7 @@ annotations:
 ```
 
 **After (Envoy Gateway):**
+
 ```yaml
 apiVersion: gateway.envoyproxy.io/v1alpha1
 kind: BackendTrafficPolicy
@@ -124,6 +128,7 @@ spec:
 ### 3. Canary Deployment (Weight-Based)
 
 **Before:**
+
 ```yaml
 # Primary ingress
 apiVersion: networking.k8s.io/v1
@@ -162,6 +167,7 @@ spec:
 ```
 
 **After (Single HTTPRoute):**
+
 ```yaml
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
@@ -191,6 +197,7 @@ spec:
 ### 4. Header-Based Canary
 
 **Before:**
+
 ```yaml
 annotations:
   nginx.ingress.kubernetes.io/canary: "true"
@@ -199,6 +206,7 @@ annotations:
 ```
 
 **After:**
+
 ```yaml
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
@@ -236,6 +244,7 @@ spec:
 ### 5. CORS Configuration
 
 **Before:**
+
 ```yaml
 annotations:
   nginx.ingress.kubernetes.io/enable-cors: "true"
@@ -246,6 +255,7 @@ annotations:
 ```
 
 **After (Envoy Gateway):**
+
 ```yaml
 apiVersion: gateway.envoyproxy.io/v1alpha1
 kind: SecurityPolicy
@@ -277,12 +287,14 @@ spec:
 ### 6. IP Whitelist / Authorization
 
 **Before:**
+
 ```yaml
 annotations:
   nginx.ingress.kubernetes.io/whitelist-source-range: "10.0.0.0/8,192.168.0.0/16"
 ```
 
 **After (Envoy Gateway):**
+
 ```yaml
 apiVersion: gateway.envoyproxy.io/v1alpha1
 kind: SecurityPolicy
@@ -308,6 +320,7 @@ spec:
 ### 7. TLS Configuration
 
 **Before:**
+
 ```yaml
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -326,6 +339,7 @@ spec:
 ```
 
 **After:**
+
 ```yaml
 # Gateway with TLS listener
 apiVersion: gateway.networking.k8s.io/v1
@@ -373,6 +387,7 @@ spec:
 ### 8. URL Rewrite
 
 **Before:**
+
 ```yaml
 annotations:
   nginx.ingress.kubernetes.io/rewrite-target: /$2
@@ -385,6 +400,7 @@ spec:
 ```
 
 **After:**
+
 ```yaml
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
@@ -414,6 +430,7 @@ spec:
 ### 9. Timeouts
 
 **Before:**
+
 ```yaml
 annotations:
   nginx.ingress.kubernetes.io/proxy-connect-timeout: "10"
@@ -422,6 +439,7 @@ annotations:
 ```
 
 **After (Envoy Gateway):**
+
 ```yaml
 apiVersion: gateway.envoyproxy.io/v1alpha1
 kind: BackendTrafficPolicy
@@ -445,12 +463,14 @@ spec:
 ### 10. gRPC Backend
 
 **Before:**
+
 ```yaml
 annotations:
   nginx.ingress.kubernetes.io/backend-protocol: "GRPC"
 ```
 
 **After:**
+
 ```yaml
 apiVersion: gateway.networking.k8s.io/v1
 kind: GRPCRoute
@@ -476,13 +496,13 @@ spec:
 
 ### Features Requiring Extension Policies
 
-| Feature | nginx Annotation | Gateway API Solution |
-|---------|-----------------|---------------------|
-| ModSecurity/WAF | `enable-modsecurity` | Envoy WAF filter or external WAF |
-| Custom error pages | `default-backend` | Envoy error response filter |
-| Request mirroring | N/A | HTTPRoute `RequestMirror` filter |
-| Session affinity | `affinity: cookie` | BackendTrafficPolicy `sessionPersistence` |
-| Upstream hashing | `upstream-hash-by` | BackendTrafficPolicy `consistentHash` |
+| Feature            | nginx Annotation     | Gateway API Solution                      |
+| ------------------ | -------------------- | ----------------------------------------- |
+| ModSecurity/WAF    | `enable-modsecurity` | Envoy WAF filter or external WAF          |
+| Custom error pages | `default-backend`    | Envoy error response filter               |
+| Request mirroring  | N/A                  | HTTPRoute `RequestMirror` filter          |
+| Session affinity   | `affinity: cookie`   | BackendTrafficPolicy `sessionPersistence` |
+| Upstream hashing   | `upstream-hash-by`   | BackendTrafficPolicy `consistentHash`     |
 
 ### Features Not Yet Supported in Gateway API Core
 

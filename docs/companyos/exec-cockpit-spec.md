@@ -11,7 +11,7 @@
 
 The Exec Cockpit provides role-specific dashboards that enable leadership to answer critical business questions within 30 seconds. Each persona gets a default view optimized for their responsibilities, with drill-down capabilities to investigate root causes.
 
-**Guiding Principle**: *"Evidence or it didn't happen."* Any exec question about health must be answerable from this cockpit.
+**Guiding Principle**: _"Evidence or it didn't happen."_ Any exec question about health must be answerable from this cockpit.
 
 ---
 
@@ -46,9 +46,11 @@ The Exec Cockpit provides role-specific dashboards that enable leadership to ans
 ## 1. CEO Dashboard - Business Overview
 
 ### Purpose
+
 Provide a comprehensive view of business health, combining financial performance, customer metrics, and platform stability into a single executive summary.
 
 ### Key Questions Answered
+
 - "Are we on track for our quarterly targets?"
 - "How healthy is our customer base?"
 - "What are the biggest risks to the business?"
@@ -94,15 +96,15 @@ Provide a comprehensive view of business health, combining financial performance
 
 ### Metrics & Data Sources
 
-| Panel | Metric | Query/Source | Refresh |
-|-------|--------|--------------|---------|
-| Health Score | Composite Score | `companyos:health:composite_score:gauge` | 5min |
-| ARR | Annual Recurring Revenue | Billing API | Daily |
-| NRR | Net Revenue Retention | Billing API | Daily |
-| Active Tenants | DAU count | `companyos:product:active_tenants:count` | 1hr |
-| SLO Attainment | Aggregate SLO | `avg(companyos:service:slo_attainment:ratio)` | 5min |
-| Dimension Scores | Per-dimension | Prometheus recording rules | 5min |
-| OKR Progress | OKR tracking | OKR system API | Daily |
+| Panel            | Metric                   | Query/Source                                  | Refresh |
+| ---------------- | ------------------------ | --------------------------------------------- | ------- |
+| Health Score     | Composite Score          | `companyos:health:composite_score:gauge`      | 5min    |
+| ARR              | Annual Recurring Revenue | Billing API                                   | Daily   |
+| NRR              | Net Revenue Retention    | Billing API                                   | Daily   |
+| Active Tenants   | DAU count                | `companyos:product:active_tenants:count`      | 1hr     |
+| SLO Attainment   | Aggregate SLO            | `avg(companyos:service:slo_attainment:ratio)` | 5min    |
+| Dimension Scores | Per-dimension            | Prometheus recording rules                    | 5min    |
+| OKR Progress     | OKR tracking             | OKR system API                                | Daily   |
 
 ### Alerts (CEO)
 
@@ -129,9 +131,11 @@ ceo_alerts:
 ## 2. CTO Dashboard - Technical Health
 
 ### Purpose
+
 Provide visibility into platform reliability, engineering velocity, and technical debt to enable informed architectural and resourcing decisions.
 
 ### Key Questions Answered
+
 - "Are we meeting our reliability targets?"
 - "How fast are we shipping?"
 - "What's the state of our technical debt?"
@@ -201,16 +205,16 @@ Provide visibility into platform reliability, engineering velocity, and technica
 
 ### Metrics & Data Sources
 
-| Panel | Metric | Query/Source | Refresh |
-|-------|--------|--------------|---------|
-| Platform Status | Service health | Health check aggregation | 1min |
-| SLO Performance | Per-service SLO | `companyos:service:slo_attainment:ratio` | 5min |
-| Error Budget | Budget remaining | `1 - slo:error_budget_consumed:ratio` | 5min |
-| Deploy Frequency | Deploys/week | GitHub Actions API | Real-time |
-| Lead Time | Commit to prod | `histogram_quantile(0.5, commit_to_deploy_seconds_bucket)` | 1hr |
-| Change Failure | Failed deploys % | GitHub + PagerDuty correlation | 1hr |
-| MTTR | Recovery time | PagerDuty API | Real-time |
-| Test Coverage | Jest coverage | CI metrics | Per-build |
+| Panel            | Metric           | Query/Source                                               | Refresh   |
+| ---------------- | ---------------- | ---------------------------------------------------------- | --------- |
+| Platform Status  | Service health   | Health check aggregation                                   | 1min      |
+| SLO Performance  | Per-service SLO  | `companyos:service:slo_attainment:ratio`                   | 5min      |
+| Error Budget     | Budget remaining | `1 - slo:error_budget_consumed:ratio`                      | 5min      |
+| Deploy Frequency | Deploys/week     | GitHub Actions API                                         | Real-time |
+| Lead Time        | Commit to prod   | `histogram_quantile(0.5, commit_to_deploy_seconds_bucket)` | 1hr       |
+| Change Failure   | Failed deploys % | GitHub + PagerDuty correlation                             | 1hr       |
+| MTTR             | Recovery time    | PagerDuty API                                              | Real-time |
+| Test Coverage    | Jest coverage    | CI metrics                                                 | Per-build |
 
 ### Alerts (CTO)
 
@@ -272,9 +276,11 @@ CTO Dashboard
 ## 3. CISO Dashboard - Security Posture
 
 ### Purpose
+
 Provide comprehensive visibility into security vulnerabilities, compliance status, and threat detection to enable proactive risk management.
 
 ### Key Questions Answered
+
 - "Are we compliant with our security standards?"
 - "What's our vulnerability exposure?"
 - "Are there active threats or anomalies?"
@@ -347,16 +353,16 @@ Provide comprehensive visibility into security vulnerabilities, compliance statu
 
 ### Metrics & Data Sources
 
-| Panel | Metric | Query/Source | Refresh |
-|-------|--------|--------------|---------|
-| Security Score | Composite security | Security scoring formula | 1hr |
-| Critical CVEs | Count critical | Snyk/Trivy API | 1hr |
-| Compliance | Control coverage | Compliance system | Daily |
-| ABAC Coverage | Policy coverage | OPA metrics | 5min |
-| Secret Scans | Violations count | Gitleaks + CI | Per-commit |
-| Failed Auth | Auth failures/24h | Auth logs aggregation | 5min |
-| WAF Blocks | Blocked requests | WAF metrics | 5min |
-| Anomaly Score | ML anomaly detection | Anomaly detector | 15min |
+| Panel          | Metric               | Query/Source             | Refresh    |
+| -------------- | -------------------- | ------------------------ | ---------- |
+| Security Score | Composite security   | Security scoring formula | 1hr        |
+| Critical CVEs  | Count critical       | Snyk/Trivy API           | 1hr        |
+| Compliance     | Control coverage     | Compliance system        | Daily      |
+| ABAC Coverage  | Policy coverage      | OPA metrics              | 5min       |
+| Secret Scans   | Violations count     | Gitleaks + CI            | Per-commit |
+| Failed Auth    | Auth failures/24h    | Auth logs aggregation    | 5min       |
+| WAF Blocks     | Blocked requests     | WAF metrics              | 5min       |
+| Anomaly Score  | ML anomaly detection | Anomaly detector         | 15min      |
 
 ### Alerts (CISO)
 
@@ -427,9 +433,11 @@ CISO Dashboard
 ## 4. Head of Ops Dashboard - Platform Operations
 
 ### Purpose
+
 Provide operational visibility into infrastructure health, incident management, capacity planning, and cost efficiency.
 
 ### Key Questions Answered
+
 - "Is the platform healthy right now?"
 - "What incidents are active or recent?"
 - "Are we over/under-provisioned?"
@@ -496,9 +504,11 @@ Provide operational visibility into infrastructure health, incident management, 
 ## 5. Head of Product Dashboard - Product Adoption
 
 ### Purpose
+
 Provide visibility into product usage, feature adoption, customer engagement, and feedback to drive product decisions.
 
 ### Key Questions Answered
+
 - "How engaged are our users?"
 - "Which features are being adopted?"
 - "What are customers struggling with?"
@@ -617,15 +627,15 @@ level_4_trace:
 
 ### Alert Severity Matrix
 
-| Alert Type | CEO | CTO | CISO | Head Ops | Head Product |
-|------------|-----|-----|------|----------|--------------|
-| P1 Incident | SMS | PagerDuty | Email | PagerDuty | Email |
-| SLO Budget Exhausted | Email | PagerDuty | - | PagerDuty | - |
-| Critical CVE | - | Email | PagerDuty | Email | - |
-| NRR Below Target | Slack | - | - | - | Email |
-| Churn Risk | Slack | - | - | - | PagerDuty |
-| Cost Anomaly | Email | Email | - | PagerDuty | - |
-| Compliance Drop | - | Email | PagerDuty | - | - |
+| Alert Type           | CEO   | CTO       | CISO      | Head Ops  | Head Product |
+| -------------------- | ----- | --------- | --------- | --------- | ------------ |
+| P1 Incident          | SMS   | PagerDuty | Email     | PagerDuty | Email        |
+| SLO Budget Exhausted | Email | PagerDuty | -         | PagerDuty | -            |
+| Critical CVE         | -     | Email     | PagerDuty | Email     | -            |
+| NRR Below Target     | Slack | -         | -         | -         | Email        |
+| Churn Risk           | Slack | -         | -         | -         | PagerDuty    |
+| Cost Anomaly         | Email | Email     | -         | PagerDuty | -            |
+| Compliance Drop      | -     | Email     | PagerDuty | -         | -            |
 
 ### PagerDuty Integration
 
@@ -673,13 +683,13 @@ routes:
 
 ### Data Freshness Requirements
 
-| Dashboard | Critical Panels | Max Staleness |
-|-----------|-----------------|---------------|
-| CEO | Health Score, NRR | 1 hour |
-| CTO | SLO Status, Incidents | 5 minutes |
-| CISO | CVE Count, Anomalies | 15 minutes |
-| Ops | Platform Status | 1 minute |
-| Product | DAU/WAU | 1 hour |
+| Dashboard | Critical Panels       | Max Staleness |
+| --------- | --------------------- | ------------- |
+| CEO       | Health Score, NRR     | 1 hour        |
+| CTO       | SLO Status, Incidents | 5 minutes     |
+| CISO      | CVE Count, Anomalies  | 15 minutes    |
+| Ops       | Platform Status       | 1 minute      |
+| Product   | DAU/WAU               | 1 hour        |
 
 ### Access Control
 
@@ -720,6 +730,6 @@ teams:
 
 ## Changelog
 
-| Version | Date | Author | Changes |
-|---------|------|--------|---------|
-| 0.1.0 | 2025-12-07 | Platform Engineering | Initial Exec Cockpit Spec |
+| Version | Date       | Author               | Changes                   |
+| ------- | ---------- | -------------------- | ------------------------- |
+| 0.1.0   | 2025-12-07 | Platform Engineering | Initial Exec Cockpit Spec |

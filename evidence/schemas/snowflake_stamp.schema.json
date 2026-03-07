@@ -4,8 +4,8 @@
   "type": "object",
   "required": ["evidence_id", "generated_at_utc"],
   "properties": {
-    "evidence_id": {"type": "string"},
-    "generated_at_utc": {"type": "string", "format": "date-time"}
+    "evidence_id": { "type": "string" },
+    "generated_at_utc": { "type": "string", "format": "date-time" }
   },
   "additionalProperties": true
 }

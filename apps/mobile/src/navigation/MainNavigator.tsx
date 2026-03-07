@@ -1,13 +1,7 @@
 import React from 'react';
 import { View } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import {
-  LayoutDashboard,
-  FileText,
-  Map,
-  Bell,
-  Menu,
-} from 'lucide-react-native';
+import { LayoutDashboard, FileText, Map, Bell, Menu } from 'lucide-react-native';
 
 import type { MainTabParamList } from '@/types';
 import { DashboardScreen } from '@/screens/DashboardScreen';
@@ -51,9 +45,7 @@ export const MainNavigator: React.FC = () => {
         component={DashboardScreen}
         options={{
           tabBarLabel: 'Dashboard',
-          tabBarIcon: ({ color, size }) => (
-            <LayoutDashboard size={size} color={color} />
-          ),
+          tabBarIcon: ({ color, size }) => <LayoutDashboard size={size} color={color} />,
         }}
       />
       <Tab.Screen
@@ -61,9 +53,7 @@ export const MainNavigator: React.FC = () => {
         component={InvestigationsScreen}
         options={{
           tabBarLabel: 'Cases',
-          tabBarIcon: ({ color, size }) => (
-            <FileText size={size} color={color} />
-          ),
+          tabBarIcon: ({ color, size }) => <FileText size={size} color={color} />,
         }}
       />
       <Tab.Screen
@@ -71,9 +61,7 @@ export const MainNavigator: React.FC = () => {
         component={MapScreen}
         options={{
           tabBarLabel: 'Map',
-          tabBarIcon: ({ color, size }) => (
-            <Map size={size} color={color} />
-          ),
+          tabBarIcon: ({ color, size }) => <Map size={size} color={color} />,
         }}
       />
       <Tab.Screen
@@ -81,9 +69,7 @@ export const MainNavigator: React.FC = () => {
         component={AlertsScreen}
         options={{
           tabBarLabel: 'Alerts',
-          tabBarIcon: ({ color, size }) => (
-            <Bell size={size} color={color} />
-          ),
+          tabBarIcon: ({ color, size }) => <Bell size={size} color={color} />,
           tabBarBadge: undefined, // Can be set dynamically
         }}
       />
@@ -92,9 +78,7 @@ export const MainNavigator: React.FC = () => {
         component={MoreScreen}
         options={{
           tabBarLabel: 'More',
-          tabBarIcon: ({ color, size }) => (
-            <Menu size={size} color={color} />
-          ),
+          tabBarIcon: ({ color, size }) => <Menu size={size} color={color} />,
         }}
       />
     </Tab.Navigator>

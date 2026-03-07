@@ -1,6 +1,6 @@
 // @ts-nocheck - SpeechRecognition type conflict with DOM lib
-import { useState, useRef, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useRef, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   MagnifyingGlassIcon,
   MicrophoneIcon,
@@ -8,10 +8,10 @@ import {
   XMarkIcon,
   ClockIcon,
   SparklesIcon,
-} from '@heroicons/react/24/outline';
-import { useDebounce } from '@/hooks/useDebounce';
-import { useQuery } from '@tanstack/react-query';
-import { apiClient } from '@/services/api';
+} from "@heroicons/react/24/outline";
+import { useDebounce } from "@/hooks/useDebounce";
+import { useQuery } from "@tanstack/react-query";
+import { apiClient } from "@/services/api";
 
 interface SearchBarProps {
   placeholder?: string;
@@ -19,13 +19,13 @@ interface SearchBarProps {
   showVoiceSearch?: boolean;
   showQRScanner?: boolean;
   autoFocus?: boolean;
-  size?: 'sm' | 'md' | 'lg';
+  size?: "sm" | "md" | "lg";
 }
 
 interface SearchSuggestion {
   id: string;
   text: string;
-  type: 'entity' | 'case' | 'recent' | 'suggestion';
+  type: "entity" | "case" | "recent" | "suggestion";
   metadata?: {
     type?: string;
     status?: string;
@@ -48,9 +48,7 @@ declare global {
     abort(): void;
     onerror: ((this: SpeechRecognition, ev: Event) => void) | null;
     onend: ((this: SpeechRecognition, ev: Event) => void) | null;
-    onresult:
-      | ((this: SpeechRecognition, ev: SpeechRecognitionEvent) => void)
-      | null;
+    onresult: ((this: SpeechRecognition, ev: SpeechRecognitionEvent) => void) | null;
     onstart: ((this: SpeechRecognition, ev: Event) => void) | null;
   }
 
@@ -78,14 +76,14 @@ declare global {
 }
 
 export function SearchBar({
-  placeholder = 'Search...',
+  placeholder = "Search...",
   onSearch,
   showVoiceSearch = false,
   showQRScanner = false,
   autoFocus = false,
-  size = 'md',
+  size = "md",
 }: SearchBarProps) {
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState("");
   const [isFocused, setIsFocused] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -93,20 +91,20 @@ export function SearchBar({
   const debouncedQuery = useDebounce(query, 300);
 
   const sizeClasses = {
-    sm: 'h-10 text-sm',
-    md: 'h-12 text-base',
-    lg: 'h-14 text-lg',
+    sm: "h-10 text-sm",
+    md: "h-12 text-base",
+    lg: "h-14 text-lg",
   };
 
   const iconSizes = {
-    sm: 'w-4 h-4',
-    md: 'w-5 h-5',
-    lg: 'w-6 h-6',
+    sm: "w-4 h-4",
+    md: "w-5 h-5",
+    lg: "w-6 h-6",
   };
 
   // Fetch search suggestions
   const { data: suggestions = [] } = useQuery({
-    queryKey: ['search-suggestions', debouncedQuery],
+    queryKey: ["search-suggestions", debouncedQuery],
     queryFn: () => apiClient.getSearchSuggestions(debouncedQuery),
     enabled: debouncedQuery.length > 2 && showSuggestions,
     staleTime: 1000 * 60 * 5, // 5 minutes
@@ -114,21 +112,17 @@ export function SearchBar({
 
   // Voice search functionality
   const startVoiceSearch = () => {
-    if (
-      !('webkitSpeechRecognition' in window) &&
-      !('SpeechRecognition' in window)
-    ) {
-      alert('Speech recognition not supported in this browser');
+    if (!("webkitSpeechRecognition" in window) && !("SpeechRecognition" in window)) {
+      alert("Speech recognition not supported in this browser");
       return;
     }
 
-    const SpeechRecognition =
-      window.webkitSpeechRecognition || window.SpeechRecognition;
+    const SpeechRecognition = window.webkitSpeechRecognition || window.SpeechRecognition;
     const recognition = new SpeechRecognition();
 
     recognition.continuous = false;
     recognition.interimResults = false;
-    recognition.lang = 'en-US';
+    recognition.lang = "en-US";
 
     recognition.onstart = () => {
       setIsListening(true);
@@ -155,21 +149,21 @@ export function SearchBar({
   // QR code scanner functionality
   const startQRScanner = async () => {
     try {
-      if (!('BarcodeDetector' in window)) {
+      if (!("BarcodeDetector" in window)) {
         // Fallback to camera access
         const stream = await navigator.mediaDevices.getUserMedia({
           video: true,
         });
         // Implementation would require additional QR scanning library
-        console.log('QR Scanner opened', stream);
+        console.log("QR Scanner opened", stream);
       } else {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         new (window as any).BarcodeDetector();
         // Implementation for native barcode detection
-        console.log('Native barcode detector available');
+        console.log("Native barcode detector available");
       }
     } catch (error) {
-      console.error('QR Scanner error:', error);
+      console.error("QR Scanner error:", error);
     }
   };
 
@@ -189,7 +183,7 @@ export function SearchBar({
   };
 
   const clearSearch = () => {
-    setQuery('');
+    setQuery("");
     setShowSuggestions(false);
     inputRef.current?.focus();
   };
@@ -210,15 +204,13 @@ export function SearchBar({
             ${sizeClasses[size]}
             ${
               isFocused
-                ? 'border-primary-500 shadow-lg shadow-primary-500/20'
-                : 'border-intel-200 dark:border-intel-700 hover:border-intel-300 dark:hover:border-intel-600'
+                ? "border-primary-500 shadow-lg shadow-primary-500/20"
+                : "border-intel-200 dark:border-intel-700 hover:border-intel-300 dark:hover:border-intel-600"
             }
           `}
         >
           {/* Search Icon */}
-          <MagnifyingGlassIcon
-            className={`${iconSizes[size]} text-intel-400 ml-4 flex-shrink-0`}
-          />
+          <MagnifyingGlassIcon className={`${iconSizes[size]} text-intel-400 ml-4 flex-shrink-0`} />
 
           {/* Input Field */}
           <input
@@ -264,8 +256,8 @@ export function SearchBar({
                 p-2 mr-2 rounded-lg transition-colors
                 ${
                   isListening
-                    ? 'bg-danger-100 dark:bg-danger-900/50 text-danger-600 dark:text-danger-400'
-                    : 'text-intel-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/50'
+                    ? "bg-danger-100 dark:bg-danger-900/50 text-danger-600 dark:text-danger-400"
+                    : "text-intel-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/50"
                 }
               `}
             >
@@ -310,23 +302,21 @@ export function SearchBar({
                   Recent Searches
                 </h3>
                 <div className="space-y-2">
-                  {['threat intelligence', 'case 2024-001', 'john doe'].map(
-                    (recent, index) => (
-                      <button
-                        key={index}
-                        onClick={() =>
-                          handleSuggestionClick({
-                            id: `recent-${index}`,
-                            text: recent,
-                            type: 'recent',
-                          })
-                        }
-                        className="block w-full text-left px-3 py-2 text-sm text-intel-600 dark:text-intel-400 hover:bg-intel-50 dark:hover:bg-intel-700 rounded-lg transition-colors"
-                      >
-                        {recent}
-                      </button>
-                    ),
-                  )}
+                  {["threat intelligence", "case 2024-001", "john doe"].map((recent, index) => (
+                    <button
+                      key={index}
+                      onClick={() =>
+                        handleSuggestionClick({
+                          id: `recent-${index}`,
+                          text: recent,
+                          type: "recent",
+                        })
+                      }
+                      className="block w-full text-left px-3 py-2 text-sm text-intel-600 dark:text-intel-400 hover:bg-intel-50 dark:hover:bg-intel-700 rounded-lg transition-colors"
+                    >
+                      {recent}
+                    </button>
+                  ))}
                 </div>
               </div>
             )}
@@ -349,10 +339,8 @@ export function SearchBar({
                         <div className="font-medium">{suggestion.text}</div>
                         {suggestion.metadata && (
                           <div className="text-xs text-intel-500 dark:text-intel-400 mt-1">
-                            {suggestion.type === 'entity' &&
-                              `Entity • ${suggestion.metadata.type}`}
-                            {suggestion.type === 'case' &&
-                              `Case • ${suggestion.metadata.status}`}
+                            {suggestion.type === "entity" && `Entity • ${suggestion.metadata.type}`}
+                            {suggestion.type === "case" && `Case • ${suggestion.metadata.status}`}
                           </div>
                         )}
                       </div>
@@ -360,11 +348,11 @@ export function SearchBar({
                         className={`
                           px-2 py-1 text-xs rounded-md
                           ${
-                            suggestion.type === 'entity'
-                              ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300'
-                              : suggestion.type === 'case'
-                                ? 'bg-success-100 dark:bg-success-900/50 text-success-700 dark:text-success-300'
-                                : 'bg-intel-100 dark:bg-intel-700 text-intel-700 dark:text-intel-300'
+                            suggestion.type === "entity"
+                              ? "bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300"
+                              : suggestion.type === "case"
+                                ? "bg-success-100 dark:bg-success-900/50 text-success-700 dark:text-success-300"
+                                : "bg-intel-100 dark:bg-intel-700 text-intel-700 dark:text-intel-300"
                           }
                         `}
                       >

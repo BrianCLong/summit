@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 
 interface ResolutionRecord {
   id: string;
@@ -12,8 +12,8 @@ const AuditDashboard: React.FC = () => {
 
   useEffect(() => {
     // Placeholder: fetch logs and resolution data from API
-    setLogs(['ingest started']);
-    setResolutions([{ id: '1', source: 'Alice', canonicalId: 'canonical_1' }]);
+    setLogs(["ingest started"]);
+    setResolutions([{ id: "1", source: "Alice", canonicalId: "canonical_1" }]);
   }, []);
 
   return (

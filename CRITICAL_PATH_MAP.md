@@ -1,4 +1,5 @@
 # Integration Critical Path Map
+
 **Generated:** 2026-01-19
 **Branch:** `claude/setup-staff-engineer-role-ayWTk`
 **Mission:** IG-101 → MC-205 → CO-58 + SB-33 (parallel)
@@ -15,6 +16,7 @@ Switchboard → IntelGraph → Maestro → CompanyOS
 ```
 
 **Key Finding:** Services exist in isolation with no shared event bus, API gateway, or unified contract repository. Integration requires:
+
 1. Unified contract package
 2. Cross-service adapters
 3. End-to-end integration tests
@@ -25,17 +27,20 @@ Switchboard → IntelGraph → Maestro → CompanyOS
 ## Service Inventory
 
 ### IntelGraph (IG) - Canonical Graph Model
+
 **Location:** `/intelgraph/`
 **Tech Stack:** Neo4j, GraphQL, Redis, Python/FastAPI
 **API Port:** TBD (from environment)
 **Package Version:** 2.0.0
 
 **Persistence:**
+
 - **Database:** Neo4j (graph database)
 - **Cache:** Redis (ioredis)
 - **Schema:** Entities, Claims, Decisions, Sources (provenance)
 
 **API Surface (Python FastAPI):**
+
 ```
 POST   /entities              - Create entity
 GET    /entities              - List entities
@@ -48,6 +53,7 @@ GET    /health                - Health check
 ```
 
 **Key Files:**
+
 - `/intelgraph/api.py` - FastAPI REST endpoints
 - `/intelgraph/server/src/config/database.js` - Neo4j + Redis config
 - `/intelgraph/packages/contracts/` - Type definitions
@@ -57,18 +63,21 @@ GET    /health                - Health check
 ---
 
 ### CompanyOS (CO) - Product-Facing Operational API
+
 **Location:** `/companyos/`
 **Tech Stack:** PostgreSQL (maestro schema), Express, TypeScript
 **API Port:** 4100 (companyos-api)
 **Package Version:** 2.0.0
 
 **Persistence:**
+
 - **Database:** PostgreSQL
   - Schema: `maestro` (incidents, deployments, alerts, slo_violations, runbooks, etc.)
   - Schema: `companyos` (tenant lifecycle, disclosure packs)
 - **Adapter:** `/companyos/services/companyos-api/src/db.ts` (pg.Pool)
 
 **API Surface (Express REST):**
+
 ```
 GET    /incidents              - List incidents
 POST   /incidents              - Create incident
@@ -85,10 +94,12 @@ GET    /health                 - Health check
 ```
 
 **Webhook Integrations:**
+
 - `POST /api/companyos/github-webhook` - GitHub issues/deployments
 - `POST /api/companyos/prometheus-webhook` - Prometheus alerts
 
 **Key Files:**
+
 - `/companyos/src/api/index.ts` - Main API router
 - `/companyos/src/api/incidentRoutes.ts` - Incident endpoints
 - `/companyos/src/api/deploymentRoutes.ts` - Deployment endpoints
@@ -99,22 +110,26 @@ GET    /health                 - Health check
 ---
 
 ### Maestro Conductor (MC) - Orchestration Service
+
 **Location:** `/orchestration/`
 **Tech Stack:** Go (runtime), TypeScript (intent engine), PostgreSQL
 **API Port:** 8080 (chronosd runtime)
 **Package Version:** 2.0.0
 
 **Persistence:**
+
 - **Database:** PostgreSQL (workflow execution state)
 - **Adapter:** `/orchestration/runtime/internal/state/store.go`
 
 **API Surface (Go HTTP):**
+
 ```
 POST   /v1/start              - Start workflow execution
 GET    /v1/status/{runId}     - Check execution status
 ```
 
 **Workflow Format:**
+
 ```yaml
 apiVersion: chronos.v1
 kind: Workflow
@@ -130,6 +145,7 @@ spec:
 ```
 
 **Components:**
+
 - **Intent Engine:** `/orchestration/packages/intent-engine/` (TypeScript)
   - Compiles YAML → DAG IR
   - CLI: `chronos-intent`
@@ -140,6 +156,7 @@ spec:
   - OpenTelemetry instrumentation
 
 **Key Files:**
+
 - `/orchestration/runtime/cmd/chronosd/main.go` - Runtime entry point
 - `/orchestration/runtime/internal/engine/executor.go` - Workflow execution
 - `/orchestration/packages/intent-engine/src/compiler.ts` - IR compiler
@@ -149,16 +166,19 @@ spec:
 ---
 
 ### Switchboard (SB) - Ingestion/Routing Service
+
 **Location:** `/ingestion/`
 **Tech Stack:** Python, multiple source adapters
 **API Port:** TBD
 **Package Version:** N/A (Python)
 
 **Persistence:**
+
 - **Database:** PostgreSQL (contract state, metadata)
 - **Schema:** `/db/switchboard/schema.sql`
 
 **Ingestors:**
+
 - CSV ingestor
 - HTTP endpoint ingestor
 - STIX/TAXII data ingestion
@@ -167,6 +187,7 @@ spec:
 - Pastebin scraping
 
 **Contract Framework:**
+
 - **Location:** `/ingestion/contracts/`
 - **Capabilities:**
   - Specification registry
@@ -176,6 +197,7 @@ spec:
   - Quarantine management
 
 **Key Files:**
+
 - `/ingestion/main.py` - Entry point
 - `/ingestion/streaming_worker.py` - Async ingestion worker
 - `/ingestion/contracts/registry.ts` - Spec registry
@@ -188,16 +210,18 @@ spec:
 ## Communication Patterns
 
 ### Current State
-| Source | Target | Method | Status |
-|--------|--------|--------|--------|
-| GitHub | CompanyOS | Webhook (HMAC-signed) | ✓ Operational |
-| Prometheus | CompanyOS | Webhook | ✓ Operational |
-| **Switchboard** | **IntelGraph** | **MISSING** | ✗ Gap |
-| **IntelGraph** | **CompanyOS** | **MISSING** | ✗ Gap |
-| **Maestro** | **CompanyOS** | **MISSING** | ✗ Gap |
-| **CompanyOS** | **Maestro** | **MISSING** | ✗ Gap |
+
+| Source          | Target         | Method                | Status        |
+| --------------- | -------------- | --------------------- | ------------- |
+| GitHub          | CompanyOS      | Webhook (HMAC-signed) | ✓ Operational |
+| Prometheus      | CompanyOS      | Webhook               | ✓ Operational |
+| **Switchboard** | **IntelGraph** | **MISSING**           | ✗ Gap         |
+| **IntelGraph**  | **CompanyOS**  | **MISSING**           | ✗ Gap         |
+| **Maestro**     | **CompanyOS**  | **MISSING**           | ✗ Gap         |
+| **CompanyOS**   | **Maestro**    | **MISSING**           | ✗ Gap         |
 
 ### Missing Infrastructure
+
 - ✗ API Gateway (unified entry point)
 - ✗ Service mesh (inter-service RPC)
 - ✗ Event bus (Kafka/RabbitMQ)
@@ -208,11 +232,11 @@ spec:
 
 ## Contract Repositories (Scattered)
 
-| Location | Scope | Tech |
-|----------|-------|------|
-| `/contracts/` | Service contract tests (maestro-contract-tests) | TypeScript, Vitest, AJV |
-| `/intelgraph/packages/contracts/` | IntelGraph type definitions | TypeScript |
-| `/ingestion/contracts/` | Ingestion specifications | TypeScript |
+| Location                          | Scope                                           | Tech                    |
+| --------------------------------- | ----------------------------------------------- | ----------------------- |
+| `/contracts/`                     | Service contract tests (maestro-contract-tests) | TypeScript, Vitest, AJV |
+| `/intelgraph/packages/contracts/` | IntelGraph type definitions                     | TypeScript              |
+| `/ingestion/contracts/`           | Ingestion specifications                        | TypeScript              |
 
 **Gap:** No unified, versioned contract package shared across all services.
 
@@ -221,12 +245,14 @@ spec:
 ## Critical Gaps & Blockers
 
 ### Integration Gaps
+
 1. **Switchboard → IntelGraph:** No ingestion pipeline to canonical graph
 2. **IntelGraph → Maestro:** No graph queries triggerable from workflows
 3. **Maestro → CompanyOS:** No orchestrated incident response workflows
 4. **CompanyOS → IntelGraph:** No entity/claim enrichment for incidents
 
 ### Technical Debt
+
 - Hardcoded service URLs (no discovery)
 - HTTP-only communication (no gRPC/event bus)
 - Scattered contract definitions
@@ -234,6 +260,7 @@ spec:
 - No shared authentication layer
 
 ### Test Gaps
+
 - ✗ Cross-service integration tests
 - ✗ Contract compatibility tests (across IG/MC/CO/SB)
 - ✗ End-to-end smoke tests
@@ -243,12 +270,12 @@ spec:
 
 ## Database Landscape
 
-| Service | Technology | Schema | Notes |
-|---------|-----------|--------|-------|
-| IntelGraph | Neo4j | N/A (graph) | Entities, Claims, Decisions |
-| CompanyOS | PostgreSQL | `maestro`, `companyos` | Incidents, Deployments, Alerts, Tenants |
-| Maestro | PostgreSQL | (default) | Workflow execution state |
-| Switchboard | PostgreSQL | `switchboard` | Ingestion state, contracts |
+| Service     | Technology | Schema                 | Notes                                   |
+| ----------- | ---------- | ---------------------- | --------------------------------------- |
+| IntelGraph  | Neo4j      | N/A (graph)            | Entities, Claims, Decisions             |
+| CompanyOS   | PostgreSQL | `maestro`, `companyos` | Incidents, Deployments, Alerts, Tenants |
+| Maestro     | PostgreSQL | (default)              | Workflow execution state                |
+| Switchboard | PostgreSQL | `switchboard`          | Ingestion state, contracts              |
 
 ---
 
@@ -292,9 +319,11 @@ spec:
 ## Critical Path Definition
 
 ### Minimal Viable Slice
+
 **One entity type, one edge type, one ingest path, one query, one workflow, one API endpoint.**
 
 **Proposal:**
+
 - **Entity:** `Person` (with `id`, `name`, `email`, `source`, `confidence`)
 - **Edge:** `ASSOCIATED_WITH` (Person ↔ Person)
 - **Ingest:** CSV upload → Switchboard → IntelGraph upsert

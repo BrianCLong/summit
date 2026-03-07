@@ -17,7 +17,7 @@ export interface AudioData {
 }
 
 export class TTSSynthesizer {
-  async synthesize(text: string, voice: string = 'default'): Promise<AudioData> {
+  async synthesize(text: string, voice: string = "default"): Promise<AudioData> {
     // TTS implementation
     const duration = text.length * 0.1; // Estimate duration
     const sampleRate = 44100;
@@ -25,7 +25,7 @@ export class TTSSynthesizer {
 
     // Generate audio waveform (placeholder for actual TTS)
     for (let i = 0; i < samples.length; i++) {
-      samples[i] = Math.sin(2 * Math.PI * 440 * i / sampleRate) * 0.1;
+      samples[i] = Math.sin((2 * Math.PI * 440 * i) / sampleRate) * 0.1;
     }
 
     return { samples, sampleRate, channels: 1, duration };

@@ -1,9 +1,11 @@
 # ADR-0005: Canonical Entity Types with Bitemporal Support
 
 ## Status
+
 Accepted
 
 ## Date
+
 2025-11-21
 
 ## Context
@@ -17,6 +19,7 @@ Summit's current entity model uses a generic `Entity` type with a `type` field d
 5. **Compliance gaps** - Cannot enforce required fields for specific entity types
 
 The Council Wishbook requires entities that support:
+
 - Bitemporal queries (what was true at time T?)
 - Provenance tracking (where did this come from?)
 - Classification and compartmentation
@@ -27,6 +30,7 @@ The Council Wishbook requires entities that support:
 We will implement **8 canonical entity types** with standardized schemas and bitemporal support:
 
 ### Entity Types
+
 1. **Person** - Individuals with identity information
 2. **Organization** - Legal entities, companies, groups
 3. **Asset** - Physical and financial assets (vehicles, vessels, accounts, crypto)
@@ -37,12 +41,15 @@ We will implement **8 canonical entity types** with standardized schemas and bit
 8. **Case** - Investigations and workflows
 
 ### Bitemporal Fields
+
 All entities will include:
+
 - `validFrom` / `validTo` - When the fact was true in the real world
 - `observedAt` - When the fact was observed/discovered
 - `recordedAt` - When recorded in the system (immutable)
 
 ### Implementation
+
 - TypeScript interfaces in `@intelgraph/canonical-entities` package
 - GraphQL types implementing `CanonicalEntity` interface
 - Zod validation schemas for runtime checking
@@ -51,6 +58,7 @@ All entities will include:
 ## Consequences
 
 ### Positive
+
 - Type-safe entity handling across the platform
 - Standardized schemas enable better connector interoperability
 - Bitemporal queries enable historical analysis
@@ -58,12 +66,14 @@ All entities will include:
 - Better entity resolution through standardized key fields
 
 ### Negative
+
 - Migration effort for existing generic entities
 - More complex schema to maintain
 - Learning curve for developers
 - Potential performance impact from additional indexes
 
 ### Mitigations
+
 - Provide migration scripts for existing data
 - Document entity type selection guidelines
 - Index optimization for bitemporal queries
@@ -74,23 +84,24 @@ All entities will include:
 ```typescript
 // Example: Creating a Person entity
 const person: Person = {
-  entityType: 'Person',
+  entityType: "Person",
   props: {
-    name: 'John Doe',
-    dateOfBirth: new Date('1980-01-15'),
-    nationalities: ['US'],
+    name: "John Doe",
+    dateOfBirth: new Date("1980-01-15"),
+    nationalities: ["US"],
   },
-  validFrom: new Date('2020-01-01'),
+  validFrom: new Date("2020-01-01"),
   validTo: null, // Still valid
-  observedAt: new Date('2024-06-15'),
+  observedAt: new Date("2024-06-15"),
   recordedAt: new Date(), // Immutable
   confidence: 0.95,
-  source: 'connector:ofac-sdn',
-  classification: 'UNCLASSIFIED',
+  source: "connector:ofac-sdn",
+  classification: "UNCLASSIFIED",
 };
 ```
 
 ## Related
+
 - [Canonical Entities Package](/packages/canonical-entities/)
 - [Strategic Implementation Roadmap](/docs/STRATEGIC_IMPLEMENTATION_ROADMAP.md)
 - ADR-0001: Choose Neo4j

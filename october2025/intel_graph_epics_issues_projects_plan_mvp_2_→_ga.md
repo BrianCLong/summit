@@ -195,20 +195,7 @@ body:
       {
         label: Workstream,
         options:
-          [
-            Prov,
-            XAI,
-            Copilot,
-            Ingest,
-            Case,
-            Ops,
-            Policy,
-            UI,
-            Gateway,
-            Predict,
-            Offline,
-            Infra,
-          ],
+          [Prov, XAI, Copilot, Ingest, Case, Ops, Policy, UI, Gateway, Predict, Offline, Infra],
       }
   - type: dropdown
     id: size

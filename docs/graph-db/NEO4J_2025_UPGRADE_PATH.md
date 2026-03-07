@@ -7,6 +7,7 @@ This document outlines the critical shifts in the Neo4j platform (2025.01 and la
 Neo4j now includes a first-class `VECTOR` type, moving away from ad-hoc list properties for embeddings.
 
 ### Key Changes:
+
 - **Storage**: Vectors are stored with explicit dtype (e.g., `FLOAT32`, `INT32`) and fixed length.
 - **Constraints**: You can now enforce vector type and dimension at the database level.
   ```cypher
@@ -19,6 +20,7 @@ Neo4j now includes a first-class `VECTOR` type, moving away from ad-hoc list pro
   - `vector.similarity.euclidean(v1, v2)`
 
 ### Migration Recommendation:
+
 - Move from `db.index.vector.queryNodes` (deprecated in Cypher 25) to native Cypher vector search for exact pre-filtering.
 - Convert existing list properties to `VECTOR` type:
   ```cypher
@@ -29,22 +31,27 @@ Neo4j now includes a first-class `VECTOR` type, moving away from ad-hoc list pro
 ## 2. Infrastructure & Clustering Shifts
 
 ### Discovery Service v2
+
 - **Discovery v1 is completely removed** in 2025.01.
 - You must migrate to Discovery v2 before upgrading.
 - **Port Change**: Port `5000` (default for discovery v1) is no longer used. Port `6000` is now used for internal cluster traffic.
 
 ### Configuration Renames:
+
 - `dbms.cluster.discovery.v2.endpoints` -> `dbms.cluster.endpoints`
 - `dbms.kubernetes.discovery.v2.service_port_name` -> `dbms.kubernetes.discovery.service_port_name`
 
 ### Java 21 Requirement
+
 - Neo4j 2025.01 and later **require Java 21**. Java 17 is no longer supported for self-managed deployments.
 
 ## 3. Drivers
+
 - **Neo4j Driver v6.0+** is required for native vector support.
 - Ensure all services (Node.js, Python, etc.) are updated to the 6.x series.
 
 ## 4. Logging
+
 - The default `debug.log` format has changed from Text to **JSON**.
 
 ---

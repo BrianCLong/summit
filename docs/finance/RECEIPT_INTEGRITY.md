@@ -9,11 +9,13 @@ To prevent tampering and ensure consistency across distributed systems, all rece
 ## Canonicalization Rules
 
 The canonicalization process ensures that semantically identical receipts produce the exact same string representation, regardless of:
+
 - Key ordering in JSON objects.
 - Non-semantic whitespace in strings (leading/trailing whitespace is trimmed).
 - Formatting of numbers (standard JSON serialization is used).
 
 ### Specifics:
+
 1.  **Object Keys**: Sorted lexicographically.
 2.  **Strings**: Trimmed of leading and trailing whitespace.
 3.  **Arrays**: Order is preserved (lists are ordered sequences).

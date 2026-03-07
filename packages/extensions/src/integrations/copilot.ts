@@ -4,14 +4,14 @@
  * Exposes extension capabilities as copilot tools and skills.
  */
 
-import { ExtensionRegistry } from '../registry.js';
-import { Extension, ExtensionCapability } from '../types.js';
+import { ExtensionRegistry } from "../registry.js";
+import { Extension, ExtensionCapability } from "../types.js";
 
 export interface CopilotTool {
   name: string;
   description: string;
   parameters: {
-    type: 'object';
+    type: "object";
     properties: Record<string, any>;
     required?: string[];
   };
@@ -43,9 +43,7 @@ export class CopilotIntegration {
       await this.registerExtension(ext);
     }
 
-    console.info(
-      `Registered ${this.tools.size} copilot tools and ${this.skills.size} skills`
-    );
+    console.info(`Registered ${this.tools.size} copilot tools and ${this.skills.size} skills`);
   }
 
   /**
@@ -91,7 +89,9 @@ export class CopilotIntegration {
   private async createTool(ext: Extension, toolDef: any): Promise<CopilotTool> {
     const entrypoint = ext.manifest.entrypoints[toolDef.entrypoint];
     if (!entrypoint) {
-      throw new Error(`Entrypoint ${toolDef.entrypoint} not found in extension ${ext.manifest.name}`);
+      throw new Error(
+        `Entrypoint ${toolDef.entrypoint} not found in extension ${ext.manifest.name}`
+      );
     }
 
     // Get the handler function from the loaded module
@@ -139,7 +139,7 @@ export class CopilotIntegration {
       throw new Error(`Extension ${ext.manifest.name} not loaded`);
     }
 
-    const exportName = entrypoint.export || 'default';
+    const exportName = entrypoint.export || "default";
     const exported = module[exportName];
 
     if (!exported) {
@@ -149,14 +149,14 @@ export class CopilotIntegration {
     // If handler name specified, get it from the exported object
     if (entrypoint.handler) {
       const handler = exported[entrypoint.handler];
-      if (typeof handler !== 'function') {
+      if (typeof handler !== "function") {
         throw new Error(`Handler ${entrypoint.handler} is not a function`);
       }
       return handler.bind(exported);
     }
 
     // Otherwise, exported itself should be a function
-    if (typeof exported !== 'function') {
+    if (typeof exported !== "function") {
       throw new Error(`Export ${exportName} is not a function`);
     }
 

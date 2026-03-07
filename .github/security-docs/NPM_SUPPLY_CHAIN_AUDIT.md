@@ -15,12 +15,12 @@ This audit identifies all vulnerable transitive dependencies and implements miti
 
 ### Directly Compromised Packages
 
-| Package | Weekly Downloads | Severity | Action |
-|---------|-----------------|----------|--------|
-| `debug` | 200M+ | CRITICAL | Update to >=4.3.5 |
-| `chalk` | 150M+ | CRITICAL | Update to >=5.3.0 |
-| `color` | 50M+ | CRITICAL | Update to >=4.2.3 |
-| `ansi-regex` | 100M+ | CRITICAL | Update to >=6.1.0 |
+| Package      | Weekly Downloads | Severity | Action            |
+| ------------ | ---------------- | -------- | ----------------- |
+| `debug`      | 200M+            | CRITICAL | Update to >=4.3.5 |
+| `chalk`      | 150M+            | CRITICAL | Update to >=5.3.0 |
+| `color`      | 50M+             | CRITICAL | Update to >=4.2.3 |
+| `ansi-regex` | 100M+            | CRITICAL | Update to >=6.1.0 |
 
 ### Transitive Dependencies
 
@@ -79,12 +79,12 @@ These overrides ensure that even if transitive dependencies specify older versio
 
 Updated direct dependencies to latest secure versions:
 
-| Package | Old Version | New Version | Reason |
-|---------|-------------|-------------|--------|
-| `axios` | 1.13.2 | 1.13.3 | Security patches |
-| `apollo-server-express` | 3.13.0 | 3.13.1 | Security patches |
-| `redis` | 5.8.1 | 5.9.0 | Security patches |
-| `ws` | 8.18.3 | 8.18.4 | Security patches |
+| Package                 | Old Version | New Version | Reason           |
+| ----------------------- | ----------- | ----------- | ---------------- |
+| `axios`                 | 1.13.2      | 1.13.3      | Security patches |
+| `apollo-server-express` | 3.13.0      | 3.13.1      | Security patches |
+| `redis`                 | 5.8.1       | 5.9.0       | Security patches |
+| `ws`                    | 8.18.3      | 8.18.4      | Security patches |
 
 ### 3. Dependency Lock File Updates
 
@@ -97,12 +97,14 @@ Updated direct dependencies to latest secure versions:
 ### Audit Results
 
 **Before Remediation:**
+
 ```
 npm audit
 vulnerabilities: 178 (1 critical, 144 high, 18 moderate, 15 low)
 ```
 
 **After Remediation:**
+
 ```
 npm audit
 vulnerabilities: 155 (0 critical from supply chain, 144 high, 18 moderate, 15 low)
@@ -123,18 +125,22 @@ vulnerabilities: 155 (0 critical from supply chain, 144 high, 18 moderate, 15 lo
 ### Transitive Dependencies Affected
 
 **axios** (1.13.3):
+
 - Depends on: follow-redirects
 - Indirect dependencies: None of the compromised packages
 
 **apollo-server-express** (3.13.1):
+
 - Depends on: graphql, express
 - Indirect dependencies: chalk (UPDATED), debug (UPDATED)
 
 **redis** (5.9.0):
+
 - Depends on: cluster-key-slot, generic-pool, yallist
 - Indirect dependencies: None of the compromised packages
 
 **ws** (8.18.4):
+
 - Depends on: None
 - Indirect dependencies: None of the compromised packages
 
@@ -162,12 +168,12 @@ vulnerabilities: 155 (0 critical from supply chain, 144 high, 18 moderate, 15 lo
 
 ## Remediation Timeline
 
-| Date | Action | Status |
-|------|--------|--------|
-| 2025-09-15 | Attack discovered | ✅ Complete |
+| Date       | Action                     | Status      |
+| ---------- | -------------------------- | ----------- |
+| 2025-09-15 | Attack discovered          | ✅ Complete |
 | 2025-09-20 | Malicious versions removed | ✅ Complete |
-| 2025-09-25 | Patches released | ✅ Complete |
-| 2026-01-14 | Summit repository patched | ✅ Complete |
+| 2025-09-25 | Patches released           | ✅ Complete |
+| 2026-01-14 | Summit repository patched  | ✅ Complete |
 
 ## Conclusion
 

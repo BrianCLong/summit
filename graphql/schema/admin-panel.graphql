@@ -3,7 +3,6 @@ Admin Panel GraphQL API
 Comprehensive administration interface for Summit/IntelGraph
 All mutations require ADMIN role and emit audit events
 """
-
 scalar JSON
 scalar DateTime
 scalar Upload
@@ -523,36 +522,20 @@ type Query {
   adminDashboard: AdminDashboardStats!
 
   # User Management
-  users(
-    first: Int
-    after: String
-    filters: UserSearchFilters
-  ): UserConnection!
+  users(first: Int, after: String, filters: UserSearchFilters): UserConnection!
   user(id: ID!): User
   searchUsers(query: String!, limit: Int): [User!]!
 
   # Audit Logs
-  auditLogs(
-    first: Int
-    after: String
-    filters: AuditLogFilters
-  ): AuditLogConnection!
+  auditLogs(first: Int, after: String, filters: AuditLogFilters): AuditLogConnection!
   auditLog(id: ID!): AuditLog
 
   # Impersonation
   activeImpersonations: [UserImpersonation!]!
-  impersonationHistory(
-    userId: ID
-    first: Int
-    after: String
-  ): [UserImpersonation!]!
+  impersonationHistory(userId: ID, first: Int, after: String): [UserImpersonation!]!
 
   # Moderation
-  moderationQueue(
-    first: Int
-    after: String
-    filters: ModerationFilters
-  ): ModerationConnection!
+  moderationQueue(first: Int, after: String, filters: ModerationFilters): ModerationConnection!
   moderationItem(id: ID!): ModerationItem
 
   # Feature Flags
@@ -568,18 +551,11 @@ type Query {
   ): [SystemMetric!]!
 
   # Alerts
-  adminAlerts(
-    status: AlertStatus
-    severity: AlertSeverity
-    limit: Int
-  ): [AdminAlert!]!
+  adminAlerts(status: AlertStatus, severity: AlertSeverity, limit: Int): [AdminAlert!]!
   adminAlert(id: ID!): AdminAlert
 
   # Exports
-  dataExports(
-    first: Int
-    after: String
-  ): [DataExport!]!
+  dataExports(first: Int, after: String): [DataExport!]!
   dataExport(id: ID!): DataExport
 
   # System Configuration
@@ -599,7 +575,6 @@ type Mutation {
   suspendUser(input: SuspendUserInput!): User!
   unsuspendUser(userId: ID!, reason: String!): User!
   resetUserPassword(userId: ID!): String! # Returns temporary password
-
   # Impersonation
   startImpersonation(input: ImpersonateUserInput!): UserImpersonation!
   endImpersonation(impersonationId: ID!): UserImpersonation!

@@ -2,9 +2,9 @@
  * AWS S3 cloud storage connector
  */
 
-import { BaseConnector } from '../core/BaseConnector';
-import { ConnectorCapabilities, DataSourceConfig } from '../types';
-import { Logger } from 'winston';
+import { BaseConnector } from "../core/BaseConnector";
+import { ConnectorCapabilities, DataSourceConfig } from "../types";
+import { Logger } from "winston";
 
 export class S3Connector extends BaseConnector {
   private s3Client: any = null;
@@ -19,7 +19,7 @@ export class S3Connector extends BaseConnector {
       // Using @aws-sdk/client-s3 (would need to be installed)
       // const { S3Client } = require('@aws-sdk/client-s3');
 
-      this.logger.info('S3 connector ready for implementation');
+      this.logger.info("S3 connector ready for implementation");
       this.isConnected = true;
 
       // Placeholder for actual implementation
@@ -31,7 +31,7 @@ export class S3Connector extends BaseConnector {
       //   }
       // });
     } catch (error) {
-      this.logger.error('Failed to connect to S3', { error });
+      this.logger.error("Failed to connect to S3", { error });
       throw error;
     }
   }
@@ -39,7 +39,7 @@ export class S3Connector extends BaseConnector {
   async disconnect(): Promise<void> {
     this.s3Client = null;
     this.isConnected = false;
-    this.logger.info('Disconnected from S3');
+    this.logger.info("Disconnected from S3");
   }
 
   async testConnection(): Promise<boolean> {
@@ -49,7 +49,7 @@ export class S3Connector extends BaseConnector {
       // await this.s3Client.send(new HeadBucketCommand({ Bucket: bucket }));
       return true;
     } catch (error) {
-      this.logger.error('Connection test failed', { error });
+      this.logger.error("Connection test failed", { error });
       return false;
     }
   }
@@ -61,14 +61,14 @@ export class S3Connector extends BaseConnector {
       supportsCDC: false,
       supportsSchema: false,
       supportsPartitioning: true,
-      maxConcurrentConnections: 100
+      maxConcurrentConnections: 100,
     };
   }
 
   async *extract(): AsyncGenerator<any[], void, unknown> {
     const bucket = this.config.metadata.bucket;
-    const prefix = this.config.metadata.prefix || '';
-    const format = this.config.metadata.format || 'json'; // json, csv, parquet
+    const prefix = this.config.metadata.prefix || "";
+    const format = this.config.metadata.format || "json"; // json, csv, parquet
 
     this.logger.info(`Extracting data from S3 bucket: ${bucket}, prefix: ${prefix}`);
 
@@ -104,10 +104,10 @@ export class S3Connector extends BaseConnector {
 
   async getSchema(): Promise<any> {
     return {
-      type: 's3',
+      type: "s3",
       bucket: this.config.metadata.bucket,
       format: this.config.metadata.format,
-      schema: 'inferred'
+      schema: "inferred",
     };
   }
 }

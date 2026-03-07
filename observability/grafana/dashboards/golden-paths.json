@@ -12,10 +12,10 @@
         }
       ],
       "fieldConfig": {
-        "defaults": {"unit": "s"},
+        "defaults": { "unit": "s" },
         "overrides": []
       },
-      "gridPos": {"h": 9, "w": 24, "x": 0, "y": 0}
+      "gridPos": { "h": 9, "w": 24, "x": 0, "y": 0 }
     },
     {
       "type": "stat",
@@ -26,7 +26,7 @@
           "legendFormat": "success"
         }
       ],
-      "gridPos": {"h": 4, "w": 8, "x": 0, "y": 9}
+      "gridPos": { "h": 4, "w": 8, "x": 0, "y": 9 }
     },
     {
       "type": "table",
@@ -37,7 +37,7 @@
           "legendFormat": "{{journey}}/{{step}}"
         }
       ],
-      "gridPos": {"h": 7, "w": 16, "x": 8, "y": 9}
+      "gridPos": { "h": 7, "w": 16, "x": 8, "y": 9 }
     },
     {
       "type": "stat",
@@ -54,7 +54,7 @@
           "url": "${TEMPO_URL}/search?q={{__value.text}}"
         }
       ],
-      "gridPos": {"h": 6, "w": 24, "x": 0, "y": 16}
+      "gridPos": { "h": 6, "w": 24, "x": 0, "y": 16 }
     }
   ],
   "templating": {

@@ -5,18 +5,22 @@ This roadmap consolidates all 32 prompts into a phased, production-ready plan. I
 ## Thematic Workstreams
 
 ### Foundation (Prompts 1–8)
+
 - Establish core platform, CI/CD, observability, and security baselines to support all later work.
 - Deliver: stable delivery pipelines, baseline monitoring, initial compliance controls, and hardened developer workflows.
 
 ### Expansion (Prompts 9–16)
+
 - Extend product coverage (APIs, integrations, data pipelines, performance) while maintaining parity with the foundation guardrails.
 - Deliver: integration kits, performance budgets, data contracts, and expanded developer tooling.
 
 ### Resilience & Scale (Prompts 17–24)
+
 - Build high-availability patterns, disaster recovery, chaos testing, and reliability guardrails to prepare for production scale.
 - Deliver: SLOs/SLIs, failover runbooks, chaos drills, and backup/restore readiness.
 
 ### Advanced Innovation (Prompts 25–32)
+
 - **Microservices Decomposition (25):** Service boundaries, APIs, and Kubernetes orchestration for independent deployability and scaling.
 - **API Gateway & Rate Limiting (26):** Central routing/authn, rate limiting, caching, and usage monitoring with auditable configuration.
 - **Machine Learning Integration (27):** Training/inference pipelines, model registry/versioning, reproducible data snapshots, and prediction APIs.
@@ -28,17 +32,19 @@ This roadmap consolidates all 32 prompts into a phased, production-ready plan. I
 
 ## Sequencing & Dependencies (Quarterly Swimlanes)
 
-| Phase | Timeline | Key Outcomes | Dependencies |
-| --- | --- | --- | --- |
-| **Phase 0: Foundation Readiness** | Weeks 1–4 | Complete foundational prompts (1–8); finalize CI/CD, baseline observability, and security posture. | None (starting point). |
-| **Phase 1: Platform Expansion** | Weeks 5–8 | Deliver expansion prompts (9–16); ensure performance budgets and data contracts feed into upcoming decomposition and gateway work. | Builds on Phase 0 guardrails. |
-| **Phase 2: Resilience & Scale-Up** | Weeks 9–12 | Execute resilience prompts (17–24); establish SLOs and DR drills that will govern microservices/edge patterns. | Requires Phase 1 monitoring/data standards. |
-| **Phase 3: Advanced Innovation** | Weeks 13–20 | Address prompts 25–32. Microservices decomposition precedes gateway rollout; feature flags precede ML/edge experiments; self-healing aligns with resilience tooling. | Prior phases provide standards and telemetry. |
+| Phase                              | Timeline    | Key Outcomes                                                                                                                                                         | Dependencies                                  |
+| ---------------------------------- | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
+| **Phase 0: Foundation Readiness**  | Weeks 1–4   | Complete foundational prompts (1–8); finalize CI/CD, baseline observability, and security posture.                                                                   | None (starting point).                        |
+| **Phase 1: Platform Expansion**    | Weeks 5–8   | Deliver expansion prompts (9–16); ensure performance budgets and data contracts feed into upcoming decomposition and gateway work.                                   | Builds on Phase 0 guardrails.                 |
+| **Phase 2: Resilience & Scale-Up** | Weeks 9–12  | Execute resilience prompts (17–24); establish SLOs and DR drills that will govern microservices/edge patterns.                                                       | Requires Phase 1 monitoring/data standards.   |
+| **Phase 3: Advanced Innovation**   | Weeks 13–20 | Address prompts 25–32. Microservices decomposition precedes gateway rollout; feature flags precede ML/edge experiments; self-healing aligns with resilience tooling. | Prior phases provide standards and telemetry. |
 
 ## Comprehensive Implementation Guides (Prompts 1–32)
+
 Each prompt includes step-by-step actions, patterns, stack recommendations, integration points, testing criteria, and rollback plans.
 
 ### Prompts 1–8: Foundation
+
 1. **Prompt 1: CI/CD Baseline**
    - Steps: Create mono-repo pipelines (lint → test → build → artifact → deploy); enable branch protections; set up caching.
    - Patterns: Trunk-based development; reusable pipeline templates; environment-specific variables.
@@ -104,6 +110,7 @@ Each prompt includes step-by-step actions, patterns, stack recommendations, inte
    - Risk/Rollback: Keep previous doc versions; toggle docs deployment.
 
 ### Prompts 9–16: Expansion
+
 9. **Prompt 9: API Expansion**
    - Steps: Add new endpoints; enforce versioning (v1/v2); contract tests; pagination and filtering standards.
    - Patterns: OpenAPI-first; GraphQL schema stitching where applicable.
@@ -169,6 +176,7 @@ Each prompt includes step-by-step actions, patterns, stack recommendations, inte
     - Risk/Rollback: Keep previous CLI version; fallback to docker-compose only.
 
 ### Prompts 17–24: Resilience & Scale
+
 17. **Prompt 17: Reliability Engineering**
     - Steps: Define SLIs/SLOs; error budgets; alert routing; reliability reviews.
     - Patterns: Four Golden Signals; error-budget policies.
@@ -234,6 +242,7 @@ Each prompt includes step-by-step actions, patterns, stack recommendations, inte
     - Risk/Rollback: Freeze non-critical jobs; scale down non-prod clusters.
 
 ### Prompts 25–32: Advanced Innovation (Deep-Dive)
+
 25. **Microservices Decomposition**
     - Steps: Domain modeling → bounded contexts → identify seams; create service templates (REST/GraphQL + async events); carve out first service via strangler; containerize with Helm charts; set per-service CI/CD.
     - Patterns: Hexagonal architecture; API-first design; event-driven choreography; anti-corruption layers for legacy.
@@ -344,26 +353,31 @@ project-root/
 ## Technical Specifications
 
 ### API Contracts & Schemas
+
 - Format: OpenAPI 3.x for REST, GraphQL SDL for gateway stitching, Protobuf/gRPC for internal events.
 - Versioning: Semantic (`v1`, `v1.1`), deprecation headers, compatibility tests in CI using Pact.
 - Governance: Contract source in `libs/shared-contracts`; gateway routing generated from contracts; docs auto-published (Redoc/GraphQL Docs).
 
 ### Database Schemas & Data Models
+
 - Per-service databases (PostgreSQL) with schema migration tool (Flyway/Liquibase); analytics lake on S3/Parquet; feature store tables for ML.
 - Patterns: Transactional outbox; CDC for event streams; soft deletes with retention; row-level security for multi-tenant.
 - Acceptance: Migrations tested in staging; DQ checks on critical tables; backward-compatible changes required.
 
 ### Infrastructure as Code Templates
+
 - Terraform modules for VPC, subnets, IAM roles, KMS, EKS/GKE clusters, RDS/Cloud SQL, Redis/ElastiCache, S3/GCS buckets.
 - Helm charts per service with ingress, HPA/KEDA, PodDisruptionBudgets, network policies, service mesh sidecars, probes, and PodSecurity admission.
 - Kustomize overlays for env-specific configs (dev/stage/prod/edge) and Argo CD applications for GitOps delivery.
 
 ### CI/CD Pipeline Configurations
+
 - Pipelines: lint → unit/integration → contract tests → security scans (SAST/DAST/deps) → performance tests → build/package → publish image → deploy via GitOps.
 - Promotion: Staged environments with automated smoke tests; manual approval for prod; feature-flag gating for risky changes.
 - Templates: Reusable CI YAML in `ci/templates`; per-service pipeline extends templates; caching for dependencies; SBOM generation and signing (cosign/sigstore).
 
 ### Monitoring & Alerting Configurations
+
 - Metrics: RED/USE + domain SLIs; per-service dashboards in Grafana; SLO configs stored as code (OpenSLO).
 - Logging: Structured JSON logs; Loki/ELK; trace correlation IDs propagated from gateway.
 - Alerts: Alertmanager/PagerDuty routes per severity; runbook links embedded; synthetic checks for edge nodes and gateway endpoints.
@@ -371,21 +385,25 @@ project-root/
 ## Cross-Cutting Concerns
 
 ### Security Architecture & Threat Models
+
 - Threat modeling per service (STRIDE); mTLS mesh; JWT/OIDC with short-lived tokens; WAF at gateway; secrets in Vault; hardware-backed KMS keys.
 - Data security: Pseudonymization where possible; encryption at rest (KMS) and in transit; RBAC/ABAC; audit logging for flag changes and admin actions.
 - Supply chain: SBOM, image signing (cosign), admission controls to enforce signatures; dependency update cadence.
 
 ### Performance Benchmarks & Optimization Strategies
+
 - Benchmarks: p95 latency per endpoint, throughput per service, inference latency for ML, sync latency for edge.
 - Strategies: Autoscaling tuning; connection pooling; caching layers; queue backpressure; CPU/memory profiling; CDN for static assets; edge cache hints.
 - Acceptance: Performance regression gates in CI; SLO error budgets govern release cadence.
 
 ### Cost Estimation & Resource Planning
+
 - Estimation: Terraform plan cost estimations; Kubecost reports; per-service cost allocation tags.
 - Planning: Reserved instances/commitments for steady-state; autoscale floors/ceilings; shutdown schedules for non-prod; GPU quota management for ML.
 - Metrics: Cost per request, per-tenant cost, ML training cost per run; alerts on budget thresholds.
 
 ### Team Structure & Skill Requirements
+
 - Workstreams aligned to domains: Platform (CI/CD, infra, security), Services (microservices, gateway), Data/ML (pipelines, feature store, inference), Edge (agents, sync), SRE (observability, resilience, self-heal), Developer Experience (tooling, community).
 - Roles: Tech Lead per workstream, Product/Delivery manager, SRE rotation, Security champion, Data/ML engineer, Edge specialist, Developer advocate for community.
 - RACI: R=service owners for code changes, A=workstream lead, C=SRE/Security, I=Product/Support.
@@ -393,15 +411,18 @@ project-root/
 ## Timelines, Dependencies, and Critical Path
 
 ### Detailed Dependencies
+
 - **Preconditions:** Foundation (1–8) before Expansion (9–16); Resilience (17–24) needs Observability/Security/Contracts; Advanced (25–32) requires gateway-ready contracts, feature flag service, and DR guardrails.
 - **Critical path:** Data contracts → Gateway → Microservices cutover → Feature flags → ML/Edge rollout → Self-healing tuning.
 - **Integration points:** Gateway policies depend on contracts; ML inference depends on feature flags and observability; edge sync depends on data schemas and DR policies.
 
 ### Resource Allocation Recommendations
+
 - Parallelize by workstream: Platform/SRE run Foundation/Resilience; Services team handles Decomposition/Gateway; Data/ML team runs Prompts 10/13/27; Edge team runs Prompts 12/28; DevEx owns Prompt 30/31; Cost/FinOps covers Prompt 24.
 - Staffing: Minimum squads—Platform (5–7), Services (6–8), Data/ML (5–7), Edge (4–6), DevEx (3–5), Security (overlay, 3–4), SRE (shared, 4–6).
 
 ### Critical Path Analysis (Weeks 1–20)
+
 - Weeks 1–4: CI/CD, observability, security, data contracts (1–4); DevEx (5), performance budgets (6), compliance (7), docs (8).
 - Weeks 5–8: API expansion (9), data pipelines (10), UX/mobile (11–12), analytics (13), partner integrations (14), performance tuning (15), DX enhancers (16).
 - Weeks 9–12: Reliability/SLOs (17), DR (18), chaos (19), scalability (20), mesh/network (21), storage resilience (22), compliance at scale (23), cost governance (24).
@@ -409,19 +430,22 @@ project-root/
 - Weeks 17–20: ML training/inference (27) with controlled rollout; edge readiness (28) pilots; incident playbooks (29) finalized; community framework (30) launched; self-healing (32) tuned with chaos tests.
 
 ### Milestone Celebration Points & Success Metrics
-- **M1 (Week 4):** Foundation complete; CI/CD + observability live; security gates enforced. *Metric:* 100% repos on new pipeline; ≥80% trace coverage.
-- **M2 (Week 8):** Expansion features shipped with performance budgets. *Metric:* p95 latency within targets; contract tests passing for new APIs.
-- **M3 (Week 12):** Resilience guardrails in place. *Metric:* SLOs defined for all critical services; DR drill pass; chaos experiments <5% error budget impact.
-- **M4 (Week 16):** First microservice live behind gateway and feature flags. *Metric:* Zero-regression canary; gateway latency budget met; audit trail for flags.
-- **M5 (Week 20):** ML/Edge pilots, incident playbooks, community framework, and self-healing operational. *Metric:* Model rollback tested; edge sync success >99%; MTTR improved by 20%; contributor SLA adherence >90%.
+
+- **M1 (Week 4):** Foundation complete; CI/CD + observability live; security gates enforced. _Metric:_ 100% repos on new pipeline; ≥80% trace coverage.
+- **M2 (Week 8):** Expansion features shipped with performance budgets. _Metric:_ p95 latency within targets; contract tests passing for new APIs.
+- **M3 (Week 12):** Resilience guardrails in place. _Metric:_ SLOs defined for all critical services; DR drill pass; chaos experiments <5% error budget impact.
+- **M4 (Week 16):** First microservice live behind gateway and feature flags. _Metric:_ Zero-regression canary; gateway latency budget met; audit trail for flags.
+- **M5 (Week 20):** ML/Edge pilots, incident playbooks, community framework, and self-healing operational. _Metric:_ Model rollback tested; edge sync success >99%; MTTR improved by 20%; contributor SLA adherence >90%.
 
 ## Migration & Adoption Strategy
+
 - Wave-based rollout per domain; enable dual-write/read during strangler transitions; use feature flags and gateway routing for canaries.
 - Data & state: Snapshots for ML; schema versioning; blue/green migrations; shadow traffic for gateway and new services.
 - Risk controls: Automated rollbacks (Argo Rollouts), health checks post-deploy, staged rollouts per tenant/region.
 - Change management: Owners per workstream; status dashboards; regular readiness reviews tied to milestones above.
 
 ## Acceptance & Verification Checklist (per release)
+
 - CI/CD pipelines green (lint, unit, integration, contract, security, performance).
 - SLO/SLA impact assessed; error budgets tracked.
 - Runbooks updated; feature flags documented; gateway configs versioned.

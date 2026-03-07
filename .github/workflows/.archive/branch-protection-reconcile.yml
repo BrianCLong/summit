@@ -13,7 +13,6 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-
 on:
   # Manual trigger only - reconciliation is an intentional action
   workflow_dispatch:

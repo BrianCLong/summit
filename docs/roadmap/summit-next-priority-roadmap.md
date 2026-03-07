@@ -1,6 +1,7 @@
 # Summit Next-Priority Roadmap (GA Sprint)
 
 ## Readiness Assertion
+
 Summit advances to GA only when the Golden Path, governed evidence, and enforceable agent controls are simultaneously shippable. This roadmap converts that requirement into an execution sequence with explicit exit criteria.
 
 ## Priority Stack
@@ -66,8 +67,9 @@ Summit advances to GA only when the Golden Path, governed evidence, and enforcea
    - **Exit metric:** every exported claim carries verification metadata and conflict status.
 
 10. **Operator control dashboard**
-   - Show active agents, risk scores, policy violations, evidence completeness, and cost telemetry.
-   - **Exit metric:** operators can detect and intervene on policy/risk drift in one screen.
+
+- Show active agents, risk scores, policy violations, evidence completeness, and cost telemetry.
+- **Exit metric:** operators can detect and intervene on policy/risk drift in one screen.
 
 ## Single Highest-Leverage Move (Now)
 

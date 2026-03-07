@@ -1,11 +1,7 @@
 import { config } from "dotenv";
 config();
 
-type FlagKey =
-  | "db.dual_write"
-  | "db.shadow_read"
-  | "db.backfill.rps"
-  | "db.cutover.enabled";
+type FlagKey = "db.dual_write" | "db.shadow_read" | "db.backfill.rps" | "db.cutover.enabled";
 
 type FlagBoolean = "true" | "false";
 

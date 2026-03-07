@@ -57,9 +57,9 @@ ledger:
     - ANCHOR_BATCH_SIZE=64
     - ANCHOR_INTERVAL_MS=500
   ports:
-    - '4600:4600'
+    - "4600:4600"
   healthcheck:
-    test: ['CMD', 'curl', '-f', 'http://localhost:4600/healthz']
+    test: ["CMD", "curl", "-f", "http://localhost:4600/healthz"]
     interval: 10s
     timeout: 3s
     retries: 6
@@ -139,7 +139,7 @@ If you run OPA as a sidecar:
 ```yaml
 opa:
   build: ./infra/opa
-  ports: ['8181:8181']
+  ports: ["8181:8181"]
 ```
 
 ---
@@ -149,53 +149,46 @@ opa:
 ### `services/api/src/middleware/authz-receipt.ts`
 
 ```ts
-import type { Request, Response, NextFunction } from 'express';
-import {
-  inputHash,
-  signReceipt,
-} from '../../../impl/policy-receipt-ts/src/index.js';
-import fetch from 'node-fetch';
+import type { Request, Response, NextFunction } from "express";
+import { inputHash, signReceipt } from "../../../impl/policy-receipt-ts/src/index.js";
+import fetch from "node-fetch";
 
-const LEDGER = process.env.LEDGER_ENDPOINT || 'http://localhost:4600';
-const POLICY_VERSION = process.env.POLICY_VERSION || 'policy-v1';
-const PRIVATE_KEY_PEM = process.env.PRIVATE_KEY_PEM || ''; // supply via secrets
+const LEDGER = process.env.LEDGER_ENDPOINT || "http://localhost:4600";
+const POLICY_VERSION = process.env.POLICY_VERSION || "policy-v1";
+const PRIVATE_KEY_PEM = process.env.PRIVATE_KEY_PEM || ""; // supply via secrets
 
-export async function authzReceipt(
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) {
+export async function authzReceipt(req: Request, res: Response, next: NextFunction) {
   try {
     const subject = {
-      id: req.headers['x-user-id'],
-      roles: ((req.headers['x-roles'] as string) || '').split(','),
+      id: req.headers["x-user-id"],
+      roles: ((req.headers["x-roles"] as string) || "").split(","),
     };
     const action = { act: req.method.toLowerCase() };
-    const resource = { type: 'api', path: req.path };
+    const resource = { type: "api", path: req.path };
     const context = { ip: req.ip };
 
     // OPA check (optional inline; replace with your adapter)
-    const allow = action.act === 'get'; // stub until wired to OPA
-    if (!allow) return res.status(403).json({ error: 'forbidden' });
+    const allow = action.act === "get"; // stub until wired to OPA
+    if (!allow) return res.status(403).json({ error: "forbidden" });
 
     const ih = inputHash(subject, action, resource, context);
-    const r = signReceipt(ih, POLICY_VERSION, 'allow', PRIVATE_KEY_PEM);
+    const r = signReceipt(ih, POLICY_VERSION, "allow", PRIVATE_KEY_PEM);
     const payload = [
       {
         receipt_id: ih.slice(0, 16),
-        payload_hex: Buffer.from(JSON.stringify(r)).toString('hex'),
+        payload_hex: Buffer.from(JSON.stringify(r)).toString("hex"),
       },
     ];
 
     // fire-and-forget anchor (do not block request)
     fetch(`${LEDGER}/receipts/anchor`, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
+      method: "POST",
+      headers: { "content-type": "application/json" },
       body: JSON.stringify(payload),
     }).catch(() => {});
 
     // expose receipt hash to downstream
-    res.setHeader('x-authz-receipt', ih);
+    res.setHeader("x-authz-receipt", ih);
     return next();
   } catch (e) {
     return next(e);
@@ -206,8 +199,8 @@ export async function authzReceipt(
 Wire it in your Express app (e.g., `services/api/src/server.ts`):
 
 ```ts
-import express from 'express';
-import { authzReceipt } from './middleware/authz-receipt.js';
+import express from "express";
+import { authzReceipt } from "./middleware/authz-receipt.js";
 const app = express();
 app.use(authzReceipt);
 // ... your routes
@@ -272,32 +265,29 @@ app.add_middleware(AuthzReceiptMiddleware)
 ### Node: `services/worker/src/interceptors/authz-receipt.ts`
 
 ```ts
-import {
-  inputHash,
-  signReceipt,
-} from '../../../impl/policy-receipt-ts/src/index.js';
-import fetch from 'node-fetch';
-const LEDGER = process.env.LEDGER_ENDPOINT || 'http://localhost:4600';
-const POLICY_VERSION = process.env.POLICY_VERSION || 'policy-v1';
-const PRIVATE_KEY_PEM = process.env.PRIVATE_KEY_PEM || '';
+import { inputHash, signReceipt } from "../../../impl/policy-receipt-ts/src/index.js";
+import fetch from "node-fetch";
+const LEDGER = process.env.LEDGER_ENDPOINT || "http://localhost:4600";
+const POLICY_VERSION = process.env.POLICY_VERSION || "policy-v1";
+const PRIVATE_KEY_PEM = process.env.PRIVATE_KEY_PEM || "";
 
 export async function withReceipt<T>(
   job: { type: string; id: string; payload: any },
-  fn: () => Promise<T>,
+  fn: () => Promise<T>
 ): Promise<T> {
-  const subject = { id: 'worker', roles: ['service'] };
+  const subject = { id: "worker", roles: ["service"] };
   const action = { act: job.type };
-  const resource = { type: 'job', id: job.id };
+  const resource = { type: "job", id: job.id };
   const context = {};
   const ih = inputHash(subject, action, resource, context);
-  const r = signReceipt(ih, POLICY_VERSION, 'allow', PRIVATE_KEY_PEM);
+  const r = signReceipt(ih, POLICY_VERSION, "allow", PRIVATE_KEY_PEM);
   fetch(`${LEDGER}/receipts/anchor`, {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
+    method: "POST",
+    headers: { "content-type": "application/json" },
     body: JSON.stringify([
       {
         receipt_id: ih.slice(0, 16),
-        payload_hex: Buffer.from(JSON.stringify(r)).toString('hex'),
+        payload_hex: Buffer.from(JSON.stringify(r)).toString("hex"),
       },
     ]),
   }).catch(() => {});
@@ -364,9 +354,9 @@ assurance:
   steps:
     - uses: actions/checkout@v4
     - uses: actions/setup-python@v5
-      with: { python-version: '3.11' }
+      with: { python-version: "3.11" }
     - uses: actions/setup-node@v4
-      with: { node-version: '20' }
+      with: { node-version: "20" }
     - run: make bootstrap
     - run: |
         nohup make run &

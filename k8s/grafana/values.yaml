@@ -4,4 +4,4 @@ image:
   pullPolicy: IfNotPresent
 service:
   port: 3000
-adminPassword: '${GRAFANA_PASS}'
+adminPassword: "${GRAFANA_PASS}"

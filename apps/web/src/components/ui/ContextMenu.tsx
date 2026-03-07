@@ -1,26 +1,26 @@
-import React from 'react';
+import React from 'react'
 
-import { cn } from '@/lib/utils';
+import { cn } from '@/lib/utils'
 
 type ChildrenProps = {
-  children: React.ReactNode;
-};
+  children: React.ReactNode
+}
 
 type ContextMenuContentProps = ChildrenProps & {
-  className?: string;
-};
+  className?: string
+}
 
 type ContextMenuItemProps = ChildrenProps & {
-  className?: string;
-  onSelect?: () => void;
-};
+  className?: string
+  onSelect?: () => void
+}
 
 export function ContextMenu({ children }: ChildrenProps) {
-  return <>{children}</>;
+  return <>{children}</>
 }
 
 export function ContextMenuTrigger({ children }: ChildrenProps) {
-  return <>{children}</>;
+  return <>{children}</>
 }
 
 export function ContextMenuContent({
@@ -36,7 +36,7 @@ export function ContextMenuContent({
     >
       {children}
     </div>
-  );
+  )
 }
 
 export function ContextMenuItem({
@@ -55,5 +55,5 @@ export function ContextMenuItem({
     >
       {children}
     </button>
-  );
+  )
 }

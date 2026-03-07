@@ -1,4 +1,4 @@
-version: '3.9'
+version: "3.9"
 
 services:
   innovation-sandbox:
@@ -15,12 +15,12 @@ services:
       PROV_LEDGER_URL: http://prov-ledger:3000
       PROV_SIGNING_KEY: ${PROV_SIGNING_KEY:-dev-signing-key}
     ports:
-      - '3100:3100'
+      - "3100:3100"
     depends_on:
       redis:
         condition: service_healthy
     healthcheck:
-      test: ['CMD', 'wget', '-qO-', 'http://localhost:3100/health']
+      test: ["CMD", "wget", "-qO-", "http://localhost:3100/health"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -28,16 +28,16 @@ services:
     networks:
       - summit
     labels:
-      - 'prometheus.job=innovation_sandbox'
-      - 'prometheus.port=3100'
-      - 'prometheus.path=/metrics'
+      - "prometheus.job=innovation_sandbox"
+      - "prometheus.port=3100"
+      - "prometheus.path=/metrics"
     deploy:
       resources:
         limits:
-          cpus: '2'
+          cpus: "2"
           memory: 2G
         reservations:
-          cpus: '0.5'
+          cpus: "0.5"
           memory: 512M
     security_opt:
       - no-new-privileges:true

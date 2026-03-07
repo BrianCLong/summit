@@ -1,6 +1,6 @@
 # Market Entry Thesis: Asymmetric Entry
 
-> *You do not enter markets by convincing buyers. You enter by solving problems that buyers cannot afford to mishandle.*
+> _You do not enter markets by convincing buyers. You enter by solving problems that buyers cannot afford to mishandle._
 
 ## Core Market Entry Thesis
 
@@ -11,15 +11,17 @@ Summit should first appear **where failure is unacceptable and explanation is ma
 ## Entry Principle (Non-Negotiable)
 
 Summit **must not** enter as:
-* A generic "AI platform"
-* A dashboard
-* A productivity accelerator
-* A replacement for existing tools
+
+- A generic "AI platform"
+- A dashboard
+- A productivity accelerator
+- A replacement for existing tools
 
 Summit **must** enter as:
-* A **governance substrate**
-* A **decision integrity layer**
-* A **risk-reducing control plane**
+
+- A **governance substrate**
+- A **decision integrity layer**
+- A **risk-reducing control plane**
 
 ## Strategic Imperative
 

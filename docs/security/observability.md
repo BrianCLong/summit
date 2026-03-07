@@ -10,8 +10,8 @@ We use a GitHub Actions workflow (`.github/workflows/security-observability.yml`
 
 The `scripts/ci/collect_security_metrics.mjs` script gathers the following data using the GitHub API:
 
-*   **Code Scanning Alerts**: Counts of open alerts by severity (Critical, High, Medium, Low).
-*   **Dependabot Alerts**: Counts of open dependency vulnerabilities by severity.
+- **Code Scanning Alerts**: Counts of open alerts by severity (Critical, High, Medium, Low).
+- **Dependabot Alerts**: Counts of open dependency vulnerabilities by severity.
 
 ### Artifacts
 
@@ -40,12 +40,13 @@ Each run produces a JSON artifact named `security-metrics.json` containing the s
 
 ### Dashboarding and Trending
 
-*   **Job Summary**: Every run outputs a Markdown summary table comparing the current metrics with the previous successful run (if available).
-*   **Artifact History**: Metrics are retained for 90 days as build artifacts, allowing for historical analysis or ingestion by external tools.
+- **Job Summary**: Every run outputs a Markdown summary table comparing the current metrics with the previous successful run (if available).
+- **Artifact History**: Metrics are retained for 90 days as build artifacts, allowing for historical analysis or ingestion by external tools.
 
 ### Alerting
 
 The workflow will **fail** (triggering GitHub notifications) if:
+
 1.  The count of **Critical** alerts exceeds the threshold (default: 0).
 2.  The count of Critical alerts has **increased** since the last successful run.
 
@@ -59,5 +60,5 @@ To adjust thresholds, modify the `ALERT_THRESHOLD_CRITICAL` environment variable
 
 ### Troubleshooting
 
-*   **Missing Metrics**: Ensure the `GITHUB_TOKEN` has `security-events: read` and `dependabot-alerts: read` permissions.
-*   **"Previous metrics not found"**: This is normal for the first run or if artifacts have expired.
+- **Missing Metrics**: Ensure the `GITHUB_TOKEN` has `security-events: read` and `dependabot-alerts: read` permissions.
+- **"Previous metrics not found"**: This is normal for the first run or if artifacts have expired.

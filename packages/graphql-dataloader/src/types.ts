@@ -1,4 +1,4 @@
-import DataLoader from 'dataloader';
+import DataLoader from "dataloader";
 
 export interface LoaderOptions<K, V> {
   cache?: boolean;

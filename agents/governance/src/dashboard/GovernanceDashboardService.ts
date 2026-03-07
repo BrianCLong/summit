@@ -20,13 +20,13 @@ import {
   IncidentType,
   HallucinationSeverity,
   RollbackTrigger,
-} from '../types';
-import { AgentPolicyEngine } from '../policy-engine/AgentPolicyEngine';
-import { PromptChainOrchestrator } from '../orchestration/PromptChainOrchestrator';
-import { IncidentResponseManager } from '../incident-response/IncidentResponseManager';
-import { HallucinationAuditor } from '../hallucination-audit/HallucinationAuditor';
-import { RollbackManager } from '../rollback/RollbackManager';
-import { ICFY28ComplianceValidator } from '../compliance/ICFY28ComplianceValidator';
+} from "../types";
+import { AgentPolicyEngine } from "../policy-engine/AgentPolicyEngine";
+import { PromptChainOrchestrator } from "../orchestration/PromptChainOrchestrator";
+import { IncidentResponseManager } from "../incident-response/IncidentResponseManager";
+import { HallucinationAuditor } from "../hallucination-audit/HallucinationAuditor";
+import { RollbackManager } from "../rollback/RollbackManager";
+import { ICFY28ComplianceValidator } from "../compliance/ICFY28ComplianceValidator";
 
 // ============================================================================
 // Dashboard Service
@@ -143,10 +143,10 @@ export class GovernanceDashboardService {
 
     // Calculate top denial reasons from event history
     const denialReasons: Record<string, number> = {};
-    const policyEvents = this.eventHistory.filter((e) => e.type === 'policy_violation');
+    const policyEvents = this.eventHistory.filter((e) => e.type === "policy_violation");
 
     for (const event of policyEvents) {
-      const reason = (event.details?.reason as string) || 'Unknown';
+      const reason = (event.details?.reason as string) || "Unknown";
       denialReasons[reason] = (denialReasons[reason] || 0) + 1;
     }
 
@@ -161,8 +161,7 @@ export class GovernanceDashboardService {
       evaluationsDenied: engineMetrics.evaluationsDenied,
       averageLatencyMs: engineMetrics.averageLatencyMs,
       cacheHitRate:
-        engineMetrics.cacheHits /
-        Math.max(1, engineMetrics.cacheHits + engineMetrics.cacheMisses),
+        engineMetrics.cacheHits / Math.max(1, engineMetrics.cacheHits + engineMetrics.cacheMisses),
       topDenialReasons,
     };
   }
@@ -175,7 +174,7 @@ export class GovernanceDashboardService {
     const activeIncidents = this.incidentManager.getActiveIncidents();
 
     // Calculate MTTR from resolved incidents
-    const resolvedEvents = this.eventHistory.filter((e) => e.type === 'incident_resolved');
+    const resolvedEvents = this.eventHistory.filter((e) => e.type === "incident_resolved");
     let totalMttr = 0;
     let mttrCount = 0;
 
@@ -188,9 +187,7 @@ export class GovernanceDashboardService {
 
     // Get incidents resolved in last 24h
     const oneDayAgo = Date.now() - 24 * 60 * 60 * 1000;
-    const resolvedLast24h = resolvedEvents.filter(
-      (e) => e.timestamp.getTime() >= oneDayAgo,
-    ).length;
+    const resolvedLast24h = resolvedEvents.filter((e) => e.timestamp.getTime() >= oneDayAgo).length;
 
     return {
       activeIncidents: activeIncidents.length,
@@ -206,7 +203,7 @@ export class GovernanceDashboardService {
    */
   private async getHallucinationMetrics(): Promise<HallucinationMetrics> {
     const hallucinationEvents = this.eventHistory.filter(
-      (e) => e.type === 'hallucination_detected',
+      (e) => e.type === "hallucination_detected"
     );
 
     const bySeverity: Record<HallucinationSeverity, number> = {
@@ -219,25 +216,21 @@ export class GovernanceDashboardService {
     const patterns: Record<string, number> = {};
 
     for (const event of hallucinationEvents) {
-      const severity = (event.details?.severity as HallucinationSeverity) || 'benign';
+      const severity = (event.details?.severity as HallucinationSeverity) || "benign";
       bySeverity[severity]++;
 
-      const type = (event.details?.type as string) || 'unknown';
+      const type = (event.details?.type as string) || "unknown";
       patterns[type] = (patterns[type] || 0) + 1;
     }
 
-    const remediatedEvents = this.eventHistory.filter(
-      (e) => e.type === 'hallucination_remediated',
-    );
+    const remediatedEvents = this.eventHistory.filter((e) => e.type === "hallucination_remediated");
 
     return {
       detectionRate: hallucinationEvents.length > 0 ? 1 : 0, // Would calculate from total generations
       totalDetections: hallucinationEvents.length,
       bySeverity,
       remediationRate:
-        hallucinationEvents.length > 0
-          ? remediatedEvents.length / hallucinationEvents.length
-          : 1,
+        hallucinationEvents.length > 0 ? remediatedEvents.length / hallucinationEvents.length : 1,
       topPatterns: Object.entries(patterns)
         .map(([pattern, count]) => ({ pattern, count }))
         .sort((a, b) => b.count - a.count)
@@ -272,10 +265,10 @@ export class GovernanceDashboardService {
     return {
       overallScore: score.score,
       icfy28Compliant: latest?.overallCompliant || false,
-      slsaLevel: 'SLSA_3',
+      slsaLevel: "SLSA_3",
       lastAudit: latest?.timestamp || new Date(0),
       openFindings: openFindings.length,
-      criticalFindings: openFindings.filter((f) => f.severity === 'critical').length,
+      criticalFindings: openFindings.filter((f) => f.severity === "critical").length,
     };
   }
 
@@ -300,16 +293,14 @@ export class GovernanceDashboardService {
    * Get events for time range
    */
   getEventsInRange(start: Date, end: Date): GovernanceEvent[] {
-    return this.eventHistory.filter(
-      (e) => e.timestamp >= start && e.timestamp <= end,
-    );
+    return this.eventHistory.filter((e) => e.timestamp >= start && e.timestamp <= end);
   }
 
   /**
    * Get health status
    */
   async getHealthStatus(): Promise<{
-    overall: 'healthy' | 'degraded' | 'unhealthy';
+    overall: "healthy" | "degraded" | "unhealthy";
     components: Record<string, { status: string; message: string }>;
   }> {
     const components: Record<string, { status: string; message: string }> = {};
@@ -317,30 +308,34 @@ export class GovernanceDashboardService {
     // Check policy engine
     const policyMetrics = this.policyEngine.getMetrics();
     components.policyEngine = {
-      status: policyMetrics.evaluationsFailed === 0 ? 'healthy' : 'degraded',
+      status: policyMetrics.evaluationsFailed === 0 ? "healthy" : "degraded",
       message: `${policyMetrics.evaluationsTotal} evaluations, ${policyMetrics.evaluationsFailed} failed`,
     };
 
     // Check incident manager
     const activeIncidents = this.incidentManager.getActiveIncidents();
-    const criticalIncidents = activeIncidents.filter((i) => i.severity === 'critical');
+    const criticalIncidents = activeIncidents.filter((i) => i.severity === "critical");
     components.incidentResponse = {
-      status: criticalIncidents.length === 0 ? 'healthy' : 'degraded',
+      status: criticalIncidents.length === 0 ? "healthy" : "degraded",
       message: `${activeIncidents.length} active incidents, ${criticalIncidents.length} critical`,
     };
 
     // Check compliance
     const compliance = this.complianceValidator.getComplianceScore();
     components.compliance = {
-      status: compliance.score >= 80 ? 'healthy' : compliance.score >= 60 ? 'degraded' : 'unhealthy',
+      status:
+        compliance.score >= 80 ? "healthy" : compliance.score >= 60 ? "degraded" : "unhealthy",
       message: `${compliance.score}% compliant, trend: ${compliance.trend}`,
     };
 
     // Determine overall health
     const statuses = Object.values(components).map((c) => c.status);
-    let overall: 'healthy' | 'degraded' | 'unhealthy' = 'healthy';
-    if (statuses.includes('unhealthy')) {overall = 'unhealthy';}
-    else if (statuses.includes('degraded')) {overall = 'degraded';}
+    let overall: "healthy" | "degraded" | "unhealthy" = "healthy";
+    if (statuses.includes("unhealthy")) {
+      overall = "unhealthy";
+    } else if (statuses.includes("degraded")) {
+      overall = "degraded";
+    }
 
     return { overall, components };
   }

@@ -29,6 +29,7 @@ api-contracts/
 **Purpose:** Immutable record of API contracts at each major version
 
 **Contents:**
+
 - `graphql-schema-v{VERSION}.graphql` - GraphQL schema snapshot
 - `openapi-spec-v{VERSION}.json` - OpenAPI specification snapshot
 - `version-metadata.json` - Version metadata and hashes
@@ -42,6 +43,7 @@ api-contracts/
 **Purpose:** Automated detection of breaking vs non-breaking changes
 
 **Format:** JSON and text reports with:
+
 - Breaking changes categorization
 - Impact analysis
 - Recommendations
@@ -56,6 +58,7 @@ api-contracts/
 **Purpose:** Immutable audit trail of all schema validation events
 
 **Format:** JSON Lines (`.jsonl`) with:
+
 - Timestamp
 - Event type (schema_diff_check, version_bump, etc.)
 - PR/commit information
@@ -73,6 +76,7 @@ api-contracts/
 **Purpose:** Documentation of policy enforcement and compliance
 
 **Contents:**
+
 - Version policy document
 - CI/CD workflow configurations
 - Merge blocking evidence
@@ -87,6 +91,7 @@ api-contracts/
 **Purpose:** Explicit mapping of controls to evidence
 
 **Format:** Structured documentation linking:
+
 - SOC 2 control requirements
 - Implemented mechanisms
 - Evidence artifacts
@@ -99,6 +104,7 @@ api-contracts/
 **Control Requirement:** The entity authorizes, designs, develops or acquires, configures, documents, tests, approves, and implements changes to infrastructure, data, software, and procedures to meet its objectives.
 
 **Implementation:**
+
 1. **Schema Snapshots:** Immutable baseline for change detection
 2. **CI/CD Validation:** Automated schema diff on every PR
 3. **Breaking Change Detection:** Categorizes changes by impact
@@ -106,6 +112,7 @@ api-contracts/
 5. **Audit Trail:** All checks logged with PR/author information
 
 **Evidence Artifacts:**
+
 - `/api-schemas/registry.json` - Version registry
 - `/api-schemas/VERSION_POLICY.md` - Change policy
 - `diff-reports/*.json` - Change analysis
@@ -117,12 +124,14 @@ api-contracts/
 **Control Requirement:** The entity identifies, assesses, and manages risks associated with the design and development of its services.
 
 **Implementation:**
+
 1. **Impact Categorization:** Breaking vs non-breaking change classification
 2. **Severity Assessment:** Critical/high/medium/low severity levels
 3. **Recommendations Engine:** Automated guidance on version bumps
 4. **Migration Planning:** Required documentation for breaking changes
 
 **Evidence Artifacts:**
+
 - `diff-reports/*.json` - Risk assessment in diff reports
 - `/scripts/schema-diff.ts` - Risk categorization logic
 - `/api-schemas/VERSION_POLICY.md` - Risk mitigation procedures
@@ -132,12 +141,14 @@ api-contracts/
 **Control Requirement:** The entity implements policies and procedures to ensure that inputs and outputs are complete, accurate, timely, and valid to meet the entity's objectives.
 
 **Implementation:**
+
 1. **Schema Validation:** Input/output contracts enforced via snapshots
 2. **Version Detection:** Request version validation middleware
 3. **Response Headers:** Version metadata in all API responses
 4. **Contract Testing:** Automated diff against known-good snapshots
 
 **Evidence Artifacts:**
+
 - `/api-schemas/v1/openapi-spec-v1.json` - API contract specification
 - `/api-schemas/v1/graphql-schema-v1.graphql` - GraphQL contract
 - `/server/src/middleware/api-version.ts` - Enforcement middleware
@@ -234,16 +245,19 @@ This repository provides complete audit trails for:
 When creating a new API version (e.g., v2):
 
 1. Create snapshot directory:
+
    ```bash
    mkdir -p api-schemas/v2
    ```
 
 2. Generate snapshots:
+
    ```bash
    npm run schema:snapshot -- --version v2
    ```
 
 3. Update registry:
+
    ```bash
    # Edit api-schemas/registry.json
    # Add v2 to supported versions
@@ -251,6 +265,7 @@ When creating a new API version (e.g., v2):
    ```
 
 4. Create migration guide:
+
    ```bash
    # Document in api-schemas/VERSION_POLICY.md
    # Add v1-to-v2 migration section
@@ -265,6 +280,7 @@ When creating a new API version (e.g., v2):
 ### Deprecating a Version
 
 1. Update registry status:
+
    ```json
    {
      "deprecated": ["v1"],

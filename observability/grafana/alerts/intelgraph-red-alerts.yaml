@@ -15,7 +15,7 @@ groups:
           team: sre
           channel: pager
         annotations:
-          summary: 'High error rate for {{ $labels.service }}'
+          summary: "High error rate for {{ $labels.service }}"
           description: >-
             5xx error ratio is above 5% for service {{ $labels.service }} over the last 5 minutes.
             Investigate recent deploys, dependency health, and upstream timeouts.
@@ -31,7 +31,7 @@ groups:
           team: sre
           channel: alerts
         annotations:
-          summary: 'p95 latency regression for {{ $labels.service }}'
+          summary: "p95 latency regression for {{ $labels.service }}"
           description: >-
             The 95th percentile latency is above 750ms for 10m. Check downstream dependency health
             and recent configuration changes before paging end users.
@@ -49,7 +49,7 @@ groups:
           team: sre
           channel: alerts
         annotations:
-          summary: 'CPU saturation in {{ $labels.namespace }}'
+          summary: "CPU saturation in {{ $labels.namespace }}"
           description: >-
             Namespace {{ $labels.namespace }} is consuming more than 85% of provisioned CPU for 10m.
             Consider scaling the workload or checking for runaway requests.
@@ -67,7 +67,7 @@ groups:
           team: sre
           channel: alerts
         annotations:
-          summary: 'Memory saturation in {{ $labels.namespace }}'
+          summary: "Memory saturation in {{ $labels.namespace }}"
           description: >-
             Namespace {{ $labels.namespace }} is above 90% of provisioned memory for 10m. Review pod
             limits and recent deployment changes to avoid OOMKills.

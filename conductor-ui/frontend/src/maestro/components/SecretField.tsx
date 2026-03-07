@@ -1,9 +1,5 @@
-import React, { useState } from 'react';
-import {
-  maskSecret,
-  createSecureCopy,
-  validateSecretStrength,
-} from '../utils/secretUtils';
+import React, { useState } from "react";
+import { maskSecret, createSecureCopy, validateSecretStrength } from "../utils/secretUtils";
 
 interface SecretFieldProps {
   label: string;
@@ -24,14 +20,13 @@ const SecretField: React.FC<SecretFieldProps> = ({
   allowCopy = false,
   allowReveal = true,
   showStrengthIndicator = false,
-  className = '',
+  className = "",
 }) => {
   const [isRevealed, setIsRevealed] = useState(false);
   const [copied, setCopied] = useState(false);
 
   const displayValue = isRevealed ? value : maskSecret(value);
-  const validation =
-    showStrengthIndicator && value ? validateSecretStrength(value) : null;
+  const validation = showStrengthIndicator && value ? validateSecretStrength(value) : null;
 
   const handleCopy = createSecureCopy(value, () => {
     setCopied(true);
@@ -43,7 +38,7 @@ const SecretField: React.FC<SecretFieldProps> = ({
       setIsRevealed(false);
     } else {
       const confirmed = window.confirm(
-        `This will reveal the ${label.toLowerCase()} in plain text. Are you sure?`,
+        `This will reveal the ${label.toLowerCase()} in plain text. Are you sure?`
       );
       if (confirmed) {
         setIsRevealed(true);
@@ -61,14 +56,14 @@ const SecretField: React.FC<SecretFieldProps> = ({
           <span
             className={`ml-2 text-xs ${
               validation.isValid
-                ? 'text-green-600'
+                ? "text-green-600"
                 : validation.score > 2
-                  ? 'text-yellow-600'
-                  : 'text-red-600'
+                  ? "text-yellow-600"
+                  : "text-red-600"
             }`}
           >
-            Security: {validation.score}/5 {'★'.repeat(validation.score)}
-            {'☆'.repeat(5 - validation.score)}
+            Security: {validation.score}/5 {"★".repeat(validation.score)}
+            {"☆".repeat(5 - validation.score)}
           </span>
         )}
       </label>
@@ -81,7 +76,7 @@ const SecretField: React.FC<SecretFieldProps> = ({
             </div>
           ) : (
             <input
-              type={isRevealed ? 'text' : 'password'}
+              type={isRevealed ? "text" : "password"}
               value={value}
               onChange={(e) => onChange?.(e.target.value)}
               className="flex-1 px-3 py-2 border border-slate-200 rounded-l-md font-mono text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -95,15 +90,10 @@ const SecretField: React.FC<SecretFieldProps> = ({
                 type="button"
                 onClick={toggleReveal}
                 className="px-3 py-2 text-sm text-slate-600 hover:text-slate-800 hover:bg-slate-100"
-                title={isRevealed ? 'Hide' : 'Reveal'}
+                title={isRevealed ? "Hide" : "Reveal"}
               >
                 {isRevealed ? (
-                  <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -112,12 +102,7 @@ const SecretField: React.FC<SecretFieldProps> = ({
                     />
                   </svg>
                 ) : (
-                  <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -157,12 +142,7 @@ const SecretField: React.FC<SecretFieldProps> = ({
                     />
                   </svg>
                 ) : (
-                  <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"

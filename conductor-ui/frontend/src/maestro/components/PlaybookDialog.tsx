@@ -1,6 +1,6 @@
-import React, { useRef, useState } from 'react';
-import { api } from '../api';
-import { useFocusTrap } from '../utils/useFocusTrap';
+import React, { useRef, useState } from "react";
+import { api } from "../api";
+import { useFocusTrap } from "../utils/useFocusTrap";
 
 export default function PlaybookDialog({
   open,
@@ -39,9 +39,7 @@ export default function PlaybookDialog({
           <div className="mb-1">Signature</div>
           <code className="break-all text-xs">{sig}</code>
           {providerGuess && (
-            <div className="mt-2 text-xs text-gray-500">
-              Provider: {providerGuess}
-            </div>
+            <div className="mt-2 text-xs text-gray-500">Provider: {providerGuess}</div>
           )}
         </div>
         <div className="mt-3 flex gap-2">
@@ -56,9 +54,9 @@ export default function PlaybookDialog({
                 const set = new Set(pol.allowSignatures || []);
                 set.add(sig);
                 await putDLQPolicy({ allowSignatures: Array.from(set) });
-                setMsg('Added to auto-replay allowlist');
+                setMsg("Added to auto-replay allowlist");
               } catch (e: any) {
-                setMsg(e?.message || 'Failed');
+                setMsg(e?.message || "Failed");
               } finally {
                 setBusy(false);
               }

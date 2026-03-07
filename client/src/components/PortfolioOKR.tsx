@@ -1,15 +1,15 @@
-import React, { useEffect, useState } from 'react';
-import $ from 'jquery';
+import React, { useEffect, useState } from "react";
+import $ from "jquery";
 export default function PortfolioOKR() {
   const [rows, setRows] = useState<any[]>([]);
   useEffect(() => {
     const controller = new AbortController();
-    fetch('/api/pm/okr/summary', { signal: controller.signal })
+    fetch("/api/pm/okr/summary", { signal: controller.signal })
       .then((r) => r.json())
       .then(setRows)
       .catch((err) => {
-        if (err.name !== 'AbortError') {
-          console.error('Fetch error:', err);
+        if (err.name !== "AbortError") {
+          console.error("Fetch error:", err);
         }
       });
     return () => controller.abort();

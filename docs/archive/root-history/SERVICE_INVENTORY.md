@@ -2,7 +2,7 @@
 
 **Generated:** 2025-11-21  
 **Total Services:** 154  
-**Total Packages:** 62  
+**Total Packages:** 62
 
 ---
 
@@ -24,6 +24,7 @@ The Summit platform is a comprehensive intelligence and orchestration system wit
 ### A. PROVENANCE & AUDIT SERVICES
 
 #### 1. **prov-ledger** (Provenance Ledger Service)
+
 - **Entry Point:** `/home/user/summit/services/prov-ledger/src/index.ts`
 - **Technology Stack:** Node.js/TypeScript + Fastify + PostgreSQL
 - **Key Dependencies:**
@@ -32,7 +33,6 @@ The Summit platform is a comprehensive intelligence and orchestration system wit
   - crypto - Hash generation and verification
   - zod (^4.1.12) - Schema validation
   - pino (^10.1.0) - Structured logging
-  
 - **API Endpoints:**
   - `POST /claims` - Create a new claim with content, signature, and metadata
   - `GET /claims/:id` - Retrieve claim by ID
@@ -57,6 +57,7 @@ The Summit platform is a comprehensive intelligence and orchestration system wit
 ---
 
 #### 2. **audit-log** Service
+
 - **Entry Point:** Unknown (likely archive or legacy)
 - **Technology Stack:** TypeScript
 - **Key Functionality:** Audit log integrity tracking and testing
@@ -67,6 +68,7 @@ The Summit platform is a comprehensive intelligence and orchestration system wit
 ---
 
 #### 3. **auditlake** Service
+
 - **Entry Point:** `/home/user/summit/services/auditlake/src/audit-lake-engine.ts`
 - **Key Features:** Central audit event aggregation and analysis
 - **Integration Points:** Provenance ledger, policy systems
@@ -74,6 +76,7 @@ The Summit platform is a comprehensive intelligence and orchestration system wit
 ---
 
 #### 4. **audit** Service (Lightweight Python)
+
 - **Entry Point:** `/home/user/summit/services/audit/anchor_daily.py`
 - **Technology Stack:** Python
 - **Key Features:** Daily anchor audits for data integrity
@@ -83,6 +86,7 @@ The Summit platform is a comprehensive intelligence and orchestration system wit
 ### B. AUTHORIZATION & POLICY SERVICES
 
 #### 5. **authz-gateway** (Authorization Gateway)
+
 - **Entry Point:** `/home/user/summit/services/authz-gateway/src/index.ts`
 - **Technology Stack:** Node.js/Express + JOSE + OpenTelemetry
 - **Key Dependencies:**
@@ -90,7 +94,7 @@ The Summit platform is a comprehensive intelligence and orchestration system wit
   - jose (^6.1.0) - JWT handling
   - http-proxy-middleware (^3.0.5) - Request proxying
   - pino (^10.1.0) - Logging
-  - @opentelemetry/* - Observability
+  - @opentelemetry/\* - Observability
 
 - **API Endpoints:**
   - `POST /auth/login` - User authentication
@@ -110,6 +114,7 @@ The Summit platform is a comprehensive intelligence and orchestration system wit
   - **Policy Engine**: Attribute-based access control (ABAC) with OPA
 
 - **Authorization Decision Structure:**
+
   ```javascript
   {
     allow: boolean,
@@ -127,6 +132,7 @@ The Summit platform is a comprehensive intelligence and orchestration system wit
 ---
 
 #### 6. **policy-audit** Service
+
 - **Entry Point:** `/home/user/summit/services/policy-audit/src/`
 - **Technology Stack:** TypeScript
 - **Key Features:** Policy execution auditing and compliance tracking
@@ -135,6 +141,7 @@ The Summit platform is a comprehensive intelligence and orchestration system wit
 ---
 
 #### 7. **ga-policy-engine** Service
+
 - **Technology Stack:** Python/TypeScript
 - **Key Features:** Policy engine for general availability features
 - **Integration Points:** Main API gateway, authorization decisions
@@ -144,6 +151,7 @@ The Summit platform is a comprehensive intelligence and orchestration system wit
 ### C. GRAPH & DATA MANAGEMENT SERVICES
 
 #### 8. **graph-core** Service
+
 - **Entry Point:** `/home/user/summit/services/graph-core/src/index.ts`
 - **Technology Stack:** Node.js/Express + Neo4j + PostgreSQL
 - **Key Dependencies:**
@@ -164,8 +172,9 @@ The Summit platform is a comprehensive intelligence and orchestration system wit
 ---
 
 #### 9. **graph-api** Service
+
 - **Technology Stack:** TypeScript/Node.js
-- **Key Features:** 
+- **Key Features:**
   - Path algorithms (shortest path, traversal)
   - Graph analytics
   - Cypher query support
@@ -173,6 +182,7 @@ The Summit platform is a comprehensive intelligence and orchestration system wit
 ---
 
 #### 10. **data-spine** Service
+
 - **Entry Point:** `/home/user/summit/services/data-spine/src/`
 - **Technology Stack:** TypeScript
 - **Key Features:** Central data backbone, entity correlation
@@ -181,6 +191,7 @@ The Summit platform is a comprehensive intelligence and orchestration system wit
 ---
 
 #### 11. **entity-resolution** (ER) Service
+
 - **Entry Point:** `/home/user/summit/services/er/main.py`
 - **Technology Stack:** Python + ML pipelines
 - **Key Features:**
@@ -198,6 +209,7 @@ The Summit platform is a comprehensive intelligence and orchestration system wit
 ### D. ORCHESTRATION & WORKFLOW SERVICES
 
 #### 12. **conductor** Service
+
 - **Entry Point:** `/home/user/summit/services/conductor/src/index.ts`
 - **Technology Stack:** Node.js/TypeScript
 - **Key Components:**
@@ -220,12 +232,14 @@ The Summit platform is a comprehensive intelligence and orchestration system wit
 ---
 
 #### 13. **release** Service (Canary Manager)
+
 - **Entry Point:** `/home/user/summit/services/release/canary/canaryManager.ts`
 - **Key Features:** Release orchestration, canary deployments, health scoring
 
 ---
 
 #### 14. **workflow** Service
+
 - **Entry Point:** `/home/user/summit/services/workflow/package.json`
 - **Technology Stack:** Node.js/TypeScript
 - **Key Features:** Workflow execution engine
@@ -233,6 +247,7 @@ The Summit platform is a comprehensive intelligence and orchestration system wit
 ---
 
 #### 15. **agent-runtime** Service
+
 - **Entry Point:** `/home/user/summit/services/agent-runtime/src/index.ts`
 - **Technology Stack:** Node.js/TypeScript
 - **Key Features:** Runtime for autonomous agents
@@ -242,6 +257,7 @@ The Summit platform is a comprehensive intelligence and orchestration system wit
 ### E. API GATEWAY & INTEGRATION SERVICES
 
 #### 16. **api-gateway** Service
+
 - **Entry Point:** `/home/user/summit/services/api-gateway/src/index.ts`
 - **Technology Stack:** Node.js + Apollo Server + GraphQL
 - **Key Dependencies:**
@@ -274,6 +290,7 @@ The Summit platform is a comprehensive intelligence and orchestration system wit
 ---
 
 #### 17. **api** Service
+
 - **Entry Point:** `/home/user/summit/services/api/src/app.ts`
 - **Technology Stack:** Node.js/TypeScript
 - **Key Middleware:**
@@ -305,21 +322,25 @@ The Summit platform is a comprehensive intelligence and orchestration system wit
 ### F. INTELLIGENCE & ANALYSIS SERVICES
 
 #### 18. **insights** Service
+
 - **Key Features:** Intelligence insights and analysis
 
 ---
 
 #### 19. **search** Service
+
 - **Key Features:** Full-text and graph search
 
 ---
 
 #### 20. **rag** (Retrieval-Augmented Generation) Service
+
 - **Key Features:** RAG pipeline for document-based querying
 
 ---
 
 #### 21. **aml** (Anti-Money Laundering) Service
+
 - **Key Files:**
   - `src/entity-resolver.ts` - Entity linking for AML networks
   - `src/sanctions-screener.ts` - Sanctions list screening
@@ -329,6 +350,7 @@ The Summit platform is a comprehensive intelligence and orchestration system wit
 ### G. PROCESSING & TRANSFORMATION SERVICES
 
 #### 22. **docling-svc** Service
+
 - **Entry Point:** `/home/user/summit/services/docling-svc/src/server.ts`
 - **Key Features:** Document processing and extraction
 - **Provenance Tracking:** Records document processing lineage
@@ -337,12 +359,14 @@ The Summit platform is a comprehensive intelligence and orchestration system wit
 ---
 
 #### 23. **feed-processor** Service
+
 - **Entry Point:** `/home/user/summit/services/feed-processor/src/index.ts`
 - **Key Features:** Process and normalize feed data
 
 ---
 
 #### 24. **ingest** Services (Multiple)
+
 - **ingest** - Main ingestion service
 - **ingest-sandbox** - Sandboxed ingestion environment
 - **web-ingest** - Web content ingestion
@@ -350,6 +374,7 @@ The Summit platform is a comprehensive intelligence and orchestration system wit
 ---
 
 #### 25. **analytics** Service
+
 - **Key Features:** Offline evaluation and analytics
 - **Key Files:** `services/analytics/offline_eval.py`
 
@@ -358,7 +383,8 @@ The Summit platform is a comprehensive intelligence and orchestration system wit
 ### H. DATA QUALITY & VALIDATION SERVICES
 
 #### 26. **data-quality** Service
-- **Key Features:** 
+
+- **Key Features:**
   - Lineage tracking (`src/lineage-tracker.ts`)
   - Data quality monitoring
   - Anomaly detection
@@ -366,6 +392,7 @@ The Summit platform is a comprehensive intelligence and orchestration system wit
 ---
 
 #### 27. **anomaly** Service (Python)
+
 - **Entry Point:** `/home/user/summit/services/anomaly/engine.py`
 - **Key Components:**
   - `detectors.py` - Anomaly detection algorithms
@@ -377,6 +404,7 @@ The Summit platform is a comprehensive intelligence and orchestration system wit
 ### I. SPECIALIZED SERVICES
 
 #### 28. **privacy** Service
+
 - **Entry Point:** `/home/user/summit/services/privacy/src/`
 - **Key Features:**
   - Consent reconciliation
@@ -386,6 +414,7 @@ The Summit platform is a comprehensive intelligence and orchestration system wit
 ---
 
 #### 29. **compliance** Service
+
 - **Key Features:**
   - DSAR (Data Subject Access Request) handling
   - RTBF (Right to be Forgotten)
@@ -395,18 +424,21 @@ The Summit platform is a comprehensive intelligence and orchestration system wit
 ---
 
 #### 30. **exporter** Service
+
 - **Entry Point:** `/home/user/summit/services/exporter/src/index.ts`
 - **Key Features:** Data export with security controls
 
 ---
 
 #### 31. **geospatial** Service (Python)
+
 - **Entry Point:** `/home/user/summit/services/geospatial/main.py`
 - **Key Features:** Geospatial analytics and mapping
 
 ---
 
 #### 32. **scheduler** Service
+
 - **Key Features:** Job scheduling and execution
 - **Admission Control:** `services/scheduler/admission/admission-controller.ts`
 
@@ -421,6 +453,7 @@ The Summit platform is a comprehensive intelligence and orchestration system wit
 ### A. ORCHESTRATION & WORKFLOW PACKAGES
 
 #### 1. **maestro-core**
+
 - **Purpose:** Core orchestration engine
 - **Location:** `/home/user/summit/packages/maestro-core/package.json`
 - **Key Dependencies:**
@@ -441,6 +474,7 @@ The Summit platform is a comprehensive intelligence and orchestration system wit
 ---
 
 #### 2. **maestro-cli**
+
 - **Purpose:** CLI for Maestro orchestration
 - **Key Commands:** run, dsar
 - **Integration:** Works with maestro-core
@@ -448,6 +482,7 @@ The Summit platform is a comprehensive intelligence and orchestration system wit
 ---
 
 #### 3. **maestroflow**
+
 - **Purpose:** Workflow DSL and execution
 - **Entry Point:** `/home/user/summit/packages/maestroflow/`
 
@@ -456,6 +491,7 @@ The Summit platform is a comprehensive intelligence and orchestration system wit
 ### B. PROVENANCE & AUDIT PACKAGES
 
 #### 4. **prov-ledger-sdk**
+
 - **Purpose:** TypeScript SDK for Provenance Ledger service
 - **Location:** `/home/user/summit/packages/prov-ledger-sdk/package.json`
 - **Dependencies:** zod (minimal)
@@ -464,18 +500,21 @@ The Summit platform is a comprehensive intelligence and orchestration system wit
 ---
 
 #### 5. **prov-ledger-client**
+
 - **Purpose:** Client library for prov-ledger interactions
 - **Integration:** Used by other packages and services
 
 ---
 
 #### 6. **prov-ledger** (Package)
+
 - **Purpose:** Package version of prov-ledger
 - **Exports:** Ledger client and types
 
 ---
 
 #### 7. **policy-audit** (Package)
+
 - **Purpose:** Policy audit and compliance tracking
 - **Integration:** Works with authority-compiler
 
@@ -484,6 +523,7 @@ The Summit platform is a comprehensive intelligence and orchestration system wit
 ### C. AUTHORITY & POLICY PACKAGES
 
 #### 8. **authority-compiler**
+
 - **Purpose:** Authority/License Compiler for Summit Platform
 - **Location:** `/home/user/summit/packages/authority-compiler/package.json`
 - **Description:** Runtime enforcement of authority policies
@@ -509,6 +549,7 @@ The Summit platform is a comprehensive intelligence and orchestration system wit
 ### D. SDK & CONNECTIVITY PACKAGES
 
 #### 9. **sdk-ts** (TypeScript SDK)
+
 - **Purpose:** TypeScript SDK for Summit platform
 - **Key Exports:**
   - `context.ts` - Context management
@@ -518,18 +559,21 @@ The Summit platform is a comprehensive intelligence and orchestration system wit
 ---
 
 #### 10. **sdk-py** (Python SDK)
+
 - **Purpose:** Python SDK for Summit platform
 - **Location:** `/home/user/summit/packages/sdk-py/`
 
 ---
 
 #### 11. **sdk-python** (Alt Python SDK)
+
 - **Purpose:** Alternative Python SDK
 - **Location:** `/home/user/summit/packages/sdk-python/`
 
 ---
 
 #### 12. **sdk** (Multi-language SDK)
+
 - **Purpose:** Polyglot SDK with language-specific packages
 - **Sub-packages:**
   - `sdk/secrets-js` - JavaScript secrets management
@@ -538,6 +582,7 @@ The Summit platform is a comprehensive intelligence and orchestration system wit
 ---
 
 #### 13. **common-types**
+
 - **Purpose:** Shared type definitions across platform
 - **Key Exports:**
   - `types.ts` - Core types
@@ -546,6 +591,7 @@ The Summit platform is a comprehensive intelligence and orchestration system wit
 ---
 
 #### 14. **connector-sdk**
+
 - **Purpose:** SDK for building platform connectors
 - **Integration Points:** External data sources, APIs
 
@@ -554,18 +600,21 @@ The Summit platform is a comprehensive intelligence and orchestration system wit
 ### E. INTELLIGENCE & ANALYSIS PACKAGES
 
 #### 15. **graphai** & **graph-ai-core**
+
 - **Purpose:** AI-enhanced graph operations
 - **Key Files:** Graph algorithms, AI model integration
 
 ---
 
 #### 16. **narrative-engine**
+
 - **Purpose:** Generate narratives from data
 - **Integration:** Story/report generation from intelligence
 
 ---
 
 #### 17. **govbrief** (Government Briefing)
+
 - **Purpose:** Briefing document generation
 - **Key Features:**
   - `pcs.ts` - Briefing creation
@@ -574,36 +623,42 @@ The Summit platform is a comprehensive intelligence and orchestration system wit
 ---
 
 #### 18. **finintel** (Financial Intelligence)
+
 - **Purpose:** Financial intelligence analysis
 - **Integration:** Transaction analysis, sanctions screening
 
 ---
 
 #### 19. **cyberintel**
+
 - **Purpose:** Cybersecurity intelligence
 - **Location:** `/home/user/summit/packages/cyberintel/`
 
 ---
 
 #### 20. **osint**
+
 - **Purpose:** Open Source Intelligence package
 - **Integration:** Web scraping, OSINT tool integration
 
 ---
 
 #### 21. **influence-mining**
+
 - **Purpose:** Influence and network analysis
 - **Feature:** Detect influence networks and key actors
 
 ---
 
 #### 22. **deception-detector**
+
 - **Purpose:** Deception detection algorithms
 - **Use Case:** Misinformation/disinformation detection
 
 ---
 
 #### 23. **psyops-module**
+
 - **Purpose:** Psychological operations analysis
 - **Integration:** Cognitive bias detection, narrative analysis
 
@@ -612,12 +667,14 @@ The Summit platform is a comprehensive intelligence and orchestration system wit
 ### F. DOMAIN-SPECIFIC PACKAGES
 
 #### 24. **event-booster**
+
 - **Purpose:** Event processing and enrichment
 - **Key Types:** Event data structures and operations
 
 ---
 
 #### 25. **liquid-nano**
+
 - **Purpose:** Lightweight liquid template engine
 - **Key Features:**
   - Runtime configuration
@@ -627,12 +684,14 @@ The Summit platform is a comprehensive intelligence and orchestration system wit
 ---
 
 #### 26. **mapping-dsl**
+
 - **Purpose:** Domain-Specific Language for data mapping
 - **Use Case:** Schema mapping, data transformation rules
 
 ---
 
 #### 27. **jira-integration**
+
 - **Purpose:** Jira integration package
 - **Key Files:**
   - `client.ts` - Jira API client
@@ -641,18 +700,21 @@ The Summit platform is a comprehensive intelligence and orchestration system wit
 ---
 
 #### 28. **lreg-exporter** (License Registry Exporter)
+
 - **Purpose:** Export license registry data
 - **Server Integration:** Exports to external systems
 
 ---
 
 #### 29. **hit-protocol** (Handy Integration Tool Protocol)
+
 - **Purpose:** Integration protocol definition
 - **Use Case:** Standard connector protocol
 
 ---
 
 #### 30. **hrn** (Hierarchical Resource Name)
+
 - **Purpose:** Resource naming and identification
 - **Integration:** Unique resource identification across platform
 
@@ -661,32 +723,38 @@ The Summit platform is a comprehensive intelligence and orchestration system wit
 ### G. SPECIALIZED PACKAGES
 
 #### 31. **adc** (Application Data Catalog)
+
 - **Purpose:** Catalog and discover applications
 
 ---
 
 #### 32. **aer-ledger** (Application Event Record Ledger)
+
 - **Purpose:** Application event tracking ledger
 
 ---
 
 #### 33. **afl-store** (Application Flow Store)
+
 - **Purpose:** Store and manage application workflows
 
 ---
 
 #### 34. **atl** (Application Template Library)
+
 - **Purpose:** Templates for application development
 
 ---
 
 #### 35. **canary-lattice**
+
 - **Purpose:** Canary deployment orchestration
 - **Integration:** Release management
 
 ---
 
 #### 36. **canonical-entities**
+
 - **Purpose:** Canonical entity definitions
 - **Key Files:**
   - `types.ts` - Entity type definitions
@@ -695,75 +763,88 @@ The Summit platform is a comprehensive intelligence and orchestration system wit
 ---
 
 #### 37. **contracts**
+
 - **Purpose:** API and service contracts
 - **Integration:** Contract testing, schema validation
 
 ---
 
 #### 38. **crsp** (Compliance Risk Scoring Platform)
+
 - **Purpose:** Compliance risk calculation
 - **Key Tests:** Compliance scoring algorithms
 
 ---
 
 #### 39. **gdr** (Global Data Registry)
+
 - **Purpose:** Central data registry
 - **Key Tests:** Registry operations
 
 ---
 
 #### 40. **gateway-tariff**
+
 - **Purpose:** API gateway tariffing/billing
 - **Integration:** Rate limiting, billing
 
 ---
 
 #### 41. **gml** (Graph Modeling Language)
+
 - **Purpose:** Language for graph definitions
 - **Components:** Type system, validation
 
 ---
 
 #### 42. **geo** & **geotemporal**
+
 - **Purpose:** Geographic and temporal data handling
 - **Use Case:** Location-based intelligence, temporal queries
 
 ---
 
 #### 43. **kpw-media** (Key Person Tracking - Media)
+
 - **Purpose:** Media analysis for key figures
 
 ---
 
 #### 44. **kompromat-sim** (Compromise Material Simulator)
+
 - **Purpose:** Simulation of compromise scenarios
 - **Note:** Appears to be for red-teaming or scenario analysis
 
 ---
 
 #### 45. **ledger-server**
+
 - **Purpose:** Server-side ledger management
 
 ---
 
 #### 46. **marketplace**
+
 - **Purpose:** Platform marketplace for services/plugins
 
 ---
 
 #### 47. **rptc** (Report Template Collection)
+
 - **Purpose:** Report templates
 - **Integration:** Report generation
 
 ---
 
 #### 48. **tasks-core**
+
 - **Purpose:** Core task execution framework
 - **Integration:** Workflow task execution
 
 ---
 
 #### 49. **types**
+
 - **Purpose:** Shared type definitions
 - **Scope:** Platform-wide types
 
@@ -778,6 +859,7 @@ The Summit platform is a comprehensive intelligence and orchestration system wit
 ### A. KEY DIRECTORIES & COMPONENTS
 
 #### 1. **Middleware** (`/server/src/middleware/`)
+
 Essential request processing middleware:
 
 ```
@@ -809,6 +891,7 @@ Key Middleware Files:
 #### 2. **GraphQL** (`/server/src/graphql/`)
 
 ##### Schema Files:
+
 ```
 Key Schema Files:
 ├── schema.provenance.ts - Provenance types and queries
@@ -818,6 +901,7 @@ Key Schema Files:
 ```
 
 ##### Resolver Files (30+):
+
 ```
 Major Resolver Groups:
 ├── resolvers.ts - Main resolvers
@@ -842,6 +926,7 @@ Major Resolver Groups:
 ```
 
 ##### Plugins:
+
 ```
 GraphQL Plugins:
 ├── auditLogger.ts - Audit logging plugin
@@ -856,6 +941,7 @@ GraphQL Plugins:
 #### 3. **Services** (`/server/src/services/`)
 
 Over 150 services including:
+
 - **AI/ML Services:** AIExtractionService, AIQueueService, AdvancedMLService
 - **Analytics:** AdvancedAnalyticsService, GraphAnalyticsService
 - **Entity/Graph:** EntityResolutionService, EntityModelService, GraphStore, GraphOpsService
@@ -908,6 +994,7 @@ Additional Structure:
 ### A. PROVENANCE ARCHITECTURE
 
 #### Services:
+
 1. **prov-ledger** - Central provenance ledger
    - Claims-based tracking
    - Hash verification
@@ -922,11 +1009,13 @@ Additional Structure:
 4. **auditlake** - Audit lake aggregation
 
 #### Packages:
+
 1. **prov-ledger-sdk** - TypeScript client
 2. **prov-ledger-client** - Client library
 3. **prov-ledger** - Package version
 
 #### GraphQL Integration:
+
 - **schema.provenance.ts** - Provenance type definitions
 - Queries for retrieving claims and lineage
 - Integration with api-gateway
@@ -934,12 +1023,14 @@ Additional Structure:
 ### B. AUDIT TRACKING
 
 #### In-Service Audit Logs:
+
 - **API Service:** `/home/user/summit/services/api/src/middleware/auditLog.ts`
   - Circular buffer (max 1000 events)
   - Timestamp, user, action, details, IP
   - Accessible via `getAuditEvents()` function
 
 #### Policy Audit:
+
 - **authz-gateway:** Records authorization decisions
 - **policy-audit service:** Compliance tracking
 - **GraphQL plugins:** auditLogger.ts records all GraphQL operations
@@ -947,11 +1038,13 @@ Additional Structure:
 ### C. LINEAGE TRACKING
 
 #### Data Quality Service:
+
 - `lineage-tracker.ts` - Tracks data transformations
 - Records source->transform->target relationships
 - Integrates with provenance ledger
 
 #### Conductor Ledger:
+
 - `conductor/src/provenance/ledger.ts`
 - **ProvenanceRecord structure:**
   ```typescript
@@ -974,11 +1067,13 @@ Additional Structure:
 ### D. COMPLIANCE & DATA RETENTION
 
 #### Compliance Service:
+
 - DSAR worker (`compliance/workers/dsar_worker.ts`)
 - RTBF worker (`compliance/workers/rtbf_worker.ts`)
 - Evidence collection (`compliance/evidence_collector.ts`)
 
 #### Privacy Controls:
+
 - **privacy-labeler:** Labels data with privacy classifications
 - **privacy service:** Consent reconciliation
 - **PII redaction:** Middleware for sensitive data masking
@@ -990,11 +1085,13 @@ Additional Structure:
 ### A. POLICY EVALUATION ARCHITECTURE
 
 #### OPA Integration (Open Policy Agent):
+
 - **OPA URL:** Environment variable `OPA_URL` (default: http://localhost:8181/v1/data/summit/abac/decision)
 - **Policy Format:** Rego language rules
 - **Evaluation Pattern:** POST with input JSON
 
 #### Key Middleware:
+
 1. **opa-abac.ts** - Main OPA-based ABAC enforcement
    - Evaluates OIDC JWT tokens
    - Builds policy input from user/resource/action/context
@@ -1007,11 +1104,13 @@ Additional Structure:
 ### B. AUTHORIZATION COMPONENTS
 
 #### authz-gateway:
+
 - **AttributeService**: Caches subject/resource attributes
 - **Policy Decision:** Allow/Deny with obligations
 - **Step-up Authentication:** WebAuthn challenges for high-risk operations
 
 #### Authority Compiler (Package):
+
 - **Runtime Policy Enforcement**
 - **Components:**
   - `compiler.ts` - Compile policies to runtime form
@@ -1020,6 +1119,7 @@ Additional Structure:
   - `schema/policy.schema.ts` - Policy schema (Zod)
 
 #### Access Control Models:
+
 1. **RBAC** (Role-Based Access Control)
    - `middleware/rbac.ts`
    - Role definitions and membership
@@ -1036,6 +1136,7 @@ Additional Structure:
 ### C. AUTHORIZATION CONTEXT
 
 #### Policy Input Structure (OPA):
+
 ```typescript
 {
   user: {
@@ -1067,6 +1168,7 @@ Additional Structure:
 ```
 
 #### Policy Decision Result:
+
 ```typescript
 {
   allowed: boolean,
@@ -1105,19 +1207,23 @@ Additional Structure:
 ### E. POLICY ENFORCEMENT POINTS
 
 #### GraphQL Layer:
+
 - **graphql-authz.ts** - Authorization directive
 - **graphql-hardening.ts** - Security hardening
 - **schema directives** - @auth, @policy annotations
 
 #### API Gateway:
+
 - **Policy middleware chain** (`api-gateway/src/middleware/policy.ts`)
 - Per-endpoint authorization
 
 #### Service Layer:
+
 - **maestro-authz.ts** - Orchestration-specific authorization
 - **policy-sidecar** - Sidecar for sidecar architecture
 
 #### Data Layer:
+
 - **Reason-for-Access (RFA)** validation
 - `x-reason-for-access` header requirement
 - Appeal mechanism for denials
@@ -1125,6 +1231,7 @@ Additional Structure:
 ### F. POLICY CONFIGURATION
 
 #### Environment Variables:
+
 ```bash
 OPA_URL=http://localhost:8181/v1/data/summit/abac/decision
 POLICY_DRY_RUN=true|false  # Test mode
@@ -1133,6 +1240,7 @@ X_REASON_FOR_ACCESS=<purpose>  # Purpose tracking header
 ```
 
 #### Policy Features:
+
 - Dry-run mode for testing
 - Appeal system for denied requests
 - Obligation enforcement
@@ -1148,6 +1256,7 @@ X_REASON_FOR_ACCESS=<purpose>  # Purpose tracking header
 ### A. KEY REST ENDPOINTS
 
 #### Provenance Ledger Service:
+
 ```
 POST /claims
 GET /claims/:id
@@ -1159,6 +1268,7 @@ GET /health
 ```
 
 #### Authorization Gateway:
+
 ```
 POST /auth/login
 POST /auth/introspect
@@ -1174,6 +1284,7 @@ GET /metrics
 ### B. GRAPHQL SCHEMA HIGHLIGHTS
 
 #### Core Types:
+
 ```graphql
 scalar DateTime
 scalar JSON
@@ -1245,6 +1356,7 @@ type Forecast {
 ```
 
 #### Query Examples:
+
 ```graphql
 # Entity and relationship queries
 query {
@@ -1291,6 +1403,7 @@ query {
 ## PART 7: TECHNOLOGY STACK SUMMARY
 
 ### Languages & Runtimes:
+
 - **TypeScript** - Primary language for services and packages
 - **Python** - Data processing, ML, analytics
 - **JavaScript/Node.js** - Server-side runtime
@@ -1299,17 +1412,20 @@ query {
 ### Key Frameworks & Libraries:
 
 #### Node.js/Server:
+
 - **Express** - Web framework
 - **Apollo Server** - GraphQL server
 - **Fastify** - High-performance HTTP server
 - **NestJS** - Framework (likely in some services)
 
 #### Databases:
+
 - **PostgreSQL** - Relational data
 - **Neo4j** - Graph database
 - **Elasticsearch** (implied) - Search
 
 #### Authentication & Security:
+
 - **JOSE** - JWT handling
 - **OPA** - Policy evaluation
 - **SPIFFE** - Service identity
@@ -1317,18 +1433,21 @@ query {
 - **Helmet** - Security headers
 
 #### Observability:
+
 - **OpenTelemetry** - Distributed tracing
 - **Jaeger** - Trace collection
 - **Prometheus** - Metrics
 - **Pino** - Structured logging
 
 #### Data Processing:
+
 - **Zod** - Schema validation
 - **UUID** - ID generation
 - **Axios** - HTTP client
 - **JSDOM/Cheerio** - DOM parsing
 
 #### Testing:
+
 - **Jest** - Test runner
 - **Vitest** - Alternative test runner
 - **Supertest** - HTTP testing
@@ -1341,12 +1460,14 @@ query {
 ### Critical Integration Hubs:
 
 #### 1. Authorization Hub (authz-gateway)
+
 - Integrates with OPA for policy evaluation
 - Connects to AttributeService for subject/resource data
 - Provides JWT tokens with level-of-assurance
 - Output: Authorization decisions with obligations
 
 #### 2. Provenance Hub (prov-ledger)
+
 - Receives claims from all services
 - Tracks lineage through transforms
 - Generates manifest exports
@@ -1354,18 +1475,21 @@ query {
 - Output: Verifiable claim records with proofs
 
 #### 3. Audit Hub (audit-log, auditlake, GraphQL auditLogger)
+
 - Centralizes all audit events
 - Links authorization decisions to actions
 - Tracks policy violations
 - Retention and compliance tracking
 
 #### 4. Orchestration Hub (conductor, maestro-core)
+
 - Routes requests through policy gates
 - Records provenance at each step
 - Enforces budget controls
 - Integrates with RPC and authority validation
 
 #### 5. Data Integration Hub (API Gateway)
+
 - Delegates to specialized services
 - Enforces policy on all queries
 - Requires authority binding headers
@@ -1376,24 +1500,30 @@ query {
 ## RECOMMENDATIONS FOR STRATEGIC IMPLEMENTATION
 
 ### 1. Service Discovery Pattern:
+
 Use the prov-ledger as source of truth for service registry with provenance tracking.
 
 ### 2. Policy Enforcement:
+
 Leverage OPA at two levels:
+
 - Coarse-grained: authz-gateway for access decisions
 - Fine-grained: GraphQL directives for field-level control
 
 ### 3. Audit Trail Integration:
+
 - Mandate all services emit to prov-ledger
 - Use conductor for workflow audit points
 - Implement GraphQL auditLogger plugin for all mutations
 
 ### 4. Authority Binding:
+
 - Always require x-authority-id and x-reason-for-access headers
 - Validate against authority-compiler
 - Record in all audit logs
 
 ### 5. Lineage Tracking:
+
 - Use conductor provenance ledger for all transformations
 - Record input/output hashes at each step
 - Generate manifests for compliance reporting
@@ -1404,6 +1534,7 @@ Leverage OPA at two levels:
 
 **Total Services:** 154  
 **Key Service Categories:**
+
 - Provenance: 4 services
 - Authorization: 3 services
 - Graph/Data: 6 services
@@ -1418,6 +1549,7 @@ Leverage OPA at two levels:
 
 **Total Packages:** 62  
 **Key Package Categories:**
+
 - Orchestration: 3 packages
 - Provenance/Audit: 3 packages
 - Authority/Policy: 1 package
@@ -1425,4 +1557,3 @@ Leverage OPA at two levels:
 - Intelligence: 10+ packages
 - Domain-specific: 15+ packages
 - Infrastructure: 25+ packages
-

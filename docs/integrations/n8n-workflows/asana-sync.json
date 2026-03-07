@@ -95,7 +95,7 @@
         "operation": "search",
         "base": "={{$env.AIRTABLE_BASE_ID}}",
         "table": "Issues",
-        "filterByFormula": "=AND({platform}='Asana', {platform_id}='{{$json[\"gid\"]}}')" ,
+        "filterByFormula": "=AND({platform}='Asana', {platform_id}='{{$json[\"gid\"]}}')",
         "options": {
           "maxRecords": 1
         }

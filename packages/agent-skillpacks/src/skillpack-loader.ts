@@ -1,6 +1,6 @@
-import fs from 'node:fs/promises';
-import path from 'node:path';
-import { minimatch } from 'minimatch';
+import fs from "node:fs/promises";
+import path from "node:path";
+import { minimatch } from "minimatch";
 import {
   DistilledToolSchema,
   McpServerConfig,
@@ -12,13 +12,13 @@ import {
   ToolLoadingReport,
   ToolSchema,
   TriggerContext,
-} from './types.js';
-import { distillToolSchema, estimateTokenFootprint } from './schema-distiller.js';
-import { evaluateToolAccess, mergePolicies } from './policy-gate.js';
-import { loadMcpConfig, loadPolicyConfig, loadSkillpackManifest } from './skillpack-discovery.js';
-import { selectShard } from './shard-router.js';
+} from "./types.js";
+import { distillToolSchema, estimateTokenFootprint } from "./schema-distiller.js";
+import { evaluateToolAccess, mergePolicies } from "./policy-gate.js";
+import { loadMcpConfig, loadPolicyConfig, loadSkillpackManifest } from "./skillpack-discovery.js";
+import { selectShard } from "./shard-router.js";
 
-const DEFAULT_CACHE_DIR = path.join('.summit', 'mcp-cache');
+const DEFAULT_CACHE_DIR = path.join(".summit", "mcp-cache");
 
 const sortStrings = (values: string[]): string[] => [...values].sort();
 
@@ -43,13 +43,10 @@ const mergeMcpConfigs = (
   };
 };
 
-const resolveToolPatterns = (
-  availableTools: string[],
-  patterns: string[]
-): string[] => {
+const resolveToolPatterns = (availableTools: string[], patterns: string[]): string[] => {
   const resolved = new Set<string>();
   patterns.forEach((pattern) => {
-    if (pattern.includes('*')) {
+    if (pattern.includes("*")) {
       availableTools
         .filter((tool) => minimatch(tool, pattern, { matchBase: true }))
         .forEach((tool) => resolved.add(tool));
@@ -67,20 +64,17 @@ const readFullSchema = async (
 ): Promise<ToolSchema | null> => {
   const schemaPath = path.join(cacheDir, serverName, `${toolName}.json`);
   try {
-    const content = await fs.readFile(schemaPath, 'utf-8');
+    const content = await fs.readFile(schemaPath, "utf-8");
     return JSON.parse(content) as ToolSchema;
   } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
       return null;
     }
     throw error;
   }
 };
 
-const mapToolPatterns = (
-  serverConfig: McpServerConfig,
-  shard: string
-): string[] => {
+const mapToolPatterns = (serverConfig: McpServerConfig, shard: string): string[] => {
   if (serverConfig.shards?.[shard]?.length) {
     return serverConfig.shards[shard];
   }
@@ -99,7 +93,7 @@ const gatherShardNames = (config: SkillpackMcpConfig): Record<string, string[]> 
     if (server.shards) {
       Object.keys(server.shards).forEach((name) => shardNames.add(name));
     } else {
-      shardNames.add('default');
+      shardNames.add("default");
     }
   });
   return Object.fromEntries([...shardNames].map((name) => [name, [] as string[]]));
@@ -136,16 +130,19 @@ export const injectSkillpackTools = async (options: {
   const localMcpConfig = await loadMcpConfig(options.skillpackDir);
   const mergedMcpConfig = mergeMcpConfigs(localMcpConfig, options.globalMcpConfig);
   if (!mergedMcpConfig) {
-    throw new Error('Skillpack missing mcp.json and no global MCP config provided.');
+    throw new Error("Skillpack missing mcp.json and no global MCP config provided.");
   }
 
   const localPolicy = await loadPolicyConfig(options.skillpackDir);
-  const effectivePolicy = mergePolicies(options.policy ?? { defaultBehavior: 'deny' }, localPolicy ?? undefined);
+  const effectivePolicy = mergePolicies(
+    options.policy ?? { defaultBehavior: "deny" },
+    localPolicy ?? undefined
+  );
 
   const shardSelection = selectShard(gatherShardNames(mergedMcpConfig), options.shardContext);
 
   const cacheDir = options.cacheDir ?? DEFAULT_CACHE_DIR;
-  const environment = options.environment ?? 'dev';
+  const environment = options.environment ?? "dev";
   const toolsInjected: DistilledToolSchema[] = [];
   const injectionRecords: ToolInjectionRecord[] = [];
 
@@ -157,7 +154,7 @@ export const injectSkillpackTools = async (options: {
     if (patterns.length === 0) {
       throw new Error(`Tool selection empty for ${serverName}:${shardSelection.shard}`);
     }
-    if (patterns.some((pattern) => pattern.includes('*')) && available.length === 0) {
+    if (patterns.some((pattern) => pattern.includes("*")) && available.length === 0) {
       throw new Error(`Available tools missing for glob resolution on ${serverName}.`);
     }
     const selectedTools = resolveToolPatterns(available, patterns);
@@ -169,27 +166,24 @@ export const injectSkillpackTools = async (options: {
         environment,
       });
       const fullSchema = await readFullSchema(cacheDir, serverName, toolName);
-      const safetyNotes = [
-        `Policy: ${decision.reason}`,
-        `Environment: ${environment}`,
-      ];
+      const safetyNotes = [`Policy: ${decision.reason}`, `Environment: ${environment}`];
       const distilled = distillToolSchema(
-        fullSchema ?? { name: toolName, description: 'Schema cached pending.' },
+        fullSchema ?? { name: toolName, description: "Schema cached pending." },
         safetyNotes,
-        fullSchema ? 'cache' : 'placeholder'
+        fullSchema ? "cache" : "placeholder"
       );
 
       const justification = {
         expectedUtility: `Requested by shard ${shardSelection.shard}.`,
         tokenCost: distilled.tokenEstimate,
-        alternatives: ['Built-in toolset', 'Deferred schema expansion'],
+        alternatives: ["Built-in toolset", "Deferred schema expansion"],
         planStepRef: `skillpack:${manifest.name}:${shardSelection.shard}`,
       };
 
       injectionRecords.push({
         toolName,
         serverName,
-        mode: decision.allowed ? 'distilled' : 'distilled',
+        mode: decision.allowed ? "distilled" : "distilled",
         tokenEstimate: distilled.tokenEstimate,
         decision,
         justification,

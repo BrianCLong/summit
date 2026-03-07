@@ -11,7 +11,7 @@
       "type": "string",
       "enum": ["sha256", "sha512", "none"]
     },
-    "salt": {"type": "string"}
+    "salt": { "type": "string" }
   },
   "additionalProperties": false
 }

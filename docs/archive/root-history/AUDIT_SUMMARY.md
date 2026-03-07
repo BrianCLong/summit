@@ -23,12 +23,12 @@
 
 ## 📊 Key Metrics
 
-| Metric | Count |
-|--------|-------|
-| Package.json files | 355 |
-| Packages with multiple versions | 178 |
-| Potentially unused dependencies | ~170 |
-| Security vulnerabilities | 16 |
+| Metric                          | Count |
+| ------------------------------- | ----- |
+| Package.json files              | 355   |
+| Packages with multiple versions | 178   |
+| Potentially unused dependencies | ~170  |
+| Security vulnerabilities        | 16    |
 
 ---
 

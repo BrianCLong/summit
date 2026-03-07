@@ -1,9 +1,9 @@
 ---
-name: 'Issue #4: Backend GraphQL Query Performance Regression'
+name: "Issue #4: Backend GraphQL Query Performance Regression"
 about: Optimize GraphQL query times for multi-hop neighbor retrieval
-title: 'Issue #4: Backend GraphQL Query Performance Regression'
-labels: 'bug, performance, backend, graphql'
-assignees: ''
+title: "Issue #4: Backend GraphQL Query Performance Regression"
+labels: "bug, performance, backend, graphql"
+assignees: ""
 ---
 
 **Branch**: `fix/graphql-query-perf`

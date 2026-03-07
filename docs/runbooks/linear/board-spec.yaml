@@ -143,7 +143,7 @@ automations:
     trigger: issue.created
     actions:
       - add_label: triage-needed
-      - add_label_if: "source == automated"  # adds "automated" when created by agent
+      - add_label_if: "source == automated" # adds "automated" when created by agent
   - name: Block when governance link missing
     trigger: pr.opened
     condition: "!issue.linked_to_roadmap"

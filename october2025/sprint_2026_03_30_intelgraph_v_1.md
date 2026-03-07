@@ -128,21 +128,15 @@
 
 ```ts
 // server/src/plugins/sandbox.ts
-import { NodeVM } from 'vm2';
-export async function runPlugin(
-  code: string,
-  manifest: any,
-  ctx: any,
-  args: any,
-) {
-  if (!ctx.capBroker.allow(manifest.capabilities))
-    throw new Error('CapabilityDenied');
+import { NodeVM } from "vm2";
+export async function runPlugin(code: string, manifest: any, ctx: any, args: any) {
+  if (!ctx.capBroker.allow(manifest.capabilities)) throw new Error("CapabilityDenied");
   const vm = new NodeVM({
     sandbox: { args, ctx: ctx.safe },
     timeout: manifest.budgets?.ms || 800,
     eval: false,
     wasm: false,
-    console: 'redirect',
+    console: "redirect",
   });
   let memory = 0;
   const t0 = Date.now();
@@ -151,15 +145,11 @@ export async function runPlugin(
     const res = await Promise.race([
       Promise.resolve(mod.run(args, ctx.api)),
       new Promise((_, rej) =>
-        setTimeout(
-          () => rej(new Error('Timeout')),
-          manifest.budgets?.ms || 800,
-        ),
+        setTimeout(() => rej(new Error("Timeout")), manifest.budgets?.ms || 800)
       ),
     ]);
     const ms = Date.now() - t0;
-    if (ms > (manifest.budgets?.ms || 800))
-      throw new Error('BudgetExceeded:time');
+    if (ms > (manifest.budgets?.ms || 800)) throw new Error("BudgetExceeded:time");
     return { ok: true, res, ms };
   } catch (e) {
     return { ok: false, error: String(e) };
@@ -198,11 +188,11 @@ module.exports.run = async function (args, api) {
 
 ```ts
 // server/src/contracts/registry.ts
-import { readFileSync } from 'fs';
-import Ajv from 'ajv';
+import { readFileSync } from "fs";
+import Ajv from "ajv";
 const ajv = new Ajv({ allErrors: true });
 export function validate(schemaPath: string, payload: any) {
-  const schema = JSON.parse(readFileSync(schemaPath, 'utf8'));
+  const schema = JSON.parse(readFileSync(schemaPath, "utf8"));
   const validate = ajv.compile(schema);
   const ok = validate(payload);
   return { ok, errors: validate.errors };
@@ -212,15 +202,15 @@ export function validate(schemaPath: string, payload: any) {
 ```yaml
 # contracts/person.v1.json (excerpt)
 {
-  '$schema': 'http://json-schema.org/draft-07/schema#',
-  'title': 'PersonV1',
-  'type': 'object',
-  'required': ['name', 'id'],
-  'properties':
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "PersonV1",
+  "type": "object",
+  "required": ["name", "id"],
+  "properties":
     {
-      'id': { 'type': 'string' },
-      'name': { 'type': 'string' },
-      'dob': { 'type': ['string', 'null'], 'format': 'date' },
+      "id": { "type": "string" },
+      "name": { "type": "string" },
+      "dob": { "type": ["string", "null"], "format": "date" },
     },
 }
 ```
@@ -242,11 +232,7 @@ type ReviewTask {
 }
 
 type Mutation {
-  requestPolicyChange(
-    kind: String!
-    payload: JSON!
-    reason: String!
-  ): ReviewTask!
+  requestPolicyChange(kind: String!, payload: JSON!, reason: String!): ReviewTask!
   reviewApprove(id: ID!, note: String): ReviewTask!
   reviewDeny(id: ID!, reason: String!): ReviewTask!
 }
@@ -257,25 +243,25 @@ type Mutation {
 ```js
 // apps/web/src/features/plugins/jquery-market.js
 $(function () {
-  $(document).on('click', '.install', function () {
-    const id = $(this).data('id');
+  $(document).on("click", ".install", function () {
+    const id = $(this).data("id");
     $.ajax({
-      url: '/graphql',
-      method: 'POST',
-      contentType: 'application/json',
+      url: "/graphql",
+      method: "POST",
+      contentType: "application/json",
       data: JSON.stringify({
         query: `mutation{ pluginInstall(id:"${id}"){ id, capabilities } }`,
       }),
     });
   });
-  $(document).on('click', '#grant', function () {
+  $(document).on("click", "#grant", function () {
     const caps = collectCaps();
     $.ajax({
-      url: '/graphql',
-      method: 'POST',
-      contentType: 'application/json',
+      url: "/graphql",
+      method: "POST",
+      contentType: "application/json",
       data: JSON.stringify({
-        query: `mutation{ pluginGrant(id:"${$('#pid').val()}", caps:${JSON.stringify(caps)}) }`,
+        query: `mutation{ pluginGrant(id:"${$("#pid").val()}", caps:${JSON.stringify(caps)}) }`,
       }),
     });
   });
@@ -286,16 +272,16 @@ $(function () {
 
 ```ts
 // server/src/finops/meters.ts
-import { Counter, Histogram } from 'prom-client';
+import { Counter, Histogram } from "prom-client";
 export const pluginExec = new Histogram({
-  name: 'plugin_exec_ms',
-  help: 'Plugin exec time',
+  name: "plugin_exec_ms",
+  help: "Plugin exec time",
   buckets: [50, 100, 200, 400, 800, 1600],
 });
 export const pluginCost = new Counter({
-  name: 'plugin_rows_total',
-  help: 'Rows returned by plugin',
-  labelNames: ['plugin', 'org'],
+  name: "plugin_rows_total",
+  help: "Rows returned by plugin",
+  labelNames: ["plugin", "org"],
 });
 export function beforeRun(id: string) {
   return Date.now();
@@ -323,24 +309,23 @@ jobs:
 ### 4.10 k6 — Plugin & Governance Mix
 
 ```js
-import http from 'k6/http';
-export const options = { vus: 40, duration: '3m' };
+import http from "k6/http";
+export const options = { vus: 40, duration: "3m" };
 export default function () {
   http.post(
-    'http://localhost:4000/graphql',
+    "http://localhost:4000/graphql",
     JSON.stringify({
-      query:
-        'mutation{ pluginRun(id:"sample-enricher", input:{ q:"acme" }){ ok } }',
+      query: 'mutation{ pluginRun(id:"sample-enricher", input:{ q:"acme" }){ ok } }',
     }),
-    { headers: { 'Content-Type': 'application/json' } },
+    { headers: { "Content-Type": "application/json" } }
   );
   http.post(
-    'http://localhost:4000/graphql',
+    "http://localhost:4000/graphql",
     JSON.stringify({
       query:
         'mutation{ requestPolicyChange(kind:"export_gate", payload:{"threshold":0.9}, reason:"tighten export" ){ id } }',
     }),
-    { headers: { 'Content-Type': 'application/json' } },
+    { headers: { "Content-Type": "application/json" } }
   );
 }
 ```

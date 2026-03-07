@@ -7,28 +7,28 @@ metadata:
     cert-manager.io/cluster-issuer: letsencrypt-prod
 spec:
   rules:
-  - host: api.example.com
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: summit-server
-            port:
-              number: 4000
-  - host: app.example.com
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: summit-client
-            port:
-              number: 80
+    - host: api.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: summit-server
+                port:
+                  number: 4000
+    - host: app.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: summit-client
+                port:
+                  number: 80
   tls:
-  - hosts:
-    - api.example.com
-    - app.example.com
-    secretName: summit-tls
+    - hosts:
+        - api.example.com
+        - app.example.com
+      secretName: summit-tls

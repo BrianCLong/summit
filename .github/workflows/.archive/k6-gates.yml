@@ -7,14 +7,14 @@ on:
     branches: [main]
   workflow_dispatch:
   schedule:
-    - cron: '0 9 * * 1' # Weekly visibility into strict SLOs
+    - cron: "0 9 * * 1" # Weekly visibility into strict SLOs
 
 jobs:
   k6-smoke:
     runs-on: ubuntu-latest
     env:
       PNPM_CACHE_FOLDER: ~/.pnpm-store
-      NODE_VERSION: '20.x'
+      NODE_VERSION: "20.x"
 
     steps:
       - uses: actions/checkout@v4
@@ -22,7 +22,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Syntax check mock Maestro server
         run: node --check scripts/ci/mock-maestro-server.mjs

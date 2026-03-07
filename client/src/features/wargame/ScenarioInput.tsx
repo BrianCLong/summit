@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   TextField,
   Button,
@@ -13,9 +13,9 @@ import {
   InputLabel,
   Select,
   MenuItem,
-} from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+} from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
+import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 
 interface SimulationInput {
   crisisType: string;
@@ -40,29 +40,25 @@ interface ScenarioInputProps {
 }
 
 const predefinedCrisisTypes = [
-  'geopolitical_conflict',
-  'cyber_attack',
-  'natural_disaster',
-  'public_health_crisis',
+  "geopolitical_conflict",
+  "cyber_attack",
+  "natural_disaster",
+  "public_health_crisis",
 ];
 const predefinedTargetAudiences = [
-  'allies',
-  'neutrals',
-  'adversaries',
-  'domestic_population',
-  'international_community',
+  "allies",
+  "neutrals",
+  "adversaries",
+  "domestic_population",
+  "international_community",
 ];
 const predefinedKeyNarratives = [
-  'disinformation_campaigns',
-  'unity_messaging',
-  'threat_mitigation',
-  'economic_stability',
+  "disinformation_campaigns",
+  "unity_messaging",
+  "threat_mitigation",
+  "economic_stability",
 ];
-const predefinedAdversaryProfiles = [
-  'state_actor_X',
-  'non_state_actor_Y',
-  'insider_threat_Z',
-];
+const predefinedAdversaryProfiles = ["state_actor_X", "non_state_actor_Y", "insider_threat_Z"];
 
 const ScenarioInput: React.FC<ScenarioInputProps> = ({
   onRunSimulation,
@@ -70,36 +66,31 @@ const ScenarioInput: React.FC<ScenarioInputProps> = ({
   onSelectScenario,
   selectedScenarioId,
 }) => {
-  const [crisisType, setCrisisType] = useState<string>('');
+  const [crisisType, setCrisisType] = useState<string>("");
   const [targetAudiences, setTargetAudiences] = useState<string[]>([]);
   const [keyNarratives, setKeyNarratives] = useState<string[]>([]);
   const [adversaryProfiles, setAdversaryProfiles] = useState<string[]>([]);
-  const [customSimulationParameters, setCustomSimulationParameters] =
-    useState<string>('{}');
+  const [customSimulationParameters, setCustomSimulationParameters] = useState<string>("{}");
   const [inputError, setInputError] = useState<string | null>(null);
 
   useEffect(() => {
     if (selectedScenarioId) {
-      const scenario = existingScenarios.find(
-        (s) => s.id === selectedScenarioId,
-      );
+      const scenario = existingScenarios.find((s) => s.id === selectedScenarioId);
       if (scenario) {
         setCrisisType(scenario.crisisType);
         setTargetAudiences(scenario.targetAudiences);
         setKeyNarratives(scenario.keyNarratives);
         setAdversaryProfiles(scenario.adversaryProfiles);
         // Assuming simulationParameters are stored as JSON string in the backend
-        setCustomSimulationParameters(
-          JSON.stringify(scenario.simulationParameters || {}, null, 2),
-        );
+        setCustomSimulationParameters(JSON.stringify(scenario.simulationParameters || {}, null, 2));
       }
     } else {
       // Reset form when no scenario is selected
-      setCrisisType('');
+      setCrisisType("");
       setTargetAudiences([]);
       setKeyNarratives([]);
       setAdversaryProfiles([]);
-      setCustomSimulationParameters('{}');
+      setCustomSimulationParameters("{}");
     }
   }, [selectedScenarioId, existingScenarios]);
 
@@ -116,29 +107,27 @@ const ScenarioInput: React.FC<ScenarioInputProps> = ({
       onRunSimulation(input);
       setInputError(null);
     } catch (e) {
-      setInputError('Invalid JSON for Simulation Parameters.');
-      console.error('JSON parsing error:', e);
+      setInputError("Invalid JSON for Simulation Parameters.");
+      console.error("JSON parsing error:", e);
     }
   };
 
   const handleSelectExistingScenario = (event: any) => {
     const scenarioId = event.target.value;
-    onSelectScenario(scenarioId === '' ? null : scenarioId);
+    onSelectScenario(scenarioId === "" ? null : scenarioId);
   };
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
       <Typography variant="h6" gutterBottom>
         Define or Select Crisis Scenario
       </Typography>
 
       <FormControl fullWidth>
-        <InputLabel id="select-scenario-label">
-          Select Existing Scenario
-        </InputLabel>
+        <InputLabel id="select-scenario-label">Select Existing Scenario</InputLabel>
         <Select
           labelId="select-scenario-label"
-          value={selectedScenarioId || ''}
+          value={selectedScenarioId || ""}
           label="Select Existing Scenario"
           onChange={handleSelectExistingScenario}
         >
@@ -147,8 +136,7 @@ const ScenarioInput: React.FC<ScenarioInputProps> = ({
           </MenuItem>
           {existingScenarios.map((scenario) => (
             <MenuItem key={scenario.id} value={scenario.id}>
-              {scenario.crisisType} -{' '}
-              {new Date(scenario.createdAt).toLocaleDateString()}
+              {scenario.crisisType} - {new Date(scenario.createdAt).toLocaleDateString()}
             </MenuItem>
           ))}
         </Select>
@@ -178,19 +166,11 @@ const ScenarioInput: React.FC<ScenarioInputProps> = ({
         freeSolo
         renderTags={(value, getTagProps) =>
           value.map((option, index) => (
-            <Chip
-              variant="outlined"
-              label={option}
-              {...getTagProps({ index })}
-            />
+            <Chip variant="outlined" label={option} {...getTagProps({ index })} />
           ))
         }
         renderInput={(params) => (
-          <TextField
-            {...params}
-            label="Target Audiences"
-            placeholder="Add audiences"
-          />
+          <TextField {...params} label="Target Audiences" placeholder="Add audiences" />
         )}
       />
 
@@ -203,19 +183,11 @@ const ScenarioInput: React.FC<ScenarioInputProps> = ({
         freeSolo
         renderTags={(value, getTagProps) =>
           value.map((option, index) => (
-            <Chip
-              variant="outlined"
-              label={option}
-              {...getTagProps({ index })}
-            />
+            <Chip variant="outlined" label={option} {...getTagProps({ index })} />
           ))
         }
         renderInput={(params) => (
-          <TextField
-            {...params}
-            label="Key Narratives"
-            placeholder="Add narratives"
-          />
+          <TextField {...params} label="Key Narratives" placeholder="Add narratives" />
         )}
       />
 
@@ -228,19 +200,11 @@ const ScenarioInput: React.FC<ScenarioInputProps> = ({
         freeSolo
         renderTags={(value, getTagProps) =>
           value.map((option, index) => (
-            <Chip
-              variant="outlined"
-              label={option}
-              {...getTagProps({ index })}
-            />
+            <Chip variant="outlined" label={option} {...getTagProps({ index })} />
           ))
         }
         renderInput={(params) => (
-          <TextField
-            {...params}
-            label="Adversary Profiles"
-            placeholder="Add profiles"
-          />
+          <TextField {...params} label="Adversary Profiles" placeholder="Add profiles" />
         )}
       />
 

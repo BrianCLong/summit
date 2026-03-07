@@ -4,12 +4,12 @@
   "type": "object",
   "required": ["evidence_id"],
   "properties": {
-    "evidence_id": {"type": "string"},
-    "late_data_detected_count": {"type": "integer"},
-    "schema_drift_detected_count": {"type": "integer"},
-    "file_format_violation_count": {"type": "integer"},
-    "cost_budget_violation_count": {"type": "integer"},
-    "reconcile_mismatch_count": {"type": "integer"}
+    "evidence_id": { "type": "string" },
+    "late_data_detected_count": { "type": "integer" },
+    "schema_drift_detected_count": { "type": "integer" },
+    "file_format_violation_count": { "type": "integer" },
+    "cost_budget_violation_count": { "type": "integer" },
+    "reconcile_mismatch_count": { "type": "integer" }
   },
   "additionalProperties": true
 }

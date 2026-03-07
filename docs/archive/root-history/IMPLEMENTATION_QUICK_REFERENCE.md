@@ -3,6 +3,7 @@
 ## Absolute File Paths
 
 ### Core Query Execution
+
 - `/home/user/summit/server/src/graphql/resolvers.ts` - Main GraphQL resolvers
 - `/home/user/summit/server/src/index.ts` - Server entry point
 - `/home/user/summit/server/src/app.ts` - Express app configuration
@@ -11,6 +12,7 @@
 - `/home/user/summit/server/src/db/redis.js` - Redis client
 
 ### Audit & Logging
+
 - `/home/user/summit/server/src/audit/advanced-audit-system.ts` - Immutable audit system
 - `/home/user/summit/server/src/middleware/audit-logger.ts` - HTTP audit middleware
 - `/home/user/summit/server/src/graphql/plugins/auditLogger.ts` - GraphQL audit plugin
@@ -18,6 +20,7 @@
 - `/home/user/summit/server/src/db/repositories/audit.ts` - Audit data access
 
 ### Security & Policy
+
 - `/home/user/summit/server/src/policy/enforcer.ts` - Policy enforcement engine
 - `/home/user/summit/server/src/policy/opa.ts` - OPA integration
 - `/home/user/summit/server/src/policy/opaClient.ts` - OPA client
@@ -26,6 +29,7 @@
 - `/home/user/summit/server/src/middleware/security.ts` - Security headers
 
 ### Compliance & Reporting
+
 - `/home/user/summit/server/src/services/ComplianceService.ts` - Compliance automation
 - `/home/user/summit/server/src/services/ReportingService.js` - Report generation
 - `/home/user/summit/server/src/routes/compliance.ts` - Compliance endpoints
@@ -33,6 +37,7 @@
 - `/home/user/summit/server/src/conductor/compliance/compliance-engine.ts` - Conductor compliance
 
 ### Monitoring & Analytics
+
 - `/home/user/summit/server/src/services/monitoringObservabilityService.ts` - Monitoring
 - `/home/user/summit/server/src/routes/monitoring.ts` - Monitoring endpoints
 - `/home/user/summit/server/src/anomaly.ts` - Anomaly detection algorithms
@@ -47,11 +52,12 @@
 **File:** `/home/user/summit/server/src/graphql/resolvers.ts`
 
 **Add Hook Before Query Execution:**
+
 ```typescript
 async someResolver(_: any, args: any, ctx: any) {
   // NEW: Calculate selector expansion
   const selectorMetrics = await calculateSelectorExpansion(args, ctx);
-  
+
   // NEW: Log to audit system
   if (selectorMetrics.expansionRatio > EXPANSION_THRESHOLD) {
     await auditSystem.recordEvent({
@@ -62,10 +68,10 @@ async someResolver(_: any, args: any, ctx: any) {
       complianceRelevant: true,
     });
   }
-  
+
   // Existing policy enforcement
   const policyDecision = await policyEnforcer.requirePurpose(...);
-  
+
   // ... rest of resolver
 }
 ```
@@ -75,10 +81,11 @@ async someResolver(_: any, args: any, ctx: any) {
 **File:** `/home/user/summit/server/src/policy/enforcer.ts`
 
 **Add Selector Validation to Policy Decision:**
+
 ```typescript
 async enforce(context: PolicyContext): Promise<PolicyDecision> {
   const startTime = Date.now();
-  
+
   // NEW: Validate selector expansion
   if (context.expandedSelectors) {
     const expansionRatio = context.expandedSelectors.length / context.baseSelectors.length;
@@ -90,7 +97,7 @@ async enforce(context: PolicyContext): Promise<PolicyDecision> {
       };
     }
   }
-  
+
   // Existing policy logic
   // ...
 }
@@ -101,6 +108,7 @@ async enforce(context: PolicyContext): Promise<PolicyDecision> {
 **File:** `/home/user/summit/server/src/audit/advanced-audit-system.ts`
 
 **Log Selector Expansion Events:**
+
 ```typescript
 async recordSelectorExpansionEvent(
   userId: string,
@@ -137,19 +145,17 @@ async recordSelectorExpansionEvent(
 **File:** `/home/user/summit/server/src/anomaly.ts`
 
 **Add Expansion Anomaly Detection:**
+
 ```typescript
-export function detectExpansionAnomaly(
-  userHistory: number[],
-  currentExpansion: number
-) {
+export function detectExpansionAnomaly(userHistory: number[], currentExpansion: number) {
   const mu = userHistory.reduce((a, b) => a + b, 0) / Math.max(1, userHistory.length);
   const mad = median(userHistory.map((v) => Math.abs(v - mu)));
   const z = robustZ(currentExpansion, mu, mad);
-  
+
   return {
     anomaly: z >= 4,
     z,
-    severity: z >= 4 ? 'critical' : z >= 2 ? 'high' : 'low',
+    severity: z >= 4 ? "critical" : z >= 2 ? "high" : "low",
     userBaseline: mu,
     currentValue: currentExpansion,
     deviations: z,
@@ -162,18 +168,19 @@ export function detectExpansionAnomaly(
 **File:** `/home/user/summit/server/src/services/ComplianceService.ts`
 
 **Add Selector Minimization to Compliance Assessment:**
+
 ```typescript
 private async assessQueryMinimizationRequirement(
   requirement: ComplianceRequirement
 ): Promise<any> {
   const findings: ComplianceFinding[] = [];
-  
+
   // Check query expansion policies
   const expansionPolicy = policyConfig.maxSelectorExpansion;
   const violations = await this.queryAuditForExpansionViolations(
     expansionPolicy
   );
-  
+
   if (violations.length > 0) {
     findings.push({
       id: 'query-minimization-violations',
@@ -185,7 +192,7 @@ private async assessQueryMinimizationRequirement(
       // ...
     });
   }
-  
+
   return { status: findings.length === 0 ? 'compliant' : 'non-compliant', findings };
 }
 ```
@@ -195,6 +202,7 @@ private async assessQueryMinimizationRequirement(
 ## Required Environment Variables
 
 ### Audit & Logging
+
 ```bash
 AUDIT_LOGGING_ENABLED=true
 AUDIT_RETENTION_DAYS=2555  # 7 years
@@ -203,6 +211,7 @@ AUDIT_CRITICAL_FLUSH_ENABLED=true
 ```
 
 ### Policy Enforcement
+
 ```bash
 POLICY_ENFORCEMENT_ENABLED=true
 OPA_URL=http://opa:8181
@@ -212,6 +221,7 @@ SELECTOR_EXPANSION_ALERT_THRESHOLD=5
 ```
 
 ### Compliance
+
 ```bash
 COMPLIANCE_FRAMEWORKS=GDPR,SOC2,ISO27001
 COMPLIANCE_ASSESSMENT_FREQUENCY=monthly
@@ -219,6 +229,7 @@ COMPLIANCE_REPORT_RETENTION_DAYS=2555
 ```
 
 ### Monitoring
+
 ```bash
 MONITORING_ENABLED=true
 ANOMALY_DETECTION_ENABLED=true
@@ -227,6 +238,7 @@ PERFORMANCE_ALERT_THRESHOLD_MS=1000
 ```
 
 ### Report Generation
+
 ```bash
 REPORT_STORAGE_PATH=/tmp
 REPORT_RETENTION_DAYS=30
@@ -247,32 +259,32 @@ CREATE TABLE IF NOT EXISTS query_expansion_metrics (
   user_id TEXT,
   correlation_id UUID NOT NULL,
   session_id UUID,
-  
+
   -- Query identification
   graphql_operation_name TEXT,
   base_selectors INTEGER NOT NULL,
   expanded_selectors INTEGER NOT NULL,
   expansion_ratio FLOAT NOT NULL,
-  
+
   -- Execution metrics
   execution_time_ms INTEGER,
   data_transferred_bytes BIGINT,
   result_count INTEGER,
-  
+
   -- Analysis
   is_anomalous BOOLEAN DEFAULT FALSE,
   z_score FLOAT,
   user_baseline_expansion FLOAT,
-  
+
   -- Classification
   severity TEXT,  -- low, medium, high, critical
   data_classification TEXT,
-  
+
   -- Compliance
   policy_violation BOOLEAN DEFAULT FALSE,
   violation_type TEXT,
   requires_approval BOOLEAN DEFAULT FALSE,
-  
+
   -- Tracking
   created_at TIMESTAMPTZ DEFAULT NOW(),
   analyzed_at TIMESTAMPTZ
@@ -305,45 +317,43 @@ expansion:alerts:{tenant_id} => [{ user_id, timestamp, severity, message }]
 ### Unit Test Template
 
 ```typescript
-describe('Query Selector Minimization', () => {
-  it('should detect high selector expansion', async () => {
+describe("Query Selector Minimization", () => {
+  it("should detect high selector expansion", async () => {
     const metrics = {
       baseSelectors: 5,
       expandedSelectors: 50,
       expansionRatio: 10,
     };
-    
+
     const policy = await policyEnforcer.enforce({
-      tenantId: 'test-tenant',
-      userId: 'test-user',
-      action: 'read',
+      tenantId: "test-tenant",
+      userId: "test-user",
+      action: "read",
       expandedSelectors: metrics.expandedSelectors,
       baseSelectors: metrics.baseSelectors,
     });
-    
+
     expect(policy.allow).toBe(false);
-    expect(policy.reason).toContain('expansion');
+    expect(policy.reason).toContain("expansion");
   });
-  
-  it('should log expansion anomalies', async () => {
+
+  it("should log expansion anomalies", async () => {
     const anomaly = detectExpansionAnomaly([2, 2.1, 2.2], 15);
     expect(anomaly.anomaly).toBe(true);
     expect(anomaly.z).toBeGreaterThan(4);
-    
+
     const auditId = await auditSystem.recordEvent({
-      eventType: 'anomaly_detected',
+      eventType: "anomaly_detected",
       details: { ...anomaly },
     });
-    
+
     expect(auditId).toBeDefined();
   });
-  
-  it('should generate compliance findings for violations', async () => {
-    const assessment = await complianceService.runAssessment('soc2');
-    const findings = assessment.findings.filter(f =>
-      f.title.includes('Query')
-    );
-    
+
+  it("should generate compliance findings for violations", async () => {
+    const assessment = await complianceService.runAssessment("soc2");
+    const findings = assessment.findings.filter((f) => f.title.includes("Query"));
+
     expect(findings.length).toBeGreaterThan(0);
   });
 });
@@ -403,7 +413,7 @@ describe('Query Selector Minimization', () => {
     severity: warning
   annotations:
     summary: "High query selector expansion detected"
-    
+
 - alert: SelectorExpansionAnomalyDetected
   expr: |
     increase(query_expansion:anomalies:total[5m]) > 5
@@ -412,7 +422,7 @@ describe('Query Selector Minimization', () => {
     severity: critical
   annotations:
     summary: "Multiple anomalous query expansions detected"
-    
+
 - alert: QueryMinimizationComplianceViolation
   expr: |
     compliance:query_minimization:violation:total > 0
@@ -429,13 +439,13 @@ describe('Query Selector Minimization', () => {
 
 ### Expected Metrics
 
-| Metric | Baseline | Alert Threshold |
-|--------|----------|-----------------|
-| Selector expansion detection latency | <10ms | >100ms |
-| Anomaly detection latency | <50ms | >500ms |
-| Policy enforcement latency | <20ms | >200ms |
-| Audit event flush rate | <5s | >30s |
-| Compliance assessment duration | <60s | >120s |
+| Metric                               | Baseline | Alert Threshold |
+| ------------------------------------ | -------- | --------------- |
+| Selector expansion detection latency | <10ms    | >100ms          |
+| Anomaly detection latency            | <50ms    | >500ms          |
+| Policy enforcement latency           | <20ms    | >200ms          |
+| Audit event flush rate               | <5s      | >30s            |
+| Compliance assessment duration       | <60s     | >120s           |
 
 ---
 
@@ -455,4 +465,3 @@ describe('Query Selector Minimization', () => {
 - [ ] Integration tests passing
 - [ ] Performance benchmarks validated
 - [ ] Documentation updated
-

@@ -1,5 +1,5 @@
-import { z } from 'zod';
-import { BaseFacetSchema } from './core.js';
+import { z } from "zod";
+import { BaseFacetSchema } from "./core.js";
 
 export const TenantFacetSchema = BaseFacetSchema.extend({
   tenantId: z.string(),
@@ -10,7 +10,7 @@ export const TenantFacetSchema = BaseFacetSchema.extend({
 export type TenantFacet = z.infer<typeof TenantFacetSchema>;
 
 export const SecurityFacetSchema = BaseFacetSchema.extend({
-  classification: z.enum(['PUBLIC', 'INTERNAL', 'CONFIDENTIAL', 'RESTRICTED']),
+  classification: z.enum(["PUBLIC", "INTERNAL", "CONFIDENTIAL", "RESTRICTED"]),
   approvedBy: z.string().optional(),
 });
 

@@ -25,4 +25,3 @@ describe('ClusteringToggle', () => {
     expect(queryByText('Clustering')).toBeNull();
   });
 });
-

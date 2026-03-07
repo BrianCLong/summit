@@ -1,12 +1,14 @@
 # Demo: Shadow Procurement Network
 
 ## One-Command Run
+
 ```bash
 make summit-up
 make demo-shadow-network
 ```
 
 ## Expected Output Artifacts
+
 - `runs/demo-shadow/ingestion.log`
 - `runs/demo-shadow/normalized_entities.json`
 - `evidence-bundle/demo-shadow/run.json`
@@ -16,6 +18,7 @@ make demo-shadow-network
 - `evidence-bundle/demo-shadow/policy_checks.json`
 
 ## Verification Queries
+
 - Hub entity appears in insights feed.
 - At least one sanctions proximity insight emitted.
 - At least one policy escalation marked `human_review_required`.

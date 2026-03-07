@@ -1,4 +1,12 @@
-import { Dialog, DialogTitle, List, ListItem, ListItemButton, ListItemIcon, ListItemText } from '@mui/material';
+import {
+  Dialog,
+  DialogTitle,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+} from '@mui/material';
 import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
 import ClearIcon from '@mui/icons-material/Clear';
@@ -13,11 +21,21 @@ interface CommandPaletteProps {
   mode: 'light' | 'dark';
 }
 
-export function CommandPalette({ open, onClose, toggleTheme, mode }: CommandPaletteProps) {
+export function CommandPalette({
+  open,
+  onClose,
+  toggleTheme,
+  mode,
+}: CommandPaletteProps) {
   const dispatch = useDispatch();
-  const { selectedNodeId, timeRange } = useSelector((state: RootState) => state.selection);
+  const { selectedNodeId, timeRange } = useSelector(
+    (state: RootState) => state.selection,
+  );
 
-  const exec = (fn: () => void) => { fn(); onClose(); };
+  const exec = (fn: () => void) => {
+    fn();
+    onClose();
+  };
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
@@ -25,22 +43,41 @@ export function CommandPalette({ open, onClose, toggleTheme, mode }: CommandPale
       <List>
         <ListItem disablePadding>
           <ListItemButton onClick={() => exec(toggleTheme)}>
-            <ListItemIcon>{mode === 'light' ? <Brightness4Icon /> : <Brightness7Icon />}</ListItemIcon>
-            <ListItemText primary={mode === 'light' ? 'Switch to Dark Mode' : 'Switch to Light Mode'} />
+            <ListItemIcon>
+              {mode === 'light' ? <Brightness4Icon /> : <Brightness7Icon />}
+            </ListItemIcon>
+            <ListItemText
+              primary={
+                mode === 'light'
+                  ? 'Switch to Dark Mode'
+                  : 'Switch to Light Mode'
+              }
+            />
           </ListItemButton>
         </ListItem>
         {selectedNodeId && (
           <ListItem disablePadding>
-            <ListItemButton onClick={() => exec(() => dispatch(selectNode(null)))}>
-              <ListItemIcon><ClearIcon /></ListItemIcon>
-              <ListItemText primary="Clear Node Selection" secondary={`Selected: ${selectedNodeId}`} />
+            <ListItemButton
+              onClick={() => exec(() => dispatch(selectNode(null)))}
+            >
+              <ListItemIcon>
+                <ClearIcon />
+              </ListItemIcon>
+              <ListItemText
+                primary="Clear Node Selection"
+                secondary={`Selected: ${selectedNodeId}`}
+              />
             </ListItemButton>
           </ListItem>
         )}
         {timeRange && (
           <ListItem disablePadding>
-            <ListItemButton onClick={() => exec(() => dispatch(setTimeRange(null)))}>
-              <ListItemIcon><DateRangeIcon /></ListItemIcon>
+            <ListItemButton
+              onClick={() => exec(() => dispatch(setTimeRange(null)))}
+            >
+              <ListItemIcon>
+                <DateRangeIcon />
+              </ListItemIcon>
               <ListItemText primary="Reset Time Range" />
             </ListItemButton>
           </ListItem>

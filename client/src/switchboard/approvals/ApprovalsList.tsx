@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   Alert,
   Box,
@@ -14,7 +14,7 @@ import {
   Stack,
   TextField,
   Typography,
-} from '@mui/material';
+} from "@mui/material";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const AnyGrid = Grid as any;
@@ -25,7 +25,7 @@ import {
   Refresh as RefreshIcon,
   Shield as ShieldIcon,
   WarningAmber as WarningAmberIcon,
-} from '@mui/icons-material';
+} from "@mui/icons-material";
 
 export interface ApprovalQueueItem {
   id: string;
@@ -51,15 +51,11 @@ const normalizeApprovals = (payload: unknown): ApprovalQueueItem[] => {
     const record = item as Record<string, unknown>;
     const id = String(record.id ?? `approval-${index}`);
     const requester =
-      (record.requester as string) ||
-      (record.requester_id as string) ||
-      'unknown-requester';
-    const operation = (record.operation as string) || (record.action as string) || 'Pending action';
+      (record.requester as string) || (record.requester_id as string) || "unknown-requester";
+    const operation = (record.operation as string) || (record.action as string) || "Pending action";
     const submittedAt =
       (record.submittedAt as string) || (record.created_at as string) || new Date().toISOString();
-    const obligations = Array.isArray(record.obligations)
-      ? (record.obligations as string[])
-      : [];
+    const obligations = Array.isArray(record.obligations) ? (record.obligations as string[]) : [];
     const riskFlags = Array.isArray(record.riskFlags)
       ? (record.riskFlags as string[])
       : Array.isArray(record.risks)
@@ -88,14 +84,14 @@ export function useApprovalsQueue(fetchImpl: Fetcher = fetch) {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetchImpl('/api/switchboard/approvals');
+      const response = await fetchImpl("/api/switchboard/approvals");
       if (!response.ok) {
-        throw new Error('Failed to load approvals');
+        throw new Error("Failed to load approvals");
       }
       const payload = await response.json();
       setApprovals(normalizeApprovals(payload));
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Failed to load approvals';
+      const message = err instanceof Error ? err.message : "Failed to load approvals";
       setError(message);
     } finally {
       setLoading(false);
@@ -107,7 +103,7 @@ export function useApprovalsQueue(fetchImpl: Fetcher = fetch) {
   }, [loadQueue]);
 
   const updateApproval = React.useCallback(
-    async (id: string, action: 'approve' | 'deny', rationale: string) => {
+    async (id: string, action: "approve" | "deny", rationale: string) => {
       const snapshot = approvals.map((item) => ({ ...item }));
       setPendingId(id);
       setError(null);
@@ -115,26 +111,26 @@ export function useApprovalsQueue(fetchImpl: Fetcher = fetch) {
 
       try {
         const response = await fetchImpl(`/api/switchboard/approvals/${id}/${action}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ rationale }),
         });
 
         if (!response.ok) {
           const message = await response.text();
-          throw new Error(message || 'Decision failed');
+          throw new Error(message || "Decision failed");
         }
 
         await loadQueue();
       } catch (err: unknown) {
-        const message = err instanceof Error ? err.message : 'Decision failed';
+        const message = err instanceof Error ? err.message : "Decision failed";
         setApprovals(snapshot);
         setError(message);
       } finally {
         setPendingId(null);
       }
     },
-    [approvals, fetchImpl, loadQueue],
+    [approvals, fetchImpl, loadQueue]
   );
 
   return {
@@ -142,8 +138,8 @@ export function useApprovalsQueue(fetchImpl: Fetcher = fetch) {
     loading,
     error,
     refresh: loadQueue,
-    approve: (id: string, rationale: string) => updateApproval(id, 'approve', rationale),
-    deny: (id: string, rationale: string) => updateApproval(id, 'deny', rationale),
+    approve: (id: string, rationale: string) => updateApproval(id, "approve", rationale),
+    deny: (id: string, rationale: string) => updateApproval(id, "deny", rationale),
     pendingId,
   };
 }
@@ -164,20 +160,19 @@ export default function ApprovalsList() {
 
   const selected = React.useMemo(
     () => approvals.find((item) => item.id === selectedId) ?? null,
-    [approvals, selectedId],
+    [approvals, selectedId]
   );
 
-  const rationale = selected?.id ? rationaleById[selected.id] || '' : '';
-  const rationaleError = showValidation && !rationale.trim()
-    ? 'Rationale is required to record your decision.'
-    : '';
+  const rationale = selected?.id ? rationaleById[selected.id] || "" : "";
+  const rationaleError =
+    showValidation && !rationale.trim() ? "Rationale is required to record your decision." : "";
 
   const handleRationaleChange = (value: string) => {
     if (!selected?.id) return;
     setRationaleById((prev) => ({ ...prev, [selected.id]: value }));
   };
 
-  const handleDecision = async (action: 'approve' | 'deny') => {
+  const handleDecision = async (action: "approve" | "deny") => {
     if (!selected?.id) return;
     if (!rationale.trim()) {
       setShowValidation(true);
@@ -186,7 +181,7 @@ export default function ApprovalsList() {
 
     setShowValidation(false);
 
-    if (action === 'approve') {
+    if (action === "approve") {
       await approve(selected.id, rationale.trim());
     } else {
       await deny(selected.id, rationale.trim());
@@ -194,7 +189,7 @@ export default function ApprovalsList() {
   };
 
   return (
-    <Paper elevation={0} sx={{ p: 2, border: '1px solid', borderColor: 'divider' }}>
+    <Paper elevation={0} sx={{ p: 2, border: "1px solid", borderColor: "divider" }}>
       <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
         <Stack direction="row" spacing={1} alignItems="center">
           <WarningAmberIcon color="primary" />
@@ -230,7 +225,7 @@ export default function ApprovalsList() {
       ) : (
         <AnyGrid container spacing={2} alignItems="stretch">
           <AnyGrid xs={12} md={5} lg={4}>
-            <Paper variant="outlined" sx={{ height: '100%' }}>
+            <Paper variant="outlined" sx={{ height: "100%" }}>
               <List disablePadding>
                 {approvals.map((item) => (
                   <React.Fragment key={item.id}>
@@ -286,13 +281,14 @@ export default function ApprovalsList() {
           </AnyGrid>
 
           <AnyGrid xs={12} md={7} lg={8}>
-            <Paper variant="outlined" sx={{ height: '100%', p: 2 }}>
+            <Paper variant="outlined" sx={{ height: "100%", p: 2 }}>
               {selected ? (
                 <Stack spacing={2} height="100%">
                   <Box>
                     <Typography variant="h6">{selected.operation}</Typography>
                     <Typography variant="body2" color="text.secondary">
-                      {selected.requester} • Submitted {new Date(selected.submittedAt).toLocaleString()}
+                      {selected.requester} • Submitted{" "}
+                      {new Date(selected.submittedAt).toLocaleString()}
                     </Typography>
                   </Box>
 
@@ -339,16 +335,18 @@ export default function ApprovalsList() {
                       onChange={(event) => handleRationaleChange(event.target.value)}
                       onBlur={() => setShowValidation(true)}
                       error={Boolean(rationaleError)}
-                      helperText={rationaleError || 'Capture why you are approving or denying this run.'}
+                      helperText={
+                        rationaleError || "Capture why you are approving or denying this run."
+                      }
                     />
                   </Box>
 
-                  <Stack direction="row" spacing={1} sx={{ mt: 'auto' }}>
+                  <Stack direction="row" spacing={1} sx={{ mt: "auto" }}>
                     <Button
                       variant="contained"
                       color="success"
                       startIcon={<CheckCircleIcon />}
-                      onClick={() => handleDecision('approve')}
+                      onClick={() => handleDecision("approve")}
                       disabled={Boolean(pendingId)}
                     >
                       Approve
@@ -357,7 +355,7 @@ export default function ApprovalsList() {
                       variant="outlined"
                       color="error"
                       startIcon={<CloseIcon />}
-                      onClick={() => handleDecision('deny')}
+                      onClick={() => handleDecision("deny")}
                       disabled={Boolean(pendingId)}
                     >
                       Deny
@@ -366,7 +364,9 @@ export default function ApprovalsList() {
                 </Stack>
               ) : (
                 <Stack spacing={1} alignItems="center" justifyContent="center" sx={{ py: 6 }}>
-                  <Typography variant="subtitle1">Select a request to review the details.</Typography>
+                  <Typography variant="subtitle1">
+                    Select a request to review the details.
+                  </Typography>
                   <Typography variant="body2" color="text.secondary">
                     Obligations, risk flags, and rationale capture will appear here.
                   </Typography>

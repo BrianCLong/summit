@@ -125,11 +125,11 @@ Mark each item as ✅ before closing v1.
 
 ```ts
 // server/src/middleware/versioning.ts
-import { v4 as uuid } from 'uuid';
-import type { Request, Response, NextFunction } from 'express';
+import { v4 as uuid } from "uuid";
+import type { Request, Response, NextFunction } from "express";
 
 export function assignOpId(req: Request, _res: Response, next: NextFunction) {
-  (req as any).opId = req.headers['x-op-id'] || uuid();
+  (req as any).opId = req.headers["x-op-id"] || uuid();
   next();
 }
 
@@ -145,7 +145,7 @@ export function compareClock(a: VClock, b: VClock): number {
 async function upsertEntity(entity: EntityInput, opId: string, clock: VClock) {
   // idempotency: ignore if opId already applied
   const seen = await redis.sismember(`ops:${entity.id}`, opId);
-  if (seen) return { status: 'noop' };
+  if (seen) return { status: "noop" };
 
   const cypher = `
     MERGE (e:Entity {id:$id})
@@ -166,26 +166,19 @@ async function upsertEntity(entity: EntityInput, opId: string, clock: VClock) {
 
 ```ts
 // server/src/realtime/presence.ts
-import { Server } from 'socket.io';
-import Redis from 'ioredis';
+import { Server } from "socket.io";
+import Redis from "ioredis";
 
 export function wirePresence(io: Server, redis = new Redis()) {
-  io.on('connection', (socket) => {
-    socket.on('join-investigation', async ({ invId, user }) => {
+  io.on("connection", (socket) => {
+    socket.on("join-investigation", async ({ invId, user }) => {
       socket.join(`inv:${invId}`);
-      await redis.hset(
-        `presence:${invId}`,
-        socket.id,
-        JSON.stringify({ user, ts: Date.now() }),
-      );
-      io.to(`inv:${invId}`).emit(
-        'presence:update',
-        await redis.hlen(`presence:${invId}`),
-      );
+      await redis.hset(`presence:${invId}`, socket.id, JSON.stringify({ user, ts: Date.now() }));
+      io.to(`inv:${invId}`).emit("presence:update", await redis.hlen(`presence:${invId}`));
     });
 
-    socket.on('disconnect', async () => {
-      const keys = await redis.keys('presence:*');
+    socket.on("disconnect", async () => {
+      const keys = await redis.keys("presence:*");
       for (const k of keys) await redis.hdel(k, socket.id);
     });
   });
@@ -203,8 +196,8 @@ CREATE INDEX IF NOT EXISTS entity_embeddings_hnsw_cos ON entity_embeddings USING
 
 ```ts
 // server/src/graphql/resolvers/similarity.ts
-import { pool } from '../../config/database.js';
-import { z } from 'zod';
+import { pool } from "../../config/database.js";
+import { z } from "zod";
 
 const Args = z.object({
   entityId: z.string().optional(),
@@ -219,16 +212,16 @@ export const similarityResolvers = {
       let embedding: number[];
       if (entityId) {
         const { rows } = await pool.query(
-          'SELECT embedding FROM entity_embeddings WHERE entity_id=$1',
-          [entityId],
+          "SELECT embedding FROM entity_embeddings WHERE entity_id=$1",
+          [entityId]
         );
         embedding = rows[0].embedding;
       } else {
         embedding = await computeEmbedding(text!);
       }
       const { rows } = await pool.query(
-        'SELECT e.entity_id, 1 - (e.embedding <=> $1::vector) AS score\n         FROM entity_embeddings e\n         ORDER BY e.embedding <=> $1::vector ASC\n         LIMIT $2',
-        [`[${embedding.join(',')}]`, topK],
+        "SELECT e.entity_id, 1 - (e.embedding <=> $1::vector) AS score\n         FROM entity_embeddings e\n         ORDER BY e.embedding <=> $1::vector ASC\n         LIMIT $2",
+        [`[${embedding.join(",")}]`, topK]
       );
       // hydrate entities from Neo4j or PG cache
       return rows.map((r) => ({ id: r.entity_id, score: r.score }));
@@ -251,7 +244,7 @@ CREATE INDEX rel_type_if_exists IF NOT EXISTS FOR ()-[r:RELATIONSHIP]-() ON (r.t
 
 ```ts
 // server/src/services/NeighborhoodService.ts
-import Redis from 'ioredis';
+import Redis from "ioredis";
 const redis = new Redis();
 
 export async function expandNeighborhoodCached(id: string, radius = 1) {
@@ -273,15 +266,15 @@ export async function invalidateNeighborhood(id: string) {
 
 ```ts
 // server/src/middleware/rateLimit.ts
-import { RateLimiterRedis } from 'rate-limiter-flexible';
-import Redis from 'ioredis';
+import { RateLimiterRedis } from "rate-limiter-flexible";
+import Redis from "ioredis";
 
 const redis = new Redis();
 const limiter = new RateLimiterRedis({
   storeClient: redis,
   points: 300,
   duration: 60,
-  keyPrefix: 'rlf',
+  keyPrefix: "rlf",
 });
 
 export async function rateLimit(req, res, next) {
@@ -289,7 +282,7 @@ export async function rateLimit(req, res, next) {
     await limiter.consume(req.user?.id || req.ip);
     return next();
   } catch {
-    return res.status(429).json({ error: 'Too Many Requests' });
+    return res.status(429).json({ error: "Too Many Requests" });
   }
 }
 ```
@@ -303,12 +296,10 @@ export function applyLOD(cy) {
     const z = cy.zoom();
     const showLabels = z > 0.7;
     cy.batch(() => {
-      cy.nodes().forEach((n) =>
-        n.style('label', showLabels ? n.data('label') : ''),
-      );
+      cy.nodes().forEach((n) => n.style("label", showLabels ? n.data("label") : ""));
     });
   };
-  cy.on('zoom', update);
+  cy.on("zoom", update);
   update();
 }
 ```

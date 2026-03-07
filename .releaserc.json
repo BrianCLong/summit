@@ -60,11 +60,7 @@
           }
         ],
         "parserOpts": {
-          "noteKeywords": [
-            "BREAKING CHANGE",
-            "BREAKING CHANGES",
-            "BREAKING"
-          ]
+          "noteKeywords": ["BREAKING CHANGE", "BREAKING CHANGES", "BREAKING"]
         }
       }
     ],
@@ -73,10 +69,7 @@
       {
         "preset": "conventionalcommits",
         "writerOpts": {
-          "commitsSort": [
-            "subject",
-            "scope"
-          ]
+          "commitsSort": ["subject", "scope"]
         },
         "presetConfig": {
           "types": [
@@ -156,12 +149,7 @@
     [
       "@semantic-release/git",
       {
-        "assets": [
-          "CHANGELOG.md",
-          "package.json",
-          "package-lock.json",
-          "pnpm-lock.yaml"
-        ],
+        "assets": ["CHANGELOG.md", "package.json", "package-lock.json", "pnpm-lock.yaml"],
         "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
       }
     ],
@@ -169,9 +157,7 @@
       "@semantic-release/github",
       {
         "successComment": "This ${issue.pull_request ? 'PR is included' : 'issue has been resolved'} in version ${nextRelease.version} :tada:",
-        "labels": [
-          "released"
-        ],
+        "labels": ["released"],
         "releasedLabels": [
           "released<%= nextRelease.channel ? `on @\${nextRelease.channel}` : '' %>"
         ],

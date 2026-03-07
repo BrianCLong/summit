@@ -266,7 +266,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-        with: { python-version: '3.12' }
+        with: { python-version: "3.12" }
       - run: pip install -r ds/er/requirements.txt && python ds/er/train.py --out models/er_v0_2
       - run: echo "::set-output name=model_sha::$(sha256sum models/er_v0_2.bin | cut -d' ' -f1)"
   deploy:
@@ -315,10 +315,7 @@ repo/
 **ER Online Scorer (TypeScript)**
 
 ```ts
-export async function scorePair(
-  a: any,
-  b: any,
-): Promise<{ score: number; feats: any }> {
+export async function scorePair(a: any, b: any): Promise<{ score: number; feats: any }> {
   const feats = featurize(a, b);
   const score = await model.predict(feats); // WASM or native addon
   return { score, feats };
@@ -354,7 +351,7 @@ echo "RTO=$RTO, RPO=$lag" | tee drill.out
 export function enforceBudget(tenant: string, usage: Usage) {
   const cap = getCap(tenant);
   if (usage.monthToDate > cap * 0.8) alert(tenant);
-  if (usage.monthToDate > cap) throw new Error('BudgetExceeded');
+  if (usage.monthToDate > cap) throw new Error("BudgetExceeded");
 }
 ```
 

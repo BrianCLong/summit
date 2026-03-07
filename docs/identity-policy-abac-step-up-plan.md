@@ -52,7 +52,7 @@ The program introduces a layered architecture:
    - Lightweight clients for Go (server-side) and TypeScript (Node/Edge) with retry, caching, and decision tracing.
    - Sample app demonstrates attribute sync, OPA decision query, and WebAuthn enforcement end-to-end.
 
-```text
+````text
 
 [Client] → [Gateway w/ Step-Up Middleware] → [AuthZ Gateway (OPA)] ↔ [Attribute Service Cache]
                                                        ↘
@@ -285,3 +285,4 @@ obligations := {"step_up": true} {
 - Verify WebAuthn middleware enforces replay protection, rate limits, telemetry logging, and SOC alert routing.
 - Confirm evidence attachments (ADR link, dashboard screenshot, release notes, policy diff) ahead of weekly status reviews.
 - Produce launch readiness packet summarizing SLO burn rates, open risks, mitigation owners, and rollback criteria.
+````

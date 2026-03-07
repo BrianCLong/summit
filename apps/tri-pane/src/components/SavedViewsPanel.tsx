@@ -1,12 +1,14 @@
-import React, { useMemo, useState } from 'react';
-import { useTriPane } from './EventBus';
+import React, { useMemo, useState } from "react";
+import { useTriPane } from "./EventBus";
 
 export function SavedViewsPanel() {
   const { state, dispatch } = useTriPane();
-  const [name, setName] = useState('Analyst snapshot');
+  const [name, setName] = useState("Analyst snapshot");
   const sorted = useMemo(
     () =>
-      [...state.savedViews].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()),
+      [...state.savedViews].sort(
+        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      ),
     [state.savedViews]
   );
 
@@ -19,7 +21,7 @@ export function SavedViewsPanel() {
         </div>
         <button
           className="rounded-full border border-accent/60 bg-accent/10 px-3 py-1 text-sm text-accent"
-          onClick={() => dispatch({ type: 'saveView', payload: name })}
+          onClick={() => dispatch({ type: "saveView", payload: name })}
         >
           Save view
         </button>
@@ -42,13 +44,14 @@ export function SavedViewsPanel() {
           <button
             key={view.id}
             className="flex w-full items-center justify-between rounded-lg border border-sand/20 bg-ink/50 px-3 py-2 text-left text-sm hover:border-accent focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-midnight"
-            onClick={() => dispatch({ type: 'loadView', payload: view.id })}
+            onClick={() => dispatch({ type: "loadView", payload: view.id })}
           >
             <div>
               <p className="font-semibold">{view.snapshot.name}</p>
               <p className="text-xs text-sand/70">
-                {view.snapshot.timeRange.start}h → {view.snapshot.timeRange.end}h · {view.snapshot.activeLayers.length} layers ·{' '}
-                {view.snapshot.pinnedNodes.length} pins · {view.snapshot.layoutMode} layout
+                {view.snapshot.timeRange.start}h → {view.snapshot.timeRange.end}h ·{" "}
+                {view.snapshot.activeLayers.length} layers · {view.snapshot.pinnedNodes.length} pins
+                · {view.snapshot.layoutMode} layout
               </p>
             </div>
             <div className="flex flex-col items-end gap-1">

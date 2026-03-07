@@ -22,14 +22,14 @@ IBOM-Verified: true
 
 **High‑signal developments**
 
-* **Maltego One access expansion (controlled rollout):** Additional cohorts gained access to the **browser‑native Maltego One** environment, with emphasis on **identity‑centric workflows** (POI triage → enrichment → graphing) and **team sharing**. This reflects a continued migration of core functionality away from desktop‑only usage.
-* **Graph performance & collaboration tuning:** Under‑the‑hood improvements target **faster large‑graph rendering** and **commented/annotated graphs** for collaborative cases (no UI overhaul announced).
-* **Monitor → Analysis handoff refinement:** Incremental improvements to move **alerted social signals** from Maltego Monitor into investigation graphs with less manual normalization.
+- **Maltego One access expansion (controlled rollout):** Additional cohorts gained access to the **browser‑native Maltego One** environment, with emphasis on **identity‑centric workflows** (POI triage → enrichment → graphing) and **team sharing**. This reflects a continued migration of core functionality away from desktop‑only usage.
+- **Graph performance & collaboration tuning:** Under‑the‑hood improvements target **faster large‑graph rendering** and **commented/annotated graphs** for collaborative cases (no UI overhaul announced).
+- **Monitor → Analysis handoff refinement:** Incremental improvements to move **alerted social signals** from Maltego Monitor into investigation graphs with less manual normalization.
 
 **Strategic implications**
 
-* Confirms Maltego’s **cloud‑first trajectory**: lower setup friction, easier cross‑team collaboration, and clearer separation between **collection/monitoring** and **investigation/analysis**.
-* Signals future **licensing convergence** around account‑based access rather than machine‑bound seats.
+- Confirms Maltego’s **cloud‑first trajectory**: lower setup friction, easier cross‑team collaboration, and clearer separation between **collection/monitoring** and **investigation/analysis**.
+- Signals future **licensing convergence** around account‑based access rather than machine‑bound seats.
 
 ---
 
@@ -39,18 +39,18 @@ IBOM-Verified: true
 
 ![i2 TextChart](https://docs.i2group.com/textchart/2023.11/images/image28.png)
 
-![i2 Analyst](https://media.licdn.com/dms/image/v2/C5612AQG17Ai-b351QA/article-cover_image-shrink_720_1280/article-cover_image-shrink_720_1280/0/1520123114143?e=2147483647\&t=_L-X-oHnMDD3Y9xO70Qu0ZdWbvbtw2doyKs2RqtoI04\&v=beta)
+![i2 Analyst](https://media.licdn.com/dms/image/v2/C5612AQG17Ai-b351QA/article-cover_image-shrink_720_1280/article-cover_image-shrink_720_1280/0/1520123114143?e=2147483647&t=_L-X-oHnMDD3Y9xO70Qu0ZdWbvbtw2doyKs2RqtoI04&v=beta)
 
 **High‑signal developments**
 
-* **TextChart pipeline refinements:** Ongoing enhancements to **entity extraction accuracy** and **relationship suggestion scoring** from unstructured text (reports, OSINT dumps, transcripts), reducing analyst clean‑up time.
-* **Connector‑centric OSINT workflows:** Increased emphasis (documentation + partner messaging) on **external OSINT ingestion** feeding i2’s visualization layer, rather than native collection.
-* **Deployment flexibility reiterated:** Continued positioning of **subscription and bundled offerings** (Analyst’s Notebook + TextChart + Insights), aligned with enterprise procurement cycles.
+- **TextChart pipeline refinements:** Ongoing enhancements to **entity extraction accuracy** and **relationship suggestion scoring** from unstructured text (reports, OSINT dumps, transcripts), reducing analyst clean‑up time.
+- **Connector‑centric OSINT workflows:** Increased emphasis (documentation + partner messaging) on **external OSINT ingestion** feeding i2’s visualization layer, rather than native collection.
+- **Deployment flexibility reiterated:** Continued positioning of **subscription and bundled offerings** (Analyst’s Notebook + TextChart + Insights), aligned with enterprise procurement cycles.
 
 **Strategic implications**
 
-* i2 is doubling down on being the **authoritative sense‑making layer**—best‑in‑class for **temporal, relational, and geospatial reasoning**, while relying on partners for OSINT acquisition.
-* Reinforces a **hub‑and‑spoke workflow**: collect elsewhere → reason deeply in i2.
+- i2 is doubling down on being the **authoritative sense‑making layer**—best‑in‑class for **temporal, relational, and geospatial reasoning**, while relying on partners for OSINT acquisition.
+- Reinforces a **hub‑and‑spoke workflow**: collect elsewhere → reason deeply in i2.
 
 ---
 
@@ -64,23 +64,22 @@ IBOM-Verified: true
 
 ### **1 TRACE**
 
-* Continued traction as a **full‑stack, browser‑based OSINT platform** combining SOCMINT, CYBINT, FININT, and GEOINT.
-* Positioning centers on **single‑platform workflows** (collection → analysis → visualization) with enterprise security posture (ISO‑aligned).
+- Continued traction as a **full‑stack, browser‑based OSINT platform** combining SOCMINT, CYBINT, FININT, and GEOINT.
+- Positioning centers on **single‑platform workflows** (collection → analysis → visualization) with enterprise security posture (ISO‑aligned).
 
 ### **SL Crimewall**
 
-* Highlighted in industry channels for **large‑scale source coverage** and **collaborative case management**, appealing to teams seeking to reduce tool sprawl.
+- Highlighted in industry channels for **large‑scale source coverage** and **collaborative case management**, appealing to teams seeking to reduce tool sprawl.
 
 ### **Recorded Future** (adjacent signal)
 
-* Ongoing emphasis on **AI‑driven risk scoring and alerting** shows convergence between **threat intel** and **traditional OSINT**, especially for early‑warning use cases.
+- Ongoing emphasis on **AI‑driven risk scoring and alerting** shows convergence between **threat intel** and **traditional OSINT**, especially for early‑warning use cases.
 
 **Strategic implications**
 
-* Market continues to bifurcate:
-
-  * **Integrated platforms** (1 TRACE, SL Crimewall) aiming to own the full workflow.
-  * **Best‑of‑breed stacks** (Maltego + collectors; i2 + OSINT feeds) optimized for depth and analytic rigor.
+- Market continues to bifurcate:
+  - **Integrated platforms** (1 TRACE, SL Crimewall) aiming to own the full workflow.
+  - **Best‑of‑breed stacks** (Maltego + collectors; i2 + OSINT feeds) optimized for depth and analytic rigor.
 
 ---
 

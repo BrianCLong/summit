@@ -5,7 +5,7 @@ const {
   detectType,
   normalizeText,
   resolveMilestoneTitle,
-} = require('./issue-triage-lib');
+} = require("./issue-triage-lib");
 
 async function ensureLabels({ github, owner, repo }) {
   const existingLabels = await github.paginate(github.rest.issues.listLabelsForRepo, {
@@ -24,7 +24,7 @@ async function ensureLabels({ github, owner, repo }) {
 
 function deriveLabelChanges(issue) {
   const currentLabels = new Set(
-    (issue.labels || []).map((label) => (typeof label === 'string' ? label : label.name)),
+    (issue.labels || []).map((label) => (typeof label === "string" ? label : label.name))
   );
 
   const labelsToAdd = [];
@@ -33,12 +33,12 @@ function deriveLabelChanges(issue) {
   const text = normalizeText(issue);
   const detectedType = detectType(text);
   const detectedAreas = detectAreas(text);
-  const detectedPriority = detectPriority(issue.title || '');
-  const hasPriority = Array.from(currentLabels).some((label) => label.startsWith('priority:'));
-  const hasType = Array.from(currentLabels).some((label) => label.startsWith('type:'));
-  const triageLabels = Array.from(currentLabels).filter((label) => label.startsWith('triage:'));
+  const detectedPriority = detectPriority(issue.title || "");
+  const hasPriority = Array.from(currentLabels).some((label) => label.startsWith("priority:"));
+  const hasType = Array.from(currentLabels).some((label) => label.startsWith("type:"));
+  const triageLabels = Array.from(currentLabels).filter((label) => label.startsWith("triage:"));
   const hasTriage = triageLabels.length > 0;
-  const hasNonNeededTriage = triageLabels.some((label) => label !== 'triage:needed');
+  const hasNonNeededTriage = triageLabels.some((label) => label !== "triage:needed");
 
   if (!hasType && detectedType) {
     labelsToAdd.push(detectedType);
@@ -49,9 +49,9 @@ function deriveLabelChanges(issue) {
   }
 
   if (!hasTriage) {
-    labelsToAdd.push('triage:needed');
-  } else if (hasNonNeededTriage && currentLabels.has('triage:needed')) {
-    labelsToRemove.push('triage:needed');
+    labelsToAdd.push("triage:needed");
+  } else if (hasNonNeededTriage && currentLabels.has("triage:needed")) {
+    labelsToRemove.push("triage:needed");
   }
 
   for (const areaLabel of detectedAreas) {
@@ -61,17 +61,17 @@ function deriveLabelChanges(issue) {
   }
 
   if (/\bga\b|\bga hard gate\b|\bgolden path\b|\bblocker\b/.test(text)) {
-    if (!currentLabels.has('ga:polish')) {
-      labelsToAdd.push('ga:polish');
+    if (!currentLabels.has("ga:polish")) {
+      labelsToAdd.push("ga:polish");
     }
   }
 
   if (/\bga\b.*\bblocker\b|\bga:blocker\b|\bshipstopper\b/.test(text)) {
-    if (!currentLabels.has('ga:blocker')) {
-      labelsToAdd.push('ga:blocker');
+    if (!currentLabels.has("ga:blocker")) {
+      labelsToAdd.push("ga:blocker");
     }
-    if (!hasPriority && !labelsToAdd.some((label) => label.startsWith('priority:'))) {
-      labelsToAdd.push('priority:P0');
+    if (!hasPriority && !labelsToAdd.some((label) => label.startsWith("priority:"))) {
+      labelsToAdd.push("priority:P0");
     }
   }
 
@@ -84,7 +84,12 @@ async function syncLabels({ github, owner, repo, issueNumber, labelsToAdd, label
   }
 
   if (labelsToAdd.length > 0) {
-    await github.rest.issues.addLabels({ owner, repo, issue_number: issueNumber, labels: labelsToAdd });
+    await github.rest.issues.addLabels({
+      owner,
+      repo,
+      issue_number: issueNumber,
+      labels: labelsToAdd,
+    });
   }
 }
 
@@ -97,7 +102,7 @@ async function updateMilestone({ github, owner, repo, issue, labels }) {
   const milestones = await github.paginate(github.rest.issues.listMilestones, {
     owner,
     repo,
-    state: 'open',
+    state: "open",
     per_page: 100,
   });
   const match = milestones.find((milestone) => milestone.title === desiredTitle);
@@ -127,9 +132,9 @@ async function processIssue({ github, context, issue }) {
 
   const updatedLabels = new Set(
     (issue.labels || [])
-      .map((label) => (typeof label === 'string' ? label : label.name))
+      .map((label) => (typeof label === "string" ? label : label.name))
       .concat(labelsToAdd)
-      .filter((label) => !labelsToRemove.includes(label)),
+      .filter((label) => !labelsToRemove.includes(label))
   );
   await updateMilestone({ github, owner, repo, issue, labels: updatedLabels });
 }
@@ -141,7 +146,7 @@ async function processAllOpenIssues({ github, context }) {
   for await (const response of github.paginate.iterator(github.rest.issues.listForRepo, {
     owner,
     repo,
-    state: 'open',
+    state: "open",
     per_page: 100,
   })) {
     for (const issue of response.data) {
@@ -156,7 +161,7 @@ module.exports = async function run({ github, context }) {
 
   await ensureLabels({ github, owner, repo });
 
-  if (context.eventName === 'issues') {
+  if (context.eventName === "issues") {
     const issue = context.payload.issue;
     await processIssue({ github, context, issue });
     return;

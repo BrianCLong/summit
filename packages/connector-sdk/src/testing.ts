@@ -16,7 +16,7 @@ import type {
   ConnectorEntity,
   ConnectorRelationship,
   ConnectorResult,
-} from './types';
+} from "./types";
 
 // -----------------------------------------------------------------------------
 // Mock Implementations
@@ -29,19 +29,19 @@ export class MockLogger implements ConnectorLogger {
   public logs: Array<{ level: string; message: string; meta?: Record<string, unknown> }> = [];
 
   debug(message: string, meta?: Record<string, unknown>): void {
-    this.logs.push({ level: 'debug', message, meta });
+    this.logs.push({ level: "debug", message, meta });
   }
 
   info(message: string, meta?: Record<string, unknown>): void {
-    this.logs.push({ level: 'info', message, meta });
+    this.logs.push({ level: "info", message, meta });
   }
 
   warn(message: string, meta?: Record<string, unknown>): void {
-    this.logs.push({ level: 'warn', message, meta });
+    this.logs.push({ level: "warn", message, meta });
   }
 
   error(message: string, _error?: Error, meta?: Record<string, unknown>): void {
-    this.logs.push({ level: 'error', message, meta });
+    this.logs.push({ level: "error", message, meta });
   }
 
   clear(): void {
@@ -61,19 +61,19 @@ export class MockMetrics implements ConnectorMetrics {
   }> = [];
 
   increment(name: string, value = 1, tags?: Record<string, string>): void {
-    this.metrics.push({ type: 'counter', name, value, tags });
+    this.metrics.push({ type: "counter", name, value, tags });
   }
 
   gauge(name: string, value: number, tags?: Record<string, string>): void {
-    this.metrics.push({ type: 'gauge', name, value, tags });
+    this.metrics.push({ type: "gauge", name, value, tags });
   }
 
   histogram(name: string, value: number, tags?: Record<string, string>): void {
-    this.metrics.push({ type: 'histogram', name, value, tags });
+    this.metrics.push({ type: "histogram", name, value, tags });
   }
 
   timing(name: string, durationMs: number, tags?: Record<string, string>): void {
-    this.metrics.push({ type: 'timing', name, value: durationMs, tags });
+    this.metrics.push({ type: "timing", name, value: durationMs, tags });
   }
 
   clear(): void {
@@ -95,7 +95,7 @@ export class MockRateLimiter implements RateLimiter {
 
   async acquire(): Promise<void> {
     if (this.remaining_ <= 0) {
-      throw new Error('Rate limit exceeded');
+      throw new Error("Rate limit exceeded");
     }
     this.remaining_--;
   }
@@ -186,9 +186,7 @@ export class MockEntityEmitter implements EntityEmitter {
 /**
  * Create a mock connector context for testing
  */
-export function createMockContext(
-  overrides?: Partial<ConnectorContext>
-): ConnectorContext & {
+export function createMockContext(overrides?: Partial<ConnectorContext>): ConnectorContext & {
   logger: MockLogger;
   metrics: MockMetrics;
   rateLimiter: MockRateLimiter;
@@ -221,10 +219,10 @@ export function createMockConfig(overrides?: Partial<ConnectorConfig>): Connecto
   return {
     config: {},
     secrets: {},
-    tenantId: 'test-tenant',
-    investigationIds: ['test-investigation'],
-    defaultClassification: 'UNCLASSIFIED',
-    defaultTags: ['test'],
+    tenantId: "test-tenant",
+    investigationIds: ["test-investigation"],
+    defaultClassification: "UNCLASSIFIED",
+    defaultTags: ["test"],
     ...overrides,
   };
 }
@@ -238,7 +236,7 @@ export function createMockConfig(overrides?: Partial<ConnectorConfig>): Connecto
  */
 export function assertSuccess(result: ConnectorResult): void {
   if (!result.success) {
-    const errors = result.errors?.map((e) => e.message).join(', ') || 'Unknown error';
+    const errors = result.errors?.map((e) => e.message).join(", ") || "Unknown error";
     throw new Error(`Expected success but got failure: ${errors}`);
   }
 }
@@ -248,7 +246,7 @@ export function assertSuccess(result: ConnectorResult): void {
  */
 export function assertFailure(result: ConnectorResult): void {
   if (result.success) {
-    throw new Error('Expected failure but got success');
+    throw new Error("Expected failure but got success");
   }
 }
 
@@ -291,7 +289,11 @@ export interface GoldenIOTest {
 export async function runGoldenIOTests(
   connector: Connector,
   tests: GoldenIOTest[]
-): Promise<{ passed: number; failed: number; results: Array<{ name: string; passed: boolean; error?: string }> }> {
+): Promise<{
+  passed: number;
+  failed: number;
+  results: Array<{ name: string; passed: boolean; error?: string }>;
+}> {
   const results: Array<{ name: string; passed: boolean; error?: string }> = [];
   let passed = 0;
   let failed = 0;

@@ -18,7 +18,7 @@ paths:
                 manifest:
                   type: object
       responses:
-        '200':
+        "200":
           description: Replay executed
           content:
             application/json:

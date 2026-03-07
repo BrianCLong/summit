@@ -1,16 +1,11 @@
-import React, { useMemo, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { gql, useQuery } from '@apollo/client';
-import ProvenanceFilterPanel from '../components/ProvenanceFilterPanel';
-import ExportAuditBundleButton from '../components/ExportAuditBundleButton';
+import React, { useMemo, useState } from "react";
+import { useParams } from "react-router-dom";
+import { gql, useQuery } from "@apollo/client";
+import ProvenanceFilterPanel from "../components/ProvenanceFilterPanel";
+import ExportAuditBundleButton from "../components/ExportAuditBundleButton";
 
 const PROV_Q = gql`
-  query ProvByInvestigation(
-    $id: ID!
-    $filter: ProvenanceFilter
-    $first: Int
-    $offset: Int
-  ) {
+  query ProvByInvestigation($id: ID!, $filter: ProvenanceFilter, $first: Int, $offset: Int) {
     provenanceByInvestigation(
       investigationId: $id
       filter: $filter
@@ -26,26 +21,26 @@ const PROV_Q = gql`
 `;
 
 export default function InvestigationDetailsRoute() {
-  const { investigationId = '' } = useParams();
+  const { investigationId = "" } = useParams();
   const [filter, setFilter] = useState<any>(undefined);
-  const [groupBy, setGroupBy] = useState<'none' | 'minute' | 'hour'>('none');
+  const [groupBy, setGroupBy] = useState<"none" | "minute" | "hour">("none");
   const variables = useMemo(
     () => ({ id: investigationId, filter, first: 50, offset: 0 }),
-    [investigationId, filter],
+    [investigationId, filter]
   );
   const { data, loading, error, refetch } = useQuery(PROV_Q, {
     variables,
-    fetchPolicy: 'cache-and-network',
+    fetchPolicy: "cache-and-network",
     skip: !investigationId,
   });
 
   const events = data?.provenanceByInvestigation ?? [];
 
   const groups = useMemo(() => {
-    if (!events || groupBy === 'none') return null;
+    if (!events || groupBy === "none") return null;
     const fmt = (iso: string) => {
       const d = new Date(iso);
-      if (groupBy === 'hour') return d.toISOString().slice(0, 13); // YYYY-MM-DDTHH
+      if (groupBy === "hour") return d.toISOString().slice(0, 13); // YYYY-MM-DDTHH
       // minute
       return d.toISOString().slice(0, 16); // YYYY-MM-DDTHH:MM
     };
@@ -61,12 +56,8 @@ export default function InvestigationDetailsRoute() {
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-3">
-        <h2 className="text-lg font-semibold">
-          Investigation {investigationId}
-        </h2>
-        {!!investigationId && (
-          <ExportAuditBundleButton investigationId={investigationId} />
-        )}
+        <h2 className="text-lg font-semibold">Investigation {investigationId}</h2>
+        {!!investigationId && <ExportAuditBundleButton investigationId={investigationId} />}
       </div>
       <ProvenanceFilterPanel
         onApply={(f) => {
@@ -93,10 +84,8 @@ export default function InvestigationDetailsRoute() {
       {error && <div className="text-red-600">Error loading provenance</div>}
       {!loading && !error && (
         <div>
-          <div className="text-sm opacity-70 mb-2">
-            {events.length} event(s)
-          </div>
-          {groupBy === 'none' ? (
+          <div className="text-sm opacity-70 mb-2">{events.length} event(s)</div>
+          {groupBy === "none" ? (
             <table className="w-full text-sm">
               <thead>
                 <tr className="text-left border-b">
@@ -109,11 +98,9 @@ export default function InvestigationDetailsRoute() {
               <tbody>
                 {events.map((e: any) => (
                   <tr key={e.id} className="border-b">
-                    <td className="p-2">
-                      {new Date(e.createdAt).toLocaleString()}
-                    </td>
+                    <td className="p-2">{new Date(e.createdAt).toLocaleString()}</td>
                     <td className="p-2">{e.kind}</td>
-                    <td className="p-2">{e.metadata?.reasonCode || '-'}</td>
+                    <td className="p-2">{e.metadata?.reasonCode || "-"}</td>
                     <td className="p-2">
                       <MetadataPreview metadata={e.metadata} />
                     </td>
@@ -126,7 +113,7 @@ export default function InvestigationDetailsRoute() {
               {groups!.map(([bucket, items]) => (
                 <div key={bucket} className="border rounded">
                   <div className="px-3 py-2 text-xs bg-gray-50 border-b">
-                    {bucket.replace('T', ' ')} ({items.length})
+                    {bucket.replace("T", " ")} ({items.length})
                   </div>
                   <table className="w-full text-sm">
                     <thead>
@@ -140,13 +127,9 @@ export default function InvestigationDetailsRoute() {
                     <tbody>
                       {items.map((e: any) => (
                         <tr key={e.id} className="border-b">
-                          <td className="p-2">
-                            {new Date(e.createdAt).toLocaleTimeString()}
-                          </td>
+                          <td className="p-2">{new Date(e.createdAt).toLocaleTimeString()}</td>
                           <td className="p-2">{e.kind}</td>
-                          <td className="p-2">
-                            {e.metadata?.reasonCode || '-'}
-                          </td>
+                          <td className="p-2">{e.metadata?.reasonCode || "-"}</td>
                           <td className="p-2">
                             <MetadataPreview metadata={e.metadata} />
                           </td>
@@ -170,7 +153,7 @@ function MetadataPreview({ metadata }: { metadata: any }) {
   const preview = (() => {
     try {
       const s = JSON.stringify(metadata);
-      return s.length > 60 ? s.slice(0, 60) + '…' : s;
+      return s.length > 60 ? s.slice(0, 60) + "…" : s;
     } catch {
       return String(metadata);
     }
@@ -186,9 +169,7 @@ function MetadataPreview({ metadata }: { metadata: any }) {
       </button>
       {open && (
         <div className="absolute z-10 mt-1 w-[320px] max-h-[240px] overflow-auto border rounded bg-white shadow p-2 text-xs">
-          <pre className="whitespace-pre-wrap break-words">
-            {JSON.stringify(metadata, null, 2)}
-          </pre>
+          <pre className="whitespace-pre-wrap break-words">{JSON.stringify(metadata, null, 2)}</pre>
         </div>
       )}
     </span>

@@ -5,6 +5,7 @@ This runbook describes how to manage oversized Pull Requests ("Mega PRs") using 
 ## 🚨 When to use this
 
 Use this process when a PR triggers one of the following alerts or is visibly too large to review safely:
+
 - Changed files > 20
 - Additions/Deletions > 1000 lines
 - Critical path changes combined with large feature work
@@ -28,6 +29,7 @@ Once the workflow completes, download the `mega-pr-<number>-plan` artifact. It c
 - `patches/`: (If requested) Git patch files for each slice.
 
 ### The Split Plan
+
 The plan divides the PR into slices (S1, S2, etc.) based on risk and dependencies.
 
 - **S1 (Critical/Base):** Often contains tooling, config, CI, or shared library changes. **Must merge first.**
@@ -39,6 +41,7 @@ The plan divides the PR into slices (S1, S2, etc.) based on risk and dependencie
 If you did not generate patches, or prefer to do it manually:
 
 1. **Checkout the PR branch:**
+
    ```bash
    git fetch origin pull/<PR>/head:pr-<PR>
    git checkout pr-<PR>
@@ -46,13 +49,15 @@ If you did not generate patches, or prefer to do it manually:
 
 2. **Create Slice Branches:**
    For each slice in the plan (e.g., S1):
+
    ```bash
    git checkout -b split/pr-<PR>/s1-critical
    ```
 
 3. **Reset and Pick Files:**
    Reset to main (keep changes in working dir) or pick specific files.
-   *Method A (Reset):*
+   _Method A (Reset):_
+
    ```bash
    git reset --mixed origin/main
    # Stage only files listed in S1 manifest
@@ -62,7 +67,8 @@ If you did not generate patches, or prefer to do it manually:
    git push -u origin split/pr-<PR>/s1-critical
    ```
 
-   *Method B (Checkout):*
+   _Method B (Checkout):_
+
    ```bash
    git checkout origin/main -b split/pr-<PR>/s1-critical
    git checkout pr-<PR> -- .github/workflows/ci.yml package.json ...
@@ -81,12 +87,14 @@ If you did not generate patches, or prefer to do it manually:
 ## 🤝 Handling "Entangled" Slices
 
 If the tool groups too many files into one slice because they are in the same directory but you want to split them further:
+
 - Use your judgment. The tool uses directory-based heuristics.
 - Manually identify logical boundaries (e.g., "API types" vs "API implementation").
 
 ## 🚦 Rate Limits & Bots
 
 If you are splitting a PR into 10+ slices:
+
 - Do not open all PRs at once to avoid triggering rate limits or overwhelming CI.
 - Open S1. Wait for merge.
 - Open S2, S3. Wait.
@@ -94,6 +102,7 @@ If you are splitting a PR into 10+ slices:
 ## ⚠️ Rollback
 
 If a slice causes a regression:
+
 - The plan includes a rollback strategy.
 - Generally: Revert in reverse order (Latest slice first).
 - If S1 (Critical) is reverted, assume the environment is unstable until verified.

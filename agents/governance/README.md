@@ -48,52 +48,52 @@ This framework provides comprehensive governance capabilities for AI agent fleet
 ## Quick Start
 
 ```typescript
-import { createGovernanceFramework } from '@intelgraph/agent-governance';
+import { createGovernanceFramework } from "@intelgraph/agent-governance";
 
 // Create governance framework with all components
 const governance = createGovernanceFramework({
   policy: {
-    opaBaseUrl: 'http://localhost:8181',
-    failSafe: 'deny',
+    opaBaseUrl: "http://localhost:8181",
+    failSafe: "deny",
   },
   orchestrator: {
     maxConcurrentChains: 10,
     enableHallucinationCheck: true,
   },
   compliance: {
-    validationLevel: 'enhanced',
-    auditFrequency: 'continuous',
+    validationLevel: "enhanced",
+    auditFrequency: "continuous",
   },
 });
 
 // Evaluate policy for an agent action
 const decision = await governance.policyEngine.evaluateAction({
-  agentId: 'agent-001',
-  fleetId: 'fleet-001',
-  sessionId: 'session-001',
-  trustLevel: 'elevated',
-  classification: 'CONFIDENTIAL',
-  capabilities: ['read', 'analyze'],
-  requestedAction: 'analyze_data',
-  targetResource: 'entity:12345',
+  agentId: "agent-001",
+  fleetId: "fleet-001",
+  sessionId: "session-001",
+  trustLevel: "elevated",
+  classification: "CONFIDENTIAL",
+  capabilities: ["read", "analyze"],
+  requestedAction: "analyze_data",
+  targetResource: "entity:12345",
   userContext: {
-    userId: 'user-001',
-    roles: ['analyst'],
-    clearance: 'SECRET',
-    organization: 'org-001',
+    userId: "user-001",
+    roles: ["analyst"],
+    clearance: "SECRET",
+    organization: "org-001",
   },
   environmentContext: {
     timestamp: Date.now(),
     airgapped: false,
     federalEnvironment: true,
-    slsaLevel: 'SLSA_3',
+    slsaLevel: "SLSA_3",
   },
 });
 
 if (decision.allow) {
   // Proceed with agent action
 } else {
-  console.log('Action denied:', decision.reason);
+  console.log("Action denied:", decision.reason);
 }
 ```
 
@@ -104,13 +104,13 @@ if (decision.allow) {
 OPA-based policy evaluation with caching, retries, and fail-safe defaults.
 
 ```typescript
-import { AgentPolicyEngine } from '@intelgraph/agent-governance/policy-engine';
+import { AgentPolicyEngine } from "@intelgraph/agent-governance/policy-engine";
 
 const engine = new AgentPolicyEngine({
-  opaBaseUrl: 'http://opa:8181',
+  opaBaseUrl: "http://opa:8181",
   cacheEnabled: true,
   cacheTtlMs: 60_000,
-  failSafe: 'deny',
+  failSafe: "deny",
 });
 
 // Evaluate different policy types
@@ -124,7 +124,7 @@ const chainDecision = await engine.evaluateChain(context, chainMetadata);
 Multi-LLM orchestration with governance controls:
 
 ```typescript
-import { PromptChainOrchestrator } from '@intelgraph/agent-governance/orchestration';
+import { PromptChainOrchestrator } from "@intelgraph/agent-governance/orchestration";
 
 const orchestrator = new PromptChainOrchestrator(policyEngine, {
   maxConcurrentChains: 10,
@@ -139,7 +139,7 @@ orchestrator.registerProvider(openaiAdapter);
 // Execute chain
 const result = await orchestrator.executeChain({
   chain: myChain,
-  inputs: { query: 'Analyze this data' },
+  inputs: { query: "Analyze this data" },
   context: agentContext,
 });
 ```
@@ -149,29 +149,29 @@ const result = await orchestrator.executeChain({
 Automated detection and mitigation:
 
 ```typescript
-import { IncidentResponseManager } from '@intelgraph/agent-governance/incident-response';
+import { IncidentResponseManager } from "@intelgraph/agent-governance/incident-response";
 
 const incidentManager = new IncidentResponseManager({
   autoMitigate: true,
   notificationChannels: [
-    { type: 'slack', config: { webhook: '...' }, severityFilter: ['critical'] },
+    { type: "slack", config: { webhook: "..." }, severityFilter: ["critical"] },
   ],
 });
 
 // Report incident
 const incident = await incidentManager.reportIncident({
-  type: 'policy_violation',
-  severity: 'high',
-  title: 'Unauthorized access attempt',
-  description: 'Agent attempted to access classified data',
-  reporter: 'system',
-  classification: 'SECRET',
+  type: "policy_violation",
+  severity: "high",
+  title: "Unauthorized access attempt",
+  description: "Agent attempted to access classified data",
+  reporter: "system",
+  classification: "SECRET",
 });
 
 // Resolve incident
 await incidentManager.resolveIncident(incident.id, {
-  resolver: 'admin',
-  rootCause: 'Misconfigured trust level',
+  resolver: "admin",
+  rootCause: "Misconfigured trust level",
 });
 ```
 
@@ -180,24 +180,24 @@ await incidentManager.resolveIncident(incident.id, {
 Detection and remediation of AI hallucinations:
 
 ```typescript
-import { HallucinationAuditor } from '@intelgraph/agent-governance/hallucination-audit';
+import { HallucinationAuditor } from "@intelgraph/agent-governance/hallucination-audit";
 
 const auditor = new HallucinationAuditor({
   enabled: true,
-  detectionMethods: ['factual_check', 'consistency_check', 'source_verification'],
+  detectionMethods: ["factual_check", "consistency_check", "source_verification"],
   autoRemediate: true,
 });
 
 const detection = await auditor.audit({
-  agentId: 'agent-001',
-  sessionId: 'session-001',
-  input: 'What is the capital of France?',
-  output: 'According to a 2023 study by Dr. Smith...',
-  sources: ['Wikipedia: France'],
+  agentId: "agent-001",
+  sessionId: "session-001",
+  input: "What is the capital of France?",
+  output: "According to a 2023 study by Dr. Smith...",
+  sources: ["Wikipedia: France"],
 });
 
 if (detection) {
-  console.log('Hallucination detected:', detection.type, detection.severity);
+  console.log("Hallucination detected:", detection.type, detection.severity);
 }
 ```
 
@@ -206,31 +206,31 @@ if (detection) {
 Automatic recovery from failures:
 
 ```typescript
-import { RollbackManager } from '@intelgraph/agent-governance/rollback';
+import { RollbackManager } from "@intelgraph/agent-governance/rollback";
 
 const rollbackManager = new RollbackManager({
   triggers: [
-    { trigger: 'policy_violation', threshold: 10, window: 300_000, enabled: true },
-    { trigger: 'hallucination_threshold', threshold: 5, window: 300_000, enabled: true },
+    { trigger: "policy_violation", threshold: 10, window: 300_000, enabled: true },
+    { trigger: "hallucination_threshold", threshold: 5, window: 300_000, enabled: true },
   ],
   autoApprove: false,
 });
 
 // Create checkpoint
 const checkpoint = await rollbackManager.createCheckpoint({
-  scope: 'agent',
-  agentId: 'agent-001',
+  scope: "agent",
+  agentId: "agent-001",
   state: currentAgentState,
-  createdBy: 'system',
+  createdBy: "system",
 });
 
 // Initiate rollback when needed
 const rollback = await rollbackManager.initiateRollback({
-  trigger: 'safety_breach',
-  scope: 'agent',
-  agentId: 'agent-001',
-  reason: 'Safety threshold exceeded',
-  initiatedBy: 'system',
+  trigger: "safety_breach",
+  scope: "agent",
+  agentId: "agent-001",
+  reason: "Safety threshold exceeded",
+  initiatedBy: "system",
 });
 ```
 
@@ -239,7 +239,7 @@ const rollback = await rollbackManager.initiateRollback({
 SLSA/cosign provenance for AI artifacts:
 
 ```typescript
-import { AIProvenanceManager } from '@intelgraph/agent-governance/provenance';
+import { AIProvenanceManager } from "@intelgraph/agent-governance/provenance";
 
 const provenanceManager = new AIProvenanceManager({
   signProvenance: true,
@@ -250,16 +250,16 @@ const provenanceManager = new AIProvenanceManager({
 const provenance = await provenanceManager.createOutputProvenance({
   output: llmResponse,
   promptHash: promptDigest,
-  modelId: 'claude-3',
-  agentId: 'agent-001',
-  sessionId: 'session-001',
+  modelId: "claude-3",
+  agentId: "agent-001",
+  sessionId: "session-001",
   temperature: 0.7,
   maxTokens: 1000,
 });
 
 // Verify provenance
 const verification = await provenanceManager.verifyProvenance(provenance.id);
-console.log('SLSA Level:', verification.slsaLevel);
+console.log("SLSA Level:", verification.slsaLevel);
 ```
 
 ### IC FY28 Compliance
@@ -267,20 +267,20 @@ console.log('SLSA Level:', verification.slsaLevel);
 Intelligence Community compliance validation:
 
 ```typescript
-import { ICFY28ComplianceValidator } from '@intelgraph/agent-governance/compliance';
+import { ICFY28ComplianceValidator } from "@intelgraph/agent-governance/compliance";
 
 const validator = new ICFY28ComplianceValidator(config, dependencies);
 
 // Run full validation
 const result = await validator.validate();
-console.log('Compliant:', result.overallCompliant);
-console.log('Controls:', result.controls.length);
-console.log('Findings:', result.findings.length);
+console.log("Compliant:", result.overallCompliant);
+console.log("Controls:", result.controls.length);
+console.log("Findings:", result.findings.length);
 
 // Get compliance score
 const score = validator.getComplianceScore();
-console.log('Score:', score.score, '%');
-console.log('Trend:', score.trend);
+console.log("Score:", score.score, "%");
+console.log("Trend:", score.trend);
 ```
 
 ## Explicit Tradeoffs
@@ -289,27 +289,29 @@ This framework makes explicit tradeoffs between **safety** and **velocity**:
 
 ### Safety-First Design (+Safety / -Velocity)
 
-| Decision | Safety Benefit | Velocity Cost |
-|----------|---------------|---------------|
-| **Fail-safe deny** | Prevents unauthorized access during outages | May block legitimate requests when OPA unavailable |
-| **Mandatory policy evaluation** | Every action is authorized | Adds ~5-50ms latency per request |
-| **Hallucination checking** | Catches fabricated content | Adds processing time to each output |
-| **SLSA-3 requirement** | Verified supply chain | Requires additional build infrastructure |
-| **Auto-rollback** | Quick recovery from issues | May cause service disruption |
-| **Classification enforcement** | Data protection | Limits cross-team collaboration |
+| Decision                        | Safety Benefit                              | Velocity Cost                                      |
+| ------------------------------- | ------------------------------------------- | -------------------------------------------------- |
+| **Fail-safe deny**              | Prevents unauthorized access during outages | May block legitimate requests when OPA unavailable |
+| **Mandatory policy evaluation** | Every action is authorized                  | Adds ~5-50ms latency per request                   |
+| **Hallucination checking**      | Catches fabricated content                  | Adds processing time to each output                |
+| **SLSA-3 requirement**          | Verified supply chain                       | Requires additional build infrastructure           |
+| **Auto-rollback**               | Quick recovery from issues                  | May cause service disruption                       |
+| **Classification enforcement**  | Data protection                             | Limits cross-team collaboration                    |
 
 ### When to Relax Constraints
 
 For **development environments**, consider:
+
 ```typescript
 createGovernanceFramework({
-  policy: { failSafe: 'allow', cacheEnabled: false },
+  policy: { failSafe: "allow", cacheEnabled: false },
   orchestrator: { enableHallucinationCheck: false },
   compliance: { enabled: false },
 });
 ```
 
 For **high-throughput scenarios**, consider:
+
 ```typescript
 createGovernanceFramework({
   policy: { cacheTtlMs: 300_000 }, // Longer cache
@@ -322,7 +324,7 @@ createGovernanceFramework({
 ```typescript
 createGovernanceFramework({
   policy: {
-    failSafe: 'deny',
+    failSafe: "deny",
     cacheEnabled: true,
     cacheTtlMs: 60_000,
     federalMode: true,
@@ -333,8 +335,8 @@ createGovernanceFramework({
     enableProvenance: true,
   },
   compliance: {
-    validationLevel: 'full',
-    auditFrequency: 'continuous',
+    validationLevel: "full",
+    auditFrequency: "continuous",
   },
 });
 ```
@@ -343,14 +345,14 @@ createGovernanceFramework({
 
 The framework implements these IC FY28 control categories:
 
-| Category | Controls | Status |
-|----------|----------|--------|
-| **Identity** | IC-AI-001, IC-AI-002 | Agent identity, trust levels |
-| **Access** | IC-AI-010, IC-AI-011 | Policy-based access, classification |
-| **Data** | IC-AI-020, IC-AI-021 | Provenance, retention |
-| **Audit** | IC-AI-030, IC-AI-031 | Logging, incident response |
-| **Supply Chain** | IC-AI-040, IC-AI-041 | SLSA-3, chain integrity |
-| **AI Safety** | IC-AI-050-053 | Hallucination, misuse, boundaries, oversight |
+| Category         | Controls             | Status                                       |
+| ---------------- | -------------------- | -------------------------------------------- |
+| **Identity**     | IC-AI-001, IC-AI-002 | Agent identity, trust levels                 |
+| **Access**       | IC-AI-010, IC-AI-011 | Policy-based access, classification          |
+| **Data**         | IC-AI-020, IC-AI-021 | Provenance, retention                        |
+| **Audit**        | IC-AI-030, IC-AI-031 | Logging, incident response                   |
+| **Supply Chain** | IC-AI-040, IC-AI-041 | SLSA-3, chain integrity                      |
+| **AI Safety**    | IC-AI-050-053        | Hallucination, misuse, boundaries, oversight |
 
 ## OPA Policy Deployment
 
@@ -364,6 +366,7 @@ opa run --server \
 ```
 
 The policy package `agents.governance` provides:
+
 - `action_allowed` - Main action authorization
 - `chain_allowed` - Prompt chain authorization
 - `provenance_valid` - Provenance verification

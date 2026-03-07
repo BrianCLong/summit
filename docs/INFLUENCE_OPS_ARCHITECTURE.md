@@ -5,6 +5,7 @@
 > **Status**: Design Document
 >
 > **Related Documents**:
+>
 > - [INFLUENCE_OPERATIONS_DEFENSE_ROADMAP.md](./INFLUENCE_OPERATIONS_DEFENSE_ROADMAP.md)
 > - [INFLUENCE_OPS_INTEGRATION_GUIDE.md](./INFLUENCE_OPS_INTEGRATION_GUIDE.md)
 > - [ARCHITECTURE.md](./ARCHITECTURE.md)
@@ -100,6 +101,7 @@ This document outlines the technical architecture for implementing defensive inf
 ### 1. Narrative Analysis Service
 
 **Responsibilities**:
+
 - Narrative detection and extraction
 - Taxonomy classification
 - Propagation tracking
@@ -173,6 +175,7 @@ interface NarrativeAnalysisService {
 ### 2. Cognitive Defense Service
 
 **Responsibilities**:
+
 - Manipulation technique detection
 - Bias exploitation identification
 - User protection recommendations
@@ -242,6 +245,7 @@ interface CognitiveDefenseService {
 ### 3. Behavioral Detection Service
 
 **Responsibilities**:
+
 - Bot detection
 - Coordinated inauthentic behavior (CIB) detection
 - Astroturfing identification
@@ -312,6 +316,7 @@ interface BehavioralDetectionService {
 ### 4. Strategic Communication Service
 
 **Responsibilities**:
+
 - Source verification
 - Fact-checking integration
 - Counter-narrative development
@@ -642,14 +647,14 @@ SELECT create_hypertable('detection_alerts', 'time');
 
 ### Model Catalog
 
-| Model | Purpose | Type | Accuracy Target |
-|-------|---------|------|----------------|
-| Bot Detector | Identify automated accounts | Random Forest / XGBoost | >90% |
-| Narrative Classifier | Categorize narratives by type | Fine-tuned BERT | >85% |
-| Manipulation Detector | Identify manipulation techniques | Transformer (RoBERTa) | >88% |
-| CIB Detector | Find coordinated behavior | Graph Neural Network | >85% |
-| Mutation Detector | Identify narrative variants | Siamese Network (BERT) | >90% similarity |
-| Sentiment Analyzer | Measure sentiment shifts | Fine-tuned DistilBERT | >87% |
+| Model                 | Purpose                          | Type                    | Accuracy Target |
+| --------------------- | -------------------------------- | ----------------------- | --------------- |
+| Bot Detector          | Identify automated accounts      | Random Forest / XGBoost | >90%            |
+| Narrative Classifier  | Categorize narratives by type    | Fine-tuned BERT         | >85%            |
+| Manipulation Detector | Identify manipulation techniques | Transformer (RoBERTa)   | >88%            |
+| CIB Detector          | Find coordinated behavior        | Graph Neural Network    | >85%            |
+| Mutation Detector     | Identify narrative variants      | Siamese Network (BERT)  | >90% similarity |
+| Sentiment Analyzer    | Measure sentiment shifts         | Fine-tuned DistilBERT   | >87%            |
 
 ---
 
@@ -1160,6 +1165,7 @@ input SourceFilter {
 ### Key Metrics
 
 **Detection Metrics**:
+
 - `narratives_detected_total{threat_level, taxonomy}`
 - `bots_detected_total{confidence_level}`
 - `campaigns_detected_total{type}`
@@ -1167,12 +1173,14 @@ input SourceFilter {
 - `false_positive_rate{detection_type}`
 
 **Performance Metrics**:
+
 - `api_request_duration_seconds{endpoint, method}`
 - `db_query_duration_seconds{database, query_type}`
 - `ml_inference_duration_seconds{model}`
 - `kafka_consumer_lag{topic, consumer_group}`
 
 **Business Metrics**:
+
 - `active_threats{threat_level}`
 - `interventions_deployed_total{type}`
 - `user_resilience_score{user_id}`
@@ -1301,32 +1309,35 @@ influence-ops/
 ### Scaling Strategy
 
 **Horizontal Scaling**:
+
 - API Gateway: 3-10 replicas based on load
 - Services: 2-5 replicas per service
 - ML Workers: 2-8 workers based on queue depth
 - Stream Processors: 2-6 processors based on lag
 
 **Vertical Scaling**:
+
 - Neo4j: Large memory instances for graph traversal
 - PostgreSQL: SSD-backed instances with high IOPS
 - ML Workers: GPU-enabled instances
 
 ### Performance Targets
 
-| Metric | Target | Notes |
-|--------|--------|-------|
-| API Latency (p95) | <500ms | For most queries |
-| API Latency (p99) | <1s | For complex queries |
-| Detection Latency | <10 minutes | From content publish to detection |
-| Bot Detection Accuracy | >90% | With <5% false positives |
-| Narrative Classification Accuracy | >85% | Multi-class classification |
-| System Throughput | >10,000 items/sec | Content processing |
-| Database Query (p95) | <100ms | Neo4j graph queries |
-| ML Inference (p95) | <200ms | Per model inference |
+| Metric                            | Target            | Notes                             |
+| --------------------------------- | ----------------- | --------------------------------- |
+| API Latency (p95)                 | <500ms            | For most queries                  |
+| API Latency (p99)                 | <1s               | For complex queries               |
+| Detection Latency                 | <10 minutes       | From content publish to detection |
+| Bot Detection Accuracy            | >90%              | With <5% false positives          |
+| Narrative Classification Accuracy | >85%              | Multi-class classification        |
+| System Throughput                 | >10,000 items/sec | Content processing                |
+| Database Query (p95)              | <100ms            | Neo4j graph queries               |
+| ML Inference (p95)                | <200ms            | Per model inference               |
 
 ### Caching Strategy
 
 **Redis Caching**:
+
 - Narrative metadata (TTL: 1 hour)
 - Actor profiles (TTL: 30 minutes)
 - Source credibility scores (TTL: 6 hours)
@@ -1334,6 +1345,7 @@ influence-ops/
 - ML model predictions (TTL: 15 minutes)
 
 **CDN Caching**:
+
 - Static assets (long TTL)
 - Public API responses (short TTL)
 
@@ -1344,11 +1356,13 @@ influence-ops/
 ### Backup Strategy
 
 **Databases**:
+
 - Neo4j: Daily full backups, 6-hour incremental
 - PostgreSQL: Continuous WAL archiving, daily base backups
 - Redis: RDB snapshots every 6 hours, AOF enabled
 
 **Retention**:
+
 - Daily backups: 30 days
 - Weekly backups: 90 days
 - Monthly backups: 1 year
@@ -1359,6 +1373,7 @@ influence-ops/
 **RPO (Recovery Point Objective)**: 1 hour
 
 **Disaster Recovery Plan**:
+
 1. Detect failure (automated monitoring)
 2. Assess impact and declare incident
 3. Switch to backup region (if multi-region)
@@ -1390,6 +1405,7 @@ influence-ops/
 ### Audit Trail
 
 All operations logged:
+
 - Narrative detection events
 - Bot flagging actions
 - Attribution decisions
@@ -1437,12 +1453,14 @@ All operations logged:
 ### Appendix B: Resource Requirements
 
 **Minimum (Development)**:
+
 - 4 CPU cores
 - 16 GB RAM
 - 100 GB SSD storage
 - No GPU required
 
 **Recommended (Production)**:
+
 - 32 CPU cores (across cluster)
 - 128 GB RAM (across cluster)
 - 1 TB SSD storage
@@ -1451,6 +1469,7 @@ All operations logged:
 ### Appendix C: Cost Estimates
 
 **Infrastructure (Monthly)**:
+
 - Kubernetes cluster: $1,500 - $3,000
 - Databases: $800 - $2,000
 - Object storage: $100 - $500
@@ -1459,6 +1478,7 @@ All operations logged:
 - **Total**: $3,800 - $11,500/month
 
 **External Services (Monthly)**:
+
 - Fact-checking APIs: $500 - $1,500
 - Threat intelligence feeds: $1,000 - $5,000
 - **Total**: $1,500 - $6,500/month

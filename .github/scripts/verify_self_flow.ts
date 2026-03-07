@@ -7,7 +7,7 @@ const badTraj = {
   modality: "text" as const,
   steps: [],
   claims: [{ text: "foo", kgNodeIds: [], docSpans: [] }],
-  policy: { piiRisk: "low" as const, blocked: false, reasons: [] }
+  policy: { piiRisk: "low" as const, blocked: false, reasons: [] },
 };
 
 const result = assertGrounded(badTraj);

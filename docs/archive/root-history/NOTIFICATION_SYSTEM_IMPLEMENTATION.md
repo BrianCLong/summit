@@ -24,6 +24,7 @@ Implemented a comprehensive real-time notification system that extends the exist
 ### 2. Database Schema (`server/db/migrations/postgres/2025-11-25_real_time_notification_system.sql`)
 
 Tables Created:
+
 - `notification_preferences` - User notification settings
 - `notification_delivery_log` - Complete delivery audit trail
 - `notification_templates` - Message templates (Handlebars)
@@ -31,6 +32,7 @@ Tables Created:
 - `notification_role_defaults` - Role-based defaults
 
 Key Features:
+
 - PostgreSQL NOTIFY triggers for real-time events
 - Helper functions for common operations
 - Materialized view for statistics
@@ -40,6 +42,7 @@ Key Features:
 ### 3. Notification Router Service (`services/notification-router/`)
 
 Core Components:
+
 - `types.ts` - TypeScript definitions with Zod validation
 - `severity-calculator.ts` - Intelligent severity scoring
 - `notification-throttler.ts` - Rate limiting and deduplication
@@ -48,6 +51,7 @@ Core Components:
 **Severity Levels**: Low → Medium → High → Critical → Emergency
 
 **Throttling Features**:
+
 - Per-user, per-channel rate limiting
 - Event deduplication
 - Quiet hours enforcement
@@ -60,6 +64,7 @@ Core Components:
 - **Slack**: Rich Block Kit formatting with interactive buttons
 
 Each channel includes:
+
 - Retry logic with exponential backoff
 - Health checks
 - Statistics tracking
@@ -70,18 +75,21 @@ Each channel includes:
 **Schema**: `server/src/graphql/notifications/schema.graphql`
 
 Queries:
+
 - `myNotificationPreferences` - User settings
 - `notificationHistory` - Paginated delivery history
 - `unreadNotificationCount` - Real-time count
 - `notificationStats` - Aggregated statistics
 
 Mutations:
+
 - `updateNotificationPreferences` - Update settings
 - `markNotificationRead` - Mark as read
 - `acknowledgeNotification` - Acknowledge critical alerts
 - `testNotification` - Admin testing
 
 Subscriptions:
+
 - `notificationReceived` - Real-time stream
 - `unreadCountUpdated` - Count updates
 
@@ -123,13 +131,13 @@ PORT=3003
 
 ## Lines of Code
 
-| Component | Lines |
-|---|---|
-| Architecture docs | ~1,200 |
-| Database migration | ~800 |
-| Notification router | ~2,400 |
-| GraphQL API | ~650 |
-| **Total** | **~5,050** |
+| Component           | Lines      |
+| ------------------- | ---------- |
+| Architecture docs   | ~1,200     |
+| Database migration  | ~800       |
+| Notification router | ~2,400     |
+| GraphQL API         | ~650       |
+| **Total**           | **~5,050** |
 
 ## Deployment Checklist
 

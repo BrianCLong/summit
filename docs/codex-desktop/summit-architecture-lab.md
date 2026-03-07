@@ -16,6 +16,7 @@
 **Objective:** Produce/maintain `docs/architecture/frontend-overview.md`.
 
 **Checklist:**
+
 1. Inventory current UI entrypoints (`apps/web`, `client`, `conductor-ui`).
 2. Capture ownership, build tooling, and deployment notes.
 3. Update or create `docs/architecture/frontend-overview.md` with citations.
@@ -25,6 +26,7 @@
 **Objective:** Maintain `docs/architecture/agentic-seams.md`.
 
 **Checklist:**
+
 1. Identify boundaries between agents, services, and policy layers.
 2. Document seam contracts (inputs/outputs, constraints, observability).
 3. Validate references to governance sources and policy-as-code.
@@ -34,6 +36,7 @@
 **Objective:** Isolated refactor or experiment with explicit success criteria.
 
 **Checklist:**
+
 1. Define scope, success criteria, and rollback steps.
 2. Create a dedicated branch: `archlab/<experiment-name>`.
 3. Keep the change set doc- or utility-only; avoid GA-critical paths.

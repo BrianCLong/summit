@@ -116,6 +116,7 @@ The Espionage and Foreign Intelligence Operations Platform is an enterprise-grad
 Foundation package providing core types and schemas for all espionage-related data.
 
 **Key Types:**
+
 - `IntelligenceAgency`: Foreign intelligence service records
 - `IntelligenceOfficer`: Intelligence officer profiles
 - `EspionageOperation`: Operational tracking
@@ -125,20 +126,21 @@ Foundation package providing core types and schemas for all espionage-related da
 - `Indicator`: Threat indicators
 
 **Example:**
+
 ```typescript
-import { intelligenceAgencySchema, IntelligenceAgency } from '@intelgraph/espionage-tracking';
+import { intelligenceAgencySchema, IntelligenceAgency } from "@intelgraph/espionage-tracking";
 
 const agency: IntelligenceAgency = intelligenceAgencySchema.parse({
   id: crypto.randomUUID(),
-  name: 'Foreign Intelligence Service Alpha',
-  country: 'Country X',
-  agencyType: 'FOREIGN_INTELLIGENCE',
-  capabilities: ['HUMINT', 'SIGINT', 'CYBER'],
-  priorityTargets: ['Technology', 'Defense', 'Government'],
-  classification: 'SECRET',
+  name: "Foreign Intelligence Service Alpha",
+  country: "Country X",
+  agencyType: "FOREIGN_INTELLIGENCE",
+  capabilities: ["HUMINT", "SIGINT", "CYBER"],
+  priorityTargets: ["Technology", "Defense", "Government"],
+  classification: "SECRET",
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
-  tenantId: 'your-tenant-id',
+  tenantId: "your-tenant-id",
 });
 ```
 
@@ -147,14 +149,16 @@ const agency: IntelligenceAgency = intelligenceAgencySchema.parse({
 Advanced tracking of foreign intelligence services, organizational structures, and capabilities.
 
 **Key Classes:**
+
 - `AgencyTracker`: Agency profile management
 - `OrganizationalUnit`: Org structure tracking
 - `LeadershipProfile`: Leadership analysis
 - `CapabilityAssessment`: Capability evaluation
 
 **Example:**
+
 ```typescript
-import { AgencyTracker } from '@intelgraph/foreign-intelligence';
+import { AgencyTracker } from "@intelgraph/foreign-intelligence";
 
 const tracker = new AgencyTracker({
   enableCapabilityAssessment: true,
@@ -163,11 +167,11 @@ const tracker = new AgencyTracker({
 
 const assessment = tracker.assessCapabilities(agencyId, [
   {
-    capabilityType: 'CYBER',
-    capabilityName: 'Advanced Persistent Threat Operations',
-    maturityLevel: 'ADVANCED',
-    effectiveness: 'VERY_HIGH',
-    assessmentConfidence: 'HIGH',
+    capabilityType: "CYBER",
+    capabilityName: "Advanced Persistent Threat Operations",
+    maturityLevel: "ADVANCED",
+    effectiveness: "VERY_HIGH",
+    assessmentConfidence: "HIGH",
   },
 ]);
 ```
@@ -177,14 +181,16 @@ const assessment = tracker.assessCapabilities(agencyId, [
 Intelligence officer tracking, cover analysis, and network mapping.
 
 **Key Classes:**
+
 - `AgentAnalyzer`: Agent analysis engine
 - `CoverAnalysis`: Cover identity evaluation
 - `TravelPattern`: Travel pattern analysis
 - `AgentNetwork`: Network mapping
 
 **Example:**
+
 ```typescript
-import { AgentAnalyzer } from '@intelgraph/agent-identification';
+import { AgentAnalyzer } from "@intelgraph/agent-identification";
 
 const analyzer = new AgentAnalyzer({
   enableCoverAnalysis: true,
@@ -193,12 +199,12 @@ const analyzer = new AgentAnalyzer({
 });
 
 // Analyze cover identity
-const coverAnalysis = analyzer.analyzeCoverIdentity(officer, 'John Smith');
+const coverAnalysis = analyzer.analyzeCoverIdentity(officer, "John Smith");
 
 // Analyze travel patterns
 const travelPattern = analyzer.analyzeTravelPatterns(officer, {
-  startDate: '2024-01-01T00:00:00Z',
-  endDate: '2024-12-31T23:59:59Z',
+  startDate: "2024-01-01T00:00:00Z",
+  endDate: "2024-12-31T23:59:59Z",
 });
 
 // Generate risk profile
@@ -210,14 +216,16 @@ const riskProfile = analyzer.generateRiskProfile(officer);
 Detection and tracking of covert operations including influence, interference, and sabotage.
 
 **Key Classes:**
+
 - `OperationsDetector`: Operation detection engine
 - `InfluenceOperation`: Influence operation tracking
 - `PoliticalInterference`: Political interference detection
 - `SabotageOperation`: Sabotage tracking
 
 **Example:**
+
 ```typescript
-import { OperationsDetector } from '@intelgraph/covert-operations';
+import { OperationsDetector } from "@intelgraph/covert-operations";
 
 const detector = new OperationsDetector({
   enableInfluenceDetection: true,
@@ -225,17 +233,19 @@ const detector = new OperationsDetector({
 });
 
 const influenceOp = detector.detectInfluenceOperation({
-  operationName: 'Operation Digital Divide',
+  operationName: "Operation Digital Divide",
   sponsoringAgency: agencyId,
-  targetCountry: 'Country Y',
-  objectives: ['Sow discord', 'Undermine trust in institutions'],
-  narratives: [{
-    narrative: 'Government corruption narrative',
-    themes: ['corruption', 'incompetence'],
-    targetDemographic: 'Young adults',
-    disseminationChannels: ['social-media', 'forums'],
-    reach: 'MASS',
-  }],
+  targetCountry: "Country Y",
+  objectives: ["Sow discord", "Undermine trust in institutions"],
+  narratives: [
+    {
+      narrative: "Government corruption narrative",
+      themes: ["corruption", "incompetence"],
+      targetDemographic: "Young adults",
+      disseminationChannels: ["social-media", "forums"],
+      reach: "MASS",
+    },
+  ],
 });
 ```
 
@@ -244,6 +254,7 @@ const influenceOp = detector.detectInfluenceOperation({
 Technical intelligence operations including SIGINT, IMINT, MASINT, and cyber operations.
 
 **Key Classes:**
+
 - `TechintAnalyzer`: Technical intelligence analysis
 - `SigintCollection`: SIGINT operations
 - `ImintCollection`: IMINT operations
@@ -251,8 +262,9 @@ Technical intelligence operations including SIGINT, IMINT, MASINT, and cyber ope
 - `MasintCollection`: MASINT operations
 
 **Example:**
+
 ```typescript
-import { TechintAnalyzer } from '@intelgraph/technical-intelligence';
+import { TechintAnalyzer } from "@intelgraph/technical-intelligence";
 
 const analyzer = new TechintAnalyzer({
   enableSigint: true,
@@ -262,23 +274,27 @@ const analyzer = new TechintAnalyzer({
 
 // Track cyber operation
 const cyberOp = analyzer.trackCyberOperation({
-  operationName: 'APT-28 Campaign',
+  operationName: "APT-28 Campaign",
   sponsoringAgency: agencyId,
-  operationType: 'ADVANCED_PERSISTENT_THREAT',
-  targets: [{
-    targetName: 'Government Network',
-    targetType: 'NETWORK',
-    sector: 'Government',
-    criticalityLevel: 'CRITICAL',
-    compromised: true,
-  }],
-  ttps: [{
-    tactic: 'Initial Access',
-    technique: 'Spearphishing',
-    procedure: 'Targeted email with malicious attachment',
-    mitreId: 'T1566.001',
-    frequency: 'ROUTINE',
-  }],
+  operationType: "ADVANCED_PERSISTENT_THREAT",
+  targets: [
+    {
+      targetName: "Government Network",
+      targetType: "NETWORK",
+      sector: "Government",
+      criticalityLevel: "CRITICAL",
+      compromised: true,
+    },
+  ],
+  ttps: [
+    {
+      tactic: "Initial Access",
+      technique: "Spearphishing",
+      procedure: "Targeted email with malicious attachment",
+      mitreId: "T1566.001",
+      frequency: "ROUTINE",
+    },
+  ],
 });
 ```
 
@@ -287,6 +303,7 @@ const cyberOp = analyzer.trackCyberOperation({
 Counterintelligence operations including penetration detection and double agent management.
 
 **Key Classes:**
+
 - `CIManager`: Counterintelligence manager
 - `PenetrationIndicator`: Penetration detection
 - `DoubleAgent`: Double agent management
@@ -294,8 +311,9 @@ Counterintelligence operations including penetration detection and double agent 
 - `InsiderThreatProfile`: Insider threat hunting
 
 **Example:**
+
 ```typescript
-import { CIManager } from '@intelgraph/counterintel-ops';
+import { CIManager } from "@intelgraph/counterintel-ops";
 
 const ciManager = new CIManager({
   enablePenetrationDetection: true,
@@ -305,12 +323,12 @@ const ciManager = new CIManager({
 
 // Create penetration indicator
 const indicator = ciManager.createPenetrationIndicator({
-  indicatorType: 'UNAUTHORIZED_ACCESS',
-  description: 'Unusual access to classified systems',
+  indicatorType: "UNAUTHORIZED_ACCESS",
+  description: "Unusual access to classified systems",
   observedAt: new Date().toISOString(),
-  severity: 'CRITICAL',
+  severity: "CRITICAL",
   confidence: 0.92,
-  investigationStatus: 'INVESTIGATING',
+  investigationStatus: "INVESTIGATING",
 });
 
 // Assess CI posture
@@ -331,6 +349,7 @@ const posture = ciManager.assessCIPosture({
 Primary service for espionage operations, agent tracking, and analytics.
 
 **Endpoints:**
+
 - `/api/operations/*` - Operations management
 - `/api/agents/*` - Agent tracking
 - `/api/analytics/*` - Analytics and intelligence products
@@ -341,6 +360,7 @@ Primary service for espionage operations, agent tracking, and analytics.
 Dedicated service for foreign intelligence agency tracking and analysis.
 
 **Endpoints:**
+
 - `/api/agencies/*` - Intelligence agency management
 - `/api/capabilities/*` - Capability assessments
 - `/api/cooperation/*` - Cooperation relationships
@@ -352,6 +372,7 @@ Dedicated service for foreign intelligence agency tracking and analysis.
 ### Classification Levels
 
 All data supports the following classification levels:
+
 - `UNCLASSIFIED`
 - `CONFIDENTIAL`
 - `SECRET`
@@ -362,6 +383,7 @@ All data supports the following classification levels:
 ### Compartments
 
 Fine-grained access control through compartments:
+
 ```typescript
 {
   code: 'TK', // TALENT KEYHOLE
@@ -373,6 +395,7 @@ Fine-grained access control through compartments:
 ### Tenant Isolation
 
 All data includes `tenantId` for multi-tenant security:
+
 ```typescript
 {
   tenantId: 'org-alpha-001',
@@ -387,6 +410,7 @@ All data includes `tenantId` for multi-tenant security:
 ### Operations API
 
 #### Create Espionage Operation
+
 ```http
 POST /api/operations/espionage
 Content-Type: application/json
@@ -405,6 +429,7 @@ Content-Type: application/json
 ```
 
 #### List Operations
+
 ```http
 GET /api/operations/espionage?status=ACTIVE&agencyId=agency-uuid
 ```
@@ -412,6 +437,7 @@ GET /api/operations/espionage?status=ACTIVE&agencyId=agency-uuid
 ### Agents API
 
 #### Create Intelligence Officer
+
 ```http
 POST /api/agents/officers
 Content-Type: application/json
@@ -437,6 +463,7 @@ Content-Type: application/json
 ```
 
 #### Analyze Cover Identity
+
 ```http
 POST /api/agents/officers/{id}/analyze-cover
 Content-Type: application/json
@@ -449,6 +476,7 @@ Content-Type: application/json
 ### Analytics API
 
 #### Create Analytical Product
+
 ```http
 POST /api/analytics/products
 Content-Type: application/json
@@ -470,6 +498,7 @@ Content-Type: application/json
 ```
 
 #### Generate Threat Assessment
+
 ```http
 POST /api/analytics/threat-assessment
 Content-Type: application/json
@@ -486,6 +515,7 @@ Content-Type: application/json
 ### Counterintel API
 
 #### Create Penetration Indicator
+
 ```http
 POST /api/counterintel/penetration-indicators
 Content-Type: application/json
@@ -515,19 +545,19 @@ Content-Type: application/json
 ### Complete Workflow: Tracking a Foreign Intelligence Operation
 
 ```typescript
-import { AgencyTracker } from '@intelgraph/foreign-intelligence';
-import { AgentAnalyzer } from '@intelgraph/agent-identification';
-import { OperationsDetector } from '@intelgraph/covert-operations';
+import { AgencyTracker } from "@intelgraph/foreign-intelligence";
+import { AgentAnalyzer } from "@intelgraph/agent-identification";
+import { OperationsDetector } from "@intelgraph/covert-operations";
 
 // 1. Create intelligence agency profile
 const tracker = new AgencyTracker();
 const agency = tracker.createAgencyProfile({
-  name: 'Foreign Intelligence Service',
-  country: 'Country X',
-  agencyType: 'FOREIGN_INTELLIGENCE',
-  capabilities: ['HUMINT', 'SIGINT', 'CYBER'],
-  classification: 'SECRET',
-  tenantId: 'your-tenant-id',
+  name: "Foreign Intelligence Service",
+  country: "Country X",
+  agencyType: "FOREIGN_INTELLIGENCE",
+  capabilities: ["HUMINT", "SIGINT", "CYBER"],
+  classification: "SECRET",
+  tenantId: "your-tenant-id",
 });
 
 // 2. Track intelligence officers
@@ -535,40 +565,42 @@ const analyzer = new AgentAnalyzer();
 const officer = {
   id: crypto.randomUUID(),
   agency: agency.id,
-  role: 'CASE_OFFICER',
-  coverIdentities: [{
-    name: 'John Smith',
-    coverType: 'DIPLOMATIC',
-    organization: 'Embassy',
-    position: 'Cultural Attaché',
-    location: 'Capital City',
-    validFrom: new Date().toISOString(),
-  }],
-  operationalStatus: 'ACTIVE',
-  classification: 'SECRET',
-  tenantId: 'your-tenant-id',
+  role: "CASE_OFFICER",
+  coverIdentities: [
+    {
+      name: "John Smith",
+      coverType: "DIPLOMATIC",
+      organization: "Embassy",
+      position: "Cultural Attaché",
+      location: "Capital City",
+      validFrom: new Date().toISOString(),
+    },
+  ],
+  operationalStatus: "ACTIVE",
+  classification: "SECRET",
+  tenantId: "your-tenant-id",
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
 };
 
 // 3. Analyze cover and risk
-const coverAnalysis = analyzer.analyzeCoverIdentity(officer, 'John Smith');
+const coverAnalysis = analyzer.analyzeCoverIdentity(officer, "John Smith");
 const riskProfile = analyzer.generateRiskProfile(officer);
 
 // 4. Detect operations
 const detector = new OperationsDetector();
 const operation = detector.detectInfluenceOperation({
-  operationName: 'Digital Influence Campaign',
+  operationName: "Digital Influence Campaign",
   sponsoringAgency: agency.id,
-  targetCountry: 'Country Y',
-  objectives: ['Shape public opinion'],
-  tenantId: 'your-tenant-id',
+  targetCountry: "Country Y",
+  objectives: ["Shape public opinion"],
+  tenantId: "your-tenant-id",
 });
 
-console.log('Agency:', agency);
-console.log('Cover Analysis:', coverAnalysis);
-console.log('Risk Profile:', riskProfile);
-console.log('Operation:', operation);
+console.log("Agency:", agency);
+console.log("Cover Analysis:", coverAnalysis);
+console.log("Risk Profile:", riskProfile);
+console.log("Operation:", operation);
 ```
 
 ---
@@ -578,6 +610,7 @@ console.log('Operation:', operation);
 ### Access Control
 
 All API endpoints enforce:
+
 1. **Authentication**: JWT-based authentication
 2. **Tenant Isolation**: Automatic tenant filtering
 3. **Classification-Based Access**: Users only see data at or below their clearance level
@@ -596,11 +629,13 @@ All API endpoints enforce:
 // Automatic classification validation
 const operation = espionageOperationSchema.parse({
   // ... data
-  classification: 'TOP_SECRET',
-  compartments: [{
-    code: 'SI',
-    name: 'Special Intelligence',
-  }],
+  classification: "TOP_SECRET",
+  compartments: [
+    {
+      code: "SI",
+      name: "Special Intelligence",
+    },
+  ],
 });
 ```
 
@@ -611,7 +646,7 @@ const operation = espionageOperationSchema.parse({
 ### 1. Always Use Schemas for Validation
 
 ```typescript
-import { intelligenceOfficerSchema } from '@intelgraph/espionage-tracking';
+import { intelligenceOfficerSchema } from "@intelgraph/espionage-tracking";
 
 // Good: Validation with Zod
 const officer = intelligenceOfficerSchema.parse(data);
@@ -627,9 +662,9 @@ try {
   const operation = detector.detectInfluenceOperation(data);
 } catch (error) {
   if (error instanceof z.ZodError) {
-    console.error('Validation failed:', error.errors);
+    console.error("Validation failed:", error.errors);
   } else {
-    console.error('Unexpected error:', error);
+    console.error("Unexpected error:", error);
   }
 }
 ```
@@ -640,18 +675,16 @@ try {
 // Always set appropriate classification
 const product: AnalyticalProduct = {
   // ... data
-  classification: 'SECRET',
-  compartments: [
-    { code: 'TK', name: 'TALENT KEYHOLE' },
-  ],
-  tenantId: 'your-tenant-id',
+  classification: "SECRET",
+  compartments: [{ code: "TK", name: "TALENT KEYHOLE" }],
+  tenantId: "your-tenant-id",
 };
 ```
 
 ### 4. Use TypeScript Types
 
 ```typescript
-import type { IntelligenceAgency, IntelligenceOfficer } from '@intelgraph/espionage-tracking';
+import type { IntelligenceAgency, IntelligenceOfficer } from "@intelgraph/espionage-tracking";
 
 function analyzeAgency(agency: IntelligenceAgency): void {
   // TypeScript ensures type safety
@@ -684,7 +717,7 @@ const officers = await queryOfficers({
 // Always use ISO 8601 format
 const operation = {
   startDate: new Date().toISOString(),
-  endDate: new Date('2025-01-01').toISOString(),
+  endDate: new Date("2025-01-01").toISOString(),
 };
 ```
 
@@ -713,4 +746,4 @@ const operation = {
 
 ---
 
-*This platform provides advanced intelligence capabilities for national security operations. All usage must comply with applicable laws, regulations, and organizational policies.*
+_This platform provides advanced intelligence capabilities for national security operations. All usage must comply with applicable laws, regulations, and organizational policies._

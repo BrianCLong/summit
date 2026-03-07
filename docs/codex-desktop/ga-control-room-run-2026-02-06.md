@@ -21,6 +21,7 @@
 **Status:** GREEN (tracker indicates no open GA blockers).
 
 **Today’s GA Blockers (Actionable):**
+
 - **Blocker:** Required check name mapping remains unresolved for several CI jobs (temporary names still in use). This is a GA gate because branch protection requires exact check names.
   - **Action:** Resolve check name mappings in CI workflows and update `required_checks.todo.md` once names are verified.
 
@@ -30,12 +31,14 @@
 ### 2) Security Evidence Auditor → Gaps by Priority
 
 **GA‑Blocking Gaps (fix before GA):**
+
 1. **Required CI check name mapping** remains incomplete, which can misalign branch protection and GA Risk Gate enforcement.
    - Suggested change: update workflow job names to match the required checks list and then close the TODO mapping list.
 2. **GA Risk Gate workflow file is missing.** Documentation describes `.github/workflows/ga-risk-gate.yml`, but the CI pipeline notes it is absent.
    - Suggested change: create the workflow or reconcile documentation + CI configuration so the required gate is enforced.
 
 **Post‑GA Gaps (backlog candidates):**
+
 1. **Add GA Risk Gate to the evidence index.** The GA Risk Gate is defined, but the compliance evidence index does not explicitly call it out.
    - Suggested change: add a dedicated `SEC-*` or `CICD-*` entry linking to the GA gate workflow and `SECURITY_GA_GATE.md`.
 2. **Operationalize GA gate verification as a daily evidence artifact.** Convert the local verification commands in `SECURITY_GA_GATE.md` into a reusable ops checklist record.
@@ -43,6 +46,7 @@
 ### 3) Ops & Incident Console → Checklists
 
 #### Pre‑GA Checklist (Stability & Evidence)
+
 - [ ] Run CI gates locally: `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm run test:e2e`.
 - [ ] Run golden‑path: `make smoke`.
 - [ ] Verify GA Risk Gate locally (see `SECURITY_GA_GATE.md`): `./scripts/check-ga-policy.sh`, `grype .`, `trivy fs .`.
@@ -50,12 +54,14 @@
 - [ ] Review incident response readiness (`docs/operations/INCIDENT_RESPONSE.md`, `docs/operations/ON_CALL_GUIDE.md`).
 
 #### GA Cut Checklist (Go/No‑Go)
+
 - [ ] Confirm freeze window state in `docs/policies/trust-policy.yaml`.
 - [ ] Review GA war‑room roles and launch cadence (`docs/GA_WAR_ROOM.md`).
 - [ ] Validate GA Risk Gate status and branch protection check names.
 - [ ] Open operational dashboards (Grafana GA Core dashboard: `grafana_ga_core_dashboard.json`).
 
 #### Hypercare Checklist (Post‑Launch)
+
 - [ ] Monitor active incidents and on‑call rotations (`docs/operations/ON_CALL_GUIDE.md`).
 - [ ] Execute incident response lifecycle as needed (`docs/operations/INCIDENT_RESPONSE.md`).
 - [ ] Capture incident evidence and link to governance artifacts (per GA gate requirements).

@@ -3,8 +3,8 @@
  * Detect coordinated inauthentic behavior, bot networks, and influence campaigns
  */
 
-export * from './cross-platform/correlation-engine';
-export * from './temporal/network-evolution';
+export * from "./cross-platform/correlation-engine";
+export * from "./temporal/network-evolution";
 
 // Types
 export interface DisinformationAnalysisResult {
@@ -30,13 +30,13 @@ export interface DetectedCampaign {
 }
 
 export enum CampaignType {
-  COORDINATED_INAUTHENTIC_BEHAVIOR = 'coordinated_inauthentic_behavior',
-  AMPLIFICATION = 'amplification',
-  ASTROTURFING = 'astroturfing',
-  PROPAGANDA = 'propaganda',
-  MISINFORMATION_SPREAD = 'misinformation_spread',
-  POLARIZATION = 'polarization',
-  SUPPRESSION = 'suppression',
+  COORDINATED_INAUTHENTIC_BEHAVIOR = "coordinated_inauthentic_behavior",
+  AMPLIFICATION = "amplification",
+  ASTROTURFING = "astroturfing",
+  PROPAGANDA = "propaganda",
+  MISINFORMATION_SPREAD = "misinformation_spread",
+  POLARIZATION = "polarization",
+  SUPPRESSION = "suppression",
 }
 
 export interface BotNetwork {
@@ -199,13 +199,15 @@ export class DisinformationDetector {
 
     // 5. Generate recommendations
     if (campaigns.length > 0) {
-      recommendations.push('Coordinated campaign detected - investigate account connections');
+      recommendations.push("Coordinated campaign detected - investigate account connections");
     }
     if (botNetworks.length > 0) {
-      recommendations.push(`${botNetworks.length} bot networks identified - consider account suspension`);
+      recommendations.push(
+        `${botNetworks.length} bot networks identified - consider account suspension`
+      );
     }
     if (narratives.some((n) => n.spread.velocity > 0.8)) {
-      recommendations.push('Rapid narrative spread detected - monitor for viral amplification');
+      recommendations.push("Rapid narrative spread detected - monitor for viral amplification");
     }
 
     return {
@@ -276,7 +278,8 @@ export class DisinformationDetector {
 
     // Check for low variance (indicates coordination)
     const mean = intervals.reduce((a, b) => a + b, 0) / intervals.length;
-    const variance = intervals.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / intervals.length;
+    const variance =
+      intervals.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / intervals.length;
     const stdDev = Math.sqrt(variance);
     const cv = stdDev / mean; // Coefficient of variation
 
@@ -363,13 +366,13 @@ export class DisinformationDetector {
           networks.push({
             networkId: `network_${Date.now()}_${networks.length}`,
             confidence: cluster.coherence,
-            accounts: cluster.accounts.map(id => botAccounts.find(a => a.accountId === id)!),
+            accounts: cluster.accounts.map((id) => botAccounts.find((a) => a.accountId === id)!),
             coordination: this.calculateCoordinationMetrics(cluster.accounts, network),
             behavior: {
               amplificationFactor: 2.5,
               reachEstimate: cluster.accounts.length * 1000,
-              targetAudiences: ['general'],
-              tactics: ['amplification', 'coordinated_posting'],
+              targetAudiences: ["general"],
+              tactics: ["amplification", "coordinated_posting"],
             },
           });
         }
@@ -407,17 +410,17 @@ export class DisinformationDetector {
 
     if (!account.profile?.bio) {
       indicators.push({
-        type: 'missing_bio',
+        type: "missing_bio",
         severity: 0.4,
-        description: 'Account has no biography',
+        description: "Account has no biography",
       });
     }
 
     if (account.activity?.postsPerDay > 50) {
       indicators.push({
-        type: 'high_frequency',
+        type: "high_frequency",
         severity: 0.7,
-        description: 'Unusually high posting frequency',
+        description: "Unusually high posting frequency",
       });
     }
 
@@ -460,7 +463,7 @@ export class DisinformationDetector {
           clusterId: `cluster_${clusters.length}`,
           accounts: cluster,
           coherence: 0.8,
-          purpose: 'amplification',
+          purpose: "amplification",
         });
       }
     }
@@ -503,7 +506,7 @@ export class DisinformationDetector {
 
   private clusterContent(content: any[]): Array<{ representative: string; content: any[] }> {
     // Simple content clustering
-    return [{ representative: 'example narrative', content: content.slice(0, 3) }];
+    return [{ representative: "example narrative", content: content.slice(0, 3) }];
   }
 
   private trackEvolution(content: any[]): NarrativeEvolution[] {
@@ -549,7 +552,7 @@ export class DisinformationDetector {
       source: edge.source,
       target: edge.target,
       weight: 1,
-      type: edge.type || 'connection',
+      type: edge.type || "connection",
     }));
 
     const clusters = this.findAccountClusters([], network);
@@ -573,7 +576,10 @@ export class DisinformationDetector {
     return Math.min(connections.length / 100, 1);
   }
 
-  private calculateOverallConfidence(campaigns: DetectedCampaign[], botNetworks: BotNetwork[]): number {
+  private calculateOverallConfidence(
+    campaigns: DetectedCampaign[],
+    botNetworks: BotNetwork[]
+  ): number {
     if (campaigns.length === 0 && botNetworks.length === 0) return 0;
 
     let totalConfidence = 0;

@@ -4,20 +4,20 @@ on:
   workflow_dispatch:
     inputs:
       cloud_provider:
-        description: 'Cloud provider to configure'
+        description: "Cloud provider to configure"
         required: true
         type: choice
         options:
-          - 'aws'
-          - 'oci'
-          - 'both'
+          - "aws"
+          - "oci"
+          - "both"
       environment:
-        description: 'Target environment'
+        description: "Target environment"
         required: true
         type: choice
         options:
-          - 'staging'
-          - 'production'
+          - "staging"
+          - "production"
 
 permissions:
   id-token: write

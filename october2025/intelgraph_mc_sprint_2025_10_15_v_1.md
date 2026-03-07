@@ -292,20 +292,19 @@ repo/
 **Router bootstrap (TypeScript)**
 
 ```ts
-import fastify from 'fastify';
-import proxy from '@fastify/http-proxy';
-import { regionForTenant } from './tenant-map';
+import fastify from "fastify";
+import proxy from "@fastify/http-proxy";
+import { regionForTenant } from "./tenant-map";
 
 const app = fastify({ trustProxy: true });
-app.addHook('onRequest', async (req) => {
-  const tenant = req.headers['x-tenant-id'] as string;
+app.addHook("onRequest", async (req) => {
+  const tenant = req.headers["x-tenant-id"] as string;
   const region = await regionForTenant(tenant);
-  req.headers['x-target-region'] = region;
+  req.headers["x-target-region"] = region;
 });
 app.register(proxy, {
-  upstream: (req: any) =>
-    `https://gw-${req.headers['x-target-region']}.svc.cluster.local` as any,
-  prefix: '/graphql',
+  upstream: (req: any) => `https://gw-${req.headers["x-target-region"]}.svc.cluster.local` as any,
+  prefix: "/graphql",
 });
 app.listen({ port: 8080 });
 ```
@@ -336,13 +335,13 @@ export async function rtbf(entityId: string, tenant: string) {
 **k6 cross‑region read test (JS)**
 
 ```js
-import http from 'k6/http';
-import { Trend } from 'k6/metrics';
-const p95 = new Trend('gw_p95');
+import http from "k6/http";
+import { Trend } from "k6/metrics";
+const p95 = new Trend("gw_p95");
 export default function () {
   const res = http.post(
-    'https://router.stg/graphql',
-    JSON.stringify({ id: 'getEntityById:v1', vars: { id: '1' } }),
+    "https://router.stg/graphql",
+    JSON.stringify({ id: "getEntityById:v1", vars: { id: "1" } })
   );
   p95.add(res.timings.duration);
 }

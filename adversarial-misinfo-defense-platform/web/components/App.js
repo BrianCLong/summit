@@ -1,10 +1,10 @@
 /**
  * Main App Component for Adversarial Misinformation Defense Platform Web UI
  */
-import React from 'react';
-import { Outlet } from 'react-router-dom';
-import styled from 'styled-components';
-import { ToastContainer } from 'react-toastify';
+import React from "react";
+import { Outlet } from "react-router-dom";
+import styled from "styled-components";
+import { ToastContainer } from "react-toastify";
 
 // Styled components
 const AppContainer = styled.div`
@@ -43,15 +43,15 @@ const Footer = styled.footer`
 // Navigation component
 const Navigation = () => {
   return (
-    <nav style={{ marginBottom: '1rem' }}>
+    <nav style={{ marginBottom: "1rem" }}>
       <ul
         style={{
-          display: 'flex',
-          listStyle: 'none',
+          display: "flex",
+          listStyle: "none",
           padding: 0,
           margin: 0,
-          backgroundColor: '#3498db',
-          borderRadius: '4px',
+          backgroundColor: "#3498db",
+          borderRadius: "4px",
         }}
       >
         <li>
@@ -95,12 +95,12 @@ const Navigation = () => {
 };
 
 const navLinkStyle = {
-  display: 'block',
-  padding: '0.75rem 1rem',
-  color: 'white',
-  textDecoration: 'none',
-  fontWeight: '500',
-  transition: 'background-color 0.2s',
+  display: "block",
+  padding: "0.75rem 1rem",
+  color: "white",
+  textDecoration: "none",
+  fontWeight: "500",
+  transition: "background-color 0.2s",
 };
 
 // App component

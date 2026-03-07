@@ -1,5 +1,5 @@
-import { createHash } from 'crypto';
-import type { MasterRecord, RecordVersion } from '@intelgraph/mdm-core';
+import { createHash } from "crypto";
+import type { MasterRecord, RecordVersion } from "@intelgraph/mdm-core";
 
 export class VersioningService {
   private versions: Map<string, RecordVersion[]> = new Map();
@@ -12,8 +12,8 @@ export class VersioningService {
     const version: RecordVersion = {
       version: history.length + 1,
       recordId: record.id.id,
-      recordType: record.metadata.recordType ?? 'unknown',
-      tenantId: record.metadata.tenantId ?? 'unknown',
+      recordType: record.metadata.recordType ?? "unknown",
+      tenantId: record.metadata.tenantId ?? "unknown",
       data: record.data,
       checksum,
       timestamp: new Date(),
@@ -41,9 +41,7 @@ export class VersioningService {
   }
 
   private computeChecksum(data: Record<string, unknown>): string {
-    return createHash('sha256')
-      .update(JSON.stringify(data))
-      .digest('hex');
+    return createHash("sha256").update(JSON.stringify(data)).digest("hex");
   }
 
   private computeDiff(
@@ -53,7 +51,7 @@ export class VersioningService {
     const diff: Record<string, { previous: unknown; current: unknown }> = {};
     const fields = new Set([...Object.keys(previous), ...Object.keys(current)]);
 
-    fields.forEach(field => {
+    fields.forEach((field) => {
       const before = previous[field];
       const after = current[field];
       if (JSON.stringify(before) !== JSON.stringify(after)) {

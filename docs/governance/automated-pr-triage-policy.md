@@ -4,24 +4,24 @@
 
 ### 🔴 Blocker (Auto-hold)
 
-* Touches CI workflows
-* Alters governance or policy enforcement
-* Modifies run manifest logic
-* Introduces new external dependencies
+- Touches CI workflows
+- Alters governance or policy enforcement
+- Modifies run manifest logic
+- Introduces new external dependencies
 
 ### 🟠 High Risk
 
-* Cross-module changes
-* Database schema changes
-* Redis/runtime changes
-* Performance-sensitive code paths
+- Cross-module changes
+- Database schema changes
+- Redis/runtime changes
+- Performance-sensitive code paths
 
 ### 🟢 Low Risk (Fast-Track Eligible)
 
-* Docs
-* Tests only
-* Lint/formatting
-* Isolated module with passing MBV
+- Docs
+- Tests only
+- Lint/formatting
+- Isolated module with passing MBV
 
 ---
 
@@ -31,9 +31,9 @@
 
 Bot assigns:
 
-* `risk:blocker`
-* `risk:high`
-* `risk:low`
+- `risk:blocker`
+- `risk:high`
+- `risk:low`
 
 ### Step 2 — Required Checks
 
@@ -45,9 +45,9 @@ Bot assigns:
 
 ### Step 3 — Merge Rules
 
-* Low risk → auto-merge when green
-* High risk → require 1 human review
-* Blocker → require 2 reviews + Jules PASS
+- Low risk → auto-merge when green
+- High risk → require 1 human review
+- Blocker → require 2 reviews + Jules PASS
 
 ---
 
@@ -55,6 +55,6 @@ Bot assigns:
 
 If queue depth > 300:
 
-* Pause auto-merge
-* Allow only blocker fixes
-* Notify Observer
+- Pause auto-merge
+- Allow only blocker fixes
+- Notify Observer

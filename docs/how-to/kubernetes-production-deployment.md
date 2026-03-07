@@ -12,7 +12,7 @@ This guide covers a **Helm‑based** production deployment of IntelGraph onto a 
 
 ### Namespaces
 
-```bash
+````bash
 kubectl create ns intelgraph
 kubectl label ns intelgraph istio-injection=enabled # if using service mesh (optional)
 
@@ -155,3 +155,4 @@ spec:
 - `kubectl -n intelgraph get pods,svc,hpa` shows all Ready
 - `/healthz`, `/readyz` return 200
 - p95 GraphQL query latency < **1.5s** on baseline dataset
+````

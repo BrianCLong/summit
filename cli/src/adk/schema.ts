@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 export const toolSchema = z.object({
   name: z.string().min(1),
@@ -22,14 +22,14 @@ export const knowledgeBaseSchema = z
           name: z.string().min(1),
           uri: z.string().min(1),
           type: z.string().min(1),
-        }),
+        })
       )
       .optional(),
   })
   .optional();
 
 export const manifestSchema = z.object({
-  schema_version: z.literal('s-adk/v1'),
+  schema_version: z.literal("s-adk/v1"),
   name: z.string().min(1),
   description: z.string().optional(),
   tools: z.array(toolSchema).optional(),

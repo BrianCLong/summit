@@ -3,6 +3,7 @@
 Follow this cadence to keep momentum and hygiene high.
 
 ## Daily (Mon–Fri)
+
 - [ ] Update CRM next actions for every active opp; log all touches.
 - [ ] Send targeted outreach (15–30/day) using persona sequences; A/B test subject lines.
 - [ ] Review inbound/security questions; send compliance kit snippets as needed.
@@ -10,6 +11,7 @@ Follow this cadence to keep momentum and hygiene high.
 - [ ] Capture notes immediately after calls; link recordings and artifacts.
 
 ## Weekly Rhythm
+
 - **Monday**
   - [ ] Prioritize 10–15 accounts for the week; assign owners.
   - [ ] Refresh `summit-icp-targets.md` with new accounts/contacts.
@@ -23,11 +25,13 @@ Follow this cadence to keep momentum and hygiene high.
   - [ ] Document learnings (subject lines, objections, proof points that landed).
 
 ## Weekly Metrics
+
 - Meetings booked, pilots proposed/accepted, velocity by stage.
 - Security review turnaround, new champions, exec sponsors engaged.
 - Outreach performance by persona (open/reply/meeting rate).
 
 ## Hygiene Rules
+
 - No stage advancement without dated notes and next action.
 - Keep contact data fresh; update research every quarter.
 - Attach capture briefs, pilot offers, compliance artifacts to each opportunity.

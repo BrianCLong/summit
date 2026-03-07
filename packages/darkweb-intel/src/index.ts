@@ -5,26 +5,33 @@
  * underground forums, and illicit marketplaces
  */
 
-import { z } from 'zod';
+import { z } from "zod";
 
 export const DarkWebSourceSchema = z.object({
   id: z.string().uuid(),
   name: z.string(),
   type: z.enum([
-    'TOR_FORUM', 'TOR_MARKETPLACE', 'TOR_PASTE', 'I2P_SITE',
-    'TELEGRAM_CHANNEL', 'DISCORD_SERVER', 'IRC_CHANNEL',
-    'PASTE_SITE', 'LEAK_SITE', 'RANSOMWARE_BLOG'
+    "TOR_FORUM",
+    "TOR_MARKETPLACE",
+    "TOR_PASTE",
+    "I2P_SITE",
+    "TELEGRAM_CHANNEL",
+    "DISCORD_SERVER",
+    "IRC_CHANNEL",
+    "PASTE_SITE",
+    "LEAK_SITE",
+    "RANSOMWARE_BLOG",
   ]),
   url: z.string(),
-  accessMethod: z.enum(['TOR', 'I2P', 'CLEARNET', 'VPN_REQUIRED']),
-  status: z.enum(['ACTIVE', 'MONITORING', 'INACTIVE', 'SEIZED', 'EXIT_SCAM']),
+  accessMethod: z.enum(["TOR", "I2P", "CLEARNET", "VPN_REQUIRED"]),
+  status: z.enum(["ACTIVE", "MONITORING", "INACTIVE", "SEIZED", "EXIT_SCAM"]),
   reliability: z.number().min(0).max(100),
   lastAccessed: z.date(),
   intelligence: z.object({
     threatsIdentified: z.number(),
     leaksDiscovered: z.number(),
-    actorsTracked: z.number()
-  })
+    actorsTracked: z.number(),
+  }),
 });
 
 export type DarkWebSource = z.infer<typeof DarkWebSourceSchema>;
@@ -33,28 +40,43 @@ export const ThreatActorProfileSchema = z.object({
   id: z.string().uuid(),
   handles: z.array(z.string()),
   reputation: z.object({ score: z.number(), reviews: z.number(), vouches: z.number() }),
-  activities: z.array(z.enum([
-    'MALWARE_DEVELOPMENT', 'RANSOMWARE', 'DATA_BROKER', 'CREDENTIAL_SALES',
-    'EXPLOIT_SALES', 'CARDING', 'FRAUD', 'HACKING_SERVICES', 'DDoS_SERVICES',
-    'ACCESS_BROKER', 'MONEY_LAUNDERING', 'RECRUITMENT'
-  ])),
+  activities: z.array(
+    z.enum([
+      "MALWARE_DEVELOPMENT",
+      "RANSOMWARE",
+      "DATA_BROKER",
+      "CREDENTIAL_SALES",
+      "EXPLOIT_SALES",
+      "CARDING",
+      "FRAUD",
+      "HACKING_SERVICES",
+      "DDoS_SERVICES",
+      "ACCESS_BROKER",
+      "MONEY_LAUNDERING",
+      "RECRUITMENT",
+    ])
+  ),
   knownAliases: z.array(z.string()),
   communicationMethods: z.array(z.string()),
   languageIndicators: z.array(z.string()),
   activeForums: z.array(z.string()),
-  transactions: z.array(z.object({
-    date: z.date(),
-    type: z.string(),
-    amount: z.number().optional(),
-    currency: z.string().optional(),
-    counterparty: z.string().optional()
-  })),
-  threatLevel: z.enum(['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']),
-  attribution: z.object({
-    realIdentity: z.string().optional(),
-    location: z.string().optional(),
-    confidence: z.number()
-  }).optional()
+  transactions: z.array(
+    z.object({
+      date: z.date(),
+      type: z.string(),
+      amount: z.number().optional(),
+      currency: z.string().optional(),
+      counterparty: z.string().optional(),
+    })
+  ),
+  threatLevel: z.enum(["LOW", "MEDIUM", "HIGH", "CRITICAL"]),
+  attribution: z
+    .object({
+      realIdentity: z.string().optional(),
+      location: z.string().optional(),
+      confidence: z.number(),
+    })
+    .optional(),
 });
 
 export type ThreatActorProfile = z.infer<typeof ThreatActorProfileSchema>;
@@ -64,27 +86,36 @@ export const DataLeakSchema = z.object({
   discoveredAt: z.date(),
   source: z.string(),
   victimOrganization: z.string().optional(),
-  dataTypes: z.array(z.enum([
-    'CREDENTIALS', 'PII', 'FINANCIAL', 'HEALTHCARE', 'CORPORATE',
-    'GOVERNMENT', 'MILITARY', 'INTELLECTUAL_PROPERTY', 'SOURCE_CODE'
-  ])),
+  dataTypes: z.array(
+    z.enum([
+      "CREDENTIALS",
+      "PII",
+      "FINANCIAL",
+      "HEALTHCARE",
+      "CORPORATE",
+      "GOVERNMENT",
+      "MILITARY",
+      "INTELLECTUAL_PROPERTY",
+      "SOURCE_CODE",
+    ])
+  ),
   recordCount: z.number(),
   sampleAvailable: z.boolean(),
-  verificationStatus: z.enum(['UNVERIFIED', 'PARTIAL', 'VERIFIED', 'FALSE_POSITIVE']),
+  verificationStatus: z.enum(["UNVERIFIED", "PARTIAL", "VERIFIED", "FALSE_POSITIVE"]),
   sellerProfile: z.string().optional(),
   askingPrice: z.object({ amount: z.number(), currency: z.string() }).optional(),
   exposure: z.object({
     publiclyAvailable: z.boolean(),
     forSale: z.boolean(),
-    exclusiveAccess: z.boolean()
+    exclusiveAccess: z.boolean(),
   }),
   impactAssessment: z.object({
-    severity: z.enum(['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']),
+    severity: z.enum(["LOW", "MEDIUM", "HIGH", "CRITICAL"]),
     affectedIndividuals: z.number().optional(),
     financialImpact: z.number().optional(),
-    regulatoryImplications: z.array(z.string())
+    regulatoryImplications: z.array(z.string()),
   }),
-  responseActions: z.array(z.object({ action: z.string(), date: z.date(), status: z.string() }))
+  responseActions: z.array(z.object({ action: z.string(), date: z.date(), status: z.string() })),
 });
 
 export type DataLeak = z.infer<typeof DataLeakSchema>;
@@ -93,19 +124,31 @@ export const MalwareListingSchema = z.object({
   id: z.string().uuid(),
   name: z.string(),
   type: z.enum([
-    'RANSOMWARE', 'RAT', 'STEALER', 'LOADER', 'BOTNET', 'ROOTKIT',
-    'EXPLOIT_KIT', 'PHISHING_KIT', 'CRYPTER', 'WEBSHELL'
+    "RANSOMWARE",
+    "RAT",
+    "STEALER",
+    "LOADER",
+    "BOTNET",
+    "ROOTKIT",
+    "EXPLOIT_KIT",
+    "PHISHING_KIT",
+    "CRYPTER",
+    "WEBSHELL",
   ]),
   seller: z.string(),
   source: z.string(),
-  price: z.object({ amount: z.number(), currency: z.string(), model: z.enum(['ONE_TIME', 'SUBSCRIPTION', 'REVENUE_SHARE']) }),
+  price: z.object({
+    amount: z.number(),
+    currency: z.string(),
+    model: z.enum(["ONE_TIME", "SUBSCRIPTION", "REVENUE_SHARE"]),
+  }),
   capabilities: z.array(z.string()),
   targetPlatforms: z.array(z.string()),
   antiAnalysis: z.array(z.string()),
   samples: z.array(z.object({ hash: z.string(), type: z.string(), analyzed: z.boolean() })),
   c2Infrastructure: z.array(z.string()).optional(),
   detectionRate: z.number().optional(),
-  lastUpdated: z.date()
+  lastUpdated: z.date(),
 });
 
 export type MalwareListing = z.infer<typeof MalwareListingSchema>;
@@ -113,14 +156,20 @@ export type MalwareListing = z.infer<typeof MalwareListingSchema>;
 export interface MonitoringAlert {
   id: string;
   timestamp: Date;
-  type: 'CREDENTIAL_LEAK' | 'DATA_BREACH' | 'THREAT_MENTION' | 'MALWARE_LISTING' | 'ACTOR_ACTIVITY' | 'BRAND_MENTION';
-  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  type:
+    | "CREDENTIAL_LEAK"
+    | "DATA_BREACH"
+    | "THREAT_MENTION"
+    | "MALWARE_LISTING"
+    | "ACTOR_ACTIVITY"
+    | "BRAND_MENTION";
+  severity: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
   source: string;
   content: string;
   matchedKeywords: string[];
   relatedEntities: string[];
   actionRequired: boolean;
-  status: 'NEW' | 'ACKNOWLEDGED' | 'INVESTIGATING' | 'RESOLVED' | 'FALSE_POSITIVE';
+  status: "NEW" | "ACKNOWLEDGED" | "INVESTIGATING" | "RESOLVED" | "FALSE_POSITIVE";
 }
 
 /**
@@ -145,8 +194,8 @@ export class DarkWebIntelEngine {
     brandNames: string[];
     executiveNames: string[];
   }): void {
-    config.keywords.forEach(k => this.monitoringKeywords.add(k.toLowerCase()));
-    config.domains.forEach(d => this.monitoringDomains.add(d.toLowerCase()));
+    config.keywords.forEach((k) => this.monitoringKeywords.add(k.toLowerCase()));
+    config.domains.forEach((d) => this.monitoringDomains.add(d.toLowerCase()));
     // Store additional patterns for matching
   }
 
@@ -169,19 +218,19 @@ export class DarkWebIntelEngine {
       alerts: [] as MonitoringAlert[],
       leaks: [] as DataLeak[],
       actors: [] as ThreatActorProfile[],
-      malware: [] as MalwareListing[]
+      malware: [] as MalwareListing[],
     };
 
     // Check for keyword matches
     const matches = this.findKeywordMatches(content.text);
     if (matches.length > 0) {
-      results.alerts.push(this.createAlert('THREAT_MENTION', content, matches));
+      results.alerts.push(this.createAlert("THREAT_MENTION", content, matches));
     }
 
     // Check for credential leaks
     const credentialLeaks = this.detectCredentialLeaks(content.text);
     if (credentialLeaks.length > 0) {
-      results.alerts.push(this.createAlert('CREDENTIAL_LEAK', content, credentialLeaks));
+      results.alerts.push(this.createAlert("CREDENTIAL_LEAK", content, credentialLeaks));
       results.leaks.push(...this.createLeakRecords(credentialLeaks, content));
     }
 
@@ -196,7 +245,7 @@ export class DarkWebIntelEngine {
     const malwareIndicators = this.detectMalwareListings(content.text, content.metadata);
     if (malwareIndicators) {
       results.malware.push(malwareIndicators);
-      results.alerts.push(this.createAlert('MALWARE_LISTING', content, [malwareIndicators.name]));
+      results.alerts.push(this.createAlert("MALWARE_LISTING", content, [malwareIndicators.name]));
     }
 
     // Store alerts
@@ -208,8 +257,15 @@ export class DarkWebIntelEngine {
   /**
    * Search for organization exposure
    */
-  async searchOrganizationExposure(organizationName: string, domains: string[]): Promise<{
-    credentialExposure: Array<{ source: string; count: number; dateRange: { start: Date; end: Date } }>;
+  async searchOrganizationExposure(
+    organizationName: string,
+    domains: string[]
+  ): Promise<{
+    credentialExposure: Array<{
+      source: string;
+      count: number;
+      dateRange: { start: Date; end: Date };
+    }>;
     dataLeaks: DataLeak[];
     threatMentions: Array<{ source: string; context: string; date: Date }>;
     brandAbuse: Array<{ type: string; url: string; details: string }>;
@@ -222,14 +278,15 @@ export class DarkWebIntelEngine {
       threatMentions: [] as any[],
       brandAbuse: [] as any[],
       employeeExposure: [] as any[],
-      riskScore: 0
+      riskScore: 0,
     };
 
     // Search for credential leaks by domain
     for (const domain of domains) {
-      const leaks = Array.from(this.leaks.values()).filter(leak =>
-        leak.victimOrganization?.toLowerCase().includes(organizationName.toLowerCase()) ||
-        leak.dataTypes.includes('CREDENTIALS')
+      const leaks = Array.from(this.leaks.values()).filter(
+        (leak) =>
+          leak.victimOrganization?.toLowerCase().includes(organizationName.toLowerCase()) ||
+          leak.dataTypes.includes("CREDENTIALS")
       );
       exposure.dataLeaks.push(...leaks);
     }
@@ -269,23 +326,24 @@ export class DarkWebIntelEngine {
     };
   }> {
     // Aggregate ransomware intelligence
-    const ransomwareGroups = Array.from(this.actors.values())
-      .filter(a => a.activities.includes('RANSOMWARE'));
+    const ransomwareGroups = Array.from(this.actors.values()).filter((a) =>
+      a.activities.includes("RANSOMWARE")
+    );
 
     return {
-      activeGroups: ransomwareGroups.map(g => ({
+      activeGroups: ransomwareGroups.map((g) => ({
         name: g.handles[0],
         victims: g.transactions.length,
         lastActivity: g.transactions[0]?.date || new Date(),
         ttps: [],
-        demandRange: { min: 100000, max: 10000000 }
+        demandRange: { min: 100000, max: 10000000 },
       })),
       recentVictims: [],
       trends: {
         totalVictims30Days: 0,
         averageDemand: 500000,
-        topTargetedSectors: ['Healthcare', 'Finance', 'Government']
-      }
+        topTargetedSectors: ["Healthcare", "Finance", "Government"],
+      },
     };
   }
 
@@ -311,7 +369,7 @@ export class DarkWebIntelEngine {
     return {
       activeListings: [],
       recentSales: [],
-      trendingTargets: ['Microsoft Exchange', 'Cisco ASA', 'Fortinet VPN']
+      trendingTargets: ["Microsoft Exchange", "Cisco ASA", "Fortinet VPN"],
     };
   }
 
@@ -331,8 +389,8 @@ export class DarkWebIntelEngine {
     recommendations: string[];
     iocs: Array<{ type: string; value: string; context: string }>;
   } {
-    const filteredAlerts = this.alerts.filter(a =>
-      a.timestamp >= timeframe.start && a.timestamp <= timeframe.end
+    const filteredAlerts = this.alerts.filter(
+      (a) => a.timestamp >= timeframe.start && a.timestamp <= timeframe.end
     );
 
     return {
@@ -340,24 +398,24 @@ export class DarkWebIntelEngine {
       keyFindings: [
         `${filteredAlerts.length} alerts generated`,
         `${this.leaks.size} data leaks tracked`,
-        `${this.actors.size} threat actors monitored`
+        `${this.actors.size} threat actors monitored`,
       ],
       threatLandscape: {
         activeThreatActors: this.actors.size,
         newMalwareFamilies: this.malware.size,
         dataLeaksDiscovered: this.leaks.size,
-        credentialExposures: filteredAlerts.filter(a => a.type === 'CREDENTIAL_LEAK').length
+        credentialExposures: filteredAlerts.filter((a) => a.type === "CREDENTIAL_LEAK").length,
       },
       sectorAnalysis: [
-        { sector: 'Finance', threatLevel: 'HIGH', topThreats: ['Credential theft', 'Ransomware'] },
-        { sector: 'Healthcare', threatLevel: 'CRITICAL', topThreats: ['Ransomware', 'Data theft'] }
+        { sector: "Finance", threatLevel: "HIGH", topThreats: ["Credential theft", "Ransomware"] },
+        { sector: "Healthcare", threatLevel: "CRITICAL", topThreats: ["Ransomware", "Data theft"] },
       ],
       recommendations: [
-        'Implement dark web monitoring for corporate credentials',
-        'Enable multi-factor authentication organization-wide',
-        'Conduct regular credential rotation'
+        "Implement dark web monitoring for corporate credentials",
+        "Enable multi-factor authentication organization-wide",
+        "Conduct regular credential rotation",
       ],
-      iocs: []
+      iocs: [],
     };
   }
 
@@ -374,34 +432,44 @@ export class DarkWebIntelEngine {
   private detectCredentialLeaks(text: string): string[] {
     const leaks: string[] = [];
     for (const domain of this.monitoringDomains) {
-      const regex = new RegExp(`[a-zA-Z0-9._%+-]+@${domain.replace('.', '\\.')}`, 'gi');
+      const regex = new RegExp(`[a-zA-Z0-9._%+-]+@${domain.replace(".", "\\.")}`, "gi");
       const matches = text.match(regex);
       if (matches) leaks.push(...matches);
     }
     return leaks;
   }
 
-  private identifyActors(text: string): string[] { return []; }
-  private detectMalwareListings(text: string, metadata: any): MalwareListing | null { return null; }
+  private identifyActors(text: string): string[] {
+    return [];
+  }
+  private detectMalwareListings(text: string, metadata: any): MalwareListing | null {
+    return null;
+  }
 
-  private createAlert(type: MonitoringAlert['type'], content: any, matches: string[]): MonitoringAlert {
+  private createAlert(
+    type: MonitoringAlert["type"],
+    content: any,
+    matches: string[]
+  ): MonitoringAlert {
     return {
       id: crypto.randomUUID(),
       timestamp: new Date(),
       type,
-      severity: 'MEDIUM',
+      severity: "MEDIUM",
       source: content.source,
       content: content.text.substring(0, 500),
       matchedKeywords: matches,
       relatedEntities: [],
-      actionRequired: type === 'CREDENTIAL_LEAK',
-      status: 'NEW'
+      actionRequired: type === "CREDENTIAL_LEAK",
+      status: "NEW",
     };
   }
 
-  private createLeakRecords(credentials: string[], content: any): DataLeak[] { return []; }
+  private createLeakRecords(credentials: string[], content: any): DataLeak[] {
+    return [];
+  }
   private async updateOrCreateActor(handle: string, content: any): Promise<ThreatActorProfile> {
-    const existing = Array.from(this.actors.values()).find(a => a.handles.includes(handle));
+    const existing = Array.from(this.actors.values()).find((a) => a.handles.includes(handle));
     if (existing) return existing;
 
     const actor: ThreatActorProfile = {
@@ -414,23 +482,35 @@ export class DarkWebIntelEngine {
       languageIndicators: [],
       activeForums: [content.source],
       transactions: [],
-      threatLevel: 'LOW'
+      threatLevel: "LOW",
     };
     this.actors.set(actor.id, actor);
     return actor;
   }
 
-  private searchThreatMentions(org: string): any[] { return []; }
-  private calculateOrganizationRiskScore(exposure: any): number { return 50; }
+  private searchThreatMentions(org: string): any[] {
+    return [];
+  }
+  private calculateOrganizationRiskScore(exposure: any): number {
+    return 50;
+  }
 
   // Public API
-  getAlerts(status?: MonitoringAlert['status']): MonitoringAlert[] {
-    return status ? this.alerts.filter(a => a.status === status) : this.alerts;
+  getAlerts(status?: MonitoringAlert["status"]): MonitoringAlert[] {
+    return status ? this.alerts.filter((a) => a.status === status) : this.alerts;
   }
-  getActor(id: string): ThreatActorProfile | undefined { return this.actors.get(id); }
-  getAllActors(): ThreatActorProfile[] { return Array.from(this.actors.values()); }
-  getLeak(id: string): DataLeak | undefined { return this.leaks.get(id); }
-  getAllLeaks(): DataLeak[] { return Array.from(this.leaks.values()); }
+  getActor(id: string): ThreatActorProfile | undefined {
+    return this.actors.get(id);
+  }
+  getAllActors(): ThreatActorProfile[] {
+    return Array.from(this.actors.values());
+  }
+  getLeak(id: string): DataLeak | undefined {
+    return this.leaks.get(id);
+  }
+  getAllLeaks(): DataLeak[] {
+    return Array.from(this.leaks.values());
+  }
 }
 
 export { DarkWebIntelEngine };

@@ -1,9 +1,9 @@
-import React from 'react';
-import { render } from '@testing-library/react';
-import { MockedProvider } from '@apollo/client/testing';
-import GraphCanvas from '../GraphCanvas';
+import React from "react";
+import { render } from "@testing-library/react";
+import { MockedProvider } from "@apollo/client/testing";
+import GraphCanvas from "../GraphCanvas";
 
-jest.mock('cytoscape', () => () => ({
+jest.mock("cytoscape", () => () => ({
   destroy: jest.fn(),
   add: jest.fn(),
   layout: jest.fn(() => ({ run: jest.fn() })),
@@ -19,25 +19,25 @@ jest.mock('cytoscape', () => () => ({
 }));
 
 // Mock the generated GraphQL hooks
-jest.mock('../../../generated/graphql.js', () => ({
+jest.mock("../../../generated/graphql.js", () => ({
   useGwGraphDataQuery: () => ({
     data: {
       graphData: {
         nodes: [
           {
-            id: '1',
-            label: 'Test Node',
-            type: 'Test',
-            description: 'Test node',
+            id: "1",
+            label: "Test Node",
+            type: "Test",
+            description: "Test node",
           },
         ],
         edges: [
           {
-            id: '1',
-            fromEntityId: '1',
-            toEntityId: '1',
-            label: 'Test Edge',
-            type: 'Test',
+            id: "1",
+            fromEntityId: "1",
+            toEntityId: "1",
+            label: "Test Edge",
+            type: "Test",
           },
         ],
       },
@@ -45,16 +45,13 @@ jest.mock('../../../generated/graphql.js', () => ({
     loading: false,
     error: null,
   }),
-  useGwSearchEntitiesLazyQuery: () => [
-    jest.fn(),
-    { data: null, loading: false },
-  ],
+  useGwSearchEntitiesLazyQuery: () => [jest.fn(), { data: null, loading: false }],
 }));
 
-test('mounts graph canvas and binds interactions', () => {
+test("mounts graph canvas and binds interactions", () => {
   render(
     <MockedProvider mocks={[]}>
       <GraphCanvas />
-    </MockedProvider>,
+    </MockedProvider>
   );
 });

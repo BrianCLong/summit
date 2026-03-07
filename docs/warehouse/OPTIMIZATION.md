@@ -33,7 +33,7 @@ Create MVs for expensive queries:
 
 ```typescript
 await optimizer.mvManager.createMaterializedView({
-  name: 'mv_daily_sales_summary',
+  name: "mv_daily_sales_summary",
   query: `
     SELECT
       DATE_TRUNC('day', sale_date) as day,
@@ -44,8 +44,8 @@ await optimizer.mvManager.createMaterializedView({
     FROM fact_sales
     GROUP BY day, product_id
   `,
-  refreshStrategy: 'incremental',
-  indexes: ['day', 'product_id']
+  refreshStrategy: "incremental",
+  indexes: ["day", "product_id"],
 });
 ```
 
@@ -56,9 +56,9 @@ await optimizer.mvManager.createMaterializedView({
 Monitor compression effectiveness:
 
 ```typescript
-const stats = await warehouse.getStorageStats('fact_sales');
+const stats = await warehouse.getStorageStats("fact_sales");
 
-stats.columnStats.forEach(col => {
+stats.columnStats.forEach((col) => {
   const ratio = col.uncompressedSize / col.compressedSize;
   console.log(`${col.column}: ${ratio.toFixed(2)}x compression`);
 
@@ -123,7 +123,7 @@ await warehouse.query(batchSql, QueryPriority.BATCH);
 const workloadConfig = {
   maxConcurrentQueries: 100,
   maxMemoryPerQuery: 2 * 1024 * 1024 * 1024, // 2GB
-  timeoutMs: 300000 // 5 minutes
+  timeoutMs: 300000, // 5 minutes
 };
 ```
 
@@ -153,8 +153,8 @@ const cache = new ResultCache(
 
 // Cache warming for frequently used queries
 await cache.warmCache([
-  { queryHash: 'hash1', queryId: 'q1', result: data1, metadata: meta1 },
-  { queryHash: 'hash2', queryId: 'q2', result: data2, metadata: meta2 }
+  { queryHash: "hash1", queryId: "q1", result: data1, metadata: meta1 },
+  { queryHash: "hash2", queryId: "q2", result: data2, metadata: meta2 },
 ]);
 
 // Monitor cache performance
@@ -171,7 +171,7 @@ Cache table and column statistics:
 await queryPlanner.clearCaches();
 
 // Collect fresh statistics
-await pool.query('ANALYZE fact_sales');
+await pool.query("ANALYZE fact_sales");
 ```
 
 ## Partitioning Optimization
@@ -194,6 +194,7 @@ WHERE DATE_TRUNC('month', sale_date) = '2024-01-01';
 ### Dynamic Partition Pruning
 
 Automatically enabled for:
+
 - Range predicates on partition keys
 - IN clauses with partition key
 - JOIN conditions on partition keys
@@ -235,7 +236,7 @@ JOIN dim_product p ON ...;
 ### Query Performance Tracking
 
 ```typescript
-warehouse.queryExecutor.on('query:completed', (event) => {
+warehouse.queryExecutor.on("query:completed", (event) => {
   const { queryId, metrics } = event;
 
   if (metrics.totalDurationMs > 10000) {
@@ -251,13 +252,14 @@ warehouse.queryExecutor.on('query:completed', (event) => {
 
 ```typescript
 setInterval(async () => {
-  const tables = ['fact_sales', 'fact_returns', 'fact_inventory'];
+  const tables = ["fact_sales", "fact_returns", "fact_inventory"];
 
   for (const table of tables) {
     const stats = await warehouse.getStorageStats(table);
     const growthRate = calculateGrowthRate(stats);
 
-    if (growthRate > 0.1) { // 10% growth
+    if (growthRate > 0.1) {
+      // 10% growth
       console.log(`⚠️  High growth rate on ${table}: ${(growthRate * 100).toFixed(2)}%/day`);
     }
   }
@@ -281,7 +283,7 @@ const slowQueries = await pool.query(`
   LIMIT 10
 `);
 
-slowQueries.rows.forEach(q => {
+slowQueries.rows.forEach((q) => {
   console.log(`Query: ${q.query}`);
   console.log(`Calls: ${q.calls}, Avg: ${q.avg_time}ms`);
 });
@@ -302,11 +304,11 @@ slowQueries.rows.forEach(q => {
 
 ## Performance Targets
 
-| Metric | Target | Good | Needs Improvement |
-|--------|--------|------|-------------------|
-| Compression Ratio | > 10x | 5-10x | < 5x |
-| Cache Hit Rate | > 80% | 60-80% | < 60% |
-| Query Response (p95) | < 1s | 1-5s | > 5s |
-| Storage Growth | < 5%/day | 5-10%/day | > 10%/day |
-| Partition Pruning | > 90% | 70-90% | < 70% |
-| Worker Utilization | 70-90% | 50-70% | < 50% or > 90% |
+| Metric               | Target   | Good      | Needs Improvement |
+| -------------------- | -------- | --------- | ----------------- |
+| Compression Ratio    | > 10x    | 5-10x     | < 5x              |
+| Cache Hit Rate       | > 80%    | 60-80%    | < 60%             |
+| Query Response (p95) | < 1s     | 1-5s      | > 5s              |
+| Storage Growth       | < 5%/day | 5-10%/day | > 10%/day         |
+| Partition Pruning    | > 90%    | 70-90%    | < 70%             |
+| Worker Utilization   | 70-90%   | 50-70%    | < 50% or > 90%    |

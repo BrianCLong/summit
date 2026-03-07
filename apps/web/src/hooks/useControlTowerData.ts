@@ -2,33 +2,33 @@
  * useControlTowerData - Hook for fetching Control Tower dashboard data
  */
 
-import { useState, useEffect, useCallback } from 'react';
-import { useDemoMode } from '@/components/common/DemoIndicator';
-import type { EventFilterState } from '../pages/control-tower/ControlTowerDashboard';
+import { useState, useEffect, useCallback } from 'react'
+import { useDemoMode } from '@/components/common/DemoIndicator'
+import type { EventFilterState } from '../pages/control-tower/ControlTowerDashboard'
 import type {
   HealthScoreComponent,
   KeyMetric,
   TeamMember,
   Situation,
   OperationalEvent,
-} from '../components/control-tower';
+} from '../components/control-tower'
 
 export interface HealthScoreData {
-  score: number;
-  trend: 'UP' | 'DOWN' | 'STABLE';
-  change: number;
-  components: HealthScoreComponent[];
+  score: number
+  trend: 'UP' | 'DOWN' | 'STABLE'
+  change: number
+  components: HealthScoreComponent[]
 }
 
 export interface ControlTowerData {
-  healthScore: HealthScoreData | null;
-  keyMetrics: KeyMetric[];
-  teamPulse: TeamMember[];
-  activeSituations: Situation[];
-  events: OperationalEvent[];
-  isLoading: boolean;
-  error: Error | null;
-  refetch: () => void;
+  healthScore: HealthScoreData | null
+  keyMetrics: KeyMetric[]
+  teamPulse: TeamMember[]
+  activeSituations: Situation[]
+  events: OperationalEvent[]
+  isLoading: boolean
+  error: Error | null
+  refetch: () => void
 }
 
 // Mock data for development
@@ -42,7 +42,7 @@ const mockHealthScore: HealthScoreData = {
     { name: 'Product', score: 88, status: 'HEALTHY' },
     { name: 'Team', score: 83, status: 'WARNING' },
   ],
-};
+}
 
 const mockKeyMetrics: KeyMetric[] = [
   {
@@ -104,19 +104,27 @@ const mockKeyMetrics: KeyMetric[] = [
     change: 4,
     status: 'HEALTHY',
   },
-];
+]
 
 const mockTeamPulse: TeamMember[] = [
   {
     user: { id: '1', name: 'Sarah Chen', email: 'sarah@example.com' },
-    status: { online: true, statusMessage: 'Working on Acme escalation', availableForAssignment: false },
+    status: {
+      online: true,
+      statusMessage: 'Working on Acme escalation',
+      availableForAssignment: false,
+    },
     currentAssignment: 'Acme escalation',
     activeSituationsCount: 2,
     eventsAssignedToday: 5,
   },
   {
     user: { id: '2', name: 'Mike Johnson', email: 'mike@example.com' },
-    status: { online: true, statusMessage: 'Working on Payment P1', availableForAssignment: false },
+    status: {
+      online: true,
+      statusMessage: 'Working on Payment P1',
+      availableForAssignment: false,
+    },
     currentAssignment: 'Payment P1',
     activeSituationsCount: 1,
     eventsAssignedToday: 3,
@@ -129,12 +137,16 @@ const mockTeamPulse: TeamMember[] = [
   },
   {
     user: { id: '4', name: 'Jordan Lee', email: 'jordan@example.com' },
-    status: { online: true, statusMessage: 'In meeting until 2pm', availableForAssignment: false },
+    status: {
+      online: true,
+      statusMessage: 'In meeting until 2pm',
+      availableForAssignment: false,
+    },
     currentAssignment: 'Q4 planning',
     activeSituationsCount: 1,
     eventsAssignedToday: 1,
   },
-];
+]
 
 const mockActiveSituations: Situation[] = [
   {
@@ -170,7 +182,7 @@ const mockActiveSituations: Situation[] = [
     eventCount: 2,
     startedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
   },
-];
+]
 
 const mockEvents: OperationalEvent[] = [
   {
@@ -238,29 +250,31 @@ const mockEvents: OperationalEvent[] = [
     source: 'Onboarding System',
     occurredAt: new Date(Date.now() - 4 * 60 * 60 * 1000),
   },
-];
+]
 
-export function useControlTowerData(filters: EventFilterState): ControlTowerData {
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
-  const isDemoMode = useDemoMode();
+export function useControlTowerData(
+  filters: EventFilterState
+): ControlTowerData {
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<Error | null>(null)
+  const isDemoMode = useDemoMode()
   const [data, setData] = useState<{
-    healthScore: HealthScoreData | null;
-    keyMetrics: KeyMetric[];
-    teamPulse: TeamMember[];
-    activeSituations: Situation[];
-    events: OperationalEvent[];
+    healthScore: HealthScoreData | null
+    keyMetrics: KeyMetric[]
+    teamPulse: TeamMember[]
+    activeSituations: Situation[]
+    events: OperationalEvent[]
   }>({
     healthScore: null,
     keyMetrics: [],
     teamPulse: [],
     activeSituations: [],
     events: [],
-  });
+  })
 
   const fetchData = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
+    setIsLoading(true)
+    setError(null)
 
     try {
       if (!isDemoMode) {
@@ -270,32 +284,32 @@ export function useControlTowerData(filters: EventFilterState): ControlTowerData
           teamPulse: [],
           activeSituations: [],
           events: [],
-        });
-        return;
+        })
+        return
       }
 
       // Simulate API delay
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      await new Promise(resolve => setTimeout(resolve, 500))
 
       // In production, this would be GraphQL queries
       // const { data } = await client.query({ query: CONTROL_TOWER_QUERY, variables: { filters } });
 
       // Apply filters to mock data
-      let filteredEvents = [...mockEvents];
+      let filteredEvents = [...mockEvents]
 
       if (filters.severity?.length) {
-        filteredEvents = filteredEvents.filter((e) =>
+        filteredEvents = filteredEvents.filter(e =>
           filters.severity!.includes(e.severity)
-        );
+        )
       }
 
       if (filters.searchQuery) {
-        const query = filters.searchQuery.toLowerCase();
+        const query = filters.searchQuery.toLowerCase()
         filteredEvents = filteredEvents.filter(
-          (e) =>
+          e =>
             e.title.toLowerCase().includes(query) ||
             e.description?.toLowerCase().includes(query)
-        );
+        )
       }
 
       setData({
@@ -304,24 +318,24 @@ export function useControlTowerData(filters: EventFilterState): ControlTowerData
         teamPulse: mockTeamPulse,
         activeSituations: mockActiveSituations,
         events: filteredEvents,
-      });
+      })
     } catch (err) {
-      setError(err instanceof Error ? err : new Error('Failed to fetch data'));
+      setError(err instanceof Error ? err : new Error('Failed to fetch data'))
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  }, [filters, isDemoMode]);
+  }, [filters, isDemoMode])
 
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    fetchData()
+  }, [fetchData])
 
   return {
     ...data,
     isLoading,
     error,
     refetch: fetchData,
-  };
+  }
 }
 
-export default useControlTowerData;
+export default useControlTowerData

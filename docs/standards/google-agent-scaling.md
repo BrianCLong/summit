@@ -13,5 +13,6 @@ We implemented a deterministic evaluation harness to measure whether multi-agent
 | Summit Agent Protocol | internal orchestration |
 
 ## Architecture Decisions
+
 - Add deterministic benchmarking.
 - Implement specialized roles instead of arbitrary chaining.

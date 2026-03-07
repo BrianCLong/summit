@@ -5,13 +5,13 @@ import { store } from './store'
 import App from './App'
 import config from './config'
 import './index.css'
-import reportWebVitals from './reportWebVitals';
+import reportWebVitals from './reportWebVitals'
 import { TenantProvider } from './contexts/TenantContext'
 import { BrandPackProvider } from './contexts/BrandPackContext'
-import { initializeInstrumentation } from './instrumentation';
+import { initializeInstrumentation } from './instrumentation'
 
 // Initialize OpenTelemetry
-initializeInstrumentation();
+initializeInstrumentation()
 
 // Start MSW for development
 async function enableMocking() {
@@ -40,5 +40,5 @@ enableMocking().then(() => {
   )
 
   // Initialize Web Vitals reporting
-  reportWebVitals();
+  reportWebVitals()
 })

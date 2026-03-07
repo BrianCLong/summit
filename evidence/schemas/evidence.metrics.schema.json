@@ -9,8 +9,6 @@
       "type": "string"
     }
   },
-  "required": [
-    "evidence_id"
-  ],
+  "required": ["evidence_id"],
   "type": "object"
 }

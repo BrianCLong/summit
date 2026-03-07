@@ -6,11 +6,11 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: 'https://github.com/BrianCLong/intelgraph'
+    repoURL: "https://github.com/BrianCLong/intelgraph"
     path: deploy/k8s/environments # Path to your environment-specific Helm charts or K8s manifests
     targetRevision: HEAD
   destination:
-    server: 'https://kubernetes.default.svc'
+    server: "https://kubernetes.default.svc"
     namespace: intelgraph # Target namespace for IntelGraph deployments
   syncPolicy:
     automated:

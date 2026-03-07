@@ -3,7 +3,6 @@
 > Evidence-IDs: EVD-PLACEHOLDER
 > Status: planned
 
-
 # Runtime Governance Enforcement
 
 This capability is intentionally constrained pending policy engine integration.

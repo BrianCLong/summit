@@ -7,11 +7,11 @@ spec:
   inputs:
     repo: summit-2025.09.23.1710
     targetVersion: v3.0.0
-    windowUtc: '2025-10-15 02:00 -> 04:00'
+    windowUtc: "2025-10-15 02:00 -> 04:00"
     oncall:
-      - '@sre'
-      - '@platform'
-      - '@security'
+      - "@sre"
+      - "@platform"
+      - "@security"
     pilotTenants:
       - t1
       - t2
@@ -25,8 +25,8 @@ spec:
         gateway: 180
         web: 220
         services: 200
-    oidcIssuer: 'https://idp.example.com'
-    scimBaseUrl: 'https://scim.example.com'
+    oidcIssuer: "https://idp.example.com"
+    scimBaseUrl: "https://scim.example.com"
     rto: 30m
     rpo: 5m
   tasks:
@@ -38,7 +38,7 @@ spec:
         scope:
           env: dev
           services:
-            - '*'
+            - "*"
         checks:
           - slo-gates
           - migration-gate
@@ -55,7 +55,7 @@ spec:
         scope:
           env: dev
           services:
-            - '*'
+            - "*"
         artifacts:
           - sbom
           - slsa
@@ -94,7 +94,7 @@ spec:
         scope:
           env: stage
           services:
-            - '*'
+            - "*"
         probes:
           - golden-path
           - synthetic-probes
@@ -248,7 +248,7 @@ spec:
         scope:
           env: prod
           services:
-            - '*'
+            - "*"
         canary: [10, 50, 100]
         requiredGates:
           - slo
@@ -269,6 +269,6 @@ spec:
         scope:
           env: prod
           services:
-            - '*'
-        schedule: '+24h'
+            - "*"
+        schedule: "+24h"
         regressionTickets: auto-filed

@@ -4,12 +4,12 @@
   "type": "object",
   "required": ["run_id", "generated_at_utc"],
   "properties": {
-    "run_id": {"type": "string"},
+    "run_id": { "type": "string" },
     "generated_at_utc": {
       "type": "string",
       "format": "date-time"
     },
-    "ci_run_id": {"type": "string"}
+    "ci_run_id": { "type": "string" }
   },
   "additionalProperties": false
 }

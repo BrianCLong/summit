@@ -1,4 +1,4 @@
-import { gql } from '@apollo/client';
+import { gql } from "@apollo/client";
 
 export const GET_AUDIT_TRACE = gql`
   query GetAuditTrace($investigationId: ID!, $filter: AuditLogFilter) {

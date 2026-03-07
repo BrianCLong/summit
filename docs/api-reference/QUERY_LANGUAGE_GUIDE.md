@@ -279,7 +279,7 @@ Use the `cursor` parameter in your API request:
 ```javascript
 const result = await api.query(queryString, {
   limit: 100,
-  cursor: previousResult.metadata.cursor
+  cursor: previousResult.metadata.cursor,
 });
 ```
 
@@ -290,7 +290,7 @@ const result = await api.query(queryString, {
 const result = await ql.execute(queryString, {
   cache: true,
   cacheTTL: 3600,
-  timeout: 30000
+  timeout: 30000,
 });
 
 // Stream query results
@@ -335,9 +335,9 @@ const query = `
 
 const result = await ql.execute(query, {
   variables: {
-    entityType: 'Person',
-    country: 'US'
-  }
+    entityType: "Person",
+    country: "US",
+  },
 });
 ```
 
@@ -356,11 +356,11 @@ const result = await ql.execute(query, {
 try {
   const result = await ql.execute(queryString);
 } catch (error) {
-  if (error.code === 'PARSE_ERROR') {
+  if (error.code === "PARSE_ERROR") {
     // Handle syntax errors
-  } else if (error.code === 'VALIDATION_ERROR') {
+  } else if (error.code === "VALIDATION_ERROR") {
     // Handle validation errors
-  } else if (error.code === 'EXECUTION_ERROR') {
+  } else if (error.code === "EXECUTION_ERROR") {
     // Handle runtime errors
   }
 }
@@ -465,7 +465,7 @@ curl -X POST http://localhost:3000/api/v1/query/explain \
 ### TypeScript SDK
 
 ```typescript
-import { SummitQL } from '@intelgraph/query-language';
+import { SummitQL } from "@intelgraph/query-language";
 
 const ql = new SummitQL({
   optimize: true,

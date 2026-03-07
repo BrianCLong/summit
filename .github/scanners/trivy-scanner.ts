@@ -3,12 +3,12 @@
  * @module .github/scanners/trivy-scanner
  */
 
-import { spawn } from 'node:child_process';
-import crypto from 'node:crypto';
-import fs from 'node:fs/promises';
-import path from 'node:path';
+import { spawn } from "node:child_process";
+import crypto from "node:crypto";
+import fs from "node:fs/promises";
+import path from "node:path";
 
-import { loadConfig, CVSS_THRESHOLDS } from './config.js';
+import { loadConfig, CVSS_THRESHOLDS } from "./config.js";
 import type {
   Vulnerability,
   VulnerabilityScanResult,
@@ -18,16 +18,16 @@ import type {
   PolicyEvaluationResult,
   VulnerabilityPolicy,
   ServicePolicy,
-} from './types.js';
+} from "./types.js";
 
 export interface TrivyScanOptions {
   target: string;
-  targetType?: 'image' | 'filesystem' | 'repository' | 'sbom';
+  targetType?: "image" | "filesystem" | "repository" | "sbom";
   severity?: VulnerabilitySeverity[];
   ignoreUnfixed?: boolean;
   timeout?: string;
-  scanners?: ('vuln' | 'misconfig' | 'secret' | 'license')[];
-  outputFormat?: 'json' | 'sarif' | 'table';
+  scanners?: ("vuln" | "misconfig" | "secret" | "license")[];
+  outputFormat?: "json" | "sarif" | "table";
   outputPath?: string;
   offlineDb?: string;
   ignoreFile?: string;
@@ -74,14 +74,14 @@ export class TrivyScanner {
       const trivyArgs = this.buildTrivyArgs(options, targetType, outputPath);
 
       // Execute Trivy
-      const result = await this.executeCommand('trivy', trivyArgs);
+      const result = await this.executeCommand("trivy", trivyArgs);
 
       // Parse results
       let scanResult: TrivyScanResultExtended;
 
       if (result.success || result.exitCode === 1) {
         // Exit code 1 means vulnerabilities found but scan succeeded
-        const rawResult = await fs.readFile(outputPath, 'utf-8');
+        const rawResult = await fs.readFile(outputPath, "utf-8");
         const trivyOutput = JSON.parse(rawResult);
         scanResult = this.parseTrivyOutput(trivyOutput, scanId, options.target, targetType);
         scanResult.exitCode = result.exitCode;
@@ -89,7 +89,7 @@ export class TrivyScanner {
         scanResult = {
           scanId,
           scanTime: new Date().toISOString(),
-          scanner: 'trivy',
+          scanner: "trivy",
           scannerVersion: await this.getTrivyVersion(),
           target: options.target,
           targetType,
@@ -113,8 +113,8 @@ export class TrivyScanner {
       return {
         scanId,
         scanTime: new Date().toISOString(),
-        scanner: 'trivy',
-        scannerVersion: 'unknown',
+        scanner: "trivy",
+        scannerVersion: "unknown",
         target: options.target,
         targetType,
         vulnerabilities: [],
@@ -133,7 +133,7 @@ export class TrivyScanner {
       return this.scan(options);
     }
 
-    console.log('🔒 Running in air-gapped mode');
+    console.log("🔒 Running in air-gapped mode");
 
     // Use offline database
     const airgapOptions: TrivyScanOptions = {
@@ -149,14 +149,19 @@ export class TrivyScanner {
    */
   async downloadDatabase(outputPath: string): Promise<{ success: boolean; error?: string }> {
     try {
-      console.log('📥 Downloading Trivy vulnerability database...');
+      console.log("📥 Downloading Trivy vulnerability database...");
 
-      const args = ['image', '--download-db-only', '--db-repository', 'ghcr.io/aquasecurity/trivy-db'];
+      const args = [
+        "image",
+        "--download-db-only",
+        "--db-repository",
+        "ghcr.io/aquasecurity/trivy-db",
+      ];
 
       // Set cache directory
       const env = { ...process.env, TRIVY_CACHE_DIR: outputPath };
 
-      const result = await this.executeCommand('trivy', args, env);
+      const result = await this.executeCommand("trivy", args, env);
 
       if (result.success) {
         console.log(`✅ Database downloaded to: ${outputPath}`);
@@ -173,7 +178,7 @@ export class TrivyScanner {
    * Scan multiple targets in batch
    */
   async scanBatch(
-    targets: { target: string; type?: 'image' | 'filesystem' | 'repository' | 'sbom' }[]
+    targets: { target: string; type?: "image" | "filesystem" | "repository" | "sbom" }[]
   ): Promise<Map<string, TrivyScanResultExtended>> {
     const results = new Map<string, TrivyScanResultExtended>();
 
@@ -188,17 +193,21 @@ export class TrivyScanner {
   /**
    * Generate SARIF report for GitHub Security
    */
-  async generateSarifReport(scanResult: TrivyScanResultExtended, outputPath: string): Promise<void> {
+  async generateSarifReport(
+    scanResult: TrivyScanResultExtended,
+    outputPath: string
+  ): Promise<void> {
     const sarif = {
-      $schema: 'https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json',
-      version: '2.1.0',
+      $schema:
+        "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json",
+      version: "2.1.0",
       runs: [
         {
           tool: {
             driver: {
-              name: 'Trivy',
+              name: "Trivy",
               version: scanResult.scannerVersion,
-              informationUri: 'https://github.com/aquasecurity/trivy',
+              informationUri: "https://github.com/aquasecurity/trivy",
               rules: scanResult.vulnerabilities.map((vuln) => ({
                 id: vuln.id,
                 name: vuln.id,
@@ -206,14 +215,14 @@ export class TrivyScanner {
                 fullDescription: { text: vuln.description },
                 help: {
                   text: `Vulnerability ${vuln.id} in ${vuln.affectedPackage}`,
-                  markdown: `# ${vuln.id}\n\n${vuln.description}\n\n## Fix\n\nUpdate to version ${vuln.fixedVersion || 'N/A'}`,
+                  markdown: `# ${vuln.id}\n\n${vuln.description}\n\n## Fix\n\nUpdate to version ${vuln.fixedVersion || "N/A"}`,
                 },
                 defaultConfiguration: {
                   level: this.mapSeverityToSarifLevel(vuln.severity),
                 },
                 properties: {
-                  tags: ['security', 'vulnerability', vuln.severity],
-                  precision: 'high',
+                  tags: ["security", "vulnerability", vuln.severity],
+                  precision: "high",
                 },
               })),
             },
@@ -256,51 +265,51 @@ export class TrivyScanner {
 
     // Scan type
     switch (targetType) {
-      case 'image':
-        args.push('image');
+      case "image":
+        args.push("image");
         break;
-      case 'filesystem':
-        args.push('fs');
+      case "filesystem":
+        args.push("fs");
         break;
-      case 'repository':
-        args.push('repo');
+      case "repository":
+        args.push("repo");
         break;
-      case 'sbom':
-        args.push('sbom');
+      case "sbom":
+        args.push("sbom");
         break;
       default:
-        args.push('fs');
+        args.push("fs");
     }
 
     // Output format
-    args.push('-f', options.outputFormat || 'json');
-    args.push('-o', outputPath);
+    args.push("-f", options.outputFormat || "json");
+    args.push("-o", outputPath);
 
     // Severity filter
     const severities = options.severity || this.config.trivy.severity;
-    args.push('--severity', severities.map((s) => s.toUpperCase()).join(','));
+    args.push("--severity", severities.map((s) => s.toUpperCase()).join(","));
 
     // Scanners
     const scanners = options.scanners || this.config.trivy.scanners;
-    args.push('--scanners', scanners.join(','));
+    args.push("--scanners", scanners.join(","));
 
     // Timeout
-    args.push('--timeout', options.timeout || this.config.trivy.timeout);
+    args.push("--timeout", options.timeout || this.config.trivy.timeout);
 
     // Ignore unfixed
     if (options.ignoreUnfixed ?? this.config.trivy.ignoreUnfixed) {
-      args.push('--ignore-unfixed');
+      args.push("--ignore-unfixed");
     }
 
     // Offline database
     if (options.offlineDb || this.config.trivy.offlineDb) {
-      args.push('--skip-db-update');
-      args.push('--offline-scan');
+      args.push("--skip-db-update");
+      args.push("--offline-scan");
     }
 
     // Ignore file
     if (options.ignoreFile) {
-      args.push('--ignorefile', options.ignoreFile);
+      args.push("--ignorefile", options.ignoreFile);
     }
 
     // Target
@@ -328,17 +337,17 @@ export class TrivyScanner {
       const vulns = result.Vulnerabilities || [];
 
       for (const vuln of vulns) {
-        const severity = (vuln.Severity?.toLowerCase() || 'unknown') as VulnerabilitySeverity;
+        const severity = (vuln.Severity?.toLowerCase() || "unknown") as VulnerabilitySeverity;
         const hasFixedVersion = !!vuln.FixedVersion;
 
         const vulnerability: Vulnerability = {
           id: vuln.VulnerabilityID,
-          source: vuln.DataSource?.ID || 'nvd',
+          source: vuln.DataSource?.ID || "nvd",
           severity,
           cvssScore: vuln.CVSS?.nvd?.V3Score || vuln.CVSS?.redhat?.V3Score,
           cvssVector: vuln.CVSS?.nvd?.V3Vector || vuln.CVSS?.redhat?.V3Vector,
           title: vuln.Title || vuln.VulnerabilityID,
-          description: vuln.Description || '',
+          description: vuln.Description || "",
           affectedPackage: vuln.PkgName,
           installedVersion: vuln.InstalledVersion,
           fixedVersion: vuln.FixedVersion,
@@ -362,10 +371,10 @@ export class TrivyScanner {
     return {
       scanId,
       scanTime: new Date().toISOString(),
-      scanner: 'trivy',
-      scannerVersion: output.SchemaVersion || 'unknown',
+      scanner: "trivy",
+      scannerVersion: output.SchemaVersion || "unknown",
       target,
-      targetType: targetType as 'image' | 'filesystem' | 'repository' | 'sbom',
+      targetType: targetType as "image" | "filesystem" | "repository" | "sbom",
       vulnerabilities,
       summary,
       exitCode: 0,
@@ -379,14 +388,16 @@ export class TrivyScanner {
   /**
    * Evaluate vulnerabilities against policy
    */
-  private evaluatePolicy(serviceName: string, vulnerabilities: Vulnerability[]): PolicyEvaluationResult {
-    const servicePolicy: ServicePolicy =
-      this.policy.services[serviceName] || {
-        exposure: 'internal',
-        severityThresholds: this.policy.global.defaultSeverityThresholds,
-        allowedVulnerabilities: [],
-        scanSchedule: 'daily',
-      };
+  private evaluatePolicy(
+    serviceName: string,
+    vulnerabilities: Vulnerability[]
+  ): PolicyEvaluationResult {
+    const servicePolicy: ServicePolicy = this.policy.services[serviceName] || {
+      exposure: "internal",
+      severityThresholds: this.policy.global.defaultSeverityThresholds,
+      allowedVulnerabilities: [],
+      scanSchedule: "daily",
+    };
 
     const result: PolicyEvaluationResult = {
       allowed: true,
@@ -407,15 +418,17 @@ export class TrivyScanner {
       const action = servicePolicy.severityThresholds[vuln.severity];
 
       switch (action) {
-        case 'block':
+        case "block":
           result.blockedVulnerabilities.push(vuln.id);
           result.allowed = false;
-          result.policyViolations.push(`${vuln.id}: ${vuln.severity.toUpperCase()} severity blocked`);
+          result.policyViolations.push(
+            `${vuln.id}: ${vuln.severity.toUpperCase()} severity blocked`
+          );
           break;
-        case 'warn':
+        case "warn":
           result.warnings.push(`${vuln.id}: ${vuln.severity.toUpperCase()} severity warning`);
           break;
-        case 'ignore':
+        case "ignore":
           // No action
           break;
       }
@@ -427,24 +440,24 @@ export class TrivyScanner {
   /**
    * Detect target type from path/reference
    */
-  private detectTargetType(target: string): 'image' | 'filesystem' | 'repository' | 'sbom' {
-    if (target.includes(':') && (target.includes('/') || target.includes('.'))) {
+  private detectTargetType(target: string): "image" | "filesystem" | "repository" | "sbom" {
+    if (target.includes(":") && (target.includes("/") || target.includes("."))) {
       // Likely a container image reference
-      if (!target.startsWith('/') && !target.startsWith('.')) {
-        return 'image';
+      if (!target.startsWith("/") && !target.startsWith(".")) {
+        return "image";
       }
     }
 
-    if (target.endsWith('.json') || target.endsWith('.xml')) {
+    if (target.endsWith(".json") || target.endsWith(".xml")) {
       // Likely an SBOM file
-      return 'sbom';
+      return "sbom";
     }
 
-    if (target.startsWith('https://') || target.startsWith('git@')) {
-      return 'repository';
+    if (target.startsWith("https://") || target.startsWith("git@")) {
+      return "repository";
     }
 
-    return 'filesystem';
+    return "filesystem";
   }
 
   /**
@@ -466,16 +479,16 @@ export class TrivyScanner {
    */
   private mapSeverityToSarifLevel(severity: VulnerabilitySeverity): string {
     switch (severity) {
-      case 'critical':
-      case 'high':
-        return 'error';
-      case 'medium':
-        return 'warning';
-      case 'low':
-      case 'unknown':
-        return 'note';
+      case "critical":
+      case "high":
+        return "error";
+      case "medium":
+        return "warning";
+      case "low":
+      case "unknown":
+        return "note";
       default:
-        return 'note';
+        return "note";
     }
   }
 
@@ -485,7 +498,7 @@ export class TrivyScanner {
   private logScanSummary(result: TrivyScanResultExtended): void {
     const { summary, policyResult } = result;
 
-    console.log('\n📊 Scan Summary:');
+    console.log("\n📊 Scan Summary:");
     console.log(`   Total: ${summary.total}`);
     console.log(`   Critical: ${summary.critical}`);
     console.log(`   High: ${summary.high}`);
@@ -495,10 +508,10 @@ export class TrivyScanner {
 
     if (policyResult) {
       if (policyResult.allowed) {
-        console.log('✅ Policy evaluation: PASSED');
+        console.log("✅ Policy evaluation: PASSED");
       } else {
-        console.log('❌ Policy evaluation: FAILED');
-        console.log(`   Blocked: ${policyResult.blockedVulnerabilities.join(', ')}`);
+        console.log("❌ Policy evaluation: FAILED");
+        console.log(`   Blocked: ${policyResult.blockedVulnerabilities.join(", ")}`);
       }
     }
   }
@@ -508,11 +521,11 @@ export class TrivyScanner {
    */
   private async getTrivyVersion(): Promise<string> {
     try {
-      const result = await this.executeCommand('trivy', ['--version']);
+      const result = await this.executeCommand("trivy", ["--version"]);
       const match = result.stdout.match(/Version: (\S+)/);
-      return match ? match[1] : 'unknown';
+      return match ? match[1] : "unknown";
     } catch {
-      return 'unknown';
+      return "unknown";
     }
   }
 
@@ -527,18 +540,18 @@ export class TrivyScanner {
     return new Promise((resolve) => {
       const proc = spawn(command, args, { env: env || process.env });
 
-      let stdout = '';
-      let stderr = '';
+      let stdout = "";
+      let stderr = "";
 
-      proc.stdout.on('data', (data) => {
+      proc.stdout.on("data", (data) => {
         stdout += data.toString();
       });
 
-      proc.stderr.on('data', (data) => {
+      proc.stderr.on("data", (data) => {
         stderr += data.toString();
       });
 
-      proc.on('close', (code) => {
+      proc.on("close", (code) => {
         resolve({
           success: code === 0,
           stdout,
@@ -547,7 +560,7 @@ export class TrivyScanner {
         });
       });
 
-      proc.on('error', (error) => {
+      proc.on("error", (error) => {
         resolve({
           success: false,
           stdout,

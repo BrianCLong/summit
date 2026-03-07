@@ -43,7 +43,7 @@ Automated index of available runbooks.
 - [SYNTHETICS_DASHBOARDS_RUNBOOK.md](SYNTHETICS_DASHBOARDS_RUNBOOK.md)
 - [TABLETOP_SCENARIOS.md](TABLETOP_SCENARIOS.md)
 - [TTD-TTR-IMPROVEMENTS.md](TTD-TTR-IMPROVEMENTS.md)
-- [_template.md](_template.md)
+- [\_template.md](_template.md)
 - [acceptance-criteria.md](acceptance-criteria.md)
 - [actor-pivoting.yaml](actor-pivoting.yaml)
 - [agent-launch.md](agent-launch.md)

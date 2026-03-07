@@ -11,6 +11,7 @@
 ### 1. Evidence Workflows (19 → 3)
 
 **Current workflows** (19 total):
+
 - ci-evidence-verify.yml
 - cogsec_evidence.yml
 - evidence_ci_step35flash.yml
@@ -58,6 +59,7 @@
 ### 2. Governance Workflows (17 → 4)
 
 **Current workflows** (17 total):
+
 - governance-check.yml
 - governance-engine.yml
 - governance-meta-gate.yml
@@ -74,7 +76,7 @@
 - ux-governance.yml
 - ci-governance.yml
 - governance.yml
-- _reusable-governance-gate.yml
+- \_reusable-governance-gate.yml
 
 **Proposed consolidation**:
 
@@ -109,6 +111,7 @@
 ### 3. Supply Chain Workflows (13 → 3)
 
 **Current workflows** (13 total):
+
 - ci_supplychain_foundation.yml
 - golden-path-supply-chain.yml
 - security-supplychain.yml
@@ -150,6 +153,7 @@
 ## Implementation Phases
 
 ### Phase 1: Quick Wins (1-2 days)
+
 **Target**: Reduce 45 → 35 workflows per PR (-22%)
 
 1. ✅ Enable MERGE_SURGE mode (done)
@@ -170,6 +174,7 @@
 **Expected impact**: Skip 5-10 workflows per PR based on changes
 
 ### Phase 2: Evidence Consolidation (3-5 days)
+
 **Target**: Reduce 35 → 25 workflows per PR (-29%)
 
 1. Create evidence-gate.yml
@@ -183,6 +188,7 @@
 **Expected impact**: -16 workflows per PR
 
 ### Phase 3: Governance Consolidation (3-5 days)
+
 **Target**: Reduce 25 → 18 workflows per PR (-28%)
 
 1. Create governance-gate.yml
@@ -195,6 +201,7 @@
 **Expected impact**: -13 workflows per PR
 
 ### Phase 4: Supply Chain Consolidation (2-3 days)
+
 **Target**: Reduce 18 → 13 workflows per PR (-28%)
 
 1. Create supply-chain-gate.yml
@@ -207,6 +214,7 @@
 **Expected impact**: -10 workflows per PR
 
 ### Phase 5: Final Optimization (2-3 days)
+
 **Target**: Reduce 13 → 15 workflows per PR (final tuning)
 
 1. Review remaining workflows
@@ -220,18 +228,21 @@
 ## Success Metrics
 
 ### Immediate (Phase 1 - Achieved ✅)
+
 - ✅ Queue depth < 100
 - ✅ Runners actively processing (> 0 in-progress)
 - ✅ MERGE_SURGE enabled
 - ✅ Emergency response tools created
 
 ### Short-term (Phase 2-3)
+
 - Workflows per PR: 45 → 25 (44% reduction)
 - Average CI time: 20-30 minutes → 15-20 minutes
 - Queue depth: Consistently < 50
 - Zero gridlock incidents
 
 ### Long-term (Phase 4-5)
+
 - Workflows per PR: 45 → 15 (67% reduction)
 - Average CI time: 20-30 minutes → 10-15 minutes
 - Queue depth: Consistently < 30
@@ -240,12 +251,14 @@
 ## Cost-Benefit Analysis
 
 ### Investment
+
 - Engineering time: 2-3 weeks (1 engineer)
 - Testing overhead: 1 week (parallel runs)
 - Documentation: 2-3 days
 - **Total**: ~4-5 weeks effort
 
 ### Returns
+
 - **Immediate**: 200+ queued runs → 0 (gridlock resolved)
 - **Short-term**: 45 → 15 workflows per PR (67% reduction)
 - **Long-term**:
@@ -255,6 +268,7 @@
   - Easier maintenance (fewer workflows to manage)
 
 ### ROI
+
 - Current state: 45 workflows × 23 PRs = 1,035 potential jobs
 - Future state: 15 workflows × 23 PRs = 345 jobs
 - **Savings**: 67% reduction in job volume

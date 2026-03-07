@@ -1,23 +1,23 @@
-import { RegistryLoader } from '../index.js';
-import { Phase } from '../../phases.js';
+import { RegistryLoader } from "../index.js";
+import { Phase } from "../../phases.js";
 
-describe('RegistryLoader', () => {
-  test('should validate valid registry', () => {
+describe("RegistryLoader", () => {
+  test("should validate valid registry", () => {
     const validData = {
       queries: [
         {
-          id: 'q1',
-          phase: 'DISCOVERY',
-          cypher: 'MATCH (n) RETURN n',
-          tenant_scope: true
+          id: "q1",
+          phase: "DISCOVERY",
+          cypher: "MATCH (n) RETURN n",
+          tenant_scope: true,
         },
         {
-          id: 'q2',
-          phase: 'JUSTIFICATION',
-          cypher: 'MATCH (n) RETURN n.id',
+          id: "q2",
+          phase: "JUSTIFICATION",
+          cypher: "MATCH (n) RETURN n.id",
           max_rows: 10,
-          projection_allowlist: ['n.id'],
-          tenant_scope: true
+          projection_allowlist: ["n.id"],
+          tenant_scope: true,
         },
       ],
     };
@@ -27,13 +27,13 @@ describe('RegistryLoader', () => {
     expect(registry.queries[0].phase).toBe(Phase.DISCOVERY);
   });
 
-  test('should throw on invalid phase', () => {
+  test("should throw on invalid phase", () => {
     const invalidData = {
       queries: [
         {
-          id: 'q1',
-          phase: 'INVALID_PHASE',
-          cypher: 'MATCH (n) RETURN n',
+          id: "q1",
+          phase: "INVALID_PHASE",
+          cypher: "MATCH (n) RETURN n",
         },
       ],
     };
@@ -41,11 +41,11 @@ describe('RegistryLoader', () => {
     expect(() => RegistryLoader.validate(invalidData)).toThrow();
   });
 
-  test('should throw on missing required fields', () => {
+  test("should throw on missing required fields", () => {
     const invalidData = {
       queries: [
         {
-          id: 'q1',
+          id: "q1",
         },
       ],
     };

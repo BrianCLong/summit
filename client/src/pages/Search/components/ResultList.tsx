@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   Box,
   Card,
@@ -21,7 +21,7 @@ import {
   MenuItem as SelectMenuItem,
   Alert,
   ChipProps,
-} from '@mui/material';
+} from "@mui/material";
 import {
   Person,
   Business,
@@ -37,7 +37,7 @@ import {
   Visibility,
   Star,
   StarBorder,
-} from '@mui/icons-material';
+} from "@mui/icons-material";
 
 interface SearchResultMetadata {
   organization?: string;
@@ -49,7 +49,7 @@ interface SearchResultMetadata {
 
 interface SearchResult {
   id: string;
-  type: 'PERSON' | 'ORGANIZATION' | 'DOCUMENT' | 'EVENT' | 'LOCATION' | 'IOC';
+  type: "PERSON" | "ORGANIZATION" | "DOCUMENT" | "EVENT" | "LOCATION" | "IOC";
   title: string;
   description: string;
   score: number;
@@ -66,48 +66,48 @@ interface ResultListProps {
   getResultHref?: (result: SearchResult) => string | null;
 }
 
-const getEntityIcon = (type: SearchResult['type']) => {
+const getEntityIcon = (type: SearchResult["type"]) => {
   switch (type) {
-    case 'PERSON':
+    case "PERSON":
       return <Person />;
-    case 'ORGANIZATION':
+    case "ORGANIZATION":
       return <Business />;
-    case 'DOCUMENT':
+    case "DOCUMENT":
       return <Description />;
-    case 'EVENT':
+    case "EVENT":
       return <Event />;
-    case 'LOCATION':
+    case "LOCATION":
       return <Place />;
-    case 'IOC':
+    case "IOC":
       return <Security />;
     default:
       return <Description />;
   }
 };
 
-const getEntityColor = (type: SearchResult['type']): ChipProps['color'] => {
+const getEntityColor = (type: SearchResult["type"]): ChipProps["color"] => {
   switch (type) {
-    case 'PERSON':
-      return 'primary';
-    case 'ORGANIZATION':
-      return 'secondary';
-    case 'DOCUMENT':
-      return 'info';
-    case 'EVENT':
-      return 'warning';
-    case 'LOCATION':
-      return 'success';
-    case 'IOC':
-      return 'error';
+    case "PERSON":
+      return "primary";
+    case "ORGANIZATION":
+      return "secondary";
+    case "DOCUMENT":
+      return "info";
+    case "EVENT":
+      return "warning";
+    case "LOCATION":
+      return "success";
+    case "IOC":
+      return "error";
     default:
-      return 'default';
+      return "default";
   }
 };
 
-const getScoreColor = (score: number): ChipProps['color'] => {
-  if (score >= 0.8) return 'success';
-  if (score >= 0.6) return 'warning';
-  return 'error';
+const getScoreColor = (score: number): ChipProps["color"] => {
+  if (score >= 0.8) return "success";
+  if (score >= 0.6) return "warning";
+  return "error";
 };
 
 export default function ResultList({
@@ -118,7 +118,7 @@ export default function ResultList({
   getResultHref,
 }: ResultListProps) {
   const [page, setPage] = useState(1);
-  const [sortBy, setSortBy] = useState('relevance');
+  const [sortBy, setSortBy] = useState("relevance");
   const [menuAnchor, setMenuAnchor] = useState<{
     [key: string]: HTMLElement | null;
   }>({});
@@ -128,15 +128,13 @@ export default function ResultList({
 
   const sortedResults = [...results].sort((a, b) => {
     switch (sortBy) {
-      case 'relevance':
+      case "relevance":
         return b.score - a.score;
-      case 'date':
-        return (
-          new Date(b.lastUpdated).getTime() - new Date(a.lastUpdated).getTime()
-        );
-      case 'title':
+      case "date":
+        return new Date(b.lastUpdated).getTime() - new Date(a.lastUpdated).getTime();
+      case "title":
         return a.title.localeCompare(b.title);
-      case 'type':
+      case "type":
         return a.type.localeCompare(b.type);
       default:
         return 0;
@@ -144,15 +142,9 @@ export default function ResultList({
   });
 
   const startIndex = (page - 1) * resultsPerPage;
-  const paginatedResults = sortedResults.slice(
-    startIndex,
-    startIndex + resultsPerPage,
-  );
+  const paginatedResults = sortedResults.slice(startIndex, startIndex + resultsPerPage);
 
-  const handleMenuOpen = (
-    resultId: string,
-    event: React.MouseEvent<HTMLElement>,
-  ) => {
+  const handleMenuOpen = (resultId: string, event: React.MouseEvent<HTMLElement>) => {
     setMenuAnchor({ ...menuAnchor, [resultId]: event.currentTarget });
   };
 
@@ -177,7 +169,7 @@ export default function ResultList({
   const openInNewTab = (result: SearchResult) => {
     const href = getResultHref ? getResultHref(result) : null;
     if (href) {
-      window.open(href, '_blank', 'noopener,noreferrer');
+      window.open(href, "_blank", "noopener,noreferrer");
       return;
     }
     handleSelectResult(result);
@@ -197,7 +189,7 @@ export default function ResultList({
   if (results.length === 0) {
     return (
       <Card sx={{ borderRadius: 3 }}>
-        <CardContent sx={{ textAlign: 'center', py: 6 }}>
+        <CardContent sx={{ textAlign: "center", py: 6 }}>
           <Typography variant="h6" gutterBottom>
             No Results Found
           </Typography>
@@ -212,24 +204,13 @@ export default function ResultList({
   return (
     <Box>
       {/* Results Header */}
-      <Stack
-        direction="row"
-        justifyContent="space-between"
-        alignItems="center"
-        sx={{ mb: 3 }}
-      >
-        <Typography variant="h6">
-          {results.length.toLocaleString()} results found
-        </Typography>
+      <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
+        <Typography variant="h6">{results.length.toLocaleString()} results found</Typography>
 
         <Stack direction="row" spacing={2} alignItems="center">
           <FormControl size="small" sx={{ minWidth: 120 }}>
             <InputLabel>Sort by</InputLabel>
-            <Select
-              value={sortBy}
-              label="Sort by"
-              onChange={(e) => setSortBy(e.target.value)}
-            >
+            <Select value={sortBy} label="Sort by" onChange={(e) => setSortBy(e.target.value)}>
               <SelectMenuItem value="relevance">Relevance</SelectMenuItem>
               <SelectMenuItem value="date">Date</SelectMenuItem>
               <SelectMenuItem value="title">Title</SelectMenuItem>
@@ -242,10 +223,7 @@ export default function ResultList({
       {/* Results List */}
       <Stack spacing={2}>
         {paginatedResults.map((result) => (
-          <Card
-            key={result.id}
-            sx={{ borderRadius: 3, '&:hover': { boxShadow: 4 } }}
-          >
+          <Card key={result.id} sx={{ borderRadius: 3, "&:hover": { boxShadow: 4 } }}>
             <CardContent>
               <Stack direction="row" spacing={2} alignItems="flex-start">
                 <Avatar
@@ -259,24 +237,15 @@ export default function ResultList({
                 </Avatar>
 
                 <Box sx={{ flex: 1 }}>
-                  <Stack
-                    direction="row"
-                    alignItems="flex-start"
-                    justifyContent="space-between"
-                  >
+                  <Stack direction="row" alignItems="flex-start" justifyContent="space-between">
                     <Box sx={{ flex: 1 }}>
-                      <Stack
-                        direction="row"
-                        alignItems="center"
-                        spacing={2}
-                        sx={{ mb: 1 }}
-                      >
+                      <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 1 }}>
                         <Typography
                           variant="h6"
                           sx={{
-                            fontWeight: 'bold',
-                            cursor: 'pointer',
-                            '&:hover': { color: 'primary.main' },
+                            fontWeight: "bold",
+                            cursor: "pointer",
+                            "&:hover": { color: "primary.main" },
                           }}
                           onClick={() => handleSelectResult(result)}
                         >
@@ -290,9 +259,7 @@ export default function ResultList({
                           variant="outlined"
                         />
 
-                        <Box
-                          sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
-                        >
+                        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                           <Typography variant="caption" color="text.secondary">
                             Relevance:
                           </Typography>
@@ -305,24 +272,13 @@ export default function ResultList({
                         </Box>
                       </Stack>
 
-                      <Typography
-                        variant="body2"
-                        color="text.secondary"
-                        paragraph
-                        sx={{ mb: 2 }}
-                      >
+                      <Typography variant="body2" color="text.secondary" paragraph sx={{ mb: 2 }}>
                         {result.description}
                       </Typography>
 
-                      <Stack
-                        direction="row"
-                        alignItems="center"
-                        spacing={2}
-                        sx={{ mb: 2 }}
-                      >
+                      <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 2 }}>
                         <Typography variant="caption" color="text.secondary">
-                          Last updated:{' '}
-                          {new Date(result.lastUpdated).toLocaleDateString()}
+                          Last updated: {new Date(result.lastUpdated).toLocaleDateString()}
                         </Typography>
                       </Stack>
 
@@ -334,7 +290,7 @@ export default function ResultList({
                             label={tag}
                             size="small"
                             variant="outlined"
-                            sx={{ fontSize: '0.7rem', height: 24 }}
+                            sx={{ fontSize: "0.7rem", height: 24 }}
                             onClick={() => onTagSelect?.(tag)}
                           />
                         ))}
@@ -343,7 +299,7 @@ export default function ResultList({
                             label={`+${result.tags.length - 4} more`}
                             size="small"
                             variant="outlined"
-                            sx={{ fontSize: '0.7rem', height: 24 }}
+                            sx={{ fontSize: "0.7rem", height: 24 }}
                           />
                         )}
                       </Stack>
@@ -351,30 +307,14 @@ export default function ResultList({
 
                     {/* Actions */}
                     <Stack direction="row" spacing={1}>
-                      <Tooltip
-                        title={
-                          bookmarked.has(result.id)
-                            ? 'Remove bookmark'
-                            : 'Bookmark'
-                        }
-                      >
-                        <IconButton
-                          size="small"
-                          onClick={() => toggleBookmark(result.id)}
-                        >
-                          {bookmarked.has(result.id) ? (
-                            <Star color="warning" />
-                          ) : (
-                            <StarBorder />
-                          )}
+                      <Tooltip title={bookmarked.has(result.id) ? "Remove bookmark" : "Bookmark"}>
+                        <IconButton size="small" onClick={() => toggleBookmark(result.id)}>
+                          {bookmarked.has(result.id) ? <Star color="warning" /> : <StarBorder />}
                         </IconButton>
                       </Tooltip>
 
                       <Tooltip title="View details">
-                        <IconButton
-                          size="small"
-                          onClick={() => handleSelectResult(result)}
-                        >
+                        <IconButton size="small" onClick={() => handleSelectResult(result)}>
                           <Visibility />
                         </IconButton>
                       </Tooltip>
@@ -386,10 +326,7 @@ export default function ResultList({
                       </Tooltip>
 
                       <Tooltip title="More actions">
-                        <IconButton
-                          size="small"
-                          onClick={(e) => handleMenuOpen(result.id, e)}
-                        >
+                        <IconButton size="small" onClick={(e) => handleMenuOpen(result.id, e)}>
                           <MoreVert />
                         </IconButton>
                       </Tooltip>
@@ -404,56 +341,45 @@ export default function ResultList({
                   sx={{
                     mt: 2,
                     pt: 2,
-                    borderTop: '1px solid',
-                    borderTopColor: 'divider',
+                    borderTop: "1px solid",
+                    borderTopColor: "divider",
                   }}
                 >
                   <Stack direction="row" spacing={4}>
-                    {result.type === 'PERSON' &&
-                      typeof result.metadata?.organization === 'string' && (
+                    {result.type === "PERSON" &&
+                      typeof result.metadata?.organization === "string" && (
                         <Box>
                           <Typography variant="caption" color="text.secondary">
                             Organization
                           </Typography>
-                          <Typography variant="body2">
-                            {result.metadata.organization}
-                          </Typography>
+                          <Typography variant="body2">{result.metadata.organization}</Typography>
                         </Box>
                       )}
-                    {result.type === 'ORGANIZATION' &&
-                      typeof result.metadata?.industry === 'string' && (
+                    {result.type === "ORGANIZATION" &&
+                      typeof result.metadata?.industry === "string" && (
                         <Box>
                           <Typography variant="caption" color="text.secondary">
                             Industry
                           </Typography>
-                          <Typography variant="body2">
-                            {result.metadata.industry}
-                          </Typography>
+                          <Typography variant="body2">{result.metadata.industry}</Typography>
                         </Box>
                       )}
-                    {result.type === 'IOC' &&
-                      typeof result.metadata?.threatType === 'string' && (
-                        <Box>
-                          <Typography variant="caption" color="text.secondary">
-                            Threat Type
-                          </Typography>
-                          <Typography variant="body2">
-                            {result.metadata.threatType}
-                          </Typography>
-                        </Box>
-                      )}
-                    {typeof result.metadata?.riskScore === 'number' &&
+                    {result.type === "IOC" && typeof result.metadata?.threatType === "string" && (
+                      <Box>
+                        <Typography variant="caption" color="text.secondary">
+                          Threat Type
+                        </Typography>
+                        <Typography variant="body2">{result.metadata.threatType}</Typography>
+                      </Box>
+                    )}
+                    {typeof result.metadata?.riskScore === "number" &&
                       (() => {
                         const riskScore =
-                          typeof result.metadata?.riskScore === 'number'
+                          typeof result.metadata?.riskScore === "number"
                             ? result.metadata.riskScore
                             : 0;
                         const color =
-                          riskScore > 70
-                            ? 'error'
-                            : riskScore > 40
-                              ? 'warning'
-                              : 'success';
+                          riskScore > 70 ? "error" : riskScore > 40 ? "warning" : "success";
                         return (
                           <Box>
                             <Typography variant="caption" color="text.secondary">
@@ -523,7 +449,7 @@ export default function ResultList({
 
       {/* Pagination */}
       {results.length > resultsPerPage && (
-        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+        <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
           <Pagination
             count={Math.ceil(results.length / resultsPerPage)}
             page={page}
@@ -538,10 +464,9 @@ export default function ResultList({
       {results.length > 0 && (
         <Alert severity="info" sx={{ mt: 3 }}>
           <Typography variant="body2">
-            Showing {startIndex + 1}-
-            {Math.min(startIndex + resultsPerPage, results.length)} of{' '}
-            {results.length} results. Results are sorted by {sortBy} and
-            filtered based on your search criteria.
+            Showing {startIndex + 1}-{Math.min(startIndex + resultsPerPage, results.length)} of{" "}
+            {results.length} results. Results are sorted by {sortBy} and filtered based on your
+            search criteria.
           </Typography>
         </Alert>
       )}

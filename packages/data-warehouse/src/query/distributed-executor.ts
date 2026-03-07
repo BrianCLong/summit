@@ -12,8 +12,8 @@
  * Surpasses Snowflake with intelligent work stealing and adaptive parallelism
  */
 
-import { Pool } from 'pg';
-import { EventEmitter } from 'events';
+import { Pool } from "pg";
+import { EventEmitter } from "events";
 
 export interface QueryPlan {
   queryId: string;
@@ -36,22 +36,22 @@ export interface ExecutionStage {
 }
 
 export enum StageType {
-  SCAN = 'SCAN',
-  FILTER = 'FILTER',
-  PROJECT = 'PROJECT',
-  AGGREGATE = 'AGGREGATE',
-  JOIN = 'JOIN',
-  SORT = 'SORT',
-  LIMIT = 'LIMIT',
-  SHUFFLE = 'SHUFFLE',
-  EXCHANGE = 'EXCHANGE',
+  SCAN = "SCAN",
+  FILTER = "FILTER",
+  PROJECT = "PROJECT",
+  AGGREGATE = "AGGREGATE",
+  JOIN = "JOIN",
+  SORT = "SORT",
+  LIMIT = "LIMIT",
+  SHUFFLE = "SHUFFLE",
+  EXCHANGE = "EXCHANGE",
 }
 
 export enum ShuffleStrategy {
-  HASH = 'HASH',
-  BROADCAST = 'BROADCAST',
-  RANGE = 'RANGE',
-  ROUND_ROBIN = 'ROUND_ROBIN',
+  HASH = "HASH",
+  BROADCAST = "BROADCAST",
+  RANGE = "RANGE",
+  ROUND_ROBIN = "ROUND_ROBIN",
 }
 
 export interface Predicate {
@@ -131,14 +131,14 @@ export class DistributedQueryExecutor extends EventEmitter {
         workersUsed: this.workers.length,
       };
 
-      this.emit('query:completed', { queryId: plan.queryId, metrics });
+      this.emit("query:completed", { queryId: plan.queryId, metrics });
 
       return {
         rows: results[results.length - 1] || [],
         metrics,
       };
     } catch (error) {
-      this.emit('query:failed', { queryId: plan.queryId, error });
+      this.emit("query:failed", { queryId: plan.queryId, error });
       throw error;
     } finally {
       this.executingQueries.delete(plan.queryId);
@@ -150,7 +150,7 @@ export class DistributedQueryExecutor extends EventEmitter {
    */
   private async executeStages(
     execution: QueryExecution,
-    stages: ExecutionStage[],
+    stages: ExecutionStage[]
   ): Promise<any[][]> {
     const results: any[][] = [];
     const stageOutputs = new Map<string, any[]>();
@@ -166,7 +166,7 @@ export class DistributedQueryExecutor extends EventEmitter {
             throw new Error(`Missing input for stage ${stage.stageId}: ${inputId}`);
           }
           return output;
-        }),
+        })
       );
 
       // Execute stage
@@ -190,7 +190,7 @@ export class DistributedQueryExecutor extends EventEmitter {
       stageOutputs.set(stage.stageId, output);
       results.push(output);
 
-      this.emit('stage:completed', {
+      this.emit("stage:completed", {
         queryId: execution.plan.queryId,
         stageId: stage.stageId,
         durationMs: stageDuration,
@@ -206,7 +206,7 @@ export class DistributedQueryExecutor extends EventEmitter {
   private async executeStage(
     execution: QueryExecution,
     stage: ExecutionStage,
-    inputs: any[][],
+    inputs: any[][]
   ): Promise<any[]> {
     switch (stage.type) {
       case StageType.SCAN:
@@ -238,10 +238,7 @@ export class DistributedQueryExecutor extends EventEmitter {
   /**
    * Execute parallel table scan
    */
-  private async executeScan(
-    execution: QueryExecution,
-    stage: ExecutionStage,
-  ): Promise<any[]> {
+  private async executeScan(execution: QueryExecution, stage: ExecutionStage): Promise<any[]> {
     const tasks = this.createScanTasks(stage);
 
     // Execute tasks in parallel across workers
@@ -257,7 +254,7 @@ export class DistributedQueryExecutor extends EventEmitter {
   private async executeFilter(
     execution: QueryExecution,
     stage: ExecutionStage,
-    inputs: any[][],
+    inputs: any[][]
   ): Promise<any[]> {
     const input = inputs[0] || [];
 
@@ -287,7 +284,7 @@ export class DistributedQueryExecutor extends EventEmitter {
   private async executeProject(
     execution: QueryExecution,
     stage: ExecutionStage,
-    inputs: any[][],
+    inputs: any[][]
   ): Promise<any[]> {
     const input = inputs[0] || [];
     // Simple projection - select columns
@@ -300,7 +297,7 @@ export class DistributedQueryExecutor extends EventEmitter {
   private async executeAggregate(
     execution: QueryExecution,
     stage: ExecutionStage,
-    inputs: any[][],
+    inputs: any[][]
   ): Promise<any[]> {
     const input = inputs[0] || [];
 
@@ -342,10 +339,10 @@ export class DistributedQueryExecutor extends EventEmitter {
   private async executeJoin(
     execution: QueryExecution,
     stage: ExecutionStage,
-    inputs: any[][],
+    inputs: any[][]
   ): Promise<any[]> {
     if (inputs.length < 2) {
-      throw new Error('Join requires at least 2 inputs');
+      throw new Error("Join requires at least 2 inputs");
     }
 
     const [left, right] = inputs;
@@ -367,7 +364,7 @@ export class DistributedQueryExecutor extends EventEmitter {
     execution: QueryExecution,
     stage: ExecutionStage,
     left: any[],
-    right: any[],
+    right: any[]
   ): Promise<any[]> {
     const partitions = this.partitionData(left, stage.parallelism);
 
@@ -391,13 +388,13 @@ export class DistributedQueryExecutor extends EventEmitter {
     execution: QueryExecution,
     stage: ExecutionStage,
     left: any[],
-    right: any[],
+    right: any[]
   ): Promise<any[]> {
     const parallelism = stage.parallelism;
 
     // Hash partition both sides
-    const leftPartitions = this.hashPartition(left, parallelism, 'id');
-    const rightPartitions = this.hashPartition(right, parallelism, 'id');
+    const leftPartitions = this.hashPartition(left, parallelism, "id");
+    const rightPartitions = this.hashPartition(right, parallelism, "id");
 
     // Join each partition pair
     const tasks = Array.from({ length: parallelism }, (_, idx) => ({
@@ -422,7 +419,7 @@ export class DistributedQueryExecutor extends EventEmitter {
   private async executeSort(
     execution: QueryExecution,
     stage: ExecutionStage,
-    inputs: any[][],
+    inputs: any[][]
   ): Promise<any[]> {
     const input = inputs[0] || [];
 
@@ -438,10 +435,7 @@ export class DistributedQueryExecutor extends EventEmitter {
       parameters: partition,
     }));
 
-    const sortedPartitions = await this.executeTasksParallel(
-      execution,
-      localSortTasks,
-    );
+    const sortedPartitions = await this.executeTasksParallel(execution, localSortTasks);
 
     // Merge sorted partitions
     return this.mergeSorted(sortedPartitions);
@@ -453,7 +447,7 @@ export class DistributedQueryExecutor extends EventEmitter {
   private async executeLimit(
     execution: QueryExecution,
     stage: ExecutionStage,
-    inputs: any[][],
+    inputs: any[][]
   ): Promise<any[]> {
     const input = inputs[0] || [];
     const limit = parseInt(stage.operation);
@@ -465,11 +459,9 @@ export class DistributedQueryExecutor extends EventEmitter {
    */
   private async executeTasksParallel(
     execution: QueryExecution,
-    tasks: WorkerTask[],
+    tasks: WorkerTask[]
   ): Promise<any[][]> {
-    const results = await Promise.all(
-      tasks.map((task) => this.executeTask(execution, task)),
-    );
+    const results = await Promise.all(tasks.map((task) => this.executeTask(execution, task)));
 
     return results;
   }
@@ -477,10 +469,7 @@ export class DistributedQueryExecutor extends EventEmitter {
   /**
    * Execute single task on a worker
    */
-  private async executeTask(
-    execution: QueryExecution,
-    task: WorkerTask,
-  ): Promise<any[]> {
+  private async executeTask(execution: QueryExecution, task: WorkerTask): Promise<any[]> {
     const worker = this.workers[task.workerId % this.workers.length];
 
     try {
@@ -488,7 +477,7 @@ export class DistributedQueryExecutor extends EventEmitter {
       // In production, this would execute actual SQL on the worker
       return task.parameters;
     } catch (error) {
-      this.emit('task:failed', { taskId: task.taskId, error });
+      this.emit("task:failed", { taskId: task.taskId, error });
       throw error;
     }
   }
@@ -522,11 +511,7 @@ export class DistributedQueryExecutor extends EventEmitter {
     return result;
   }
 
-  private hashPartition<T>(
-    data: T[],
-    partitions: number,
-    key: string,
-  ): T[][] {
+  private hashPartition<T>(data: T[], partitions: number, key: string): T[][] {
     const result: T[][] = Array.from({ length: partitions }, () => []);
 
     data.forEach((item) => {
@@ -558,9 +543,7 @@ export class DistributedQueryExecutor extends EventEmitter {
   }
 
   private buildFilterSQL(predicates: Predicate[]): string {
-    return predicates
-      .map((p) => `${p.column} ${p.operator} ${p.value}`)
-      .join(' AND ');
+    return predicates.map((p) => `${p.column} ${p.operator} ${p.value}`).join(" AND ");
   }
 
   private estimateSize(data: any[]): number {
@@ -574,7 +557,7 @@ export class DistributedQueryExecutor extends EventEmitter {
     const execution = this.executingQueries.get(queryId);
     if (execution) {
       execution.cancelled = true;
-      this.emit('query:cancelled', { queryId });
+      this.emit("query:cancelled", { queryId });
     }
   }
 
@@ -582,7 +565,7 @@ export class DistributedQueryExecutor extends EventEmitter {
    * Get query status
    */
   getQueryStatus(queryId: string): {
-    status: 'running' | 'completed' | 'failed' | 'cancelled';
+    status: "running" | "completed" | "failed" | "cancelled";
     progress: number;
   } | null {
     const execution = this.executingQueries.get(queryId);
@@ -591,7 +574,7 @@ export class DistributedQueryExecutor extends EventEmitter {
     }
 
     return {
-      status: execution.cancelled ? 'cancelled' : 'running',
+      status: execution.cancelled ? "cancelled" : "running",
       progress: execution.progress,
     };
   }
@@ -606,6 +589,6 @@ class QueryExecution {
   constructor(
     public plan: QueryPlan,
     public workers: Pool[],
-    public maxParallelism: number,
+    public maxParallelism: number
   ) {}
 }

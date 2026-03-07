@@ -11,9 +11,11 @@ This document describes the CI/CD test job configuration for running RBAC verifi
 ## Test Job Requirements
 
 ### Job Name
+
 `rbac-verification-tests` or integrated into existing `security-tests` job
 
 ### When to Run
+
 - On every pull request to `main` or `develop` branches
 - On changes to files matching:
   - `server/src/authz/**`
@@ -39,6 +41,7 @@ environment:
 ```
 
 ### Dependencies
+
 - PostgreSQL 14+ (for audit log verification)
 - Redis 7+ (for session/MFA state)
 - Node.js 20+
@@ -99,6 +102,7 @@ Time:        2.145 s
 ### Failure Actions
 
 If RBAC tests fail:
+
 1. **Block PR merge** - No bypass allowed without security team approval
 2. **Alert security team** - Send notification to `#security-alerts` Slack channel
 3. **Create security incident** - Log failure in incident tracking system
@@ -108,13 +112,13 @@ If RBAC tests fail:
 
 ### Code Coverage Targets
 
-| Component | Line Coverage | Branch Coverage | Function Coverage |
-|-----------|---------------|-----------------|-------------------|
-| `authz/permissions.ts` | 100% | 100% | 100% |
-| `middleware/rbac.ts` | 95% | 95% | 100% |
-| `services/EnhancedGovernanceRBACService.ts` | 90% | 90% | 95% |
-| `graphql/resolvers/investigation.ts` | 85% | 85% | 90% |
-| `analytics/exports/ExportService.ts` | 90% | 90% | 95% |
+| Component                                   | Line Coverage | Branch Coverage | Function Coverage |
+| ------------------------------------------- | ------------- | --------------- | ----------------- |
+| `authz/permissions.ts`                      | 100%          | 100%            | 100%              |
+| `middleware/rbac.ts`                        | 95%           | 95%             | 100%              |
+| `services/EnhancedGovernanceRBACService.ts` | 90%           | 90%             | 95%               |
+| `graphql/resolvers/investigation.ts`        | 85%           | 85%             | 90%               |
+| `analytics/exports/ExportService.ts`        | 90%           | 90%             | 95%               |
 
 ### Mutation Testing
 
@@ -138,17 +142,17 @@ name: RBAC Verification Tests
 on:
   pull_request:
     paths:
-      - 'server/src/authz/**'
-      - 'server/src/middleware/rbac.ts'
-      - 'server/src/services/*RBAC*.ts'
-      - 'server/src/graphql/resolvers/investigation.ts'
-      - 'server/src/analytics/exports/**'
-      - 'server/__tests__/rbac/**'
-      - 'docs/security/rbac_policy.md'
+      - "server/src/authz/**"
+      - "server/src/middleware/rbac.ts"
+      - "server/src/services/*RBAC*.ts"
+      - "server/src/graphql/resolvers/investigation.ts"
+      - "server/src/analytics/exports/**"
+      - "server/__tests__/rbac/**"
+      - "docs/security/rbac_policy.md"
   push:
     branches: [main, develop]
   schedule:
-    - cron: '0 2 * * *' # Nightly at 2 AM UTC
+    - cron: "0 2 * * *" # Nightly at 2 AM UTC
 
 jobs:
   rbac-verification:
@@ -187,8 +191,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: "20"
+          cache: "npm"
 
       - name: Install dependencies
         run: npm ci
@@ -245,8 +249,8 @@ jobs:
         if: failure()
         uses: slackapi/slack-github-action@v1
         with:
-          channel-id: 'security-alerts'
-          slack-message: 'RBAC verification tests failed in ${{ github.repository }} on branch ${{ github.ref }}'
+          channel-id: "security-alerts"
+          slack-message: "RBAC verification tests failed in ${{ github.repository }} on branch ${{ github.ref }}"
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 ```
@@ -331,6 +335,7 @@ Add RBAC tests to pre-commit hooks for files that modify permissions:
 ### Dashboards
 
 Create monitoring dashboard with:
+
 - Daily test run results
 - Coverage trends over time
 - Time-to-fix for RBAC test failures
@@ -339,6 +344,7 @@ Create monitoring dashboard with:
 ### Alerts
 
 Configure alerts for:
+
 - RBAC test failures in CI
 - Coverage drops below threshold
 - Flaky test detection
@@ -356,6 +362,7 @@ Configure alerts for:
 ### Documentation for Auditors
 
 Provide auditors with:
+
 1. This test job configuration document
 2. RBAC policy document (`rbac_policy.md`)
 3. Sample test execution logs
@@ -383,6 +390,7 @@ Provide auditors with:
 ### Quarterly Review
 
 Every quarter, review and update:
+
 - Test coverage requirements
 - Performance benchmarks
 - Alert thresholds
@@ -391,6 +399,7 @@ Every quarter, review and update:
 ### Annual Certification
 
 Annually certify that:
+
 - All RBAC policies are tested
 - Tests align with current threat model
 - Coverage meets compliance requirements
@@ -410,6 +419,7 @@ Annually certify that:
 **Next Review:** 2026-04-30
 
 This configuration must be approved by:
+
 - [ ] Security Team Lead
 - [ ] DevOps/Platform Team Lead
 - [ ] QA Engineering Lead

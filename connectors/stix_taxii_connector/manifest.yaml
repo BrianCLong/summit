@@ -22,8 +22,8 @@ golden_io_tests:
 
 # Rate limiting policy (critical for TAXII servers)
 rate_limit:
-  requests_per_hour: 100  # Conservative default
-  requests_per_minute: 2  # Prevent overwhelming TAXII servers
+  requests_per_hour: 100 # Conservative default
+  requests_per_minute: 2 # Prevent overwhelming TAXII servers
   burst_limit: 5
   backoff_strategy: exponential
   max_retries: 3
@@ -85,7 +85,7 @@ configuration:
   taxii_version: "2.1"
   verify_ssl: true
   timeout_seconds: 30
-  max_content_length: 10485760  # 10MB
+  max_content_length: 10485760 # 10MB
   stix_version: "2.1"
 
   # TAXII server settings (example)
@@ -99,9 +99,9 @@ configuration:
   # password: <set via env>
 
   # Filtering
-  added_after: null  # Filter for objects added after this timestamp
+  added_after: null # Filter for objects added after this timestamp
   match_spec_version: "2.1"
-  object_types:  # Only fetch these STIX object types
+  object_types: # Only fetch these STIX object types
     - indicator
     - malware
     - threat-actor
@@ -132,7 +132,7 @@ quality_metrics:
 
 # Feed-specific metadata
 feed_metadata:
-  tlp_marking: amber  # Default TLP marking
-  confidence_threshold: 50  # Minimum confidence score for indicators
-  validate_stix: true  # Validate STIX objects against schema
+  tlp_marking: amber # Default TLP marking
+  confidence_threshold: 50 # Minimum confidence score for indicators
+  validate_stix: true # Validate STIX objects against schema
   dedupe_window_hours: 24

@@ -83,24 +83,18 @@ Propose a black-swan drill: poison a connector feed in staging and verify quaran
 ```ts
 // GA gate: Authority Binding + Reason-for-Access enforcement (Express/OPA)
 // Passes Bandit/Sonar-equivalent checks (no secrets, strict types, input validation)
-import type { Request, Response, NextFunction } from 'express';
-import fetch from 'node-fetch';
+import type { Request, Response, NextFunction } from "express";
+import fetch from "node-fetch";
 
 const OPA_URL = process.env.OPA_URL!;
 
-export async function requireAuthority(
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) {
-  const user = req.header('X-User-Id');
-  const reason = req.header('X-Reason-For-Access');
-  const legalBasis = req.header('X-Legal-Basis'); // e.g., "WARRANT#123" or policy tag
+export async function requireAuthority(req: Request, res: Response, next: NextFunction) {
+  const user = req.header("X-User-Id");
+  const reason = req.header("X-Reason-For-Access");
+  const legalBasis = req.header("X-Legal-Basis"); // e.g., "WARRANT#123" or policy tag
 
   if (!user || !reason || !legalBasis) {
-    return res
-      .status(403)
-      .json({ blocked: true, why: 'Missing authority or reason-for-access' });
+    return res.status(403).json({ blocked: true, why: "Missing authority or reason-for-access" });
   }
 
   const input = {
@@ -112,15 +106,15 @@ export async function requireAuthority(
     attributes: req.body?.attributes,
   };
   const decision = await fetch(`${OPA_URL}/v1/data/intelgraph/allow`, {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
+    method: "POST",
+    headers: { "content-type": "application/json" },
     body: JSON.stringify({ input }),
   }).then((r) => r.json());
 
   if (decision?.result?.allow === true) return next();
   return res.status(403).json({
     blocked: true,
-    why: decision?.result?.why ?? 'Policy denies request',
+    why: decision?.result?.why ?? "Policy denies request",
   });
 }
 ```

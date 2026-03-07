@@ -152,6 +152,7 @@ chmod +x scripts/categorize-codex-prs.sh
 ```
 
 **Output will show:**
+
 - How many merge candidates
 - How many have conflicts
 - How many are high risk
@@ -165,10 +166,10 @@ This data drives Week 2-3 systematic review.
 
 ### P0: Fix These Bot PRs (High Value)
 
-| PR | Issue | How to Fix | Time |
-|----|-------|-----------|------|
-| #11985 | Elasticsearch API bug | Change `if (existsResponse)` to `if (existsResponse.body)` in createIndex method | 30 min |
-| #11886 | Missing rate limiting + conflicts | 1) Rebase, 2) Add rate limiter to auth routes | 2 hrs |
+| PR     | Issue                             | How to Fix                                                                       | Time   |
+| ------ | --------------------------------- | -------------------------------------------------------------------------------- | ------ |
+| #11985 | Elasticsearch API bug             | Change `if (existsResponse)` to `if (existsResponse.body)` in createIndex method | 30 min |
+| #11886 | Missing rate limiting + conflicts | 1) Rebase, 2) Add rate limiter to auth routes                                    | 2 hrs  |
 
 ```bash
 # After fixing locally:
@@ -187,6 +188,7 @@ gh pr comment 11985 --body "Fixed in #{NEW_PR_NUMBER}"
 This PR claims to fix 3 CI issues but actually contains 7,000+ lines across 16 commits.
 
 **Action:**
+
 ```bash
 # Create focused CI fix PR
 git checkout main
@@ -234,6 +236,7 @@ gh pr merge {NUMBER} --squash --delete-branch
 All scripts are in `/home/user/summit/PR_TRIAGE_PLAN.md` Appendix A.
 
 **Most useful:**
+
 1. `scripts/find-duplicate-prs.sh` - Find more duplicates
 2. `scripts/categorize-codex-prs.sh` - Categorize September batch
 3. `scripts/bulk-close-prs.sh` - Close PRs in bulk with same message
@@ -244,13 +247,16 @@ All scripts are in `/home/user/summit/PR_TRIAGE_PLAN.md` Appendix A.
 ## Communication Tips
 
 ### When closing PRs:
+
 ✅ **DO:**
+
 - Explain why clearly
 - Thank contributor
 - Offer path forward (rebase, resubmit, etc.)
 - Reference related PRs or issues
 
 ❌ **DON'T:**
+
 - Close without comment
 - Be dismissive of the work
 - Forget to check for valuable code that should be salvaged
@@ -263,6 +269,7 @@ Thank you for this PR! As part of our PR backlog triage, we're reviewing the Sep
 **This PR is being closed because:** {specific reason}
 
 **If this feature is still relevant:**
+
 - Please rebase on current main (2+ months of changes)
 - Address any bot-flagged issues: {list issues}
 - Resubmit as a fresh PR
@@ -283,6 +290,7 @@ echo "$(date): $(gh pr list --state open --json number | jq 'length') open PRs"
 ```
 
 **Target trajectory:**
+
 - Day 1: 420 open PRs (closed 8 duplicates)
 - Day 2: 418 open PRs (closed 2 security issues)
 - Day 3: ~390 open PRs (closed 20-30 stale conflicted)

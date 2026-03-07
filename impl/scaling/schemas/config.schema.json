@@ -69,7 +69,7 @@
               "curriculum_stage": {
                 "type": "integer",
                 "minimum": 0,
-                "description": "Optional curriculum stage index for scheduling." 
+                "description": "Optional curriculum stage index for scheduling."
               },
               "filtering": {
                 "type": "string",

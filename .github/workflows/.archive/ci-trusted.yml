@@ -26,8 +26,8 @@ jobs:
       - name: Authenticate to Cloud
         uses: google-github-actions/auth@v3
         with:
-          workload_identity_provider: 'projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider'
-          service_account: 'my-service-account@my-project.iam.gserviceaccount.com'
+          workload_identity_provider: "projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider"
+          service_account: "my-service-account@my-project.iam.gserviceaccount.com"
       - name: Deploy
         run: |
           echo "Deploying to staging..."

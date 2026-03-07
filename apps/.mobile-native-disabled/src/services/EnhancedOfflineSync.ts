@@ -99,7 +99,9 @@ class EnhancedOfflineSyncService {
       useSyncStore.getState().setLastSyncTime(Date.now());
       useAppStore.getState().setLastSyncTime(Date.now());
 
-      console.log(`[EnhancedSync] Sync complete: ${result.syncedCount} synced, ${result.failedCount} failed`);
+      console.log(
+        `[EnhancedSync] Sync complete: ${result.syncedCount} synced, ${result.failedCount} failed`,
+      );
 
       // Notify listeners
       this.notifyListeners(result);
@@ -304,7 +306,7 @@ class EnhancedOfflineSyncService {
    * Notify all listeners
    */
   private notifyListeners(result: SyncResult): void {
-    this.syncListeners.forEach((listener) => listener(result));
+    this.syncListeners.forEach(listener => listener(result));
   }
 
   /**
@@ -329,7 +331,7 @@ class EnhancedOfflineSyncService {
       queueSize: queue.length,
       isSyncing,
       lastSyncTime,
-      unresolvedConflicts: conflicts.filter((c) => !c.resolvedAt).length,
+      unresolvedConflicts: conflicts.filter(c => !c.resolvedAt).length,
       stats: {
         totalSynced: stats.totalSynced,
         totalFailed: stats.totalFailed,
@@ -342,7 +344,7 @@ class EnhancedOfflineSyncService {
 export const enhancedOfflineSync = new EnhancedOfflineSyncService();
 
 // Auto-sync when coming online
-NetInfo.addEventListener((state) => {
+NetInfo.addEventListener(state => {
   if (state.isConnected && state.isInternetReachable) {
     console.log('[EnhancedSync] Network connected, triggering sync');
     enhancedOfflineSync.sync();

@@ -186,16 +186,10 @@ Deliver a **prov‑ledger beta vertical** + **ABAC/OPA** gate at GraphQL + **tri
 **Jest — GraphQL policy elision**
 
 ```ts
-it('elides restricted fields under OPA', async () => {
-  const res = await gqlPersisted(
-    'CaseEntitiesRestricted',
-    { id: 'C-1' },
-    as('analyst'),
-  );
+it("elides restricted fields under OPA", async () => {
+  const res = await gqlPersisted("CaseEntitiesRestricted", { id: "C-1" }, as("analyst"));
   expect(res.errors).toBeFalsy();
-  expect(res.data.entities.every((e) => e.sensitivity === undefined)).toBe(
-    true,
-  );
+  expect(res.data.entities.every((e) => e.sensitivity === undefined)).toBe(true);
 });
 ```
 
@@ -228,11 +222,11 @@ print('Valid')
 **k6 — SLO profile**
 
 ```js
-import http from 'k6/http';
-import { Trend } from 'k6/metrics';
-const lat = new Trend('graph_latency');
+import http from "k6/http";
+import { Trend } from "k6/metrics";
+const lat = new Trend("graph_latency");
 export default function () {
-  const r = http.post('https://gw/graphql', JSON.stringify({ query: '...' }));
+  const r = http.post("https://gw/graphql", JSON.stringify({ query: "..." }));
   lat.add(r.timings.duration);
 }
 ```
@@ -240,10 +234,10 @@ export default function () {
 **Playwright — E2E happy path**
 
 ```ts
-await page.goto('/cases/C-1');
-await page.getByRole('button', { name: 'Export' }).click();
-await page.getByText('Disclosure Bundle').click();
-await expect(page.getByText('Export complete')).toBeVisible();
+await page.goto("/cases/C-1");
+await page.getByRole("button", { name: "Export" }).click();
+await page.getByText("Disclosure Bundle").click();
+await expect(page.getByText("Export complete")).toBeVisible();
 ```
 
 ---

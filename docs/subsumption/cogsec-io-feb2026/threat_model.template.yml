@@ -1,5 +1,5 @@
 version: 1
-evidence_id_prefix: "EID-CIG-"   # ASSUMPTION: confirm repo Evidence ID convention
+evidence_id_prefix: "EID-CIG-" # ASSUMPTION: confirm repo Evidence ID convention
 campaign:
   name: "Storm-like coordinated narrative surge"
   cognitive_objective: "CONFUSE"

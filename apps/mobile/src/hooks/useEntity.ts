@@ -22,43 +22,46 @@ export function useEntity(initialId?: string): UseEntityResult {
   const { isOnline } = useNetwork();
   const { accessToken } = useAuth();
 
-  const fetchEntity = useCallback(async (id: string) => {
-    setIsLoading(true);
-    setError(null);
+  const fetchEntity = useCallback(
+    async (id: string) => {
+      setIsLoading(true);
+      setError(null);
 
-    try {
-      // Check cache first
-      let entityData = await offlineCache.entities.get(id);
+      try {
+        // Check cache first
+        let entityData = await offlineCache.entities.get(id);
 
-      // If online, try to fetch fresh data
-      if (isOnline && accessToken) {
-        try {
-          const response = await fetch(`/api/mobile/entities/${id}`, {
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-            },
-          });
+        // If online, try to fetch fresh data
+        if (isOnline && accessToken) {
+          try {
+            const response = await fetch(`/api/mobile/entities/${id}`, {
+              headers: {
+                Authorization: `Bearer ${accessToken}`,
+              },
+            });
 
-          if (response.ok) {
-            entityData = await response.json();
-            await offlineCache.entities.set(entityData);
+            if (response.ok) {
+              entityData = await response.json();
+              await offlineCache.entities.set(entityData);
+            }
+          } catch {
+            // Use cached data if fetch fails
           }
-        } catch {
-          // Use cached data if fetch fails
         }
-      }
 
-      if (entityData) {
-        setEntity(entityData);
-      } else {
-        setError('Entity not found');
+        if (entityData) {
+          setEntity(entityData);
+        } else {
+          setError('Entity not found');
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to fetch entity');
+      } finally {
+        setIsLoading(false);
       }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch entity');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [isOnline, accessToken]);
+    },
+    [isOnline, accessToken],
+  );
 
   // Fetch initial entity if provided
   if (initialId && !entity && !isLoading) {

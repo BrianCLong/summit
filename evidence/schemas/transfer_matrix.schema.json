@@ -15,9 +15,7 @@
           "type": "string"
         }
       },
-      "required": [
-        "source"
-      ],
+      "required": ["source"],
       "type": "object"
     },
     "source_languages": {

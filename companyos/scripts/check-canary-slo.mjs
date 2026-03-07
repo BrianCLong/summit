@@ -5,8 +5,7 @@ import { resolve } from "node:path";
 import fetch from "node-fetch";
 import YAML from "yaml";
 
-const PROM_URL =
-  process.env.PROM_URL || "http://prometheus:9090/api/v1/query";
+const PROM_URL = process.env.PROM_URL || "http://prometheus:9090/api/v1/query";
 
 const SERVICE = process.env.SERVICE || "companyos-api";
 const FALLBACK_WINDOW = "10m";
@@ -19,12 +18,7 @@ const FALLBACK_AVAILABILITY = 0.995; // 99.5%
 
 const DEFAULT_SLO_CONFIG = process.env.SLO_CONFIG_PATH
   ? resolve(process.env.SLO_CONFIG_PATH)
-  : resolve(
-      process.cwd(),
-      "observability",
-      "slo",
-      `${SERVICE}.slo.yaml`
-    );
+  : resolve(process.cwd(), "observability", "slo", `${SERVICE}.slo.yaml`);
 
 async function loadSloConfig() {
   try {
@@ -41,17 +35,14 @@ async function loadSloConfig() {
 
 function extractAvailabilityObjective(sloConfig) {
   if (!sloConfig?.slos) return FALLBACK_AVAILABILITY;
-  const availability = sloConfig.slos.find(slo => slo.name === "availability");
+  const availability = sloConfig.slos.find((slo) => slo.name === "availability");
   return Number(availability?.objective) || FALLBACK_AVAILABILITY;
 }
 
 function resolveThresholds(sloConfig) {
   const canaryThresholds = sloConfig.canary_thresholds || {};
   return {
-    window:
-      process.env.CANARY_WINDOW ||
-      canaryThresholds.evaluation_window ||
-      FALLBACK_WINDOW,
+    window: process.env.CANARY_WINDOW || canaryThresholds.evaluation_window || FALLBACK_WINDOW,
     baseline: BASELINE,
     errorFactor:
       Number(process.env.CANARY_ERROR_FACTOR) ||
@@ -61,11 +52,9 @@ function resolveThresholds(sloConfig) {
       Number(process.env.CANARY_LATENCY_FACTOR) ||
       Number(canaryThresholds.latency_factor) ||
       FALLBACK_LATENCY_FACTOR,
-    latencyAbsoluteLimitSec:
-      Number(canaryThresholds.latency_abs_seconds) || FALLBACK_LATENCY_ABS,
-    errorAbsoluteLimit:
-      Number(canaryThresholds.error_rate_abs) || FALLBACK_ERROR_ABS,
-    availabilityObjective: extractAvailabilityObjective(sloConfig)
+    latencyAbsoluteLimitSec: Number(canaryThresholds.latency_abs_seconds) || FALLBACK_LATENCY_ABS,
+    errorAbsoluteLimit: Number(canaryThresholds.error_rate_abs) || FALLBACK_ERROR_ABS,
+    availabilityObjective: extractAvailabilityObjective(sloConfig),
   };
 }
 
@@ -113,7 +102,7 @@ function buildQueries(service, window, baseline) {
     (
       sum(rate(http_requests_total{job="${service}"}[${window}]))
     )
-  `
+  `,
   };
 }
 
@@ -155,10 +144,7 @@ function evaluateCanary(metrics, thresholds) {
   }
 
   if (metrics.latencyBaseline != null && metrics.latencyNow != null) {
-    if (
-      metrics.latencyBaseline === 0 &&
-      metrics.latencyNow > thresholds.latencyAbsoluteLimitSec
-    ) {
+    if (metrics.latencyBaseline === 0 && metrics.latencyNow > thresholds.latencyAbsoluteLimitSec) {
       problems.push(
         `Latency went from ~0 to ${metrics.latencyNow.toFixed(
           3
@@ -171,9 +157,7 @@ function evaluateCanary(metrics, thresholds) {
       problems.push(
         `Latency ratio exceeded: now=${metrics.latencyNow.toFixed(
           3
-        )}s, baseline=${metrics.latencyBaseline.toFixed(
-          3
-        )}s, factor=${thresholds.latencyFactor}`
+        )}s, baseline=${metrics.latencyBaseline.toFixed(3)}s, factor=${thresholds.latencyFactor}`
       );
     }
   }
@@ -201,29 +185,24 @@ async function main() {
 
   const queries = buildQueries(SERVICE, thresholds.window, thresholds.baseline);
 
-  const [errorNow, errorBaseline, latNow, latBaseline, availabilityNow] =
-    await Promise.all([
-      promQuery(queries.errorNow),
-      promQuery(queries.errorBaseline),
-      promQuery(queries.latencyNow),
-      promQuery(queries.latencyBaseline),
-      promQuery(queries.availabilityNow)
-    ]);
+  const [errorNow, errorBaseline, latNow, latBaseline, availabilityNow] = await Promise.all([
+    promQuery(queries.errorNow),
+    promQuery(queries.errorBaseline),
+    promQuery(queries.latencyNow),
+    promQuery(queries.latencyBaseline),
+    promQuery(queries.availabilityNow),
+  ]);
 
   const metrics = {
     errorNow,
     errorBaseline,
     latencyNow: latNow,
     latencyBaseline: latBaseline,
-    availabilityNow
+    availabilityNow,
   };
 
-  console.log(
-    `Error rate now=${errorNow ?? "N/A"}, baseline=${errorBaseline ?? "N/A"}`
-  );
-  console.log(
-    `Latency p95 now=${latNow ?? "N/A"}s, baseline=${latBaseline ?? "N/A"}s`
-  );
+  console.log(`Error rate now=${errorNow ?? "N/A"}, baseline=${errorBaseline ?? "N/A"}`);
+  console.log(`Latency p95 now=${latNow ?? "N/A"}s, baseline=${latBaseline ?? "N/A"}s`);
   console.log(
     `Availability now=${availabilityNow ?? "N/A"}, objective=${thresholds.availabilityObjective}`
   );
@@ -241,7 +220,7 @@ async function main() {
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
-  main().catch(err => {
+  main().catch((err) => {
     console.error("❌ Canary SLO check error:", err);
     process.exit(1);
   });
@@ -252,5 +231,5 @@ export {
   evaluateCanary,
   extractAvailabilityObjective,
   loadSloConfig,
-  resolveThresholds
+  resolveThresholds,
 };

@@ -92,19 +92,9 @@ type Query {
 
 type Mutation {
   setFeatureFlags(tenant: Tenant!, flags: FeatureFlagsInput!): MutationResult!
-  setCanaryWeights(
-    tenant: Tenant!
-    weights: CanaryWeightsInput!
-  ): MutationResult!
-  setSloThresholds(
-    tenant: Tenant!
-    thresholds: SloThresholdsInput!
-  ): MutationResult!
-  proposeRemediation(
-    tenant: Tenant!
-    type: RemediationType!
-    hitl: Boolean!
-  ): MutationResult!
+  setCanaryWeights(tenant: Tenant!, weights: CanaryWeightsInput!): MutationResult!
+  setSloThresholds(tenant: Tenant!, thresholds: SloThresholdsInput!): MutationResult!
+  proposeRemediation(tenant: Tenant!, type: RemediationType!, hitl: Boolean!): MutationResult!
   canaryPromote(tenant: Tenant!): MutationResult!
   canaryHold(tenant: Tenant!): MutationResult!
   evidencePack(version: String!): EvidenceResult!

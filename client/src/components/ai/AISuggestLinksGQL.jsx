@@ -1,21 +1,14 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { useQuery, useSubscription } from '@apollo/client';
-import { SUGGEST_LINKS, AI_SUGGESTIONS_SUB } from '../../graphql/ai.gql.js';
-import {
-  Box,
-  CircularProgress,
-  List,
-  ListItem,
-  ListItemText,
-  Typography,
-} from '@mui/material';
+import React, { useEffect, useMemo, useState } from "react";
+import { useQuery, useSubscription } from "@apollo/client";
+import { SUGGEST_LINKS, AI_SUGGESTIONS_SUB } from "../../graphql/ai.gql.js";
+import { Box, CircularProgress, List, ListItem, ListItemText, Typography } from "@mui/material";
 
 export default function AISuggestLinksGQL({ entityId, limit = 5 }) {
   const [items, setItems] = useState([]);
   const { data, loading, error } = useQuery(SUGGEST_LINKS, {
     variables: { entityId, limit },
     skip: !entityId,
-    fetchPolicy: 'cache-first',
+    fetchPolicy: "cache-first",
   });
   const { data: subData } = useSubscription(AI_SUGGESTIONS_SUB, {
     variables: { entityId },
@@ -36,11 +29,7 @@ export default function AISuggestLinksGQL({ entityId, limit = 5 }) {
   }, [subData]);
 
   if (!entityId) {
-    return (
-      <Typography color="text.secondary">
-        Select an entity to see AI suggestions.
-      </Typography>
-    );
+    return <Typography color="text.secondary">Select an entity to see AI suggestions.</Typography>;
   }
   if (loading && items.length === 0) return <CircularProgress size={20} />;
   if (error) return <Typography color="error">{error.message}</Typography>;
@@ -55,7 +44,7 @@ export default function AISuggestLinksGQL({ entityId, limit = 5 }) {
             <ListItem key={`${s.to}-${idx}`}>
               <ListItemText
                 primary={`${s.from} → ${s.to}`}
-                secondary={`score: ${s.score.toFixed(3)}${s.reason ? ` — ${s.reason}` : ''}`}
+                secondary={`score: ${s.score.toFixed(3)}${s.reason ? ` — ${s.reason}` : ""}`}
               />
             </ListItem>
           ))}

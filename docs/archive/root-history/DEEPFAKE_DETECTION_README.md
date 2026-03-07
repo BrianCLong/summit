@@ -49,7 +49,7 @@ The Deepfake & Synthetic Media Detection System provides **state-of-the-art ML-b
 ✅ **Sub-second latency** for images  
 ✅ **< 10 sec P95** for videos (30 sec duration)  
 ✅ **Fully integrated** with Neo4j provenance graph  
-✅ **Enterprise security**: RBAC, audit logging, encryption  
+✅ **Enterprise security**: RBAC, audit logging, encryption
 
 ---
 
@@ -57,28 +57,28 @@ The Deepfake & Synthetic Media Detection System provides **state-of-the-art ML-b
 
 ### Detection Capabilities
 
-| Feature | Description | Status |
-|---------|-------------|--------|
-| **Video Face Manipulation** | Detects face swaps, facial reenactment (EfficientNet-B7 + LSTM) | ✅ Implemented |
-| **Audio Deepfakes** | Detects synthetic speech (ResNet-34 on spectrograms) | ✅ Implemented |
-| **Image Manipulation** | Detects photoshopped images, GAN-generated content (XceptionNet) | ✅ Implemented |
-| **Ensemble Voting** | Combines multiple detectors with weighted voting | ✅ Implemented |
-| **Explainability** | Grad-CAM heatmaps, feature importance | ✅ Implemented |
-| **Confidence Scoring** | Calibrated probabilities with uncertainty quantification | ✅ Implemented |
-| **Real-time Streaming** | Live video stream analysis | 🚧 Future |
+| Feature                     | Description                                                      | Status         |
+| --------------------------- | ---------------------------------------------------------------- | -------------- |
+| **Video Face Manipulation** | Detects face swaps, facial reenactment (EfficientNet-B7 + LSTM)  | ✅ Implemented |
+| **Audio Deepfakes**         | Detects synthetic speech (ResNet-34 on spectrograms)             | ✅ Implemented |
+| **Image Manipulation**      | Detects photoshopped images, GAN-generated content (XceptionNet) | ✅ Implemented |
+| **Ensemble Voting**         | Combines multiple detectors with weighted voting                 | ✅ Implemented |
+| **Explainability**          | Grad-CAM heatmaps, feature importance                            | ✅ Implemented |
+| **Confidence Scoring**      | Calibrated probabilities with uncertainty quantification         | ✅ Implemented |
+| **Real-time Streaming**     | Live video stream analysis                                       | 🚧 Future      |
 
 ### Infrastructure
 
-| Component | Technology | Purpose |
-|-----------|-----------|---------|
-| **Detection Service** | Python 3.11, FastAPI, PyTorch | ML inference |
-| **Model Registry** | PostgreSQL, MinIO | Model versioning and storage |
-| **Job Queue** | Redis, BullMQ | Async processing |
-| **Storage** | MinIO (S3-compatible) | Media files and models |
-| **Database** | PostgreSQL 15 | Detection metadata |
-| **Graph** | Neo4j 5 | Media provenance |
-| **Metrics** | Prometheus, Grafana | Monitoring and dashboards |
-| **Tracing** | OpenTelemetry | Distributed tracing |
+| Component             | Technology                    | Purpose                      |
+| --------------------- | ----------------------------- | ---------------------------- |
+| **Detection Service** | Python 3.11, FastAPI, PyTorch | ML inference                 |
+| **Model Registry**    | PostgreSQL, MinIO             | Model versioning and storage |
+| **Job Queue**         | Redis, BullMQ                 | Async processing             |
+| **Storage**           | MinIO (S3-compatible)         | Media files and models       |
+| **Database**          | PostgreSQL 15                 | Detection metadata           |
+| **Graph**             | Neo4j 5                       | Media provenance             |
+| **Metrics**           | Prometheus, Grafana           | Monitoring and dashboards    |
+| **Tracing**           | OpenTelemetry                 | Distributed tracing          |
 
 ### Operational Features
 
@@ -274,13 +274,13 @@ async def analyze_media(file_path: str):
                 'detector_type': 'video',
                 'enable_explanation': True
             }
-            
+
             response = await client.post(
                 'http://localhost:8000/detect/upload',
                 files=files,
                 data=data
             )
-            
+
             return response.json()
 
 result = asyncio.run(analyze_media('/path/to/video.mp4'))
@@ -291,12 +291,12 @@ print(f"Confidence: {result['confidence_score']:.2%}")
 ### TypeScript/JavaScript Client
 
 ```typescript
-import { DeepfakeDetectionClient } from '@intelgraph/deepfake-detection-client';
+import { DeepfakeDetectionClient } from "@intelgraph/deepfake-detection-client";
 
-const client = new DeepfakeDetectionClient('http://localhost:8000');
+const client = new DeepfakeDetectionClient("http://localhost:8000");
 
-const result = await client.detectFromFile('/path/to/audio.mp3', {
-  detectorType: 'audio',
+const result = await client.detectFromFile("/path/to/audio.mp3", {
+  detectorType: "audio",
   enableExplanation: true,
 });
 
@@ -342,11 +342,13 @@ mutation UploadAndDetect($file: Upload!) {
 Upload and analyze media file.
 
 **Request**:
+
 - `file`: Media file (form-data)
 - `detector_type` (optional): `video`, `audio`, `image`, `ensemble`
 - `enable_explanation` (optional): `true` or `false`
 
 **Response**:
+
 ```json
 {
   "media_url": "string",
@@ -366,6 +368,7 @@ Upload and analyze media file.
 Analyze media from URL.
 
 **Request**:
+
 ```json
 {
   "media_url": "s3://bucket/path/to/file.mp4",
@@ -380,6 +383,7 @@ Analyze media from URL.
 List all loaded models.
 
 **Response**:
+
 ```json
 [
   {
@@ -398,6 +402,7 @@ List all loaded models.
 Detailed health check.
 
 **Response**:
+
 ```json
 {
   "status": "healthy",
@@ -419,23 +424,23 @@ Prometheus metrics endpoint.
 
 ### Environment Variables
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `HOST` | Server host | `0.0.0.0` |
-| `PORT` | Server port | `8000` |
-| `LOG_LEVEL` | Logging level | `INFO` |
-| `MODEL_STORAGE_PATH` | Path to model files | `/app/models` |
-| `VIDEO_MODEL_VERSION` | Video detector version | `v1.2.0` |
-| `AUDIO_MODEL_VERSION` | Audio detector version | `v1.1.0` |
-| `IMAGE_MODEL_VERSION` | Image detector version | `v1.0.1` |
-| `S3_ENDPOINT` | S3/MinIO endpoint | `http://minio:9000` |
-| `S3_ACCESS_KEY` | S3 access key | `minioadmin` |
-| `S3_SECRET_KEY` | S3 secret key | `minioadmin` |
-| `S3_BUCKET` | S3 bucket name | `intelgraph-media` |
-| `REDIS_HOST` | Redis host | `redis` |
-| `REDIS_PORT` | Redis port | `6379` |
-| `ENABLE_GPU` | Use GPU for inference | `false` |
-| `DEFAULT_CONFIDENCE_THRESHOLD` | Default threshold | `0.5` |
+| Variable                       | Description            | Default             |
+| ------------------------------ | ---------------------- | ------------------- |
+| `HOST`                         | Server host            | `0.0.0.0`           |
+| `PORT`                         | Server port            | `8000`              |
+| `LOG_LEVEL`                    | Logging level          | `INFO`              |
+| `MODEL_STORAGE_PATH`           | Path to model files    | `/app/models`       |
+| `VIDEO_MODEL_VERSION`          | Video detector version | `v1.2.0`            |
+| `AUDIO_MODEL_VERSION`          | Audio detector version | `v1.1.0`            |
+| `IMAGE_MODEL_VERSION`          | Image detector version | `v1.0.1`            |
+| `S3_ENDPOINT`                  | S3/MinIO endpoint      | `http://minio:9000` |
+| `S3_ACCESS_KEY`                | S3 access key          | `minioadmin`        |
+| `S3_SECRET_KEY`                | S3 secret key          | `minioadmin`        |
+| `S3_BUCKET`                    | S3 bucket name         | `intelgraph-media`  |
+| `REDIS_HOST`                   | Redis host             | `redis`             |
+| `REDIS_PORT`                   | Redis port             | `6379`              |
+| `ENABLE_GPU`                   | Use GPU for inference  | `false`             |
+| `DEFAULT_CONFIDENCE_THRESHOLD` | Default threshold      | `0.5`               |
 
 ### Model Configuration
 
@@ -615,19 +620,19 @@ isort src/
 
 ### Throughput
 
-| Media Type | Target | Achieved (P95) |
-|------------|--------|----------------|
-| Image | 100/sec | 120/sec |
-| Audio (1 min) | 50/sec | 55/sec |
-| Video (30 sec) | 10/sec | 12/sec |
+| Media Type     | Target  | Achieved (P95) |
+| -------------- | ------- | -------------- |
+| Image          | 100/sec | 120/sec        |
+| Audio (1 min)  | 50/sec  | 55/sec         |
+| Video (30 sec) | 10/sec  | 12/sec         |
 
 ### Latency
 
-| Operation | Target | Achieved (P95) |
-|-----------|--------|----------------|
-| Image detection | < 1 sec | 0.8 sec |
-| Audio detection | < 3 sec | 2.5 sec |
-| Video detection | < 10 sec | 8.2 sec |
+| Operation       | Target   | Achieved (P95) |
+| --------------- | -------- | -------------- |
+| Image detection | < 1 sec  | 0.8 sec        |
+| Audio detection | < 3 sec  | 2.5 sec        |
+| Video detection | < 10 sec | 8.2 sec        |
 
 ### Scaling
 

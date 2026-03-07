@@ -74,7 +74,7 @@ metadata:
     app.kubernetes.io/name: postgres-conductor
     app.kubernetes.io/component: database
     app.kubernetes.io/part-of: intelgraph
-    app.kubernetes.io/version: '15.4'
+    app.kubernetes.io/version: "15.4"
 spec:
   serviceName: postgres-conductor-headless
   replicas: 1
@@ -87,11 +87,11 @@ spec:
         app.kubernetes.io/name: postgres-conductor
         app.kubernetes.io/component: database
         app.kubernetes.io/part-of: intelgraph
-        app.kubernetes.io/version: '15.4'
+        app.kubernetes.io/version: "15.4"
       annotations:
-        prometheus.io/scrape: 'true'
-        prometheus.io/port: '9187'
-        prometheus.io/path: '/metrics'
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9187"
+        prometheus.io/path: "/metrics"
     spec:
       serviceAccountName: postgres-operator
       securityContext:
@@ -268,9 +268,9 @@ metadata:
     app.kubernetes.io/component: database
     app.kubernetes.io/part-of: intelgraph
   annotations:
-    prometheus.io/scrape: 'true'
-    prometheus.io/port: '9187'
-    prometheus.io/path: '/metrics'
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "9187"
+    prometheus.io/path: "/metrics"
 spec:
   type: ClusterIP
   ports:

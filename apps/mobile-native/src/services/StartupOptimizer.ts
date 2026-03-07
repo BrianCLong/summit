@@ -1,6 +1,6 @@
-import { InteractionManager } from 'react-native';
-import { performanceMonitor } from './PerformanceMonitor';
-import { useAppStore } from '../stores/appStore';
+import {InteractionManager} from 'react-native';
+import {performanceMonitor} from './PerformanceMonitor';
+import {useAppStore} from '../stores/appStore';
 import * as Sentry from '@sentry/react-native';
 
 interface StartupTask {
@@ -95,13 +95,13 @@ class StartupOptimizerService {
   private async runCriticalTasks(): Promise<void> {
     performanceMonitor.mark('critical_tasks');
 
-    const criticalTasks = this.tasks.filter((t) => t.priority === 'critical');
+    const criticalTasks = this.tasks.filter(t => t.priority === 'critical');
 
     console.log(`[StartupOptimizer] Running ${criticalTasks.length} critical tasks`);
 
     // Run critical tasks in parallel for faster startup
     await Promise.all(
-      criticalTasks.map(async (task) => {
+      criticalTasks.map(async task => {
         try {
           performanceMonitor.mark(task.name);
           await task.fn();
@@ -125,14 +125,14 @@ class StartupOptimizerService {
   private runHighPriorityTasks(): void {
     performanceMonitor.mark('high_priority_tasks');
 
-    const highPriorityTasks = this.tasks.filter((t) => t.priority === 'high');
+    const highPriorityTasks = this.tasks.filter(t => t.priority === 'high');
 
     console.log(`[StartupOptimizer] Running ${highPriorityTasks.length} high priority tasks`);
 
     // Run after current interactions complete
     InteractionManager.runAfterInteractions(async () => {
       await Promise.all(
-        highPriorityTasks.map(async (task) => {
+        highPriorityTasks.map(async task => {
           try {
             performanceMonitor.mark(task.name);
             await task.fn();
@@ -154,9 +154,7 @@ class StartupOptimizerService {
    * Run deferred tasks (after interactions complete)
    */
   private runDeferredTasks(): void {
-    const deferredTasks = this.tasks.filter(
-      (t) => t.priority === 'medium' || t.priority === 'low',
-    );
+    const deferredTasks = this.tasks.filter(t => t.priority === 'medium' || t.priority === 'low');
 
     console.log(`[StartupOptimizer] Deferring ${deferredTasks.length} tasks`);
 
@@ -200,7 +198,7 @@ class StartupOptimizerService {
   } {
     return {
       totalDuration: Date.now() - this.startTime,
-      tasks: this.tasks.map((t) => ({
+      tasks: this.tasks.map(t => ({
         name: t.name,
         priority: t.priority,
         duration: t.duration,
@@ -231,7 +229,7 @@ export const configureDefaultStartupTasks = () => {
   startupOptimizer.registerTask(
     'initialize_database',
     async () => {
-      const { initializeDatabase } = await import('./Database');
+      const {initializeDatabase} = await import('./Database');
       await initializeDatabase();
     },
     'critical',
@@ -240,7 +238,7 @@ export const configureDefaultStartupTasks = () => {
   startupOptimizer.registerTask(
     'restore_apollo_cache',
     async () => {
-      const { restoreCache } = await import('./GraphQLClient');
+      const {restoreCache} = await import('./GraphQLClient');
       await restoreCache();
     },
     'critical',
@@ -261,9 +259,9 @@ export const configureDefaultStartupTasks = () => {
     async () => {
       const NetInfo = await import('@react-native-community/netinfo');
       const state = await NetInfo.default.fetch();
-      useAppStore.getState().setOnlineStatus(
-        state.isConnected === true && state.isInternetReachable === true,
-      );
+      useAppStore
+        .getState()
+        .setOnlineStatus(state.isConnected === true && state.isInternetReachable === true);
     },
     'high',
   );
@@ -271,7 +269,7 @@ export const configureDefaultStartupTasks = () => {
   startupOptimizer.registerTask(
     'request_location_permission',
     async () => {
-      const { requestLocationPermission } = await import('./LocationService');
+      const {requestLocationPermission} = await import('./LocationService');
       await requestLocationPermission();
     },
     'high',
@@ -280,7 +278,7 @@ export const configureDefaultStartupTasks = () => {
   startupOptimizer.registerTask(
     'register_background_tasks',
     async () => {
-      const { registerBackgroundTasks } = await import('./BackgroundTasks');
+      const {registerBackgroundTasks} = await import('./BackgroundTasks');
       await registerBackgroundTasks();
     },
     'high',
@@ -292,7 +290,7 @@ export const configureDefaultStartupTasks = () => {
     async () => {
       const settings = useAppStore.getState().settings;
       if (settings.notificationsEnabled) {
-        const { setupPushNotifications } = await import('./NotificationService');
+        const {setupPushNotifications} = await import('./NotificationService');
         await setupPushNotifications();
       }
     },
@@ -302,7 +300,7 @@ export const configureDefaultStartupTasks = () => {
   startupOptimizer.registerTask(
     'sync_offline_data',
     async () => {
-      const { enhancedOfflineSync } = await import('./EnhancedOfflineSync');
+      const {enhancedOfflineSync} = await import('./EnhancedOfflineSync');
       await enhancedOfflineSync.sync();
     },
     'medium',

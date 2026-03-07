@@ -1,4 +1,4 @@
-export type InvariantSeverity = 'info' | 'warn' | 'block';
+export type InvariantSeverity = "info" | "warn" | "block";
 
 export interface InvariantViolation {
   ruleId: string;
@@ -51,11 +51,11 @@ export interface GraphEdge {
 
 export function uniquenessRule<T extends { id: string }>(
   scope: string,
-  severity: InvariantSeverity = 'block',
+  severity: InvariantSeverity = "block"
 ): InvariantRule<T> {
   return {
     id: `${scope}-unique-id`,
-    description: 'IDs must be unique within scope',
+    description: "IDs must be unique within scope",
     severity,
     checkAudit: (candidates) => {
       const seen = new Set<string>();
@@ -69,10 +69,10 @@ export function uniquenessRule<T extends { id: string }>(
       if (duplicates.length > 0) {
         return {
           ruleId: `${scope}-unique-id`,
-          message: `Duplicate IDs detected: ${duplicates.join(', ')}`,
+          message: `Duplicate IDs detected: ${duplicates.join(", ")}`,
           affectedIds: duplicates,
           severity,
-          remediation: 'Normalize upstream ID generation or de-duplicate records',
+          remediation: "Normalize upstream ID generation or de-duplicate records",
         };
       }
       return undefined;
@@ -83,7 +83,7 @@ export function uniquenessRule<T extends { id: string }>(
 export function requiredRelationshipRule<T extends { id: string }>(
   relation: string,
   requiredIds: Set<string>,
-  severity: InvariantSeverity = 'block',
+  severity: InvariantSeverity = "block"
 ): InvariantRule<T> {
   return {
     id: `${relation}-required`,
@@ -104,10 +104,13 @@ export function requiredRelationshipRule<T extends { id: string }>(
   };
 }
 
-export function cycleRule(edges: GraphEdge[], severity: InvariantSeverity = 'warn'): InvariantRule<{ id: string }> {
+export function cycleRule(
+  edges: GraphEdge[],
+  severity: InvariantSeverity = "warn"
+): InvariantRule<{ id: string }> {
   return {
-    id: 'graph-cycle-check',
-    description: 'Detect bounded cycles',
+    id: "graph-cycle-check",
+    description: "Detect bounded cycles",
     severity,
     checkAudit: () => {
       const adjacency = new Map<string, Set<string>>();
@@ -134,11 +137,11 @@ export function cycleRule(edges: GraphEdge[], severity: InvariantSeverity = 'war
       for (const node of adjacency.keys()) {
         if (detect(node, 0)) {
           return {
-            ruleId: 'graph-cycle-check',
-            message: 'Cycle detected in bounded traversal',
+            ruleId: "graph-cycle-check",
+            message: "Cycle detected in bounded traversal",
             affectedIds: Array.from(stack),
             severity,
-            remediation: 'Review recent relationships and remove circular dependencies',
+            remediation: "Review recent relationships and remove circular dependencies",
           };
         }
       }

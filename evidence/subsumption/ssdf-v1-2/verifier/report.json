@@ -1,7 +1,5 @@
 {
-  "artifacts": [
-    "evidence/subsumption/ssdf-v1-2/verifier"
-  ],
+  "artifacts": ["evidence/subsumption/ssdf-v1-2/verifier"],
   "claims": [],
   "decisions": [],
   "evidence_id": "EVD-SSDF12-GATE-001",

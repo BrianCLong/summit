@@ -1,4 +1,4 @@
-export type RiskLevel = 'low' | 'medium' | 'high';
+export type RiskLevel = "low" | "medium" | "high";
 
 export interface PolicyContext {
   tenantId: string;
@@ -14,7 +14,7 @@ export interface ToolPolicy {
 
 export interface ToolDecision {
   allowed: boolean;
-  code: 'TOOL_ALLOWED' | 'TOOL_DENIED';
+  code: "TOOL_ALLOWED" | "TOOL_DENIED";
   reason: string;
 }
 
@@ -45,14 +45,16 @@ export class ToolPermissionGateway {
       if (!policy.minRiskLevel) {
         return true;
       }
-      const riskOrder: RiskLevel[] = ['low', 'medium', 'high'];
+      const riskOrder: RiskLevel[] = ["low", "medium", "high"];
       return riskOrder.indexOf(context.riskLevel) >= riskOrder.indexOf(policy.minRiskLevel);
     });
 
     const decision: ToolDecision = {
       allowed,
-      code: allowed ? 'TOOL_ALLOWED' : 'TOOL_DENIED',
-      reason: allowed ? 'Tool is allowlisted for route' : 'Tool is not allowlisted for this route/risk',
+      code: allowed ? "TOOL_ALLOWED" : "TOOL_DENIED",
+      reason: allowed
+        ? "Tool is allowlisted for route"
+        : "Tool is not allowlisted for this route/risk",
     };
 
     this.auditLog.push({

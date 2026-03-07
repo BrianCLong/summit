@@ -54,26 +54,26 @@ We implement a **centralized LLM client architecture** using **LiteLLM** for mul
 ```yaml
 model_list:
   # Primary: Local models via Ollama
-  - model_name: 'local/qwen-coder'
+  - model_name: "local/qwen-coder"
     litellm_params:
-      model: 'ollama/qwen2.5-coder:7b'
-      api_base: 'http://127.0.0.1:11434'
+      model: "ollama/qwen2.5-coder:7b"
+      api_base: "http://127.0.0.1:11434"
 
-  - model_name: 'local/llama-8b'
+  - model_name: "local/llama-8b"
     litellm_params:
-      model: 'ollama/llama3.1:8b'
-      api_base: 'http://127.0.0.1:11434'
+      model: "ollama/llama3.1:8b"
+      api_base: "http://127.0.0.1:11434"
 
   # Fallback: Cloud APIs (budget-limited)
-  - model_name: 'cloud/deepseek-v3'
+  - model_name: "cloud/deepseek-v3"
     litellm_params:
-      model: 'openrouter/deepseek/deepseek-chat'
-      api_base: 'https://openrouter.ai/v1'
+      model: "openrouter/deepseek/deepseek-chat"
+      api_base: "https://openrouter.ai/v1"
 
 router_settings:
-  routing_strategy: 'simple-shuffle'
+  routing_strategy: "simple-shuffle"
   fallbacks:
-    - ['local/llama-8b', 'local/qwen-coder']
+    - ["local/llama-8b", "local/qwen-coder"]
   timeout: 60
   num_retries: 2
 ```
@@ -246,8 +246,8 @@ export interface LLMClient {
 
 ## Revision History
 
-| Date       | Author           | Change                                        |
-| ---------- | ---------------- | --------------------------------------------- |
+| Date       | Author            | Change                                        |
+| ---------- | ----------------- | --------------------------------------------- |
 | 2024-03-01 | AI Platform Guild | Initial version                               |
 | 2024-08-15 | AI Platform Guild | Added Qwen2.5 and DeepSeek-V3 models          |
 | 2025-12-06 | Architecture Team | Migrated to /docs/architecture/adr/ framework |

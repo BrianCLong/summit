@@ -1,9 +1,7 @@
 {
   "evidence_id": "EVD-REPLITAGENT-SCAFF-001",
   "item_slug": "replit-agent-scaffold",
-  "claims": [
-    "Scaffold generator remains disabled by default and deterministic when enabled."
-  ],
+  "claims": ["Scaffold generator remains disabled by default and deterministic when enabled."],
   "decisions": [
     {
       "decision": "scaffold_flag",

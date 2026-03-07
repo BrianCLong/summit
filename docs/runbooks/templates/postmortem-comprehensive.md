@@ -24,6 +24,7 @@ _Write this last. 2-3 paragraphs for leadership summarizing what happened, impac
 [1-2 sentences: what broke and when]
 
 **Impact**:
+
 - Duration: X hours Y minutes
 - Users affected: [Number or percentage]
 - Revenue impact: $[amount] (estimated)
@@ -36,6 +37,7 @@ _Write this last. 2-3 paragraphs for leadership summarizing what happened, impac
 [1-2 sentences: how it was fixed]
 
 **Key Lessons**:
+
 1. [Most important lesson]
 2. [Second most important lesson]
 3. [Third most important lesson]
@@ -46,12 +48,12 @@ _Write this last. 2-3 paragraphs for leadership summarizing what happened, impac
 
 ### Quantitative Impact
 
-| Metric | Before Incident | During Incident | After Resolution |
-|--------|----------------|-----------------|------------------|
-| Request Rate | ___ req/s | ___ req/s | ___ req/s |
-| Latency (p95) | ___ ms | ___ ms | ___ ms |
-| Error Rate | __% | __% | __% |
-| Availability | 99.__% | 9_.__ % | 99.__% |
+| Metric        | Before Incident | During Incident | After Resolution |
+| ------------- | --------------- | --------------- | ---------------- |
+| Request Rate  | \_\_\_ req/s    | \_\_\_ req/s    | \_\_\_ req/s     |
+| Latency (p95) | \_\_\_ ms       | \_\_\_ ms       | \_\_\_ ms        |
+| Error Rate    | \_\_%           | \_\_%           | \_\_%            |
+| Availability  | 99.\_\_%        | 9\_.\_\_ %      | 99.\_\_%         |
 
 **Time to Detect (TTD)**: [X minutes from first failure to alert]
 **Time to Recover (TTR)**: [Y minutes from alert to resolution]
@@ -60,20 +62,23 @@ _Write this last. 2-3 paragraphs for leadership summarizing what happened, impac
 ### User Impact
 
 **Users Affected**: [Total number or percentage]
+
 - **Complete outage**: [Number] users
 - **Degraded experience**: [Number] users
 - **No impact**: [Number] users
 
 **Features Affected**:
+
 - [ ] Investigation creation
 - [ ] Entity management
 - [ ] Relationship graph
 - [ ] Copilot queries
 - [ ] Search
 - [ ] Authentication
-- [ ] Other: __________
+- [ ] Other: ****\_\_****
 
 **Customer Reports**:
+
 - Support tickets: [Number]
 - In-app feedback: [Number]
 - Social media mentions: [Number]
@@ -81,16 +86,19 @@ _Write this last. 2-3 paragraphs for leadership summarizing what happened, impac
 ### Business Impact
 
 **Revenue Impact**:
+
 - Direct revenue loss: $[amount]
 - Estimated opportunity cost: $[amount]
 - Total estimated impact: $[amount]
 
 **Contractual/SLA Impact**:
+
 - SLA violations: [Number of customers]
 - Credits due: $[amount]
 - SLO error budget consumed: [__%]
 
 **Reputation Impact**:
+
 - Press coverage: [Yes/No]
 - Social media sentiment: [Positive/Negative/Neutral]
 - NPS impact: [Change in score, if measurable]
@@ -103,36 +111,36 @@ _All times in UTC. Focus on what happened, not who did it (blameless)._
 
 ### Detection Phase
 
-| Time | Event | Evidence |
-|------|-------|----------|
-| HH:MM | First user affected | [Log/metric showing first failure] |
-| HH:MM | Alert fired | [Alert name and condition] |
-| HH:MM | On-call acknowledged | PagerDuty notification |
-| HH:MM | Incident declared | Slack #incident-channel |
+| Time  | Event                | Evidence                           |
+| ----- | -------------------- | ---------------------------------- |
+| HH:MM | First user affected  | [Log/metric showing first failure] |
+| HH:MM | Alert fired          | [Alert name and condition]         |
+| HH:MM | On-call acknowledged | PagerDuty notification             |
+| HH:MM | Incident declared    | Slack #incident-channel            |
 
 **Time to Detect (TTD)**: [X minutes]
 
 ### Investigation Phase
 
-| Time | Event | Evidence |
-|------|-------|----------|
-| HH:MM | Investigation started | Logs reviewed, metrics checked |
-| HH:MM | Hypothesis 1 | [What we thought was wrong] |
-| HH:MM | Hypothesis 1 ruled out | [Why it wasn't that] |
-| HH:MM | Hypothesis 2 | [Second theory] |
-| HH:MM | Root cause identified | [What actually broke] |
+| Time  | Event                  | Evidence                       |
+| ----- | ---------------------- | ------------------------------ |
+| HH:MM | Investigation started  | Logs reviewed, metrics checked |
+| HH:MM | Hypothesis 1           | [What we thought was wrong]    |
+| HH:MM | Hypothesis 1 ruled out | [Why it wasn't that]           |
+| HH:MM | Hypothesis 2           | [Second theory]                |
+| HH:MM | Root cause identified  | [What actually broke]          |
 
 **Time to Understand (TTU)**: [Y minutes]
 
 ### Mitigation Phase
 
-| Time | Event | Evidence |
-|------|-------|----------|
-| HH:MM | Mitigation started | [Command/action taken] |
-| HH:MM | Partial restoration | [Metric showing improvement] |
-| HH:MM | Full restoration | [Metrics back to normal] |
-| HH:MM | Monitoring period begins | [Declared stable] |
-| HH:MM | Incident resolved | [Final verification complete] |
+| Time  | Event                    | Evidence                      |
+| ----- | ------------------------ | ----------------------------- |
+| HH:MM | Mitigation started       | [Command/action taken]        |
+| HH:MM | Partial restoration      | [Metric showing improvement]  |
+| HH:MM | Full restoration         | [Metrics back to normal]      |
+| HH:MM | Monitoring period begins | [Declared stable]             |
+| HH:MM | Incident resolved        | [Final verification complete] |
 
 **Time to Mitigate (TTM)**: [Z minutes]
 **Time to Recover (TTR)**: [Total minutes from alert to resolution]
@@ -164,6 +172,7 @@ _All times in UTC. Focus on what happened, not who did it (blameless)._
 [Detailed technical explanation of what broke]
 
 **Contributing Factors**:
+
 1. [Factor 1 that made it worse or more likely]
 2. [Factor 2]
 3. [Factor 3]
@@ -174,14 +183,17 @@ _All times in UTC. Focus on what happened, not who did it (blameless)._
 ### Why It Wasn't Caught Earlier
 
 **Testing Gaps**:
+
 - [What tests were missing?]
 - [Why didn't CI/CD catch it?]
 
 **Monitoring Gaps**:
+
 - [What metrics/alerts were missing?]
 - [Why didn't we detect it sooner?]
 
 **Process Gaps**:
+
 - [What process could have prevented this?]
 - [What review was skipped?]
 
@@ -192,6 +204,7 @@ _All times in UTC. Focus on what happened, not who did it (blameless)._
 ### What Worked
 
 **Mitigation Actions** (in order):
+
 1. [Action 1 with timestamp and outcome]
 2. [Action 2 with timestamp and outcome]
 3. [Action 3 with timestamp and outcome]
@@ -200,6 +213,7 @@ _All times in UTC. Focus on what happened, not who did it (blameless)._
 [Explanation of why these actions resolved the issue]
 
 **Verification**:
+
 - [How we verified service was restored]
 - [What metrics we checked]
 - [What tests we ran]
@@ -207,6 +221,7 @@ _All times in UTC. Focus on what happened, not who did it (blameless)._
 ### What Didn't Work
 
 **Failed Attempts**:
+
 1. [Action that didn't help and why]
 2. [Another failed attempt]
 
@@ -243,29 +258,30 @@ _Opportunities for improvement_
 
 ### Immediate (Complete within 24 hours)
 
-| Action | Owner | Deadline | Tracking Issue |
-|--------|-------|----------|----------------|
-| [Action 1] | @owner | YYYY-MM-DD | [JIRA-###] |
-| [Action 2] | @owner | YYYY-MM-DD | [JIRA-###] |
-| [Action 3] | @owner | YYYY-MM-DD | [JIRA-###] |
+| Action     | Owner  | Deadline   | Tracking Issue |
+| ---------- | ------ | ---------- | -------------- |
+| [Action 1] | @owner | YYYY-MM-DD | [JIRA-###]     |
+| [Action 2] | @owner | YYYY-MM-DD | [JIRA-###]     |
+| [Action 3] | @owner | YYYY-MM-DD | [JIRA-###]     |
 
 ### Short-term (Complete within 1 week)
 
-| Action | Owner | Deadline | Tracking Issue |
-|--------|-------|----------|----------------|
-| [Action 4] | @owner | YYYY-MM-DD | [JIRA-###] |
-| [Action 5] | @owner | YYYY-MM-DD | [JIRA-###] |
-| [Action 6] | @owner | YYYY-MM-DD | [JIRA-###] |
+| Action     | Owner  | Deadline   | Tracking Issue |
+| ---------- | ------ | ---------- | -------------- |
+| [Action 4] | @owner | YYYY-MM-DD | [JIRA-###]     |
+| [Action 5] | @owner | YYYY-MM-DD | [JIRA-###]     |
+| [Action 6] | @owner | YYYY-MM-DD | [JIRA-###]     |
 
 ### Long-term (Complete within 1 month)
 
-| Action | Owner | Deadline | Tracking Issue |
-|--------|-------|----------|----------------|
-| [Action 7] | @owner | YYYY-MM-DD | [JIRA-###] |
-| [Action 8] | @owner | YYYY-MM-DD | [JIRA-###] |
-| [Action 9] | @owner | YYYY-MM-DD | [JIRA-###] |
+| Action     | Owner  | Deadline   | Tracking Issue |
+| ---------- | ------ | ---------- | -------------- |
+| [Action 7] | @owner | YYYY-MM-DD | [JIRA-###]     |
+| [Action 8] | @owner | YYYY-MM-DD | [JIRA-###]     |
+| [Action 9] | @owner | YYYY-MM-DD | [JIRA-###]     |
 
 **Action Item Categories**:
+
 - 🔍 Monitoring/Alerting improvements
 - 🧪 Testing improvements
 - 📚 Documentation/Runbook updates
@@ -326,6 +342,7 @@ _Opportunities for improvement_
 ### Metrics & Graphs
 
 **Attach screenshots or links to**:
+
 - Latency graph showing spike and recovery
 - Error rate graph
 - Traffic/request rate
@@ -341,6 +358,7 @@ _Opportunities for improvement_
 [What architectural changes would prevent this?]
 
 **Example**:
+
 - Add circuit breakers to prevent cascading failures
 - Implement read replicas to distribute load
 - Add caching layer to reduce database pressure
@@ -350,6 +368,7 @@ _Opportunities for improvement_
 [What code changes would prevent this?]
 
 **Example**:
+
 - Add input validation for user data
 - Implement retry logic with exponential backoff
 - Add graceful degradation for non-critical features
@@ -359,6 +378,7 @@ _Opportunities for improvement_
 [What operational changes would prevent this?]
 
 **Example**:
+
 - Require load testing before production deploys
 - Add pre-deployment smoke tests
 - Implement canary deployments with automatic rollback
@@ -368,6 +388,7 @@ _Opportunities for improvement_
 [What monitoring would detect this sooner?]
 
 **Example**:
+
 - Add alert for [specific metric]
 - Create synthetic monitor for golden path
 - Implement SLO-based alerting with error budgets
@@ -425,6 +446,7 @@ histogram_quantile(0.95, sum(rate(graphql_query_duration_ms_bucket[5m])) by (le)
 ## Follow-up
 
 **6-week review**: [Date]
+
 - Verify all action items completed
 - Assess effectiveness of preventive measures
 - Update incident response procedures if needed

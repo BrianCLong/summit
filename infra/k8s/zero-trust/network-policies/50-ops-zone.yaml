@@ -131,9 +131,9 @@ spec:
         - protocol: TCP
           port: 9091
         - protocol: TCP
-          port: 9187  # PostgreSQL exporter
+          port: 9187 # PostgreSQL exporter
         - protocol: TCP
-          port: 9121  # Redis exporter
+          port: 9121 # Redis exporter
 
 ---
 # Allow Prometheus ingress for its own UI and API
@@ -259,9 +259,9 @@ spec:
         - namespaceSelector: {}
       ports:
         - protocol: TCP
-          port: 14250  # gRPC
+          port: 14250 # gRPC
         - protocol: TCP
-          port: 14268  # HTTP
+          port: 14268 # HTTP
 
 ---
 # Allow Jaeger query UI ingress
@@ -475,7 +475,7 @@ spec:
         - protocol: TCP
           port: 443
         - protocol: TCP
-          port: 587  # SMTP with STARTTLS
+          port: 587 # SMTP with STARTTLS
 
 ---
 # Allow health check probes from Kubernetes

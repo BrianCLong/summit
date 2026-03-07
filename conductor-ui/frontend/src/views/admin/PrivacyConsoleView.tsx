@@ -1,5 +1,5 @@
 // conductor-ui/frontend/src/views/admin/PrivacyConsoleView.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 
 // Mock types
 type PolicyEntity = {
@@ -13,14 +13,14 @@ const fetchPolicyEntity = async (entityId: string): Promise<PolicyEntity> => {
   await new Promise((res) => setTimeout(res, 200));
   return {
     id: entityId,
-    purposeTags: ['investigation', 'threat-intel'],
-    retentionTier: 'standard-365d',
+    purposeTags: ["investigation", "threat-intel"],
+    retentionTier: "standard-365d",
   };
 };
 
 const updatePolicyEntity = async (
   entityId: string,
-  data: Partial<PolicyEntity>,
+  data: Partial<PolicyEntity>
 ): Promise<PolicyEntity> => {
   console.log(`Updating ${entityId} with`, data);
   await new Promise((res) => setTimeout(res, 400));
@@ -28,12 +28,12 @@ const updatePolicyEntity = async (
   return {
     id: entityId,
     purposeTags: data.purposeTags || [],
-    retentionTier: data.retentionTier || '',
+    retentionTier: data.retentionTier || "",
   };
 };
 
 export const PrivacyConsoleView = () => {
-  const [entityId, setEntityId] = useState('ent-123');
+  const [entityId, setEntityId] = useState("ent-123");
   const [entity, setEntity] = useState<PolicyEntity | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -50,22 +50,20 @@ export const PrivacyConsoleView = () => {
   const handleUpdateRetention = () => {
     if (!entity) return;
     // This would typically open a modal with OPA checks
-    const newTier = prompt('Enter new retention tier:', entity.retentionTier);
+    const newTier = prompt("Enter new retention tier:", entity.retentionTier);
     if (newTier) {
-      updatePolicyEntity(entity.id, { retentionTier: newTier }).then(
-        (updatedEntity) => {
-          // In a real app, you'd update state with the response.
-          alert('Update request sent.');
-        },
-      );
+      updatePolicyEntity(entity.id, { retentionTier: newTier }).then((updatedEntity) => {
+        // In a real app, you'd update state with the response.
+        alert("Update request sent.");
+      });
     }
   };
 
   const handleRtbfRequest = () => {
     if (!entity) return;
     if (confirm(`Initiate RTBF request for entity ${entity.id}?`)) {
-      console.log('Initiating RTBF request...');
-      alert('RTBF request initiated.');
+      console.log("Initiating RTBF request...");
+      alert("RTBF request initiated.");
     }
   };
 
@@ -83,16 +81,14 @@ export const PrivacyConsoleView = () => {
         <div>
           <h2>Entity: {entity.id}</h2>
           <p>
-            <strong>Retention Tier:</strong> {entity.retentionTier}{' '}
+            <strong>Retention Tier:</strong> {entity.retentionTier}{" "}
             <button onClick={handleUpdateRetention}>Edit</button>
           </p>
           <p>
-            <strong>Purpose Tags:</strong> {entity.purposeTags.join(', ')}
+            <strong>Purpose Tags:</strong> {entity.purposeTags.join(", ")}
           </p>
           <hr />
-          <button onClick={handleRtbfRequest}>
-            Initiate Right To Be Forgotten (RTBF)
-          </button>
+          <button onClick={handleRtbfRequest}>Initiate Right To Be Forgotten (RTBF)</button>
         </div>
       )}
     </div>

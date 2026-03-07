@@ -1,28 +1,23 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 /**
  * Attack Surface Monitoring Types
  */
 export const assetTypeEnum = z.enum([
-  'DOMAIN',
-  'SUBDOMAIN',
-  'IP_ADDRESS',
-  'PORT',
-  'SERVICE',
-  'WEB_APP',
-  'CLOUD_RESOURCE',
-  'SSL_CERTIFICATE',
-  'DNS_RECORD',
-  'EMAIL_SERVER',
-  'API_ENDPOINT',
+  "DOMAIN",
+  "SUBDOMAIN",
+  "IP_ADDRESS",
+  "PORT",
+  "SERVICE",
+  "WEB_APP",
+  "CLOUD_RESOURCE",
+  "SSL_CERTIFICATE",
+  "DNS_RECORD",
+  "EMAIL_SERVER",
+  "API_ENDPOINT",
 ]);
 
-export const assetStatusEnum = z.enum([
-  'ACTIVE',
-  'INACTIVE',
-  'UNKNOWN',
-  'DEPRECATED',
-]);
+export const assetStatusEnum = z.enum(["ACTIVE", "INACTIVE", "UNKNOWN", "DEPRECATED"]);
 
 /**
  * External Asset Schema
@@ -34,7 +29,14 @@ export const externalAssetSchema = z.object({
   status: assetStatusEnum,
 
   // Discovery
-  discoveredBy: z.enum(['SUBDOMAIN_ENUM', 'PORT_SCAN', 'CERT_TRANSPARENCY', 'DNS_MONITORING', 'CLOUD_DISCOVERY', 'MANUAL']),
+  discoveredBy: z.enum([
+    "SUBDOMAIN_ENUM",
+    "PORT_SCAN",
+    "CERT_TRANSPARENCY",
+    "DNS_MONITORING",
+    "CLOUD_DISCOVERY",
+    "MANUAL",
+  ]),
   discoveredAt: z.string().datetime(),
   lastSeenAt: z.string().datetime(),
 
@@ -42,31 +44,37 @@ export const externalAssetSchema = z.object({
   ipAddress: z.string().optional(),
   hostnames: z.array(z.string()).default([]),
   ports: z.array(z.number().int()).default([]),
-  services: z.array(z.object({
-    port: z.number().int(),
-    protocol: z.string(),
-    service: z.string(),
-    version: z.string().optional(),
-  })).default([]),
+  services: z
+    .array(
+      z.object({
+        port: z.number().int(),
+        protocol: z.string(),
+        service: z.string(),
+        version: z.string().optional(),
+      })
+    )
+    .default([]),
 
   // SSL/TLS
-  sslCertificate: z.object({
-    issuer: z.string(),
-    subject: z.string(),
-    validFrom: z.string().datetime(),
-    validTo: z.string().datetime(),
-    fingerprint: z.string(),
-    selfSigned: z.boolean(),
-  }).optional(),
+  sslCertificate: z
+    .object({
+      issuer: z.string(),
+      subject: z.string(),
+      validFrom: z.string().datetime(),
+      validTo: z.string().datetime(),
+      fingerprint: z.string(),
+      selfSigned: z.boolean(),
+    })
+    .optional(),
 
   // Cloud resources
-  cloudProvider: z.enum(['AWS', 'AZURE', 'GCP', 'DIGITAL_OCEAN', 'CLOUDFLARE', 'OTHER']).optional(),
+  cloudProvider: z.enum(["AWS", "AZURE", "GCP", "DIGITAL_OCEAN", "CLOUDFLARE", "OTHER"]).optional(),
   cloudRegion: z.string().optional(),
   cloudResourceId: z.string().optional(),
 
   // Risk assessment
   riskScore: z.number().min(0).max(100),
-  exposureLevel: z.enum(['CRITICAL', 'HIGH', 'MEDIUM', 'LOW']),
+  exposureLevel: z.enum(["CRITICAL", "HIGH", "MEDIUM", "LOW"]),
 
   // Vulnerabilities
   vulnerabilities: z.array(z.string()).default([]),
@@ -98,7 +106,14 @@ export const subdomainSchema = z.object({
   txtRecords: z.array(z.string()).default([]),
 
   // Discovery
-  discoveryMethod: z.enum(['BRUTE_FORCE', 'CERTIFICATE_TRANSPARENCY', 'DNS_AGGREGATOR', 'SEARCH_ENGINE', 'PASSIVE_DNS', 'MANUAL']),
+  discoveryMethod: z.enum([
+    "BRUTE_FORCE",
+    "CERTIFICATE_TRANSPARENCY",
+    "DNS_AGGREGATOR",
+    "SEARCH_ENGINE",
+    "PASSIVE_DNS",
+    "MANUAL",
+  ]),
   discoveredAt: z.string().datetime(),
   lastCheckedAt: z.string().datetime(),
 
@@ -146,7 +161,7 @@ export const certTransparencySchema = z.object({
  */
 export const cloudAssetSchema = z.object({
   id: z.string(),
-  provider: z.enum(['AWS', 'AZURE', 'GCP', 'DIGITAL_OCEAN', 'OTHER']),
+  provider: z.enum(["AWS", "AZURE", "GCP", "DIGITAL_OCEAN", "OTHER"]),
   resourceType: z.string(),
   resourceId: z.string(),
   resourceName: z.string().optional(),
@@ -188,12 +203,12 @@ export const shadowITSchema = z.object({
   assetValue: z.string(),
 
   // Detection
-  detectionMethod: z.enum(['CLOUD_DISCOVERY', 'DNS_MONITORING', 'TRAFFIC_ANALYSIS', 'USER_REPORT']),
+  detectionMethod: z.enum(["CLOUD_DISCOVERY", "DNS_MONITORING", "TRAFFIC_ANALYSIS", "USER_REPORT"]),
   detectedAt: z.string().datetime(),
 
   // Classification
   approved: z.boolean().default(false),
-  riskLevel: z.enum(['CRITICAL', 'HIGH', 'MEDIUM', 'LOW']),
+  riskLevel: z.enum(["CRITICAL", "HIGH", "MEDIUM", "LOW"]),
 
   // Business context
   possibleOwner: z.string().optional(),
@@ -201,7 +216,7 @@ export const shadowITSchema = z.object({
   businessUnit: z.string().optional(),
 
   // Action
-  status: z.enum(['DETECTED', 'INVESTIGATING', 'APPROVED', 'DECOMMISSIONED']),
+  status: z.enum(["DETECTED", "INVESTIGATING", "APPROVED", "DECOMMISSIONED"]),
   actionRequired: z.string().optional(),
 
   tenantId: z.string(),
@@ -234,7 +249,13 @@ export const brandMonitoringSchema = z.object({
   phishing: z.boolean().default(false),
 
   // Status
-  status: z.enum(['DETECTED', 'INVESTIGATING', 'CONFIRMED_MALICIOUS', 'BENIGN', 'TAKEDOWN_REQUESTED']),
+  status: z.enum([
+    "DETECTED",
+    "INVESTIGATING",
+    "CONFIRMED_MALICIOUS",
+    "BENIGN",
+    "TAKEDOWN_REQUESTED",
+  ]),
   takedownStatus: z.string().optional(),
 
   detectedAt: z.string().datetime(),
@@ -249,7 +270,7 @@ export const brandMonitoringSchema = z.object({
  */
 export const dataLeakSchema = z.object({
   id: z.string(),
-  source: z.enum(['PASTE_SITE', 'CODE_REPOSITORY', 'DARK_WEB', 'BREACH_DATABASE', 'PUBLIC_BUCKET']),
+  source: z.enum(["PASTE_SITE", "CODE_REPOSITORY", "DARK_WEB", "BREACH_DATABASE", "PUBLIC_BUCKET"]),
   url: z.string().url(),
 
   // Content
@@ -258,20 +279,24 @@ export const dataLeakSchema = z.object({
   contentHash: z.string(),
 
   // Classification
-  dataTypes: z.array(z.enum([
-    'CREDENTIALS',
-    'API_KEYS',
-    'SOURCE_CODE',
-    'DATABASE',
-    'PII',
-    'FINANCIAL',
-    'INTELLECTUAL_PROPERTY',
-    'INTERNAL_DOCUMENTS',
-    'OTHER',
-  ])).default([]),
+  dataTypes: z
+    .array(
+      z.enum([
+        "CREDENTIALS",
+        "API_KEYS",
+        "SOURCE_CODE",
+        "DATABASE",
+        "PII",
+        "FINANCIAL",
+        "INTELLECTUAL_PROPERTY",
+        "INTERNAL_DOCUMENTS",
+        "OTHER",
+      ])
+    )
+    .default([]),
 
   // Severity
-  severity: z.enum(['CRITICAL', 'HIGH', 'MEDIUM', 'LOW']),
+  severity: z.enum(["CRITICAL", "HIGH", "MEDIUM", "LOW"]),
   confirmed: z.boolean().default(false),
 
   // Timeline
@@ -279,7 +304,7 @@ export const dataLeakSchema = z.object({
   publishedAt: z.string().datetime().optional(),
 
   // Response
-  status: z.enum(['DETECTED', 'INVESTIGATING', 'CONFIRMED', 'MITIGATED', 'FALSE_POSITIVE']),
+  status: z.enum(["DETECTED", "INVESTIGATING", "CONFIRMED", "MITIGATED", "FALSE_POSITIVE"]),
   mitigationActions: z.array(z.string()).default([]),
 
   tenantId: z.string(),

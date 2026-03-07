@@ -1,4 +1,4 @@
-import { useCallback, useRef } from 'react';
+import { useCallback, useRef } from "react";
 
 export interface OptimisticState<T> {
   version: number;
@@ -12,19 +12,19 @@ export interface OptimisticState<T> {
 export function withOptimism<T>(
   update: () => void,
   rollback: () => void,
-  run: () => Promise<T>,
+  run: () => Promise<T>
 ): Promise<T> {
   try {
     update();
   } catch (e) {
-    console.warn('Optimistic update failed:', e);
+    console.warn("Optimistic update failed:", e);
   }
 
   return run().catch((e) => {
     try {
       rollback();
     } catch (rollbackError) {
-      console.error('Rollback failed:', rollbackError);
+      console.error("Rollback failed:", rollbackError);
     }
     throw e;
   });
@@ -48,24 +48,20 @@ export function useOptimisticState<T>(initialData: T, serverVersion?: number) {
     };
   }, []);
 
-  const commitOptimistic = useCallback(
-    (serverData: T, serverVersion: number) => {
-      const current = stateRef.current;
+  const commitOptimistic = useCallback((serverData: T, serverVersion: number) => {
+    const current = stateRef.current;
 
-      // Conflict detection: server version advanced more than expected
-      const hasConflict =
-        current.isOptimistic && serverVersion > current.version + 1;
+    // Conflict detection: server version advanced more than expected
+    const hasConflict = current.isOptimistic && serverVersion > current.version + 1;
 
-      stateRef.current = {
-        version: serverVersion,
-        data: serverData,
-        isOptimistic: false,
-      };
+    stateRef.current = {
+      version: serverVersion,
+      data: serverData,
+      isOptimistic: false,
+    };
 
-      return { hasConflict, data: serverData };
-    },
-    [],
-  );
+    return { hasConflict, data: serverData };
+  }, []);
 
   const rollbackOptimistic = useCallback(() => {
     if (stateRef.current.isOptimistic) {
@@ -101,7 +97,7 @@ export interface OptimisticComment {
 
 export function createOptimisticComment(
   content: string,
-  currentUser: { id: string; displayName: string },
+  currentUser: { id: string; displayName: string }
 ): OptimisticComment {
   return {
     id: `temp-${Date.now()}-${Math.random().toString(36).slice(2)}`,
@@ -122,14 +118,14 @@ export interface OptimisticEvidence {
   type: string;
   uploadedBy: string;
   uploadedAt: string;
-  status: 'uploading' | 'processing' | 'ready' | 'error';
+  status: "uploading" | "processing" | "ready" | "error";
   isOptimistic?: boolean;
 }
 
 export function createOptimisticEvidence(
   name: string,
   type: string,
-  uploadedBy: string,
+  uploadedBy: string
 ): OptimisticEvidence {
   return {
     id: `temp-evidence-${Date.now()}-${Math.random().toString(36).slice(2)}`,
@@ -137,7 +133,7 @@ export function createOptimisticEvidence(
     type,
     uploadedBy,
     uploadedAt: new Date().toISOString(),
-    status: 'uploading',
+    status: "uploading",
     isOptimistic: true,
   };
 }

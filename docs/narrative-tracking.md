@@ -132,14 +132,17 @@ All metrics emit to the standard observability pipeline for longitudinal monitor
 ## Operational Considerations
 
 ### Data Freshness Targets
+
 - **Streaming platforms**: ≤5 minutes end-to-end for embedding + cluster updates.
 - **News/press**: ≤30 minutes for ingestion to shift graph updates.
 
 ### Reliability Guardrails
+
 - **Backfill safe mode**: bulk re-embedding routes through dedicated capacity pools.
 - **Idempotent updates**: content hash + observed_at for upserts across sources.
 
 ## Risks & Mitigations
+
 - **Language drift**: monitor semantic drift via centroid deviation thresholds.
 - **Cross-platform bias**: apply platform-weight normalization before correlation scoring.
 - **False merges**: enforce minimum mutual nearest-neighbor similarity for cluster merging.

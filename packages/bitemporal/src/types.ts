@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 /**
  * Temporal interval representing valid time and transaction time
@@ -69,7 +69,7 @@ export interface TemporalDiff<T = any> {
 export interface SignedAudit {
   id: string;
   entityKey: string;
-  operation: 'INSERT' | 'UPDATE' | 'DELETE';
+  operation: "INSERT" | "UPDATE" | "DELETE";
   validTime: Date;
   txTime: Date;
   userId?: string;

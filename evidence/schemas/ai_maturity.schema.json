@@ -11,6 +11,12 @@
     "runtime_monitoring": { "type": "boolean" },
     "owner_role": { "type": "string" }
   },
-  "required": ["stage", "decision_rights_defined", "model_inventory_present", "runtime_monitoring", "owner_role"],
+  "required": [
+    "stage",
+    "decision_rights_defined",
+    "model_inventory_present",
+    "runtime_monitoring",
+    "owner_role"
+  ],
   "additionalProperties": false
 }

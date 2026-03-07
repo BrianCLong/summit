@@ -1,6 +1,6 @@
 registry:
   url: https://policies.example.com
-  credentialsSecret: ''
+  credentialsSecret: ""
 
 bundles:
   - name: baseline-controls
@@ -19,4 +19,4 @@ bundles:
 configMap:
   annotations: {}
 
-serviceAccountName: ''
+serviceAccountName: ""

@@ -192,18 +192,14 @@ breach["rtbf-sla"] { now := time.now_ns(); (now - input.rtbf.requested_at) > 24 
 **Subscriptions Server (extract)**
 
 ```ts
-import { WebSocketServer } from 'ws';
-import { useServer } from 'graphql-ws/lib/use/ws';
-import { schema } from './schema';
-import { pubsub } from './pubsub';
+import { WebSocketServer } from "ws";
+import { useServer } from "graphql-ws/lib/use/ws";
+import { schema } from "./schema";
+import { pubsub } from "./pubsub";
 
 const wss = new WebSocketServer({ noServer: true });
 useServer({ schema, onConnect: (ctx) => authz(ctx) }, wss);
-export function publishAssetUpdated(
-  tenantId: string,
-  id: string,
-  payload: any,
-) {
+export function publishAssetUpdated(tenantId: string, id: string, payload: any) {
   pubsub.publish(`asset:${tenantId}:${id}`, payload);
 }
 ```
@@ -212,7 +208,7 @@ export function publishAssetUpdated(
 
 ```ts
 // pubsub.ts
-import { Redis } from 'ioredis';
+import { Redis } from "ioredis";
 const sub = new Redis(process.env.REDIS_URL);
 const pub = new Redis(process.env.REDIS_URL);
 export const pubsub = {
@@ -220,7 +216,7 @@ export const pubsub = {
   subscribe: (ch: string, cb: (m: any) => void) => {
     const r = new Redis(process.env.REDIS_URL);
     r.subscribe(ch);
-    r.on('message', (_, m) => cb(JSON.parse(m)));
+    r.on("message", (_, m) => cb(JSON.parse(m)));
     return r;
   },
 };
@@ -235,7 +231,7 @@ async function handle(req) {
   await redactPostgres(req);
   await purgeObjects(req);
   await ledgerAppend({
-    action: 'rtbf',
+    action: "rtbf",
     subject: req.subject_id,
     tenant: req.tenant_id,
   });
@@ -245,24 +241,24 @@ async function handle(req) {
 **k6 WebSocket Test (extract)**
 
 ```js
-import ws from 'k6/ws';
-import { check } from 'k6';
+import ws from "k6/ws";
+import { check } from "k6";
 export default function () {
   const url = __ENV.WS_URL;
   const res = ws.connect(url, {}, function (socket) {
-    socket.on('open', () =>
+    socket.on("open", () =>
       socket.send(
         JSON.stringify({
-          type: 'subscribe',
+          type: "subscribe",
           query: 'subscription{ assetUpdated(tenantId:"alpha", id:"1"){ id } }',
-        }),
-      ),
+        })
+      )
     );
-    socket.on('message', (data) => {
+    socket.on("message", (data) => {
       socket.close();
     });
   });
-  check(res, { 'status 101': (r) => r && r.status === 101 });
+  check(res, { "status 101": (r) => r && r.status === 101 });
 }
 ```
 
@@ -276,7 +272,7 @@ spec:
   scaleTargetRef: { name: subs-server }
   triggers:
     - type: redis
-      metadata: { address: REDIS_ADDR, listName: events, listLength: '1000' }
+      metadata: { address: REDIS_ADDR, listName: events, listLength: "1000" }
   minReplicaCount: 2
   maxReplicaCount: 20
 ```

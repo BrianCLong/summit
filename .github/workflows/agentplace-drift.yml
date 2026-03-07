@@ -2,7 +2,7 @@ name: AgentPlace Drift Detection
 
 on:
   schedule:
-    - cron: '0 0 * * 0' # Weekly on Sundays
+    - cron: "0 0 * * 0" # Weekly on Sundays
   workflow_dispatch: # Allow manual trigger
 
 jobs:
@@ -16,7 +16,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: "3.12"
       - name: Install dependencies
         run: pip install PyYAML jsonschema
       - name: Run Drift Detector

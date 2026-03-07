@@ -15,7 +15,7 @@ jobs:
     name: sast_sca
     runs-on: ubuntu-latest
     env:
-      NODE_VERSION: '20.x'
+      NODE_VERSION: "20.x"
       PNPM_CACHE_FOLDER: ~/.pnpm-store
     steps:
       - name: Checkout
@@ -27,8 +27,8 @@ jobs:
         uses: actions/setup-node@v4 # v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
-          cache-dependency-path: '**/pnpm-lock.yaml'
+          cache: "pnpm"
+          cache-dependency-path: "**/pnpm-lock.yaml"
 
       - name: Enable corepack
         run: corepack enable

@@ -3,10 +3,10 @@ name: AI Supply Chain Firewall
 on:
   pull_request:
     paths:
-      - 'agents/**'
-      - 'policies/**'
-      - 'package.json'
-      - 'requirements.txt'
+      - "agents/**"
+      - "policies/**"
+      - "package.json"
+      - "requirements.txt"
 
 jobs:
   ai_supply_chain_firewall:
@@ -19,7 +19,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: "3.11"
 
       - name: Extract AI Suggested Dependencies
         # This is a mock step for the prototype. In reality, it would pull from MCP logs or PR analysis.

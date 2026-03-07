@@ -122,13 +122,27 @@ const navItems: NavItem[] = [
 ]
 
 const supportItems: NavItem[] = [
-  { name: 'Help', href: '/help', icon: HelpCircle as React.ComponentType<{ className?: string }> },
-  { name: 'Changelog', href: '/changelog', icon: History as React.ComponentType<{ className?: string }> },
+  {
+    name: 'Help',
+    href: '/help',
+    icon: HelpCircle as React.ComponentType<{ className?: string }>,
+  },
+  {
+    name: 'Changelog',
+    href: '/changelog',
+    icon: History as React.ComponentType<{ className?: string }>,
+  },
 ]
 
 // Optimization: Extracted component to avoid re-definition on every Navigation render.
 // This prevents unnecessary unmounting/remounting of nav items and improves performance.
-const NavItemComponent = ({ item, user }: { item: NavItem; user: User | null }) => {
+const NavItemComponent = ({
+  item,
+  user,
+}: {
+  item: NavItem
+  user: User | null
+}) => {
   const location = useLocation()
   const { hasPermission } = useRbac(item.resource || '', item.action || '', {
     user,

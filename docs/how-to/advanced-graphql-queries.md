@@ -6,7 +6,7 @@
 
 ### Schema (excerpt)
 
-```graphql
+````graphql
 scalar DateTime
 
 type Query {
@@ -44,3 +44,4 @@ query_pathsPolicyAware($from: ID!, $to: ID!) {
 }
 
 ```text
+````

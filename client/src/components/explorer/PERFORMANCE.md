@@ -8,12 +8,12 @@ The Knowledge Graph Explorer (`KGExplorer`) is designed for high-performance gra
 
 ### Rendering Performance
 
-| Graph Size | Nodes | Edges | Target FPS | Notes |
-|------------|-------|-------|------------|-------|
-| Small | < 100 | < 200 | 60 | Smooth interactions, all features enabled |
-| Medium | 100-500 | 500-1500 | 45-60 | May reduce animation complexity |
-| Large | 500-2000 | 2000-5000 | 30-45 | Consider clustering, reduce label rendering |
-| Very Large | > 2000 | > 5000 | 20-30 | Requires virtualization/LOD |
+| Graph Size | Nodes    | Edges     | Target FPS | Notes                                       |
+| ---------- | -------- | --------- | ---------- | ------------------------------------------- |
+| Small      | < 100    | < 200     | 60         | Smooth interactions, all features enabled   |
+| Medium     | 100-500  | 500-1500  | 45-60      | May reduce animation complexity             |
+| Large      | 500-2000 | 2000-5000 | 30-45      | Consider clustering, reduce label rendering |
+| Very Large | > 2000   | > 5000    | 20-30      | Requires virtualization/LOD                 |
 
 ### Memory Usage
 
@@ -31,14 +31,14 @@ The Knowledge Graph Explorer (`KGExplorer`) is designed for high-performance gra
 const layoutOptions = {
   // For small graphs (< 100 nodes): fcose with high quality
   fcose: {
-    quality: 'default',
+    quality: "default",
     numIter: 2500,
     randomize: true,
   },
 
   // For medium graphs (100-500 nodes): reduce iterations
   fcose_medium: {
-    quality: 'default',
+    quality: "default",
     numIter: 1000,
     randomize: false,
   },
@@ -46,7 +46,7 @@ const layoutOptions = {
   // For large graphs (> 500 nodes): use faster layout
   dagre: {
     // Faster than force-directed for large hierarchical graphs
-    rankDir: 'TB',
+    rankDir: "TB",
   },
 };
 ```
@@ -62,7 +62,7 @@ cy.batch(() => {
 
 // Avoid individual element updates in loops
 // Bad:
-elements.forEach(el => cy.add(el)); // Multiple redraws
+elements.forEach((el) => cy.add(el)); // Multiple redraws
 
 // Good:
 cy.add(elements); // Single redraw
@@ -73,16 +73,14 @@ cy.add(elements); // Single redraw
 ```typescript
 // Reduce label rendering overhead for large graphs
 const styleForLargeGraph = {
-  selector: 'node',
+  selector: "node",
   style: {
     // Hide labels below zoom threshold
-    'label': nodeCount > 500
-      ? (node) => cy.zoom() > 0.5 ? node.data('label') : ''
-      : 'data(label)',
+    label: nodeCount > 500 ? (node) => (cy.zoom() > 0.5 ? node.data("label") : "") : "data(label)",
 
     // Limit text width
-    'text-max-width': 80,
-    'text-wrap': 'ellipsis',
+    "text-max-width": 80,
+    "text-wrap": "ellipsis",
   },
 };
 ```
@@ -91,13 +89,13 @@ const styleForLargeGraph = {
 
 ```typescript
 // Throttle expensive event handlers
-import { throttle } from 'lodash';
+import { throttle } from "lodash";
 
 const handleMouseMove = throttle((e) => {
   // Update hover state
 }, 50);
 
-cy.on('mousemove', 'node', handleMouseMove);
+cy.on("mousemove", "node", handleMouseMove);
 ```
 
 ### 5. Virtualization for Very Large Graphs
@@ -111,16 +109,18 @@ For graphs with > 2000 nodes, consider:
 
 ```typescript
 // Example: Viewport-based element visibility
-cy.on('viewport', throttle(() => {
-  const extent = cy.extent();
-  cy.nodes().forEach(node => {
-    const pos = node.position();
-    const visible =
-      pos.x >= extent.x1 && pos.x <= extent.x2 &&
-      pos.y >= extent.y1 && pos.y <= extent.y2;
-    node.style('display', visible ? 'element' : 'none');
-  });
-}, 100));
+cy.on(
+  "viewport",
+  throttle(() => {
+    const extent = cy.extent();
+    cy.nodes().forEach((node) => {
+      const pos = node.position();
+      const visible =
+        pos.x >= extent.x1 && pos.x <= extent.x2 && pos.y >= extent.y1 && pos.y <= extent.y2;
+      node.style("display", visible ? "element" : "none");
+    });
+  }, 100)
+);
 ```
 
 ## GraphQL Query Optimization
@@ -155,16 +155,8 @@ query GetGraphData($investigationId: ID!) {
 ### 2. Pagination for Large Results
 
 ```graphql
-query GetGraphDataPaginated(
-  $investigationId: ID!
-  $first: Int = 100
-  $after: String
-) {
-  graphData(
-    investigationId: $investigationId
-    first: $first
-    after: $after
-  ) {
+query GetGraphDataPaginated($investigationId: ID!, $first: Int = 100, $after: String) {
+  graphData(investigationId: $investigationId, first: $first, after: $after) {
     nodes {
       id
       label
@@ -206,18 +198,24 @@ function handleSubscriptionUpdate(update: GraphUpdate) {
 
 ```typescript
 // Reduce render quality during gestures
-cy.on('pinchstart panstart', () => {
-  cy.style().selector('node').style({
-    'text-opacity': 0,
-    'border-width': 1,
-  }).update();
+cy.on("pinchstart panstart", () => {
+  cy.style()
+    .selector("node")
+    .style({
+      "text-opacity": 0,
+      "border-width": 1,
+    })
+    .update();
 });
 
-cy.on('pinchend panend', () => {
-  cy.style().selector('node').style({
-    'text-opacity': 1,
-    'border-width': 2,
-  }).update();
+cy.on("pinchend panend", () => {
+  cy.style()
+    .selector("node")
+    .style({
+      "text-opacity": 1,
+      "border-width": 2,
+    })
+    .update();
 });
 ```
 
@@ -229,7 +227,7 @@ useEffect(() => {
   return () => {
     cy.destroy();
     // Clear any cached data
-    queryClient.removeQueries(['graphData', investigationId]);
+    queryClient.removeQueries(["graphData", investigationId]);
   };
 }, []);
 ```
@@ -323,14 +321,14 @@ if (layoutTime > 1000) {
 
 ## Browser Support
 
-| Browser | Min Version | Notes |
-|---------|-------------|-------|
-| Chrome | 80+ | Full support |
-| Firefox | 75+ | Full support |
-| Safari | 14+ | Full support |
-| Edge | 80+ | Full support |
-| Mobile Safari | 14+ | Touch optimizations applied |
-| Chrome Android | 80+ | Touch optimizations applied |
+| Browser        | Min Version | Notes                       |
+| -------------- | ----------- | --------------------------- |
+| Chrome         | 80+         | Full support                |
+| Firefox        | 75+         | Full support                |
+| Safari         | 14+         | Full support                |
+| Edge           | 80+         | Full support                |
+| Mobile Safari  | 14+         | Touch optimizations applied |
+| Chrome Android | 80+         | Touch optimizations applied |
 
 ## Additional Resources
 

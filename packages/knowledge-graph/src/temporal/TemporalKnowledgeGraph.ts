@@ -2,8 +2,8 @@
  * Temporal Knowledge Graph Support
  */
 
-import { Driver } from 'neo4j-driver';
-import { v4 as uuidv4 } from 'uuid';
+import { Driver } from "neo4j-driver";
+import { v4 as uuidv4 } from "uuid";
 
 export interface TemporalEntity {
   entityId: string;
@@ -33,7 +33,7 @@ export class TemporalKnowledgeGraph {
     entityId: string,
     validFrom: string,
     properties: Record<string, any>,
-    validTo?: string,
+    validTo?: string
   ): Promise<TemporalEntity> {
     const session = this.driver.session();
     try {
@@ -43,10 +43,10 @@ export class TemporalKnowledgeGraph {
         MATCH (e {id: $entityId})-[:HAS_SNAPSHOT]->(s:TemporalSnapshot)
         RETURN max(s.version) as maxVersion
         `,
-        { entityId },
+        { entityId }
       );
 
-      const maxVersion = versionResult.records[0]?.get('maxVersion') || 0;
+      const maxVersion = versionResult.records[0]?.get("maxVersion") || 0;
       const newVersion = maxVersion + 1;
 
       // Create new snapshot
@@ -69,7 +69,7 @@ export class TemporalKnowledgeGraph {
           validTo: validTo ? `datetime(${validTo})` : null,
           properties: JSON.stringify(properties),
           version: newVersion,
-        },
+        }
       );
 
       return {
@@ -99,14 +99,14 @@ export class TemporalKnowledgeGraph {
         ORDER BY s.version DESC
         LIMIT 1
         `,
-        { entityId, timestamp },
+        { entityId, timestamp }
       );
 
       if (result.records.length === 0) {
         return null;
       }
 
-      const snapshot = result.records[0].get('s').properties;
+      const snapshot = result.records[0].get("s").properties;
 
       return {
         entityId,
@@ -132,11 +132,11 @@ export class TemporalKnowledgeGraph {
         RETURN s
         ORDER BY s.version ASC
         `,
-        { entityId },
+        { entityId }
       );
 
       return result.records.map((record) => {
-        const snapshot = record.get('s').properties;
+        const snapshot = record.get("s").properties;
         return {
           entityId,
           validFrom: snapshot.validFrom.toString(),
@@ -159,7 +159,7 @@ export class TemporalKnowledgeGraph {
     type: string,
     validFrom: string,
     properties: Record<string, any>,
-    validTo?: string,
+    validTo?: string
   ): Promise<TemporalRelationship> {
     const session = this.driver.session();
     try {
@@ -169,7 +169,7 @@ export class TemporalKnowledgeGraph {
         `
         MATCH (source {id: $sourceId})
         MATCH (target {id: $targetId})
-        CREATE (source)-[r:${type.toUpperCase().replace(/[^A-Z0-9_]/g, '_')} {
+        CREATE (source)-[r:${type.toUpperCase().replace(/[^A-Z0-9_]/g, "_")} {
           id: $relationshipId,
           validFrom: datetime($validFrom),
           validTo: $validTo,
@@ -185,7 +185,7 @@ export class TemporalKnowledgeGraph {
           validFrom,
           validTo: validTo ? `datetime(${validTo})` : null,
           properties: JSON.stringify(properties),
-        },
+        }
       );
 
       return {
@@ -207,7 +207,7 @@ export class TemporalKnowledgeGraph {
    */
   async getRelationshipsAtTime(
     entityId: string,
-    timestamp: string,
+    timestamp: string
   ): Promise<TemporalRelationship[]> {
     const session = this.driver.session();
     try {
@@ -221,16 +221,16 @@ export class TemporalKnowledgeGraph {
                startNode(r).id as sourceId,
                endNode(r).id as targetId
         `,
-        { entityId, timestamp },
+        { entityId, timestamp }
       );
 
       return result.records.map((record) => {
-        const rel = record.get('r').properties;
+        const rel = record.get("r").properties;
         return {
           relationshipId: rel.id,
-          sourceId: record.get('sourceId'),
-          targetId: record.get('targetId'),
-          type: record.get('relType'),
+          sourceId: record.get("sourceId"),
+          targetId: record.get("targetId"),
+          type: record.get("relType"),
           validFrom: rel.validFrom.toString(),
           validTo: rel.validTo?.toString(),
           properties: JSON.parse(rel.properties),
@@ -244,10 +244,7 @@ export class TemporalKnowledgeGraph {
   /**
    * Query entities that changed within a time range
    */
-  async getChangesInTimeRange(
-    startTime: string,
-    endTime: string,
-  ): Promise<TemporalEntity[]> {
+  async getChangesInTimeRange(startTime: string, endTime: string): Promise<TemporalEntity[]> {
     const session = this.driver.session();
     try {
       const result = await session.run(
@@ -258,13 +255,13 @@ export class TemporalKnowledgeGraph {
         RETURN e.id as entityId, s
         ORDER BY s.validFrom DESC
         `,
-        { startTime, endTime },
+        { startTime, endTime }
       );
 
       return result.records.map((record) => {
-        const snapshot = record.get('s').properties;
+        const snapshot = record.get("s").properties;
         return {
-          entityId: record.get('entityId'),
+          entityId: record.get("entityId"),
           validFrom: snapshot.validFrom.toString(),
           validTo: snapshot.validTo?.toString(),
           properties: JSON.parse(snapshot.properties),

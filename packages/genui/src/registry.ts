@@ -1,4 +1,4 @@
-import { ComponentKind } from './schema.js';
+import { ComponentKind } from "./schema.js";
 
 export type ComponentDefinition = {
   kind: ComponentKind;
@@ -9,64 +9,64 @@ export type ComponentDefinition = {
 
 export const componentRegistry: ComponentDefinition[] = [
   {
-    kind: 'kpi',
-    displayName: 'KPI',
+    kind: "kpi",
+    displayName: "KPI",
     requiresCitations: true,
-    description: 'Metric tiles with trend context and guardrail thresholds.',
+    description: "Metric tiles with trend context and guardrail thresholds.",
   },
   {
-    kind: 'table',
-    displayName: 'Table',
+    kind: "table",
+    displayName: "Table",
     requiresCitations: true,
-    description: 'Tabular evidence with sortable columns and row-level citations.',
+    description: "Tabular evidence with sortable columns and row-level citations.",
   },
   {
-    kind: 'timeline',
-    displayName: 'Timeline',
+    kind: "timeline",
+    displayName: "Timeline",
     requiresCitations: true,
-    description: 'Ordered events with provenance pointers and timestamps.',
+    description: "Ordered events with provenance pointers and timestamps.",
   },
   {
-    kind: 'graphView',
-    displayName: 'Graph View',
+    kind: "graphView",
+    displayName: "Graph View",
     requiresCitations: true,
-    description: 'Entity/relationship visualization with citation overlays.',
+    description: "Entity/relationship visualization with citation overlays.",
   },
   {
-    kind: 'checklist',
-    displayName: 'Checklist',
+    kind: "checklist",
+    displayName: "Checklist",
     requiresCitations: false,
-    description: 'Structured action checklist with completion state.',
+    description: "Structured action checklist with completion state.",
   },
   {
-    kind: 'diff',
-    displayName: 'Diff',
+    kind: "diff",
+    displayName: "Diff",
     requiresCitations: true,
-    description: 'Before/after comparison panel with source references.',
+    description: "Before/after comparison panel with source references.",
   },
   {
-    kind: 'callout',
-    displayName: 'Callout',
+    kind: "callout",
+    displayName: "Callout",
     requiresCitations: true,
-    description: 'Narrative insight callout with required attribution.',
+    description: "Narrative insight callout with required attribution.",
   },
   {
-    kind: 'form',
-    displayName: 'Form',
+    kind: "form",
+    displayName: "Form",
     requiresCitations: false,
-    description: 'Structured input form with policy-aware validation.',
+    description: "Structured input form with policy-aware validation.",
   },
   {
-    kind: 'stepper',
-    displayName: 'Stepper',
+    kind: "stepper",
+    displayName: "Stepper",
     requiresCitations: false,
-    description: 'Guided workflow steps with tool handoffs.',
+    description: "Guided workflow steps with tool handoffs.",
   },
   {
-    kind: 'citationList',
-    displayName: 'Citation List',
+    kind: "citationList",
+    displayName: "Citation List",
     requiresCitations: false,
-    description: 'Canonical citations panel for evidence overview.',
+    description: "Canonical citations panel for evidence overview.",
   },
 ];
 

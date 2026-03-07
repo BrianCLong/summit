@@ -2,8 +2,8 @@
  * Multi-language NER support
  */
 
-import type { Entity, EntityType } from '../types';
-import { NERExtractor } from './index';
+import type { Entity, EntityType } from "../types";
+import { NERExtractor } from "./index";
 
 export class MultilingualNER {
   private extractors: Map<string, NERExtractor> = new Map();
@@ -36,6 +36,6 @@ export class MultilingualNER {
   private async detectLanguage(text: string): Promise<string> {
     // Simplified language detection
     // In production, use @intelgraph/nlp language detection
-    return 'en';
+    return "en";
   }
 }

@@ -3,11 +3,11 @@ name: Data Spine Governance Checks
 on:
   pull_request:
     paths:
-      - 'services/data-spine/**'
+      - "services/data-spine/**"
   push:
     branches: [main]
     paths:
-      - 'services/data-spine/**'
+      - "services/data-spine/**"
 
 jobs:
   governance:
@@ -19,8 +19,8 @@ jobs:
           version: 10.0.0
       - uses: actions/setup-node@v4
         with:
-          cache: 'pnpm'
-          node-version: '20'
+          cache: "pnpm"
+          node-version: "20"
       - name: Run unit tests
         run: node --test services/data-spine/test
       - name: Validate schemas and residency policies

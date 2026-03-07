@@ -21,9 +21,9 @@ The following activities are strictly prohibited under any circumstance, regardl
 
 To support diverse enterprise needs while maintaining safety, Summit offers configurable inference profiles that dictate allowable use cases beyond the universal red lines.
 
-*   **`civilian_safe`**: The default profile, optimized for general enterprise productivity. Allowed uses include general inquiry, content creation, data analysis, and software development.
-*   **`defense_restricted`**: Available under strict, human-in-the-loop oversight for authorized government and defense contractors. Allowed uses include intelligence analysis, logistics planning, cyber defense simulation, and scenario modeling (expressly excluding autonomous lethal action).
-*   **`research_unrestricted`**: Restricted to verified research environments for experimental models, unverified data processing, and synthetic data generation.
+- **`civilian_safe`**: The default profile, optimized for general enterprise productivity. Allowed uses include general inquiry, content creation, data analysis, and software development.
+- **`defense_restricted`**: Available under strict, human-in-the-loop oversight for authorized government and defense contractors. Allowed uses include intelligence analysis, logistics planning, cyber defense simulation, and scenario modeling (expressly excluding autonomous lethal action).
+- **`research_unrestricted`**: Restricted to verified research environments for experimental models, unverified data processing, and synthetic data generation.
 
 ## Audit and Compliance
 

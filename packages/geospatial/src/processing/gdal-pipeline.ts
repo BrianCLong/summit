@@ -5,11 +5,11 @@
  * Designed for air-gapped environments with local processing
  */
 
-import { EventEmitter } from 'events';
-import { spawn, ChildProcess } from 'child_process';
-import * as path from 'path';
-import * as fs from 'fs/promises';
-import * as crypto from 'crypto';
+import { EventEmitter } from "events";
+import { spawn, ChildProcess } from "child_process";
+import * as path from "path";
+import * as fs from "fs/promises";
+import * as crypto from "crypto";
 import {
   GDALProcessingOptions,
   RasterTile,
@@ -18,7 +18,7 @@ import {
   SpectralBand,
   ProcessingLevel,
   BoundingBox,
-} from '../types/satellite.js';
+} from "../types/satellite.js";
 
 export interface PipelineEvents {
   progress: [number, string];
@@ -55,16 +55,16 @@ export class GDALPipeline extends EventEmitter {
 
   // Default GDAL configuration for performance
   private static readonly GDAL_ENV = {
-    GDAL_CACHEMAX: '1024', // 1GB cache
-    GDAL_NUM_THREADS: 'ALL_CPUS',
-    CPL_VSIL_CURL_CACHE_SIZE: '67108864', // 64MB for HTTP reads
-    GDAL_HTTP_MULTIRANGE: 'YES',
-    GDAL_HTTP_MERGE_CONSECUTIVE_RANGES: 'YES',
-    VSI_CACHE: 'TRUE',
-    VSI_CACHE_SIZE: '67108864',
+    GDAL_CACHEMAX: "1024", // 1GB cache
+    GDAL_NUM_THREADS: "ALL_CPUS",
+    CPL_VSIL_CURL_CACHE_SIZE: "67108864", // 64MB for HTTP reads
+    GDAL_HTTP_MULTIRANGE: "YES",
+    GDAL_HTTP_MERGE_CONSECUTIVE_RANGES: "YES",
+    VSI_CACHE: "TRUE",
+    VSI_CACHE_SIZE: "67108864",
   };
 
-  constructor(workDir: string, gdalPath = '/usr/bin') {
+  constructor(workDir: string, gdalPath = "/usr/bin") {
     super();
     this.workDir = workDir;
     this.gdalPath = gdalPath;
@@ -77,22 +77,22 @@ export class GDALPipeline extends EventEmitter {
     await fs.mkdir(this.workDir, { recursive: true });
 
     const versionResult = await this.runGDALCommand({
-      command: 'gdalinfo',
-      args: ['--version'],
-      description: 'Check GDAL version',
+      command: "gdalinfo",
+      args: ["--version"],
+      description: "Check GDAL version",
     });
 
     const driversResult = await this.runGDALCommand({
-      command: 'gdalinfo',
-      args: ['--formats'],
-      description: 'List GDAL drivers',
+      command: "gdalinfo",
+      args: ["--formats"],
+      description: "List GDAL drivers",
     });
 
     const version = versionResult.stdout.trim();
     const drivers = driversResult.stdout
-      .split('\n')
-      .filter((line) => line.includes('('))
-      .map((line) => line.trim().split(' ')[0]);
+      .split("\n")
+      .filter((line) => line.includes("("))
+      .map((line) => line.trim().split(" ")[0]);
 
     return { version, drivers };
   }
@@ -106,49 +106,49 @@ export class GDALPipeline extends EventEmitter {
     options: GDALProcessingOptions = {}
   ): Promise<PipelineResult> {
     const startTime = Date.now();
-    this.emit('progress', 0, 'Starting COG conversion');
+    this.emit("progress", 0, "Starting COG conversion");
 
     const args = [
-      '-of',
-      'COG',
-      '-co',
-      `COMPRESS=${options.compression || 'DEFLATE'}`,
-      '-co',
-      'TILING_SCHEME=GoogleMapsCompatible',
-      '-co',
-      'BLOCKSIZE=512',
-      '-co',
-      'BIGTIFF=IF_SAFER',
-      '-co',
-      'RESAMPLING=' + (options.resampleMethod || 'cubic'),
-      '-co',
-      'OVERVIEWS=AUTO',
+      "-of",
+      "COG",
+      "-co",
+      `COMPRESS=${options.compression || "DEFLATE"}`,
+      "-co",
+      "TILING_SCHEME=GoogleMapsCompatible",
+      "-co",
+      "BLOCKSIZE=512",
+      "-co",
+      "BIGTIFF=IF_SAFER",
+      "-co",
+      "RESAMPLING=" + (options.resampleMethod || "cubic"),
+      "-co",
+      "OVERVIEWS=AUTO",
     ];
 
     if (options.outputSRS) {
-      args.push('-t_srs', options.outputSRS);
+      args.push("-t_srs", options.outputSRS);
     }
 
     if (options.noDataValue !== undefined) {
-      args.push('-a_nodata', String(options.noDataValue));
+      args.push("-a_nodata", String(options.noDataValue));
     }
 
     args.push(inputPath, outputPath);
 
-    this.emit('progress', 10, 'Running GDAL translation');
+    this.emit("progress", 10, "Running GDAL translation");
 
     await this.runGDALCommand({
-      command: 'gdal_translate',
+      command: "gdal_translate",
       args,
-      description: 'Convert to COG',
+      description: "Convert to COG",
     });
 
-    this.emit('progress', 90, 'Calculating statistics');
+    this.emit("progress", 90, "Calculating statistics");
 
     const stats = await this.calculateStatistics(outputPath);
     const checksum = await this.calculateChecksum(outputPath);
 
-    this.emit('progress', 100, 'COG conversion complete');
+    this.emit("progress", 100, "COG conversion complete");
 
     const result: PipelineResult = {
       success: true,
@@ -157,10 +157,10 @@ export class GDALPipeline extends EventEmitter {
       processingTimeMs: Date.now() - startTime,
       statistics: stats,
       checksum,
-      metadata: { format: 'COG', compression: options.compression || 'DEFLATE' },
+      metadata: { format: "COG", compression: options.compression || "DEFLATE" },
     };
 
-    this.emit('complete', result);
+    this.emit("complete", result);
     return result;
   }
 
@@ -174,47 +174,47 @@ export class GDALPipeline extends EventEmitter {
     options: GDALProcessingOptions = {}
   ): Promise<PipelineResult> {
     const startTime = Date.now();
-    this.emit('progress', 0, 'Starting reprojection');
+    this.emit("progress", 0, "Starting reprojection");
 
     const args = [
-      '-t_srs',
+      "-t_srs",
       targetSRS,
-      '-r',
-      options.resampleMethod || 'bilinear',
-      '-of',
-      options.outputFormat || 'GTiff',
-      '-co',
-      `COMPRESS=${options.compression || 'DEFLATE'}`,
-      '-co',
-      'TILED=YES',
-      '-co',
-      'BLOCKXSIZE=512',
-      '-co',
-      'BLOCKYSIZE=512',
+      "-r",
+      options.resampleMethod || "bilinear",
+      "-of",
+      options.outputFormat || "GTiff",
+      "-co",
+      `COMPRESS=${options.compression || "DEFLATE"}`,
+      "-co",
+      "TILED=YES",
+      "-co",
+      "BLOCKXSIZE=512",
+      "-co",
+      "BLOCKYSIZE=512",
     ];
 
     if (options.inputSRS) {
-      args.push('-s_srs', options.inputSRS);
+      args.push("-s_srs", options.inputSRS);
     }
 
     if (options.noDataValue !== undefined) {
-      args.push('-dstnodata', String(options.noDataValue));
+      args.push("-dstnodata", String(options.noDataValue));
     }
 
     args.push(inputPath, outputPath);
 
     await this.runGDALCommand({
-      command: 'gdalwarp',
+      command: "gdalwarp",
       args,
-      description: 'Reproject raster',
+      description: "Reproject raster",
     });
 
-    this.emit('progress', 90, 'Calculating statistics');
+    this.emit("progress", 90, "Calculating statistics");
 
     const stats = await this.calculateStatistics(outputPath);
     const checksum = await this.calculateChecksum(outputPath);
 
-    this.emit('progress', 100, 'Reprojection complete');
+    this.emit("progress", 100, "Reprojection complete");
 
     const result: PipelineResult = {
       success: true,
@@ -223,10 +223,10 @@ export class GDALPipeline extends EventEmitter {
       processingTimeMs: Date.now() - startTime,
       statistics: stats,
       checksum,
-      metadata: { targetSRS, resampleMethod: options.resampleMethod || 'bilinear' },
+      metadata: { targetSRS, resampleMethod: options.resampleMethod || "bilinear" },
     };
 
-    this.emit('complete', result);
+    this.emit("complete", result);
     return result;
   }
 
@@ -240,61 +240,67 @@ export class GDALPipeline extends EventEmitter {
       minZoom?: number;
       maxZoom?: number;
       tileSize?: number;
-      format?: 'png' | 'jpeg' | 'webp';
+      format?: "png" | "jpeg" | "webp";
       resampling?: string;
     } = {}
   ): Promise<PipelineResult> {
     const startTime = Date.now();
-    this.emit('progress', 0, 'Starting tile generation');
+    this.emit("progress", 0, "Starting tile generation");
 
     const minZoom = options.minZoom ?? 0;
     const maxZoom = options.maxZoom ?? 18;
     const tileSize = options.tileSize ?? 256;
-    const format = options.format ?? 'png';
+    const format = options.format ?? "png";
 
     const args = [
-      '-z',
+      "-z",
       `${minZoom}-${maxZoom}`,
-      '-w',
-      'none',
-      '--tilesize',
+      "-w",
+      "none",
+      "--tilesize",
       String(tileSize),
-      '-r',
-      options.resampling || 'average',
+      "-r",
+      options.resampling || "average",
     ];
 
-    if (format === 'png') {
-      args.push('--tiledriver', 'PNG');
-    } else if (format === 'jpeg') {
-      args.push('--tiledriver', 'JPEG', '-q', '85');
-    } else if (format === 'webp') {
-      args.push('--tiledriver', 'WEBP', '-q', '80');
+    if (format === "png") {
+      args.push("--tiledriver", "PNG");
+    } else if (format === "jpeg") {
+      args.push("--tiledriver", "JPEG", "-q", "85");
+    } else if (format === "webp") {
+      args.push("--tiledriver", "WEBP", "-q", "80");
     }
 
     args.push(inputPath, outputDir);
 
     await this.runGDALCommand({
-      command: 'gdal2tiles.py',
+      command: "gdal2tiles.py",
       args,
-      description: 'Generate XYZ tiles',
+      description: "Generate XYZ tiles",
     });
 
     // Count generated tiles
     const tileCount = await this.countTiles(outputDir);
 
-    this.emit('progress', 100, 'Tile generation complete');
+    this.emit("progress", 100, "Tile generation complete");
 
     const result: PipelineResult = {
       success: true,
       outputPath: outputDir,
       tileCount,
       processingTimeMs: Date.now() - startTime,
-      statistics: { min: 0, max: 255, mean: 127, stdDev: 50, validPixelCount: tileCount * tileSize * tileSize },
-      checksum: '',
+      statistics: {
+        min: 0,
+        max: 255,
+        mean: 127,
+        stdDev: 50,
+        validPixelCount: tileCount * tileSize * tileSize,
+      },
+      checksum: "",
       metadata: { minZoom, maxZoom, tileSize, format },
     };
 
-    this.emit('complete', result);
+    this.emit("complete", result);
     return result;
   }
 
@@ -308,34 +314,34 @@ export class GDALPipeline extends EventEmitter {
     options: GDALProcessingOptions = {}
   ): Promise<PipelineResult> {
     const startTime = Date.now();
-    this.emit('progress', 0, 'Starting clip operation');
+    this.emit("progress", 0, "Starting clip operation");
 
     const args = [
-      '-te',
+      "-te",
       String(clipBbox.minLon),
       String(clipBbox.minLat),
       String(clipBbox.maxLon),
       String(clipBbox.maxLat),
-      '-of',
-      options.outputFormat || 'GTiff',
-      '-co',
-      `COMPRESS=${options.compression || 'DEFLATE'}`,
-      '-co',
-      'TILED=YES',
+      "-of",
+      options.outputFormat || "GTiff",
+      "-co",
+      `COMPRESS=${options.compression || "DEFLATE"}`,
+      "-co",
+      "TILED=YES",
     ];
 
     args.push(inputPath, outputPath);
 
     await this.runGDALCommand({
-      command: 'gdalwarp',
+      command: "gdalwarp",
       args,
-      description: 'Clip raster',
+      description: "Clip raster",
     });
 
     const stats = await this.calculateStatistics(outputPath);
     const checksum = await this.calculateChecksum(outputPath);
 
-    this.emit('progress', 100, 'Clip complete');
+    this.emit("progress", 100, "Clip complete");
 
     const result: PipelineResult = {
       success: true,
@@ -347,7 +353,7 @@ export class GDALPipeline extends EventEmitter {
       metadata: { clipBbox },
     };
 
-    this.emit('complete', result);
+    this.emit("complete", result);
     return result;
   }
 
@@ -357,34 +363,34 @@ export class GDALPipeline extends EventEmitter {
   async calculateBandIndex(
     inputPath: string,
     outputPath: string,
-    indexType: 'ndvi' | 'ndwi' | 'ndbi' | 'evi' | 'custom',
+    indexType: "ndvi" | "ndwi" | "ndbi" | "evi" | "custom",
     bandMapping: { red?: number; nir?: number; green?: number; blue?: number; swir?: number },
     customFormula?: string
   ): Promise<PipelineResult> {
     const startTime = Date.now();
-    this.emit('progress', 0, `Calculating ${indexType.toUpperCase()}`);
+    this.emit("progress", 0, `Calculating ${indexType.toUpperCase()}`);
 
     let formula: string;
 
     switch (indexType) {
-      case 'ndvi':
+      case "ndvi":
         // (NIR - Red) / (NIR + Red)
         formula = `(B${bandMapping.nir}-B${bandMapping.red})/(B${bandMapping.nir}+B${bandMapping.red}+0.00001)`;
         break;
-      case 'ndwi':
+      case "ndwi":
         // (Green - NIR) / (Green + NIR)
         formula = `(B${bandMapping.green}-B${bandMapping.nir})/(B${bandMapping.green}+B${bandMapping.nir}+0.00001)`;
         break;
-      case 'ndbi':
+      case "ndbi":
         // (SWIR - NIR) / (SWIR + NIR)
         formula = `(B${bandMapping.swir}-B${bandMapping.nir})/(B${bandMapping.swir}+B${bandMapping.nir}+0.00001)`;
         break;
-      case 'evi':
+      case "evi":
         // Enhanced Vegetation Index
         formula = `2.5*(B${bandMapping.nir}-B${bandMapping.red})/(B${bandMapping.nir}+6*B${bandMapping.red}-7.5*B${bandMapping.blue}+1)`;
         break;
-      case 'custom':
-        if (!customFormula) throw new Error('Custom formula required for custom index');
+      case "custom":
+        if (!customFormula) throw new Error("Custom formula required for custom index");
         formula = customFormula;
         break;
       default:
@@ -392,24 +398,24 @@ export class GDALPipeline extends EventEmitter {
     }
 
     const args = [
-      '-A',
+      "-A",
       inputPath,
-      '--outfile',
+      "--outfile",
       outputPath,
-      '--calc',
+      "--calc",
       formula,
-      '--type',
-      'Float32',
-      '--NoDataValue',
-      '-9999',
-      '--co',
-      'COMPRESS=DEFLATE',
-      '--co',
-      'TILED=YES',
+      "--type",
+      "Float32",
+      "--NoDataValue",
+      "-9999",
+      "--co",
+      "COMPRESS=DEFLATE",
+      "--co",
+      "TILED=YES",
     ];
 
     await this.runGDALCommand({
-      command: 'gdal_calc.py',
+      command: "gdal_calc.py",
       args,
       description: `Calculate ${indexType.toUpperCase()}`,
     });
@@ -417,7 +423,7 @@ export class GDALPipeline extends EventEmitter {
     const stats = await this.calculateStatistics(outputPath);
     const checksum = await this.calculateChecksum(outputPath);
 
-    this.emit('progress', 100, 'Index calculation complete');
+    this.emit("progress", 100, "Index calculation complete");
 
     const result: PipelineResult = {
       success: true,
@@ -429,7 +435,7 @@ export class GDALPipeline extends EventEmitter {
       metadata: { indexType, formula },
     };
 
-    this.emit('complete', result);
+    this.emit("complete", result);
     return result;
   }
 
@@ -442,43 +448,43 @@ export class GDALPipeline extends EventEmitter {
     options: GDALProcessingOptions = {}
   ): Promise<PipelineResult> {
     const startTime = Date.now();
-    this.emit('progress', 0, 'Starting mosaic operation');
+    this.emit("progress", 0, "Starting mosaic operation");
 
     // First create VRT
     const vrtPath = path.join(this.workDir, `mosaic_${Date.now()}.vrt`);
 
-    const vrtArgs = ['-input_file_list', '-'];
-    const inputList = inputPaths.join('\n');
+    const vrtArgs = ["-input_file_list", "-"];
+    const inputList = inputPaths.join("\n");
 
     await this.runGDALCommand(
       {
-        command: 'gdalbuildvrt',
+        command: "gdalbuildvrt",
         args: [...vrtArgs, vrtPath],
-        description: 'Build VRT',
+        description: "Build VRT",
       },
       inputList
     );
 
-    this.emit('progress', 50, 'VRT created, converting to output');
+    this.emit("progress", 50, "VRT created, converting to output");
 
     // Convert VRT to final output
     const translateArgs = [
-      '-of',
-      options.outputFormat || 'GTiff',
-      '-co',
-      `COMPRESS=${options.compression || 'DEFLATE'}`,
-      '-co',
-      'TILED=YES',
-      '-co',
-      'BIGTIFF=IF_SAFER',
+      "-of",
+      options.outputFormat || "GTiff",
+      "-co",
+      `COMPRESS=${options.compression || "DEFLATE"}`,
+      "-co",
+      "TILED=YES",
+      "-co",
+      "BIGTIFF=IF_SAFER",
       vrtPath,
       outputPath,
     ];
 
     await this.runGDALCommand({
-      command: 'gdal_translate',
+      command: "gdal_translate",
       args: translateArgs,
-      description: 'Convert VRT to output',
+      description: "Convert VRT to output",
     });
 
     // Cleanup VRT
@@ -487,7 +493,7 @@ export class GDALPipeline extends EventEmitter {
     const stats = await this.calculateStatistics(outputPath);
     const checksum = await this.calculateChecksum(outputPath);
 
-    this.emit('progress', 100, 'Mosaic complete');
+    this.emit("progress", 100, "Mosaic complete");
 
     const result: PipelineResult = {
       success: true,
@@ -499,7 +505,7 @@ export class GDALPipeline extends EventEmitter {
       metadata: { inputCount: inputPaths.length },
     };
 
-    this.emit('complete', result);
+    this.emit("complete", result);
     return result;
   }
 
@@ -517,9 +523,9 @@ export class GDALPipeline extends EventEmitter {
     metadata: Record<string, string>;
   }> {
     const result = await this.runGDALCommand({
-      command: 'gdalinfo',
-      args: ['-json', inputPath],
-      description: 'Get raster info',
+      command: "gdalinfo",
+      args: ["-json", inputPath],
+      description: "Get raster info",
     });
 
     const info = JSON.parse(result.stdout);
@@ -535,11 +541,11 @@ export class GDALPipeline extends EventEmitter {
     return {
       size: { width: info.size[0], height: info.size[1] },
       bands: info.bands?.length || 0,
-      projection: info.coordinateSystem?.wkt || '',
+      projection: info.coordinateSystem?.wkt || "",
       geoTransform: info.geoTransform || [],
       bbox,
       noDataValue: info.bands?.[0]?.noDataValue,
-      dataType: info.bands?.[0]?.type || 'unknown',
+      dataType: info.bands?.[0]?.type || "unknown",
       metadata: info.metadata || {},
     };
   }
@@ -549,9 +555,9 @@ export class GDALPipeline extends EventEmitter {
    */
   async calculateStatistics(inputPath: string): Promise<TileStatistics> {
     const result = await this.runGDALCommand({
-      command: 'gdalinfo',
-      args: ['-json', '-stats', inputPath],
-      description: 'Calculate statistics',
+      command: "gdalinfo",
+      args: ["-json", "-stats", inputPath],
+      description: "Calculate statistics",
     });
 
     const info = JSON.parse(result.stdout);
@@ -585,7 +591,7 @@ export class GDALPipeline extends EventEmitter {
   ): Promise<{ stdout: string; stderr: string }> {
     return new Promise((resolve, reject) => {
       if (this.cancelled) {
-        reject(new Error('Pipeline cancelled'));
+        reject(new Error("Pipeline cancelled"));
         return;
       }
 
@@ -600,14 +606,14 @@ export class GDALPipeline extends EventEmitter {
 
       this.processes.set(cmd.command, proc);
 
-      let stdout = '';
-      let stderr = '';
+      let stdout = "";
+      let stderr = "";
 
-      proc.stdout.on('data', (data) => {
+      proc.stdout.on("data", (data) => {
         stdout += data.toString();
       });
 
-      proc.stderr.on('data', (data) => {
+      proc.stderr.on("data", (data) => {
         stderr += data.toString();
       });
 
@@ -616,17 +622,17 @@ export class GDALPipeline extends EventEmitter {
         proc.stdin.end();
       }
 
-      proc.on('error', (error) => {
+      proc.on("error", (error) => {
         this.processes.delete(cmd.command);
         reject(new Error(`Failed to execute ${cmd.command}: ${error.message}`));
       });
 
-      proc.on('close', (code) => {
+      proc.on("close", (code) => {
         this.processes.delete(cmd.command);
 
         if (code !== 0) {
           const error = new Error(`${cmd.command} exited with code ${code}: ${stderr}`);
-          this.emit('error', error);
+          this.emit("error", error);
           reject(error);
         } else {
           resolve({ stdout, stderr });
@@ -640,7 +646,7 @@ export class GDALPipeline extends EventEmitter {
    */
   private async calculateChecksum(filePath: string): Promise<string> {
     const fileBuffer = await fs.readFile(filePath);
-    return crypto.createHash('sha256').update(fileBuffer).digest('hex');
+    return crypto.createHash("sha256").update(fileBuffer).digest("hex");
   }
 
   /**
@@ -674,7 +680,7 @@ export class GDALPipeline extends EventEmitter {
     this.cancelled = true;
 
     for (const [name, proc] of this.processes) {
-      proc.kill('SIGTERM');
+      proc.kill("SIGTERM");
       this.processes.delete(name);
     }
   }

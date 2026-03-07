@@ -24,6 +24,7 @@ The data is mapped to the `IntelCraftElement` format used by the IntelGraph inge
 ### Relationship Types
 
 The following custom relationship types are utilized as per the IO Threat Ontology:
+
 - `LAUNCHED`
 - `AMPLIFIED_VIA`
 - `TARGETED`

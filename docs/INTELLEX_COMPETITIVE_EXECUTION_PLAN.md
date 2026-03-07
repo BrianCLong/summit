@@ -23,13 +23,13 @@
 
 **72-Hour Hit List**
 
-| Priority | Outcome | Owner | Deadline | Notes |
-| --- | --- | --- | --- | --- |
-| P0 | Green-light PMR Alpha & Gateway MVP scope | Co-CEOs + Product | Day 1 | Approve specs + budget; unblock squads |
-| P0 | Sign 3 design partners (Logistics, Support, Nonprofit) with proof metrics | GTM Lead | Day 3 | Each partner has ROI baseline + disclosure opt-in |
-| P0 | Enable Disclosure Pack default in Maestro | DevEx Lead | Day 3 | Auto-attach SBOM/SLSA + claim ledger |
-| P1 | Publish public roadmap + connector bounty brief | Marketing + Platform | Day 3 | Include top 25 connectors and reward structure |
-| P1 | Stand up Intellex competitor watchlist | Strategy | Day 2 | Weekly update cadence; RSS + alert routing |
+| Priority | Outcome                                                                   | Owner                | Deadline | Notes                                             |
+| -------- | ------------------------------------------------------------------------- | -------------------- | -------- | ------------------------------------------------- |
+| P0       | Green-light PMR Alpha & Gateway MVP scope                                 | Co-CEOs + Product    | Day 1    | Approve specs + budget; unblock squads            |
+| P0       | Sign 3 design partners (Logistics, Support, Nonprofit) with proof metrics | GTM Lead             | Day 3    | Each partner has ROI baseline + disclosure opt-in |
+| P0       | Enable Disclosure Pack default in Maestro                                 | DevEx Lead           | Day 3    | Auto-attach SBOM/SLSA + claim ledger              |
+| P1       | Publish public roadmap + connector bounty brief                           | Marketing + Platform | Day 3    | Include top 25 connectors and reward structure    |
+| P1       | Stand up Intellex competitor watchlist                                    | Strategy             | Day 2    | Weekly update cadence; RSS + alert routing        |
 
 ---
 
@@ -55,16 +55,16 @@
 
 ## 3. Gap Matrix — Intellex vs. Topicality
 
-| Area | Intellex (Now / Intent) | Topicality (Now) | Our Edge / Gap | Action Plan |
-| --- | --- | --- | --- | --- |
-| Memory Licensing | Usage-metered royalties; agent-accessible memory objects | Claim-level provenance & policy labels; no public royalty registry | **Gap:** Monetisation UX & shared protocol | Launch **PMR Alpha** with per-claim manifests, royalties, and legal starter pack |
-| Agent Interop | Protocol message passing; Slack/Teams + bot focus | Maestro connectors + OPA policies + SLO budgets | **Parity:** Need deeper adapters | Ship **Gateway MVP** with SDKs (LangChain, LlamaIndex, OpenAI Assistants) + event hooks |
-| Freemium GTM | Free tooling for 3 verticals | Design-partner motion; enterprise-first | **Gap:** Self-serve activation | Release **Starter Kits** (Logistics, Support, Nonprofit) + hosted sandbox |
-| Provenance | Mentions graphs; unclear attestation rigour | **Strength:** IntelGraph + SLSA/SBOM defaults | **Edge:** Compliance-grade provenance | Surface disclosure-first demos; make manifests human-readable |
-| Governance & Access | Vision statements; few controls detailed | **Strength:** OPA ABAC, WebAuthn, DLP, policy libraries | **Edge:** Enterprise-ready governance | Publish policy bundles; enable one-click auditor view |
-| Economics | Token/micro-royalty narrative | Value tied to asset usage; pricing TBD | **Open field** | Meter by **provable decisions** with PMR publishing credits |
-| Community | Early protocol/brand hype | Customer-led references | **Need:** Developer surface area | Publish docs, OSS samples, connector bounty |
-| Integrations | Slack/Teams; Jira/Notion/Drive claims | Maestro connectors; regulated workloads TBD | **Gap:** Catalogue depth | Certify 25 connectors in 90 days; keep roadmap public |
+| Area                | Intellex (Now / Intent)                                  | Topicality (Now)                                                   | Our Edge / Gap                             | Action Plan                                                                             |
+| ------------------- | -------------------------------------------------------- | ------------------------------------------------------------------ | ------------------------------------------ | --------------------------------------------------------------------------------------- |
+| Memory Licensing    | Usage-metered royalties; agent-accessible memory objects | Claim-level provenance & policy labels; no public royalty registry | **Gap:** Monetisation UX & shared protocol | Launch **PMR Alpha** with per-claim manifests, royalties, and legal starter pack        |
+| Agent Interop       | Protocol message passing; Slack/Teams + bot focus        | Maestro connectors + OPA policies + SLO budgets                    | **Parity:** Need deeper adapters           | Ship **Gateway MVP** with SDKs (LangChain, LlamaIndex, OpenAI Assistants) + event hooks |
+| Freemium GTM        | Free tooling for 3 verticals                             | Design-partner motion; enterprise-first                            | **Gap:** Self-serve activation             | Release **Starter Kits** (Logistics, Support, Nonprofit) + hosted sandbox               |
+| Provenance          | Mentions graphs; unclear attestation rigour              | **Strength:** IntelGraph + SLSA/SBOM defaults                      | **Edge:** Compliance-grade provenance      | Surface disclosure-first demos; make manifests human-readable                           |
+| Governance & Access | Vision statements; few controls detailed                 | **Strength:** OPA ABAC, WebAuthn, DLP, policy libraries            | **Edge:** Enterprise-ready governance      | Publish policy bundles; enable one-click auditor view                                   |
+| Economics           | Token/micro-royalty narrative                            | Value tied to asset usage; pricing TBD                             | **Open field**                             | Meter by **provable decisions** with PMR publishing credits                             |
+| Community           | Early protocol/brand hype                                | Customer-led references                                            | **Need:** Developer surface area           | Publish docs, OSS samples, connector bounty                                             |
+| Integrations        | Slack/Teams; Jira/Notion/Drive claims                    | Maestro connectors; regulated workloads TBD                        | **Gap:** Catalogue depth                   | Certify 25 connectors in 90 days; keep roadmap public                                   |
 
 ---
 
@@ -75,6 +75,7 @@
 **Objectives:** Deliver measurable ROI in days, launch PMR alpha, and secure three design partners.
 
 **Deliverables:**
+
 - **PMR Alpha:** Postgres + IntelGraph-backed registry with claim manifests, license terms, royalty meter, CLI + JSON schemas.
 - **Agent Interop Gateway MVP:** Policy-enforced proxy with Slack, Teams, LangChain, OpenAI Assistants adapters; audit stream → IntelGraph; latency budget ≤ 350 ms p95.
 - **Starter Kits:** Logistics, Support, and Nonprofit packages with one-click Maestro runs, sample datasets, dashboards, and ethics memo templates.
@@ -140,39 +141,39 @@
 
 ## 7. Metrics & SLOs
 
-| Metric | Target | Owner | Instrumentation |
-| --- | --- | --- | --- |
-| Time-to-First-Value | ≤ 10 days | GTM Ops | Maestro starter kit telemetry |
-| Decision Throughput | +20% WoW per design partner | Product Analytics | IntelGraph decision ledger |
-| Gateway Reliability | ≥ 99.9% uptime; p95 ≤ 300 ms | Platform | Gateway observability dashboards |
-| Disclosure Coverage | 100% artifacts | DevEx | Maestro publishing pipeline |
-| Design Partners | ≥ 5 signed; ≥ 4 with ROI ≤ 8 weeks | GTM Lead | CRM + Maestro proofs |
-| Supply-Chain Attestations | 100% releases with SBOM + SLSA | Security | Release pipeline check |
-| Cost / Decision | Within budget guardrails | Finance Ops | Maestro billing reports |
+| Metric                    | Target                             | Owner             | Instrumentation                  |
+| ------------------------- | ---------------------------------- | ----------------- | -------------------------------- |
+| Time-to-First-Value       | ≤ 10 days                          | GTM Ops           | Maestro starter kit telemetry    |
+| Decision Throughput       | +20% WoW per design partner        | Product Analytics | IntelGraph decision ledger       |
+| Gateway Reliability       | ≥ 99.9% uptime; p95 ≤ 300 ms       | Platform          | Gateway observability dashboards |
+| Disclosure Coverage       | 100% artifacts                     | DevEx             | Maestro publishing pipeline      |
+| Design Partners           | ≥ 5 signed; ≥ 4 with ROI ≤ 8 weeks | GTM Lead          | CRM + Maestro proofs             |
+| Supply-Chain Attestations | 100% releases with SBOM + SLSA     | Security          | Release pipeline check           |
+| Cost / Decision           | Within budget guardrails           | Finance Ops       | Maestro billing reports          |
 
 ---
 
 ## 8. Risks & Controls
 
-| Risk | Control | Owner |
-| --- | --- | --- |
-| Ambiguity around "Intellex" brand overlap | Scope explicitly to intellex.xyz protocol; maintain competitor watchlist; engage legal if conflicts emerge | Strategy + Legal |
-| Token / royalty compliance concerns | Legal starter pack, revenue-share structured as service credits, regional compliance flags | Legal + Finance |
-| Data handling / regulatory drift | Residency controls, DLP presets, auditor view with read-only scopes, quarterly compliance review | Governance |
-| Integration fragility | Canary deployments, contract tests per connector, success criteria gating release | Platform |
-| Scope creep in PMR & Gateway | Weekly steering review, budget guardrails in Maestro, DoD enforcement | Co-CEOs + Product |
+| Risk                                      | Control                                                                                                    | Owner             |
+| ----------------------------------------- | ---------------------------------------------------------------------------------------------------------- | ----------------- |
+| Ambiguity around "Intellex" brand overlap | Scope explicitly to intellex.xyz protocol; maintain competitor watchlist; engage legal if conflicts emerge | Strategy + Legal  |
+| Token / royalty compliance concerns       | Legal starter pack, revenue-share structured as service credits, regional compliance flags                 | Legal + Finance   |
+| Data handling / regulatory drift          | Residency controls, DLP presets, auditor view with read-only scopes, quarterly compliance review           | Governance        |
+| Integration fragility                     | Canary deployments, contract tests per connector, success criteria gating release                          | Platform          |
+| Scope creep in PMR & Gateway              | Weekly steering review, budget guardrails in Maestro, DoD enforcement                                      | Co-CEOs + Product |
 
 ---
 
 ## 9. Execution Order — Two-Week Plan
 
-| # | Workstream | Owner | Day 0–14 Milestones | Definition of Done |
-| --- | --- | --- | --- | --- |
-| 1 | PMR Alpha | Engineering Lead | Day 2 schema freeze; Day 7 API beta; Day 10 alpha review; Day 14 first publisher live | APIs deployed, manifests emitted, royalty accrual working, security review signed |
-| 2 | Gateway MVP | Platform Lead | Day 3 adapter stubs; Day 6 policy enforcement; Day 9 latency tuning; Day 12 observability dash; Day 14 demo ready | Slack + LangChain adapters, p95 ≤ 350 ms, audit stream flowing to IntelGraph |
-| 3 | Starter Kits | Solutions Lead | Day 4 dataset curation; Day 7 runbooks; Day 10 dry runs; Day 13 partner workshops | Logistics/Support/Nonprofit kits live with ROI calculators and disclosure packs |
-| 4 | Disclosure Pack | DevEx Lead | Day 2 pipeline update; Day 5 QA; Day 8 documentation; Day 12 customer comms | SBOM + SLSA + claim ledger auto-attached for all artifacts |
-| 5 | Design Partners | GTM Lead | Day 1 target list; Day 5 contract templates; Day 9 handshake approvals; Day 14 proofs scheduled | 3 partners signed, ROI metrics baselined, proof demos booked |
+| #   | Workstream      | Owner            | Day 0–14 Milestones                                                                                               | Definition of Done                                                                |
+| --- | --------------- | ---------------- | ----------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| 1   | PMR Alpha       | Engineering Lead | Day 2 schema freeze; Day 7 API beta; Day 10 alpha review; Day 14 first publisher live                             | APIs deployed, manifests emitted, royalty accrual working, security review signed |
+| 2   | Gateway MVP     | Platform Lead    | Day 3 adapter stubs; Day 6 policy enforcement; Day 9 latency tuning; Day 12 observability dash; Day 14 demo ready | Slack + LangChain adapters, p95 ≤ 350 ms, audit stream flowing to IntelGraph      |
+| 3   | Starter Kits    | Solutions Lead   | Day 4 dataset curation; Day 7 runbooks; Day 10 dry runs; Day 13 partner workshops                                 | Logistics/Support/Nonprofit kits live with ROI calculators and disclosure packs   |
+| 4   | Disclosure Pack | DevEx Lead       | Day 2 pipeline update; Day 5 QA; Day 8 documentation; Day 12 customer comms                                       | SBOM + SLSA + claim ledger auto-attached for all artifacts                        |
+| 5   | Design Partners | GTM Lead         | Day 1 target list; Day 5 contract templates; Day 9 handshake approvals; Day 14 proofs scheduled                   | 3 partners signed, ROI metrics baselined, proof demos booked                      |
 
 ---
 

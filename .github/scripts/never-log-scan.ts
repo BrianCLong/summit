@@ -1,5 +1,5 @@
-import * as fs from 'fs';
-import * as path from 'path';
+import * as fs from "fs";
+import * as path from "path";
 
 const FORBIDDEN_PATTERNS = [
   /password:\s*\S+/i,
@@ -8,10 +8,10 @@ const FORBIDDEN_PATTERNS = [
   /auth[-_]?token:\s*\S+/i,
   /ssn:\s*\d{3}-\d{2}-\d{4}/i,
   /phone[-_]?number:\s*\d+/i,
-  /credit[-_]?card:\s*\d+/i
+  /credit[-_]?card:\s*\d+/i,
 ];
 
-const SEARCH_DIRS = ['evidence'];
+const SEARCH_DIRS = ["evidence"];
 
 async function main() {
   let foundViolations = false;
@@ -22,11 +22,11 @@ async function main() {
     for (const file of files) {
       const filePath = path.join(dirPath, file);
       if (fs.statSync(filePath).isDirectory()) continue;
-      if (!file.endsWith('.json') && !file.endsWith('.log')) continue;
-      const content = fs.readFileSync(filePath, 'utf-8');
+      if (!file.endsWith(".json") && !file.endsWith(".log")) continue;
+      const content = fs.readFileSync(filePath, "utf-8");
       for (const pattern of FORBIDDEN_PATTERNS) {
         if (pattern.test(content)) {
-          if (filePath.includes('.schema.json')) continue;
+          if (filePath.includes(".schema.json")) continue;
           console.error(`FORBIDDEN FIELD DETECTED in ${filePath}: matched ${pattern}`);
           foundViolations = true;
         }
@@ -34,9 +34,12 @@ async function main() {
     }
   }
   if (foundViolations) {
-    console.error('NEVER-LOG SCAN FAILED: Sensitive patterns found in evidence or logs.');
+    console.error("NEVER-LOG SCAN FAILED: Sensitive patterns found in evidence or logs.");
     process.exit(1);
   }
-  console.log('NEVER-LOG scan passed.');
+  console.log("NEVER-LOG scan passed.");
 }
-main().catch(err => { console.error(err); process.exit(1); });
+main().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});

@@ -4,24 +4,24 @@ The following documents and artifacts represent the **V1 Guarantee**. They are c
 
 ## 1. Governance & Compliance
 
-*   **Governance Framework:** `docs/GOVERNANCE.md`
-    *   *Constraint:* The Policy-as-Code structure (OPA, Schemas) must remain the primary enforcement mechanism.
-*   **Provenance Schema:** `docs/PROVENANCE_SCHEMA.md` (or equivalent in `schemas/`)
-    *   *Constraint:* All mutations must generate provenance events compatible with the V1 schema.
+- **Governance Framework:** `docs/GOVERNANCE.md`
+  - _Constraint:_ The Policy-as-Code structure (OPA, Schemas) must remain the primary enforcement mechanism.
+- **Provenance Schema:** `docs/PROVENANCE_SCHEMA.md` (or equivalent in `schemas/`)
+  - _Constraint:_ All mutations must generate provenance events compatible with the V1 schema.
 
 ## 2. Security & Trust
 
-*   **Security Policy:** `SECURITY.md`
-    *   *Constraint:* Supply chain security (SBOM, Signing) and vulnerability management SLAs cannot be relaxed.
-*   **Authorization Policy:** `policy/summit/access` (OPA)
-    *   *Constraint:* Access control logic must default to "Deny".
+- **Security Policy:** `SECURITY.md`
+  - _Constraint:_ Supply chain security (SBOM, Signing) and vulnerability management SLAs cannot be relaxed.
+- **Authorization Policy:** `policy/summit/access` (OPA)
+  - _Constraint:_ Access control logic must default to "Deny".
 
 ## 3. Architecture & Operations
 
-*   **Traceability:** `TRACEABILITY.md` (if exists) / `docs/v2/CHARTER.md` section 3.
-    *   *Constraint:* Requirements to Code traceability must be maintained.
-*   **Operational SLOs:** Existing `slo-config.yaml` or equivalent.
-    *   *Constraint:* V2 features must not degrade V1 performance below established baselines.
+- **Traceability:** `TRACEABILITY.md` (if exists) / `docs/v2/CHARTER.md` section 3.
+  - _Constraint:_ Requirements to Code traceability must be maintained.
+- **Operational SLOs:** Existing `slo-config.yaml` or equivalent.
+  - _Constraint:_ V2 features must not degrade V1 performance below established baselines.
 
 ## 4. Machine-Readable Allowlist
 

@@ -9,6 +9,7 @@
 ## Executive Summary
 
 **Current Stack Overview**:
+
 - **Compute**: EKS (m6i.large CPU nodes + GPU nodes with Tesla K80)
 - **Storage**: S3 (backups, billing data), EBS volumes
 - **Databases**: Aurora Serverless v2, RDS PostgreSQL (db.t3.micro), Neo4j, Redis
@@ -17,6 +18,7 @@
 - **Analytics**: AWS Glue, Athena
 
 **Identified Cost Pain Points**:
+
 1. **GPU Instances**: Tesla K80 GPUs are legacy/expensive - modern alternatives are 3-5x more cost-efficient
 2. **Database Sprawl**: Running 4 database systems (Aurora, RDS, Neo4j, Redis) with potential consolidation opportunities
 3. **EKS Node Utilization**: Fixed-size node groups (m6i.large) may be under-utilized during off-peak hours
@@ -30,6 +32,7 @@
 ### 1.1 Compute (EKS & EC2)
 
 #### EKS Cluster
+
 - [ ] **Node Utilization**: Verify CPU/memory utilization across all node groups
   - Target: >60% average utilization
   - Check HPA (Horizontal Pod Autoscaler) effectiveness
@@ -51,6 +54,7 @@
   - Check if minimum node counts can be reduced during off-hours
 
 #### Auto-Scaling Configuration
+
 - [ ] **HPA Metrics**: Verify HPA is using appropriate metrics (CPU/memory/custom)
 - [ ] **KEDA**: Confirm KEDA autoscalers are configured for event-driven workloads
 - [ ] **Cluster Autoscaler**: Check CA logs for unschedulable pods or scale-down delays
@@ -58,6 +62,7 @@
 ### 1.2 Storage
 
 #### S3 Buckets
+
 - [ ] **Lifecycle Policies**: Audit all buckets for lifecycle rules
   - Backups: Transition to Glacier after 30 days
   - Logs: Expire after 90 days
@@ -72,6 +77,7 @@
 - [ ] **S3 Analytics**: Review S3 Storage Class Analysis recommendations
 
 #### EBS Volumes
+
 - [ ] **Unattached Volumes**: Identify orphaned EBS volumes from deleted instances
 - [ ] **Snapshots**: Audit snapshot retention policies
   - Delete snapshots older than 90 days (except compliance-required)
@@ -83,6 +89,7 @@
 ### 1.3 Databases
 
 #### Aurora Serverless v2
+
 - [ ] **ACU Scaling**: Review min/max ACU settings (currently 1-16)
   - Monitor actual ACU usage; reduce max if consistently <50%
 - [ ] **Instance Count**: Validate 2 instances are required for HA
@@ -91,6 +98,7 @@
 - [ ] **Snapshot Deletion**: Clean up old manual snapshots
 
 #### RDS PostgreSQL
+
 - [ ] **Instance Class**: db.t3.micro is cost-effective, but check CPU credits
   - If credit balance depletes, consider t3.small or Reserved Instances
 - [ ] **Multi-AZ**: Currently disabled (good for cost) - verify acceptable for workload
@@ -100,6 +108,7 @@
 - [ ] **Reserved Instances**: If 24/7 production workload, commit to 1-year RI (40% savings)
 
 #### Self-Managed Databases (Neo4j, Redis)
+
 - [ ] **Pod Resource Utilization**: Check CPU/memory usage for Neo4j and Redis pods
 - [ ] **Persistent Volume Claims**: Review PVC sizes for over-provisioning
 - [ ] **Replication Factor**: Validate if 3-replica setup is necessary (vs. 2 or 1+snapshot)
@@ -109,6 +118,7 @@
 ### 1.4 Networking
 
 #### VPC & NAT Gateway
+
 - [ ] **NAT Gateway Data Transfer**: Monitor GB processed (billed at $0.045/GB)
   - Consider VPC endpoints for S3/DynamoDB/ECR to bypass NAT
   - Evaluate NAT instances (t3.nano) for dev/staging (~80% cheaper)
@@ -121,6 +131,7 @@
   - Consider LCU (Load Balancer Capacity Units) optimization
 
 #### VPC Endpoints
+
 - [ ] **S3 Gateway Endpoint**: Free, eliminates NAT charges for S3 traffic
 - [ ] **ECR Interface Endpoints**: Reduce NAT costs for container image pulls
 - [ ] **Secrets Manager/SSM Endpoints**: If heavy usage, can reduce NAT costs
@@ -135,12 +146,14 @@
 ### 1.6 Monitoring & Analytics
 
 #### Observability Stack
+
 - [ ] **Prometheus Retention**: 15 days configured - reduce to 7 days if acceptable
 - [ ] **Metrics Volume**: Audit cardinality of custom metrics (high cardinality = high cost)
 - [ ] **Grafana Dashboards**: Review if all dashboards are actively used
 - [ ] **Jaeger Trace Sampling**: Confirm appropriate sampling rate (<100% for production)
 
 #### AWS Glue & Athena
+
 - [ ] **Glue Crawler Frequency**: Audit crawler schedules - reduce if daily is overkill
 - [ ] **Athena Query Volume**: Review query costs; implement result caching
 - [ ] **Data Format**: Confirm Parquet format for billing data (columnar = cheaper queries)
@@ -712,32 +725,33 @@ echo "- Inter-AZ data transfer costs: \$0.01/GB in, \$0.01/GB out"
 
 ## Section 3: Top 5 Cost-Saving Opportunities
 
-| # | Action | Est. Savings | Complexity | Risk | Notes |
-|---|--------|--------------|------------|------|-------|
-| **1** | **Migrate GPU workloads from Tesla K80 to T4** | **$150-300/mo (60-75%)** | Medium | Low | K80 (p2.xlarge: $0.90/hr) → T4 (g4dn.xlarge: $0.526/hr). T4 is 3x more cost-efficient and faster. Requires testing ML models for compatibility. Consider Inferentia2 for even lower costs ($0.35/hr) if models are PyTorch/TensorFlow. |
-| **2** | **Implement VPC Endpoints for S3 and ECR** | **$80-120/mo** | Low | None | Eliminates NAT Gateway data transfer charges for S3 backups and ECR image pulls. S3 Gateway Endpoint is free; ECR Interface Endpoint costs $7.20/mo but saves on NAT data transfer ($0.045/GB). Estimate 2-3 TB/mo traffic reduction. |
-| **3** | **Consolidate databases: Migrate Redis to Aurora Serverless or ElastiCache** | **$60-100/mo** | High | Medium | Running Redis as StatefulSet on EKS incurs node costs + management overhead. AWS ElastiCache (cache.t4g.micro: $11/mo) or use Aurora as caching layer (read replicas). Risk: Redis persistence behavior differs from managed service; requires testing. |
-| **4** | **Right-size EKS node groups with Karpenter** | **$100-200/mo (20-30%)** | Medium | Low | Replace static node groups with Karpenter for dynamic provisioning. Karpenter consolidates pods onto fewer nodes, uses spot instances aggressively, and selects optimal instance types. Current m6i.large nodes may be over-provisioned during off-peak hours. |
-| **5** | **Purchase RDS/Aurora Reserved Instances (1-year, no upfront)** | **$40-80/mo (40%)** | Low | Low | If Aurora Serverless is running 24/7 in production, commit to 1-year RI for base capacity. No-upfront option has no financial risk. Savings apply to minimum ACU setting (1 ACU = ~$0.06/hr → $0.036/hr with RI). Also applies to RDS db.t3.micro if it's production workload. |
+| #     | Action                                                                       | Est. Savings             | Complexity | Risk   | Notes                                                                                                                                                                                                                                                                          |
+| ----- | ---------------------------------------------------------------------------- | ------------------------ | ---------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **1** | **Migrate GPU workloads from Tesla K80 to T4**                               | **$150-300/mo (60-75%)** | Medium     | Low    | K80 (p2.xlarge: $0.90/hr) → T4 (g4dn.xlarge: $0.526/hr). T4 is 3x more cost-efficient and faster. Requires testing ML models for compatibility. Consider Inferentia2 for even lower costs ($0.35/hr) if models are PyTorch/TensorFlow.                                         |
+| **2** | **Implement VPC Endpoints for S3 and ECR**                                   | **$80-120/mo**           | Low        | None   | Eliminates NAT Gateway data transfer charges for S3 backups and ECR image pulls. S3 Gateway Endpoint is free; ECR Interface Endpoint costs $7.20/mo but saves on NAT data transfer ($0.045/GB). Estimate 2-3 TB/mo traffic reduction.                                          |
+| **3** | **Consolidate databases: Migrate Redis to Aurora Serverless or ElastiCache** | **$60-100/mo**           | High       | Medium | Running Redis as StatefulSet on EKS incurs node costs + management overhead. AWS ElastiCache (cache.t4g.micro: $11/mo) or use Aurora as caching layer (read replicas). Risk: Redis persistence behavior differs from managed service; requires testing.                        |
+| **4** | **Right-size EKS node groups with Karpenter**                                | **$100-200/mo (20-30%)** | Medium     | Low    | Replace static node groups with Karpenter for dynamic provisioning. Karpenter consolidates pods onto fewer nodes, uses spot instances aggressively, and selects optimal instance types. Current m6i.large nodes may be over-provisioned during off-peak hours.                 |
+| **5** | **Purchase RDS/Aurora Reserved Instances (1-year, no upfront)**              | **$40-80/mo (40%)**      | Low        | Low    | If Aurora Serverless is running 24/7 in production, commit to 1-year RI for base capacity. No-upfront option has no financial risk. Savings apply to minimum ACU setting (1 ACU = ~$0.06/hr → $0.036/hr with RI). Also applies to RDS db.t3.micro if it's production workload. |
 
 ### Additional Quick Wins (Implement Immediately)
 
-| Action | Est. Savings | Complexity | Risk |
-|--------|--------------|------------|------|
-| Delete unattached EBS volumes | $10-30/mo | Low | None (snapshot first) |
-| Implement S3 lifecycle policies on all buckets | $20-50/mo | Low | None (configure per bucket) |
-| Clean up old ECR images (keep last 10 tagged) | $5-15/mo | Low | None (deploy from latest tags) |
-| Delete old EBS snapshots (>90 days) | $15-40/mo | Low | Low (verify backup redundancy) |
-| Migrate gp2 EBS volumes to gp3 | 20% savings | Low | None (online migration) |
-| Enable S3 Intelligent-Tiering for backups | $30-60/mo | Low | None (automatic) |
-| Reduce Prometheus retention from 15 to 7 days | $10-20/mo | Low | None (adjust in config) |
-| Delete incomplete S3 multipart uploads | $5-10/mo | Low | None (automated cleanup) |
+| Action                                         | Est. Savings | Complexity | Risk                           |
+| ---------------------------------------------- | ------------ | ---------- | ------------------------------ |
+| Delete unattached EBS volumes                  | $10-30/mo    | Low        | None (snapshot first)          |
+| Implement S3 lifecycle policies on all buckets | $20-50/mo    | Low        | None (configure per bucket)    |
+| Clean up old ECR images (keep last 10 tagged)  | $5-15/mo     | Low        | None (deploy from latest tags) |
+| Delete old EBS snapshots (>90 days)            | $15-40/mo    | Low        | Low (verify backup redundancy) |
+| Migrate gp2 EBS volumes to gp3                 | 20% savings  | Low        | None (online migration)        |
+| Enable S3 Intelligent-Tiering for backups      | $30-60/mo    | Low        | None (automatic)               |
+| Reduce Prometheus retention from 15 to 7 days  | $10-20/mo    | Low        | None (adjust in config)        |
+| Delete incomplete S3 multipart uploads         | $5-10/mo     | Low        | None (automated cleanup)       |
 
 ---
 
 ## Implementation Roadmap
 
 ### Phase 1: Quick Wins (Week 1)
+
 1. ✅ Create VPC endpoints for S3 and ECR
 2. ✅ Implement S3 lifecycle policies on all buckets
 3. ✅ Delete unattached EBS volumes and old snapshots
@@ -747,6 +761,7 @@ echo "- Inter-AZ data transfer costs: \$0.01/GB in, \$0.01/GB out"
 **Expected Savings**: $100-200/mo
 
 ### Phase 2: Compute Optimization (Weeks 2-3)
+
 1. ✅ Deploy Karpenter for dynamic node provisioning
 2. ✅ Increase spot instance adoption to 70%+
 3. ✅ Right-size pod resource requests based on actual usage
@@ -755,6 +770,7 @@ echo "- Inter-AZ data transfer costs: \$0.01/GB in, \$0.01/GB out"
 **Expected Savings**: $200-400/mo
 
 ### Phase 3: Database Consolidation (Week 4)
+
 1. ⚠️ Evaluate ElastiCache for Redis (or Aurora caching)
 2. ✅ Purchase Aurora/RDS Reserved Instances for production
 3. ✅ Optimize Aurora min/max ACU based on actual usage
@@ -763,6 +779,7 @@ echo "- Inter-AZ data transfer costs: \$0.01/GB in, \$0.01/GB out"
 **Expected Savings**: $100-180/mo
 
 ### Phase 4: Continuous Optimization (Ongoing)
+
 1. ✅ Set up AWS Cost Anomaly Detection alerts
 2. ✅ Implement Kubecost recommendations dashboard
 3. ✅ Schedule weekly cost review meetings
@@ -775,6 +792,7 @@ echo "- Inter-AZ data transfer costs: \$0.01/GB in, \$0.01/GB out"
 ## Monitoring & Alerts
 
 ### AWS Cost Anomaly Detection
+
 ```bash
 # Create anomaly detector for overall spend
 aws ce create-anomaly-monitor \
@@ -792,9 +810,11 @@ aws ce create-anomaly-subscription \
 ```
 
 ### Kubecost Dashboard
+
 Access Kubecost at: `http://kubecost-cost-analyzer.kubecost:9090`
 
 Key metrics to monitor:
+
 - **Cost per namespace**: Identify expensive services
 - **Idle resource cost**: Unused CPU/memory requests
 - **Spot instance savings**: Track actual savings
@@ -805,11 +825,13 @@ Key metrics to monitor:
 ## Appendix: Tool Installation
 
 ### Install kubectl metrics-server (required for `kubectl top`)
+
 ```bash
 kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
 ```
 
 ### Install Karpenter (for dynamic node provisioning)
+
 ```bash
 helm repo add karpenter https://charts.karpenter.sh
 helm install karpenter karpenter/karpenter \
@@ -819,6 +841,7 @@ helm install karpenter karpenter/karpenter \
 ```
 
 ### Install AWS CLI v2 (if not already installed)
+
 ```bash
 curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
 unzip awscliv2.zip

@@ -33,16 +33,16 @@ This architecture is designed for **regulated environments** (financial services
 
 ### Key Security Posture
 
-| Control | Implementation | Status |
-|---------|---------------|--------|
-| Network Isolation | Kubernetes NetworkPolicies | ✅ Implemented |
-| Service Identity | mTLS with SPIFFE/SPIRE | ✅ Implemented |
-| Authentication | OIDC/OAuth2 for humans, mTLS for services | ✅ Implemented |
-| Authorization | ABAC with OPA | ✅ Implemented |
-| Encryption in Transit | TLS 1.3, mTLS | ✅ Implemented |
-| Encryption at Rest | AES-256 for all storage | ✅ Implemented |
-| Pod Security | Restricted PSS, non-root, RO filesystem | ✅ Implemented |
-| Supply Chain Security | SLSA L3, SBOM, signed images | ✅ Implemented |
+| Control               | Implementation                            | Status         |
+| --------------------- | ----------------------------------------- | -------------- |
+| Network Isolation     | Kubernetes NetworkPolicies                | ✅ Implemented |
+| Service Identity      | mTLS with SPIFFE/SPIRE                    | ✅ Implemented |
+| Authentication        | OIDC/OAuth2 for humans, mTLS for services | ✅ Implemented |
+| Authorization         | ABAC with OPA                             | ✅ Implemented |
+| Encryption in Transit | TLS 1.3, mTLS                             | ✅ Implemented |
+| Encryption at Rest    | AES-256 for all storage                   | ✅ Implemented |
+| Pod Security          | Restricted PSS, non-root, RO filesystem   | ✅ Implemented |
+| Supply Chain Security | SLSA L3, SBOM, signed images              | ✅ Implemented |
 
 ---
 
@@ -97,12 +97,14 @@ The Agentic Mesh is segmented into **four primary trust zones**, each with disti
 **Namespace**: `mesh-edge`
 **Trust Level**: Untrusted
 **Components**:
+
 - Ingress controllers (NGINX, Envoy, or cloud LB)
 - API Gateway (auth-gateway)
 - Rate limiters
 - WAF (Web Application Firewall)
 
 **Security Controls**:
+
 - ✅ DDoS protection
 - ✅ TLS termination (TLS 1.3 only)
 - ✅ Request validation & sanitization
@@ -111,6 +113,7 @@ The Agentic Mesh is segmented into **four primary trust zones**, each with disti
 - ✅ Geographic restrictions (optional)
 
 **Network Policy**:
+
 - **Ingress**: From internet (0.0.0.0/0) on ports 443, 8443
 - **Egress**: To control plane only (mesh-orchestrator, policy-enforcer)
 
@@ -122,6 +125,7 @@ The Agentic Mesh is segmented into **four primary trust zones**, each with disti
 **Namespace**: `mesh-control`
 **Trust Level**: Trusted (authenticated services only)
 **Components**:
+
 - mesh-orchestrator
 - routing-gateway
 - policy-enforcer
@@ -131,6 +135,7 @@ The Agentic Mesh is segmented into **four primary trust zones**, each with disti
 - mesh-eval
 
 **Security Controls**:
+
 - ✅ mTLS required for all service-to-service communication
 - ✅ ABAC policies for inter-service calls
 - ✅ Request signing & validation
@@ -138,6 +143,7 @@ The Agentic Mesh is segmented into **four primary trust zones**, each with disti
 - ✅ Circuit breakers and bulkheads
 
 **Network Policy**:
+
 - **Ingress**: From edge zone (auth-gateway) and data plane
 - **Egress**: To data plane, storage plane, external APIs (restricted)
 
@@ -149,12 +155,14 @@ The Agentic Mesh is segmented into **four primary trust zones**, each with disti
 **Namespace**: `mesh-data`
 **Trust Level**: Sandboxed (isolated workloads)
 **Components**:
+
 - Agent runtimes (containerized)
 - Tool executors (sandboxed)
 - Model providers (proxied)
 - Code execution sandboxes
 
 **Security Controls**:
+
 - ✅ Strong isolation (gVisor, Kata Containers, or Firecracker)
 - ✅ Network egress restrictions (allowlist only)
 - ✅ Resource quotas (CPU, memory, disk, network)
@@ -164,6 +172,7 @@ The Agentic Mesh is segmented into **four primary trust zones**, each with disti
 - ✅ Seccomp/AppArmor profiles
 
 **Network Policy**:
+
 - **Ingress**: From control plane only
 - **Egress**: To control plane (for results), external APIs (allowlisted per tool)
 
@@ -175,6 +184,7 @@ The Agentic Mesh is segmented into **four primary trust zones**, each with disti
 **Namespace**: `mesh-storage`
 **Trust Level**: Highly Trusted (encrypted, access-controlled)
 **Components**:
+
 - PostgreSQL (provenance, metadata, audit logs)
 - Neo4j (relationship graphs, optional)
 - Redis (caching, session state)
@@ -182,6 +192,7 @@ The Agentic Mesh is segmented into **four primary trust zones**, each with disti
 - Message queues (Kafka/Redpanda)
 
 **Security Controls**:
+
 - ✅ Encryption at rest (AES-256)
 - ✅ Encryption in transit (TLS 1.3)
 - ✅ Database-level access control (user/password + mTLS)
@@ -191,6 +202,7 @@ The Agentic Mesh is segmented into **four primary trust zones**, each with disti
 - ✅ Point-in-time recovery (PITR)
 
 **Network Policy**:
+
 - **Ingress**: From control plane and data plane (read/write operations)
 - **Egress**: None (storage services should not initiate outbound connections)
 
@@ -202,6 +214,7 @@ The Agentic Mesh is segmented into **four primary trust zones**, each with disti
 **Namespace**: `mesh-ops`
 **Trust Level**: Privileged (operator access only)
 **Components**:
+
 - mesh-operator-console-api
 - mesh-operator-console (UI)
 - mesh-observability (Prometheus, Grafana, Jaeger)
@@ -209,6 +222,7 @@ The Agentic Mesh is segmented into **four primary trust zones**, each with disti
 - Alerting (Alertmanager)
 
 **Security Controls**:
+
 - ✅ OIDC/OAuth2 for operator authentication
 - ✅ MFA required for privileged actions
 - ✅ Role-based access (MeshOperator, SecurityOfficer, AuditReader)
@@ -217,6 +231,7 @@ The Agentic Mesh is segmented into **four primary trust zones**, each with disti
 - ✅ IP allowlisting (optional, for corporate VPN)
 
 **Network Policy**:
+
 - **Ingress**: From edge (authenticated operators only)
 - **Egress**: To all zones (read-only metrics/logs, except approved write operations)
 
@@ -272,14 +287,14 @@ The Agentic Mesh is segmented into **four primary trust zones**, each with disti
 
 ### Service-to-Service Communication Matrix
 
-| From Zone | To Zone | Protocol | Authentication | Allowed Services |
-|-----------|---------|----------|----------------|------------------|
-| Edge | Control Plane | HTTP/2 + mTLS | mTLS cert + JWT | mesh-orchestrator, policy-enforcer |
-| Control Plane | Data Plane | gRPC + mTLS | mTLS cert | agent-runtimes, tool-executors |
-| Control Plane | Storage Plane | TCP + TLS | mTLS cert + DB auth | postgres, redis, s3 |
-| Data Plane | Storage Plane | TCP + TLS | mTLS cert + DB auth | postgres, redis (read-only) |
-| Ops | All Zones | HTTP/HTTPS | OIDC + mTLS | Metrics endpoints only (read) |
-| Data Plane | External | HTTPS | API key (per tool) | Allowlisted domains only |
+| From Zone     | To Zone       | Protocol      | Authentication      | Allowed Services                   |
+| ------------- | ------------- | ------------- | ------------------- | ---------------------------------- |
+| Edge          | Control Plane | HTTP/2 + mTLS | mTLS cert + JWT     | mesh-orchestrator, policy-enforcer |
+| Control Plane | Data Plane    | gRPC + mTLS   | mTLS cert           | agent-runtimes, tool-executors     |
+| Control Plane | Storage Plane | TCP + TLS     | mTLS cert + DB auth | postgres, redis, s3                |
+| Data Plane    | Storage Plane | TCP + TLS     | mTLS cert + DB auth | postgres, redis (read-only)        |
+| Ops           | All Zones     | HTTP/HTTPS    | OIDC + mTLS         | Metrics endpoints only (read)      |
+| Data Plane    | External      | HTTPS         | API key (per tool)  | Allowlisted domains only           |
 
 ---
 
@@ -296,17 +311,18 @@ spiffe://mesh.summit.internal/ns/<namespace>/sa/<service-account>
 ```
 
 Examples:
+
 - `spiffe://mesh.summit.internal/ns/mesh-control/sa/mesh-orchestrator`
 - `spiffe://mesh.summit.internal/ns/mesh-data/sa/agent-runtime`
 
 #### Certificate Lifecycle
 
-| Phase | Process | Rotation Interval |
-|-------|---------|-------------------|
-| **Bootstrap** | SPIRE agent validates node identity, requests cert | N/A (on pod start) |
-| **Issuance** | SPIRE server issues short-lived X.509 cert (SVID) | N/A |
-| **Rotation** | SPIRE agent auto-rotates before expiry | Every 1 hour |
-| **Revocation** | SPIRE server revokes on pod termination | Immediate |
+| Phase          | Process                                            | Rotation Interval  |
+| -------------- | -------------------------------------------------- | ------------------ |
+| **Bootstrap**  | SPIRE agent validates node identity, requests cert | N/A (on pod start) |
+| **Issuance**   | SPIRE server issues short-lived X.509 cert (SVID)  | N/A                |
+| **Rotation**   | SPIRE agent auto-rotates before expiry             | Every 1 hour       |
+| **Revocation** | SPIRE server revokes on pod termination            | Immediate          |
 
 ### mTLS Enforcement
 
@@ -330,6 +346,7 @@ All service-to-service communication **must** use mTLS:
 **Implementation**: See `infra/k8s/zero-trust/network-policies/`
 
 Example policy:
+
 ```yaml
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -360,6 +377,7 @@ spec:
 **Enforced Profile**: `restricted` (highest security)
 
 Key restrictions:
+
 - ❌ No privileged containers
 - ❌ No host namespaces (PID, IPC, network)
 - ❌ No host path mounts
@@ -373,6 +391,7 @@ Key restrictions:
 ### 3. Runtime Guardrails
 
 - **Resource Quotas**: Per namespace and per pod
+
   ```yaml
   resources:
     limits:
@@ -415,21 +434,25 @@ Key restrictions:
 ### Deployment Steps
 
 1. **Apply Namespaces**
+
    ```bash
    kubectl apply -f infra/k8s/zero-trust/namespaces/
    ```
 
 2. **Deploy SPIRE** (for mTLS)
+
    ```bash
    kubectl apply -f infra/k8s/zero-trust/spire/
    ```
 
 3. **Apply NetworkPolicies**
+
    ```bash
    kubectl apply -f infra/k8s/zero-trust/network-policies/
    ```
 
 4. **Configure PodSecurity**
+
    ```bash
    kubectl label namespace mesh-control pod-security.kubernetes.io/enforce=restricted
    kubectl label namespace mesh-data pod-security.kubernetes.io/enforce=restricted
@@ -437,6 +460,7 @@ Key restrictions:
    ```
 
 5. **Deploy Core Services**
+
    ```bash
    # Control plane
    kubectl apply -f infra/k8s/services/mesh-control/
@@ -449,6 +473,7 @@ Key restrictions:
    ```
 
 6. **Verify Zero-Trust Enforcement**
+
    ```bash
    # Test that default-deny works
    kubectl run test-pod --image=busybox -n mesh-control -- sleep 3600
@@ -466,15 +491,15 @@ Key restrictions:
 
 ### Threats Mitigated
 
-| Threat | Mitigation | Residual Risk |
-|--------|------------|---------------|
-| **Lateral Movement** | NetworkPolicies, mTLS, ABAC | Low (requires multiple exploits) |
-| **Privilege Escalation** | Pod Security Standards, RBAC | Low (non-root, capabilities dropped) |
-| **Data Exfiltration** | Egress filtering, encryption, DLP | Medium (insider threat remains) |
-| **Supply Chain Attack** | SLSA, SBOM, signed images, OPA | Low (requires compromising CI/CD) |
-| **Credential Theft** | Short-lived certs, no static secrets | Low (rotation < 1 hour) |
-| **DoS/Resource Exhaustion** | Rate limiting, quotas, timeouts | Medium (application-level DoS possible) |
-| **Man-in-the-Middle** | mTLS everywhere | Very Low (requires CA compromise) |
+| Threat                      | Mitigation                           | Residual Risk                           |
+| --------------------------- | ------------------------------------ | --------------------------------------- |
+| **Lateral Movement**        | NetworkPolicies, mTLS, ABAC          | Low (requires multiple exploits)        |
+| **Privilege Escalation**    | Pod Security Standards, RBAC         | Low (non-root, capabilities dropped)    |
+| **Data Exfiltration**       | Egress filtering, encryption, DLP    | Medium (insider threat remains)         |
+| **Supply Chain Attack**     | SLSA, SBOM, signed images, OPA       | Low (requires compromising CI/CD)       |
+| **Credential Theft**        | Short-lived certs, no static secrets | Low (rotation < 1 hour)                 |
+| **DoS/Resource Exhaustion** | Rate limiting, quotas, timeouts      | Medium (application-level DoS possible) |
+| **Man-in-the-Middle**       | mTLS everywhere                      | Very Low (requires CA compromise)       |
 
 ### Threats NOT Fully Mitigated
 
@@ -501,13 +526,13 @@ Key restrictions:
 
 All security-relevant events are logged to immutable audit trail:
 
-| Event Type | Logged Attributes | Retention |
-|------------|-------------------|-----------|
-| Authentication | User ID, timestamp, IP, MFA status | 7 years |
-| Authorization | User ID, resource, action, decision, policy | 7 years |
-| Data Access | User ID, tenant, resource, operation | 7 years |
-| Configuration Changes | User ID, resource, old/new values | 7 years |
-| Security Incidents | Alert ID, severity, affected resources | 7 years |
+| Event Type            | Logged Attributes                           | Retention |
+| --------------------- | ------------------------------------------- | --------- |
+| Authentication        | User ID, timestamp, IP, MFA status          | 7 years   |
+| Authorization         | User ID, resource, action, decision, policy | 7 years   |
+| Data Access           | User ID, tenant, resource, operation        | 7 years   |
+| Configuration Changes | User ID, resource, old/new values           | 7 years   |
+| Security Incidents    | Alert ID, severity, affected resources      | 7 years   |
 
 **Export Formats**: JSON Lines, CEF (Common Event Format), Parquet
 
@@ -563,13 +588,14 @@ In case of emergency (e.g., policy misconfiguration preventing all access):
 
 ## Changelog
 
-| Version | Date | Changes | Author |
-|---------|------|---------|--------|
-| 1.0 | 2025-11-22 | Initial zero-trust architecture | Platform Team |
+| Version | Date       | Changes                         | Author        |
+| ------- | ---------- | ------------------------------- | ------------- |
+| 1.0     | 2025-11-22 | Initial zero-trust architecture | Platform Team |
 
 ---
 
 **Next Steps**:
+
 1. Review and approve this architecture document
 2. Deploy Kubernetes manifests (`infra/k8s/zero-trust/`)
 3. Configure SPIRE for service identity

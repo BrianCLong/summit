@@ -7,12 +7,7 @@
  * @see docs/adr/ADR-009_context_provenance_graph.md
  */
 
-import {
-  ProvenanceGraph,
-  ProvenanceSnapshot,
-  ContextSegment,
-  ProvenanceQuery
-} from './types.js';
+import { ProvenanceGraph, ProvenanceSnapshot, ContextSegment, ProvenanceQuery } from "./types.js";
 
 /**
  * ReplayEngine
@@ -35,9 +30,7 @@ export class ReplayEngine {
     }
 
     // Sort by timestamp for chronological reconstruction
-    activeSegments.sort((a, b) =>
-      a.metadata.timestamp.getTime() - b.metadata.timestamp.getTime()
-    );
+    activeSegments.sort((a, b) => a.metadata.timestamp.getTime() - b.metadata.timestamp.getTime());
 
     return activeSegments;
   }
@@ -57,16 +50,13 @@ export class ReplayEngine {
   /**
    * Generate audit report for a specific query
    */
-  async generateAuditReport(
-    graph: ProvenanceGraph,
-    query: ProvenanceQuery
-  ): Promise<AuditReport> {
+  async generateAuditReport(graph: ProvenanceGraph, query: ProvenanceQuery): Promise<AuditReport> {
     const segments = graph.query(query);
 
     // Group by agent
     const byAgent = new Map<string, ContextSegment[]>();
     for (const segment of segments) {
-      const agentId = segment.metadata.sourceAgentId || 'unknown';
+      const agentId = segment.metadata.sourceAgentId || "unknown";
       if (!byAgent.has(agentId)) {
         byAgent.set(agentId, []);
       }
@@ -84,9 +74,7 @@ export class ReplayEngine {
     }
 
     // Find revoked segments
-    const revokedSegments = segments.filter(
-      s => s.metadata.verificationStatus === 'revoked'
-    );
+    const revokedSegments = segments.filter((s) => s.metadata.verificationStatus === "revoked");
 
     return {
       query,
@@ -95,26 +83,23 @@ export class ReplayEngine {
       segmentsByTrustTier: Object.fromEntries(byTrustTier.entries()),
       revokedSegments,
       timeRange: {
-        earliest: segments.reduce((min, s) =>
-          s.metadata.timestamp < min ? s.metadata.timestamp : min,
+        earliest: segments.reduce(
+          (min, s) => (s.metadata.timestamp < min ? s.metadata.timestamp : min),
           segments[0]?.metadata.timestamp || new Date()
         ),
-        latest: segments.reduce((max, s) =>
-          s.metadata.timestamp > max ? s.metadata.timestamp : max,
+        latest: segments.reduce(
+          (max, s) => (s.metadata.timestamp > max ? s.metadata.timestamp : max),
           segments[0]?.metadata.timestamp || new Date()
-        )
+        ),
       },
-      generatedAt: new Date()
+      generatedAt: new Date(),
     };
   }
 
   /**
    * Trace lineage of a specific segment back to root sources
    */
-  async traceLineage(
-    graph: ProvenanceGraph,
-    segmentId: string
-  ): Promise<LineageTrace> {
+  async traceLineage(graph: ProvenanceGraph, segmentId: string): Promise<LineageTrace> {
     const node = graph.nodes.get(segmentId);
     if (!node) {
       throw new Error(`Segment not found: ${segmentId}`);
@@ -138,16 +123,16 @@ export class ReplayEngine {
       }
 
       for (const edge of currentNode.incomingEdges) {
-        if (edge.type === 'DERIVED_FROM' && !visited.has(edge.from)) {
+        if (edge.type === "DERIVED_FROM" && !visited.has(edge.from)) {
           queue.push(edge.from);
         }
       }
     }
 
     // Find root sources (segments with no incoming derivation edges)
-    const roots = ancestors.filter(segment => {
+    const roots = ancestors.filter((segment) => {
       const ancestorNode = graph.nodes.get(segment.id);
-      return ancestorNode?.incomingEdges.every(e => e.type !== 'DERIVED_FROM') ?? false;
+      return ancestorNode?.incomingEdges.every((e) => e.type !== "DERIVED_FROM") ?? false;
     });
 
     return {
@@ -155,7 +140,7 @@ export class ReplayEngine {
       ancestors,
       rootSources: roots,
       depth: ancestors.length,
-      tracedAt: new Date()
+      tracedAt: new Date(),
     };
   }
 
@@ -192,7 +177,7 @@ export class ReplayEngine {
       addedSegments: Array.from(added),
       removedSegments: Array.from(removed),
       unchangedSegments: Array.from(unchanged),
-      computedAt: new Date()
+      computedAt: new Date(),
     };
   }
 
@@ -227,7 +212,7 @@ export class ReplayEngine {
       wouldAffectSegments: affectedSegments,
       wouldAffectSessions: Array.from(affectedSessions),
       cascadeDepth: affectedSegments.length - 1,
-      simulatedAt: new Date()
+      simulatedAt: new Date(),
     };
   }
 

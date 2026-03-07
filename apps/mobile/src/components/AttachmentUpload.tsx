@@ -76,7 +76,7 @@ export function AttachmentUpload({ caseId, entityId, onUpload }: AttachmentUploa
   // Process file selection
   const handleFileSelect = async (
     event: React.ChangeEvent<HTMLInputElement>,
-    type: AttachmentType
+    type: AttachmentType,
   ) => {
     const file = event.target.files?.[0];
     if (!file || !user) return;
@@ -176,12 +176,7 @@ export function AttachmentUpload({ caseId, entityId, onUpload }: AttachmentUploa
         >
           Photo
         </Button>
-        <Button
-          variant="outlined"
-          startIcon={<Mic />}
-          onClick={handleAudioCapture}
-          size="small"
-        >
+        <Button variant="outlined" startIcon={<Mic />} onClick={handleAudioCapture} size="small">
           Audio
         </Button>
         {pendingAttachments.length > 0 && (
@@ -219,12 +214,7 @@ export function AttachmentUpload({ caseId, entityId, onUpload }: AttachmentUploa
       )}
 
       {/* Pending Attachments Dialog */}
-      <Dialog
-        open={dialogOpen}
-        onClose={() => setDialogOpen(false)}
-        fullWidth
-        maxWidth="sm"
-      >
+      <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} fullWidth maxWidth="sm">
         <DialogTitle>
           Pending Attachments
           <IconButton

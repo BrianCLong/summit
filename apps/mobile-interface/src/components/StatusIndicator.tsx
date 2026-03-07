@@ -1,22 +1,22 @@
 // @ts-nocheck
-import React from 'react';
+import React from "react";
 
 interface StatusIndicatorProps {
-  status?: 'online' | 'offline' | 'syncing';
+  status?: "online" | "offline" | "syncing";
   className?: string;
 }
 
-export function StatusIndicator({ status = 'online', className = '' }: StatusIndicatorProps) {
+export function StatusIndicator({ status = "online", className = "" }: StatusIndicatorProps) {
   const statusColors = {
-    online: 'bg-green-500',
-    offline: 'bg-red-500',
-    syncing: 'bg-yellow-500',
+    online: "bg-green-500",
+    offline: "bg-red-500",
+    syncing: "bg-yellow-500",
   };
 
   const statusLabels = {
-    online: 'Online',
-    offline: 'Offline',
-    syncing: 'Syncing...',
+    online: "Online",
+    offline: "Offline",
+    syncing: "Syncing...",
   };
 
   return (

@@ -46,7 +46,9 @@ const CRITICAL_BUDGET = Number.parseInt(process.env.TRIVY_CRITICAL_BUDGET ?? "0"
 const HIGH_BUDGET = Number.parseInt(process.env.TRIVY_HIGH_BUDGET ?? "0", 10);
 
 if (Number.isNaN(CRITICAL_BUDGET) || Number.isNaN(HIGH_BUDGET)) {
-  console.error("Budget values must be numeric. Set TRIVY_CRITICAL_BUDGET/TRIVY_HIGH_BUDGET to integers.");
+  console.error(
+    "Budget values must be numeric. Set TRIVY_CRITICAL_BUDGET/TRIVY_HIGH_BUDGET to integers."
+  );
   process.exit(2);
 }
 

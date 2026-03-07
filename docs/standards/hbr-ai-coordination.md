@@ -8,20 +8,20 @@ Summit operationalizes **coordination assurance in CI** by measuring handoff int
 
 ## Import / Export Matrix
 
-| Element | Import | Export |
-| --- | --- | --- |
-| `coordination_event` | Agent workflow trace | Structured event stream with evidence IDs |
-| `coordination_score` | Event stream | Deterministic score and metrics JSON |
-| CI coordination gate | `coordination_metrics.json` | Pass/fail verdict |
-| Shared context ledger | Context payloads | Stable context hashes |
+| Element               | Import                      | Export                                    |
+| --------------------- | --------------------------- | ----------------------------------------- |
+| `coordination_event`  | Agent workflow trace        | Structured event stream with evidence IDs |
+| `coordination_score`  | Event stream                | Deterministic score and metrics JSON      |
+| CI coordination gate  | `coordination_metrics.json` | Pass/fail verdict                         |
+| Shared context ledger | Context payloads            | Stable context hashes                     |
 
 ## Standards Mapping
 
-| Standard | Mapping |
-| --- | --- |
-| ISO/IEC 42001 | Governance control with explicit quality threshold gates |
-| NIST AI RMF | Ongoing risk detection through coordination drift monitoring |
-| SOC 2 CC7 | Continuous change monitoring in CI and weekly trend checks |
+| Standard      | Mapping                                                      |
+| ------------- | ------------------------------------------------------------ |
+| ISO/IEC 42001 | Governance control with explicit quality threshold gates     |
+| NIST AI RMF   | Ongoing risk detection through coordination drift monitoring |
+| SOC 2 CC7     | Continuous change monitoring in CI and weekly trend checks   |
 
 ## Non-goals
 

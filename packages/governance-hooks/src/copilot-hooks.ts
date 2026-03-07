@@ -18,7 +18,7 @@ export interface CopilotRequest {
   /** Tenant ID */
   tenantId: string;
   /** Conversation history */
-  history?: Array<{ role: 'user' | 'assistant'; content: string }>;
+  history?: Array<{ role: "user" | "assistant"; content: string }>;
   /** Model preferences */
   model?: string;
   /** Temperature */
@@ -75,7 +75,9 @@ export function createQueryValidationHook(config: QueryValidationConfig): Copilo
     async beforeQuery(request: CopilotRequest) {
       // Check query length
       if (request.query.length > config.maxQueryLength) {
-        throw new CopilotPolicyError(`Query exceeds maximum length of ${config.maxQueryLength} characters`);
+        throw new CopilotPolicyError(
+          `Query exceeds maximum length of ${config.maxQueryLength} characters`
+        );
       }
 
       // Check for blocked keywords
@@ -89,13 +91,13 @@ export function createQueryValidationHook(config: QueryValidationConfig): Copilo
       // Check for blocked patterns
       for (const pattern of config.blockedPatterns) {
         if (pattern.test(request.query)) {
-          throw new CopilotPolicyError('Query matches blocked pattern');
+          throw new CopilotPolicyError("Query matches blocked pattern");
         }
       }
 
       // Check investigation requirement
       if (config.requireInvestigation && !request.investigationId) {
-        throw new CopilotPolicyError('Investigation context is required for copilot queries');
+        throw new CopilotPolicyError("Investigation context is required for copilot queries");
       }
 
       return request;
@@ -104,14 +106,14 @@ export function createQueryValidationHook(config: QueryValidationConfig): Copilo
 }
 
 export const DEFAULT_BLOCKED_KEYWORDS = [
-  'delete all',
-  'drop table',
-  'truncate',
-  'rm -rf',
-  'format c:',
-  'sudo',
-  'password',
-  'credential',
+  "delete all",
+  "drop table",
+  "truncate",
+  "rm -rf",
+  "format c:",
+  "sudo",
+  "password",
+  "credential",
 ];
 
 export const DEFAULT_BLOCKED_PATTERNS = [
@@ -151,7 +153,7 @@ export function createPIIScrubbingHook(config: PIIScrubbingConfig): CopilotHook 
       }
 
       if (detected.length > 0 && config.logDetection) {
-        console.warn(`[CopilotPII] Detected PII in query: ${detected.join(', ')}`);
+        console.warn(`[CopilotPII] Detected PII in query: ${detected.join(", ")}`);
       }
 
       return {
@@ -175,10 +177,14 @@ export function createPIIScrubbingHook(config: PIIScrubbingConfig): CopilotHook 
   };
 }
 
-export const DEFAULT_PII_SCRUBBING_PATTERNS: PIIScrubbingConfig['patterns'] = [
-  { name: 'SSN', regex: /\b\d{3}-?\d{2}-?\d{4}\b/g, replacement: '[SSN]' },
-  { name: 'Credit Card', regex: /\b\d{4}[- ]?\d{4}[- ]?\d{4}[- ]?\d{4}\b/g, replacement: '[CARD]' },
-  { name: 'Phone', regex: /\b(\+\d{1,2}\s?)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}\b/g, replacement: '[PHONE]' },
+export const DEFAULT_PII_SCRUBBING_PATTERNS: PIIScrubbingConfig["patterns"] = [
+  { name: "SSN", regex: /\b\d{3}-?\d{2}-?\d{4}\b/g, replacement: "[SSN]" },
+  { name: "Credit Card", regex: /\b\d{4}[- ]?\d{4}[- ]?\d{4}[- ]?\d{4}\b/g, replacement: "[CARD]" },
+  {
+    name: "Phone",
+    regex: /\b(\+\d{1,2}\s?)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}\b/g,
+    replacement: "[PHONE]",
+  },
 ];
 
 // -----------------------------------------------------------------------------
@@ -195,7 +201,10 @@ export interface CostControlConfig {
   /** Cost tracking callback */
   trackCost: (userId: string, tenantId: string, tokens: number, cost: number) => Promise<void>;
   /** Get current usage */
-  getCurrentUsage: (userId: string, tenantId: string) => Promise<{ userTokens: number; tenantTokens: number }>;
+  getCurrentUsage: (
+    userId: string,
+    tenantId: string
+  ) => Promise<{ userTokens: number; tenantTokens: number }>;
 }
 
 export function createCostControlHook(config: CostControlConfig): CopilotHook {
@@ -204,11 +213,11 @@ export function createCostControlHook(config: CostControlConfig): CopilotHook {
       const usage = await config.getCurrentUsage(request.userId, request.tenantId);
 
       if (usage.userTokens >= config.maxTokensPerUserPerHour) {
-        throw new CopilotPolicyError('User token limit exceeded for this hour');
+        throw new CopilotPolicyError("User token limit exceeded for this hour");
       }
 
       if (usage.tenantTokens >= config.maxTokensPerTenantPerHour) {
-        throw new CopilotPolicyError('Tenant token limit exceeded for this hour');
+        throw new CopilotPolicyError("Tenant token limit exceeded for this hour");
       }
 
       return request;
@@ -217,7 +226,9 @@ export function createCostControlHook(config: CostControlConfig): CopilotHook {
     async afterResponse(request: CopilotRequest, response: CopilotResponse) {
       // Check if response exceeded token limit
       if (response.tokens.total > config.maxTokensPerRequest) {
-        console.warn(`[CopilotCost] Response exceeded token limit: ${response.tokens.total} > ${config.maxTokensPerRequest}`);
+        console.warn(
+          `[CopilotCost] Response exceeded token limit: ${response.tokens.total} > ${config.maxTokensPerRequest}`
+        );
       }
 
       // Estimate cost (rough estimate based on common pricing)
@@ -233,11 +244,11 @@ export function createCostControlHook(config: CostControlConfig): CopilotHook {
 
 function estimateCost(model: string, inputTokens: number, outputTokens: number): number {
   const rates: Record<string, { input: number; output: number }> = {
-    'gpt-4': { input: 0.03, output: 0.06 },
-    'gpt-4-turbo': { input: 0.01, output: 0.03 },
-    'gpt-3.5-turbo': { input: 0.0005, output: 0.0015 },
-    'claude-3-opus': { input: 0.015, output: 0.075 },
-    'claude-3-sonnet': { input: 0.003, output: 0.015 },
+    "gpt-4": { input: 0.03, output: 0.06 },
+    "gpt-4-turbo": { input: 0.01, output: 0.03 },
+    "gpt-3.5-turbo": { input: 0.0005, output: 0.0015 },
+    "claude-3-opus": { input: 0.015, output: 0.075 },
+    "claude-3-sonnet": { input: 0.003, output: 0.015 },
     default: { input: 0.001, output: 0.002 },
   };
 
@@ -293,7 +304,7 @@ export interface CopilotProvenanceRecorder {
 }
 
 export interface CopilotProvenanceEvent {
-  type: 'query' | 'response' | 'citation';
+  type: "query" | "response" | "citation";
   userId: string;
   tenantId: string;
   investigationId?: string;
@@ -309,7 +320,7 @@ export function createCopilotProvenanceHook(recorder: CopilotProvenanceRecorder)
   return {
     async afterResponse(request: CopilotRequest, response: CopilotResponse) {
       await recorder.record({
-        type: 'response',
+        type: "response",
         userId: request.userId,
         tenantId: request.tenantId,
         investigationId: request.investigationId,
@@ -373,6 +384,6 @@ export function composeCopilotHooks(...hooks: CopilotHook[]): CopilotHook {
 export class CopilotPolicyError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = 'CopilotPolicyError';
+    this.name = "CopilotPolicyError";
   }
 }

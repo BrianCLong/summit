@@ -1,9 +1,11 @@
 # Mobile Architecture Reset & Release Safety Program
 
 ## Purpose
+
 This plan turns the 9×11 epic set into a single execution blueprint for rebuilding the mobile stack, ensuring one modern architecture, predictable releases, and production-grade performance, security, and UX. It prioritizes fast wins on the highest-traffic screens while eliminating legacy dual-maintenance.
 
 ## Target Architecture
+
 - **Pattern:** MVVM with unidirectional data flow (Redux-style store per module) to balance testability and predictable state.
 - **Shared layers:**
   - **Networking:** idempotent HTTP client with retries, deadlines, cache directives, request dedupe, and redaction-aware logging.
@@ -15,6 +17,7 @@ This plan turns the 9×11 epic set into a single execution blueprint for rebuild
 - **Automation:** lint/typecheck/unit/UI smoke in CI, reproducible builds, SBOM, provenance, staged rollout hooks, and weekly release train.
 
 ## Execution Waves
+
 1. **Foundations (Weeks 0–3)**
    - Land architecture docs and the golden module template (MVVM + store slice + navigation contract).
    - Ship shared networking layer (timeouts, retries, idempotency headers, caching) and centralized auth/session manager.
@@ -33,6 +36,7 @@ This plan turns the 9×11 epic set into a single execution blueprint for rebuild
    - Track change failure rate, MTTR, crash-free %, ANR %, startup p95, API p95, sync success, and battery regressions.
 
 ## Deliverables by Epic
+
 - **Architecture & templates (Epics 1, 9.9, 8.9):** Golden module template, navigation conventions, DI, test harness, and codegen hook for new modules.
 - **Networking & auth (Epics 1.3–1.4, 4, 5):** Shared client with retries/backoff, idempotency headers, caching; centralized auth with secure storage, rotation, remote revoke, and device integrity signals.
 - **Design system & UX (Epics 1.5, 6):** Token library, primitives, accessible components, error/empty/undo patterns, dynamic type, and haptics/animation guidance.
@@ -45,6 +49,7 @@ This plan turns the 9×11 epic set into a single execution blueprint for rebuild
 - **GTM & adoption (Epic 9):** Value-moment instrumentation, push/deep link strategy, onboarding templates, in-app feedback, A/B testing guardrails, cohort retention tracking, ROI reporting.
 
 ## First 30-Day Action Plan
+
 - Ratify MVVM + Redux-style store as the single pattern; publish module template and navigation contract.
 - Build shared networking client and auth/session manager; integrate into the first migrated screen.
 - Stand up feature-flag service with ownership/expiry; add kill switches for payment/auth flows.
@@ -53,10 +58,12 @@ This plan turns the 9×11 epic set into a single execution blueprint for rebuild
 - Establish weekly release train with staged rollout and rollback checklist; add build provenance and SBOM generation to CI.
 
 ## Risk Mitigation & Proof Points
+
 - **No dual-maintain:** Delete legacy module immediately after migrated screen ships behind a guarded flag.
 - **Safety nets:** Feature flags + kill switches for critical flows; release envelopes for high-risk changes.
 - **Quality gates:** CI enforces lint/typecheck/unit + UI smoke; performance budgets block regressions; quarterly rollback and corruption GameDays.
 
 ## Innovation Track
+
 - **Predictive prefetch + battery-aware scheduling:** Use on-device heuristics (recent nav graph, connectivity, battery level) to prefetch caches only when cheap, combining with sync dedupe keys to avoid over-fetching.
 - **State-aware tracing:** Propagate correlation IDs through the store to link UI events, network calls, and sync operations for faster incident triage.

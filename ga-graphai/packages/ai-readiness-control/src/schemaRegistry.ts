@@ -1,27 +1,27 @@
-import { CanonicalEntityName, SchemaDefinition, SchemaValidationResult } from './types.js';
+import { CanonicalEntityName, SchemaDefinition, SchemaValidationResult } from "./types.js";
 
-type PropertySchema = { type: 'string' | 'number' | 'boolean' | 'object' };
+type PropertySchema = { type: "string" | "number" | "boolean" | "object" };
 
 type ObjectSchema = {
-  type: 'object';
+  type: "object";
   properties?: Record<string, PropertySchema>;
   required?: string[];
 };
 
 const supportedEntities: CanonicalEntityName[] = [
-  'user',
-  'account',
-  'tenant',
-  'asset',
-  'document',
-  'ticket',
-  'runbook',
-  'model',
-  'dataset',
-  'feature',
-  'automation',
-  'policy',
-  'release',
+  "user",
+  "account",
+  "tenant",
+  "asset",
+  "document",
+  "ticket",
+  "runbook",
+  "model",
+  "dataset",
+  "feature",
+  "automation",
+  "policy",
+  "release",
 ];
 
 export class SchemaRegistry {
@@ -46,11 +46,7 @@ export class SchemaRegistry {
     return versions.at(-1);
   }
 
-  validate(
-    name: CanonicalEntityName,
-    payload: unknown,
-    version?: string,
-  ): SchemaValidationResult {
+  validate(name: CanonicalEntityName, payload: unknown, version?: string): SchemaValidationResult {
     const targetVersion = version ?? this.latestVersion(name);
     if (!targetVersion) {
       return { valid: false, errors: [`No schema registered for ${name}`] };
@@ -61,14 +57,14 @@ export class SchemaRegistry {
       return { valid: false, errors: [`Schema not found for ${name}@${targetVersion}`] };
     }
     if (!this.isObjectSchema(definition.schema)) {
-      return { valid: false, errors: ['Schema must be an object schema'] };
+      return { valid: false, errors: ["Schema must be an object schema"] };
     }
     return this.validateAgainstSchema(payload, definition.schema);
   }
 
   private validateAgainstSchema(payload: unknown, schema: ObjectSchema): SchemaValidationResult {
-    if (typeof payload !== 'object' || payload === null) {
-      return { valid: false, errors: ['Payload must be an object'] };
+    if (typeof payload !== "object" || payload === null) {
+      return { valid: false, errors: ["Payload must be an object"] };
     }
     const errors: string[] = [];
     const required = schema.required ?? [];
@@ -88,13 +84,13 @@ export class SchemaRegistry {
     return { valid: errors.length === 0, errors };
   }
 
-  private matchesType(value: unknown, type: PropertySchema['type']): boolean {
-    if (type === 'object') return typeof value === 'object' && value !== null;
+  private matchesType(value: unknown, type: PropertySchema["type"]): boolean {
+    if (type === "object") return typeof value === "object" && value !== null;
     return typeof value === type;
   }
 
   private isObjectSchema(schema: Record<string, unknown>): schema is ObjectSchema {
-    return schema.type === 'object';
+    return schema.type === "object";
   }
 
   private key(name: CanonicalEntityName, version: string): string {

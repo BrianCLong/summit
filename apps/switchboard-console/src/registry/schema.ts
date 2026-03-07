@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 const ToolEntrySchema = z.object({
   tool_id: z.string({
@@ -22,32 +22,34 @@ const ServerEntrySchema = z.object({
   health_check: z.record(z.unknown()).optional(),
 });
 
-export const RegistryRootSchema = z.object({
-  version: z.string().regex(/^\d+\.\d+\.\d+$/, "version must be semantic version (e.g. 1.0.0)"),
-  tools: z.array(ToolEntrySchema).default([]),
-  servers: z.array(ServerEntrySchema).default([]),
-}).superRefine((data, ctx) => {
-  const toolIds = new Set();
-  data.tools.forEach((tool, idx) => {
-    if (toolIds.has(tool.tool_id)) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: `Duplicate tool_id: ${tool.tool_id}`,
-        path: ['tools', idx, 'tool_id'],
-      });
-    }
-    toolIds.add(tool.tool_id);
-  });
+export const RegistryRootSchema = z
+  .object({
+    version: z.string().regex(/^\d+\.\d+\.\d+$/, "version must be semantic version (e.g. 1.0.0)"),
+    tools: z.array(ToolEntrySchema).default([]),
+    servers: z.array(ServerEntrySchema).default([]),
+  })
+  .superRefine((data, ctx) => {
+    const toolIds = new Set();
+    data.tools.forEach((tool, idx) => {
+      if (toolIds.has(tool.tool_id)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: `Duplicate tool_id: ${tool.tool_id}`,
+          path: ["tools", idx, "tool_id"],
+        });
+      }
+      toolIds.add(tool.tool_id);
+    });
 
-  const serverIds = new Set();
-  data.servers.forEach((server, idx) => {
-    if (serverIds.has(server.server_id)) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: `Duplicate server_id: ${server.server_id}`,
-        path: ['servers', idx, 'server_id'],
-      });
-    }
-    serverIds.add(server.server_id);
+    const serverIds = new Set();
+    data.servers.forEach((server, idx) => {
+      if (serverIds.has(server.server_id)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: `Duplicate server_id: ${server.server_id}`,
+          path: ["servers", idx, "server_id"],
+        });
+      }
+      serverIds.add(server.server_id);
+    });
   });
-});

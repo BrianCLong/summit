@@ -84,7 +84,7 @@ metadata:
 spec:
   securityContext:
     runAsNonRoot: true
-    runAsUser: 999  # postgres user
+    runAsUser: 999 # postgres user
     runAsGroup: 999
     fsGroup: 999
     seccompProfile:
@@ -144,12 +144,12 @@ spec:
   # Pod-level security context with maximum restrictions
   securityContext:
     runAsNonRoot: true
-    runAsUser: 65534  # nobody user
+    runAsUser: 65534 # nobody user
     runAsGroup: 65534
     fsGroup: 65534
     seccompProfile:
       type: Localhost
-      localhostProfile: sandbox-strict.json  # Custom seccomp profile
+      localhostProfile: sandbox-strict.json # Custom seccomp profile
     # SELinux/AppArmor (if available)
     # seLinuxOptions:
     #   level: "s0:c123,c456"
@@ -218,7 +218,7 @@ metadata:
 spec:
   securityContext:
     runAsNonRoot: true
-    runAsUser: 65534  # nobody
+    runAsUser: 65534 # nobody
     runAsGroup: 65534
     fsGroup: 65534
     seccompProfile:

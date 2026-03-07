@@ -2,7 +2,7 @@
  * Entity linking to knowledge bases
  */
 
-import type { Entity, KnowledgeBaseLink } from '../types';
+import type { Entity, KnowledgeBaseLink } from "../types";
 
 export class EntityLinker {
   private cache: Map<string, KnowledgeBaseLink[]> = new Map();
@@ -10,7 +10,7 @@ export class EntityLinker {
   /**
    * Link entity to knowledge base
    */
-  async link(entity: Entity, sources: string[] = ['wikidata']): Promise<KnowledgeBaseLink[]> {
+  async link(entity: Entity, sources: string[] = ["wikidata"]): Promise<KnowledgeBaseLink[]> {
     const cacheKey = `${entity.text}:${entity.type}`;
 
     if (this.cache.has(cacheKey)) {
@@ -44,13 +44,13 @@ export class EntityLinker {
 
     const links: KnowledgeBaseLink[] = [];
 
-    if (source === 'wikidata') {
+    if (source === "wikidata") {
       // Mock Wikidata link
       links.push({
         entityId: `Q${Math.floor(Math.random() * 1000000)}`,
         entityName: entity.text,
         entityType: entity.type,
-        source: 'wikidata',
+        source: "wikidata",
         url: `https://www.wikidata.org/wiki/Q${Math.floor(Math.random() * 1000000)}`,
         confidence: 0.85,
         properties: {},
@@ -66,8 +66,12 @@ export class EntityLinker {
   async disambiguate(entity: Entity, context: string): Promise<KnowledgeBaseLink | null> {
     const links = await this.link(entity);
 
-    if (links.length === 0) {return null;}
-    if (links.length === 1) {return links[0];}
+    if (links.length === 0) {
+      return null;
+    }
+    if (links.length === 1) {
+      return links[0];
+    }
 
     // Use context to select best link
     const scores = links.map((link) => ({
@@ -91,7 +95,7 @@ export class EntityLinker {
       const contextWords = new Set(context.toLowerCase().split(/\s+/));
 
       for (const value of Object.values(link.properties)) {
-        if (typeof value === 'string') {
+        if (typeof value === "string") {
           const valueWords = value.toLowerCase().split(/\s+/);
           const matches = valueWords.filter((w) => contextWords.has(w)).length;
           score += matches * 0.05;

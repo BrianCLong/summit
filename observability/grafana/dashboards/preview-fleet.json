@@ -7,7 +7,7 @@
     {
       "type": "stat",
       "title": "Active previews",
-      "gridPos": {"x": 0, "y": 0, "w": 6, "h": 4},
+      "gridPos": { "x": 0, "y": 0, "w": 6, "h": 4 },
       "targets": [
         {
           "expr": "preview_active_total",
@@ -18,7 +18,7 @@
     {
       "type": "table",
       "title": "Fleet burn-down",
-      "gridPos": {"x": 6, "y": 0, "w": 18, "h": 8},
+      "gridPos": { "x": 6, "y": 0, "w": 18, "h": 8 },
       "targets": [
         {
           "expr": "preview_cost_estimate_usd",
@@ -42,7 +42,7 @@
     {
       "type": "graph",
       "title": "TTL remaining",
-      "gridPos": {"x": 0, "y": 8, "w": 12, "h": 8},
+      "gridPos": { "x": 0, "y": 8, "w": 12, "h": 8 },
       "targets": [
         {
           "expr": "preview_ttl_seconds_remaining",
@@ -53,7 +53,7 @@
     {
       "type": "graph",
       "title": "Idle seconds",
-      "gridPos": {"x": 12, "y": 8, "w": 12, "h": 8},
+      "gridPos": { "x": 12, "y": 8, "w": 12, "h": 8 },
       "targets": [
         {
           "expr": "preview_idle_seconds",

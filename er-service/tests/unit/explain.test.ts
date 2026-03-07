@@ -1,12 +1,12 @@
-import { describe, it, expect } from '@jest/globals';
+import { describe, it, expect } from "@jest/globals";
 import {
   DEFAULT_SCORING_CONFIG,
   ExplainPairRequestSchema,
   ExplainPairResponseSchema,
-} from '../../src/types';
-import { buildFeatureContributions } from '../../src/scoring/scorer';
+} from "../../src/types";
+import { buildFeatureContributions } from "../../src/scoring/scorer";
 
-describe('ER explanation utilities', () => {
+describe("ER explanation utilities", () => {
   const features = {
     nameSimilarity: 0.82,
     nameJaccard: 0.7,
@@ -25,68 +25,58 @@ describe('ER explanation utilities', () => {
     editDistance: 2,
   };
 
-  it('builds normalized feature contributions', () => {
-    const contributions = buildFeatureContributions(
-      features,
-      DEFAULT_SCORING_CONFIG.weights,
-    );
+  it("builds normalized feature contributions", () => {
+    const contributions = buildFeatureContributions(features, DEFAULT_SCORING_CONFIG.weights);
 
-    expect(contributions).toHaveLength(
-      Object.keys(DEFAULT_SCORING_CONFIG.weights).length,
-    );
+    expect(contributions).toHaveLength(Object.keys(DEFAULT_SCORING_CONFIG.weights).length);
     expect(contributions[0].contribution).toBeGreaterThanOrEqual(
-      contributions[contributions.length - 1].contribution,
+      contributions[contributions.length - 1].contribution
     );
 
     const totalNormalized = contributions.reduce(
       (sum, entry) => sum + entry.normalizedContribution,
-      0,
+      0
     );
     expect(totalNormalized).toBeCloseTo(1, 5);
   });
 
-  it('validates explain pair schema', () => {
+  it("validates explain pair schema", () => {
     const request = {
       entityA: {
-        id: 'e1',
-        type: 'person',
-        name: 'Jane Doe',
-        tenantId: 'tenant-1',
-        attributes: { email: 'jane@example.com' },
+        id: "e1",
+        type: "person",
+        name: "Jane Doe",
+        tenantId: "tenant-1",
+        attributes: { email: "jane@example.com" },
       },
       entityB: {
-        id: 'e2',
-        type: 'person',
-        name: 'Janet Doe',
-        tenantId: 'tenant-1',
-        attributes: { email: 'janet@example.com' },
+        id: "e2",
+        type: "person",
+        name: "Janet Doe",
+        tenantId: "tenant-1",
+        attributes: { email: "janet@example.com" },
       },
-      method: 'hybrid',
+      method: "hybrid",
       threshold: 0.7,
     };
 
     const parsedRequest = ExplainPairRequestSchema.parse(request);
-    expect(parsedRequest.method).toBe('hybrid');
+    expect(parsedRequest.method).toBe("hybrid");
 
-    const contributions = buildFeatureContributions(
-      features,
-      DEFAULT_SCORING_CONFIG.weights,
-    );
+    const contributions = buildFeatureContributions(features, DEFAULT_SCORING_CONFIG.weights);
 
     const response = {
       score: 0.81,
       confidence: 0.77,
-      method: 'hybrid',
+      method: "hybrid",
       threshold: 0.7,
       features,
-      rationale: ['Name similarity: 82.0%'],
+      rationale: ["Name similarity: 82.0%"],
       featureWeights: DEFAULT_SCORING_CONFIG.weights,
       featureContributions: contributions,
     };
 
     const parsedResponse = ExplainPairResponseSchema.parse(response);
-    expect(parsedResponse.featureContributions).toHaveLength(
-      contributions.length,
-    );
+    expect(parsedResponse.featureContributions).toHaveLength(contributions.length);
   });
 });

@@ -10,7 +10,7 @@ attestations:
   signature:
     algorithm: ed25519
     keyRef: kms://projects/summit/keys/maestro
-    signature: 'BASE64_SIGNATURE'
+    signature: "BASE64_SIGNATURE"
 spec:
   parameters:
     - name: source_bucket

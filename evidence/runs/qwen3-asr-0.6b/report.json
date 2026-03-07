@@ -1,10 +1,5 @@
 {
-  "artifacts": [
-    "report.json",
-    "metrics.json",
-    "stamp.json",
-    "index.json"
-  ],
+  "artifacts": ["report.json", "metrics.json", "stamp.json", "index.json"],
   "evidence_id": "EVD-QWEN3ASR06B-EVAL-001",
   "item": {
     "hf_model": "Qwen/Qwen3-ASR-0.6B",

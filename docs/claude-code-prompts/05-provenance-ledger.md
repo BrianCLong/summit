@@ -1,10 +1,13 @@
 # Prompt 5: Provenance Ledger + Export Signing
 
 ## Role
+
 Reliability/Integrity Engineer
 
 ## Context
+
 IntelGraph operates in high-stakes environments requiring:
+
 - **Immutable audit trails** for all data operations
 - **Chain-of-custody** for evidence and intelligence
 - **Air-gap/offline resynchronization** capabilities
@@ -13,15 +16,18 @@ IntelGraph operates in high-stakes environments requiring:
 The provenance ledger ensures data integrity and enables forensic analysis.
 
 ## Task
+
 Implement a provenance ledger system with signed export capabilities:
 
 ### 1. Provenance Ledger Module
+
 - Append-only log of all data operations
 - Hash-chained records for tamper detection
 - Cryptographic signatures on ledger entries
 - Query API for provenance retrieval
 
 ### 2. Signed Export Bundles
+
 - Export manifest with SHA-256 Merkle tree
 - Timestamp and signer identity
 - Offline verification CLI
@@ -30,11 +36,13 @@ Implement a provenance ledger system with signed export capabilities:
 ## Guardrails
 
 ### Security
+
 - **No PII in manifests** - only hashes and metadata
 - **Strong cryptographic signatures** - RSA 2048+ or Ed25519
 - **Tamper detection** - any modification breaks verification
 
 ### Compliance
+
 - Immutable once written (append-only)
 - Provenance records retained per retention policy
 - Audit trail for all provenance queries
@@ -42,6 +50,7 @@ Implement a provenance ledger system with signed export capabilities:
 ## Deliverables
 
 ### 1. Provenance Ledger Library
+
 - [ ] `libs/provenance/` package with:
   - [ ] Ledger storage interface (pluggable backends)
   - [ ] In-memory implementation (for testing)
@@ -51,6 +60,7 @@ Implement a provenance ledger system with signed export capabilities:
   - [ ] Query API (by entity ID, time range, operation type)
 
 ### 2. CLI Tool
+
 - [ ] `provenance` CLI with commands:
   - [ ] `export` - Create signed export bundle
   - [ ] `verify` - Verify bundle integrity and signature
@@ -58,23 +68,27 @@ Implement a provenance ledger system with signed export capabilities:
   - [ ] `validate-chain` - Validate hash chain integrity
 
 ### 3. Export Bundle Format
+
 - [ ] Manifest specification (YAML/JSON schema)
 - [ ] Bundle structure documentation
 - [ ] Example bundles for reference
 
 ### 4. Testing
+
 - [ ] Unit tests for hash-chain logic
 - [ ] Tamper detection tests (modify bundle, verify fails)
 - [ ] Round-trip tests (export → verify → pass)
 - [ ] Performance tests for ledger queries
 
 ### 5. Documentation
+
 - [ ] Provenance ledger design doc
 - [ ] Export bundle specification
 - [ ] CLI usage guide
 - [ ] Integration guide for services
 
 ## Acceptance Criteria
+
 - ✅ Tamper test fails verification (modified bundle detected)
 - ✅ Round-trip export/verify passes
 - ✅ Hash chain validates correctly
@@ -87,26 +101,26 @@ Implement a provenance ledger system with signed export capabilities:
 ```typescript
 interface LedgerEntry {
   // Entry identification
-  entryId: string;            // UUID v4
-  sequenceNumber: bigint;     // Monotonic counter
+  entryId: string; // UUID v4
+  sequenceNumber: bigint; // Monotonic counter
 
   // Hash chain
-  previousHash: string;       // SHA-256 of previous entry
-  currentHash: string;        // SHA-256 of this entry
+  previousHash: string; // SHA-256 of previous entry
+  currentHash: string; // SHA-256 of this entry
 
   // Operation details
-  operation: 'CREATE' | 'UPDATE' | 'DELETE' | 'ACCESS';
-  entityId: string;           // Entity affected
-  entityType: string;         // Entity type
+  operation: "CREATE" | "UPDATE" | "DELETE" | "ACCESS";
+  entityId: string; // Entity affected
+  entityType: string; // Entity type
 
   // Metadata
-  timestamp: string;          // ISO 8601
-  actor: string;              // User or service performing operation
-  purpose: string;            // Purpose tag or investigation ID
+  timestamp: string; // ISO 8601
+  actor: string; // User or service performing operation
+  purpose: string; // Purpose tag or investigation ID
 
   // Signature
-  signature?: string;         // Optional cryptographic signature
-  signatureAlgorithm?: 'RSA-SHA256' | 'Ed25519';
+  signature?: string; // Optional cryptographic signature
+  signatureAlgorithm?: "RSA-SHA256" | "Ed25519";
 
   // Additional context
   metadata: Record<string, unknown>;
@@ -178,6 +192,7 @@ provenance validate-chain \
 ## Implementation Notes
 
 ### Hash Chain Algorithm
+
 ```typescript
 function computeEntryHash(entry: LedgerEntry): string {
   const payload = {
@@ -204,6 +219,7 @@ function validateChain(entries: LedgerEntry[]): boolean {
 ```
 
 ## Related Files
+
 - `/home/user/summit/docs/provenance-export.md` - Provenance design
 - `/home/user/summit/libs/provenance/` - Existing provenance code
 - `/home/user/summit/docs/privacy.md` - Privacy requirements
@@ -219,6 +235,7 @@ claude "Execute prompt 5: Provenance ledger implementation"
 ```
 
 ## Notes
+
 - Store ledger in PostgreSQL with TOAST for large entries
 - Consider using PostgreSQL's native crypto extensions
 - Implement ledger compaction for long-term storage

@@ -7,9 +7,7 @@
     "tsBuildInfoFile": "dist/.tsbuildinfo",
     "types": []
   },
-  "include": [
-    "src"
-  ],
+  "include": ["src"],
   "references": [
     {
       "path": "../types"

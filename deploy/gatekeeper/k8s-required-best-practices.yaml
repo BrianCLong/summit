@@ -37,5 +37,5 @@ metadata: { name: maestro-req-bp }
 spec:
   match:
     kinds:
-      - apiGroups: ['argoproj.io']
-        kinds: ['Rollout']
+      - apiGroups: ["argoproj.io"]
+        kinds: ["Rollout"]

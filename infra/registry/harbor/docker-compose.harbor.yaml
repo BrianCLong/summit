@@ -9,7 +9,7 @@
 #   - 8GB+ RAM allocated to Docker
 #   - SSL certificates in ./certs/
 
-version: '3.8'
+version: "3.8"
 
 services:
   # PostgreSQL Database
@@ -189,7 +189,7 @@ services:
       - ALL
     volumes:
       - harbor-trivy-cache:/home/scanner/.cache
-      - ./trivy-db:/home/scanner/trivy-db:ro  # Offline DB
+      - ./trivy-db:/home/scanner/trivy-db:ro # Offline DB
     networks:
       - harbor-internal
     environment:
@@ -200,8 +200,8 @@ services:
       SCANNER_TRIVY_VULN_TYPE: "os,library"
       SCANNER_TRIVY_SEVERITY: "UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL"
       SCANNER_TRIVY_IGNORE_UNFIXED: "false"
-      SCANNER_TRIVY_SKIP_UPDATE: "true"  # Air-gapped mode
-      SCANNER_TRIVY_OFFLINE_SCAN: "true"  # Air-gapped mode
+      SCANNER_TRIVY_SKIP_UPDATE: "true" # Air-gapped mode
+      SCANNER_TRIVY_OFFLINE_SCAN: "true" # Air-gapped mode
       SCANNER_TRIVY_GITHUB_TOKEN: ""
       SCANNER_TRIVY_TIMEOUT: 10m
     healthcheck:

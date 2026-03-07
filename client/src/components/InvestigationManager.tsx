@@ -1,13 +1,9 @@
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import React, { useState, useEffect } from 'react';
-import { useQuery, useMutation, gql } from '@apollo/client';
+import React, { useState, useEffect } from "react";
+import { useQuery, useMutation, gql } from "@apollo/client";
 
 const GET_INVESTIGATIONS = gql`
-  query GetInvestigations(
-    $filter: InvestigationFilter
-    $sort: InvestigationSort
-    $limit: Int
-  ) {
+  query GetInvestigations($filter: InvestigationFilter, $sort: InvestigationSort, $limit: Int) {
     investigations(filter: $filter, sort: $sort, limit: $limit) {
       id
       name
@@ -52,8 +48,8 @@ interface Investigation {
   id: string;
   name: string;
   description?: string;
-  status: 'active' | 'closed' | 'archived' | 'draft';
-  priority: 'low' | 'medium' | 'high' | 'critical';
+  status: "active" | "closed" | "archived" | "draft";
+  priority: "low" | "medium" | "high" | "critical";
   createdBy: string;
   assignedTo?: string;
   createdAt: string;
@@ -75,29 +71,26 @@ function InvestigationManager({
   currentInvestigationId,
 }: InvestigationManagerProps) {
   const [showCreateForm, setShowCreateForm] = useState(false);
-  const [editingInvestigation, setEditingInvestigation] =
-    useState<Investigation | null>(null);
+  const [editingInvestigation, setEditingInvestigation] = useState<Investigation | null>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [filter, setFilter] = useState<any>({
-    status: '',
-    priority: '',
-    assignedTo: '',
+    status: "",
+    priority: "",
+    assignedTo: "",
   });
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
   const { data, loading, error, refetch } = useQuery(GET_INVESTIGATIONS, {
     variables: {
       filter: Object.keys(filter).length > 0 ? filter : undefined,
-      sort: { field: 'updatedAt', direction: 'DESC' },
+      sort: { field: "updatedAt", direction: "DESC" },
       limit: 50,
     },
-    errorPolicy: 'all',
+    errorPolicy: "all",
   });
 
-  const [createInvestigation, { loading: createLoading }] =
-    useMutation(CREATE_INVESTIGATION);
-  const [updateInvestigation, { loading: updateLoading }] =
-    useMutation(UPDATE_INVESTIGATION);
+  const [createInvestigation, { loading: createLoading }] = useMutation(CREATE_INVESTIGATION);
+  const [updateInvestigation, { loading: updateLoading }] = useMutation(UPDATE_INVESTIGATION);
 
   const investigations = data?.investigations || [];
 
@@ -109,10 +102,10 @@ function InvestigationManager({
           input: {
             name: formData.name,
             description: formData.description,
-            priority: formData.priority || 'medium',
+            priority: formData.priority || "medium",
             tags:
               formData.tags
-                ?.split(',')
+                ?.split(",")
                 .map((tag: string) => tag.trim())
                 .filter(Boolean) || [],
           },
@@ -125,7 +118,7 @@ function InvestigationManager({
         onInvestigationSelect?.(result.data.createInvestigation);
       }
     } catch (error) {
-      console.error('Failed to create investigation:', error);
+      console.error("Failed to create investigation:", error);
     }
   };
 
@@ -143,7 +136,7 @@ function InvestigationManager({
             assignedTo: formData.assignedTo,
             tags:
               formData.tags
-                ?.split(',')
+                ?.split(",")
                 .map((tag: string) => tag.trim())
                 .filter(Boolean) || [],
           },
@@ -153,49 +146,49 @@ function InvestigationManager({
       setEditingInvestigation(null);
       refetch();
     } catch (error) {
-      console.error('Failed to update investigation:', error);
+      console.error("Failed to update investigation:", error);
     }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'active':
-        return '#059669';
-      case 'draft':
-        return '#d97706';
-      case 'closed':
-        return '#6b7280';
-      case 'archived':
-        return '#9ca3af';
+      case "active":
+        return "#059669";
+      case "draft":
+        return "#d97706";
+      case "closed":
+        return "#6b7280";
+      case "archived":
+        return "#9ca3af";
       default:
-        return '#6b7280';
+        return "#6b7280";
     }
   };
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'critical':
-        return '#dc2626';
-      case 'high':
-        return '#ea580c';
-      case 'medium':
-        return '#d97706';
-      case 'low':
-        return '#059669';
+      case "critical":
+        return "#dc2626";
+      case "high":
+        return "#ea580c";
+      case "medium":
+        return "#d97706";
+      case "low":
+        return "#059669";
       default:
-        return '#6b7280';
+        return "#6b7280";
     }
   };
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const InvestigationForm = ({ investigation, onSubmit, onCancel }: any) => {
     const [formData, setFormData] = useState({
-      name: investigation?.name || '',
-      description: investigation?.description || '',
-      status: investigation?.status || 'draft',
-      priority: investigation?.priority || 'medium',
-      assignedTo: investigation?.assignedTo || '',
-      tags: investigation?.tags?.join(', ') || '',
+      name: investigation?.name || "",
+      description: investigation?.description || "",
+      status: investigation?.status || "draft",
+      priority: investigation?.priority || "medium",
+      assignedTo: investigation?.assignedTo || "",
+      tags: investigation?.tags?.join(", ") || "",
     });
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -204,25 +197,25 @@ function InvestigationManager({
     };
 
     return (
-      <div className="panel" style={{ padding: '24px', marginBottom: '20px' }}>
+      <div className="panel" style={{ padding: "24px", marginBottom: "20px" }}>
         <h3
           style={{
-            fontSize: '1.2rem',
-            fontWeight: '600',
-            marginBottom: '20px',
+            fontSize: "1.2rem",
+            fontWeight: "600",
+            marginBottom: "20px",
           }}
         >
-          {investigation ? '✏️ Edit Investigation' : '➕ New Investigation'}
+          {investigation ? "✏️ Edit Investigation" : "➕ New Investigation"}
         </h3>
 
-        <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '16px' }}>
+        <form onSubmit={handleSubmit} style={{ display: "grid", gap: "16px" }}>
           <div>
             <label
               style={{
-                fontSize: '14px',
-                fontWeight: '600',
-                marginBottom: '6px',
-                display: 'block',
+                fontSize: "14px",
+                fontWeight: "600",
+                marginBottom: "6px",
+                display: "block",
               }}
             >
               Investigation Name *
@@ -231,15 +224,13 @@ function InvestigationManager({
               type="text"
               required
               value={formData.name}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, name: e.target.value }))
-              }
+              onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
               style={{
-                width: '100%',
-                padding: '8px 12px',
-                border: '1px solid var(--hairline)',
-                borderRadius: '4px',
-                fontSize: '14px',
+                width: "100%",
+                padding: "8px 12px",
+                border: "1px solid var(--hairline)",
+                borderRadius: "4px",
+                fontSize: "14px",
               }}
               placeholder="Enter investigation name..."
             />
@@ -248,10 +239,10 @@ function InvestigationManager({
           <div>
             <label
               style={{
-                fontSize: '14px',
-                fontWeight: '600',
-                marginBottom: '6px',
-                display: 'block',
+                fontSize: "14px",
+                fontWeight: "600",
+                marginBottom: "6px",
+                display: "block",
               }}
             >
               Description
@@ -266,12 +257,12 @@ function InvestigationManager({
               }
               rows={3}
               style={{
-                width: '100%',
-                padding: '8px 12px',
-                border: '1px solid var(--hairline)',
-                borderRadius: '4px',
-                fontSize: '14px',
-                resize: 'vertical',
+                width: "100%",
+                padding: "8px 12px",
+                border: "1px solid var(--hairline)",
+                borderRadius: "4px",
+                fontSize: "14px",
+                resize: "vertical",
               }}
               placeholder="Describe the investigation objective and scope..."
             />
@@ -279,34 +270,32 @@ function InvestigationManager({
 
           <div
             style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
-              gap: '16px',
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
+              gap: "16px",
             }}
           >
             {investigation && (
               <div>
                 <label
                   style={{
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    marginBottom: '6px',
-                    display: 'block',
+                    fontSize: "14px",
+                    fontWeight: "600",
+                    marginBottom: "6px",
+                    display: "block",
                   }}
                 >
                   Status
                 </label>
                 <select
                   value={formData.status}
-                  onChange={(e) =>
-                    setFormData((prev) => ({ ...prev, status: e.target.value }))
-                  }
+                  onChange={(e) => setFormData((prev) => ({ ...prev, status: e.target.value }))}
                   style={{
-                    width: '100%',
-                    padding: '8px 12px',
-                    border: '1px solid var(--hairline)',
-                    borderRadius: '4px',
-                    fontSize: '14px',
+                    width: "100%",
+                    padding: "8px 12px",
+                    border: "1px solid var(--hairline)",
+                    borderRadius: "4px",
+                    fontSize: "14px",
                   }}
                 >
                   <option value="draft">Draft</option>
@@ -320,25 +309,23 @@ function InvestigationManager({
             <div>
               <label
                 style={{
-                  fontSize: '14px',
-                  fontWeight: '600',
-                  marginBottom: '6px',
-                  display: 'block',
+                  fontSize: "14px",
+                  fontWeight: "600",
+                  marginBottom: "6px",
+                  display: "block",
                 }}
               >
                 Priority
               </label>
               <select
                 value={formData.priority}
-                onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, priority: e.target.value }))
-                }
+                onChange={(e) => setFormData((prev) => ({ ...prev, priority: e.target.value }))}
                 style={{
-                  width: '100%',
-                  padding: '8px 12px',
-                  border: '1px solid var(--hairline)',
-                  borderRadius: '4px',
-                  fontSize: '14px',
+                  width: "100%",
+                  padding: "8px 12px",
+                  border: "1px solid var(--hairline)",
+                  borderRadius: "4px",
+                  fontSize: "14px",
                 }}
               >
                 <option value="low">Low</option>
@@ -352,10 +339,10 @@ function InvestigationManager({
               <div>
                 <label
                   style={{
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    marginBottom: '6px',
-                    display: 'block',
+                    fontSize: "14px",
+                    fontWeight: "600",
+                    marginBottom: "6px",
+                    display: "block",
                   }}
                 >
                   Assigned To
@@ -370,11 +357,11 @@ function InvestigationManager({
                     }))
                   }
                   style={{
-                    width: '100%',
-                    padding: '8px 12px',
-                    border: '1px solid var(--hairline)',
-                    borderRadius: '4px',
-                    fontSize: '14px',
+                    width: "100%",
+                    padding: "8px 12px",
+                    border: "1px solid var(--hairline)",
+                    borderRadius: "4px",
+                    fontSize: "14px",
                   }}
                   placeholder="analyst@example.com"
                 />
@@ -385,10 +372,10 @@ function InvestigationManager({
           <div>
             <label
               style={{
-                fontSize: '14px',
-                fontWeight: '600',
-                marginBottom: '6px',
-                display: 'block',
+                fontSize: "14px",
+                fontWeight: "600",
+                marginBottom: "6px",
+                display: "block",
               }}
             >
               Tags (comma-separated)
@@ -396,33 +383,29 @@ function InvestigationManager({
             <input
               type="text"
               value={formData.tags}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, tags: e.target.value }))
-              }
+              onChange={(e) => setFormData((prev) => ({ ...prev, tags: e.target.value }))}
               style={{
-                width: '100%',
-                padding: '8px 12px',
-                border: '1px solid var(--hairline)',
-                borderRadius: '4px',
-                fontSize: '14px',
+                width: "100%",
+                padding: "8px 12px",
+                border: "1px solid var(--hairline)",
+                borderRadius: "4px",
+                fontSize: "14px",
               }}
               placeholder="cybersecurity, financial, APT, malware..."
             />
           </div>
 
-          <div
-            style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}
-          >
+          <div style={{ display: "flex", gap: "12px", justifyContent: "flex-end" }}>
             <button
               type="button"
               onClick={onCancel}
               style={{
-                padding: '8px 16px',
-                backgroundColor: 'transparent',
-                border: '1px solid var(--hairline)',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                fontSize: '14px',
+                padding: "8px 16px",
+                backgroundColor: "transparent",
+                border: "1px solid var(--hairline)",
+                borderRadius: "4px",
+                cursor: "pointer",
+                fontSize: "14px",
               }}
             >
               Cancel
@@ -431,21 +414,21 @@ function InvestigationManager({
               type="submit"
               disabled={createLoading || updateLoading}
               style={{
-                padding: '8px 16px',
-                backgroundColor: '#1a73e8',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                fontSize: '14px',
-                minWidth: '100px',
+                padding: "8px 16px",
+                backgroundColor: "#1a73e8",
+                color: "white",
+                border: "none",
+                borderRadius: "4px",
+                cursor: "pointer",
+                fontSize: "14px",
+                minWidth: "100px",
               }}
             >
               {createLoading || updateLoading
-                ? '⏳ Saving...'
+                ? "⏳ Saving..."
                 : investigation
-                  ? 'Update'
-                  : 'Create'}
+                  ? "Update"
+                  : "Create"}
             </button>
           </div>
         </form>
@@ -454,52 +437,50 @@ function InvestigationManager({
   };
 
   return (
-    <div style={{ padding: '24px' }}>
+    <div style={{ padding: "24px" }}>
       {/* Header */}
       <div
         style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '24px',
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: "24px",
         }}
       >
-        <h2 style={{ fontSize: '1.5rem', fontWeight: '600', margin: 0 }}>
+        <h2 style={{ fontSize: "1.5rem", fontWeight: "600", margin: 0 }}>
           🔍 Investigation Manager
         </h2>
 
-        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+        <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
           <div
             style={{
-              display: 'flex',
-              border: '1px solid var(--hairline)',
-              borderRadius: '4px',
+              display: "flex",
+              border: "1px solid var(--hairline)",
+              borderRadius: "4px",
             }}
           >
             <button
-              onClick={() => setViewMode('grid')}
+              onClick={() => setViewMode("grid")}
               style={{
-                padding: '6px 12px',
-                backgroundColor:
-                  viewMode === 'grid' ? '#1a73e8' : 'transparent',
-                color: viewMode === 'grid' ? 'white' : '#666',
-                border: 'none',
-                cursor: 'pointer',
-                fontSize: '12px',
+                padding: "6px 12px",
+                backgroundColor: viewMode === "grid" ? "#1a73e8" : "transparent",
+                color: viewMode === "grid" ? "white" : "#666",
+                border: "none",
+                cursor: "pointer",
+                fontSize: "12px",
               }}
             >
               ⊞ Grid
             </button>
             <button
-              onClick={() => setViewMode('list')}
+              onClick={() => setViewMode("list")}
               style={{
-                padding: '6px 12px',
-                backgroundColor:
-                  viewMode === 'list' ? '#1a73e8' : 'transparent',
-                color: viewMode === 'list' ? 'white' : '#666',
-                border: 'none',
-                cursor: 'pointer',
-                fontSize: '12px',
+                padding: "6px 12px",
+                backgroundColor: viewMode === "list" ? "#1a73e8" : "transparent",
+                color: viewMode === "list" ? "white" : "#666",
+                border: "none",
+                cursor: "pointer",
+                fontSize: "12px",
               }}
             >
               ☰ List
@@ -509,13 +490,13 @@ function InvestigationManager({
           <button
             onClick={() => setShowCreateForm(!showCreateForm)}
             style={{
-              padding: '8px 16px',
-              backgroundColor: '#059669',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer',
-              fontSize: '14px',
+              padding: "8px 16px",
+              backgroundColor: "#059669",
+              color: "white",
+              border: "none",
+              borderRadius: "4px",
+              cursor: "pointer",
+              fontSize: "14px",
             }}
           >
             ➕ New Investigation
@@ -524,21 +505,21 @@ function InvestigationManager({
       </div>
 
       {/* Filters */}
-      <div className="panel" style={{ padding: '16px', marginBottom: '20px' }}>
+      <div className="panel" style={{ padding: "16px", marginBottom: "20px" }}>
         <div
           style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-            gap: '12px',
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+            gap: "12px",
           }}
         >
           <div>
             <label
               style={{
-                fontSize: '12px',
-                fontWeight: '600',
-                marginBottom: '4px',
-                display: 'block',
+                fontSize: "12px",
+                fontWeight: "600",
+                marginBottom: "4px",
+                display: "block",
               }}
             >
               Status
@@ -550,11 +531,11 @@ function InvestigationManager({
                 setFilter((prev: any) => ({ ...prev, status: e.target.value }))
               }
               style={{
-                width: '100%',
-                padding: '6px 8px',
-                border: '1px solid var(--hairline)',
-                borderRadius: '4px',
-                fontSize: '14px',
+                width: "100%",
+                padding: "6px 8px",
+                border: "1px solid var(--hairline)",
+                borderRadius: "4px",
+                fontSize: "14px",
               }}
             >
               <option value="">All Statuses</option>
@@ -568,10 +549,10 @@ function InvestigationManager({
           <div>
             <label
               style={{
-                fontSize: '12px',
-                fontWeight: '600',
-                marginBottom: '4px',
-                display: 'block',
+                fontSize: "12px",
+                fontWeight: "600",
+                marginBottom: "4px",
+                display: "block",
               }}
             >
               Priority
@@ -583,11 +564,11 @@ function InvestigationManager({
                 setFilter((prev: any) => ({ ...prev, priority: e.target.value }))
               }
               style={{
-                width: '100%',
-                padding: '6px 8px',
-                border: '1px solid var(--hairline)',
-                borderRadius: '4px',
-                fontSize: '14px',
+                width: "100%",
+                padding: "6px 8px",
+                border: "1px solid var(--hairline)",
+                borderRadius: "4px",
+                fontSize: "14px",
               }}
             >
               <option value="">All Priorities</option>
@@ -601,10 +582,10 @@ function InvestigationManager({
           <div>
             <label
               style={{
-                fontSize: '12px',
-                fontWeight: '600',
-                marginBottom: '4px',
-                display: 'block',
+                fontSize: "12px",
+                fontWeight: "600",
+                marginBottom: "4px",
+                display: "block",
               }}
             >
               Assigned To
@@ -618,11 +599,11 @@ function InvestigationManager({
               }
               placeholder="Filter by assignee..."
               style={{
-                width: '100%',
-                padding: '6px 8px',
-                border: '1px solid var(--hairline)',
-                borderRadius: '4px',
-                fontSize: '14px',
+                width: "100%",
+                padding: "6px 8px",
+                border: "1px solid var(--hairline)",
+                borderRadius: "4px",
+                fontSize: "14px",
               }}
             />
           </div>
@@ -642,16 +623,14 @@ function InvestigationManager({
         <InvestigationForm
           investigation={editingInvestigation}
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          onSubmit={(formData: any) =>
-            handleUpdateInvestigation(editingInvestigation.id, formData)
-          }
+          onSubmit={(formData: any) => handleUpdateInvestigation(editingInvestigation.id, formData)}
           onCancel={() => setEditingInvestigation(null)}
         />
       )}
 
       {/* Loading State */}
       {loading && (
-        <div style={{ textAlign: 'center', padding: '40px' }}>
+        <div style={{ textAlign: "center", padding: "40px" }}>
           <div>⏳ Loading investigations...</div>
         </div>
       )}
@@ -661,29 +640,27 @@ function InvestigationManager({
         <div
           className="panel"
           style={{
-            padding: '20px',
-            backgroundColor: '#fef2f2',
-            borderColor: '#fecaca',
-            textAlign: 'center',
+            padding: "20px",
+            backgroundColor: "#fef2f2",
+            borderColor: "#fecaca",
+            textAlign: "center",
           }}
         >
-          <div style={{ color: '#dc2626', marginBottom: '8px' }}>
+          <div style={{ color: "#dc2626", marginBottom: "8px" }}>
             ❌ Failed to load investigations
           </div>
-          <div style={{ fontSize: '14px', color: '#7f1d1d' }}>
-            {error.message}
-          </div>
+          <div style={{ fontSize: "14px", color: "#7f1d1d" }}>{error.message}</div>
           <button
             onClick={() => refetch()}
             style={{
-              marginTop: '12px',
-              padding: '6px 12px',
-              backgroundColor: '#dc2626',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer',
-              fontSize: '14px',
+              marginTop: "12px",
+              padding: "6px 12px",
+              backgroundColor: "#dc2626",
+              color: "white",
+              border: "none",
+              borderRadius: "4px",
+              cursor: "pointer",
+              fontSize: "14px",
             }}
           >
             🔄 Retry
@@ -698,35 +675,34 @@ function InvestigationManager({
             <div
               className="panel"
               style={{
-                padding: '40px',
-                textAlign: 'center',
-                backgroundColor: '#f8f9fa',
+                padding: "40px",
+                textAlign: "center",
+                backgroundColor: "#f8f9fa",
               }}
             >
-              <div style={{ fontSize: '48px', marginBottom: '16px' }}>🔍</div>
+              <div style={{ fontSize: "48px", marginBottom: "16px" }}>🔍</div>
               <h3
                 style={{
-                  fontSize: '1.2rem',
-                  fontWeight: '600',
-                  marginBottom: '8px',
+                  fontSize: "1.2rem",
+                  fontWeight: "600",
+                  marginBottom: "8px",
                 }}
               >
                 No investigations found
               </h3>
-              <p style={{ color: '#666', marginBottom: '16px' }}>
-                Create your first investigation to start organizing your
-                intelligence analysis work.
+              <p style={{ color: "#666", marginBottom: "16px" }}>
+                Create your first investigation to start organizing your intelligence analysis work.
               </p>
               <button
                 onClick={() => setShowCreateForm(true)}
                 style={{
-                  padding: '10px 20px',
-                  backgroundColor: '#1a73e8',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                  fontSize: '14px',
+                  padding: "10px 20px",
+                  backgroundColor: "#1a73e8",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "4px",
+                  cursor: "pointer",
+                  fontSize: "14px",
                 }}
               >
                 ➕ Create Investigation
@@ -735,12 +711,10 @@ function InvestigationManager({
           ) : (
             <div
               style={{
-                display: 'grid',
+                display: "grid",
                 gridTemplateColumns:
-                  viewMode === 'grid'
-                    ? 'repeat(auto-fill, minmax(350px, 1fr))'
-                    : '1fr',
-                gap: '16px',
+                  viewMode === "grid" ? "repeat(auto-fill, minmax(350px, 1fr))" : "1fr",
+                gap: "16px",
               }}
             >
               {investigations.map((investigation: Investigation) => (
@@ -748,32 +722,29 @@ function InvestigationManager({
                   key={investigation.id}
                   className="panel"
                   style={{
-                    padding: '20px',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s',
+                    padding: "20px",
+                    cursor: "pointer",
+                    transition: "all 0.2s",
                     border:
                       currentInvestigationId === investigation.id
-                        ? '2px solid #1a73e8'
-                        : '1px solid var(--hairline)',
+                        ? "2px solid #1a73e8"
+                        : "1px solid var(--hairline)",
                   }}
                   onClick={() => onInvestigationSelect?.(investigation)}
                 >
                   <div
                     style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      marginBottom: '12px',
+                      display: "flex",
+                      justifyContent: "space-between",
+                      marginBottom: "12px",
                     }}
                   >
                     <h3
                       style={{
-                        fontSize: '1.1rem',
-                        fontWeight: '600',
+                        fontSize: "1.1rem",
+                        fontWeight: "600",
                         margin: 0,
-                        color:
-                          currentInvestigationId === investigation.id
-                            ? '#1a73e8'
-                            : 'inherit',
+                        color: currentInvestigationId === investigation.id ? "#1a73e8" : "inherit",
                       }}
                     >
                       {investigation.name}
@@ -781,21 +752,20 @@ function InvestigationManager({
 
                     <div
                       style={{
-                        display: 'flex',
-                        gap: '4px',
-                        alignItems: 'center',
+                        display: "flex",
+                        gap: "4px",
+                        alignItems: "center",
                       }}
                     >
                       <span
                         style={{
-                          fontSize: '10px',
-                          padding: '2px 6px',
-                          borderRadius: '3px',
-                          backgroundColor:
-                            getStatusColor(investigation.status) + '20',
+                          fontSize: "10px",
+                          padding: "2px 6px",
+                          borderRadius: "3px",
+                          backgroundColor: getStatusColor(investigation.status) + "20",
                           color: getStatusColor(investigation.status),
-                          textTransform: 'uppercase',
-                          fontWeight: '600',
+                          textTransform: "uppercase",
+                          fontWeight: "600",
                         }}
                       >
                         {investigation.status}
@@ -803,14 +773,13 @@ function InvestigationManager({
 
                       <span
                         style={{
-                          fontSize: '10px',
-                          padding: '2px 6px',
-                          borderRadius: '3px',
-                          backgroundColor:
-                            getPriorityColor(investigation.priority) + '20',
+                          fontSize: "10px",
+                          padding: "2px 6px",
+                          borderRadius: "3px",
+                          backgroundColor: getPriorityColor(investigation.priority) + "20",
                           color: getPriorityColor(investigation.priority),
-                          textTransform: 'uppercase',
-                          fontWeight: '600',
+                          textTransform: "uppercase",
+                          fontWeight: "600",
                         }}
                       >
                         {investigation.priority}
@@ -821,9 +790,9 @@ function InvestigationManager({
                   {investigation.description && (
                     <p
                       style={{
-                        fontSize: '14px',
-                        color: '#666',
-                        marginBottom: '12px',
+                        fontSize: "14px",
+                        color: "#666",
+                        marginBottom: "12px",
                         lineHeight: 1.4,
                       }}
                     >
@@ -835,52 +804,49 @@ function InvestigationManager({
 
                   <div
                     style={{
-                      display: 'grid',
-                      gridTemplateColumns:
-                        'repeat(auto-fit, minmax(100px, 1fr))',
-                      gap: '12px',
-                      marginBottom: '12px',
-                      fontSize: '12px',
-                      color: '#666',
+                      display: "grid",
+                      gridTemplateColumns: "repeat(auto-fit, minmax(100px, 1fr))",
+                      gap: "12px",
+                      marginBottom: "12px",
+                      fontSize: "12px",
+                      color: "#666",
                     }}
                   >
                     <div>
-                      <strong>Entities:</strong>{' '}
-                      {investigation.entityCount || 0}
+                      <strong>Entities:</strong> {investigation.entityCount || 0}
                     </div>
                     <div>
-                      <strong>Relations:</strong>{' '}
-                      {investigation.relationshipCount || 0}
+                      <strong>Relations:</strong> {investigation.relationshipCount || 0}
                     </div>
                     <div>
-                      <strong>Created:</strong>{' '}
+                      <strong>Created:</strong>{" "}
                       {new Date(investigation.createdAt).toLocaleDateString()}
                     </div>
                     <div>
-                      <strong>Updated:</strong>{' '}
+                      <strong>Updated:</strong>{" "}
                       {new Date(investigation.updatedAt).toLocaleDateString()}
                     </div>
                   </div>
 
                   {investigation.tags && investigation.tags.length > 0 && (
-                    <div style={{ marginBottom: '12px' }}>
+                    <div style={{ marginBottom: "12px" }}>
                       {investigation.tags.slice(0, 3).map((tag) => (
                         <span
                           key={tag}
                           style={{
-                            fontSize: '10px',
-                            padding: '2px 6px',
-                            marginRight: '4px',
-                            backgroundColor: '#e5e7eb',
-                            color: '#4b5563',
-                            borderRadius: '3px',
+                            fontSize: "10px",
+                            padding: "2px 6px",
+                            marginRight: "4px",
+                            backgroundColor: "#e5e7eb",
+                            color: "#4b5563",
+                            borderRadius: "3px",
                           }}
                         >
                           {tag}
                         </span>
                       ))}
                       {investigation.tags.length > 3 && (
-                        <span style={{ fontSize: '10px', color: '#999' }}>
+                        <span style={{ fontSize: "10px", color: "#999" }}>
                           +{investigation.tags.length - 3} more
                         </span>
                       )}
@@ -889,16 +855,14 @@ function InvestigationManager({
 
                   <div
                     style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
                     }}
                   >
-                    <div style={{ fontSize: '11px', color: '#999' }}>
-                      {investigation.createdBy &&
-                        `by ${investigation.createdBy}`}
-                      {investigation.assignedTo &&
-                        ` • assigned to ${investigation.assignedTo}`}
+                    <div style={{ fontSize: "11px", color: "#999" }}>
+                      {investigation.createdBy && `by ${investigation.createdBy}`}
+                      {investigation.assignedTo && ` • assigned to ${investigation.assignedTo}`}
                     </div>
 
                     <button
@@ -907,13 +871,13 @@ function InvestigationManager({
                         setEditingInvestigation(investigation);
                       }}
                       style={{
-                        padding: '4px 8px',
-                        backgroundColor: 'transparent',
-                        border: '1px solid var(--hairline)',
-                        borderRadius: '3px',
-                        cursor: 'pointer',
-                        fontSize: '11px',
-                        color: '#666',
+                        padding: "4px 8px",
+                        backgroundColor: "transparent",
+                        border: "1px solid var(--hairline)",
+                        borderRadius: "3px",
+                        cursor: "pointer",
+                        fontSize: "11px",
+                        color: "#666",
                       }}
                     >
                       ✏️ Edit

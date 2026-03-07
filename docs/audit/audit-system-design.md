@@ -439,14 +439,9 @@ function calculateEventHash(event: AuditEvent): string {
   };
 
   // Canonical JSON (sorted keys)
-  const canonical = JSON.stringify(
-    hashableData,
-    Object.keys(hashableData).sort()
-  );
+  const canonical = JSON.stringify(hashableData, Object.keys(hashableData).sort());
 
-  return createHash('sha256')
-    .update(canonical)
-    .digest('hex');
+  return createHash("sha256").update(canonical).digest("hex");
 }
 ```
 
@@ -459,17 +454,12 @@ function signEvent(event: AuditEvent, signingKey: string): string {
     hash: event.hash,
     timestamp: event.timestamp.toISOString(),
     tenantId: event.tenantId,
-    previousEventHash: event.previousEventHash || '',
+    previousEventHash: event.previousEventHash || "",
   };
 
-  const canonical = JSON.stringify(
-    payload,
-    Object.keys(payload).sort()
-  );
+  const canonical = JSON.stringify(payload, Object.keys(payload).sort());
 
-  return createHmac('sha256', signingKey)
-    .update(canonical)
-    .digest('hex');
+  return createHmac("sha256", signingKey).update(canonical).digest("hex");
 }
 ```
 
@@ -479,8 +469,8 @@ function signEvent(event: AuditEvent, signingKey: string): string {
 function verifyEventSignature(event: AuditEvent, signingKey: string): boolean {
   const expectedSignature = signEvent(event, signingKey);
 
-  const eventSigBuffer = Buffer.from(event.signature || '', 'hex');
-  const expectedSigBuffer = Buffer.from(expectedSignature, 'hex');
+  const eventSigBuffer = Buffer.from(event.signature || "", "hex");
+  const expectedSigBuffer = Buffer.from(expectedSignature, "hex");
 
   if (eventSigBuffer.length !== expectedSigBuffer.length) {
     return false;
@@ -494,7 +484,7 @@ function verifyEventSignature(event: AuditEvent, signingKey: string): boolean {
 ### Hash Chain
 
 ```typescript
-let lastEventHash = '';
+let lastEventHash = "";
 
 async function recordEvent(eventData: Partial<AuditEvent>) {
   // 1. Build complete event
@@ -518,13 +508,10 @@ async function recordEvent(eventData: Partial<AuditEvent>) {
 ### Integrity Verification
 
 ```typescript
-async function verifyIntegrity(
-  startTime: Date,
-  endTime: Date
-): Promise<IntegrityVerification> {
+async function verifyIntegrity(startTime: Date, endTime: Date): Promise<IntegrityVerification> {
   const events = await queryEvents({ startTime, endTime });
 
-  let expectedPreviousHash = '';
+  let expectedPreviousHash = "";
   const issues: Array<any> = [];
 
   for (const event of events) {
@@ -533,9 +520,9 @@ async function verifyIntegrity(
     if (event.hash !== calculatedHash) {
       issues.push({
         eventId: event.id,
-        issueType: 'hash_mismatch',
-        description: 'Event content was modified',
-        severity: 'critical',
+        issueType: "hash_mismatch",
+        description: "Event content was modified",
+        severity: "critical",
       });
       continue;
     }
@@ -544,9 +531,9 @@ async function verifyIntegrity(
     if (!verifyEventSignature(event, signingKey)) {
       issues.push({
         eventId: event.id,
-        issueType: 'signature_invalid',
-        description: 'HMAC signature verification failed',
-        severity: 'critical',
+        issueType: "signature_invalid",
+        description: "HMAC signature verification failed",
+        severity: "critical",
       });
       continue;
     }
@@ -555,9 +542,9 @@ async function verifyIntegrity(
     if (expectedPreviousHash && event.previousEventHash !== expectedPreviousHash) {
       issues.push({
         eventId: event.id,
-        issueType: 'chain_broken',
-        description: 'Hash chain link broken',
-        severity: 'critical',
+        issueType: "chain_broken",
+        description: "Hash chain link broken",
+        severity: "critical",
       });
     }
 
@@ -576,10 +563,10 @@ async function verifyIntegrity(
     },
     issues,
     chainVerification: {
-      startHash: events[0]?.hash || '',
-      endHash: events[events.length - 1]?.hash || '',
-      chainIntact: issues.filter(i => i.issueType === 'chain_broken').length === 0,
-      brokenLinks: issues.filter(i => i.issueType === 'chain_broken'),
+      startHash: events[0]?.hash || "",
+      endHash: events[events.length - 1]?.hash || "",
+      chainIntact: issues.filter((i) => i.issueType === "chain_broken").length === 0,
+      brokenLinks: issues.filter((i) => i.issueType === "chain_broken"),
     },
   };
 }
@@ -726,31 +713,31 @@ WHERE overall_valid = FALSE;
 ### Unit Tests
 
 ```typescript
-describe('AuditService', () => {
-  describe('recordEvent', () => {
-    it('should calculate SHA-256 hash correctly');
-    it('should generate HMAC signature correctly');
-    it('should link to previous event hash');
-    it('should validate event with Zod schema');
-    it('should reject invalid events');
-    it('should buffer events for batch processing');
-    it('should flush on critical events');
+describe("AuditService", () => {
+  describe("recordEvent", () => {
+    it("should calculate SHA-256 hash correctly");
+    it("should generate HMAC signature correctly");
+    it("should link to previous event hash");
+    it("should validate event with Zod schema");
+    it("should reject invalid events");
+    it("should buffer events for batch processing");
+    it("should flush on critical events");
   });
 
-  describe('verifyIntegrity', () => {
-    it('should detect hash tampering');
-    it('should detect signature tampering');
-    it('should detect chain breaks');
-    it('should detect missing events');
-    it('should pass for valid chains');
+  describe("verifyIntegrity", () => {
+    it("should detect hash tampering");
+    it("should detect signature tampering");
+    it("should detect chain breaks");
+    it("should detect missing events");
+    it("should pass for valid chains");
   });
 
-  describe('queryEvents', () => {
-    it('should filter by time range');
-    it('should filter by user');
-    it('should filter by event type');
-    it('should filter by compliance framework');
-    it('should paginate correctly');
+  describe("queryEvents", () => {
+    it("should filter by time range");
+    it("should filter by user");
+    it("should filter by event type");
+    it("should filter by compliance framework");
+    it("should paginate correctly");
   });
 });
 ```
@@ -758,32 +745,32 @@ describe('AuditService', () => {
 ### Integration Tests
 
 ```typescript
-describe('Audit System Integration', () => {
-  it('should log user login events');
-  it('should log mutation events with before/after');
-  it('should log access denied events');
-  it('should verify hash chain integrity');
-  it('should detect tampered events');
-  it('should generate compliance reports');
-  it('should perform forensic analysis');
+describe("Audit System Integration", () => {
+  it("should log user login events");
+  it("should log mutation events with before/after");
+  it("should log access denied events");
+  it("should verify hash chain integrity");
+  it("should detect tampered events");
+  it("should generate compliance reports");
+  it("should perform forensic analysis");
 });
 ```
 
 ### Performance Tests
 
 ```typescript
-describe('Audit System Performance', () => {
-  it('should handle 10,000 events/sec sustained', async () => {
+describe("Audit System Performance", () => {
+  it("should handle 10,000 events/sec sustained", async () => {
     const events = generateTestEvents(10000);
     const start = Date.now();
 
-    await Promise.all(events.map(e => auditService.recordEvent(e)));
+    await Promise.all(events.map((e) => auditService.recordEvent(e)));
 
     const duration = Date.now() - start;
     expect(duration).toBeLessThan(1000); // < 1 second
   });
 
-  it('should query 1M events in < 1 second', async () => {
+  it("should query 1M events in < 1 second", async () => {
     const start = Date.now();
 
     const results = await auditService.queryEvents({
@@ -801,23 +788,21 @@ describe('Audit System Performance', () => {
 ### Security Tests
 
 ```typescript
-describe('Audit System Security', () => {
-  it('should prevent event modification via UPDATE', async () => {
+describe("Audit System Security", () => {
+  it("should prevent event modification via UPDATE", async () => {
     await expect(
-      db.query('UPDATE audit_events SET message = $1 WHERE id = $2', ['Tampered', eventId])
-    ).rejects.toThrow();  // RLS policy violation
+      db.query("UPDATE audit_events SET message = $1 WHERE id = $2", ["Tampered", eventId])
+    ).rejects.toThrow(); // RLS policy violation
   });
 
-  it('should prevent event deletion via DELETE', async () => {
-    await expect(
-      db.query('DELETE FROM audit_events WHERE id = $1', [eventId])
-    ).rejects.toThrow();  // RLS policy violation
+  it("should prevent event deletion via DELETE", async () => {
+    await expect(db.query("DELETE FROM audit_events WHERE id = $1", [eventId])).rejects.toThrow(); // RLS policy violation
   });
 
-  it('should use timing-safe comparison', async () => {
+  it("should use timing-safe comparison", async () => {
     // Timing attack test
     const validSig = event.signature;
-    const invalidSig = 'a'.repeat(64);  // Same length
+    const invalidSig = "a".repeat(64); // Same length
 
     const times = [];
     for (let i = 0; i < 1000; i++) {
@@ -952,14 +937,14 @@ See `/server/src/audit/audit-types.ts` for complete list of 60+ event types.
 
 ### Compliance Framework Reference
 
-| Framework | Description | Retention | Key Controls |
-|-----------|-------------|-----------|--------------|
-| **SOC 2** | Service Organization Controls | 7 years | CC6, CC7, CC8, A1 |
-| **GDPR** | General Data Protection Regulation | 3 years | Article 30, 32, 33 |
-| **HIPAA** | Health Insurance Portability | 6 years | § 164.308, 164.312 |
-| **SOX** | Sarbanes-Oxley Act | 7 years | Section 404, 802 |
-| **ISO 27001** | Information Security Management | 3 years | A.12.4, A.16.1 |
-| **PCI DSS** | Payment Card Industry | 1 year | 10.1-10.7 |
+| Framework     | Description                        | Retention | Key Controls       |
+| ------------- | ---------------------------------- | --------- | ------------------ |
+| **SOC 2**     | Service Organization Controls      | 7 years   | CC6, CC7, CC8, A1  |
+| **GDPR**      | General Data Protection Regulation | 3 years   | Article 30, 32, 33 |
+| **HIPAA**     | Health Insurance Portability       | 6 years   | § 164.308, 164.312 |
+| **SOX**       | Sarbanes-Oxley Act                 | 7 years   | Section 404, 802   |
+| **ISO 27001** | Information Security Management    | 3 years   | A.12.4, A.16.1     |
+| **PCI DSS**   | Payment Card Industry              | 1 year    | 10.1-10.7          |
 
 ### Migration Guide
 

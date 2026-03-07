@@ -2,7 +2,12 @@
  * ARIMA and SARIMA Time Series Forecasting
  */
 
-import type { TimeSeriesData, ForecastResult, ARIMAParams, ModelPerformance } from '../types/index.js';
+import type {
+  TimeSeriesData,
+  ForecastResult,
+  ARIMAParams,
+  ModelPerformance,
+} from "../types/index.js";
 
 export class ARIMAForecaster {
   private params: ARIMAParams;
@@ -28,7 +33,7 @@ export class ARIMAForecaster {
 
     // Apply differencing
     const differenced = this.difference(
-      data.map(d => d.value),
+      data.map((d) => d.value),
       this.params.d,
       this.params.D || 0,
       this.params.s || 1
@@ -62,12 +67,12 @@ export class ARIMAForecaster {
    */
   forecast(horizon: number, confidenceLevel: number = 0.95): ForecastResult[] {
     if (!this.fitted || !this.coefficients) {
-      throw new Error('Model must be fitted before forecasting');
+      throw new Error("Model must be fitted before forecasting");
     }
 
     const results: ForecastResult[] = [];
     const lastTimestamp = this.data[this.data.length - 1].timestamp;
-    const values = this.data.map(d => d.value);
+    const values = this.data.map((d) => d.value);
 
     for (let h = 1; h <= horizon; h++) {
       const forecast = this.forecastOneStep(values, h);
@@ -96,8 +101,8 @@ export class ARIMAForecaster {
    */
   evaluate(testData: TimeSeriesData[]): ModelPerformance {
     const predictions = this.forecast(testData.length, 0.95);
-    const actual = testData.map(d => d.value);
-    const predicted = predictions.map(p => p.forecast);
+    const actual = testData.map((d) => d.value);
+    const predicted = predictions.map((p) => p.forecast);
 
     return this.calculateMetrics(actual, predicted);
   }
@@ -134,7 +139,7 @@ export class ARIMAForecaster {
 
     const n = data.length;
     const mean = data.reduce((a, b) => a + b, 0) / n;
-    const centered = data.map(x => x - mean);
+    const centered = data.map((x) => x - mean);
 
     // Calculate autocorrelations
     const acf: number[] = [];
@@ -178,7 +183,7 @@ export class ARIMAForecaster {
     const mean = data.reduce((a, b) => a + b, 0) / n;
 
     // Calculate residuals from AR fit
-    const residuals = data.map(x => x - mean);
+    const residuals = data.map((x) => x - mean);
 
     for (let i = 0; i < order && i < residuals.length - 1; i++) {
       let sum = 0;
@@ -221,7 +226,7 @@ export class ARIMAForecaster {
    * Forecast one step ahead
    */
   private forecastOneStep(values: number[], horizon: number): number {
-    if (!this.coefficients) throw new Error('Model not fitted');
+    if (!this.coefficients) throw new Error("Model not fitted");
 
     const { ar, ma } = this.coefficients;
     let forecast = 0;
@@ -259,7 +264,7 @@ export class ARIMAForecaster {
     if (!this.coefficients) return [];
 
     const residuals: number[] = [];
-    const values = this.data.map(d => d.value);
+    const values = this.data.map((d) => d.value);
 
     for (let i = this.params.p; i < values.length; i++) {
       let predicted = 0;
@@ -278,7 +283,7 @@ export class ARIMAForecaster {
   private getZScore(confidenceLevel: number): number {
     // Approximate z-scores for common confidence levels
     const zScores: Record<number, number> = {
-      0.90: 1.645,
+      0.9: 1.645,
       0.95: 1.96,
       0.99: 2.576,
     };
@@ -290,7 +295,10 @@ export class ARIMAForecaster {
    */
   private calculateMetrics(actual: number[], predicted: number[]): ModelPerformance {
     const n = actual.length;
-    let mae = 0, mse = 0, mape = 0, smape = 0;
+    let mae = 0,
+      mse = 0,
+      mape = 0,
+      smape = 0;
 
     for (let i = 0; i < n; i++) {
       const error = actual[i] - predicted[i];
@@ -318,11 +326,11 @@ export class ARIMAForecaster {
     const meanActual = actual.reduce((a, b) => a + b, 0) / n;
     const ssTotal = actual.reduce((sum, val) => sum + Math.pow(val - meanActual, 2), 0);
     const ssResidual = actual.reduce((sum, val, i) => sum + Math.pow(val - predicted[i], 2), 0);
-    const r2 = 1 - (ssResidual / ssTotal);
+    const r2 = 1 - ssResidual / ssTotal;
 
     // Calculate MASE (simplified)
-    const naiveMae = actual.slice(1).reduce((sum, val, i) =>
-      sum + Math.abs(val - actual[i]), 0) / (n - 1);
+    const naiveMae =
+      actual.slice(1).reduce((sum, val, i) => sum + Math.abs(val - actual[i]), 0) / (n - 1);
     const mase = mae / naiveMae;
 
     return { mae, rmse, mape, mase, smape, r2 };
@@ -338,12 +346,7 @@ export class AutoARIMA {
   private maxQ: number;
   private seasonal: boolean;
 
-  constructor(
-    maxP: number = 5,
-    maxD: number = 2,
-    maxQ: number = 5,
-    seasonal: boolean = false
-  ) {
+  constructor(maxP: number = 5, maxD: number = 2, maxQ: number = 5, seasonal: boolean = false) {
     this.maxP = maxP;
     this.maxD = maxD;
     this.maxQ = maxQ;
@@ -391,7 +394,7 @@ export class AutoARIMA {
     }
 
     if (!bestParams || !bestPerformance) {
-      throw new Error('Failed to find suitable ARIMA parameters');
+      throw new Error("Failed to find suitable ARIMA parameters");
     }
 
     return { params: bestParams, performance: bestPerformance };

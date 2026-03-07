@@ -20,27 +20,27 @@ pnpm add @intelgraph/logger
 ## Quick Start
 
 ```typescript
-import createLogger from '@intelgraph/logger';
+import createLogger from "@intelgraph/logger";
 
 const logger = createLogger({
-  serviceName: 'summit-api',
-  level: 'info',
+  serviceName: "summit-api",
+  level: "info",
 });
 
-logger.info('Application started');
-logger.info({ port: 4000 }, 'Server listening');
+logger.info("Application started");
+logger.info({ port: 4000 }, "Server listening");
 ```
 
 ## Configuration
 
 ### Logger Options
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `serviceName` | string | **required** | Name of the service (e.g., 'summit-api') |
-| `level` | string | `'info'` | Log level (trace, debug, info, warn, error, fatal) |
-| `prettyPrint` | boolean | `NODE_ENV !== 'production'` | Enable pretty-printed logs |
-| `redact` | string[] | `['password', 'token', ...]` | Fields to redact from logs |
+| Option        | Type     | Default                      | Description                                        |
+| ------------- | -------- | ---------------------------- | -------------------------------------------------- |
+| `serviceName` | string   | **required**                 | Name of the service (e.g., 'summit-api')           |
+| `level`       | string   | `'info'`                     | Log level (trace, debug, info, warn, error, fatal) |
+| `prettyPrint` | boolean  | `NODE_ENV !== 'production'`  | Enable pretty-printed logs                         |
+| `redact`      | string[] | `['password', 'token', ...]` | Fields to redact from logs                         |
 
 ### Environment Variables
 
@@ -54,9 +54,9 @@ logger.info({ port: 4000 }, 'Server listening');
 ### Basic Logging
 
 ```typescript
-logger.info('Simple message');
-logger.info({ key: 'value' }, 'Message with context');
-logger.error({ err: error }, 'Error occurred');
+logger.info("Simple message");
+logger.info({ key: "value" }, "Message with context");
+logger.error({ err: error }, "Error occurred");
 ```
 
 ### Child Loggers
@@ -64,14 +64,14 @@ logger.error({ err: error }, 'Error occurred');
 Create child loggers with additional context:
 
 ```typescript
-import { createChildLogger } from '@intelgraph/logger';
+import { createChildLogger } from "@intelgraph/logger";
 
 const requestLogger = createChildLogger(logger, {
-  requestId: 'req-123',
-  userId: 'user-456',
+  requestId: "req-123",
+  userId: "user-456",
 });
 
-requestLogger.info('Processing request'); // Includes requestId and userId
+requestLogger.info("Processing request"); // Includes requestId and userId
 ```
 
 ### Express Middleware
@@ -79,14 +79,14 @@ requestLogger.info('Processing request'); // Includes requestId and userId
 Automatically add request context to logs:
 
 ```typescript
-import { createLogMiddleware } from '@intelgraph/logger';
-import express from 'express';
+import { createLogMiddleware } from "@intelgraph/logger";
+import express from "express";
 
 const app = express();
 app.use(createLogMiddleware(logger));
 
-app.get('/api/users', (req, res) => {
-  req.log.info('Fetching users'); // Includes request context
+app.get("/api/users", (req, res) => {
+  req.log.info("Fetching users"); // Includes request context
   res.json({ users: [] });
 });
 ```
@@ -96,18 +96,19 @@ app.get('/api/users', (req, res) => {
 Logs automatically include trace IDs when running in an instrumented service:
 
 ```typescript
-import { trace } from '@opentelemetry/api';
+import { trace } from "@opentelemetry/api";
 
-const tracer = trace.getTracer('summit-api');
-const span = tracer.startSpan('process-order');
+const tracer = trace.getTracer("summit-api");
+const span = tracer.startSpan("process-order");
 
 // This log will include traceId and spanId
-logger.info({ orderId: '123' }, 'Processing order');
+logger.info({ orderId: "123" }, "Processing order");
 
 span.end();
 ```
 
 Output:
+
 ```json
 {
   "level": "INFO",
@@ -125,18 +126,13 @@ Output:
 Add log data as span attributes for better correlation:
 
 ```typescript
-import { logWithSpan, LogLevel } from '@intelgraph/logger';
+import { logWithSpan, LogLevel } from "@intelgraph/logger";
 
-logWithSpan(
-  logger,
-  LogLevel.INFO,
-  'Database query executed',
-  {
-    query: 'SELECT * FROM entities',
-    duration: 150,
-    rowCount: 42,
-  }
-);
+logWithSpan(logger, LogLevel.INFO, "Database query executed", {
+  query: "SELECT * FROM entities",
+  duration: 150,
+  rowCount: 42,
+});
 ```
 
 ## Log Schema
@@ -160,6 +156,7 @@ All logs follow this consistent schema:
 ## Sensitive Data Redaction
 
 By default, the following fields are redacted:
+
 - `password`
 - `token`
 - `secret`
@@ -170,14 +167,17 @@ Customize redaction:
 
 ```typescript
 const logger = createLogger({
-  serviceName: 'auth-service',
-  redact: ['password', 'ssn', 'creditCard', 'cvv'],
+  serviceName: "auth-service",
+  redact: ["password", "ssn", "creditCard", "cvv"],
 });
 
-logger.info({
-  username: 'john',
-  password: 'super-secret', // Will be [Redacted]
-}, 'User login');
+logger.info(
+  {
+    username: "john",
+    password: "super-secret", // Will be [Redacted]
+  },
+  "User login"
+);
 ```
 
 ## Integration with Grafana/Loki
@@ -228,6 +228,7 @@ logger.info({ key: 'value' }, 'Message');
 ```
 
 Key differences:
+
 - Pino uses `(object, message)` format instead of `(message, object)`
 - Errors should be in `{ err: error }` not `{ error }`
 - No need for transports configuration (handled automatically)

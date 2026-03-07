@@ -5,18 +5,11 @@
  * patterns for external service calls (OPA policy engine)
  */
 
-import pino from 'pino';
-import {
-  executeWithResilience,
-  RetryPolicies,
-  withGracefulDegradation,
-} from '../resilience.js';
-import {
-  ExternalServiceError,
-  AuthorizationError,
-} from '../errors.js';
+import pino from "pino";
+import { executeWithResilience, RetryPolicies, withGracefulDegradation } from "../resilience.js";
+import { ExternalServiceError, AuthorizationError } from "../errors.js";
 
-const logger = pino({ name: 'OPAClient' });
+const logger = pino({ name: "OPAClient" });
 
 interface OPADecision {
   allow: boolean;
@@ -42,7 +35,7 @@ interface OPAInput {
 export class OPAClient {
   constructor(
     private baseUrl: string,
-    private policy: string = 'authz/allow',
+    private policy: string = "authz/allow"
   ) {}
 
   /**
@@ -50,8 +43,8 @@ export class OPAClient {
    */
   async decide(input: OPAInput): Promise<OPADecision> {
     return executeWithResilience({
-      serviceName: 'opa',
-      operation: 'decide',
+      serviceName: "opa",
+      operation: "decide",
       fn: () => this.makeRequest(input),
       retryPolicy: RetryPolicies.externalService,
       timeoutMs: 5000, // 5 second timeout for policy decisions
@@ -71,17 +64,13 @@ export class OPAClient {
   async decideWithFallback(input: OPAInput): Promise<OPADecision> {
     const fallbackDecision: OPADecision = {
       allow: false,
-      reason: 'Policy engine unavailable - failing closed',
+      reason: "Policy engine unavailable - failing closed",
     };
 
-    return withGracefulDegradation(
-      () => this.decide(input),
-      fallbackDecision,
-      {
-        serviceName: 'opa',
-        operation: 'decideWithFallback',
-      },
-    );
+    return withGracefulDegradation(() => this.decide(input), fallbackDecision, {
+      serviceName: "opa",
+      operation: "decideWithFallback",
+    });
   }
 
   /**
@@ -92,25 +81,25 @@ export class OPAClient {
 
     try {
       const response = await fetch(url, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ input }),
       });
 
       if (!response.ok) {
-        const errorText = await response.text().catch(() => 'Unknown error');
+        const errorText = await response.text().catch(() => "Unknown error");
 
         throw new ExternalServiceError(
-          'OPA_ERROR',
-          'opa',
+          "OPA_ERROR",
+          "opa",
           `OPA request failed: ${response.status} ${response.statusText}`,
           {
             status: response.status,
             statusText: response.statusText,
             error: errorText,
-          },
+          }
         );
       }
 
@@ -120,7 +109,7 @@ export class OPAClient {
       if (!data.result) {
         return {
           allow: false,
-          reason: 'No decision from policy engine',
+          reason: "No decision from policy engine",
         };
       }
 
@@ -136,11 +125,11 @@ export class OPAClient {
 
       // Network or parsing errors
       throw new ExternalServiceError(
-        'OPA_ERROR',
-        'opa',
+        "OPA_ERROR",
+        "opa",
         `OPA request failed: ${error.message}`,
         undefined,
-        error,
+        error
       );
     }
   }
@@ -153,13 +142,13 @@ export class OPAClient {
 
     if (!decision.allow) {
       throw new AuthorizationError(
-        'POLICY_VIOLATION',
-        decision.reason || 'Access denied by policy',
+        "POLICY_VIOLATION",
+        decision.reason || "Access denied by policy",
         {
           user: input.user.id,
           resource: input.resource,
           action: input.action,
-        },
+        }
       );
     }
 
@@ -169,7 +158,7 @@ export class OPAClient {
         resource: input.resource,
         action: input.action,
       },
-      'Authorization granted',
+      "Authorization granted"
     );
   }
 }
@@ -178,8 +167,8 @@ export class OPAClient {
  * Create OPA client instance
  */
 export function createOPAClient(
-  baseUrl: string = process.env.OPA_URL || 'http://localhost:8181',
-  policy?: string,
+  baseUrl: string = process.env.OPA_URL || "http://localhost:8181",
+  policy?: string
 ): OPAClient {
   return new OPAClient(baseUrl, policy);
 }

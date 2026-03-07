@@ -15,16 +15,16 @@ This document establishes retention, minimization, and purge guidelines across I
 
 ## Retention schedule (authoritative defaults)
 
-| Data category | Location | Retention rule | Notes |
-| --- | --- | --- | --- |
-| Security/audit logs | Postgres `audit_logs` | 180 days, then eligible for deletion | TTL captured via `retention_expires_at` column and enforced by purge job. |
-| Admin activity + authorization evidence | Postgres `admin_activity_log`, `authorization_audit_log` | 180 days, then purge or archive per regulator needs | Same 180-day posture as audit logs; extend only with explicit approval. |
-| Copilot event stream (LLM intermediate outputs) | Postgres `copilot_events` | 30 days, then delete | TTL stored in `expires_at` to protect prompts/responses. |
-| Copilot run metadata | Postgres `copilot_runs` | 180 days, then anonymize plan/metadata/goal text | Keeps operational lineage while stripping PII-heavy payloads. |
-| Feature/config history | Postgres `feature_flag_history`, similar history tables | 365 days | Retain change control evidence; redact requester identifiers on DSAR. |
-| Session/auth tokens & cached lookups | Redis | ≤7 days (prefer hours) | Keep TTL on access/session caches; tokens beyond 7d must be rotated. |
-| Operational event logs | File/telemetry sinks | 30 days | Export older telemetry to cold storage with identifiers hashed/anonymized. |
-| Backups | Encrypted object storage | 35 days rolling backups; ensure purge mirrors production retention | Backups must inherit deletions within 35 days and remain encrypted at rest. |
+| Data category                                   | Location                                                 | Retention rule                                                     | Notes                                                                       |
+| ----------------------------------------------- | -------------------------------------------------------- | ------------------------------------------------------------------ | --------------------------------------------------------------------------- |
+| Security/audit logs                             | Postgres `audit_logs`                                    | 180 days, then eligible for deletion                               | TTL captured via `retention_expires_at` column and enforced by purge job.   |
+| Admin activity + authorization evidence         | Postgres `admin_activity_log`, `authorization_audit_log` | 180 days, then purge or archive per regulator needs                | Same 180-day posture as audit logs; extend only with explicit approval.     |
+| Copilot event stream (LLM intermediate outputs) | Postgres `copilot_events`                                | 30 days, then delete                                               | TTL stored in `expires_at` to protect prompts/responses.                    |
+| Copilot run metadata                            | Postgres `copilot_runs`                                  | 180 days, then anonymize plan/metadata/goal text                   | Keeps operational lineage while stripping PII-heavy payloads.               |
+| Feature/config history                          | Postgres `feature_flag_history`, similar history tables  | 365 days                                                           | Retain change control evidence; redact requester identifiers on DSAR.       |
+| Session/auth tokens & cached lookups            | Redis                                                    | ≤7 days (prefer hours)                                             | Keep TTL on access/session caches; tokens beyond 7d must be rotated.        |
+| Operational event logs                          | File/telemetry sinks                                     | 30 days                                                            | Export older telemetry to cold storage with identifiers hashed/anonymized.  |
+| Backups                                         | Encrypted object storage                                 | 35 days rolling backups; ensure purge mirrors production retention | Backups must inherit deletions within 35 days and remain encrypted at rest. |
 
 ## Minimization and anonymization strategy
 

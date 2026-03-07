@@ -35,6 +35,7 @@ Successfully deployed **4-PR CI stabilization stack** with **post-deployment har
 ### 1. Branch Protection Validation ✅
 
 **Current Configuration**:
+
 ```json
 {
   "required_checks": ["gate"],
@@ -53,11 +54,13 @@ Successfully deployed **4-PR CI stabilization stack** with **post-deployment har
 **Script**: `scripts/ci/cancel-archived-workflow-runs.sh`
 
 **Features**:
+
 - Preserves new workflows (pr-gate, client-ci, server-ci, docs-ci, infra-ci, main-validation, release-ga)
 - Targets only archived workflows
 - Safe for production use
 
 **First Run**:
+
 - Cancelled: 200 archived workflow runs
 - Preserved: All new workflow runs
 - Queue: 500 → 300 remaining (60% reduction)
@@ -67,11 +70,13 @@ Successfully deployed **4-PR CI stabilization stack** with **post-deployment har
 **Script**: `scripts/ci/workflow-budget-sentinel.mjs`
 
 **Enforces**:
+
 - Max 12 active workflows (currently 7/12)
 - Path filtering on all non-exempt workflows
 - Fails CI if violations detected
 
 **Exemptions**:
+
 - pr-gate (always runs)
 - main-validation (main branch only)
 - Release GA Pipeline (tag-driven)
@@ -84,6 +89,7 @@ Successfully deployed **4-PR CI stabilization stack** with **post-deployment har
 **Script**: `scripts/ci/runner-saturation-policy.sh`
 
 **Auto-Recovery System**:
+
 ```
 HEALTHY (<100):      No action
 ELEVATED (100-199):  Monitor only
@@ -92,6 +98,7 @@ GRIDLOCK (>300):     Emergency cancel ALL + Alert
 ```
 
 **First Run Results**:
+
 - Detected: GRIDLOCK (500 queued)
 - Action: Cancelled 200 runs
 - Enabled: MERGE_SURGE mode
@@ -105,15 +112,18 @@ GRIDLOCK (>300):     Emergency cancel ALL + Alert
 **PR #19077**: test: validate new 8-workflow CI system
 
 **Changes**:
+
 - `README.md` (triggers docs-ci)
 - `server/src/routes/health.ts` (triggers server-ci)
 
 **Workflows Triggered**:
+
 - ✅ pr-gate (gate check)
 - ✅ docs-ci (lint check)
 - ✅ server-ci (test check)
 
 **Workflows NOT Triggered**:
+
 - ❌ client-ci (no client/ changes)
 - ❌ infra-ci (no infra/ changes)
 - ❌ 252 archived workflows (archived)
@@ -126,34 +136,34 @@ GRIDLOCK (>300):     Emergency cancel ALL + Alert
 
 ### Before Stabilization
 
-| Metric | Value |
-|--------|-------|
-| Active Workflows | 260+ |
-| Workflows per PR | ~260 |
-| Queue Status | 200+ queued, 0 running |
-| CI Status | GRIDLOCK (3+ hours) |
-| Concurrent Limit | 60 (exceeded) |
+| Metric           | Value                  |
+| ---------------- | ---------------------- |
+| Active Workflows | 260+                   |
+| Workflows per PR | ~260                   |
+| Queue Status     | 200+ queued, 0 running |
+| CI Status        | GRIDLOCK (3+ hours)    |
+| Concurrent Limit | 60 (exceeded)          |
 
 ### After Stabilization + Hardening
 
-| Metric | Value |
-|--------|-------|
-| Active Workflows | 7 |
-| Workflows per PR | 3-4 (path filtered) |
-| Queue Status | 100 queued, 14 running |
-| CI Status | WARNING → Improving |
-| Budget Used | 7/12 (42%) |
+| Metric           | Value                  |
+| ---------------- | ---------------------- |
+| Active Workflows | 7                      |
+| Workflows per PR | 3-4 (path filtered)    |
+| Queue Status     | 100 queued, 14 running |
+| CI Status        | WARNING → Improving    |
+| Budget Used      | 7/12 (42%)             |
 
 ### Recovery Timeline
 
-| Time | Event | Queue |
-|------|-------|-------|
-| T+0h | Deployed 4-PR stack | 200 queued |
-| T+0h30m | Branch protection restored | 200 queued |
-| T+1h | Selective cancellation | 300 queued |
-| T+1h30m | Saturation policy run | 500 queued |
-| T+2h | Emergency cancellation | 100 queued |
-| **Current** | **Stable + monitoring** | **100 queued** |
+| Time        | Event                      | Queue          |
+| ----------- | -------------------------- | -------------- |
+| T+0h        | Deployed 4-PR stack        | 200 queued     |
+| T+0h30m     | Branch protection restored | 200 queued     |
+| T+1h        | Selective cancellation     | 300 queued     |
+| T+1h30m     | Saturation policy run      | 500 queued     |
+| T+2h        | Emergency cancellation     | 100 queued     |
+| **Current** | **Stable + monitoring**    | **100 queued** |
 
 ---
 
@@ -208,7 +218,7 @@ GRIDLOCK (>300):     Emergency cancel ALL + Alert
 
 ### Automated Recovery
 
-4. **Runner Saturation Policy** (cron: */5)
+4. **Runner Saturation Policy** (cron: \*/5)
    - Auto-enables MERGE_SURGE mode
    - Auto-cancels archived workflows
    - Emergency cancels ALL if gridlock
@@ -233,17 +243,19 @@ GRIDLOCK (>300):     Emergency cancel ALL + Alert
 
 **Current Queue (100 queued)**:
 
-| Workflow Type | Count | Source |
-|---------------|-------|--------|
-| Archived workflows | ~95 | Old PRs (created before consolidation) |
-| New workflows | ~5 | New PRs (pr-gate, client-ci, server-ci) |
+| Workflow Type      | Count | Source                                  |
+| ------------------ | ----- | --------------------------------------- |
+| Archived workflows | ~95   | Old PRs (created before consolidation)  |
+| New workflows      | ~5    | New PRs (pr-gate, client-ci, server-ci) |
 
 **Why archived workflows still run**:
+
 - Old PRs reference archived workflow files
 - These runs fail with "workflow not found"
 - Natural cleanup as PRs are updated/closed
 
 **Solution**: No intervention needed
+
 - Old PRs will fail naturally
 - Authors can rebase to adopt new workflows
 - Or close/reopen to trigger new system
@@ -256,16 +268,16 @@ GRIDLOCK (>300):     Emergency cancel ALL + Alert
 
 **Expected Behavior**: ✅ ALL PASSED
 
-| Check | Expected | Actual | Status |
-|-------|----------|--------|--------|
-| pr-gate runs | Yes | Yes | ✅ |
-| docs-ci runs | Yes (README changed) | Yes | ✅ |
-| server-ci runs | Yes (server/ changed) | Yes | ✅ |
-| client-ci runs | No (no client/ change) | No | ✅ |
-| infra-ci runs | No (no infra/ change) | No | ✅ |
-| Archived workflows | No (252 archived) | No | ✅ |
-| Required check "gate" | Shows up | Shows up | ✅ |
-| Budget sentinel | Passes | Passes | ✅ |
+| Check                 | Expected               | Actual   | Status |
+| --------------------- | ---------------------- | -------- | ------ |
+| pr-gate runs          | Yes                    | Yes      | ✅     |
+| docs-ci runs          | Yes (README changed)   | Yes      | ✅     |
+| server-ci runs        | Yes (server/ changed)  | Yes      | ✅     |
+| client-ci runs        | No (no client/ change) | No       | ✅     |
+| infra-ci runs         | No (no infra/ change)  | No       | ✅     |
+| Archived workflows    | No (252 archived)      | No       | ✅     |
+| Required check "gate" | Shows up               | Shows up | ✅     |
+| Budget sentinel       | Passes                 | Passes   | ✅     |
 
 **Conclusion**: New 8-workflow system working perfectly ✅
 

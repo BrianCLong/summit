@@ -152,15 +152,7 @@ with explicit evidence and approval.
     },
     "Block": {
       "type": "object",
-      "required": [
-        "id",
-        "kind",
-        "body",
-        "language",
-        "audience",
-        "related_entities",
-        "policy_tags"
-      ],
+      "required": ["id", "kind", "body", "language", "audience", "related_entities", "policy_tags"],
       "properties": {
         "id": { "type": "string", "pattern": "^block_[a-z0-9_-]+$" },
         "kind": {
@@ -364,10 +356,7 @@ with explicit evidence and approval.
   "layouts": [
     {
       "id": "layout_governance_drift_v1",
-      "block_ids": [
-        "block_governance_drift_context",
-        "block_governance_drift_procedure"
-      ],
+      "block_ids": ["block_governance_drift_context", "block_governance_drift_procedure"],
       "layout_recipe": "context -> procedure"
     }
   ],

@@ -42,15 +42,15 @@ import {
   createDefaultEventBooster,
   generateUniformEvents,
   runPatternBenchmark,
-} from '@intelgraph/event-booster';
+} from "@intelgraph/event-booster";
 
 const booster = createDefaultEventBooster();
 const baseline = generateUniformEvents(5, { signal: 3 });
-const result = booster.boost(baseline, 'amplify-signal');
+const result = booster.boost(baseline, "amplify-signal");
 
 console.log(`Generated ${result.outputCount} boosted events`);
 
-const metrics = runPatternBenchmark(booster, 'amplify-signal', baseline, {
+const metrics = runPatternBenchmark(booster, "amplify-signal", baseline, {
   iterations: 25,
 });
 console.table(metrics);

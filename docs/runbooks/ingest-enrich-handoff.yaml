@@ -5,7 +5,7 @@ metadata:
   version: 1.2.0
   owner: data@summit
   allowList:
-    roles: ['data-engineer', 'platform-engineer']
+    roles: ["data-engineer", "platform-engineer"]
 spec:
   inputs:
     - name: source_bucket

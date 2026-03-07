@@ -10,14 +10,14 @@ To enable the ACP backend, set `SUMMIT_ACP_ENABLE = True` in `summit/config/flag
 
 ## Architecture
 
-* **Transport**: Stdio via NDJSON.
-* **Protocol**: ACP (initialize, session, prompt, permissions).
-* **Policy**: Deny-by-default permission broker.
+- **Transport**: Stdio via NDJSON.
+- **Protocol**: ACP (initialize, session, prompt, permissions).
+- **Policy**: Deny-by-default permission broker.
 
 ## Security
 
-* **Headless Mode**: Denies all tool execution and URL fetching by default.
-* **Interactive Mode**: Requires allowlist for specific tools/URLs.
+- **Headless Mode**: Denies all tool execution and URL fetching by default.
+- **Interactive Mode**: Requires allowlist for specific tools/URLs.
 
 ## Usage
 

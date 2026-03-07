@@ -63,35 +63,35 @@
       "title": "MTTA / MTTR",
       "type": "timeseries",
       "targets": [
-          {
-              "expr": "avg_over_time(alert_acknowledge_latency[24h])",
-              "legendFormat": "MTTA",
-              "refId": "A"
-          },
-          {
-            "expr": "avg_over_time(alert_resolve_latency[24h])",
-            "legendFormat": "MTTR",
-            "refId": "B"
-          }
+        {
+          "expr": "avg_over_time(alert_acknowledge_latency[24h])",
+          "legendFormat": "MTTA",
+          "refId": "A"
+        },
+        {
+          "expr": "avg_over_time(alert_resolve_latency[24h])",
+          "legendFormat": "MTTR",
+          "refId": "B"
+        }
       ]
     },
     {
-        "gridPos": {
-            "h": 8,
-            "w": 12,
-            "x": 12,
-            "y": 8
-        },
-        "id": 4,
-        "title": "Autoremediation Success Rate",
-        "type": "stat",
-        "targets": [
-            {
-                "expr": "sum(autoremediation_success_total) / sum(autoremediation_total)",
-                "legendFormat": "Success Rate",
-                "refId": "A"
-            }
-        ]
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 8
+      },
+      "id": 4,
+      "title": "Autoremediation Success Rate",
+      "type": "stat",
+      "targets": [
+        {
+          "expr": "sum(autoremediation_success_total) / sum(autoremediation_total)",
+          "legendFormat": "Success Rate",
+          "refId": "A"
+        }
+      ]
     }
   ],
   "schemaVersion": 38,

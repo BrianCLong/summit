@@ -1,10 +1,13 @@
 # Required checks discovery for SIPL
 
 ## Goal
-List the repository's *required* CI checks for the SIPL module.
+
+List the repository's _required_ CI checks for the SIPL module.
 
 ## Temporary convention
+
 Until discovered, we use temporary verifier names:
+
 - `ci:sipl-unit`
 - `ci:sipl-schema`
 - `ci:sipl-lint`
@@ -14,4 +17,5 @@ Until discovered, we use temporary verifier names:
 - `ci:sipl-eval-smoke`
 
 ## Rename plan
+
 Once actual check names are known, update CI config to emit the official check names.

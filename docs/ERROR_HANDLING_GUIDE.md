@@ -50,12 +50,12 @@ The Summit platform implements a comprehensive, standardized error handling and 
 ```typescript
 // ✅ Good: Fail fast with clear error
 if (!userId) {
-  throw new ValidationError('User ID is required', { field: 'userId' });
+  throw new ValidationError("User ID is required", { field: "userId" });
 }
 
 // ❌ Bad: Silent failure
 if (!userId) {
-  logger.warn('User ID missing');
+  logger.warn("User ID missing");
   return null;
 }
 ```
@@ -63,29 +63,31 @@ if (!userId) {
 ### 2. Distinguish Operational vs Programming Errors
 
 **Operational Errors** (expected, handle gracefully):
+
 - Validation failures
 - Authentication failures
 - External service unavailable
 - Database connection timeout
 
 **Programming Errors** (bugs, crash and fix):
+
 - `null` reference errors
 - Type errors
 - Assertion failures
 
 ```typescript
-import { isOperationalError } from '@intelgraph/error-handling';
+import { isOperationalError } from "@intelgraph/error-handling";
 
 try {
   await operation();
 } catch (error) {
   if (isOperationalError(error)) {
     // Handle gracefully
-    logger.warn({ error }, 'Operational error occurred');
+    logger.warn({ error }, "Operational error occurred");
     return fallbackValue;
   } else {
     // Programming error - re-throw
-    logger.error({ error }, 'Programming error - requires fix');
+    logger.error({ error }, "Programming error - requires fix");
     throw error;
   }
 }
@@ -96,8 +98,8 @@ try {
 ```typescript
 // ✅ Good: Rich context for debugging
 throw new DatabaseError(
-  'POSTGRES_ERROR',
-  'User query failed',
+  "POSTGRES_ERROR",
+  "User query failed",
   {
     query: sql.substring(0, 100),
     userId,
@@ -108,18 +110,18 @@ throw new DatabaseError(
 );
 
 // ❌ Bad: Generic message
-throw new Error('Database error');
+throw new Error("Database error");
 ```
 
 ### 4. Use Appropriate Resilience Patterns
 
-| Scenario | Pattern | Reason |
-|----------|---------|--------|
-| External API call | Circuit Breaker + Retry + Timeout | Prevent cascading failures |
-| Database query | Retry + Timeout | Transient failures common |
-| Cache (Redis) | Graceful Degradation | Non-critical, should not break app |
-| Policy Engine (OPA) | Circuit Breaker + Fallback | Critical but needs graceful failure |
-| Analytics/Logging | Graceful Degradation | Optional feature |
+| Scenario            | Pattern                           | Reason                              |
+| ------------------- | --------------------------------- | ----------------------------------- |
+| External API call   | Circuit Breaker + Retry + Timeout | Prevent cascading failures          |
+| Database query      | Retry + Timeout                   | Transient failures common           |
+| Cache (Redis)       | Graceful Degradation              | Non-critical, should not break app  |
+| Policy Engine (OPA) | Circuit Breaker + Fallback        | Critical but needs graceful failure |
+| Analytics/Logging   | Graceful Degradation              | Optional feature                    |
 
 ---
 
@@ -137,32 +139,32 @@ import {
   NotFoundError,
   ConflictError,
   RateLimitError,
-} from '@intelgraph/error-handling';
+} from "@intelgraph/error-handling";
 
 // 400 - Validation error
-throw new ValidationError('Invalid email format', {
-  field: 'email',
+throw new ValidationError("Invalid email format", {
+  field: "email",
   value: email,
-  expected: 'valid email address',
+  expected: "valid email address",
 });
 
 // 401 - Authentication error
-throw new AuthenticationError('AUTH_TOKEN_EXPIRED',
-  'Your session has expired',
-  { tokenAge: tokenAge }
-);
+throw new AuthenticationError("AUTH_TOKEN_EXPIRED", "Your session has expired", {
+  tokenAge: tokenAge,
+});
 
 // 403 - Authorization error
-throw new AuthorizationError('INSUFFICIENT_PERMISSIONS',
-  'Admin role required',
-  { userId, requiredRole: 'admin', userRoles }
-);
+throw new AuthorizationError("INSUFFICIENT_PERMISSIONS", "Admin role required", {
+  userId,
+  requiredRole: "admin",
+  userRoles,
+});
 
 // 404 - Not found
-throw new NotFoundError('Investigation', { id: investigationId });
+throw new NotFoundError("Investigation", { id: investigationId });
 
 // 409 - Conflict
-throw new ConflictError('Investigation name already exists', {
+throw new ConflictError("Investigation name already exists", {
   name: investigationName,
   existingId: existing.id,
 });
@@ -181,39 +183,41 @@ import {
   TimeoutError,
   CircuitBreakerError,
   ServiceUnavailableError,
-} from '@intelgraph/error-handling';
+} from "@intelgraph/error-handling";
 
 // 500 - Internal error
-throw new InternalError('Unexpected error during processing', {
-  operation: 'calculateScore',
-}, originalError);
+throw new InternalError(
+  "Unexpected error during processing",
+  {
+    operation: "calculateScore",
+  },
+  originalError
+);
 
 // 500/503 - Database error
-throw new DatabaseError('POSTGRES_ERROR',
-  'Connection pool exhausted',
-  { poolSize: 20, activeConnections: 20 }
-);
+throw new DatabaseError("POSTGRES_ERROR", "Connection pool exhausted", {
+  poolSize: 20,
+  activeConnections: 20,
+});
 
 // 502 - External service error
-throw new ExternalServiceError('OPA_ERROR',
-  'opa',
-  'Policy engine returned 500',
-  { responseStatus: 500 }
-);
+throw new ExternalServiceError("OPA_ERROR", "opa", "Policy engine returned 500", {
+  responseStatus: 500,
+});
 
 // 504 - Timeout
-throw new TimeoutError('database.query', 5000, {
+throw new TimeoutError("database.query", 5000, {
   query: sql.substring(0, 50),
 });
 
 // 503 - Circuit breaker
-throw new CircuitBreakerError('payment-gateway', {
-  state: 'open',
+throw new CircuitBreakerError("payment-gateway", {
+  state: "open",
   failures: 5,
 });
 
 // 503 - Service unavailable
-throw new ServiceUnavailableError('System maintenance in progress');
+throw new ServiceUnavailableError("System maintenance in progress");
 ```
 
 ### Error Response Format
@@ -239,6 +243,7 @@ All errors return consistent JSON:
 ```
 
 **Key Fields:**
+
 - `code`: Machine-readable error code
 - `message`: Human-readable description
 - `traceId`: Unique ID for error tracking (generated automatically)
@@ -256,39 +261,42 @@ All errors return consistent JSON:
 **Purpose**: Prevent cascading failures by "opening" after repeated failures
 
 ```typescript
-import { executeWithCircuitBreaker } from '@intelgraph/error-handling';
+import { executeWithCircuitBreaker } from "@intelgraph/error-handling";
 
 const result = await executeWithCircuitBreaker(
-  'payment-gateway',
+  "payment-gateway",
   async () => {
     const response = await fetch(paymentGatewayUrl, {
-      method: 'POST',
+      method: "POST",
       body: JSON.stringify(payment),
     });
     return response.json();
   },
   {
-    failureThreshold: 5,     // Open after 5 failures
-    successThreshold: 2,     // Close after 2 successes in half-open
-    timeout: 30000,          // Try half-open after 30s
+    failureThreshold: 5, // Open after 5 failures
+    successThreshold: 2, // Close after 2 successes in half-open
+    timeout: 30000, // Try half-open after 30s
     monitoringPeriod: 60000, // Track failures over 60s window
   }
 );
 ```
 
 **States:**
+
 - **Closed** (normal): Requests pass through
 - **Open** (failing): Requests immediately fail with `CircuitBreakerError`
 - **Half-Open** (testing): Allow limited requests to test recovery
 
 **When to Use:**
+
 - External API calls (payment, email, SMS)
 - Downstream microservices
 - Third-party integrations
 
 **Monitoring:**
+
 ```typescript
-import { getCircuitBreakerMetrics } from '@intelgraph/error-handling';
+import { getCircuitBreakerMetrics } from "@intelgraph/error-handling";
 
 const metrics = getCircuitBreakerMetrics();
 // {
@@ -302,41 +310,40 @@ const metrics = getCircuitBreakerMetrics();
 **Purpose**: Automatically retry transient failures with increasing delays
 
 ```typescript
-import { executeWithRetry, RetryPolicies } from '@intelgraph/error-handling';
+import { executeWithRetry, RetryPolicies } from "@intelgraph/error-handling";
 
 // Use pre-configured policy
 const data = await executeWithRetry(
-  () => database.query('SELECT * FROM users'),
+  () => database.query("SELECT * FROM users"),
   RetryPolicies.database
 );
 
 // Custom policy
-const result = await executeWithRetry(
-  () => apiClient.fetchData(),
-  {
-    maxRetries: 4,
-    initialDelay: 2000,      // Start with 2s
-    maxDelay: 30000,         // Cap at 30s
-    backoffMultiplier: 2,    // 2s → 4s → 8s → 16s → 30s
-    retryableErrors: [       // Only retry these errors
-      'OPERATION_TIMEOUT',
-      'SERVICE_UNAVAILABLE',
-    ],
-  }
-);
+const result = await executeWithRetry(() => apiClient.fetchData(), {
+  maxRetries: 4,
+  initialDelay: 2000, // Start with 2s
+  maxDelay: 30000, // Cap at 30s
+  backoffMultiplier: 2, // 2s → 4s → 8s → 16s → 30s
+  retryableErrors: [
+    // Only retry these errors
+    "OPERATION_TIMEOUT",
+    "SERVICE_UNAVAILABLE",
+  ],
+});
 ```
 
 **Pre-configured Policies:**
 
-| Policy | Max Retries | Initial Delay | Max Delay | Use Case |
-|--------|-------------|---------------|-----------|----------|
-| `default` | 3 | 1000ms | 10000ms | General operations |
-| `database` | 3 | 500ms | 5000ms | DB queries |
-| `externalService` | 4 | 2000ms | 30000ms | API calls |
-| `quick` | 2 | 100ms | 1000ms | Fast operations |
-| `none` | 0 | - | - | No retry |
+| Policy            | Max Retries | Initial Delay | Max Delay | Use Case           |
+| ----------------- | ----------- | ------------- | --------- | ------------------ |
+| `default`         | 3           | 1000ms        | 10000ms   | General operations |
+| `database`        | 3           | 500ms         | 5000ms    | DB queries         |
+| `externalService` | 4           | 2000ms        | 30000ms   | API calls          |
+| `quick`           | 2           | 100ms         | 1000ms    | Fast operations    |
+| `none`            | 0           | -             | -         | No retry           |
 
 **Backoff Calculation:**
+
 ```
 Attempt 1: initialDelay = 1000ms
 Attempt 2: 1000ms * 2 = 2000ms
@@ -349,14 +356,14 @@ Attempt 4: 4000ms * 2 = 8000ms (capped at maxDelay)
 **Purpose**: Prevent operations from hanging indefinitely
 
 ```typescript
-import { executeWithTimeout } from '@intelgraph/error-handling';
+import { executeWithTimeout } from "@intelgraph/error-handling";
 
 const result = await executeWithTimeout(
   async () => {
     return await longRunningOperation();
   },
   5000, // 5 second timeout
-  'longRunningOperation'
+  "longRunningOperation"
 );
 
 // If operation takes > 5s, throws TimeoutError:
@@ -369,28 +376,28 @@ const result = await executeWithTimeout(
 
 **Recommended Timeouts:**
 
-| Operation Type | Timeout | Rationale |
-|---------------|---------|-----------|
-| Database query | 5-10s | Slow queries indicate index issues |
-| External API | 10-30s | Network latency + processing |
-| Policy decision (OPA) | 2-5s | Should be fast, critical path |
-| File upload | 60-300s | Depends on file size |
-| Background job | No timeout | Use job queue timeout instead |
+| Operation Type        | Timeout    | Rationale                          |
+| --------------------- | ---------- | ---------------------------------- |
+| Database query        | 5-10s      | Slow queries indicate index issues |
+| External API          | 10-30s     | Network latency + processing       |
+| Policy decision (OPA) | 2-5s       | Should be fast, critical path      |
+| File upload           | 60-300s    | Depends on file size               |
+| Background job        | No timeout | Use job queue timeout instead      |
 
 ### 4. Graceful Degradation
 
 **Purpose**: Handle non-critical failures without breaking the application
 
 ```typescript
-import { withGracefulDegradation } from '@intelgraph/error-handling';
+import { withGracefulDegradation } from "@intelgraph/error-handling";
 
 // Non-critical feature
 const recommendations = await withGracefulDegradation(
   () => recommendationService.getRecommendations(userId),
   [], // Fallback to empty array
   {
-    serviceName: 'recommendations',
-    operation: 'getRecommendations',
+    serviceName: "recommendations",
+    operation: "getRecommendations",
     logError: true,
   }
 );
@@ -404,6 +411,7 @@ res.json({
 ```
 
 **Use Cases:**
+
 - Analytics/tracking
 - Recommendations
 - Caching (Redis)
@@ -415,11 +423,11 @@ res.json({
 **Purpose**: Apply multiple patterns for maximum reliability
 
 ```typescript
-import { executeWithResilience, RetryPolicies } from '@intelgraph/error-handling';
+import { executeWithResilience, RetryPolicies } from "@intelgraph/error-handling";
 
 const result = await executeWithResilience({
-  serviceName: 'payment-gateway',
-  operation: 'processPayment',
+  serviceName: "payment-gateway",
+  operation: "processPayment",
   fn: () => paymentGateway.charge(amount, cardToken),
 
   // Retry configuration
@@ -459,13 +467,13 @@ const result = await executeWithResilience({
 
 ```typescript
 // server/src/app.ts
-import express from 'express';
+import express from "express";
 import {
   correlationIdMiddleware,
   errorHandler,
   notFoundHandler,
   asyncHandler,
-} from '@intelgraph/error-handling';
+} from "@intelgraph/error-handling";
 
 const app = express();
 
@@ -473,15 +481,18 @@ const app = express();
 app.use(correlationIdMiddleware);
 
 // 2. Your routes (use asyncHandler)
-app.get('/api/entities/:id', asyncHandler(async (req, res) => {
-  const entity = await entityService.findById(req.params.id);
+app.get(
+  "/api/entities/:id",
+  asyncHandler(async (req, res) => {
+    const entity = await entityService.findById(req.params.id);
 
-  if (!entity) {
-    throw new NotFoundError('Entity', { id: req.params.id });
-  }
+    if (!entity) {
+      throw new NotFoundError("Entity", { id: req.params.id });
+    }
 
-  res.json(entity);
-}));
+    res.json(entity);
+  })
+);
 
 // 3. Add 404 handler
 app.use(notFoundHandler);
@@ -493,16 +504,19 @@ app.use(errorHandler);
 #### 2. Use asyncHandler
 
 ```typescript
-import { asyncHandler } from '@intelgraph/error-handling';
+import { asyncHandler } from "@intelgraph/error-handling";
 
 // ✅ Good: Errors automatically caught
-app.post('/api/investigations', asyncHandler(async (req, res) => {
-  const investigation = await investigationService.create(req.body);
-  res.status(201).json(investigation);
-}));
+app.post(
+  "/api/investigations",
+  asyncHandler(async (req, res) => {
+    const investigation = await investigationService.create(req.body);
+    res.status(201).json(investigation);
+  })
+);
 
 // ❌ Bad: Manual try/catch needed
-app.post('/api/investigations', async (req, res) => {
+app.post("/api/investigations", async (req, res) => {
   try {
     const investigation = await investigationService.create(req.body);
     res.status(201).json(investigation);
@@ -519,8 +533,8 @@ app.post('/api/investigations', async (req, res) => {
 
 ```typescript
 // services/api/src/app.ts
-import { ApolloServer } from '@apollo/server';
-import { createGraphQLErrorFormatter } from '@intelgraph/error-handling';
+import { ApolloServer } from "@apollo/server";
+import { createGraphQLErrorFormatter } from "@intelgraph/error-handling";
 
 const server = new ApolloServer({
   typeDefs,
@@ -532,23 +546,21 @@ const server = new ApolloServer({
 #### 2. Throw Errors in Resolvers
 
 ```typescript
-import { NotFoundError, AuthorizationError } from '@intelgraph/error-handling';
+import { NotFoundError, AuthorizationError } from "@intelgraph/error-handling";
 
 const resolvers = {
   Query: {
     entity: async (parent, { id }, context) => {
       // Authorization
       if (!context.user) {
-        throw new AuthenticationError('AUTH_TOKEN_MISSING',
-          'Authentication required'
-        );
+        throw new AuthenticationError("AUTH_TOKEN_MISSING", "Authentication required");
       }
 
       // Fetch entity
       const entity = await entityService.findById(id);
 
       if (!entity) {
-        throw new NotFoundError('Entity', { id });
+        throw new NotFoundError("Entity", { id });
       }
 
       return entity;
@@ -559,8 +571,8 @@ const resolvers = {
     createInvestigation: async (parent, { input }, context) => {
       // Validate
       if (!input.name) {
-        throw new ValidationError('Investigation name is required', {
-          field: 'name',
+        throw new ValidationError("Investigation name is required", {
+          field: "name",
         });
       }
 
@@ -578,7 +590,7 @@ const resolvers = {
   "errors": [
     {
       "message": "Entity not found",
-      "locations": [{"line": 2, "column": 3}],
+      "locations": [{ "line": 2, "column": 3 }],
       "path": ["entity"],
       "extensions": {
         "code": "RESOURCE_NOT_FOUND",
@@ -600,22 +612,19 @@ const resolvers = {
 #### Neo4j
 
 ```typescript
-import { executeNeo4jQuery } from '@intelgraph/error-handling';
+import { executeNeo4jQuery } from "@intelgraph/error-handling";
 
 export class EntityRepository {
   constructor(private driver: any) {}
 
   async findById(id: string) {
     return executeNeo4jQuery(
-      'findEntityById',
+      "findEntityById",
       async () => {
         const session = this.driver.session();
         try {
-          const result = await session.run(
-            'MATCH (e:Entity {id: $id}) RETURN e',
-            { id }
-          );
-          return result.records[0]?.get('e').properties;
+          const result = await session.run("MATCH (e:Entity {id: $id}) RETURN e", { id });
+          return result.records[0]?.get("e").properties;
         } finally {
           await session.close();
         }
@@ -629,19 +638,16 @@ export class EntityRepository {
 #### PostgreSQL
 
 ```typescript
-import { executePostgresQuery } from '@intelgraph/error-handling';
+import { executePostgresQuery } from "@intelgraph/error-handling";
 
 export class UserRepository {
   constructor(private pool: any) {}
 
   async findById(id: string) {
     return executePostgresQuery(
-      'findUserById',
+      "findUserById",
       async () => {
-        const result = await this.pool.query(
-          'SELECT * FROM users WHERE id = $1',
-          [id]
-        );
+        const result = await this.pool.query("SELECT * FROM users WHERE id = $1", [id]);
         return result.rows[0];
       },
       { timeoutMs: 3000 }
@@ -653,14 +659,14 @@ export class UserRepository {
 #### Redis
 
 ```typescript
-import { executeRedisOperation } from '@intelgraph/error-handling';
+import { executeRedisOperation } from "@intelgraph/error-handling";
 
 export class CacheService {
   constructor(private redis: any) {}
 
   async get<T>(key: string): Promise<T | null> {
     return executeRedisOperation(
-      'get',
+      "get",
       async () => {
         const value = await this.redis.get(key);
         return value ? JSON.parse(value) : null;
@@ -676,13 +682,13 @@ export class CacheService {
 #### OPA Policy Engine
 
 ```typescript
-import { executeWithResilience, RetryPolicies } from '@intelgraph/error-handling';
+import { executeWithResilience, RetryPolicies } from "@intelgraph/error-handling";
 
 export class PolicyService {
   async authorize(input: any): Promise<boolean> {
     const decision = await executeWithResilience({
-      serviceName: 'opa',
-      operation: 'authorize',
+      serviceName: "opa",
+      operation: "authorize",
       fn: () => this.makeOPARequest(input),
       retryPolicy: RetryPolicies.externalService,
       timeoutMs: 5000,
@@ -699,16 +705,13 @@ export class PolicyService {
 
   private async makeOPARequest(input: any) {
     const response = await fetch(`${this.opaUrl}/v1/data/authz/allow`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ input }),
     });
 
     if (!response.ok) {
-      throw new ExternalServiceError('OPA_ERROR',
-        'opa',
-        `OPA returned ${response.status}`
-      );
+      throw new ExternalServiceError("OPA_ERROR", "opa", `OPA returned ${response.status}`);
     }
 
     return response.json();
@@ -728,47 +731,49 @@ import {
   ConflictError,
   DatabaseError,
   asyncHandler,
-} from '@intelgraph/error-handling';
+} from "@intelgraph/error-handling";
 
-app.post('/api/users/register', asyncHandler(async (req, res) => {
-  const { email, password, name } = req.body;
+app.post(
+  "/api/users/register",
+  asyncHandler(async (req, res) => {
+    const { email, password, name } = req.body;
 
-  // 1. Validate input
-  if (!email || !isValidEmail(email)) {
-    throw new ValidationError('Invalid email format', {
-      field: 'email',
-      value: email,
+    // 1. Validate input
+    if (!email || !isValidEmail(email)) {
+      throw new ValidationError("Invalid email format", {
+        field: "email",
+        value: email,
+      });
+    }
+
+    if (!password || password.length < 8) {
+      throw new ValidationError("Password must be at least 8 characters", {
+        field: "password",
+        minLength: 8,
+      });
+    }
+
+    // 2. Check for existing user
+    const existing = await userRepo.findByEmail(email);
+    if (existing) {
+      throw new ConflictError("Email already registered", {
+        email,
+        existingUserId: existing.id,
+      });
+    }
+
+    // 3. Create user (database operation has retry built-in)
+    const user = await userRepo.create({ email, password, name });
+
+    // 4. Send welcome email (graceful degradation)
+    await withGracefulDegradation(() => emailService.sendWelcome(email, name), null, {
+      serviceName: "email",
+      operation: "sendWelcome",
     });
-  }
 
-  if (!password || password.length < 8) {
-    throw new ValidationError('Password must be at least 8 characters', {
-      field: 'password',
-      minLength: 8,
-    });
-  }
-
-  // 2. Check for existing user
-  const existing = await userRepo.findByEmail(email);
-  if (existing) {
-    throw new ConflictError('Email already registered', {
-      email,
-      existingUserId: existing.id,
-    });
-  }
-
-  // 3. Create user (database operation has retry built-in)
-  const user = await userRepo.create({ email, password, name });
-
-  // 4. Send welcome email (graceful degradation)
-  await withGracefulDegradation(
-    () => emailService.sendWelcome(email, name),
-    null,
-    { serviceName: 'email', operation: 'sendWelcome' }
-  );
-
-  res.status(201).json({ user });
-}));
+    res.status(201).json({ user });
+  })
+);
 ```
 
 ### Scenario 2: Payment Processing
@@ -779,34 +784,35 @@ import {
   RetryPolicies,
   ValidationError,
   ExternalServiceError,
-} from '@intelgraph/error-handling';
+} from "@intelgraph/error-handling";
 
 async function processPayment(amount: number, cardToken: string) {
   // 1. Validate
   if (amount <= 0) {
-    throw new ValidationError('Amount must be positive', {
-      field: 'amount',
+    throw new ValidationError("Amount must be positive", {
+      field: "amount",
       value: amount,
     });
   }
 
   // 2. Process with full resilience
   const result = await executeWithResilience({
-    serviceName: 'payment-gateway',
-    operation: 'charge',
+    serviceName: "payment-gateway",
+    operation: "charge",
     fn: async () => {
       const response = await fetch(paymentGatewayUrl, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Authorization': `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ amount, cardToken }),
       });
 
       if (!response.ok) {
-        throw new ExternalServiceError('EXTERNAL_SERVICE_ERROR',
-          'payment-gateway',
+        throw new ExternalServiceError(
+          "EXTERNAL_SERVICE_ERROR",
+          "payment-gateway",
           `Payment failed: ${response.status}`
         );
       }
@@ -830,11 +836,7 @@ async function processPayment(amount: number, cardToken: string) {
 ### Scenario 3: Complex GraphQL Query
 
 ```typescript
-import {
-  NotFoundError,
-  AuthorizationError,
-  executeOptional,
-} from '@intelgraph/error-handling';
+import { NotFoundError, AuthorizationError, executeOptional } from "@intelgraph/error-handling";
 
 const resolvers = {
   Query: {
@@ -847,19 +849,20 @@ const resolvers = {
       // 2. Fetch investigation
       const investigation = await investigationRepo.findById(id);
       if (!investigation) {
-        throw new NotFoundError('Investigation', { id });
+        throw new NotFoundError("Investigation", { id });
       }
 
       // 3. Check authorization
       const canAccess = await policyService.authorize({
         user: context.user,
-        resource: { type: 'investigation', id },
-        action: 'read',
+        resource: { type: "investigation", id },
+        action: "read",
       });
 
       if (!canAccess) {
-        throw new AuthorizationError('INSUFFICIENT_PERMISSIONS',
-          'Cannot access this investigation'
+        throw new AuthorizationError(
+          "INSUFFICIENT_PERMISSIONS",
+          "Cannot access this investigation"
         );
       }
 
@@ -867,10 +870,10 @@ const resolvers = {
       investigation.entities = await entityRepo.findByInvestigation(id);
 
       // 5. Fetch analytics (optional - graceful degradation)
-      investigation.analytics = await executeOptional(
-        () => analyticsService.getStats(id),
-        { serviceName: 'analytics', operation: 'getStats' }
-      ) || { views: 0, lastUpdated: null };
+      investigation.analytics = (await executeOptional(() => analyticsService.getStats(id), {
+        serviceName: "analytics",
+        operation: "getStats",
+      })) || { views: 0, lastUpdated: null };
 
       return investigation;
     },
@@ -913,15 +916,15 @@ All errors are logged with structured context:
 ### 2. Circuit Breaker Metrics
 
 ```typescript
-import { getCircuitBreakerMetrics, getHealthStatus } from '@intelgraph/error-handling';
+import { getCircuitBreakerMetrics, getHealthStatus } from "@intelgraph/error-handling";
 
 // Add to health check endpoint
-app.get('/health/detailed', (req, res) => {
+app.get("/health/detailed", (req, res) => {
   const circuitBreakers = getCircuitBreakerMetrics();
   const health = getHealthStatus();
 
   res.json({
-    status: health.healthy ? 'healthy' : 'degraded',
+    status: health.healthy ? "healthy" : "degraded",
     timestamp: new Date().toISOString(),
     circuitBreakers,
   });
@@ -933,15 +936,15 @@ app.get('/health/detailed', (req, res) => {
 ```typescript
 // Example metrics to expose
 const circuitBreakerStateGauge = new Gauge({
-  name: 'circuit_breaker_state',
-  help: 'Circuit breaker state (0=closed, 1=open, 2=half-open)',
-  labelNames: ['service'],
+  name: "circuit_breaker_state",
+  help: "Circuit breaker state (0=closed, 1=open, 2=half-open)",
+  labelNames: ["service"],
 });
 
 const circuitBreakerFailuresCounter = new Counter({
-  name: 'circuit_breaker_failures_total',
-  help: 'Total circuit breaker failures',
-  labelNames: ['service'],
+  name: "circuit_breaker_failures_total",
+  help: "Total circuit breaker failures",
+  labelNames: ["service"],
 });
 ```
 
@@ -973,11 +976,13 @@ Every error has a unique `traceId`:
 Set up alerts for:
 
 **Critical**:
+
 - Circuit breaker opened (indicates service degradation)
 - Error rate > 5% for 5 minutes
 - Specific error codes: `DATABASE_CONNECTION_FAILED`, `CIRCUIT_BREAKER_OPEN`
 
 **Warning**:
+
 - Retry exhaustion rate increasing
 - Timeout errors increasing
 - Error rate > 1% for 15 minutes
@@ -1012,13 +1017,19 @@ groups:
 ### Phase 1: Add Middleware (Low Risk)
 
 1. Install package:
+
    ```bash
    pnpm add @intelgraph/error-handling --filter <your-service>
    ```
 
 2. Add middleware to Express app:
+
    ```typescript
-   import { errorHandler, notFoundHandler, correlationIdMiddleware } from '@intelgraph/error-handling';
+   import {
+     errorHandler,
+     notFoundHandler,
+     correlationIdMiddleware,
+   } from "@intelgraph/error-handling";
 
    app.use(correlationIdMiddleware);
    // ... your routes
@@ -1027,8 +1038,9 @@ groups:
    ```
 
 3. Add GraphQL formatter:
+
    ```typescript
-   import { createGraphQLErrorFormatter } from '@intelgraph/error-handling';
+   import { createGraphQLErrorFormatter } from "@intelgraph/error-handling";
 
    const server = new ApolloServer({
      formatError: createGraphQLErrorFormatter(),
@@ -1041,11 +1053,11 @@ Replace custom errors with standard errors:
 
 ```typescript
 // Before
-throw new Error('User not found');
+throw new Error("User not found");
 
 // After
-import { NotFoundError } from '@intelgraph/error-handling';
-throw new NotFoundError('User', { id: userId });
+import { NotFoundError } from "@intelgraph/error-handling";
+throw new NotFoundError("User", { id: userId });
 ```
 
 ### Phase 3: Add Resilience Patterns (High Value)
@@ -1075,11 +1087,8 @@ Wrap database operations:
 const result = await db.query(sql, params);
 
 // After
-import { executePostgresQuery } from '@intelgraph/error-handling';
-const result = await executePostgresQuery(
-  'operation-name',
-  () => db.query(sql, params)
-);
+import { executePostgresQuery } from "@intelgraph/error-handling";
+const result = await executePostgresQuery("operation-name", () => db.query(sql, params));
 ```
 
 ---
@@ -1091,17 +1100,19 @@ const result = await executePostgresQuery(
 **Symptoms**: All requests to a service immediately fail with `CIRCUIT_BREAKER_OPEN`
 
 **Diagnosis**:
+
 ```typescript
-import { getCircuitBreakerMetrics } from '@intelgraph/error-handling';
+import { getCircuitBreakerMetrics } from "@intelgraph/error-handling";
 console.log(getCircuitBreakerMetrics());
 // { 'my-service': { state: 'open', failureCount: 5, successCount: 0 } }
 ```
 
 **Solutions**:
+
 1. Check if downstream service is actually healthy
 2. Manually reset circuit breaker (testing only):
    ```typescript
-   import { resetAllCircuitBreakers } from '@intelgraph/error-handling';
+   import { resetAllCircuitBreakers } from "@intelgraph/error-handling";
    resetAllCircuitBreakers();
    ```
 3. Adjust configuration (if too sensitive):
@@ -1119,9 +1130,12 @@ console.log(getCircuitBreakerMetrics());
 **Diagnosis**: Check logs for retry attempts
 
 **Solutions**:
+
 1. Reduce max retries:
    ```typescript
-   retryPolicy: { maxRetries: 2 }
+   retryPolicy: {
+     maxRetries: 2;
+   }
    ```
 2. Use specific retryable errors:
    ```typescript
@@ -1136,6 +1150,7 @@ console.log(getCircuitBreakerMetrics());
 **Symptoms**: Unhandled promise rejections, app crashes
 
 **Solutions**:
+
 1. Ensure `asyncHandler` wraps all async routes:
    ```typescript
    app.get('/api/users', asyncHandler(async (req, res) => { ... }));
@@ -1153,6 +1168,7 @@ console.log(getCircuitBreakerMetrics());
 **Expected**: This is intentional for 5xx errors in production
 
 **Solutions**:
+
 1. Use appropriate error types (4xx errors show details)
 2. Check server logs using `traceId` for debugging
 3. For debugging, temporarily set `NODE_ENV=development`
@@ -1162,6 +1178,7 @@ console.log(getCircuitBreakerMetrics());
 ## Best Practices Checklist
 
 ### Development
+
 - [ ] Use `asyncHandler` for all Express async routes
 - [ ] Throw specific error types (`ValidationError`, `NotFoundError`, etc.)
 - [ ] Include context in error details
@@ -1171,12 +1188,14 @@ console.log(getCircuitBreakerMetrics());
 - [ ] Set appropriate timeouts
 
 ### Error Messages
+
 - [ ] User-facing messages are clear and actionable
 - [ ] No sensitive information in error messages
 - [ ] Include field names in validation errors
 - [ ] Provide trace IDs for support
 
 ### Testing
+
 - [ ] Test error paths, not just happy paths
 - [ ] Test circuit breaker behavior
 - [ ] Test retry exhaustion scenarios
@@ -1184,6 +1203,7 @@ console.log(getCircuitBreakerMetrics());
 - [ ] Reset circuit breakers in test setup
 
 ### Monitoring
+
 - [ ] Log all errors with structured logging
 - [ ] Include correlation IDs in logs
 - [ ] Monitor circuit breaker states
@@ -1191,6 +1211,7 @@ console.log(getCircuitBreakerMetrics());
 - [ ] Track error rates by code
 
 ### Documentation
+
 - [ ] Document expected error responses in API docs
 - [ ] Document retry behavior for clients
 - [ ] Document timeout values

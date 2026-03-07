@@ -1,16 +1,9 @@
-import { EventEmitter } from 'node:events';
-import { promises as fs } from 'node:fs';
-import path from 'node:path';
-import { randomUUID } from 'node:crypto';
+import { EventEmitter } from "node:events";
+import { promises as fs } from "node:fs";
+import path from "node:path";
+import { randomUUID } from "node:crypto";
 
-const STATUS_ORDER = [
-  'Backlog',
-  'Ready',
-  'Running',
-  'Needs Review',
-  'Done',
-  'Blocked',
-];
+const STATUS_ORDER = ["Backlog", "Ready", "Running", "Needs Review", "Done", "Blocked"];
 
 const DEFAULT_DATA = {
   workItems: [],
@@ -23,28 +16,28 @@ const createSeed = () => {
     workItems: [
       {
         id: randomUUID(),
-        title: 'Maestro Workboard MVP',
-        description: 'Seed card to demonstrate plan → implement → validate.',
-        status: 'Backlog',
+        title: "Maestro Workboard MVP",
+        description: "Seed card to demonstrate plan → implement → validate.",
+        status: "Backlog",
         createdAt: now,
         updatedAt: now,
         dependencies: [],
         acceptanceCriteria: [
-          'Board renders columns with cards',
-          'Run emits events and evidence bundle',
+          "Board renders columns with cards",
+          "Run emits events and evidence bundle",
         ],
-        skills: ['planner', 'runner', 'evidence-bundler'],
+        skills: ["planner", "runner", "evidence-bundler"],
       },
       {
         id: randomUUID(),
-        title: 'Policy gate validation',
-        description: 'Confirm capability profile enforcement is logged.',
-        status: 'Ready',
+        title: "Policy gate validation",
+        description: "Confirm capability profile enforcement is logged.",
+        status: "Ready",
         createdAt: now,
         updatedAt: now,
         dependencies: [],
-        acceptanceCriteria: ['Capability profile is stored in provenance'],
-        skills: ['policy'],
+        acceptanceCriteria: ["Capability profile is stored in provenance"],
+        skills: ["policy"],
       },
     ],
     runs: [],
@@ -53,7 +46,7 @@ const createSeed = () => {
 
 export const createStore = ({ dataDir }) => {
   const emitter = new EventEmitter();
-  const dataPath = path.join(dataDir, 'maestro-workboard.json');
+  const dataPath = path.join(dataDir, "maestro-workboard.json");
   const state = { ...DEFAULT_DATA };
   let writeQueue = Promise.resolve();
 
@@ -67,12 +60,12 @@ export const createStore = ({ dataDir }) => {
 
   const load = async () => {
     try {
-      const raw = await fs.readFile(dataPath, 'utf-8');
+      const raw = await fs.readFile(dataPath, "utf-8");
       const parsed = JSON.parse(raw);
       state.workItems = parsed.workItems ?? [];
       state.runs = parsed.runs ?? [];
     } catch (error) {
-      if (error.code !== 'ENOENT') {
+      if (error.code !== "ENOENT") {
         throw error;
       }
       const seed = createSeed();
@@ -90,11 +83,9 @@ export const createStore = ({ dataDir }) => {
     const now = new Date().toISOString();
     const item = {
       id: randomUUID(),
-      title: payload.title ?? 'Untitled',
-      description: payload.description ?? '',
-      status: STATUS_ORDER.includes(payload.status)
-        ? payload.status
-        : 'Backlog',
+      title: payload.title ?? "Untitled",
+      description: payload.description ?? "",
+      status: STATUS_ORDER.includes(payload.status) ? payload.status : "Backlog",
       createdAt: now,
       updatedAt: now,
       dependencies: payload.dependencies ?? [],
@@ -114,9 +105,8 @@ export const createStore = ({ dataDir }) => {
     const next = {
       ...item,
       ...updates,
-      status: updates.status && STATUS_ORDER.includes(updates.status)
-        ? updates.status
-        : item.status,
+      status:
+        updates.status && STATUS_ORDER.includes(updates.status) ? updates.status : item.status,
       dependencies: updates.dependencies ?? item.dependencies,
       acceptanceCriteria: updates.acceptanceCriteria ?? item.acceptanceCriteria,
       skills: updates.skills ?? item.skills,
@@ -133,7 +123,7 @@ export const createStore = ({ dataDir }) => {
     const run = {
       id: randomUUID(),
       workItemId,
-      status: 'running',
+      status: "running",
       capabilityProfile: payload.capabilityProfile,
       waiverId: payload.waiverId ?? null,
       createdAt: now,

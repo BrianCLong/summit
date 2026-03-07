@@ -1,6 +1,6 @@
-import { addDays } from 'date-fns';
-import type { MasterRecord, RetentionPolicy } from '@intelgraph/mdm-core';
-import { LegalHoldService } from './legal-hold-service.js';
+import { addDays } from "date-fns";
+import type { MasterRecord, RetentionPolicy } from "@intelgraph/mdm-core";
+import { LegalHoldService } from "./legal-hold-service.js";
 
 export class RetentionEngine {
   private policies: Map<string, RetentionPolicy> = new Map();
@@ -32,10 +32,13 @@ export class RetentionEngine {
       return { expired: false, holds: [] };
     }
 
-    const expiresAt = addDays(record.createdAt, policy.retentionDays + (policy.purgeGraceDays ?? 0));
+    const expiresAt = addDays(
+      record.createdAt,
+      policy.retentionDays + (policy.purgeGraceDays ?? 0)
+    );
     const holds = this.legalHoldService
       .holdsForRecord(record.id.id, recordType, tenantId)
-      .map(hold => hold.id);
+      .map((hold) => hold.id);
 
     const expired = new Date() >= expiresAt && holds.length === 0;
 

@@ -6,7 +6,5 @@
     "schemas/json/**/*.{json,yaml,yml}",
     "packages/**/*document-schema*/**/*.{json,yaml,yml,ts}"
   ],
-  "migrationGlobs": [
-    "migrations/json/**/*.{json,yaml,yml,ts}"
-  ]
+  "migrationGlobs": ["migrations/json/**/*.{json,yaml,yml,ts}"]
 }

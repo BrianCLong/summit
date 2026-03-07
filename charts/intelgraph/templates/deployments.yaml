@@ -9,15 +9,15 @@ spec:
     spec:
       containers:
         - name: policy-lac
-          image: {{ .Values.services.policyLac.image }}
-          ports: [{ name: http, containerPort: {{ .Values.services.policyLac.port }} }]
+          image: { { .Values.services.policyLac.image } }
+          ports: [{ name: http, containerPort: { { .Values.services.policyLac.port } } }]
 ---
 apiVersion: v1
 kind: Service
 metadata: { name: policy-lac }
 spec:
   selector: { app: policy-lac }
-  ports: [{ port: 80, targetPort: {{ .Values.services.policyLac.port }} }]
+  ports: [{ port: 80, targetPort: { { .Values.services.policyLac.port } } }]
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -30,15 +30,15 @@ spec:
     spec:
       containers:
         - name: prov-ledger
-          image: {{ .Values.services.provLedger.image }}
-          ports: [{ name: http, containerPort: {{ .Values.services.provLedger.port }} }]
+          image: { { .Values.services.provLedger.image } }
+          ports: [{ name: http, containerPort: { { .Values.services.provLedger.port } } }]
 ---
 apiVersion: v1
 kind: Service
 metadata: { name: prov-ledger }
 spec:
   selector: { app: prov-ledger }
-  ports: [{ port: 80, targetPort: {{ .Values.services.provLedger.port }} }]
+  ports: [{ port: 80, targetPort: { { .Values.services.provLedger.port } } }]
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -51,12 +51,12 @@ spec:
     spec:
       containers:
         - name: nl2cypher
-          image: {{ .Values.services.nl2cypher.image }}
-          ports: [{ name: http, containerPort: {{ .Values.services.nl2cypher.port }} }]
+          image: { { .Values.services.nl2cypher.image } }
+          ports: [{ name: http, containerPort: { { .Values.services.nl2cypher.port } } }]
 ---
 apiVersion: v1
 kind: Service
 metadata: { name: nl2cypher }
 spec:
   selector: { app: nl2cypher }
-  ports: [{ port: 80, targetPort: {{ .Values.services.nl2cypher.port }} }]
+  ports: [{ port: 80, targetPort: { { .Values.services.nl2cypher.port } } }]

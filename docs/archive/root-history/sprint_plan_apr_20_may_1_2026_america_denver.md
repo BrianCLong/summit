@@ -48,7 +48,7 @@ Deliver **Graph-Grounded RAG v1**, **Investigations Studio (MVP)** with live cit
 
 **Stretch:**
 
-- Additional reranker tuning (freshness, domain priors) with learned weights. 
+- Additional reranker tuning (freshness, domain priors) with learned weights.
 - Expanded export templates for Report Builder beyond default.
 - UI transliteration enhancements for additional entity scripts.
 
@@ -158,4 +158,3 @@ Deliver **Graph-Grounded RAG v1**, **Investigations Studio (MVP)** with live cit
 1. Which domains/languages seed the multilingual eval set (top 3 to start)?
 2. Preference for on-prem models vs hosted (with redaction) for translation/embedding in v1?
 3. Any mandatory citation style or report template constraints (numeric vs author-year, report formats)?
-

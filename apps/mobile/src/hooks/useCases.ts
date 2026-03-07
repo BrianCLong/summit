@@ -27,9 +27,11 @@ export function useCases(): UseCasesResult {
   const loadFromCache = useCallback(async () => {
     try {
       const cached = await offlineCache.cases.getAll();
-      setCases(cached.sort((a, b) =>
-        new Date(b.lastUpdated).getTime() - new Date(a.lastUpdated).getTime()
-      ));
+      setCases(
+        cached.sort(
+          (a, b) => new Date(b.lastUpdated).getTime() - new Date(a.lastUpdated).getTime(),
+        ),
+      );
     } catch (err) {
       console.error('Failed to load cases from cache:', err);
     }
@@ -52,9 +54,12 @@ export function useCases(): UseCasesResult {
 
       const data = await response.json();
       await offlineCache.cases.setMany(data);
-      setCases(data.sort((a: Case, b: Case) =>
-        new Date(b.lastUpdated).getTime() - new Date(a.lastUpdated).getTime()
-      ));
+      setCases(
+        data.sort(
+          (a: Case, b: Case) =>
+            new Date(b.lastUpdated).getTime() - new Date(a.lastUpdated).getTime(),
+        ),
+      );
       setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch cases');
@@ -77,30 +82,33 @@ export function useCases(): UseCasesResult {
   }, [isOnline, fetchFromServer, loadFromCache]);
 
   // Get single case
-  const getCase = useCallback(async (id: string): Promise<Case | null> => {
-    // Check cache first
-    let caseData = await offlineCache.cases.get(id);
+  const getCase = useCallback(
+    async (id: string): Promise<Case | null> => {
+      // Check cache first
+      let caseData = await offlineCache.cases.get(id);
 
-    // If online, fetch fresh data
-    if (isOnline && accessToken) {
-      try {
-        const response = await fetch(`/api/mobile/cases/${id}`, {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        });
+      // If online, fetch fresh data
+      if (isOnline && accessToken) {
+        try {
+          const response = await fetch(`/api/mobile/cases/${id}`, {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          });
 
-        if (response.ok) {
-          caseData = await response.json();
-          await offlineCache.cases.set(caseData);
+          if (response.ok) {
+            caseData = await response.json();
+            await offlineCache.cases.set(caseData);
+          }
+        } catch {
+          // Use cached data
         }
-      } catch {
-        // Use cached data
       }
-    }
 
-    return caseData;
-  }, [isOnline, accessToken]);
+      return caseData;
+    },
+    [isOnline, accessToken],
+  );
 
   // Initial load
   useEffect(() => {

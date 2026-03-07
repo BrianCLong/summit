@@ -17,12 +17,12 @@ roles:
   - FinOps Lead
   - Repo Maintainer / Arborist
 objectives:
-  - 'Production readiness tiering: gold/silver/bronze runbooks, SLOs, and escalation per service.'
-  - 'Immutable delivery: image pinning by digest, provenance verification at admission, and rollback provenance links.'
-  - 'Data residency & tenancy: region pinning, policy-enforced data paths, and residency-aware previews.'
-  - 'Performance posture v3: tail latency (p99) controls, queue shedding, and cache stampede protection.'
-  - 'DevX paved road v2: one-command scaffold → preview with guardrails, feature flag lifecycle automation.'
-  - 'Cost efficiency v3: dynamic right-sizing (HPA+VPA), idle node pools scale-to-zero, and budget regression tests in CI.'
+  - "Production readiness tiering: gold/silver/bronze runbooks, SLOs, and escalation per service."
+  - "Immutable delivery: image pinning by digest, provenance verification at admission, and rollback provenance links."
+  - "Data residency & tenancy: region pinning, policy-enforced data paths, and residency-aware previews."
+  - "Performance posture v3: tail latency (p99) controls, queue shedding, and cache stampede protection."
+  - "DevX paved road v2: one-command scaffold → preview with guardrails, feature flag lifecycle automation."
+  - "Cost efficiency v3: dynamic right-sizing (HPA+VPA), idle node pools scale-to-zero, and budget regression tests in CI."
 ---
 
 # Sprint 34 Plan — Production Tiering, Immutable Delivery, and Residency Guardrails
@@ -150,9 +150,9 @@ Builds on Sprint 33 (outbox+CDC, FLE, multi-cloud registry, svc-template). This 
 
 ```yaml
 services:
-  gateway: { tier: gold, oncall: '#oncall-core', owner: 'platform' }
-  docs-api: { tier: gold, oncall: '#oncall-core', owner: 'backend' }
-  ingest: { tier: silver, oncall: '#oncall-core', owner: 'backend' }
+  gateway: { tier: gold, oncall: "#oncall-core", owner: "platform" }
+  docs-api: { tier: gold, oncall: "#oncall-core", owner: "backend" }
+  ingest: { tier: silver, oncall: "#oncall-core", owner: "backend" }
 ```
 ````
 
@@ -163,7 +163,7 @@ services:
 ```yaml
 image:
   repository: ghcr.io/org/app
-  digest: 'sha256:abcdef...'
+  digest: "sha256:abcdef..."
 ```
 
 **Gatekeeper policy**
@@ -174,7 +174,7 @@ apiVersion: constraints.gatekeeper.sh/v1beta1
 kind: K8sRequireImageDigest
 metadata: { name: require-digest }
 spec:
-  match: { kinds: [{ apiGroups: ['apps'], kinds: ['Deployment'] }] }
+  match: { kinds: [{ apiGroups: ["apps"], kinds: ["Deployment"] }] }
 ```
 
 ### 5.3 Admission Verify Provenance (Kyverno)
@@ -191,7 +191,7 @@ spec:
     - name: require-provenance
       match: { resources: { kinds: [Deployment, StatefulSet] } }
       verifyImages:
-        - image: 'ghcr.io/org/*'
+        - image: "ghcr.io/org/*"
           attestations:
             - predicateType: https://slsa.dev/provenance/v1
 ```
@@ -227,11 +227,11 @@ datasets:
 
 ```ts
 let inflight = 0;
-const MAX = Number(process.env.MAX_INFLIGHT || '200');
+const MAX = Number(process.env.MAX_INFLIGHT || "200");
 export function gate(req, res, next) {
-  if (inflight > MAX) return res.status(429).set('Retry-After', '1').end();
+  if (inflight > MAX) return res.status(429).set("Retry-After", "1").end();
   inflight++;
-  res.on('finish', () => inflight--);
+  res.on("finish", () => inflight--);
   next();
 }
 ```
@@ -254,15 +254,12 @@ export async function once(key: string, fn: () => Promise<any>) {
 **Path:** `services/docs-api/src/fallback.ts`
 
 ```ts
-export async function maybeAsync(
-  pathFn: () => Promise<any>,
-  enqueue: () => Promise<string>,
-) {
+export async function maybeAsync(pathFn: () => Promise<any>, enqueue: () => Promise<string>) {
   try {
     return await pathFn();
   } catch (e) {
     const id = await enqueue();
-    return { status: 'accepted', id };
+    return { status: "accepted", id };
   }
 }
 ```
@@ -273,13 +270,13 @@ export async function maybeAsync(
 
 ```js
 #!/usr/bin/env node
-import { execSync as x } from 'node:child_process';
+import { execSync as x } from "node:child_process";
 const cmd = process.argv[2];
-if (cmd === 'init') {
-  x('plop service', { stdio: 'inherit' });
+if (cmd === "init") {
+  x("plop service", { stdio: "inherit" });
 }
-if (cmd === 'up') {
-  x('make preview PR=$PR', { stdio: 'inherit' });
+if (cmd === "up") {
+  x("make preview PR=$PR", { stdio: "inherit" });
 }
 ```
 
@@ -308,8 +305,8 @@ apiVersion: autoscaling.k8s.io/v1
 kind: VerticalPodAutoscaler
 metadata: { name: app-vpa }
 spec:
-  targetRef: { apiVersion: 'apps/v1', kind: Deployment, name: app }
-  updatePolicy: { updateMode: 'Auto' }
+  targetRef: { apiVersion: "apps/v1", kind: Deployment, name: app }
+  updatePolicy: { updateMode: "Auto" }
 ```
 
 **Idle pool (Terraform or K8s) sketch**

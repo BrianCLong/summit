@@ -1,18 +1,18 @@
-import { describe, expect, it } from 'vitest'
-import { buildOnboardingPlan } from '../src/onboarding'
-import { TenantProfile } from '../src/types'
+import { describe, expect, it } from "vitest";
+import { buildOnboardingPlan } from "../src/onboarding";
+import { TenantProfile } from "../src/types";
 
 const profile: TenantProfile = {
-  id: 'tenant-2',
-  name: 'ACME',
-  segment: 'enterprise',
-  icp: 'regulated',
-  targetUseCases: ['governance'],
-  tier: 'premium'
-}
+  id: "tenant-2",
+  name: "ACME",
+  segment: "enterprise",
+  icp: "regulated",
+  targetUseCases: ["governance"],
+  tier: "premium",
+};
 
-describe('buildOnboardingPlan', () => {
-  it('builds day 7/14/30 outcomes and hypercare actions', () => {
+describe("buildOnboardingPlan", () => {
+  it("builds day 7/14/30 outcomes and hypercare actions", () => {
     const metrics = {
       ssoLive: true,
       integrations: 2,
@@ -24,17 +24,17 @@ describe('buildOnboardingPlan', () => {
       championTrained: true,
       hypercareResponseMinutes: 20,
       businessReviewScheduled: true,
-      backlogOfUseCases: 3
-    }
-    const { outcomes, hypercare } = buildOnboardingPlan(profile, metrics, new Date())
-    expect(outcomes).toHaveLength(3)
-    expect(outcomes.find((o) => o.stage === 'day7')?.completed).toBe(true)
-    expect(outcomes.find((o) => o.stage === 'day30')?.completed).toBe(true)
-    expect(hypercare.some((action) => action.slaMinutes === 30)).toBe(true)
-    expect(hypercare.some((action) => action.id.includes('office-hours'))).toBe(true)
-  })
+      backlogOfUseCases: 3,
+    };
+    const { outcomes, hypercare } = buildOnboardingPlan(profile, metrics, new Date());
+    expect(outcomes).toHaveLength(3);
+    expect(outcomes.find((o) => o.stage === "day7")?.completed).toBe(true);
+    expect(outcomes.find((o) => o.stage === "day30")?.completed).toBe(true);
+    expect(hypercare.some((action) => action.slaMinutes === 30)).toBe(true);
+    expect(hypercare.some((action) => action.id.includes("office-hours"))).toBe(true);
+  });
 
-  it('surfaces blockers when targets are missed', () => {
+  it("surfaces blockers when targets are missed", () => {
     const metrics = {
       ssoLive: false,
       integrations: 0,
@@ -46,11 +46,11 @@ describe('buildOnboardingPlan', () => {
       championTrained: false,
       hypercareResponseMinutes: 120,
       businessReviewScheduled: false,
-      backlogOfUseCases: 0
-    }
-    const { outcomes } = buildOnboardingPlan(profile, metrics, new Date())
-    const day7 = outcomes.find((o) => o.stage === 'day7')
-    expect(day7?.completed).toBe(false)
-    expect(day7?.blockers).toContain('SSO live')
-  })
-})
+      backlogOfUseCases: 0,
+    };
+    const { outcomes } = buildOnboardingPlan(profile, metrics, new Date());
+    const day7 = outcomes.find((o) => o.stage === "day7");
+    expect(day7?.completed).toBe(false);
+    expect(day7?.blockers).toContain("SSO live");
+  });
+});

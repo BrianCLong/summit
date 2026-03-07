@@ -1,6 +1,6 @@
-import React from 'react';
-import { ErrorBoundary } from './ErrorBoundary';
-import { Button } from '@/components/ui/Button';
+import React from 'react'
+import { ErrorBoundary } from './ErrorBoundary'
+import { Button } from '@/components/ui/Button'
 import {
   Card,
   CardHeader,
@@ -8,14 +8,14 @@ import {
   CardDescription,
   CardContent,
   CardFooter,
-} from '@/components/ui/Card';
-import { AlertTriangle, RefreshCw, Home } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+} from '@/components/ui/Card'
+import { AlertTriangle, RefreshCw, Home } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 
 interface MutationErrorFallbackProps {
-  error: Error;
-  resetErrorBoundary: () => void;
-  operationName?: string;
+  error: Error
+  resetErrorBoundary: () => void
+  operationName?: string
 }
 
 const MutationErrorFallback: React.FC<MutationErrorFallbackProps> = ({
@@ -23,11 +23,11 @@ const MutationErrorFallback: React.FC<MutationErrorFallbackProps> = ({
   resetErrorBoundary,
   operationName = 'operation',
 }) => {
-  const navigate = useNavigate();
+  const navigate = useNavigate()
 
   const handleGoHome = () => {
-    navigate('/');
-  };
+    navigate('/')
+  }
 
   return (
     <div className="flex min-h-[400px] w-full items-center justify-center p-4">
@@ -38,8 +38,8 @@ const MutationErrorFallback: React.FC<MutationErrorFallbackProps> = ({
             <CardTitle className="text-xl">Operation Failed</CardTitle>
           </div>
           <CardDescription className="text-base">
-            The {operationName} could not be completed. Your changes may not have been
-            saved.
+            The {operationName} could not be completed. Your changes may not
+            have been saved.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -48,8 +48,8 @@ const MutationErrorFallback: React.FC<MutationErrorFallbackProps> = ({
               ⚠️ Important: Please verify your data
             </p>
             <p className="text-xs text-yellow-700 dark:text-yellow-300 mt-1">
-              Before retrying, check if your changes were partially saved to avoid
-              duplication or data loss.
+              Before retrying, check if your changes were partially saved to
+              avoid duplication or data loss.
             </p>
           </div>
           <div className="text-sm text-muted-foreground space-y-2">
@@ -81,14 +81,14 @@ const MutationErrorFallback: React.FC<MutationErrorFallbackProps> = ({
         </CardFooter>
       </Card>
     </div>
-  );
-};
+  )
+}
 
 interface MutationErrorBoundaryProps {
-  children: React.ReactNode;
-  operationName?: string;
-  onError?: (error: Error, errorInfo: React.ErrorInfo) => void;
-  context?: Record<string, any>;
+  children: React.ReactNode
+  operationName?: string
+  onError?: (error: Error, errorInfo: React.ErrorInfo) => void
+  context?: Record<string, any>
 }
 
 /**
@@ -125,11 +125,11 @@ export const MutationErrorBoundary: React.FC<MutationErrorBoundaryProps> = ({
         operationName,
         boundaryType: 'mutation',
       }}
-      fallback={(props) => (
+      fallback={props => (
         <MutationErrorFallback {...props} operationName={operationName} />
       )}
     >
       {children}
     </ErrorBoundary>
-  );
-};
+  )
+}

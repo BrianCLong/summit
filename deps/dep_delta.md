@@ -1,6 +1,7 @@
 # Dependency Delta - Core Standardization & Bug Fixes
 
 ## Changes
+
 - Standardized React ecosystem to v18.
 - Downgraded ESLint to v8.57.0.
 - Aligned OpenTelemetry API to v1.7.0.
@@ -10,6 +11,7 @@
 - Updated `typescript` to 5.8.3 in `services/agentic-mesh-evaluation`.
 
 ## Justification
+
 - **React**: Resolve peer mismatches and ensure ecosystem stability.
 - **ESLint**: Maintain compatibility with existing plugins.
 - **OTel/Storybook**: Eliminate Skew and peer warnings.

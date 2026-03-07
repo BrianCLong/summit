@@ -1,4 +1,4 @@
-import { type Page, expect } from '@playwright/test';
+import { type Page, expect } from "@playwright/test";
 
 export class BasePage {
   readonly page: Page;
@@ -24,13 +24,15 @@ export class BasePage {
    */
   async checkAccessibility() {
     try {
-        // Placeholder: Requires @axe-core/playwright to be installed
-        // import { injectAxe, checkA11y } from 'axe-playwright';
-        // await injectAxe(this.page);
-        // await checkA11y(this.page);
-        console.warn('Accessibility check skipped: axe-playwright integration pending package installation.');
+      // Placeholder: Requires @axe-core/playwright to be installed
+      // import { injectAxe, checkA11y } from 'axe-playwright';
+      // await injectAxe(this.page);
+      // await checkA11y(this.page);
+      console.warn(
+        "Accessibility check skipped: axe-playwright integration pending package installation."
+      );
     } catch (e) {
-        console.error('Accessibility check failed:', e);
+      console.error("Accessibility check failed:", e);
     }
   }
 }

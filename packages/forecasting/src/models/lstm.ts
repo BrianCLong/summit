@@ -3,7 +3,7 @@
  * Simplified implementation without external dependencies
  */
 
-import type { TimeSeriesData, ForecastResult, LSTMConfig } from '../types/index.js';
+import type { TimeSeriesData, ForecastResult, LSTMConfig } from "../types/index.js";
 
 /**
  * LSTM Cell
@@ -88,10 +88,7 @@ class LSTMCell {
     );
 
     // New cell state
-    const cell = this.add(
-      this.elementwiseMul(f, prevCell),
-      this.elementwiseMul(i, cCandidate)
-    );
+    const cell = this.add(this.elementwiseMul(f, prevCell), this.elementwiseMul(i, cCandidate));
 
     // Output gate
     const o = this.sigmoid(
@@ -130,9 +127,7 @@ class LSTMCell {
   }
 
   private matVecMul(matrix: number[][], vector: number[]): number[] {
-    return matrix.map(row =>
-      row.reduce((sum, val, i) => sum + val * vector[i], 0)
-    );
+    return matrix.map((row) => row.reduce((sum, val, i) => sum + val * vector[i], 0));
   }
 
   private add(a: number[], b: number[]): number[] {
@@ -144,11 +139,11 @@ class LSTMCell {
   }
 
   private sigmoid(x: number[]): number[] {
-    return x.map(v => 1 / (1 + Math.exp(-Math.max(-500, Math.min(500, v)))));
+    return x.map((v) => 1 / (1 + Math.exp(-Math.max(-500, Math.min(500, v)))));
   }
 
   private tanh(x: number[]): number[] {
-    return x.map(v => Math.tanh(v));
+    return x.map((v) => Math.tanh(v));
   }
 }
 
@@ -179,7 +174,7 @@ export class LSTMForecaster {
    * Fit LSTM model
    */
   fit(data: TimeSeriesData[]): void {
-    const values = data.map(d => d.value);
+    const values = data.map((d) => d.value);
 
     // Normalize data
     this.mean = values.reduce((a, b) => a + b, 0) / values.length;
@@ -187,7 +182,7 @@ export class LSTMForecaster {
       values.reduce((sum, v) => sum + Math.pow(v - this.mean, 2), 0) / values.length
     );
 
-    const normalized = values.map(v => (v - this.mean) / this.std);
+    const normalized = values.map((v) => (v - this.mean) / this.std);
 
     // Create sequences
     const { X, y } = this.createSequences(normalized);
@@ -197,9 +192,7 @@ export class LSTMForecaster {
     this.lstmCell = new LSTMCell(1, hiddenSize);
 
     // Initialize output layer
-    this.outputWeights = Array.from({ length: hiddenSize }, () =>
-      (Math.random() - 0.5) * 0.1
-    );
+    this.outputWeights = Array.from({ length: hiddenSize }, () => (Math.random() - 0.5) * 0.1);
     this.outputBias = 0;
 
     // Training loop
@@ -221,8 +214,9 @@ export class LSTMForecaster {
         }
 
         // Output layer
-        const prediction = this.outputWeights.reduce((sum, w, j) =>
-          sum + w * hidden[j], this.outputBias
+        const prediction = this.outputWeights.reduce(
+          (sum, w, j) => sum + w * hidden[j],
+          this.outputBias
         );
 
         // Calculate loss
@@ -252,7 +246,7 @@ export class LSTMForecaster {
    */
   forecast(horizon: number, confidenceLevel: number = 0.95): ForecastResult[] {
     if (!this.fitted || !this.lstmCell) {
-      throw new Error('Model must be fitted before forecasting');
+      throw new Error("Model must be fitted before forecasting");
     }
 
     const results: ForecastResult[] = [];
@@ -274,8 +268,9 @@ export class LSTMForecaster {
       }
 
       // Get prediction
-      const normalizedPred = this.outputWeights.reduce((sum, w, j) =>
-        sum + w * hidden[j], this.outputBias
+      const normalizedPred = this.outputWeights.reduce(
+        (sum, w, j) => sum + w * hidden[j],
+        this.outputBias
       );
 
       // Denormalize
@@ -343,7 +338,7 @@ export class GRUForecaster {
   }
 
   fit(data: TimeSeriesData[]): void {
-    const values = data.map(d => d.value);
+    const values = data.map((d) => d.value);
     this.mean = values.reduce((a, b) => a + b, 0) / values.length;
     this.std = Math.sqrt(
       values.reduce((sum, v) => sum + Math.pow(v - this.mean, 2), 0) / values.length
@@ -358,16 +353,14 @@ export class GRUForecaster {
       candidate: this.randomMatrix(hiddenSize, hiddenSize + 1, scale),
     };
 
-    this.outputWeights = Array.from({ length: hiddenSize }, () =>
-      (Math.random() - 0.5) * scale
-    );
+    this.outputWeights = Array.from({ length: hiddenSize }, () => (Math.random() - 0.5) * scale);
 
     this.fitted = true;
   }
 
   forecast(horizon: number, confidenceLevel: number = 0.95): ForecastResult[] {
     if (!this.fitted) {
-      throw new Error('Model must be fitted before forecasting');
+      throw new Error("Model must be fitted before forecasting");
     }
 
     const results: ForecastResult[] = [];

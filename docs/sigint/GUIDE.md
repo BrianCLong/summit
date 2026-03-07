@@ -5,6 +5,7 @@
 This is a **TRAINING AND SIMULATION** platform for signals intelligence concepts. It does NOT implement actual signal interception capabilities.
 
 **Compliance References:**
+
 - NSPM-7 (National Security Presidential Memorandum 7)
 - Executive Order 12333
 - USSID 18 (U.S. Signals Intelligence Directive 18)
@@ -52,17 +53,18 @@ This is a **TRAINING AND SIMULATION** platform for signals intelligence concepts
 ## Packages
 
 ### @intelgraph/sigint-collector
+
 Signal collection simulation and management.
 
 ```typescript
-import { CollectionManager, SignalGenerator, SpectrumMonitor } from '@intelgraph/sigint-collector';
+import { CollectionManager, SignalGenerator, SpectrumMonitor } from "@intelgraph/sigint-collector";
 
 // Initialize collection manager
-const manager = new CollectionManager({ complianceMode: 'TRAINING' });
+const manager = new CollectionManager({ complianceMode: "TRAINING" });
 
 // Generate simulated signals
-const generator = new SignalGenerator({ realism: 'HIGH' });
-const signal = generator.generateRFSignal({ signalType: 'CELLULAR_4G' });
+const generator = new SignalGenerator({ realism: "HIGH" });
+const signal = generator.generateRFSignal({ signalType: "CELLULAR_4G" });
 
 // Monitor spectrum
 const monitor = new SpectrumMonitor({
@@ -70,20 +72,21 @@ const monitor = new SpectrumMonitor({
   endFrequency: 6e9,
   resolution: 100e3,
   sweepRate: 1,
-  sensitivity: -80
+  sensitivity: -80,
 });
 monitor.start();
 ```
 
 ### @intelgraph/rf-processor
+
 Digital signal processing and analysis.
 
 ```typescript
-import { SignalProcessor, ModulationClassifier, SpectralAnalyzer } from '@intelgraph/rf-processor';
+import { SignalProcessor, ModulationClassifier, SpectralAnalyzer } from "@intelgraph/rf-processor";
 
 // Process signals
 const processor = new SignalProcessor(1e6);
-const filtered = processor.applyFilter(signal, { type: 'lowpass', cutoffLow: 100000, order: 64 });
+const filtered = processor.applyFilter(signal, { type: "lowpass", cutoffLow: 100000, order: 64 });
 
 // Classify modulation
 const classifier = new ModulationClassifier();
@@ -92,10 +95,11 @@ console.log(`Detected: ${result.modulation} (${result.confidence * 100}%)`);
 ```
 
 ### @intelgraph/comint-analyzer
+
 Communications intelligence analysis.
 
 ```typescript
-import { VoiceAnalyzer, MessageAnalyzer, CommunicationsMapper } from '@intelgraph/comint-analyzer';
+import { VoiceAnalyzer, MessageAnalyzer, CommunicationsMapper } from "@intelgraph/comint-analyzer";
 
 // Analyze voice (simulated)
 const voiceAnalyzer = new VoiceAnalyzer();
@@ -107,15 +111,16 @@ const msgAnalysis = await messageAnalyzer.analyze(messageContent);
 
 // Map communications network
 const mapper = new CommunicationsMapper();
-mapper.addCommunication({ source, target, timestamp, type: 'voice' });
+mapper.addCommunication({ source, target, timestamp, type: "voice" });
 const metrics = mapper.calculateMetrics();
 ```
 
 ### @intelgraph/network-interceptor
+
 Network traffic analysis (simulation only).
 
 ```typescript
-import { PacketAnalyzer, FlowAnalyzer, ProtocolDecoder } from '@intelgraph/network-interceptor';
+import { PacketAnalyzer, FlowAnalyzer, ProtocolDecoder } from "@intelgraph/network-interceptor";
 
 // Generate simulated packets
 const packetAnalyzer = new PacketAnalyzer();
@@ -128,10 +133,11 @@ const stats = flowAnalyzer.getStatistics();
 ```
 
 ### @intelgraph/cryptanalysis-engine
+
 Cryptographic traffic analysis (educational only).
 
 ```typescript
-import { CryptoAnalyzer, TrafficPatternAnalyzer } from '@intelgraph/cryptanalysis-engine';
+import { CryptoAnalyzer, TrafficPatternAnalyzer } from "@intelgraph/cryptanalysis-engine";
 
 // Analyze encrypted traffic metadata
 const cryptoAnalyzer = new CryptoAnalyzer();
@@ -139,18 +145,25 @@ const metadata = cryptoAnalyzer.analyzeTraffic(packets);
 
 // Classify traffic patterns
 const patternAnalyzer = new TrafficPatternAnalyzer();
-const session = patternAnalyzer.generateSimulatedSession('voip-call', 60);
+const session = patternAnalyzer.generateSimulatedSession("voip-call", 60);
 ```
 
 ### @intelgraph/geolocation-engine
+
 Signal-based geolocation.
 
 ```typescript
-import { TDOALocator, Triangulator, TrackManager } from '@intelgraph/geolocation-engine';
+import { TDOALocator, Triangulator, TrackManager } from "@intelgraph/geolocation-engine";
 
 // TDOA geolocation
 const locator = new TDOALocator();
-locator.registerSensor({ id: 'S1', latitude: 38.9, longitude: -77.0, altitude: 100, timestampAccuracy: 10 });
+locator.registerSensor({
+  id: "S1",
+  latitude: 38.9,
+  longitude: -77.0,
+  altitude: 100,
+  timestampAccuracy: 10,
+});
 const position = locator.calculatePosition(measurements);
 
 // Track management
@@ -167,7 +180,7 @@ const engine = new SIGINTEngine(complianceManager);
 await engine.start();
 
 // Generate training data
-const scenario = await engine.generateTrainingScenario('advanced');
+const scenario = await engine.generateTrainingScenario("advanced");
 // Returns: { signals, messages, reports, locations }
 ```
 
@@ -180,13 +193,13 @@ const compliance = new ComplianceManager();
 
 // Check authorization
 const auth = compliance.checkAuthorization({
-  action: 'COLLECT',
-  userId: 'operator-1',
-  classification: 'SECRET'
+  action: "COLLECT",
+  userId: "operator-1",
+  classification: "SECRET",
 });
 
 // Apply minimization
-const minimized = compliance.applyMinimization(content, ['US_PERSON_DETECTED']);
+const minimized = compliance.applyMinimization(content, ["US_PERSON_DETECTED"]);
 
 // Generate audit report
 const report = compliance.getAuditReport({ startDate, endDate });
@@ -195,20 +208,24 @@ const report = compliance.getAuditReport({ startDate, endDate });
 ## API Endpoints
 
 ### Engine Control
+
 - `GET /api/v1/status` - Get engine status
 - `POST /api/v1/engine/start` - Start engine
 - `POST /api/v1/engine/stop` - Stop engine
 
 ### Processing
+
 - `POST /api/v1/tasks` - Submit processing task
 - `POST /api/v1/training/scenario` - Generate training scenario
 
 ### Analysis
+
 - `GET /api/v1/spectrum` - Get spectrum data
 - `GET /api/v1/comms/network` - Get communications network
 - `GET /api/v1/geolocation/tracks` - Get active tracks
 
 ### Compliance
+
 - `GET /api/v1/compliance/status` - Get compliance status
 - `GET /api/v1/compliance/audit` - Get audit report
 - `POST /api/v1/compliance/minimize` - Apply minimization

@@ -1,33 +1,33 @@
-import { verifyManifestInBrowser } from '../dist/browser/browser.js';
+import { verifyManifestInBrowser } from "../dist/browser/browser.js";
 
-const assetInput = document.getElementById('asset');
-const manifestInput = document.getElementById('manifest');
-const publicKeyInput = document.getElementById('publicKey');
-const verifyButton = document.getElementById('verify');
-const resultsSection = document.getElementById('results');
-const resultText = document.getElementById('resultText');
+const assetInput = document.getElementById("asset");
+const manifestInput = document.getElementById("manifest");
+const publicKeyInput = document.getElementById("publicKey");
+const verifyButton = document.getElementById("verify");
+const resultsSection = document.getElementById("results");
+const resultText = document.getElementById("resultText");
 
 async function readSelectedFile(input) {
   if (!input.files || input.files.length === 0) {
-    throw new Error('Missing required file input.');
+    throw new Error("Missing required file input.");
   }
   return input.files[0];
 }
 
 function formatIssues(issues) {
   if (!issues.length) {
-    return 'No issues detected.';
+    return "No issues detected.";
   }
-  return issues.map((issue) => `- [${issue.level}] ${issue.message}`).join('\n');
+  return issues.map((issue) => `- [${issue.level}] ${issue.message}`).join("\n");
 }
 
-verifyButton.addEventListener('click', async () => {
+verifyButton.addEventListener("click", async () => {
   try {
     const assetFile = await readSelectedFile(assetInput);
     const manifestFile = await readSelectedFile(manifestInput);
     const publicKey = publicKeyInput.value.trim();
     if (!publicKey) {
-      throw new Error('Public key is required.');
+      throw new Error("Public key is required.");
     }
 
     const [assetBuffer, manifestText] = await Promise.all([
@@ -42,15 +42,15 @@ verifyButton.addEventListener('click', async () => {
     });
 
     const lines = [
-      `Signature: ${result.validSignature ? 'valid' : 'INVALID'}`,
-      `Asset hash: ${result.validAssetHash ? 'valid' : 'INVALID'}`,
+      `Signature: ${result.validSignature ? "valid" : "INVALID"}`,
+      `Asset hash: ${result.validAssetHash ? "valid" : "INVALID"}`,
       `Manifest hash: ${result.manifestHash}`,
       `Claim hash: ${result.claimHash}`,
-      'Issues:',
+      "Issues:",
       formatIssues(result.issues),
     ];
 
-    resultText.textContent = lines.join('\n');
+    resultText.textContent = lines.join("\n");
     resultsSection.hidden = false;
   } catch (error) {
     resultText.textContent = `Verification failed: ${(error && error.message) || error}`;

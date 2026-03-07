@@ -170,25 +170,25 @@ It forces orientation, validation, and then action—exactly what you want when 
 
 ### By Situation
 
-| Situation | Use Prompt |
-|-----------|-----------|
-| **Just opened repo / unsure what to do** | #1 (Repo intake) |
-| **Know exactly what feature to build** | #2 (Feature + acceptance criteria) |
-| **Have failing test or error** | #3 (Debug & fix) |
-| **Want to clean up messy code** | #4 (Refactor with guardrails) |
-| **Need better test coverage** | #5 (Add tests strategically) |
-| **Want quick win for PR** | #6 (Fast ship-it) |
+| Situation                                | Use Prompt                         |
+| ---------------------------------------- | ---------------------------------- |
+| **Just opened repo / unsure what to do** | #1 (Repo intake)                   |
+| **Know exactly what feature to build**   | #2 (Feature + acceptance criteria) |
+| **Have failing test or error**           | #3 (Debug & fix)                   |
+| **Want to clean up messy code**          | #4 (Refactor with guardrails)      |
+| **Need better test coverage**            | #5 (Add tests strategically)       |
+| **Want quick win for PR**                | #6 (Fast ship-it)                  |
 
 ### By Goal
 
-| Goal | Best Prompt | Why |
-|------|------------|-----|
-| **Understanding codebase** | #1 | Maps structure + proposes next steps |
-| **Implementing new feature** | #2 | Clear criteria + constraints |
-| **Fixing bugs** | #3 | Tight focus on root cause |
-| **Improving code quality** | #4 | Safe refactor with guardrails |
-| **Increasing test coverage** | #5 | Strategic test additions |
-| **Getting PR ready** | #6 | End-to-end ownership |
+| Goal                         | Best Prompt | Why                                  |
+| ---------------------------- | ----------- | ------------------------------------ |
+| **Understanding codebase**   | #1          | Maps structure + proposes next steps |
+| **Implementing new feature** | #2          | Clear criteria + constraints         |
+| **Fixing bugs**              | #3          | Tight focus on root cause            |
+| **Improving code quality**   | #4          | Safe refactor with guardrails        |
+| **Increasing test coverage** | #5          | Strategic test additions             |
+| **Getting PR ready**         | #6          | End-to-end ownership                 |
 
 ---
 
@@ -207,6 +207,7 @@ It forces orientation, validation, and then action—exactly what you want when 
 Sometimes you'll need to run prompts sequentially:
 
 **Example: New feature workflow**
+
 1. Start with #1 (Repo intake) to understand codebase
 2. Use #2 (Feature implementation) to build the feature
 3. Apply #5 (Add tests) to ensure coverage
@@ -216,6 +217,7 @@ Sometimes you'll need to run prompts sequentially:
 ### Customizing Prompts
 
 Feel free to adapt these prompts to your needs:
+
 - Add project-specific constraints
 - Adjust acceptance criteria
 - Include team conventions
@@ -228,6 +230,7 @@ Feel free to adapt these prompts to your needs:
 ### Project-Specific Prompts
 
 See [README.md](./README.md) for IntelGraph-specific prompts covering:
+
 - Infrastructure setup
 - GraphQL gateway
 - Neo4j data modeling
@@ -245,6 +248,7 @@ See [README.md](./README.md) for IntelGraph-specific prompts covering:
 ## Tips for Success
 
 ### Do's
+
 - ✅ Provide clear context and constraints
 - ✅ Define explicit acceptance criteria
 - ✅ Ask for tests and documentation
@@ -252,6 +256,7 @@ See [README.md](./README.md) for IntelGraph-specific prompts covering:
 - ✅ Keep changes focused and minimal
 
 ### Don'ts
+
 - ❌ Vague requests without acceptance criteria
 - ❌ Skip testing "to save time"
 - ❌ Ask for large rewrites without constraints
@@ -263,35 +268,41 @@ See [README.md](./README.md) for IntelGraph-specific prompts covering:
 ## Quick Reference Card
 
 ### When starting fresh
+
 ```
 Use: Prompt #1 (Repo intake + recommend next steps)
 ```
 
 ### When you know what to build
+
 ```
 Use: Prompt #2 (Feature + acceptance criteria)
 Fill in: FEATURE, ACCEPTANCE CRITERIA, CONSTRAINTS
 ```
 
 ### When something's broken
+
 ```
 Use: Prompt #3 (Debug & fix)
 Paste: Stack trace or error message
 ```
 
 ### When code is messy
+
 ```
 Use: Prompt #4 (Refactor with guardrails)
 Specify: SCOPE and GOALS
 ```
 
 ### When tests are missing
+
 ```
 Use: Prompt #5 (Add tests strategically)
 Specify: TARGET AREA
 ```
 
 ### When you want quick PR
+
 ```
 Use: Prompt #6 (Fast ship-it)
 Let Claude pick the improvement

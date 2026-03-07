@@ -24,11 +24,11 @@ git checkout -b release/phase-3-ga
 ```yaml
 gateway:
   env:
-    ENFORCE_PERSISTED: 'true'
-    GQL_MAX_COST: '1000'
+    ENFORCE_PERSISTED: "true"
+    GQL_MAX_COST: "1000"
   resources:
-    requests: { cpu: '500m', memory: '1Gi' }
-    limits: { cpu: '2', memory: '4Gi' }
+    requests: { cpu: "500m", memory: "1Gi" }
+    limits: { cpu: "2", memory: "4Gi" }
 
 opa:
   bundleUrl: s3://intelgraph-policies/bundles/prod.tar.gz
@@ -39,12 +39,12 @@ opa:
 audit:
   signing:
     enabled: true
-    publicKeyHex: '<ed25519-hex>'
+    publicKeyHex: "<ed25519-hex>"
 
 traefik:
   additionalArguments:
-    - '--serverstransport.insecureskipverify=false'
-    - '--accesslog=true'
+    - "--serverstransport.insecureskipverify=false"
+    - "--accesslog=true"
 ```
 
 ---
@@ -171,18 +171,17 @@ allow {
 **File:** `apps/gateway/src/plugins/persistedOnly.ts`
 
 ```ts
-import Keyv from 'keyv';
-const keyv = new Keyv(process.env.REDIS_URL || 'redis://redis:6379');
+import Keyv from "keyv";
+const keyv = new Keyv(process.env.REDIS_URL || "redis://redis:6379");
 export function persistedOnlyPlugin() {
-  const enabled = (process.env.ENFORCE_PERSISTED || 'true') === 'true';
+  const enabled = (process.env.ENFORCE_PERSISTED || "true") === "true";
   return {
     async requestDidStart(ctx: any) {
       if (!enabled) return;
-      const h = ctx.request.http?.headers.get('x-persisted-hash') || '';
-      const tenant = ctx.request.http?.headers.get('x-tenant') || 'default';
-      const ok =
-        h.startsWith('sha256:') && (await keyv.get(`pq:${tenant}:${h}`));
-      if (!ok) throw new Error('Persisted queries only in production');
+      const h = ctx.request.http?.headers.get("x-persisted-hash") || "";
+      const tenant = ctx.request.http?.headers.get("x-tenant") || "default";
+      const ok = h.startsWith("sha256:") && (await keyv.get(`pq:${tenant}:${h}`));
+      if (!ok) throw new Error("Persisted queries only in production");
     },
   };
 }
@@ -191,21 +190,18 @@ export function persistedOnlyPlugin() {
 **File:** `apps/gateway/src/plugins/costLimit.ts`
 
 ```ts
-export function costLimitPlugin(
-  limitDefault = Number(process.env.GQL_MAX_COST || 1000),
-) {
+export function costLimitPlugin(limitDefault = Number(process.env.GQL_MAX_COST || 1000)) {
   return {
     async didResolveOperation(ctx: any) {
       const roles = (ctx.contextValue?.roles as string[]) || [];
-      const limit = roles.includes('admin') ? limitDefault * 2 : limitDefault;
+      const limit = roles.includes("admin") ? limitDefault * 2 : limitDefault;
       let cost = 0;
       const sel = ctx.operation?.selectionSet?.selections || [];
       for (const s of sel) {
-        const name = s?.name?.value || 'unknown';
-        cost += name.includes('search') ? 50 : 10;
+        const name = s?.name?.value || "unknown";
+        cost += name.includes("search") ? 50 : 10;
       }
-      if (cost > limit)
-        throw new Error(`Query exceeds cost limit (${cost} > ${limit})`);
+      if (cost > limit) throw new Error(`Query exceeds cost limit (${cost} > ${limit})`);
     },
   };
 }
@@ -240,24 +236,24 @@ export function costLimitPlugin(
 **File:** `tests/gateway/persisted-only.e2e.test.ts`
 
 ```ts
-import request from 'supertest';
-const URL = process.env.GQL_URL || 'http://localhost:4000';
+import request from "supertest";
+const URL = process.env.GQL_URL || "http://localhost:4000";
 
-describe('Persisted-only', () => {
-  it('rejects ad-hoc in prod', async () => {
+describe("Persisted-only", () => {
+  it("rejects ad-hoc in prod", async () => {
     const res = await request(URL)
-      .post('/graphql')
-      .set('x-tenant', 'default')
-      .send({ query: '{ __typename }' });
+      .post("/graphql")
+      .set("x-tenant", "default")
+      .send({ query: "{ __typename }" });
     expect(res.status).toBe(200);
     expect(JSON.stringify(res.body)).toMatch(/Persisted queries only/i);
   });
-  it('accepts known persisted hash', async () => {
+  it("accepts known persisted hash", async () => {
     const res = await request(URL)
-      .post('/graphql')
-      .set('x-tenant', 'default')
-      .set('x-persisted-hash', 'sha256:abc123...')
-      .send({ operationName: 'Ping', variables: {} });
+      .post("/graphql")
+      .set("x-tenant", "default")
+      .set("x-persisted-hash", "sha256:abc123...")
+      .send({ operationName: "Ping", variables: {} });
     expect(res.status).toBe(200);
     expect(res.body.data).toBeTruthy();
   });
@@ -286,16 +282,9 @@ test_deny_sensitive if {
 ```yaml
 name: Verify Phase-3 Evidence & Policy
 on:
-  push: { tags: ['v3.*'] }
+  push: { tags: ["v3.*"] }
   pull_request:
-    paths:
-      [
-        'docs/releases/phase-3-ga/**',
-        'policy/**',
-        'apps/gateway/**',
-        'deploy/**',
-        'tests/**',
-      ]
+    paths: ["docs/releases/phase-3-ga/**", "policy/**", "apps/gateway/**", "deploy/**", "tests/**"]
 jobs:
   verify:
     runs-on: ubuntu-latest

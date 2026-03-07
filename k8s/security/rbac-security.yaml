@@ -15,7 +15,7 @@ metadata:
     app.kubernetes.io/name: maestro
     app.kubernetes.io/component: orchestrator
   annotations:
-    eks.amazonaws.com/role-arn: 'arn:aws:iam::123456789012:role/maestro-orchestrator-role'
+    eks.amazonaws.com/role-arn: "arn:aws:iam::123456789012:role/maestro-orchestrator-role"
     security.intelgraph.ai/principle: least-privilege
 automountServiceAccountToken: true
 
@@ -33,38 +33,38 @@ metadata:
     app.kubernetes.io/component: orchestrator
 rules:
   # ConfigMaps - read only access to configuration
-  - apiGroups: ['']
-    resources: ['configmaps']
-    verbs: ['get', 'list', 'watch']
-    resourceNames: ['maestro-config', 'maestro-features']
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs: ["get", "list", "watch"]
+    resourceNames: ["maestro-config", "maestro-features"]
 
   # Secrets - read only access to own secrets
-  - apiGroups: ['']
-    resources: ['secrets']
-    verbs: ['get', 'list', 'watch']
-    resourceNames: ['maestro-secrets', 'maestro-tls']
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get", "list", "watch"]
+    resourceNames: ["maestro-secrets", "maestro-tls"]
 
   # Pods - read access for self-monitoring
-  - apiGroups: ['']
-    resources: ['pods']
-    verbs: ['get', 'list', 'watch']
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list", "watch"]
     resourceNames: [] # Empty means no specific resource restriction
 
   # Services - read access to discover other services
-  - apiGroups: ['']
-    resources: ['services', 'endpoints']
-    verbs: ['get', 'list', 'watch']
+  - apiGroups: [""]
+    resources: ["services", "endpoints"]
+    verbs: ["get", "list", "watch"]
 
   # Events - create events for auditing
-  - apiGroups: ['']
-    resources: ['events']
-    verbs: ['create', 'patch']
+  - apiGroups: [""]
+    resources: ["events"]
+    verbs: ["create", "patch"]
 
   # Leases - for leader election in HA deployments
-  - apiGroups: ['coordination.k8s.io']
-    resources: ['leases']
-    verbs: ['get', 'list', 'watch', 'create', 'update', 'patch']
-    resourceNames: ['maestro-leader-election']
+  - apiGroups: ["coordination.k8s.io"]
+    resources: ["leases"]
+    verbs: ["get", "list", "watch", "create", "update", "patch"]
+    resourceNames: ["maestro-leader-election"]
 
 ---
 # ===================================================================
@@ -109,14 +109,14 @@ metadata:
   name: maestro-monitoring-role
 rules:
   # Pods and services - read access for metrics collection
-  - apiGroups: ['']
-    resources: ['pods', 'services', 'endpoints']
-    verbs: ['get', 'list', 'watch']
+  - apiGroups: [""]
+    resources: ["pods", "services", "endpoints"]
+    verbs: ["get", "list", "watch"]
 
   # Pod metrics - read access
-  - apiGroups: ['metrics.k8s.io']
-    resources: ['pods', 'nodes']
-    verbs: ['get', 'list']
+  - apiGroups: ["metrics.k8s.io"]
+    resources: ["pods", "nodes"]
+    verbs: ["get", "list"]
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -146,7 +146,7 @@ metadata:
     app.kubernetes.io/name: external-secrets
     security.intelgraph.ai/component: secrets-management
   annotations:
-    eks.amazonaws.com/role-arn: 'arn:aws:iam::123456789012:role/external-secrets-role'
+    eks.amazonaws.com/role-arn: "arn:aws:iam::123456789012:role/external-secrets-role"
 automountServiceAccountToken: true
 
 ---
@@ -157,20 +157,20 @@ metadata:
   name: external-secrets-role
 rules:
   # Secrets - create and update managed secrets
-  - apiGroups: ['']
-    resources: ['secrets']
-    verbs: ['create', 'update', 'patch', 'delete']
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["create", "update", "patch", "delete"]
 
   # ConfigMaps - read vault configuration
-  - apiGroups: ['']
-    resources: ['configmaps']
-    verbs: ['get', 'list', 'watch']
-    resourceNames: ['vault-ca-cert', 'external-secrets-config']
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs: ["get", "list", "watch"]
+    resourceNames: ["vault-ca-cert", "external-secrets-config"]
 
   # Events - create events for audit trail
-  - apiGroups: ['']
-    resources: ['events']
-    verbs: ['create', 'patch']
+  - apiGroups: [""]
+    resources: ["events"]
+    verbs: ["create", "patch"]
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -209,19 +209,19 @@ metadata:
   name: secret-rotator-role
 rules:
   # Secrets - read and update for rotation
-  - apiGroups: ['']
-    resources: ['secrets']
-    verbs: ['get', 'list', 'patch', 'update']
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get", "list", "patch", "update"]
 
   # ExternalSecrets - trigger refresh after rotation
-  - apiGroups: ['external-secrets.io']
-    resources: ['externalsecrets']
-    verbs: ['get', 'list', 'patch']
+  - apiGroups: ["external-secrets.io"]
+    resources: ["externalsecrets"]
+    verbs: ["get", "list", "patch"]
 
   # Events - create rotation audit events
-  - apiGroups: ['']
-    resources: ['events']
-    verbs: ['create', 'patch']
+  - apiGroups: [""]
+    resources: ["events"]
+    verbs: ["create", "patch"]
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -260,20 +260,20 @@ metadata:
   name: secret-scanner-role
 rules:
   # Pods - read access to scan running containers
-  - apiGroups: ['']
-    resources: ['pods']
-    verbs: ['get', 'list']
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list"]
 
   # ConfigMaps - read scanner configuration
-  - apiGroups: ['']
-    resources: ['configmaps']
-    verbs: ['get', 'list']
-    resourceNames: ['secret-scanner-config']
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs: ["get", "list"]
+    resourceNames: ["secret-scanner-config"]
 
   # Events - create scanning audit events
-  - apiGroups: ['']
-    resources: ['events']
-    verbs: ['create', 'patch']
+  - apiGroups: [""]
+    resources: ["events"]
+    verbs: ["create", "patch"]
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -302,24 +302,24 @@ metadata:
     security.intelgraph.ai/rbac: cluster-reader
 rules:
   # Nodes - read access for security monitoring
-  - apiGroups: ['']
-    resources: ['nodes']
-    verbs: ['get', 'list', 'watch']
+  - apiGroups: [""]
+    resources: ["nodes"]
+    verbs: ["get", "list", "watch"]
 
   # Network policies - read access for compliance
-  - apiGroups: ['networking.k8s.io']
-    resources: ['networkpolicies']
-    verbs: ['get', 'list', 'watch']
+  - apiGroups: ["networking.k8s.io"]
+    resources: ["networkpolicies"]
+    verbs: ["get", "list", "watch"]
 
   # Pod security policies - read access
-  - apiGroups: ['policy']
-    resources: ['podsecuritypolicies']
-    verbs: ['get', 'list', 'watch']
+  - apiGroups: ["policy"]
+    resources: ["podsecuritypolicies"]
+    verbs: ["get", "list", "watch"]
 
   # RBAC resources - read access for audit
-  - apiGroups: ['rbac.authorization.k8s.io']
-    resources: ['roles', 'rolebindings', 'clusterroles', 'clusterrolebindings']
-    verbs: ['get', 'list', 'watch']
+  - apiGroups: ["rbac.authorization.k8s.io"]
+    resources: ["roles", "rolebindings", "clusterroles", "clusterrolebindings"]
+    verbs: ["get", "list", "watch"]
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -363,24 +363,24 @@ metadata:
     security.intelgraph.ai/rbac: admission-controller
 rules:
   # Validate resources during admission
-  - apiGroups: ['']
-    resources: ['pods', 'services', 'configmaps', 'secrets']
-    verbs: ['get', 'list', 'watch']
+  - apiGroups: [""]
+    resources: ["pods", "services", "configmaps", "secrets"]
+    verbs: ["get", "list", "watch"]
 
   # Validate deployments and other workloads
-  - apiGroups: ['apps']
-    resources: ['deployments', 'replicasets', 'statefulsets', 'daemonsets']
-    verbs: ['get', 'list', 'watch']
+  - apiGroups: ["apps"]
+    resources: ["deployments", "replicasets", "statefulsets", "daemonsets"]
+    verbs: ["get", "list", "watch"]
 
   # Validate RBAC resources
-  - apiGroups: ['rbac.authorization.k8s.io']
-    resources: ['roles', 'rolebindings', 'clusterroles', 'clusterrolebindings']
-    verbs: ['get', 'list', 'watch']
+  - apiGroups: ["rbac.authorization.k8s.io"]
+    resources: ["roles", "rolebindings", "clusterroles", "clusterrolebindings"]
+    verbs: ["get", "list", "watch"]
 
   # Create validation events
-  - apiGroups: ['']
-    resources: ['events']
-    verbs: ['create', 'patch']
+  - apiGroups: [""]
+    resources: ["events"]
+    verbs: ["create", "patch"]
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -419,14 +419,14 @@ metadata:
     security.intelgraph.ai/rbac: auditor
 rules:
   # Read-only access to all resources for auditing
-  - apiGroups: ['*']
-    resources: ['*']
-    verbs: ['get', 'list', 'watch']
+  - apiGroups: ["*"]
+    resources: ["*"]
+    verbs: ["get", "list", "watch"]
 
   # Access to audit logs
-  - apiGroups: ['audit.k8s.io']
-    resources: ['events']
-    verbs: ['get', 'list', 'watch']
+  - apiGroups: ["audit.k8s.io"]
+    resources: ["events"]
+    verbs: ["get", "list", "watch"]
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -467,11 +467,11 @@ spec:
               kinds:
                 - ServiceAccount
       validate:
-        message: 'ServiceAccounts must have security labels'
+        message: "ServiceAccounts must have security labels"
         pattern:
           metadata:
             labels:
-              app.kubernetes.io/name: '?*'
+              app.kubernetes.io/name: "?*"
 
     - name: block-cluster-admin-binding
       match:
@@ -480,10 +480,10 @@ spec:
               kinds:
                 - ClusterRoleBinding
       validate:
-        message: 'ClusterRoleBinding to cluster-admin is not allowed'
+        message: "ClusterRoleBinding to cluster-admin is not allowed"
         pattern:
           roleRef:
-            name: '!cluster-admin'
+            name: "!cluster-admin"
 
     - name: require-rbac-annotations
       match:
@@ -493,11 +493,11 @@ spec:
                 - Role
                 - ClusterRole
       validate:
-        message: 'Roles must have security annotations'
+        message: "Roles must have security annotations"
         pattern:
           metadata:
             annotations:
-              security.intelgraph.ai/principle: 'least-privilege'
+              security.intelgraph.ai/principle: "least-privilege"
 
     - name: block-wildcard-permissions
       match:
@@ -507,7 +507,7 @@ spec:
                 - Role
                 - ClusterRole
       validate:
-        message: 'Wildcard permissions (*) are not allowed in production'
+        message: "Wildcard permissions (*) are not allowed in production"
         deny:
           conditions:
             - key: "{{ request.object.rules[?contains(resources, '*')] | length(@) }}"
@@ -536,8 +536,8 @@ spec:
           labels:
             severity: warning
           annotations:
-            summary: 'Unauthorized RoleBinding created'
-            description: 'A RoleBinding was created - verify authorization'
+            summary: "Unauthorized RoleBinding created"
+            description: "A RoleBinding was created - verify authorization"
 
         - alert: ClusterAdminBinding
           expr: increase(apiserver_audit_total{verb="create",objectRef_resource="clusterrolebindings",objectRef_name="cluster-admin"}[1m]) > 0
@@ -545,8 +545,8 @@ spec:
           labels:
             severity: critical
           annotations:
-            summary: 'Cluster admin binding created'
-            description: 'A cluster-admin ClusterRoleBinding was created'
+            summary: "Cluster admin binding created"
+            description: "A cluster-admin ClusterRoleBinding was created"
 
         - alert: ServiceAccountTokenMount
           expr: increase(kubernetes_build_info{job="kube-state-metrics"}[5m]) and on() kube_pod_spec_service_account_token_mount{service_account!="default"} == 1
@@ -554,8 +554,8 @@ spec:
           labels:
             severity: warning
           annotations:
-            summary: 'ServiceAccount token mounted'
-            description: 'Pod {{ $labels.pod }} has ServiceAccount token mounted'
+            summary: "ServiceAccount token mounted"
+            description: "Pod {{ $labels.pod }} has ServiceAccount token mounted"
 
 ---
 # ===================================================================
@@ -571,25 +571,25 @@ metadata:
     security.intelgraph.ai/team: development
 rules:
   # Read access to most resources for troubleshooting
-  - apiGroups: ['']
-    resources: ['pods', 'pods/log', 'services', 'endpoints', 'configmaps']
-    verbs: ['get', 'list', 'watch']
+  - apiGroups: [""]
+    resources: ["pods", "pods/log", "services", "endpoints", "configmaps"]
+    verbs: ["get", "list", "watch"]
 
   # Limited secret access (no sensitive secrets)
-  - apiGroups: ['']
-    resources: ['secrets']
-    verbs: ['get', 'list']
-    resourceNames: ['maestro-config-secret']
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get", "list"]
+    resourceNames: ["maestro-config-secret"]
 
   # Deployment read access
-  - apiGroups: ['apps']
-    resources: ['deployments', 'replicasets']
-    verbs: ['get', 'list', 'watch']
+  - apiGroups: ["apps"]
+    resources: ["deployments", "replicasets"]
+    verbs: ["get", "list", "watch"]
 
   # Events for debugging
-  - apiGroups: ['']
-    resources: ['events']
-    verbs: ['get', 'list', 'watch']
+  - apiGroups: [""]
+    resources: ["events"]
+    verbs: ["get", "list", "watch"]
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -622,28 +622,28 @@ metadata:
     security.intelgraph.ai/team: sre
 rules:
   # Full access to monitoring and observability
-  - apiGroups: ['monitoring.coreos.com']
-    resources: ['*']
-    verbs: ['*']
+  - apiGroups: ["monitoring.coreos.com"]
+    resources: ["*"]
+    verbs: ["*"]
 
   # Read access to all resources for troubleshooting
-  - apiGroups: ['']
-    resources: ['*']
-    verbs: ['get', 'list', 'watch']
+  - apiGroups: [""]
+    resources: ["*"]
+    verbs: ["get", "list", "watch"]
 
   # Limited write access for incident response
-  - apiGroups: ['']
-    resources: ['pods']
-    verbs: ['delete']
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["delete"]
 
-  - apiGroups: ['apps']
-    resources: ['deployments', 'replicasets']
-    verbs: ['patch', 'update']
+  - apiGroups: ["apps"]
+    resources: ["deployments", "replicasets"]
+    verbs: ["patch", "update"]
 
   # Network policy management
-  - apiGroups: ['networking.k8s.io']
-    resources: ['networkpolicies']
-    verbs: ['*']
+  - apiGroups: ["networking.k8s.io"]
+    resources: ["networkpolicies"]
+    verbs: ["*"]
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1

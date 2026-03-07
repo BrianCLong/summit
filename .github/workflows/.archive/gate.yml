@@ -3,7 +3,6 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-
 # Reusable workflow for health gates based on SLO metrics
 # Blocks production deployment if error rates or latency exceed thresholds
 #

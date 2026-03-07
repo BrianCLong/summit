@@ -10,11 +10,11 @@
  * - High-throughput optimization
  */
 
-export * from './producer.js';
-export * from './consumer.js';
-export * from './admin.js';
-export * from './schema-registry.js';
-export * from './partitioner.js';
-export * from './dlq.js';
-export * from './config.js';
-export * from './types.js';
+export * from "./producer.js";
+export * from "./consumer.js";
+export * from "./admin.js";
+export * from "./schema-registry.js";
+export * from "./partitioner.js";
+export * from "./dlq.js";
+export * from "./config.js";
+export * from "./types.js";

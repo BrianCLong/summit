@@ -15,7 +15,7 @@ describe('demo mode gating', () => {
     vi.stubEnv('VITE_DEMO_MODE', 'false')
 
     render(
-      <MemoryRouter initialEntries={[{ pathname: '/demo' }]}> 
+      <MemoryRouter initialEntries={[{ pathname: '/demo' }]}>
         <Routes>
           <Route path="/" element={<div>home</div>} />
           <Route

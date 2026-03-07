@@ -7,6 +7,7 @@ IntelGraph is the investigative spine of the Summit platform, providing a multi-
 ## Core Models
 
 ### Entity
+
 Represents a node in the graph (e.g., Person, Organization, Account).
 
 ```typescript
@@ -17,11 +18,12 @@ interface Entity {
   label: string;
   attributes: Record<string, unknown>;
   metadata: Record<string, unknown>;
-  sensitivity?: 'public' | 'internal' | 'confidential' | 'restricted';
+  sensitivity?: "public" | "internal" | "confidential" | "restricted";
 }
 ```
 
 ### Edge
+
 Represents a directed relationship between two entities.
 
 ```typescript
@@ -37,6 +39,7 @@ interface Edge {
 ```
 
 ### Investigation Session
+
 Persists the state of an analyst's investigation workbench.
 
 ```typescript
@@ -44,9 +47,9 @@ interface InvestigationSession {
   id: string;
   tenantId: string;
   graphState: {
-      focusedEntityIds: string[];
-      visibleEdges: string[];
-      pinnedNotes: Array<{entityId?: string, text: string}>;
+    focusedEntityIds: string[];
+    visibleEdges: string[];
+    pinnedNotes: Array<{ entityId?: string; text: string }>;
   };
 }
 ```
@@ -78,6 +81,7 @@ IntelGraph supports the following on-demand analytics:
 ## Usage
 
 ### Pattern Search API
+
 ```json
 POST /api/v1/graph/patterns/search
 {

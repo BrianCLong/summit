@@ -3,7 +3,7 @@ name: Stale Issue and PR Cleanup
 on:
   schedule:
     # Run daily at 00:00 UTC
-    - cron: '0 0 * * *'
+    - cron: "0 0 * * *"
   workflow_dispatch:
 
 permissions:
@@ -18,63 +18,63 @@ jobs:
         uses: actions/stale@v9
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
-          
+
           # Issue configuration
           days-before-issue-stale: 60
           days-before-issue-close: 14
-          stale-issue-label: 'stale'
+          stale-issue-label: "stale"
           stale-issue-message: |
             This issue has been automatically marked as stale because it has not had any activity for 60 days.
-            
+
             It will be closed in 14 days if no further activity occurs.
-            
+
             If this issue is still relevant, please:
             - Comment to keep it open
             - Add the `keep-open` label
             - Update the issue with current information
-            
+
             Thank you for your contributions to Summit!
           close-issue-message: |
             This issue has been automatically closed due to inactivity.
-            
+
             If you believe this issue is still relevant, please reopen it with updated information.
-            
+
           # PR configuration
           days-before-pr-stale: 30
           days-before-pr-close: 7
-          stale-pr-label: 'stale'
+          stale-pr-label: "stale"
           stale-pr-message: |
             This pull request has been automatically marked as stale because it has not had any activity for 30 days.
-            
+
             It will be closed in 7 days if no further activity occurs.
-            
+
             If this PR is still relevant, please:
             - Comment to keep it open
             - Add the `keep-open` label
             - Rebase or update the PR
             - Request a review
-            
+
             Thank you for your contribution to Summit!
           close-pr-message: |
             This pull request has been automatically closed due to inactivity.
-            
+
             If you would like to continue working on this PR, please reopen it and update as needed.
-            
+
           # Labels to exempt from stale marking
-          exempt-issue-labels: 'keep-open,pinned,security,critical,priority:critical,priority:high,in-progress,blocked'
-          exempt-pr-labels: 'keep-open,pinned,security,wip,work-in-progress,blocked,priority:critical'
-          
+          exempt-issue-labels: "keep-open,pinned,security,critical,priority:critical,priority:high,in-progress,blocked"
+          exempt-pr-labels: "keep-open,pinned,security,wip,work-in-progress,blocked,priority:critical"
+
           # Don't mark issues/PRs with these milestones as stale
           exempt-milestones: true
           exempt-all-milestones: false
-          
+
           # Activity check
           operations-per-run: 100
           remove-stale-when-updated: true
-          
+
           # Debugging
           debug-only: false
           ascending: false
-          
+
           # Don't process drafts
           exempt-draft-pr: true

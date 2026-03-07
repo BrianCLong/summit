@@ -10,8 +10,8 @@ This policy defines where human authority must be preserved in AI-assisted decis
 
 ## Controls
 
-*   **Critical Decisions** (e.g., denying service, legal judgments) MUST have `human_override_required: true`.
-*   All overrides MUST be logged (`override_logged: true`).
+- **Critical Decisions** (e.g., denying service, legal judgments) MUST have `human_override_required: true`.
+- All overrides MUST be logged (`override_logged: true`).
 
 ## Enforcement
 

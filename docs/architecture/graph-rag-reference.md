@@ -10,6 +10,7 @@
 Summit GraphRAG (Retrieval-Augmented Generation) leverages the Knowledge Graph as the primary retrieval substrate, ensuring that AI reasoning is grounded in structured evidence, relationships, and provenance rather than just semantic similarity.
 
 By combining the strengths of property graphs (Neo4j) with vector-based augmentation, Summit achieves:
+
 - **Multi-hop reasoning**: Traversal of complex relationships (e.g., Actor -> Campaign -> Malware -> Target).
 - **Explainability**: Every retrieved fact is linked to a Graph Node with a persistent Evidence ID.
 - **Determinism**: Graph traversals provide stable retrieval sets compared to non-deterministic vector-only top-k results.
@@ -49,16 +50,17 @@ graph TD
 
 ## Mapping to Summit Domains
 
-| Summit Domain | GraphRAG Integration |
-| :--- | :--- |
-| **Evidence IDs** | Every node in the Knowledge Graph must contain an `evidence_id` property, which is included in the RAG context. |
-| **Governance Artifacts** | Governance policies are represented as nodes, allowing the LLM to reason about compliance during retrieval. |
-| **CI Signals** | CI failures and deployment events are linked to code artifacts, enabling "root cause" GraphRAG over infrastructure state. |
-| **Narrative Intelligence** | Narrative objects (Actor profiles, Campaign timelines) form the high-level clusters that guide multi-hop traversal. |
+| Summit Domain              | GraphRAG Integration                                                                                                      |
+| :------------------------- | :------------------------------------------------------------------------------------------------------------------------ |
+| **Evidence IDs**           | Every node in the Knowledge Graph must contain an `evidence_id` property, which is included in the RAG context.           |
+| **Governance Artifacts**   | Governance policies are represented as nodes, allowing the LLM to reason about compliance during retrieval.               |
+| **CI Signals**             | CI failures and deployment events are linked to code artifacts, enabling "root cause" GraphRAG over infrastructure state. |
+| **Narrative Intelligence** | Narrative objects (Actor profiles, Campaign timelines) form the high-level clusters that guide multi-hop traversal.       |
 
 ## Explainability Guarantees
 
 Summit GraphRAG enforces **Traceability-by-Design**:
+
 - **Source Attribution**: Every claim in the LLM response must map to a specific Evidence ID retrieved from the graph.
 - **Path Evidence**: If the LLM reasons across multiple hops, the specific Cypher path used to find that connection is recorded in the execution trace.
 - **Auditability**: Post-hoc reviewers can replay the exact Cypher query against a specific graph snapshot to verify the context provided to the LLM.

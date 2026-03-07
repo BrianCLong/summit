@@ -1,11 +1,11 @@
 // src/lib/api/maestro.ts
 
-import type { MaestroRunResponse } from '@/types/maestro';
+import type { MaestroRunResponse } from '@/types/maestro'
 
 export async function runMaestroRequest(params: {
-  userId: string;
-  requestText: string;
-  signal?: AbortSignal;
+  userId: string
+  requestText: string
+  signal?: AbortSignal
 }): Promise<MaestroRunResponse> {
   const res = await fetch('/api/maestro/runs', {
     method: 'POST',
@@ -15,14 +15,14 @@ export async function runMaestroRequest(params: {
       requestText: params.requestText,
     }),
     signal: params.signal,
-  });
+  })
 
   if (!res.ok) {
-    const text = await res.text().catch(() => '');
+    const text = await res.text().catch(() => '')
     throw new Error(
-      `Failed to run Maestro request: ${res.status} ${res.statusText} ${text}`,
-    );
+      `Failed to run Maestro request: ${res.status} ${res.statusText} ${text}`
+    )
   }
 
-  return res.json();
+  return res.json()
 }

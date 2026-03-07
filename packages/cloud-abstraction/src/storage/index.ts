@@ -9,8 +9,8 @@ import {
   StorageDownloadOptions,
   StorageListOptions,
   StorageListResult,
-  StorageError
-} from '../types';
+  StorageError,
+} from "../types";
 
 export interface IStorageProvider {
   readonly provider: CloudProvider;
@@ -28,11 +28,7 @@ export interface IStorageProvider {
   /**
    * Download an object from storage
    */
-  download(
-    bucket: string,
-    key: string,
-    options?: StorageDownloadOptions
-  ): Promise<Buffer>;
+  download(bucket: string, key: string, options?: StorageDownloadOptions): Promise<Buffer>;
 
   /**
    * Delete an object from storage
@@ -57,12 +53,7 @@ export interface IStorageProvider {
   /**
    * Copy object within or between buckets
    */
-  copy(
-    sourceBucket: string,
-    sourceKey: string,
-    destBucket: string,
-    destKey: string
-  ): Promise<void>;
+  copy(sourceBucket: string, sourceKey: string, destBucket: string, destKey: string): Promise<void>;
 
   /**
    * Generate a pre-signed URL for temporary access
@@ -71,10 +62,10 @@ export interface IStorageProvider {
     bucket: string,
     key: string,
     expiresIn: number,
-    operation: 'get' | 'put'
+    operation: "get" | "put"
   ): Promise<string>;
 }
 
-export { AWSStorageProvider } from './aws-storage';
-export { AzureStorageProvider } from './azure-storage';
-export { GCPStorageProvider } from './gcp-storage';
+export { AWSStorageProvider } from "./aws-storage";
+export { AzureStorageProvider } from "./azure-storage";
+export { GCPStorageProvider } from "./gcp-storage";

@@ -3,7 +3,6 @@
 > Evidence-IDs: EVD-PLACEHOLDER
 > Status: active
 
-
 # Anti-Fragmentation & Fork Defense
 
 **Mission**: Prevent Summit from splintering into parallel or divergent implementations.

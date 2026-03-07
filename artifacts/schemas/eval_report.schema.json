@@ -4,10 +4,10 @@
   "type": "object",
   "required": ["scores", "average", "threshold", "pass"],
   "properties": {
-    "scores": {"type": "array", "items": {"type": "number"}},
-    "average": {"type": "number"},
-    "threshold": {"type": "number"},
-    "pass": {"type": "boolean"}
+    "scores": { "type": "array", "items": { "type": "number" } },
+    "average": { "type": "number" },
+    "threshold": { "type": "number" },
+    "pass": { "type": "boolean" }
   },
   "additionalProperties": false
 }

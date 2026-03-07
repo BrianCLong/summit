@@ -1,10 +1,10 @@
-const { performance } = require('perf_hooks');
-const { generateGraph } = require('@intelgraph/synthdata-js');
+const { performance } = require("perf_hooks");
+const { generateGraph } = require("@intelgraph/synthdata-js");
 
 function runBenchmark(iterations = 1000) {
   const latencies = [];
   const spec = {
-    seed: 'bench',
+    seed: "bench",
     counts: { persons: 10, orgs: 5, assets: 3, comms: 10 },
   };
   for (let i = 0; i < iterations; i++) {

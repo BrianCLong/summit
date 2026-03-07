@@ -2,22 +2,22 @@ name: "CI: Infra Verify"
 on:
   pull_request:
     paths:
-      - 'src/platform/infra/**'
-      - '.github/policies/infra/**'
-      - '.github/workflows/ci-infra-verify.yml'
-      - '.github/scripts/infra-verify.ts'
-      - '.github/scripts/evidence-emit.ts'
-      - 'tests/infra/**'
+      - "src/platform/infra/**"
+      - ".github/policies/infra/**"
+      - ".github/workflows/ci-infra-verify.yml"
+      - ".github/scripts/infra-verify.ts"
+      - ".github/scripts/evidence-emit.ts"
+      - "tests/infra/**"
   push:
     branches:
       - main
     paths:
-      - 'src/platform/infra/**'
-      - '.github/policies/infra/**'
-      - '.github/workflows/ci-infra-verify.yml'
-      - '.github/scripts/infra-verify.ts'
-      - '.github/scripts/evidence-emit.ts'
-      - 'tests/infra/**'
+      - "src/platform/infra/**"
+      - ".github/policies/infra/**"
+      - ".github/workflows/ci-infra-verify.yml"
+      - ".github/scripts/infra-verify.ts"
+      - ".github/scripts/evidence-emit.ts"
+      - "tests/infra/**"
 
 jobs:
   verify:

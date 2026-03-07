@@ -1,12 +1,12 @@
-import React from 'react';
-import { useParams } from 'react-router-dom';
-import { api } from '../api';
-import GrafanaPanel from '../components/GrafanaPanel';
-import ErrorBudgetBurn from '../components/ErrorBudgetBurn';
-import { api } from '../api';
+import React from "react";
+import { useParams } from "react-router-dom";
+import { api } from "../api";
+import GrafanaPanel from "../components/GrafanaPanel";
+import ErrorBudgetBurn from "../components/ErrorBudgetBurn";
+import { api } from "../api";
 
 export default function PipelineDetail() {
-  const { id = '' } = useParams();
+  const { id = "" } = useParams();
   const {
     getPipeline,
     planPipeline,
@@ -16,21 +16,19 @@ export default function PipelineDetail() {
     putPipelineBaseline,
   } = api();
   const [pipe, setPipe] = React.useState<any | null>(null);
-  const [yaml, setYaml] = React.useState('');
+  const [yaml, setYaml] = React.useState("");
   const [plan, setPlan] = React.useState<any | null>(null);
   const [msg, setMsg] = React.useState<string | null>(null);
-  const [tab, setTab] = React.useState<
-    'overview' | 'validate' | 'policy' | 'observability'
-  >('overview');
-  const pipelineIdOrName = (pipe?.name ||
-    id ||
-    'intelgraph_pr_build') as string;
+  const [tab, setTab] = React.useState<"overview" | "validate" | "policy" | "observability">(
+    "overview"
+  );
+  const pipelineIdOrName = (pipe?.name || id || "intelgraph_pr_build") as string;
   const [baseline, setBaseline] = React.useState<any>(null);
   React.useEffect(() => {
     (async () => {
       const p = await getPipeline(id);
       setPipe(p);
-      setYaml(p.yaml || '');
+      setYaml(p.yaml || "");
       try {
         const b = await getPipelineBaseline(pipelineIdOrName);
         setBaseline(b.baseline || {});
@@ -43,44 +41,42 @@ export default function PipelineDetail() {
       <div role="tablist" className="flex gap-2">
         <button
           role="tab"
-          aria-selected={tab === 'overview'}
-          onClick={() => setTab('overview')}
+          aria-selected={tab === "overview"}
+          onClick={() => setTab("overview")}
           className="rounded border px-2 py-1"
         >
           Overview
         </button>
         <button
           role="tab"
-          aria-selected={tab === 'validate'}
-          onClick={() => setTab('validate')}
+          aria-selected={tab === "validate"}
+          onClick={() => setTab("validate")}
           className="rounded border px-2 py-1"
         >
           Validate
         </button>
         <button
           role="tab"
-          aria-selected={tab === 'policy'}
-          onClick={() => setTab('policy')}
+          aria-selected={tab === "policy"}
+          onClick={() => setTab("policy")}
           className="rounded border px-2 py-1"
         >
           Policy
         </button>
         <button
           role="tab"
-          aria-selected={tab === 'observability'}
-          onClick={() => setTab('observability')}
+          aria-selected={tab === "observability"}
+          onClick={() => setTab("observability")}
           className="rounded border px-2 py-1"
         >
           Observability
         </button>
       </div>
 
-      {tab === 'overview' && (
+      {tab === "overview" && (
         <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
           <section className="rounded border bg-white p-3">
-            <div className="mb-2 text-sm font-semibold text-slate-700">
-              YAML
-            </div>
+            <div className="mb-2 text-sm font-semibold text-slate-700">YAML</div>
             <textarea
               aria-label="Pipeline YAML"
               className="h-[50vh] w-full rounded border p-2 font-mono text-xs"
@@ -89,22 +85,16 @@ export default function PipelineDetail() {
             />
           </section>
           <section className="rounded border bg-white p-3">
-            <div className="text-sm text-slate-600">
-              Owner: {pipe?.owner || '—'}
-            </div>
-            <div className="text-sm text-slate-600">
-              Version: {pipe?.version || '—'}
-            </div>
+            <div className="text-sm text-slate-600">Owner: {pipe?.owner || "—"}</div>
+            <div className="text-sm text-slate-600">Version: {pipe?.version || "—"}</div>
           </section>
         </div>
       )}
 
-      {tab === 'validate' && (
+      {tab === "validate" && (
         <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
           <section className="rounded border bg-white p-3">
-            <div className="mb-2 text-sm font-semibold text-slate-700">
-              YAML
-            </div>
+            <div className="mb-2 text-sm font-semibold text-slate-700">YAML</div>
             <textarea
               aria-label="Pipeline YAML"
               className="h-[50vh] w-full rounded border p-2 font-mono text-xs"
@@ -117,10 +107,10 @@ export default function PipelineDetail() {
                 onClick={async () => {
                   try {
                     const r = await validatePipeline(id, { yaml });
-                    setMsg(r.valid ? 'Valid ✔' : 'Invalid');
+                    setMsg(r.valid ? "Valid ✔" : "Invalid");
                     setTimeout(() => setMsg(null), 1500);
                   } catch (e: any) {
-                    setMsg(e?.message || 'Validate failed');
+                    setMsg(e?.message || "Validate failed");
                   }
                 }}
               >
@@ -132,10 +122,10 @@ export default function PipelineDetail() {
                   try {
                     const r = await planPipeline(id, { yaml });
                     setPlan(r);
-                    setMsg('Plan computed');
+                    setMsg("Plan computed");
                     setTimeout(() => setMsg(null), 1500);
                   } catch (e: any) {
-                    setMsg(e?.message || 'Plan failed');
+                    setMsg(e?.message || "Plan failed");
                   }
                 }}
               >
@@ -145,13 +135,9 @@ export default function PipelineDetail() {
             </div>
           </section>
           <section className="rounded border bg-white p-3">
-            <div className="mb-2 text-sm font-semibold text-slate-700">
-              Diff & Impact
-            </div>
+            <div className="mb-2 text-sm font-semibold text-slate-700">Diff & Impact</div>
             {!plan && (
-              <div className="text-sm text-slate-500">
-                Click Plan Preview to see changes.
-              </div>
+              <div className="text-sm text-slate-500">Click Plan Preview to see changes.</div>
             )}
             {plan && (
               <div className="text-sm">
@@ -172,11 +158,9 @@ export default function PipelineDetail() {
         </div>
       )}
 
-      {tab === 'policy' && (
+      {tab === "policy" && (
         <section className="rounded border bg-white p-3">
-          <div className="mb-2 text-sm font-semibold text-slate-700">
-            Policy Explain
-          </div>
+          <div className="mb-2 text-sm font-semibold text-slate-700">Policy Explain</div>
           <div>
             <button
               className="rounded border px-2 py-1 text-xs"
@@ -194,22 +178,18 @@ export default function PipelineDetail() {
           </div>
           {plan?.explain && (
             <div className="mt-2 rounded border bg-slate-50 p-2 text-xs">
-              Decision: {plan.explain.allowed ? 'Allow' : 'Deny'}
+              Decision: {plan.explain.allowed ? "Allow" : "Deny"}
               <br />
               Rule: <span className="font-mono">{plan.explain.rulePath}</span>
               <br />
-              Reasons: {(plan.explain.reasons || []).join('; ')}
+              Reasons: {(plan.explain.reasons || []).join("; ")}
             </div>
           )}
         </section>
       )}
 
-      {tab === 'observability' && (
-        <div
-          role="tabpanel"
-          aria-label="Pipeline observability"
-          className="space-y-3"
-        >
+      {tab === "observability" && (
+        <div role="tabpanel" aria-label="Pipeline observability" className="space-y-3">
           <section className="rounded-2xl border p-4 space-y-2">
             <div className="text-sm font-medium">Eval baselines</div>
             <div className="grid grid-cols-1 gap-2 md:grid-cols-4">
@@ -280,24 +260,17 @@ export default function PipelineDetail() {
           <ErrorBudgetBurn pipeline={pipelineIdOrName} />
           <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
             <GrafanaPanel
-              uid={
-                (window as any).__MAESTRO_CFG__?.grafanaDashboards?.slo ||
-                'maestro-slo'
-              }
+              uid={(window as any).__MAESTRO_CFG__?.grafanaDashboards?.slo || "maestro-slo"}
               vars={{ pipeline: pipelineIdOrName }}
             />
             <GrafanaPanel
               uid={
-                (window as any).__MAESTRO_CFG__?.grafanaDashboards?.overview ||
-                'maestro-overview'
+                (window as any).__MAESTRO_CFG__?.grafanaDashboards?.overview || "maestro-overview"
               }
               vars={{ pipeline: pipelineIdOrName }}
             />
             <GrafanaPanel
-              uid={
-                (window as any).__MAESTRO_CFG__?.grafanaDashboards?.cost ||
-                'maestro-cost'
-              }
+              uid={(window as any).__MAESTRO_CFG__?.grafanaDashboards?.cost || "maestro-cost"}
               vars={{ pipeline: pipelineIdOrName }}
             />
           </div>

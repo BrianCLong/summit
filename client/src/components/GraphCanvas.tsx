@@ -1,11 +1,10 @@
- 
-import React, { useEffect, useRef } from 'react';
-import cytoscape, { ElementDefinition } from 'cytoscape';
-import $ from 'jquery';
-import { useDispatch, useSelector } from 'react-redux';
-import { addNode, addEdge } from '../store/graphSlice';
-import { RootState } from '../store/types';
-import { io, Socket } from 'socket.io-client';
+import React, { useEffect, useRef } from "react";
+import cytoscape, { ElementDefinition } from "cytoscape";
+import $ from "jquery";
+import { useDispatch, useSelector } from "react-redux";
+import { addNode, addEdge } from "../store/graphSlice";
+import { RootState } from "../store/types";
+import { io, Socket } from "socket.io-client";
 
 /**
  * GraphCanvas mounts a Cytoscape instance and wires up
@@ -28,29 +27,25 @@ const GraphCanvas: React.FC = () => {
     // This avoids expensive destroy/recreate cycles and redundant Socket.IO connections.
     const cy = (cyRef.current = cytoscape({
       container: containerRef.current,
-      style: [{ selector: 'node', style: { label: 'data(id)' } }],
-      layout: { name: 'grid' },
+      style: [{ selector: "node", style: { label: "data(id)" } }],
+      layout: { name: "grid" },
     }));
 
     // jQuery wrapper for simple drag feedback
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    $(cy.container()).on('mouseup', 'node', (evt: any) => {
+    $(cy.container()).on("mouseup", "node", (evt: any) => {
       const n = evt.target;
       dispatch(
         addNode({
           data: { id: n.id() },
           position: n.position(),
-        }),
+        })
       );
     });
 
     socketRef.current = io();
-    socketRef.current.on('graph:add-node', (n: ElementDefinition) =>
-      dispatch(addNode(n)),
-    );
-    socketRef.current.on('graph:add-edge', (e: ElementDefinition) =>
-      dispatch(addEdge(e)),
-    );
+    socketRef.current.on("graph:add-node", (n: ElementDefinition) => dispatch(addNode(n)));
+    socketRef.current.on("graph:add-edge", (e: ElementDefinition) => dispatch(addEdge(e)));
 
     return () => {
       cy.destroy();
@@ -65,11 +60,11 @@ const GraphCanvas: React.FC = () => {
       cyRef.current.json({
         elements: [...graph.nodes, ...graph.edges] as ElementDefinition[],
       });
-      cyRef.current.layout({ name: 'grid' }).run();
+      cyRef.current.layout({ name: "grid" }).run();
     }
   }, [graph.nodes, graph.edges]);
 
-  return <div ref={containerRef} style={{ width: '100%', height: '100%' }} />;
+  return <div ref={containerRef} style={{ width: "100%", height: "100%" }} />;
 };
 
 export default GraphCanvas;

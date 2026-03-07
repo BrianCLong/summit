@@ -1,5 +1,5 @@
 // @ts-nocheck
-import React from 'react';
+import React from "react";
 
 interface FilterOption {
   label: string;
@@ -16,7 +16,7 @@ interface FilterPanelProps {
   className?: string;
 }
 
-export function FilterPanel({ filters = {}, onChange, className = '' }: FilterPanelProps) {
+export function FilterPanel({ filters = {}, onChange, className = "" }: FilterPanelProps) {
   return (
     <div className={`p-4 bg-white dark:bg-gray-800 rounded-lg shadow ${className}`}>
       <h3 className="font-semibold text-gray-900 dark:text-white mb-3">Filters</h3>

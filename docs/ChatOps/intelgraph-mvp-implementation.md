@@ -38,18 +38,18 @@ Based on the project knowledge, the IntelGraph repository currently has:
 #### 1.1 Authentication Service (`server/src/services/AuthService.js`)
 
 ```javascript
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const { v4: uuidv4 } = require('uuid');
-const logger = require('../utils/logger');
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const { v4: uuidv4 } = require("uuid");
+const logger = require("../utils/logger");
 
 class AuthService {
   constructor(userService) {
     this.userService = userService;
     this.jwtSecret = process.env.JWT_SECRET;
     this.refreshSecret = process.env.JWT_REFRESH_SECRET;
-    this.jwtExpiry = process.env.JWT_EXPIRY || '15m';
-    this.refreshExpiry = process.env.JWT_REFRESH_EXPIRY || '7d';
+    this.jwtExpiry = process.env.JWT_EXPIRY || "15m";
+    this.refreshExpiry = process.env.JWT_REFRESH_EXPIRY || "7d";
   }
 
   async register(email, username, password) {
@@ -57,7 +57,7 @@ class AuthService {
       // Check if user already exists
       const existingUser = await this.userService.findByEmail(email);
       if (existingUser) {
-        throw new Error('User already exists with this email');
+        throw new Error("User already exists with this email");
       }
 
       // Hash password
@@ -70,7 +70,7 @@ class AuthService {
         email,
         username,
         password: hashedPassword,
-        role: 'ANALYST',
+        role: "ANALYST",
         createdAt: new Date(),
         updatedAt: new Date(),
       });
@@ -81,7 +81,7 @@ class AuthService {
       logger.info(`User registered successfully: ${email}`);
       return { user: this.sanitizeUser(user), ...tokens };
     } catch (error) {
-      logger.error('Registration failed:', error);
+      logger.error("Registration failed:", error);
       throw error;
     }
   }
@@ -90,12 +90,12 @@ class AuthService {
     try {
       const user = await this.userService.findByEmail(email);
       if (!user) {
-        throw new Error('Invalid email or password');
+        throw new Error("Invalid email or password");
       }
 
       const isValidPassword = await bcrypt.compare(password, user.password);
       if (!isValidPassword) {
-        throw new Error('Invalid email or password');
+        throw new Error("Invalid email or password");
       }
 
       const tokens = this.generateTokens(user);
@@ -103,7 +103,7 @@ class AuthService {
       logger.info(`User logged in successfully: ${email}`);
       return { user: this.sanitizeUser(user), ...tokens };
     } catch (error) {
-      logger.error('Login failed:', error);
+      logger.error("Login failed:", error);
       throw error;
     }
   }
@@ -117,17 +117,13 @@ class AuthService {
 
     const accessToken = jwt.sign(payload, this.jwtSecret, {
       expiresIn: this.jwtExpiry,
-      issuer: 'intelgraph',
+      issuer: "intelgraph",
     });
 
-    const refreshToken = jwt.sign(
-      { ...payload, type: 'refresh' },
-      this.refreshSecret,
-      {
-        expiresIn: this.refreshExpiry,
-        issuer: 'intelgraph',
-      },
-    );
+    const refreshToken = jwt.sign({ ...payload, type: "refresh" }, this.refreshSecret, {
+      expiresIn: this.refreshExpiry,
+      issuer: "intelgraph",
+    });
 
     return { accessToken, refreshToken };
   }
@@ -136,7 +132,7 @@ class AuthService {
     try {
       return jwt.verify(token, this.jwtSecret);
     } catch (error) {
-      throw new Error('Invalid token');
+      throw new Error("Invalid token");
     }
   }
 
@@ -152,17 +148,14 @@ module.exports = AuthService;
 #### 1.2 Graph Service (`server/src/services/GraphService.js`)
 
 ```javascript
-const neo4j = require('neo4j-driver');
-const logger = require('../utils/logger');
+const neo4j = require("neo4j-driver");
+const logger = require("../utils/logger");
 
 class GraphService {
   constructor() {
     this.driver = neo4j.driver(
-      process.env.NEO4J_URI || 'bolt://localhost:7687',
-      neo4j.auth.basic(
-        process.env.NEO4J_USER || 'neo4j',
-        process.env.NEO4J_PASSWORD || 'password',
-      ),
+      process.env.NEO4J_URI || "bolt://localhost:7687",
+      neo4j.auth.basic(process.env.NEO4J_USER || "neo4j", process.env.NEO4J_PASSWORD || "password")
     );
   }
 
@@ -196,9 +189,9 @@ class GraphService {
         FOR (e:Entity) ON (e.name)
       `);
 
-      logger.info('Neo4j constraints and indexes created successfully');
+      logger.info("Neo4j constraints and indexes created successfully");
     } catch (error) {
-      logger.error('Failed to create constraints:', error);
+      logger.error("Failed to create constraints:", error);
       throw error;
     } finally {
       await session.close();
@@ -221,12 +214,12 @@ class GraphService {
         })
         RETURN e
       `,
-        entityData,
+        entityData
       );
 
-      return result.records[0].get('e').properties;
+      return result.records[0].get("e").properties;
     } catch (error) {
-      logger.error('Failed to create entity:', error);
+      logger.error("Failed to create entity:", error);
       throw error;
     } finally {
       await session.close();
@@ -251,20 +244,20 @@ class GraphService {
         }]->(to)
         RETURN r, from, to
       `,
-        relationshipData,
+        relationshipData
       );
 
       if (result.records.length === 0) {
-        throw new Error('Could not create relationship - entities not found');
+        throw new Error("Could not create relationship - entities not found");
       }
 
       return {
-        relationship: result.records[0].get('r').properties,
-        fromEntity: result.records[0].get('from').properties,
-        toEntity: result.records[0].get('to').properties,
+        relationship: result.records[0].get("r").properties,
+        fromEntity: result.records[0].get("from").properties,
+        toEntity: result.records[0].get("to").properties,
       };
     } catch (error) {
-      logger.error('Failed to create relationship:', error);
+      logger.error("Failed to create relationship:", error);
       throw error;
     } finally {
       await session.close();
@@ -280,24 +273,24 @@ class GraphService {
         OPTIONAL MATCH (e)-[r:RELATES_TO {investigationId: $investigationId}]->(e2:Entity)
         RETURN e, r, e2
       `,
-        { investigationId },
+        { investigationId }
       );
 
       const entities = new Map();
       const relationships = [];
 
       result.records.forEach((record) => {
-        const entity = record.get('e');
+        const entity = record.get("e");
         if (entity && !entities.has(entity.properties.id)) {
           entities.set(entity.properties.id, entity.properties);
         }
 
-        const entity2 = record.get('e2');
+        const entity2 = record.get("e2");
         if (entity2 && !entities.has(entity2.properties.id)) {
           entities.set(entity2.properties.id, entity2.properties);
         }
 
-        const relationship = record.get('r');
+        const relationship = record.get("r");
         if (relationship) {
           relationships.push(relationship.properties);
         }
@@ -308,7 +301,7 @@ class GraphService {
         relationships,
       };
     } catch (error) {
-      logger.error('Failed to get investigation graph:', error);
+      logger.error("Failed to get investigation graph:", error);
       throw error;
     } finally {
       await session.close();
@@ -335,7 +328,7 @@ class GraphService {
           }
         )
       `,
-        { investigationId },
+        { investigationId }
       );
 
       // Run Louvain community detection
@@ -350,7 +343,7 @@ class GraphService {
         YIELD communityCount, modularity
         RETURN communityCount, modularity
       `,
-        { investigationId },
+        { investigationId }
       );
 
       // Clean up the projected graph
@@ -358,12 +351,12 @@ class GraphService {
         `
         CALL gds.graph.drop('investigation-' + $investigationId)
       `,
-        { investigationId },
+        { investigationId }
       );
 
       return result.records[0].toObject();
     } catch (error) {
-      logger.error('Failed to run community detection:', error);
+      logger.error("Failed to run community detection:", error);
       throw error;
     } finally {
       await session.close();
@@ -382,8 +375,8 @@ module.exports = GraphService;
 
 ```javascript
 // server/src/graphql/resolvers/userResolvers.js
-const AuthService = require('../../services/AuthService');
-const UserService = require('../../services/UserService');
+const AuthService = require("../../services/AuthService");
+const UserService = require("../../services/UserService");
 
 const authService = new AuthService(new UserService());
 
@@ -391,7 +384,7 @@ module.exports = {
   Query: {
     me: async (parent, args, context) => {
       if (!context.user) {
-        throw new Error('Not authenticated');
+        throw new Error("Not authenticated");
       }
       return context.user;
     },
@@ -407,8 +400,8 @@ module.exports = {
 };
 
 // server/src/graphql/resolvers/investigationResolvers.js
-const InvestigationService = require('../../services/InvestigationService');
-const { PubSub } = require('graphql-subscriptions');
+const InvestigationService = require("../../services/InvestigationService");
+const { PubSub } = require("graphql-subscriptions");
 
 const investigationService = new InvestigationService();
 const pubsub = new PubSub();
@@ -417,13 +410,13 @@ module.exports = {
   Query: {
     investigations: async (parent, args, context) => {
       if (!context.user) {
-        throw new Error('Not authenticated');
+        throw new Error("Not authenticated");
       }
       return await investigationService.findByUserId(context.user.id);
     },
     investigation: async (parent, { id }, context) => {
       if (!context.user) {
-        throw new Error('Not authenticated');
+        throw new Error("Not authenticated");
       }
       return await investigationService.findById(id);
     },
@@ -431,7 +424,7 @@ module.exports = {
   Mutation: {
     createInvestigation: async (parent, { input }, context) => {
       if (!context.user) {
-        throw new Error('Not authenticated');
+        throw new Error("Not authenticated");
       }
 
       const investigation = await investigationService.create({
@@ -439,7 +432,7 @@ module.exports = {
         createdBy: context.user.id,
       });
 
-      pubsub.publish('INVESTIGATION_CREATED', {
+      pubsub.publish("INVESTIGATION_CREATED", {
         investigationUpdated: investigation,
       });
 
@@ -448,11 +441,7 @@ module.exports = {
   },
   Subscription: {
     investigationUpdated: {
-      subscribe: () =>
-        pubsub.asyncIterator([
-          'INVESTIGATION_CREATED',
-          'INVESTIGATION_UPDATED',
-        ]),
+      subscribe: () => pubsub.asyncIterator(["INVESTIGATION_CREATED", "INVESTIGATION_UPDATED"]),
     },
   },
 };
@@ -463,54 +452,45 @@ module.exports = {
 #### 2.1 Apollo Client Setup (`client/src/services/apollo.js`)
 
 ```javascript
-import {
-  ApolloClient,
-  InMemoryCache,
-  createHttpLink,
-  from,
-} from '@apollo/client';
-import { setContext } from '@apollo/client/link/context';
-import { onError } from '@apollo/client/link/error';
+import { ApolloClient, InMemoryCache, createHttpLink, from } from "@apollo/client";
+import { setContext } from "@apollo/client/link/context";
+import { onError } from "@apollo/client/link/error";
 
 const httpLink = createHttpLink({
-  uri: process.env.REACT_APP_GRAPHQL_URL || 'http://localhost:4000/graphql',
+  uri: process.env.REACT_APP_GRAPHQL_URL || "http://localhost:4000/graphql",
 });
 
 const authLink = setContext((_, { headers }) => {
-  const token = localStorage.getItem('accessToken');
+  const token = localStorage.getItem("accessToken");
   return {
     headers: {
       ...headers,
-      authorization: token ? `Bearer ${token}` : '',
+      authorization: token ? `Bearer ${token}` : "",
     },
   };
 });
 
-const errorLink = onError(
-  ({ graphQLErrors, networkError, operation, forward }) => {
-    if (graphQLErrors) {
-      graphQLErrors.forEach(({ message, locations, path }) => {
-        console.error(
-          `GraphQL error: Message: ${message}, Location: ${locations}, Path: ${path}`,
-        );
-      });
-    }
+const errorLink = onError(({ graphQLErrors, networkError, operation, forward }) => {
+  if (graphQLErrors) {
+    graphQLErrors.forEach(({ message, locations, path }) => {
+      console.error(`GraphQL error: Message: ${message}, Location: ${locations}, Path: ${path}`);
+    });
+  }
 
-    if (networkError) {
-      console.error(`Network error: ${networkError}`);
-    }
-  },
-);
+  if (networkError) {
+    console.error(`Network error: ${networkError}`);
+  }
+});
 
 export const apolloClient = new ApolloClient({
   link: from([errorLink, authLink, httpLink]),
   cache: new InMemoryCache(),
   defaultOptions: {
     watchQuery: {
-      errorPolicy: 'ignore',
+      errorPolicy: "ignore",
     },
     query: {
-      errorPolicy: 'all',
+      errorPolicy: "all",
     },
   },
 });
@@ -545,17 +525,12 @@ export type AppDispatch = typeof store.dispatch;
 #### 2.3 Graph Visualization Component (`client/src/components/graph/GraphViewer.js`)
 
 ```javascript
-import React, { useEffect, useRef, useState } from 'react';
-import cytoscape from 'cytoscape';
-import { Box, Paper, Typography, Fab, Menu, MenuItem } from '@mui/material';
-import { Add as AddIcon, Settings as SettingsIcon } from '@mui/icons-material';
+import React, { useEffect, useRef, useState } from "react";
+import cytoscape from "cytoscape";
+import { Box, Paper, Typography, Fab, Menu, MenuItem } from "@mui/material";
+import { Add as AddIcon, Settings as SettingsIcon } from "@mui/icons-material";
 
-const GraphViewer = ({
-  entities = [],
-  relationships = [],
-  onEntityClick,
-  onAddEntity,
-}) => {
+const GraphViewer = ({ entities = [], relationships = [], onEntityClick, onAddEntity }) => {
   const cyRef = useRef(null);
   const [cy, setCy] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -583,70 +558,70 @@ const GraphViewer = ({
             label: rel.type,
             confidence: rel.confidence,
           },
-          classes: 'relationship',
+          classes: "relationship",
         })),
       ],
       style: [
         {
-          selector: 'node',
+          selector: "node",
           style: {
-            'background-color': '#00bcd4',
-            label: 'data(label)',
-            'text-valign': 'center',
-            'text-halign': 'center',
-            color: '#ffffff',
-            'font-size': '12px',
-            width: '60px',
-            height: '60px',
-            'border-width': 2,
-            'border-color': '#ffffff',
+            "background-color": "#00bcd4",
+            label: "data(label)",
+            "text-valign": "center",
+            "text-halign": "center",
+            color: "#ffffff",
+            "font-size": "12px",
+            width: "60px",
+            height: "60px",
+            "border-width": 2,
+            "border-color": "#ffffff",
           },
         },
         {
-          selector: 'node.person',
+          selector: "node.person",
           style: {
-            'background-color': '#ff9800',
-            shape: 'ellipse',
+            "background-color": "#ff9800",
+            shape: "ellipse",
           },
         },
         {
-          selector: 'node.organization',
+          selector: "node.organization",
           style: {
-            'background-color': '#4caf50',
-            shape: 'rectangle',
+            "background-color": "#4caf50",
+            shape: "rectangle",
           },
         },
         {
-          selector: 'node.location',
+          selector: "node.location",
           style: {
-            'background-color': '#f44336',
-            shape: 'triangle',
+            "background-color": "#f44336",
+            shape: "triangle",
           },
         },
         {
-          selector: 'edge',
+          selector: "edge",
           style: {
             width: 2,
-            'line-color': '#666',
-            'target-arrow-color': '#666',
-            'target-arrow-shape': 'triangle',
-            'curve-style': 'bezier',
-            label: 'data(label)',
-            'font-size': '10px',
-            color: '#999',
-            'text-rotation': 'autorotate',
+            "line-color": "#666",
+            "target-arrow-color": "#666",
+            "target-arrow-shape": "triangle",
+            "curve-style": "bezier",
+            label: "data(label)",
+            "font-size": "10px",
+            color: "#999",
+            "text-rotation": "autorotate",
           },
         },
         {
-          selector: 'node:selected',
+          selector: "node:selected",
           style: {
-            'border-width': 4,
-            'border-color': '#fff',
+            "border-width": 4,
+            "border-color": "#fff",
           },
         },
       ],
       layout: {
-        name: 'cose',
+        name: "cose",
         animate: true,
         animationDuration: 1000,
         nodeRepulsion: 8000,
@@ -656,14 +631,14 @@ const GraphViewer = ({
     });
 
     // Event handlers
-    cytoscape_instance.on('tap', 'node', (evt) => {
+    cytoscape_instance.on("tap", "node", (evt) => {
       const node = evt.target;
       if (onEntityClick) {
         onEntityClick(node.data());
       }
     });
 
-    cytoscape_instance.on('cxttap', 'node', (evt) => {
+    cytoscape_instance.on("cxttap", "node", (evt) => {
       evt.preventDefault();
       setAnchorEl(evt.originalEvent);
     });
@@ -683,22 +658,22 @@ const GraphViewer = ({
   };
 
   return (
-    <Box sx={{ position: 'relative', height: '100%' }}>
+    <Box sx={{ position: "relative", height: "100%" }}>
       <Paper
         ref={cyRef}
         sx={{
-          width: '100%',
-          height: '100%',
-          minHeight: '600px',
-          backgroundColor: '#0a0e1a',
-          border: '1px solid #333',
+          width: "100%",
+          height: "100%",
+          minHeight: "600px",
+          backgroundColor: "#0a0e1a",
+          border: "1px solid #333",
         }}
       />
 
       <Fab
         color="primary"
         aria-label="add entity"
-        sx={{ position: 'absolute', bottom: 16, right: 16 }}
+        sx={{ position: "absolute", bottom: 16, right: 16 }}
         onClick={onAddEntity}
       >
         <AddIcon />
@@ -707,29 +682,17 @@ const GraphViewer = ({
       <Fab
         color="secondary"
         aria-label="settings"
-        sx={{ position: 'absolute', bottom: 16, right: 80 }}
+        sx={{ position: "absolute", bottom: 16, right: 80 }}
         onClick={(e) => setAnchorEl(e.currentTarget)}
       >
         <SettingsIcon />
       </Fab>
 
-      <Menu
-        anchorEl={anchorEl}
-        open={Boolean(anchorEl)}
-        onClose={() => setAnchorEl(null)}
-      >
-        <MenuItem onClick={() => handleLayoutChange('cose')}>
-          Force Layout
-        </MenuItem>
-        <MenuItem onClick={() => handleLayoutChange('circle')}>
-          Circle Layout
-        </MenuItem>
-        <MenuItem onClick={() => handleLayoutChange('grid')}>
-          Grid Layout
-        </MenuItem>
-        <MenuItem onClick={() => handleLayoutChange('breadthfirst')}>
-          Hierarchical Layout
-        </MenuItem>
+      <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={() => setAnchorEl(null)}>
+        <MenuItem onClick={() => handleLayoutChange("cose")}>Force Layout</MenuItem>
+        <MenuItem onClick={() => handleLayoutChange("circle")}>Circle Layout</MenuItem>
+        <MenuItem onClick={() => handleLayoutChange("grid")}>Grid Layout</MenuItem>
+        <MenuItem onClick={() => handleLayoutChange("breadthfirst")}>Hierarchical Layout</MenuItem>
       </Menu>
     </Box>
   );
@@ -792,23 +755,22 @@ CMD ["nginx", "-g", "daemon off;"]
 #### 4.1 Server Test Setup (`server/src/tests/setup.js`)
 
 ```javascript
-const { GraphService } = require('../services/GraphService');
-const { Pool } = require('pg');
+const { GraphService } = require("../services/GraphService");
+const { Pool } = require("pg");
 
 // Setup test database
 beforeAll(async () => {
   // Set test environment
-  process.env.NODE_ENV = 'test';
-  process.env.NEO4J_URI = 'bolt://localhost:7687';
-  process.env.POSTGRES_URL =
-    'postgresql://postgres:testpassword@localhost:5432/intelgraph_test';
+  process.env.NODE_ENV = "test";
+  process.env.NEO4J_URI = "bolt://localhost:7687";
+  process.env.POSTGRES_URL = "postgresql://postgres:testpassword@localhost:5432/intelgraph_test";
 
   // Clear test databases
   const graphService = new GraphService();
   await graphService.clearDatabase();
 
   const pool = new Pool({ connectionString: process.env.POSTGRES_URL });
-  await pool.query('TRUNCATE TABLE users, investigations CASCADE');
+  await pool.query("TRUNCATE TABLE users, investigations CASCADE");
   await pool.end();
 });
 
@@ -820,13 +782,13 @@ afterAll(async () => {
 #### 4.2 GraphQL Integration Tests (`server/src/tests/integration/graphql.test.js`)
 
 ```javascript
-const request = require('supertest');
-const { ApolloServer } = require('apollo-server-express');
-const express = require('express');
-const typeDefs = require('../../graphql/schema');
-const resolvers = require('../../graphql/resolvers');
+const request = require("supertest");
+const { ApolloServer } = require("apollo-server-express");
+const express = require("express");
+const typeDefs = require("../../graphql/schema");
+const resolvers = require("../../graphql/resolvers");
 
-describe('GraphQL API Integration Tests', () => {
+describe("GraphQL API Integration Tests", () => {
   let app;
   let server;
 
@@ -841,7 +803,7 @@ describe('GraphQL API Integration Tests', () => {
     await server.stop();
   });
 
-  test('should register a new user', async () => {
+  test("should register a new user", async () => {
     const mutation = `
       mutation {
         register(email: "test@example.com", username: "testuser", password: "password123") {
@@ -855,19 +817,17 @@ describe('GraphQL API Integration Tests', () => {
       }
     `;
 
-    const response = await request(app)
-      .post('/graphql')
-      .send({ query: mutation });
+    const response = await request(app).post("/graphql").send({ query: mutation });
 
     expect(response.status).toBe(200);
-    expect(response.body.data.register.user.email).toBe('test@example.com');
+    expect(response.body.data.register.user.email).toBe("test@example.com");
     expect(response.body.data.register.accessToken).toBeTruthy();
   });
 
-  test('should create an investigation', async () => {
+  test("should create an investigation", async () => {
     // First register and login
     const registerResponse = await request(app)
-      .post('/graphql')
+      .post("/graphql")
       .send({
         query: `
           mutation {
@@ -895,14 +855,12 @@ describe('GraphQL API Integration Tests', () => {
     `;
 
     const response = await request(app)
-      .post('/graphql')
-      .set('Authorization', `Bearer ${token}`)
+      .post("/graphql")
+      .set("Authorization", `Bearer ${token}`)
       .send({ query: mutation });
 
     expect(response.status).toBe(200);
-    expect(response.body.data.createInvestigation.title).toBe(
-      'Test Investigation',
-    );
+    expect(response.body.data.createInvestigation.title).toBe("Test Investigation");
   });
 });
 ```

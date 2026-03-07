@@ -54,7 +54,7 @@ export class MetaPromptPlanner {
   }
 
   plan(context: PromptModuleContext): PlannedPrompt {
-    const candidates = this.modules.filter(module => {
+    const candidates = this.modules.filter((module) => {
       if (module.minComplexity !== undefined && context.complexity < module.minComplexity) {
         return false;
       }
@@ -76,8 +76,8 @@ export class MetaPromptPlanner {
       estimatedTokens += module.estimatedTokens;
     }
 
-    const prompt = selected.map(module => module.template(context)).join('\n\n');
-    return { modules: selected.map(module => module.name), prompt, estimatedTokens };
+    const prompt = selected.map((module) => module.template(context)).join("\n\n");
+    return { modules: selected.map((module) => module.name), prompt, estimatedTokens };
   }
 
   recordFeedback(feedback: PlannerFeedback): void {

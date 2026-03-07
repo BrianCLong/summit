@@ -1,22 +1,29 @@
 # Security Charter & Objectives
 
 ## Mission
+
 Our mission is to enable the business to move fast by making security a built-in feature of our platform, not a gate. We operate as a product function, delivering controls that protect our customers, our revenue, and our trust.
 
 ## Core Objectives
 
 ### 1. Protect Customers (Safety)
+
 We ensure that our customers' data and operations are safe from compromise.
+
 - **Goal:** Zero data breaches affecting customer PII or intellectual property.
 - **Metric:** 0 Critical vulnerabilities in production > 24 hours.
 
 ### 2. Protect Revenue (Reliability)
+
 We ensure that security controls do not impede legitimate business operations and that our platform remains available.
+
 - **Goal:** 99.99% availability of security services (Auth, WAF).
 - **Metric:** < 1% false positive rate on blocking controls.
 
 ### 3. Protect Trust (Reputation)
+
 We build and maintain trust with our stakeholders (customers, partners, investors) through transparency and assurance.
+
 - **Goal:** Obtain and maintain SOC 2 Type II and ISO 27001 certifications.
 - **Metric:** 100% on-time delivery of security evidence to customers.
 
@@ -30,14 +37,14 @@ We build and maintain trust with our stakeholders (customers, partners, investor
 
 ## Decision Rights
 
-| Decision Type | Owner | Consulted | Informed |
-| :--- | :--- | :--- | :--- |
-| **Security Strategy** | CISO | CEO, CTO | All Staff |
-| **Architecture Review** | Security Architect | Eng Leads | Developers |
-| **Risk Acceptance (Low/Med)** | Service Owner | Security Eng | CISO |
-| **Risk Acceptance (High/Crit)** | CISO | CEO, Legal | Board |
-| **Incident Declaration** | Incident Commander | - | All Staff |
-| **Public Disclosure** | Legal/CISO | CEO, Comms | - |
+| Decision Type                   | Owner              | Consulted    | Informed   |
+| :------------------------------ | :----------------- | :----------- | :--------- |
+| **Security Strategy**           | CISO               | CEO, CTO     | All Staff  |
+| **Architecture Review**         | Security Architect | Eng Leads    | Developers |
+| **Risk Acceptance (Low/Med)**   | Service Owner      | Security Eng | CISO       |
+| **Risk Acceptance (High/Crit)** | CISO               | CEO, Legal   | Board      |
+| **Incident Declaration**        | Incident Commander | -            | All Staff  |
+| **Public Disclosure**           | Legal/CISO         | CEO, Comms   | -          |
 
 ## Escalation Ladder
 

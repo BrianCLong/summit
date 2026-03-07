@@ -8,20 +8,64 @@ import type { Entity, Relationship } from '@/types'
 
 // Mock Data for Shell Dev
 const MOCK_NODES: Entity[] = [
-  { id: '1', name: 'John Doe', type: 'PERSON', confidence: 0.9, properties: {}, createdAt: '2026-01-01T00:00:00Z', updatedAt: '2026-01-01T00:00:00Z' },
-  { id: '2', name: 'Acme Corp', type: 'ORGANIZATION', confidence: 0.95, properties: {}, createdAt: '2026-01-01T00:00:00Z', updatedAt: '2026-01-01T00:00:00Z' },
-  { id: '3', name: 'Project X', type: 'PROJECT', confidence: 0.8, properties: {}, createdAt: '2026-01-01T00:00:00Z', updatedAt: '2026-01-01T00:00:00Z' },
+  {
+    id: '1',
+    name: 'John Doe',
+    type: 'PERSON',
+    confidence: 0.9,
+    properties: {},
+    createdAt: '2026-01-01T00:00:00Z',
+    updatedAt: '2026-01-01T00:00:00Z',
+  },
+  {
+    id: '2',
+    name: 'Acme Corp',
+    type: 'ORGANIZATION',
+    confidence: 0.95,
+    properties: {},
+    createdAt: '2026-01-01T00:00:00Z',
+    updatedAt: '2026-01-01T00:00:00Z',
+  },
+  {
+    id: '3',
+    name: 'Project X',
+    type: 'PROJECT',
+    confidence: 0.8,
+    properties: {},
+    createdAt: '2026-01-01T00:00:00Z',
+    updatedAt: '2026-01-01T00:00:00Z',
+  },
 ]
 const MOCK_EDGES: Relationship[] = [
-  { id: 'e1', sourceId: '1', targetId: '2', type: 'WORKS_FOR', confidence: 0.9, properties: {}, createdAt: '2026-01-01T00:00:00Z', direction: 'directed' },
-  { id: 'e2', sourceId: '1', targetId: '3', type: 'RELATED_TO', confidence: 0.7, properties: {}, createdAt: '2026-01-01T00:00:00Z', direction: 'directed' },
+  {
+    id: 'e1',
+    sourceId: '1',
+    targetId: '2',
+    type: 'WORKS_FOR',
+    confidence: 0.9,
+    properties: {},
+    createdAt: '2026-01-01T00:00:00Z',
+    direction: 'directed',
+  },
+  {
+    id: 'e2',
+    sourceId: '1',
+    targetId: '3',
+    type: 'RELATED_TO',
+    confidence: 0.7,
+    properties: {},
+    createdAt: '2026-01-01T00:00:00Z',
+    direction: 'directed',
+  },
 ]
 
 export function WorkbenchShell() {
   const {
-    leftRailOpen, toggleLeftRail,
-    rightRailOpen, toggleRightRail,
-    saveView
+    leftRailOpen,
+    toggleLeftRail,
+    rightRailOpen,
+    toggleRightRail,
+    saveView,
   } = useWorkbenchStore()
 
   // In a real app, these would come from a query hook
@@ -38,8 +82,8 @@ export function WorkbenchShell() {
         edges,
         transform: { x: 0, y: 0, k: 1 },
         filters: { types: [], timeRange: null },
-        selection: []
-      }
+        selection: [],
+      },
     })
   }
 
@@ -60,8 +104,12 @@ export function WorkbenchShell() {
         <div className="p-4 flex-1">
           <div className="text-sm text-muted-foreground">Case Context</div>
           <ul className="mt-2 space-y-2 text-sm">
-            <li className="p-2 bg-accent rounded cursor-pointer">Operation Chimera</li>
-            <li className="p-2 hover:bg-muted rounded cursor-pointer">Suspicious Flows</li>
+            <li className="p-2 bg-accent rounded cursor-pointer">
+              Operation Chimera
+            </li>
+            <li className="p-2 hover:bg-muted rounded cursor-pointer">
+              Suspicious Flows
+            </li>
           </ul>
         </div>
       </aside>
@@ -78,11 +126,11 @@ export function WorkbenchShell() {
           </div>
 
           <div className="flex items-center gap-2">
-             <Button variant="outline" size="sm" onClick={handleSaveView}>
-               <Save className="h-4 w-4 mr-2" />
-               Save View
-             </Button>
-             <Button variant="ghost" size="icon" onClick={toggleRightRail}>
+            <Button variant="outline" size="sm" onClick={handleSaveView}>
+              <Save className="h-4 w-4 mr-2" />
+              Save View
+            </Button>
+            <Button variant="ghost" size="icon" onClick={toggleRightRail}>
               <PanelRight className="h-4 w-4" />
             </Button>
           </div>
@@ -90,7 +138,7 @@ export function WorkbenchShell() {
 
         {/* Canvas */}
         <div className="flex-1 relative">
-           <LinkAnalysisCanvas nodes={nodes} edges={edges} />
+          <LinkAnalysisCanvas nodes={nodes} edges={edges} />
         </div>
       </main>
 

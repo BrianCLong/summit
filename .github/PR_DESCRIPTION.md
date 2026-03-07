@@ -35,13 +35,13 @@ This PR implements the complete **Policy-Gated Approvals** system for high-risk 
 
 ### API Endpoints
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/v1/requests` | Create approval request |
-| GET | `/api/v1/requests` | List requests with filtering |
-| GET | `/api/v1/requests/:id` | Get request by ID |
-| POST | `/api/v1/requests/:id/decision` | Submit approval/rejection |
-| POST | `/api/v1/requests/:id/cancel` | Cancel pending request |
+| Method | Endpoint                        | Description                  |
+| ------ | ------------------------------- | ---------------------------- |
+| POST   | `/api/v1/requests`              | Create approval request      |
+| GET    | `/api/v1/requests`              | List requests with filtering |
+| GET    | `/api/v1/requests/:id`          | Get request by ID            |
+| POST   | `/api/v1/requests/:id/decision` | Submit approval/rejection    |
+| POST   | `/api/v1/requests/:id/cancel`   | Cancel pending request       |
 
 ### Policy Profiles
 
@@ -54,13 +54,16 @@ This PR implements the complete **Policy-Gated Approvals** system for high-risk 
 ### Files Changed (26 files, +6828 lines)
 
 **New Service:**
+
 - `services/approvals/` - Complete approvals microservice
 
 **Observability:**
+
 - `observability/dashboards/approvals-service.json` - Grafana dashboard
 - `observability/prometheus/alerts/approvals-alerts.yaml` - Alert rules
 
 **Operations:**
+
 - `RUNBOOKS/approvals-service.md` - Comprehensive runbook
 
 ## Test plan

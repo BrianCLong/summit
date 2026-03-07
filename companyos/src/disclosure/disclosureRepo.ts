@@ -1,4 +1,4 @@
-import type { Pool } from 'pg';
+import type { Pool } from "pg";
 
 type VulnerabilitySummary = {
   critical?: number;
@@ -62,10 +62,7 @@ export class DisclosureRepository {
     return res.rows;
   }
 
-  async getDisclosurePackById(
-    id: string,
-    tenantId: string
-  ): Promise<DisclosurePackRecord | null> {
+  async getDisclosurePackById(id: string, tenantId: string): Promise<DisclosurePackRecord | null> {
     const query = `
       SELECT *
       FROM disclosure_packs

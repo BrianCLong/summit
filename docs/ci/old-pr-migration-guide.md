@@ -97,10 +97,12 @@ After migration, your PR should show:
 ### ✅ New Workflows (3-4 total)
 
 **Always runs**:
+
 - `gate` (pr-gate workflow) - **REQUIRED CHECK**
 
 **Runs based on changed files**:
-- `lint` (docs-ci) - if docs/ or *.md changed
+
+- `lint` (docs-ci) - if docs/ or \*.md changed
 - `test` (server-ci) - if server/ or packages/ changed
 - `test` (client-ci) - if client/ or apps/web/ changed
 - (infra-ci workflows if infra/ changed)
@@ -108,6 +110,7 @@ After migration, your PR should show:
 ### ❌ Old Workflows (Gone)
 
 These should **NOT** appear anymore:
+
 - CI Core (Primary Gate)
 - Governance Check
 - Summit CI
@@ -131,6 +134,7 @@ These should **NOT** appear anymore:
 **Cause**: PR not fully updated, old workflow runs cached
 
 **Solution**:
+
 1. Wait 5 minutes for old runs to fail naturally
 2. Or manually cancel old runs:
    ```bash
@@ -145,6 +149,7 @@ These should **NOT** appear anymore:
 **Cause**: Files changed significantly on main
 
 **Solution**:
+
 ```bash
 # During rebase, resolve conflicts
 git status  # Shows conflicted files
@@ -160,12 +165,14 @@ Or use Option 2 (Merge Main) instead
 **Cause**: Real issue with your code
 
 **Solution**: Check the workflow logs:
+
 ```bash
 gh pr checks your-pr-number
 # Click on the "gate" check URL to see logs
 ```
 
 Common failures:
+
 - **Lint errors**: Run `pnpm lint --fix`
 - **Type errors**: Run `pnpm typecheck` and fix
 - **Unit test failures**: Run `pnpm test:unit` and fix
@@ -175,6 +182,7 @@ Common failures:
 **Cause**: Branch is protected or someone else pushed
 
 **Solution**:
+
 ```bash
 # Use force-with-lease (safer)
 git push --force-with-lease
@@ -193,13 +201,13 @@ git push --force-with-lease
 
 Workflows only run when relevant files change:
 
-| Files Changed | Workflows Triggered |
-|---------------|---------------------|
-| `server/**` | pr-gate + server-ci |
-| `client/**` | pr-gate + client-ci |
-| `docs/**` or `*.md` | pr-gate + docs-ci |
-| `infra/**` | pr-gate + infra-ci |
-| Multiple paths | pr-gate + relevant *-ci workflows |
+| Files Changed       | Workflows Triggered                |
+| ------------------- | ---------------------------------- |
+| `server/**`         | pr-gate + server-ci                |
+| `client/**`         | pr-gate + client-ci                |
+| `docs/**` or `*.md` | pr-gate + docs-ci                  |
+| `infra/**`          | pr-gate + infra-ci                 |
+| Multiple paths      | pr-gate + relevant \*-ci workflows |
 
 ### Workflow Budget
 
@@ -282,6 +290,7 @@ done
 ### Q: Will I lose my PR reviews/approvals?
 
 **A**: No! Rebasing or merging preserves:
+
 - ✅ Reviews and approvals
 - ✅ Comments and discussions
 - ✅ PR metadata (labels, assignees, etc.)
@@ -295,12 +304,14 @@ Only the commit history changes (rebase) or adds a merge commit (merge).
 ### Q: What if I already merged main but still see old checks?
 
 **A**: Old workflow runs may still be queued. They'll fail naturally within an hour. To speed up:
+
 - Push a new commit (triggers fresh runs)
 - Or cancel old runs manually (see Troubleshooting above)
 
 ### Q: How long will the new CI take?
 
 **A**: Typical PR:
+
 - **pr-gate**: 3-5 minutes (lint, typecheck, unit tests)
 - **path-filtered CIs**: 2-4 minutes each (only relevant ones run)
 - **Total**: 5-10 minutes (vs. 45+ minutes before)
@@ -315,12 +326,12 @@ Only the commit history changes (rebase) or adds a merge commit (merge).
 
 ## Timeline
 
-| Date | Event |
-|------|-------|
-| 2026-03-04 | CI consolidation deployed (260 → 8 workflows) |
-| 2026-03-04 | This migration guide published |
+| Date       | Event                                           |
+| ---------- | ----------------------------------------------- |
+| 2026-03-04 | CI consolidation deployed (260 → 8 workflows)   |
+| 2026-03-04 | This migration guide published                  |
 | 2026-03-05 | Batch notifications to old PR authors (planned) |
-| 2026-03-11 | Review and close stale PRs (planned) |
+| 2026-03-11 | Review and close stale PRs (planned)            |
 
 ---
 

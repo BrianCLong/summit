@@ -3,11 +3,11 @@
  * Cross-source entity resolution, conflict resolution, and data integration
  */
 
-import { Driver } from 'neo4j-driver';
-import { v4 as uuidv4 } from 'uuid';
+import { Driver } from "neo4j-driver";
+import { v4 as uuidv4 } from "uuid";
 
 export interface ConflictResolutionStrategy {
-  type: 'latest' | 'highest_confidence' | 'majority_vote' | 'source_priority' | 'custom';
+  type: "latest" | "highest_confidence" | "majority_vote" | "source_priority" | "custom";
   sourcePriority?: string[]; // For source_priority strategy
   customResolver?: (values: any[]) => any; // For custom strategy
 }
@@ -29,7 +29,7 @@ export class KnowledgeFusion {
    */
   async resolveEntitiesAcrossSources(
     sources: string[],
-    similarityThreshold = 0.8,
+    similarityThreshold = 0.8
   ): Promise<Array<{ canonicalId: string; matchedEntities: string[] }>> {
     const session = this.driver.session();
     try {
@@ -51,7 +51,7 @@ export class KnowledgeFusion {
         WHERE props1 = props2 OR e1.namespace = e2.namespace
         RETURN e1.id as id1, e2.id as id2
         `,
-        { sources },
+        { sources }
       );
 
       // Group matched entities
@@ -59,8 +59,8 @@ export class KnowledgeFusion {
       const entityToCluster = new Map<string, string>();
 
       for (const record of result.records) {
-        const id1 = record.get('id1');
-        const id2 = record.get('id2');
+        const id1 = record.get("id1");
+        const id2 = record.get("id2");
 
         const cluster1 = entityToCluster.get(id1);
         const cluster2 = entityToCluster.get(id2);
@@ -102,7 +102,7 @@ export class KnowledgeFusion {
    */
   async fuseEntities(
     entityIds: string[],
-    strategy: ConflictResolutionStrategy = { type: 'highest_confidence' },
+    strategy: ConflictResolutionStrategy = { type: "highest_confidence" }
   ): Promise<FusionResult> {
     const session = this.driver.session();
     try {
@@ -113,16 +113,16 @@ export class KnowledgeFusion {
         WHERE e.id IN $entityIds
         RETURN e
         `,
-        { entityIds },
+        { entityIds }
       );
 
       const entities = result.records.map((record) => {
-        const props = record.get('e').properties;
+        const props = record.get("e").properties;
         return {
           id: props.id,
-          properties: JSON.parse(props.properties || '{}'),
+          properties: JSON.parse(props.properties || "{}"),
           confidence: props.confidence || 0.5,
-          provenance: JSON.parse(props.provenance || '{}'),
+          provenance: JSON.parse(props.provenance || "{}"),
         };
       });
 
@@ -158,8 +158,7 @@ export class KnowledgeFusion {
       }
 
       // Calculate overall confidence
-      const avgConfidence =
-        entities.reduce((sum, e) => sum + e.confidence, 0) / entities.length;
+      const avgConfidence = entities.reduce((sum, e) => sum + e.confidence, 0) / entities.length;
 
       // Create canonical entity
       const canonicalId = uuidv4();
@@ -180,7 +179,7 @@ export class KnowledgeFusion {
           confidence: avgConfidence,
           fusedFrom: JSON.stringify(entityIds),
           sources: JSON.stringify(Array.from(sources)),
-        },
+        }
       );
 
       // Link original entities to canonical entity
@@ -191,7 +190,7 @@ export class KnowledgeFusion {
           MATCH (c:CanonicalEntity {id: $canonicalId})
           CREATE (e)-[:FUSED_INTO]->(c)
           `,
-          { entityId, canonicalId },
+          { entityId, canonicalId }
         );
       }
 
@@ -212,16 +211,16 @@ export class KnowledgeFusion {
    */
   private resolveConflict(
     values: Array<{ value: any; confidence: number; source: string }>,
-    strategy: ConflictResolutionStrategy,
+    strategy: ConflictResolutionStrategy
   ): any {
     switch (strategy.type) {
-      case 'latest':
+      case "latest":
         return values[values.length - 1].value;
 
-      case 'highest_confidence':
+      case "highest_confidence":
         return values.sort((a, b) => b.confidence - a.confidence)[0].value;
 
-      case 'majority_vote':
+      case "majority_vote":
         const counts = new Map<any, number>();
         values.forEach(({ value }) => {
           counts.set(value, (counts.get(value) || 0) + 1);
@@ -236,7 +235,7 @@ export class KnowledgeFusion {
         }
         return majorityValue;
 
-      case 'source_priority':
+      case "source_priority":
         if (!strategy.sourcePriority) {
           return values[0].value;
         }
@@ -248,7 +247,7 @@ export class KnowledgeFusion {
         }
         return values[0].value;
 
-      case 'custom':
+      case "custom":
         if (strategy.customResolver) {
           return strategy.customResolver(values.map((v) => v.value));
         }
@@ -267,7 +266,7 @@ export class KnowledgeFusion {
     sourceId: string,
     sourceType: string,
     extractedAt: string,
-    metadata?: Record<string, any>,
+    metadata?: Record<string, any>
   ): Promise<void> {
     const session = this.driver.session();
     try {
@@ -290,7 +289,7 @@ export class KnowledgeFusion {
           sourceType,
           extractedAt,
           metadata: JSON.stringify(metadata || {}),
-        },
+        }
       );
     } finally {
       await session.close();
@@ -309,14 +308,14 @@ export class KnowledgeFusion {
         RETURN p
         ORDER BY p.extractedAt DESC
         `,
-        { entityId },
+        { entityId }
       );
 
       return result.records.map((record) => {
-        const props = record.get('p').properties;
+        const props = record.get("p").properties;
         return {
           ...props,
-          metadata: JSON.parse(props.metadata || '{}'),
+          metadata: JSON.parse(props.metadata || "{}"),
         };
       });
     } finally {

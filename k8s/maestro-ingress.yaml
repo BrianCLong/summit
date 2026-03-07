@@ -5,7 +5,7 @@ metadata:
   namespace: intelgraph-prod
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /$2
-    nginx.ingress.kubernetes.io/ssl-redirect: 'true'
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
     # Optional: admin IP allow-list (comma-separated CIDRs)
     # Set via kustomize/helm or edit here: e.g., 203.0.113.0/24,198.51.100.10/32
     # nginx.ingress.kubernetes.io/whitelist-source-range: "0.0.0.0/0"

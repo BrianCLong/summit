@@ -1,4 +1,4 @@
-import type { Snapshot } from './types.js';
+import type { Snapshot } from "./types.js";
 
 export interface SnapshotStore<TState = unknown> {
   getLatest(streamId: string): Promise<Snapshot<TState> | null>;

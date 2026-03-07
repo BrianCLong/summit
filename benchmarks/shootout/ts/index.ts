@@ -1,4 +1,4 @@
-import { performance } from 'perf_hooks';
+import { performance } from "perf_hooks";
 
 const RUNS = 5;
 
@@ -13,9 +13,10 @@ function jsonTest() {
     data.push({
       id: i,
       name: `Item ${i}`,
-      description: "Some description text that is relatively long to test string handling in JSON parsing.",
+      description:
+        "Some description text that is relatively long to test string handling in JSON parsing.",
       values: [i, i * 2, i * 3],
-      active: i % 2 === 0
+      active: i % 2 === 0,
     });
   }
   const jsonStr = JSON.stringify(data);
@@ -40,21 +41,21 @@ function benchmark(name: string, fn: () => any) {
     const start = performance.now();
     fn();
     const end = performance.now();
-    total += (end - start);
+    total += end - start;
   }
   const avg = total / RUNS;
   console.log(`TS,${name},${avg.toFixed(4)}`);
 }
 
 function main() {
-    // Warmup
-    fib(20);
-    jsonTest();
-    stringConcatTest();
+  // Warmup
+  fib(20);
+  jsonTest();
+  stringConcatTest();
 
-    benchmark("Fibonacci(30)", () => fib(30));
-    benchmark("JSON Parse", jsonTest);
-    benchmark("String Concat", stringConcatTest);
+  benchmark("Fibonacci(30)", () => fib(30));
+  benchmark("JSON Parse", jsonTest);
+  benchmark("String Concat", stringConcatTest);
 }
 
 main();

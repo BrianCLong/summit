@@ -29,45 +29,45 @@ These are the **authoritative** commands. If you see other variations, prefer th
 
 ### Environment Management
 
-| Task | Command | Notes |
-|------|---------|-------|
-| **Bootstrap** | `make bootstrap` | Install deps, create `.env`, set up venv |
-| **Start services** | `make up` | Start Docker dev stack |
-| **Start with AI** | `make up-ai` | Start with AI/ML services (requires 12GB+ RAM) |
-| **Stop services** | `make down` | Stop all containers |
-| **Check health** | `make health` | Verify services are running |
+| Task               | Command          | Notes                                          |
+| ------------------ | ---------------- | ---------------------------------------------- |
+| **Bootstrap**      | `make bootstrap` | Install deps, create `.env`, set up venv       |
+| **Start services** | `make up`        | Start Docker dev stack                         |
+| **Start with AI**  | `make up-ai`     | Start with AI/ML services (requires 12GB+ RAM) |
+| **Stop services**  | `make down`      | Stop all containers                            |
+| **Check health**   | `make health`    | Verify services are running                    |
 
 ### Code Quality
 
-| Task | Command | Notes |
-|------|---------|-------|
-| **Lint** | `make lint` | ESLint + Prettier check |
+| Task           | Command          | Notes                        |
+| -------------- | ---------------- | ---------------------------- |
+| **Lint**       | `make lint`      | ESLint + Prettier check      |
 | **Type check** | `make typecheck` | TypeScript compilation check |
-| **Format** | `make format` | Auto-fix formatting |
-| **All checks** | `make check` | lint + typecheck (fast) |
+| **Format**     | `make format`    | Auto-fix formatting          |
+| **All checks** | `make check`     | lint + typecheck (fast)      |
 
 ### Testing
 
-| Task | Command | Notes |
-|------|---------|-------|
-| **Unit tests** | `make test` | Run Jest tests across workspace |
-| **Smoke test** | `make smoke` | Validate golden path (requires `make up`) |
-| **Quick tests** | `make test-quick` | Fast subset for pre-commit |
-| **E2E tests** | `make e2e` | Playwright browser tests |
+| Task            | Command           | Notes                                     |
+| --------------- | ----------------- | ----------------------------------------- |
+| **Unit tests**  | `make test`       | Run Jest tests across workspace           |
+| **Smoke test**  | `make smoke`      | Validate golden path (requires `make up`) |
+| **Quick tests** | `make test-quick` | Fast subset for pre-commit                |
+| **E2E tests**   | `make e2e`        | Playwright browser tests                  |
 
 ### CI-Like Local Checks
 
-| Task | Command | Notes |
-|------|---------|-------|
+| Task        | Command        | Notes                                 |
+| ----------- | -------------- | ------------------------------------- |
 | **CI fast** | `make ci-fast` | lint + typecheck + quick tests (~30s) |
-| **CI full** | `make ci` | Full CI suite locally (~2-5 min) |
+| **CI full** | `make ci`      | Full CI suite locally (~2-5 min)      |
 
 ### Build
 
-| Task | Command | Notes |
-|------|---------|-------|
+| Task          | Command      | Notes                             |
+| ------------- | ------------ | --------------------------------- |
 | **Build all** | `make build` | Build all packages (Turbo cached) |
-| **Clean** | `make clean` | Remove build artifacts and caches |
+| **Clean**     | `make clean` | Remove build artifacts and caches |
 
 ---
 
@@ -159,19 +159,19 @@ git commit --no-verify -m "fix: emergency hotfix"
 
 If you find an old command, here's where it moved:
 
-| Old Command | New Canonical Command |
-|-------------|----------------------|
-| `pnpm run lint` | `make lint` |
-| `pnpm run lint:check` | `make lint` |
-| `pnpm run typecheck` | `make typecheck` |
-| `npm run test:jest` | `make test` |
-| `pnpm test` | `make test` |
-| `pnpm run ci` | `make ci` |
-| `npm run test:quick` | `make test-quick` |
-| `./start.sh` | `make bootstrap && make up` |
-| `make dev-setup` | `make bootstrap` |
-| `make dev-run` | `make up` |
-| `make dev-test` | `make smoke` |
+| Old Command           | New Canonical Command       |
+| --------------------- | --------------------------- |
+| `pnpm run lint`       | `make lint`                 |
+| `pnpm run lint:check` | `make lint`                 |
+| `pnpm run typecheck`  | `make typecheck`            |
+| `npm run test:jest`   | `make test`                 |
+| `pnpm test`           | `make test`                 |
+| `pnpm run ci`         | `make ci`                   |
+| `npm run test:quick`  | `make test-quick`           |
+| `./start.sh`          | `make bootstrap && make up` |
+| `make dev-setup`      | `make bootstrap`            |
+| `make dev-run`        | `make up`                   |
+| `make dev-test`       | `make smoke`                |
 
 ---
 
@@ -197,13 +197,13 @@ pnpm run typecheck  # Also works
 
 After `make up`, these services are available:
 
-| Service | URL | Credentials |
-|---------|-----|-------------|
-| **Frontend** | http://localhost:3000 | - |
-| **GraphQL API** | http://localhost:4000/graphql | - |
-| **Neo4j Browser** | http://localhost:7474 | neo4j / devpassword |
-| **Grafana** | http://localhost:3001 | admin / admin |
-| **Prometheus** | http://localhost:9090 | - |
+| Service           | URL                           | Credentials         |
+| ----------------- | ----------------------------- | ------------------- |
+| **Frontend**      | http://localhost:3000         | -                   |
+| **GraphQL API**   | http://localhost:4000/graphql | -                   |
+| **Neo4j Browser** | http://localhost:7474         | neo4j / devpassword |
+| **Grafana**       | http://localhost:3001         | admin / admin       |
+| **Prometheus**    | http://localhost:9090         | -                   |
 
 ---
 

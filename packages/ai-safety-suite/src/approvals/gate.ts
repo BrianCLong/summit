@@ -1,6 +1,6 @@
-import crypto from 'crypto';
+import crypto from "crypto";
 
-export type ApprovalStatus = 'pending' | 'approved' | 'denied';
+export type ApprovalStatus = "pending" | "approved" | "denied";
 
 export interface ApprovalRequest {
   id: string;
@@ -20,12 +20,14 @@ export class ApprovalGate {
   private requests = new Map<string, ApprovalRequest>();
   private audit: ApprovalRequest[] = [];
 
-  requestApproval(payload: Omit<ApprovalRequest, 'id' | 'status' | 'createdAt' | 'token' | 'reviewer'>): ApprovalRequest {
+  requestApproval(
+    payload: Omit<ApprovalRequest, "id" | "status" | "createdAt" | "token" | "reviewer">
+  ): ApprovalRequest {
     const id = crypto.randomUUID();
     const request: ApprovalRequest = {
       ...payload,
       id,
-      status: 'pending',
+      status: "pending",
       createdAt: Date.now(),
     };
     this.requests.set(id, request);
@@ -36,12 +38,12 @@ export class ApprovalGate {
   approve(id: string, reviewer: string): ApprovalRequest {
     const request = this.getRequest(id);
     if (request.requester === reviewer) {
-      throw new Error('Requester cannot approve their own request');
+      throw new Error("Requester cannot approve their own request");
     }
     if (this.isExpired(request)) {
-      throw new Error('Approval request expired');
+      throw new Error("Approval request expired");
     }
-    request.status = 'approved';
+    request.status = "approved";
     request.reviewer = reviewer;
     request.token = this.buildToken(request);
     return request;
@@ -50,22 +52,26 @@ export class ApprovalGate {
   deny(id: string, reviewer: string): ApprovalRequest {
     const request = this.getRequest(id);
     if (this.isExpired(request)) {
-      throw new Error('Approval request expired');
+      throw new Error("Approval request expired");
     }
-    request.status = 'denied';
+    request.status = "denied";
     request.reviewer = reviewer;
     return request;
   }
 
   validateToken(actionType: string, scope: string, planHash: string, token?: string): boolean {
     if (!token) return false;
-    const parts = token.split(':');
+    const parts = token.split(":");
     if (parts.length !== 2) return false;
     const [id, signature] = parts;
     const request = this.requests.get(id);
-    if (!request || request.status !== 'approved' || !request.token) return false;
+    if (!request || request.status !== "approved" || !request.token) return false;
     if (this.isExpired(request)) return false;
-    if (request.actionType !== actionType || request.scope !== scope || request.planHash !== planHash) {
+    if (
+      request.actionType !== actionType ||
+      request.scope !== scope ||
+      request.planHash !== planHash
+    ) {
       return false;
     }
     const expected = this.buildToken(request);
@@ -79,7 +85,7 @@ export class ApprovalGate {
   private getRequest(id: string): ApprovalRequest {
     const request = this.requests.get(id);
     if (!request) {
-      throw new Error('Approval request not found');
+      throw new Error("Approval request not found");
     }
     return request;
   }
@@ -91,9 +97,9 @@ export class ApprovalGate {
   private buildToken(request: ApprovalRequest): string {
     const id = request.id;
     const signature = crypto
-      .createHash('sha256')
-      .update([request.actionType, request.scope, request.planHash, request.createdAt].join('|'))
-      .digest('hex');
+      .createHash("sha256")
+      .update([request.actionType, request.scope, request.planHash, request.createdAt].join("|"))
+      .digest("hex");
     return `${id}:${signature}`;
   }
 }

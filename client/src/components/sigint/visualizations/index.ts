@@ -3,5 +3,5 @@
  * WebGL-accelerated real-time signal visualizations.
  */
 
-export { WaveformRenderer } from './WaveformRenderer';
-export { SpectrumAnalyzer } from './SpectrumAnalyzer';
+export { WaveformRenderer } from "./WaveformRenderer";
+export { SpectrumAnalyzer } from "./SpectrumAnalyzer";

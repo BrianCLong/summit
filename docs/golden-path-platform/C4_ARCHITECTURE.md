@@ -51,14 +51,14 @@ This document provides a C4-model architecture overview of the Golden Path Platf
 
 ### System Context Description
 
-| Element | Type | Description |
-|---------|------|-------------|
-| **Developers** | Person | Engineers who create, deploy, and maintain services |
-| **Security Team** | Person | Responsible for security policies, audits, and compliance |
-| **SRE Team** | Person | Manages reliability, incidents, and capacity planning |
+| Element                  | Type   | Description                                                |
+| ------------------------ | ------ | ---------------------------------------------------------- |
+| **Developers**           | Person | Engineers who create, deploy, and maintain services        |
+| **Security Team**        | Person | Responsible for security policies, audits, and compliance  |
+| **SRE Team**             | Person | Manages reliability, incidents, and capacity planning      |
 | **Golden Path Platform** | System | The platform providing standardized development experience |
-| **Production Services** | System | Deployed services running in Kubernetes |
-| **External Systems** | System | Third-party and infrastructure dependencies |
+| **Production Services**  | System | Deployed services running in Kubernetes                    |
+| **External Systems**     | System | Third-party and infrastructure dependencies                |
 
 ---
 
@@ -131,20 +131,20 @@ This document provides a C4-model architecture overview of the Golden Path Platf
 
 ### Container Descriptions
 
-| Container | Technology | Purpose |
-|-----------|------------|---------|
-| **Scaffold CLI** | Node.js CLI | Generates new services from templates |
-| **Templates Repository** | Git + YAML/JSON | Stores service archetypes and configurations |
-| **Documentation Portal** | Docusaurus/MkDocs | Developer guides and API reference |
-| **Reusable Workflows** | GitHub Actions | Composable CI/CD pipeline stages |
-| **Build System** | Docker BuildKit, Turbo | Container and package builds |
-| **Artifact Management** | ECR/GAR, Cosign | Image storage and signing |
-| **Policy Engine (OPA)** | Open Policy Agent | Runtime policy decisions |
-| **Admission Controller** | Kyverno | Kubernetes admission policies |
-| **Audit Ledger** | PostgreSQL + API | Deployment and policy audit trail |
-| **Kubernetes** | EKS/GKE | Container orchestration |
-| **Service Mesh** | Istio | mTLS, traffic management |
-| **Observability Stack** | Prometheus, Grafana, Loki, Tempo | Metrics, logs, traces |
+| Container                | Technology                       | Purpose                                      |
+| ------------------------ | -------------------------------- | -------------------------------------------- |
+| **Scaffold CLI**         | Node.js CLI                      | Generates new services from templates        |
+| **Templates Repository** | Git + YAML/JSON                  | Stores service archetypes and configurations |
+| **Documentation Portal** | Docusaurus/MkDocs                | Developer guides and API reference           |
+| **Reusable Workflows**   | GitHub Actions                   | Composable CI/CD pipeline stages             |
+| **Build System**         | Docker BuildKit, Turbo           | Container and package builds                 |
+| **Artifact Management**  | ECR/GAR, Cosign                  | Image storage and signing                    |
+| **Policy Engine (OPA)**  | Open Policy Agent                | Runtime policy decisions                     |
+| **Admission Controller** | Kyverno                          | Kubernetes admission policies                |
+| **Audit Ledger**         | PostgreSQL + API                 | Deployment and policy audit trail            |
+| **Kubernetes**           | EKS/GKE                          | Container orchestration                      |
+| **Service Mesh**         | Istio                            | mTLS, traffic management                     |
+| **Observability Stack**  | Prometheus, Grafana, Loki, Tempo | Metrics, logs, traces                        |
 
 ---
 
@@ -461,15 +461,15 @@ This document provides a C4-model architecture overview of the Golden Path Platf
 
 ## Key Integration Points
 
-| Integration | Protocol | Authentication | Purpose |
-|-------------|----------|----------------|---------|
-| GitHub → Actions | Webhook | HMAC signature | Trigger pipelines |
-| Actions → Registry | HTTPS | OIDC token | Push images |
-| Actions → K8s | HTTPS | kubeconfig/SA | Deploy workloads |
-| K8s → OPA | gRPC | mTLS | Policy decisions |
-| Services → Prometheus | HTTP | mTLS | Metrics scrape |
-| Services → Loki | HTTP | mTLS | Log shipping |
-| Services → Tempo | gRPC | mTLS | Trace export |
+| Integration           | Protocol | Authentication | Purpose           |
+| --------------------- | -------- | -------------- | ----------------- |
+| GitHub → Actions      | Webhook  | HMAC signature | Trigger pipelines |
+| Actions → Registry    | HTTPS    | OIDC token     | Push images       |
+| Actions → K8s         | HTTPS    | kubeconfig/SA  | Deploy workloads  |
+| K8s → OPA             | gRPC     | mTLS           | Policy decisions  |
+| Services → Prometheus | HTTP     | mTLS           | Metrics scrape    |
+| Services → Loki       | HTTP     | mTLS           | Log shipping      |
+| Services → Tempo      | gRPC     | mTLS           | Trace export      |
 
 ---
 

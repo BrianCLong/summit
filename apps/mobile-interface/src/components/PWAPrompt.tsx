@@ -1,9 +1,9 @@
 // @ts-nocheck
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 
 interface BeforeInstallPromptEvent extends Event {
   readonly platforms: string[];
-  readonly userChoice: Promise<{ outcome: 'accepted' | 'dismissed'; platform: string }>;
+  readonly userChoice: Promise<{ outcome: "accepted" | "dismissed"; platform: string }>;
   prompt(): Promise<void>;
 }
 
@@ -18,15 +18,15 @@ export function PWAPrompt() {
       setShowPrompt(true);
     };
 
-    window.addEventListener('beforeinstallprompt', handler);
-    return () => window.removeEventListener('beforeinstallprompt', handler);
+    window.addEventListener("beforeinstallprompt", handler);
+    return () => window.removeEventListener("beforeinstallprompt", handler);
   }, []);
 
   const handleInstall = async () => {
     if (!deferredPrompt) return;
     deferredPrompt.prompt();
     const { outcome } = await deferredPrompt.userChoice;
-    if (outcome === 'accepted') {
+    if (outcome === "accepted") {
       setShowPrompt(false);
     }
     setDeferredPrompt(null);
@@ -43,7 +43,9 @@ export function PWAPrompt() {
       <div className="flex items-center justify-between">
         <div>
           <h3 className="font-semibold text-gray-900 dark:text-white">Install App</h3>
-          <p className="text-sm text-gray-600 dark:text-gray-300">Add to home screen for a better experience</p>
+          <p className="text-sm text-gray-600 dark:text-gray-300">
+            Add to home screen for a better experience
+          </p>
         </div>
         <div className="flex gap-2">
           <button

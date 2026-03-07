@@ -1,7 +1,7 @@
-import fs from 'fs';
-import path from 'path';
-import crypto from 'crypto';
-import YAML from 'yaml';
+import fs from "fs";
+import path from "path";
+import crypto from "crypto";
+import YAML from "yaml";
 
 export type Defaults = {
   stream: boolean;
@@ -70,16 +70,15 @@ export type Policy = {
   _loadedAt?: number;
 };
 
-const POLICY_FILE =
-  process.env.POLICY_FILE || path.resolve('config/router.policy.yml');
+const POLICY_FILE = process.env.POLICY_FILE || path.resolve("config/router.policy.yml");
 let cached: Policy | null = null;
 
 export function loadPolicy(): Policy {
   if (cached) return cached;
-  const text = fs.readFileSync(POLICY_FILE, 'utf8');
+  const text = fs.readFileSync(POLICY_FILE, "utf8");
   const p = YAML.parse(text) as Policy;
   p._loadedAt = Date.now();
-  p._hash = crypto.createHash('sha1').update(text).digest('hex');
+  p._hash = crypto.createHash("sha1").update(text).digest("hex");
   cached = p;
   return p;
 }
@@ -92,7 +91,7 @@ export function watchPolicy(onChange: (p: Policy) => void) {
       onChange(p);
     } catch (e) {
       // eslint-disable-next-line no-console
-      console.error('policy reload failed', e);
+      console.error("policy reload failed", e);
     }
   });
 }

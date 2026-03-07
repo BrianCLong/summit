@@ -1,5 +1,14 @@
 import React, { useState, useEffect } from 'react'
-import { Search, Filter, Settings, Download, RefreshCw, Shield, FileCheck, History } from 'lucide-react'
+import {
+  Search,
+  Filter,
+  Settings,
+  Download,
+  RefreshCw,
+  Shield,
+  FileCheck,
+  History,
+} from 'lucide-react'
 import { useSearchParams } from 'react-router-dom'
 import { Button } from '@/components/ui/Button'
 import { SearchBar } from '@/components/ui/SearchBar'
@@ -48,7 +57,9 @@ export default function ExplorePage(): React.ReactElement {
   const [timelineOpen, setTimelineOpen] = useState(true)
   const [snapshotsOpen, setSnapshotsOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
-  const [policyOverlay, setPolicyOverlay] = useState<'none' | 'purpose' | 'retention' | 'residency'>('none')
+  const [policyOverlay, setPolicyOverlay] = useState<
+    'none' | 'purpose' | 'retention' | 'residency'
+  >('none')
   const isDemoMode = useDemoMode()
 
   // Graph state
@@ -83,7 +94,9 @@ export default function ExplorePage(): React.ReactElement {
         setTimelineEvents([])
         setLoading(false)
         setError(
-          new Error('Live graph data is unavailable without a backend connection.')
+          new Error(
+            'Live graph data is unavailable without a backend connection.'
+          )
         )
         return
       }
@@ -128,29 +141,34 @@ export default function ExplorePage(): React.ReactElement {
     if (
       filters.entityTypes.length > 0 &&
       !filters.entityTypes.includes(entity.type)
-    )
-      {return false}
+    ) {
+      return false
+    }
     if (
       filters.confidenceRange.min > entity.confidence ||
       filters.confidenceRange.max < entity.confidence
-    )
-      {return false}
+    ) {
+      return false
+    }
     if (
       filters.tags.length > 0 &&
       !entity.tags?.some(tag => filters.tags.includes(tag))
-    )
-      {return false}
+    ) {
+      return false
+    }
     if (
       filters.sources.length > 0 &&
       entity.source &&
       !filters.sources.includes(entity.source)
-    )
-      {return false}
+    ) {
+      return false
+    }
     if (
       searchQuery &&
       !entity.name.toLowerCase().includes(searchQuery.toLowerCase())
-    )
-      {return false}
+    ) {
+      return false
+    }
     return true
   })
 
@@ -158,8 +176,9 @@ export default function ExplorePage(): React.ReactElement {
     if (
       filters.relationshipTypes.length > 0 &&
       !filters.relationshipTypes.includes(rel.type)
-    )
-      {return false}
+    ) {
+      return false
+    }
     // Only include relationships where both entities are in filtered set
     return (
       filteredEntities.some(e => e.id === rel.sourceId) &&
@@ -198,27 +217,27 @@ export default function ExplorePage(): React.ReactElement {
     trackGoldenPathStep('results_viewed')
 
     // 1. Prepare Manifest
-    const timestamp = new Date().toISOString();
+    const timestamp = new Date().toISOString()
     const manifestPayload = {
-        tenant: 'CURRENT_TENANT', // Should come from context
-        filters,
-        timestamp
-    };
+      tenant: 'CURRENT_TENANT', // Should come from context
+      filters,
+      timestamp,
+    }
 
     // 2. Sign Manifest (Simulated call to new endpoint)
-    let signature = 'mock-signature';
+    let signature = 'mock-signature'
     try {
-        const res = await fetch('/api/exports/sign-manifest', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(manifestPayload)
-        });
-        if (res.ok) {
-            const json = await res.json();
-            signature = json.signature;
-        }
+      const res = await fetch('/api/exports/sign-manifest', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(manifestPayload),
+      })
+      if (res.ok) {
+        const json = await res.json()
+        signature = json.signature
+      }
     } catch (e) {
-        console.warn("Failed to sign export manifest", e);
+      console.warn('Failed to sign export manifest', e)
     }
 
     if (format === 'json') {
@@ -227,7 +246,7 @@ export default function ExplorePage(): React.ReactElement {
         data: {
           entities: filteredEntities,
           relationships: filteredRelationships,
-        }
+        },
       }
 
       const blob = new Blob([JSON.stringify(data, null, 2)], {
@@ -241,26 +260,30 @@ export default function ExplorePage(): React.ReactElement {
       URL.revokeObjectURL(url)
     } else if (format === 'csv') {
       // Simple CSV generation
-      const headers = ['id', 'type', 'name', 'confidence', 'source'].join(',');
+      const headers = ['id', 'type', 'name', 'confidence', 'source'].join(',')
       const rows = filteredEntities.map(e =>
         [e.id, e.type, `"${e.name}"`, e.confidence, e.source].join(',')
-      );
-      const csvContent = [headers, ...rows].join('\n');
+      )
+      const csvContent = [headers, ...rows].join('\n')
 
       // Append manifest as comment
-      const manifestComment = `# MANIFEST: ${JSON.stringify(manifestPayload)}\n# SIGNATURE: ${signature}\n`;
+      const manifestComment = `# MANIFEST: ${JSON.stringify(manifestPayload)}\n# SIGNATURE: ${signature}\n`
 
-      const blob = new Blob([manifestComment + csvContent], { type: 'text/csv' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `intelgraph-export-${Date.now()}.csv`;
-      a.click();
-      URL.revokeObjectURL(url);
+      const blob = new Blob([manifestComment + csvContent], {
+        type: 'text/csv',
+      })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `intelgraph-export-${Date.now()}.csv`
+      a.click()
+      URL.revokeObjectURL(url)
     } else if (format === 'png') {
       // Placeholder for PNG export logic
       // In a real implementation, this would use html2canvas or similar
-      alert('PNG export requires canvas integration not available in this environment.');
+      alert(
+        'PNG export requires canvas integration not available in this environment.'
+      )
     }
   }
 
@@ -298,21 +321,31 @@ export default function ExplorePage(): React.ReactElement {
         <div className="flex items-center gap-2">
           {/* Policy Overlays */}
           <div className="flex items-center gap-2 border-r pr-4 mr-2">
-              <span className="text-xs text-muted-foreground font-medium">Overlays:</span>
-              <Button
-                variant={policyOverlay === 'purpose' ? 'default' : 'ghost'}
-                size="sm"
-                onClick={() => setPolicyOverlay(policyOverlay === 'purpose' ? 'none' : 'purpose')}
-              >
-                  <Shield className="h-3 w-3 mr-1" /> Purpose
-              </Button>
-              <Button
-                variant={policyOverlay === 'residency' ? 'default' : 'ghost'}
-                size="sm"
-                onClick={() => setPolicyOverlay(policyOverlay === 'residency' ? 'none' : 'residency')}
-              >
-                  <Shield className="h-3 w-3 mr-1" /> Residency
-              </Button>
+            <span className="text-xs text-muted-foreground font-medium">
+              Overlays:
+            </span>
+            <Button
+              variant={policyOverlay === 'purpose' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() =>
+                setPolicyOverlay(
+                  policyOverlay === 'purpose' ? 'none' : 'purpose'
+                )
+              }
+            >
+              <Shield className="h-3 w-3 mr-1" /> Purpose
+            </Button>
+            <Button
+              variant={policyOverlay === 'residency' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() =>
+                setPolicyOverlay(
+                  policyOverlay === 'residency' ? 'none' : 'residency'
+                )
+              }
+            >
+              <Shield className="h-3 w-3 mr-1" /> Residency
+            </Button>
           </div>
 
           <Button
@@ -355,11 +388,19 @@ export default function ExplorePage(): React.ReactElement {
           </Button>
 
           <div className="flex gap-1">
-             <Button variant="outline" size="sm" onClick={() => handleExport('json')}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleExport('json')}
+            >
               <Download className="h-4 w-4 mr-2" />
               JSON
             </Button>
-             <Button variant="outline" size="sm" onClick={() => handleExport('csv')}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleExport('csv')}
+            >
               <Download className="h-4 w-4 mr-2" />
               CSV
             </Button>
@@ -444,14 +485,25 @@ export default function ExplorePage(): React.ReactElement {
           )}
           {/* Legend for Policy Overlay */}
           {policyOverlay !== 'none' && (
-              <div className="absolute bottom-4 right-4 bg-background/90 p-4 rounded shadow border z-10">
-                  <h4 className="font-semibold mb-2 capitalize">{policyOverlay} Policy</h4>
-                  <div className="space-y-1 text-sm">
-                      <div className="flex items-center"><span className="w-3 h-3 rounded-full bg-green-500 mr-2"></span> Compliant</div>
-                      <div className="flex items-center"><span className="w-3 h-3 rounded-full bg-yellow-500 mr-2"></span> Review</div>
-                      <div className="flex items-center"><span className="w-3 h-3 rounded-full bg-red-500 mr-2"></span> Violation</div>
-                  </div>
+            <div className="absolute bottom-4 right-4 bg-background/90 p-4 rounded shadow border z-10">
+              <h4 className="font-semibold mb-2 capitalize">
+                {policyOverlay} Policy
+              </h4>
+              <div className="space-y-1 text-sm">
+                <div className="flex items-center">
+                  <span className="w-3 h-3 rounded-full bg-green-500 mr-2"></span>{' '}
+                  Compliant
+                </div>
+                <div className="flex items-center">
+                  <span className="w-3 h-3 rounded-full bg-yellow-500 mr-2"></span>{' '}
+                  Review
+                </div>
+                <div className="flex items-center">
+                  <span className="w-3 h-3 rounded-full bg-red-500 mr-2"></span>{' '}
+                  Violation
+                </div>
               </div>
+            </div>
           )}
         </div>
 

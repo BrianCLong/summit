@@ -4,10 +4,10 @@
  * Validates JWT tokens with various security checks
  */
 
-import { JWTManager, TokenPayload } from './jwt-manager.js';
-import { createLogger } from '../utils/logger.js';
+import { JWTManager, TokenPayload } from "./jwt-manager.js";
+import { createLogger } from "../utils/logger.js";
 
-const logger = createLogger('token-validator');
+const logger = createLogger("token-validator");
 
 export interface ValidationOptions {
   checkExpiration?: boolean;
@@ -28,7 +28,7 @@ export class TokenValidator {
   async validate(token: string, options: ValidationOptions = {}): Promise<TokenPayload> {
     // Check if token is revoked
     if (this.revokedTokens.has(token)) {
-      throw new Error('Token has been revoked');
+      throw new Error("Token has been revoked");
     }
 
     // Verify token signature and decode
@@ -37,7 +37,7 @@ export class TokenValidator {
     try {
       payload = this.jwtManager.verifyAccessToken(token);
     } catch (error) {
-      logger.error('Token validation failed', {
+      logger.error("Token validation failed", {
         error: error instanceof Error ? error.message : String(error),
       });
       throw error;
@@ -46,14 +46,14 @@ export class TokenValidator {
     // Check required scopes
     if (options.requiredScopes && options.requiredScopes.length > 0) {
       if (!this.hasRequiredScopes(payload, options.requiredScopes)) {
-        throw new Error('Token does not have required scopes');
+        throw new Error("Token does not have required scopes");
       }
     }
 
     // Check required roles
     if (options.requiredRoles && options.requiredRoles.length > 0) {
       if (!this.hasRequiredRoles(payload, options.requiredRoles)) {
-        throw new Error('Token does not have required roles');
+        throw new Error("Token does not have required roles");
       }
     }
 
@@ -62,7 +62,7 @@ export class TokenValidator {
 
   revokeToken(token: string): void {
     this.revokedTokens.add(token);
-    logger.info('Token revoked');
+    logger.info("Token revoked");
   }
 
   private hasRequiredScopes(payload: TokenPayload, requiredScopes: string[]): boolean {
@@ -70,7 +70,7 @@ export class TokenValidator {
       return false;
     }
 
-    return requiredScopes.every(scope => payload.scopes!.includes(scope));
+    return requiredScopes.every((scope) => payload.scopes!.includes(scope));
   }
 
   private hasRequiredRoles(payload: TokenPayload, requiredRoles: string[]): boolean {
@@ -78,11 +78,11 @@ export class TokenValidator {
       return false;
     }
 
-    return requiredRoles.every(role => payload.roles!.includes(role));
+    return requiredRoles.every((role) => payload.roles!.includes(role));
   }
 
   clearRevokedTokens(): void {
     this.revokedTokens.clear();
-    logger.info('Revoked tokens cleared');
+    logger.info("Revoked tokens cleared");
   }
 }

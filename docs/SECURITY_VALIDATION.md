@@ -117,7 +117,7 @@ Located in `server/src/validation/MutationValidators.ts`:
 #### Basic Usage
 
 ```typescript
-import { EntityIdSchema, validateInput } from '../validation';
+import { EntityIdSchema, validateInput } from "../validation";
 
 // In a GraphQL resolver
 async function getEntity(parent, args, context) {
@@ -132,11 +132,15 @@ async function getEntity(parent, args, context) {
 #### Custom Schemas
 
 ```typescript
-import { z } from 'zod';
+import { z } from "zod";
 
 // Create custom schema
 const UserInputSchema = z.object({
-  username: z.string().min(3).max(50).regex(/^[a-zA-Z0-9_-]+$/),
+  username: z
+    .string()
+    .min(3)
+    .max(50)
+    .regex(/^[a-zA-Z0-9_-]+$/),
   email: EmailSchema,
   age: z.number().int().min(18).max(120),
   roles: z.array(z.string()).min(1).max(10),
@@ -149,17 +153,14 @@ const validated = validateInput(UserInputSchema, userInput);
 #### GraphQL Resolver Wrapper
 
 ```typescript
-import { withValidation } from '../validation';
+import { withValidation } from "../validation";
 
 const resolvers = {
   Mutation: {
-    createEntity: withValidation(
-      EntityInputSchema,
-      async (parent, args, context) => {
-        // args are already validated!
-        return entityService.create(args);
-      }
-    ),
+    createEntity: withValidation(EntityInputSchema, async (parent, args, context) => {
+      // args are already validated!
+      return entityService.create(args);
+    }),
   },
 };
 ```
@@ -173,7 +174,7 @@ const resolvers = {
 All requests are automatically sanitized by the `sanitizeRequest` middleware:
 
 ```typescript
-import sanitizeRequest from './middleware/sanitize';
+import sanitizeRequest from "./middleware/sanitize";
 
 app.use(sanitizeRequest);
 ```
@@ -181,7 +182,7 @@ app.use(sanitizeRequest);
 ### Manual Sanitization
 
 ```typescript
-import { SanitizationUtils } from './validation';
+import { SanitizationUtils } from "./validation";
 
 // Sanitize HTML
 const safe = SanitizationUtils.sanitizeHTML(userInput);
@@ -214,16 +215,16 @@ const sanitized = SanitizationUtils.sanitizeUserInput(requestBody);
 
 ```typescript
 // Neo4j Cypher
-const result = await session.run(
-  'MATCH (n:Entity {id: $id, tenantId: $tenantId}) RETURN n',
-  { id: entityId, tenantId }
-);
+const result = await session.run("MATCH (n:Entity {id: $id, tenantId: $tenantId}) RETURN n", {
+  id: entityId,
+  tenantId,
+});
 
 // PostgreSQL
-const result = await pool.query(
-  'SELECT * FROM entities WHERE id = $1 AND tenant_id = $2',
-  [entityId, tenantId]
-);
+const result = await pool.query("SELECT * FROM entities WHERE id = $1 AND tenant_id = $2", [
+  entityId,
+  tenantId,
+]);
 ```
 
 #### ❌ Incorrect (Vulnerable to Injection)
@@ -241,18 +242,18 @@ const result = await pool.query(sql);
 ### Secondary Defense: Query Validation
 
 ```typescript
-import { QueryValidator } from './validation';
+import { QueryValidator } from "./validation";
 
 // Validate Cypher query
 const validation = QueryValidator.validateCypherQuery(query, params);
 if (!validation.valid) {
-  throw new Error(`Invalid query: ${validation.errors.join(', ')}`);
+  throw new Error(`Invalid query: ${validation.errors.join(", ")}`);
 }
 
 // Validate SQL query
 const validation = QueryValidator.validateSQLQuery(query, params);
 if (!validation.valid) {
-  throw new Error(`Invalid query: ${validation.errors.join(', ')}`);
+  throw new Error(`Invalid query: ${validation.errors.join(", ")}`);
 }
 ```
 
@@ -274,7 +275,7 @@ if (!validation.valid) {
 All user input is sanitized before storage:
 
 ```typescript
-import { SanitizationUtils } from './validation';
+import { SanitizationUtils } from "./validation";
 
 // Sanitize before saving
 const safeDescription = SanitizationUtils.sanitizeHTML(userInput.description);
@@ -302,7 +303,7 @@ When rendering user content, use appropriate encoding:
 Helmet middleware sets CSP headers automatically:
 
 ```typescript
-import helmet from 'helmet';
+import helmet from "helmet";
 
 app.use(
   helmet({
@@ -311,7 +312,7 @@ app.use(
         defaultSrc: ["'self'"],
         scriptSrc: ["'self'"],
         styleSrc: ["'self'", "'unsafe-inline'"],
-        imgSrc: ["'self'", 'data:', 'https:'],
+        imgSrc: ["'self'", "data:", "https:"],
         connectSrc: ["'self'"],
         fontSrc: ["'self'"],
         objectSrc: ["'none'"],
@@ -330,7 +331,7 @@ app.use(
 ### Request Rate Limiting
 
 ```typescript
-import { createRateLimitMiddleware } from './middleware/rateLimit';
+import { createRateLimitMiddleware } from "./middleware/rateLimit";
 
 // Global rate limit
 app.use(
@@ -342,7 +343,7 @@ app.use(
 
 // Endpoint-specific rate limit
 app.post(
-  '/api/graphql',
+  "/api/graphql",
   createRateLimitMiddleware({
     windowMs: 60 * 1000, // 1 minute
     max: 30, // 30 requests per minute
@@ -353,7 +354,7 @@ app.post(
 ### Size-Based Rate Limiting
 
 ```typescript
-import { createSizeBasedRateLimiter } from './middleware/request-validation';
+import { createSizeBasedRateLimiter } from "./middleware/request-validation";
 
 // Limit bandwidth usage
 app.use(
@@ -375,7 +376,7 @@ Handled automatically by the GraphQL validation plugin.
 ### Body Size Limits
 
 ```typescript
-import { createRequestValidationMiddleware } from './middleware/request-validation';
+import { createRequestValidationMiddleware } from "./middleware/request-validation";
 
 app.use(
   createRequestValidationMiddleware({
@@ -389,14 +390,14 @@ app.use(
 ### File Upload Limits
 
 ```typescript
-import { createFileUploadValidator } from './middleware/request-validation';
+import { createFileUploadValidator } from "./middleware/request-validation";
 
 app.post(
-  '/upload',
+  "/upload",
   createFileUploadValidator({
     maxFileSize: 10 * 1024 * 1024, // 10MB
     maxFiles: 10,
-    allowedMimeTypes: ['image/jpeg', 'image/png', 'application/pdf'],
+    allowedMimeTypes: ["image/jpeg", "image/png", "application/pdf"],
   }),
   uploadHandler
 );
@@ -405,7 +406,7 @@ app.post(
 ### GraphQL Query Limits
 
 ```typescript
-import { createGraphQLValidationPlugin } from './middleware/graphql-validation-plugin';
+import { createGraphQLValidationPlugin } from "./middleware/graphql-validation-plugin";
 
 const server = new ApolloServer({
   typeDefs,
@@ -484,12 +485,12 @@ Use persisted queries to prevent arbitrary query execution:
 ```typescript
 // Only allow pre-approved queries
 const approvedQueries = {
-  'getEntity': 'query GetEntity($id: ID!) { entity(id: $id) { id name } }',
+  getEntity: "query GetEntity($id: ID!) { entity(id: $id) { id name } }",
 };
 
 // Validate operation name
 if (!approvedQueries[operationName]) {
-  throw new Error('Query not allowed');
+  throw new Error("Query not allowed");
 }
 ```
 
@@ -511,7 +512,7 @@ const entity = await createEntity(args); // Unvalidated
 
 ```typescript
 // ✅ Good
-session.run('MATCH (n {id: $id}) RETURN n', { id });
+session.run("MATCH (n {id: $id}) RETURN n", { id });
 
 // ❌ Bad
 session.run(`MATCH (n {id: "${id}"}) RETURN n`);
@@ -532,16 +533,13 @@ await save(input); // Unsanitized
 
 ```typescript
 // ✅ Good
-const entity = await db.query(
-  'SELECT * FROM entities WHERE id = $1 AND tenant_id = $2',
-  [id, context.user.tenant]
-);
+const entity = await db.query("SELECT * FROM entities WHERE id = $1 AND tenant_id = $2", [
+  id,
+  context.user.tenant,
+]);
 
 // ❌ Bad
-const entity = await db.query(
-  'SELECT * FROM entities WHERE id = $1',
-  [id]
-);
+const entity = await db.query("SELECT * FROM entities WHERE id = $1", [id]);
 ```
 
 ### 5. Log Security Events
@@ -550,12 +548,12 @@ const entity = await db.query(
 // ✅ Good
 if (!validation.valid) {
   logger.warn({
-    event: 'validation_failed',
+    event: "validation_failed",
     errors: validation.errors,
     userId: context.user.id,
     input: sanitizeForLog(input),
   });
-  throw new GraphQLError('Invalid input');
+  throw new GraphQLError("Invalid input");
 }
 ```
 
@@ -563,14 +561,14 @@ if (!validation.valid) {
 
 ```typescript
 // ✅ Good
-if (!hasPermission(user, 'entity:read')) {
-  throw new GraphQLError('Access denied', {
-    extensions: { code: 'FORBIDDEN' },
+if (!hasPermission(user, "entity:read")) {
+  throw new GraphQLError("Access denied", {
+    extensions: { code: "FORBIDDEN" },
   });
 }
 
 // ❌ Bad
-if (hasPermission(user, 'entity:read')) {
+if (hasPermission(user, "entity:read")) {
   return entity;
 }
 // Falls through without explicit denial
@@ -580,11 +578,7 @@ if (hasPermission(user, 'entity:read')) {
 
 ```typescript
 // ✅ Good
-app.post(
-  '/api/ml/analyze',
-  createRateLimitMiddleware({ windowMs: 60000, max: 5 }),
-  mlHandler
-);
+app.post("/api/ml/analyze", createRateLimitMiddleware({ windowMs: 60000, max: 5 }), mlHandler);
 ```
 
 ### 8. Validate File Uploads
@@ -598,7 +592,7 @@ const validation = FileUploadSchema.safeParse({
 });
 
 if (!validation.success) {
-  throw new Error('Invalid file');
+  throw new Error("Invalid file");
 }
 ```
 
@@ -614,15 +608,15 @@ import {
   validateInput,
   SecurityValidator,
   BusinessRuleValidator,
-} from '../validation';
+} from "../validation";
 
 const resolvers = {
   Mutation: {
     createEntity: async (parent, args, context) => {
       // 1. Validate authentication
       if (!context.user) {
-        throw new GraphQLError('Authentication required', {
-          extensions: { code: 'UNAUTHENTICATED' },
+        throw new GraphQLError("Authentication required", {
+          extensions: { code: "UNAUTHENTICATED" },
         });
       }
 
@@ -632,29 +626,26 @@ const resolvers = {
       // 3. Security validation
       const securityCheck = SecurityValidator.validateInput(validated);
       if (!securityCheck.valid) {
-        throw new GraphQLError(`Security validation failed: ${securityCheck.errors.join(', ')}`);
+        throw new GraphQLError(`Security validation failed: ${securityCheck.errors.join(", ")}`);
       }
 
       // 4. Permission check
       const permissionCheck = SecurityValidator.validatePermissions(
         context.user,
-        'create',
-        'entity'
+        "create",
+        "entity"
       );
       if (!permissionCheck.valid) {
-        throw new GraphQLError('Insufficient permissions');
+        throw new GraphQLError("Insufficient permissions");
       }
 
       // 5. Business rule validation
-      const businessCheck = BusinessRuleValidator.validateEntityCreation(
-        validated,
-        {
-          entityCount: await getEntityCount(context.user.tenant),
-          user: context.user,
-        }
-      );
+      const businessCheck = BusinessRuleValidator.validateEntityCreation(validated, {
+        entityCount: await getEntityCount(context.user.tenant),
+        user: context.user,
+      });
       if (!businessCheck.valid) {
-        throw new GraphQLError(`Business rule violation: ${businessCheck.errors.join(', ')}`);
+        throw new GraphQLError(`Business rule violation: ${businessCheck.errors.join(", ")}`);
       }
 
       // 6. Sanitize inputs
@@ -686,13 +677,13 @@ const resolvers = {
 
       // 8. Audit log
       logger.info({
-        event: 'entity_created',
-        entityId: result.records[0].get('e').properties.id,
+        event: "entity_created",
+        entityId: result.records[0].get("e").properties.id,
         userId: context.user.id,
         tenantId: context.user.tenant,
       });
 
-      return result.records[0].get('e').properties;
+      return result.records[0].get("e").properties;
     },
   },
 };
@@ -701,28 +692,28 @@ const resolvers = {
 ### Complete API Endpoint Example
 
 ```typescript
-import express from 'express';
+import express from "express";
 import {
   createRequestValidationMiddleware,
   createRateLimitMiddleware,
   createFileUploadValidator,
-} from './middleware';
-import { validateInput, FileUploadSchema } from './validation';
+} from "./middleware";
+import { validateInput, FileUploadSchema } from "./validation";
 
 const app = express();
 
 // Global middleware
-app.use(express.json({ limit: '10mb' }));
+app.use(express.json({ limit: "10mb" }));
 app.use(createRequestValidationMiddleware());
 app.use(sanitizeRequest);
 
 // Rate-limited upload endpoint
 app.post(
-  '/api/upload',
+  "/api/upload",
   createRateLimitMiddleware({ windowMs: 60000, max: 10 }),
   createFileUploadValidator({
     maxFileSize: 10 * 1024 * 1024,
-    allowedMimeTypes: ['image/jpeg', 'image/png'],
+    allowedMimeTypes: ["image/jpeg", "image/png"],
   }),
   async (req, res) => {
     try {
@@ -739,7 +730,7 @@ app.post(
 
       res.json({ success: true, fileId: result.id });
     } catch (error) {
-      logger.error({ error }, 'Upload failed');
+      logger.error({ error }, "Upload failed");
       res.status(400).json({ error: error.message });
     }
   }
@@ -753,21 +744,21 @@ app.post(
 ### Validation Tests
 
 ```typescript
-import { EntityIdSchema, validateInput } from '../validation';
+import { EntityIdSchema, validateInput } from "../validation";
 
-describe('EntityIdSchema', () => {
-  it('should accept valid UUID', () => {
-    const valid = '123e4567-e89b-12d3-a456-426614174000';
+describe("EntityIdSchema", () => {
+  it("should accept valid UUID", () => {
+    const valid = "123e4567-e89b-12d3-a456-426614174000";
     expect(() => validateInput(EntityIdSchema, valid)).not.toThrow();
   });
 
-  it('should reject invalid UUID', () => {
-    const invalid = 'not-a-uuid';
+  it("should reject invalid UUID", () => {
+    const invalid = "not-a-uuid";
     expect(() => validateInput(EntityIdSchema, invalid)).toThrow();
   });
 
-  it('should reject empty string', () => {
-    expect(() => validateInput(EntityIdSchema, '')).toThrow();
+  it("should reject empty string", () => {
+    expect(() => validateInput(EntityIdSchema, "")).toThrow();
   });
 });
 ```
@@ -775,10 +766,10 @@ describe('EntityIdSchema', () => {
 ### Injection Tests
 
 ```typescript
-import { QueryValidator } from '../validation';
+import { QueryValidator } from "../validation";
 
-describe('QueryValidator', () => {
-  it('should detect SQL injection attempts', () => {
+describe("QueryValidator", () => {
+  it("should detect SQL injection attempts", () => {
     const malicious = "'; DROP TABLE users; --";
     const result = QueryValidator.hasDangerousSQLPatterns(
       `SELECT * FROM users WHERE name = '${malicious}'`
@@ -786,8 +777,8 @@ describe('QueryValidator', () => {
     expect(result).toBe(true);
   });
 
-  it('should allow safe parameterized queries', () => {
-    const safe = 'SELECT * FROM users WHERE id = $1';
+  it("should allow safe parameterized queries", () => {
+    const safe = "SELECT * FROM users WHERE id = $1";
     const result = QueryValidator.hasDangerousSQLPatterns(safe);
     expect(result).toBe(false);
   });
@@ -797,19 +788,19 @@ describe('QueryValidator', () => {
 ### XSS Tests
 
 ```typescript
-import { SanitizationUtils } from '../validation';
+import { SanitizationUtils } from "../validation";
 
-describe('SanitizationUtils', () => {
-  it('should sanitize XSS attempts', () => {
+describe("SanitizationUtils", () => {
+  it("should sanitize XSS attempts", () => {
     const xss = '<script>alert("XSS")</script>';
     const safe = SanitizationUtils.removeDangerousContent(xss);
-    expect(safe).not.toContain('<script>');
+    expect(safe).not.toContain("<script>");
   });
 
-  it('should escape HTML entities', () => {
-    const html = '<div>Test</div>';
+  it("should escape HTML entities", () => {
+    const html = "<div>Test</div>";
     const safe = SanitizationUtils.sanitizeHTML(html);
-    expect(safe).toBe('&lt;div&gt;Test&lt;&#x2F;div&gt;');
+    expect(safe).toBe("&lt;div&gt;Test&lt;&#x2F;div&gt;");
   });
 });
 ```

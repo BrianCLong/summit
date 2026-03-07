@@ -7,45 +7,40 @@
  */
 
 /* eslint-disable no-console */
-import chalk from 'chalk';
+import chalk from "chalk";
 
 /**
  * Format data as a table
  */
-export function formatOutput<T extends object>(
-  data: T[],
-  columns: string[]
-): string {
-  if (data.length === 0) {return '';}
+export function formatOutput<T extends object>(data: T[], columns: string[]): string {
+  if (data.length === 0) {
+    return "";
+  }
 
   // Calculate column widths
   const widths: Record<string, number> = {};
   columns.forEach((col) => {
     widths[col] = Math.max(
       col.length,
-      ...data.map((row) => String((row as Record<string, unknown>)[col] || '').length)
+      ...data.map((row) => String((row as Record<string, unknown>)[col] || "").length)
     );
   });
 
   // Header
-  const headerRow = columns
-    .map((col) => col.toUpperCase().padEnd(widths[col]))
-    .join('  ');
-  const separator = columns
-    .map((col) => '─'.repeat(widths[col]))
-    .join('──');
+  const headerRow = columns.map((col) => col.toUpperCase().padEnd(widths[col])).join("  ");
+  const separator = columns.map((col) => "─".repeat(widths[col])).join("──");
 
   // Data rows
   const dataRows = data.map((row) =>
     columns
       .map((col) => {
-        const value = String((row as Record<string, unknown>)[col] || '');
+        const value = String((row as Record<string, unknown>)[col] || "");
         return value.padEnd(widths[col]);
       })
-      .join('  ')
+      .join("  ")
   );
 
-  return [chalk.bold(headerRow), separator, ...dataRows].join('\n');
+  return [chalk.bold(headerRow), separator, ...dataRows].join("\n");
 }
 
 /**
@@ -53,14 +48,16 @@ export function formatOutput<T extends object>(
  */
 export function formatDate(dateStr: string): string {
   const date = new Date(dateStr);
-  if (isNaN(date.getTime())) {return dateStr;}
+  if (isNaN(date.getTime())) {
+    return dateStr;
+  }
 
-  return date.toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
+  return date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
   });
 }
 
@@ -68,8 +65,10 @@ export function formatDate(dateStr: string): string {
  * Truncate string to max length
  */
 export function truncate(str: string, maxLength: number): string {
-  if (str.length <= maxLength) {return str;}
-  return `${str.substring(0, maxLength - 3)  }...`;
+  if (str.length <= maxLength) {
+    return str;
+  }
+  return `${str.substring(0, maxLength - 3)}...`;
 }
 
 /**
@@ -78,9 +77,9 @@ export function truncate(str: string, maxLength: number): string {
 export function parseKeyValue(pairs: string[]): Record<string, string> {
   const result: Record<string, string> = {};
   pairs.forEach((pair) => {
-    const [key, ...valueParts] = pair.split('=');
+    const [key, ...valueParts] = pair.split("=");
     if (key && valueParts.length > 0) {
-      result[key] = valueParts.join('=');
+      result[key] = valueParts.join("=");
     }
   });
   return result;
@@ -94,14 +93,14 @@ export function createSpinner(message: string): {
   stop: (success?: boolean) => void;
   update: (msg: string) => void;
 } {
-  const frames = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
+  const frames = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
   let frameIndex = 0;
   let interval: NodeJS.Timeout | null = null;
   let currentMessage = message;
 
   return {
     start() {
-      process.stdout.write('\x1B[?25l'); // Hide cursor
+      process.stdout.write("\x1B[?25l"); // Hide cursor
       interval = setInterval(() => {
         process.stdout.write(`\r${chalk.blue(frames[frameIndex])} ${currentMessage}`);
         frameIndex = (frameIndex + 1) % frames.length;
@@ -112,9 +111,9 @@ export function createSpinner(message: string): {
         clearInterval(interval);
         interval = null;
       }
-      const icon = success ? chalk.green('✓') : chalk.red('✗');
+      const icon = success ? chalk.green("✓") : chalk.red("✗");
       process.stdout.write(`\r${icon} ${currentMessage}\n`);
-      process.stdout.write('\x1B[?25h'); // Show cursor
+      process.stdout.write("\x1B[?25h"); // Show cursor
     },
     update(msg: string) {
       currentMessage = msg;
@@ -126,22 +125,22 @@ export function createSpinner(message: string): {
  * Confirm action with user
  */
 export async function confirm(message: string, defaultValue = false): Promise<boolean> {
-  const readline = await import('readline');
+  const readline = await import("readline");
   const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
   });
 
-  const defaultHint = defaultValue ? '(Y/n)' : '(y/N)';
+  const defaultHint = defaultValue ? "(Y/n)" : "(y/N)";
 
   return new Promise((resolve) => {
     rl.question(`${message} ${defaultHint} `, (answer) => {
       rl.close();
       const normalized = answer.toLowerCase().trim();
-      if (normalized === '') {
+      if (normalized === "") {
         resolve(defaultValue);
       } else {
-        resolve(normalized === 'y' || normalized === 'yes');
+        resolve(normalized === "y" || normalized === "yes");
       }
     });
   });

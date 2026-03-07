@@ -1,5 +1,5 @@
-import { Graph, CommunitySummary, CommunityResult } from '../types/analytics';
-import { logger } from '../utils/logger';
+import { Graph, CommunitySummary, CommunityResult } from "../types/analytics";
+import { logger } from "../utils/logger";
 
 /**
  * Community Detection Algorithms
@@ -43,11 +43,11 @@ function buildAdjacencyStructures(graph: Graph): {
 
     weightedAdj[edge.fromId]?.set(
       edge.toId,
-      (weightedAdj[edge.fromId]?.get(edge.toId) || 0) + weight,
+      (weightedAdj[edge.fromId]?.get(edge.toId) || 0) + weight
     );
     weightedAdj[edge.toId]?.set(
       edge.fromId,
-      (weightedAdj[edge.toId]?.get(edge.fromId) || 0) + weight,
+      (weightedAdj[edge.toId]?.get(edge.fromId) || 0) + weight
     );
 
     degrees.set(edge.fromId, (degrees.get(edge.fromId) || 0) + weight);
@@ -60,11 +60,8 @@ function buildAdjacencyStructures(graph: Graph): {
 /**
  * Label Propagation Algorithm for community detection
  */
-export function labelPropagation(
-  graph: Graph,
-  maxIterations: number = 100,
-): CommunitySummary {
-  logger.info('Running label propagation algorithm', {
+export function labelPropagation(graph: Graph, maxIterations: number = 100): CommunitySummary {
+  logger.info("Running label propagation algorithm", {
     nodes: graph.nodes.length,
     maxIterations,
   });
@@ -168,7 +165,7 @@ export function labelPropagation(
     }
   }
 
-  logger.info('Label propagation completed', {
+  logger.info("Label propagation completed", {
     iterations: iteration,
     communities: communityMap.size,
   });
@@ -184,10 +181,7 @@ export function labelPropagation(
 /**
  * Calculate modularity score for a community assignment
  */
-export function calculateModularity(
-  graph: Graph,
-  communities: CommunityResult[],
-): number {
+export function calculateModularity(graph: Graph, communities: CommunityResult[]): number {
   const m = graph.edges.length;
   if (m === 0) return 0;
 
@@ -226,7 +220,7 @@ export function calculateModularity(
  * Louvain-style modularity optimization (simplified single-pass)
  */
 export function louvainCommunityDetection(graph: Graph): CommunitySummary {
-  logger.info('Running Louvain community detection', {
+  logger.info("Running Louvain community detection", {
     nodes: graph.nodes.length,
   });
 
@@ -274,7 +268,7 @@ export function louvainCommunityDetection(graph: Graph): CommunitySummary {
           targetCommunity,
           nodeToCommunity,
           weightedAdj,
-          degrees,
+          degrees
         );
 
         if (gain > bestGain) {
@@ -311,9 +305,7 @@ export function louvainCommunityDetection(graph: Graph): CommunitySummary {
   const densities: Record<string, number> = {};
 
   for (const communityId of communityMap.values()) {
-    sizes[communityId] = communities.filter(
-      (c) => c.communityId === communityId,
-    ).length;
+    sizes[communityId] = communities.filter((c) => c.communityId === communityId).length;
   }
 
   // Calculate densities
@@ -323,8 +315,7 @@ export function louvainCommunityDetection(graph: Graph): CommunitySummary {
       .map((c) => c.nodeId);
 
     let internalEdges = 0;
-    const possibleEdges =
-      (nodesInCommunity.length * (nodesInCommunity.length - 1)) / 2;
+    const possibleEdges = (nodesInCommunity.length * (nodesInCommunity.length - 1)) / 2;
 
     if (possibleEdges > 0) {
       const nodeSet = new Set(nodesInCommunity);
@@ -341,7 +332,7 @@ export function louvainCommunityDetection(graph: Graph): CommunitySummary {
 
   const modularityScore = calculateModularity(graph, communities);
 
-  logger.info('Louvain completed', {
+  logger.info("Louvain completed", {
     iterations: iteration,
     communities: communityMap.size,
     modularity: modularityScore.toFixed(4),
@@ -365,7 +356,7 @@ function calculateModularityGain(
   toCommunity: string,
   nodeToCommunity: Map<string, string>,
   weightedAdj: WeightedAdjacency,
-  degrees: Map<string, number>,
+  degrees: Map<string, number>
 ): number {
   // Simplified calculation - in production would use more precise formula
   const neighbors = weightedAdj[nodeId];
@@ -393,9 +384,9 @@ function calculateModularityGain(
  */
 export function detectCommunities(
   graph: Graph,
-  algorithm: 'label_propagation' | 'louvain' = 'louvain',
+  algorithm: "label_propagation" | "louvain" = "louvain"
 ): CommunitySummary {
-  if (algorithm === 'label_propagation') {
+  if (algorithm === "label_propagation") {
     return labelPropagation(graph);
   } else {
     return louvainCommunityDetection(graph);

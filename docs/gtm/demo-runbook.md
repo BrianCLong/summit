@@ -31,24 +31,24 @@ _Version: 2025-11-27_
 
 ### Pre-Demo Checklist
 
-| Item | Check | Notes |
-|------|-------|-------|
-| Environment accessible | [ ] | Test URL, login |
-| Data loaded | [ ] | Golden path dataset |
-| Browser clean | [ ] | No bookmarks bar, clear history |
-| Screen resolution | [ ] | 1920x1080 or adjust for projector |
-| Notifications off | [ ] | Do Not Disturb mode |
-| Backup browser ready | [ ] | In case of issues |
-| Demo script printed/visible | [ ] | Reference without screen share |
-| Water nearby | [ ] | Stay hydrated |
+| Item                        | Check | Notes                             |
+| --------------------------- | ----- | --------------------------------- |
+| Environment accessible      | [ ]   | Test URL, login                   |
+| Data loaded                 | [ ]   | Golden path dataset               |
+| Browser clean               | [ ]   | No bookmarks bar, clear history   |
+| Screen resolution           | [ ]   | 1920x1080 or adjust for projector |
+| Notifications off           | [ ]   | Do Not Disturb mode               |
+| Backup browser ready        | [ ]   | In case of issues                 |
+| Demo script printed/visible | [ ]   | Reference without screen share    |
+| Water nearby                | [ ]   | Stay hydrated                     |
 
 ### Demo Environment Details
 
-| Environment | URL | Credentials | Dataset |
-|-------------|-----|-------------|---------|
-| Production Demo | {{URL}} | {{user/pass}} | Golden Path v2 |
-| Sandbox | {{URL}} | {{user/pass}} | Clean for live data |
-| Offline/Air-Gap | {{local}} | {{user/pass}} | Portable dataset |
+| Environment     | URL       | Credentials   | Dataset             |
+| --------------- | --------- | ------------- | ------------------- |
+| Production Demo | {{URL}}   | {{user/pass}} | Golden Path v2      |
+| Sandbox         | {{URL}}   | {{user/pass}} | Clean for live data |
+| Offline/Air-Gap | {{local}} | {{user/pass}} | Portable dataset    |
 
 ### Golden Path Dataset
 
@@ -339,11 +339,11 @@ _Show: API documentation or sample calls_
 
 > "We support three deployment patterns:"
 
-| Pattern | Description | Use Case |
-|---------|-------------|----------|
-| Cloud | AWS GovCloud / Azure Gov | Standard; fastest deployment |
-| On-Prem | K8s on customer infrastructure | Data residency requirements |
-| Air-Gap | Fully disconnected; offline updates | Classified environments |
+| Pattern | Description                         | Use Case                     |
+| ------- | ----------------------------------- | ---------------------------- |
+| Cloud   | AWS GovCloud / Azure Gov            | Standard; fastest deployment |
+| On-Prem | K8s on customer infrastructure      | Data residency requirements  |
+| Air-Gap | Fully disconnected; offline updates | Classified environments      |
 
 ---
 
@@ -364,13 +364,13 @@ _Show: API documentation or sample calls_
 
 Customize based on customer use case. Common variants:
 
-| Use Case | Focus Areas | Dataset Twist |
-|----------|-------------|---------------|
-| OSINT Fusion | Multi-source ingestion, deduplication | Multiple overlapping feeds |
-| Threat Intel | STIX/TAXII, TTP mapping, IOC correlation | APT campaign data |
-| Fraud Investigation | Entity resolution, transaction networks | Financial flow data |
-| Disinformation | Social graph, narrative tracking, temporal | Influence op data |
-| Supply Chain Risk | Vendor networks, risk propagation | Supplier relationship data |
+| Use Case            | Focus Areas                                | Dataset Twist              |
+| ------------------- | ------------------------------------------ | -------------------------- |
+| OSINT Fusion        | Multi-source ingestion, deduplication      | Multiple overlapping feeds |
+| Threat Intel        | STIX/TAXII, TTP mapping, IOC correlation   | APT campaign data          |
+| Fraud Investigation | Entity resolution, transaction networks    | Financial flow data        |
+| Disinformation      | Social graph, narrative tracking, temporal | Influence op data          |
+| Supply Chain Risk   | Vendor networks, risk propagation          | Supplier relationship data |
 
 ---
 
@@ -378,23 +378,26 @@ Customize based on customer use case. Common variants:
 
 ### Common Issues
 
-| Issue | Quick Fix | Root Cause |
-|-------|-----------|------------|
-| Slow graph render | Reduce visible nodes; apply filter | Too many nodes on screen |
-| Login fails | Check credentials; clear cache | Session expired |
-| Data missing | Verify dataset loaded; check filters | Wrong environment |
-| NL query fails | Simplify query; use keywords | Query too complex |
-| Export hangs | Reduce selection; check permissions | Large export |
+| Issue             | Quick Fix                            | Root Cause               |
+| ----------------- | ------------------------------------ | ------------------------ |
+| Slow graph render | Reduce visible nodes; apply filter   | Too many nodes on screen |
+| Login fails       | Check credentials; clear cache       | Session expired          |
+| Data missing      | Verify dataset loaded; check filters | Wrong environment        |
+| NL query fails    | Simplify query; use keywords         | Query too complex        |
+| Export hangs      | Reduce selection; check permissions  | Large export             |
 
 ### Recovery Scripts
 
 **Environment Down:**
+
 > "Looks like we're having a technical hiccup. While we sort that out, let me walk you through this on slides and then follow up with a recorded demo."
 
 **Feature Bug:**
+
 > "That's not behaving as expected—I'll flag that for the team. Let me show you the intended behavior and we'll follow up with a fix."
 
 **Question You Can't Answer:**
+
 > "Great question—I want to give you an accurate answer rather than guess. I'll follow up with our team and get back to you by [specific time]."
 
 ---
@@ -403,12 +406,12 @@ Customize based on customer use case. Common variants:
 
 ### Immediately After Demo
 
-| Action | Owner | Timing |
-|--------|-------|--------|
-| Send thank you email | AE | Same day |
-| Share demo recording (if recorded) | AE | Same day |
-| Answer open questions | SE | 24 hours |
-| Send relevant collateral | AE | 24 hours |
+| Action                             | Owner | Timing   |
+| ---------------------------------- | ----- | -------- |
+| Send thank you email               | AE    | Same day |
+| Share demo recording (if recorded) | AE    | Same day |
+| Answer open questions              | SE    | 24 hours |
+| Send relevant collateral           | AE    | 24 hours |
 
 ### Thank You Email Template
 
@@ -470,25 +473,25 @@ To be demo-certified, team members must:
 
 ### Key Phrases
 
-| Moment | Say This |
-|--------|----------|
-| Opening | "Let me show you what this looks like for your team..." |
-| Transition | "Now here's where it gets interesting..." |
+| Moment     | Say This                                                  |
+| ---------- | --------------------------------------------------------- |
+| Opening    | "Let me show you what this looks like for your team..."   |
+| Transition | "Now here's where it gets interesting..."                 |
 | Provenance | "Every fact has a source. Here's the chain-of-custody..." |
-| AI | "AI that plays by your rules, not a black box..." |
-| Policy | "Your policies, enforced automatically..." |
-| Objection | "That's a great question. Let me show you..." |
-| Close | "Where would you want to see this applied first?" |
+| AI         | "AI that plays by your rules, not a black box..."         |
+| Policy     | "Your policies, enforced automatically..."                |
+| Objection  | "That's a great question. Let me show you..."             |
+| Close      | "Where would you want to see this applied first?"         |
 
 ### Numbers to Remember
 
-| Metric | Value | Context |
-|--------|-------|---------|
-| Time-to-insight reduction | 30-50% | Conservative; validated in pilots |
-| Provenance coverage | 95%+ | Default; configurable |
-| Pilot duration | 8-12 weeks | Standard scope |
-| Users in pilot | 10-25 | Typical range |
-| Data sources in pilot | 3-6 | P1 + P2 |
+| Metric                    | Value      | Context                           |
+| ------------------------- | ---------- | --------------------------------- |
+| Time-to-insight reduction | 30-50%     | Conservative; validated in pilots |
+| Provenance coverage       | 95%+       | Default; configurable             |
+| Pilot duration            | 8-12 weeks | Standard scope                    |
+| Users in pilot            | 10-25      | Typical range                     |
+| Data sources in pilot     | 3-6        | P1 + P2                           |
 
 ---
 

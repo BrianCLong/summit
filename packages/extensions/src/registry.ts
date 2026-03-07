@@ -4,7 +4,7 @@
  * Manages the collection of discovered and loaded extensions.
  */
 
-import { Extension, ExtensionManifest } from './types.js';
+import { Extension, ExtensionManifest } from "./types.js";
 
 export class ExtensionRegistry {
   private extensions = new Map<string, Extension>();
@@ -94,9 +94,7 @@ export class ExtensionRegistry {
    * Get extensions by capability
    */
   getByCapability(capability: string): Extension[] {
-    return this.getLoaded().filter((ext) =>
-      ext.manifest.capabilities.includes(capability as any)
-    );
+    return this.getLoaded().filter((ext) => ext.manifest.capabilities.includes(capability as any));
   }
 
   /**

@@ -123,15 +123,15 @@ Fully managed Summit in the cloud with instant onboarding.
 
 Extend Summit with pre-configured workflows, policies, and dashboards for specific business functions.
 
-| Operating Model Pack | Description | Price |
-|---------------------|-------------|-------|
-| **RevOps Pack** | Pipeline health, forecast variance, churn prediction, attribution | $5,000/year |
-| **People Ops Pack** | Hiring pipeline, performance reviews, engagement signals | $5,000/year |
-| **Finance Pack** | Budget tracking, spend anomalies, financial planning | $5,000/year |
-| **Security Pack** | Security posture, threat detection, compliance monitoring | $5,000/year |
-| **Product Ops Pack** | Feature requests, usage analytics, roadmap prioritization | $5,000/year |
+| Operating Model Pack | Description                                                       | Price       |
+| -------------------- | ----------------------------------------------------------------- | ----------- |
+| **RevOps Pack**      | Pipeline health, forecast variance, churn prediction, attribution | $5,000/year |
+| **People Ops Pack**  | Hiring pipeline, performance reviews, engagement signals          | $5,000/year |
+| **Finance Pack**     | Budget tracking, spend anomalies, financial planning              | $5,000/year |
+| **Security Pack**    | Security posture, threat detection, compliance monitoring         | $5,000/year |
+| **Product Ops Pack** | Feature requests, usage analytics, roadmap prioritization         | $5,000/year |
 
-*Hosted SaaS pricing includes Operating Model Packs pro-rated into monthly fees.*
+_Hosted SaaS pricing includes Operating Model Packs pro-rated into monthly fees._
 
 ---
 
@@ -163,41 +163,41 @@ Extend Summit with pre-configured workflows, policies, and dashboards for specif
 
 ## Feature Comparison
 
-| Feature | Internal | White-Label | Hosted SaaS |
-|---------|----------|-------------|-------------|
-| **Core Platform** |
-| Knowledge graph (Neo4j) | ✅ | ✅ | ✅ |
-| Workflow engine | ✅ | ✅ | ✅ |
-| Policy engine (OPA) | ✅ | ✅ | ✅ |
-| Approval workflows | ✅ | ✅ | ✅ |
-| Audit trail | ✅ | ✅ | ✅ |
-| **Agent Archetypes** |
-| AI Chief of Staff | ✅ | ✅ | ✅ |
-| AI COO | ✅ | ✅ | ✅ |
-| AI RevOps | ✅ | ✅ | ✅ |
-| Custom agents (SDK) | ✅ | ✅ | ✅ |
-| **Integrations** |
-| Pre-built connectors (17+) | ✅ | ✅ | ✅ |
-| Custom connectors | ✅ | ✅ | ✅ |
-| Webhook triggers | ✅ | ✅ | ✅ |
-| **Security & Compliance** |
-| SSO (OIDC/SAML) | ✅ | ✅ | ✅ |
-| RBAC & ABAC | ✅ | ✅ | ✅ |
-| Audit logs | ✅ | ✅ | ✅ |
-| SOC 2 Type II | Self-managed | Self-managed | ✅ (Q1 2026) |
-| Data residency | Full control | Full control | Select region |
-| **Deployment** |
-| Self-hosted | ✅ | ✅ | ❌ |
-| Multi-tenant | ❌ | ✅ | ✅ |
-| White-label branding | ❌ | ✅ | ❌ |
-| **Support** |
-| Email support | Add-on | Included | Included |
-| Phone + Slack | Add-on | Included | Premium tier |
-| Dedicated CSM | ❌ | ✅ | Enterprise tier |
-| **Pricing Model** |
-| Annual license | ✅ | ✅ | ❌ |
-| Monthly subscription | ❌ | ❌ | ✅ |
-| Per-user pricing | Yes (tiers) | Per-tenant | Yes (tiers) |
+| Feature                    | Internal     | White-Label  | Hosted SaaS     |
+| -------------------------- | ------------ | ------------ | --------------- |
+| **Core Platform**          |
+| Knowledge graph (Neo4j)    | ✅           | ✅           | ✅              |
+| Workflow engine            | ✅           | ✅           | ✅              |
+| Policy engine (OPA)        | ✅           | ✅           | ✅              |
+| Approval workflows         | ✅           | ✅           | ✅              |
+| Audit trail                | ✅           | ✅           | ✅              |
+| **Agent Archetypes**       |
+| AI Chief of Staff          | ✅           | ✅           | ✅              |
+| AI COO                     | ✅           | ✅           | ✅              |
+| AI RevOps                  | ✅           | ✅           | ✅              |
+| Custom agents (SDK)        | ✅           | ✅           | ✅              |
+| **Integrations**           |
+| Pre-built connectors (17+) | ✅           | ✅           | ✅              |
+| Custom connectors          | ✅           | ✅           | ✅              |
+| Webhook triggers           | ✅           | ✅           | ✅              |
+| **Security & Compliance**  |
+| SSO (OIDC/SAML)            | ✅           | ✅           | ✅              |
+| RBAC & ABAC                | ✅           | ✅           | ✅              |
+| Audit logs                 | ✅           | ✅           | ✅              |
+| SOC 2 Type II              | Self-managed | Self-managed | ✅ (Q1 2026)    |
+| Data residency             | Full control | Full control | Select region   |
+| **Deployment**             |
+| Self-hosted                | ✅           | ✅           | ❌              |
+| Multi-tenant               | ❌           | ✅           | ✅              |
+| White-label branding       | ❌           | ✅           | ❌              |
+| **Support**                |
+| Email support              | Add-on       | Included     | Included        |
+| Phone + Slack              | Add-on       | Included     | Premium tier    |
+| Dedicated CSM              | ❌           | ✅           | Enterprise tier |
+| **Pricing Model**          |
+| Annual license             | ✅           | ✅           | ❌              |
+| Monthly subscription       | ❌           | ❌           | ✅              |
+| Per-user pricing           | Yes (tiers)  | Per-tenant   | Yes (tiers)     |
 
 ---
 
@@ -288,4 +288,4 @@ Contact sales for pricing on:
 
 ---
 
-*Pricing subject to change. All prices in USD. Annual licenses invoiced annually. Monthly subscriptions billed monthly.*
+_Pricing subject to change. All prices in USD. Annual licenses invoiced annually. Monthly subscriptions billed monthly._

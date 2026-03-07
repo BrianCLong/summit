@@ -3,19 +3,19 @@ name: Nightly Testing
 on:
   schedule:
     # Run nightly at 2:19 AM UTC (jittered from :00, avoids :07 health check)
-    - cron: '19 2 * * *'
+    - cron: "19 2 * * *"
   workflow_dispatch:
     inputs:
       environment:
-        description: 'Target environment'
+        description: "Target environment"
         required: true
-        default: 'stage'
+        default: "stage"
         type: choice
         options:
           - stage
           - dev
       skip_soak:
-        description: 'Skip k6 soak test (4h duration)'
+        description: "Skip k6 soak test (4h duration)"
         required: false
         default: false
         type: boolean
@@ -84,7 +84,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'npm'
+          cache: "npm"
 
       - name: Install pnpm
         uses: pnpm/action-setup@v3
@@ -160,7 +160,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'npm'
+          cache: "npm"
 
       - name: Install pnpm
         uses: pnpm/action-setup@v3
@@ -195,7 +195,7 @@ jobs:
         uses: dorny/test-reporter@v1
         with:
           name: Integration Tests
-          path: '**/*junit*.xml'
+          path: "**/*junit*.xml"
           reporter: java-junit
 
   nightly-performance:

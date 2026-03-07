@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
-const AWS = require('aws-sdk');
-const crypto = require('crypto');
+const AWS = require("aws-sdk");
+const crypto = require("crypto");
 
 class SecretRotator {
   constructor() {
@@ -15,14 +15,14 @@ class SecretRotator {
     try {
       // Get current secret
       const currentSecret = await this.getCurrentSecret(secretPath);
-      console.log('Retrieved current secret');
+      console.log("Retrieved current secret");
 
       // Generate new secret
       const newSecret = this.generateSecret();
-      console.log('Generated new secret');
+      console.log("Generated new secret");
 
       // Store new secret with timestamp
-      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+      const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
       const backupPath = `${secretPath}/backup/${timestamp}`;
 
       // Backup current secret
@@ -31,11 +31,11 @@ class SecretRotator {
 
       // Update with new secret
       await this.storeSecret(secretPath, newSecret);
-      console.log('Updated secret with new value');
+      console.log("Updated secret with new value");
 
       // Schedule cleanup of old backups (keep last 7 days)
       await this.cleanupOldBackups(secretPath);
-      console.log('Cleaned up old backups');
+      console.log("Cleaned up old backups");
 
       console.log(`✅ Successfully rotated secret: ${secretPath}`);
       return { success: true, secretPath, timestamp };
@@ -55,10 +55,8 @@ class SecretRotator {
       const result = await this.ssm.getParameter(params).promise();
       return result.Parameter.Value;
     } catch (error) {
-      if (error.code === 'ParameterNotFound') {
-        console.log(
-          `Parameter ${path} not found in SSM, checking Secrets Manager...`,
-        );
+      if (error.code === "ParameterNotFound") {
+        console.log(`Parameter ${path} not found in SSM, checking Secrets Manager...`);
         return await this.getSecretFromSecretsManager(path);
       }
       throw error;
@@ -76,7 +74,7 @@ class SecretRotator {
       return result.SecretString;
     } catch (error) {
       throw new Error(
-        `Failed to retrieve secret from both SSM and Secrets Manager: ${error.message}`,
+        `Failed to retrieve secret from both SSM and Secrets Manager: ${error.message}`
       );
     }
   }
@@ -84,9 +82,8 @@ class SecretRotator {
   generateSecret() {
     // Generate a secure random password
     const length = 32;
-    const charset =
-      'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*';
-    let secret = '';
+    const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
+    let secret = "";
 
     for (let i = 0; i < length; i++) {
       secret += charset.charAt(Math.floor(Math.random() * charset.length));
@@ -101,16 +98,14 @@ class SecretRotator {
       const params = {
         Name: path,
         Value: value,
-        Type: 'SecureString',
+        Type: "SecureString",
         Overwrite: true,
       };
 
       await this.ssm.putParameter(params).promise();
     } catch (error) {
       // Fall back to Secrets Manager
-      console.log(
-        `SSM storage failed, trying Secrets Manager: ${error.message}`,
-      );
+      console.log(`SSM storage failed, trying Secrets Manager: ${error.message}`);
       await this.storeInSecretsManager(path, value);
     }
   }
@@ -124,13 +119,13 @@ class SecretRotator {
         })
         .promise();
     } catch (error) {
-      if (error.code === 'ResourceNotFoundException') {
+      if (error.code === "ResourceNotFoundException") {
         // Create new secret
         await this.secretsManager
           .createSecret({
             Name: secretId,
             SecretString: secretValue,
-            Description: 'Auto-rotated secret',
+            Description: "Auto-rotated secret",
           })
           .promise();
       } else {
@@ -173,7 +168,7 @@ async function main() {
   const secretPath = process.argv[2];
 
   if (!secretPath) {
-    console.error('Usage: node rotate_secret.js <secret-path>');
+    console.error("Usage: node rotate_secret.js <secret-path>");
     process.exit(1);
   }
 
@@ -181,9 +176,9 @@ async function main() {
 
   try {
     await rotator.rotateSecret(secretPath);
-    console.log('🎉 Secret rotation completed successfully!');
+    console.log("🎉 Secret rotation completed successfully!");
   } catch (error) {
-    console.error('💥 Secret rotation failed:', error.message);
+    console.error("💥 Secret rotation failed:", error.message);
     process.exit(1);
   }
 }

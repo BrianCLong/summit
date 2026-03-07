@@ -1,15 +1,15 @@
-import http from 'k6/http';
-import { check, sleep } from 'k6';
-import { Trend, Rate, Counter } from 'k6/metrics';
+import http from "k6/http";
+import { check, sleep } from "k6";
+import { Trend, Rate, Counter } from "k6/metrics";
 
-const workflowSubmissionDuration = new Trend('workflow_submission_duration');
-const workflowStatusDuration = new Trend('workflow_status_duration');
-const workflowErrors = new Rate('workflow_errors');
-const workflowRetries = new Counter('workflow_retries');
+const workflowSubmissionDuration = new Trend("workflow_submission_duration");
+const workflowStatusDuration = new Trend("workflow_status_duration");
+const workflowErrors = new Rate("workflow_errors");
+const workflowRetries = new Counter("workflow_retries");
 
-const BASE_URL = __ENV.ARGO_BASE_URL || 'http://localhost:2746';
-const WORKFLOW_TEMPLATE = __ENV.WORKFLOW_TEMPLATE || 'stress-test-dag';
-const TOKEN = __ENV.ARGO_TOKEN || '';
+const BASE_URL = __ENV.ARGO_BASE_URL || "http://localhost:2746";
+const WORKFLOW_TEMPLATE = __ENV.WORKFLOW_TEMPLATE || "stress-test-dag";
+const TOKEN = __ENV.ARGO_TOKEN || "";
 const MAX_STATUS_POLLS = Number(__ENV.MAX_STATUS_POLLS || 120);
 const STATUS_POLL_INTERVAL = Number(__ENV.STATUS_POLL_INTERVAL || 5);
 const MAX_RETRIES = Number(__ENV.MAX_RETRIES || 3);
@@ -17,33 +17,33 @@ const MAX_RETRIES = Number(__ENV.MAX_RETRIES || 3);
 export const options = {
   scenarios: {
     submit_and_watch: {
-      executor: 'ramping-arrival-rate',
+      executor: "ramping-arrival-rate",
       startRate: Number(__ENV.START_RATE || 5),
       stages: JSON.parse(
         __ENV.STAGES ||
           JSON.stringify([
-            { target: 20, duration: '2m' },
-            { target: 60, duration: '5m' },
-            { target: 0, duration: '1m' },
-          ]),
+            { target: 20, duration: "2m" },
+            { target: 60, duration: "5m" },
+            { target: 0, duration: "1m" },
+          ])
       ),
       preAllocatedVUs: Number(__ENV.PREALLOCATED_VUS || 100),
       maxVUs: Number(__ENV.MAX_VUS || 500),
-      exec: 'submitAndWatchWorkflow',
+      exec: "submitAndWatchWorkflow",
     },
   },
   thresholds: {
-    workflow_errors: ['rate<0.05'],
-    http_req_duration: ['p(95)<2000', 'avg<1000'],
-    workflow_submission_duration: ['p(95)<1500'],
-    workflow_status_duration: ['p(95)<30000'],
+    workflow_errors: ["rate<0.05"],
+    http_req_duration: ["p(95)<2000", "avg<1000"],
+    workflow_submission_duration: ["p(95)<1500"],
+    workflow_status_duration: ["p(95)<30000"],
   },
-  summaryTrendStats: ['avg', 'min', 'med', 'max', 'p(90)', 'p(95)', 'p(99)'],
-  setupTimeout: '5m',
+  summaryTrendStats: ["avg", "min", "med", "max", "p(90)", "p(95)", "p(99)"],
+  setupTimeout: "5m",
 };
 
 function authHeaders() {
-  const headers = { 'Content-Type': 'application/json' };
+  const headers = { "Content-Type": "application/json" };
   if (TOKEN) {
     headers.Authorization = `Bearer ${TOKEN}`;
   }
@@ -52,21 +52,21 @@ function authHeaders() {
 
 function submitWorkflow() {
   const payload = JSON.stringify({
-    namespace: __ENV.ARGO_NAMESPACE || 'argo',
-    resourceKind: 'Workflow',
+    namespace: __ENV.ARGO_NAMESPACE || "argo",
+    resourceKind: "Workflow",
     resourceName: WORKFLOW_TEMPLATE,
   });
 
   const res = http.post(
-    `${BASE_URL}/api/v1/workflows/${__ENV.ARGO_NAMESPACE || 'argo'}/submit`,
+    `${BASE_URL}/api/v1/workflows/${__ENV.ARGO_NAMESPACE || "argo"}/submit`,
     payload,
-    { headers: authHeaders(), tags: { name: 'workflow_submit' } },
+    { headers: authHeaders(), tags: { name: "workflow_submit" } }
   );
 
   workflowSubmissionDuration.add(res.timings.duration);
 
   const ok = check(res, {
-    'submitted workflow successfully': (r) => r.status === 200,
+    "submitted workflow successfully": (r) => r.status === 200,
   });
 
   if (!ok) {
@@ -82,14 +82,14 @@ function submitWorkflow() {
 
 function getWorkflowStatus(name) {
   let attempt = 0;
-  const namespace = __ENV.ARGO_NAMESPACE || 'argo';
+  const namespace = __ENV.ARGO_NAMESPACE || "argo";
   const url = `${BASE_URL}/api/v1/workflows/${namespace}/${name}`;
   let statusResponse;
 
   while (attempt < MAX_STATUS_POLLS) {
     statusResponse = http.get(url, {
       headers: authHeaders(),
-      tags: { name: 'workflow_status' },
+      tags: { name: "workflow_status" },
     });
 
     workflowStatusDuration.add(statusResponse.timings.duration);
@@ -102,8 +102,8 @@ function getWorkflowStatus(name) {
       continue;
     }
 
-    const phase = statusResponse.json('status.phase');
-    if (phase === 'Succeeded' || phase === 'Failed' || phase === 'Error') {
+    const phase = statusResponse.json("status.phase");
+    if (phase === "Succeeded" || phase === "Failed" || phase === "Error") {
       return phase;
     }
 
@@ -111,12 +111,12 @@ function getWorkflowStatus(name) {
     sleep(STATUS_POLL_INTERVAL);
   }
 
-  return 'Timeout';
+  return "Timeout";
 }
 
 export function setup() {
   if (!TOKEN) {
-    console.warn('Running without authentication token; ensure Argo API allows anonymous access.');
+    console.warn("Running without authentication token; ensure Argo API allows anonymous access.");
   }
 }
 
@@ -142,7 +142,7 @@ export function submitAndWatchWorkflow() {
   const phase = getWorkflowStatus(workflowName);
 
   check(phase, {
-    'workflow completed successfully': (p) => p === 'Succeeded',
+    "workflow completed successfully": (p) => p === "Succeeded",
   }) || workflowErrors.add(1);
 
   sleep(Number(__ENV.PAUSE_BETWEEN_WORKFLOWS || 1));

@@ -4,7 +4,7 @@
   "type": "object",
   "required": ["run_id", "items"],
   "properties": {
-    "run_id": {"type": "string"},
+    "run_id": { "type": "string" },
     "items": {
       "type": "array",
       "items": {
@@ -15,10 +15,10 @@
             "type": "string",
             "pattern": "^EVD-NARDOM-[A-Z]+-[0-9]{3}$"
           },
-          "area": {"type": "string"},
+          "area": { "type": "string" },
           "artifacts": {
             "type": "array",
-            "items": {"type": "string"}
+            "items": { "type": "string" }
           }
         },
         "additionalProperties": false

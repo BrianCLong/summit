@@ -5,18 +5,18 @@ ensure tenant isolation, rapid deprovisioning, and synchronized attributes for A
 
 ## Base Endpoints
 
-| Resource | Endpoint | Notes |
-| --- | --- | --- |
-| Users | `/scim/v2/Tenants/{tenantId}/Users` | Tenant-scoped, requires OIDC client with `scim:write` scope. |
-| Groups | `/scim/v2/Tenants/{tenantId}/Groups` | Used for role assignment + purpose tags. |
-| Service Principals | `/scim/v2/Tenants/{tenantId}/ServicePrincipals` | Machine identities, `client_credentials` only. |
-| Bulk | `/scim/v2/Tenants/{tenantId}/Bulk` | Limited to 100 operations per request, rate-limited (see misuse tests). |
+| Resource           | Endpoint                                        | Notes                                                                   |
+| ------------------ | ----------------------------------------------- | ----------------------------------------------------------------------- |
+| Users              | `/scim/v2/Tenants/{tenantId}/Users`             | Tenant-scoped, requires OIDC client with `scim:write` scope.            |
+| Groups             | `/scim/v2/Tenants/{tenantId}/Groups`            | Used for role assignment + purpose tags.                                |
+| Service Principals | `/scim/v2/Tenants/{tenantId}/ServicePrincipals` | Machine identities, `client_credentials` only.                          |
+| Bulk               | `/scim/v2/Tenants/{tenantId}/Bulk`              | Limited to 100 operations per request, rate-limited (see misuse tests). |
 
 All endpoints require:
 
-* `Authorization: Bearer <access_token>` signed by Summit OIDC issuer with `scp` containing `scim:write` or `scim:read`.
-* `X-Summit-Audit-Session` header to correlate with immutable audit logs.
-* mTLS for transport + TLS 1.3.
+- `Authorization: Bearer <access_token>` signed by Summit OIDC issuer with `scp` containing `scim:write` or `scim:read`.
+- `X-Summit-Audit-Session` header to correlate with immutable audit logs.
+- mTLS for transport + TLS 1.3.
 
 ## Schema Extensions
 
@@ -46,9 +46,9 @@ All endpoints require:
 
 Additional fields:
 
-* `mfa.methods`: MUST include `webauthn` once a credential is registered.
-* `purposeTags`: Drives OPA purpose enforcement and privacy minimisation maps.
-* `legalHold`: When true, overrides 30-day retention expiry for affected resources.
+- `mfa.methods`: MUST include `webauthn` once a credential is registered.
+- `purposeTags`: Drives OPA purpose enforcement and privacy minimisation maps.
+- `legalHold`: When true, overrides 30-day retention expiry for affected resources.
 
 ### Group Resource
 
@@ -77,45 +77,45 @@ Groups encapsulate Summit roles and application access policies.
 
 ### Update
 
-* Attribute updates use PATCH with `path` operations (RFC 7644). Only changed fields are accepted.
-* Purpose changes require governance approval; SCIM PATCH validated by policy engine before commit.
-* When `mfa.enrolled` transitions to `false`, Summit forces session revocation and sets `force_reauth=true` in ID token session store.
+- Attribute updates use PATCH with `path` operations (RFC 7644). Only changed fields are accepted.
+- Purpose changes require governance approval; SCIM PATCH validated by policy engine before commit.
+- When `mfa.enrolled` transitions to `false`, Summit forces session revocation and sets `force_reauth=true` in ID token session store.
 
 ### Deprovisioning
 
 1. SCIM PATCH `active=false` triggers:
-   * Immediate token revocation via OIDC back-channel logout.
-   * WebAuthn credential disablement + attestation log entry.
-   * Data minimisation workflow to wipe PII beyond 30 days while respecting `legalHold`.
+   - Immediate token revocation via OIDC back-channel logout.
+   - WebAuthn credential disablement + attestation log entry.
+   - Data minimisation workflow to wipe PII beyond 30 days while respecting `legalHold`.
 2. After 30 days of inactivity, user record is cryptographically tombstoned (hash of subject ID stored for audit).
 
 ### Service Account Lifecycle
 
-* Service principals require Vault-managed signing keys; `mfa` omitted.
-* `purposeTags` limited to machine-to-machine contexts (e.g., `etl-ingest`).
-* Rotation: SCIM PATCH rotates signing certificates every 7 days via `x509Certificates` attribute.
+- Service principals require Vault-managed signing keys; `mfa` omitted.
+- `purposeTags` limited to machine-to-machine contexts (e.g., `etl-ingest`).
+- Rotation: SCIM PATCH rotates signing certificates every 7 days via `x509Certificates` attribute.
 
 ## SCIM -> Summit Mapping
 
-| SCIM Field | Summit Target | Notes |
-| --- | --- | --- |
-| `userName` | Login username (lowercase) | Unique per tenant. |
-| `externalId` | HRIS identifier | Stored encrypted-at-rest using envelope keys. |
-| `emails[type eq "work"].value` | Notification address | Verified via challenge email on onboarding. |
-| `phoneNumbers[type eq "mobile"].value` | WebAuthn recovery SMS (optional) | Stored encrypted with per-tenant DEK. |
-| `urn:summit:scim:schemas:security:1.0.purposeTags` | OPA `purpose` claim + privacy map | Max 5 tags per identity. |
-| `groups` | Roles & scopes | Each group maps to OPA role/purpose statements. |
+| SCIM Field                                         | Summit Target                     | Notes                                           |
+| -------------------------------------------------- | --------------------------------- | ----------------------------------------------- |
+| `userName`                                         | Login username (lowercase)        | Unique per tenant.                              |
+| `externalId`                                       | HRIS identifier                   | Stored encrypted-at-rest using envelope keys.   |
+| `emails[type eq "work"].value`                     | Notification address              | Verified via challenge email on onboarding.     |
+| `phoneNumbers[type eq "mobile"].value`             | WebAuthn recovery SMS (optional)  | Stored encrypted with per-tenant DEK.           |
+| `urn:summit:scim:schemas:security:1.0.purposeTags` | OPA `purpose` claim + privacy map | Max 5 tags per identity.                        |
+| `groups`                                           | Roles & scopes                    | Each group maps to OPA role/purpose statements. |
 
 ## Error Handling & Monitoring
 
-* SCIM responses include `schemas: ["urn:ietf:params:scim:api:messages:2.0:Error"]` with correlation ID header `X-Summit-Correlation`.
-* Rate limit: 120 write ops/min per tenant; violation returns HTTP 429 with retry-after.
-* Provisioning audit events stored in append-only ledger and forwarded to SIEM via syslog over TLS.
-* SCIM bulk operations validated against OPA simulation pipeline before commit; failing operations rolled back atomically.
+- SCIM responses include `schemas: ["urn:ietf:params:scim:api:messages:2.0:Error"]` with correlation ID header `X-Summit-Correlation`.
+- Rate limit: 120 write ops/min per tenant; violation returns HTTP 429 with retry-after.
+- Provisioning audit events stored in append-only ledger and forwarded to SIEM via syslog over TLS.
+- SCIM bulk operations validated against OPA simulation pipeline before commit; failing operations rolled back atomically.
 
 ## Privacy & Security Controls
 
-* PII attributes flagged in catalog are encrypted in transit (TLS 1.3) and at rest (field-level AES-256-GCM + KMS envelope keys).
-* Purpose tags enforced for every SCIM mutating call; mismatches rejected with `403`.
-* Immutable audit: every SCIM change writes to ledger with event hash anchored in Summit transparency log.
-* Legal hold support: `legalHold=true` prevents automated deletion until compliance system clears the flag.
+- PII attributes flagged in catalog are encrypted in transit (TLS 1.3) and at rest (field-level AES-256-GCM + KMS envelope keys).
+- Purpose tags enforced for every SCIM mutating call; mismatches rejected with `403`.
+- Immutable audit: every SCIM change writes to ledger with event hash anchored in Summit transparency log.
+- Legal hold support: `legalHold=true` prevents automated deletion until compliance system clears the flag.

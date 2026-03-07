@@ -1,13 +1,13 @@
-import crypto from 'crypto';
-import yaml from 'yaml';
+import crypto from "crypto";
+import yaml from "yaml";
 
-export type TelemetryDomain = 'EDR' | 'NDR' | 'CLOUD' | 'IDP' | 'SAAS';
+export type TelemetryDomain = "EDR" | "NDR" | "CLOUD" | "IDP" | "SAAS";
 
 export interface TelemetrySource {
   id: string;
   domain: TelemetryDomain;
   retentionDays: number;
-  sensitivity: 'PUBLIC' | 'INTERNAL' | 'CONFIDENTIAL' | 'SECRET';
+  sensitivity: "PUBLIC" | "INTERNAL" | "CONFIDENTIAL" | "SECRET";
   minimalFields: string[];
   freshnessSloMinutes: number;
   classificationTags?: string[];
@@ -34,7 +34,7 @@ export interface NormalizedTelemetryEvent {
 }
 
 export interface DriftFinding {
-  type: 'SCHEMA' | 'CONTENT';
+  type: "SCHEMA" | "CONTENT";
   missingFields?: string[];
   unexpectedFields?: string[];
   fieldTypeMismatches?: Record<string, string>;
@@ -50,22 +50,28 @@ export interface TrustScore {
 
 export interface LakeView {
   name: string;
-  allowedSensitivities: TelemetrySource['sensitivity'][];
+  allowedSensitivities: TelemetrySource["sensitivity"][];
   events: NormalizedTelemetryEvent[];
 }
 
 export class TelemetryLake {
   private readonly views: Map<string, LakeView> = new Map();
 
-  constructor(viewNames: Array<{ name: string; allowedSensitivities: TelemetrySource['sensitivity'][] }>) {
-    viewNames.forEach(view => {
+  constructor(
+    viewNames: Array<{ name: string; allowedSensitivities: TelemetrySource["sensitivity"][] }>
+  ) {
+    viewNames.forEach((view) => {
       this.views.set(view.name, { ...view, events: [] });
     });
   }
 
   pipe(event: NormalizedTelemetryEvent): void {
     for (const view of this.views.values()) {
-      if (view.allowedSensitivities.includes(event.resource.sensitivity as TelemetrySource['sensitivity'])) {
+      if (
+        view.allowedSensitivities.includes(
+          event.resource.sensitivity as TelemetrySource["sensitivity"]
+        )
+      ) {
         view.events.push(event);
       }
     }
@@ -94,28 +100,30 @@ export class TelemetryUnifier {
     const attributes = event.attributes ?? {};
     const body = { ...event.body };
 
-    const missing = source.minimalFields.filter(field => !(field in body) && !(field in attributes));
+    const missing = source.minimalFields.filter(
+      (field) => !(field in body) && !(field in attributes)
+    );
     if (missing.length > 0) {
-      throw new Error(`Missing minimal fields for ${source.id}: ${missing.join(', ')}`);
+      throw new Error(`Missing minimal fields for ${source.id}: ${missing.join(", ")}`);
     }
 
-    const classification = new Set<string>(['telemetry', source.domain.toLowerCase()]);
-    source.classificationTags?.forEach(tag => classification.add(tag));
+    const classification = new Set<string>(["telemetry", source.domain.toLowerCase()]);
+    source.classificationTags?.forEach((tag) => classification.add(tag));
 
     const normalized: NormalizedTelemetryEvent = {
       sourceId: source.id,
       domain: source.domain,
       timestamp: event.timestamp,
-      severityText: 'INFO',
+      severityText: "INFO",
       body,
       attributes,
       resource: {
-        schemaVersion: event.schemaVersion ?? '1.0',
+        schemaVersion: event.schemaVersion ?? "1.0",
         retentionDays: source.retentionDays,
         sensitivity: source.sensitivity,
-        domain: source.domain
+        domain: source.domain,
       },
-      classification: Array.from(classification)
+      classification: Array.from(classification),
     };
 
     this.lake.pipe(normalized);
@@ -123,7 +131,12 @@ export class TelemetryUnifier {
     return normalized;
   }
 
-  buildTrustScore(sourceId: string, validationRate: number, expectedEvents: number, receivedEvents: number): TrustScore {
+  buildTrustScore(
+    sourceId: string,
+    validationRate: number,
+    expectedEvents: number,
+    receivedEvents: number
+  ): TrustScore {
     const source = this.sources.get(sourceId);
     if (!source) {
       throw new Error(`Unknown telemetry source ${sourceId}`);
@@ -132,7 +145,7 @@ export class TelemetryUnifier {
     const freshness = this.calculateFreshnessScore(source);
     const completeness = expectedEvents === 0 ? 1 : Math.min(receivedEvents / expectedEvents, 1);
     const fidelity = Math.max(Math.min(validationRate, 1), 0);
-    const overall = Number(((freshness * 0.4 + completeness * 0.35 + fidelity * 0.25)).toFixed(3));
+    const overall = Number((freshness * 0.4 + completeness * 0.35 + fidelity * 0.25).toFixed(3));
     return { freshness, completeness, fidelity, overall };
   }
 
@@ -147,35 +160,43 @@ export class TelemetryUnifier {
     const bodyKeys = new Set(Object.keys(event.body));
     const attrKeys = new Set(Object.keys(attributes));
 
-    const missingFields = source.minimalFields.filter(field => !bodyKeys.has(field) && !attrKeys.has(field));
-    const unexpectedFields = Array.from(new Set([...bodyKeys, ...attrKeys])).filter(field => !source.minimalFields.includes(field));
+    const missingFields = source.minimalFields.filter(
+      (field) => !bodyKeys.has(field) && !attrKeys.has(field)
+    );
+    const unexpectedFields = Array.from(new Set([...bodyKeys, ...attrKeys])).filter(
+      (field) => !source.minimalFields.includes(field)
+    );
     const fieldTypeMismatches: Record<string, string> = {};
 
-    source.minimalFields.forEach(field => {
+    source.minimalFields.forEach((field) => {
       const candidate = (event.body as Record<string, unknown>)[field] ?? attributes[field];
       if (candidate !== undefined) {
-        if (typeof candidate === 'string' && candidate.trim() === '') {
-          fieldTypeMismatches[field] = 'empty-string';
+        if (typeof candidate === "string" && candidate.trim() === "") {
+          fieldTypeMismatches[field] = "empty-string";
         }
       }
     });
 
-    if (missingFields.length || unexpectedFields.length || Object.keys(fieldTypeMismatches).length) {
-      findings.push({ type: 'SCHEMA', missingFields, unexpectedFields, fieldTypeMismatches });
+    if (
+      missingFields.length ||
+      unexpectedFields.length ||
+      Object.keys(fieldTypeMismatches).length
+    ) {
+      findings.push({ type: "SCHEMA", missingFields, unexpectedFields, fieldTypeMismatches });
     }
 
     const suspiciousContent: Array<{ field: string; reason: string }> = [];
     Object.entries(event.body).forEach(([field, value]) => {
-      if (typeof value === 'string' && value.toLowerCase().includes('drop table')) {
-        suspiciousContent.push({ field, reason: 'sql-injection-linguistic-match' });
+      if (typeof value === "string" && value.toLowerCase().includes("drop table")) {
+        suspiciousContent.push({ field, reason: "sql-injection-linguistic-match" });
       }
-      if (field.toLowerCase().includes('password')) {
-        suspiciousContent.push({ field, reason: 'secret-in-body' });
+      if (field.toLowerCase().includes("password")) {
+        suspiciousContent.push({ field, reason: "secret-in-body" });
       }
     });
 
     if (suspiciousContent.length) {
-      findings.push({ type: 'CONTENT', suspiciousContent });
+      findings.push({ type: "CONTENT", suspiciousContent });
     }
 
     return findings;
@@ -194,7 +215,7 @@ export class TelemetryUnifier {
 
 export interface LegacyRuleCondition {
   field: string;
-  operator: 'equals' | 'contains' | 'gt' | 'lt';
+  operator: "equals" | "contains" | "gt" | "lt";
   value: string | number;
 }
 
@@ -229,7 +250,7 @@ export class DetectionEngineeringService {
       detection[`condition_${index}`] = {
         field: condition.field,
         operator: condition.operator,
-        value: condition.value
+        value: condition.value,
       };
     });
 
@@ -237,15 +258,20 @@ export class DetectionEngineeringService {
       title: rule.name,
       id: rule.id,
       description: `${rule.name} auto-converted from legacy conditions`,
-      status: 'experimental',
+      status: "experimental",
       logsource: {
-        category: rule.telemetryDomains.join(',')
+        category: rule.telemetryDomains.join(","),
       },
       detection,
-      fields: rule.legacyConditions.map(c => c.field),
-      tags: ['bulwark', ...rule.tactics, `owner:${rule.owner}`, `renew:${rule.renewAt.toISOString()}`],
-      falsepositives: ['validated by synthetic data harness'],
-      level: 'medium'
+      fields: rule.legacyConditions.map((c) => c.field),
+      tags: [
+        "bulwark",
+        ...rule.tactics,
+        `owner:${rule.owner}`,
+        `renew:${rule.renewAt.toISOString()}`,
+      ],
+      falsepositives: ["validated by synthetic data harness"],
+      level: "medium",
     };
 
     return yaml.stringify(sigmaDocument);
@@ -257,37 +283,42 @@ export class DetectionEngineeringService {
 
   clusterAlerts(alerts: Array<{ tactic: string; campaign?: string }>): Map<string, number> {
     const clusters = new Map<string, number>();
-    alerts.forEach(alert => {
-      const key = `${alert.campaign ?? 'unknown'}:${alert.tactic}`;
+    alerts.forEach((alert) => {
+      const key = `${alert.campaign ?? "unknown"}:${alert.tactic}`;
       clusters.set(key, (clusters.get(key) ?? 0) + 1);
     });
     return clusters;
   }
 
-  validateWithSyntheticData(rule: DetectionRule, syntheticEvents: RawTelemetryEvent[]): ValidationResult {
+  validateWithSyntheticData(
+    rule: DetectionRule,
+    syntheticEvents: RawTelemetryEvent[]
+  ): ValidationResult {
     let triggered = 0;
     let falsePositives = 0;
     let falseNegatives = 0;
 
     const evalCondition = (event: RawTelemetryEvent, condition: LegacyRuleCondition): boolean => {
-      const haystack = (event.body as Record<string, unknown>)[condition.field] ?? event.attributes?.[condition.field];
+      const haystack =
+        (event.body as Record<string, unknown>)[condition.field] ??
+        event.attributes?.[condition.field];
       if (haystack === undefined) return false;
       switch (condition.operator) {
-        case 'equals':
+        case "equals":
           return haystack === condition.value;
-        case 'contains':
-          return typeof haystack === 'string' && haystack.includes(String(condition.value));
-        case 'gt':
-          return typeof haystack === 'number' && haystack > Number(condition.value);
-        case 'lt':
-          return typeof haystack === 'number' && haystack < Number(condition.value);
+        case "contains":
+          return typeof haystack === "string" && haystack.includes(String(condition.value));
+        case "gt":
+          return typeof haystack === "number" && haystack > Number(condition.value);
+        case "lt":
+          return typeof haystack === "number" && haystack < Number(condition.value);
         default:
           return false;
       }
     };
 
-    syntheticEvents.forEach(event => {
-      const matches = rule.legacyConditions.every(condition => evalCondition(event, condition));
+    syntheticEvents.forEach((event) => {
+      const matches = rule.legacyConditions.every((condition) => evalCondition(event, condition));
       const shouldTrigger = Boolean((event.body as Record<string, unknown>).expectedAlert);
       if (matches) {
         triggered += 1;
@@ -301,18 +332,29 @@ export class DetectionEngineeringService {
     const sourceId = syntheticEvents[0]?.sourceId;
     if (sourceId) {
       try {
-        health = this.telemetry.buildTrustScore(sourceId, 0.95, syntheticEvents.length, syntheticEvents.length).overall;
+        health = this.telemetry.buildTrustScore(
+          sourceId,
+          0.95,
+          syntheticEvents.length,
+          syntheticEvents.length
+        ).overall;
       } catch {
         health = 0;
       }
     }
-    return { ruleId: rule.id, triggered, falsePositives, falseNegatives, telemetryHealthCorrelation: health };
+    return {
+      ruleId: rule.id,
+      triggered,
+      falsePositives,
+      falseNegatives,
+      telemetryHealthCorrelation: health,
+    };
   }
 
   buildCoverageHeatmap(rules: DetectionRule[]): Map<string, number> {
     const heatmap = new Map<string, number>();
-    rules.forEach(rule => {
-      rule.tactics.forEach(tactic => {
+    rules.forEach((rule) => {
+      rule.tactics.forEach((tactic) => {
         heatmap.set(tactic, (heatmap.get(tactic) ?? 0) + 1);
       });
     });
@@ -342,8 +384,8 @@ export class RapidResponseModernizer {
   private isolationState = new Map<string, { isolated: boolean; reason: string }>();
 
   createPlaybook(alertName: string, actions: PlaybookAction[]): void {
-    if (!actions.some(a => a.containmentFirst)) {
-      throw new Error('Playbook must include at least one containment-first action');
+    if (!actions.some((a) => a.containmentFirst)) {
+      throw new Error("Playbook must include at least one containment-first action");
     }
     this.playbooks.set(alertName, actions);
   }
@@ -353,18 +395,22 @@ export class RapidResponseModernizer {
     if (!actions) throw new Error(`No playbook for ${alertName}`);
 
     actions
-      .filter(action => action.containmentFirst)
-      .forEach(action => {
+      .filter((action) => action.containmentFirst)
+      .forEach((action) => {
         this.isolationState.set(assetId, { isolated: true, reason: action.name });
       });
 
     return actions;
   }
 
-  appendEvidence(action: string, actor: string, details: Record<string, unknown>): EvidenceLogEntry {
-    const previousHash = this.custodyLog[this.custodyLog.length - 1]?.hash ?? '';
+  appendEvidence(
+    action: string,
+    actor: string,
+    details: Record<string, unknown>
+  ): EvidenceLogEntry {
+    const previousHash = this.custodyLog[this.custodyLog.length - 1]?.hash ?? "";
     const payload = `${previousHash}${action}${actor}${JSON.stringify(details)}`;
-    const hash = crypto.createHash('sha256').update(payload).digest('hex');
+    const hash = crypto.createHash("sha256").update(payload).digest("hex");
     const entry: EvidenceLogEntry = {
       id: crypto.randomUUID(),
       timestamp: new Date(),
@@ -372,7 +418,7 @@ export class RapidResponseModernizer {
       actor,
       details,
       previousHash,
-      hash
+      hash,
     };
     this.custodyLog.push(entry);
     return entry;
@@ -382,15 +428,20 @@ export class RapidResponseModernizer {
     for (let i = 0; i < this.custodyLog.length; i += 1) {
       const entry = this.custodyLog[i];
       const expectedPayload = `${entry.previousHash}${entry.action}${entry.actor}${JSON.stringify(entry.details)}`;
-      const expectedHash = crypto.createHash('sha256').update(expectedPayload).digest('hex');
+      const expectedHash = crypto.createHash("sha256").update(expectedPayload).digest("hex");
       if (entry.hash !== expectedHash) return false;
       if (i > 0 && this.custodyLog[i - 1].hash !== entry.previousHash) return false;
     }
     return true;
   }
 
-  metrics(ttd: number[], ttr: number[], mttr: number[]): { ttd: number; ttr: number; mttr: number } {
-    const average = (list: number[]) => (list.length ? list.reduce((a, b) => a + b, 0) / list.length : 0);
+  metrics(
+    ttd: number[],
+    ttr: number[],
+    mttr: number[]
+  ): { ttd: number; ttr: number; mttr: number } {
+    const average = (list: number[]) =>
+      list.length ? list.reduce((a, b) => a + b, 0) / list.length : 0;
     return { ttd: average(ttd), ttr: average(ttr), mttr: average(mttr) };
   }
 
@@ -425,7 +476,7 @@ export class IdentityTripwireFramework {
 
   registerAccount(profile: AccountProfile): void {
     if (!profile.mfaEnforced) {
-      throw new Error('MFA is mandatory for all accounts');
+      throw new Error("MFA is mandatory for all accounts");
     }
     this.accounts.set(profile.id, profile);
   }
@@ -438,7 +489,7 @@ export class IdentityTripwireFramework {
     const enriched: IdentityEvent = {
       ...event,
       riskScore: this.scoreRisk(event),
-      honeytoken: this.honeytokens.has(event.actor)
+      honeytoken: this.honeytokens.has(event.actor),
     };
     this.eventLog.push(enriched);
     return enriched;
@@ -446,15 +497,15 @@ export class IdentityTripwireFramework {
 
   private scoreRisk(event: IdentityEvent): number {
     let score = 0.2;
-    if (event.action.includes('admin') || event.action.includes('elevate')) score += 0.4;
-    if (event.location && event.location !== 'trusted') score += 0.2;
+    if (event.action.includes("admin") || event.action.includes("elevate")) score += 0.4;
+    if (event.location && event.location !== "trusted") score += 0.2;
     if (!event.justification) score += 0.2;
     if (this.honeytokens.has(event.actor)) score += 1;
     return Math.min(score, 1);
   }
 
   riskBasedSessionScore(accountId: string): number {
-    const recentEvents = this.eventLog.filter(event => event.actor === accountId).slice(-5);
+    const recentEvents = this.eventLog.filter((event) => event.actor === accountId).slice(-5);
     if (!recentEvents.length) return 0;
     const avg = recentEvents.reduce((sum, e) => sum + (e.riskScore ?? 0), 0) / recentEvents.length;
     return Number(avg.toFixed(2));
@@ -463,7 +514,7 @@ export class IdentityTripwireFramework {
 
 export interface AssetExposure {
   id: string;
-  environment: 'dev' | 'test' | 'prod';
+  environment: "dev" | "test" | "prod";
   exposedPorts: number[];
   expiration: Date;
   baselineConfig: Record<string, unknown>;
@@ -492,8 +543,10 @@ export class InfrastructureHygieneManager {
 
   enforceBaseline(assetId: string, desired: Record<string, unknown>): boolean {
     const asset = this.assets.get(assetId);
-    if (!asset) throw new Error('Unknown asset');
-    const drift = Object.entries(desired).some(([key, value]) => asset.baselineConfig[key] !== value);
+    if (!asset) throw new Error("Unknown asset");
+    const drift = Object.entries(desired).some(
+      ([key, value]) => asset.baselineConfig[key] !== value
+    );
     if (drift) {
       this.assets.set(assetId, { ...asset, baselineConfig: { ...desired } });
     }
@@ -512,12 +565,16 @@ export class InfrastructureHygieneManager {
     return findings;
   }
 
-  verifyAttestation(artifact: { sbom: boolean; slsaLevel: number; signatureValid: boolean }): boolean {
+  verifyAttestation(artifact: {
+    sbom: boolean;
+    slsaLevel: number;
+    signatureValid: boolean;
+  }): boolean {
     return artifact.sbom && artifact.signatureValid && artifact.slsaLevel >= 3;
   }
 
   reclaimOrphans(orphanIds: string[]): void {
-    orphanIds.forEach(id => this.orphanedResources.add(id));
+    orphanIds.forEach((id) => this.orphanedResources.add(id));
   }
 
   getOrphans(): string[] {
@@ -545,11 +602,15 @@ export class GovernanceGuardrails {
   private readonly riskMapping = new Map<string, string>();
 
   registerPolicy(name: string, evaluator: (input: Record<string, unknown>) => boolean): void {
-    this.policies.push(input => ({ policy: name, allowed: evaluator(input), reason: evaluator(input) ? 'ok' : 'deny-by-default' }));
+    this.policies.push((input) => ({
+      policy: name,
+      allowed: evaluator(input),
+      reason: evaluator(input) ? "ok" : "deny-by-default",
+    }));
   }
 
   evaluate(input: Record<string, unknown>): PolicyDecision[] {
-    return this.policies.map(policy => policy(input));
+    return this.policies.map((policy) => policy(input));
   }
 
   addException(record: ExceptionRecord): void {
@@ -571,9 +632,17 @@ export class GovernanceGuardrails {
     this.riskMapping.set(risk, control);
   }
 
-  controlScoreboard(alertFidelity: number): { coverage: number; riskDelta: number; alertFidelity: number } {
+  controlScoreboard(alertFidelity: number): {
+    coverage: number;
+    riskDelta: number;
+    alertFidelity: number;
+  } {
     const coverage = this.policies.length ? Math.min(1, this.policies.length / 10) : 0;
     const riskDelta = this.riskMapping.size * 0.05;
-    return { coverage: Number(coverage.toFixed(2)), riskDelta: Number(riskDelta.toFixed(2)), alertFidelity };
+    return {
+      coverage: Number(coverage.toFixed(2)),
+      riskDelta: Number(riskDelta.toFixed(2)),
+      alertFidelity,
+    };
   }
 }

@@ -13,9 +13,9 @@ Tokenizer-aware TOON v3 superset encoder/decoder with dictionaries, adaptive tab
 ## Usage
 
 ```ts
-import { encodeKtoon, renderKtoon } from '@summit/ktoon';
+import { encodeKtoon, renderKtoon } from "@summit/ktoon";
 
-const doc = encodeKtoon(data, { mode: 'ktoon' });
+const doc = encodeKtoon(data, { mode: "ktoon" });
 const text = renderKtoon(doc); // compact form
 const strictText = renderKtoon(doc, true); // TOON-safe
 ```

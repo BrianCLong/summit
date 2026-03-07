@@ -17,9 +17,11 @@ The IntelGraph Edge Computing Platform enables low-latency intelligence processi
 ### 1. Core Packages
 
 #### @intelgraph/edge-computing
+
 Core types, utilities, and configuration for edge computing infrastructure.
 
 **Key Features:**
+
 - Edge node metadata and status tracking
 - Resource capacity monitoring
 - Geographic location-based routing
@@ -27,13 +29,16 @@ Core types, utilities, and configuration for edge computing infrastructure.
 - Load balancing strategies
 
 **Main Classes:**
+
 - `EdgeNodeManager`: Manages edge node lifecycle, health monitoring, and cluster operations
 - Utility functions for distance calculation, resource scoring, and validation
 
 #### @intelgraph/edge-runtime
+
 Container orchestration and runtime management for edge deployments.
 
 **Key Features:**
+
 - Docker container lifecycle management
 - Image pulling and caching
 - Resource limits and health checks
@@ -41,12 +46,15 @@ Container orchestration and runtime management for edge deployments.
 - Command execution in containers
 
 **Main Classes:**
+
 - `ContainerOrchestrator`: Manages Docker containers on edge nodes with deployment, monitoring, and management capabilities
 
 #### @intelgraph/edge-ai
+
 Edge AI and ML inference with model optimization.
 
 **Key Features:**
+
 - Multi-format model support (ONNX, TensorFlow Lite, PyTorch)
 - Model quantization (FP32, FP16, INT8)
 - Model pruning and compression
@@ -54,13 +62,16 @@ Edge AI and ML inference with model optimization.
 - Performance benchmarking
 
 **Main Classes:**
+
 - `InferenceEngine`: Manages ML model inference with caching and queue management
 - `ModelOptimizer`: Optimizes models for edge deployment through quantization, pruning, and compression
 
 #### @intelgraph/federated-learning
+
 Federated learning infrastructure with privacy-preserving techniques.
 
 **Key Features:**
+
 - Distributed model training across edge nodes
 - Multiple aggregation strategies (FedAvg, FedProx, FedAdam)
 - Client selection strategies
@@ -68,13 +79,16 @@ Federated learning infrastructure with privacy-preserving techniques.
 - Training metrics and convergence tracking
 
 **Main Classes:**
+
 - `FederatedTrainer`: Coordinates federated learning rounds and model aggregation
 - `DifferentialPrivacy`: Implements privacy-preserving mechanisms (Gaussian/Laplace noise, secure aggregation)
 
 #### @intelgraph/edge-sync
+
 Edge-to-cloud synchronization with offline support.
 
 **Key Features:**
+
 - Priority-based sync queue
 - Automatic retry with exponential backoff
 - Offline queue management
@@ -82,14 +96,17 @@ Edge-to-cloud synchronization with offline support.
 - Compression and encryption support
 
 **Main Classes:**
+
 - `SyncManager`: Manages bidirectional synchronization between edge and cloud
 
 ### 2. Services
 
 #### Edge Orchestrator Service
+
 Central orchestration service for managing the entire edge infrastructure.
 
 **Responsibilities:**
+
 - Node registration and lifecycle management
 - Container deployment and orchestration
 - Model inference coordination
@@ -97,6 +114,7 @@ Central orchestration service for managing the entire edge infrastructure.
 - Metrics aggregation
 
 **API Endpoints:**
+
 - `/api/nodes` - Node management
 - `/api/deployments` - Container deployments
 - `/api/inference` - Model inference
@@ -105,9 +123,11 @@ Central orchestration service for managing the entire edge infrastructure.
 **Port:** 8080
 
 #### Edge Gateway Service
+
 API gateway providing authentication, rate limiting, and routing.
 
 **Responsibilities:**
+
 - Request authentication and authorization
 - Rate limiting and throttling
 - Request routing and load balancing
@@ -138,11 +158,13 @@ Cloud Services
 ### 4. Deployment Architecture
 
 #### Docker Compose Deployment
+
 - Gateway, Orchestrator, Redis, Prometheus, Grafana
 - Suitable for development and small-scale deployments
 - Single-host deployment with Docker networking
 
 #### Kubernetes Deployment
+
 - Highly available with 3+ replicas
 - Auto-scaling based on CPU/memory
 - Persistent storage for data, logs, and models
@@ -151,16 +173,19 @@ Cloud Services
 ### 5. Security Architecture
 
 **Authentication:**
+
 - JWT-based authentication
 - Role-based access control (admin, node, user)
 - Token expiration and rotation
 
 **Transport Security:**
+
 - TLS/mTLS support
 - Certificate management
 - Secure communication between edge and cloud
 
 **Data Security:**
+
 - End-to-end encryption for sync operations
 - Differential privacy for federated learning
 - Secure aggregation protocols
@@ -168,6 +193,7 @@ Cloud Services
 ### 6. Observability
 
 **Metrics:**
+
 - Node health and resource utilization
 - Container performance metrics
 - Inference latency and throughput
@@ -175,11 +201,13 @@ Cloud Services
 - Sync operation statistics
 
 **Logging:**
+
 - Structured logging with Pino
 - Centralized log aggregation
 - Log retention policies
 
 **Monitoring:**
+
 - Prometheus for metrics collection
 - Grafana dashboards for visualization
 - Health check endpoints
@@ -187,16 +215,19 @@ Cloud Services
 ### 7. High Availability
 
 **Node-Level:**
+
 - Automatic failover detection
 - Health monitoring with heartbeats
 - Graceful degradation
 
 **Cluster-Level:**
+
 - Multiple orchestrator replicas
 - Load balancing across edge nodes
 - Auto-scaling based on demand
 
 **Data-Level:**
+
 - Persistent storage with PVCs
 - Data replication
 - Backup and recovery

@@ -16,7 +16,7 @@
  * - Demo data option
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Card,
@@ -49,7 +49,7 @@ import {
   Tooltip,
   Grid,
   Paper,
-} from '@mui/material';
+} from "@mui/material";
 import {
   Close as CloseIcon,
   CheckCircle as CheckIcon,
@@ -65,9 +65,9 @@ import {
   Timeline as TimelineIcon,
   AutoAwesome as AutoAwesomeIcon,
   Link as LinkIcon,
-} from '@mui/icons-material';
-import { useMutation, useQuery } from '@apollo/client';
-import { useNavigate } from 'react-router-dom';
+} from "@mui/icons-material";
+import { useMutation, useQuery } from "@apollo/client";
+import { useNavigate } from "react-router-dom";
 
 // GraphQL operations (would be imported from actual files)
 const CREATE_INVESTIGATION = `
@@ -116,34 +116,34 @@ const START_COPILOT_RUN = `
 
 const steps = [
   {
-    label: 'Create Investigation',
-    description: 'Set up a new investigation to organize your analysis',
+    label: "Create Investigation",
+    description: "Set up a new investigation to organize your analysis",
     icon: <AddIcon />,
-    estimatedTime: '1 min',
+    estimatedTime: "1 min",
   },
   {
-    label: 'Add Entities & Links',
-    description: 'Add some entities and relationships to build your graph',
+    label: "Add Entities & Links",
+    description: "Add some entities and relationships to build your graph",
     icon: <DataIcon />,
-    estimatedTime: '2-3 min',
+    estimatedTime: "2-3 min",
   },
   {
-    label: 'Import Data',
-    description: 'Upload CSV files or connect STIX/TAXII feeds',
+    label: "Import Data",
+    description: "Upload CSV files or connect STIX/TAXII feeds",
     icon: <UploadIcon />,
-    estimatedTime: '2-5 min',
+    estimatedTime: "2-5 min",
   },
   {
-    label: 'Run Copilot',
-    description: 'Let AI analyze your data and generate insights',
+    label: "Run Copilot",
+    description: "Let AI analyze your data and generate insights",
     icon: <AutoAwesomeIcon />,
-    estimatedTime: '1-3 min',
+    estimatedTime: "1-3 min",
   },
   {
-    label: 'View Results',
-    description: 'Explore the analysis results and graph annotations',
+    label: "View Results",
+    description: "Explore the analysis results and graph annotations",
     icon: <ViewIcon />,
-    estimatedTime: '5+ min',
+    estimatedTime: "5+ min",
   },
 ];
 
@@ -169,25 +169,24 @@ const GoldenPathWizard = ({ open, onClose, onComplete }) => {
   const [startCopilotRun] = useMutation(START_COPILOT_RUN);
 
   const [formData, setFormData] = useState({
-    investigationName: '',
-    investigationDescription: '',
-    entityName: '',
-    entityType: 'PERSON',
-    canonicalId: '',
-    copilotGoal: 'Find connections and analyze relationships between entities',
+    investigationName: "",
+    investigationDescription: "",
+    entityName: "",
+    entityType: "PERSON",
+    canonicalId: "",
+    copilotGoal: "Find connections and analyze relationships between entities",
   });
 
   useEffect(() => {
     if (useDemo) {
       setFormData({
-        investigationName: 'Demo Investigation: Corporate Network Analysis',
+        investigationName: "Demo Investigation: Corporate Network Analysis",
         investigationDescription:
-          'Analysis of corporate entities and their relationships to identify potential conflicts of interest',
-        entityName: 'John Smith',
-        entityType: 'PERSON',
-        canonicalId: '',
-        copilotGoal:
-          'Analyze the network to identify key players and potential hidden connections',
+          "Analysis of corporate entities and their relationships to identify potential conflicts of interest",
+        entityName: "John Smith",
+        entityType: "PERSON",
+        canonicalId: "",
+        copilotGoal: "Analyze the network to identify key players and potential hidden connections",
       });
     }
   }, [useDemo]);
@@ -221,7 +220,7 @@ const GoldenPathWizard = ({ open, onClose, onComplete }) => {
           input: {
             name: formData.investigationName,
             description: formData.investigationDescription,
-            type: 'THREAT_ANALYSIS',
+            type: "THREAT_ANALYSIS",
           },
         },
       });
@@ -233,7 +232,7 @@ const GoldenPathWizard = ({ open, onClose, onComplete }) => {
       handleComplete(0);
       handleNext();
     } catch (error) {
-      console.error('Failed to create investigation:', error);
+      console.error("Failed to create investigation:", error);
     }
   };
 
@@ -250,7 +249,7 @@ const GoldenPathWizard = ({ open, onClose, onComplete }) => {
             name: formData.entityName,
             canonicalId: formData.canonicalId || undefined,
             properties: {
-              source: 'wizard',
+              source: "wizard",
               demo: useDemo,
             },
           },
@@ -271,15 +270,15 @@ const GoldenPathWizard = ({ open, onClose, onComplete }) => {
       handleComplete(1);
       handleNext();
     } catch (error) {
-      console.error('Failed to create entity:', error);
+      console.error("Failed to create entity:", error);
     }
   };
 
   const createDemoData = async () => {
     const demoEntities = [
-      { name: 'ACME Corporation', type: 'ORGANIZATION' },
-      { name: 'TechStart Inc', type: 'ORGANIZATION' },
-      { name: 'Jane Doe', type: 'PERSON' },
+      { name: "ACME Corporation", type: "ORGANIZATION" },
+      { name: "TechStart Inc", type: "ORGANIZATION" },
+      { name: "Jane Doe", type: "PERSON" },
     ];
 
     const createdEntities = [];
@@ -292,13 +291,13 @@ const GoldenPathWizard = ({ open, onClose, onComplete }) => {
               investigationId: wizardData.investigation.id,
               type: entityData.type,
               name: entityData.name,
-              properties: { source: 'demo' },
+              properties: { source: "demo" },
             },
           },
         });
         createdEntities.push(data.createEntity);
       } catch (error) {
-        console.error('Failed to create demo entity:', error);
+        console.error("Failed to create demo entity:", error);
       }
     }
 
@@ -309,15 +308,15 @@ const GoldenPathWizard = ({ open, onClose, onComplete }) => {
           variables: {
             input: {
               investigationId: wizardData.investigation.id,
-              type: 'WORKS_FOR',
+              type: "WORKS_FOR",
               fromEntityId: wizardData.entities[0]?.id,
               toEntityId: createdEntities[0]?.id,
-              properties: { role: 'CEO', since: '2020' },
+              properties: { role: "CEO", since: "2020" },
             },
           },
         });
       } catch (error) {
-        console.error('Failed to create demo relationship:', error);
+        console.error("Failed to create demo relationship:", error);
       }
     }
   };
@@ -338,7 +337,7 @@ const GoldenPathWizard = ({ open, onClose, onComplete }) => {
       handleComplete(3);
       handleNext();
     } catch (error) {
-      console.error('Failed to start Copilot run:', error);
+      console.error("Failed to start Copilot run:", error);
     }
   };
 
@@ -359,8 +358,8 @@ const GoldenPathWizard = ({ open, onClose, onComplete }) => {
         return (
           <Box>
             <Typography variant="body2" color="textSecondary" paragraph>
-              Let's start by creating a new investigation. This will be the
-              container for all your analysis work.
+              Let's start by creating a new investigation. This will be the container for all your
+              analysis work.
             </Typography>
 
             <TextField
@@ -409,9 +408,8 @@ const GoldenPathWizard = ({ open, onClose, onComplete }) => {
         return (
           <Box>
             <Typography variant="body2" color="textSecondary" paragraph>
-              Now let's add some entities to your graph. Entities represent
-              people, organizations, locations, or any other objects of
-              interest.
+              Now let's add some entities to your graph. Entities represent people, organizations,
+              locations, or any other objects of interest.
             </Typography>
 
             <Grid container spacing={2}>
@@ -485,17 +483,13 @@ const GoldenPathWizard = ({ open, onClose, onComplete }) => {
                   {wizardData.entities.map((entity) => (
                     <ListItem key={entity.id}>
                       <ListItemIcon>
-                        {entity.canonicalId &&
-                        entity.canonicalId !== entity.id ? (
+                        {entity.canonicalId && entity.canonicalId !== entity.id ? (
                           <LinkIcon color="primary" />
                         ) : (
                           <CheckIcon color="success" />
                         )}
                       </ListItemIcon>
-                      <ListItemText
-                        primary={entity.name}
-                        secondary={entity.type}
-                      />
+                      <ListItemText primary={entity.name} secondary={entity.type} />
                     </ListItem>
                   ))}
                 </List>
@@ -508,13 +502,12 @@ const GoldenPathWizard = ({ open, onClose, onComplete }) => {
         return (
           <Box>
             <Typography variant="body2" color="textSecondary" paragraph>
-              Import data to enrich your investigation. You can upload CSV files
-              or connect to STIX/TAXII feeds.
+              Import data to enrich your investigation. You can upload CSV files or connect to
+              STIX/TAXII feeds.
             </Typography>
 
             <Alert severity="info" sx={{ mb: 2 }}>
-              For this tutorial, we'll simulate a data import. In the full
-              application, you would:
+              For this tutorial, we'll simulate a data import. In the full application, you would:
               <ul>
                 <li>Upload CSV files with entities and relationships</li>
                 <li>Connect to TAXII feeds for threat intelligence</li>
@@ -529,7 +522,7 @@ const GoldenPathWizard = ({ open, onClose, onComplete }) => {
                 onClick={() => {
                   setWizardData((prev) => ({
                     ...prev,
-                    importJob: { id: 'demo-import', status: 'completed' },
+                    importJob: { id: "demo-import", status: "completed" },
                   }));
                   handleComplete(2);
                   handleNext();
@@ -544,7 +537,7 @@ const GoldenPathWizard = ({ open, onClose, onComplete }) => {
                 onClick={() => {
                   setWizardData((prev) => ({
                     ...prev,
-                    importJob: { id: 'demo-stix', status: 'completed' },
+                    importJob: { id: "demo-stix", status: "completed" },
                   }));
                   handleComplete(2);
                   handleNext();
@@ -560,8 +553,7 @@ const GoldenPathWizard = ({ open, onClose, onComplete }) => {
         return (
           <Box>
             <Typography variant="body2" color="textSecondary" paragraph>
-              Now let's run the AI Copilot to analyze your data and generate
-              insights.
+              Now let's run the AI Copilot to analyze your data and generate insights.
             </Typography>
 
             <TextField
@@ -597,8 +589,7 @@ const GoldenPathWizard = ({ open, onClose, onComplete }) => {
         return (
           <Box>
             <Typography variant="body2" color="textSecondary" paragraph>
-              Great! Your investigation is set up and the Copilot is analyzing
-              your data.
+              Great! Your investigation is set up and the Copilot is analyzing your data.
             </Typography>
 
             <Alert severity="success" sx={{ mb: 2 }}>
@@ -634,8 +625,8 @@ const GoldenPathWizard = ({ open, onClose, onComplete }) => {
             </Alert>
 
             <Typography variant="body2" paragraph>
-              Click "Open Investigation" to view your investigation and monitor
-              the Copilot analysis in real-time.
+              Click "Open Investigation" to view your investigation and monitor the Copilot analysis
+              in real-time.
             </Typography>
 
             <Box mt={2}>
@@ -652,7 +643,7 @@ const GoldenPathWizard = ({ open, onClose, onComplete }) => {
         );
 
       default:
-        return 'Unknown step';
+        return "Unknown step";
     }
   };
 
@@ -665,7 +656,7 @@ const GoldenPathWizard = ({ open, onClose, onComplete }) => {
             <Tooltip title="Use demo data">
               <Button
                 size="small"
-                variant={useDemo ? 'contained' : 'outlined'}
+                variant={useDemo ? "contained" : "outlined"}
                 onClick={() => setUseDemo(!useDemo)}
               >
                 Demo Mode
@@ -686,9 +677,8 @@ const GoldenPathWizard = ({ open, onClose, onComplete }) => {
       <DialogContent>
         <Box mb={3}>
           <Typography variant="body2" color="textSecondary" paragraph>
-            Welcome to IntelGraph! This 5-step wizard will guide you through
-            creating your first investigation, adding data, and running AI
-            analysis. Estimated time: 5-15 minutes.
+            Welcome to IntelGraph! This 5-step wizard will guide you through creating your first
+            investigation, adding data, and running AI analysis. Estimated time: 5-15 minutes.
           </Typography>
 
           <LinearProgress
@@ -702,11 +692,7 @@ const GoldenPathWizard = ({ open, onClose, onComplete }) => {
           {steps.map((step, index) => (
             <Step key={step.label}>
               <StepLabel
-                optional={
-                  <Typography variant="caption">
-                    {step.estimatedTime}
-                  </Typography>
-                }
+                optional={<Typography variant="caption">{step.estimatedTime}</Typography>}
                 StepIconComponent={() =>
                   isStepCompleted(index) ? (
                     <CheckIcon color="success" />
@@ -726,11 +712,7 @@ const GoldenPathWizard = ({ open, onClose, onComplete }) => {
                 {getStepContent(index)}
 
                 <Box sx={{ mb: 2, mt: 2 }}>
-                  <Button
-                    disabled={activeStep === 0}
-                    onClick={handleBack}
-                    sx={{ mr: 1 }}
-                  >
+                  <Button disabled={activeStep === 0} onClick={handleBack} sx={{ mr: 1 }}>
                     Back
                   </Button>
                   {activeStep < steps.length - 1 && (
@@ -750,21 +732,20 @@ const GoldenPathWizard = ({ open, onClose, onComplete }) => {
 
         {/* Help Section */}
         <Collapse in={showHelp}>
-          <Paper sx={{ p: 2, mt: 2, bgcolor: 'background.default' }}>
+          <Paper sx={{ p: 2, mt: 2, bgcolor: "background.default" }}>
             <Typography variant="subtitle2" gutterBottom>
               Need Help?
             </Typography>
             <Typography variant="body2" paragraph>
-              • <strong>Demo Mode:</strong> Automatically fills in sample data
-              to speed up the tutorial
+              • <strong>Demo Mode:</strong> Automatically fills in sample data to speed up the
+              tutorial
             </Typography>
             <Typography variant="body2" paragraph>
-              • <strong>Skip:</strong> Jump to the main application if you're
-              already familiar with the workflow
+              • <strong>Skip:</strong> Jump to the main application if you're already familiar with
+              the workflow
             </Typography>
             <Typography variant="body2">
-              • <strong>Questions?</strong> Check the documentation or contact
-              support
+              • <strong>Questions?</strong> Check the documentation or contact support
             </Typography>
           </Paper>
         </Collapse>
@@ -772,7 +753,7 @@ const GoldenPathWizard = ({ open, onClose, onComplete }) => {
 
       <DialogActions>
         <Button onClick={() => setShowHelp(!showHelp)} startIcon={<HelpIcon />}>
-          {showHelp ? 'Hide Help' : 'Show Help'}
+          {showHelp ? "Hide Help" : "Show Help"}
         </Button>
         <Button onClick={onClose}>Close</Button>
       </DialogActions>

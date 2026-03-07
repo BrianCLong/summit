@@ -33,11 +33,13 @@ This evidence pack demonstrates that Summit's **predictive analytics and multi-a
 ### 1.1 Predictive Analytics (Governed)
 
 **What It Does:**
+
 - Forecasts compliance trends, risk levels, and audit outcomes
 - Supports 5 prediction types: trend analysis, risk assessment, likelihood scoring, anomaly detection, what-if simulation
 - Returns structured, confidence-scored outputs with full explanations
 
 **What It Does NOT Do:**
+
 - Make autonomous decisions
 - Execute predictions without policy checks
 - Operate outside resource limits
@@ -52,11 +54,13 @@ This evidence pack demonstrates that Summit's **predictive analytics and multi-a
 ### 1.2 Multi-Agent Negotiation (Protocol-Controlled)
 
 **What It Does:**
+
 - Enables agents to negotiate resource allocation, task priorities, and policy conflicts
 - Enforces turn limits (max 20), timeouts (max 30 min), and role constraints
 - Captures full transcripts with cryptographic hashing
 
 **What It Does NOT Do:**
+
 - Allow unbounded dialogue
 - Permit self-escalation of authority
 - Execute outcomes without approval
@@ -71,11 +75,13 @@ This evidence pack demonstrates that Summit's **predictive analytics and multi-a
 ### 1.3 Trust & Confidence Scoring (Advisory)
 
 **What It Does:**
+
 - Computes non-authoritative trust scores (0-1) for agents and models
 - Based on historical accuracy, compliance, audit outcomes, consistency
 - Transparent, explainable, time-decaying
 
 **What It Does NOT Do:**
+
 - Grant or revoke capabilities
 - Serve as sole decision criterion
 - Profile individuals
@@ -91,15 +97,15 @@ This evidence pack demonstrates that Summit's **predictive analytics and multi-a
 
 ### 2.1 Predictive Analytics Controls
 
-| Control | Mechanism | Enforcement |
-|---------|-----------|-------------|
-| **Capability Check** | Agent must have `predictive_analytics` capability | Pre-execution policy check |
-| **Resource Limits** | CPU: 10s max, Memory: 2GB max, Timeout: 5min max | Hard limits with abort |
-| **Policy Checks** | Pre-execution, post-execution verdicts | PolicyEngine integration |
-| **Metadata Envelope** | 15 required fields (confidence, assumptions, data sources, etc.) | Schema validation |
-| **Audit Trail** | Every prediction logged with full context | Append-only audit store |
-| **Explainability** | Method, top factors, feature importance | Mandatory explanation payload |
-| **Output Validation** | Schema conformance, confidence range checks | Rejection on failure |
+| Control               | Mechanism                                                        | Enforcement                   |
+| --------------------- | ---------------------------------------------------------------- | ----------------------------- |
+| **Capability Check**  | Agent must have `predictive_analytics` capability                | Pre-execution policy check    |
+| **Resource Limits**   | CPU: 10s max, Memory: 2GB max, Timeout: 5min max                 | Hard limits with abort        |
+| **Policy Checks**     | Pre-execution, post-execution verdicts                           | PolicyEngine integration      |
+| **Metadata Envelope** | 15 required fields (confidence, assumptions, data sources, etc.) | Schema validation             |
+| **Audit Trail**       | Every prediction logged with full context                        | Append-only audit store       |
+| **Explainability**    | Method, top factors, feature importance                          | Mandatory explanation payload |
+| **Output Validation** | Schema conformance, confidence range checks                      | Rejection on failure          |
 
 **Proof:** See `test/verification/predictive.node.test.ts` (8 test suites, 20+ assertions)
 
@@ -107,15 +113,15 @@ This evidence pack demonstrates that Summit's **predictive analytics and multi-a
 
 ### 2.2 Negotiation Controls
 
-| Control | Mechanism | Enforcement |
-|---------|-----------|-------------|
-| **Turn Limits** | Max 20 turns, configurable per negotiation | Counter with automatic abort |
-| **Timeouts** | Per-turn: 5min max, Total: 30min max | Timers with automatic abort |
-| **Policy Hooks** | Pre-negotiation, per-turn, pre-resolution, post-approval | PolicyEngine at every phase |
-| **Role Enforcement** | Proposer, Challenger, Arbiter roles with constraints | Schema validation |
-| **Transcript Integrity** | SHA-256 hash chain of all messages | Cryptographic verification |
-| **Approval Requirement** | Human/policy approval before execution | Mandatory approval phase |
-| **Abort Conditions** | 6 abort triggers (policy deny, timeout, turn limit, etc.) | Immediate termination |
+| Control                  | Mechanism                                                 | Enforcement                  |
+| ------------------------ | --------------------------------------------------------- | ---------------------------- |
+| **Turn Limits**          | Max 20 turns, configurable per negotiation                | Counter with automatic abort |
+| **Timeouts**             | Per-turn: 5min max, Total: 30min max                      | Timers with automatic abort  |
+| **Policy Hooks**         | Pre-negotiation, per-turn, pre-resolution, post-approval  | PolicyEngine at every phase  |
+| **Role Enforcement**     | Proposer, Challenger, Arbiter roles with constraints      | Schema validation            |
+| **Transcript Integrity** | SHA-256 hash chain of all messages                        | Cryptographic verification   |
+| **Approval Requirement** | Human/policy approval before execution                    | Mandatory approval phase     |
+| **Abort Conditions**     | 6 abort triggers (policy deny, timeout, turn limit, etc.) | Immediate termination        |
 
 **Proof:** See `test/verification/negotiation.node.test.ts` (7 test suites, 25+ assertions)
 
@@ -123,14 +129,14 @@ This evidence pack demonstrates that Summit's **predictive analytics and multi-a
 
 ### 2.3 Trust Scoring Controls
 
-| Control | Mechanism | Enforcement |
-|---------|-----------|-------------|
-| **Advisory Only** | Scores cannot grant capabilities or make decisions | Access control (agents cannot see own scores) |
-| **Transparent Calculation** | 4-component weighted sum with breakdown | Full score breakdown returned |
-| **Time Decay** | Scores decay over inactivity (50% after 180 days) | Decay factor applied on calculation |
-| **Explainability** | Human-readable explanations for every score | Generated explanation text |
-| **Audit Trail** | All score updates logged | Event emission on updates |
-| **Cache Expiry** | 5-minute TTL to prevent stale scores | Cache management |
+| Control                     | Mechanism                                          | Enforcement                                   |
+| --------------------------- | -------------------------------------------------- | --------------------------------------------- |
+| **Advisory Only**           | Scores cannot grant capabilities or make decisions | Access control (agents cannot see own scores) |
+| **Transparent Calculation** | 4-component weighted sum with breakdown            | Full score breakdown returned                 |
+| **Time Decay**              | Scores decay over inactivity (50% after 180 days)  | Decay factor applied on calculation           |
+| **Explainability**          | Human-readable explanations for every score        | Generated explanation text                    |
+| **Audit Trail**             | All score updates logged                           | Event emission on updates                     |
+| **Cache Expiry**            | 5-minute TTL to prevent stale scores               | Cache management                              |
 
 **Proof:** Trust scores are computed on-demand and never used for authorization in code.
 
@@ -143,28 +149,31 @@ This evidence pack demonstrates that Summit's **predictive analytics and multi-a
 **Scenario:** Predict audit readiness for upcoming SOC 2 audit.
 
 **Input:**
+
 ```typescript
 const request: PredictionRequest = {
-  type: 'risk_assessment',
-  tenantId: 'tenant-acme',
-  agentId: 'compliance-agent-1',
+  type: "risk_assessment",
+  tenantId: "tenant-acme",
+  agentId: "compliance-agent-1",
   inputs: {
-    framework: 'SOC2',
+    framework: "SOC2",
     openGaps: 12,
     evidenceQuality: 0.78,
-    lastAuditOutcome: 'pass_with_findings',
-    daysUntilAudit: 45
-  }
+    lastAuditOutcome: "pass_with_findings",
+    daysUntilAudit: 45,
+  },
 };
 ```
 
 **Execution:**
+
 ```typescript
 const engine = getPredictiveEngine();
 const response = await engine.predict(request);
 ```
 
 **Output:**
+
 ```typescript
 {
   output: {
@@ -244,12 +253,14 @@ const response = await engine.predict(request);
 ```
 
 **Interpretation:**
+
 - **68% risk score** means moderate-to-high likelihood of audit findings
 - **82% confidence** indicates reliable prediction based on good data
 - **Top factor:** 12 open gaps are the primary driver
 - **Recommendation:** Prioritize gap remediation before audit
 
 **Governance Evidence:**
+
 - ✅ Policy check passed (ALLOW verdict)
 - ✅ Capability authorized (compliance-agent-1)
 - ✅ Complete metadata envelope (15/15 required fields)
@@ -266,6 +277,7 @@ const response = await engine.predict(request);
 **Scenario:** Two agents need GPU resources, but only one GPU is available.
 
 **Participants:**
+
 - **Agent A (Proposer):** Compliance prediction task (ETA 10 min)
 - **Agent B (Challenger):** Policy optimization task (ETA 15 min)
 - **System (Arbiter):** Enforces protocol, resolves deadlocks
@@ -404,12 +416,14 @@ const response = await engine.predict(request);
 ```
 
 **Outcome:**
+
 - **Agreement reached** in 5 turns (under 10-turn default limit)
 - **Time-shared allocation:** Agent A gets GPU for 0-5min and 10-15min, Agent B gets 5-10min
 - **Both tasks complete** within deadlines
 - **Policy approved** the final terms
 
 **Governance Evidence:**
+
 - ✅ Turn limit respected (5 < 10 default limit)
 - ✅ Timeout not exceeded (50s < 10min total limit)
 - ✅ Policy checks at every phase (6 policy verdicts recorded)
@@ -426,12 +440,14 @@ const response = await engine.predict(request);
 ### 5.1 Run Verification Tests
 
 **Predictive Analytics:**
+
 ```bash
 cd /home/user/summit
 npm test -- test/verification/predictive.node.test.ts
 ```
 
 **Expected Output:**
+
 ```
 PASS test/verification/predictive.node.test.ts
   Predictive Analytics Governance Verification
@@ -465,11 +481,13 @@ Tests:       17 passed, 17 total
 ```
 
 **Multi-Agent Negotiation:**
+
 ```bash
 npm test -- test/verification/negotiation.node.test.ts
 ```
 
 **Expected Output:**
+
 ```
 PASS test/verification/negotiation.node.test.ts
   Negotiation Protocol Governance Verification
@@ -512,73 +530,76 @@ Tests:       22 passed, 22 total
 ### 5.2 Manual Testing
 
 **Test Predictive Engine:**
+
 ```typescript
-import { getPredictiveEngine } from './server/src/analytics/engine';
+import { getPredictiveEngine } from "./server/src/analytics/engine";
 
 const engine = getPredictiveEngine();
 
 // Register test model (see test files for examples)
 
 const response = await engine.predict({
-  type: 'trend_analysis',
-  tenantId: 'test-tenant',
-  inputs: { metric: 'compliance_score' }
+  type: "trend_analysis",
+  tenantId: "test-tenant",
+  inputs: { metric: "compliance_score" },
 });
 
-console.log('Prediction:', response.output);
-console.log('Confidence:', response.metadata.confidence);
-console.log('Explanation:', response.metadata.explanation);
+console.log("Prediction:", response.output);
+console.log("Confidence:", response.metadata.confidence);
+console.log("Explanation:", response.metadata.explanation);
 ```
 
 **Test Negotiation Runtime:**
+
 ```typescript
-import { getNegotiationRuntime } from './server/src/agents/negotiation';
+import { getNegotiationRuntime } from "./server/src/agents/negotiation";
 
 const runtime = getNegotiationRuntime();
 
 const session = await runtime.initiate({
-  type: 'resource_allocation',
-  tenantId: 'test-tenant',
-  proposerId: 'agent-1',
-  challengerId: 'agent-2',
+  type: "resource_allocation",
+  tenantId: "test-tenant",
+  proposerId: "agent-1",
+  challengerId: "agent-2",
   initialProposal: {
-    goal: 'Allocate CPU',
+    goal: "Allocate CPU",
     terms: { cpu: 2 },
-    justification: 'Need compute'
-  }
+    justification: "Need compute",
+  },
 });
 
-console.log('Negotiation started:', session.negotiationId);
-console.log('Current turn:', session.currentTurn);
-console.log('Transcript:', session.transcript);
+console.log("Negotiation started:", session.negotiationId);
+console.log("Current turn:", session.currentTurn);
+console.log("Transcript:", session.transcript);
 ```
 
 **Test Trust Scoring:**
+
 ```typescript
-import { getTrustScoringService } from './server/src/agents/trust';
+import { getTrustScoringService } from "./server/src/agents/trust";
 
 const service = getTrustScoringService();
 
 // Inject test data
-service.injectHistoricalData('agent-1', {
+service.injectHistoricalData("agent-1", {
   totalTasks: 100,
   successfulTasks: 92,
   recentAccuracy: 0.95,
   olderAccuracy: 0.88,
   totalPredictions: 0,
-  correctPredictions: 0
+  correctPredictions: 0,
 });
 
 const response = await service.calculateTrustScore({
-  subjectId: 'agent-1',
-  subjectType: 'agent',
-  tenantId: 'test-tenant',
-  includeExplanation: true
+  subjectId: "agent-1",
+  subjectType: "agent",
+  tenantId: "test-tenant",
+  includeExplanation: true,
 });
 
-console.log('Trust score:', response.score.overallScore);
-console.log('Band:', response.score.band);
-console.log('Explanation:', response.explanation);
+console.log("Trust score:", response.score.overallScore);
+console.log("Band:", response.score.band);
+console.log("Explanation:", response.explanation);
 ```
 
 ---
@@ -792,21 +813,23 @@ NegotiationRuntime.approve()
 
 ### 7.1 Framework Alignment
 
-| Framework | Controls | Evidence |
-|-----------|----------|----------|
-| **SOC 2** | CC6.1 (Logical access), CC7.2 (Monitoring), CC8.1 (Change management) | Policy checks enforce access; audit trail monitors all activity; negotiation approval enforces change control |
-| **ISO 27001** | A.9.2.1 (User registration), A.12.4.1 (Event logging), A.18.1.4 (Privacy) | Agent capability checks; comprehensive audit logging; PII redaction in transcripts |
-| **NIST AI RMF** | GOVERN 1.1, MAP 1.1, MEASURE 2.1 | Predictive contract defines governance; prediction types mapped; trust scores measure performance |
-| **GDPR** | Article 22 (Automated decision-making), Article 13 (Transparency) | No autonomous decisions (approval required); full explainability in predictions |
+| Framework       | Controls                                                                  | Evidence                                                                                                      |
+| --------------- | ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| **SOC 2**       | CC6.1 (Logical access), CC7.2 (Monitoring), CC8.1 (Change management)     | Policy checks enforce access; audit trail monitors all activity; negotiation approval enforces change control |
+| **ISO 27001**   | A.9.2.1 (User registration), A.12.4.1 (Event logging), A.18.1.4 (Privacy) | Agent capability checks; comprehensive audit logging; PII redaction in transcripts                            |
+| **NIST AI RMF** | GOVERN 1.1, MAP 1.1, MEASURE 2.1                                          | Predictive contract defines governance; prediction types mapped; trust scores measure performance             |
+| **GDPR**        | Article 22 (Automated decision-making), Article 13 (Transparency)         | No autonomous decisions (approval required); full explainability in predictions                               |
 
 ### 7.2 Audit Events Generated
 
 **Predictive Analytics:**
+
 - `prediction_executed` (success)
 - `prediction_failed` (error/policy deny)
 - `prediction_contract_violation` (contract breach)
 
 **Negotiation:**
+
 - `negotiation_initiated`
 - `negotiation_turn` (each message)
 - `negotiation_resolved`
@@ -815,6 +838,7 @@ NegotiationRuntime.approve()
 - `negotiation_violation`
 
 **Trust Scoring:**
+
 - `trust_score_updated` (on score change)
 
 ### 7.3 Audit Log Sample
@@ -861,23 +885,27 @@ NegotiationRuntime.approve()
 ### 8.1 What Reviewers Will Find
 
 **Documentation:**
+
 - ✅ Complete predictive analytics contract (15 sections, 12 pages)
 - ✅ Complete negotiation protocol (16 sections, 15 pages)
 - ✅ Complete trust model (15 sections, 13 pages)
 - ✅ This evidence pack with examples and proofs
 
 **Code:**
+
 - ✅ Predictive execution engine (500+ lines, fully typed)
 - ✅ Negotiation runtime (700+ lines, fully typed)
 - ✅ Trust scoring service (600+ lines, fully typed)
 - ✅ Type definitions with full JSDoc comments
 
 **Tests:**
+
 - ✅ Predictive verification suite (17 tests, 500+ lines)
 - ✅ Negotiation verification suite (22 tests, 600+ lines)
 - ✅ 100% coverage of governance constraints
 
 **Governance Integration:**
+
 - ✅ PolicyEngine integration at every critical point
 - ✅ Audit event generation for all operations
 - ✅ No capability grants without authorization
@@ -911,6 +939,7 @@ NegotiationRuntime.approve()
 ### 8.3 Reviewer Commands
 
 **Clone and Test:**
+
 ```bash
 git clone https://github.com/BrianCLong/summit.git
 cd summit
@@ -920,6 +949,7 @@ npm test -- test/verification/
 ```
 
 **Review Documentation:**
+
 ```bash
 cat docs/analytics/PREDICTIVE_MODEL_CONTRACT.md
 cat docs/agents/NEGOTIATION_PROTOCOL.md
@@ -928,6 +958,7 @@ cat docs/analytics/EVIDENCE_PREDICTIVE_NEGOTIATION.md
 ```
 
 **Inspect Code:**
+
 ```bash
 # Predictive engine
 cat server/src/analytics/engine/PredictiveExecutionEngine.ts
@@ -967,12 +998,14 @@ cat server/src/agents/trust/types.ts
 ### What This Enables
 
 **Immediate:**
+
 - Audit readiness forecasting
 - Resource allocation optimization
 - Policy conflict resolution
 - Agent performance monitoring
 
 **Next Sprint (N+6):**
+
 - User-facing explainability UI
 - End-to-end provenance explorer
 - Reviewer-friendly visualization tools

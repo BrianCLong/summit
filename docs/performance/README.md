@@ -49,24 +49,24 @@ Entity: {
 
 ## What's Included
 
-| Module | Purpose | Key Benefit |
-|--------|---------|-------------|
-| `config/neo4j.ts` | Neo4j optimization | 50+ indexes, query caching, connection pooling |
-| `config/postgresql.ts` | PostgreSQL optimization | 40+ indexes, slow query logging, prepared statements |
-| `config/redis.ts` | Redis caching | GraphQL caching, session management, metrics |
-| `middleware/dataloader.ts` | N+1 prevention | Eliminates N+1 queries completely |
-| `middleware/pagination.ts` | Cursor pagination | Relay-style pagination for GraphQL |
-| `middleware/database-monitoring.ts` | Performance monitoring | Prometheus metrics, health checks |
+| Module                              | Purpose                 | Key Benefit                                          |
+| ----------------------------------- | ----------------------- | ---------------------------------------------------- |
+| `config/neo4j.ts`                   | Neo4j optimization      | 50+ indexes, query caching, connection pooling       |
+| `config/postgresql.ts`              | PostgreSQL optimization | 40+ indexes, slow query logging, prepared statements |
+| `config/redis.ts`                   | Redis caching           | GraphQL caching, session management, metrics         |
+| `middleware/dataloader.ts`          | N+1 prevention          | Eliminates N+1 queries completely                    |
+| `middleware/pagination.ts`          | Cursor pagination       | Relay-style pagination for GraphQL                   |
+| `middleware/database-monitoring.ts` | Performance monitoring  | Prometheus metrics, health checks                    |
 
 ## Performance Targets
 
-| Metric | Target | How to Measure |
-|--------|--------|----------------|
+| Metric                    | Target | How to Measure                                                                          |
+| ------------------------- | ------ | --------------------------------------------------------------------------------------- |
 | Query Response Time (p90) | <100ms | Prometheus: `histogram_quantile(0.9, rate(postgres_query_duration_seconds_bucket[5m]))` |
-| Cache Hit Rate | >90% | `/health/cache-stats` endpoint |
-| N+1 Queries | 0 | Check logs for multiple identical queries |
-| Database Pool Utilization | <80% | `/health/database` endpoint |
-| Slow Query Rate | <1% | Prometheus: `rate(postgres_slow_query_total[5m]) / rate(postgres_query_total[5m])` |
+| Cache Hit Rate            | >90%   | `/health/cache-stats` endpoint                                                          |
+| N+1 Queries               | 0      | Check logs for multiple identical queries                                               |
+| Database Pool Utilization | <80%   | `/health/database` endpoint                                                             |
+| Slow Query Rate           | <1%    | Prometheus: `rate(postgres_slow_query_total[5m]) / rate(postgres_query_total[5m])`      |
 
 ## Documentation
 
@@ -80,6 +80,7 @@ Entity: {
 ### Use Case 1: Eliminate N+1 Queries
 
 **Before** (N+1 problem):
+
 ```typescript
 // ❌ This executes N+1 queries (1 + N relationships)
 const entities = await getEntities(); // 1 query
@@ -89,11 +90,12 @@ for (const entity of entities) {
 ```
 
 **After** (using DataLoader):
+
 ```typescript
 // ✅ This executes 2 queries total (1 + 1 batched)
 const entities = await getEntities(); // 1 query
 const relationships = await Promise.all(
-  entities.map(e => context.loaders.entityRelationshipsLoader.load(e.id))
+  entities.map((e) => context.loaders.entityRelationshipsLoader.load(e.id))
 ); // 1 batched query
 ```
 
@@ -102,6 +104,7 @@ const relationships = await Promise.all(
 ### Use Case 2: Cache GraphQL Queries
 
 **Before** (no caching):
+
 ```typescript
 // ❌ Every request hits the database
 Query: {
@@ -112,6 +115,7 @@ Query: {
 ```
 
 **After** (with caching):
+
 ```typescript
 // ✅ Subsequent requests use cache
 Query: {
@@ -132,6 +136,7 @@ Query: {
 ### Use Case 3: Implement Pagination
 
 **Before** (unbounded query):
+
 ```typescript
 // ❌ Returns all results (could be millions)
 Query: {
@@ -142,6 +147,7 @@ Query: {
 ```
 
 **After** (with pagination):
+
 ```typescript
 // ✅ Returns paginated results with cursor
 Query: {
@@ -193,12 +199,12 @@ REDIS_KEY_PREFIX=intelgraph:
 Add these routes to your server:
 
 ```typescript
-app.get('/health/database', handleHealthCheck);
-app.get('/health/slow-queries', (req, res) => {
+app.get("/health/database", handleHealthCheck);
+app.get("/health/slow-queries", (req, res) => {
   const tracker = databaseHealthMonitor.getQueryTracker();
   res.json(tracker.getSlowQueryReport(20));
 });
-app.get('/health/cache-stats', (req, res) => {
+app.get("/health/cache-stats", (req, res) => {
   const monitor = databaseHealthMonitor.getCacheMonitor();
   res.json(monitor.getStats());
 });
@@ -209,6 +215,7 @@ app.get('/health/cache-stats', (req, res) => {
 All metrics are automatically exposed at `/metrics`:
 
 **Key Metrics to Monitor**:
+
 ```promql
 # Cache hit rate (target: >0.9)
 rate(redis_cache_hits_total[5m]) /
@@ -231,12 +238,14 @@ histogram_quantile(0.95, rate(postgres_query_duration_seconds_bucket[5m]))
 **Symptoms**: Cache hit rate <50%
 
 **Solutions**:
+
 1. Increase TTLs for stable data
 2. Pre-warm cache on startup
 3. Review cache invalidation logic
 4. Check for unique query parameters
 
 **Example**:
+
 ```typescript
 // Increase TTL for stable reference data
 CACHE_TTL.ENTITY_DATA = 3600; // 1 hour instead of 30 minutes
@@ -247,12 +256,14 @@ CACHE_TTL.ENTITY_DATA = 3600; // 1 hour instead of 30 minutes
 **Symptoms**: Queries taking >100ms
 
 **Solutions**:
+
 1. Check indexes are being used: `EXPLAIN ANALYZE query`
 2. Add missing indexes for common patterns
 3. Use pagination for large result sets
 4. Enable query result caching
 
 **Example**:
+
 ```sql
 -- Check if index is being used
 EXPLAIN ANALYZE
@@ -266,11 +277,13 @@ SELECT * FROM entities WHERE tenant_id = '...' AND type = '...';
 **Symptoms**: Same query executed many times
 
 **Solutions**:
+
 1. Ensure DataLoaders are in context
 2. Use `Promise.all()` instead of `await` in loops
 3. Use DataLoader's `.load()` method
 
 **Example**:
+
 ```typescript
 // ❌ Wrong
 for (const entity of entities) {
@@ -278,7 +291,7 @@ for (const entity of entities) {
 }
 
 // ✅ Correct
-entities.forEach(entity => {
+entities.forEach((entity) => {
   entity.relationships = loader.load(entity.id);
 });
 ```
@@ -371,6 +384,7 @@ This optimization package is part of the IntelGraph platform.
 ## Version History
 
 ### v1.0.0 (Current)
+
 - Initial release
 - Neo4j optimization with 50+ indexes
 - PostgreSQL optimization with 40+ indexes

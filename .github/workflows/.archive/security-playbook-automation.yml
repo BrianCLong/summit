@@ -2,11 +2,11 @@ name: Security Playbook Automation
 
 on:
   schedule:
-    - cron: '0 8 * * 1' # Run every Monday at 8am
+    - cron: "0 8 * * 1" # Run every Monday at 8am
   workflow_dispatch:
     inputs:
       create_issue:
-        description: 'Create a GitHub Issue with the report'
+        description: "Create a GitHub Issue with the report"
         type: boolean
         required: false
         default: true
@@ -27,7 +27,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: "3.11"
 
       - name: Run Triage Script
         env:

@@ -206,9 +206,7 @@
         "justifyMode": "auto",
         "orientation": "auto",
         "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
+          "calcs": ["lastNotNull"],
           "fields": "",
           "values": false
         },
@@ -290,12 +288,7 @@
   "refresh": "1m",
   "schemaVersion": 38,
   "style": "dark",
-  "tags": [
-    "predictive",
-    "alpha",
-    "security",
-    "threat-intel"
-  ],
+  "tags": ["predictive", "alpha", "security", "threat-intel"],
   "templating": {
     "list": []
   },

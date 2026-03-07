@@ -1,5 +1,5 @@
-import type { Procedure, ProcedurePlan } from '../types';
-import { stableStringify } from '../utils/stableStringify';
+import type { Procedure, ProcedurePlan } from "../types";
+import { stableStringify } from "../utils/stableStringify";
 
 function sortObjectKeys(value: Record<string, unknown>): Record<string, unknown> {
   return Object.keys(value)
@@ -22,7 +22,7 @@ export function compileProcedure(procedure: Procedure): ProcedurePlan {
     },
     inputs,
     steps: procedure.steps.map((step, index) => ({
-      id: `step-${String(index + 1).padStart(2, '0')}`,
+      id: `step-${String(index + 1).padStart(2, "0")}`,
       name: step.name,
       type: step.type,
       with: step.with ? sortObjectKeys(step.with) : {},

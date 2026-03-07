@@ -11,7 +11,7 @@
           "expr": "histogram_quantile(0.95, sum(rate(agent_runtime_seconds_bucket[5m])) by (le, agent))"
         }
       ],
-      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0}
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 }
     },
     {
       "type": "bargauge",
@@ -21,25 +21,25 @@
           "expr": "sum(rate(agent_cost_usd[5m])) by (agent)"
         }
       ],
-      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0}
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 }
     },
     {
       "type": "timeseries",
       "title": "Success vs failure",
       "targets": [
-        {"expr": "sum(rate(agent_success_total[5m])) by (agent)"},
-        {"expr": "sum(rate(agent_failure_total[5m])) by (agent)"}
+        { "expr": "sum(rate(agent_success_total[5m])) by (agent)" },
+        { "expr": "sum(rate(agent_failure_total[5m])) by (agent)" }
       ],
-      "gridPos": {"h": 8, "w": 24, "x": 0, "y": 8}
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 8 }
     },
     {
       "type": "timeseries",
       "title": "Pod resource usage",
       "targets": [
-        {"expr": "sum(rate(process_cpu_seconds_total[5m])) by (pod)"},
-        {"expr": "avg_over_time(process_resident_memory_bytes[5m])"}
+        { "expr": "sum(rate(process_cpu_seconds_total[5m])) by (pod)" },
+        { "expr": "avg_over_time(process_resident_memory_bytes[5m])" }
       ],
-      "gridPos": {"h": 8, "w": 24, "x": 0, "y": 16}
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 16 }
     }
   ]
 }

@@ -5,15 +5,15 @@ import {
   GraphQLObjectType,
   Kind,
   buildSchema,
-} from 'graphql';
-import type { GraphQLFieldResolver, ValueNode } from 'graphql';
+} from "graphql";
+import type { GraphQLFieldResolver, ValueNode } from "graphql";
 import type {
   EntityResolver,
   FederationCompositionResult,
   FederationServiceDefinition,
   ResolverEntry,
   ResolverMap,
-} from './types.js';
+} from "./types.js";
 
 type ResolverDictionary = Record<string, Record<string, GraphQLFieldResolver>>;
 
@@ -54,7 +54,7 @@ function normalizeResolverEntry(entry: ResolverEntry): GraphQLFieldResolver {
       let current = parent;
       for (const resolver of entry) {
         const result = await resolver(current, args, context, info);
-        if (typeof result !== 'undefined') {
+        if (typeof result !== "undefined") {
           current = result;
         }
       }
@@ -82,11 +82,11 @@ function attachResolvers(schema: GraphQLSchema, resolvers: ResolverDictionary) {
 
 function buildFederationSDL(
   services: FederationServiceDefinition[],
-  entityTypeNames: string[],
+  entityTypeNames: string[]
 ): string {
-  const placeholderEntity = 'FederationPlaceholder';
+  const placeholderEntity = "FederationPlaceholder";
   const entityUnionMembers = entityTypeNames.length
-    ? entityTypeNames.join(' | ')
+    ? entityTypeNames.join(" | ")
     : placeholderEntity;
 
   const base = `
@@ -96,11 +96,11 @@ function buildFederationSDL(
       _service: _Service!
       _entities(representations: [_Any!]!): [_Entity]!
     }
-    ${entityTypeNames.length ? '' : `type ${placeholderEntity} { _empty: String }`}
+    ${entityTypeNames.length ? "" : `type ${placeholderEntity} { _empty: String }`}
     union _Entity = ${entityUnionMembers}
   `;
 
-  return [base, ...services.map((service) => service.typeDefs)].join('\n');
+  return [base, ...services.map((service) => service.typeDefs)].join("\n");
 }
 
 function mergeResolverMaps(services: FederationServiceDefinition[]): ResolverMap {
@@ -113,9 +113,7 @@ function mergeResolverMaps(services: FederationServiceDefinition[]): ResolverMap
       for (const [fieldName, resolver] of Object.entries(fieldMap)) {
         const existing = merged[typeName][fieldName];
         if (existing) {
-          const combined = Array.isArray(existing)
-            ? existing
-            : [existing];
+          const combined = Array.isArray(existing) ? existing : [existing];
           merged[typeName][fieldName] = [...combined, resolver];
         } else {
           merged[typeName][fieldName] = resolver;
@@ -127,13 +125,16 @@ function mergeResolverMaps(services: FederationServiceDefinition[]): ResolverMap
   return merged;
 }
 
-function buildBaseResolvers(
-  context: ResolverBuilderContext,
-): ResolverDictionary {
+function buildBaseResolvers(context: ResolverBuilderContext): ResolverDictionary {
   const resolvers: ResolverDictionary = {
     Query: {
       _service: () => ({ sdl: context.composedSDL }),
-      _entities: async (_root, args: { representations: Array<{ __typename: string }> }, cxt, info) => {
+      _entities: async (
+        _root,
+        args: { representations: Array<{ __typename: string }> },
+        cxt,
+        info
+      ) => {
         return Promise.all(
           args.representations.map(async (reference) => {
             const resolver = context.entityResolvers.get(reference.__typename);
@@ -141,7 +142,7 @@ function buildBaseResolvers(
               return reference;
             }
             return resolver(reference, cxt, info);
-          }),
+          })
         );
       },
     },
@@ -168,7 +169,7 @@ function attachEntityResolveType(schema: GraphQLSchema) {
   const entityUnion = typeMap._Entity;
   if (entityUnion instanceof GraphQLUnionType) {
     entityUnion.resolveType = (value) => {
-      if (value && typeof value === 'object' && '__typename' in value) {
+      if (value && typeof value === "object" && "__typename" in value) {
         const typeName = (value as { __typename: string }).__typename;
         const target = schema.getType(typeName);
         if (target) return target as GraphQLObjectType;
@@ -178,9 +179,11 @@ function attachEntityResolveType(schema: GraphQLSchema) {
   }
 }
 
-export function composeServices(
-  services: FederationServiceDefinition[],
-): { schema: GraphQLSchema; composition: FederationCompositionResult; entityResolvers: Map<string, EntityResolver> } {
+export function composeServices(services: FederationServiceDefinition[]): {
+  schema: GraphQLSchema;
+  composition: FederationCompositionResult;
+  entityResolvers: Map<string, EntityResolver>;
+} {
   const entityResolvers = new Map<string, EntityResolver>();
   for (const service of services) {
     if (!service.entityResolvers) continue;

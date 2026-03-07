@@ -34,7 +34,10 @@ const GET_SNAPSHOTS = gql`
 
 const CREATE_SNAPSHOT = gql`
   mutation CreateInvestigationSnapshot($investigationId: ID!, $label: String) {
-    createInvestigationSnapshot(investigationId: $investigationId, label: $label) {
+    createInvestigationSnapshot(
+      investigationId: $investigationId
+      label: $label
+    ) {
       id
       createdAt
       snapshotLabel
@@ -47,7 +50,10 @@ interface SnapshotManagerProps {
   onClose?: () => void
 }
 
-export function SnapshotManager({ investigationId, onClose }: SnapshotManagerProps) {
+export function SnapshotManager({
+  investigationId,
+  onClose,
+}: SnapshotManagerProps) {
   const { data, loading, error, refetch } = useQuery(GET_SNAPSHOTS, {
     variables: { investigationId },
     fetchPolicy: 'cache-and-network',
@@ -62,7 +68,9 @@ export function SnapshotManager({ investigationId, onClose }: SnapshotManagerPro
 
   const handleCreateSnapshot = () => {
     const label = prompt('Enter a label for this snapshot (optional):')
-    createSnapshot({ variables: { investigationId, label: label || 'Manual Snapshot' } })
+    createSnapshot({
+      variables: { investigationId, label: label || 'Manual Snapshot' },
+    })
   }
 
   const handleToggleSelect = (id: string) => {
@@ -85,12 +93,16 @@ export function SnapshotManager({ investigationId, onClose }: SnapshotManagerPro
   }
 
   if (viewMode === 'diff') {
-    const snap1 = data?.investigationSnapshots.find((s: any) => s.id === selectedSnapshots[0])
-    const snap2 = data?.investigationSnapshots.find((s: any) => s.id === selectedSnapshots[1])
+    const snap1 = data?.investigationSnapshots.find(
+      (s: any) => s.id === selectedSnapshots[0]
+    )
+    const snap2 = data?.investigationSnapshots.find(
+      (s: any) => s.id === selectedSnapshots[1]
+    )
 
     return (
       <div className="flex flex-col h-full bg-background border rounded-lg shadow-sm">
-         <div className="flex items-center justify-between p-4 border-b">
+        <div className="flex items-center justify-between p-4 border-b">
           <h3 className="text-lg font-semibold flex items-center">
             <ArrowLeftRight className="mr-2 h-5 w-5" />
             Comparing Snapshots
@@ -122,23 +134,25 @@ export function SnapshotManager({ investigationId, onClose }: SnapshotManagerPro
 
       <div className="p-2 border-b bg-muted/20">
         <div className="flex items-center justify-between px-2">
-            <span className="text-sm text-muted-foreground">
-                {selectedSnapshots.length} selected
-            </span>
-            <Button
-                size="sm"
-                variant="default"
-                disabled={selectedSnapshots.length !== 2}
-                onClick={handleCompare}
-            >
-                Compare Selected
-            </Button>
+          <span className="text-sm text-muted-foreground">
+            {selectedSnapshots.length} selected
+          </span>
+          <Button
+            size="sm"
+            variant="default"
+            disabled={selectedSnapshots.length !== 2}
+            onClick={handleCompare}
+          >
+            Compare Selected
+          </Button>
         </div>
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
         {loading && <div className="text-center p-4">Loading snapshots...</div>}
-        {error && <div className="text-red-500 p-4">Error: {error.message}</div>}
+        {error && (
+          <div className="text-red-500 p-4">Error: {error.message}</div>
+        )}
 
         {!loading && data?.investigationSnapshots.length === 0 && (
           <div className="text-center text-muted-foreground p-8">
@@ -150,15 +164,20 @@ export function SnapshotManager({ investigationId, onClose }: SnapshotManagerPro
           <Card
             key={snap.id}
             className={`p-3 cursor-pointer transition-colors ${
-                selectedSnapshots.includes(snap.id) ? 'border-primary ring-1 ring-primary' : 'hover:bg-accent'
+              selectedSnapshots.includes(snap.id)
+                ? 'border-primary ring-1 ring-primary'
+                : 'hover:bg-accent'
             }`}
             onClick={() => handleToggleSelect(snap.id)}
           >
             <div className="flex items-center justify-between">
               <div>
-                <div className="font-medium">{snap.snapshotLabel || 'Untitled Snapshot'}</div>
+                <div className="font-medium">
+                  {snap.snapshotLabel || 'Untitled Snapshot'}
+                </div>
                 <div className="text-xs text-muted-foreground">
-                  {format(new Date(snap.createdAt), 'MMM d, yyyy HH:mm:ss')} • {snap.createdBy}
+                  {format(new Date(snap.createdAt), 'MMM d, yyyy HH:mm:ss')} •{' '}
+                  {snap.createdBy}
                 </div>
               </div>
               <div className="text-xs text-muted-foreground font-mono">
@@ -173,19 +192,19 @@ export function SnapshotManager({ investigationId, onClose }: SnapshotManagerPro
 }
 
 function SnapshotView({ snapshot }: { snapshot: any }) {
-    if (!snapshot) return <div>Snapshot not found</div>
+  if (!snapshot) return <div>Snapshot not found</div>
 
-    return (
-        <div className="border rounded p-4 h-full overflow-auto bg-card">
-            <div className="mb-4 pb-2 border-b">
-                <h4 className="font-semibold">{snapshot.snapshotLabel}</h4>
-                <div className="text-xs text-muted-foreground">
-                    {format(new Date(snapshot.createdAt), 'PPpp')}
-                </div>
-            </div>
-            <pre className="text-xs overflow-auto whitespace-pre-wrap font-mono">
-                {JSON.stringify(snapshot.data, null, 2)}
-            </pre>
+  return (
+    <div className="border rounded p-4 h-full overflow-auto bg-card">
+      <div className="mb-4 pb-2 border-b">
+        <h4 className="font-semibold">{snapshot.snapshotLabel}</h4>
+        <div className="text-xs text-muted-foreground">
+          {format(new Date(snapshot.createdAt), 'PPpp')}
         </div>
-    )
+      </div>
+      <pre className="text-xs overflow-auto whitespace-pre-wrap font-mono">
+        {JSON.stringify(snapshot.data, null, 2)}
+      </pre>
+    </div>
+  )
 }

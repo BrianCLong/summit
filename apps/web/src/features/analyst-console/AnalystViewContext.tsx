@@ -23,7 +23,7 @@ import type {
 import {
   normalizeWindow,
   fromIsoWindow,
-  assertValidWindow
+  assertValidWindow,
 } from '@/domain/timeWindow'
 
 // =============================================================================
@@ -69,7 +69,7 @@ export function AnalystViewProvider({
   const [state, setState] = useState<AnalystViewState>(() => ({
     ...initialState,
     timeWindowSeq: initialState.timeWindowSeq ?? 0,
-    timeWindow: normalizeWindow(initialState.timeWindow)
+    timeWindow: normalizeWindow(initialState.timeWindow),
   }))
 
   // Store initial state for reset functionality
@@ -78,39 +78,44 @@ export function AnalystViewProvider({
   /**
    * Update the global time window - affects filtering in all panes
    */
-  const setTimeWindow = useCallback((timeWindow: TimeWindow, meta?: { source: string }) => {
-    // 1. Normalize
-    const normalized = normalizeWindow(timeWindow)
+  const setTimeWindow = useCallback(
+    (timeWindow: TimeWindow, meta?: { source: string }) => {
+      // 1. Normalize
+      const normalized = normalizeWindow(timeWindow)
 
-    // 2. Assert Valid (Dev only check ideally, but safe to keep cheap checks)
-    if (process.env.NODE_ENV !== 'production') {
-      assertValidWindow(normalized)
-    }
+      // 2. Assert Valid (Dev only check ideally, but safe to keep cheap checks)
+      if (process.env.NODE_ENV !== 'production') {
+        assertValidWindow(normalized)
+      }
 
-    setState(prev => {
-      // Avoid update if identical (optional optimization, but strict equality of objects usually fails)
-      if (prev.timeWindow.startMs === normalized.startMs &&
+      setState(prev => {
+        // Avoid update if identical (optional optimization, but strict equality of objects usually fails)
+        if (
+          prev.timeWindow.startMs === normalized.startMs &&
           prev.timeWindow.endMs === normalized.endMs &&
           prev.timeWindow.granularity === normalized.granularity &&
-          prev.timeWindow.tzMode === normalized.tzMode) {
-        return prev
-      }
+          prev.timeWindow.tzMode === normalized.tzMode
+        ) {
+          return prev
+        }
 
-      // 3. Emit Telemetry (console for now)
-      console.log('triPane.timeWindow.change', {
-        window: normalized,
-        source: meta?.source,
-        prevSeq: prev.timeWindowSeq
+        // 3. Emit Telemetry (console for now)
+        console.log('triPane.timeWindow.change', {
+          window: normalized,
+          source: meta?.source,
+          prevSeq: prev.timeWindowSeq,
+        })
+
+        // 4. Update State & Bump Sequence
+        return {
+          ...prev,
+          timeWindow: normalized,
+          timeWindowSeq: prev.timeWindowSeq + 1,
+        }
       })
-
-      // 4. Update State & Bump Sequence
-      return {
-        ...prev,
-        timeWindow: normalized,
-        timeWindowSeq: prev.timeWindowSeq + 1
-      }
-    })
-  }, [])
+    },
+    []
+  )
 
   /**
    * Update filters - merges with existing filters
@@ -165,7 +170,7 @@ export function AnalystViewProvider({
   const resetAll = useCallback(() => {
     setState({
       ...initialStateRef.current,
-      timeWindowSeq: (state.timeWindowSeq || 0) + 1 // Keep sequence moving forward even on reset
+      timeWindowSeq: (state.timeWindowSeq || 0) + 1, // Keep sequence moving forward even on reset
     })
   }, [state.timeWindowSeq])
 

@@ -97,24 +97,18 @@
 **UI Modal (`apps/web/src/components/StepUpModal.tsx`)**
 
 ```tsx
-'use client';
-import { useState } from 'react';
-export default function StepUpModal({
-  onVerified,
-}: {
-  onVerified: () => void;
-}) {
+"use client";
+import { useState } from "react";
+export default function StepUpModal({ onVerified }: { onVerified: () => void }) {
   const [busy, setBusy] = useState(false);
   async function doStepUp() {
     setBusy(true);
-    const chal = await fetch('/api/auth/webauthn/challenge').then((r) =>
-      r.json(),
-    );
+    const chal = await fetch("/api/auth/webauthn/challenge").then((r) => r.json());
     const cred = await navigator.credentials.create({ publicKey: chal });
-    const ok = await fetch('/api/auth/webauthn/verify', {
-      method: 'POST',
+    const ok = await fetch("/api/auth/webauthn/verify", {
+      method: "POST",
       body: JSON.stringify(cred),
-      headers: { 'content-type': 'application/json' },
+      headers: { "content-type": "application/json" },
     }).then((r) => r.ok);
     setBusy(false);
     if (ok) onVerified();
@@ -123,11 +117,7 @@ export default function StepUpModal({
     <div className="p-4 rounded-2xl shadow bg-white space-y-2">
       <h3 className="text-lg font-semibold">Step‑Up Required</h3>
       <p>Confirm with your security key or platform authenticator.</p>
-      <button
-        disabled={busy}
-        onClick={doStepUp}
-        className="px-3 py-2 rounded-2xl shadow"
-      >
+      <button disabled={busy} onClick={doStepUp} className="px-3 py-2 rounded-2xl shadow">
         Verify
       </button>
     </div>
@@ -156,11 +146,10 @@ export function hasFreshStepUp(session, ttlMs = 5 * 60 * 1000) {
 **Route Guard Example**
 
 ```ts
-import { hasFreshStepUp } from '@/lib/stepup';
+import { hasFreshStepUp } from "@/lib/stepup";
 export async function POST(req: Request) {
   const session = await getSession();
-  if (!hasFreshStepUp(session))
-    return new Response('step_up_required', { status: 428 });
+  if (!hasFreshStepUp(session)) return new Response("step_up_required", { status: 428 });
   // proceed
 }
 ```
@@ -241,13 +230,13 @@ create index on audit_events (ts);
 **Appender (Node)**
 
 ```ts
-import { createHash } from 'crypto';
+import { createHash } from "crypto";
 let lastDigest = Buffer.alloc(0);
 export async function appendAudit(ev: any, db: any) {
-  const h = createHash('sha256')
+  const h = createHash("sha256")
     .update(Buffer.concat([lastDigest, Buffer.from(JSON.stringify(ev))]))
     .digest();
-  await db.insert('audit_events', { ...ev, sig_prev: lastDigest, sig_curr: h });
+  await db.insert("audit_events", { ...ev, sig_prev: lastDigest, sig_curr: h });
   lastDigest = h;
 }
 ```
@@ -267,15 +256,14 @@ export function ResidencyGuard({
   region,
   children,
 }: {
-  residency: 'US' | 'EU';
+  residency: "US" | "EU";
   region: string;
   children: React.ReactNode;
 }) {
   if (residency !== region) {
     return (
       <div className="p-3 rounded-2xl bg-yellow-50">
-        This data is restricted to {residency}. Switch your region or request
-        access.
+        This data is restricted to {residency}. Switch your region or request access.
       </div>
     );
   }
@@ -297,8 +285,8 @@ export function redact(obj: any) {
   const o = JSON.parse(JSON.stringify(obj));
   for (const [k, v] of Object.entries(o)) {
     for (const p of patterns) {
-      if (p.k.test(k) || (typeof v === 'string' && p.v.test(v as string))) {
-        o[k] = '[REDACTED]';
+      if (p.k.test(k) || (typeof v === "string" && p.v.test(v as string))) {
+        o[k] = "[REDACTED]";
       }
     }
   }
@@ -317,14 +305,14 @@ export function logJSON(entry: any) {
 **CI Linter (`scripts/telemetry-lint.js`)**
 
 ```js
-const fs = require('fs');
-const BAD = ['email', 'ssn', 'sin', 'phone', 'address'];
+const fs = require("fs");
+const BAD = ["email", "ssn", "sin", "phone", "address"];
 const files = process.argv.slice(2);
 let bad = 0;
 for (const f of files) {
-  const t = fs.readFileSync(f, 'utf8');
+  const t = fs.readFileSync(f, "utf8");
   for (const b of BAD) {
-    if (t.match(new RegExp(b, 'i'))) {
+    if (t.match(new RegExp(b, "i"))) {
       console.error(`PII token '${b}' in ${f}`);
       bad++;
     }
@@ -345,16 +333,16 @@ process.exit(bad ? 1 : 0);
 **k6 Profile (`perf/k6/smoke.js`)**
 
 ```js
-import http from 'k6/http';
-import { sleep, check } from 'k6';
+import http from "k6/http";
+import { sleep, check } from "k6";
 export const options = {
-  thresholds: { http_req_duration: ['p(95)<300', 'p(99)<600'] },
+  thresholds: { http_req_duration: ["p(95)<300", "p(99)<600"] },
   vus: 10,
-  duration: '3m',
+  duration: "3m",
 };
 export default function () {
   const r = http.get(`${__ENV.BASE_URL}/`);
-  check(r, { 'status 200': (res) => res.status === 200 });
+  check(r, { "status 200": (res) => res.status === 200 });
   sleep(1);
 }
 ```
@@ -430,15 +418,14 @@ switchboard.audit.v1.append
 ```yaml
 name: sbom-drift
 on:
-  schedule: [{ cron: '0 6 * * 1' }]
+  schedule: [{ cron: "0 6 * * 1" }]
 jobs:
   drift:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: anchore/sbom-action@v0
-        with:
-          { path: '.', format: cyclonedx-json, output-file: current.cdx.json }
+        with: { path: ".", format: cyclonedx-json, output-file: current.cdx.json }
       - name: Compare
         run: node scripts/compare-sbom.js releases/latest/sbom.cdx.json current.cdx.json
 ```
@@ -448,7 +435,7 @@ jobs:
 ```yaml
 name: attest-verify
 on:
-  schedule: [{ cron: '0 6 * * 2' }]
+  schedule: [{ cron: "0 6 * * 2" }]
 jobs:
   verify:
     runs-on: ubuntu-latest

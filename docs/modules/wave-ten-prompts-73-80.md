@@ -3,6 +3,7 @@
 This plan sequences the new capabilities into discrete workstreams with hard interfaces so they can progress in parallel without cross-team contention. Each module is API-first and scoped to avoid touching underlying engines directly.
 
 ## 73. Investigation Pattern Library (`invest-patterns/`)
+
 - **Objective:** Provide declarative investigation recipes with stable schemas and versioned executions that sit on top of existing graph/time/analytics APIs.
 - **Key Artifacts:**
   - Pattern DSL/schema covering inputs, underlying queries/analytics, expected outputs, and version metadata.
@@ -15,6 +16,7 @@ This plan sequences the new capabilities into discrete workstreams with hard int
 - **Guardrails:** Patterns are data-driven; engine immutability enforced. Versioned definitions are immutable once published. **Hard gate:** cannot merge new pattern unless golden fixtures + perf threshold recorded and schema migration reviewed.
 
 ## 74. Multi-Party Clean Room (`cleanroom/`)
+
 - **Objective:** Federated analytics across tenants with privacy-preserving outputs (aggregates/tokens) and strict session governance.
 - **Key Artifacts:**
   - Session model (participants, scopes, legal basis, allowed operations, policies).
@@ -27,6 +29,7 @@ This plan sequences the new capabilities into discrete workstreams with hard int
 - **Guardrails:** Whitelisted operations only; DP/threshold gates mandatory; per-tenant approvals. **Hard gate:** any op returning <k threshold is suppressed; queries without explicit session approvals are rejected.
 
 ## 75. Graph Federation (`graph-federation/`)
+
 - **Objective:** Execute logical queries across core and external graphs with stitched results and provenance, without ETL-ing external data.
 - **Key Artifacts:**
   - Federated source registry (endpoints, schemas, capabilities, trust/timeouts).
@@ -39,6 +42,7 @@ This plan sequences the new capabilities into discrete workstreams with hard int
 - **Guardrails:** Provenance preserved per source; graceful degradation on partial failures. **Hard gate:** no federated source moves to prod without latency/error budget SLOs + provenance correctness tests.
 
 ## 76. Regulatory Knowledge (`reg-knowledge/`)
+
 - **Objective:** Centralized, versioned store of regimes, jurisdictions, and obligations for governance/compliance lookups.
 - **Key Artifacts:**
   - Models for regimes/rulesets (scope, obligations, data categories, subject rights, retention), jurisdictions, applicability mappings.
@@ -51,6 +55,7 @@ This plan sequences the new capabilities into discrete workstreams with hard int
 - **Guardrails:** Additive changes with deprecation tags; no deletions; immutable versions. **Hard gate:** no write path without audit trail + effective date validation; lookup responses must enumerate sources/versions for downstream auditability.
 
 ## 77. Auto-Report Drafting (`report-auto/`)
+
 - **Objective:** Generate draft report sections grounded in evidence, with template-specific styles and provenance.
 - **Key Artifacts:**
   - Prompt assembly layer integrating case data, `prov-ledger`, report templates, and copilot/LLM.
@@ -63,6 +68,7 @@ This plan sequences the new capabilities into discrete workstreams with hard int
 - **Guardrails:** Reject hallucinated IDs; enforce template tone/length; respect governance filters. **Hard gate:** drafts failing grounding or safety checks are discarded; provenance must include model version + prompt hash.
 
 ## 78. Personalization (`personalization/`)
+
 - **Objective:** Store per-user preferences and lightweight signals to tune UI defaults and copilot hints within policy bounds.
 - **Key Artifacts:**
   - User profile schema (UI layouts/themes/filters, copilot style knobs, saved searches/views).
@@ -75,6 +81,7 @@ This plan sequences the new capabilities into discrete workstreams with hard int
 - **Guardrails:** Cross-tenant isolation; opt-out/default-safe behavior; explainable suggestion traces. **Hard gate:** no personalization surface can bypass access controls or leak cross-tenant signals; suggestions must be suppressible per user/tenant policy.
 
 ## 79. A/B Testing Framework (`ab-testing/`)
+
 - **Objective:** Governed experimentation for product features with deterministic bucketing and basic stats.
 - **Key Artifacts:**
   - Experiment model (population filters, variants, rollout fractions, start/stop, guardrails).
@@ -87,6 +94,7 @@ This plan sequences the new capabilities into discrete workstreams with hard int
 - **Guardrails:** Consistent hashing with salt/namespace, rollout/kill-switch controls, guardrail metric thresholds. **Hard gate:** experiments auto-stop on guardrail breach; variant assignment must be reproducible given user + experiment id.
 
 ## 80. Storyboard Engine (`storyboard/`)
+
 - **Objective:** Capture missions end-to-end from event streams and export structured storyboards for replay/training.
 - **Key Artifacts:**
   - Event listener/ingestor subscribing to cross-service streams.
@@ -99,12 +107,14 @@ This plan sequences the new capabilities into discrete workstreams with hard int
 - **Guardrails:** Respect redaction/tenancy; provenance for all steps; no mutation of upstream events. **Hard gate:** exporting or replaying a mission requires redaction policy evaluation + provenance completeness score.
 
 ## Sequencing and Parallelization
+
 - **Foundational (Week 1–2):** Define schemas/DSLs for `invest-patterns/`, `cleanroom/` session/operation catalog, `graph-federation/` source registry, `reg-knowledge/` regime model. Stand up stub APIs with contract tests. Deliver “hello world” fixture tests for each to lock schemas before executor work begins.
 - **Middle (Week 3–5):** Implement execution engines + adapters (`invest-patterns` runner, cleanroom federation ops, federation planner, reg-knowledge lookups); wire baseline tests. Begin `personalization/` signals and `ab-testing/` bucketing. Add load/latency benchmarks for federation and pattern execution to set SLOs.
 - **Late (Week 6–7):** Integrate `report-auto/` grounding/guardrails, finalize `personalization` suggestions, connect `ab-testing` to feature flags/analytics, and ship `storyboard/` recorder/exporter. Run performance/privacy/failure drills before rollout; document rollback and kill-switch levers.
 - **Stability Gates:** Immutable versioning for patterns/regimes; whitelisted ops for cleanroom; provenance for federated/LLM/storyboard outputs; deterministic bucketing with guardrails; redaction/privacy enforcement proven with fixtures before any external data touch.
 
 ## Definition of Done (per module)
+
 - API contracts documented and versioned.
 - Golden/fixture tests green (including privacy/governance where applicable).
 - Integration harnesses for dependent services (mocked where needed).

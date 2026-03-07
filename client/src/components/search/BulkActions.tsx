@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from "react";
 import {
   Box,
   Button,
@@ -16,16 +16,8 @@ import {
   InputLabel,
   Select,
   CircularProgress,
-} from '@mui/material';
-import {
-  MoreVert,
-  Label,
-  Folder,
-  Delete,
-  Archive,
-  Share,
-  GetApp,
-} from '@mui/icons-material';
+} from "@mui/material";
+import { MoreVert, Label, Folder, Delete, Archive, Share, GetApp } from "@mui/icons-material";
 
 interface BulkActionsProps {
   selectedItems: string[];
@@ -33,52 +25,46 @@ interface BulkActionsProps {
   onActionComplete: () => void;
 }
 
-type BulkActionId =
-  | 'tag'
-  | 'move'
-  | 'share'
-  | 'export'
-  | 'archive'
-  | 'delete';
+type BulkActionId = "tag" | "move" | "share" | "export" | "archive" | "delete";
 
 type BulkActionConfig = {
   id: BulkActionId;
   label: string;
   icon: typeof Label;
-  color: 'primary' | 'info' | 'secondary' | 'success' | 'warning' | 'error';
+  color: "primary" | "info" | "secondary" | "success" | "warning" | "error";
 };
 
 const BULK_ACTIONS: BulkActionConfig[] = [
-  { id: 'tag', label: 'Add Tags', icon: Label, color: 'primary' },
+  { id: "tag", label: "Add Tags", icon: Label, color: "primary" },
   {
-    id: 'move',
-    label: 'Move to Investigation',
+    id: "move",
+    label: "Move to Investigation",
     icon: Folder,
-    color: 'info',
+    color: "info",
   },
   {
-    id: 'share',
-    label: 'Share Selection',
+    id: "share",
+    label: "Share Selection",
     icon: Share,
-    color: 'secondary',
+    color: "secondary",
   },
   {
-    id: 'export',
-    label: 'Export Selection',
+    id: "export",
+    label: "Export Selection",
     icon: GetApp,
-    color: 'success',
+    color: "success",
   },
   {
-    id: 'archive',
-    label: 'Archive Items',
+    id: "archive",
+    label: "Archive Items",
     icon: Archive,
-    color: 'warning',
+    color: "warning",
   },
   {
-    id: 'delete',
-    label: 'Delete Items',
+    id: "delete",
+    label: "Delete Items",
     icon: Delete,
-    color: 'error',
+    color: "error",
   },
 ];
 
@@ -89,9 +75,7 @@ export function BulkActions({
 }: BulkActionsProps) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [dialogAction, setDialogAction] = useState<BulkActionId | null>(null);
-  const [actionMetadata, setActionMetadata] = useState<Record<string, string>>(
-    {},
-  );
+  const [actionMetadata, setActionMetadata] = useState<Record<string, string>>({});
 
   const [bulkAction, { loading }] = useBulkActionMutation();
 
@@ -117,7 +101,7 @@ export function BulkActions({
       onActionComplete();
       onSelectionClear();
     } catch (error) {
-      console.error('Bulk action failed:', error);
+      console.error("Bulk action failed:", error);
     }
   };
 
@@ -127,23 +111,19 @@ export function BulkActions({
     <>
       <Box
         sx={{
-          position: 'sticky',
+          position: "sticky",
           top: 0,
           zIndex: 10,
-          bgcolor: 'background.paper',
+          bgcolor: "background.paper",
           p: 2,
           borderBottom: 1,
-          borderColor: 'divider',
-          display: 'flex',
-          alignItems: 'center',
+          borderColor: "divider",
+          display: "flex",
+          alignItems: "center",
           gap: 2,
         }}
       >
-        <Chip
-          label={`${selectedItems.length} selected`}
-          color="primary"
-          variant="outlined"
-        />
+        <Chip label={`${selectedItems.length} selected`} color="primary" variant="outlined" />
 
         <Button
           variant="outlined"
@@ -154,20 +134,13 @@ export function BulkActions({
           Bulk Actions
         </Button>
 
-        <Button variant="text" onClick={onSelectionClear} sx={{ ml: 'auto' }}>
+        <Button variant="text" onClick={onSelectionClear} sx={{ ml: "auto" }}>
           Clear Selection
         </Button>
 
-        <Menu
-          anchorEl={anchorEl}
-          open={Boolean(anchorEl)}
-          onClose={() => setAnchorEl(null)}
-        >
+        <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={() => setAnchorEl(null)}>
           {BULK_ACTIONS.map((action) => (
-            <MenuItem
-              key={action.id}
-              onClick={() => handleActionClick(action.id)}
-            >
+            <MenuItem key={action.id} onClick={() => handleActionClick(action.id)}>
               <ListItemIcon>
                 <action.icon color={action.color} />
               </ListItemIcon>
@@ -184,31 +157,27 @@ export function BulkActions({
         maxWidth="sm"
         fullWidth
       >
-        <DialogTitle>
-          {BULK_ACTIONS.find((a) => a.id === dialogAction)?.label}
-        </DialogTitle>
+        <DialogTitle>{BULK_ACTIONS.find((a) => a.id === dialogAction)?.label}</DialogTitle>
 
         <DialogContent>
-          {dialogAction === 'tag' && (
+          {dialogAction === "tag" && (
             <TextField
               autoFocus
               margin="dense"
               label="Tags (comma-separated)"
               fullWidth
               variant="outlined"
-              value={actionMetadata.tags || ''}
-              onChange={(e) =>
-                setActionMetadata({ ...actionMetadata, tags: e.target.value })
-              }
+              value={actionMetadata.tags || ""}
+              onChange={(e) => setActionMetadata({ ...actionMetadata, tags: e.target.value })}
               placeholder="urgent, review-needed, evidence"
             />
           )}
 
-          {dialogAction === 'move' && (
+          {dialogAction === "move" && (
             <FormControl fullWidth margin="dense">
               <InputLabel>Target Investigation</InputLabel>
               <Select
-                value={actionMetadata.investigationId || ''}
+                value={actionMetadata.investigationId || ""}
                 onChange={(e) =>
                   setActionMetadata({
                     ...actionMetadata,
@@ -223,11 +192,11 @@ export function BulkActions({
             </FormControl>
           )}
 
-          {dialogAction === 'export' && (
+          {dialogAction === "export" && (
             <FormControl fullWidth margin="dense">
               <InputLabel>Export Format</InputLabel>
               <Select
-                value={actionMetadata.format || 'pdf'}
+                value={actionMetadata.format || "pdf"}
                 onChange={(e) =>
                   setActionMetadata({
                     ...actionMetadata,
@@ -243,7 +212,7 @@ export function BulkActions({
             </FormControl>
           )}
 
-          {(dialogAction === 'delete' || dialogAction === 'archive') && (
+          {(dialogAction === "delete" || dialogAction === "archive") && (
             <TextField
               margin="dense"
               label="Reason (optional)"
@@ -251,10 +220,8 @@ export function BulkActions({
               multiline
               rows={3}
               variant="outlined"
-              value={actionMetadata.reason || ''}
-              onChange={(e) =>
-                setActionMetadata({ ...actionMetadata, reason: e.target.value })
-              }
+              value={actionMetadata.reason || ""}
+              onChange={(e) => setActionMetadata({ ...actionMetadata, reason: e.target.value })}
               placeholder="Explain why these items are being archived/deleted..."
             />
           )}
@@ -268,7 +235,7 @@ export function BulkActions({
             disabled={loading}
             startIcon={loading ? <CircularProgress size={16} /> : undefined}
           >
-            {loading ? 'Processing...' : 'Execute'}
+            {loading ? "Processing..." : "Execute"}
           </Button>
         </DialogActions>
       </Dialog>
@@ -282,14 +249,9 @@ type BulkActionVariables = {
   metadata: Record<string, string>;
 };
 
-type BulkActionMutation = (options: {
-  variables: BulkActionVariables;
-}) => Promise<void>;
+type BulkActionMutation = (options: { variables: BulkActionVariables }) => Promise<void>;
 
-function useBulkActionMutation(): [
-  BulkActionMutation,
-  { loading: boolean },
-] {
+function useBulkActionMutation(): [BulkActionMutation, { loading: boolean }] {
   const [loading, setLoading] = useState(false);
 
   const mutate = useCallback<BulkActionMutation>(async ({ variables }) => {
@@ -297,7 +259,7 @@ function useBulkActionMutation(): [
     try {
       // Simulate async persistence while UI wiring is finalized.
       await new Promise((resolve) => setTimeout(resolve, 250));
-      console.log('Bulk action executed', variables);
+      console.log("Bulk action executed", variables);
     } finally {
       setLoading(false);
     }

@@ -57,8 +57,8 @@ module.exports = {
         mono: ['JetBrains Mono', 'Menlo', 'monospace'],
       },
       spacing: {
-        '18': '4.5rem',
-        '88': '22rem',
+        18: '4.5rem',
+        88: '22rem',
       },
       borderRadius: {
         '4xl': '2rem',

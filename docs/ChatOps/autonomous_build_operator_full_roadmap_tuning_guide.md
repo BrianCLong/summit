@@ -205,7 +205,7 @@ budgets:
   wall_time_minutes: 120
 safety:
   require_reason_for_access: true
-  forbidden_patterns: ['DROP TABLE', 'exec(']
+  forbidden_patterns: ["DROP TABLE", "exec("]
 ```
 
 ---

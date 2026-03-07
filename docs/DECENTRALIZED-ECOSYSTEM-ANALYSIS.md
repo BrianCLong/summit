@@ -15,6 +15,7 @@ The Summit/IntelGraph platform has a mature, production-ready foundation for dec
 **Purpose:** Tamper-evident storage and retrieval of claims, evidence, and provenance chains with cryptographic integrity verification.
 
 **Key Features:**
+
 - **Claims Management**: Register assertions with SHA-256 content hashes
 - **Evidence Tracking**: Store files/data with checksums and transformation chains
 - **Provenance Chains**: Append-only transformation history (immutable audit trail)
@@ -22,6 +23,7 @@ The Summit/IntelGraph platform has a mature, production-ready foundation for dec
 - **Transform Chains**: Full lineage tracking with configurable transformations
 
 **Technology Stack:**
+
 - Framework: Fastify 5.x (lightweight, high-performance)
 - Database: PostgreSQL 15+ (relational storage)
 - Validation: Zod schemas
@@ -29,6 +31,7 @@ The Summit/IntelGraph platform has a mature, production-ready foundation for dec
 - Security: Helmet middleware, CORS, policy-based authorization
 
 **Data Model:**
+
 ```typescript
 // Core entities in prov-ledger
 - Claim: id, content (JSON), hash, signature, metadata, sourceRef, licenseId, policyLabels, created_at
@@ -39,6 +42,7 @@ The Summit/IntelGraph platform has a mature, production-ready foundation for dec
 ```
 
 **API Endpoints:**
+
 - `POST /claims` - Create claim with content hash
 - `GET /claims/:id` - Retrieve claim
 - `POST /evidence` - Register evidence with transform chain
@@ -48,6 +52,7 @@ The Summit/IntelGraph platform has a mature, production-ready foundation for dec
 - `POST /hash/verify` - Verify content integrity
 
 **Client Library:** Located at `/home/user/summit/server/src/prov-ledger-client/`
+
 - HTTP client with retry logic and error handling
 - Used by other services for ledger interactions
 - Supports authority-based access control headers
@@ -61,6 +66,7 @@ The Summit/IntelGraph platform has a mature, production-ready foundation for dec
 **PostgreSQL Schema** (`services/api/migrations/`)
 
 Key audit and configuration tables:
+
 ```sql
 -- Immutable audit log (append-only)
 maestro.audit_events (
@@ -89,6 +95,7 @@ maestro.case_spaces (
 **Neo4j Graph Schema** (`services/api/src/db/neo4j.ts`)
 
 Core graph entities with tenant isolation:
+
 - Entity nodes with constraints and indexes
 - RELATES_TO relationships with uniqueness constraints
 - Investigation nodes with full lineage tracking
@@ -103,12 +110,14 @@ Core graph entities with tenant isolation:
 **Location:** `/home/user/summit/services/authz-gateway/src/`
 
 **Architecture:**
+
 - Express.js based gateway
 - JWT token management and introspection
 - Open Policy Agent (OPA) integration for ABAC (Attribute-Based Access Control)
 - Subject and resource attribute caching
 
 **Key Components:**
+
 1. **JWT Management** (`auth.ts`):
    - JWK key management (public/private key pairs)
    - Token introspection endpoint
@@ -134,6 +143,7 @@ Core graph entities with tenant isolation:
    - Subject, action, resource tracking
 
 **Authorization Decision Output:**
+
 ```typescript
 {
   allowed: boolean,
@@ -147,6 +157,7 @@ Core graph entities with tenant isolation:
 Located at `/home/user/summit/server/src/prov-ledger-client/types.ts`
 
 Authority enforcement headers:
+
 - `x-authority-id`: Identifier for requesting authority
 - `x-reason-for-access`: Justification for audit trail
 
@@ -183,6 +194,7 @@ Authority enforcement headers:
 Located in `/home/user/summit/server/src/federal/`
 
 **WORM (Write Once Read Many) Chain:**
+
 ```typescript
 export class WORMAuditChainService {
   // Immutable audit chain for federal compliance
@@ -191,6 +203,7 @@ export class WORMAuditChainService {
 ```
 
 **Dual Notary Service:**
+
 ```typescript
 export class DualNotaryService {
   // Two-party signing and attestation
@@ -199,6 +212,7 @@ export class DualNotaryService {
 ```
 
 **FIPS Compliance Service:**
+
 ```typescript
 export class FIPSComplianceService implements FIPSCrypto {
   // Federal cryptographic standards
@@ -214,6 +228,7 @@ export class FIPSComplianceService implements FIPSCrypto {
 **Location:** `/home/user/summit/services/blockchain/src/`
 
 **Current Status:** Service directory exists with `address-clusterer.ts` (43KB)
+
 - Address clustering for blockchain analysis
 - Likely used for cryptocurrency/blockchain intelligence
 
@@ -222,11 +237,13 @@ export class FIPSComplianceService implements FIPSCrypto {
 #### Crypto Service (`services/crypto-service/src/index.ts`)
 
 **Post-Quantum Cryptography Support:**
+
 - Kyber KEM (Key Encapsulation)
 - Dilithium Signatures (Post-quantum digital signatures)
 - Hybrid KEM (classical + quantum-safe)
 
 **Endpoints:**
+
 - `POST /api/v1/keys/generate` - Generate key pairs (kyber|dilithium|hybrid)
 - `POST /api/v1/kem/encapsulate` - Key encapsulation
 - `POST /api/v1/kem/decapsulate` - Key decapsulation
@@ -236,6 +253,7 @@ export class FIPSComplianceService implements FIPSCrypto {
 - `POST /api/v1/inventory/scan` - Crypto inventory scanning
 
 **Algorithm Registry & Migration:**
+
 - Cryptographic algorithm inventory
 - Agility support for algorithm migration
 - `@intelgraph/cryptographic-agility` package
@@ -265,6 +283,7 @@ Post-quantum cryptographic primitives for quantum-safe operations.
 **Location:** `/home/user/summit/server/src/config/distributed/multi-backend-repository.ts`
 
 **Architecture:**
+
 ```
 Primary (Consul) ←→ Fallback (PostgreSQL) ←→ Cache (In-Memory)
                       ↓
@@ -273,12 +292,14 @@ Primary (Consul) ←→ Fallback (PostgreSQL) ←→ Cache (In-Memory)
 ```
 
 **Key Features:**
+
 - Automatic health checking and failover
 - Write-through consistency across backends
 - Cache-aside read pattern
 - Event emission on state changes
 
 **Supports:**
+
 - Consul-backed distributed configuration
 - PostgreSQL persistent storage
 - In-memory caching for performance
@@ -288,12 +309,14 @@ Primary (Consul) ←→ Fallback (PostgreSQL) ←→ Cache (In-Memory)
 **Location:** `/home/user/summit/server/src/config/distributed/consul-repository.ts`
 
 **Capabilities:**
+
 - Real-time distributed configuration
 - Automatic change propagation via watchers
 - Audit trail with version history
 - Key-value store with prefix-based namespacing
 
 **Storage Structure:**
+
 ```
 summit/config/{configId}/versions/{versionNumber}
 summit/config/{configId}/latest
@@ -306,6 +329,7 @@ summit/config/{configId}/audit_trail
 **Location:** `/home/user/summit/server/src/config/distributed/types.ts`
 
 **Core Types:**
+
 ```typescript
 ConfigVersion<TConfig>: {
   id, config, overrides, metadata, checksum, abTest, canary, featureFlags
@@ -326,6 +350,7 @@ CanaryConfig<TConfig>: {
 ```
 
 **Supports:**
+
 - A/B testing configurations
 - Canary deployments
 - Feature flags
@@ -337,6 +362,7 @@ CanaryConfig<TConfig>: {
 **Location:** `/home/user/summit/server/src/data-residency/residency-service.ts`
 
 **Capabilities:**
+
 - Multi-region, multi-jurisdiction data management
 - Data classification with residency requirements
 - KMS provider abstraction:
@@ -347,6 +373,7 @@ CanaryConfig<TConfig>: {
   - Customer-managed encryption
 
 **Features:**
+
 - Encryption enforcement per classification level
 - Retention policy enforcement (1 day - 100 years)
 - Tenant-based configuration
@@ -361,6 +388,7 @@ CanaryConfig<TConfig>: {
 **Location:** `/home/user/summit/packages/common-types/src/types.ts`
 
 **Core Entities:**
+
 ```typescript
 Entity: {
   id, kind (Person|Org|Location|Event|Document|Indicator|Case|Claim),
@@ -388,6 +416,7 @@ Envelope: {
 **Location:** `/home/user/summit/packages/canonical-schema/`
 
 Unified data model for entities and relationships:
+
 - Person entities
 - Organization entities
 - Entity-relationship types
@@ -396,19 +425,21 @@ Unified data model for entities and relationships:
 ### 6.3 Database Connection Patterns
 
 **PostgreSQL Pattern** (`services/api/src/db/postgres.ts`):
+
 ```typescript
 class PostgreSQLConnection {
-  private pool: Pool
-  async query<T>(text: string, params?: any[]): Promise<QueryResult<T>>
-  async getClient(): Promise<PoolClient>
+  private pool: Pool;
+  async query<T>(text: string, params?: any[]): Promise<QueryResult<T>>;
+  async getClient(): Promise<PoolClient>;
 }
 ```
 
 **Neo4j Pattern** (`services/api/src/db/neo4j.ts`):
+
 ```typescript
 class Neo4jConnection {
-  private driver: Driver
-  async run(cypher: string, params?: any[]): Promise<any>
+  private driver: Driver;
+  async run(cypher: string, params?: any[]): Promise<any>;
   // Auto-creates constraints and indexes on connect
 }
 ```
@@ -498,18 +529,21 @@ packages/
 ### 8.1 Authentication Integration
 
 **Use Existing:** `services/authz-gateway/`
+
 - Extend OPA policies for distributed agent authorization
 - Use JWT tokens for inter-service authentication
 - Leverage attribute service for data provider credentials
 
 ### 8.2 Audit & Compliance Integration
 
-**Use Existing:** 
+**Use Existing:**
+
 - `services/prov-ledger/` for immutable evidence trails
 - `services/audit_svc/` for operation auditing
 - `server/src/federal/worm-audit-chain.ts` for WORM compliance
 
 **Extend with:**
+
 - Distributed audit log aggregation
 - Cross-shard audit verification
 - Merkle tree proof generation for audit trails
@@ -517,23 +551,27 @@ packages/
 ### 8.3 Cryptography Integration
 
 **Use Existing:**
+
 - `services/crypto-service/` for key management
 - `packages/post-quantum-crypto/` for quantum-safe operations
 - `packages/cryptographic-agility/` for algorithm migration
 
 **Extend with:**
+
 - Threshold cryptography for multi-party computation
 - Threshold signatures for governance
 - Zero-knowledge proof generation
 
 ### 8.4 Distributed Configuration
 
-**Use Existing:** 
+**Use Existing:**
+
 - `server/src/config/distributed/` for distributed configuration management
 - Consul for service discovery
 - Multi-backend repository for fallback support
 
 **Extend with:**
+
 - Decentralized configuration consensus
 - Network-wide version tracking
 - Global configuration state verification
@@ -541,11 +579,13 @@ packages/
 ### 8.5 Data Residency & Privacy
 
 **Use Existing:**
+
 - `server/src/data-residency/residency-service.ts` for jurisdiction-aware storage
 - KMS provider abstraction for key management
 - Tenant isolation patterns
 
 **Extend with:**
+
 - Distributed data sharding
 - Privacy-preserving data queries
 - Homomorphic encryption support
@@ -585,6 +625,7 @@ packages/
 **Location:** `/home/user/summit/docker-compose.dev.yml`
 
 Services already defined:
+
 - PostgreSQL (port 5432)
 - Redis (port 6379)
 - Neo4j (ports 7474, 7687)
@@ -597,6 +638,7 @@ Services already defined:
 **Location:** `/home/user/summit/k8s/`
 
 Helm charts for deployment of all services including:
+
 - Service definitions
 - ConfigMaps for distributed configuration
 - Secrets management
@@ -618,6 +660,7 @@ Helm charts for deployment of all services including:
 
 **Framework:** Jest with TypeScript
 **Test Types:**
+
 - Unit tests (`**/*.test.ts`)
 - Integration tests with database mocks
 - E2E tests with Playwright
@@ -635,20 +678,20 @@ Helm charts for deployment of all services including:
 
 ## 12. KEY FILES & LOCATIONS SUMMARY
 
-| Component | Location | Purpose |
-|-----------|----------|---------|
-| Prov-Ledger Service | `services/prov-ledger/` | Immutable evidence storage & provenance |
-| Prov-Ledger Client | `server/src/prov-ledger-client/` | HTTP client for ledger operations |
-| Auth Gateway | `services/authz-gateway/` | RBAC + ABAC authorization |
-| Crypto Service | `services/crypto-service/` | Post-quantum cryptography |
-| Distributed Config | `server/src/config/distributed/` | Multi-backend configuration repository |
-| Data Residency | `server/src/data-residency/` | Jurisdiction-aware encryption & storage |
-| WORM Audit | `server/src/federal/worm-audit-chain.ts` | Immutable audit trail |
-| Neo4j Interface | `services/api/src/db/neo4j.ts` | Graph database abstraction |
-| PostgreSQL Pool | `services/api/src/db/postgres.ts` | Relational database abstraction |
-| Canonical Schema | `packages/canonical-schema/` | Unified entity/relationship model |
-| Common Types | `packages/common-types/` | Shared type definitions |
-| Prov-Ledger SDK | `packages/prov-ledger-sdk/` | TypeScript SDK for ledger |
+| Component           | Location                                 | Purpose                                 |
+| ------------------- | ---------------------------------------- | --------------------------------------- |
+| Prov-Ledger Service | `services/prov-ledger/`                  | Immutable evidence storage & provenance |
+| Prov-Ledger Client  | `server/src/prov-ledger-client/`         | HTTP client for ledger operations       |
+| Auth Gateway        | `services/authz-gateway/`                | RBAC + ABAC authorization               |
+| Crypto Service      | `services/crypto-service/`               | Post-quantum cryptography               |
+| Distributed Config  | `server/src/config/distributed/`         | Multi-backend configuration repository  |
+| Data Residency      | `server/src/data-residency/`             | Jurisdiction-aware encryption & storage |
+| WORM Audit          | `server/src/federal/worm-audit-chain.ts` | Immutable audit trail                   |
+| Neo4j Interface     | `services/api/src/db/neo4j.ts`           | Graph database abstraction              |
+| PostgreSQL Pool     | `services/api/src/db/postgres.ts`        | Relational database abstraction         |
+| Canonical Schema    | `packages/canonical-schema/`             | Unified entity/relationship model       |
+| Common Types        | `packages/common-types/`                 | Shared type definitions                 |
+| Prov-Ledger SDK     | `packages/prov-ledger-sdk/`              | TypeScript SDK for ledger               |
 
 ---
 
@@ -657,11 +700,13 @@ Helm charts for deployment of all services including:
 **Location:** `Makefile`, `docker-compose.dev.yml`, `scripts/smoke-test.js`
 
 **Golden Path Workflow:**
+
 ```
 Investigation → Entities → Relationships → Copilot → Results
 ```
 
 **Command Flow:**
+
 ```bash
 make bootstrap    # Install deps, create .env
 make up          # Start docker-compose.dev.yml
@@ -683,6 +728,7 @@ The Summit/IntelGraph codebase provides a strong foundation for decentralized da
 6. **Data Privacy**: Data residency service with KMS abstraction
 
 **Recommended First Steps:**
+
 1. Create `services/distributed-registry/` for peer discovery
 2. Create `packages/merkle-proofs/` for proof generation
 3. Extend `prov-ledger/` with cross-shard consensus
@@ -690,6 +736,7 @@ The Summit/IntelGraph codebase provides a strong foundation for decentralized da
 5. Implement zero-knowledge proofs in new `services/zero-knowledge-proof/`
 
 All new services should follow existing patterns:
+
 - Use Fastify for HTTP services
 - Extend prov-ledger for audit trails
 - Use Neo4j for relationship tracking

@@ -5,6 +5,7 @@
 ## Overview
 
 Organizations forget. Especially when:
+
 - Founders leave
 - Team turnover is high
 - Time passes and urgency fades
@@ -12,6 +13,7 @@ Organizations forget. Especially when:
 - Documentation exists but rationale doesn't
 
 **Institutional memory** is the systematic preservation of:
+
 - **What** the mission and constraints are
 - **Why** they exist (the reasoning and context)
 - **How** they should be maintained
@@ -31,6 +33,7 @@ Without institutional memory, constraints become cargo cults—followed mechanic
 ### Layer 1: The Mission (The "What")
 
 **Minimum Documentation**:
+
 - Core purpose statement
 - Scope boundaries (what Summit does and doesn't do)
 - Non-negotiable invariants
@@ -38,12 +41,14 @@ Without institutional memory, constraints become cargo cults—followed mechanic
 - Oversight and governance structure
 
 **Format**:
+
 - Written in charter/bylaws (legally binding)
 - Plain language explainer for accessibility
 - Decision flowcharts and examples
 - Regular training materials
 
 **Maintenance**:
+
 - Version controlled
 - Changes documented with rationale
 - Public and accessible
@@ -96,6 +101,7 @@ What Would Happen Without It:
 **For Each Decision**:
 
 Regular capture of decision rationale in logs:
+
 ```
 Decision: Refused request for [X]
 Evidence Status: Insufficient - only 1 source, credibility score 0.6
@@ -113,18 +119,21 @@ Learning: [any insight from this case]
 #### Organizational History
 
 **Founding Story**:
+
 - What problem was Summit created to solve?
 - What failures or gaps in the world prompted this?
 - Who founded it and what was their vision?
 - What principles were non-negotiable from day one?
 
 **Evolution**:
+
 - How has Summit evolved since founding?
 - What early approaches were tried and abandoned (and why)?
 - What crises or challenges shaped current structure?
 - What mistakes were made and what was learned?
 
 **Example Documentation**:
+
 ```
 Summit Founding Context (2024)
 
@@ -204,6 +213,7 @@ this case study shows why the answer is no.
 #### External Failure Examples
 
 **Document Why Others Failed**:
+
 ```
 Case Study: [Other Organization] Evidence Discipline Collapse (2023)
 
@@ -299,6 +309,7 @@ Pressure to compromise will exist—resisting it is your job.
 #### 1. Core Documents Repository
 
 **Contents**:
+
 - Mission statement and invariants (authoritative version)
 - Governance structure documentation
 - Rationale for each constraint
@@ -307,6 +318,7 @@ Pressure to compromise will exist—resisting it is your job.
 - Cultural values and norms
 
 **Maintenance**:
+
 - Version controlled (Git or equivalent)
 - Cryptographically hashed for integrity
 - Regular review and updates
@@ -315,6 +327,7 @@ Pressure to compromise will exist—resisting it is your job.
 #### 2. Decision Logs
 
 **Every Decision Includes**:
+
 - What was decided
 - What evidence supported it
 - What constraints were applied
@@ -327,12 +340,14 @@ Pressure to compromise will exist—resisting it is your job.
 #### 3. Oral History Program
 
 **Periodic Recorded Interviews**:
+
 - Founders explain their vision and reasoning
 - Long-tenured staff discuss evolution and lessons
 - Oversight board members describe governance philosophy
 - External stakeholders explain why they trust Summit
 
 **Format**:
+
 - Video or audio recordings
 - Transcribed for searchability
 - Preserved indefinitely
@@ -345,6 +360,7 @@ Pressure to compromise will exist—resisting it is your job.
 #### 1. Onboarding Program
 
 **Every New Team Member**:
+
 - Reads core mission documents
 - Studies rationale for constraints
 - Reviews case studies of drift resistance
@@ -352,6 +368,7 @@ Pressure to compromise will exist—resisting it is your job.
 - Commits to upholding mission
 
 **Assessment**:
+
 - Can articulate mission in own words
 - Understands trade-offs and why they're accepted
 - Knows how to escalate if pressured to compromise
@@ -359,6 +376,7 @@ Pressure to compromise will exist—resisting it is your job.
 #### 2. Regular Immersion
 
 **Ongoing Activities**:
+
 - Quarterly mission refresh (review "why we're here")
 - Case study discussions (near-misses, external failures)
 - Constraint application workshops
@@ -369,6 +387,7 @@ Pressure to compromise will exist—resisting it is your job.
 #### 3. Succession Handoff
 
 **Departing Leader Obligations**:
+
 - Record oral history before leaving
 - Document tacit knowledge
 - Brief successor on mission context
@@ -376,6 +395,7 @@ Pressure to compromise will exist—resisting it is your job.
 - Introduce to oversight board and external stakeholders
 
 **New Leader Obligations**:
+
 - Study institutional memory before starting
 - Demonstrate understanding of mission rationale
 - Commit publicly to constraints
@@ -388,6 +408,7 @@ Pressure to compromise will exist—resisting it is your job.
 #### 1. Governance Documents
 
 **Charter and Bylaws Include**:
+
 - Mission statement (the "what")
 - Rationale section (the "why")
 - Historical context (the "how we got here")
@@ -398,6 +419,7 @@ Pressure to compromise will exist—resisting it is your job.
 #### 2. External Accountability
 
 **Public Commitments Reference History**:
+
 - "We commit to evidence discipline because [historical rationale]"
 - "Oversight is non-negotiable because [lessons learned]"
 - "Scope limitation exists because [external failures we studied]"
@@ -407,6 +429,7 @@ Pressure to compromise will exist—resisting it is your job.
 #### 3. Independent Oversight
 
 **Oversight Board Responsibilities**:
+
 - Custodian of institutional memory
 - Ensures rationale is preserved
 - Challenges "legacy thinking" dismissals with evidence
@@ -421,6 +444,7 @@ Pressure to compromise will exist—resisting it is your job.
 New leaders or team members will question constraints. This is healthy—**if** met with evidence-based answers.
 
 **Dangerous Pattern**:
+
 ```
 New Leader: "Why do we require evidence citations? Seems like overhead."
 Veteran: "We've always done it that way."
@@ -428,6 +452,7 @@ New Leader: "That's not a reason. Let's simplify."
 ```
 
 **Effective Pattern**:
+
 ```
 New Leader: "Why do we require evidence citations?"
 Veteran: "Great question. Here's the documented rationale [references
@@ -451,6 +476,7 @@ we require evidence for decisions."
 ### Warning Signs
 
 🚨 **Memory Erosion Indicators**:
+
 - "We've always done it this way" is the main defense
 - New leaders can't articulate why constraints exist
 - Documentation exists but no one reads it
@@ -461,6 +487,7 @@ we require evidence for decisions."
 ### Response
 
 **Immediate Actions**:
+
 1. Audit institutional memory preservation
 2. Update and redistribute core documents
 3. Reinvigorate oral history program
@@ -473,6 +500,7 @@ we require evidence for decisions."
 ## Institutional Memory Checklist
 
 ### Documentation
+
 - [ ] Core mission documents written and accessible
 - [ ] Rationale for each constraint documented
 - [ ] Founding story and context preserved
@@ -481,6 +509,7 @@ we require evidence for decisions."
 - [ ] Decision logs maintained and searchable
 
 ### Oral History
+
 - [ ] Founder interviews recorded and transcribed
 - [ ] Long-tenured staff perspectives captured
 - [ ] Oversight board philosophy documented
@@ -488,6 +517,7 @@ we require evidence for decisions."
 - [ ] Regular update schedule established
 
 ### Cultural Transmission
+
 - [ ] Onboarding program includes mission immersion
 - [ ] Regular refreshes scheduled and conducted
 - [ ] Case study discussions held quarterly
@@ -495,6 +525,7 @@ we require evidence for decisions."
 - [ ] Succession handoff protocols in place
 
 ### Structural Reinforcement
+
 - [ ] Governance documents include rationale
 - [ ] Public commitments reference history
 - [ ] Oversight board custodian role active
@@ -502,6 +533,7 @@ we require evidence for decisions."
 - [ ] Challenge protocol (for questioning constraints) documented
 
 ### Maintenance
+
 - [ ] Annual review of institutional memory
 - [ ] Gaps identified and filled
 - [ ] Outdated content updated or contextualized
@@ -530,6 +562,7 @@ Institutional memory is effective when:
 ### For Extreme Continuity
 
 **Consider**:
+
 - **Archival preservation**: Print copies in addition to digital
 - **Multiple redundant systems**: Don't rely on single repository
 - **External preservation**: Trusted partners hold copies

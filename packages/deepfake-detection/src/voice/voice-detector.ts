@@ -10,7 +10,7 @@ import type {
   ProsodyAnalysis,
   AudioArtifact,
   PitchAnalysis,
-} from '../types';
+} from "../types";
 
 export class VoiceDeepfakeDetector {
   private modelLoaded: boolean = false;
@@ -41,7 +41,7 @@ export class VoiceDeepfakeDetector {
       characteristics,
       spectralAnomalies,
       prosody,
-      artifacts,
+      artifacts
     );
 
     return {
@@ -266,7 +266,7 @@ export class VoiceDeepfakeDetector {
         frequency: 8000,
         magnitude: 0.15,
         timestamp: 0.5,
-        type: 'neural_vocoder_artifact',
+        type: "neural_vocoder_artifact",
       },
     ];
   }
@@ -321,7 +321,7 @@ export class VoiceDeepfakeDetector {
 
   private async analyzeTiming(audioBuffer: Buffer): Promise<number> {
     // Analyze pause durations and speech timing
-    return 0.90;
+    return 0.9;
   }
 
   /**
@@ -396,7 +396,7 @@ export class VoiceDeepfakeDetector {
     characteristics: VoiceCharacteristics,
     spectralAnomalies: SpectralAnomaly[],
     prosody: ProsodyAnalysis,
-    artifacts: AudioArtifact[],
+    artifacts: AudioArtifact[]
   ): number {
     let score = 0;
 
@@ -404,10 +404,10 @@ export class VoiceDeepfakeDetector {
     // Natural speech has moderate jitter/shimmer
     const jitterScore = Math.abs(characteristics.jitter - 0.75) / 0.75;
     const shimmerScore = Math.abs(characteristics.shimmer - 5.0) / 5.0;
-    score += (jitterScore + shimmerScore) / 2 * 0.15;
+    score += ((jitterScore + shimmerScore) / 2) * 0.15;
 
     // Spectral anomalies (30% weight)
-    score += (spectralAnomalies.length / 10) * 0.30;
+    score += (spectralAnomalies.length / 10) * 0.3;
 
     // Prosody naturalness (25% weight)
     score += (1 - prosody.naturalness) * 0.25;
@@ -417,12 +417,12 @@ export class VoiceDeepfakeDetector {
       artifacts.length > 0
         ? artifacts.reduce((sum, art) => sum + art.severity, 0) / artifacts.length
         : 0;
-    score += avgArtifactSeverity * 0.20;
+    score += avgArtifactSeverity * 0.2;
 
     // Harmonic-to-noise ratio (10% weight)
     // Unnaturally high or low HNR is suspicious
     const hnrScore = Math.abs(characteristics.harmonicRatio - 18) / 18;
-    score += hnrScore * 0.10;
+    score += hnrScore * 0.1;
 
     return Math.min(score, 1);
   }
@@ -441,19 +441,19 @@ export class VoiceDeepfakeDetector {
 
     // High synthesis score
     if (analysis.synthesisScore > 0.6) {
-      evidence.push('High synthesis score detected');
+      evidence.push("High synthesis score detected");
       cloneScore += 0.4;
     }
 
     // Prosody issues
     if (analysis.prosodyAnalysis.naturalness < 0.7) {
-      evidence.push('Unnatural prosody patterns');
+      evidence.push("Unnatural prosody patterns");
       cloneScore += 0.3;
     }
 
     // Spectral anomalies
     if (analysis.spectralAnomalies.length > 3) {
-      evidence.push('Multiple spectral anomalies detected');
+      evidence.push("Multiple spectral anomalies detected");
       cloneScore += 0.3;
     }
 

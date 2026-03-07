@@ -1,13 +1,13 @@
-import { EventEmitter } from 'events';
-import { Pool } from 'pg';
-import { logger } from '../utils/logger.js';
+import { EventEmitter } from "events";
+import { Pool } from "pg";
+import { logger } from "../utils/logger.js";
 import {
   InferenceRecord,
   ModelEngine,
   ModelPerformanceRecord,
   PerformanceSnapshot,
   RealtimeMetricSnapshot,
-} from './types.js';
+} from "./types.js";
 
 interface AggregatedInferenceState {
   modelVersionId: string;
@@ -34,7 +34,7 @@ export class ModelBenchmarkingService {
 
     const client = await this.pool.connect();
     try {
-      await client.query('BEGIN');
+      await client.query("BEGIN");
 
       await client.query(`
         CREATE TABLE IF NOT EXISTS ml_model_ab_tests (
@@ -88,12 +88,12 @@ export class ModelBenchmarkingService {
           ON ml_inference_metrics(model_version_id, created_at DESC)
       `);
 
-      await client.query('COMMIT');
+      await client.query("COMMIT");
       this.initialized = true;
-      logger.info('ModelBenchmarkingService initialized');
+      logger.info("ModelBenchmarkingService initialized");
     } catch (error) {
-      await client.query('ROLLBACK');
-      logger.error('Failed to initialize ModelBenchmarkingService', error);
+      await client.query("ROLLBACK");
+      logger.error("Failed to initialize ModelBenchmarkingService", error);
       throw error;
     } finally {
       client.release();
@@ -101,19 +101,17 @@ export class ModelBenchmarkingService {
   }
 
   onUpdate(listener: (snapshots: RealtimeMetricSnapshot[]) => void): void {
-    this.emitter.on('update', listener);
+    this.emitter.on("update", listener);
   }
 
   removeUpdateListener(listener: (snapshots: RealtimeMetricSnapshot[]) => void): void {
-    this.emitter.removeListener('update', listener);
+    this.emitter.removeListener("update", listener);
   }
 
   async recordPerformance(record: ModelPerformanceRecord): Promise<void> {
     await this.initialize();
 
-    const evaluationDate = record.evaluationDate
-      ? new Date(record.evaluationDate)
-      : new Date();
+    const evaluationDate = record.evaluationDate ? new Date(record.evaluationDate) : new Date();
 
     await this.pool.query(
       `
@@ -142,7 +140,7 @@ export class ModelBenchmarkingService {
           modelType: record.modelType,
           ...(record.evaluationContext ?? {}),
         }),
-      ],
+      ]
     );
 
     const key = record.modelVersionId;
@@ -199,7 +197,7 @@ export class ModelBenchmarkingService {
         record.predictedLabel ?? null,
         JSON.stringify(record.metrics ?? {}),
         JSON.stringify(record.metadata ?? {}),
-      ],
+      ]
     );
 
     const key = record.modelVersionId;
@@ -239,10 +237,7 @@ export class ModelBenchmarkingService {
     this.emitUpdate();
   }
 
-  async getPerformanceHistory(
-    modelVersionId: string,
-    limit = 50,
-  ): Promise<PerformanceSnapshot[]> {
+  async getPerformanceHistory(modelVersionId: string, limit = 50): Promise<PerformanceSnapshot[]> {
     await this.initialize();
 
     const result = await this.pool.query(
@@ -253,7 +248,7 @@ export class ModelBenchmarkingService {
         ORDER BY evaluation_date DESC, metric_name ASC
         LIMIT $2 * 4
       `,
-      [modelVersionId, limit],
+      [modelVersionId, limit]
     );
 
     const grouped = new Map<string, PerformanceSnapshot>();
@@ -270,16 +265,16 @@ export class ModelBenchmarkingService {
       };
 
       switch (row.metric_name) {
-        case 'accuracy':
+        case "accuracy":
           snapshot.accuracy = Number(row.metric_value);
           break;
-        case 'precision':
+        case "precision":
           snapshot.precision = Number(row.metric_value);
           break;
-        case 'recall':
+        case "recall":
           snapshot.recall = Number(row.metric_value);
           break;
-        case 'f1_score':
+        case "f1_score":
           snapshot.f1Score = Number(row.metric_value);
           break;
         default:
@@ -291,8 +286,7 @@ export class ModelBenchmarkingService {
 
     return Array.from(grouped.values()).sort(
       (a, b) =>
-        new Date(a.evaluationDate ?? 0).getTime() -
-        new Date(b.evaluationDate ?? 0).getTime(),
+        new Date(a.evaluationDate ?? 0).getTime() - new Date(b.evaluationDate ?? 0).getTime()
     );
   }
 
@@ -305,13 +299,9 @@ export class ModelBenchmarkingService {
       }
 
       const averageLatency =
-        aggregate.requestCount === 0
-          ? 0
-          : aggregate.totalLatency / aggregate.requestCount;
+        aggregate.requestCount === 0 ? 0 : aggregate.totalLatency / aggregate.requestCount;
       const successRate =
-        aggregate.requestCount === 0
-          ? 0
-          : aggregate.successCount / aggregate.requestCount;
+        aggregate.requestCount === 0 ? 0 : aggregate.successCount / aggregate.requestCount;
 
       snapshots.push({
         modelVersionId: aggregate.modelVersionId,
@@ -327,13 +317,12 @@ export class ModelBenchmarkingService {
     }
 
     return snapshots.sort(
-      (a, b) =>
-        new Date(b.lastUpdated).getTime() - new Date(a.lastUpdated).getTime(),
+      (a, b) => new Date(b.lastUpdated).getTime() - new Date(a.lastUpdated).getTime()
     );
   }
 
   private emitUpdate(): void {
     const snapshots = this.getRealtimeSnapshot();
-    this.emitter.emit('update', snapshots);
+    this.emitter.emit("update", snapshots);
   }
 }

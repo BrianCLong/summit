@@ -88,10 +88,10 @@ interface Warrant {
   expiryDate: "2025-12-31T23:59:59Z";
   jurisdiction: "US";
   scopeConstraints: {
-    resourceTypes: ["investigation", "entity"],
-    allowedOperations: ["read", "export"],
-    purposes: ["investigation"],
-    maxSensitivity: "restricted"
+    resourceTypes: ["investigation", "entity"];
+    allowedOperations: ["read", "export"];
+    purposes: ["investigation"];
+    maxSensitivity: "restricted";
   };
   status: "active" | "expired" | "revoked" | "superseded";
 }
@@ -104,41 +104,41 @@ Every access is logged with full governance context:
 ```typescript
 interface AuditEvent {
   // WHO
-  userId: "user-123",
-  tenantId: "tenant-a",
-  ipAddress: "192.168.1.1",
-  userAgent: "Mozilla/5.0...",
-  sessionId: "session-abc",
+  userId: "user-123";
+  tenantId: "tenant-a";
+  ipAddress: "192.168.1.1";
+  userAgent: "Mozilla/5.0...";
+  sessionId: "session-abc";
 
   // WHAT
-  resourceType: "investigation",
-  resourceId: "inv-456",
-  action: "view_case_graph",
-  operation: "query",
+  resourceType: "investigation";
+  resourceId: "inv-456";
+  action: "view_case_graph";
+  operation: "query";
 
   // WHY
-  purpose: "investigation",
-  legalBasis: ["court_order"],
-  warrantId: "warrant-789",
-  reasonForAccess: "Reviewing evidence for case XYZ-123",
+  purpose: "investigation";
+  legalBasis: ["court_order"];
+  warrantId: "warrant-789";
+  reasonForAccess: "Reviewing evidence for case XYZ-123";
 
   // WHEN
-  timestamp: "2025-01-15T14:30:00Z",
-  correlationId: "req-abc-123",
+  timestamp: "2025-01-15T14:30:00Z";
+  correlationId: "req-abc-123";
 
   // OUTCOME
-  outcome: "success" | "failure" | "partial",
+  outcome: "success" | "failure" | "partial";
   policyDecision: {
-    allowed: true,
-    denyReasons: [],
-    redactedFields: [],
-    evaluationTimeMs: 12
-  },
+    allowed: true;
+    denyReasons: [];
+    redactedFields: [];
+    evaluationTimeMs: 12;
+  };
 
   // INTEGRITY
-  hash: "sha256-of-event",
-  signature: "jwt-signature",
-  previousEventHash: "sha256-of-previous-event"
+  hash: "sha256-of-event";
+  signature: "jwt-signature";
+  previousEventHash: "sha256-of-previous-event";
 }
 ```
 
@@ -193,31 +193,31 @@ Request ID for reference: req-abc-123
 
 ### Core Implementation
 
-| File | Purpose | Lines |
-|------|---------|-------|
-| `GOVERNANCE_DESIGN.md` | Comprehensive design document | 1,500+ |
-| `server/src/migrations/001_governance_schema.sql` | PostgreSQL schema for warrants, access purposes, audit | 400+ |
-| `server/src/migrations/002_neo4j_policy_tags.ts` | Neo4j policy tag migration | 350+ |
-| `server/src/services/WarrantService.ts` | Warrant management and validation | 500+ |
-| `server/src/middleware/governance.ts` | Governance context extraction and validation | 400+ |
-| `policies/intelgraph/abac/allow.rego` | OPA authorization policies | 250+ |
-| `server/src/graphql/resolvers/governedInvestigation.ts` | Case graph resolver with full governance | 450+ |
+| File                                                    | Purpose                                                | Lines  |
+| ------------------------------------------------------- | ------------------------------------------------------ | ------ |
+| `GOVERNANCE_DESIGN.md`                                  | Comprehensive design document                          | 1,500+ |
+| `server/src/migrations/001_governance_schema.sql`       | PostgreSQL schema for warrants, access purposes, audit | 400+   |
+| `server/src/migrations/002_neo4j_policy_tags.ts`        | Neo4j policy tag migration                             | 350+   |
+| `server/src/services/WarrantService.ts`                 | Warrant management and validation                      | 500+   |
+| `server/src/middleware/governance.ts`                   | Governance context extraction and validation           | 400+   |
+| `policies/intelgraph/abac/allow.rego`                   | OPA authorization policies                             | 250+   |
+| `server/src/graphql/resolvers/governedInvestigation.ts` | Case graph resolver with full governance               | 450+   |
 
 ### Testing & Documentation
 
-| File | Purpose | Lines |
-|------|---------|-------|
-| `server/tests/governance-acceptance.test.ts` | Acceptance tests for Wishbook criteria | 800+ |
-| `GOVERNANCE_IMPLEMENTATION_CHECKLIST.md` | Step-by-step deployment guide | 500+ |
-| `GOVERNANCE_README.md` | This file | You're reading it! |
+| File                                         | Purpose                                | Lines              |
+| -------------------------------------------- | -------------------------------------- | ------------------ |
+| `server/tests/governance-acceptance.test.ts` | Acceptance tests for Wishbook criteria | 800+               |
+| `GOVERNANCE_IMPLEMENTATION_CHECKLIST.md`     | Step-by-step deployment guide          | 500+               |
+| `GOVERNANCE_README.md`                       | This file                              | You're reading it! |
 
 ### Existing Files Enhanced
 
-| File | Enhancement |
-|------|-------------|
+| File                                        | Enhancement                                                      |
+| ------------------------------------------- | ---------------------------------------------------------------- |
 | `server/src/audit/advanced-audit-system.ts` | Already had comprehensive audit logging, hash chains, signatures |
-| `server/src/middleware/opa-abac.ts` | Already had OPA integration, enhanced with warrant validation |
-| `server/src/middleware/context-binding.ts` | Already extracted governance headers |
+| `server/src/middleware/opa-abac.ts`         | Already had OPA integration, enhanced with warrant validation    |
+| `server/src/middleware/context-binding.ts`  | Already extracted governance headers                             |
 
 ## API Usage
 
