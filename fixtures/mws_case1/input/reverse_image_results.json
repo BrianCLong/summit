@@ -1,0 +1,8 @@
+{
+  "reverse_image": {
+    "candidates": [
+      { "id": "cand-1", "url": "https://example.org/a", "score": 0.91 },
+      { "id": "cand-2", "url": "https://example.org/b", "score": 0.73 }
+    ]
+  }
+}
