@@ -1,0 +1,9 @@
+version: 1
+frontiers:
+  default:
+    require_single_live_frontier_per_concern: true
+    allow_direct_pr_creation: false
+    require_materialization_gate: true
+    archive_superseded_candidates: true
+    freshness:
+      max_main_drift_commits: 12

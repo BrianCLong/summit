@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["version", "concerns"],
+  "properties": {
+    "version": { "type": "integer" },
+    "concerns": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "domain", "files", "invariants", "lane"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^concern\\.[a-z0-9._-]+$" },
+          "title": { "type": "string" },
+          "domain": { "type": "string" },
+          "files": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "invariants": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "lane": { "type": "string", "pattern": "^lane\\.[a-z0-9._-]+$" }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": false
+}

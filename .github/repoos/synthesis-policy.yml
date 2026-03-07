@@ -1,0 +1,12 @@
+version: 1
+prefer:
+  - preserves_required_checks
+  - reduces_ci_fanout
+  - increases_determinism
+  - minimizes_surface_area
+  - preserves_tests_and_docs
+reject:
+  - removes_governance_checks
+  - introduces_nondeterministic_timestamps
+  - changes_artifact_schema_without_migration
+  - expands_required_check_surface_without_registry_update

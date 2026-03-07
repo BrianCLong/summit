@@ -1,0 +1,85 @@
+version: 1
+concerns:
+  - id: concern.ci.required-contexts
+    title: Restore and preserve required status context production
+    domain: ci
+    files:
+      - .github/workflows/**
+      - scripts/branch-protection/**
+      - docs/ci/**
+    invariants:
+      - required status names remain stable
+      - merge queue compatibility preserved
+      - no CI fan-out regression
+    lane: lane.gov-deterministic
+    frontier:
+      max_patch_candidates: 200
+      max_files_changed: 25
+    materialization:
+      require_green: true
+      require_main_freshness: true
+      require_overlap_zero: true
+    archive:
+      preserve_all_superseded: true
+
+  - id: concern.evidence.deterministic-contract
+    title: Preserve deterministic evidence artifact contracts
+    domain: governance
+    files:
+      - scripts/evidence/**
+      - docs/governance/**
+      - tools/evidence/**
+    invariants:
+      - no nondeterministic timestamps
+      - stable ordering
+      - stable hashing
+    lane: lane.gov-deterministic
+    frontier:
+      max_patch_candidates: 150
+      max_files_changed: 20
+    materialization:
+      require_green: true
+      require_main_freshness: true
+      require_overlap_zero: true
+    archive:
+      preserve_all_superseded: true
+
+  - id: concern.ci.path-filters
+    title: Maintain fast path filters for CI
+    domain: ci
+    files:
+      - .github/workflows/**
+      - scripts/ci/**
+    invariants:
+      - pr-gate remains required
+      - no required check context removed
+    lane: lane.fast
+    frontier:
+      max_patch_candidates: 200
+      max_files_changed: 25
+    materialization:
+      require_green: true
+      require_main_freshness: true
+      require_overlap_zero: true
+    archive:
+      preserve_all_superseded: true
+
+  - id: concern.governance.branch-protection-drift
+    title: Fix branch protection metadata drift
+    domain: governance
+    files:
+      - .github/branch-protection/**
+      - docs/governance/branch-protection.md
+    invariants:
+      - merge group trigger remains on main
+      - no required checks disabled
+    lane: lane.gov-deterministic
+    frontier:
+      max_patch_candidates: 100
+      max_files_changed: 15
+    materialization:
+      require_green: true
+      require_main_freshness: true
+      require_overlap_zero: true
+    archive:
+      preserve_all_superseded: true
