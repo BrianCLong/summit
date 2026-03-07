@@ -70,7 +70,7 @@ jobs:
       - name: Verify container signature
         run: |
           set -euo pipefail
-          cosign verify "${{ inputs.image_uri }}" \
+          cosign verify --use-signed-timestamps "${{ inputs.image_uri }}" \
             --rekor-url "${{ env.REKOR_URL }}" \
             --certificate-identity-regexp "${{ env.EXPECTED_IDENTITY_REGEX }}" \
             --certificate-oidc-issuer "${{ env.EXPECTED_OIDC_ISSUER }}"
@@ -78,13 +78,13 @@ jobs:
       - name: Verify SBOM attestations
         run: |
           set -euo pipefail
-          cosign verify-attestation "${{ inputs.image_uri }}" --type cyclonedx --rekor-url "${{ env.REKOR_URL }}" --certificate-oidc-issuer "${{ env.EXPECTED_OIDC_ISSUER }}" --certificate-identity-regexp "${{ env.EXPECTED_IDENTITY_REGEX }}"
-          cosign verify-attestation "${{ inputs.image_uri }}" --type spdxjson --rekor-url "${{ env.REKOR_URL }}" --certificate-oidc-issuer "${{ env.EXPECTED_OIDC_ISSUER }}" --certificate-identity-regexp "${{ env.EXPECTED_IDENTITY_REGEX }}"
+          cosign verify-attestation --use-signed-timestamps "${{ inputs.image_uri }}" --type cyclonedx --rekor-url "${{ env.REKOR_URL }}" --certificate-oidc-issuer "${{ env.EXPECTED_OIDC_ISSUER }}" --certificate-identity-regexp "${{ env.EXPECTED_IDENTITY_REGEX }}"
+          cosign verify-attestation --use-signed-timestamps "${{ inputs.image_uri }}" --type spdxjson --rekor-url "${{ env.REKOR_URL }}" --certificate-oidc-issuer "${{ env.EXPECTED_OIDC_ISSUER }}" --certificate-identity-regexp "${{ env.EXPECTED_IDENTITY_REGEX }}"
 
       - name: Verify SLSA provenance attestation
         run: |
           set -euo pipefail
-          cosign verify-attestation "${{ inputs.image_uri }}" --type slsaprovenance --rekor-url "${{ env.REKOR_URL }}" --certificate-oidc-issuer "${{ env.EXPECTED_OIDC_ISSUER }}" --certificate-identity-regexp "${{ env.EXPECTED_IDENTITY_REGEX }}"
+          cosign verify-attestation --use-signed-timestamps "${{ inputs.image_uri }}" --type slsaprovenance --rekor-url "${{ env.REKOR_URL }}" --certificate-oidc-issuer "${{ env.EXPECTED_OIDC_ISSUER }}" --certificate-identity-regexp "${{ env.EXPECTED_IDENTITY_REGEX }}"
 
       - name: Check SBOM vs lockfile drift
         run: |
