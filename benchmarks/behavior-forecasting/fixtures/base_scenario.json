@@ -1,0 +1,26 @@
+{
+  "scenario_id": "base_scenario_01",
+  "events": [
+    {
+      "event_id": "ev_001",
+      "ts_offset_ms": 0,
+      "actor": "agent_alpha",
+      "event_type": "tool_call",
+      "payload": {"tool": "search", "query": "latest vulnerabilities"}
+    },
+    {
+      "event_id": "ev_002",
+      "ts_offset_ms": 100,
+      "actor": "system",
+      "event_type": "tool_response",
+      "payload": {"result": "CVE-2024-XXXX found"}
+    },
+    {
+      "event_id": "ev_003",
+      "ts_offset_ms": 300,
+      "actor": "agent_alpha",
+      "event_type": "tool_call",
+      "payload": {"tool": "exploit_runner", "target": "internal_service"}
+    }
+  ]
+}

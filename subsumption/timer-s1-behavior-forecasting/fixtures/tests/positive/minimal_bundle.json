@@ -1,0 +1,5 @@
+{
+  "test_case": "minimal_bundle_positive",
+  "expected": "pass",
+  "description": "A minimal positive test fixture demonstrating standard behavior forecasting output."
+}

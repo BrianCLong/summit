@@ -1,0 +1,15 @@
+policies:
+  - id: BF-POL-001
+    name: "Max Calibration Error"
+    threshold: 0.05
+    enforcement: "deny"
+
+  - id: BF-POL-002
+    name: "Max Policy Violation Probability"
+    threshold: 0.10
+    enforcement: "deny"
+
+  - id: BF-POL-003
+    name: "Require Fixture Integrity"
+    threshold: true
+    enforcement: "deny"
