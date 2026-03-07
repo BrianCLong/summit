@@ -1,35 +1,35 @@
-# Repo Assumptions — ai-platform-daily-2026-02-07
+# Repo Assumptions
 
-**Status:** Intentionally constrained pending in-repo validation.
-**Item Slug:** ai-platform-daily-2026-02-07
+**Verified Paths:**
+* `.ci/`
+* `.github/`
+* `.merge-captain/`
+* `.opa/policy/`
+* `GOLDEN/datasets/`
+* `RUNBOOKS/`
+* `SECURITY/`
+* `__tests__/`
+* `agents/`
+* `analysis/`
+* `api/`
+* `apps/`
+* `architecture/`
+* `artifact/`
+* `artifacts/`
 
-## Verified (from provided path map)
+**Assumed Paths:**
+* `summit/cli/`
+* `summit/kernel/`
+* `api/summit_governance/`
+* `scripts/summit_*/`
 
-- Runtime: **Node 18+**, **TypeScript**, **pnpm**, GitHub Actions.
-- Canonical paths:
-  - `.github/workflows/{ci-core.yml,ci-pr.yml,ci-security.yml,ci-verify.yml,codeql.yml,agent-guardrails.yml,agentic-plan-gate.yml,_reusable-*.yml}`
-  - `.github/{actions/,scripts/,policies/,MILESTONES/}`
-  - `src/{api/graphql,api/rest,agents,connectors,graphrag}`
-  - `tests/<module>/...`, `tests/e2e/...` (via pnpm scripts)
-- Docs layout: `docs/{architecture,api,security}` with suggested extensions `docs/{governance,operations,ga}`.
+**Must Not Touch Files:**
+* `.merge-captain/**`
+* `.opa/policy/**`
+* `GOLDEN/datasets/**`
+* `SECURITY/**`
 
-## Assumed (must validate in repo)
+(Until conventions are validated)
 
-- Actual existing agent runtime entrypoints under `src/agents/` (names, interfaces).
-- Existing policy engine format under `.github/policies/` (OPA vs custom).
-- Evidence schema conventions (filenames, JSON structure).
-- Current CI job names inside the workflows (exact `name:` fields).
-
-## Must-not-touch list (until validated)
-
-- `.github/workflows/codeql.yml`
-- Any production deployment workflows (if present)
-- DB migration directories (if present)
-- Secrets / encrypted configs
-
-## Validation checklist (before PRs merge)
-
-- Confirm `.github/workflows/*` filenames + required checks in branch protection.
-- Confirm `src/agents` architecture (planner/executor/observer?) and how tools are defined today.
-- Confirm logging/telemetry stack (to wire MCP audit + drift detector).
-- Confirm test runner + assertion libs (`pnpm test:*`).
+**Smallest Integration Surface for summit explain:**
+The CLI command `summit explain <file>` which calls local parsing via tree-sitter, computes metrics, generates an LLM explanation via OpenAI API, and outputs to `artifacts/summit/explain/` generating `report.json`, `metrics.json`, and `stamp.json`.
