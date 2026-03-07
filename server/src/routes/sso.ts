@@ -13,6 +13,18 @@ import cookieParser from 'cookie-parser'; // Assuming cookie-parser is available
 const router = Router();
 const ssoService = new SSOService();
 
+/**
+ * Helper to ensure a parameter is a single string.
+ * Prevents HTTP Parameter Pollution (HPP) where an attacker might provide multiple
+ * values for the same key (e.g., ?state=a&state=b) to bypass validation logic.
+ */
+function toSingleString(val: any): string | undefined {
+  if (Array.isArray(val)) {
+    return typeof val[0] === 'string' ? val[0] : undefined;
+  }
+  return typeof val === 'string' ? val : undefined;
+}
+
 // Validation schemas
 const ssoConfigSchema = z.object({
   type: z.enum(['oidc', 'saml']),
@@ -121,7 +133,11 @@ router.post('/auth/sso/:tenantId/callback', rateLimitMiddleware, asyncHandler(as
 
   // CSRF / State Validation
   const stateCookie = req.cookies['sso_state'];
-  const stateParam = req.body.RelayState || req.body.state || (req.query.state as string) || (req.query.RelayState as string);
+  const stateParam =
+    toSingleString(req.body.RelayState) ||
+    toSingleString(req.body.state) ||
+    toSingleString(req.query.state) ||
+    toSingleString(req.query.RelayState);
 
   // In SAML, RelayState is passed back. In OIDC, state is passed back.
   // Note: Some IdPs might not preserve RelayState perfectly in all flows (e.g. IdP initiated),
@@ -167,7 +183,7 @@ router.get('/auth/sso/:tenantId/callback', rateLimitMiddleware, asyncHandler(asy
   const baseUrl = `${req.protocol}://${req.get('host')}`;
 
   const stateCookie = req.cookies['sso_state'];
-  const stateParam = (req.query.state as string) || (req.query.RelayState as string);
+  const stateParam = toSingleString(req.query.state) || toSingleString(req.query.RelayState);
 
   if (!stateCookie || !stateParam || stateCookie !== stateParam) {
     logger.warn(`SSO State mismatch or missing. Cookie: ${stateCookie ? 'present' : 'missing'}, Param: ${stateParam ? 'present' : 'missing'}`);
