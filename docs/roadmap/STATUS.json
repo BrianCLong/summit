@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-08T00:15:00Z",
-  "revision_note": "Added Summit Architecture Brief reference; Summit Ops & Incident Console runbook guidance; CI/CD high-signal delta action register.",
+  "last_updated": "2026-03-07T00:00:00Z",
+  "revision_note": "Hardened SWE-rebench substrate: implemented typed loader, deterministic runTask artifacts, container policy runner, behavior reward/task validator utilities, and focused unit tests.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -205,6 +205,12 @@
       "status": "completed",
       "owner": "codex",
       "notes": "Published Summit Architecture Brief with module boundaries, data flow, and acceptance criteria."
+    },
+    {
+      "id": "swe-rebench-summit-lab-architecture",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Implemented core SWE substrate hardening (loader, runner, validator, reward) and added test coverage for deterministic artifact and validation flows."
     }
   ],
   "summary": {
