@@ -8,6 +8,7 @@ GitHub Actions currently executes many checks, but we need to verify their exact
 ## Known check names (Verify these)
 - CI Core (Primary Gate) / CI Core Gate ✅
 - CI / Unit Tests
+- CI Verify / verify
 - GA Gate
 - Release Readiness Gate
 - SOC Controls
@@ -18,6 +19,7 @@ We are using these names in our CI pipeline definitions, but they might be repor
 - `gate/evidence` (PR2)
 - `gate/supplychain` (PR4)
 - `gate/fimi` (PR7)
+- `ci-verify / verify`
 - `lint`
 - `typecheck`
 - `build`
@@ -36,5 +38,6 @@ Once official names are known, we will alias these jobs or rename them in the wo
 ## Required checks discovery (one-time for Memory Privacy)
 1) GitHub UI: Repo → Settings → Branches → Branch protection rules → note required checks
 2) GitHub API: GET /repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks
-3) Update: ci/gates/memory_privacy_gates.yml to match exact check names
-4) Add PR to rename temporary checks to required names once known
+3) Confirm `CI Verify / verify` status check name matches this workflow
+4) Update: ci/gates/memory_privacy_gates.yml to match exact check names
+5) Add PR to rename temporary checks to required names once known

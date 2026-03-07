@@ -316,6 +316,24 @@ jobs:
           fi
         continue-on-error: true # Non-blocking for PRs
 
+
+  dependency-homepage-evidence:
+    name: Dependency Homepage Evidence
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4 # v6
+      - uses: pnpm/action-setup@v4 # v4
+      - uses: actions/setup-node@v4 # v6
+        with:
+          node-version: "20"
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate dependency homepage evidence bundle
+        run: pnpm exec tsx .github/scripts/gen-evidence.ts
+
   ga-evidence-completeness:
     name: GA Evidence Completeness
     runs-on: ubuntu-22.04
@@ -413,6 +431,7 @@ jobs:
       - provenance
       - schema-validation
       - compliance-evidence
+      - dependency-homepage-evidence
       - ga-evidence-completeness
     if: always()
     steps:
@@ -426,6 +445,7 @@ jobs:
           echo "Provenance & SBOM: ${{ needs.provenance.result }}"
           echo "Schema Validation: ${{ needs.schema-validation.result }}"
           echo "Compliance Evidence: ${{ needs.compliance-evidence.result }}"
+          echo "Dependency Homepage Evidence: ${{ needs.dependency-homepage-evidence.result }}"
           echo "GA Evidence Completeness: ${{ needs.ga-evidence-completeness.result }}"
           echo ""
 
@@ -442,6 +462,11 @@ jobs:
 
           if [[ "${{ needs.ga-evidence-completeness.result }}" != "success" ]]; then
             echo "::error::GA Evidence Completeness FAILED - CI BLOCKED"
+            exit 1
+          fi
+
+          if [[ "${{ needs.dependency-homepage-evidence.result }}" != "success" ]]; then
+            echo "::error::Dependency Homepage Evidence FAILED - CI BLOCKED"
             exit 1
           fi
 
@@ -465,6 +490,7 @@ jobs:
           echo "- ✅ Security Scan (Gitleaks, pnpm audit)" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ Policy Compliance (OPA check + test)" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ GA Evidence Completeness" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Dependency Homepage Evidence" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ MCP Tool UX Lint" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Informational Gates (Non-blocking)" >> $GITHUB_STEP_SUMMARY
