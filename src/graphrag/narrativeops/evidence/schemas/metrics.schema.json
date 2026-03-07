@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "narrativeops.metrics",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "runId": { "type": "string", "minLength": 8 },
+    "transform": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string" },
+        "version": { "type": "string" }
+      },
+      "required": ["name", "version"]
+    },
+    "window": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "start": { "type": "string" },
+        "end": { "type": "string" }
+      },
+      "required": ["start", "end"]
+    },
+    "metrics": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "key": { "type": "string" },
+          "value": { "type": "number" },
+          "scope": { "type": "string" },
+          "provenance": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "artifactHashes": { "type": "array", "items": { "type": "string" } },
+              "assumptionHashes": { "type": "array", "items": { "type": "string" } }
+            },
+            "required": ["artifactHashes", "assumptionHashes"]
+          }
+        },
+        "required": ["key", "value", "scope", "provenance"]
+      }
+    }
+  },
+  "required": ["runId", "transform", "window", "metrics"]
+}

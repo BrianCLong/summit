@@ -1,0 +1,32 @@
+{
+  "policy": "narrativeops",
+  "version": "0.1.0",
+  "defaults": {
+    "narrativeops_enabled": false,
+    "narrativeops_extract_assumptions": false,
+    "narrativeops_state_machine": false
+  },
+  "rules": [
+    {
+      "id": "narrativeops-provenance-required",
+      "description": "Disallow metrics without provenance artifact hashes.",
+      "deny": {
+        "when": "metrics.provenance.artifactHashes missing or empty"
+      }
+    },
+    {
+      "id": "narrativeops-state-min-evidence",
+      "description": "Disallow trusted state transitions without minimum evidence.",
+      "deny": {
+        "when": "state_transition.trusted true AND evidence_count < 2"
+      }
+    },
+    {
+      "id": "narrativeops-flags-default-off",
+      "description": "Disallow default-enabled narrativeops flags.",
+      "deny": {
+        "when": "defaults.narrativeops_enabled != false OR defaults.narrativeops_extract_assumptions != false OR defaults.narrativeops_state_machine != false"
+      }
+    }
+  ]
+}

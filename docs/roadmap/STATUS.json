@@ -1,6 +1,6 @@
 {
   "last_updated": "2026-02-07T00:00:00Z",
-  "revision_note": "Added Summit PR Stack Sequencer skill scaffolding.",
+  "revision_note": "Hardened narrativeops evidence scaffolding with negative fixtures and dedicated CI workflow.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -153,6 +153,12 @@
       "notes": "Governed narrative risk ops documentation: standards, data handling, and runbook. Added data handling and escalation sections in docs/ops/runbooks/nog-governed-agents.md."
     },
     {
+      "id": "narrativeops-evidence-lane1",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Evidence schemas, deterministic hashing utilities, golden and negative evidence fixtures, and dedicated CI verification workflow for narrativeops lane-1."
+    },
+    {
       "id": "ru-ua-cogwar-lab",
       "status": "in_progress",
       "owner": "codex",
@@ -200,7 +206,7 @@
     "partial": 2,
     "incomplete": 0,
     "not_started": 5,
-    "total": 17,
+    "total": 18,
     "ga_blockers": []
   }
 }

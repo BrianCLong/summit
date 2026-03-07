@@ -1,0 +1,8 @@
+{
+  "generatedAt": "2026-02-07T00:00:00Z",
+  "runId": "run-negative-fixture",
+  "transform": {
+    "name": "narrativeops-evidence",
+    "version": "0.1.0"
+  }
+}

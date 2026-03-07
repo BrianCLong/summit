@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "narrativeops.report",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "runId": { "type": "string", "minLength": 8 },
+    "summary": { "type": "string" },
+    "status": { "type": "string" },
+    "notes": { "type": "array", "items": { "type": "string" } }
+  },
+  "required": ["runId", "summary", "status", "notes"]
+}

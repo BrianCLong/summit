@@ -1,0 +1,6 @@
+{
+  "runId": "run-seeded-minimal",
+  "summary": "Deterministic narrativeops evidence bundle (seeded minimal).",
+  "status": "ok",
+  "notes": ["evidence-only seed fixture"]
+}

@@ -1,0 +1,6 @@
+{
+  "runId": "run-negative-fixture",
+  "summary": "Negative fixture includes timestamp leakage.",
+  "status": "ok",
+  "notes": ["2026-02-07T00:00:00Z should fail"]
+}

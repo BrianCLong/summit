@@ -1,0 +1,17 @@
+{
+  "entries": [
+    {
+      "evdId": "EVD-NARRATIVEOPS-POLICY-250",
+      "files": ["report.json", "metrics.json", "stamp.json"],
+      "sha256": {
+        "report.json": "invalid",
+        "metrics.json": "invalid",
+        "stamp.json": "invalid"
+      },
+      "transform": {
+        "name": "narrativeops-evidence",
+        "version": "0.1.0"
+      }
+    }
+  ]
+}

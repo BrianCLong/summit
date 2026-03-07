@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "narrativeops.stamp",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "generatedAt": { "type": "string" },
+    "runId": { "type": "string", "minLength": 8 },
+    "transform": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string" },
+        "version": { "type": "string" }
+      },
+      "required": ["name", "version"]
+    }
+  },
+  "required": ["generatedAt", "runId", "transform"]
+}

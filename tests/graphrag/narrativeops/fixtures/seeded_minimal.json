@@ -1,0 +1,6 @@
+{
+  "artifactId": "artifact-001",
+  "observedAt": "2026-02-07T00:00:00Z",
+  "channel": "fixture:seeded",
+  "text": "A minimal seeded narrative artifact."
+}

@@ -1,0 +1,22 @@
+{
+  "runId": "run-seeded-minimal",
+  "transform": {
+    "name": "narrativeops-evidence",
+    "version": "0.1.0"
+  },
+  "window": {
+    "start": "window-start",
+    "end": "window-end"
+  },
+  "metrics": [
+    {
+      "key": "narrative.debt.index",
+      "value": 0,
+      "scope": "global",
+      "provenance": {
+        "artifactHashes": ["artifact-hash-001"],
+        "assumptionHashes": []
+      }
+    }
+  ]
+}
