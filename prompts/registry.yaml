@@ -1,5 +1,32 @@
 version: 1
 prompts:
+  - id: summit-architecture-lab
+    version: v1
+    path: prompts/architecture/summit-architecture-lab@v1.md
+    sha256: 134ed877140060c3197dbfdecff63568af8a74525b6188e79c4842b60fbfcfb0
+    description: Define Summit Architecture Lab threads and publish frontend + agentic seams recon docs with roadmap updates.
+    scope:
+      paths:
+        - docs/architecture/summit-architecture-lab.md
+        - docs/architecture/frontend-overview.md
+        - docs/architecture/agentic-seams.md
+        - docs/roadmap/STATUS.json
+        - prompts/architecture/summit-architecture-lab@v1.md
+        - prompts/registry.yaml
+        - agents/examples/SUMMIT_ARCH_LAB_20260208.json
+      domains:
+        - documentation
+        - architecture
+        - governance
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: io-cogwar-radar-brief
     version: v1
     path: prompts/briefs/io-cogwar-radar-brief@v1.md

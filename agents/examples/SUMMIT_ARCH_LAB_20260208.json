@@ -1,0 +1,40 @@
+{
+  "task_id": "SUMMIT_ARCH_LAB_20260208",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "summit-architecture-lab",
+    "version": "v1",
+    "sha256": "134ed877140060c3197dbfdecff63568af8a74525b6188e79c4842b60fbfcfb0",
+    "path": "prompts/architecture/summit-architecture-lab@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "docs/architecture/summit-architecture-lab.md",
+      "docs/architecture/frontend-overview.md",
+      "docs/architecture/agentic-seams.md",
+      "docs/roadmap/STATUS.json",
+      "prompts/architecture/summit-architecture-lab@v1.md",
+      "prompts/registry.yaml",
+      "agents/examples/SUMMIT_ARCH_LAB_20260208.json"
+    ],
+    "domains": ["architecture", "documentation", "governance"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["boundary-check-log"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Architecture lab project definition published in docs/architecture.",
+    "Frontend overview and agentic seams reconnaissance published.",
+    "Roadmap status updated with Summit Architecture Lab initiative."
+  ],
+  "stop_conditions": [
+    "Scope expansion beyond declared paths.",
+    "Missing governance alignment with readiness assertion."
+  ]
+}
