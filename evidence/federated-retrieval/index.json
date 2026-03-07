@@ -1,0 +1,8 @@
+{
+  "evidence": [
+    {
+      "id": "EVD-FEDERATED-RETRIEVAL-BROKER-001",
+      "files": ["report.json", "metrics.json", "stamp.json"]
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+name: GA Gate - Federated Retrieval
+
+on:
+  workflow_call:
+    inputs:
+      check_evidence:
+        required: true
+        type: boolean
+
+jobs:
+  verify-evidence:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Evidence Files
+        run: |
+          if [ ! -f evidence/federated-retrieval/report.json ]; then
+            echo "Missing report.json"
+          fi
+          if [ ! -f evidence/federated-retrieval/metrics.json ]; then
+            echo "Missing metrics.json"
+          fi
+          if [ ! -f evidence/federated-retrieval/stamp.json ]; then
+            echo "Missing stamp.json"
+          fi
