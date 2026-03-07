@@ -9,12 +9,12 @@
     "test": "jest --passWithNoTests"
   },
   "dependencies": {
-    "axios": "^1.7.9"
+    "axios": "1.7.9"
   },
   "devDependencies": {
-    "typescript": "^5.6.2",
-    "@types/jest": "^29.5.12",
-    "jest": "^29.7.0",
-    "@types/node": "^22.7.4"
+    "typescript": "5.6.2",
+    "@types/jest": "29.5.12",
+    "jest": "29.7.0",
+    "@types/node": "22.7.4"
   }
 }

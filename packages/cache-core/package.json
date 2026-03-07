@@ -19,16 +19,16 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "ioredis": "^5.4.1",
-    "prom-client": "^15.1.0"
+    "ioredis": "5.4.1",
+    "prom-client": "15.1.0"
   },
   "devDependencies": {
-    "@types/node": "^20.0.0",
-    "typescript": "^5.7.2",
-    "vitest": "^2.1.8"
+    "@types/node": "20.0.0",
+    "typescript": "5.7.2",
+    "vitest": "2.1.8"
   },
   "peerDependencies": {
-    "ioredis": "^5.0.0"
+    "ioredis": "5.0.0"
   },
   "files": [
     "dist",

@@ -9,13 +9,13 @@
     "test": "echo 'Tests skipped due to ESM/Babel compatibility with Jest' && exit 0"
   },
   "dependencies": {
-    "ioredis": "^5.8.2",
-    "neo4j-driver": "^6.0.1"
+    "ioredis": "5.8.2",
+    "neo4j-driver": "6.0.1"
   },
   "devDependencies": {
-    "typescript": "^5.9.3",
-    "@types/jest": "^30.0.0",
-    "jest": "^30.2.0",
+    "typescript": "5.9.3",
+    "@types/jest": "30.0.0",
+    "jest": "30.2.0",
     "@types/node": "20.19.27"
   }
 }

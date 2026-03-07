@@ -13,13 +13,13 @@
     "@intelgraph/real-time-sync": "workspace:*",
     "@intelgraph/commenting": "workspace:*",
     "@intelgraph/version-control": "workspace:*",
-    "zod": "^3.22.0",
-    "nanoid": "^5.0.0",
-    "ws": "^8.14.0"
+    "zod": "3.22.0",
+    "nanoid": "5.0.0",
+    "ws": "8.14.0"
   },
   "devDependencies": {
-    "@types/node": "^20.0.0",
-    "@types/ws": "^8.5.0",
-    "typescript": "^5.3.0"
+    "@types/node": "20.0.0",
+    "@types/ws": "8.5.0",
+    "typescript": "5.3.0"
   }
 }

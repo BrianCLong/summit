@@ -34,15 +34,15 @@
   ],
   "dependencies": {
     "@intelgraph/nlp": "workspace:*",
-    "compromise": "^14.13.0",
-    "compromise-dates": "^3.3.0",
-    "wink-nlp": "^2.2.0"
+    "compromise": "14.13.0",
+    "compromise-dates": "3.3.0",
+    "wink-nlp": "2.2.0"
   },
   "devDependencies": {
-    "@types/jest": "^30.0.0",
+    "@types/jest": "30.0.0",
     "@types/node": "20.19.27",
-    "jest": "^30.2.0",
-    "typescript": "^5.9.3",
+    "jest": "30.2.0",
+    "typescript": "5.9.3",
     "eslint": "9.39.2"
   }
 }

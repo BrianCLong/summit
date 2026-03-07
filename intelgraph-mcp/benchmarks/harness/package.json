@@ -8,6 +8,6 @@
     "k6": "file:./k6"
   },
   "devDependencies": {
-    "tsx": "^4.19.0"
+    "tsx": "4.19.0"
   }
 }

@@ -12,11 +12,11 @@
   },
   "dependencies": {
     "@intelgraph/graph-analytics": "workspace:*",
-    "redis": "^4.6.0"
+    "redis": "4.6.0"
   },
   "devDependencies": {
-    "typescript": "^5.9.3",
-    "@types/node": "^20.0.0"
+    "typescript": "5.9.3",
+    "@types/node": "20.0.0"
   },
   "type": "module"
 }

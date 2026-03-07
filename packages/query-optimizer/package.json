@@ -17,12 +17,12 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "pg": "^8.11.3"
+    "pg": "8.11.3"
   },
   "devDependencies": {
-    "@types/jest": "^30.0.0",
+    "@types/jest": "30.0.0",
     "@types/node": "20.19.27",
-    "@types/pg": "^8.15.6",
-    "typescript": "^5.9.3"
+    "@types/pg": "8.15.6",
+    "typescript": "5.9.3"
   }
 }

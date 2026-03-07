@@ -9,9 +9,9 @@
     "build": "tsc -p tsconfig.json"
   },
   "dependencies": {
-    "@noble/ed25519": "^2.0.0"
+    "@noble/ed25519": "2.0.0"
   },
   "devDependencies": {
-    "typescript": "^5.4.0"
+    "typescript": "5.4.0"
   }
 }

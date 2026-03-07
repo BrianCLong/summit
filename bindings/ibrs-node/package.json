@@ -15,7 +15,7 @@
     "prepublishOnly": "npm run build"
   },
   "devDependencies": {
-    "@napi-rs/cli": "^2.16.4"
+    "@napi-rs/cli": "2.16.4"
   },
   "license": "MIT"
 }

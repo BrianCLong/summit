@@ -14,14 +14,14 @@
   "dependencies": {
     "@intelgraph/data-catalog": "workspace:*",
     "@intelgraph/common-types": "workspace:*",
-    "pg": "^8.16.3",
-    "zod": "^3.22.4"
+    "pg": "8.16.3",
+    "zod": "3.22.4"
   },
   "devDependencies": {
-    "typescript": "^5.9.3",
-    "@types/jest": "^30.0.0",
-    "@types/pg": "^8.11.0",
-    "jest": "^30.2.0",
+    "typescript": "5.9.3",
+    "@types/jest": "30.0.0",
+    "@types/pg": "8.11.0",
+    "jest": "30.2.0",
     "@types/node": "20.19.27"
   }
 }

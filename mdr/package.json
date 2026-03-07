@@ -16,13 +16,13 @@
     "test": "ts-node src/cli.ts test"
   },
   "dependencies": {
-    "diff": "^5.1.0",
-    "yaml": "^2.4.5"
+    "diff": "5.1.0",
+    "yaml": "2.4.5"
   },
   "devDependencies": {
-    "@types/diff": "^5.0.8",
-    "@types/node": "^20.11.19",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.4.0"
+    "@types/diff": "5.0.8",
+    "@types/node": "20.11.19",
+    "ts-node": "10.9.2",
+    "typescript": "5.4.0"
   }
 }

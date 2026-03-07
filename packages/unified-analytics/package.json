@@ -11,11 +11,11 @@
   },
   "dependencies": {
     "@intelgraph/lakehouse": "workspace:*",
-    "zod": "^4.1.12",
-    "pino": "^10.1.0"
+    "zod": "4.1.12",
+    "pino": "10.1.0"
   },
   "devDependencies": {
     "@types/node": "20.19.27",
-    "typescript": "^5.9.3"
+    "typescript": "5.9.3"
   }
 }

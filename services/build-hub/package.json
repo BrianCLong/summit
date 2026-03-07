@@ -14,15 +14,15 @@
     "docker:build": "docker build -t maestro-build-hub ."
   },
   "dependencies": {
-    "express": "^5.2.0",
-    "ws": "^8.18.3"
+    "express": "5.2.0",
+    "ws": "8.18.3"
   },
   "devDependencies": {
-    "@types/express": "^5.0.3",
+    "@types/express": "5.0.3",
     "@types/node": "20.19.27",
-    "@types/ws": "^8.18.1",
-    "tsx": "^4.16.2",
-    "typescript": "^5.9.3"
+    "@types/ws": "8.18.1",
+    "tsx": "4.16.2",
+    "typescript": "5.9.3"
   },
   "engines": {
     "node": ">=20.0.0"

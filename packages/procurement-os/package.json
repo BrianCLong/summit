@@ -12,12 +12,12 @@
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
-    "date-fns": "^3.6.0"
+    "date-fns": "3.6.0"
   },
   "devDependencies": {
-    "@types/jest": "^30.0.0",
+    "@types/jest": "30.0.0",
     "@types/node": "20.19.27",
-    "jest": "^30.2.0",
-    "typescript": "^5.9.3"
+    "jest": "30.2.0",
+    "typescript": "5.9.3"
   }
 }

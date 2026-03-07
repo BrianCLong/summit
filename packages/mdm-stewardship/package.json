@@ -18,12 +18,12 @@
   ],
   "dependencies": {
     "@intelgraph/mdm-core": "workspace:*",
-    "zod": "^3.22.4",
-    "uuid": "^11.0.3"
+    "zod": "3.22.4",
+    "uuid": "11.0.3"
   },
   "devDependencies": {
     "@types/node": "20.19.27",
-    "@types/uuid": "^10.0.0",
-    "typescript": "^5.9.3"
+    "@types/uuid": "10.0.0",
+    "typescript": "5.9.3"
   }
 }

@@ -22,13 +22,13 @@
   "license": "MIT",
   "dependencies": {
     "@intelgraph/geospatial": "workspace:*",
-    "@turf/turf": "^7.1.0",
-    "@types/geojson": "^7946.0.14"
+    "@turf/turf": "7.1.0",
+    "@types/geojson": "7946.0.14"
   },
   "devDependencies": {
-    "@types/jest": "^30.0.0",
+    "@types/jest": "30.0.0",
     "@types/node": "20.19.27",
-    "jest": "^30.2.0",
-    "typescript": "^5.9.3"
+    "jest": "30.2.0",
+    "typescript": "5.9.3"
   }
 }

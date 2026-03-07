@@ -34,11 +34,11 @@
   "author": "Summit Team",
   "license": "PROPRIETARY",
   "dependencies": {
-    "zod": "^3.22.4"
+    "zod": "3.22.4"
   },
   "devDependencies": {
-    "@types/node": "^20.11.5",
-    "typescript": "^5.3.3",
-    "vitest": "^1.2.0"
+    "@types/node": "20.11.5",
+    "typescript": "5.3.3",
+    "vitest": "1.2.0"
   }
 }

@@ -10,10 +10,10 @@
     "test": "node --test dist/__tests__/*.test.js"
   },
   "dependencies": {
-    "zod": "^4.1.12"
+    "zod": "4.1.12"
   },
   "devDependencies": {
-    "typescript": "^5.3.3",
-    "@types/node": "^20.0.0"
+    "typescript": "5.3.3",
+    "@types/node": "20.0.0"
   }
 }

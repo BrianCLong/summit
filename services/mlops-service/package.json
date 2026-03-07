@@ -17,20 +17,20 @@
     "@intelgraph/model-monitoring": "workspace:*",
     "@intelgraph/model-explainability": "workspace:*",
     "@intelgraph/training-orchestration": "workspace:*",
-    "express": "^5.2.0",
-    "cors": "^2.8.5",
-    "helmet": "^8.1.0",
-    "compression": "^1.7.4",
-    "winston": "^3.18.3",
-    "zod": "^4.1.12"
+    "express": "5.2.0",
+    "cors": "2.8.5",
+    "helmet": "8.1.0",
+    "compression": "1.7.4",
+    "winston": "3.18.3",
+    "zod": "4.1.12"
   },
   "devDependencies": {
-    "@types/express": "^5.0.3",
-    "@types/cors": "^2.8.17",
-    "@types/compression": "^1.7.5",
+    "@types/express": "5.0.3",
+    "@types/cors": "2.8.17",
+    "@types/compression": "1.7.5",
     "@types/node": "20.19.27",
-    "tsx": "^4.6.2",
-    "typescript": "^5.9.3"
+    "tsx": "4.6.2",
+    "typescript": "5.9.3"
   },
   "keywords": [
     "mlops",

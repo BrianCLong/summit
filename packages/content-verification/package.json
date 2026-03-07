@@ -12,9 +12,9 @@
     "@intelgraph/common-types": "workspace:*"
   },
   "devDependencies": {
-    "typescript": "^5.9.3",
-    "@types/jest": "^30.0.0",
-    "jest": "^30.2.0",
+    "typescript": "5.9.3",
+    "@types/jest": "30.0.0",
+    "jest": "30.2.0",
     "@types/node": "20.19.27"
   },
   "types": "dist/index.d.ts"
