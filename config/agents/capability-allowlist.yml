@@ -1,0 +1,7 @@
+# Capability Allowlist Configuration
+workspace.read: true
+workspace.write: true
+http.fetch: false
+graph.query: true
+artifact.emit: true
+channel.reply: false

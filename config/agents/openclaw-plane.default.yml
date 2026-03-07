@@ -1,0 +1,7 @@
+# Default configuration for the OpenClaw Agent Plane subsystem
+version: 1
+enabled: false
+sandbox_by_default: true
+max_steps: 12
+max_external_calls: 8
+memory_ceiling_mb: 512
