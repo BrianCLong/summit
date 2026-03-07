@@ -1,0 +1,8 @@
+{
+  "id": "EVID:graphrag:002:efgh",
+  "content": "GraphRAG integrates into the execution harness by supplying vectorized context wrapped in stable EVID structures.",
+  "metadata": {
+    "source": "Summit Architecture Guide v2",
+    "classification": "internal"
+  }
+}

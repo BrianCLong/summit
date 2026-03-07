@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "adk/spec/stamp.schema.json",
+  "title": "Summit Bench Stamp Artifact",
+  "description": "Environment snapshot to ensure deterministic replay.",
+  "type": "object",
+  "required": ["stamp_version", "environment_hash", "runner"],
+  "properties": {
+    "stamp_version": { "type": "string" },
+    "environment_hash": { "type": "string" },
+    "runner": { "type": "string" },
+    "run_nonce": { "type": "string" },
+    "system_metadata": {
+      "type": "object",
+      "properties": {
+        "model": { "type": "string" },
+        "temperature": { "type": "number" }
+      }
+    }
+  }
+}
