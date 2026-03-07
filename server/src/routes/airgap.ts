@@ -78,3 +78,50 @@ airgapRouter.get('/imports/:id', async (req: any, res) => {
         res.status(500).json({ error: e.message });
     }
 });
+
+// Sync Disconnected Graph
+airgapRouter.post('/sync-graph', async (req: any, res) => {
+    const tenantId = req.tenantId;
+    const tempFile = join('/tmp', `sync-${randomUUID()}.zip`);
+
+    try {
+        const writeStream = createWriteStream(tempFile);
+        await new Promise<void>((resolve, reject) => {
+             req.pipe(writeStream);
+             writeStream.on('finish', () => resolve());
+             writeStream.on('error', reject);
+             req.on('error', reject);
+        });
+
+        const result = await service.syncDisconnectedGraph(tenantId, tempFile);
+
+        res.json(result);
+    } catch (e: any) {
+        res.status(500).json({ error: e.message });
+    } finally {
+        try { await unlink(tempFile); } catch {}
+    }
+});
+
+// Verify Offline SBOM
+airgapRouter.post('/verify-sbom', async (req: any, res) => {
+    const tempFile = join('/tmp', `sbom-${randomUUID()}.json`);
+
+    try {
+        const writeStream = createWriteStream(tempFile);
+        await new Promise<void>((resolve, reject) => {
+             req.pipe(writeStream);
+             writeStream.on('finish', () => resolve());
+             writeStream.on('error', reject);
+             req.on('error', reject);
+        });
+
+        const result = await service.verifyOfflineSbom(tempFile);
+
+        res.json(result);
+    } catch (e: any) {
+        res.status(500).json({ error: e.message });
+    } finally {
+        try { await unlink(tempFile); } catch {}
+    }
+});
