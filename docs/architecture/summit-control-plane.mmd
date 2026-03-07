@@ -1,0 +1,165 @@
+flowchart TD
+    %% Base styling
+    classDef external fill:#f9f9f9,stroke:#333,stroke-width:1px,stroke-dasharray: 5 5;
+    classDef collector fill:#e1f5fe,stroke:#0288d1,stroke-width:2px;
+    classDef ingest fill:#e8eaf6,stroke:#3f51b5,stroke-width:2px;
+    classDef ledger fill:#e0f2f1,stroke:#00796b,stroke-width:3px;
+    classDef graph fill:#f3e5f5,stroke:#7b1fa2,stroke-width:3px;
+    classDef maestro fill:#fff3e0,stroke:#e65100,stroke-width:3px;
+    classDef policy fill:#ffebee,stroke:#c62828,stroke-width:3px;
+    classDef agent fill:#f1f8e9,stroke:#33691e,stroke-width:2px;
+    classDef module fill:#fffde7,stroke:#fbc02d,stroke-width:2px;
+    classDef replay fill:#eceff1,stroke:#455a64,stroke-width:3px;
+
+    %% External Data Sources
+    subgraph External_World["External World (Unverified Data)"]
+        RSS[RSS Feeds]:::external
+        Social[Social Media APIs]:::external
+        Gov[Gov/Regulatory Filings]:::external
+        Web[Web Scraping]:::external
+        News[News APIs]:::external
+    end
+
+    %% Extension Layer 1: Collectors
+    subgraph Collectors["Collectors (Extension Layer)"]
+        Coll_RSS[summit-collector-rss]:::collector
+        Coll_Social[summit-collector-social]:::collector
+        Coll_Gov[summit-collector-regulatory]:::collector
+        Coll_Web[summit-collector-web]:::collector
+        Coll_News[summit-collector-news]:::collector
+    end
+
+    External_World -.->|Raw Data| Collectors
+
+    %% Ingestion Pipeline
+    subgraph Ingest_Pipeline["Ingestion Pipeline"]
+        API_GW[API Gateway / Ledger Events]:::ingest
+        Val_Sig[Signature Validation (Cosign)]:::ingest
+        Val_Prov[Provenance Validator]:::ingest
+        Kafka_Ingest[Kafka Event Bus]:::ingest
+    end
+
+    Collectors -->|POST /ledger/events| API_GW
+    API_GW --> Val_Sig
+    Val_Sig --> Val_Prov
+    Val_Prov --> Kafka_Ingest
+
+    %% Core System of Record: Epistemic Ledger
+    subgraph System_Of_Record["System of Record (Immutable)"]
+        Ledger_DB[(Postgres: Epistemic Ledger)]:::ledger
+        Ledger_Claims[Claims Table]:::ledger
+        Ledger_Evidence[Evidence Table]:::ledger
+        Ledger_WriteSets[WriteSets (Bitemporal)]:::ledger
+        Ledger_DB --- Ledger_Claims
+        Ledger_DB --- Ledger_Evidence
+        Ledger_DB --- Ledger_WriteSets
+    end
+
+    Kafka_Ingest -->|Append Only| Ledger_DB
+
+    %% CDC Pipeline
+    subgraph CDC_Pipeline["Change Data Capture"]
+        Debezium[Debezium CDC]:::ingest
+        Kafka_CDC[Kafka Topic: intelgraph-sync]:::ingest
+    end
+
+    Ledger_DB -->|WAL Log| Debezium
+    Debezium --> Kafka_CDC
+
+    %% Materialized Graph: IntelGraph
+    subgraph IntelGraph_Subsystem["IntelGraph (Materialized Views)"]
+        Neo4j[(Neo4j: Knowledge Graph)]:::graph
+        Graph_Reality[Reality Graph (RG)]:::graph
+        Graph_Belief[Belief Graph (BG)]:::graph
+        Graph_Narrative[Narrative Graph (NG)]:::graph
+        Neo4j --- Graph_Reality
+        Neo4j --- Graph_Belief
+        Neo4j --- Graph_Narrative
+    end
+
+    Kafka_CDC -->|Deterministic Projection| Neo4j
+
+    %% Epistemic Assurance Plane (Policy)
+    subgraph Governance_Plane["Epistemic Assurance Plane"]
+        Policy_Engine[OPA Policy Engine]:::policy
+        Policy_SourceTrust[summit-policy-source-trust]:::policy
+        Policy_Contradiction[summit-policy-contradiction]:::policy
+        Policy_Regulatory[summit-policy-regulatory]:::policy
+        Lane_Model[Promotion Lane Evaluator]:::policy
+
+        Policy_Engine --- Policy_SourceTrust
+        Policy_Engine --- Policy_Contradiction
+        Policy_Engine --- Policy_Regulatory
+        Policy_Engine --> Lane_Model
+    end
+
+    Neo4j -->|Graph State Query| Policy_Engine
+
+    %% Orchestration: Maestro
+    subgraph Maestro_Subsystem["Maestro Orchestrator"]
+        Maestro_Engine[Maestro Control Loop]:::maestro
+        Event_Router[Event & Intent Router]:::maestro
+        Decision_Strip[Decision Strip / Rationale]:::maestro
+        Audit_Rail[Audit Rail (Governance UI)]:::maestro
+
+        Maestro_Engine --- Event_Router
+        Maestro_Engine --- Decision_Strip
+        Maestro_Engine --- Audit_Rail
+    end
+
+    Lane_Model -->|Authorization/Constraints| Maestro_Engine
+
+    %% Extension Layer 2: Agents
+    subgraph Agents["Agents (Extension Layer)"]
+        Agent_Verif[summit-agent-verification]:::agent
+        Agent_Narr[summit-agent-narrative]:::agent
+        Agent_Remed[summit-agent-remediation]:::agent
+        Agent_OSINT[summit-agent-osint]:::agent
+    end
+
+    Maestro_Engine -->|Orchestrate Actions| Agents
+    Agents -->|Retrieve Context| Neo4j
+    Agents -->|Execute Tools| External_World
+    Agents -->|Publish New Claims / Evidence| API_GW
+
+    %% Extension Layer 3: Modules (Higher Order Analytics)
+    subgraph Modules["Modules (Higher Order Capabilities)"]
+        Mod_CogGeo[summit-coggeo (DuckDB/Parquet)]:::module
+        Mod_Culture[summit-cultural-reality]:::module
+        Mod_Doctrine[summit-doctrine-advisor]:::module
+        Mod_RegEW[summit-regulatory-ew]:::module
+    end
+
+    Neo4j -->|Graph Subsets| Modules
+    Modules -->|Insights / Alerts| API_GW
+    Modules -->|Analyst Views| Maestro_Engine
+
+    %% Deterministic Replay / CI / Audit
+    subgraph Replay_Audit["Replay & Audit Subsystem"]
+        Replay_Engine[Deterministic Replay Engine]:::replay
+        CI_Pipeline[CI / PR Gate Convergence]:::replay
+        Parity_Check[Postgres <-> Neo4j Parity Check]:::replay
+    end
+
+    Ledger_DB -->|Read Historical WriteSets| Replay_Engine
+    Replay_Engine -->|Reconstruct Graph| Neo4j
+    CI_Pipeline -->|Verify Determinism| Replay_Engine
+    Parity_Check -->|Verify LSN/Tombstones| Ledger_DB
+    Parity_Check -->|Verify Node IDs| Neo4j
+
+    %% Final Connections
+    Policy_Engine -->|Record Governance Decisions| API_GW
+    Maestro_Engine -->|Record Orchestration State| API_GW
+
+    %% Annotations
+    class External_World external
+    class Collectors collector
+    class Ingest_Pipeline ingest
+    class System_Of_Record ledger
+    class CDC_Pipeline ingest
+    class IntelGraph_Subsystem graph
+    class Governance_Plane policy
+    class Maestro_Subsystem maestro
+    class Agents agent
+    class Modules module
+    class Replay_Audit replay
