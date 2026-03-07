@@ -1,0 +1,7 @@
+{
+  "recall_at_10": 0.85,
+  "latency_ms_p50": 150,
+  "latency_ms_p95": 210,
+  "partial_failures": 0,
+  "tenant_scope_violations": 0
+}

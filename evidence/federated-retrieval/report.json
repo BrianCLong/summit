@@ -1,0 +1,10 @@
+{
+  "query_id": "test-query",
+  "tenant_scope": ["tenant-A"],
+  "sources_considered": ["source-1", "source-2"],
+  "sources_used": ["source-1"],
+  "vector_hits": [],
+  "keyword_hits": [],
+  "graph_hits": [],
+  "fused_hits": []
+}
