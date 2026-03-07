@@ -6,18 +6,95 @@ interface StepUpAuthModalProps {
   onClose: () => void;
   onSuccess: (newAmr: string[]) => void;
   actionName: string; // e.g., "delete a critical resource"
+  sessionId?: string; // session to elevate; falls back to cookie-based session
 }
 
-// Mock API with failure simulation
-const performStepUpAuth = async (
-  shouldFail: boolean,
+/**
+ * Fetch a WebAuthn assertion challenge from the server, perform the credential
+ * assertion via the browser WebAuthn API, then post the signed assertion back.
+ * Returns the updated Authentication Method References on success.
+ */
+const performWebAuthnStepUp = async (
+  sessionId?: string,
 ): Promise<{ amr: string[] }> => {
-  console.log('Performing step-up authentication flow...');
-  await new Promise((res) => setTimeout(res, 1500));
-  if (shouldFail) {
-    throw new Error('Multi-factor authentication failed or was cancelled.');
+  if (!window.PublicKeyCredential) {
+    throw new Error('WebAuthn is not supported in this browser.');
   }
-  return { amr: ['pwd', 'mfa'] };
+
+  // 1. Request a challenge from the server.
+  const challengeRes = await fetch('/api/auth/webauthn/challenge', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ sessionId, purpose: 'step_up' }),
+    credentials: 'include',
+  });
+
+  if (!challengeRes.ok) {
+    throw new Error(`Failed to fetch WebAuthn challenge: ${challengeRes.status}`);
+  }
+
+  const { challenge, rpId, allowCredentials, timeout } = await challengeRes.json();
+
+  // 2. Decode the base64url challenge.
+  const challengeBytes = Uint8Array.from(
+    atob(challenge.replace(/-/g, '+').replace(/_/g, '/')),
+    (c) => c.charCodeAt(0),
+  );
+
+  // 3. Invoke the browser authenticator.
+  const assertion = await navigator.credentials.get({
+    publicKey: {
+      challenge: challengeBytes,
+      rpId: rpId ?? window.location.hostname,
+      allowCredentials: (allowCredentials ?? []).map(
+        (c: { id: string; type: string; transports?: string[] }) => ({
+          ...c,
+          id: Uint8Array.from(
+            atob(c.id.replace(/-/g, '+').replace(/_/g, '/')),
+            (ch) => ch.charCodeAt(0),
+          ),
+        }),
+      ),
+      userVerification: 'required',
+      timeout: timeout ?? 60000,
+    },
+  });
+
+  if (!assertion || assertion.type !== 'public-key') {
+    throw new Error('WebAuthn assertion was not completed.');
+  }
+
+  const pk = assertion as PublicKeyCredential;
+  const resp = pk.response as AuthenticatorAssertionResponse;
+
+  const toBase64url = (buf: ArrayBuffer) =>
+    btoa(String.fromCharCode(...new Uint8Array(buf)))
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=+$/, '');
+
+  // 4. Send the signed assertion to the server for verification.
+  const verifyRes = await fetch('/api/auth/webauthn/assert', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      sessionId,
+      credentialId: pk.id,
+      authenticatorData: toBase64url(resp.authenticatorData),
+      clientDataJSON: toBase64url(resp.clientDataJSON),
+      signature: toBase64url(resp.signature),
+      userHandle: resp.userHandle ? toBase64url(resp.userHandle) : null,
+    }),
+    credentials: 'include',
+  });
+
+  if (!verifyRes.ok) {
+    const body = await verifyRes.json().catch(() => ({}));
+    throw new Error(body.message ?? `Verification failed: ${verifyRes.status}`);
+  }
+
+  const { amr } = await verifyRes.json();
+  return { amr: amr ?? ['pwd', 'mfa', 'hwk'] };
 };
 
 export const StepUpAuthModal = ({
@@ -25,6 +102,7 @@ export const StepUpAuthModal = ({
   onClose,
   onSuccess,
   actionName,
+  sessionId,
 }: StepUpAuthModalProps) => {
   const [state, setState] = useState<'idle' | 'authenticating' | 'error'>(
     'idle',
@@ -35,15 +113,12 @@ export const StepUpAuthModal = ({
     setState('authenticating');
     setError('');
     try {
-      // In a real scenario, you might have a button to test the failure case.
-      const result = await performStepUpAuth(false);
+      const result = await performWebAuthnStepUp(sessionId);
       onSuccess(result.amr);
-      onClose(); // Close on success
+      onClose();
     } catch (err: any) {
       setState('error');
       setError(err.message || 'An unknown error occurred.');
-    } finally {
-      if (state !== 'error') setState('idle');
     }
   };
 
@@ -58,8 +133,8 @@ export const StepUpAuthModal = ({
           provide additional authentication.
         </p>
         <p>
-          This will typically involve a prompt from your multi-factor
-          authentication (MFA) device.
+          This will prompt your security key or platform authenticator (Face ID,
+          Touch ID, Windows Hello, etc.).
         </p>
 
         {state === 'error' && (
@@ -76,8 +151,8 @@ export const StepUpAuthModal = ({
         <div className="modal-actions">
           <button onClick={handleAuth} disabled={state === 'authenticating'}>
             {state === 'authenticating'
-              ? 'Waiting for MFA...'
-              : 'Begin Authentication'}
+              ? 'Waiting for security key...'
+              : 'Authenticate with Security Key'}
           </button>
           <button onClick={onClose} disabled={state === 'authenticating'}>
             Cancel
