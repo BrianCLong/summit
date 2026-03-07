@@ -1,0 +1,28 @@
+{
+  "campaign_id": "camp_scam_transrep",
+  "actor_ids": ["actor_criminal_scam_syndicate", "actor_state_aligned_repressor"],
+  "objectives": ["Financial Fraud", "Transnational Repression"],
+  "tactics": [
+    {
+      "tactic_id": "PERSONA_FABRICATION",
+      "technique_ids": ["synthetic-headshot-seeding", "romance-scam-trust-building"]
+    },
+    {
+      "tactic_id": "HARASSMENT_AND_REPRESSION",
+      "technique_ids": ["mass-reporting-account-suppression"]
+    }
+  ],
+  "ai_usage": [
+    {
+      "phase": "PERSONA_FABRICATION",
+      "capability": "ChatGPT-driven Romance Personas",
+      "evidence_ids": ["EVID:ai-influence-campaign:evidence:0003"]
+    }
+  ],
+  "evidence": [
+    {
+      "evidence_id": "EVID:ai-influence-campaign:evidence:0003",
+      "label": "OpenAI Threat Report Feb 2026"
+    }
+  ]
+}
