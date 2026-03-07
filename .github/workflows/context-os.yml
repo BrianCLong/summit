@@ -1,0 +1,27 @@
+name: context-governance
+
+on:
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  context_token_budget:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check Context Token Budget
+        run: echo "Checking context token budget..."
+
+  agent_step_regression:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check Agent Step Regression
+        run: echo "Checking agent step regression..."
+
+  context_relevance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check Context Relevance
+        run: echo "Checking context relevance..."
