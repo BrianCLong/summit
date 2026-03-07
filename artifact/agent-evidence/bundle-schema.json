@@ -1,0 +1,16 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "EvidenceBundle",
+  "type": "object",
+  "properties": {
+    "runId": { "type": "string" },
+    "workload": { "type": "string" },
+    "repoSnapshot": { "type": "string" },
+    "artifacts": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "signature": { "type": "string" }
+  },
+  "required": ["runId", "workload", "repoSnapshot", "artifacts", "signature"]
+}

@@ -1,0 +1,17 @@
+name: Agent OS Drift Sentinel
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  push:
+    paths:
+      - 'api/agent-os/**'
+      - '.opa/policy/agent-os/**'
+
+jobs:
+  check-drift:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run drift check
+        run: ./scripts/monitoring/agent-os-drift.sh

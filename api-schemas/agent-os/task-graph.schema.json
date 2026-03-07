@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "TaskGraph",
+  "type": "object",
+  "properties": {
+    "id": { "type": "string" },
+    "repo": { "type": "string" },
+    "nodes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "kind": { "enum": ["plan", "code", "test", "security", "verify"] },
+          "deps": { "type": "array", "items": { "type": "string" } },
+          "evidenceRequired": { "type": "array", "items": { "type": "string" } },
+          "budgetClass": { "enum": ["xs", "s", "m", "l"] }
+        },
+        "required": ["id", "kind", "deps", "evidenceRequired", "budgetClass"]
+      }
+    }
+  },
+  "required": ["id", "repo", "nodes"]
+}

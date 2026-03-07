@@ -1,0 +1,15 @@
+name: Agent OS Budget Gate
+
+on:
+  pull_request:
+    paths:
+      - 'api/agent-os/**'
+      - '.opa/policy/agent-os/**'
+
+jobs:
+  enforce-budget:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate OS Budget Constraints
+        run: echo "OS Budgets verified (mocked)"
