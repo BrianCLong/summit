@@ -1,5 +1,40 @@
 version: 1
 prompts:
+  - id: osint-evidence-pr1
+    version: v1
+    path: prompts/osint/osint-evidence-pr1@v1.md
+    sha256: 96a6be40a6e97e565caa1420d51e47dc5a1e0090f29be7e4e5032311c3beec4d
+    description: Add OSINT evidence schemas, governance docs, and the summit-osint-verify CI gate.
+    scope:
+      paths:
+        - .github/scripts/osint_verify.mjs
+        - .github/workflows/ci-osint-verify.yml
+        - docs/architecture/osint-pipeline.md
+        - docs/security/osint-governance.md
+        - docs/roadmap/STATUS.json
+        - schemas/osint/report.schema.json
+        - schemas/osint/metrics.schema.json
+        - schemas/osint/stamp.schema.json
+        - schemas/osint/evidence-index.schema.json
+        - required_checks.todo.md
+        - prompts/osint/osint-evidence-pr1@v1.md
+        - prompts/registry.yaml
+        - agents/examples/OSINT_EVIDENCE_PR1.json
+      domains:
+        - osint
+        - governance
+        - ci
+        - documentation
+        - schemas
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: io-cogwar-radar-brief
     version: v1
     path: prompts/briefs/io-cogwar-radar-brief@v1.md

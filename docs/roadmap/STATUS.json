@@ -1,12 +1,18 @@
 {
-  "last_updated": "2026-02-07T00:00:00Z",
-  "revision_note": "Added Summit PR Stack Sequencer skill scaffolding.",
+  "last_updated": "2026-02-07T01:00:00Z",
+  "revision_note": "Added OSINT evidence gate, schemas, and governance docs (PR1 lane).",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
       "status": "in_progress",
       "owner": "codex",
       "notes": "Scaffold adenhq/hive subsumption bundle, required check mapping, and evidence-first lane-1 posture."
+    },
+    {
+      "id": "osint-evidence-pr1",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "OSINT evidence schemas, governance docs, and summit-osint-verify CI gate (lane 1, PR1)."
     },
     {
       "id": "B",
