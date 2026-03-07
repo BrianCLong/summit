@@ -123,6 +123,7 @@ import masteryRouter from './routes/mastery.js';
 import cryptoIntelligenceRouter from './routes/crypto-intelligence.js';
 import demoRouter from './routes/demo.js';
 import claimsRouter from './routes/claims.js';
+import evidenceTrailPeekRouter from './routes/evidence-trail-peek.js';
 import opsRouter from './routes/ops.js';
 import featureFlagsRouter from './routes/feature-flags.js';
 import mlReviewRouter from './routes/ml_review.js';
@@ -477,6 +478,7 @@ export const createApp = async () => {
   app.use('/api/crypto-intelligence', cryptoIntelligenceRouter);
   app.use('/api/demo', demoRouter);
   app.use('/api/claims', claimsRouter);
+  app.use('/api', evidenceTrailPeekRouter);
   app.use('/api/feature-flags', featureFlagsRouter);
   app.use('/api/ml-reviews', mlReviewRouter);
   app.use('/api/admin/flags', adminFlagsRouter);
