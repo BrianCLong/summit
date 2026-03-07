@@ -1,0 +1,103 @@
+{
+  "$id": "https://summit.dev/schemas/pg.playbook.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PG Playbook (Analytic/Defensive)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "name", "useCase", "links", "steps", "outcomes", "provenance", "contentSafety"],
+  "properties": {
+    "id": { "type": "string", "minLength": 3 },
+    "name": { "type": "string", "minLength": 3 },
+    "useCase": {
+      "type": "string",
+      "enum": ["detection", "attribution", "forecasting", "training"]
+    },
+    "links": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["valueIds", "goalIds", "strategyIds"],
+      "properties": {
+        "valueIds": { "type": "array", "items": { "type": "string" } },
+        "goalIds": { "type": "array", "items": { "type": "string" } },
+        "strategyIds": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "steps": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "actionSignatureId"],
+        "properties": {
+          "id": { "type": "string" },
+          "actionSignatureId": { "type": "string" },
+          "dependsOn": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "condition": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["type", "expression"],
+            "properties": {
+              "type": { "type": "string", "enum": ["whenEvidence", "whenConstraint"] },
+              "expression": { "type": "string", "minLength": 3 }
+            }
+          }
+        }
+      }
+    },
+    "outcomes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "description", "timeToEffectDays", "likelihood"],
+        "properties": {
+          "id": { "type": "string" },
+          "description": { "type": "string", "minLength": 3 },
+          "timeToEffectDays": { "type": "number", "minimum": 0, "maximum": 3650 },
+          "likelihood": { "type": "number", "minimum": 0, "maximum": 1 },
+          "stateDeltas": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["stateVarId", "delta", "confidence"],
+              "properties": {
+                "stateVarId": { "type": "string" },
+                "delta": { "type": "number" },
+                "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+              }
+            }
+          }
+        }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source", "createdAt", "curator"],
+      "properties": {
+        "source": { "type": "string", "minLength": 3 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "curator": { "type": "string", "minLength": 2 },
+        "references": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "contentSafety": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["analyticOnly", "forbidPrescriptive"],
+      "properties": {
+        "analyticOnly": { "type": "boolean", "const": true },
+        "forbidPrescriptive": { "type": "boolean", "const": true }
+      }
+    }
+  }
+}

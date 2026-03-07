@@ -1,0 +1,45 @@
+{
+  "id": "pg.playbook.defensive.indicator-cluster.v1",
+  "name": "Indicator Cluster: Coordinated Narrative Injection (Analytic)",
+  "useCase": "detection",
+  "links": {
+    "valueIds": ["vg.value.trust", "vg.value.security"],
+    "goalIds": ["tg.goal.undermine-credibility"],
+    "strategyIds": ["tg.strategy.information-shaping"]
+  },
+  "steps": [
+    {
+      "id": "s1",
+      "actionSignatureId": "pg.action.sig.coordinated-posting.v1"
+    },
+    {
+      "id": "s2",
+      "actionSignatureId": "pg.action.sig.cross-platform-amplification.v1",
+      "dependsOn": ["s1"]
+    }
+  ],
+  "outcomes": [
+    {
+      "id": "o1",
+      "description": "Observed trust metrics may degrade in targeted communities over time.",
+      "timeToEffectDays": 14,
+      "likelihood": 0.35,
+      "stateDeltas": [
+        {
+          "stateVarId": "rg.state.community-trust-index",
+          "delta": -0.1,
+          "confidence": 0.4
+        }
+      ]
+    }
+  ],
+  "provenance": {
+    "source": "internal-analytic-seed",
+    "createdAt": "2026-03-05T00:00:00Z",
+    "curator": "summit.seed"
+  },
+  "contentSafety": {
+    "analyticOnly": true,
+    "forbidPrescriptive": true
+  }
+}
