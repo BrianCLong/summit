@@ -1,0 +1,6 @@
+{
+  "signal_id": "signal.inv_00182.dead_end",
+  "type": "dead_end",
+  "source": "inv_00182",
+  "evidence": "evidence://investigations/inv_00182/metrics.json"
+}

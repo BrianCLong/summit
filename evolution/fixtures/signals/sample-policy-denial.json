@@ -1,0 +1,6 @@
+{
+  "signal_id": "signal.inv_00195.policy_denial",
+  "type": "policy_denial",
+  "source": "inv_00195",
+  "evidence": "evidence://investigations/inv_00195/metrics.json"
+}

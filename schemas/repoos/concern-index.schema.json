@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.example.com/repoos/concern-index.schema.json",
+  "type": "object",
+  "properties": {
+    "concerns": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "concern_id": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "concern_id",
+          "path"
+        ]
+      }
+    }
+  },
+  "required": [
+    "concerns"
+  ]
+}

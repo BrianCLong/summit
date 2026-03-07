@@ -1,0 +1,17 @@
+name: evolution/concern-contracts
+on: [push, pull_request]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+      - run: pnpm install
+      - run: pnpm test tests/contracts/concern.contract.test.ts tests/contracts/signal.contract.test.ts tests/integration/concern-registry.integration.test.ts

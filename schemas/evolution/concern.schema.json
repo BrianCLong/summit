@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.example.com/evolution/concern.schema.json",
+  "type": "object",
+  "properties": {
+    "concern_id": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string"
+    },
+    "domain": {
+      "type": "string"
+    },
+    "severity": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string"
+    },
+    "source_signals": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1
+    },
+    "evidence_refs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "owner": {
+      "type": "string"
+    },
+    "created_from": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "concern_id",
+    "title",
+    "type",
+    "domain",
+    "severity",
+    "status",
+    "source_signals",
+    "evidence_refs",
+    "owner"
+  ]
+}
