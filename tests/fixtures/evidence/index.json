@@ -1,0 +1,16 @@
+{
+  "entries": [
+    {
+      "evidenceId": "EVD-COMPANYOS-POLICY-001",
+      "report": "tests/fixtures/evidence/deny/EVD-COMPANYOS-POLICY-001/report.json",
+      "metrics": "tests/fixtures/evidence/deny/EVD-COMPANYOS-POLICY-001/metrics.json",
+      "stamp": "tests/fixtures/evidence/deny/EVD-COMPANYOS-POLICY-001/stamp.json"
+    },
+    {
+      "evidenceId": "EVD-COMPANYOS-POLICY-002",
+      "report": "tests/fixtures/evidence/allow/EVD-COMPANYOS-POLICY-002/report.json",
+      "metrics": "tests/fixtures/evidence/allow/EVD-COMPANYOS-POLICY-002/metrics.json",
+      "stamp": "tests/fixtures/evidence/allow/EVD-COMPANYOS-POLICY-002/stamp.json"
+    }
+  ]
+}

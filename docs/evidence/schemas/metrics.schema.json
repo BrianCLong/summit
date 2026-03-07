@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit/docs/evidence/schemas/metrics.schema.json",
+  "title": "Policy Decision Metrics",
+  "type": "object",
+  "required": ["evidenceId", "allowedCount", "deniedCount", "tokenEstimate"],
+  "additionalProperties": false,
+  "properties": {
+    "evidenceId": { "type": "string", "pattern": "^EVD-COMPANYOS-[A-Z]+-\\d{3}$" },
+    "allowedCount": { "type": "integer", "minimum": 0 },
+    "deniedCount": { "type": "integer", "minimum": 0 },
+    "tokenEstimate": { "type": "integer", "minimum": 0 }
+  }
+}

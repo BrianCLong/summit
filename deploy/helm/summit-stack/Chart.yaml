@@ -1,0 +1,5 @@
+apiVersion: v2
+name: summit-stack
+description: Summit stack skeleton chart with companyOS foundation lane
+version: 0.1.0
+appVersion: "1.0.0"

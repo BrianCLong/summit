@@ -305,6 +305,26 @@ jobs:
           else
             echo "Control coverage verification skipped (script not yet implemented)"
           fi
+
+  evidence-contracts:
+    name: Evidence Contracts
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4 # v6
+      - uses: pnpm/action-setup@v4 # v4
+      - uses: actions/setup-node@v4 # v6
+        with:
+          node-version: "20"
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Verify companyOS evidence schemas and fixtures
+        run: node .github/scripts/verify-evidence.mjs
+
+      - name: Verify dependency delta ledger
+        run: node .github/scripts/verify-dependency-delta.mjs
         continue-on-error: true # Non-blocking until implementation complete
 
       - name: Generate evidence bundle (dry run)
@@ -414,6 +434,7 @@ jobs:
       - schema-validation
       - compliance-evidence
       - ga-evidence-completeness
+      - evidence-contracts
     if: always()
     steps:
       - name: Check critical gates passed
@@ -427,6 +448,7 @@ jobs:
           echo "Schema Validation: ${{ needs.schema-validation.result }}"
           echo "Compliance Evidence: ${{ needs.compliance-evidence.result }}"
           echo "GA Evidence Completeness: ${{ needs.ga-evidence-completeness.result }}"
+          echo "Evidence Contracts: ${{ needs.evidence-contracts.result }}"
           echo ""
 
           # Critical gates (BLOCKING)
@@ -450,6 +472,11 @@ jobs:
             exit 1
           fi
 
+          if [[ "${{ needs.evidence-contracts.result }}" != "success" ]]; then
+            echo "::error::Evidence Contracts FAILED - CI BLOCKED"
+            exit 1
+          fi
+
           # Non-critical gates (informational)
           # Governance, provenance, schema, compliance are non-blocking until implementation complete
 
@@ -466,6 +493,7 @@ jobs:
           echo "- ✅ Policy Compliance (OPA check + test)" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ GA Evidence Completeness" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ MCP Tool UX Lint" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Evidence Contracts" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Informational Gates (Non-blocking)" >> $GITHUB_STEP_SUMMARY
           echo "- ℹ️ Governance Checks" >> $GITHUB_STEP_SUMMARY

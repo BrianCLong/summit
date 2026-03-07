@@ -1,0 +1,8 @@
+{
+  "evidenceId": "EVD-COMPANYOS-POLICY-002",
+  "decisionId": "decision-b165df87e594b34f",
+  "summary": "Allowed TOOL_INVOKE for allowlisted tool with budget in range.",
+  "allowed": true,
+  "policyIds": ["policy-allow-1"],
+  "retentionClass": "standard"
+}

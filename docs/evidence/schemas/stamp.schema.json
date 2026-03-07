@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit/docs/evidence/schemas/stamp.schema.json",
+  "title": "Evidence Stamp",
+  "type": "object",
+  "required": ["evidenceId", "generatedAt"],
+  "additionalProperties": false,
+  "properties": {
+    "evidenceId": { "type": "string", "pattern": "^EVD-COMPANYOS-[A-Z]+-\\d{3}$" },
+    "generatedAt": { "type": "string", "format": "date-time" }
+  }
+}

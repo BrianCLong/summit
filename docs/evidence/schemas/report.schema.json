@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit/docs/evidence/schemas/report.schema.json",
+  "title": "Policy Decision Report",
+  "type": "object",
+  "required": ["evidenceId", "decisionId", "summary", "allowed", "policyIds", "retentionClass"],
+  "additionalProperties": false,
+  "properties": {
+    "evidenceId": { "type": "string", "pattern": "^EVD-COMPANYOS-[A-Z]+-\\d{3}$" },
+    "decisionId": { "type": "string" },
+    "summary": { "type": "string" },
+    "allowed": { "type": "boolean" },
+    "policyIds": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "retentionClass": {
+      "type": "string",
+      "enum": ["standard", "extended", "regulated"]
+    }
+  }
+}

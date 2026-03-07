@@ -1,0 +1,11 @@
+companyos:
+  enforce: false
+  url: http://companyos:8080
+summitCore:
+  replicas: 1
+maestro:
+  replicas: 1
+switchboard:
+  replicas: 1
+intelgraph:
+  replicas: 1

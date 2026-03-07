@@ -1,0 +1,40 @@
+services:
+  intelgraph-db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: summit
+      POSTGRES_USER: summit
+      POSTGRES_PASSWORD: ${SUMMIT_DB_PASSWORD:-summit}
+
+  companyos:
+    image: node:20-alpine
+    environment:
+      COMPANYOS_ENFORCE: ${COMPANYOS_ENFORCE:-0}
+      SUMMIT_ORG_SEED: ${SUMMIT_ORG_SEED:-1}
+    command: ["sh", "-c", "echo companyos placeholder"]
+
+  summit-core:
+    image: node:20-alpine
+    environment:
+      COMPANYOS_URL: ${COMPANYOS_URL:-http://companyos:8080}
+      COMPANYOS_ENFORCE: ${COMPANYOS_ENFORCE:-0}
+    command: ["sh", "-c", "echo summit-core placeholder"]
+
+  maestro:
+    image: node:20-alpine
+    environment:
+      COMPANYOS_URL: ${COMPANYOS_URL:-http://companyos:8080}
+      COMPANYOS_ENFORCE: ${COMPANYOS_ENFORCE:-0}
+    command: ["sh", "-c", "echo maestro placeholder"]
+
+  switchboard:
+    image: node:20-alpine
+    environment:
+      COMPANYOS_URL: ${COMPANYOS_URL:-http://companyos:8080}
+      COMPANYOS_ENFORCE: ${COMPANYOS_ENFORCE:-0}
+    command: ["sh", "-c", "echo switchboard placeholder"]
+
+  gateway:
+    image: nginx:alpine
+    ports:
+      - "3000:80"
