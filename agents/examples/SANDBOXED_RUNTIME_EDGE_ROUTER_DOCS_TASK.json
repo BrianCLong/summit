@@ -1,0 +1,51 @@
+{
+  "task_id": "SANDBOXED_RUNTIME_EDGE_ROUTER_DOCS_20260207",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "sandboxed-runtime-edge-router-docs",
+    "version": "v1",
+    "sha256": "5d383bea085eb55d1136d0856fad9cf2eb72731f7c07621a6251b531170a6a5d",
+    "path": "prompts/docs/sandboxed-runtime-edge-router@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "docs/standards/cloudflare-moltworker.md",
+      "docs/ops/runbooks/cloudflare-moltworker.md",
+      "docs/security/data-handling/cloudflare-moltworker.md",
+      "src/runtime/sandbox/",
+      "tests/runtime/",
+      "repo_assumptions.md",
+      "docs/roadmap/STATUS.json",
+      "agents/examples/SANDBOXED_RUNTIME_EDGE_ROUTER_DOCS_TASK.json",
+      "prompts/docs/sandboxed-runtime-edge-router@v1.md",
+      "prompts/registry.yaml"
+    ],
+    "domains": ["documentation", "governance", "security", "operations", "runtime", "testing"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "B",
+    "artifacts": [
+      "docs/standards/cloudflare-moltworker.md",
+      "docs/ops/runbooks/cloudflare-moltworker.md",
+      "docs/security/data-handling/cloudflare-moltworker.md",
+      "tests/runtime/sandbox_runtime_smoke.test.ts",
+      "tests/runtime/egress_deny_default.test.ts",
+      "tests/runtime/state_namespace_isolation.test.ts"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Sandboxed runtime standards, runbook, and data-handling docs are published",
+    "Experimental in-process sandbox runtime and persistence contract are implemented",
+    "Deny-by-default and persistence isolation tests pass",
+    "Roadmap status updated to reflect implementation progress"
+  ],
+  "stop_conditions": [
+    "Authority files required by governance are missing",
+    "Policy-as-code requirements cannot be satisfied"
+  ]
+}

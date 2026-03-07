@@ -17,7 +17,7 @@ prompts:
         - io-cogwar
     verification:
       tiers_required:
-        - C
+        - B
       debt_budget:
         permitted: 0
         retirement_target: 0
@@ -43,7 +43,7 @@ prompts:
         - documentation
     verification:
       tiers_required:
-        - C
+        - B
       debt_budget:
         permitted: 0
         retirement_target: 0
@@ -68,7 +68,7 @@ prompts:
         - ci
     verification:
       tiers_required:
-        - C
+        - B
       debt_budget:
         permitted: 0
         retirement_target: 0
@@ -97,7 +97,7 @@ prompts:
         - ci
     verification:
       tiers_required:
-        - C
+        - B
       debt_budget:
         permitted: 0
         retirement_target: 0
@@ -129,7 +129,7 @@ prompts:
         - cogwar
     verification:
       tiers_required:
-        - C
+        - B
       debt_budget:
         permitted: 0
         retirement_target: 0
@@ -158,7 +158,7 @@ prompts:
         - governance
     verification:
       tiers_required:
-        - C
+        - B
       debt_budget:
         permitted: 0
         retirement_target: 0
@@ -181,7 +181,7 @@ prompts:
         - documentation
     verification:
       tiers_required:
-        - C
+        - B
       debt_budget:
         permitted: 0
         retirement_target: 0
@@ -204,7 +204,7 @@ prompts:
         - evidence
     verification:
       tiers_required:
-        - C
+        - B
       debt_budget:
         permitted: 0
         retirement_target: 0
@@ -247,7 +247,7 @@ prompts:
         - docs
     verification:
       tiers_required:
-        - C
+        - B
       debt_budget:
         permitted: 0
         retirement_target: 0
@@ -271,7 +271,7 @@ prompts:
         - governance
     verification:
       tiers_required:
-        - C
+        - B
       debt_budget:
         permitted: 0
         retirement_target: 0
@@ -298,7 +298,7 @@ prompts:
         - governance
     verification:
       tiers_required:
-        - C
+        - B
       debt_budget:
         permitted: 0
         retirement_target: 0
@@ -325,7 +325,7 @@ prompts:
         - documentation
     verification:
       tiers_required:
-        - C
+        - B
       debt_budget:
         permitted: 0
         retirement_target: 0
@@ -355,7 +355,7 @@ prompts:
         - documentation
     verification:
       tiers_required:
-        - C
+        - B
       debt_budget:
         permitted: 0
         retirement_target: 0
@@ -435,7 +435,7 @@ prompts:
         - governance
     verification:
       tiers_required:
-        - C
+        - B
       debt_budget:
         permitted: 0
         retirement_target: 0
@@ -487,9 +487,44 @@ prompts:
         - governance
         - security
         - operations
+        - runtime
+        - testing
     verification:
       tiers_required:
-        - C
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
+  - id: sandboxed-runtime-edge-router-docs
+    version: v1
+    path: prompts/docs/sandboxed-runtime-edge-router@v1.md
+    sha256: 5d383bea085eb55d1136d0856fad9cf2eb72731f7c07621a6251b531170a6a5d
+    description: Document and implement sandboxed runtime edge router standards, runtime prototype, and tests.
+    scope:
+      paths:
+        - docs/standards/cloudflare-moltworker.md
+        - docs/ops/runbooks/cloudflare-moltworker.md
+        - docs/security/data-handling/cloudflare-moltworker.md
+        - docs/roadmap/STATUS.json
+        - src/runtime/sandbox/
+        - tests/runtime/
+        - repo_assumptions.md
+        - agents/examples/SANDBOXED_RUNTIME_EDGE_ROUTER_DOCS_TASK.json
+        - prompts/docs/sandboxed-runtime-edge-router@v1.md
+        - prompts/registry.yaml
+      domains:
+        - documentation
+        - governance
+        - security
+        - operations
+        - runtime
+        - testing
+    verification:
+      tiers_required:
+        - B
       debt_budget:
         permitted: 0
         retirement_target: 0
@@ -513,7 +548,7 @@ prompts:
         - roadmap
     verification:
       tiers_required:
-        - C
+        - B
       debt_budget:
         permitted: 0
         retirement_target: 0
@@ -599,7 +634,7 @@ prompts:
         - maestro
     verification:
       tiers_required:
-        - C
+        - B
       debt_budget:
         permitted: 0
         retirement_target: 0
@@ -656,7 +691,7 @@ prompts:
         - quality
     verification:
       tiers_required:
-        - C
+        - B
       debt_budget:
         permitted: 0
         retirement_target: 0
@@ -681,7 +716,7 @@ prompts:
         - documentation
     verification:
       tiers_required:
-        - C
+        - B
       debt_budget:
         permitted: 0
         retirement_target: 0
@@ -709,7 +744,7 @@ prompts:
         - governance
     verification:
       tiers_required:
-        - C
+        - B
       debt_budget:
         permitted: 0
         retirement_target: 0
@@ -732,7 +767,7 @@ prompts:
         - documentation
     verification:
       tiers_required:
-        - C
+        - B
       debt_budget:
         permitted: 0
         retirement_target: 0
@@ -756,7 +791,7 @@ prompts:
         - operations
     verification:
       tiers_required:
-        - C
+        - B
       debt_budget:
         permitted: 0
         retirement_target: 0
@@ -779,7 +814,7 @@ prompts:
         - ip
     verification:
       tiers_required:
-        - C
+        - B
       debt_budget:
         permitted: 0
         retirement_target: 0
@@ -835,7 +870,7 @@ prompts:
         - labs
     verification:
       tiers_required:
-        - C
+        - B
       debt_budget:
         permitted: 0
         retirement_target: 0
@@ -864,7 +899,7 @@ prompts:
         - testing
     verification:
       tiers_required:
-        - C
+        - B
       debt_budget:
         permitted: 0
         retirement_target: 0
@@ -890,7 +925,7 @@ prompts:
         - governance
     verification:
       tiers_required:
-        - C
+        - B
       debt_budget:
         permitted: 0
         retirement_target: 0
