@@ -1,0 +1,48 @@
+claims:
+  - id: "gtm12.claim.001"
+    statement: "ShadowDragon is positioned in-market as an OSINT monitoring and investigations vendor."
+    status: "verified"
+    confidence: "medium"
+    sources:
+      - url: "https://shadowdragon.io/products/monitor/"
+        citation: "ShadowDragon Horizon Monitor product page"
+    evidence:
+      - path: "docs/ci/evidence/gtm-12-vendor/EVIDENCE.md"
+        excerpt: "Vendor-level category mapping used in executive matrix."
+
+  - id: "gtm12.claim.002"
+    statement: "Social Links provides investigation tooling plus API-access commercialization signals."
+    status: "verified"
+    confidence: "medium"
+    sources:
+      - url: "https://sociallinks.io/products/sl-api-cybersecurity"
+        citation: "Social Links API product page"
+      - url: "https://www.accessnewswire.com/newsroom/en/computers-technology-and-internet/social-links-redefines-the-entire-intelligence-cycle-with-the-laun-808440"
+        citation: "Product launch/positioning announcement"
+    evidence:
+      - path: "docs/ci/evidence/gtm-12-vendor/EVIDENCE.md"
+        excerpt: "Data-feed + investigator UI posture."
+
+  - id: "gtm12.claim.003"
+    statement: "Maltego is positioned as an analyst workbench with explicit pricing plans."
+    status: "verified"
+    confidence: "high"
+    sources:
+      - url: "https://www.maltego.com/pricing/"
+        citation: "Maltego pricing page"
+      - url: "https://www.maltego.com/"
+        citation: "Maltego platform page"
+    evidence:
+      - path: "docs/ci/evidence/gtm-12-vendor/EVIDENCE.md"
+        excerpt: "Workbench-centric procurement profile."
+
+  - id: "gtm12.claim.004"
+    statement: "Summit differentiation claims are framed around reproducibility, policy gates, and evidence bundles."
+    status: "internal"
+    confidence: "high"
+    sources:
+      - url: "docs/gtm/competitive-battlecards-12-vendor.md"
+        citation: "Summit battlecard pack"
+    evidence:
+      - path: "docs/gtm/competitive-battlecards-12-vendor.md"
+        excerpt: "Kill-shot positioning and disqualifying questions."

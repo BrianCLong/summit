@@ -1,0 +1,14 @@
+competitive-intel-gtm-12-vendor-sources:
+  path: "docs/ci/evidence/gtm-12-vendor/SOURCES.md"
+  description: "Public source registry and citation scope for GTM 12 vendor pack"
+  generator: "competitive-intel-protocol"
+
+competitive-intel-gtm-12-vendor-claims:
+  path: "docs/ci/evidence/gtm-12-vendor/CLAIMS.yml"
+  description: "Claim-to-citation map for field collateral"
+  generator: "competitive-intel-protocol"
+
+competitive-intel-gtm-12-vendor-evidence:
+  path: "docs/ci/evidence/gtm-12-vendor/EVIDENCE.md"
+  description: "Append-only competitive evidence log"
+  generator: "competitive-intel-protocol"
