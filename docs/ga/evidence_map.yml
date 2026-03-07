@@ -10,3 +10,5 @@ required:
     artifact: docs/governance/GOVERNANCE_ACCEPTANCE.md
   - id: graph-sync-validator
     artifact: packages/graph-sync-validator/metrics.json
+  - id: evidence-trail-peek
+    artifact: apps/web/src/components/EvidenceTrailPeek.tsx

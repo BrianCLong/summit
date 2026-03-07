@@ -92,5 +92,16 @@ export const initialFeatureFlags: FeatureFlag[] = [
     updatedAt: new Date(),
     rolloutPercentage: 100,
     environment: ['development', 'staging', 'production']
+  },
+  {
+    key: 'features.evidenceTrailPeek',
+    enabled: true,
+    type: 'boolean',
+    description: 'Enable the Evidence-Trail Peek overlay for answer verification',
+    createdBy: 'system',
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    rolloutPercentage: 100,
+    environment: ['development', 'staging']
   }
 ];
