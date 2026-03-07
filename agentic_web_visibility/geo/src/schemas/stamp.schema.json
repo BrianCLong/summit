@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "GEO Run Stamp",
+  "type": "object",
+  "properties": {
+    "timestamp": { "type": "string", "format": "date-time" },
+    "gitHash": { "type": "string" },
+    "engines": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "required": ["timestamp", "engines"]
+}
