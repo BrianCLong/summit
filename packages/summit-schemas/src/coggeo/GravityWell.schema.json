@@ -1,0 +1,16 @@
+{
+  "$id": "https://schemas.summit.dev/coggeo/GravityWell.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "GravityWell",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "label", "strength", "time_window", "evidence_refs", "explain_ref"],
+  "properties": {
+    "id": { "type": "string" },
+    "label": { "type": "string" },
+    "strength": { "type": "number", "minimum": 0, "maximum": 1 },
+    "time_window": { "type": "string" },
+    "evidence_refs": { "type": "array", "items": { "type": "string" }, "default": [] },
+    "explain_ref": { "type": "string" }
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "$id": "https://schemas.summit.dev/coggeo/BeliefSignal.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "BeliefSignal",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "obs_id", "ts", "statement", "certainty", "confidence"],
+  "properties": {
+    "id": { "type": "string" },
+    "obs_id": { "type": "string" },
+    "ts": { "type": "string", "format": "date-time" },
+    "statement": { "type": "string", "minLength": 1 },
+    "certainty": { "type": "number", "minimum": 0, "maximum": 1 },
+    "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+    "targets": { "type": "array", "items": { "type": "string" }, "default": [] }
+  }
+}

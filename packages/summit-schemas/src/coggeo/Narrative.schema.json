@@ -1,0 +1,17 @@
+{
+  "$id": "https://schemas.summit.dev/coggeo/Narrative.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Narrative",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "title", "summary", "first_seen", "last_seen", "confidence"],
+  "properties": {
+    "id": { "type": "string" },
+    "title": { "type": "string" },
+    "summary": { "type": "string" },
+    "first_seen": { "type": "string", "format": "date-time" },
+    "last_seen": { "type": "string", "format": "date-time" },
+    "tags": { "type": "array", "items": { "type": "string" }, "default": [] },
+    "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+  }
+}

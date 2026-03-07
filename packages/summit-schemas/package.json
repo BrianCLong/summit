@@ -1,0 +1,23 @@
+{
+  "name": "@summit/summit-schemas",
+  "version": "0.1.0",
+  "description": "Cognitive Geophysics JSON schemas and AJV validators for Summit phenomenology layer",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest --passWithNoTests",
+    "lint": "eslint src --ext .ts"
+  },
+  "keywords": ["summit", "coggeo", "phenomenology", "schema", "ajv"],
+  "author": "Summit Team",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "ajv": "^8.12.0",
+    "ajv-formats": "^2.1.1"
+  }
+}

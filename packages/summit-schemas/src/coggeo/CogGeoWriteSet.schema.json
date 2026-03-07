@@ -1,0 +1,52 @@
+{
+  "$id": "https://schemas.summit.dev/coggeo/CogGeoWriteSet.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "CogGeoWriteSet",
+  "description": "Graph write firewall envelope for cognitive geophysics artifacts. Validated before IntelGraph persistence.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "ts", "nodes", "edges", "provenance"],
+  "properties": {
+    "id": { "type": "string" },
+    "ts": { "type": "string", "format": "date-time" },
+    "nodes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["type", "id", "data"],
+        "properties": {
+          "type": { "type": "string" },
+          "id": { "type": "string" },
+          "data": { "type": "object" }
+        }
+      },
+      "default": []
+    },
+    "edges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["type", "from", "to", "data"],
+        "properties": {
+          "type": { "type": "string" },
+          "from": { "type": "string" },
+          "to": { "type": "string" },
+          "data": { "type": "object" }
+        }
+      },
+      "default": []
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["collector", "hash"],
+      "properties": {
+        "collector": { "type": "string" },
+        "hash": { "type": "string" },
+        "models": { "type": "array", "items": { "type": "string" }, "default": [] }
+      }
+    }
+  }
+}

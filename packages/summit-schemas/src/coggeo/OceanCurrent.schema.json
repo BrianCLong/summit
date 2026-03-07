@@ -1,0 +1,16 @@
+{
+  "$id": "https://schemas.summit.dev/coggeo/OceanCurrent.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "OceanCurrent",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "label", "strength", "direction", "time_window", "explain_ref"],
+  "properties": {
+    "id": { "type": "string" },
+    "label": { "type": "string" },
+    "strength": { "type": "number", "minimum": 0, "maximum": 1 },
+    "direction": { "type": "string" },
+    "time_window": { "type": "string" },
+    "explain_ref": { "type": "string" }
+  }
+}

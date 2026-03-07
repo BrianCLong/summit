@@ -1,0 +1,16 @@
+{
+  "$id": "https://schemas.summit.dev/coggeo/WorldviewPlate.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "WorldviewPlate",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "label", "velocity", "scope", "evidence_refs", "explain_ref"],
+  "properties": {
+    "id": { "type": "string" },
+    "label": { "type": "string" },
+    "velocity": { "type": "number" },
+    "scope": { "type": "string" },
+    "evidence_refs": { "type": "array", "items": { "type": "string" }, "default": [] },
+    "explain_ref": { "type": "string" }
+  }
+}

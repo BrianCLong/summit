@@ -1,0 +1,17 @@
+{
+  "$id": "https://schemas.summit.dev/coggeo/StormEvent.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "StormEvent",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "narrative_id", "start_ts", "severity", "cells", "explain_ref"],
+  "properties": {
+    "id": { "type": "string" },
+    "narrative_id": { "type": "string" },
+    "start_ts": { "type": "string", "format": "date-time" },
+    "end_ts": { "type": ["string", "null"] },
+    "severity": { "type": "number", "minimum": 0, "maximum": 1 },
+    "cells": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+    "explain_ref": { "type": "string" }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "$id": "https://schemas.summit.dev/coggeo/TerrainCell.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "TerrainCell",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "ts_bucket", "h3", "narrative_id", "pressure", "temperature", "storm_score"],
+  "properties": {
+    "id": { "type": "string" },
+    "ts_bucket": { "type": "string", "minLength": 1 },
+    "h3": { "type": "string" },
+    "narrative_id": { "type": "string" },
+    "pressure": { "type": "number" },
+    "temperature": { "type": "number" },
+    "wind_u": { "type": "number", "default": 0 },
+    "wind_v": { "type": "number", "default": 0 },
+    "turbulence": { "type": "number", "default": 0 },
+    "storm_score": { "type": "number" }
+  }
+}

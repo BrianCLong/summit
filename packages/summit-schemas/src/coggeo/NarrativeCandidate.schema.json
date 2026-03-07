@@ -1,0 +1,17 @@
+{
+  "$id": "https://schemas.summit.dev/coggeo/NarrativeCandidate.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "NarrativeCandidate",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "obs_id", "ts", "title", "summary", "confidence"],
+  "properties": {
+    "id": { "type": "string" },
+    "obs_id": { "type": "string" },
+    "ts": { "type": "string", "format": "date-time" },
+    "title": { "type": "string", "minLength": 1 },
+    "summary": { "type": "string", "minLength": 1 },
+    "tags": { "type": "array", "items": { "type": "string" }, "default": [] },
+    "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "$id": "https://schemas.summit.dev/coggeo/FaultLine.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "FaultLine",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "label", "stress", "trigger_sensitivity", "scope", "evidence_refs", "explain_ref"],
+  "properties": {
+    "id": { "type": "string" },
+    "label": { "type": "string" },
+    "stress": { "type": "number", "minimum": 0, "maximum": 1 },
+    "trigger_sensitivity": { "type": "number", "minimum": 0, "maximum": 1 },
+    "scope": { "type": "string" },
+    "evidence_refs": { "type": "array", "items": { "type": "string" }, "default": [] },
+    "explain_ref": { "type": "string" }
+  }
+}
