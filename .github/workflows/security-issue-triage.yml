@@ -1,0 +1,69 @@
+name: Security Issue Triage
+
+on:
+  issues:
+    types: [opened, edited]
+
+permissions:
+  issues: write
+
+jobs:
+  triage:
+    name: Auto-triage Security Issues
+    runs-on: ubuntu-latest
+    if: contains(github.event.issue.labels.*.name, 'security') && contains(github.event.issue.labels.*.name, 'needs-triage')
+    steps:
+      - name: Parse Severity and Assign Labels
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issueBody = context.payload.issue.body;
+            if (!issueBody) return;
+
+            let severityLabel = null;
+            if (issueBody.includes('Critical (CVSS >= 9.0)')) severityLabel = 'severity:critical';
+            else if (issueBody.includes('High (CVSS 7.0 - 8.9)')) severityLabel = 'severity:high';
+            else if (issueBody.includes('Moderate (CVSS 4.0 - 6.9)')) severityLabel = 'severity:moderate';
+            else if (issueBody.includes('Low (CVSS < 4.0)')) severityLabel = 'severity:low';
+
+            if (severityLabel) {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                labels: [severityLabel]
+              });
+
+              // Define escalation/SLA message based on SECURITY.md
+              let slaMsg = '';
+              if (severityLabel === 'severity:critical') {
+                slaMsg = '**Critical Severity Triage:** Expected immediate response within 24 hours. Emergency patch required within 72 hours.';
+              } else if (severityLabel === 'severity:high') {
+                slaMsg = '**High Severity Triage:** Expected acknowledgment within 48 hours. Patch required in next scheduled release (or sooner).';
+              } else if (severityLabel === 'severity:moderate') {
+                slaMsg = '**Moderate Severity Triage:** Expected acknowledgment within 48 hours. Patch required in next scheduled release.';
+              } else if (severityLabel === 'severity:low') {
+                slaMsg = '**Low Severity Triage:** Expected triage within 5 business days. Fix to be scheduled for upcoming release.';
+              }
+
+              const commentBody = `👋 Thank you for reporting this security issue.\n\nAutomated triage has assigned the \`${severityLabel}\` label based on your selection.\n\n${slaMsg}\n\nOur security team has been notified and will review this issue shortly.`;
+
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: commentBody
+              });
+
+              // Remove needs-triage label
+              try {
+                await github.rest.issues.removeLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: context.issue.number,
+                  name: 'needs-triage'
+                });
+              } catch (e) {
+                console.log('Error removing needs-triage label:', e);
+              }
+            }
