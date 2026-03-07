@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "narrative_graph",
+  "type": "object",
+  "required": ["version", "nodes", "edges"],
+  "properties": {
+    "version": { "type": "integer", "minimum": 1 },
+    "nodes": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["key", "props"],
+        "properties": {
+          "key": { "type": "string" },
+          "props": { "type": "array", "items": { "type": "string" } }
+        },
+        "additionalProperties": false
+      }
+    },
+    "edges": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["from", "to", "props"],
+        "properties": {
+          "from": { "type": "string" },
+          "to": { "type": "string" },
+          "props": { "type": "array", "items": { "type": "string" } }
+        },
+        "additionalProperties": false
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "properties": {
+        "receipt_node": { "type": "string" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

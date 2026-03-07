@@ -1,0 +1,26 @@
+version: 1
+thresholds:
+  seeding_density_high: 0.65
+  handoff_score_high: 0.7
+  compression_ratio_high: 0.6
+  contested_counterclaim_rate: 0.4
+  dormant_volume_runs: 4
+  reactivation_similarity: 0.8
+register_shift:
+  dictionary:
+    - "it is hereby"
+    - "pursuant to"
+    - "hereby"
+    - "therefore"
+    - "compliance"
+tier_jump_scores:
+  fringe_to_mainstream: 1.0
+  adjacent: 0.5
+  same: 0.1
+citation_circularity:
+  denylist:
+    - "lowcred.example"
+    - "mirror.example"
+  allowlist:
+    - "gov.example"
+    - "ngo.example"

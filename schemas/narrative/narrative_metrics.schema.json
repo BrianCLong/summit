@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "narrative_metrics",
+  "x-targets": [
+    "seeding_density.json",
+    "handoff_candidates.json",
+    "compression_ratio.json"
+  ],
+  "type": "object",
+  "required": ["run_id", "config_hash"],
+  "properties": {
+    "run_id": { "type": "string" },
+    "config_hash": { "type": "string" },
+    "scores": { "type": "array" },
+    "handoff_candidates": { "type": "array" },
+    "compression_ratios": { "type": "array" }
+  },
+  "additionalProperties": false
+}

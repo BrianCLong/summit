@@ -1,0 +1,42 @@
+name: narrative-ci
+on:
+  workflow_dispatch: {}
+  pull_request:
+    paths:
+      - "intelgraph/pipelines/narrative_ci/**"
+      - "intelgraph/schema/**"
+      - "schemas/narrative/**"
+      - ".github/policies/narrative_ci/**"
+  schedule:
+    - cron: "17 3 * * *"
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      NARRATIVE_CI_ENABLED: "false"
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup OPA
+        uses: open-policy-agent/setup-opa@950f159a49aa91f9323f36f1de81c7f6b5de9576
+      - name: Run fixture pipeline
+        run: |
+          npx tsx intelgraph/pipelines/narrative_ci/steps/50_bundle_evidence.ts --fixture
+      - name: Validate schemas
+        run: |
+          npx tsx intelgraph/pipelines/narrative_ci/lib/schema_validate.ts out schemas/narrative
+      - name: OPA policy tests
+        run: |
+          opa test .github/policies/narrative_ci -v
+      - name: Determinism gate (no timestamps)
+        run: |
+          ! rg -n '"ts"|"timestamp"|"created_at"|"updated_at"' out || (echo "timestamp-like fields found in deterministic outputs" && exit 1)
+      - name: Upload evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: narrative-ci-evidence
+          path: |
+            evidence/**
+            out/**

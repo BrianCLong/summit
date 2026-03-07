@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "narrative_tests",
+  "x-targets": ["results.json"],
+  "type": "object",
+  "required": ["suite_id", "run_id", "results"],
+  "properties": {
+    "suite_id": { "type": "string" },
+    "run_id": { "type": "string" },
+    "results": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["test_id", "status"],
+        "properties": {
+          "test_id": { "type": "string" },
+          "status": { "type": "string", "enum": ["pass", "fail", "skipped"] }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

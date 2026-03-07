@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "narrative_state",
+  "x-targets": ["state_transitions.json"],
+  "type": "object",
+  "required": ["run_id", "config_hash", "transitions"],
+  "properties": {
+    "run_id": { "type": "string" },
+    "config_hash": { "type": "string" },
+    "transitions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["narrative_id", "from_state", "to_state"],
+        "properties": {
+          "narrative_id": { "type": "string" },
+          "from_state": { "type": "string" },
+          "to_state": { "type": "string" },
+          "score_basis": { "type": "object" }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}
