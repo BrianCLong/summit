@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-07T00:00:00Z",
-  "revision_note": "Added Summit PR Stack Sequencer skill scaffolding.",
+  "last_updated": "2026-02-09T00:00:00Z",
+  "revision_note": "Expanded Summit Architecture Lab with experiment catalog, thread contracts, and reconnaissance refinements.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -77,6 +77,12 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "Merge-train skill for deterministic PR DAGs, merge order, rollback plans, and evidence hooks."
+    },
+    {
+      "id": "summit-architecture-lab",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Expanded lab contract with thread model, branch conventions, promotion gates, and refined frontend/agentic reconnaissance docs."
     },
     {
       "id": "promptspec-foundation-lane1",
@@ -200,7 +206,7 @@
     "partial": 2,
     "incomplete": 0,
     "not_started": 5,
-    "total": 17,
+    "total": 18,
     "ga_blockers": []
   }
 }
