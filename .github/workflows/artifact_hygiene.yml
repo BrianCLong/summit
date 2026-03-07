@@ -1,0 +1,33 @@
+name: Artifact Hygiene and Retention
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  enforce-hygiene:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Run Artifact Hygiene Script
+        id: hygiene
+        run: node scripts/artifacts/artifact_hygiene.mjs
+
+      - name: Commit changes
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: prune expired artifacts"
+          file_pattern: ".artifacts/"
