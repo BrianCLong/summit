@@ -1,0 +1,23 @@
+{
+  "item_slug": "agent-fleet-control-plane-2027",
+  "category": "ecosystem_scan",
+  "verified_inputs": [
+    "CIO 21 agent orchestration tools article"
+  ],
+  "assumptions": [
+    "Graph-native orchestration provides durable differentiation"
+  ],
+  "subsystems": [
+    "registry",
+    "policy",
+    "router",
+    "graph_context_compiler",
+    "flight_recorder",
+    "saga_runtime"
+  ],
+  "pr_stack": [
+    "foundation-pr1",
+    "foundation-pr2",
+    "foundation-pr3"
+  ]
+}

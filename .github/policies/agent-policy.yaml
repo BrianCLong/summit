@@ -1,0 +1,18 @@
+version: 1
+policy: agent-control-plane
+rules:
+  - id: require-capabilities
+    description: Agent descriptors must declare at least one capability.
+    enforce: true
+  - id: require-risk-level
+    description: Agent descriptors must include riskLevel.
+    enforce: true
+  - id: require-observability-score
+    description: Agent descriptors must include observabilityScore between 0 and 1.
+    enforce: true
+  - id: require-determinism-score
+    description: Agent descriptors must include determinismScore between 0 and 1.
+    enforce: true
+  - id: deny-by-default
+    description: Routing denies execution when policy checks fail.
+    enforce: true
