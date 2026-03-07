@@ -1,0 +1,46 @@
+name: provenance-sbom
+on:
+  pull_request:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  sbom_evidence:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Generate SBOM (SPDX JSON)
+        uses: anchore/sbom-action@v0
+        with:
+          format: spdx-json
+          output-file: sbom.spdx.json
+
+      - name: Write evidence + badge
+        run: node .github/scripts/write-evidence.mjs
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+          PR_NUMBER: ${{ github.event.number }}
+
+      - name: Upload evidence artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: evidence-${{ github.sha }}
+          path: |
+            evidence/${{ github.sha }}/badge.json
+            evidence/${{ github.sha }}/report.json
+            evidence/${{ github.sha }}/metrics.json
+            evidence/${{ github.sha }}/stamp.json
+            evidence/${{ github.sha }}/index.json
+            sbom.spdx.json
+
+      - name: PR comment (status)
+        if: ${{ always() && github.event.pull_request.number && github.event.pull_request.head.repo.fork == false }}
+        run: node .github/scripts/pr-comment.mjs
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.number }}
+          SHA: ${{ github.sha }}

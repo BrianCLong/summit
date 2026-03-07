@@ -1,12 +1,18 @@
 {
-  "last_updated": "2026-02-07T00:00:00Z",
-  "revision_note": "Added Summit PR Stack Sequencer skill scaffolding.",
+  "last_updated": "2026-02-08T00:54:02Z",
+  "revision_note": "Added provenance SBOM PR1 evidence workflow tracking.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
       "status": "in_progress",
       "owner": "codex",
       "notes": "Scaffold adenhq/hive subsumption bundle, required check mapping, and evidence-first lane-1 posture."
+    },
+    {
+      "id": "provenance-sbom-pr1",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "PR1 SBOM + evidence bundle workflow, deterministic badge/report JSON, and PR comment surfacing."
     },
     {
       "id": "B",
