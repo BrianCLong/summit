@@ -24,6 +24,65 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: playwright-cli-governance-pack
+    version: v1
+    path: prompts/standards/playwright-cli-vs-mcp@v1.md
+    sha256: cbbb4ce284b68d97523cecde0d14e10f0918d0d21cb74e8c0e7e12e4d14eb831
+    description: Publish Playwright CLI vs MCP governance standard, data handling, runbook, and update roadmap status.
+    scope:
+      paths:
+        - docs/standards/playwright-cli-vs-mcp.md
+        - docs/security/data-handling/playwright-cli-vs-mcp.md
+        - docs/ops/runbooks/playwright-cli-vs-mcp.md
+        - repo_assumptions.md
+        - docs/roadmap/STATUS.json
+        - prompts/standards/playwright-cli-vs-mcp@v1.md
+        - prompts/registry.yaml
+      domains:
+        - documentation
+        - governance
+        - operations
+        - security
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
+  - id: playwright-cli-runner-mws
+    version: v1
+    path: prompts/implement/playwright-cli-runner@v1.md
+    sha256: e65acd8a8c055d7bde6ced4c560956b75d292cfe2969008b461df7e74e15e829
+    description: Implement feature-flagged Playwright CLI runner with deterministic evidence outputs and smoke-spec tests.
+    scope:
+      paths:
+        - scripts/playwright-cli-runner.mjs
+        - scripts/summit-playwright-cli.mjs
+        - specs/playwright/todomvc.smoke.json
+        - tests/playwright-cli/runner.test.mjs
+        - package.json
+        - docs/standards/playwright-cli-vs-mcp.md
+        - docs/ops/runbooks/playwright-cli-vs-mcp.md
+        - repo_assumptions.md
+        - docs/roadmap/STATUS.json
+        - prompts/implement/playwright-cli-runner@v1.md
+        - prompts/registry.yaml
+      domains:
+        - implementation
+        - governance
+        - testing
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: structured-content-primitives
     version: v1
     path: prompts/content/structured-content-primitives@v1.md

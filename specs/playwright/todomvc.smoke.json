@@ -1,0 +1,12 @@
+{
+  "name": "todomvc-smoke",
+  "startUrl": "https://demo.playwright.dev/todomvc",
+  "allowedDomains": ["demo.playwright.dev"],
+  "steps": [
+    { "action": "open", "target": "https://demo.playwright.dev/todomvc" },
+    { "action": "type", "target": "input.new-todo", "value": "ship summit playwright cli" },
+    { "action": "press", "target": "Enter" },
+    { "action": "check", "target": "text=ship summit playwright cli" },
+    { "action": "screenshot", "output": "screenshots/todomvc-smoke.png" }
+  ]
+}
