@@ -1,40 +1,38 @@
-# Required Checks Todo List
+# Required Checks Discovery and Alignment Plan
 
-This file tracks the status of CI check discovery and alignment with branch protection rules.
+## Objective
+Align GitHub branch protection required check names with workflow job names used in this repository so golden-main merges remain deterministic and green.
 
-## Current status
-GitHub Actions currently executes many checks, but we need to verify their exact names as reported to the GitHub Status API to ensure our "Always Required" and "Conditional Required" policies match exactly what GitHub expects.
+## Discovery Steps (authoritative)
+1. Open **GitHub → Settings → Branches → Branch protection rules**.
+2. Record every required status check exactly as displayed.
+3. Query API for confirmation:
+   - `GET /repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks`
+4. Compare UI/API output with workflow job names in `.github/workflows/*.yml`.
+5. Create a normalization PR that renames job IDs where mismatches exist.
 
-## Known check names (Verify these)
-- CI Core (Primary Gate) / CI Core Gate ✅
-- CI / Unit Tests
-- GA Gate
-- Release Readiness Gate
-- SOC Controls
-- Unit Tests & Coverage
-
-## Temporary names (Mapping needed)
-We are using these names in our CI pipeline definitions, but they might be reported differently to GitHub:
-- `gate/evidence` (PR2)
-- `gate/supplychain` (PR4)
-- `gate/fimi` (PR7)
+## Temporary Internal Mapping (pending validation)
+- `CI Core (Primary Gate) / CI Core Gate`
+- `CI / Unit Tests`
+- `GA Gate`
+- `Release Readiness Gate`
+- `SOC Controls`
+- `Unit Tests & Coverage`
+- `gate/evidence`
+- `gate/supplychain`
+- `gate/fimi`
 - `lint`
 - `typecheck`
 - `build`
 - `test`
 
-Once official names are known, we will alias these jobs or rename them in the workflow files to match the branch protection rules.
+## Rename Plan
+- Keep existing checks stable until branch protection names are verified.
+- Introduce aliases only when necessary to avoid check-history disruption.
+- Update `.github/required-checks.yml` and any policy docs in same PR.
+- Re-run branch protection verification after merge.
 
-## Temporary gates (Summit Harness & Skills)
-- ci/summit-harness-evidence
-- ci/summit-tool-policy
-- Use `skills/*` jobs with stable names (If actual required checks differ, add a rename PR that preserves history).
-- summit-skillsec
-- summit-evidence
-- summit-harness-mock
-
-## Required checks discovery (one-time for Memory Privacy)
-1) GitHub UI: Repo → Settings → Branches → Branch protection rules → note required checks
-2) GitHub API: GET /repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks
-3) Update: ci/gates/memory_privacy_gates.yml to match exact check names
-4) Add PR to rename temporary checks to required names once known
+## Exit Criteria
+- Required check names in branch protection match workflow job names exactly.
+- No transient check-name drift remains in protection rules.
+- Documentation reflects final canonical check list.

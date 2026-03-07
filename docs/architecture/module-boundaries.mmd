@@ -1,0 +1,10 @@
+flowchart LR
+  companyOS[companyOS\nOrg/Role/Policy Source] -->|facts + policy decisions| summit[Summit Core]
+  summit -->|evidence/events| intelgraph[IntelGraph\nEvidence + Provenance]
+  summit -->|run requests + context| switchboard[Switchboard\nTools/Flows]
+  summit -->|job requests + context| maestro[Maestro\nJobs]
+  switchboard -->|policy checks| companyOS
+  maestro -->|policy checks| companyOS
+  edge[Edge/Gateway\nAuth + Tenant Context] -->|org + actor context| summit
+  switchboard -->|tool/run evidence| intelgraph
+  maestro -->|job/run evidence| intelgraph
