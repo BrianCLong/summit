@@ -1,0 +1,57 @@
+lanes:
+  ci-gates:
+    paths:
+      - ".github/workflows/**"
+      - ".github/scripts/**"
+    constraints:
+      - "minimal blast radius"
+      - "no new required checks without mapping"
+    required_artifacts:
+      - "dependency-delta-note"
+      - "rollback-note"
+
+  evidence-contracts:
+    paths:
+      - "evidence/**"
+      - "docs/governance/**"
+    constraints:
+      - "no timestamps outside stamp.json"
+      - "stable evidence ids"
+    required_artifacts:
+      - "evidence-summary"
+      - "determinism-note"
+
+  graphrag:
+    paths:
+      - "src/graphrag/**"
+      - "tests/graphrag/**"
+    constraints:
+      - "feature-flag note required when applicable"
+      - "deterministic fixtures only"
+    required_artifacts:
+      - "test-surface-note"
+      - "rollback-note"
+
+  control-plane:
+    paths:
+      - "src/agents/**"
+      - "src/api/**"
+    constraints:
+      - "fail closed by default"
+      - "no unrelated refactors"
+    required_artifacts:
+      - "feature-flag-note"
+      - "reviewer-warning-note"
+
+  governance-security:
+    paths:
+      - "docs/security/**"
+      - ".github/policies/**"
+      - "docs/ga/**"
+      - "docs/architecture/**"
+    constraints:
+      - "deny by default"
+      - "privacy rules must be explicit"
+    required_artifacts:
+      - "policy-note"
+      - "rollback-note"
