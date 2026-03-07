@@ -400,6 +400,38 @@
         "metrics": "evidence/EVD-INTSUM-2026-THREAT-HORIZON-001/metrics.json",
         "stamp": "evidence/EVD-INTSUM-2026-THREAT-HORIZON-001/stamp.json"
       }
+    },
+    {
+      "evidence_id": "EVD-BROWSER-APIS-GOV-001",
+      "files": {
+        "report": "evidence/browser-apis/report.json",
+        "metrics": "evidence/browser-apis/metrics.json",
+        "stamp": "evidence/browser-apis/stamp.json"
+      }
+    },
+    {
+      "evidence_id": "EVD-BROWSER-APIS-CI-001",
+      "files": {
+        "report": "evidence/browser-apis/report.json",
+        "metrics": "evidence/browser-apis/metrics.json",
+        "stamp": "evidence/browser-apis/stamp.json"
+      }
+    },
+    {
+      "evidence_id": "EVD-BROWSER-APIS-COMPAT-001",
+      "files": {
+        "report": "evidence/browser-apis/report.json",
+        "metrics": "evidence/browser-apis/metrics.json",
+        "stamp": "evidence/browser-apis/stamp.json"
+      }
+    },
+    {
+      "evidence_id": "EVD-BROWSER-APIS-WRAP-001",
+      "files": {
+        "report": "evidence/browser-apis/report.json",
+        "metrics": "evidence/browser-apis/metrics.json",
+        "stamp": "evidence/browser-apis/stamp.json"
+      }
     }
   ]
 }

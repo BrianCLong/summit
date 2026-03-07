@@ -1,0 +1,52 @@
+{
+  "item": {
+    "slug": "browser-apis",
+    "source": "https://dev.to/sylwia-lask/stop-installing-libraries-10-browser-apis-that-already-solve-your-problems-35bi",
+    "published_date": "2026-02-04"
+  },
+  "evidence_ids": [
+    "EVD-BROWSER-APIS-GOV-001",
+    "EVD-BROWSER-APIS-CI-001",
+    "EVD-BROWSER-APIS-COMPAT-001",
+    "EVD-BROWSER-APIS-WRAP-001"
+  ],
+  "claims": [
+    {
+      "id": "CLAIM-001",
+      "text": "Browser-native APIs can replace several lightweight third-party dependencies in common UI workflows.",
+      "support": [
+        "structuredClone",
+        "Performance API",
+        "Page Visibility API",
+        "ResizeObserver",
+        "IntersectionObserver",
+        "AbortController",
+        "BroadcastChannel"
+      ]
+    }
+  ],
+  "decisions": [
+    {
+      "id": "DECISION-001",
+      "decision": "Adopt platform-first rubric for browser runtime dependency proposals.",
+      "status": "adopted"
+    },
+    {
+      "id": "DECISION-002",
+      "decision": "Classify Idle Detection, Web Locks, and File System Access as chromium-centric and default OFF.",
+      "status": "adopted"
+    }
+  ],
+  "compat_matrix": [
+    { "api": "structuredClone", "class": "universal-ish", "fallback_required": true },
+    { "api": "Performance", "class": "universal-ish", "fallback_required": true },
+    { "api": "Page Visibility", "class": "universal-ish", "fallback_required": true },
+    { "api": "ResizeObserver", "class": "universal-ish", "fallback_required": true },
+    { "api": "IntersectionObserver", "class": "universal-ish", "fallback_required": true },
+    { "api": "AbortController", "class": "universal-ish", "fallback_required": true },
+    { "api": "BroadcastChannel", "class": "universal-ish", "fallback_required": true },
+    { "api": "Idle Detection", "class": "chromium-centric", "fallback_required": true },
+    { "api": "Web Locks", "class": "chromium-centric", "fallback_required": true },
+    { "api": "File System Access", "class": "chromium-centric", "fallback_required": true }
+  ]
+}

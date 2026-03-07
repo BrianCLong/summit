@@ -1,0 +1,14 @@
+{
+  "metrics": [
+    {
+      "name": "web.platform.dependency.delta.added",
+      "value": 0,
+      "unit": "count"
+    },
+    {
+      "name": "web.platform.chromium.only.apis",
+      "value": 3,
+      "unit": "count"
+    }
+  ]
+}

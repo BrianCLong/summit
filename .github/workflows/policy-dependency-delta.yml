@@ -1,0 +1,33 @@
+name: policy/dependency-delta
+
+on:
+  pull_request:
+    paths:
+      - 'pnpm-lock.yaml'
+      - '.github/scripts/deps-delta.mjs'
+      - '.github/policies/platform-first-deps.json'
+      - '.github/workflows/policy-dependency-delta.yml'
+
+jobs:
+  dependency-delta:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Validate deps-delta parser tests
+        run: node --test .github/scripts/__tests__/deps-delta.test.mjs
+
+      - name: Generate dependency delta report
+        run: node .github/scripts/deps-delta.mjs
+
+      - name: Upload dependency delta artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: deps-delta
+          path: artifacts/deps-delta.json

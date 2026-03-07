@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Browser APIs Evidence Report",
+  "type": "object",
+  "required": ["item", "evidence_ids", "claims", "decisions", "compat_matrix"],
+  "properties": {
+    "item": {
+      "type": "object",
+      "required": ["slug", "source", "published_date"],
+      "properties": {
+        "slug": { "const": "browser-apis" },
+        "source": { "type": "string", "format": "uri" },
+        "published_date": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" }
+      },
+      "additionalProperties": false
+    },
+    "evidence_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^EVD-BROWSER-APIS-(GOV|CI|COMPAT|WRAP)-001$"
+      },
+      "minItems": 4,
+      "uniqueItems": true
+    },
+    "claims": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "text", "support"],
+        "properties": {
+          "id": { "type": "string" },
+          "text": { "type": "string" },
+          "support": { "type": "array", "items": { "type": "string" } }
+        },
+        "additionalProperties": false
+      }
+    },
+    "decisions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "decision", "status"],
+        "properties": {
+          "id": { "type": "string" },
+          "decision": { "type": "string" },
+          "status": { "enum": ["adopted", "deferred", "rejected"] }
+        },
+        "additionalProperties": false
+      }
+    },
+    "compat_matrix": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["api", "class", "fallback_required"],
+        "properties": {
+          "api": { "type": "string" },
+          "class": { "enum": ["universal-ish", "chromium-centric"] },
+          "fallback_required": { "type": "boolean" }
+        },
+        "additionalProperties": false
+      },
+      "minItems": 10
+    }
+  },
+  "additionalProperties": false
+}

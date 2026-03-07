@@ -1,0 +1,6 @@
+{
+  "schema_version": 1,
+  "description": "Allowlisted browser runtime dependency additions that passed platform-first exception review.",
+  "allowed_new_dependencies": [],
+  "deny_by_default": true
+}

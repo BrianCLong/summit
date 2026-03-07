@@ -1,0 +1,5 @@
+{
+  "generated_by": "ci-policy-dependency-delta",
+  "generated_at": "1970-01-01T00:00:00Z",
+  "note": "Runtime CI stamps replace baseline placeholders during pipeline execution."
+}
