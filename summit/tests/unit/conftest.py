@@ -1,8 +1,11 @@
+from unittest.mock import AsyncMock, MagicMock
+
 import pytest
-from unittest.mock import MagicMock, AsyncMock
+
 from summit.services.cache import CacheService
-from summit.services.vector_search import VectorSearch
 from summit.services.shared.core_verification import CoreVerificationService
+from summit.services.vector_search import VectorSearch
+
 
 @pytest.fixture
 def mock_redis_client():

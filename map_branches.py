@@ -2,9 +2,10 @@ import json
 import subprocess
 import sys
 
+
 def get_pr_data():
     try:
-        with open('pr-open.json', 'r') as f:
+        with open('pr-open.json') as f:
             return json.load(f)
     except FileNotFoundError:
         print("pr-open.json not found")

@@ -5,8 +5,8 @@ import json
 from pathlib import Path
 from typing import Any
 
-from summit.modulith.schemas import ModulithConfig, Violation
 from summit.modulith.scanner import ImportEdge
+from summit.modulith.schemas import ModulithConfig, Violation
 
 
 def _stable_json(data: Any) -> str:

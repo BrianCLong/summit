@@ -1,6 +1,7 @@
-import yaml
 import json
 import sys
+
+import yaml
 
 files_yaml = [
     ".github/workflows/ci.yml",
@@ -16,7 +17,7 @@ files_json = [
 
 def check_yaml(file_path):
     try:
-        with open(file_path, 'r') as f:
+        with open(file_path) as f:
             yaml.safe_load(f)
         print(f"YAML Valid: {file_path}")
     except Exception as e:
@@ -25,7 +26,7 @@ def check_yaml(file_path):
 
 def check_json(file_path):
     try:
-        with open(file_path, 'r') as f:
+        with open(file_path) as f:
             json.load(f)
         print(f"JSON Valid: {file_path}")
     except Exception as e:

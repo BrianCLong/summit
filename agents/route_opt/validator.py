@@ -8,7 +8,6 @@ from typing import Any
 
 from jsonschema import Draft202012Validator
 
-
 SCHEMA_PATH = Path(__file__).resolve().parent / "schemas" / "route_plan.schema.json"
 
 

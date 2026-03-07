@@ -14,8 +14,8 @@ if str(ROOT) not in sys.path:
 
 import hashlib
 import json
-from agents.route_opt.planner import run
 
+from agents.route_opt.planner import run
 
 FIXTURE = Path("agents/route_opt/tests/fixtures/input.json")
 STAMP = Path("artifacts/route_plan/stamp.json")
