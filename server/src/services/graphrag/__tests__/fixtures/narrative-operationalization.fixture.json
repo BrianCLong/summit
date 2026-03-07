@@ -1,0 +1,45 @@
+{
+  "schemaVersion": "1.0.0",
+  "codeVersion": "test-build",
+  "source": "fixture",
+  "dataset": "narrative-operationalization",
+  "params": {
+    "window": 7,
+    "threshold": 0.55
+  },
+  "narratives": [
+    {
+      "narrativeId": "n-001",
+      "fragmentId": "f-001",
+      "text": "Uncertainty persists and review is pending.",
+      "span": { "start": 0, "end": 40 },
+      "clusterId": "c-a",
+      "state": "seeded",
+      "eventTime": "2026-01-01T00:00:00Z",
+      "governanceRefType": "review",
+      "directionalClaim": false
+    },
+    {
+      "narrativeId": "n-001",
+      "fragmentId": "f-001",
+      "text": "Uncertainty persists and review is pending.",
+      "span": { "start": 0, "end": 40 },
+      "clusterId": "c-b",
+      "state": "exhausted",
+      "eventTime": "2026-01-02T00:00:00Z",
+      "counterClaimText": "review is pending",
+      "reframedAsSupport": true,
+      "directionalClaim": false
+    },
+    {
+      "narrativeId": "n-002",
+      "fragmentId": "f-020",
+      "text": "Initial statement adds strict interpretation.",
+      "span": { "start": 5, "end": 47 },
+      "clusterId": "c-z",
+      "state": "contested",
+      "eventTime": "2026-01-03T00:00:00Z",
+      "directionalClaim": true
+    }
+  ]
+}
