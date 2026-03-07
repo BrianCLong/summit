@@ -5,13 +5,13 @@ on:
     branches: [main, develop]
     paths:
       - '**/*.py'
-      - 'pyproject.toml'
-      - 'requirements*.txt'
+      - '**/pyproject.toml'
+      - '**/requirements*.txt'
   pull_request:
     paths:
       - '**/*.py'
-      - 'pyproject.toml'
-      - 'requirements*.txt'
+      - '**/pyproject.toml'
+      - '**/requirements*.txt'
 
 jobs:
   python-ci:
