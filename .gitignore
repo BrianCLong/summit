@@ -297,7 +297,9 @@ tmp-audit/
 .maestro-workboard/
 
 # Test reports
-reports/
+reports/*
+!reports/a11y-keyboard/
+!reports/a11y-keyboard/README.md
 bug-bash-results/
 *-report.json
 lint_output.txt
@@ -348,7 +350,6 @@ logs_*.zip
 .aider.chat.history.md
 .aider.input.history
 .aider.tags.cache.v4/
-reports/
 
 # Policy artifacts
 policy/bin/

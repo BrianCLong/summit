@@ -1,0 +1,8 @@
+{
+  "evidence_id": "EVD-DFLASH-SPEC-001",
+  "summary": "Speculative decoding evidence scaffolding established for deny-by-default configuration.",
+  "artifacts": [
+    ".github/policies/speculative-decoding.policy.json",
+    "docs/ga/evidence-schemas.md"
+  ]
+}

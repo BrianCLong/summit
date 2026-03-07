@@ -1,0 +1,6 @@
+{
+  "evidence_id": "EVD-DFLASH-SEC-001",
+  "generated_at": "2026-02-07T00:00:00Z",
+  "runner": "codex",
+  "pipeline": "manual"
+}

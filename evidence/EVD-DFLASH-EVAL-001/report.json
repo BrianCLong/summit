@@ -1,0 +1,7 @@
+{
+  "evidence_id": "EVD-DFLASH-EVAL-001",
+  "summary": "Placeholder for speculative decoding evaluation harness evidence.",
+  "artifacts": [
+    "docs/ga/evidence-schemas.md"
+  ]
+}

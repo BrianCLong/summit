@@ -1,0 +1,19 @@
+{
+  "policy_id": "speculative-decoding",
+  "version": "1.0",
+  "description": "Deny-by-default speculative decoding guardrails.",
+  "defaults": {
+    "enabled": false,
+    "allowlist_required": true,
+    "evidence_required": true
+  },
+  "requirements": {
+    "tenant_allowlist": true,
+    "evidence_thresholds": true,
+    "redaction_controls": true
+  },
+  "notes": [
+    "Speculative decoding must remain disabled unless an explicit tenant allowlist and evidence thresholds are configured.",
+    "Never log prompts, completions, token probabilities, or target feature payloads."
+  ]
+}

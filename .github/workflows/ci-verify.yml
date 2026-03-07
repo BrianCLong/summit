@@ -402,6 +402,21 @@ jobs:
             echo "Artifacts: ga-evidence-index-${GITHUB_SHA}" >> $GITHUB_STEP_SUMMARY
           fi
 
+  speculative-off-by-default:
+    name: verify/speculative-off-by-default
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4 # v6
+      - uses: pnpm/action-setup@v4 # v4
+      - uses: actions/setup-node@v4 # v6
+        with:
+          node-version: "20"
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Verify speculative config deny-by-default
+        run: node .github/scripts/verify-speculative-off-by-default.mjs
+
   ci-verify-gate:
     name: CI Verify Gate ✅
     runs-on: ubuntu-22.04
@@ -414,6 +429,7 @@ jobs:
       - schema-validation
       - compliance-evidence
       - ga-evidence-completeness
+      - speculative-off-by-default
     if: always()
     steps:
       - name: Check critical gates passed
@@ -427,6 +443,7 @@ jobs:
           echo "Schema Validation: ${{ needs.schema-validation.result }}"
           echo "Compliance Evidence: ${{ needs.compliance-evidence.result }}"
           echo "GA Evidence Completeness: ${{ needs.ga-evidence-completeness.result }}"
+          echo "Speculative Off By Default: ${{ needs.speculative-off-by-default.result }}"
           echo ""
 
           # Critical gates (BLOCKING)
@@ -450,6 +467,11 @@ jobs:
             exit 1
           fi
 
+          if [[ "${{ needs.speculative-off-by-default.result }}" != "success" ]]; then
+            echo "::error::Speculative Off By Default FAILED - CI BLOCKED"
+            exit 1
+          fi
+
           # Non-critical gates (informational)
           # Governance, provenance, schema, compliance are non-blocking until implementation complete
 
@@ -466,6 +488,7 @@ jobs:
           echo "- ✅ Policy Compliance (OPA check + test)" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ GA Evidence Completeness" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ MCP Tool UX Lint" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Speculative Off By Default" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Informational Gates (Non-blocking)" >> $GITHUB_STEP_SUMMARY
           echo "- ℹ️ Governance Checks" >> $GITHUB_STEP_SUMMARY
