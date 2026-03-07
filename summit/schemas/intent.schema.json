@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.com/schemas/intent.schema.json",
+  "title": "Intent Schema",
+  "type": "object",
+  "properties": {
+    "intent": {
+      "type": "string",
+      "description": "The description of the goal or outcome."
+    },
+    "context": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Contextual metadata."
+    }
+  },
+  "required": ["intent"]
+}

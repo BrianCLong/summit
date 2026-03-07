@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.com/schemas/mode-selection.schema.json",
+  "title": "Mode Selection Schema",
+  "type": "object",
+  "properties": {
+    "mode": {
+      "type": "string",
+      "enum": ["ask", "edit", "agent"],
+      "description": "The operating mode for the AI system."
+    }
+  },
+  "required": ["mode"]
+}

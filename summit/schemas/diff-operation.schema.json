@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.com/schemas/diff-operation.schema.json",
+  "title": "Diff Operation Schema",
+  "type": "object",
+  "properties": {
+    "kind": {
+      "type": "string",
+      "enum": ["add", "update", "delete", "replace", "bulk_edit", "privileged_tool"],
+      "description": "The type of operation."
+    },
+    "target": {
+      "type": "string",
+      "description": "The path or identifier of the object being modified."
+    },
+    "delta": {
+      "type": ["object", "string", "array"],
+      "description": "The payload representing the change."
+    }
+  },
+  "required": ["kind", "target"]
+}
