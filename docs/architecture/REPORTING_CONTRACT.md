@@ -1,22 +1,19 @@
 # Reporting Contract (v0)
 
-Summit reports are generated only from verified claims.
+Reports are rendered ONLY from verified claims.
 
 ## Invariants
-
-- Every narrative statement must cite one or more `claim_cids`.
-- Every report includes `claims_used` and `evidence_cids`.
-- Raw retrieval context is prohibited from report artifacts.
+- Every statement cites claim CIDs (`claim_cids[]`).
+- Every report includes `claims_used[]` and `evidence_cids[]`.
+- No raw retrieval context is embedded into report artifacts.
 
 ## Enforcement
+The gate `scripts/gates/enforce_report_from_claims.mjs` blocks patterns
+that indicate report generation from raw context dumps.
 
-- Deterministic render path: `packages/reporting/src/render.js`.
-- CI gate: `node scripts/gates/enforce_report_from_claims.mjs`.
-- Runtime hard fail: renderer throws `UNVERIFIED_CLAIM_REFERENCED:<cid>` when a statement references an unverified claim.
-
-## Pipeline Contract
-
-1. Retrieve evidence.
-2. Produce candidate claims.
-3. Verify + attest claims.
-4. Render report exclusively from verified claims.
+## Migration guidance
+Any existing report generator must be refactored to:
+1) retrieve evidence
+2) produce claims
+3) verify claims
+4) render report from claims only
