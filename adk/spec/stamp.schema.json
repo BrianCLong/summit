@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "adk/spec/stamp.schema.json",
+  "title": "Summit Agent Evaluation Stamp",
+  "type": "object",
+  "required": ["stamp_version", "agent_id"],
+  "properties": {
+    "stamp_version": { "type": "string" },
+    "agent_id": { "type": "string" }
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "adk/spec/trace.schema.json",
+  "title": "Summit Agent Evaluation Trace",
+  "type": "object",
+  "required": ["trace_version", "agent_id", "steps", "evidence_ids"],
+  "properties": {
+    "trace_version": { "type": "string" },
+    "agent_id": { "type": "string" },
+    "steps": { "type": "array" },
+    "evidence_ids": { "type": "array", "items": { "type": "string" } }
+  }
+}
