@@ -71,9 +71,9 @@ This report outlines how we convert our core strengths—**Deterministic Provena
 
 Moonshot's release of Kimi K2.5 validates our "Agentic OS" thesis but raises the bar on **multimodal grounding** and **swarm efficiency**. We respond by subsuming their features into our governance layer:
 
-1.  **Vendor-Agnostic Swarm Primitives**: We don't just run Kimi swarms; we provide the **Summit Swarm Kernel** that manages parallel execution and OPA-gated context merging across any model family.
-2.  **Reasoning Budget Contract (RBC)**: We generalize "Thinking vs Instant" into a universal enterprise knob for Latency/Cost/Risk, decoupling the UX from specific model features.
-3.  **Conformance-as-a-Product**: We launch the **Summit Agent Conformance Suite (SACS)** to verify vendor claims (e.g., "Native INT4", "Vision Grounding") before they reach production.
+1. **Vendor-Agnostic Swarm Primitives**: We don't just run Kimi swarms; we provide the **Summit Swarm Kernel** that manages parallel execution and OPA-gated context merging across any model family.
+2. **Reasoning Budget Contract (RBC)**: We generalize "Thinking vs Instant" into a universal enterprise knob for Latency/Cost/Risk, decoupling the UX from specific model features.
+3. **Conformance-as-a-Product**: We launch the **Summit Agent Conformance Suite (SACS)** to verify vendor claims (e.g., "Native INT4", "Vision Grounding") before they reach production.
 
 ---
 

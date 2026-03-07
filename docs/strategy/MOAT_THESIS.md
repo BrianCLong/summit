@@ -9,11 +9,11 @@
 
 We are committing to two primary structural moats that reinforce each other:
 
-1.  **Compliance & Trust (The "High-Stakes" Moat)**
+1. **Compliance & Trust (The "High-Stakes" Moat)**
     - **Thesis:** By embedding "controls-as-code", immutable audit logs (Provenance Ledger), and policy-driven data access (OPA) directly into the platform's core, we make leaving the platform a compliance risk. We sell risk reduction, not just software.
     - **Why we win:** Competitors treat compliance as a checkbox feature; we treat it as the database physics.
 
-2.  **Data Network Effects (The "Gravity" Moat)**
+2. **Data Network Effects (The "Gravity" Moat)**
     - **Thesis:** As users ingest more data (entities) and define more relationships (edges) in the Knowledge Lattice, the value of the graph grows superlinearly. The "Graph Intelligence" becomes smarter with every interaction.
     - **Why we win:** Relational-based competitors cannot easily replicate the rich, traversal-based insights of a deep graph.
 
@@ -35,10 +35,10 @@ We are committing to two primary structural moats that reinforce each other:
 
 We do not measure "active users" alone; we measure **entanglement**.
 
-1.  **Retention:** Net Revenue Retention (NRR) > 120%.
-2.  **Depth of Usage:** % of queries that touch >3 degrees of the graph (indicates dependency on _our_ data model).
-3.  **Integration Count:** Average number of data connectors active per tenant (Target: >5).
-4.  **Data Gravity:** Ratio of _derived_ facts (system-generated) to _ingested_ facts (user-uploaded). A higher ratio means the platform is generating unique value.
+1. **Retention:** Net Revenue Retention (NRR) > 120%.
+2. **Depth of Usage:** % of queries that touch >3 degrees of the graph (indicates dependency on _our_ data model).
+3. **Integration Count:** Average number of data connectors active per tenant (Target: >5).
+4. **Data Gravity:** Ratio of _derived_ facts (system-generated) to _ingested_ facts (user-uploaded). A higher ratio means the platform is generating unique value.
 
 ---
 
@@ -46,9 +46,9 @@ We do not measure "active users" alone; we measure **entanglement**.
 
 Customers are "locked in" (in a value-positive way) when they take these steps:
 
-1.  **Migration of Authority:** The customer shuts down their legacy "shadow" spreadsheets and designates IntelGraph as the _System of Record_ for investigations.
-2.  **Policy Encoding:** The customer translates their internal governance rules into our OPA policy language. Migrating away requires rewriting their legal rulebook.
-3.  **Integration of Identity:** The customer connects their SSO/SCIM and maps their organizational hierarchy to our RBAC roles.
+1. **Migration of Authority:** The customer shuts down their legacy "shadow" spreadsheets and designates IntelGraph as the _System of Record_ for investigations.
+2. **Policy Encoding:** The customer translates their internal governance rules into our OPA policy language. Migrating away requires rewriting their legal rulebook.
+3. **Integration of Identity:** The customer connects their SSO/SCIM and maps their organizational hierarchy to our RBAC roles.
 
 ---
 
@@ -141,6 +141,6 @@ _Exception:_ Unless "Table Stakes" for the specific persona (e.g., a specific gr
 
 **Execution Outcomes (land-and-expand):**
 
-1.  **Land:** Ship governed adapters fast with zero-trust defaults so customers keep their tools but trust our graph.
-2.  **Expand:** Embed graph intelligence back into the connected systems (closed-loop actions, ticket automation, SIEM suppression).
-3.  **Defend:** Benchmark integrations as SLO-backed features (uptime, drift checks, governance events) and review quarterly via the Moat Gate.
+1. **Land:** Ship governed adapters fast with zero-trust defaults so customers keep their tools but trust our graph.
+2. **Expand:** Embed graph intelligence back into the connected systems (closed-loop actions, ticket automation, SIEM suppression).
+3. **Defend:** Benchmark integrations as SLO-backed features (uptime, drift checks, governance events) and review quarterly via the Moat Gate.

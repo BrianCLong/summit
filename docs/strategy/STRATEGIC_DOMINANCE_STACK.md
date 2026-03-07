@@ -15,11 +15,13 @@ Move Summit from "excellent investigative software" to "global investigative int
 Define a declarative DSL that captures targets, goals, evidence constraints, and required outputs.
 
 **Outcomes**
+
 - Reproducible investigations as versioned programs.
 - Agent-executable workflows with deterministic plans.
 - Shareable investigation templates across teams/partners.
 
 **First deliverables**
+
 - Investigation schema (`intent`, `find`, `detect`, `constraints`, `outputs`).
 - Compiler to execution graph (via IntentCompiler and EvidenceBudget).
 - Template registry with signed versioning.
@@ -29,12 +31,14 @@ Define a declarative DSL that captures targets, goals, evidence constraints, and
 Build graph-native retrieval primitives beyond document search.
 
 **Required indexes**
+
 - Entity index
 - Relationship index
 - Temporal index
 - Narrative index
 
 **Outcomes**
+
 - Query paths and relationship reasoning in milliseconds.
 - Direct answers to "how is X connected to Y" questions.
 - Foundation for explainable graph search UX.
@@ -44,6 +48,7 @@ Build graph-native retrieval primitives beyond document search.
 Model claims, amplifiers, audiences, and propagation paths as first-class graph objects.
 
 **Outcomes**
+
 - Detection and scoring of coordinated narrative campaigns.
 - Cross-community propagation tracing.
 - Attribution-ready evidence chains.
@@ -53,6 +58,7 @@ Model claims, amplifiers, audiences, and propagation paths as first-class graph 
 Run scenario simulations against narrative and actor networks.
 
 **Outcomes**
+
 - "What-if" analysis for moderation/intervention strategies.
 - Impact forecasts before operational action.
 - Decision support for cognitive defense playbooks.
@@ -62,6 +68,7 @@ Run scenario simulations against narrative and actor networks.
 Generate ranked investigative hypotheses from graph anomalies and known patterns.
 
 **Outcomes**
+
 - Analyst acceleration from anomaly to actionable lead.
 - Standardized hypothesis catalogs tied to evidence thresholds.
 - Reduced miss rate for latent high-risk patterns.
@@ -71,12 +78,14 @@ Generate ranked investigative hypotheses from graph anomalies and known patterns
 Treat investigations like code with branching, review, and merge workflows.
 
 **Core features**
+
 - Shared workspaces
 - Investigation branches
 - Node/edge annotations
 - Evidence review gates
 
 **Outcomes**
+
 - Multi-analyst throughput without evidence drift.
 - Audit-ready decision records per finding.
 
@@ -85,12 +94,14 @@ Treat investigations like code with branching, review, and merge workflows.
 Attach dynamic confidence/trust scores to every claim and evidence object.
 
 **Inputs**
+
 - Source reputation
 - Corroboration count
 - Extraction confidence
 - Historical reliability
 
 **Outcomes**
+
 - Transparent confidence accounting.
 - Better triage under uncertainty.
 
@@ -99,6 +110,7 @@ Attach dynamic confidence/trust scores to every claim and evidence object.
 Use graph ML + probabilistic reasoning for forward-looking intelligence.
 
 **Outcomes**
+
 - Risk propagation forecasts across supply chains/networks.
 - Collaboration likelihood predictions.
 - Pre-event mitigation planning.
@@ -108,12 +120,14 @@ Use graph ML + probabilistic reasoning for forward-looking intelligence.
 Auto-produce live, graph-linked intelligence reports.
 
 **Outputs**
+
 - Structured reports
 - Network visuals
 - Timeline narratives
 - Evidence appendices
 
 **Outcomes**
+
 - Faster report generation with traceable evidence.
 - Executable reports (click-through to graph state).
 
@@ -122,6 +136,7 @@ Auto-produce live, graph-linked intelligence reports.
 Treat proprietary data advantage as a product moat.
 
 **Outcomes**
+
 - Licensing strategy mapped to use cases and jurisdiction.
 - Data partner program with provenance guarantees.
 - Enrichment pipelines that compound graph value.
@@ -131,6 +146,7 @@ Treat proprietary data advantage as a product moat.
 Continuously ingest research/threat reporting/journalism and transform it into graph updates.
 
 **Outcomes**
+
 - Systematically shrinking model staleness window.
 - Automatic extraction of entities, relationships, and methods.
 - Rapid transfer of external analytic innovation into Summit.
@@ -140,6 +156,7 @@ Continuously ingest research/threat reporting/journalism and transform it into g
 Institutionalize credibility with repeatable benchmark and adversarial evaluation.
 
 **Outcomes**
+
 - Benchmark investigations and scorecards.
 - Hallucination and reasoning-failure detection.
 - Evidence-first quality gates for high-stakes workflows.
@@ -163,46 +180,55 @@ Each upper layer is constrained by lower-layer evidence quality and governance p
 ### Mistake 1: Build Features Before Canonical Semantics
 
 **Failure mode**
+
 - Teams ship UI/agent features on inconsistent entity/claim/evidence definitions.
 - Cross-module interoperability degrades and trust erodes.
 
 **Required control**
+
 - Enforce canonical definitions and authority files before adding net-new surfaces.
 - Gate merges on schema conformance + deterministic query behavior.
 
 ### Mistake 2: Optimize for Demos Instead of Reproducibility
 
 **Failure mode**
+
 - Strong one-off investigations, weak repeatability and auditability.
 - Results cannot be reliably replayed under governance review.
 
 **Required control**
+
 - Treat investigations as versioned programs with immutable evidence snapshots.
 - Require replayability and signed execution traces for promoted findings.
 
 ### Mistake 3: Treat Evaluation as a Late-Stage Add-On
 
 **Failure mode**
+
 - Platform scales faster than credibility; confidence collapses under adversarial pressure.
 - Hallucinations and drift become operational liabilities.
 
 **Required control**
+
 - Ship benchmark + red-team + regression gates as first-class platform infrastructure.
 - Tie releases to evidence thresholds, rollback triggers, and accountability windows.
 
 ## 90-Day Execution Envelope (Platform, Not Feature)
 
 ### Phase A (0-30 days): Semantic and Governance Foundation
+
 - Investigation DSL v0 schema + compiler spec.
 - Canonical trust scoring model v0.
 - Benchmark investigation suite seed set.
 
 ### Phase B (31-60 days): Retrieval and Collaboration Core
+
 - Entity/relationship/temporal index MVP.
 - Collaborative investigation branching + review controls.
 - Live report prototype linked to graph entities.
 
 ### Phase C (61-90 days): Simulation and Forecasting Differentiators
+
 - Narrative propagation model v1.
 - Counter-disinformation simulator v1.
 - Hypothesis generation + scenario forecasting pilot.
