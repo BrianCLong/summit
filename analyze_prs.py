@@ -1,9 +1,10 @@
 import json
 from datetime import datetime
 
+
 def main():
     try:
-        with open('pr-open.json', 'r') as f:
+        with open('pr-open.json') as f:
             prs = json.load(f)
     except:
         print("Error reading pr-open.json")

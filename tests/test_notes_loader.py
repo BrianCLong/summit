@@ -1,8 +1,11 @@
 import os
 import shutil
+
 import pytest
-from summit.ingestion.notes_loader import NotesLoader
+
 from summit.ingestion.chunker import chunk_markdown
+from summit.ingestion.notes_loader import NotesLoader
+
 
 def test_chunk_markdown():
     text = "Paragraph 1\n\nParagraph 2\n\nParagraph 3"

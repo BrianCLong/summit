@@ -1,6 +1,8 @@
 import time
+from typing import Any, Dict
+
 from models.base import BaseModelAdapter, ModelOutput
-from typing import Dict, Any
+
 
 class Sonnet45Adapter(BaseModelAdapter):
     MODEL_ID = "sonnet-4.5"

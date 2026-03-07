@@ -1,6 +1,6 @@
-import re
 import json
 import os
+import re
 import sys
 
 # Constants
@@ -79,7 +79,7 @@ def main():
         print(f"Error: {TRACKING_ISSUE_PATH} not found.")
         sys.exit(1)
 
-    with open(TRACKING_ISSUE_PATH, 'r') as f:
+    with open(TRACKING_ISSUE_PATH) as f:
         content = f.read()
 
     worklist = parse_issue(content)

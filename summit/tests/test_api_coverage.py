@@ -1,6 +1,7 @@
 import pytest
 from fastapi.testclient import TestClient
 
+
 # Fixture to provide client for all tests in this file
 @pytest.fixture
 def client():
