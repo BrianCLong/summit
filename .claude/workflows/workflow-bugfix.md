@@ -1,140 +1,95 @@
-# Workflow: Bug Fix
+# Workflow: Bugfix
 
-Use this workflow when fixing a reported bug or regression.
+## 1) When to use
 
----
+- A defect/regression exists and expected behavior is known.
+- Scope is one bug path, one root cause, one PR.
 
-## Scope Guardrails
+## 2) Inputs required from user
 
-- **One bug per PR** - Don't bundle multiple fixes
-- **No refactoring** - Fix the bug, don't improve surrounding code
-- **Minimal diff** - Smallest change that fixes the issue
-- **Add regression test** - Prevent the bug from returning
+- Issue link or incident ID.
+- Reproduction steps (expected vs actual).
+- Impacted area/path (use `.claude/areas.md` if present).
+- Severity + release target.
 
----
-
-## Steps
-
-### 1. Understand the Bug
-
-```
-Read the bug report/issue. Identify:
-- Expected behavior
-- Actual behavior
-- Steps to reproduce
-- Affected files/components
-```
-
-### 2. Locate the Bug
-
-```
-Search for the relevant code:
-- Use grep/glob to find affected files
-- Read the code to understand the flow
-- Identify root cause vs. symptoms
-```
-
-### 3. Write a Failing Test
-
-```
-Before fixing, write a test that reproduces the bug:
-- Test should FAIL before the fix
-- Test should PASS after the fix
-- This becomes your regression test
-```
-
-### 4. Implement the Fix
-
-```
-Apply the minimal fix:
-- Change only what's necessary
-- Don't refactor unrelated code
-- Preserve existing behavior for other cases
-```
-
-### 5. Verify the Fix
+## 3) Discover (read-only)
 
 ```bash
-# Run the specific test
+# Repo contract (if present)
+cat .claude/README.md
+cat .claude/areas.md
+cat .prbodies/claude-evidence.md
+
+# Find bug path + existing tests
+rg -n "<error|symptom|component>" .
+rg -n "<error|symptom|component>" client server packages services tests
+
+# Inspect candidate files
+sed -n '1,220p' <path/to/file>
+sed -n '1,220p' <path/to/test>
+```
+
+## 4) Plan (checklist)
+
+- [ ] File list (explicit):
+  - [ ] `<path/to/file>`
+  - [ ] `<path/to/test>`
+- [ ] Root cause statement is one sentence.
+- [ ] Risk level selected: Low | Medium | High.
+- [ ] Regression test approach defined.
+
+## 5) Apply (rules)
+
+- Keep diff minimal and local to bug path.
+- No drive-by refactors.
+- Add/extend regression test in same PR.
+- Keep commits atomic and reviewable.
+
+## 6) Verify
+
+```bash
+# Narrow first
 pnpm test -- --testPathPattern="<test-file>"
 
-# Run related test suite
-pnpm test -- --testPathPattern="<directory>"
+# Area checks
+pnpm lint
+pnpm typecheck
 
-# Run full test suite
-pnpm test
-```
-
----
-
-## Local Commands
-
-```bash
-# Before committing
-pnpm lint:fix
-pnpm test
-
-# Before PR
+# Preferred repo gates
 make claude-preflight
 make ga
 ```
 
----
+- If a command is unavailable or out of scope, use the repo golden path in `.claude/README.md`.
 
-## PR Body Template
+## 7) Evidence bundle
+
+Use `.prbodies/claude-evidence.md` (do not duplicate template).
+Capture at minimum:
+
+- Before/after behavior summary.
+- Exact commands and pass/fail results.
+- Files changed and purpose.
+- Risk classification + rollback command.
+
+## 8) PR checklist
+
+- [ ] Single bug intent.
+- [ ] Regression test included.
+- [ ] Verify commands recorded.
+- [ ] Evidence template completed.
+
+### PR body snippet (paste)
 
 ```markdown
 ## Summary
-
-Fixes #<issue-number>: <brief description of the bug>
-
-## Root Cause
-
-<Explain what was causing the bug>
-
-## Fix
-
-<Explain the fix and why it works>
+Fixes <issue-id>: <single-line bug description>.
 
 ## Verification
+- `pnpm test -- --testPathPattern="<test-file>"`
+- `make claude-preflight`
+- `make ga`
 
-- [ ] Added regression test: `<test-file-path>`
-- [ ] Existing tests pass
-- [ ] `make ga` passes
-
-### Commands Run
+## Evidence
+Filled using `.prbodies/claude-evidence.md`.
 ```
-
-pnpm test -- --testPathPattern="<test-file>"
-make ga
-
-```
-
-### Test Output
-
-<paste relevant test output>
-
-## Risk
-
-Low | Medium | High
-
-<Justify risk level>
-
-## Rollback
-
-Revert this commit: `git revert <sha>`
-
-## Follow-ups
-
-- [ ] <any follow-up tasks, or "None">
-```
-
----
-
-## Checklist Before PR
-
-- [ ] Bug is reproducible with a test
-- [ ] Fix is minimal and focused
-- [ ] No unrelated changes
-- [ ] Regression test added
-- [ ] `make ga` passes

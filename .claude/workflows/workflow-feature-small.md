@@ -1,156 +1,96 @@
-# Workflow: Small Feature
+# Workflow: Feature (Small)
 
-Use this workflow when adding a small, well-defined feature.
+## 1) When to use
 
----
+- Small, bounded feature with clear acceptance criteria.
+- Intended to stay compact (single intent, usually <500 LOC net).
 
-## Scope Guardrails
+## 2) Inputs required from user
 
-- **One feature per PR** - Single logical addition
-- **< 500 lines changed** - If larger, split into multiple PRs
-- **Self-contained** - Feature works end-to-end in this PR
-- **Tested** - Unit tests for new functionality
-- **No refactoring** - Don't improve unrelated code
+- Acceptance criteria (must be testable).
+- In-scope / out-of-scope bullets.
+- Impacted area/path (use `.claude/areas.md` if present).
+- UX/API examples (when applicable).
 
----
-
-## Steps
-
-### 1. Understand Requirements
-
-```
-Clarify the feature scope:
-- What is the user-facing behavior?
-- What are the acceptance criteria?
-- What's explicitly OUT of scope?
-```
-
-### 2. Research Existing Patterns
-
-```
-Find similar features in the codebase:
-- How are similar things implemented?
-- What patterns should be followed?
-- What utilities/helpers exist?
-```
-
-### 3. Plan the Implementation
-
-```
-Identify files to modify:
-- List all files that need changes
-- Estimate the diff size
-- If > 500 lines, consider splitting
-```
-
-### 4. Implement the Feature
-
-```
-Code the feature:
-- Follow existing patterns
-- Use TypeScript types
-- Handle errors gracefully
-- Add inline comments for complex logic
-```
-
-### 5. Add Tests
-
-```
-Write tests for the feature:
-- Unit tests for new functions
-- Integration tests if crossing boundaries
-- Edge cases and error scenarios
-```
-
-### 6. Verify the Implementation
+## 3) Discover (read-only)
 
 ```bash
-# Run new tests
+# Repo contract (if present)
+cat .claude/README.md
+cat .claude/areas.md
+cat .prbodies/claude-evidence.md
+
+# Find similar implementations and tests
+rg -n "<feature keyword>" client server packages services
+rg -n "<feature keyword>" tests client/**/__tests__ server/tests
+
+# Inspect baseline files
+sed -n '1,220p' <path/to/file>
+sed -n '1,220p' <path/to/test>
+```
+
+## 4) Plan (checklist)
+
+- [ ] File list (explicit):
+  - [ ] `<path/to/file>`
+  - [ ] `<path/to/test>`
+- [ ] User-visible behavior changes listed.
+- [ ] Risk level selected: Low | Medium | High.
+- [ ] Verification plan maps to acceptance criteria.
+
+## 5) Apply (rules)
+
+- One feature intent per PR.
+- Follow existing project patterns and typing.
+- Keep diff small and atomic.
+- Add/update tests in the same PR.
+
+## 6) Verify
+
+```bash
+# Targeted tests first
 pnpm test -- --testPathPattern="<test-file>"
 
-# Run full test suite
-pnpm test
-
-# Check types
-pnpm typecheck
-```
-
----
-
-## Local Commands
-
-```bash
-# During development
-pnpm lint:fix
+# Quality checks
+pnpm lint
 pnpm typecheck
 
-# Before committing
-pnpm test
-
-# Before PR
+# Preferred repo gates
 make claude-preflight
 make ga
 ```
 
----
+- If commands are unavailable, use repo golden path in `.claude/README.md`.
 
-## PR Body Template
+## 7) Evidence bundle
+
+Use `.prbodies/claude-evidence.md` (do not duplicate template).
+Capture at minimum:
+
+- Acceptance criteria mapping (criterion -> evidence).
+- Commands run with pass/fail outputs.
+- Files changed and rationale.
+- Risk + rollback.
+- UI screenshot paths (if UI changed).
+
+## 8) PR checklist
+
+- [ ] Single feature intent.
+- [ ] Tests added/updated.
+- [ ] Verify commands recorded.
+- [ ] Evidence template completed.
+
+### PR body snippet (paste)
 
 ```markdown
 ## Summary
-
-Adds <feature name>: <brief description>
-
-## Changes
-
-- <file1>: <what changed>
-- <file2>: <what changed>
-- ...
-
-## How It Works
-
-<Brief explanation of the implementation>
+Adds <feature-name>: <single-line behavior change>.
 
 ## Verification
+- `pnpm test -- --testPathPattern="<test-file>"`
+- `make claude-preflight`
+- `make ga`
 
-- [ ] Unit tests added: `<test-file-path>`
-- [ ] All tests pass
-- [ ] `make ga` passes
-
-### Commands Run
+## Evidence
+Filled using `.prbodies/claude-evidence.md`.
 ```
-
-pnpm test -- --testPathPattern="<test-file>"
-pnpm typecheck
-make ga
-
-```
-
-### Screenshots/Output
-
-<If UI change, add screenshots. If API, add example request/response>
-
-## Risk
-
-Low | Medium | High
-
-<Justify risk level>
-
-## Rollback
-
-Revert this commit: `git revert <sha>`
-
-## Follow-ups
-
-- [ ] <any follow-up tasks, or "None">
-```
-
----
-
-## Checklist Before PR
-
-- [ ] Feature is complete and works end-to-end
-- [ ] < 500 lines changed
-- [ ] Tests added for new functionality
-- [ ] No unrelated changes
-- [ ] `make ga` passes

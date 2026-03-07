@@ -1,125 +1,88 @@
 # Workflow: Documentation
 
-Use this workflow when updating documentation.
+## 1) When to use
 
----
+- Docs-only updates (guides, runbooks, reference content).
+- No behavior change in runtime code.
 
-## Scope Guardrails
+## 2) Inputs required from user
 
-- **One topic per PR** - Don't mix unrelated docs
-- **Accurate only** - Don't speculate; verify claims
-- **No code changes** - Unless fixing doc examples
-- **Check links** - Ensure all links work
+- Target doc path/topic.
+- Required corrections/additions.
+- Source of truth (code path, runbook, policy, or issue).
 
----
-
-## Steps
-
-### 1. Identify the Gap
-
-```
-What documentation is missing or wrong?
-- Outdated information
-- Missing howto/guide
-- Incorrect examples
-- Broken links
-```
-
-### 2. Research Current State
-
-```
-Verify the current behavior:
-- Read the actual code
-- Run the commands yourself
-- Test the examples
-```
-
-### 3. Write/Update Documentation
-
-```
-Make the changes:
-- Use clear, concise language
-- Include working examples
-- Add screenshots if helpful
-- Link to related docs
-```
-
-### 4. Verify Examples Work
+## 3) Discover (read-only)
 
 ```bash
-# If the doc includes commands, run them
-<paste example commands from doc>
+# Repo contract (if present)
+cat .claude/README.md
+cat .claude/areas.md
+cat .prbodies/claude-evidence.md
 
-# If the doc includes code, ensure it compiles
-pnpm typecheck
+# Locate related docs and references
+rg -n "<topic keyword>" docs RUNBOOKS .claude
+
+# Inspect target docs
+sed -n '1,220p' <path/to/doc.md>
 ```
 
----
+## 4) Plan (checklist)
 
-## Local Commands
+- [ ] File list (explicit):
+  - [ ] `<path/to/doc.md>`
+- [ ] Claims requiring validation are listed.
+- [ ] Risk level selected: Low (docs-only).
+- [ ] Link/reference check plan defined.
+
+## 5) Apply (rules)
+
+- Keep language operational and concise.
+- Prefer bullets + copy/paste command blocks.
+- No speculation; align to source-of-truth files.
+- Keep commits atomic.
+
+## 6) Verify
 
 ```bash
-# Check markdown formatting (if linter exists)
+# Validate commands/examples included in docs
+<commands copied from doc>
+
+# Optional markdown lint if configured
 pnpm lint -- --ext .md
 
-# Verify any code examples compile
-pnpm typecheck
-
-# Before PR
+# Preferred repo preflight
 make claude-preflight
 ```
 
----
+- If commands are unavailable, use repo golden path in `.claude/README.md`.
 
-## PR Body Template
+## 7) Evidence bundle
+
+Use `.prbodies/claude-evidence.md` (do not duplicate template).
+Capture at minimum:
+
+- What claims were verified and how.
+- Links/examples validated.
+- Files changed and rationale.
+- Risk + rollback.
+
+## 8) PR checklist
+
+- [ ] Docs scope only.
+- [ ] Claims/commands validated or intentionally constrained.
+- [ ] Verify commands recorded.
+- [ ] Evidence template completed.
+
+### PR body snippet (paste)
 
 ```markdown
 ## Summary
-
-Updates documentation for <topic>
-
-## Changes
-
-- <file1>: <what changed>
-- ...
-
-## Why
-
-<Explain why this doc update is needed>
+Updates docs for <topic>.
 
 ## Verification
+- `<commands from docs or intentionally constrained note>`
+- `make claude-preflight`
 
-- [ ] All examples tested and work
-- [ ] Links verified
-- [ ] Spelling/grammar checked
-
-### Commands Run
-```
-
-<any commands you ran to verify examples>
-```
-
-## Risk
-
-Low - Documentation only
-
-## Rollback
-
-Revert this commit: `git revert <sha>`
-
-## Follow-ups
-
-- [ ] <any follow-up tasks, or "None">
-
-```
-
----
-
-## Checklist Before PR
-
-- [ ] Examples are accurate and work
-- [ ] All links are valid
-- [ ] No code changes (unless fixing examples)
-- [ ] Clear and concise language
-- [ ] Spelling/grammar checked
+## Evidence
+Filled using `.prbodies/claude-evidence.md`.
 ```

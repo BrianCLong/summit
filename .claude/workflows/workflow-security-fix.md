@@ -1,144 +1,97 @@
 # Workflow: Security Fix
 
-Use this workflow when fixing a security vulnerability.
+## 1) When to use
 
----
+- Security vulnerability remediation.
+- Security hardening to close a known risk path.
 
-## Scope Guardrails
+## 2) Inputs required from user
 
-- **One vulnerability per PR** - Don't bundle security fixes
-- **Minimal exposure** - Don't describe exploit details in PR
-- **Coordinated disclosure** - Follow security team guidance
-- **Regression test** - Add test without exposing the vulnerability
-- **No feature work** - Security fix only
+- Advisory/CVE (when available).
+- Severity and affected surfaces.
+- Disclosure handling constraints.
+- Target remediation timeline.
 
----
-
-## Steps
-
-### 1. Understand the Vulnerability
-
-```
-Gather information (keep details private):
-- CVE number (if applicable)
-- Affected components
-- Attack vector
-- Severity (CVSS if available)
-```
-
-### 2. Assess the Impact
-
-```
-Determine:
-- Which users/systems are affected
-- Data exposure risk
-- Exploitation difficulty
-- Urgency of fix
-```
-
-### 3. Develop the Fix
-
-```
-Implement the security fix:
-- Apply principle of least privilege
-- Input validation and sanitization
-- Output encoding
-- Secure defaults
-```
-
-### 4. Add Security Tests
-
-```
-Add tests that verify the fix without exposing details:
-- Test that malicious input is rejected
-- Test that access controls work
-- Don't include actual exploits in tests
-```
-
-### 5. Security Verification
+## 3) Discover (read-only)
 
 ```bash
-# Run security scan
-pnpm security:scan
+# Repo contract (if present)
+cat .claude/README.md
+cat .claude/areas.md
+cat .prbodies/claude-evidence.md
 
-# Run tests
-pnpm test
+# Locate affected code/tests
+rg -n "<cve|vuln keyword|surface>" client server packages services tests
 
-# Check for regressions
-make ga
+# Inspect candidate files
+sed -n '1,220p' <path/to/file>
+sed -n '1,220p' <path/to/test>
 ```
 
----
+## 4) Plan (checklist)
 
-## Local Commands
+- [ ] File list (explicit):
+  - [ ] `<path/to/file>`
+  - [ ] `<path/to/test>`
+- [ ] Risk level selected: Medium | High.
+- [ ] Disclosure-safe PR language confirmed.
+- [ ] Security regression test approach defined.
+
+## 5) Apply (rules)
+
+- One vulnerability intent per PR.
+- Minimum-change remediation; no feature work.
+- Apply least-privilege and secure defaults.
+- Add sanitized security regression tests.
+- Keep commits atomic.
+
+## 6) Verify
 
 ```bash
-# Security scanning
+# Security checks
 pnpm security:scan
 pnpm audit
 
-# Before committing
+# Targeted and broader tests
+pnpm test -- --testPathPattern="<test-file>"
 pnpm test
 
-# Before PR
+# Preferred repo gates
 make claude-preflight
 make ga
 ```
 
----
+- If commands are unavailable, use repo golden path in `.claude/README.md`.
 
-## PR Body Template
+## 7) Evidence bundle
+
+Use `.prbodies/claude-evidence.md` (do not duplicate template).
+Capture at minimum:
+
+- Non-sensitive remediation summary.
+- Security/test commands and outputs.
+- Files changed and rationale.
+- Risk + rollback.
+
+## 8) PR checklist
+
+- [ ] Vulnerability path addressed.
+- [ ] No exploit details in PR text.
+- [ ] Security regression tests included.
+- [ ] Verify commands recorded.
+- [ ] Evidence template completed.
+
+### PR body snippet (paste)
 
 ```markdown
 ## Summary
-
-Security fix for <brief, non-exploitable description>
-
-**Note:** Details intentionally omitted. See security advisory for full information.
-
-## Changes
-
-- <file1>: <what changed, without vulnerability details>
-- ...
+Security fix for <brief non-sensitive description>.
 
 ## Verification
+- `pnpm security:scan`
+- `pnpm test -- --testPathPattern="<test-file>"`
+- `make ga`
 
-- [ ] Security test added (without exposing vulnerability)
-- [ ] `pnpm security:scan` passes
-- [ ] All tests pass
-- [ ] `make ga` passes
-
-### Commands Run
+## Evidence
+Filled using `.prbodies/claude-evidence.md`.
 ```
-
-pnpm security:scan
-pnpm test
-make ga
-
-```
-
-## Risk
-
-<Severity level> - Refer to security advisory
-
-## Rollback
-
-**Caution:** Rollback reintroduces vulnerability.
-Only rollback if fix causes critical breakage.
-
-## Follow-ups
-
-- [ ] Security advisory to be published after merge
-- [ ] <other follow-ups>
-```
-
----
-
-## Checklist Before PR
-
-- [ ] Fix addresses the vulnerability
-- [ ] No vulnerability details in PR description
-- [ ] Security tests added
-- [ ] No unrelated changes
-- [ ] `make ga` passes
-- [ ] Security team notified/consulted
