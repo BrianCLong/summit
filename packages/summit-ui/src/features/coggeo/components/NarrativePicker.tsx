@@ -1,19 +1,20 @@
-import type { FC } from "react";
-import type { Narrative } from "../types";
+import React from "react";
 
-type Props = {
-  narratives: Narrative[];
-  selected: string | null;
-  onSelect: (id: string) => void;
-};
-
-export const NarrativePicker: FC<Props> = ({ narratives, selected, onSelect }) => (
-  <select value={selected ?? ""} onChange={(event) => onSelect(event.target.value)}>
-    <option value="">Select narrative</option>
-    {narratives.map((narrative) => (
-      <option key={narrative.id} value={narrative.id}>
-        {narrative.label}
-      </option>
-    ))}
-  </select>
-);
+export function NarrativePicker(props: {
+  narratives: Array<{ id: string; title: string }>;
+  value: string;
+  onChange: (id: string) => void;
+}) {
+  return (
+    <label style={{ display: "flex", gap: 8, alignItems: "center" }}>
+      <span>Narrative</span>
+      <select value={props.value} onChange={(e) => props.onChange(e.target.value)}>
+        {props.narratives.map((n) => (
+          <option key={n.id} value={n.id}>
+            {n.title}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
