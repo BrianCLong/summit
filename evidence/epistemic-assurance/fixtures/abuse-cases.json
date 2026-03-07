@@ -1,0 +1,67 @@
+[
+  {
+    "description": "Hallucinated claim with no evidence",
+    "context": {
+      "claimId": "claim-missing-evidence",
+      "supportScore": 0.9,
+      "epistemicUncertainty": 0.1,
+      "conflictScore": 0.0,
+      "independentSourceCount": 5,
+      "evidenceIds": []
+    },
+    "expectedDecision": "BLOCK",
+    "expectedRationale": "missing_evidence"
+  },
+  {
+    "description": "Single-source reputational allegation",
+    "context": {
+      "claimId": "claim-single-source",
+      "supportScore": 0.85,
+      "epistemicUncertainty": 0.2,
+      "conflictScore": 0.0,
+      "independentSourceCount": 1,
+      "evidenceIds": ["ev-1"]
+    },
+    "expectedDecision": "ESCALATE",
+    "expectedRationale": "insufficient_independent_sources"
+  },
+  {
+    "description": "High conflict score",
+    "context": {
+      "claimId": "claim-high-conflict",
+      "supportScore": 0.9,
+      "epistemicUncertainty": 0.1,
+      "conflictScore": 0.8,
+      "independentSourceCount": 3,
+      "evidenceIds": ["ev-1", "ev-2", "ev-3"]
+    },
+    "expectedDecision": "BLOCK",
+    "expectedRationale": "active_conflict"
+  },
+  {
+    "description": "Low support score",
+    "context": {
+      "claimId": "claim-low-support",
+      "supportScore": 0.5,
+      "epistemicUncertainty": 0.1,
+      "conflictScore": 0.0,
+      "independentSourceCount": 3,
+      "evidenceIds": ["ev-1", "ev-2", "ev-3"]
+    },
+    "expectedDecision": "DEGRADE",
+    "expectedRationale": "low_support"
+  },
+  {
+    "description": "Valid OSINT lead",
+    "context": {
+      "claimId": "claim-valid",
+      "supportScore": 0.95,
+      "epistemicUncertainty": 0.1,
+      "conflictScore": 0.0,
+      "independentSourceCount": 4,
+      "evidenceIds": ["ev-1", "ev-2", "ev-3", "ev-4"]
+    },
+    "expectedDecision": "APPROVE",
+    "expectedRationale": "policy_satisfied"
+  }
+]

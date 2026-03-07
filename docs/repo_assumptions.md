@@ -1,35 +1,40 @@
-# Repo Assumptions — ai-platform-daily-2026-02-07
+# Repo Assumptions and Ground Truth
 
-**Status:** Intentionally constrained pending in-repo validation.
-**Item Slug:** ai-platform-daily-2026-02-07
+This document logs the verified paths and assumptions for implementing the Epistemic Assurance Plane based on the repository structure.
 
-## Verified (from provided path map)
+## Verified Paths
 
-- Runtime: **Node 18+**, **TypeScript**, **pnpm**, GitHub Actions.
-- Canonical paths:
-  - `.github/workflows/{ci-core.yml,ci-pr.yml,ci-security.yml,ci-verify.yml,codeql.yml,agent-guardrails.yml,agentic-plan-gate.yml,_reusable-*.yml}`
-  - `.github/{actions/,scripts/,policies/,MILESTONES/}`
-  - `src/{api/graphql,api/rest,agents,connectors,graphrag}`
-  - `tests/<module>/...`, `tests/e2e/...` (via pnpm scripts)
-- Docs layout: `docs/{architecture,api,security}` with suggested extensions `docs/{governance,operations,ga}`.
+1. **Maestro Orchestrator**: `services/maestro-orchestrator/`
+   - Entry point: `services/maestro-orchestrator/src/index.ts`
+   - App setup: `services/maestro-orchestrator/src/app.ts`
 
-## Assumed (must validate in repo)
+2. **IntelGraph Schema**: `intelgraph/schema/`
+   - Canonical types: `intelgraph/schema/canonical_types.py`
+   - Graph primitives: `intelgraph/schema/graph_primitives.py`
 
-- Actual existing agent runtime entrypoints under `src/agents/` (names, interfaces).
-- Existing policy engine format under `.github/policies/` (OPA vs custom).
-- Evidence schema conventions (filenames, JSON structure).
-- Current CI job names inside the workflows (exact `name:` fields).
+3. **IntelGraph Server**: `intelgraph/server/src/`
+   - Services module: `intelgraph/server/src/services/`
+   - Graphql: `intelgraph/server/src/graphql/`
 
-## Must-not-touch list (until validated)
+4. **API Schemas**: `api-schemas/`
 
-- `.github/workflows/codeql.yml`
-- Any production deployment workflows (if present)
-- DB migration directories (if present)
-- Secrets / encrypted configs
+5. **Workflows**: `.github/workflows/`
 
-## Validation checklist (before PRs merge)
+6. **Evidence Directory**: `evidence/`
 
-- Confirm `.github/workflows/*` filenames + required checks in branch protection.
-- Confirm `src/agents` architecture (planner/executor/observer?) and how tools are defined today.
-- Confirm logging/telemetry stack (to wire MCP audit + drift detector).
-- Confirm test runner + assertion libs (`pnpm test:*`).
+## Missing / Assumed Paths to Create
+
+- `api-schemas/epistemic/` (for claim, policy, decision schemas)
+- `services/maestro-orchestrator/src/epistemic.ts` (for intent evaluate and policy engine)
+- `intelgraph/schema/epistemic.py` (for epistemic schema definitions)
+- `scripts/monitoring/epistemic-assurance-drift.ts` (for epistemic assurance drift detector)
+- `evidence/epistemic-assurance/fixtures/` (for abuse-case fixtures)
+- `tests/epistemic/` (for determinism test suites)
+
+## Must-Not-Touch List
+
+- `.github/workflows/ci.yml` (and core validation workflows unless directly adding jobs)
+- Existing `.opa/policy/**`
+- Existing evidence bundle schemas unless extending
+- `SECURITY/**` and `.security/**`
+
