@@ -1,3 +1,5 @@
+# Strategic Integrator Interop Architect
+
 Prompt: Define and evolve interoperability standards across allied systems, vendors, and classification levels. Establish STANAG/NIEM-compliant interfaces and schema mappings. Lead cross-domain data fusion design.
 
 Questions:

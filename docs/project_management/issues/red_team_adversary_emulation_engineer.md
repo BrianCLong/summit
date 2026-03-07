@@ -1,3 +1,5 @@
+# Red Team Adversary Emulation Engineer
+
 Prompt: Simulate threat actor TTPs (MITRE ATT&CK, MISP), inject synthetic adversarial patterns, and validate detection/modeling efficacy. Feed adversary behavior into HUMINT/CYBER/INFLUENCE graphs.
 
 Questions:

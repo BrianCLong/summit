@@ -1,1 +1,3 @@
+# Neuroadaptive Content Systems
+
 AI that dynamically adjusts influence messaging in real time based on biometric or behavioral feedback. This is moving from theory to early field trials. It will require provenance tracking at the message variant level in IntelGraph.
