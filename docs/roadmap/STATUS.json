@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-08T00:15:00Z",
-  "revision_note": "Added Summit Architecture Brief reference; Summit Ops & Incident Console runbook guidance; CI/CD high-signal delta action register.",
+  "last_updated": "2026-03-07T00:00:00Z",
+  "revision_note": "Expanded killer-loop priority brief with acceptance gates, MAESTRO threat alignment, and delivery metrics; synchronized roadmap summary total with active initiative count.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -205,6 +205,12 @@
       "status": "completed",
       "owner": "codex",
       "notes": "Published Summit Architecture Brief with module boundaries, data flow, and acceptance criteria."
+    },
+    {
+      "id": "summit-killer-loop-priority",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Prioritize 30-second killer loop: ingestion -> WriteSet firewall -> tri-graph updates -> deterministic Explain()/What changed?."
     }
   ],
   "summary": {
@@ -212,7 +218,7 @@
     "partial": 2,
     "incomplete": 0,
     "not_started": 5,
-    "total": 16,
+    "total": 17,
     "ga_blockers": []
   }
 }
