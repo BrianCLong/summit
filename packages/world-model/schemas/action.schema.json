@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.com/schemas/world-model/action.schema.json",
+  "title": "World Model Action Affordance",
+  "type": "object",
+  "properties": {
+    "action_name": {
+      "type": "string"
+    },
+    "required_roles": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "policy_checks": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": ["action_name"]
+}

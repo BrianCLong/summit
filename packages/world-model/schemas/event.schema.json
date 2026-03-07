@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.com/schemas/world-model/event.schema.json",
+  "title": "World Model Event",
+  "type": "object",
+  "properties": {
+    "evidence_id": {
+      "type": "string"
+    },
+    "entity_id": {
+      "type": "string"
+    },
+    "event_type": {
+      "type": "string"
+    },
+    "observed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "payload": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  },
+  "required": ["evidence_id", "entity_id", "event_type", "observed_at", "payload"]
+}
