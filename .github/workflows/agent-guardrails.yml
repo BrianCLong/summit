@@ -132,3 +132,53 @@ jobs:
           # Parse the JSON array of files and pass each as an argument to the script
           files='${{ steps.files.outputs.result }}'
           echo "$files" | jq -r '.[]' | xargs -d '\n' node scripts/ga/scan-pii.mjs
+
+  # ── Agent Control Plane guardrail jobs ────────────────────────────────────
+
+  evidence-schema-check:
+    name: Evidence Schema Check (ACP)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm tsx .github/scripts/verify-evidence-acp.ts
+
+  agent-policy-check:
+    name: Agent Policy Check (ACP)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm tsx .github/scripts/verify-agent-policy.ts
+
+  deny-fixtures-check:
+    name: Deny Fixtures Check (ACP)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm jest --testPathPattern="tests/agents/controlplane/deny-fixtures" --runInBand
+
+  router-determinism-check:
+    name: Router Determinism Check (ACP)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm jest --testPathPattern="tests/agents/controlplane/router" --runInBand

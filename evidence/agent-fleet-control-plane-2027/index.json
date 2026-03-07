@@ -1,0 +1,33 @@
+{
+  "item_slug": "agent-fleet-control-plane-2027",
+  "source": "CIO: 21 agent orchestration tools for managing your AI fleet",
+  "source_date": "2026-03-05",
+  "generated_at": "2026-03-07T00:00:00Z",
+  "evidence": [
+    {
+      "id": "EVD-AFCP-ARCH-001",
+      "type": "architecture",
+      "files": ["docs/architecture/agent-control-plane-2027.md"]
+    },
+    {
+      "id": "EVD-AFCP-ROUTER-002",
+      "type": "implementation",
+      "files": ["src/agents/controlplane/router/routeTask.ts"]
+    },
+    {
+      "id": "EVD-AFCP-KG-003",
+      "type": "implementation",
+      "files": ["src/graphrag/context-compiler/compileGraphContext.ts"]
+    },
+    {
+      "id": "EVD-AFCP-POLICY-004",
+      "type": "policy",
+      "files": ["src/agents/controlplane/policy/PolicyDecisionPoint.ts"]
+    },
+    {
+      "id": "EVD-AFCP-EVAL-005",
+      "type": "evaluation",
+      "files": ["docs/ga/agent-control-plane-ga.md"]
+    }
+  ]
+}
