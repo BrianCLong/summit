@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.example.com/ai-stack/evidence.schema.json",
+  "title": "AI Stack Evidence",
+  "type": "object",
+  "properties": {
+    "runId": { "type": "string" },
+    "lane": { "enum": ["automation", "factory", "recursive", "research"] },
+    "taskGraphId": { "type": "string" },
+    "evidenceIds": { "type": "array", "items": { "type": "string" } }
+  },
+  "required": ["runId", "lane", "taskGraphId", "evidenceIds"]
+}
