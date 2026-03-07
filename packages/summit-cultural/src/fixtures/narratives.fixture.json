@@ -1,0 +1,16 @@
+[
+  {
+    "id": "nar-energy-sanctions",
+    "title": "Energy crisis caused by Western sanctions",
+    "summary": "A narrative attributing energy cost shocks primarily to sanctions policy.",
+    "themes": ["energy", "economy", "sanctions"],
+    "frameTags": ["regional-news", "youtube", "facebook"],
+    "language": "de",
+    "dialectHints": ["standard-de"],
+    "moralEmphasis": ["economic-security", "order"],
+    "identityAppeals": ["de"],
+    "historicalReferences": ["energy-shock"],
+    "sourceType": "social",
+    "observedAt": "2026-03-06T18:00:00Z"
+  }
+]

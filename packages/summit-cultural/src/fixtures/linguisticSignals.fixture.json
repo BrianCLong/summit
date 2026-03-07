@@ -1,0 +1,15 @@
+[
+  {
+    "id": "lf-energy-sanctions",
+    "narrativeId": "nar-energy-sanctions",
+    "expectedLanguage": "de",
+    "detectedLanguage": "de",
+    "dialectFitScore": 0.81,
+    "idiomFitScore": 0.73,
+    "syntaxNaturalnessScore": 0.78,
+    "translationArtifactScore": 0.16,
+    "propagandaPhraseScore": 0.34,
+    "anomalyScore": 0,
+    "reasons": []
+  }
+]

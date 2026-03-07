@@ -1,41 +1,68 @@
-import {
-  DiffusionResult,
-  LinguisticSignal,
-  Narrative,
-  PopulationGroup,
-} from './culturalGraph.js';
-import { scoreNarrativeCompatibility } from './narrativeCompatibility.js';
+import { scoreNarrativeCompatibility } from "./narrativeCompatibility.js";
+import type {
+  DiffusionMap,
+  DiffusionPoint,
+  LinguisticFingerprint,
+  NarrativeSignal,
+  PopulationGroup
+} from "./types.js";
 
 export interface DiffusionInputs {
+  narrative: NarrativeSignal;
   populations: PopulationGroup[];
-  narrative: Narrative;
-  signal: LinguisticSignal;
-  demographicSusceptibility?: Record<string, number>;
+  fingerprintByPopulationId?: Record<string, LinguisticFingerprint | null>;
 }
 
-export function buildNarrativeDiffusionMap({
-  populations,
-  narrative,
-  signal,
-  demographicSusceptibility = {},
-}: DiffusionInputs): DiffusionResult[] {
-  return populations
-    .map((population) => {
-      const compatibility = scoreNarrativeCompatibility(
-        population,
-        narrative,
-        signal,
-      );
-      const susceptibility = demographicSusceptibility[population.id] ?? 0.5;
-      const adoptionLikelihood = Number(
-        Math.min(1, compatibility.score * 0.7 + susceptibility * 0.3).toFixed(3),
-      );
+function clamp01(v: number): number {
+  return Math.max(0, Math.min(1, v));
+}
 
-      return {
-        populationId: population.id,
-        adoptionLikelihood,
-        confidence: Number((0.5 + compatibility.score / 2).toFixed(3)),
-      };
-    })
-    .sort((a, b) => b.adoptionLikelihood - a.adoptionLikelihood);
+function estimateVelocity(compatibility: number, mediaConsumption?: string[]): number {
+  const socialBoost = (mediaConsumption ?? []).some((m) =>
+    ["telegram", "tiktok", "x", "youtube", "whatsapp", "facebook"].includes(m.toLowerCase())
+  )
+    ? 0.15
+    : 0;
+
+  return clamp01(compatibility * 0.75 + socialBoost);
+}
+
+export function buildDiffusionMap(input: DiffusionInputs): DiffusionMap {
+  const points: DiffusionPoint[] = input.populations.map((population) => {
+    const breakdown = scoreNarrativeCompatibility({
+      population,
+      narrative: input.narrative,
+      fingerprint: input.fingerprintByPopulationId?.[population.id] ?? null
+    });
+
+    const diffusionProbability = clamp01(
+      breakdown.finalScore * 0.7 +
+        breakdown.mediaChannelFit * 0.1 +
+        breakdown.economicRelevance * 0.1 +
+        breakdown.historicalResonance * 0.1
+    );
+
+    return {
+      populationId: population.id,
+      regionId: population.regionId,
+      h3Cells: population.h3Cells,
+      compatibilityScore: breakdown.finalScore,
+      diffusionProbability,
+      estimatedVelocity: estimateVelocity(diffusionProbability, population.mediaConsumption),
+      confidence: 0.7,
+      explanation: breakdown.explanation
+    };
+  });
+
+  const sorted = [...points].sort((a, b) => b.diffusionProbability - a.diffusionProbability);
+  return {
+    narrativeId: input.narrative.id,
+    generatedAt: new Date().toISOString(),
+    points,
+    globalSummary: {
+      highResonanceRegions: sorted.slice(0, 5).map((p) => p.regionId),
+      lowResonanceRegions: sorted.slice(-5).map((p) => p.regionId),
+      topDrivers: ["linguistic authenticity", "economic relevance", "historical resonance"]
+    }
+  };
 }

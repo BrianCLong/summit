@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.local/schema/narrativeSignal.schema.json",
+  "title": "NarrativeSignal",
+  "type": "object",
+  "required": ["id", "title", "summary", "themes", "frameTags", "language", "observedAt"],
+  "properties": {
+    "id": { "type": "string" },
+    "title": { "type": "string" },
+    "summary": { "type": "string" },
+    "themes": { "type": "array", "items": { "type": "string" } },
+    "frameTags": { "type": "array", "items": { "type": "string" } },
+    "language": { "type": "string" },
+    "dialectHints": { "type": "array", "items": { "type": "string" } },
+    "moralEmphasis": { "type": "array", "items": { "type": "string" } },
+    "identityAppeals": { "type": "array", "items": { "type": "string" } },
+    "historicalReferences": { "type": "array", "items": { "type": "string" } },
+    "sourceType": {
+      "type": "string",
+      "enum": ["news", "social", "speech", "blog", "forum", "other"]
+    },
+    "observedAt": { "type": "string", "format": "date-time" },
+    "metadata": { "type": "object", "additionalProperties": true }
+  },
+  "additionalProperties": false
+}
