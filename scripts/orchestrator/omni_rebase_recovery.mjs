@@ -283,13 +283,16 @@ async function main() {
 
   exec("git fetch origin main");
   
+  // Save current branch to return to it later
+  const originalBranch = exec("git rev-parse --abrev-ref HEAD", true)?.trim() || "main";
+
   for (const pr of batch) {
     console.log(`\nEvaluating PR #${pr.number}: ${pr.title}`);
     const recoveryBranch = `recovery/pr-${pr.number}`;
     
-    exec("git reset --hard origin/main");
-    exec("git clean -fd");
+    // Create recovery branch directly from origin/main without resetting current branch
     exec(`git checkout -B ${recoveryBranch} origin/main`);
+    exec("git clean -fd");
 
     const fetchPrHead = exec(`git fetch origin pull/${pr.number}/head:pr-${pr.number}-head`, true);
     if (!fetchPrHead) {
@@ -348,6 +351,10 @@ async function main() {
   results.conflicted.forEach(n => md += `- PR #${n}\n`);
   
   await fs.writeFile("artifacts/omni-recovery-summary.md", md);
+  
+  // Return to original branch
+  exec(`git checkout ${originalBranch}`, true);
+
   console.log("Omni-Recovery cycle complete.");
 }
 
