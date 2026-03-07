@@ -1,0 +1,30 @@
+version: 1
+nodes:
+  Artifact:
+    key: artifact_id
+    props: [artifact_id, kind, uri, content_sha256, outlet, outlet_tier, published_at, lang]
+  Narrative:
+    key: narrative_id
+    props: [narrative_id, title, state]
+  Frame:
+    key: frame_id
+    props: [frame_id, label, stance]
+  Claim:
+    key: claim_id
+    props: [claim_id, text_norm, claim_hash, verifiability, confidence]
+  Assumption:
+    key: assumption_id
+    props: [assumption_id, text_norm, assumption_hash, stability, confidence]
+  Handoff:
+    key: handoff_id
+    props: [handoff_id, from_tier, to_tier, score, narrative_id]
+
+edges:
+  COMPOSED_OF: { from: Narrative, to: Frame, props: [weight] }
+  EXPRESSES: { from: Artifact, to: Frame, props: [extract_confidence] }
+  MAKES: { from: Artifact, to: Claim, props: [extract_confidence] }
+  SUPPORTED_BY: { from: Frame, to: Assumption, props: [support_weight] }
+  HANDOFF_TO: { from: Narrative, to: Handoff, props: [] }
+
+provenance:
+  receipt_node: ProvenanceReceipt

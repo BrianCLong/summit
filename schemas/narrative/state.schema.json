@@ -1,0 +1,25 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Narrative State Transitions",
+  "type": "object",
+  "required": ["version", "run_id", "transitions"],
+  "properties": {
+    "version": { "type": "integer" },
+    "run_id": { "type": "string" },
+    "transitions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["narrative_id", "from_state", "to_state"],
+        "properties": {
+          "narrative_id": { "type": "string" },
+          "from_state": { "type": "string" },
+          "to_state": { "type": "string" },
+          "trigger_scores": { "type": "object" }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": true
+}

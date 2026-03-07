@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "receipts": [
+    {
+      "receipt_id": "rcpt_clm_alekseyev_regained_consciousness",
+      "target": { "type": "Claim", "id": "clm_alekseyev_regained_consciousness" },
+      "sources": [
+        {
+          "artifact_id": "art_reuters_alekseyev_2026_02_07",
+          "content_sha256": "sha256:REPLACE_WITH_REAL_HASH_IF_AVAILABLE"
+        }
+      ],
+      "method": { "pipeline_step": "fixture_extract", "transform_chain": ["normalize_text_v1"] },
+      "model": { "name": "rules_v1", "version": "1.0.0" },
+      "confidence": 0.6
+    }
+  ]
+}

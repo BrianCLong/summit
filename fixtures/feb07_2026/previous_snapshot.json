@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "run_id": "run_0001",
+  "narratives": [
+    {
+      "narrative_id": "narr_alekseyev_hit",
+      "title": "Alekseyev assassination attempt",
+      "state": "Seeded"
+    }
+  ],
+  "claims": [
+    {
+      "claim_id": "clm_alekseyev_critical_condition",
+      "claim_hash": "hash:prev_critical_condition",
+      "text_norm": "Alekseyev is in critical condition after a shooting in Moscow.",
+      "verifiability": 0.8,
+      "confidence": 0.7,
+      "supporting_artifact_ids": ["art_guardian_alekseyev_2026_02_06"]
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "inferred_nodes": [{ "type": "Claim", "id": "clm_ok" }],
+  "receipts": [
+    {
+      "target": { "type": "Claim", "id": "clm_ok" },
+      "sources": [{ "artifact_id": "art_x", "content_sha256": "sha256:abc" }]
+    }
+  ]
+}

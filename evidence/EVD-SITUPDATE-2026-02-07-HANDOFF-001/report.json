@@ -1,0 +1,6 @@
+{
+  "evidence_id": "EVD-SITUPDATE-2026-02-07-HANDOFF-001",
+  "subject": { "type": "narrative_ci_fixture", "name": "SITUPDATE-2026-02-07" },
+  "result": "pass",
+  "artifacts": []
+}

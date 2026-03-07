@@ -1,0 +1,55 @@
+name: narrative-ci-verify
+
+on:
+  pull_request:
+    paths:
+      - "intelgraph/schema/**"
+      - "intelgraph/pipelines/narrative_ci/**"
+      - "schemas/narrative/**"
+      - "fixtures/feb07_2026/**"
+      - ".github/policies/narrative_ci/**"
+      - ".github/workflows/narrative-ci-verify.yml"
+  workflow_dispatch: {}
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install OPA
+        run: |
+          set -euo pipefail
+          curl -sSfL -o opa https://openpolicyagent.org/downloads/latest/opa_linux_amd64_static
+          chmod +x opa
+          sudo mv opa /usr/local/bin/opa
+
+      - name: OPA fixtures
+        run: |
+          set -euo pipefail
+          opa eval -d .github/policies/narrative_ci/traceability.rego -i .github/policies/narrative_ci/fixtures/traceability_pass.json "data.narrative_ci.traceability.allow" | rg "true"
+          ! opa eval -d .github/policies/narrative_ci/traceability.rego -i .github/policies/narrative_ci/fixtures/traceability_fail.json "data.narrative_ci.traceability.allow" | rg "true"
+
+          opa eval -d .github/policies/narrative_ci/determinism.rego -i .github/policies/narrative_ci/fixtures/determinism_pass.json "data.narrative_ci.determinism.allow" | rg "true"
+          ! opa eval -d .github/policies/narrative_ci/determinism.rego -i .github/policies/narrative_ci/fixtures/determinism_fail.json "data.narrative_ci.determinism.allow" | rg "true"
+
+          opa eval -d .github/policies/narrative_ci/tier_taxonomy.rego -i .github/policies/narrative_ci/fixtures/tier_taxonomy_pass.json "data.narrative_ci.tier_taxonomy.allow" | rg "true"
+          ! opa eval -d .github/policies/narrative_ci/tier_taxonomy.rego -i .github/policies/narrative_ci/fixtures/tier_taxonomy_fail.json "data.narrative_ci.tier_taxonomy.allow" | rg "true"
+
+      - name: Determinism linter (out/**)
+        run: |
+          set -euo pipefail
+          if [ -d out ]; then
+            ! rg -n "\"(ts|timestamp|created_at|updated_at|datetime|time)\"" out || (echo "timestamp-like keys found in deterministic outputs" && exit 1)
+          fi
+
+      - name: Upload fixtures + policies (debug)
+        uses: actions/upload-artifact@v4
+        with:
+          name: narrative-ci-fixtures
+          path: |
+            fixtures/feb07_2026/**
+            .github/policies/narrative_ci/**
