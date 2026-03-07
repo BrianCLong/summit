@@ -350,6 +350,12 @@ logs_*.zip
 .aider.tags.cache.v4/
 reports/
 
+# GA verification allowlist
+!reports/
+reports/*
+!reports/a11y-keyboard/
+!reports/a11y-keyboard/README.md
+
 # Policy artifacts
 policy/bin/
 policy/test_report.json

@@ -400,6 +400,22 @@
         "metrics": "evidence/EVD-INTSUM-2026-THREAT-HORIZON-001/metrics.json",
         "stamp": "evidence/EVD-INTSUM-2026-THREAT-HORIZON-001/stamp.json"
       }
+    },
+    {
+      "evidence_id": "EVD-CLAUDE-OBSIDIAN-EVID-001",
+      "files": {
+        "report": "evidence/bundles/CLAUDE-OBSIDIAN-EVID-001/report.json",
+        "metrics": "evidence/bundles/CLAUDE-OBSIDIAN-EVID-001/metrics.json",
+        "stamp": "evidence/bundles/CLAUDE-OBSIDIAN-EVID-001/stamp.json"
+      }
+    },
+    {
+      "evidence_id": "EVD-CLAUDE-OBSIDIAN-CI-002",
+      "files": {
+        "report": "evidence/bundles/CLAUDE-OBSIDIAN-CI-002/report.json",
+        "metrics": "evidence/bundles/CLAUDE-OBSIDIAN-CI-002/metrics.json",
+        "stamp": "evidence/bundles/CLAUDE-OBSIDIAN-CI-002/stamp.json"
+      }
     }
   ]
 }

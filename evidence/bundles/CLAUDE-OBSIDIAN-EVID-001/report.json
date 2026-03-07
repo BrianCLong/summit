@@ -1,0 +1,10 @@
+{
+  "evidence_id": "EVD-CLAUDE-OBSIDIAN-EVID-001",
+  "item": "xda-claude-code-obsidian",
+  "summary": "Evidence schema scaffolding installed for Claude-in-Obsidian bundles.",
+  "artifacts": ["metrics.json", "stamp.json"],
+  "policy": {
+    "mode": "read_only",
+    "write_enabled": false
+  }
+}
