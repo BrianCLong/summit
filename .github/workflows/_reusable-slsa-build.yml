@@ -156,7 +156,7 @@ jobs:
 
       - name: Install Cosign
         if: inputs.sign
-        uses: sigstore/cosign-installer@f713795cb21599bc4e5c4b58cbad1da852d7eeb9 # v3
+        uses: sigstore/cosign-installer@v3.7.0
         with:
           cosign-release: v2.2.4
 
@@ -182,7 +182,7 @@ jobs:
 
           IMAGE="${{ steps.image-uri.outputs.uri }}"
 
-          cosign verify "$IMAGE" \
+          cosign verify --use-signed-timestamps "$IMAGE" \ || { echo "::error::Supply chain verification failed! Missing or invalid signed timestamps."; false; }
             --certificate-identity "${{ env.EXPECTED_OIDC_SUBJECT }}" \
             --certificate-oidc-issuer "${{ env.EXPECTED_OIDC_ISSUER }}"
 
