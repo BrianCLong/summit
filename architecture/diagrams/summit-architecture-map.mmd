@@ -1,0 +1,72 @@
+graph TD
+    %% API and Experience Layer
+    subgraph API["API + Experience Layer"]
+        User["User / UI / Operator"]
+        API_GW["API Gateway"]
+        SDK["Summit SDK"]
+        User --> API_GW
+        User --> SDK
+        SDK --> API_GW
+    end
+
+    %% Agentic Control Plane
+    subgraph ACP["Agentic Control Plane"]
+        Orchestrator["Control Plane Router"]
+        API_GW --> Orchestrator
+    end
+
+    %% Execution Layers
+    subgraph Execution["Execution Layers"]
+        CA["Creative Agents (Tool Orchestration)"]
+        COS["Creative OS (Workflow DAGs)"]
+        CME["Cognitive Media Engine (World Model Generation)"]
+        SRE["Synthetic Reality Engine (Simulation Platform)"]
+
+        Orchestrator --> CA
+        Orchestrator --> COS
+        Orchestrator --> CME
+        Orchestrator --> SRE
+
+        CA --> COS
+        COS --> CME
+        CME --> SRE
+    end
+
+    %% Memory and Retrieval
+    subgraph Memory["Memory + Retrieval"]
+        GraphRAG["GraphRAG Pipeline"]
+        Neo4j["Neo4j (Ontology/World State)"]
+        Postgres["Postgres (Metrics/Ledger)"]
+
+        CA --> GraphRAG
+        COS --> GraphRAG
+        CME --> GraphRAG
+        SRE --> GraphRAG
+        GraphRAG --> Neo4j
+        GraphRAG --> Postgres
+    end
+
+    %% Governance and CI
+    subgraph Gov["Governance + CI"]
+        Policy["OPA Policy Gate"]
+        Prov["Provenance Ledger"]
+        CI["CI/CD Validation"]
+
+        Orchestrator --> Policy
+        Policy --> Execution
+        Execution --> Prov
+        Prov --> CI
+    end
+
+    classDef default fill:#f9f9f9,stroke:#333,stroke-width:2px;
+    classDef api fill:#dbeafe,stroke:#2563eb,stroke-width:2px;
+    classDef acp fill:#fef3c7,stroke:#d97706,stroke-width:2px;
+    classDef exec fill:#d1fae5,stroke:#059669,stroke-width:2px;
+    classDef mem fill:#f3e8ff,stroke:#9333ea,stroke-width:2px;
+    classDef gov fill:#fee2e2,stroke:#dc2626,stroke-width:2px;
+
+    class API,User,API_GW,SDK api;
+    class ACP,Orchestrator acp;
+    class CA,COS,CME,SRE exec;
+    class GraphRAG,Neo4j,Postgres mem;
+    class Policy,Prov,CI gov;
