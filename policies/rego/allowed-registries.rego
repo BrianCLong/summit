@@ -1,9 +1,10 @@
 package policies.allowedregistries
 
-default allow = false
+import rego.v1
 
-allow {
-  some img
-  img := input.review.object.spec.template.spec.containers[_].image
-  startswith(img, "ghcr.io/BrianCLong/")
+default allow := false
+
+allow if {
+  some container in input.review.object.spec.template.spec.containers
+  startswith(container.image, "ghcr.io/BrianCLong/")
 }

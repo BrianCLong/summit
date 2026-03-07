@@ -14,10 +14,21 @@ let missing = [];
 for (const p of reg.policies.filter(x => x.required)) {
   for (const wf of p.workflows) {
     const file = path.resolve(wf.artifact);
-    if (!fs.existsSync(file)) {
+    // Support both nested paths (artifacts/ci/report.json) and flat paths (artifacts/report.json)
+    // which can happen depending on how actions/upload-artifact + download-artifact are used.
+    const flatFile = path.join(process.cwd(), "artifacts", path.basename(wf.artifact));
+
+    let actualFile = null;
+    if (fs.existsSync(file)) {
+      actualFile = file;
+    } else if (fs.existsSync(flatFile)) {
+      actualFile = flatFile;
+    }
+
+    if (!actualFile) {
       missing.push({ policy: p.id, artifact: wf.artifact, evidence_id: wf.evidence_id });
     } else {
-      const body = fs.readFileSync(file, "utf8");
+      const body = fs.readFileSync(actualFile, "utf8");
 
       // Determinism guard: forbid ISO timestamps to maintain hash stability
       if (/\b20\d{2}-\d{2}-\d{2}T\d{2}:\d{2}/.test(body)) {

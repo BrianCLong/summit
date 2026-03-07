@@ -1,16 +1,18 @@
 package orchestrator
 
-default allow = false
+import rego.v1
 
-allow {
+default allow := false
+
+allow if {
     input.action == "start_task"
 }
 
-allow {
+allow if {
     input.action == "complete_task"
 }
 
-allow {
+allow if {
     input.action == "approve_join"
     input.user.id == input.team.leadAgentId
 }

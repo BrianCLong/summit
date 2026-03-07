@@ -102,7 +102,7 @@ jobs:
       - name: Upload artifacts (for audit)
         uses: actions/upload-artifact@v4
         with:
-          name: supply-chain
+          name: supply-chain-evidence
           path: |
             artifacts/build.tar.gz
             artifacts/provenance/

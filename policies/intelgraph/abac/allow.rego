@@ -5,15 +5,14 @@
 
 package intelgraph.abac
 
-import future.keywords.if
-import future.keywords.in
+import rego.v1
 
 # ============================================================================
 # MAIN AUTHORIZATION DECISION
 # ============================================================================
 
 # Default deny
-default allow = false
+default allow := false
 
 # Allow if all checks pass
 allow if {
@@ -190,10 +189,10 @@ warrant_is_valid if {
 
 purpose_limitation_check if {
   input.context.purpose
-  purpose_allowed(input.context.purpose, input.operation_type)
+  purpose_allowed_helper(input.context.purpose, input.operation_type)
 }
 
-purpose_allowed(purpose, operation) if {
+purpose_allowed_helper(purpose, operation) if {
   # Allow specific purpose/operation combinations
   valid_combinations := {
     {"purpose": "investigation", "operations": {"read", "write", "export"}},
@@ -330,7 +329,7 @@ resource_expired if {
 
 # Check if access is during business hours (optional constraint)
 is_business_hours if {
-  hour := time.clock([time.now_ns()])[0]
+  hour := time.clock(time.now_ns())[0]
   hour >= 8
   hour <= 18
 }

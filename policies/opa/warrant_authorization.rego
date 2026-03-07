@@ -3,9 +3,7 @@
 
 package intelgraph.warrant
 
-import future.keywords.contains
-import future.keywords.if
-import future.keywords.in
+import rego.v1
 
 # =============================================================================
 # Main Decision Rules
@@ -145,8 +143,9 @@ valid_warrant if {
   warrant_data.status in ["ACTIVE", "PENDING"]
 }
 
-warrant_status := warrant_data.status if {
+warrant_status := status if {
   warrant_data
+  status := warrant_data.status
 } else := "NOT_PROVIDED"
 
 # =============================================================================
@@ -263,7 +262,7 @@ emergency_warrant_obligations := [
     "requirement": "Supervisor will be notified of this access",
     "enforceAt": "AFTER"
   }
-] if emergency_warrant
+]
 
 # Subpoenas may have specific compliance requirements
 subpoena_warrant if {
@@ -271,14 +270,14 @@ subpoena_warrant if {
   warrant_data.warrantType == "SUBPOENA"
 }
 
-subpoena_obligations := [
+subpoena_warrant_obligations := [
   {
     "type": "LEGAL_HOLD",
     "description": "Data accessed under subpoena is subject to legal hold",
     "requirement": "Do not delete or modify accessed data",
     "enforceAt": "AFTER"
   }
-] if subpoena_warrant
+]
 
 # Court orders require strict audit trail
 court_order_warrant if {
@@ -286,44 +285,32 @@ court_order_warrant if {
   warrant_data.warrantType == "COURT_ORDER"
 }
 
-court_order_obligations := [
+court_order_warrant_obligations := [
   {
     "type": "ENHANCED_AUDIT",
     "description": "Court order requires enhanced audit logging",
     "requirement": "All actions will be logged with full context",
     "enforceAt": "DURING"
   }
-] if court_order_warrant
+]
 
 # =============================================================================
 # Obligations
 # =============================================================================
 
+emergency_obs := emergency_warrant_obligations if { emergency_warrant } else := []
+subpoena_obs := subpoena_warrant_obligations if { subpoena_warrant } else := []
+court_order_obs := court_order_warrant_obligations if { court_order_warrant } else := []
+
 # Collect all obligations based on warrant type and conditions
 obligations := array.concat(
   array.concat(
-    emergency_obligations,
-    subpoena_obligations
+    emergency_obs,
+    subpoena_obs
   ),
-  court_order_obligations
+  court_order_obs
 ) if {
   warrant_exists
-}
-
-obligations := [] if {
-  not warrant_exists
-}
-
-emergency_obligations := emergency_warrant_obligations if {
-  emergency_warrant
-} else := []
-
-subpoena_obligations := subpoena_warrant_obligations if {
-  subpoena_warrant
-} else := []
-
-court_order_obligations := court_order_obligations if {
-  court_order_warrant
 } else := []
 
 # =============================================================================

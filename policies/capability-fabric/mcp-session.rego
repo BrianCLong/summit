@@ -1,7 +1,9 @@
 package summit.capability.mcp_session
 
-default allow = false
+import rego.v1
 
-allow {
-  input.subjectAttributes.scopes[_] == "mcp:session"
+default allow := false
+
+allow if {
+  "mcp:session" in input.subjectAttributes.scopes
 }

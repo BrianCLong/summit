@@ -4,11 +4,13 @@
 
 package counter_intelligence
 
-default allow = false
+import rego.v1
+
+default allow := false
 
 # Example rule: Allow containment protocol to be activated if attribution
 # confidence is 'Probable' or higher.
-# allow {
+# allow if {
 #     input.attribution.confidence == "Probable"
 #     input.action == "activate_containment"
 # }

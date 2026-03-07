@@ -1,7 +1,9 @@
 # (same as in sprint doc)
 package abac.authz
 
-default allow = false
+import rego.v1
+
+default allow := false
 
 # Rule to check if tenant is isolated
 tenant_isolated if {
@@ -62,18 +64,18 @@ role_can_write if { role_editor_write }
 # Sensitive data read checks
 sensitive_read_basic_ok if {
   input.action == "read"
-  not ("pii" in input.resource.labels)
+  not "pii" in input.resource.labels
 }
 
 sensitive_read_privileged_ok if {
   input.action == "read"
-  ("pii" in input.resource.labels)
+  "pii" in input.resource.labels
   input.jwt.roles[_] == "admin"
 }
 
 sensitive_read_officer_ok if {
   input.action == "read"
-  ("pii" in input.resource.labels)
+  "pii" in input.resource.labels
   input.jwt.roles[_] == "privacy-officer"
 }
 

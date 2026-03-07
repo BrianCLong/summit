@@ -3,9 +3,7 @@
 
 package intelgraph.license
 
-import future.keywords.contains
-import future.keywords.if
-import future.keywords.in
+import rego.v1
 
 # =============================================================================
 # Main Decision Rules
@@ -198,7 +196,7 @@ attribution_obligation := {
   "metadata": {
     "attributionText": license_data.attributionText
   }
-} if requires_attribution
+}
 
 # Check share-alike requirement
 requires_share_alike if {
@@ -218,7 +216,7 @@ share_alike_obligation := {
   "metadata": {
     "requiredLicense": license_data.licenseKey
   }
-} if requires_share_alike
+}
 
 # Check non-commercial restriction
 non_commercial_restriction if {
@@ -265,7 +263,7 @@ notice_obligation := {
   "metadata": {
     "noticeText": license_data.noticeText
   }
-} if requires_notice
+}
 
 # =============================================================================
 # Export Control
@@ -329,7 +327,7 @@ export_control_condition := {
     "permittedCountries": license_data.permittedCountries,
     "prohibitedCountries": license_data.prohibitedCountries
   }
-} if export_controlled
+}
 
 # =============================================================================
 # TOS Acceptance
@@ -355,6 +353,8 @@ tos_accepted if {
 tos_accepted if {
   not tos_required
 }
+
+tos_accepted_if_required if { tos_accepted }
 
 # =============================================================================
 # License Type-Specific Rules
@@ -387,7 +387,7 @@ orcon_condition := {
   "metadata": {
     "originator": license_data.metadata.originator
   }
-} if orcon
+}
 
 # NOFORN - No Foreign Nationals
 noforn if {
@@ -426,7 +426,7 @@ all_combinations_compatible if {
 
 incompatible_license_types if {
   multiple_licenses
-  has_share_alike := [l | l := input.context.sourceLicenses[_]; l.restrictions.shareAlike]
+  has_share_alike := [l | some l in input.context.sourceLicenses; l.restrictions.shareAlike]
   count(has_share_alike) > 0
   # If one license is share-alike, all must be compatible
   not all_same_license_family
@@ -434,8 +434,8 @@ incompatible_license_types if {
 
 all_same_license_family if {
   multiple_licenses
-  families := [l.licenseFamily | l := input.context.sourceLicenses[_]]
-  count({f | f := families[_]}) == 1
+  families := [l.licenseFamily | some l in input.context.sourceLicenses]
+  count({f | some f in families}) == 1
 }
 
 deny contains msg if {
@@ -451,28 +451,28 @@ deny contains msg if {
 # Collect all obligations
 obligations := array.concat(
   array.concat(
-    attribution_obligations,
-    share_alike_obligations
+    attr_obs,
+    sa_obs
   ),
-  notice_obligations
-) if license_exists
+  not_obs
+) if {
+    license_exists
+} else := []
 
-obligations := [] if not license_exists
-
-attribution_obligations := [attribution_obligation] if requires_attribution else := []
-share_alike_obligations := [share_alike_obligation] if requires_share_alike else := []
-notice_obligations := [notice_obligation] if requires_notice else := []
+attr_obs := [attribution_obligation] if { requires_attribution } else := []
+sa_obs := [share_alike_obligation] if { requires_share_alike } else := []
+not_obs := [notice_obligation] if { requires_notice } else := []
 
 # Collect all conditions
 conditions := array.concat(
-  export_control_conditions,
-  orcon_conditions
-) if license_exists
+  ec_conds,
+  or_conds
+) if {
+    license_exists
+} else := []
 
-conditions := [] if not license_exists
-
-export_control_conditions := [export_control_condition] if export_controlled else := []
-orcon_conditions := [orcon_condition] if orcon else := []
+ec_conds := [export_control_condition] if { export_controlled } else := []
+or_conds := [orcon_condition] if { orcon } else := []
 
 # =============================================================================
 # License Metadata for Audit

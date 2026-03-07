@@ -1,7 +1,9 @@
 package summit.capability.maestro_runs_read
 
-default allow = false
+import rego.v1
 
-allow {
-  input.subjectAttributes.scopes[_] == "run_maestro"
+default allow := false
+
+allow if {
+  "run_maestro" in input.subjectAttributes.scopes
 }

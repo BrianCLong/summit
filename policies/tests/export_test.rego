@@ -1,8 +1,8 @@
 package intelgraph.export
 
-import future.keywords.every
+import rego.v1
 
-test_simulate_allows_without_step_up {
+test_simulate_allows_without_step_up if {
   input := {
     "mode": "simulate",
     "action": "export",
@@ -23,7 +23,7 @@ test_simulate_allows_without_step_up {
   count(d.redactions) == 3
 }
 
-test_enforce_denies_without_step_up_when_sensitive {
+test_enforce_denies_without_step_up_when_sensitive if {
   input := {
     "mode": "enforce",
     "action": "export",
@@ -40,7 +40,7 @@ test_enforce_denies_without_step_up_when_sensitive {
   not d.step_up.satisfied
 }
 
-test_enforce_allows_with_step_up {
+test_enforce_allows_with_step_up if {
   input := {
     "mode": "enforce",
     "action": "export",
@@ -54,7 +54,7 @@ test_enforce_allows_with_step_up {
   data.intelgraph.export.allow with input as input
 }
 
-test_redactions_merge_tags_and_explicit {
+test_redactions_merge_tags_and_explicit if {
   input := {
     "mode": "simulate",
     "action": "export",
@@ -69,7 +69,8 @@ test_redactions_merge_tags_and_explicit {
     }
   }
   d := data.intelgraph.export.decision with input as input
-  some r in d.redactions; r.path == "email"
-  some s in d.redactions; s.path == "notes.secret"
+  some r in d.redactions
+  r.path == "email"
+  some s in d.redactions
+  s.path == "notes.secret"
 }
-

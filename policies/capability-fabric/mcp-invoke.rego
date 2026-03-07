@@ -1,7 +1,9 @@
 package summit.capability.mcp_invoke
 
-default allow = false
+import rego.v1
 
-allow {
-  input.subjectAttributes.scopes[_] == "mcp:invoke"
+default allow := false
+
+allow if {
+  "mcp:invoke" in input.subjectAttributes.scopes
 }

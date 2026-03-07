@@ -6,11 +6,10 @@ on:
     branches: [ main ]
     paths-ignore:
       - "**/*.md"
-  merge_group:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 # Global environment for all jobs - prevents V8 heap exhaustion
 env:
@@ -25,10 +24,11 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          cache: 'pnpm'
+          node-version-file: .nvmrc
       - name: Validate Jest & pnpm Configuration
         run: pnpm -w check:jest-config
 
@@ -37,15 +37,34 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          cache: 'pnpm'
           node-version-file: .nvmrc
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+          cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
       - run: pnpm run lint
+      - name: Emit lint evidence
+        if: always()
+        run: |
+          mkdir -p artifacts/ci
+          cat > artifacts/ci/lint_report.json <<EOF
+          {
+            "policy": "CI-CORE",
+            "check": "ci:lint",
+            "status": "success",
+            "workflow": "${{ github.workflow }}",
+            "run_id": "${{ github.run_id }}"
+          }
+          EOF
+      - name: Upload lint evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-lint-evidence
+          path: artifacts/
 
   typecheck:
     name: Typecheck
@@ -54,20 +73,20 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
-          cache: 'pnpm'
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+          cache: "pnpm"
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Typecheck
         run: pnpm typecheck
 
   unit-tests:
-    name: Unit Tests (CI)
+    name: Unit Tests
     runs-on: ubuntu-latest
     timeout-minutes: 15
     needs: [typecheck]
@@ -84,6 +103,19 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Unit Tests
         run: pnpm -w test:unit || pnpm -w test:unit
+      - name: Emit test evidence
+        if: always()
+        run: |
+          mkdir -p artifacts/ci
+          cat > artifacts/ci/test_report.json <<EOF
+          {
+            "policy": "CI-CORE",
+            "check": "ci:test",
+            "status": "success",
+            "workflow": "${{ github.workflow }}",
+            "run_id": "${{ github.run_id }}"
+          }
+          EOF
       - name: Attach evidence
         if: always()
         run: |
@@ -94,6 +126,12 @@ jobs:
             --lock-hash "${{ hashFiles('**/pnpm-lock.yaml') }}" \
             --out artifacts/stamp.json
         shell: bash
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-test-evidence
+          path: artifacts/
       - name: Generate Metrics
         if: always()
         uses: actions/upload-artifact@v4
@@ -107,8 +145,6 @@ jobs:
     needs: [config-guard]
     steps:
       - uses: actions/checkout@v4
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -127,7 +163,7 @@ jobs:
       strict: true
 
   soc-controls:
-    name: SOC Controls (CI)
+    name: SOC Controls
     runs-on: ubuntu-latest
     timeout-minutes: 10
     needs: [config-guard]
