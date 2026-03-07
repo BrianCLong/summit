@@ -1,0 +1,32 @@
+{
+  "writeset_id": "ws_bg_shift_001",
+  "system_time": "2026-03-06T12:05:00Z",
+  "source": "fixture.bg",
+  "ops": [
+    {
+      "op": "UPSERT_CLAIM",
+      "graph": "BG",
+      "claim": {
+        "claim_id": "bg_claim_001",
+        "subject": "community:cluster_a",
+        "predicate": "believes",
+        "object": "narrative:shockwave",
+        "confidence": 0.71,
+        "time": {
+          "valid_from": "2026-03-06T12:04:00Z",
+          "valid_to": null
+        },
+        "evidence_ids": ["artifact_social_003"]
+      }
+    }
+  ],
+  "provenance": {
+    "artifacts": [
+      {
+        "artifact_id": "artifact_social_003",
+        "type": "social_post",
+        "sha256": "ccc333"
+      }
+    ]
+  }
+}
