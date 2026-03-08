@@ -1,0 +1,35 @@
+intents:
+  - id: recommendation
+    weight: 0.4
+    examples: ["best {category}"]
+  - id: comparison
+    weight: 0.3
+    examples: ["{brand} vs {competitor}"]
+  - id: alternatives
+    weight: 0.2
+    examples: ["alternatives to {brand}"]
+  - id: how-to
+    weight: 0.1
+    examples: ["how to use {category}"]
+
+categories:
+  - id: CRM
+    weight: 1.0
+  - id: Email marketing
+    weight: 1.0
+  - id: Project management
+    weight: 1.0
+
+modifiers:
+  - id: startups
+    weight: 0.4
+  - id: small business
+    weight: 0.4
+  - id: enterprise
+    weight: 0.2
+
+contexts:
+  - id: remote teams
+    weight: 0.5
+  - id: in 2026
+    weight: 0.5

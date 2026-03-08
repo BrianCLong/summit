@@ -1,0 +1,2 @@
+{"scenarioId": "add_statistic", "promptId": "GEO:PROMPT:001", "engine": "gpt-4", "baseline": {"selectionScore": 0.35, "attributionScore": 0}, "treatment": {"selectionScore": 0.7, "attributionScore": 0.5}}
+{"scenarioId": "add_quote", "promptId": "GEO:PROMPT:002", "engine": "claude-3", "baseline": {"selectionScore": 0, "attributionScore": 0}, "treatment": {"selectionScore": 0.55, "attributionScore": 0.6}}

@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "GEO Report",
+  "type": "object",
+  "properties": {
+    "runId": { "type": "string" },
+    "scores": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "brandName": { "type": "string" },
+          "promptClass": { "type": "string" },
+          "eligibility": { "type": "number" },
+          "selection": { "type": "number" },
+          "attribution": { "type": "number" },
+          "upstreamPrior": { "type": "number" },
+          "correctedLift": { "type": "number" }
+        },
+        "required": ["brandName", "promptClass", "eligibility", "selection", "attribution", "upstreamPrior", "correctedLift"]
+      }
+    }
+  },
+  "required": ["runId", "scores"]
+}

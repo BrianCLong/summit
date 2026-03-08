@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "GEO Metrics",
+  "type": "object",
+  "properties": {
+    "averageSelectionScore": { "type": "number" },
+    "averageAttributionScore": { "type": "number" },
+    "averageCorrectedLift": { "type": "number" }
+  },
+  "required": ["averageSelectionScore", "averageAttributionScore", "averageCorrectedLift"]
+}
