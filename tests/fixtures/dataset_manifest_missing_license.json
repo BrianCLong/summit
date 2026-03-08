@@ -1,0 +1,12 @@
+{
+  "datasets": [
+    {
+      "name": "typhoon_s_negative_test",
+      "source": "paper:arXiv:2601.18129",
+      "license": "",
+      "sha256": "TODO",
+      "classification": "restricted",
+      "retention_days": 30
+    }
+  ]
+}

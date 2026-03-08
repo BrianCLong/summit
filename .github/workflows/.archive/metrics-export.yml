@@ -37,7 +37,7 @@ jobs:
     name: 📈 Export Release Captain Metrics
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    if: ((${{ github.repository_owner == 'BrianCLong' }}) && (steps.check-alerts.outputs.circuit_open == 'true' || steps.check-alerts.outputs.health_low == 'true')) && (always())
+    if: ${{ github.repository_owner == 'BrianCLong' }}
     steps:
     - uses: actions/checkout@v4
 
@@ -203,6 +203,7 @@ EOF
         echo "✅ Alert checks completed"
 
     - name: Create alert issue
+      if: steps.check-alerts.outputs.circuit_open == 'true' || steps.check-alerts.outputs.health_low == 'true'
       run: |
         echo "🚨 Creating alert issue for metric violations..."
 
@@ -259,6 +260,7 @@ EOF
     name: 🔍 Validate Metrics
     runs-on: ubuntu-latest
     needs: export-metrics
+    if: always()
     steps:
     - name: Download metrics artifact
       uses: actions/download-artifact@v4

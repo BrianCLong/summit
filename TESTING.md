@@ -182,28 +182,6 @@ The verification suite is integrated into CI workflows to ensure:
 
 See `.github/workflows/ci.yml` for the current CI configuration.
 
-## Seed Debugging & Environment Parity
-
-To avoid seed-based flakiness, we standardize test environment variables and log the active seed.
-
-**Standardized test env (`.env.test`):**
-- `TZ=UTC`
-- `LANG=en_US.UTF-8`
-- `LC_ALL=en_US.UTF-8`
-- `NODE_ENV=test`
-- `LOG_LEVEL=error`
-
-**Seed logging:**
-Test setup logs the active seed value on every run:
-
-```bash
-TEST_SEED=1234567890 pnpm test
-```
-
-**Repro tips:**
-- Re-run with the same seed used in CI.
-- Keep `TZ=UTC` to avoid local timezone variance.
-
 ## FAQ
 
 ### Why not just fix Jest configuration?

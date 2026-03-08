@@ -1,4 +1,4 @@
-FROM node:22-alpine
+FROM node:20-alpine
 
 WORKDIR /app
 
@@ -16,62 +16,29 @@ RUN apk add --no-cache \
     pangomm-dev \
     libjpeg-turbo-dev \
     freetype-dev \
-    postgresql-client \
     curl
 
-# Install nodemon globally
-RUN npm install -g pnpm nodemon
+# Install nodemon globally (as root)
+RUN npm install -g nodemon
 
 # Create a non-root user
 RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser
 
-# Set npm/pnpm resilience
-ENV PUPPETEER_SKIP_DOWNLOAD=1 \
-    NPM_CONFIG_AUDIT=false \
-    NPM_CONFIG_FUND=false \
-    NPM_CONFIG_ENGINE_STRICT=false
+# Copy package files and install as root
+COPY package*.json intelgraph-feature-flags-4.2.3.tgz intelgraph-telemetry-config-4.2.3.tgz ./
+RUN npm install --legacy-peer-deps
 
-# Copy workspace configuration
-COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
-COPY tsconfig.base.json tsconfig.json ./
-COPY server/package.json ./server/
-COPY packages/feature-flags/package.json ./packages/feature-flags/
-COPY packages/osint-collector/package.json ./packages/osint-collector/
-COPY packages/maestro-core/package.json ./packages/maestro-core/
-COPY packages/telemetry-config/package.json ./packages/telemetry-config/
-COPY packages/types/package.json ./packages/types/
-COPY libs/context-shell/node/package.json ./libs/context-shell/node/
-
-# Install dependencies for the server workspace
-RUN pnpm install --filter intelgraph-server... --filter @intelgraph/osint-collector... --filter @intelgraph/maestro-core... --filter @intelgraph/types... --frozen-lockfile || pnpm install --filter intelgraph-server... --filter @intelgraph/osint-collector... --filter @intelgraph/maestro-core... --filter @intelgraph/types...
-
-# Copy workspace packages source for building
-COPY packages/feature-flags ./packages/feature-flags/
-COPY packages/osint-collector ./packages/osint-collector/
-COPY packages/maestro-core ./packages/maestro-core/
-COPY packages/types ./packages/types/
-
-# Build workspace packages
-RUN pnpm --filter @intelgraph/feature-flags run build
-RUN pnpm --filter @intelgraph/osint-collector run build
-RUN pnpm --filter @intelgraph/maestro-core run build
-
-# Copy the rest of the code
+# Copy source code and set permissions
 COPY . .
-
-# Set permissions
-RUN mkdir -p server/uploads server/logs && chown -R appuser:appgroup /app
-
-# Switch to the server directory for execution
-WORKDIR /app/server
+RUN mkdir -p uploads logs && chown -R appuser:appgroup /app
 
 # Switch to non-root user
 USER appuser
 
-HEALTHCHECK --interval=30s --timeout=10s --retries=3 CMD curl -f http://localhost:4000/health/ready || exit 1
+HEALTHCHECK --interval=30s --timeout=10s --retries=3 CMD curl -f http://localhost:4000/graphql || exit 1
 
 # Expose ports
 EXPOSE 4000 9229
 
-# Start development server
-CMD ["pnpm", "run", "dev"]
+# Start development server with debugging
+CMD ["npm", "run", "dev"]

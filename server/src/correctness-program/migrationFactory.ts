@@ -4,7 +4,7 @@ import {
   MigrationProgress,
   MigrationStage,
   newIdentifier,
-} from './types.js';
+} from './types';
 
 export class MigrationFactory {
   private progress = new Map<string, MigrationProgress>();

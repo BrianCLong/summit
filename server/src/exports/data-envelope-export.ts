@@ -12,7 +12,7 @@ import {
   ExportBundle,
   ExportFormat,
   DataClassification,
-} from '../types/data-envelope.js';
+} from '../types/data-envelope';
 import { randomUUID } from 'crypto';
 import * as fs from 'fs/promises';
 import * as path from 'path';

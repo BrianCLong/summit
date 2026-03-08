@@ -1,6 +1,6 @@
 import express from 'express';
-import { meteringService } from '../services/billing/MeteringService.js';
-import { ensureAuthenticated } from '../middleware/auth.js';
+import { meteringService } from '../services/billing/MeteringService';
+import { ensureAuthenticated } from '../middleware/auth';
 import { z } from 'zod';
 
 const router = express.Router();

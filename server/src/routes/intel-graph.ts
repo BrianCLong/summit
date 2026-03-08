@@ -1,8 +1,8 @@
 // server/src/routes/intel-graph.ts
 import express from 'express';
 import { z } from 'zod/v4';
-import { IntelGraphService } from '../services/IntelGraphService.js';
-import { ensureAuthenticated } from '../middleware/auth.js';
+import { IntelGraphService } from '../services/IntelGraphService';
+import { ensureAuthenticated } from '../middleware/auth';
 import { tenantContextMiddleware as tenantContext } from '../middleware/tenantContext.js';
 
 const router = express.Router();

@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 
-import { Maestro } from '../maestro/core.js';
-import { IntelGraphClientImpl } from '../intelgraph/client.js';
-import { CostMeter } from '../maestro/cost_meter.js';
-import { OpenAILLM } from '../maestro/adapters/llm_openai.js';
+import { Maestro } from '../maestro/core';
+import { IntelGraphClientImpl } from '../intelgraph/client';
+import { CostMeter } from '../maestro/cost_meter';
+import { OpenAILLM } from '../maestro/adapters/llm_openai';
 
 async function main() {
   const [, , ...args] = process.argv;

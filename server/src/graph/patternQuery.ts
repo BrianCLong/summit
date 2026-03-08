@@ -1,4 +1,4 @@
-import { TenantId, EntityType, EdgeType } from './types.js';
+import { TenantId, EntityType, EdgeType } from './types';
 
 export interface GraphPatternNode {
   alias: string;

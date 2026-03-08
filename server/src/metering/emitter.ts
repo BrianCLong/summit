@@ -1,6 +1,6 @@
-import logger from '../utils/logger.js';
-import { meteringPipeline } from './pipeline.js';
-import { MeterEvent, MeterEventKind } from './schema.js';
+import logger from '../utils/logger';
+import { meteringPipeline } from './pipeline';
+import { MeterEvent, MeterEventKind } from './schema';
 
 export class MeteringEmitter {
   async emit(event: MeterEvent): Promise<void> {

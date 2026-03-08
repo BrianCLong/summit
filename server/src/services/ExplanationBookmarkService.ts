@@ -1,5 +1,5 @@
-import { cacheService } from './CacheService.js';
-import { logger } from '../config/logger.js';
+import { cacheService } from './CacheService';
+import { logger } from '../config/logger';
 import crypto from 'crypto';
 
 export interface BookmarkResult {

@@ -1,14 +1,14 @@
 
-import { RedisService } from '../cache/redis.js';
-import logger from '../config/logger.js';
-import { getNeo4jDriver } from '../db/neo4j.js';
+import { RedisService } from '../cache/redis.ts';
+import logger from '../config/logger.ts';
+import { getNeo4jDriver } from '../db/neo4j.ts';
 import fs from 'fs/promises';
 import path from 'path';
 import { promisify } from 'util';
 import { exec } from 'child_process';
 import { createWriteStream } from 'fs';
 import zlib from 'zlib';
-import { PrometheusMetrics } from '../utils/metrics.js';
+import { PrometheusMetrics } from '../utils/metrics.ts';
 
 const execAsync = promisify(exec);
 
@@ -161,7 +161,7 @@ export class BackupService {
     try {
       const dir = await this.ensureBackupDir('neo4j');
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-      const filename = `neo4j-export-${timestamp}.jsonl`;
+      const filename = `neo4j-export-${timestamp}.tsonl`;
       const filepath = path.join(dir, filename);
       const finalPath = options.compress ? `${filepath}.gz` : filepath;
 

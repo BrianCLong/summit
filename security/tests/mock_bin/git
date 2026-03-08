@@ -1,0 +1,5 @@
+#!/bin/bash
+if [[ "$1" == "diff" ]]; then
+    # Return the file path provided in environment
+    echo "$MOCK_DIFF_FILE"
+fi

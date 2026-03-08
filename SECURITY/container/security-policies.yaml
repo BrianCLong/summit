@@ -1,0 +1,472 @@
+# Kubernetes Security Policies for IntelGraph Container Hardening
+# Implements Pod Security Standards, Network Policies, and Security Contexts
+
+---
+# Pod Security Policy (Legacy) - Use Pod Security Standards in newer K8s versions
+apiVersion: policy/v1beta1
+kind: PodSecurityPolicy
+metadata:
+  name: intelgraph-restricted-psp
+  namespace: intelgraph
+  labels:
+    app: intelgraph
+    security.policy: restricted
+spec:
+  privileged: false
+  allowPrivilegeEscalation: false
+  requiredDropCapabilities:
+    - ALL
+  volumes:
+    - 'configMap'
+    - 'emptyDir'
+    - 'projected'
+    - 'secret'
+    - 'downwardAPI'
+    - 'persistentVolumeClaim'
+  hostNetwork: false
+  hostIPC: false
+  hostPID: false
+  runAsUser:
+    rule: 'MustRunAsNonRoot'
+  runAsGroup:
+    rule: 'MustRunAs'
+    ranges:
+      - min: 1
+        max: 65535
+  seLinux:
+    rule: 'RunAsAny'
+  supplementalGroups:
+    rule: 'MustRunAs'
+    ranges:
+      - min: 1
+        max: 65535
+  fsGroup:
+    rule: 'RunAsAny'
+  readOnlyRootFilesystem: true
+
+---
+# Pod Security Standards - Restricted Profile
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: intelgraph
+  labels:
+    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/audit: restricted
+    pod-security.kubernetes.io/warn: restricted
+
+---
+# Network Policy - Deny All Ingress by Default
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: intelgraph-deny-all-ingress
+  namespace: intelgraph
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+
+---
+# Network Policy - Allow Ingress from Load Balancer
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: intelgraph-allow-ingress
+  namespace: intelgraph
+spec:
+  podSelector:
+    matchLabels:
+      app: intelgraph
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: ingress-nginx
+      ports:
+        - protocol: TCP
+          port: 3000
+    - from:
+        - podSelector:
+            matchLabels:
+              app: intelgraph-frontend
+      ports:
+        - protocol: TCP
+          port: 3000
+        - protocol: TCP
+          port: 8080
+
+---
+# Network Policy - Allow Egress to Databases and External Services
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: intelgraph-allow-egress
+  namespace: intelgraph
+spec:
+  podSelector:
+    matchLabels:
+      app: intelgraph
+  policyTypes:
+    - Egress
+  egress:
+    # Allow DNS resolution
+    - to: []
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    # Allow connection to databases
+    - to:
+        - podSelector:
+            matchLabels:
+              app: neo4j
+      ports:
+        - protocol: TCP
+          port: 7687
+        - protocol: TCP
+          port: 7474
+    - to:
+        - podSelector:
+            matchLabels:
+              app: redis
+      ports:
+        - protocol: TCP
+          port: 6379
+    - to:
+        - podSelector:
+            matchLabels:
+              app: elasticsearch
+      ports:
+        - protocol: TCP
+          port: 9200
+        - protocol: TCP
+          port: 9300
+    # Allow HTTPS for external API calls
+    - to: []
+      ports:
+        - protocol: TCP
+          port: 443
+    # Allow Kafka communication
+    - to:
+        - podSelector:
+            matchLabels:
+              app: kafka
+      ports:
+        - protocol: TCP
+          port: 9092
+
+---
+# Service Account with minimal permissions
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: intelgraph-service-account
+  namespace: intelgraph
+automountServiceAccountToken: false
+
+---
+# Role with minimal required permissions
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: intelgraph
+  name: intelgraph-role
+rules:
+  - apiGroups: ['']
+    resources: ['configmaps', 'secrets']
+    verbs: ['get', 'list']
+  - apiGroups: ['']
+    resources: ['pods']
+    verbs: ['get', 'list']
+    resourceNames: ['intelgraph-*']
+
+---
+# Role Binding
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: intelgraph-rolebinding
+  namespace: intelgraph
+subjects:
+  - kind: ServiceAccount
+    name: intelgraph-service-account
+    namespace: intelgraph
+roleRef:
+  kind: Role
+  name: intelgraph-role
+  apiGroup: rbac.authorization.k8s.io
+
+---
+# Security Context Constraints (OpenShift)
+apiVersion: security.openshift.io/v1
+kind: SecurityContextConstraints
+metadata:
+  name: intelgraph-restricted-scc
+allowHostDirVolumePlugin: false
+allowHostIPC: false
+allowHostNetwork: false
+allowHostPID: false
+allowHostPorts: false
+allowPrivilegeEscalation: false
+allowPrivilegedContainer: false
+allowedCapabilities: []
+defaultAddCapabilities: []
+fsGroup:
+  type: MustRunAs
+  ranges:
+    - min: 1
+      max: 65535
+readOnlyRootFilesystem: true
+requiredDropCapabilities:
+  - ALL
+runAsUser:
+  type: MustRunAsNonRoot
+seLinuxContext:
+  type: MustRunAs
+supplementalGroups:
+  type: MustRunAs
+  ranges:
+    - min: 1
+      max: 65535
+volumes:
+  - configMap
+  - downwardAPI
+  - emptyDir
+  - persistentVolumeClaim
+  - projected
+  - secret
+
+---
+# OPA Gatekeeper Constraint Template for Security Validation
+apiVersion: templates.gatekeeper.sh/v1beta1
+kind: ConstraintTemplate
+metadata:
+  name: intelgraphsecurity
+spec:
+  crd:
+    spec:
+      names:
+        kind: IntelGraphSecurity
+      validation:
+        type: object
+        properties:
+          requiredSecurityContext:
+            type: object
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package intelgraphsecurity
+
+        violation[{"msg": msg}] {
+          container := input.review.object.spec.containers[_]
+          not container.securityContext.runAsNonRoot == true
+          msg := "Container must run as non-root user"
+        }
+
+        violation[{"msg": msg}] {
+          container := input.review.object.spec.containers[_]
+          container.securityContext.allowPrivilegeEscalation == true
+          msg := "Container must not allow privilege escalation"
+        }
+
+        violation[{"msg": msg}] {
+          container := input.review.object.spec.containers[_]
+          "ALL" in container.securityContext.capabilities.drop
+          msg := "Container must drop ALL capabilities"
+        }
+
+        violation[{"msg": msg}] {
+          not input.review.object.spec.securityContext.runAsNonRoot == true
+          msg := "Pod must run as non-root user"
+        }
+
+        violation[{"msg": msg}] {
+          not input.review.object.spec.securityContext.readOnlyRootFilesystem == true
+          msg := "Pod must have read-only root filesystem"
+        }
+
+---
+# OPA Gatekeeper Constraint
+apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: IntelGraphSecurity
+metadata:
+  name: intelgraph-security-constraints
+spec:
+  match:
+    kinds:
+      - apiGroups: ['apps']
+        kinds: ['Deployment']
+    namespaces: ['intelgraph']
+  parameters:
+    requiredSecurityContext:
+      runAsNonRoot: true
+      readOnlyRootFilesystem: true
+
+---
+# Falco Security Rules ConfigMap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: intelgraph-falco-rules
+  namespace: intelgraph
+data:
+  intelgraph_rules.yaml: |
+    - rule: IntelGraph Container Privilege Escalation
+      desc: Detect privilege escalation attempts in IntelGraph containers
+      condition: >
+        spawned_process and
+        k8s_ns = "intelgraph" and
+        k8s_pod_label_app = "intelgraph" and
+        (proc.name in (sudo, su, doas) or
+         proc.pname in (sudo, su, doas) or
+         proc.aname[2] in (sudo, su, doas))
+      output: >
+        Privilege escalation detected in IntelGraph container
+        (user=%user.name command=%proc.cmdline container=%container.name
+         image=%container.image.repository:%container.image.tag)
+      priority: WARNING
+      tags: [container, privilege_escalation, intelgraph]
+
+    - rule: IntelGraph Suspicious File Access
+      desc: Detect suspicious file access in IntelGraph containers
+      condition: >
+        open_read and
+        k8s_ns = "intelgraph" and
+        k8s_pod_label_app = "intelgraph" and
+        (fd.name startswith /etc/shadow or
+         fd.name startswith /etc/passwd or
+         fd.name startswith /etc/sudoers or
+         fd.name startswith /root/.ssh or
+         fd.name contains private_key)
+      output: >
+        Suspicious file access in IntelGraph container
+        (file=%fd.name command=%proc.cmdline container=%container.name
+         image=%container.image.repository:%container.image.tag)
+      priority: WARNING
+      tags: [container, file_access, intelgraph]
+
+    - rule: IntelGraph Network Anomaly
+      desc: Detect unusual network connections from IntelGraph containers
+      condition: >
+        outbound and
+        k8s_ns = "intelgraph" and
+        k8s_pod_label_app = "intelgraph" and
+        not fd.sport in (80, 443, 6379, 7687, 9092, 9200) and
+        not fd.dport in (80, 443, 6379, 7687, 9092, 9200)
+      output: >
+        Unusual network connection from IntelGraph container
+        (destination=%fd.rip:%fd.rport source=%fd.lip:%fd.lport
+         command=%proc.cmdline container=%container.name)
+      priority: WARNING
+      tags: [container, network, intelgraph]
+
+---
+# Pod Disruption Budget for high availability
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: intelgraph-pdb
+  namespace: intelgraph
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: intelgraph
+
+---
+# Resource Quota to limit resource usage
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: intelgraph-quota
+  namespace: intelgraph
+spec:
+  hard:
+    requests.cpu: '4'
+    requests.memory: 8Gi
+    limits.cpu: '8'
+    limits.memory: 16Gi
+    pods: '20'
+    persistentvolumeclaims: '10'
+    services: '10'
+    secrets: '20'
+    configmaps: '20'
+
+---
+# Limit Range for default resource limits
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: intelgraph-limits
+  namespace: intelgraph
+spec:
+  limits:
+    - default:
+        cpu: 500m
+        memory: 512Mi
+      defaultRequest:
+        cpu: 100m
+        memory: 128Mi
+      type: Container
+    - max:
+        cpu: '2'
+        memory: 2Gi
+      min:
+        cpu: 10m
+        memory: 64Mi
+      type: Container
+
+---
+# Secret for storing sensitive security configurations
+apiVersion: v1
+kind: Secret
+metadata:
+  name: intelgraph-security-config
+  namespace: intelgraph
+type: Opaque
+data:
+  # Base64 encoded security configurations
+  api-key: '' # Replace with actual base64 encoded API key
+  jwt-secret: '' # Replace with actual base64 encoded JWT secret
+  encryption-key: '' # Replace with actual base64 encoded encryption key
+
+---
+# ConfigMap for security monitoring configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: intelgraph-security-monitoring
+  namespace: intelgraph
+data:
+  security-config.yaml: |
+    security:
+      monitoring:
+        enabled: true
+        log_level: "INFO"
+        audit_enabled: true
+        threat_detection:
+          enabled: true
+          sensitivity: "medium"
+        vulnerability_scanning:
+          enabled: true
+          schedule: "0 2 * * *"  # Daily at 2 AM
+        compliance_checks:
+          enabled: true
+          standards: ["CIS", "PCI-DSS", "SOX"]
+
+      runtime_protection:
+        enabled: true
+        behavioral_analysis: true
+        anomaly_detection: true
+        auto_response: false
+
+      network_security:
+        tls_enforcement: true
+        certificate_validation: true
+        allowed_protocols: ["https", "wss"]
+        blocked_ips: []
+        rate_limiting: true

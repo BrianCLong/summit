@@ -1,5 +1,5 @@
 import { EventEmitter } from 'events';
-import { RedisService as RedisCache } from '../cache/redis.js';
+import { RedisService as RedisCache } from '../cache/redis';
 
 interface SearchQuery {
   id: string;

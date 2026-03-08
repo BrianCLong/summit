@@ -117,12 +117,13 @@ jobs:
 
       - name: Upload precision metrics
         uses: actions/upload-artifact@v4
-        if: ((((always()) && (github.event_name == 'pull_request')) && (always())) && (always())) && (always())
+        if: always()
         with:
           name: er-metrics-${{ matrix.entity_type }}-${{ github.sha }}
           path: reports/er-metrics-*.json
 
       - name: Comment PR with results
+        if: github.event_name == 'pull_request'
         uses: actions/github-script@v7
         with:
           script: |
@@ -166,6 +167,7 @@ jobs:
             });
 
       - name: Set check status
+        if: always()
         uses: actions/github-script@v7
         with:
           script: |
@@ -203,6 +205,7 @@ jobs:
   er-precision-summary:
     runs-on: ubuntu-latest
     needs: er-precision-gate
+    if: always()
     steps:
       - name: Check all precision gates
         run: |
@@ -219,6 +222,7 @@ jobs:
           echo "🚀 GA Core release approved - ER precision requirements met"
 
       - name: Set final check status
+        if: always()
         uses: actions/github-script@v7
         with:
           script: |

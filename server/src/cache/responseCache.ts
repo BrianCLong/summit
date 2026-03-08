@@ -1,11 +1,11 @@
-import { getRedisClient } from '../config/database.js';
+import { getRedisClient } from '../config/database.ts';
 import crypto from 'node:crypto';
 import {
   recHit,
   recMiss,
   recSet,
   cacheLocalSize,
-} from '../metrics/cacheMetrics.js';
+} from '../metrics/cacheMetrics.ts';
 
 // Cache Tier Interface
 export interface CacheTier {

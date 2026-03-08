@@ -1,7 +1,7 @@
 // server/src/featureFlags/ConfigService.ts
 import { Redis } from 'ioredis';
-import { Logger } from '../utils/logger.js';
-import { FeatureFlag } from './types.js';
+import { Logger } from '../utils/logger';
+import { FeatureFlag } from './types';
 
 export interface ConfigRepository {
   getConfig(key: string, environment: string): Promise<any | null>;

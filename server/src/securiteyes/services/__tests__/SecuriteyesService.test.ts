@@ -1,6 +1,6 @@
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
-import { SecuriteyesService } from '../SecuriteyesService.js';
-import { NODE_LABELS } from '../../models/types.js';
+import { SecuriteyesService } from '../SecuriteyesService';
+import { NODE_LABELS } from '../../models/types';
 
 // Mock dependencies
 const mockRunCypher = jest.fn();

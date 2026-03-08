@@ -1,4 +1,4 @@
-import { logger } from '../utils/logger.js';
+import { logger } from '../utils/logger';
 
 export class Budget {
   public usedUSD: number = 0;

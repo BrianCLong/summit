@@ -6,7 +6,7 @@
 
 import { errorFactory, isSummitError, SummitError } from '@intelgraph/errors';
 
-import type { Request, Response, NextFunction } from '../types.js';
+import type { Request, Response, NextFunction } from '../types';
 
 function toSummitError(err: Error, req: Request): SummitError {
   if (isSummitError(err)) {

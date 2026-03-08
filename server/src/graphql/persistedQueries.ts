@@ -1,7 +1,7 @@
 // server/src/graphql/persistedQueries.ts
 import { Redis } from 'ioredis';
 import crypto from 'crypto';
-import { Logger } from '../utils/logger.js';
+import { Logger } from '../utils/logger';
 
 export interface PersistedQueryRepository {
   getAllowlist(): Promise<Set<string>>;

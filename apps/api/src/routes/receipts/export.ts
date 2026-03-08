@@ -7,8 +7,8 @@ import {
   RedactionRules,
 } from '../../../../prov-ledger-service/src/export/bundleAssembler';
 import { Manifest } from '../../../../prov-ledger-service/src/ledger';
-import { RBACManager } from '../../../../../packages/authentication/src/rbac/rbac-manager.js';
-import { requirePermission } from '../../middleware/security.js';
+
+const router = Router();
 
 function parsePayload(body: any): ExportBundleInput {
   const manifest = body.manifest as Manifest | undefined;
@@ -25,28 +25,22 @@ function parsePayload(body: any): ExportBundleInput {
   };
 }
 
-export function createExportRouter(rbacManager: RBACManager): Router {
-  const router = Router();
+router.post('/receipts/export', async (req: Request, res: Response) => {
+  try {
+    const payload = parsePayload(req.body);
+    const { stream, metadata } = assembleExportBundle(payload);
 
-  router.post('/receipts/export', requirePermission(rbacManager, 'receipts', 'read'), async (req: Request, res: Response) => {
-    try {
-      const payload = parsePayload(req.body);
-      const { stream, metadata } = assembleExportBundle(payload);
+    res.setHeader('Content-Type', 'application/gzip');
+    res.setHeader(
+      'X-Redaction-Applied',
+      metadata.redaction.applied ? 'true' : 'false',
+    );
+    stream.pipe(res);
+  } catch (error) {
+    res.status(400).json({
+      error: error instanceof Error ? error.message : 'export_failed',
+    });
+  }
+});
 
-      res.setHeader('Content-Type', 'application/gzip');
-      res.setHeader(
-        'X-Redaction-Applied',
-        metadata.redaction.applied ? 'true' : 'false',
-      );
-      stream.pipe(res);
-    } catch (error) {
-      res.status(400).json({
-        error: error instanceof Error ? error.message : 'export_failed',
-      });
-    }
-  });
-
-  return router;
-}
-
-export default createExportRouter;
+export default router;

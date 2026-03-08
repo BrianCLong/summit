@@ -1,1 +1,1 @@
-export * from "./trustScore.js";
+export * from "./trustScore";

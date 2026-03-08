@@ -1,10 +1,10 @@
 import express, { Request, Response } from 'express';
-import { KPIEngine } from '../summitsight/engine/KPIEngine.js';
-import { RiskEngine } from '../summitsight/engine/RiskEngine.js';
-import { ForecastingEngine } from '../summitsight/engine/ForecastingEngine.js';
-import { CorrelationEngine } from '../summitsight/engine/CorrelationEngine.js';
-import { SummitsightDataService } from '../summitsight/SummitsightDataService.js';
-import { ensureAuthenticated } from '../middleware/auth.js';
+import { KPIEngine } from '../summitsight/engine/KPIEngine';
+import { RiskEngine } from '../summitsight/engine/RiskEngine';
+import { ForecastingEngine } from '../summitsight/engine/ForecastingEngine';
+import { CorrelationEngine } from '../summitsight/engine/CorrelationEngine';
+import { SummitsightDataService } from '../summitsight/SummitsightDataService';
+import { ensureAuthenticated } from '../middleware/auth';
 
 const router = express.Router();
 

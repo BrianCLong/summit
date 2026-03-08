@@ -1,11 +1,11 @@
 import { Queue, Worker, Job } from 'bullmq';
 import { createRequire } from 'module';
-import logger from '../utils/logger.js';
-import { VeracityScoringService } from './VeracityScoringService.js';
+import logger from '../utils/logger';
+import { VeracityScoringService } from './VeracityScoringService';
 
 import config from '../config/index.js';
-import { ExternalAPIService } from './ExternalAPIService.js';
-import { OSINTService } from './OSINTService.js';
+import { ExternalAPIService } from './ExternalAPIService';
+import { OSINTService } from './OSINTService';
 
 interface OSINTJobData {
   type: string; // 'comprehensive_scan', 'wikipedia', 'search'

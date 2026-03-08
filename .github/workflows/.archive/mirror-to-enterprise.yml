@@ -11,7 +11,7 @@ jobs:
   mirror:
     runs-on: ubuntu-latest
     # Prevent infinite loop by checking if the push came from GitHub Actions
-    if: ((((github.event.head_commit.author.name != 'TopicalityLLC Mirror Bot') && (success())) && (success())) && (success())) && (failure())
+    if: github.event.head_commit.author.name != 'TopicalityLLC Mirror Bot'
     
     steps:
       - name: Checkout source repo
@@ -34,6 +34,7 @@ jobs:
           git push enterprise main --force
 
       - name: Sync Release Branches
+        if: success()
         continue-on-error: true
         run: |
           for branch in $(git branch -r | grep 'origin/release/' | sed 's|origin/||'); do
@@ -43,14 +44,17 @@ jobs:
           done
 
       - name: Sync Tags
+        if: success()
         continue-on-error: true
         run: |
           git push enterprise --tags --force
 
       - name: Notify on success
+        if: success()
         run: |
           echo "✅ Successfully mirrored to TopicalityLLC/Summit"
 
       - name: Notify on failure
+        if: failure()
         run: |
           echo "::error::Failed to mirror to TopicalityLLC/Summit"

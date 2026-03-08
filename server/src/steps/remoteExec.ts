@@ -1,4 +1,4 @@
-import { enqueue } from '../relay/queue.js';
+import { enqueue } from '../relay/queue';
 import { Pool } from 'pg';
 const pg = new Pool({ connectionString: process.env.DATABASE_URL });
 

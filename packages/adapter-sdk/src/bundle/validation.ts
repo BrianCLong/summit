@@ -10,7 +10,6 @@ import manifestSchema from './schemas/manifest.schema.json';
 const ajv = new Ajv({
   allErrors: true,
   strict: false,
-  validateSchema: false,
 });
 addFormats(ajv);
 

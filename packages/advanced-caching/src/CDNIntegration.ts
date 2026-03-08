@@ -1,6 +1,6 @@
 import { trace } from '@opentelemetry/api';
 import pino from 'pino';
-import { L3CacheConfig } from './types.js';
+import { L3CacheConfig } from './types';
 
 const logger = pino({ name: 'CDNIntegration' });
 const tracer = trace.getTracer('advanced-caching');

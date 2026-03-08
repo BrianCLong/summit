@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { pg } from '../db/pg.js';
+import { pg } from '../db/pg';
 
 function readRetentionDays(): { riskDays: number; evidenceDays: number } {
   try {

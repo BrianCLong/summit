@@ -1,6 +1,6 @@
 import { getPostgresPool } from '../db/postgres.js';
 import { logger as rootLogger } from '../utils/logger.js';
-import { UsageEvent } from './events.js';
+import { UsageEvent } from './events';
 
 export interface UsageMeteringService {
   record(event: UsageEvent): Promise<void>;

@@ -1,4 +1,4 @@
-import { IncubationCapability, SandboxContext, IncubationResult } from './types.js';
+import { IncubationCapability, SandboxContext, IncubationResult } from './types';
 
 // Candidate 1: Recursive Critic
 // Mock implementation that pretends to critique itself

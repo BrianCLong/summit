@@ -1,7 +1,7 @@
-import { TenantUsageDailyRow } from './schema.js';
-import { persistentUsageRepository } from './persistence.js';
-import logger from '../utils/logger.js';
-import { planService } from '../usage/plans.js';
+import { TenantUsageDailyRow } from './schema';
+import { persistentUsageRepository } from './persistence';
+import logger from '../utils/logger';
+import { planService } from '../usage/plans';
 
 export interface QuotaLimit {
   soft: number;

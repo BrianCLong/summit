@@ -1,7 +1,7 @@
 // server/src/oracle/OracleService.ts
 
 import { randomUUID } from 'crypto';
-import { SimulationParameters, SimulationRun, PropheticTruth } from './oracle.types.js';
+import { SimulationParameters, SimulationRun, PropheticTruth } from './oracle.types';
 
 /**
  * Service for managing the (simulated) Causal Time-Loop Forecasting Engine.

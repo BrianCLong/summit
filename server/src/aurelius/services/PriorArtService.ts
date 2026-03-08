@@ -1,6 +1,6 @@
 // @ts-nocheck
-import { getNeo4jDriver } from '../../config/database.js';
-import EmbeddingService from '../../services/EmbeddingService.js';
+import { getNeo4jDriver } from '../../config/database.ts';
+import EmbeddingService from '../../services/EmbeddingService.ts';
 
 export class PriorArtService {
   private static instance: PriorArtService;

@@ -5,7 +5,7 @@ import type {
   Obligation,
   PolicyDecision,
   PreflightRequest,
-} from '../../../packages/policy-audit/src/types.js';
+} from '../../../packages/policy-audit/src/types';
 import { getPostgresPool } from '../db/postgres.js';
 import { logger } from '../config/logger.js';
 import { policyBundleStore } from '../policy/bundleStore.js';

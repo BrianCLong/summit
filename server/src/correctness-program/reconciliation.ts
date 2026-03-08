@@ -1,4 +1,4 @@
-import { DriftPair, ReconciliationRun, newIdentifier } from './types.js';
+import { DriftPair, ReconciliationRun, newIdentifier } from './types';
 
 export class ReconciliationEngine {
   private pairs = new Map<string, DriftPair>();

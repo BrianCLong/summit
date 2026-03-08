@@ -77,7 +77,7 @@ jobs:
           fi
       
       - name: Create Pull Request
-        if: ((steps.changes.outputs.changed == 'true') && (always())) && (always())
+        if: steps.changes.outputs.changed == 'true'
         uses: peter-evans/create-pull-request@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -121,6 +121,7 @@ jobs:
             automated
       
       - name: Upload inventory report
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: workflow-inventory-report
@@ -128,6 +129,7 @@ jobs:
           retention-days: 90
       
       - name: Post summary
+        if: always()
         run: |
           echo "## 📊 Workflow Audit Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY

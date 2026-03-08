@@ -23,7 +23,7 @@
  */
 
 import { Request, Response, NextFunction } from 'express';
-import { costGuard, CostGuardService } from '../services/cost-guard.js';
+import { costGuard, CostGuardService } from '../services/cost-guard';
 import pino from 'pino';
 
 const logger = (pino as any)({ name: 'cost-guard:middleware' });

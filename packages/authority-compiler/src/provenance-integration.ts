@@ -5,8 +5,8 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import type { PolicyDecision, Operation } from './schema/policy.schema.js';
-import type { EvaluationContext } from './evaluator.js';
+import type { PolicyDecision, Operation } from './schema/policy.schema';
+import type { EvaluationContext } from './evaluator';
 
 // -----------------------------------------------------------------------------
 // Provenance Event Types

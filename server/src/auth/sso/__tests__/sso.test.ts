@@ -15,7 +15,7 @@ jest.mock('pg', () => ({
 
 // Hoist mock for AuthService - Using regex string for module matching in case of relative path issues
 // But unstable_mockModule requires exact specifier or one that matches what is imported.
-jest.mock('../../../services/AuthService.js', () => {
+jest.mock('../../../services/AuthService.ts', () => {
   class MockAuthService {
     externalLogin() {
       return Promise.resolve({
@@ -37,7 +37,7 @@ describe('SSOService', () => {
   let SSOServiceClass: any;
 
   beforeAll(async () => {
-    const module = await import('../SSOService.js');
+    const module = await import('../SSOService.ts');
     SSOServiceClass = module.SSOService;
   });
 

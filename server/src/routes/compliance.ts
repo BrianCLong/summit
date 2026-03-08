@@ -1,13 +1,13 @@
 // @ts-nocheck
 import { Router } from 'express';
-import { SOC2ComplianceService } from '../services/SOC2ComplianceService.js';
-import { ComplianceMonitoringService } from '../services/ComplianceMonitoringService.js';
-import { EventSourcingService } from '../services/EventSourcingService.js';
-import { UserRepository } from '../data/UserRepository.js';
-import { getPostgresPool } from '../config/database.js';
-import { generatePdfFromPacket } from '../utils/pdfGenerator.js';
-import { SigningService } from '../services/SigningService.js';
-import { ensureAuthenticated, ensureRole } from '../middleware/auth.js';
+import { SOC2ComplianceService } from '../services/SOC2ComplianceService';
+import { ComplianceMonitoringService } from '../services/ComplianceMonitoringService';
+import { EventSourcingService } from '../services/EventSourcingService';
+import { UserRepository } from '../data/UserRepository';
+import { getPostgresPool } from '../config/database';
+import { generatePdfFromPacket } from '../utils/pdfGenerator';
+import { SigningService } from '../services/SigningService';
+import { ensureAuthenticated, ensureRole } from '../middleware/auth';
 
 const router = Router();
 const pgPool = getPostgresPool();

@@ -4,14 +4,14 @@
  */
 
 // Types
-export * from '../types/digitalTwin.js';
+export * from '../types/digitalTwin';
 
 // Services
-export { DigitalTwinService, digitalTwinService } from '../services/DigitalTwinService.js';
-export { PredictiveMaintenanceService } from '../services/PredictiveMaintenanceService.js';
+export { DigitalTwinService, digitalTwinService } from '../services/DigitalTwinService';
+export { PredictiveMaintenanceService } from '../services/PredictiveMaintenanceService';
 
 // Simulation
-export { SimulationEngine } from '../simulation/SimulationEngine.js';
+export { SimulationEngine } from '../simulation/SimulationEngine';
 
 // Integrations
-export { SmartCityConnector } from '../integrations/SmartCityConnector.js';
+export { SmartCityConnector } from '../integrations/SmartCityConnector';

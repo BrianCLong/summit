@@ -1,7 +1,7 @@
 // server/src/routes/oracle.ts
 import { Router } from 'express';
-import { oracleService } from '../oracle/OracleService.js';
-import { SimulationParameters } from '../oracle/oracle.types.js';
+import { oracleService } from '../oracle/OracleService';
+import { SimulationParameters } from '../oracle/oracle.types';
 
 const router = Router();
 

@@ -167,7 +167,7 @@ export class GAReleaseService {
         process.cwd(),
         'scripts',
         'migrate',
-        'preflight_cli.js',
+        'preflight_cli.ts',
       );
       if (fs.existsSync(preflightPath)) {
         results.push({
@@ -293,7 +293,7 @@ export class GAReleaseService {
         'src',
         'routes',
         'internal',
-        'command-console.js',
+        'command-console.ts',
       ),
       path.join(
         process.cwd(),
@@ -313,7 +313,7 @@ export class GAReleaseService {
 
   private checkHealthEndpoints(): boolean {
     const candidates = [
-      path.join(process.cwd(), 'server', 'src', 'routes', 'health.js'),
+      path.join(process.cwd(), 'server', 'src', 'routes', 'health.ts'),
       path.join(process.cwd(), 'server', 'dist', 'routes', 'health.js'),
     ];
     return candidates.some((candidate) => fs.existsSync(candidate));

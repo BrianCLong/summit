@@ -14,10 +14,10 @@ import {
   softDeleteEntity,
   createEntityVersion,
   temporalDistance,
-} from '../../canonical/helpers.js';
-import { CanonicalPerson, createPerson } from '../../canonical/entities/Person.js';
-import { isValidAt, wasKnownAt, filterByTemporal } from '../../canonical/types.js';
-import migrate from '../../migrations/021_canonical_entities_bitemporal.js';
+} from '../../canonical/helpers';
+import { CanonicalPerson, createPerson } from '../../canonical/entities/Person';
+import { isValidAt, wasKnownAt, filterByTemporal } from '../../canonical/types';
+import migrate from '../../migrations/021_canonical_entities_bitemporal';
 
 const describeIfDb = process.env.TEST_DATABASE_URL ? describe : describe.skip;
 

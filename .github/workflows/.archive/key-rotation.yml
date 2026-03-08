@@ -95,13 +95,14 @@ jobs:
           fi
       
       - name: Notify rotation start
-        if: ((((((steps.check.outputs.required == 'true') && (needs.pre-rotation-checks.outputs.rotation_required == 'true')) && (github.event.inputs.emergency != 'true')) && (github.event.inputs.dry_run != 'true')) && (always())) && (github.event.inputs.dry_run != 'true')) && (github.event.inputs.dry_run != 'true')
+        if: steps.check.outputs.required == 'true'
         run: |
           echo "::notice::Starting key rotation for: ${{ steps.check.outputs.keys }}"
 
   rotate-keys:
     name: Rotate KMS Keys
     needs: pre-rotation-checks
+    if: needs.pre-rotation-checks.outputs.rotation_required == 'true'
     runs-on: ubuntu-latest
     
     strategy:
@@ -192,6 +193,7 @@ jobs:
           # kubectl rollout restart deployment/summit-worker
       
       - name: Wait for dual-write period
+        if: github.event.inputs.emergency != 'true'
         run: |
           DRY_RUN="${{ github.event.inputs.dry_run || 'true' }}"
           EMERGENCY="${{ github.event.inputs.emergency || 'false' }}"
@@ -244,6 +246,7 @@ jobs:
           fi
       
       - name: Disable old key
+        if: github.event.inputs.dry_run != 'true'
         run: |
           DRY_RUN="${{ github.event.inputs.dry_run || 'true' }}"
           
@@ -289,6 +292,7 @@ jobs:
   finalize-rotation:
     name: Finalize Rotation
     needs: [pre-rotation-checks, rotate-keys]
+    if: always()
     runs-on: ubuntu-latest
     
     steps:
@@ -323,6 +327,7 @@ jobs:
           cat summary.md >> $GITHUB_STEP_SUMMARY
       
       - name: Send Slack notification
+        if: github.event.inputs.dry_run != 'true'
         run: |
           # Send notification to #security channel
           echo "Sending Slack notification..."
@@ -332,6 +337,7 @@ jobs:
           #   -d '{"text":"Key rotation completed. Run ID: ${{ github.run_id }}"}'
       
       - name: Update compliance tracking
+        if: github.event.inputs.dry_run != 'true'
         run: |
           echo "Updating compliance tracking..."
           # Update compliance database/spreadsheet with rotation completion

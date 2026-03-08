@@ -1,7 +1,7 @@
-import { getPostgresPool } from '../db/postgres.js';
-import baseLogger from '../config/logger.js';
-import { LegalHoldManager } from './legal-hold.js';
-import { LifecycleEvidence } from './evidence.js';
+import { getPostgresPool } from '../db/postgres';
+import baseLogger from '../config/logger';
+import { LegalHoldManager } from './legal-hold';
+import { LifecycleEvidence } from './evidence';
 
 const logger = baseLogger.child({ name: 'deletion-service' });
 

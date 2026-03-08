@@ -8,7 +8,7 @@
 import { describe, it, expect, beforeEach, jest, afterEach } from '@jest/globals';
 import { EventEmitter } from 'events';
 import type { Pool, PoolClient, QueryResult } from 'pg';
-import { StrategicPlanningService } from './StrategicPlanningService.js';
+import { StrategicPlanningService } from './StrategicPlanningService';
 import type {
   StrategicPlan,
   StrategicObjective,
@@ -20,7 +20,7 @@ import type {
   CreateInitiativeInput,
   CreateRiskInput,
   PlanStatus,
-} from '../types/strategic-planning.js';
+} from '../types/strategic-planning';
 
 // Mock dependencies
 jest.mock('../config/logger.js', () => ({

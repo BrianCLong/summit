@@ -14,7 +14,7 @@ import type {
   ValidationResult,
   ValidationError,
   ValidationWarning,
-} from '../types.js';
+} from '../types';
 
 export interface CompilerOptions {
   optimize?: boolean;

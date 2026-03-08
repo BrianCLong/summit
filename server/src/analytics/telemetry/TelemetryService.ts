@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
-import { TelemetryEvent, TelemetryConfig } from './types.js';
-import { TelemetryScrubber } from './scrubber.js';
+import { TelemetryEvent, TelemetryConfig } from './types.ts';
+import { TelemetryScrubber } from './scrubber.ts';
 import crypto from 'crypto';
 
 export class TelemetryService {
@@ -32,7 +32,7 @@ export class TelemetryService {
 
   private rotateLog() {
     const date = new Date().toISOString().split('T')[0];
-    const filename = `telemetry-${date}.jsonl`;
+    const filename = `telemetry-${date}.tsonl`;
     const filepath = path.join(this.config.logDir, filename);
 
     if (this.currentLogFile !== filepath) {

@@ -35,10 +35,6 @@ on:
     tags:
       - "v*.*.*-rc.*"
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 permissions:
   contents: read
   pull-requests: write
@@ -81,13 +77,8 @@ jobs:
 
           ARGS="--report"
 
-          # Use PR base SHA on pull requests so we only gate on changes introduced
-          # by this PR. Keep RC baseline for tag/release/manual contexts.
-          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            BASELINE="${{ github.event.pull_request.base.sha }}"
-          else
-            BASELINE="${{ inputs.baseline || steps.rc-phase.outputs.rc_tag }}"
-          fi
+          # Use provided baseline or default to RC tag
+          BASELINE="${{ inputs.baseline || steps.rc-phase.outputs.rc_tag }}"
           if [[ -n "$BASELINE" ]]; then
             ARGS="$ARGS --baseline $BASELINE"
           fi
@@ -102,30 +93,20 @@ jobs:
 
           # Run verification
           EXIT_CODE=0
-          JSON_OUTPUT=$(./scripts/release/verify_dependency_freeze.sh $ARGS 2> dependency_freeze_stderr.log) || EXIT_CODE=$?
-          cat dependency_freeze_stderr.log
+          OUTPUT=$(./scripts/release/verify_dependency_freeze.sh $ARGS 2>&1) || EXIT_CODE=$?
 
-          if ! echo "$JSON_OUTPUT" | jq -e . >/dev/null 2>&1; then
-            echo "::error::verify_dependency_freeze.sh did not return valid JSON output"
-            echo "Raw stdout:"
-            echo "$JSON_OUTPUT"
-            exit 1
-          fi
+          # Parse JSON output
+          JSON_OUTPUT=$(echo "$OUTPUT" | tail -1)
 
-          STATUS=$(echo "$JSON_OUTPUT" | jq -r '.status // "UNKNOWN"')
-          HAS_CHANGES=$(echo "$JSON_OUTPUT" | jq -r '.has_changes // false')
+          STATUS=$(echo "$JSON_OUTPUT" | jq -r '.status')
+          HAS_CHANGES=$(echo "$JSON_OUTPUT" | jq -r '.has_changes')
 
           echo "status=$STATUS" >> $GITHUB_OUTPUT
           echo "has_changes=$HAS_CHANGES" >> $GITHUB_OUTPUT
           echo "exit_code=$EXIT_CODE" >> $GITHUB_OUTPUT
 
           # Show full output
-          echo "$JSON_OUTPUT"
-
-          if [[ "$EXIT_CODE" -ne 0 && "${{ github.event_name }}" == "pull_request" ]]; then
-            echo "::warning::Dependency freeze violation detected on PR; leaving status as advisory until release/tag enforcement."
-            exit 0
-          fi
+          echo "$OUTPUT"
 
           exit $EXIT_CODE
 
@@ -138,7 +119,7 @@ jobs:
 
       - name: Upload Report
         if: always()
-        uses: actions/upload-artifact@v4 # v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
           name: dependency-freeze-report-${{ github.run_id }}
           path: artifacts/reports/dependency-freeze-*.md
@@ -147,7 +128,6 @@ jobs:
 
       - name: Comment on PR
         if: github.event_name == 'pull_request' && steps.verify.outputs.status == 'FAIL'
-        continue-on-error: true
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
         with:
           script: |

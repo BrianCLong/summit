@@ -1,5 +1,5 @@
 import { EventEmitter } from 'events';
-import baseLogger from '../config/logger.js';
+import baseLogger from '../config/logger';
 import * as crypto from 'crypto';
 import * as zlib from 'zlib';
 import { promisify } from 'util';

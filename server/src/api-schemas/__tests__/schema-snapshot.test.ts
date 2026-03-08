@@ -19,7 +19,7 @@ import {
   GovernanceResult,
   Provenance,
   DataClassification,
-} from '../../types/data-envelope.js';
+} from '../../types/data-envelope.ts';
 
 // Schema definitions for snapshot testing
 const ProvenanceSchema = z.object({

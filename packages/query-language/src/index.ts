@@ -23,22 +23,22 @@
  * ```
  */
 
-import { tokenize } from './parser/lexer.js';
-import { parse } from './parser/parser.js';
-import { QueryCompiler, type CompilerOptions } from './compiler/compiler.js';
+import { tokenize } from './parser/lexer';
+import { parse } from './parser/parser';
+import { QueryCompiler, type CompilerOptions } from './compiler/compiler';
 import type {
   QueryResult,
   StreamingQueryResult,
   ValidationResult,
   ExecutionPlan,
   ASTNode,
-} from './types.js';
+} from './types';
 
-export * from './types.js';
-export * from './compiler.js';
+export * from './types';
+export * from './compiler';
 // Explicitly export from parser to avoid name conflicts (e.g. Query)
-export { tokenize } from './parser/lexer.js';
-export { parse, parserInstance, SummitQLParser } from './parser/parser.js';
+export { tokenize } from './parser/lexer';
+export { parse, parserInstance, SummitQLParser } from './parser/parser';
 
 export interface SummitQLOptions extends CompilerOptions {
   // Execution options

@@ -4,8 +4,8 @@
  */
 
 import { describe, it, expect, beforeEach } from '@jest/globals';
-import { ContradictionDetector, ContradictionRule } from '../ContradictionDetector.js';
-import { Claim, Contradiction } from '../types.js';
+import { ContradictionDetector, ContradictionRule } from '../ContradictionDetector';
+import { Claim, Contradiction } from '../types';
 
 describe('ContradictionDetector', () => {
   let detector: ContradictionDetector;

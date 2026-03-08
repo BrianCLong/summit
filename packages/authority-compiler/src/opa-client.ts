@@ -5,8 +5,8 @@
  * Supports both embedded and remote OPA evaluation modes.
  */
 
-import { PolicyBundle, PolicyDecision, Operation, ClassificationLevel } from './schema/policy.schema.js';
-import type { EvaluationContext } from './evaluator.js';
+import { PolicyBundle, PolicyDecision, Operation, ClassificationLevel } from './schema/policy.schema';
+import type { EvaluationContext } from './evaluator';
 
 // -----------------------------------------------------------------------------
 // OPA Client Configuration

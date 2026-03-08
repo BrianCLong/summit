@@ -1,4 +1,4 @@
-import { crudResolvers } from '../src/graphql/resolvers/crudResolvers.js';
+import { crudResolvers } from '../src/graphql/resolvers/crudResolvers';
 import { jest, describe, test, expect, beforeEach } from '@jest/globals';
 
 let session: any;

@@ -15,13 +15,13 @@
  * - Comprehensive coherence scoring and risk assessment
  */
 
-import { getNeo4jDriver } from '../db/neo4j.js';
-import { RedisService } from '../cache/redis.js';
-import { CoherenceService } from './coherenceService.js';
-import { createCoherenceRoutes } from './routes.js';
-import { CoherenceSubscriptionManager } from './graphql/subscriptions.js';
-import { subscriptionResolvers } from './graphql/subscriptions.js';
-import logger from '../utils/logger.js';
+import { getNeo4jDriver } from '../db/neo4j';
+import { RedisService } from '../cache/redis';
+import { CoherenceService } from './coherenceService';
+import { createCoherenceRoutes } from './routes';
+import { CoherenceSubscriptionManager } from './graphql/subscriptions';
+import { subscriptionResolvers } from './graphql/subscriptions';
+import logger from '../utils/logger';
 import { Router, Application } from 'express';
 
 export interface CoherenceEcosystemConfig {
@@ -401,31 +401,31 @@ export {
 export type {
   CoherenceAnalysisResult,
   CoherenceConfiguration,
-} from './coherenceService.js';
+} from './coherenceService';
 
 export type {
   ActivityFingerprint,
   BehavioralSignature,
   ActivityPattern,
-} from './intelligence/activityFingerprintIndex.js';
+} from './intelligence/activityFingerprintIndex';
 
 export type {
   NarrativeImpact,
   NarrativeThread,
   PropagationNode,
-} from './intelligence/narrativeImpactModel.js';
+} from './intelligence/narrativeImpactModel';
 
 export type {
   MissionContext,
   MissionObjective,
   RiskProfile,
-} from './intelligence/missionVault.js';
+} from './intelligence/missionVault';
 
 export type {
   CoherenceUpdate,
   ActivityUpdate,
   NarrativeUpdate,
-} from './graphql/subscriptions.js';
+} from './graphql/subscriptions';
 
 /**
  * Usage Examples:

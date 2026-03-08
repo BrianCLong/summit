@@ -1,6 +1,6 @@
 // @ts-nocheck
-import { GraphStore } from '../graph/store.js';
-import { EntityType, EdgeType } from '../graph/types.js';
+import { GraphStore } from '../graph/store';
+import { EntityType, EdgeType } from '../graph/types';
 import { v4 as uuidv4 } from 'uuid';
 
 export class GraphUpdater {

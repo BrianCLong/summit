@@ -20,7 +20,7 @@
     "dev": "tsc --watch",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src --ext .ts,.tsx",
-    "test": "jest --passWithNoTests"
+    "test": "jest"
   },
   "dependencies": {
     "zod": "^3.24.1"

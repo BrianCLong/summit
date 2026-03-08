@@ -1,7 +1,7 @@
 // server/src/abyss/AbyssService.ts
 
 import { randomUUID } from 'crypto';
-import { AbyssProtocolState, DeadManSwitch, SystemStateSnapshot } from './abyss.types.js';
+import { AbyssProtocolState, DeadManSwitch, SystemStateSnapshot } from './abyss.types';
 
 /**
  * Service for managing the (simulated) Final Protocol.

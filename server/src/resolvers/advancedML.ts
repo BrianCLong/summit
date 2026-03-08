@@ -1,6 +1,6 @@
-import { advancedMLService } from '../services/AdvancedMLService.js';
-import { logger } from '../logging.js';
-import { wrapResolversWithPolicy } from './policyWrapper.js';
+import { advancedMLService } from '../services/AdvancedMLService';
+import { logger } from '../logging';
+import { wrapResolversWithPolicy } from './policyWrapper';
 
 /**
  * GraphQL resolvers for advanced ML capabilities

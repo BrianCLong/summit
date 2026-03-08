@@ -101,7 +101,7 @@ jobs:
           echo "✅ Total bundle size: ${TOTAL_MB} MB"
 
       - name: Compare with base branch
-        if: (((github.event_name == 'pull_request') && (always())) && (always())) && (always() && github.event_name == 'pull_request')
+        if: github.event_name == 'pull_request'
         id: compare
         run: |
           echo "📊 Comparing with base branch..."
@@ -358,17 +358,20 @@ jobs:
           echo "  P99: ${P99}ms"
 
       - name: Upload k6 results
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: k6-results
           path: perf-results.json
 
       - name: Cleanup
+        if: always()
         run: docker-compose -f docker-compose.dev.yml down -v
 
   performance-summary:
     name: 📊 Performance Summary
     needs: [bundle-size-check, build-performance, runtime-performance]
+    if: always() && github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - name: Post performance summary

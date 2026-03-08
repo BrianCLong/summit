@@ -1,4 +1,4 @@
-import { add, multiply } from './mathUtils.js';
+import { add, multiply } from './mathUtils';
 import { describe, it, expect } from '@jest/globals';
 
 describe('Math Utils', () => {

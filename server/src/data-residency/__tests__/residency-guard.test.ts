@@ -1,34 +1,43 @@
-import { jest } from '@jest/globals';
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
+import { ResidencyGuard, ResidencyViolationError } from '../residency-guard';
+import { getPostgresPool } from '../../db/postgres';
 
-const queryMock = jest.fn();
-jest.unstable_mockModule('../../db/postgres.js', () => ({
-  getPostgresPool: () => ({
-    query: queryMock,
-  }),
+jest.mock('../../db/postgres', () => ({
+  getPostgresPool: jest.fn(),
 }));
 
-const { ResidencyGuard, ResidencyViolationError } = await import('../residency-guard.js');
+jest.mock('../../middleware/observability/otel-tracing', () => ({
+  otelService: {
+    createSpan: jest.fn(() => ({ end: jest.fn() })),
+    addSpanAttributes: jest.fn(),
+  },
+}));
 
 describe('ResidencyGuard', () => {
   let guard: ResidencyGuard;
+  let mockPool: any;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    // Reset singleton if possible, or just use the instance
     guard = ResidencyGuard.getInstance();
+    mockPool = {
+      query: jest.fn(),
+    };
+    (getPostgresPool as jest.Mock).mockReturnValue(mockPool);
   });
 
   it('should allow access when region is allowed', async () => {
-    queryMock.mockResolvedValueOnce({
+    mockPool.query.mockResolvedValueOnce({
       rows: [
         {
           region: 'us-east-1',
-          allowed_regions: '["us-west-2"]',
+          allowed_transfers: '["us-west-2"]',
         },
       ],
     });
 
     await expect(
-      guard.enforce('tenant-allowed', {
+      guard.enforce('tenant-1', {
         operation: 'compute',
         targetRegion: 'us-west-2',
       })
@@ -36,22 +45,44 @@ describe('ResidencyGuard', () => {
   });
 
   it('should block access when region is prohibited', async () => {
-    queryMock.mockResolvedValueOnce({
+    mockPool.query.mockResolvedValueOnce({
       rows: [
         {
           region: 'us-east-1',
-          allowed_regions: '[]',
+          allowed_transfers: '[]',
         },
       ],
     });
 
-    queryMock.mockResolvedValueOnce({ rows: [] }); // checkExceptions
+    // Mock exceptions check to return false
+    mockPool.query.mockResolvedValueOnce({ rows: [] });
 
     await expect(
-      guard.enforce('tenant-blocked', {
+      guard.enforce('tenant-1', {
         operation: 'compute',
         targetRegion: 'eu-central-1',
       })
     ).rejects.toThrow(ResidencyViolationError);
+  });
+
+  it('should allow access via exception', async () => {
+    mockPool.query.mockResolvedValueOnce({
+      rows: [
+        {
+          region: 'us-east-1',
+          allowed_transfers: '[]',
+        },
+      ],
+    });
+
+    // Mock exceptions check to return true
+    mockPool.query.mockResolvedValueOnce({ rows: [{ id: 'exc-1' }] });
+
+    await expect(
+      guard.enforce('tenant-1', {
+        operation: 'compute',
+        targetRegion: 'eu-central-1',
+      })
+    ).resolves.not.toThrow();
   });
 });

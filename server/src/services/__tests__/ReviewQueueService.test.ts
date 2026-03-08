@@ -7,14 +7,14 @@ jest.unstable_mockModule('../../db/postgres', () => ({
 }));
 
 describe('ReviewQueueService', () => {
-  let reviewQueueService: typeof import('../ReviewQueueService.js').reviewQueueService;
+  let reviewQueueService: typeof import('../ReviewQueueService').reviewQueueService;
   let getPostgresPool: jest.Mock;
   let mockPool: any;
   let mockClient: any;
 
   beforeAll(async () => {
-    ({ reviewQueueService } = await import('../ReviewQueueService.js'));
-    ({ getPostgresPool } = await import('../../db/postgres.js'));
+    ({ reviewQueueService } = await import('../ReviewQueueService'));
+    ({ getPostgresPool } = await import('../../db/postgres'));
   });
 
   beforeEach(() => {

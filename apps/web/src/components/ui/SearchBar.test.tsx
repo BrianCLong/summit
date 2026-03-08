@@ -16,7 +16,7 @@ describe('SearchBar', () => {
     const handleChange = vi.fn();
     render(<SearchBar onChange={handleChange} debounceTime={300} />);
 
-    const input = screen.getByRole('searchbox');
+    const input = screen.getByRole('textbox');
     fireEvent.change(input, { target: { value: 'test' } });
 
     // Should not be called immediately
@@ -32,7 +32,7 @@ describe('SearchBar', () => {
 
   it('updates display value immediately', () => {
     render(<SearchBar />);
-    const input = screen.getByRole('searchbox') as HTMLInputElement;
+    const input = screen.getByRole('textbox') as HTMLInputElement;
     fireEvent.change(input, { target: { value: 'test' } });
     expect(input.value).toBe('test');
   });
@@ -44,7 +44,7 @@ describe('SearchBar', () => {
     };
 
     render(<TestComponent />);
-    const input = screen.getByRole('searchbox') as HTMLInputElement;
+    const input = screen.getByRole('textbox') as HTMLInputElement;
 
     expect(input.value).toBe('initial');
 
@@ -76,14 +76,14 @@ describe('SearchBar', () => {
     fireEvent.click(clearButton);
 
     expect(handleChange).toHaveBeenCalledWith('');
-    expect(screen.getByRole('searchbox')).toHaveValue('');
+    expect(screen.getByRole('textbox')).toHaveValue('');
   });
 
   it('resets timer on consecutive keystrokes', () => {
     const handleChange = vi.fn();
     render(<SearchBar onChange={handleChange} debounceTime={300} />);
 
-    const input = screen.getByRole('searchbox');
+    const input = screen.getByRole('textbox');
 
     // Type 'a'
     fireEvent.change(input, { target: { value: 'a' } });

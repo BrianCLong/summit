@@ -1,6 +1,6 @@
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
-import { RiskManager } from '../RiskManager.js';
-import { SecuriteyesService } from '../SecuriteyesService.js';
+import { RiskManager } from '../RiskManager';
+import { SecuriteyesService } from '../SecuriteyesService';
 
 const mockSecuriteyesService = {
   getOrCreateRiskProfile: jest.fn().mockReturnValue(Promise.resolve({ principalId: 'p1', riskScore: 10, riskFactors: {} })),

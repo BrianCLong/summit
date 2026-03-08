@@ -7,7 +7,7 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "test": "jest --passWithNoTests",
+    "test": "jest",
     "retrieval:plan": "ts-node src/cli.ts"
   },
   "dependencies": {

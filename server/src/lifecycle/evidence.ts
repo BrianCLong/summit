@@ -1,5 +1,5 @@
-import { getPostgresPool } from '../db/postgres.js';
-import baseLogger from '../config/logger.js';
+import { getPostgresPool } from '../db/postgres';
+import baseLogger from '../config/logger';
 
 const logger = baseLogger.child({ name: 'lifecycle-evidence' });
 

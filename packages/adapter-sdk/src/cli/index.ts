@@ -1,4 +1,4 @@
 #!/usr/bin/env node
-import { buildCli } from './replay.js';
+import { buildCli } from './replay';
 
 buildCli();

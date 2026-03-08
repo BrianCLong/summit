@@ -34,22 +34,6 @@ export const EnvSchema = z
     COST_EXEMPT_TENANTS: z.string().optional().default(''),
     GA_CLOUD: z.coerce.boolean().default(false),
     AWS_REGION: z.string().optional(),
-    AI_ENABLED: z.coerce.boolean().default(false),
-    FACTFLOW_ENABLED: z.coerce.boolean().default(false),
-    KAFKA_ENABLED: z.coerce.boolean().default(false),
-    OPENAI_API_KEY: z.string().optional(),
-    ANTHROPIC_API_KEY: z.string().optional(),
-    SKIP_AI_ROUTES: z.coerce.boolean().default(false),
-    SKIP_WEBHOOKS: z.coerce.boolean().default(false),
-    SKIP_GRAPHQL: z.coerce.boolean().default(false),
-    FACTFLOW_ENABLED: z.coerce.boolean().default(false),
-    // Email Configuration
-    SMTP_HOST: z.string().optional(),
-    SMTP_PORT: z.coerce.number().optional().default(587),
-    SMTP_USER: z.string().optional(),
-    SMTP_PASS: z.string().optional(),
-    EMAIL_FROM_ADDRESS: z.string().email().optional().default('noreply@intelgraph.com'),
-    EMAIL_FROM_NAME: z.string().optional().default('IntelGraph'),
   });
 
 const TestEnvSchema = EnvSchema.extend({
@@ -89,36 +73,12 @@ const ENV_VAR_HELP: Record<string, string> = {
   COST_EXEMPT_TENANTS: 'Comma-separated list of tenant IDs exempt from cost limits',
   GA_CLOUD: 'Enable strict GA cloud readiness checks (default: false)',
   AWS_REGION: 'AWS Region (required if GA_CLOUD is true)',
-  AI_ENABLED: 'Enable AI-augmented features (default: false)',
-  FACTFLOW_ENABLED: 'Enable FactFlow product module (default: false)',
-  OPENAI_API_KEY: 'OpenAI API Key (required if AI_ENABLED=true)',
-  ANTHROPIC_API_KEY: 'Anthropic API Key (required if AI_ENABLED=true)',
-  SMTP_HOST: 'SMTP host for emails (e.g., smtp.gmail.com)',
-  SMTP_PORT: 'SMTP port (default: 587)',
-  SMTP_USER: 'SMTP username',
-  SMTP_PASS: 'SMTP password',
-  EMAIL_FROM_ADDRESS: 'Verified sender email address',
-  EMAIL_FROM_NAME: 'Sender name displayed in emails',
 };
 
-export const initializeConfig = (options: { exitOnError?: boolean } = { exitOnError: true }) => {
+export const cfg = (() => {
   const isTest = process.env.NODE_ENV === 'test';
   const schema = isTest ? TestEnv : Env;
-
-  // Cross-field validation for AI
-  const rawData = { ...process.env };
-  const parsed = schema.safeParse(rawData);
-
-  if (parsed.success) {
-    const data = parsed.data;
-    if (data.AI_ENABLED && !data.OPENAI_API_KEY && !data.ANTHROPIC_API_KEY) {
-      const msg = '\n❌ AI Configuration Error: AI_ENABLED=true requires either OPENAI_API_KEY or ANTHROPIC_API_KEY.\n';
-      console.error(msg);
-      if (options.exitOnError) process.exit(1);
-      throw new Error(msg);
-    }
-  }
-
+  const parsed = schema.safeParse(process.env);
   if (!parsed.success) {
     console.error('\n❌ Environment Validation Failed\n');
     console.error('Missing or invalid environment variables:\n');
@@ -137,18 +97,26 @@ export const initializeConfig = (options: { exitOnError?: boolean } = { exitOnEr
     console.error('  3. For production, generate strong secrets (e.g., openssl rand -base64 32)');
     console.error('  4. See docs/ONBOARDING.md for detailed setup instructions\n');
 
-    if (options.exitOnError) process.exit(1);
-    throw new Error('Environment Validation Failed');
+    process.exit(1);
   }
   const env = parsed.data;
   const present = Object.keys(env).length;
   if (env.NODE_ENV === 'production') {
     const insecureTokens = ['devpassword', 'changeme', 'secret', 'localhost'];
     const fail = (key: string, reason: string) => {
-      const msg = `\n❌ Production Configuration Error\n  Invariant GC-03 Violated: Production environment cannot use default secrets.\n  Variable: ${key}\n  Issue: ${reason}\n`;
-      console.error(msg);
-      if (options.exitOnError) process.exit(1);
-      throw new Error(msg);
+      console.error('\n❌ Production Configuration Error\n');
+      console.error(`  Invariant GC-03 Violated: Production environment cannot use default secrets.`);
+      console.error(`  Variable: ${key}`);
+      console.error(`  Issue: ${reason}\n`);
+      console.error('Production deployments require secure configuration:');
+      console.error('  • JWT secrets must be >= 32 characters and cryptographically random');
+      console.error('  • Database passwords must not contain dev/test values');
+      console.error('  • CORS origins must use explicit HTTPS URLs (no wildcards)');
+      console.error('  • All connection strings must use production hosts (no localhost)\n');
+      console.error('To generate a secure secret:');
+      console.error('  openssl rand -base64 32\n');
+      console.error('See .env.production.sample for a production template.\n');
+      process.exit(1);
     };
     const guardSecret = (key: keyof typeof env) => {
       const value = String(env[key]);
@@ -198,28 +166,22 @@ export const initializeConfig = (options: { exitOnError?: boolean } = { exitOnEr
     console.log('🔒 GA Cloud Guard Active: Enforcing strict production constraints');
 
     if (env.NODE_ENV !== 'production') {
-      const msg = '\n❌ GA Cloud Error: NODE_ENV must be "production" when GA_CLOUD is enabled.\n';
-      console.error(msg);
-      if (options.exitOnError) process.exit(1);
-      throw new Error(msg);
+      console.error('\n❌ GA Cloud Error: NODE_ENV must be "production" when GA_CLOUD is enabled.\n');
+      process.exit(1);
     }
 
     if (!env.AWS_REGION) {
-      const msg = '\n❌ GA Cloud Error: AWS_REGION is required when GA_CLOUD is enabled.\n';
-      console.error(msg);
-      if (options.exitOnError) process.exit(1);
-      throw new Error(msg);
+      console.error('\n❌ GA Cloud Error: AWS_REGION is required when GA_CLOUD is enabled.\n');
+      process.exit(1);
     }
 
     // Ensure strictly no localhost in critical URLs for GA
     const criticalUrls = [env.DATABASE_URL, env.NEO4J_URI];
     criticalUrls.forEach(url => {
-      if (url && (url.includes('localhost') || url.includes('127.0.0.1'))) {
-        const msg = `\n❌ GA Cloud Error: Critical service URL contains localhost: ${url}\n`;
-        console.error(msg);
-        if (options.exitOnError) process.exit(1);
-        throw new Error(msg);
-      }
+        if (url && (url.includes('localhost') || url.includes('127.0.0.1'))) {
+             console.error(`\n❌ GA Cloud Error: Critical service URL contains localhost: ${url}\n`);
+             process.exit(1);
+        }
     });
   }
 
@@ -227,37 +189,7 @@ export const initializeConfig = (options: { exitOnError?: boolean } = { exitOnEr
     console.log(`[STARTUP] Environment validated (${present} keys)`);
   }
   return env;
-};
-
-let _cfg: any = null;
-
-/**
- * Reset config cache for testing
- */
-export const resetConfig = () => {
-  _cfg = null;
-};
-
-export const cfg = new Proxy({} as any, {
-  get: (_target, prop) => {
-    if (!_cfg) {
-      _cfg = initializeConfig();
-    }
-    return _cfg[prop];
-  },
-  ownKeys: (_target) => {
-    if (!_cfg) {
-      _cfg = initializeConfig();
-    }
-    return Reflect.ownKeys(_cfg);
-  },
-  getOwnPropertyDescriptor: (_target, prop) => {
-    if (!_cfg) {
-      _cfg = initializeConfig();
-    }
-    return Reflect.getOwnPropertyDescriptor(_cfg, prop);
-  }
-});
+})();
 
 // Derived URLs for convenience
 export const dbUrls = {

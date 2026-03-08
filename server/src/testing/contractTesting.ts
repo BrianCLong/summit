@@ -4,8 +4,8 @@
 
 import { trace, Span } from '@opentelemetry/api';
 import { Counter, Histogram, Gauge } from 'prom-client';
-import { pool } from '../db/pg.js';
-import { neo } from '../db/neo4j.js';
+import { pool } from '../db/pg';
+import { neo } from '../db/neo4j';
 import { EventEmitter } from 'events';
 import Ajv from 'ajv';
 import addFormats from 'ajv-formats';

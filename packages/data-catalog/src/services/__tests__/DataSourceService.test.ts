@@ -2,7 +2,7 @@
  * Data Source Service Unit Tests
  */
 
-import { DataSourceService } from '../DataSourceService.js';
+import { DataSourceService } from '../DataSourceService';
 import {
   DataSourceType,
   ConnectionStatus,
@@ -11,7 +11,7 @@ import {
   MappingStatus,
   MappingTransformationType,
   LicenseType,
-} from '../../types/dataSourceTypes.js';
+} from '../../types/dataSourceTypes';
 
 describe('DataSourceService', () => {
   let service: DataSourceService;

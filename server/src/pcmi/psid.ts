@@ -1,5 +1,5 @@
 import { createHash } from 'crypto';
-import { AttributeBucket, PolicyScope, SubjectBucket } from './types.js';
+import { AttributeBucket, PolicyScope, SubjectBucket } from './types';
 
 const serializeAttributes = (attributes: AttributeBucket): string => {
   return Object.keys(attributes)

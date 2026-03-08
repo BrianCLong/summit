@@ -6,8 +6,8 @@
  */
 
 import { describe, it, expect, beforeEach, jest, afterEach } from '@jest/globals';
-import { requestFactory, responseFactory, nextFactory } from '../../../../tests/factories/requestFactory.js';
-import { userFactory } from '../../../../tests/factories/userFactory.js';
+import { requestFactory, responseFactory, nextFactory } from '../../../../tests/factories/requestFactory';
+import { userFactory } from '../../../../tests/factories/userFactory';
 
 // Mock function declared before mock
 const mockAxiosPost = jest.fn();
@@ -21,7 +21,7 @@ jest.unstable_mockModule('axios', () => ({
 }));
 
 // Dynamic imports AFTER mocks are set up
-const { OPAClient, createABACMiddleware, ABACContext } = await import('../opa-abac.js');
+const { OPAClient, createABACMiddleware, ABACContext } = await import('../opa-abac');
 
 describe('OPAClient', () => {
   let opaClient: InstanceType<typeof OPAClient>;

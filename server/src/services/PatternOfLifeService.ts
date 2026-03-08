@@ -1,5 +1,5 @@
 
-import { ProvenanceEntry } from '../provenance/ledger.js';
+import { ProvenanceEntry } from '../provenance/ledger';
 
 export interface Pattern {
   id: string;

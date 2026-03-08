@@ -1,4 +1,4 @@
-import { EntityResolutionService } from '../services/EntityResolutionService.js';
+import { EntityResolutionService } from '../services/EntityResolutionService';
 import { describe, it, expect } from '@jest/globals';
 
 // TODO: These tests describe advanced normalization features not yet implemented

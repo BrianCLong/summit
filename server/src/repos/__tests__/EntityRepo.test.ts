@@ -11,12 +11,9 @@
  */
 
 import { jest } from '@jest/globals';
-import { EntityRepo, type Entity, type EntityInput } from '../EntityRepo.js';
+import { EntityRepo, type Entity, type EntityInput } from '../EntityRepo';
 import type { Pool } from 'pg';
 import type { Driver, Session } from 'neo4j-driver';
-import { getNeo4jBatchWriter } from '../../db/neo4jBatchWriter.js';
-
-jest.mock('../../db/neo4jBatchWriter.js');
 
 describe('EntityRepo', () => {
   const tenantId = 'tenant-123';
@@ -25,16 +22,8 @@ describe('EntityRepo', () => {
   let mockPgClient: any;
   let mockNeo4jDriver: jest.Mocked<Driver>;
   let mockNeo4jSession: jest.Mocked<Session>;
-  let mockBatchWriter: any;
 
   beforeEach(() => {
-    // Mock Neo4jBatchWriter
-    mockBatchWriter = {
-      queueCreateNode: jest.fn(),
-      queueDeleteNode: jest.fn(),
-    };
-    (getNeo4jBatchWriter as jest.Mock).mockReturnValue(mockBatchWriter);
-
     // Mock PostgreSQL client
     mockPgClient = {
       query: jest.fn(),
@@ -135,7 +124,7 @@ describe('EntityRepo', () => {
       expect(outboxCall?.[1]?.[1]).toBe('entity.upsert');
     });
 
-    it('should attempt batched Neo4j write', async () => {
+    it('should attempt immediate Neo4j write', async () => {
       const mockEntityRow = {
         id: 'entity-789',
         tenant_id: mockEntityInput.tenantId,
@@ -151,19 +140,13 @@ describe('EntityRepo', () => {
       mockPgClient.query.mockResolvedValueOnce({ rows: [mockEntityRow] }); // INSERT
       mockPgClient.query.mockResolvedValueOnce(undefined); // Outbox event
       mockPgClient.query.mockResolvedValueOnce(undefined); // COMMIT
+      mockNeo4jSession.executeWrite.mockResolvedValue(undefined);
 
       await entityRepo.create(mockEntityInput, mockUserId);
 
-      expect(mockBatchWriter.queueCreateNode).toHaveBeenCalledWith(
-        'Entity',
-        expect.objectContaining({
-          id: mockEntityRow.id,
-          kind: mockEntityRow.kind,
-          labels: mockEntityRow.labels,
-          props: mockEntityRow.props,
-        }),
-        mockEntityRow.tenant_id,
-      );
+      expect(mockNeo4jDriver.session).toHaveBeenCalled();
+      expect(mockNeo4jSession.executeWrite).toHaveBeenCalled();
+      expect(mockNeo4jSession.close).toHaveBeenCalled();
     });
 
     it('should rollback on PostgreSQL error', async () => {
@@ -180,7 +163,7 @@ describe('EntityRepo', () => {
       expect(mockPgClient.release).toHaveBeenCalled();
     });
 
-    it('should commit even if Neo4j batch queue fails', async () => {
+    it('should commit even if Neo4j write fails', async () => {
       const mockEntityRow = {
         id: 'entity-789',
         tenant_id: mockEntityInput.tenantId,
@@ -196,10 +179,9 @@ describe('EntityRepo', () => {
       mockPgClient.query.mockResolvedValueOnce({ rows: [mockEntityRow] }); // INSERT
       mockPgClient.query.mockResolvedValueOnce(undefined); // Outbox event
       mockPgClient.query.mockResolvedValueOnce(undefined); // COMMIT
-
-      mockBatchWriter.queueCreateNode.mockImplementation(() => {
-        throw new Error('Queue full');
-      });
+      mockNeo4jSession.executeWrite.mockRejectedValue(
+        new Error('Neo4j connection error'),
+      );
 
       // Should not throw - best effort Neo4j write
       const result = await entityRepo.create(mockEntityInput, mockUserId);
@@ -397,22 +379,19 @@ describe('EntityRepo', () => {
       expect(mockPgClient.query).toHaveBeenCalledWith('ROLLBACK');
     });
 
-    it('should attempt batched Neo4j delete', async () => {
+    it('should attempt Neo4j delete', async () => {
       const entityId = 'entity-789';
 
       mockPgClient.query.mockResolvedValueOnce(undefined); // BEGIN
-      mockPgClient.query.mockResolvedValueOnce({
-        rows: [{ tenant_id: tenantId }],
-      }); // DELETE
+      mockPgClient.query.mockResolvedValueOnce({ rows: [{ tenant_id: tenantId }] }); // DELETE
       mockPgClient.query.mockResolvedValueOnce(undefined); // Outbox event
       mockPgClient.query.mockResolvedValueOnce(undefined); // COMMIT
+      mockNeo4jSession.executeWrite.mockResolvedValue(undefined);
 
       await entityRepo.delete(entityId, tenantId);
 
-      expect(mockBatchWriter.queueDeleteNode).toHaveBeenCalledWith(
-        entityId,
-        expect.stringContaining(tenantId),
-      );
+      expect(mockNeo4jDriver.session).toHaveBeenCalled();
+      expect(mockNeo4jSession.executeWrite).toHaveBeenCalled();
     });
   });
 

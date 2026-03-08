@@ -11,8 +11,8 @@ import Redis from 'ioredis';
 import { logger } from '../utils/logger.js';
 import { AgentTask, TaskResult } from './types.js';
 import { PolicyGuard } from './policyGuard.js';
-import { systemMonitor } from '../lib/system-monitor.js';
-import { getTracer, SpanStatusCode, SpanKind } from '../observability/tracer.js';
+import { systemMonitor } from '../lib/system-monitor';
+import { getTracer, SpanStatusCode, SpanKind } from '../observability/tracer';
 
 // Mock Budget class until we locate the real one or fix the import
 class Budget {
@@ -325,9 +325,9 @@ class MaestroOrchestrator {
     const scaffold = {
       branch: `feature/${job.id}`,
       files_created: [
-        'src/components/NewComponent.js',
-        'src/types/NewTypes.js',
-        'tests/NewComponent.test.js',
+        'src/components/NewComponent.tsx',
+        'src/types/NewTypes.ts',
+        'tests/NewComponent.test.tsx',
       ],
     };
 

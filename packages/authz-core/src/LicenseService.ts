@@ -20,8 +20,8 @@ import type {
   LicenseValidationResult,
   LicenseCondition,
   Action,
-} from './types.js';
-import { LicenseError } from './types.js';
+} from './types';
+import { LicenseError } from './types';
 
 const logger = pino({ name: 'license-service' });
 

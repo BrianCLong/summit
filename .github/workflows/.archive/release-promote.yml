@@ -156,7 +156,7 @@ jobs:
           echo "All guardrails passed"
 
       - name: Require dual approval
-        if: ((((inputs.action == 'promote-100' || inputs.action == 'rollback') && (inputs.action != 'rollback')) && (steps.weight.outputs.weight != '100')) && (needs.validate-canary.outputs.passed != 'true' && inputs.action != 'rollback')) && (inputs.action == 'rollback')
+        if: inputs.action == 'promote-100' || inputs.action == 'rollback'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -171,6 +171,7 @@ jobs:
   deploy-canary:
     name: Deploy Canary (${{ inputs.action }})
     needs: validate
+    if: inputs.action != 'rollback'
     runs-on: ubuntu-latest
     environment: production
     outputs:
@@ -263,6 +264,7 @@ jobs:
           fi
 
       - name: Update feature flags for canary
+        if: steps.weight.outputs.weight != '100'
         env:
           WEIGHT: ${{ steps.weight.outputs.weight }}
         run: |
@@ -378,6 +380,7 @@ jobs:
   auto-rollback:
     name: Auto-Rollback
     needs: [validate, deploy-canary, validate-canary]
+    if: needs.validate-canary.outputs.passed != 'true' && inputs.action != 'rollback'
     runs-on: ubuntu-latest
     environment: production
     steps:
@@ -476,6 +479,7 @@ jobs:
   manual-rollback:
     name: Manual Rollback
     needs: validate
+    if: inputs.action == 'rollback'
     runs-on: ubuntu-latest
     environment: production
     steps:
@@ -556,7 +560,7 @@ jobs:
   finalize:
     name: Finalize Release
     needs: [validate, deploy-canary, validate-canary]
-    if: ((inputs.action == 'promote-100' && needs.validate-canary.outputs.passed == 'true') && (inputs.skip_evidence != 'true')) && (inputs.skip_evidence != 'true')
+    if: inputs.action == 'promote-100' && needs.validate-canary.outputs.passed == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -596,6 +600,7 @@ jobs:
           git push origin "v$FINAL_VERSION"
 
       - name: Generate evidence bundle
+        if: inputs.skip_evidence != 'true'
         env:
           VERSION: ${{ needs.validate.outputs.final_version }}
           RC_VERSION: ${{ inputs.version }}
@@ -612,6 +617,7 @@ jobs:
             --output "release_evidence_v${VERSION}.zip"
 
       - name: Sign evidence bundle
+        if: inputs.skip_evidence != 'true'
         env:
           VERSION: ${{ needs.validate.outputs.final_version }}
         run: |

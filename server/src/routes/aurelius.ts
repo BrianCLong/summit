@@ -1,13 +1,13 @@
 // @ts-nocheck
 import express, { Response } from 'express';
 import type { AuthenticatedRequest } from './types.js';
-import { IngestionService } from '../aurelius/services/IngestionService.js';
-import { InventionService } from '../aurelius/services/InventionService.js';
-import { PriorArtService } from '../aurelius/services/PriorArtService.js';
-import { CompetitiveIntelligenceService } from '../aurelius/services/CompetitiveIntelligenceService.js';
-import { ForesightService } from '../aurelius/services/ForesightService.js';
-import { ensureAuthenticated } from '../middleware/auth.js';
-import { tenantContext } from '../middleware/tenantContext.js';
+import { IngestionService } from '../aurelius/services/IngestionService';
+import { InventionService } from '../aurelius/services/InventionService';
+import { PriorArtService } from '../aurelius/services/PriorArtService';
+import { CompetitiveIntelligenceService } from '../aurelius/services/CompetitiveIntelligenceService';
+import { ForesightService } from '../aurelius/services/ForesightService';
+import { ensureAuthenticated } from '../middleware/auth';
+import { tenantContext } from '../middleware/tenantContext';
 
 const router = express.Router();
 

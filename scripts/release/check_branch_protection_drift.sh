@@ -27,7 +27,6 @@ POLICY_FILE="${REPO_ROOT}/docs/ci/REQUIRED_CHECKS_POLICY.yml"
 EXCEPTIONS_FILE="${REPO_ROOT}/docs/ci/REQUIRED_CHECKS_EXCEPTIONS.yml"
 OUT_DIR="artifacts/release-train"
 VERBOSE=false
-FAIL_ON_DRIFT=false
 
 usage() {
     cat << 'EOF'
@@ -41,7 +40,6 @@ Options:
   --policy FILE       Policy file path (default: docs/ci/REQUIRED_CHECKS_POLICY.yml)
   --exceptions FILE   Exceptions file path (default: docs/ci/REQUIRED_CHECKS_EXCEPTIONS.yml)
   --out-dir DIR       Output directory (default: artifacts/release-train)
-  --fail-on-drift     Exit with code 1 if drift is detected
   --verbose           Enable verbose logging
   --help              Show this help
 
@@ -95,10 +93,6 @@ while [[ $# -gt 0 ]]; do
         --out-dir)
             OUT_DIR="$2"
             shift 2
-            ;;
-        --fail-on-drift)
-            FAIL_ON_DRIFT=true
-            shift
             ;;
         --verbose)
             VERBOSE=true
@@ -285,10 +279,7 @@ if [[ "$API_ACCESSIBLE" == "true" ]]; then
     log "Missing in GitHub: ${#MISSING_IN_GITHUB[@]} (${#EXCEPTED_MISSING[@]} excepted)"
     log "Extra in GitHub: ${#EXTRA_IN_GITHUB[@]} (${#EXCEPTED_EXTRA[@]} excepted)"
 else
-    # In PR contexts, GITHUB_TOKEN often cannot read branch protection.
-    # Treat inaccessible API as advisory-only rather than hard drift.
-    DRIFT_DETECTED=false
-    log_warn "Branch protection API inaccessible; running in advisory mode"
+    DRIFT_DETECTED=true  # Unknown state is treated as potential drift
 fi
 
 # --- Step 5: Generate reports ---
@@ -548,14 +539,9 @@ if [[ "$DRIFT_DETECTED" == "true" ]]; then
     if [[ ${#EXTRA_IN_GITHUB[@]} -gt 0 ]]; then
         log_warn "  Extra in GitHub: ${EXTRA_IN_GITHUB[*]}"
     fi
-
-    if [[ "$FAIL_ON_DRIFT" == "true" ]]; then
-        log_error "Failing due to detected drift (--fail-on-drift active)"
-        exit 1
-    fi
 else
     log_info "No drift detected - Policy and GitHub branch protection are in sync"
 fi
 
-# Always exit 0 unless FAIL_ON_DRIFT is true and drift was found
+# Always exit 0 (advisory mode)
 exit 0

@@ -1,3 +1,9 @@
-# Dependency Delta
+# Dependency Delta Log
 
-- None.
+Use this file to document changes to project dependencies.
+
+## Format
+- Date: YYYY-MM-DD
+- Action: Add/Remove/Update
+- Package: <name>
+- Reason: <reason>

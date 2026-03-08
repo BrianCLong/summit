@@ -1,5 +1,5 @@
 import { Pool } from 'pg';
-import { nextLamport } from './lamport.js';
+import { nextLamport } from './lamport';
 
 const pg = new Pool({ connectionString: process.env.DATABASE_URL });
 

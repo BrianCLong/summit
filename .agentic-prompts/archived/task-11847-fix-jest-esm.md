@@ -1,8 +1,8 @@
 # 🎯 CODEX TASK: Fix Jest ESM Configuration (#11847)
 
-**Priority:** 1️⃣ BLOCKING - Must complete first  
-**Branch:** `agentic/fix-jest-esm-config`  
-**Estimate:** 2 hours  
+**Priority:** 1️⃣ BLOCKING - Must complete first
+**Branch:** `agentic/fix-jest-esm-config`
+**Estimate:** 2 hours
 **Agent:** Claude Code (Infrastructure Track)
 
 ---

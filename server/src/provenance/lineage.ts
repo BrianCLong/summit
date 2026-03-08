@@ -1,4 +1,4 @@
-import { ProvenanceEntry, provenanceLedger } from './ledger.js';
+import { ProvenanceEntry, provenanceLedger } from './ledger';
 
 export interface LineageNode {
   id: string;

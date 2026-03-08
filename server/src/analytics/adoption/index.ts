@@ -6,5 +6,5 @@
  * @module analytics/adoption
  */
 
-export * from './types.js';
-export { AdoptionAnalyticsService, adoptionAnalyticsService } from './AdoptionAnalyticsService.js';
+export * from './types.ts';
+export { AdoptionAnalyticsService, adoptionAnalyticsService } from './AdoptionAnalyticsService.ts';

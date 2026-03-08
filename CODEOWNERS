@@ -57,4 +57,3 @@
 # Provenance & Audit
 /audit/                       @acme/provenance-team
 /server/src/audit/            @acme/provenance-team
-\n# CI/CD Governance & Infrastructure\n/.github/workflows/           @BrianCLong\n/.github/actions/             @BrianCLong\n/docs/ci/                     @BrianCLong\n/docs/governance/             @BrianCLong\n/scripts/ci/                  @BrianCLong\n/scripts/release/             @BrianCLong

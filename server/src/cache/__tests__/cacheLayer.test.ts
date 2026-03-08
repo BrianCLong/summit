@@ -1,12 +1,12 @@
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
-import { cached, cacheQueryResult, flushLocalCache, getLocalCacheStats } from '../responseCache.js';
-import { emitInvalidation } from '../invalidation.js';
+import { cached, cacheQueryResult, flushLocalCache, getLocalCacheStats } from '../responseCache.ts';
+import { emitInvalidation } from '../invalidation.ts';
 import {
   registerCacheWarmer,
   runWarmers,
   resetWarmersForTesting,
   getWarmerStats,
-} from '../warmers.js';
+} from '../warmers.ts';
 
 describe('advanced cache layer', () => {
   beforeEach(() => {

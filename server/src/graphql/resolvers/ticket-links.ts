@@ -1,4 +1,4 @@
-import { getPostgresPool } from '../../db/postgres.js';
+import { getPostgresPool } from '../../db/postgres';
 
 const ticketLinksResolvers = {
     Query: {

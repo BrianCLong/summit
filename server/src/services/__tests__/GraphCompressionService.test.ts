@@ -1,6 +1,6 @@
 
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
-import { GraphCompressionService } from '../GraphCompressionService.js';
+import { GraphCompressionService } from '../GraphCompressionService';
 
 describe('GraphCompressionService', () => {
   let service: GraphCompressionService;

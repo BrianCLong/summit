@@ -1,5 +1,5 @@
 
-import { MaestroRun, MaestroTask } from './model.js';
+import { MaestroRun, MaestroTask } from './model';
 
 export interface PolicyService {
   canCreateRun(tenantId: string, principalId: string, templateId: string): Promise<boolean>;

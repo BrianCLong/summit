@@ -2,7 +2,7 @@ import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll 
 import express from 'express';
 import request from 'supertest';
 import nock from 'nock';
-import type { PreflightRequest } from '../../../../packages/policy-audit/src/types.js';
+import type { PreflightRequest } from '../../../../packages/policy-audit/src/types';
 
 // Mock functions declared before mocks
 const mockGetPostgresPool = jest.fn();

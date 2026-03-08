@@ -2,13 +2,13 @@ import fs from 'fs';
 import path from 'path';
 import { tmpdir } from 'os';
 
-import { ContentBoundary } from '../src/contentBoundary.js';
-import { EvidenceStore } from '../src/evidence.js';
-import { judgeRun } from '../src/judge.js';
-import { BasicPolicyEngine } from '../src/policy.js';
-import { runWorkflow, createDefaultBus } from '../src/toolBus.js';
-import { builtInTools } from '../src/tools.js';
-import { validateWorkflowSpec } from '../src/workflowSpec.js';
+import { ContentBoundary } from '../src/contentBoundary';
+import { EvidenceStore } from '../src/evidence';
+import { judgeRun } from '../src/judge';
+import { BasicPolicyEngine } from '../src/policy';
+import { runWorkflow, createDefaultBus } from '../src/toolBus';
+import { builtInTools } from '../src/tools';
+import { validateWorkflowSpec } from '../src/workflowSpec';
 
 describe('Policy Engine', () => {
   it('denies when tool not allowlisted', () => {

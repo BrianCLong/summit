@@ -1,6 +1,6 @@
 import { describe, it, expect } from '@jest/globals';
-import { AnomalyDetector } from '../AnomalyDetector.js';
-import { TimeSeriesPoint } from '../types.js';
+import { AnomalyDetector } from '../AnomalyDetector.ts';
+import { TimeSeriesPoint } from '../types.ts';
 
 describe('AnomalyDetector', () => {
     describe('Z-Score', () => {

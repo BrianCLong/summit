@@ -14,7 +14,6 @@ import { v4 as uuidv4 } from 'uuid';
 class SafeExpressionParser {
   private allowedOperators = ['+', '-', '*', '/', '%', '>', '<', '>=', '<=', '==', '!=', '&&', '||', '!'];
   private allowedFunctions = ['Math.abs', 'Math.ceil', 'Math.floor', 'Math.round', 'Math.max', 'Math.min'];
-  private static readonly MAX_EXPRESSION_LENGTH = 2048;
 
   parse(expression: string): { evaluate: (context: Record<string, any>) => any } {
     // Validate expression for safety
@@ -28,10 +27,6 @@ class SafeExpressionParser {
   }
 
   private validateExpression(expr: string): void {
-    if (expr.length > SafeExpressionParser.MAX_EXPRESSION_LENGTH) {
-      throw new Error(`Expression exceeds maximum length of ${SafeExpressionParser.MAX_EXPRESSION_LENGTH} characters`);
-    }
-
     // Block dangerous patterns
     const dangerousPatterns = [
       /constructor/i,
@@ -61,10 +56,10 @@ class SafeExpressionParser {
     // Copy only primitive values and simple objects from context
     for (const [key, value] of Object.entries(context)) {
       if (typeof value === 'number' ||
-        typeof value === 'string' ||
-        typeof value === 'boolean' ||
-        value === null ||
-        value === undefined) {
+          typeof value === 'string' ||
+          typeof value === 'boolean' ||
+          value === null ||
+          value === undefined) {
         safeContext[key] = value;
       } else if (typeof value === 'object' && !Array.isArray(value)) {
         // Shallow copy of simple objects
@@ -119,64 +114,43 @@ class SafeExpressionParser {
     }
 
     // Handle comparison operators
-    // Use a more deterministic split to avoid ReDoS from (.+?)
-    const compOperators = ['===', '!==', '==', '!=', '>=', '<=', '>', '<'];
-    for (const op of compOperators) {
-      const idx = expr.lastIndexOf(op);
-      if (idx > 0) {
-        const left = expr.substring(0, idx).trim();
-        const right = expr.substring(idx + op.length).trim();
-        if (left && right) {
-          const leftVal = this.parseExpression(left);
-          const rightVal = this.parseExpression(right);
+    const compMatch = expr.match(/^(.+?)(===|!==|==|!=|>=|<=|>|<)(.+)$/);
+    if (compMatch) {
+      const left = this.parseExpression(compMatch[1]);
+      const op = compMatch[2];
+      const right = this.parseExpression(compMatch[3]);
 
-          switch (op) {
-            case '===': return leftVal === rightVal;
-            case '!==': return leftVal !== rightVal;
-            // eslint-disable-next-line eqeqeq -- intentional loose equality for expression language
-            case '==': return leftVal == rightVal;
-            // eslint-disable-next-line eqeqeq -- intentional loose inequality for expression language
-            case '!=': return leftVal != rightVal;
-            case '>=': return Number(leftVal) >= Number(rightVal);
-            case '<=': return Number(leftVal) <= Number(rightVal);
-            case '>': return Number(leftVal) > Number(rightVal);
-            case '<': return Number(leftVal) < Number(rightVal);
-          }
-        }
+      switch (op) {
+        case '===': return left === right;
+        case '!==': return left !== right;
+        // eslint-disable-next-line eqeqeq -- intentional loose equality for expression language
+        case '==': return left == right;
+        // eslint-disable-next-line eqeqeq -- intentional loose inequality for expression language
+        case '!=': return left != right;
+        case '>=': return Number(left) >= Number(right);
+        case '<=': return Number(left) <= Number(right);
+        case '>': return Number(left) > Number(right);
+        case '<': return Number(left) < Number(right);
       }
     }
 
     // Handle arithmetic operators (higher precedence)
     // Addition/Subtraction
-    // Use lastIndexOf for deterministic splitting (left-associative via recursion)
-    const addOps = ['+', '-'];
-    for (const op of addOps) {
-      const idx = expr.lastIndexOf(op);
-      // Ensure it's not a unary minus and has content on both sides
-      if (idx > 0 && !['+', '-', '*', '/', '>', '<', '=', '&', '|', '!'].includes(expr[idx - 1])) {
-        const leftStr = expr.substring(0, idx).trim();
-        const rightStr = expr.substring(idx + 1).trim();
-        if (leftStr && rightStr) {
-          const left = Number(this.parseExpression(leftStr));
-          const right = Number(this.parseExpression(rightStr));
-          return op === '+' ? left + right : left - right;
-        }
-      }
+    const addMatch = expr.match(/^(.+?)([+-])([^*/]+)$/);
+    if (addMatch) {
+      const left = Number(this.parseExpression(addMatch[1]));
+      const op = addMatch[2];
+      const right = Number(this.parseExpression(addMatch[3]));
+      return op === '+' ? left + right : left - right;
     }
 
     // Multiplication/Division
-    const mulOps = ['*', '/'];
-    for (const op of mulOps) {
-      const idx = expr.lastIndexOf(op);
-      if (idx > 0) {
-        const leftStr = expr.substring(0, idx).trim();
-        const rightStr = expr.substring(idx + 1).trim();
-        if (leftStr && rightStr) {
-          const left = Number(this.parseExpression(leftStr));
-          const right = Number(this.parseExpression(rightStr));
-          return op === '*' ? left * right : left / right;
-        }
-      }
+    const mulMatch = expr.match(/^(.+?)([*/])(.+)$/);
+    if (mulMatch) {
+      const left = Number(this.parseExpression(mulMatch[1]));
+      const op = mulMatch[2];
+      const right = Number(this.parseExpression(mulMatch[3]));
+      return op === '*' ? left * right : left / right;
     }
 
     // Handle negation
@@ -186,17 +160,17 @@ class SafeExpressionParser {
 
     // Handle string literals
     if ((expr.startsWith('"') && expr.endsWith('"')) ||
-      (expr.startsWith("'") && expr.endsWith("'"))) {
+        (expr.startsWith("'") && expr.endsWith("'"))) {
       return expr.slice(1, -1);
     }
 
     // Handle boolean literals
-    if (expr === 'true') { return true; }
-    if (expr === 'false') { return false; }
+    if (expr === 'true') {return true;}
+    if (expr === 'false') {return false;}
 
     // Handle numeric literals
     const num = Number(expr);
-    if (!isNaN(num)) { return num; }
+    if (!isNaN(num)) {return num;}
 
     throw new Error(`Cannot parse expression: ${expr}`);
   }
@@ -246,19 +220,19 @@ export interface DecisionRule {
 export interface RuleCondition {
   inputId: string;
   operator:
-  | 'eq'
-  | 'ne'
-  | 'gt'
-  | 'gte'
-  | 'lt'
-  | 'lte'
-  | 'in'
-  | 'not_in'
-  | 'contains'
-  | 'matches'
-  | 'between'
-  | 'exists'
-  | 'expression';
+    | 'eq'
+    | 'ne'
+    | 'gt'
+    | 'gte'
+    | 'lt'
+    | 'lte'
+    | 'in'
+    | 'not_in'
+    | 'contains'
+    | 'matches'
+    | 'between'
+    | 'exists'
+    | 'expression';
   value?: any;
   value2?: any; // For 'between' operator
   expression?: string; // For complex expressions
@@ -551,17 +525,11 @@ export class BusinessRulesEngine extends EventEmitter {
         );
 
       case 'matches':
-        if (typeof value === 'string' && typeof condition.value === 'string') {
-          if (condition.value.length > 256) {
-            throw new Error('Regex pattern too long');
-          }
-          try {
-            return new RegExp(condition.value).test(value);
-          } catch (e) {
-            return false;
-          }
-        }
-        return false;
+        return (
+          typeof value === 'string' &&
+          typeof condition.value === 'string' &&
+          new RegExp(condition.value).test(value)
+        );
 
       case 'between':
         return (

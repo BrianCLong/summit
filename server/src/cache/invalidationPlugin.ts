@@ -1,5 +1,5 @@
 import type { ApolloServerPlugin } from '@apollo/server';
-import { emitInvalidation } from './invalidation.js';
+import { emitInvalidation } from './invalidation.ts';
 
 export type InvalidationMap = Record<string, string[]>;
 

@@ -138,7 +138,7 @@ jobs:
   version:
     name: Calculate Version
     needs: preflight
-    if: ((((((((((needs.preflight.outputs.eligible == 'true') && (needs.preflight.outputs.eligible == 'true')) && (inputs.dry_run != 'true')) && (inputs.dry_run != 'true')) && (inputs.dry_run != 'true')) && (inputs.dry_run != 'true')) && (inputs.dry_run != 'true')) && (inputs.dry_run != 'true')) && (inputs.dry_run != 'true')) && (inputs.dry_run != 'true')) && (inputs.dry_run != 'true')
+    if: needs.preflight.outputs.eligible == 'true'
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.semver.outputs.version }}
@@ -177,6 +177,7 @@ jobs:
   validate-whitepaper:
     name: Validate GA Whitepaper
     needs: preflight
+    if: needs.preflight.outputs.eligible == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -216,6 +217,7 @@ jobs:
 
       - name: Create release branch
         id: branch
+        if: inputs.dry_run != 'true'
         env:
           VERSION: ${{ needs.version.outputs.version }}
           RC_VERSION: ${{ needs.version.outputs.rc_version }}
@@ -269,6 +271,7 @@ jobs:
 
       - name: Create draft GitHub release
         id: release
+        if: inputs.dry_run != 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           RC_VERSION: ${{ needs.version.outputs.rc_version }}
@@ -321,6 +324,7 @@ jobs:
 
       - name: Build and push API image
         id: build-api
+        if: inputs.dry_run != 'true'
         uses: docker/build-push-action@v5
         with:
           context: ./server
@@ -336,6 +340,7 @@ jobs:
 
       - name: Build and push Web image
         id: build-web
+        if: inputs.dry_run != 'true'
         uses: docker/build-push-action@v5
         with:
           context: ./client
@@ -350,6 +355,7 @@ jobs:
           sbom: true
 
       - name: Sign images with cosign
+        if: inputs.dry_run != 'true'
         env:
           COSIGN_EXPERIMENTAL: 1
           API_DIGEST: ${{ steps.build-api.outputs.digest }}
@@ -379,6 +385,7 @@ jobs:
           version: 'v3.11.1'
 
       - name: Create Kubeconfig
+        if: inputs.dry_run != 'true'
         run: |
           set -euo pipefail
           mkdir -p ~/.kube
@@ -386,6 +393,7 @@ jobs:
           chmod 600 ~/.kube/config
 
       - name: Deploy to Stage
+        if: inputs.dry_run != 'true'
         env:
           NAMESPACE: stage
           RC_VERSION: ${{ needs.version.outputs.rc_version }}
@@ -418,6 +426,7 @@ jobs:
             --wait
 
       - name: Wait for rollout
+        if: inputs.dry_run != 'true'
         env:
           NAMESPACE: stage
         run: |
@@ -483,6 +492,7 @@ jobs:
     name: Package Evidence Bundle
     needs: [version, create-release-branch, build-images, stage-validation]
     runs-on: ubuntu-latest
+    if: inputs.dry_run != 'true'
     steps:
       - uses: actions/checkout@v4
         with:

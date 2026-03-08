@@ -1,10 +1,10 @@
 version: 1
 items:
-  - title: "Populate ITEM claims + snippets + claim registry"
-    owner: "unassigned"
+  - title: "Populate claim registry from real ITEM excerpts"
+    owner: "TBD"
     estimate: "2h"
-    dependency: "ITEM excerpts"
-    reason_deferred: "ITEM not provided"
+    dependency: "ITEM provided"
+    reason_deferred: "No ITEM content in current invocation"
     related_claim_ids: []
     required_gates_later:
-      - "verify_subsumption_bundle"
+      - "subsumption-bundle-verify"

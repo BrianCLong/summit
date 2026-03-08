@@ -3,7 +3,7 @@ import {
   ObligationTrackerService,
   ObligationClause,
   EvidenceWebhookPayload,
-} from './ObligationTrackerService.js';
+} from './ObligationTrackerService';
 
 describe('ObligationTrackerService', () => {
   const baseClause: ObligationClause = {

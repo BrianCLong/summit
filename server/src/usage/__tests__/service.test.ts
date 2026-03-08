@@ -1,6 +1,6 @@
 import { beforeAll, beforeEach, describe, expect, it, jest } from '@jest/globals';
 import type { PostgresUsageMeteringService } from '../service.js';
-import type { UsageEvent } from '../events.js';
+import type { UsageEvent } from '../events';
 
 const mockWrite = jest.fn(async (..._args: any[]) => undefined);
 const mockWithTransaction = jest.fn(async (..._args: any[]) => undefined);

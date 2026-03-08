@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import { ReportArtifact, ReportTemplate, ReportVersion } from './types.js';
+import { ReportArtifact, ReportTemplate, ReportVersion } from './types';
 
 export class VersionStore {
   private readonly versionsByTemplate = new Map<string, ReportVersion[]>();

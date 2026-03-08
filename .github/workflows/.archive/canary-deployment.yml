@@ -123,7 +123,7 @@ PY
           fi
 
   pre-flight-checks:
-    if: ((((((inputs.action == 'deploy') && (inputs.action == 'deploy')) && (failure())) && (inputs.action == 'promote')) && (inputs.action == 'abort')) && (always())) && (always())
+    if: inputs.action == 'deploy'
     needs: validate-inputs
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
@@ -170,6 +170,7 @@ PY
           docker manifest inspect ${{ env.REGISTRY }}/${{ github.repository }}/client:${{ inputs.version }}
 
   deploy-canary:
+    if: inputs.action == 'deploy'
     needs: [validate-inputs, pre-flight-checks]
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
@@ -251,6 +252,7 @@ PY
           done
 
       - name: Abort canary on guard failure
+        if: failure()
         run: |
           NAMESPACE="${{ needs.validate-inputs.outputs.namespace }}"
           ./scripts/rollback-deployment.sh canary-abort --namespace ${NAMESPACE} || true
@@ -293,6 +295,7 @@ PY
           echo "Environment: ${{ inputs.environment }}"
 
   promote-canary:
+    if: inputs.action == 'promote'
     needs: validate-inputs
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
@@ -417,6 +420,7 @@ PY
           echo "Environment: ${{ inputs.environment }}"
 
   abort-canary:
+    if: inputs.action == 'abort'
     needs: validate-inputs
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
@@ -472,6 +476,7 @@ PY
           echo "Status: Stable deployment restored"
 
   notify-teams:
+    if: always()
     needs: [deploy-canary, promote-canary, abort-canary]
     runs-on: ubuntu-latest
     steps:
@@ -505,6 +510,7 @@ PY
           fi
 
       - name: Notify Slack
+        if: always()
         uses: 8398a7/action-slack@v3
         with:
           status: custom

@@ -5,7 +5,7 @@
  * Represents physical locations with varying levels of precision
  */
 
-import { BaseCanonicalEntity, CanonicalEntityMetadata } from '../types.js';
+import { BaseCanonicalEntity, CanonicalEntityMetadata } from '../types.ts';
 
 export interface LocationCoordinates {
   /** Latitude */

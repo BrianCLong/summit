@@ -1,9 +1,9 @@
 
 import fc from 'fast-check';
-import { NarrativeSimulationEngine } from '../src/narrative/engine.js';
-import { nl2cypher } from '../src/nl2cypher/index.js';
+import { NarrativeSimulationEngine } from '../src/narrative/engine';
+import { nl2cypher } from '../src/nl2cypher/index';
 import { dedupeAlerts } from '../src/rules/engine.js';
-import { SimulationConfig, NarrativeEvent } from '../src/narrative/types.js';
+import { SimulationConfig, NarrativeEvent } from '../src/narrative/types';
 import { describe, it, test, expect } from '@jest/globals';
 
 // Determine number of runs based on environment

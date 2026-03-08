@@ -1,7 +1,7 @@
 import vm from 'vm';
-import { PluginManifest, PluginContext, CapabilityType } from './types.js';
-import { TrustTier } from '../marketplace/types.js';
-import { MarketplaceService } from '../marketplace/service.js';
+import { PluginManifest, PluginContext, CapabilityType } from './types';
+import { TrustTier } from '../marketplace/types';
+import { MarketplaceService } from '../marketplace/service';
 
 export class PluginRuntime {
   private static readonly DEFAULT_TIMEOUT_MS = 1000;

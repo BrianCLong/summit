@@ -46,10 +46,6 @@ on:
         type: number
         default: 7
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 permissions:
   contents: read
 
@@ -95,24 +91,15 @@ jobs:
           fi
 
           # Run verification
-          EXIT_CODE=0
-          RESULT_JSON=$(./scripts/release/verify_governance_lockfile.sh ${ARGS} 2> verification_stderr.log) || EXIT_CODE=$?
-          cat verification_stderr.log
+          RESULT=$(./scripts/release/verify_governance_lockfile.sh ${ARGS} 2>&1) || EXIT_CODE=$?
 
-          if ! echo "${RESULT_JSON}" | jq -e . >/dev/null 2>&1; then
-            echo "::error::verify_governance_lockfile.sh did not return valid JSON output"
-            echo "Raw stdout:"
-            echo "${RESULT_JSON}"
-            exit 1
-          fi
-
-          echo "${RESULT_JSON}" > verification_report.json
+          echo "${RESULT}" > verification_report.json
 
           # Parse results
-          STATUS=$(echo "${RESULT_JSON}" | jq -r '.status // "unknown"')
-          PASSED=$(echo "${RESULT_JSON}" | jq -r '.summary.checks_passed // 0')
-          FAILED=$(echo "${RESULT_JSON}" | jq -r '.summary.checks_failed // 0')
-          WARNED=$(echo "${RESULT_JSON}" | jq -r '.summary.checks_warned // 0')
+          STATUS=$(echo "${RESULT}" | jq -r '.status // "unknown"')
+          PASSED=$(echo "${RESULT}" | jq -r '.summary.checks_passed // 0')
+          FAILED=$(echo "${RESULT}" | jq -r '.summary.checks_failed // 0')
+          WARNED=$(echo "${RESULT}" | jq -r '.summary.checks_warned // 0')
 
           echo "status=${STATUS}" >> $GITHUB_OUTPUT
           echo "passed=${PASSED}" >> $GITHUB_OUTPUT
@@ -133,7 +120,7 @@ jobs:
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "### Failed Checks" >> $GITHUB_STEP_SUMMARY
             echo '```json' >> $GITHUB_STEP_SUMMARY
-            echo "${RESULT_JSON}" | jq '.results[] | select(.status == "fail")' >> $GITHUB_STEP_SUMMARY
+            echo "${RESULT}" | jq '.results[] | select(.status == "fail")' >> $GITHUB_STEP_SUMMARY
             echo '```' >> $GITHUB_STEP_SUMMARY
           fi
 
@@ -189,7 +176,7 @@ jobs:
             || echo "::warning::Failed to update audit log"
 
       - name: Upload Verification Report
-        uses: actions/upload-artifact@v4 # v4
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4
         if: steps.check-exists.outputs.exists == 'true'
         with:
           name: governance-lockfile-verification-${{ github.run_number }}
@@ -198,7 +185,6 @@ jobs:
 
       - name: PR Comment on Failure
         if: failure() && github.event_name == 'pull_request'
-        continue-on-error: true
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v7
         with:
           script: |

@@ -9,9 +9,9 @@ import {
   ReportRequest,
   ReportTemplate,
   ReportVersion,
-} from './types.js';
-import { VersionStore } from './version-store.js';
-import { validateReportRequest } from './validation.js';
+} from './types';
+import { VersionStore } from './version-store';
+import { validateReportRequest } from './validation';
 
 export class ReportingService {
   constructor(

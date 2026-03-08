@@ -7,12 +7,10 @@
 import { Pool, PoolClient } from 'pg';
 import { randomUUID as uuidv4 } from 'crypto';
 import logger from '../config/logger.js';
-import { getTenantCacheManager } from '../cache/factory.js';
 
 const repoLogger = logger.child({ name: 'CaseRepo' });
 
 export type CaseStatus = 'open' | 'active' | 'closed' | 'archived';
-export type CasePriority = 'low' | 'medium' | 'high' | 'critical';
 
 export interface Case {
   id: string;
@@ -20,7 +18,6 @@ export interface Case {
   title: string;
   description?: string;
   status: CaseStatus;
-  priority: CasePriority;
   compartment?: string;
   policyLabels: string[];
   metadata: Record<string, any>;
@@ -45,7 +42,6 @@ export interface CaseInput {
   title: string;
   description?: string;
   status?: CaseStatus;
-  priority?: CasePriority;
   compartment?: string;
   policyLabels?: string[];
   metadata?: Record<string, any>;
@@ -56,7 +52,6 @@ export interface CaseUpdateInput {
   title?: string;
   description?: string;
   status?: CaseStatus;
-  priority?: CasePriority;
   compartment?: string;
   policyLabels?: string[];
   metadata?: Record<string, any>;
@@ -68,7 +63,6 @@ interface CaseRow {
   title: string;
   description: string | null;
   status: string;
-  priority: string;
   compartment: string | null;
   policy_labels: string[];
   metadata: any;
@@ -90,10 +84,10 @@ export class CaseRepo {
 
     const { rows } = (await this.pg.query(
       `INSERT INTO maestro.cases (
-        id, tenant_id, title, description, status, priority, compartment,
+        id, tenant_id, title, description, status, compartment,
         policy_labels, metadata, created_by
       )
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
        RETURNING *`,
       [
         id,
@@ -101,7 +95,6 @@ export class CaseRepo {
         input.title,
         input.description || null,
         input.status || 'open',
-        input.priority || 'medium',
         input.compartment || null,
         input.policyLabels || [],
         JSON.stringify(input.metadata || {}),
@@ -119,17 +112,7 @@ export class CaseRepo {
       'Case created',
     );
 
-    const newCase = this.mapRow(rows[0]);
-
-    // Cache the new case
-    try {
-      const cacheManager = getTenantCacheManager(newCase.tenantId);
-      await cacheManager.set(this.getCacheKey(newCase.id), newCase);
-    } catch (err) {
-      repoLogger.warn({ err }, 'Failed to cache new case');
-    }
-
-    return newCase;
+    return this.mapRow(rows[0]);
   }
 
   /**
@@ -164,12 +147,6 @@ export class CaseRepo {
         params.push(userId);
         paramIndex++;
       }
-    }
-
-    if (input.priority !== undefined) {
-      updateFields.push(`priority = $${paramIndex}`);
-      params.push(input.priority);
-      paramIndex++;
     }
 
     if (input.compartment !== undefined) {
@@ -213,19 +190,7 @@ export class CaseRepo {
       );
     }
 
-    const updatedCase = rows[0] ? this.mapRow(rows[0]) : null;
-
-    if (updatedCase) {
-      // Invalidate cache (delete instead of set to avoid race conditions)
-      try {
-        const cacheManager = getTenantCacheManager(updatedCase.tenantId);
-        await cacheManager.delete(this.getCacheKey(updatedCase.id));
-      } catch (err) {
-        repoLogger.warn({ err }, 'Failed to invalidate case cache');
-      }
-    }
-
-    return updatedCase;
+    return rows[0] ? this.mapRow(rows[0]) : null;
   }
 
   /**
@@ -249,8 +214,8 @@ export class CaseRepo {
         );
       }
 
-      const { rows, rowCount } = await client.query(
-        `DELETE FROM maestro.cases WHERE id = $1 RETURNING tenant_id`,
+      const { rowCount } = await client.query(
+        `DELETE FROM maestro.cases WHERE id = $1`,
         [id],
       );
 
@@ -258,15 +223,6 @@ export class CaseRepo {
 
       if (rowCount && rowCount > 0) {
         repoLogger.warn({ caseId: id }, 'Case deleted');
-
-        // Invalidate cache
-        try {
-          const tenantId = rows[0].tenant_id;
-          const cacheManager = getTenantCacheManager(tenantId);
-          await cacheManager.delete(this.getCacheKey(id));
-        } catch (err) {
-          repoLogger.warn({ err }, 'Failed to invalidate case cache on delete');
-        }
       }
 
       return rowCount !== null && rowCount > 0;
@@ -289,33 +245,7 @@ export class CaseRepo {
    * Find case by ID
    */
   async findById(id: string, tenantId?: string): Promise<Case | null> {
-    if (tenantId) {
-      const cacheManager = getTenantCacheManager(tenantId);
-      const key = this.getCacheKey(id);
-
-      return cacheManager.getOrSet(key, async () => {
-        return this.findFromDb(id, tenantId);
-      });
-    }
-
-    // Fallback if tenantId not provided (cannot lookup efficiently in partitioned cache)
-    const result = await this.findFromDb(id);
-
-    if (result) {
-      // Opportunistic caching
-      try {
-        const cacheManager = getTenantCacheManager(result.tenantId);
-        await cacheManager.set(this.getCacheKey(id), result);
-      } catch (err) {
-        repoLogger.warn({ err }, 'Failed to opportunistically cache case');
-      }
-    }
-
-    return result;
-  }
-
-  private async findFromDb(id: string, tenantId?: string): Promise<Case | null> {
-    const params: any[] = [id];
+    const params = [id];
     let query = `SELECT * FROM maestro.cases WHERE id = $1`;
 
     if (tenantId) {
@@ -327,10 +257,6 @@ export class CaseRepo {
       rows: CaseRow[];
     };
     return rows[0] ? this.mapRow(rows[0]) : null;
-  }
-
-  private getCacheKey(id: string): string {
-    return `case:${id}`;
   }
 
   /**
@@ -532,7 +458,6 @@ export class CaseRepo {
       title: row.title,
       description: row.description || undefined,
       status: row.status as CaseStatus,
-      priority: row.priority as CasePriority,
       compartment: row.compartment || undefined,
       policyLabels: row.policy_labels || [],
       metadata: row.metadata || {},

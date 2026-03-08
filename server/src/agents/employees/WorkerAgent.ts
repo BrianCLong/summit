@@ -1,6 +1,6 @@
 
-import { AgentEmployee } from './AgentEmployee.js';
-import { AgentTask } from './types.js';
+import { AgentEmployee } from './AgentEmployee.ts';
+import { AgentTask } from './types.ts';
 
 export class WorkerAgent extends AgentEmployee {
   async processTask(task: AgentTask): Promise<void> {

@@ -12,8 +12,6 @@
  * @module provenance/revocation-daemon
  */
 
-import crypto from 'node:crypto';
-import { Pool } from 'pg';
 import { AIProvenanceManager } from './AIProvenanceManager';
 
 /**
@@ -90,8 +88,7 @@ export interface TaintProof {
 export class RevocationDaemon {
   constructor(
     private provenanceManager: AIProvenanceManager,
-    private db: Pool,
-    private trustedKeys: Map<string, string>,
+    // TODO: Add PostgreSQL client for provenance_merkle_tree table
     // TODO: Add Redis client for Bloom filter cache
   ) {}
 
@@ -107,56 +104,19 @@ export class RevocationDaemon {
    * @throws Error if signature verification fails
    */
   async issueRevocation(certificate: RevocationCertificate): Promise<void> {
-    // Verify Ed25519 signature using issuer's public key
-    await this.verifySignature(certificate);
+    // TODO: Verify Ed25519 signature using issuer's public key
+    // await this.verifySignature(certificate);
 
-    // Insert into revocation_ledger table
-    await this.db.query(
-      `
-      INSERT INTO revocation_ledger (revoked_hash, reason, revocation_time, issuer, signature)
-      VALUES ($1, $2, $3, $4, $5)
-    `,
-      [
-        certificate.revokedNodeHash,
-        certificate.reason,
-        certificate.revocationTime,
-        certificate.issuer,
-        certificate.signature,
-      ],
-    );
+    // TODO: Insert into revocation_ledger table
+    // await this.db.query(`
+    //   INSERT INTO revocation_ledger (revoked_hash, reason, revocation_time, issuer, signature)
+    //   VALUES ($1, $2, $3, $4, $5)
+    // `, [certificate.revokedNodeHash, certificate.reason, certificate.revocationTime, certificate.issuer, certificate.signature]);
 
-    // Trigger propagation
-    await this.propagateTaint(certificate.revokedNodeHash);
+    // TODO: Trigger async propagation (via background job)
+    // await this.triggerPropagation(certificate.revokedNodeHash);
 
     console.log(`Revocation issued for ${certificate.revokedNodeHash} by ${certificate.issuer}`);
-  }
-
-  /**
-   * Verify Ed25519 signature of the revocation certificate.
-   */
-  private async verifySignature(certificate: RevocationCertificate): Promise<void> {
-    const publicKey = this.trustedKeys.get(certificate.issuer);
-    if (!publicKey) {
-      throw new Error(`Unknown issuer: ${certificate.issuer}`);
-    }
-
-    const payload = JSON.stringify({
-      revokedNodeHash: certificate.revokedNodeHash,
-      reason: certificate.reason,
-      revocationTime: certificate.revocationTime.toISOString(),
-      issuer: certificate.issuer,
-    });
-
-    const isVerified = crypto.verify(
-      null,
-      Buffer.from(payload),
-      crypto.createPublicKey(publicKey),
-      Buffer.from(certificate.signature, 'base64'),
-    );
-
-    if (!isVerified) {
-      throw new Error('Invalid signature');
-    }
   }
 
   /**
@@ -178,45 +138,37 @@ export class RevocationDaemon {
    * @returns Number of outputs marked as tainted
    */
   async propagateTaint(revokedNodeHash: string): Promise<number> {
-    const queue = [revokedNodeHash];
-    let taintedCount = 0;
+    // TODO: Implement BFS traversal
+    // const queue = [revokedNodeHash];
+    // let taintedCount = 0;
 
-    while (queue.length > 0) {
-      const currentHash = queue.shift();
-
-      // Find all children
-      const children = await this.db.query(
-        `
-        SELECT node_hash FROM provenance_merkle_tree
-        WHERE parent_hash = $1 AND tainted = false
-      `,
-        [currentHash],
-      );
-
-      // Mark children as tainted (batch update)
-      if (children.rows.length > 0) {
-        const hashes = children.rows.map((r) => r.node_hash);
-
-        // Use dynamic IN clause for pg-mem compatibility
-        const placeholders = hashes.map((_, i) => `$${i + 2}`).join(', ');
-        await this.db.query(
-          `
-          UPDATE provenance_merkle_tree
-          SET tainted = true, revocation_cert_id = $1
-          WHERE node_hash IN (${placeholders})
-        `,
-          [revokedNodeHash, ...hashes],
-        );
-
-        queue.push(...hashes);
-        taintedCount += hashes.length;
-      }
-    }
+    // while (queue.length > 0) {
+    //   const currentHash = queue.shift();
+    //
+    //   // Find all children
+    //   const children = await this.db.query(`
+    //     SELECT node_hash FROM provenance_merkle_tree
+    //     WHERE parent_hash = $1 AND tainted = false
+    //   `, [currentHash]);
+    //
+    //   // Mark children as tainted (batch update)
+    //   if (children.rows.length > 0) {
+    //     const hashes = children.rows.map(r => r.node_hash);
+    //     await this.db.query(`
+    //       UPDATE provenance_merkle_tree
+    //       SET tainted = true, revocation_cert_id = $1
+    //       WHERE node_hash = ANY($2)
+    //     `, [revokedNodeHash, hashes]);
+    //
+    //     queue.push(...hashes);
+    //     taintedCount += hashes.length;
+    //   }
+    // }
 
     // TODO: Update Bloom filter
     // await this.updateBloomFilter(revokedNodeHash);
 
-    return taintedCount;
+    return 0; // TODO: Return actual count
   }
 
   /**

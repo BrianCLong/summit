@@ -8,7 +8,7 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
-    "test": "jest --passWithNoTests",
+    "test": "jest",
     "lint": "eslint src --ext .ts",
     "typecheck": "tsc --noEmit"
   },
@@ -31,7 +31,7 @@
     "typescript": "^5.3.3"
   },
   "peerDependencies": {
-    "@apollo/server": "^4.13.0",
+    "@apollo/server": "^4.0.0",
     "express": "^4.18.0"
   },
   "peerDependenciesMeta": {

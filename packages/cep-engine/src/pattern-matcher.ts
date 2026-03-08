@@ -5,7 +5,7 @@ import {
   PatternMatch,
   MatchContext,
   PatternElement,
-} from './types.js';
+} from './types';
 
 const logger = pino({ name: 'pattern-matcher' });
 

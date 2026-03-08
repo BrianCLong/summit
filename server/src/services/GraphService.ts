@@ -7,9 +7,9 @@ import {
   EdgeId,
   EntityQuery,
   EdgeQuery,
-} from '../graph/types.js';
-import { getDriver, runCypher } from '../graph/neo4j.js';
-import logger from '../utils/logger.js';
+} from '../graph/types';
+import { getDriver, runCypher } from '../graph/neo4j';
+import logger from '../utils/logger';
 
 // Helper to sanitize attribute keys to prevent injection
 function sanitizeKey(key: string): string {

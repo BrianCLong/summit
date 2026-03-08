@@ -5,12 +5,12 @@
 
 import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
 import { EventEmitter } from 'events';
-import { ThreatHuntingOrchestrator } from '../ThreatHuntingOrchestrator.js';
-import { HuntFinding } from '../types.js';
-import { HypothesisGenerationOutput, QueryGenerationOutput, ResultAnalysisOutput } from '../LLMChainExecutor.js';
-import { CypherTemplateEngine } from '../CypherTemplateEngine.js';
-import { LLMChainExecutor } from '../LLMChainExecutor.js';
-let AutoRemediationHooks: typeof import('../AutoRemediationHooks.js').AutoRemediationHooks;
+import { ThreatHuntingOrchestrator } from '../ThreatHuntingOrchestrator';
+import { HuntFinding } from '../types';
+import { HypothesisGenerationOutput, QueryGenerationOutput, ResultAnalysisOutput } from '../LLMChainExecutor';
+import { CypherTemplateEngine } from '../CypherTemplateEngine';
+import { LLMChainExecutor } from '../LLMChainExecutor';
+let AutoRemediationHooks: typeof import('../AutoRemediationHooks').AutoRemediationHooks;
 import type {
   GeneratedCypherQuery,
   HuntContext,
@@ -20,7 +20,7 @@ import type {
   LLMChainResult,
   QueryValidationStatus,
   RemediationPlan,
-} from '../types.js';
+} from '../types';
 
 function buildCypherTemplateEngineMockClass() {
   return class MockCypherTemplateEngine {
@@ -345,7 +345,6 @@ describe('ThreatHuntingOrchestrator', () => {
   });
 
   afterEach(() => {
-    orchestrator.dispose();
     jest.clearAllMocks();
   });
 
@@ -710,7 +709,7 @@ describe('AutoRemediationHooks', () => {
   let hooks: InstanceType<typeof AutoRemediationHooks>;
 
   beforeAll(async () => {
-    ({ AutoRemediationHooks } = await import('../AutoRemediationHooks.js'));
+    ({ AutoRemediationHooks } = await import('../AutoRemediationHooks'));
   });
 
   beforeEach(() => {
@@ -862,50 +861,44 @@ describe('Integration Tests', () => {
       const orchestrator = new ThreatHuntingOrchestrator();
       await orchestrator.initialize();
 
-      try {
-        // Start hunt
-        const startResponse = await orchestrator.startHunt({
-          scope: 'all',
-          timeWindowHours: 24,
-          configuration: {
-            autoRemediate: false,
-            confidenceThreshold: 0.7,
-            targetPrecision: 0.91,
-          },
-        });
+      // Start hunt
+      const startResponse = await orchestrator.startHunt({
+        scope: 'all',
+        timeWindowHours: 24,
+        configuration: {
+          autoRemediate: false,
+          confidenceThreshold: 0.7,
+          targetPrecision: 0.91,
+        },
+      });
 
-        expect(startResponse.huntId).toBeDefined();
+      expect(startResponse.huntId).toBeDefined();
 
-        // Wait for completion (with timeout)
-        let status = await orchestrator.getHuntStatus(startResponse.huntId);
-        let attempts = 0;
-        const maxAttempts = 30;
+      // Wait for completion (with timeout)
+      let status = await orchestrator.getHuntStatus(startResponse.huntId);
+      let attempts = 0;
+      const maxAttempts = 30;
 
-        while (
-          !['completed', 'failed', 'cancelled'].includes(status.status) &&
-          attempts < maxAttempts
-        ) {
-          await new Promise((resolve) => setTimeout(resolve, 500));
-          status = await orchestrator.getHuntStatus(startResponse.huntId);
-          attempts++;
-        }
-
-        // Verify completion
-        expect(['completed', 'failed', 'cancelled']).toContain(status.status);
-
-        if (status.status === 'completed') {
-          // Get results
-          const results = await orchestrator.getHuntResults(startResponse.huntId);
-
-          expect(results).toBeDefined();
-          expect(results.metrics).toBeDefined();
-          expect(results.findings).toBeDefined();
-        }
-      } finally {
-        orchestrator.dispose();
+      while (
+        !['completed', 'failed', 'cancelled'].includes(status.status) &&
+        attempts < maxAttempts
+      ) {
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        status = await orchestrator.getHuntStatus(startResponse.huntId);
+        attempts++;
       }
 
-      orchestrator.dispose();
+      // Verify completion
+      expect(['completed', 'failed', 'cancelled']).toContain(status.status);
+
+      if (status.status === 'completed') {
+        // Get results
+        const results = await orchestrator.getHuntResults(startResponse.huntId);
+
+        expect(results).toBeDefined();
+        expect(results.metrics).toBeDefined();
+        expect(results.findings).toBeDefined();
+      }
     }, 30000); // 30 second timeout
   });
 
@@ -914,35 +907,29 @@ describe('Integration Tests', () => {
       const orchestrator = new ThreatHuntingOrchestrator();
       await orchestrator.initialize();
 
-      try {
-        const response = await orchestrator.startHunt({
-          configuration: {
-            targetPrecision: 0.91,
-            precisionMode: true,
-          },
-        });
+      const response = await orchestrator.startHunt({
+        configuration: {
+          targetPrecision: 0.91,
+          precisionMode: true,
+        },
+      });
 
-        // Wait for completion
-        let status = await orchestrator.getHuntStatus(response.huntId);
-        let attempts = 0;
+      // Wait for completion
+      let status = await orchestrator.getHuntStatus(response.huntId);
+      let attempts = 0;
 
-        while (!['completed', 'failed'].includes(status.status) && attempts < 30) {
-          await new Promise((resolve) => setTimeout(resolve, 500));
-          status = await orchestrator.getHuntStatus(response.huntId);
-          attempts++;
-        }
-
-        if (status.status === 'completed') {
-          const results = await orchestrator.getHuntResults(response.huntId);
-
-          // Precision should be at or above target
-          expect(results.metrics.precisionEstimate).toBeGreaterThanOrEqual(0.85); // Allow 6% margin
-        }
-      } finally {
-        orchestrator.dispose();
+      while (!['completed', 'failed'].includes(status.status) && attempts < 30) {
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        status = await orchestrator.getHuntStatus(response.huntId);
+        attempts++;
       }
 
-      orchestrator.dispose();
+      if (status.status === 'completed') {
+        const results = await orchestrator.getHuntResults(response.huntId);
+
+        // Precision should be at or above target
+        expect(results.metrics.precisionEstimate).toBeGreaterThanOrEqual(0.85); // Allow 6% margin
+      }
     }, 30000);
   });
 });

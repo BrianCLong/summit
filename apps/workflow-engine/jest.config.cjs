@@ -4,8 +4,6 @@ module.exports = {
   ...base,
   displayName: 'workflow-engine',
   rootDir: __dirname,
-  roots: ['<rootDir>/src'],
-  setupFilesAfterEnv: [],
   testMatch: ['<rootDir>/src/**/*.test.ts'],
   transform: {
     '^.+\\.(t|j)sx?$': [

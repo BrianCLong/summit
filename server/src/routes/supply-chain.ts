@@ -1,9 +1,9 @@
 import express, { Router, Request, Response } from 'express';
-import { VendorService } from '../supply-chain/VendorService.js';
-import { SBOMParser } from '../supply-chain/SBOMParser.js';
-import { VulnerabilityService } from '../supply-chain/VulnerabilityService.js';
-import { ContractAnalyzer } from '../supply-chain/ContractAnalyzer.js';
-import { SupplyChainRiskEngine } from '../supply-chain/SupplyChainRiskEngine.js';
+import { VendorService } from '../supply-chain/VendorService';
+import { SBOMParser } from '../supply-chain/SBOMParser';
+import { VulnerabilityService } from '../supply-chain/VulnerabilityService';
+import { ContractAnalyzer } from '../supply-chain/ContractAnalyzer';
+import { SupplyChainRiskEngine } from '../supply-chain/SupplyChainRiskEngine';
 
 const router = Router();
 

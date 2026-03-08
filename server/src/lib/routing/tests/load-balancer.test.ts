@@ -1,6 +1,6 @@
 
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
-import LoadBalancer from '../load-balancer.js';
+import LoadBalancer from '../load-balancer';
 
 // Mock backend data for testing
 const mockBackends = [

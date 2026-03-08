@@ -1,7 +1,7 @@
 
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
-import { NarrativeTracker } from '../NarrativeTracker.js';
-import { SocialPost } from '../types.js';
+import { NarrativeTracker } from '../NarrativeTracker';
+import { SocialPost } from '../types';
 
 describe('NarrativeTracker', () => {
   let tracker: NarrativeTracker;

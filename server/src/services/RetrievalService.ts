@@ -1,6 +1,6 @@
-import { Entity, Edge, Document, Chunk, ConnectorContext } from '../data-model/types.js';
+import { Entity, Edge, Document, Chunk, ConnectorContext } from '../data-model/types';
 import { Pool } from 'pg';
-import { getNeo4jDriver } from '../config/database.js';
+import { getNeo4jDriver } from '../config/database';
 
 export class RetrievalService {
   private pgPool: Pool;

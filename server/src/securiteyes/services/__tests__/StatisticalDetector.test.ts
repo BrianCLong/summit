@@ -1,6 +1,6 @@
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
-import { StatisticalDetector } from '../StatisticalDetector.js';
-import { SecuriteyesService } from '../SecuriteyesService.js';
+import { StatisticalDetector } from '../StatisticalDetector';
+import { SecuriteyesService } from '../SecuriteyesService';
 
 const mockSecuriteyesService = {
   getRecentSuspiciousEvents: jest.fn().mockResolvedValue([]),

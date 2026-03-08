@@ -8,21 +8,11 @@ import {
   recordQueryDuration,
   recordError,
   recordQueryComplexity,
-  recordGoldenPathSuccess,
-  recordGoldenPathError,
   getOperationInfo,
 } from '../metrics';
 import { trace, context, SpanStatusCode } from '@opentelemetry/api';
 
 const tracer = trace.getTracer('graphql-gateway', '1.0.0');
-
-const GOLDEN_PATH_STEPS = [
-  'create_investigation',
-  'add_entity',
-  'add_relationship',
-  'copilot_query',
-  'view_results',
-];
 
 interface MetricsPluginOptions {
   enableComplexityTracking?: boolean;
@@ -59,30 +49,12 @@ export function metricsPlugin(
           // Record metrics
           recordQueryDuration(operationName, operationType, durationMs, status);
 
-          // Record Golden Path metrics
-          if (operationName && GOLDEN_PATH_STEPS.includes(operationName)) {
-            if (hasErrors) {
-              // We just take the first error type for now
-              const errorType =
-                responseContext.errors![0].extensions?.code ||
-                'INTERNAL_SERVER_ERROR';
-              recordGoldenPathError(operationName, errorType as string);
-            } else {
-              recordGoldenPathSuccess(operationName, durationMs);
-            }
-          }
-
           // Record errors
           if (hasErrors) {
             for (const error of responseContext.errors) {
-              const errorType =
-                error.extensions?.code || 'INTERNAL_SERVER_ERROR';
+              const errorType = error.extensions?.code || 'INTERNAL_SERVER_ERROR';
               const errorCode = error.extensions?.errorCode;
-              recordError(
-                operationName,
-                errorType as string,
-                errorCode as string
-              );
+              recordError(operationName, errorType as string, errorCode as string);
 
               // Add error to span
               span.recordException(error);

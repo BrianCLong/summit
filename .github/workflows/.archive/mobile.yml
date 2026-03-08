@@ -50,7 +50,7 @@ jobs:
   build-android:
     needs: validate
     runs-on: ubuntu-latest
-    if: (github.ref == 'refs/heads/main') && (github.ref == 'refs/heads/main')
+    if: github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v4
 
@@ -83,6 +83,7 @@ jobs:
   build-ios:
     needs: validate
     runs-on: macos-latest
+    if: github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v4
 

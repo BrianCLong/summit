@@ -3,8 +3,8 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
-import { PolicyEvaluator } from '../evaluator/policy-evaluator.js';
-import { PolicyBundle, Authority, License } from '../schema/policy.schema.js';
+import { PolicyEvaluator } from '../evaluator/policy-evaluator';
+import { PolicyBundle, Authority, License } from '../schema/policy.schema';
 
 describe('PolicyEvaluator', () => {
   let evaluator: PolicyEvaluator;

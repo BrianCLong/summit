@@ -1,6 +1,6 @@
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
-import { PlaybookRunBundleExporter } from '../PlaybookRunBundleExporter.js';
-import { playbookRunManifestSchema } from '../../provenance/playbookRunManifest.js';
+import { PlaybookRunBundleExporter } from '../PlaybookRunBundleExporter';
+import { playbookRunManifestSchema } from '../../provenance/playbookRunManifest';
 
 describe('PlaybookRunBundleExporter', () => {
   it('builds bundle entries with run logs, outputs, and provenance manifest', async () => {

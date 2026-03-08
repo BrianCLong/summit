@@ -1,4 +1,4 @@
-import { replayWithSanctions } from '../src.js';
+import { replayWithSanctions } from '../src';
 test('emits sanctions under stress', () => {
   const res = replayWithSanctions(
     {

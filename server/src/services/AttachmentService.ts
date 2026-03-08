@@ -47,7 +47,7 @@ export interface AttachmentMetadata {
  *
  * @example
  * ```typescript
- * import { AttachmentService } from './AttachmentService.js';
+ * import { AttachmentService } from './AttachmentService';
  * import { createReadStream } from 'fs';
  *
  * const attachmentService = new AttachmentService();

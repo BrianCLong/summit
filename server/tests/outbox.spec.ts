@@ -1,4 +1,4 @@
-import { enqueueSync } from '../src/sync/outbox.js';
+import { enqueueSync } from '../src/sync/outbox';
 
 test('queues sync item (may fail without DB)', async () => {
   await expect(

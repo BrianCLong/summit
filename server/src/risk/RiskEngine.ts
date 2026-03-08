@@ -1,5 +1,5 @@
-import type { FeatureVector } from './FeatureStore.js';
-export type { FeatureVector } from './FeatureStore.js';
+import type { FeatureVector } from './FeatureStore';
+export type { FeatureVector } from './FeatureStore';
 
 export type RiskResult = {
   score: number;

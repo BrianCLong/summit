@@ -1,7 +1,7 @@
 
 import { tenantCostService } from './TenantCostService.js';
 import { CostOptimizationService } from './CostOptimizationService.js';
-import logger from '../utils/logger.js';
+import logger from '../utils/logger';
 
 interface ResourceCostAnalysis {
   tenantId: string;
