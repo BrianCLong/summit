@@ -6,6 +6,7 @@ on:
   push:
     branches:
       - main
+  merge_group:
 
 jobs:
   enforce-constitution:
@@ -40,25 +41,97 @@ jobs:
         id: deterministic
         run: |
           echo "Checking deterministic integration..."
-          # Verify all patches have timestamps
+
+          # Verify patch files have timestamps
+          if [ -d ".repoos/patches" ]; then
+            PATCHES_WITHOUT_TIMESTAMPS=$(find .repoos/patches -name "*.json" -exec jq -e '.timestamp' {} \; 2>&1 | grep -c "null" || echo "0")
+            if [ "$PATCHES_WITHOUT_TIMESTAMPS" -gt 0 ]; then
+              echo "❌ Found $PATCHES_WITHOUT_TIMESTAMPS patches without timestamps"
+              echo "   All patches must have deterministic timestamps for reproducibility"
+              exit 1
+            fi
+          fi
+
           # Verify synthesis artifacts are versioned
+          if [ -d ".repoos/frontiers" ]; then
+            FRONTIERS_WITHOUT_VERSION=$(find .repoos/frontiers -name "frontier.json" -exec jq -e '.version' {} \; 2>&1 | grep -c "null" || echo "0")
+            if [ "$FRONTIERS_WITHOUT_VERSION" -gt 0 ]; then
+              echo "❌ Found $FRONTIERS_WITHOUT_VERSION frontiers without version metadata"
+              echo "   All synthesis artifacts must be versioned"
+              exit 1
+            fi
+          fi
+
           echo "✅ Deterministic integration verified"
 
       - name: Law 3 - Evidence Preservation
         id: evidence
         run: |
           echo "Checking evidence preservation..."
-          # Verify PR has classification artifact
-          # Verify evidence graph updated
+
+          # Verify PR classification artifact exists (if PR)
+          if [ -n "${{ github.event.pull_request.number }}" ]; then
+            PR_NUM="${{ github.event.pull_request.number }}"
+            CLASSIFICATION_FILE=".repoos/pr-classifications/pr-${PR_NUM}.json"
+
+            if [ ! -f "$CLASSIFICATION_FILE" ]; then
+              echo "⚠️  PR classification not yet generated for PR #${PR_NUM}"
+              echo "   Classification will be created by pr-classification workflow"
+              echo "   This is acceptable for newly opened PRs"
+            else
+              # Verify classification has required fields
+              if ! jq -e '.prNumber and .timestamp and .concerns' "$CLASSIFICATION_FILE" > /dev/null 2>&1; then
+                echo "❌ PR classification exists but is missing required fields"
+                echo "   Required: prNumber, timestamp, concerns"
+                exit 1
+              fi
+              echo "✅ PR classification artifact verified"
+            fi
+          fi
+
+          # Verify evidence preservation structure exists
+          if [ ! -d ".repoos/evidence-archive" ] && [ ! -d ".repoos/pr-classifications" ]; then
+            echo "❌ Evidence preservation directories not found"
+            echo "   Required: .repoos/evidence-archive/ or .repoos/pr-classifications/"
+            echo "   At least one evidence storage location must exist"
+            exit 1
+          fi
+
           echo "✅ Evidence preservation verified"
 
       - name: Law 4 - System Homeostasis
         id: homeostasis
         run: |
           echo "Checking system homeostasis..."
-          # Verify entropy velocity monitoring active
-          # Verify homeostasis thresholds configured
-          node services/repoos/frontier-entropy.mjs velocity || true
+
+          # Verify frontier-entropy.mjs exists and is executable
+          if [ ! -f "services/repoos/frontier-entropy.mjs" ]; then
+            echo "❌ Frontier entropy monitor not found"
+            echo "   Required: services/repoos/frontier-entropy.mjs"
+            echo "   System homeostasis monitoring requires this component"
+            exit 1
+          fi
+
+          # Verify entropy velocity tracking is functional
+          # Run velocity check and verify it produces valid output
+          VELOCITY_OUTPUT=$(node services/repoos/frontier-entropy.mjs velocity 2>&1)
+          VELOCITY_EXIT_CODE=$?
+
+          if [ $VELOCITY_EXIT_CODE -ne 0 ]; then
+            echo "❌ Entropy velocity monitoring failed"
+            echo "$VELOCITY_OUTPUT"
+            exit 1
+          fi
+
+          # Verify constitution.yml has homeostasis thresholds configured
+          if [ -f ".repoos/constitution.yml" ]; then
+            if ! grep -q "entropy_velocity_critical" .repoos/constitution.yml; then
+              echo "❌ Homeostasis thresholds not configured in constitution"
+              echo "   Required: entropy_velocity_critical threshold"
+              exit 1
+            fi
+          fi
+
           echo "✅ System homeostasis verified"
 
       - name: Law 5 - Evolutionary Continuity
