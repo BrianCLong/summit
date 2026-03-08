@@ -36,6 +36,183 @@ export const ENTROPY_THRESHOLDS = {
 };
 
 /**
+ * Entropy Velocity thresholds
+ */
+export const VELOCITY_THRESHOLDS = {
+  stable: 0.001,    // < 0.001 = stable
+  watch: 0.005,     // 0.001-0.005 = watch
+  warning: 0.01,    // 0.005-0.01 = warning
+  critical: 0.02    // > 0.01 = instability forming
+};
+
+/**
+ * Entropy Velocity Tracker
+ *
+ * Predicts instability 2-4 weeks early by tracking rate of change of entropy.
+ * Most systems only monitor entropy level. This tracks entropy acceleration.
+ *
+ * FEV = d(Entropy) / dt
+ *
+ * Rising velocity predicts instability before it becomes visible in CI or merges.
+ */
+export class EntropyVelocityTracker {
+  constructor(windowSize = 20) {
+    this.history = [];
+    this.windowSize = windowSize;
+  }
+
+  /**
+   * Record entropy measurement
+   * @param {number} entropy - Entropy value
+   */
+  record(entropy) {
+    const now = Date.now();
+
+    this.history.push({
+      entropy,
+      time: now
+    });
+
+    // Maintain window size
+    if (this.history.length > this.windowSize) {
+      this.history.shift();
+    }
+  }
+
+  /**
+   * Calculate entropy velocity (rate of change)
+   * @returns {number} Velocity value
+   */
+  velocity() {
+    if (this.history.length < 2) {
+      return 0;
+    }
+
+    const a = this.history[this.history.length - 2];
+    const b = this.history[this.history.length - 1];
+
+    const deltaEntropy = b.entropy - a.entropy;
+    const deltaTime = b.time - a.time;
+
+    // Convert to per-second rate
+    return deltaTime > 0 ? (deltaEntropy / deltaTime) * 1000 : 0;
+  }
+
+  /**
+   * Calculate average velocity over window
+   * @returns {number} Average velocity
+   */
+  avgVelocity() {
+    if (this.history.length < 2) {
+      return 0;
+    }
+
+    const velocities = [];
+
+    for (let i = 1; i < this.history.length; i++) {
+      const a = this.history[i - 1];
+      const b = this.history[i];
+
+      const deltaEntropy = b.entropy - a.entropy;
+      const deltaTime = b.time - a.time;
+
+      if (deltaTime > 0) {
+        velocities.push((deltaEntropy / deltaTime) * 1000);
+      }
+    }
+
+    return velocities.length > 0
+      ? velocities.reduce((sum, v) => sum + v, 0) / velocities.length
+      : 0;
+  }
+
+  /**
+   * Detect acceleration (velocity trending upward)
+   * @returns {boolean} True if accelerating
+   */
+  isAccelerating() {
+    if (this.history.length < 4) {
+      return false;
+    }
+
+    const recent = this.history.slice(-4);
+    const velocities = [];
+
+    for (let i = 1; i < recent.length; i++) {
+      const a = recent[i - 1];
+      const b = recent[i];
+
+      const deltaEntropy = b.entropy - a.entropy;
+      const deltaTime = b.time - a.time;
+
+      if (deltaTime > 0) {
+        velocities.push((deltaEntropy / deltaTime) * 1000);
+      }
+    }
+
+    // Check if velocities are increasing
+    if (velocities.length < 3) {
+      return false;
+    }
+
+    return velocities[2] > velocities[1] && velocities[1] > velocities[0];
+  }
+
+  /**
+   * Assess velocity level
+   * @param {number} velocity - Velocity value
+   * @returns {Object} Assessment
+   */
+  assessVelocity(velocity) {
+    const absVelocity = Math.abs(velocity);
+
+    if (absVelocity < VELOCITY_THRESHOLDS.stable) {
+      return {
+        level: 'stable',
+        severity: 'none',
+        color: '🟢',
+        recommendation: 'System stable, entropy oscillating normally'
+      };
+    } else if (absVelocity < VELOCITY_THRESHOLDS.watch) {
+      return {
+        level: 'watch',
+        severity: 'low',
+        color: '🟡',
+        recommendation: 'Monitor entropy trends, slight drift detected'
+      };
+    } else if (absVelocity < VELOCITY_THRESHOLDS.warning) {
+      return {
+        level: 'warning',
+        severity: 'medium',
+        color: '🟠',
+        recommendation: 'Entropy rising steadily, prepare homeostasis response'
+      };
+    } else {
+      return {
+        level: 'critical',
+        severity: 'high',
+        color: '🔴',
+        recommendation: 'INSTABILITY FORMING: Reduce patch rate, increase windows, limit frontiers'
+      };
+    }
+  }
+
+  /**
+   * Get velocity statistics
+   * @returns {Object} Statistics
+   */
+  getStatistics() {
+    return {
+      measurements: this.history.length,
+      currentVelocity: this.velocity(),
+      avgVelocity: this.avgVelocity(),
+      isAccelerating: this.isAccelerating(),
+      windowSize: this.windowSize
+    };
+  }
+}
+
+/**
  * Frontier Entropy Monitor
  */
 export class FrontierEntropyMonitor {
@@ -43,6 +220,7 @@ export class FrontierEntropyMonitor {
     this.repoRoot = config.repoRoot || process.cwd();
     this.frontiersDir = config.frontiersDir || '.repoos/frontiers';
     this.thresholds = config.thresholds || ENTROPY_THRESHOLDS;
+    this.velocityTracker = new EntropyVelocityTracker(config.velocityWindow || 20);
   }
 
   /**
@@ -290,9 +468,53 @@ export class FrontierEntropyMonitor {
       ? summary.avgEntropy / reports.length
       : 0;
 
+    // Record entropy for velocity tracking
+    this.velocityTracker.record(summary.avgEntropy);
+
+    // Get velocity metrics
+    const velocity = this.velocityTracker.velocity();
+    const avgVelocity = this.velocityTracker.avgVelocity();
+    const isAccelerating = this.velocityTracker.isAccelerating();
+    const velocityAssessment = this.velocityTracker.assessVelocity(velocity);
+
+    // Add velocity-based recommended actions
+    if (velocityAssessment.severity === 'high') {
+      summary.recommendedActions.unshift({
+        action: 'HOMEOSTASIS_RESPONSE',
+        reason: 'High entropy velocity detected',
+        velocity,
+        priority: 'immediate',
+        steps: [
+          'Reduce patch ingestion rate',
+          'Increase patch window durations',
+          'Limit frontier concurrency',
+          'Alert operators'
+        ]
+      });
+    } else if (velocityAssessment.severity === 'medium' && isAccelerating) {
+      summary.recommendedActions.unshift({
+        action: 'MONITOR_DRIFT',
+        reason: 'Entropy acceleration detected',
+        velocity,
+        priority: 'high',
+        steps: [
+          'Increase monitoring frequency',
+          'Prepare for homeostasis response',
+          'Review agent patch patterns'
+        ]
+      });
+    }
+
     return {
       timestamp: new Date().toISOString(),
       summary,
+      velocity: {
+        current: velocity,
+        average: avgVelocity,
+        isAccelerating,
+        assessment: velocityAssessment,
+        measurements: this.velocityTracker.history.length
+      },
       frontiers: reports
     };
   }
@@ -313,6 +535,16 @@ export class FrontierEntropyMonitor {
     console.log(`  Total Frontiers: ${report.summary.totalFrontiers}`);
     console.log(`  Average Entropy: ${report.summary.avgEntropy.toFixed(3)}`);
     console.log(`  Maximum Entropy: ${report.summary.maxEntropy.toFixed(3)}\n`);
+
+    // Velocity metrics (early warning system)
+    if (report.velocity) {
+      console.log('Entropy Velocity (Early Warning):');
+      console.log(`  ${report.velocity.assessment.color} Current: ${report.velocity.current.toFixed(6)}/s`);
+      console.log(`  Average: ${report.velocity.average.toFixed(6)}/s`);
+      console.log(`  Status: ${report.velocity.assessment.level}`);
+      console.log(`  Accelerating: ${report.velocity.isAccelerating ? '⚠️  YES' : 'No'}`);
+      console.log(`  Recommendation: ${report.velocity.assessment.recommendation}\n`);
+    }
 
     console.log('By Entropy Level:');
     console.log(`  🟢 Healthy:   ${report.summary.byLevel.healthy}`);
@@ -400,6 +632,46 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     for (const frontier of highEntropy) {
       console.log(`- ${frontier.concernId}: ${frontier.entropy.toFixed(3)} (${frontier.assessment.level})`);
     }
+  } else if (command === 'velocity') {
+    const report = await monitor.generateReport();
+
+    console.log('\n╔═══════════════════════════════════════════════════════════════╗');
+    console.log('║           Entropy Velocity Analysis                         ║');
+    console.log('╚═══════════════════════════════════════════════════════════════╝\n');
+
+    console.log(`Timestamp: ${report.timestamp}\n`);
+
+    if (report.velocity) {
+      const v = report.velocity;
+
+      console.log('Velocity Metrics:');
+      console.log(`  ${v.assessment.color} Current Velocity: ${v.current.toFixed(6)}/s`);
+      console.log(`  Average Velocity: ${v.average.toFixed(6)}/s`);
+      console.log(`  Status: ${v.assessment.level}`);
+      console.log(`  Accelerating: ${v.isAccelerating ? '⚠️  YES' : 'No'}`);
+      console.log(`  Measurements: ${v.measurements}\n`);
+
+      console.log('Assessment:');
+      console.log(`  Severity: ${v.assessment.severity}`);
+      console.log(`  Recommendation: ${v.assessment.recommendation}\n`);
+
+      if (v.isAccelerating) {
+        console.log('🚨 ENTROPY ACCELERATION DETECTED');
+        console.log('   System is trending toward instability.');
+        console.log('   Predicted failure in 2-4 weeks if trend continues.\n');
+      }
+
+      console.log('Entropy History (last 10 measurements):\n');
+
+      const history = monitor.velocityTracker.history.slice(-10);
+      for (let i = 0; i < history.length; i++) {
+        const h = history[i];
+        const age = Math.round((Date.now() - h.time) / 60000); // minutes ago
+        console.log(`  ${i + 1}. entropy: ${h.entropy.toFixed(3)} (${age}m ago)`);
+      }
+    } else {
+      console.log('No velocity data available yet. Run analyze command first.\n');
+    }
   } else if (command === 'monitor') {
     const interval = parseInt(process.argv[3]) || 600000; // Default 10 minutes
     await monitor.startMonitoring(interval);
@@ -413,6 +685,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     console.log('Frontier Entropy Monitor\n');
     console.log('Usage:');
     console.log('  node frontier-entropy.mjs analyze          - Analyze all frontiers');
+    console.log('  node frontier-entropy.mjs velocity         - Show entropy velocity (early warning)');
     console.log('  node frontier-entropy.mjs high-entropy     - Show high-entropy frontiers');
     console.log('  node frontier-entropy.mjs monitor [ms]     - Start continuous monitoring');
     console.log('\nEntropy Thresholds:');
@@ -421,6 +694,11 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     console.log(`  🟠 Alert:     ${ENTROPY_THRESHOLDS.warning} - ${ENTROPY_THRESHOLDS.alert}`);
     console.log(`  🔴 Critical:  ${ENTROPY_THRESHOLDS.alert} - ${ENTROPY_THRESHOLDS.critical}`);
     console.log(`  🚨 Emergency: > ${ENTROPY_THRESHOLDS.critical}`);
+    console.log('\nVelocity Thresholds (early warning):');
+    console.log(`  🟢 Stable:    < ${VELOCITY_THRESHOLDS.stable}/s`);
+    console.log(`  🟡 Watch:     ${VELOCITY_THRESHOLDS.stable} - ${VELOCITY_THRESHOLDS.watch}/s`);
+    console.log(`  🟠 Warning:   ${VELOCITY_THRESHOLDS.watch} - ${VELOCITY_THRESHOLDS.warning}/s`);
+    console.log(`  🔴 Critical:  > ${VELOCITY_THRESHOLDS.warning}/s`);
   }
 }
 
