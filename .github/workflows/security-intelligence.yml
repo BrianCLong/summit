@@ -1,0 +1,42 @@
+name: Security Intelligence Gate
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  security-intelligence-gates:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate required artifacts exist
+        run: |
+          test -f artifacts/insider-risk-report.json
+          test -f artifacts/evidence-chain.json
+          test -f artifacts/provenance-report.json
+          test -f artifacts/influence-detection.json
+
+      - name: provenance-check
+        run: |
+          jq -e '.source_count > 0' artifacts/provenance-report.json >/dev/null
+
+      - name: tamper-check
+        run: |
+          jq -e '.valid == true' artifacts/evidence-chain.json >/dev/null
+
+      - name: insider-risk-check
+        run: |
+          jq -e '.critical_risk == false' artifacts/insider-risk-report.json >/dev/null
+
+      - name: confidentiality-check
+        run: |
+          jq -e '.pii_detected == false' artifacts/insider-risk-report.json >/dev/null
+          jq -e '.reporter_identity_present == false' artifacts/provenance-report.json >/dev/null
+
+      - name: trust-threshold-check
+        run: |
+          jq -e '.trust_score >= 0.35' artifacts/provenance-report.json >/dev/null
