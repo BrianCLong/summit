@@ -1,0 +1,16 @@
+[
+  {
+    "event_id": "evt_001",
+    "ts_offset_ms": 0,
+    "actor": "user",
+    "event_type": "request",
+    "payload": {"text": "Summarize the latest logs"}
+  },
+  {
+    "event_id": "evt_002",
+    "ts_offset_ms": 100,
+    "actor": "agent",
+    "event_type": "tool_call",
+    "payload": {"tool": "read_logs"}
+  }
+]

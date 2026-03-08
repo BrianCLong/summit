@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="900" viewBox="0 0 1400 900" role="img" aria-labelledby="title desc">
+  <title id="title">Summit Category Creation Map</title>
+  <desc id="desc">Competitive positioning map across automation and verifiability dimensions.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0A0F1E"/>
+      <stop offset="100%" stop-color="#0F1B36"/>
+    </linearGradient>
+    <style>
+      .title { font: 700 42px Inter,Segoe UI,Arial,sans-serif; fill: #F8FAFC; }
+      .axis { font: 600 22px Inter,Segoe UI,Arial,sans-serif; fill: #E2E8F0; }
+      .label { font: 600 22px Inter,Segoe UI,Arial,sans-serif; fill: #D1D5DB; }
+      .summit { font: 700 24px Inter,Segoe UI,Arial,sans-serif; fill: #0B1220; }
+      .legend { font: 500 18px Inter,Segoe UI,Arial,sans-serif; fill: #94A3B8; }
+    </style>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="6" refY="6" orient="auto-start-reverse">
+      <path d="M0,0 L12,6 L0,12 z" fill="#93C5FD"/>
+    </marker>
+  </defs>
+
+  <rect width="1400" height="900" fill="url(#bg)"/>
+  <text x="700" y="72" text-anchor="middle" class="title">Summit Category Creation: "Git for Trustable Pipelines"</text>
+
+  <line x1="160" y1="760" x2="1260" y2="760" stroke="#93C5FD" stroke-width="4" marker-end="url(#arrow)"/>
+  <line x1="160" y1="760" x2="160" y2="140" stroke="#93C5FD" stroke-width="4" marker-end="url(#arrow)"/>
+
+  <text x="1240" y="800" text-anchor="end" class="axis">Automation / Pipeline Orchestration</text>
+  <text x="90" y="165" transform="rotate(-90 90 165)" class="axis">Trust / Verifiability</text>
+
+  <circle cx="410" cy="520" r="64" fill="#1E3A8A" stroke="#60A5FA" stroke-width="2"/>
+  <text x="410" y="528" text-anchor="middle" class="label">CyberChef</text>
+
+  <circle cx="930" cy="560" r="76" fill="#1F2937" stroke="#9CA3AF" stroke-width="2"/>
+  <text x="930" y="570" text-anchor="middle" class="label">GitHub Actions</text>
+
+  <circle cx="1060" cy="470" r="72" fill="#164E63" stroke="#22D3EE" stroke-width="2"/>
+  <text x="1060" y="478" text-anchor="middle" class="label">Kubeflow</text>
+
+  <circle cx="720" cy="380" r="68" fill="#4B5563" stroke="#D1D5DB" stroke-width="2"/>
+  <text x="720" y="388" text-anchor="middle" class="label">Sigstore/SLSA</text>
+
+  <rect x="690" y="190" width="420" height="170" rx="20" fill="#FDE68A" stroke="#F59E0B" stroke-width="3"/>
+  <text x="900" y="250" text-anchor="middle" class="summit">Summit Trust Engine</text>
+  <text x="900" y="288" text-anchor="middle" class="summit">Transform + Evidence + Attestation</text>
+
+  <line x1="900" y1="360" x2="900" y2="430" stroke="#FBBF24" stroke-width="3" stroke-dasharray="8 8"/>
+  <line x1="690" y1="275" x2="480" y2="520" stroke="#FBBF24" stroke-width="2" stroke-dasharray="8 8"/>
+  <line x1="1110" y1="275" x2="1060" y2="470" stroke="#FBBF24" stroke-width="2" stroke-dasharray="8 8"/>
+
+  <text x="180" y="845" class="legend">Positioning thesis: Summit is the trust layer above existing automation systems.</text>
+</svg>
