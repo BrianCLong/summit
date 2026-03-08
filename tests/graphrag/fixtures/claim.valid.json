@@ -1,0 +1,12 @@
+{
+  "claim_id": "valid-claim-001",
+  "subject_ref": "subj-xyz",
+  "statement": "Valid statement with high support.",
+  "status": "corroborated",
+  "confidence": 0.9,
+  "epistemic_uncertainty": 0.1,
+  "aleatoric_uncertainty": 0.05,
+  "support_score": 0.95,
+  "conflict_score": 0.0,
+  "domain": "osint"
+}
