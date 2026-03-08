@@ -199,3 +199,41 @@ jobs:
         with:
           name: verification-artifacts
           path: artifacts/**
+
+  ai-evals:
+    name: AI Evaluations
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [unit-tests]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: "pnpm"
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Run AI Evals
+        run: pnpm run test:ai-evals
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ai-eval-artifacts
+          path: artifacts/ai-evals/
+
+  drift-monitor:
+    name: Drift Monitor
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      - name: Run Drift Monitor
+        run: node scripts/monitoring/eval-driven-agentic-rag-2026-drift.mjs

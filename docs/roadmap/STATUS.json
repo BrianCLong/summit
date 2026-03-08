@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-03-07T06:03:42Z",
-  "revision_note": "Added Nature s41562-026-02411-w Layer 2/3 regulatory subsumption architecture brief and roadmap tracking entry.",
+  "last_updated": "2026-03-08T03:00:00Z",
+  "revision_note": "Completed implementation of Eval-driven Agentic RAG with deterministic evaluation harness and CI integration.",
   "initiatives": [
     {
       "id": "nature-s41562-026-02411-w-layer2-layer3",
@@ -199,6 +199,13 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "Documented CI/CD high-signal deltas with enforced action register and evidence targets."
+    },
+    {
+      "id": "eval-driven-agentic-rag-2026",
+      "status": "completed",
+      "owner": "Jules",
+      "notes": "Implemented Eval-driven Agentic RAG with deterministic CI/evidence posture, including verifier loop and groundedness graders.",
+      "evidence": "server/src/ai/evals/harness.ts, artifacts/ai-evals/report.json"
     }
   ],
   "summary": {
