@@ -1,0 +1,14 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Interactive Benchmark Metrics",
+  "type": "object",
+  "properties": {
+    "evidence_id": {
+      "type": "string",
+      "pattern": "^SUMMIT-IB-[a-zA-Z0-9_]+-[a-zA-Z0-9_]+-[0-9]+$"
+    },
+    "information_gain": { "type": "number" },
+    "budget_efficiency": { "type": "number" }
+  },
+  "required": ["evidence_id", "information_gain", "budget_efficiency"]
+}

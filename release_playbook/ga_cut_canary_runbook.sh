@@ -34,7 +34,7 @@ helm template $CHART_NAME $CHART_PATH -f $CHART_PATH/values-prod.yaml > /tmp/pro
 conftest test /tmp/prod.yaml --policy policies/opa
 
 echo ">> Cosign verify sample image"
-cosign verify "$REG_PREFIX/$CHART_NAME:${SHA}" \
+cosign verify --use-signed-timestamps "$REG_PREFIX/$CHART_NAME:${SHA}" \ || { echo "::error::Supply chain verification failed! Missing or invalid signed timestamps."; false; }
   --certificate-oidc-issuer https://token.actions.githubusercontent.com \
   --certificate-identity-regexp ".*github\.com/${ORG}/${REPO}.*"
 

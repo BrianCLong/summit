@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 import argparse
-import sys
 import json
 import os
+import sys
 
 # Ensure we can import from summit
 sys.path.insert(0, os.getcwd())
 
 from summit.evals.systems_quality.runner import SystemsQualityEvaluator
+
 
 def main():
     parser = argparse.ArgumentParser(description="Run Systems Quality Evaluation")
@@ -24,7 +25,7 @@ def main():
     test_data = {}
     if args.test_results:
         try:
-            with open(args.test_results, 'r') as f:
+            with open(args.test_results) as f:
                 test_data = json.load(f)
         except Exception as e:
             print(f"Error loading test results: {e}")
