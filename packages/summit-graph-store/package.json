@@ -1,0 +1,17 @@
+{
+  "name": "@summit/summit-graph-store",
+  "version": "1.0.0",
+  "description": "Graph store adapter",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "npx tsc",
+    "test": "jest --passWithNoTests"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "jest": "^29.0.0",
+    "@types/jest": "^29.0.0"
+  }
+}

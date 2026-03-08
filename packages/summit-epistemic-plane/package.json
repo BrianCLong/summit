@@ -1,0 +1,20 @@
+{
+  "name": "@summit/summit-epistemic-plane",
+  "version": "1.0.0",
+  "description": "Truth-sufficiency and contradiction plane",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "npx tsc",
+    "test": "jest --passWithNoTests"
+  },
+  "dependencies": {
+    "@summit/summit-maestro-events": "workspace:*",
+    "@summit/summit-maestro-engine": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "jest": "^29.0.0",
+    "@types/jest": "^29.0.0"
+  }
+}
