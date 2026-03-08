@@ -189,25 +189,27 @@ jobs:
 
             const allPassed = sovereigntyPassed && deterministicPassed && evidencePassed && homeostasisPassed && continuityPassed;
 
-            const body = `## 📜 Evolution Constitution Enforcement
-
-**Overall Status:** ${allPassed ? '✅ COMPLIANT' : '❌ NON-COMPLIANT'}
-
-### Constitutional Laws
-
-| Law | Status | Description |
-|-----|--------|-------------|
-| **1. Frontier Sovereignty** | ${sovereigntyPassed ? '✅' : '❌'} | No direct modification of frontier-owned domains |
-| **2. Deterministic Integration** | ${deterministicPassed ? '✅' : '❌'} | Repository evolution must be reproducible |
-| **3. Evidence Preservation** | ${evidencePassed ? '✅' : '❌'} | All evolution must produce evidence artifacts |
-| **4. System Homeostasis** | ${homeostasisPassed ? '✅' : '❌'} | Repository must maintain operational health |
-| **5. Evolutionary Continuity** | ${continuityPassed ? '✅' : '❌'} | Core RepoOS components protected |
-
-${!allPassed ? '⚠️ **This PR violates the Evolution Constitution and cannot be merged until compliance is achieved.**' : ''}
-
----
-📖 [Constitution Document](.repoos/constitution.yml)
-🤖 Enforced by Evolution Constitution v1.0`;
+            const body = [
+              '## 📜 Evolution Constitution Enforcement',
+              '',
+              `**Overall Status:** ${allPassed ? '✅ COMPLIANT' : '❌ NON-COMPLIANT'}`,
+              '',
+              '### Constitutional Laws',
+              '',
+              '| Law | Status | Description |',
+              '|-----|--------|-------------|',
+              `| **1. Frontier Sovereignty** | ${sovereigntyPassed ? '✅' : '❌'} | No direct modification of frontier-owned domains |`,
+              `| **2. Deterministic Integration** | ${deterministicPassed ? '✅' : '❌'} | Repository evolution must be reproducible |`,
+              `| **3. Evidence Preservation** | ${evidencePassed ? '✅' : '❌'} | All evolution must produce evidence artifacts |`,
+              `| **4. System Homeostasis** | ${homeostasisPassed ? '✅' : '❌'} | Repository must maintain operational health |`,
+              `| **5. Evolutionary Continuity** | ${continuityPassed ? '✅' : '❌'} | Core RepoOS components protected |`,
+              '',
+              !allPassed ? '⚠️ **This PR violates the Evolution Constitution and cannot be merged until compliance is achieved.**' : '',
+              '',
+              '---',
+              '📖 [Constitution Document](.repoos/constitution.yml)',
+              '🤖 Enforced by Evolution Constitution v1.0'
+            ].join('\n');
 
             github.rest.issues.createComment({
               issue_number: context.issue.number,
