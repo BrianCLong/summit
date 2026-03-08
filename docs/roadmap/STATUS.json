@@ -1,7 +1,13 @@
 {
-  "last_updated": "2026-03-07T06:03:42Z",
-  "revision_note": "Added Nature s41562-026-02411-w Layer 2/3 regulatory subsumption architecture brief and roadmap tracking entry.",
+  "last_updated": "2026-03-08T21:05:47Z",
+  "revision_note": "Added Summit vector-temporal memory frontier architecture brief and roadmap initiative entry.",
   "initiatives": [
+    {
+      "id": "summit-vector-temporal-memory-frontier",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Published five-motion moat architecture for VTGI, narrative drift, agent experience graph, causal forecasting, and memory time machine in docs/strategy/vector-temporal-memory-frontier.md."
+    },
     {
       "id": "nature-s41562-026-02411-w-layer2-layer3",
       "status": "in_progress",
