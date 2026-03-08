@@ -128,7 +128,8 @@
     "ga:smoke": "echo '✅ Smoke tests not configured - add integration tests here' && exit 0",
     "release:ready": "pnpm ga:verify && pnpm --filter intelgraph-server test:ci && bash scripts/ci/validate-workflow-filters.sh",
     "prepare": "husky",
-    "verify:archive": "bash scripts/verify-archive-integrity.sh"
+    "verify:archive": "bash scripts/verify-archive-integrity.sh",
+    "validate:schemas": "ajv validate -s schemas/evidence_bundle.schema.json -d fixtures/schemas/valid/evidence_bundle.json"
   },
   "keywords": [
     "intelligence-analysis",
@@ -164,7 +165,7 @@
     "@types/uuid": "^11.0.0",
     "@typescript-eslint/eslint-plugin": "^8.50.1",
     "@typescript-eslint/parser": "^8.50.1",
-    "ajv": "^8.17.1",
+    "ajv": "^8.12.0",
     "ajv-formats": "^3.0.1",
     "body-parser": "^2.2.1",
     "commander": "^12.1.0",
