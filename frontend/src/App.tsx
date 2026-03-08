@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react';
+import AnalystWorkspace from './components/AnalystWorkspace';
 import Graph from './Graph';
 import TimelinePanel from './TimelinePanel';
 import './App.css';
+
+type View = 'home' | 'workspace';
 
 interface EventItem {
   id: string;
@@ -32,7 +35,7 @@ interface GraphData {
   edges: EdgeElement[];
 }
 
-function App() {
+function HomeView({ onOpenWorkspace }: { onOpenWorkspace: () => void }) {
   const [graphData, setGraphData] = useState<GraphData>({
     nodes: [],
     edges: [],
@@ -71,9 +74,18 @@ function App() {
     <div className="App">
       <header className="App-header">
         <h1>IntelGraph</h1>
-        <button onClick={() => setNeighborhoodMode((m) => !m)}>
-          {neighborhoodMode ? 'Show Full Graph' : 'Neighborhood Mode'}
-        </button>
+        <nav className="App-nav" aria-label="Main navigation">
+          <button onClick={() => setNeighborhoodMode((m) => !m)}>
+            {neighborhoodMode ? 'Show Full Graph' : 'Neighborhood Mode'}
+          </button>
+          <button
+            className="App-nav-cta"
+            onClick={onOpenWorkspace}
+            aria-label="Open Analyst Workspace"
+          >
+            Analyst Workspace →
+          </button>
+        </nav>
       </header>
       <main>
         <Graph elements={graphData} neighborhoodMode={neighborhoodMode} />
@@ -81,6 +93,49 @@ function App() {
       </main>
     </div>
   );
+}
+
+function App() {
+  // Hash-based routing: #/workspace opens the analyst workspace
+  const [view, setView] = useState<View>(() =>
+    window.location.hash === '#/workspace' ? 'workspace' : 'home',
+  );
+
+  const openWorkspace = () => {
+    window.location.hash = '#/workspace';
+    setView('workspace');
+  };
+
+  const goHome = () => {
+    window.location.hash = '';
+    setView('home');
+  };
+
+  // Sync with browser back/forward navigation
+  useEffect(() => {
+    const onHashChange = () => {
+      setView(window.location.hash === '#/workspace' ? 'workspace' : 'home');
+    };
+    window.addEventListener('hashchange', onHashChange);
+    return () => window.removeEventListener('hashchange', onHashChange);
+  }, []);
+
+  if (view === 'workspace') {
+    return (
+      <div className="root-workspace">
+        <button
+          className="workspace-back-btn"
+          onClick={goHome}
+          aria-label="Back to IntelGraph home"
+        >
+          ← Back
+        </button>
+        <AnalystWorkspace />
+      </div>
+    );
+  }
+
+  return <HomeView onOpenWorkspace={openWorkspace} />;
 }
 
 export default App;
