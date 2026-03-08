@@ -124,3 +124,31 @@ Validates GA hardening requirements against the verification map and documentati
 ```bash
 node scripts/ga/verify-ga-surface.mjs
 ```
+
+## run-ga-hardening-audit.mjs
+
+Runs a deterministic GA hardening check suite that aligns security, dependency, quality, and reliability gates into one machine-readable report.
+
+### Usage
+
+```bash
+# Run baseline checks and write JSON report
+pnpm ga:hardening:audit
+
+# Write report to a custom location
+node scripts/ga/run-ga-hardening-audit.mjs --out artifacts/custom-hardening.json
+
+# Treat environment warnings as failures
+node scripts/ga/run-ga-hardening-audit.mjs --fail-on-warning
+```
+
+### Included checks
+
+1. `pnpm security:check`
+2. `pnpm audit --prod --json`
+3. `pnpm outdated --recursive`
+4. `pnpm lint`
+5. `pnpm typecheck`
+6. `pnpm test`
+
+By default, network/registry failures (for example npm audit `403`) are classified as warnings so local hardening runs still produce actionable output in restricted environments.

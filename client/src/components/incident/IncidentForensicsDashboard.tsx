@@ -1780,6 +1780,24 @@ const IncidentForensicsDashboard: React.FC<IncidentForensicsDashboardProps> = ({
   // Main Render
   // ============================================================================
 
+
+  // Memoize navigation tabs to prevent unnecessary recalculations of active counts on every render
+  const navigationTabs = useMemo(() => {
+    // Combine filter and length operations into reduce for better O(n) performance
+    const activeIncidents = incidents.reduce((count, i) => count + (i.status === 'active' ? 1 : 0), 0);
+    const activePlaybooks = playbooks.reduce((count, p) => count + (p.status === 'running' ? 1 : 0), 0);
+    const activeWarRooms = warRooms.reduce((count, w) => count + (w.status === 'active' ? 1 : 0), 0);
+
+    return [
+      { id: 'overview', label: 'Overview', icon: '📊' },
+      { id: 'incidents', label: 'Incidents', icon: '🚨', count: activeIncidents },
+      { id: 'evidence', label: 'Evidence', icon: '📁', count: evidence.length },
+      { id: 'timeline', label: 'Timeline', icon: '⏱️' },
+      { id: 'playbooks', label: 'Playbooks', icon: '📋', count: activePlaybooks },
+      { id: 'warroom', label: 'War Rooms', icon: '🎖️', count: activeWarRooms },
+    ];
+  }, [incidents, evidence.length, playbooks, warRooms]);
+
   return (
     <div className={`incident-forensics-dashboard ${className}`}>
       {/* Header */}
@@ -1809,14 +1827,7 @@ const IncidentForensicsDashboard: React.FC<IncidentForensicsDashboardProps> = ({
 
         {/* Navigation Tabs */}
         <div className="flex gap-2 flex-wrap">
-          {[
-            { id: 'overview', label: 'Overview', icon: '📊' },
-            { id: 'incidents', label: 'Incidents', icon: '🚨', count: incidents.filter(i => i.status === 'active').length },
-            { id: 'evidence', label: 'Evidence', icon: '📁', count: evidence.length },
-            { id: 'timeline', label: 'Timeline', icon: '⏱️' },
-            { id: 'playbooks', label: 'Playbooks', icon: '📋', count: playbooks.filter(p => p.status === 'running').length },
-            { id: 'warroom', label: 'War Rooms', icon: '🎖️', count: warRooms.filter(w => w.status === 'active').length },
-          ].map((tab) => (
+          {navigationTabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveView(tab.id as typeof activeView)}
@@ -1834,8 +1845,7 @@ const IncidentForensicsDashboard: React.FC<IncidentForensicsDashboardProps> = ({
                 </span>
               )}
             </button>
-          ))}
-        </div>
+          ))}</div>
       </div>
 
       {/* Loading State */}

@@ -1,8 +1,8 @@
-# Governance as Velocity
+> Owner: Jules (Release Captain)
+> Last-Reviewed: 2025-05-15
+> Evidence-IDs: EVD-PLACEHOLDER
+> Status: active
 
-> **Status:** DOCTRINE
-> **Owner:** Jules (Release Captain)
-> **Last Updated:** 2025-05-15
 
 ## The Core Paradox
 

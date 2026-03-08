@@ -12,6 +12,10 @@ on:
       - 'packages/extortion/**'
       - 'scripts/ci/.*extortion'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   validate:
     runs-on: ubuntu-latest
@@ -26,6 +30,7 @@ jobs:
         with:
           node-version: 20
           cache: 'pnpm'
+          cache-dependency-path: '**/pnpm-lock.yaml'
 
       - name: Install dependencies
         run: pnpm install --ignore-scripts --frozen-lockfile

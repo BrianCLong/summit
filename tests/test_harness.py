@@ -1,6 +1,8 @@
-from summit_harness.harness import AgentHarness, HarnessConfig
-from summit_harness.evidence import EvidenceWriter
 from pathlib import Path
+
+from summit_harness.evidence import EvidenceWriter
+from summit_harness.harness import AgentHarness, HarnessConfig
+
 
 def test_harness_run_generates_evidence(tmp_path):
     output_dir = tmp_path / "evidence"

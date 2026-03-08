@@ -1,5 +1,5 @@
-from pathlib import Path
 import json
+from pathlib import Path
 
 SCHEMA_FILES = [
     "evidence/schemas/se-dicow-report.schema.json",

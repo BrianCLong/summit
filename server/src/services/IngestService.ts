@@ -508,24 +508,32 @@ export class IngestService {
             break;
           }
 
-          // Process entity batch
-          // We could use UNWIND in Cypher for better performance, but keeping logic similar for now
-          // to minimize risk, just fixing the memory issue.
+          // BOLT: Group entities by kind for batched UNWIND processing.
+          // This reduces round-trips from O(N) to O(unique kinds).
+          const entitiesByKind = new Map<string, any[]>();
           for (const entity of entities) {
-             await session.run(
-              `MERGE (n {id: $id, tenantId: $tenantId})
-               SET n += $properties, n:${entity.kind}
-               RETURN n`,
-              {
-                id: entity.id,
-                tenantId: entity.tenant_id,
-                properties: {
-                  ...JSON.parse(entity.props),
-                  labels: entity.labels,
-                  createdAt: entity.created_at.toISOString(),
-                  updatedAt: entity.updated_at.toISOString(),
-                },
+            const kind = entity.kind || 'Entity';
+            if (!entitiesByKind.has(kind)) {
+              entitiesByKind.set(kind, []);
+            }
+            entitiesByKind.get(kind).push({
+              id: entity.id,
+              tenantId: entity.tenant_id,
+              properties: {
+                ...JSON.parse(entity.props),
+                labels: entity.labels,
+                createdAt: entity.created_at.toISOString(),
+                updatedAt: entity.updated_at.toISOString(),
               },
+            });
+          }
+
+          for (const [kind, batch] of entitiesByKind.entries()) {
+            await session.run(
+              `UNWIND $batch AS item
+               MERGE (n {id: item.id, tenantId: item.tenantId})
+               SET n += item.properties, n:\`${kind}\``,
+              { batch },
             );
           }
 
@@ -547,25 +555,38 @@ export class IngestService {
             break;
           }
 
+          // BOLT: Group relationships by type for batched UNWIND processing.
+          // This reduces round-trips from O(N) to O(unique relationship types).
+          const relsByType = new Map<string, any[]>();
           for (const rel of relationships) {
-            await session.run(
-              `MATCH (from {id: $fromId, tenantId: $tenantId})
-               MATCH (to {id: $toId, tenantId: $tenantId})
-               MERGE (from)-[r:${rel.relationship_type}]->(to)
-               SET r += $properties
-               RETURN r`,
-              {
-                fromId: rel.from_entity_id,
-                toId: rel.to_entity_id,
-                tenantId: rel.tenant_id,
-                properties: {
-                  ...JSON.parse(rel.props),
-                  confidence: rel.confidence,
-                  source: rel.source,
-                  firstSeen: rel.first_seen.toISOString(),
-                  lastSeen: rel.last_seen ? rel.last_seen.toISOString() : new Date().toISOString()
-                },
+            const type = rel.relationship_type || 'RELATES_TO';
+            if (!relsByType.has(type)) {
+              relsByType.set(type, []);
+            }
+            relsByType.get(type).push({
+              fromId: rel.from_entity_id,
+              toId: rel.to_entity_id,
+              tenantId: rel.tenant_id,
+              properties: {
+                ...JSON.parse(rel.props),
+                confidence: rel.confidence,
+                source: rel.source,
+                firstSeen: rel.first_seen.toISOString(),
+                lastSeen: rel.last_seen
+                  ? rel.last_seen.toISOString()
+                  : new Date().toISOString(),
               },
+            });
+          }
+
+          for (const [type, batch] of relsByType.entries()) {
+            await session.run(
+              `UNWIND $batch AS item
+               MATCH (from {id: item.fromId, tenantId: item.tenantId})
+               MATCH (to {id: item.toId, tenantId: item.tenantId})
+               MERGE (from)-[r:\`${type}\`]->(to)
+               SET r += item.properties`,
+              { batch },
             );
           }
 

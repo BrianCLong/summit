@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "evidence_id_prefix": "EID-CIG-",
+  "campaign": {
+    "name": "Storm-like coordinated narrative surge",
+    "cognitive_objective": "CONFUSE",
+    "confidence": 0.6,
+    "contested": true
+  },
+  "targets": [
+    {
+      "label": "frontline soldiers",
+      "protectedClass": false
+    },
+    {
+      "label": "diaspora community",
+      "protectedClass": true
+    }
+  ],
+  "narratives": [
+    {
+      "claim": "Strike was 'precision engagement' with no civilians harmed",
+      "synthesis_method": "HYBRID",
+      "synthetic_credibility_markers": ["cloned_media_brand", "forged_evidence"],
+      "channels": ["telegram", "x", "tiktok"]
+    }
+  ],
+  "tempo": {
+    "trigger_event": {
+      "kind": "KINETIC",
+      "occurred_at": "2026-02-15T12:00:00Z",
+      "evidence_ids": ["EID-CIG-000001"]
+    },
+    "surge_window_hours": { "min": 3, "max": 6 },
+    "rationale_evidence_ids": ["EID-CIG-000002", "EID-CIG-000003"]
+  },
+  "responses": {
+    "institutional": [
+      {
+        "type": "election_court_ruling",
+        "jurisdiction": "BR",
+        "evidence_ids": ["EID-CIG-000010"]
+      }
+    ]
+  },
+  "security": {
+    "never_log": ["raw_handles", "pii", "protected_characteristics"]
+  }
+}

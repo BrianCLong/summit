@@ -28,7 +28,9 @@ export class EvidenceWriter {
         selected_explanation: result.selectedExplanation.id,
         robustness_score: result.robustness.score.toString(),
         node_count: result.selectedProof.nodes.length.toString(),
-        edge_count: result.selectedProof.edges.length.toString()
+        edge_count: result.selectedProof.edges.length.toString(),
+        retrieval_strategy: 'Hybrid-GVG',
+        justification_rationale: result.selectedExplanation.rationale
       }
     };
 

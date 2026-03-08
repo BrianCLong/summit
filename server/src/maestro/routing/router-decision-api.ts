@@ -5,6 +5,7 @@ import { ensureAuthenticated } from '../../middleware/auth.js';
 import { requirePermission } from '../../middleware/rbac.js';
 import { otelService } from '../../middleware/observability/otel-tracing.js';
 import { policyActionGate } from '../../middleware/policy-action-gate.js';
+import { firstString } from '../../utils/http-param.js';
 
 const router = express.Router();
 router.use(express.json());
@@ -81,7 +82,7 @@ router.post(
   policyActionGate({
     action: 'override',
     resource: 'maestro_run',
-    resolveResourceId: (req) => req.params.runId,
+    resolveResourceId: (req) => firstString(req.params.runId),
     buildResourceAttributes: (req) => ({
       runId: req.params.runId,
       nodeId: req.params.nodeId,

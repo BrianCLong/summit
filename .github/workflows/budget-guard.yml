@@ -1,0 +1,77 @@
+name: Budget Guard & Cost Observability
+
+on:
+  pull_request:
+    paths:
+      - 'server/src/db/budgetLedger.ts'
+      - 'server/ai/llmBudget.ts'
+      - '.github/workflows/budget-guard.yml'
+  schedule:
+    - cron: '0 0 * * *'
+
+jobs:
+  budget-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 8
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Run Budget Audit
+        run: |
+          echo "Running budget audit for active PRs and agents..."
+          npx tsx scripts/ci/budget-audit-report.ts
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  cost-drift-detection:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Detect Cost Drift
+        run: |
+          echo "Verifying cost metrics against contract..."
+          npx tsx scripts/ci/verify-cost-metrics.ts
+
+      - name: Create or update PR Cost Footprint comment
+        uses: actions/github-script@v7
+        if: github.event_name == 'pull_request'
+        with:
+          script: |
+            const fs = require('fs');
+            const commentBody = fs.readFileSync('cost-footprint-comment.md', 'utf8');
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const botComment = comments.find(comment =>
+              comment.user.type === 'Bot' && comment.body.includes('## 💰 Cost Footprint')
+            );
+
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: commentBody
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: commentBody
+              });
+            }

@@ -65,6 +65,10 @@ on:
         description: "Container registry password/token"
         required: false
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
   packages: write
@@ -152,9 +156,9 @@ jobs:
 
       - name: Install Cosign
         if: inputs.sign
-        uses: sigstore/cosign-installer@f713795cb21599bc4e5c4b58cbad1da852d7eeb9 # v3
+        uses: sigstore/cosign-installer@v3.7.0
         with:
-          cosign-release: v2.2.4
+          cosign-release: 'v3.0.5'
 
       - name: Sign image (OIDC keyless)
         if: inputs.sign && inputs.push
@@ -178,7 +182,7 @@ jobs:
 
           IMAGE="${{ steps.image-uri.outputs.uri }}"
 
-          cosign verify "$IMAGE" \
+          cosign verify --use-signed-timestamps "$IMAGE" \ || { echo "::error::Supply chain verification failed! Missing or invalid signed timestamps."; false; }
             --certificate-identity "${{ env.EXPECTED_OIDC_SUBJECT }}" \
             --certificate-oidc-issuer "${{ env.EXPECTED_OIDC_ISSUER }}"
 
@@ -206,7 +210,7 @@ jobs:
 
       - name: Attest SBOM
         if: inputs.sbom && inputs.sign && inputs.push
-        uses: actions/attest-sbom@v2
+        uses: actions/attest-sbom@v3
         with:
           subject-name: ${{ env.REGISTRY }}/${{ inputs.image_name }}
           subject-digest: ${{ steps.build.outputs.digest }}

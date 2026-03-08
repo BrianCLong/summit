@@ -58,7 +58,7 @@ Ship a pilot-ready CompanyOS Policy Spine with versioned bundles delivered by `c
 ### B3. SLOs, Dashboards, and Runbooks for the Policy Spine
 - [ ] Define SLOs: fetch availability (e.g., 99.5% under 2s), decision latency (e.g., 95% < 50ms).
 - [ ] Grafana dashboard for `cos-policy-fetcher` and enforcement metrics; alerts for no recent success, elevated error rates.
-- [ ] Runbook `RUNBOOKS/companyos-policy-spine.md` with symptom → diagnosis → actions, rollback for policy bundles and code, and comms template.
+- [ ] Runbook `runbooks/companyos-policy-spine.md` with symptom → diagnosis → actions, rollback for policy bundles and code, and comms template.
 - **Acceptance:** Dashboard labeled “CompanyOS Policy Spine”; alerts validated in dev; runbook linked from alerts.
 
 ## Cross-Cutting: Architecture & Evidence

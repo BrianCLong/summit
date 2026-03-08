@@ -1,5 +1,6 @@
-from summit.vuln.types import Aliases
 from summit.vuln.normalize.alias_stitch import stitch_aliases
+from summit.vuln.types import Aliases
+
 
 def test_stitch_aliases():
     existing = Aliases(cve=["CVE-2021-0001"], ghsa=["GHSA-xxx1"])

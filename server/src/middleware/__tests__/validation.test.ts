@@ -8,7 +8,7 @@ import {
   requestFactory,
   responseFactory,
   nextFactory,
-} from '../../../../tests/factories/requestFactory.js';
+} from '../../../tests/mocks/request-factory.js';
 
 describe('Validation Middleware', () => {
   describe('validateRequest', () => {

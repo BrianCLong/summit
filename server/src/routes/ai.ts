@@ -27,6 +27,7 @@ import { MediaType } from '../services/MediaUploadService.js'; // Import MediaTy
 import { createRateLimiter, EndpointClass } from '../middleware/rateLimit.js';
 import { cfg } from '../config.js';
 import { rateLimiter } from '../services/RateLimiter.js';
+import { ResidencyGuard } from '../data-residency/residency-guard.js';
 
 const logger = (pino as any)();
 const router = express.Router();
@@ -159,6 +160,30 @@ router.use(aiRateLimit);
 
 // Apply permissions to all AI routes
 router.use(requirePermission('ai:request'));
+
+// Localized AI residency check (v2)
+const localizedAIProtection = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+  try {
+    const tenantId = req.user?.tenantId || (req as any).tenantId;
+    if (!tenantId) return next();
+
+    const guard = ResidencyGuard.getInstance();
+    const isAllowed = await guard.validateFeatureAccess(tenantId, 'aiFeatures');
+
+    if (!isAllowed) {
+      logger.warn(`AI feature access blocked for tenant ${tenantId} due to regional residency policy.`);
+      return res.status(403).json({
+        error: 'FeatureRestricted',
+        message: 'AI features are not available in your region due to data residency or privacy regulations.'
+      });
+    }
+    next();
+  } catch (err) {
+    next(err);
+  }
+};
+
+router.use(localizedAIProtection);
 
 // Validation middleware
 const validatePredictLinks = [
@@ -835,8 +860,10 @@ router.post(
   handleValidationErrors,
   async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const { insight, feedbackType, user, timestamp, originalPrediction } =
-        req.body;
+      const { insight, feedbackType, timestamp, originalPrediction } = req.body;
+      // 🛡️ Sentinel: Prevent user spoofing by using authenticated user ID
+      const user = req.user?.id || req.user?.email || 'unknown';
+
       logger.info('AI Feedback received:', {
         insight,
         feedbackType,
@@ -923,7 +950,10 @@ router.post(
   handleValidationErrors,
   async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const { text, label, user, timestamp, deceptionScore } = req.body;
+      const { text, label, timestamp, deceptionScore } = req.body;
+      // 🛡️ Sentinel: Prevent user spoofing by using authenticated user ID
+      const user = req.user?.id || req.user?.email || 'unknown';
+
       await enforceBackgroundThrottle(req, 'ai-feedback');
       await feedbackQueue.add('logDeceptionFeedback', {
         insight: { text, deceptionScore },

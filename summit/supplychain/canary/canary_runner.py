@@ -1,11 +1,12 @@
 # summit/supplychain/canary/canary_runner.py
-from typing import Dict, List, Any
+from typing import Any, Dict, List
+
 
 class CanaryRunner:
-    def __init__(self, providers: List[Any]):
+    def __init__(self, providers: list[Any]):
         self.providers = providers
 
-    def run_check(self, target_url: str) -> Dict[str, Any]:
+    def run_check(self, target_url: str) -> dict[str, Any]:
         results = {}
         for provider in self.providers:
             results[provider.name] = provider.probe(target_url)

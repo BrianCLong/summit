@@ -3,17 +3,20 @@ ACP Installer.
 Generates plan-only installation steps (no execution).
 """
 from __future__ import annotations
+
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple
-from .registry_client import AgentDescriptor, NpxDist, BinaryDist
+
 from .policy import AcpPolicy, assert_https_and_allowlisted
+from .registry_client import AgentDescriptor, BinaryDist, NpxDist
+
 
 @dataclass(frozen=True)
 class InstallPlan:
     kind: str  # "npx" | "binary"
-    argv: List[str]
-    env: Dict[str, str]
-    notes: List[str]
+    argv: list[str]
+    env: dict[str, str]
+    notes: list[str]
 
 def plan_install(agent: AgentDescriptor, platform_key: str, policy: AcpPolicy) -> InstallPlan:
     if not policy.install_enabled:

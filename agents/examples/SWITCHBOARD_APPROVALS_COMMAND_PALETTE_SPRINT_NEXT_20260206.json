@@ -1,0 +1,54 @@
+{
+  "task_id": "SWITCHBOARD_APPROVALS_COMMAND_PALETTE_SPRINT_NEXT_20260206",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "switchboard-approvals-command-palette",
+    "version": "v1",
+    "sha256": "79b4df8f5a869097218a931b2aac1de7e2b538f62637a4ee6d5cca4c856cd9f1",
+    "path": "prompts/switchboard/switchboard-approvals-command-palette@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "sprint/sprint-next-switchboard-approvals-command-palette.md",
+      "openapi/switchboard-approvals-command-palette.yaml",
+      "opa/policies/switchboard.rego",
+      "opa/policies/switchboard_test.rego",
+      "packages/decision-policy/policy.switchboard.v1.yaml",
+      "provenance/receipt_schema_switchboard_v0_1.json",
+      "provenance/examples/switchboard-receipt.example.json",
+      "docs/switchboard/",
+      "grafana/dashboards/switchboard-approvals.json",
+      "grafana/alerts/switchboard-approvals-alerts.yaml",
+      "RUNBOOKS/switchboard-*.md",
+      "docs/roadmap/STATUS.json",
+      "prompts/switchboard/switchboard-approvals-command-palette@v1.md",
+      "prompts/registry.yaml",
+      "agents/examples/SWITCHBOARD_APPROVALS_COMMAND_PALETTE_SPRINT_NEXT_20260206.json"
+    ],
+    "domains": ["switchboard", "policy", "provenance", "observability", "governance"],
+    "exclusions": []
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["opa-test-results", "dashboard-json", "runbooks"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Switchboard sprint backlog, API contract, policy, and receipt schema are published.",
+    "OPA tests validate privileged command gating.",
+    "Operability artifacts include dashboards, alerts, and runbooks."
+  ],
+  "stop_conditions": [
+    "Policy logic cannot be expressed as policy-as-code.",
+    "Receipt signing or verification requirements conflict with governance constraints."
+  ],
+  "dependencies": [
+    "docs/SUMMIT_READINESS_ASSERTION.md",
+    "packages/decision-policy/policy.switchboard.v1.yaml"
+  ],
+  "approvals": []
+}

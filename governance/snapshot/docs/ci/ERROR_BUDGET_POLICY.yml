@@ -1,0 +1,192 @@
+# ERROR_BUDGET_POLICY.yml
+# Release Ops Error Budget Configuration
+#
+# Defines monthly error budgets for publication safety.
+# When budget is exhausted, thresholds tighten automatically.
+#
+# Authority: docs/ci/ERROR_BUDGET.md
+
+version: "1.0"
+
+# Budget period
+period:
+  type: monthly          # Reset on 1st of each month
+  timezone: UTC
+
+# Monthly allocations
+budgets:
+  # Rollback budget - most critical
+  rollbacks:
+    monthly_allocation: 3
+    description: "Maximum rollbacks allowed per month"
+    severity: critical
+
+  # FAIL events (forbidden patterns detected)
+  fails:
+    monthly_allocation: 2
+    description: "Maximum FAIL events allowed per month"
+    severity: high
+
+  # WARN events (elevated redaction counts)
+  warns:
+    monthly_allocation: 10
+    description: "Maximum WARN events allowed per month"
+    severity: medium
+
+# Budget health tiers
+tiers:
+  green:
+    description: "Healthy - budget available"
+    rollback_remaining_gte: 2
+    fail_remaining_gte: 1
+    warn_remaining_gte: 5
+
+  yellow:
+    description: "Caution - budget running low"
+    rollback_remaining_gte: 1
+    fail_remaining_gte: 1
+    warn_remaining_gte: 2
+
+  red:
+    description: "Critical - budget nearly exhausted"
+    # Anything below yellow thresholds
+
+# Actions when budget exhausted
+exhaustion_actions:
+  rollbacks:
+    # When rollback budget hits 0
+    - action: tighten_thresholds
+      description: "Reduce WARN threshold by 20%"
+      config:
+        warn_redaction_multiplier: 0.8
+
+    - action: require_approval
+      description: "Require manual approval for next publish"
+      config:
+        approval_required: true
+        approval_team: "@release-engineering"
+
+    - action: create_issue
+      description: "Create P1 budget exhaustion issue"
+      config:
+        priority: P1
+        labels:
+          - error-budget
+          - budget-exhausted
+          - release-ops
+
+  fails:
+    # When FAIL budget hits 0
+    - action: tighten_thresholds
+      description: "Lower forbidden pattern tolerance"
+      config:
+        forbidden_tolerance: 0
+
+    - action: create_issue
+      description: "Create P1 budget exhaustion issue"
+      config:
+        priority: P1
+        labels:
+          - error-budget
+          - budget-exhausted
+
+  warns:
+    # When WARN budget hits 0
+    - action: tighten_thresholds
+      description: "Reduce WARN threshold by 30%"
+      config:
+        warn_redaction_multiplier: 0.7
+
+    - action: create_issue
+      description: "Create P2 budget warning issue"
+      config:
+        priority: P2
+        labels:
+          - error-budget
+          - warn-budget-exhausted
+
+# Threshold adjustments when budget is low
+threshold_adjustments:
+  # Applied when tier is yellow
+  yellow_tier:
+    redaction_warn_multiplier: 0.9    # 10% stricter
+    additional_review: false
+
+  # Applied when tier is red
+  red_tier:
+    redaction_warn_multiplier: 0.75   # 25% stricter
+    additional_review: true
+    review_team: "@platform-engineering"
+
+# Budget carryover rules
+carryover:
+  enabled: false                       # No unused budget carries over
+  max_carryover_pct: 0                # Even if enabled, 0% max
+
+# Notifications
+notifications:
+  # Notify when entering yellow tier
+  yellow_threshold:
+    enabled: true
+    channels:
+      - github_issue
+
+  # Notify when entering red tier
+  red_threshold:
+    enabled: true
+    channels:
+      - github_issue
+
+  # Notify on budget reset (monthly)
+  budget_reset:
+    enabled: true
+    channels:
+      - github_issue
+
+# State tracking
+state:
+  file: docs/releases/_state/error_budget_state.json
+
+# Output files
+output:
+  json: error_budget.json
+  html: error_budget.html
+  md: error_budget.md
+
+# Change Freeze Mode (Phase 2 enforcement)
+freeze_mode:
+  # When to activate freeze
+  trigger:
+    on_tier: RED                        # Activate when tier reaches RED
+    on_any_budget_exhausted: true       # Or when any budget hits 0
+
+  # What freeze blocks
+  scope:
+    block_ga_promotion: true            # Block GA tag promotion
+    block_rc_promotion_to_ga: true      # Block RC->GA promotion
+    block_pages_publish_on_warn: false  # Optional: block WARN publishes
+    allow_hotfix_release: true          # Always allow hotfix path
+
+  # Override configuration
+  override:
+    require_environment: release-override
+    require_justification: true
+    require_ticket_url: true
+    max_override_hours: 24              # Override expires after 24h
+
+  # State files
+  state:
+    freeze_mode_file: docs/releases/_state/freeze_mode.json
+    override_file: docs/releases/_state/release_override.json
+
+  # Messaging
+  messages:
+    freeze_active: |
+      Change freeze is active due to error budget exhaustion.
+      Options:
+      1. Use hotfix-release workflow (always allowed)
+      2. Request temporary override via release-override workflow
+      3. Wait for manual freeze reset after remediation
+    override_granted: |
+      Temporary override granted. Expires in {hours} hours.
+      This does not clear freeze mode - it provides a bounded exception.

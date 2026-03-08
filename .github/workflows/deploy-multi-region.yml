@@ -37,7 +37,9 @@ jobs:
         uses: actions/checkout@v4 # v6
 
       - name: Install Cosign
-        uses: sigstore/cosign-installer@f713795cb21599bc4e5c4b58cbad1da852d7eeb9 # v3
+        uses: sigstore/cosign-installer@v3.7.0
+        with:
+          cosign-release: "v3.0.5"
 
       - name: Verify SBOM attestation and signature (deployment gate)
         run: scripts/ci/verify-sbom-signature.sh "${{ inputs.image_ref }}"

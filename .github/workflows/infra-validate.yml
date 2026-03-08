@@ -1,0 +1,13 @@
+name: Infra Validate
+on:
+  push:
+    paths:
+      - 'src/platform/infra/**'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate Infra
+        run: echo "Validating infrastructure modules..."

@@ -4,6 +4,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field
 
+
 class PricingModel(BaseModel):
     model_type: str  # "subscription", "per_api_call", "contract"
     base_price: float
@@ -20,25 +21,25 @@ class Product(BaseModel):
     name: str
     category: str
     description: str
-    use_cases: List[str]
-    integrations: List[str]
+    use_cases: list[str]
+    integrations: list[str]
 
 class Vendor(BaseModel):
     vendor_id: str
     company_name: str
-    products: List[Product]
-    certifications: List[Certification]
-    cooperative_memberships: List[str]
-    compliance_docs: Dict[str, str]
+    products: list[Product]
+    certifications: list[Certification]
+    cooperative_memberships: list[str]
+    compliance_docs: dict[str, str]
     pricing: PricingModel
     performance_score: float = 0.0
 
 class VendorCreate(BaseModel):
     company_name: str
-    products: List[Product]
-    certifications: List[Certification] = []
-    cooperative_memberships: List[str] = []
-    compliance_docs: Dict[str, str] = {}
+    products: list[Product]
+    certifications: list[Certification] = []
+    cooperative_memberships: list[str] = []
+    compliance_docs: dict[str, str] = {}
     pricing: PricingModel
 
 class Agency(BaseModel):
@@ -52,7 +53,7 @@ class Agency(BaseModel):
 class AuditReport(BaseModel):
     audit_id: str
     passed: bool
-    failures: List[str]
+    failures: list[str]
     timestamp: datetime
 
 class Contract(BaseModel):
@@ -76,8 +77,8 @@ class ContractInitiateRequest(BaseModel):
     contract_value: float
 
 class Requirements(BaseModel):
-    technical: List[str]
-    compliance: List[str]
+    technical: list[str]
+    compliance: list[str]
     budget: Optional[str] = None
 
 class RFP(BaseModel):
@@ -93,8 +94,8 @@ class RFP(BaseModel):
 class VendorMatch(BaseModel):
     vendor: Vendor
     fit_score: float
-    compliance_gaps: List[str]
-    recommended_validators: List[str]
+    compliance_gaps: list[str]
+    recommended_validators: list[str]
 
 class RFPMatchRequest(BaseModel):
     rfp_text: str

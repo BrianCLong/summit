@@ -1,13 +1,16 @@
-from typing import List, Dict, Any
+from typing import Any, Dict, List
+
 import httpx
+
 from .auth import AzureAuthProvider
+
 
 class AzureFoundryCatalog:
     def __init__(self, endpoint: str, auth_provider: AzureAuthProvider):
         self.endpoint = endpoint.rstrip("/")
         self.auth_provider = auth_provider
 
-    async def list_models(self) -> List[Dict[str, Any]]:
+    async def list_models(self) -> list[dict[str, Any]]:
         """
         Lists available models/deployments.
         """

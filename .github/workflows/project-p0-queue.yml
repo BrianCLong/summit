@@ -1,0 +1,119 @@
+# .github/workflows/project-p0-queue.yml
+name: Project P0 Queue
+
+on:
+  issues:
+    types: [opened, edited, labeled, unlabeled, reopened]
+  pull_request_target:
+    types: [opened, edited, labeled, unlabeled, reopened, synchronize]
+
+permissions:
+  contents: read
+
+jobs:
+  sync_project:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Sync item to Project #7 and set fields
+        uses: actions/github-script@v7
+        env:
+          GH_TOKEN: ${{ secrets.PROJECTS_TOKEN }}
+        with:
+          script: |
+            const isPR = context.eventName === 'pull_request_target';
+            const item = isPR ? context.payload.pull_request : context.payload.issue;
+            const labels = (item.labels || []).map(l => (typeof l === 'string' ? l : l.name));
+
+            // ----- CONFIG YOU MUST FILL IN -----
+            // Get these via a one-time GraphQL query (I include it below)
+            const PROJECT_NODE_ID = "PVT_kwDOXXXXXXXX"; // Project #7 node_id
+            const FIELD_PRIORITY_ID = "PVTF_lADOXXXXXX"; // field id
+            const FIELD_STATE_ID = "PVTF_lADOYYYYYY";
+            const FIELD_BUCKET_ID = "PVTF_lADOZZZZZZ";
+            const FIELD_QUEUERANK_ID = "PVTF_lADOQQQQQQ";
+            const OPTION_PRIORITY = { P0: "xxxxxxxx", P1: "yyyyyyyy", P2: "zzzzzzzz" }; // option ids
+            const OPTION_STATE = { Triage:"aaaa", Ready:"bbbb", Blocked:"cccc", InProgress:"dddd", Done:"eeee" };
+            const OPTION_BUCKET = {
+              "p0:ci-saturation":"b1",
+              "p0:ci-determinism":"b2",
+              "p0:manifest-provenance":"b3",
+              "p0:compliance-sbom":"b4",
+              "p0:authz-policy":"b5",
+              "p0:slo-k6":"b6",
+              "p0:release-integrity":"b7",
+            };
+
+            // ----- DERIVED VALUES -----
+            const has = (l) => labels.includes(l);
+
+            // Priority
+            const priority = has("prio:P0") ? "P0" : has("prio:P1") ? "P1" : has("prio:P2") ? "P2" : null;
+
+            // State (default triage if any labels exist)
+            const state =
+              has("state:done") ? "Done" :
+              has("state:in-progress") ? "InProgress" :
+              has("state:blocked") ? "Blocked" :
+              has("state:ready") ? "Ready" :
+              (labels.length ? "Triage" : null);
+
+            // Bucket (deterministic: pick first match in bucket order)
+            const bucketOrder = [
+              "p0:ci-saturation",
+              "p0:ci-determinism",
+              "p0:manifest-provenance",
+              "p0:compliance-sbom",
+              "p0:authz-policy",
+              "p0:slo-k6",
+              "p0:release-integrity",
+            ];
+            const bucket = bucketOrder.find(b => has(b)) || null;
+
+            // QueueRank: deterministic integer by bucket + tie-breaker
+            // Lower is earlier. We encode bucket rank * 1000 + (blocksRequiredChecks?0:100) + ageDays
+            const bucketRank = bucket ? (bucketOrder.indexOf(bucket) + 1) : 99;
+            const text = ((item.title || "") + "\n" + (item.body || "")).toLowerCase();
+            const blocks = text.includes("blocks required checks") || text.includes("fails on main") || text.includes("release blocker");
+            const createdAt = new Date(item.created_at);
+            const ageDays = Math.floor((Date.now() - createdAt.getTime()) / (1000*60*60*24));
+            const queueRank = bucket ? (bucketRank * 1000 + (blocks ? 0 : 100) + Math.min(ageDays, 899)) : null;
+
+            // ----- GraphQL helpers -----
+            const gql = async (query, variables={}) => {
+              const res = await fetch("https://api.github.com/graphql", {
+                method: "POST",
+                headers: { "Authorization": `Bearer ${process.env.GH_TOKEN}`, "Content-Type": "application/json" },
+                body: JSON.stringify({ query, variables })
+              });
+              const json = await res.json();
+              if (json.errors) throw new Error(JSON.stringify(json.errors));
+              return json.data;
+            };
+
+            // 1) Add item to project
+            const addMutation = `
+              mutation($projectId:ID!, $contentId:ID!) {
+                addProjectV2ItemById(input:{projectId:$projectId, contentId:$contentId}) {
+                  item { id }
+                }
+              }`;
+            const added = await gql(addMutation, { projectId: PROJECT_NODE_ID, contentId: item.node_id });
+            const projectItemId = added.addProjectV2ItemById.item.id;
+
+            // 2) Update fields (only if values exist)
+            const updateField = async (fieldId, value) => {
+              const m = `
+                mutation($projectId:ID!, $itemId:ID!, $fieldId:ID!, $value:ProjectV2FieldValue!) {
+                  updateProjectV2ItemFieldValue(input:{
+                    projectId:$projectId, itemId:$itemId, fieldId:$fieldId, value:$value
+                  }) { projectV2Item { id } }
+                }`;
+              return gql(m, { projectId: PROJECT_NODE_ID, itemId: projectItemId, fieldId, value });
+            };
+
+            if (priority) await updateField(FIELD_PRIORITY_ID, { singleSelectOptionId: OPTION_PRIORITY[priority] });
+            if (state)    await updateField(FIELD_STATE_ID,    { singleSelectOptionId: OPTION_STATE[state] });
+            if (bucket)   await updateField(FIELD_BUCKET_ID,   { singleSelectOptionId: OPTION_BUCKET[bucket] });
+            if (queueRank !== null) await updateField(FIELD_QUEUERANK_ID, { number: queueRank });
+
+            console.log({priority, state, bucket, queueRank});

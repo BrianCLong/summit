@@ -40,6 +40,9 @@ graph TD
 Ingests competitive intelligence data (snapshots) to produce deterministic evidence and battlecards.
 Located in: `services/competitive_kg`
 
+### Sector Countermeasures
+[Sector-by-Sector Countermeasure Package](./sector-countermeasures-package.md) - Strategic defense-focused countermeasures for Defense, Cloud, Civil Society, and Media sectors.
+
 ### Hybrid Retrieval Planner
 Plans queries across graph, vector, and full-text engines.
 Located in: `packages/hybrid_planner`

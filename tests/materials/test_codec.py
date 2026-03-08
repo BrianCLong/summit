@@ -1,5 +1,7 @@
-from plugins.materials.codec import decode_structure, encode_structure, StructureObj
 import pytest
+
+from plugins.materials.codec import StructureObj, decode_structure, encode_structure
+
 
 def test_roundtrip_valid():
     text = "LATTICE: 1.0 2.0 3.0\nSPECIES: Si O\nCOORDS: 0.0 0.0 0.0; 0.5 0.5 0.5"

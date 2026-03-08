@@ -125,3 +125,73 @@ groups:
           summary: "Narrative Velocity Anomaly"
           description: "Z-score of narrative velocity > 3"
           runbook_url: "https://docs.intelgraph.com/runbooks/narrative-velocity"
+
+  - name: intelgraph.ai
+    rules:
+      - alert: LLMErrorRate
+        expr: sum(rate(llm_requests_total{status="error"}[5m])) / sum(rate(llm_requests_total[5m])) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+          service: intelgraph-ai
+        annotations:
+          summary: "High LLM Error Rate"
+          description: "LLM error rate is > 5%"
+          runbook_url: "https://docs.intelgraph.com/runbooks/llm-errors"
+
+      - alert: LLMHighLatency
+        expr: histogram_quantile(0.95, sum(rate(llm_request_duration_seconds_bucket[5m])) by (le)) > 10
+        for: 5m
+        labels:
+          severity: warning
+          service: intelgraph-ai
+        annotations:
+          summary: "High LLM Latency"
+          description: "95th percentile LLM latency is > 10s"
+          runbook_url: "https://docs.intelgraph.com/runbooks/llm-latency"
+
+      - alert: AIJobQueueBacklog
+        expr: ai_jobs_queued > 50
+        for: 5m
+        labels:
+          severity: warning
+          service: intelgraph-ai
+        annotations:
+          summary: "AI Job Queue Backlog"
+          description: "More than 50 AI jobs queued for > 5 minutes"
+          runbook_url: "https://docs.intelgraph.com/runbooks/ai-queue-backlog"
+
+  - name: maestro.orchestration
+    rules:
+      - alert: MaestroDeploymentFailure
+        expr: increase(maestro_deployments_total{status="failed"}[1h]) > 0
+        for: 1m
+        labels:
+          severity: critical
+          service: maestro
+        annotations:
+          summary: "Maestro Deployment Failed"
+          description: "A deployment failed in the last hour"
+          runbook_url: "https://docs.intelgraph.com/runbooks/maestro-deployment-failure"
+
+      - alert: MaestroChangeFailureRateHigh
+        expr: maestro_change_failure_rate > 0.1
+        for: 15m
+        labels:
+          severity: warning
+          service: maestro
+        annotations:
+          summary: "High Change Failure Rate"
+          description: "Change failure rate is > 10%"
+          runbook_url: "https://docs.intelgraph.com/runbooks/maestro-cfr"
+
+      - alert: CircuitBreakerOpen
+        expr: circuit_breaker_state == 1
+        for: 1m
+        labels:
+          severity: critical
+          service: intelgraph
+        annotations:
+          summary: "Circuit Breaker Open"
+          description: "Circuit breaker for {{ $labels.service }} is OPEN"
+          runbook_url: "https://docs.intelgraph.com/runbooks/circuit-breaker"

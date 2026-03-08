@@ -1,10 +1,10 @@
-import AjvModule from 'ajv';
+import Ajv2020Module from 'ajv/dist/2020.js';
 import addFormatsModule from 'ajv-formats';
 import { promises as fs } from 'fs';
 import path from 'path';
 import { FcrSignal } from './types.js';
 
-const Ajv = (AjvModule as any).default || AjvModule;
+const Ajv = (Ajv2020Module as any).default || Ajv2020Module;
 const addFormats = (addFormatsModule as any).default || addFormatsModule;
 
 export class FcrSchemaValidator {
@@ -15,13 +15,25 @@ export class FcrSchemaValidator {
   }
 
   async validateSignals(signals: FcrSignal[]) {
-    const schemaPath = path.resolve(
+    const workspaceSchemaPath = path.resolve(
       process.cwd(),
       'schemas',
       'fcr',
       'v1',
       'fcr-signal.schema.json',
     );
+    const repoRootSchemaPath = path.resolve(
+      process.cwd(),
+      '..',
+      'schemas',
+      'fcr',
+      'v1',
+      'fcr-signal.schema.json',
+    );
+    const schemaPath = await fs
+      .access(workspaceSchemaPath)
+      .then(() => workspaceSchemaPath)
+      .catch(() => repoRootSchemaPath);
     const schemaRaw = await fs.readFile(schemaPath, 'utf8');
     const schema = JSON.parse(schemaRaw);
     const validate = this.ajv.compile(schema);

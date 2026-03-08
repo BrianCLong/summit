@@ -1,7 +1,9 @@
 import os
 import time
 from typing import Optional
+
 import httpx
+
 
 class AzureAuthProvider:
     def __init__(self, tenant_id: Optional[str] = None, client_id: Optional[str] = None, client_secret: Optional[str] = None):

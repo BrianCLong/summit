@@ -17,14 +17,14 @@ data:
 
     db:
       skip-update: false
-      
+
     vulnerability:
       type: "os,library"
       ignore-unfixed: false
-      
+
     secret:
       config: /etc/trivy/secret.yaml
-      
+
     severity: "UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL"
 
     output: table
@@ -44,13 +44,13 @@ data:
         title: AWS Access Key
         regex: 'AKIA[0-9A-Z]{16}'
         keywords: ["AKIA"]
-        
+
       - id: private-key
         category: secret
         title: Private Key
         regex: '-----BEGIN [A-Z ]+ PRIVATE KEY-----'
         keywords: ["BEGIN", "PRIVATE KEY"]
-        
+
       - id: api-key
         category: secret
         title: Generic API Key
@@ -305,12 +305,12 @@ data:
     scanner:
       name: "IntelGraph Security Scanner"
       version: "1.0.0"
-      
+
     scanning:
       enabled: true
       schedule: "0 */6 * * *"  # Every 6 hours
       timeout: 1800  # 30 minutes
-      
+
       image_scanning:
         enabled: true
         registries:
@@ -319,12 +319,12 @@ data:
           - "quay.io"
         ignore_unfixed: false
         severity_levels: ["CRITICAL", "HIGH", "MEDIUM"]
-        
+
       dependency_scanning:
         enabled: true
         package_managers: ["npm", "pip", "go", "maven"]
         include_dev_deps: false
-        
+
       secret_scanning:
         enabled: true
         rules:
@@ -334,7 +334,7 @@ data:
           - certificates
           - database_credentials
         entropy_threshold: 4.0
-        
+
       compliance_scanning:
         enabled: true
         standards:
@@ -342,7 +342,7 @@ data:
           - "NIST"
           - "PCI-DSS"
           - "SOX"
-        
+
     reporting:
       enabled: true
       formats: ["json", "sarif", "html"]
@@ -353,7 +353,7 @@ data:
           bucket: "${SCAN_RESULTS_BUCKET}"
         - type: "slack"
           webhook: "${SLACK_WEBHOOK_URL}"
-          
+
     notifications:
       enabled: true
       channels:
@@ -366,18 +366,18 @@ data:
           - "email"
         medium:
           - "email"
-          
+
     integrations:
       jira:
         enabled: false
         url: "${JIRA_URL}"
         project: "SEC"
-        
+
       github:
         enabled: true
         repository: "intelgraph/intelgraph"
         create_issues: true
-        
+
       defectdojo:
         enabled: false
         url: "${DEFECTDOJO_URL}"

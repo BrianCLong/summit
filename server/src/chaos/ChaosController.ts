@@ -110,6 +110,7 @@ export class ChaosController extends EventEmitter {
         network_partition: 0,
         packet_loss: 0,
         dns_failure: 0,
+        region_kill: 0,
         timeout: 0,
         exception: 0,
       },

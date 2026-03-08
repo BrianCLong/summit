@@ -196,11 +196,15 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
       - name: Setup Node.js
         uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
         with:
           node-version: 20
           cache: "pnpm"
+          cache-dependency-path: '**/pnpm-lock.yaml'
 
       - name: Setup OPA
         uses: open-policy-agent/setup-opa@b0eb0c1eb5f79b7ec602946f1fa93f3fc06f6e70 # v2
@@ -250,18 +254,21 @@ jobs:
           fi
           echo "sha=${SHA}" >> $GITHUB_OUTPUT
 
-      - name: Setup Node.js
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
-        with:
-          node-version: "20"
-
       - name: Setup pnpm
         uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
         with:
           version: 10
 
+      - name: Setup Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "20"
+
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: LongRunJob Contract Gate (strict)
+        run: node scripts/ci/verify-longrun-contract.mjs
 
       - name: Security Guardrails
         run: |
@@ -391,9 +398,9 @@ jobs:
           fi
 
       - name: Install Cosign
-        uses: sigstore/cosign-installer@9614fae9e5c5eddabb09f90a270fcb487c9f7149 # v3.3.0
+        uses: sigstore/cosign-installer@v3.7.0
         with:
-          cosign-release: "v2.2.2"
+          cosign-release: "v3.0.5"
 
       - name: Sign Provenance (Keyless)
         run: |
@@ -433,21 +440,21 @@ jobs:
           ref: ${{ needs.gate.outputs.tag }}
 
       - name: Download GA Bundle
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
           name: ga-bundle-staging
           path: staging/ga-bundle
 
       - name: Download Verification Output
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
           name: verification-output
           path: staging/verification
 
       - name: Install Cosign
-        uses: sigstore/cosign-installer@9614fae9e5c5eddabb09f90a270fcb487c9f7149 # v3.3.0
+        uses: sigstore/cosign-installer@v3.7.0
         with:
-          cosign-release: "v2.2.2"
+          cosign-release: "v3.0.5"
 
       - name: Verify Signed Bundle (Strict)
         env:
@@ -518,7 +525,7 @@ jobs:
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       - name: Download All Artifacts
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
           path: staging
 
@@ -705,7 +712,7 @@ jobs:
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       - name: Download GA Release Bundle
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
           name: ga-release-bundle-${{ needs.gate.outputs.tag }}
           path: ga-release-bundle

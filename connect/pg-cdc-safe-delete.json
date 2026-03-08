@@ -1,0 +1,22 @@
+{
+  "name": "pg-cdc-safe-delete",
+  "config": {
+    "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
+    "tasks.max": "1",
+    "database.hostname": "postgres",
+    "database.port": "5432",
+    "database.user": "postgres",
+    "database.password": "${file:/secrets/pg-pass:password}",
+    "database.dbname": "intelgraph",
+    "database.server.name": "postgres_server",
+    "table.include.list": "public.users,public.tenants,public.investigations,public.sources,public.entity_metadata,public.relationship_metadata,public.accounts,public.contacts,public.edges_.*",
+    "plugin.name": "pgoutput",
+    "publication.autocreate.mode": "filtered",
+    "tombstones.on.delete": "true",
+    "message.key.columns": "public.users:id;public.tenants:id;public.investigations:id;public.sources:id;public.entity_metadata:id;public.relationship_metadata:id;public.accounts:id;public.contacts:id;public.edges_.*:source_id,target_id",
+    "transforms": "unwrap",
+    "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
+    "transforms.unwrap.delete.handling.mode": "rewrite",
+    "transforms.unwrap.drop.tombstones": "false"
+  }
+}

@@ -26,6 +26,10 @@ on:
 
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
   checks: write
@@ -157,7 +161,7 @@ jobs:
 
       - name: Publish JUnit Results
         if: always()
-        uses: mikepenz/action-junit-report@db71d41eb79864e25ab0337e395c352e84523afe # v4
+        uses: mikepenz/action-junit-report@74626db7353a25a20a72816467ebf035f674c5f8 # v6.2.0
         with:
           report_paths: test-results/*-junit.xml
           fail_on_failure: true

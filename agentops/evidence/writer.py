@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
 from pathlib import Path
 from typing import Any, Mapping
 
@@ -51,7 +51,7 @@ class EvidenceWriter:
         stamp_payload = {
             "evidence_id": evidence_id,
             "run_id": run_id,
-            "created_at": datetime.now(timezone.utc).isoformat(),
+            "created_at": datetime.now(UTC).isoformat(),
         }
 
         report_path = run_dir / "report.json"

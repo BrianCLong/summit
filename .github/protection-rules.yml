@@ -9,13 +9,14 @@ branch_protection:
     required_status_checks:
       strict: true # Require branches to be up to date before merging
       checks:
-        - "CI Core (Primary Gate)"
-        - "CI / config-guard"
-        - "CI / unit-tests"
-        - "GA Gate"
+        - "meta-gate"
+        - "CI Core Gate ✅"
+        - "Unit Tests"
+        - "gate"
         - "Release Readiness Gate"
-        - "Unit Tests & Coverage"
-        - "ga / gate"
+        - "SOC Controls"
+        - "test (20.x)"
+        - "Workflow Validity Check"
       # Conditional checks (Workflow Lint, CodeQL, SBOM, Schema Compatibility)
       # are enforced via REQUIRED_CHECKS_POLICY.yml + drift detection.
 
@@ -47,9 +48,9 @@ branch_protection:
     merge_queue:
       enabled: true
       required_status_checks:
-        - "CI Core (Primary Gate)"
+        - "CI Core Gate ✅"
         - "Release Readiness Gate"
-        - "GA Gate"
+        - "gate"
       merge_method: "merge" # Preserve full history
       min_entries_to_merge: 1
       max_entries_to_merge: 10
@@ -77,13 +78,14 @@ rulesets:
         parameters:
           strict_required_status_checks_policy: true
           required_status_checks:
-            - context: "CI Core (Primary Gate)"
-            - context: "CI / config-guard"
-            - context: "CI / unit-tests"
-            - context: "GA Gate"
+            - context: "meta-gate"
+            - context: "CI Core Gate ✅"
+            - context: "Unit Tests"
+            - context: "gate"
             - context: "Release Readiness Gate"
-            - context: "Unit Tests & Coverage"
-            - context: "ga / gate"
+            - context: "SOC Controls"
+            - context: "test (20.x)"
+            - context: "Workflow Validity Check"
 
       - type: "required_signatures"
         parameters: {}
@@ -101,7 +103,7 @@ deployment:
       command: |
         gh api repos/:owner/:repo/branches/main/protection \
           --method PUT \
-          --field required_status_checks='{"strict":true,"checks":[{"context":"CI Core (Primary Gate)"},{"context":"CI / config-guard"},{"context":"CI / unit-tests"},{"context":"GA Gate"},{"context":"Release Readiness Gate"},{"context":"Unit Tests & Coverage"},{"context":"ga / gate"}]}' \
+          --field required_status_checks='{"strict":true,"checks":[{"context":"meta-gate"},{"context":"CI Core Gate ✅"},{"context":"Unit Tests"},{"context":"gate"},{"context":"Release Readiness Gate"},{"context":"SOC Controls"},{"context":"test (20.x)"},{"context":"Workflow Validity Check"}]}' \
           --field required_pull_request_reviews='{"required_approving_review_count":2,"dismiss_stale_reviews":true,"require_code_owner_reviews":true}' \
           --field enforce_admins=false \
           --field restrictions=null
@@ -111,7 +113,7 @@ deployment:
         gh api repos/:owner/:repo/merge-queue \
           --method PATCH \
           --field enabled=true \
-          --field required_status_checks='[{"context":"CI Core (Primary Gate)"},{"context":"Release Readiness Gate"},{"context":"GA Gate"}]' \
+          --field required_status_checks='[{"context":"CI Core Gate ✅"},{"context":"Release Readiness Gate"},{"context":"gate"}]' \
           --field merge_method="merge"
 
 # Environment-specific overrides

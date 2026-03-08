@@ -1,0 +1,50 @@
+{
+  "task_id": "LLM_COUNCIL_EVIDENCE_SCAFFOLDING_20260208",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "llm-council-evidence-scaffold",
+    "version": "v1",
+    "sha256": "a909d1d18643e1838aecc887e57674776df080bb55e8ff34077121ed46e1b08b",
+    "path": "prompts/evidence/llm-council-evidence-scaffold@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "evidence/schemas/council-*.schema.json",
+      ".github/scripts/validate-evidence.ts",
+      ".github/workflows/ci-council-evidence.yml",
+      "required_checks.todo.md",
+      "docs/roadmap/STATUS.json",
+      "prompts/evidence/llm-council-evidence-scaffold@v1.md",
+      "prompts/registry.yaml",
+      "agents/examples/LLM_COUNCIL_EVIDENCE_SCAFFOLDING_20260208.json"
+    ],
+    "domains": ["evidence", "governance", "ci"],
+    "exclusions": []
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": [
+      "ci-council-evidence workflow output",
+      "validator console output"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Council evidence schemas exist in evidence/schemas.",
+    "Validator script confirms required evidence scaffolding.",
+    "CI workflow runs the validator without dependency changes.",
+    "Required checks todo includes ci-council-evidence entry.",
+    "Roadmap status updated with LLM council lane-1 initiative."
+  ],
+  "stop_conditions": [
+    "Schema files cannot be created within declared scope.",
+    "Validator requires non-deterministic data to pass.",
+    "Dependency updates are required to complete the task."
+  ],
+  "dependencies": [],
+  "approvals": []
+}

@@ -137,13 +137,10 @@ export class SupernodeQueryOptimizer {
       const result = await session.run(
         `
         MATCH (e:Entity {id: $entityId})
-        OPTIONAL MATCH (e)-[r_out]->()
-        WITH e, count(r_out) AS outgoing
-        OPTIONAL MATCH (e)<-[r_in]-()
-        WITH e, outgoing, count(r_in) AS incoming
+        // BOLT OPTIMIZATION: Use size((e)-->()) and size((e)<--()) for O(1) degree checks via degree store
+        WITH e, size((e)-->()) AS outgoing, size((e)<--()) AS incoming
         OPTIONAL MATCH (e)-[r]-()
-        WITH e, outgoing, incoming, type(r) AS relType
-        WITH e, outgoing, incoming, relType, count(*) AS typeCount
+        WITH e, outgoing, incoming, type(r) AS relType, count(*) AS typeCount
         ORDER BY typeCount DESC
         WITH e, outgoing, incoming, collect({type: relType, count: typeCount})[0..5] AS topTypes
         RETURN e.id AS entityId,
@@ -195,16 +192,81 @@ export class SupernodeQueryOptimizer {
    * Detect supernodes in a list of entity IDs
    */
   async detectSupernodes(entityIds: string[]): Promise<SupernodeInfo[]> {
-    const supernodes: SupernodeInfo[] = [];
+    if (entityIds.length === 0) return [];
 
-    for (const entityId of entityIds) {
-      const info = await this.getSupernodeInfo(entityId);
-      if (info && info.connectionCount >= this.config.supernodeThreshold) {
-        supernodes.push(info);
+    const supernodes: SupernodeInfo[] = [];
+    const missingIds: string[] = [];
+
+    // Check memory cache first
+    for (const id of entityIds) {
+      if (this.supernodeCache.has(id)) {
+        const info = this.supernodeCache.get(id)!;
+        if (info.connectionCount >= this.config.supernodeThreshold) {
+          supernodes.push(info);
+        }
+      } else {
+        missingIds.push(id);
       }
     }
 
-    return supernodes;
+    if (missingIds.length === 0) return supernodes;
+
+    // BOLT OPTIMIZATION: Batch query for missing IDs using UNWIND to avoid N+1 queries.
+    // Also uses size() for O(1) degree checks.
+    const session = this.neo4j.session();
+    try {
+      const result = await session.run(
+        `
+        UNWIND $entityIds AS entityId
+        MATCH (e:Entity {id: entityId})
+        WITH e, size((e)-->()) AS outgoing, size((e)<--()) AS incoming
+        WITH e, outgoing, incoming, outgoing + incoming AS connectionCount
+        WHERE connectionCount >= $threshold
+        OPTIONAL MATCH (e)-[r]-()
+        WITH e, outgoing, incoming, connectionCount, type(r) AS relType, count(*) AS typeCount
+        ORDER BY e.id, typeCount DESC
+        WITH e, outgoing, incoming, connectionCount, collect({type: relType, count: typeCount})[0..5] AS topTypes
+        RETURN e.id AS entityId,
+               e.label AS label,
+               e.type AS type,
+               connectionCount,
+               outgoing,
+               incoming,
+               topTypes
+        `,
+        { entityIds: missingIds, threshold: this.config.supernodeThreshold }
+      );
+
+      for (const record of result.records) {
+        const info: SupernodeInfo = {
+          entityId: record.get('entityId'),
+          label: record.get('label') || 'Unknown',
+          type: record.get('type') || 'Entity',
+          connectionCount: record.get('connectionCount').toNumber(),
+          incomingCount: record.get('incoming').toNumber(),
+          outgoingCount: record.get('outgoing').toNumber(),
+          topConnectionTypes: record.get('topTypes') || [],
+          lastUpdated: new Date(),
+        };
+
+        // Cache it
+        this.supernodeCache.set(info.entityId, info);
+        supernodes.push(info);
+
+        // Also cache in Redis if enabled
+        if (this.redis && this.config.cachePrecomputedStats) {
+          await this.redis.setex(
+            `supernode:${info.entityId}`,
+            this.config.statsCacheTTL,
+            JSON.stringify(info)
+          );
+        }
+      }
+
+      return supernodes;
+    } finally {
+      await session.close();
+    }
   }
 
   /**
@@ -550,12 +612,10 @@ export class SupernodeQueryOptimizer {
       );
 
       const entityIds = result.records.map((r: any) => r.get('entityId'));
-      let processed = 0;
 
-      for (const entityId of entityIds) {
-        await this.getSupernodeInfo(entityId); // This will cache the result
-        processed++;
-      }
+      // BOLT OPTIMIZATION: Use batched detectSupernodes to pre-compute and cache stats for all entities at once
+      const supernodes = await this.detectSupernodes(entityIds);
+      const processed = entityIds.length;
 
       serviceLogger.info('Supernode pre-computation complete', { processed });
       return processed;

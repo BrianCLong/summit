@@ -1,16 +1,16 @@
+import argparse
+import hashlib
 import json
 import os
 import sys
-import argparse
-import hashlib
-from datetime import datetime, timezone
-from typing import Dict, Any, List
+from datetime import UTC, datetime, timezone
+from typing import Any, Dict, List
 
-from summit.slopguard.policy import evaluate_artifact, SlopDecision
+from summit.slopguard.policy import SlopDecision, evaluate_artifact
 
 EXCEPTION_LEDGER = "governance/overrides/slopguard_exceptions.jsonl"
 
-def redact_dict(data: Dict[str, Any], never_log_fields: List[str]) -> Dict[str, Any]:
+def redact_dict(data: dict[str, Any], never_log_fields: list[str]) -> dict[str, Any]:
     """Redacts sensitive fields from a dictionary."""
     redacted = {}
     for k, v in data.items():
@@ -24,7 +24,7 @@ def redact_dict(data: Dict[str, Any], never_log_fields: List[str]) -> Dict[str, 
             redacted[k] = v
     return redacted
 
-def write_evidence(evd_id: str, area: str, summary: str, details: Dict[str, Any], metrics: Dict[str, Any], never_log_fields: List[str]):
+def write_evidence(evd_id: str, area: str, summary: str, details: dict[str, Any], metrics: dict[str, Any], never_log_fields: list[str]):
     """Writes standard evidence artifacts with redaction and determinism."""
     base_path = f"evidence/slopguard/{area}"
     os.makedirs(base_path, exist_ok=True)
@@ -54,12 +54,12 @@ def write_evidence(evd_id: str, area: str, summary: str, details: Dict[str, Any]
     # stamp.json
     stamp = {
         "evidence_id": evd_id,
-        "created_at": datetime.now(timezone.utc).isoformat()
+        "created_at": datetime.now(UTC).isoformat()
     }
     with open(f"{base_path}/stamp.json", "w") as f:
         json.dump(stamp, f, indent=2, sort_keys=True)
 
-def append_to_ledger(entry: Dict[str, Any]):
+def append_to_ledger(entry: dict[str, Any]):
     """Appends an entry to the Governed Exception Ledger with a tamper-evident hash."""
     os.makedirs(os.path.dirname(EXCEPTION_LEDGER), exist_ok=True)
 
@@ -94,14 +94,14 @@ def main():
         print(f"Artifact not found: {args.artifact}")
         sys.exit(1)
 
-    with open(args.artifact, "r") as f:
+    with open(args.artifact) as f:
         artifact = json.load(f)
 
     if not os.path.exists(policy_path):
         print(f"Policy not found: {policy_path}")
         sys.exit(1)
 
-    with open(policy_path, "r") as f:
+    with open(policy_path) as f:
         policy = json.load(f)
 
     never_log_fields = policy.get("never_log_fields", [])
@@ -141,7 +141,7 @@ def main():
         print(f"OVERRIDE APPLIED: {args.override_reason} (by {args.approver})")
 
         audit_entry = {
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "artifact_id": artifact.get("id", "unknown"),
             "reason": args.override_reason,
             "approver": args.approver,

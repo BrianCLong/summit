@@ -6,7 +6,7 @@ def automations_enabled() -> bool:
   return os.getenv("SUMMIT_AUTOMATIONS_ENABLE", "0") == "1"
 
 
-def run(workflow_id: str, payload: Dict[str, object]) -> Dict[str, object]:
+def run(workflow_id: str, payload: dict[str, object]) -> dict[str, object]:
   if not automations_enabled():
     return {"status": "disabled", "reason": "flag_off"}
 

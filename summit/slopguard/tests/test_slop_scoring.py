@@ -1,5 +1,7 @@
 import pytest
+
 from summit.slopguard.scoring import get_slop_score
+
 
 def test_high_repetition_scoring():
     text = "This is a test. This is a test. This is a test. " * 10

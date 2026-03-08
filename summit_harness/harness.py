@@ -1,6 +1,9 @@
 from dataclasses import dataclass
-from typing import List, Dict, Any
+from datetime import UTC
+from typing import Any, Dict, List
+
 from .evidence import EvidenceWriter
+
 
 @dataclass
 class HarnessConfig:
@@ -12,7 +15,7 @@ class AgentHarness:
         self.cfg = cfg
         self.evidence = evidence
 
-    def run(self, item: str) -> Dict[str, Any]:
+    def run(self, item: str) -> dict[str, Any]:
         if not self.cfg.enabled:
             return {"status": "disabled"}
 
@@ -42,7 +45,7 @@ class AgentHarness:
         from datetime import datetime, timezone
         stamp = {
             "evidence_id": evd_id,
-            "generated_at": datetime.now(timezone.utc).isoformat()
+            "generated_at": datetime.now(UTC).isoformat()
         }
         self.evidence.write_stamp(stamp)
 

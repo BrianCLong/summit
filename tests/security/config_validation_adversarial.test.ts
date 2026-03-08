@@ -75,7 +75,7 @@ describe('Adversarial Security: Production Config Validation', () => {
     // Modify env AFTER Proxy is created but BEFORE first access
     process.env.JWT_SECRET = 'too-short';
     resetConfig();
-    
+
     // Accessing a property should trigger validation and throw
     expect(() => cfg.JWT_SECRET).toThrow();
   });

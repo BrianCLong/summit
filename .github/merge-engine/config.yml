@@ -1,0 +1,8 @@
+# Merge Engine deterministic configuration.
+version: "1"
+lanes: ["auto-merge", "fix-forward", "conflicts", "quarantine", "capture-close"]
+risk_paths: ["**/auth/**", "**/crypto/**", "**/policy/**", ".github/workflows/**", "infra/**", "k8s/**", "terraform/**"]
+large_pr_thresholds: {"files_changed": 40, "lines_changed": 1200}
+required_checks: {"auto-merge": ["ci / test", "ci / lint"], "fix-forward": ["ci / test"], "conflicts": ["ci / test"], "quarantine": ["ci / test", "security / policy-check"], "capture-close": ["ci / test"]}
+batch_size_default: 5
+tie_breaker_order: ["ci-green", "conflicts:no", "low-risk", "newest"]

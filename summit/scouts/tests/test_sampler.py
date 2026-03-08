@@ -7,7 +7,8 @@ import unittest
 from unittest.mock import MagicMock
 
 from summit.scouts.base import Config
-from summit.scouts.test_sampler import TestSamplerScout, is_safe_test_file, find_test_files
+from summit.scouts.test_sampler import TestSamplerScout, find_test_files, is_safe_test_file
+
 
 class TestTestSampler(unittest.TestCase):
     def setUp(self):

@@ -1,4 +1,4 @@
-import { z } from 'zod/v4';
+import { z } from 'zod';
 
 export const RiskLevel = z.enum(['HIGH', 'MEDIUM', 'LOW']);
 export type RiskLevel = z.infer<typeof RiskLevel>;

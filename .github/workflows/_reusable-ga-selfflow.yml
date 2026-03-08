@@ -1,0 +1,7 @@
+name: _reusable-ga-selfflow
+on: [push]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo ga

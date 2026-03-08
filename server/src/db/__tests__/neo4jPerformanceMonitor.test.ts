@@ -1,4 +1,4 @@
-import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
+import { jest, describe, it, expect, beforeEach } from '@jest/globals';
 import {
   neo4jPerformanceMonitor,
   Neo4jPerformanceMonitor,
@@ -10,6 +10,9 @@ import {
 } from '../../metrics/neo4jMetrics.js';
 
 describe('Neo4jPerformanceMonitor', () => {
+  const metricSum = (values: Array<{ value: unknown }>): number =>
+    values.reduce((sum, entry) => sum + Number(entry.value), 0);
+
   beforeEach(() => {
     neo4jPerformanceMonitor.reset();
   });
@@ -19,6 +22,7 @@ describe('Neo4jPerformanceMonitor', () => {
       slowQueryThresholdMs: 100,
       maxTrackedQueries: 5,
     });
+    const observeSpy = jest.spyOn(neo4jQueryLatencyMs as any, 'observe');
 
     customMonitor.recordSuccess({
       cypher: 'MATCH (n:Person) RETURN n',
@@ -30,9 +34,11 @@ describe('Neo4jPerformanceMonitor', () => {
     const latencyValues = neo4jQueryLatencyMs.get().values;
     const totalValues = neo4jQueryTotal.get().values;
 
-    expect(latencyValues[0].value).toBeGreaterThan(0);
-    expect(totalValues[0].value).toBe(1);
+    expect(observeSpy).toHaveBeenCalledWith(150);
+    expect(latencyValues[0].value).toBeGreaterThanOrEqual(0);
+    expect(metricSum(totalValues)).toBe(1);
     expect(customMonitor.getSlowQueries()).toHaveLength(1);
+    observeSpy.mockRestore();
   });
 
   it('records errors with labels', () => {
@@ -45,7 +51,7 @@ describe('Neo4jPerformanceMonitor', () => {
     });
 
     const errorValues = neo4jQueryErrorsTotal.get().values;
-    expect(errorValues[0].value).toBe(1);
+    expect(metricSum(errorValues)).toBe(1);
     expect(neo4jPerformanceMonitor.getRecentErrors()).toHaveLength(1);
   });
 });

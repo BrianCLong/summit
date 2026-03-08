@@ -1,0 +1,49 @@
+{
+  "$id": "https://schemas.summit.local/cogbattlespace/narrative.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Narrative",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "label", "summary", "firstSeen", "lastSeen", "variants", "frames", "rhetoricalMoves", "metrics", "provenance"],
+  "properties": {
+    "id": { "type": "string", "minLength": 8 },
+    "label": { "type": "string", "minLength": 3 },
+    "summary": { "type": "string", "minLength": 8 },
+    "firstSeen": { "type": "string", "format": "date-time" },
+    "lastSeen": { "type": "string", "format": "date-time" },
+    "variants": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "text", "count"],
+        "properties": {
+          "id": { "type": "string", "minLength": 8 },
+          "text": { "type": "string", "minLength": 1 },
+          "count": { "type": "integer", "minimum": 0 }
+        }
+      }
+    },
+    "frames": { "type": "array", "items": { "type": "string" }, "default": [] },
+    "rhetoricalMoves": { "type": "array", "items": { "type": "string" }, "default": [] },
+    "metrics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["velocity", "reach", "channels"],
+      "properties": {
+        "velocity": { "type": "number", "minimum": 0 },
+        "reach": { "type": "number", "minimum": 0 },
+        "channels": { "type": "array", "items": { "type": "string" }, "default": [] }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["derivedFromArtifacts"],
+      "properties": {
+        "derivedFromArtifacts": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+        "method": { "type": "string", "default": "cluster+summarize" }
+      }
+    }
+  }
+}

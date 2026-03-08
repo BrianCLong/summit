@@ -1,0 +1,64 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://summit.dev/schemas/agentplace/agent_manifest.schema.json",
+  "title": "AgentPlace Manifest",
+  "description": "Schema for autonomous agent manifests in the AgentPlace ecosystem.",
+  "type": "object",
+  "required": [
+    "name",
+    "version",
+    "capabilities",
+    "api_scopes",
+    "interaction_intents",
+    "data_classifications"
+  ],
+  "properties": {
+    "name": {
+      "type": "string",
+      "pattern": "^[a-z0-9_-]+$"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "description": {
+      "type": "string"
+    },
+    "capabilities": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Declared capabilities of the agent (e.g., 'web-search', 'code-execution')."
+    },
+    "api_scopes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "OAuth-style scopes for external API access."
+    },
+    "interaction_intents": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "target": { "type": "string" },
+          "action": { "type": "string" },
+          "purpose": { "type": "string" }
+        },
+        "required": ["target", "action", "purpose"]
+      },
+      "description": "Explicit declaration of intent for agent-to-agent or agent-to-service interactions."
+    },
+    "data_classifications": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["public", "internal", "confidential", "restricted"]
+      },
+      "description": "Explicit data classification levels the agent is allowed to handle."
+    }
+  },
+  "additionalProperties": false
+}

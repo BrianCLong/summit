@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "coggeo/WorldviewPlate.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "label", "velocity", "evidence_refs"],
+  "properties": {
+    "id": { "type": "string" },
+    "label": { "type": "string" },
+    "velocity": { "type": "number" },
+    "direction": { "type": ["number", "null"] },
+    "evidence_refs": { "type": "array", "items": { "type": "string" } }
+  }
+}

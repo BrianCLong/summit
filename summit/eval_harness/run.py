@@ -1,13 +1,15 @@
 from __future__ import annotations
+
 import argparse
 import hashlib
 import json
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from summit.evidence.index import append_item, EvidenceItem
+from summit.evidence.index import EvidenceItem, append_item
+
 
 def calculate_sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
@@ -29,7 +31,7 @@ def main():
 
     # 1. Load dataset
     ds = []
-    with open(dataset_path, "r", encoding="utf-8") as f:
+    with open(dataset_path, encoding="utf-8") as f:
         for line in f:
             if line.strip():
                 ds.append(json.loads(line))
@@ -104,7 +106,7 @@ def main():
     stamp_path = out_dir / "stamp.json"
     stamp = {
         "run_id": args.run_id,
-        "created_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+        "created_at": datetime.now(UTC).isoformat().replace("+00:00", "Z"),
         "git_sha": "HEAD" # TODO: get actual SHA?
     }
     write_json(stamp_path, stamp)

@@ -1,5 +1,6 @@
-from summit.vuln.types import VulnRecord, Aliases
 from summit.vuln.drift.compute_drift import compute_drift
+from summit.vuln.types import Aliases, VulnRecord
+
 
 def test_compute_drift():
     # Record with known CVE

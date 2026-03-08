@@ -437,9 +437,9 @@ This operational readiness checklist provides a comprehensive framework for depl
 
 - [ ] ## Appendix B: Links & Resources
 
-- [ ] - [Production Runbook](./DEPLOYMENT_RUNBOOK.md)
-- [ ] - [Rollback Procedures](./ROLLBACK_PROCEDURES.md)
-- [ ] - [Incident Response Guide](./INCIDENT_RESPONSE.md)
+- [ ] - [Production Runbook](../runbooks/deployment-procedures.md)
+- [ ] - [Rollback Procedures](../runbooks/deployment-procedures.md)
+- [ ] - [Incident Response Guide](../runbooks/incident-response.md)
 - [ ] - [Architecture Documentation](./ARCHITECTURE.md)
 - [ ] - [Security Assessment Report](./SECURITY_ASSESSMENT_TRACKING.md)
 - [ ] - [Implementation Guide](./SECURITY_INITIATIVES_IMPLEMENTATION_GUIDE.md)

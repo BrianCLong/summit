@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
+import datetime
+import json
 import os
 import sys
-import json
-import datetime
 from dataclasses import asdict
 
 # Ensure we can import summit
 sys.path.append(os.getcwd())
 
-from summit.brand_story import plan_series, BrandStoryInput, generate_hooks
+from summit.brand_story import BrandStoryInput, generate_hooks, plan_series
+
 
 def main():
     # Force enable feature

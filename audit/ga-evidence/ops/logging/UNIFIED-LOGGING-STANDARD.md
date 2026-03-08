@@ -20,7 +20,7 @@ Every log entry MUST include the following fields:
 
 | Field | Type | Description | Example |
 |-------|------|-------------|---------|
-| `time` | ISO 8601 timestamp | UTC timestamp of log event | `2025-12-27T14:23:45.123Z` |
+| `time` | ISO 8601 timestamp | UTC timestamp of log event | `YYYY-MM-DDTHH:mm:ss.sssZ` |
 | `level` | number/string | Log level (10=trace, 20=debug, 30=info, 40=warn, 50=error, 60=fatal) | `30` or `info` |
 | `service` | string | Service name emitting the log | `summit-api` |
 | `correlationId` | UUID v4 | Request correlation ID for tracing | `a1b2c3d4-e5f6-7890-abcd-ef1234567890` |

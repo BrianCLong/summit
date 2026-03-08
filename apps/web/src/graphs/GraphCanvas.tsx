@@ -19,6 +19,10 @@ import { drag } from 'd3-drag'
 import { cn } from '@/lib/utils'
 import type { Entity, Relationship, GraphLayout } from '@/types'
 import { CanvasGraphRenderer } from './CanvasGraphRenderer'
+import { useAuth } from '@/contexts/AuthContext'
+import { useRbac } from '@/hooks/useRbac'
+import { FlagGuard } from '@/components/FlagGuard'
+import { DisabledOverlay } from '@/components/DisabledOverlay'
 
 interface GraphCanvasProps {
   entities: Entity[]
@@ -55,6 +59,10 @@ export function GraphCanvas({
   selectedEntityId,
   className,
 }: GraphCanvasProps) {
+  // Auth & RBAC
+  const { user } = useAuth()
+  const { hasPermission: canEdit } = useRbac('investigations', 'write', { user })
+
   // Use canvas renderer for large graphs
   const PERFORMANCE_THRESHOLD = 500
   if (entities.length > PERFORMANCE_THRESHOLD) {
@@ -74,6 +82,13 @@ export function GraphCanvas({
   const [dimensions, setDimensions] = useState({ width: 800, height: 600 })
   const [fps, setFps] = useState(0)
   const [debugMode, setDebugMode] = useState(false)
+  const [tooltip, setTooltip] = useState<{
+    show: boolean
+    x: number
+    y: number
+    content: string
+  }>({ show: false, x: 0, y: 0, content: '' })
+
   const frameCountRef = useRef(0)
   const lastTimeRef = useRef(performance.now())
 
@@ -217,9 +232,50 @@ export function GraphCanvas({
       .enter()
       .append('line')
       .attr('class', 'link')
-      .attr('stroke', '#999')
+      .attr('stroke', d => {
+        // Visual guardrail: highlight drift/low confidence
+        if (d.relationship.confidence < 0.8) return '#ef4444' // red-500
+        return '#999'
+      })
+      .attr('stroke-dasharray', d => {
+        // Visual guardrail: dashed line for low confidence
+        if (d.relationship.confidence < 0.8) return '5,5'
+        return 'none'
+      })
       .attr('stroke-opacity', 0.6)
       .attr('stroke-width', d => Math.sqrt(d.relationship.confidence * 3))
+
+    // Add interactions for links (guardrails)
+    link
+      .style('cursor', d => d.relationship.confidence < 0.8 ? 'pointer' : 'default')
+      .on('mouseenter', (event, d) => {
+        if (d.relationship.confidence < 0.8) {
+          select(event.currentTarget).attr('stroke-width', Math.sqrt(d.relationship.confidence * 3) + 2)
+
+          if (!canEdit) {
+            setTooltip({
+              show: true,
+              x: event.clientX,
+              y: event.clientY,
+              content: "Upgrade to propose fixes"
+            })
+          }
+        }
+      })
+      .on('mouseleave', (event, d) => {
+        select(event.currentTarget).attr('stroke-width', Math.sqrt(d.relationship.confidence * 3))
+        if (!canEdit) {
+          setTooltip(prev => ({ ...prev, show: false }))
+        }
+      })
+      .on('click', (event, d) => {
+        if (d.relationship.confidence < 0.8 && canEdit) {
+           // Simulate fix action
+           console.log(`Fixing drift for relationship ${d.id}`)
+           // In real app, this would open a dialog or trigger an action
+        }
+      })
+
 
     // Draw link labels
     const linkLabel = linksGroup
@@ -402,6 +458,7 @@ export function GraphCanvas({
     dimensions,
     selectedEntityId,
     onEntitySelect,
+    canEdit
   ])
 
   return (
@@ -414,6 +471,20 @@ export function GraphCanvas({
             'radial-gradient(circle at 50% 50%, rgba(6, 182, 212, 0.05) 0%, transparent 50%)',
         }}
       />
+
+      {/* Tooltip Overlay */}
+      {tooltip.show && (
+        <div
+          className="fixed z-50 px-2 py-1 text-xs text-white bg-black rounded shadow pointer-events-none"
+          style={{
+            left: tooltip.x + 10,
+            top: tooltip.y + 10,
+            transform: 'translate(0, 0)' // Ensure no offset issues
+          }}
+        >
+          {tooltip.content}
+        </div>
+      )}
 
       {/* Graph controls overlay */}
       <div className="absolute top-4 right-4 flex flex-col gap-2">
@@ -433,6 +504,30 @@ export function GraphCanvas({
             <div>Entities: {entities.length}</div>
             <div>Relationships: {relationships.length}</div>
             <div>Layout: {layout.type}</div>
+
+            {/* RBAC Info */}
+            <div className="border-t my-1 pt-1 border-muted" />
+            <div className="flex items-center gap-1">
+              <span className="text-muted-foreground">Role:</span>
+              <span className="font-medium capitalize">{user?.role || 'Guest'}</span>
+            </div>
+            <div className="flex items-center gap-1">
+               <span className="text-muted-foreground">Access:</span>
+               <span className={cn("font-medium", canEdit ? "text-green-600" : "text-amber-600")}>
+                 {canEdit ? 'Full Edit' : 'Read Only'}
+               </span>
+            </div>
+            {/* Permission Matrix Tooltip Trigger */}
+            <FlagGuard required={[{ resource: 'investigations', action: 'write' }]} fallback={
+                 <div className="text-[10px] text-amber-600 mt-1 italic">
+                   Upgrade to edit graph
+                 </div>
+            }>
+               <div className="text-[10px] text-green-600 mt-1 italic">
+                 You can edit graph
+               </div>
+            </FlagGuard>
+
             {debugMode && (
               <>
                 <div className="border-t my-1 pt-1 border-muted" />
@@ -482,6 +577,15 @@ export function GraphCanvas({
               <span>{type.replace('_', ' ')}</span>
             </div>
           ))}
+        </div>
+
+        {/* Guardrail Legend Item */}
+        <div className="border-t my-2 pt-2 border-muted" />
+        <div className="grid grid-cols-1 gap-2 text-xs">
+           <div className="flex items-center gap-2">
+              <div className="w-6 h-0 border-t-2 border-dashed border-red-500" />
+              <span>Low Confidence (Drift)</span>
+           </div>
         </div>
       </div>
     </div>

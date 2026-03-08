@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { Tooltip } from '@/components/ui/Tooltip'
+import { Kbd } from '@/components/ui/Kbd'
 import { TimelineRail } from '@/components/panels/TimelineRail'
 import { GraphCanvas } from '@/graphs/GraphCanvas'
 import { ExplainViewSidebar } from '@/features/explain/ExplainViewSidebar'
@@ -392,9 +393,7 @@ export function EnhancedTriPaneView({
               <CardTitle className="flex items-center gap-2 text-sm" id="timeline-title">
                 <Clock className="h-4 w-4" />
                 Timeline
-                <kbd className="ml-auto text-xs px-1.5 py-0.5 bg-muted rounded">
-                  ⌘1
-                </kbd>
+                <Kbd keys={['mod', '1']} className="ml-auto" />
                 {timeFilter && (
                   <Badge variant="secondary" className="text-xs">
                     Filtered
@@ -452,9 +451,7 @@ export function EnhancedTriPaneView({
               <CardTitle className="flex items-center gap-2 text-sm" id="graph-title">
                 <Network className="h-4 w-4" />
                 Entity Graph
-                <kbd className="ml-auto text-xs px-1.5 py-0.5 bg-muted rounded">
-                  ⌘2
-                </kbd>
+                <Kbd keys={['mod', '2']} className="ml-auto" />
                 {showProvenance && (
                   <Badge variant="secondary" className="text-xs">
                     Provenance
@@ -531,9 +528,7 @@ export function EnhancedTriPaneView({
               <CardTitle className="flex items-center gap-2 text-sm" id="map-title">
                 <MapPin className="h-4 w-4" />
                 Geographic View
-                <kbd className="ml-auto text-xs px-1.5 py-0.5 bg-muted rounded">
-                  ⌘3
-                </kbd>
+                <Kbd keys={['mod', '3']} className="ml-auto" />
               </CardTitle>
             </CardHeader>
             <CardContent className="p-0 h-[calc(100%-4rem)]">
@@ -571,17 +566,21 @@ export function EnhancedTriPaneView({
         >
           <div className="font-semibold mb-2">Keyboard Shortcuts</div>
           <div className="space-y-1 text-muted-foreground">
-            <div>
-              <kbd>⌘1-3</kbd> Focus pane
+            <div className="flex items-center justify-between gap-4">
+              <span>Focus pane</span>
+              <Kbd keys={['mod', '1-3']} />
             </div>
-            <div>
-              <kbd>P</kbd> Toggle provenance
+            <div className="flex items-center justify-between gap-4">
+              <span>Provenance</span>
+              <Kbd keys="P" />
             </div>
-            <div>
-              <kbd>X</kbd> Toggle XAI
+            <div className="flex items-center justify-between gap-4">
+              <span>XAI</span>
+              <Kbd keys="X" />
             </div>
-            <div>
-              <kbd>Esc</kbd> Clear focus
+            <div className="flex items-center justify-between gap-4">
+              <span>Clear focus</span>
+              <Kbd keys="Esc" />
             </div>
           </div>
         </div>

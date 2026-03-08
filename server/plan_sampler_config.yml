@@ -1,0 +1,11 @@
+enabled: true
+global_sampling_rate: 0.0075     # 0.75%
+overrides:                       # targeted 10% for top 20 queries
+  - pattern: "MATCH (p:Person)-[:WORKS_AT]->(c:Company) WHERE p.id= RETURN c"
+    rate: 0.10
+  - pattern: "MATCH (a)-[r:REL]->(b) WHERE a.k= RETURN r LIMIT 100"
+    rate: 0.10
+trigger_on_latency_p95_ms: 400
+trigger_on_error_rate: 0.01
+sample_bucket_dir: ".plan-samples"     # local; CI will collect
+max_samples_per_query: 2000            # rolling cap

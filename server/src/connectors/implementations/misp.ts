@@ -73,4 +73,20 @@ export class MISPConnector extends BaseConnector {
       });
       return stream;
   }
+
+  async writeRecords(records: any[]): Promise<void> {
+      for (const record of records) {
+          try {
+              // Push event to MISP
+              await axios.post(`${this.url}/events/add`,
+                record,
+                { headers: { 'Authorization': this.apiKey, 'Accept': 'application/json' } }
+              );
+              this.metrics.recordsProcessed++;
+          } catch (err: any) {
+              this.logger.error({ err, recordId: record.id }, 'Failed to write record to MISP');
+              this.metrics.errors++;
+          }
+      }
+  }
 }

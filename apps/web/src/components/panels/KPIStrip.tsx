@@ -130,10 +130,19 @@ export function KPIStrip({
           <Card
             key={metric.id}
             className={cn(
-              'cursor-pointer transition-all hover:shadow-md border-l-4',
+              'cursor-pointer transition-all hover:shadow-md border-l-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
               getStatusColor(metric.status)
             )}
             onClick={() => onSelect?.(metric)}
+            tabIndex={0}
+            role="button"
+            aria-label={`${metric.title}: ${formatValue(metric.value, metric.format)}`}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault()
+                onSelect?.(metric)
+              }
+            }}
           >
             <CardContent className="p-6">
               <div className="flex items-center justify-between">

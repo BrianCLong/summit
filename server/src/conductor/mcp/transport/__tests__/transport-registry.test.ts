@@ -1,22 +1,17 @@
-import { jest, describe, expect, test } from '@jest/globals';
-import {
-  createDefaultTransportRegistry,
-  selectTransportName,
-} from '../registry.js';
-import { WebSocketJsonRpcClientTransport } from '../websocket-jsonrpc.js';
+import { jest, beforeAll, beforeEach, describe, expect, test } from '@jest/globals';
 import type { MCPServerConfig } from '../../../types/index.js';
 import type { TransportConnectOptions } from '../types.js';
-import WebSocket from 'ws';
 
-jest.mock('ws', () => {
-  const MockWebSocket = jest.fn();
-  return {
-    __esModule: true,
-    default: Object.assign(MockWebSocket, { OPEN: 1 }),
-  };
-});
+const MockWebSocket = Object.assign(jest.fn(), { OPEN: 1 });
 
-const MockWebSocket = WebSocket as jest.MockedClass<typeof WebSocket>;
+jest.unstable_mockModule('ws', () => ({
+  __esModule: true,
+  default: MockWebSocket,
+}));
+
+let createDefaultTransportRegistry: any;
+let selectTransportName: any;
+let WebSocketJsonRpcClientTransport: any;
 
 const baseConfig: MCPServerConfig = {
   url: 'ws://localhost:8001',
@@ -26,6 +21,19 @@ const baseConfig: MCPServerConfig = {
 };
 
 describe('MCP transport registry', () => {
+  beforeAll(async () => {
+    const registryModule = await import('../registry.js');
+    const websocketModule = await import('../websocket-jsonrpc.js');
+
+    createDefaultTransportRegistry = registryModule.createDefaultTransportRegistry;
+    selectTransportName = registryModule.selectTransportName;
+    WebSocketJsonRpcClientTransport = websocketModule.WebSocketJsonRpcClientTransport;
+  });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   test('selects grpc fallback to http when policy allows', () => {
     const registry = createDefaultTransportRegistry();
 
@@ -47,9 +55,7 @@ describe('MCP transport registry', () => {
       selectTransportName('grpc', 'strict', registry),
     ).toThrow('no fallback');
   });
-});
 
-describe('WebSocket transport metadata', () => {
   test('merges metadata into connect headers without overriding auth', async () => {
     const transport = new WebSocketJsonRpcClientTransport(baseConfig);
     const connectOptions: TransportConnectOptions = {
@@ -60,7 +66,7 @@ describe('WebSocket transport metadata', () => {
     };
 
     const mockWs = {
-      once: jest.fn().mockImplementation((event: string, callback: any) => {
+      once: jest.fn().mockImplementation((event: string, callback: () => void) => {
         if (event === 'open') {
           setTimeout(callback, 0);
         }
@@ -69,10 +75,10 @@ describe('WebSocket transport metadata', () => {
       on: jest.fn().mockReturnThis(),
       removeAllListeners: jest.fn().mockReturnThis(),
       close: jest.fn(),
-      readyState: WebSocket.OPEN,
-    } as any;
+      readyState: MockWebSocket.OPEN,
+    };
 
-    MockWebSocket.mockImplementation(() => mockWs);
+    (MockWebSocket as jest.Mock).mockImplementation(() => mockWs);
 
     await transport.connect(connectOptions);
 

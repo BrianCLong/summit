@@ -1,0 +1,10 @@
+version: 1
+slug: cnbc-bizplan-formation
+mandatory:
+  - legal_structure_selected
+  - business_registered
+  - licenses_permits_documented
+  - separate_business_bank_account
+optional:
+  - ein_recorded
+  - operating_agreement_on_file

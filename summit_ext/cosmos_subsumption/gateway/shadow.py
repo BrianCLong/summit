@@ -1,8 +1,10 @@
 from __future__ import annotations
-from .adapter import GatewayAdapter
-from ..policy.model import ExposureRule
-from ..policy.eval import validate, PolicyError
+
 from ..evidence.emit import emit
+from ..policy.eval import PolicyError, validate
+from ..policy.model import ExposureRule
+from .adapter import GatewayAdapter
+
 
 class ShadowGatewayAdapter(GatewayAdapter):
     def apply_policy(self, rule: ExposureRule) -> None:

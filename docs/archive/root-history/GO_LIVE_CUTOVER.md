@@ -1219,9 +1219,9 @@ cat > evidence-bundle-v1.0.0/manifest.json << EOF
     "reports/golden-transactions.json"
   ],
   "runbooks": [
-    "RUNBOOKS/deploy-upgrade.md",
-    "RUNBOOKS/oncall-triage.md",
-    "RUNBOOKS/emergency-procedures.md"
+    "runbooks/deploy-upgrade.md",
+    "runbooks/oncall-triage.md",
+    "runbooks/emergency-procedures.md"
   ],
   "compliance": {
     "security_scan": "passed",

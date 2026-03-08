@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "evidence.index.schema.json",
+  "title": "EvidenceIndex",
+  "type": "object",
+  "additionalProperties": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["report", "metrics", "stamp"],
+    "properties": {
+      "report": {
+        "type": "string",
+        "minLength": 1
+      },
+      "metrics": {
+        "type": "string",
+        "minLength": 1
+      },
+      "stamp": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  }
+}

@@ -204,7 +204,7 @@ verify_attestation() {
 
     # Verify the attestation
     local verify_output
-    if verify_output=$(cosign verify-blob-attestation \
+    if verify_output=$(cosign verify-blob-attestation --use-signed-timestamps \
         --certificate-identity-regexp "$CERT_IDENTITY_REGEXP" \
         --certificate-oidc-issuer "$EXPECTED_ISSUER" \
         --type "$attestation_type" \

@@ -16,6 +16,10 @@ on:
         required: false
         default: "5.3.1"
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
   security-events: write
@@ -31,14 +35,13 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
 
       - name: Install Dependencies
         run: pnpm install --no-frozen-lockfile
@@ -54,7 +57,12 @@ jobs:
           version: v0.61.0
 
       - name: Generate Evidence Bundle
-        run: pnpm ga:evidence
+        run: |
+          if pnpm run -s ga:evidence >/dev/null 2>&1; then
+            pnpm ga:evidence
+          else
+            bash scripts/release/ga_evidence_bundle.sh
+          fi
         env:
           VERSION: ${{ github.event.inputs.version || '5.3.1' }}
 

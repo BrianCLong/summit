@@ -6,7 +6,7 @@ def repair_enabled() -> bool:
   return os.getenv("SUMMIT_REPAIR_ENABLE", "0") == "1"
 
 
-def propose_patch(failing_output: str) -> Dict[str, object]:
+def propose_patch(failing_output: str) -> dict[str, object]:
   if not repair_enabled():
     return {"status": "disabled", "reason": "flag_off"}
 

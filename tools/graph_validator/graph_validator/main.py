@@ -8,9 +8,9 @@ from typing import Dict
 
 from graph_validator.checks.counts import placeholder_counts
 from graph_validator.config.mapping import load_mapping, mapping_to_dict
+from graph_validator.emit.json import write_json
 from graph_validator.evidence.ids import EvidenceIdInputs, derive_evidence_id
 from graph_validator.evidence.stamp import StampInputs, build_stamp
-from graph_validator.emit.json import write_json
 
 
 def _hash_bytes(value: bytes) -> str:
@@ -52,7 +52,7 @@ def _parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def _build_report_payload(mapping_payload: Dict[str, object]) -> Dict[str, object]:
+def _build_report_payload(mapping_payload: dict[str, object]) -> dict[str, object]:
     counts = placeholder_counts()
     return {
         'status': 'scaffold',

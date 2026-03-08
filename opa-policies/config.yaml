@@ -1,0 +1,10 @@
+services:
+  - name: bundle-server
+    url: http://bundle-server:3001
+bundles:
+  authz:
+    service: bundle-server
+    resource: bundles/maestro-policy-bundle.tgz
+    polling:
+      min_delay_seconds: 5
+      max_delay_seconds: 10

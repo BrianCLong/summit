@@ -1,0 +1,19 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Personal Intelligence Evidence Metrics",
+  "type": "object",
+  "required": ["suite", "version", "metrics"],
+  "properties": {
+    "suite": {
+      "const": "personal-intelligence"
+    },
+    "version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "metrics": {
+      "type": "object"
+    }
+  },
+  "additionalProperties": false
+}

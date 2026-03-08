@@ -7,7 +7,7 @@ from typing import Dict
 @dataclass(frozen=True)
 class CountsResult:
     status: str
-    details: Dict[str, int]
+    details: dict[str, int]
 
 
 def placeholder_counts() -> CountsResult:

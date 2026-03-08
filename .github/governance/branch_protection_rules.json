@@ -4,7 +4,18 @@
   "enforce_admins": true,
   "required_status_checks": {
     "strict": true,
-    "contexts": ["ci: governance-bundle", "ci: branch-protection-drift"]
+    "contexts": [
+      "ci: governance-bundle",
+      "ci: branch-protection-drift",
+      "lint",
+      "Typecheck",
+      "Unit Tests (CI)",
+      "CI Core Gate \u2705",
+      "Analyze (javascript-typescript)",
+      "Analyze (python)",
+      "Analyze (go)",
+      "ci-actionlint"
+    ]
   },
   "required_pull_request_reviews": {
     "dismiss_stale_reviews": true,

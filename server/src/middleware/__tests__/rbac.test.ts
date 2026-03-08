@@ -3,25 +3,16 @@
  */
 
 import { jest, describe, it, expect, beforeEach } from '@jest/globals';
-
-// Mock function declared before mock
-const mockHasPermission = jest.fn();
-
-// ESM-compatible mocking using unstable_mockModule
-jest.unstable_mockModule('../../services/AuthService', () => ({
-  __esModule: true,
-  default: class MockAuthService {
-    hasPermission = mockHasPermission;
-  },
-}));
-
-// Dynamic imports AFTER mocks are set up
-const {
+import AuthService from '../../services/AuthService.js';
+import {
   requirePermission,
   requireAnyPermission,
   requireAllPermissions,
   requireRole,
-} = await import('../rbac.js');
+} from '../rbac.js';
+
+// Mock function declared before mock
+const mockHasPermission = jest.fn();
 
 describe('RBAC Middleware', () => {
   const requestFactory = (overrides: Record<string, unknown> = {}) => ({
@@ -46,6 +37,9 @@ describe('RBAC Middleware', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    jest
+      .spyOn(AuthService.prototype, 'hasPermission')
+      .mockImplementation(mockHasPermission as any);
   });
 
   describe('requirePermission', () => {

@@ -42,19 +42,16 @@ jobs:
         run: pnpm exec ts-node --project tsconfig.json --esm scripts/cleanup/find-dead-code.ts
 
       - name: Upload dead-code report
-        uses: actions/upload-artifact@v4
-        with:
-          name: dead-code-report
+        uses: actions/upload-artifact@v4          name: dead-code-report
           path: reports/dead-code-report.json
 
       - name: Generate cleanup PR (dry run)
-        if: ${{ github.event_name != 'workflow_dispatch' || inputs.dry-run != false }}
+        if: (${{ github.event_name != 'workflow_dispatch' || inputs.dry-run != false }}) && (${{ github.event_name == 'workflow_dispatch' && inputs.dry-run == false }})
         env:
           DEAD_CODE_BRANCH: feature/dead-code-detector-pr-bot-01
         run: pnpm exec ts-node --project tsconfig.json --esm scripts/cleanup/create-dead-code-pr.ts
 
       - name: Generate cleanup PR (execute)
-        if: ${{ github.event_name == 'workflow_dispatch' && inputs.dry-run == false }}
         env:
           DEAD_CODE_BRANCH: feature/dead-code-detector-pr-bot-01
         run: pnpm exec ts-node --project tsconfig.json --esm scripts/cleanup/create-dead-code-pr.ts --execute

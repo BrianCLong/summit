@@ -17,7 +17,8 @@ IG_BACKUP_PASSPHRASE="$(cat /secure/path/passphrase)" \
 node tools/ig-backup/index.js backup create \
   --db /tmp/ig-db.json \
   --output /tmp/ig-backup.enc
-```
+
+```text
 
 Key flags:
 - `--case <id>`: limit backup to one case (repeat for multiple).
@@ -32,7 +33,8 @@ IG_BACKUP_PASSPHRASE="$(cat /secure/path/passphrase)" \
 node tools/ig-backup/index.js backup restore \
   --db /tmp/ig-restore.json \
   --input /tmp/ig-backup.enc
-```
+
+```text
 
 Key flags:
 - `--case <id>`: restore only the selected case(s).
@@ -52,7 +54,8 @@ Run the bundled tests to exercise backup, restore, checksum validation, referenc
 
 ```bash
 node --test tools/ig-backup/index.test.js
-```
+
+```text
 
 ## Expected outcomes
 

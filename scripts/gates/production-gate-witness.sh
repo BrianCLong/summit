@@ -81,7 +81,7 @@ gate_supply_chain_immutability() {
         # Cosign verification
         log "Verifying image signature with Cosign..."
         local cosign_output
-        if cosign_output=$(cosign verify "$image_digest" 2>&1); then
+        if cosign_output=$(cosign verify --use-signed-timestamps "$image_digest" 2>&1); then
             if echo "$cosign_output" | grep -q "Verified OK"; then
                 success "Cosign verification passed"
                 record_evidence "supply-chain" "cosign-verify.json" "$cosign_output"

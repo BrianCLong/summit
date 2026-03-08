@@ -13,6 +13,7 @@ import { ensureAuthenticated } from '../middleware/auth.js';
 import { isEnabled } from '../lib/featureFlags.js';
 import logger from '../utils/logger.js';
 import { supportImpersonationService, tenantHealthBundleService } from '../services/support/index.js';
+import { firstString, firstStringOr } from '../utils/http-param.js';
 
 const router = Router();
 
@@ -114,10 +115,12 @@ router.get(
   requireFeatureFlag('support.knowledgeBase'),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const query = req.query.q as string;
-      const category = req.query.category as string | undefined;
-      const locale = req.query.locale as string | undefined;
-      const limit = req.query.limit ? parseInt(req.query.limit as string) : undefined;
+      const query = firstString(req.query.q);
+      const category = firstString(req.query.category);
+      const locale = firstString(req.query.locale);
+      const limit = firstString(req.query.limit)
+        ? parseInt(firstStringOr(req.query.limit, '0'))
+        : undefined;
 
       if (!query) {
         res.status(400).json({ error: 'Search query is required' });
@@ -147,10 +150,14 @@ router.get(
   requireFeatureFlag('support.knowledgeBase'),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const category = req.query.category as string | undefined;
-      const locale = req.query.locale as string | undefined;
-      const limit = req.query.limit ? parseInt(req.query.limit as string) : undefined;
-      const offset = req.query.offset ? parseInt(req.query.offset as string) : undefined;
+      const category = firstString(req.query.category);
+      const locale = firstString(req.query.locale);
+      const limit = firstString(req.query.limit)
+        ? parseInt(firstStringOr(req.query.limit, '0'))
+        : undefined;
+      const offset = firstString(req.query.offset)
+        ? parseInt(firstStringOr(req.query.offset, '0'))
+        : undefined;
 
       const result = await supportCenterService.getArticles({
         category: category as any,
@@ -176,7 +183,7 @@ router.get(
   requireFeatureFlag('support.knowledgeBase'),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { slug } = req.params;
+      const slug = firstStringOr(req.params.slug, '');
 
       const result = await supportCenterService.getArticleBySlug(slug, true);
 
@@ -202,7 +209,7 @@ router.post(
   requireFeatureFlag('support.knowledgeBase'),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { id } = req.params;
+      const id = firstStringOr(req.params.id, '');
       const { helpful } = VoteSchema.parse(req.body);
 
       await supportCenterService.voteArticle(id, helpful);
@@ -224,8 +231,8 @@ router.get(
   requireFeatureFlag('support.faq'),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const category = req.query.category as string | undefined;
-      const locale = req.query.locale as string | undefined;
+      const category = firstString(req.query.category);
+      const locale = firstString(req.query.locale);
 
       const result = await supportCenterService.getFAQs({
         category: category as any,
@@ -375,7 +382,7 @@ router.post(
   requireFeatureFlag('support.tickets'),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { ticketId } = req.params;
+      const ticketId = firstStringOr(req.params.ticketId, '');
       const { content, isInternal } = AddMessageSchema.parse(req.body);
       const { id: userId } = req.user!;
 
@@ -404,7 +411,7 @@ router.post(
   requireFeatureFlag('support.escalation'),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { ticketId } = req.params;
+      const ticketId = firstStringOr(req.params.ticketId, '');
       const { reason } = req.body;
 
       const result = await supportCenterService.escalateTicket(ticketId, reason || 'User requested escalation');

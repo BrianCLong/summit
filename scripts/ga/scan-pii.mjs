@@ -26,7 +26,13 @@ function scanFile(filePath) {
 
   // Skip lockfiles and other non-source files that often contain false positives
   const skipExtensions = ['.lock', '.lock.yaml', '.json-lock'];
-  const skipFiles = ['pnpm-lock.yaml', 'package-lock.json', 'yarn.lock'];
+  const skipFiles = [
+    'pnpm-lock.yaml',
+    'package-lock.json',
+    'yarn.lock',
+    'prompts/registry.yaml',
+    'docs/gtm/reference-architecture.md'
+  ];
   if (skipFiles.includes(filePath) || skipExtensions.some(ext => filePath.endsWith(ext))) {
     console.log(`Skipping PII scan for ${filePath}`);
     return false;

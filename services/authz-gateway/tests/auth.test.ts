@@ -57,7 +57,14 @@ async function buildOidcToken(
 }
 
 describe('token lifecycle', () => {
+  beforeAll(() => {
+    process.env.AUTHZ_DEMO_USERNAME = 'alice';
+    process.env.AUTHZ_DEMO_PASSWORD = 'password123';
+  });
+
   afterAll(async () => {
+    delete process.env.AUTHZ_DEMO_USERNAME;
+    delete process.env.AUTHZ_DEMO_PASSWORD;
     await stopObservability();
   });
 

@@ -1,5 +1,6 @@
-import sys
 import os
+import sys
+
 
 def verify_dep_delta():
     # Stub: In a real environment, this would diff package.json/pyproject.toml

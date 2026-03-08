@@ -23,7 +23,7 @@ export class SearchIndexService {
       },
       extractField: (document: SearchableItem, fieldName: string) => {
         // Access nested fields if necessary
-        const record = document as Record<string, unknown>;
+        const record = document as unknown as unknown as Record<string, unknown>;
         return record[fieldName];
       }
     });
@@ -51,9 +51,9 @@ export class SearchIndexService {
 
     // Map entity to SearchableItem
     // Attempt to extract caseId from properties if available
-    const record = entity as Record<string, unknown>;
-    const context = record.context as Record<string, unknown> | undefined;
-    const properties = record.properties as Record<string, unknown> | undefined;
+    const record = entity as unknown as unknown as Record<string, unknown>;
+    const context = record.context as unknown as unknown as Record<string, unknown> | undefined;
+    const properties = record.properties as unknown as unknown as Record<string, unknown> | undefined;
     const caseId = (record.caseId || context?.caseId || properties?.caseId || 'global') as string;
 
     const item: SearchableItem = {
@@ -74,8 +74,8 @@ export class SearchIndexService {
   public async onClaimUpsert(claim: Record<string, unknown>) {
     if (process.env.SEARCH_ENABLED !== 'true') return;
 
-    const record = claim as Record<string, unknown>;
-    const context = record.context as Record<string, unknown> | undefined;
+    const record = claim as unknown as unknown as Record<string, unknown>;
+    const context = record.context as unknown as unknown as Record<string, unknown> | undefined;
     const caseId = (context?.caseId ?? 'global') as string;
 
     const item: SearchableItem = {
@@ -238,7 +238,7 @@ export class SearchIndexService {
             prefix: true
           },
           extractField: (document: SearchableItem, fieldName: string) => {
-            const record = document as Record<string, unknown>;
+            const record = document as unknown as unknown as Record<string, unknown>;
             return record[fieldName];
           }
         });

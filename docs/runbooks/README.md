@@ -22,7 +22,7 @@ Automated index of available runbooks.
 - [HIGH_ERROR_LATENCY.md](HIGH_ERROR_LATENCY.md)
 - [INCIDENT_RESPONSE.md](INCIDENT_RESPONSE.md)
 - [INCIDENT_RESPONSE_PLAYBOOK.md](INCIDENT_RESPONSE_PLAYBOOK.md)
-- [INDEX.md](INDEX.md)
+- INDEX.md
 - [INDEX_STALENESS.md](INDEX_STALENESS.md)
 - [KEY_MANAGEMENT.md](KEY_MANAGEMENT.md)
 - [LAMBDA_DEPLOYMENT_RUNBOOK.md](LAMBDA_DEPLOYMENT_RUNBOOK.md)
@@ -118,7 +118,7 @@ Automated index of available runbooks.
 - [incident-management.md](incident-management.md)
 - [incident-response-playbook.md](incident-response-playbook.md)
 - [incident-response.md](incident-response.md)
-- [index.md](index.md)
+- index.md
 - [ingest-enrich-handoff.yaml](ingest-enrich-handoff.yaml)
 - [ingest.md](ingest.md)
 - [ingestion-stuck.md](ingestion-stuck.md)

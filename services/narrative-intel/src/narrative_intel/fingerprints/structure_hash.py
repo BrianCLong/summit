@@ -1,8 +1,9 @@
 import hashlib
 import json
-from typing import Dict, Any
+from typing import Any, Dict
 
-def compute_structure_fingerprint(frame: Dict[str, Any], lang: str) -> str:
+
+def compute_structure_fingerprint(frame: dict[str, Any], lang: str) -> str:
     """
     Computes a deterministic hash of the narrative structure.
     """

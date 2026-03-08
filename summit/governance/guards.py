@@ -1,13 +1,14 @@
-from typing import Optional, Dict, Any
+from typing import Any, Dict, Optional
 
-from summit.registry.service import RegistryService
 from summit.registry.model import RiskTier
+from summit.registry.service import RegistryService
+
 
 class AgentGuard:
     def __init__(self, registry_service: Optional[RegistryService] = None):
         self.registry = registry_service or RegistryService()
 
-    def check_allowed(self, agent_id: str, context: Dict[str, Any]) -> None:
+    def check_allowed(self, agent_id: str, context: dict[str, Any]) -> None:
         """
         Checks if an agent is allowed to run in the current context.
         Raises PermissionError if not allowed.

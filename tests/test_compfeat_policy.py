@@ -1,5 +1,6 @@
 from summit.policy.compfeat_policy import evaluate_compfeat
 
+
 def test_denies_when_flag_off():
   d = evaluate_compfeat(actor={"role":"admin"}, request={}, flags={"compfeat_enabled": False})
   assert d.allowed is False

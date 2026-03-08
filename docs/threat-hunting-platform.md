@@ -451,4 +451,4 @@ threat_hunt_duration_seconds{hunt_type="agentic"}
 For issues and feature requests, see:
 - Documentation: `/docs/threat-hunting-platform.md`
 - Issues: `https://github.com/BrianCLong/summit/issues`
-- Runbooks: `/RUNBOOKS/threat-hunting.md`
+- Runbooks: `/runbooks/threat-hunting.md`

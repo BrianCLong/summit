@@ -1,0 +1,34 @@
+# AI Supply Chain Firewall Policy Definitions
+
+name: ai_supply_chain_firewall
+version: "1.0"
+mode: "observe" # "observe" or "enforce"
+
+slopsquat:
+  enabled: true
+  allowlist:
+    - "^custom-internal-.*$"
+  heuristics:
+    flag_missing_from_known_registries: true
+
+typosquat:
+  enabled: true
+  edit_distance_threshold: 1
+  protected_targets:
+    - requests
+    - urllib3
+    - react
+    - lodash
+    - express
+    - django
+    - numpy
+    - pandas
+
+propagation_risk:
+  enabled: true
+  velocity_threshold: 50
+  trust_score_minimum: 0.3
+  quarantine_on_anomaly: true
+
+# Network checks are explicitly disabled for CI runs by default per performance budgets.
+network_enrichment: false

@@ -1,20 +1,23 @@
 from __future__ import annotations
+
 from dataclasses import dataclass, field
-from typing import Dict, Any, List, Optional
-from summit.slopguard.scoring import get_slop_score
+from typing import Any, Dict, List, Optional
+
 from summit.slopguard.citations import extract_citations, validate_citations
 from summit.slopguard.cluster import run_cluster_analysis
+from summit.slopguard.scoring import get_slop_score
+
 
 @dataclass(frozen=True)
 class SlopDecision:
     allowed: bool
     score: float
-    reasons: List[str]
+    reasons: list[str]
     policy_version: str
     override_required: bool = False
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
-def evaluate_artifact(*, artifact: Dict[str, Any], policy: Dict[str, Any]) -> SlopDecision:
+def evaluate_artifact(*, artifact: dict[str, Any], policy: dict[str, Any]) -> SlopDecision:
     """
     Deny-by-default if score >= threshold OR missing required disclosure fields OR citation issues OR cluster findings.
     """

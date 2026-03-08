@@ -1,32 +1,33 @@
-# DAAO Standards
+# Difficulty-Aware Agent Orchestration (DAAO) Standards
 
-## Difficulty Signal
+## Overview
+DAAO provides a mechanism to adapt agent workflow complexity and model selection based on task difficulty.
 
-The difficulty signal is a standardized JSON object emitted by the Difficulty Estimator.
+## Components
+1. **Difficulty Estimator**: Heuristic-based scorer (0-1) that maps to bands (easy, medium, hard).
+2. **Cost-Aware Router**: Selects models from a catalog based on budget and capability requirements.
+3. **Collaboration Loop**: Optional "Critic -> Refiner" loop for high-difficulty tasks.
 
-```json
-{
-  "score": 0.0-1.0,
-  "band": "easy" | "medium" | "hard",
-  "domain": "coding" | "math" | "writing" | "general",
-  "recommendedDepth": 1-3,
-  "reasons": ["..."]
+## Interface Standards
+### Difficulty Signal
+```typescript
+interface DifficultySignal {
+  score: number;
+  band: "easy" | "medium" | "hard";
+  reasons: string[];
 }
 ```
 
-## Routing Decision
-
-The routing decision is deterministic given the same inputs and catalog.
-
-```json
-{
-  "modelId": "provider/model-name",
-  "estimatedCost": 0.001,
-  "reason": "Budget constrained"
+### Routing Decision
+```typescript
+interface RoutingDecision {
+  modelId: string;
+  provider: string;
+  estimatedWorstCaseCost: number;
+  reasons: string[];
 }
 ```
 
-## Validation Protocol
-
-For tasks with `band: medium` or `band: hard`, a critique-refine loop is triggered unless the initial response score is very high (>0.95).
-The critique must be structured JSON.
+## Usage
+- Always provide a `budget` (USD) when requesting routing.
+- Check `DifficultySignal.band` to determine if debate validation is needed.

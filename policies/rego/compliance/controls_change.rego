@@ -1,4 +1,5 @@
 package compliance
+import rego.v1
 
 pass["chg-DEPLOY-001"]["Prod deploy has CI run, commit, artifact digest"] {
   input.evidence.spec == "summit.evidence.deployment.v1"

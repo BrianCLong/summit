@@ -1,7 +1,9 @@
 # summit/supplychain/canary/tests/test_redirect_differential.py
 import pytest
+
 from summit.supplychain.canary.canary_runner import CanaryRunner
 from summit.supplychain.canary.providers.http_probe import HttpProbe
+
 
 def test_detect_differential():
     provider1 = HttpProbe(name="client_a", headers={"User-Agent": "ClientA"})

@@ -74,9 +74,7 @@ jobs:
         run: ts-node scripts/ops/generate-evidence-bundle.ts
 
       - name: Upload evidence bundle artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: evidence-bundle-${{ github.sha }}
+        uses: actions/upload-artifact@v4          name: evidence-bundle-${{ github.sha }}
           path: evidence-bundles/evidence-${{ github.sha }}.json
 
   build-and-deploy:

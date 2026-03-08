@@ -364,7 +364,7 @@ export function teardown(data) {
     - Persisted Query Success Rate: ${(persistedQuerySuccessRate.rate || 0) * 100}%
     - Canary Operations Rate: ${(canaryOperationsRate.rate || 0) * 100}%
     - Log Phase Violations: ${logPhaseViolations.count || 0}
-    
+
     Expected Results:
     - Log Phase: Should see violations but operations succeed
     - Enforce Phase: Canaries should reject non-persisted, production may allow

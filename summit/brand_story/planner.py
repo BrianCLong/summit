@@ -1,6 +1,8 @@
-from typing import List, Dict, Any
-from .schemas import Episode, SeriesPlan, BrandStoryInput
+from typing import Any, Dict, List
+
 from .flags import enabled
+from .schemas import BrandStoryInput, Episode, SeriesPlan
+
 
 def plan_series(input_data: BrandStoryInput, episodes_count: int = 5) -> SeriesPlan:
     """

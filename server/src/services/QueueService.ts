@@ -1,7 +1,7 @@
 import { Queue, Worker, Job } from 'bullmq';
 import config from '../config/index.js';
 import SocialService from './SocialService.js';
-import { intelgraphJobQueueDepth } from '../monitoring/metrics.js';
+import { summitJobQueueDepth } from '../monitoring/metrics.js';
 
 interface SocialJobData {
   provider: string;
@@ -29,9 +29,9 @@ export function startQueueMetrics(): () => void {
     const interval = setInterval(async () => {
         try {
             const counts = await socialQueue.getJobCounts('waiting', 'active', 'failed');
-            intelgraphJobQueueDepth.set({ queue_name: 'social:ingest', status: 'waiting' }, counts.waiting);
-            intelgraphJobQueueDepth.set({ queue_name: 'social:ingest', status: 'active' }, counts.active);
-            intelgraphJobQueueDepth.set({ queue_name: 'social:ingest', status: 'failed' }, counts.failed);
+            summitJobQueueDepth.set({ queue_name: 'social:ingest', status: 'waiting' }, counts.waiting);
+            summitJobQueueDepth.set({ queue_name: 'social:ingest', status: 'active' }, counts.active);
+            summitJobQueueDepth.set({ queue_name: 'social:ingest', status: 'failed' }, counts.failed);
         } catch (error: any) {
             console.error('Failed to collect queue metrics:', error);
         }

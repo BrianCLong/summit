@@ -19,6 +19,7 @@ import { cache } from '../../lib/cache/index.js';
 import { cfg } from '../../config.js';
 import { getPostgresPool } from '../../config/database.js';
 import argon2 from 'argon2';
+import { randomBytes } from 'crypto';
 import type { GraphQLContext } from '../apollo-v5-server.js';
 import { authGuard } from '../utils/auth.js';
 
@@ -201,7 +202,7 @@ const userResolvers = {
         }
 
         // Generate a temporary password
-        const tempPassword = require('crypto').randomBytes(16).toString('hex');
+        const tempPassword = randomBytes(16).toString('hex');
         const passwordHash = await argon2.hash(tempPassword);
 
         const result = await pool.query(

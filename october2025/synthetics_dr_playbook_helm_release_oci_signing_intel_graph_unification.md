@@ -341,7 +341,7 @@ jobs:
 # deploy/helm/intelgraph/chart-signing.md
 
 - Use GitHub OIDC + keyless signing (cosign) for charts.
-- Consumers can verify: `cosign verify ghcr.io/ORG/intelgraph/charts/intelgraph:1.0.0`.
+- Consumers can verify: `cosign verify --use-signed-timestamps ghcr.io/ORG/intelgraph/charts/intelgraph:1.0.0`.
 - Optionally, also push to a static index (`helm repo index`) for air‑gapped installs.
 ```
 

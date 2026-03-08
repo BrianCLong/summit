@@ -3,9 +3,10 @@ import json
 import os
 import sys
 
+
 def validate_json_file(filepath):
     try:
-        with open(filepath, 'r') as f:
+        with open(filepath) as f:
             return json.load(f)
     except json.JSONDecodeError as e:
         print(f"ERROR: Invalid JSON in {filepath}: {e}")

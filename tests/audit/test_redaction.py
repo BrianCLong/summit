@@ -1,5 +1,6 @@
 from summit.audit.redaction import redact
 
+
 def test_redacts_api_keys_deny_by_default_fixture():
     # Negative fixture (should trigger redaction/deny)
     text = "here is my key sk-ABCDEFGHIJKLMNOPQRSTUVWXYZ123456"

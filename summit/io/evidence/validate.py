@@ -3,7 +3,8 @@ import json
 import os
 import re
 import sys
-from jsonschema import validate, ValidationError
+
+from jsonschema import ValidationError, validate
 
 # Map file types to schema files
 SCHEMA_MAP = {
@@ -21,7 +22,7 @@ RFC3339_PATTERN = re.compile(
 
 def load_schema(schema_name):
     schema_path = os.path.join(SCHEMA_DIR, schema_name)
-    with open(schema_path, "r") as f:
+    with open(schema_path) as f:
         return json.load(f)
 
 def validate_file(file_path, file_type=None):
@@ -54,7 +55,7 @@ def validate_file(file_path, file_type=None):
         return False
 
     try:
-        with open(file_path, "r") as f:
+        with open(file_path) as f:
             data = json.load(f)
     except json.JSONDecodeError as e:
         print(f"Error: Invalid JSON in {file_path}: {e}")

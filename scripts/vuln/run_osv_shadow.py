@@ -1,15 +1,16 @@
+import hashlib
 import json
 import os
 import sys
-import hashlib
 from typing import List
 
 # Ensure project root is in path
 sys.path.append(os.getcwd())
 
+from summit.flags import SUMMIT_VULN_OSV_SHADOW
 from summit.vuln.ingest.osv_client import OSVClient
 from summit.vuln.normalize.osv_to_vuln_record import osv_to_vuln_record
-from summit.flags import SUMMIT_VULN_OSV_SHADOW
+
 
 def main():
     if not SUMMIT_VULN_OSV_SHADOW:

@@ -1,0 +1,37 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AI Evals Report Schema",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": ["case_id", "pass", "scores", "evidence"],
+    "properties": {
+      "case_id": {
+        "type": "string"
+      },
+      "pass": {
+        "type": "boolean"
+      },
+      "scores": {
+        "type": "object",
+        "additionalProperties": { "type": "number" }
+      },
+      "evidence": {
+        "type": "object",
+        "properties": {
+          "chunk_ids": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "citations": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        }
+      },
+      "notes": {
+        "type": "string"
+      }
+    }
+  }
+}

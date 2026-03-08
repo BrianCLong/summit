@@ -14,6 +14,8 @@ const IGNORE = [
   '**/.cache/**',
   '**/.turbo/**',
   '**/generated/**',
+  'reports/**',
+  'playwright-report/**',
   'frontend/.vite/**', // legacy build artifacts
   '**/public/**',
   '**/*.min.js',

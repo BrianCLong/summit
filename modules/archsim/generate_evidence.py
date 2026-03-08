@@ -1,11 +1,13 @@
+import datetime
 import json
 import os
-import datetime
+
+from modules.archsim.audit.auditors import bottleneck_risks, find_spofs
 from modules.archsim.sim.simulate import simulate
-from modules.archsim.audit.auditors import find_spofs, bottleneck_risks
+
 
 def generate_evidence(spec_path, scenario, evidence_id):
-    with open(spec_path, 'r') as f:
+    with open(spec_path) as f:
         spec = json.load(f)
 
     sim_result = simulate(spec, scenario)
@@ -37,7 +39,7 @@ def generate_evidence(spec_path, scenario, evidence_id):
 
     stamp = {
         "evidence_id": evidence_id,
-        "generated_at": datetime.datetime.now(datetime.timezone.utc).isoformat()
+        "generated_at": datetime.datetime.now(datetime.UTC).isoformat()
     }
 
     with open(f"{evidence_dir}/report.json", 'w') as f:
@@ -57,7 +59,7 @@ def generate_evidence(spec_path, scenario, evidence_id):
 def update_index(evidence_id, paths):
     index_path = "evidence/index.json"
     if os.path.exists(index_path):
-        with open(index_path, 'r') as f:
+        with open(index_path) as f:
             index = json.load(f)
     else:
         index = {"version": "1.0", "items": {}}

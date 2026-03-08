@@ -22,12 +22,18 @@ scrape_configs:
     static_configs:
       - targets: ['localhost:9090']
 
-  # IntelGraph Application
+  # IntelGraph Application (Prom-client metrics)
   - job_name: 'intelgraph-app'
     static_configs:
       - targets: ['host.docker.internal:4000']
     metrics_path: '/metrics'
-    scrape_interval: 30s
+    scrape_interval: 15s
+
+  # IntelGraph OTel (OpenTelemetry metrics)
+  - job_name: 'intelgraph-otel'
+    static_configs:
+      - targets: ['host.docker.internal:9464']
+    scrape_interval: 15s
 
   # System Metrics
   - job_name: 'node-exporter'
@@ -72,23 +78,3 @@ scrape_configs:
         target_label: instance
       - target_label: __address__
         replacement: blackbox-exporter:9115
-
-  # GraphQL Endpoint Monitoring
-  - job_name: 'graphql-endpoint'
-    static_configs:
-      - targets: ['host.docker.internal:4000']
-    metrics_path: '/graphql'
-    scrape_interval: 60s
-
-  # Custom Application Metrics
-  - job_name: 'intelgraph-custom-metrics'
-    static_configs:
-      - targets: ['host.docker.internal:4000']
-    metrics_path: '/api/metrics/custom'
-    scrape_interval: 30s
-# Remote write configuration (for long-term storage)
-# remote_write:
-#   - url: "https://prometheus-remote-write.example.com/api/v1/write"
-#     basic_auth:
-#       username: "your_username"
-#       password: "your_password"

@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
-from typing import Dict, List, Any
+from typing import Any, Dict, List
+
 
 class AlertAdapter(ABC):
     """
@@ -8,7 +9,7 @@ class AlertAdapter(ABC):
     """
 
     @abstractmethod
-    def ingest_signal(self, payload: Dict[str, Any]) -> 'CognitiveAlert':
+    def ingest_signal(self, payload: dict[str, Any]) -> 'CognitiveAlert':
         """
         Convert raw payload into a structured alert.
         """
@@ -22,7 +23,7 @@ class AlertAdapter(ABC):
         pass
 
 class CognitiveAlert:
-    def __init__(self, title: str, severity: str, source: str, metadata: Dict[str, Any]):
+    def __init__(self, title: str, severity: str, source: str, metadata: dict[str, Any]):
         self.title = title
         self.severity = severity
         self.source = source

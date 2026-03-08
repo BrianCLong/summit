@@ -11,7 +11,7 @@
     "test": "jest --passWithNoTests",
     "test:coverage": "jest --coverage",
     "typecheck": "tsc --noEmit",
-    "benchmark": "jest --testPathPattern=benchmark"
+    "benchmark": "jest --testPathPatterns=benchmark"
   },
   "keywords": [
     "geospatial",

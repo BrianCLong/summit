@@ -1,36 +1,37 @@
+import hashlib
 import json
 from dataclasses import dataclass, field
-from typing import List, Optional, Dict
 from pathlib import Path
-import hashlib
+from typing import Dict, List, Optional
+
 
 @dataclass
 class PromptRecord:
     prompt_id: str
     scene: str
     prompt_text: str
-    subdomains: List[str]
+    subdomains: list[str]
 
 @dataclass
 class QARecord:
     question_id: str
     prompt_id: str
     question: str
-    choices: List[str]
+    choices: list[str]
     answer_index: int
     subdomain: str
     omni_dim: Optional[str] = None
 
 @dataclass
 class PromptBundle:
-    prompts: Dict[str, PromptRecord]
-    questions: List[QARecord]
+    prompts: dict[str, PromptRecord]
+    questions: list[QARecord]
 
 def load_prompt_bundle(jsonl_path: Path) -> PromptBundle:
     prompts = {}
     questions = []
 
-    with open(jsonl_path, 'r') as f:
+    with open(jsonl_path) as f:
         for line in f:
             if not line.strip():
                 continue

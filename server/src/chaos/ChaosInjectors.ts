@@ -26,6 +26,7 @@ import {
   createDataEnvelope,
 } from '../types/data-envelope.js';
 import logger from '../utils/logger.js';
+import { RegionalAvailabilityService } from '../services/RegionalAvailabilityService.js';
 
 // ============================================================================
 // Types
@@ -274,6 +275,38 @@ export const exceptionInjector: Injector = {
   },
 };
 
+/**
+ * Region Kill Injector - Simulates a complete regional outage
+ */
+export const regionKillInjector: Injector = {
+  type: 'region_kill',
+
+  canApply(experiment: ChaosExperiment, _context: InjectionContext): boolean {
+    return true; 
+  },
+
+  async inject(experiment: ChaosExperiment, _context: InjectionContext): Promise<InjectionResult> {
+    const targetRegion = (experiment.config as any).region || 'us-east-1';
+    
+    logger.warn({ experimentId: experiment.id, targetRegion }, 'Chaos: Killing region!');
+
+    const availability = RegionalAvailabilityService.getInstance();
+    availability.setRegionStatus(targetRegion, 'DOWN');
+
+    return {
+      injected: true,
+      injectorType: 'region_kill',
+      experimentId: experiment.id,
+      experimentName: experiment.name,
+      details: {
+        killedRegion: targetRegion,
+        status: 'DOWN'
+      },
+      timestamp: new Date().toISOString(),
+    };
+  },
+};
+
 // ============================================================================
 // Injector Registry
 // ============================================================================
@@ -283,6 +316,7 @@ const injectorRegistry: Map<ChaosInjectorType, Injector> = new Map([
   ['failure', failureInjector],
   ['timeout', timeoutInjector],
   ['exception', exceptionInjector],
+  ['region_kill', regionKillInjector],
 ]);
 
 /**

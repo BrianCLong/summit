@@ -15,7 +15,7 @@ import type {
   ProvenanceInfo,
 } from './types.js';
 
-const logger = pino({ name: 'text-pipeline' });
+const logger: any = (pino as any)({ name: 'text-pipeline' });
 
 // Text Model Configurations
 const TEXT_MODELS: Record<string, TextModelConfig> = {

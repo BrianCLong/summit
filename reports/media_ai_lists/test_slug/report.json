@@ -1,0 +1,34 @@
+{
+  "details": {
+    "claims": [
+      {
+        "description": "Improves productivity by 50%",
+        "determinism_hash": "e2afe366b2d9c76ce001dc4eace5010562b49b878c8373739cf26e00077df6d0",
+        "id": "MEDIA-test_slug-CLAIM-001",
+        "raw": "MOCK_CLAIM_02",
+        "source": "media_ai_list/test_slug",
+        "tool_ref": "TOOL-01",
+        "type": "claim"
+      }
+    ],
+    "policy_flags": [
+      {
+        "evidence_id": "MEDIA-test_slug-CLAIM-001",
+        "flag": "unverified_data_handling",
+        "severity": "medium"
+      }
+    ],
+    "tools": [
+      {
+        "id": "TOOL-01",
+        "name": "Mock Tool"
+      }
+    ]
+  },
+  "slug": "test_slug",
+  "summary": {
+    "governance_score": 95,
+    "total_claims": 1,
+    "total_tools": 1
+  }
+}

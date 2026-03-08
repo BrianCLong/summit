@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "evidence": [
+    {
+      "id": "EVD-PIDM-CORE-001",
+      "path": "EVD-PIDM-CORE-001",
+      "report": "EVD-PIDM-CORE-001/report.json",
+      "metrics": "EVD-PIDM-CORE-001/metrics.json",
+      "stamp": "EVD-PIDM-CORE-001/stamp.json"
+    }
+  ]
+}

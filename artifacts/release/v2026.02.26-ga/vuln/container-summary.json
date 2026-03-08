@@ -1,0 +1,16 @@
+{
+  "matches": [],
+  "source": {
+    "type": "image",
+    "target": "intelgraph-platform:2026.02.26-ga"
+  },
+  "distro": {
+    "name": "unknown",
+    "version": "unknown",
+    "idLike": "unknown"
+  },
+  "descriptor": {
+    "name": "grype",
+    "version": "mock-0.0.1"
+  }
+}

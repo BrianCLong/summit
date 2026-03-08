@@ -224,7 +224,7 @@ The default response must include the following sections, in order; omit only if
 ## Repository Anchors (for MC’s internal routing)
 
 - `connectors/`, `ingestion/`, `modules/connector-sdk-s3csv/` — connector SDK & ingest pipelines.
-- `RUNBOOKS/` — operator playbooks (deploy/upgrade, triage, DB health, LLM failover, provenance integrity).
+- `runbooks/` — operator playbooks (deploy/upgrade, triage, DB health, LLM failover, provenance integrity).
 - `policies/`, `opa/`, `governance/` — enforcement rules & policy data.
 - `grafana/`, `prometheus/` — dashboards, alerts, recording rules.
 - `helm/`, `terraform/` — deployment overlays, region sharding, air‑gap bundles.

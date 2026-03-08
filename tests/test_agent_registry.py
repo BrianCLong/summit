@@ -1,9 +1,12 @@
-import pytest
 import os
+from unittest.mock import MagicMock, patch
+
+import pytest
+
+from summit.governance.audit import AuditEvent
 from summit.registry.model import AgentDefinition, RiskTier
 from summit.registry.service import RegistryService
-from summit.governance.audit import AuditEvent
-from unittest.mock import patch, MagicMock
+
 
 @pytest.fixture
 def tmp_registry_path(tmp_path):

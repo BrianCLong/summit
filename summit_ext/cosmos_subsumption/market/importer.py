@@ -1,7 +1,10 @@
 from __future__ import annotations
+
 from dataclasses import dataclass
 from typing import List, Optional
+
 from ..evidence.emit import emit
+
 
 @dataclass(frozen=True)
 class AppTemplate:
@@ -11,7 +14,7 @@ class AppTemplate:
     is_privileged: bool = False
 
 class MarketImporter:
-    def __init__(self, allowlist: List[str]):
+    def __init__(self, allowlist: list[str]):
         self.allowlist = allowlist
 
     def import_template(self, template: AppTemplate) -> bool:

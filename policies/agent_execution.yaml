@@ -1,0 +1,7 @@
+# Agent Execution Integrity Policy
+version: "1.0"
+rules:
+  - id: require_clearance
+    description: Agent actions must run in a context with defined clearance.
+    condition: "context.clearance != null"
+    enforcement: deny

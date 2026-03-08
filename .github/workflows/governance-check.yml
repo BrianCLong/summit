@@ -32,8 +32,8 @@ jobs:
             }
 
             const valid = labels.some(l => ['patch', 'minor', 'major'].includes(l));
-            if (!valid) {
-              core.setFailed("PR must have a classification label (patch, minor, or major) or use conventional commit prefixes (feat:, fix:).");
+            if (!valid && !labels.some(l => ['chore', 'test', 'ci', 'refactor', 'perf', 'style', 'build'].includes(l))) {
+              core.setFailed("PR must have a classification label (patch, minor, major) or a conventional commit prefix (feat:, fix:, chore:, test:, ci:, etc.).");
             }
 
   check-approvals:

@@ -1,15 +1,15 @@
+import hashlib
 import json
 import os
-import hashlib
-from typing import Dict, Any, List, Set
+from typing import Any, Dict, List, Set
 
 REGISTRY_PATH = "evidence/slopguard/registry/seen_artifacts.json"
 
-def get_tokens(text: str) -> Set[str]:
+def get_tokens(text: str) -> set[str]:
     """Simple shingling/tokenization for similarity."""
     return set(text.lower().split())
 
-def calculate_jaccard(set1: Set[str], set2: Set[str]) -> float:
+def calculate_jaccard(set1: set[str], set2: set[str]) -> float:
     """Calculates Jaccard similarity between two sets."""
     if not set1 or not set2:
         return 0.0
@@ -17,7 +17,7 @@ def calculate_jaccard(set1: Set[str], set2: Set[str]) -> float:
     union = set1.union(set2)
     return len(intersection) / len(union)
 
-def run_cluster_analysis(artifact: Dict[str, Any], policy: Dict[str, Any]) -> Dict[str, Any]:
+def run_cluster_analysis(artifact: dict[str, Any], policy: dict[str, Any]) -> dict[str, Any]:
     """
     Detects if the artifact is too similar to previously seen artifacts.
     """
@@ -37,7 +37,7 @@ def run_cluster_analysis(artifact: Dict[str, Any], policy: Dict[str, Any]) -> Di
     registry = []
     if os.path.exists(REGISTRY_PATH):
         try:
-            with open(REGISTRY_PATH, "r") as f:
+            with open(REGISTRY_PATH) as f:
                 registry = json.load(f)
         except:
             registry = []

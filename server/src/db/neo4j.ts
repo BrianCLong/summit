@@ -16,6 +16,7 @@ import {
   neo4jQueryTotal,
 } from '../metrics/neo4jMetrics.js';
 import { neo4jPerformanceMonitor } from './neo4jPerformanceMonitor.js';
+import { maybeSample } from '../lib/telemetry/plan-sampler.js';
 
 dotenv.config();
 
@@ -109,13 +110,16 @@ export const neo = {
       // Return a dummy session or throw?
       // For now, simple mock if needed or just rely on realDriver if available
       // But typically we should just return realDriver.session() if initialized
-      if(realDriver) return realDriver.session();
-      // If we are in mock mode but no driver (e.g. tests without init),
-      // we might need a better mock strategy.
-      // For now, let's assume getNeo4jDriver throws or handles it.
-      return getNeo4jDriver().session();
+      const s = realDriver ? realDriver.session() : getNeo4jDriver().session();
+      // Even in mock mode, if we have a session, we instrument it?
+      // Mocks might not support PROFILE.
+      // But if realDriver is present (just not initialized? No, getNeo4jDriver throws).
+      // If mock mode is true, getNeo4jDriver returns something?
+      // If we are truly in mock mode (no DB), instrumenting might be noisy.
+      // We'll instrument only if realDriver is active or we want to test instrumentation.
+      return instrumentSession(s);
     }
-    return realDriver.session();
+    return instrumentSession(realDriver.session());
   },
   run: async (query: string, params?: any) => {
     const session = neo.session();
@@ -149,21 +153,50 @@ export function instrumentSession<T extends SessionLike>(session: T): T {
     const labels = inferLabels(cypher);
     try {
       const result = await session.run(cypher, params, txConfig);
+
+      const durationMs = Date.now() - start;
       neo4jPerformanceMonitor.recordSuccess({
         cypher,
         params,
-        durationMs: Date.now() - start,
+        durationMs,
         labels,
       });
+
+      // Plan Sampling
+      if (!isNeo4jMockMode()) {
+        await maybeSample(
+          cypher,
+          params,
+          durationMs,
+          false, // hasError
+          labels.operation,
+          () => getNeo4jDriver().session()
+        );
+      }
+
       return result;
     } catch (error: any) {
+      const durationMs = Date.now() - start;
       neo4jPerformanceMonitor.recordError({
         cypher,
         params,
-        durationMs: Date.now() - start,
+        durationMs,
         labels,
         error: error?.message ?? String(error),
       });
+
+      // Plan Sampling on error
+      if (!isNeo4jMockMode()) {
+        await maybeSample(
+          cypher,
+          params,
+          durationMs,
+          true, // hasError
+          labels.operation,
+          () => getNeo4jDriver().session()
+        );
+      }
+
       throw error;
     }
   };
@@ -191,6 +224,17 @@ export function transformNeo4jIntegers(obj: any): any {
   // Handle Neo4j Integers
   if (neo4j.isInt(obj)) {
     return obj.inSafeRange() ? obj.toNumber() : obj.toString();
+  }
+
+  // Handle Neo4j temporal types
+  if (
+    obj instanceof neo4j.types.DateTime ||
+    obj instanceof neo4j.types.Date ||
+    obj instanceof neo4j.types.Time ||
+    obj instanceof neo4j.types.LocalDateTime ||
+    obj instanceof neo4j.types.LocalTime
+  ) {
+    return obj.toString();
   }
 
   // Handle Arrays

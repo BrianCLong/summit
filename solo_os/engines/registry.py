@@ -1,10 +1,13 @@
 from typing import Dict, Optional
-from .base import Engine, RunRequest, RunResult
+
 from solo_os.governance.gate import GovernanceGate
+
+from .base import Engine, RunRequest, RunResult
+
 
 class EngineRegistry:
     def __init__(self, gate: Optional[GovernanceGate] = None):
-        self._engines: Dict[str, Engine] = {}
+        self._engines: dict[str, Engine] = {}
         self._gate = gate or GovernanceGate()
 
     def register(self, engine: Engine):

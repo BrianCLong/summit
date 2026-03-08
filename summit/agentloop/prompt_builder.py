@@ -1,5 +1,6 @@
 from dataclasses import dataclass
-from typing import List, Dict, Any
+from typing import Any, Dict, List
+
 
 @dataclass(frozen=True)
 class PromptItem:
@@ -11,11 +12,11 @@ class PromptBuilder:
     """
     Stateless builder: produces an append-only list of items for each turn.
     """
-    def __init__(self, *, sandbox_md: str, tool_list: List[Dict[str, Any]]):
+    def __init__(self, *, sandbox_md: str, tool_list: list[dict[str, Any]]):
         self._sandbox_md = sandbox_md
         self._tools = tool_list
 
-    def initial_items(self, *, agents_text: str, cwd: str, shell: str) -> List[PromptItem]:
+    def initial_items(self, *, agents_text: str, cwd: str, shell: str) -> list[PromptItem]:
         """
         Constructs the initial prompt sequence.
         Layering:

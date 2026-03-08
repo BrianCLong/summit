@@ -1,5 +1,7 @@
 import random
+
 from graph_shape_guardrail.sampling import bottom_k_sample_stream
+
 
 def test_bottom_k_sample_stream_logic():
     # If we have 1000 elements and k=10

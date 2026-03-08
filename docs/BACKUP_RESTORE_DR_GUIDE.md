@@ -593,7 +593,7 @@ Summit includes comprehensive DR drill scenarios integrated with the chaos engin
 
 **Execution**:
 ```bash
-./RUNBOOKS/execute-dr-drill.sh scenario-1-total-data-loss
+./runbooks/execute-dr-drill.sh scenario-1-total-data-loss
 ```
 
 ### Scenario 2: Database Corruption Recovery
@@ -1064,8 +1064,8 @@ pg_restore: [archiver] could not open input file: Permission denied
 - **Backup Sets**: `/home/user/summit/config/backup-sets.yaml`
 - **Backup Script**: `/home/user/summit/scripts/backup-enhanced.sh`
 - **Restore Script**: `/home/user/summit/scripts/restore-enhanced.sh`
-- **DR Drill Scenarios**: `/home/user/summit/RUNBOOKS/dr-drill-scenarios.yaml`
-- **DR Procedures**: `/home/user/summit/RUNBOOKS/disaster-recovery-procedures.yaml`
+- **DR Drill Scenarios**: `/home/user/summit/runbooks/dr-drill-scenarios.yaml`
+- **DR Procedures**: `/home/user/summit/runbooks/disaster-recovery-procedures.yaml`
 - **CI Workflow**: `/home/user/summit/.github/workflows/backup-restore-validation.yml`
 
 ### Useful Commands

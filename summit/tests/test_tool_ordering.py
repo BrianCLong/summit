@@ -1,6 +1,8 @@
 import pytest
+
 from summit.tools.registry import ToolRegistry
 from summit.tools.shell import ShellTool
+
 
 def test_tool_ordering():
     registry = ToolRegistry()

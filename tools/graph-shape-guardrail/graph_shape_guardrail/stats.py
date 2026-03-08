@@ -1,5 +1,6 @@
 import math
 
+
 def calculate_mean(data):
     if not data:
         return 0.0

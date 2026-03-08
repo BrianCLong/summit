@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
+import argparse
+import hashlib
 import json
 import os
 import sys
-import argparse
-import hashlib
 
 EVIDENCE_DIR = 'evidence/EVD-COGSEC-DRILL-001'
 
@@ -14,7 +14,7 @@ def ensure_dir(d):
 def generate_evidence(scenario_path):
     print(f"Running drill for scenario: {scenario_path}")
 
-    with open(scenario_path, 'r') as f:
+    with open(scenario_path) as f:
         scenario = json.load(f)
 
     scenario_id = scenario.get('scenario_id', 'UNKNOWN')

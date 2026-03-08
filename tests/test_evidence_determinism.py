@@ -20,8 +20,10 @@ def test_determinism(tmp_path):
     assert p1.read_bytes() == p2.read_bytes()
 
 
-from summit_harness.evidence import EvidenceWriter
 from pathlib import Path
+
+from summit_harness.evidence import EvidenceWriter
+
 
 def test_harness_evidence_writer_determinism(tmp_path):
     writer = EvidenceWriter(tmp_path)

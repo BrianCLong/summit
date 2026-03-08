@@ -11,6 +11,10 @@ on:
       - 'server/src/policy-engine/**'
       - 'server/src/scripts/policy-propose.ts'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test-engine:
     runs-on: ubuntu-latest
@@ -23,6 +27,7 @@ jobs:
         uses: actions/setup-node@v4 # v6
         with:
           cache: 'pnpm'
+          cache-dependency-path: '**/pnpm-lock.yaml'
           node-version: '20'
 
       - name: Install dependencies

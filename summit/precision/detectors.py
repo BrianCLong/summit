@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
 import math
+from dataclasses import dataclass
 from typing import Any, Dict
 
 import torch
@@ -24,6 +24,9 @@ def compute_mismatch_metrics(train_vals: dict[str, Any], rollout_vals: dict[str,
 
     if train_logprobs is None or rollout_logprobs is None:
         return MismatchReport()
+
+    if torch is None:
+        raise ImportError("torch is required for computing mismatch metrics involving tensors")
 
     delta = (train_logprobs - rollout_logprobs).abs()
 

@@ -8,9 +8,9 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    - uses: sigstore/cosign-installer@v3
+    - uses: sigstore/cosign-installer@v3.7.0
       with:
-        cosign-release: 'v2.2.4'
+        cosign-release: 'v3.0.5'
 
     - name: Verify image attestation
       shell: bash
@@ -31,7 +31,7 @@ runs:
           VERIFY_ARGS+=(--certificate-oidc-issuer "https://token.actions.githubusercontent.com")
         fi
 
-        cosign verify-attestation --type spdxjson "${VERIFY_ARGS[@]}" "${{ inputs.image }}"
+        cosign verify-attestation --use-signed-timestamps --type spdxjson "${VERIFY_ARGS[@]}" "${{ inputs.image }}" || { echo "::error::Supply chain verification failed! Missing or invalid signed timestamps."; false; }
 
     - uses: azure/setup-helm@v4
     - run: |

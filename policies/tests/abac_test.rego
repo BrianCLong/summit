@@ -1,5 +1,6 @@
 
 package policies
+import rego.v1
 
 # Test tenant isolation: user from tenant A cannot access tenant B data
 test_deny_cross_tenant_access {

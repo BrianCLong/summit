@@ -1,6 +1,7 @@
 from services.graphrag_api.middleware.budget_enforcer import BudgetEnforcer
 from services.graphrag_api.models.reasoning_budget import ReasoningBudget
 
+
 def test_enforce_defaults():
     enforcer = BudgetEnforcer()
     budget = ReasoningBudget()

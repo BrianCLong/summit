@@ -1,9 +1,11 @@
-import unittest
-import pathlib
 import json
+import pathlib
 import shutil
 import tempfile
-from scripts.verify_evidence import validate_file, check_determinism
+import unittest
+
+from scripts.verify_evidence import check_determinism, validate_file
+
 
 class TestVerifyEvidence(unittest.TestCase):
     def setUp(self):
