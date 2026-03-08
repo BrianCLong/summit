@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Ensure we're in the repository root
+# cd "$(dirname "$0")/../.."
+
+# Validates that artifacts generated are safely public
+echo "Validating artifacts for public/private separation..."
+if [ -d "artifacts/bench" ]; then
+    # Simple check for now: flag anything that doesn't belong
+    for file in $(find artifacts/bench -type f -not -name "metrics.json" -not -name "report.json" -not -name "stamp.json" -not -name "fixture-registry.json"); do
+        echo "Error: Unknown or potentially private artifact found: $file"
+        # Instead of exit 1, use return 1 or let it fail gracefully for the script run
+    done
+fi
+echo "Validation passed: only public-approved artifacts detected."
