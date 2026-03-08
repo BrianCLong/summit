@@ -15,7 +15,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'pnpm'
           cache-dependency-path: '**/pnpm-lock.yaml'
       - name: Install workspace
         run: pnpm -w install --frozen-lockfile
