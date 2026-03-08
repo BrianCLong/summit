@@ -1,7 +1,13 @@
 {
-  "last_updated": "2026-03-07T06:03:42Z",
-  "revision_note": "Added Nature s41562-026-02411-w Layer 2/3 regulatory subsumption architecture brief and roadmap tracking entry.",
+  "last_updated": "2026-03-07T15:59:22Z",
+  "revision_note": "Added defensive counter-intelligence and insider-threat MWS governance, CI gate, and runbook plan.",
   "initiatives": [
+    {
+      "id": "defensive-counterintelligence-insider-threat-mws",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Established governed MWS docs, security-intelligence gate workflow, baseline artifacts, and drift monitoring script."
+    },
     {
       "id": "nature-s41562-026-02411-w-layer2-layer3",
       "status": "in_progress",
