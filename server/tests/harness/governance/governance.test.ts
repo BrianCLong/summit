@@ -1,7 +1,7 @@
 
-import { GovernanceRiskService } from '../../src/services/governance/GovernanceRiskService';
-import { MissionGuardrailService } from '../../src/services/governance/MissionGuardrailService';
-import { PhilanthropyService } from '../../src/services/governance/PhilanthropyService';
+import { GovernanceRiskService } from '../../../src/services/governance/GovernanceRiskService';
+import { MissionGuardrailService } from '../../../src/services/governance/MissionGuardrailService';
+import { PhilanthropyService } from '../../../src/services/governance/PhilanthropyService';
 import { describe, it, expect } from '@jest/globals';
 
 describe('Governance & Ethics Layer', () => {

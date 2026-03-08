@@ -5,8 +5,8 @@
 
 import { describe, it, expect, beforeAll, afterAll } from '@jest/globals';
 import { Pool } from 'pg';
-import { CaseWorkflowService } from '../cases/workflow/index.js';
-import { getPostgresPool } from '../db/postgres.js';
+import { CaseWorkflowService } from '../../../src/cases/workflow/index.js';
+import { getPostgresPool } from '../../../src/db/postgres.js';
 
 describe('Case Workflow Integration Tests', () => {
   let pg: Pool;
