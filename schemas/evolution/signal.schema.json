@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.example.com/evolution/signal.schema.json",
+  "type": "object",
+  "properties": {
+    "signal_id": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string"
+    },
+    "source": {
+      "type": "string"
+    },
+    "evidence": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "signal_id",
+    "type",
+    "source",
+    "evidence"
+  ]
+}
