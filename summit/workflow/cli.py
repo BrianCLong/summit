@@ -1,7 +1,5 @@
 import click
-
 from summit.workflow.base import WorkflowValidator
-
 
 @click.group()
 def workflow():

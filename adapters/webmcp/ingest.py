@@ -2,10 +2,11 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 import hashlib
 import json
-from dataclasses import dataclass
 from typing import Any
+
 
 _REQUIRED_FIELDS = ("origin", "timestamp_ms", "actions")
 

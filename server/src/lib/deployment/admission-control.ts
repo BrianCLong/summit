@@ -75,7 +75,7 @@ export class ArtifactVerifier {
       // In a real environment, we would use cosign verify
       // For now, we'll try to execute cosign, but catch errors and fallback/fail gracefully
       // Using the OIDC issuer pattern from preflight_image_check.sh
-      const cmd = `cosign verify --use-signed-timestamps "${imageRef}" --certificate-identity-regexp ".*" --certificate-oidc-issuer "https://token.actions.githubusercontent.com"`;
+      const cmd = `cosign verify "${imageRef}" --certificate-identity-regexp ".*" --certificate-oidc-issuer "https://token.actions.githubusercontent.com"`;
       await execAsync(cmd);
       return { allowed: true, reason: 'Cosign signature verified' };
     } catch (e: any) {

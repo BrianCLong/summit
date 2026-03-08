@@ -30,7 +30,7 @@ runs:
         esac
 
     - name: Install cosign (pinned)
-      uses: sigstore/cosign-installer@v3.7.0
+      uses: sigstore/cosign-installer@v3.5.0
       with:
         cosign-release: "v${{ inputs.cosign_version }}"
 

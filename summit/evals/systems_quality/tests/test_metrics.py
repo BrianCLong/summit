@@ -1,13 +1,6 @@
-from unittest.mock import MagicMock, patch
-
 import pytest
-
-from summit.evals.systems_quality.metrics import (
-    calculate_defect_density,
-    calculate_rework_rate,
-    calculate_variance_score,
-)
-
+from unittest.mock import patch, MagicMock
+from summit.evals.systems_quality.metrics import calculate_defect_density, calculate_rework_rate, calculate_variance_score
 
 @patch("summit.evals.systems_quality.metrics.run_git_command")
 def test_calculate_defect_density(mock_git):

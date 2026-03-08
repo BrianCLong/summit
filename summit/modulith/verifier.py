@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from summit.modulith.scanner import ImportEdge
 from summit.modulith.schemas import ModulithConfig, Violation
+from summit.modulith.scanner import ImportEdge
 
 
 def verify(edges: list[ImportEdge], dynamic_candidates: list[dict[str, object]], config: ModulithConfig) -> list[Violation]:

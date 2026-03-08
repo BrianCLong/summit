@@ -1,9 +1,8 @@
 import os
 import re
 
-
 def fix_file(filepath):
-    with open(filepath) as f:
+    with open(filepath, 'r') as f:
         lines = f.readlines()
 
     new_lines = []

@@ -1,9 +1,8 @@
-import hashlib
 import json
 import os
+import hashlib
 from datetime import UTC, datetime
 from pathlib import Path
-
 
 def write_engine_evidence(engine_name: str, run_id: str, summary: dict, metrics: dict):
     base_path = Path("solo_os/evidence/runs") / engine_name / run_id

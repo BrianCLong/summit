@@ -1,8 +1,0 @@
-{
-  "title": "Merge Readiness",
-  "widgets": [
-    { "name": "Open PRs by Status", "type": "bar" },
-    { "name": "Median Readiness by Area", "type": "bar" },
-    { "name": "Top Blockers", "type": "table" }
-  ]
-}

@@ -39,7 +39,7 @@
     "db:migration:check": "node --loader ts-node/esm scripts/migration_check.ts"
   },
   "dependencies": {
-    "@apollo/server": "4.11.3",
+    "@apollo/server": "^5.4.0",
     "@as-integrations/express4": "1.1.2",
     "@aws-sdk/client-s3": "^3.962.0",
     "@bull-board/api": "6.12.0",
@@ -48,7 +48,6 @@
     "@intelgraph/feature-flags": "workspace:*",
     "@intelgraph/maestro-core": "workspace:*",
     "@intelgraph/provenance": "workspace:*",
-    "@intelgraph/telemetry-config": "file:../packages/telemetry-config",
     "@node-saml/node-saml": "^5.1.0",
     "@opentelemetry/api": "1.9.0",
     "@opentelemetry/auto-instrumentations-node": "0.39.0",
