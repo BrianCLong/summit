@@ -1,6 +1,6 @@
 // graphql-upload-ts types are not properly exported, using any for now
 const GraphQLUpload: any = null; // TODO: Fix graphql-upload-ts import
-import { AttachmentService } from '../services/AttachmentService';
+import { AttachmentService } from '../services/AttachmentService.js';
 import type { Readable } from 'stream';
 
 const service = new AttachmentService();

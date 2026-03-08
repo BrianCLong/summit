@@ -1,4 +1,4 @@
-import { registerModel } from '../src/conductor/models';
+import { registerModel } from '../src/conductor/models.js';
 
 test('rejects unsigned model', async () => {
   await expect(

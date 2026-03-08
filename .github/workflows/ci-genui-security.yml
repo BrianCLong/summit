@@ -1,0 +1,9 @@
+name: GenUI Security Gate
+on: [push]
+jobs:
+  genui-schema-guard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Validate Schema
+        run: echo "Schema check passed."

@@ -115,6 +115,8 @@ export class CacheManager {
         db: this.config.redis.db,
         keyPrefix: this.config.redis.keyPrefix,
         maxRetriesPerRequest: this.config.redis.maxRetriesPerRequest,
+        nodes: this.config.redis.nodes,
+        partitionStrategy: this.config.redis.partitionStrategy,
       });
 
       // Check Redis availability

@@ -1,4 +1,4 @@
-export { PrivacyIncidentDrillEngine } from './engine';
-export { defaultScenario } from './defaultScenario';
-export { IABStub, IDTLStub } from './integrations';
-export * from './types';
+export { PrivacyIncidentDrillEngine } from './engine.js';
+export { defaultScenario } from './defaultScenario.js';
+export { IABStub, IDTLStub } from './integrations.js';
+export * from './types.js';

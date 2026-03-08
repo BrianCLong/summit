@@ -1,0 +1,104 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.local/schemas/business_plan.schema.json",
+  "title": "BusinessPlan",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "executive_summary",
+    "market_analysis",
+    "organization_management",
+    "products_services",
+    "marketing_sales",
+    "financials",
+    "formation",
+    "banking"
+  ],
+  "properties": {
+    "executive_summary": {
+      "type": "string",
+      "minLength": 1
+    },
+    "market_analysis": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["target_market", "competitive_landscape"],
+      "properties": {
+        "target_market": { "type": "string", "minLength": 1 },
+        "competitive_landscape": { "type": "string", "minLength": 1 }
+      }
+    },
+    "organization_management": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["team"],
+      "properties": {
+        "team": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "products_services": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["offerings"],
+      "properties": {
+        "offerings": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "marketing_sales": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["channels", "go_to_market"],
+      "properties": {
+        "channels": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "go_to_market": { "type": "string", "minLength": 1 }
+      }
+    },
+    "financials": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["startup_costs", "funding_strategy", "projected_income", "projected_expenses"],
+      "properties": {
+        "startup_costs": { "type": "number", "minimum": 0 },
+        "funding_strategy": { "type": "string", "minLength": 1 },
+        "projected_income": { "type": "number", "minimum": 0 },
+        "projected_expenses": { "type": "number", "minimum": 0 }
+      }
+    },
+    "formation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["legal_structure", "registered", "licenses_permits"],
+      "properties": {
+        "legal_structure": {
+          "type": "string",
+          "enum": ["sole_proprietorship", "llc", "corporation"]
+        },
+        "registered": { "type": "boolean" },
+        "licenses_permits": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "banking": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["separate_business_bank_account"],
+      "properties": {
+        "separate_business_bank_account": { "type": "boolean" }
+      }
+    }
+  }
+}

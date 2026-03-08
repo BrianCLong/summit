@@ -12,11 +12,11 @@ import type {
   CompileResponse,
   CompileError,
   SchemaContext,
-} from './types.ts';
-import { generateFromPattern, queryPatterns } from './query-patterns.ts';
-import { estimateQueryCost, isSafeToExecute, generateCostWarnings } from './cost-estimator.ts';
-import { validateCypher, extractRequiredParameters, isReadOnlyQuery } from './validator.ts';
-import { buildQueryExplanation, explainQuery, summarizeQuery } from './explainer.ts';
+} from './types.js';
+import { generateFromPattern, queryPatterns } from './query-patterns.js';
+import { estimateQueryCost, isSafeToExecute, generateCostWarnings } from './cost-estimator.js';
+import { validateCypher, extractRequiredParameters, isReadOnlyQuery } from './validator.js';
+import { buildQueryExplanation, explainQuery, summarizeQuery } from './explainer.js';
 
 const logger = (pino as any)({ name: 'nl-graph-query' });
 

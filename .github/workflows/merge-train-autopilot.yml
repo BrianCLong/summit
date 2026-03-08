@@ -1,0 +1,62 @@
+name: Merge-train Autopilot
+
+on:
+  schedule:
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
+    inputs:
+      batch_size:
+        description: 'Number of PRs to enqueue'
+        required: true
+        default: '10'
+      max_queue:
+        description: 'Halt if merge queue depth >= N'
+        required: true
+        default: '50'
+      dry_run:
+        description: 'Dry run mode'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  autopilot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run Autopilot
+        id: drain
+        run: |
+          # Use inputs if provided, otherwise defaults
+          BATCH="${{ github.event.inputs.batch_size || '10' }}"
+          MAXQ="${{ github.event.inputs.max_queue || '50' }}"
+          DRY="${{ github.event.inputs.dry_run }}"
+
+          ARGS="--batch-size $BATCH --max-queue $MAXQ"
+          if [ "$DRY" == "true" ]; then ARGS="$ARGS --dry-run"; fi
+
+          # If triggered by schedule, use defaults explicitly
+          if [ "${{ github.event_name }}" == "schedule" ]; then
+            ARGS="--batch-size 10 --max-queue 50"
+          fi
+
+          chmod +x .github/scripts/merge-train-autopilot.sh
+          ./.github/scripts/merge-train-autopilot.sh $ARGS | tee autopilot.log
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Step Summary
+        if: always()
+        run: |
+          echo "### Merge-train Autopilot Report" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          if [ -f autopilot.log ]; then
+            cat autopilot.log >> $GITHUB_STEP_SUMMARY
+          else
+            echo "Error: autopilot.log not found." >> $GITHUB_STEP_SUMMARY
+          fi
+          echo '```' >> $GITHUB_STEP_SUMMARY

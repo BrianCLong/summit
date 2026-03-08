@@ -26,7 +26,7 @@ export {
   type TrendDataPoint,
   type PredictionEngineConfig,
   type PredictionStats,
-} from './CompliancePredictionEngine.ts';
+} from './CompliancePredictionEngine.js';
 
 export {
   GapPredictionService,
@@ -42,7 +42,7 @@ export {
   type ControlMetricPoint,
   type GapPredictionConfig,
   type GapPredictionStats,
-} from './GapPredictionService.ts';
+} from './GapPredictionService.js';
 
 export {
   RemediationPrioritizer,
@@ -60,7 +60,7 @@ export {
   type RiskProjection,
   type PrioritizerConfig,
   type PrioritizerStats,
-} from './RemediationPrioritizer.ts';
+} from './RemediationPrioritizer.js';
 
 export {
   EvidenceQualityScorer,
@@ -77,4 +77,4 @@ export {
   type BatchScoreResult,
   type ScorerConfig,
   type ScorerStats,
-} from './EvidenceQualityScorer.ts';
+} from './EvidenceQualityScorer.js';

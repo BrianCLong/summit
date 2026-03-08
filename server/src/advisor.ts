@@ -3,7 +3,7 @@ import {
   listPools,
   currentPricing,
   pickCheapestEligible,
-} from './conductor/scheduling/pools.ts';
+} from './conductor/scheduling/pools.js';
 
 export async function advise({ runbookYaml }: { runbookYaml: string }) {
   const rb: any = YAML.parse(runbookYaml);

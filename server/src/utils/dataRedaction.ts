@@ -1,4 +1,4 @@
-import { User } from '../types/context'; // Assuming User type is defined here
+import { User } from '../types/context.js'; // Assuming User type is defined here
 // @ts-ignore
 import { default as pino } from 'pino';
 import { createHash } from 'crypto';

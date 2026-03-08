@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { metrics } from '../observability/metrics.ts';
+import { metrics } from '../observability/metrics.js';
 import { Meter } from '@opentelemetry/api';
 import { MeterProvider } from '@opentelemetry/sdk-metrics';
 import { Resource } from '@opentelemetry/resources';
@@ -24,6 +24,7 @@ class ComprehensiveTelemetry {
       dels: { add: (value?: number) => void };
     };
     api: { requests: { add: (value?: number) => void }; errors: { add: (value?: number) => void } };
+    adoption: { track: (featureId: string, action: string, tenantId: string, userId: string, metadata?: any) => void };
   };
 
   // Request/response timing
@@ -45,21 +46,71 @@ class ComprehensiveTelemetry {
     this.meter = meterProvider.getMeter('intelgraph-server-telemetry-legacy');
 
     // Mocks to satisfy type checker while we migrate
-    this.requestDuration = { record: () => {} };
-    this.activeConnections = { add: (value: number) => {} };
+    this.requestDuration = { record: () => { } };
+    this.activeConnections = { add: (value: number) => { } };
+
+    // Wire up subsystems to actual metrics
     this.subsystems = {
       database: {
-        queries: { add: (value?: number) => {} },
-        errors: { add: (value?: number) => {} },
-        latency: { record: (value?: number) => {} },
+        queries: {
+          add: (value: number = 1) => {
+            if (metrics.dbQueriesTotal) {
+              // Use generic labels for legacy adapter usage
+              metrics.dbQueriesTotal.labels('unknown', 'query', 'ok').inc(value);
+            }
+          }
+        },
+        errors: {
+          add: (value: number = 1) => {
+            if (metrics.dbQueriesTotal) {
+              metrics.dbQueriesTotal.labels('unknown', 'query', 'error').inc(value);
+            }
+          }
+        },
+        latency: {
+          record: (value: number) => {
+            if (metrics.dbQueryDuration) {
+              metrics.dbQueryDuration.labels('unknown', 'query').observe(value);
+            }
+            // Also update legacy metric
+            if (metrics.intelgraphDatabaseQueryDuration) {
+              metrics.intelgraphDatabaseQueryDuration.labels('unknown', 'query').observe(value);
+            }
+          }
+        },
       },
       cache: {
-        hits: { add: (value?: number) => {} },
-        misses: { add: (value?: number) => {} },
-        sets: { add: (value?: number) => {} },
-        dels: { add: (value?: number) => {} },
+        hits: {
+          add: (value: number = 1) => {
+            if (metrics.intelgraphCacheHits) metrics.intelgraphCacheHits.labels('redis').inc(value);
+            if (metrics.cacheHits) metrics.cacheHits.inc(value);
+          }
+        },
+        misses: {
+          add: (value: number = 1) => {
+            if (metrics.intelgraphCacheMisses) metrics.intelgraphCacheMisses.inc(value);
+            if (metrics.cacheMisses) metrics.cacheMisses.inc(value);
+          }
+        },
+        sets: { add: (value: number = 1) => { /* TODO: cacheSets? */ } },
+        dels: { add: (value: number = 1) => { /* TODO: cacheDels? */ } },
       },
-      api: { requests: { add: (value?: number) => {} }, errors: { add: (value?: number) => {} } },
+      api: {
+        requests: {
+          add: (value: number = 1) => {
+            if (metrics.stdHttpRequestsTotal) {
+              metrics.stdHttpRequestsTotal.labels('GET', 'unknown', '200').inc(value);
+            }
+          }
+        },
+        errors: {
+          add: (value: number = 1) => {
+            if (metrics.applicationErrors) {
+              metrics.applicationErrors.labels('api', 'error', 'high', 'general').inc(value);
+            }
+          }
+        }
+      },
     };
   }
 
@@ -93,7 +144,7 @@ class ComprehensiveTelemetry {
     const legacyLabels = {
       method: String(attributes.method || 'GET'),
       route: String(attributes.route || 'unknown'),
-      status: String(attributes.status || 200),
+      status_code: String(attributes.status || 200),
     };
     metrics.httpRequestDuration.observe(legacyLabels, duration);
   }

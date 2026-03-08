@@ -6,8 +6,7 @@ import { osintQueue } from '../services/OSINTQueueService.js';
 import { ensureAuthenticated } from '../middleware/auth.js';
 import { osintRateLimiter } from '../middleware/osintRateLimiter.js';
 import { getPostgresPool } from '../db/postgres.js';
-import { SimpleFeedCollector } from '../../../packages/osint-collector/src/collectors/SimpleFeedCollector.js';
-import { CollectionType, TaskStatus } from '../../../packages/osint-collector/src/types/index.js';
+import { securityAudit } from '../audit/security-audit-logger.js';
 
 interface AuthenticatedRequest extends Request {
   user?: {
@@ -18,6 +17,23 @@ interface AuthenticatedRequest extends Request {
 const router = express.Router();
 // const prioritizationService = new OSINTPrioritizationService();
 // const veracityService = new VeracityScoringService();
+
+const COLLECTION_TYPE_WEB_SCRAPING = 'web_scraping';
+const TASK_STATUS_PENDING = 'pending';
+let simpleFeedCollectorPromise: Promise<any> | undefined;
+
+async function loadSimpleFeedCollector() {
+  if (!simpleFeedCollectorPromise) {
+    const moduleUrl = new URL(
+      '../../../packages/osint-collector/src/collectors/SimpleFeedCollector.js',
+      import.meta.url,
+    ).href;
+    simpleFeedCollectorPromise = import(moduleUrl).then(
+      (module) => module.SimpleFeedCollector,
+    );
+  }
+  return simpleFeedCollectorPromise;
+}
 
 router.use(osintRateLimiter);
 
@@ -36,10 +52,23 @@ router.post('/ingest-feed', ensureAuthenticated, async (req: Request, res: Respo
   try {
     const { url } = req.body;
 
+    securityAudit.logDataImport({
+      actor: (req as AuthenticatedRequest).user?.tenantId ?? 'unknown',
+      tenantId: (req as AuthenticatedRequest).user?.tenantId,
+      resourceType: 'osint_feed',
+      resourceId: url ?? 'unknown',
+      action: 'ingest',
+      details: { feedUrl: url },
+      ipAddress: req.ip,
+      userAgent: req.get('user-agent'),
+      dataClassification: 'confidential',
+    });
+
     // Use the Real Collector
+    const SimpleFeedCollector = await loadSimpleFeedCollector();
     const collector = new SimpleFeedCollector({
       name: 'on-demand-feed',
-      type: CollectionType.WEB_SCRAPING,
+      type: COLLECTION_TYPE_WEB_SCRAPING,
       enabled: true,
       feedUrl: url
     });
@@ -48,12 +77,12 @@ router.post('/ingest-feed', ensureAuthenticated, async (req: Request, res: Respo
 
     const result = await collector.collect({
       id: `manual-${Date.now()}`,
-      type: CollectionType.WEB_SCRAPING,
+      type: COLLECTION_TYPE_WEB_SCRAPING,
       source: url,
       target: 'iocs',
       priority: 1,
       scheduledAt: new Date(),
-      status: TaskStatus.PENDING,
+      status: TASK_STATUS_PENDING,
       config: { url }
     });
 
@@ -92,6 +121,18 @@ router.post('/assess-risk', ensureAuthenticated, async (req: Request, res: Respo
     if (!iocs || !Array.isArray(iocs)) {
        return res.status(400).json({ success: false, error: 'iocs array required' });
     }
+
+    securityAudit.logSensitiveRead({
+      actor: (req as AuthenticatedRequest).user?.tenantId ?? 'unknown',
+      tenantId: (req as AuthenticatedRequest).user?.tenantId,
+      resourceType: 'osint_risk_assessment',
+      resourceId: `batch-${iocs.length}`,
+      action: 'assess',
+      details: { iocCount: iocs.length },
+      ipAddress: req.ip,
+      userAgent: req.get('user-agent'),
+      dataClassification: 'confidential',
+    });
 
     const results = [];
     const llmEndpoint = process.env.LLM_ENDPOINT;

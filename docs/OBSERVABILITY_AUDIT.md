@@ -32,7 +32,7 @@ This document captures the current state of observability in the Summit/IntelGra
 
 4. **Operational Runbooks**
    - Comprehensive set of runbooks for incidents and operations
-   - Location: `RUNBOOKS/INDEX.md`
+   - Location: `runbooks/INDEX.md`
    - Covers deployment, rollback, chaos testing, investigation playbooks
 
 ### ⚠️ Gaps & Areas for Improvement
@@ -253,7 +253,7 @@ This document captures the current state of observability in the Summit/IntelGra
 - Current setup: `observability/README.md`
 - Prometheus config: `observability/prometheus/prometheus-dev.yml`
 - OpenTelemetry code: `server/src/monitoring/opentelemetry.ts`
-- Runbooks: `RUNBOOKS/INDEX.md`
+- Runbooks: `runbooks/INDEX.md`
 - SLO definitions: `observability/slo/slo.yaml`
 
 ---

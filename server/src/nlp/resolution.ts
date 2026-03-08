@@ -4,7 +4,7 @@ export interface CoreferenceChain {
   confidence: number;
 }
 
-import { GraphStore } from '../graph/store';
+import { GraphStore } from '../graph/store.js';
 
 interface EntityCluster {
     canonicalName: string;

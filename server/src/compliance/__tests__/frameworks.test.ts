@@ -17,7 +17,7 @@ import {
   REQUIREMENT_METADATA,
   FUNCTION_METADATA,
   DOMAIN_METADATA,
-} from '../frameworks/index';
+} from '../frameworks/index.js';
 
 describe('Compliance Frameworks', () => {
   describe('Framework Discovery', () => {

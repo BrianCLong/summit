@@ -1,0 +1,23 @@
+version: "1.0.0"
+name: "Switchboard Approvals Policy"
+policy_bundle: "switchboard-approvals@2026-02-06"
+principles:
+  - "default-deny"
+  - "dual-control for privileged commands"
+  - "receipt-required"
+commands:
+  - name: "access.request"
+    privileged: true
+    risk_level: "high"
+    required_approver_roles:
+      - "security"
+      - "incident_commander"
+  - name: "incident.open"
+    privileged: false
+    risk_level: "medium"
+  - name: "task.create"
+    privileged: false
+    risk_level: "low"
+receipts:
+  required: true
+  schema: "provenance/receipt_schema_switchboard_v0_1.json"

@@ -1,0 +1,14 @@
+{
+  "origin": "https://allowed.example",
+  "timestamp_ms": 1000,
+  "actions": [
+    {
+      "type": "dom_read",
+      "target": "#content",
+      "timestamp_ms": 1000,
+      "payload": {
+        "html": "<script>alert('xss')</script>"
+      }
+    }
+  ]
+}

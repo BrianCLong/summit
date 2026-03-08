@@ -6,7 +6,7 @@
  * decisions made with evidence and policy context.
  */
 
-import { BaseCanonicalEntity, CanonicalEntityMetadata } from '../types.ts';
+import { BaseCanonicalEntity, CanonicalEntityMetadata } from '../types.js';
 
 export interface PolicyLabel {
   /** Origin classification */

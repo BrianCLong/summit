@@ -1,0 +1,48 @@
+{
+  "task_id": "EVENING_STANDUP_20260207",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "evening-standup-note",
+    "version": "v1",
+    "sha256": "21fa98c95f01b43f5fa52d1ae9b725d2a35a27b9a6d6cd4a9c7323cac19198fa",
+    "path": "prompts/standup/evening-standup-note@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "docs/standups/2026-02-07-evening-standup.md",
+      "docs/roadmap/STATUS.json",
+      "prompts/standup/evening-standup-note@v1.md",
+      "prompts/registry.yaml",
+      "agents/examples/EVENING_STANDUP_20260207.json"
+    ],
+    "domains": [
+      "documentation",
+      "governance",
+      "standup"
+    ]
+  },
+  "allowed_operations": [
+    "create",
+    "edit"
+  ],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": [
+      "docs/standups/2026-02-07-evening-standup.md",
+      "docs/roadmap/STATUS.json"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Evening standup note is published with evidence links.",
+    "Roadmap status metadata updated for the standup entry.",
+    "Prompt registry includes the standup prompt reference."
+  ],
+  "stop_conditions": [
+    "Requested scope exceeds documentation and governance paths.",
+    "Evidence links cannot be validated against provided sources."
+  ]
+}

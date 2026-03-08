@@ -8,7 +8,7 @@ import {
 } from '../graph/algorithms.js';
 import { InfluenceDetectionService } from '../services/InfluenceDetectionService.js';
 import { authenticate } from '../middleware/auth.js';
-import { z } from 'zod/v4';
+import { z } from 'zod';
 
 const router = Router();
 

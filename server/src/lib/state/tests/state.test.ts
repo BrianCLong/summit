@@ -2,10 +2,10 @@
 // server/src/lib/state/tests/state.test.ts
 
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
-import { ConsistencyEngine, ConsistencyLevel } from '../consistency-engine';
-import { GCounter, PNCounter, LWWRegister, ORSet, ConflictResolver } from '../conflict-resolver';
-import { TwoPhaseCommitCoordinator, TransactionParticipant, SagaCoordinator, SagaAction } from '../distributed-transaction';
-import { StateSyncClient } from '../state-sync';
+import { ConsistencyEngine, ConsistencyLevel } from '../consistency-engine.js';
+import { GCounter, PNCounter, LWWRegister, ORSet, ConflictResolver } from '../conflict-resolver.js';
+import { TwoPhaseCommitCoordinator, TransactionParticipant, SagaCoordinator, SagaAction } from '../distributed-transaction.js';
+import { StateSyncClient } from '../state-sync.js';
 import { WebSocket } from 'ws';
 
 jest.mock('ws');

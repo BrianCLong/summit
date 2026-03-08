@@ -4,7 +4,7 @@ import { copilotResolvers as copilotResolversRaw } from './resolvers.copilot.js'
 import { graphResolvers as graphResolversRaw } from './resolvers.graphops.js';
 import { aiResolvers as aiResolversRaw } from './resolvers.ai.js';
 import { annotationsResolvers as annotationsResolversRaw } from './resolvers.annotations.js';
-import { v040Resolvers } from './resolvers/v040/index';
+import { v040Resolvers } from './resolvers/v040/index.js';
 import { activityResolvers } from './resolvers/activity.js';
 import { geoIntResolvers } from './resolvers/geoint.js';
 import { documentResolvers as documentResolversRaw } from './resolvers.document.js';

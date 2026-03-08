@@ -5,11 +5,11 @@ import {
   PoisoningDetectionResult,
   AdversarialAttackType,
   DefenseMechanism
-} from '../types';
-import { FGSMAttack } from '../attacks/fgsm';
-import { PGDAttack } from '../attacks/pgd';
-import { CarliniWagnerAttack } from '../attacks/cw';
-import { DeepFoolAttack } from '../attacks/deepfool';
+} from '../types.js';
+import { FGSMAttack } from '../attacks/fgsm.js';
+import { PGDAttack } from '../attacks/pgd.js';
+import { CarliniWagnerAttack } from '../attacks/cw.js';
+import { DeepFoolAttack } from '../attacks/deepfool.js';
 
 /**
  * Comprehensive robustness testing framework

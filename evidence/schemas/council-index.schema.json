@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Council Evidence Index",
+  "type": "object",
+  "required": ["evidenceId", "files"],
+  "properties": {
+    "evidenceId": {
+      "type": "string",
+      "pattern": "^EVD-LLMCOUNCIL-[A-Z]+-[0-9]{3}$"
+    },
+    "files": {
+      "type": "object",
+      "required": ["report", "metrics", "stamp"],
+      "properties": {
+        "report": { "type": "string" },
+        "metrics": { "type": "string" },
+        "stamp": { "type": "string" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

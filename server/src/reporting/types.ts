@@ -94,6 +94,7 @@ export interface AccessContext {
   userId: string;
   roles: string[];
   permissions?: string[];
+  tenantId?: string;
 }
 
 export interface AccessRule {

@@ -1,8 +1,8 @@
 // @ts-nocheck
 import { Router, Response, NextFunction } from 'express';
-import { buildManifest } from '../replay/manifest';
-import { replayRun } from '../replay/runner';
-import { diffRuns } from '../replay/diff';
+import { buildManifest } from '../replay/manifest.js';
+import { replayRun } from '../replay/runner.js';
+import { diffRuns } from '../replay/diff.js';
 import type { AuthenticatedRequest } from './types.js';
 const r = Router();
 r.post('/replay/:runId', async (req: AuthenticatedRequest, res: Response) => {
@@ -14,7 +14,7 @@ r.get('/replay/manifest/:runId', async (req: AuthenticatedRequest, res: Response
   res.json(m);
 });
 r.get('/replay/diff', async (req: AuthenticatedRequest, res: Response) => {
-  const d = await diffRuns(String(req.query.a), String(req.query.b));
+  const d = await diffRuns(String((((req.query.a as string) as string) as string)), String((((req.query.b as string) as string) as string)));
   res.json(d);
 });
 export default r;

@@ -1,0 +1,19 @@
+{
+  "evidence_id": "EVD-WORLD_MODEL-PLAN-003",
+  "item_slug": "WORLD_MODEL",
+  "area": "planning",
+  "summary": "Planning engine and simulation rollout layer for enterprise agent decision optimization.",
+  "findings": [
+    "simulatePlan() performs rollout over action sequences against WorldState",
+    "selectBestPolicy() scores rollout outcomes and returns highest-scoring plan",
+    "Enterprise action space defined: deploy_software, launch_campaign, change_pricing, hire_team, ship_feature",
+    "Policy gate blocks simulation when WORLD_MODEL_ENABLED=false",
+    "Target planning success rate delta: +30% over non-simulated baseline"
+  ],
+  "status": "scaffolded",
+  "governance": {
+    "policy_gate": "WORLD_MODEL_ENABLED env flag",
+    "data_classification": ["PUBLIC", "INTERNAL", "CONFIDENTIAL", "RESTRICTED"],
+    "never_log": ["customer_records", "internal_embeddings", "private_transcripts"]
+  }
+}

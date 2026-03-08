@@ -1,0 +1,22 @@
+{
+  "platformId": "summit",
+  "displayName": "Summit Platform",
+  "components": [
+    {
+      "componentId": "ig",
+      "displayName": "Intelgraph"
+    },
+    {
+      "componentId": "mc",
+      "displayName": "Maestro Conductor/Composer"
+    },
+    {
+      "componentId": "sb",
+      "displayName": "Switchboard"
+    },
+    {
+      "componentId": "co",
+      "displayName": "CompanyOS"
+    }
+  ]
+}

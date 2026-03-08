@@ -1,6 +1,6 @@
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
-import { AutonomousEvaluationService } from '../../service';
-import { EvaluationCapabilityType, EvaluationRequest } from '../../types';
+import { AutonomousEvaluationService } from '../../service.js';
+import { EvaluationCapabilityType, EvaluationRequest } from '../../types.js';
 
 describe('Autonomous Evaluation Threat Model - Abuse Tests', () => {
   let service: AutonomousEvaluationService;

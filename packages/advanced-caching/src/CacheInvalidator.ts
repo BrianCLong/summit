@@ -1,8 +1,8 @@
 import { trace } from '@opentelemetry/api';
 import pino from 'pino';
 import { Redis } from 'ioredis';
-import { MultiTierCache } from './MultiTierCache';
-import { InvalidationStrategy } from './types';
+import { MultiTierCache } from './MultiTierCache.js';
+import { InvalidationStrategy } from './types.js';
 
 const logger = pino({ name: 'CacheInvalidator' });
 const tracer = trace.getTracer('advanced-caching');

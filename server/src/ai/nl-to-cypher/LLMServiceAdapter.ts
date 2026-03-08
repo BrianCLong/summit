@@ -1,5 +1,5 @@
-import { ModelAdapter } from './model-adapter.ts';
-import { LLMService } from '../../services/LLMService.ts';
+import { ModelAdapter } from './model-adapter.js';
+import { LLMService } from '../../services/LLMService.js';
 
 export class LLMServiceAdapter implements ModelAdapter {
   constructor(private llmService: LLMService) {}

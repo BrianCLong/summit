@@ -1,0 +1,20 @@
+version: 1
+name: self_check
+description: >
+  Validate Summit integrity.
+
+steps:
+  - id: check_governance
+    agent: executor
+
+  - id: check_agents
+    agent: executor
+
+  - id: check_flows
+    agent: executor
+
+  - id: check_analytics
+    agent: predictive
+
+  - id: check_prompts
+    agent: psyops

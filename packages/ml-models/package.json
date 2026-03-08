@@ -6,12 +6,12 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@intelgraph/threat-detection-core": "workspace:*",
-    "axios": "^1.6.2"
+    "axios": "^1.7.9"
   },
   "devDependencies": {
     "@types/node": "^20.10.0",

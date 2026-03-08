@@ -1,0 +1,8 @@
+{
+  "evidence_id": "EVD-MAVEN-CLAUDE-PM-001",
+  "item_slug": "maven-claude-code-pms",
+  "timestamp": "2026-02-26T16:17:47.370Z",
+  "tool_versions": {
+    "node": "v22.22.0"
+  }
+}

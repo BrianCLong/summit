@@ -11,7 +11,7 @@ This registry lists Data Processing Addendums (DPAs) from third-party service pr
 - **Date**: 2024-01-15
 - **Contact**: privacy@openai.com
 - **Scope**: AI model training and inference
-- **Document**: [openai_dpa_v1_0.pdf](../../legal/providers/openai_dpa_v1_0.pdf)
+- **Document**: [openai_dpa_v1_0.pdf] (See Legal Repository)
   - **SHA256 Hash**: `685699fcab68bc665f39d0ecf7aeead142ca5bffdc5bfe3dc5f1f635ece1df98`
 
 ### Anthropic DPA
@@ -21,7 +21,7 @@ This registry lists Data Processing Addendums (DPAs) from third-party service pr
 - **Date**: 2024-02-01
 - **Contact**: privacy@anthropic.com
 - **Scope**: AI model training and inference
-- **Document**: [anthropic_dpa_v1_1.pdf](../../legal/providers/anthropic_dpa_v1_1.pdf)
+- **Document**: [anthropic_dpa_v1_1.pdf] (See Legal Repository)
   - **SHA256 Hash**: `b8ec867d7503e8d0dff65f9beebe0101d276a19b9b152409b194129229ebbb23`
 
 ### Google DPA
@@ -31,7 +31,7 @@ This registry lists Data Processing Addendums (DPAs) from third-party service pr
 - **Date**: 2024-03-10
 - **Contact**: privacy@google.com
 - **Scope**: Cloud services and AI APIs
-- **Document**: [google_dpa_v2_0.pdf](../../legal/providers/google_dpa_v2_0.pdf)
+- **Document**: [google_dpa_v2_0.pdf] (See Legal Repository)
   - **SHA256 Hash**: `e2290bf2cfbd79b89da98d4c2ac253c023454d9ab0ef0fefef22219899651951`
 
 ---

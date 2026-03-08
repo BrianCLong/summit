@@ -1,0 +1,20 @@
+version: "1.0.0"
+effective_date: "2024-05-01"
+environments:
+  dev:
+    minimum_trust_score: 70
+    required_attestations: []
+  staging:
+    minimum_trust_score: 85
+    required_attestations:
+      - "qa_approval"
+  sovereign:
+    minimum_trust_score: 95
+    required_attestations:
+      - "security_approval"
+      - "release_manager_approval"
+  prod:
+    minimum_trust_score: 95
+    required_attestations:
+      - "security_approval"
+      - "release_manager_approval"

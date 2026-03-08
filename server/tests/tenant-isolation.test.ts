@@ -1,6 +1,6 @@
 
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
-import { investigationWorkflowService } from '../src/services/investigationWorkflowService';
+import { investigationWorkflowService } from '../src/services/investigationWorkflowService.js';
 
 describe('Investigation Workflow Service - Tenant Isolation', () => {
   const tenantA = 'tenant-a-uuid';

@@ -1,0 +1,17 @@
+{
+  "last_updated": "2026-01-30",
+  "dependencies": [
+    {
+      "name": "tomllib",
+      "purpose": "Parsing OS profiles (standard library since Python 3.11)",
+      "lane": "Foundation"
+    }
+  ],
+  "delta_history": [
+    {
+      "pr": "PR2",
+      "action": "added",
+      "reason": "VM Workbench foundation"
+    }
+  ]
+}

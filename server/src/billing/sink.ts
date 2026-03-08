@@ -1,8 +1,9 @@
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { createHmac, randomUUID } from 'crypto';
-import pino from 'pino';
+import pinoModule from 'pino';
+const pino = (pinoModule as any).default || pinoModule;
 
-const logger = (pino as any)({ name: 'BillingAdapter' });
+const logger = pino({ name: 'BillingAdapter' });
 
 export interface UsageRecord {
   tenant_id: string;
@@ -13,7 +14,7 @@ export interface UsageRecord {
   egress_gb: number;
   plan: string;
   quota_overrides: boolean;
-  metadata?: any;
+  metadata?: Record<string, unknown>;
 }
 
 export class BillingAdapter {
@@ -33,7 +34,7 @@ export class BillingAdapter {
           region: process.env.AWS_REGION || 'us-east-1',
           maxAttempts: 3 // AWS SDK built-in retries
         });
-      } catch (err: any) {
+      } catch (err: unknown) {
         logger.error({ err }, "Failed to initialize S3 client");
         this.enabled = false; // Disable if client fails
       }
@@ -103,7 +104,7 @@ export class BillingAdapter {
         logger.info({ tenant: record.tenant_id, key }, "Usage exported successfully");
         return `s3://${this.bucket}/${key}`;
 
-      } catch (err: any) {
+      } catch (err: unknown) {
         attempts++;
         logger.warn({ err, attempts, tenant: record.tenant_id }, "Failed to export usage, retrying...");
         if (attempts >= maxRetries) {

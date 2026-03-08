@@ -1,0 +1,29 @@
+{
+  "milestone": "ga",
+  "name": "ai_adoption",
+  "required_artifacts": [
+    {
+      "id": "adoption-brief",
+      "template": "docs/governance/ai-adoption/ADOPTION_BRIEF.template.md",
+      "required": true
+    },
+    {
+      "id": "experiment-plan",
+      "template": "docs/governance/ai-adoption/EXPERIMENT_PLAN.template.md",
+      "required": true
+    },
+    {
+      "id": "integration-checklist",
+      "template": "docs/governance/ai-adoption/INTEGRATION_CHECKLIST.template.md",
+      "required": true
+    }
+  ],
+  "evidence_pack": {
+    "files": [
+      "report.json",
+      "metrics.json",
+      "stamp.json"
+    ],
+    "registry": "evidence/index.json"
+  }
+}

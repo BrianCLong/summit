@@ -1,6 +1,6 @@
 import express from 'express';
-import { EntityResolutionService } from '../services/entity-resolution/service';
-import { DataQualityService } from '../services/entity-resolution/quality';
+import { EntityResolutionService } from '../services/entity-resolution/service.js';
+import { DataQualityService } from '../services/entity-resolution/quality.js';
 import { EntityResolutionV2Service } from '../services/er/EntityResolutionV2Service.js';
 import { getPostgresPool } from '../config/database.js';
 
@@ -57,7 +57,7 @@ router.get('/quality/metrics', async (req, res) => {
 // Guardrail status endpoint
 router.get('/guardrails/status', async (req, res) => {
   try {
-    const datasetId = typeof req.query.datasetId === 'string' ? req.query.datasetId : undefined;
+    const datasetId = typeof (((req.query.datasetId as string) as string) as string) === 'string' ? (((req.query.datasetId as string) as string) as string) : undefined;
     const guardrails = erV2Service.evaluateGuardrails(datasetId);
     const pool = getPostgresPool();
     const overrideResult = await pool.query(

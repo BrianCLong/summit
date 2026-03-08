@@ -1,5 +1,5 @@
-import { KafkaConsumerWrapper } from '../../streaming/KafkaConsumer.ts';
-import { Logger } from '../../streaming/Logger.ts';
+import { KafkaConsumerWrapper } from '../../streaming/KafkaConsumer.js';
+import { Logger } from '../../streaming/Logger.js';
 
 export class RealTimeAnalyticsService {
   private consumer: KafkaConsumerWrapper;

@@ -1,7 +1,7 @@
 // server/src/api/anomalyDetectionRouter.ts
 import express, { Router } from 'express';
-import { AnomalyDetectionController } from './anomalyDetectionController';
-import { AnomalyDetectionService } from '../ai/anomalyDetectionService';
+import { AnomalyDetectionController } from './anomalyDetectionController.js';
+import { AnomalyDetectionService } from '../ai/anomalyDetectionService.js';
 
 export const createAnomalyDetectionRouter = (anomalyService: AnomalyDetectionService): Router => {
   const router = express.Router();

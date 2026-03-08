@@ -1,0 +1,45 @@
+version: 1
+nodes:
+  Actor:
+    key: actor_id
+    props: [actor_id, kind, handle, org, credibility_tier, tags, actor_type]
+  Campaign:
+    key: campaign_id
+    props: [campaign_id, name, description, start_date, end_date, tags, target_environment, ttp_class]
+  Narrative:
+    key: narrative_id
+    props: [narrative_id, title, state, tags]
+  Event:
+    key: event_id
+    props: [event_id, kind, occurred_at, external_ref, tags, location]
+  Infra:
+    key: infra_id
+    props: [infra_id, kind, provider, location, tags, type]
+  Platform:
+    key: platform_id
+    props: [platform_id, name, type, tags]
+  Person:
+    key: person_id
+    props: [person_id, name, aliases, role, tags]
+  Case:
+    key: case_id
+    props: [case_id, title, status, jurisdiction, tags, description]
+  MediaBrand:
+    key: brand_id
+    props: [brand_id, name, type, tier, tags]
+  IntelligenceService:
+    key: service_id
+    props: [service_id, name, country, tags]
+
+edges:
+  LAUNCHED: { from: [Actor, IntelligenceService], to: [Campaign, Case], props: [occurred_at] }
+  AMPLIFIED_VIA: { from: Campaign, to: Platform, props: [weight] }
+  TARGETED: { from: [Campaign, Actor, IntelligenceService], to: [Event, Infra], props: [objective] }
+  RECRUITED: { from: [Actor, IntelligenceService], to: Person, props: [vector] }
+  EXFILTRATED: { from: [Actor, IntelligenceService], to: Infra, props: [method] }
+  IMPERSONATED: { from: Campaign, to: MediaBrand, props: [confidence] }
+  PLACED_CONTENT_IN: { from: Campaign, to: MediaBrand, props: [method] }
+  COORDINATED_WITH: { from: [Actor, IntelligenceService], to: [Actor, IntelligenceService], props: [level] }
+  SUPPORTS: { from: [Event, Campaign], to: Narrative, props: [weight] }
+  TRIGGERED_BY: { from: Campaign, to: Event, props: [weight] }
+  ASSOCIATED_WITH: { from: [Actor, Case, Person], to: [IntelligenceService, Org, Platform], props: [] }

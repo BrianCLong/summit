@@ -1,5 +1,5 @@
-import { SymbiosisEngine } from './SymbiosisEngine';
-import { BeliefState } from './types';
+import { SymbiosisEngine } from './SymbiosisEngine.js';
+import { BeliefState } from './types.js';
 
 async function runDemo() {
   console.log("=== Initializing Predictive Context Symbiosis Engine ===");

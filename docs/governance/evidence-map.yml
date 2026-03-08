@@ -1,0 +1,9 @@
+evidence:
+  - description: "Unit Test Coverage"
+    eventType: "unit-test-coverage"
+    platform: "github"
+    locator: "coverage/lcov.info"
+  - description: "Integration Test Results"
+    eventType: "integration-test-results"
+    platform: "github"
+    locator: "test-results/results.xml"

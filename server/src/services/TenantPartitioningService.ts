@@ -7,11 +7,12 @@
  */
 
 import { EventEmitter } from 'events';
-import { PrometheusMetrics } from '../utils/metrics';
-import logger from '../utils/logger';
-import { tracer, Span } from '../utils/tracing';
-import { DatabaseService } from './DatabaseService';
-import { TenantCostService } from './TenantCostService';
+import { PrometheusMetrics } from '../utils/metrics.js';
+import logger from '../utils/logger.js';
+import { tracer, Span } from '../utils/tracing.js';
+import { getPostgresPool } from '../db/postgres.js';
+import { tenantRouter } from '../db/tenantRouter.js';
+import { TenantCostService } from './TenantCostService.js';
 
 // Partitioning configuration
 interface PartitioningConfig {
@@ -165,7 +166,6 @@ interface RiskAssessment {
 export class TenantPartitioningService extends EventEmitter {
   private config: PartitioningConfig;
   private metrics: PrometheusMetrics;
-  private db: DatabaseService;
   private costService: TenantCostService;
   private partitions: Map<string, TenantPartition> = new Map();
   private migrationQueue: MigrationPlan[] = [];
@@ -173,7 +173,6 @@ export class TenantPartitioningService extends EventEmitter {
 
   constructor(
     config: Partial<PartitioningConfig> = {},
-    db: DatabaseService,
     costService: TenantCostService,
   ) {
     super();
@@ -189,7 +188,6 @@ export class TenantPartitioningService extends EventEmitter {
       ...config,
     };
 
-    this.db = db;
     this.costService = costService;
     this.metrics = new PrometheusMetrics('tenant_partitioning');
 
@@ -325,7 +323,7 @@ export class TenantPartitioningService extends EventEmitter {
 
   private async loadTenantPartitions(): Promise<void> {
     try {
-      const results = await this.db.query(`
+      const results = await getPostgresPool().query(`
         SELECT tenant_id, partition_config 
         FROM tenant_partitions 
         WHERE active = true
@@ -512,7 +510,7 @@ export class TenantPartitioningService extends EventEmitter {
   }
 
   private async getActiveTenants(): Promise<string[]> {
-    const result = await this.db.query(`
+    const result = await getPostgresPool().query(`
       SELECT DISTINCT tenant_id 
       FROM tenant_resource_usage 
       WHERE timestamp >= NOW() - INTERVAL '24 hours'
@@ -562,7 +560,7 @@ export class TenantPartitioningService extends EventEmitter {
 
   private async collectTenantMetrics(tenantId: string): Promise<any> {
     // Get resource usage from the past 24 hours
-    const usageResult = await this.db.query(
+    const usageResult = await getPostgresPool().query(
       `
       SELECT 
         AVG(cpu_percent) as avg_cpu_percent,
@@ -703,7 +701,7 @@ export class TenantPartitioningService extends EventEmitter {
     partition: TenantPartition,
   ): Promise<void> {
     try {
-      await this.db.query(
+      await getPostgresPool().query(
         `
         INSERT INTO tenant_partitions (tenant_id, partition_config, active, updated_at)
         VALUES ($1, $2, true, NOW())
@@ -969,10 +967,10 @@ export class TenantPartitioningService extends EventEmitter {
         });
 
         // In a real implementation, this would execute the actual migration commands
-        await this.executeStep(step);
+        await this.executeStep(tenantId, step);
 
         // Validate step completion
-        await this.validateStep(step);
+        await this.validateStep(tenantId, step);
       }
 
       // Migration completed successfully
@@ -1044,18 +1042,50 @@ export class TenantPartitioningService extends EventEmitter {
     }
   }
 
-  private async executeStep(step: MigrationStep): Promise<void> {
-    // In a real implementation, this would execute the actual command
-    // For now, simulate execution time
-    await new Promise((resolve) =>
-      setTimeout(resolve, Math.min(step.estimatedDuration * 10, 5000)),
-    );
+  private async executeStep(tenantId: string, step: MigrationStep): Promise<void> {
+    logger.debug({ tenantId, step: step.name }, 'Executing migration step');
+
+    if (step.command.startsWith('update_routing')) {
+      const match = step.command.match(/--partition (\w+)/);
+      if (match) {
+        const partitionKey = match[1];
+        await getPostgresPool().query(
+          `INSERT INTO tenant_partition_map (tenant_id, partition_key, updated_at)
+           VALUES ($1, $2, NOW())
+           ON CONFLICT (tenant_id) DO UPDATE SET partition_key = EXCLUDED.partition_key, updated_at = NOW()`,
+          [tenantId, partitionKey]
+        );
+        // Refresh router cache
+        await tenantRouter.refresh();
+        logger.info({ tenantId, partitionKey }, 'Updated tenant routing');
+      }
+    } else if (step.command.startsWith('migrate_tenant_data')) {
+      // v2: In a real distributed system, this would trigger logical replication or a background worker
+      // For the monolith, we simulate it with a delay, as data stays in the same cluster but different schema/partition
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+    } else {
+      // Default simulation for other steps
+      await new Promise((resolve) =>
+        setTimeout(resolve, Math.min(step.estimatedDuration * 2, 1000)),
+      );
+    }
   }
 
-  private async validateStep(step: MigrationStep): Promise<void> {
-    // In a real implementation, this would run the validation command
-    // For now, simulate validation
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+  private async validateStep(tenantId: string, step: MigrationStep): Promise<void> {
+    if (step.validation.startsWith('verify_routing')) {
+      const match = step.validation.match(/--partition (\w+)/);
+      if (match) {
+        const expectedPartition = match[1];
+        const result = await getPostgresPool().query(
+          'SELECT partition_key FROM tenant_partition_map WHERE tenant_id = $1',
+          [tenantId]
+        );
+        if (result.rows[0]?.partition_key !== expectedPartition) {
+          throw new Error(`Routing validation failed: expected ${expectedPartition}, got ${result.rows[0]?.partition_key}`);
+        }
+      }
+    }
+    await new Promise((resolve) => setTimeout(resolve, 500));
   }
 
   private async rollbackMigration(
@@ -1073,8 +1103,8 @@ export class TenantPartitioningService extends EventEmitter {
     // Execute rollback steps in reverse order
     for (const step of plan.rollbackSteps) {
       try {
-        await this.executeStep(step);
-        await this.validateStep(step);
+        await this.executeStep(tenantId, step);
+        await this.validateStep(tenantId, step);
       } catch (error: any) {
         logger.error('Rollback step failed', {
           tenantId,
@@ -1190,7 +1220,6 @@ export class TenantPartitioningService extends EventEmitter {
 }
 
 // Export singleton instance
-const dbService = new DatabaseService();
 export const tenantPartitioningService = new TenantPartitioningService(
   {
     enabled: process.env.TENANT_PARTITIONING_ENABLED !== 'false',
@@ -1203,6 +1232,5 @@ export const tenantPartitioningService = new TenantPartitioningService(
     autoMigrationEnabled: process.env.PARTITIONING_AUTO_MIGRATION === 'true',
     rollbackEnabled: process.env.PARTITIONING_ROLLBACK_ENABLED !== 'false',
   },
-  dbService,
-  new TenantCostService({}, dbService),
+  new TenantCostService({}, {} as any), // costService uses DatabaseService stub too, but we mainly care about its logic for now
 );

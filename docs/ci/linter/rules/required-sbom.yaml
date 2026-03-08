@@ -1,0 +1,6 @@
+# Rule: Required SBOM
+# Detect generation of SBOM in production builds
+rule:
+  id: required-sbom
+  severity: high
+  message: Production builds must generate a Software Bill of Materials (SBOM).

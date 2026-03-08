@@ -1,0 +1,41 @@
+{
+  "task_id": "CEP_CORE_PR1_UPDATE",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "cep-core-pr1-update",
+    "version": "v1",
+    "sha256": "d9122126ee6d6c977f5c04876bc322ca4e1159611b9ed1abaac34c0d69637797",
+    "path": "prompts/context/cep-core-pr1-update.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "packages/context-engineering/",
+      "docs/context-engineering/",
+      "CHANGELOG.md",
+      "docs/roadmap/STATUS.json",
+      "artifacts/agent-runs/"
+    ],
+    "domains": ["context", "maestro", "governance", "observability"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "B",
+    "artifacts": [
+      "artifacts/agent-runs/CEP_CORE_PR1_UPDATE.json",
+      "packages/context-engineering/src/__tests__/context-engineer.test.ts"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Context manifest includes schema version.",
+    "Context items require provenance and source metadata.",
+    "Validation utilities are documented and tested."
+  ],
+  "stop_conditions": [
+    "Manifest schema fails validation.",
+    "Tests fail or outputs are non-deterministic."
+  ]
+}

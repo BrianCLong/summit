@@ -247,6 +247,32 @@ export class CacheClient {
   }
 
   /**
+   * Backup cache data (Redis only currently)
+   */
+  async backup(): Promise<string> {
+    if (this.redisProvider && this.redisProvider.backup) {
+      return this.redisProvider.backup();
+    }
+    throw new Error('Backup not supported by current providers');
+  }
+
+  /**
+   * Restore cache data from backup (Redis only currently)
+   */
+  async restore(backupData: string): Promise<void> {
+    if (this.redisProvider && this.redisProvider.restore) {
+      await this.redisProvider.restore(backupData);
+
+      // Optionally clear local cache to prevent inconsistencies
+      if (this.localProvider && typeof (this.localProvider as any).clear === 'function') {
+        await (this.localProvider as any).clear();
+      }
+      return;
+    }
+    throw new Error('Restore not supported by current providers');
+  }
+
+  /**
    * Close connections
    */
   async close(): Promise<void> {

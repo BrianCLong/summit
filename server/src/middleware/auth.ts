@@ -1,5 +1,7 @@
 // @ts-nocheck
 import { Request, Response, NextFunction } from 'express';
+import { trace } from '@opentelemetry/api';
+import { correlationStorage } from '../config/logger.js';
 import AuthService from '../services/AuthService.js';
 import { getAuditSystem } from '../audit/advanced-audit-system.js';
 import logger from '../utils/logger.js';
@@ -21,6 +23,23 @@ export async function ensureAuthenticated(
     const user = await authService.verifyToken(token);
     if (!user) return res.status(401).json({ error: 'Unauthorized' });
     req.user = user;
+
+    // Propagate user context to OpenTelemetry and Logging
+    const userId = user.id || user.sub;
+    if (userId) {
+      const store = correlationStorage.getStore();
+      if (store) {
+        store.set('principalId', userId);
+        if (user.role) store.set('role', user.role);
+      }
+
+      const span = trace.getActiveSpan();
+      if (span) {
+        span.setAttribute('enduser.id', userId);
+        span.setAttribute('enduser.role', user.role || 'unknown');
+      }
+    }
+
     next();
   } catch (e: any) {
     return res.status(401).json({ error: 'Unauthorized' });
@@ -65,7 +84,9 @@ export function requirePermission(permission: string) {
 }
 
 export function ensureRole(requiredRole: string | string[]) {
-  const roles = Array.isArray(requiredRole) ? requiredRole : [requiredRole];
+  const roles = (Array.isArray(requiredRole) ? requiredRole : [requiredRole]).map(r =>
+    r.toUpperCase(),
+  );
   return (
     req: Request,
     res: Response,
@@ -74,7 +95,8 @@ export function ensureRole(requiredRole: string | string[]) {
     const user = req.user;
     if (!user || !user.role) return res.status(401).json({ error: 'Unauthorized' });
 
-    if (roles.includes(user.role)) {
+    const userRole = user.role.toUpperCase();
+    if (roles.includes(userRole)) {
       return next();
     } else {
       return res.status(403).json({ error: 'Forbidden: Insufficient role' });

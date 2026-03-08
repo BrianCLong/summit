@@ -90,7 +90,11 @@ router.get('/status', (_req: Request, res: Response) => {
  *         description: Service is healthy
  */
 import { asyncHandler } from '../middleware/async-handler.js';
+import { summitHealthChecksTotal } from '../monitoring/metrics.js';
+
 router.get('/health', asyncHandler(async (_req: Request, res: Response) => {
+  summitHealthChecksTotal.inc({ status: 'success' });
+
   // Removed telemetry call to avoid spam
   res.status(200).json({
     status: 'ok',
@@ -165,20 +169,24 @@ router.get('/health/detailed', async (req: Request, res: Response) => {
   };
 
   // Check Neo4j connection
-  try {
-    const neo4j = (await import('../db/neo4jConnection.js')).default;
-    await neo4j.getDriver().verifyConnectivity();
-    health.services.neo4j = 'healthy';
-  } catch (error: any) {
-    const errorMsg = error instanceof Error ? error.message : 'Connection failed';
-    health.services.neo4j = 'unhealthy';
-    health.status = 'degraded';
-    errors.push({
-      service: 'neo4j',
-      error: errorMsg,
-      timestamp: new Date().toISOString(),
-    });
-    logger.error({ error, service: 'neo4j' }, 'Neo4j health check failed');
+  if (process.env.DISABLE_NEO4J === 'true' || process.env.SKIP_DB_CHECKS === 'true') {
+    health.services.neo4j = 'skipped';
+  } else {
+    try {
+      const { getNeo4jDriver } = await import('../db/neo4j.js');
+      await getNeo4jDriver().verifyConnectivity();
+      health.services.neo4j = 'healthy';
+    } catch (error: any) {
+      const errorMsg = error instanceof Error ? error.message : 'Connection failed';
+      health.services.neo4j = 'unhealthy';
+      health.status = 'degraded';
+      errors.push({
+        service: 'neo4j',
+        error: errorMsg,
+        timestamp: new Date().toISOString(),
+      });
+      logger.error({ error, service: 'neo4j' }, 'Neo4j health check failed');
+    }
   }
 
   // Check PostgreSQL connection
@@ -294,13 +302,15 @@ router.get('/health/ready', async (_req: Request, res: Response) => {
   const failures: string[] = [];
 
   // Check if critical services are available
-  try {
-    const neo4j = (await import('../db/neo4jConnection.js')).default;
-    await neo4j.getDriver().verifyConnectivity();
-  } catch (error: any) {
-    const msg = error instanceof Error ? error.message : 'Unknown error';
-    failures.push(`Neo4j: ${msg}`);
-    logger.warn({ error }, 'Readiness check failed: Neo4j unavailable');
+  if (process.env.DISABLE_NEO4J !== 'true' && process.env.SKIP_DB_CHECKS !== 'true') {
+    try {
+      const { getNeo4jDriver } = await import('../db/neo4j.js');
+      await getNeo4jDriver().verifyConnectivity();
+    } catch (error: any) {
+      const msg = error instanceof Error ? error.message : 'Unknown error';
+      failures.push(`Neo4j: ${msg}`);
+      logger.warn({ error }, 'Readiness check failed: Neo4j unavailable');
+    }
   }
 
   try {
@@ -386,3 +396,4 @@ export const checkHealth = async () => {
 };
 
 export default router;
+// Test: validate new workflow system

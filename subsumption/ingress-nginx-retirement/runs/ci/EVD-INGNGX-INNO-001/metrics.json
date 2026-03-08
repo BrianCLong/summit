@@ -1,0 +1,8 @@
+{
+  "evidence_id": "EVD-INGNGX-INNO-001",
+  "item_slug": "ingress-nginx-retirement",
+  "metrics": {
+    "feature_flag_default": 0,
+    "deferred_items": 4
+  }
+}

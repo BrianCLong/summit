@@ -1,0 +1,7 @@
+[
+  {
+    "evidence_id": "MEDIA-test_slug-CLAIM-001",
+    "flag": "unverified_data_handling",
+    "severity": "medium"
+  }
+]

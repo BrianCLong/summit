@@ -10,8 +10,8 @@ describe('WebSocket JWT auth with RBAC', () => {
   let server: http.Server;
   let url: string;
   let io: any;
-  let initSocket: typeof import('../src/realtime/socket').initSocket;
-  let overrideVerifyToken: typeof import('../src/realtime/socket').overrideVerifyToken;
+  let initSocket: typeof import('../src/realtime/socket.js').initSocket;
+  let overrideVerifyToken: typeof import('../src/realtime/socket.js').overrideVerifyToken;
   const verifyTokenMock = jest.fn(async (token: string) => {
     if (token === 'admin-token') {
       return { id: '1', email: 'a@example.com', role: 'ADMIN' } as any;

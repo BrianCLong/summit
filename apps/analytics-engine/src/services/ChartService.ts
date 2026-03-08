@@ -477,7 +477,7 @@ export class ChartService {
   }
 
   private getColorScheme(schemeName: string): string[] {
-    return this.colorSchemes[schemeName] || this.colorSchemes.default;
+    return (this.colorSchemes as Record<string, string[]>)[schemeName] || this.colorSchemes.default;
   }
 
   private darkenColor(color: string, amount: number): string {

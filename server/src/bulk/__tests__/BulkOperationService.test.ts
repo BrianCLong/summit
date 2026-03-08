@@ -1,11 +1,11 @@
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
-import { BulkOperationService } from '../BulkOperationService.ts';
-import { handlers } from '../handlers.ts';
-import { BulkContext, BulkItemInput } from '../types.ts';
-import { getPostgresPool } from '../../db/postgres.ts';
+import { BulkOperationService } from '../BulkOperationService.js';
+import { handlers } from '../handlers.js';
+import { BulkContext, BulkItemInput } from '../types.js';
+import { getPostgresPool } from '../../db/postgres.js';
 
 // Mock dependencies
-jest.mock('../../db/postgres.ts', () => ({
+jest.mock('../../db/postgres.js', () => ({
   getPostgresPool: jest.fn(() => ({
       connect: jest.fn(() => ({
         query: jest.fn(),
@@ -14,7 +14,7 @@ jest.mock('../../db/postgres.ts', () => ({
   }))
 }));
 
-jest.mock('../../config/logger.ts', () => ({
+jest.mock('../../config/logger.js', () => ({
   child: jest.fn(() => ({
     info: jest.fn(),
     error: jest.fn(),

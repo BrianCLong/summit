@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "coggeo/CogGeoWriteSet.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "created_at", "producer", "writes", "evidence_refs"],
+  "properties": {
+    "id": { "type": "string" },
+    "created_at": { "type": "string", "format": "date-time" },
+    "producer": { "type": "string" },
+    "writes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["kind", "payload"],
+        "properties": {
+          "kind": { "type": "string" },
+          "payload": { "type": "object" },
+          "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+        }
+      }
+    },
+    "evidence_refs": { "type": "array", "items": { "type": "string" } }
+  }
+}

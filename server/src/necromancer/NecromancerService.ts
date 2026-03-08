@@ -1,7 +1,7 @@
 // server/src/necromancer/NecromancerService.ts
 
 import { randomUUID } from 'crypto';
-import { BehavioralCloneParameters, SyntheticIdentity, SyntheticActivityLog } from './necromancer.types';
+import { BehavioralCloneParameters, SyntheticIdentity, SyntheticActivityLog } from './necromancer.types.js';
 
 /**
  * Service for managing the (simulated) creation and operation of synthetic identities.

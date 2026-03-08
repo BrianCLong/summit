@@ -1,0 +1,44 @@
+{
+  "eventType": "COMPLETE",
+  "eventTime": "2023-10-26T10:00:00.000Z",
+  "run": {
+    "runId": "123e4567-e89b-12d3-a456-426614174000",
+    "facets": {
+      "tenant": {
+        "_producer": "https://github.com/Summit/maestro",
+        "_schemaURL": "https://summit.io/schema/tenant/v1",
+        "tenantId": "tenant-123",
+        "workspaceId": "ws-456",
+        "residencyRegion": "us-east-1"
+      },
+      "security": {
+        "_producer": "https://github.com/Summit/maestro",
+        "_schemaURL": "https://summit.io/schema/security/v1",
+        "classification": "INTERNAL"
+      },
+      "build": {
+         "_producer": "https://github.com/Summit/maestro",
+         "_schemaURL": "https://summit.io/schema/build/v1",
+         "buildId": "b-789",
+         "imageDigest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  "job": {
+    "namespace": "summit.etl",
+    "name": "daily_users",
+    "facets": {
+      "sourceCode": {
+        "_producer": "https://github.com/Summit/maestro",
+        "_schemaURL": "https://openlineage.io/spec/facets/1-0-1/SourceCodeJobFacet.json",
+        "language": "typescript",
+        "sourceUri": "https://github.com/Summit/monorepo.git",
+        "version": "abc1234"
+      }
+    }
+  },
+  "inputs": [],
+  "outputs": [],
+  "producer": "https://github.com/Summit/maestro",
+  "schemaURL": "https://openlineage.io/spec/1-0-5/OpenLineage.json"
+}

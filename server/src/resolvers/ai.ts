@@ -1,9 +1,9 @@
 import axios from 'axios';
 import jwt from 'jsonwebtoken';
 import { randomUUID as uuid } from 'node:crypto';
-import { pubsub } from '../realtime/pubsub';
-import logger from '../utils/logger';
-import { wrapResolversWithPolicy } from './policyWrapper';
+import { pubsub } from '../realtime/pubsub.js';
+import logger from '../utils/logger.js';
+import { wrapResolversWithPolicy } from './policyWrapper.js';
 
 const ML_URL = process.env.ML_URL || 'http://intelgraph-ml:8081';
 const JWT_PRIVATE_KEY = process.env.JWT_PRIVATE_KEY!;

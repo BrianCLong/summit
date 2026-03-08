@@ -11,10 +11,10 @@ import {
   ResponseDrivenEvent,
   SlaBreach,
   TimelineEntry,
-} from './types';
-import { SeededRandom } from './seededRandom';
-import { defaultScenario } from './defaultScenario';
-import { defaultIntegrations } from './integrations';
+} from './types.js';
+import { SeededRandom } from './seededRandom.js';
+import { defaultScenario } from './defaultScenario.js';
+import { defaultIntegrations } from './integrations.js';
 
 const HOURS_IN_DAY = 24;
 const MILLIS_PER_HOUR = 60 * 60 * 1000;

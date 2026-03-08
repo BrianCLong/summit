@@ -1,5 +1,5 @@
 import request from 'supertest';
-import { createTestUser, createTestCase } from '../setup';
+import { createTestUser, createTestCase } from '../setup.js';
 import { jest, describe, it, test, expect, beforeAll, afterAll } from '@jest/globals';
 
 let createServer: ((options?: any) => Promise<any>) | null = null;

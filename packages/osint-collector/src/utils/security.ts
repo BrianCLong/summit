@@ -7,11 +7,13 @@ const lookup = promisify(dns.lookup);
 /**
  * Validates a URL to prevent SSRF attacks.
  * Checks for private IP ranges and valid protocols.
+ * Returns the resolved IP address to prevent TOCTOU attacks.
  *
  * @param url The URL to validate
+ * @returns The resolved IP address
  * @throws Error if URL is invalid or unsafe
  */
-export async function validateSafeUrl(url: string): Promise<void> {
+export async function validateSafeUrl(url: string): Promise<string> {
   let parsedUrl: URL;
 
   try {
@@ -36,22 +38,21 @@ export async function validateSafeUrl(url: string): Promise<void> {
   // Check if hostname is an IP (IPv4 or IPv6)
   if (Address4.isValid(hostname)) {
     checkIp(hostname);
-    return;
+    return hostname;
   }
 
   if (Address6.isValid(hostname)) {
     checkIp(hostname);
-    return;
+    return hostname;
   }
 
   // 3. DNS Resolution & IP Check
   try {
     // lookup returns the first address found
     const result = await lookup(hostname);
-    // Note: There is a Time-of-Check Time-of-Use (TOCTOU) race condition here.
-    // The IP resolved here might differ from the one used by fetch() due to DNS rebinding.
-    // For a robust fix, we would need a custom HTTP Agent that uses the resolved IP.
+
     checkIp(result.address);
+    return result.address;
   } catch (error) {
     if ((error as Error).message.includes('Unsafe IP')) {
         throw error;

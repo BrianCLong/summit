@@ -58,7 +58,7 @@ verify_signature() {
     log_info "Verifying image signature for: $image"
 
     if [ -n "$repo_pattern" ]; then
-        if cosign verify "$image" \
+        if cosign verify --use-signed-timestamps "$image" \
             --certificate-identity-regexp="https://github.com/${repo_pattern}" \
             --certificate-oidc-issuer="$GITHUB_OIDC_ISSUER" 2>/dev/null; then
             log_success "Image signature verified (OIDC identity matched)"
@@ -68,7 +68,7 @@ verify_signature() {
             return 1
         fi
     else
-        if cosign verify "$image" \
+        if cosign verify --use-signed-timestamps "$image" \
             --certificate-oidc-issuer="$GITHUB_OIDC_ISSUER" 2>/dev/null; then
             log_success "Image signature verified"
             return 0
@@ -91,7 +91,7 @@ verify_sbom() {
 
     for sbom_type in "${sbom_types[@]}"; do
         if [ -n "$repo_pattern" ]; then
-            if cosign verify-attestation "$image" \
+            if cosign verify-attestation --use-signed-timestamps "$image" \
                 --type "$sbom_type" \
                 --certificate-identity-regexp="https://github.com/${repo_pattern}" \
                 --certificate-oidc-issuer="$GITHUB_OIDC_ISSUER" 2>/dev/null; then
@@ -99,7 +99,7 @@ verify_sbom() {
                 found=true
             fi
         else
-            if cosign verify-attestation "$image" \
+            if cosign verify-attestation --use-signed-timestamps "$image" \
                 --type "$sbom_type" \
                 --certificate-oidc-issuer="$GITHUB_OIDC_ISSUER" 2>/dev/null; then
                 log_success "SBOM attestation verified (type: $sbom_type)"
@@ -124,7 +124,7 @@ verify_provenance() {
     log_info "Verifying SLSA provenance attestation..."
 
     if [ -n "$repo_pattern" ]; then
-        if cosign verify-attestation "$image" \
+        if cosign verify-attestation --use-signed-timestamps "$image" \
             --type slsaprovenance \
             --certificate-identity-regexp="https://github.com/${repo_pattern}" \
             --certificate-oidc-issuer="$GITHUB_OIDC_ISSUER" 2>/dev/null; then
@@ -132,7 +132,7 @@ verify_provenance() {
             return 0
         fi
     else
-        if cosign verify-attestation "$image" \
+        if cosign verify-attestation --use-signed-timestamps "$image" \
             --type slsaprovenance \
             --certificate-oidc-issuer="$GITHUB_OIDC_ISSUER" 2>/dev/null; then
             log_success "SLSA provenance attestation verified"
@@ -151,7 +151,7 @@ show_provenance_details() {
     log_info "Extracting provenance details..."
 
     local provenance
-    provenance=$(cosign verify-attestation "$image" \
+    provenance=$(cosign verify-attestation --use-signed-timestamps "$image" \
         --type slsaprovenance \
         --certificate-oidc-issuer="$GITHUB_OIDC_ISSUER" 2>/dev/null | jq -r '.payload' | base64 -d 2>/dev/null || echo "{}")
 

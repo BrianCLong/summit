@@ -194,7 +194,7 @@ def rscore(reversible: bool, blast_radius: int, fanout: int):
 set -euo pipefail
 FILE=$1
 jq . $FILE > /dev/null
-COSIGN_EXPERIMENTAL=1 cosign verify-blob --signature ${FILE}.sig --certificate ${FILE}.crt $FILE
+COSIGN_EXPERIMENTAL=1 cosign verify-blob --use-signed-timestamps --signature ${FILE}.sig --certificate ${FILE}.crt $FILE
 sha256sum $FILE
 ```
 

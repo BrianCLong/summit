@@ -1,0 +1,64 @@
+name: CI Concurrency Enforcer
+
+# Prevents duplicate run storms through intelligent concurrency management
+# Implements lessons learned from codex/fix-frontend-automation-errors-x incident (68 duplicate runs)
+
+on:
+  workflow_run:
+    workflows: ["*"]
+    types: [requested]
+
+permissions:
+  contents: read
+  actions: write
+
+jobs:
+  enforce-limits:
+    name: Enforce Concurrency Limits
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Check Branch Concurrency
+        run: |
+          echo "🔍 Checking concurrency limits..."
+
+          BRANCH="${{ github.event.workflow_run.head_branch }}"
+          WORKFLOW="${{ github.event.workflow_run.workflow_id }}"
+
+          # Get active runs for this branch and workflow
+          ACTIVE_RUNS=$(gh run list --repo ${{ github.repository }} \
+            --branch "$BRANCH" \
+            --workflow-id "$WORKFLOW" \
+            --status queued --status pending --status in_progress \
+            --limit 100 --json databaseId,status,createdAt)
+
+          RUN_COUNT=$(echo "$ACTIVE_RUNS" | jq '. | length')
+
+          echo "Branch: $BRANCH"
+          echo "Workflow: $WORKFLOW"
+          echo "Active runs: $RUN_COUNT"
+
+          # Enforce limit of 3 concurrent runs per branch per workflow
+          if [ "$RUN_COUNT" -gt 3 ]; then
+            echo "⚠️ LIMIT EXCEEDED: $RUN_COUNT > 3"
+
+            # Cancel oldest queued/pending runs (keep 3 newest)
+            echo "$ACTIVE_RUNS" | jq -r '
+              sort_by(.createdAt) |
+              .[0:-3] |
+              .[] |
+              select(.status == "queued" or .status == "pending") |
+              .databaseId
+            ' | while read run_id; do
+              echo "Canceling excess run: $run_id"
+              gh run cancel --repo ${{ github.repository }} $run_id || true
+              sleep 0.5
+            done
+
+            echo "✅ Enforced concurrency limit"
+          else
+            echo "✅ Within limits ($RUN_COUNT/3)"
+          fi
+        env:
+          GH_TOKEN: ${{ github.token }}

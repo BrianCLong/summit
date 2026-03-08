@@ -13,6 +13,9 @@ export * from './core/CollectorBase.js';
 export * from './core/CollectionScheduler.js';
 export * from './core/CollectionQueue.js';
 export * from './core/RateLimiter.js';
+export * from './core/Snapshot.js';
+export * from './core/Diff.js';
+export * from './core/Vantage.js';
 
 export * from './collectors/SocialMediaCollector.js';
 export * from './collectors/WebScraperCollector.js';

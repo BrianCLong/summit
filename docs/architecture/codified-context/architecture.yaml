@@ -1,0 +1,55 @@
+version: "1.0"
+metadata:
+  name: "Codified Context for Summit Agent Control Plane"
+  description: "Three-tier memory hierarchy for agent orchestration"
+  status: "proposed"
+  author: "Jules (Agent Governance Designer)"
+
+tiers:
+  hot_memory:
+    name: "Constitutional Core"
+    description: "Always-loaded context defining identity, ethics, core architecture, and unbreakable rules."
+    characteristics:
+      - Max size: < 1k lines / ~5k tokens
+      - Scope: Global to the agent
+      - Mutation: Strictly controlled via CI governance gates
+    location: "prompts/sys/CONSTITUTION.md"
+    examples:
+      - "Role definitions (e.g., Jules as Governance Designer)"
+      - "Global code conventions (e.g., Summit namespace for metrics)"
+      - "Golden path CI requirements (e.g., strict squash-and-merge, S-AOS headers)"
+
+  domain_memory:
+    name: "Domain Expert Agents"
+    description: "Specialized context loaded dynamically based on task routing and semantic classification."
+    characteristics:
+      - Max size: ~2-5k lines / 10k-25k tokens
+      - Scope: Specific domain, feature, or service boundary
+      - Mutation: Domain owner PRs
+    location: "prompts/agents/domain/"
+    examples:
+      - "prompts/agents/domain/merge-engine-agent.md"
+      - "prompts/agents/domain/graphrag-retriever-agent.md"
+      - "prompts/agents/domain/evidence-integrity-agent.md"
+
+  cold_memory:
+    name: "Knowledge Base (Retrieval Layer)"
+    description: "Structured specs, historical data, schemas, and blueprints retrieved on-demand via MCP/RAG."
+    characteristics:
+      - Max size: Practically unlimited (stored out-of-context)
+      - Scope: Highly specific data points, logs, schemas, historical decisions
+      - Access: Semantic search or targeted MCP tool calls
+    location: "docs/ (indexed by RAG), tools/ (for retrieval)"
+    examples:
+      - "docs/governance/schemas/ (JSON Schemas for validation)"
+      - "docs/architecture/ (ADRs, design docs)"
+      - "docs/governance/acceptance/ (Governance Acceptance Records - GARs)"
+      - "evals/metrics.json (historical benchmark data)"
+
+orchestration:
+  routing_logic:
+    - Step 1: Request received by Agent Control Plane (ACP).
+    - Step 2: ACP injects Hot Memory (Constitution).
+    - Step 3: ACP classifies task intent (e.g., 'Update Lineage Gate').
+    - Step 4: ACP dynamically loads the corresponding Domain Memory (e.g., 'evidence-integrity-agent.md').
+    - Step 5: Agent begins execution, making MCP tool calls to retrieve Cold Memory (e.g., specific JSON schema or GAR) as needed.

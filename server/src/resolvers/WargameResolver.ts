@@ -1,17 +1,17 @@
-import { GraphQLContext } from '../types/context';
+import { GraphQLContext } from '../types/context.js';
 // @ts-ignore - GraphQL generated type: CrisisScenario
-import type { CrisisScenario } from '../generated/graphql-types';
+import type { CrisisScenario } from '../generated/graphql-types.js';
 // @ts-ignore - GraphQL generated type: CrisisScenarioInput
-import type { CrisisScenarioInput } from '../generated/graphql-types';
+import type { CrisisScenarioInput } from '../generated/graphql-types.js';
 // @ts-ignore - GraphQL generated type: SocialMediaTelemetry
-import type { SocialMediaTelemetry } from '../generated/graphql-types';
+import type { SocialMediaTelemetry } from '../generated/graphql-types.js';
 // @ts-ignore - GraphQL generated type: AdversaryIntentEstimate
-import type { AdversaryIntentEstimate } from '../generated/graphql-types';
+import type { AdversaryIntentEstimate } from '../generated/graphql-types.js';
 // @ts-ignore - GraphQL generated type: NarrativeHeatmapData
-import type { NarrativeHeatmapData } from '../generated/graphql-types';
+import type { NarrativeHeatmapData } from '../generated/graphql-types.js';
 // @ts-ignore - GraphQL generated type: StrategicResponsePlaybook
-import type { StrategicResponsePlaybook } from '../generated/graphql-types';
-import { getNeo4jDriver } from '../db/neo4j';
+import type { StrategicResponsePlaybook } from '../generated/graphql-types.js';
+import { getNeo4jDriver } from '../db/neo4j.js';
 import { randomUUID as uuidv4 } from 'node:crypto';
 import axios from 'axios';
 

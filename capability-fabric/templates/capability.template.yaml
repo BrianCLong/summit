@@ -1,0 +1,40 @@
+version: 1
+capabilities:
+  - capability_id: <capability-id>
+    name: <short name>
+    description: <what this does>
+    business_domain: <billing|identity|inventory|comms|orchestration>
+    owner_team: <team>
+    oncall: <oncall rotation>
+    repo: <repo>
+    service: <service>
+    data_classification: <public|internal|confidential|restricted>
+    allowed_identities:
+      - <scope or agent role>
+    authn:
+      method: <session_token|oidc|api_key>
+    authz:
+      mode: <scopes|rbac|abac>
+      required_scopes:
+        - <scope>
+    schemas:
+      input_schema_ref: capability-fabric/schemas/<input>.schema.json
+      output_schema_ref: capability-fabric/schemas/<output>.schema.json
+    operations:
+      - <read|write|delete|exec>
+    risk_controls:
+      rate_limit:
+        max_per_minute: 60
+      approvals_required: false
+      redaction_fields: []
+      allowlist_fields: []
+    dependency_edges:
+      - type: downstream
+        target: <service|dataset>
+        description: <edge description>
+    policy_refs:
+      - policies/capability-fabric/<policy>.rego
+    matchers:
+      - type: <mcp_tool|http_endpoint>
+        server: '*'
+        tool: '*'

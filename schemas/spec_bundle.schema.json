@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Maestro Spec Bundle Schema",
+  "type": "object",
+  "required": [
+    "spec",
+    "metadata",
+    "metrics",
+    "evidence_id"
+  ],
+  "properties": {
+    "spec": { "$ref": "maestro_spec.schema.json" },
+    "metadata": {
+      "type": "object",
+      "required": ["timestamp", "mode", "engine_version"],
+      "properties": {
+        "timestamp": { "type": "string", "format": "date-time" },
+        "mode": { "type": "string" },
+        "engine_version": { "type": "string" }
+      }
+    },
+    "metrics": {
+      "type": "object",
+      "required": ["completeness_score"],
+      "properties": {
+        "completeness_score": { "type": "integer", "minimum": 0, "maximum": 25 },
+        "requirement_count": { "type": "integer" },
+        "open_question_count": { "type": "integer" }
+      }
+    },
+    "evidence_id": { "type": "string", "pattern": "^EVD-MAESTRO-SPEC-[0-9]+$" }
+  },
+  "additionalProperties": false
+}

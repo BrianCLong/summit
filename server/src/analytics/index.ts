@@ -21,10 +21,10 @@ export {
   type DataPoint,
   type AnomalyDetectorConfig,
   type DetectorStats,
-} from './AnomalyDetectionService.ts';
+} from './AnomalyDetectionService.js';
 
 // Policy Analytics
-export * from './policy/index.ts';
+export * from './policy/index.js';
 
 // Compliance Analytics
 // Note: RiskFactor is already exported from policy/index.ts, so we exclude it from compliance
@@ -90,4 +90,4 @@ export {
   type BatchScoreResult,
   type ScorerConfig,
   type ScorerStats,
-} from './compliance/index.ts';
+} from './compliance/index.js';

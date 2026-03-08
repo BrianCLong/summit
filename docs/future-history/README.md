@@ -110,7 +110,7 @@ Each quarter:
 - [Entry Template](./template.md)
 - [96-Prompt Engineering Roadmap](../ENGINEERING_ROADMAP_96_PROMPTS.md)
 - [Architecture Overview](../ARCHITECTURE.md)
-- [ADRs](../adr/)
+- ADRs
 
 ## Maintenance
 

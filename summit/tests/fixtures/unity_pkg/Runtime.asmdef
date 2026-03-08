@@ -1,0 +1,7 @@
+{
+  "name": "Company.Analytics.Runtime",
+  "references": [
+    "Company.Core",
+    "Company.Math"
+  ]
+}

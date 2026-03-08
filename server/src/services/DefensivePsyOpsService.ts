@@ -6,9 +6,9 @@
  */
 
 import { Pool } from 'pg';
-import logger from '../utils/logger';
+import logger from '../utils/logger.js';
 import { EventEmitter } from 'events';
-import { ContentAnalyzer, AnalysisResult } from './ContentAnalyzer';
+import { ContentAnalyzer, AnalysisResult } from './ContentAnalyzer.js';
 import { eventBus } from '../lib/events/event-bus.js';
 
 export interface PsyOpsThread {

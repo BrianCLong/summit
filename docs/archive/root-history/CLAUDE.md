@@ -120,7 +120,7 @@ exclude:
 - **`.archive/`**: Additional archived content
 - **`.disabled/`**: Temporarily disabled features/services
 - **`docs/`**: Comprehensive documentation including architecture, onboarding, runbooks
-- **`RUNBOOKS/`**: Operational runbooks
+- **`runbooks/`**: Operational runbooks
 - **`SECURITY/`**: Security documentation and policies
 - **`ops/`**: Operations scripts and configurations
 - **`observability/`**: Prometheus, Grafana configs, and monitoring dashboards
@@ -690,7 +690,7 @@ The API **refuses to boot in production** if:
 | `docs/Copilot-Playbook.md`      | AI copilot usage guide                    |
 | `docs/TESTPLAN.md`              | Testing strategy and plans                |
 | `docs/security/SLSA-L3-COMPLIANCE.md` | SLSA Level 3 compliance documentation |
-| `RUNBOOKS/`                     | Operational runbooks                      |
+| `runbooks/`                     | Operational runbooks                      |
 | `SECURITY/`                     | Security policies and guidelines          |
 | `SECURITY/docs/IC-MULTI-TENANCY.md` | IC-grade multi-tenant isolation        |
 

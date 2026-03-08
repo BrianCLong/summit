@@ -2,9 +2,9 @@
 import { EventEmitter } from 'events';
 import { v4 as uuidv4 } from 'uuid';
 import { getRedisClient } from '../../db/redis.js';
-import { getNeo4jDriver } from '../../db/neo4j.js';
+import { getNeo4jDriver, transformNeo4jIntegers } from '../../db/neo4j.js';
 import { Gauge, Counter } from 'prom-client';
-import neo4j from 'neo4j-driver';
+import type * as neo4j from 'neo4j-driver';
 import { CompressionUtils } from '../../utils/compression.js';
 import { logger } from '../../config/logger.js';
 
@@ -171,7 +171,7 @@ export class GraphStreamer extends EventEmitter {
     const channel = `stream:${streamId}`;
 
     // Normalize data (Neo4j Integers -> JS numbers)
-    const normalizedBatch = this.transformNeo4jIntegers(batch);
+    const normalizedBatch = transformNeo4jIntegers(batch);
 
     let payload: {
       type: string;
@@ -247,33 +247,6 @@ export class GraphStreamer extends EventEmitter {
     }
   }
 
-  // Helper to convert Neo4j Integers to standard JS numbers/strings
-  // Duplicated from QueryOptimizer for independence
-  private transformNeo4jIntegers(obj: unknown): unknown {
-    if (obj === null || obj === undefined) return obj;
-
-    if (neo4j.isInt(obj)) {
-      return obj.inSafeRange() ? obj.toNumber() : obj.toString();
-    }
-
-    if (Array.isArray(obj)) {
-      return obj.map((v) => this.transformNeo4jIntegers(v));
-    }
-
-    if (typeof obj === 'object') {
-      const newObj: Record<string, unknown> = {};
-      for (const k in obj) {
-        if (Object.prototype.hasOwnProperty.call(obj, k)) {
-          newObj[k] = this.transformNeo4jIntegers(
-            (obj as Record<string, unknown>)[k],
-          );
-        }
-      }
-      return newObj;
-    }
-
-    return obj;
-  }
 }
 
 export const graphStreamer = new GraphStreamer();

@@ -16,7 +16,7 @@ jobs:
   sbom:
     name: Attach SBOM
     needs: companyos-api
-    uses: ./.github/workflows/reusable/sbom.yml
+    uses: ./.github/workflows/_reusable-sbom.yml
     with:
       service: companyos-api
       working-directory: companyos

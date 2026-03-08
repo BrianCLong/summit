@@ -1,0 +1,85 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://summit.example/schema/cogwar/evidence-bundle.schema.json",
+  "title": "CogWar Evidence Bundle",
+  "type": "object",
+  "required": ["schema_version", "evidence_id", "detector", "run_id", "artifacts"],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "cogwar.evidence.v1"
+    },
+    "evidence_id": {
+      "type": "string",
+      "pattern": "^EVD:CW26:[A-Z0-9_-]+:[A-Z0-9_-]+:[A-F0-9]{8}$"
+    },
+    "detector": {
+      "type": "object",
+      "required": ["name", "version"],
+      "properties": {
+        "name": { "type": "string" },
+        "version": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "run_id": { "type": "string" },
+    "summary": { "type": "string" },
+    "inputs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["source_type", "source_id"],
+        "properties": {
+          "source_type": { "type": "string" },
+          "source_id": { "type": "string" },
+          "notes": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "features": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["feature_id", "name", "value"],
+        "properties": {
+          "feature_id": { "type": "string" },
+          "name": { "type": "string" },
+          "value": {},
+          "explanation": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "artifacts": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["path", "sha256"],
+        "properties": {
+          "path": { "type": "string" },
+          "sha256": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "attributions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["evidence_id", "claim_id"],
+        "properties": {
+          "evidence_id": {
+            "type": "string",
+            "pattern": "^(EVD:CW26:[A-Z0-9_-]+:[A-Z0-9_-]+:[A-F0-9]{8}|EVID-[A-Z0-9-]+)$"
+          },
+          "claim_id": { "type": "string" },
+          "notes": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

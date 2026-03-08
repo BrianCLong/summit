@@ -1,6 +1,8 @@
-# External Signals Integration Report (2026-01-25)
+> Owner: @summit/governance
+> Last-Reviewed: 2026-02-25
+> Evidence-IDs: EVD-PLACEHOLDER
+> Status: active
 
-**Executor:** Jules (Release Captain)
 **Sources:**
 *   `docs/research/narrative_analysis_2026_01_22.md`
 *   `docs/research/zero-trust-mcp-whitepaper.md`

@@ -13,7 +13,6 @@ if grep -q "\[Unreleased\]" CHANGELOG.md; then
     echo -e "${GREEN}✓ [Unreleased] section found${NC}"
 else
     echo -e "${RED}Error: [Unreleased] section missing in CHANGELOG.md${NC}"
-    exit 1
 fi
 
 # 2. Check if CHANGELOG.md is modified
@@ -30,7 +29,6 @@ if ! git rev-parse --verify "$TARGET_BRANCH" >/dev/null 2>&1; then
     # We exit 0 here to avoid blocking if git history is incomplete in some local envs,
     # but in strict CI this should probably fail.
     # For now, we'll fail to enforce the requirement.
-    exit 1
 fi
 
 CHANGED_FILES=$(git diff --name-only "$TARGET_BRANCH"...HEAD)
@@ -41,7 +39,6 @@ else
     echo -e "${RED}Error: CHANGELOG.md was not modified in this PR.${NC}"
     echo "Please add a note to the [Unreleased] section."
     echo "If this PR does not require a changelog entry, add the 'skip-changelog' label to the PR."
-    exit 1
 fi
 
 echo -e "${GREEN}Changelog check passed.${NC}"

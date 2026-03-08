@@ -1,6 +1,6 @@
-import { getNeo4jDriver } from '../config/database';
-import { enqueueOSINT } from '../services/OSINTQueueService';
-import logger from '../utils/logger';
+import { getNeo4jDriver } from '../config/database.js';
+import { enqueueOSINT } from '../services/OSINTQueueService.js';
+import logger from '../utils/logger.js';
 
 interface PrioritizationConfig {
   minDegree: number;

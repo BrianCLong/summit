@@ -1,0 +1,78 @@
+{{- if and .Values.gatewayApi.enabled .Values.gatewayApi.policies.rateLimit.enabled }}
+---
+# BackendTrafficPolicy for rate limiting
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: BackendTrafficPolicy
+metadata:
+  name: {{ include "sandbox-gateway.fullname" . }}-rate-limit
+  labels:
+    {{- include "sandbox-gateway.labels" . | nindent 4 }}
+spec:
+  targetRef:
+    group: gateway.networking.k8s.io
+    kind: HTTPRoute
+    name: {{ include "sandbox-gateway.fullname" . }}
+  rateLimit:
+    type: Local
+    local:
+      rules:
+        - limit:
+            requests: {{ .Values.gatewayApi.policies.rateLimit.requestsPerMinute | default 100 }}
+            unit: Minute
+          clientSelectors:
+            - sourceCIDR:
+                value: "0.0.0.0/0"
+                type: Distinct
+{{- end }}
+
+{{- if and .Values.gatewayApi.enabled .Values.gatewayApi.policies.timeout.enabled }}
+---
+# BackendTrafficPolicy for timeouts and retries
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: BackendTrafficPolicy
+metadata:
+  name: {{ include "sandbox-gateway.fullname" . }}-timeout
+  labels:
+    {{- include "sandbox-gateway.labels" . | nindent 4 }}
+spec:
+  targetRef:
+    group: gateway.networking.k8s.io
+    kind: HTTPRoute
+    name: {{ include "sandbox-gateway.fullname" . }}
+  timeout:
+    tcp:
+      connectTimeout: {{ .Values.gatewayApi.policies.timeout.connect | default "10s" }}
+    http:
+      requestTimeout: {{ .Values.gatewayApi.policies.timeout.request | default "60s" }}
+      idleTimeout: {{ .Values.gatewayApi.policies.timeout.idle | default "3600s" }}
+  {{- if .Values.gatewayApi.policies.retry.enabled }}
+  retry:
+    numRetries: {{ .Values.gatewayApi.policies.retry.attempts | default 2 }}
+    retryOn:
+      - connect-failure
+      - refused-stream
+      - unavailable
+    perRetry:
+      timeout: {{ .Values.gatewayApi.policies.retry.perRetryTimeout | default "10s" }}
+  {{- end }}
+{{- end }}
+
+{{- if and .Values.gatewayApi.enabled .Values.gatewayApi.policies.circuitBreaker.enabled }}
+---
+# Circuit breaker policy
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: BackendTrafficPolicy
+metadata:
+  name: {{ include "sandbox-gateway.fullname" . }}-circuit-breaker
+  labels:
+    {{- include "sandbox-gateway.labels" . | nindent 4 }}
+spec:
+  targetRef:
+    group: gateway.networking.k8s.io
+    kind: HTTPRoute
+    name: {{ include "sandbox-gateway.fullname" . }}
+  circuitBreaker:
+    maxConnections: {{ .Values.gatewayApi.policies.circuitBreaker.maxConnections | default 1024 }}
+    maxPendingRequests: {{ .Values.gatewayApi.policies.circuitBreaker.maxPendingRequests | default 128 }}
+    maxRequests: {{ .Values.gatewayApi.policies.circuitBreaker.maxRequests | default 1024 }}
+{{- end }}

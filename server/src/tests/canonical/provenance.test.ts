@@ -18,7 +18,7 @@ import {
   ProvenanceSource,
   ProvenanceAssertion,
   ProvenanceTransform,
-} from '../../canonical/provenance';
+} from '../../canonical/provenance.js';
 
 describe('Provenance Functionality', () => {
   describe('Hashing', () => {

@@ -1,0 +1,39 @@
+{
+  "$id": "https://summit.dev/schemas/pg.hypothesis.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PG Hypothesis Output (Non-Prescriptive)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["playbookId", "branch", "confidence", "matchedIndicators", "missingEvidence", "notes"],
+  "properties": {
+    "playbookId": { "type": "string" },
+    "branch": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["stepIdsConsidered", "stepIdsPlausible"],
+      "properties": {
+        "stepIdsConsidered": { "type": "array", "items": { "type": "string" } },
+        "stepIdsPlausible": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+    "matchedIndicators": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["indicatorId", "evidenceId", "score"],
+        "properties": {
+          "indicatorId": { "type": "string" },
+          "evidenceId": { "type": "string" },
+          "score": { "type": "number", "minimum": 0, "maximum": 1 }
+        }
+      }
+    },
+    "missingEvidence": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "notes": { "type": "string" }
+  }
+}

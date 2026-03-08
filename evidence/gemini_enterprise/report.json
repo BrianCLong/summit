@@ -1,0 +1,6 @@
+{
+  "controls": [],
+  "policy_status": "enforced",
+  "provider": "google_gemini_enterprise",
+  "workspace_bound": true
+}

@@ -391,7 +391,7 @@ The artifact or attestation has been modified. Verify:
 ### Internal Documentation
 - [Evidence Collection](../ci/EVIDENCE_COLLECTION.md)
 - [Release Runbook](runbook.md)
-- [GA Evidence Index](GA_EVIDENCE_INDEX.md)
+- GA Evidence Index
 
 ### External Resources
 - [Sigstore Documentation](https://docs.sigstore.dev/)

@@ -6,6 +6,10 @@ on:
       - 'summit/providers/**'
       - 'scripts/monitoring/kimi-k2-5-drift.py'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   conformance:
     runs-on: ubuntu-latest

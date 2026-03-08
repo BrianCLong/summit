@@ -442,7 +442,7 @@ router.get(
   query('timeRange').isIn(['1h', '24h', '7d', '30d']).optional(),
   async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const timeRange = (req.query.timeRange as string) || '24h';
+      const timeRange = ((((req.query.timeRange as string) as string) as string) as string) || '24h';
 
       // In a real implementation, this would query metrics from a time-series database
       const mockMetrics = {

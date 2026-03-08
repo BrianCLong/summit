@@ -16,6 +16,7 @@ import {
   neo4jQueryTotal,
 } from '../metrics/neo4jMetrics.js';
 import { neo4jPerformanceMonitor } from './neo4jPerformanceMonitor.js';
+import { maybeSample } from '../lib/telemetry/plan-sampler.js';
 
 dotenv.config();
 
@@ -109,13 +110,16 @@ export const neo = {
       // Return a dummy session or throw?
       // For now, simple mock if needed or just rely on realDriver if available
       // But typically we should just return realDriver.session() if initialized
-      if(realDriver) return realDriver.session();
-      // If we are in mock mode but no driver (e.g. tests without init),
-      // we might need a better mock strategy.
-      // For now, let's assume getNeo4jDriver throws or handles it.
-      return getNeo4jDriver().session();
+      const s = realDriver ? realDriver.session() : getNeo4jDriver().session();
+      // Even in mock mode, if we have a session, we instrument it?
+      // Mocks might not support PROFILE.
+      // But if realDriver is present (just not initialized? No, getNeo4jDriver throws).
+      // If mock mode is true, getNeo4jDriver returns something?
+      // If we are truly in mock mode (no DB), instrumenting might be noisy.
+      // We'll instrument only if realDriver is active or we want to test instrumentation.
+      return instrumentSession(s);
     }
-    return realDriver.session();
+    return instrumentSession(realDriver.session());
   },
   run: async (query: string, params?: any) => {
     const session = neo.session();
@@ -149,24 +153,129 @@ export function instrumentSession<T extends SessionLike>(session: T): T {
     const labels = inferLabels(cypher);
     try {
       const result = await session.run(cypher, params, txConfig);
+
+      const durationMs = Date.now() - start;
       neo4jPerformanceMonitor.recordSuccess({
         cypher,
         params,
-        durationMs: Date.now() - start,
+        durationMs,
         labels,
       });
+
+      // Plan Sampling
+      if (!isNeo4jMockMode()) {
+        await maybeSample(
+          cypher,
+          params,
+          durationMs,
+          false, // hasError
+          labels.operation,
+          () => getNeo4jDriver().session()
+        );
+      }
+
       return result;
     } catch (error: any) {
+      const durationMs = Date.now() - start;
       neo4jPerformanceMonitor.recordError({
         cypher,
         params,
-        durationMs: Date.now() - start,
+        durationMs,
         labels,
         error: error?.message ?? String(error),
       });
+
+      // Plan Sampling on error
+      if (!isNeo4jMockMode()) {
+        await maybeSample(
+          cypher,
+          params,
+          durationMs,
+          true, // hasError
+          labels.operation,
+          () => getNeo4jDriver().session()
+        );
+      }
+
       throw error;
     }
   };
 
   return { ...session, run } as T;
+}
+
+/**
+ * Normalizes Neo4j query results by converting Neo4j Integers to standard JS numbers or strings.
+ * This implementation is optimized to avoid unnecessary deep cloning when no Neo4j Integers are present.
+ *
+ * BOLT OPTIMIZATION:
+ * - Avoids object/array allocation if no transformation is needed.
+ * - Reduces GC pressure and CPU cycles for large result sets.
+ * - Handles Neo4j Record-like objects (toObject).
+ *
+ * @param obj - The object or array to normalize.
+ * @returns The normalized object or array.
+ */
+export function transformNeo4jIntegers(obj: any): any {
+  if (obj === null || obj === undefined || typeof obj !== 'object') {
+    return obj;
+  }
+
+  // Handle Neo4j Integers
+  if (neo4j.isInt(obj)) {
+    return obj.inSafeRange() ? obj.toNumber() : obj.toString();
+  }
+
+  // Handle Neo4j temporal types
+  if (
+    obj instanceof neo4j.types.DateTime ||
+    obj instanceof neo4j.types.Date ||
+    obj instanceof neo4j.types.Time ||
+    obj instanceof neo4j.types.LocalDateTime ||
+    obj instanceof neo4j.types.LocalTime
+  ) {
+    return obj.toString();
+  }
+
+  // Handle Arrays
+  if (Array.isArray(obj)) {
+    let newArr: any[] | null = null;
+    for (let i = 0; i < obj.length; i++) {
+      const v = obj[i];
+      const t = transformNeo4jIntegers(v);
+      if (t !== v && !newArr) {
+        newArr = obj.slice(0, i);
+      }
+      if (newArr) {
+        newArr.push(t);
+      }
+    }
+    return newArr || obj;
+  }
+
+  // Handle Neo4j Record-like objects
+  if (typeof obj.toObject === 'function') {
+    return transformNeo4jIntegers(obj.toObject());
+  }
+
+  // Avoid recursing into common non-plain objects that won't contain Neo4j Integers
+  if (obj instanceof Date || obj instanceof RegExp || (typeof Buffer !== 'undefined' && Buffer.isBuffer(obj))) {
+    return obj;
+  }
+
+  // Handle Plain Objects
+  let newObj: any = null;
+  for (const k in obj) {
+    if (Object.prototype.hasOwnProperty.call(obj, k)) {
+      const v = obj[k];
+      const t = transformNeo4jIntegers(v);
+      if (t !== v && !newObj) {
+        newObj = { ...obj };
+      }
+      if (newObj) {
+        newObj[k] = t;
+      }
+    }
+  }
+  return newObj || obj;
 }

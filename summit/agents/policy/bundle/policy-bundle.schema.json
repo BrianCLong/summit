@@ -1,0 +1,45 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "summit/agents/policy/bundle/policy-bundle.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "bundle_version",
+    "policy_version",
+    "created_at",
+    "env",
+    "policy_sha256",
+    "skills_sha256",
+    "policy_path",
+    "skills_path",
+    "approvals",
+    "signatures"
+  ],
+  "properties": {
+    "bundle_version": { "type": "integer", "const": 1 },
+    "policy_version": { "type": "integer", "minimum": 1 },
+    "created_at": { "type": "string", "format": "date-time" },
+    "env": { "type": "string", "enum": ["dev", "test", "prod"] },
+    "policy_sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "skills_sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "policy_path": { "type": "string", "minLength": 1 },
+    "skills_path": { "type": "string", "minLength": 1 },
+    "approvals": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "signatures": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["type", "signer", "sig"],
+        "properties": {
+          "type": { "type": "string", "const": "sha256" },
+          "signer": { "type": "string", "minLength": 1 },
+          "sig": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
+  }
+}

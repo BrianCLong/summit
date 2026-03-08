@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "coggeo/NarrativeCandidate.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "obs_id", "label", "ts"],
+  "properties": {
+    "id": { "type": "string" },
+    "obs_id": { "type": "string" },
+    "label": { "type": "string" },
+    "summary": { "type": ["string", "null"] },
+    "ts": { "type": "string", "format": "date-time" }
+  }
+}

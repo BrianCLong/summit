@@ -1376,7 +1376,7 @@ app.get(`${API_BASE}/runs/:id/evidence`, (req, res) => {
   res.json({
     runId: id,
     sbom: { present: true, href: `https://example.com/artifacts/${id}/sbom.spdx.json` },
-    cosign: { signed: true, verifyCmd: `cosign verify --key cosign.pub ghcr.io/intelgraph/app@sha256:deadbeef` },
+    cosign: { signed: true, verifyCmd: `cosign verify --use-signed-timestamps --key cosign.pub ghcr.io/intelgraph/app@sha256:deadbeef` },
     slsa: { present: true, href: `https://example.com/artifacts/${id}/slsa.attestation` },
     attestations: [
       { type: 'provenance', issuer: 'cosign', ref: 'ghcr.io/intelgraph/builder', ts: Date.now() - 120000 },

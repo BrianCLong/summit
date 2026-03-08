@@ -1,14 +1,15 @@
 
-import { RedisService } from '../cache/redis.ts';
-import logger from '../config/logger.ts';
-import { getNeo4jDriver } from '../db/neo4j.ts';
+import { RedisService } from '../cache/redis.js';
+import logger from '../config/logger.js';
+import { getNeo4jDriver } from '../db/neo4j.js';
 import fs from 'fs/promises';
 import path from 'path';
 import { promisify } from 'util';
 import { exec } from 'child_process';
 import { createWriteStream } from 'fs';
 import zlib from 'zlib';
-import { PrometheusMetrics } from '../utils/metrics.ts';
+import { PrometheusMetrics } from '../utils/metrics.js';
+import { S3Config } from '../types/infrastructure.js';
 
 const execAsync = promisify(exec);
 
@@ -17,14 +18,6 @@ const backupMetrics = new PrometheusMetrics('backup_service');
 backupMetrics.createCounter('ops_total', 'Total backup operations', ['type', 'status']);
 backupMetrics.createHistogram('duration_seconds', 'Backup duration', { buckets: [0.1, 0.5, 1, 5, 10, 30, 60, 120] });
 backupMetrics.createGauge('size_bytes', 'Backup size', ['type']);
-
-export interface S3Config {
-  bucket: string;
-  region: string;
-  endpoint?: string;
-  accessKeyId?: string;
-  secretAccessKey?: string;
-}
 
 export interface BackupOptions {
   compress?: boolean;
@@ -161,7 +154,7 @@ export class BackupService {
     try {
       const dir = await this.ensureBackupDir('neo4j');
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-      const filename = `neo4j-export-${timestamp}.tsonl`;
+      const filename = `neo4j-export-${timestamp}.jsonl`;
       const filepath = path.join(dir, filename);
       const finalPath = options.compress ? `${filepath}.gz` : filepath;
 

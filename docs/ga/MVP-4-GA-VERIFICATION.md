@@ -15,6 +15,7 @@ This sweep captures the minimum credible verification for the GA-hardening surfa
 | Generative UI Plan Contract      | `docs/ga/genui/UI_CONTRACT.md` (contract, tool manual, anti-footguns evidence)                                              | C    | `make ga-verify`          | Confirms the GenUI plan contract, tool schema, and safety guardrails are anchored in GA docs.                 |
 | GA Gate Artifact Closure         | `docs/ga/MVP4_GA_GATE_ARTIFACTS.md` (gate artifact closure runbook + evidence map)                                          | C    | `make ga-verify`          | Forces closure of Terraform/DR/Canary/Migrations gate artifacts before GA readiness changes.                  |
 | Media Authenticity & Provenance  | `scripts/ci/verify_media_provenance.ts` + `docs/governance/media_provenance.md`                                             | B    | `make ga-verify`          | Blocks marketing/public media changes without deterministic provenance evidence.                              |
+| GA Exit Criteria Scorecard       | `docs/ga/GA_EXIT_CRITERIA_v1.md` (binary release gate, weighted GA Readiness Index, and acceptance criteria)     | C    | `make ga-verify`          | Anchors GA promotion to an explicit scorecard with auditable acceptance tests and status tracking.            |
 
 ## Deferred / To-Improve Items
 

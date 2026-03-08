@@ -14,7 +14,7 @@ import {
   deprecationMiddleware,
   VersionedRequest,
   SchemaVersionManager,
-} from './index';
+} from './index.js';
 
 // ============================================================================
 // Example 1: Basic Express App with Versioned Routes

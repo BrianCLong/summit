@@ -1,0 +1,51 @@
+{
+  "evidence_id": "SUMMIT-AIFW-DEP-GATE",
+  "item_slug": "ai-supply-chain-firewall",
+  "patterns": [
+    "slopsquat",
+    "typosquat",
+    "propagation_velocity"
+  ],
+  "claims": [
+    "blocks ai-suggested risky dependencies"
+  ],
+  "assessments": [
+    {
+      "dependency": "requests",
+      "risk_score": 0.0,
+      "reasons": [
+        "Dependency appears safe based on offline heuristics."
+      ]
+    },
+    {
+      "dependency": "requezts",
+      "risk_score": 0.8,
+      "reasons": [
+        "Typosquatting risk: similar to requests",
+        "Package 'requezts' not found in known registry"
+      ]
+    },
+    {
+      "dependency": "react",
+      "risk_score": 0.0,
+      "reasons": [
+        "Dependency appears safe based on offline heuristics."
+      ]
+    },
+    {
+      "dependency": "malicious-pkg-001",
+      "risk_score": 0.9,
+      "reasons": [
+        "Package 'malicious-pkg-001' not found in known registry",
+        "High recommendation velocity (150) combined with low trust score (0.1)."
+      ]
+    },
+    {
+      "dependency": "fake-pkg-999",
+      "risk_score": 0.7,
+      "reasons": [
+        "Package 'fake-pkg-999' not found in known registry"
+      ]
+    }
+  ]
+}

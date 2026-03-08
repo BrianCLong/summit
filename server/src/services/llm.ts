@@ -5,7 +5,7 @@ export interface LLMClient {
 }
 
 // Example impl: replace with your real provider(s)
-import { wrapStream } from './llmBreaker'; // New import
+import { wrapStream } from './llmBreaker.js'; // New import
 
 export class MockLLM implements LLMClient {
   // Original stream implementation

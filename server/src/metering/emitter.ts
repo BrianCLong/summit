@@ -1,6 +1,6 @@
-import logger from '../utils/logger';
-import { meteringPipeline } from './pipeline';
-import { MeterEvent, MeterEventKind } from './schema';
+import logger from '../utils/logger.js';
+import { meteringPipeline } from './pipeline.js';
+import { MeterEvent, MeterEventKind } from './schema.js';
 
 export class MeteringEmitter {
   async emit(event: MeterEvent): Promise<void> {
@@ -19,6 +19,65 @@ export class MeteringEmitter {
       kind: MeterEventKind.INGEST_UNITS,
       tenantId: input.tenantId,
       units: input.units,
+      source: input.source,
+      correlationId: input.correlationId,
+      idempotencyKey: input.idempotencyKey,
+      metadata: input.metadata,
+    });
+  }
+
+  async emitPolicySimulation(input: {
+    tenantId: string;
+    rulesCount: number;
+    source: string;
+    correlationId?: string;
+    idempotencyKey?: string;
+    metadata?: Record<string, unknown>;
+  }) {
+    await this.safeEmit({
+      kind: MeterEventKind.POLICY_SIMULATION,
+      tenantId: input.tenantId,
+      rulesCount: input.rulesCount,
+      source: input.source,
+      correlationId: input.correlationId,
+      idempotencyKey: input.idempotencyKey,
+      metadata: input.metadata,
+    });
+  }
+
+  async emitWorkflowExecution(input: {
+    tenantId: string;
+    workflowName: string;
+    stepsCount: number;
+    source: string;
+    correlationId?: string;
+    idempotencyKey?: string;
+    metadata?: Record<string, unknown>;
+  }) {
+    await this.safeEmit({
+      kind: MeterEventKind.WORKFLOW_EXECUTION,
+      tenantId: input.tenantId,
+      workflowName: input.workflowName,
+      stepsCount: input.stepsCount,
+      source: input.source,
+      correlationId: input.correlationId,
+      idempotencyKey: input.idempotencyKey,
+      metadata: input.metadata,
+    });
+  }
+
+  async emitReceiptWrite(input: {
+    tenantId: string;
+    action: string;
+    source: string;
+    correlationId?: string;
+    idempotencyKey?: string;
+    metadata?: Record<string, unknown>;
+  }) {
+    await this.safeEmit({
+      kind: MeterEventKind.RECEIPT_WRITE,
+      tenantId: input.tenantId,
+      action: input.action,
       source: input.source,
       correlationId: input.correlationId,
       idempotencyKey: input.idempotencyKey,

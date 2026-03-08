@@ -1,0 +1,52 @@
+{
+  "runId": "lh-demo-001",
+  "tenantId": "summit",
+  "taskPrompt": "Add a feature flag with a unit test and documentation entry.",
+  "allowedPaths": ["docs/", "feature-flags/", "tests/"],
+  "steps": [
+    {
+      "id": "plan",
+      "title": "Plan and decompose",
+      "dependsOn": [],
+      "role": "planner"
+    },
+    {
+      "id": "implement",
+      "title": "Implement feature flag",
+      "dependsOn": ["plan"],
+      "role": "implementer"
+    },
+    {
+      "id": "review",
+      "title": "Review and validate",
+      "dependsOn": ["implement"],
+      "role": "reviewer"
+    }
+  ],
+  "budgets": {
+    "maxTokens": 6000,
+    "maxSeconds": 600,
+    "maxToolCalls": 40
+  },
+  "evaluationProfile": {
+    "name": "fast",
+    "commands": ["pnpm test:quick"],
+    "targetedTests": ["tests/longhorizon/longhorizon.test.ts"]
+  },
+  "islands": 2,
+  "migrationInterval": 1,
+  "candidateSeeds": [
+    {
+      "id": "seed-docs-flag",
+      "title": "Docs and test flag",
+      "patch": "+++ b/docs/feature-flags.md\n+## longhorizon.enable\n+Enable LongHorizon MVP pathways.\n+++ b/tests/longhorizon/feature-flags.test.ts\n+test('longhorizon flag', () => expect(true).toBe(true));",
+      "metadata": { "diffSize": 15, "risk": 2, "testImpact": 1, "locality": "docs" }
+    },
+    {
+      "id": "seed-alt",
+      "title": "Alt candidate",
+      "patch": "+++ b/feature-flags/longhorizon.json\n+{\"longhorizon.enable\": true}",
+      "metadata": { "diffSize": 5, "risk": 1, "testImpact": 1, "locality": "flags" }
+    }
+  ]
+}

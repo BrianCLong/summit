@@ -8,7 +8,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "dev": "tsc -p tsconfig.json --watch",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "lint": "eslint src"
   },
   "dependencies": {

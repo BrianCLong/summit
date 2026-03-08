@@ -6,7 +6,7 @@
  */
 
 import { Driver, Session } from 'neo4j-driver';
-import { logger } from '../utils/logger';
+import { logger } from '../utils/logger.js';
 
 export interface PolicyTags {
   policy_origin: string;

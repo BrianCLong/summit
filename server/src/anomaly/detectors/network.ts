@@ -4,8 +4,8 @@ import {
   Detector,
   AnomalyResult,
   Severity,
-} from '../types.ts';
-import { isolationForest, Neo4jGraph, AnomalyScore } from '../forest.ts';
+} from '../types.js';
+import { isolationForest, Neo4jGraph, AnomalyScore } from '../forest.js';
 
 interface NetworkData {
   graph: Neo4jGraph;
@@ -21,7 +21,7 @@ export class NetworkDetector implements Detector {
 
     // Run existing isolation forest implementation
     const result = isolationForest.fit_transform(
-      (await import('../forest.ts')).features(graph)
+      (await import('../forest.js')).features(graph)
     );
 
     // If looking for a specific node's anomaly status

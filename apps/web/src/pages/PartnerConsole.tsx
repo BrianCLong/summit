@@ -6,8 +6,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/Badge';
 import { PolicyProfileSelector } from '@/components/PolicyProfileSelector';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/Dialog';
-import { Input } from '@/components/ui/Input';
-import { Label } from '@/components/ui/Label';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Plus } from 'lucide-react';
 
 interface Tenant {
@@ -22,7 +22,8 @@ interface Tenant {
 }
 
 export default function PartnerConsole() {
-  const { token, user } = useAuth();
+  const { user } = useAuth();
+  const token = localStorage.getItem('auth_token');
   const [tenants, setTenants] = useState<Tenant[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedTenant, setSelectedTenant] = useState<string | null>(null);

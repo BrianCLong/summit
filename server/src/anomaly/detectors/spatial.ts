@@ -4,7 +4,7 @@ import {
   Detector,
   AnomalyResult,
   Severity,
-} from '../types.ts';
+} from '../types.js';
 
 interface SpatialData {
   latitude: number;

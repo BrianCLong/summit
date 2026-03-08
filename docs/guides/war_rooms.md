@@ -23,9 +23,9 @@ Once a War Room is created, you can add and remove participants.
 
 ### Participant Roles
 
-*   **Admin**: Can add and remove participants, assign roles, and delete the War Room.
-*   **Moderator**: Can add and remove participants.
-*   **Participant**: Can view and interact with the contents of the War Room.
+- **Admin**: Can add and remove participants, assign roles, and delete the War Room.
+- **Moderator**: Can add and remove participants.
+- **Participant**: Can view and interact with the contents of the War Room.
 
 ### Removing Participants
 

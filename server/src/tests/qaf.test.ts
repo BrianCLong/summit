@@ -1,6 +1,6 @@
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
-import { SummitQAF } from '../qaf/factory';
-import { AgentConfig } from '../qaf/types';
+import { SummitQAF } from '../qaf/factory.js';
+import { AgentConfig } from '../qaf/types.js';
 
 describe('SummitQAF Factory', () => {
   let factory: SummitQAF;

@@ -1,0 +1,4 @@
+[
+  {"actor": {"user_id": "user_004"}, "action": "gmail_send_message", "target": {"resource_id": "msg123"}},
+  {"actor": {"user_id": "user_004"}, "action": "gmail_delete_message", "target": {"resource_id": "msg123"}}
+]

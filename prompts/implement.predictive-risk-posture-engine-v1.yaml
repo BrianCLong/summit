@@ -1,0 +1,77 @@
+meta:
+  id: implement.predictive-risk-posture-engine-v1
+  owner: 'intelgraph-advisory-committee'
+  purpose: 'Implement Summit Predictive Risk Posture Engine (PRPE)'
+  tags: ['prpe', 'risk', 'predictive', 'forecasting']
+  guardrails:
+    - 'Must operate air-gapped/sovereign'
+    - 'Explainability required (feature attribution)'
+    - 'Hard guardrails: no autonomous destructive actions, DAL requires policy gate'
+
+modelConfig:
+  model: 'claude-sonnet-4-5'
+  temperature: 0.2
+  maxTokens: 7000
+
+inputs:
+  target_completion_time_minutes: string
+
+template: |
+  You are implementing the **Predictive Risk Posture Engine (PRPE)** for Summit.
+
+  ## Objective
+  Forecast risk trajectories and recommend preventive actions with measurable expected impact.
+
+  ## Target Paths
+  ```
+  services/prpe/
+    ├── src/
+    │   ├── api/
+    │   │   ├── RiskController.ts
+    │   │   └── CounterfactualController.ts
+    │   ├── models/
+    │   │   ├── BaselineForecaster.ts
+    │   │   ├── GradientBoostingForecaster.ts
+    │   │   └── TemporalGraphForecaster.ts
+    │   ├── features/
+    │   │   ├── GraphFeatures.ts
+    │   │   ├── TemporalFeatures.ts
+    │   │   └── BehavioralFeatures.ts
+    │   ├── planning/
+    │   │   └── CounterfactualPlanner.ts
+    │   └── drift/
+    │       └── DriftDetector.ts
+    └── README.md
+  ```
+
+  ## Core Requirements
+  1. **Risk Posture Model**: Per-entity, per-network, and per-system posture scores (0-100). Forecast horizons: 7/30/90 days. Confidence intervals and drift detection.
+  2. **Feature Pipeline**:
+     - Graph features: centrality change, community churn, shortest-path exposure to known-risk nodes
+     - Temporal features: rate-of-change of events, bursts, persistence, seasonality
+     - Behavioral features: policy denials, auth anomalies, ingest anomalies, provenance gaps
+  3. **Forecasting Methods**:
+     - Baseline: EWMA + change-point detection
+     - Intermediate: gradient boosting on engineered features
+     - Advanced: temporal graph model (optional) with fallback to baseline
+  4. **Counterfactual Planner**: Given a candidate DAL action, estimate delta-risk. Return top-3 actions by expected impact / cost.
+  5. **API**:
+     - GET /risk/posture?entity=...&horizon=30d
+     - GET /risk/forecast?entity=...&horizons=7d,30d,90d
+     - POST /risk/counterfactual
+     - GET /risk/drift
+  6. **Dashboard widgets**: "Top Rising Risks", "Risk Drivers", "Preemptive Actions Queue", "Forecast Accuracy & Drift".
+
+  ## Constraints & Success Criteria
+  - Must operate air-gapped/sovereign.
+  - Explainability required (feature attribution).
+  - Hard guardrails: no autonomous destructive actions, DAL requires policy gate.
+  - Success: Detect rising risk >=30% earlier, maintain calibrated confidence, reduce critical incidents.
+
+  ## Acceptance Tests
+  - [ ] Must pass CI gate check: no regression on runtime performance.
+  - [ ] Feature importance mapping clearly ties input signals to calculated risk score outputs.
+  - [ ] Risk scores computed effectively and returned via appropriate endpoints.
+  - [ ] DAL actions checked effectively against policy gate logic.
+  - [ ] API routes conform to specs.
+  - [ ] Drift metrics reflect accurate model deterioration state.

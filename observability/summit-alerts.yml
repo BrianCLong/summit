@@ -106,3 +106,18 @@ groups:
           summary: 'Summit API High Memory Usage'
           description: 'Memory usage is {{ $value }}MB, exceeding 1.5GB.'
           runbook_url: 'https://docs.intelgraph.com/runbooks/high-memory'
+
+  # Verification Performance
+  - name: summit.verification
+    rules:
+      - alert: SummitVerificationLatencyHigh
+        expr: histogram_quantile(0.95, sum(rate(verification_latency_seconds_bucket[5m])) by (le, product)) > 5.0
+        for: 5m
+        labels:
+          severity: warning
+          service: summit-api
+          component: verification
+        annotations:
+          summary: 'Verification Latency High'
+          description: 'P95 verification latency for {{ $labels.product }} is {{ $value }}s, exceeding 5s.'
+          runbook_url: 'https://docs.intelgraph.com/runbooks/verification-latency'

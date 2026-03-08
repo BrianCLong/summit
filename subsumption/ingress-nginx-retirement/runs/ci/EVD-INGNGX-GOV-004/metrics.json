@@ -1,0 +1,8 @@
+{
+  "evidence_id": "EVD-INGNGX-GOV-004",
+  "item_slug": "ingress-nginx-retirement",
+  "metrics": {
+    "workflow_jobs": 2,
+    "required_checks": 2
+  }
+}

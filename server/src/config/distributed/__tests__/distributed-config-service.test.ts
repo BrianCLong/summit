@@ -1,7 +1,7 @@
 import { z } from 'zod';
-import DistributedConfigService from '../distributed-config-service';
-import InMemoryConfigRepository from '../repository';
-import { FeatureFlagAdapter, SecretResolver } from '../types';
+import DistributedConfigService from '../distributed-config-service.js';
+import InMemoryConfigRepository from '../repository.js';
+import { FeatureFlagAdapter, SecretResolver } from '../types.js';
 import { jest, describe, it, test, expect, beforeEach } from '@jest/globals';
 
 describe('DistributedConfigService', () => {

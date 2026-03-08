@@ -1,4 +1,4 @@
-import { AccessContext, AccessRule } from './types';
+import { AccessContext, AccessRule } from './types.js';
 
 export class AccessControlService {
   constructor(private readonly rules: AccessRule[]) {}

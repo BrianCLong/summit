@@ -1,0 +1,13 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`policy reasoner produces stable deny reason snapshots 1`] = `
+[
+  "policy.require-purpose: A documented purpose tag (X-Purpose) is required for access.",
+  "policy.require-authority: A legal authority (X-Authority) must be declared before access is granted.",
+  "policy.block-sandbox: Sandbox tokens are not permitted on the production gateway.",
+  "policy.block-suspended: Suspended identities are blocked from access.",
+  "policy.require-clearance-claim: Clearance claim is required for policy evaluation.",
+  "policy.need-to-know: Request lacks the required need-to-know clearance.",
+  "policy.tenant-isolation: Cross-tenant access is blocked without a compliance override.",
+]
+`;

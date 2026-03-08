@@ -1,6 +1,6 @@
 
 import crypto from 'crypto';
-import { Claim, VerificationResult } from './types';
+import { Claim, VerificationResult } from './types.js';
 
 /**
  * Validation strategy interface for extensible claim verification.

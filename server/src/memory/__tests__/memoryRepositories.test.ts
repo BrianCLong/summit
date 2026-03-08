@@ -1,9 +1,9 @@
 import { jest } from '@jest/globals';
-import { ValidationError, NotFoundError } from '../../errors/ErrorHandlingFramework';
-import { createSession, getSessionById } from '../repositories/sessionRepository';
-import { createPage, listPagesForSession, toPgVector } from '../repositories/pageRepository';
-import { createEvent, listEventsForPage } from '../repositories/eventRepository';
-import { pg } from '../../db/pg';
+import { ValidationError, NotFoundError } from '../../errors/ErrorHandlingFramework.js';
+import { createSession, getSessionById } from '../repositories/sessionRepository.js';
+import { createPage, listPagesForSession, toPgVector } from '../repositories/pageRepository.js';
+import { createEvent, listEventsForPage } from '../repositories/eventRepository.js';
+import { pg } from '../../db/pg.js';
 
 jest.mock('../../db/pg', () => {
   const write = jest.fn();

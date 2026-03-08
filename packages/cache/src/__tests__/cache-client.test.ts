@@ -1,6 +1,6 @@
 import { describe, expect, it, beforeEach, afterEach, vi } from 'vitest';
 import { Registry } from 'prom-client';
-import { CacheClient } from '../index';
+import { CacheClient } from '../index.js';
 
 async function metricValue(registry: Registry, name: string, namespace: string) {
   const metrics = await registry.getMetricsAsJSON();

@@ -1,0 +1,5 @@
+{
+  "evidence_id_pattern": "GEM-ENT-<CONTROL>-<SEQ>",
+  "profile": "deny_by_default",
+  "provider": "google_gemini_enterprise"
+}

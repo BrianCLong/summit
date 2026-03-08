@@ -6,7 +6,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import logger from '../utils/logger.js';
-import { ExplainableRun } from '../explainability/types';
+import { ExplainableRun } from '../explainability/types.js';
 
 export type SIEMProvider = 'splunk' | 'datadog' | 'elastic' | 'sumologic' | 'custom';
 

@@ -5,7 +5,7 @@
  * Represents a sensor or data collection point
  */
 
-import { BaseCanonicalEntity, CanonicalEntityMetadata } from '../types.ts';
+import { BaseCanonicalEntity, CanonicalEntityMetadata } from '../types.js';
 
 export interface CanonicalSensor extends BaseCanonicalEntity, CanonicalEntityMetadata {
   entityType: 'Sensor';

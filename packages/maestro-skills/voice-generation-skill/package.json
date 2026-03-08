@@ -8,7 +8,7 @@
     "build": "tsc"
   },
   "dependencies": {
-    "@maestro/core": "workspace:*",
+    "@intelgraph/maestro-core": "workspace:*",
     "uuid": "^9.0.0"
   },
   "devDependencies": {

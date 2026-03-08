@@ -1,0 +1,33 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Vendor Battlecard",
+  "type": "object",
+  "properties": {
+    "vendor": { "type": "string" },
+    "last_updated": { "type": "string", "format": "date-time" },
+    "summary": { "type": "string" },
+    "strengths": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "weaknesses": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "claims": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "positioning_rules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "condition": { "type": "string" },
+          "recommended_action": { "type": "string" }
+        }
+      }
+    }
+  },
+  "required": ["vendor", "last_updated", "claims"]
+}

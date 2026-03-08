@@ -28,11 +28,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v3
-        with:
-          version: 9.12.0
-
-      - name: Setup Node.js
+        uses: pnpm/action-setup@v3      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
@@ -52,9 +48,7 @@ jobs:
         run: npx tsx scripts/compliance/generate-sbom.ts --spdx --output sbom
 
       - name: Upload SBOM artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: sbom
+        uses: actions/upload-artifact@v4          name: sbom
           path: sbom/
           retention-days: 90
 
@@ -74,11 +68,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v3
-        with:
-          version: 9.12.0
-
-      - name: Setup Node.js
+        uses: pnpm/action-setup@v3      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
@@ -91,9 +81,7 @@ jobs:
         run: npx tsx scripts/compliance/license-check.ts --markdown --output license-report.md
 
       - name: Upload license report
-        uses: actions/upload-artifact@v4
-        with:
-          name: license-report
+        uses: actions/upload-artifact@v4          name: license-report
           path: license-report.md
 
       - name: Add license report to summary
@@ -103,7 +91,7 @@ jobs:
   fossa:
     name: FOSSA Scan
     runs-on: ubuntu-latest
-    if: ${{ vars.FOSSA_API_KEY != '' }}
+    if: (${{ vars.FOSSA_API_KEY != '' }}) && (github.event_name == 'release')
     steps:
       - uses: actions/checkout@v4
 
@@ -122,7 +110,6 @@ jobs:
   container-sbom:
     name: Container SBOM
     runs-on: ubuntu-latest
-    if: github.event_name == 'release'
     needs: [sbom]
     steps:
       - uses: actions/checkout@v4
@@ -154,9 +141,7 @@ jobs:
           output-file: sbom/container-sbom-spdx.json
 
       - name: Upload container SBOM
-        uses: actions/upload-artifact@v4
-        with:
-          name: container-sbom
+        uses: actions/upload-artifact@v4          name: container-sbom
           path: sbom/container-*.json
 
   # SLSA provenance attestation

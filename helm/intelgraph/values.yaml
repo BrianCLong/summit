@@ -58,3 +58,55 @@ neo4j:
   resources:
     cpu: '1'
     memory: '2Gi'
+
+# Monitoring
+monitoring:
+  enabled: true
+  serviceMonitor:
+    enabled: true
+    interval: 30s
+    path: /metrics
+  prometheus:
+    server: prometheus-server.monitoring.svc.cluster.local
+
+# Health checks
+healthCheck:
+  enabled: true
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+# Preview environment specific settings
+preview:
+  enabled: false
+  ttl: "24h"
+  cleanup: true
+
+rollout:
+  enabled: true
+  autoPromotionEnabled: false
+  scaleDownDelaySeconds: 30
+  progressDeadlineSeconds: 600
+  canary:
+    initialWeight: 10
+    secondWeight: 50
+    initialPause: 5m
+    secondPause: 10m
+    maxSurge: 1
+    maxUnavailable: 0
+  metrics:
+    interval: "30s"
+    count: 5
+    successRate:
+      successCondition: "result[0] >= 0.95"
+      failureCondition: "result[0] < 0.90"
+    errorRate:
+      successCondition: "result[0] <= 0.05"
+      failureCondition: "result[0] > 0.10"
+    latency:
+      successCondition: "result[0] <= 2000"
+      failureCondition: "result[0] > 5000"
+  tests:
+    enabled: false
+    image: curlimages/curl:8.4.0

@@ -1,6 +1,6 @@
 // Mock WebAuthn middleware
 import { Request, Response, NextFunction } from 'express';
-import { cfg } from '../../config.ts'; // Assuming config exists
+import { cfg } from '../../config.js'; // Assuming config exists
 
 export const requireStepUp = (req: Request, res: Response, next: NextFunction) => {
     // In production, check for MFA/Step-Up token
@@ -14,7 +14,7 @@ export const requireStepUp = (req: Request, res: Response, next: NextFunction) =
             return next();
         }
 
-        return res.status(401).tson({
+        return res.status(401).json({
             error: 'Step-up authentication required',
             required: ['WebAuthn'],
             message: 'Please provide x-step-up-auth header with valid token'

@@ -362,7 +362,7 @@ deploy:
 
 - [Release Ops Index](RELEASE_OPS_INDEX.md)
 - [GA Hard Gates](ga-hard-gates.md)
-- [API Design Guidelines](../api/DESIGN_GUIDELINES.md)
+- API Design Guidelines
 
 ---
 

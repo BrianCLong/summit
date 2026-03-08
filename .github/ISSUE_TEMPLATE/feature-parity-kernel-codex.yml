@@ -1,0 +1,27 @@
+name: "Feature: Parity Kernel Scaffolding (Codex)"
+description: "Implement baseline parity features against legacy OSINT scanners (SpiderFoot) and Enterprise CTI."
+title: "[Feature] Parity Kernel Scaffolding"
+labels: ["lane:platform", "feature", "codex"]
+assignees:
+  - codex
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Overview
+        Implement the foundational features required to achieve minimal viable parity with legacy threat intelligence solutions. This forms the basis upon which our "Proof Moat" will be built.
+
+  - type: textarea
+    id: tasks
+    attributes:
+      label: "Tasks"
+      description: Specific implementation tasks.
+      value: |
+        - [ ] Develop Module SDK based on MCP for rapid connector development.
+        - [ ] Implement scheduling engine for continuous drift detection.
+        - [ ] Build data export utilities (CSV, JSON, GEXF equivalents).
+        - [ ] Define initial correlation rules engine.
+        - [ ] Create bi-directional integration stubs for standard SIEM/SOAR platforms.
+        - [ ] Create bi-directional integration stubs for enterprise ticketing (Jira/ServiceNow).
+    validations:
+      required: true

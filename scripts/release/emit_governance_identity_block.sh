@@ -168,7 +168,7 @@ if [[ "$VERIFY" == "true" ]]; then
 
             if [[ -f "$SIG_FILE" && -f "$CERT_FILE" && -f "$SUBJECT_FILE" ]]; then
                 export COSIGN_EXPERIMENTAL=1
-                if cosign verify-blob \
+                if cosign verify-blob --use-signed-timestamps \
                     --signature "$SIG_FILE" \
                     --certificate "$CERT_FILE" \
                     --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
@@ -202,7 +202,7 @@ else
 
             if [[ -f "$SIG_FILE" && -f "$CERT_FILE" && -f "$SUBJECT_FILE" ]]; then
                 export COSIGN_EXPERIMENTAL=1
-                if cosign verify-blob \
+                if cosign verify-blob --use-signed-timestamps \
                     --signature "$SIG_FILE" \
                     --certificate "$CERT_FILE" \
                     --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
@@ -261,7 +261,7 @@ EOF
         cat << EOF
 
 # Verify signature (requires cosign)
-cosign verify-blob \\
+cosign verify-blob --use-signed-timestamps \\ || { echo "::error::Supply chain verification failed! Missing or invalid signed timestamps."; false; }
   --signature governance/signatures/governance_SHA256SUMS.sig \\
   --certificate governance/signatures/governance_SHA256SUMS.cert \\
   --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \\

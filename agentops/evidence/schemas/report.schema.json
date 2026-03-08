@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["evidence_id", "summary", "inputs", "outputs", "policy"],
+  "properties": {
+    "evidence_id": { "type": "string" },
+    "summary": { "type": "string" },
+    "inputs": { "type": "object" },
+    "outputs": { "type": "object" },
+    "policy": { "type": "object" }
+  },
+  "additionalProperties": false
+}

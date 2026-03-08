@@ -10,8 +10,8 @@ import {
   CacheOptions,
   CacheStats,
   TierStats,
-} from './types';
-import { StampedeProtection } from './StampedeProtection';
+} from './types.js';
+import { StampedeProtection } from './StampedeProtection.js';
 
 const logger = pino({ name: 'MultiTierCache' });
 const tracer = trace.getTracer('advanced-caching');

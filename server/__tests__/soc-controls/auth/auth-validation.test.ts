@@ -49,7 +49,7 @@ describe('CC6.1 - Logical Access Security - Authentication Validation', () => {
   });
   
   test('should enforce multi-factor authentication for privileged accounts', async () => {
-    const mockPrivilegedUser = {
+    _mockPrivilegedUser = {
       id: 'admin-user-456',
       email: 'admin@example.com',
       role: 'admin',

@@ -41,3 +41,18 @@ def test_node_classification_training():
     preds = classifier(z).argmax(dim=1)
     accuracy = (preds == labels).float().mean().item()
     assert accuracy >= 0.5
+
+
+def test_node_classification_training_with_sam():
+    features, neigh, _ = build_chain_graph()
+    labels = torch.tensor([0, 0, 1, 1], dtype=torch.long)
+    cfg = NodeClsConfig(
+        GraphSAGEConfig(in_dim=4, hidden_dim=8, num_layers=1),
+        epochs=20,
+        optimizer="sam",
+        sam_rho=0.05,
+    )
+    encoder, classifier = train_node_cls(features, neigh, labels, cfg)
+    z = encoder(features, neigh)
+    preds = classifier(z).argmax(dim=1)
+    assert preds.shape[0] == labels.shape[0]

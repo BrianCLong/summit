@@ -1,0 +1,12 @@
+default_decision: deny
+allow_domains:
+  - finance
+  - healthcare
+  - public_sector
+deny_patterns:
+  - ignore previous instructions
+  - reveal system prompt
+  - bypass policy
+redact_patterns:
+  - social security number
+  - account number

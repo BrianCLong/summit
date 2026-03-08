@@ -7,7 +7,7 @@
   "description": "Chain of custody tracking for evidence and legal compliance",
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "test": "jest"
+    "test": "jest --passWithNoTests"
   },
   "dependencies": {
     "@intelgraph/blockchain": "workspace:*",

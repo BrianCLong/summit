@@ -1,5 +1,5 @@
 import json
-from datetime import UTC
+from datetime import UTC, timezone
 from pathlib import Path
 from typing import Any, Dict
 
@@ -18,7 +18,7 @@ def write_compliance_evidence(run_dir: Path, evidence_id: str, findings: dict[st
         "prohibited_intent_blocks": int(findings.get("prohibited_intent_blocks", 0)),
         "prohibited_field_blocks": int(findings.get("prohibited_field_blocks", 0)),
     }
-    from datetime import datetime, timezone
+    from datetime import datetime
     stamp = {
         "generated_at": datetime.now(UTC).isoformat().replace("+00:00", "Z"),
         "run_id": run_dir.name

@@ -675,7 +675,7 @@ export const multimodalResolvers = {
   },
 
   // Scalar resolvers
-  Upload: require('graphql-upload-ts').GraphQLUpload,
+  Upload,
 };
 
 export default multimodalResolvers;

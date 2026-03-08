@@ -1,12 +1,12 @@
 // @ts-nocheck
-import logger from '../utils/logger';
-import { postgresMeterRepository } from './postgres-repository';
-import { meterStore } from './persistence';
+import logger from '../utils/logger.js';
+import { postgresMeterRepository } from './postgres-repository.js';
+import { meterStore } from './persistence.js';
 import {
   MeterEvent,
   MeterEventKind,
   TenantUsageDailyRow,
-} from './schema';
+} from './schema.js';
 
 type DeadLetter = { event: MeterEvent; reason: string };
 
@@ -140,6 +140,9 @@ export class MeteringPipeline {
         llmTokens: 0,
         computeMs: 0,
         apiRequests: 0,
+        policySimulations: 0,
+        workflowExecutions: 0,
+        receiptWrites: 0,
         correlationIds: [],
         lastEventAt: occurred.toISOString(),
       } satisfies TenantUsageDailyRow);
@@ -165,6 +168,15 @@ export class MeteringPipeline {
         break;
       case MeterEventKind.API_REQUEST:
         current.apiRequests = (current.apiRequests || 0) + 1;
+        break;
+      case MeterEventKind.POLICY_SIMULATION:
+        current.policySimulations = (current.policySimulations || 0) + 1;
+        break;
+      case MeterEventKind.WORKFLOW_EXECUTION:
+        current.workflowExecutions = (current.workflowExecutions || 0) + 1;
+        break;
+      case MeterEventKind.RECEIPT_WRITE:
+        current.receiptWrites = (current.receiptWrites || 0) + 1;
         break;
       default:
         break;

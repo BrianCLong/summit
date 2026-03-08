@@ -1,4 +1,7 @@
 package composer.residency
+import rego.v1
+
+import rego.v1
 
 # Input contract (example):
 # input = {
@@ -9,7 +12,7 @@ package composer.residency
 
 default allow := true
 
-violation[msg] {
+violation contains msg if {
   not input.artifact.region in input.tenant.allowed_regions
   msg := {
     "code": "RESIDENCY_VIOLATION",
@@ -19,12 +22,13 @@ violation[msg] {
   }
 }
 
-allow {
+allow if {
   count(violation) == 0
 }
 
 # Top-level decision with shadow support
 package composer.decision
+import rego.v1
 
 import data.composer.residency as r
 
@@ -33,9 +37,7 @@ decision := {
   "mode": mode,
   "allow": allow_val,
   "violations": r.violation,
-}
-{
+} if {
   mode := input.mode
   allow_val := r.allow
 }
-

@@ -3,9 +3,9 @@ import { describe, expect, it, beforeAll, afterAll, jest } from '@jest/globals';
 import { GraphQLError } from 'graphql';
 
 // Using relative path mapping that aligns with Jest config
-import { createApp } from '../../../appFactory';
-import { validateTenantAccess, TenantValidator } from '../../../middleware/tenantValidator';
-import { getNeo4jDriver } from '../../../config/database'; // We will mock this
+import { createApp } from '../../../appFactory.js';
+import { validateTenantAccess, TenantValidator } from '../../../middleware/tenantValidator.js';
+import { getNeo4jDriver } from '../../../config/database.js'; // We will mock this
 
 // Mock database config to avoid real connection attempts in this simulation
 jest.mock('../../../config/database', () => ({

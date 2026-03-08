@@ -33,6 +33,8 @@ async function bootstrap({
 } = {}) {
   cleanupLogs();
   jest.resetModules();
+  process.env.AUTHZ_DEMO_USERNAME = 'alice';
+  process.env.AUTHZ_DEMO_PASSWORD = 'password123';
   process.env.BREAK_GLASS_TTL_SECONDS = ttlSeconds;
   const opa = express();
   opa.use(express.json());
@@ -69,6 +71,8 @@ async function teardown(
   delete process.env.BREAK_GLASS_TTL_SECONDS;
   delete process.env.OPA_URL;
   delete process.env.UPSTREAM;
+  delete process.env.AUTHZ_DEMO_USERNAME;
+  delete process.env.AUTHZ_DEMO_PASSWORD;
   jest.resetModules();
   cleanupLogs();
 }
