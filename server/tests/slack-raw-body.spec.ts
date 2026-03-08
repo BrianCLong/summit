@@ -1,7 +1,7 @@
 import request from 'supertest';
 import express from 'express';
 import crypto from 'crypto';
-import slackRouter from '../src/routes/slack';
+import slackRouter from '../src/routes/slack.js';
 
 describe('Slack raw-body route', () => {
   const app = express();

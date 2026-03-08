@@ -24,7 +24,7 @@ RUN apt-get update && apt-get install -y \
 # Install Node.js 18
 RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
     && apt-get install -y nodejs \
-    && npm install -g pnpm@9.12.0
+    && npm install -g pnpm@10.0.0
 
 # Install Python dependencies
 COPY requirements.txt /tmp/requirements.txt

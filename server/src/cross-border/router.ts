@@ -9,6 +9,7 @@ import { getCrossBorderGateway } from './gateway.js';
 import { getResilienceManager } from './resilience.js';
 import { getCrossBorderMetrics, updateActiveSessions, updateActivePartners } from './metrics.js';
 import type { DataClassification } from './types.js';
+import { firstString } from '../utils/http-param.js';
 
 const router = Router();
 
@@ -98,14 +99,19 @@ router.get('/partners', (_req, res) => {
  */
 router.get('/partners/:code', (req, res) => {
   const gateway = getCrossBorderGateway();
-  const partner = gateway.getPartner(req.params.code);
+  const partnerCode = firstString(req.params.code);
+  if (!partnerCode) {
+    res.status(400).json({ error: 'Partner code is required' });
+    return;
+  }
+  const partner = gateway.getPartner(partnerCode);
 
   if (!partner) {
     res.status(404).json({ error: 'Partner not found' });
     return;
   }
 
-  const health = gateway.getPartnerHealth(req.params.code);
+  const health = gateway.getPartnerHealth(partnerCode);
 
   res.json({
     ...partner,
@@ -119,7 +125,12 @@ router.get('/partners/:code', (req, res) => {
  */
 router.get('/partners/:code/health', (req, res) => {
   const gateway = getCrossBorderGateway();
-  const health = gateway.getPartnerHealth(req.params.code);
+  const partnerCode = firstString(req.params.code);
+  if (!partnerCode) {
+    res.status(400).json({ error: 'Partner code is required' });
+    return;
+  }
+  const health = gateway.getPartnerHealth(partnerCode);
 
   if (!health) {
     res.status(404).json({ error: 'Partner health not found' });
@@ -231,7 +242,12 @@ router.get('/sessions', (_req, res) => {
  */
 router.get('/sessions/:id', (req, res) => {
   const gateway = getCrossBorderGateway();
-  const session = gateway.getSession(req.params.id);
+  const sessionId = firstString(req.params.id);
+  if (!sessionId) {
+    res.status(400).json({ error: 'Session id is required' });
+    return;
+  }
+  const session = gateway.getSession(sessionId);
 
   if (!session) {
     res.status(404).json({ error: 'Session not found' });
@@ -249,14 +265,15 @@ router.post(
   '/sessions/:id/messages',
   asyncHandler(async (req, res) => {
     const gateway = getCrossBorderGateway();
+    const sessionId = firstString(req.params.id);
     const { content, translate, targetLanguage } = req.body;
 
-    if (!content) {
+    if (!sessionId || !content) {
       res.status(400).json({ error: 'Missing required field: content' });
       return;
     }
 
-    const message = await gateway.sendMessage(req.params.id, content, {
+    const message = await gateway.sendMessage(sessionId, content, {
       translate,
       targetLanguage,
     });
@@ -271,7 +288,12 @@ router.post(
  */
 router.get('/sessions/:id/messages', (req, res) => {
   const gateway = getCrossBorderGateway();
-  const messages = gateway.getMessages(req.params.id);
+  const sessionId = firstString(req.params.id);
+  if (!sessionId) {
+    res.status(400).json({ error: 'Session id is required' });
+    return;
+  }
+  const messages = gateway.getMessages(sessionId);
 
   res.json({
     count: messages.length,
@@ -287,7 +309,12 @@ router.post(
   '/sessions/:id/complete',
   asyncHandler(async (req, res) => {
     const gateway = getCrossBorderGateway();
-    await gateway.completeSession(req.params.id);
+    const sessionId = firstString(req.params.id);
+    if (!sessionId) {
+      res.status(400).json({ error: 'Session id is required' });
+      return;
+    }
+    await gateway.completeSession(sessionId);
 
     res.json({ success: true });
   })
@@ -301,9 +328,10 @@ router.post(
   '/sessions/:id/handover',
   asyncHandler(async (req, res) => {
     const gateway = getCrossBorderGateway();
+    const sessionId = firstString(req.params.id);
     const { targetNation, reason } = req.body;
 
-    if (!targetNation || !reason) {
+    if (!sessionId || !targetNation || !reason) {
       res.status(400).json({
         error: 'Missing required fields: targetNation, reason',
       });
@@ -311,7 +339,7 @@ router.post(
     }
 
     const response = await gateway.initiateHandover(
-      req.params.id,
+      sessionId,
       targetNation,
       reason
     );
@@ -406,11 +434,12 @@ router.post(
 router.get('/audit', (req, res) => {
   const gateway = getCrossBorderGateway();
   const { operation, sessionId, since } = req.query;
+  const sinceRaw = firstString(since);
 
   const entries = gateway.getAuditLog({
-    operation: operation as string | undefined,
-    sessionId: sessionId as string | undefined,
-    since: since ? new Date(since as string) : undefined,
+    operation: firstString(operation),
+    sessionId: firstString(sessionId),
+    since: sinceRaw ? new Date(sinceRaw) : undefined,
   });
 
   res.json({

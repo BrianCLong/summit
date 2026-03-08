@@ -1,5 +1,5 @@
 import request from 'supertest';
-import { createApp } from '../src/app';
+import { createApp } from '../src/app.js';
 import { describe, it, expect, beforeAll } from '@jest/globals';
 
 const NO_NETWORK_LISTEN = process.env.NO_NETWORK_LISTEN === 'true';

@@ -1,0 +1,6 @@
+# Rule: Signature Presence
+# Verify artifact signing
+rule:
+  id: signature-presence
+  severity: high
+  message: Production artifacts must be signed (e.g., using cosign).

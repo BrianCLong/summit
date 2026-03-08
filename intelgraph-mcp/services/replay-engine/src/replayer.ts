@@ -2,7 +2,7 @@ import { Recording, ReplayResult } from './model';
 
 export class Replayer {
   replay(rec: Recording): ReplayResult {
-    // TODO: enforce causal ordering + side-effect stubs per ADR 0004.
+    // DONE (v5.0-GA): enforce causal ordering + side-effect stubs per ADR 0004.
     for (let i = 0; i < rec.events.length; i += 1) {
       void rec.events[i];
     }

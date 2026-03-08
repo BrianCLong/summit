@@ -23,6 +23,8 @@ export interface ConductInput {
   runId?: string;
   missionControlContext?: MissionControlConflictContext;
   emergency_justification?: string;
+  agentId?: string;
+  agentVersion?: string;
 }
 
 export interface ConductResult {
@@ -98,6 +100,7 @@ export interface MCPTool {
 
 export interface MCPServerConfig {
   url: string;
+  transport?: 'websocket' | 'local';
   name: string;
   tools: MCPTool[];
   authToken?: string;

@@ -1,0 +1,5 @@
+lockfileVersion: '9.0'
+packages:
+  /hono@4.11.6:
+    resolution: { integrity: sha512-bad }
+    engines: { node: '>=18' }

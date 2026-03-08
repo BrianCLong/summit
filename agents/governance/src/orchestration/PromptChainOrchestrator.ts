@@ -32,6 +32,7 @@ export interface OrchestratorConfig {
   enableProvenance: boolean;
   enableHallucinationCheck: boolean;
   hallucinationThreshold: number;
+  maxValidationRetries: number;
   auditLevel: 'minimal' | 'standard' | 'enhanced' | 'forensic';
 }
 
@@ -42,6 +43,7 @@ const DEFAULT_CONFIG: OrchestratorConfig = {
   enableProvenance: true,
   enableHallucinationCheck: true,
   hallucinationThreshold: 0.7,
+  maxValidationRetries: 3,
   auditLevel: 'standard',
 };
 
@@ -89,6 +91,7 @@ export interface ValidationResult {
   passed: boolean;
   message: string;
   details?: Record<string, unknown>;
+  action?: 'warn' | 'reject' | 'remediate';
 }
 
 export interface ChainMetrics {
@@ -258,7 +261,11 @@ export class PromptChainOrchestrator {
 
       // Update final metrics
       state.metrics.totalLatencyMs = Date.now() - startTime;
-      state.status = 'completed';
+
+      // Only mark as completed if not already failed
+      if (state.status === 'running') {
+          state.status = 'completed';
+      }
 
       // Emit completion event
       this.emitEvent({
@@ -272,7 +279,7 @@ export class PromptChainOrchestrator {
         actor: request.context.userContext.userId,
         action: 'execute_chain',
         resource: request.chain.id,
-        outcome: 'success',
+        outcome: state.status === 'completed' ? 'success' : 'failure',
         classification: request.context.classification,
         details: {
           chainName: request.chain.name,
@@ -284,12 +291,13 @@ export class PromptChainOrchestrator {
 
       return {
         chainId: request.chain.id,
-        success: true,
+        success: state.status === 'completed',
         outputs: state.outputs,
         steps: state.stepResults,
         metrics: state.metrics,
         provenance,
         hallucinationReport,
+        errors: state.status === 'failed' ? ['Chain execution failed'] : undefined,
       };
     } catch (error) {
       state.status = 'failed';
@@ -331,6 +339,9 @@ export class PromptChainOrchestrator {
     request: ChainExecutionRequest,
   ): Promise<StepExecutionResult> {
     const startTime = Date.now();
+    let totalStepCost = 0;
+    let totalInputTokens = 0;
+    let totalOutputTokens = 0;
 
     try {
       // Get provider
@@ -339,56 +350,98 @@ export class PromptChainOrchestrator {
         throw new Error(`Provider not found: ${step.llmProvider}`);
       }
 
-      // Build prompt from template
-      const prompt = this.buildPrompt(step.prompt, state.outputs, step.inputMappings);
+      // Build initial prompt
+      let currentPrompt = this.buildPrompt(step.prompt, state.outputs, step.inputMappings);
 
-      // Execute with retry logic
-      let result: LLMExecutionResult | null = null;
-      let lastError: Error | null = null;
+      let lastResult: LLMExecutionResult | null = null;
+      let validationResults: ValidationResult[] = [];
+      let allPassed = false;
       let retries = 0;
 
-      for (let attempt = 0; attempt <= step.retryPolicy.maxRetries; attempt++) {
-        try {
-          result = await provider.execute(prompt, step.prompt.systemPrompt, {
-            maxTokens: step.prompt.maxTokens,
-            temperature: step.prompt.temperature,
-            timeout: step.timeout,
-          });
-          break;
-        } catch (error) {
-          lastError = error instanceof Error ? error : new Error(String(error));
-          retries++;
+      // Validation Loop
+      const maxValidationRetries = this.config.maxValidationRetries ?? 0;
 
-          if (attempt < step.retryPolicy.maxRetries) {
-            const backoff =
-              step.retryPolicy.backoffMs *
-              Math.pow(step.retryPolicy.backoffMultiplier, attempt);
-            await this.sleep(backoff);
+      for (let vAttempt = 0; vAttempt <= maxValidationRetries; vAttempt++) {
+          let executionResult: LLMExecutionResult | null = null;
+          let lastError: Error | null = null;
+
+          // Execution Retry Loop (Network/Provider errors)
+          for (let attempt = 0; attempt <= step.retryPolicy.maxRetries; attempt++) {
+            try {
+              executionResult = await provider.execute(currentPrompt, step.prompt.systemPrompt, {
+                maxTokens: step.prompt.maxTokens,
+                temperature: step.prompt.temperature,
+                timeout: step.timeout,
+              });
+              break;
+            } catch (error) {
+              lastError = error instanceof Error ? error : new Error(String(error));
+              retries++;
+
+              if (attempt < step.retryPolicy.maxRetries) {
+                const backoff =
+                  step.retryPolicy.backoffMs *
+                  Math.pow(step.retryPolicy.backoffMultiplier, attempt);
+                await this.sleep(backoff);
+              }
+            }
           }
-        }
-      }
 
-      if (!result) {
-        throw lastError || new Error('Execution failed');
+          if (!executionResult) {
+              throw lastError || new Error('Execution failed');
+          }
+
+          lastResult = executionResult;
+
+          // Cost tracking
+          const cost = provider.estimateCost(executionResult.inputTokens, executionResult.outputTokens);
+          totalStepCost += cost;
+          totalInputTokens += executionResult.inputTokens;
+          totalOutputTokens += executionResult.outputTokens;
+
+          // Run validations
+          validationResults = await this.runValidations(
+            step.validations,
+            executionResult.output,
+            state.outputs,
+          );
+
+          allPassed = validationResults.every((v) => v.passed);
+
+          if (allPassed) {
+              break;
+          }
+
+          // Check validation actions
+          const failedRejecting = validationResults.filter(
+            (v) => !v.passed && v.action === 'reject'
+          );
+
+          if (failedRejecting.length > 0) {
+            // Immediate failure on reject action
+            break;
+          }
+
+          const failedRemediable = validationResults.filter(
+            (v) => !v.passed && v.action === 'remediate'
+          );
+
+          // Only retry if we have remediable failures and retries left
+          if (failedRemediable.length > 0 && vAttempt < maxValidationRetries) {
+              const feedback = this.constructFeedback(failedRemediable);
+              // Append feedback to prompt
+              currentPrompt += `\n\n${feedback}`;
+          } else {
+             // If no remediable failures (only warnings or no retries left), break
+             break;
+          }
       }
 
       state.metrics.retries += retries;
-
-      // Run validations
-      const validationResults = await this.runValidations(
-        step.validations,
-        result.output,
-        state.outputs,
-      );
-
-      const allPassed = validationResults.every((v) => v.passed);
       state.metrics.validationsPassed += validationResults.filter((v) => v.passed).length;
       state.metrics.validationsFailed += validationResults.filter((v) => !v.passed).length;
-
-      // Calculate cost
-      const cost = provider.estimateCost(result.inputTokens, result.outputTokens);
-      state.metrics.totalCost += cost;
-      state.metrics.totalTokens += result.inputTokens + result.outputTokens;
+      state.metrics.totalCost += totalStepCost;
+      state.metrics.totalTokens += totalInputTokens + totalOutputTokens;
 
       // Check cost limit
       const maxCost = request.overrides?.maxCost ?? this.config.maxChainCostUsd;
@@ -403,12 +456,12 @@ export class PromptChainOrchestrator {
         sequence: step.sequence,
         llmProvider: step.llmProvider,
         success: allPassed,
-        output: this.parseOutput(result.output),
+        output: lastResult ? this.parseOutput(lastResult.output) : null,
         latencyMs: Date.now() - startTime,
-        tokenCount: { input: result.inputTokens, output: result.outputTokens },
-        cost,
+        tokenCount: { input: totalInputTokens, output: totalOutputTokens },
+        cost: totalStepCost,
         validationResults,
-        error: allPassed ? undefined : 'Validation failed',
+        error: allPassed ? undefined : 'Validation failed after retries',
       };
     } catch (error) {
       return {
@@ -418,12 +471,37 @@ export class PromptChainOrchestrator {
         success: false,
         output: null,
         latencyMs: Date.now() - startTime,
-        tokenCount: { input: 0, output: 0 },
-        cost: 0,
+        tokenCount: { input: totalInputTokens, output: totalOutputTokens },
+        cost: totalStepCost,
         validationResults: [],
         error: error instanceof Error ? error.message : String(error),
       };
     }
+  }
+
+  /**
+   * Construct feedback message from validation results
+   */
+  private constructFeedback(results: ValidationResult[]): string {
+    const feedbackLines = [
+        "Errors detected in your output. Please correct them and try again.",
+        "",
+        "Validation errors:"
+    ];
+
+    for (const result of results) {
+        let typePrefix = "";
+        switch (result.type) {
+            case 'schema': typePrefix = "[Schema Error]"; break;
+            case 'regex': typePrefix = "[Format Error]"; break;
+            case 'safety': typePrefix = "[Safety Violation]"; break;
+            case 'hallucination': typePrefix = "[Hallucination Detected]"; break;
+            default: typePrefix = "[Validation Error]";
+        }
+        feedbackLines.push(`- ${typePrefix} ${result.message}`);
+    }
+
+    return feedbackLines.join("\n");
   }
 
   /**
@@ -547,6 +625,7 @@ export class PromptChainOrchestrator {
           type: validation.type,
           passed: false,
           message: `Validation error: ${error instanceof Error ? error.message : String(error)}`,
+          action: validation.action, // Include action from config
         });
       }
     }
@@ -562,33 +641,39 @@ export class PromptChainOrchestrator {
     output: string,
     context: Record<string, unknown>,
   ): Promise<ValidationResult> {
+    // Helper to add action to result
+    const withAction = (res: Omit<ValidationResult, 'action'>): ValidationResult => ({
+      ...res,
+      action: validation.action
+    });
+
     switch (validation.type) {
       case 'regex': {
         const pattern = new RegExp(validation.config.pattern as string);
         const passed = pattern.test(output);
-        return {
+        return withAction({
           type: 'regex',
           passed,
           message: passed ? 'Pattern matched' : 'Pattern not matched',
-        };
+        });
       }
 
       case 'schema': {
         // Simplified schema validation
         try {
           const parsed = JSON.parse(output);
-          return {
+          return withAction({
             type: 'schema',
             passed: true,
             message: 'Valid JSON',
             details: { parsed },
-          };
+          });
         } catch {
-          return {
+          return withAction({
             type: 'schema',
             passed: false,
             message: 'Invalid JSON schema',
-          };
+          });
         }
       }
 
@@ -599,28 +684,28 @@ export class PromptChainOrchestrator {
           output.toLowerCase().includes(pattern.toLowerCase()),
         );
 
-        return {
+        return withAction({
           type: 'safety',
           passed: !hasBlockedContent,
           message: hasBlockedContent ? 'Blocked content detected' : 'Content safe',
-        };
+        });
       }
 
       case 'hallucination': {
         // Placeholder for hallucination detection
-        return {
+        return withAction({
           type: 'hallucination',
           passed: true,
           message: 'Hallucination check passed',
-        };
+        });
       }
 
       default:
-        return {
+        return withAction({
           type: validation.type,
           passed: true,
           message: 'Unknown validation type - skipped',
-        };
+        });
     }
   }
 

@@ -1,8 +1,0 @@
-extends: substitution
-message: "Prefer '%s' over '%s'."
-level: warning
-ignorecase: true
-swap:
-  log-in: login
-  sign into: sign in
-  e-mail: email

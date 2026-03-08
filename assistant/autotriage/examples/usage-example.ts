@@ -101,7 +101,6 @@ export async function example3_GitHubIntegration() {
       token,
       state: 'open',
       maxResults: 50,
-      retryAttempts: 3,
     });
 
     console.log(`Fetched ${items.length} GitHub issues`);

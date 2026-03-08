@@ -1,0 +1,33 @@
+name: graphrag-repro
+on:
+  pull_request:
+    paths:
+      - "scripts/graphrag/**"
+      - "tests/graphrag/**"
+      - "requirements*.txt"
+      - "pyproject.toml"
+  schedule:
+    - cron: "17 6 * * *"
+jobs:
+  repro:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - name: Install
+        run: |
+          pip install --upgrade pip
+          pip install "sentence-transformers==2.6.1" "faiss-cpu==1.8.0.post1" "numpy==1.26.4" "tokenizers==0.15.2" pytest
+      - name: Generate corpus
+        run: python scripts/graphrag/generate_canary_dataset.py
+      - name: Build index (fixed seed)
+        run: python scripts/graphrag/build_index.py
+      - name: Run deterministic tests
+        run: pytest -q tests/graphrag/repro_test.py
+      - name: Upload artifact (results snapshot)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: graphrag-repro
+          path: artifacts/graphrag/

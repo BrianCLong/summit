@@ -1,0 +1,12 @@
+{
+  "evidence_id": "SUMMIT-AISCM-001",
+  "package_evaluated": "fast-json-parser",
+  "status": "DENY",
+  "is_high_risk": true,
+  "metrics": {
+    "age_days": 2,
+    "trust_score": 0.2,
+    "ai_recommendations": 20000
+  },
+  "timestamp": "2026-03-05T03:58:09.415139+00:00"
+}

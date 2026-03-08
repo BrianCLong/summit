@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "VM Launch Spec",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string" },
+    "raw_launch_script": { "type": "string" },
+    "qemu_bin": { "type": "string" },
+    "qemu_args": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "devices": {
+      "type": "array",
+      "items": { "$ref": "device_ref.schema.json" }
+    }
+  },
+  "required": ["id", "raw_launch_script"]
+}

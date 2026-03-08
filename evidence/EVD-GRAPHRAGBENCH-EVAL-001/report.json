@@ -1,0 +1,8 @@
+{
+  "evidence_id": "EVD-GRAPHRAGBENCH-EVAL-001",
+  "item_slug": "graphragbench-eval",
+  "summary": "Evidence harness scaffolding is registered for GraphRAG decision evaluation.",
+  "claims": ["Evidence harness scaffolding is registered for GraphRAG decision evaluation."],
+  "decisions": [],
+  "findings": []
+}

@@ -1,14 +1,15 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import $ from 'jquery';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
 import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/badge';
-import { useToast } from '@/components/ui/use-toast';
+import { Badge } from '@/components/ui/Badge';
+import { Label } from '@/components/ui/label';
+import { useToast } from '@/hooks/use-toast';
 import { Play, RotateCcw, AlertTriangle, CheckCircle, Code, BookOpen } from 'lucide-react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/Tabs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/Dialog';
 
 // Define types locally if not available globally
 interface TranslationResult {
@@ -22,6 +23,13 @@ interface TranslationResult {
   citations?: { id: string; source: string; url?: string; confidence: number }[];
 }
 
+const QUICK_PROMPTS = [
+  "Find all User nodes with email 'admin@example.com'",
+  "List organizations created in the last 7 days",
+  "Show relationships between User and Organization",
+  "Summarize evidence for incident 'INC-123'",
+];
+
 export function CopilotPanel() {
   const [prompt, setPrompt] = useState('');
   const [result, setResult] = useState<TranslationResult | null>(null);
@@ -31,6 +39,8 @@ export function CopilotPanel() {
   const [activeTab, setActiveTab] = useState('prompt');
   const { toast } = useToast();
 
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
   // jQuery ref for the action panel
   const actionPanelRef = useRef<HTMLDivElement>(null);
 
@@ -39,8 +49,8 @@ export function CopilotPanel() {
     if (actionPanelRef.current) {
       const $panel = $(actionPanelRef.current);
       $panel.find('.action-btn').hover(
-        function() { $(this).stop().animate({ opacity: 0.8 }, 100); },
-        function() { $(this).stop().animate({ opacity: 1 }, 100); }
+        function(this: HTMLElement) { $(this).stop().animate({ opacity: 0.8 }, 100); },
+        function(this: HTMLElement) { $(this).stop().animate({ opacity: 1 }, 100); }
       );
     }
   }, [result]);
@@ -82,14 +92,12 @@ export function CopilotPanel() {
       toast({
         title: "Translation Complete",
         description: `Cost Estimate: ${data.estimatedCost} units`,
-        variant: data.isValid ? "default" : "destructive",
       });
 
     } catch (err: any) {
       toast({
         title: "Error",
         description: err.message,
-        variant: "destructive",
       });
     } finally {
       setLoading(false);
@@ -119,7 +127,6 @@ export function CopilotPanel() {
       toast({
         title: "Execution Error",
         description: err.message,
-        variant: "destructive",
       });
     } finally {
       setLoading(false);
@@ -140,11 +147,13 @@ export function CopilotPanel() {
           <CardTitle className="flex justify-between items-center">
             <span>Copilot v0.9</span>
             {result?.isValid === false && (
-              <Badge variant="destructive">Invalid Syntax</Badge>
+              <Badge variant="destructive">
+                <AlertTriangle className="w-3 h-3 mr-1" aria-hidden="true" /> Invalid Syntax
+              </Badge>
             )}
             {result?.isValid === true && (
               <Badge variant="outline" className="text-green-600 border-green-600">
-                <CheckCircle className="w-3 h-3 mr-1" /> Valid
+                <CheckCircle className="w-3 h-3 mr-1" aria-hidden="true" /> Valid
               </Badge>
             )}
           </CardTitle>
@@ -161,14 +170,45 @@ export function CopilotPanel() {
             </TabsList>
 
             <TabsContent value="prompt" className="flex-1 flex flex-col gap-4 pt-4">
-              <Textarea
-                placeholder="Ask a question about the graph (e.g., 'find User where email is ...')"
-                value={prompt}
-                onChange={e => setPrompt(e.target.value)}
-                className="flex-1 resize-none"
-              />
-              <Button onClick={handleTranslate} disabled={loading} className="w-full">
-                {loading ? 'Thinking...' : 'Generate Cypher'}
+              <div className="grid w-full gap-1.5 flex-1">
+                <Label htmlFor="copilot-prompt">Prompt</Label>
+                <Textarea
+                  ref={textareaRef}
+                  id="copilot-prompt"
+                  placeholder="Ask a question about the graph (e.g., 'find User where email is ...')"
+                  value={prompt}
+                  onChange={e => setPrompt(e.target.value)}
+                  className="flex-1 resize-none"
+                />
+
+                {!prompt && (
+                  <div className="flex flex-wrap gap-2 pt-1">
+                    <span className="text-[10px] font-medium text-muted-foreground">
+                      Try:
+                    </span>
+                    {QUICK_PROMPTS.map(p => (
+                      <button
+                        key={p}
+                        type="button"
+                        onClick={() => {
+                          setPrompt(p);
+                          setTimeout(() => textareaRef.current?.focus(), 0);
+                        }}
+                        aria-label={`Use prompt: ${p}`}
+                        className="rounded-full border border-input bg-background px-2 py-0.5 text-[10px] text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      >
+                        {p}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <Button
+                onClick={handleTranslate}
+                loading={loading}
+                className="w-full"
+              >
+                Generate Cypher
               </Button>
             </TabsContent>
 
@@ -187,12 +227,15 @@ export function CopilotPanel() {
                       variant="outline"
                       onClick={handleRollback}
                       disabled={editedCypher === result?.cypher}
+                      aria-label="Rollback to original Cypher"
                     >
-                      <RotateCcw className="w-4 h-4 mr-1" /> Rollback
+                      <RotateCcw className="w-4 h-4 mr-1" aria-hidden="true" /> Rollback
                     </Button>
                     <Dialog>
                       <DialogTrigger asChild>
-                         <Button size="sm" variant="ghost"><Code className="w-4 h-4 mr-1"/> Diff</Button>
+                         <Button size="sm" variant="ghost" aria-label="Show Cypher diff">
+                           <Code className="w-4 h-4 mr-1" aria-hidden="true" /> Diff
+                         </Button>
                       </DialogTrigger>
                       <DialogContent>
                         <DialogHeader><DialogTitle>Diff</DialogTitle></DialogHeader>
@@ -239,9 +282,14 @@ export function CopilotPanel() {
                     <Button
                       className="action-btn bg-green-600 hover:bg-green-700 text-white"
                       onClick={handleSandboxRun}
-                      disabled={loading || !result?.isValid}
+                      loading={loading}
+                      disabled={!result?.isValid}
+                      aria-label="Run Cypher query in sandbox"
                     >
-                      <Play className="w-4 h-4 mr-1" /> Run in Sandbox
+                      {!loading && (
+                        <Play className="w-4 h-4 mr-1" aria-hidden="true" />
+                      )}
+                      Run in Sandbox
                     </Button>
                   </div>
                 </div>

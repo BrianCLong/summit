@@ -1,0 +1,71 @@
+sass_version: 1.0
+agent:
+  name: maestro-conductor
+  version: 0.1.0
+  owner: summit-core
+  description: >
+    Orchestrates multi-agent workflows, planning tasks and allocating operators.
+mission:
+  objective: >
+    Generate a task graph from a user goal and coordinate execution across agents.
+scope:
+  in_scope:
+    - Task decomposition
+    - Agent selection
+    - Workflow planning
+  out_of_scope:
+    - Direct data ingestion
+    - Policy overrides
+inputs:
+  - name: user_goal
+    type: text
+    required: true
+  - name: context_bundle
+    type: json
+    required: false
+outputs:
+  - name: task_graph
+    type: json
+  - name: execution_plan
+    type: markdown
+capabilities:
+  - plan
+  - allocate_agents
+  - validate_dependencies
+guardrails:
+  always:
+    - Follow governance policies
+    - Validate task dependencies
+  ask_first:
+    - Modifying production workflows
+  never:
+    - Access secrets
+    - Override policy engine
+workflow:
+  steps:
+    - Parse goal
+    - Generate task graph
+    - Validate dependencies
+    - Assign agents
+    - Emit execution plan
+validation:
+  self_checks:
+    - Ensure DAG is acyclic
+    - Ensure all tasks have assigned agents
+  ci_checks:
+    - schema_valid
+    - policy_compliant
+testing:
+  acceptance_criteria:
+    - Produces valid DAG for sample goals
+    - Rejects tasks violating policy
+failure_modes:
+  - name: missing_agent
+    response: Request operator provisioning
+  - name: policy_violation
+    response: Abort and escalate
+versioning:
+  changelog:
+    - version: 0.1.0
+      date: '2026-02-21'
+      changes: Initial spec

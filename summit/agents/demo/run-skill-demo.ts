@@ -1,0 +1,58 @@
+import crypto from "node:crypto";
+
+import { AgentOrchestrator, type AgentEvent } from "../orchestrator/agent-orchestrator.js";
+import type { SkillInvocation } from "../skills/types.js";
+
+async function run(): Promise<void> {
+  const runId = crypto.randomUUID();
+  const eventLog: AgentEvent[] = [];
+  const provenanceLog: AgentEvent[] = [];
+
+  const orchestrator = new AgentOrchestrator({
+    eventSink: (event) => eventLog.push(event),
+    provenanceSink: (event) => provenanceLog.push(event),
+  });
+
+  orchestrator.registerSkill("tests.run", async () => ({ ok: true, suite: "unit" }));
+
+  const allowedInvocation: SkillInvocation = {
+    run_id: runId,
+    task_id: "task-allowed",
+    agent_name: "codex",
+    agent_role: "builder",
+    skill: "tests.run",
+    inputs: { suite: "unit" },
+    scope: { repo_paths: ["server/src/index.ts"] },
+    env: "dev",
+  };
+
+  const deniedInvocation: SkillInvocation = {
+    run_id: runId,
+    task_id: "task-denied",
+    agent_name: "codex",
+    agent_role: "builder",
+    skill: "release.approve",
+    inputs: { tag: "v1.2.3" },
+    scope: {},
+    env: "dev",
+  };
+
+  const allowed = await orchestrator.invokeSkill(allowedInvocation);
+  console.log("Allowed invocation result:", allowed);
+
+  try {
+    await orchestrator.invokeSkill(deniedInvocation);
+  } catch (error) {
+    console.log("Denied invocation error:", (error as Error).message);
+  }
+
+  console.log("Event log tail:");
+  console.log(eventLog.slice(-6));
+  console.log("Provenance log tail:");
+  console.log(provenanceLog.slice(-6));
+}
+
+run().catch((error) => {
+  console.error(error);
+  process.exitCode = 1;
+});

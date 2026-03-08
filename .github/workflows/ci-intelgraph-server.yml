@@ -20,7 +20,8 @@ concurrency:
 jobs:
   ci:
     uses: ./.github/workflows/_reusable-ci.yml
-      node-version: "20"
+    with:
+      node-version: "18"
       package-manager: "pnpm"
       workspace-filter: "intelgraph-server"
       run-lint: true

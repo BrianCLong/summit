@@ -12,6 +12,7 @@ global:
 rule_files:
   - 'alert-rules.yml'
   - 'summit-alerts.yml'
+  - 'summit-agent-alerts.yml'
   - 'alerts/maestro-alerts.yml'
 
 # Alert manager configuration
@@ -112,6 +113,16 @@ scrape_configs:
       - source_labels: [__address__]
         target_label: instance
         replacement: 'predictive-suite'
+
+  # Summit Platform API
+  - job_name: 'summit-ai'
+    static_configs:
+      - targets: ['ai-worker:8000']
+        labels:
+          service: 'summit-api'
+    scrape_interval: 15s
+    metrics_path: /metrics
+    scrape_timeout: 10s
 
 # Recording rules for pre-computed metrics
 recording_rules:

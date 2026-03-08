@@ -1,4 +1,4 @@
-import { getPostgresPool } from '../config/database';
+import { getPostgresPool } from '../config/database.js';
 import { logger } from '../config/logger.js';
 
 export interface Workspace {

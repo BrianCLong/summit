@@ -44,17 +44,25 @@ const InternalCommandDashboard = React.lazy(() => import('@/pages/internal/Inter
 const SignInPage = React.lazy(() => import('@/pages/SignInPage'))
 const SignupPage = React.lazy(() => import('@/pages/SignupPage'))
 const VerifyEmailPage = React.lazy(() => import('@/pages/VerifyEmailPage'))
+const TrialSignupPage = React.lazy(() => import('@/onboarding/trial-signup'))
 const AccessDeniedPage = React.lazy(() => import('@/pages/AccessDeniedPage'))
 const TriPanePage = React.lazy(() => import('@/pages/TriPanePage'))
 const GeoIntPane = React.lazy(() => import('@/panes/GeoIntPane').then(module => ({ default: module.GeoIntPane })))
 const NarrativeIntelligencePage = React.lazy(() => import('@/pages/NarrativeIntelligencePage'))
 const MissionControlPage = React.lazy(() => import('@/features/mission-control/MissionControlPage'))
+const PRTriagePage = React.lazy(() => import('@/features/pr-triage/PRTriagePage'))
 const DemoControlPage = React.lazy(() => import('@/pages/DemoControlPage'))
 // const OnboardingWizard = React.lazy(() => import('@/pages/Onboarding/OnboardingWizard').then(module => ({ default: module.OnboardingWizard })))
 const MaestroDashboard = React.lazy(() => import('@/pages/maestro/MaestroDashboard'))
 const TrustDashboard = React.lazy(() => import('@/pages/TrustDashboard'))
 const CopilotPage = React.lazy(() => import('@/components/CopilotPanel').then(m => ({ default: m.CopilotPanel })))
 const InvestigationCanvas = React.lazy(() => import('@/pages/InvestigationCanvas'))
+
+// New Switchboard Pages
+const ApprovalsPage = React.lazy(() => import('@/pages/ApprovalsPage'))
+const ReceiptsPage = React.lazy(() => import('@/pages/ReceiptsPage'))
+const TenantOpsPage = React.lazy(() => import('@/pages/TenantOpsPage'))
+const OutreachDashboard = React.lazy(() => import('@/pages/outreach-dashboard'))
 
 // Workbench
 import { WorkbenchShell } from '@/workbench/shell/WorkbenchLayout'
@@ -67,9 +75,11 @@ import { ResilienceProvider } from '@/contexts/ResilienceContext'
 import { ErrorBoundary, NotFound, DataFetchErrorBoundary, MutationErrorBoundary } from '@/components/error'
 import Explain from '@/components/Explain'
 import { CommandStatusProvider } from '@/features/internal-command/CommandStatusProvider'
+import { SnapshotProvider } from '@/features/snapshots'
 import { DemoIndicator } from '@/components/common/DemoIndicator'
 import { DemoModeGate } from '@/components/common/DemoModeGate'
 import { isDemoModeEnabled } from '@/lib/demoMode'
+import { CommandPalette } from '@/components/CommandPalette'
 
 function App() {
   const [showPalette, setShowPalette] = React.useState(false);
@@ -95,9 +105,10 @@ function App() {
           <AuthProvider>
             <FeatureFlagProvider>
               <SearchProvider>
-                <CommandStatusProvider>
-                  <ResilienceProvider>
-                    <Router>
+                <SnapshotProvider>
+                  <CommandStatusProvider>
+                    <ResilienceProvider>
+                      <Router>
                       <ErrorBoundary
                         enableRetry={true}
                         maxRetries={3}
@@ -134,6 +145,7 @@ function App() {
                         {/* Auth routes */}
                       <Route path="/signin" element={<SignInPage />} />
                       <Route path="/signup" element={<SignupPage />} />
+                      <Route path="/trial-signup" element={<TrialSignupPage />} />
                       <Route path="/verify-email" element={<VerifyEmailPage />} />
                       <Route
                         path="/access-denied"
@@ -145,6 +157,11 @@ function App() {
                         </DataFetchErrorBoundary>
                       } />
                       <Route path="/trust" element={<TrustDashboard />} />
+
+                      {/* Switchboard Routes */}
+                      <Route path="/approvals" element={<ApprovalsPage />} />
+                      <Route path="/receipts" element={<ReceiptsPage />} />
+                      <Route path="/tenant-ops" element={<TenantOpsPage />} />
 
                       {/* Workbench Route */}
                       <Route path="/workbench" element={<WorkbenchShell />} />
@@ -246,10 +263,27 @@ function App() {
                           }
                         />
                         <Route
+                          path="pr-triage"
+                          element={
+                            <DataFetchErrorBoundary dataSourceName="PR Triage">
+                              <PRTriagePage />
+                            </DataFetchErrorBoundary>
+                          }
+                        />
+                                                <Route
                           path="mission-control"
                           element={
                             <DataFetchErrorBoundary dataSourceName="Mission Control">
                               <MissionControlPage />
+                            </DataFetchErrorBoundary>
+                          }
+                        />
+
+                        <Route
+                          path="outreach"
+                          element={
+                            <DataFetchErrorBoundary dataSourceName="Outreach Dashboard">
+                              <OutreachDashboard />
                             </DataFetchErrorBoundary>
                           }
                         />
@@ -313,9 +347,10 @@ function App() {
                     </Routes>
                     </React.Suspense>
                     </ErrorBoundary>
-                  </Router>
-                  </ResilienceProvider>
-                </CommandStatusProvider>
+                      </Router>
+                    </ResilienceProvider>
+                  </CommandStatusProvider>
+                </SnapshotProvider>
               </SearchProvider>
             </FeatureFlagProvider>
           </AuthProvider>

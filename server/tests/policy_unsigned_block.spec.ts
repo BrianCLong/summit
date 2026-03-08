@@ -1,4 +1,4 @@
-import { loadSignedPolicy } from '../src/policy/loader';
+import { loadSignedPolicy } from '../src/policy/loader.js';
 
 describe('policy unsigned gate', () => {
   const prev = process.env.ALLOW_UNSIGNED_POLICY;

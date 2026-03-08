@@ -1,8 +1,8 @@
-# GA Post-Merge Verification Checklist
+> Owner: @summit/governance
+> Last-Reviewed: 2026-02-25
+> Evidence-IDs: EVD-PLACEHOLDER
+> Status: active
 
-**Role:** Release Captain
-**Trigger:** Immediately after `ga-risk-gate` workflow completes on `main` merge.
-**SLA:** 15 minutes.
 
 ## 1. Governance Gate Workflow Verification
 

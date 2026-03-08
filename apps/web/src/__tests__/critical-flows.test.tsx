@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
+import { vi } from 'vitest'
 import { DemoModeGate } from '../components/common/DemoModeGate'
 import * as demoModeLib from '../lib/demoMode'
 

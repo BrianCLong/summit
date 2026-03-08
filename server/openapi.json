@@ -2955,6 +2955,63 @@
           }
         }
       }
+    },
+    "/api/support-bundles:generate": {
+      "post": {
+        "summary": "Generate a support diagnostics bundle",
+        "tags": ["Support"],
+        "description": "Produces a redacted support diagnostics bundle along with a signed manifest and receipt.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "tenantId": { "type": "string" },
+                  "reason": { "type": "string" },
+                  "receiptsLimit": { "type": "integer", "minimum": 1, "maximum": 200 },
+                  "sloRunbook": { "type": "string" },
+                  "sloWindow": { "type": "string" }
+                },
+                "required": ["tenantId", "reason"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Support bundle generated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "manifest": { "type": "object" },
+                    "signatureType": { "type": "string" },
+                    "manifestSignature": { "type": "string" },
+                    "bundle": { "type": "object" },
+                    "receipt": { "type": "object" },
+                    "policyDecision": { "type": "object" },
+                    "redaction": { "type": "object" }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Feature disabled or forbidden"
+          },
+          "404": {
+            "description": "Tenant not found"
+          }
+        }
+      }
     }
   },
   "tags": [

@@ -1,0 +1,5 @@
+- Monorepo structure requires careful dependency management.
+- Python services without explicit dependency files rely on root configuration or environment.
+- Node.js services need explicit package.json updates.
+- Frontend routing in this app uses lazy loading and centralized route definition in App.tsx.
+- Navigation items are managed in a component, not just routes.

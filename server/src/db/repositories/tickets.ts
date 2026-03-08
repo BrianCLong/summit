@@ -3,6 +3,8 @@ import baseLogger from '../../config/logger.js';
 
 const logger = baseLogger.child({ name: 'tickets-repo' });
 
+let initializationPromise: Promise<void> | null = null;
+
 export type Ticket = {
   provider: 'github' | 'jira';
   external_id: string;
@@ -20,8 +22,11 @@ export type Ticket = {
 };
 
 async function ensureTable() {
-  const pool = getPostgresPool();
-  const sql = `
+  if (initializationPromise) return initializationPromise;
+
+  initializationPromise = (async () => {
+    const pool = getPostgresPool();
+    const sql = `
     CREATE TABLE IF NOT EXISTS maestro_tickets (
       id SERIAL PRIMARY KEY,
       provider TEXT NOT NULL,
@@ -53,21 +58,36 @@ async function ensureTable() {
       PRIMARY KEY (ticket_provider, ticket_external_id, deployment_id)
     );
   `;
-  try {
-    await pool.query(sql);
-  } catch (e: any) {
-    logger.warn(
-      { err: e },
-      'failed to ensure maestro_tickets table (mock mode?)',
-    );
-  }
+    try {
+      await pool.query(sql);
+    } catch (e: any) {
+      logger.warn(
+        { err: e },
+        'failed to ensure maestro_tickets table (mock mode?)',
+      );
+      // Reset promise on failure so we can retry later
+      initializationPromise = null;
+      throw e;
+    }
+  })();
+
+  return initializationPromise;
 }
 
 export async function upsertTickets(items: Ticket[]) {
-  await ensureTable();
+  try {
+    await ensureTable();
+  } catch (e) {
+    // If table ensuring fails, we might still want to try (it might already exist)
+    // but the original code just logged warning.
+    // My ensureTable now throws, so we catch it here to match original "best effort" behavior.
+    logger.debug({ err: e }, 'ensureTable failed in upsertTickets, proceeding anyway');
+  }
+
   if (!items?.length) return { upserted: 0 };
   const pool = getPostgresPool();
-  const sql = `
+
+  const individualSql = `
     INSERT INTO maestro_tickets (provider, external_id, title, status, assignee, labels, priority, sprint, project, repo, url, created_at, updated_at)
     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11, COALESCE($12, NOW()), NOW())
     ON CONFLICT (provider, external_id)
@@ -83,10 +103,19 @@ export async function upsertTickets(items: Ticket[]) {
       url = EXCLUDED.url,
       updated_at = NOW();
   `;
+
+  // BOLT: Optimized batched upsert with chunking to reduce database round-trips.
+  const chunkSize = 100;
   let count = 0;
-  for (const t of items) {
-    try {
-      await pool.query(sql, [
+
+  for (let i = 0; i < items.length; i += chunkSize) {
+    const chunk = items.slice(i, i + chunkSize);
+    const values: any[] = [];
+    const placeholders: string[] = [];
+    let paramIndex = 1;
+
+    for (const t of chunk) {
+      values.push(
         t.provider,
         t.external_id,
         t.title,
@@ -99,12 +128,60 @@ export async function upsertTickets(items: Ticket[]) {
         t.repo ?? null,
         t.url ?? null,
         t.created_at ?? null,
-      ]);
-      count++;
+      );
+      placeholders.push(
+        `($${paramIndex}, $${paramIndex + 1}, $${paramIndex + 2}, $${paramIndex + 3}, $${paramIndex + 4}, $${paramIndex + 5}, $${paramIndex + 6}, $${paramIndex + 7}, $${paramIndex + 8}, $${paramIndex + 9}, $${paramIndex + 10}, COALESCE($${paramIndex + 11}, NOW()), NOW())`,
+      );
+      paramIndex += 12;
+    }
+
+    const batchSql = `
+      INSERT INTO maestro_tickets (provider, external_id, title, status, assignee, labels, priority, sprint, project, repo, url, created_at, updated_at)
+      VALUES ${placeholders.join(', ')}
+      ON CONFLICT (provider, external_id)
+      DO UPDATE SET
+        title = EXCLUDED.title,
+        status = EXCLUDED.status,
+        assignee = EXCLUDED.assignee,
+        labels = EXCLUDED.labels,
+        priority = EXCLUDED.priority,
+        sprint = EXCLUDED.sprint,
+        project = EXCLUDED.project,
+        repo = EXCLUDED.repo,
+        url = EXCLUDED.url,
+        updated_at = NOW();
+    `;
+
+    try {
+      const res = await pool.query(batchSql, values);
+      count += res.rowCount ?? chunk.length;
     } catch (e: any) {
-      logger.warn({ err: e, t }, 'ticket upsert failed');
+      logger.warn({ err: e }, 'batched ticket upsert failed, falling back to individual inserts');
+      // BOLT: Fallback to preserve row-level success/failure behavior if batch fails
+      for (const t of chunk) {
+        try {
+          await pool.query(individualSql, [
+            t.provider,
+            t.external_id,
+            t.title,
+            t.status,
+            t.assignee ?? null,
+            t.labels ? JSON.stringify(t.labels) : null,
+            t.priority ?? null,
+            t.sprint ?? null,
+            t.project ?? null,
+            t.repo ?? null,
+            t.url ?? null,
+            t.created_at ?? null,
+          ]);
+          count++;
+        } catch (innerErr: any) {
+          logger.warn({ err: innerErr, t }, 'individual ticket upsert failed');
+        }
+      }
     }
   }
+
   return { upserted: count };
 }
 

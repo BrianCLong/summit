@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "structures": [
+    {
+      "name": "sole_proprietorship",
+      "liability_protection": "low",
+      "tax_complexity": "low",
+      "risk_tier": "high"
+    },
+    {
+      "name": "llc",
+      "liability_protection": "medium",
+      "tax_complexity": "medium",
+      "risk_tier": "moderate"
+    },
+    {
+      "name": "corporation",
+      "liability_protection": "high",
+      "tax_complexity": "high",
+      "risk_tier": "low"
+    }
+  ]
+}

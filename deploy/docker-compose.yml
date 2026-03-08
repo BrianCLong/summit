@@ -1,15 +1,65 @@
 version: '3.8'
+
 services:
-  graphql-orchestrator:
-    build: .
-    ports:
-      - '8000:8000'
+  runtime:
+    image: summit-runtime:latest
+    build:
+      context: ../services/runtime
     environment:
-      - DATABASE_URL=${DATABASE_URL}
-      - OPA_URL=${OPA_URL}
-  bandit-router:
-    build: .
-  web-fetch-worker:
-    build: .
-  synthesizer:
-    build: .
+      - LOG_LEVEL=debug
+      - CAPTURE_PROXY_URL=http://capture:8080
+    networks:
+      - summit_net
+
+  scheduler:
+    image: summit-scheduler:latest
+    build:
+      context: ../services/scheduler
+    depends_on:
+      - runtime
+    networks:
+      - summit_net
+
+  capture:
+    image: summit-capture:latest
+    build:
+      context: ../services/capture
+    ports:
+      - "8080:8080"
+    networks:
+      - summit_net
+
+  evidence:
+    image: summit-evidence:latest
+    build:
+      context: ../services/evidence
+    volumes:
+      - evidence_data:/var/lib/summit/evidence
+    networks:
+      - summit_net
+
+  graph:
+    image: summit-graph:latest
+    build:
+      context: ../services/graph
+    networks:
+      - summit_net
+
+  api:
+    image: summit-api:latest
+    build:
+      context: ../apps/api
+    ports:
+      - "3000:3000"
+    depends_on:
+      - graph
+      - evidence
+    networks:
+      - summit_net
+
+networks:
+  summit_net:
+    driver: bridge
+
+volumes:
+  evidence_data:

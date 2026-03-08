@@ -250,8 +250,8 @@ git log v1.24.0 -10 --oneline
 ## Related Documentation
 
 - [scripts/production-canary.sh](../scripts/production-canary.sh) - Canary deployment script
-- [RUNBOOKS/incident-response.md](../RUNBOOKS/incident-response.md) - Incident procedures
-- [RUNBOOKS/rollback-procedures.md](../RUNBOOKS/rollback-procedures.md) - Rollback guide
+- [RUNBOOKS/incident-response.md](../docs/runbooks/incident-response.md) - Incident procedures
+- [RUNBOOKS/rollback-procedures.md](../docs/runbooks/rollback-procedures.md) - Rollback guide
 - [.github/workflows/deploy-multi-region.yml](../.github/workflows/deploy-multi-region.yml) - CI/CD config
 
 ---

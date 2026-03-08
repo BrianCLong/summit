@@ -1,0 +1,10 @@
+milestone: declarative-pipelines-ga
+status: proposed
+criteria:
+  - Declarative pipeline schema validation coverage reaches 100% for required fields.
+  - Dependency cycle detection tests are passing.
+  - Evidence artifacts are generated in evidence/pipelines and indexed.
+  - Lineage execution path is verified with feature flag OFF and ON.
+kill_switch:
+  env: SUMMIT_DECLARATIVE_PIPELINES
+  default: "false"

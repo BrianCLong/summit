@@ -1,29 +1,37 @@
-import { jest } from '@jest/globals';
-import { NarrativePrioritizationService } from '../NarrativePrioritizationService';
+import { beforeAll, beforeEach, describe, expect, it, jest } from '@jest/globals';
 
 // Mock dependencies
 const mockRun = jest.fn() as jest.Mock;
+const mockClose = jest.fn() as jest.Mock;
+const mockSessionFactory = jest.fn() as jest.Mock;
+const getNeo4jDriverMock = jest.fn();
+
 const mockSession = {
   run: mockRun,
-  close: jest.fn(),
+  close: mockClose,
 };
 const mockDriver = {
-  session: () => mockSession,
+  session: mockSessionFactory,
 };
 
-jest.mock('../../db/neo4j.js', () => ({
-  getNeo4jDriver: () => mockDriver,
+jest.unstable_mockModule('../../db/neo4j.js', () => ({
+  getNeo4jDriver: getNeo4jDriverMock,
 }));
 
 describe('NarrativePrioritizationService', () => {
-  let service: NarrativePrioritizationService;
+  let NarrativePrioritizationService: any;
+  let service: any;
 
-  beforeAll(() => {
-    service = NarrativePrioritizationService.getInstance();
+  beforeAll(async () => {
+    ({ NarrativePrioritizationService } = await import('../NarrativePrioritizationService.js'));
   });
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockSessionFactory.mockReturnValue(mockSession);
+    getNeo4jDriverMock.mockReturnValue(mockDriver);
+    (NarrativePrioritizationService as any).instance = undefined;
+    service = NarrativePrioritizationService.getInstance();
   });
 
   it('should prioritize a critical narrative correctly', async () => {

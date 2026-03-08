@@ -2,6 +2,10 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Summit Evidence Metrics",
   "type": "object",
-  "description": "Generic metrics schema allowing module-specific metrics.",
+  "required": ["evidence_id"],
+  "properties": {
+    "evidence_id": { "type": "string" },
+    "cosign_exit_code": { "type": "integer" }
+  },
   "additionalProperties": true
 }

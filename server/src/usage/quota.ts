@@ -1,6 +1,6 @@
 import { getPostgresPool } from '../db/postgres.js';
-import { planService, Plan } from './plans';
-import { UsageDimension } from './events';
+import { planService, Plan } from './plans.js';
+import { UsageDimension } from './events.js';
 
 export interface QuotaLimit {
   limit: number;

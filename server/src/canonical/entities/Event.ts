@@ -5,7 +5,7 @@
  * Represents significant occurrences (meetings, transactions, incidents, etc.)
  */
 
-import { BaseCanonicalEntity, CanonicalEntityMetadata } from '../types.ts';
+import { BaseCanonicalEntity, CanonicalEntityMetadata } from '../types.js';
 
 export interface EventParticipant {
   /** Participant entity ID */

@@ -68,6 +68,23 @@ flags:
       - tests/e2e/
     carryforward: true
 
+  python-3.11:
+    paths:
+      - src/
+    carryforward: true
+
+  python-3.12:
+    paths:
+      - src/
+    carryforward: true
+
+  rust:
+    paths:
+      - ibrs/
+      - bindings/
+      - rust/
+    carryforward: true
+
 ignore:
   - "**/*.test.ts"
   - "**/*.test.tsx"

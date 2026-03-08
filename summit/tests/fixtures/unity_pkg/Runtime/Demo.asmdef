@@ -1,0 +1,6 @@
+{
+  "name": "Company.Demo.Runtime",
+  "references": [
+    "Company.Core"
+  ]
+}

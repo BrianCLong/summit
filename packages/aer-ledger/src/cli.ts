@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import * as fs from 'fs';
-import { verify } from './crypto';
+import { verify } from './crypto.js';
 const aerPath = process.argv[2];
 const pub =
   process.argv[3] || process.env.AER_PUBLIC_KEY_FILE || './aer.pub.pem';

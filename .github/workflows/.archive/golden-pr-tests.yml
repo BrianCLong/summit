@@ -64,8 +64,8 @@ jobs:
       - name: Install Release Captain dependencies
         run: |
           # Install OPA for policy testing
-          curl -L -o opa https://openpolicyagent.org/downloads/v0.57.0/opa_linux_amd64_static
-          chmod +x opa && sudo mv opa /usr/local/bin/
+          curl -L -o opa-bin https://openpolicyagent.org/downloads/v0.57.0/opa_linux_amd64_static
+          chmod +x opa-bin && sudo mv opa /usr/local/bin/
 
           # Install additional testing tools
           npm install -g @types/jest
@@ -110,7 +110,7 @@ jobs:
           EOF
 
           # Evaluate policy
-          opa eval -d .github/policies -i test-policy-input.json "data.summit.release.decision"
+          ./opa-bin eval -d .github/policies -i test-policy-input.json "data.summit.release.decision"
 
           echo "✅ OPA policies validated"
 
@@ -211,7 +211,7 @@ jobs:
 
           # Benchmark OPA policy evaluation
           echo "Testing OPA performance..."
-          time opa eval -d .github/policies -i test-policy-input.json "data.summit.release.decision"
+          time ./opa-bin eval -d .github/policies -i test-policy-input.json "data.summit.release.decision"
 
           # Benchmark safety circuit
           echo "Testing safety circuit performance..."
@@ -226,7 +226,7 @@ jobs:
           echo "✅ Performance benchmarks completed"
 
       - name: Generate validation report
-        if: always()
+        if: ((always()) && (failure())) && (success())
         run: |
           cat > validation-report.md << EOF
           # 🚢 Release Captain Validation Report
@@ -268,7 +268,6 @@ jobs:
           cat validation-report.md
 
       - name: Create validation issue
-        if: failure()
         run: |
           # Create issue for failed validation
           gh issue create \
@@ -285,7 +284,6 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Post success summary
-        if: success()
         run: |
           echo "🎉 Release Captain validation completed successfully!"
           echo ""

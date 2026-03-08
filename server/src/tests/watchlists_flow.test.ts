@@ -1,4 +1,4 @@
-import { watchlistResolvers } from '../resolvers/watchlists';
+import { watchlistResolvers } from '../resolvers/watchlists.js';
 import { describe, it, test, expect } from '@jest/globals';
 
 describe('Watchlist flow', () => {

@@ -2,7 +2,7 @@
  * Performance tests for EntityRepo
  */
 import { Pool } from 'pg';
-import { EntityRepo, EntityInput } from '../EntityRepo';
+import { EntityRepo, EntityInput } from '../EntityRepo.js';
 
 describe('EntityRepo Performance', () => {
   let repo: EntityRepo;

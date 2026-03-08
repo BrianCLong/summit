@@ -385,7 +385,7 @@ export function emitRun(job: string, inputs: string[], outputs: string[]) {
 
 ### Directory Structure
 ```
-/home/user/summit/RUNBOOKS/
+/home/user/summit/runbooks/
 ├── INDEX.md                          # Central index (47 runbooks)
 ├── actions/                          # GitHub Actions procedures
 │   └── flip_index.yml

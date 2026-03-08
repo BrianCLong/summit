@@ -1,6 +1,6 @@
 
 import { describe, it, expect } from '@jest/globals';
-import { O2CEvent, O2CEventSchema } from '../events';
+import { O2CEvent, O2CEventSchema } from '../events.js';
 
 describe('Order-to-Cash (O2C) Events', () => {
   it('should have stable enum values matching the documentation', () => {

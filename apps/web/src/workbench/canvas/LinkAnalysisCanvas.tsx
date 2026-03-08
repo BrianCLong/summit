@@ -1,7 +1,6 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react'
 import * as d3 from 'd3'
 import { useWorkbenchStore } from '../store/viewStore'
-import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from '@/components/ui/ContextMenu'
 import type { Entity, Relationship } from '@/types'
 
 // Use a local interface if Types are missing
@@ -88,7 +87,7 @@ export function LinkAnalysisCanvas({ nodes: initialNodes, edges: initialEdges }:
 
     // Render Nodes
     const node = g.append('g')
-      .selectAll('g')
+      .selectAll<SVGGElement, Node>('g')
       .data(nodes)
       .join('g')
       .attr('class', 'node')

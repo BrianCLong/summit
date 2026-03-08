@@ -1,0 +1,11 @@
+{
+  "artifacts": [],
+  "events": [],
+  "evidence_id": "EVD-DEEPSEEK-OCR2-VLLM-ARCH-EVAL-001",
+  "item": {
+    "id": "deepseek-ocr-mini-eval"
+  },
+  "item_slug": "deepseek-ocr-mini-eval",
+  "run_id": "test-run-001",
+  "summary": "Report for deepseek-ocr-mini-eval"
+}

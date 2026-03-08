@@ -5,9 +5,9 @@ import helmet from 'helmet';
 import mongoSanitize from 'express-mongo-sanitize';
 import hpp from 'hpp';
 import request from 'supertest';
-import { expressValidationPipeline } from '../middleware/express-validation-pipeline.ts';
-import { createRedisRateLimiter } from '../middleware/redisRateLimiter.ts';
-import { sanitizeHtml } from '../utils/htmlSanitizer.ts';
+import { expressValidationPipeline } from '../middleware/express-validation-pipeline.js';
+import { createRedisRateLimiter } from '../middleware/redisRateLimiter.js';
+import { sanitizeHtml } from '../utils/htmlSanitizer.js';
 
 describe('Security middleware integration', () => {
   const allowedOrigins = ['http://allowed.test'];

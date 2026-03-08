@@ -1,6 +1,6 @@
-import { BulkHandler, BulkItemResult, BulkContext, BulkItemInput } from './types.ts';
-import { getPostgresPool } from '../db/postgres.ts';
-import logger from '../config/logger.ts';
+import { BulkHandler, BulkItemResult, BulkContext, BulkItemInput } from './types.js';
+import { getPostgresPool } from '../db/postgres.js';
+import logger from '../config/logger.js';
 import { randomUUID } from 'crypto';
 
 const handlerLogger = logger.child({ name: 'BulkHandlers' });

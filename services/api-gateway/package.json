@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@as-integrations/express4": "^1.1.2",
-    "@apollo/server": "^5.1.0",
+    "@apollo/server": "4.11.3",
     "express": "^5.2.0",
     "graphql": "^16.12.0",
     "graphql-tag": "^2.12.0",
@@ -32,7 +32,7 @@
     "tsx": "^4.7.0",
     "jest": "^30.2.0",
     "@types/jest": "^30.0.0",
-    "eslint": "^9.39.1",
+    "eslint": "^9.39.2",
     "@typescript-eslint/eslint-plugin": "^8.46.4",
     "@typescript-eslint/parser": "^8.46.4"
   },

@@ -1,0 +1,64 @@
+id: FLOW_FEATURE_LIFECYCLE
+owner: MC-ARCH
+description: Standard pipeline for taking a new feature request through triage, design, implementation, and deployment.
+nodes:
+  - id: idea_intake
+    owner: PX-UX
+    input: Feature Request
+    action: Triage & Categorize
+    output: Feature Spec Draft
+  - id: architecture_review
+    owner: MC-ARCH
+    input: Feature Spec Draft
+    action: Review feasibility, impact, and arch fit
+    output: Approved Arch Design
+  - id: governance_check
+    owner: GOV-STEWARD
+    input: Approved Arch Design
+    action: Check against mission & safety policies
+    output: Governance Approval
+  - id: implementation
+    owner: MC-ARCH
+    input: Approved Arch Design
+    action: Coding & Testing
+    output: Pull Request
+  - id: verification
+    owner: SEC-DEF
+    input: Pull Request
+    action: CI Checks, Security Scan, Peer Review
+    output: Verified Artifact
+  - id: deployment
+    owner: MC-ARCH
+    input: Verified Artifact
+    action: Canary Deploy -> Full Rollout
+    output: Live Feature
+  - id: post_release_monitoring
+    owner: SSIGHT
+    input: Live Feature
+    action: Monitor SLOs & User Feedback
+    output: Success Report
+edges:
+  - source: idea_intake
+    target: architecture_review
+  - source: architecture_review
+    target: governance_check
+  - source: governance_check
+    target: implementation
+    condition: governance_approved == true
+  - source: implementation
+    target: verification
+  - source: verification
+    target: deployment
+    condition: verification_passed == true
+  - source: deployment
+    target: post_release_monitoring
+variants:
+  - name: high_risk
+    add_nodes:
+      - id: red_team_assessment
+        owner: SEC-DEF
+        after: verification
+        before: deployment
+  - name: hotfix
+    skip_nodes:
+      - architecture_review

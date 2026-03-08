@@ -5,7 +5,7 @@
  * Represents a threat indicator or signal
  */
 
-import { BaseCanonicalEntity, CanonicalEntityMetadata } from '../types.ts';
+import { BaseCanonicalEntity, CanonicalEntityMetadata } from '../types.js';
 
 export interface CanonicalIndicator extends BaseCanonicalEntity, CanonicalEntityMetadata {
   entityType: 'Indicator';

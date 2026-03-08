@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import type { DlqEvent, DlqPublisher } from './types';
+import type { DlqEvent, DlqPublisher } from './types.js';
 
 vi.mock('@opentelemetry/api', () => ({
   metrics: {
@@ -41,7 +41,7 @@ vi.mock('pino', () => ({
   }),
 }), { virtual: true });
 
-import { AdapterExecutor } from './executor';
+import { AdapterExecutor } from './executor.js';
 
 class StubDlqPublisher implements DlqPublisher {
   public events: DlqEvent[] = [];

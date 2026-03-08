@@ -1,6 +1,6 @@
 
 import { Driver } from 'neo4j-driver';
-import { AnomalyDetectionResult } from './types';
+import { AnomalyDetectionResult } from './types.js';
 
 export class GraphDetector {
   private driver: Driver;

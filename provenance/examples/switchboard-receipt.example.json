@@ -1,0 +1,71 @@
+{
+  "spec_version": "0.1",
+  "id": "receipt-7b8f5f",
+  "timestamp": "2026-02-06T20:45:12Z",
+  "correlation_id": "trace-1f0b",
+  "tenant_id": "tenant-acme",
+  "actor": {
+    "id": "user-42",
+    "type": "user",
+    "email": "ops@acme.example",
+    "roles": ["operator"],
+    "ip_address": "203.0.113.8"
+  },
+  "command": {
+    "name": "access.request",
+    "parameters": {
+      "resource": "production-db",
+      "duration_minutes": 60,
+      "justification": "incident-response"
+    },
+    "role_scope": ["operator"],
+    "privileged": true
+  },
+  "inputs_hash": "2f2a8a8f2d9412b1f0d775baf899b8360c987c7d1c4ce14bfc6ec52d7df1f1d2",
+  "outputs_hash": "4c9a89d0a1cf606c0b0f8f6f8340f4d0f7c0a9c356c2c1d0f3de7f4e3b8d7c11",
+  "policy_decision": {
+    "decision_id": "policy-33e1",
+    "outcome": "require_approval",
+    "policy_bundle": "switchboard-approvals@2026-02-06",
+    "risk_level": "high",
+    "evaluated_at": "2026-02-06T20:45:10Z",
+    "required_approver_roles": ["security", "incident_commander"]
+  },
+  "approvals": [
+    {
+      "approval_id": "approval-9c12",
+      "decision": "approve",
+      "actor_id": "user-99",
+      "rationale_hash": "9b94e4f2b1e64a9d8e38dbf781df2f527e833d2c65b0179f4a1247f38e3b4a66",
+      "decided_at": "2026-02-06T20:46:02Z"
+    }
+  ],
+  "result": {
+    "status": "success",
+    "details": "Access granted for 60 minutes"
+  },
+  "evidence_links": [
+    {
+      "type": "timeline",
+      "uri": "https://api.summit.example.com/timeline?tenant_id=tenant-acme&entity_id=approval-9c12"
+    }
+  ],
+  "notary": {
+    "provider": "local-dev-signer",
+    "key_id": "dev-key-1",
+    "attested_at": "2026-02-06T20:46:05Z"
+  },
+  "signatures": [
+    {
+      "key_id": "dev-key-1",
+      "algorithm": "RS256",
+      "value": "c2lnbmF0dXJlLWJhc2U2NC1wbGFjZWhvbGRlcg=="
+    }
+  ],
+  "redactions": [
+    {
+      "field": "command.parameters.justification",
+      "reason": "pii_reduction"
+    }
+  ]
+}

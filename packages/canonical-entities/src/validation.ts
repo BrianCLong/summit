@@ -8,7 +8,7 @@ import type {
   EntityType,
   ClassificationLevel,
   BitemporalFields,
-} from './types';
+} from './types.js';
 
 // -----------------------------------------------------------------------------
 // Base Schemas

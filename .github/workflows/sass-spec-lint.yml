@@ -1,0 +1,38 @@
+name: sass-spec-lint
+
+on:
+  pull_request:
+    paths:
+      - 'agents/**/*.sass.yaml'
+      - 'agents/**/*.sass.yml'
+      - 'specs/schema/sass.schema.json'
+      - 'tools/spec_lint.py'
+  push:
+    branches:
+      - main
+    paths:
+      - 'agents/**/*.sass.yaml'
+      - 'agents/**/*.sass.yml'
+      - 'specs/schema/sass.schema.json'
+      - 'tools/spec_lint.py'
+
+jobs:
+  lint-sass:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install lint dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyyaml jsonschema
+
+      - name: Lint SASS specs
+        run: |
+          python tools/spec_lint.py 'agents/**/*.sass.yaml' 'agents/**/*.sass.yml'

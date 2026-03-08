@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import { quotaService } from './service';
+import { quotaService } from './service.js';
 
 const getTenantId = (req: Request): string => {
   return (

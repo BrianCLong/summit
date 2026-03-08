@@ -1,6 +1,6 @@
 // server/src/services/MaestroArtifactService.ts
-import { pool } from '../db/pg';
-import { AppError, NotFoundError } from '../lib/errors';
+import { pool } from '../db/pg.js';
+import { AppError, NotFoundError } from '../lib/errors.js';
 
 export type MaestroRunStatus = 'PENDING' | 'RUNNING' | 'SUCCESS' | 'FAILED';
 

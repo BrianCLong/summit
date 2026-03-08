@@ -51,7 +51,7 @@ Builds on Sprint 33 (outbox+CDC, FLE, multi-cloud registry, svc-template). This 
 ### B. Immutable Delivery & Provenance (CI/CD + Platform)
 
 1. **Digest pinning** in Helm values; prohibit `:latest` and tag-only deploys.
-2. **Admission verify**: provenance (SLSA) + cosign verify on deployment.
+2. **Admission verify**: provenance (SLSA) + cosign verify --use-signed-timestamps on deployment.
 3. **Rollback provenance**: link prior digest + SBOM in release notes.
 
 ### C. Data Residency & Tenancy (Security/Data)

@@ -1,0 +1,2 @@
+# Allowlist for workflows that require write permissions.
+# Use exact paths or shell globs (e.g., .github/workflows/release-*.yml).

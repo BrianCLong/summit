@@ -1,6 +1,6 @@
 // @ts-nocheck
 import express, { Response, NextFunction } from 'express';
-import { z } from 'zod/v4';
+import { z } from 'zod';
 import { randomUUID } from 'node:crypto';
 import { requirePermission } from '../middleware/auth.js';
 import { narrativeSimulationManager } from '../narrative/manager.js';

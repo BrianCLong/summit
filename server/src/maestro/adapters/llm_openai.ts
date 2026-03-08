@@ -13,18 +13,16 @@ export class OpenAILLM {
   constructor(
     private apiKey: string,
     private costMeter: CostMeter,
-  ) {}
+  ) { }
 
   async callCompletion(
     runId: string,
     taskId: string,
-    params: { model: string; messages: any[] },
+    params: { model: string; messages: any[]; tools?: any[] },
     metadata: LLMCallMetadata = {},
   ): Promise<LLMResult> {
-    // Strip prefix if present, e.g. "openai:gpt-4" -> "gpt-4"
     const modelName = params.model.replace(/^openai:/, '');
 
-    // pseudo-code — plug in real OpenAI client
     const raw = await this.fakeOpenAIChatCompletion({ ...params, model: modelName });
 
     const usage: LLMUsage = {
@@ -36,8 +34,11 @@ export class OpenAILLM {
 
     const sample = await this.costMeter.record(runId, taskId, usage, metadata);
 
+    const message = raw.choices[0].message;
+
     return {
-      content: raw.choices[0].message.content,
+      content: message.content || '',
+      tool_calls: message.tool_calls,
       usage,
       costUSD: sample.cost,
       feature: metadata.feature,
@@ -47,7 +48,27 @@ export class OpenAILLM {
   }
 
   // Helper method to simulate OpenAI call
-  private async fakeOpenAIChatCompletion(params: { model: string; messages: any[] }) {
+  private async fakeOpenAIChatCompletion(params: { model: string; messages: any[]; tools?: any[] }) {
+    const lastUserMessage = params.messages.filter(m => m.role === 'user').pop()?.content || '';
+    let content = 'This is a simulated response from OpenAI.';
+    let tool_calls: any[] | undefined = undefined;
+
+    // Simulate tool usage if requested and relevant
+    if (params.tools && (lastUserMessage.toLowerCase().includes('simulate') || lastUserMessage.toLowerCase().includes('verify'))) {
+      const tool = params.tools.find(t => t.function?.name === 'narrative.simulate');
+      if (tool) {
+        content = 'I will run a simulation to verify the narrative impact.';
+        tool_calls = [{
+          id: 'call_' + Math.random().toString(36).substring(7),
+          type: 'function',
+          function: {
+            name: 'narrative.simulate',
+            arguments: JSON.stringify({ rootId: 'node-123', ticks: 5 })
+          }
+        }];
+      }
+    }
+
     return {
       id: 'chatcmpl-123',
       object: 'chat.completion',
@@ -58,9 +79,10 @@ export class OpenAILLM {
           index: 0,
           message: {
             role: 'assistant',
-            content: 'This is a simulated response from OpenAI.',
+            content,
+            tool_calls
           },
-          finish_reason: 'stop',
+          finish_reason: tool_calls ? 'tool_calls' : 'stop',
         },
       ],
       usage: {
@@ -70,4 +92,14 @@ export class OpenAILLM {
       },
     };
   }
+}
+
+export interface LLMResult {
+  content: string;
+  tool_calls?: any[];
+  usage: LLMUsage;
+  costUSD: number;
+  feature?: string;
+  tenantId?: string;
+  environment?: string;
 }

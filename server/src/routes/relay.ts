@@ -1,7 +1,7 @@
 import { Router } from 'express';
-import { poll, ack } from '../relay/queue';
+import { poll, ack } from '../relay/queue.js';
 import { Pool } from 'pg';
-import { verifySiteAuth } from '../sites/auth';
+import { verifySiteAuth } from '../sites/auth.js';
 
 const r = Router();
 const pg = new Pool({ connectionString: process.env.DATABASE_URL });

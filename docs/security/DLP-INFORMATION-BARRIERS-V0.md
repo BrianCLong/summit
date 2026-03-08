@@ -1099,7 +1099,7 @@ type Mutation {
 
 ### B. Detection Pattern Library
 
-See: [SECURITY/dlp/rules.yml](/SECURITY/dlp/rules.yml)
+See: SECURITY/dlp/rules.yml
 
 ### C. OPA Policy Reference
 

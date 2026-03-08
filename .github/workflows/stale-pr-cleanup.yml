@@ -1,0 +1,283 @@
+name: Stale PR Lifecycle Management
+
+# Prevents PR backlog accumulation through automated lifecycle management
+# Implements lessons learned from 886-PR backlog event (2026-02-28)
+
+on:
+  schedule:
+    # Run weekly on Sundays at 00:00 UTC
+    - cron: '0 0 * * 0'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run (no actual changes)'
+        required: false
+        default: true
+        type: boolean
+      stale_days:
+        description: 'Days of inactivity threshold'
+        required: false
+        default: '90'
+        type: string
+
+concurrency:
+  group: stale-pr-cleanup
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  identify-stale:
+    name: Identify Stale PRs
+    runs-on: ubuntu-latest
+    outputs:
+      stale_count: ${{ steps.analyze.outputs.stale_count }}
+      critical_count: ${{ steps.analyze.outputs.critical_count }}
+
+    steps:
+      - name: Analyze PR Age
+        id: analyze
+        run: |
+          echo "🔍 Analyzing PR lifecycle..."
+
+          STALE_DAYS="${{ github.event.inputs.stale_days || '90' }}"
+          CUTOFF_DATE=$(date -u -d "$STALE_DAYS days ago" +%Y-%m-%d)
+
+          # Get stale PRs (90+ days)
+          gh pr list --repo ${{ github.repository }} \
+            --state open --limit 1000 \
+            --json number,title,updatedAt,author,headRefName,isDraft \
+            > /tmp/all_prs.json
+
+          # Filter stale
+          STALE_PRS=$(cat /tmp/all_prs.json | jq --arg cutoff "$CUTOFF_DATE" '
+            [.[] | select(.updatedAt < $cutoff)]
+          ')
+
+          # Get critical stale (180+ days)
+          CRITICAL_CUTOFF=$(date -u -d "180 days ago" +%Y-%m-%d)
+          CRITICAL_PRS=$(echo "$STALE_PRS" | jq --arg cutoff "$CRITICAL_CUTOFF" '
+            [.[] | select(.updatedAt < $cutoff)]
+          ')
+
+          STALE_COUNT=$(echo "$STALE_PRS" | jq '. | length')
+          CRITICAL_COUNT=$(echo "$CRITICAL_PRS" | jq '. | length')
+
+          echo "stale_count=$STALE_COUNT" >> $GITHUB_OUTPUT
+          echo "critical_count=$CRITICAL_COUNT" >> $GITHUB_OUTPUT
+
+          echo "$STALE_PRS" > /tmp/stale_prs.json
+          echo "$CRITICAL_PRS" > /tmp/critical_prs.json
+
+          echo "## 📊 Stale PR Analysis" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Category | Count | Threshold |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------|-------|-----------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Stale | $STALE_COUNT | ${STALE_DAYS}+ days |" >> $GITHUB_STEP_SUMMARY
+          echo "| Critical Stale | $CRITICAL_COUNT | 180+ days |" >> $GITHUB_STEP_SUMMARY
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Upload Analysis
+        uses: actions/upload-artifact@v4
+        with:
+          name: stale-pr-analysis
+          path: |
+            /tmp/stale_prs.json
+            /tmp/critical_prs.json
+          retention-days: 30
+
+  warn-stale:
+    name: Warn Stale PRs
+    runs-on: ubuntu-latest
+    needs: identify-stale
+    if: needs.identify-stale.outputs.stale_count > 0
+
+    steps:
+      - name: Download Analysis
+        uses: actions/download-artifact@v4
+        with:
+          name: stale-pr-analysis
+          path: /tmp/
+
+      - name: Add Stale Warning Comments
+        run: |
+          DRY_RUN="${{ github.event.inputs.dry_run || 'true' }}"
+
+          echo "⚠️ Adding stale warnings..."
+
+          cat /tmp/stale_prs.json | jq -r '.[] | @json' | while read pr; do
+            PR_NUM=$(echo "$pr" | jq -r '.number')
+            PR_TITLE=$(echo "$pr" | jq -r '.title')
+            UPDATED=$(echo "$pr" | jq -r '.updatedAt')
+            IS_DRAFT=$(echo "$pr" | jq -r '.isDraft')
+
+            # Skip drafts (different lifecycle rules)
+            if [ "$IS_DRAFT" = "true" ]; then
+              echo "Skipping draft PR #$PR_NUM"
+              continue
+            fi
+
+            COMMENT="⚠️ **Stale PR Notice**
+
+This PR has been inactive for 90+ days (last updated: $UPDATED).
+
+**Next Steps:**
+- If still relevant: Please rebase, update, and request review
+- If no longer needed: Consider closing to reduce backlog
+
+**Auto-close Policy:**
+PRs inactive for 180+ days will be automatically closed with a 7-day warning.
+
+---
+*This is an automated lifecycle management notice*"
+
+            if [ "$DRY_RUN" = "false" ]; then
+              gh pr comment $PR_NUM --repo ${{ github.repository }} --body "$COMMENT"
+              echo "✅ Warned PR #$PR_NUM: $PR_TITLE"
+              sleep 2
+            else
+              echo "🔍 [DRY RUN] Would warn PR #$PR_NUM: $PR_TITLE"
+            fi
+          done
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+  schedule-closure:
+    name: Schedule Critical Stale Closure
+    runs-on: ubuntu-latest
+    needs: identify-stale
+    if: needs.identify-stale.outputs.critical_count > 0
+
+    steps:
+      - name: Download Analysis
+        uses: actions/download-artifact@v4
+        with:
+          name: stale-pr-analysis
+          path: /tmp/
+
+      - name: Add 7-Day Closure Warnings
+        run: |
+          DRY_RUN="${{ github.event.inputs.dry_run || 'true' }}"
+
+          echo "🚨 Scheduling critical stale PR closures..."
+
+          cat /tmp/critical_prs.json | jq -r '.[] | @json' | while read pr; do
+            PR_NUM=$(echo "$pr" | jq -r '.number')
+            PR_TITLE=$(echo "$pr" | jq -r '.title')
+            UPDATED=$(echo "$pr" | jq -r '.updatedAt')
+            IS_DRAFT=$(echo "$pr" | jq -r '.isDraft')
+
+            # Skip drafts
+            if [ "$IS_DRAFT" = "true" ]; then
+              continue
+            fi
+
+            COMMENT="🚨 **7-Day Auto-Close Warning**
+
+This PR has been inactive for 180+ days (last updated: $UPDATED).
+
+**Action Required:**
+This PR will be automatically closed in 7 days unless activity is detected.
+
+To prevent closure:
+- Add a comment
+- Push new commits
+- Request review
+
+If closed, it can be reopened at any time.
+
+---
+*Automated by Stale PR Lifecycle Management*"
+
+            if [ "$DRY_RUN" = "false" ]; then
+              gh pr comment $PR_NUM --repo ${{ github.repository }} --body "$COMMENT"
+
+              # Add label
+              gh pr edit $PR_NUM --repo ${{ github.repository }} \
+                --add-label "stale-scheduled-closure"
+
+              echo "🚨 Scheduled closure for PR #$PR_NUM: $PR_TITLE"
+              sleep 2
+            else
+              echo "🔍 [DRY RUN] Would schedule closure for PR #$PR_NUM: $PR_TITLE"
+            fi
+          done
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+  execute-closure:
+    name: Execute Scheduled Closures
+    runs-on: ubuntu-latest
+    needs: identify-stale
+
+    steps:
+      - name: Close PRs After Warning Period
+        run: |
+          DRY_RUN="${{ github.event.inputs.dry_run || 'true' }}"
+
+          echo "🔒 Executing scheduled closures..."
+
+          # Find PRs with stale-scheduled-closure label that were labeled 7+ days ago
+          gh pr list --repo ${{ github.repository }} \
+            --state open --label "stale-scheduled-closure" \
+            --limit 100 --json number,title,labels \
+            > /tmp/scheduled.json
+
+          # This is a simplified version - full implementation would check label timestamp
+          cat /tmp/scheduled.json | jq -r '.[] | @json' | while read pr; do
+            PR_NUM=$(echo "$pr" | jq -r '.number')
+            PR_TITLE=$(echo "$pr" | jq -r '.title')
+
+            COMMENT="🔒 **Auto-Closed: Stale PR**
+
+This PR was automatically closed due to 180+ days of inactivity.
+
+**To Reopen:**
+If this work is still relevant, you can reopen this PR and it will resume normal lifecycle.
+
+**Rationale:**
+Automated closure prevents backlog accumulation and CI resource exhaustion (see GA Readiness Signal Report 2026-02-28).
+
+---
+*Closed by Stale PR Lifecycle Management*"
+
+            if [ "$DRY_RUN" = "false" ]; then
+              gh pr close $PR_NUM --repo ${{ github.repository }} --comment "$COMMENT"
+              echo "🔒 Closed PR #$PR_NUM: $PR_TITLE"
+              sleep 2
+            else
+              echo "🔍 [DRY RUN] Would close PR #$PR_NUM: $PR_TITLE"
+            fi
+          done
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+  report:
+    name: Generate Report
+    runs-on: ubuntu-latest
+    needs: [identify-stale, warn-stale, schedule-closure, execute-closure]
+    if: always()
+
+    steps:
+      - name: Summary Report
+        run: |
+          DRY_RUN="${{ github.event.inputs.dry_run || 'true' }}"
+          MODE=$([ "$DRY_RUN" = "true" ] && echo "DRY RUN" || echo "LIVE")
+
+          echo "## 📋 Lifecycle Management Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Mode**: $MODE" >> $GITHUB_STEP_SUMMARY
+          echo "**Stale PRs**: ${{ needs.identify-stale.outputs.stale_count }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Critical Stale**: ${{ needs.identify-stale.outputs.critical_count }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🎯 Goals" >> $GITHUB_STEP_SUMMARY
+          echo "- Prevent PR backlog accumulation (886-PR event)" >> $GITHUB_STEP_SUMMARY
+          echo "- Reduce CI load from inactive branches" >> $GITHUB_STEP_SUMMARY
+          echo "- Improve merge queue velocity" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "---" >> $GITHUB_STEP_SUMMARY
+          echo "*Next run: Next Sunday 00:00 UTC*" >> $GITHUB_STEP_SUMMARY

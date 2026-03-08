@@ -1,0 +1,37 @@
+name: Telemetry Lineage Gates
+
+on:
+  pull_request:
+    branches:
+      - main
+      - release/*
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  telemetry-lineage-validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup PNPM
+        uses: pnpm/action-setup@v4
+
+      - name: Install dependencies
+        run: pnpm install --filter @intelgraph/summit-lineage-normalizer...
+
+      - name: Build Normalizer
+        run: pnpm run build --filter @intelgraph/summit-lineage-normalizer
+
+      - name: Test Normalizer
+        env:
+          NODE_OPTIONS: '--experimental-vm-modules'
+        run: pnpm --filter @intelgraph/summit-lineage-normalizer run test

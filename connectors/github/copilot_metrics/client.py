@@ -1,7 +1,5 @@
 import os
 
-import requests
-
 from .config import CopilotMetricsConfig
 
 
@@ -39,6 +37,8 @@ class CopilotMetricsClient:
             f"{self.cfg.api_base_url}/enterprises/{enterprise}"
             "/copilot/metrics/reports/enterprise-1-day"
         )
+        import requests
+
         response = requests.get(
             url,
             headers=self._headers(),

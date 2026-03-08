@@ -1,11 +1,11 @@
 
-import { EntityResolutionService } from './EntityResolutionService';
-import { OSINTEnrichmentService } from './OSINTEnrichmentService';
-import { ClaimExtractor } from './ClaimExtractor';
-import { ClaimValidator } from './ClaimValidator';
-import { ContradictionDetector } from './ContradictionDetector';
-import { OSINTQuery } from './connectors/types';
-import { OSINTProfile, Claim, Contradiction } from './types';
+import { EntityResolutionService } from './EntityResolutionService.js';
+import { OSINTEnrichmentService } from './OSINTEnrichmentService.js';
+import { ClaimExtractor } from './ClaimExtractor.js';
+import { ClaimValidator } from './ClaimValidator.js';
+import { ContradictionDetector } from './ContradictionDetector.js';
+import { OSINTQuery } from './connectors/types.js';
+import { OSINTProfile, Claim, Contradiction } from './types.js';
 import crypto from 'crypto';
 
 export class OSINTPipeline {

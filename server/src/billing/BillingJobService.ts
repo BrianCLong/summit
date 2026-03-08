@@ -1,7 +1,7 @@
 import { CronJob } from 'cron';
-import baseLogger from '../config/logger.ts';
-import { billingService } from './BillingService.ts';
-import { getPostgresPool } from '../config/database.ts';
+import baseLogger from '../config/logger.js';
+import { billingService } from './BillingService.js';
+import { getPostgresPool } from '../config/database.js';
 
 type BillingJobDependencies = {
   pool?: ReturnType<typeof getPostgresPool>;
@@ -11,7 +11,10 @@ type BillingJobDependencies = {
 };
 
 type PostgresClient = {
-  query: (text: string, params?: unknown[]) => Promise<{ rows: any[] }>;
+  query: <T = Record<string, unknown>>(
+    text: string,
+    params?: unknown[],
+  ) => Promise<{ rows: T[] }>;
   release: () => void;
 };
 
@@ -79,8 +82,10 @@ export class BillingJobService {
         return;
       }
 
-      const res = await activeClient.query('SELECT tenant_id FROM tenant_plans');
-      const tenantIds = res.rows.map((r: { tenant_id: string }) => r.tenant_id);
+      const res = await activeClient.query<{ tenant_id: string }>(
+        'SELECT tenant_id FROM tenant_plans',
+      );
+      const tenantIds = res.rows.map((r) => r.tenant_id);
 
       for (const tenantId of tenantIds) {
         try {
@@ -89,11 +94,11 @@ export class BillingJobService {
             continue;
           }
           await this.billing.generateAndExportReport(tenantId);
-        } catch (err: any) {
+        } catch (err: unknown) {
           this.logger.error({ err, tenantId }, 'Failed to process billing for tenant');
         }
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       this.logger.error({ err }, 'Failed to list tenants for billing close');
     } finally {
       if (lockAcquired && client) {
@@ -109,9 +114,12 @@ export class BillingJobService {
   private async acquireDistributedLock(client: PostgresClient, timeoutMs: number): Promise<boolean> {
     const endAt = Date.now() + timeoutMs;
     while (Date.now() < endAt) {
-      const result = await client.query('SELECT pg_try_advisory_lock($1) AS acquired', [
+      const result = await client.query<{ acquired: boolean }>(
+        'SELECT pg_try_advisory_lock($1) AS acquired',
+        [
         BillingJobService.BILLING_CLOSE_LOCK_KEY,
-      ]);
+        ],
+      );
       if (result?.rows?.[0]?.acquired) {
         this.logger.info('Billing close lock acquired via pg_try_advisory_lock');
         return true;
@@ -129,7 +137,7 @@ export class BillingJobService {
         BillingJobService.BILLING_CLOSE_LOCK_KEY,
       ]);
       this.logger.info('Billing close lock released');
-    } catch (err: any) {
+    } catch (err: unknown) {
       this.logger.error({ err }, 'Failed to release billing close advisory lock');
     }
   }

@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any -- jest mocks require type assertions */
+
 /**
  * Tests for Provenance & Integrity Gateway (PIG)
  *

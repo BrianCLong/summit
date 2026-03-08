@@ -19,9 +19,10 @@ def load_cases(path: pathlib.Path) -> list[dict[str, Any]]:
     return json.loads(path.read_text(encoding="utf-8")).get("cases", [])
 
 
-def run_cases(cases: list[dict[str, Any]]) -> tuple[int, int]:
+def run_cases(cases: list[dict[str, Any]]) -> tuple[int, int, list[str]]:
     passed = 0
     failed = 0
+    failed_cases: list[str] = []
     for case in cases:
         label = extract_frame(case.get("event", {}))
         expected_valid = case.get("expect_valid")
@@ -32,7 +33,8 @@ def run_cases(cases: list[dict[str, Any]]) -> tuple[int, int]:
             passed += 1
         else:
             failed += 1
-    return passed, failed
+            failed_cases.append(case.get("id", "unknown-case"))
+    return passed, failed, failed_cases
 
 
 def write_json(path: pathlib.Path, payload: dict[str, Any]) -> None:
@@ -42,12 +44,13 @@ def write_json(path: pathlib.Path, payload: dict[str, Any]) -> None:
 def main() -> None:
     positive = load_cases(FIXTURES_DIR / "frames_positive.json")
     negative = load_cases(FIXTURES_DIR / "frames_negative.json")
-    passed_pos, failed_pos = run_cases(positive)
-    passed_neg, failed_neg = run_cases(negative)
+    passed_pos, failed_pos, failed_cases_pos = run_cases(positive)
+    passed_neg, failed_neg, failed_cases_neg = run_cases(negative)
 
     total_passed = passed_pos + passed_neg
     total_failed = failed_pos + failed_neg
     coverage = total_passed / max(1, total_passed + total_failed)
+    failed_cases = sorted(failed_cases_pos + failed_cases_neg)
 
     EVIDENCE_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -61,6 +64,7 @@ def main() -> None:
         "results": {
             "passed": total_passed,
             "failed": total_failed,
+            "failed_cases": failed_cases,
         },
     }
     metrics = {

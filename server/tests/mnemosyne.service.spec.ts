@@ -1,5 +1,5 @@
 // server/tests/mnemosyne.service.spec.ts
-import { MnemosyneService } from '../src/mnemosyne/MnemosyneService';
+import { MnemosyneService } from '../src/mnemosyne/MnemosyneService.js';
 import { FalseMemoryPayload } from '../src/mnemosyne/mnemosyne.types';
 
 jest.useFakeTimers();

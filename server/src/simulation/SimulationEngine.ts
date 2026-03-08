@@ -13,7 +13,7 @@ import {
   DigitalTwinAsset,
   MaintenancePrediction,
   GeoJSONGeometry,
-} from '../types/digitalTwin';
+} from '../types/digitalTwin.js';
 
 /**
  * Configuration for simulation runs

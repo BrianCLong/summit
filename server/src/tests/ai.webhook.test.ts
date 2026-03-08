@@ -1,6 +1,6 @@
 import request from 'supertest';
 import crypto from 'crypto';
-import { createApp } from '../app'; // assumes your express app export
+import { createApp } from '../app.js'; // assumes your express app export
 import { describe, it, test, expect, beforeAll } from '@jest/globals';
 import type { Express } from 'express';
 

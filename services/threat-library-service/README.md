@@ -43,7 +43,7 @@ The Threat Library Service is the authoritative source for:
 ### Prerequisites
 
 - Node.js >= 18.18.0
-- pnpm >= 9.12.0
+- pnpm >= 10.0.0
 
 ### Installation
 

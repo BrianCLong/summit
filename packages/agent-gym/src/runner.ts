@@ -1,4 +1,4 @@
-import { GymEnvironment, Agent, EpisodeResult, Turn, Observation } from './types';
+import { GymEnvironment, Agent, EpisodeResult, Turn, Observation } from './types.js';
 import { v4 as uuidv4 } from 'uuid';
 
 export class GymRunner {

@@ -324,6 +324,80 @@ async function analyze() {
       else pr.recommendedAction = 'MERGE_NOW';
   }
 
+
+
+
+  // --- Agentic Triage Ready Queue ---
+  if (process.argv.includes('--ready')) {
+      console.log('📋 Generating Agentic Triage Ready Queue...');
+
+      // Load Worklist
+      let worklist: any[] = [];
+      const worklistPath = path.join(process.cwd(), 'ops/comet_v2/worklist.json');
+      if (fs.existsSync(worklistPath)) {
+          try {
+              worklist = JSON.parse(fs.readFileSync(worklistPath, 'utf-8'));
+          } catch (e) {
+              console.warn('⚠️ Could not parse worklist.json');
+          }
+      }
+
+      // Helper to get score
+      const getScore = (pr: any) => {
+          const labels = pr.labels.map((l: any) => l.toLowerCase());
+          if (labels.includes('comet_v2_triage')) {
+              const item = worklist.find((w: any) => w.pr_number === pr.number);
+              return item ? item.score : 0;
+          }
+          if (labels.includes('websocket_metrics')) {
+              if (labels.includes('metrics-failed')) return 100; // High priority
+              return 1;
+          }
+          return 0;
+      };
+
+      const readyQueue = processedPrs.filter(pr => {
+          const labels = pr.labels.map((l: any) => l.toLowerCase());
+          return labels.includes('comet_v2_triage') || labels.includes('websocket_metrics');
+      }).sort((a, b) => {
+          return getScore(b) - getScore(a);
+      });
+
+      console.log('\n## 🚀 Ready Queue\n');
+      if (readyQueue.length === 0) {
+          console.log('_No items in ready queue._');
+      } else {
+          console.log('| PR | Initiative | Priority/Score | Status |');
+          console.log('|----|------------|----------------|--------|');
+          readyQueue.forEach(pr => {
+              const labels = pr.labels.map((l: any) => l.toLowerCase());
+              let initiative = 'Unknown';
+              let priority = 'Normal';
+              let statusText = '';
+
+              if (labels.includes('comet_v2_triage')) {
+                  initiative = 'Comet v2';
+                  const item = worklist.find((w: any) => w.pr_number === pr.number);
+                  if (item) {
+                       priority = `Score ${item.score}`;
+                       statusText = item.status_text;
+                  } else {
+                       priority = 'Score 0';
+                       statusText = 'Unknown';
+                  }
+              } else if (labels.includes('websocket_metrics')) {
+                  initiative = 'WebSocket';
+                  if (labels.includes('metrics-failed')) priority = '🔴 Metrics Failed';
+                  else priority = '🟢 Normal';
+              }
+
+              const row = `| #${pr.number} ${pr.title} | ${initiative} | ${priority} ${statusText ? '('+statusText+')' : ''} | ${pr.ci.status} |`;
+              console.log(row);
+          });
+      }
+      return;
+  }
+  // ----------------------------------
   // 4. Generate Merge Train
   const mergeTrain = processedPrs
       .filter(p => p.recommendedAction === 'MERGE_NOW' || p.recommendedAction === 'NEEDS_REVIEW')

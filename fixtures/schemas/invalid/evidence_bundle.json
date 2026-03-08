@@ -1,0 +1,11 @@
+{
+  "bundle_id": "bundle-789",
+  "objects": [
+    {
+      "evidence_id": "evid-456",
+      "type": "log",
+      "content": {"message": "actor found"},
+      "hash": "abcdef123456"
+    }
+  ]
+}

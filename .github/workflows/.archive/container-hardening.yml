@@ -59,9 +59,7 @@ jobs:
           python .ci/scripts/images/size_budget.py --sizes artifacts/sample-sizes.json --allow-empty
 
       - name: Upload trend artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: image-size-trend
+        uses: actions/upload-artifact@v4          name: image-size-trend
           path: artifacts/image-size-trend.json
 
   attest:
@@ -78,7 +76,5 @@ jobs:
           echo "provenance: placeholder" > artifacts/provenance.txt
 
       - name: Upload provenance stub
-        uses: actions/upload-artifact@v4
-        with:
-          name: provenance
+        uses: actions/upload-artifact@v4          name: provenance
           path: artifacts/provenance.txt

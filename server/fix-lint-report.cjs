@@ -1,9 +1,9 @@
 const fs = require('fs');
 
-console.log('Reading lint report...');
+console.warn('Reading lint report...');
 try {
     const results = JSON.parse(fs.readFileSync('lint_report.json', 'utf8'));
-    console.log(`Loaded ${results.length} file results.`);
+    console.warn(`Loaded ${results.length} file results.`);
 
     let totalFixed = 0;
 
@@ -51,13 +51,13 @@ try {
 
             if (modified) {
                 fs.writeFileSync(filePath, lines.join('\n'));
-                console.log(`Fixed ${errors.length} in ${filePath}`);
+                console.warn(`Fixed ${errors.length} in ${filePath}`);
             }
         } catch (fErr) {
             console.error(`Failed to process ${filePath}:`, fErr.message);
         }
     }
-    console.log(`Done. Added ${totalFixed} comments.`);
+    console.warn(`Done. Added ${totalFixed} comments.`);
 
 } catch (e) {
     console.error('Fatal error:', e);

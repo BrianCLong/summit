@@ -81,7 +81,7 @@ export function EntityPanel({
             <h3 className="font-semibold">Relationship</h3>
             <p className="text-sm text-muted-foreground">{edge.label}</p>
           </div>
-          <Button variant="ghost" size="sm" onClick={onClose}>
+          <Button variant="ghost" size="sm" onClick={onClose} aria-label="Close">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="16"
@@ -193,7 +193,7 @@ export function EntityPanel({
           </div>
           <h3 className="font-semibold text-lg truncate">{node!.label}</h3>
         </div>
-        <Button variant="ghost" size="sm" onClick={onClose} className="ml-2">
+        <Button variant="ghost" size="sm" onClick={onClose} className="ml-2" aria-label="Close">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="16"

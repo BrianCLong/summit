@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SITREP: 2026 THREAT HORIZON</title>
+    <style>
+        body { font-family: monospace; background: #0d1117; color: #c9d1d9; margin: 0; padding: 20px; }
+        .container { max-width: 900px; margin: 0 auto; border: 1px solid #30363d; padding: 20px; background: #161b22; }
+        h1, h2, h3 { color: #58a6ff; border-bottom: 1px solid #30363d; padding-bottom: 10px; }
+        .meta { color: #8b949e; font-size: 0.9em; margin-bottom: 20px; }
+        .section { margin-bottom: 30px; }
+        .card { border: 1px solid #30363d; padding: 15px; margin-bottom: 10px; background: #21262d; }
+        .card-title { font-weight: bold; color: #79c0ff; }
+        .implication { margin-top: 10px; padding-left: 10px; border-left: 3px solid #f78166; color: #ffa657; }
+        ul { list-style-type: square; }
+        .tag { display: inline-block; padding: 2px 5px; font-size: 0.8em; border-radius: 3px; background: #238636; color: white; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>SITREP: 2026 THREAT HORIZON</h1>
+        <div class="meta" id="meta"></div>
+
+        <div class="section">
+            <h2>Strategic Pattern Recognition</h2>
+            <div id="patterns"></div>
+        </div>
+
+        <div class="section">
+            <h2>Key Claims</h2>
+            <ul id="claims"></ul>
+        </div>
+
+        <div class="section">
+            <h2>Assessments</h2>
+            <div id="assessments"></div>
+        </div>
+
+        <div class="section">
+            <h2>Recommendations</h2>
+            <div id="recommendations"></div>
+        </div>
+    </div>
+
+    <script>
+        const report = {
+  "evidence_id": "EVD-INTSUM-2026-THREAT-HORIZON-001",
+  "item_slug": "intsum-2026-threat-horizon",
+  "patterns": [
+    {
+      "name": "Russian Tradecraft Transition",
+      "description": "Shift from diplomatic cover to embedded bureaucratic insiders and proxies.",
+      "implication": "Threat is epistemic corruption, not just document theft. Clearance vetting insufficient."
+    },
+    {
+      "name": "24-Hour Zero-Day Weaponization",
+      "description": "Disclosure to exploit to targeting in <24h. Cloud-native C2.",
+      "implication": "Shift from days-to-patch to hours-to-contain."
+    },
+    {
+      "name": "IPIDEA Takedown Friction",
+      "description": "Removal of commodity anonymity leads to bespoke proxy meshes.",
+      "implication": "Increases attribution clarity, not attacker weakness."
+    },
+    {
+      "name": "Iran-China Infra Lock-in",
+      "description": "Permanent population segmentation via tiered access and full-stack surveillance.",
+      "implication": "Need for non-IP-based comms for human rights monitoring."
+    },
+    {
+      "name": "Uranium Mobility Signaling",
+      "description": "400kg transfer discussion is about option preservation and leverage.",
+      "implication": "Pre-realignment choreography, not crisis management."
+    }
+  ],
+  "claims": [
+    "Russian intelligence has completed transition to deep civilian embeds.",
+    "Zero-day exploitation is now industrialized CI/CD.",
+    "China is exporting authoritarian operating systems.",
+    "Iran is being structurally absorbed by Chinese digital infra."
+  ],
+  "assessments": [
+    {
+      "category": "Cross-Domain Synthesis",
+      "text": "Adversaries are optimizing for strategic optionality under detection pressure (Anti-fragile competition)."
+    },
+    {
+      "category": "Bottom Line",
+      "text": "Normalization of a higher-tempo conflict environment. Russian intel is operationally ahead. Proxy disruption increases clarity."
+    }
+  ],
+  "recommendations": [
+    {
+      "target": "Governments/NATO",
+      "actions": [
+        "Shift CI from clearance-centric to behavior-centric.",
+        "Assume breach; optimize for containment velocity.",
+        "Prepare for proxy scarcity; invest in legal/diplomatic follow-through."
+      ]
+    },
+    {
+      "target": "Civil Society",
+      "actions": [
+        "Prepare for post-IP Iran (RF mesh, satellite).",
+        "Expect Chinese surveillance export to scale."
+      ]
+    }
+  ]
+};
+
+        document.getElementById('meta').innerHTML = `
+            <strong>ID:</strong> ${report.evidence_id}<br>
+            <strong>Slug:</strong> ${report.item_slug}
+        `;
+
+        const patternsContainer = document.getElementById('patterns');
+        report.patterns.forEach(p => {
+            const div = document.createElement('div');
+            div.className = 'card';
+            div.innerHTML = `
+                <div class="card-title">${p.name}</div>
+                <p>${p.description}</p>
+                <div class="implication"><strong>Implication:</strong> ${p.implication}</div>
+            `;
+            patternsContainer.appendChild(div);
+        });
+
+        const claimsContainer = document.getElementById('claims');
+        report.claims.forEach(c => {
+            const li = document.createElement('li');
+            li.textContent = c;
+            claimsContainer.appendChild(li);
+        });
+
+        const assessmentsContainer = document.getElementById('assessments');
+        report.assessments.forEach(a => {
+            const div = document.createElement('div');
+            div.className = 'card';
+            div.innerHTML = `
+                <div class="card-title">${a.category}</div>
+                <p>${a.text}</p>
+            `;
+            assessmentsContainer.appendChild(div);
+        });
+
+        const recommendationsContainer = document.getElementById('recommendations');
+        report.recommendations.forEach(r => {
+            const div = document.createElement('div');
+            div.className = 'card';
+            let actions = r.actions.map(act => `<li>${act}</li>`).join('');
+            div.innerHTML = `
+                <div class="card-title">Target: ${r.target}</div>
+                <ul>${actions}</ul>
+            `;
+            recommendationsContainer.appendChild(div);
+        });
+    </script>
+</body>
+</html>

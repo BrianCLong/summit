@@ -43,8 +43,8 @@ router.get('/audit-events', async (req, res) => {
       resourceTypes: parseList(req.query.resourceTypes as string | undefined),
       correlationIds: parseList(req.query.correlationIds as string | undefined),
       tenantIds: [tenantId],
-      limit: req.query.limit ? Number(req.query.limit) : 100,
-      offset: req.query.offset ? Number(req.query.offset) : 0,
+      limit: (req.query.limit as string) ? Number((req.query.limit as string)) : 100,
+      offset: (req.query.offset as string) ? Number((req.query.offset as string)) : 0,
     };
 
     const events = await advancedAuditSystem.queryEvents(query);

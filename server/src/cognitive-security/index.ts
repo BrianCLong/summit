@@ -71,6 +71,9 @@ export {
   type EvaluationServiceConfig,
 } from './evaluation.service.js';
 
+export { CognitiveStateService } from '../services/CognitiveStateService.js';
+export { CascadeDetectionService } from '../services/CascadeDetectionService.js';
+
 // Module initialization
 import type { Driver } from 'neo4j-driver';
 import pino from 'pino';

@@ -7,7 +7,7 @@ import {
 } from '../services/ticket-links.js';
 import { LifecycleManager } from '../services/lifecycle-listeners.js';
 import { webhookService, CreateWebhookSchema, UpdateWebhookSchema } from '../webhooks/webhook.service.js';
-import { z } from 'zod/v4';
+import { z } from 'zod';
 import { logger, metrics, tracer } from '../observability/index.js';
 import { SpanKind, SpanStatusCode } from '@opentelemetry/api';
 import crypto from 'crypto';
@@ -347,8 +347,8 @@ router.delete('/:id', async (req, res) => {
 router.get('/:id/deliveries', async (req, res) => {
   try {
     const tenantId = getTenantId(req);
-    const limit = parseInt(req.query.limit as string) || 20;
-    const offset = parseInt(req.query.offset as string) || 0;
+    const limit = parseInt(req.query.limit as string as string) || 20;
+    const offset = parseInt(req.query.offset as string as string) || 0;
     const deliveries = await webhookService.getDeliveries(tenantId, req.params.id, limit, offset);
     res.json(deliveries);
   } catch (error: any) {

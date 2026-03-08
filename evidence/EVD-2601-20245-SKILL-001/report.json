@@ -1,0 +1,8 @@
+{
+  "evidence_id": "EVD-2601-20245-SKILL-001",
+  "summary": "Skill-preserving evidence scaffolding created with deterministic index mapping and CI gate placeholders.",
+  "artifacts": [
+    "evidence/EVD-2601-20245-SKILL-001/metrics.json",
+    "evidence/EVD-2601-20245-SKILL-001/stamp.json"
+  ]
+}

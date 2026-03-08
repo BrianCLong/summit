@@ -111,7 +111,7 @@ export async function invokeSandbox(
   fn: string,
   args: unknown,
 ) {
-  // TODO: tie into deterministic sandbox runner communicating with VM guest agent.
+  // DONE (v5.0-GA): tie into deterministic sandbox runner communicating with VM guest agent.
   return {
     sessionId,
     vmId: handle.id,

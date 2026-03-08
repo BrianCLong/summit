@@ -37,9 +37,7 @@ jobs:
         run: |
           npx playwright install --with-deps
           npx playwright test -c tests/e2e || true # smoke only (no app)
-      - uses: actions/upload-artifact@v4
-        with:
-          name: contract-verify-artifacts
+      - uses: actions/upload-artifact@v4          name: contract-verify-artifacts
           path: |
             out/persisted-manifest.resolved.json
             graphql/schema/mc-admin.graphql

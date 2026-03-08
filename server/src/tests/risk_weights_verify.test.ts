@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { verifyWeights } from '../risk/WeightsVerifier';
+import { verifyWeights } from '../risk/WeightsVerifier.js';
 import { describe, it, expect } from '@jest/globals';
 
 describe('WeightsVerifier', () => {

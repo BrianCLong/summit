@@ -1,0 +1,30 @@
+{
+  "bundle": "vmworkbench",
+  "version": "0.1.0",
+  "feature_flags": {
+    "VMWORKBENCH": false,
+    "VMWORKBENCH_PARSE": false,
+    "VMWORKBENCH_INVENTORY": false,
+    "VMWORKBENCH_PROFILES": false,
+    "VMWORKBENCH_PASSTHROUGH_PLAN": false
+  },
+  "evidence_ids": [
+    "EVD-VMCURATOR-DISCOVERY-001",
+    "EVD-VMCURATOR-PARSE-001",
+    "EVD-VMCURATOR-EMIT-001",
+    "EVD-VMCURATOR-INVENTORY-001",
+    "EVD-VMCURATOR-SNAPSHOT-001",
+    "EVD-VMCURATOR-POLICY-001",
+    "EVD-VMCURATOR-PASSTHROUGH-001"
+  ],
+  "schemas": [
+    "evidence/schemas/index.schema.json",
+    "evidence/schemas/report.schema.json",
+    "evidence/schemas/metrics.schema.json",
+    "evidence/schemas/stamp.schema.json",
+    "vmworkbench/spec/vm_launch_spec.schema.json",
+    "vmworkbench/spec/device_ref.schema.json",
+    "vmworkbench/spec/os_profile.schema.json",
+    "vmworkbench/spec/dangerous_op_plan.schema.json"
+  ]
+}

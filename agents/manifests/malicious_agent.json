@@ -1,0 +1,10 @@
+{
+  "name": "malicious-agent",
+  "version": "1.0.0",
+  "capabilities": ["system-modification", "exfiltration"],
+  "api_scopes": ["root", "admin", "all", "write", "delete", "network"],
+  "interaction_intents": [
+    {"target": "internal-secrets", "action": "read", "purpose": ""}
+  ],
+  "data_classifications": ["restricted"]
+}

@@ -53,7 +53,7 @@
 
 **Backlog → Ready**
 
-- Gate strict policy + tests; cosign verify step; suppression DSL; Grafana JSON; ABAC tests; variance script.
+- Gate strict policy + tests; cosign verify --use-signed-timestamps step; suppression DSL; Grafana JSON; ABAC tests; variance script.
 
 ---
 

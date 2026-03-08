@@ -1,7 +1,7 @@
 
-import { provenanceLedger } from './ledger';
-import { CanonicalGraphService } from './CanonicalGraphService';
-import { pool } from '../db/pg';
+import { provenanceLedger } from './ledger.js';
+import { CanonicalGraphService } from './CanonicalGraphService.js';
+import { pool } from '../db/pg.js';
 
 async function rebuildGraph() {
   console.log('Starting Lineage Graph Rebuild...');

@@ -1,0 +1,6 @@
+{
+  "evidence_id": "EVD-HBR-AI-COORD-001",
+  "area": "coordination-schema",
+  "validated": true,
+  "notes": "Initial schema and validation scaffolding added for coordination events."
+}

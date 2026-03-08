@@ -1,0 +1,30 @@
+name: Prompt Repetition Hygiene
+on:
+  pull_request:
+    paths:
+      - 'summit/policies/**'
+      - 'summit/evaluators/**'
+      - 'scripts/bench_repetition.py'
+
+jobs:
+  hygiene-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Run benchmark
+        run: |
+          python scripts/bench_repetition.py --prompt "This is a harmful repetition string that is very long. This is a harmful repetition string that is very long. This is a harmful repetition string that is very long. This is a harmful repetition string that is very long. This is a harmful repetition string that is very long. This is a harmful repetition string that is very long. This is a harmful repetition string that is very long. This is a harmful repetition string that is very long. This is a harmful repetition string that is very long. This is a harmful repetition string that is very long. "
+
+          # Check if score exceeds threshold (e.g., 200)
+          score=$(cat artifacts/repetition/metrics.json | jq '.repetition_score')
+          if [ "$score" -gt 200 ]; then
+            echo "Harmful repetition detected. Score $score exceeds threshold of 200."
+            echo "Failing pipeline..."
+            python -c "import sys; sys.exit(1)"
+          fi
+
+          echo "Prompt hygiene check passed."

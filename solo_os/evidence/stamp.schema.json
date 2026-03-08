@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SoloOSEvidenceStamp",
+  "type": "object",
+  "required": ["created_at", "git_commit", "run_id"],
+  "properties": {
+    "created_at": { "type": "string", "format": "date-time" },
+    "git_commit": { "type": "string" },
+    "run_id": { "type": "string" }
+  },
+  "additionalProperties": false
+}

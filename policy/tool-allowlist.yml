@@ -1,0 +1,15 @@
+# Only pin by FULL SHA (40 chars). Never tags like @v1, @main, @stable.
+approved_actions:
+  - name: actions/checkout
+    sha: 8e8c483db84b4bee98b60c0593521ed34d9990e8
+  - name: actions/setup-node
+    sha: 6044e13b5dc448c55e2357c09f80417699197238
+  - name: pnpm/action-setup
+    sha: c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c
+  - name: docker/setup-buildx-action
+    sha: 8d2750c68a42422c14e847fe6c8ac0403b4cbd6f
+  - name: sigstore/cosign-installer
+    sha: f713795cb21599bc4e5c4b58cbad1da852d7eeb9
+  - name: actions/upload-artifact
+    sha: b7c566a772e6b6bfb58ed0dc250532a479d7789f
+# Add more as needed. Keep SHAs updated via Renovate/Dependabot w/ pinning rules.

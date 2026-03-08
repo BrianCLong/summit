@@ -2,22 +2,68 @@ name: graph-sync
 on:
   pull_request:
     types: [opened, synchronize, reopened]
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
       - uses: actions/setup-node@v4
-        with: { node-version: '20' }
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+          cache-dependency-path: '**/pnpm-lock.yaml'
       - name: Install workspace
         run: pnpm -w install --frozen-lockfile
+      - name: Ensure compose file exists
+        run: |
+          mkdir -p .github/compose
+          cat > .github/compose/pg_neo.yml <<'YAML'
+          services:
+            postgres:
+              image: postgres:16-alpine
+              environment:
+                POSTGRES_DB: postgres
+                POSTGRES_USER: postgres
+                POSTGRES_PASSWORD: postgres
+              ports:
+                - "5432:5432"
+              healthcheck:
+                test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+                interval: 5s
+                timeout: 3s
+                retries: 30
+
+            neo4j:
+              image: neo4j:5.26
+              environment:
+                NEO4J_AUTH: neo4j/test1234
+              ports:
+                - "7474:7474"
+                - "7687:7687"
+              healthcheck:
+                test:
+                  [
+                    "CMD-SHELL",
+                    "cypher-shell -a bolt://localhost:7687 -u neo4j -p test1234 'RETURN 1' >/dev/null 2>&1 || exit 1"
+                  ]
+                interval: 10s
+                timeout: 5s
+                retries: 30
+          YAML
       - name: Neo4j & PG services
         uses: hoverkraft-tech/compose-action@v2
+        with:
           compose-file: .github/compose/pg_neo.yml
       - name: Validate Graph↔PG sync
         run: node scripts/ci/validate_graph_pg_sync.mjs
       - name: Upload evidence
         if: always()
         uses: actions/upload-artifact@v4
+        with:
           name: graph-sync-evidence
           path: artifacts/graph-sync/*.json

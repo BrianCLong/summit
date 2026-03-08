@@ -1,0 +1,22 @@
+name: AI Code Firewall
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  ai-firewall:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Run AI Firewall
+      run: python scripts/run_ai_firewall.py
+    - name: Check exploit paths
+      run: |
+        exploit_paths=$(jq '.vulnerabilities | length' evidence/ai-firewall/report.json)
+        if [ "$exploit_paths" -gt 0 ]; then
+          echo "Exploit paths detected!"
+          exit 1
+        fi

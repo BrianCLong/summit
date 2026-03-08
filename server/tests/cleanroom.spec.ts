@@ -1,4 +1,4 @@
-import { cleanroomJoin } from '../src/conductor/steps/cleanroomJoin';
+import { cleanroomJoin } from '../src/conductor/steps/cleanroomJoin.js';
 
 test('applies DP noise to aggregates (placeholder)', async () => {
   const ctx: any = {

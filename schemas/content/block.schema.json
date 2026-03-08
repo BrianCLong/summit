@@ -1,0 +1,51 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://summit.example.com/schemas/content/block.schema.json",
+  "title": "Summit Content Block",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string" },
+    "kind": {
+      "type": "string",
+      "enum": ["narrative", "procedure", "context", "risk", "metric"]
+    },
+    "body": { "type": "string" },
+    "language": { "type": "string" },
+    "audience": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "related_entities": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "policy_tags": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "claim_ids": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "work_items": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/workItemRef" }
+    }
+  },
+  "required": ["id", "kind", "body", "language"],
+  "definitions": {
+    "workItemRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": { "type": "string", "enum": ["issue", "pr", "workflow"] },
+        "repo": { "type": "string" },
+        "number": { "type": "integer", "minimum": 1 },
+        "state": { "type": "string" },
+        "url": { "type": "string" }
+      },
+      "required": ["kind", "repo", "number", "state"]
+    }
+  }
+}

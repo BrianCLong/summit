@@ -1,48 +1,28 @@
 import json
-import re
+from datetime import datetime
 
 
 def main():
     try:
         with open('pr-open.json') as f:
             prs = json.load(f)
-    except Exception as e:
-        print(f"Error reading pr-open.json: {e}")
+    except:
+        print("Error reading pr-open.json")
         return
 
-    keywords = [
-        "GA", "cloud", "readiness", "infra", "diff",
-        "compliance", "evidence", "failure mode",
-        "simulation", "prod", "guard", "runtime",
-        "lockfile", "drift", "security", "pipeline"
-    ]
+    # Sort by updatedAt descending
+    prs.sort(key=lambda x: x.get('updatedAt', ''), reverse=True)
 
-    relevant_prs = []
+    print(f"Total PRs: {len(prs)}")
+    print("Top 5 most recent PRs:")
+    for pr in prs[:5]:
+        print(f"#{pr['number']} {pr['updatedAt']} {pr['title']}")
+
+    # Check for 'fix'
+    print("\nRecent fixes:")
     for pr in prs:
-        title = pr.get('title', '')
-        number = pr.get('number')
-        labels = [l.get('name') for l in pr.get('labels', [])]
-
-        score = 0
-        matched_keywords = []
-        for kw in keywords:
-            if re.search(r'\b' + kw + r'\b', title, re.IGNORECASE):
-                score += 1
-                matched_keywords.append(kw)
-
-        if score > 0:
-            relevant_prs.append({
-                'number': number,
-                'title': title,
-                'keywords': matched_keywords,
-                'author': pr.get('author', {}).get('login'),
-                'updatedAt': pr.get('updatedAt')
-            })
-
-    print(f"Found {len(relevant_prs)} relevant PRs out of {len(prs)} total.")
-    print("Top 20 relevant PRs:")
-    for pr in relevant_prs[:20]:
-        print(f"PR #{pr['number']}: {pr['title']} (Keywords: {', '.join(pr['keywords'])})")
+        if 'fix' in pr['title'].lower():
+             print(f"#{pr['number']} {pr['updatedAt']} {pr['title']}")
 
 if __name__ == "__main__":
     main()

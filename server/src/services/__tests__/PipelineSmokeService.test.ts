@@ -1,22 +1,50 @@
-import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
-import { PipelineSmokeService } from '../../services/PipelineSmokeService.js';
-import { runsRepo } from '../../maestro/runs/runs-repo.js';
+import { jest, describe, it, expect, beforeEach, beforeAll } from '@jest/globals';
 
-// Mock dependencies
-jest.mock('../../maestro/runs/runs-repo.js');
-jest.mock('../../utils/metrics.js', () => ({
-  PrometheusMetrics: jest.fn().mockImplementation(() => ({
-    createCounter: jest.fn(),
-    createGauge: jest.fn(),
-    createHistogram: jest.fn(),
-    setGauge: jest.fn(),
-    incrementCounter: jest.fn(),
-    observeHistogram: jest.fn(),
-  })),
+const mockRunsRepo = {
+  create: jest.fn(),
+  get: jest.fn(),
+  list: jest.fn(),
+  update: jest.fn(),
+  delete: jest.fn(),
+  getByPipeline: jest.fn(),
+  getRunForTenant: jest.fn(),
+};
+
+const mockMetrics = {
+  createCounter: jest.fn(),
+  createGauge: jest.fn(),
+  createHistogram: jest.fn(),
+  setGauge: jest.fn(),
+  incrementCounter: jest.fn(),
+  observeHistogram: jest.fn(),
+};
+
+jest.unstable_mockModule('../../maestro/runs/runs-repo.js', () => ({
+  runsRepo: mockRunsRepo,
+}));
+
+jest.unstable_mockModule('../../utils/metrics.js', () => ({
+  PrometheusMetrics: jest.fn().mockImplementation(() => mockMetrics),
+}));
+
+jest.unstable_mockModule('../../utils/logger.js', () => ({
+  default: {
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+    debug: jest.fn(),
+    child: jest.fn().mockReturnThis(),
+  },
 }));
 
 describe('PipelineSmokeService', () => {
-  let service: PipelineSmokeService;
+  let service: any;
+  let PipelineSmokeService: any;
+
+  beforeAll(async () => {
+    const module = await import('../../services/PipelineSmokeService.js');
+    PipelineSmokeService = module.PipelineSmokeService;
+  });
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -34,32 +62,39 @@ describe('PipelineSmokeService', () => {
       tenant_id: tenantId,
     };
 
-    // Mock create
-    (runsRepo.create as jest.Mock).mockResolvedValue(mockRun);
-
-    // Mock polling: succeeded on first poll
-    (runsRepo.get as jest.Mock).mockResolvedValueOnce({
+    mockRunsRepo.create.mockResolvedValue(mockRun);
+    mockRunsRepo.get.mockResolvedValueOnce({
       ...mockRun,
       status: 'succeeded',
       output_data: { foo: 'bar' },
     });
 
-    const result = await service.runSmokeTest(tenantId, 'smoke-test-pipeline', 1000);
+    const result = await service.runSmokeTest(
+      tenantId,
+      'smoke-test-pipeline',
+      1000,
+    );
 
     expect(result.success).toBe(true);
     expect(result.runId).toBe('run-123');
     expect(result.stages.creation).toBe(true);
     expect(result.stages.completion).toBe(true);
-    expect(runsRepo.create).toHaveBeenCalledWith(expect.objectContaining({
-      tenant_id: tenantId,
-      input_params: expect.objectContaining({ synthetic: true }),
-    }));
+    expect(mockRunsRepo.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tenant_id: tenantId,
+        input_params: expect.objectContaining({ synthetic: true }),
+      }),
+    );
   });
 
   it('should handle creation failure', async () => {
-    (runsRepo.create as jest.Mock).mockResolvedValue(null);
+    mockRunsRepo.create.mockResolvedValue(null);
 
-    const result = await service.runSmokeTest('test-tenant', 'smoke-test-pipeline', 1000);
+    const result = await service.runSmokeTest(
+      'test-tenant',
+      'smoke-test-pipeline',
+      1000,
+    );
 
     expect(result.success).toBe(false);
     expect(result.error).toContain('Failed to create run');
@@ -76,14 +111,18 @@ describe('PipelineSmokeService', () => {
       tenant_id: tenantId,
     };
 
-    (runsRepo.create as jest.Mock).mockResolvedValue(mockRun);
-    (runsRepo.get as jest.Mock).mockResolvedValue({
+    mockRunsRepo.create.mockResolvedValue(mockRun);
+    mockRunsRepo.get.mockResolvedValue({
       ...mockRun,
       status: 'failed',
-      error_message: 'Pipeline exploded'
+      error_message: 'Pipeline exploded',
     });
 
-    const result = await service.runSmokeTest(tenantId, 'smoke-test-pipeline', 1000);
+    const result = await service.runSmokeTest(
+      tenantId,
+      'smoke-test-pipeline',
+      1000,
+    );
 
     expect(result.success).toBe(false);
     expect(result.error).toContain('Run failed with status: failed');

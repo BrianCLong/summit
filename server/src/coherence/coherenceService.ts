@@ -1,13 +1,13 @@
 // @ts-nocheck
-import { getNeo4jDriver } from '../db/neo4j';
-import { RedisService } from '../cache/redis';
-import logger from '../utils/logger';
-import { CoherenceSignalIngest } from './signalIngest';
-import { CoherenceGraphQLResolvers } from './graphql/resolvers';
-import { CoherenceSubscriptionManager } from './graphql/subscriptions';
-import { ActivityFingerprintIndex } from './intelligence/activityFingerprintIndex';
-import { NarrativeImpactModel } from './intelligence/narrativeImpactModel';
-import { MissionVault } from './intelligence/missionVault';
+import { getNeo4jDriver } from '../db/neo4j.js';
+import { RedisService } from '../cache/redis.js';
+import logger from '../utils/logger.js';
+import { CoherenceSignalIngest } from './signalIngest.js';
+import { CoherenceGraphQLResolvers } from './graphql/resolvers.js';
+import { CoherenceSubscriptionManager } from './graphql/subscriptions.js';
+import { ActivityFingerprintIndex } from './intelligence/activityFingerprintIndex.js';
+import { NarrativeImpactModel } from './intelligence/narrativeImpactModel.js';
+import { MissionVault } from './intelligence/missionVault.js';
 
 export interface CoherenceAnalysisResult {
   tenantId: string;

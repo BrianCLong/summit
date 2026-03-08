@@ -1,0 +1,14 @@
+{
+  "merge_eligible": true,
+  "required_checks_status": "passed",
+  "trust_score": 91,
+  "violations": [
+    {
+      "code": "SBOM_DELTA_UNAPPROVED",
+      "evidence": "artifacts/sbom-diff.json",
+      "points": 6,
+      "remediation": "Add approval label or update allowlist.",
+      "severity": "MEDIUM"
+    }
+  ]
+}

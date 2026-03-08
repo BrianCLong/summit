@@ -1,5 +1,5 @@
 import { Pool } from 'pg';
-import { ConnectorContext } from '../data-model/types';
+import { ConnectorContext } from '../data-model/types.js';
 
 export class DLQService {
   private pgPool: Pool;

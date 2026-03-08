@@ -97,14 +97,14 @@ export default defineConfig({
     ? undefined
     : [
         {
-          command: 'npm run dev',
+          command: 'pnpm run dev',
           cwd: '../client',
           port: 3000,
           reuseExistingServer: !process.env.CI,
           timeout: 120000,
         },
         {
-          command: 'npm run dev',
+          command: 'pnpm run dev',
           cwd: '../server',
           port: 4000,
           reuseExistingServer: !process.env.CI,

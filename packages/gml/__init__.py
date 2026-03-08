@@ -1,3 +1,3 @@
-"""GML service package providing basic GraphSAGE models and tasks."""
+"""GML service package providing basic GraphSAGE models, optimizers, and tasks."""
 
-__all__ = ["models", "tasks"]
+__all__ = ["models", "optim", "tasks"]

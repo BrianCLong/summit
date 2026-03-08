@@ -4,7 +4,7 @@ import path from 'path';
 import Ajv from 'ajv/dist/2020';
 import addFormats from 'ajv-formats';
 import pino, { type Logger } from 'pino';
-import auditEventSchema from '../../../schemas/audit_event_v1.tson';
+import auditEventSchema from '../../../schemas/audit_event_v1.json';
 
 export type AuditClassification = 'public' | 'internal' | 'confidential' | 'restricted';
 
@@ -92,7 +92,7 @@ const hashRecord = (record: Omit<AuditRecord, 'hash'>): string =>
     .digest('hex');
 
 const defaultStorePath = (): string =>
-  process.env.AUDIT_EVENT_STORE ?? path.join(process.cwd(), 'logs', 'audit', 'audit-events.tsonl');
+  process.env.AUDIT_EVENT_STORE ?? path.join(process.cwd(), 'logs', 'audit', 'audit-events.jsonl');
 
 const readLastRecord = (filePath: string): AuditRecord | null => {
   if (!fs.existsSync(filePath)) return null;

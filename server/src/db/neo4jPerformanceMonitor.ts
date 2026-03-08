@@ -35,6 +35,7 @@ export class Neo4jPerformanceMonitor {
   private readonly maxTrackedQueries: number;
   private readonly slowQueries: TrackedQuery[] = [];
   private readonly recentErrors: TrackedQuery[] = [];
+  private readonly labelCache = new Map<string, QueryLabels>();
 
   constructor(options: MonitorOptions) {
     this.slowQueryThresholdMs = options.slowQueryThresholdMs;
@@ -44,12 +45,14 @@ export class Neo4jPerformanceMonitor {
   recordSuccess(outcome: QueryOutcome): void {
     const { cypher, durationMs } = outcome;
     const labels = this.normalizeLabels(outcome.labels);
-    const normalizedOutcome: QueryOutcome = { ...outcome, labels };
 
-    neo4jQueryTotal.inc(labels);
-    neo4jQueryLatencyMs.observe(labels, durationMs);
+    this.incrementCounter(neo4jQueryTotal, labels);
+    this.observeHistogram(neo4jQueryLatencyMs, labels, durationMs);
 
     if (durationMs >= this.slowQueryThresholdMs) {
+      // BOLT: Only create the normalized outcome object for slow queries
+      // to avoid unnecessary spreads on every successful query.
+      const normalizedOutcome: QueryOutcome = { ...outcome, labels };
       this.trackSlowQuery(normalizedOutcome);
     }
 
@@ -69,13 +72,13 @@ export class Neo4jPerformanceMonitor {
   recordError(outcome: QueryOutcome): void {
     const { durationMs } = outcome;
     const labels = this.normalizeLabels(outcome.labels);
-    const normalizedOutcome: QueryOutcome = { ...outcome, labels };
 
-    neo4jQueryTotal.inc(labels);
-    neo4jQueryErrorsTotal.inc(labels);
-    neo4jQueryLatencyMs.observe(labels, durationMs);
+    this.incrementCounter(neo4jQueryTotal, labels);
+    this.incrementCounter(neo4jQueryErrorsTotal, labels);
+    this.observeHistogram(neo4jQueryLatencyMs, labels, durationMs);
 
-    this.recentErrors.unshift({ ...normalizedOutcome, timestamp: Date.now() });
+    // BOLT: Spread directly into the recentErrors array to avoid intermediate object creation.
+    this.recentErrors.unshift({ ...outcome, labels, timestamp: Date.now() });
     this.trimTracked(this.recentErrors);
   }
 
@@ -107,11 +110,65 @@ export class Neo4jPerformanceMonitor {
   }
 
   private normalizeLabels(labels?: QueryLabels): QueryLabels {
-    return {
-      operation: labels?.operation || 'unknown',
-      label: labels?.label || 'unlabeled',
-      tenant_id: labels?.tenant_id || 'unknown',
-    };
+    const operation = labels?.operation || 'unknown';
+    const label = labels?.label || 'unlabeled';
+    const tenant_id = labels?.tenant_id || 'unknown';
+
+    // BOLT: Cache label objects to reduce GC pressure and allocation overhead.
+    const cacheKey = `${operation}:${label}:${tenant_id}`;
+    let cached = this.labelCache.get(cacheKey);
+
+    if (!cached) {
+      cached = { operation, label, tenant_id };
+      // Limit cache size to prevent memory leaks
+      if (this.labelCache.size < 1000) {
+        this.labelCache.set(cacheKey, cached);
+      }
+    }
+
+    return cached;
+  }
+
+  private incrementCounter(metric: any, labels: QueryLabels): void {
+    const labeled = this.getLabeledMetric(metric, labels);
+    if (labeled && typeof labeled.inc === 'function') {
+      labeled.inc();
+      return;
+    }
+
+    if (typeof metric?.inc === 'function') {
+      metric.inc(1);
+    }
+  }
+
+  private observeHistogram(metric: any, labels: QueryLabels, value: number): void {
+    const labeled = this.getLabeledMetric(metric, labels);
+    if (labeled && typeof labeled.observe === 'function') {
+      labeled.observe(value);
+      return;
+    }
+
+    if (typeof metric?.observe === 'function') {
+      metric.observe(value);
+    }
+  }
+
+  private getLabeledMetric(metric: any, labels: QueryLabels): any {
+    if (typeof metric?.labels !== 'function') {
+      return null;
+    }
+
+    try {
+      return metric.labels(labels.operation, labels.label, labels.tenant_id);
+    } catch {
+      // Fall through to object-label form.
+    }
+
+    try {
+      return metric.labels(labels);
+    } catch {
+      return null;
+    }
   }
 }
 

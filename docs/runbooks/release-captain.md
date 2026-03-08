@@ -279,7 +279,7 @@ watch -n 30 'curl -s https://prometheus.intelgraph.io/api/v1/query \
 
 ### Rollback & Feature-Flag Strategy
 
-- If any smoke or soak check fails, **pause all promotions**, disable launch-specific flags using the runbook in `RUNBOOKS/feature-flags.md`, and execute the rollback procedure in the next section.
+- If any smoke or soak check fails, **pause all promotions**, disable launch-specific flags using the runbook in `runbooks/feature-flags.md`, and execute the rollback procedure in the next section.
 - Keep kill-switch flags enabled for at least 24h post-merge so rollback can be executed without new deployments.
 - For partial failures isolated to a feature, prefer flagging off that feature and re-running smoke/soak before initiating a full rollback.
 
@@ -299,9 +299,9 @@ watch -n 30 'curl -s https://prometheus.intelgraph.io/api/v1/query \
 ### Rollback vs Roll-forward decision tree
 
 Use this decision tree before triggering a rollback or a roll-forward (fix forward).
-Reference the canary signals defined in [REL-1](../project_management/companyos/COS-POD-TICKET-SET.md#rel-1--adr-standard-release-strategy-v1),
+Reference the canary signals defined in REL-1,
 and follow the rollback automation steps and thresholds in
-[REL-2](../project_management/companyos/COS-POD-TICKET-SET.md#rel-2--define-release-gates--canary-thresholds).
+REL-2.
 
 **Decision criteria**
 
@@ -334,9 +334,9 @@ Trigger rollback if ANY of these occur:
 
 Use this decision tree to determine whether to roll back immediately or roll
 forward with a safe fix. Confirm canary signals per
-[REL-1](../project_management/companyos/COS-POD-TICKET-SET.md#rel-1--adr-standard-release-strategy-v1)
+REL-1
 before proceeding, and follow rollback automation steps in
-[REL-2](../project_management/companyos/COS-POD-TICKET-SET.md#rel-2--define-release-gates--canary-thresholds).
+REL-2.
 
 | Decision criteria | Roll back when                                                    | Roll forward when                                                               |
 | ----------------- | ----------------------------------------------------------------- | ------------------------------------------------------------------------------- |
@@ -449,7 +449,7 @@ The weekly release train has been cut.
 **Highlights**:
 {HIGHLIGHTS}
 
-:link: [Release Notes]({RELEASE_URL}) | [Grafana]({GRAFANA_URL}) | [Runbook](./RUNBOOKS/release-captain.md)
+:link: [Release Notes]({RELEASE_URL}) | [Grafana]({GRAFANA_URL}) | [Runbook](./runbooks/release-captain.md)
 ```
 
 ### Canary Progress
@@ -629,11 +629,11 @@ promql 'slo:error_budget_remaining{service="api"}'
 
 ### Related Documentation
 
-- [Release Train Workflow](.github/workflows/release-train.yml)
+- Release Train Workflow
 - [Canary Rollout Runbook](./release/canary-rollout.md)
-- [SLO Configuration](.ci/config/slo.yml)
-- [Versioning Guide](../docs/release/versioning.md)
-- [Evidence Bundle Schema](../docs/release/evidence-schema.md)
+- SLO Configuration
+- Versioning Guide
+- Evidence Bundle Schema
 
 ---
 

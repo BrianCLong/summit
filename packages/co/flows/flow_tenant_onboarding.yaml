@@ -1,0 +1,46 @@
+id: FLOW_TENANT_ONBOARDING
+owner: MaaS-OPS
+description: Automated flow to bring a new tenant onto the platform securely and compliantly.
+nodes:
+  - id: lead_evaluation
+    owner: MaaS-OPS
+    input: Prospect Data
+    action: Qualify & Assess fit
+    output: Qualified Lead
+  - id: governance_risk_scoring
+    owner: GOV-STEWARD
+    input: Qualified Lead
+    action: Check against Restricted Entities/Sectors
+    output: Risk Score & Approval
+  - id: legal_contract
+    owner: MaaS-OPS
+    input: Risk Score & Approval
+    action: MSA / DPA Signing
+    output: Signed Contract
+  - id: environment_provisioning
+    owner: MC-ARCH
+    input: Signed Contract
+    action: Create Tenant ID, DB Schema, Isolation Policies
+    output: Provisioned Tenant
+  - id: integration_setup
+    owner: MaaS-OPS
+    input: Provisioned Tenant
+    action: Configure SSO, Webhooks, Ingest Sources
+    output: Integrated Tenant
+  - id: baseline_analytics
+    owner: SSIGHT
+    input: Integrated Tenant
+    action: Setup Dashboards & Alerts
+    output: Live Tenant
+edges:
+  - source: lead_evaluation
+    target: governance_risk_scoring
+  - source: governance_risk_scoring
+    target: legal_contract
+    condition: risk_score < threshold AND approved == true
+  - source: legal_contract
+    target: environment_provisioning
+  - source: environment_provisioning
+    target: integration_setup
+  - source: integration_setup
+    target: baseline_analytics

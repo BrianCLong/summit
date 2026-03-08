@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["default", "rules"],
+  "additionalProperties": false,
+  "properties": {
+    "default": {
+      "type": "string",
+      "enum": ["allow", "deny"]
+    },
+    "rules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "effect"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "effect": {
+            "type": "string",
+            "enum": ["allow", "deny"]
+          },
+          "env": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": ["dev", "test", "prod"]
+            }
+          },
+          "agent_role": {
+            "anyOf": [
+              { "type": "string" },
+              {
+                "type": "array",
+                "items": { "type": "string" }
+              }
+            ]
+          },
+          "skills": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "scopes": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "annotations": {
+            "type": "object",
+            "additionalProperties": true,
+            "properties": {
+              "approvals": {
+                "type": "array",
+                "items": { "type": "string" }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

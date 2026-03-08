@@ -1058,7 +1058,7 @@ curl https://ga.intelgraph.internal/health
 - [API Reference](./API-REFERENCE.md)
 - [Non-Capabilities](./NON-CAPABILITIES.md)
 - [SLSA L3 Compliance](../security/SLSA-L3-COMPLIANCE.md)
-- [IC Multi-Tenancy](../../SECURITY/docs/IC-MULTI-TENANCY.md)
+- IC Multi-Tenancy
 
 ---
 

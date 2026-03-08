@@ -1,0 +1,15 @@
+groups:
+  - name: gmr.recording
+    interval: 5m
+    rules:
+      - record: summit:gmr:numerator
+        expr: |
+          increase(graph_nodes_created_total[1h])
+          + increase(graph_edges_created_total[1h])
+      - record: summit:gmr:denominator
+        expr: |
+          increase(cdc_rows_total[1h])
+      - record: summit:gmr:ratio
+        expr: |
+          summit:gmr:numerator
+          / clamp_min(summit:gmr:denominator, 1)

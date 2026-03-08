@@ -1,7 +1,7 @@
 // server/src/routes/mnemosyne.ts
 import { Router } from 'express';
-import { mnemosyneService } from '../mnemosyne/MnemosyneService';
-import { FalseMemoryPayload } from '../mnemosyne/mnemosyne.types';
+import { mnemosyneService } from '../mnemosyne/MnemosyneService.js';
+import { FalseMemoryPayload } from '../mnemosyne/mnemosyne.types.js';
 
 const router = Router();
 

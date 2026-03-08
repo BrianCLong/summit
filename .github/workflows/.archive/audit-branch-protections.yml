@@ -27,7 +27,5 @@ jobs:
           GITHUB_REPOSITORY: ${{ github.repository }}
         run: ./.ci/scripts/export_github_rules.py
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: branch-protection-evidence
+        uses: actions/upload-artifact@v4          name: branch-protection-evidence
           path: artifacts/branch-protection.json

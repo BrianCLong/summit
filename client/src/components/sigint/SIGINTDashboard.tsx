@@ -275,6 +275,17 @@ export const SIGINTDashboard: React.FC<SIGINTDashboardProps> = ({
     [onDemodulationComplete]
   );
 
+
+  // Memoize footer stats to prevent unnecessary array iterations on every render
+  const footerStats = useMemo(() => {
+    return {
+      activeStreams: streams.reduce((count, s) => count + (s.active ? 1 : 0), 0),
+      totalDetections: masintOverlays.reduce((sum, o) => sum + o.detections.length, 0),
+      runningTasks: demodTasks.reduce((count, t) =>
+        count + ((t.status !== 'COMPLETED' && t.status !== 'FAILED') ? 1 : 0), 0)
+    };
+  }, [streams, masintOverlays, demodTasks]);
+
   return (
     <div
       className={`flex flex-col h-full bg-slate-950 text-slate-100 ${className || ''}`}
@@ -433,18 +444,18 @@ export const SIGINTDashboard: React.FC<SIGINTDashboardProps> = ({
       <footer className="flex items-center justify-between px-4 py-1.5 bg-slate-900 border-t border-slate-800 text-xs text-slate-400">
         <div className="flex items-center gap-4">
           <span>
-            <span className="text-cyan-400 font-medium">{streams.filter((s) => s.active).length}</span>{' '}
+            <span className="text-cyan-400 font-medium">{footerStats.activeStreams}</span>{' '}
             active streams
           </span>
           <span>
             <span className="text-amber-400 font-medium">
-              {masintOverlays.reduce((sum, o) => sum + o.detections.length, 0)}
+              {footerStats.totalDetections}
             </span>{' '}
             MASINT detections
           </span>
           <span>
             <span className="text-purple-400 font-medium">
-              {demodTasks.filter((t) => t.status !== 'COMPLETED' && t.status !== 'FAILED').length}
+              {footerStats.runningTasks}
             </span>{' '}
             demod tasks running
           </span>

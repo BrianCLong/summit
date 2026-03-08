@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["id", "platform", "event_type", "classification"],
+  "properties": {
+    "id": {"type": "string"},
+    "platform": {"type": "string"},
+    "event_type": {"type": "string"},
+    "classification": {"type": "string", "enum": ["public", "restricted", "sensitive"]}
+  },
+  "additionalProperties": false
+}

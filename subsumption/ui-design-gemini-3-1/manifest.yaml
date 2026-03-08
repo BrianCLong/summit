@@ -1,0 +1,10 @@
+version: "4.0"
+project: "ui-design-gemini-3-1"
+type: "research-integration"
+status: "planning"
+constraints:
+  - "no_new_infra"
+  - "no_new_db"
+  - "no_breaking_api_changes"
+  - "no_external_llm_in_ci"
+  - "no_client_side_inference"

@@ -1,9 +1,10 @@
 // server/src/api/featureFlags.ts
 import express, { Request, Response, Router, NextFunction } from 'express';
-import { FeatureFlagService } from '../featureFlags/FeatureFlagService';
-import { ConfigService } from '../featureFlags/ConfigService';
-import { EvaluationContext } from '../featureFlags/types';
-import { ensureAuthenticated, ensureRole, requirePermission } from '../middleware/auth.ts';
+import { FeatureFlagService } from '../featureFlags/FeatureFlagService.js';
+import { ConfigService } from '../featureFlags/ConfigService.js';
+import { EvaluationContext } from '../featureFlags/types.js';
+import { ensureAuthenticated, ensureRole, requirePermission } from '../middleware/auth.js';
+import { firstString } from '../utils/http-param.js';
 
 export interface FeatureFlagApiDependencies {
   featureFlagService: FeatureFlagService;
@@ -16,7 +17,7 @@ export interface FeatureFlagApiDependencies {
  */
 const requireAuth = (req: Request, res: Response, next: NextFunction) => {
   if (!req.user) {
-    return res.status(401).tson({
+    return res.status(401).json({
       error: 'Authentication required',
       message: 'You must be logged in to access this resource'
     });
@@ -30,7 +31,7 @@ const requireAuth = (req: Request, res: Response, next: NextFunction) => {
  */
 const requireAdmin = (req: Request, res: Response, next: NextFunction) => {
   if (!req.user) {
-    return res.status(401).tson({
+    return res.status(401).json({
       error: 'Authentication required',
       message: 'You must be logged in to access this resource'
     });
@@ -40,7 +41,7 @@ const requireAdmin = (req: Request, res: Response, next: NextFunction) => {
   const isAdmin = user.role === 'admin' || user.roles?.includes('admin') || user.isAdmin === true;
 
   if (!isAdmin) {
-    return res.status(403).tson({
+    return res.status(403).json({
       error: 'Admin access required',
       message: 'You do not have permission to modify feature flags',
       requiredRole: 'admin',
@@ -58,10 +59,12 @@ export const createFeatureFlagRouter = (deps: FeatureFlagApiDependencies): Route
   router.get('/', async (req: Request, res: Response) => {
     try {
       // Extract context from request
+      const groupsRaw = firstString(req.query.groups);
+      const attributesRaw = firstString(req.query.attributes);
       const context: EvaluationContext = {
-        userId: req.query.userId as string || req.user?.id,
-        groups: req.query.groups ? (req.query.groups as string).split(',') : (req.user as any)?.groups || [],
-        attributes: req.query.attributes ? JSON.parse(req.query.attributes as string) : (req.user as any)?.attributes || {}
+        userId: firstString(req.query.userId) || req.user?.id,
+        groups: groupsRaw ? groupsRaw.split(',') : (req.user as any)?.groups || [],
+        attributes: attributesRaw ? JSON.parse(attributesRaw) : (req.user as any)?.attributes || {}
       };
 
       // Get all flags with their evaluation status
@@ -82,30 +85,35 @@ export const createFeatureFlagRouter = (deps: FeatureFlagApiDependencies): Route
         timestamp: new Date().toISOString()
       };
 
-      res.tson(response);
+      res.json(response);
     } catch (error: any) {
       console.error('Error fetching feature flags:', error);
-      res.status(500).tson({ error: 'Internal server error', message: error.message });
+      res.status(500).json({ error: 'Internal server error', message: error.message });
     }
   });
 
   // Get a specific feature flag evaluation
   router.get('/:flagKey', async (req: Request, res: Response) => {
     try {
-      const { flagKey } = req.params;
+      const flagKey = firstString(req.params.flagKey);
+      if (!flagKey) {
+        return res.status(400).json({ error: 'flagKey is required' });
+      }
 
       // Extract context from request
+      const groupsRaw = firstString(req.query.groups);
+      const attributesRaw = firstString(req.query.attributes);
       const context: EvaluationContext = {
-        userId: req.query.userId as string || req.user?.id,
-        groups: req.query.groups ? (req.query.groups as string).split(',') : (req.user as any)?.groups || [],
-        attributes: req.query.attributes ? JSON.parse(req.query.attributes as string) : (req.user as any)?.attributes || {}
+        userId: firstString(req.query.userId) || req.user?.id,
+        groups: groupsRaw ? groupsRaw.split(',') : (req.user as any)?.groups || [],
+        attributes: attributesRaw ? JSON.parse(attributesRaw) : (req.user as any)?.attributes || {}
       };
 
       // Get the flag evaluation
       const enabled = await deps.featureFlagService.isEnabled(flagKey, context);
       const variant = await deps.featureFlagService.getVariant(flagKey, context);
 
-      res.tson({
+      res.json({
         key: flagKey,
         enabled,
         value: variant !== null ? variant : enabled,
@@ -113,7 +121,7 @@ export const createFeatureFlagRouter = (deps: FeatureFlagApiDependencies): Route
       });
     } catch (error: any) {
       console.error(`Error fetching feature flag ${req.params.flagKey}:`, error);
-      res.status(500).tson({ error: 'Internal server error', message: error.message });
+      res.status(500).json({ error: 'Internal server error', message: error.message });
     }
   });
 
@@ -143,14 +151,14 @@ export const createFeatureFlagRouter = (deps: FeatureFlagApiDependencies): Route
       // TODO: Actually implement the createFlag method in the service
       // await deps.featureFlagService.createFlag(newFlag);
 
-      res.status(201).tson({
+      res.status(201).json({
         key,
         enabled,
         message: 'Feature flag created successfully'
       });
     } catch (error: any) {
       console.error('Error creating feature flag:', error);
-      res.status(500).tson({ error: 'Internal server error', message: error.message });
+      res.status(500).json({ error: 'Internal server error', message: error.message });
     }
   });
 
@@ -164,7 +172,7 @@ export const createFeatureFlagRouter = (deps: FeatureFlagApiDependencies): Route
       // Update the flag
       // await deps.featureFlagService.updateFlag(flagKey, updateData);
 
-      res.tson({
+      res.json({
         key: flagKey,
         updated: true,
         message: 'Feature flag updated successfully',
@@ -172,7 +180,7 @@ export const createFeatureFlagRouter = (deps: FeatureFlagApiDependencies): Route
       });
     } catch (error: any) {
       console.error(`Error updating feature flag ${req.params.flagKey}:`, error);
-      res.status(500).tson({ error: 'Internal server error', message: error.message });
+      res.status(500).json({ error: 'Internal server error', message: error.message });
     }
   });
 
@@ -185,26 +193,30 @@ export const createFeatureFlagRouter = (deps: FeatureFlagApiDependencies): Route
       // Delete the flag
       // await deps.featureFlagService.deleteFlag(flagKey);
 
-      res.tson({
+      res.json({
         key: flagKey,
         deleted: true,
         message: 'Feature flag deleted successfully'
       });
     } catch (error: any) {
       console.error(`Error deleting feature flag ${req.params.flagKey}:`, error);
-      res.status(500).tson({ error: 'Internal server error', message: error.message });
+      res.status(500).json({ error: 'Internal server error', message: error.message });
     }
   });
 
   // Get configuration values
   router.get('/config/:key', async (req: Request, res: Response) => {
     try {
-      const { key } = req.params;
-      const environment = req.query.env as string || process.env.NODE_ENV || 'development';
+      const key = firstString(req.params.key);
+      if (!key) {
+        return res.status(400).json({ error: 'key is required' });
+      }
+      const environment =
+        firstString(req.query.env) || process.env.NODE_ENV || 'development';
 
       const value = await deps.configService.getConfig(key, environment);
 
-      res.tson({
+      res.json({
         key,
         value,
         environment,
@@ -212,7 +224,7 @@ export const createFeatureFlagRouter = (deps: FeatureFlagApiDependencies): Route
       });
     } catch (error: any) {
       console.error(`Error fetching config ${req.params.key}:`, error);
-      res.status(500).tson({ error: 'Internal server error', message: error.message });
+      res.status(500).json({ error: 'Internal server error', message: error.message });
     }
   });
 
@@ -220,22 +232,23 @@ export const createFeatureFlagRouter = (deps: FeatureFlagApiDependencies): Route
   router.post('/config/batch', async (req: Request, res: Response) => {
     try {
       const { keys } = req.body;
-      const environment = req.query.env as string || process.env.NODE_ENV || 'development';
+      const environment =
+        firstString(req.query.env) || process.env.NODE_ENV || 'development';
 
       if (!Array.isArray(keys)) {
-        return res.status(400).tson({ error: 'Keys must be an array' });
+        return res.status(400).json({ error: 'Keys must be an array' });
       }
 
       const configs = await deps.configService.getMultipleConfig(keys, environment);
 
-      res.tson({
+      res.json({
         configs,
         environment,
         timestamp: new Date().toISOString()
       });
     } catch (error: any) {
       console.error('Error fetching multiple configs:', error);
-      res.status(500).tson({ error: 'Internal server error', message: error.message });
+      res.status(500).json({ error: 'Internal server error', message: error.message });
     }
   });
 

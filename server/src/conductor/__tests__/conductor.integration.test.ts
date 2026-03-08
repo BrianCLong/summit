@@ -1,10 +1,10 @@
 // Integration Tests for Conductor System
 // Tests the complete MoE+MCP system end-to-end
 
-import { Conductor, ConductorConfig } from '../index';
-import { mcpRegistry } from '../mcp/client';
-import { ConductInput } from '../types';
-import { conductorMetrics } from '../metrics';
+import { Conductor, ConductorConfig } from '../index.js';
+import { mcpRegistry } from '../mcp/client.js';
+import { ConductInput } from '../types.js';
+import { conductorMetrics } from '../metrics.js';
 import { describe, test, expect, beforeEach, afterEach } from '@jest/globals';
 
 describe('Conductor Integration', () => {

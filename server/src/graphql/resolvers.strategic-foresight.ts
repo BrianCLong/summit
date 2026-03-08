@@ -11,7 +11,7 @@ import {
   MarketSignalInput,
   ScenarioInput,
   PivotAnalysisInput,
-} from '../services/strategic-foresight-client';
+} from '../services/strategic-foresight-client.js';
 
 const client = new StrategicForesightClient();
 

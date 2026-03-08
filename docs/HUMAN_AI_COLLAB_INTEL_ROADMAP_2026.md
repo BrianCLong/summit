@@ -7,6 +7,7 @@
 ## 3–5 Defensible Capabilities (build order = phases)
 
 ### 1) GraphRAG Hypothesis Tester
+
 - VALUE: NLQ → Cypher traversal → LLM synthesis → narrative injection for rapid CTI/OSINT courses of action.
 - WHY-NOW: GraphRAG/KG-LLM surge (attack-path reasoning, anomaly synthesis) aligns with Summit Neo4j core.
 - V0/V1 BUILD (4–8wks):
@@ -21,6 +22,7 @@
 - TRADEOFFS: On-prem Neo4j + Llama3.1 vs cloud acceleration; explainability enforced via graph provenance even if slower; optional Redis cache for NLQ autocomplete.
 
 ### 2) Disinfo ThreatNet (Real-time Deepfake/Disinfo OPS)
+
 - VALUE: Automated detection + response graph for deepfakes/narratives; pushes counter-messaging arcs within minutes.
 - WHY-NOW: AI-OSINT platforms delivering synthetic media at scale; need real-time graph defense and narrative counterforce.
 - V0/V1 BUILD (4–8wks):
@@ -35,6 +37,7 @@
 - TRADEOFFS: On-prem multimodal slower but compliant; GPU sizing vs throughput; Redis stream buffering vs pure DB triggers.
 
 ### 3) Workcell Copilot Orchestrator
+
 - VALUE: Human-AI work orchestration for OSINT/CTI tasks with optimal handoffs and confidence-aware UX.
 - WHY-NOW: Human-AI symbiosis research shows productivity gains from structured delegation and uncertainty displays.
 - V0/V1 BUILD (4–8wks):
@@ -49,6 +52,7 @@
 - TRADEOFFS: On-prem routing may limit external model quality; explainability-first UI may slow power users; caching of playbooks vs freshness.
 
 ### 4) Provenance Ledger & Risk Scoring
+
 - VALUE: End-to-end intel provenance with privacy/adversarial risk scoring powering trust and compliance.
 - WHY-NOW: Governance 3.0 patterns (provenance chains, privacy scoring) are maturing; regulators demanding auditability.
 - V0/V1 BUILD (4–8wks):
@@ -63,6 +67,7 @@
 - TRADEOFFS: Strong provenance may add latency; on-prem crypto/signing overhead; optional batched writes vs immediacy.
 
 ### 5) Adversarial Resilience & Red-Team Harness
+
 - VALUE: Continuous hardening against disinfo injection, prompt leaks, model poisoning for mission-critical ops.
 - WHY-NOW: Rising attack surface from AI-integrated intel stacks; orgs demanding provable robustness.
 - V0/V1 BUILD (4–8wks):
@@ -77,11 +82,13 @@
 - TRADEOFFS: On-prem sandbox capacity vs speed; thorough explainability may slow iteration; resource spikes during campaigns.
 
 ## Roadmap Phases & Branching
+
 - PHASE 1 (2–4wks): Collab primitives to ship analyst ROI fast (Workcell Copilot Orchestrator V0, initial provenance drawer). Branch: `git checkout -b feat/collab-primitives`.
 - PHASE 2 (8–12wks): GraphRAG + narrative moat (GraphRAG Hypothesis Tester, Disinfo ThreatNet, provenance hardening). Branch: `git checkout -b feat/graphrag-narrative`.
 - PHASE 3 (post-gates): Autonomous bets gated by governance validation (Adversarial Resilience harness expansion + autonomous playbooks). Branch: `git checkout -b feat/autonomy-gated`.
 
 ## Dependencies & Deployability
+
 - Data layer: Neo4j + pgvector/Redis/TimescaleDB; ensure `make up-graphrag` smoke green; seed canonical entities.
 - API: GraphQL schemas above; maintain backward compatibility via unions/interfaces; ensure p95<2s.
 - UI: React/Cytoscape layers; Copilot surface standardized; instrument with Grafana/Loki traces.

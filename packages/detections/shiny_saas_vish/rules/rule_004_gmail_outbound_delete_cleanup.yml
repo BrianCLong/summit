@@ -1,0 +1,15 @@
+id: SHINY-004
+title: Gmail Outbound Message Deletion Cleanup
+description: Detects the immediate deletion of an outbound email, which may indicate an attacker sending phishing messages and covering their tracks.
+severity: medium
+required_sources:
+  - workspace
+query: |
+  sequence by user_id
+    [action == "gmail_send_message"]
+    [action == "gmail_delete_message"]
+  within 5m
+explain_fields:
+  - user_id
+  - target.resource_id
+  - geo.ip

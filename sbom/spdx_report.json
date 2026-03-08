@@ -1,0 +1,1 @@
+{"SPDXID": "SPDXRef-DOCUMENT", "spdxVersion": "SPDX-2.3", "name": "Summit Phase Shift Artifacts", "packages": [{"name": "pnel_runtime", "versionInfo": "0.1.0"}, {"name": "dtbe_sdk", "versionInfo": "1.0.0"}]}

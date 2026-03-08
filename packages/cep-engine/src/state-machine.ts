@@ -1,6 +1,6 @@
 import { EventEmitter } from 'eventemitter3';
 import pino from 'pino';
-import { StateMachine, State, Transition } from './types';
+import { StateMachine, State, Transition } from './types.js';
 
 const logger = pino({ name: 'state-machine' });
 

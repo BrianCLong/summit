@@ -1,7 +1,7 @@
 
-import { BaseConnector } from './BaseConnector';
-import { ConnectorContext } from '../data-model/types';
-import { DataEnvelope } from '../types/data-envelope';
+import { BaseConnector } from './BaseConnector.js';
+import { ConnectorContext } from '../data-model/types.js';
+import { DataEnvelope } from '../types/data-envelope.js';
 
 export interface MispConfig {
   baseUrl: string;

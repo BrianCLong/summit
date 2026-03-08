@@ -1,0 +1,243 @@
+[
+  {
+    "element_id": "actor:mexican_cartel",
+    "name": "Mexican Cartel",
+    "category": "Actor",
+    "description": "Non-state criminal organization involved in coordinated disinformation.",
+    "confidence": 0.85,
+    "metadata": {
+      "actor_type": "Non-state criminal organization",
+      "tags": ["IO.NONSTATE.CARTEL"]
+    },
+    "relationships": [
+      {
+        "target_id": "campaign:cartel_disinfo_feb_2026",
+        "relation_type": "LAUNCHED",
+        "metadata": { "occurred_at": "2026-02" }
+      }
+    ]
+  },
+  {
+    "element_id": "campaign:cartel_disinfo_feb_2026",
+    "name": "Cartel Coordinated Disinformation (Feb 2026)",
+    "category": "Campaign",
+    "description": "Bot amplification and fear projection psyops following the killing of a top drug lord.",
+    "confidence": 0.8,
+    "metadata": {
+      "ttp_class": "Fabricated news, bot amplification, fear projection psyops",
+      "trigger_event": "Killing of top drug lord",
+      "tags": ["TTP.FABRICATED_INCIDENT", "EFFECT.FEAR_DOMESTIC", "AMPLIFICATION.BOT_CLUSTER"]
+    },
+    "relationships": [
+      {
+        "target_id": "event:killing_of_drug_lord",
+        "relation_type": "TRIGGERED_BY"
+      },
+      {
+        "target_id": "platform:x",
+        "relation_type": "AMPLIFIED_VIA"
+      },
+      {
+        "target_id": "platform:facebook",
+        "relation_type": "AMPLIFIED_VIA"
+      },
+      {
+        "target_id": "platform:whatsapp",
+        "relation_type": "AMPLIFIED_VIA"
+      }
+    ]
+  },
+  {
+    "element_id": "event:killing_of_drug_lord",
+    "name": "Killing of Top Drug Lord",
+    "category": "Event",
+    "metadata": { "occurred_at": "2026-02" }
+  },
+  {
+    "element_id": "actor:ru_io_cell",
+    "name": "Russian IO Cell (Operation Matryoshka)",
+    "category": "Actor",
+    "confidence": 0.9,
+    "metadata": {
+      "actor_type": "State-linked (Russia)",
+      "operational_label": "Operation Matryoshka",
+      "tags": ["IO.STATE.RU"]
+    },
+    "relationships": [
+      {
+        "target_id": "campaign:operation_matryoshka",
+        "relation_type": "LAUNCHED"
+      }
+    ]
+  },
+  {
+    "element_id": "campaign:operation_matryoshka",
+    "name": "Operation Matryoshka",
+    "category": "Campaign",
+    "description": "Russian Olympic Information Operations targeting the 2026 Winter Games.",
+    "confidence": 0.9,
+    "metadata": {
+      "target_environment": "2026 Winter Olympics",
+      "target_audience": ["Ukrainian athletes", "IOC", "European publics"],
+      "ttps": ["Fake Reuters-style news packages", "Altered narration (cheapfakes)", "Reputation attack narratives", "Fabricated scandal framing", "AI-assisted content scaling"],
+      "tags": ["TARGET.SPORT_EVENT", "VECTOR.FAKE_NEWS_BRAND", "TTP.CHEAPFAKE_EDIT"]
+    },
+    "relationships": [
+      {
+        "target_id": "event:2026_winter_olympics",
+        "relation_type": "TARGETED"
+      },
+      {
+        "target_id": "brand:reuters",
+        "relation_type": "IMPERSONATED",
+        "metadata": { "confidence": 0.9, "tags": ["TTP.IMPERSONATION_MEDIA"] }
+      },
+      {
+        "target_id": "narrative:ukrainian_corruption",
+        "relation_type": "SUPPORTS",
+        "metadata": { "tags": ["NARRATIVE.LAUNDERING"] }
+      }
+    ]
+  },
+  {
+    "element_id": "event:2026_winter_olympics",
+    "name": "2026 Winter Olympics",
+    "category": "Event",
+    "metadata": { "location": "Milan/Cortina", "start_date": "2026-02-06" }
+  },
+  {
+    "element_id": "brand:reuters",
+    "name": "Reuters",
+    "category": "MediaBrand",
+    "metadata": { "type": "International News Agency", "tier": "Tier-1" }
+  },
+  {
+    "element_id": "actor:the_company",
+    "name": "The Company",
+    "category": "Actor",
+    "description": "Kremlin Cross-Continental Influence Architecture.",
+    "confidence": 0.75,
+    "metadata": {
+      "actor_type": "State-linked contractor / hybrid IO entity",
+      "regions": ["Africa", "Latin America"],
+      "model": ["Paid journalists", "Narrative placement", "Expert persona laundering"],
+      "tags": ["IO.STATE_PROXY", "TTP.PAID_MEDIA_PLACEMENT", "TTP.EXPERT_PERSONA", "GEO.AFRICA_LATAM"]
+    }
+  },
+  {
+    "element_id": "actor:prc_intel",
+    "name": "PRC Intelligence",
+    "category": "IntelligenceService",
+    "confidence": 0.95,
+    "metadata": {
+      "country": "China",
+      "tags": ["ESPIONAGE.PRC"]
+    },
+    "relationships": [
+      {
+        "target_id": "case:greece_nato_officer",
+        "relation_type": "LAUNCHED"
+      },
+      {
+        "target_id": "campaign:france_starlink_collection",
+        "relation_type": "LAUNCHED"
+      }
+    ]
+  },
+  {
+    "element_id": "case:greece_nato_officer",
+    "name": "Greece NATO Officer Case",
+    "category": "Case",
+    "description": "PRC intelligence targeting NATO military/tech documentation via LinkedIn recruitment.",
+    "confidence": 0.9,
+    "metadata": {
+      "recruitment_vector": "LinkedIn",
+      "tags": ["TTP.LINKEDIN_RECRUITMENT", "TTP.ENCRYPTED_EXFIL", "TARGET.NATO_TECH"]
+    },
+    "relationships": [
+      {
+        "target_id": "platform:linkedin",
+        "relation_type": "ASSOCIATED_WITH"
+      }
+    ]
+  },
+  {
+    "element_id": "campaign:france_starlink_collection",
+    "name": "France Starlink Collection Attempt",
+    "category": "Campaign",
+    "description": "PRC attempt to acquire Starlink satellite network data and dual-use military information.",
+    "confidence": 0.85,
+    "metadata": {
+      "tags": ["TARGET.SATELLITE_INFRA", "TTP.TECHNICAL_COLLECTION", "CRITICAL_INFRA.DUAL_USE"]
+    },
+    "relationships": [
+      {
+        "target_id": "infra:starlink",
+        "relation_type": "TARGETED"
+      }
+    ]
+  },
+  {
+    "element_id": "infra:starlink",
+    "name": "Starlink",
+    "category": "Infra",
+    "metadata": { "type": "Satellite Infrastructure" }
+  },
+  {
+    "element_id": "actor:ru_humint_germany",
+    "name": "Russian HUMINT Network (Germany)",
+    "category": "Actor",
+    "description": "Political insider network targeting German defense deliberations.",
+    "confidence": 0.9,
+    "metadata": {
+      "tags": ["ESPIONAGE.RU", "TTP.POLITICAL_NETWORK_ACCESS", "TARGET.DEFENSE_POLICY"]
+    }
+  },
+  {
+    "element_id": "case:ai_trade_secret_google",
+    "name": "Google AI Trade-Secret Espionage Case",
+    "category": "Case",
+    "description": "Conviction of former Google engineer for exfiltration of AI stack trade secrets.",
+    "confidence": 1.0,
+    "metadata": {
+      "pattern": ["Internal doc exfiltration", "Cloud staging", "Insider vector"],
+      "tags": ["ESPIONAGE.ECONOMIC", "TARGET.AI_TRADE_SECRET", "TTP.CLOUD_STAGING", "VECTOR.INSIDER"]
+    }
+  },
+  {
+    "element_id": "campaign:iran_blackout_io",
+    "name": "Iran Information Blackout IO",
+    "category": "Campaign",
+    "description": "State-driven IO during internet shutdown during unrest.",
+    "confidence": 0.8,
+    "metadata": {
+      "condition": "Internet shutdown",
+      "effects": ["Misattributed protest footage", "AI-generated images", "Truth decay"],
+      "tags": ["IO.STATE.IR", "ENV.INFO_BLACKOUT", "TTP.AI_IMAGE_GENERATION", "EFFECT.TRUTH_DECAY"]
+    }
+  },
+  {
+    "element_id": "platform:x",
+    "name": "X (formerly Twitter)",
+    "category": "Platform",
+    "metadata": { "type": "Social Media" }
+  },
+  {
+    "element_id": "platform:facebook",
+    "name": "Facebook",
+    "category": "Platform",
+    "metadata": { "type": "Social Media" }
+  },
+  {
+    "element_id": "platform:whatsapp",
+    "name": "WhatsApp",
+    "category": "Platform",
+    "metadata": { "type": "Messaging" }
+  },
+  {
+    "element_id": "platform:linkedin",
+    "name": "LinkedIn",
+    "category": "Platform",
+    "metadata": { "type": "Professional Network" }
+  }
+]

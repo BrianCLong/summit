@@ -6,7 +6,7 @@
  *
  * Usage:
  * ```typescript
- * import { EmailSchema, SanitizationUtils, validateInput } from './validation';
+ * import { EmailSchema, SanitizationUtils, validateInput } from './validation.js';
  *
  * // Validate email
  * const result = EmailSchema.safeParse(userInput);
@@ -55,7 +55,7 @@ export {
   QueryValidator,
 } from './MutationValidators.js';
 
-import { z, type ZodError } from 'zod/v4';
+import { z, type ZodError } from 'zod';
 import { GraphQLError } from 'graphql';
 
 /**

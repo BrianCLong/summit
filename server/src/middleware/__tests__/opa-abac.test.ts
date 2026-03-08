@@ -5,23 +5,14 @@
  * Target coverage: 80%
  */
 
-import { describe, it, expect, beforeEach, jest, afterEach } from '@jest/globals';
-import { requestFactory, responseFactory, nextFactory } from '../../../../tests/factories/requestFactory';
-import { userFactory } from '../../../../tests/factories/userFactory';
+import { describe, it, expect, beforeEach, jest } from '@jest/globals';
+import axios from 'axios';
+import { requestFactory, responseFactory, nextFactory } from '../../../tests/mocks/request-factory.js';
+import { userFactory } from '../../../tests/mocks/user-factory.js';
+import { OPAClient, createABACMiddleware, ABACContext } from '../opa-abac.js';
 
-// Mock function declared before mock
+// Mock function declared before tests
 const mockAxiosPost = jest.fn();
-
-// ESM-compatible mocking using unstable_mockModule
-jest.unstable_mockModule('axios', () => ({
-  __esModule: true,
-  default: {
-    post: mockAxiosPost,
-  },
-}));
-
-// Dynamic imports AFTER mocks are set up
-const { OPAClient, createABACMiddleware, ABACContext } = await import('../opa-abac');
 
 describe('OPAClient', () => {
   let opaClient: InstanceType<typeof OPAClient>;
@@ -29,6 +20,7 @@ describe('OPAClient', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.spyOn(axios, 'post').mockImplementation(mockAxiosPost as any);
     opaClient = new OPAClient(baseUrl, 5000);
   });
 
@@ -246,6 +238,7 @@ describe('createABACMiddleware', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.spyOn(axios, 'post').mockImplementation(mockAxiosPost as any);
     opaClient = new OPAClient('http://localhost:8181', 5000);
     abacMiddleware = createABACMiddleware(opaClient);
   });

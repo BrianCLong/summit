@@ -1,6 +1,6 @@
 // @ts-nocheck
 import nunjucks, { Environment } from 'nunjucks';
-import { ReportContext, ReportRenderResult, ReportTemplate } from './types';
+import { ReportContext, ReportRenderResult, ReportTemplate } from './types.js';
 
 const env = new nunjucks.Environment(undefined, {
   autoescape: false,

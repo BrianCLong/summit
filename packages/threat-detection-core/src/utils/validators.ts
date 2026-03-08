@@ -3,7 +3,7 @@
  */
 
 import { z } from 'zod';
-import { ThreatEvent, ThreatSeverity, ThreatCategory, EventSource } from '../types/events';
+import { ThreatEvent, ThreatSeverity, ThreatCategory, EventSource } from '../types/events.js';
 
 /**
  * Zod schema for ThreatEvent validation

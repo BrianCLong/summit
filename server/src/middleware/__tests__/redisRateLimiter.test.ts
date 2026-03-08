@@ -15,14 +15,6 @@ describe('createRedisRateLimiter fallback behavior', () => {
     ({ createRedisRateLimiter } = await import('../redisRateLimiter.js'));
   });
 
-  beforeAll(() => {
-    jest.useFakeTimers({ now: 0 });
-  });
-
-  afterAll(() => {
-    jest.useRealTimers();
-  });
-
   const buildLimiter = () =>
     createRedisRateLimiter({
       windowMs: 1000,
@@ -93,7 +85,7 @@ describe('createRedisRateLimiter fallback behavior', () => {
     await runRequest(limiter);
     await runRequest(limiter);
 
-    jest.advanceTimersByTime(1100);
+    await new Promise((resolve) => setTimeout(resolve, 1100));
 
     const afterReset = await runRequest(limiter);
     expect(afterReset.statusCode).toBe(200);

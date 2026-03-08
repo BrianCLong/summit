@@ -1,0 +1,27 @@
+name: Hardening Guardrails
+
+on:
+  workflow_call: {}
+
+permissions: read-all
+
+jobs:
+  guardrails:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
+      - name: Preflight: permissions scan
+        run: bash scripts/ci/check-gha-perms.sh
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.sha }}
+      - name: Preflight: action pinning scan
+        run: bash scripts/ci/check-gha-action-pinning.sh
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.sha }}
+      - name: Inspect token scopes
+        run: |
+          curl -sI -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/ |
+          awk -F': ' 'tolower($1)=="x-oauth-scopes"{print "X-OAuth-Scopes:",$2}'

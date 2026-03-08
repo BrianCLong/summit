@@ -44,16 +44,25 @@ def main():
 
     items = index.get("items", [])
     if args.item:
-        items = [i for i in items if i["item_slug"] == args.item]
+        items = [i for i in items if i.get("evidence_id") == args.item or i.get("item_slug") == args.item]
 
     if not items:
         print("No items to validate.")
-        sys.exit(0) # Not an error if just nothing matched filter in some contexts, but arguably error.
+        sys.exit(0)
 
     success = True
     for item in items:
-        print(f"Validating item: {item['item_slug']}")
+        evidence_id = item.get("evidence_id") or item.get("item_slug")
+        print(f"Validating item: {evidence_id}")
+
+        # Support both 'artifacts' (dict) and 'report'/'metrics'/'stamp' (direct fields)
         artifacts = item.get("artifacts", {})
+        if not artifacts:
+            artifacts = {
+                "report": item.get("report"),
+                "metrics": item.get("metrics"),
+                "stamp": item.get("stamp")
+            }
 
         # Hardcoded schema map for this task
         schema_map = {

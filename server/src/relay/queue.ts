@@ -1,6 +1,6 @@
 import { Pool } from 'pg';
 import crypto from 'crypto';
-import type { RelayMsg } from './types';
+import type { RelayMsg } from './types.js';
 
 const pg = new Pool({ connectionString: process.env.DATABASE_URL });
 

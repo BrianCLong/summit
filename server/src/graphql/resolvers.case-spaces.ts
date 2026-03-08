@@ -1,5 +1,5 @@
 // server/src/graphql/resolvers.case-spaces.js
-import { pool } from '../db/pg';
+import { pool } from '../db/pg.js';
 
 export const caseSpacesResolvers = {
   Query: {

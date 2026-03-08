@@ -2,7 +2,7 @@
  * Tests for tenantHeader middleware
  */
 
-import { requestFactory, responseFactory, nextFactory } from '../../../../tests/factories/requestFactory';
+import { requestFactory, responseFactory, nextFactory } from '../../../tests/mocks/request-factory.js';
 import { describe, it, test, expect } from '@jest/globals';
 
 // Mock the middleware since we need to read it first

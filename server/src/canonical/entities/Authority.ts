@@ -5,7 +5,7 @@
  * Represents a legal or regulatory authority
  */
 
-import { BaseCanonicalEntity, CanonicalEntityMetadata } from '../types.ts';
+import { BaseCanonicalEntity, CanonicalEntityMetadata } from '../types.js';
 
 export interface CanonicalAuthority extends BaseCanonicalEntity, CanonicalEntityMetadata {
   entityType: 'Authority';

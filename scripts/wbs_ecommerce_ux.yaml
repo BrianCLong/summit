@@ -1,0 +1,42 @@
+version: 1
+initiative: ecommerce-uiux-2026-subsumption
+objective: deterministic conversion-readiness UX evaluation with policy-enforced CI gates
+workstreams:
+  - id: ws1-ground-truth
+    owner: codex
+    deliverables:
+      - claim_registry_verified.md
+      - source_html_snapshot.html
+    status: pending
+  - id: ws2-schema
+    owner: codex
+    deliverables:
+      - schemas/ux_readiness_report.schema.json
+      - docs/subsumption/ecommerce-uiux-2026-subsumption-plan.md
+    status: in_progress
+  - id: ws3-ci-gates
+    owner: codex
+    deliverables:
+      - .github/workflows/ux-readiness-gate.yml
+      - tests/test_mobile_score.py
+      - tests/test_page_speed_gate.py
+      - tests/test_nav_complexity.py
+    status: pending
+  - id: ws4-security
+    owner: codex
+    deliverables:
+      - docs/security/data-handling/ecommerce-ux.md
+      - tests/test_hidden_fee_flag.py
+      - tests/test_invalid_badge.py
+    status: pending
+  - id: ws5-performance
+    owner: codex
+    deliverables:
+      - scripts/profile_ux.py
+      - performance_metrics.json
+    status: pending
+constraints:
+  - feature_flag: --enable-ux-eval
+  - default_state: off
+  - max_prs: 6
+  - no_core_redesign: true

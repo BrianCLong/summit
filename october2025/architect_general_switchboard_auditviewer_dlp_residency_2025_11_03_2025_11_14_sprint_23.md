@@ -357,7 +357,7 @@ initContainers:
     command: ['/bin/sh', '-c']
     args:
       - >-
-        cosign verify-blob --yes --signature /policy/switchboard.bundle.sig /policy/switchboard.bundle.tar.gz
+        cosign verify-blob --use-signed-timestamps --yes --signature /policy/switchboard.bundle.sig /policy/switchboard.bundle.tar.gz
     volumeMounts:
       - name: policy
         mountPath: /policy

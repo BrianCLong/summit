@@ -205,3 +205,106 @@
 'size: XL':
   - changed-files:
     - count-greater-than: 499
+
+# AGENT ROUTING LABELS
+# =============================================================================
+
+codex:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'src/**'
+      - 'orchestration/**'
+      - 'intelgraph/**'
+
+ci:
+  - changed-files:
+    - any-glob-to-any-file:
+      - '.github/workflows/**'
+
+docs:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'docs/**'
+
+security:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'policies/**'
+      - 'compliance/**'
+
+'area:server':
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'server/**'
+      - 'services/**'
+      - 'apps/api/**'
+
+'area:web':
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'apps/web/**'
+      - 'web/**'
+
+'area:client':
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'client/**'
+
+'area:packages':
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'packages/**'
+
+'area:docs':
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'docs/**'
+      - '**/*.md'
+
+'area:ci':
+  - changed-files:
+    - any-glob-to-any-file:
+      - '.github/workflows/**'
+      - '.github/actions/**'
+      - 'scripts/ci/**'
+      - 'Makefile'
+
+'area:governance':
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'docs/governance/**'
+      - 'governance/**'
+      - 'policy/**'
+      - 'policies/**'
+      - 'agent-contract.json'
+      - 'prompts/registry.yaml'
+
+'area:security':
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'SECURITY/**'
+      - 'security/**'
+      - 'runtime_security/**'
+      - '**/*auth*'
+      - '**/*rbac*'
+      - '**/*secrets*'
+
+'route:jules':
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'docs/governance/**'
+      - 'governance/**'
+      - 'policy/**'
+      - 'policies/**'
+      - 'prompts/registry.yaml'
+
+'route:observer':
+  - changed-files:
+    - any-glob-to-any-file:
+      - '.github/workflows/**'
+      - 'tests/**'
+      - '**/__tests__/**'
+      - '**/*.test.*'
+      - '**/*.spec.*'
+      - 'evidence/**'
+      - 'artifacts/**'

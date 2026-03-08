@@ -613,7 +613,7 @@ router.get(
         tenantId: getTenantId(req),
         actorId: req.query.actorId as string,
         resourceType: req.query.resourceType as string,
-        resourceId: req.query.resourceId as string,
+        resourceId: String((req.query.resourceId as string) || ""),
         entryTypes: req.query.entryType
           ? [req.query.entryType as any]
           : undefined,

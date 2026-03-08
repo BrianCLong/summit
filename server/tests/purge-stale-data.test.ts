@@ -4,7 +4,7 @@ import {
   buildCandidateQuery,
   purgeTarget,
   type PurgeTarget,
-} from '../src/jobs/purgeStaleData';
+} from '../src/jobs/purgeStaleData.js';
 
 type QueryInput = string | QueryConfig;
 

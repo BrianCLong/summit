@@ -1,0 +1,23 @@
+{
+  "classification": "public",
+  "sources": [
+    {
+      "id": "breakingdefense-2026-01-30",
+      "publisher": "Breaking Defense",
+      "title": "Pentagon CTO picks six defense tech vets to lead Critical Technology Areas",
+      "published_date": "2026-01-30",
+      "url": "https://breakingdefense.com/2026/01/pentagon-cto-picks-six-defense-tech-vets-to-lead-critical-technology-areas/",
+      "captured_excerpt_path": "summit/fixtures/cta_leaders_2026_01/breakingdefense_excerpt.md",
+      "excerpt_sha256": "4b7c7e5c4c6fbfae1db15aab7ef7405a6d5c15507ef1342e9111b7884df93b39"
+    },
+    {
+      "id": "cto-mil-2026-01-29",
+      "publisher": "cto.mil",
+      "title": "Senior Officials Announced for the War Department’s Six Critical Technology Areas",
+      "published_date": "2026-01-29",
+      "url": "https://www.cto.mil/cta-senior-officials/",
+      "captured_excerpt_path": "summit/fixtures/cta_leaders_2026_01/cto_mil_excerpt.md",
+      "excerpt_sha256": "d1aa29bbdbe4c46317b834e8c796ad9fce7a5df6442d0ba344daa84d4bbdda34"
+    }
+  ]
+}

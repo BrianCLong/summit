@@ -1,9 +1,9 @@
 // @ts-nocheck
 import { EventEmitter } from 'events';
-import { createLogger } from '../config/logger';
-import { LinUCBOptimizer } from './LinUCBOptimizer';
-import { RedisStateManager } from './RedisStateManager';
-import { DifferentialPrivacyAccountant } from './DifferentialPrivacyAccountant';
+import { createLogger } from '../config/logger.js';
+import { LinUCBOptimizer } from './LinUCBOptimizer.js';
+import { RedisStateManager } from './RedisStateManager.js';
+import { DifferentialPrivacyAccountant } from './DifferentialPrivacyAccountant.js';
 
 const logger = createLogger('AdaptiveQuantumApp');
 

@@ -1,0 +1,104 @@
+# REDACTION_TREND_ALERT_POLICY.yml
+# Policy configuration for trend-based alerting on redaction metrics
+#
+# This policy defines thresholds for automatic incident creation based on
+# trends in the redaction metrics time series. All alerts contain counts-only
+# information - no sensitive content.
+#
+# Authority: docs/ci/REDACTION_TREND_ALERTS.md
+
+version: "1.0"
+
+# --- Incident Triggers ---
+
+# P0: Hard incident - forbidden patterns detected
+# This indicates potential data leak - highest priority
+hard_incident:
+  # Any forbidden_hits > 0 in the most recent entry triggers P0
+  forbidden_hits_gt: 0
+  # Check only the latest N entries for forbidden patterns
+  lookback_entries: 1
+
+# P1: Rollback stability incident - too many rollbacks indicate instability
+rollback_incident:
+  # Rollbacks in the last 24 hours (based on timestamp_utc)
+  rollbacks_last_24h_gte: 2
+  # Rollbacks in the last N entries (regardless of time)
+  rollbacks_last_entries_gte: 3
+  rollbacks_last_entries_window: 7
+
+# P1: WARN spike incident - elevated warning counts indicate drift
+warn_spike:
+  # WARN or FAIL health levels in last N entries
+  warn_last_entries_gte: 3
+  warn_last_entries_window: 7
+  # Also trigger if tokens_redacted increases sharply
+  tokens_spike_pct: 300
+  tokens_spike_window: 3
+
+# --- Deduplication and Rate Limiting ---
+
+dedup:
+  # Don't create duplicate issues within this window
+  window_hours: 24
+  # Rate limit issue updates (prevent spam)
+  update_cooldown_hours: 6
+  # State file for tracking open alerts
+  state_file: "docs/releases/_state/redaction_trend_alerts_state.json"
+
+# --- Issue Configuration ---
+
+labels:
+  # Labels applied to P0 incidents
+  p0:
+    - "release-ops"
+    - "security"
+    - "redaction-alert"
+    - "severity:P0"
+  # Labels applied to P1 incidents
+  p1:
+    - "release-ops"
+    - "redaction-alert"
+    - "severity:P1"
+
+# Issue title templates
+issue_titles:
+  p0: "[Redaction Alert P0] Forbidden patterns detected — {date}"
+  p1_rollback: "[Redaction Alert P1] Rollback stability alert — {date}"
+  p1_warn: "[Redaction Alert P1] Elevated WARN trend — {date}"
+
+# --- Auto-Close Policy ---
+
+close_policy:
+  # Automatically close alerts when metrics return to OK
+  auto_close_when_clear: true
+  # Number of consecutive OK entries required before auto-close
+  clear_window_entries: 7
+  # Comment to add when auto-closing
+  close_comment: |
+    This alert has been automatically closed after {clear_count} consecutive OK entries.
+
+    The underlying issue appears to be resolved. If problems persist, a new alert will be opened.
+
+# --- Notification Links ---
+
+links:
+  # Include link to Pages trend page
+  trend_page: true
+  # Include link to triggering workflow run
+  workflow_run: true
+  # Include link to triage packet artifact (if WARN/FAIL)
+  triage_packet: true
+
+# --- Thresholds Documentation ---
+#
+# These thresholds are tuned for:
+# - Quick response to forbidden patterns (P0, immediate)
+# - Detection of instability patterns (P1, 2+ rollbacks in 24h)
+# - Early warning on drift (P1, 3+ WARNs in 7 entries)
+#
+# To adjust thresholds:
+# 1. Review recent alert history
+# 2. Adjust values in this file
+# 3. Test with --dry-run flag
+# 4. Document rationale in PR

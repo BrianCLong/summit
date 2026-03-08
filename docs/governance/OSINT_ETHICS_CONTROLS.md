@@ -1,6 +1,8 @@
-# OSINT Ethics & Governance Controls
+> Owner: @summit/governance
+> Last-Reviewed: 2026-02-25
+> Evidence-IDs: EVD-PLACEHOLDER
+> Status: active
 
-## OSINT-01: Inference Creep Detection
 
 ### Control Description
 "Inference Creep" occurs when secondary or tertiary inferences drift too far from the primary evidence, creating a chain of reasoning that is statistically weak but presented as fact.

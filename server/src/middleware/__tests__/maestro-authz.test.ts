@@ -1,40 +1,18 @@
-import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
+import { jest, describe, it, expect, beforeEach } from '@jest/globals';
 import {
   requestFactory,
   responseFactory,
   nextFactory,
-} from '../../../../tests/factories/requestFactory';
+} from '../../../tests/mocks/request-factory.js';
+import { maestroAuthzMiddleware } from '../maestro-authz.js';
+import { opaPolicyEngine } from '../../conductor/governance/opa-integration.js';
+import logger from '../../utils/logger.js';
 
 // Mock functions declared before mocks
 const mockEvaluatePolicy = jest.fn();
 const mockLoggerInfo = jest.fn();
 const mockLoggerWarn = jest.fn();
 const mockLoggerError = jest.fn();
-
-// ESM-compatible mocking using unstable_mockModule
-jest.unstable_mockModule('../../conductor/governance/opa-integration', () => ({
-  opaPolicyEngine: {
-    evaluatePolicy: mockEvaluatePolicy,
-  },
-}));
-
-jest.unstable_mockModule('../../utils/logger', () => {
-  const logger = {
-    info: mockLoggerInfo,
-    warn: mockLoggerWarn,
-    error: mockLoggerError,
-  };
-
-  return {
-    __esModule: true,
-    default: logger,
-    logger,
-  };
-});
-
-// Dynamic imports AFTER mocks are set up
-const { maestroAuthzMiddleware } = await import('../maestro-authz');
-const { opaPolicyEngine } = await import('../../conductor/governance/opa-integration');
 
 describe('maestroAuthzMiddleware', () => {
   const createRequest = () => {
@@ -67,6 +45,12 @@ describe('maestroAuthzMiddleware', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    jest
+      .spyOn(opaPolicyEngine, 'evaluatePolicy')
+      .mockImplementation(mockEvaluatePolicy as any);
+    jest.spyOn(logger, 'info').mockImplementation(mockLoggerInfo as any);
+    jest.spyOn(logger, 'warn').mockImplementation(mockLoggerWarn as any);
+    jest.spyOn(logger, 'error').mockImplementation(mockLoggerError as any);
   });
 
   it('allows a request when OPA approves and logs decision metadata', async () => {

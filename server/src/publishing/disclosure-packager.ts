@@ -19,7 +19,7 @@ import type {
   AudienceScope,
   ProofCarryingManifest,
   RevocationRecord,
-} from './proof-carrying-types';
+} from './proof-carrying-types.js';
 
 export interface PackagerConfig {
   privateKey: string; // PEM format
