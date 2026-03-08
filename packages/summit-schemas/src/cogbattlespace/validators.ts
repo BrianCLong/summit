@@ -1,4 +1,4 @@
-import Ajv, { type ValidateFunction } from 'ajv';
+import Ajv2020, { type ValidateFunction } from 'ajv/dist/2020';
 import addFormats from 'ajv-formats';
 
 import artifactSchema from './artifact.schema.json';
@@ -17,8 +17,8 @@ import cogOpSchema from './writeset/cog-op.schema.json';
 import cogWriteSetSchema from './writeset/cog-writeset.schema.json';
 import cogRejectionReportSchema from './writeset/cog-rejection-report.schema.json';
 
-const ajv = new Ajv({ allErrors: true, strict: true });
-addFormats(ajv);
+const ajv = new Ajv2020({ allErrors: true, strict: true });
+addFormats(ajv as any);
 
 [
   artifactSchema,
