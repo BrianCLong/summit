@@ -1,5 +1,7 @@
 import json
-from datetime import UTC, timezone
+from datetime import timezone
+from datetime import timedelta
+UTC = timezone.utc
 from pathlib import Path
 from typing import Any, Dict
 
