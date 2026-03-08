@@ -1,0 +1,24 @@
+{
+  "name": "summit-postgres",
+  "config": {
+    "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
+    "database.hostname": "${POSTGRES_HOST}",
+    "database.port": "5432",
+    "database.user": "${POSTGRES_USER}",
+    "database.password": "${POSTGRES_PASSWORD}",
+    "database.dbname": "${POSTGRES_DB}",
+    "slot.name": "summit_cdc_slot",
+    "publication.autocreate.mode": "filtered",
+    "tombstones.on.delete": "true",
+    "plugin.name": "pgoutput",
+    "topic.prefix": "summit.postgres",
+    "decimal.handling.mode": "string",
+    "include.schema.changes": "false",
+    "snapshot.mode": "initial",
+    "heartbeat.interval.ms": "10000",
+    "status.storage.topic": "debezium.status",
+    "offset.storage.topic": "debezium.offsets",
+    "schema.history.internal.kafka.topic": "debezium.schemahistory",
+    "slot.drop.on.stop": "false"
+  }
+}
