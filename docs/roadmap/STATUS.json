@@ -1,7 +1,13 @@
 {
-  "last_updated": "2026-03-07T06:03:42Z",
-  "revision_note": "Added Nature s41562-026-02411-w Layer 2/3 regulatory subsumption architecture brief and roadmap tracking entry.",
+  "last_updated": "2026-03-07T15:54:39Z",
+  "revision_note": "Added multi-agent uncertainty control-plane brief and tracking initiative for lifecycle-based uncertainty governance.",
   "initiatives": [
+    {
+      "id": "multi-agent-uncertainty-control-plane-2026-02-25",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Published evidence-first brief defining Detected\u2192Characterized\u2192Mitigated\u2192Resolved uncertainty lifecycle and Summit control-plane role mapping in docs/briefs/multi-agent-uncertainty-control-plane-2026-02-25.md."
+    },
     {
       "id": "nature-s41562-026-02411-w-layer2-layer3",
       "status": "in_progress",
