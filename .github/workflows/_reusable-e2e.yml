@@ -107,5 +107,7 @@ jobs:
         if: (failure()) && (always())
         run: ./scripts/run-compose.sh -f docker-compose.dev.yml logs --tail=200
 
+        working-directory: ${{ github.workspace }}
       - name: Tear down stack
         run: ./scripts/run-compose.sh -f docker-compose.dev.yml down -v
+        working-directory: ${{ github.workspace }}

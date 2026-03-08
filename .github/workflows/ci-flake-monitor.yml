@@ -19,11 +19,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+        with:
+          fetch-depth: 0
       - name: Update Flake Registry and Plan
         run: node .github/workflows/scripts/update-flake-registry.cjs
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+        working-directory: ${{ github.workspace }}
       - name: Commit changes
         uses: stefanzweifel/git-auto-commit-action@v5
         with:

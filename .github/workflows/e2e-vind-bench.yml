@@ -2,9 +2,9 @@ name: E2E Vind Benchmark Test
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
   workflow_dispatch:
 
 concurrency:
@@ -21,6 +21,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+        with:
+          fetch-depth: 0
       - name: Set Start Time
         run: echo "START_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> $GITHUB_ENV
 
@@ -118,3 +120,5 @@ jobs:
           with open(path, 'w') as f:
               json.dump(data, f, indent=2)
           "
+permissions:
+  contents: read

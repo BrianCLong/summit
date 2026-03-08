@@ -1,5 +1,5 @@
 {
-  "evidence_id": "evid-456",
-  "type": "log",
-  "content": {"message": "actor found"}
+  "evidence_id": "EVD-002",
+  "type": "image",
+  "content_hash": "i9j0k1l2"
 }

@@ -2,9 +2,9 @@ name: Supply Chain Build
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -24,6 +24,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4 # v4.1.7
 
+        with:
+          fetch-depth: 0
       - name: Install pnpm
         uses: pnpm/action-setup@v4 # v4.1.0
 
@@ -107,3 +109,5 @@ jobs:
           path: |
             sbom.*.json
             attestation.json
+permissions:
+  contents: read

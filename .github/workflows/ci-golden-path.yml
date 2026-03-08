@@ -18,6 +18,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+        with:
+          fetch-depth: 0
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
 
@@ -43,3 +45,5 @@ jobs:
           name: playwright-report
           path: reports/playwright/
           retention-days: 7
+permissions:
+  contents: read

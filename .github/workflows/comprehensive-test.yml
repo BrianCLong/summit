@@ -2,9 +2,9 @@ name: Comprehensive Test Suite
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -19,6 +19,8 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
+        with:
+          fetch-depth: 0
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
       - name: Setup Node.js
@@ -53,6 +55,7 @@ jobs:
           chmod +x scripts/test-comprehensive.sh
           ./scripts/test-comprehensive.sh
 
+        working-directory: ${{ github.workspace }}
       - name: Upload Test Results
         if: always()
         uses: actions/upload-artifact@v4
@@ -65,3 +68,5 @@ jobs:
             scripts/coverage-junit.xml
             reports/
             test-results/
+permissions:
+  contents: read

@@ -1,24 +1,28 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "EvidenceBundle",
   "type": "object",
   "properties": {
     "bundle_id": {
       "type": "string"
     },
-    "objects": {
+    "run_id": {
+      "type": "string"
+    },
+    "evidence_objects": {
       "type": "array",
       "items": {
-        "$ref": "evidence_object.schema.json"
+        "type": "string"
       }
     },
-    "manifest_hash": {
+    "bundle_hash": {
       "type": "string"
     }
   },
   "required": [
     "bundle_id",
-    "objects",
-    "manifest_hash"
-  ]
+    "run_id",
+    "evidence_objects",
+    "bundle_hash"
+  ],
+  "additionalProperties": false
 }

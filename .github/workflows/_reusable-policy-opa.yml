@@ -17,6 +17,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4 # v4
 
+        with:
+          fetch-depth: 0
       - name: Set up OPA
         uses: open-policy-agent/setup-opa@9c3361f8beace1df5a8e053b85fed850d191ebc3 # v1
         with:

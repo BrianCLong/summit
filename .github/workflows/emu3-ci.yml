@@ -23,6 +23,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+        with:
+          fetch-depth: 0
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -41,3 +43,5 @@ jobs:
         run: pytest
         env:
           SUMMIT_EMU3_ALLOW_MODEL_DOWNLOAD: "0"
+permissions:
+  contents: read

@@ -5,8 +5,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
       - name: Run AI Dependency Firewall
         run: |
           echo "Scanning for malicious AI-generated dependencies..."
           # if malicious_dependency_detected:
           #   fail build
+permissions:
+  contents: read

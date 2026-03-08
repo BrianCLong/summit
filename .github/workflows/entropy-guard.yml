@@ -17,6 +17,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+        with:
+          fetch-depth: 0
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -29,3 +31,5 @@ jobs:
         env:
           SUMMIT_ENTROPY_GUARD: on
         run: python3 tools/entropy_guard/entropy_guard.py
+permissions:
+  contents: read

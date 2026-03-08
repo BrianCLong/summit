@@ -81,3 +81,5 @@ jobs:
             echo "- Commit: \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
             echo "- GA verification failed. Review logs above for details." >> $GITHUB_STEP_SUMMARY
           fi
+permissions:
+  contents: read

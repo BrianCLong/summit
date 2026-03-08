@@ -2,9 +2,9 @@ name: Reproducibility Check
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -16,6 +16,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+        with:
+          fetch-depth: 0
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
@@ -48,6 +50,7 @@ jobs:
           fi
           echo "RUN_ID=$run_id" >> $GITHUB_ENV
 
+        working-directory: ${{ github.workspace }}
       - name: Replay Run
         run: |
           echo "Replaying Run ID: $RUN_ID"
@@ -82,3 +85,6 @@ jobs:
             /bin/false
           fi
           echo "Determinism check passed! Hash: $hash1"
+        working-directory: ${{ github.workspace }}
+permissions:
+  contents: read

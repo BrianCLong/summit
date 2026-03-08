@@ -2,7 +2,7 @@ name: graphrag-eval
 on:
   pull_request:
   push:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   graphrag_eval:
@@ -13,6 +13,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+        with:
+          fetch-depth: 0
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -42,3 +44,5 @@ jobs:
           name: graphrag-eval
           path: |
             out/graphrag-eval/results.json
+permissions:
+  contents: read

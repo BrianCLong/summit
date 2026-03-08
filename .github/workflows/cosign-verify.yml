@@ -2,8 +2,8 @@ name: cosign-verify
 on:
   workflow_call:
   push:
-    branches: [ main ]
-    paths: [ 'release/**' ]
+    branches: [main]
+    paths: ['release/**']
 jobs:
   verify:
     runs-on: ubuntu-latest
@@ -23,3 +23,5 @@ jobs:
             cosign verify --use-signed-timestamps --key "$COSIGN_PUB" --certificate-oidc-issuer https://token.actions.githubusercontent.com "$img" || { echo "::error::Supply chain verification failed! Missing or invalid signed timestamps."; false; }
             cosign verify-attestation --use-signed-timestamps --key "$COSIGN_PUB" "$img" --type slsaprovenance || { echo "::error::Supply chain verification failed! Missing or invalid signed timestamps."; false; }
           done
+permissions:
+  contents: read

@@ -24,6 +24,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+        with:
+          fetch-depth: 0
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
@@ -41,3 +43,4 @@ jobs:
           fi
 
           python3 scripts/security/triage_alerts.py $ARGS
+        working-directory: ${{ github.workspace }}

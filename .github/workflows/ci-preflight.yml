@@ -31,6 +31,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+        with:
+          fetch-depth: 0
       - name: Validate Docker Compose Config
         run: docker compose -f docker-compose.dev.yaml config
 
@@ -39,6 +41,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+        with:
+          fetch-depth: 0
       - name: Install pnpm
         uses: pnpm/action-setup@v4
 
@@ -58,5 +62,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+        with:
+          fetch-depth: 0
       - name: Build Gateway Docker Image
         run: docker compose -f docker-compose.dev.yaml build gateway
+permissions:
+  contents: read

@@ -16,6 +16,8 @@ jobs:
       DEV_HOST: dev.topicality.co
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: docker/setup-buildx-action@v3
       - name: Configure AWS creds (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
@@ -50,8 +52,8 @@ jobs:
           kubectl -n intelgraph-dev create secret generic redis-uri --from-literal=uri="${REDIS_URI}" --dry-run=client -o yaml | kubectl apply -f -
         env:
           NEO4J_PASSWORD: ${{ secrets.NEO4J_PASSWORD }}
-          POSTGRES_URI:  ${{ secrets.POSTGRES_URI }}
-          REDIS_URI:     ${{ secrets.REDIS_URI }}
+          POSTGRES_URI: ${{ secrets.POSTGRES_URI }}
+          REDIS_URI: ${{ secrets.REDIS_URI }}
       - name: Helm upgrade
         run: |
           helm upgrade --install intelgraph ./helm/intelgraph \

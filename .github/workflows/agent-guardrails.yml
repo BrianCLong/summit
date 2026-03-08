@@ -19,6 +19,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4 # v6
 
+        with:
+          fetch-depth: 0
       - name: Evaluate restricted path changes
         uses: actions/github-script@v7
         with:
@@ -76,6 +78,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4 # v6
 
+        with:
+          fetch-depth: 0
       - name: Install pnpm
         uses: pnpm/action-setup@v4
       - name: Install pnpm
@@ -86,6 +90,7 @@ jobs:
         env:
           PR_BODY: ${{ github.event.pull_request.body }}
 
+        working-directory: ${{ github.workspace }}
   saos-enforcement:
     name: S-AOS Enforcement
     runs-on: ubuntu-latest
@@ -93,6 +98,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4 # v6
 
+        with:
+          fetch-depth: 0
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -107,12 +114,15 @@ jobs:
         env:
           PR_BODY: ${{ github.event.pull_request.body }}
 
+        working-directory: ${{ github.workspace }}
   pii-scan:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4 # v6
 
+        with:
+          fetch-depth: 0
       - name: Get changed files
         id: files
         uses: actions/github-script@v7
@@ -132,3 +142,4 @@ jobs:
           # Parse the JSON array of files and pass each as an argument to the script
           files='${{ steps.files.outputs.result }}'
           echo "$files" | jq -r '.[]' | xargs -d '\n' node scripts/ga/scan-pii.mjs
+        working-directory: ${{ github.workspace }}

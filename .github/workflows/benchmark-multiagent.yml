@@ -1,0 +1,16 @@
+name: benchmark-multiagent
+
+on:
+  pull_request:
+    paths:
+      - 'benchmarks/interactive/runners/multiagent_runner.*'
+      - '.github/workflows/benchmark-multiagent.yml'
+  push:
+    branches: [main]
+
+jobs:
+  multiagent-benchmarks:
+    uses: ./.github/workflows/_reusable-ci.yml
+    with:
+      run-tests: true
+      workspace-filter: ""

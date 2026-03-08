@@ -117,9 +117,12 @@ jobs:
             if [[ "${{ inputs.strict }}" == "true" ]]; then exit 1; fi
           fi
 
+        working-directory: ${{ github.workspace }}
       - name: Gate Summary
         id: gate-check
         if: always()
         run: |
           echo "passed=true" >> $GITHUB_OUTPUT
           echo "### ✅ Security & Compliance Verified" >> $GITHUB_STEP_SUMMARY
+permissions:
+  contents: read

@@ -2,7 +2,7 @@ name: GraphCI Determinism
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
     paths:
       - 'ci/graphci/**'
   pull_request:
@@ -19,6 +19,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+        with:
+          fetch-depth: 0
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -73,3 +75,5 @@ jobs:
 
           print('Determinism check passed')
           "
+permissions:
+  contents: read

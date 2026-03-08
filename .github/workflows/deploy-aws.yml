@@ -48,6 +48,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+        with:
+          fetch-depth: 0
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -94,6 +96,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+        with:
+          fetch-depth: 0
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
@@ -109,6 +113,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+        with:
+          fetch-depth: 0
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -170,3 +176,4 @@ jobs:
 
           # Optional: Run app-level functional smoke tests
           # pnpm run test:smoke
+        working-directory: ${{ github.workspace }}

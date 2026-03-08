@@ -22,3 +22,5 @@ jobs:
     uses: ./.github/workflows/_reusable-python.yml
     with:
       python-version: ${{ matrix.python-version }}
+permissions:
+  contents: read

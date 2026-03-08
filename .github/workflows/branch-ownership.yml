@@ -30,3 +30,4 @@ jobs:
           PR_NUMBER: ${{ github.event.pull_request.number }}
           GITHUB_HEAD_REF: ${{ github.head_ref }}
         run: npx tsx scripts/governance/branch_ownership_enforcer.ts
+        working-directory: ${{ github.workspace }}

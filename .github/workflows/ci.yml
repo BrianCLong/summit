@@ -3,7 +3,7 @@ name: CI
 on:
   pull_request:
   push:
-    branches: [ main ]
+    branches: [main]
     paths-ignore:
       - "**/*.md"
   merge_group:
@@ -25,6 +25,8 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
       - name: Setup pnpm
@@ -37,6 +39,8 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -54,6 +58,8 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -73,6 +79,8 @@ jobs:
     needs: [typecheck]
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
       - name: Setup Node
@@ -94,6 +102,7 @@ jobs:
             --lock-hash "${{ hashFiles('**/pnpm-lock.yaml') }}" \
             --out artifacts/stamp.json
         shell: bash
+        working-directory: ${{ github.workspace }}
       - name: Generate Metrics
         if: always()
         uses: actions/upload-artifact@v4
@@ -107,6 +116,8 @@ jobs:
     needs: [config-guard]
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
       - name: Setup Node
@@ -116,9 +127,11 @@ jobs:
           node-version-file: .nvmrc
       - name: Verify TSConfig Exclusions Frozen
         run: node scripts/ci/verify_tsconfig_excludes_frozen.mjs
+        working-directory: ${{ github.workspace }}
       - name: Verify TSConfig Inheritance
         run: node scripts/ci/verify_tsconfig_inheritance.mjs
 
+        working-directory: ${{ github.workspace }}
   security-compliance:
     name: Security & Compliance
     uses: ./.github/workflows/_reusable-security-compliance.yml
@@ -157,6 +170,8 @@ jobs:
           - 7687:7687
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
       - name: Setup Node
@@ -168,6 +183,7 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: SOC Control Unit Tests
         run: bash scripts/test-soc-controls.sh soc-compliance-reports || bash scripts/test-soc-controls.sh soc-compliance-reports
+        working-directory: ${{ github.workspace }}
       - name: Upload SOC compliance reports
         if: always()
         uses: actions/upload-artifact@v4
@@ -181,6 +197,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Verify Versions
         uses: ./.github/actions/verify-workflow-versions
       - name: Attach evidence
@@ -193,9 +211,12 @@ jobs:
             --lock-hash "${{ hashFiles('**/pnpm-lock.yaml') }}" \
             --out artifacts/stamp.json
         shell: bash
+        working-directory: ${{ github.workspace }}
       - name: Upload artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: verification-artifacts
           path: artifacts/**
+permissions:
+  contents: read

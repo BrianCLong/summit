@@ -1,7 +1,7 @@
 name: supplychain-verify
 on:
   push:
-    branches: [ "**" ]
+    branches: ["**"]
   workflow_dispatch: {}
 
 concurrency:
@@ -20,6 +20,8 @@ jobs:
       - name: Checkout (shallow ok)
         uses: actions/checkout@v4
 
+        with:
+          fetch-depth: 0
       - name: Set image ref
         id: img
         run: |

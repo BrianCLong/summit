@@ -32,8 +32,11 @@ jobs:
           npx tsx scripts/repoos/map-concern.ts "${CHANGED_FILES[@]}"
           cat concern-classification.json
 
+        working-directory: ${{ github.workspace }}
       - name: Upload concern artifact
         uses: actions/upload-artifact@v4
         with:
           name: concern-classification
           path: concern-classification.json
+permissions:
+  contents: read

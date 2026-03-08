@@ -21,6 +21,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4 # v6
 
+        with:
+          fetch-depth: 0
       - name: Install pnpm
         uses: pnpm/action-setup@v4 # v4
         # version is read from package.json packageManager field
@@ -37,3 +39,6 @@ jobs:
 
       - name: Run AI Copilot canary checks
         run: node scripts/ai-copilot-canary.cjs
+        working-directory: ${{ github.workspace }}
+permissions:
+  contents: read

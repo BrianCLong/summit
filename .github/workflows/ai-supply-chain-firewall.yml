@@ -16,6 +16,8 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
+        with:
+          fetch-depth: 0
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
@@ -33,6 +35,7 @@ jobs:
           # We run in observe mode for rollout
           python scripts/run_ai_supply_chain_firewall.py --deps ${{ env.deps }} --mode observe --output-dir evidence/ai-supply-chain-firewall
 
+        working-directory: ${{ github.workspace }}
       - name: Upload Evidence Artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -45,7 +48,11 @@ jobs:
           python scripts/profile_ai_supply_chain_firewall.py
           cat evidence/ai-supply-chain-firewall/perf.json
 
+        working-directory: ${{ github.workspace }}
       - name: Drift Monitoring
         run: |
           python scripts/monitoring/ai-supply-chain-drift.py
           cat evidence/ai-supply-chain-firewall/drift_report.json
+        working-directory: ${{ github.workspace }}
+permissions:
+  contents: read

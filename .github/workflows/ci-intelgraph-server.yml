@@ -31,3 +31,5 @@ jobs:
       evidence-artifact-name: "ci-evidence-intelgraph-server-${{ github.run_id }}"
     secrets:
       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+permissions:
+  contents: read

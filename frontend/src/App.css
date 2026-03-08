@@ -7,10 +7,39 @@
   padding: 20px;
   color: white;
   border-bottom: 1px solid #444;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.App-header h1 {
+  margin: 0;
+}
+
+.App-nav {
+  display: flex;
+  gap: 8px;
+  align-items: center;
 }
 
 .App-header button {
-  margin-left: 1rem;
+  margin-left: 0;
+}
+
+.App-nav-cta {
+  background-color: #4a90d9;
+  border: none;
+  color: #fff;
+  padding: 6px 14px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  transition: background 0.15s;
+}
+
+.App-nav-cta:hover {
+  background-color: #2f6fb3;
 }
 
 main {
@@ -22,4 +51,31 @@ main {
   height: 80vh;
   border: 1px solid #444;
   background-color: #20232a;
+}
+
+/* Root workspace wrapper */
+.root-workspace {
+  position: relative;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.workspace-back-btn {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 100;
+  background: rgba(40, 44, 52, 0.9);
+  border: 1px solid #3a3f4b;
+  color: #9da3b0;
+  padding: 5px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.workspace-back-btn:hover {
+  color: #e8eaf0;
+  border-color: #4a90d9;
 }
