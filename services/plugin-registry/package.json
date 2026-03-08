@@ -14,7 +14,7 @@
   "dependencies": {
     "@intelgraph/plugin-system": "workspace:*",
     "express": "^4.18.2",
-    "express-rate-limit": "^7.1.5",
+    "express-rate-limit": "^7.0.0",
     "pg": "^8.11.3",
     "redis": "^4.6.11",
     "zod": "^3.22.4",
