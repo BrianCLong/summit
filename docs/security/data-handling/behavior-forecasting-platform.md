@@ -1,17 +1,17 @@
-# Data Classification and Retention
+# Behavior Forecasting Data Handling
 
-## Classification
+Classification:
 - Public benchmark fixtures
 - Internal synthetic scenario traces
 - Sensitive operational traces
 - Restricted agent memory/tool I/O
 
-## Retention
-- benchmark metrics: 90 days
+Retention:
+- metrics: 90 days
 - deterministic evidence bundles: 30 days
 - raw sensitive traces: do not persist in default path
 
-## Never log
+Never log:
 - raw chain-of-thought
 - secrets / tokens / credentials
 - unredacted user content

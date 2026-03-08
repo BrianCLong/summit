@@ -1,5 +1,3 @@
-# Forecast Gate Triage
-SLO / SLA assumptions
-- forecast benchmark lane available for every PR touching agents/policies/benchmarks
-- scheduled drift job daily
-- governance gate result reproducible from artifact bundle
+# Forecast Gate Triage Runbook
+
+Steps to handle a failed forecast gate. Check fixture integrity, policy coverage, and calibration bounds. If valid, check if trajectory forecasting indicates a true risk of policy violation.

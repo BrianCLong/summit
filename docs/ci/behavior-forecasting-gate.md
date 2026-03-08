@@ -1,4 +1,14 @@
-# Behavior Forecasting Evidence Gate
-This CI workflow ensures that the agent's simulated trajectory over N steps does not exceed the allowed risk budget and calibration bounds.
+# Behavior Forecasting CI Gate
 
-Artifacts are produced deterministically into `artifacts/behavior-forecasting/` and consumed by the OPA policy check at `.opa/policy/behavior_forecasting.rego`.
+## Purpose
+The behavior forecasting gate evaluates agent scenario trajectories before allowing a PR to merge. It uses deterministic serial trajectory evaluation.
+
+## Artifacts
+Produces:
+- `report.json`
+- `metrics.json`
+- `stamp.json`
+with prefix `EVID-BF-SCENARIO-`.
+
+## Policies
+Enforces policies in `.opa/policy/behavior_forecasting.rego`. If `deny` evaluates to true, the CI job fails.
