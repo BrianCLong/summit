@@ -88,3 +88,10 @@
 }
 
 <!-- AGENT-METADATA:END -->
+
+## Security Checklist (Required)
+
+- [ ] Does not introduce any hardcoded secrets.
+- [ ] Dependencies have been audited (`pnpm audit`).
+- [ ] No restrictive licenses introduced (GPL, AGPL, LGPL).
+- [ ] No regression on branch protections or compliance gates.
