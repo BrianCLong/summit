@@ -1,9 +1,9 @@
 [
   {
     "case_id": "eval_001",
-    "pass": false,
+    "pass": true,
     "scores": {
-      "groundedness": 0,
+      "groundedness": 1,
       "citation": 1
     },
     "evidence": {
