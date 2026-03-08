@@ -1,4 +1,6 @@
 import express from "express";
+import rateLimit from "express-rate-limit";
+
 import { readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 
@@ -44,6 +46,13 @@ import {
 
 const app = express();
 app.use(express.json());
+
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per windowMs
+});
+app.use(limiter);
+
 
 const quarantineStore = new MemoryQuarantineStore();
 const antibodyLibrary = new MemoryAntibodyLibrary();
