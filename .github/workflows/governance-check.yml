@@ -25,9 +25,9 @@ jobs:
 
             // Auto-infer from title if no labels
             if (labels.length === 0) {
-              if (title.startsWith('feat:')) labels.push('minor');
-              else if (title.startsWith('fix:')) labels.push('patch');
-              else if (title.startsWith('docs:')) labels.push('patch');
+              if (title.startsWith('feat:') || title.startsWith('feat(')) labels.push('minor');
+              else if (title.startsWith('fix:') || title.startsWith('fix(')) labels.push('patch');
+              else if (title.startsWith('docs:') || title.startsWith('docs(')) labels.push('patch');
               else if (title.includes('BREAKING CHANGE')) labels.push('major');
             }
 
