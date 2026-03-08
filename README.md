@@ -1,8 +1,6 @@
-# 🏔 Summit - Agentic AI OSINT Platform & Safety Infrastructure
+# 🏔 Summit - Agentic AI OSINT Platform
 
 > Open-source intelligence gathering powered by agentic AI, knowledge graphs, and real-time data ingestion.
->
-> **Summit verifies, governs, simulates, and controls AI automation systems before they can cause real-world failures.**
 
 [![Build Status](https://github.com/BrianCLong/summit/workflows/CI/badge.svg)](https://github.com/BrianCLong/summit/actions)
 [![Coverage](https://img.shields.io/codecov/c/github/BrianCLong/summit)](https://codecov.io/gh/BrianCLong/summit)
@@ -16,52 +14,6 @@
 - **🔍 Vector Search**: Semantic retrieval with embeddings
 - **📈 CompanyOS SDK**: Enterprise intelligence APIs
 - **🔒 Security Hardened**: Production-ready CORS, Helmet, observability
-- **🛡️ Autonomous Safety Infrastructure**: Full safety lifecycle for AI agents
-
-## Why Summit Exists
-
-Autonomous systems are rapidly being deployed across software infrastructure:
-
-- AI agents
-- workflow automation
-- multi-agent pipelines
-- autonomous orchestration systems
-
-These systems can fail in ways traditional software rarely does:
-
-- runaway automation loops
-- cascading system failures
-- silent data corruption
-- governance violations
-- infrastructure overload
-
-Most platforms only focus on building automation.
-
-**Summit focuses on making automation safe.**
-
-## What Summit Does
-
-Summit provides a full safety lifecycle for autonomous systems.
-
-`Verify → Govern → Simulate → Control`
-
-It ensures systems are safe:
-
-- before deployment
-- during deployment
-- while running in production
-
-## The Summit Safety Stack
-
-Summit is built as five integrated safety layers.
-
-- **Autonomous Systems Control Plane (ASCP)**: Runtime intervention + containment
-- **Autonomous Systems Risk Simulation Lab (ARS-Lab)**: Catastrophic failure simulation
-- **Autonomous Systems Governance & Compliance Engine (ASGCE)**: Governance + regulatory evidence
-- **Agentic Automation Safety Framework (AASF)**: Operational safety verification
-- **Automation Scale Analyzer**: Architecture readiness evaluation
-
-Together they form safety infrastructure for autonomous systems.
 
 ## 🚀 Quickstart
 
@@ -124,152 +76,37 @@ curl -X POST http://localhost:4000/api/graphql \
 open http://localhost:3000
 ```
 
-## 🏛 Architecture Overview
+## 🏛 Architecture
 
-```text
-                         Control
-                          ▲
-                          │
-                Risk Simulation
-                          ▲
-                          │
-                   Governance
-                          ▲
-                          │
-                 Safety Verification
-                          ▲
-                          │
-                Architecture Analysis
-                          ▲
-                          │
-                  Autonomous Systems
+Summit follows a modular microservices architecture:
+
+```
+┌──────────────────────────────────┐
+│ 👥 User Agents (Jules, Codex)   │
+└──────────┬───────────────────────┘
+           │
+           v
+┌──────────┬────────────────────────┐
+│ API Layer │ GraphQL + REST APIs    │
+└──────────┬────────────────────────┘
+           │
+   ┌───────┼────────┐
+   │       │        │
+   v       v        v
+┌────────┐ ┌────────┐ ┌────────┐
+│ Ingest │ │GraphRAG│ │ Agents │
+│ Engine │ │Pipeline│ │ Orchest│
+└────┬───┘ └───┬────┘ └───┬────┘
+     │         │          │
+     v         v          v
+┌─────────────────────────────────┐
+│ 📊 Data Layer                   │
+│ Neo4j | Postgres | Redis | Qdrant│
+└─────────────────────────────────┘
 ```
 
-Detailed architecture documentation:
-
-- [Summit Autonomous Safety Architecture](docs/architecture/summit-autonomous-safety-architecture.md)
-- [Architecture Map](docs/architecture/summit-safety-architecture-map.md)
-
-## Safety Lifecycle
-
-Summit enforces a complete safety pipeline.
-
-```text
-Design
- ↓
-Architecture Verification
- ↓
-Operational Safety Validation
- ↓
-Governance Enforcement
- ↓
-Catastrophic Risk Simulation
- ↓
-Runtime Monitoring & Control
-```
-
-Each step produces machine-verifiable evidence.
-
-## Deterministic Safety Artifacts
-
-All modules produce reproducible artifacts.
-
-```text
-artifacts/
-
-automation-scale/
-  architecture-score.json
-
-aasf/
-  safety-score.json
-
-asgce/
-  compliance-report.json
-
-ars-lab/
-  catastrophe-risk.json
-
-ascp/
-  control-decisions.json
-```
-
-These artifacts allow CI systems to enforce safety guarantees.
-
-## CI Safety Gates
-
-Summit integrates directly into CI pipelines.
-
-- `automation-scale-check`
-- `aasf-safety-check`
-- `asgce-compliance-check`
-- `ars-lab-risk-check`
-- `ascp-runtime-check`
-
-If a safety check fails: **deployment blocked**
-
-## Threat Model
-
-Summit is designed to mitigate failures such as:
-
-- runaway agents
-- cascading automation failures
-- silent data corruption
-- governance violations
-- resource exhaustion
-- shadow automation
-
-See the full threat model: [Summit Threat Model](docs/security/summit-threat-model.md)
-
-## Example Usage
-
-Example workflow:
-
-```bash
-pnpm summit analyze
-pnpm summit safety-check
-pnpm summit governance-check
-pnpm summit simulate-risk
-pnpm summit runtime-monitor
-```
-
-This pipeline verifies that a system is safe to deploy and operate.
-
-## Repository Structure
-
-```text
-packages/
-
-automation-scale/
-aasf/
-asgce/
-ars-lab/
-ascp/
-
-docs/
-
-architecture/
-security/
-
-scripts/
-tests/
-```
-
-## Who Summit Is For
-
-Summit is useful for teams building:
-
-- AI agents
-- multi-agent systems
-- workflow automation
-- autonomous infrastructure
-- AI orchestration platforms
-
-It is especially valuable where failures could impact:
-
-- infrastructure
-- financial systems
-- enterprise workflows
-- regulatory compliance
+For the complete trust architecture narrative and visual map, see
+[`docs/architecture/overview.md`](docs/architecture/overview.md).
 
 ## 🧩 Core Components
 
@@ -370,50 +207,11 @@ See: [Deployment Guide](docs/deployment/README.md)
 
 ## 🤝 Contributing
 
-We welcome contributions in several areas:
+We welcome contributions! Please see:
 
-- agent safety verification
-- risk simulation models
-- governance policy engines
-- runtime intervention systems
-- safety benchmarking
-
-Before contributing, please review:
-
-- `docs/architecture/`
-- `docs/security/`
 - [Contributing Guidelines](CONTRIBUTING.md)
 - [Code of Conduct](CODE_OF_CONDUCT.md)
 - [Development Setup](docs/development/setup.md)
-
-## Design Principles
-
-Summit follows five core safety principles.
-
-| Principle | Meaning |
-| --- | --- |
-| Fail Predictably | detect failures early |
-| Contain Failures | isolate damage |
-| Prove Safety | machine-verifiable evidence |
-| Enforce Governance | policy enforcement |
-| Control Runtime | intervene when necessary |
-
-## Project Status
-
-Summit is currently in early development.
-
-The architecture is designed to support:
-
-- large-scale agent systems
-- enterprise automation
-- regulated AI deployments
-- safety-critical infrastructure
-
-## Long-Term Vision
-
-Summit aims to become the safety layer for autonomous systems.
-
-Just as Kubernetes became infrastructure for containerized software, Summit aims to become infrastructure for safe AI automation.
 
 ## 📄 License
 
@@ -426,3 +224,4 @@ Just as Kubernetes became infrastructure for containerized software, Summit aims
 - **Documentation**: [Full docs](docs/)
 
 Built with ❤️ by [@BrianCLong](https://github.com/BrianCLong) and [contributors](https://github.com/BrianCLong/summit/graphs/contributors)
+\n\n# Verified Governance (2026-02-10)
