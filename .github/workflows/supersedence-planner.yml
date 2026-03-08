@@ -1,0 +1,62 @@
+name: supersedence-planner
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 * * * *"
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review, edited]
+
+permissions:
+  contents: read
+  pull-requests: read
+  issues: read
+
+concurrency:
+  group: supersedence-planner-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  plan:
+    name: plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    env:
+      REPO: ${{ github.repository }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      SUPERSEDENCE_MIN_SCORE: "0.78"
+      SUPERSEDENCE_PENDING_CLOSE_SCORE: "0.80"
+      SUPERSEDENCE_AUTO_CLOSE_SCORE: "0.90"
+      SUPERSEDENCE_MAX_PRS: "250"
+      SUPERSEDENCE_MAX_FILES_PER_PR: "300"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Generate supersedence plan
+        run: node scripts/pr/supersedence_planner.mjs
+
+      - name: Validate artifacts exist
+        run: |
+          test -f artifacts/supersedence-report.json
+          test -f artifacts/supersedence-actions.json
+          test -f artifacts/supersedence-summary.md
+
+      - name: Upload supersedence artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: supersedence-plan
+          path: |
+            artifacts/supersedence-report.json
+            artifacts/supersedence-actions.json
+            artifacts/supersedence-summary.md
+
+      - name: Append job summary
+        run: cat artifacts/supersedence-summary.md >> "$GITHUB_STEP_SUMMARY"

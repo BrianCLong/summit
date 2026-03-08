@@ -1,0 +1,27 @@
+name: Merge Train (Dry-Run)
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 * * * *"
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  plan-train:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Prioritized Batch Plan
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "### spec: Speculative Merge Train Plan (Prioritized)" > plan.md
+          echo "Sorting by freshest activity to minimize rebase churn." >> plan.md
+          echo "" >> plan.md
+          gh pr list --label "queue:merge-now" --json number,title,updatedAt --limit 10 | jq -r 'sort_by(.updatedAt) | reverse | .[] | "- [ ] Merge #\(.number): \(.title)"' >> plan.md
+          echo "" >> plan.md
+          echo "TODO: Once reviewed, flip merge-train.yml to 'live' to enable automated FAANG-scale harvesting." >> plan.md
+          cat plan.md >> $GITHUB_STEP_SUMMARY

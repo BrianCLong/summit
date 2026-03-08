@@ -45,7 +45,7 @@ jobs:
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4 # v4
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
         with:
           ref: ${{ inputs.ref }}
           fetch-depth: 0
@@ -54,11 +54,14 @@ jobs:
         id: capture-sha
         run: echo "sha=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
 
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@dc72c7d5c4d10cd6bcb8cf6e3fd625a9e5e537da # v3.7.0
+
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@069ec91038596646506f21226bb872652a23364f # v4.0.0
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4 # v4
+        uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4
         with:
           cache: 'pnpm'
           cache-dependency-path: '**/pnpm-lock.yaml'
@@ -69,17 +72,12 @@ jobs:
         with:
           go-version: "1.21"
 
-      - name: Install Tools (OPA, Cosign, Syft, Grype)
+      - name: Install Tools (OPA, Syft, Grype)
         run: |
           # OPA
           curl -L -o opa https://openpolicyagent.org/downloads/v0.61.0/opa_linux_amd64_static
           chmod +x opa
           sudo mv opa /usr/local/bin/
-
-          # Cosign
-          curl -L -o cosign https://github.com/sigstore/cosign/releases/download/v2.2.3/cosign-linux-amd64
-          chmod +x cosign
-          sudo mv cosign /usr/local/bin/
 
           # Syft
           curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
@@ -98,8 +96,8 @@ jobs:
           npm run compliance:antigravity
 
       # 2. Security: Secrets & Vulns
-      - name: Run Trivy (Secrets)
-        uses: aquasecurity/trivy-action@22438a435773de8c97dc0958cc0b823c45b064ac # v0.24.0
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@97725528e1d711b7a66f7f2b963e6399182390f7 # v0.24.0
         with:
           scan-type: "fs"
           scan-ref: "."

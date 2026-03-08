@@ -1,0 +1,100 @@
+name: Hyper-Scale Merge Train & Semantic Slicer
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+concurrency:
+  group: hyperscale-train-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  slicer-and-maturer:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      REPO: ${{ github.repository }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Git
+        run: |
+          git config --global user.name "summit-slicer-agent[bot]"
+          git config --global user.email "summit-slicer-agent[bot]@users.noreply.github.com"
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install GitHub CLI
+        run: |
+          sudo apt-get update
+          sudo apt-get install gh -y
+
+      - name: Run Semantic PR Slicer & Maturer
+        run: node scripts/orchestrator/semantic_slicer_maturer.mjs
+
+      - name: Upload recovery artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: updated-recovery-requests
+          path: artifacts/recovery_requests.json
+
+  mass-harvest-train:
+    needs: slicer-and-maturer
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      REPO: ${{ github.repository }}
+      HARVEST_MAX_BATCH_SIZE: "50"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Git
+        run: |
+          git config --global user.name "summit-harvest-engine[bot]"
+          git config --global user.email "summit-harvest-engine[bot]@users.noreply.github.com"
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install GitHub CLI
+        run: |
+          sudo apt-get update
+          sudo apt-get install gh -y
+
+      - name: Run Mass Harvest Integration Engine
+        run: node scripts/orchestrator/mass_harvest_train.mjs
+
+      - name: Upload Harvest Manifest
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: harvest-manifest
+          path: artifacts/harvest/harvest_manifest.json
+
+      - name: Append job summary
+        if: always()
+        run: |
+          if [ -f artifacts/harvest/harvest-summary.md ]; then
+            cat artifacts/harvest/harvest-summary.md >> "$GITHUB_STEP_SUMMARY"
+          fi

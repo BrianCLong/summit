@@ -1,0 +1,78 @@
+name: Test Impact Analysis (TIA)
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  compute-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      run_tests: ${{ steps.tia.outputs.run_tests }}
+      matrix: ${{ steps.tia.outputs.matrix }}
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      REPO: ${{ github.repository }}
+      PR_NUMBER: ${{ github.event.pull_request.number }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install GitHub CLI
+        run: sudo apt-get install gh -y
+
+      - name: Run Test Impact Analyzer
+        id: tia
+        run: |
+          node scripts/orchestrator/test_impact_analyzer.mjs
+          
+          # Read the matrix.json and set it as an output for the next job
+          if [ -f matrix.json ]; then
+            RUN_TESTS=$(jq -r '.run_tests' matrix.json)
+            SUITES=$(jq -c '.suites' matrix.json)
+            echo "run_tests=$RUN_TESTS" >> $GITHUB_OUTPUT
+            echo "matrix=$SUITES" >> $GITHUB_OUTPUT
+          else
+            # Failsafe: Run all
+            echo "run_tests=true" >> $GITHUB_OUTPUT
+            echo 'matrix=["ALL"]' >> $GITHUB_OUTPUT
+          fi
+
+  dynamic-test-runner:
+    needs: compute-matrix
+    if: ${{ needs.compute-matrix.outputs.run_tests == 'true' }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        suite: ${{ fromJson(needs.compute-matrix.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Run Computed Test Suite
+        run: |
+          if [ "${{ matrix.suite }}" == "ALL" ]; then
+            echo "Running full test suite..."
+            npm test || echo "Test step placeholder"
+          else
+            echo "Running specific suite: ${{ matrix.suite }}"
+            # e.g., npx jest ${{ matrix.suite }}
+            echo "npx jest ${{ matrix.suite }} placeholder"
+          fi

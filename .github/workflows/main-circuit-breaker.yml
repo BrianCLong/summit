@@ -1,0 +1,37 @@
+name: CI Circuit Breaker (Auto-Revert)
+
+on:
+  workflow_run:
+    workflows: ["ci"] # Replace with the actual name of your main CI workflow
+    branches: [main]
+    types: [completed]
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  auto-revert-failed-main:
+    if: ${{ github.event.workflow_run.conclusion == 'failure' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      REPO: ${{ github.repository }}
+      FAILED_COMMIT_SHA: ${{ github.event.workflow_run.head_sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install GitHub CLI
+        run: sudo apt-get install gh -y
+
+      - name: Engage Circuit Breaker
+        run: node scripts/orchestrator/circuit_breaker.mjs

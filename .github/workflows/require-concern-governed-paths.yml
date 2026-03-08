@@ -1,0 +1,56 @@
+name: require-concern-governed-paths
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened, ready_for_review]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: read
+  issues: read
+
+concurrency:
+  group: require-concern-governed-paths-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  enforce:
+    name: enforce
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      REPO: ${{ github.repository }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GOVERNED_PATHS: |
+        .github/**
+        docs/governance/**
+        infra/**
+        scripts/pr/**
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Enforce /concern on governed paths
+        run: node scripts/pr/require_concern_governed_paths.mjs
+
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: governed-path-concern-report
+          path: |
+            artifacts/governed-path-concern-report.json
+            artifacts/governed-path-concern-summary.md
+
+      - name: Append job summary
+        if: always()
+        run: |
+          if [ -f artifacts/governed-path-concern-summary.md ]; then
+            cat artifacts/governed-path-concern-summary.md >> "$GITHUB_STEP_SUMMARY"
+          fi

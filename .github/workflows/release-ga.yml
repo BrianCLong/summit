@@ -90,7 +90,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4 # v4
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
       - name: Check Freeze Mode
         run: |
@@ -119,7 +119,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4 # v4
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
           fetch-depth: 0
           ref: ${{ needs.gate.outputs.tag }}
@@ -221,7 +221,7 @@ jobs:
           fi
 
       - name: Install Cosign
-        uses: sigstore/cosign-installer@9614fae9e5c5eddabb09f90a270fcb487c9f7149 # v3.3.0
+        uses: sigstore/cosign-installer@dc72c7d5c4d10cd6bcb8cf6e3fd625a9e5e537da # v3.7.0
         with:
           cosign-release: "v3.0.5"
 
@@ -235,8 +235,8 @@ jobs:
 
           echo "Signature created: staging/ga-bundle/provenance.json.sig"
 
-      - name: Upload GA Bundle
-        uses: actions/upload-artifact@v4 # v4
+      - name: Upload Evidence
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.6.0
         with:
           name: ga-bundle-staging
           path: staging/ga-bundle/
@@ -257,25 +257,25 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4 # v4
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
           fetch-depth: 0
           ref: ${{ needs.gate.outputs.tag }}
 
       - name: Download GA Bundle
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v4
+        uses: actions/download-artifact@f4449ee484a51e670490b4d4554b679f5370d76f # v4.1.7
         with:
           name: ga-bundle-staging
           path: staging/ga-bundle
 
       - name: Download Verification Output
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v4
+        uses: actions/download-artifact@f4449ee484a51e670490b4d4554b679f5370d76f # v4.1.7
         with:
           name: verification-output
           path: staging/verification
 
       - name: Install Cosign
-        uses: sigstore/cosign-installer@9614fae9e5c5eddabb09f90a270fcb487c9f7149 # v3.3.0
+        uses: sigstore/cosign-installer@dc72c7d5c4d10cd6bcb8cf6e3fd625a9e5e537da # v3.7.0
         with:
           cosign-release: "v3.0.5"
 
@@ -313,7 +313,7 @@ jobs:
           fi
 
       - name: Upload Publish Guard Report
-        uses: actions/upload-artifact@v4 # v4
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4
         with:
           name: publish-guard-report
           path: artifacts/publish-guard/
@@ -345,10 +345,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4 # v4
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
       - name: Download All Artifacts
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v4
+        uses: actions/download-artifact@f4449ee484a51e670490b4d4554b679f5370d76f # v4.1.7
         with:
           path: staging
 
@@ -439,7 +439,7 @@ jobs:
           ls -la "${BUNDLE_DIR}/"
 
       - name: Upload GA Release Bundle
-        uses: actions/upload-artifact@v4 # v4
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4
         with:
           name: ga-release-bundle-${{ needs.gate.outputs.tag }}
           path: ga-release-bundle-${{ needs.gate.outputs.tag }}
@@ -532,10 +532,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4 # v4
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
       - name: Download GA Release Bundle
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v4
+        uses: actions/download-artifact@f4449ee484a51e670490b4d4554b679f5370d76f # v4.1.7
         with:
           name: ga-release-bundle-${{ needs.gate.outputs.tag }}
           path: ga-release-bundle

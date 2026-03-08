@@ -1,0 +1,43 @@
+name: enforce-pr-concern-hints
+
+on:
+  pull_request:
+    types: [opened, reopened, edited, synchronize, ready_for_review]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: read
+  issues: read
+
+concurrency:
+  group: enforce-pr-concern-hints-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  enforce:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      REPO: ${{ github.repository }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      CONCERN_STRICT: "true"
+      CONCERN_REQUIRE_DECLARATION: "true"
+      CONCERN_WARN_ON_DUPLICATE_OPEN: "true"
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Enforce PR concern hints
+        run: node scripts/pr/enforce_pr_concern_hints.mjs
+
+      - name: Upload summary artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr-concern-hints-summary
+          path: artifacts/pr-concern-hints-summary.md

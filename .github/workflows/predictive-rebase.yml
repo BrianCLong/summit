@@ -1,0 +1,40 @@
+name: Predictive Rebase
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  rebase:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Git
+        run: |
+          git config --global user.name "summit-rebase-agent[bot]"
+          git config --global user.email "summit-rebase-agent[bot]@users.noreply.github.com"
+
+      - name: Find and Rebase Outdated PRs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr list --state open --limit 50 --json number,headRefName,mergeStateStatus | jq -c '.[]' | while read pr; do
+            num=$(echo $pr | jq -r '.number')
+            state=$(echo $pr | jq -r '.mergeStateStatus')
+            
+            if [ "$state" = "BEHIND" ]; then
+              echo "Rebasing PR #$num"
+              gh pr checkout $num
+              git fetch origin main
+              git rebase origin/main || (git rebase --abort && echo "Manual rebase required for #$num")
+              git push --force-with-lease || echo "Failed to push rebase for #$num"
+            fi
+          done

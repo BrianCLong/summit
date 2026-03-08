@@ -1,0 +1,53 @@
+name: 🎯 PR Intake Processor (Quick Cycle)
+
+on:
+  schedule:
+    # Run every 15 minutes for quick PR processing
+    - cron: '*/15 * * * *'
+
+  pull_request:
+    types: [opened, reopened, synchronize, ready_for_review]
+
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  intake:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Auto-Detect Concerns
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          chmod +x scripts/orchestrator/auto_concern_detector.mjs
+          node scripts/orchestrator/auto_concern_detector.mjs || true
+
+      - name: Classify PRs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          chmod +x scripts/orchestrator/pr-classifier.mjs
+          node scripts/orchestrator/pr-classifier.mjs
+
+      - name: Select Canonical Survivors
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          chmod +x scripts/orchestrator/canonical_survivor_selector.mjs
+          node scripts/orchestrator/canonical_survivor_selector.mjs
