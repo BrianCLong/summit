@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["case_id", "risk_score", "risk_level", "confidence", "evidence_ids"],
+  "properties": {
+    "case_id": { "type": "string" },
+    "risk_score": { "type": "number" },
+    "risk_level": { "type": "string" },
+    "confidence": { "type": "number" },
+    "evidence_ids": { "type": "array", "items": { "type": "string" } }
+  }
+}

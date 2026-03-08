@@ -1,0 +1,8 @@
+{
+  "suite": "mosaic-threat-model",
+  "cases": 250,
+  "p50_ms": 21,
+  "p95_ms": 88,
+  "max_rss_mb": 18,
+  "baseline_ref": "main"
+}

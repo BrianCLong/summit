@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["case_id", "context", "item_slug", "observations"],
+  "properties": {
+    "case_id": { "type": "string" },
+    "context": { "enum": ["domestic", "public_figure", "workplace", "school", "general"] },
+    "item_slug": { "type": "string" },
+    "observations": { "type": "array" }
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "case_id": "CASE-EXAMPLE",
+  "context": "public_figure",
+  "risk_score": 0.81,
+  "risk_level": "HIGH",
+  "confidence": 0.77,
+  "score_breakdown": {
+    "base": 18.4,
+    "context_prior": 1.5,
+    "interaction_bonus": 4,
+    "protective_suppression": 1.6,
+    "uncertainty_penalty": 0.4
+  },
+  "triggered_indicators": ["TA_COMM_001", "TA_APPROACH_004", "TA_PLAN_012"],
+  "evidence_ids": ["EVID:mosaic-threat-model:MSG:001", "EVID:mosaic-threat-model:OBS:004"],
+  "recommendations": ["analyst_review_urgent", "harden_access_controls"]
+}

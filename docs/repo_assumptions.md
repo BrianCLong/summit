@@ -1,35 +1,9 @@
-# Repo Assumptions — ai-platform-daily-2026-02-07
+# Repository Assumptions for MOSAIC-style Threat Model
 
-**Status:** Intentionally constrained pending in-repo validation.
-**Item Slug:** ai-platform-daily-2026-02-07
-
-## Verified (from provided path map)
-
-- Runtime: **Node 18+**, **TypeScript**, **pnpm**, GitHub Actions.
-- Canonical paths:
-  - `.github/workflows/{ci-core.yml,ci-pr.yml,ci-security.yml,ci-verify.yml,codeql.yml,agent-guardrails.yml,agentic-plan-gate.yml,_reusable-*.yml}`
-  - `.github/{actions/,scripts/,policies/,MILESTONES/}`
-  - `src/{api/graphql,api/rest,agents,connectors,graphrag}`
-  - `tests/<module>/...`, `tests/e2e/...` (via pnpm scripts)
-- Docs layout: `docs/{architecture,api,security}` with suggested extensions `docs/{governance,operations,ga}`.
-
-## Assumed (must validate in repo)
-
-- Actual existing agent runtime entrypoints under `src/agents/` (names, interfaces).
-- Existing policy engine format under `.github/policies/` (OPA vs custom).
-- Evidence schema conventions (filenames, JSON structure).
-- Current CI job names inside the workflows (exact `name:` fields).
-
-## Must-not-touch list (until validated)
-
-- `.github/workflows/codeql.yml`
-- Any production deployment workflows (if present)
-- DB migration directories (if present)
-- Secrets / encrypted configs
-
-## Validation checklist (before PRs merge)
-
-- Confirm `.github/workflows/*` filenames + required checks in branch protection.
-- Confirm `src/agents` architecture (planner/executor/observer?) and how tools are defined today.
-- Confirm logging/telemetry stack (to wire MCP audit + drift detector).
-- Confirm test runner + assertion libs (`pnpm test:*`).
+| Item | Status | Validation method | Owner |
+|---|---|---|---|
+| Summit has `server/` TypeScript runtime suitable for isolated module work | verified | inspected `server/package.json` and `server/src` | codex |
+| Required checks policy exists and should not be edited in this slice | verified | inspected `docs/ci/REQUIRED_CHECKS_POLICY.yml` path presence | codex |
+| Landing zone `server/src/threat_assessment/` minimizes blast radius | assumed | constrained to new subtree only | codex |
+| Feature should remain off by default | verified | implemented `SUMMIT_THREAT_ASSESSMENT_ENABLED` default false check | codex |
+| Deterministic artifacts can live under `artifacts/threat-assessment/mosaic-threat-model` | assumed | created isolated artifact namespace with stable JSON fields | codex |

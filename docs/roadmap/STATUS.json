@@ -1,7 +1,13 @@
 {
-  "last_updated": "2026-03-07T06:03:42Z",
-  "revision_note": "Added Nature s41562-026-02411-w Layer 2/3 regulatory subsumption architecture brief and roadmap tracking entry.",
+  "last_updated": "2026-03-08T04:20:55Z",
+  "revision_note": "Added clean-room MOSAIC-style threat assessment scaffold and evidence artifacts.",
   "initiatives": [
+    {
+      "id": "mosaic-threat-model-clean-room",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Scaffolded deterministic clean-room MOSAIC-style threat assessment module, tests, docs, artifacts, and monitoring scripts with feature flag default OFF."
+    },
     {
       "id": "nature-s41562-026-02411-w-layer2-layer3",
       "status": "in_progress",
