@@ -3,35 +3,150 @@
   "type": "object",
   "anyOf": [
     {
-      "required": ["evidence_id", "summary", "artifacts"],
+      "required": [
+        "evidence_id",
+        "summary",
+        "artifacts"
+      ],
       "properties": {
-        "evidence_id": { "type": "string" },
-        "summary": { "type": "string" },
-        "artifacts": { "type": "array", "items": { "type": "string" } }
+        "evidence_id": {
+          "type": "string"
+        },
+        "summary": {
+          "type": "string"
+        },
+        "artifacts": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
       }
     },
     {
-      "required": ["run_id", "item_slug", "evd_ids", "summary", "artifacts"],
+      "required": [
+        "run_id",
+        "item_slug",
+        "evd_ids",
+        "summary",
+        "artifacts"
+      ],
       "properties": {
-        "run_id": { "type": "string" },
-        "item_slug": { "type": "string" },
-        "evd_ids": { "type": "array", "items": { "type": "string" } },
+        "run_id": {
+          "type": "string"
+        },
+        "item_slug": {
+          "type": "string"
+        },
+        "evd_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
         "summary": {
           "type": "object",
-          "required": ["what_ran", "result"],
+          "required": [
+            "what_ran",
+            "result"
+          ],
           "properties": {
-            "what_ran": { "type": "string" },
-            "result": { "type": "string" }
+            "what_ran": {
+              "type": "string"
+            },
+            "result": {
+              "type": "string"
+            }
           }
         },
         "artifacts": {
           "type": "object",
           "properties": {
-            "metrics": { "type": "string" },
-            "stamp": { "type": "string" }
+            "metrics": {
+              "type": "string"
+            },
+            "stamp": {
+              "type": "string"
+            }
           }
         }
       }
+    },
+    {
+      "required": [
+        "eid",
+        "summary"
+      ],
+      "properties": {
+        "eid": {
+          "type": "string"
+        },
+        "summary": {
+          "type": "string"
+        }
+      }
+    },
+    {
+      "title": "Summit Evidence Report (Strict)",
+      "required": [
+        "evidence_id",
+        "subject",
+        "result",
+        "artifacts"
+      ],
+      "properties": {
+        "evidence_id": {
+          "type": "string",
+          "pattern": "^EVD-[A-Z0-9-]+-[A-Z]+-[0-9]{3}$"
+        },
+        "subject": {
+          "type": "object",
+          "required": [
+            "type",
+            "name"
+          ],
+          "properties": {
+            "type": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "digest": {
+              "type": "string"
+            }
+          }
+        },
+        "result": {
+          "type": "string",
+          "enum": [
+            "pass",
+            "fail"
+          ]
+        },
+        "artifacts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "kind",
+              "path"
+            ],
+            "properties": {
+              "kind": {
+                "type": "string"
+              },
+              "path": {
+                "type": "string"
+              },
+              "sha256": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "additionalProperties": false
     }
   ],
   "additionalProperties": true

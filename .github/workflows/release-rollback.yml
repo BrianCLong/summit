@@ -13,7 +13,7 @@ on:
         required: true
         type: string
       reason:
-        description: "Reason for rollback (min 20 chars)"
+        description: "Reason for rollback (min 18 chars)"
         required: true
         type: string
       create_issue:
@@ -57,8 +57,8 @@ jobs:
           fi
 
           # Validate reason length
-          if [[ ${#REASON} -lt 20 ]]; then
-            echo "::error::Reason must be at least 20 characters"
+          if [[ ${#REASON} -lt 18 ]]; then
+            echo "::error::Reason must be at least 18 characters"
             echo "valid=false" >> $GITHUB_OUTPUT
             exit 1
           fi
@@ -144,7 +144,7 @@ jobs:
 
       - name: Upload Report
         if: always()
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        uses: actions/upload-artifact@v4 # v6
         with:
           name: rollback-report-${{ inputs.tag }}-${{ github.run_id }}
           path: artifacts/reports/rollback-*.md

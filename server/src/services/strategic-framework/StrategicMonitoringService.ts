@@ -33,7 +33,10 @@ import {
 } from './types.js';
 import { strategicPlanningService } from './StrategicPlanningService.js';
 
-const tracer = getTracer('strategic-monitoring-service');
+const tracer =
+  typeof getTracer === 'function'
+    ? getTracer('strategic-monitoring-service')
+    : { startSpan: () => ({ end: () => { } }) };
 
 // In-memory storage
 const dashboardsStore = new Map<string, StrategicDashboard>();

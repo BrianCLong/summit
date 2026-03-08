@@ -129,6 +129,11 @@ SLSA Level 3 compliant container builds with SBOM and provenance.
 - Cosign signing
 - Multi-platform support
 
+## Protocols & Playbooks
+
+- `COMPETITIVE_INTELLIGENCE_PROTOCOL.md`: Competitive intelligence subsumption protocol,
+  including target intake, extraction, integration, PR stack slicing, and gates.
+
 ## Actions Pinning
 
 All actions are pinned to SHA hashes in `.github/actions-lock.json`:
@@ -238,7 +243,7 @@ gh run cancel <run-id>  # Cancel stale run
 
 - [GOVERNANCE_LOCKFILE.md](./GOVERNANCE_LOCKFILE.md) - Lockfile format and verification
 - [BRANCH_PROTECTION_RECONCILIATION.md](./BRANCH_PROTECTION_RECONCILIATION.md) - Protection alignment
-- [CANARY_ROLLOUT.md](./CANARY_ROLLOUT.md) - Canary promotion process
-- [ACTIONS_PINNING.md](./ACTIONS_PINNING.md) - SHA pinning policy
+- CANARY_ROLLOUT.md - Canary promotion process
+- ACTIONS_PINNING.md - SHA pinning policy
 - [LINEAR_SYNC.md](./LINEAR_SYNC.md) - Linear ↔ GitHub sync invariants for governance tickets
 - [daily/2026-01-29-ci-cd-daily.md](./daily/2026-01-29-ci-cd-daily.md) - CI/CD daily report

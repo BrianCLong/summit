@@ -1,0 +1,19 @@
+version: 1
+policy: flex_node_policy
+enabled: false
+deny_by_default: true
+default_provider: aws
+providers:
+  aws:
+    allowed_families: [m7i, c7i, r7i]
+    max_hourly_cost_usd: 4.0
+  azure:
+    allowed_families: [Dsv5, Esv5, Fsv2]
+    max_hourly_cost_usd: 4.0
+  gcp:
+    allowed_families: [n2, c3, e2]
+    max_hourly_cost_usd: 4.0
+budgets:
+  max_selection_runtime_ms: 50
+  max_memory_mb: 50
+  max_ci_runtime_s: 30

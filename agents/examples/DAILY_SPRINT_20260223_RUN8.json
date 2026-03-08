@@ -1,0 +1,38 @@
+{
+  "task_id": "DAILY_SPRINT_20260223_RUN8",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "daily-sprint",
+    "version": "v1",
+    "sha256": "1c3be7c6b79e4bc6f3c2bec38313bd05327d20b957f65b2df454bdfad54043e7",
+    "path": "prompts/automation/daily-sprint@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "docs/ops/DAILY_SPRINT_2026-02-23.md",
+      "docs/roadmap/STATUS.json",
+      "prompts/automation/daily-sprint@v1.md",
+      "prompts/registry.yaml",
+      "agents/examples/DAILY_SPRINT_20260223_RUN8.json"
+    ],
+    "domains": ["operations", "governance", "documentation"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["docs/ops/DAILY_SPRINT_2026-02-23.md"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Daily sprint plan and evidence bundle recorded.",
+    "Status and blockers documented with Governed Exceptions as needed.",
+    "Prompt registry entry updated for the daily sprint prompt."
+  ],
+  "stop_conditions": [
+    "Prompt registry entry fails integrity validation.",
+    "Required evidence bundle cannot be captured due to tooling outage."
+  ]
+}

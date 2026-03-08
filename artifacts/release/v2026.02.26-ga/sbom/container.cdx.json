@@ -1,0 +1,21 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.4",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2026-02-26T00:00:00Z",
+    "tools": [
+      {
+        "vendor": "Anchore",
+        "name": "syft",
+        "version": "mock-0.0.1"
+      }
+    ],
+    "component": {
+      "type": "container",
+      "name": "intelgraph-platform-container",
+      "version": "2026.02.26-ga"
+    }
+  },
+  "components": []
+}

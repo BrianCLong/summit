@@ -1,0 +1,12 @@
+{
+  "origin": "https://evil.example",
+  "timestamp_ms": 1000,
+  "actions": [
+    {
+      "type": "click",
+      "target": "#submit",
+      "timestamp_ms": 1001,
+      "payload": {}
+    }
+  ]
+}

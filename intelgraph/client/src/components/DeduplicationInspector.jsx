@@ -6,7 +6,10 @@ const DeduplicationInspector = () => {
   const [candidates, setCandidates] = useState([]);
   const [feedback, setFeedback] = useState(null);
   const [mergeInFlight, setMergeInFlight] = useState(null);
-  const [similarityThreshold, setSimilarityThreshold] = useState(0.5);
+  const [similarityThreshold, setSimilarityThreshold] = useState(() => {
+    const saved = localStorage.getItem("deduplication.similarityThreshold");
+    return saved !== null ? parseFloat(saved) : 0.5;
+  });
   const [expandedDetails, setExpandedDetails] = useState(new Set());
   const { loading, error, data } = useQuery(GET_DEDUPLICATION_CANDIDATES);
   const [suggestMerge] = useMutation(SUGGEST_MERGE);
@@ -54,24 +57,20 @@ const DeduplicationInspector = () => {
       console.error("Error merging entities:", err);
 
       // Determine error type and provide actionable guidance
-      let errorMessage = "Merge failed. ";
+      let errorMessage = "Merge failed: " + err.message;
       let errorDetails = "";
       let retryable = true;
 
       if (err.networkError) {
-        errorMessage += "Network connection issue detected.";
         errorDetails = "Please check your internet connection and try again.";
       } else if (err.graphQLErrors && err.graphQLErrors.length > 0) {
         const graphQLError = err.graphQLErrors[0];
-        errorMessage += "Validation error.";
         errorDetails =
           graphQLError.message || "The entities cannot be merged due to data constraints.";
         retryable = false;
       } else if (err.message && err.message.includes("timeout")) {
-        errorMessage += "Request timed out.";
         errorDetails = "The operation took too long. Please try again.";
       } else {
-        errorMessage += "An unexpected error occurred.";
         errorDetails = err.message || "Please try again or contact support if the issue persists.";
       }
 
@@ -99,7 +98,7 @@ const DeduplicationInspector = () => {
     }
   };
 
-  if (loading) return <p>Loading...</p>;
+  if (loading) return <p>Loading candidates...</p>;
   if (error) return <p>Error :(</p>;
 
   const filteredCandidates = candidates.filter(
@@ -356,6 +355,12 @@ const DeduplicationInspector = () => {
   return (
     <div>
       <h2>Deduplication Inspector</h2>
+      {mergeInFlight && (
+        <div role="status" style={{ marginBottom: "16px", color: "#1976d2", fontWeight: "bold" }}>
+          Submitting merge to server...
+        </div>
+      )}
+
       <div style={{ marginBottom: "20px" }}>
         <label htmlFor="similarity-threshold">
           Similarity threshold: {(similarityThreshold * 100).toFixed(0)}%
@@ -367,7 +372,11 @@ const DeduplicationInspector = () => {
           max="1"
           step="0.05"
           value={similarityThreshold}
-          onChange={(event) => setSimilarityThreshold(Number(event.target.value))}
+          onChange={(event) => {
+            const val = Number(event.target.value);
+            setSimilarityThreshold(val);
+            localStorage.setItem("deduplication.similarityThreshold", String(val));
+          }}
           aria-label="Similarity threshold"
         />
       </div>
@@ -480,7 +489,7 @@ const DeduplicationInspector = () => {
                 }}
               >
                 {mergeInFlight === `${entityA.id}-${entityB.id}`
-                  ? "⏳ Merging..."
+                  ? "Merging..."
                   : `← Merge into ${entityB.label}`}
               </button>
               <button
@@ -506,7 +515,7 @@ const DeduplicationInspector = () => {
                 }}
               >
                 {mergeInFlight === `${entityB.id}-${entityA.id}`
-                  ? "⏳ Merging..."
+                  ? "Merging..."
                   : `Merge into ${entityA.label} →`}
               </button>
             </div>

@@ -12,6 +12,7 @@
 This disclosure describes a **policy-as-code system** for export controls, data residency, and access governance using **Open Policy Agent (OPA), graph-based ABAC, and provenance-integrated audit trails**. The system ensures all operations are legally defensible with automated compliance reporting and real-time policy enforcement.
 
 **Core Innovation**:
+
 1. **Policy-as-Code with OPA**: All compliance rules expressed in Rego (declarative, version-controlled)
 2. **Graph-Based ABAC**: Attribute-based access control using Neo4j entity properties
 3. **Real-Time Export Control**: Block LLM outputs containing controlled technical data (ITAR, EAR)
@@ -19,6 +20,7 @@ This disclosure describes a **policy-as-code system** for export controls, data 
 5. **Automated Compliance Reporting**: Generate SOC 2, GDPR, ITAR compliance reports
 
 **Differentiation**:
+
 - **Keycloak/Auth0**: Identity only → We enforce data-level policies
 - **AWS IAM**: Cloud-specific → We work across cloud + on-prem
 - **Palantir Foundry**: Proprietary ABAC → We use open-source OPA
@@ -31,12 +33,14 @@ This disclosure describes a **policy-as-code system** for export controls, data 
 ### 1.1 Technical Problem
 
 **Manual compliance is error-prone and slow**:
+
 - Analysts must remember export control rules (ITAR, EAR, EU sanctions)
 - Access control decisions made ad-hoc (no consistent policy)
 - Compliance audits require weeks of manual data collection
 - No proof that policies were enforced at runtime
 
 **Real-world failure scenario**:
+
 ```
 [2024-01-15] Analyst queries LLM about Entity X
 [LLM returns technical specifications for missile guidance system]
@@ -49,12 +53,14 @@ This disclosure describes a **policy-as-code system** for export controls, data 
 ### 1.2 Compliance Problem
 
 **Modern regulations require proof**:
+
 - **GDPR**: Prove EU citizen data never left EU
 - **ITAR**: Prove controlled technical data not shared with foreign nationals
 - **SOC 2**: Prove access controls enforced consistently
 - **CMMC**: Prove all operations audit-ready
 
 **Traditional approach** (manual):
+
 1. Hire compliance team
 2. Create policy documents (Word/PDF)
 3. Train users on policies
@@ -105,9 +111,10 @@ has_export_license(user, eccn) if {
 ```
 
 **Runtime enforcement**:
+
 ```typescript
 // server/src/middleware/PolicyEnforcement.ts
-import { OPA } from 'opa-client';
+import { OPA } from "opa-client";
 
 export class PolicyEnforcement {
   private opa: OPA;
@@ -125,21 +132,23 @@ export class PolicyEnforcement {
         id: user.id,
         nationality: user.nationality,
         clearance_level: user.clearance_level,
-        roles: user.roles
+        roles: user.roles,
       },
       data: {
         classification: data.classification,
         export_control_classification_number: data.eccn,
-        contains_controlled_tech: data.contains_controlled_tech
+        contains_controlled_tech: data.contains_controlled_tech,
       },
-      entity: entity ? {
-        name: entity.name,
-        risk_score: entity.risk_score,
-        nationality: entity.nationality
-      } : null
+      entity: entity
+        ? {
+            name: entity.name,
+            risk_score: entity.risk_score,
+            nationality: entity.nationality,
+          }
+        : null,
     };
 
-    const response = await this.opa.evaluate('export_control/deny', input);
+    const response = await this.opa.evaluate("export_control/deny", input);
 
     if (response.result && response.result.length > 0) {
       // Policy violation detected
@@ -147,12 +156,12 @@ export class PolicyEnforcement {
 
       // Log to provenance ledger
       await this.provenanceLedger.record({
-        type: 'POLICY_VIOLATION_BLOCKED',
+        type: "POLICY_VIOLATION_BLOCKED",
         user_id: user.id,
         operation,
         violations,
         timestamp: new Date(),
-        signature: await this.sign({ user_id: user.id, operation, violations })
+        signature: await this.sign({ user_id: user.id, operation, violations }),
       });
 
       throw new PolicyViolationError(violations);
@@ -160,10 +169,10 @@ export class PolicyEnforcement {
 
     // Policy check passed, log to provenance
     await this.provenanceLedger.record({
-      type: 'POLICY_CHECK_PASSED',
+      type: "POLICY_CHECK_PASSED",
       user_id: user.id,
       operation,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     return { allowed: true };
@@ -172,6 +181,7 @@ export class PolicyEnforcement {
 ```
 
 **Integration with LLM orchestrator**:
+
 ```typescript
 // server/src/services/orchestrator/PolicyAwareLLM.ts
 export class PolicyAwareLLM {
@@ -183,9 +193,9 @@ export class PolicyAwareLLM {
     const contains_controlled_tech = await this.detectControlledTech(response);
 
     // 3. Check export control policy
-    await this.policyEnforcement.checkPolicy('llm_output', user, {
-      classification: 'UNCLASS',  // Assume unclass unless detected
-      contains_controlled_tech
+    await this.policyEnforcement.checkPolicy("llm_output", user, {
+      classification: "UNCLASS", // Assume unclass unless detected
+      contains_controlled_tech,
     });
 
     // 4. If policy passes, return response
@@ -195,10 +205,10 @@ export class PolicyAwareLLM {
   private async detectControlledTech(text: string): Promise<boolean> {
     // Use NLP to detect controlled technical data keywords
     const controlled_keywords = [
-      'missile guidance',
-      'encryption algorithm',
-      'nuclear',
-      'biological weapon',
+      "missile guidance",
+      "encryption algorithm",
+      "nuclear",
+      "biological weapon",
       // ... USML / CCL keywords
     ];
 
@@ -249,6 +259,7 @@ is_investigation_member(user_id, investigation_id) if {
 ```
 
 **Neo4j integration**:
+
 ```cypher
 // Query for policy evaluation
 MATCH (u:User {id: $user_id})-[:MEMBER_OF]->(i:Investigation {id: $investigation_id})
@@ -265,52 +276,52 @@ export class ComplianceReportGenerator {
   async generateGDPRReport(start_date: Date, end_date: Date): Promise<GDPRReport> {
     // Query provenance ledger for all data processing activities
     const activities = await this.provenanceLedger.query({
-      type: 'DATA_PROCESSING',
-      data_classification: 'EU_CITIZEN_DATA',
+      type: "DATA_PROCESSING",
+      data_classification: "EU_CITIZEN_DATA",
       start_date,
-      end_date
+      end_date,
     });
 
     // Group by processing purpose
-    const by_purpose = groupBy(activities, a => a.processing_purpose);
+    const by_purpose = groupBy(activities, (a) => a.processing_purpose);
 
     // Check for policy violations
     const violations = await this.provenanceLedger.query({
-      type: 'POLICY_VIOLATION',
+      type: "POLICY_VIOLATION",
       start_date,
-      end_date
+      end_date,
     });
 
     return {
       report_period: { start_date, end_date },
       total_processing_activities: activities.length,
       activities_by_purpose: by_purpose,
-      data_residency_violations: violations.filter(v => v.violation_type === 'DATA_RESIDENCY'),
-      recommendations: this.generateRecommendations(violations)
+      data_residency_violations: violations.filter((v) => v.violation_type === "DATA_RESIDENCY"),
+      recommendations: this.generateRecommendations(violations),
     };
   }
 
   async generateITARReport(): Promise<ITARReport> {
     // Query all ITAR-classified operations
     const itar_operations = await this.provenanceLedger.query({
-      data_classification: 'ITAR'
+      data_classification: "ITAR",
     });
 
     // Check for violations
-    const violations = itar_operations.filter(op => {
-      return op.user_nationality !== 'US' && !op.export_license;
+    const violations = itar_operations.filter((op) => {
+      return op.user_nationality !== "US" && !op.export_license;
     });
 
     return {
       total_itar_operations: itar_operations.length,
       violations: violations.length,
-      compliance_rate: 1 - (violations.length / itar_operations.length),
-      violation_details: violations.map(v => ({
+      compliance_rate: 1 - violations.length / itar_operations.length,
+      violation_details: violations.map((v) => ({
         user_id: v.user_id,
         operation: v.operation,
         timestamp: v.timestamp,
-        data_involved: v.data_summary
-      }))
+        data_involved: v.data_summary,
+      })),
     };
   }
 
@@ -321,14 +332,14 @@ export class ComplianceReportGenerator {
       availability: await this.assessAvailability(),
       processing_integrity: await this.assessProcessingIntegrity(),
       confidentiality: await this.assessConfidentiality(),
-      privacy: await this.assessPrivacy()
+      privacy: await this.assessPrivacy(),
     };
 
     return {
       assessment_date: new Date(),
       criteria_assessments: criteria,
       overall_compliance: this.computeOverallCompliance(criteria),
-      evidence_artifacts: await this.collectEvidence()
+      evidence_artifacts: await this.collectEvidence(),
     };
   }
 }
@@ -341,14 +352,14 @@ export class ComplianceReportGenerator {
 ```typescript
 // Provenance record schema
 interface PolicyDecisionRecord {
-  type: 'POLICY_CHECK' | 'POLICY_VIOLATION';
+  type: "POLICY_CHECK" | "POLICY_VIOLATION";
   user_id: string;
   operation: string;
-  policy_evaluated: string;  // e.g., "export_control/deny"
-  input: any;               // Full OPA input
+  policy_evaluated: string; // e.g., "export_control/deny"
+  input: any; // Full OPA input
   result: PolicyResult;
   timestamp: Date;
-  signature: string;        // Ed25519 signature for immutability
+  signature: string; // Ed25519 signature for immutability
 }
 
 // Audit query example
@@ -356,20 +367,21 @@ async function auditUserActivity(user_id: string, since: Date): Promise<AuditTra
   const records = await provenanceLedger.query({
     user_id,
     since,
-    types: ['POLICY_CHECK', 'POLICY_VIOLATION', 'DATA_ACCESS']
+    types: ["POLICY_CHECK", "POLICY_VIOLATION", "DATA_ACCESS"],
   });
 
   return {
     user_id,
     total_operations: records.length,
-    policy_violations: records.filter(r => r.type === 'POLICY_VIOLATION'),
-    data_accessed: records.filter(r => r.type === 'DATA_ACCESS').map(r => r.entity_id),
-    risk_score: computeRiskScore(records)
+    policy_violations: records.filter((r) => r.type === "POLICY_VIOLATION"),
+    data_accessed: records.filter((r) => r.type === "DATA_ACCESS").map((r) => r.entity_id),
+    risk_score: computeRiskScore(records),
   };
 }
 ```
 
 **Audit UI**:
+
 ```typescript
 // client/src/pages/Compliance/AuditLog.tsx
 export const AuditLogPage: React.FC = () => {
@@ -420,14 +432,15 @@ export const AuditLogPage: React.FC = () => {
 
 ## 4. Performance Benchmarks
 
-| Metric | Target | Actual |
-|--------|--------|--------|
-| Policy check latency (p95) | <10ms | 8ms ✅ |
-| OPA decision cache hit rate | >90% | 94% ✅ |
-| Audit query latency (30-day window) | <2s | 1.6s ✅ |
-| Compliance report generation | <60s | 42s ✅ |
+| Metric                              | Target | Actual  |
+| ----------------------------------- | ------ | ------- |
+| Policy check latency (p95)          | <10ms  | 8ms ✅  |
+| OPA decision cache hit rate         | >90%   | 94% ✅  |
+| Audit query latency (30-day window) | <2s    | 1.6s ✅ |
+| Compliance report generation        | <60s   | 42s ✅  |
 
 **Compliance Metrics**:
+
 - Policy violation rate: 0.02% (2 violations per 10,000 operations)
 - Audit trail completeness: 100% (all operations logged)
 - SOC 2 compliance score: 98/100
@@ -437,16 +450,19 @@ export const AuditLogPage: React.FC = () => {
 ## 5. Competitive Advantages
 
 **vs. Keycloak/Auth0**:
+
 - We enforce data-level policies (not just identity)
 - We integrate with provenance ledger
 - We support export control rules (ITAR/EAR)
 
 **vs. AWS IAM**:
+
 - We work across cloud providers
 - We support graph-based ABAC
 - We have automated compliance reporting
 
 **vs. Palantir Foundry**:
+
 - We use open-source OPA (not proprietary)
 - We have cryptographic audit trails
 - We support export control automation
@@ -466,6 +482,7 @@ export const AuditLogPage: React.FC = () => {
 ### Patentability Assessment
 
 **Preliminary opinion**: Moderate-to-strong patentability
+
 - **Novel combination**: OPA + graph ABAC + provenance ledger
 - **Technical improvement**: 100% policy enforcement vs. manual processes
 - **Non-obvious**: Automated ITAR detection in LLM outputs is non-obvious

@@ -11,8 +11,8 @@
 ## 1. Detection
 *   **Trigger:** P95 latency > 1.5s for 10m.
 *   **Threshold:** > 1.5s
-*   **Dashboards:** [Gateway Dashboard](/grafana/d/gateway)
-*   **Traces:** [Slow Requests](/tempo/search?tags=service=gateway&minDuration=1.5s)
+*   **Dashboards:** Gateway Dashboard
+*   **Traces:** Slow Requests
 
 ## 2. Triage
 *   **Impact:** Users experiencing slow page loads. API timeouts.

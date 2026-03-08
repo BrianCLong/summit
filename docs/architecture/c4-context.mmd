@@ -1,0 +1,26 @@
+C4Context
+  title System Context Diagram for IntelGraph Platform
+
+  Person(analyst, "Intelligence Analyst", "Conducts research and investigations using the graph.")
+  Person(ds, "Data Scientist", "Develops models and algorithms on the graph.")
+  Person(admin, "Platform Admin", "Manages tenants, policies, and configurations.")
+  Person(auditor, "Compliance Auditor", "Reviews provenance and security logs.")
+
+  System(intelgraph, "IntelGraph Platform", "Agentic AI OSINT Platform for intelligence gathering and analysis.")
+
+  System_Ext(oidc, "OIDC Provider", "Handles user authentication (e.g., Auth0, Okta).")
+  System_Ext(s3, "Object Storage (S3)", "Source of raw data files (CSV, JSON, Parquet).")
+  System_Ext(apis, "External APIs", "Third-party data sources (REST, GraphQL).")
+  System_Ext(llm, "LLM Provider", "External AI models (OpenAI, Anthropic) via Gateway.")
+  System_Ext(kms, "KMS/HSM", "Key Management Service for encryption and signing.")
+
+  Rel(analyst, intelgraph, "Uses", "HTTPS/WSS")
+  Rel(ds, intelgraph, "Queries/Trains", "HTTPS/Bolt")
+  Rel(admin, intelgraph, "Configures", "HTTPS")
+  Rel(auditor, intelgraph, "Audits", "HTTPS")
+
+  Rel(intelgraph, oidc, "Authenticates users via", "OIDC/OAuth2")
+  Rel(intelgraph, s3, "Ingests data from", "HTTPS")
+  Rel(intelgraph, apis, "Polls/Streams data from", "HTTPS")
+  Rel(intelgraph, llm, "Generates insights via", "HTTPS")
+  Rel(intelgraph, kms, "Signs/Encrypts with", "HTTPS/GRPC")

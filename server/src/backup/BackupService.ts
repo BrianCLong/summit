@@ -9,6 +9,7 @@ import { exec } from 'child_process';
 import { createWriteStream } from 'fs';
 import zlib from 'zlib';
 import { PrometheusMetrics } from '../utils/metrics.js';
+import { S3Config } from '../types/infrastructure.js';
 
 const execAsync = promisify(exec);
 
@@ -17,14 +18,6 @@ const backupMetrics = new PrometheusMetrics('backup_service');
 backupMetrics.createCounter('ops_total', 'Total backup operations', ['type', 'status']);
 backupMetrics.createHistogram('duration_seconds', 'Backup duration', { buckets: [0.1, 0.5, 1, 5, 10, 30, 60, 120] });
 backupMetrics.createGauge('size_bytes', 'Backup size', ['type']);
-
-export interface S3Config {
-  bucket: string;
-  region: string;
-  endpoint?: string;
-  accessKeyId?: string;
-  secretAccessKey?: string;
-}
 
 export interface BackupOptions {
   compress?: boolean;

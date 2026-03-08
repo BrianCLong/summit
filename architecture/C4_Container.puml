@@ -1,0 +1,38 @@
+@startuml C4_Container
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+LAYOUT_WITH_LEGEND()
+
+Person(analyst, "Intelligence Analyst", "Consumes insights and explores the graph.")
+
+System_Boundary(intelgraph_boundary, "IntelGraph Platform") {
+    Container(web_app, "Web App", "React, MUI", "Provides the user interface for exploration and administration.")
+    Container(api_gateway, "API Gateway", "Node.js, GraphQL", "Aggregates services and handles authorization.")
+
+    Container(ingest_service, "Ingest Service", "Python/Node.js", "Processes and transforms incoming data.")
+    Container(graph_service, "Graph Service", "Node.js", "Manages graph queries and mutations.")
+    Container(provenance_service, "Provenance Service", "Node.js", "Tracks lineage and audit trails.")
+    Container(ai_service, "AI Service", "Python", "Provides embeddings, RAG, and inference.")
+
+    ContainerDb(neo4j, "Neo4j", "Graph DB", "Stores the knowledge graph.")
+    ContainerDb(postgres, "Postgres", "Relational DB", "Stores metadata, users, and policies.")
+    ContainerDb(redis, "Redis", "Cache", "Caches queries and sessions.")
+    ContainerDb(s3, "Object Storage", "S3", "Stores raw data and artifacts.")
+}
+
+Rel(analyst, web_app, "Uses", "HTTPS")
+Rel(web_app, api_gateway, "API calls", "GraphQL/HTTPS")
+
+Rel(api_gateway, graph_service, "Delegates to", "gRPC/HTTP")
+Rel(api_gateway, provenance_service, "Delegates to", "gRPC/HTTP")
+Rel(api_gateway, ai_service, "Delegates to", "gRPC/HTTP")
+
+Rel(ingest_service, neo4j, "Writes to", "Bolt")
+Rel(ingest_service, postgres, "Writes metadata to", "SQL")
+Rel(ingest_service, provenance_service, "Registers lineage", "gRPC")
+
+Rel(graph_service, neo4j, "Reads/Writes", "Bolt")
+Rel(provenance_service, postgres, "Reads/Writes", "SQL")
+Rel(ai_service, neo4j, "Reads", "Bolt")
+
+@enduml

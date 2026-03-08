@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.example/schema/io/post.schema.json",
+  "title": "IO Post",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "content_id",
+    "account_id",
+    "platform",
+    "posted_at",
+    "provenance"
+  ],
+  "properties": {
+    "content_id": {
+      "type": "string"
+    },
+    "account_id": {
+      "type": "string",
+      "description": "Canonical entity_id for the posting account."
+    },
+    "platform": {
+      "type": "string"
+    },
+    "posted_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "thread_id": {
+      "type": "string"
+    },
+    "reply_to_content_id": {
+      "type": "string"
+    },
+    "engagement_summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "likes": {"type": "integer", "minimum": 0},
+        "shares": {"type": "integer", "minimum": 0},
+        "comments": {"type": "integer", "minimum": 0}
+      }
+    },
+    "provenance": {
+      "$ref": "provenance.schema.json"
+    }
+  }
+}

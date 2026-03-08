@@ -1,0 +1,30 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy project configuration
+COPY pyproject.toml .
+# Create a dummy README.md as pyproject.toml references it
+RUN touch README.md
+
+# Install dependencies
+# We also install uvicorn explicitly to ensure we have an ASGI server
+RUN pip install . uvicorn fastapi
+
+# Copy the application code
+COPY summit/ summit/
+
+# Expose the port
+EXPOSE 8000
+
+# Set python path to include the current directory
+ENV PYTHONPATH=/app
+
+# Run the application
+CMD ["uvicorn", "summit.main:app", "--host", "0.0.0.0", "--port", "8000"]

@@ -1,6 +1,7 @@
-import json
 import hashlib
+import json
 from typing import Any
+
 
 def sha256_bytes(b: bytes) -> str:
     """Computes the SHA-256 hash of a byte string."""

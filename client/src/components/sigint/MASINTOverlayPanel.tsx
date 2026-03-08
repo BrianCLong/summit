@@ -58,14 +58,20 @@ export const MASINTOverlayPanel: React.FC<MASINTOverlayPanelProps> = ({
 
   // Calculate stats
   const stats = useMemo(() => {
-    const active = overlays.filter((o) => o.status === 'ACTIVE').length;
+    const active = overlays.reduce((count, o) => count + (o.status === 'ACTIVE' ? 1 : 0), 0);
     const totalDetections = overlays.reduce((sum, o) => sum + o.detections.length, 0);
-    const recentDetections = overlays.reduce(
-      (sum, o) =>
-        sum +
-        o.detections.filter((d) => Date.now() - d.timestamp < 300000).length,
-      0
-    );
+
+    // Use an optimized loop instead of filter().length
+    const now = Date.now();
+    let recentDetections = 0;
+    for (const o of overlays) {
+      for (const d of o.detections) {
+        if (now - d.timestamp < 300000) {
+          recentDetections++;
+        }
+      }
+    }
+
     return { active, total: overlays.length, totalDetections, recentDetections };
   }, [overlays]);
 

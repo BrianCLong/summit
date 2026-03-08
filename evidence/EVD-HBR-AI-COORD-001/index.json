@@ -1,0 +1,4 @@
+{
+  "evidence_id": "EVD-HBR-AI-COORD-001",
+  "artifacts": ["report.json", "metrics.json", "stamp.json"]
+}

@@ -1,5 +1,7 @@
 import json
+
 from stamp import generate_stamp
+
 
 def test_stamp_determinism():
     inputs = {"mode": "offline", "fixture": "test.json"}

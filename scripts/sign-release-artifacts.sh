@@ -72,12 +72,12 @@ if command -v docker &> /dev/null && [ -n "$TAG_NAME" ]; then
             # Verify the signature
             echo "🔍 Verifying signature for: $IMAGE_NAME"
             if [ -n "$COSIGN_PWD" ]; then
-                cosign verify --key env://COSIGN_PWD "$IMAGE_NAME" | grep -q "verified" || {
+                cosign verify --use-signed-timestamps --key env://COSIGN_PWD "$IMAGE_NAME" | grep -q "verified" || {
                     echo "❌ Signature verification failed for $IMAGE_NAME"
                     exit 1
                 }
             else
-                cosign verify "$IMAGE_NAME" | grep -q "verified" || {
+                cosign verify --use-signed-timestamps "$IMAGE_NAME" | grep -q "verified" || {
                     echo "❌ Signature verification failed for $IMAGE_NAME"
                     exit 1
                 }
@@ -120,9 +120,9 @@ if [ -d "$ARTIFACT_DIR" ]; then
             
             # Verify the signature
             if [ -n "$COSIGN_PWD" ]; then
-                cosign verify-blob --key env://COSIGN_PWD --signature "$signature_file" --certificate "$cert_file" "$artifact"
+                cosign verify-blob --use-signed-timestamps --key env://COSIGN_PWD --signature "$signature_file" --certificate "$cert_file" "$artifact" || { echo "::error::Supply chain verification failed! Missing or invalid signed timestamps."; false; }
             else
-                cosign verify-blob --signature "$signature_file" --certificate "$cert_file" --yes "$artifact"
+                cosign verify-blob --use-signed-timestamps --signature "$signature_file" --certificate "$cert_file" --yes "$artifact" || { echo "::error::Supply chain verification failed! Missing or invalid signed timestamps."; false; }
             fi
             
             SIGNATURE_COUNT=$((SIGNATURE_COUNT + 1))
@@ -209,4 +209,4 @@ fi
 
 echo ""
 echo "🔒 Remember to verify signatures before release:"
-echo "   cosign verify --certificate-identity-regexp='.*' --certificate-oidc-issuer-regexp='.*' $REGISTRY/$REPO_NAME:$TAG_NAME"
+echo "   cosign verify --use-signed-timestamps --certificate-identity-regexp='.*' --certificate-oidc-issuer-regexp='.*' $REGISTRY/$REPO_NAME:$TAG_NAME"

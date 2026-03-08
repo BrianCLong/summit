@@ -22,7 +22,5 @@ jobs:
         run: |
           python ml/app/training/retrain_deception.py
       - name: Upload model
-        uses: actions/upload-artifact@v3
-        with:
-          name: deception-model
+        uses: actions/upload-artifact@v3          name: deception-model
           path: models/deception/

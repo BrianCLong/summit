@@ -1,0 +1,7 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: passing-service
+spec:
+  type: service
+  owner: good-team

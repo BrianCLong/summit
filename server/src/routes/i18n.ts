@@ -12,6 +12,7 @@ import { i18nService } from '../i18n/index.js';
 import { ensureAuthenticated } from '../middleware/auth.js';
 import { isEnabled } from '../lib/featureFlags.js';
 import logger from '../utils/logger.js';
+import { firstStringOr } from '../utils/http-param.js';
 
 const router = Router();
 
@@ -320,7 +321,7 @@ router.get(
   requireFeatureFlag('i18n.regionalCompliance'),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { region } = req.params;
+      const region = firstStringOr(req.params.region, '');
       const result = i18nService.getRegionalCompliance(region);
 
       if (!result.data) {

@@ -1,7 +1,8 @@
 import json
 import os
-import sys
 import subprocess
+import sys
+
 
 def validate_schemas(manifest):
     print("Checking schemas...")
@@ -32,7 +33,7 @@ def main():
         print(f"FAILED: Manifest not found: {manifest_path}")
         sys.exit(1)
 
-    with open(manifest_path, "r") as f:
+    with open(manifest_path) as f:
         manifest = json.load(f)
 
     success = True

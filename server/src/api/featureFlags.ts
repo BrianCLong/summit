@@ -4,6 +4,7 @@ import { FeatureFlagService } from '../featureFlags/FeatureFlagService.js';
 import { ConfigService } from '../featureFlags/ConfigService.js';
 import { EvaluationContext } from '../featureFlags/types.js';
 import { ensureAuthenticated, ensureRole, requirePermission } from '../middleware/auth.js';
+import { firstString } from '../utils/http-param.js';
 
 export interface FeatureFlagApiDependencies {
   featureFlagService: FeatureFlagService;
@@ -58,10 +59,12 @@ export const createFeatureFlagRouter = (deps: FeatureFlagApiDependencies): Route
   router.get('/', async (req: Request, res: Response) => {
     try {
       // Extract context from request
+      const groupsRaw = firstString(req.query.groups);
+      const attributesRaw = firstString(req.query.attributes);
       const context: EvaluationContext = {
-        userId: req.query.userId as string || req.user?.id,
-        groups: req.query.groups ? (req.query.groups as string).split(',') : (req.user as any)?.groups || [],
-        attributes: req.query.attributes ? JSON.parse(req.query.attributes as string) : (req.user as any)?.attributes || {}
+        userId: firstString(req.query.userId) || req.user?.id,
+        groups: groupsRaw ? groupsRaw.split(',') : (req.user as any)?.groups || [],
+        attributes: attributesRaw ? JSON.parse(attributesRaw) : (req.user as any)?.attributes || {}
       };
 
       // Get all flags with their evaluation status
@@ -92,13 +95,18 @@ export const createFeatureFlagRouter = (deps: FeatureFlagApiDependencies): Route
   // Get a specific feature flag evaluation
   router.get('/:flagKey', async (req: Request, res: Response) => {
     try {
-      const { flagKey } = req.params;
+      const flagKey = firstString(req.params.flagKey);
+      if (!flagKey) {
+        return res.status(400).json({ error: 'flagKey is required' });
+      }
 
       // Extract context from request
+      const groupsRaw = firstString(req.query.groups);
+      const attributesRaw = firstString(req.query.attributes);
       const context: EvaluationContext = {
-        userId: req.query.userId as string || req.user?.id,
-        groups: req.query.groups ? (req.query.groups as string).split(',') : (req.user as any)?.groups || [],
-        attributes: req.query.attributes ? JSON.parse(req.query.attributes as string) : (req.user as any)?.attributes || {}
+        userId: firstString(req.query.userId) || req.user?.id,
+        groups: groupsRaw ? groupsRaw.split(',') : (req.user as any)?.groups || [],
+        attributes: attributesRaw ? JSON.parse(attributesRaw) : (req.user as any)?.attributes || {}
       };
 
       // Get the flag evaluation
@@ -199,8 +207,12 @@ export const createFeatureFlagRouter = (deps: FeatureFlagApiDependencies): Route
   // Get configuration values
   router.get('/config/:key', async (req: Request, res: Response) => {
     try {
-      const { key } = req.params;
-      const environment = req.query.env as string || process.env.NODE_ENV || 'development';
+      const key = firstString(req.params.key);
+      if (!key) {
+        return res.status(400).json({ error: 'key is required' });
+      }
+      const environment =
+        firstString(req.query.env) || process.env.NODE_ENV || 'development';
 
       const value = await deps.configService.getConfig(key, environment);
 
@@ -220,7 +232,8 @@ export const createFeatureFlagRouter = (deps: FeatureFlagApiDependencies): Route
   router.post('/config/batch', async (req: Request, res: Response) => {
     try {
       const { keys } = req.body;
-      const environment = req.query.env as string || process.env.NODE_ENV || 'development';
+      const environment =
+        firstString(req.query.env) || process.env.NODE_ENV || 'development';
 
       if (!Array.isArray(keys)) {
         return res.status(400).json({ error: 'Keys must be an array' });

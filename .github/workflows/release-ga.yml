@@ -221,9 +221,9 @@ jobs:
           fi
 
       - name: Install Cosign
-        uses: sigstore/cosign-installer@9614fae9e5c5eddabb09f90a270fcb487c9f7149 # v3.3.0
+        uses: sigstore/cosign-installer@v3.7.0
         with:
-          cosign-release: "v2.2.2"
+          cosign-release: "v3.0.5"
 
       - name: Sign Provenance (Keyless)
         run: |
@@ -236,7 +236,7 @@ jobs:
           echo "Signature created: staging/ga-bundle/provenance.json.sig"
 
       - name: Upload GA Bundle
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4
+        uses: actions/upload-artifact@v4 # v4
         with:
           name: ga-bundle-staging
           path: staging/ga-bundle/
@@ -275,9 +275,9 @@ jobs:
           path: staging/verification
 
       - name: Install Cosign
-        uses: sigstore/cosign-installer@9614fae9e5c5eddabb09f90a270fcb487c9f7149 # v3.3.0
+        uses: sigstore/cosign-installer@v3.7.0
         with:
-          cosign-release: "v2.2.2"
+          cosign-release: "v3.0.5"
 
       - name: Verify Signed Bundle (Strict)
         env:
@@ -313,7 +313,7 @@ jobs:
           fi
 
       - name: Upload Publish Guard Report
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4
+        uses: actions/upload-artifact@v4 # v4
         with:
           name: publish-guard-report
           path: artifacts/publish-guard/
@@ -439,7 +439,7 @@ jobs:
           ls -la "${BUNDLE_DIR}/"
 
       - name: Upload GA Release Bundle
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4
+        uses: actions/upload-artifact@v4 # v4
         with:
           name: ga-release-bundle-${{ needs.gate.outputs.tag }}
           path: ga-release-bundle-${{ needs.gate.outputs.tag }}

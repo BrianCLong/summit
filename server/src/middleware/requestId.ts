@@ -1,9 +1,25 @@
-import type { Request, Response, NextFunction } from 'express';
-import { randomUUID } from 'node:crypto';
-export function requestId() {
-  return (req: Request, res: Response, next: NextFunction) => {
-    (req as any).reqId = req.headers['x-request-id'] || randomUUID();
-    res.setHeader('x-request-id', (req as any).reqId);
+import { randomUUID } from 'crypto';
+import { NextFunction, Request, Response } from 'express';
+
+declare global {
+  namespace Express {
+    interface Request {
+      reqId?: string;
+    }
+  }
+}
+
+export function requestId(headerName = 'x-request-id') {
+  return (req: Request, res: Response, next: NextFunction): void => {
+    const headerValue = req.headers[headerName];
+    const existingRequestId = Array.isArray(headerValue)
+      ? headerValue[0]
+      : headerValue;
+    const reqId = existingRequestId || randomUUID();
+
+    req.reqId = reqId;
+    res.setHeader(headerName, reqId);
     next();
   };
 }
+

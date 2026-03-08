@@ -5,36 +5,39 @@ on:
     outputs:
       metrics_path:
         description: "Path to the generated metrics.json"
-        value: "packages/graph-sync-validator/metrics.json"
+        value: "artifacts/graph-sync/metrics.json"
 
 jobs:
   validate-sync:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: 'pnpm'
+          cache-dependency-path: '**/pnpm-lock.yaml'
       - run: corepack enable
       - run: pnpm -w install --frozen-lockfile
 
       - name: Build Validator
-        run: pnpm --filter @intelgraph/graph-sync-validator build
+        run: pnpm --filter @summit/graph-sync-validator build
 
       - name: Run Validator
         env:
           PG_DSN: ${{ secrets.PG_DSN }}
           NEO4J_URI: ${{ secrets.NEO4J_URI }}
           NEO4J_USER: ${{ secrets.NEO4J_USER }}
-          NEO4J_PASS: ${{ secrets.NEO4J_PASS }}
-        run: |
-          node packages/graph-sync-validator/dist/cli.js \
-            --config packages/graph-sync-validator/config/default.yaml \
-            --output packages/graph-sync-validator/metrics.json
+          NEO4J_PASSWORD: ${{ secrets.NEO4J_PASSWORD }}
+        run: node scripts/ci/validate_graph_pg_sync.mjs
 
       - name: Upload Metrics
         uses: actions/upload-artifact@v4
         with:
           name: graph-sync-metrics
-          path: packages/graph-sync-validator/metrics.json
+          path: |
+            artifacts/graph-sync/metrics.json
+            artifacts/graph-sync/recon.json
+            artifacts/graph-sync/evidence.json

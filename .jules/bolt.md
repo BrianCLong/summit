@@ -1,8 +1,3 @@
-## 2025-12-29 - [Debouncing Controlled Components]
-
-**Learning:** When debouncing a controlled input in React, you must decouple the input's display value (internal state) from the prop value (external state). If you bind the input directly to the prop value while debouncing the callback, the UI will freeze or lag because the prop updates are delayed.
-**Action:** Always maintain an `internalValue` state for the input field, sync it with `useEffect` from props, and use it for the `value` prop of the input element.
-
-## 2026-01-22 - [Optimized Neo4j Result Normalization]
-**Learning:** Recursively normalizing large Neo4j result sets (converting `Integer` objects to JS numbers) is a major performance bottleneck if implemented with deep cloning. Most query results don't contain integers, so a "copy-on-write" approach that only clones when a change is detected can improve performance by >50%.
-**Action:** Use the centralized `transformNeo4jIntegers` utility in `server/src/db/neo4j.ts` which implements this optimization.
+## YYYY-MM-DD - [Optimize lists in HomePage]
+**Learning:** The `HomePage` component rendered several lists (Quick Actions, Recent Investigations, Recent Alerts, Active Cases) with inline handlers inside the map method, causing new closures to be created for every item on every render, preventing pure component optimizations from being effective.
+**Action:** Extract list items to components wrapped in `React.memo` and use `useCallback` on the handlers at the parent level before passing them to the child items.

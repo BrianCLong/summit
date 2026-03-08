@@ -1,6 +1,6 @@
 // @ts-nocheck
 import express, { Response, NextFunction } from 'express';
-import { z } from 'zod/v4';
+import { z } from 'zod';
 import { storageTierRecommender, WorkloadSpecsSchema } from '../services/StorageTierRecommenderService.js';
 import { AppError } from '../lib/errors.js';
 import logger from '../utils/logger.js';

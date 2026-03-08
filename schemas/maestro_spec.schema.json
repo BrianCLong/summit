@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Maestro Spec Schema",
+  "type": "object",
+  "required": [
+    "spec_version",
+    "scope",
+    "functional_requirements",
+    "non_functional_requirements",
+    "data_model",
+    "agent_design",
+    "interfaces",
+    "risk_analysis",
+    "acceptance_criteria",
+    "open_questions",
+    "jules_tasks",
+    "codex_tasks"
+  ],
+  "properties": {
+    "spec_version": { "type": "string" },
+    "scope": { "type": "string" },
+    "functional_requirements": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "description"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^REQ-[0-9]+$" },
+          "description": { "type": "string" },
+          "priority": { "type": "string", "enum": ["P0", "P1", "P2"] }
+        }
+      }
+    },
+    "non_functional_requirements": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "description"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^NFR-[0-9]+$" },
+          "description": { "type": "string" }
+        }
+      }
+    },
+    "data_model": { "type": "object" },
+    "agent_design": { "type": "object" },
+    "interfaces": { "type": "array" },
+    "risk_analysis": { "type": "array" },
+    "acceptance_criteria": { "type": "array" },
+    "open_questions": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "jules_tasks": {
+      "type": "array",
+      "items": { "type": "object" }
+    },
+    "codex_tasks": {
+      "type": "array",
+      "items": { "type": "object" }
+    }
+  },
+  "additionalProperties": false
+}

@@ -4,7 +4,6 @@ import re
 import sys
 from pathlib import Path
 
-
 ISO_TS_PATTERN = re.compile(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z")
 
 SCHEMA_PATHS = {
@@ -77,10 +76,14 @@ def validate_reports_and_metrics(root: Path) -> None:
         rel_path = str(path)
         if rel_path in exceptions:
             continue
-        if path.name == "report.json":
-            report_validator.validate(load_json(path))
-        if path.name == "metrics.json":
-            metrics_validator.validate(load_json(path))
+        try:
+            if path.name == "report.json":
+                report_validator.validate(load_json(path))
+            if path.name == "metrics.json":
+                metrics_validator.validate(load_json(path))
+        except Exception as e:
+            print(f"Validation failed for {path}")
+            raise e
 
 
 def verify_timestamps(root: Path) -> None:

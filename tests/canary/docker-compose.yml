@@ -1,0 +1,39 @@
+version: "3.9"
+services:
+  postgres:
+    image: debezium/postgres:16
+    environment:
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=app
+      - POSTGRES_INITDB_ARGS=--wal-segsize=64
+    ports: [ "5432:5432" ]
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    environment: { ZOOKEEPER_CLIENT_PORT: 2181 }
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENERS: PLAINTEXT://:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+    depends_on: [zookeeper]
+  debezium:
+    image: debezium/connect:2.6
+    environment:
+      - BOOTSTRAP_SERVERS=kafka:9092
+      - GROUP_ID=1
+      - CONFIG_STORAGE_TOPIC=connect-configs
+      - OFFSET_STORAGE_TOPIC=connect-offsets
+      - STATUS_STORAGE_TOPIC=connect-status
+    depends_on: [kafka, postgres]
+  neo4j:
+    image: neo4j:5.18
+    environment:
+      - NEO4J_AUTH=neo4j/password
+    ports: [ "7474:7474", "7687:7687" ]
+  consumer:
+    build: ../../..
+    environment:
+      - APPLY_LSN=true
+    depends_on: [kafka, neo4j]

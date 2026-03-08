@@ -44,7 +44,7 @@ router.get('/query-previews/:id/stream', async (req, res) => {
   const previewId = req.params.id;
   const parsedBatchSize = Number(req.query.batchSize ?? NaN);
   const batchSize = Number.isFinite(parsedBatchSize) && parsedBatchSize > 0 ? parsedBatchSize : undefined;
-  const cursor = typeof req.query.cursor === 'string' ? req.query.cursor : null;
+  const cursor = typeof (req.query.cursor as string) === 'string' ? (req.query.cursor as string) : null;
   const autoStart = req.query.autostart !== 'false';
   const useEditedQuery = req.query.useEdited === 'true';
   const userId = (req as any).user?.id ?? 'stream-subscriber';

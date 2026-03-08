@@ -1,5 +1,11 @@
 # Summit Agent Governance (Canonical)
 
+> Owner: @summit/governance
+> Last-Reviewed: 2026-02-25
+> Evidence-IDs: EVD-PLACEHOLDER
+> Status: active
+
+
 ## Agent Classes
 - ReleaseCaptain
 - RuntimeAgent

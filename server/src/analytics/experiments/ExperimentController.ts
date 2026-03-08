@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { experimentService } from './ExperimentService.js';
 import { Experiment } from './types.js';
+import { firstString } from '../../utils/http-param.js';
 
 export const createExperiment = (req: Request, res: Response) => {
     try {
@@ -23,14 +24,16 @@ export const listExperiments = (req: Request, res: Response) => {
 };
 
 export const stopExperiment = (req: Request, res: Response) => {
-    const { id } = req.params;
+    const id = firstString(req.params.id);
+    if (!id) return res.status(400).json({ error: 'id is required' });
     experimentService.stopExperiment(id);
     res.status(200).json({ status: 'stopped' });
 };
 
 // Internal endpoint to check assignment (useful for debugging or client-side assignment via API)
 export const getAssignment = (req: Request, res: Response) => {
-    const { id } = req.params;
+    const id = firstString(req.params.id);
+    if (!id) return res.status(400).json({ error: 'id is required' });
     const user = (req as any).user; // Assumes auth middleware populated user
 
     if (!user) {

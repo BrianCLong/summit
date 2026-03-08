@@ -118,6 +118,7 @@ const ReleaseReadinessRoute = React.lazy(() =>
 );
 const IOCList = React.lazy(() => import('./pages/IOC/IOCList'));
 const IOCDetail = React.lazy(() => import('./pages/IOC/IOCDetail'));
+const NewInvestigation = React.lazy(() => import('./pages/Investigations/NewInvestigation'));
 const HuntList = React.lazy(() => import('./pages/Hunting/HuntList'));
 const HuntDetail = React.lazy(() => import('./pages/Hunting/HuntDetail'));
 const SearchHome = React.lazy(() => import('./pages/Search/SearchHome'));
@@ -280,7 +281,9 @@ function AppHeader({ onMenuClick }) {
   );
 
   // Show demo walkthrough link only in demo mode
-  const showDemoWalkthrough = import.meta.env.VITE_DEMO_MODE === '1' || import.meta.env.VITE_DEMO_MODE === 'true';
+  const showDemoWalkthrough =
+    import.meta.env.VITE_DEMO_MODE === '1' ||
+    import.meta.env.VITE_DEMO_MODE === 'true';
 
   return (
     <AppBar position="fixed">
@@ -288,6 +291,7 @@ function AppHeader({ onMenuClick }) {
         <IconButton
           edge="start"
           color="inherit"
+          aria-label="Open navigation menu"
           onClick={onMenuClick}
           sx={{ mr: 2 }}
         >
@@ -747,6 +751,13 @@ function MainLayout() {
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[10001] focus:bg-white focus:text-blue-600 focus:px-4 focus:py-2 focus:border focus:border-blue-600 focus:rounded shadow-md"
+        style={{ textDecoration: 'none' }}
+      >
+        Skip to main content
+      </a>
       <AppHeader onMenuClick={() => setDrawerOpen(true)} />
       <NavigationDrawer
         open={drawerOpen}
@@ -755,6 +766,7 @@ function MainLayout() {
 
       <Box
         component="main"
+        id="main-content"
         role="main"
         tabIndex={a11yGuardrailsEnabled ? -1 : undefined}
         ref={mainRef}
@@ -792,6 +804,7 @@ function MainLayout() {
               <Route path="/ioc" element={<IOCList />} />
               <Route path="/ioc/:id" element={<IOCDetail />} />
               <Route path="/investigations" element={<InvestigationsPage />} />
+              <Route path="/investigations/new" element={<NewInvestigation />} />
               <Route path="/graph" element={<GraphExplorerPage />} />
               <Route path="/copilot" element={<CopilotPage />} />
               <Route path="/orchestrator" element={<OrchestratorPage />} />

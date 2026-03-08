@@ -24,6 +24,7 @@ export {
 } from './Drawer'
 export { EmptyState } from './EmptyState'
 export { Input } from './input'
+export { Kbd } from './Kbd'
 export { Label } from './label'
 export { Pagination } from './Pagination'
 export { Popover, PopoverContent, PopoverTrigger } from './Popover'

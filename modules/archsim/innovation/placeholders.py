@@ -1,5 +1,6 @@
 import os
 
+
 def incremental_diff(old_spec, new_spec):
     if os.getenv("ARCHSIM_INCREMENTAL", "0") != "1":
         return "Incremental diffing is disabled (ARCHSIM_INCREMENTAL=0)"

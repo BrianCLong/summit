@@ -1,0 +1,42 @@
+{
+  "task_id": "DAILY_SPRINT_20260223_RUN9",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "daily-sprint-automation",
+    "version": "v1",
+    "sha256": "87c76ac951bde59b7df0a3e16a227b179085b825426aeb3bb201624bd568e42a",
+    "path": "prompts/automation/daily-sprint@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "docs/ops/DAILY_SPRINT_2026-02-23.md",
+      "docs/roadmap/STATUS.json",
+      "prompts/automation/daily-sprint@v1.md",
+      "prompts/registry.yaml",
+      "agents/examples/DAILY_SPRINT_20260223_RUN9.json"
+    ],
+    "domains": ["operations", "governance", "documentation"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": [
+      "docs/ops/DAILY_SPRINT_2026-02-23.md",
+      "docs/roadmap/STATUS.json"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Daily sprint log captured with evidence and blockers",
+    "Roadmap STATUS timestamp refreshed",
+    "PR opened with template-compliant metadata"
+  ],
+  "stop_conditions": [
+    "GitHub API connectivity prevents PR or issue evidence",
+    "Repository permissions prevent writing docs",
+    "CI infrastructure outage blocks validation"
+  ]
+}

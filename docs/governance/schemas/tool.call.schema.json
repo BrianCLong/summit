@@ -1,0 +1,52 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "summit.tool.call.v1",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "enum": ["1.0.0"]
+    },
+    "tool_name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "run_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "action": {
+      "type": "string"
+    },
+    "parameters": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "declared_scope": {
+      "type": "string"
+    },
+    "data_class": {
+      "type": "string",
+      "enum": ["PUBLIC", "PII", "INTERNAL", "RESTRICTED"]
+    },
+    "decision": {
+      "type": "string",
+      "enum": ["ALLOW", "DENY", "LOG"]
+    },
+    "reason": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "tool_name",
+    "run_id",
+    "action",
+    "parameters",
+    "declared_scope",
+    "data_class",
+    "decision",
+    "reason"
+  ],
+  "additionalProperties": false
+}

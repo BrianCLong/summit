@@ -1,4 +1,4 @@
-### Overview
+# Overview
 
 This guide covers a **Helm‑based** production deployment of IntelGraph onto a Kubernetes cluster (K8s 1.27+). It assumes an umbrella chart with subcharts for: `gateway-api`, `apps/web`, `server/graphql`, `prov-ledger`, `graph-xai`, `predictive-threat-suite`, `postgres`, `neo4j`, and `redis`.
 
@@ -15,25 +15,31 @@ This guide covers a **Helm‑based** production deployment of IntelGraph onto a 
 ```bash
 kubectl create ns intelgraph
 kubectl label ns intelgraph istio-injection=enabled # if using service mesh (optional)
-```
+
+```text
 
 ### Install Core Add‑ons
 
 ```bash
+
 # cert-manager
+
 helm repo add jetstack https://charts.jetstack.io
 helm upgrade --install cert-manager jetstack/cert-manager \
   -n cert-manager --create-namespace \
   --set installCRDs=true
 
 # nginx ingress
+
 helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
 helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx -n ingress-nginx --create-namespace
 
 # sealed-secrets (optional)
+
 helm repo add bitnami https://charts.bitnami.com/bitnami
 helm upgrade --install sealed-secrets bitnami/sealed-secrets -n kube-system
-```
+
+```text
 
 ### Secrets (example via Sealed Secrets)
 
@@ -44,12 +50,15 @@ kubectl -n intelgraph create secret generic ig-secrets \
   --from-literal=NEO4J_AUTH="neo4j/strong_pw" \
   --dry-run=client -o yaml | kubeseal --format yaml > k8s/secrets/ig-sealed.yaml
 kubectl apply -f k8s/secrets/ig-sealed.yaml
-```
+
+```text
 
 ### Umbrella Chart Values (snippet)
 
 ```yaml
+
 # charts/intelgraph/values.yaml
+
 image:
   pullPolicy: IfNotPresent
   tag: 'v0.1.0'
@@ -97,14 +106,16 @@ redis:
   architecture: standalone
   auth:
     enabled: false
-```
+
+```text
 
 ### Install
 
 ```bash
 helm dependency update charts/intelgraph
 helm upgrade --install intelgraph charts/intelgraph -n intelgraph
-```
+
+```text
 
 ### Ingress (example)
 
@@ -120,12 +131,15 @@ metadata:
     nginx.ingress.kubernetes.io/enable-cors: 'true'
 spec:
   tls:
-    - hosts: [intelgraph.example.com]
+
+  - hosts: [intelgraph.example.com]
       secretName: intelgraph-tls
   rules:
-    - host: intelgraph.example.com
+
+  - host: intelgraph.example.com
       http:
         paths:
+
           - path: /
             pathType: Prefix
             backend:
@@ -133,7 +147,8 @@ spec:
                 name: server
                 port:
                   number: 3000
-```
+
+```text
 
 ### Health & SLO Checks
 

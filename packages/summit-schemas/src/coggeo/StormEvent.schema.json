@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "coggeo/StormEvent.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "narrative_id", "start_ts", "severity", "evidence_refs"],
+  "properties": {
+    "id": { "type": "string" },
+    "narrative_id": { "type": "string" },
+    "start_ts": { "type": "string", "format": "date-time" },
+    "severity": { "type": "number", "minimum": 0, "maximum": 1 },
+    "affected_h3": { "type": "array", "items": { "type": "string" } },
+    "evidence_refs": { "type": "array", "items": { "type": "string" } }
+  }
+}

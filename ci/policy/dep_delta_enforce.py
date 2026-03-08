@@ -1,6 +1,8 @@
 from __future__ import annotations
+
 import sys
 from pathlib import Path
+
 
 def main() -> int:
     # Check both potential files to be safe

@@ -1,9 +1,12 @@
 import hashlib
 from typing import List
-from ..merkle.models import MerkleTree, MerkleNode
+
+from ..merkle.models import MerkleNode, MerkleTree
+
+
 class SimhashBuilder:
     def __init__(self, hash_bits: int = 64): self.hash_bits = hash_bits
-    def compute(self, tree: MerkleTree) -> List[int]:
+    def compute(self, tree: MerkleTree) -> list[int]:
         v = [0] * self.hash_bits
         hashes = []
         self._collect(tree.root, hashes)
@@ -14,7 +17,7 @@ class SimhashBuilder:
                 if (bh >> i) & 1: v[i] += 1
                 else: v[i] -= 1
         return [1 if x > 0 else 0 for x in v]
-    def _collect(self, node: MerkleNode, hashes: List[str]):
+    def _collect(self, node: MerkleNode, hashes: list[str]):
         if not node.is_dir: hashes.append(node.hash)
         else:
             for c in node.children.values(): self._collect(c, hashes)

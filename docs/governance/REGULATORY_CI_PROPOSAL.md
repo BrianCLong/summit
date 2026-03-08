@@ -1,5 +1,11 @@
 # Regulatory CI/Automation Proposal
 
+> Owner: @summit/governance
+> Last-Reviewed: 2026-02-25
+> Evidence-IDs: EVD-PLACEHOLDER
+> Status: active
+
+
 ## 1. AI Risk Classification Gate
 *   **Purpose:** Enforce EU AI Act "High-Risk" obligations by blocking undocumented changes to risk-critical components.
 *   **Trigger:** Pull Request modifying paths: `server/src/narrative-engine/`, `server/src/decision-engine/`.

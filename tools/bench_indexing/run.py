@@ -1,6 +1,10 @@
-import time, json, os
+import json
+import os
+import time
 from pathlib import Path
+
 from services.indexing.merkle.builder import MerkleBuilder
+
 
 def run_benchmark():
     fixture_dir = Path("tools/bench_indexing/fixtures/large_repo")

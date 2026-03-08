@@ -1,0 +1,172 @@
+name: Agent Task
+description: Execution contract for Jules -> Codex -> Observer delivery
+title: '[Agent Task] '
+labels: ['agent-task', 'triage:needed']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this form to create implementation-ready tasks with deterministic acceptance criteria and evidence requirements.
+  - type: dropdown
+    id: target_agent
+    attributes:
+      label: Target Agent
+      description: Select the agent accountable for this issue.
+      options:
+        - Codex
+        - Jules
+        - Observer
+    validations:
+      required: true
+  - type: dropdown
+    id: task_class
+    attributes:
+      label: Task Class
+      description: Select the primary workstream.
+      options:
+        - Run Manifest Integration
+        - CI Reproducibility
+        - Compliance Automation
+        - Cost Telemetry
+        - Explainability CLI
+        - Repo Consistency
+        - Other
+    validations:
+      required: true
+  - type: dropdown
+    id: primary_zone
+    attributes:
+      label: Primary Zone
+      description: Keep one primary zone unless changes are strictly coupled.
+      options:
+        - server/
+        - apps/web/
+        - client/
+        - docs/
+        - .github/
+        - packages/
+        - services/
+    validations:
+      required: true
+  - type: checkboxes
+    id: coupled_zones
+    attributes:
+      label: Coupled Zones (if needed)
+      description: Select additional zones only when changes cannot be split.
+      options:
+        - label: server/
+        - label: apps/web/
+        - label: client/
+        - label: docs/
+        - label: .github/
+        - label: packages/
+        - label: services/
+  - type: input
+    id: prompt_hash
+    attributes:
+      label: Prompt Registry Hash
+      description: SHA-256 hash from prompts/registry.yaml for this task.
+      placeholder: sha256:...
+    validations:
+      required: true
+  - type: textarea
+    id: objective
+    attributes:
+      label: Objective
+      description: State the desired end state in one paragraph.
+    validations:
+      required: true
+  - type: textarea
+    id: scope_boundaries
+    attributes:
+      label: Scope Boundaries
+      description: List in-scope and explicitly out-of-scope surfaces.
+      placeholder: |
+        In scope:
+        - ...
+        Out of scope:
+        - ...
+    validations:
+      required: true
+  - type: textarea
+    id: implementation_tasks
+    attributes:
+      label: Implementation Tasks
+      description: Ordered checklist of concrete implementation steps.
+      placeholder: |
+        1. ...
+        2. ...
+        3. ...
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance_criteria
+    attributes:
+      label: Acceptance Criteria
+      description: Testable criteria with deterministic pass/fail outcomes.
+      placeholder: |
+        - [ ] ...
+        - [ ] ...
+    validations:
+      required: true
+  - type: textarea
+    id: verification_commands
+    attributes:
+      label: Verification Commands
+      description: Exact commands to validate this work.
+      placeholder: |
+        pnpm lint
+        pnpm typecheck
+        pnpm test
+        make smoke
+    validations:
+      required: true
+  - type: textarea
+    id: evidence_artifacts
+    attributes:
+      label: Evidence Artifacts
+      description: List required artifacts and paths for auditability.
+      placeholder: |
+        - artifacts/...
+        - docs/...
+        - CI job links
+    validations:
+      required: true
+  - type: textarea
+    id: rollback_plan
+    attributes:
+      label: Rollback Plan
+      description: Trigger conditions and exact rollback steps.
+    validations:
+      required: true
+  - type: dropdown
+    id: change_classification
+    attributes:
+      label: Change Classification
+      description: Required by post-GA governance.
+      options:
+        - patch
+        - minor
+        - major
+    validations:
+      required: true
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies and Blockers
+      description: Link dependent issues/PRs and blockers.
+  - type: checkboxes
+    id: ready_gate
+    attributes:
+      label: Ready-to-Execute Checklist
+      options:
+        - label: Objective and scope are clear.
+          required: true
+        - label: Acceptance criteria are testable.
+          required: true
+        - label: Verification commands are listed.
+          required: true
+        - label: Evidence artifacts are defined.
+          required: true
+        - label: Rollback plan is explicit.
+          required: true

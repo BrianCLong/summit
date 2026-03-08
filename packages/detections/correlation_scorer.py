@@ -5,8 +5,9 @@ Finds sequences of: mfa_enrollment -> oauth_consent -> bulk_download.
 Controlled by feature flag: flag_vishing_saas_scorer.
 """
 import json
-import yaml
 import pathlib
+
+import yaml
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 FLAGS_PATH = ROOT / "feature_flags" / "flags.yml"
@@ -14,7 +15,7 @@ FLAGS_PATH = ROOT / "feature_flags" / "flags.yml"
 def is_enabled():
     if not FLAGS_PATH.exists():
         return False
-    with open(FLAGS_PATH, 'r') as f:
+    with open(FLAGS_PATH) as f:
         flags = yaml.safe_load(f)
     return flags.get('flag_vishing_saas_scorer', False)
 

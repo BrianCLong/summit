@@ -1,6 +1,7 @@
 import json
 import re
 
+
 def map_item(cti_item):
     mappings = []
     claims = cti_item.get("claims", [])

@@ -1,4 +1,5 @@
 package summit.governance.mvp4
+import rego.v1
 
 # Goal: Ensure EVERY mutation has an explicit governance verdict.
 

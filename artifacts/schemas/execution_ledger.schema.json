@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.dev/schemas/execution_ledger.schema.json",
+  "type": "object",
+  "required": ["run_id", "todos", "decisions"],
+  "properties": {
+    "run_id": {"type": "string", "minLength": 1},
+    "todos": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["value", "evidence_id"],
+        "properties": {
+          "value": {"type": "string"},
+          "evidence_id": {"type": "string", "pattern": "^EV-[A-Za-z0-9_-]+-[a-z0-9_-]+-[0-9]{3}$"}
+        },
+        "additionalProperties": false
+      }
+    },
+    "decisions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["value", "evidence_id"],
+        "properties": {
+          "value": {"type": "string"},
+          "evidence_id": {"type": "string", "pattern": "^EV-[A-Za-z0-9_-]+-[a-z0-9_-]+-[0-9]{3}$"}
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,6 @@
+{
+  "description": "Synthetic latency samples captured during chaos experiments to validate p95 gating",
+  "samplesMs": [120, 140, 135, 150, 160, 175, 190, 210, 205, 198],
+  "expectedP95": 210,
+  "notes": "Used to sanity check regression outputs and load simulations."
+}

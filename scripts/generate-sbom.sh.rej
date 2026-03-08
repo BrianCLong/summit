@@ -1,0 +1,13 @@
+--- scripts/generate-sbom.sh
++++ scripts/generate-sbom.sh
+@@ -96,8 +96,8 @@
+   jq -s '[.[][]]' ./sboms/*.json > "$OUTPUT_FILE"
+
+   # Also save a nice text summary
+-  echo -e "${YELLOW}📝 Generating summary...${NC}"
+-  jq -r '. | "Package: \(.name) (\(.version)) - \(.type)"' "$OUTPUT_FILE" | sort | uniq > "./sboms/SBOM_SUMMARY-$(basename "$OUTPUT_FILE").txt"
++  # echo -e "${YELLOW}📝 Generating summary...${NC}"
++  # jq -r '. | "Package: \(.name) (\(.version)) - \(.type)"' "$OUTPUT_FILE" | sort | uniq > "./sboms/SBOM_SUMMARY-$(basename "$OUTPUT_FILE").txt"
+
+   echo -e "${GREEN}✅ SBOM generation complete! Saved to $OUTPUT_FILE${NC}"
+ }

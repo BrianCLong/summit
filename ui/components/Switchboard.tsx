@@ -148,7 +148,7 @@ export default function Switchboard() {
   return (
     <div className="grid grid-cols-12 gap-4 p-4">
       {/* Left rail */}
-      <aside className="col-span-3 space-y-3">
+      <div role="complementary" className="col-span-3 space-y-3">
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -171,13 +171,25 @@ export default function Switchboard() {
                     size="sm"
                     variant="secondary"
                     onClick={() => setOpen(true)}
+                    aria-label={t('messageAgent', { agentName: a.name })}
+                    title={t('messageAgent', { agentName: a.name })}
                   >
                     <MessageSquare className="h-4 w-4" />
                   </Button>
-                  <Button size="sm" variant="secondary">
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    aria-label={t('callAgent', { agentName: a.name })}
+                    title={t('callAgent', { agentName: a.name })}
+                  >
                     <PhoneCall className="h-4 w-4" />
                   </Button>
-                  <Button size="sm" variant="secondary">
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    aria-label={t('videoCallAgent', { agentName: a.name })}
+                    title={t('videoCallAgent', { agentName: a.name })}
+                  >
                     <Video className="h-4 w-4" />
                   </Button>
                 </div>
@@ -189,7 +201,7 @@ export default function Switchboard() {
           <Rocket className="mr-2 h-4 w-4" />
           {t('openCommandPalette')}
         </Button>
-      </aside>
+      </div>
 
       {/* Center tiles */}
       <main className="col-span-6 space-y-3">
@@ -314,7 +326,7 @@ export default function Switchboard() {
       </main>
 
       {/* Right rail: Co-pilot */}
-      <aside className="col-span-3 space-y-3">
+      <div role="complementary" className="col-span-3 space-y-3">
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -335,7 +347,7 @@ export default function Switchboard() {
             </div>
           </CardContent>
         </Card>
-      </aside>
+      </div>
 
       {/* Chat dialog */}
       <Dialog open={open} onOpenChange={setOpen}>

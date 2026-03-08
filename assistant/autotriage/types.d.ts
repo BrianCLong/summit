@@ -16,6 +16,9 @@ export interface TriageItem {
     priority?: string;
     runbook?: string;
     environment?: string;
+    initiative?: string;
+    link_primary?: string;
+    link_secondary?: string;
     clusterId?: string;
     clusterTheme?: string;
     impactScore: number;
@@ -39,6 +42,7 @@ export interface TriageReport {
         byArea: Record<string, number>;
         byImpact: Record<string, number>;
         byType: Record<string, number>;
+        byInitiative?: Record<string, number>;
     };
     topBlockingThemes: IssueCluster[];
     topIssues: TriageItem[];

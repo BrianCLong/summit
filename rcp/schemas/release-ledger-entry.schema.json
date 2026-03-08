@@ -1,0 +1,31 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Release Ledger Entry",
+  "type": "object",
+  "required": ["timestamp", "action", "run_id", "trust_score", "prev_hash"],
+  "properties": {
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "action": {
+      "type": "string",
+      "enum": ["merge", "promotion"]
+    },
+    "run_id": {
+      "type": "string"
+    },
+    "trust_score": {
+      "type": "integer"
+    },
+    "prev_hash": {
+      "type": "string"
+    },
+    "signature": {
+      "type": "string"
+    },
+    "details": {
+      "type": "object"
+    }
+  }
+}

@@ -1,5 +1,5 @@
 import re
-from typing import Dict, List, Any
+from typing import Any, Dict, List
 
 # Restricted QEMU parser for Summit VM Workbench
 # Inspired by vm-curator, implemented as a clean-room restricted adapter.
@@ -7,7 +7,7 @@ from typing import Dict, List, Any
 QEMU_RE = re.compile(r'^\s*(qemu-system-[^\s]+)\s+(.*)$')
 FORBIDDEN = ["|", "&&", "||", "$(", "`", ">", "<"]
 
-def parse_launch_script(text: str) -> Dict[str, Any]:
+def parse_launch_script(text: str) -> dict[str, Any]:
     """
     Parses a QEMU launch script into a structured format.
     Refuses any shell constructs to prevent injection.

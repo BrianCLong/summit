@@ -238,7 +238,7 @@ They are **enforceable** and apply to all code under this repository.
 - DB: `pnpm run db:migrate` and `pnpm run db:seed` (from repo root).
 - Docker: `pnpm run docker:dev` or `pnpm run docker:prod`.
 
-- **Golden Path**: `make bootstrap && make up && make smoke` - fresh clones must go green
+- **Golden Path**: `make golden-path` - fresh clones must go green
 - **Task Runner**: `Makefile` is the single source of truth. `Justfile` is deprecated and removed.
 - **Deployable-First**: Maintain the workflow: Investigation -> Entities -> Relationships -> Copilot
   -> Results
@@ -460,10 +460,11 @@ npm run summitctl -- test
    pnpm e2e
    ```
 
-4. **Smoke Tests**: Golden path validation
+4. **Golden Path Verification**:
    ```bash
-   make smoke
+   make golden-path
    ```
+   (Aliases: `make smoke`)
 
 ### Test Conventions
 
@@ -564,8 +565,8 @@ docker exec -it <neo4j-container> cypher-shell -u neo4j -p devpassword
 ## Quick Reference
 
 ```bash
-# Full setup and validation
-make bootstrap && make up && make smoke
+# Full setup and validation (Golden Path)
+make golden-path
 
 # Development workflow
 pnpm dev          # Start dev servers

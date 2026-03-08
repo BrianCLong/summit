@@ -1,0 +1,31 @@
+version: "summit.subsumption.v4"
+project_id: "mtwgl-multi-tenant-workspace-governance"
+name: "MTWGL: Multi-Tenant Workspace & Governance Layer"
+description: "Architecting Summit for Enterprise Multi-Tenancy (Few Big Enterprises)"
+
+lanes:
+  - id: "lane/mtwgl-1-foundation"
+    description: "Core Data Models & Hierarchy (Org -> Tenant -> Workspace -> Project)"
+  - id: "lane/mtwgl-2-isolation"
+    description: "Hard Isolation & Blast Radius Controls (DB, Network, Redis)"
+  - id: "lane/mtwgl-3-policy"
+    description: "Policy Engine, RBAC, and Secret Management"
+  - id: "lane/mtwgl-4-billing"
+    description: "Usage Tracking, Quotas, and Resource Governance"
+  - id: "lane/mtwgl-5-enterprise"
+    description: "SSO, Auditing, and Internal Agent Marketplace"
+
+prompts:
+  - id: "P1-Foundation"
+    file: "P1_foundation_prompt.md"
+  - id: "P2-Isolation"
+    file: "P2_isolation_prompt.md"
+  - id: "P3-Policy"
+    file: "P3_policy_prompt.md"
+  - id: "P4-Billing"
+    file: "P4_billing_prompt.md"
+  - id: "P5-Enterprise"
+    file: "P5_enterprise_prompt.md"
+
+convergence:
+  file: "CONVERGENCE.md"

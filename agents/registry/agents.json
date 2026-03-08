@@ -1,0 +1,28 @@
+{
+  "agents": [
+    {
+      "id": "summit-core-analyst-001",
+      "name": "Core Analyst",
+      "owner": "summit-team",
+      "env": "production",
+      "runtime": "nodejs",
+      "capabilities": ["graph-query", "reasoning"]
+    },
+    {
+      "id": "moltbook-relay-agent",
+      "name": "Moltbook Relay Agent",
+      "owner": "security-ops",
+      "env": "production",
+      "runtime": "python",
+      "capabilities": ["relay-messaging", "discovery"]
+    },
+    {
+      "id": "maestro-spec-interviewer",
+      "name": "Maestro Spec Interviewer",
+      "owner": "summit-team",
+      "env": "production",
+      "runtime": "python",
+      "capabilities": ["requirements-engineering", "spec-generation"]
+    }
+  ]
+}

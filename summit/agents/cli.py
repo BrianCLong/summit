@@ -1,9 +1,11 @@
 import argparse
-import sys
 import json
-from ..acp.registry_client import fetch_registry_json, parse_agents
+import sys
+
 from ..acp.installer import plan_install
 from ..acp.policy import AcpPolicy
+from ..acp.registry_client import fetch_registry_json, parse_agents
+
 
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(prog="summit agents")

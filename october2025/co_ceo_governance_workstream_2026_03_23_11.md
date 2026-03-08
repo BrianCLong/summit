@@ -91,7 +91,7 @@ verify_policy:
       with: { name: policy-bundle, path: . }
     - name: Verify signature
       run: |
-        COSIGN_EXPERIMENTAL=1 cosign verify-blob --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+        COSIGN_EXPERIMENTAL=1 cosign verify-blob --use-signed-timestamps --certificate-oidc-issuer https://token.actions.githubusercontent.com \
           --signature policy.sig policy.tar.gz
 ```
 

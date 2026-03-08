@@ -258,7 +258,7 @@ run_ui_tests() {
 
         # Run Playwright tests with specific browser
         cd "${PROJECT_ROOT}/client"
-        npx playwright test --browser="$browser" --reporter=json --output-dir="../bug-bash-results/$(date +%Y%m%d)/playwright-${browser}" > "$results_file" 2>&1 || warn "Some tests failed in $browser"
+        npx playwright test --browser="$browser" --reporter=json --output="../bug-bash-results/$(date +%Y%m%d)/playwright-${browser}" > "$results_file" 2>&1 || warn "Some tests failed in $browser"
 
         # Run accessibility tests
         info "Running accessibility tests in ${browser}..."

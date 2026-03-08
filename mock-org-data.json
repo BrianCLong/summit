@@ -1,0 +1,402 @@
+{
+  "users": [
+    {
+      "id": "u0",
+      "email": "user0@example.com",
+      "role": "admin",
+      "department": "engineering"
+    },
+    {
+      "id": "u1",
+      "email": "user1@example.com",
+      "role": "admin",
+      "department": "sales"
+    },
+    {
+      "id": "u2",
+      "email": "user2@example.com",
+      "role": "admin",
+      "department": "marketing"
+    },
+    {
+      "id": "u3",
+      "email": "user3@example.com",
+      "role": "admin",
+      "department": "engineering"
+    },
+    {
+      "id": "u4",
+      "email": "user4@example.com",
+      "role": "admin",
+      "department": "sales"
+    },
+    {
+      "id": "u5",
+      "email": "user5@example.com",
+      "role": "member",
+      "department": "marketing"
+    },
+    {
+      "id": "u6",
+      "email": "user6@example.com",
+      "role": "member",
+      "department": "engineering"
+    },
+    {
+      "id": "u7",
+      "email": "user7@example.com",
+      "role": "member",
+      "department": "sales"
+    },
+    {
+      "id": "u8",
+      "email": "user8@example.com",
+      "role": "member",
+      "department": "marketing"
+    },
+    {
+      "id": "u9",
+      "email": "user9@example.com",
+      "role": "member",
+      "department": "engineering"
+    },
+    {
+      "id": "u10",
+      "email": "user10@example.com",
+      "role": "member",
+      "department": "sales"
+    },
+    {
+      "id": "u11",
+      "email": "user11@example.com",
+      "role": "member",
+      "department": "marketing"
+    },
+    {
+      "id": "u12",
+      "email": "user12@example.com",
+      "role": "member",
+      "department": "engineering"
+    },
+    {
+      "id": "u13",
+      "email": "user13@example.com",
+      "role": "member",
+      "department": "sales"
+    },
+    {
+      "id": "u14",
+      "email": "user14@example.com",
+      "role": "member",
+      "department": "marketing"
+    },
+    {
+      "id": "u15",
+      "email": "user15@example.com",
+      "role": "member",
+      "department": "engineering"
+    },
+    {
+      "id": "u16",
+      "email": "user16@example.com",
+      "role": "member",
+      "department": "sales"
+    },
+    {
+      "id": "u17",
+      "email": "user17@example.com",
+      "role": "member",
+      "department": "marketing"
+    },
+    {
+      "id": "u18",
+      "email": "user18@example.com",
+      "role": "member",
+      "department": "engineering"
+    },
+    {
+      "id": "u19",
+      "email": "user19@example.com",
+      "role": "member",
+      "department": "sales"
+    },
+    {
+      "id": "u20",
+      "email": "user20@example.com",
+      "role": "member",
+      "department": "marketing"
+    },
+    {
+      "id": "u21",
+      "email": "user21@example.com",
+      "role": "member",
+      "department": "engineering"
+    },
+    {
+      "id": "u22",
+      "email": "user22@example.com",
+      "role": "member",
+      "department": "sales"
+    },
+    {
+      "id": "u23",
+      "email": "user23@example.com",
+      "role": "member",
+      "department": "marketing"
+    },
+    {
+      "id": "u24",
+      "email": "user24@example.com",
+      "role": "member",
+      "department": "engineering"
+    },
+    {
+      "id": "u25",
+      "email": "user25@example.com",
+      "role": "member",
+      "department": "sales"
+    },
+    {
+      "id": "u26",
+      "email": "user26@example.com",
+      "role": "member",
+      "department": "marketing"
+    },
+    {
+      "id": "u27",
+      "email": "user27@example.com",
+      "role": "member",
+      "department": "engineering"
+    },
+    {
+      "id": "u28",
+      "email": "user28@example.com",
+      "role": "member",
+      "department": "sales"
+    },
+    {
+      "id": "u29",
+      "email": "user29@example.com",
+      "role": "member",
+      "department": "marketing"
+    },
+    {
+      "id": "u30",
+      "email": "user30@example.com",
+      "role": "member",
+      "department": "engineering"
+    },
+    {
+      "id": "u31",
+      "email": "user31@example.com",
+      "role": "member",
+      "department": "sales"
+    },
+    {
+      "id": "u32",
+      "email": "user32@example.com",
+      "role": "member",
+      "department": "marketing"
+    },
+    {
+      "id": "u33",
+      "email": "user33@example.com",
+      "role": "member",
+      "department": "engineering"
+    },
+    {
+      "id": "u34",
+      "email": "user34@example.com",
+      "role": "member",
+      "department": "sales"
+    },
+    {
+      "id": "u35",
+      "email": "user35@example.com",
+      "role": "member",
+      "department": "marketing"
+    },
+    {
+      "id": "u36",
+      "email": "user36@example.com",
+      "role": "member",
+      "department": "engineering"
+    },
+    {
+      "id": "u37",
+      "email": "user37@example.com",
+      "role": "member",
+      "department": "sales"
+    },
+    {
+      "id": "u38",
+      "email": "user38@example.com",
+      "role": "member",
+      "department": "marketing"
+    },
+    {
+      "id": "u39",
+      "email": "user39@example.com",
+      "role": "member",
+      "department": "engineering"
+    },
+    {
+      "id": "u40",
+      "email": "user40@example.com",
+      "role": "member",
+      "department": "sales"
+    },
+    {
+      "id": "u41",
+      "email": "user41@example.com",
+      "role": "member",
+      "department": "marketing"
+    },
+    {
+      "id": "u42",
+      "email": "user42@example.com",
+      "role": "member",
+      "department": "engineering"
+    },
+    {
+      "id": "u43",
+      "email": "user43@example.com",
+      "role": "member",
+      "department": "sales"
+    },
+    {
+      "id": "u44",
+      "email": "user44@example.com",
+      "role": "member",
+      "department": "marketing"
+    },
+    {
+      "id": "u45",
+      "email": "user45@example.com",
+      "role": "member",
+      "department": "engineering"
+    },
+    {
+      "id": "u46",
+      "email": "user46@example.com",
+      "role": "member",
+      "department": "sales"
+    },
+    {
+      "id": "u47",
+      "email": "user47@example.com",
+      "role": "member",
+      "department": "marketing"
+    },
+    {
+      "id": "u48",
+      "email": "user48@example.com",
+      "role": "member",
+      "department": "engineering"
+    },
+    {
+      "id": "u49",
+      "email": "user49@example.com",
+      "role": "member",
+      "department": "sales"
+    }
+  ],
+  "repos": [
+    {
+      "id": "r0",
+      "name": "repo-0",
+      "visibility": "public",
+      "branchProtection": false,
+      "lastCommit": "2026-02-11T05:58:23.447Z"
+    },
+    {
+      "id": "r1",
+      "name": "repo-1",
+      "visibility": "private",
+      "branchProtection": true,
+      "lastCommit": "2026-02-11T05:58:23.447Z"
+    },
+    {
+      "id": "r2",
+      "name": "repo-2",
+      "visibility": "public",
+      "branchProtection": true,
+      "lastCommit": "2026-02-11T05:58:23.447Z"
+    },
+    {
+      "id": "r3",
+      "name": "repo-3",
+      "visibility": "private",
+      "branchProtection": false,
+      "lastCommit": "2026-02-11T05:58:23.447Z"
+    },
+    {
+      "id": "r4",
+      "name": "repo-4",
+      "visibility": "public",
+      "branchProtection": true,
+      "lastCommit": "2026-02-11T05:58:23.447Z"
+    },
+    {
+      "id": "r5",
+      "name": "repo-5",
+      "visibility": "private",
+      "branchProtection": true,
+      "lastCommit": "2026-02-11T05:58:23.447Z"
+    },
+    {
+      "id": "r6",
+      "name": "repo-6",
+      "visibility": "public",
+      "branchProtection": false,
+      "lastCommit": "2026-02-11T05:58:23.447Z"
+    },
+    {
+      "id": "r7",
+      "name": "repo-7",
+      "visibility": "private",
+      "branchProtection": true,
+      "lastCommit": "2026-02-11T05:58:23.447Z"
+    },
+    {
+      "id": "r8",
+      "name": "repo-8",
+      "visibility": "public",
+      "branchProtection": true,
+      "lastCommit": "2026-02-11T05:58:23.447Z"
+    },
+    {
+      "id": "r9",
+      "name": "repo-9",
+      "visibility": "private",
+      "branchProtection": false,
+      "lastCommit": "2026-02-11T05:58:23.447Z"
+    }
+  ],
+  "narrativeSignals": [
+    {
+      "id": "s1",
+      "type": "pr_comment",
+      "content": "We should just disable the firewall for now to get this working.",
+      "riskScore": 0.8,
+      "repoId": "r0",
+      "userId": "u10"
+    },
+    {
+      "id": "s2",
+      "type": "issue_body",
+      "content": "Can we bypass the compliance check?",
+      "riskScore": 0.7,
+      "repoId": "r2",
+      "userId": "u20"
+    },
+    {
+      "id": "s3",
+      "type": "commit_message",
+      "content": "Fixing bug, temporary hack, will fix later",
+      "riskScore": 0.4,
+      "repoId": "r5",
+      "userId": "u5"
+    }
+  ]
+}

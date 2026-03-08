@@ -1,0 +1,27 @@
+{
+  "version": "v1",
+  "rules": [
+    {
+      "id": "allow-low-risk",
+      "riskTier": "low",
+      "requiredScopes": [],
+      "decision": "allow"
+    },
+    {
+      "id": "allow-medium-with-scope",
+      "riskTier": "medium",
+      "requiredScopes": ["mcp:medium"],
+      "decision": "allow"
+    },
+    {
+      "id": "allow-high-with-scope",
+      "riskTier": "high",
+      "requiredScopes": ["mcp:high"],
+      "decision": "allow"
+    }
+  ],
+  "breakGlass": {
+    "scope": "mcp:break-glass",
+    "maxDurationMinutes": 60
+  }
+}

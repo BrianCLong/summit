@@ -14,6 +14,8 @@ const IGNORE = [
   '**/.cache/**',
   '**/.turbo/**',
   '**/generated/**',
+  'reports/**',
+  'playwright-report/**',
   'frontend/.vite/**', // legacy build artifacts
   '**/public/**',
   '**/*.min.js',
@@ -92,6 +94,7 @@ const IGNORE = [
   'apps/**',
   'client/**',
   'packages/**',
+  '!packages/agent-skillpacks/**',
   'services/**',
   'server/**',
   'streaming/**',
@@ -148,6 +151,8 @@ const IGNORE = [
   '*.cjs',
   '*.mjs',
   '*.ts',
+  '!packages/agent-skillpacks/**/*.ts',
+  '!packages/agent-skillpacks/**/*.tsx',
 ];
 
 export default [

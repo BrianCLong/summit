@@ -1,0 +1,89 @@
+# Release Ops On-Call Handoff Policy
+# Configures the handoff note generator for shift transitions
+#
+# This policy file is read by scripts/release/generate_oncall_handoff.sh
+# Cadence gating by scripts/release/should_run_task.sh
+# See docs/ci/ONCALL_HANDOFF.md for full documentation.
+
+version: "1.1.0"
+
+# Run windows (UTC) - handoff only runs within these shift-change windows
+# The orchestrator runs hourly; this gates when handoff actually executes
+run_windows_utc:
+  - start: "09:00"   # Morning handoff window (EMEA -> Americas)
+    end: "09:30"
+  - start: "17:00"   # Evening handoff window (Americas -> APAC)
+    end: "17:30"
+
+# Cadence hours - minimum time between handoff executions
+# Combined with run_windows_utc ensures twice-per-day execution at shift changes
+cadence_hours: 8
+
+# Handoff timing (legacy format, preserved for compatibility)
+schedule:
+  # Shift change times (UTC)
+  shift_changes:
+    - "08:00"  # EMEA -> Americas handoff
+    - "16:00"  # Americas -> APAC handoff
+    - "00:00"  # APAC -> EMEA handoff
+
+  # Generate handoff note this many minutes before shift change
+  lead_time_minutes: 30
+
+# Content configuration
+content:
+  # Maximum items per section
+  max_blockers: 5
+  max_recent_events: 10
+  max_pending_actions: 5
+
+  # Sections to include
+  include_sections:
+    - summary           # Quick status overview
+    - active_blockers   # Current P0/P1 blockers
+    - recent_events     # Last 8 hours of activity
+    - pending_actions   # Items needing attention
+    - release_status    # Current release line states
+    - escalation_status # Active escalations
+
+  # Time window for recent events
+  recent_events_hours: 8
+
+  # Include context from previous handoff
+  include_previous_context: true
+
+# Output configuration
+output:
+  # Generate artifact
+  artifact: true
+  artifact_path: "artifacts/release-train/oncall_handoff.md"
+
+  # Slack-friendly format (plain text, no tables)
+  slack_format:
+    enabled: true
+    artifact_path: "artifacts/release-train/oncall_handoff_slack.txt"
+
+  # Optional: post to Slack channel
+  slack_webhook:
+    enabled: false
+    # channel_id: "C0123456789"
+
+# State tracking
+state:
+  path: "docs/releases/_state/handoff_state.json"
+
+# Priority labels for sorting
+priority_labels:
+  - "severity:P0"
+  - "escalation:P0"
+  - "blocked"
+  - "severity:P1"
+  - "escalation:P1"
+  - "release-blocker"
+
+# Status indicators
+status_indicators:
+  healthy: ":white_check_mark:"
+  warning: ":warning:"
+  critical: ":rotating_light:"
+  unknown: ":grey_question:"

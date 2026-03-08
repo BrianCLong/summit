@@ -1,7 +1,7 @@
 // @ts-nocheck
 import express, { Response, NextFunction } from 'express';
 import { DeceptionService, HoneypotConfig, InteractionData } from '../services/DeceptionService.js';
-import { z } from 'zod/v4';
+import { z } from 'zod';
 import logger from '../utils/logger.js';
 import { cfg } from '../config.js';
 import type { AuthenticatedRequest } from './types.js';
@@ -94,7 +94,7 @@ router.post('/interactions', async (req: AuthenticatedRequest, res: Response) =>
 
 // GET /api/deception/profiles
 router.get('/profiles', async (req: AuthenticatedRequest, res: Response) => {
-    const ip = req.query.ip;
+    const ip = (((req.query.ip as string) as string) as string);
     if (!ip || typeof ip !== 'string' || !z.string().ip().safeParse(ip).success) {
         return res.status(400).json({ error: 'Valid IP address required' });
     }

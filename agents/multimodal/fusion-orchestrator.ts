@@ -34,7 +34,7 @@ import { HallucinationGuard } from './hallucination-guard.js';
 import { PgVectorStore } from './pgvector-store.js';
 import { Neo4jEmbeddings } from './neo4j-embeddings.js';
 
-const logger = pino({ name: 'fusion-orchestrator' });
+const logger: any = (pino as any)({ name: 'fusion-orchestrator' });
 
 export interface FusionOrchestratorConfig extends Partial<FusionPipelineConfig> {
   enableGraphEmbeddings: boolean;

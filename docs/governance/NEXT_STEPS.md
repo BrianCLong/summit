@@ -1,7 +1,8 @@
-# Recommended Next Actions (Weekly Conveyor)
+> Owner: @summit/governance
+> Last-Reviewed: 2026-02-25
+> Evidence-IDs: EVD-PLACEHOLDER
+> Status: active
 
-**Date**: 2026-01-25
-**Context**: Post-GA Stabilization & Governance Hardening
 
 ## 1. High-Leverage Technical Hardening (Claude Code)
 **Goal**: Automate the Governance Drift Detection to prevent manual toil.

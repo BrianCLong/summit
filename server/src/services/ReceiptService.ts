@@ -2,12 +2,14 @@ import { ProvenanceLedgerV2 } from '../provenance/ledger.js';
 import type { ReceiptEvidence } from '../provenance/types.js';
 import { SigningService } from './SigningService.js';
 import { createHash } from 'crypto';
+import { meteringEmitter } from '../metering/emitter.js';
 
 export interface Receipt {
   id: string; // usually the ledger entry ID
   timestamp: string;
   action: string;
   actor: string;
+  tenantId: string;
   resource: string;
   inputHash: string;
   policyDecisionId?: string;
@@ -48,6 +50,46 @@ export class ReceiptService {
    * Generates a signed receipt for an action.
    * This also logs the action to the Provenance Ledger if it hasn't been logged yet.
    */
+  private _batchQueue: ReceiptEvidence[] = [];
+  private _batchInterval?: NodeJS.Timeout;
+  private readonly BATCH_SIZE = 50;
+  private readonly FLUSH_INTERVAL_MS = 1000;
+
+  private startBatching() {
+    if (this._batchInterval) return;
+    this._batchInterval = setInterval(() => this.flushBatch(), this.FLUSH_INTERVAL_MS);
+    this._batchInterval.unref?.();
+  }
+
+  private async flushBatch() {
+    if (this._batchQueue.length === 0) return;
+    const batch = [...this._batchQueue];
+    this._batchQueue = [];
+
+    try {
+      // Sprint 08 Hardening: Reliable batch writing
+      // Use Promise.allSettled to ensure failure of one doesn't stop others,
+      // but we still log failures.
+      const results = await Promise.allSettled(
+        batch.map((evidence) => this.ledger.recordReceiptEvidence(evidence))
+      );
+
+      const failures = results.filter((r) => r.status === 'rejected');
+      if (failures.length > 0) {
+        console.error(`Failed to flush ${failures.length} receipts in batch`, failures);
+        // In production, we'd move these to a dead-letter queue for replay
+      }
+    } catch (err) {
+      console.error('Critical failure in receipt batch flush', err);
+      // Re-queue items if the whole flush failed (best-effort)
+      this._batchQueue.push(...batch);
+    }
+  }
+
+  /**
+   * Generates a signed receipt for an action.
+   * This also logs the action to the Provenance Ledger if it hasn't been logged yet.
+   */
   public async generateReceipt(params: {
     action: string;
     actor: { id: string; tenantId: string };
@@ -62,13 +104,17 @@ export class ReceiptService {
     const inputHash = createHash('sha256').update(inputStr).digest('hex');
 
     // 2. Append to Ledger (this is the "truth" store)
+    // Synchronous write to Ledger ensures "happened-at" ordering for the audit trail
     const entry = await this.ledger.appendEntry({
-      action,
+      actionType: action,
       actorId: actor.id,
       tenantId: actor.tenantId,
-      resource,
-      details: { inputHash, policyDecisionId }, // stored in 'details' which maps to metadata or payload
-      timestamp: new Date().toISOString()
+      resourceId: resource,
+      resourceType: 'entity',
+      actorType: 'user',
+      payload: { inputHash, policyDecisionId },
+      metadata: {},
+      timestamp: new Date()
     } as any);
     const entryId = entry.id;
 
@@ -113,7 +159,27 @@ export class ReceiptService {
       issuedAt: timestamp
     };
 
-    await this.ledger.recordReceiptEvidence(receiptEvidence);
+    // Sprint 08: Batch receipt evidence writes to improve throughput
+    this._batchQueue.push(receiptEvidence);
+    this.startBatching();
+    if (this._batchQueue.length >= this.BATCH_SIZE) {
+      this.flushBatch();
+    }
+
+    // Metering: Record receipt write
+    try {
+      await meteringEmitter.emitReceiptWrite({
+        tenantId: actor.tenantId,
+        action,
+        source: 'ReceiptService',
+        correlationId: entryId,
+        metadata: {
+          resourceId: resource,
+        },
+      });
+    } catch (err) {
+      console.warn('Failed to emit receipt write meter event', err);
+    }
 
     return receipt;
   }
@@ -140,6 +206,7 @@ export class ReceiptService {
 
     return {
       id: entry.id,
+      tenantId: entry.tenantId,
       timestamp: entry.timestamp.toISOString(),
       action: entry.actionType,
       actor: entry.actorId,

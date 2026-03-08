@@ -19,7 +19,7 @@ This checklist is the authoritative gate for promoting Summit to General Availab
 ## Architecture, Reliability, and Observability
 - [ ] **Topology alignment** confirmed against the [architecture overview](../architecture/README.md) and [system map](../architecture/system-map.png); deviations documented.
 - [ ] **Resilience targets** satisfied: SLOs from [phase2-slo-observability](../architecture/phase2-slo-observability.md) are met in staging with alerting enabled.
-- [ ] **Feature flag and blast radius controls** configured per [CONFIGURATION_AND_FLAGS](../architecture/CONFIGURATION_AND_FLAGS.md) and [blast radius report](../architecture/blast-radius-report.txt).
+- [ ] **Feature flag and blast radius controls** configured per [CONFIGURATION_AND_FLAGS](../architecture/CONFIGURATION_AND_FLAGS.md) and blast radius report.
 
 ## Streaming Readiness
 - [ ] **Pipeline health** validated against [streaming architecture](../streaming/ARCHITECTURE.md) with throughput/batch benchmarks recorded.

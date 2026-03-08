@@ -1,0 +1,20 @@
+18476	chore(ops): daily sprint evidence refresh + schema conflict repair	chore/daily-sprint-2026-02-11-refresh	OPEN	2026-02-11T11:10:39Z
+18475	IntelGraph Phase 2 Foundations & Hardened Services	feat/intelgraph/phase2-foundations-hardened-852790884084947131	OPEN	2026-02-11T11:03:02Z
+18474	Security Sprint 2: Batch 1 Remediation	sec-sprint-2-batch1-10679402050883836401	OPEN	2026-02-11T11:02:37Z
+18473	Execute Wave 0 & 1 PR Management (EP04-T01)	jules-11027107234280109574-1f43ad13	OPEN	2026-02-11T10:54:02Z
+18472	CompanyOS Core Platform Primitives (Tasks 9-16)	feat/companyos-platform-primitives-2865563395573772890	OPEN	2026-02-11T10:53:59Z
+18471	GraphRAG Determinism Gate: Retrieval, Index Config, Regression Harness	jules/graphrag-determinism-gate-2129655590686802330	OPEN	2026-02-11T10:53:30Z
+18470	docs: harden GA control-room docs and PR explainer for golden-path merge	codex/implement-daily-automation-for-ga-control-room-sejmt7	OPEN	2026-02-11T10:52:53Z
+18469	Sprint 08: Multi-Tenant Hardening + FinOps + Policy Ramps	sprint-08-multi-tenant-hardening-finops-12649272389148867140	OPEN	2026-02-11T10:50:47Z
+18468	🎨 Palette: Spinner accessibility improvement	palette-spinner-a11y-1523367429162190557	OPEN	2026-02-11T10:48:29Z
+18467	Production Capacity Verification - Org Mesh GA	feat/org-mesh-capacity-verification-3348653644948533449	OPEN	2026-02-11T10:47:14Z
+18466	IntelGraph v1.0 SDLC Expansion Planning and Orchestration	intelgraph-v1-sdlc-expansion-4737897661757165968	OPEN	2026-02-11T10:39:23Z
+18465	Stripe Billing + Subscriptions Integration	stripe-billing-integration-11206261455454280972	OPEN	2026-02-11T10:36:55Z
+18464	Operability Gate: Observability, Artifacts, and Healthchecks	operability-gate-ga-14277907292508713657	OPEN	2026-02-11T10:27:45Z
+18463	GA Readiness: Security Fixes & Tech Debt Removal	fix/ga-security-and-debt-7096284321754160450	OPEN	2026-02-11T10:04:56Z
+18462	docs(roadmap): add Todo standup snapshot and update STATUS.json	codex/list-current-todo-items-in-roadmap	OPEN	2026-02-11T09:34:44Z
+18461	docs(ops): harden daily sprint automation loop generation	codex/create-daily-sprint-automation-loop	OPEN	2026-02-11T09:34:40Z
+18460	feat(ga): add deterministic GA hardening audit runner	codex/eliminate-security-vulnerabilities-and-technical-debt	OPEN	2026-02-11T09:34:37Z
+18459	feat(service-factory): Implement Golden Path Service Generator	feat/service-factory-9263416505476656254	OPEN	2026-02-11T09:34:31Z
+18458	IntelGraph Master Orchestration Plan Implementation	feat/orchestration/master-plan-8623917487116633573	OPEN	2026-02-11T09:19:02Z
+18457	feat(threat-emulation): add UNC3886 and TGR-STA-1030 actor profiles	threat-intel/feb-2026-updates-15879490859178472679	OPEN	2026-02-11T09:18:04Z
