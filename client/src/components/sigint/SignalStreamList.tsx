@@ -36,9 +36,7 @@ const CONFIDENCE_STYLES: Record<ConfidenceLevel, { bg: string; text: string }> =
 type SortField = 'frequency' | 'name' | 'confidence' | 'activity';
 type SortDirection = 'asc' | 'desc';
 
-// ⚡ Bolt: Wrapped SignalStreamList with React.memo to prevent expensive list filtering
-// and rendering when dashboard state changes (like visualizations or MASINT updates).
-export const SignalStreamList = React.memo(({
+export const SignalStreamList: React.FC<SignalStreamListProps> = ({
   streams,
   selectedStreamId,
   onSelectStream,
@@ -46,7 +44,7 @@ export const SignalStreamList = React.memo(({
   onUnsubscribe,
   subscribedIds = new Set(),
   className,
-}: SignalStreamListProps) => {
+}) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [bandFilter, setBandFilter] = useState<FrequencyBand | 'ALL'>('ALL');
   const [sortField, setSortField] = useState<SortField>('frequency');
@@ -348,8 +346,6 @@ export const SignalStreamList = React.memo(({
       </div>
     </div>
   );
-});
-
-SignalStreamList.displayName = 'SignalStreamList';
+};
 
 export default SignalStreamList;

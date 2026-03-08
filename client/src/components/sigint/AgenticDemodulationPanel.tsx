@@ -40,16 +40,14 @@ const STATUS_CONFIG = {
   FAILED: { label: 'Failed', color: 'text-red-400', icon: 'x' },
 };
 
-// ⚡ Bolt: Wrapped AgenticDemodulationPanel with React.memo to prevent unnecessary re-renders
-// when parent dashboard state (like selected view mode or MASINT detections) changes.
-export const AgenticDemodulationPanel = React.memo(({
+export const AgenticDemodulationPanel: React.FC<AgenticDemodulationPanelProps> = ({
   tasks,
   availableStreams,
   onStartDemodulation,
   onCancelTask,
   onViewResult,
   className,
-}: AgenticDemodulationPanelProps) => {
+}) => {
   const [selectedStreamId, setSelectedStreamId] = useState<string | null>(null);
   const [showStreamSelector, setShowStreamSelector] = useState(false);
 
@@ -353,8 +351,6 @@ export const AgenticDemodulationPanel = React.memo(({
       </div>
     </div>
   );
-});
-
-AgenticDemodulationPanel.displayName = 'AgenticDemodulationPanel';
+};
 
 export default AgenticDemodulationPanel;
