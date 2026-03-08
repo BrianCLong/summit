@@ -68,6 +68,25 @@ export const getContext = async ({
 
     const token = extractToken(req);
     if (!token) {
+      if (process.env.ENABLE_INSECURE_DEV_AUTH === 'true' && process.env.NODE_ENV === 'development') {
+        logger.info({ requestId }, 'Allowing unauthenticated request (ENABLE_INSECURE_DEV_AUTH)');
+        return {
+          user: {
+            id: 'dev-user-1',
+            email: 'developer@intelgraph.com',
+            username: 'developer',
+            role: 'ADMIN',
+            token_version: 0,
+            tenantId: 'tenant_1',
+          },
+          isAuthenticated: true,
+          requestId,
+          loaders,
+          tenantContext:
+            req.tenantContext ||
+            extractTenantContext(req, { strict: false }),
+        };
+      }
       logger.info({ requestId }, 'Unauthenticated request');
       return { isAuthenticated: false, requestId, loaders };
     }
@@ -94,14 +113,17 @@ export const getContext = async ({
 
 export const verifyToken = async (token: string): Promise<User> => {
   try {
+    logger.info({ token: token === 'dev-token' ? 'dev-token' : '[REDACTED]' }, 'Verifying token');
     // For development, accept a simple test token
     if (process.env.NODE_ENV === 'development' && token === 'dev-token') {
+      logger.info('Accepted dev-token');
       return {
         id: 'dev-user-1',
         email: 'developer@intelgraph.com',
         username: 'developer',
         role: 'ADMIN',
         token_version: 0,
+        tenantId: 'tenant_1',
       };
     }
 

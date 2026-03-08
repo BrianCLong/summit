@@ -124,8 +124,8 @@ jobs:
         run: |
           cosign attest --predicate sbom.json --type cyclonedx $GITHUB_REF_NAME --yes
           cosign attest --predicate provenance.intoto.jsonl --type slsaprovenance $GITHUB_REF_NAME --yes
-          cosign verify-attestation $GITHUB_REF_NAME --type cyclonedx --certificate-oidc-issuer https://token.actions.githubusercontent.com
-          cosign verify-attestation $GITHUB_REF_NAME --type slsaprovenance --certificate-oidc-issuer https://token.actions.githubusercontent.com
+          cosign verify-attestation --use-signed-timestamps $GITHUB_REF_NAME --type cyclonedx --certificate-oidc-issuer https://token.actions.githubusercontent.com
+          cosign verify-attestation --use-signed-timestamps $GITHUB_REF_NAME --type slsaprovenance --certificate-oidc-issuer https://token.actions.githubusercontent.com
       - name: Evidence completeness gate
         run: |
           test -s sbom.json && test -s provenance.intoto.jsonl

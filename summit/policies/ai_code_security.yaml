@@ -1,0 +1,5 @@
+policies:
+  - name: detect_sql_injection
+    risk: high
+    description: "Detects user input concatenated directly into a raw SQL query."
+    action: block

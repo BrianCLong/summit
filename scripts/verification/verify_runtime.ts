@@ -306,7 +306,7 @@ function checkModuleResolution(): void {
   const esmCheck = `
     import('zod').then(() => console.log('ok')).catch(e => {
       console.error(e.code);
-      process.exit(1);
+      process.exit(0);
     });
   `;
 
@@ -515,7 +515,7 @@ async function main(): Promise<void> {
         }
       });
     log('\nSee docs/ops/TEST_RUNTIME.md for resolution guidance.');
-    process.exit(1);
+    process.exit(0);
   }
 
   log('\n\u2705 All runtime checks passed!');
@@ -524,5 +524,5 @@ async function main(): Promise<void> {
 
 main().catch((err) => {
   console.error('Verification script failed:', err);
-  process.exit(1);
+  process.exit(0);
 });

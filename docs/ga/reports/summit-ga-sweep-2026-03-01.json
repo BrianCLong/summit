@@ -1,0 +1,774 @@
+{
+  "summit_ga_sweep": {
+    "merge_health": {
+      "pending_checks": -1,
+      "blocked_merges": -1,
+      "orphaned_runs": -1,
+      "ci_queue_depth": -1,
+      "status": "degraded",
+      "note": "GitHub API unavailable in this execution environment; remote merge and CI telemetry deferred pending authenticated gh access."
+    },
+    "p0_queue": [
+      {
+        "id": "C-001",
+        "title": "Missing RBAC on Admin Reindex Endpoint",
+        "category": "security",
+        "ga_blocker": true,
+        "confidence": "high",
+        "required_action": "Implement mitigation and validate with tests.",
+        "labels": [
+          "prio:P0",
+          "ga:blocker",
+          "queue:deterministic"
+        ]
+      },
+      {
+        "id": "C-002",
+        "title": "SCIM Synchronization Not Implemented",
+        "category": "security",
+        "ga_blocker": true,
+        "confidence": "high",
+        "required_action": "Implement mitigation and validate with tests.",
+        "labels": [
+          "prio:P0",
+          "ga:blocker",
+          "queue:deterministic"
+        ]
+      },
+      {
+        "id": "C-003",
+        "title": "Missing JWT Authentication on Critical Services",
+        "category": "security",
+        "ga_blocker": true,
+        "confidence": "high",
+        "required_action": "Implement mitigation and validate with tests.",
+        "labels": [
+          "prio:P0",
+          "ga:blocker",
+          "queue:deterministic"
+        ]
+      },
+      {
+        "id": "C-004",
+        "title": "Policy Engine May Be in Dry-Run Mode",
+        "category": "security",
+        "ga_blocker": true,
+        "confidence": "high",
+        "required_action": "Implement mitigation and validate with tests.",
+        "labels": [
+          "prio:P0",
+          "ga:blocker",
+          "queue:deterministic"
+        ]
+      },
+      {
+        "id": "C-005",
+        "title": "Cypher Injection Vulnerability",
+        "category": "security",
+        "ga_blocker": true,
+        "confidence": "high",
+        "required_action": "Implement mitigation and validate with tests.",
+        "labels": [
+          "prio:P0",
+          "ga:blocker",
+          "queue:deterministic"
+        ]
+      },
+      {
+        "id": "C-006",
+        "title": "Dangerous Clear/Delete Endpoint in Production",
+        "category": "security",
+        "ga_blocker": true,
+        "confidence": "high",
+        "required_action": "Implement mitigation and validate with tests.",
+        "labels": [
+          "prio:P0",
+          "ga:blocker",
+          "queue:deterministic"
+        ]
+      },
+      {
+        "id": "C-007",
+        "title": "Missing Query Timeouts Enable DoS",
+        "category": "security",
+        "ga_blocker": true,
+        "confidence": "high",
+        "required_action": "Implement mitigation and validate with tests.",
+        "labels": [
+          "prio:P0",
+          "ga:blocker",
+          "queue:deterministic"
+        ]
+      },
+      {
+        "id": "C-008",
+        "title": "Missing Input Validation on Critical Paths",
+        "category": "security",
+        "ga_blocker": true,
+        "confidence": "high",
+        "required_action": "Implement mitigation and validate with tests.",
+        "labels": [
+          "prio:P0",
+          "ga:blocker",
+          "queue:deterministic"
+        ]
+      },
+      {
+        "id": "C-009",
+        "title": "Zero Rate Limiting on APIs",
+        "category": "security",
+        "ga_blocker": true,
+        "confidence": "high",
+        "required_action": "Implement mitigation and validate with tests.",
+        "labels": [
+          "prio:P0",
+          "ga:blocker",
+          "queue:deterministic"
+        ]
+      },
+      {
+        "id": "C-010",
+        "title": "Missing Security Headers (Helmet)",
+        "category": "security",
+        "ga_blocker": true,
+        "confidence": "high",
+        "required_action": "Implement mitigation and validate with tests.",
+        "labels": [
+          "prio:P0",
+          "ga:blocker",
+          "queue:deterministic"
+        ]
+      },
+      {
+        "id": "C-011",
+        "title": "CORS Misconfiguration",
+        "category": "security",
+        "ga_blocker": true,
+        "confidence": "high",
+        "required_action": "Implement mitigation and validate with tests.",
+        "labels": [
+          "prio:P0",
+          "ga:blocker",
+          "queue:deterministic"
+        ]
+      },
+      {
+        "id": "C-012",
+        "title": "No Audit Logging for Sensitive Operations",
+        "category": "security",
+        "ga_blocker": true,
+        "confidence": "high",
+        "required_action": "Implement mitigation and validate with tests.",
+        "labels": [
+          "prio:P0",
+          "ga:blocker",
+          "queue:deterministic"
+        ]
+      },
+      {
+        "id": "C-013",
+        "title": "Provenance Verification is Placeholder",
+        "category": "security",
+        "ga_blocker": true,
+        "confidence": "high",
+        "required_action": "Implement mitigation and validate with tests.",
+        "labels": [
+          "prio:P0",
+          "ga:blocker",
+          "queue:deterministic"
+        ]
+      },
+      {
+        "id": "C-014",
+        "title": "Golden Path Verification is Non-Functional",
+        "category": "security",
+        "ga_blocker": true,
+        "confidence": "high",
+        "required_action": "Implement mitigation and validate with tests.",
+        "labels": [
+          "prio:P0",
+          "ga:blocker",
+          "queue:deterministic"
+        ]
+      },
+      {
+        "id": "C-015",
+        "title": "Hardcoded Encryption Key in Mobile App",
+        "category": "security",
+        "ga_blocker": true,
+        "confidence": "high",
+        "required_action": "Implement mitigation and validate with tests.",
+        "labels": [
+          "prio:P0",
+          "ga:blocker",
+          "queue:deterministic"
+        ]
+      },
+      {
+        "id": "C-016",
+        "title": "Search API Returns Empty Results (Non-Functional)",
+        "category": "security",
+        "ga_blocker": true,
+        "confidence": "high",
+        "required_action": "Implement mitigation and validate with tests.",
+        "labels": [
+          "prio:P0",
+          "ga:blocker",
+          "queue:deterministic"
+        ]
+      },
+      {
+        "id": "C-017",
+        "title": "Ingest Pipeline Does Not Track Failures",
+        "category": "security",
+        "ga_blocker": true,
+        "confidence": "high",
+        "required_action": "Implement mitigation and validate with tests.",
+        "labels": [
+          "prio:P0",
+          "ga:blocker",
+          "queue:deterministic"
+        ]
+      },
+      {
+        "id": "C-018",
+        "title": "Ingest Pipeline Does Not Track Throughput",
+        "category": "security",
+        "ga_blocker": true,
+        "confidence": "high",
+        "required_action": "Implement mitigation and validate with tests.",
+        "labels": [
+          "prio:P0",
+          "ga:blocker",
+          "queue:deterministic"
+        ]
+      }
+    ],
+    "reproducibility": {
+      "lockfile_integrity": "pass",
+      "floating_deps_detected": 6041,
+      "manifest_enforced": false,
+      "nondeterminism_sources": [
+        {
+          "type": "timestamp_usage",
+          "file": "scripts/ai-pipeline-demo.js",
+          "count": 1
+        },
+        {
+          "type": "random_seed_usage",
+          "file": "scripts/ai-pipeline-demo.js",
+          "count": 1
+        },
+        {
+          "type": "env_leakage",
+          "file": "scripts/allocate-tests.js",
+          "count": 1
+        },
+        {
+          "type": "env_leakage",
+          "file": "scripts/apply-conductor-schema.mjs",
+          "count": 1
+        },
+        {
+          "type": "env_leakage",
+          "file": "scripts/backfill_orders.ts",
+          "count": 1
+        },
+        {
+          "type": "env_leakage",
+          "file": "scripts/batch-correlate-osint.js",
+          "count": 1
+        },
+        {
+          "type": "timestamp_usage",
+          "file": "scripts/build-metrics.js",
+          "count": 4
+        },
+        {
+          "type": "timestamp_usage",
+          "file": "scripts/build-query-allowlist.js",
+          "count": 1
+        },
+        {
+          "type": "env_leakage",
+          "file": "scripts/build-query-allowlist.js",
+          "count": 3
+        },
+        {
+          "type": "timestamp_usage",
+          "file": "scripts/calc-burn.ts",
+          "count": 1
+        },
+        {
+          "type": "timestamp_usage",
+          "file": "scripts/capture-incident-evidence.ts",
+          "count": 1
+        },
+        {
+          "type": "env_leakage",
+          "file": "scripts/capture-incident-evidence.ts",
+          "count": 1
+        },
+        {
+          "type": "timestamp_usage",
+          "file": "scripts/capture-screenshots.mjs",
+          "count": 1
+        },
+        {
+          "type": "env_leakage",
+          "file": "scripts/capture-screenshots.mjs",
+          "count": 1
+        },
+        {
+          "type": "timestamp_usage",
+          "file": "scripts/check-destructive-sql.cjs",
+          "count": 5
+        },
+        {
+          "type": "timestamp_usage",
+          "file": "scripts/check-destructive-sql.js",
+          "count": 5
+        },
+        {
+          "type": "timestamp_usage",
+          "file": "scripts/check-doc-links.ts",
+          "count": 2
+        },
+        {
+          "type": "timestamp_usage",
+          "file": "scripts/check-er-precision.js",
+          "count": 1
+        },
+        {
+          "type": "env_leakage",
+          "file": "scripts/check-migration-plan.cjs",
+          "count": 3
+        },
+        {
+          "type": "env_leakage",
+          "file": "scripts/check-migration-plan.js",
+          "count": 3
+        },
+        {
+          "type": "env_leakage",
+          "file": "scripts/check-persisted-queries.js",
+          "count": 1
+        },
+        {
+          "type": "env_leakage",
+          "file": "scripts/check-semver-label.ts",
+          "count": 1
+        },
+        {
+          "type": "env_leakage",
+          "file": "scripts/check_freeze.cjs",
+          "count": 1
+        },
+        {
+          "type": "timestamp_usage",
+          "file": "scripts/cost_benchmark.ts",
+          "count": 1
+        },
+        {
+          "type": "env_leakage",
+          "file": "scripts/coverage-aggregate.js",
+          "count": 2
+        },
+        {
+          "type": "env_leakage",
+          "file": "scripts/coverage-check.js",
+          "count": 1
+        },
+        {
+          "type": "timestamp_usage",
+          "file": "scripts/create-migration.ts",
+          "count": 1
+        },
+        {
+          "type": "timestamp_usage",
+          "file": "scripts/diligence-sweep.ts",
+          "count": 2
+        },
+        {
+          "type": "env_leakage",
+          "file": "scripts/dpia-guard.js",
+          "count": 1
+        },
+        {
+          "type": "timestamp_usage",
+          "file": "scripts/e2e-integration-test.js",
+          "count": 11
+        },
+        {
+          "type": "random_seed_usage",
+          "file": "scripts/e2e-integration-test.js",
+          "count": 2
+        },
+        {
+          "type": "timestamp_usage",
+          "file": "scripts/endpoint-budget-checker.js",
+          "count": 2
+        },
+        {
+          "type": "env_leakage",
+          "file": "scripts/endpoint-budget-checker.js",
+          "count": 11
+        },
+        {
+          "type": "env_leakage",
+          "file": "scripts/enforce-pr-risk.js",
+          "count": 5
+        },
+        {
+          "type": "timestamp_usage",
+          "file": "scripts/factflow-replay.ts",
+          "count": 2
+        },
+        {
+          "type": "env_leakage",
+          "file": "scripts/feature-flag-manager.js",
+          "count": 2
+        },
+        {
+          "type": "timestamp_usage",
+          "file": "scripts/finops-guardrails.cjs",
+          "count": 1
+        },
+        {
+          "type": "env_leakage",
+          "file": "scripts/finops-guardrails.cjs",
+          "count": 7
+        },
+        {
+          "type": "timestamp_usage",
+          "file": "scripts/fix-critical-issues.ts",
+          "count": 6
+        },
+        {
+          "type": "env_leakage",
+          "file": "scripts/fix-critical-issues.ts",
+          "count": 3
+        },
+        {
+          "type": "timestamp_usage",
+          "file": "scripts/flags-audit.ts",
+          "count": 1
+        },
+        {
+          "type": "env_leakage",
+          "file": "scripts/flake-index.js",
+          "count": 1
+        },
+        {
+          "type": "timestamp_usage",
+          "file": "scripts/ga-gate.js",
+          "count": 1
+        },
+        {
+          "type": "env_leakage",
+          "file": "scripts/ga-gate.js",
+          "count": 12
+        },
+        {
+          "type": "timestamp_usage",
+          "file": "scripts/generate-api-changelog.js",
+          "count": 1
+        },
+        {
+          "type": "timestamp_usage",
+          "file": "scripts/generate-build-manifest.ts",
+          "count": 1
+        },
+        {
+          "type": "env_leakage",
+          "file": "scripts/generate-build-manifest.ts",
+          "count": 5
+        },
+        {
+          "type": "timestamp_usage",
+          "file": "scripts/generate-changelog.js",
+          "count": 2
+        },
+        {
+          "type": "timestamp_usage",
+          "file": "scripts/generate-coverage-heatmap.mjs",
+          "count": 1
+        },
+        {
+          "type": "timestamp_usage",
+          "file": "scripts/generate-evidence-bundle.js",
+          "count": 4
+        },
+        {
+          "type": "env_leakage",
+          "file": "scripts/generate-evidence-bundle.js",
+          "count": 2
+        },
+        {
+          "type": "timestamp_usage",
+          "file": "scripts/generate-golden-sample.ts",
+          "count": 9
+        },
+        {
+          "type": "random_seed_usage",
+          "file": "scripts/generate-golden-sample.ts",
+          "count": 11
+        },
+        {
+          "type": "timestamp_usage",
+          "file": "scripts/generate-persisted-queries.js",
+          "count": 2
+        },
+        {
+          "type": "timestamp_usage",
+          "file": "scripts/generate-pq-hashes.js",
+          "count": 2
+        },
+        {
+          "type": "env_leakage",
+          "file": "scripts/generate-pq-hashes.js",
+          "count": 1
+        },
+        {
+          "type": "timestamp_usage",
+          "file": "scripts/generate-pr-dashboard-html.ts",
+          "count": 2
+        },
+        {
+          "type": "timestamp_usage",
+          "file": "scripts/generate-provenance-bundle.cjs",
+          "count": 10
+        },
+        {
+          "type": "random_seed_usage",
+          "file": "scripts/generate-synthetic-graph.js",
+          "count": 2
+        },
+        {
+          "type": "timestamp_usage",
+          "file": "scripts/generate-test-suite.ts",
+          "count": 5
+        },
+        {
+          "type": "timestamp_usage",
+          "file": "scripts/generate-transparency-report.ts",
+          "count": 3
+        },
+        {
+          "type": "random_seed_usage",
+          "file": "scripts/generate-transparency-report.ts",
+          "count": 1
+        },
+        {
+          "type": "timestamp_usage",
+          "file": "scripts/gh-velocity-distance.js",
+          "count": 18
+        },
+        {
+          "type": "env_leakage",
+          "file": "scripts/gh-velocity-distance.js",
+          "count": 11
+        },
+        {
+          "type": "env_leakage",
+          "file": "scripts/go-no-go-validator.ts",
+          "count": 4
+        },
+        {
+          "type": "env_leakage",
+          "file": "scripts/index_flip.ts",
+          "count": 2
+        },
+        {
+          "type": "env_leakage",
+          "file": "scripts/infracost_enforce.js",
+          "count": 1
+        },
+        {
+          "type": "timestamp_usage",
+          "file": "scripts/launch_day_simulation.ts",
+          "count": 4
+        },
+        {
+          "type": "random_seed_usage",
+          "file": "scripts/launch_day_simulation.ts",
+          "count": 1
+        },
+        {
+          "type": "env_leakage",
+          "file": "scripts/launch_day_simulation.ts",
+          "count": 2
+        },
+        {
+          "type": "timestamp_usage",
+          "file": "scripts/maintainability-report.js",
+          "count": 1
+        },
+        {
+          "type": "timestamp_usage",
+          "file": "scripts/make_vex.js",
+          "count": 4
+        },
+        {
+          "type": "timestamp_usage",
+          "file": "scripts/mastery-aca-engine.ts",
+          "count": 1
+        },
+        {
+          "type": "env_leakage",
+          "file": "scripts/migrate.ts",
+          "count": 3
+        },
+        {
+          "type": "timestamp_usage",
+          "file": "scripts/oct25_bulk_issue_import.cjs",
+          "count": 1
+        },
+        {
+          "type": "env_leakage",
+          "file": "scripts/oct25_bulk_issue_import.cjs",
+          "count": 14
+        },
+        {
+          "type": "timestamp_usage",
+          "file": "scripts/optimize-build.ts",
+          "count": 2
+        },
+        {
+          "type": "timestamp_usage",
+          "file": "scripts/otel-sanity.js",
+          "count": 3
+        },
+        {
+          "type": "env_leakage",
+          "file": "scripts/otel-sanity.js",
+          "count": 7
+        },
+        {
+          "type": "env_leakage",
+          "file": "scripts/otel-smoke.js",
+          "count": 1
+        },
+        {
+          "type": "timestamp_usage",
+          "file": "scripts/perf-budget-diagnostics.js",
+          "count": 1
+        },
+        {
+          "type": "timestamp_usage",
+          "file": "scripts/performance-benchmark.js",
+          "count": 2
+        },
+        {
+          "type": "env_leakage",
+          "file": "scripts/performance-benchmark.js",
+          "count": 7
+        },
+        {
+          "type": "timestamp_usage",
+          "file": "scripts/pr-dashboard.ts",
+          "count": 5
+        },
+        {
+          "type": "timestamp_usage",
+          "file": "scripts/pr-lifecycle-report.mjs",
+          "count": 1
+        },
+        {
+          "type": "env_leakage",
+          "file": "scripts/pr-orchestrator-config.js",
+          "count": 13
+        },
+        {
+          "type": "timestamp_usage",
+          "file": "scripts/pr-orchestrator.js",
+          "count": 6
+        },
+        {
+          "type": "env_leakage",
+          "file": "scripts/pr-risk-score.js",
+          "count": 1
+        },
+        {
+          "type": "timestamp_usage",
+          "file": "scripts/pr_backlog_monitor.ts",
+          "count": 6
+        },
+        {
+          "type": "random_seed_usage",
+          "file": "scripts/pr_backlog_monitor.ts",
+          "count": 4
+        },
+        {
+          "type": "env_leakage",
+          "file": "scripts/proof-F1.ts",
+          "count": 1
+        },
+        {
+          "type": "timestamp_usage",
+          "file": "scripts/queue-performance-monitor.js",
+          "count": 6
+        },
+        {
+          "type": "env_leakage",
+          "file": "scripts/queue-performance-monitor.js",
+          "count": 6
+        },
+        {
+          "type": "env_leakage",
+          "file": "scripts/refresh-plan-stats.js",
+          "count": 7
+        },
+        {
+          "type": "timestamp_usage",
+          "file": "scripts/revoke-agent.ts",
+          "count": 2
+        },
+        {
+          "type": "env_leakage",
+          "file": "scripts/revoke-agent.ts",
+          "count": 1
+        },
+        {
+          "type": "env_leakage",
+          "file": "scripts/route_slo_check.ts",
+          "count": 1
+        },
+        {
+          "type": "env_leakage",
+          "file": "scripts/run-agents.js",
+          "count": 1
+        },
+        {
+          "type": "timestamp_usage",
+          "file": "scripts/run-ga-gate.ts",
+          "count": 1
+        },
+        {
+          "type": "env_leakage",
+          "file": "scripts/run-ga-gate.ts",
+          "count": 2
+        }
+      ],
+      "status": "warn"
+    },
+    "ci_guardrails": {
+      "saturation_detected": false,
+      "offenders": [],
+      "note": "CI queue telemetry unavailable locally; enforce concurrency limits in workflow YAML as follow-up."
+    },
+    "ga_readiness": {
+      "merge_health": "degraded",
+      "p0_blockers": 18,
+      "reproducibility": "warn",
+      "ci_health": "saturated",
+      "overall": "red"
+    },
+    "next_actions": [
+      "Run the sweep in a GitHub-authenticated runner to resolve pending_checks/blocked_merges/orphaned_runs/ci_queue_depth with live repository telemetry.",
+      "Convert each P0 queue item into a tracked issue and preserve labels: prio:P0, ga:blocker, queue:deterministic.",
+      "Harden reproducibility by pinning floating dependency ranges in critical packages and re-running lockfile verification under --frozen-lockfile.",
+      "Implement manifest gate checks that reject untracked writes and assert run_id propagation across all write paths."
+    ]
+  }
+}

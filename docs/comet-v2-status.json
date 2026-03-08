@@ -1,0 +1,20 @@
+{
+  "initiative": "Comet v2 Triage",
+  "tracking_issue": "https://github.com/BrianCLong/summit/issues/56",
+  "items": [
+    {
+      "name": "Phase 1: Status Structure",
+      "status": "in_progress",
+      "owner": "Jules",
+      "pr_link": "https://github.com/BrianCLong/summit/pull/101",
+      "ci_status": "pending"
+    },
+    {
+      "name": "Phase 2: WebSocket Metrics",
+      "status": "not_started",
+      "owner": "Jules",
+      "pr_link": "https://github.com/BrianCLong/summit/pull/102",
+      "ci_status": "unknown"
+    }
+  ]
+}

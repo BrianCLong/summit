@@ -1,6 +1,7 @@
 import logging
 from pathlib import Path
 from typing import List, Optional
+
 from .model_cache_policy import ModelCachePolicy
 
 logger = logging.getLogger(__name__)
@@ -9,7 +10,7 @@ class Qwen3ModelDownloader:
     """
     Downloader for Qwen3-TTS models with allowlist enforcement and canonical path policy.
     """
-    def __init__(self, policy: ModelCachePolicy, allowlist: Optional[List[str]] = None):
+    def __init__(self, policy: ModelCachePolicy, allowlist: Optional[list[str]] = None):
         self.policy = policy
         self.allowlist = allowlist or ["Qwen/Qwen3-TTS-12Hz-1.7B-CustomVoice"]
 

@@ -1,0 +1,6 @@
+{
+  "evidence_id": "SUMMIT-WEBMCP-FF1DC9F94804",
+  "name": "webmcp_replay",
+  "policy_reason": "origin_not_allowlisted",
+  "status": "fail"
+}

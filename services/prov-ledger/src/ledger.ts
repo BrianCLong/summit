@@ -1,6 +1,7 @@
 // @ts-nocheck
 import crypto from 'crypto';
 import { query } from './db';
+import { fipsService } from '@intelgraph/cryptographic-agility';
 
 export async function addEvidence(sha256: string, contentType: string) {
   if (!/^[a-fA-F0-9]{64}$/.test(sha256)) {
@@ -47,7 +48,19 @@ export async function exportManifest(caseId: string) {
     version: 1,
     issuedAt: new Date().toISOString(),
     claims: claims.map((c) => ({ id: c.id, hashRoot: c.hash_root, chain: c.transform_chain })),
-    signature: { alg: 'none', kid: 'dev', sig: '' },
   };
-  return Buffer.from(JSON.stringify(manifest)).toString('base64');
+
+  const manifestContent = JSON.stringify(manifest);
+  const sig = await fipsService.sign(manifestContent, 'ledger-key');
+
+  const signedManifest = {
+    ...manifest,
+    signature: {
+      alg: 'ECDSA-P-384',
+      kid: 'ledger-key',
+      sig
+    },
+  };
+
+  return Buffer.from(JSON.stringify(signedManifest)).toString('base64');
 }

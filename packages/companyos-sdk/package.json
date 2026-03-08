@@ -1,0 +1,8 @@
+{
+  "name": "companyos-sdk",
+  "version": "0.0.0",
+  "private": true,
+  "devDependencies": {
+    "typescript": "^5.4.0"
+  }
+}

@@ -8,7 +8,7 @@
 
 - SBOM: attached as `sbom.json` (CycloneDX)
 - SLSA Provenance: uploaded via SLSA generator (see release assets)
-- Attestation verify (cosign): `cosign verify-attestation --type slsaprovenance <artifact>`
+- Attestation verify (cosign): `cosign verify-attestation --use-signed-timestamps --type slsaprovenance <artifact>`
 
 ## Highlights
 

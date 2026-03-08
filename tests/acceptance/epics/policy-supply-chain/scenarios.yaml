@@ -1,0 +1,23 @@
+version: 1
+name: policy-supply-chain
+scenarios:
+  - id: sbom-generate
+    type: node-script
+    command: npm run sbom
+    owner: devex
+    evidence:
+      - sbom.json
+  - id: policy-sim
+    type: opa
+    command: npm run policy:test
+    owner: security
+    evidence:
+      - policies/tests/quality_gates_output.json
+  - id: acceptance-bundle
+    type: packaging
+    command: |
+      tar -czf artifacts/acceptance/policy-supply-chain/acceptance-pack.tgz \
+        tests/acceptance/epics/policy-supply-chain
+    owner: release
+    evidence:
+      - artifacts/acceptance/policy-supply-chain/acceptance-pack.tgz

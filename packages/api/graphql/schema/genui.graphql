@@ -1,0 +1,36 @@
+type GenerativeInterface {
+  id: ID!
+  version: Int!
+  blocks: [UIBlock!]!
+}
+
+union UIBlock = Chart | Table | Form | Workflow | ActionPanel
+
+type Chart {
+  type: String!
+  props: JSON!
+}
+
+type Table {
+  type: String!
+  props: JSON!
+}
+
+type Form {
+  type: String!
+  props: JSON!
+}
+
+type Workflow {
+  type: String!
+  props: JSON!
+}
+
+type ActionPanel {
+  type: String!
+  props: JSON!
+}
+
+extend type Query {
+  getInterface(sessionId: ID!): GenerativeInterface
+}

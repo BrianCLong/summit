@@ -1,11 +1,8 @@
-Owner: Governance
-Last-Reviewed: 2026-01-14
-Evidence-IDs: none
-Status: active
+> Owner: Governance
+> Last-Reviewed: 2026-01-14
+> Evidence-IDs: EVD-PLACEHOLDER
+> Status: active
 
-# Epic 6: Vendor & Licensing Controls for AI (don’t donate your crown jewels)
-
-1.  Review vendor AI terms: training on your data, retention, confidentiality, subprocessors.
 2.  Negotiate “no training on customer data” by default (or make it opt-in with compensation).
 3.  Implement contractual and technical controls for data sent to vendors (minimize).
 4.  Maintain model/provider inventory with risk tier and contract posture.

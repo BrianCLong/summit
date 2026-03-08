@@ -1,0 +1,32 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "InvestigationRun",
+  "type": "object",
+  "properties": {
+    "run_id": {
+      "type": "string"
+    },
+    "inputs": {
+      "type": "object"
+    },
+    "scope": {
+      "type": "object"
+    },
+    "tools_invoked": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "outputs_summary": {
+      "type": "object"
+    }
+  },
+  "required": [
+    "run_id",
+    "inputs",
+    "scope",
+    "tools_invoked",
+    "outputs_summary"
+  ]
+}

@@ -124,13 +124,14 @@ export class ConflictUIController {
         allFieldConflicts.push(...conflictData);
       }
 
+      const user = (req as any).user;
       const resolutions = await this.conflictResolver.resolveConflicts(
         entityId,
         tenantId,
         allFieldConflicts,
         {
-          userId: (req.headers['x-user-id'] as string) || 'system',
-          userRole: (req.headers['x-user-role'] as string) || 'user',
+          userId: user?.userId || user?.id || user?.sub || 'system',
+          userRole: user?.role || 'user',
           manualOverrides,
           approver,
         },
@@ -267,13 +268,14 @@ export class ConflictUIController {
               allFieldConflicts.push(...conflictData);
             }
 
+            const user = (req as any).user;
             const resolutions = await this.conflictResolver.resolveConflicts(
               entityId,
               tenantId,
               allFieldConflicts,
               {
-                userId: (req.headers['x-user-id'] as string) || 'batch-system',
-                userRole: (req.headers['x-user-role'] as string) || 'admin',
+                userId: user?.userId || user?.id || user?.sub || 'batch-system',
+                userRole: user?.role || 'admin',
                 approver,
               },
             );

@@ -1,3 +1,6 @@
+// Ensure OpenTelemetry instrumentation runs before anything else
+import './instrumentation.js';
+
 import http from 'http';
 import express from 'express';
 import { GraphQLError } from 'graphql';
@@ -30,6 +33,9 @@ import { logger } from './config/logger.js';
 import { createApp } from './app.js';
 import './monitoring/metrics.js'; // Initialize Prometheus metrics collection
 import { partitionMaintenanceService } from './services/PartitionMaintenanceService.js';
+import { zeroTouchOrchestrator } from './conductor/deployment/ZeroTouchOrchestrator.js';
+import { driftRemediationService } from './services/DriftRemediationService.js';
+import { projectSunsettingService } from './services/ProjectSunsettingService.js';
 
 const startServer = async () => {
   // Initialize OpenTelemetry tracing early in the startup sequence
@@ -189,6 +195,15 @@ const startServer = async () => {
 
     // Start Partition Maintenance Service
     partitionMaintenanceService.start();
+
+    // Start Zero-Touch Deployment Orchestrator
+    zeroTouchOrchestrator.start().catch(err => logger.error('Failed to start ZeroTouchOrchestrator', err));
+
+    // Start Drift Remediation Service (Self-Healing)
+    driftRemediationService.start();
+
+    // Start Project Sunsetting Service (Lifecycle Automation)
+    projectSunsettingService.start();
 
     // WAR-GAMED SIMULATION - Start Kafka Consumer
     if (typeof startKafkaConsumer === 'function') {

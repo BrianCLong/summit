@@ -1,0 +1,9 @@
+# GA Release Values
+replicaCount: 3
+image:
+  repository: summit
+  tag: ga
+  pullPolicy: IfNotPresent
+service:
+  type: ClusterIP
+  port: 80

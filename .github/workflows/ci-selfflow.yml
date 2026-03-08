@@ -1,0 +1,8 @@
+name: ci-selfflow
+on: [push]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - run: pnpm test:selfflow
+      - run: pnpm eval:selfflow

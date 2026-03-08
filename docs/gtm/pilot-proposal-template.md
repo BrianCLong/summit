@@ -22,6 +22,7 @@ This proposal outlines an {{Duration}}-week paid pilot engagement to deploy Summ
 {{One sentence describing primary goal, e.g., "Prove that analysts can reduce time-to-answer on priority cases by 40% while maintaining full provenance and compliance with data-handling policies."}}
 
 **Scope:**
+
 - {{Number}} named users (analysts + supervisors)
 - {{Number}} initial data sources
 - {{Number}} priority use cases / workflows
@@ -84,6 +85,7 @@ Summit's Analyst Workbench is designed for exactly these challenges:
 | {{Source 4}} | {{Type}} | {{Method}} | P2 |
 
 **Notes:**
+
 - P1 sources will be integrated in first 2 weeks
 - P2 sources as stretch goals or Phase 2
 - Additional sources available as change orders
@@ -223,6 +225,7 @@ Summit's Analyst Workbench is designed for exactly these challenges:
 | Network Isolation | {{Describe network controls}} |
 
 **Compliance Documentation Provided:**
+
 - [ ] SBOM (CycloneDX)
 - [ ] SLSA attestation
 - [ ] Architecture diagram
@@ -273,6 +276,7 @@ Summit's Analyst Workbench is designed for exactly these challenges:
 | **Total** | | **${{Total}}** |
 
 **Payment Terms:**
+
 - 50% due at contract signature
 - 50% due at pilot midpoint (Week {{N/2}})
 

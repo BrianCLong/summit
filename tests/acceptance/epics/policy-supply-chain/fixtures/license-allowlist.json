@@ -1,0 +1,14 @@
+{
+  "allowedLicenses": [
+    "Apache-2.0",
+    "MIT",
+    "BSD-3-Clause",
+    "ISC"
+  ],
+  "deniedLicenses": [
+    "GPL-3.0",
+    "AGPL-3.0",
+    "SSPL-1.0"
+  ],
+  "notes": "OPA test asserts SBOM dependencies remain inside the allow list."
+}

@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS maestro.case_sla_timers (
     metadata JSONB DEFAULT '{}'::jsonb,
 
     -- Indexes
-    CONSTRAINT fk_case_sla_case FOREIGN KEY (case_id) REFERENCES maestro.cases(case_id) ON DELETE CASCADE
+    CONSTRAINT fk_case_sla_case FOREIGN KEY (case_id) REFERENCES maestro.cases(id) ON DELETE CASCADE
 );
 
 CREATE INDEX IF NOT EXISTS idx_case_sla_timers_case_id ON maestro.case_sla_timers(case_id);

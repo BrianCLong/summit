@@ -17,7 +17,8 @@ contracts are implemented in `server/src/services/identity/OidcScimContracts.ts`
   "scopes": ["openid", "profile", "email", "groups"],
   "signingAlgorithm": "RS256"
 }
-```
+
+```text
 
 **Response**
 
@@ -35,7 +36,8 @@ contracts are implemented in `server/src/services/identity/OidcScimContracts.ts`
     "scopes": "openid profile email groups"
   }
 }
-```
+
+```text
 
 ## SCIM Provisioning Registration
 
@@ -50,7 +52,8 @@ contracts are implemented in `server/src/services/identity/OidcScimContracts.ts`
   "groupSyncSchedule": "15 */6 * * *",
   "userFilter": "active eq true"
 }
-```
+
+```text
 
 **Response**
 
@@ -65,4 +68,5 @@ contracts are implemented in `server/src/services/identity/OidcScimContracts.ts`
     "serviceProviderConfig": "https://idp.example.com/scim/v2/ServiceProviderConfig"
   }
 }
-```
+
+```text

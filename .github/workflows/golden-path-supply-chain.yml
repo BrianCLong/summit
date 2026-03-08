@@ -3,9 +3,13 @@ name: Golden Path Supply Chain
 on:
   push:
     branches: ["main"]
+  workflow_dispatch:
   pull_request:
     branches: ["main"]
-  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   actions: read

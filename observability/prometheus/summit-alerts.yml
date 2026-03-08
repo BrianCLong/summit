@@ -2,38 +2,36 @@
 # Focuses on the core API, Database, and Platform health
 
 groups:
-  # Summit API Availability and Performance
-  - name: summit.api
+  # Summit Platform Availability and Performance
+  - name: summit.platform
     rules:
-      - alert: SummitApiHighErrorRate
+      - alert: ServiceHighErrorRate
         expr: |
-          sum(rate(http_requests_total{status=~"5.."}[5m]))
+          sum(rate(http_requests_total{status=~"5.."}[5m])) by (job)
           /
-          sum(rate(http_requests_total[5m]))
+          sum(rate(http_requests_total[5m])) by (job)
           > 0.01
         for: 2m
         labels:
           severity: critical
-          service: summit-api
           component: api
         annotations:
-          summary: 'Summit API Error Rate > 1%'
-          description: 'The API is experiencing a high error rate ({{ $value | humanizePercentage }}).'
-          runbook_url: 'https://docs.intelgraph.com/runbooks/summit-api-errors'
+          summary: 'Service High Error Rate ({{ $labels.job }})'
+          description: 'Service {{ $labels.job }} is experiencing a high error rate ({{ $value | humanizePercentage }}).'
+          runbook_url: 'https://docs.intelgraph.com/runbooks/service-errors'
 
-      - alert: SummitApiLatencyHigh
-        expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le)) > 1.0
+      - alert: ServiceLatencyHigh
+        expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le, job)) > 1.0
         for: 5m
         labels:
           severity: warning
-          service: summit-api
           component: api
         annotations:
-          summary: 'Summit API P95 Latency > 1s'
-          description: '95th percentile latency is {{ $value }}s, exceeding the 1s threshold.'
-          runbook_url: 'https://docs.intelgraph.com/runbooks/summit-api-latency'
+          summary: 'Service P95 Latency > 1s ({{ $labels.job }})'
+          description: '95th percentile latency for {{ $labels.job }} is {{ $value }}s, exceeding the 1s threshold.'
+          runbook_url: 'https://docs.intelgraph.com/runbooks/service-latency'
 
-  # GraphQL Specific
+  # GraphQL Specific (Node.js Server)
   - name: summit.graphql
     rules:
       - alert: GoldenPathBroken
@@ -45,7 +43,7 @@ groups:
         for: 10m
         labels:
           severity: critical
-          service: summit-api
+          service: server
           component: golden-path
         annotations:
           summary: 'Golden Path Success < 95%'
@@ -61,7 +59,7 @@ groups:
         for: 15m
         labels:
           severity: warning
-          service: summit-api
+          service: server
           component: golden-path
         annotations:
           summary: 'Golden Path Success < 98%'
@@ -72,7 +70,7 @@ groups:
         for: 5m
         labels:
           severity: critical
-          service: summit-api
+          service: server
           component: graphql
         annotations:
           summary: 'GraphQL P95 Latency > 2s'
@@ -84,7 +82,7 @@ groups:
         for: 10m
         labels:
           severity: warning
-          service: summit-api
+          service: server
           component: graphql
         annotations:
           summary: 'GraphQL P95 Latency > 1s'
@@ -99,7 +97,7 @@ groups:
         for: 5m
         labels:
           severity: critical
-          service: summit-api
+          service: server
           component: graphql
         annotations:
           summary: 'GraphQL Error Rate > 5%'
@@ -115,7 +113,7 @@ groups:
         for: 10m
         labels:
           severity: warning
-          service: summit-api
+          service: server
           component: graphql
         annotations:
           summary: 'GraphQL Error Rate > 2%'
@@ -126,7 +124,7 @@ groups:
         for: 1m
         labels:
           severity: critical
-          service: summit-api
+          service: gateway
           component: graphql
         annotations:
           summary: 'GraphQL Gateway Down'
@@ -141,7 +139,7 @@ groups:
         for: 1m
         labels:
           severity: critical
-          service: summit-api
+          service: server
           component: database
         annotations:
           summary: 'Postgres Connection Pool Saturated'
@@ -153,7 +151,7 @@ groups:
         for: 10m
         labels:
           severity: warning
-          service: summit-api
+          service: server
           component: database
         annotations:
           summary: 'Neo4j Query P95 Latency > 500ms'
@@ -168,7 +166,7 @@ groups:
         for: 30s
         labels:
           severity: critical
-          service: summit-api
+          service: redis
           component: redis
         annotations:
           summary: 'Redis is down'
@@ -179,13 +177,12 @@ groups:
   - name: summit.resources
     rules:
       - alert: SummitMemoryHigh
-        expr: process_resident_memory_bytes{service="summit-api"} / 1024 / 1024 > 1500
+        expr: process_resident_memory_bytes{job=~"server|summit-ai"} / 1024 / 1024 > 1500
         for: 5m
         labels:
           severity: warning
-          service: summit-api
           component: system
         annotations:
-          summary: 'Summit API High Memory Usage'
-          description: 'Memory usage is {{ $value }}MB, exceeding 1.5GB.'
+          summary: 'High Memory Usage ({{ $labels.job }})'
+          description: 'Memory usage for {{ $labels.job }} is {{ $value }}MB, exceeding 1.5GB.'
           runbook_url: 'https://docs.intelgraph.com/runbooks/high-memory'

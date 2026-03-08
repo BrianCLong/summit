@@ -3,7 +3,14 @@ import { createApp } from '../src/index';
 import { stopObservability } from '../src/observability';
 
 describe('metrics', () => {
+  beforeAll(() => {
+    process.env.AUTHZ_DEMO_USERNAME = 'alice';
+    process.env.AUTHZ_DEMO_PASSWORD = 'password123';
+  });
+
   afterAll(async () => {
+    delete process.env.AUTHZ_DEMO_USERNAME;
+    delete process.env.AUTHZ_DEMO_PASSWORD;
     await stopObservability();
   });
 

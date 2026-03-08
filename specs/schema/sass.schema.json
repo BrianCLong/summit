@@ -1,0 +1,167 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.dev/schemas/sass.schema.json",
+  "title": "Summit Agent Specification Standard (SASS)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "sass_version",
+    "agent",
+    "mission",
+    "scope",
+    "inputs",
+    "outputs",
+    "capabilities",
+    "guardrails",
+    "workflow",
+    "validation",
+    "testing",
+    "failure_modes"
+  ],
+  "properties": {
+    "sass_version": {
+      "type": "number",
+      "const": 1.0
+    },
+    "agent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "version", "owner", "description"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+        "owner": { "type": "string", "minLength": 1 },
+        "description": { "type": "string", "minLength": 1 }
+      }
+    },
+    "mission": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["objective"],
+      "properties": {
+        "objective": { "type": "string", "minLength": 1 }
+      }
+    },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["in_scope", "out_of_scope"],
+      "properties": {
+        "in_scope": { "$ref": "#/$defs/nonEmptyStringArray" },
+        "out_of_scope": { "$ref": "#/$defs/nonEmptyStringArray" }
+      }
+    },
+    "inputs": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/ioField" }
+    },
+    "outputs": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/ioFieldOutput" }
+    },
+    "capabilities": { "$ref": "#/$defs/nonEmptyStringArray" },
+    "guardrails": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["always", "ask_first", "never"],
+      "properties": {
+        "always": { "$ref": "#/$defs/nonEmptyStringArray" },
+        "ask_first": { "$ref": "#/$defs/nonEmptyStringArray" },
+        "never": { "$ref": "#/$defs/nonEmptyStringArray" }
+      }
+    },
+    "workflow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["steps"],
+      "properties": {
+        "steps": { "$ref": "#/$defs/nonEmptyStringArray" }
+      }
+    },
+    "validation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["self_checks", "ci_checks"],
+      "properties": {
+        "self_checks": { "$ref": "#/$defs/nonEmptyStringArray" },
+        "ci_checks": { "$ref": "#/$defs/nonEmptyStringArray" }
+      }
+    },
+    "testing": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["acceptance_criteria"],
+      "properties": {
+        "acceptance_criteria": { "$ref": "#/$defs/nonEmptyStringArray" }
+      }
+    },
+    "failure_modes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "response"],
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "response": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "versioning": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["changelog"],
+      "properties": {
+        "changelog": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["version", "date", "changes"],
+            "additionalProperties": false,
+            "properties": {
+              "version": {
+                "type": "string",
+                "pattern": "^\\d+\\.\\d+\\.\\d+$"
+              },
+              "date": { "type": "string", "format": "date" },
+              "changes": { "type": "string", "minLength": 1 }
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "nonEmptyStringArray": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "ioField": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "type", "required"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "type": { "type": "string", "minLength": 1 },
+        "required": { "type": "boolean" }
+      }
+    },
+    "ioFieldOutput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "type"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "type": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}

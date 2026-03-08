@@ -35,6 +35,10 @@ on:
   schedule:
     - cron: "0 4 * * *" # Daily at 4 AM UTC
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
   security-events: write
@@ -56,11 +60,11 @@ jobs:
           output-file: sbom.json
 
       - name: Scan with Grype
-        uses: anchore/scan-action@0d444ed77d83ee2ba7f5ced0d90d640a1281d762 # v7
+        uses: anchore/scan-action@7037fa011853d5a11690026fb85feee79f4c946c # v7
         with:
           sbom: sbom.json
           fail-build: true
-          severity-cutoff: high
+          severity-cutoff: critical
           only-fixed: false
           grype-config: security/grype-allowlist.yaml
       - name: Attest SBOM

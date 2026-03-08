@@ -381,7 +381,7 @@ sudo mv cosign-linux-amd64 /usr/local/bin/cosign
 Verify that the evidence checksums file was attested by the authorized GitHub workflow:
 
 ```bash
-cosign verify-blob-attestation \
+cosign verify-blob-attestation --use-signed-timestamps \ || { echo "::error::Supply chain verification failed! Missing or invalid signed timestamps."; false; }
   --certificate-identity-regexp "https://github.com/.*/summit/.github/workflows/.*" \
   --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
   --type slsaprovenance \
@@ -397,7 +397,7 @@ cosign verify-blob-attestation \
 ### 2. Verify CycloneDX SBOM Attestation
 
 ```bash
-cosign verify-blob-attestation \
+cosign verify-blob-attestation --use-signed-timestamps \ || { echo "::error::Supply chain verification failed! Missing or invalid signed timestamps."; false; }
   --certificate-identity-regexp "https://github.com/.*/summit/.github/workflows/.*" \
   --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
   --type cyclonedx \
@@ -408,7 +408,7 @@ cosign verify-blob-attestation \
 ### 3. Verify SPDX SBOM Attestation
 
 ```bash
-cosign verify-blob-attestation \
+cosign verify-blob-attestation --use-signed-timestamps \ || { echo "::error::Supply chain verification failed! Missing or invalid signed timestamps."; false; }
   --certificate-identity-regexp "https://github.com/.*/summit/.github/workflows/.*" \
   --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
   --type spdx \
@@ -453,7 +453,7 @@ The trust anchor is:
 Check that the certificate identity matches:
 ```bash
 # Extract certificate from attestation
-cosign verify-blob-attestation --insecure-ignore-tlog \
+cosign verify-blob-attestation --use-signed-timestamps --insecure-ignore-tlog \ || { echo "::error::Supply chain verification failed! Missing or invalid signed timestamps."; false; }
   --certificate-identity-regexp ".*" \
   --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
   --type slsaprovenance \

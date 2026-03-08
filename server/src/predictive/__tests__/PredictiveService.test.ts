@@ -1,100 +1,122 @@
-import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
-import { PredictiveService } from '../PredictiveService.js';
-import { getNeo4jDriver } from '../../config/database.js';
-import { WhatIfRequest } from '../../contracts/predictive/types.js';
+import { beforeAll, beforeEach, describe, expect, it, jest } from '@jest/globals';
+import type { WhatIfRequest } from '../../contracts/predictive/types.js';
 
-// Mock getNeo4jDriver
-jest.mock('../../config/database', () => ({
-  getNeo4jDriver: jest.fn(),
+const getNeo4jDriverMock = jest.fn();
+
+jest.unstable_mockModule('../../config/database.js', () => ({
+  getNeo4jDriver: getNeo4jDriverMock,
 }));
 
 describe('PredictiveService Integration (Mocked Driver)', () => {
-    let mockSession: any;
-    let mockRun: jest.Mock;
-    let service: PredictiveService;
+  let PredictiveService: any;
+  let mockSession: { run: jest.Mock; close: jest.Mock };
+  let mockRun: jest.Mock;
+  let service: any;
 
-    beforeEach(() => {
-        mockRun = jest.fn();
-        mockSession = {
-            run: mockRun,
-            close: jest.fn(),
-        };
+  beforeAll(async () => {
+    const module = await import('../PredictiveService.js');
+    PredictiveService = module.PredictiveService;
+  });
 
-        (getNeo4jDriver as jest.Mock).mockReturnValue({
-            session: jest.fn().mockReturnValue(mockSession)
-        });
+  beforeEach(() => {
+    jest.clearAllMocks();
 
-        service = new PredictiveService();
+    mockRun = jest.fn();
+    mockSession = {
+      run: mockRun,
+      close: jest.fn(),
+    };
+
+    getNeo4jDriverMock.mockReturnValue({
+      session: jest.fn().mockReturnValue(mockSession),
     });
 
-    it('correctly reconstructs edges from GraphStore convention', async () => {
-        // Setup mock response with properties-based edges
-        mockRun.mockResolvedValue({
-            records: [
-                {
-                    get: (key: string) => {
-                        if (key === 'n') return { properties: { id: 'node1' }, labels: ['Person'], elementId: 'n1' };
-                        if (key === 'm') return { properties: { id: 'node2' }, labels: ['Person'], elementId: 'n2' };
-                        if (key === 'r') return {
-                            properties: { id: 'edge1', fromId: 'node1', toId: 'node2' },
-                            type: 'KNOWS',
-                            startNodeElementId: 'n1',
-                            endNodeElementId: 'n2'
-                        };
-                    }
-                }
-            ]
-        });
+    service = new PredictiveService();
+  });
 
-        const req: WhatIfRequest = {
-            investigationId: 'inv1',
-            injectedNodes: [],
-            injectedEdges: [],
-            legalBasis: { purpose: 'test', policyId: 'p1' }
-        };
-
-        const result = await service.simulateWhatIf(req);
-
-        // Base metric avgDegree should be 1/2 = 0.5 (1 edge, 2 nodes).
-        // My SimpleGraph treats density/centrality.
-        // SimpleGraph edges: [{ source: 'node1', target: 'node2' }]
-        // 2 nodes. 1 edge.
-        // Density: 1 / (2*1) = 0.5.
-
-        expect(result.baselineMetrics.density).toBeCloseTo(0.5);
+  it('correctly reconstructs edges from GraphStore convention', async () => {
+    mockRun.mockResolvedValue({
+      records: [
+        {
+          get: (key: string) => {
+            if (key === 'n') {
+              return { properties: { id: 'node1' }, labels: ['Person'], elementId: 'n1' };
+            }
+            if (key === 'm') {
+              return { properties: { id: 'node2' }, labels: ['Person'], elementId: 'n2' };
+            }
+            if (key === 'r') {
+              return {
+                properties: { id: 'edge1', fromId: 'node1', toId: 'node2' },
+                type: 'KNOWS',
+                startNodeElementId: 'n1',
+                endNodeElementId: 'n2',
+              };
+            }
+            return undefined;
+          },
+        },
+      ],
     });
 
-    it('correctly reconstructs edges from Internal IDs fallback', async () => {
-        // Setup mock response without properties but with internal ID match
-        mockRun.mockResolvedValue({
-            records: [
-                {
-                    get: (key: string) => {
-                        if (key === 'n') return { properties: { id: 'nodeA' }, labels: ['Person'], elementId: 'intA', identity: 'intA' };
-                        if (key === 'm') return { properties: { id: 'nodeB' }, labels: ['Person'], elementId: 'intB', identity: 'intB' };
-                        if (key === 'r') return {
-                            properties: { id: 'edgeX' }, // Missing fromId/toId
-                            type: 'KNOWS',
-                            startNodeElementId: 'intA', // Matches nodeA
-                            endNodeElementId: 'intB',   // Matches nodeB
-                            start: 'intA',
-                            end: 'intB'
-                        };
-                    }
-                }
-            ]
-        });
+    const req: WhatIfRequest = {
+      investigationId: 'inv1',
+      injectedNodes: [],
+      injectedEdges: [],
+      legalBasis: { purpose: 'test', policyId: 'p1' },
+    };
 
-        const req: WhatIfRequest = {
-            investigationId: 'inv2',
-            injectedNodes: [],
-            injectedEdges: [],
-            legalBasis: { purpose: 'test', policyId: 'p1' }
-        };
+    const result = await service.simulateWhatIf(req);
 
-        const result = await service.simulateWhatIf(req);
+    expect(result.baselineMetrics.density).toBeCloseTo(0.5);
+  });
 
-        // Should successfully link nodeA -> nodeB
-        expect(result.baselineMetrics.density).toBeCloseTo(0.5);
+  it('correctly reconstructs edges from Internal IDs fallback', async () => {
+    mockRun.mockResolvedValue({
+      records: [
+        {
+          get: (key: string) => {
+            if (key === 'n') {
+              return {
+                properties: { id: 'nodeA' },
+                labels: ['Person'],
+                elementId: 'intA',
+                identity: 'intA',
+              };
+            }
+            if (key === 'm') {
+              return {
+                properties: { id: 'nodeB' },
+                labels: ['Person'],
+                elementId: 'intB',
+                identity: 'intB',
+              };
+            }
+            if (key === 'r') {
+              return {
+                properties: { id: 'edgeX' },
+                type: 'KNOWS',
+                startNodeElementId: 'intA',
+                endNodeElementId: 'intB',
+                start: 'intA',
+                end: 'intB',
+              };
+            }
+            return undefined;
+          },
+        },
+      ],
     });
+
+    const req: WhatIfRequest = {
+      investigationId: 'inv2',
+      injectedNodes: [],
+      injectedEdges: [],
+      legalBasis: { purpose: 'test', policyId: 'p1' },
+    };
+
+    const result = await service.simulateWhatIf(req);
+
+    expect(result.baselineMetrics.density).toBeCloseTo(0.5);
+  });
 });

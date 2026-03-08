@@ -18,7 +18,7 @@ This blueprint translates the nine provided epics into a cohesive, execution-rea
 - Stand up a **stability kanban** with explicit WIP limits; block drive-by work until triage clears (Epic 1.2).
 - Build a **top-25 pain list** from incidents, tickets, and on-call notes; rank by frequency x blast radius (Epic 1.1).
 - Define **error taxonomy** (codes + categories) and enforce via code review checklist (Epic 1.4).
-- Add **runbooks for top 10 alerts** with owners, rollback, and contacts; publish in RUNBOOKS/ (Epic 1.5).
+- Add **runbooks for top 10 alerts** with owners, rollback, and contacts; publish in runbooks/ (Epic 1.5).
 - Standardize **logging fields** (tenant/user/request IDs) and start crash-only hardening on top 5 failure paths with timeouts/retries/fallbacks (Epics 1.3, 6.1).
 - Add **release health checks** to block deploys on key SLO regressions; gate in CI/CD (Epic 1.10).
 - Establish **contract standards** (versioning, pagination, idempotency, error envelope) and linting in CI (Epics 2.1, 2.6).
@@ -56,7 +56,7 @@ This blueprint translates the nine provided epics into a cohesive, execution-rea
 ## Controls, Tooling, and Checklists
 - **Code review gates:** error taxonomy adherence, contract lint results, state transition invariants, telemetry fields present, and flag ownership/expiry.
 - **CI/CD:** contract breaking-change check, health-check gate on SLO regressions, brownout toggle verification, and migration harness smoke tests.
-- **Runbook index:** map alerts → runbooks → owners with rollback steps; keep in RUNBOOKS/ and link from dashboards.
+- **Runbook index:** map alerts → runbooks → owners with rollback steps; keep in runbooks/ and link from dashboards.
 - **Metrics & alerts:** RED/USE dashboards per service, anomaly detection for error spikes/tenant anomalies, synthetic checks for critical flows, release markers, and debug links chaining alerts to dashboards, traces, and runbooks.
 - **Data quality:** backfill verification (row counts, hashes, invariants), shadow reads before cutover, and DLQ visibility for jobs.
 - **Security/permissions:** scoped roles, 2-person approvals for high-risk actions, replay-protected webhooks, and standardized signatures.

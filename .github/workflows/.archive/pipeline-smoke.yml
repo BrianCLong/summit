@@ -16,7 +16,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           cache: 'pnpm'
-          node-version: '18'
+          node-version: '20'
 
       # Ideally this would spin up the environment or target a staging environment
       # For now, we assume this runs against a deployed environment, but since this is a repo CI,

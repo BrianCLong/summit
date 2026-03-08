@@ -3,7 +3,7 @@
 > **Service**: Ingest/ETL Pipeline
 > **Team**: Platform/Ingest
 > **SLOs**: p95 lag ≤60s, DLQ rate <0.5%, Replay within RTO
-> **Dashboard**: [Ingest Overview](/d/ingest-overview)
+> **Dashboard**: Ingest Overview
 
 ## Table of Contents
 

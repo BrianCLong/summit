@@ -1,0 +1,16 @@
+{
+  "matches": [],
+  "source": {
+    "type": "directory",
+    "target": "."
+  },
+  "distro": {
+    "name": "unknown",
+    "version": "unknown",
+    "idLike": "unknown"
+  },
+  "descriptor": {
+    "name": "grype",
+    "version": "mock-0.0.1"
+  }
+}

@@ -1,12 +1,14 @@
 import json
 import os
+
 import pytest
+
 from summit.io.detectors.contradiction import detect_contradictions
 
 FIXTURE_DIR = os.path.join(os.path.dirname(__file__), "..", "fixtures", "io")
 
 def load_fixture(filename):
-    with open(os.path.join(FIXTURE_DIR, filename), "r") as f:
+    with open(os.path.join(FIXTURE_DIR, filename)) as f:
         return json.load(f)
 
 def test_contradiction_positive():

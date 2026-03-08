@@ -1,0 +1,13 @@
+{
+  "baseline": {
+    "p95": 280,
+    "p99": 340,
+    "errorRate": 0.003
+  },
+  "slo": {
+    "target": 300,
+    "alert": 320,
+    "burnRate": 2
+  },
+  "notes": "Used by k6 + Playwright assertions to confirm the health endpoint meets contractual performance budgets."
+}

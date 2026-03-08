@@ -1,6 +1,7 @@
-from typing import Dict, Any
+from typing import Any, Dict
 
-def render_markdown(metrics: Dict[str, Any]) -> str:
+
+def render_markdown(metrics: dict[str, Any]) -> str:
     md = "# CI/CD Automation Report\n\n"
     md += f"**Total Runs:** {metrics.get('total_runs', 0)}\n"
     md += f"**Success Rate:** {metrics.get('success_rate', 0):.2%}\n"
@@ -15,7 +16,7 @@ def render_markdown(metrics: Dict[str, Any]) -> str:
 
     return md
 
-def render_report_json(metrics: Dict[str, Any]) -> Dict[str, Any]:
+def render_report_json(metrics: dict[str, Any]) -> dict[str, Any]:
     return {
         "report_v1": {
             "summary": metrics,

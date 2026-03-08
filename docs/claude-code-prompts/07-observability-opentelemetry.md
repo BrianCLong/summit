@@ -272,7 +272,7 @@ groups:
 ## Related Files
 - `/home/user/summit/docs/OBSERVABILITY.md` - Observability guide
 - `/home/user/summit/observability/` - Prometheus/Grafana configs
-- `/home/user/summit/RUNBOOKS/` - Operational runbooks
+- `/home/user/summit/runbooks/` - Operational runbooks
 
 ## Usage with Claude Code
 

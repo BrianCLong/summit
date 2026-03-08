@@ -114,6 +114,15 @@ export const AgenticDemodulationPanel: React.FC<AgenticDemodulationPanelProps> =
     );
   };
 
+
+  // Memoize task stats to avoid unnecessary array iterations during renders
+  const taskStats = useMemo(() => {
+    return {
+      completed: tasks.reduce((count, t) => count + (t.status === 'COMPLETED' ? 1 : 0), 0),
+      failed: tasks.reduce((count, t) => count + (t.status === 'FAILED' ? 1 : 0), 0)
+    };
+  }, [tasks]);
+
   return (
     <div
       className={`flex flex-col h-full bg-slate-900 text-slate-100 rounded-lg overflow-hidden ${className || ''}`}
@@ -329,13 +338,13 @@ export const AgenticDemodulationPanel: React.FC<AgenticDemodulationPanelProps> =
         </span>
         <span className="text-slate-400">
           <span className="text-green-400 font-medium">
-            {tasks.filter((t) => t.status === 'COMPLETED').length}
+            {taskStats.completed}
           </span>{' '}
           completed
         </span>
         <span className="text-slate-400">
           <span className="text-red-400 font-medium">
-            {tasks.filter((t) => t.status === 'FAILED').length}
+            {taskStats.failed}
           </span>{' '}
           failed
         </span>

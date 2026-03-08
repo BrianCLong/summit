@@ -1,0 +1,26 @@
+name: "Feature: Evidence & Integrity Gate (Antigravity)"
+description: "Implement our 'Proof Moat' by ensuring deterministic evidence bundles and run-to-run reproducibility."
+title: "[Feature] Evidence & Integrity Gate"
+labels: ["lane:policy", "feature", "antigravity"]
+assignees:
+  - antigravity
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Overview
+        This feature establishes our strategic differentiator against legacy threat intelligence platforms. By guaranteeing deterministic, cryptographically signed, and hash-stable evidence bundles, we provide actionability + provability, critical for audit and legal defensibility.
+
+  - type: textarea
+    id: tasks
+    attributes:
+      label: "Tasks"
+      description: Specific implementation tasks.
+      value: |
+        - [ ] Design and implement EVID ID tagging system for all intelligence claims.
+        - [ ] Establish provenance capture mechanisms for tracking data origins.
+        - [ ] Develop lineage tracking to ensure a complete chain-of-custody.
+        - [ ] Implement hash-stable output generation to guarantee run-to-run reproducibility.
+        - [ ] Create a verifiable signing process for all generated evidence bundles.
+    validations:
+      required: true

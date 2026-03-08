@@ -1,9 +1,8 @@
-# Provenance Revocation Standard (Merkle Tree)
+> Owner: Governance / Security
+> Last-Reviewed: 2026-02-25
+> Evidence-IDs: EVD-PLACEHOLDER
+> Status: active
 
-**Status:** Draft
-**Owner:** Governance / Security
-**Source:** Zero-Trust MCP Whitepaper (2026-01)
-**Related:** Immutable Audit Log (C2)
 
 ## 1. Overview
 To meet FedRAMP High and GDPR requirements, Summit must support **retroactive invalidation** of analytic outputs derived from poisoned or non-compliant sources. This standard defines the **Merkle Tree Provenance** mechanism for transitive contamination tracking.

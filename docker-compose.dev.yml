@@ -1,20 +1,36 @@
-version: '3.9'
+# version removed
 
 services:
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: summit-qdrant
+    restart: unless-stopped
+    ports:
+      - "6333:6333"
+    volumes:
+      - qdrant_data:/qdrant/storage
+    networks:
+      - summit
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:6333/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   postgres:
-    image: postgres:16-alpine
+    image: pgvector/pgvector:pg16
     container_name: summit-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-summit_dev}
-      POSTGRES_USER: ${POSTGRES_USER:-summit}
+      POSTGRES_DB: ${POSTGRES_DB:-intelgraph}
+      POSTGRES_USER: ${POSTGRES_USER:-intelgraph}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env (see .env.example)}
     ports:
       - '5432:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-summit} -d ${POSTGRES_DB:-summit_dev}']
+      test: ['CMD-SHELL', "pg_isready -U ${POSTGRES_USER:-summit} -d ${POSTGRES_DB:-summit_dev} || sh -c 'exit 1'"]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -54,7 +70,7 @@ services:
       - neo4j_logs:/logs
     healthcheck:
       test:
-        ['CMD-SHELL', 'cypher-shell -u ${NEO4J_USERNAME:-neo4j} -p ${NEO4J_PASSWORD} "RETURN 1"']
+        ['CMD-SHELL', 'cypher-shell -u ${NEO4J_USERNAME:-neo4j} -p ${NEO4J_PASSWORD} "RETURN 1" || sh -c \'exit 1\'']
       interval: 15s
       timeout: 10s
       retries: 10
@@ -100,8 +116,8 @@ services:
 
   api:
     build:
-      context: ./server
-      dockerfile: Dockerfile.dev
+      context: .
+      dockerfile: server/Dockerfile.dev
     container_name: summit-api
     restart: unless-stopped
     env_file:
@@ -202,8 +218,8 @@ services:
 
   web:
     build:
-      context: ./apps/web
-      dockerfile: Dockerfile.dev
+      context: .
+      dockerfile: apps/web/Dockerfile.dev
     container_name: summit-web
     restart: unless-stopped
     env_file:
@@ -228,8 +244,8 @@ services:
 
   websocket-server:
     build:
-      context: ./services/websocket-server
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: services/websocket-server/Dockerfile
     command: node dist/index.js
     container_name: summit-websocket-server
     restart: unless-stopped
@@ -253,7 +269,7 @@ services:
       HEARTBEAT_INTERVAL: "30000"
       HEARTBEAT_TIMEOUT: "60000"
     ports:
-      - '9001:9001'
+      - '9002:9001'
     depends_on:
       redis:
         condition: service_healthy
@@ -338,7 +354,7 @@ services:
       COLLECTOR_OTLP_ENABLED: true
       SPAN_STORAGE_TYPE: memory
     ports:
-      - '16686:16686' # Jaeger UI
+      - '16687:16686' # Jaeger UI (changed from 16686)
       - '14268:14268' # Jaeger collector HTTP
     networks:
       - summit
@@ -387,8 +403,8 @@ services:
 
   ai-sandbox:
     build:
-      context: ./services/ai-sandbox
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: services/ai-sandbox/Dockerfile
     command: node dist/index.js
     container_name: summit-ai-sandbox
     restart: unless-stopped
@@ -418,8 +434,8 @@ services:
 
   agentic-mesh-evaluation:
     build:
-      context: ./services/agentic-mesh-evaluation
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: services/agentic-mesh-evaluation/Dockerfile
     container_name: summit-agentic-mesh-evaluation
     restart: unless-stopped
     environment:
@@ -455,6 +471,7 @@ volumes:
   prometheus_data:
   loki_data:
   alertmanager_data:
+  qdrant_data: {}
 
 networks:
   summit:

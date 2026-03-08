@@ -1,12 +1,14 @@
-import unittest
 import json
 import os
+import unittest
+
+from modules.archsim.audit.auditors import bottleneck_risks, find_spofs
 from modules.archsim.sim.simulate import simulate
-from modules.archsim.audit.auditors import find_spofs, bottleneck_risks
+
 
 class TestArchSim(unittest.TestCase):
     def setUp(self):
-        with open("fixtures/archsim/valid_minimal.json", "r") as f:
+        with open("fixtures/archsim/valid_minimal.json") as f:
             self.valid_spec = json.load(f)
 
     def test_simulation_deterministic(self):

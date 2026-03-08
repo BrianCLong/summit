@@ -1,0 +1,10 @@
+default: deny
+rules:
+  - id: allow_read_public
+    when:
+      dataset_classification: PUBLIC
+      action: READ
+    then:
+      decision: allow
+      obligations:
+        - audit_log

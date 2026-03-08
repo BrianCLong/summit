@@ -1,0 +1,26 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Trust Score Weights",
+  "type": "object",
+  "required": ["version", "effective_date", "weights"],
+  "properties": {
+    "version": {
+      "type": "string"
+    },
+    "effective_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "weights": {
+      "type": "object",
+      "required": ["reproducibility", "provenance", "supply_chain", "evidence", "explainability"],
+      "properties": {
+        "reproducibility": { "type": "number", "minimum": 0, "maximum": 1 },
+        "provenance": { "type": "number", "minimum": 0, "maximum": 1 },
+        "supply_chain": { "type": "number", "minimum": 0, "maximum": 1 },
+        "evidence": { "type": "number", "minimum": 0, "maximum": 1 },
+        "explainability": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    }
+  }
+}

@@ -1,13 +1,8 @@
-# Evidence ID Consistency Gate - Operations Manual
+> Owner: @summit/governance
+> Last-Reviewed: 2026-02-25
+> Evidence-IDs: EVD-PLACEHOLDER
+> Status: active
 
-## Purpose
-The Evidence ID Consistency gate ensures that all `Evidence-IDs` referenced in governance documents have corresponding entries in the evidence registry, maintaining traceability and completeness of governance artifacts.
-
-## Quick Start
-
-### Installation
-```bash
-npm run ci:evidence-id-consistency
 ```
 
 ### Basic Operation

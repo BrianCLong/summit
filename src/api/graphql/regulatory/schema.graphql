@@ -1,0 +1,9 @@
+type RegulatoryEarlyWarning {
+  institutionId: ID!
+  enforcementRiskScore: Float!
+  leadTimeDaysPredicted: Int
+  likelyRegulator: String!
+  likelyIssue: String!
+  topDrivers: [String!]!
+  evidenceIds: [String!]!
+}

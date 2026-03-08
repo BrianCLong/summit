@@ -1,16 +1,20 @@
-import { describe, it, expect, jest, beforeEach } from '@jest/globals';
-import { CryptoIntelligenceService } from '../CryptoIntelligenceService.js';
-import { getNeo4jDriver } from '../../db/neo4j.js';
+import { afterEach, beforeAll, beforeEach, describe, expect, it, jest } from '@jest/globals';
 
-// Mock getNeo4jDriver
-jest.mock('../../db/neo4j.js', () => ({
-  getNeo4jDriver: jest.fn(),
+const getNeo4jDriverMock = jest.fn();
+
+jest.unstable_mockModule('../../db/neo4j.js', () => ({
+  getNeo4jDriver: getNeo4jDriverMock,
 }));
 
 describe('CryptoIntelligenceService', () => {
-  let service: CryptoIntelligenceService;
+  let CryptoIntelligenceService: any;
+  let service: any;
   let mockDriver: any;
   let mockSession: any;
+
+  beforeAll(async () => {
+    ({ CryptoIntelligenceService } = await import('../CryptoIntelligenceService.js'));
+  });
 
   beforeEach(() => {
     mockSession = {
@@ -20,12 +24,16 @@ describe('CryptoIntelligenceService', () => {
     mockDriver = {
       session: jest.fn().mockReturnValue(mockSession),
     };
-    (getNeo4jDriver as jest.Mock).mockReturnValue(mockDriver);
+    getNeo4jDriverMock.mockReturnValue(mockDriver);
 
     // Reset instance to ensure fresh start
     // @ts-ignore
     CryptoIntelligenceService.instance = undefined;
     service = CryptoIntelligenceService.getInstance();
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
   describe('analyzeTransactionPattern', () => {

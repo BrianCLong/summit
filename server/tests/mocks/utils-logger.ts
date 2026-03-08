@@ -14,4 +14,6 @@ export const logger = {
   flush: () => { },
 };
 
+export const createLogger = () => logger;
+
 export default logger;

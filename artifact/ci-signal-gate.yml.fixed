@@ -1,0 +1,87 @@
+name: CI Signal Gate
+on:
+  workflow_dispatch: null
+  schedule:
+    - cron: "*/30 * * * *"
+  pull_request: null
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+permissions:
+  contents: read
+  actions: read
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup gh + jq
+        run: |
+          sudo apt-get update && sudo apt-get install -y jq
+          type gh || (type brew >/dev/null 2>&1 && brew install gh) || sudo apt-get install -y gh
+      - name: Auth GH (GITHUB_TOKEN)
+        run: gh auth setup-git
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Harvest runs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          REPO="${{ github.repository }}"
+          ./scripts/ci/harvest_actions_signals.sh "$REPO" 100
+      - name: Compute metrics
+        run: |
+          REPO="${{ github.repository }}"
+          jq -f scripts/ci/compute_metrics.jq --arg repo "$REPO" runs_raw.json > runs_metrics.json
+          echo "Computed metrics:"
+          cat runs_metrics.json | jq .success_rate_pct
+      - name: Diff vs prior
+        run: >
+          # PR fast-path: avoid long artifact-history fetches in required context.
+
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            echo "PR advisory mode: skipping historical artifact diff."
+            echo "{}" > runs_diff.json
+            exit 0
+          fi
+
+
+          # Attempt to download the latest 'ci-signal' artifact.
+
+          mkdir -p artifacts
+
+          timeout 120 gh run download -n ci-signal -D artifacts || echo "No prior artifact found or download timed out"
+
+
+          if [ -f artifacts/runs_metrics.json ]; then
+            jq -n --argjson cur "$(cat runs_metrics.json)" --argjson prev "$(cat artifacts/runs_metrics.json)" -f scripts/ci/diff_metrics.jq > runs_diff.json
+            echo "Diff computed vs previous artifact."
+          else
+            echo "No prior metrics found to diff against."
+            echo "{}" > runs_diff.json
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Enforce policy (blocking)
+        if: github.event_name != 'pull_request'
+        run: |
+          ./scripts/ci/gate_check.sh runs_metrics.json .ci/policy.json runs_diff.json
+      - name: Enforce policy (advisory on PR)
+        if: github.event_name == 'pull_request'
+        run: |
+          if ! ./scripts/ci/gate_check.sh runs_metrics.json .ci/policy.json runs_diff.json; then
+            echo "::warning::CI signal gate is advisory on pull_request context."
+          fi
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ci-signal
+          path: |
+            runs_raw.json
+            runs_metrics.json
+            runs_diff.json
+            gate_status.json
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}-${{ github.job }}
+      cancel-in-progress: true

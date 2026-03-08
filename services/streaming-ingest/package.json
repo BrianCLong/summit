@@ -21,7 +21,7 @@
     "@intelgraph/prov-ledger": "workspace:*",
     "@opentelemetry/api": "1.7.0",
     "@opentelemetry/sdk-trace-base": "1.19.0",
-    "axios": "^1.13.2",
+    "axios": "^1.13.5",
     "commander": "^12.0.0",
     "crypto": "^1.0.1",
     "crypto-js": "^4.2.0",

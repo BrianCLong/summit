@@ -1,0 +1,10 @@
+{
+  "policy": "jurisdiction",
+  "mode": "deny-by-default",
+  "deny": [
+    {
+      "condition": "media.synthetic == true && (media.jurisdiction == null || media.label == null)",
+      "message": "synthetic media must include jurisdiction and disclosure label"
+    }
+  ]
+}

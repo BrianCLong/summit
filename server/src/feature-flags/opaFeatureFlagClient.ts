@@ -1,6 +1,5 @@
-// @ts-nocheck
 import { context as otContext, propagation, trace } from '@opentelemetry/api';
-import { randomUUID } from 'crypto';
+import { randomUUID, createHash } from 'crypto';
 import { logger } from '../config/logger.js';
 import { OPAClient } from '../services/opa-client.js';
 import {
@@ -151,9 +150,17 @@ export class OPAFeatureFlagClient {
     propagation.inject(activeContext, carrier);
     const spanContext = trace.getSpan(activeContext)?.spanContext();
 
+    // Sprint 08: Deterministic ramp seed for percentage rollouts
+    const tenantId = context.tenantId || 'unknown';
+    const rampSeed = createHash('sha256')
+      .update(`${tenantId}:${flag}:${context.requestId || evaluationId}`)
+      .digest('hex')
+      .substring(0, 16);
+
     return {
       flag,
       evaluation_id: evaluationId,
+      ramp_seed: rampSeed,
       context: {
         source: context.source || DEFAULT_SOURCE,
         userId: context.userId,

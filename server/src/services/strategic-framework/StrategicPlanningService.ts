@@ -40,7 +40,10 @@ import {
   MetricDataPoint,
 } from './types.js';
 
-const tracer = getTracer('strategic-planning-service');
+const tracer =
+  typeof getTracer === 'function'
+    ? getTracer('strategic-planning-service')
+    : { startSpan: () => ({ end: () => { } }) };
 
 // In-memory storage (in production, this would be backed by PostgreSQL/Neo4j)
 const goalsStore = new Map<string, StrategicGoal>();

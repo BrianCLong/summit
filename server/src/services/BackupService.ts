@@ -4,7 +4,9 @@ import fs from 'fs';
 import { getNeo4jDriver } from '../db/neo4j.js';
 import { getRedisClient } from '../db/redis.js';
 import pino from 'pino';
-import { S3Client, PutObjectCommand, ListObjectsV2Command, DeleteObjectsCommand } from '@aws-sdk/client-s3';
+import { S3Client, PutObjectCommand, ListObjectsV2Command, DeleteObjectsCommand, GetObjectCommand } from '@aws-sdk/client-s3';
+import { Readable } from 'stream';
+import { pipeline } from 'stream/promises';
 
 const logger = (pino as any)({ name: 'BackupService' });
 
@@ -250,20 +252,63 @@ export class BackupService {
   }
 
   private async backupRedis(timestamp: string): Promise<string> {
-    const fileName = `redis_${timestamp}.json`;
-    const file = path.join(this.backupDir, fileName);
     const client = getRedisClient();
     if (!client) throw new Error('Redis client unavailable');
 
+    // Try BGSAVE first for a point-in-time snapshot
     try {
-      await client.bgsave();
-    } catch (err: any) {
-      const message = err instanceof Error ? err.message : String(err);
-      if (!message.includes('already in progress')) {
-        throw err;
+      logger.info('Triggering Redis BGSAVE...');
+      const bgsaveResult = await client.bgsave();
+      if (bgsaveResult !== 'Background saving started') {
+          // If already in progress, that's fine too
+          logger.info(`BGSAVE result: ${bgsaveResult}`);
       }
+
+      // Poll for completion
+      let retries = 30; // 30 seconds wait max
+      while (retries > 0) {
+        const info = await client.info('persistence');
+        if (info.includes('rdb_bgsave_in_progress:0')) {
+          if (info.includes('rdb_last_bgsave_status:ok')) {
+             break;
+          } else {
+             throw new Error('Redis BGSAVE failed (status not ok)');
+          }
+        }
+        await new Promise(r => setTimeout(r, 1000));
+        retries--;
+      }
+
+      if (retries === 0) {
+          throw new Error('Redis BGSAVE timed out');
+      }
+
+      // Get RDB file location
+      const dirConfig = await client.config('GET', 'dir');
+      const filenameConfig = await client.config('GET', 'dbfilename');
+
+      // ioredis config GET returns [key, value]
+      const dir = dirConfig[1];
+      const dbfilename = filenameConfig[1];
+
+      if (dir && dbfilename) {
+          const rdbPath = path.join(dir as string, dbfilename as string);
+          if (fs.existsSync(rdbPath)) {
+              const destFile = path.join(this.backupDir, `redis_${timestamp}.rdb`);
+              fs.copyFileSync(rdbPath, destFile);
+              logger.info(`Redis RDB backup created at ${destFile}`);
+              return destFile;
+          } else {
+              logger.warn(`Redis RDB file not found at ${rdbPath}, falling back to scan`);
+          }
+      }
+    } catch (err: any) {
+        logger.warn({ err }, 'Redis BGSAVE backup failed, falling back to logical export');
     }
 
+    // Fallback: Logical Export (Scan)
+    const fileName = `redis_${timestamp}.json`;
+    const file = path.join(this.backupDir, fileName);
     const writeStream = fs.createWriteStream(file);
     writeStream.write('{');
     let isFirstKey = true;
@@ -290,7 +335,7 @@ export class BackupService {
     writeStream.write('}');
     writeStream.end();
 
-    logger.info(`Redis backup created at ${file}`);
+    logger.info(`Redis backup (fallback) created at ${file}`);
     return file;
   }
 
@@ -374,10 +419,61 @@ export class BackupService {
   }
 
   /**
-   * Stub for restoring a backup
+   * Restore a backup from S3
+   * @param backupId The timestamp identifier of the backup (e.g., '2023-10-27T10-00-00-000Z')
    */
   async restore(backupId: string): Promise<void> {
-    logger.warn(`Restore functionality requested for ${backupId} but not fully implemented. Manual intervention required.`);
-    // TODO: Implement download from S3 and restoration logic for each service
+    if (!this.s3Client || !this.s3Bucket) {
+      throw new Error('S3 not configured');
+    }
+
+    logger.info(`Starting restoration for backup ID: ${backupId}`);
+
+    const artifacts = [
+        `postgres_${backupId}.sql`,
+        `neo4j_${backupId}.json`,
+        `redis_${backupId}.rdb`,
+        `redis_${backupId}.json`
+    ];
+
+    const downloadedFiles: string[] = [];
+
+    for (const artifact of artifacts) {
+        try {
+            const key = `backups/${artifact}`;
+            const destPath = path.join(this.backupDir, artifact);
+
+            logger.info(`Downloading ${key} from S3...`);
+            const command = new GetObjectCommand({
+                Bucket: this.s3Bucket,
+                Key: key
+            });
+
+            const response = await this.s3Client.send(command);
+            if (response.Body instanceof Readable) {
+                await pipeline(response.Body, fs.createWriteStream(destPath));
+                downloadedFiles.push(destPath);
+                logger.info(`Downloaded to ${destPath}`);
+            }
+        } catch (error: any) {
+            // Ignore NoSuchKey errors for optional files (like checking both .rdb and .json)
+             if (error.name !== 'NoSuchKey') {
+                 logger.warn({ error, artifact }, 'Failed to download artifact');
+             }
+        }
+    }
+
+    if (downloadedFiles.length === 0) {
+        throw new Error(`No artifacts found for backup ID ${backupId}`);
+    }
+
+    logger.info('Restoration artifacts downloaded successfully.');
+    logger.info('To restore fully, perform the following manual steps (or automate via scripts):');
+    logger.info('1. PostgreSQL: psql -h $POSTGRES_HOST -U $POSTGRES_USER $POSTGRES_DB < ' + downloadedFiles.find(f => f.includes('postgres')));
+    logger.info('2. Neo4j: Use apoc.import.json or stop server and replace graph.db');
+    logger.info('3. Redis: Stop redis-server, replace dump.rdb with the downloaded .rdb file, and restart.');
+
+    // Attempt automated Postgres restore if possible?
+    // Doing so on a live DB is risky without explicit force flag.
   }
 }

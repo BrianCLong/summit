@@ -1,5 +1,5 @@
 import { BackupService } from './BackupService.js';
-import logger from '../utils/logger.js';
+import { logger } from '../config/logger.js';
 import cron from 'node-cron';
 
 export class BackupManager {
@@ -20,6 +20,16 @@ export class BackupManager {
         logger.info({ results }, 'Scheduled backups completed');
       } catch (error: any) {
         logger.error('Scheduled backup execution failed', error);
+      }
+    });
+
+    // Hourly Redis Backup (for fast recovery)
+    cron.schedule('0 * * * *', async () => {
+      logger.info('Running hourly Redis backup...');
+      try {
+        await this.backupService.backupRedis({ uploadToS3: false }); // Local only for speed
+      } catch (error: any) {
+        logger.error('Hourly Redis backup failed', error);
       }
     });
   }

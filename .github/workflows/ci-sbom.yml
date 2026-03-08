@@ -1,0 +1,107 @@
+name: CI SBOM & Provenance
+
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+  schedule:
+    - cron: '0 2 * * 1-5'   # Weekdays 02:00 UTC
+
+permissions:
+  contents: read
+  id-token: write   # needed for GitHub OIDC attestations
+  attestations: write
+
+jobs:
+  sbom-generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.0.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.19.0'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate CycloneDX SBOM
+        run: |
+          # Generate SBOM in XML format (version 1.5)
+          # We use cdxgen which is versatile for monorepos
+          npx @cyclonedx/cdxgen -r . -o cyclonedx.xml -t javascript --fail-on-error
+        env:
+          FETCH_LICENSE: 'true'
+
+      - name: Export dependencies to JSON for verification
+        run: pnpm list --json --recursive > pnpm-deps.json
+
+      - name: Upload SBOM artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-artifacts
+          path: |
+            cyclonedx.xml
+            pnpm-deps.json
+
+  sbom-validate:
+    runs-on: ubuntu-latest
+    needs: sbom-generate
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: sbom-artifacts
+          path: .
+
+      - name: Install CycloneDX CLI
+        run: |
+          npm -g i @cyclonedx/cyclonedx-cli
+
+      - name: Schema validate SBOM
+        run: |
+          cyclonedx validate --input-file ./cyclonedx.xml --fail-on-errors
+
+      - name: Compare SBOM vs lockfile (drift detection)
+        run: |
+          python3 scripts/compare_sbom_vs_lockfile.py \
+            --sbom ./cyclonedx.xml \
+            --lockfile pnpm-deps.json
+
+  provenance-attest-verify:
+    runs-on: ubuntu-latest
+    needs: [sbom-validate]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: sbom-artifacts
+          path: .
+
+      # Produce a provenance attestation for the SBOM blob
+      - name: Attest build provenance (in-toto SLSA predicate)
+        uses: actions/attest-build-provenance@v1
+        with:
+          subject-path: ./cyclonedx.xml
+
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v3.7.0
+
+      # Verify using Sigstore bundle + Rekor inclusion (no skipping tlog)
+      - name: Verify attestation bundle & Rekor inclusion
+        run: |
+          # GitHub stores attestation as a linked artifact; fetch bundle path
+          gh attestation download --artifact-path ./cyclonedx.xml --bundle bundle.json
+          # Verify signature + cert + Rekor inclusion from bundle (keyless OIDC)
+          cosign verify-blob --use-signed-timestamps --bundle bundle.json ./cyclonedx.xml || { echo "::error::Supply chain verification failed! Missing or invalid signed timestamps."; false; }
+
+      - name: Enforce attestation TTL/recency (<= 24h)
+        run: |
+          python3 scripts/attestation_ttl_guard.py --bundle bundle.json --max-age-hours 24

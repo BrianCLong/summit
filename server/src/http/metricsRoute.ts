@@ -1,6 +1,5 @@
-// @ts-nocheck
 import { Request, Response } from 'express';
-import { registry as register } from '../observability/metrics.js';
+import { register } from '../monitoring/metrics.js';
 import { logger } from '../config/logger.js';
 
 export const metricsRoute = async (_req: Request, res: Response) => {

@@ -67,7 +67,7 @@ Models approaching or past their review dates:
 - [Threat Modeling Framework](./threat-modeling-framework.md)
 - [Template](./threat-models/template.md)
 - [Security Guidelines](./SECURITY_GUIDELINES.md)
-- [Existing System Threat Model](../../SECURITY/threat-model.md)
+- Existing System Threat Model
 
 ## How to Add a New Threat Model
 

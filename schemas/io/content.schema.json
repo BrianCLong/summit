@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.example/schema/io/content.schema.json",
+  "title": "IO Content",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["content_id", "content_type", "created_at", "provenance"],
+  "properties": {
+    "content_id": {
+      "type": "string",
+      "description": "Stable canonical content ID."
+    },
+    "content_type": {
+      "type": "string",
+      "enum": ["text", "image", "video", "audio", "link", "document", "other"]
+    },
+    "title": {
+      "type": "string"
+    },
+    "body": {
+      "type": "string"
+    },
+    "language": {
+      "type": "string",
+      "description": "BCP-47 language tag."
+    },
+    "source_url": {
+      "type": "string",
+      "format": "uri"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "labels": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "provenance": {
+      "$ref": "provenance.schema.json"
+    }
+  }
+}

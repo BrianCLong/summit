@@ -1,0 +1,84 @@
+name: Reproducibility Check
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check-determinism:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 8
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build packages
+        run: pnpm run build
+
+      - name: Generate Deterministic Run
+        id: generate
+        run: |
+          # Run the script and capture output
+          output=$(npx tsx scripts/test-determinism.ts)
+          echo "$output"
+          # Extract run_id from the log line: "Starting deterministic test run: test-run-..."
+          run_id=$(echo "$output" | grep "Starting deterministic test run:" | awk '{print $5}')
+          if [ -z "$run_id" ]; then
+            echo "Failed to extract run_id"
+            # Fail the step
+            /bin/false
+          fi
+          echo "RUN_ID=$run_id" >> $GITHUB_ENV
+
+      - name: Replay Run
+        run: |
+          echo "Replaying Run ID: $RUN_ID"
+          # Use the built CLI
+          node packages/cli/dist/index.js replay --run "$RUN_ID"
+
+      - name: Assert Provenance Bundle Determinism
+        run: |
+          echo "Testing generate-provenance-bundle.cjs for determinism"
+          export DETERMINISTIC_BUILD=true
+          export SOURCE_DATE_EPOCH=1700000000
+          export GITHUB_SHA=$(git rev-parse HEAD)
+
+          mkdir -p /tmp/provenance_test_1 /tmp/provenance_test_2
+
+          # Run 1
+          cd /tmp/provenance_test_1
+          node $GITHUB_WORKSPACE/scripts/generate-provenance-bundle.cjs
+          hash1=$(sha256sum provenance/export-manifest.json | awk '{print $1}')
+
+          # Run 2
+          cd /tmp/provenance_test_2
+          node $GITHUB_WORKSPACE/scripts/generate-provenance-bundle.cjs
+          hash2=$(sha256sum provenance/export-manifest.json | awk '{print $1}')
+
+          cd $GITHUB_WORKSPACE
+          if [ "$hash1" != "$hash2" ]; then
+            echo "Determinism check failed! Hashes do not match."
+            echo "Run 1: $hash1"
+            echo "Run 2: $hash2"
+            diff /tmp/provenance_test_1/provenance/export-manifest.json /tmp/provenance_test_2/provenance/export-manifest.json || true
+            /bin/false
+          fi
+          echo "Determinism check passed! Hash: $hash1"

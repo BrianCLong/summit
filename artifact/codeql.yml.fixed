@@ -1,0 +1,87 @@
+name: CodeQL
+on:
+  push:
+    branches:
+      - main
+      - master
+    paths-ignore:
+      - "**.md"
+      - docs/**
+      - .github/workflows/*.md
+  pull_request:
+    branches:
+      - main
+      - master
+    paths-ignore:
+      - "**.md"
+      - docs/**
+      - .github/workflows/*.md
+  schedule:
+    - cron: 30 1 * * 0
+  workflow_dispatch: null
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+jobs:
+  analyze:
+    name: Analyze (${{ matrix.language }})
+    if: ${{ vars.MERGE_SURGE != 'true' || github.event_name == 'merge_group' || github.event_name == 'push' ||
+      github.event_name == 'schedule' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    strategy:
+      fail-fast: false
+      matrix:
+        language:
+          - javascript-typescript
+          - python
+          - go
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Setup pnpm
+        if: matrix.language == 'javascript-typescript'
+        uses: pnpm/action-setup@v4
+      - name: Setup Node.js
+        if: matrix.language == 'javascript-typescript'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - name: Install dependencies (monorepo workspaces)
+        if: matrix.language == 'javascript-typescript'
+        run: pnpm install --frozen-lockfile --ignore-scripts
+        env:
+          HUSKY: 0
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@cdefb33c0f6224e58673d9004f47f7cb3e328b89
+        with:
+          languages: ${{ matrix.language }}
+          config: |
+            paths:
+              - client
+              - server
+              - packages
+      - name: Build TypeScript projects (manual build for reliability)
+        if: matrix.language == 'javascript-typescript'
+        run: |
+          # Build server and client separately to handle build failures gracefully
+          # TypeScript compilation helps CodeQL understand the codebase structure
+          pnpm --filter intelgraph-server build || echo "Server build failed (non-blocking)"
+          pnpm --filter client build || echo "Client build failed (non-blocking)"
+        continue-on-error: true
+      - name: Autobuild (Python/Go)
+        if: matrix.language != 'javascript-typescript'
+        uses: github/codeql-action/autobuild@cdefb33c0f6224e58673d9004f47f7cb3e328b89
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@cdefb33c0f6224e58673d9004f47f7cb3e328b89
+        with:
+          category: /language:${{matrix.language}}
+          upload: always
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}-${{ github.job }}
+      cancel-in-progress: true

@@ -1,0 +1,194 @@
+# REDACTION_POLICY.yml v1.0.0
+# Defines what content is redacted in sanitized vs full render modes
+#
+# Authority: docs/ci/RELEASE_OPS_REDACTION.md
+# Used by: scripts/release/redact_release_ops_content.sh
+
+version: "1.0.0"
+
+# --- Render Modes ---
+modes:
+  sanitized:
+    description: "Public-facing view for GitHub Pages"
+    purpose: "Safe for public visibility, no sensitive details"
+
+  full:
+    description: "Internal maintainer view"
+    purpose: "Complete details for debugging and investigation"
+
+# --- Section Handling ---
+# Controls which markdown sections are allowed/redacted by heading
+sections:
+  # Sections always allowed in sanitized mode
+  allowed_in_sanitized:
+    - "Release Ops Single Page"
+    - "Release Snapshot"
+    - "Summary"
+    - "Candidate Status"
+    - "Quick Links"
+    - "Artifacts"
+    - "Generated"
+
+  # Sections collapsed (show count only) in sanitized mode
+  collapse_in_sanitized:
+    - heading: "Top Blockers"
+      replacement: "_{count} blocker(s) - see internal report for details_"
+      max_visible: 0  # Show heading + replacement only
+
+    - heading: "Escalation Status"
+      replacement: "_{count} escalation(s) in progress_"
+      max_visible: 0
+
+    - heading: "Recent Digest"
+      replacement: "_Daily digest available in internal report_"
+      max_visible: 0
+
+    - heading: "Shift Handoff"
+      replacement: "_Handoff notes available in internal report_"
+      max_visible: 0
+
+  # Sections completely removed in sanitized mode
+  remove_in_sanitized:
+    - "Internal Notes"
+    - "Debug Information"
+    - "State Snapshot"
+    - "Detailed Blockers"
+    - "Issue Bodies"
+
+# --- Forbidden Patterns ---
+# Patterns that must NEVER appear in sanitized output
+# Build will FAIL if any are detected after redaction
+forbidden_patterns:
+  # GitHub issue/PR URLs with bodies or comments
+  - pattern: "github\\.com/[^/]+/[^/]+/issues/\\d+#issuecomment"
+    description: "Issue comment links"
+    replacement: "[issue comment]"
+
+  - pattern: "github\\.com/[^/]+/[^/]+/pull/\\d+#discussion"
+    description: "PR discussion links"
+    replacement: "[PR discussion]"
+
+  # Internal domains (customize for your org)
+  - pattern: "\\.(internal|corp|local)\\b"
+    description: "Internal domain references"
+    replacement: "[internal]"
+
+  - pattern: "@(internal|corp)\\.example\\.com"
+    description: "Internal email addresses"
+    replacement: "[email]"
+
+  # Tokens and secrets
+  - pattern: "(ghp|gho|ghu|ghs|ghr)_[A-Za-z0-9]{36,}"
+    description: "GitHub tokens"
+    replacement: "[REDACTED_TOKEN]"
+
+  - pattern: "Bearer\\s+[A-Za-z0-9\\-_.]+"
+    description: "Bearer tokens"
+    replacement: "Bearer [REDACTED]"
+
+  - pattern: "(api[_-]?key|apikey|secret|password|token)\\s*[:=]\\s*['\"]?[A-Za-z0-9\\-_.]+"
+    description: "API keys and secrets"
+    replacement: "[REDACTED_SECRET]"
+
+  # State file paths (should never appear in public output)
+  - pattern: "_state\\.json"
+    description: "State file references"
+    replacement: "[state]"
+
+  - pattern: "state-snapshot/"
+    description: "State snapshot paths"
+    replacement: "[snapshot]"
+
+  # Workflow run IDs (internal operational detail)
+  - pattern: "actions/runs/\\d{10,}"
+    description: "Workflow run IDs"
+    replacement: "actions/runs/[run]"
+
+  # Internal team handles (customize)
+  - pattern: "@(platform-team|security-team|sre-oncall)"
+    description: "Internal team mentions"
+    replacement: "@[team]"
+
+# --- Allowed Link Patterns ---
+# Only links matching these patterns are preserved in sanitized mode
+# All other links are converted to plain text
+allowed_links:
+  # Public GitHub repository links (no issue/PR bodies)
+  - pattern: "^https://github\\.com/[^/]+/[^/]+/?$"
+    description: "Repository root"
+
+  - pattern: "^https://github\\.com/[^/]+/[^/]+/releases"
+    description: "Releases page"
+
+  - pattern: "^https://github\\.com/[^/]+/[^/]+/actions$"
+    description: "Actions page"
+
+  - pattern: "^https://github\\.com/[^/]+/[^/]+/blob/"
+    description: "File links"
+
+  # Documentation links
+  - pattern: "^https://docs\\."
+    description: "Documentation sites"
+
+  # Relative links within the site
+  - pattern: "^[a-zA-Z0-9_\\-]+\\.(html|md|json)$"
+    description: "Local file links"
+
+# --- Dashboard JSON Sanitization ---
+# Controls what fields appear in dashboard_summary.json (sanitized)
+dashboard_fields:
+  # Fields to include in sanitized dashboard
+  include:
+    - "generated_at"
+    - "summary.total_candidates"
+    - "summary.promotable"
+    - "summary.blocked"
+    - "summary.pending"
+    - "candidates[].tag"
+    - "candidates[].promotable_state"
+
+  # Fields to explicitly exclude
+  exclude:
+    - "candidates[].blockers"
+    - "candidates[].check_failures"
+    - "candidates[].workflow_runs"
+    - "candidates[].issue_details"
+    - "internal_notes"
+    - "debug_info"
+
+# --- Replacement Strategies ---
+replacements:
+  # How to handle redacted content
+  text:
+    default: "[REDACTED]"
+    count_template: "_{count} item(s) redacted_"
+
+  # How to handle removed sections
+  section:
+    show_placeholder: true
+    placeholder: "_This section is available in the internal report._"
+
+  # How to handle forbidden links
+  link:
+    strategy: "text_only"  # Convert to plain text, or "remove" entirely
+
+# --- Verification ---
+# Post-redaction verification requirements
+verification:
+  # Must pass all checks for sanitized mode
+  fail_on_forbidden_pattern: true
+  fail_on_unlisted_link: false  # Warn only
+  require_section_markers: true
+
+  # Patterns that indicate incomplete redaction
+  incomplete_redaction_markers:
+    - "TODO"
+    - "FIXME"
+    - "XXX"
+    - "INTERNAL"
+
+# --- Metadata ---
+metadata:
+  last_updated: "2026-01-08"
+  owner: "Platform Engineering"
+  review_schedule: "Quarterly"

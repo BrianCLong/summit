@@ -1,0 +1,6 @@
+# Rule: Agent Manifest Permissions
+# Agent manifests must explicitly declare tool permissions.
+rule:
+  id: agent-manifest-permissions
+  severity: critical
+  message: Agent manifests must explicitly declare required tool permissions.

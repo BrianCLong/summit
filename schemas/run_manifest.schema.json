@@ -1,0 +1,61 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "RunManifest",
+  "description": "Schema for Summit Agent Run Manifests",
+  "type": "object",
+  "properties": {
+    "run_id": {
+      "type": "string",
+      "description": "Unique identifier for the run"
+    },
+    "agent_graph_version": {
+      "type": "string",
+      "description": "Version identifier of the agent graph"
+    },
+    "tool_versions": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      },
+      "description": "Map of tool names to their versions"
+    },
+    "model_parameters": {
+      "type": "object",
+      "properties": {
+        "model_name": { "type": "string" },
+        "temperature": { "type": "number" },
+        "top_p": { "type": "number" }
+      },
+      "required": ["model_name"],
+      "description": "Model configuration used for the run"
+    },
+    "memory_snapshot_hashes": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      },
+      "description": "Hashes of memory snapshots at start of run"
+    },
+    "policy_bundle_hash": {
+      "type": "string",
+      "description": "Hash of the policy bundle used"
+    },
+    "seed_values": {
+      "type": "object",
+      "properties": {
+        "global_seed": { "type": "number" }
+      },
+      "required": ["global_seed"],
+      "description": "Seed values for deterministic execution"
+    },
+    "final_state_hash": {
+      "type": "string",
+      "description": "Hash of the final state (e.g. TaskGraph) after run completion"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": ["run_id", "seed_values", "created_at"]
+}

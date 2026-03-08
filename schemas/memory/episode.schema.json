@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.dev/schemas/memory/episode.schema.json",
+  "title": "Summit Episodic Memory Record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["episode_id", "case_id", "events", "signature"],
+  "properties": {
+    "episode_id": { "type": "string", "minLength": 5 },
+    "case_id": { "type": "string", "minLength": 3 },
+    "events": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["t", "type"],
+        "properties": {
+          "t": { "type": "string", "format": "date-time" },
+          "type": {
+            "type": "string",
+            "enum": ["tool_call", "memory_proposal", "policy_decision", "summary_compaction"]
+          },
+          "tool": { "type": "string" },
+          "input_hash": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+          "output_hash": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+          "target_path": { "type": "string" },
+          "diff": { "type": "string" },
+          "rationale": { "type": "string" },
+          "risk_flags": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "provenance": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "source": { "type": "string" },
+              "doc_id": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "signature": {
+      "type": "string",
+      "pattern": "^(sigstore|rekor|kms):.+$"
+    }
+  }
+}

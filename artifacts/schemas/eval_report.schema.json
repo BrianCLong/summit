@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.dev/schemas/eval_report.schema.json",
+  "type": "object",
+  "required": ["scores", "average", "threshold", "pass"],
+  "properties": {
+    "scores": {"type": "array", "items": {"type": "number"}},
+    "average": {"type": "number"},
+    "threshold": {"type": "number"},
+    "pass": {"type": "boolean"}
+  },
+  "additionalProperties": false
+}

@@ -12,7 +12,7 @@
  * Implements "Auditable by Design" from Wishbook requirements
  */
 
-import { z } from 'zod/v4';
+import { z } from 'zod';
 import { logger as appLogger } from '../utils/logger.js';
 import { LLMGuardrailsService } from '../security/llm-guardrails.js';
 import LLMService from './LLMService.js';

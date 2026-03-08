@@ -8,7 +8,7 @@ interface KPIViewProps {
     onClick?: () => void;
 }
 
-export const KPIView: React.FC<KPIViewProps> = ({ data, onClick }) => {
+export const KPIView = React.memo<KPIViewProps>(({ data, onClick }) => {
     const { definition, currentValue, status } = data;
 
     const colorClass = status === 'green' ? 'text-green-500' : (status === 'yellow' ? 'text-yellow-500' : 'text-red-500');
@@ -41,4 +41,6 @@ export const KPIView: React.FC<KPIViewProps> = ({ data, onClick }) => {
             </CardContent>
         </Card>
     );
-};
+});
+
+KPIView.displayName = 'KPIView';

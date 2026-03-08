@@ -46,8 +46,8 @@ export class Neo4jPerformanceMonitor {
     const { cypher, durationMs } = outcome;
     const labels = this.normalizeLabels(outcome.labels);
 
-    neo4jQueryTotal.inc(labels);
-    neo4jQueryLatencyMs.observe(labels, durationMs);
+    this.incrementCounter(neo4jQueryTotal, labels);
+    this.observeHistogram(neo4jQueryLatencyMs, labels, durationMs);
 
     if (durationMs >= this.slowQueryThresholdMs) {
       // BOLT: Only create the normalized outcome object for slow queries
@@ -73,9 +73,9 @@ export class Neo4jPerformanceMonitor {
     const { durationMs } = outcome;
     const labels = this.normalizeLabels(outcome.labels);
 
-    neo4jQueryTotal.inc(labels);
-    neo4jQueryErrorsTotal.inc(labels);
-    neo4jQueryLatencyMs.observe(labels, durationMs);
+    this.incrementCounter(neo4jQueryTotal, labels);
+    this.incrementCounter(neo4jQueryErrorsTotal, labels);
+    this.observeHistogram(neo4jQueryLatencyMs, labels, durationMs);
 
     // BOLT: Spread directly into the recentErrors array to avoid intermediate object creation.
     this.recentErrors.unshift({ ...outcome, labels, timestamp: Date.now() });
@@ -127,6 +127,48 @@ export class Neo4jPerformanceMonitor {
     }
 
     return cached;
+  }
+
+  private incrementCounter(metric: any, labels: QueryLabels): void {
+    const labeled = this.getLabeledMetric(metric, labels);
+    if (labeled && typeof labeled.inc === 'function') {
+      labeled.inc();
+      return;
+    }
+
+    if (typeof metric?.inc === 'function') {
+      metric.inc(1);
+    }
+  }
+
+  private observeHistogram(metric: any, labels: QueryLabels, value: number): void {
+    const labeled = this.getLabeledMetric(metric, labels);
+    if (labeled && typeof labeled.observe === 'function') {
+      labeled.observe(value);
+      return;
+    }
+
+    if (typeof metric?.observe === 'function') {
+      metric.observe(value);
+    }
+  }
+
+  private getLabeledMetric(metric: any, labels: QueryLabels): any {
+    if (typeof metric?.labels !== 'function') {
+      return null;
+    }
+
+    try {
+      return metric.labels(labels.operation, labels.label, labels.tenant_id);
+    } catch {
+      // Fall through to object-label form.
+    }
+
+    try {
+      return metric.labels(labels);
+    } catch {
+      return null;
+    }
   }
 }
 

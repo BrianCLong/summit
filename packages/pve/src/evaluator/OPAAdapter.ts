@@ -245,7 +245,7 @@ export class OPAAdapter {
       }
 
       const firstExpr = expressions[0] as Record<string, unknown>;
-      const value = firstExpr?.expressions?.[0]?.value ?? firstExpr?.value;
+      const value = (firstExpr?.expressions as any[])?.[0]?.value ?? firstExpr?.value;
 
       return this.parseEvalValue(value, result);
     }

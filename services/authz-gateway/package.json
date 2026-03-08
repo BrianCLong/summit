@@ -27,7 +27,7 @@
     "@opentelemetry/propagator-b3": "latest",
     "@opentelemetry/propagator-jaeger": "latest",
     "@opentelemetry/core": "latest",
-    "axios": "^1.6.7",
+    "axios": "^1.7.9",
     "express": "^5.2.0",
     "http-proxy-middleware": "^3.0.5",
     "jose": "^6.1.0",

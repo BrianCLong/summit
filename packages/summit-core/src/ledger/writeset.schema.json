@@ -1,0 +1,101 @@
+{
+  "$id": "https://summit.local/schemas/writeset.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "WriteSet",
+  "type": "object",
+  "required": ["writeset_id", "tx_time", "provenance", "artifacts", "claims", "links"],
+  "properties": {
+    "writeset_id": { "type": "string", "minLength": 8 },
+    "tx_time": { "type": "string", "format": "date-time" },
+    "provenance": { "$ref": "provenance.schema.json" },
+
+    "artifacts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["artifact_id", "kind", "uri", "observed_at"],
+        "properties": {
+          "artifact_id": { "type": "string" },
+          "kind": { "type": "string", "enum": ["doc", "post", "sensor", "file", "image"] },
+          "uri": { "type": "string" },
+          "observed_at": { "type": "string", "format": "date-time" },
+          "content_type": { "type": "string" },
+          "sha256": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    },
+
+    "claims": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["claim_id", "statement", "valid_time", "confidence"],
+        "properties": {
+          "claim_id": { "type": "string" },
+          "statement": { "type": "string", "minLength": 1 },
+          "topic": { "type": "string" },
+          "valid_time": {
+            "type": "object",
+            "required": ["start"],
+            "properties": {
+              "start": { "type": "string", "format": "date-time" },
+              "end": { "type": ["string", "null"], "format": "date-time" }
+            },
+            "additionalProperties": false
+          },
+          "confidence": {
+            "type": "object",
+            "required": ["score"],
+            "properties": {
+              "score": { "type": "number", "minimum": 0, "maximum": 1 },
+              "method": { "type": "string" },
+              "rationale": { "type": "string" }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+
+    "links": {
+      "type": "array",
+      "description": "Typed edges connecting claim <-> artifact and claim <-> entity, etc.",
+      "items": {
+        "type": "object",
+        "required": ["from", "to", "type"],
+        "properties": {
+          "from": { "type": "string" },
+          "to": { "type": "string" },
+          "type": {
+            "type": "string",
+            "enum": [
+              "supported_by",
+              "mentions_entity",
+              "member_of_narrative",
+              "updates_belief"
+            ]
+          },
+          "weight": { "type": "number" }
+        },
+        "additionalProperties": false
+      }
+    },
+
+    "entities": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["entity_id", "label", "kind"],
+        "properties": {
+          "entity_id": { "type": "string" },
+          "label": { "type": "string" },
+          "kind": { "type": "string", "enum": ["person", "org", "place", "asset", "topic", "unknown"] }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

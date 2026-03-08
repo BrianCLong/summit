@@ -11,6 +11,7 @@ We've implemented five automation workflows to improve PR efficiency and code qu
 3. **Auto-Assign Reviewers** - Assigns reviewers based on CODEOWNERS file
 4. **PR Size Checker** - Monitors PR size and suggests splits for large PRs
 5. **Test Coverage Check** - Ensures PRs include appropriate test coverage
+6. **PR Routing** - Applies assignees/reviewers from governance routing labels
 
 ---
 
@@ -261,6 +262,25 @@ Recognizes these as test files:
 ### Triggers
 
 - PR opened, synchronized, or reopened
+
+---
+
+## 6. PR Routing
+
+**File:** `pr-routing.yml`
+
+### What it does
+
+- Routes PR ownership by labels (`codex`, `security`, `ci`, `docs`)
+- Applies default assignee/reviewer routing to repository owner
+- Supports override env lists for CI/docs routing:
+  - `ROUTE_CI_REVIEWERS`
+  - `ROUTE_DOCS_ASSIGNEES`
+  - `ROUTE_DOCS_REVIEWERS`
+
+### Triggers
+
+- PR opened, synchronized, reopened, or when labels change
 
 ### Example Output
 

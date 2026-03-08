@@ -1,7 +1,10 @@
-import pytest
 import json
 from pathlib import Path
+
+import pytest
+
 from summit.plugins.validator import validate_spp
+
 
 @pytest.fixture
 def valid_manifest(tmp_path):

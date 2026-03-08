@@ -1,0 +1,9 @@
+{
+  "evidence_id": "EVID::ops::daily_sprint::2026-02-11::run-193625Z::v1",
+  "git_sha": "0ecc8d91e8ac9e7a98d6ea3553627e7c379570ca",
+  "build_toolchain_versions": {
+    "node": "v20.19.6"
+  },
+  "timestamp_utc": "2026-02-11T19:36:25Z",
+  "repro_command": "gh pr list --repo BrianCLong/summit --state open --limit 20 --json number,title,author,updatedAt,labels,headRefName,reviewDecision,url && gh issue list --repo BrianCLong/summit --state open --search \"label:security OR label:ga OR label:bolt OR label:osint OR label:governance\" --limit 50 --json number,title,labels,updatedAt,url"
+}
