@@ -1,0 +1,6 @@
+{
+  "smoke_pass_rate": 0.98,
+  "grounding_score_drop": false,
+  "jailbreak_regression": false,
+  "retrieval_empty_context_rate": 0.01
+}
