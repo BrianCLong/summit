@@ -1,0 +1,11 @@
+{
+  "id": "EVD-AFCP-ROUTER-002",
+  "item_slug": "agent-fleet-control-plane-2027",
+  "type": "implementation",
+  "files": [
+    "src/agents/controlplane/router/routeTask.ts",
+    "src/agents/controlplane/router/RouterTypes.ts",
+    "tests/agents/controlplane/router.test.ts"
+  ],
+  "created_at": "2026-03-07T00:00:00Z"
+}

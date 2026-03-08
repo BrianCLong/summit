@@ -1,0 +1,102 @@
+# Agent Control Plane — GA Milestone Definition
+# EVD-AFCP-EVAL-005
+#
+# A PR or release branch may only be declared GA-ready for the Agent Control
+# Plane when ALL of the following exit criteria are satisfied.
+
+name: agent-control-plane-ga
+version: "1.0"
+item_slug: agent-fleet-control-plane-2027
+
+exit_criteria:
+  # 1. Deterministic router replay passes.
+  - id: router-determinism
+    description: >
+      routeTask produces identical output across ≥ 10 consecutive calls
+      with identical inputs.  Verified by router.test.ts determinism block.
+    gate: router-determinism-check
+    status: pending
+
+  # 2. Deny fixtures pass.
+  - id: deny-fixtures
+    description: >
+      All deny-fixture tests in deny-fixtures.test.ts pass (registry,
+      router, and policy layers each cover their denial paths).
+    gate: deny-fixtures-check
+    status: pending
+
+  # 3. Evidence files complete.
+  - id: evidence-complete
+    description: >
+      evidence/agent-fleet-control-plane-2027/{index,report,metrics,stamp}.json
+      all exist, are valid JSON, and carry item_slug = agent-fleet-control-plane-2027.
+    gate: evidence-schema-check
+    status: pending
+
+  # 4. Agent policy check passes.
+  - id: agent-policy
+    description: >
+      .github/policies/agent-policy.yaml present, structurally valid,
+      and all required control-plane source files exist.
+    gate: agent-policy-check
+    status: pending
+
+  # 5. Audit export succeeds.
+  - id: audit-export
+    description: >
+      FlightRecorder.drain() produces valid TraceEnvelope records and
+      NEVER_LOG_FIELDS are stripped from all payloads.
+    gate: deny-fixtures-check  # covered by policy.test.ts
+    status: pending
+
+  # 6. Context compiler benchmark.
+  - id: graph-context-compiler
+    description: >
+      compileGraphContext() returns a GraphContextPackage without throwing
+      for all task types in the test matrix.
+    gate: router-determinism-check  # covered by context-compiler.test.ts
+    status: pending
+
+success_metrics:
+  mean_routing_latency_ms: 50
+  deterministic_replay_agreement_pct: 100
+  policy_violation_rate: 0
+  recovery_success_after_failure_pct: 95
+  context_token_reduction_vs_naive_pct: 40
+  audit_artifact_completeness_pct: 100
+
+rollback_flags:
+  - SUMMIT_AGENT_CONTROL_PLANE
+  - SUMMIT_GRAPH_CONTEXT_COMPILER
+  - SUMMIT_DETERMINISTIC_ROUTER
+  - SUMMIT_DURABLE_SAGA_RUNTIME
+  - SUMMIT_CAUSATION_ENGINE
+  - SUMMIT_INTEROP_FABRIC
+
+pr_stack:
+  - pr: PR1
+    scope: evidence schema + CI scripts
+    risk: green
+    status: pending
+  - pr: PR2
+    scope: agent registry + descriptors
+    risk: green
+    status: pending
+  - pr: PR3
+    scope: policy PDP + deny fixtures
+    risk: green
+    status: pending
+  - pr: PR4
+    scope: graph context compiler skeleton
+    risk: yellow
+    flag: SUMMIT_GRAPH_CONTEXT_COMPILER
+    status: pending
+  - pr: PR5
+    scope: deterministic router
+    risk: green
+    flag: SUMMIT_DETERMINISTIC_ROUTER
+    status: pending
+  - pr: PR6
+    scope: docs + GA gates
+    risk: green
+    status: pending

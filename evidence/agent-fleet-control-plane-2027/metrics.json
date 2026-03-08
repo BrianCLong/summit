@@ -1,0 +1,30 @@
+{
+  "item_slug": "agent-fleet-control-plane-2027",
+  "baseline_date": "2026-03-07",
+  "routing_accuracy": 0,
+  "approval_false_positive_rate": 0,
+  "mean_plan_latency_ms": 0,
+  "mean_route_latency_ms": 0,
+  "deterministic_replay_agreement_pct": 0,
+  "policy_violation_rate": 0,
+  "context_token_reduction_vs_naive_pct": 0,
+  "audit_artifact_completeness_pct": 0,
+  "targets": {
+    "mean_routing_latency_ms": 50,
+    "deterministic_replay_agreement_pct": 100,
+    "policy_violation_rate": 0,
+    "recovery_success_after_injected_failure_pct": 95,
+    "context_token_reduction_vs_naive_pct": 40,
+    "audit_artifact_completeness_pct": 100
+  },
+  "capability_gaps": [
+    "agent_registry",
+    "orchestration_planner",
+    "fleet_observability",
+    "policy_decision_point",
+    "graph_context_compiler",
+    "durable_saga_runtime",
+    "human_authority_gateway",
+    "interop_fabric"
+  ]
+}
