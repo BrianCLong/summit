@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Agent Report Artifact",
+  "type": "object",
+  "properties": {
+    "runId": { "type": "string" },
+    "timestamp": { "type": "string" },
+    "data": { "type": "object" }
+  },
+  "required": ["runId", "timestamp", "data"]
+}

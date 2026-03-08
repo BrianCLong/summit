@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Capability Manifest",
+  "type": "object",
+  "properties": {
+    "id": { "type": "string" },
+    "description": { "type": "string" },
+    "filesystemScope": { "type": "string" },
+    "networkDestinations": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "maxRuntimeMs": { "type": "integer" },
+    "maxTokens": { "type": "integer" },
+    "evidenceFieldsEmitted": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "denylistedOperations": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "required": ["id", "description"]
+}
