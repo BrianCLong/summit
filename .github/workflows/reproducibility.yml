@@ -1,22 +1,18 @@
 name: Reproducibility Check
 
 on:
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
   push:
     branches: [ main ]
   pull_request:
     branches: [ main ]
 
-jobs:
-  check-determinism:
-    runs-on: ubuntu-latest
-
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
+
+jobs:
+  check-determinism:
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
@@ -25,18 +21,10 @@ concurrency:
         with:
           version: 8
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
           cache: 'pnpm'
 
       - name: Install dependencies
