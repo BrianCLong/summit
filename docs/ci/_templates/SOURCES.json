@@ -1,0 +1,14 @@
+{
+  "target": {
+    "name": "",
+    "type": "repo",
+    "slug": ""
+  },
+  "run": {
+    "date": "YYYY-MM-DD",
+    "analyst": "agentic",
+    "scope": []
+  },
+  "sources": [],
+  "claims": []
+}
