@@ -1,12 +1,11 @@
 {
-  "bundle_id": "bundle-789",
-  "objects": [
+  "bundle_id": "bnd-001",
+  "evidence_objects": ["evd-001", "evd-002"],
+  "manifest_hash": "manifest_hash_123",
+  "signatures": [
     {
-      "evidence_id": "evid-456",
-      "type": "log",
-      "content": {"message": "actor found"},
-      "hash": "abcdef123456"
+      "signer_id": "signer-1",
+      "signature": "sig_abc"
     }
-  ],
-  "manifest_hash": "deadbeef9876"
+  ]
 }

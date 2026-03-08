@@ -67,7 +67,7 @@ jobs:
         run: pnpm gate:report
 
 
-      - name: Schema validation gate
+      - name: Validate JSON Schemas
         run: pnpm gate:schema
 
       - name: Detect governance policy changes
