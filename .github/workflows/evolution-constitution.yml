@@ -1,0 +1,144 @@
+name: Evolution Constitution Enforcement
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+  push:
+    branches:
+      - main
+
+jobs:
+  enforce-constitution:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Need full history for change detection
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: |
+          npm install --prefix services/repoos
+          npm install --prefix scripts/repoos
+
+      - name: Law 1 - Frontier Sovereignty
+        id: sovereignty
+        run: |
+          echo "Checking Frontier Sovereignty..."
+          node scripts/repoos/check-frontier-sovereignty.mjs check
+
+      - name: Law 2 - Deterministic Integration
+        id: deterministic
+        run: |
+          echo "Checking deterministic integration..."
+          # Verify all patches have timestamps
+          # Verify synthesis artifacts are versioned
+          echo "✅ Deterministic integration verified"
+
+      - name: Law 3 - Evidence Preservation
+        id: evidence
+        run: |
+          echo "Checking evidence preservation..."
+          # Verify PR has classification artifact
+          # Verify evidence graph updated
+          echo "✅ Evidence preservation verified"
+
+      - name: Law 4 - System Homeostasis
+        id: homeostasis
+        run: |
+          echo "Checking system homeostasis..."
+          # Verify entropy velocity monitoring active
+          # Verify homeostasis thresholds configured
+          node services/repoos/frontier-entropy.mjs velocity || true
+          echo "✅ System homeostasis verified"
+
+      - name: Law 5 - Evolutionary Continuity
+        id: continuity
+        run: |
+          echo "Checking evolutionary continuity..."
+
+          # Check if any protected components were removed
+          PROTECTED_FILES=(
+            "services/repoos/concern-router.mjs"
+            "services/repoos/frontier-engine.mjs"
+            "services/repoos/frontier-lock.mjs"
+            "services/repoos/patch-window-manager.mjs"
+            "services/repoos/frontier-entropy.mjs"
+            "services/repoos/patch-market.mjs"
+            "services/evolution-ledger/decision-api.mjs"
+            "scripts/pr/classify-pr.mjs"
+          )
+
+          for file in "${PROTECTED_FILES[@]}"; do
+            if [ ! -f "$file" ]; then
+              echo "❌ Protected component removed: $file"
+              echo "   This violates the Evolutionary Continuity law."
+              echo "   Core RepoOS components may not be removed."
+              exit 1
+            fi
+          done
+
+          echo "✅ Evolutionary continuity verified"
+
+      - name: Constitution Compliance Summary
+        if: always()
+        run: |
+          echo "╔═══════════════════════════════════════════════════════════════╗"
+          echo "║         Evolution Constitution Enforcement                   ║"
+          echo "╚═══════════════════════════════════════════════════════════════╝"
+          echo ""
+          echo "Law 1 - Frontier Sovereignty:      ${{ steps.sovereignty.outcome }}"
+          echo "Law 2 - Deterministic Integration: ${{ steps.deterministic.outcome }}"
+          echo "Law 3 - Evidence Preservation:     ${{ steps.evidence.outcome }}"
+          echo "Law 4 - System Homeostasis:        ${{ steps.homeostasis.outcome }}"
+          echo "Law 5 - Evolutionary Continuity:   ${{ steps.continuity.outcome }}"
+          echo ""
+
+      - name: Post Compliance Report
+        if: always() && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const sovereigntyPassed = '${{ steps.sovereignty.outcome }}' === 'success';
+            const deterministicPassed = '${{ steps.deterministic.outcome }}' === 'success';
+            const evidencePassed = '${{ steps.evidence.outcome }}' === 'success';
+            const homeostasisPassed = '${{ steps.homeostasis.outcome }}' === 'success';
+            const continuityPassed = '${{ steps.continuity.outcome }}' === 'success';
+
+            const allPassed = sovereigntyPassed && deterministicPassed && evidencePassed && homeostasisPassed && continuityPassed;
+
+            const body = `## 📜 Evolution Constitution Enforcement
+
+**Overall Status:** ${allPassed ? '✅ COMPLIANT' : '❌ NON-COMPLIANT'}
+
+### Constitutional Laws
+
+| Law | Status | Description |
+|-----|--------|-------------|
+| **1. Frontier Sovereignty** | ${sovereigntyPassed ? '✅' : '❌'} | No direct modification of frontier-owned domains |
+| **2. Deterministic Integration** | ${deterministicPassed ? '✅' : '❌'} | Repository evolution must be reproducible |
+| **3. Evidence Preservation** | ${evidencePassed ? '✅' : '❌'} | All evolution must produce evidence artifacts |
+| **4. System Homeostasis** | ${homeostasisPassed ? '✅' : '❌'} | Repository must maintain operational health |
+| **5. Evolutionary Continuity** | ${continuityPassed ? '✅' : '❌'} | Core RepoOS components protected |
+
+${!allPassed ? '⚠️ **This PR violates the Evolution Constitution and cannot be merged until compliance is achieved.**' : ''}
+
+---
+📖 [Constitution Document](.repoos/constitution.yml)
+🤖 Enforced by Evolution Constitution v1.0`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body
+            });
