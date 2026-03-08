@@ -98,6 +98,7 @@ jobs:
                 }
               }`;
             const added = await gql(addMutation, { projectId: PROJECT_NODE_ID, contentId: item.node_id });
+            if (!added || !added.addProjectV2ItemById) { console.error("Failed to add to project:", added); return; }
             const projectItemId = added.addProjectV2ItemById.item.id;
 
             // 2) Update fields (only if values exist)
