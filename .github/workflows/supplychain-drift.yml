@@ -11,6 +11,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+        with:
+          fetch-depth: 0
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -22,9 +24,12 @@ jobs:
       - name: Run Drift Check
         run: node scripts/monitoring/ai-guardrails-supplychain-drift.mjs
 
+        working-directory: ${{ github.workspace }}
       - name: Upload Evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: supplychain-drift-evidence
           path: artifacts/supplychain/drift/
+permissions:
+  contents: read

@@ -16,6 +16,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+        with:
+          fetch-depth: 0
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -31,9 +33,12 @@ jobs:
         run: |
           python scripts/monitoring/kimi-k2-5-drift.py
 
+        working-directory: ${{ github.workspace }}
       - name: Upload Artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: toolcall-conformance-artifacts
           path: artifacts/kimi-k2-5/
+permissions:
+  contents: read

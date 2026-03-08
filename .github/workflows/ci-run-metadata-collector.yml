@@ -73,3 +73,5 @@ jobs:
           name: run-meta-${{ github.event.workflow_run.id }}
           path: run-meta.json
           retention-days: 7
+permissions:
+  contents: read

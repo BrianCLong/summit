@@ -195,6 +195,7 @@ jobs:
         with:
           ref: ${{ inputs.ref }}
 
+          fetch-depth: 0
       - name: Setup pnpm
         uses: pnpm/action-setup@v4 # v4
 
@@ -261,6 +262,7 @@ jobs:
         with:
           ref: ${{ inputs.ref }}
 
+          fetch-depth: 0
       - name: Download Release Bundle
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v4
         with:
@@ -269,6 +271,7 @@ jobs:
 
       - name: Create Git Tag
         run: |
+          git fetch --tags --force
           TAG="${{ inputs.release_tag }}"
           SHA="${{ needs.verify-evidence.outputs.sha }}"
 

@@ -27,12 +27,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+        with:
+          fetch-depth: 0
       - name: Install actionlint
         run: |
           bash <(curl https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash)
           sudo mv ./actionlint /usr/local/bin/
           actionlint -version
 
+        working-directory: ${{ github.workspace }}
       - name: Run actionlint
         run: |
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then

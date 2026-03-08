@@ -26,6 +26,7 @@ jobs:
         id: hygiene
         run: node scripts/artifacts/artifact_hygiene.mjs
 
+        working-directory: ${{ github.workspace }}
       - name: Commit changes
         uses: stefanzweifel/git-auto-commit-action@v5
         with:

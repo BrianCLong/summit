@@ -17,6 +17,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4 # v6
+        with:
+          fetch-depth: 0
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
@@ -29,12 +31,15 @@ jobs:
       - name: Generate SBOM
         run: npx tsx scripts/compliance/generate_sbom.ts
 
+        working-directory: ${{ github.workspace }}
       - name: Sign Artifacts
         run: npx tsx scripts/compliance/sign_artifacts.ts
 
+        working-directory: ${{ github.workspace }}
       - name: Vulnerability Scan & OPA Input Generation
         run: npx tsx scripts/security/mock_scan.ts
 
+        working-directory: ${{ github.workspace }}
       - name: Policy Gate (OPA)
         run: |
           # Install OPA
@@ -43,3 +48,5 @@ jobs:
 
           # Evaluate Policy
           ./opa-bin eval -i .evidence/results/input.json -d policy/release-gates/ "data.release_gates.allow" | grep "true" || exit 1
+permissions:
+  contents: read

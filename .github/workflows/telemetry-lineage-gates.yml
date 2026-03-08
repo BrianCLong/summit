@@ -17,6 +17,8 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
+        with:
+          fetch-depth: 0
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -35,3 +37,5 @@ jobs:
         env:
           NODE_OPTIONS: '--experimental-vm-modules'
         run: pnpm --filter @intelgraph/summit-lineage-normalizer run test
+permissions:
+  contents: read

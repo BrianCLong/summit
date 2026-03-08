@@ -10,6 +10,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+        with:
+          fetch-depth: 0
       - name: Check PR Semantic Versioning
         uses: actions/github-script@v7
         with:
@@ -61,3 +63,5 @@ jobs:
             } else {
               console.log("PR classification check passed.");
             }
+permissions:
+  contents: read

@@ -1,8 +1,8 @@
 name: Render evidence graph
 on:
   workflow_run:
-    workflows: [ "CI" ]
-    types: [ completed ]
+    workflows: ["CI"]
+    types: [completed]
 jobs:
   render-evidence-graph:
     runs-on: ubuntu-latest
@@ -15,6 +15,8 @@ jobs:
       - uses: actions/checkout@v4
 
       # Ensure evidence.json exists (adapt paths to your pipeline)
+        with:
+          fetch-depth: 0
       - name: Locate evidence.json
         id: locate
         run: |
@@ -42,6 +44,7 @@ jobs:
           python scripts/evidence_to_dot.py ${{ steps.locate.outputs.found }} build/evidence.dot || true
           if [ -f build/evidence.svg ]; then echo 'svg rendered'; else dot -Tsvg build/evidence.dot -o build/evidence.svg || true; fi
 
+        working-directory: ${{ github.workspace }}
       - name: Upload evidence SVG artifact
         if: ${{ steps.locate.outputs.found != '' }}
         uses: actions/upload-artifact@v4
@@ -49,3 +52,5 @@ jobs:
           name: evidence-graph-svg
           path: build/evidence.svg
           if-no-files-found: warn
+permissions:
+  contents: read

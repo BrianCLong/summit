@@ -20,6 +20,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
@@ -27,6 +29,7 @@ jobs:
           node-version: 20
       - run: node scripts/ci/verify_subsumption_bundle.mjs subsumption/branch-protection-as-code/manifest.yaml
 
+        working-directory: ${{ github.workspace }}
   branch-protection-drift:
     name: branch-protection-drift
     runs-on: ubuntu-latest
@@ -42,6 +45,8 @@ jobs:
           fi
       - uses: actions/checkout@v4
         if: steps.check-token.outputs.has_token == 'true'
+        with:
+          fetch-depth: 0
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
@@ -59,3 +64,6 @@ jobs:
       - name: Verify branch protection
         if: steps.check-token.outputs.has_token == 'true'
         run: node scripts/ci/verify_branch_protection.mjs
+        working-directory: ${{ github.workspace }}
+permissions:
+  contents: read

@@ -11,6 +11,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+        with:
+          fetch-depth: 0
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
@@ -30,3 +32,6 @@ jobs:
 
       - name: Validate evidence schemas and determinism
         run: pnpm exec tsx scripts/ci/verify-evidence-bundle.ts
+        working-directory: ${{ github.workspace }}
+permissions:
+  contents: read

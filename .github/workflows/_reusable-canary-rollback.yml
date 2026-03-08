@@ -46,6 +46,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4 # v4
 
+        with:
+          fetch-depth: 0
       - name: Setup pnpm
         uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
 
@@ -73,3 +75,5 @@ jobs:
         run: |
           echo "Canary checks failed for ${{ inputs.service-name }}." >&2
           exit 1
+permissions:
+  contents: read

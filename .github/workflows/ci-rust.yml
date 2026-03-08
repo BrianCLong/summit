@@ -33,3 +33,5 @@ jobs:
       toolchain: beta
     # Beta failures are informational only
     continue-on-error: true
+permissions:
+  contents: read

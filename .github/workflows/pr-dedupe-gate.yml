@@ -34,12 +34,14 @@ jobs:
           PR_TITLE: ${{ github.event.pull_request.title }}
           PR_BODY: ${{ github.event.pull_request.body }}
 
+        working-directory: ${{ github.workspace }}
       - name: Detect existing canonical PR
         id: detect
         run: node scripts/find_existing_concern_pr.mjs
         env:
           PR_CONCERN: ${{ steps.classify.outputs.concern }}
 
+        working-directory: ${{ github.workspace }}
       - name: Block duplicate merge candidate
         id: enforce
         run: node scripts/enforce_one_concern_one_pr.mjs
@@ -50,6 +52,7 @@ jobs:
           PR_NUMBER: ${{ github.event.pull_request.number }}
         continue-on-error: true
 
+        working-directory: ${{ github.workspace }}
       - name: Upload Artifact
         if: steps.enforce.outputs.duplicate == 'true'
         uses: actions/upload-artifact@v4

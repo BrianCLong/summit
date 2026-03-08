@@ -13,6 +13,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Install tooling
         run: |
           sudo apt-get update
@@ -27,16 +29,21 @@ jobs:
           mkdir -p artifacts
           scripts/ci/iac_plan_diff.sh scripts/ci/envs/stage scripts/ci/envs/prod > artifacts/iac.diff
           scripts/ci/deny_on_drift.sh artifacts/iac.diff
+        working-directory: ${{ github.workspace }}
       - name: Secret parity check
         run: scripts/ci/secret_matrix_check.sh scripts/ci/configs/secrets.stage.json scripts/ci/configs/secrets.prod.json
 
+        working-directory: ${{ github.workspace }}
   third_party_status:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Check provider status
         id: gate
         run: scripts/ci/provider_status_gate.sh scripts/ci/configs/providers.yaml
+        working-directory: ${{ github.workspace }}
     outputs:
       ok: ${{ steps.gate.outputs.ok }}
 
@@ -50,6 +57,8 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4 # v6
 
+        with:
+          fetch-depth: 0
       - name: Install pnpm
         uses: pnpm/action-setup@v4 # v4.1.0
 
@@ -96,6 +105,8 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4 # v6
 
+        with:
+          fetch-depth: 0
       - name: Install Syft
         uses: anchore/sbom-action/download-syft@62ad5284b8ced813296287a0b63906cb364b73ee # v0
 
@@ -107,9 +118,11 @@ jobs:
           echo "DIGEST=$DIGEST" >> $GITHUB_OUTPUT
       - name: Generate provenance
         run: scripts/ci/release-train/provenance_attest.sh ${{ steps.image.outputs.DIGEST }}
+        working-directory: ${{ github.workspace }}
       - name: Push + record artifact
         run: scripts/ci/release-train/publish_and_record.sh ${{ steps.image.outputs.DIGEST }} scripts/ci/records/artifacts.json
 
+        working-directory: ${{ github.workspace }}
   canary_rollout:
     needs: build_and_sign
     runs-on: ubuntu-latest
@@ -117,6 +130,8 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4 # v6
 
+        with:
+          fetch-depth: 0
       - name: Install pnpm
         uses: pnpm/action-setup@v4 # v4.1.0
 
@@ -136,6 +151,7 @@ jobs:
             echo "Provenance generation script not found. Skipping."
           fi
 
+        working-directory: ${{ github.workspace }}
       - name: Upload Evidence Artifacts
         uses: actions/upload-artifact@v4 # v6
         with:
@@ -150,16 +166,25 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Step up 25% → 50% → 100%
         run: scripts/ci/release-train/progressive.sh --env=${{ inputs.target_env }} --digest=${{ needs.build_and_sign.outputs.digest }}
 
+        working-directory: ${{ github.workspace }}
   post_deploy_verification:
     needs: finalize
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Post-deploy probes (latency/error rates/log SLOs)
         run: scripts/ci/release-train/probes.sh --env=${{ inputs.target_env }} --mode=post --timeout=20m
+        working-directory: ${{ github.workspace }}
       - name: Enforce rollback on SLO breach
         run: scripts/ci/release-train/rollback_if_needed.sh --env=${{ inputs.target_env }}
+        working-directory: ${{ github.workspace }}
+permissions:
+  contents: read

@@ -1,6 +1,6 @@
 name: Generate release sparkline
 on:
-  schedule: [{ cron: '0 2 * * *' }]
+  schedule: [cron: '0 2 * * *']
   workflow_dispatch: {}
 jobs:
   generate:
@@ -8,6 +8,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+        with:
+          fetch-depth: 0
       - name: Collect release metadata
         run: |
           mkdir -p build
@@ -35,6 +37,7 @@ jobs:
           pnpm install --prefer-offline || true
           node scripts/generate_release_timeline.js build/releases.json
 
+        working-directory: ${{ github.workspace }}
       - name: Smoke-check HTML
         run: |
           node --input-type=module -e "import fs from 'fs'; const d=JSON.parse(fs.readFileSync('./build/releases.json')); \
@@ -46,3 +49,5 @@ jobs:
         with:
           name: release-sparkline-report
           path: reports/release-sparkline.html
+permissions:
+  contents: read

@@ -7,6 +7,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
       - name: Lint and Test
@@ -17,3 +19,5 @@ jobs:
           echo '{"status": "success"}' > artifacts/report.json
           echo '{"duration": "1s"}' > artifacts/metrics.json
           echo '{"timestamp": "'$(date -u +"%Y-%m-%dT%H:%M:%SZ")'"}' > artifacts/stamp.json
+permissions:
+  contents: read

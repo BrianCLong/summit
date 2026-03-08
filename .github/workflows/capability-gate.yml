@@ -10,6 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
@@ -20,3 +22,6 @@ jobs:
         run: pnpm ts-node packages/capabilities/capability-evaluator/evaluator.ts
       - name: Check metrics
         run: pnpm ts-node scripts/evolution/automated-evolution.ts
+        working-directory: ${{ github.workspace }}
+permissions:
+  contents: read

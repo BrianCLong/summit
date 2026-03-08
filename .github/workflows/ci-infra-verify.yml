@@ -25,6 +25,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+        with:
+          fetch-depth: 0
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -39,8 +41,11 @@ jobs:
       - name: Verify Infrastructure and Emit Evidence
         run: npx tsx .github/scripts/infra-verify.ts
 
+        working-directory: ${{ github.workspace }}
       - name: Upload Evidence
         uses: actions/upload-artifact@v4
         with:
           name: infra-evidence
           path: evidence/
+permissions:
+  contents: read

@@ -25,6 +25,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+        with:
+          fetch-depth: 0
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
@@ -51,9 +53,11 @@ jobs:
       - name: Validate Evidence Schemas
         run: node scripts/ci/validate_policy_references.mjs
 
+        working-directory: ${{ github.workspace }}
       - name: Golden Evidence Tests
         run: node --test scripts/ci/__tests__/governance_evidence_contracts.test.mjs
 
+        working-directory: ${{ github.workspace }}
       - name: Upload Governance Evidence
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
         with:

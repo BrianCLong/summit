@@ -13,6 +13,8 @@ jobs:
       SUMMIT_AGENTPLACE_ENABLED: ${{ vars.SUMMIT_AGENTPLACE_ENABLED || 'false' }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -22,8 +24,11 @@ jobs:
       - name: Run Drift Detector
         run: |
           PYTHONPATH=. python3 scripts/monitoring/agentplace-drift.py
+        working-directory: ${{ github.workspace }}
       - name: Upload Drift Report
         uses: actions/upload-artifact@v4
         with:
           name: agentplace-drift-report
           path: drift_report.json
+permissions:
+  contents: read

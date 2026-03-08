@@ -7,6 +7,7 @@ on:
 permissions:
   issues: write
 
+  contents: read
 jobs:
   triage:
     name: Auto-triage Security Issues

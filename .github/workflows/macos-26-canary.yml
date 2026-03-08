@@ -42,3 +42,5 @@ jobs:
         run: |
           echo "=== Available SDKs ==="
           xcodebuild -showsdks
+permissions:
+  contents: read

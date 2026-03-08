@@ -13,6 +13,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: pnpm/action-setup@v4
         with:
           version: 10
@@ -24,3 +26,6 @@ jobs:
       - run: npx tsx .github/scripts/verify-regulatory-ew-evidence.ts
       # We will run tests once we actually have them added
       #- run: pnpm test -- tests/graphrag/regulatory/earlywarning
+        working-directory: ${{ github.workspace }}
+permissions:
+  contents: read

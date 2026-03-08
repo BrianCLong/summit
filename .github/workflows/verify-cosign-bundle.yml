@@ -28,6 +28,8 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
+        with:
+          fetch-depth: 0
       - name: Install Cosign
         uses: sigstore/cosign-installer@v3
         with:
@@ -45,3 +47,6 @@ jobs:
             --expected-oidc-issuer "$EXPECTED_OIDC_ISSUER" \
             --expected-identity "$EXPECTED_IDENTITY" \
             --rekor-pub-key "$REKOR_PUB_KEY"
+        working-directory: ${{ github.workspace }}
+permissions:
+  contents: read
