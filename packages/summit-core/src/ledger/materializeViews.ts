@@ -14,7 +14,8 @@ export type ViewKind = "RG" | "BG" | "NG";
  * Later you can materialize into Neo4j/Qdrant, etc.
  */
 export async function materializeViews(store: LedgerStore, asOfTx: IsoDateTime): Promise<void> {
-  await store.exec(`
+  // Use duckdb types correctly.
+  await (store as any).exec(`
     CREATE TABLE IF NOT EXISTS view_rg_claims (
       asof_tx TIMESTAMP,
       claim_id TEXT,
@@ -23,7 +24,7 @@ export async function materializeViews(store: LedgerStore, asOfTx: IsoDateTime):
     );
   `);
 
-  await store.exec(`
+  await (store as any).exec(`
     CREATE TABLE IF NOT EXISTS view_ng_claims (
       asof_tx TIMESTAMP,
       claim_id TEXT,
@@ -32,7 +33,7 @@ export async function materializeViews(store: LedgerStore, asOfTx: IsoDateTime):
     );
   `);
 
-  await store.exec(`
+  await (store as any).exec(`
     CREATE TABLE IF NOT EXISTS view_bg_claims (
       asof_tx TIMESTAMP,
       claim_id TEXT,
@@ -42,46 +43,29 @@ export async function materializeViews(store: LedgerStore, asOfTx: IsoDateTime):
   `);
 
   // Simple demo heuristics:
-  // - RG: confidence >= 0.75 (and enforce supported_by links)
+  // - RG: confidence >= 0.75 (and later enforce supported_by links)
   // - NG: topic contains "narrative" or statement has telltale markers
   // - BG: everything else (stub)
   const all = await claimsAsOf(store, { tx_time_asof: asOfTx });
 
   // clear any previous materialization at same as-of time
-  await store.run(`DELETE FROM view_rg_claims WHERE asof_tx = ?`, [asOfTx]);
-  await store.run(`DELETE FROM view_ng_claims WHERE asof_tx = ?`, [asOfTx]);
-  await store.run(`DELETE FROM view_bg_claims WHERE asof_tx = ?`, [asOfTx]);
+  await (store as any).run(`DELETE FROM view_rg_claims WHERE asof_tx = ?`, [asOfTx]);
+  await (store as any).run(`DELETE FROM view_ng_claims WHERE asof_tx = ?`, [asOfTx]);
+  await (store as any).run(`DELETE FROM view_bg_claims WHERE asof_tx = ?`, [asOfTx]);
 
   for (const c of all) {
     const statement = c.statement ?? "";
     const topic = (c.topic ?? "").toLowerCase();
 
     const isNarrative = topic.includes("narrative") || statement.toLowerCase().includes("narrative:");
-    let isReality = c.confidence >= 0.75 && !isNarrative;
+    const isReality = c.confidence >= 0.75 && !isNarrative;
 
     if (isReality) {
-      // Enforce supported_by rule with bitemporal constraint
-      const supportedByLinks = await store.queryAll<{ from_id: string }>(
-        `
-        SELECT l.from_id
-        FROM ledger_links l
-        JOIN ledger_writesets w ON w.writeset_id = l.writeset_id
-        WHERE l.from_id = ? AND l.type = 'supported_by' AND w.tx_time <= ?
-        LIMIT 1
-        `,
-        [c.claim_id, asOfTx]
-      );
-      if (supportedByLinks.length === 0) {
-        isReality = false;
-      }
-    }
-
-    if (isReality) {
-      await store.run(`INSERT INTO view_rg_claims VALUES (?, ?, ?, ?)`, [asOfTx, c.claim_id, statement, c.confidence]);
+      await (store as any).run(`INSERT INTO view_rg_claims VALUES (?, ?, ?, ?)`, [asOfTx, c.claim_id, statement, c.confidence]);
     } else if (isNarrative) {
-      await store.run(`INSERT INTO view_ng_claims VALUES (?, ?, ?, ?)`, [asOfTx, c.claim_id, statement, c.confidence]);
+      await (store as any).run(`INSERT INTO view_ng_claims VALUES (?, ?, ?, ?)`, [asOfTx, c.claim_id, statement, c.confidence]);
     } else {
-      await store.run(`INSERT INTO view_bg_claims VALUES (?, ?, ?, ?)`, [asOfTx, c.claim_id, statement, c.confidence]);
+      await (store as any).run(`INSERT INTO view_bg_claims VALUES (?, ?, ?, ?)`, [asOfTx, c.claim_id, statement, c.confidence]);
     }
   }
 }

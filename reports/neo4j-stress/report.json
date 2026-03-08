@@ -1,6 +1,0 @@
-{
-  "evidenceId": "EVID:TEST:NEO4J_STRESS:c093ee90",
-  "schemaVersion": "1.0",
-  "status": "PASSED",
-  "summary": "Neo4j Stress Tests completed successfully."
-}

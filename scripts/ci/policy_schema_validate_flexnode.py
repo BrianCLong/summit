@@ -5,6 +5,7 @@ from pathlib import Path
 
 import yaml
 
+
 REQUIRED_TOP_LEVEL = {
     "version",
     "policy",

@@ -13,8 +13,8 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 import json
-
 from agents.route_opt.validator import validate_output
+
 
 REPORT_PATH = Path("artifacts/route_plan/report.json")
 

@@ -1,9 +1,7 @@
-import json
-import os
 import unittest
-
+import os
+import json
 from summit.workflow.base import WorkflowValidator
-
 
 class TestWorkflowValidator(unittest.TestCase):
     def setUp(self):

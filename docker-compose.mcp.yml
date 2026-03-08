@@ -100,7 +100,7 @@ services:
       - prometheus
 
   opa:
-    image: openpolicyagent/opa:0.61.0
+    image: openpolicyagent/opa:latest
     command: ['run', '--server', '/policies']
     ports:
       - '8181:8181'

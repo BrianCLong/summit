@@ -1,10 +1,7 @@
+import pytest
 import json
 import os
-
-import pytest
-
 from modules.agentplace.evaluator import AgentPlaceEvaluator
-
 
 @pytest.fixture
 def evaluator():

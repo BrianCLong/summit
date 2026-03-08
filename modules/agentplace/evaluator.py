@@ -1,22 +1,20 @@
 import json
-import os
-from typing import Any, Dict, List
-
-import jsonschema
 import yaml
-
+import os
+import jsonschema
+from typing import Dict, Any, List
 
 class AgentPlaceEvaluator:
     def __init__(self, risk_model_path: str, schema_path: str):
-        with open(risk_model_path) as f:
+        with open(risk_model_path, 'r') as f:
             self.risk_model = yaml.safe_load(f)
-        with open(schema_path) as f:
+        with open(schema_path, 'r') as f:
             self.schema = json.load(f)
 
-    def validate_manifest(self, manifest: dict[str, Any]):
+    def validate_manifest(self, manifest: Dict[str, Any]):
         jsonschema.validate(instance=manifest, schema=self.schema)
 
-    def evaluate(self, manifest: dict[str, Any]) -> dict[str, Any]:
+    def evaluate(self, manifest: Dict[str, Any]) -> Dict[str, Any]:
         self.validate_manifest(manifest)
 
         score = 0
@@ -90,7 +88,7 @@ def main():
 
     evaluator = AgentPlaceEvaluator(risk_model_path, schema_path)
 
-    with open(args.manifest) as f:
+    with open(args.manifest, 'r') as f:
         manifest = json.load(f)
 
     report = evaluator.evaluate(manifest)

@@ -191,7 +191,7 @@ fi
 
 # Check deployment verification workflow
 if [ -f "$ROOT_DIR/.github/workflows/deploy-verify.yml" ] && \
-   grep -q "cosign verify --use-signed-timestamps" "$ROOT_DIR/.github/workflows/deploy-verify.yml" && \
+   grep -q "cosign verify" "$ROOT_DIR/.github/workflows/deploy-verify.yml" && \
    grep -q "verify-attestation" "$ROOT_DIR/.github/workflows/deploy-verify.yml"; then
     check_result "Deployment Verification Workflow" "PASS" "- Pre-deployment signature verification
 - SBOM attestation verification

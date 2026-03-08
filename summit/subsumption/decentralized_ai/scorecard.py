@@ -5,11 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
-from summit.subsumption.decentralized_ai.governance_audit import (
-    gini,
-    participation_rate,
-    shannon_entropy,
-)
+from summit.subsumption.decentralized_ai.governance_audit import gini, participation_rate, shannon_entropy
 from summit.subsumption.decentralized_ai.incentive_model import incentive_transparency_score
 from summit.subsumption.decentralized_ai.openness_validator import validate_openness
 from summit.subsumption.decentralized_ai.schema import evidence_id

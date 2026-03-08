@@ -1,8 +1,0 @@
-{
-  "minimumReadinessScore": 0.9,
-  "preferredMaxFilesChanged": 25,
-  "preferredMaxLocDelta": 1500,
-  "requiredChecks": ["tests", "build", "architecture"],
-  "warningChecks": ["docs", "provenance"],
-  "blockOnDraftPR": false
-}

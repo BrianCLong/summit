@@ -8,7 +8,6 @@ from unittest.mock import MagicMock
 from summit.scouts.base import Config
 from summit.scouts.repo_map import RepoMapScout
 
-
 class TestRepoMapScout(unittest.TestCase):
     def setUp(self):
         self.test_dir = tempfile.mkdtemp()

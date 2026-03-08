@@ -33,13 +33,13 @@ def load_yaml(path: Path) -> dict[str, Any]:
 
 
 def deterministic_score(tool_id: str, task_id: str) -> float:
-    digest = hashlib.sha256(f"{tool_id}:{task_id}".encode()).hexdigest()
+    digest = hashlib.sha256(f"{tool_id}:{task_id}".encode("utf-8")).hexdigest()
     raw = int(digest[:8], 16) % 401
     return round(0.6 + raw / 1000, 3)
 
 
 def deterministic_latency_ms(tool_id: str, task_id: str) -> int:
-    digest = hashlib.sha256(f"latency:{tool_id}:{task_id}".encode()).hexdigest()
+    digest = hashlib.sha256(f"latency:{tool_id}:{task_id}".encode("utf-8")).hexdigest()
     return 200 + (int(digest[:8], 16) % 2400)
 
 

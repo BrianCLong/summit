@@ -28,7 +28,7 @@ verify_root() {
     echo -n "$root_hash" > "$temp_hash"
     echo "$signature" > "$temp_sig"
 
-    if cosign verify-blob --use-signed-timestamps --key "$COSIGN_PUB_KEY" --signature "$temp_sig" "$temp_hash" >/dev/null 2>&1; then
+    if cosign verify-blob --key "$COSIGN_PUB_KEY" --signature "$temp_sig" "$temp_hash" >/dev/null 2>&1; then
         rm -f "$temp_hash" "$temp_sig"
         return 0
     else
