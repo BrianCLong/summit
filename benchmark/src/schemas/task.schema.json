@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.dev/schemas/task.schema.json",
+  "type": "object",
+  "required": [
+    "taskId",
+    "benchmarkVersion",
+    "family",
+    "title",
+    "description",
+    "difficulty",
+    "environmentRef",
+    "toolProfile",
+    "budgets",
+    "inputs",
+    "successCriteria",
+    "scoringProfile"
+  ],
+  "properties": {
+    "taskId": { "type": "string", "pattern": "^[a-z0-9._-]+$" },
+    "benchmarkVersion": { "type": "string" },
+    "family": {
+      "type": "string",
+      "enum": [
+        "software-engineering",
+        "intelgraph",
+        "coordination",
+        "governance",
+        "long-horizon"
+      ]
+    },
+    "title": { "type": "string" },
+    "description": { "type": "string" },
+    "difficulty": {
+      "type": "string",
+      "enum": ["easy", "medium", "hard", "frontier"]
+    },
+    "environmentRef": { "type": "string" },
+    "graphSnapshotRef": { "type": "string" },
+    "toolProfile": { "type": "string" },
+    "budgets": {
+      "type": "object",
+      "required": ["maxSteps", "maxRuntimeSec"],
+      "properties": {
+        "maxSteps": { "type": "integer", "minimum": 1 },
+        "maxRuntimeSec": { "type": "integer", "minimum": 1 },
+        "maxCostUsd": { "type": "number", "minimum": 0 },
+        "maxToolCalls": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "inputs": { "type": "object" },
+    "successCriteria": { "type": "object" },
+    "scoringProfile": { "type": "string" },
+    "requiredArtifacts": {
+      "type": "array",
+      "items": { "type": "object" }
+    },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "seed": { "type": "integer" }
+  },
+  "additionalProperties": false
+}
