@@ -18,7 +18,7 @@ import cogWriteSetSchema from './writeset/cog-writeset.schema.json';
 import cogRejectionReportSchema from './writeset/cog-rejection-report.schema.json';
 
 const ajv = new Ajv({ allErrors: true, strict: true });
-addFormats(ajv);
+addFormats(ajv as any);
 
 [
   artifactSchema,

@@ -1,0 +1,9 @@
+{
+  "name": "summit-ui",
+  "version": "1.0.0",
+  "main": "src/index.ts",
+  "dependencies": {
+    "mapbox-gl": "^3.0.0",
+    "react": "^18.0.0"
+  }
+}
