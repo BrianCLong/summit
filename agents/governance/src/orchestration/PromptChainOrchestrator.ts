@@ -741,8 +741,8 @@ export class PromptChainOrchestrator {
       type: 'deployment',
       attestedBy: 'PromptChainOrchestrator',
       attestedAt: new Date(),
-      predicateType: 'https://summit.intelgraph.io/chain-execution/v1',
-      predicate: {
+      claims: {
+        predicateType: 'https://summit.intelgraph.io/chain-execution/v1',
         chainId: chain.id,
         executionId: state.executionId,
         stepsCompleted: state.metrics.stepsCompleted,
