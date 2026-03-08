@@ -6,6 +6,6 @@ jobs:
   drift-check:
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Run Drift Script
         run: npx tsx scripts/monitoring/genui-drift.ts
