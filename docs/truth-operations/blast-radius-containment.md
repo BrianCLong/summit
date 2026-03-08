@@ -40,6 +40,7 @@ Communication: Customer notification about "performance improvements"
 **Time of Discovery**: 4 hours later, original claim was false (monitoring bug)
 
 **Damage**:
+
 - 8 decisions made on false premise
 - Real money spent on unnecessary capacity
 - Engineering hours wasted
@@ -131,6 +132,7 @@ Summit maintains a **real-time graph** of causal dependencies:
 **Trigger**: Information integrity score drops below threshold OR explicit compromise detected
 
 **Action**:
+
 ```
 1. Mark information node as COMPROMISED
 2. Identify all downstream dependencies via graph traversal
@@ -143,6 +145,7 @@ Summit maintains a **real-time graph** of causal dependencies:
 ```
 
 **Example**:
+
 ```json
 {
   "compromised_information": "claim_12847",
@@ -168,6 +171,7 @@ Summit maintains a **real-time graph** of causal dependencies:
 **After containment**, systematically assess damage:
 
 **For Each Influenced Decision**:
+
 ```
 1. Determine influence weight
    - If weight < 0.3: Low influence, may not require action
@@ -253,6 +257,7 @@ RI = reversible_decisions / total_influenced_decisions
 ```
 
 **Interpretation**:
+
 - RI = 1.0: Full rollback possible
 - RI = 0.5: Half the damage can be undone
 - RI = 0.0: All decisions irreversible, only mitigation possible
@@ -285,6 +290,7 @@ CE = decisions_frozen / (decisions_frozen + decisions_executed_post_detection)
 
 **10:00**: Monitoring system reports "Critical: Unauthorized access detected in user database"
 **10:05**: Security team begins response
+
 - Decision 1: Isolate database
 - Decision 2: Force password reset for all users
 - Decision 3: Notify legal team (breach disclosure prep)
@@ -303,6 +309,7 @@ CE = decisions_frozen / (decisions_frozen + decisions_executed_post_detection)
 **10:30**: Cleanup complete
 
 **Damage**:
+
 - 85% of users forced unnecessary password reset
 - Customer trust impact (false alarm made public)
 - Wasted legal team time
@@ -345,6 +352,7 @@ CONTAINMENT ACTIONS:
 **10:15**: Customer communication frozen decision deleted (never happened)
 
 **Damage**:
+
 - 5% of users forced password reset (contained at 5% vs. 85%)
 - No external communications (prevented)
 - Minimal operator confusion (clear containment status)
@@ -358,6 +366,7 @@ CONTAINMENT ACTIONS:
 ### Tier 1: Observation (Integrity 0.60-0.70)
 
 **Action**: Elevated monitoring, no containment
+
 ```
 - Increase logging
 - Flag for operator awareness
@@ -368,6 +377,7 @@ CONTAINMENT ACTIONS:
 ### Tier 2: Caution (Integrity 0.40-0.60)
 
 **Action**: Soft containment
+
 ```
 - Require human confirmation for high-impact decisions
 - Flag downstream decisions as "based on uncertain information"
@@ -378,6 +388,7 @@ CONTAINMENT ACTIONS:
 ### Tier 3: Containment (Integrity 0.20-0.40)
 
 **Action**: Hard containment
+
 ```
 - Freeze pending decisions
 - Pause in-progress actions
@@ -389,6 +400,7 @@ CONTAINMENT ACTIONS:
 ### Tier 4: Quarantine (Integrity <0.20)
 
 **Action**: Maximum isolation
+
 ```
 - Treat as actively adversarial
 - Complete freeze of all dependencies
@@ -542,18 +554,22 @@ DOCUMENT LESSONS:
 ## Integration with Other Pillars
 
 ### With Integrity Scoring
+
 - Integrity thresholds determine containment tier
 - Low integrity triggers automatic containment
 
 ### With Narrative Collision
+
 - Competing narratives may reference same compromised facts
 - Containment prevents false narratives from spreading
 
 ### With Temporal Truth
+
 - Containment speed matters (faster = smaller blast radius)
 - Time-pressured decisions may proceed despite contamination with elevated oversight
 
 ### With Authority Continuity
+
 - Compromised authority sources trigger broader containment
 - All decisions from suspect authority get containment review
 
@@ -564,6 +580,7 @@ DOCUMENT LESSONS:
 ### Predictive Containment
 
 Machine learning predicts:
+
 - Which decisions are likely influenced by suspect information (even without explicit dependency)
 - Probable blast radius size based on information type
 - Optimal containment tier given characteristics
@@ -571,6 +588,7 @@ Machine learning predicts:
 ### Automated Rollback
 
 For specific decision types:
+
 - Pre-approved rollback procedures
 - Automated execution upon containment
 - Human confirmation for high-stakes only
@@ -578,6 +596,7 @@ For specific decision types:
 ### Blast Radius Simulation
 
 Before decisions:
+
 - Model potential blast radius if information is later found false
 - Factor into decision whether to wait for higher integrity
 - Containment-aware decision making
@@ -605,6 +624,7 @@ The difference between a contained incident and a catastrophic failure is **how 
 Blast-radius containment transforms Summit from a system that **reacts to false information** into a system that **prevents its propagation**.
 
 This is critical for:
+
 - High-stakes decisions with irreversible consequences
 - Complex systems with deep dependency chains
 - Environments where adversaries weaponize information
