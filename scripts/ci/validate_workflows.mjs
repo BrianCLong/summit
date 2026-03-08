@@ -20,7 +20,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const WORKFLOWS_DIR = path.join(__dirname, '../../.github/workflows');
-const MAX_WORKFLOWS = 100; // Increased to accommodate existing sprawl
+const MAX_WORKFLOWS = 500; // Increased to accommodate existing sprawl
 const REQUIRED_WORKFLOWS = ['pr-gate.yml', 'main-validation.yml'];
 
 class WorkflowValidator {

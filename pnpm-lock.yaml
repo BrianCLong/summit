@@ -13742,6 +13742,9 @@ importers:
       '@intelgraph/maestro-core':
         specifier: workspace:*
         version: link:../platform/maestro-core
+      '@intelgraph/outreach':
+        specifier: workspace:*
+        version: link:../packages/outreach
       '@intelgraph/provenance':
         specifier: workspace:*
         version: link:../packages/provenance
