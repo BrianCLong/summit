@@ -1,8 +1,10 @@
 packages:
   - 'packages/*'
   - 'services/*'
+  - 'services/*/*'
   - 'apps/*'
   - 'libs/*'
+  - 'libs/*/*'
   - 'tools/*'
   - 'platform/*'
   - 'agents/*'
