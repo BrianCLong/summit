@@ -1,7 +1,10 @@
 import math
-from typing import List, Dict
+from typing import Dict, List
+
 from summit.embeddings.base import EmbeddingProvider
 from summit.evidence.schema import generate_evidence_id
+
+
 def cosine_similarity(v1, v2):
     dot_product = sum(a * b for a, b in zip(v1, v2))
     mag1 = math.sqrt(sum(a * a for a in v1))
