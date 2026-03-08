@@ -1,7 +1,3 @@
-# Behavior Forecasting Platform
-- failed calibration gate
-- policy-risk spike
-- fixture integrity failure
-- drift detector alert
-- false-positive override procedure
-- feature-flag rollback
+# Behavior Forecasting Runbook
+
+Guidance on maintaining the behavior forecasting platform. Covers scheduled drift detectors, alerts (e.g., `behavior_forecast_calibration_drift`), and artifact debugging.

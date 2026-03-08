@@ -1,16 +1,41 @@
-import unittest
-import sys
+import json
 import os
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+import unittest
+from analysis.behavior_forecasting.counterfactual_runner import perturb_tool_latency, run_counterfactual_suite
 
-from analysis.behavior_forecasting.counterfactual_runner import perturb_tool_latency
+class TestCounterfactualScenarios(unittest.TestCase):
+    def setUp(self):
+        self.base_scenario = {
+            "scenario_id": "base_scenario_01",
+            "events": [
+                {
+                  "event_id": "ev_001",
+                  "actor": "agent_alpha",
+                  "event_type": "tool_call",
+                  "payload": {"tool": "search"}
+                }
+            ]
+        }
 
-class TestCounterfactuals(unittest.TestCase):
     def test_perturb_tool_latency(self):
-        scenario = {"env": {"tool_latency_multiplier": 1.0}}
-        mutated = perturb_tool_latency(scenario, 2.0)
-        self.assertEqual(mutated["env"]["tool_latency_multiplier"], 2.0)
-        self.assertEqual(scenario["env"]["tool_latency_multiplier"], 1.0)
+        mutated = perturb_tool_latency(self.base_scenario, 3.0)
+        self.assertEqual(mutated["env"]["tool_latency_multiplier"], 3.0)
+        # Ensure original is unchanged
+        self.assertNotIn("env", self.base_scenario)
 
-if __name__ == "__main__":
+    def test_run_counterfactual_suite(self):
+        output_path = "artifacts/behavior-forecasting/counterfactuals.json"
+
+        if os.path.exists(output_path):
+            os.remove(output_path)
+
+        results = run_counterfactual_suite(self.base_scenario)
+        self.assertTrue(os.path.exists(output_path))
+        self.assertEqual(len(results), 3)
+
+        with open(output_path, "r") as f:
+            data = json.load(f)
+            self.assertEqual(len(data), 3)
+
+if __name__ == '__main__':
     unittest.main()

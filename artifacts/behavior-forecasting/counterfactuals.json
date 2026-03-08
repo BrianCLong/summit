@@ -1,0 +1,59 @@
+[
+  {
+    "name": "latency_x2",
+    "scenario": {
+      "scenario_id": "base_scenario_01",
+      "events": [
+        {
+          "event_id": "ev_001",
+          "actor": "agent_alpha",
+          "event_type": "tool_call",
+          "payload": {
+            "tool": "search"
+          }
+        }
+      ],
+      "env": {
+        "tool_latency_multiplier": 2.0
+      }
+    }
+  },
+  {
+    "name": "latency_x5",
+    "scenario": {
+      "scenario_id": "base_scenario_01",
+      "events": [
+        {
+          "event_id": "ev_001",
+          "actor": "agent_alpha",
+          "event_type": "tool_call",
+          "payload": {
+            "tool": "search"
+          }
+        }
+      ],
+      "env": {
+        "tool_latency_multiplier": 5.0
+      }
+    }
+  },
+  {
+    "name": "strict_policy",
+    "scenario": {
+      "scenario_id": "base_scenario_01",
+      "events": [
+        {
+          "event_id": "ev_001",
+          "actor": "agent_alpha",
+          "event_type": "tool_call",
+          "payload": {
+            "tool": "search"
+          }
+        }
+      ],
+      "env": {
+        "policy_constraint": "strict"
+      }
+    }
+  }
+]

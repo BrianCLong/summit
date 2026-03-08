@@ -1,22 +1,29 @@
 import json
 import os
-import sys
 
-def detect_drift(current_metrics_file, baseline_metrics_file):
-    try:
-        with open(current_metrics_file, "r") as f:
-            current = json.load(f)
-        with open(baseline_metrics_file, "r") as f:
-            baseline = json.load(f)
+def check_calibration_drift(calibration_error_7d, baseline_calibration_error, output_dir="artifacts/behavior-forecasting"):
+    os.makedirs(output_dir, exist_ok=True)
 
-        if current.get("calibration_error", 0) > baseline.get("calibration_error", 0) * 1.15:
-            print("ALERT: behavior_forecast_calibration_drift")
-            return True
+    threshold = baseline_calibration_error * 1.15
+    is_drifting = calibration_error_7d > threshold
 
-    except FileNotFoundError:
-        pass
-    return False
+    drift_report = {
+        "calibration_error_7d": calibration_error_7d,
+        "baseline": baseline_calibration_error,
+        "threshold": threshold,
+        "drift_detected": is_drifting,
+        "alerts": []
+    }
+
+    if is_drifting:
+        drift_report["alerts"].append("behavior_forecast_calibration_drift")
+        print("Alert emitted: behavior_forecast_calibration_drift")
+
+    with open(os.path.join(output_dir, "drift.json"), "w") as f:
+        json.dump(drift_report, f, indent=2)
+
+    return drift_report
 
 if __name__ == "__main__":
-    # Typically run as a daily cron
-    detect_drift(sys.argv[1], sys.argv[2])
+    # Simulate a drift check
+    check_calibration_drift(0.06, 0.05)

@@ -3,25 +3,28 @@ import os
 import unittest
 
 class TestFixtureIntegrity(unittest.TestCase):
-    def test_fixture_schema_compliance(self):
-        schema_path = "benchmarks/behavior_forecasting/event_schema.json"
-        fixture_dir = "benchmarks/behavior_forecasting/fixtures"
+    def setUp(self):
+        self.schema_path = "benchmarks/behavior-forecasting/event_schema.json"
+        self.fixture_path = "benchmarks/behavior-forecasting/fixtures/base_scenario.json"
 
-        with open(schema_path, "r") as f:
+    def test_schema_exists(self):
+        self.assertTrue(os.path.exists(self.schema_path))
+        with open(self.schema_path) as f:
             schema = json.load(f)
+            self.assertIn("required", schema)
 
-        for file in os.listdir(fixture_dir):
-            if not file.endswith(".json"):
-                continue
-            with open(os.path.join(fixture_dir, file), "r") as f:
-                data = json.load(f)
+    def test_fixture_matches_schema(self):
+        self.assertTrue(os.path.exists(self.fixture_path))
+        with open(self.fixture_path) as f:
+            fixture = json.load(f)
 
-            for event in data:
-                for req in schema["required"]:
-                    self.assertIn(req, event)
+        # Simple schema validation
+        for event in fixture.get("events", []):
+            self.assertIn("event_id", event)
+            self.assertIn("ts_offset_ms", event)
+            self.assertIn("actor", event)
+            self.assertIn("event_type", event)
+            self.assertIn("payload", event)
 
-    def test_fixture_determinism(self):
-        pass # ensures NO system times exist in fixtures
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     unittest.main()

@@ -1,1 +1,6 @@
-{"evidence_id": "EVID-BF-SCENARIO-0001", "status": "pass"}
+{
+  "evidence_id": "EVID-BF-SCENARIO-0001",
+  "build_meta": {
+    "status": "success"
+  }
+}

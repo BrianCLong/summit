@@ -1,1 +1,4 @@
-{"calibration_error": 0.02, "policy_violation_probability": 0.05}
+{
+  "average_divergence": 0.2,
+  "calibration_error": 0.1
+}
