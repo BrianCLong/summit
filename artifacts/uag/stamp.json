@@ -1,0 +1,12 @@
+{
+  "schemaVersion": "v1.0.0",
+  "connectorVersions": {
+    "container": "v1",
+    "python": "v1",
+    "terraform": "v1",
+    "model": "v1"
+  },
+  "fixtureDigests": {
+    "dockerfile": "sha256:initial"
+  }
+}
