@@ -1,55 +1,58 @@
-import { jsx as _jsx, jsxs as _jsxs } from 'react/jsx-runtime';
-import { useEffect, useState } from 'react';
-import { api } from '../api';
-export default function ModelAnomalyPanels({ tenant }) {
-  const { getModelCostAnomalies } = api();
-  const [items, setItems] = useState([]);
-  useEffect(() => {
-    getModelCostAnomalies(tenant).then((r) => setItems(r.items || []));
-  }, [tenant]);
-  return _jsxs('section', {
-    className: 'space-y-3 rounded-2xl border p-4',
-    'aria-label': 'Model anomalies',
-    children: [
-      _jsx('h2', { className: 'font-medium', children: 'Per-model anomalies' }),
-      _jsxs('div', {
-        className: 'grid grid-cols-1 gap-3 md:grid-cols-3',
-        children: [
-          items.map((it, idx) =>
-            _jsxs(
-              'div',
-              {
-                className: 'rounded-xl border p-3 text-sm',
-                children: [
-                  _jsxs('div', {
-                    className: 'mb-1 text-gray-600',
-                    children: [
-                      it.provider,
-                      ' / ',
-                      _jsx('span', {
-                        className: 'font-medium',
-                        children: it.model,
-                      }),
-                      ' \u2014 z=',
-                      it.z,
-                    ],
-                  }),
-                  _jsxs('div', {
-                    className: 'text-xs text-slate-600',
-                    children: ['last: $', it.last],
-                  }),
-                ],
-              },
-              idx,
-            ),
-          ),
-          !items.length &&
-            _jsx('div', {
-              className: 'p-3 text-sm text-gray-500',
-              children: 'No data',
-            }),
-        ],
-      }),
-    ],
-  });
+"use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.default = ModelAnomalyPanels;
+const react_1 = __importStar(require("react"));
+const api_1 = require("../api");
+function ModelAnomalyPanels({ tenant }) {
+    const { getModelCostAnomalies } = (0, api_1.api)();
+    const [items, setItems] = (0, react_1.useState)([]);
+    (0, react_1.useEffect)(() => {
+        getModelCostAnomalies(tenant).then((r) => setItems(r.items || []));
+    }, [tenant]);
+    return (<section className="space-y-3 rounded-2xl border p-4" aria-label="Model anomalies">
+      <h2 className="font-medium">Per-model anomalies</h2>
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+        {items.map((it, idx) => (<div key={idx} className="rounded-xl border p-3 text-sm">
+            <div className="mb-1 text-gray-600">
+              {it.provider} / <span className="font-medium">{it.model}</span> —
+              z={it.z}
+            </div>
+            <div className="text-xs text-slate-600">last: ${it.last}</div>
+          </div>))}
+        {!items.length && (<div className="p-3 text-sm text-gray-500">No data</div>)}
+      </div>
+    </section>);
 }

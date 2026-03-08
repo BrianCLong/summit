@@ -1,0 +1,15 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.TalentRepository = exports.talentRepository = exports.OnboardingService = exports.onboardingService = exports.IncentiveGenerator = exports.incentiveGenerator = exports.MatchingEngine = exports.matchingEngine = void 0;
+var MatchingEngine_js_1 = require("./MatchingEngine.js");
+Object.defineProperty(exports, "matchingEngine", { enumerable: true, get: function () { return MatchingEngine_js_1.matchingEngine; } });
+Object.defineProperty(exports, "MatchingEngine", { enumerable: true, get: function () { return MatchingEngine_js_1.MatchingEngine; } });
+var IncentiveGenerator_js_1 = require("./IncentiveGenerator.js");
+Object.defineProperty(exports, "incentiveGenerator", { enumerable: true, get: function () { return IncentiveGenerator_js_1.incentiveGenerator; } });
+Object.defineProperty(exports, "IncentiveGenerator", { enumerable: true, get: function () { return IncentiveGenerator_js_1.IncentiveGenerator; } });
+var OnboardingService_js_1 = require("./OnboardingService.js");
+Object.defineProperty(exports, "onboardingService", { enumerable: true, get: function () { return OnboardingService_js_1.onboardingService; } });
+Object.defineProperty(exports, "OnboardingService", { enumerable: true, get: function () { return OnboardingService_js_1.OnboardingService; } });
+var TalentRepository_js_1 = require("./TalentRepository.js");
+Object.defineProperty(exports, "talentRepository", { enumerable: true, get: function () { return TalentRepository_js_1.talentRepository; } });
+Object.defineProperty(exports, "TalentRepository", { enumerable: true, get: function () { return TalentRepository_js_1.TalentRepository; } });

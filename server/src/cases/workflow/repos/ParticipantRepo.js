@@ -1,0 +1,262 @@
+"use strict";
+/**
+ * Participant Repository - Data access layer for case participants and roles
+ */
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ParticipantRepo = void 0;
+const crypto_1 = require("crypto");
+const logger_js_1 = __importDefault(require("../../../config/logger.js"));
+const repoLogger = logger_js_1.default.child({ name: 'ParticipantRepo' });
+class ParticipantRepo {
+    pg;
+    constructor(pg) {
+        this.pg = pg;
+    }
+    // ==================== PARTICIPANTS ====================
+    /**
+     * Add a participant to a case
+     */
+    async addParticipant(input) {
+        const id = (0, crypto_1.randomUUID)();
+        const { rows } = await this.pg.query(`INSERT INTO maestro.case_participants (
+        id, case_id, user_id, role_id, assigned_by, metadata
+      )
+      VALUES ($1, $2, $3, $4, $5, $6)
+      ON CONFLICT (case_id, user_id, role_id)
+      WHERE is_active = true
+      DO UPDATE SET
+        is_active = true,
+        removed_at = NULL,
+        removed_by = NULL,
+        assigned_at = NOW(),
+        assigned_by = EXCLUDED.assigned_by
+      RETURNING *`, [
+            id,
+            input.caseId,
+            input.userId,
+            input.roleId,
+            input.assignedBy || null,
+            JSON.stringify(input.metadata || {}),
+        ]);
+        repoLogger.info({
+            caseId: input.caseId,
+            userId: input.userId,
+            roleId: input.roleId,
+        }, 'Participant added to case');
+        return this.mapParticipantRow(rows[0]);
+    }
+    /**
+     * Remove a participant from a case
+     */
+    async removeParticipant(caseId, userId, roleId, removedBy) {
+        const { rows } = await this.pg.query(`UPDATE maestro.case_participants
+       SET is_active = false,
+           removed_at = NOW(),
+           removed_by = $4
+       WHERE case_id = $1
+       AND user_id = $2
+       AND role_id = $3
+       AND is_active = true
+       RETURNING *`, [caseId, userId, roleId, removedBy]);
+        if (rows[0]) {
+            repoLogger.info({ caseId, userId, roleId }, 'Participant removed from case');
+        }
+        return rows[0] ? this.mapParticipantRow(rows[0]) : null;
+    }
+    /**
+     * Get all participants for a case
+     */
+    async getCaseParticipants(caseId, activeOnly = true) {
+        let query = `
+      SELECT * FROM maestro.case_participants
+      WHERE case_id = $1
+    `;
+        if (activeOnly) {
+            query += ` AND is_active = true`;
+        }
+        query += ` ORDER BY assigned_at DESC`;
+        const { rows } = await this.pg.query(query, [caseId]);
+        return rows.map(this.mapParticipantRow);
+    }
+    /**
+     * Get participant by case and user
+     */
+    async getParticipant(caseId, userId) {
+        const { rows } = await this.pg.query(`SELECT * FROM maestro.case_participants
+       WHERE case_id = $1 AND user_id = $2 AND is_active = true
+       ORDER BY assigned_at DESC`, [caseId, userId]);
+        return rows.map(this.mapParticipantRow);
+    }
+    /**
+     * Get user's role IDs in a case
+     */
+    async getUserRoleIds(caseId, userId) {
+        const { rows } = await this.pg.query(`SELECT role_id FROM maestro.case_participants
+       WHERE case_id = $1 AND user_id = $2 AND is_active = true`, [caseId, userId]);
+        return rows.map((r) => r.role_id);
+    }
+    /**
+     * Get cases for a user
+     */
+    async getUserCases(userId, tenantId, activeOnly = true) {
+        let query = `
+      SELECT DISTINCT cp.case_id
+      FROM maestro.case_participants cp
+      JOIN maestro.cases c ON c.id = cp.case_id
+      WHERE cp.user_id = $1
+      AND cp.is_active = true
+    `;
+        const params = [userId];
+        let paramIndex = 2;
+        if (tenantId) {
+            query += ` AND c.tenant_id = $${paramIndex}`;
+            params.push(tenantId);
+            paramIndex++;
+        }
+        if (activeOnly) {
+            query += ` AND c.status NOT IN ('closed', 'archived')`;
+        }
+        const { rows } = await this.pg.query(query, params);
+        return rows.map((r) => r.case_id);
+    }
+    // ==================== ROLES ====================
+    /**
+     * Create a custom role
+     */
+    async createRole(input) {
+        const id = (0, crypto_1.randomUUID)();
+        const { rows } = await this.pg.query(`INSERT INTO maestro.case_roles (
+        id, name, description, permissions, is_system_role
+      )
+      VALUES ($1, $2, $3, $4, $5)
+      RETURNING *`, [
+            id,
+            input.name,
+            input.description || null,
+            JSON.stringify(input.permissions || []),
+            input.isSystemRole || false,
+        ]);
+        repoLogger.info({ roleId: id, name: input.name }, 'Role created');
+        return this.mapRoleRow(rows[0]);
+    }
+    /**
+     * Get role by ID
+     */
+    async getRole(id) {
+        const { rows } = await this.pg.query(`SELECT * FROM maestro.case_roles WHERE id = $1`, [id]);
+        return rows[0] ? this.mapRoleRow(rows[0]) : null;
+    }
+    /**
+     * Get role by name
+     */
+    async getRoleByName(name) {
+        const { rows } = await this.pg.query(`SELECT * FROM maestro.case_roles WHERE name = $1`, [name]);
+        return rows[0] ? this.mapRoleRow(rows[0]) : null;
+    }
+    /**
+     * Get all roles
+     */
+    async listRoles(systemOnly = false) {
+        let query = `SELECT * FROM maestro.case_roles`;
+        if (systemOnly) {
+            query += ` WHERE is_system_role = true`;
+        }
+        query += ` ORDER BY name ASC`;
+        const { rows } = await this.pg.query(query);
+        return rows.map(this.mapRoleRow);
+    }
+    /**
+     * Get system role IDs by names
+     */
+    async getSystemRoleIds(names) {
+        const { rows } = await this.pg.query(`SELECT id, name FROM maestro.case_roles
+       WHERE name = ANY($1) AND is_system_role = true`, [names]);
+        const roleMap = {};
+        rows.forEach((r) => {
+            roleMap[r.name] = r.id;
+        });
+        return roleMap;
+    }
+    /**
+     * Update role
+     */
+    async updateRole(id, updates) {
+        // Don't allow updating system roles
+        const role = await this.getRole(id);
+        if (role?.isSystemRole) {
+            throw new Error('Cannot update system roles');
+        }
+        const updateFields = [];
+        const params = [id];
+        let paramIndex = 2;
+        if (updates.name !== undefined) {
+            updateFields.push(`name = $${paramIndex}`);
+            params.push(updates.name);
+            paramIndex++;
+        }
+        if (updates.description !== undefined) {
+            updateFields.push(`description = $${paramIndex}`);
+            params.push(updates.description);
+            paramIndex++;
+        }
+        if (updates.permissions !== undefined) {
+            updateFields.push(`permissions = $${paramIndex}`);
+            params.push(JSON.stringify(updates.permissions));
+            paramIndex++;
+        }
+        if (updateFields.length === 0) {
+            return role;
+        }
+        updateFields.push(`updated_at = NOW()`);
+        const { rows } = await this.pg.query(`UPDATE maestro.case_roles
+       SET ${updateFields.join(', ')}
+       WHERE id = $1
+       RETURNING *`, params);
+        return rows[0] ? this.mapRoleRow(rows[0]) : null;
+    }
+    /**
+     * Delete role (only custom roles)
+     */
+    async deleteRole(id) {
+        // Don't allow deleting system roles
+        const role = await this.getRole(id);
+        if (role?.isSystemRole) {
+            throw new Error('Cannot delete system roles');
+        }
+        const { rowCount } = await this.pg.query(`DELETE FROM maestro.case_roles WHERE id = $1 AND is_system_role = false`, [id]);
+        if (rowCount && rowCount > 0) {
+            repoLogger.info({ roleId: id }, 'Role deleted');
+        }
+        return rowCount !== null && rowCount > 0;
+    }
+    // ==================== MAPPERS ====================
+    mapParticipantRow(row) {
+        return {
+            id: row.id,
+            caseId: row.case_id,
+            userId: row.user_id,
+            roleId: row.role_id,
+            assignedAt: row.assigned_at,
+            assignedBy: row.assigned_by,
+            removedAt: row.removed_at,
+            removedBy: row.removed_by,
+            isActive: row.is_active,
+            metadata: row.metadata || {},
+        };
+    }
+    mapRoleRow(row) {
+        return {
+            id: row.id,
+            name: row.name,
+            description: row.description,
+            permissions: row.permissions || [],
+            isSystemRole: row.is_system_role,
+            createdAt: row.created_at,
+            updatedAt: row.updated_at,
+        };
+    }
+}
+exports.ParticipantRepo = ParticipantRepo;

@@ -1,24 +1,32 @@
+"use strict";
 /**
  * Autotriage Usage Examples
  *
  * Demonstrates various ways to use the autotriage engine
  * programmatically in your own scripts and integrations.
  */
-import { parseBacklog } from '../data/backlog-parser.js';
-import { parseBugBash } from '../data/bugbash-parser.js';
-import { fetchGitHubIssues } from '../data/github-fetcher.js';
-import { detectAreas } from '../classifier/area-detector.js';
-import { analyzeImpact } from '../classifier/impact-analyzer.js';
-import { classifyType } from '../classifier/type-classifier.js';
-import { clusterIssues } from '../classifier/issue-clusterer.js';
-import { generateTriageReport, formatReportAsMarkdown } from '../reports/triage-report.js';
-import { defaultConfig } from '../config.js';
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.example1_ParseBacklog = example1_ParseBacklog;
+exports.example2_FullPipeline = example2_FullPipeline;
+exports.example3_GitHubIntegration = example3_GitHubIntegration;
+exports.example4_CustomConfig = example4_CustomConfig;
+exports.example5_FilteringQueries = example5_FilteringQueries;
+exports.example6_ToolIntegration = example6_ToolIntegration;
+const backlog_parser_js_1 = require("../data/backlog-parser.js");
+const bugbash_parser_js_1 = require("../data/bugbash-parser.js");
+const github_fetcher_js_1 = require("../data/github-fetcher.js");
+const area_detector_js_1 = require("../classifier/area-detector.js");
+const impact_analyzer_js_1 = require("../classifier/impact-analyzer.js");
+const type_classifier_js_1 = require("../classifier/type-classifier.js");
+const issue_clusterer_js_1 = require("../classifier/issue-clusterer.js");
+const triage_report_js_1 = require("../reports/triage-report.js");
+const config_js_1 = require("../config.js");
 /**
  * Example 1: Parse backlog only
  */
-export async function example1_ParseBacklog() {
+async function example1_ParseBacklog() {
     console.log('Example 1: Parse Backlog\n');
-    const items = await parseBacklog('./examples/sample-backlog.json');
+    const items = await (0, backlog_parser_js_1.parseBacklog)('./examples/sample-backlog.json');
     console.log(`Parsed ${items.length} backlog items`);
     items.forEach((item) => {
         console.log(`- [${item.id}] ${item.title} (${item.impact})`);
@@ -27,36 +35,36 @@ export async function example1_ParseBacklog() {
 /**
  * Example 2: Full triage pipeline with classification
  */
-export async function example2_FullPipeline() {
+async function example2_FullPipeline() {
     console.log('\nExample 2: Full Triage Pipeline\n');
     // Step 1: Collect items from all sources
-    const backlogItems = await parseBacklog();
-    const bugBashItems = await parseBugBash();
+    const backlogItems = await (0, backlog_parser_js_1.parseBacklog)();
+    const bugBashItems = await (0, bugbash_parser_js_1.parseBugBash)();
     const items = [...backlogItems, ...bugBashItems];
     console.log(`Collected ${items.length} items`);
     // Step 2: Classify each item
     items.forEach((item) => {
         // Detect areas
         if (item.area.length === 0) {
-            item.area = detectAreas(item, defaultConfig.areas);
+            item.area = (0, area_detector_js_1.detectAreas)(item, config_js_1.defaultConfig.areas);
         }
         // Analyze impact
-        const impactResult = analyzeImpact(item, defaultConfig.impactRules);
+        const impactResult = (0, impact_analyzer_js_1.analyzeImpact)(item, config_js_1.defaultConfig.impactRules);
         item.impact = impactResult.impact;
         item.impactScore = impactResult.score;
         // Classify type
-        item.type = classifyType(item, defaultConfig.typeRules);
+        item.type = (0, type_classifier_js_1.classifyType)(item, config_js_1.defaultConfig.typeRules);
         // Determine if good first issue
         item.isGoodFirstIssue =
-            item.complexityScore <= defaultConfig.reporting.goodFirstIssueThreshold;
+            item.complexityScore <= config_js_1.defaultConfig.reporting.goodFirstIssueThreshold;
     });
     console.log('Classification complete');
     // Step 3: Cluster similar issues
-    const clusters = clusterIssues(items, defaultConfig.clustering);
+    const clusters = (0, issue_clusterer_js_1.clusterIssues)(items, config_js_1.defaultConfig.clustering);
     console.log(`Found ${clusters.length} clusters`);
     // Step 4: Generate report
-    const report = generateTriageReport(items, clusters, defaultConfig.reporting.topIssuesCount, defaultConfig.reporting.topThemesCount);
-    const markdown = formatReportAsMarkdown(report);
+    const report = (0, triage_report_js_1.generateTriageReport)(items, clusters, config_js_1.defaultConfig.reporting.topIssuesCount, config_js_1.defaultConfig.reporting.topThemesCount);
+    const markdown = (0, triage_report_js_1.formatReportAsMarkdown)(report);
     console.log('\nGenerated report preview:');
     console.log(markdown.substring(0, 500) + '...');
     return report;
@@ -64,14 +72,14 @@ export async function example2_FullPipeline() {
 /**
  * Example 3: GitHub integration with error handling
  */
-export async function example3_GitHubIntegration() {
+async function example3_GitHubIntegration() {
     console.log('\nExample 3: GitHub Integration\n');
     const token = process.env.GITHUB_TOKEN;
     if (!token) {
         console.warn('GITHUB_TOKEN not set. Using unauthenticated requests (rate limited).');
     }
     try {
-        const items = await fetchGitHubIssues({
+        const items = await (0, github_fetcher_js_1.fetchGitHubIssues)({
             owner: 'BrianCLong',
             repo: 'summit',
             token,
@@ -95,11 +103,11 @@ export async function example3_GitHubIntegration() {
 /**
  * Example 4: Custom configuration
  */
-export async function example4_CustomConfig() {
+async function example4_CustomConfig() {
     console.log('\nExample 4: Custom Configuration\n');
     // Create custom area configuration
     const customAreas = [
-        ...defaultConfig.areas,
+        ...config_js_1.defaultConfig.areas,
         {
             name: 'mobile',
             keywords: ['mobile', 'ios', 'android', 'app'],
@@ -108,9 +116,9 @@ export async function example4_CustomConfig() {
         },
     ];
     // Parse and classify with custom config
-    const items = await parseBacklog('./examples/sample-backlog.json');
+    const items = await (0, backlog_parser_js_1.parseBacklog)('./examples/sample-backlog.json');
     items.forEach((item) => {
-        item.area = detectAreas(item, customAreas);
+        item.area = (0, area_detector_js_1.detectAreas)(item, customAreas);
     });
     console.log('Classified with custom areas:');
     items.forEach((item) => {
@@ -120,9 +128,9 @@ export async function example4_CustomConfig() {
 /**
  * Example 5: Filtering and querying
  */
-export async function example5_FilteringQueries() {
+async function example5_FilteringQueries() {
     console.log('\nExample 5: Filtering and Queries\n');
-    const items = await parseBacklog('./examples/sample-backlog.json');
+    const items = await (0, backlog_parser_js_1.parseBacklog)('./examples/sample-backlog.json');
     // Find all blocker items
     const blockers = items.filter((i) => i.impact === 'blocker');
     console.log(`\nBlockers (${blockers.length}):`);
@@ -146,11 +154,11 @@ export async function example5_FilteringQueries() {
 /**
  * Example 6: Integration with existing tools
  */
-export async function example6_ToolIntegration() {
+async function example6_ToolIntegration() {
     console.log('\nExample 6: Tool Integration\n');
     // This example shows how to integrate autotriage with other tools
     // For example, posting results to Slack or creating GitHub issues
-    const items = await parseBacklog('./examples/sample-backlog.json');
+    const items = await (0, backlog_parser_js_1.parseBacklog)('./examples/sample-backlog.json');
     const blockers = items.filter((i) => i.impact === 'blocker');
     // Example: Format for Slack notification
     const slackMessage = {
@@ -203,4 +211,3 @@ async function main() {
 if (require.main === module) {
     main();
 }
-//# sourceMappingURL=usage-example.js.map

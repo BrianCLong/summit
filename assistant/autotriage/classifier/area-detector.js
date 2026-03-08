@@ -1,8 +1,11 @@
+"use strict";
 /**
  * Area detection classifier
  * Detects which areas an issue belongs to (copilot, ingestion, graph, UI, infra, etc.)
  */
-export function detectAreas(item, areaConfigs) {
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.detectAreas = detectAreas;
+function detectAreas(item, areaConfigs) {
     const text = `${item.title} ${item.description}`.toLowerCase();
     const areaScores = new Map();
     for (const config of areaConfigs) {
@@ -46,4 +49,3 @@ export function detectAreas(item, areaConfigs) {
 function escapeRegex(str) {
     return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
-//# sourceMappingURL=area-detector.js.map

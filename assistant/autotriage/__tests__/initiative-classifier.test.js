@@ -1,6 +1,8 @@
-import { describe, it, expect } from '@jest/globals';
-import { classifyInitiative } from '../classifier/initiative-classifier';
-describe('classifyInitiative', () => {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const globals_1 = require("@jest/globals");
+const initiative_classifier_1 = require("../classifier/initiative-classifier");
+(0, globals_1.describe)('classifyInitiative', () => {
     const rules = [
         {
             id: 'my-initiative',
@@ -8,26 +10,25 @@ describe('classifyInitiative', () => {
             patterns: [/baz-\d+/],
         },
     ];
-    it('matches keyword in title', () => {
+    (0, globals_1.it)('matches keyword in title', () => {
         const item = {
             title: 'This has foo in it',
             description: 'nothing',
         };
-        expect(classifyInitiative(item, rules)).toBe('my-initiative');
+        (0, globals_1.expect)((0, initiative_classifier_1.classifyInitiative)(item, rules)).toBe('my-initiative');
     });
-    it('matches pattern in description', () => {
+    (0, globals_1.it)('matches pattern in description', () => {
         const item = {
             title: 'Normal title',
             description: 'Has baz-123 pattern',
         };
-        expect(classifyInitiative(item, rules)).toBe('my-initiative');
+        (0, globals_1.expect)((0, initiative_classifier_1.classifyInitiative)(item, rules)).toBe('my-initiative');
     });
-    it('returns undefined for no match', () => {
+    (0, globals_1.it)('returns undefined for no match', () => {
         const item = {
             title: 'Nothing here',
             description: 'Also nothing',
         };
-        expect(classifyInitiative(item, rules)).toBeUndefined();
+        (0, globals_1.expect)((0, initiative_classifier_1.classifyInitiative)(item, rules)).toBeUndefined();
     });
 });
-//# sourceMappingURL=initiative-classifier.test.js.map

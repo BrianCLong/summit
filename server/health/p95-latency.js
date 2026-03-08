@@ -1,8 +1,11 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.getP95Latency = void 0;
 // Placeholder for p95 latency service
-export const getP95Latency = async () => {
+const getP95Latency = async () => {
     return {
         value: 120, // ms
         score: 95,
     };
 };
-//# sourceMappingURL=p95-latency.js.map
+exports.getP95Latency = getP95Latency;

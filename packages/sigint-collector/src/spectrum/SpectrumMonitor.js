@@ -222,4 +222,3 @@ class SpectrumMonitor extends eventemitter3_1.EventEmitter {
     }
 }
 exports.SpectrumMonitor = SpectrumMonitor;
-//# sourceMappingURL=SpectrumMonitor.js.map

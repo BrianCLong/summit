@@ -1,0 +1,157 @@
+"use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.default = AdminPanel;
+const react_1 = __importStar(require("react"));
+const urls_1 = require("../config/urls");
+function AdminPanel() {
+    const api = (0, urls_1.getApiBaseUrl)();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const [tenants, setTenants] = (0, react_1.useState)([]);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const [users, setUsers] = (0, react_1.useState)([]);
+    const [flags, setFlags] = (0, react_1.useState)({});
+    const [status, setStatus] = (0, react_1.useState)('');
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const [audit, setAudit] = (0, react_1.useState)([]);
+    const [q, setQ] = (0, react_1.useState)('');
+    const [policy, setPolicy] = (0, react_1.useState)('');
+    (0, react_1.useEffect)(() => {
+        refresh();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+    async function refresh() {
+        try {
+            const t = await (await fetch(api + '/admin/tenants')).json();
+            setTenants(t.items || []);
+            const u = await (await fetch(api + '/admin/users')).json();
+            setUsers(u.items || []);
+            const f = await (await fetch(api + '/admin/flags')).json();
+            setFlags(f.flags || {});
+            await loadAudit();
+            await loadPolicy();
+        }
+        catch (e) {
+            setStatus(String(e));
+        }
+    }
+    async function toggleFlag(k) {
+        const v = !flags[k];
+        await fetch(api + '/admin/flags/' + k, {
+            method: 'PUT',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ value: v }),
+        });
+        setFlags({ ...flags, [k]: v });
+    }
+    async function loadAudit() {
+        const a = await (await fetch(api +
+            '/admin/audit?limit=200' +
+            (q ? `&query=${encodeURIComponent(q)}` : ''))).json();
+        setAudit(a.items || []);
+    }
+    async function loadPolicy() {
+        try {
+            const txt = await (await fetch(api + '/admin/policy')).text();
+            setPolicy(txt);
+            // eslint-disable-next-line no-empty
+        }
+        catch { }
+    }
+    async function savePolicy() {
+        await fetch(api + '/admin/policy', {
+            method: 'PUT',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ content: policy }),
+        });
+        setStatus('Policy saved');
+    }
+    return (<div style={{ border: '1px solid #ddd', borderRadius: 6, padding: 12 }}>
+      <strong>Admin</strong>
+      {status && <div style={{ color: '#a00' }}>{status}</div>}
+      <div style={{ marginTop: 8 }}>
+        <div style={{ fontWeight: 600 }}>Tenants</div>
+        <ul>
+          {tenants.map((t) => (<li key={t.id}>
+              {t.id} – {t.name}
+            </li>))}
+        </ul>
+      </div>
+      <div style={{ marginTop: 8 }}>
+        <div style={{ fontWeight: 600 }}>Users</div>
+        <ul>
+          {users.map((u) => (<li key={u.id}>
+              {u.email} ({u.role})
+            </li>))}
+        </ul>
+      </div>
+      <div style={{ marginTop: 8 }}>
+        <div style={{ fontWeight: 600 }}>Feature Flags</div>
+        <ul>
+          {Object.keys(flags).length === 0 && <li>No flags</li>}
+          {Object.entries(flags).map(([k, v]) => (<li key={k}>
+              <label>
+                <input type="checkbox" checked={!!v} onChange={() => toggleFlag(k)}/>{' '}
+                {k}
+              </label>
+            </li>))}
+          <li>
+            <button onClick={() => toggleFlag('demo-mode')}>
+              Toggle demo-mode
+            </button>
+          </li>
+        </ul>
+      </div>
+      <div style={{ marginTop: 8 }}>
+        <div style={{ fontWeight: 600 }}>Audit (filter)</div>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <input placeholder="query" value={q} onChange={(e) => setQ(e.target.value)}/>
+          <button onClick={loadAudit}>Search</button>
+        </div>
+        <ul>
+          {audit.map((a, i) => (<li key={i}>
+              <code style={{ fontSize: 12 }}>{a.ts}</code> {a.action}
+            </li>))}
+        </ul>
+      </div>
+      <div style={{ marginTop: 8 }}>
+        <div style={{ fontWeight: 600 }}>Policy Editor</div>
+        <textarea rows={8} value={policy} onChange={(e) => setPolicy(e.target.value)} style={{ width: '100%', fontFamily: 'monospace' }}/>
+        <div>
+          <button onClick={savePolicy}>Save Policy</button>
+        </div>
+      </div>
+    </div>);
+}

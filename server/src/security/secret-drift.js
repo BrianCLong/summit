@@ -1,0 +1,185 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.SecretDriftDetector = void 0;
+const fs_1 = __importDefault(require("fs"));
+const path_1 = __importDefault(require("path"));
+// We import EnvSchema. Note that importing '../config' will execute the validation logic in config.ts.
+// If the environment is invalid, the process might exit. This is acceptable for now.
+const config_js_1 = require("../config.js");
+class SecretDriftDetector {
+    envFilePath;
+    fs;
+    env;
+    constructor(envFilePath, dependencies) {
+        // Default to .env in the current working directory (usually server root or repo root)
+        this.envFilePath = envFilePath || path_1.default.resolve(process.cwd(), '.env');
+        this.fs = dependencies?.fs || fs_1.default;
+        this.env = dependencies?.env || process.env;
+    }
+    /**
+     * Detects unused secrets.
+     * "Unused" here implies keys present in the .env file
+     * that are NOT defined in the EnvSchema.
+     */
+    detectUnusedSecrets() {
+        // 1. Get keys from EnvSchema
+        const schemaKeys = Object.keys(config_js_1.EnvSchema.shape);
+        // 2. Get keys from .env file
+        if (!this.fs.existsSync(this.envFilePath)) {
+            console.warn(`[SecretDrift] No .env file found at ${this.envFilePath}`);
+            return [];
+        }
+        const envContent = this.fs.readFileSync(this.envFilePath, 'utf-8');
+        const envKeys = envContent
+            .split('\n')
+            .map((line) => line.trim())
+            .filter((line) => line && !line.startsWith('#'))
+            .map((line) => line.split('=')[0].trim());
+        // 3. Filter out keys that are in schema or are known system/comment lines
+        const unused = envKeys.filter((key) => !schemaKeys.includes(key));
+        return unused;
+    }
+    /**
+     * Detects leaked secrets in the codebase.
+     * Scans server/src directory for values of sensitive secrets.
+     */
+    detectLeakedSecrets() {
+        // Identify sensitive keys heuristically
+        const sensitiveKeys = Object.keys(config_js_1.EnvSchema.shape).filter(k => {
+            const upper = k.toUpperCase();
+            return upper.includes('SECRET') ||
+                upper.includes('PASSWORD') ||
+                upper.includes('KEY') ||
+                upper.includes('TOKEN') ||
+                upper.includes('AUTH');
+        });
+        const leaks = [];
+        // Assume we are in server/src/security
+        // Go up two levels to reach server/src
+        // But __dirname might be different in ESM.
+        // We'll assume the standard structure relative to this file.
+        // If run with ts-node, __dirname is valid.
+        // Ideally we scan the whole 'src' directory.
+        const srcDir = path_1.default.resolve(process.cwd(), 'src');
+        if (!this.fs.existsSync(srcDir)) {
+            console.warn(`[SecretDrift] src directory not found at ${srcDir}`);
+            return [];
+        }
+        const scanFile = (filePath) => {
+            // Skip test files to avoid false positives in mocks, although leaking real secrets in tests is bad too.
+            // But snapshots might contain them?
+            // Let's scan everything for now, maybe exclude node_modules or dist.
+            if (filePath.includes('node_modules') || filePath.includes('.git'))
+                return;
+            const content = this.fs.readFileSync(filePath, 'utf-8');
+            sensitiveKeys.forEach(key => {
+                const value = this.env[key];
+                // Only check for secrets that are long enough to be unique/meaningful
+                if (value && value.length > 8 && content.includes(value)) {
+                    // Find line number
+                    const lines = content.split('\n');
+                    lines.forEach((line, idx) => {
+                        if (line.includes(value)) {
+                            // Check if it's the config file itself or the .env loading part
+                            if (filePath.endsWith('config.js') || filePath.endsWith('.env'))
+                                return;
+                            leaks.push({ secret: key, file: filePath, line: idx + 1 });
+                        }
+                    });
+                }
+            });
+        };
+        const walkDir = (dir) => {
+            const files = this.fs.readdirSync(dir);
+            files.forEach((f) => {
+                const fp = path_1.default.join(dir, f);
+                if (this.fs.statSync(fp).isDirectory()) {
+                    walkDir(fp);
+                }
+                else if (f.endsWith('.js') || f.endsWith('.js') || f.endsWith('.json')) {
+                    scanFile(fp);
+                }
+            });
+        };
+        walkDir(srcDir);
+        return leaks;
+    }
+    /**
+     * Detects potentially expired or insecure secrets.
+     */
+    detectExpiredSecrets() {
+        const expired = [];
+        const env = this.env;
+        Object.keys(config_js_1.EnvSchema.shape).forEach(key => {
+            const val = env[key];
+            if (!val)
+                return;
+            // 1. Insecure defaults
+            if (typeof val === 'string' && (val.includes('changeme') || val.includes('devpassword') || val === 'secret')) {
+                expired.push(`${key} (insecure default detected)`);
+            }
+            // 2. Heuristic: check if there's a corresponding _EXPIRY key in env that is passed
+            const expiryKey = `${key}_EXPIRY`;
+            if (env[expiryKey]) {
+                const expiryDate = new Date(env[expiryKey]);
+                if (!isNaN(expiryDate.getTime()) && expiryDate < new Date()) {
+                    expired.push(`${key} (expired on ${expiryDate.toISOString()})`);
+                }
+            }
+        });
+        return expired;
+    }
+    /**
+     * Enforces removal of unused keys from the .env file.
+     */
+    enforceRemoval(keysToRemove) {
+        if (!this.fs.existsSync(this.envFilePath))
+            return;
+        let content = this.fs.readFileSync(this.envFilePath, 'utf-8');
+        const lines = content.split('\n');
+        const newLines = lines.filter((line) => {
+            const key = line.split('=')[0].trim();
+            if (keysToRemove.includes(key)) {
+                console.log(`[SecretDrift] Removing ${key} from .env`);
+                return false;
+            }
+            return true;
+        });
+        this.fs.writeFileSync(this.envFilePath, newLines.join('\n'));
+    }
+    async runAudit(autoFix = false) {
+        console.log('Running Secret Drift Audit...');
+        const unused = this.detectUnusedSecrets();
+        if (unused.length > 0) {
+            console.log(`Found ${unused.length} unused secrets: ${unused.join(', ')}`);
+            if (autoFix) {
+                this.enforceRemoval(unused);
+                console.log('Auto-removed unused secrets.');
+            }
+        }
+        else {
+            console.log('No unused secrets found.');
+        }
+        const leaked = this.detectLeakedSecrets();
+        if (leaked.length > 0) {
+            console.warn(`Found ${leaked.length} leaked secrets in codebase!`);
+            leaked.forEach(l => console.warn(`  - ${l.secret} in ${l.file}:${l.line}`));
+        }
+        else {
+            console.log('No leaked secrets found.');
+        }
+        const expired = this.detectExpiredSecrets();
+        if (expired.length > 0) {
+            console.warn(`Found ${expired.length} potentially expired/insecure secrets:`);
+            expired.forEach(e => console.warn(`  - ${e}`));
+        }
+        else {
+            console.log('No expired secrets found.');
+        }
+        return { unused, leaked, expired };
+    }
+}
+exports.SecretDriftDetector = SecretDriftDetector;

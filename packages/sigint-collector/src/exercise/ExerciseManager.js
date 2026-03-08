@@ -384,4 +384,3 @@ class ExerciseManager extends eventemitter3_1.EventEmitter {
     }
 }
 exports.ExerciseManager = ExerciseManager;
-//# sourceMappingURL=ExerciseManager.js.map

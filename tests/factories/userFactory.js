@@ -1,14 +1,21 @@
+"use strict";
 /**
  * User Factory
  *
  * Generates test user data with sensible defaults
  */
-import { randomUUID } from 'crypto';
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.userFactory = userFactory;
+exports.userFactoryBatch = userFactoryBatch;
+exports.adminUserFactory = adminUserFactory;
+exports.analystUserFactory = analystUserFactory;
+exports.viewerUserFactory = viewerUserFactory;
+const crypto_1 = require("crypto");
 /**
  * Create a test user with optional overrides
  */
-export function userFactory(options = {}) {
-    const id = options.id || randomUUID();
+function userFactory(options = {}) {
+    const id = options.id || (0, crypto_1.randomUUID)();
     const username = options.username || `testuser_${id.slice(0, 8)}`;
     const email = options.email || `${username}@test.intelgraph.local`;
     const role = options.role || 'analyst';
@@ -26,7 +33,10 @@ export function userFactory(options = {}) {
         username,
         role,
         tenantId,
+        defaultTenantId: options.defaultTenantId || tenantId,
         permissions: options.permissions || defaultPermissions[role] || [],
+        isActive: options.isActive ?? true,
+        scopes: options.scopes || [],
         createdAt: options.createdAt || now,
         updatedAt: options.updatedAt || now,
     };
@@ -34,25 +44,24 @@ export function userFactory(options = {}) {
 /**
  * Create multiple test users
  */
-export function userFactoryBatch(count, options = {}) {
+function userFactoryBatch(count, options = {}) {
     return Array.from({ length: count }, () => userFactory(options));
 }
 /**
  * Create an admin user for testing
  */
-export function adminUserFactory(options = {}) {
+function adminUserFactory(options = {}) {
     return userFactory({ ...options, role: 'admin' });
 }
 /**
  * Create an analyst user for testing
  */
-export function analystUserFactory(options = {}) {
+function analystUserFactory(options = {}) {
     return userFactory({ ...options, role: 'analyst' });
 }
 /**
  * Create a viewer user for testing
  */
-export function viewerUserFactory(options = {}) {
+function viewerUserFactory(options = {}) {
     return userFactory({ ...options, role: 'viewer' });
 }
-//# sourceMappingURL=userFactory.js.map

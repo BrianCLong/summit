@@ -1,0 +1,160 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.PricingEngine = void 0;
+const database_js_1 = require("../config/database.js");
+const crypto_1 = require("crypto");
+class PricingEngine {
+    static instance;
+    _pool;
+    constructor() {
+        // Lazy initialization
+    }
+    get pool() {
+        if (!this._pool) {
+            this._pool = (0, database_js_1.getPostgresPool)();
+        }
+        return this._pool;
+    }
+    static getInstance() {
+        if (!PricingEngine.instance) {
+            PricingEngine.instance = new PricingEngine();
+        }
+        return PricingEngine.instance;
+    }
+    async getEffectivePlan(tenantId) {
+        const client = await this.pool.connect();
+        try {
+            const res = await client.query(`SELECT p.*, tp.custom_overrides
+         FROM tenant_plans tp
+         JOIN plans p ON tp.plan_id = p.id
+         WHERE tp.tenant_id = $1
+         AND (tp.effective_to IS NULL OR tp.effective_to > NOW())
+         ORDER BY tp.effective_from DESC
+         LIMIT 1`, [tenantId]);
+            if (res.rows.length === 0) {
+                // Fallback to a default plan if exists, or throw. For now, assume 'Free' exists or handle gracefully.
+                // We will try to fetch a plan named 'Free'.
+                const freePlanRes = await client.query(`SELECT * FROM plans WHERE name = 'Free'`);
+                if (freePlanRes.rows.length > 0) {
+                    const plan = this.mapRowToPlan(freePlanRes.rows[0]);
+                    return { plan, overrides: null };
+                }
+                throw new Error(`No active plan found for tenant ${tenantId}`);
+            }
+            const row = res.rows[0];
+            return {
+                plan: this.mapRowToPlan(row),
+                overrides: row.custom_overrides
+            };
+        }
+        finally {
+            client.release();
+        }
+    }
+    /**
+     * Retrieves a plan definition by ID.
+     */
+    async getPlanById(planId) {
+        const client = await this.pool.connect();
+        try {
+            const res = await client.query(`SELECT * FROM plans WHERE id = $1`, [planId]);
+            if (res.rows.length === 0)
+                return null;
+            return this.mapRowToPlan(res.rows[0]);
+        }
+        finally {
+            client.release();
+        }
+    }
+    mapRowToPlan(row) {
+        return {
+            id: row.id,
+            name: row.name,
+            description: row.description,
+            currency: row.currency,
+            basePrice: row.base_price ? parseFloat(row.base_price) : 0,
+            limits: row.limits,
+            features: row.features,
+            createdAt: row.created_at,
+            updatedAt: row.updated_at
+        };
+    }
+    /**
+     * Estimate cost for a specific usage.
+     * This is a simple estimation based on unit price defined in the plan.
+     */
+    async estimateCost(tenantId, kind, quantity) {
+        const { plan, overrides } = await this.getEffectivePlan(tenantId);
+        const limitConfig = plan.limits[kind];
+        if (!limitConfig)
+            return 0;
+        // Check overrides
+        // TODO: Merge logic for overrides
+        const unitPrice = limitConfig.unitPrice || 0;
+        // Simple calculation: just quantity * unitPrice.
+        // Does not account for "included" amount because this is a stateless estimate for a single operation.
+        return quantity * unitPrice;
+    }
+    /**
+     * Generates an invoice for a given period based on aggregated usage.
+     */
+    async generateInvoice(tenantId, periodStart, periodEnd) {
+        const client = await this.pool.connect();
+        try {
+            const { plan } = await this.getEffectivePlan(tenantId);
+            // Fetch summaries
+            const summariesRes = await client.query(`SELECT * FROM usage_summaries
+         WHERE tenant_id = $1
+         AND period_start >= $2
+         AND period_end <= $3`, [tenantId, periodStart, periodEnd]);
+            const lineItems = [];
+            let subtotal = 0;
+            for (const row of summariesRes.rows) {
+                const kind = row.kind;
+                const totalQty = parseFloat(row.total_quantity);
+                const limitConfig = plan.limits[kind];
+                if (!limitConfig)
+                    continue;
+                const included = limitConfig.monthlyIncluded || 0;
+                const billableQty = Math.max(0, totalQty - included);
+                const unitPrice = limitConfig.unitPrice || 0;
+                const amount = billableQty * unitPrice;
+                if (amount > 0) {
+                    lineItems.push({
+                        kind,
+                        quantity: billableQty, // Billed quantity
+                        unit: row.unit,
+                        unitPrice,
+                        amount,
+                        metadata: {
+                            totalUsage: totalQty,
+                            includedUsage: included
+                        }
+                    });
+                    subtotal += amount;
+                }
+            }
+            const invoice = {
+                id: (0, crypto_1.randomUUID)(),
+                tenantId,
+                periodStart,
+                periodEnd,
+                currency: plan.currency,
+                lineItems,
+                subtotal,
+                taxes: 0, // Placeholder
+                total: subtotal, // + taxes
+                status: 'DRAFT'
+            };
+            // Persist invoice
+            await client.query(`INSERT INTO invoices (id, tenant_id, period_start, period_end, currency, line_items, subtotal, taxes, total, status)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`, [invoice.id, invoice.tenantId, invoice.periodStart, invoice.periodEnd, invoice.currency, JSON.stringify(invoice.lineItems), invoice.subtotal, invoice.taxes, invoice.total, invoice.status]);
+            return invoice;
+        }
+        finally {
+            client.release();
+        }
+    }
+}
+exports.PricingEngine = PricingEngine;
+exports.default = PricingEngine.getInstance();

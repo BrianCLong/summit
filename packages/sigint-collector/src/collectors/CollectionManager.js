@@ -179,4 +179,3 @@ class CollectionManager extends eventemitter3_1.EventEmitter {
     }
 }
 exports.CollectionManager = CollectionManager;
-//# sourceMappingURL=CollectionManager.js.map

@@ -1,0 +1,633 @@
+"use strict";
+/**
+ * Multi-LLM Orchestrator
+ *
+ * Main orchestrator class that provides resilient multi-LLM chaining
+ * with governance gates, hallucination scoring, and fallback routing.
+ */
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.BudgetError = exports.GovernanceError = exports.OrchestratorError = exports.MultiLLMOrchestrator = void 0;
+const eventemitter3_1 = require("eventemitter3");
+const uuid_1 = require("uuid");
+const index_js_1 = require("./providers/index.js");
+const index_js_2 = require("./routing/index.js");
+const index_js_3 = require("./state/index.js");
+const index_js_4 = require("./governance/index.js");
+const index_js_5 = require("./scoring/index.js");
+const index_js_6 = require("./context/index.js");
+const index_js_7 = require("./evidence/index.js");
+class MultiLLMOrchestrator extends eventemitter3_1.EventEmitter {
+    providerRegistry;
+    circuitRegistry;
+    stateManager;
+    governanceEngine;
+    hallucinationScorer;
+    fallbackRouter;
+    contextCompiler;
+    config;
+    chains = new Map();
+    evidenceManager;
+    toolRuntime;
+    constructor(config = {}) {
+        super();
+        this.config = {
+            defaultModel: config.defaultModel ?? 'claude-3-5-sonnet-20241022',
+            maxChainDepth: config.maxChainDepth ?? 10,
+            enableMetrics: config.enableMetrics ?? true,
+            hallucinationScoring: config.hallucinationScoring ?? true,
+            ...config,
+        };
+        // Initialize components
+        this.providerRegistry = index_js_1.ProviderFactory.createDefaultRegistry();
+        this.circuitRegistry = new index_js_2.CircuitBreakerRegistry();
+        this.stateManager = new index_js_3.RedisStateManager(config.redis);
+        this.governanceEngine = new index_js_4.GovernanceEngine(config.governance);
+        this.hallucinationScorer = new index_js_5.HallucinationScorer({
+            enabled: this.config.hallucinationScoring,
+        });
+        this.fallbackRouter = new index_js_2.FallbackRouter(this.providerRegistry, this.circuitRegistry, config.routing);
+        this.evidenceManager = new index_js_7.EvidenceBundleManager(config.evidence);
+        this.toolRuntime = config.toolRuntime;
+        // Initialize Context Engineering Pipeline (Google ADK Pattern)
+        const processors = config.contextProcessors ?? [
+            new index_js_6.InstructionProcessor([]),
+            new index_js_6.ArtifactProcessor(),
+            new index_js_6.MemoryProcessor(),
+            new index_js_6.HistoryProcessor()
+        ];
+        this.contextCompiler = new index_js_6.ContextCompiler(processors);
+        this.setupEventForwarding();
+        this.on('event', (payload) => void this.evidenceManager.recordOrchestratorEvent(payload));
+    }
+    // ============================================================================
+    // Public API
+    // ============================================================================
+    /**
+     * Execute a simple completion request with governance and fallback
+     */
+    async complete(request, options = {}) {
+        const sessionId = options.sessionId ?? (0, uuid_1.v4)();
+        const userId = options.userId ?? 'anonymous';
+        // Create or get session
+        let redisSession = await this.stateManager.getSession(sessionId);
+        if (!redisSession) {
+            redisSession = await this.stateManager.createSession(sessionId, userId);
+        }
+        // Adapt to Context Session
+        const session = {
+            id: redisSession.sessionId,
+            userId: redisSession.userId,
+            events: redisSession.messages.map(m => this.mapLLMMessageToEvent(m)),
+            metadata: redisSession.context,
+            variables: {},
+        };
+        // Build context
+        const context = {
+            chainId: (0, uuid_1.v4)(),
+            stepId: 'single-completion',
+            sessionId,
+            userId,
+            startTime: new Date(),
+            variables: {},
+            history: redisSession.messages,
+            metadata: {},
+        };
+        const goal = request.messages.map((message) => message.content).join('\n');
+        const plan = (0, index_js_7.buildPlanFromRequest)(request, {
+            runId: sessionId,
+            planId: context.chainId,
+            goal,
+        });
+        await this.evidenceManager.createBundle(plan, sessionId);
+        this.emitEvent('chain:started', sessionId, context.chainId, undefined, {
+            input: goal,
+        });
+        // Note: 'request' here overrides the session history typically.
+        // However, if we want to respect the "Context as Compiled View" pattern,
+        // we should really be building the request from the session + new input.
+        // But 'complete' API signature takes 'request' which usually implies a direct call.
+        // We will stick to the existing logic for 'complete' but add governance/scoring.
+        try {
+            // Run governance check on input
+            let governanceResult = { allowed: true, violations: [], warnings: [], score: 1 };
+            if (!options.skipGovernance) {
+                governanceResult = await this.governanceEngine.evaluateMessages(request.messages, context);
+                if (!governanceResult.allowed) {
+                    this.emitEvent('governance:blocked', sessionId, context.chainId, undefined, {
+                        violations: governanceResult.violations,
+                    });
+                    throw new GovernanceError('Request blocked by governance', governanceResult.violations);
+                }
+            }
+            // Check budget
+            const budgetCheck = await this.stateManager.checkBudget(userId, this.estimateRequestCost(request), {
+                daily: this.config.budget?.maxDailyCostUSD ?? 50,
+                monthly: this.config.budget?.maxMonthlyCostUSD ?? 500,
+            });
+            if (!budgetCheck.allowed) {
+                this.emitEvent('budget:exceeded', sessionId, context.chainId, undefined, {
+                    reason: budgetCheck.reason,
+                });
+                throw new BudgetError(budgetCheck.reason ?? 'Budget exceeded');
+            }
+            // Route and execute request
+            const routingResult = await this.fallbackRouter.route(request, context);
+            if (!routingResult.success || !routingResult.response) {
+                throw new OrchestratorError(routingResult.error ?? 'All providers failed');
+            }
+            const response = routingResult.response;
+            // Update session state
+            // Note: Request messages might contain full history or just last turn.
+            // We assume just last turn for storage if length > history
+            const lastUserMessage = request.messages[request.messages.length - 1];
+            if (lastUserMessage && lastUserMessage.role === 'user') {
+                await this.stateManager.addMessage(sessionId, lastUserMessage);
+            }
+            await this.stateManager.addMessage(sessionId, {
+                role: 'assistant',
+                content: response.content,
+            });
+            await this.stateManager.updateUsage(sessionId, response.usage);
+            // Record budget usage
+            await this.stateManager.recordBudgetUsage(userId, {
+                timestamp: new Date(),
+                chainId: context.chainId,
+                stepId: context.stepId,
+                provider: response.provider,
+                model: response.model,
+                costUSD: response.usage.estimatedCostUSD,
+                tokens: response.usage.totalTokens,
+            });
+            // Run hallucination scoring
+            let hallucinationScore;
+            if (!options.skipHallucinationCheck && this.config.hallucinationScoring) {
+                hallucinationScore = await this.hallucinationScorer.score(response, context, request.messages.map((m) => m.content).join('\n'));
+            }
+            // Run governance check on output
+            if (!options.skipGovernance) {
+                const outputGovernance = await this.governanceEngine.evaluate(response.content, context, 'response');
+                governanceResult.violations.push(...outputGovernance.violations);
+                governanceResult.warnings.push(...outputGovernance.warnings);
+                governanceResult.score = Math.min(governanceResult.score, outputGovernance.score);
+            }
+            this.emitEvent('chain:completed', sessionId, context.chainId, undefined, {
+                result: { success: true },
+            });
+            await this.evidenceManager.finalize(sessionId, 'completed');
+            return {
+                ...response,
+                governance: governanceResult,
+                hallucination: hallucinationScore,
+            };
+        }
+        catch (error) {
+            this.emitEvent('chain:failed', sessionId, context.chainId, undefined, {
+                error: error.message,
+            });
+            await this.evidenceManager.finalize(sessionId, 'failed');
+            throw error;
+        }
+    }
+    /**
+     * Execute a multi-step chain
+     */
+    async executeChain(chainId, input, options = {}) {
+        const chain = this.chains.get(chainId);
+        if (!chain) {
+            throw new OrchestratorError(`Chain not found: ${chainId}`);
+        }
+        const sessionId = options.sessionId ?? (0, uuid_1.v4)();
+        const userId = options.userId ?? 'anonymous';
+        const startTime = Date.now();
+        // Create session
+        let redisSession = await this.stateManager.getSession(sessionId);
+        if (!redisSession) {
+            redisSession = await this.stateManager.createSession(sessionId, userId);
+        }
+        const context = {
+            chainId,
+            stepId: '',
+            sessionId,
+            userId,
+            startTime: new Date(),
+            variables: options.variables ?? {},
+            history: redisSession.messages,
+            metadata: {},
+        };
+        const plan = (0, index_js_7.buildPlanFromChain)(chain, { runId: sessionId, goal: input });
+        await this.evidenceManager.createBundle(plan, sessionId);
+        this.emitEvent('chain:started', sessionId, chainId, undefined, { input });
+        const stepResults = [];
+        const allViolations = [];
+        let currentInput = input;
+        let totalCostUSD = 0;
+        let totalTokens = 0;
+        try {
+            // Execute chain based on strategy
+            switch (chain.strategy) {
+                case 'sequential':
+                    for (const step of chain.steps) {
+                        const result = await this.executeStep(step, currentInput, context);
+                        stepResults.push(result);
+                        if (!result.success) {
+                            throw new OrchestratorError(`Step ${step.id} failed: ${result.error}`);
+                        }
+                        currentInput = result.output;
+                        totalCostUSD += result.costUSD;
+                        totalTokens += result.tokens.totalTokens;
+                    }
+                    break;
+                case 'parallel':
+                    const parallelResults = await Promise.all(chain.steps.map((step) => this.executeStep(step, input, context)));
+                    stepResults.push(...parallelResults);
+                    currentInput = parallelResults.map((r) => r.output).join('\n\n');
+                    totalCostUSD = parallelResults.reduce((sum, r) => sum + r.costUSD, 0);
+                    totalTokens = parallelResults.reduce((sum, r) => sum + r.tokens.totalTokens, 0);
+                    break;
+                case 'fallback':
+                    for (const step of chain.steps) {
+                        const result = await this.executeStep(step, input, context);
+                        stepResults.push(result);
+                        if (result.success) {
+                            currentInput = result.output;
+                            totalCostUSD += result.costUSD;
+                            totalTokens += result.tokens.totalTokens;
+                            break;
+                        }
+                    }
+                    break;
+                case 'consensus':
+                    const consensusResults = await Promise.all(chain.steps.map((step) => this.executeStep(step, input, context)));
+                    stepResults.push(...consensusResults);
+                    // Use hallucination scorer for consensus
+                    const responses = consensusResults
+                        .filter((r) => r.success)
+                        .map((r) => ({
+                        id: r.stepId,
+                        model: r.model,
+                        provider: r.provider,
+                        content: r.output,
+                        usage: r.tokens,
+                        latencyMs: r.latencyMs,
+                        cached: false,
+                    }));
+                    if (responses.length > 0) {
+                        const consensusScore = await this.hallucinationScorer.scoreConsensus(responses, context, input);
+                        // Use the response with highest individual quality
+                        const bestResult = consensusResults
+                            .filter((r) => r.success)
+                            .sort((a, b) => (b.hallucinationScore?.overall ?? 0) - (a.hallucinationScore?.overall ?? 0))[0];
+                        if (bestResult) {
+                            currentInput = bestResult.output;
+                        }
+                    }
+                    totalCostUSD = consensusResults.reduce((sum, r) => sum + r.costUSD, 0);
+                    totalTokens = consensusResults.reduce((sum, r) => sum + r.tokens.totalTokens, 0);
+                    break;
+            }
+            // Run governance gates
+            for (const gate of chain.governanceGates) {
+                const result = await this.governanceEngine.evaluate(currentInput, context, 'response');
+                allViolations.push(...result.violations);
+            }
+            // Final hallucination score
+            const finalResponse = {
+                id: (0, uuid_1.v4)(),
+                model: this.config.defaultModel,
+                provider: 'claude',
+                content: currentInput,
+                usage: { promptTokens: 0, completionTokens: 0, totalTokens, estimatedCostUSD: totalCostUSD },
+                latencyMs: Date.now() - startTime,
+                cached: false,
+            };
+            const hallucinationScore = await this.hallucinationScorer.score(finalResponse, context, input);
+            const result = {
+                chainId,
+                success: stepResults.every((r) => r.success),
+                output: currentInput,
+                steps: stepResults,
+                totalLatencyMs: Date.now() - startTime,
+                totalCostUSD,
+                totalTokens,
+                governanceViolations: allViolations,
+                hallucinationScore,
+            };
+            this.emitEvent('chain:completed', sessionId, chainId, undefined, { result });
+            await this.evidenceManager.finalize(sessionId, 'completed');
+            return result;
+        }
+        catch (error) {
+            this.emitEvent('chain:failed', sessionId, chainId, undefined, {
+                error: error.message,
+            });
+            await this.evidenceManager.finalize(sessionId, 'failed');
+            throw error;
+        }
+    }
+    /**
+     * Register a chain configuration
+     */
+    registerChain(chain) {
+        this.chains.set(chain.id, chain);
+    }
+    /**
+     * Create a simple two-step chain (e.g., analyze then synthesize)
+     */
+    createSimpleChain(id, name, steps) {
+        const chain = {
+            id,
+            name,
+            description: `Simple ${steps.length}-step chain`,
+            strategy: 'sequential',
+            steps: steps.map((s, i) => ({
+                id: `${id}-step-${i}`,
+                name: s.name,
+                provider: s.model.startsWith('claude') ? 'claude' : s.model.startsWith('o1') ? 'o1' : 'gpt',
+                model: s.model,
+                systemPrompt: s.systemPrompt,
+            })),
+            governanceGates: [],
+            timeout: 120000,
+            maxRetries: 2,
+            budget: {
+                maxRequestCostUSD: 5,
+                maxChainCostUSD: 20,
+                maxDailyCostUSD: 50,
+                maxMonthlyCostUSD: 500,
+                warningThreshold: 0.8,
+                enforcementMode: 'hard',
+            },
+        };
+        this.registerChain(chain);
+        return chain;
+    }
+    /**
+     * Get session history
+     */
+    async getSessionHistory(sessionId) {
+        const session = await this.stateManager.getSession(sessionId);
+        return session?.messages ?? [];
+    }
+    /**
+     * Get provider health status
+     */
+    getHealthStatus() {
+        return this.fallbackRouter.getHealthStatus();
+    }
+    /**
+     * Get orchestrator metrics
+     */
+    getMetrics() {
+        const providerMetrics = {};
+        for (const [key, provider] of this.providerRegistry.getAll()) {
+            providerMetrics[key] = provider.getMetrics();
+        }
+        return {
+            providers: providerMetrics,
+            circuitBreakers: this.circuitRegistry.getAllStates(),
+            chains: Array.from(this.chains.keys()),
+        };
+    }
+    /**
+     * Health check
+     */
+    async healthCheck() {
+        const redisHealthy = await this.stateManager.healthCheck();
+        const providerHealth = {};
+        for (const [key, provider] of this.providerRegistry.getAll()) {
+            try {
+                providerHealth[key] = await provider.healthCheck();
+            }
+            catch {
+                providerHealth[key] = false;
+            }
+        }
+        const allHealthy = redisHealthy && Object.values(providerHealth).some((h) => h);
+        return {
+            healthy: allHealthy,
+            details: {
+                redis: redisHealthy,
+                ...providerHealth,
+            },
+        };
+    }
+    /**
+     * Shutdown orchestrator
+     */
+    async shutdown() {
+        await this.stateManager.close();
+    }
+    // ============================================================================
+    // Private Methods
+    // ============================================================================
+    /**
+     * Executes a single step using the Context Engineering pipeline
+     */
+    async executeStep(step, input, context) {
+        const stepContext = { ...context, stepId: step.id };
+        const startTime = Date.now();
+        this.emitEvent('step:started', context.sessionId, context.chainId, step.id, { input });
+        try {
+            // Apply transform if provided
+            let transformedInput = input;
+            if (step.transform) {
+                transformedInput = step.transform(input, stepContext);
+            }
+            // ----------------------------------------------------------------------
+            // NEW: Use Context Compiler to build the request
+            // ----------------------------------------------------------------------
+            // 1. Fetch current session from Redis
+            const redisSession = await this.stateManager.getSession(context.sessionId);
+            if (!redisSession) {
+                throw new OrchestratorError('Session not found');
+            }
+            // 2. Adapt to Context Session
+            const session = {
+                id: redisSession.sessionId,
+                userId: redisSession.userId,
+                events: redisSession.messages.map(m => this.mapLLMMessageToEvent(m)),
+                metadata: { ...redisSession.context, systemInstructions: step.systemPrompt },
+                variables: context.variables,
+            };
+            // 3. Add pending user input to session (transiently for compilation)
+            session.events.push({
+                id: (0, uuid_1.v4)(),
+                type: 'message',
+                role: 'user',
+                content: transformedInput,
+                timestamp: new Date(),
+            });
+            // 4. Compile Context
+            const request = await this.contextCompiler.compile(session, {
+                model: step.model ?? this.config.defaultModel,
+                tokenLimit: 4096, // Could be configured per step
+            });
+            // ----------------------------------------------------------------------
+            const routingResult = await this.fallbackRouter.route(request, stepContext);
+            if (!routingResult.success || !routingResult.response) {
+                // Try fallback if defined
+                if (step.fallback) {
+                    this.emitEvent('step:fallback', context.sessionId, context.chainId, step.id, {
+                        originalError: routingResult.error,
+                    });
+                    return this.executeStep(step.fallback, input, context);
+                }
+                throw new Error(routingResult.error ?? 'Step execution failed');
+            }
+            const response = routingResult.response;
+            const latencyMs = Date.now() - startTime;
+            if (response.toolCalls && this.toolRuntime) {
+                const recorder = this.evidenceManager.getBundle(context.sessionId);
+                for (const call of response.toolCalls) {
+                    let args = {};
+                    try {
+                        args = JSON.parse(call.function.arguments || '{}');
+                    }
+                    catch (error) {
+                        await recorder?.record({
+                            type: 'tool:validation_failed',
+                            timestamp: new Date().toISOString(),
+                            run_id: context.sessionId,
+                            plan_id: context.chainId,
+                            step_id: step.id,
+                            tool_name: call.function.name,
+                            data: { stage: 'args', error: error.message },
+                        });
+                        continue;
+                    }
+                    await this.toolRuntime.runTool(call.function.name, args, {
+                        runId: context.sessionId,
+                        planId: context.chainId,
+                        stepId: step.id,
+                        recorder,
+                    });
+                }
+            }
+            // Validate output if validator provided
+            if (step.validate) {
+                const validation = step.validate(response.content, stepContext);
+                if (!validation.valid) {
+                    throw new Error(`Validation failed: ${validation.issues.map((i) => i.message).join(', ')}`);
+                }
+            }
+            // Score for hallucination
+            const hallucinationScore = await this.hallucinationScorer.score(response, stepContext, transformedInput);
+            const result = {
+                stepId: step.id,
+                stepName: step.name,
+                provider: response.provider,
+                model: response.model,
+                success: true,
+                output: response.content,
+                latencyMs,
+                costUSD: response.usage.estimatedCostUSD,
+                tokens: response.usage,
+                retries: routingResult.totalAttempts - 1,
+                usedFallback: routingResult.fallbacksUsed.length > 0,
+                hallucinationScore,
+            };
+            this.emitEvent('step:completed', context.sessionId, context.chainId, step.id, { result });
+            return result;
+        }
+        catch (error) {
+            const latencyMs = Date.now() - startTime;
+            const result = {
+                stepId: step.id,
+                stepName: step.name,
+                provider: step.provider,
+                model: step.model ?? this.config.defaultModel,
+                success: false,
+                output: '',
+                latencyMs,
+                costUSD: 0,
+                tokens: { promptTokens: 0, completionTokens: 0, totalTokens: 0, estimatedCostUSD: 0 },
+                error: error.message,
+                retries: 0,
+                usedFallback: false,
+            };
+            this.emitEvent('step:failed', context.sessionId, context.chainId, step.id, {
+                error: error.message,
+            });
+            return result;
+        }
+    }
+    mapLLMMessageToEvent(message) {
+        return {
+            id: (0, uuid_1.v4)(),
+            type: message.role === 'tool' ? 'tool_result' : 'message',
+            role: message.role,
+            content: message.content,
+            metadata: {
+                name: message.name,
+                toolCalls: message.toolCalls,
+                toolCallId: message.toolCallId,
+            },
+            timestamp: new Date(), // RedisStateManager doesn't store timestamps per msg yet
+        };
+    }
+    estimateRequestCost(request) {
+        const totalChars = request.messages.reduce((sum, m) => sum + m.content.length, 0);
+        const estimatedTokens = Math.ceil(totalChars / 4);
+        return (estimatedTokens / 1000) * 0.01; // Rough estimate
+    }
+    emitEvent(event, sessionId, chainId, stepId, data = {}) {
+        const payload = {
+            event,
+            timestamp: new Date(),
+            sessionId,
+            chainId,
+            stepId,
+            data,
+        };
+        this.emit(event, payload);
+        this.emit('event', payload);
+    }
+    setupEventForwarding() {
+        // Forward circuit breaker events
+        this.fallbackRouter.on('routing:failure', (data) => {
+            this.emit('routing:failure', data);
+        });
+        this.fallbackRouter.on('routing:success', (data) => {
+            this.emit('routing:success', data);
+        });
+        // Forward governance events
+        this.governanceEngine.on('governance:violation', (data) => {
+            this.emit('governance:violation', data);
+        });
+        // Forward hallucination events
+        this.hallucinationScorer.on('hallucination:detected', (data) => {
+            this.emit('hallucination:detected', data);
+        });
+        // Forward state manager events
+        this.stateManager.on('session:created', (data) => {
+            this.emit('session:created', data);
+        });
+    }
+}
+exports.MultiLLMOrchestrator = MultiLLMOrchestrator;
+// ============================================================================
+// Error Classes
+// ============================================================================
+class OrchestratorError extends Error {
+    constructor(message) {
+        super(message);
+        this.name = 'OrchestratorError';
+    }
+}
+exports.OrchestratorError = OrchestratorError;
+class GovernanceError extends Error {
+    violations;
+    constructor(message, violations) {
+        super(message);
+        this.violations = violations;
+        this.name = 'GovernanceError';
+    }
+}
+exports.GovernanceError = GovernanceError;
+class BudgetError extends Error {
+    constructor(message) {
+        super(message);
+        this.name = 'BudgetError';
+    }
+}
+exports.BudgetError = BudgetError;

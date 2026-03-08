@@ -1,7 +1,8 @@
 # scripts/extract_metrics.py
 
-from summit.core.agents.extraction_agent import ExtractionAgent
 from summit.core.agents.document_agent import DocumentAgent
+from summit.core.agents.extraction_agent import ExtractionAgent
+
 
 def main():
     doc_agent = DocumentAgent("data/raw")

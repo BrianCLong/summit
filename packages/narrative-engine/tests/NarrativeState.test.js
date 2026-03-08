@@ -1,9 +1,11 @@
-import { NarrativeState } from '../src/core/NarrativeState.js';
-import { Actor } from '../src/entities/Actor.js';
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const NarrativeState_js_1 = require("../src/core/NarrativeState.js");
+const Actor_js_1 = require("../src/entities/Actor.js");
 describe('NarrativeState', () => {
     it('stores actors and events and produces snapshots', () => {
-        const state = new NarrativeState(5);
-        const actor = new Actor({ id: 'a1', name: 'Analyst Ava', mood: 1 });
+        const state = new NarrativeState_js_1.NarrativeState(5);
+        const actor = new Actor_js_1.Actor({ id: 'a1', name: 'Analyst Ava', mood: 1 });
         state.addActor(actor);
         state.recordEvent({
             id: 'e1',
@@ -20,9 +22,9 @@ describe('NarrativeState', () => {
         expect(snapshot.logs).toContain('briefing delivered');
     });
     it('registers reciprocal relationships', () => {
-        const state = new NarrativeState();
-        const a = new Actor({ id: 'alpha', name: 'Alpha' });
-        const b = new Actor({ id: 'bravo', name: 'Bravo' });
+        const state = new NarrativeState_js_1.NarrativeState();
+        const a = new Actor_js_1.Actor({ id: 'alpha', name: 'Alpha' });
+        const b = new Actor_js_1.Actor({ id: 'bravo', name: 'Bravo' });
         state.addActor(a);
         state.addActor(b);
         state.registerRelationship({

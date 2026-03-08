@@ -1,0 +1,414 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.createCollaborationHub = exports.CollaborationHub = void 0;
+const crypto_1 = require("crypto");
+class CollaborationHub {
+    namespace;
+    socketWorkspace = new Map();
+    workspaceState = new Map();
+    activityLimit;
+    presenceThrottleMs;
+    presenceChannels = new Map();
+    socketPresenceChannel = new Map();
+    lastPresenceUpdate = new Map();
+    constructor(io, options = {}) {
+        this.namespace = io.of('/collaboration');
+        this.activityLimit = options.activityLimit ?? 200;
+        this.presenceThrottleMs = options.presenceThrottleMs ?? 75;
+        this.namespace.on('connection', (socket) => this.handleConnection(socket));
+    }
+    handleConnection(socket) {
+        socket.on('workspace:join', (payload) => this.handleJoin(socket, payload));
+        socket.on('workspace:leave', () => this.handleLeave(socket));
+        socket.on('presence:update', (payload) => this.handlePresenceUpdate(socket, payload));
+        socket.on('presence:channel:join', (payload) => this.handlePresenceChannelJoin(socket, payload));
+        socket.on('presence:channel:leave', () => this.handlePresenceChannelLeave(socket));
+        socket.on('presence:channel:update', (payload) => this.handlePresenceChannelUpdate(socket, payload));
+        socket.on('chat:message', (payload) => this.handleChat(socket, payload));
+        socket.on('annotation:add', (payload) => this.handleAnnotation(socket, 'add', payload));
+        socket.on('annotation:update', (payload) => this.handleAnnotation(socket, 'update', payload));
+        socket.on('annotation:delete', (payload) => this.handleAnnotation(socket, 'delete', payload));
+        socket.on('edit:submit', (payload) => this.handleEdit(socket, payload));
+        socket.on('disconnect', () => {
+            this.handlePresenceChannelLeave(socket);
+            this.handleLeave(socket);
+        });
+    }
+    handleJoin(socket, payload) {
+        const { workspaceId, userId, userName } = payload;
+        if (!workspaceId || !userId)
+            return;
+        const workspace = this.getOrCreateWorkspace(workspaceId);
+        const presence = {
+            userId,
+            userName,
+            workspaceId,
+            status: 'online',
+            lastActive: Date.now(),
+        };
+        workspace.members.set(userId, presence);
+        this.socketWorkspace.set(socket.id, workspaceId);
+        socket.join(this.roomName(workspaceId));
+        this.recordActivity(workspaceId, {
+            id: (0, crypto_1.randomUUID)(),
+            workspaceId,
+            type: 'workspace_join',
+            description: `${userName} joined workspace`,
+            actorId: userId,
+            createdAt: Date.now(),
+        });
+        socket.emit('workspace:joined', this.serializeWorkspace(workspaceId));
+        socket
+            .to(this.roomName(workspaceId))
+            .emit('presence:joined', { ...presence });
+        this.namespace
+            .to(this.roomName(workspaceId))
+            .emit('workspace:activity', this.latestActivity(workspaceId));
+    }
+    handleLeave(socket) {
+        const workspaceId = this.socketWorkspace.get(socket.id);
+        if (!workspaceId)
+            return;
+        const workspace = this.workspaceState.get(workspaceId);
+        if (!workspace)
+            return;
+        const departingUser = [...workspace.members.values()].find((member) => member.workspaceId === workspaceId);
+        if (departingUser) {
+            workspace.members.delete(departingUser.userId);
+            this.recordActivity(workspaceId, {
+                id: (0, crypto_1.randomUUID)(),
+                workspaceId,
+                type: 'workspace_leave',
+                description: `${departingUser.userName} left workspace`,
+                actorId: departingUser.userId,
+                createdAt: Date.now(),
+            });
+            socket
+                .to(this.roomName(workspaceId))
+                .emit('presence:left', { userId: departingUser.userId });
+            this.namespace
+                .to(this.roomName(workspaceId))
+                .emit('workspace:activity', this.latestActivity(workspaceId));
+        }
+        this.socketWorkspace.delete(socket.id);
+    }
+    handlePresenceChannelJoin(socket, payload) {
+        const { workspaceId, channel, userId, userName } = payload;
+        if (!workspaceId || !channel || !userId)
+            return;
+        this.handlePresenceChannelLeave(socket);
+        const channelMembers = this.getOrCreatePresenceChannel(workspaceId, channel);
+        const presence = {
+            userId,
+            userName,
+            workspaceId,
+            channel,
+            status: 'online',
+            lastActive: Date.now(),
+        };
+        channelMembers.set(userId, presence);
+        this.socketPresenceChannel.set(socket.id, { workspaceId, channel, userId });
+        socket.join(this.presenceRoomName(workspaceId, channel));
+        socket.emit('presence:channel:snapshot', {
+            workspaceId,
+            channel,
+            members: [...channelMembers.values()],
+        });
+        socket
+            .to(this.presenceRoomName(workspaceId, channel))
+            .emit('presence:channel:joined', { ...presence });
+    }
+    handlePresenceChannelLeave(socket) {
+        const presenceInfo = this.socketPresenceChannel.get(socket.id);
+        if (!presenceInfo)
+            return;
+        const { workspaceId, channel, userId } = presenceInfo;
+        const channelMembers = this.getPresenceChannel(workspaceId, channel);
+        if (!channelMembers)
+            return;
+        channelMembers.delete(userId);
+        if (channelMembers.size === 0) {
+            const workspaceChannels = this.presenceChannels.get(workspaceId);
+            workspaceChannels?.delete(channel);
+            if (workspaceChannels?.size === 0) {
+                this.presenceChannels.delete(workspaceId);
+            }
+        }
+        socket
+            .to(this.presenceRoomName(workspaceId, channel))
+            .emit('presence:channel:left', { userId, workspaceId, channel });
+        this.socketPresenceChannel.delete(socket.id);
+        this.lastPresenceUpdate.delete(socket.id);
+    }
+    handlePresenceChannelUpdate(socket, payload) {
+        const presenceInfo = this.socketPresenceChannel.get(socket.id);
+        if (!presenceInfo)
+            return;
+        const { workspaceId, channel, userId } = presenceInfo;
+        if (workspaceId !== payload.workspaceId || channel !== payload.channel)
+            return;
+        const lastUpdate = this.lastPresenceUpdate.get(socket.id) ?? 0;
+        if (Date.now() - lastUpdate < this.presenceThrottleMs)
+            return;
+        this.lastPresenceUpdate.set(socket.id, Date.now());
+        const channelMembers = this.getPresenceChannel(workspaceId, channel);
+        if (!channelMembers)
+            return;
+        const presence = channelMembers.get(userId);
+        if (!presence)
+            return;
+        const updated = {
+            ...presence,
+            cursor: payload.cursor ?? presence.cursor,
+            selection: payload.selection ?? presence.selection,
+            status: payload.status ?? presence.status,
+            lastActive: Date.now(),
+        };
+        channelMembers.set(userId, updated);
+        this.namespace
+            .to(this.presenceRoomName(workspaceId, channel))
+            .emit('presence:channel:update', { ...updated });
+    }
+    handlePresenceUpdate(socket, payload) {
+        const { workspaceId, userId } = payload;
+        const workspace = this.workspaceState.get(workspaceId);
+        if (!workspace)
+            return;
+        const presence = workspace.members.get(userId);
+        if (!presence)
+            return;
+        const updated = {
+            ...presence,
+            ...payload,
+            lastActive: Date.now(),
+        };
+        workspace.members.set(userId, updated);
+        this.recordActivity(workspaceId, {
+            id: (0, crypto_1.randomUUID)(),
+            workspaceId,
+            type: 'presence_update',
+            description: `${presence.userName} moved cursor`,
+            actorId: userId,
+            createdAt: Date.now(),
+        });
+        socket
+            .to(this.roomName(workspaceId))
+            .emit('presence:update', { ...updated });
+        this.namespace
+            .to(this.roomName(workspaceId))
+            .emit('workspace:activity', this.latestActivity(workspaceId));
+    }
+    handleChat(socket, payload) {
+        const { workspaceId, userId, message } = payload;
+        const workspace = this.workspaceState.get(workspaceId);
+        if (!workspace || !message)
+            return;
+        const chat = {
+            id: (0, crypto_1.randomUUID)(),
+            workspaceId,
+            userId,
+            message,
+            createdAt: Date.now(),
+        };
+        this.recordActivity(workspaceId, {
+            id: (0, crypto_1.randomUUID)(),
+            workspaceId,
+            type: 'chat',
+            description: message,
+            actorId: userId,
+            createdAt: chat.createdAt,
+        });
+        this.namespace.to(this.roomName(workspaceId)).emit('chat:message', chat);
+        this.namespace
+            .to(this.roomName(workspaceId))
+            .emit('workspace:activity', this.latestActivity(workspaceId));
+    }
+    handleAnnotation(socket, action, payload) {
+        const { workspaceId, userId, targetId } = payload;
+        const workspace = this.workspaceState.get(workspaceId);
+        if (!workspace || !targetId)
+            return;
+        const annotationId = payload.annotationId ?? (0, crypto_1.randomUUID)();
+        const existing = workspace.annotations.get(annotationId);
+        if (action === 'delete') {
+            workspace.annotations.delete(annotationId);
+        }
+        else {
+            const now = Date.now();
+            const annotation = {
+                id: annotationId,
+                workspaceId,
+                targetId,
+                userId,
+                body: payload.body ?? existing?.body ?? '',
+                createdAt: existing?.createdAt ?? now,
+                updatedAt: now,
+            };
+            workspace.annotations.set(annotationId, annotation);
+        }
+        this.recordActivity(workspaceId, {
+            id: (0, crypto_1.randomUUID)(),
+            workspaceId,
+            type: 'annotation',
+            description: `${action} annotation on ${targetId}`,
+            actorId: userId,
+            createdAt: Date.now(),
+        });
+        this.namespace.to(this.roomName(workspaceId)).emit('annotation:updated', {
+            action,
+            annotationId,
+            targetId,
+            workspaceId,
+            body: payload.body,
+            userId,
+        });
+        this.namespace
+            .to(this.roomName(workspaceId))
+            .emit('workspace:activity', this.latestActivity(workspaceId));
+    }
+    handleEdit(socket, payload) {
+        const { workspaceId, entityId, userId, version, changes } = payload;
+        const workspace = this.workspaceState.get(workspaceId);
+        if (!workspace || !entityId)
+            return;
+        const entityState = workspace.entities.get(entityId) ?? {
+            version: 0,
+        };
+        if (version !== entityState.version) {
+            const resolution = this.resolveConflict(entityState.lastEdit, {
+                workspaceId,
+                entityId,
+                userId,
+                version,
+                changes,
+                timestamp: Date.now(),
+            });
+            const resolvedEdit = {
+                workspaceId,
+                entityId,
+                userId,
+                version: resolution.resolvedVersion,
+                changes: resolution.resolvedChanges,
+                timestamp: Date.now(),
+            };
+            workspace.entities.set(entityId, {
+                version: resolution.resolvedVersion,
+                lastEdit: resolvedEdit,
+            });
+            socket.emit('edit:conflict', resolution);
+            this.namespace
+                .to(this.roomName(workspaceId))
+                .emit('edit:applied', resolvedEdit);
+            this.recordActivity(workspaceId, {
+                id: (0, crypto_1.randomUUID)(),
+                workspaceId,
+                type: 'edit_conflict',
+                description: `Conflict on ${entityId} resolved`,
+                actorId: userId,
+                createdAt: Date.now(),
+            });
+            this.namespace
+                .to(this.roomName(workspaceId))
+                .emit('workspace:activity', this.latestActivity(workspaceId));
+            return;
+        }
+        const appliedEdit = {
+            workspaceId,
+            entityId,
+            userId,
+            version: entityState.version + 1,
+            changes,
+            timestamp: Date.now(),
+        };
+        workspace.entities.set(entityId, {
+            version: appliedEdit.version,
+            lastEdit: appliedEdit,
+        });
+        this.namespace
+            .to(this.roomName(workspaceId))
+            .emit('edit:applied', appliedEdit);
+        this.recordActivity(workspaceId, {
+            id: (0, crypto_1.randomUUID)(),
+            workspaceId,
+            type: 'edit_applied',
+            description: `Edit applied to ${entityId}`,
+            actorId: userId,
+            createdAt: appliedEdit.timestamp,
+        });
+        this.namespace
+            .to(this.roomName(workspaceId))
+            .emit('workspace:activity', this.latestActivity(workspaceId));
+    }
+    resolveConflict(previousEdit, incoming) {
+        const mergedChanges = {
+            ...(previousEdit?.changes ?? {}),
+            ...incoming.changes,
+        };
+        const resolvedVersion = Math.max(previousEdit?.version ?? 0, incoming.version) + 1;
+        return {
+            strategy: 'last-writer-wins+merge',
+            previousVersion: previousEdit?.version ?? 0,
+            incomingVersion: incoming.version,
+            resolvedVersion,
+            resolvedChanges: mergedChanges,
+        };
+    }
+    getOrCreateWorkspace(workspaceId) {
+        if (!this.workspaceState.has(workspaceId)) {
+            this.workspaceState.set(workspaceId, {
+                members: new Map(),
+                annotations: new Map(),
+                activity: [],
+                entities: new Map(),
+            });
+        }
+        return this.workspaceState.get(workspaceId);
+    }
+    roomName(workspaceId) {
+        return `workspace:${workspaceId}`;
+    }
+    presenceRoomName(workspaceId, channel) {
+        return `presence:${workspaceId}:${channel}`;
+    }
+    getOrCreatePresenceChannel(workspaceId, channel) {
+        const workspaceChannels = this.presenceChannels.get(workspaceId) ?? new Map();
+        if (!this.presenceChannels.has(workspaceId)) {
+            this.presenceChannels.set(workspaceId, workspaceChannels);
+        }
+        const channelMembers = workspaceChannels.get(channel) ?? new Map();
+        if (!workspaceChannels.has(channel)) {
+            workspaceChannels.set(channel, channelMembers);
+        }
+        return channelMembers;
+    }
+    getPresenceChannel(workspaceId, channel) {
+        return this.presenceChannels.get(workspaceId)?.get(channel);
+    }
+    recordActivity(workspaceId, event) {
+        const workspace = this.getOrCreateWorkspace(workspaceId);
+        workspace.activity.unshift(event);
+        if (workspace.activity.length > this.activityLimit) {
+            workspace.activity = workspace.activity.slice(0, this.activityLimit);
+        }
+    }
+    latestActivity(workspaceId) {
+        const workspace = this.workspaceState.get(workspaceId);
+        return workspace ? [...workspace.activity] : [];
+    }
+    serializeWorkspace(workspaceId) {
+        const workspace = this.getOrCreateWorkspace(workspaceId);
+        return {
+            workspaceId,
+            members: [...workspace.members.values()],
+            annotations: [...workspace.annotations.values()],
+            activity: [...workspace.activity],
+            entities: [...workspace.entities.entries()].map(([entityId, state]) => ({
+                entityId,
+                version: state.version,
+            })),
+        };
+    }
+}
+exports.CollaborationHub = CollaborationHub;
+const createCollaborationHub = (io, options) => new CollaborationHub(io, options);
+exports.createCollaborationHub = createCollaborationHub;

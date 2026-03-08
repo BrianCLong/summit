@@ -1,0 +1,174 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ombudsService = exports.OmbudsService = void 0;
+const crypto_1 = require("crypto");
+const ledger_js_1 = require("../provenance/ledger.js");
+const logger_js_1 = require("../config/logger.js");
+const database_js_1 = require("../config/database.js");
+class OmbudsService {
+    constructor() {
+        this.initializeSchema().catch(err => {
+            logger_js_1.logger.error({ error: err }, 'Failed to initialize OmbudsService schema');
+        });
+    }
+    async initializeSchema() {
+        try {
+            const pool = (0, database_js_1.getPostgresPool)();
+            await pool.query(`
+        CREATE TABLE IF NOT EXISTS ombuds_decisions (
+          decision_id TEXT PRIMARY KEY,
+          tenant_id TEXT NOT NULL,
+          case_id TEXT NOT NULL,
+          trigger TEXT NOT NULL,
+          ruling TEXT NOT NULL,
+          rationale JSONB NOT NULL,
+          linked_evidence JSONB NOT NULL,
+          redaction_notes TEXT,
+          tags TEXT[],
+          status TEXT NOT NULL,
+          created_at TIMESTAMPTZ DEFAULT NOW(),
+          updated_at TIMESTAMPTZ DEFAULT NOW(),
+          decided_by TEXT NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS idx_ombuds_decisions_tenant ON ombuds_decisions(tenant_id);
+        CREATE INDEX IF NOT EXISTS idx_ombuds_decisions_case ON ombuds_decisions(case_id);
+        CREATE INDEX IF NOT EXISTS idx_ombuds_decisions_tags ON ombuds_decisions USING GIN(tags);
+      `);
+        }
+        catch (e) {
+            // In tests/sandbox where DB might be missing, log and ignore?
+            // But for production this is critical.
+            logger_js_1.logger.warn({ error: e }, "Could not initialize DB schema for OmbudsService");
+        }
+    }
+    async recordDecision(input) {
+        const decision = {
+            decisionId: `dec_${(0, crypto_1.randomUUID)()}`,
+            tenantId: input.tenantId,
+            caseId: input.caseId,
+            trigger: input.trigger,
+            ruling: input.ruling,
+            rationale: input.rationale,
+            linkedEvidence: {
+                auditEventIds: input.linkedEvidence?.auditEventIds || [],
+                claimIds: input.linkedEvidence?.claimIds || [],
+                bundleIds: input.linkedEvidence?.bundleIds || [],
+            },
+            redactionNotes: input.redactionNotes,
+            tags: input.tags || [],
+            status: 'final', // For MVP, we go straight to final.
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            decidedBy: input.decidedBy,
+        };
+        // Persist to DB
+        try {
+            const pool = (0, database_js_1.getPostgresPool)();
+            await pool.query(`
+        INSERT INTO ombuds_decisions (
+          decision_id, tenant_id, case_id, trigger, ruling, rationale,
+          linked_evidence, redaction_notes, tags, status, created_at, updated_at, decided_by
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+      `, [
+                decision.decisionId, decision.tenantId, decision.caseId, decision.trigger, decision.ruling,
+                JSON.stringify(decision.rationale), JSON.stringify(decision.linkedEvidence),
+                decision.redactionNotes, decision.tags, decision.status,
+                decision.createdAt, decision.updatedAt, decision.decidedBy
+            ]);
+        }
+        catch (e) {
+            logger_js_1.logger.error({ error: e }, "Failed to persist decision to DB");
+            // Fallback or throw? Ideally throw. But for now, if DB is down, maybe we just rely on Ledger (which also uses DB but might be different pool/retry logic)
+            // I'll throw to be safe as per "Persistence" requirement.
+            // But if pool is missing (test env), I might want to skip.
+            // I'll throw.
+            throw e;
+        }
+        // Audit trail integration
+        try {
+            await ledger_js_1.provenanceLedger.appendEntry({
+                timestamp: new Date(),
+                tenantId: decision.tenantId,
+                actionType: 'ombuds_decision_recorded',
+                resourceType: 'OmbudsDecision',
+                resourceId: decision.decisionId,
+                actorId: decision.decidedBy,
+                actorType: 'user', // Assuming ombuds is a user
+                payload: {
+                    mutationType: 'create',
+                    entityId: decision.decisionId,
+                    entityType: 'OmbudsDecision',
+                    trigger: decision.trigger,
+                    ruling: decision.ruling,
+                    caseId: decision.caseId,
+                    tags: decision.tags,
+                    linkedEvidence: decision.linkedEvidence
+                }, // Cast to any to allow extra fields if type is strict
+                metadata: {
+                    purpose: 'governance_oversight',
+                    classification: ['internal', 'confidential']
+                }
+            });
+        }
+        catch (error) {
+            logger_js_1.logger.error({ error, decisionId: decision.decisionId }, 'Failed to append ombuds decision to provenance ledger');
+            // We don't block the operation for MVP if ledger fails (e.g. DB issue)
+        }
+        return decision;
+    }
+    async getDecision(decisionId) {
+        const pool = (0, database_js_1.getPostgresPool)();
+        const res = await pool.query('SELECT * FROM ombuds_decisions WHERE decision_id = $1', [decisionId]);
+        if (res.rows.length === 0)
+            return undefined;
+        return this.mapRowToDecision(res.rows[0]);
+    }
+    async getDecisionsByCase(caseId) {
+        const pool = (0, database_js_1.getPostgresPool)();
+        const res = await pool.query('SELECT * FROM ombuds_decisions WHERE case_id = $1', [caseId]);
+        return res.rows.map((row) => this.mapRowToDecision(row));
+    }
+    async getDecisionsByTenant(tenantId) {
+        const pool = (0, database_js_1.getPostgresPool)();
+        const res = await pool.query('SELECT * FROM ombuds_decisions WHERE tenant_id = $1', [tenantId]);
+        return res.rows.map((row) => this.mapRowToDecision(row));
+    }
+    async getAllDecisions() {
+        const pool = (0, database_js_1.getPostgresPool)();
+        const res = await pool.query('SELECT * FROM ombuds_decisions');
+        return res.rows.map((row) => this.mapRowToDecision(row));
+    }
+    mapRowToDecision(row) {
+        return {
+            decisionId: row.decision_id,
+            tenantId: row.tenant_id,
+            caseId: row.case_id,
+            trigger: row.trigger,
+            ruling: row.ruling,
+            rationale: row.rationale,
+            linkedEvidence: row.linked_evidence,
+            redactionNotes: row.redaction_notes,
+            tags: row.tags || [],
+            status: row.status,
+            createdAt: row.created_at,
+            updatedAt: row.updated_at,
+            decidedBy: row.decided_by
+        };
+    }
+    /**
+     * Export a decision receipt as JSON
+     */
+    async generateReceipt(decisionId) {
+        const decision = await this.getDecision(decisionId);
+        if (!decision)
+            return null;
+        return {
+            receiptId: `rcpt_${(0, crypto_1.randomUUID)()}`,
+            issuedAt: new Date(),
+            decision,
+            signature: 'mock_signature_for_mvp' // In real system, sign this object
+        };
+    }
+}
+exports.OmbudsService = OmbudsService;
+exports.ombudsService = new OmbudsService();

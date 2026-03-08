@@ -1,6 +1,11 @@
-import express from 'express';
-import { createNarrativeRouter } from '../src/api/routes.js';
-import { SimulationEngine } from '../src/core/SimulationEngine.js';
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = __importDefault(require("express"));
+const routes_js_1 = require("../src/api/routes.js");
+const SimulationEngine_js_1 = require("../src/core/SimulationEngine.js");
 const config = {
     initialTimestamp: 0,
     actors: [
@@ -32,10 +37,10 @@ const crisisEvent = {
 };
 describe('Narrative API integration', () => {
     it('initializes, steps, and injects events via API', async () => {
-        const engine = new SimulationEngine();
-        const app = express();
-        app.use(express.json());
-        app.use(createNarrativeRouter(engine));
+        const engine = new SimulationEngine_js_1.SimulationEngine();
+        const app = (0, express_1.default)();
+        app.use(express_1.default.json());
+        app.use((0, routes_js_1.createNarrativeRouter)(engine));
         const server = await new Promise((resolve) => {
             const listener = app.listen(0, () => resolve(listener));
         });

@@ -31,4 +31,3 @@ __exportStar(require("./simulation/SignalGenerator"), exports);
 __exportStar(require("./protocols/ProtocolDecoder"), exports);
 __exportStar(require("./integration/DataSourceAdapter"), exports);
 __exportStar(require("./exercise/ExerciseManager"), exports);
-//# sourceMappingURL=index.js.map

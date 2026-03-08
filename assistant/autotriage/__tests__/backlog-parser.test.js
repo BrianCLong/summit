@@ -1,3 +1,4 @@
+"use strict";
 /**
  * Unit tests for backlog parser
  *
@@ -7,9 +8,43 @@
  * - Edge cases
  * - Validation
  */
-import * as fs from 'fs';
-import * as path from 'path';
-import { parseBacklogWithDetails } from '../data/backlog-parser.js';
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+const fs = __importStar(require("fs"));
+const path = __importStar(require("path"));
+const backlog_parser_js_1 = require("../data/backlog-parser.js");
 describe('Backlog Parser', () => {
     const testDataDir = path.join(__dirname, 'fixtures');
     beforeAll(() => {
@@ -46,7 +81,7 @@ describe('Backlog Parser', () => {
                 ],
             };
             fs.writeFileSync(testFile, JSON.stringify(backlog, null, 2));
-            const result = await parseBacklogWithDetails(testFile);
+            const result = await (0, backlog_parser_js_1.parseBacklogWithDetails)(testFile);
             expect(result.items).toHaveLength(1);
             expect(result.errors).toHaveLength(0);
             expect(result.warnings).toHaveLength(0);
@@ -81,7 +116,7 @@ describe('Backlog Parser', () => {
                 ],
             };
             fs.writeFileSync(testFile, JSON.stringify(backlog, null, 2));
-            const result = await parseBacklogWithDetails(testFile);
+            const result = await (0, backlog_parser_js_1.parseBacklogWithDetails)(testFile);
             expect(result.items).toHaveLength(3);
             expect(result.stats.totalEpics).toBe(2);
             expect(result.stats.totalStories).toBe(3);
@@ -89,7 +124,7 @@ describe('Backlog Parser', () => {
     });
     describe('Error handling', () => {
         it('should handle missing file gracefully', async () => {
-            const result = await parseBacklogWithDetails('/nonexistent/file.json');
+            const result = await (0, backlog_parser_js_1.parseBacklogWithDetails)('/nonexistent/file.json');
             expect(result.items).toHaveLength(0);
             expect(result.warnings.length).toBeGreaterThan(0);
             expect(result.warnings[0]).toContain('not found');
@@ -97,7 +132,7 @@ describe('Backlog Parser', () => {
         it('should handle empty file', async () => {
             const testFile = path.join(testDataDir, 'empty.json');
             fs.writeFileSync(testFile, '');
-            const result = await parseBacklogWithDetails(testFile);
+            const result = await (0, backlog_parser_js_1.parseBacklogWithDetails)(testFile);
             expect(result.items).toHaveLength(0);
             expect(result.errors.length).toBeGreaterThan(0);
             expect(result.errors[0].type).toBe('invalid_format');
@@ -105,7 +140,7 @@ describe('Backlog Parser', () => {
         it('should handle invalid JSON', async () => {
             const testFile = path.join(testDataDir, 'invalid.json');
             fs.writeFileSync(testFile, '{ invalid json }');
-            const result = await parseBacklogWithDetails(testFile);
+            const result = await (0, backlog_parser_js_1.parseBacklogWithDetails)(testFile);
             expect(result.items).toHaveLength(0);
             expect(result.errors.length).toBeGreaterThan(0);
             expect(result.errors[0].message).toContain('Invalid JSON');
@@ -113,7 +148,7 @@ describe('Backlog Parser', () => {
         it('should handle missing epics array', async () => {
             const testFile = path.join(testDataDir, 'no-epics.json');
             fs.writeFileSync(testFile, JSON.stringify({ version: '1.0' }));
-            const result = await parseBacklogWithDetails(testFile);
+            const result = await (0, backlog_parser_js_1.parseBacklogWithDetails)(testFile);
             expect(result.items).toHaveLength(0);
             expect(result.errors.length).toBeGreaterThan(0);
             expect(result.errors[0].message).toContain('epics');
@@ -131,7 +166,7 @@ describe('Backlog Parser', () => {
                 ],
             };
             fs.writeFileSync(testFile, JSON.stringify(backlog));
-            const result = await parseBacklogWithDetails(testFile);
+            const result = await (0, backlog_parser_js_1.parseBacklogWithDetails)(testFile);
             expect(result.items).toHaveLength(0);
             expect(result.errors.length).toBeGreaterThan(0);
             expect(result.errors[0].type).toBe('missing_field');
@@ -152,7 +187,7 @@ describe('Backlog Parser', () => {
                 ],
             };
             fs.writeFileSync(testFile, JSON.stringify(backlog));
-            const result = await parseBacklogWithDetails(testFile);
+            const result = await (0, backlog_parser_js_1.parseBacklogWithDetails)(testFile);
             expect(result.items).toHaveLength(0);
             expect(result.stats.skipped).toBe(1);
         });
@@ -172,7 +207,7 @@ describe('Backlog Parser', () => {
                 ],
             };
             fs.writeFileSync(testFile, JSON.stringify(backlog));
-            const result = await parseBacklogWithDetails(testFile);
+            const result = await (0, backlog_parser_js_1.parseBacklogWithDetails)(testFile);
             expect(result.items[0].impact).toBe('blocker');
         });
         it('should map "Should" to high', async () => {
@@ -189,7 +224,7 @@ describe('Backlog Parser', () => {
                 ],
             };
             fs.writeFileSync(testFile, JSON.stringify(backlog));
-            const result = await parseBacklogWithDetails(testFile);
+            const result = await (0, backlog_parser_js_1.parseBacklogWithDetails)(testFile);
             expect(result.items[0].impact).toBe('high');
         });
         it('should map "Could" to medium', async () => {
@@ -206,7 +241,7 @@ describe('Backlog Parser', () => {
                 ],
             };
             fs.writeFileSync(testFile, JSON.stringify(backlog));
-            const result = await parseBacklogWithDetails(testFile);
+            const result = await (0, backlog_parser_js_1.parseBacklogWithDetails)(testFile);
             expect(result.items[0].impact).toBe('medium');
         });
         it('should default to low for unknown priority', async () => {
@@ -223,7 +258,7 @@ describe('Backlog Parser', () => {
                 ],
             };
             fs.writeFileSync(testFile, JSON.stringify(backlog));
-            const result = await parseBacklogWithDetails(testFile);
+            const result = await (0, backlog_parser_js_1.parseBacklogWithDetails)(testFile);
             expect(result.items[0].impact).toBe('low');
         });
     });
@@ -247,7 +282,7 @@ describe('Backlog Parser', () => {
                 ],
             };
             fs.writeFileSync(testFile, JSON.stringify(backlog));
-            const result = await parseBacklogWithDetails(testFile);
+            const result = await (0, backlog_parser_js_1.parseBacklogWithDetails)(testFile);
             expect(result.items[0].complexityScore).toBe(10); // Base complexity
         });
         it('should increase complexity with dependencies', async () => {
@@ -270,7 +305,7 @@ describe('Backlog Parser', () => {
                 ],
             };
             fs.writeFileSync(testFile, JSON.stringify(backlog));
-            const result = await parseBacklogWithDetails(testFile);
+            const result = await (0, backlog_parser_js_1.parseBacklogWithDetails)(testFile);
             expect(result.items[0].complexityScore).toBe(40); // 10 + 2*15
         });
         it('should increase complexity with acceptance criteria', async () => {
@@ -293,7 +328,7 @@ describe('Backlog Parser', () => {
                 ],
             };
             fs.writeFileSync(testFile, JSON.stringify(backlog));
-            const result = await parseBacklogWithDetails(testFile);
+            const result = await (0, backlog_parser_js_1.parseBacklogWithDetails)(testFile);
             expect(result.items[0].complexityScore).toBe(25); // 10 + 3*5
         });
     });
@@ -317,7 +352,7 @@ describe('Backlog Parser', () => {
                 ],
             };
             fs.writeFileSync(testFile, JSON.stringify(backlog));
-            const result = await parseBacklogWithDetails(testFile);
+            const result = await (0, backlog_parser_js_1.parseBacklogWithDetails)(testFile);
             expect(result.items[0].title).toBe('Story with multiple spaces');
         });
         it('should handle missing owner gracefully', async () => {
@@ -340,9 +375,8 @@ describe('Backlog Parser', () => {
                 ],
             };
             fs.writeFileSync(testFile, JSON.stringify(backlog));
-            const result = await parseBacklogWithDetails(testFile);
+            const result = await (0, backlog_parser_js_1.parseBacklogWithDetails)(testFile);
             expect(result.items[0].owner).toBeUndefined();
         });
     });
 });
-//# sourceMappingURL=backlog-parser.test.js.map

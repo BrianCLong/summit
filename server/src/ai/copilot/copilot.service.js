@@ -1,0 +1,477 @@
+"use strict";
+/**
+ * Copilot Service
+ *
+ * Main orchestration service for AI copilot functionality.
+ * Integrates:
+ * - NL-to-Query translation
+ * - GraphRAG with provenance
+ * - Sandbox execution
+ * - Redaction filtering
+ * - Guardrails enforcement
+ */
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.CopilotService = void 0;
+exports.createCopilotService = createCopilotService;
+exports.initializeCopilotService = initializeCopilotService;
+exports.getCopilotService = getCopilotService;
+const crypto_1 = require("crypto");
+const pino_1 = __importDefault(require("pino"));
+const nl_query_service_js_1 = require("./nl-query.service.js");
+const sandbox_executor_service_js_1 = require("./sandbox-executor.service.js");
+const graphrag_provenance_service_js_1 = require("./graphrag-provenance.service.js");
+const redaction_service_js_1 = require("./redaction.service.js");
+const guardrails_service_js_1 = require("./guardrails.service.js");
+const governance_service_js_1 = require("./governance.service.js");
+const logger = pino_1.default({ name: 'copilot-service' });
+/**
+ * Main Copilot Service
+ */
+class CopilotService {
+    nlQueryService;
+    sandboxExecutor;
+    graphRAGService;
+    redactionService;
+    guardrailsService;
+    governanceService;
+    config;
+    constructor(config) {
+        this.config = config;
+        // Initialize services
+        this.nlQueryService = (0, nl_query_service_js_1.createNLQueryService)({});
+        this.sandboxExecutor = (0, sandbox_executor_service_js_1.createSandboxExecutor)(config.neo4jDriver);
+        this.graphRAGService = (0, graphrag_provenance_service_js_1.createGraphRAGProvenanceService)(config.neo4jDriver, config.llmService, config.provLedgerUrl);
+        this.redactionService = (0, redaction_service_js_1.createRedactionService)({
+            userClearance: config.defaultClearance || 'UNCLASSIFIED',
+        });
+        this.guardrailsService = (0, guardrails_service_js_1.createGuardrailsService)();
+        this.governanceService = (0, governance_service_js_1.getCopilotGovernance)();
+        logger.info('Copilot service initialized with governance');
+    }
+    /**
+     * Process a natural language query
+     *
+     * Flow:
+     * 1. Validate prompt with guardrails
+     * 2. Compile NL to Cypher query
+     * 3. If dry-run: return preview
+     * 4. If execution allowed: run in sandbox
+     * 5. Generate answer with GraphRAG
+     * 6. Apply redaction
+     * 7. Final guardrail validation
+     */
+    async processQuery(request, context) {
+        const requestId = (0, crypto_1.randomUUID)();
+        const startTime = Date.now();
+        logger.info({
+            requestId,
+            investigationId: request.investigationId,
+            queryLength: request.query.length,
+            dryRun: request.dryRun,
+        }, 'Processing copilot query');
+        try {
+            // Step 1: Validate prompt with guardrails
+            const promptValidation = this.guardrailsService.validatePrompt(request.query, context.userId, context.tenantId);
+            if (!promptValidation.allowed) {
+                logger.warn({ requestId, riskLevel: promptValidation.riskLevel }, 'Prompt blocked by guardrails');
+                const refusal = this.guardrailsService.createPolicyRefusal(promptValidation.reason || 'Prompt validation failed');
+                // Generate governance verdict for refusal
+                const governanceVerdict = this.governanceService.generateRefusalVerdict(refusal);
+                return {
+                    type: 'refusal',
+                    data: {
+                        ...refusal,
+                        governanceVerdict,
+                    },
+                };
+            }
+            // Step 2: Compile NL to Cypher
+            const preview = await this.nlQueryService.compileQuery({
+                ...request,
+                userId: context.userId,
+                tenantId: context.tenantId,
+            });
+            // If compilation failed or query not allowed
+            if (!preview.allowed || !preview.cypher) {
+                logger.info({ requestId, blockReason: preview.blockReason }, 'Query compilation blocked');
+                return {
+                    type: 'preview',
+                    data: preview,
+                };
+            }
+            // Step 3: If dry-run, return preview
+            if (request.dryRun) {
+                // Add dry-run plan information
+                const dryRunPlan = await this.sandboxExecutor.dryRunPlan(preview);
+                return {
+                    type: 'preview',
+                    data: {
+                        ...preview,
+                        // Merge dry-run information
+                        refinements: dryRunPlan.withinBudget
+                            ? preview.refinements
+                            : dryRunPlan.refinements,
+                        warnings: [
+                            ...preview.warnings,
+                            ...dryRunPlan.budgetViolations,
+                        ],
+                        allowed: dryRunPlan.recommendExecution,
+                        blockReason: dryRunPlan.recommendExecution
+                            ? undefined
+                            : dryRunPlan.recommendationReason,
+                    },
+                };
+            }
+            // Step 4: Execute in sandbox (if enabled)
+            if (!this.config.enableExecution) {
+                return {
+                    type: 'preview',
+                    data: {
+                        ...preview,
+                        warnings: [
+                            ...preview.warnings,
+                            'Query execution is disabled. Only preview is available.',
+                        ],
+                    },
+                };
+            }
+            // Execute compiled Cypher within sandbox budgets
+            const executionResult = await this.executeQuery(preview, context);
+            if (!executionResult.success) {
+                const refusal = {
+                    refusalId: (0, crypto_1.randomUUID)(),
+                    reason: executionResult.error || 'Query execution failed due to sandbox restrictions',
+                    category: 'internal_error',
+                    suggestions: [
+                        'Try simplifying your question',
+                        'Adjust filters to reduce query cost',
+                        'Contact support if the problem persists',
+                    ],
+                    timestamp: new Date().toISOString(),
+                    auditId: (0, crypto_1.randomUUID)(),
+                };
+                // Generate governance verdict for refusal
+                const governanceVerdict = this.governanceService.generateRefusalVerdict(refusal);
+                return {
+                    type: 'refusal',
+                    data: {
+                        ...refusal,
+                        governanceVerdict,
+                    },
+                };
+            }
+            // Step 5: Generate answer with GraphRAG
+            const answer = await this.generateAnswer(request, context, preview);
+            // Step 6: Apply redaction based on user clearance
+            const redactionService = context.clearance
+                ? (0, redaction_service_js_1.createRedactionServiceForUser)(context.clearance)
+                : this.redactionService;
+            const redactedResult = redactionService.redactAnswer(answer);
+            const warnings = [
+                ...redactedResult.content.warnings,
+                ...executionResult.warnings,
+            ];
+            // Step 7: Final guardrail validation
+            const validation = this.guardrailsService.validateAnswer(redactedResult.content, request.query);
+            if (!validation.valid || validation.refusal) {
+                logger.warn({
+                    requestId,
+                    failureReason: validation.checks.failureReason,
+                }, 'Answer failed guardrail validation');
+                if (validation.refusal) {
+                    // Generate governance verdict for refusal
+                    const governanceVerdict = this.governanceService.generateRefusalVerdict(validation.refusal);
+                    return {
+                        type: 'refusal',
+                        data: {
+                            ...validation.refusal,
+                            governanceVerdict,
+                        },
+                    };
+                }
+            }
+            const executionTime = Date.now() - startTime;
+            // Build answer without governance verdict first
+            const answerWithoutVerdict = {
+                ...redactedResult.content,
+                warnings,
+                executedQuery: executionResult.cypher,
+            };
+            // Generate governance verdict for approved answer
+            const governanceVerdict = this.governanceService.generateApprovedVerdict(answerWithoutVerdict, validation.checks);
+            logger.info({
+                requestId,
+                executionTimeMs: executionTime,
+                citationCount: redactedResult.content.citations.length,
+                confidence: redactedResult.content.confidence,
+                wasRedacted: redactedResult.wasRedacted,
+                governanceVerdict: governanceVerdict.verdict,
+            }, 'Copilot query completed');
+            return {
+                type: 'answer',
+                data: {
+                    ...answerWithoutVerdict,
+                    governanceVerdict,
+                },
+            };
+        }
+        catch (error) {
+            const executionTime = Date.now() - startTime;
+            logger.error({
+                requestId,
+                executionTimeMs: executionTime,
+                error: error instanceof Error ? error.message : 'Unknown error',
+            }, 'Copilot query failed');
+            const refusal = {
+                refusalId: (0, crypto_1.randomUUID)(),
+                reason: error instanceof Error
+                    ? `Processing error: ${error.message}`
+                    : 'An unexpected error occurred',
+                category: 'internal_error',
+                suggestions: [
+                    'Try simplifying your question',
+                    'Check if the investigation has the data you need',
+                    'Contact support if the problem persists',
+                ],
+                timestamp: new Date().toISOString(),
+                auditId: (0, crypto_1.randomUUID)(),
+            };
+            // Generate governance verdict for refusal
+            const governanceVerdict = this.governanceService.generateRefusalVerdict(refusal);
+            return {
+                type: 'refusal',
+                data: {
+                    ...refusal,
+                    governanceVerdict,
+                },
+            };
+        }
+    }
+    /**
+     * Answer a question using GraphRAG
+     */
+    async answerQuestion(request, context) {
+        const requestId = (0, crypto_1.randomUUID)();
+        const startTime = Date.now();
+        logger.info({
+            requestId,
+            investigationId: request.investigationId,
+            questionLength: request.question.length,
+        }, 'Processing GraphRAG question');
+        try {
+            // Validate prompt
+            const promptValidation = this.guardrailsService.validatePrompt(request.question, context.userId, context.tenantId);
+            if (!promptValidation.allowed) {
+                const refusal = this.guardrailsService.createPolicyRefusal(promptValidation.reason || 'Question validation failed');
+                const governanceVerdict = this.governanceService.generateRefusalVerdict(refusal);
+                return {
+                    type: 'refusal',
+                    data: {
+                        ...refusal,
+                        governanceVerdict,
+                    },
+                };
+            }
+            // Generate answer with GraphRAG
+            const answer = await this.graphRAGService.answer({
+                ...request,
+                userId: context.userId,
+                tenantId: context.tenantId,
+            });
+            // Apply redaction
+            const redactionService = context.clearance
+                ? (0, redaction_service_js_1.createRedactionServiceForUser)(context.clearance)
+                : this.redactionService;
+            const redactedResult = redactionService.redactAnswer(answer);
+            // Validate with guardrails
+            const validation = this.guardrailsService.validateAnswer(redactedResult.content, request.question);
+            if (validation.refusal) {
+                const governanceVerdict = this.governanceService.generateRefusalVerdict(validation.refusal);
+                return {
+                    type: 'refusal',
+                    data: {
+                        ...validation.refusal,
+                        governanceVerdict,
+                    },
+                };
+            }
+            const executionTime = Date.now() - startTime;
+            // Generate governance verdict for approved answer
+            const governanceVerdict = this.governanceService.generateApprovedVerdict(redactedResult.content, validation.checks);
+            logger.info({
+                requestId,
+                executionTimeMs: executionTime,
+                citationCount: redactedResult.content.citations.length,
+                confidence: redactedResult.content.confidence,
+                governanceVerdict: governanceVerdict.verdict,
+            }, 'GraphRAG question answered');
+            return {
+                type: 'answer',
+                data: {
+                    ...redactedResult.content,
+                    governanceVerdict,
+                },
+            };
+        }
+        catch (error) {
+            logger.error({
+                requestId,
+                error: error instanceof Error ? error.message : 'Unknown error',
+            }, 'GraphRAG question failed');
+            const refusal = {
+                refusalId: (0, crypto_1.randomUUID)(),
+                reason: error instanceof Error
+                    ? error.message
+                    : 'Failed to answer question',
+                category: 'internal_error',
+                suggestions: ['Try a simpler question', 'Check your access permissions'],
+                timestamp: new Date().toISOString(),
+                auditId: (0, crypto_1.randomUUID)(),
+            };
+            const governanceVerdict = this.governanceService.generateRefusalVerdict(refusal);
+            return {
+                type: 'refusal',
+                data: {
+                    ...refusal,
+                    governanceVerdict,
+                },
+            };
+        }
+    }
+    /**
+     * Preview a query without execution
+     */
+    async previewQuery(request, context) {
+        // Force dry-run mode
+        const preview = await this.nlQueryService.compileQuery({
+            ...request,
+            dryRun: true,
+            userId: context.userId,
+            tenantId: context.tenantId,
+        });
+        // Add dry-run plan if query is valid
+        if (preview.cypher && preview.allowed) {
+            const dryRunPlan = await this.sandboxExecutor.dryRunPlan(preview);
+            return {
+                ...preview,
+                refinements: dryRunPlan.withinBudget
+                    ? preview.refinements
+                    : dryRunPlan.refinements,
+                warnings: [...preview.warnings, ...dryRunPlan.budgetViolations],
+                allowed: dryRunPlan.recommendExecution,
+                blockReason: dryRunPlan.recommendExecution
+                    ? undefined
+                    : dryRunPlan.recommendationReason,
+            };
+        }
+        return preview;
+    }
+    /**
+     * Execute a previewed query
+     */
+    async executeQuery(preview, context) {
+        if (!this.config.enableExecution) {
+            return {
+                executionId: (0, crypto_1.randomUUID)(),
+                cypher: preview.cypher,
+                success: false,
+                rows: [],
+                rowCount: 0,
+                truncated: false,
+                executionTimeMs: 0,
+                error: 'Query execution is disabled',
+                warnings: [],
+            };
+        }
+        return this.sandboxExecutor.execute(preview, {
+            investigationId: context.investigationId,
+            tenantId: context.tenantId,
+            userId: context.userId,
+        });
+    }
+    /**
+     * Generate answer from query execution
+     */
+    async generateAnswer(request, context, preview) {
+        // Use GraphRAG to generate answer
+        const graphRAGRequest = {
+            question: request.query,
+            investigationId: request.investigationId,
+            userId: context.userId,
+            tenantId: context.tenantId,
+            focusEntityIds: request.focusEntityIds,
+            maxHops: request.maxHops,
+            temperature: request.temperature,
+            includeEvidence: true,
+            includeClaims: true,
+        };
+        return this.graphRAGService.answer(graphRAGRequest);
+    }
+    /**
+     * Get available query patterns
+     */
+    getAvailablePatterns() {
+        return this.nlQueryService.getAvailablePatterns();
+    }
+    /**
+     * Get guardrail statistics
+     */
+    getGuardrailStats() {
+        return this.guardrailsService.getStats();
+    }
+    /**
+     * Get risky prompts for review
+     */
+    getRiskyPromptsForReview() {
+        return this.guardrailsService.getRiskyPromptsForReview();
+    }
+    /**
+     * Health check
+     */
+    async healthCheck() {
+        const sandboxHealth = await this.sandboxExecutor.healthCheck();
+        const graphRAGHealth = await this.graphRAGService.healthCheck();
+        return {
+            healthy: sandboxHealth.healthy && graphRAGHealth.healthy,
+            services: {
+                nlQuery: true,
+                sandbox: sandboxHealth.healthy,
+                graphRAG: graphRAGHealth.healthy,
+                neo4j: sandboxHealth.neo4jConnected,
+                provLedger: graphRAGHealth.provLedger,
+                redaction: true,
+                guardrails: true,
+            },
+        };
+    }
+}
+exports.CopilotService = CopilotService;
+/**
+ * Create a copilot service instance
+ */
+function createCopilotService(config) {
+    return new CopilotService(config);
+}
+/**
+ * Singleton instance
+ */
+let serviceInstance = null;
+/**
+ * Initialize the singleton copilot service
+ */
+function initializeCopilotService(config) {
+    serviceInstance = new CopilotService(config);
+    return serviceInstance;
+}
+/**
+ * Get the singleton copilot service
+ */
+function getCopilotService() {
+    if (!serviceInstance) {
+        throw new Error('Copilot service not initialized. Call initializeCopilotService first.');
+    }
+    return serviceInstance;
+}

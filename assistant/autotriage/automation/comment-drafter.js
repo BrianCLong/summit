@@ -1,11 +1,16 @@
+"use strict";
 /**
  * Comment drafting module
  * Drafts comments for deduplicated clusters
  */
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.draftDeduplicationComments = draftDeduplicationComments;
+exports.draftAutoTriageComment = draftAutoTriageComment;
+exports.draftBatchComments = draftBatchComments;
 /**
  * Draft deduplication comments for clustered issues
  */
-export function draftDeduplicationComments(cluster) {
+function draftDeduplicationComments(cluster) {
     if (cluster.items.length < 2) {
         return [];
     }
@@ -65,7 +70,7 @@ Please review and consider closing as duplicate or linking the issues.
 /**
  * Draft auto-triage comments with classification results
  */
-export function draftAutoTriageComment(item) {
+function draftAutoTriageComment(item) {
     const comment = `## 🤖 Auto-Triage Results
 
 This issue has been automatically analyzed:
@@ -93,7 +98,7 @@ ${item.clusterTheme ? `**Theme**: ${item.clusterTheme}\n\n` : ''}
 /**
  * Draft batch comments for all issues
  */
-export function draftBatchComments(items, clusters) {
+function draftBatchComments(items, clusters) {
     const drafts = [];
     // Draft deduplication comments for clusters
     clusters.forEach((cluster) => {
@@ -134,4 +139,3 @@ function generateLabelList(item) {
     }
     return labels.join(', ');
 }
-//# sourceMappingURL=comment-drafter.js.map

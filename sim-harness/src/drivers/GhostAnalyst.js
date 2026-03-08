@@ -1,0 +1,713 @@
+"use strict";
+/**
+ * Ghost Analyst Driver
+ * Simulates human analyst workflows interacting with the IntelGraph platform
+ */
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.GhostAnalyst = void 0;
+const axios_1 = __importDefault(require("axios"));
+const uuid_1 = require("uuid");
+const MetricsCollector_js_1 = require("../metrics/MetricsCollector.js");
+const Logger_js_1 = require("../utils/Logger.js");
+/**
+ * GraphQL queries used by the ghost analyst
+ */
+const QUERIES = {
+    healthCheck: `
+    query {
+      __typename
+    }
+  `,
+    createInvestigation: `
+    mutation CreateInvestigation($input: CreateInvestigationInput!) {
+      createInvestigation(input: $input) {
+        id
+        name
+        description
+        status
+        createdAt
+      }
+    }
+  `,
+    addEntity: `
+    mutation AddEntity($input: CreateEntityInput!) {
+      createEntity(input: $input) {
+        id
+        type
+        name
+        properties
+      }
+    }
+  `,
+    addRelationship: `
+    mutation AddRelationship($input: CreateRelationshipInput!) {
+      createRelationship(input: $input) {
+        id
+        type
+        fromEntityId
+        toEntityId
+        properties
+      }
+    }
+  `,
+    queryEntities: `
+    query QueryEntities($investigationId: ID!, $type: String, $limit: Int) {
+      investigation(id: $investigationId) {
+        entities(type: $type, limit: $limit) {
+          id
+          type
+          name
+          properties
+        }
+      }
+    }
+  `,
+    queryRelationships: `
+    query QueryRelationships($investigationId: ID!, $entityId: ID) {
+      investigation(id: $investigationId) {
+        relationships(entityId: $entityId) {
+          id
+          type
+          fromEntityId
+          toEntityId
+          properties
+        }
+      }
+    }
+  `,
+    expandNetwork: `
+    query ExpandNetwork($investigationId: ID!, $entityId: ID!, $depth: Int!) {
+      investigation(id: $investigationId) {
+        expandNetwork(entityId: $entityId, depth: $depth) {
+          entities {
+            id
+            type
+            name
+          }
+          relationships {
+            id
+            type
+            fromEntityId
+            toEntityId
+          }
+        }
+      }
+    }
+  `,
+    startCopilotRun: `
+    mutation StartCopilotRun($goal: String!, $investigationId: ID!) {
+      startCopilotRun(goal: $goal, investigationId: $investigationId) {
+        id
+        goal
+        status
+        createdAt
+      }
+    }
+  `,
+    getCopilotRunStatus: `
+    query GetCopilotRunStatus($id: ID!) {
+      copilotRun(id: $id) {
+        id
+        status
+        results
+        completedAt
+      }
+    }
+  `,
+    searchEntities: `
+    query SearchEntities($investigationId: ID!, $query: String!) {
+      investigation(id: $investigationId) {
+        searchEntities(query: $query) {
+          id
+          type
+          name
+          relevanceScore
+        }
+      }
+    }
+  `,
+    analyzePath: `
+    query AnalyzePath($investigationId: ID!, $fromId: ID!, $toId: ID!) {
+      investigation(id: $investigationId) {
+        analyzePath(fromId: $fromId, toId: $toId) {
+          paths {
+            entities {
+              id
+              name
+            }
+            relationships {
+              id
+              type
+            }
+            length
+            strength
+          }
+        }
+      }
+    }
+  `,
+    getInvestigation: `
+    query GetInvestigation($id: ID!) {
+      investigation(id: $id) {
+        id
+        name
+        entities {
+          id
+          type
+          name
+        }
+        relationships {
+          id
+          type
+          fromEntityId
+          toEntityId
+        }
+      }
+    }
+  `,
+};
+class GhostAnalyst {
+    client;
+    config;
+    metricsCollector;
+    logger;
+    activeSessions = new Map();
+    constructor(config) {
+        this.config = config;
+        this.logger = new Logger_js_1.Logger('GhostAnalyst');
+        this.metricsCollector = new MetricsCollector_js_1.MetricsCollector();
+        this.client = axios_1.default.create({
+            baseURL: config.api.baseUrl,
+            timeout: config.api.timeout,
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Simulation-Mode': 'true',
+                'X-Non-Production': 'true',
+                ...config.api.headers,
+            },
+        });
+        this.validateSafetyConfig();
+    }
+    /**
+     * Validate that we're not targeting production
+     */
+    validateSafetyConfig() {
+        if (!this.config.safety.nonProdOnly) {
+            throw new Error('SAFETY: nonProdOnly must be true. This harness cannot target production.');
+        }
+        const url = this.config.api.baseUrl.toLowerCase();
+        if (url.includes('prod') ||
+            url.includes('production') ||
+            url.includes('.com') ||
+            url.includes('.io')) {
+            throw new Error(`SAFETY: URL appears to be production: ${url}. Only localhost or explicit dev endpoints allowed.`);
+        }
+        this.logger.info('Safety validation passed: non-production mode confirmed');
+    }
+    /**
+     * Run a workflow session
+     */
+    async runWorkflow(workflow, scenarioData) {
+        const sessionId = (0, uuid_1.v4)();
+        const session = {
+            id: sessionId,
+            scenarioData,
+            workflow,
+            config: this.config,
+            metrics: this.initializeMetrics(sessionId, scenarioData),
+            state: {
+                entityIds: [],
+                relationshipIds: [],
+                currentStep: 0,
+                completed: false,
+                failed: false,
+                groundTruthHits: {
+                    entities: new Set(),
+                    relationships: new Set(),
+                },
+            },
+        };
+        this.activeSessions.set(sessionId, session);
+        this.metricsCollector.startSession(sessionId);
+        const groundTruthTotal = (scenarioData.metadata?.groundTruth?.keyEntityIndices.length || 0) +
+            (scenarioData.metadata?.groundTruth?.criticalRelationshipIndices.length || 0);
+        if (groundTruthTotal > 0) {
+            this.metricsCollector.updateSessionMetrics(sessionId, {
+                groundTruthTotal,
+                groundTruthCoverage: 0,
+            });
+            session.metrics.groundTruthTotal = groundTruthTotal;
+            session.metrics.groundTruthCoverage = 0;
+        }
+        this.logger.info(`Starting workflow session ${sessionId}: ${workflow.name}`);
+        try {
+            await this.executeWorkflow(session);
+            session.state.completed = true;
+            session.metrics.investigationCompleted = true;
+            this.metricsCollector.updateSessionMetrics(session.id, {
+                investigationCompleted: true,
+            });
+            session.metrics = this.metricsCollector.endSession(sessionId);
+            this.logger.info(`Workflow session ${sessionId} completed successfully`);
+        }
+        catch (error) {
+            session.state.failed = true;
+            session.metrics.errors.push({
+                timestamp: new Date().toISOString(),
+                type: 'WORKFLOW_FAILURE',
+                message: error.message,
+                step: `Step ${session.state.currentStep}`,
+            });
+            this.logger.error(`Workflow session ${sessionId} failed: ${error.message}`);
+            throw error;
+        }
+        finally {
+            this.activeSessions.delete(sessionId);
+        }
+        return session;
+    }
+    /**
+     * Execute workflow steps
+     */
+    async executeWorkflow(session) {
+        for (let i = 0; i < session.workflow.steps.length; i++) {
+            session.state.currentStep = i;
+            const step = session.workflow.steps[i];
+            this.logger.debug(`Executing step ${i + 1}/${session.workflow.steps.length}: ${step.type}`);
+            try {
+                await this.executeStep(session, step);
+                // Think time between steps (simulate human behavior)
+                if (this.config.ghostAnalyst.thinkTime > 0 && i < session.workflow.steps.length - 1) {
+                    await this.sleep(this.config.ghostAnalyst.thinkTime);
+                }
+            }
+            catch (error) {
+                this.logger.error(`Step ${step.type} failed: ${error.message}`);
+                session.metrics.tasksFailed++;
+                session.metrics.errors.push({
+                    timestamp: new Date().toISOString(),
+                    type: step.type,
+                    message: error.message,
+                    step: `Step ${i}`,
+                });
+                throw error;
+            }
+        }
+    }
+    /**
+     * Execute a single workflow step
+     */
+    async executeStep(session, step) {
+        const startTime = Date.now();
+        try {
+            let result;
+            switch (step.type) {
+                case 'CREATE_INVESTIGATION':
+                    result = await this.createInvestigation(session, step);
+                    break;
+                case 'ADD_ENTITY':
+                    result = await this.addEntity(session, step);
+                    break;
+                case 'ADD_RELATIONSHIP':
+                    result = await this.addRelationship(session, step);
+                    break;
+                case 'QUERY_ENTITIES':
+                    result = await this.queryEntities(session, step);
+                    break;
+                case 'QUERY_RELATIONSHIPS':
+                    result = await this.queryRelationships(session, step);
+                    break;
+                case 'EXPAND_NETWORK':
+                    result = await this.expandNetwork(session, step);
+                    break;
+                case 'RUN_COPILOT':
+                    result = await this.runCopilot(session, step);
+                    break;
+                case 'SEARCH':
+                    result = await this.searchEntities(session, step);
+                    break;
+                case 'ANALYZE_PATH':
+                    result = await this.analyzePath(session, step);
+                    break;
+                case 'EXPORT_DATA':
+                    result = await this.exportData(session, step);
+                    break;
+                case 'WAIT':
+                    await this.sleep(step.params.duration || 1000);
+                    break;
+                default:
+                    throw new Error(`Unknown step type: ${step.type}`);
+            }
+            const duration = Date.now() - startTime;
+            session.metrics.tasksCompleted++;
+            session.metrics.totalQueries++;
+            session.metrics.averageQueryTime =
+                (session.metrics.averageQueryTime * (session.metrics.totalQueries - 1) +
+                    duration) /
+                    session.metrics.totalQueries;
+            this.metricsCollector.recordStepCompletion(session.id, step.type, duration);
+            return result;
+        }
+        catch (error) {
+            const duration = Date.now() - startTime;
+            this.metricsCollector.recordStepFailure(session.id, step.type, duration, error);
+            throw error;
+        }
+    }
+    // ==================== Step Implementations ====================
+    async createInvestigation(session, step) {
+        const { investigation } = session.scenarioData;
+        const variables = {
+            input: {
+                name: investigation.name,
+                description: investigation.description,
+                type: investigation.type,
+                ...step.params,
+            },
+        };
+        const result = await this.graphqlRequest(QUERIES.createInvestigation, variables);
+        session.state.investigationId = result.createInvestigation.id;
+        this.logger.info(`Created investigation: ${session.state.investigationId}`);
+        return result;
+    }
+    async addEntity(session, step) {
+        if (!session.state.investigationId) {
+            throw new Error('No investigation ID available');
+        }
+        const entityIndex = step.params.entityIndex;
+        const entity = session.scenarioData.entities[entityIndex];
+        if (!entity) {
+            throw new Error(`Entity at index ${entityIndex} not found`);
+        }
+        const variables = {
+            input: {
+                investigationId: session.state.investigationId,
+                type: entity.type,
+                name: entity.name,
+                properties: entity.properties,
+            },
+        };
+        const result = await this.graphqlRequest(QUERIES.addEntity, variables);
+        const entityId = result.createEntity.id;
+        session.state.entityIds[entityIndex] = entityId;
+        session.metrics.entitiesExplored++;
+        this.markGroundTruthHit(session, 'entity', entityIndex);
+        this.logger.debug(`Added entity: ${entity.name} (${entityId})`);
+        return result;
+    }
+    async addRelationship(session, step) {
+        if (!session.state.investigationId) {
+            throw new Error('No investigation ID available');
+        }
+        const relIndex = step.params.relationshipIndex;
+        const relationship = session.scenarioData.relationships[relIndex];
+        if (!relationship) {
+            throw new Error(`Relationship at index ${relIndex} not found`);
+        }
+        const fromEntityId = session.state.entityIds[relationship.from];
+        const toEntityId = session.state.entityIds[relationship.to];
+        if (!fromEntityId || !toEntityId) {
+            throw new Error('Entity IDs not available for relationship');
+        }
+        const variables = {
+            input: {
+                investigationId: session.state.investigationId,
+                type: relationship.type,
+                fromEntityId,
+                toEntityId,
+                properties: relationship.properties,
+            },
+        };
+        const result = await this.graphqlRequest(QUERIES.addRelationship, variables);
+        session.state.relationshipIds.push(result.createRelationship.id);
+        session.metrics.relationshipsExplored++;
+        this.markGroundTruthHit(session, 'relationship', relIndex);
+        this.logger.debug(`Added relationship: ${relationship.type}`);
+        return result;
+    }
+    async queryEntities(session, step) {
+        if (!session.state.investigationId) {
+            throw new Error('No investigation ID available');
+        }
+        const variables = {
+            investigationId: session.state.investigationId,
+            type: step.params.type,
+            limit: step.params.limit || 100,
+        };
+        const result = await this.graphqlRequest(QUERIES.queryEntities, variables);
+        this.logger.debug(`Queried entities: ${result.investigation.entities.length} found`);
+        return result;
+    }
+    async queryRelationships(session, step) {
+        if (!session.state.investigationId) {
+            throw new Error('No investigation ID available');
+        }
+        const variables = {
+            investigationId: session.state.investigationId,
+            entityId: step.params.entityId,
+        };
+        const result = await this.graphqlRequest(QUERIES.queryRelationships, variables);
+        this.logger.debug(`Queried relationships: ${result.investigation.relationships.length} found`);
+        return result;
+    }
+    async expandNetwork(session, step) {
+        if (!session.state.investigationId) {
+            throw new Error('No investigation ID available');
+        }
+        const variables = {
+            investigationId: session.state.investigationId,
+            entityId: step.params.entityId,
+            depth: step.params.depth || 2,
+        };
+        const result = await this.graphqlRequest(QUERIES.expandNetwork, variables);
+        const expanded = result.investigation.expandNetwork;
+        session.metrics.entitiesExplored += expanded.entities.length;
+        session.metrics.relationshipsExplored += expanded.relationships.length;
+        this.logger.debug(`Expanded network: ${expanded.entities.length} entities, ${expanded.relationships.length} relationships`);
+        return result;
+    }
+    async runCopilot(session, step) {
+        if (!session.state.investigationId) {
+            throw new Error('No investigation ID available');
+        }
+        const goal = step.params.goal || session.scenarioData.copilotGoal || 'Analyze network';
+        const variables = {
+            goal,
+            investigationId: session.state.investigationId,
+        };
+        const startTime = Date.now();
+        const result = await this.graphqlRequest(QUERIES.startCopilotRun, variables);
+        const copilotRunId = result.startCopilotRun.id;
+        this.logger.info(`Started Copilot run: ${copilotRunId}`);
+        // Poll for completion
+        let completed = false;
+        let attempts = 0;
+        const maxAttempts = step.timeout ? step.timeout / 2000 : 30;
+        while (!completed && attempts < maxAttempts) {
+            await this.sleep(2000);
+            attempts++;
+            const statusResult = await this.graphqlRequest(QUERIES.getCopilotRunStatus, { id: copilotRunId });
+            const status = statusResult.copilotRun.status;
+            if (status === 'COMPLETED' || status === 'FAILED') {
+                completed = true;
+                session.metrics.copilotQueriesCount++;
+                if (status === 'COMPLETED') {
+                    session.metrics.copilotSuccessRate =
+                        session.metrics.copilotSuccessRate === 0
+                            ? 1
+                            : (session.metrics.copilotSuccessRate + 1) / 2;
+                }
+                const duration = Date.now() - startTime;
+                session.metrics.copilotAverageResponseTime =
+                    (session.metrics.copilotAverageResponseTime *
+                        (session.metrics.copilotQueriesCount - 1) +
+                        duration) /
+                        session.metrics.copilotQueriesCount;
+                this.logger.info(`Copilot run ${copilotRunId} ${status.toLowerCase()} in ${duration}ms`);
+                return statusResult;
+            }
+        }
+        if (!completed) {
+            throw new Error(`Copilot run timed out after ${maxAttempts * 2}s`);
+        }
+        return result;
+    }
+    async searchEntities(session, step) {
+        if (!session.state.investigationId) {
+            throw new Error('No investigation ID available');
+        }
+        const variables = {
+            investigationId: session.state.investigationId,
+            query: step.params.query,
+        };
+        const result = await this.graphqlRequest(QUERIES.searchEntities, variables);
+        this.logger.debug(`Search completed: ${result.investigation.searchEntities.length} results`);
+        return result;
+    }
+    async analyzePath(session, step) {
+        if (!session.state.investigationId) {
+            throw new Error('No investigation ID available');
+        }
+        const variables = {
+            investigationId: session.state.investigationId,
+            fromId: step.params.fromId,
+            toId: step.params.toId,
+        };
+        const result = await this.graphqlRequest(QUERIES.analyzePath, variables);
+        this.logger.debug(`Path analysis: ${result.investigation.analyzePath.paths.length} paths found`);
+        return result;
+    }
+    async exportData(session, step) {
+        if (!session.state.investigationId) {
+            throw new Error('No investigation ID available');
+        }
+        const result = await this.graphqlRequest(QUERIES.getInvestigation, {
+            id: session.state.investigationId,
+        });
+        this.evaluateInvestigationIntegrity(session, result);
+        this.logger.info('Data export completed');
+        return result;
+    }
+    // ==================== Helper Methods ====================
+    markGroundTruthHit(session, type, index) {
+        const groundTruth = session.scenarioData.metadata?.groundTruth;
+        if (!groundTruth) {
+            return;
+        }
+        const tracker = session.state.groundTruthHits;
+        const alreadySeen = type === 'entity'
+            ? tracker.entities.has(index)
+            : tracker.relationships.has(index);
+        if (alreadySeen) {
+            return;
+        }
+        const targetIndices = type === 'entity'
+            ? groundTruth.keyEntityIndices
+            : groundTruth.criticalRelationshipIndices;
+        if (!targetIndices.includes(index)) {
+            return;
+        }
+        if (type === 'entity') {
+            tracker.entities.add(index);
+        }
+        else {
+            tracker.relationships.add(index);
+        }
+        const found = tracker.entities.size + tracker.relationships.size;
+        const totalTargets = (groundTruth.keyEntityIndices?.length || 0) +
+            (groundTruth.criticalRelationshipIndices?.length || 0);
+        const timeToGroundTruth = session.metrics.timeToGroundTruth ||
+            Date.now() - new Date(session.metrics.startTime).getTime();
+        const coverage = totalTargets > 0 ? found / totalTargets : 0;
+        session.metrics.groundTruthFound = found;
+        session.metrics.groundTruthTotal = totalTargets;
+        session.metrics.groundTruthCoverage = coverage;
+        session.metrics.timeToGroundTruth = timeToGroundTruth;
+        this.metricsCollector.updateSessionMetrics(session.id, {
+            groundTruthFound: found,
+            groundTruthTotal: totalTargets,
+            groundTruthCoverage: coverage,
+            timeToGroundTruth,
+        });
+    }
+    evaluateInvestigationIntegrity(session, exportResult) {
+        const investigation = exportResult?.investigation;
+        if (!investigation) {
+            return;
+        }
+        const entityNameById = new Map((investigation.entities || []).map((entity) => [entity.id, entity.name]));
+        const expectedRelationships = new Set(session.scenarioData.relationships.map((rel) => {
+            const fromName = session.scenarioData.entities[rel.from]?.name;
+            const toName = session.scenarioData.entities[rel.to]?.name;
+            return `${rel.type}|${fromName}|${toName}`;
+        }));
+        const observedRelationships = (investigation.relationships || []).map((rel) => {
+            const fromName = entityNameById.get(rel.fromEntityId) || rel.fromEntityId || 'unknown';
+            const toName = entityNameById.get(rel.toEntityId) || rel.toEntityId || 'unknown';
+            return `${rel.type}|${fromName}|${toName}`;
+        });
+        const truePositives = observedRelationships.filter((key) => expectedRelationships.has(key)).length;
+        const falsePositives = observedRelationships.length - truePositives;
+        const falseLinkRate = observedRelationships.length > 0
+            ? falsePositives / observedRelationships.length
+            : 0;
+        const citationSources = new Set(session.scenarioData.metadata?.groundTruth?.citationSources || []);
+        const exportedDocuments = (investigation.entities || []).filter((entity) => entity.type === 'DOCUMENT');
+        const citationCorrectnessRate = exportedDocuments.length === 0
+            ? 1
+            : exportedDocuments.filter((_, index) => citationSources.has(index)).length /
+                exportedDocuments.length;
+        const leakageIncidents = this.detectLeakage(investigation.entities || []);
+        session.metrics.falseLinkRate = falseLinkRate;
+        session.metrics.citationCorrectnessRate = citationCorrectnessRate;
+        session.metrics.leakageIncidents = leakageIncidents;
+        this.metricsCollector.updateSessionMetrics(session.id, {
+            falseLinkRate,
+            citationCorrectnessRate,
+            leakageIncidents,
+        });
+    }
+    detectLeakage(entities) {
+        const leakagePatterns = /(password|secret|token|apikey|api_key|authorization)/i;
+        let incidents = 0;
+        entities.forEach((entity) => {
+            const values = Object.values(entity.properties || {});
+            values.forEach((value) => {
+                if (typeof value === 'string' && leakagePatterns.test(value)) {
+                    incidents += 1;
+                }
+            });
+        });
+        return incidents;
+    }
+    async graphqlRequest(query, variables = {}) {
+        try {
+            const response = await this.client.post(this.config.api.graphqlUrl, {
+                query,
+                variables,
+            });
+            if (response.data.errors) {
+                throw new Error(`GraphQL Error: ${JSON.stringify(response.data.errors)}`);
+            }
+            return response.data.data;
+        }
+        catch (error) {
+            if (error.response) {
+                throw new Error(`HTTP ${error.response.status}: ${error.response.statusText}`);
+            }
+            throw error;
+        }
+    }
+    sleep(ms) {
+        return new Promise((resolve) => setTimeout(resolve, ms));
+    }
+    initializeMetrics(sessionId, scenarioData) {
+        return {
+            sessionId,
+            scenarioType: scenarioData.metadata?.parameters.type || 'custom',
+            startTime: new Date().toISOString(),
+            duration: 0,
+            investigationCompleted: false,
+            tasksCompleted: 0,
+            tasksFailed: 0,
+            successRate: 0,
+            totalQueries: 0,
+            averageQueryTime: 0,
+            p95StepLatency: 0,
+            entitiesExplored: 0,
+            entitiesTotal: scenarioData.entities.length,
+            coverageRate: 0,
+            relationshipsExplored: 0,
+            relationshipsTotal: scenarioData.relationships.length,
+            keyEntitiesFound: 0,
+            keyEntitiesExpected: 0,
+            groundTruthFound: 0,
+            groundTruthTotal: (scenarioData.metadata?.groundTruth?.keyEntityIndices.length || 0) +
+                (scenarioData.metadata?.groundTruth?.criticalRelationshipIndices.length || 0),
+            groundTruthCoverage: 0,
+            falseLinkRate: 0,
+            citationCorrectnessRate: 1,
+            leakageIncidents: 0,
+            copilotQueriesCount: 0,
+            copilotSuccessRate: 0,
+            copilotAverageResponseTime: 0,
+            errors: [],
+        };
+    }
+    /**
+     * Get active sessions
+     */
+    getActiveSessions() {
+        return Array.from(this.activeSessions.values());
+    }
+    /**
+     * Get metrics collector
+     */
+    getMetricsCollector() {
+        return this.metricsCollector;
+    }
+}
+exports.GhostAnalyst = GhostAnalyst;

@@ -1,0 +1,2 @@
+"use strict";
+// perf benchmark

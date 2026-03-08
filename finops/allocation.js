@@ -1,4 +1,8 @@
-export const defaultMeteringRatios = {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.defaultMeteringRatios = void 0;
+exports.allocateCostBuckets = allocateCostBuckets;
+exports.defaultMeteringRatios = {
     computePerUnitUsd: 0.0025, // $/compute unit
     storagePerGbHourUsd: 0.00012, // $/GB-hour
     egressPerGbUsd: 0.09, // $/GB transferred
@@ -7,7 +11,7 @@ export const defaultMeteringRatios = {
 function roundCurrency(value) {
     return Math.round((value + Number.EPSILON) * 10000) / 10000;
 }
-export function allocateCostBuckets(usage, ratios = defaultMeteringRatios) {
+function allocateCostBuckets(usage, ratios = exports.defaultMeteringRatios) {
     const computeCost = roundCurrency((usage.computeUnits || 0) * ratios.computePerUnitUsd);
     const storageCost = roundCurrency((usage.storageGbHours || 0) * ratios.storagePerGbHourUsd);
     const egressCost = roundCurrency((usage.egressGb || 0) * ratios.egressPerGbUsd);
@@ -40,4 +44,3 @@ export function allocateCostBuckets(usage, ratios = defaultMeteringRatios) {
         meteringApplied: ratios,
     };
 }
-//# sourceMappingURL=allocation.js.map

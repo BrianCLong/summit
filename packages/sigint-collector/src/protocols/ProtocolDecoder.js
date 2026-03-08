@@ -199,4 +199,3 @@ class ProtocolDecoder {
     }
 }
 exports.ProtocolDecoder = ProtocolDecoder;
-//# sourceMappingURL=ProtocolDecoder.js.map

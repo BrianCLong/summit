@@ -1,262 +1,62 @@
-import React from 'react';
-import { useParams } from 'react-router-dom';
-import { useQuery, useMutation, gql } from '@apollo/client';
-import {
-  Container,
-  Typography,
-  Box,
-  CircularProgress,
-  Alert,
-  Button,
-  List,
-  ListItem,
-  ListItemText,
-  Paper,
-} from '@mui/material';
-import { SuggestionsPanel } from '../components/predictive/SuggestionsPanel';
-import { attachSuggestionHover } from '../graph/hooks/jquery-hover-preview';
-import { AlertsPanel } from '../components/alerts/AlertsPanel';
-import { attachAlertHighlight } from '../graph/hooks/jquery-alert-highlight';
-
-const GET_CASE_DETAILS = gql`
-  query Case($id: ID!) {
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.default = CaseDetail;
+const react_1 = __importDefault(require("react"));
+const react_router_dom_1 = require("react-router-dom");
+const client_1 = require("@apollo/client");
+const CASE_Q = (0, client_1.gql) `
+  query ($id: ID!) {
     case(id: $id) {
       id
       name
       status
       priority
       summary
-      created_by
-      created_at
-      updated_at
-      members {
-        user_id
-        role
-      }
-      items {
-        id
-        kind
-        ref_id
-        tags
-        added_by
-        added_at
-      }
-      notes {
-        id
-        author_id
-        body
-        created_at
-      }
-      timeline {
-        id
-        at
-        event
-        payload
-      }
+      createdAt
     }
-  }
-`;
-
-const ADD_CASE_NOTE = gql`
-  mutation AddCaseNote($caseId: ID!, $body: String!) {
-    addCaseNote(caseId: $caseId, body: $body) {
+    caseItems(caseId: $id) {
       id
-      body
-      author_id
-      created_at
+      kind
+      refId
+      tags
+      addedAt
     }
-  }
-`;
-
-const UPDATE_CASE = gql`
-  mutation UpdateCase($id: ID!, $status: String, $priority: String) {
-    updateCase(id: $id, status: $status, priority: $priority) {
+    caseTimeline(caseId: $id, limit: 100) {
       id
-      status
-      priority
+      at
+      event
+      payload
     }
   }
 `;
-
-const REMOVE_CASE_ITEM = gql`
-  mutation RemoveCaseItem($caseId: ID!, $itemId: ID!) {
-    removeCaseItem(caseId: $caseId, itemId: $itemId)
-  }
-`;
-
-const EXPORT_CASE_BUNDLE = gql`
-  mutation ExportCaseBundle($caseId: ID!, $format: String!) {
-    exportCaseBundle(caseId: $caseId, format: $format)
-  }
-`;
-
 function CaseDetail() {
-  const { id } = useParams();
-
-  const { loading, error, data, refetch } = useQuery(GET_CASE_DETAILS, {
-    variables: { id },
-  });
-
-  const [addNote] = useMutation(ADD_CASE_NOTE);
-  const [updateCase] = useMutation(UPDATE_CASE);
-  const [removeCaseItem] = useMutation(REMOVE_CASE_ITEM);
-  const [exportCaseBundle] = useMutation(EXPORT_CASE_BUNDLE);
-
-  if (loading) return <CircularProgress />;
-  if (error) return <Alert severity="error">Error: {error.message}</Alert>;
-  if (!data || !data.case)
-    return <Alert severity="info">Case not found.</Alert>;
-
-  const { case: caseData } = data;
-
-  const handleAddNote = async () => {
-    const body = prompt('Enter note content:');
-    if (body) {
-      await addNote({ variables: { caseId: id, body } });
-      refetch();
-    }
-  };
-
-  const handleUpdateStatus = async () => {
-    const newStatus = prompt('Enter new status (OPEN/CLOSED):');
-    if (newStatus) {
-      await updateCase({ variables: { id, status: newStatus } });
-      refetch();
-    }
-  };
-
-  const handleExport = async (format) => {
-    try {
-      const { data } = await exportCaseBundle({
-        variables: { caseId: id, format },
-      });
-      if (data && data.exportCaseBundle) {
-        alert(`Export successful! Download link: ${data.exportCaseBundle}`);
-        // Optionally, trigger download directly
-        window.open(data.exportCaseBundle, '_blank');
-      }
-    } catch (e) {
-      alert(`Export failed: ${e.message}`);
-    }
-  };
-
-  const handleRemoveItem = async (itemId) => {
-    if (
-      window.confirm('Are you sure you want to remove this item from the case?')
-    ) {
-      await removeCaseItem({ variables: { caseId: id, itemId } });
-      refetch();
-    }
-  };
-
-  return (
-    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-      <Typography variant="h4" component="h1" gutterBottom>
-        Case: {caseData.name}
-      </Typography>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-        <Typography variant="h6">
-          Status: {caseData.status} | Priority: {caseData.priority}
-        </Typography>
-        <Box>
-          <Button variant="outlined" onClick={handleAddNote} sx={{ mr: 1 }}>
-            Add Note
-          </Button>
-          <Button
-            variant="outlined"
-            onClick={handleUpdateStatus}
-            sx={{ mr: 1 }}
-          >
-            Update Status
-          </Button>
-          <Button
-            variant="outlined"
-            onClick={() => handleExport('PDF')}
-            sx={{ mr: 1 }}
-          >
-            Export PDF
-          </Button>
-          <Button
-            variant="outlined"
-            onClick={() => handleExport('HTML')}
-            sx={{ mr: 1 }}
-          >
-            Export HTML
-          </Button>
-          <Button variant="outlined" onClick={() => handleExport('ZIP')}>
-            Export ZIP
-          </Button>
-        </Box>
-      </Box>
-      <Paper elevation={2} sx={{ p: 2, mb: 2 }}>
-        <Typography variant="h5" gutterBottom>
-          Summary
-        </Typography>
-        <Typography variant="body1">
-          {caseData.summary || 'No summary provided.'}
-        </Typography>
-      </Paper>
-      <Paper elevation={2} sx={{ p: 2, mb: 2 }}>
-        <Typography variant="h5" gutterBottom>
-          Evidence ({caseData.items.length})
-        </Typography>
-        <List>
-          {caseData.items.map((item) => (
-            <ListItem
-              key={item.id}
-              secondaryAction={
-                <Button
-                  edge="end"
-                  aria-label="delete"
-                  onClick={() => handleRemoveItem(item.id)}
-                >
-                  Remove
-                </Button>
-              }
-            >
-              <ListItemText
-                primary={`${item.kind}: ${item.ref_id}`}
-                secondary={`Added by: ${item.added_by} on ${new Date(item.added_at).toLocaleString()} | Tags: ${item.tags.join(', ')}`}
-              />
-            </ListItem>
-          ))}
-        </List>
-      </Paper>
-      <Paper elevation={2} sx={{ p: 2, mb: 2 }}>
-        <Typography variant="h5" gutterBottom>
-          Notes ({caseData.notes.length})
-        </Typography>
-        <List>
-          {caseData.notes.map((note) => (
-            <ListItem key={note.id}>
-              <ListItemText
-                primary={note.body}
-                secondary={`By: ${note.author_id} on ${new Date(note.created_at).toLocaleString()}`}
-              />
-            </ListItem>
-          ))}
-        </List>
-      </Paper>
-      <SuggestionsPanel caseId={caseData.id} seeds={[caseData.id]} />{' '}
-      {/* Add SuggestionsPanel */}
-      <AlertsPanel caseId={caseData.id} /> {/* Add AlertsPanel */}
-      <Paper elevation={2} sx={{ p: 2, mb: 2 }}>
-        <Typography variant="h5" gutterBottom>
-          Timeline ({caseData.timeline.length})
-        </Typography>
-        <List>
-          {caseData.timeline.map((event) => (
-            <ListItem key={event.id}>
-              <ListItemText
-                primary={`${event.event} at ${new Date(event.at).toLocaleString()}`}
-                secondary={JSON.stringify(event.payload)}
-              />
-            </ListItem>
-          ))}
-        </List>
-      </Paper>
-    </Container>
-  );
+    const { id } = (0, react_router_dom_1.useParams)();
+    const { data } = (0, client_1.useQuery)(CASE_Q, { variables: { id } });
+    const c = data?.case;
+    return (<div className="p-4" style={{ display: 'flex', gap: 16 }}>
+      <div style={{ flex: 1 }}>
+        <h2>{c?.name || 'Case'}</h2>
+        <p>
+          Status: {c?.status} • Priority: {c?.priority || '-'}
+        </p>
+        <h3>Timeline</h3>
+        <ul>
+          {(data?.caseTimeline || []).map((t) => (<li key={t.id}>
+              {t.at} • {t.event} • {JSON.stringify(t.payload)}
+            </li>))}
+        </ul>
+      </div>
+      <div style={{ width: 420 }}>
+        <h3>Evidence</h3>
+        <ul>
+          {(data?.caseItems || []).map((it) => (<li key={it.id}>
+              {it.kind}: {it.refId}{' '}
+              {it.tags?.length ? `[${it.tags.join(',')}]` : ''}
+            </li>))}
+        </ul>
+      </div>
+    </div>);
 }
-
-export default CaseDetail;

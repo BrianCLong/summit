@@ -1,0 +1,19 @@
+"use strict";
+/**
+ * Configuration for the reliability features.
+ * This file centralizes the logic for reading feature flags and other
+ * configuration values from environment variables.
+ */
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.isOpsGuardV1Enabled = isOpsGuardV1Enabled;
+/**
+ * Checks if the Ops Guard v1 feature is enabled.
+ *
+ * To enable, set the `FEATURE_OPS_GUARD_V1` environment variable to "true" or "1".
+ *
+ * @returns {boolean} True if the feature is enabled, false otherwise.
+ */
+function isOpsGuardV1Enabled() {
+    const flag = process.env.FEATURE_OPS_GUARD_V1?.toLowerCase();
+    return flag === 'true' || flag === '1';
+}

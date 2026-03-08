@@ -1,8 +1,14 @@
+"use strict";
 /**
  * Auto-labeling module
  * Generates GitHub labels and titles for issues
  */
-export function generateLabels(item) {
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.generateLabels = generateLabels;
+exports.generateBatchLabels = generateBatchLabels;
+exports.suggestImprovedTitle = suggestImprovedTitle;
+exports.generateGitHubLabelPayload = generateGitHubLabelPayload;
+function generateLabels(item) {
     const labels = [];
     // Area labels
     item.area.forEach((area) => {
@@ -56,13 +62,13 @@ export function generateLabels(item) {
         confidence,
     };
 }
-export function generateBatchLabels(items) {
+function generateBatchLabels(items) {
     return items.map((item) => generateLabels(item));
 }
 /**
  * Generate improved title for an issue
  */
-export function suggestImprovedTitle(item) {
+function suggestImprovedTitle(item) {
     const currentTitle = item.title.trim();
     // Don't suggest if title already has good format
     if (/^(feat|fix|refactor|docs|test|chore|perf|style|ci|build):/.test(currentTitle.toLowerCase())) {
@@ -124,9 +130,8 @@ function lowercaseFirst(str) {
 /**
  * Generate GitHub API payload for bulk label update
  */
-export function generateGitHubLabelPayload(suggestion) {
+function generateGitHubLabelPayload(suggestion) {
     return {
         labels: suggestion.labels,
     };
 }
-//# sourceMappingURL=label-generator.js.map

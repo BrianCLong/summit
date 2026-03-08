@@ -1,0 +1,44 @@
+"use strict";
+/**
+ * CopilotNLQueryService - Natural Language to Cypher Translation
+ * Provides preview functionality with guardrails for GA Core
+ */
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.CopilotNLQueryService = void 0;
+class CopilotNLQueryService {
+    /**
+     * Convert natural language query to Cypher with guardrails
+     * This is a preview implementation for GA Core
+     */
+    async translateToVypher(request) {
+        // Basic guardrails - only allow safe read operations
+        const safePatterns = ['MATCH', 'RETURN', 'WHERE', 'WITH'];
+        // Simple pattern matching for MVP
+        const { query } = request;
+        if (query.toLowerCase().includes('find') ||
+            query.toLowerCase().includes('show')) {
+            return {
+                // SECURITY: Always enforce tenant isolation in generated Cypher
+                cypher: 'MATCH (n) WHERE n.tenantId = $tenantId RETURN n LIMIT 10',
+                explanation: `Generated safe Cypher for: "${query}"`,
+                confidence: 0.7,
+                preview: true,
+            };
+        }
+        return {
+            // SECURITY: Always enforce tenant isolation in generated Cypher
+            cypher: 'MATCH (n) WHERE n.tenantId = $tenantId RETURN count(n) as total_nodes',
+            explanation: 'Default safe query - preview mode',
+            confidence: 0.5,
+            preview: true,
+        };
+    }
+    /**
+     * Validate query is safe for execution
+     */
+    validateSafety(cypher) {
+        const dangerous = ['DELETE', 'CREATE', 'SET', 'REMOVE', 'MERGE'];
+        return !dangerous.some((op) => cypher.toUpperCase().includes(op));
+    }
+}
+exports.CopilotNLQueryService = CopilotNLQueryService;

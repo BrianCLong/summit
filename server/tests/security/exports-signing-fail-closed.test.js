@@ -1,0 +1,96 @@
+"use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const supertest_1 = __importDefault(require("supertest"));
+const express_1 = __importDefault(require("express"));
+const globals_1 = require("@jest/globals");
+// Use unstable_mockModule for ESM mocking
+globals_1.jest.unstable_mockModule('../../src/middleware/auth.js', () => ({
+    ensureAuthenticated: (req, res, next) => {
+        req.user = { sub: 'test-user', tenantId: 'test-tenant' };
+        next();
+    },
+}));
+globals_1.jest.unstable_mockModule('../../src/middleware/sensitive-context.js', () => ({
+    sensitiveContextMiddleware: (req, res, next) => next(),
+}));
+globals_1.jest.unstable_mockModule('../../src/middleware/high-risk-approval.js', () => ({
+    highRiskApprovalMiddleware: (req, res, next) => next(),
+}));
+globals_1.jest.unstable_mockModule('../../src/analytics/exports/ExportController.js', () => ({
+    exportData: (req, res) => res.json({ status: 'ok' })
+}));
+// Dynamic import of the router after mocks
+const { default: router } = await Promise.resolve().then(() => __importStar(require('../../src/routes/exports.js')));
+const app = (0, express_1.default)();
+app.use(express_1.default.json());
+app.use(router);
+(0, globals_1.describe)('POST /sign-manifest Security', () => {
+    const originalEnv = process.env;
+    (0, globals_1.beforeEach)(() => {
+        globals_1.jest.resetModules();
+        process.env = { ...originalEnv };
+    });
+    (0, globals_1.test)('should fail closed (500) in production if EXPORT_SIGNING_SECRET is missing', async () => {
+        process.env.NODE_ENV = 'production';
+        delete process.env.EXPORT_SIGNING_SECRET;
+        const res = await (0, supertest_1.default)(app)
+            .post('/sign-manifest')
+            .send({ tenant: 't1', filters: {}, timestamp: Date.now() });
+        (0, globals_1.expect)(res.status).toBe(500);
+        (0, globals_1.expect)(res.body).toEqual({ error: 'Failed to sign manifest' });
+    });
+    (0, globals_1.test)('should succeed if EXPORT_SIGNING_SECRET is provided', async () => {
+        process.env.NODE_ENV = 'production';
+        process.env.EXPORT_SIGNING_SECRET = 'strong-secret';
+        const res = await (0, supertest_1.default)(app)
+            .post('/sign-manifest')
+            .send({ tenant: 't1', filters: {}, timestamp: Date.now() });
+        (0, globals_1.expect)(res.status).toBe(200);
+        (0, globals_1.expect)(res.body).toHaveProperty('signature');
+    });
+    (0, globals_1.test)('should fallback to dev-secret in non-production (development)', async () => {
+        process.env.NODE_ENV = 'development';
+        delete process.env.EXPORT_SIGNING_SECRET;
+        const res = await (0, supertest_1.default)(app)
+            .post('/sign-manifest')
+            .send({ tenant: 't1', filters: {}, timestamp: Date.now() });
+        (0, globals_1.expect)(res.status).toBe(200);
+        (0, globals_1.expect)(res.body).toHaveProperty('signature');
+    });
+});

@@ -1,4 +1,7 @@
-export function schedule(tasks, pools) {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.schedule = schedule;
+function schedule(tasks, pools) {
     // Respect lane reserves, capacity and caps
     const bins = Object.fromEntries(pools.map((p) => [p.id, { load: 0, items: [] }]));
     const fits = (t, p) => t.caps.every((c) => p.caps.includes(c));

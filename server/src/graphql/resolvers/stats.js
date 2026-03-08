@@ -1,0 +1,47 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.statsResolvers = void 0;
+const database_js_1 = require("../../config/database.js");
+const responseCache_js_1 = require("../../cache/responseCache.js");
+exports.statsResolvers = {
+    Query: {
+        // Returns counts for cases/investigations; aggregates only (no PII)
+        async caseCounts(_, _args = {}, ctx) {
+            const tenant = ctx?.tenantId || ctx?.user?.tenant || 'anon';
+            const key = ['counts', tenant];
+            const result = await (0, responseCache_js_1.cached)(key, { ttlSec: 45, tags: ['counts'], op: 'caseCounts', swrSec: 20 }, async () => {
+                const pool = (0, database_js_1.getPostgresPool)();
+                const sql = `SELECT status, COUNT(*)::int AS c FROM investigations WHERE tenant_id=$1 GROUP BY status`;
+                const r = await pool.query(sql, [tenant]);
+                const list = Array.isArray(r?.rows) ? r.rows : [];
+                const byStatus = {};
+                let total = 0;
+                for (const row of list) {
+                    const k = String(row?.status ?? 'UNKNOWN');
+                    const v = Number(row?.c ?? row?.count ?? 0);
+                    byStatus[k] = (byStatus[k] || 0) + v;
+                    total += v;
+                }
+                return { byStatus, total };
+            });
+            return result;
+        },
+        // Basic summary; keep non-sensitive aggregates only
+        async summaryStats(_, _args, ctx) {
+            const tenant = ctx?.tenantId || ctx?.user?.tenant || 'anon';
+            const key = ['summary', tenant];
+            return await (0, responseCache_js_1.cached)(key, { ttlSec: 120, tags: ['summary'], op: 'summaryStats', swrSec: 30 }, async () => {
+                const pool = (0, database_js_1.getPostgresPool)();
+                const r1 = await pool.query(`SELECT COUNT(*)::int AS entities FROM entities WHERE tenant_id = $1`, [tenant]);
+                const r2 = await pool.query(`SELECT COUNT(*)::int AS relationships FROM relationships WHERE tenant_id = $1`, [tenant]);
+                const r3 = await pool.query(`SELECT COUNT(*)::int AS investigations FROM investigations WHERE tenant_id = $1`, [tenant]);
+                return {
+                    entities: r1.rows?.[0]?.entities || 0,
+                    relationships: r2.rows?.[0]?.relationships || 0,
+                    investigations: r3.rows?.[0]?.investigations || 0,
+                };
+            });
+        },
+    },
+};
+exports.default = exports.statsResolvers;

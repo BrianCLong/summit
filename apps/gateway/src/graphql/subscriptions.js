@@ -1,0 +1,50 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.resolvers = void 0;
+const graphql_subscriptions_1 = require("graphql-subscriptions");
+const realtimeManager_1 = require("../realtimeManager");
+// Use local PubSub because realtimeManager is already listening to Redis
+const pubsub = new graphql_subscriptions_1.PubSub();
+// Bridge RealtimeManager -> PubSub
+realtimeManager_1.realtimeManager.on('event', (event) => {
+    pubsub.publish('GRAPH_EVENT', { onGraphEvent: event });
+});
+exports.resolvers = {
+    Subscription: {
+        onGraphEvent: {
+            subscribe: (0, graphql_subscriptions_1.withFilter)(() => pubsub.asyncIterator(['GRAPH_EVENT']), (payload, variables, context) => {
+                const event = payload.onGraphEvent;
+                // AuthZ Check: Context should contain user/tenant info
+                if (!context.user) {
+                    // If context not populated (e.g. dev), maybe deny?
+                    // For skeleton, we'll allow if tenant matches provided variable,
+                    // but ideally context.user.tenant should be checked.
+                    // throw new Error("Unauthorized");
+                }
+                if (context.user && context.user.tenant !== variables.tenant) {
+                    return false;
+                }
+                // Filter by tenant (mandatory)
+                if (event.tenant !== variables.tenant)
+                    return false;
+                // Type filter
+                if (variables.types && variables.types.length > 0) {
+                    if (!variables.types.includes(event.type))
+                        return false;
+                }
+                // Entity ID filter
+                if (variables.entityIds && variables.entityIds.length > 0) {
+                    if (!variables.entityIds.includes(event.entity.id))
+                        return false;
+                }
+                // Kind filter
+                if (variables.kinds && variables.kinds.length > 0) {
+                    if (!variables.kinds.includes(event.entity.kind))
+                        return false;
+                }
+                return true;
+            }),
+            resolve: (payload) => payload.onGraphEvent,
+        },
+    },
+};

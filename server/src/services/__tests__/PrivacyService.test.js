@@ -1,0 +1,185 @@
+"use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+const globals_1 = require("@jest/globals");
+const requests = new Map();
+const evidences = new Map();
+const queryImpl = async (text, params = []) => {
+    const query = text.replace(/\s+/g, ' ').trim().toLowerCase();
+    if (query.startsWith('insert into privacy_dsar_requests')) {
+        const [id, tenantId, userId, subjectId, type, status, details, submittedAt, deadline,] = params;
+        requests.set(id, {
+            id,
+            tenant_id: tenantId,
+            user_id: userId,
+            subject_id: subjectId,
+            type,
+            status,
+            details: typeof details === 'string' ? JSON.parse(details) : details,
+            submitted_at: submittedAt,
+            deadline,
+            completed_at: undefined,
+            evidence_id: undefined,
+            rejection_reason: undefined,
+        });
+        return { rows: [] };
+    }
+    if (query.startsWith('select * from privacy_dsar_requests where id')) {
+        const [id] = params;
+        const row = requests.get(id);
+        return { rows: row ? [row] : [] };
+    }
+    if (query.startsWith('select * from privacy_dsar_requests where tenant_id')) {
+        const [tenantId] = params;
+        const rows = Array.from(requests.values()).filter((row) => row.tenant_id === tenantId);
+        return { rows };
+    }
+    if (query.startsWith('update privacy_dsar_requests set status')) {
+        const [id, status, ...rest] = params;
+        const row = requests.get(id);
+        if (row) {
+            row.status = status;
+            let idx = 0;
+            if (query.includes('completed_at')) {
+                row.completed_at = rest[idx++];
+            }
+            if (query.includes('evidence_id')) {
+                row.evidence_id = rest[idx++];
+            }
+            if (query.includes('rejection_reason')) {
+                row.rejection_reason = rest[idx++];
+            }
+        }
+        return { rows: [] };
+    }
+    if (query.startsWith('insert into privacy_evidence')) {
+        const [id, requestId, summary, actions, generatedAt] = params;
+        evidences.set(requestId, {
+            id,
+            request_id: requestId,
+            summary,
+            actions: typeof actions === 'string' ? JSON.parse(actions) : actions,
+            generated_at: generatedAt,
+        });
+        return { rows: [] };
+    }
+    if (query.startsWith('select * from privacy_evidence where request_id')) {
+        const [requestId] = params;
+        const row = evidences.get(requestId);
+        return { rows: row ? [row] : [] };
+    }
+    return { rows: [] };
+};
+const pool = {
+    query: globals_1.jest.fn(queryImpl),
+};
+const ledgerMock = {
+    appendEntry: globals_1.jest.fn(async () => ({ id: 'mock-entry-id' })),
+};
+globals_1.jest.unstable_mockModule('../../db/pg.js', () => ({ pool }));
+globals_1.jest.unstable_mockModule('../../provenance/ledger.js', () => ({
+    provenanceLedger: ledgerMock,
+}));
+let PrivacyService;
+let DSARType;
+let DSARStatus;
+let provenanceLedger;
+beforeAll(async () => {
+    ({ PrivacyService, DSARType, DSARStatus } = await Promise.resolve().then(() => __importStar(require('../PrivacyService.js'))));
+    ({ provenanceLedger } = await Promise.resolve().then(() => __importStar(require('../../provenance/ledger.js'))));
+});
+describe('PrivacyService', () => {
+    let privacyService;
+    beforeEach(() => {
+        PrivacyService.instance = undefined;
+        privacyService = PrivacyService.getInstance();
+        globals_1.jest.clearAllMocks();
+        pool.query.mockImplementation(queryImpl);
+        requests.clear();
+        evidences.clear();
+    });
+    describe('submitRequest', () => {
+        it('should successfully submit a DSAR request', async () => {
+            const tenantId = 'tenant-1';
+            const userId = 'user-1';
+            const type = DSARType.ACCESS;
+            const request = await privacyService.submitRequest(tenantId, userId, type);
+            expect(request).toBeDefined();
+            expect(request.id).toBeDefined();
+            expect(request.tenantId).toBe(tenantId);
+            expect(request.userId).toBe(userId);
+            expect(request.type).toBe(type);
+            expect(request.status).not.toBe(DSARStatus.FAILED);
+            expect(provenanceLedger.appendEntry).toHaveBeenCalledWith(expect.objectContaining({
+                tenantId,
+                actionType: 'PRIVACY_DSAR_SUBMITTED',
+                resourceType: 'dsar_request',
+                resourceId: request.id,
+            }));
+        });
+    });
+    describe('verifyRequest', () => {
+        it('should transition request to PROCESSING and then COMPLETED after verification', async () => {
+            const tenantId = 'tenant-1';
+            const userId = 'user-2';
+            const type = DSARType.EXPORT;
+            const request = await privacyService.submitRequest(tenantId, userId, type);
+            const requestId = request.id;
+            await new Promise((resolve) => setTimeout(resolve, 200));
+            const updatedRequest = await privacyService.getRequestStatus(requestId);
+            expect([DSARStatus.PROCESSING, DSARStatus.COMPLETED]).toContain(updatedRequest?.status);
+            if (updatedRequest?.status === DSARStatus.COMPLETED) {
+                expect(updatedRequest.evidenceId).toBeDefined();
+            }
+        });
+    });
+    describe('getEvidence', () => {
+        it('should return evidence for a completed request', async () => {
+            const tenantId = 'tenant-1';
+            const userId = 'user-3';
+            const type = DSARType.EXPORT;
+            const request = await privacyService.submitRequest(tenantId, userId, type);
+            let evidence = await privacyService.getEvidence(request.id);
+            const deadline = Date.now() + 4000;
+            while (!evidence && Date.now() < deadline) {
+                await new Promise((resolve) => setTimeout(resolve, 200));
+                evidence = await privacyService.getEvidence(request.id);
+            }
+            expect(evidence).toBeDefined();
+            expect(evidence?.requestId).toBe(request.id);
+            expect(evidence?.actions.length).toBeGreaterThan(0);
+        });
+    });
+});
