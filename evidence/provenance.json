@@ -1,6 +1,29 @@
 {
-  "_type": "https://summit.dev/provenance/v1",
-  "version": "1.0.0",
+  "_type": "https://in-toto.io/Statement/v1",
+  "subject": [],
+  "predicateType": "https://slsa.dev/provenance/v1.2",
+  "predicate": {
+    "buildDefinition": {
+      "buildType": "https://slsa.dev/provenance/v1.2",
+      "externalParameters": {},
+      "internalParameters": {},
+      "resolvedDependencies": [],
+      "source": {
+        "uri": "git+https://github.com/BrianCLong/summit",
+        "digest": {
+          "sha1": "unknown"
+        }
+      }
+    },
+    "runDetails": {
+      "builder": {
+        "id": "local-dev"
+      },
+      "metadata": {
+        "invocationId": "local"
+      }
+    }
+  },
   "build": {
     "timestamp": "2026-01-25T22:07:34.177Z",
     "commit": "local-dev",
