@@ -1,0 +1,54 @@
+[
+  {
+    "command": [
+      "node",
+      "-e",
+      "setTimeout(() => { console.log('RESULT::' + process.argv[1]) }, 400)",
+      "Summarize the goal: test prompt"
+    ],
+    "priority": 9,
+    "retries": 0,
+    "role": "summarizer",
+    "taskId": "cb2fea287ffb-t1",
+    "title": "task-1"
+  },
+  {
+    "command": [
+      "node",
+      "-e",
+      "setTimeout(() => { console.log('RESULT::' + process.argv[1]) }, 400)",
+      "List implementation steps for: test prompt"
+    ],
+    "priority": 8,
+    "retries": 0,
+    "role": "implementer",
+    "taskId": "cb2fea287ffb-t2",
+    "title": "task-2"
+  },
+  {
+    "command": [
+      "node",
+      "-e",
+      "setTimeout(() => { console.log('RESULT::' + process.argv[1]) }, 400)",
+      "List risks and test cases for: test prompt"
+    ],
+    "priority": 7,
+    "retries": 0,
+    "role": "tester",
+    "taskId": "cb2fea287ffb-t3",
+    "title": "task-3"
+  },
+  {
+    "command": [
+      "node",
+      "-e",
+      "setTimeout(() => { console.log('RESULT::' + process.argv[1]) }, 400)",
+      "Write acceptance criteria for: test prompt"
+    ],
+    "priority": 6,
+    "retries": 0,
+    "role": "evaluator",
+    "taskId": "cb2fea287ffb-t4",
+    "title": "task-4"
+  }
+]
