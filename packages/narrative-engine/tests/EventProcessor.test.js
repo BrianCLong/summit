@@ -1,6 +1,8 @@
-import { EventProcessor } from '../src/core/EventProcessor.js';
-import { NarrativeState } from '../src/core/NarrativeState.js';
-import { Actor } from '../src/entities/Actor.js';
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const EventProcessor_js_1 = require("../src/core/EventProcessor.js");
+const NarrativeState_js_1 = require("../src/core/NarrativeState.js");
+const Actor_js_1 = require("../src/entities/Actor.js");
 const crisisEvent = {
     id: 'crisis-1',
     type: 'crisis',
@@ -10,8 +12,8 @@ const crisisEvent = {
 };
 describe('EventProcessor', () => {
     it('returns log entry when actor is missing', () => {
-        const state = new NarrativeState();
-        const processor = new EventProcessor(state);
+        const state = new NarrativeState_js_1.NarrativeState();
+        const processor = new EventProcessor_js_1.EventProcessor(state);
         const update = processor.processEvent({
             ...crisisEvent,
             actorId: 'missing',
@@ -20,15 +22,15 @@ describe('EventProcessor', () => {
         expect(update.triggeredEvents).toHaveLength(0);
     });
     it('modifies actor mood and triggers support events', () => {
-        const state = new NarrativeState();
-        const leader = new Actor({
+        const state = new NarrativeState_js_1.NarrativeState();
+        const leader = new Actor_js_1.Actor({
             id: 'leader',
             name: 'Leader Lane',
             mood: 3,
             resilience: 0.1,
             influence: 3,
         });
-        const deputy = new Actor({
+        const deputy = new Actor_js_1.Actor({
             id: 'deputy',
             name: 'Deputy Drew',
             mood: 2,
@@ -44,7 +46,7 @@ describe('EventProcessor', () => {
             intensity: 0.9,
             trust: 0.8,
         });
-        const processor = new EventProcessor(state);
+        const processor = new EventProcessor_js_1.EventProcessor(state);
         const update = processor.processEvent(crisisEvent);
         expect(update.actorMood.leader).toBeLessThan(0);
         expect(update.triggeredEvents.some((event) => event.type === 'support')).toBe(true);

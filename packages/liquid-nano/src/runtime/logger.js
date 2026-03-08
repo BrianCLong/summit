@@ -1,4 +1,8 @@
-export class StructuredConsoleLogger {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.StructuredConsoleLogger = void 0;
+exports.createLogger = createLogger;
+class StructuredConsoleLogger {
     scope;
     constructor(scope) {
         this.scope = scope;
@@ -24,6 +28,7 @@ export class StructuredConsoleLogger {
         console[level](JSON.stringify(payload));
     }
 }
-export function createLogger(scope) {
+exports.StructuredConsoleLogger = StructuredConsoleLogger;
+function createLogger(scope) {
     return new StructuredConsoleLogger(scope);
 }

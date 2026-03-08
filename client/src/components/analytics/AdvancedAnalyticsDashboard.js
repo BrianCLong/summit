@@ -1,937 +1,490 @@
-import React, { useState, useEffect, useRef } from 'react';
-import {
-  Box,
-  Grid,
-  Card,
-  CardContent,
-  CardHeader,
-  Typography,
-  Button,
-  IconButton,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Switch,
-  FormControlLabel,
-  Paper,
-  Tabs,
-  Tab,
-  Badge,
-  Tooltip,
-  LinearProgress,
-  Alert,
-  Chip,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-  Menu,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemIcon,
-  Divider,
-} from '@mui/material';
-import {
-  Dashboard,
-  TrendingUp,
-  Speed,
-  Storage,
-  Security,
-  Timeline,
-  Map,
-  Assessment,
-  Settings,
-  Refresh,
-  Download,
-  Fullscreen,
-  Close,
-  Add,
-  Edit,
-  Delete,
-  FilterList,
-  ViewModule,
-  BarChart,
-  PieChart,
-  ShowChart,
-  ScatterPlot,
-  BubbleChart,
-  DonutLarge,
-  NetworkCheck,
-  Memory,
-  CloudQueue,
-  Warning,
-  CheckCircle,
-  Error,
-} from '@mui/icons-material';
-import {
-  LineChart,
-  Line,
-  AreaChart,
-  Area,
-  BarChart as RechartsBarChart,
-  Bar,
-  PieChart as RechartsPieChart,
-  Pie,
-  Cell,
-  ScatterChart,
-  Scatter,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip as RechartsTooltip,
-  ResponsiveContainer,
-  Legend,
-} from 'recharts';
-import { useQuery, useMutation, useSubscription } from '@apollo/client';
-import { gql } from '@apollo/client';
-
-const GET_DASHBOARD_CONFIG = gql`
-  query GetDashboardConfig {
-    getDashboardConfig {
-      widgets {
-        id
-        title
-        type
-        config
-        position {
-          x
-          y
-          width
-          height
-        }
-        refreshInterval
-        dataSource
-      }
-      charts {
-        id
-        type
-        title
-        data
-        metadata {
-          lastUpdated
-          dataPoints
-          refreshRate
-        }
-      }
-      metadata {
-        lastUpdated
-        totalWidgets
-        totalCharts
-      }
+"use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
     }
-  }
-`;
-
-const GET_THREAT_METRICS = gql`
-  query GetThreatMetrics {
-    getThreatMetrics {
-      totalIOCs
-      activeThreats
-      resolvedThreats
-      threatSeverityDistribution
-      topThreatTypes {
-        type
-        count
-      }
-      geographicDistribution {
-        country
-        threatCount
-      }
-      timeSeriesData {
-        timestamp
-        value
-      }
-    }
-  }
-`;
-
-const GET_INVESTIGATION_METRICS = gql`
-  query GetInvestigationMetrics {
-    getInvestigationMetrics {
-      totalInvestigations
-      activeInvestigations
-      completedInvestigations
-      avgCompletionTime
-      investigationsByStatus
-      evidenceMetrics {
-        totalEvidence
-        evidenceByType
-      }
-      findingsMetrics {
-        totalFindings
-        findingsBySeverity
-      }
-    }
-  }
-`;
-
-const GET_PERFORMANCE_REPORT = gql`
-  query GetPerformanceReport {
-    getPerformanceReport {
-      timestamp
-      metrics {
-        totalRequests
-        avgResponseTime
-        errorRate
-        cacheHitRate
-        concurrentUsers
-      }
-      cacheStrategies {
-        id
-        name
-        pattern
-        ttl
-        priority
-        compressionEnabled
-        prefetchEnabled
-      }
-      connectionPools {
-        id
-        type
-        maxConnections
-        activeConnections
-        avgResponseTime
-        errorRate
-      }
-      systemHealth {
-        memoryUsage {
-          heapUsed
-          heapTotal
-        }
-        uptime
-      }
-    }
-  }
-`;
-
-const CREATE_WIDGET = gql`
-  mutation CreateWidget($widget: DashboardWidgetInput!) {
-    createWidget(widget: $widget) {
-      id
-      title
-      type
-      config
-    }
-  }
-`;
-
-const EXPORT_DASHBOARD = gql`
-  mutation ExportDashboard($format: ExportFormat!) {
-    exportDashboard(format: $format) {
-      filename
-      url
-      size
-    }
-  }
-`;
-
-const AdvancedAnalyticsDashboard = () => {
-  const [selectedTab, setSelectedTab] = useState(0);
-  const [dashboardConfig, setDashboardConfig] = useState(null);
-  const [threatMetrics, setThreatMetrics] = useState(null);
-  const [investigationMetrics, setInvestigationMetrics] = useState(null);
-  const [performanceData, setPerformanceData] = useState(null);
-  const [widgetDialogOpen, setWidgetDialogOpen] = useState(false);
-  const [selectedWidget, setSelectedWidget] = useState(null);
-  const [refreshing, setRefreshing] = useState(false);
-  const [autoRefresh, setAutoRefresh] = useState(true);
-  const refreshInterval = useRef(null);
-
-  // GraphQL queries
-  const {
-    data: dashboardData,
-    refetch: refetchDashboard,
-    loading: dashboardLoading,
-  } = useQuery(GET_DASHBOARD_CONFIG, {
-    pollInterval: autoRefresh ? 60000 : 0,
-  });
-
-  const {
-    data: threatData,
-    refetch: refetchThreat,
-    loading: threatLoading,
-  } = useQuery(GET_THREAT_METRICS, {
-    pollInterval: autoRefresh ? 30000 : 0,
-  });
-
-  const {
-    data: investigationData,
-    refetch: refetchInvestigation,
-    loading: investigationLoading,
-  } = useQuery(GET_INVESTIGATION_METRICS, {
-    pollInterval: autoRefresh ? 45000 : 0,
-  });
-
-  const {
-    data: performanceReportData,
-    refetch: refetchPerformance,
-    loading: performanceLoading,
-  } = useQuery(GET_PERFORMANCE_REPORT, {
-    pollInterval: autoRefresh ? 15000 : 0,
-  });
-
-  const [createWidget] = useMutation(CREATE_WIDGET);
-  const [exportDashboard] = useMutation(EXPORT_DASHBOARD);
-
-  useEffect(() => {
-    if (dashboardData) {
-      setDashboardConfig(dashboardData.getDashboardConfig);
-    }
-  }, [dashboardData]);
-
-  useEffect(() => {
-    if (threatData) {
-      setThreatMetrics(threatData.getThreatMetrics);
-    }
-  }, [threatData]);
-
-  useEffect(() => {
-    if (investigationData) {
-      setInvestigationMetrics(investigationData.getInvestigationMetrics);
-    }
-  }, [investigationData]);
-
-  useEffect(() => {
-    if (performanceReportData) {
-      setPerformanceData(performanceReportData.getPerformanceReport);
-    }
-  }, [performanceReportData]);
-
-  const handleRefreshAll = async () => {
-    setRefreshing(true);
-    try {
-      await Promise.all([
-        refetchDashboard(),
-        refetchThreat(),
-        refetchInvestigation(),
-        refetchPerformance(),
-      ]);
-    } catch (error) {
-      console.error('Refresh error:', error);
-    } finally {
-      setRefreshing(false);
-    }
-  };
-
-  const handleExportDashboard = async (format) => {
-    try {
-      const result = await exportDashboard({ variables: { format } });
-      const exportData = result.data.exportDashboard;
-
-      // Create download link
-      const link = document.createElement('a');
-      link.href = exportData.url;
-      link.download = exportData.filename;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    } catch (error) {
-      console.error('Export error:', error);
-    }
-  };
-
-  const renderThreatIntelWidget = () => {
-    if (!threatMetrics) return <LinearProgress />;
-
-    const severityData = Object.entries(
-      threatMetrics.threatSeverityDistribution || {},
-    ).map(([severity, count]) => ({
-      name: severity.charAt(0).toUpperCase() + severity.slice(1),
-      value: count,
-      fill: getSeverityColor(severity),
-    }));
-
-    return (
-      <Grid container spacing={2}>
-        {/* Key Metrics */}
-        <Grid item xs={12} md={3}>
-          <Card>
-            <CardContent>
-              <Box display="flex" alignItems="center">
-                <Security color="primary" sx={{ mr: 1 }} />
-                <Box>
-                  <Typography variant="h4" color="primary">
-                    {threatMetrics.totalIOCs.toLocaleString()}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    Total IOCs
-                  </Typography>
-                </Box>
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        <Grid item xs={12} md={3}>
-          <Card>
-            <CardContent>
-              <Box display="flex" alignItems="center">
-                <Warning color="warning" sx={{ mr: 1 }} />
-                <Box>
-                  <Typography variant="h4" color="warning.main">
-                    {threatMetrics.activeThreats.toLocaleString()}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    Active Threats
-                  </Typography>
-                </Box>
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        <Grid item xs={12} md={3}>
-          <Card>
-            <CardContent>
-              <Box display="flex" alignItems="center">
-                <CheckCircle color="success" sx={{ mr: 1 }} />
-                <Box>
-                  <Typography variant="h4" color="success.main">
-                    {threatMetrics.resolvedThreats.toLocaleString()}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    Resolved Threats
-                  </Typography>
-                </Box>
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        <Grid item xs={12} md={3}>
-          <Card>
-            <CardContent>
-              <Box display="flex" alignItems="center">
-                <Assessment color="info" sx={{ mr: 1 }} />
-                <Box>
-                  <Typography variant="h4" color="info.main">
-                    {Math.round(
-                      (threatMetrics.resolvedThreats /
-                        (threatMetrics.activeThreats +
-                          threatMetrics.resolvedThreats)) *
-                        100,
-                    )}
-                    %
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    Resolution Rate
-                  </Typography>
-                </Box>
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        {/* Threat Severity Distribution */}
-        <Grid item xs={12} md={6}>
-          <Card>
-            <CardHeader
-              title="Threat Severity Distribution"
-              subheader="Distribution of threats by severity level"
-            />
-            <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <RechartsPieChart>
-                  <Pie
-                    data={severityData}
-                    cx="50%"
-                    cy="50%"
-                    outerRadius={100}
-                    dataKey="value"
-                    label={({ name, value }) => `${name}: ${value}`}
-                  >
-                    {severityData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.fill} />
-                    ))}
-                  </Pie>
-                  <RechartsTooltip />
-                </RechartsPieChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        {/* Top Threat Types */}
-        <Grid item xs={12} md={6}>
-          <Card>
-            <CardHeader
-              title="Top Threat Types"
-              subheader="Most common threat categories"
-            />
-            <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <RechartsBarChart data={threatMetrics.topThreatTypes}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis
-                    dataKey="type"
-                    angle={-45}
-                    textAnchor="end"
-                    height={80}
-                  />
-                  <YAxis />
-                  <RechartsTooltip />
-                  <Bar dataKey="count" fill="#8884d8" />
-                </RechartsBarChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        {/* Geographic Distribution */}
-        <Grid item xs={12}>
-          <Card>
-            <CardHeader
-              title="Geographic Threat Distribution"
-              subheader="Threat activity by country"
-            />
-            <CardContent>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Country</TableCell>
-                    <TableCell align="right">Threat Count</TableCell>
-                    <TableCell align="right">Percentage</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {threatMetrics.geographicDistribution.map((geo) => (
-                    <TableRow key={geo.country}>
-                      <TableCell>{geo.country}</TableCell>
-                      <TableCell align="right">
-                        {geo.threatCount.toLocaleString()}
-                      </TableCell>
-                      <TableCell align="right">
-                        {Math.round(
-                          (geo.threatCount / threatMetrics.activeThreats) * 100,
-                        )}
-                        %
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </Grid>
-      </Grid>
-    );
-  };
-
-  const renderInvestigationWidget = () => {
-    if (!investigationMetrics) return <LinearProgress />;
-
-    const statusData = Object.entries(
-      investigationMetrics.investigationsByStatus || {},
-    ).map(([status, count]) => ({
-      name:
-        status.replace('_', ' ').charAt(0).toUpperCase() +
-        status.replace('_', ' ').slice(1),
-      value: count,
-    }));
-
-    return (
-      <Grid container spacing={2}>
-        {/* Key Metrics */}
-        <Grid item xs={12} md={4}>
-          <Card>
-            <CardContent>
-              <Typography variant="h4" color="primary" gutterBottom>
-                {investigationMetrics.totalInvestigations.toLocaleString()}
-              </Typography>
-              <Typography variant="subtitle1">Total Investigations</Typography>
-              <Box display="flex" justifyContent="space-between" mt={2}>
-                <Chip
-                  label={`Active: ${investigationMetrics.activeInvestigations}`}
-                  color="warning"
-                  size="small"
-                />
-                <Chip
-                  label={`Completed: ${investigationMetrics.completedInvestigations}`}
-                  color="success"
-                  size="small"
-                />
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        <Grid item xs={12} md={4}>
-          <Card>
-            <CardContent>
-              <Typography variant="h4" color="info.main" gutterBottom>
-                {Math.round(investigationMetrics.avgCompletionTime)}h
-              </Typography>
-              <Typography variant="subtitle1">Avg Completion Time</Typography>
-              <LinearProgress
-                variant="determinate"
-                value={Math.min(
-                  ((72 - investigationMetrics.avgCompletionTime) / 72) * 100,
-                  100,
-                )}
-                sx={{ mt: 2 }}
-              />
-              <Typography variant="caption" color="text.secondary">
-                Target: &lt; 72 hours
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        <Grid item xs={12} md={4}>
-          <Card>
-            <CardContent>
-              <Typography variant="h4" color="success.main" gutterBottom>
-                {investigationMetrics.evidenceMetrics.totalEvidence.toLocaleString()}
-              </Typography>
-              <Typography variant="subtitle1">Total Evidence Items</Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                {investigationMetrics.findingsMetrics.totalFindings.toLocaleString()}{' '}
-                findings generated
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        {/* Investigation Status Chart */}
-        <Grid item xs={12} md={6}>
-          <Card>
-            <CardHeader title="Investigation Status Distribution" />
-            <CardContent>
-              <ResponsiveContainer width="100%" height={250}>
-                <RechartsPieChart>
-                  <Pie
-                    data={statusData}
-                    cx="50%"
-                    cy="50%"
-                    outerRadius={80}
-                    dataKey="value"
-                    label={({ name, value }) => `${name}: ${value}`}
-                  />
-                  <RechartsTooltip />
-                </RechartsPieChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        {/* Evidence Types */}
-        <Grid item xs={12} md={6}>
-          <Card>
-            <CardHeader title="Evidence by Type" />
-            <CardContent>
-              <List>
-                {Object.entries(
-                  investigationMetrics.evidenceMetrics.evidenceByType || {},
-                ).map(([type, count]) => (
-                  <ListItem key={type}>
-                    <ListItemText
-                      primary={type.charAt(0).toUpperCase() + type.slice(1)}
-                      secondary={`${count} items`}
-                    />
-                    <Typography variant="body2" color="text.secondary">
-                      {Math.round(
-                        (count /
-                          investigationMetrics.evidenceMetrics.totalEvidence) *
-                          100,
-                      )}
-                      %
-                    </Typography>
-                  </ListItem>
-                ))}
-              </List>
-            </CardContent>
-          </Card>
-        </Grid>
-      </Grid>
-    );
-  };
-
-  const renderPerformanceWidget = () => {
-    if (!performanceData) return <LinearProgress />;
-
-    return (
-      <Grid container spacing={2}>
-        {/* System Health Metrics */}
-        <Grid item xs={12} md={3}>
-          <Card>
-            <CardContent>
-              <Box display="flex" alignItems="center">
-                <Speed color="primary" sx={{ mr: 1 }} />
-                <Box>
-                  <Typography variant="h4" color="primary">
-                    {Math.round(performanceData.metrics.avgResponseTime)}ms
-                  </Typography>
-                  <Typography variant="caption">Avg Response Time</Typography>
-                </Box>
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        <Grid item xs={12} md={3}>
-          <Card>
-            <CardContent>
-              <Box display="flex" alignItems="center">
-                <Memory color="info" sx={{ mr: 1 }} />
-                <Box>
-                  <Typography variant="h4" color="info.main">
-                    {Math.round(
-                      (performanceData.systemHealth.memoryUsage.heapUsed /
-                        performanceData.systemHealth.memoryUsage.heapTotal) *
-                        100,
-                    )}
-                    %
-                  </Typography>
-                  <Typography variant="caption">Memory Usage</Typography>
-                </Box>
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        <Grid item xs={12} md={3}>
-          <Card>
-            <CardContent>
-              <Box display="flex" alignItems="center">
-                <Storage color="success" sx={{ mr: 1 }} />
-                <Box>
-                  <Typography variant="h4" color="success.main">
-                    {Math.round(performanceData.metrics.cacheHitRate)}%
-                  </Typography>
-                  <Typography variant="caption">Cache Hit Rate</Typography>
-                </Box>
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        <Grid item xs={12} md={3}>
-          <Card>
-            <CardContent>
-              <Box display="flex" alignItems="center">
-                <NetworkCheck color="warning" sx={{ mr: 1 }} />
-                <Box>
-                  <Typography variant="h4" color="warning.main">
-                    {performanceData.metrics.concurrentUsers}
-                  </Typography>
-                  <Typography variant="caption">Active Users</Typography>
-                </Box>
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        {/* Connection Pool Status */}
-        <Grid item xs={12}>
-          <Card>
-            <CardHeader title="Database Connection Pools" />
-            <CardContent>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Database</TableCell>
-                    <TableCell align="right">Active</TableCell>
-                    <TableCell align="right">Max</TableCell>
-                    <TableCell align="right">Avg Response (ms)</TableCell>
-                    <TableCell align="right">Error Rate</TableCell>
-                    <TableCell align="right">Status</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {performanceData.connectionPools.map((pool) => (
-                    <TableRow key={pool.id}>
-                      <TableCell>{pool.type.toUpperCase()}</TableCell>
-                      <TableCell align="right">
-                        {pool.activeConnections}
-                      </TableCell>
-                      <TableCell align="right">{pool.maxConnections}</TableCell>
-                      <TableCell align="right">
-                        {Math.round(pool.avgResponseTime)}
-                      </TableCell>
-                      <TableCell align="right">
-                        {pool.errorRate.toFixed(2)}%
-                      </TableCell>
-                      <TableCell align="right">
-                        <Chip
-                          label={pool.errorRate < 1 ? 'Healthy' : 'Warning'}
-                          color={pool.errorRate < 1 ? 'success' : 'warning'}
-                          size="small"
-                        />
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        {/* Cache Strategies */}
-        <Grid item xs={12}>
-          <Card>
-            <CardHeader title="Cache Strategies" />
-            <CardContent>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Strategy</TableCell>
-                    <TableCell>Pattern</TableCell>
-                    <TableCell align="right">TTL (s)</TableCell>
-                    <TableCell align="center">Priority</TableCell>
-                    <TableCell align="center">Compression</TableCell>
-                    <TableCell align="center">Prefetch</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {performanceData.cacheStrategies.map((strategy) => (
-                    <TableRow key={strategy.id}>
-                      <TableCell>{strategy.name}</TableCell>
-                      <TableCell>
-                        <Typography variant="body2" fontFamily="monospace">
-                          {strategy.pattern}
-                        </Typography>
-                      </TableCell>
-                      <TableCell align="right">{strategy.ttl}</TableCell>
-                      <TableCell align="center">
-                        <Chip
-                          label={strategy.priority.toUpperCase()}
-                          color={
-                            strategy.priority === 'high'
-                              ? 'error'
-                              : strategy.priority === 'medium'
-                                ? 'warning'
-                                : 'default'
-                          }
-                          size="small"
-                        />
-                      </TableCell>
-                      <TableCell align="center">
-                        <Chip
-                          label={strategy.compressionEnabled ? 'Yes' : 'No'}
-                          color={
-                            strategy.compressionEnabled ? 'success' : 'default'
-                          }
-                          size="small"
-                        />
-                      </TableCell>
-                      <TableCell align="center">
-                        <Chip
-                          label={strategy.prefetchEnabled ? 'Yes' : 'No'}
-                          color={strategy.prefetchEnabled ? 'info' : 'default'}
-                          size="small"
-                        />
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </Grid>
-      </Grid>
-    );
-  };
-
-  const getSeverityColor = (severity) => {
-    const colors = {
-      critical: '#dc2626',
-      high: '#ea580c',
-      medium: '#d97706',
-      low: '#65a30d',
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
     };
-    return colors[severity] || '#6b7280';
-  };
-
-  const tabPanels = [
-    {
-      label: 'Threat Intelligence',
-      content: renderThreatIntelWidget(),
-      icon: <Security />,
-    },
-    {
-      label: 'Investigations',
-      content: renderInvestigationWidget(),
-      icon: <Assessment />,
-    },
-    {
-      label: 'Performance',
-      content: renderPerformanceWidget(),
-      icon: <Speed />,
-    },
-  ];
-
-  return (
-    <Box sx={{ flexGrow: 1, p: 3 }}>
-      {/* Header */}
-      <Box display="flex" justifyContent="between" alignItems="center" mb={3}>
-        <Typography variant="h4" gutterBottom>
-          Advanced Analytics Dashboard
-        </Typography>
-        <Box display="flex" gap={1}>
-          <FormControlLabel
-            control={
-              <Switch
-                checked={autoRefresh}
-                onChange={(e) => setAutoRefresh(e.target.checked)}
-              />
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+const react_1 = __importStar(require("react"));
+const ToastContainer_1 = require("../ToastContainer");
+const AdvancedAnalyticsDashboard = ({ investigationId, timeRange = '24h', className = '', }) => {
+    const [widgets, setWidgets] = (0, react_1.useState)([]);
+    const [isLoading, setIsLoading] = (0, react_1.useState)(true);
+    const [selectedTimeRange, setSelectedTimeRange] = (0, react_1.useState)(timeRange);
+    const [autoRefresh, setAutoRefresh] = (0, react_1.useState)(true);
+    const [lastUpdated, setLastUpdated] = (0, react_1.useState)(new Date());
+    const refreshIntervalRef = (0, react_1.useRef)(undefined);
+    const chartRefs = (0, react_1.useRef)({});
+    const toast = (0, ToastContainer_1.useToast)();
+    // Initialize dashboard with mock analytics data
+    (0, react_1.useEffect)(() => {
+        loadAnalyticsData();
+        if (autoRefresh) {
+            refreshIntervalRef.current = setInterval(() => {
+                loadAnalyticsData(true); // Silent refresh
+                setLastUpdated(new Date());
+            }, 30000); // Refresh every 30 seconds
+        }
+        return () => {
+            if (refreshIntervalRef.current) {
+                clearInterval(refreshIntervalRef.current);
             }
-            label="Auto Refresh"
-          />
-          <Tooltip title="Refresh All Data">
-            <IconButton onClick={handleRefreshAll} disabled={refreshing}>
-              <Refresh />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title="Export Dashboard">
-            <IconButton onClick={() => handleExportDashboard('PDF')}>
-              <Download />
-            </IconButton>
-          </Tooltip>
-        </Box>
-      </Box>
+        };
+    }, [selectedTimeRange, autoRefresh, investigationId]);
+    const loadAnalyticsData = async (silent = false) => {
+        if (!silent)
+            setIsLoading(true);
+        try {
+            // Simulate API call delay
+            await new Promise((resolve) => setTimeout(resolve, 800));
+            const mockWidgets = [
+                {
+                    id: 'entities-processed',
+                    title: 'Entities Processed',
+                    type: 'metric',
+                    size: 'small',
+                    data: {
+                        value: 1247,
+                        change: 12.3,
+                        trend: 'up',
+                        unit: 'entities',
+                        description: 'Total entities analyzed in selected time range',
+                    },
+                },
+                {
+                    id: 'confidence-score',
+                    title: 'Average Confidence',
+                    type: 'metric',
+                    size: 'small',
+                    data: {
+                        value: 87.4,
+                        change: -2.1,
+                        trend: 'down',
+                        unit: '%',
+                        description: 'Average confidence score across all analyses',
+                    },
+                },
+                {
+                    id: 'investigations-active',
+                    title: 'Active Investigations',
+                    type: 'metric',
+                    size: 'small',
+                    data: {
+                        value: 23,
+                        change: 0,
+                        trend: 'stable',
+                        unit: 'cases',
+                        description: 'Currently active investigation cases',
+                    },
+                },
+                {
+                    id: 'threat-level',
+                    title: 'Threat Level',
+                    type: 'metric',
+                    size: 'small',
+                    data: {
+                        value: 6.8,
+                        change: 1.2,
+                        trend: 'up',
+                        unit: '/10',
+                        description: 'Current overall threat assessment level',
+                    },
+                },
+                {
+                    id: 'activity-timeline',
+                    title: 'Analysis Activity',
+                    type: 'chart',
+                    size: 'large',
+                    data: generateTimeSeriesData(24, selectedTimeRange),
+                },
+                {
+                    id: 'entity-distribution',
+                    title: 'Entity Type Distribution',
+                    type: 'chart',
+                    size: 'medium',
+                    data: {
+                        type: 'pie',
+                        labels: [
+                            'Persons',
+                            'Organizations',
+                            'IP Addresses',
+                            'Emails',
+                            'Documents',
+                            'URLs',
+                        ],
+                        values: [342, 189, 156, 234, 87, 239],
+                        colors: [
+                            '#3B82F6',
+                            '#10B981',
+                            '#F59E0B',
+                            '#EF4444',
+                            '#8B5CF6',
+                            '#06B6D4',
+                        ],
+                    },
+                },
+                {
+                    id: 'top-entities',
+                    title: 'High Priority Entities',
+                    type: 'table',
+                    size: 'medium',
+                    data: {
+                        headers: [
+                            'Entity',
+                            'Type',
+                            'Confidence',
+                            'Risk Score',
+                            'Investigations',
+                        ],
+                        rows: [
+                            ['john.doe@suspicious.com', 'Email', '94%', '8.2', '3'],
+                            ['192.168.1.100', 'IP Address', '91%', '7.8', '2'],
+                            ['APT Group Alpha', 'Organization', '89%', '9.1', '5'],
+                            ['malware.exe', 'File', '96%', '8.7', '1'],
+                            ['darknet-forum.onion', 'URL', '88%', '7.3', '4'],
+                        ],
+                    },
+                },
+                {
+                    id: 'network-topology',
+                    title: 'Network Analysis',
+                    type: 'graph',
+                    size: 'large',
+                    data: {
+                        nodes: generateNetworkNodes(20),
+                        edges: generateNetworkEdges(35),
+                        metrics: {
+                            density: 0.23,
+                            clustering: 0.67,
+                            centrality: 'john.doe@suspicious.com',
+                        },
+                    },
+                },
+            ];
+            setWidgets(mockWidgets);
+            if (!silent) {
+                toast.success('Analytics Updated', 'Dashboard data refreshed successfully');
+            }
+        }
+        catch (error) {
+            console.error('Failed to load analytics:', error);
+            toast.error('Analytics Error', 'Failed to load dashboard data');
+        }
+        finally {
+            if (!silent)
+                setIsLoading(false);
+        }
+    };
+    const generateTimeSeriesData = (points, range) => {
+        const now = Date.now();
+        const intervals = {
+            '1h': 60 * 1000, // 1 minute intervals
+            '24h': 60 * 60 * 1000, // 1 hour intervals
+            '7d': 6 * 60 * 60 * 1000, // 6 hour intervals
+            '30d': 24 * 60 * 60 * 1000, // 1 day intervals
+        };
+        const interval = intervals[range];
+        const data = [];
+        for (let i = points - 1; i >= 0; i--) {
+            data.push({
+                timestamp: now - i * interval,
+                value: Math.floor(Math.random() * 100) + 50,
+                label: new Date(now - i * interval).toLocaleTimeString(),
+            });
+        }
+        return data;
+    };
+    const generateNetworkNodes = (count) => {
+        const types = ['person', 'organization', 'ip', 'email', 'file'];
+        const nodes = [];
+        for (let i = 0; i < count; i++) {
+            const type = types[Math.floor(Math.random() * types.length)];
+            nodes.push({
+                id: `node-${i}`,
+                label: `${type}-${i}`,
+                type,
+                size: Math.random() * 20 + 10,
+                risk: Math.random() * 10,
+                x: Math.random() * 400,
+                y: Math.random() * 300,
+            });
+        }
+        return nodes;
+    };
+    const generateNetworkEdges = (count) => {
+        const edges = [];
+        for (let i = 0; i < count; i++) {
+            edges.push({
+                id: `edge-${i}`,
+                source: `node-${Math.floor(Math.random() * 20)}`,
+                target: `node-${Math.floor(Math.random() * 20)}`,
+                weight: Math.random(),
+                type: ['communication', 'financial', 'location', 'association'][Math.floor(Math.random() * 4)],
+            });
+        }
+        return edges;
+    };
+    const renderMetricWidget = (widget) => {
+        const data = widget.data;
+        const trendIcon = data.trend === 'up' ? '📈' : data.trend === 'down' ? '📉' : '➡️';
+        const trendColor = data.trend === 'up'
+            ? 'text-green-600'
+            : data.trend === 'down'
+                ? 'text-red-600'
+                : 'text-gray-600';
+        return (<div className="p-6 bg-white rounded-lg border shadow-sm">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-sm font-medium text-gray-900">{widget.title}</h3>
+          <span className="text-lg">{trendIcon}</span>
+        </div>
 
-      {refreshing && <LinearProgress sx={{ mb: 2 }} />}
+        <div className="mb-2">
+          <div className="text-2xl font-bold text-gray-900">
+            {data.value.toLocaleString()}
+            {data.unit}
+          </div>
+          <div className={`text-sm flex items-center gap-1 ${trendColor}`}>
+            {data.change !== 0 && (<>
+                <span>
+                  {data.change > 0 ? '+' : ''}
+                  {data.change}%
+                </span>
+                <span className="text-gray-500">vs previous period</span>
+              </>)}
+          </div>
+        </div>
 
-      {/* Status Summary */}
-      <Alert severity="info" sx={{ mb: 2 }}>
-        Dashboard last updated:{' '}
-        {dashboardConfig?.metadata?.lastUpdated || 'Loading...'}
-        {' • '}
-        {dashboardConfig?.metadata?.totalWidgets || 0} widgets active
-        {' • '}
-        Auto-refresh: {autoRefresh ? 'ON' : 'OFF'}
-      </Alert>
+        <p className="text-xs text-gray-500">{data.description}</p>
+      </div>);
+    };
+    const renderChartWidget = (widget) => {
+        return (<div className="p-6 bg-white rounded-lg border shadow-sm">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-sm font-medium text-gray-900">{widget.title}</h3>
+          <button className="text-gray-400 hover:text-gray-600">⚙️</button>
+        </div>
 
-      {/* Tabs */}
-      <Paper sx={{ mb: 2 }}>
-        <Tabs
-          value={selectedTab}
-          onChange={(e, newValue) => setSelectedTab(newValue)}
-          variant="fullWidth"
-        >
-          {tabPanels.map((panel, index) => (
-            <Tab
-              key={index}
-              label={panel.label}
-              icon={panel.icon}
-              iconPosition="start"
-            />
-          ))}
-        </Tabs>
-      </Paper>
+        <div className="h-40 bg-gray-50 rounded flex items-center justify-center">
+          {widget.data.type === 'pie' ? (<div className="text-center">
+              <div className="text-3xl mb-2">📊</div>
+              <div className="text-sm text-gray-600">
+                Pie Chart Visualization
+              </div>
+              <div className="mt-2 text-xs text-gray-500">
+                {widget.data.labels.length} categories
+              </div>
+            </div>) : (<div className="text-center">
+              <div className="text-3xl mb-2">📈</div>
+              <div className="text-sm text-gray-600">Time Series Chart</div>
+              <div className="mt-2 text-xs text-gray-500">
+                {widget.data.length} data points
+              </div>
+            </div>)}
+        </div>
+      </div>);
+    };
+    const renderTableWidget = (widget) => {
+        const data = widget.data;
+        return (<div className="p-6 bg-white rounded-lg border shadow-sm">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-sm font-medium text-gray-900">{widget.title}</h3>
+          <button className="text-gray-400 hover:text-gray-600">↗️</button>
+        </div>
 
-      {/* Tab Content */}
-      <Box>{tabPanels[selectedTab]?.content}</Box>
-    </Box>
-  );
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b">
+                {data.headers.map((header, i) => (<th key={i} className="text-left py-2 px-3 font-medium text-gray-900">
+                    {header}
+                  </th>))}
+              </tr>
+            </thead>
+            <tbody>
+              {data.rows.map((row, i) => (<tr key={i} className="border-b hover:bg-gray-50">
+                  {row.map((cell, j) => (<td key={j} className="py-2 px-3 text-gray-700">
+                      {j === 2 || j === 3 ? ( // Confidence and Risk Score columns
+                    <span className={`font-medium ${parseFloat(cell) > 90 || parseFloat(cell) > 8
+                            ? 'text-red-600'
+                            : parseFloat(cell) > 80 || parseFloat(cell) > 6
+                                ? 'text-yellow-600'
+                                : 'text-green-600'}`}>
+                          {cell}
+                        </span>) : (cell)}
+                    </td>))}
+                </tr>))}
+            </tbody>
+          </table>
+        </div>
+      </div>);
+    };
+    const renderGraphWidget = (widget) => {
+        const data = widget.data;
+        return (<div className="p-6 bg-white rounded-lg border shadow-sm">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-sm font-medium text-gray-900">{widget.title}</h3>
+          <div className="flex gap-2">
+            <button className="text-gray-400 hover:text-gray-600" title="Fullscreen">
+              🔍
+            </button>
+            <button className="text-gray-400 hover:text-gray-600" title="Export">
+              📤
+            </button>
+          </div>
+        </div>
+
+        <div className="h-64 bg-gray-50 rounded relative">
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="text-center">
+              <div className="text-4xl mb-3">🕸️</div>
+              <div className="text-sm text-gray-600 mb-2">
+                Network Graph Visualization
+              </div>
+              <div className="text-xs text-gray-500 space-y-1">
+                <div>
+                  Nodes: {data.nodes.length} | Edges: {data.edges.length}
+                </div>
+                <div>
+                  Density: {data.metrics.density} | Clustering:{' '}
+                  {data.metrics.clustering}
+                </div>
+                <div>Central Entity: {data.metrics.centrality}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>);
+    };
+    const renderWidget = (widget) => {
+        switch (widget.type) {
+            case 'metric':
+                return renderMetricWidget(widget);
+            case 'chart':
+                return renderChartWidget(widget);
+            case 'table':
+                return renderTableWidget(widget);
+            case 'graph':
+                return renderGraphWidget(widget);
+            default:
+                return null;
+        }
+    };
+    const getGridCols = (size) => {
+        switch (size) {
+            case 'small':
+                return 'lg:col-span-1';
+            case 'medium':
+                return 'lg:col-span-2';
+            case 'large':
+                return 'lg:col-span-3';
+            default:
+                return 'lg:col-span-1';
+        }
+    };
+    if (isLoading && widgets.length === 0) {
+        return (<div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <div className="w-8 h-8 border-2 border-gray-300 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
+          <div className="text-gray-600">Loading analytics dashboard...</div>
+        </div>
+      </div>);
+    }
+    return (<div className={`analytics-dashboard ${className}`}>
+      {/* Dashboard Controls */}
+      <div className="flex items-center justify-between mb-6 bg-white p-4 rounded-lg border shadow-sm">
+        <div className="flex items-center gap-4">
+          <h2 className="text-lg font-semibold text-gray-900">
+            Advanced Analytics
+          </h2>
+          {investigationId && (<span className="px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full">
+              {investigationId}
+            </span>)}
+        </div>
+
+        <div className="flex items-center gap-4">
+          {/* Time Range Selector */}
+          <select value={selectedTimeRange} onChange={(e) => setSelectedTimeRange(e.target.value)} className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
+            <option value="1h">Last Hour</option>
+            <option value="24h">Last 24 Hours</option>
+            <option value="7d">Last 7 Days</option>
+            <option value="30d">Last 30 Days</option>
+          </select>
+
+          {/* Auto-refresh Toggle */}
+          <button onClick={() => setAutoRefresh(!autoRefresh)} className={`px-3 py-2 text-sm rounded-lg border ${autoRefresh
+            ? 'bg-blue-50 text-blue-700 border-blue-200'
+            : 'bg-gray-50 text-gray-600 border-gray-200'}`}>
+            🔄 Auto-refresh
+          </button>
+
+          {/* Manual Refresh */}
+          <button onClick={() => loadAnalyticsData()} disabled={isLoading} className="px-3 py-2 bg-gray-100 text-gray-600 text-sm rounded-lg hover:bg-gray-200 disabled:opacity-50">
+            ↻ Refresh
+          </button>
+
+          {/* Export Dashboard */}
+          <button onClick={() => toast.info('Export', 'Dashboard export functionality coming soon')} className="px-3 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700">
+            📊 Export
+          </button>
+        </div>
+      </div>
+
+      {/* Last Updated */}
+      <div className="mb-4 text-right">
+        <span className="text-xs text-gray-500">
+          Last updated: {lastUpdated.toLocaleTimeString()}
+          {autoRefresh && <span className="ml-2">• Auto-refresh enabled</span>}
+        </span>
+      </div>
+
+      {/* Widgets Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {widgets.map((widget) => (<div key={widget.id} className={getGridCols(widget.size)}>
+            {renderWidget(widget)}
+          </div>))}
+      </div>
+
+      {/* Export Modal or Additional Features */}
+      <div className="mt-8 p-4 bg-blue-50 rounded-lg border border-blue-200">
+        <div className="flex items-center gap-3">
+          <div className="text-blue-600 text-lg">💡</div>
+          <div>
+            <div className="text-sm font-medium text-blue-900">Pro Tip</div>
+            <div className="text-sm text-blue-700">
+              Click on widgets to drill down into detailed views. Use Ctrl+click
+              to open in a new tab.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>);
 };
-
-export default AdvancedAnalyticsDashboard;
+exports.default = AdvancedAnalyticsDashboard;

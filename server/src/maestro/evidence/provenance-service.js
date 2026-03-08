@@ -1,0 +1,384 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.evidenceProvenanceService = exports.PROVENANCE_SCHEMA = exports.EvidenceProvenanceService = void 0;
+const crypto_1 = __importDefault(require("crypto"));
+// import { S3Client, PutObjectCommand, HeadObjectCommand } from '@aws-sdk/client-s3';
+const postgres_js_1 = require("../../db/postgres.js");
+const otel_tracing_js_1 = require("../../middleware/observability/otel-tracing.js");
+class EvidenceProvenanceService {
+    // private s3Client: S3Client;
+    bucketName;
+    signingKey;
+    inlineThreshold;
+    constructor() {
+        // this.s3Client = new S3Client({
+        //   region: process.env.AWS_REGION || 'us-east-1',
+        // });
+        this.bucketName = process.env.EVIDENCE_BUCKET || 'maestro-evidence-worm';
+        this.signingKey =
+            process.env.EVIDENCE_SIGNING_KEY || this.generateSigningKey();
+        this.inlineThreshold = Number(process.env.MAX_INLINE_EVIDENCE_BYTES || '1000000');
+    }
+    generateSigningKey() {
+        // In production, this should be from AWS KMS or similar
+        return crypto_1.default.randomBytes(32).toString('hex');
+    }
+    /**
+     * Store evidence artifact with WORM compliance
+     */
+    async storeEvidence(artifact) {
+        const span = otel_tracing_js_1.otelService.createSpan('evidence.store');
+        try {
+            // Generate content hash for integrity
+            const contentBuffer = Buffer.isBuffer(artifact.content)
+                ? artifact.content
+                : Buffer.from(artifact.content, 'utf8');
+            const sha256Hash = crypto_1.default
+                .createHash('sha256')
+                .update(contentBuffer)
+                .digest('hex');
+            const artifactId = crypto_1.default.randomUUID();
+            // Calculate retention date
+            const retentionDays = artifact.retentionDays ||
+                this.getDefaultRetentionDays(artifact.artifactType);
+            const retentionUntil = new Date();
+            retentionUntil.setDate(retentionUntil.getDate() + retentionDays);
+            const shouldInline = artifact.artifactType === 'receipt' ||
+                contentBuffer.length <= this.inlineThreshold;
+            // S3 key with content-addressable naming
+            const s3Key = shouldInline
+                ? `inline://evidence_artifact_content/${artifactId}`
+                : `evidence/${artifact.runId}/${artifact.artifactType}/${artifactId}-${sha256Hash.slice(0, 16)}`;
+            // Upload to S3 with Object Lock
+            // const uploadCommand = new PutObjectCommand({
+            //   Bucket: this.bucketName,
+            //   Key: s3Key,
+            //   Body: contentBuffer,
+            //   ContentType: this.getContentType(artifact.artifactType),
+            //   Metadata: {
+            //     ...artifact.metadata,
+            //     'artifact-type': artifact.artifactType,
+            //     'run-id': artifact.runId,
+            //     'evidence-id': artifactId,
+            //     'integrity-hash': sha256Hash,
+            //   },
+            //   ServerSideEncryption: 'aws:kms',
+            //   SSEKMSKeyId: process.env.EVIDENCE_KMS_KEY_ID,
+            //   // WORM compliance: Object Lock until retention date
+            //   ObjectLockMode: 'COMPLIANCE',
+            //   ObjectLockRetainUntilDate: retentionUntil,
+            // });
+            // await this.s3Client.send(uploadCommand);
+            // Store metadata in database
+            const pool = (0, postgres_js_1.getPostgresPool)();
+            await pool.query(`INSERT INTO evidence_artifacts 
+         (id, run_id, artifact_type, s3_key, sha256_hash, size_bytes, retention_until, created_at)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, now())`, [
+                artifactId,
+                artifact.runId,
+                artifact.artifactType,
+                s3Key,
+                sha256Hash,
+                contentBuffer.length,
+                retentionUntil,
+            ]);
+            if (shouldInline) {
+                await pool.query(`INSERT INTO evidence_artifact_content (artifact_id, content, content_type)
+           VALUES ($1, $2, $3)`, [
+                    artifactId,
+                    contentBuffer,
+                    artifact.metadata?.contentType ||
+                        this.getContentType(artifact.artifactType),
+                ]);
+            }
+            // Create provenance chain entry
+            await this.createProvenanceEntry(artifactId, sha256Hash, artifact.runId);
+            span?.addSpanAttributes({
+                'evidence.artifact_id': artifactId,
+                'evidence.run_id': artifact.runId,
+                'evidence.type': artifact.artifactType,
+                'evidence.size_bytes': contentBuffer.length,
+            });
+            return artifactId;
+        }
+        catch (error) {
+            console.error('Failed to store evidence:', error);
+            throw new Error(`Evidence storage failed: ${error.message}`);
+        }
+        finally {
+            span?.end();
+        }
+    }
+    /**
+     * Create cryptographic provenance chain entry
+     */
+    async createProvenanceEntry(artifactId, currentHash, runId) {
+        const pool = (0, postgres_js_1.getPostgresPool)();
+        // Get previous artifact hash for chain
+        const { rows } = await pool.query(`SELECT sha256_hash FROM evidence_artifacts 
+       WHERE run_id = $1 AND created_at < now() 
+       ORDER BY created_at DESC LIMIT 1`, [runId]);
+        const previousHash = rows.length > 0 ? rows[0].sha256_hash : null;
+        // Create signature over chain
+        const chainData = JSON.stringify({
+            artifactId,
+            previousHash,
+            currentHash,
+            timestamp: new Date().toISOString(),
+            runId,
+        });
+        const signature = crypto_1.default
+            .createHmac('sha256', this.signingKey)
+            .update(chainData)
+            .digest('hex');
+        // Store provenance entry
+        await pool.query(`INSERT INTO evidence_provenance 
+       (artifact_id, previous_hash, current_hash, signature, chain_data, created_at)
+       VALUES ($1, $2, $3, $4, $5, now())`, [artifactId, previousHash, currentHash, signature, chainData]);
+    }
+    /**
+     * Verify evidence integrity and provenance chain
+     */
+    async verifyEvidence(artifactId) {
+        const span = otel_tracing_js_1.otelService.createSpan('evidence.verify');
+        try {
+            const pool = (0, postgres_js_1.getPostgresPool)();
+            // Get artifact metadata
+            const { rows: artifacts } = await pool.query('SELECT * FROM evidence_artifacts WHERE id = $1', [artifactId]);
+            if (!artifacts.length) {
+                return {
+                    valid: false,
+                    integrity: false,
+                    provenance: false,
+                    details: { error: 'Artifact not found' },
+                };
+            }
+            const artifact = artifacts[0];
+            // Verify S3 object exists and integrity
+            // const headCommand = new HeadObjectCommand({
+            //   Bucket: this.bucketName,
+            //   Key: artifact.s3_key,
+            // });
+            const integrityValid = false;
+            const s3Metadata = null;
+            // try {
+            //   const s3Response = await this.s3Client.send(headCommand);
+            //   s3Metadata = s3Response.Metadata;
+            //   // Check if stored hash matches S3 metadata
+            //   integrityValid = s3Metadata?.['integrity-hash'] === artifact.sha256_hash;
+            // } catch (error: any) {
+            //   integrityValid = false;
+            // }
+            // Verify provenance chain
+            const { rows: provenance } = await pool.query('SELECT * FROM evidence_provenance WHERE artifact_id = $1', [artifactId]);
+            let provenanceValid = false;
+            if (provenance.length > 0) {
+                const entry = provenance[0];
+                // Re-create signature and verify
+                const expectedSignature = crypto_1.default
+                    .createHmac('sha256', this.signingKey)
+                    .update(entry.chain_data)
+                    .digest('hex');
+                provenanceValid = expectedSignature === entry.signature;
+            }
+            const result = {
+                valid: integrityValid && provenanceValid,
+                integrity: integrityValid,
+                provenance: provenanceValid,
+                details: {
+                    artifact: {
+                        id: artifact.id,
+                        type: artifact.artifact_type,
+                        runId: artifact.run_id,
+                        size: artifact.size_bytes,
+                        hash: artifact.sha256_hash,
+                        created: artifact.created_at,
+                    },
+                    s3Metadata,
+                    provenance: provenance[0] || null,
+                },
+            };
+            span?.addSpanAttributes({
+                'evidence.verification.valid': result.valid,
+                'evidence.verification.integrity': result.integrity,
+                'evidence.verification.provenance': result.provenance,
+            });
+            return result;
+        }
+        catch (error) {
+            console.error('Evidence verification failed:', error);
+            return {
+                valid: false,
+                integrity: false,
+                provenance: false,
+                details: { error: error.message },
+            };
+        }
+        finally {
+            span?.end();
+        }
+    }
+    /**
+     * Verify receipt chain for a run (linkage + signature integrity).
+     */
+    async verifyReceiptChain(runId) {
+        const pool = (0, postgres_js_1.getPostgresPool)();
+        const { rows } = await pool.query(`SELECT
+         ea.id as artifact_id,
+         ea.sha256_hash,
+         ea.created_at,
+         ep.previous_hash,
+         ep.current_hash,
+         ep.signature,
+         ep.chain_data
+       FROM evidence_artifacts ea
+       JOIN evidence_provenance ep ON ep.artifact_id = ea.id
+       WHERE ea.run_id = $1 AND ea.artifact_type = 'receipt'
+       ORDER BY ea.created_at ASC`, [runId]);
+        const errors = [];
+        let previousHash = null;
+        const chainEntries = rows.map((row) => ({
+            artifactId: row.artifact_id,
+            currentHash: row.current_hash,
+            previousHash: row.previous_hash || null,
+            createdAt: row.created_at,
+            row,
+        }));
+        for (const entry of chainEntries) {
+            const currentHashMatches = entry.currentHash === entry.row.sha256_hash;
+            if (!currentHashMatches) {
+                errors.push(`Hash mismatch for receipt ${entry.artifactId}: ${entry.currentHash}`);
+            }
+            if (entry.previousHash !== previousHash) {
+                errors.push(`Chain break for receipt ${entry.artifactId}: expected ${previousHash || 'null'} got ${entry.previousHash || 'null'}`);
+            }
+            const chainData = typeof entry.row.chain_data === 'string'
+                ? entry.row.chain_data
+                : JSON.stringify(entry.row.chain_data);
+            const expectedSignature = crypto_1.default
+                .createHmac('sha256', this.signingKey)
+                .update(chainData)
+                .digest('hex');
+            if (expectedSignature !== entry.row.signature) {
+                errors.push(`Signature mismatch for receipt ${entry.artifactId}`);
+            }
+            previousHash = entry.currentHash;
+        }
+        return {
+            valid: errors.length === 0,
+            errors,
+            chain: chainEntries.map((entry) => ({
+                artifactId: entry.artifactId,
+                currentHash: entry.currentHash,
+                previousHash: entry.previousHash,
+                createdAt: entry.createdAt,
+            })),
+        };
+    }
+    /**
+     * Generate SBOM (Software Bill of Materials) evidence
+     */
+    async generateSBOMEvidence(runId, dependencies) {
+        const sbom = {
+            bomFormat: 'CycloneDX',
+            specVersion: '1.4',
+            serialNumber: `urn:uuid:${crypto_1.default.randomUUID()}`,
+            version: 1,
+            metadata: {
+                timestamp: new Date().toISOString(),
+                tools: [
+                    {
+                        vendor: 'Maestro',
+                        name: 'Evidence Generator',
+                        version: '1.0.0',
+                    },
+                ],
+                component: {
+                    type: 'application',
+                    name: `maestro-run-${runId}`,
+                    version: '1.0.0',
+                },
+            },
+            components: dependencies.map((dep) => ({
+                type: 'library',
+                name: dep.name,
+                version: dep.version,
+                licenses: dep.licenses || [],
+                hashes: dep.hashes || [],
+                externalReferences: dep.externalReferences || [],
+            })),
+        };
+        return await this.storeEvidence({
+            runId,
+            artifactType: 'sbom',
+            content: JSON.stringify(sbom, null, 2),
+            metadata: {
+                format: 'cycloneDX',
+                version: '1.4',
+                componentCount: dependencies.length,
+            },
+        });
+    }
+    /**
+     * Get retention policy for artifact type
+     */
+    getDefaultRetentionDays(artifactType) {
+        const retentionPolicies = {
+            sbom: 2555, // ~7 years for compliance
+            attestation: 2555, // ~7 years for compliance
+            log: 365, // 1 year
+            output: 90, // 3 months
+            trace: 30, // 1 month
+            receipt: 2555, // receipts should be retained long-term
+            policy_decision: 2555, // ~7 years for compliance
+        };
+        return (retentionPolicies[artifactType] || 365);
+    }
+    /**
+     * Get appropriate content type for artifact
+     */
+    getContentType(artifactType) {
+        const contentTypes = {
+            sbom: 'application/json',
+            attestation: 'application/json',
+            log: 'text/plain',
+            output: 'application/json',
+            trace: 'application/json',
+            receipt: 'application/json',
+            policy_decision: 'application/json',
+        };
+        return (contentTypes[artifactType] ||
+            'application/octet-stream');
+    }
+    /**
+     * List evidence artifacts for a run
+     */
+    async listEvidenceForRun(runId) {
+        const pool = (0, postgres_js_1.getPostgresPool)();
+        const { rows } = await pool.query(`SELECT 
+        id, artifact_type, sha256_hash, size_bytes, 
+        immutable, retention_until, created_at
+       FROM evidence_artifacts 
+       WHERE run_id = $1 
+       ORDER BY created_at DESC`, [runId]);
+        return rows;
+    }
+}
+exports.EvidenceProvenanceService = EvidenceProvenanceService;
+// Add missing provenance table to schema (update to db migration)
+exports.PROVENANCE_SCHEMA = `
+CREATE TABLE IF NOT EXISTS evidence_provenance (
+  id BIGSERIAL PRIMARY KEY,
+  artifact_id UUID REFERENCES evidence_artifacts(id) ON DELETE CASCADE,
+  previous_hash TEXT,
+  current_hash TEXT NOT NULL,
+  signature TEXT NOT NULL,
+  chain_data JSONB NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS evidence_provenance_artifact_idx ON evidence_provenance (artifact_id);
+`;
+exports.evidenceProvenanceService = new EvidenceProvenanceService();

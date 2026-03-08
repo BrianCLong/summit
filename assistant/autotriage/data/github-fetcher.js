@@ -1,7 +1,11 @@
+"use strict";
 /**
  * GitHub API integration for fetching issues and PRs
  */
-export async function fetchGitHubIssues(options) {
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.fetchGitHubIssues = fetchGitHubIssues;
+exports.fetchGitHubIssuesFromEnv = fetchGitHubIssuesFromEnv;
+async function fetchGitHubIssues(options) {
     const { owner, repo, token, includeIssues = true, includePRs = false, state = 'open', labels = [], maxResults = 1000, } = options;
     const items = [];
     let page = 1;
@@ -128,7 +132,7 @@ function estimateGitHubIssueComplexity(issue) {
 /**
  * CLI-friendly wrapper that uses environment variables
  */
-export async function fetchGitHubIssuesFromEnv() {
+async function fetchGitHubIssuesFromEnv() {
     const owner = process.env.GITHUB_OWNER || 'BrianCLong';
     const repo = process.env.GITHUB_REPO || 'summit';
     const token = process.env.GITHUB_TOKEN;
@@ -145,4 +149,3 @@ export async function fetchGitHubIssuesFromEnv() {
         maxResults: 500,
     });
 }
-//# sourceMappingURL=github-fetcher.js.map

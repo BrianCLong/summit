@@ -301,4 +301,3 @@ class SignalGenerator {
     }
 }
 exports.SignalGenerator = SignalGenerator;
-//# sourceMappingURL=SignalGenerator.js.map

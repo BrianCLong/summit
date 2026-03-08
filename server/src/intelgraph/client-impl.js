@@ -1,0 +1,251 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.IntelGraphClientImpl = void 0;
+const database_js_1 = require("../config/database.js");
+class IntelGraphClientImpl {
+    get driver() {
+        return (0, database_js_1.getNeo4jDriver)();
+    }
+    serializeRunProps(run) {
+        const { reasoningBudget, reasoningBudgetEvidence, ...props } = run;
+        return {
+            ...props,
+            ...(reasoningBudget
+                ? { reasoningBudget: JSON.stringify(reasoningBudget) }
+                : {}),
+            ...(reasoningBudgetEvidence
+                ? { reasoningBudgetEvidence: JSON.stringify(reasoningBudgetEvidence) }
+                : {}),
+        };
+    }
+    async createRun(run) {
+        const session = this.driver.session();
+        try {
+            const { user, ...rest } = run;
+            const props = this.serializeRunProps(rest);
+            await session.run(`
+        MERGE (r:MaestroRun {id: $props.id})
+        SET r += $props
+        SET r.userId = $userId
+        WITH r
+        MERGE (u:User {id: $userId})
+        MERGE (r)-[:REQUESTED_BY]->(u)
+        `, { props, userId: user?.id || 'anonymous' });
+        }
+        finally {
+            await session.close();
+        }
+    }
+    async updateRun(runId, patch) {
+        const session = this.driver.session();
+        try {
+            // Exclude nested objects from patch if any (like user)
+            const { user, ...rest } = patch;
+            const props = this.serializeRunProps(rest);
+            await session.run(`
+        MATCH (r:MaestroRun {id: $runId})
+        SET r += $props
+        `, { runId, props });
+        }
+        finally {
+            await session.close();
+        }
+    }
+    async createTask(task) {
+        const session = this.driver.session();
+        try {
+            const { agent, ...props } = task;
+            await session.run(`
+        MATCH (r:MaestroRun {id: $props.runId})
+        MERGE (t:MaestroTask {id: $props.id})
+        SET t += $props
+        SET t.agentId = $agentId, t.agentName = $agentName, t.agentKind = $agentKind
+        MERGE (r)-[:HAS_TASK]->(t)
+        `, {
+                props,
+                agentId: agent?.id,
+                agentName: agent?.name,
+                agentKind: agent?.kind
+            });
+        }
+        finally {
+            await session.close();
+        }
+    }
+    async updateTask(taskId, patch) {
+        const session = this.driver.session();
+        try {
+            const { agent, ...props } = patch;
+            await session.run(`
+        MATCH (t:MaestroTask {id: $taskId})
+        WHERE t.tenantId = $tenantId OR $tenantId IS NULL
+        SET t += $props
+        `, { taskId, props, tenantId: props.tenantId });
+        }
+        finally {
+            await session.close();
+        }
+    }
+    async createArtifact(artifact) {
+        const session = this.driver.session();
+        try {
+            await session.run(`
+        MATCH (t:MaestroTask {id: $artifact.taskId})
+        MERGE (a:MaestroArtifact {id: $artifact.id})
+        SET a += $artifact
+        SET a.tenantId = t.tenantId
+        MERGE (t)-[:HAS_ARTIFACT]->(a)
+        MERGE (r:MaestroRun {id: $artifact.runId})
+        MERGE (r)-[:HAS_ARTIFACT]->(a)
+        `, { artifact });
+        }
+        finally {
+            await session.close();
+        }
+    }
+    async recordCostSample(sample) {
+        const session = this.driver.session();
+        try {
+            await session.run(`
+        MATCH (r:MaestroRun {id: $sample.runId})
+        CREATE (c:MaestroCostSample)
+        SET c += $sample
+        MERGE (r)-[:HAS_COST]->(c)
+        `, { sample });
+        }
+        finally {
+            await session.close();
+        }
+    }
+    async getRunCostSummary(runId) {
+        const session = this.driver.session();
+        try {
+            const result = await session.run(`
+        MATCH (r:MaestroRun {id: $runId})-[:HAS_COST]->(c:MaestroCostSample)
+        RETURN
+          sum(c.costUSD) as totalCostUSD,
+          sum(c.inputTokens) as totalInputTokens,
+          sum(c.outputTokens) as totalOutputTokens,
+          collect({model: c.model, costUSD: c.costUSD, inputTokens: c.inputTokens, outputTokens: c.outputTokens}) as samples
+        `, { runId });
+            if (result.records.length === 0) {
+                return {
+                    runId,
+                    totalCostUSD: 0,
+                    totalInputTokens: 0,
+                    totalOutputTokens: 0,
+                    byModel: {},
+                };
+            }
+            const record = result.records[0];
+            const samples = record.get('samples');
+            const byModel = {};
+            for (const s of samples) {
+                if (!byModel[s.model]) {
+                    byModel[s.model] = { costUSD: 0, inputTokens: 0, outputTokens: 0 };
+                }
+                byModel[s.model].costUSD += s.costUSD;
+                byModel[s.model].inputTokens += s.inputTokens;
+                byModel[s.model].outputTokens += s.outputTokens;
+            }
+            return {
+                runId,
+                totalCostUSD: record.get('totalCostUSD') || 0,
+                totalInputTokens: record.get('totalInputTokens').toNumber(),
+                totalOutputTokens: record.get('totalOutputTokens').toNumber(),
+                byModel,
+            };
+        }
+        finally {
+            await session.close();
+        }
+    }
+    async getRun(runId) {
+        const session = this.driver.session();
+        try {
+            const result = await session.run(`
+        MATCH (r:MaestroRun {id: $runId})
+        RETURN r
+        `, { runId });
+            if (result.records.length === 0)
+                return null;
+            const props = result.records[0].get('r').properties;
+            return {
+                ...props,
+                user: { id: props.userId },
+            };
+        }
+        finally {
+            await session.close();
+        }
+    }
+    async getTasksForRun(runId) {
+        const session = this.driver.session();
+        try {
+            const result = await session.run(`
+        MATCH (r:MaestroRun {id: $runId})-[:HAS_TASK]->(t:MaestroTask)
+        RETURN t
+        ORDER BY t.createdAt
+        `, { runId });
+            return result.records.map((r) => {
+                const props = r.get('t').properties;
+                return {
+                    ...props,
+                    agent: props.agentId ? { id: props.agentId, name: props.agentName, kind: props.agentKind } : undefined
+                };
+            });
+        }
+        finally {
+            await session.close();
+        }
+    }
+    async getTask(taskId) {
+        const session = this.driver.session();
+        try {
+            const result = await session.run(`
+        MATCH (t:MaestroTask {id: $taskId})
+        RETURN t
+        `, { taskId });
+            if (result.records.length === 0)
+                return null;
+            const props = result.records[0].get('t').properties;
+            return {
+                ...props,
+                agent: props.agentId ? { id: props.agentId, name: props.agentName, kind: props.agentKind } : undefined,
+                tenantId: props.tenantId
+            };
+        }
+        finally {
+            await session.close();
+        }
+    }
+    async getArtifactsForRun(runId) {
+        const session = this.driver.session();
+        try {
+            const result = await session.run(`
+        MATCH (r:MaestroRun {id: $runId})-[:HAS_ARTIFACT]->(a:MaestroArtifact)
+        RETURN a
+        ORDER BY a.createdAt
+        `, { runId });
+            return result.records.map((r) => r.get('a').properties);
+        }
+        finally {
+            await session.close();
+        }
+    }
+    async getArtifactsForTask(taskId) {
+        const session = this.driver.session();
+        try {
+            const result = await session.run(`
+        MATCH (t:MaestroTask {id: $taskId})-[:HAS_ARTIFACT]->(a:MaestroArtifact)
+        RETURN a
+        ORDER BY a.createdAt
+        `, { taskId });
+            return result.records.map((r) => r.get('a').properties);
+        }
+        finally {
+            await session.close();
+        }
+    }
+}
+exports.IntelGraphClientImpl = IntelGraphClientImpl;

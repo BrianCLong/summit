@@ -1,4 +1,6 @@
-import { SimulationEngine } from '../src/core/SimulationEngine.js';
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const SimulationEngine_js_1 = require("../src/core/SimulationEngine.js");
 const baseConfig = {
     initialTimestamp: 0,
     actors: [
@@ -23,7 +25,7 @@ const baseConfig = {
 };
 describe('SimulationEngine', () => {
     it('initializes actors and timestamp', () => {
-        const engine = new SimulationEngine();
+        const engine = new SimulationEngine_js_1.SimulationEngine();
         engine.initialize(baseConfig);
         const state = engine.getState();
         expect(state.timestamp).toBe(0);
@@ -31,7 +33,7 @@ describe('SimulationEngine', () => {
         expect(state.ensureActor('mayor').getMood()).toBeCloseTo(2);
     });
     it('processes queued events on step and records them', () => {
-        const engine = new SimulationEngine();
+        const engine = new SimulationEngine_js_1.SimulationEngine();
         engine.initialize(baseConfig);
         engine.injectEvent({
             id: 'event-1',
@@ -48,7 +50,7 @@ describe('SimulationEngine', () => {
         expect(state.events[0].id).toBe('event-1');
     });
     it('propagates influence to related actors when mood swings', () => {
-        const engine = new SimulationEngine();
+        const engine = new SimulationEngine_js_1.SimulationEngine();
         engine.initialize(baseConfig);
         engine.injectEvent({
             id: 'event-2',

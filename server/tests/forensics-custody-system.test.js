@@ -1,0 +1,107 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const globals_1 = require("@jest/globals");
+const crypto_1 = require("crypto");
+const forensics_custody_system_js_1 = require("../src/cases/forensics-custody-system.js");
+const fixedNow = () => new Date('2025-01-01T00:00:00.000Z');
+(0, globals_1.describe)('ForensicsCustodySystem', () => {
+    (0, globals_1.it)('tracks evidence integrity, access, legal holds, and compliance reporting', async () => {
+        const { publicKey, privateKey } = (0, crypto_1.generateKeyPairSync)('ed25519');
+        const repository = new forensics_custody_system_js_1.InMemoryForensicsRepository();
+        const ledger = new forensics_custody_system_js_1.InMemoryCustodyLedger();
+        const custodySystem = new forensics_custody_system_js_1.ForensicsCustodySystem({
+            repository,
+            ledger,
+            signer: { privateKey, publicKey },
+            now: fixedNow,
+            legalHoldAdapter: {
+                initiateHold: async (request) => ({
+                    ...request,
+                    holdId: 'hold-123',
+                    status: 'active',
+                    createdAt: fixedNow(),
+                    details: 'Legal hold applied via adapter',
+                }),
+            },
+        });
+        const evidence = await custodySystem.registerEvidence({
+            id: 'ev-1',
+            caseId: 'case-42',
+            title: 'Disk image',
+            collectedBy: 'analyst-7',
+            content: Buffer.from('evidence-bytes'),
+            metadata: { region: 'eu-west' },
+        });
+        (0, globals_1.expect)(evidence.hash).toBe('3c2cc14b5c5beb243cf6ce364e02599dadd6ebccbd186c230f9f2139209ab7be');
+        await custodySystem.logAccess({
+            evidenceId: evidence.id,
+            caseId: evidence.caseId,
+            actorId: 'reviewer-1',
+            reason: 'triage-review',
+            legalBasis: 'investigation',
+            context: { source: 'timeline' },
+        });
+        const verification = await custodySystem.verifyEvidenceIntegrity(evidence.id, Buffer.from('evidence-bytes'));
+        (0, globals_1.expect)(verification.verified).toBe(true);
+        const hold = await custodySystem.placeLegalHold({
+            evidenceId: evidence.id,
+            caseId: evidence.caseId,
+            holdName: 'Breach-Containment',
+            reason: 'Regulator request',
+            scope: ['mail', 'drive'],
+            requestedBy: 'counsel-9',
+        });
+        (0, globals_1.expect)(hold.status).toBe('active');
+        const chainEvents = await ledger.list(evidence.id);
+        (0, globals_1.expect)(chainEvents).toHaveLength(4);
+        (0, globals_1.expect)(await custodySystem.verifyCustodyChain(evidence.id)).toBe(true);
+        const report = await custodySystem.generateComplianceReport();
+        (0, globals_1.expect)(report.soc2.integrity.verified).toBe(1);
+        (0, globals_1.expect)(report.soc2.accessControls.justifiedEvents).toBe(1);
+        (0, globals_1.expect)(report.gdpr.legalHolds.active).toBe(1);
+        (0, globals_1.expect)(report.chainOfCustody.breakdown[0]).toMatchObject({
+            evidenceId: evidence.id,
+            verified: true,
+        });
+    });
+    (0, globals_1.it)('guards against duplicate evidence and case mismatches', async () => {
+        const { publicKey, privateKey } = (0, crypto_1.generateKeyPairSync)('ed25519');
+        const repository = new forensics_custody_system_js_1.InMemoryForensicsRepository();
+        const ledger = new forensics_custody_system_js_1.InMemoryCustodyLedger();
+        const custodySystem = new forensics_custody_system_js_1.ForensicsCustodySystem({
+            repository,
+            ledger,
+            signer: { privateKey, publicKey },
+            now: fixedNow,
+        });
+        await custodySystem.registerEvidence({
+            id: 'ev-1',
+            caseId: 'case-42',
+            title: 'Disk image',
+            collectedBy: 'analyst-7',
+            content: Buffer.from('evidence-bytes'),
+        });
+        await (0, globals_1.expect)(custodySystem.registerEvidence({
+            id: 'ev-1',
+            caseId: 'case-42',
+            title: 'Duplicate disk image',
+            collectedBy: 'analyst-7',
+            content: Buffer.from('evidence-bytes'),
+        })).rejects.toThrow('Evidence ev-1 already exists');
+        await (0, globals_1.expect)(custodySystem.logAccess({
+            evidenceId: 'ev-1',
+            caseId: 'case-999',
+            actorId: 'reviewer-1',
+            reason: 'triage-review',
+            legalBasis: 'investigation',
+        })).rejects.toThrow('Case mismatch for evidence ev-1: expected case-999, found case-42');
+        await (0, globals_1.expect)(custodySystem.placeLegalHold({
+            evidenceId: 'ev-1',
+            caseId: 'case-42',
+            holdName: 'Breach-Containment',
+            reason: 'Regulator request',
+            scope: [],
+            requestedBy: 'counsel-9',
+        })).rejects.toThrow('Legal hold scope must include at least one target');
+    });
+});

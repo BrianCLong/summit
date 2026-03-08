@@ -1,0 +1,479 @@
+"use strict";
+/**
+ * EntityRepo Test Suite
+ *
+ * Tests for:
+ * - Entity CRUD operations
+ * - Dual-write to PostgreSQL and Neo4j
+ * - Transaction handling and rollbacks
+ * - Outbox pattern for eventual consistency
+ * - Batch operations
+ * - Search functionality
+ */
+Object.defineProperty(exports, "__esModule", { value: true });
+const globals_1 = require("@jest/globals");
+const EntityRepo_js_1 = require("../EntityRepo.js");
+const neo4jBatchWriter_js_1 = require("../../db/neo4jBatchWriter.js");
+globals_1.jest.mock('../../db/neo4jBatchWriter.js');
+describe('EntityRepo', () => {
+    const tenantId = 'tenant-123';
+    let entityRepo;
+    let mockPgPool;
+    let mockPgClient;
+    let mockNeo4jDriver;
+    let mockNeo4jSession;
+    let mockBatchWriter;
+    beforeEach(() => {
+        // Mock Neo4jBatchWriter
+        mockBatchWriter = {
+            queueCreateNode: globals_1.jest.fn(),
+            queueDeleteNode: globals_1.jest.fn(),
+        };
+        neo4jBatchWriter_js_1.getNeo4jBatchWriter.mockReturnValue(mockBatchWriter);
+        // Mock PostgreSQL client
+        mockPgClient = {
+            query: globals_1.jest.fn(),
+            release: globals_1.jest.fn(),
+        };
+        // Mock PostgreSQL pool
+        mockPgPool = {
+            connect: globals_1.jest.fn().mockResolvedValue(mockPgClient),
+            query: globals_1.jest.fn(),
+        };
+        // Mock Neo4j session
+        mockNeo4jSession = {
+            executeWrite: globals_1.jest.fn(),
+            close: globals_1.jest.fn(),
+        };
+        // Mock Neo4j driver
+        mockNeo4jDriver = {
+            session: globals_1.jest.fn().mockReturnValue(mockNeo4jSession),
+        };
+        entityRepo = new EntityRepo_js_1.EntityRepo(mockPgPool, mockNeo4jDriver);
+    });
+    afterEach(() => {
+        globals_1.jest.clearAllMocks();
+    });
+    describe('create', () => {
+        const mockEntityInput = {
+            tenantId: 'tenant-123',
+            kind: 'Person',
+            labels: ['Individual', 'Customer'],
+            props: { name: 'John Doe', email: 'john@example.com' },
+        };
+        const mockUserId = 'user-456';
+        it('should create entity in PostgreSQL', async () => {
+            const mockEntityRow = {
+                id: 'entity-789',
+                tenant_id: mockEntityInput.tenantId,
+                kind: mockEntityInput.kind,
+                labels: mockEntityInput.labels,
+                props: mockEntityInput.props,
+                created_at: new Date(),
+                updated_at: new Date(),
+                created_by: mockUserId,
+            };
+            mockPgClient.query.mockResolvedValueOnce(undefined); // BEGIN
+            mockPgClient.query.mockResolvedValueOnce({ rows: [mockEntityRow] }); // INSERT
+            mockPgClient.query.mockResolvedValueOnce(undefined); // Outbox event
+            mockPgClient.query.mockResolvedValueOnce(undefined); // COMMIT
+            mockNeo4jSession.executeWrite.mockResolvedValue(undefined);
+            const result = await entityRepo.create(mockEntityInput, mockUserId);
+            expect(result.id).toBe(mockEntityRow.id);
+            expect(result.tenantId).toBe(mockEntityInput.tenantId);
+            expect(result.kind).toBe(mockEntityInput.kind);
+            expect(result.labels).toEqual(mockEntityInput.labels);
+            expect(mockPgClient.query).toHaveBeenCalledWith('BEGIN');
+            expect(mockPgClient.query).toHaveBeenCalledWith('COMMIT');
+        });
+        it('should create outbox event for Neo4j sync', async () => {
+            const mockEntityRow = {
+                id: 'entity-789',
+                tenant_id: mockEntityInput.tenantId,
+                kind: mockEntityInput.kind,
+                labels: mockEntityInput.labels,
+                props: mockEntityInput.props,
+                created_at: new Date(),
+                updated_at: new Date(),
+                created_by: mockUserId,
+            };
+            mockPgClient.query.mockResolvedValueOnce(undefined); // BEGIN
+            mockPgClient.query.mockResolvedValueOnce({ rows: [mockEntityRow] }); // INSERT
+            mockPgClient.query.mockResolvedValueOnce(undefined); // Outbox event
+            mockPgClient.query.mockResolvedValueOnce(undefined); // COMMIT
+            mockNeo4jSession.executeWrite.mockResolvedValue(undefined);
+            await entityRepo.create(mockEntityInput, mockUserId);
+            // Verify outbox event was created
+            const outboxCall = mockPgClient.query.mock.calls.find((call) => typeof call[0] === 'string' &&
+                call[0].includes('outbox_events') &&
+                Array.isArray(call[1]) &&
+                call[1][1] === 'entity.upsert');
+            expect(outboxCall).toBeDefined();
+            expect(outboxCall?.[1]?.[1]).toBe('entity.upsert');
+        });
+        it('should attempt batched Neo4j write', async () => {
+            const mockEntityRow = {
+                id: 'entity-789',
+                tenant_id: mockEntityInput.tenantId,
+                kind: mockEntityInput.kind,
+                labels: mockEntityInput.labels,
+                props: mockEntityInput.props,
+                created_at: new Date(),
+                updated_at: new Date(),
+                created_by: mockUserId,
+            };
+            mockPgClient.query.mockResolvedValueOnce(undefined); // BEGIN
+            mockPgClient.query.mockResolvedValueOnce({ rows: [mockEntityRow] }); // INSERT
+            mockPgClient.query.mockResolvedValueOnce(undefined); // Outbox event
+            mockPgClient.query.mockResolvedValueOnce(undefined); // COMMIT
+            await entityRepo.create(mockEntityInput, mockUserId);
+            expect(mockBatchWriter.queueCreateNode).toHaveBeenCalledWith('Entity', expect.objectContaining({
+                id: mockEntityRow.id,
+                kind: mockEntityRow.kind,
+                labels: mockEntityRow.labels,
+                props: mockEntityRow.props,
+            }), mockEntityRow.tenant_id);
+        });
+        it('should rollback on PostgreSQL error', async () => {
+            mockPgClient.query.mockResolvedValueOnce(undefined); // BEGIN
+            mockPgClient.query.mockRejectedValueOnce(new Error('PostgreSQL constraint violation'));
+            await expect(entityRepo.create(mockEntityInput, mockUserId)).rejects.toThrow('PostgreSQL constraint violation');
+            expect(mockPgClient.query).toHaveBeenCalledWith('ROLLBACK');
+            expect(mockPgClient.release).toHaveBeenCalled();
+        });
+        it('should commit even if Neo4j batch queue fails', async () => {
+            const mockEntityRow = {
+                id: 'entity-789',
+                tenant_id: mockEntityInput.tenantId,
+                kind: mockEntityInput.kind,
+                labels: mockEntityInput.labels,
+                props: mockEntityInput.props,
+                created_at: new Date(),
+                updated_at: new Date(),
+                created_by: mockUserId,
+            };
+            mockPgClient.query.mockResolvedValueOnce(undefined); // BEGIN
+            mockPgClient.query.mockResolvedValueOnce({ rows: [mockEntityRow] }); // INSERT
+            mockPgClient.query.mockResolvedValueOnce(undefined); // Outbox event
+            mockPgClient.query.mockResolvedValueOnce(undefined); // COMMIT
+            mockBatchWriter.queueCreateNode.mockImplementation(() => {
+                throw new Error('Queue full');
+            });
+            // Should not throw - best effort Neo4j write
+            const result = await entityRepo.create(mockEntityInput, mockUserId);
+            expect(result.id).toBe(mockEntityRow.id);
+            expect(mockPgClient.query).toHaveBeenCalledWith('COMMIT');
+            expect(mockPgClient.query).not.toHaveBeenCalledWith('ROLLBACK');
+        });
+        it('should handle empty labels and props', async () => {
+            const minimalInput = {
+                tenantId: 'tenant-123',
+                kind: 'Entity',
+            };
+            const mockEntityRow = {
+                id: 'entity-789',
+                tenant_id: minimalInput.tenantId,
+                kind: minimalInput.kind,
+                labels: [],
+                props: {},
+                created_at: new Date(),
+                updated_at: new Date(),
+                created_by: mockUserId,
+            };
+            mockPgClient.query.mockResolvedValueOnce(undefined); // BEGIN
+            mockPgClient.query.mockResolvedValueOnce({ rows: [mockEntityRow] }); // INSERT
+            mockPgClient.query.mockResolvedValueOnce(undefined); // Outbox event
+            mockPgClient.query.mockResolvedValueOnce(undefined); // COMMIT
+            mockNeo4jSession.executeWrite.mockResolvedValue(undefined);
+            const result = await entityRepo.create(minimalInput, mockUserId);
+            expect(result.labels).toEqual([]);
+            expect(result.props).toEqual({});
+        });
+    });
+    describe('update', () => {
+        it('should update entity labels and props', async () => {
+            const updateInput = {
+                id: 'entity-789',
+                tenantId,
+                labels: ['NewLabel'],
+                props: { name: 'Jane Doe' },
+            };
+            const mockEntityRow = {
+                id: updateInput.id,
+                tenant_id: 'tenant-123',
+                kind: 'Person',
+                labels: updateInput.labels,
+                props: updateInput.props,
+                created_at: new Date(),
+                updated_at: new Date(),
+                created_by: 'user-456',
+            };
+            mockPgClient.query.mockResolvedValueOnce(undefined); // BEGIN
+            mockPgClient.query.mockResolvedValueOnce({ rows: [mockEntityRow] }); // UPDATE
+            mockPgClient.query.mockResolvedValueOnce(undefined); // Outbox event
+            mockPgClient.query.mockResolvedValueOnce(undefined); // COMMIT
+            mockNeo4jSession.executeWrite.mockResolvedValue(undefined);
+            const result = await entityRepo.update(updateInput);
+            expect(result).not.toBeNull();
+            expect(result?.labels).toEqual(updateInput.labels);
+            expect(result?.props).toEqual(updateInput.props);
+            expect(mockPgClient.query).toHaveBeenCalledWith('COMMIT');
+        });
+        it('should return null if entity not found', async () => {
+            const updateInput = {
+                id: 'non-existent',
+                tenantId,
+                labels: ['NewLabel'],
+            };
+            mockPgClient.query.mockResolvedValueOnce(undefined); // BEGIN
+            mockPgClient.query.mockResolvedValueOnce({ rows: [] }); // UPDATE (no rows)
+            const result = await entityRepo.update(updateInput);
+            expect(result).toBeNull();
+            expect(mockPgClient.query).toHaveBeenCalledWith('ROLLBACK');
+        });
+        it('should handle partial updates (only labels)', async () => {
+            const updateInput = {
+                id: 'entity-789',
+                tenantId,
+                labels: ['UpdatedLabel'],
+            };
+            const mockEntityRow = {
+                id: updateInput.id,
+                tenant_id: 'tenant-123',
+                kind: 'Person',
+                labels: updateInput.labels,
+                props: { existing: 'props' },
+                created_at: new Date(),
+                updated_at: new Date(),
+                created_by: 'user-456',
+            };
+            mockPgClient.query.mockResolvedValueOnce(undefined); // BEGIN
+            mockPgClient.query.mockResolvedValueOnce({ rows: [mockEntityRow] }); // UPDATE
+            mockPgClient.query.mockResolvedValueOnce(undefined); // Outbox event
+            mockPgClient.query.mockResolvedValueOnce(undefined); // COMMIT
+            mockNeo4jSession.executeWrite.mockResolvedValue(undefined);
+            const result = await entityRepo.update(updateInput);
+            expect(result?.labels).toEqual(updateInput.labels);
+        });
+        it('should handle partial updates (only props)', async () => {
+            const updateInput = {
+                id: 'entity-789',
+                tenantId,
+                props: { updated: 'value' },
+            };
+            const mockEntityRow = {
+                id: updateInput.id,
+                tenant_id: 'tenant-123',
+                kind: 'Person',
+                labels: ['ExistingLabel'],
+                props: updateInput.props,
+                created_at: new Date(),
+                updated_at: new Date(),
+                created_by: 'user-456',
+            };
+            mockPgClient.query.mockResolvedValueOnce(undefined); // BEGIN
+            mockPgClient.query.mockResolvedValueOnce({ rows: [mockEntityRow] }); // UPDATE
+            mockPgClient.query.mockResolvedValueOnce(undefined); // Outbox event
+            mockPgClient.query.mockResolvedValueOnce(undefined); // COMMIT
+            mockNeo4jSession.executeWrite.mockResolvedValue(undefined);
+            const result = await entityRepo.update(updateInput);
+            expect(result?.props).toEqual(updateInput.props);
+        });
+    });
+    describe('delete', () => {
+        it('should delete entity from PostgreSQL', async () => {
+            const entityId = 'entity-789';
+            mockPgClient.query.mockResolvedValueOnce(undefined); // BEGIN
+            mockPgClient.query.mockResolvedValueOnce({ rows: [{ tenant_id: tenantId }] }); // DELETE
+            mockPgClient.query.mockResolvedValueOnce(undefined); // Outbox event
+            mockPgClient.query.mockResolvedValueOnce(undefined); // COMMIT
+            mockNeo4jSession.executeWrite.mockResolvedValue(undefined);
+            const result = await entityRepo.delete(entityId, tenantId);
+            expect(result).toBe(true);
+            expect(mockPgClient.query).toHaveBeenCalledWith('COMMIT');
+        });
+        it('should create outbox event for Neo4j deletion', async () => {
+            const entityId = 'entity-789';
+            mockPgClient.query.mockResolvedValueOnce(undefined); // BEGIN
+            mockPgClient.query.mockResolvedValueOnce({ rows: [{ tenant_id: tenantId }] }); // DELETE
+            mockPgClient.query.mockResolvedValueOnce(undefined); // Outbox event
+            mockPgClient.query.mockResolvedValueOnce(undefined); // COMMIT
+            mockNeo4jSession.executeWrite.mockResolvedValue(undefined);
+            await entityRepo.delete(entityId, tenantId);
+            const outboxCall = mockPgClient.query.mock.calls.find((call) => typeof call[0] === 'string' &&
+                call[0].includes('outbox_events') &&
+                Array.isArray(call[1]) &&
+                call[1][1] === 'entity.delete');
+            expect(outboxCall).toBeDefined();
+        });
+        it('should return false if entity not found', async () => {
+            const entityId = 'non-existent';
+            mockPgClient.query.mockResolvedValueOnce(undefined); // BEGIN
+            mockPgClient.query.mockResolvedValueOnce({ rows: [] }); // DELETE
+            const result = await entityRepo.delete(entityId, tenantId);
+            expect(result).toBe(false);
+            expect(mockPgClient.query).toHaveBeenCalledWith('ROLLBACK');
+        });
+        it('should attempt batched Neo4j delete', async () => {
+            const entityId = 'entity-789';
+            mockPgClient.query.mockResolvedValueOnce(undefined); // BEGIN
+            mockPgClient.query.mockResolvedValueOnce({
+                rows: [{ tenant_id: tenantId }],
+            }); // DELETE
+            mockPgClient.query.mockResolvedValueOnce(undefined); // Outbox event
+            mockPgClient.query.mockResolvedValueOnce(undefined); // COMMIT
+            await entityRepo.delete(entityId, tenantId);
+            expect(mockBatchWriter.queueDeleteNode).toHaveBeenCalledWith(entityId, expect.stringContaining(tenantId));
+        });
+    });
+    describe('findById', () => {
+        it('should find entity by ID', async () => {
+            const entityId = 'entity-789';
+            const mockEntityRow = {
+                id: entityId,
+                tenant_id: tenantId,
+                kind: 'Person',
+                labels: ['Individual'],
+                props: { name: 'John Doe' },
+                created_at: new Date(),
+                updated_at: new Date(),
+                created_by: 'user-456',
+            };
+            mockPgPool.query.mockResolvedValue({ rows: [mockEntityRow] });
+            const result = await entityRepo.findById(entityId, tenantId);
+            expect(result).not.toBeNull();
+            expect(result?.id).toBe(entityId);
+            expect(mockPgPool.query).toHaveBeenCalledWith(expect.stringContaining('AND tenant_id = $2'), [entityId, tenantId]);
+        });
+        it('should throw on cross-tenant row', async () => {
+            const entityId = 'entity-789';
+            const mockEntityRow = {
+                id: entityId,
+                tenant_id: 'other-tenant',
+                kind: 'Person',
+                labels: ['Individual'],
+                props: { name: 'John Doe' },
+                created_at: new Date(),
+                updated_at: new Date(),
+                created_by: 'user-456',
+            };
+            mockPgPool.query.mockResolvedValue({ rows: [mockEntityRow] });
+            await expect(entityRepo.findById(entityId, tenantId)).rejects.toThrow(/Cross-tenant data access blocked/);
+        });
+        it('should return null if entity not found', async () => {
+            mockPgPool.query.mockResolvedValue({ rows: [] });
+            const result = await entityRepo.findById('non-existent', tenantId);
+            expect(result).toBeNull();
+        });
+    });
+    describe('search', () => {
+        it('should search entities by tenantId', async () => {
+            const mockEntities = [
+                {
+                    id: 'entity-1',
+                    tenant_id: 'tenant-123',
+                    kind: 'Person',
+                    labels: [],
+                    props: {},
+                    created_at: new Date(),
+                    updated_at: new Date(),
+                    created_by: 'user-1',
+                },
+            ];
+            mockPgPool.query.mockResolvedValue({ rows: mockEntities });
+            const results = await entityRepo.search({ tenantId: 'tenant-123' });
+            expect(results).toHaveLength(1);
+            expect(mockPgPool.query).toHaveBeenCalledWith(expect.stringContaining('WHERE tenant_id = $1'), expect.arrayContaining(['tenant-123']));
+        });
+        it('should filter by kind when provided', async () => {
+            mockPgPool.query.mockResolvedValue({ rows: [] });
+            await entityRepo.search({
+                tenantId: 'tenant-123',
+                kind: 'Person',
+            });
+            expect(mockPgPool.query).toHaveBeenCalledWith(expect.stringContaining('AND kind = $2'), expect.arrayContaining(['tenant-123', 'Person']));
+        });
+        it('should filter by props when provided', async () => {
+            mockPgPool.query.mockResolvedValue({ rows: [] });
+            await entityRepo.search({
+                tenantId: 'tenant-123',
+                props: { status: 'active' },
+            });
+            expect(mockPgPool.query).toHaveBeenCalledWith(expect.stringContaining('props @> $2::jsonb'), expect.any(Array));
+        });
+        it('should respect limit and offset', async () => {
+            mockPgPool.query.mockResolvedValue({ rows: [] });
+            await entityRepo.search({
+                tenantId: 'tenant-123',
+                limit: 50,
+                offset: 100,
+            });
+            const queryCall = mockPgPool.query.mock.calls[0];
+            expect(queryCall[0]).toContain('LIMIT');
+            expect(queryCall[0]).toContain('OFFSET');
+            expect(queryCall[1]).toContain(50);
+            expect(queryCall[1]).toContain(100);
+        });
+        it('should cap limit at 1000 for safety', async () => {
+            mockPgPool.query.mockResolvedValue({ rows: [] });
+            await entityRepo.search({
+                tenantId: 'tenant-123',
+                limit: 5000, // Request more than max
+            });
+            const queryCall = mockPgPool.query.mock.calls[0];
+            expect(queryCall[1]).toContain(1000); // Should be capped
+        });
+    });
+    describe('batchByIds', () => {
+        it('should load multiple entities by IDs', async () => {
+            const ids = ['entity-1', 'entity-2', 'entity-3'];
+            const mockEntities = ids.map((id) => ({
+                id,
+                tenant_id: tenantId,
+                kind: 'Person',
+                labels: [],
+                props: {},
+                created_at: new Date(),
+                updated_at: new Date(),
+                created_by: 'user-1',
+            }));
+            mockPgPool.query.mockResolvedValue({ rows: mockEntities });
+            const results = await entityRepo.batchByIds(ids, tenantId);
+            expect(results).toHaveLength(3);
+            expect(results.every((r) => r !== null)).toBe(true);
+            expect(mockPgPool.query).toHaveBeenCalledWith(expect.stringContaining('AND tenant_id = $2'), [ids, tenantId]);
+        });
+        it('should return nulls for missing entities', async () => {
+            const ids = ['entity-1', 'entity-2', 'entity-3'];
+            const mockEntities = [
+                {
+                    id: 'entity-1',
+                    tenant_id: tenantId,
+                    kind: 'Person',
+                    labels: [],
+                    props: {},
+                    created_at: new Date(),
+                    updated_at: new Date(),
+                    created_by: 'user-1',
+                },
+            ];
+            mockPgPool.query.mockResolvedValue({ rows: mockEntities });
+            const results = await entityRepo.batchByIds(ids, tenantId);
+            expect(results).toHaveLength(3);
+            expect(results[0]).not.toBeNull();
+            expect(results[1]).toBeNull();
+            expect(results[2]).toBeNull();
+        });
+        it('should handle empty IDs array', async () => {
+            const results = await entityRepo.batchByIds([], tenantId);
+            expect(results).toEqual([]);
+            expect(mockPgPool.query).not.toHaveBeenCalled();
+        });
+        it('should filter by tenantId when provided', async () => {
+            const ids = ['entity-1', 'entity-2'];
+            mockPgPool.query.mockResolvedValue({ rows: [] });
+            await entityRepo.batchByIds(ids, tenantId);
+            expect(mockPgPool.query).toHaveBeenCalledWith(expect.stringContaining('AND tenant_id = $2'), [ids, tenantId]);
+        });
+    });
+});

@@ -1,8 +1,11 @@
+"use strict";
 /**
  * Type classifier
  * Classifies issue type (bug/tech-debt/feature/enhancement)
  */
-export function classifyType(item, typeRules) {
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.classifyType = classifyType;
+function classifyType(item, typeRules) {
     // If already has type from source, use it as baseline
     const baselineType = item.type;
     const text = `${item.title} ${item.description}`.toLowerCase();
@@ -34,4 +37,3 @@ export function classifyType(item, typeRules) {
     const sortedTypes = Array.from(typeScores.entries()).sort((a, b) => b[1] - a[1]);
     return sortedTypes[0][0];
 }
-//# sourceMappingURL=type-classifier.js.map

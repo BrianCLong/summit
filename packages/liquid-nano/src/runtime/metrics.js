@@ -1,4 +1,8 @@
-export class InMemoryMetricsRegistry {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.InMemoryMetricsRegistry = void 0;
+exports.createMetricsRegistry = createMetricsRegistry;
+class InMemoryMetricsRegistry {
     metrics = new Map();
     recordCounter(name, value = 1) {
         const existing = this.metrics.get(name);
@@ -39,6 +43,7 @@ export class InMemoryMetricsRegistry {
         return view;
     }
 }
-export function createMetricsRegistry() {
+exports.InMemoryMetricsRegistry = InMemoryMetricsRegistry;
+function createMetricsRegistry() {
     return new InMemoryMetricsRegistry();
 }

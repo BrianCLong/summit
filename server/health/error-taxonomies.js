@@ -1,5 +1,8 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.getErrorTaxonomies = void 0;
 // Placeholder for error taxonomies service
-export const getErrorTaxonomies = async () => {
+const getErrorTaxonomies = async () => {
     return {
         critical: 5,
         error: 20,
@@ -7,4 +10,4 @@ export const getErrorTaxonomies = async () => {
         score: 85,
     };
 };
-//# sourceMappingURL=error-taxonomies.js.map
+exports.getErrorTaxonomies = getErrorTaxonomies;

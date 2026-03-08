@@ -1,757 +1,433 @@
-import {
-  jsx as _jsx,
-  jsxs as _jsxs,
-  Fragment as _Fragment,
-} from 'react/jsx-runtime';
-import { useState } from 'react';
-import {
-  Tabs,
-  Tab,
-  Box,
-  Typography,
-  Alert,
-  CircularProgress,
-  Chip,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-  Button,
-  TextField,
-  Switch,
-  FormControlLabel,
-} from '@mui/material';
-import {
-  ExpandMore as ExpandMoreIcon,
-  PolicyOutlined as PolicyIcon,
-  RouteOutlined as RouteIcon,
-  MonetizationOnOutlined as CostIcon,
-  SpeedOutlined as PerformanceIcon,
-  SimulationOutlined as SimulateIcon,
-} from '@mui/icons-material';
-import { api } from '../api';
+"use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.default = PolicyExplain;
+const react_1 = __importStar(require("react"));
+const material_1 = require("@mui/material");
+const icons_material_1 = require("@mui/icons-material");
+const api_1 = require("../api");
 function TabPanel(props) {
-  const { children, value, index, ...other } = props;
-  return _jsx('div', {
-    role: 'tabpanel',
-    hidden: value !== index,
-    id: `policy-tabpanel-${index}`,
-    'aria-labelledby': `policy-tab-${index}`,
-    ...other,
-    children:
-      value === index && _jsx(Box, { sx: { p: 2 }, children: children }),
-  });
+    const { children, value, index, ...other } = props;
+    return (<div role="tabpanel" hidden={value !== index} id={`policy-tabpanel-${index}`} aria-labelledby={`policy-tab-${index}`} {...other}>
+      {value === index && <material_1.Box sx={{ p: 2 }}>{children}</material_1.Box>}
+    </div>);
 }
-export default function PolicyExplain({ context }) {
-  const { postPolicyExplain } = api();
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [result, setResult] = useState(null);
-  const [tabValue, setTabValue] = useState(0);
-  const [simulation, setSimulation] = useState(null);
-  const [simulateMode, setSimulateMode] = useState(false);
-  const [proposedRules, setProposedRules] = useState('');
-  const [explanation, setExplanation] = useState(null);
-  const runExplain = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const payload = {
-        queryId: context.queryId || context.id,
-        extended: true,
-      };
-      // Fetch comprehensive explanation
-      const response = await fetch('/api/maestro/v1/policies/explain', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-      if (!response.ok) {
-        throw new Error(`Failed to fetch explanation: ${response.statusText}`);
-      }
-      const explanationData = await response.json();
-      setExplanation(explanationData);
-      // Also run legacy explain for backwards compatibility
-      const resp = await postPolicyExplain({ input: context });
-      setResult(resp);
-    } catch (e) {
-      setError(e?.message || 'Explain failed');
-    } finally {
-      setLoading(false);
-    }
-  };
-  const handleSimulate = async () => {
-    if (!proposedRules.trim() || !context.queryId) return;
-    try {
-      const rules = JSON.parse(proposedRules);
-      const response = await fetch('/api/maestro/v1/policies/simulate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          queryId: context.queryId,
-          proposedRules: Array.isArray(rules) ? rules : [rules],
-        }),
-      });
-      if (!response.ok) {
-        throw new Error(`Simulation failed: ${response.statusText}`);
-      }
-      const data = await response.json();
-      setSimulation(data.simulation);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Simulation failed');
-    }
-  };
-  const renderDecisionOverview = () =>
-    _jsx(Box, {
-      children: explanation
-        ? _jsxs(_Fragment, {
-            children: [
-              _jsxs(Alert, {
-                severity: 'info',
-                sx: { mb: 2 },
-                children: [
-                  _jsxs(Typography, {
-                    variant: 'body2',
-                    children: [
-                      _jsx('strong', { children: 'Selected Expert:' }),
-                      ' ',
-                      explanation.decision.selectedExpert,
-                    ],
-                  }),
-                  _jsxs(Typography, {
-                    variant: 'body2',
-                    children: [
-                      _jsx('strong', { children: 'Confidence:' }),
-                      ' ',
-                      explanation.decision.confidence,
-                    ],
-                  }),
-                  _jsxs(Typography, {
-                    variant: 'body2',
-                    children: [
-                      _jsx('strong', { children: 'Reason:' }),
-                      ' ',
-                      explanation.decision.reason,
-                    ],
-                  }),
-                ],
-              }),
-              _jsx(Typography, {
-                variant: 'h6',
-                gutterBottom: true,
-                children: 'Alternative Options',
-              }),
-              _jsx(TableContainer, {
-                component: Paper,
-                sx: { mb: 2 },
-                children: _jsxs(Table, {
-                  size: 'small',
-                  children: [
-                    _jsx(TableHead, {
-                      children: _jsxs(TableRow, {
-                        children: [
-                          _jsx(TableCell, { children: 'Expert' }),
-                          _jsx(TableCell, { children: 'Score' }),
-                          _jsx(TableCell, { children: 'Status' }),
-                        ],
-                      }),
-                    }),
-                    _jsx(TableBody, {
-                      children: explanation.decision.alternatives.map(
-                        (alt, index) =>
-                          _jsxs(
-                            TableRow,
-                            {
-                              children: [
-                                _jsx(TableCell, { children: alt.expert }),
-                                _jsx(TableCell, { children: alt.score }),
-                                _jsx(TableCell, {
-                                  children: _jsx(Chip, {
-                                    label: alt.rejectionReason || 'Available',
-                                    size: 'small',
-                                    color: alt.rejectionReason
-                                      ? 'default'
-                                      : 'success',
-                                  }),
-                                }),
-                              ],
-                            },
-                            index,
-                          ),
-                      ),
-                    }),
-                  ],
+function PolicyExplain({ context }) {
+    const { postPolicyExplain } = (0, api_1.api)();
+    const [loading, setLoading] = (0, react_1.useState)(false);
+    const [error, setError] = (0, react_1.useState)(null);
+    const [result, setResult] = (0, react_1.useState)(null);
+    const [tabValue, setTabValue] = (0, react_1.useState)(0);
+    const [simulation, setSimulation] = (0, react_1.useState)(null);
+    const [simulateMode, setSimulateMode] = (0, react_1.useState)(false);
+    const [proposedRules, setProposedRules] = (0, react_1.useState)('');
+    const [explanation, setExplanation] = (0, react_1.useState)(null);
+    const runExplain = async () => {
+        setLoading(true);
+        setError(null);
+        try {
+            const payload = {
+                queryId: context.queryId || context.id,
+                extended: true,
+            };
+            // Fetch comprehensive explanation
+            const response = await fetch('/api/maestro/v1/policies/explain', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+            });
+            if (!response.ok) {
+                throw new Error(`Failed to fetch explanation: ${response.statusText}`);
+            }
+            const explanationData = await response.json();
+            setExplanation(explanationData);
+            // Also run legacy explain for backwards compatibility
+            const resp = await postPolicyExplain({ input: context });
+            setResult(resp);
+        }
+        catch (e) {
+            setError(e?.message || 'Explain failed');
+        }
+        finally {
+            setLoading(false);
+        }
+    };
+    const handleSimulate = async () => {
+        if (!proposedRules.trim() || !context.queryId)
+            return;
+        try {
+            const rules = JSON.parse(proposedRules);
+            const response = await fetch('/api/maestro/v1/policies/simulate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    queryId: context.queryId,
+                    proposedRules: Array.isArray(rules) ? rules : [rules],
                 }),
-              }),
-            ],
-          })
-        : result &&
-          _jsxs('div', {
-            className: 'space-y-2 text-sm',
-            children: [
-              _jsxs('div', {
-                children: [
-                  'Decision: ',
-                  _jsx('span', {
-                    className: 'font-semibold',
-                    children: result.allowed ? 'Allow' : 'Deny',
-                  }),
-                ],
-              }),
-              _jsxs('div', {
-                children: [
-                  'Rule Path: ',
-                  _jsx('span', {
-                    className: 'font-mono text-xs',
-                    children: result.rulePath || '—',
-                  }),
-                ],
-              }),
-              _jsxs('div', {
-                children: [
-                  'Reasons:',
-                  _jsx('ul', {
-                    className: 'list-disc pl-5',
-                    children: (result.reasons || []).map((r, i) =>
-                      _jsx('li', { children: r }, i),
-                    ),
-                  }),
-                ],
-              }),
-            ],
-          }),
-    });
-  const renderRulePath = () =>
-    _jsx(Box, {
-      children: explanation?.rulePath
-        ? _jsxs(_Fragment, {
-            children: [
-              _jsx(Typography, {
-                variant: 'h6',
-                gutterBottom: true,
-                children: 'Applied Rules',
-              }),
-              explanation.rulePath.map((rule, index) =>
-                _jsxs(
-                  Accordion,
-                  {
-                    children: [
-                      _jsx(AccordionSummary, {
-                        expandIcon: _jsx(ExpandMoreIcon, {}),
-                        children: _jsxs(Box, {
-                          sx: { display: 'flex', alignItems: 'center', gap: 1 },
-                          children: [
-                            _jsx(PolicyIcon, {}),
-                            _jsx(Typography, {
-                              variant: 'subtitle1',
-                              children: rule.name,
-                            }),
-                            _jsx(Chip, {
-                              label: `Priority: ${rule.priority}`,
-                              size: 'small',
-                              color: 'primary',
-                            }),
-                            _jsx(Chip, {
-                              label: rule.action,
-                              size: 'small',
-                              color:
-                                rule.action === 'deny' ? 'error' : 'success',
-                            }),
-                          ],
-                        }),
-                      }),
-                      _jsx(AccordionDetails, {
-                        children: _jsx(Typography, {
-                          variant: 'body2',
-                          color: 'textSecondary',
-                          children: rule.description,
-                        }),
-                      }),
-                    ],
-                  },
-                  index,
-                ),
-              ),
-              _jsx(Typography, {
-                variant: 'h6',
-                sx: { mt: 3 },
-                gutterBottom: true,
-                children: 'All Policy Evaluations',
-              }),
-              _jsx(TableContainer, {
-                component: Paper,
-                children: _jsxs(Table, {
-                  size: 'small',
-                  children: [
-                    _jsx(TableHead, {
-                      children: _jsxs(TableRow, {
-                        children: [
-                          _jsx(TableCell, { children: 'Rule' }),
-                          _jsx(TableCell, { children: 'Matched' }),
-                          _jsx(TableCell, { children: 'Result' }),
-                          _jsx(TableCell, { children: 'Description' }),
-                        ],
-                      }),
-                    }),
-                    _jsx(TableBody, {
-                      children: explanation.policyEvaluations.map(
-                        (evaluation, index) =>
-                          _jsxs(
-                            TableRow,
-                            {
-                              children: [
-                                _jsx(TableCell, {
-                                  children: evaluation.ruleName,
-                                }),
-                                _jsx(TableCell, {
-                                  children: _jsx(Chip, {
-                                    label: evaluation.matched ? 'Yes' : 'No',
-                                    size: 'small',
-                                    color: evaluation.matched
-                                      ? 'success'
-                                      : 'default',
-                                  }),
-                                }),
-                                _jsx(TableCell, {
-                                  children: _jsx(Chip, {
-                                    label: evaluation.result,
-                                    size: 'small',
-                                    color:
-                                      evaluation.result === 'deny'
-                                        ? 'error'
-                                        : evaluation.result === 'allow'
-                                          ? 'success'
-                                          : 'warning',
-                                  }),
-                                }),
-                                _jsx(TableCell, {
-                                  children: evaluation.description,
-                                }),
-                              ],
-                            },
-                            index,
-                          ),
-                      ),
-                    }),
-                  ],
-                }),
-              }),
-            ],
-          })
-        : result?.trace &&
-          _jsxs('details', {
-            children: [
-              _jsx('summary', {
-                className: 'cursor-pointer',
-                children: 'Rego Trace',
-              }),
-              _jsx('pre', {
-                className: 'overflow-auto rounded bg-slate-50 p-2 text-[11px]',
-                children: Array.isArray(result.trace)
-                  ? result.trace.join('\n')
-                  : JSON.stringify(result.trace, null, 2),
-              }),
-            ],
-          }),
-    });
-  const renderCostAnalysis = () =>
-    _jsx(Box, {
-      children: explanation?.costBreakdown
-        ? _jsxs(_Fragment, {
-            children: [
-              _jsx(Typography, {
-                variant: 'h6',
-                gutterBottom: true,
-                children: 'Cost Breakdown',
-              }),
-              _jsxs(Alert, {
-                severity:
-                  explanation.costBreakdown.estimatedCost >
-                  explanation.costBreakdown.budgetRemaining * 0.8
-                    ? 'warning'
-                    : 'success',
-                sx: { mb: 2 },
-                children: [
-                  _jsxs(Typography, {
-                    variant: 'body2',
-                    children: [
-                      _jsx('strong', { children: 'Estimated Cost:' }),
-                      ' $',
-                      explanation.costBreakdown.estimatedCost.toFixed(4),
-                    ],
-                  }),
-                  _jsxs(Typography, {
-                    variant: 'body2',
-                    children: [
-                      _jsx('strong', { children: 'Budget Remaining:' }),
-                      ' $',
-                      explanation.costBreakdown.budgetRemaining.toFixed(2),
-                    ],
-                  }),
-                ],
-              }),
-              _jsx(TableContainer, {
-                component: Paper,
-                children: _jsxs(Table, {
-                  size: 'small',
-                  children: [
-                    _jsx(TableHead, {
-                      children: _jsxs(TableRow, {
-                        children: [
-                          _jsx(TableCell, { children: 'Cost Factor' }),
-                          _jsx(TableCell, { children: 'Amount' }),
-                          _jsx(TableCell, { children: 'Percentage' }),
-                        ],
-                      }),
-                    }),
-                    _jsx(TableBody, {
-                      children: Object.entries(
-                        explanation.costBreakdown.costFactors,
-                      ).map(([factor, amount]) =>
-                        _jsxs(
-                          TableRow,
-                          {
-                            children: [
-                              _jsx(TableCell, {
-                                children: factor
-                                  .replace(/([A-Z])/g, ' $1')
-                                  .replace(/^./, (str) => str.toUpperCase()),
-                              }),
-                              _jsxs(TableCell, {
-                                children: ['$', amount.toFixed(4)],
-                              }),
-                              _jsxs(TableCell, {
-                                children: [
-                                  (
-                                    (amount /
-                                      explanation.costBreakdown.estimatedCost) *
-                                    100
-                                  ).toFixed(1),
-                                  '%',
-                                ],
-                              }),
-                            ],
-                          },
-                          factor,
-                        ),
-                      ),
-                    }),
-                  ],
-                }),
-              }),
-            ],
-          })
-        : _jsx(Alert, {
-            severity: 'info',
-            children: 'Cost analysis not available for this decision',
-          }),
-    });
-  const renderPerformanceMetrics = () =>
-    _jsx(Box, {
-      children: explanation?.performanceMetrics
-        ? _jsxs(_Fragment, {
-            children: [
-              _jsx(Typography, {
-                variant: 'h6',
-                gutterBottom: true,
-                children: 'Performance Metrics',
-              }),
-              _jsxs(Box, {
-                sx: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 },
-                children: [
-                  _jsxs(Paper, {
-                    sx: { p: 2 },
-                    children: [
-                      _jsx(Typography, {
-                        variant: 'subtitle2',
-                        color: 'textSecondary',
-                        children: 'Estimated Latency',
-                      }),
-                      _jsxs(Typography, {
-                        variant: 'h4',
-                        color:
-                          explanation.performanceMetrics.latencyEstimate > 5000
-                            ? 'error'
-                            : 'primary',
-                        children: [
-                          explanation.performanceMetrics.latencyEstimate,
-                          'ms',
-                        ],
-                      }),
-                    ],
-                  }),
-                  _jsxs(Paper, {
-                    sx: { p: 2 },
-                    children: [
-                      _jsx(Typography, {
-                        variant: 'subtitle2',
-                        color: 'textSecondary',
-                        children: 'Reliability Score',
-                      }),
-                      _jsxs(Typography, {
-                        variant: 'h4',
-                        color:
-                          explanation.performanceMetrics.reliabilityScore > 0.95
-                            ? 'success'
-                            : 'warning',
-                        children: [
-                          (
-                            explanation.performanceMetrics.reliabilityScore *
-                            100
-                          ).toFixed(1),
-                          '%',
-                        ],
-                      }),
-                    ],
-                  }),
-                ],
-              }),
-              _jsx(Alert, {
-                severity: explanation.performanceMetrics.capacityAvailable
-                  ? 'success'
-                  : 'warning',
-                sx: { mt: 2 },
-                children: _jsxs(Typography, {
-                  variant: 'body2',
-                  children: [
-                    _jsx('strong', { children: 'Capacity Status:' }),
-                    ' ',
-                    explanation.performanceMetrics.capacityAvailable
-                      ? 'Available'
-                      : 'Limited',
-                  ],
-                }),
-              }),
-            ],
-          })
-        : _jsx(Alert, {
-            severity: 'info',
-            children: 'Performance metrics not available for this decision',
-          }),
-    });
-  const renderWhatIfSimulation = () =>
-    _jsxs(Box, {
-      children: [
-        _jsx(FormControlLabel, {
-          control: _jsx(Switch, {
-            checked: simulateMode,
-            onChange: (e) => setSimulateMode(e.target.checked),
-          }),
-          label: 'What-if Simulation Mode',
-        }),
-        simulateMode &&
-          _jsxs(Box, {
-            sx: { mt: 2 },
-            children: [
-              _jsx(TextField, {
-                fullWidth: true,
-                multiline: true,
-                rows: 6,
-                label: 'Proposed Rules (JSON)',
-                value: proposedRules,
-                onChange: (e) => setProposedRules(e.target.value),
-                placeholder: `{
+            });
+            if (!response.ok) {
+                throw new Error(`Simulation failed: ${response.statusText}`);
+            }
+            const data = await response.json();
+            setSimulation(data.simulation);
+        }
+        catch (err) {
+            setError(err instanceof Error ? err.message : 'Simulation failed');
+        }
+    };
+    const renderDecisionOverview = () => (<material_1.Box>
+      {explanation ? (<>
+          <material_1.Alert severity="info" sx={{ mb: 2 }}>
+            <material_1.Typography variant="body2">
+              <strong>Selected Expert:</strong>{' '}
+              {explanation.decision.selectedExpert}
+            </material_1.Typography>
+            <material_1.Typography variant="body2">
+              <strong>Confidence:</strong> {explanation.decision.confidence}
+            </material_1.Typography>
+            <material_1.Typography variant="body2">
+              <strong>Reason:</strong> {explanation.decision.reason}
+            </material_1.Typography>
+          </material_1.Alert>
+
+          <material_1.Typography variant="h6" gutterBottom>
+            Alternative Options
+          </material_1.Typography>
+          <material_1.TableContainer component={material_1.Paper} sx={{ mb: 2 }}>
+            <material_1.Table size="small">
+              <material_1.TableHead>
+                <material_1.TableRow>
+                  <material_1.TableCell>Expert</material_1.TableCell>
+                  <material_1.TableCell>Score</material_1.TableCell>
+                  <material_1.TableCell>Status</material_1.TableCell>
+                </material_1.TableRow>
+              </material_1.TableHead>
+              <material_1.TableBody>
+                {explanation.decision.alternatives.map((alt, index) => (<material_1.TableRow key={index}>
+                      <material_1.TableCell>{alt.expert}</material_1.TableCell>
+                      <material_1.TableCell>{alt.score}</material_1.TableCell>
+                      <material_1.TableCell>
+                        <material_1.Chip label={alt.rejectionReason || 'Available'} size="small" color={alt.rejectionReason ? 'default' : 'success'}/>
+                      </material_1.TableCell>
+                    </material_1.TableRow>))}
+              </material_1.TableBody>
+            </material_1.Table>
+          </material_1.TableContainer>
+        </>) : (result && (<div className="space-y-2 text-sm">
+            <div>
+              Decision:{' '}
+              <span className="font-semibold">
+                {result.allowed ? 'Allow' : 'Deny'}
+              </span>
+            </div>
+            <div>
+              Rule Path:{' '}
+              <span className="font-mono text-xs">
+                {result.rulePath || '—'}
+              </span>
+            </div>
+            <div>
+              Reasons:
+              <ul className="list-disc pl-5">
+                {(result.reasons || []).map((r, i) => (<li key={i}>{r}</li>))}
+              </ul>
+            </div>
+          </div>))}
+    </material_1.Box>);
+    const renderRulePath = () => (<material_1.Box>
+      {explanation?.rulePath ? (<>
+          <material_1.Typography variant="h6" gutterBottom>
+            Applied Rules
+          </material_1.Typography>
+          {explanation.rulePath.map((rule, index) => (<material_1.Accordion key={index}>
+              <material_1.AccordionSummary expandIcon={<icons_material_1.ExpandMore />}>
+                <material_1.Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <icons_material_1.PolicyOutlined />
+                  <material_1.Typography variant="subtitle1">{rule.name}</material_1.Typography>
+                  <material_1.Chip label={`Priority: ${rule.priority}`} size="small" color="primary"/>
+                  <material_1.Chip label={rule.action} size="small" color={rule.action === 'deny' ? 'error' : 'success'}/>
+                </material_1.Box>
+              </material_1.AccordionSummary>
+              <material_1.AccordionDetails>
+                <material_1.Typography variant="body2" color="textSecondary">
+                  {rule.description}
+                </material_1.Typography>
+              </material_1.AccordionDetails>
+            </material_1.Accordion>))}
+
+          <material_1.Typography variant="h6" sx={{ mt: 3 }} gutterBottom>
+            All Policy Evaluations
+          </material_1.Typography>
+          <material_1.TableContainer component={material_1.Paper}>
+            <material_1.Table size="small">
+              <material_1.TableHead>
+                <material_1.TableRow>
+                  <material_1.TableCell>Rule</material_1.TableCell>
+                  <material_1.TableCell>Matched</material_1.TableCell>
+                  <material_1.TableCell>Result</material_1.TableCell>
+                  <material_1.TableCell>Description</material_1.TableCell>
+                </material_1.TableRow>
+              </material_1.TableHead>
+              <material_1.TableBody>
+                {explanation.policyEvaluations.map((eval, index) => (<material_1.TableRow key={index}>
+                      <material_1.TableCell>{eval.ruleName}</material_1.TableCell>
+                      <material_1.TableCell>
+                        <material_1.Chip label={eval.matched ? 'Yes' : 'No'} size="small" color={eval.matched ? 'success' : 'default'}/>
+                      </material_1.TableCell>
+                      <material_1.TableCell>
+                        <material_1.Chip label={eval.result} size="small" color={eval.result === 'deny'
+                    ? 'error'
+                    : eval.result === 'allow'
+                        ? 'success'
+                        : 'warning'}/>
+                      </material_1.TableCell>
+                      <material_1.TableCell>{eval.description}</material_1.TableCell>
+                    </material_1.TableRow>))}
+              </material_1.TableBody>
+            </material_1.Table>
+          </material_1.TableContainer>
+        </>) : (result?.trace && (<details>
+            <summary className="cursor-pointer">Rego Trace</summary>
+            <pre className="overflow-auto rounded bg-slate-50 p-2 text-[11px]">
+              {Array.isArray(result.trace)
+                ? result.trace.join('\n')
+                : JSON.stringify(result.trace, null, 2)}
+            </pre>
+          </details>))}
+    </material_1.Box>);
+    const renderCostAnalysis = () => (<material_1.Box>
+      {explanation?.costBreakdown ? (<>
+          <material_1.Typography variant="h6" gutterBottom>
+            Cost Breakdown
+          </material_1.Typography>
+          <material_1.Alert severity={explanation.costBreakdown.estimatedCost >
+                explanation.costBreakdown.budgetRemaining * 0.8
+                ? 'warning'
+                : 'success'} sx={{ mb: 2 }}>
+            <material_1.Typography variant="body2">
+              <strong>Estimated Cost:</strong> $
+              {explanation.costBreakdown.estimatedCost.toFixed(4)}
+            </material_1.Typography>
+            <material_1.Typography variant="body2">
+              <strong>Budget Remaining:</strong> $
+              {explanation.costBreakdown.budgetRemaining.toFixed(2)}
+            </material_1.Typography>
+          </material_1.Alert>
+
+          <material_1.TableContainer component={material_1.Paper}>
+            <material_1.Table size="small">
+              <material_1.TableHead>
+                <material_1.TableRow>
+                  <material_1.TableCell>Cost Factor</material_1.TableCell>
+                  <material_1.TableCell>Amount</material_1.TableCell>
+                  <material_1.TableCell>Percentage</material_1.TableCell>
+                </material_1.TableRow>
+              </material_1.TableHead>
+              <material_1.TableBody>
+                {Object.entries(explanation.costBreakdown.costFactors).map(([factor, amount]) => (<material_1.TableRow key={factor}>
+                      <material_1.TableCell>
+                        {factor
+                    .replace(/([A-Z])/g, ' $1')
+                    .replace(/^./, (str) => str.toUpperCase())}
+                      </material_1.TableCell>
+                      <material_1.TableCell>${amount.toFixed(4)}</material_1.TableCell>
+                      <material_1.TableCell>
+                        {((amount / explanation.costBreakdown.estimatedCost) *
+                    100).toFixed(1)}
+                        %
+                      </material_1.TableCell>
+                    </material_1.TableRow>))}
+              </material_1.TableBody>
+            </material_1.Table>
+          </material_1.TableContainer>
+        </>) : (<material_1.Alert severity="info">
+          Cost analysis not available for this decision
+        </material_1.Alert>)}
+    </material_1.Box>);
+    const renderPerformanceMetrics = () => (<material_1.Box>
+      {explanation?.performanceMetrics ? (<>
+          <material_1.Typography variant="h6" gutterBottom>
+            Performance Metrics
+          </material_1.Typography>
+          <material_1.Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
+            <material_1.Paper sx={{ p: 2 }}>
+              <material_1.Typography variant="subtitle2" color="textSecondary">
+                Estimated Latency
+              </material_1.Typography>
+              <material_1.Typography variant="h4" color={explanation.performanceMetrics.latencyEstimate > 5000
+                ? 'error'
+                : 'primary'}>
+                {explanation.performanceMetrics.latencyEstimate}ms
+              </material_1.Typography>
+            </material_1.Paper>
+            <material_1.Paper sx={{ p: 2 }}>
+              <material_1.Typography variant="subtitle2" color="textSecondary">
+                Reliability Score
+              </material_1.Typography>
+              <material_1.Typography variant="h4" color={explanation.performanceMetrics.reliabilityScore > 0.95
+                ? 'success'
+                : 'warning'}>
+                {(explanation.performanceMetrics.reliabilityScore * 100).toFixed(1)}
+                %
+              </material_1.Typography>
+            </material_1.Paper>
+          </material_1.Box>
+
+          <material_1.Alert severity={explanation.performanceMetrics.capacityAvailable
+                ? 'success'
+                : 'warning'} sx={{ mt: 2 }}>
+            <material_1.Typography variant="body2">
+              <strong>Capacity Status:</strong>{' '}
+              {explanation.performanceMetrics.capacityAvailable
+                ? 'Available'
+                : 'Limited'}
+            </material_1.Typography>
+          </material_1.Alert>
+        </>) : (<material_1.Alert severity="info">
+          Performance metrics not available for this decision
+        </material_1.Alert>)}
+    </material_1.Box>);
+    const renderWhatIfSimulation = () => (<material_1.Box>
+      <material_1.FormControlLabel control={<material_1.Switch checked={simulateMode} onChange={(e) => setSimulateMode(e.target.checked)}/>} label="What-if Simulation Mode"/>
+
+      {simulateMode && (<material_1.Box sx={{ mt: 2 }}>
+          <material_1.TextField fullWidth multiline rows={6} label="Proposed Rules (JSON)" value={proposedRules} onChange={(e) => setProposedRules(e.target.value)} placeholder={`{
   "id": "new-rule",
   "name": "My Test Rule",
   "description": "Test rule description",
   "condition": "context.testFlag === true",
   "action": "route_to",
   "priority": 80
-}`,
-                sx: { mb: 2 },
-              }),
-              _jsx(Button, {
-                variant: 'contained',
-                startIcon: _jsx(SimulateIcon, {}),
-                onClick: handleSimulate,
-                disabled: !proposedRules.trim(),
-                children: 'Run Simulation',
-              }),
-            ],
-          }),
-        simulation &&
-          _jsxs(Box, {
-            sx: { mt: 2 },
-            children: [
-              _jsxs(Alert, {
-                severity: 'info',
-                children: [
-                  _jsx(Typography, {
-                    variant: 'h6',
-                    children: 'Simulation Results',
-                  }),
-                  _jsxs(Typography, {
-                    variant: 'body2',
-                    children: [
-                      _jsx('strong', { children: 'Expert Would Change:' }),
-                      ' ',
-                      simulation.impact.expertWouldChange ? 'Yes' : 'No',
-                    ],
-                  }),
-                  _jsxs(Typography, {
-                    variant: 'body2',
-                    children: [
-                      _jsx('strong', { children: 'Cost Delta:' }),
-                      ' ',
-                      simulation.impact.costDelta,
-                    ],
-                  }),
-                  _jsxs(Typography, {
-                    variant: 'body2',
-                    children: [
-                      _jsx('strong', { children: 'Latency Delta:' }),
-                      ' ',
-                      simulation.impact.latencyDelta,
-                    ],
-                  }),
-                  _jsxs(Typography, {
-                    variant: 'body2',
-                    children: [
-                      _jsx('strong', { children: 'Risk Delta:' }),
-                      ' ',
-                      simulation.impact.riskDelta,
-                    ],
-                  }),
-                ],
-              }),
-              simulation.impact.expertWouldChange &&
-                _jsxs(Alert, {
-                  severity: 'warning',
-                  sx: { mt: 1 },
-                  children: [
-                    _jsxs(Typography, {
-                      variant: 'body2',
-                      children: [
-                        _jsx('strong', { children: 'New Expert:' }),
-                        ' ',
-                        simulation.newDecision.expert,
-                      ],
-                    }),
-                    _jsxs(Typography, {
-                      variant: 'body2',
-                      children: [
-                        _jsx('strong', { children: 'New Reason:' }),
-                        ' ',
-                        simulation.newDecision.reason,
-                      ],
-                    }),
-                    _jsxs(Typography, {
-                      variant: 'body2',
-                      children: [
-                        _jsx('strong', { children: 'New Confidence:' }),
-                        ' ',
-                        simulation.newDecision.confidence,
-                      ],
-                    }),
-                  ],
-                }),
-            ],
-          }),
-        result?.whatIf &&
-          _jsxs('details', {
-            children: [
-              _jsx('summary', {
-                className: 'cursor-pointer',
-                children: 'What-if Simulation (Legacy)',
-              }),
-              _jsx('pre', {
-                className: 'overflow-auto rounded bg-slate-50 p-2 text-xs',
-                children: JSON.stringify(result.whatIf, null, 2),
-              }),
-            ],
-          }),
-      ],
-    });
-  return _jsxs('section', {
-    className: 'rounded border bg-white p-3',
-    children: [
-      _jsxs('div', {
-        className: 'mb-2 flex items-center justify-between',
-        children: [
-          _jsx('h3', {
-            className: 'text-sm font-semibold text-slate-700',
-            children: 'Policy Explain',
-          }),
-          _jsx('button', {
-            className: 'rounded border px-2 py-1 text-xs',
-            onClick: runExplain,
-            disabled: loading,
-            children: loading ? 'Explaining...' : 'Explain',
-          }),
-        ],
-      }),
-      loading &&
-        _jsx(Box, {
-          sx: { display: 'flex', justifyContent: 'center', p: 2 },
-          children: _jsx(CircularProgress, { size: 24 }),
-        }),
-      error &&
-        _jsx(Alert, { severity: 'error', sx: { mb: 2 }, children: error }),
-      (explanation || result) &&
-        _jsxs(_Fragment, {
-          children: [
-            _jsxs(Tabs, {
-              value: tabValue,
-              onChange: (_, newValue) => setTabValue(newValue),
-              variant: 'scrollable',
-              children: [
-                _jsx(Tab, { icon: _jsx(RouteIcon, {}), label: 'Decision' }),
-                _jsx(Tab, { icon: _jsx(PolicyIcon, {}), label: 'Rules' }),
-                _jsx(Tab, { icon: _jsx(CostIcon, {}), label: 'Cost' }),
-                _jsx(Tab, {
-                  icon: _jsx(PerformanceIcon, {}),
-                  label: 'Performance',
-                }),
-                _jsx(Tab, { icon: _jsx(SimulateIcon, {}), label: 'What-If' }),
-              ],
-            }),
-            _jsx(TabPanel, {
-              value: tabValue,
-              index: 0,
-              children: renderDecisionOverview(),
-            }),
-            _jsx(TabPanel, {
-              value: tabValue,
-              index: 1,
-              children: renderRulePath(),
-            }),
-            _jsx(TabPanel, {
-              value: tabValue,
-              index: 2,
-              children: renderCostAnalysis(),
-            }),
-            _jsx(TabPanel, {
-              value: tabValue,
-              index: 3,
-              children: renderPerformanceMetrics(),
-            }),
-            _jsx(TabPanel, {
-              value: tabValue,
-              index: 4,
-              children: renderWhatIfSimulation(),
-            }),
-          ],
-        }),
-      result?.inputs &&
-        _jsxs('details', {
-          className: 'mt-2',
-          children: [
-            _jsx('summary', {
-              className: 'cursor-pointer',
-              children: 'Inputs',
-            }),
-            _jsx('pre', {
-              className: 'overflow-auto rounded bg-slate-50 p-2 text-xs',
-              children: JSON.stringify(result.inputs, null, 2),
-            }),
-          ],
-        }),
-    ],
-  });
+}`} sx={{ mb: 2 }}/>
+          <material_1.Button variant="contained" startIcon={<icons_material_1.SimulationOutlined />} onClick={handleSimulate} disabled={!proposedRules.trim()}>
+            Run Simulation
+          </material_1.Button>
+        </material_1.Box>)}
+
+      {simulation && (<material_1.Box sx={{ mt: 2 }}>
+          <material_1.Alert severity="info">
+            <material_1.Typography variant="h6">Simulation Results</material_1.Typography>
+            <material_1.Typography variant="body2">
+              <strong>Expert Would Change:</strong>{' '}
+              {simulation.impact.expertWouldChange ? 'Yes' : 'No'}
+            </material_1.Typography>
+            <material_1.Typography variant="body2">
+              <strong>Cost Delta:</strong> {simulation.impact.costDelta}
+            </material_1.Typography>
+            <material_1.Typography variant="body2">
+              <strong>Latency Delta:</strong> {simulation.impact.latencyDelta}
+            </material_1.Typography>
+            <material_1.Typography variant="body2">
+              <strong>Risk Delta:</strong> {simulation.impact.riskDelta}
+            </material_1.Typography>
+          </material_1.Alert>
+
+          {simulation.impact.expertWouldChange && (<material_1.Alert severity="warning" sx={{ mt: 1 }}>
+              <material_1.Typography variant="body2">
+                <strong>New Expert:</strong> {simulation.newDecision.expert}
+              </material_1.Typography>
+              <material_1.Typography variant="body2">
+                <strong>New Reason:</strong> {simulation.newDecision.reason}
+              </material_1.Typography>
+              <material_1.Typography variant="body2">
+                <strong>New Confidence:</strong>{' '}
+                {simulation.newDecision.confidence}
+              </material_1.Typography>
+            </material_1.Alert>)}
+        </material_1.Box>)}
+
+      {result?.whatIf && (<details>
+          <summary className="cursor-pointer">
+            What-if Simulation (Legacy)
+          </summary>
+          <pre className="overflow-auto rounded bg-slate-50 p-2 text-xs">
+            {JSON.stringify(result.whatIf, null, 2)}
+          </pre>
+        </details>)}
+    </material_1.Box>);
+    return (<section className="rounded border bg-white p-3">
+      <div className="mb-2 flex items-center justify-between">
+        <h3 className="text-sm font-semibold text-slate-700">Policy Explain</h3>
+        <button className="rounded border px-2 py-1 text-xs" onClick={runExplain} disabled={loading}>
+          {loading ? 'Explaining...' : 'Explain'}
+        </button>
+      </div>
+
+      {loading && (<material_1.Box sx={{ display: 'flex', justifyContent: 'center', p: 2 }}>
+          <material_1.CircularProgress size={24}/>
+        </material_1.Box>)}
+
+      {error && (<material_1.Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </material_1.Alert>)}
+
+      {(explanation || result) && (<>
+          <material_1.Tabs value={tabValue} onChange={(_, newValue) => setTabValue(newValue)} variant="scrollable">
+            <material_1.Tab icon={<icons_material_1.RouteOutlined />} label="Decision"/>
+            <material_1.Tab icon={<icons_material_1.PolicyOutlined />} label="Rules"/>
+            <material_1.Tab icon={<icons_material_1.MonetizationOnOutlined />} label="Cost"/>
+            <material_1.Tab icon={<icons_material_1.SpeedOutlined />} label="Performance"/>
+            <material_1.Tab icon={<icons_material_1.SimulationOutlined />} label="What-If"/>
+          </material_1.Tabs>
+
+          <TabPanel value={tabValue} index={0}>
+            {renderDecisionOverview()}
+          </TabPanel>
+
+          <TabPanel value={tabValue} index={1}>
+            {renderRulePath()}
+          </TabPanel>
+
+          <TabPanel value={tabValue} index={2}>
+            {renderCostAnalysis()}
+          </TabPanel>
+
+          <TabPanel value={tabValue} index={3}>
+            {renderPerformanceMetrics()}
+          </TabPanel>
+
+          <TabPanel value={tabValue} index={4}>
+            {renderWhatIfSimulation()}
+          </TabPanel>
+        </>)}
+
+      {result?.inputs && (<details className="mt-2">
+          <summary className="cursor-pointer">Inputs</summary>
+          <pre className="overflow-auto rounded bg-slate-50 p-2 text-xs">
+            {JSON.stringify(result.inputs, null, 2)}
+          </pre>
+        </details>)}
+    </section>);
 }

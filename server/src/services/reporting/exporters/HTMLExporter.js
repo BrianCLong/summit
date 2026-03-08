@@ -1,0 +1,74 @@
+"use strict";
+/**
+ * HTML Report Exporter
+ * Exports reports to HTML format with embedded CSS
+ */
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.HTMLExporter = void 0;
+const fs_1 = require("fs");
+const path = __importStar(require("path"));
+const IReportExporter_js_1 = require("./IReportExporter.js");
+const HTMLRenderer_js_1 = require("../utils/HTMLRenderer.js");
+class HTMLExporter extends IReportExporter_js_1.BaseReportExporter {
+    renderer;
+    format = 'HTML';
+    mimeType = 'text/html';
+    extension = 'html';
+    supports = ['text', 'images', 'charts', 'tables', 'interactive', 'styling'];
+    constructor(renderer = new HTMLRenderer_js_1.HTMLRenderer()) {
+        super();
+        this.renderer = renderer;
+    }
+    async export(report, template) {
+        const htmlContent = await this.generateHTMLContent(report, template);
+        const filename = this.generateFilename(report);
+        const filepath = path.join('/tmp', filename);
+        await fs_1.promises.writeFile(filepath, htmlContent, 'utf-8');
+        return {
+            format: this.format.toLowerCase(),
+            path: filepath,
+            size: Buffer.byteLength(htmlContent, 'utf-8'),
+            mimeType: this.mimeType,
+            filename,
+            html: htmlContent,
+            css: this.renderer.getStyles(),
+        };
+    }
+    async generateHTMLContent(report, template) {
+        return this.renderer.render(report, template);
+    }
+}
+exports.HTMLExporter = HTMLExporter;

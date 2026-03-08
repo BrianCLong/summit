@@ -1,613 +1,403 @@
-import { jsx as _jsx, jsxs as _jsxs } from 'react/jsx-runtime';
-import { useEffect, useState } from 'react';
-import {
-  Timeline,
-  TimelineItem,
-  TimelineSeparator,
-  TimelineConnector,
-  TimelineContent,
-  TimelineDot,
-  TimelineOppositeContent,
-} from '@mui/lab';
-import {
-  Box,
-  Typography,
-  Chip,
-  Button,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  Alert,
-  Card,
-  CardContent,
-  Tooltip,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-  List,
-  ListItem,
-  ListItemText,
-  LinearProgress,
-} from '@mui/material';
-import {
-  PersonOutlined as PlannerIcon,
-  PsychologyOutlined as CriticIcon,
-  BuildOutlined as ExecutorIcon,
-  CheckCircleOutlined as ApprovedIcon,
-  BlockOutlined as BlockedIcon,
-  PendingOutlined as PendingIcon,
-  EditOutlined as EditIcon,
-  ExpandMore as ExpandMoreIcon,
-  AccessTimeOutlined as TimeIcon,
-  PersonOutlined as UserIcon,
-  SmartToyOutlined as AgentIcon,
-  PlayArrowOutlined as ExecuteIcon,
-} from '@mui/icons-material';
-import { api } from '../api';
-const EditDialog = ({ open, step, onClose, onSave }) => {
-  const [editedText, setEditedText] = useState('');
-  const [reason, setReason] = useState('');
-  useEffect(() => {
-    if (step) {
-      setEditedText(step.text);
-      setReason('');
+"use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
     }
-  }, [step]);
-  const handleSave = () => {
-    if (step) {
-      onSave(step.id, editedText, reason);
-      onClose();
-    }
-  };
-  return _jsxs(Dialog, {
-    open: open,
-    onClose: onClose,
-    maxWidth: 'md',
-    fullWidth: true,
-    children: [
-      _jsx(DialogTitle, { children: 'Edit Agent Step' }),
-      _jsxs(DialogContent, {
-        children: [
-          _jsxs(Box, {
-            sx: { mb: 2 },
-            children: [
-              _jsx(Typography, {
-                variant: 'subtitle2',
-                gutterBottom: true,
-                children: 'Original Text:',
-              }),
-              _jsx(Box, {
-                sx: { p: 2, bgcolor: 'grey.50', borderRadius: 1, mb: 2 },
-                children: _jsx(Typography, {
-                  variant: 'body2',
-                  component: 'pre',
-                  sx: { whiteSpace: 'pre-wrap' },
-                  children: step?.text,
-                }),
-              }),
-            ],
-          }),
-          _jsx(TextField, {
-            fullWidth: true,
-            multiline: true,
-            rows: 6,
-            label: 'Edited Text',
-            value: editedText,
-            onChange: (e) => setEditedText(e.target.value),
-            sx: { mb: 2 },
-          }),
-          _jsx(TextField, {
-            fullWidth: true,
-            label: 'Reason for Edit (optional)',
-            value: reason,
-            onChange: (e) => setReason(e.target.value),
-            placeholder: "Explain why you're making this change...",
-          }),
-        ],
-      }),
-      _jsxs(DialogActions, {
-        children: [
-          _jsx(Button, { onClick: onClose, children: 'Cancel' }),
-          _jsx(Button, {
-            variant: 'contained',
-            onClick: handleSave,
-            disabled: !editedText.trim(),
-            children: 'Save & Approve',
-          }),
-        ],
-      }),
-    ],
-  });
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.default = AgentTimeline;
+const react_1 = __importStar(require("react"));
+const lab_1 = require("@mui/lab");
+const material_1 = require("@mui/material");
+const icons_material_1 = require("@mui/icons-material");
+const api_1 = require("../api");
+const EditDialog = ({ open, step, onClose, onSave, }) => {
+    const [editedText, setEditedText] = (0, react_1.useState)('');
+    const [reason, setReason] = (0, react_1.useState)('');
+    (0, react_1.useEffect)(() => {
+        if (step) {
+            setEditedText(step.text);
+            setReason('');
+        }
+    }, [step]);
+    const handleSave = () => {
+        if (step) {
+            onSave(step.id, editedText, reason);
+            onClose();
+        }
+    };
+    return (<material_1.Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
+      <material_1.DialogTitle>Edit Agent Step</material_1.DialogTitle>
+      <material_1.DialogContent>
+        <material_1.Box sx={{ mb: 2 }}>
+          <material_1.Typography variant="subtitle2" gutterBottom>
+            Original Text:
+          </material_1.Typography>
+          <material_1.Box sx={{ p: 2, bgcolor: 'grey.50', borderRadius: 1, mb: 2 }}>
+            <material_1.Typography variant="body2" component="pre" sx={{ whiteSpace: 'pre-wrap' }}>
+              {step?.text}
+            </material_1.Typography>
+          </material_1.Box>
+        </material_1.Box>
+
+        <material_1.TextField fullWidth multiline rows={6} label="Edited Text" value={editedText} onChange={(e) => setEditedText(e.target.value)} sx={{ mb: 2 }}/>
+
+        <material_1.TextField fullWidth label="Reason for Edit (optional)" value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Explain why you're making this change..."/>
+      </material_1.DialogContent>
+      <material_1.DialogActions>
+        <material_1.Button onClick={onClose}>Cancel</material_1.Button>
+        <material_1.Button variant="contained" onClick={handleSave} disabled={!editedText.trim()}>
+          Save & Approve
+        </material_1.Button>
+      </material_1.DialogActions>
+    </material_1.Dialog>);
 };
-export default function AgentTimeline({ runId }) {
-  const { getAgentSteps, streamAgent, actOnAgent } = api();
-  const [steps, setSteps] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const [selectedStep, setSelectedStep] = useState(null);
-  const [checkpoints, setCheckpoints] = useState([]);
-  useEffect(() => {
-    let off = () => {};
-    (async () => {
-      try {
-        setLoading(true);
-        const r = await getAgentSteps(runId);
-        setSteps(r.steps || []);
-        setCheckpoints(r.checkpoints || []);
-        setError(null);
-      } catch (err) {
-        setError(
-          err instanceof Error ? err.message : 'Failed to load agent steps',
-        );
-      } finally {
-        setLoading(false);
-      }
-      off = streamAgent(runId, (s) =>
-        setSteps((x) => {
-          const nx = x.filter((y) => y.id !== s.id);
-          return [...nx, s].sort((a, b) => a.ts - b.ts);
-        }),
-      );
-    })();
-    return () => off();
-  }, [runId]);
-  const handleAction = async (stepId, action, editedText, reason) => {
-    try {
-      await actOnAgent(runId, {
-        stepId,
-        action,
-        patch: editedText,
-        reason,
-      });
-      // Update local state optimistically
-      setSteps((prevSteps) =>
-        prevSteps.map((step) =>
-          step.id === stepId
-            ? {
-                ...step,
-                state: action === 'approve' ? 'approved' : 'blocked',
-                text: editedText || step.text,
-                metadata: {
-                  ...step.metadata,
-                  user_action: action,
-                  edit_history:
-                    editedText && editedText !== step.text
-                      ? [
-                          ...(step.metadata?.edit_history || []),
-                          {
-                            timestamp: Date.now(),
-                            original: step.text,
-                            edited: editedText,
-                            reason,
-                          },
-                        ]
-                      : step.metadata?.edit_history,
-                },
-              }
-            : step,
-        ),
-      );
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Action failed');
-    }
-  };
-  const handleEdit = (step) => {
-    setSelectedStep(step);
-    setEditDialogOpen(true);
-  };
-  const handleSaveEdit = (stepId, editedText, reason) => {
-    handleAction(stepId, 'approve', editedText, reason);
-  };
-  const getRoleIcon = (role) => {
-    switch (role) {
-      case 'planner':
-        return _jsx(PlannerIcon, {});
-      case 'critic':
-        return _jsx(CriticIcon, {});
-      case 'executor':
-        return _jsx(ExecutorIcon, {});
-      case 'human':
-        return _jsx(UserIcon, {});
-      default:
-        return _jsx(AgentIcon, {});
-    }
-  };
-  const getStateColor = (state) => {
-    switch (state) {
-      case 'approved':
-        return 'success';
-      case 'blocked':
-        return 'error';
-      case 'need_approval':
-        return 'warning';
-      case 'completed':
-        return 'success';
-      case 'error':
-        return 'error';
-      case 'running':
-        return 'primary';
-      default:
-        return 'default';
-    }
-  };
-  const getStateIcon = (state) => {
-    switch (state) {
-      case 'approved':
-        return _jsx(ApprovedIcon, { color: 'success' });
-      case 'blocked':
-        return _jsx(BlockedIcon, { color: 'error' });
-      case 'need_approval':
-        return _jsx(PendingIcon, { color: 'warning' });
-      case 'running':
-        return _jsx(ExecuteIcon, { color: 'primary' });
-      default:
-        return _jsx(PendingIcon, {});
-    }
-  };
-  const formatDuration = (ms) => {
-    if (!ms) return '';
-    if (ms < 1000) return `${ms}ms`;
-    if (ms < 60000) return `${(ms / 1000).toFixed(1)}s`;
-    return `${(ms / 60000).toFixed(1)}m`;
-  };
-  const renderStepActions = (step) => {
-    if (step.state !== 'need_approval') return null;
-    return _jsxs(Box, {
-      sx: { mt: 2, display: 'flex', gap: 1, flexWrap: 'wrap' },
-      children: [
-        _jsx(Button, {
-          variant: 'contained',
-          color: 'success',
-          size: 'small',
-          startIcon: _jsx(ApprovedIcon, {}),
-          onClick: () => handleAction(step.id, 'approve'),
-          children: 'Approve',
-        }),
-        _jsx(Button, {
-          variant: 'contained',
-          color: 'error',
-          size: 'small',
-          startIcon: _jsx(BlockedIcon, {}),
-          onClick: () => handleAction(step.id, 'block'),
-          children: 'Block',
-        }),
-        _jsx(Button, {
-          variant: 'outlined',
-          size: 'small',
-          startIcon: _jsx(EditIcon, {}),
-          onClick: () => handleEdit(step),
-          children: 'Edit & Approve',
-        }),
-      ],
-    });
-  };
-  const renderStepMetadata = (step) => {
-    if (!step.metadata) return null;
-    const { duration, cost, confidence, tools_used, edit_history } =
-      step.metadata;
-    return _jsxs(Accordion, {
-      sx: { mt: 1 },
-      children: [
-        _jsx(AccordionSummary, {
-          expandIcon: _jsx(ExpandMoreIcon, {}),
-          children: _jsx(Typography, {
-            variant: 'body2',
-            color: 'textSecondary',
-            children: 'Step Details',
-          }),
-        }),
-        _jsxs(AccordionDetails, {
-          children: [
-            _jsxs(Box, {
-              sx: {
+function AgentTimeline({ runId }) {
+    const { getAgentSteps, streamAgent, actOnAgent } = (0, api_1.api)();
+    const [steps, setSteps] = (0, react_1.useState)([]);
+    const [loading, setLoading] = (0, react_1.useState)(true);
+    const [error, setError] = (0, react_1.useState)(null);
+    const [editDialogOpen, setEditDialogOpen] = (0, react_1.useState)(false);
+    const [selectedStep, setSelectedStep] = (0, react_1.useState)(null);
+    (0, react_1.useEffect)(() => {
+        (async () => {
+            try {
+                setLoading(true);
+                const r = await getAgentSteps(runId);
+                setSteps(r.steps || []);
+                setError(null);
+            }
+            catch (err) {
+                setError(err instanceof Error ? err.message : 'Failed to load agent steps');
+            }
+            finally {
+                setLoading(false);
+            }
+            const off = streamAgent(runId, (s) => setSteps((x) => {
+                const nx = x.filter((y) => y.id !== s.id);
+                return [...nx, s].sort((a, b) => a.ts - b.ts);
+            }));
+            return () => off();
+        })();
+    }, [runId, getAgentSteps, streamAgent]);
+    const handleAction = async (stepId, action, editedText, reason) => {
+        try {
+            await actOnAgent(runId, {
+                stepId,
+                action,
+                patch: editedText,
+                reason,
+            });
+            // Update local state optimistically
+            setSteps((prevSteps) => prevSteps.map((step) => step.id === stepId
+                ? {
+                    ...step,
+                    state: action === 'approve' ? 'approved' : 'blocked',
+                    text: editedText || step.text,
+                    metadata: {
+                        ...step.metadata,
+                        user_action: action,
+                        edit_history: editedText && editedText !== step.text
+                            ? [
+                                ...(step.metadata?.edit_history || []),
+                                {
+                                    timestamp: Date.now(),
+                                    original: step.text,
+                                    edited: editedText,
+                                    reason,
+                                },
+                            ]
+                            : step.metadata?.edit_history,
+                    },
+                }
+                : step));
+        }
+        catch (err) {
+            setError(err instanceof Error ? err.message : 'Action failed');
+        }
+    };
+    const handleEdit = (step) => {
+        setSelectedStep(step);
+        setEditDialogOpen(true);
+    };
+    const handleSaveEdit = (stepId, editedText, reason) => {
+        handleAction(stepId, 'approve', editedText, reason);
+    };
+    const getRoleIcon = (role) => {
+        switch (role) {
+            case 'planner':
+                return <icons_material_1.PersonOutlined />;
+            case 'critic':
+                return <icons_material_1.PsychologyOutlined />;
+            case 'executor':
+                return <icons_material_1.BuildOutlined />;
+            case 'human':
+                return <icons_material_1.PersonOutlined />;
+            default:
+                return <icons_material_1.SmartToyOutlined />;
+        }
+    };
+    const getStateColor = (state) => {
+        switch (state) {
+            case 'approved':
+                return 'success';
+            case 'blocked':
+                return 'error';
+            case 'need_approval':
+                return 'warning';
+            case 'completed':
+                return 'success';
+            case 'error':
+                return 'error';
+            case 'running':
+                return 'primary';
+            default:
+                return 'default';
+        }
+    };
+    const getStateIcon = (state) => {
+        switch (state) {
+            case 'approved':
+                return <icons_material_1.CheckCircleOutlined color="success"/>;
+            case 'blocked':
+                return <icons_material_1.BlockOutlined color="error"/>;
+            case 'need_approval':
+                return <icons_material_1.PendingOutlined color="warning"/>;
+            case 'running':
+                return <icons_material_1.PlayArrowOutlined color="primary"/>;
+            default:
+                return <icons_material_1.PendingOutlined />;
+        }
+    };
+    const formatDuration = (ms) => {
+        if (!ms)
+            return '';
+        if (ms < 1000)
+            return `${ms}ms`;
+        if (ms < 60000)
+            return `${(ms / 1000).toFixed(1)}s`;
+        return `${(ms / 60000).toFixed(1)}m`;
+    };
+    const renderStepActions = (step) => {
+        if (step.state !== 'need_approval')
+            return null;
+        return (<material_1.Box sx={{ mt: 2, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+        <material_1.Button variant="contained" color="success" size="small" startIcon={<icons_material_1.CheckCircleOutlined />} onClick={() => handleAction(step.id, 'approve')}>
+          Approve
+        </material_1.Button>
+
+        <material_1.Button variant="contained" color="error" size="small" startIcon={<icons_material_1.BlockOutlined />} onClick={() => handleAction(step.id, 'block')}>
+          Block
+        </material_1.Button>
+
+        <material_1.Button variant="outlined" size="small" startIcon={<icons_material_1.EditOutlined />} onClick={() => handleEdit(step)}>
+          Edit & Approve
+        </material_1.Button>
+      </material_1.Box>);
+    };
+    const renderStepMetadata = (step) => {
+        if (!step.metadata)
+            return null;
+        const { duration, cost, confidence, tools_used, edit_history } = step.metadata;
+        return (<material_1.Accordion sx={{ mt: 1 }}>
+        <material_1.AccordionSummary expandIcon={<icons_material_1.ExpandMore />}>
+          <material_1.Typography variant="body2" color="textSecondary">
+            Step Details
+          </material_1.Typography>
+        </material_1.AccordionSummary>
+        <material_1.AccordionDetails>
+          <material_1.Box sx={{
                 display: 'grid',
                 gridTemplateColumns: '1fr 1fr',
                 gap: 2,
                 mb: 2,
-              },
-              children: [
-                duration &&
-                  _jsxs(Box, {
-                    children: [
-                      _jsx(Typography, {
-                        variant: 'caption',
-                        color: 'textSecondary',
-                        children: 'Duration',
-                      }),
-                      _jsx(Typography, {
-                        variant: 'body2',
-                        children: formatDuration(duration),
-                      }),
-                    ],
-                  }),
-                cost &&
-                  _jsxs(Box, {
-                    children: [
-                      _jsx(Typography, {
-                        variant: 'caption',
-                        color: 'textSecondary',
-                        children: 'Cost',
-                      }),
-                      _jsxs(Typography, {
-                        variant: 'body2',
-                        children: ['$', cost.toFixed(4)],
-                      }),
-                    ],
-                  }),
-                confidence &&
-                  _jsxs(Box, {
-                    children: [
-                      _jsx(Typography, {
-                        variant: 'caption',
-                        color: 'textSecondary',
-                        children: 'Confidence',
-                      }),
-                      _jsxs(Typography, {
-                        variant: 'body2',
-                        children: [(confidence * 100).toFixed(1), '%'],
-                      }),
-                    ],
-                  }),
-              ],
-            }),
-            tools_used &&
-              tools_used.length > 0 &&
-              _jsxs(Box, {
-                sx: { mb: 2 },
-                children: [
-                  _jsx(Typography, {
-                    variant: 'caption',
-                    color: 'textSecondary',
-                    display: 'block',
-                    gutterBottom: true,
-                    children: 'Tools Used',
-                  }),
-                  _jsx(Box, {
-                    sx: { display: 'flex', gap: 0.5, flexWrap: 'wrap' },
-                    children: tools_used.map((tool, index) =>
-                      _jsx(
-                        Chip,
-                        { label: tool, size: 'small', variant: 'outlined' },
-                        index,
-                      ),
-                    ),
-                  }),
-                ],
-              }),
-            edit_history &&
-              edit_history.length > 0 &&
-              _jsxs(Box, {
-                children: [
-                  _jsx(Typography, {
-                    variant: 'caption',
-                    color: 'textSecondary',
-                    display: 'block',
-                    gutterBottom: true,
-                    children: 'Edit History',
-                  }),
-                  _jsx(List, {
-                    dense: true,
-                    children: edit_history.map((edit, index) =>
-                      _jsx(
-                        ListItem,
-                        {
-                          children: _jsx(ListItemText, {
-                            primary: `Edit ${index + 1}`,
-                            secondary: `${new Date(edit.timestamp).toLocaleString()}${edit.reason ? ` - ${edit.reason}` : ''}`,
-                          }),
-                        },
-                        index,
-                      ),
-                    ),
-                  }),
-                ],
-              }),
-            step.inputs &&
-              _jsxs(Accordion, {
-                children: [
-                  _jsx(AccordionSummary, {
-                    expandIcon: _jsx(ExpandMoreIcon, {}),
-                    children: _jsx(Typography, {
-                      variant: 'body2',
-                      children: 'Inputs',
-                    }),
-                  }),
-                  _jsx(AccordionDetails, {
-                    children: _jsx(Box, {
-                      component: 'pre',
-                      sx: { fontSize: '0.75rem', overflow: 'auto' },
-                      children: JSON.stringify(step.inputs, null, 2),
-                    }),
-                  }),
-                ],
-              }),
-            step.outputs &&
-              _jsxs(Accordion, {
-                children: [
-                  _jsx(AccordionSummary, {
-                    expandIcon: _jsx(ExpandMoreIcon, {}),
-                    children: _jsx(Typography, {
-                      variant: 'body2',
-                      children: 'Outputs',
-                    }),
-                  }),
-                  _jsx(AccordionDetails, {
-                    children: _jsx(Box, {
-                      component: 'pre',
-                      sx: { fontSize: '0.75rem', overflow: 'auto' },
-                      children: JSON.stringify(step.outputs, null, 2),
-                    }),
-                  }),
-                ],
-              }),
-          ],
-        }),
-      ],
-    });
-  };
-  if (loading) {
-    return _jsxs(Box, {
-      sx: { p: 2 },
-      children: [
-        _jsx(LinearProgress, {}),
-        _jsx(Typography, {
-          variant: 'body2',
-          sx: { mt: 1 },
-          children: 'Loading agent timeline...',
-        }),
-      ],
-    });
-  }
-  if (error) {
-    return _jsxs(Alert, {
-      severity: 'error',
-      sx: { m: 2 },
-      children: ['Failed to load agent timeline: ', error],
-    });
-  }
-  const sortedSteps = steps.sort((a, b) => a.ts - b.ts);
-  return _jsxs(Box, {
-    sx: { p: 2 },
-    children: [
-      _jsxs(Box, {
-        sx: { display: 'flex', alignItems: 'center', gap: 1, mb: 2 },
-        children: [
-          _jsx(AgentIcon, {}),
-          _jsx(Typography, { variant: 'h6', children: 'Agent Timeline' }),
-          _jsx(Chip, {
-            label: `${steps.length} steps`,
-            size: 'small',
-            color: 'primary',
-          }),
-        ],
-      }),
-      sortedSteps.length === 0 &&
-        _jsx(Alert, {
-          severity: 'info',
-          children:
-            'No agent steps yet. The agent timeline will populate as the run progresses.',
-        }),
-      _jsx(Timeline, {
-        children: sortedSteps.map((step, index) =>
-          _jsxs(
-            TimelineItem,
-            {
-              children: [
-                _jsxs(TimelineOppositeContent, {
-                  color: 'textSecondary',
-                  sx: { flex: '0 1 auto' },
-                  children: [
-                    _jsxs(Box, {
-                      sx: { display: 'flex', alignItems: 'center', gap: 1 },
-                      children: [
-                        _jsx(TimeIcon, { fontSize: 'small' }),
-                        _jsx(Typography, {
-                          variant: 'caption',
-                          children: new Date(step.ts).toLocaleTimeString(),
-                        }),
-                      ],
-                    }),
-                    step.metadata?.duration &&
-                      _jsx(Typography, {
-                        variant: 'caption',
-                        color: 'textSecondary',
-                        children: formatDuration(step.metadata.duration),
-                      }),
-                  ],
-                }),
-                _jsxs(TimelineSeparator, {
-                  children: [
-                    _jsx(TimelineDot, {
-                      color: getStateColor(step.state),
-                      children: getRoleIcon(step.role),
-                    }),
-                    index < sortedSteps.length - 1 &&
-                      _jsx(TimelineConnector, {}),
-                  ],
-                }),
-                _jsx(TimelineContent, {
-                  children: _jsx(Card, {
-                    children: _jsxs(CardContent, {
-                      children: [
-                        _jsxs(Box, {
-                          sx: {
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                            mb: 1,
-                          },
-                          children: [
-                            _jsxs(Box, {
-                              sx: {
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: 1,
-                              },
-                              children: [
-                                _jsx(Typography, {
-                                  variant: 'subtitle1',
-                                  sx: { textTransform: 'capitalize' },
-                                  children: step.role,
-                                }),
-                                step.metadata?.checkpoint_type &&
-                                  _jsx(Chip, {
-                                    label: step.metadata.checkpoint_type,
-                                    size: 'small',
-                                    color: 'info',
-                                  }),
-                              ],
-                            }),
-                            _jsx(Tooltip, {
-                              title: step.state,
-                              children: _jsx(Chip, {
-                                icon: getStateIcon(step.state),
-                                label: step.state.replace('_', ' '),
-                                color: getStateColor(step.state),
-                                size: 'small',
-                              }),
-                            }),
-                          ],
-                        }),
-                        _jsx(Typography, {
-                          variant: 'body2',
-                          component: 'pre',
-                          sx: {
-                            whiteSpace: 'pre-wrap',
-                            fontFamily: 'inherit',
-                            mb: 1,
-                          },
-                          children: step.text,
-                        }),
-                        step.error &&
-                          _jsx(Alert, {
-                            severity: 'error',
-                            sx: { mb: 1 },
-                            children: _jsx(Typography, {
-                              variant: 'body2',
-                              children: step.error,
-                            }),
-                          }),
-                        renderStepActions(step),
-                        renderStepMetadata(step),
-                      ],
-                    }),
-                  }),
-                }),
-              ],
-            },
-            step.id,
-          ),
-        ),
-      }),
-      _jsx(EditDialog, {
-        open: editDialogOpen,
-        step: selectedStep,
-        onClose: () => setEditDialogOpen(false),
-        onSave: handleSaveEdit,
-      }),
-    ],
-  });
+            }}>
+            {duration && (<material_1.Box>
+                <material_1.Typography variant="caption" color="textSecondary">
+                  Duration
+                </material_1.Typography>
+                <material_1.Typography variant="body2">
+                  {formatDuration(duration)}
+                </material_1.Typography>
+              </material_1.Box>)}
+
+            {cost && (<material_1.Box>
+                <material_1.Typography variant="caption" color="textSecondary">
+                  Cost
+                </material_1.Typography>
+                <material_1.Typography variant="body2">${cost.toFixed(4)}</material_1.Typography>
+              </material_1.Box>)}
+
+            {confidence && (<material_1.Box>
+                <material_1.Typography variant="caption" color="textSecondary">
+                  Confidence
+                </material_1.Typography>
+                <material_1.Typography variant="body2">
+                  {(confidence * 100).toFixed(1)}%
+                </material_1.Typography>
+              </material_1.Box>)}
+          </material_1.Box>
+
+          {tools_used && tools_used.length > 0 && (<material_1.Box sx={{ mb: 2 }}>
+              <material_1.Typography variant="caption" color="textSecondary" display="block" gutterBottom>
+                Tools Used
+              </material_1.Typography>
+              <material_1.Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
+                {tools_used.map((tool, index) => (<material_1.Chip key={index} label={tool} size="small" variant="outlined"/>))}
+              </material_1.Box>
+            </material_1.Box>)}
+
+          {edit_history && edit_history.length > 0 && (<material_1.Box>
+              <material_1.Typography variant="caption" color="textSecondary" display="block" gutterBottom>
+                Edit History
+              </material_1.Typography>
+              <material_1.List dense>
+                {edit_history.map((edit, index) => (<material_1.ListItem key={index}>
+                    <material_1.ListItemText primary={`Edit ${index + 1}`} secondary={`${new Date(edit.timestamp).toLocaleString()}${edit.reason ? ` - ${edit.reason}` : ''}`}/>
+                  </material_1.ListItem>))}
+              </material_1.List>
+            </material_1.Box>)}
+
+          {step.inputs && (<material_1.Accordion>
+              <material_1.AccordionSummary expandIcon={<icons_material_1.ExpandMore />}>
+                <material_1.Typography variant="body2">Inputs</material_1.Typography>
+              </material_1.AccordionSummary>
+              <material_1.AccordionDetails>
+                <material_1.Box component="pre" sx={{ fontSize: '0.75rem', overflow: 'auto' }}>
+                  {JSON.stringify(step.inputs, null, 2)}
+                </material_1.Box>
+              </material_1.AccordionDetails>
+            </material_1.Accordion>)}
+
+          {step.outputs && (<material_1.Accordion>
+              <material_1.AccordionSummary expandIcon={<icons_material_1.ExpandMore />}>
+                <material_1.Typography variant="body2">Outputs</material_1.Typography>
+              </material_1.AccordionSummary>
+              <material_1.AccordionDetails>
+                <material_1.Box component="pre" sx={{ fontSize: '0.75rem', overflow: 'auto' }}>
+                  {JSON.stringify(step.outputs, null, 2)}
+                </material_1.Box>
+              </material_1.AccordionDetails>
+            </material_1.Accordion>)}
+        </material_1.AccordionDetails>
+      </material_1.Accordion>);
+    };
+    if (loading) {
+        return (<material_1.Box sx={{ p: 2 }}>
+        <material_1.LinearProgress />
+        <material_1.Typography variant="body2" sx={{ mt: 1 }}>
+          Loading agent timeline...
+        </material_1.Typography>
+      </material_1.Box>);
+    }
+    if (error) {
+        return (<material_1.Alert severity="error" sx={{ m: 2 }}>
+        Failed to load agent timeline: {error}
+      </material_1.Alert>);
+    }
+    const sortedSteps = steps.sort((a, b) => a.ts - b.ts);
+    return (<material_1.Box sx={{ p: 2 }}>
+      <material_1.Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+        <icons_material_1.SmartToyOutlined />
+        <material_1.Typography variant="h6">Agent Timeline</material_1.Typography>
+        <material_1.Chip label={`${steps.length} steps`} size="small" color="primary"/>
+      </material_1.Box>
+
+      {sortedSteps.length === 0 && (<material_1.Alert severity="info">
+          No agent steps yet. The agent timeline will populate as the run
+          progresses.
+        </material_1.Alert>)}
+
+      <lab_1.Timeline>
+        {sortedSteps.map((step, index) => (<lab_1.TimelineItem key={step.id}>
+            <lab_1.TimelineOppositeContent color="textSecondary" sx={{ flex: '0 1 auto' }}>
+              <material_1.Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <icons_material_1.AccessTimeOutlined fontSize="small"/>
+                <material_1.Typography variant="caption">
+                  {new Date(step.ts).toLocaleTimeString()}
+                </material_1.Typography>
+              </material_1.Box>
+              {step.metadata?.duration && (<material_1.Typography variant="caption" color="textSecondary">
+                  {formatDuration(step.metadata.duration)}
+                </material_1.Typography>)}
+            </lab_1.TimelineOppositeContent>
+
+            <lab_1.TimelineSeparator>
+              <lab_1.TimelineDot color={getStateColor(step.state)}>
+                {getRoleIcon(step.role)}
+              </lab_1.TimelineDot>
+              {index < sortedSteps.length - 1 && <lab_1.TimelineConnector />}
+            </lab_1.TimelineSeparator>
+
+            <lab_1.TimelineContent>
+              <material_1.Card>
+                <material_1.CardContent>
+                  <material_1.Box sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                mb: 1,
+            }}>
+                    <material_1.Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <material_1.Typography variant="subtitle1" sx={{ textTransform: 'capitalize' }}>
+                        {step.role}
+                      </material_1.Typography>
+                      {step.metadata?.checkpoint_type && (<material_1.Chip label={step.metadata.checkpoint_type} size="small" color="info"/>)}
+                    </material_1.Box>
+
+                    <material_1.Tooltip title={step.state}>
+                      <material_1.Chip icon={getStateIcon(step.state)} label={step.state.replace('_', ' ')} color={getStateColor(step.state)} size="small"/>
+                    </material_1.Tooltip>
+                  </material_1.Box>
+
+                  <material_1.Typography variant="body2" component="pre" sx={{
+                whiteSpace: 'pre-wrap',
+                fontFamily: 'inherit',
+                mb: 1,
+            }}>
+                    {step.text}
+                  </material_1.Typography>
+
+                  {step.error && (<material_1.Alert severity="error" sx={{ mb: 1 }}>
+                      <material_1.Typography variant="body2">{step.error}</material_1.Typography>
+                    </material_1.Alert>)}
+
+                  {renderStepActions(step)}
+                  {renderStepMetadata(step)}
+                </material_1.CardContent>
+              </material_1.Card>
+            </lab_1.TimelineContent>
+          </lab_1.TimelineItem>))}
+      </lab_1.Timeline>
+
+      <EditDialog open={editDialogOpen} step={selectedStep} onClose={() => setEditDialogOpen(false)} onSave={handleSaveEdit}/>
+    </material_1.Box>);
 }

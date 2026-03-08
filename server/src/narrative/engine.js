@@ -1,0 +1,362 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.NarrativeSimulationEngine = void 0;
+const node_crypto_1 = require("node:crypto");
+const generators_js_1 = require("./generators.js");
+const agents_js_1 = require("./agents.js");
+const HISTORY_LIMIT = 64;
+const MOMENTUM_SENSITIVITY = 0.05;
+class NarrativeSimulationEngine {
+    config;
+    state;
+    generator;
+    eventQueue = [];
+    agents = [];
+    constructor(config) {
+        this.config = config;
+        const start = new Date();
+        const entities = Object.fromEntries(config.initialEntities.map((entity) => [
+            entity.id,
+            this.bootstrapEntityState(entity),
+        ]));
+        if (config.agents) {
+            config.agents.forEach((agentConfig) => {
+                const entity = config.initialEntities.find((e) => e.id === agentConfig.entityId);
+                if (entity) {
+                    if (agentConfig.type === 'llm' && config.llmClient) {
+                        this.agents.push(new agents_js_1.LLMAgent(agentConfig, entity, config.llmClient));
+                    }
+                    else {
+                        this.agents.push(new agents_js_1.RuleBasedAgent(agentConfig, entity));
+                    }
+                }
+            });
+        }
+        const parameters = Object.fromEntries((config.initialParameters ?? []).map((parameter) => [
+            parameter.name,
+            this.bootstrapParameter(parameter.name, parameter.value),
+        ]));
+        this.state = {
+            id: config.id,
+            name: config.name,
+            tick: 0,
+            startedAt: start,
+            timestamp: start,
+            tickIntervalMinutes: config.tickIntervalMinutes,
+            themes: config.themes,
+            entities,
+            parameters,
+            arcs: [],
+            recentEvents: [],
+            narrative: {
+                mode: 'rule-based',
+                summary: 'Simulation initialized.',
+                highlights: [],
+                risks: [],
+                opportunities: [],
+            },
+            metadata: config.metadata,
+        };
+        this.generator = this.createGenerator(config.generatorMode, config);
+        this.state.arcs = this.computeArcs();
+    }
+    getState() {
+        return this.state;
+    }
+    getSummary() {
+        const { id, name, tick, themes } = this.state;
+        return {
+            id,
+            name,
+            tick,
+            themes,
+            activeEntities: Object.keys(this.state.entities).length,
+            activeEvents: this.eventQueue.length,
+        };
+    }
+    setGeneratorMode(mode, llmClientConfig) {
+        this.generator = this.createGenerator(mode, {
+            ...this.config,
+            llmClient: llmClientConfig,
+        });
+    }
+    queueEvent(event) {
+        const scheduledTick = event.scheduledTick ?? this.state.tick + 1;
+        this.eventQueue.push({ ...event, scheduledTick });
+    }
+    async tick(steps = 1) {
+        for (let index = 0; index < steps; index += 1) {
+            await this.resolveAgentActions();
+            this.advanceClock();
+            const ready = this.dequeueReadyEvents();
+            ready.forEach((event) => this.applyEvent(event));
+            this.state.recentEvents = [...this.state.recentEvents, ...ready].slice(-HISTORY_LIMIT);
+            this.state.arcs = this.computeArcs();
+            await this.refreshNarrative(ready);
+            this.applyNaturalDynamics();
+        }
+        return this.state;
+    }
+    async resolveAgentActions() {
+        for (const agent of this.agents) {
+            try {
+                const event = await agent.decideAction(this.state);
+                if (event) {
+                    this.queueEvent(event);
+                }
+            }
+            catch (error) {
+                console.error(`Agent ${agent.id} failed to decide action:`, error instanceof Error ? error.message : error);
+            }
+        }
+    }
+    injectActorAction(actorId, description, overrides) {
+        const action = {
+            id: (0, node_crypto_1.randomUUID)(),
+            type: 'intervention',
+            actorId,
+            targetIds: overrides?.targetIds,
+            theme: overrides?.theme ?? this.state.themes[0],
+            intensity: overrides?.intensity ?? 0.6,
+            sentimentShift: overrides?.sentimentShift ?? 0.1,
+            influenceShift: overrides?.influenceShift ?? 0.05,
+            description,
+            parameterAdjustments: overrides?.parameterAdjustments,
+            scheduledTick: overrides?.scheduledTick ?? this.state.tick + 1,
+            metadata: overrides?.metadata,
+        };
+        this.queueEvent(action);
+    }
+    updateEntityProfile(entity) {
+        this.state.entities[entity.id] = {
+            ...this.bootstrapEntityState(entity),
+            history: this.state.entities[entity.id]?.history ?? [],
+        };
+    }
+    async refreshNarrative(recent) {
+        const narration = await this.generator.generate(this.state, recent);
+        this.state.narrative = narration;
+    }
+    bootstrapEntityState(entity) {
+        return {
+            ...entity,
+            pressure: 0.2,
+            trend: 'stable',
+            lastUpdatedTick: 0,
+            history: [
+                {
+                    tick: 0,
+                    sentiment: entity.sentiment,
+                    influence: entity.influence,
+                },
+            ],
+        };
+    }
+    bootstrapParameter(name, value) {
+        return {
+            name,
+            value,
+            trend: 'stable',
+            history: [
+                {
+                    tick: 0,
+                    value,
+                },
+            ],
+        };
+    }
+    createGenerator(mode, config) {
+        if (mode === 'llm' && config.llmClient) {
+            return new generators_js_1.LLMDrivenNarrativeGenerator(config.llmClient);
+        }
+        return new generators_js_1.RuleBasedNarrativeGenerator();
+    }
+    advanceClock() {
+        this.state.tick += 1;
+        this.state.timestamp = new Date(this.state.startedAt.getTime() +
+            this.state.tick * this.state.tickIntervalMinutes * 60_000);
+    }
+    dequeueReadyEvents() {
+        const ready = [];
+        for (let index = this.eventQueue.length - 1; index >= 0; index -= 1) {
+            const event = this.eventQueue[index];
+            if ((event.scheduledTick ?? this.state.tick) <= this.state.tick) {
+                ready.push(event);
+                this.eventQueue.splice(index, 1);
+            }
+        }
+        return ready.reverse();
+    }
+    applyEvent(event) {
+        // If it is a suppression event, we might want to handle it differently.
+        // E.g. targeting an actor to reduce their influence.
+        if (event.actorId && this.state.entities[event.actorId]) {
+            this.adjustEntityState(this.state.entities[event.actorId], event, 1);
+        }
+        (event.targetIds ?? []).forEach((targetId) => {
+            const target = this.state.entities[targetId];
+            if (target) {
+                this.adjustEntityState(target, event, 0.8);
+            }
+        });
+        if (event.parameterAdjustments?.length) {
+            event.parameterAdjustments.forEach((param) => {
+                const existing = this.state.parameters[param.name] ??
+                    this.bootstrapParameter(param.name, 0);
+                existing.value += param.delta;
+                existing.history.push({ tick: this.state.tick, value: existing.value });
+                existing.trend = this.calculateTrend(existing.history);
+                this.state.parameters[param.name] = existing;
+            });
+        }
+        // Propagation logic
+        // We only propagate if the event is "loud" enough.
+        // Suppression events might not propagate in the same way, or they might propagate as "censorship news".
+        // For now, allow suppression to propagate but with potentially negative effects handled in adjustEntityState.
+        if (event.actorId && event.intensity > 0.05) {
+            const actor = this.state.entities[event.actorId];
+            if (actor) {
+                actor.relationships.forEach((edge) => {
+                    const related = this.state.entities[edge.targetId];
+                    if (!related)
+                        return;
+                    // Decay intensity
+                    const newIntensity = event.intensity * edge.strength * 0.5;
+                    // If intensity drops below threshold, stop propagating
+                    if (newIntensity < 0.01)
+                        return;
+                    const propagatedEvent = {
+                        ...event,
+                        id: `${event.id}:${edge.targetId}`,
+                        actorId: related.id, // Neighbor becomes the "actor" of the propagated event (re-transmission)
+                        targetIds: [], // Clear specific targets
+                        intensity: newIntensity,
+                        sentimentShift: (event.sentimentShift ?? 0) * edge.strength * related.resilience,
+                        influenceShift: (event.influenceShift ?? 0) * edge.strength * 0.5,
+                        scheduledTick: this.state.tick + 1, // Queue for NEXT tick (simulating travel time)
+                    };
+                    // Queue the event instead of applying immediately.
+                    // This enables multi-hop propagation in subsequent ticks.
+                    this.queueEvent(propagatedEvent);
+                });
+            }
+        }
+    }
+    adjustEntityState(entity, event, weight) {
+        let sentimentDelta = (event.sentimentShift ?? 0) *
+            event.intensity *
+            weight *
+            (1 - entity.resilience * 0.5);
+        let influenceDelta = (event.influenceShift ?? 0) * weight * (1 - entity.volatility * 0.5);
+        // Special handling for suppression events
+        if (event.type === 'suppression') {
+            // Suppression intends to reduce influence and dampen sentiment shifts.
+            // If I am targeted by suppression, my influence drops.
+            // If I am just hearing about suppression (propagated), maybe I get scared (volatility drops)?
+            // If I am the target of suppression:
+            if (event.targetIds?.includes(entity.id)) {
+                influenceDelta = -Math.abs(event.intensity * weight * 0.5); // Force influence down
+                sentimentDelta = 0; // Suppression doesn't necessarily change my mind, just my voice
+            }
+        }
+        entity.sentiment = this.clamp(entity.sentiment + sentimentDelta, -1, 1);
+        entity.influence = this.clamp(entity.influence + influenceDelta, 0, 1.5);
+        entity.pressure = this.clamp(entity.pressure + Math.abs(sentimentDelta) * 0.5, 0, 1);
+        entity.trend =
+            sentimentDelta > MOMENTUM_SENSITIVITY
+                ? 'rising'
+                : sentimentDelta < -MOMENTUM_SENSITIVITY
+                    ? 'falling'
+                    : 'stable';
+        entity.lastEventId = event.id;
+        entity.lastUpdatedTick = this.state.tick;
+        entity.history.push({
+            tick: this.state.tick,
+            sentiment: entity.sentiment,
+            influence: entity.influence,
+        });
+        if (entity.history.length > HISTORY_LIMIT) {
+            entity.history.splice(0, entity.history.length - HISTORY_LIMIT);
+        }
+    }
+    computeArcs() {
+        return this.state.themes.map((theme) => {
+            const entityScores = Object.values(this.state.entities).map((entity) => {
+                const themeAffinity = entity.themes[theme] ?? 0;
+                const normalizedSentiment = (entity.sentiment + 1) / 2;
+                return {
+                    id: entity.id,
+                    name: entity.name,
+                    score: normalizedSentiment * entity.influence * themeAffinity,
+                };
+            });
+            entityScores.sort((a, b) => b.score - a.score);
+            const momentum = this.clamp(entityScores.reduce((total, current) => total + current.score, 0), 0, 1);
+            const previous = this.state.arcs.find((arc) => arc.theme === theme)?.momentum ??
+                momentum;
+            const delta = momentum - previous;
+            const outlook = delta > MOMENTUM_SENSITIVITY
+                ? 'improving'
+                : delta < -MOMENTUM_SENSITIVITY
+                    ? 'degrading'
+                    : 'steady';
+            const confidence = this.clamp(entityScores
+                .slice(0, 3)
+                .reduce((total, current) => total + current.score, 0), 0, 1);
+            return {
+                theme,
+                momentum,
+                outlook,
+                confidence,
+                keyEntities: entityScores.slice(0, 3).map((entry) => entry.name),
+                narrative: this.renderArcNarrative(theme, outlook, entityScores.slice(0, 2)),
+            };
+        });
+    }
+    renderArcNarrative(theme, outlook, leaders) {
+        const leadNames = leaders.map((leader) => leader.name).join(', ');
+        const outlookText = outlook === 'improving'
+            ? 'Narrative sentiment trending upward.'
+            : outlook === 'degrading'
+                ? 'Narrative momentum deteriorating.'
+                : 'Narrative pressure stable.';
+        return `${theme}: ${outlookText}${leadNames ? ` Key drivers: ${leadNames}.` : ''}`;
+    }
+    applyNaturalDynamics() {
+        Object.values(this.state.entities).forEach((entity) => {
+            const decay = (entity.pressure - entity.resilience * 0.3) * 0.05;
+            entity.pressure = this.clamp(entity.pressure - decay, 0, 1);
+            if (entity.trend === 'stable') {
+                const regression = (entity.sentiment - 0) * 0.02;
+                entity.sentiment = this.clamp(entity.sentiment - regression, -1, 1);
+            }
+        });
+        Object.values(this.state.parameters).forEach((parameter) => {
+            const regression = parameter.value * 0.01;
+            parameter.value -= regression;
+            parameter.history.push({ tick: this.state.tick, value: parameter.value });
+            if (parameter.history.length > HISTORY_LIMIT) {
+                parameter.history.splice(0, parameter.history.length - HISTORY_LIMIT);
+            }
+            parameter.trend = this.calculateTrend(parameter.history);
+        });
+    }
+    calculateTrend(history) {
+        if (history.length < 2)
+            return 'stable';
+        const recent = history.slice(-3);
+        const deltas = recent
+            .slice(1)
+            .map((point, index) => point.value - recent[index].value);
+        const avgDelta = deltas.reduce((total, value) => total + value, 0) / (deltas.length || 1);
+        if (avgDelta > MOMENTUM_SENSITIVITY / 2)
+            return 'rising';
+        if (avgDelta < -MOMENTUM_SENSITIVITY / 2)
+            return 'falling';
+        return 'stable';
+    }
+    clamp(value, min, max) {
+        return Math.max(min, Math.min(max, value));
+    }
+}
+exports.NarrativeSimulationEngine = NarrativeSimulationEngine;

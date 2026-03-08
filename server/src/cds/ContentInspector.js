@@ -1,0 +1,50 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ContentInspector = void 0;
+class ContentInspector {
+    dirtyWords = [
+        'TOP SECRET',
+        'NOFORN',
+        'ORCON',
+        'GAMMA',
+        'HCS',
+        'RESERVED',
+    ];
+    /**
+     * Deep Content Inspection (DCI)
+     * Scans objects recursively for dirty words or patterns that violate the target domain.
+     */
+    inspect(data, targetClassification) {
+        const issues = [];
+        // If target is UNCLASSIFIED, we are very strict.
+        if (targetClassification === 'UNCLASSIFIED') {
+            this.scanRecursive(data, issues);
+        }
+        if (issues.length > 0) {
+            return { passed: false, issues };
+        }
+        return { passed: true, issues: [], sanitizedContent: data };
+    }
+    scanRecursive(obj, issues, path = '') {
+        if (typeof obj === 'string') {
+            this.checkString(obj, issues, path);
+        }
+        else if (Array.isArray(obj)) {
+            obj.forEach((item, index) => this.scanRecursive(item, issues, `${path}[${index}]`));
+        }
+        else if (typeof obj === 'object' && obj !== null) {
+            for (const [key, value] of Object.entries(obj)) {
+                this.scanRecursive(value, issues, `${path}.${key}`);
+            }
+        }
+    }
+    checkString(text, issues, path) {
+        const upper = text.toUpperCase();
+        for (const word of this.dirtyWords) {
+            if (upper.includes(word)) {
+                issues.push(`Found restricted term "${word}" at ${path}`);
+            }
+        }
+    }
+}
+exports.ContentInspector = ContentInspector;

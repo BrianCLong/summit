@@ -1,9 +1,12 @@
+"use strict";
 /**
  * Autotriage Engine Configuration
  *
  * Defines rules, thresholds, and keywords for automatic issue classification
  */
-export const defaultConfig = {
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.defaultConfig = void 0;
+exports.defaultConfig = {
     areas: [
         {
             name: 'copilot',
@@ -125,4 +128,3 @@ export const defaultConfig = {
         goodFirstIssueThreshold: 30, // Complexity score threshold
     },
 };
-//# sourceMappingURL=config.js.map

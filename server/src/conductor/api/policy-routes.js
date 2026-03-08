@@ -1,0 +1,319 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.policyRoutes = void 0;
+// @ts-nocheck
+// API Routes for Policy Explanation and Simulation
+const express_1 = __importDefault(require("express"));
+const policy_explainer_js_1 = require("../router/policy-explainer.js");
+const prometheus_js_1 = require("../observability/prometheus.js");
+const opa_integration_js_1 = require("../governance/opa-integration.js");
+const logger_js_1 = __importDefault(require("../../config/logger.js"));
+const router = express_1.default.Router();
+exports.policyRoutes = router;
+const metrics = prometheus_js_1.prometheusConductorMetrics;
+async function routingOPAGuard(req, res, next) {
+    const user = req.user || {};
+    const traceId = req.traceId ||
+        req.headers['x-trace-id'] ||
+        req.headers['x-correlation-id'] ||
+        req.headers['x-request-id'] ||
+        '';
+    const tenantId = user.tenantId || req.headers['x-tenant-id'] || 'unknown';
+    const principalId = user.userId || user.sub || 'anonymous';
+    const resource = 'maestro.routing.decision';
+    const resourceAttributes = {
+        runId: req.params.runId,
+        nodeId: req.params.nodeId,
+    };
+    try {
+        const decision = await opa_integration_js_1.opaPolicyEngine.evaluatePolicy('maestro/authz', {
+            tenantId,
+            userId: principalId,
+            role: user.roles?.[0] || user.role || 'viewer',
+            action: 'read',
+            resource,
+            resourceAttributes,
+            sessionContext: {
+                ipAddress: req.ip,
+                userAgent: req.get('user-agent'),
+                traceId,
+            },
+        });
+        logger_js_1.default.info({
+            event: 'maestro.routing.opaDecision',
+            allow: decision.allow,
+            reason: decision.reason,
+            traceId,
+            tenantId,
+            principalId,
+            resource,
+            resourceAttributes,
+        }, 'OPA evaluated maestro routing access');
+        if (!decision.allow) {
+            return res.status(403).json({
+                error: 'Forbidden',
+                code: 'OPA_DENY',
+                reason: decision.reason || 'Access denied by policy',
+                traceId,
+                resource,
+            });
+        }
+        req.policyDecision = decision;
+        return next();
+    }
+    catch (error) {
+        logger_js_1.default.error({
+            event: 'maestro.routing.opaDecision.error',
+            traceId,
+            tenantId,
+            principalId,
+            resource,
+            resourceAttributes,
+            error: error?.message || String(error),
+        }, 'OPA evaluation failed for maestro routing access');
+        return res.status(500).json({
+            error: 'OPA evaluation failed',
+            code: 'OPA_ERROR',
+            traceId,
+        });
+    }
+}
+/**
+ * POST /api/maestro/v1/policies/explain
+ * Explain a routing decision with full trace
+ */
+router.post('/explain', async (req, res) => {
+    const startTime = Date.now();
+    try {
+        const { queryId, extended = false } = req.body;
+        if (!queryId) {
+            return res.status(400).json({
+                error: 'queryId is required',
+                code: 'MISSING_QUERY_ID',
+            });
+        }
+        const explanation = await policy_explainer_js_1.policyExplainer.getPolicyExplanationAPI(queryId);
+        if (!explanation) {
+            return res.status(404).json({
+                error: 'Decision trace not found',
+                code: 'TRACE_NOT_FOUND',
+                queryId,
+            });
+        }
+        // Track metrics
+        const duration = Date.now() - startTime;
+        metrics?.policyExplanationLatency?.observe(duration / 1000);
+        metrics?.policyExplanationRequests?.inc({
+            status: 'success',
+        });
+        const response = {
+            queryId: explanation.queryId,
+            timestamp: explanation.timestamp,
+            decision: explanation.decision,
+            ...(extended && {
+                rulePath: explanation.rulePath,
+                policyEvaluations: explanation.policyEvaluations,
+                costBreakdown: explanation.costBreakdown,
+                performanceMetrics: explanation.performanceMetrics,
+            }),
+        };
+        res.json(response);
+    }
+    catch (error) {
+        const duration = Date.now() - startTime;
+        metrics?.policyExplanationLatency?.observe(duration / 1000);
+        metrics?.policyExplanationRequests?.inc({
+            status: 'error',
+        });
+        console.error('Policy explanation error:', error);
+        res.status(500).json({
+            error: 'Failed to explain policy decision',
+            code: 'EXPLANATION_FAILED',
+            message: error.message,
+        });
+    }
+});
+/**
+ * POST /api/maestro/v1/policies/simulate
+ * Simulate what-if scenarios for policy changes
+ */
+router.post('/simulate', async (req, res) => {
+    const startTime = Date.now();
+    try {
+        const { queryId, proposedRules, simulationType = 'rule_change' } = req.body;
+        if (!queryId) {
+            return res.status(400).json({
+                error: 'queryId is required',
+                code: 'MISSING_QUERY_ID',
+            });
+        }
+        if (!proposedRules || !Array.isArray(proposedRules)) {
+            return res.status(400).json({
+                error: 'proposedRules must be an array',
+                code: 'INVALID_RULES',
+            });
+        }
+        const simulation = await policy_explainer_js_1.policyExplainer.simulateWhatIfAPI(queryId, {
+            rules: proposedRules,
+            type: simulationType,
+        });
+        if (!simulation) {
+            return res.status(404).json({
+                error: 'Original decision not found for simulation',
+                code: 'ORIGINAL_DECISION_NOT_FOUND',
+                queryId,
+            });
+        }
+        // Track metrics
+        const duration = Date.now() - startTime;
+        metrics?.policySimulationLatency?.observe(duration / 1000);
+        metrics?.policySimulationRequests?.inc({
+            status: 'success',
+            type: simulationType,
+        });
+        res.json({
+            queryId,
+            simulationType,
+            timestamp: new Date().toISOString(),
+            simulation,
+        });
+    }
+    catch (error) {
+        const duration = Date.now() - startTime;
+        metrics?.policySimulationLatency?.observe(duration / 1000);
+        metrics?.policySimulationRequests?.inc({
+            status: 'error',
+            type: req.body.simulationType || 'unknown',
+        });
+        console.error('Policy simulation error:', error);
+        res.status(500).json({
+            error: 'Failed to simulate policy changes',
+            code: 'SIMULATION_FAILED',
+            message: error.message,
+        });
+    }
+});
+/**
+ * GET /api/maestro/v1/policies/rules
+ * Get all available policy rules
+ */
+router.get('/rules', async (req, res) => {
+    try {
+        // In a real implementation, this would fetch from a policy store
+        const rules = [
+            {
+                id: 'pii-restriction',
+                name: 'PII Data Restriction',
+                description: 'Restrict PII data to sovereign/local models only',
+                condition: 'query.containsPII === true',
+                action: 'route_to',
+                priority: 100,
+                enabled: true,
+                metadata: { allowedExperts: ['local-llm', 'sovereign-ai'] },
+            },
+            {
+                id: 'cost-budget',
+                name: 'Cost Budget Enforcement',
+                description: 'Enforce per-tenant cost budgets',
+                condition: 'tenant.budgetRemaining > estimatedCost',
+                action: 'allow',
+                priority: 90,
+                enabled: true,
+            },
+            {
+                id: 'sensitivity-classification',
+                name: 'Sensitivity Classification',
+                description: 'Route based on data sensitivity level',
+                condition: 'context.sensitivity === "secret"',
+                action: 'route_to',
+                priority: 95,
+                enabled: true,
+                metadata: { allowedExperts: ['local-llm'] },
+            },
+            {
+                id: 'emergency-override',
+                name: 'Emergency Override',
+                description: 'Allow emergency queries to bypass normal restrictions',
+                condition: 'context.urgency === "high" && user.hasEmergencyRole',
+                action: 'allow',
+                priority: 110,
+                enabled: true,
+            },
+        ];
+        metrics?.policyRulesRequests?.inc({ status: 'success' });
+        res.json({
+            rules,
+            count: rules.length,
+            timestamp: new Date().toISOString(),
+        });
+    }
+    catch (error) {
+        metrics?.policyRulesRequests?.inc({ status: 'error' });
+        console.error('Policy rules fetch error:', error);
+        res.status(500).json({
+            error: 'Failed to fetch policy rules',
+            code: 'RULES_FETCH_FAILED',
+            message: error.message,
+        });
+    }
+});
+/**
+ * GET /api/maestro/v1/runs/:runId/nodes/:nodeId/routing
+ * Get routing decision for a specific run node
+ */
+router.get('/runs/:runId/nodes/:nodeId/routing', routingOPAGuard, async (req, res) => {
+    try {
+        const { runId, nodeId } = req.params;
+        const { includeTrace = false } = req.query;
+        // In a real implementation, this would fetch from the runs database
+        // For now, return a mock routing decision
+        const routingDecision = {
+            runId,
+            nodeId,
+            queryId: `${runId}-${nodeId}-query`,
+            timestamp: new Date().toISOString(),
+            expert: {
+                id: 'openai-gpt-4',
+                name: 'OpenAI GPT-4',
+                provider: 'openai',
+                model: 'gpt-4-0125-preview',
+            },
+            decision: {
+                confidence: 0.92,
+                reason: 'High confidence task, budget available, no PII detected',
+                estimatedCost: 0.045,
+                estimatedLatency: 1200,
+            },
+            alternatives: [
+                {
+                    expert: 'anthropic-claude-3',
+                    score: 0.87,
+                    rejectionReason: 'Higher cost per token',
+                },
+                {
+                    expert: 'local-llm',
+                    score: 0.75,
+                    rejectionReason: 'Lower performance score',
+                },
+            ],
+        };
+        if (includeTrace === 'true') {
+            const trace = await policy_explainer_js_1.policyExplainer.getPolicyExplanationAPI(routingDecision.queryId);
+            routingDecision.trace = trace;
+        }
+        metrics?.runRoutingRequests?.inc({ status: 'success' });
+        res.json(routingDecision);
+    }
+    catch (error) {
+        metrics?.runRoutingRequests?.inc({ status: 'error' });
+        console.error('Run routing fetch error:', error);
+        res.status(500).json({
+            error: 'Failed to fetch routing decision',
+            code: 'ROUTING_FETCH_FAILED',
+            message: error.message,
+        });
+    }
+});

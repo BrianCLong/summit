@@ -1,5 +1,5 @@
+"use strict";
 /**
  * Type definitions for autotriage engine
  */
-export {};
-//# sourceMappingURL=types.js.map
+Object.defineProperty(exports, "__esModule", { value: true });

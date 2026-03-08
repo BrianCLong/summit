@@ -1,8 +1,11 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.fetchSnapshot = fetchSnapshot;
 const DEFAULT_HEADERS = {};
 if (import.meta.env.VITE_COMMAND_CONSOLE_TOKEN) {
     DEFAULT_HEADERS['x-internal-token'] = import.meta.env.VITE_COMMAND_CONSOLE_TOKEN;
 }
-export async function fetchSnapshot() {
+async function fetchSnapshot() {
     const res = await fetch('/api/internal/command-console/summary', {
         headers: DEFAULT_HEADERS,
     });

@@ -1,4 +1,6 @@
-import { SimulationEngine } from '../src/core/SimulationEngine.js';
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const SimulationEngine_js_1 = require("../src/core/SimulationEngine.js");
 describe('Crisis scenario simulation', () => {
     it('stabilizes after cascading support', () => {
         const config = {
@@ -50,7 +52,7 @@ describe('Crisis scenario simulation', () => {
                 },
             ],
         };
-        const engine = new SimulationEngine();
+        const engine = new SimulationEngine_js_1.SimulationEngine();
         engine.initialize(config);
         engine.injectEvent({
             id: 'citywide-crisis',

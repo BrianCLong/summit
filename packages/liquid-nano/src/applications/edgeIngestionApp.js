@@ -1,4 +1,7 @@
-import { createRuntime } from '../runtime/core.js';
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.createEdgeIngestionApp = createEdgeIngestionApp;
+const core_js_1 = require("../runtime/core.js");
 class PersistencePlugin {
     onPersist;
     name = 'persistence';
@@ -34,8 +37,8 @@ class TelemetryPlugin {
         }
     }
 }
-export function createEdgeIngestionApp(options = {}) {
-    const runtime = options.logger ? createRuntime({ logger: options.logger }) : createRuntime();
+function createEdgeIngestionApp(options = {}) {
+    const runtime = options.logger ? (0, core_js_1.createRuntime)({ logger: options.logger }) : (0, core_js_1.createRuntime)();
     const transform = options.transform ?? ((event) => event);
     runtime.registerPlugin(new TelemetryPlugin());
     runtime.registerPlugin(new PersistencePlugin(options.onPersist));

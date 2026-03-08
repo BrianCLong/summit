@@ -1,0 +1,8 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+require("@testing-library/jest-dom");
+console.log('Setup file is executing (using require)...');
+const util = require('util');
+console.log('TextEncoder in util:', !!util.TextEncoder);
+globalThis.TextEncoder = util.TextEncoder;
+globalThis.TextDecoder = util.TextDecoder;

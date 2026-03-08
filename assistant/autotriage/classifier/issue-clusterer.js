@@ -1,11 +1,14 @@
+"use strict";
 /**
  * Issue clustering
  * Groups similar issues together and identifies themes
  */
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.clusterIssues = clusterIssues;
 /**
  * Simple TF-IDF based clustering without external dependencies
  */
-export function clusterIssues(items, config) {
+function clusterIssues(items, config) {
     if (items.length < config.minClusterSize) {
         return [];
     }
@@ -261,4 +264,3 @@ function extractCommonAreas(items) {
         .sort((a, b) => b[1] - a[1])
         .map(([area]) => area);
 }
-//# sourceMappingURL=issue-clusterer.js.map

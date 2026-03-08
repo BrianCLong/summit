@@ -1,3 +1,4 @@
+"use strict";
 /**
  * Monitoring and Observability Module
  *
@@ -9,10 +10,14 @@
  *
  * @module monitoring
  */
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.TriageMonitor = void 0;
+exports.getMonitor = getMonitor;
+exports.monitored = monitored;
 /**
  * Central monitoring class for autotriage operations
  */
-export class TriageMonitor {
+class TriageMonitor {
     static instance;
     metrics = [];
     errors = [];
@@ -240,10 +245,11 @@ export class TriageMonitor {
         // Example: send to Splunk, Elasticsearch, etc.
     }
 }
+exports.TriageMonitor = TriageMonitor;
 /**
  * Convenience function to get monitor instance
  */
-export function getMonitor() {
+function getMonitor() {
     return TriageMonitor.getInstance();
 }
 /**
@@ -251,7 +257,7 @@ export function getMonitor() {
  *
  * @param operationName - Name of the operation
  */
-export function monitored(operationName) {
+function monitored(operationName) {
     return function (target, propertyKey, descriptor) {
         const originalMethod = descriptor.value;
         const monitor = getMonitor();
@@ -274,4 +280,3 @@ export function monitored(operationName) {
         return descriptor;
     };
 }
-//# sourceMappingURL=monitoring.js.map

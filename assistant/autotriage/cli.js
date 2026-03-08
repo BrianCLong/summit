@@ -1,23 +1,58 @@
 #!/usr/bin/env node
+"use strict";
 /**
  * Autotriage CLI
  *
  * Main entry point for the autotriage engine
  * Usage: node assistant/autotriage/cli.ts [command] [options]
  */
-import * as fs from 'fs';
-import * as path from 'path';
-import { parseBacklog } from './data/backlog-parser.js';
-import { parseBugBash } from './data/bugbash-parser.js';
-import { fetchGitHubIssuesFromEnv } from './data/github-fetcher.js';
-import { detectAreas } from './classifier/area-detector.js';
-import { analyzeImpact } from './classifier/impact-analyzer.js';
-import { classifyType } from './classifier/type-classifier.js';
-import { clusterIssues } from './classifier/issue-clusterer.js';
-import { generateTriageReport, formatReportAsMarkdown, formatReportAsJSON } from './reports/triage-report.js';
-import { generateBatchLabels } from './automation/label-generator.js';
-import { draftBatchComments } from './automation/comment-drafter.js';
-import { defaultConfig } from './config.js';
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+const fs = __importStar(require("fs"));
+const path = __importStar(require("path"));
+const backlog_parser_js_1 = require("./data/backlog-parser.js");
+const bugbash_parser_js_1 = require("./data/bugbash-parser.js");
+const github_fetcher_js_1 = require("./data/github-fetcher.js");
+const area_detector_js_1 = require("./classifier/area-detector.js");
+const impact_analyzer_js_1 = require("./classifier/impact-analyzer.js");
+const type_classifier_js_1 = require("./classifier/type-classifier.js");
+const issue_clusterer_js_1 = require("./classifier/issue-clusterer.js");
+const triage_report_js_1 = require("./reports/triage-report.js");
+const label_generator_js_1 = require("./automation/label-generator.js");
+const comment_drafter_js_1 = require("./automation/comment-drafter.js");
+const config_js_1 = require("./config.js");
 async function main() {
     const args = process.argv.slice(2);
     const options = parseArgs(args);
@@ -49,7 +84,7 @@ async function runTriage(options) {
     const items = [];
     // Parse backlog
     try {
-        const backlogItems = await parseBacklog();
+        const backlogItems = await (0, backlog_parser_js_1.parseBacklog)();
         items.push(...backlogItems);
         console.log(`  ✓ Backlog: ${backlogItems.length} items`);
     }
@@ -58,7 +93,7 @@ async function runTriage(options) {
     }
     // Parse bug-bash
     try {
-        const bugBashItems = await parseBugBash();
+        const bugBashItems = await (0, bugbash_parser_js_1.parseBugBash)();
         items.push(...bugBashItems);
         console.log(`  ✓ Bug-bash: ${bugBashItems.length} items`);
     }
@@ -69,7 +104,7 @@ async function runTriage(options) {
     if (options.includeGithub) {
         try {
             console.log('  ⏳ Fetching GitHub issues (this may take a moment)...');
-            const githubItems = await fetchGitHubIssuesFromEnv();
+            const githubItems = await (0, github_fetcher_js_1.fetchGitHubIssuesFromEnv)();
             items.push(...githubItems);
             console.log(`  ✓ GitHub: ${githubItems.length} items`);
         }
@@ -84,25 +119,25 @@ async function runTriage(options) {
     }
     // Step 2: Classify items
     console.log('🏷️  Classifying items...');
-    const config = defaultConfig;
+    const config = config_js_1.defaultConfig;
     items.forEach((item) => {
         // Detect areas
         if (item.area.length === 0) {
-            item.area = detectAreas(item, config.areas);
+            item.area = (0, area_detector_js_1.detectAreas)(item, config.areas);
         }
         // Analyze impact
-        const impactResult = analyzeImpact(item, config.impactRules);
+        const impactResult = (0, impact_analyzer_js_1.analyzeImpact)(item, config.impactRules);
         item.impact = impactResult.impact;
         item.impactScore = impactResult.score;
         // Classify type
-        item.type = classifyType(item, config.typeRules);
+        item.type = (0, type_classifier_js_1.classifyType)(item, config.typeRules);
         // Detect good first issues
         item.isGoodFirstIssue = item.complexityScore <= config.reporting.goodFirstIssueThreshold;
     });
     console.log('  ✓ Classification complete\n');
     // Step 3: Cluster similar issues
     console.log('🔗 Clustering similar issues...');
-    const clusters = clusterIssues(items, config.clustering);
+    const clusters = (0, issue_clusterer_js_1.clusterIssues)(items, config.clustering);
     console.log(`  ✓ Found ${clusters.length} clusters\n`);
     // Assign cluster info to items
     clusters.forEach((cluster) => {
@@ -113,12 +148,12 @@ async function runTriage(options) {
     });
     // Step 4: Generate report
     console.log('📝 Generating triage report...');
-    const report = generateTriageReport(items, clusters, config.reporting.topIssuesCount, config.reporting.topThemesCount);
+    const report = (0, triage_report_js_1.generateTriageReport)(items, clusters, config.reporting.topIssuesCount, config.reporting.topThemesCount);
     console.log('  ✓ Report generated\n');
     // Step 5: Output report
     const output = options.outputFormat === 'json'
-        ? formatReportAsJSON(report)
-        : formatReportAsMarkdown(report);
+        ? (0, triage_report_js_1.formatReportAsJSON)(report)
+        : (0, triage_report_js_1.formatReportAsMarkdown)(report);
     if (options.outputFile) {
         const outputPath = path.resolve(options.outputFile);
         fs.writeFileSync(outputPath, output, 'utf8');
@@ -132,7 +167,7 @@ async function runTriage(options) {
     // Step 6: Generate labels (optional)
     if (options.generateLabels) {
         console.log('🏷️  Generating label suggestions...');
-        const labelSuggestions = generateBatchLabels(items);
+        const labelSuggestions = (0, label_generator_js_1.generateBatchLabels)(items);
         const labelsPath = path.resolve('triage-labels.json');
         fs.writeFileSync(labelsPath, JSON.stringify(labelSuggestions, null, 2), 'utf8');
         console.log(`  ✓ Label suggestions saved to: ${labelsPath}\n`);
@@ -140,7 +175,7 @@ async function runTriage(options) {
     // Step 7: Generate comments (optional)
     if (options.generateComments) {
         console.log('💬 Generating comment drafts...');
-        const commentDrafts = draftBatchComments(items, clusters);
+        const commentDrafts = (0, comment_drafter_js_1.draftBatchComments)(items, clusters);
         const commentsPath = path.resolve('triage-comments.json');
         fs.writeFileSync(commentsPath, JSON.stringify(commentDrafts, null, 2), 'utf8');
         console.log(`  ✓ Comment drafts saved to: ${commentsPath}\n`);
@@ -262,4 +297,3 @@ main().catch((error) => {
     console.error('❌ Error:', error);
     process.exit(1);
 });
-//# sourceMappingURL=cli.js.map

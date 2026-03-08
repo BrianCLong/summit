@@ -105,5 +105,5 @@ function emitCostEvent(input) {
     };
     // In a real implementation, this would be a more robust emitter.
     // For now, we log to stdout in a structured JSON format.
-    console.log(JSON.stringify({ type: 'CostEvent', ...event }));
+    process.stdout.write(`${JSON.stringify({ type: 'CostEvent', ...event })}\n`);
 }

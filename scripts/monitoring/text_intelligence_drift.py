@@ -2,6 +2,7 @@
 
 from summit.core.agents.qa_agent import QAAgent
 
+
 def main():
     qa_agent = QAAgent()
     qa_agent.monitor_drift()

@@ -1,0 +1,112 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.RetrievalService = void 0;
+const KnowledgeRepository_js_1 = require("./KnowledgeRepository.js");
+const EmbeddingService_js_1 = __importDefault(require("../services/EmbeddingService.js"));
+const logger_js_1 = __importDefault(require("../utils/logger.js"));
+class RetrievalService {
+    repo;
+    embeddingService;
+    constructor(pool) {
+        this.repo = new KnowledgeRepository_js_1.KnowledgeRepository(pool);
+        // EmbeddingService reads env vars internally
+        this.embeddingService = new EmbeddingService_js_1.default();
+    }
+    async search(query) {
+        const startTime = Date.now();
+        let items = [];
+        try {
+            if (query.queryKind === 'semantic') {
+                const embedding = await this.embeddingService.generateEmbedding({ text: query.queryText });
+                items = await this.repo.searchVector(query, embedding);
+            }
+            else if (query.queryKind === 'keyword') {
+                items = await this.repo.searchKeyword(query);
+            }
+            else if (query.queryKind === 'hybrid') {
+                // Simple hybrid: run both, merge and deduplicate
+                // Note: For production, we'd want RRF (Reciprocal Rank Fusion) or weighted sum.
+                // For MVP, we'll fetch topK from both and merge based on score.
+                // However, scores are not directly comparable (cosine vs ts_rank).
+                const embedding = await this.embeddingService.generateEmbedding({ text: query.queryText });
+                const [vectorResults, keywordResults] = await Promise.all([
+                    this.repo.searchVector(query, embedding),
+                    this.repo.searchKeyword(query)
+                ]);
+                // Basic Merge Strategy:
+                // 1. Normalize scores? (Hard without stats).
+                // 2. Simple deduplication favoring vector score if present?
+                const resultMap = new Map();
+                // Add vector results
+                vectorResults.forEach(r => {
+                    resultMap.set(r.object.id, r);
+                });
+                // Add keyword results, maybe boosting if it appears in both?
+                keywordResults.forEach(r => {
+                    if (resultMap.has(r.object.id)) {
+                        // exists in both. Boost score?
+                        const existing = resultMap.get(r.object.id);
+                        // Naive boost: existing.score is cosine (0-1). keyword score is open-ended.
+                        // We'll just keep the vector result as primary but maybe mark it?
+                        existing.score += 0.1; // arbitrary small boost
+                    }
+                    else {
+                        resultMap.set(r.object.id, r);
+                    }
+                });
+                items = Array.from(resultMap.values())
+                    .sort((a, b) => b.score - a.score)
+                    .slice(0, query.topK || 10);
+            }
+            // Filter content if not requested
+            if (query.includeContent === false) {
+                items.forEach(item => {
+                    delete item.object.body;
+                });
+            }
+        }
+        catch (err) {
+            logger_js_1.default.error(`Retrieval search failed: ${err}`);
+            // Return empty results rather than blowing up, but log error
+        }
+        return {
+            tenantId: query.tenantId,
+            query,
+            items
+        };
+    }
+    async indexObject(object) {
+        // 1. Upsert object
+        await this.repo.upsertKnowledgeObject(object);
+        // 2. Generate embedding if body exists
+        if (object.body) {
+            try {
+                const vector = await this.embeddingService.generateEmbedding({ text: object.title ? `${object.title} ${object.body}` : object.body });
+                // 3. Store embedding
+                await this.repo.upsertEmbedding({
+                    // Use a deterministic ID for the embedding so we can update it in place
+                    id: `emb_${object.id}`,
+                    tenantId: object.tenantId,
+                    objectId: object.id,
+                    kind: object.kind,
+                    provider: this.embeddingService.config.provider,
+                    model: this.embeddingService.config.model,
+                    dim: vector.length,
+                    vector: vector,
+                    createdAt: new Date().toISOString(),
+                    version: 'v1'
+                });
+            }
+            catch (err) {
+                logger_js_1.default.error(`Failed to generate/store embedding for ${object.id}: ${err}`);
+            }
+        }
+    }
+    async deleteObject(tenantId, objectId) {
+        await this.repo.deleteObject(tenantId, objectId);
+    }
+}
+exports.RetrievalService = RetrievalService;

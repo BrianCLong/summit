@@ -1,0 +1,277 @@
+"use strict";
+/**
+ * GraphRAG LLM Adapter
+ * Orchestrates LLM calls with strict citation enforcement
+ */
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.MockGraphRagLlmAdapter = exports.OpenAIGraphRagLlmAdapter = void 0;
+exports.createLlmAdapter = createLlmAdapter;
+const node_fetch_1 = __importDefault(require("node-fetch"));
+const logger_js_1 = __importDefault(require("../../utils/logger.js"));
+const types_js_1 = require("./types.js");
+// System prompt for evidence-first GraphRAG
+const SYSTEM_PROMPT = `You are an **intelligence analysis copilot** running inside the Summit platform.
+Your primary objective is to answer multi-step investigative questions by traversing the graph, not by guessing.
+You must minimize hallucinations by only asserting facts that are explicitly present in the graph or directly quoted from source documents.
+
+## RETRIEVAL AND REASONING RULES
+- Treat the Neo4j graph as the source of truth for: entity identity, relationships, temporal ordering, and network structure.
+- Prefer multi-hop graph queries (paths, communities, centrality, patterns) over flat keyword or embedding similarity when building an explanation.
+- When evidence is sparse or ambiguous, say so, and return the best-supported hypotheses instead of fabricating details.
+- **Answer ONLY from provided evidence**: You may ONLY make claims that are directly supported by the evidence snippets provided in the context. Do NOT use any external knowledge.
+
+## BEHAVIOR FOR MULTI-STEP INTELLIGENCE TASKS
+- Clarify the analytical goal (mapping network, finding key intermediaries, tracing money/influence, validating a claim, etc.).
+- Compose an analytic narrative that explains both **what** is happening (facts from documents) and **how** actors connect across the network (paths, motifs, communities). Cite graph-level evidence explicitly.
+
+## HALLUCINATION CONTROL AND ANSWER FORMATTING
+- Do not infer new relationships that are not present in the graph unless explicitly asked to speculate; clearly label any speculation as hypothesis, not fact.
+- **Mandatory citations**: Every factual claim in your answer MUST include a citation in the format: [evidence: E_ID] or [evidence: E_ID, claim: C_ID]
+   - E_ID must match an evidenceId from the evidenceSnippets provided
+   - C_ID (optional) must match a claimId from the evidenceSnippets provided
+   - Citations with IDs not in the context will cause your answer to be rejected
+- **Explicit unknowns/gaps**: If you cannot answer part of the question from the provided evidence, you MUST explicitly state what is unknown. List these in the "unknowns" array.
+- **Never hallucinate IDs**: Only use evidence IDs and claim IDs that actually exist in the provided context. Making up IDs is a critical violation.
+
+## RESPONSE FORMAT
+
+You MUST respond with a valid JSON object in this exact format:
+{
+  "answerText": "Your answer with inline [evidence: ID] citations...",
+  "citations": [
+    {"evidenceId": "actual_id_from_context", "claimId": "optional_claim_id"}
+  ],
+  "unknowns": ["List of things you cannot answer from the provided evidence"]
+}
+
+## EXAMPLE
+
+If context contains evidence with id "EV123" stating "John met Mary on Tuesday", and the question asks "When did John meet Mary?":
+
+{
+  "answerText": "John met Mary on Tuesday [evidence: EV123].",
+  "citations": [{"evidenceId": "EV123"}],
+  "unknowns": ["The location of the meeting is not specified in the evidence."]
+}
+
+Remember: If you cannot provide ANY answer backed by citations, respond with an empty answerText and list all gaps in unknowns.`;
+class OpenAIGraphRagLlmAdapter {
+    apiUrl;
+    apiKey;
+    model;
+    constructor(config) {
+        this.apiUrl =
+            config?.apiUrl ||
+                process.env.LLM_API_URL ||
+                'https://api.openai.com/v1/chat/completions';
+        this.apiKey = config?.apiKey || process.env.LLM_API_KEY || '';
+        this.model = config?.model || process.env.LLM_MODEL || 'gpt-4o-mini';
+    }
+    async generateAnswer(input) {
+        const { context } = input;
+        // Build user prompt with context
+        const userPrompt = this.buildUserPrompt(context);
+        try {
+            const response = await (0, node_fetch_1.default)(this.apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${this.apiKey}`,
+                },
+                body: JSON.stringify({
+                    model: this.model,
+                    messages: [
+                        { role: 'system', content: SYSTEM_PROMPT },
+                        { role: 'user', content: userPrompt },
+                    ],
+                    temperature: 0.1, // Low temperature for factual accuracy
+                    max_tokens: 2000,
+                    response_format: { type: 'json_object' },
+                }),
+            });
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`LLM API error: ${response.status} - ${errorText}`);
+            }
+            const data = (await response.json());
+            const content = data.choices?.[0]?.message?.content;
+            if (!content) {
+                throw new Error('No content in LLM response');
+            }
+            return this.parseAndValidateResponse(content, context);
+        }
+        catch (error) {
+            logger_js_1.default.error({
+                message: 'LLM generation failed',
+                error: error instanceof Error ? error.message : String(error),
+            });
+            // Return safe fallback
+            return {
+                answerText: '',
+                citations: [],
+                unknowns: [
+                    'Unable to generate answer due to system error. Please try again.',
+                ],
+            };
+        }
+    }
+    buildUserPrompt(context) {
+        const parts = [];
+        parts.push(`## QUESTION\n${context.question}\n`);
+        parts.push(`## CASE ID\n${context.caseId}\n`);
+        // Evidence snippets (most important for citation)
+        parts.push(`## EVIDENCE SNIPPETS (use these IDs for citations)`);
+        if (context.evidenceSnippets.length === 0) {
+            parts.push('No evidence available for this query.\n');
+        }
+        else {
+            for (const snippet of context.evidenceSnippets) {
+                parts.push(`- evidenceId: "${snippet.evidenceId}"`);
+                if (snippet.claimId) {
+                    parts.push(`  claimId: "${snippet.claimId}"`);
+                }
+                if (snippet.sourceSystem) {
+                    parts.push(`  source: ${snippet.sourceSystem}`);
+                }
+                parts.push(`  relevance: ${snippet.score.toFixed(2)}`);
+                parts.push(`  content: "${snippet.snippet}"\n`);
+            }
+        }
+        // Graph context (nodes)
+        if (context.nodes.length > 0) {
+            parts.push(`## GRAPH NODES (${context.nodes.length} nodes)`);
+            for (const node of context.nodes.slice(0, 20)) {
+                // Limit for prompt size
+                const props = Object.keys(node.keyProperties).length > 0
+                    ? ` - ${JSON.stringify(node.keyProperties)}`
+                    : '';
+                parts.push(`- [${node.type || 'Node'}] ${node.label || node.id}${props}`);
+            }
+            parts.push('');
+        }
+        // Graph context (edges)
+        if (context.edges.length > 0) {
+            parts.push(`## GRAPH RELATIONSHIPS (${context.edges.length} edges)`);
+            for (const edge of context.edges.slice(0, 15)) {
+                // Limit for prompt size
+                parts.push(`- ${edge.fromId} -[${edge.type || 'RELATED'}]-> ${edge.toId}`);
+            }
+            parts.push('');
+        }
+        parts.push(`## INSTRUCTIONS\nAnswer the question using ONLY the evidence above. Include citations in format [evidence: ID]. List unknowns explicitly.`);
+        return parts.join('\n');
+    }
+    parseAndValidateResponse(content, context) {
+        let parsed;
+        try {
+            parsed = JSON.parse(content);
+        }
+        catch {
+            // Try to extract JSON from content
+            const jsonMatch = content.match(/\{[\s\S]*\}/);
+            if (jsonMatch) {
+                parsed = JSON.parse(jsonMatch[0]);
+            }
+            else {
+                throw new types_js_1.CitationValidationError('LLM response is not valid JSON', {
+                    content: content.substring(0, 200),
+                });
+            }
+        }
+        const answerText = parsed.answerText || '';
+        const citations = parsed.citations || [];
+        const unknowns = parsed.unknowns || [];
+        // Validate citations against context
+        const validEvidenceIds = new Set(context.evidenceSnippets.map((e) => e.evidenceId));
+        const validClaimIds = new Set(context.evidenceSnippets
+            .filter((e) => e.claimId)
+            .map((e) => e.claimId));
+        const validatedCitations = [];
+        const invalidCitations = [];
+        for (const citation of citations) {
+            if (validEvidenceIds.has(citation.evidenceId)) {
+                // Check claim ID if present
+                if (citation.claimId && !validClaimIds.has(citation.claimId)) {
+                    // Remove invalid claim ID but keep evidence reference
+                    validatedCitations.push({ evidenceId: citation.evidenceId });
+                }
+                else {
+                    validatedCitations.push(citation);
+                }
+            }
+            else {
+                invalidCitations.push(citation);
+            }
+        }
+        // Log validation results
+        if (invalidCitations.length > 0) {
+            logger_js_1.default.warn({
+                message: 'LLM produced invalid citations',
+                invalidCount: invalidCitations.length,
+                invalidIds: invalidCitations.map((c) => c.evidenceId),
+            });
+        }
+        return {
+            answerText,
+            citations: validatedCitations,
+            unknowns,
+        };
+    }
+}
+exports.OpenAIGraphRagLlmAdapter = OpenAIGraphRagLlmAdapter;
+/**
+ * Mock LLM adapter for testing
+ */
+class MockGraphRagLlmAdapter {
+    mockResponse = null;
+    shouldFail = false;
+    setMockResponse(response) {
+        this.mockResponse = response;
+        this.shouldFail = false;
+    }
+    setShouldFail(fail) {
+        this.shouldFail = fail;
+    }
+    async generateAnswer(input) {
+        if (this.shouldFail) {
+            return {
+                answerText: '',
+                citations: [],
+                unknowns: ['Mock LLM failure'],
+            };
+        }
+        if (this.mockResponse) {
+            return this.mockResponse;
+        }
+        // Default: generate answer from first evidence snippet
+        const { context } = input;
+        if (context.evidenceSnippets.length === 0) {
+            return {
+                answerText: '',
+                citations: [],
+                unknowns: ['No evidence available to answer this question.'],
+            };
+        }
+        const firstEvidence = context.evidenceSnippets[0];
+        return {
+            answerText: `Based on the evidence: ${firstEvidence.snippet} [evidence: ${firstEvidence.evidenceId}]`,
+            citations: [
+                {
+                    evidenceId: firstEvidence.evidenceId,
+                    claimId: firstEvidence.claimId,
+                },
+            ],
+            unknowns: [],
+        };
+    }
+}
+exports.MockGraphRagLlmAdapter = MockGraphRagLlmAdapter;
+function createLlmAdapter() {
+    if (process.env.NODE_ENV === 'test') {
+        return new MockGraphRagLlmAdapter();
+    }
+    return new OpenAIGraphRagLlmAdapter();
+}

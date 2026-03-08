@@ -1,5 +1,6 @@
 from copy import deepcopy
 
+
 def perturb_tool_latency(scenario, multiplier):
     mutated = deepcopy(scenario)
     if "env" not in mutated:

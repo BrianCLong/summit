@@ -1,90 +1,85 @@
-const fs = require('fs');
-
-require('dotenv').config({ path: '.env.test' });
-
-process.env.TZ = process.env.TZ || 'UTC';
-process.env.LANG = process.env.LANG || 'en_US.UTF-8';
-process.env.LC_ALL = process.env.LC_ALL || 'en_US.UTF-8';
-
-if (!global.__TEST_SEED_LOGGED__) {
-  const testSeed = process.env.TEST_SEED || process.env.SEED;
-  console.info(`Running tests with seed: ${testSeed || 'random'}`);
-  global.__TEST_SEED_LOGGED__ = true;
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+require("@testing-library/jest-dom");
+require("jest-extended");
+// ============================================================================
+// TEST RUNTIME DETERMINISM
+// Ensures tests produce consistent results across OS/timezone/locale
+// ============================================================================
+// Force UTC timezone for all date operations
+if (typeof process !== 'undefined') {
+    process.env.TZ = 'UTC';
 }
-
-// Import jest-dom for extended matchers (toBeInTheDocument, toHaveTextContent, etc.)
-require('@testing-library/jest-dom');
-
-// Configure JSDOM environment for client tests
+// Deterministic locale for string comparisons and formatting
+if (typeof Intl !== 'undefined') {
+    // Store original for potential restoration
+    const OriginalDateTimeFormat = Intl.DateTimeFormat;
+    const OriginalNumberFormat = Intl.NumberFormat;
+    // Patch DateTimeFormat to default to en-US/UTC for consistency
+    Intl.DateTimeFormat = function (locales, options) {
+        const defaultOptions = {
+            timeZone: 'UTC',
+            ...options,
+        };
+        return new OriginalDateTimeFormat(locales || 'en-US', defaultOptions);
+    };
+    Object.setPrototypeOf(Intl.DateTimeFormat, OriginalDateTimeFormat);
+    Intl.DateTimeFormat.supportedLocalesOf = OriginalDateTimeFormat.supportedLocalesOf;
+}
+// Minimal shims for jsdom-based suites that expect browser-ish globals
+const globalObj = globalThis || global || window;
+Object.defineProperty(globalObj, 'crypto', {
+    value: { randomUUID: () => '00000000-0000-4000-8000-000000000000' },
+});
+Object.assign(globalObj, {
+    navigator: { clipboard: { writeText: jest.fn() } },
+});
+// Global test timeout and environment setup
+jest.setTimeout(30000);
+// Global environment variables for tests (Node.js environments)
+if (typeof process !== 'undefined') {
+    process.env.NODE_ENV = 'test';
+    process.env.DATABASE_URL = 'postgresql://test:test@localhost:5432/test_db';
+    process.env.REDIS_URL = 'redis://localhost:6379/0';
+    process.env.NEO4J_URI = 'bolt://localhost:7687';
+    process.env.NEO4J_USER = 'neo4j';
+    process.env.NEO4J_PASSWORD = 'test';
+}
+// Clear mocks between tests
+beforeEach(() => {
+    jest.clearAllMocks();
+    jest.clearAllTimers();
+});
+// Mock ResizeObserver for tests (browser environments)
+if (typeof window !== 'undefined' && !window.ResizeObserver) {
+    window.ResizeObserver = class MockResizeObserver {
+        observe() { }
+        unobserve() { }
+        disconnect() { }
+    };
+}
+// Mock IntersectionObserver for tests (browser environments)
+if (typeof window !== 'undefined' && !window.IntersectionObserver) {
+    window.IntersectionObserver = class MockIntersectionObserver {
+        constructor() { }
+        observe() { }
+        unobserve() { }
+        disconnect() { }
+    };
+}
+// Mock matchMedia for tests (browser environments)
 if (typeof window !== 'undefined') {
-  require('@testing-library/jest-dom');
-
-  Object.defineProperty(window, 'matchMedia', {
-    writable: true,
-    value: jest.fn().mockImplementation((query) => ({
-      matches: false,
-      media: query,
-      onchange: null,
-      addListener: jest.fn(),
-      removeListener: jest.fn(),
-      addEventListener: jest.fn(),
-      removeEventListener: jest.fn(),
-      dispatchEvent: jest.fn(),
-    })),
-  });
-}
-
-// Test quarantine functionality
-let q = [];
-try {
-  q = JSON.parse(fs.readFileSync('tests/.quarantine.json', 'utf8'));
-} catch {}
-
-const orig = globalThis.it || it;
-globalThis.it = Object.assign((name, fn, t) => {
-  if (q.some((s) => name.includes(s))) return orig.skip(name, fn, t);
-  return orig(name, fn, t);
-}, orig);
-
-try {
-  require.resolve('argon2');
-} catch (error) {
-  jest.mock(
-    'argon2',
-    () => {
-      const crypto = require('crypto');
-      const derive = async (input, salt) =>
-        new Promise((resolve, reject) => {
-          crypto.scrypt(input, salt, 32, (err, derivedKey) => {
-            if (err) {
-              reject(err);
-            } else {
-              resolve(derivedKey.toString('hex'));
-            }
-          });
-        });
-
-      const hash = jest.fn(async (input) => {
-        const salt = crypto.randomBytes(16).toString('hex');
-        const key = await derive(input, salt);
-        return `jest-scrypt$${salt}$${key}`;
-      });
-
-      const verify = jest.fn(async (stored, input) => {
-        if (typeof stored !== 'string' || !stored.startsWith('jest-scrypt$')) {
-          return false;
-        }
-        const [, salt, expected] = stored.split('$');
-        if (!salt || !expected) return false;
-        const key = await derive(input, salt);
-        return crypto.timingSafeEqual(
-          Buffer.from(key, 'hex'),
-          Buffer.from(expected, 'hex'),
-        );
-      });
-
-      return { hash, verify };
-    },
-    { virtual: true },
-  );
+    Object.defineProperty(window, 'matchMedia', {
+        writable: true,
+        value: jest.fn().mockImplementation((query) => ({
+            matches: false,
+            media: query,
+            onchange: null,
+            addListener: jest.fn(),
+            removeListener: jest.fn(),
+            addEventListener: jest.fn(),
+            removeEventListener: jest.fn(),
+            dispatchEvent: jest.fn(),
+        })),
+    });
 }

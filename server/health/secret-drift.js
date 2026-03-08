@@ -1,8 +1,11 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.getSecretDrift = void 0;
 // Placeholder for secret drift service
-export const getSecretDrift = async () => {
+const getSecretDrift = async () => {
     return {
         drift: 0.01,
         score: 99,
     };
 };
-//# sourceMappingURL=secret-drift.js.map
+exports.getSecretDrift = getSecretDrift;

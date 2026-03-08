@@ -1,0 +1,101 @@
+"use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.types = exports.integer = exports.isInt = exports.int = exports.session = exports.auth = exports.driver = void 0;
+const neo4jReal = __importStar(require("neo4j-driver"));
+const isMockEnabled = process.env.ZERO_FOOTPRINT !== 'false';
+// Mock for neo4j-driver
+const mockSession = () => ({
+    run: () => Promise.resolve({ records: [] }),
+    close: () => Promise.resolve(undefined),
+    beginTransaction: () => ({
+        run: () => Promise.resolve({ records: [] }),
+        commit: () => Promise.resolve(),
+        rollback: () => Promise.resolve(),
+    }),
+});
+const mockDriver = () => ({
+    session: () => mockSession(),
+    close: () => Promise.resolve(undefined),
+    verifyConnectivity: () => Promise.resolve(),
+});
+const neo4jMock = {
+    driver: () => mockDriver(),
+    auth: {
+        basic: () => ({ principal: '', credentials: '' }),
+        custom: () => ({}),
+    },
+    session: {
+        READ: 'READ',
+        WRITE: 'WRITE',
+    },
+    int: (value) => value,
+    isInt: () => false,
+    integer: {
+        inSafeRange: () => true,
+        toNumber: (v) => v,
+    },
+    types: {
+        Node: class {
+        },
+        Relationship: class {
+        },
+        Path: class {
+        },
+        Point: class {
+        },
+        Date: class {
+        },
+        DateTime: class {
+        },
+        Duration: class {
+        },
+        LocalDateTime: class {
+        },
+        LocalTime: class {
+        },
+        Time: class {
+        },
+    },
+};
+const neo4j = isMockEnabled ? neo4jMock : neo4jReal;
+exports.default = neo4j;
+exports.driver = neo4j.driver;
+exports.auth = neo4j.auth;
+exports.session = neo4j.session;
+exports.int = neo4j.int;
+exports.isInt = neo4j.isInt;
+exports.integer = neo4j.integer;
+exports.types = neo4j.types;

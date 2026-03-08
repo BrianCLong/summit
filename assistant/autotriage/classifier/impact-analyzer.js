@@ -1,8 +1,11 @@
+"use strict";
 /**
  * Impact analyzer
  * Analyzes the impact level of an issue (blocker/high/medium/low)
  */
-export function analyzeImpact(item, impactRules) {
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.analyzeImpact = analyzeImpact;
+function analyzeImpact(item, impactRules) {
     // If already has impact from source, use it as baseline
     const baselineImpact = item.impact;
     const text = `${item.title} ${item.description}`.toLowerCase();
@@ -55,4 +58,3 @@ function getBaselineScore(impact) {
             return 25;
     }
 }
-//# sourceMappingURL=impact-analyzer.js.map

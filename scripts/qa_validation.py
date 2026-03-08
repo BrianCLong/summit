@@ -1,7 +1,8 @@
 # scripts/qa_validation.py
 
-from summit.core.agents.qa_agent import QAAgent
 from summit.core.agents.extraction_agent import ExtractionAgent
+from summit.core.agents.qa_agent import QAAgent
+
 
 def main():
     qa_agent = QAAgent()

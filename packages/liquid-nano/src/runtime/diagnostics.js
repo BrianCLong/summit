@@ -1,5 +1,9 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.RingDiagnosticsTimeline = void 0;
+exports.createDiagnosticsTimeline = createDiagnosticsTimeline;
 const MAX_EVENTS = 500;
-export class RingDiagnosticsTimeline {
+class RingDiagnosticsTimeline {
     events = [];
     push(entry) {
         this.events.push(entry);
@@ -27,6 +31,7 @@ export class RingDiagnosticsTimeline {
         };
     }
 }
-export function createDiagnosticsTimeline() {
+exports.RingDiagnosticsTimeline = RingDiagnosticsTimeline;
+function createDiagnosticsTimeline() {
     return new RingDiagnosticsTimeline();
 }

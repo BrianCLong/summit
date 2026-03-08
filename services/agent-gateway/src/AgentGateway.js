@@ -1,0 +1,536 @@
+"use strict";
+// @ts-nocheck
+/**
+ * Agent Gateway Service
+ * AGENT-2: Gateway Foundation - All agent requests flow through here
+ * AGENT-5: Operation Mode enforcement
+ * AGENT-6: CLI & Orchestrator integration
+ */
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.AgentGateway = void 0;
+const crypto_1 = require("crypto");
+class AgentGateway {
+    db;
+    agentService;
+    policyEnforcer;
+    quotaManager;
+    approvalService;
+    observability;
+    config;
+    constructor(db, agentService, policyEnforcer, quotaManager, approvalService, observability, config) {
+        this.db = db;
+        this.agentService = agentService;
+        this.policyEnforcer = policyEnforcer;
+        this.quotaManager = quotaManager;
+        this.approvalService = approvalService;
+        this.observability = observability;
+        this.config = config;
+    }
+    /**
+     * Execute an agent request
+     * This is the main entry point for all agent operations
+     */
+    async executeRequest(request, authToken) {
+        const startTime = Date.now();
+        let agent = null;
+        let run = null;
+        let action = null;
+        try {
+            // =====================================================================
+            // AGENT-1d: Authenticate the agent
+            // =====================================================================
+            agent = await this.agentService.authenticateAgent(authToken);
+            if (!agent) {
+                throw new Error('Authentication failed: Invalid credentials');
+            }
+            // Check agent status
+            if (agent.status !== 'active') {
+                throw new Error(`Agent is not active. Status: ${agent.status}`);
+            }
+            // =====================================================================
+            // AGENT-4: Validate tenant/project scoping
+            // =====================================================================
+            this.validateScopes(agent, request.tenantId, request.projectId);
+            // =====================================================================
+            // AGENT-5: Determine operation mode
+            // =====================================================================
+            const operationMode = this.determineOperationMode(agent, request);
+            // =====================================================================
+            // AGENT-8: Check quotas
+            // =====================================================================
+            await this.quotaManager.checkQuotas(agent.id);
+            // =====================================================================
+            // Create agent run
+            // =====================================================================
+            run = await this.createRun(agent, request, operationMode);
+            // =====================================================================
+            // AGENT-7: Observability - Start tracing
+            // =====================================================================
+            const { traceId, spanId } = await this.observability.startTrace(agent, run);
+            run.traceId = traceId;
+            run.spanId = spanId;
+            // =====================================================================
+            // Assess risk and create action
+            // =====================================================================
+            const riskAssessment = this.assessRisk(request.action, agent, request.tenantId);
+            action = await this.createAction(run, request.action, riskAssessment);
+            // =====================================================================
+            // AGENT-3: Policy enforcement
+            // =====================================================================
+            const policyDecision = await this.policyEnforcer.evaluate({
+                agent,
+                action,
+                tenantId: request.tenantId,
+                projectId: request.projectId,
+                operationMode,
+            });
+            action.policyDecision = policyDecision;
+            // Handle policy decision
+            if (!policyDecision.allowed) {
+                action.authorizationStatus = 'denied';
+                action.denialReason = policyDecision.reason;
+                await this.updateAction(action);
+                return this.buildResponse(run, action, operationMode, {
+                    success: false,
+                    error: {
+                        code: 'POLICY_DENIED',
+                        message: policyDecision.reason,
+                    },
+                });
+            }
+            // =====================================================================
+            // AGENT-9: Check if approval required
+            // =====================================================================
+            if (this.requiresApproval(action, operationMode)) {
+                action.requiresApproval = true;
+                action.authorizationStatus = 'requires_approval';
+                const approval = await this.approvalService.createApproval({
+                    agentId: agent.id,
+                    runId: run.id,
+                    actionId: action.id,
+                    summary: `${agent.name} requests to ${request.action.type} ${request.action.target || 'resource'}`,
+                    details: {
+                        action: request.action,
+                        riskLevel: action.riskLevel,
+                        riskFactors: action.riskFactors,
+                    },
+                    riskLevel: action.riskLevel,
+                    assignedTo: this.config.defaultApprovalAssignees,
+                    expiresInMinutes: this.config.defaultApprovalExpiryMinutes,
+                });
+                action.approvalId = approval.id;
+                await this.updateAction(action);
+                return this.buildResponse(run, action, operationMode, {
+                    success: false,
+                    approval: {
+                        id: approval.id,
+                        status: 'pending',
+                        expiresAt: approval.expiresAt,
+                    },
+                });
+            }
+            // =====================================================================
+            // AGENT-5: Execute based on operation mode
+            // =====================================================================
+            let result;
+            if (operationMode === 'SIMULATION') {
+                // SIMULATION: Don't execute, just return what would happen
+                result = {
+                    message: `Would execute ${request.action.type} on ${request.action.target || 'resource'}`,
+                    wouldPerform: request.action,
+                    estimatedImpact: riskAssessment.riskFactors.map(f => f.description),
+                };
+                action.executed = false;
+                action.authorizationStatus = 'allowed';
+            }
+            else if (operationMode === 'DRY_RUN') {
+                // DRY_RUN: Limited execution (planning, validation, etc.)
+                result = await this.executeDryRun(request, agent);
+                action.executed = false;
+                action.authorizationStatus = 'allowed';
+            }
+            else {
+                // ENFORCED: Real execution
+                result = await this.executeEnforced(request, agent);
+                action.executed = true;
+                action.executedAt = new Date();
+                action.authorizationStatus = 'allowed';
+            }
+            action.executionResult = result;
+            await this.updateAction(action);
+            // =====================================================================
+            // Update run and quotas
+            // =====================================================================
+            run.status = 'completed';
+            run.completedAt = new Date();
+            run.durationMs = Date.now() - startTime;
+            run.actionsExecuted = [action];
+            await this.updateRun(run);
+            await this.quotaManager.recordUsage(agent.id, run);
+            // =====================================================================
+            // AGENT-7: Complete tracing
+            // =====================================================================
+            await this.observability.endTrace(traceId, spanId, { status: 'success' });
+            return this.buildResponse(run, action, operationMode, {
+                success: true,
+                result,
+            });
+        }
+        catch (error) {
+            const errorMessage = error.message || 'Unknown error';
+            // Update run if created
+            if (run) {
+                run.status = 'failed';
+                run.completedAt = new Date();
+                run.durationMs = Date.now() - startTime;
+                run.error = {
+                    code: error.code || 'EXECUTION_ERROR',
+                    message: errorMessage,
+                    stack: error.stack,
+                };
+                await this.updateRun(run);
+            }
+            // Update action if created
+            if (action) {
+                action.executionError = errorMessage;
+                await this.updateAction(action);
+            }
+            // End trace
+            if (run?.traceId && run?.spanId) {
+                await this.observability.endTrace(run.traceId, run.spanId, {
+                    status: 'error',
+                    error: errorMessage,
+                });
+            }
+            return this.buildResponse(run, action, request.operationMode || this.config.defaultOperationMode, {
+                success: false,
+                error: {
+                    code: error.code || 'EXECUTION_ERROR',
+                    message: errorMessage,
+                    details: error.details,
+                },
+            });
+        }
+    }
+    /**
+     * AGENT-4: Validate that agent has access to requested tenant/project
+     */
+    validateScopes(agent, tenantId, projectId) {
+        // Check tenant scope
+        if (agent.tenantScopes.length > 0 && !agent.tenantScopes.includes(tenantId)) {
+            throw {
+                code: 'SCOPE_VIOLATION',
+                message: `Agent ${agent.name} does not have access to tenant ${tenantId}`,
+                details: { agentId: agent.id, tenantId, allowedTenants: agent.tenantScopes },
+            };
+        }
+        // Check project scope if specified
+        if (projectId && agent.projectScopes.length > 0 && !agent.projectScopes.includes(projectId)) {
+            throw {
+                code: 'SCOPE_VIOLATION',
+                message: `Agent ${agent.name} does not have access to project ${projectId}`,
+                details: { agentId: agent.id, projectId, allowedProjects: agent.projectScopes },
+            };
+        }
+    }
+    /**
+     * AGENT-5: Determine operation mode for this request
+     */
+    determineOperationMode(agent, request) {
+        // Config can force SIMULATION mode
+        if (this.config.forceSimulationMode) {
+            return 'SIMULATION';
+        }
+        // Request can override if allowed
+        if (request.operationMode && this.config.allowModeOverride) {
+            return request.operationMode;
+        }
+        // Otherwise use default
+        return this.config.defaultOperationMode;
+    }
+    /**
+     * Assess risk level of an action
+     */
+    assessRisk(action, agent, tenantId) {
+        const riskFactors = [];
+        // High-risk action types
+        const highRiskActions = ['delete', 'config:modify', 'user:impersonate'];
+        const criticalRiskActions = ['user:impersonate'];
+        if (criticalRiskActions.includes(action.type)) {
+            riskFactors.push({
+                factor: 'critical_action_type',
+                severity: 'critical',
+                description: `Action type ${action.type} is classified as critical risk`,
+            });
+        }
+        else if (highRiskActions.includes(action.type)) {
+            riskFactors.push({
+                factor: 'high_risk_action_type',
+                severity: 'high',
+                description: `Action type ${action.type} is classified as high risk`,
+            });
+        }
+        // Check if agent is certified
+        if (!agent.isCertified) {
+            riskFactors.push({
+                factor: 'uncertified_agent',
+                severity: 'medium',
+                description: 'Agent has not been certified',
+            });
+        }
+        // Check if certification expired
+        if (agent.isCertified && agent.certificationExpiresAt && agent.certificationExpiresAt < new Date()) {
+            riskFactors.push({
+                factor: 'expired_certification',
+                severity: 'high',
+                description: 'Agent certification has expired',
+            });
+        }
+        // Determine overall risk level
+        let riskLevel = 'low';
+        if (riskFactors.some(f => f.severity === 'critical')) {
+            riskLevel = 'critical';
+        }
+        else if (riskFactors.some(f => f.severity === 'high')) {
+            riskLevel = 'high';
+        }
+        else if (riskFactors.some(f => f.severity === 'medium')) {
+            riskLevel = 'medium';
+        }
+        return { riskLevel, riskFactors };
+    }
+    /**
+     * AGENT-9: Check if action requires approval
+     */
+    requiresApproval(action, operationMode) {
+        // SIMULATION and DRY_RUN don't require approval
+        if (operationMode !== 'ENFORCED') {
+            return false;
+        }
+        // Check config
+        if (action.riskLevel === 'critical' || action.riskLevel === 'high') {
+            return true;
+        }
+        return false;
+    }
+    /**
+     * Execute in DRY_RUN mode (planning, validation, etc.)
+     */
+    async executeDryRun(request, agent) {
+        // For DRY_RUN, we can do planning, validation, etc.
+        // But no actual data modifications
+        return {
+            message: 'Dry run completed',
+            action: request.action,
+            validationPassed: true,
+            estimatedDuration: '~1s',
+        };
+    }
+    /**
+     * AGENT-6: Execute in ENFORCED mode (real execution)
+     */
+    async executeEnforced(request, agent) {
+        // Route to appropriate handler based on action type
+        switch (request.action.type) {
+            case 'read':
+                return this.executeRead(request);
+            case 'write':
+                return this.executeWrite(request);
+            case 'pipeline:trigger':
+                return this.executePipelineTrigger(request);
+            case 'execute':
+                return this.executeCLICommand(request);
+            default:
+                throw new Error(`Unsupported action type: ${request.action.type}`);
+        }
+    }
+    /**
+     * AGENT-6: Execute CLI command (wrapper for summit CLI)
+     */
+    async executeCLICommand(request) {
+        // This would integrate with the actual Summit CLI
+        // For now, return a placeholder
+        return {
+            message: 'CLI command executed',
+            command: request.action.payload?.command,
+            result: 'success',
+        };
+    }
+    /**
+     * AGENT-6: Trigger pipeline (wrapper for orchestrator)
+     */
+    async executePipelineTrigger(request) {
+        // This would integrate with the pipeline orchestrator
+        // For now, return a placeholder
+        return {
+            message: 'Pipeline triggered',
+            pipelineId: request.action.target,
+            runId: (0, crypto_1.randomUUID)(),
+            status: 'running',
+        };
+    }
+    /**
+     * Execute read operation
+     */
+    async executeRead(request) {
+        // Implement read logic
+        return {
+            message: 'Read operation completed',
+            target: request.action.target,
+            data: {},
+        };
+    }
+    /**
+     * Execute write operation
+     */
+    async executeWrite(request) {
+        // Implement write logic
+        return {
+            message: 'Write operation completed',
+            target: request.action.target,
+            data: request.action.payload,
+        };
+    }
+    // =========================================================================
+    // Database operations
+    // =========================================================================
+    async createRun(agent, request, operationMode) {
+        const result = await this.db.query(`INSERT INTO agent_runs (
+        agent_id, tenant_id, project_id, operation_mode,
+        trigger_type, trigger_source, status
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+      RETURNING *`, [
+            agent.id,
+            request.tenantId,
+            request.projectId,
+            operationMode,
+            'api',
+            JSON.stringify(request.metadata || {}),
+            'running',
+        ]);
+        return this.mapRowToRun(result.rows[0]);
+    }
+    async updateRun(run) {
+        await this.db.query(`UPDATE agent_runs
+       SET status = $1, completed_at = $2, duration_ms = $3,
+           actions_proposed = $4, actions_executed = $5, actions_denied = $6,
+           outcome = $7, error = $8, trace_id = $9, span_id = $10
+       WHERE id = $11`, [
+            run.status,
+            run.completedAt,
+            run.durationMs,
+            JSON.stringify(run.actionsProposed || []),
+            JSON.stringify(run.actionsExecuted || []),
+            JSON.stringify(run.actionsDenied || []),
+            JSON.stringify(run.outcome || {}),
+            run.error ? JSON.stringify(run.error) : null,
+            run.traceId,
+            run.spanId,
+            run.id,
+        ]);
+    }
+    async createAction(run, actionRequest, riskAssessment) {
+        const result = await this.db.query(`INSERT INTO agent_actions (
+        run_id, agent_id, action_type, action_target, action_payload,
+        risk_level, risk_factors, authorization_status
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      RETURNING *`, [
+            run.id,
+            run.agentId,
+            actionRequest.type,
+            actionRequest.target,
+            JSON.stringify(actionRequest.payload || {}),
+            riskAssessment.riskLevel,
+            JSON.stringify(riskAssessment.riskFactors),
+            'pending',
+        ]);
+        return this.mapRowToAction(result.rows[0]);
+    }
+    async updateAction(action) {
+        await this.db.query(`UPDATE agent_actions
+       SET authorization_status = $1, denial_reason = $2, requires_approval = $3,
+           approval_id = $4, executed = $5, execution_result = $6,
+           execution_error = $7, executed_at = $8, policy_decision = $9
+       WHERE id = $10`, [
+            action.authorizationStatus,
+            action.denialReason,
+            action.requiresApproval,
+            action.approvalId,
+            action.executed,
+            action.executionResult ? JSON.stringify(action.executionResult) : null,
+            action.executionError,
+            action.executedAt,
+            action.policyDecision ? JSON.stringify(action.policyDecision) : null,
+            action.id,
+        ]);
+    }
+    buildResponse(run, action, operationMode, data) {
+        return {
+            success: data.success,
+            runId: run?.id || 'unknown',
+            operationMode,
+            action: {
+                id: action?.id || 'unknown',
+                type: action?.actionType || 'unknown',
+                authorizationStatus: action?.authorizationStatus || 'denied',
+                executed: action?.executed || false,
+            },
+            result: data.result,
+            error: data.error,
+            approval: data.approval,
+        };
+    }
+    // =========================================================================
+    // Mappers
+    // =========================================================================
+    mapRowToRun(row) {
+        return {
+            id: row.id,
+            agentId: row.agent_id,
+            tenantId: row.tenant_id,
+            projectId: row.project_id,
+            operationMode: row.operation_mode,
+            triggerType: row.trigger_type,
+            triggerSource: JSON.parse(row.trigger_source || '{}'),
+            status: row.status,
+            startedAt: row.started_at,
+            completedAt: row.completed_at,
+            actionsProposed: JSON.parse(row.actions_proposed || '[]'),
+            actionsExecuted: JSON.parse(row.actions_executed || '[]'),
+            actionsDenied: JSON.parse(row.actions_denied || '[]'),
+            outcome: JSON.parse(row.outcome || '{}'),
+            error: row.error ? JSON.parse(row.error) : undefined,
+            traceId: row.trace_id,
+            spanId: row.span_id,
+            durationMs: row.duration_ms,
+            tokensConsumed: row.tokens_consumed,
+            apiCallsMade: row.api_calls_made || 0,
+            createdAt: row.created_at,
+        };
+    }
+    mapRowToAction(row) {
+        return {
+            id: row.id,
+            runId: row.run_id,
+            agentId: row.agent_id,
+            actionType: row.action_type,
+            actionTarget: row.action_target,
+            actionPayload: JSON.parse(row.action_payload || '{}'),
+            riskLevel: row.risk_level,
+            riskFactors: JSON.parse(row.risk_factors || '[]'),
+            policyDecision: row.policy_decision ? JSON.parse(row.policy_decision) : undefined,
+            authorizationStatus: row.authorization_status,
+            denialReason: row.denial_reason,
+            requiresApproval: row.requires_approval || false,
+            approvalId: row.approval_id,
+            approvedBy: row.approved_by,
+            approvedAt: row.approved_at,
+            executed: row.executed || false,
+            executionResult: row.execution_result ? JSON.parse(row.execution_result) : undefined,
+            executionError: row.execution_error,
+            executedAt: row.executed_at,
+            createdAt: row.created_at,
+        };
+    }
+}
+exports.AgentGateway = AgentGateway;

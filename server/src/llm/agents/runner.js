@@ -1,0 +1,137 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.AgentRunner = void 0;
+const logger_js_1 = require("../../config/logger.js");
+const metrics_js_1 = require("../../lib/observability/metrics.js");
+class AgentRunner {
+    orchestrator;
+    tools;
+    constructor(orchestrator, tools) {
+        this.orchestrator = orchestrator;
+        this.tools = tools;
+    }
+    async run(tenantId, task, maxSteps = 5) {
+        const startTime = Date.now();
+        const correlationId = logger_js_1.correlationStorage.getStore()?.get('correlationId') || 'unknown';
+        logger_js_1.logger.info({
+            event: 'AgentExecutionStarted',
+            tenantId,
+            task: task.substring(0, 50),
+            correlationId
+        }, 'Agent execution started');
+        // Increment total executions
+        // Note: We need to define this metric in observability/metrics.ts first or cast to any if we are lazy,
+        // but the plan is to add it properly. Assuming it exists now.
+        metrics_js_1.metrics.agentExecutionsTotal?.inc({ tenant: tenantId, status: 'started' });
+        const steps = [];
+        const messages = [
+            {
+                role: 'system',
+                content: 'You are a helpful agent. You can use tools to answer the user request.'
+            },
+            { role: 'user', content: task }
+        ];
+        let finalAnswer = '';
+        const availableTools = this.tools.getDefinitions();
+        try {
+            for (let i = 0; i < maxSteps; i++) {
+                // 1. LLM Call
+                const stepStartTime = Date.now();
+                const response = await this.orchestrator.chat({
+                    tenantId,
+                    purpose: 'agent',
+                    riskLevel: 'medium',
+                    messages,
+                    tools: availableTools
+                });
+                // Log LLM step
+                logger_js_1.logger.info({
+                    event: 'AgentStep',
+                    stepType: 'llm',
+                    durationMs: Date.now() - stepStartTime,
+                    correlationId
+                }, 'Agent LLM step completed');
+                // 2. Process Result
+                if (response.content) {
+                    messages.push({ role: 'assistant', content: response.content });
+                }
+                if (response.toolCalls && response.toolCalls.length > 0) {
+                    // It wants to call tools
+                    // We must add the assistant message WITH toolCalls to history so the provider can format it correctly
+                    // If response.content was null, we still need an assistant message
+                    if (!response.content) {
+                        messages.push({
+                            role: 'assistant',
+                            content: null,
+                            toolCalls: response.toolCalls
+                        });
+                    }
+                    else {
+                        // If we already pushed content, update that message (last one) to include toolCalls
+                        const lastMsg = messages[messages.length - 1];
+                        if (lastMsg.role === 'assistant') {
+                            lastMsg.toolCalls = response.toolCalls;
+                        }
+                    }
+                    for (const call of response.toolCalls) {
+                        steps.push({
+                            type: 'tool_call',
+                            description: `Calling ${call.toolName}`,
+                            toolCall: call
+                        });
+                        try {
+                            const result = await this.tools.execute(call.toolName, call.args, { tenantId });
+                            steps.push({
+                                type: 'decision',
+                                description: `Tool ${call.toolName} returned result`,
+                                toolResult: result
+                            });
+                            // Add Tool Result Message
+                            messages.push({
+                                role: 'tool',
+                                content: JSON.stringify(result),
+                                toolCallId: call.id
+                            });
+                        }
+                        catch (e) {
+                            messages.push({
+                                role: 'tool',
+                                content: `Error: ${e.message}`,
+                                toolCallId: call.id
+                            });
+                        }
+                    }
+                }
+                else {
+                    // No tool calls, we are done
+                    finalAnswer = response.content || '';
+                    break;
+                }
+            }
+            const duration = (Date.now() - startTime) / 1000;
+            logger_js_1.logger.info({
+                event: 'AgentExecutionCompleted',
+                outcome: 'success',
+                durationMs: Date.now() - startTime,
+                stepsCount: steps.length,
+                correlationId
+            }, 'Agent execution completed successfully');
+            metrics_js_1.metrics.agentExecutionsTotal?.inc({ tenant: tenantId, status: 'success' });
+            metrics_js_1.metrics.agentExecutionDuration?.observe({ tenant: tenantId, status: 'success' }, duration);
+            return { finalAnswer, steps };
+        }
+        catch (error) {
+            const duration = (Date.now() - startTime) / 1000;
+            logger_js_1.logger.error({
+                event: 'AgentExecutionFailed',
+                error: error.message,
+                durationMs: Date.now() - startTime,
+                correlationId
+            }, 'Agent execution failed');
+            metrics_js_1.metrics.agentExecutionsTotal?.inc({ tenant: tenantId, status: 'failure' });
+            metrics_js_1.metrics.agentExecutionDuration?.observe({ tenant: tenantId, status: 'failure' }, duration);
+            throw error;
+        }
+    }
+}
+exports.AgentRunner = AgentRunner;

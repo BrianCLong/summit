@@ -1,43 +1,33 @@
-import { jsx as _jsx, jsxs as _jsxs } from 'react/jsx-runtime';
-import { getMaestroConfig } from '../config';
-export default function SLOPanel({ service, env }) {
-  const cfg = getMaestroConfig();
-  const base = cfg.grafanaBase?.replace(/\/$/, '');
-  const sloUid = cfg.grafanaDashboards?.slo || 'maestro-slo';
-  const url = base
-    ? `${base}/d/${encodeURIComponent(sloUid)}?var-service=${encodeURIComponent(service || 'all')}&var-env=${encodeURIComponent(env || 'prod')}`
-    : undefined;
-  return _jsxs('section', {
-    className: 'rounded border bg-white p-3',
-    children: [
-      _jsxs('div', {
-        className: 'mb-2 flex items-center justify-between',
-        children: [
-          _jsx('h3', {
-            className: 'text-sm font-semibold text-slate-700',
-            children: 'SLOs & Burn Rate',
-          }),
-          url &&
-            _jsx('a', {
-              className: 'text-xs text-indigo-700 hover:underline',
-              href: url,
-              target: '_blank',
-              rel: 'noreferrer',
-              children: 'Open in Grafana',
-            }),
-        ],
-      }),
-      _jsx('div', {
-        className: 'text-sm text-slate-600',
-        children:
-          'Projected breach in 34m (burn 3.2\u00D7). Auto\u2011rollback engaged at 4\u00D7 or by operator.',
-      }),
-      !url &&
-        _jsx('div', {
-          className: 'mt-2 text-xs text-slate-500',
-          children:
-            'Configure window.__MAESTRO_CFG__.grafanaBase to enable deep links.',
-        }),
-    ],
-  });
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.default = SLOPanel;
+const react_1 = __importDefault(require("react"));
+const config_1 = require("../config");
+function SLOPanel({ service, env, }) {
+    const cfg = (0, config_1.getMaestroConfig)();
+    const base = cfg.grafanaBase?.replace(/\/$/, '');
+    const sloUid = cfg.grafanaDashboards?.slo || 'maestro-slo';
+    const url = base
+        ? `${base}/d/${encodeURIComponent(sloUid)}?var-service=${encodeURIComponent(service || 'all')}&var-env=${encodeURIComponent(env || 'prod')}`
+        : undefined;
+    return (<section className="rounded border bg-white p-3">
+      <div className="mb-2 flex items-center justify-between">
+        <h3 className="text-sm font-semibold text-slate-700">
+          SLOs & Burn Rate
+        </h3>
+        {url && (<a className="text-xs text-indigo-700 hover:underline" href={url} target="_blank" rel="noreferrer">
+            Open in Grafana
+          </a>)}
+      </div>
+      <div className="text-sm text-slate-600">
+        Projected breach in 34m (burn 3.2×). Auto‑rollback engaged at 4× or by
+        operator.
+      </div>
+      {!url && (<div className="mt-2 text-xs text-slate-500">
+          Configure window.__MAESTRO_CFG__.grafanaBase to enable deep links.
+        </div>)}
+    </section>);
 }

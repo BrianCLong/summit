@@ -1,5 +1,8 @@
-import { est } from './estimator';
-export function planPR(changed) {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.planPR = planPR;
+const estimator_1 = require("./estimator");
+function planPR(changed) {
     const build = {
         id: 'build',
         kind: 'build',
@@ -12,7 +15,7 @@ export function planPR(changed) {
         id: `test-${i}`,
         kind: 'test',
         files,
-        estSec: est(files),
+        estSec: (0, estimator_1.est)(files),
         needs: ['build'],
         caps: ['cpu', 'linux'],
         priority: 'hot',

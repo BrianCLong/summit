@@ -1,8 +1,15 @@
-import { createDiagnosticsTimeline, RingDiagnosticsTimeline } from './diagnostics.js';
-import { createLogger, StructuredConsoleLogger } from './logger.js';
-import { createMetricsRegistry, InMemoryMetricsRegistry } from './metrics.js';
-import { loadConfig } from './config.js';
-export class LiquidNanoRuntime {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.StructuredConsoleLogger = exports.RingDiagnosticsTimeline = exports.InMemoryMetricsRegistry = exports.LiquidNanoRuntime = void 0;
+exports.createRuntime = createRuntime;
+const diagnostics_js_1 = require("./diagnostics.js");
+Object.defineProperty(exports, "RingDiagnosticsTimeline", { enumerable: true, get: function () { return diagnostics_js_1.RingDiagnosticsTimeline; } });
+const logger_js_1 = require("./logger.js");
+Object.defineProperty(exports, "StructuredConsoleLogger", { enumerable: true, get: function () { return logger_js_1.StructuredConsoleLogger; } });
+const metrics_js_1 = require("./metrics.js");
+Object.defineProperty(exports, "InMemoryMetricsRegistry", { enumerable: true, get: function () { return metrics_js_1.InMemoryMetricsRegistry; } });
+const config_js_1 = require("./config.js");
+class LiquidNanoRuntime {
     config;
     logger;
     metrics;
@@ -10,10 +17,10 @@ export class LiquidNanoRuntime {
     plugins = new Map();
     started = false;
     constructor(options = {}) {
-        this.config = options.config ?? loadConfig();
-        this.logger = options.logger ?? createLogger(`runtime:${this.config.id}`);
-        this.metrics = options.metrics ?? createMetricsRegistry();
-        this.diagnostics = options.diagnostics ?? createDiagnosticsTimeline();
+        this.config = options.config ?? (0, config_js_1.loadConfig)();
+        this.logger = options.logger ?? (0, logger_js_1.createLogger)(`runtime:${this.config.id}`);
+        this.metrics = options.metrics ?? (0, metrics_js_1.createMetricsRegistry)();
+        this.diagnostics = options.diagnostics ?? (0, diagnostics_js_1.createDiagnosticsTimeline)();
     }
     get context() {
         return {
@@ -112,7 +119,7 @@ export class LiquidNanoRuntime {
         return this.metrics.snapshot();
     }
 }
-export function createRuntime(options = {}) {
+exports.LiquidNanoRuntime = LiquidNanoRuntime;
+function createRuntime(options = {}) {
     return new LiquidNanoRuntime(options);
 }
-export { InMemoryMetricsRegistry, RingDiagnosticsTimeline, StructuredConsoleLogger };

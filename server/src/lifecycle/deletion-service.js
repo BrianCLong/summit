@@ -1,0 +1,94 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.DeletionService = void 0;
+const postgres_js_1 = require("../db/postgres.js");
+const logger_js_1 = __importDefault(require("../config/logger.js"));
+const legal_hold_js_1 = require("./legal-hold.js");
+const evidence_js_1 = require("./evidence.js");
+const logger = logger_js_1.default.child({ name: 'deletion-service' });
+class DeletionService {
+    static instance;
+    constructor() { }
+    static getInstance() {
+        if (!DeletionService.instance) {
+            DeletionService.instance = new DeletionService();
+        }
+        return DeletionService.instance;
+    }
+    /**
+     * Hard deletes a tenant and all associated data.
+     * This is a destructive operation and should be used with caution.
+     *
+     * @param tenantId The ID of the tenant to delete.
+     */
+    async hardDeleteTenant(tenantId) {
+        logger.info({ tenantId }, 'Starting hard deletion of tenant');
+        const pool = (0, postgres_js_1.getPostgresPool)();
+        // Tables to clean up, in order of dependency (leafs first)
+        const tables = [
+            'maestro.audit_access_logs',
+            'audit_logs',
+            'provenance_records',
+            'user_sessions',
+            'runs',
+            'analysis_results',
+            'search_analytics',
+            'risk_scores',
+            'masint_signals',
+            'maestro.case_state_history',
+            'maestro.cases',
+            'investigations',
+            'users',
+            'tenants'
+        ];
+        await pool.withTransaction(async (client) => {
+            // Check legal hold
+            const isHeld = await legal_hold_js_1.LegalHoldManager.getInstance().isUnderHold(tenantId);
+            if (isHeld) {
+                const msg = `Tenant ${tenantId} is under active legal hold. Deletion aborted.`;
+                logger.warn({ tenantId }, msg);
+                throw new Error(msg);
+            }
+            for (const table of tables) {
+                // Handle schema prefix if present
+                const tableName = table.includes('.') ? table : `public.${table}`;
+                const [schema, name] = tableName.split('.');
+                try {
+                    const query = `DELETE FROM "${schema}"."${name}" WHERE tenant_id = $1`;
+                    await client.query(query, [tenantId]);
+                    logger.debug({ table: tableName, tenantId }, 'Deleted records for tenant');
+                }
+                catch (error) {
+                    // Ignore if table doesn't exist or column doesn't exist
+                    if (error.code === '42P01' || error.code === '42703') {
+                        logger.warn({ table: tableName, error: error.message }, 'Skipping table during tenant deletion');
+                    }
+                    else {
+                        throw error;
+                    }
+                }
+            }
+            // Log the final deletion event
+            logger.info({ tenantId }, 'Tenant hard deletion completed');
+            await evidence_js_1.LifecycleEvidence.getInstance().recordEvent('DELETION_COMPLETED', tenantId, { type: 'tenant_hard_delete' }, tenantId);
+        });
+    }
+    /**
+     * Deletes a user and their PII.
+     */
+    async deleteUser(userId, tenantId) {
+        logger.info({ userId, tenantId }, 'Starting user deletion');
+        const pool = (0, postgres_js_1.getPostgresPool)();
+        await pool.withTransaction(async (client) => {
+            // Delete sessions
+            await client.query('DELETE FROM user_sessions WHERE user_id = $1', [userId]);
+            // Anonymize or delete from users table
+            await client.query('DELETE FROM users WHERE id = $1 AND tenant_id = $2', [userId, tenantId]);
+            logger.info({ userId, tenantId }, 'User deleted');
+        });
+    }
+}
+exports.DeletionService = DeletionService;

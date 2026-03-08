@@ -23,7 +23,7 @@ export interface ResolverPerformanceMetric {
   returnType?: string;
 }
 
-export interface N+1QueryDetection {
+export interface NPlusOneQueryDetection {
   fieldName: string;
   typeName: string;
   occurrences: number;
@@ -36,7 +36,7 @@ export interface PerformanceReport {
   totalExecutionTime: number;
   resolverMetrics: ResolverPerformanceMetric[];
   slowResolvers: ResolverPerformanceMetric[];
-  nPlusOneQueries: N+1QueryDetection[];
+  nPlusOneQueries: NPlusOneQueryDetection[];
   queryComplexity?: number;
 }
 
@@ -111,8 +111,8 @@ export class PerformanceMonitor {
   /**
    * Detect N+1 queries
    */
-  private detectNPlusOneQueries(): N+1QueryDetection[] {
-    const detections: N+1QueryDetection[] = [];
+  private detectNPlusOneQueries(): NPlusOneQueryDetection[] {
+    const detections: NPlusOneQueryDetection[] = [];
 
     for (const [key, executionTimes] of this.fieldExecutions.entries()) {
       if (executionTimes.length >= this.nPlusOneThreshold) {

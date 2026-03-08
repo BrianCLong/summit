@@ -1,0 +1,141 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.partitionManager = exports.PartitionManager = void 0;
+const postgres_js_1 = require("./postgres.js");
+const logger_js_1 = require("../config/logger.js");
+const ColdStorageService_js_1 = require("../services/ColdStorageService.js");
+class PartitionManager {
+    pool = (0, postgres_js_1.getPostgresPool)();
+    /**
+     * Creates a new partition for a specific tenant in the maestro_runs table.
+     * Useful when onboarding a new tenant to ensure they have their own dedicated partition.
+     */
+    async createTenantPartition(tenantId) {
+        const safeTenantId = tenantId.replace(/[^a-zA-Z0-9_]/g, '');
+        const partitionName = `maestro_runs_${safeTenantId}`;
+        const client = await this.pool.connect();
+        try {
+            await client.query('BEGIN');
+            // Check if partition exists
+            const checkRes = await client.query(`SELECT to_regclass($1::text)`, [partitionName]);
+            if (checkRes.rows[0].to_regclass) {
+                logger_js_1.logger.info(`Partition ${partitionName} already exists.`);
+                await client.query('COMMIT');
+                return;
+            }
+            const query = `
+        CREATE TABLE ${partitionName}
+        PARTITION OF maestro_runs
+        FOR VALUES IN ('${tenantId}')
+      `;
+            await client.query(query);
+            logger_js_1.logger.info(`Created partition ${partitionName} for tenant ${tenantId}`);
+            await client.query('COMMIT');
+        }
+        catch (error) {
+            await client.query('ROLLBACK');
+            logger_js_1.logger.error(`Failed to create partition for tenant ${tenantId}`, error);
+            throw error;
+        }
+        finally {
+            client.release();
+        }
+    }
+    /**
+     * Creates a monthly partition for a time-series table (e.g., audit_logs, metrics).
+     * Range Partitioning: FOR VALUES FROM ('2023-01-01') TO ('2023-02-01')
+     */
+    async createMonthlyPartition(tableName, date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const partitionName = `${tableName}_y${year}m${month}`;
+        // Calculate range start and end
+        const startObj = new Date(year, date.getMonth(), 1);
+        const endObj = new Date(year, date.getMonth() + 1, 1); // First day of next month
+        const startStr = startObj.toISOString().split('T')[0];
+        const endStr = endObj.toISOString().split('T')[0];
+        const client = await this.pool.connect();
+        try {
+            await client.query('BEGIN');
+            // Check if partition exists
+            const checkRes = await client.query(`SELECT to_regclass($1::text)`, [partitionName]);
+            if (checkRes.rows[0].to_regclass) {
+                logger_js_1.logger.info(`Partition ${partitionName} already exists.`);
+                await client.query('COMMIT');
+                return;
+            }
+            const query = `
+        CREATE TABLE ${partitionName}
+        PARTITION OF ${tableName}
+        FOR VALUES FROM ('${startStr}') TO ('${endStr}')
+      `;
+            await client.query(query);
+            logger_js_1.logger.info(`Created monthly partition ${partitionName} (${startStr} to ${endStr})`);
+            await client.query('COMMIT');
+        }
+        catch (error) {
+            await client.query('ROLLBACK');
+            // Don't log error if it's just that the parent table doesn't exist yet (might be dev env)
+            if (error.code === '42P01') {
+                logger_js_1.logger.warn(`Parent table ${tableName} does not exist. Skipping partition creation.`);
+            }
+            else {
+                logger_js_1.logger.error(`Failed to create partition ${partitionName}`, error);
+                throw error;
+            }
+        }
+        finally {
+            client.release();
+        }
+    }
+    /**
+     * Maintenance job to ensure upcoming partitions exist and detach/archive old ones.
+     * Can be scheduled via pg-boss or node-cron.
+     */
+    async maintainPartitions(tables = ['audit_logs', 'metrics', 'provenance_ledger_v2']) {
+        const now = new Date();
+        const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+        const monthAfterNext = new Date(now.getFullYear(), now.getMonth() + 2, 1);
+        for (const table of tables) {
+            // Ensure current month exists
+            await this.createMonthlyPartition(table, now);
+            // Ensure next month exists (pre-creation)
+            await this.createMonthlyPartition(table, nextMonth);
+            // Ensure month after next exists (buffer)
+            await this.createMonthlyPartition(table, monthAfterNext);
+        }
+        // Future: Logic to detach old partitions and move to cold storage (e.g. S3 parquet)
+    }
+    async detachOldPartitions(tables, retentionMonths) {
+        const cutoff = new Date();
+        cutoff.setMonth(cutoff.getMonth() - retentionMonths);
+        const client = await this.pool.connect();
+        try {
+            for (const table of tables) {
+                const result = await client.query('SELECT inhrelid::regclass::text AS partition_name FROM pg_inherits WHERE inhparent = $1::regclass', [table]);
+                for (const row of result.rows ?? []) {
+                    const partitionName = row.partition_name;
+                    const match = partitionName.match(/_y(\d{4})m(\d{2})$/);
+                    if (!match)
+                        continue;
+                    const year = Number(match[1]);
+                    const month = Number(match[2]);
+                    const partitionDate = new Date(year, month - 1, 1);
+                    if (partitionDate <= cutoff) {
+                        await client.query(`ALTER TABLE ${table} DETACH PARTITION ${partitionName}`);
+                        await ColdStorageService_js_1.coldStorageService.archivePartition(table, partitionName, true);
+                    }
+                }
+            }
+        }
+        catch (error) {
+            logger_js_1.logger.error('Failed to detach old partitions', error);
+            throw error;
+        }
+        finally {
+            client.release();
+        }
+    }
+}
+exports.PartitionManager = PartitionManager;
+exports.partitionManager = new PartitionManager();

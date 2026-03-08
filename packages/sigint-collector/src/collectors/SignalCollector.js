@@ -171,4 +171,3 @@ class SignalCollector extends eventemitter3_1.EventEmitter {
     }
 }
 exports.SignalCollector = SignalCollector;
-//# sourceMappingURL=SignalCollector.js.map
