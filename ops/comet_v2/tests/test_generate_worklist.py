@@ -1,10 +1,11 @@
-import unittest
-import sys
 import os
+import sys
+import unittest
 
 # Add parent directory to path to import script
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from generate_worklist import parse_issue
+
 
 class TestGenerateWorklist(unittest.TestCase):
     def test_parse_simple_list(self):

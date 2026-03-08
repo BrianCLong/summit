@@ -1,14 +1,23 @@
-# Repository Assumptions and Verified State
+# IntelGraph repo assumptions
 
 ## Verified
-
-- GitHub Actions workflow files exist and suggest an active CI surface (e.g., `ci.yml`, `aeip_ci.yml`, `agentic-evals.yml`, `agentic-evals-robust.yml`, `agentplace-drift.yml`, `agentplace-policy.yml`, `api-docs-validation.yml`, `asset-inventory.yml`).
-- The repository is a multi-service workspace (`intelgraph-api`, `gateway`, etc.).
-- There are established patterns for GraphQL schemas, agent architectures, and deployment manifests.
+- Public monorepo for Summit exists
+- Node 18+, pnpm, Neo4j 5.x in quickstart
+- GraphQL + REST APIs are core
+- Collaboration/war-room and timeline issues exist
+- CI/workflow surface is large and policy/evidence oriented
 
 ## Assumed
+- `server/src/api` or equivalent GraphQL service exists
+- `client/src` or equivalent React frontend exists
+- Neo4j access is centralized behind a shared client
+- Evidence artifacts follow repo-wide conventions
+- Tenant scoping already exists outside IntelGraph
 
-- **Source Tree Paths**: We assume the existence and correctness of paths such as `src/connectors/`, `src/graphrag/`, `src/agents/`, `src/api/graphql/`, `src/dashboard/`, and scripts like `scripts/benchmarks/`.
-- **Evidence Schema**: The exact JSON schema definitions for validation are assumed to follow Draft 2020-12 located within standard directories (e.g., `data/cloud/`, `docs/standards/`).
-- **Scripts and Workflows**: We assume `pnpm docs:lint`, `pnpm test:ai-infra-stack-spec`, and `pnpm test:ai-infra-evidence-schema` represent intended CI entry points that may need setup.
-- **Must-Not-Touch Files**: We assume we should avoid mutating core CI files (like `.github/workflows/ci.yml`) unless we are implementing an explicit addition like `ai-infra-stack.yml`.
+## Validation checklist before PR1 merges
+- Confirm exact package/workspace boundaries
+- Confirm existing GraphQL schema location
+- Confirm auth context shape
+- Confirm standard test command names
+- Confirm runbook/docs locations
+- Confirm must-not-touch branch protection workflows

@@ -105,6 +105,9 @@ Summit follows a modular microservices architecture:
 └─────────────────────────────────┘
 ```
 
+For the complete trust architecture narrative and visual map, see
+[`docs/architecture/overview.md`](docs/architecture/overview.md).
+
 ## 🧩 Core Components
 
 - **IntelGraph**: Central graph data model for entities, relationships, evidence, and provenance to enable link analysis and multi-hop queries.

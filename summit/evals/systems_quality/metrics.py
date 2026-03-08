@@ -1,9 +1,10 @@
-import subprocess
 import os
 import statistics
+import subprocess
 from typing import List, Optional
 
-def run_git_command(repo_path: str, args: List[str]) -> str:
+
+def run_git_command(repo_path: str, args: list[str]) -> str:
     """Run a git command in the specified repo path."""
     try:
         result = subprocess.run(
@@ -78,7 +79,7 @@ def calculate_rework_rate(repo_path: str, commit_range: str) -> float:
         print(f"Error calculating rework rate: {e}")
         return 0.0
 
-def calculate_variance_score(scores: List[float]) -> float:
+def calculate_variance_score(scores: list[float]) -> float:
     """
     Calculate standard deviation of scores from multiple runs.
     """
