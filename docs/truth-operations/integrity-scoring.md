@@ -18,13 +18,13 @@ Summit introduces **Integrity Scores** as an orthogonal dimension to confidence,
 
 Traditional systems operate on a single axis:
 
-```
+```plaintext
 Low Confidence ←→ High Confidence
-```
+```plaintext
 
 Summit operates on two axes:
 
-```
+```plaintext
                 High Integrity
                       │
                       │
@@ -32,27 +32,31 @@ Low Confidence ───────┼─────── High Confidence
                       │
                       │
                 Low Integrity
-```
+```plaintext
 
 This creates **four quadrants** with different operational implications:
 
 ### Quadrant 1: High Confidence, High Integrity
+
 - **Interpretation**: Strong belief, resistant to manipulation
 - **Action**: Proceed with confidence
 - **Example**: Cryptographically signed data from established source with independent verification
 
 ### Quadrant 2: High Confidence, Low Integrity
+
 - **Interpretation**: Strong belief, vulnerable to manipulation
 - **Action**: Escalate scrutiny, seek independent verification
 - **Example**: Coordinated narrative from multiple sources with no independent confirmation
 - **Warning**: This is where sophisticated attacks succeed
 
 ### Quadrant 3: Low Confidence, High Integrity
+
 - **Interpretation**: Uncertain but trustworthy process
 - **Action**: Acceptable for low-stakes decisions, seek more information for high-stakes
 - **Example**: Preliminary analysis from verified source with transparent uncertainty
 
 ### Quadrant 4: Low Confidence, Low Integrity
+
 - **Interpretation**: Uncertain and untrustworthy
 - **Action**: Discard or treat as noise
 - **Example**: Unverified rumors from unknown sources
@@ -64,13 +68,15 @@ This creates **four quadrants** with different operational implications:
 Integrity scores are computed from **five factors**:
 
 ### 1. Source Volatility (SV)
+
 **Measures**: Historical stability of the source's reporting patterns
 
-```
+```plaintext
 SV = 1 - (variance(source_behavior) / expected_variance)
-```
+```plaintext
 
 **Factors**:
+
 - Frequency of contradictory statements
 - Rate of claim retractions
 - Consistency of reporting format
@@ -79,17 +85,20 @@ SV = 1 - (variance(source_behavior) / expected_variance)
 **Rationale**: Compromised or manipulated sources exhibit behavioral anomalies
 
 **Score Range**: [0.0, 1.0]
+
 - 1.0 = Highly stable, consistent source
 - 0.0 = Erratic, unreliable source
 
 ### 2. Correlation Independence (CI)
+
 **Measures**: Degree to which claims are independently verified
 
-```
+```plaintext
 CI = unique_sources / total_sources
-```
+```plaintext
 
 **Factors**:
+
 - Number of independent verification paths
 - Diversity of verification methods
 - Absence of circular citation
@@ -98,17 +107,20 @@ CI = unique_sources / total_sources
 **Rationale**: Coordinated disinformation appears as high correlation without true independence
 
 **Score Range**: [0.0, 1.0]
+
 - 1.0 = Fully independent verification from diverse sources
 - 0.0 = Single source or circular verification
 
 ### 3. Historical Adversarial Behavior (HAB)
+
 **Measures**: Source's history as an attack vector or target
 
-```
+```plaintext
 HAB = 1 - (successful_attacks_via_source / total_attacks_detected)
-```
+```plaintext
 
 **Factors**:
+
 - Number of times source was compromised
 - Number of times source originated false information
 - Time since last known compromise
@@ -117,17 +129,20 @@ HAB = 1 - (successful_attacks_via_source / total_attacks_detected)
 **Rationale**: Sources with adversarial history require elevated scrutiny
 
 **Score Range**: [0.0, 1.0]
+
 - 1.0 = No adversarial history, clean record
 - 0.0 = Frequent vector for attacks or disinformation
 
 ### 4. Narrative Shift Velocity (NSV)
+
 **Measures**: Rate of change in source's explanatory framework
 
-```
+```plaintext
 NSV = 1 - (narrative_change_rate / expected_change_rate)
-```
+```plaintext
 
 **Factors**:
+
 - Speed of adopting new narratives
 - Frequency of explanatory framework changes
 - Alignment with coordinated narrative shifts
@@ -136,17 +151,20 @@ NSV = 1 - (narrative_change_rate / expected_change_rate)
 **Rationale**: Sudden narrative shifts often indicate coordinated manipulation
 
 **Score Range**: [0.0, 1.0]
+
 - 1.0 = Stable, evidence-driven narrative evolution
 - 0.0 = Erratic, suspiciously rapid narrative changes
 
 ### 5. Verification Depth (VD)
+
 **Measures**: Quality of evidence chain supporting the claim
 
-```
+```plaintext
 VD = verified_links / total_links_in_chain
-```
+```plaintext
 
 **Factors**:
+
 - Cryptographic verification of source identity
 - Audit trail completeness
 - Evidence provenance tracking
@@ -155,6 +173,7 @@ VD = verified_links / total_links_in_chain
 **Rationale**: Deep verification chains resist manipulation
 
 **Score Range**: [0.0, 1.0]
+
 - 1.0 = Complete cryptographic verification chain
 - 0.0 = Unverified, no evidence trail
 
@@ -164,11 +183,12 @@ VD = verified_links / total_links_in_chain
 
 The **final Integrity Score (IS)** is computed as a weighted geometric mean:
 
-```
+```plaintext
 IS = (SV^w1 × CI^w2 × HAB^w3 × NSV^w4 × VD^w5)^(1/(w1+w2+w3+w4+w5))
-```
+```plaintext
 
 **Default weights** (tunable per deployment):
+
 - w1 (Source Volatility) = 0.15
 - w2 (Correlation Independence) = 0.30
 - w3 (Historical Adversarial Behavior) = 0.20
@@ -184,6 +204,7 @@ IS = (SV^w1 × CI^w2 × HAB^w3 × NSV^w4 × VD^w5)^(1/(w1+w2+w3+w4+w5))
 Summit defines **three integrity zones**:
 
 ### High Integrity Zone (IS ≥ 0.70)
+
 - **Interpretation**: Information resistant to known adversarial techniques
 - **Actions**:
   - Normal processing
@@ -191,6 +212,7 @@ Summit defines **three integrity zones**:
   - Routine logging
 
 ### Medium Integrity Zone (0.40 ≤ IS < 0.70)
+
 - **Interpretation**: Potential manipulation risk
 - **Actions**:
   - Enhanced scrutiny required
@@ -199,6 +221,7 @@ Summit defines **three integrity zones**:
   - Human-in-the-loop for high-impact decisions
 
 ### Low Integrity Zone (IS < 0.40)
+
 - **Interpretation**: High manipulation risk
 - **Actions**:
   - Treat as potentially adversarial
@@ -228,36 +251,41 @@ Summit maintains **both** confidence and integrity as first-class metadata:
   "recommended_action": "ESCALATE_SCRUTINY",
   "rationale": "High confidence but medium integrity due to low correlation independence (0.42) and weak verification depth (0.35)"
 }
-```
+```plaintext
 
 ---
 
 ## Decision Rules
 
 ### Rule 1: Confidence Without Integrity Triggers Escalation
-```
+
+```plaintext
 IF confidence > 0.80 AND integrity < 0.60 THEN
   ESCALATE for independent verification
   LOG as potential coordination attack
-```
+```plaintext
 
 ### Rule 2: Integrity Gates Critical Decisions
-```
+
+```plaintext
 IF decision_impact = CRITICAL THEN
   REQUIRE integrity > 0.70 OR human_override
-```
+```plaintext
 
 ### Rule 3: Integrity Anomalies Trigger Investigation
-```
+
+```plaintext
 IF integrity_score < (baseline - 2×stddev) THEN
   INITIATE adversarial investigation
   NOTIFY security operations
-```
+```plaintext
 
 ### Rule 4: Integrity Decay Over Time
-```
+
+```plaintext
 integrity_effective = integrity_base × exp(-λ × time_since_verification)
-```
+```plaintext
+
 Where λ is tuned based on information volatility
 
 ---
@@ -265,25 +293,33 @@ Where λ is tuned based on information volatility
 ## Adversarial Scenarios Addressed
 
 ### Scenario 1: Coordinated Disinformation Campaign
+
 **Attack**: Multiple sources converge on false narrative
+
 - High confidence (agreement across sources)
 - Low integrity (low correlation independence, high narrative shift velocity)
 - **Result**: Flagged for scrutiny despite high confidence
 
 ### Scenario 2: Compromised Trusted Source
+
 **Attack**: Previously reliable source begins distributing false information
+
 - High confidence (trusted source)
 - Low integrity (historical adversarial behavior declining, source volatility increasing)
 - **Result**: Detected via integrity degradation before major impact
 
 ### Scenario 3: Timing Attack with Plausible Delay
+
 **Attack**: Critical information withheld until decision window closes
+
 - Medium confidence (incomplete information)
 - Medium integrity (verification depth low due to time pressure)
 - **Result**: Temporal relevance rules (see `temporal-truth.md`) override integrity requirements
 
 ### Scenario 4: Authority Laundering
+
 **Attack**: False claims attributed to credible sources
+
 - High confidence (attributed to authority)
 - Low integrity (verification depth fails on attribution chain)
 - **Result**: Caught by verification depth component
@@ -293,18 +329,21 @@ Where λ is tuned based on information volatility
 ## Implementation Considerations
 
 ### Data Requirements
+
 - **Historical source behavior**: Minimum 30 days of baseline data
 - **Attack database**: Known adversarial incidents and sources
 - **Verification infrastructure**: Cryptographic signing, audit trails
 - **Correlation tracking**: Cross-source relationship mapping
 
 ### Performance
+
 - Integrity scores computed **asynchronously** to avoid blocking critical path
 - Cached with TTL based on information stability
 - Recomputed on demand for high-impact decisions
 - Incremental updates as new information arrives
 
 ### Tuning
+
 - Weights adjusted based on threat environment
 - Thresholds calibrated to organizational risk tolerance
 - Component formulas adapted to domain-specific risks
@@ -315,14 +354,16 @@ Where λ is tuned based on information volatility
 ## Monitoring and Alerting
 
 ### Integrity Degradation Alerts
-```
+
+```plaintext
 ALERT: integrity_score < threshold
 ALERT: integrity_drop_rate > acceptable_velocity
 ALERT: correlation_independence approaching zero (coordination attack)
 ALERT: source_volatility sudden spike (compromise indicator)
-```
+```plaintext
 
 ### Integrity Dashboard Metrics
+
 - Distribution of integrity scores across all active information
 - Integrity score trends over time per source
 - Correlation between integrity predictions and actual adversarial events
@@ -333,16 +374,20 @@ ALERT: source_volatility sudden spike (compromise indicator)
 ## Case Study: Integrity Preventing Cascade Failure
 
 ### Scenario
+
 At 09:15, monitoring system reports database outage with 95% confidence.
+
 - Multiple internal sources confirm
 - Automated remediation begins
 - Customer notifications prepared
 
 ### Traditional Response
+
 Act immediately on high confidence → begin failover
 
 ### Integrity-Aware Response
-```
+
+```plaintext
 Confidence: 0.95
 Integrity: 0.43 (breakdown)
   - correlation_independence: 0.20 (all sources share same data path)
@@ -350,10 +395,12 @@ Integrity: 0.43 (breakdown)
   - narrative_shift_velocity: 0.50 (very rapid consensus)
 
 ACTION: Hold automated response, dispatch human verification
-```
+```plaintext
 
 ### Outcome
+
 Human investigation reveals:
+
 - Monitoring system itself was compromised
 - Database was fully operational
 - Attack designed to trigger expensive failover
@@ -365,12 +412,14 @@ Human investigation reveals:
 ## Future Enhancements
 
 ### Planned Additions
+
 1. **Adversarial ML integration**: Use trained models to detect subtle manipulation patterns
 2. **Provenance graphs**: Visual representation of verification chains
 3. **Integrity prediction**: Forecast integrity degradation before it occurs
 4. **Cross-organization integrity sharing**: Anonymized adversarial intelligence
 
 ### Research Directions
+
 - Optimal weight tuning via reinforcement learning
 - Integration with narrative collision detection for compound scoring
 - Integrity-aware automated decision thresholds

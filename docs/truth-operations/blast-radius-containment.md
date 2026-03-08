@@ -19,7 +19,7 @@ Blast-radius containment prevents false information from cascading through decis
 
 ### How Falsehoods Propagate
 
-```
+```plaintext
 False Claim: "Database server CPU at 95%"
     ↓
 Decision 1: Scale up database cluster
@@ -35,11 +35,12 @@ Action 1: Purchase additional servers
 Action 2: Defer other projects
     ↓
 Communication: Customer notification about "performance improvements"
-```
+```plaintext
 
 **Time of Discovery**: 4 hours later, original claim was false (monitoring bug)
 
 **Damage**:
+
 - 8 decisions made on false premise
 - Real money spent on unnecessary capacity
 - Engineering hours wasted
@@ -88,7 +89,7 @@ Summit maintains a **real-time graph** of causal dependencies:
 
 ### Graph Structure
 
-```
+```plaintext
 [Information Node: "DB CPU = 95%"]
     │
     ├──influences──> [Decision: Scale cluster]
@@ -104,7 +105,7 @@ Summit maintains a **real-time graph** of causal dependencies:
     └──influences──> [Decision: Investigate DB performance]
                          │
                          └──influences──> [Resource: Assign engineer to perf work]
-```
+```plaintext
 
 ### Node Types
 
@@ -131,7 +132,8 @@ Summit maintains a **real-time graph** of causal dependencies:
 **Trigger**: Information integrity score drops below threshold OR explicit compromise detected
 
 **Action**:
-```
+
+```plaintext
 1. Mark information node as COMPROMISED
 2. Identify all downstream dependencies via graph traversal
 3. FREEZE all pending decisions that depend on compromised information
@@ -140,9 +142,10 @@ Summit maintains a **real-time graph** of causal dependencies:
    - Require explicit override to proceed
 4. FLAG all completed decisions for review
 5. QUARANTINE all communications based on compromised information
-```
+```plaintext
 
 **Example**:
+
 ```json
 {
   "compromised_information": "claim_12847",
@@ -161,14 +164,15 @@ Summit maintains a **real-time graph** of causal dependencies:
     "Notified 3 operators for manual review"
   ]
 }
-```
+```plaintext
 
 ### Protocol 2: Impact Assessment
 
 **After containment**, systematically assess damage:
 
 **For Each Influenced Decision**:
-```
+
+```plaintext
 1. Determine influence weight
    - If weight < 0.3: Low influence, may not require action
    - If weight ≥ 0.3: Significant influence, requires review
@@ -184,13 +188,13 @@ Summit maintains a **real-time graph** of causal dependencies:
 4. Check for secondary dependencies
    - Identify decisions that depend on this decision
    - Recursive containment if necessary
-```
+```plaintext
 
 ### Protocol 3: Selective Re-evaluation
 
 **Not all decisions require re-evaluation**:
 
-```
+```plaintext
 FOR each influenced decision:
   IF (influence_weight < threshold)
      AND (decision_outcome appears correct despite false input)
@@ -199,7 +203,7 @@ FOR each influenced decision:
      MARK as reviewed, no action needed
   ELSE
      REQUIRE explicit re-evaluation with corrected information
-```
+```plaintext
 
 **Rationale**: Conserve operator attention for truly compromised decisions
 
@@ -207,7 +211,7 @@ FOR each influenced decision:
 
 **For external communications** based on false information:
 
-```
+```plaintext
 1. IDENTIFY: Which communications were influenced
 2. CLASSIFY urgency:
    - High: Actively harmful if left uncorrected (issue correction immediately)
@@ -220,7 +224,7 @@ FOR each influenced decision:
    - No need to over-apologize
 4. REQUIRE approval before sending
 5. TRACK correction delivery
-```
+```plaintext
 
 ---
 
@@ -230,9 +234,9 @@ FOR each influenced decision:
 
 **Measures**: How many decision layers were affected
 
-```
+```plaintext
 PD = max(path_length from compromised_info to leaf_decision)
-```
+```plaintext
 
 **Example**: False claim → 3 decisions → 2 actions = PD of 5
 
@@ -240,19 +244,20 @@ PD = max(path_length from compromised_info to leaf_decision)
 
 **Measures**: How many parallel decisions were affected
 
-```
+```plaintext
 CW = count(unique_decisions influenced by compromised_info)
-```
+```plaintext
 
 ### 3. Reversibility Index (RI)
 
 **Measures**: What percentage of influenced decisions can be undone
 
-```
+```plaintext
 RI = reversible_decisions / total_influenced_decisions
-```
+```plaintext
 
 **Interpretation**:
+
 - RI = 1.0: Full rollback possible
 - RI = 0.5: Half the damage can be undone
 - RI = 0.0: All decisions irreversible, only mitigation possible
@@ -261,9 +266,9 @@ RI = reversible_decisions / total_influenced_decisions
 
 **Measures**: Time between falsehood introduction and detection
 
-```
+```plaintext
 TS = detection_time - introduction_time
-```
+```plaintext
 
 **Significance**: Longer TS → larger blast radius (more time to propagate)
 
@@ -271,9 +276,9 @@ TS = detection_time - introduction_time
 
 **Measures**: How quickly propagation was halted
 
-```
+```plaintext
 CE = decisions_frozen / (decisions_frozen + decisions_executed_post_detection)
-```
+```plaintext
 
 **Goal**: CE → 1.0 (perfect containment)
 
@@ -285,6 +290,7 @@ CE = decisions_frozen / (decisions_frozen + decisions_executed_post_detection)
 
 **10:00**: Monitoring system reports "Critical: Unauthorized access detected in user database"
 **10:05**: Security team begins response
+
 - Decision 1: Isolate database
 - Decision 2: Force password reset for all users
 - Decision 3: Notify legal team (breach disclosure prep)
@@ -303,6 +309,7 @@ CE = decisions_frozen / (decisions_frozen + decisions_executed_post_detection)
 **10:30**: Cleanup complete
 
 **Damage**:
+
 - 85% of users forced unnecessary password reset
 - Customer trust impact (false alarm made public)
 - Wasted legal team time
@@ -313,7 +320,7 @@ CE = decisions_frozen / (decisions_frozen + decisions_executed_post_detection)
 **10:10**: Integrity scoring detects monitoring system anomaly
 **10:10**: Automatic blast-radius containment activated
 
-```
+```plaintext
 COMPROMISED: "Unauthorized access detected" (integrity: 0.21)
 
 BLAST RADIUS:
@@ -336,7 +343,7 @@ CONTAINMENT ACTIONS:
   ✓ Paused 1 in-progress action (95% prevented)
   ✓ Flagged 1 completed action for review
   ✓ Prevented 2 external communications
-```
+```plaintext
 
 **10:11**: Operator review confirms false positive
 **10:12**: Database de-isolation (was flagged for review, not assumed correct)
@@ -345,6 +352,7 @@ CONTAINMENT ACTIONS:
 **10:15**: Customer communication frozen decision deleted (never happened)
 
 **Damage**:
+
 - 5% of users forced password reset (contained at 5% vs. 85%)
 - No external communications (prevented)
 - Minimal operator confusion (clear containment status)
@@ -358,44 +366,48 @@ CONTAINMENT ACTIONS:
 ### Tier 1: Observation (Integrity 0.60-0.70)
 
 **Action**: Elevated monitoring, no containment
-```
+
+```plaintext
 - Increase logging
 - Flag for operator awareness
 - Continue normal operations
 - Watch for additional integrity degradation
-```
+```plaintext
 
 ### Tier 2: Caution (Integrity 0.40-0.60)
 
 **Action**: Soft containment
-```
+
+```plaintext
 - Require human confirmation for high-impact decisions
 - Flag downstream decisions as "based on uncertain information"
 - Prevent automated escalation
 - Prepare rollback procedures
-```
+```plaintext
 
 ### Tier 3: Containment (Integrity 0.20-0.40)
 
 **Action**: Hard containment
-```
+
+```plaintext
 - Freeze pending decisions
 - Pause in-progress actions
 - Flag completed decisions for review
 - Prevent external communications
 - Require explicit override to proceed
-```
+```plaintext
 
 ### Tier 4: Quarantine (Integrity <0.20)
 
 **Action**: Maximum isolation
-```
+
+```plaintext
 - Treat as actively adversarial
 - Complete freeze of all dependencies
 - Forensic investigation triggered
 - Security team notification
 - No overrides without dual authorization
-```
+```plaintext
 
 ---
 
@@ -403,7 +415,7 @@ CONTAINMENT ACTIONS:
 
 ### Containment Dashboard
 
-```
+```plaintext
 ┌─────────────────────────────────────────────────────────┐
 │ 🔴 ACTIVE CONTAINMENT: claim_12847                      │
 ├─────────────────────────────────────────────────────────┤
@@ -428,11 +440,11 @@ CONTAINMENT ACTIONS:
 │                                                         │
 │ [VIEW IMPACT GRAPH] [BEGIN REMEDIATION] [OVERRIDE]     │
 └─────────────────────────────────────────────────────────┘
-```
+```plaintext
 
 ### Impact Graph Visualization
 
-```
+```plaintext
 [COMPROMISED] DB CPU = 95%
     │
     ├─[90%]─> [FROZEN] Scale cluster
@@ -452,7 +464,7 @@ Legend:
   [PAUSED] - Execution stopped mid-way
   [COMPLETED ⚠] - Requires review/remediation
   [X%] - Influence weight
-```
+```plaintext
 
 ---
 
@@ -460,7 +472,7 @@ Legend:
 
 ### Step 1: Confirm Compromise
 
-```
+```plaintext
 OPERATOR REVIEW:
   ☐ Verify information is actually false
   ☐ Identify root cause of compromise
@@ -468,11 +480,11 @@ OPERATOR REVIEW:
   ☐ Determine if adversarial or accidental
 
 If adversarial → ESCALATE to security operations
-```
+```plaintext
 
 ### Step 2: Prioritize Impact
 
-```
+```plaintext
 FOR each influenced decision, ordered by:
   1. Criticality (highest first)
   2. Reversibility (irreversible first)
@@ -483,11 +495,11 @@ CATEGORIZE:
   🟡 HIGH: Requires action within 4 hours
   🟢 MEDIUM: Review within 24 hours
   ⚪ LOW: Review when convenient
-```
+```plaintext
 
 ### Step 3: Execute Remediation
 
-```
+```plaintext
 FOR each impacted decision:
 
   IF reversible:
@@ -501,11 +513,11 @@ FOR each impacted decision:
     LEARN: How do we prevent recurrence?
 
   REQUIRE: Explicit operator decision for each
-```
+```plaintext
 
 ### Step 4: Communication
 
-```
+```plaintext
 IF external parties were affected:
   DRAFT correction/notification
   REQUIRE approval
@@ -516,11 +528,11 @@ INTERNAL:
   NOTIFY teams affected by rollbacks
   EXPLAIN what happened, what's changing
   PROVIDE timeline for remediation
-```
+```plaintext
 
 ### Step 5: Post-Incident
 
-```
+```plaintext
 FORENSIC ANALYSIS:
   - How did false information enter?
   - Why did integrity scoring catch it (or not catch it sooner)?
@@ -535,25 +547,29 @@ DOCUMENT LESSONS:
   - Add to institutional knowledge
   - Train operators on pattern recognition
   - Update runbooks
-```
+```plaintext
 
 ---
 
 ## Integration with Other Pillars
 
 ### With Integrity Scoring
+
 - Integrity thresholds determine containment tier
 - Low integrity triggers automatic containment
 
 ### With Narrative Collision
+
 - Competing narratives may reference same compromised facts
 - Containment prevents false narratives from spreading
 
 ### With Temporal Truth
+
 - Containment speed matters (faster = smaller blast radius)
 - Time-pressured decisions may proceed despite contamination with elevated oversight
 
 ### With Authority Continuity
+
 - Compromised authority sources trigger broader containment
 - All decisions from suspect authority get containment review
 
@@ -564,6 +580,7 @@ DOCUMENT LESSONS:
 ### Predictive Containment
 
 Machine learning predicts:
+
 - Which decisions are likely influenced by suspect information (even without explicit dependency)
 - Probable blast radius size based on information type
 - Optimal containment tier given characteristics
@@ -571,6 +588,7 @@ Machine learning predicts:
 ### Automated Rollback
 
 For specific decision types:
+
 - Pre-approved rollback procedures
 - Automated execution upon containment
 - Human confirmation for high-stakes only
@@ -578,6 +596,7 @@ For specific decision types:
 ### Blast Radius Simulation
 
 Before decisions:
+
 - Model potential blast radius if information is later found false
 - Factor into decision whether to wait for higher integrity
 - Containment-aware decision making
@@ -605,6 +624,7 @@ The difference between a contained incident and a catastrophic failure is **how 
 Blast-radius containment transforms Summit from a system that **reacts to false information** into a system that **prevents its propagation**.
 
 This is critical for:
+
 - High-stakes decisions with irreversible consequences
 - Complex systems with deep dependency chains
 - Environments where adversaries weaponize information
