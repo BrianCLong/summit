@@ -11,6 +11,7 @@ on:
       pnpm-version:
         description: "pnpm version to use"
         required: false
+        default: "9.12.0"
         type: string
       install-deps:
         description: "Whether to install dependencies"
@@ -52,8 +53,9 @@ jobs:
           fi
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4 # v4
+        uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
         with:
+          version: ${{ inputs.pnpm-version }}
           run_install: false
 
       - name: Setup Node.js

@@ -88,7 +88,6 @@ export class AutoRemediationHooks extends EventEmitter {
 
   constructor() {
     super();
-    this.setMaxListeners(100);
     this.initializeSources();
     this.registerDefaultHooks();
     this.registerDefaultExecutors();

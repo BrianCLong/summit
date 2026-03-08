@@ -1,0 +1,315 @@
+name: CI/CD Supply Chain Integrity
+# NOTE: GA tag triggers removed - now handled by release-ga-pipeline.yml
+# This workflow runs on branch pushes and PRs only.
+# See: docs/ci/RELEASE_GA_PIPELINE.md for GA release process.
+
+on:
+  push:
+    branches: [main, develop]
+    # Tag triggers removed - GA releases handled by release-ga-pipeline.yml
+    # tags: ["v*.*.*"]
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+      - ".github/workflows/*.md"
+  pull_request:
+    branches: [main]
+    paths:
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "server/package.json"
+      - "client/package.json"
+      - "Dockerfile"
+      - "scripts/generate-sbom.sh"
+      - "scripts/scan-vulnerabilities.sh"
+      - "scripts/check-reproducibility.sh"
+      - ".github/workflows/supply-chain-integrity.yml"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+  id-token: write # Enable OIDC for keyless signing
+  packages: write # For container image signing
+
+jobs:
+  supply-chain-integrity:
+    runs-on: ubuntu-latest
+    outputs:
+      release-version: ${{ steps.vars.outputs.release_version }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.1.7 (pinned to v4 branch tip)
+        with:
+          fetch-depth: 0
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+        # version is read from package.json packageManager field
+
+      - name: Set up Node.js
+        uses: actions/setup-node@65d868f8d4d85d7d4abb7de0875cde3fcc8798f5 # v4.0.3
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - name: Set up Python
+        uses: actions/setup-python@4f41a90a1f38628c7ccc608d05fbafe701bc20ae # v5.1.0
+        with:
+          python-version: "3.11"
+
+      - name: Set up Go
+        uses: actions/setup-go@4dc6199c7b1a012772edbd06daecab0f50c9053c # v5.0.1
+        with:
+          go-version: "1.21"
+
+      # Install supply chain tools with strict pinning
+      - name: Install syft
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin v1.39.0
+          syft version
+
+      - name: Install grype
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh -s -- -b /usr/local/bin v0.104.3
+          grype version
+
+      - name: Install cosign
+        uses: sigstore/cosign-installer@053f9b74638557590800a301da1ba82351507e2c # v3.8.1
+
+      # Set version variables
+      - name: Set version variables
+        id: vars
+        run: |
+          if [[ $GITHUB_REF == refs/tags/* ]]; then
+            VERSION=${GITHUB_REF#refs/tags/}
+          elif [[ $GITHUB_REF == refs/heads/* ]]; then
+            BRANCH=${GITHUB_REF#refs/heads/}
+            VERSION="$BRANCH-${GITHUB_SHA::8}"
+          else
+            VERSION="pr-${{ github.event.number }}-${GITHUB_SHA::8}"
+          fi
+          echo "release_version=$VERSION" >> $GITHUB_OUTPUT
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+      # Run reproducibility check
+      - name: Check Build Reproducibility
+        if: github.event_name == 'push' && github.ref_type == 'tag'
+        run: |
+          chmod +x scripts/check-reproducibility.sh
+          ./scripts/check-reproducibility.sh summit-platform "npm ci && npm run build" production 2 /tmp/build-test
+
+      # Generate SBOM
+      - name: Generate SBOM
+        run: |
+          chmod +x scripts/generate-sbom.sh
+          ./scripts/generate-sbom.sh summit-platform ${{ env.VERSION }} ./sboms
+          ls -la ./sboms/
+
+      # Run vulnerability scan
+      - name: Scan for Vulnerabilities
+        run: |
+          chmod +x scripts/scan-vulnerabilities.sh
+          if [[ "${{ github.ref_type }}" == "tag" ]]; then
+            # On tags, fail on high and critical vulnerabilities
+            ./scripts/scan-vulnerabilities.sh . ./vulnerability-reports true true json
+          else
+            # On PR/branch, just report vulnerabilities
+            ./scripts/scan-vulnerabilities.sh . ./vulnerability-reports false false json || true
+          fi
+
+      # Upload source SBOMs immediately to free disk space before Docker build
+      - name: Upload Source SBOMs
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.3.3
+        with:
+          name: sboms-source-${{ env.VERSION }}
+          path: ./sboms/
+          retention-days: 90
+
+      # Upload source vulnerability reports immediately
+      - name: Upload Source Vulnerability Reports
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.3.3
+        with:
+          name: vulnerability-reports-source-${{ env.VERSION }}
+          path: ./vulnerability-reports/
+          retention-days: 90
+
+      # Clean up source artifacts to free disk space for Docker build
+      - name: Free Disk Space for Docker Build
+        if: ${{ hashFiles('Dockerfile') != '' && (github.ref == 'refs/heads/main' || github.ref_type == 'tag') }}
+        run: |
+          echo "Disk usage before cleanup:"
+          df -h
+          echo "Removing source SBOM and vulnerability report files..."
+          rm -rf ./sboms/* ./vulnerability-reports/*
+          # Also clean up pnpm store and node_modules to maximize space
+          pnpm store prune || true
+          echo "Disk usage after cleanup:"
+          df -h
+
+      # Build and push container image (only on main branch or tags, not PRs)
+      - name: Build and Push Docker Image
+        if: ${{ hashFiles('Dockerfile') != '' && (github.ref == 'refs/heads/main' || github.ref_type == 'tag') }}
+        run: |
+          # Docker requires lowercase repository names
+          OWNER_LOWER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          DOCKER_IMAGE=ghcr.io/${OWNER_LOWER}/summit-platform
+          DOCKER_TAG=${{ env.VERSION }}
+
+          # Build image
+          docker build -t $DOCKER_IMAGE:$DOCKER_TAG .
+          docker tag $DOCKER_IMAGE:$DOCKER_TAG $DOCKER_IMAGE:latest
+
+          # Generate SBOM for container image
+          syft packages docker:$DOCKER_IMAGE:$DOCKER_TAG -o cyclonedx-json --file ./sboms/summit-platform-container-${{ env.VERSION }}.cdx.json
+
+          # Scan container image
+          grype docker:$DOCKER_IMAGE:$DOCKER_TAG -o json --file ./vulnerability-reports/summit-platform-container-${{ env.VERSION }}.json
+
+      # Sign artifacts (only on main branch or tags)
+      - name: Sign Artifacts
+        if: github.ref == 'refs/heads/main' || github.ref_type == 'tag'
+        env:
+          COSIGN_EXPERIMENTAL: "true"
+        run: |
+          # Docker requires lowercase repository names
+          OWNER_LOWER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          DOCKER_IMAGE=ghcr.io/${OWNER_LOWER}/summit-platform
+          DOCKER_TAG=${{ env.VERSION }}
+
+          # Sign container image with keyless signing
+          if [ -f "Dockerfile" ] && [ -n "$DOCKER_TAG" ]; then
+            echo "Signing container image: $DOCKER_IMAGE:$DOCKER_TAG"
+            cosign sign --yes $DOCKER_IMAGE:$DOCKER_TAG
+
+            # Attest container SBOM
+            CONTAINER_SBOM="./sboms/summit-platform-container-${{ env.VERSION }}.cdx.json"
+            if [ -f "$CONTAINER_SBOM" ]; then
+               echo "Attesting Container SBOM: $CONTAINER_SBOM"
+               cosign attest --yes --predicate "$CONTAINER_SBOM" --type cyclonedx $DOCKER_IMAGE:$DOCKER_TAG
+            fi
+
+            # Verify the signature
+            cosign verify $DOCKER_IMAGE:$DOCKER_TAG --certificate-identity-regexp=".*" --certificate-oidc-issuer-regexp=".*"
+          fi
+
+          # Sign SBOMs (Sign the artifacts themselves as well)
+          for sbom in ./sboms/*.json; do
+            if [ -f "$sbom" ]; then
+              echo "Signing SBOM file: $sbom"
+              cosign sign-blob --output-signature "${sbom}.sig" --yes "$sbom"
+            fi
+          done
+
+      # Bundle release evidence
+      - name: Bundle Release Evidence
+        if: github.event_name == 'push' && github.ref_type == 'tag'
+        run: |
+          chmod +x scripts/bundle-release-evidence.sh
+          ./scripts/bundle-release-evidence.sh ${{ env.VERSION }} summit-platform $GITHUB_SHA ./release-evidence
+
+      # Upload container SBOMs (generated during Docker build)
+      - name: Upload Container SBOMs
+        if: ${{ hashFiles('Dockerfile') != '' && (github.ref == 'refs/heads/main' || github.ref_type == 'tag') }}
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.3.3
+        with:
+          name: sboms-container-${{ env.VERSION }}
+          path: ./sboms/
+          retention-days: 90
+
+      # Upload container vulnerability reports (generated during Docker build)
+      - name: Upload Container Vulnerability Reports
+        if: ${{ hashFiles('Dockerfile') != '' && (github.ref == 'refs/heads/main' || github.ref_type == 'tag') }}
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.3.3
+        with:
+          name: vulnerability-reports-container-${{ env.VERSION }}
+          path: ./vulnerability-reports/
+          retention-days: 90
+
+      # Upload release evidence bundle
+      - name: Upload Release Evidence Bundle
+        if: github.event_name == 'push' && github.ref_type == 'tag'
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.3.3
+        with:
+          name: release-evidence-${{ env.VERSION }}
+          path: ./release-evidence/summit-release-${{ env.VERSION }}-evidence.tar.gz
+          retention-days: 90
+
+  # CI Gate: Final verification of all supply chain integrity
+  ci-gate:
+    needs: supply-chain-integrity
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' || github.event_name == 'pull_request'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.1.7
+
+      - name: Download Source SBOMs
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v4.1.7
+        with:
+          name: sboms-source-${{ needs.supply-chain-integrity.outputs.release-version }}
+          path: ./sboms
+
+      - name: Download Source Vulnerability Reports
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v4.1.7
+        with:
+          name: vulnerability-reports-source-${{ needs.supply-chain-integrity.outputs.release-version }}
+          path: ./vulnerability-reports
+
+      - name: Install tools
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin v1.39.0
+          curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh -s -- -b /usr/local/bin v0.104.3
+
+      - name: Run CI Supply Chain Gate
+        env:
+          RELEASE_VERSION: ${{ needs.supply-chain-integrity.outputs.release-version }}
+        run: |
+          chmod +x scripts/ci-supply-chain-gate.sh
+          ./scripts/ci-supply-chain-gate.sh summit-platform production true false true true true true
+
+  # Create GitHub Release (only for tags)
+  release:
+    needs: [supply-chain-integrity, ci-gate]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref_type == 'tag'
+    permissions:
+      contents: write
+      packages: write
+      id-token: write
+
+    steps:
+      - name: Download Release Evidence Bundle
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v4.1.7
+        with:
+          name: release-evidence-${{ needs.supply-chain-integrity.outputs.release-version }}
+          path: ./releases
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2.0.5
+        with:
+          name: "Release ${{ needs.supply-chain-integrity.outputs.release-version }}"
+          body: |
+            ## Summit Platform Release ${{ needs.supply-chain-integrity.outputs.release-version }}
+
+            This release includes:
+            - Supply chain security compliance (SLSA Level 3)
+            - Software Bill of Materials (SBOM)
+            - Signed artifacts and provenance
+            - Vulnerability scans and security reports
+            - Reproducible build verification
+
+            ## Compliance
+            - SBOMs included in release assets
+            - Signed artifacts with Sigstore
+            - Security scan reports included
+            - All CI gates passed
+          draft: false
+          prerelease: ${{ contains(needs.supply-chain-integrity.outputs.release-version, 'rc') || contains(needs.supply-chain-integrity.outputs.release-version, 'beta') }}
+          files: |
+            ./releases/summit-release-${{ needs.supply-chain-integrity.outputs.release-version }}-evidence.tar.gz
+            ./sboms/**

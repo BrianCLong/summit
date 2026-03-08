@@ -1,23 +1,35 @@
-import { describe, expect, it, jest } from '@jest/globals';
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { GrowthPlaybookService } from '../GrowthPlaybookService.js';
 
+// Mock LLMService
+jest.mock('../LLMService.js', () => {
+  return class MockLLMService {
+    constructor() {}
+    async complete() {
+      return {
+        content: JSON.stringify({
+          title: "Test Playbook",
+          summary: "Test Summary",
+          score: 90,
+          strengths: ["Strength 1"],
+          weaknesses: ["Weakness 1"],
+          strategic_initiatives: [],
+          tactical_actions: []
+        }),
+        usage: { total_tokens: 100 }
+      };
+    }
+  };
+});
+
 describe('GrowthPlaybookService', () => {
-  it('generates a playbook', async () => {
-    const service = new GrowthPlaybookService();
+  let service: GrowthPlaybookService;
 
-    jest.spyOn((service as any).llm, 'complete').mockResolvedValue({
-      content: JSON.stringify({
-        title: 'Test Playbook',
-        summary: 'Test Summary',
-        score: 90,
-        strengths: ['Strength 1'],
-        weaknesses: ['Weakness 1'],
-        strategic_initiatives: [],
-        tactical_actions: [],
-      }),
-      usage: { total_tokens: 100 },
-    });
+  beforeEach(() => {
+    service = new GrowthPlaybookService();
+  });
 
+  it('should generate a playbook', async () => {
     const profile = {
       name: 'Acme Corp',
       industry: 'Tech',
@@ -25,7 +37,7 @@ describe('GrowthPlaybookService', () => {
       employees: 50,
       revenue: 5000000,
       challenges: ['Scale'],
-      goals: ['IPO'],
+      goals: ['IPO']
     };
 
     const result = await service.generatePlaybook(profile);

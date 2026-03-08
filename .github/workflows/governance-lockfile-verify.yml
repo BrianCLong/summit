@@ -46,12 +46,10 @@ on:
         type: number
         default: 7
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 permissions:
   contents: read
+  pull-requests: write
+  issues: write
 
 jobs:
   verify-lockfile:
@@ -95,12 +93,13 @@ jobs:
           fi
 
           # Run verification
-          RESULT=$(./scripts/release/verify_governance_lockfile.sh ${ARGS} 2>&1) || EXIT_CODE=$?
+          ./scripts/release/verify_governance_lockfile.sh ${ARGS} > verification_report.json 2> verification_error.log || EXIT_CODE=$?
 
-          echo "${RESULT}" > verification_report.json
+          # Capture results
+          RESULT=$(cat verification_report.json)
 
           # Parse results
-          STATUS=$(echo "${RESULT}" | jq -r '.status // "unknown"')
+          STATUS=$(cat verification_report.json | jq -r '.status // "unknown"')
           PASSED=$(echo "${RESULT}" | jq -r '.summary.checks_passed // 0')
           FAILED=$(echo "${RESULT}" | jq -r '.summary.checks_failed // 0')
           WARNED=$(echo "${RESULT}" | jq -r '.summary.checks_warned // 0')
@@ -180,7 +179,7 @@ jobs:
             || echo "::warning::Failed to update audit log"
 
       - name: Upload Verification Report
-        uses: actions/upload-artifact@v4 # v4
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4
         if: steps.check-exists.outputs.exists == 'true'
         with:
           name: governance-lockfile-verification-${{ github.run_number }}
