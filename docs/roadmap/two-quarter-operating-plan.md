@@ -1,9 +1,11 @@
 # Two-Quarter Operating Plan: Reliability, Flow, and Ownership
 
 ## Purpose
+
 Create a two-quarter campaign that links incentives to measurable outcomes, improves decision hygiene, and drives disciplined execution. The plan selects the highest-leverage elements across Incentives, Decision Hygiene, Ownership, Flow, Quality, Reliability, Documentation, Meetings, and Deletion to deliver durable improvements in reliability, velocity, and cost posture.
 
 ## Outcomes and Targets
+
 - **Reliability:** Ship domain SLOs with error budgets and reduce repeat Sev-1/2 incidents by 50% by end of Q2.
 - **Velocity:** Reduce median cycle time by 35% and enforce WIP limits and ≤5-day slices on all in-flight initiatives.
 - **Cost and Simplification:** Hit quarterly delete quotas, retire at least 3 systems/major surfaces, and prevent net-new systems without retirement plans.
@@ -11,6 +13,7 @@ Create a two-quarter campaign that links incentives to measurable outcomes, impr
 - **On-Call Health:** Track pages per shift, sleep impact, and toil; keep on-call KPIs within healthy bands with quarterly bonuses tied to improvements.
 
 ## Operating Principles (Always-On)
+
 - Incentives reward outcome SLOs (reliability, cycle time, churn, cost) over feature volume.
 - Error budgets gate roadmap scope; no permanent exceptions—every exception has an expiry and owner.
 - Ownership is explicit: every domain has code owners, runbooks, dashboards, and a single-threaded owner for critical initiatives.
@@ -19,6 +22,7 @@ Create a two-quarter campaign that links incentives to measurable outcomes, impr
 - Culture of deletion: celebrate retired systems, simplified paths, and deletion shipped.
 
 ## Quarter 1 (Weeks 1–13)
+
 1. **Foundations and Guardrails (Weeks 1–3)**
    - Publish domain ownership map (systems, data, KPIs, on-call) with code owners enforced.
    - Define user-journey SLOs and error budgets; replace alert spam with SLO burn alerts and runbooks only.
@@ -38,6 +42,7 @@ Create a two-quarter campaign that links incentives to measurable outcomes, impr
    - Track repeat incidents and escalate when recurrence exceeds threshold; ship one “reliability release” per domain.
 
 ## Quarter 2 (Weeks 14–26)
+
 1. **Scale and Enforcement (Weeks 14–18)**
    - Tie leadership and manager goals to reliability + velocity + cost; introduce quarterly comp/bonus modifiers for outcome targets.
    - Enforce WIP limits with bots; add PR size limits and reviewer rotations; unblock ritual (15 min daily with decision-maker).
@@ -56,21 +61,25 @@ Create a two-quarter campaign that links incentives to measurable outcomes, impr
    - Run quarterly ownership audit to merge/retire anything unowned; publish monthly reliability scorecard.
 
 ## Scoreboard & Gating Mechanics
+
 - **Per-Domain Scoreboard (weekly):** SLO burn, error budget spend, cycle time, WIP vs limit, blocked time, rework rate, cost per unit, on-call health (pages/sleep/toil), deletion shipped, debt burn, repeat incidents.
 - **Gates:** Error budget spend gates roadmap scope; exceptions require registry entry with owner + expiry. PR size limits and release envelopes enforced via automation.
 - **Recognition:** Quarterly awards for quiet wins (boring ops, reduced toil), deletion shipped, and best decision latency improvements.
 
 ## Cadences & Governance
+
 - **Weekly:** Written operating update; scoreboard publication; kill-list review; blocker backlog review.
 - **Monthly:** GameDay, DR drill/restore test, reliability release, ownership updates.
 - **Quarterly:** Ownership audit, delete quota review, compensation modifiers against outcome targets, knowledge purge/refresh, quality review with top root causes.
 
 ## Risks & Mitigations
+
 - **Overload from new rituals:** Keep meetings short (25/50 minutes), async-first RFCs, and office hours for cross-team questions.
 - **Hidden work resurfacing:** Enforce “no hidden work” via single backlog and visible blockers; escalation ladder for cross-team delays.
 - **Metric gaming:** Pair leading indicators (cycle time, WIP) with outcome measures (SLO burn, repeat incidents) and manual reviews on exception registry.
 
 ## Success Criteria
+
 - Error budgets respected with <2% uncontrolled spend; roadmap scope adjusted when budgets burn.
 - Median decision latency <48 hours; logged decisions with revisit dates and outcomes.
 - Cycle time -35%, blocked time -40%, change failure rate down with canaries/rollback; repeat incidents reduced by 50%.

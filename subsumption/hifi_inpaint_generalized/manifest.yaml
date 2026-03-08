@@ -1,0 +1,3 @@
+name: hifi_inpaint_generalized
+description: "Generalized reference-fidelity benchmark for diffusion models"
+version: 1.0.0
