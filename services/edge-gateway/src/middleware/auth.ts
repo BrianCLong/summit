@@ -1,16 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 
+// Use environment variable, do not hardcode a fallback secret
 const JWT_SECRET = process.env.JWT_SECRET;
-
-// Validate JWT configuration at startup
-if (!JWT_SECRET) {
-  throw new Error('FATAL: JWT_SECRET environment variable is required for authentication');
-}
-
-if (JWT_SECRET.length < 32) {
-  throw new Error('FATAL: JWT_SECRET must be at least 32 characters');
-}
 
 export interface AuthRequest extends Request {
   user?: {
@@ -24,6 +16,13 @@ export interface AuthRequest extends Request {
  * Authentication middleware
  */
 export function authMiddleware(req: AuthRequest, res: Response, next: NextFunction) {
+  if (!JWT_SECRET) {
+    return res.status(500).json({
+      error: 'Internal Server Error',
+      message: 'Authentication service is not configured correctly'
+    });
+  }
+
   const authHeader = req.headers.authorization;
 
   if (!authHeader) {
@@ -43,7 +42,7 @@ export function authMiddleware(req: AuthRequest, res: Response, next: NextFuncti
   }
 
   try {
-    const decoded = jwt.verify(token, JWT_SECRET!) as {
+    const decoded = jwt.verify(token, JWT_SECRET) as {
       id: string;
       nodeId?: string;
       role: 'admin' | 'node' | 'user';
@@ -63,7 +62,10 @@ export function authMiddleware(req: AuthRequest, res: Response, next: NextFuncti
  * Generate JWT token
  */
 export function generateToken(payload: { id: string; nodeId?: string; role: string }): string {
-  return jwt.sign(payload, JWT_SECRET!, { expiresIn: '24h' });
+  if (!JWT_SECRET) {
+    throw new Error('FATAL: JWT_SECRET environment variable is required to generate tokens');
+  }
+  return jwt.sign(payload, JWT_SECRET, { expiresIn: '24h' });
 }
 
 /**

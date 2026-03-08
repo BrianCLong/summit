@@ -22,15 +22,6 @@ interface AuthContext {
 const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '24h';
 
-// Validate JWT configuration at startup
-if (!JWT_SECRET) {
-  throw new Error('FATAL: JWT_SECRET environment variable is required for authentication');
-}
-
-if (JWT_SECRET.length < 32) {
-  throw new Error('FATAL: JWT_SECRET must be at least 32 characters');
-}
-
 // Classification levels hierarchy (higher number = higher clearance)
 const CLEARANCE_LEVELS = {
   UNCLASSIFIED: 0,
@@ -72,6 +63,10 @@ const MOCK_USERS: Record<string, any> = {
 };
 
 export async function authenticateUser(req: any): Promise<User | null> {
+  if (!JWT_SECRET) {
+    logger.error('Authentication failed: JWT_SECRET environment variable is not set');
+    return null;
+  }
   try {
     const authHeader = req.headers?.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -191,6 +186,9 @@ export function createAuthContext(user: User | null): AuthContext {
 
 // Generate JWT token for user (used in login)
 export function generateToken(user: User): string {
+  if (!JWT_SECRET) {
+    throw new Error('FATAL: JWT_SECRET environment variable is required to generate tokens');
+  }
   const payload = {
     id: user.id,
     username: user.username,
@@ -198,7 +196,7 @@ export function generateToken(user: User): string {
     clearanceLevel: user.clearanceLevel,
   };
 
-  return jwt.sign(payload, JWT_SECRET!, { expiresIn: JWT_EXPIRES_IN });
+  return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
 }
 
 // Validate password (mock implementation)
