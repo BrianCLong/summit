@@ -22,6 +22,7 @@ jobs:
           script: |
             const isPR = context.eventName === 'pull_request_target';
             const item = isPR ? context.payload.pull_request : context.payload.issue;
+if (!item) { console.log("No item found. Skipping."); return; }
             const labels = (item.labels || []).map(l => (typeof l === 'string' ? l : l.name));
 
             // ----- CONFIG YOU MUST FILL IN -----
