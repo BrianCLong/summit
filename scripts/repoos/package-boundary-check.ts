@@ -81,8 +81,12 @@ function parseYaml(yamlContent: string): any {
 
 // Simple glob matching
 function minimatchLite(filePath: string, pattern: string): boolean {
-  let regexStr = pattern
-    .replace(/\./g, '\\.')
+  // First, escape all regex special characters EXCEPT *.
+  // This is required to prevent regex injection, fixing CodeQL issue: "This does not escape backslash characters in the input."
+  let regexStr = pattern.replace(/[-[\]{}()+?.,\\^$|#\s]/g, '\\$&');
+
+  // Now replace globs
+  regexStr = regexStr
     .replace(/\*\*/g, '.__GLOB__.')
     .replace(/\*/g, '[^/]*')
     .replace(/\.__GLOB__\./g, '.*');
