@@ -1,7 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+// Use environment variable, do not hardcode a fallback secret
+const JWT_SECRET = process.env.JWT_SECRET;
 
 export interface AuthRequest extends Request {
   user?: {
@@ -15,6 +16,13 @@ export interface AuthRequest extends Request {
  * Authentication middleware
  */
 export function authMiddleware(req: AuthRequest, res: Response, next: NextFunction) {
+  if (!JWT_SECRET) {
+    return res.status(500).json({
+      error: 'Internal Server Error',
+      message: 'Authentication service is not configured correctly'
+    });
+  }
+
   const authHeader = req.headers.authorization;
 
   if (!authHeader) {
@@ -54,6 +62,9 @@ export function authMiddleware(req: AuthRequest, res: Response, next: NextFuncti
  * Generate JWT token
  */
 export function generateToken(payload: { id: string; nodeId?: string; role: string }): string {
+  if (!JWT_SECRET) {
+    throw new Error('FATAL: JWT_SECRET environment variable is required to generate tokens');
+  }
   return jwt.sign(payload, JWT_SECRET, { expiresIn: '24h' });
 }
 
