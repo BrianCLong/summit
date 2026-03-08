@@ -1,0 +1,9 @@
+{
+  "connector_id": "crtsh.v1",
+  "run_id": "run:crtsh.v1:e9416c11b3f9e843",
+  "input_hash": "sha256:b9e2a80fa92f8d5059ab90188e0691ad6730871a209cc337c7565593597fbd58",
+  "raw_hash": "sha256:756c2eab22461deef9cd6c956423427d33f9f695ad43b69ac6484492a4fe48a8",
+  "output_hash": "sha256:40095dac98824fb0556e391077d5afef7b05da8c7d0ec1ab0e9140620e96c6c1",
+  "transform_hash": "sha256:f19c2ade2e4e2c303f18b28f9c930533253225b2ebe0f4a844cc58648495a914",
+  "policy_verdict": "allow"
+}
