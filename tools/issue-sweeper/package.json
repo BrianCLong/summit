@@ -7,7 +7,7 @@
   "scripts": {
     "start": "node --loader ts-node/esm src/index.ts",
     "build": "tsc",
-    "test": "node --loader ts-node/esm --test test/main.test.ts",
+    "test": "node --loader ts-node/esm --test test/*.test.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

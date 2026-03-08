@@ -30,14 +30,28 @@ function getAllFiles(dirPath, arrayOfFiles) {
   arrayOfFiles = arrayOfFiles || [];
 
   files.forEach(function(file) {
-    if (fs.statSync(dirPath + "/" + file).isDirectory()) {
+    const fullPath = path.join(dirPath, file);
+    let stat;
+    try {
+      // Use lstat so symlink loops in worktrees/node_modules do not crash traversal.
+      stat = fs.lstatSync(fullPath);
+    } catch (error) {
+      if (error && (error.code === 'ELOOP' || error.code === 'ENOENT')) {
+        return;
+      }
+      throw error;
+    }
+
+    if (stat.isSymbolicLink()) {
+      return;
+    }
+
+    if (stat.isDirectory()) {
       if (file !== 'node_modules' && file !== '.git' && file !== 'dist' && file !== 'build') {
-        arrayOfFiles = getAllFiles(dirPath + "/" + file, arrayOfFiles);
+        arrayOfFiles = getAllFiles(fullPath, arrayOfFiles);
       }
-    } else {
-      if (file.endsWith('.ts') || file.endsWith('.tsx') || file.endsWith('.js') || file.endsWith('.jsx')) {
-        arrayOfFiles.push(path.join(dirPath, "/", file));
-      }
+    } else if (file.endsWith('.ts') || file.endsWith('.tsx') || file.endsWith('.js') || file.endsWith('.jsx')) {
+      arrayOfFiles.push(fullPath);
     }
   });
 
