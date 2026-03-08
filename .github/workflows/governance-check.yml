@@ -10,7 +10,7 @@ concurrency:
 
 jobs:
   enforce-classification:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4 # v6
@@ -38,7 +38,7 @@ jobs:
 
   check-approvals:
     needs: enforce-classification
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     if: contains(github.event.pull_request.labels.*.name, 'major')
     steps:
       - name: Verify Major Approval

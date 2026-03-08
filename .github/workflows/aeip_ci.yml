@@ -8,7 +8,7 @@ on:
 
 jobs:
   check-context-determinism:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
       - name: Run context validation
@@ -19,7 +19,7 @@ cv = ContextValidator()
 assert cv.validate_recency({'last_updated': '2023-01-01'}), 'Failed recency validation'
           "
   check-policy-binding:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
       - name: Run policy enforcement validation
@@ -30,7 +30,7 @@ pe = PermissionEnforcer()
 assert pe.enforce({'agent_id': 'agent-1', 'action_type': 'read'}, {'clearance': 'level-1'}), 'Failed policy enforcement'
           "
   check-entity-reconciliation:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
       - name: Run entity reconciliation
@@ -41,7 +41,7 @@ re = ReconciliationEngine()
 assert re.reconcile({'id': '123'}, {'entity_id': '123'}), 'Failed entity reconciliation'
           "
   check-evidence-id-format:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
       - name: Validate evidence ID
@@ -60,7 +60,7 @@ for dir_name in os.listdir('evidence/aeip'):
         sys.exit(1)
           "
   check-stamp-determinism:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
       - name: Validate determinism in stamp
@@ -76,7 +76,7 @@ with open('evidence/aeip/AEIP-TEST-CONTROL-002/stamp.json', 'r') as f:
         raise ValueError('Timestamp found in stamp file violating determinism.')
           "
   check-performance-budget:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
       - name: Profile AEIP

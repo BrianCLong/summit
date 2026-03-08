@@ -13,7 +13,7 @@ permissions:
 jobs:
   contract:
     name: contract
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     env:
       NODE_VERSION: '20.x'
       PNPM_CACHE_FOLDER: ~/.pnpm-store
