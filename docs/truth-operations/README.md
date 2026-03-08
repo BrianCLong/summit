@@ -27,7 +27,6 @@ Truth Operations consists of **six innovation pillars**, each addressing specifi
 Introduces **Integrity Scores** as orthogonal to confidence—measuring how resistant information is to adversarial manipulation rather than just statistical certainty.
 
 **Key Components**:
-
 - Source Volatility (SV)
 - Correlation Independence (CI)
 - Historical Adversarial Behavior (HAB)
@@ -45,7 +44,6 @@ Introduces **Integrity Scores** as orthogonal to confidence—measuring how resi
 Tracks competing explanations for events, detecting premature convergence, coordinated messaging, and alternative suppression.
 
 **Key Components**:
-
 - Explanatory Diversity (ED)
 - Convergence Velocity (CV)
 - Unexplained Elements Ratio (UER)
@@ -63,7 +61,6 @@ Tracks competing explanations for events, detecting premature convergence, coord
 Balances accuracy, timeliness, and decision relevance under adversarial time pressure. Prevents timing attacks and delay exploitation.
 
 **Key Components**:
-
 - Temporal Relevance Curves (TRC)
 - Decision Windows
 - Early Warning Partial Truth (EWPT)
@@ -81,7 +78,6 @@ Balances accuracy, timeliness, and decision relevance under adversarial time pre
 Separates identity, authority, and continuity—detecting compromised sources through behavioral deviation rather than just credential validation.
 
 **Key Components**:
-
 - Identity Verification
 - Authority Score Maintenance
 - Behavioral Deviation Score (BDS)
@@ -99,7 +95,6 @@ Separates identity, authority, and continuity—detecting compromised sources th
 Prevents false information from cascading through decision chains via dependency graphs and surgical quarantine.
 
 **Key Components**:
-
 - Decision Dependency Graph
 - Immediate Freeze Protocols
 - Impact Assessment
@@ -117,7 +112,6 @@ Prevents false information from cascading through decision chains via dependency
 Treats deliberate non-action as a first-class, justified decision—preventing adversarial exploitation of the "action imperative."
 
 **Key Components**:
-
 - Silence Classification (Observational, Denial, Prioritization, Uncertainty)
 - Justification Requirements
 - Active Monitoring
@@ -176,7 +170,6 @@ See [diagrams/truth-defense-flow.svg](./diagrams/truth-defense-flow.svg) for vis
 ## Operational Artifacts
 
 ### Documentation
-
 - `adversarial-threat-model.md` - Canonical threat taxonomy
 - `integrity-scoring.md` - Pillar 1 specification
 - `narrative-collision.md` - Pillar 2 specification
@@ -186,11 +179,9 @@ See [diagrams/truth-defense-flow.svg](./diagrams/truth-defense-flow.svg) for vis
 - `strategic-silence.md` - Pillar 6 specification
 
 ### Diagrams
-
 - `diagrams/truth-defense-flow.svg` - System integration flow
 
 ### Policy & Schemas
-
 - `../../policies/truth-defense.rego` - Enforceable truth defense policies (OPA/Rego)
 - `../../schemas/integrity-metadata.schema.json` - Integrity metadata JSON Schema
 
@@ -201,25 +192,21 @@ See [diagrams/truth-defense-flow.svg](./diagrams/truth-defense-flow.svg) for vis
 Truth Operations is essential for organizations operating under:
 
 ### National Security
-
 - State-level adversaries
 - Information warfare scenarios
 - Intelligence analysis under deception
 
 ### Critical Infrastructure
-
 - Adversarial attacks on operational systems
 - Safety-critical decision-making
 - Insider threat environments
 
 ### Financial Systems
-
 - Market manipulation detection
 - Fraud prevention under coordinated attacks
 - High-frequency trading safeguards
 
 ### AI Governance
-
 - Model poisoning resistance
 - Prompt injection defense
 - Adversarial input detection
@@ -231,25 +218,21 @@ Truth Operations is essential for organizations operating under:
 Truth Operations effectiveness measured across:
 
 ### Detection Metrics
-
 - **Attack Detection Rate**: % of manipulation attempts identified
 - **Detection Lead Time**: Time between attack start and detection
 - **False Positive Rate**: Legitimate information incorrectly flagged
 
 ### Containment Metrics
-
 - **Containment Speed**: Time from detection to quarantine
 - **Blast Radius Reduction**: Prevented cascades vs. actual cascades
 - **Containment Effectiveness**: % of dependencies successfully frozen
 
 ### Decision Metrics
-
 - **Temporal Decision Value (TDV)**: Quality × Timeliness composite
 - **Silence Success Rate**: % of strategic silence decisions validated correct
 - **Narrative Diversity Maintenance**: Average competing explanations maintained
 
 ### Recovery Metrics
-
 - **Recovery Time**: Duration from detection to restored operations
 - **Reversibility Rate**: % of influenced decisions successfully rolled back
 - **Adaptation Rate**: Speed of defensive improvement after attacks
@@ -259,31 +242,26 @@ Truth Operations effectiveness measured across:
 ## Implementation Roadmap
 
 ### Phase 1: Foundation (Weeks 1-2)
-
 - Deploy Integrity Scoring infrastructure
 - Establish Authority Continuity Ledger
 - Implement basic containment protocols
 
 ### Phase 2: Detection (Weeks 3-4)
-
 - Activate Narrative Collision Detection
 - Deploy Temporal Truth Protection
 - Integrate threat detection across pillars
 
 ### Phase 3: Response (Weeks 5-6)
-
 - Operationalize Blast-Radius Containment
 - Train operators on Strategic Silence
 - Establish monitoring and alerting
 
 ### Phase 4: Hardening (Weeks 7-8)
-
 - Red-team adversarial testing
 - Tune thresholds and policies
 - Validate cross-pillar integration
 
 ### Phase 5: Continuous Improvement
-
 - Collect attack telemetry
 - Update baselines and models
 - Expand threat detection capabilities
@@ -293,7 +271,6 @@ Truth Operations effectiveness measured across:
 ## Operational Requirements
 
 ### Technical Infrastructure
-
 - **Data provenance tracking**: Immutable audit trails
 - **Graph database**: For dependency tracking
 - **Real-time analytics**: Low-latency integrity scoring
@@ -301,7 +278,6 @@ Truth Operations effectiveness measured across:
 - **NLP capabilities**: Narrative analysis and linguistic drift detection
 
 ### Organizational Requirements
-
 - **Operator training**: Understanding adversarial patterns
 - **Red team**: Continuous adversarial testing
 - **Incident response**: Containment and remediation procedures
@@ -309,7 +285,6 @@ Truth Operations effectiveness measured across:
 - **Metrics discipline**: Continuous effectiveness measurement
 
 ### Cultural Requirements
-
 - **Epistemic humility**: Comfort with uncertainty
 - **Action discipline**: Resisting premature response
 - **Justified silence**: Normalizing strategic non-action
@@ -320,21 +295,18 @@ Truth Operations effectiveness measured across:
 ## Advanced Topics
 
 ### Machine Learning Integration
-
 - Adversarial pattern detection models
 - Predictive integrity degradation
 - Automated narrative clustering
 - Behavioral fingerprinting
 
 ### Cross-Organization Intelligence
-
 - Anonymized attack pattern sharing
 - Coordinated defense networks
 - Threat intelligence federation
 - Authority reputation sharing
 
 ### Economic Modeling
-
 - Cost-benefit analysis of verification depth
 - Optimal integrity threshold tuning
 - Resource allocation under attack
@@ -357,21 +329,18 @@ Truth Operations integrates with:
 ## References
 
 ### Academic Foundations
-
 - Information theory and entropy
 - Game theory and adversarial reasoning
 - Epistemic logic and belief revision
 - Network security and containment theory
 
 ### Operational Precedents
-
 - Intelligence analysis tradecraft
 - Military deception and counter-deception
 - Financial fraud detection
 - Cybersecurity incident response
 
 ### Future Research
-
 - Quantum-resistant integrity verification
 - Federated learning under adversarial conditions
 - Economic game theory of information warfare
@@ -387,7 +356,6 @@ Truth Operations integrates with:
 **Review Cycle**: Quarterly
 
 For questions, contributions, or incident reporting:
-
 - See main Summit documentation
 - Engage with security operations team
 - Participate in red team exercises

@@ -1,0 +1,36 @@
+flowchart LR
+    %% Styling
+    classDef motif fill:#f3e5f5,stroke:#4a148c,stroke-width:2px,color:#000
+    classDef agents fill:#fff3e0,stroke:#e65100,stroke-width:2px,color:#000
+    classDef ci fill:#e8f5e9,stroke:#1b5e20,stroke-width:2px,color:#000
+    classDef evidence fill:#e1f5fe,stroke:#01579b,stroke-width:2px,color:#000
+
+    %% Diagram
+    GraphMotif((Graph Motif)):::motif
+
+    subgraph Execution["GitHub CI Agentic Workflow"]
+        AgentA((Agent A\n[Collector])):::agents
+        AgentB((Agent B\n[Analyzer])):::agents
+        AgentC((Agent C\n[Reviewer])):::agents
+
+        DAG{Execution DAG}:::ci
+    end
+
+    subgraph Output["Evidence Creation"]
+        EV1[Evidence Node: Raw Intel]:::evidence
+        EV2[Evidence Node: Insights]:::evidence
+        EV3[Evidence Node: Validated]:::evidence
+    end
+
+    GraphMotif -->|Compiles to| DAG
+
+    DAG -->|Step 1| AgentA
+    DAG -->|Step 2| AgentB
+    DAG -->|Step 3| AgentC
+
+    AgentA -->|Yields| EV1
+    AgentB -->|Yields| EV2
+    AgentC -->|Yields| EV3
+
+    EV1 -->|Ingested| EV2
+    EV2 -->|Ingested| EV3
