@@ -38,12 +38,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4 # v4
 
+        with:
+          fetch-depth: 0
       - name: Enforce cosign hardening policy
         run: |
           set -euo pipefail
           node scripts/ci/verify-cosign-hardening.mjs \
             --report-out artifacts/cosign-hardening-policy.json
 
+        working-directory: ${{ github.workspace }}
       - name: Download build artifacts
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
@@ -96,6 +99,7 @@ jobs:
             --sbom-spdx artifacts/sbom.spdx.json \
             --evidence-out artifacts/sbom-lockfile-drift.json
 
+        working-directory: ${{ github.workspace }}
       - name: Install grype
         uses: anchore/scan-action/download-grype@3343887d815d7b07465f6fdcd395bd66508d486a # v3
 
@@ -116,6 +120,7 @@ jobs:
             --cve-allowlist security/supply-chain/cve-allowlist.txt \
             --severity-threshold "${{ inputs.severity_threshold }}"
 
+        working-directory: ${{ github.workspace }}
       - name: Install OPA
         run: |
           set -euo pipefail

@@ -88,6 +88,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
+        with:
+          fetch-depth: 0
       - name: Check Freeze Mode
         run: |
           chmod +x scripts/release/enforce_freeze_gate.sh
@@ -103,6 +105,7 @@ jobs:
   # Stage 1: Lineage Check (fail fast)
   # Verify GA tag points to successful RC commit
   # ═══════════════════════════════════════════════════════════════════════════
+        working-directory: ${{ github.workspace }}
   lineage:
     name: "1️⃣ Lineage Check"
     runs-on: ubuntu-latest
@@ -165,6 +168,7 @@ jobs:
             exit 1
           fi
 
+        working-directory: ${{ github.workspace }}
       - name: Lineage Summary
         if: always()
         run: |
@@ -270,6 +274,7 @@ jobs:
       - name: LongRunJob Contract Gate (strict)
         run: node scripts/ci/verify-longrun-contract.mjs
 
+        working-directory: ${{ github.workspace }}
       - name: Security Guardrails
         run: |
           echo "🛡️ Running Security Guardrails..."
@@ -281,6 +286,7 @@ jobs:
           echo "2. Dependency Audit"
           node scripts/ci/security_audit_gate.mjs
 
+        working-directory: ${{ github.workspace }}
       - name: Run Release Ready
         id: ready
         run: |
@@ -307,6 +313,7 @@ jobs:
           echo "Computed base: ${BASE}"
           echo "base=${BASE}" >> $GITHUB_OUTPUT
 
+        working-directory: ${{ github.workspace }}
       - name: Verify Green for Tag
         id: verify
         env:
@@ -338,6 +345,7 @@ jobs:
             echo "status=failed" >> $GITHUB_OUTPUT
           fi
 
+        working-directory: ${{ github.workspace }}
       - name: Upload Verification Output
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
@@ -386,6 +394,7 @@ jobs:
 
           echo "bundle_path=${BUNDLE_DIR}" >> $GITHUB_OUTPUT
 
+        working-directory: ${{ github.workspace }}
       - name: Generate Provenance Manifest
         run: |
           if [[ -f scripts/release/generate_provenance_manifest.sh ]]; then
@@ -397,6 +406,7 @@ jobs:
               --workflow-run "${{ github.run_id }}" || true
           fi
 
+        working-directory: ${{ github.workspace }}
       - name: Install Cosign
         uses: sigstore/cosign-installer@v3.7.0
         with:
@@ -463,6 +473,7 @@ jobs:
           chmod +x scripts/release/verify-release-bundle.mjs
           node scripts/release/verify-release-bundle.mjs --path staging/ga-bundle --strict
 
+        working-directory: ${{ github.workspace }}
       - name: Run Publish Guard
         id: guard
         run: |
@@ -489,6 +500,7 @@ jobs:
             echo "publish_allowed=false" >> $GITHUB_OUTPUT
           fi
 
+        working-directory: ${{ github.workspace }}
       - name: Upload Publish Guard Report
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
@@ -524,6 +536,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
+        with:
+          fetch-depth: 0
       - name: Download All Artifacts
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
@@ -711,6 +725,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
+        with:
+          fetch-depth: 0
       - name: Download GA Release Bundle
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:

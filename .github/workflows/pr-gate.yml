@@ -16,6 +16,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+        with:
+          fetch-depth: 0
       - name: Install pnpm
         uses: pnpm/action-setup@v4
 
@@ -45,9 +47,11 @@ jobs:
       - name: Workflow Drift Sentinel
         run: node scripts/ci/validate_workflows.mjs
 
+        working-directory: ${{ github.workspace }}
       - name: Workflow Budget Sentinel
         run: node scripts/ci/workflow-budget-sentinel.mjs
 
+        working-directory: ${{ github.workspace }}
       - name: Lint
         run: pnpm lint
 
@@ -60,9 +64,11 @@ jobs:
       - name: Evidence ID validation
         run: node scripts/ci/verify_evidence_id_consistency.mjs
 
+        working-directory: ${{ github.workspace }}
       - name: Timestamp scan
         run: node scripts/scan_timestamp_keys.mjs
 
+        working-directory: ${{ github.workspace }}
       - name: Report separation gate
         run: pnpm gate:report
 
@@ -88,3 +94,5 @@ jobs:
         run: |
           CHANGED_FILES=$(git diff --name-only "${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha }}" "${{ github.sha }}")
           pnpm exec tsx tools/governance/check-policy.ts $CHANGED_FILES
+permissions:
+  contents: read

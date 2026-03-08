@@ -124,6 +124,7 @@ jobs:
       - name: Set reproducible build environment
         if: inputs.reproducible
         run: |
+          git fetch --tags --force
           # Set deterministic timestamps for reproducible builds
           echo "SOURCE_DATE_EPOCH=$(git log -1 --format=%ct)" >> "$GITHUB_ENV"
 

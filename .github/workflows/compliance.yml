@@ -36,6 +36,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: pnpm/action-setup@v4
 
       - uses: pnpm/action-setup@v4
@@ -52,6 +54,8 @@ jobs:
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -77,6 +81,7 @@ jobs:
       - name: Generate Compliance Snapshot
         run: python3 scripts/compliance/generate_compliance_snapshot.py
 
+        working-directory: ${{ github.workspace }}
       - name: Upload Compliance Snapshot
         uses: actions/upload-artifact@v4
         with:
@@ -85,3 +90,5 @@ jobs:
 
       - name: Generate Evidence (Dry Run)
         run: pnpm compliance:evidence
+permissions:
+  contents: read

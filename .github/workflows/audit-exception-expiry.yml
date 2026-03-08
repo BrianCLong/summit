@@ -23,6 +23,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4 # v6
+        with:
+          fetch-depth: 0
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
 
@@ -40,3 +42,6 @@ jobs:
           fi
       - name: Validate exceptions
         run: node scripts/audit/check-exceptions.js
+        working-directory: ${{ github.workspace }}
+permissions:
+  contents: read

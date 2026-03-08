@@ -14,6 +14,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+        with:
+          fetch-depth: 0
       - name: Run Deterministic Replay Benchmarks
         run: python3 -m unittest discover -s tests/behavior_forecasting -p "test_*.py"
 
@@ -27,3 +29,5 @@ jobs:
           # Use local rego evaluation
           # Example: opa eval -i artifacts/behavior-forecasting/metrics.json -d .opa/policy/behavior_forecasting.rego "data.behavior_forecasting.allow"
           echo "Policy gate passed."
+permissions:
+  contents: read

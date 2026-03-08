@@ -11,6 +11,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
       - uses: actions/setup-node@v4
         with:
@@ -61,9 +63,12 @@ jobs:
           compose-file: .github/compose/pg_neo.yml
       - name: Validate Graph↔PG sync
         run: node scripts/ci/validate_graph_pg_sync.mjs
+        working-directory: ${{ github.workspace }}
       - name: Upload evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: graph-sync-evidence
           path: artifacts/graph-sync/*.json
+permissions:
+  contents: read

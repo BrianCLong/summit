@@ -18,6 +18,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+        with:
+          fetch-depth: 0
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
@@ -46,3 +48,5 @@ jobs:
         with:
           name: grounding-bench-results
           path: bench/grounding/results.json
+permissions:
+  contents: read

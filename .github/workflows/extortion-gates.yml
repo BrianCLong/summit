@@ -22,6 +22,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+        with:
+          fetch-depth: 0
       - uses: pnpm/action-setup@v4
         with:
           run_install: false
@@ -47,5 +49,9 @@ jobs:
       - name: Never-Log Scan
         run: ./scripts/ci/never_log_scan.sh packages/extortion/artifacts/extortion
 
+        working-directory: ${{ github.workspace }}
       - name: Determinism Check
         run: ./scripts/ci/check_determinism_extortion.sh
+        working-directory: ${{ github.workspace }}
+permissions:
+  contents: read

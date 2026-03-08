@@ -5,15 +5,23 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v5
-        with: { python-version: "3.11" }
+        with: {python-version: "3.11"}
       - run: pip install jsonschema
       - run: python3 scripts/verify_evidence.py
 
+        working-directory: ${{ github.workspace }}
   policy-deny-default:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v5
-        with: { python-version: "3.11" }
+        with: {python-version: "3.11"}
       - run: python3 scripts/verify_governance_artifacts.py
+        working-directory: ${{ github.workspace }}
+permissions:
+  contents: read

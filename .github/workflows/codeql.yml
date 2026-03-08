@@ -50,6 +50,8 @@ jobs:
       # and packages/ directories. Dependencies MUST be installed before CodeQL
       # analysis to ensure proper JavaScript/TypeScript resolution.
       # ============================================================================
+        with:
+          fetch-depth: 0
       - name: Setup pnpm
         if: matrix.language == 'javascript-typescript'
         uses: pnpm/action-setup@v4 # v4
@@ -107,3 +109,5 @@ jobs:
           category: "/language:${{matrix.language}}"
           # Upload results even if there are compilation errors
           upload: always
+permissions:
+  contents: read

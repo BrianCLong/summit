@@ -23,6 +23,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
@@ -32,3 +34,5 @@ jobs:
         run: python tools/evidence/verify_evidence.py
       - name: Run cogwar contract tests
         run: pytest tests/policy tests/iw tests/provenance tests/tech_radar
+permissions:
+  contents: read

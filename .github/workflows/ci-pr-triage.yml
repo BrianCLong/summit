@@ -31,6 +31,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+        with:
+          fetch-depth: 0
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -71,6 +73,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+        with:
+          fetch-depth: 0
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -100,6 +104,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+        with:
+          fetch-depth: 0
       - name: Verify evidence bundle present
         run: |
           echo "Checking PR description for evidence bundle section..."
@@ -130,3 +136,5 @@ jobs:
           echo "| Route registration | ✅ |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "> Security review by @security-governance-team required before merge (S-AOS §6)" >> $GITHUB_STEP_SUMMARY
+permissions:
+  contents: read

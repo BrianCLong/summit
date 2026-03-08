@@ -46,6 +46,7 @@ jobs:
       - name: Validate Request
         id: validate
         run: |
+          git fetch --tags --force
           TAG="${{ inputs.tag }}"
           REASON="${{ inputs.reason }}"
 
@@ -142,6 +143,7 @@ jobs:
 
           echo "status=$STATUS" >> $GITHUB_OUTPUT
 
+        working-directory: ${{ github.workspace }}
       - name: Upload Report
         if: always()
         uses: actions/upload-artifact@v4 # v6

@@ -105,6 +105,7 @@ jobs:
 
           echo "Evidence pack hash: ${EVIDENCE_HASH}"
 
+        working-directory: ${{ github.workspace }}
       - name: Upload Evidence Pack
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
@@ -143,6 +144,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4 # v6
 
+        with:
+          fetch-depth: 0
       - name: Download Evidence Pack
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
         with:
@@ -174,6 +177,7 @@ jobs:
 
           echo "status=success" >> $GITHUB_OUTPUT
 
+        working-directory: ${{ github.workspace }}
       - name: Verify Attestations
         run: |
           chmod +x scripts/release/verify_ga_evidence_attestations.sh
@@ -184,6 +188,7 @@ jobs:
             --expected-repo "${{ github.repository }}" \
             --verbose
 
+        working-directory: ${{ github.workspace }}
       - name: Upload Attestations
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:

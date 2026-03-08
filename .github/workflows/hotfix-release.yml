@@ -114,6 +114,7 @@ jobs:
 
       - name: Verify Commit Exists
         run: |
+          git fetch --tags --force
           COMMIT_SHA="${{ inputs.commit_sha }}"
 
           if ! git cat-file -e "${COMMIT_SHA}^{commit}"; then
@@ -285,6 +286,7 @@ jobs:
         with:
           ref: ${{ inputs.commit_sha }}
 
+          fetch-depth: 0
       - name: Download Hotfix Bundle
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
         with:
@@ -357,6 +359,7 @@ jobs:
 
       - name: Create Hotfix Tag
         run: |
+          git fetch --tags --force
           TAG="${{ needs.verify-hotfix.outputs.tag }}"
           COMMIT_SHA="${{ inputs.commit_sha }}"
 

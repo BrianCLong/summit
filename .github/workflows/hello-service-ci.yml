@@ -2,7 +2,7 @@ name: Hello Service CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
     paths:
       - 'services/hello-service/**'
       - '.github/workflows/hello-service-ci.yml'
@@ -19,3 +19,5 @@ jobs:
       service_path: services/hello-service
       image_name: hello-service
     secrets: inherit
+permissions:
+  contents: read

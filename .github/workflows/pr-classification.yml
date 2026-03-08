@@ -24,6 +24,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+        with:
+          fetch-depth: 0
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -48,6 +50,7 @@ jobs:
           PR_NUMBER="${{ github.event.pull_request.number || github.event.inputs.pr_number }}"
           node scripts/pr/classify-pr.mjs classify $PR_NUMBER
 
+        working-directory: ${{ github.workspace }}
       - name: Check auto-merge eligibility
         if: success()
         id: auto_merge
@@ -115,3 +118,6 @@ jobs:
           node scripts/evolution/emit-pr-event.mjs \
             pr_classified \
             "$(cat .repoos/pr-classifications/pr-${{ github.event.pull_request.number }}.json)"
+        working-directory: ${{ github.workspace }}
+permissions:
+  contents: read

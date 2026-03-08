@@ -10,8 +10,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
       - name: Run drift detector
         run: python scripts/monitoring/copilot_pr_metrics_drift.py
+        working-directory: ${{ github.workspace }}
+permissions:
+  contents: read

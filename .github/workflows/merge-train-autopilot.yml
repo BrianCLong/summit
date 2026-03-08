@@ -28,6 +28,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+        with:
+          fetch-depth: 0
       - name: Run Autopilot
         id: drain
         run: |
@@ -49,6 +51,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+        working-directory: ${{ github.workspace }}
       - name: Step Summary
         if: always()
         run: |

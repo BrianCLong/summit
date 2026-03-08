@@ -24,3 +24,5 @@ jobs:
       - name: Requeue
         run: |
           echo "Requeuing PR..."
+permissions:
+  contents: read

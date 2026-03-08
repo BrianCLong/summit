@@ -56,6 +56,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+        with:
+          fetch-depth: 0
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
 
@@ -83,3 +85,5 @@ jobs:
           JWT_REFRESH_SECRET: test-refresh-secret-at-least-32-chars-long
           NODE_ENV: test
           CI: true
+permissions:
+  contents: read

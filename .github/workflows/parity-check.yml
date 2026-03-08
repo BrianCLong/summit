@@ -26,6 +26,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+        with:
+          fetch-depth: 0
       - name: Setup tools
         uses: actions/setup-python@v5
         with:
@@ -69,6 +71,7 @@ jobs:
           PARITY_ENV2: canary
         run: bash scripts/ci/parity_check.sh
 
+        working-directory: ${{ github.workspace }}
       - name: Upload parity artifact
         uses: actions/upload-artifact@v4
         with:

@@ -155,6 +155,7 @@ jobs:
           echo "Computed base: ${BASE}"
           echo "base=${BASE}" >> $GITHUB_OUTPUT
 
+        working-directory: ${{ github.workspace }}
       - name: Run Promotion Guard
         id: guard
         env:
@@ -194,6 +195,7 @@ jobs:
             echo "Note: Bundle will still be created for audit purposes"
           fi
 
+        working-directory: ${{ github.workspace }}
       - name: Upload Verification Output
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
@@ -263,6 +265,7 @@ jobs:
 
           echo "bundle_staging=${STAGING_DIR}" >> $GITHUB_OUTPUT
 
+        working-directory: ${{ github.workspace }}
       - name: Assemble RC Pipeline Bundle
         id: assemble
         run: |
@@ -480,3 +483,4 @@ jobs:
             echo "./scripts/release/verify-green-for-tag.sh --tag ${TAG} --commit ${COMMIT}" >> $GITHUB_STEP_SUMMARY
             echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
           fi
+        working-directory: ${{ github.workspace }}

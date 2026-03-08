@@ -51,6 +51,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4 # v6
 
+        with:
+          fetch-depth: 0
       - name: Setup pnpm
         uses: pnpm/action-setup@v4 # v4
         # version is read from package.json packageManager field
@@ -76,6 +78,7 @@ jobs:
           sudo mv ./actionlint /usr/local/bin/
           actionlint -version
 
+        working-directory: ${{ github.workspace }}
       - name: Run Release Readiness Checks
         id: readiness
         run: |
@@ -164,9 +167,11 @@ jobs:
 
           echo "✅ All release readiness checks passed"
 
+        working-directory: ${{ github.workspace }}
       - name: Generate Release Readiness Summary
         if: always()
         run: |
+          git fetch --tags --force
           mkdir -p artifacts/release-readiness
 
           TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")

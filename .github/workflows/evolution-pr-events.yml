@@ -107,6 +107,7 @@ jobs:
             "${{ steps.event-type.outputs.EVENT_TYPE }}" \
             "$PR_CONTEXT" || echo "⚠️  Evolution Ledger unavailable, skipping event emission"
 
+        working-directory: ${{ github.workspace }}
       - name: Comment on PR (optional)
         if: steps.event-type.outputs.EVENT_TYPE == 'pr_opened'
         uses: actions/github-script@v7
@@ -118,3 +119,5 @@ jobs:
               repo: context.repo.name,
               body: '📊 Evolution intelligence activated for this PR. Events will be tracked in the Evolution Ledger.'
             })
+permissions:
+  contents: read

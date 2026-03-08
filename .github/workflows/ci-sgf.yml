@@ -5,7 +5,7 @@ on:
     paths:
       - 'packages/sgf-*/**'
   push:
-    branches: [ main ]
+    branches: [main]
     paths:
       - 'packages/sgf-*/**'
 
@@ -23,6 +23,8 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
       - name: Setup Node
@@ -39,3 +41,5 @@ jobs:
           pnpm --filter "@summit/sgf-*" build
       - name: Test SGF
         run: pnpm --filter "@summit/sgf-*" test
+permissions:
+  contents: read

@@ -13,6 +13,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+        with:
+          fetch-depth: 0
       - name: Setup OPA
         run: |
           curl -L -o opa-bin https://openpolicyagent.org/downloads/v0.70.0/opa_linux_amd64_static
@@ -60,3 +62,5 @@ jobs:
                 fi
             fi
           done
+permissions:
+  contents: read

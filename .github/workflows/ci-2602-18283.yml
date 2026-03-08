@@ -16,6 +16,8 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
+        with:
+          fetch-depth: 0
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
@@ -27,8 +29,11 @@ jobs:
       - name: Run 2602_18283 Evaluator (CI Mode)
         run: python scripts/run_2602_18283.py --ci
 
+        working-directory: ${{ github.workspace }}
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: 2602_18283_artifacts
           path: artifacts/2602_18283/
+permissions:
+  contents: read

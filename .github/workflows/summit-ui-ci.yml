@@ -23,6 +23,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+        with:
+          fetch-depth: 0
       - uses: pnpm/action-setup@v4
         with:
           version: "10"
@@ -48,6 +50,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+        with:
+          fetch-depth: 0
       - uses: pnpm/action-setup@v4
         with:
           version: "10"
@@ -79,6 +83,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+        with:
+          fetch-depth: 0
       - uses: pnpm/action-setup@v4
         with:
           version: "10"
@@ -101,3 +107,5 @@ jobs:
           name: summit-ui-dist
           path: apps/summit-ui/dist/
           retention-days: 7
+permissions:
+  contents: read

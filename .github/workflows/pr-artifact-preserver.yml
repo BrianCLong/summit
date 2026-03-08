@@ -16,6 +16,7 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.base.ref }}
 
+          fetch-depth: 0
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
@@ -29,6 +30,7 @@ jobs:
           PR_MERGED: ${{ github.event.pull_request.merged }}
         run: npx -y tsx scripts/pr-artifact-archive.ts
 
+        working-directory: ${{ github.workspace }}
       - name: Push to repository
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
