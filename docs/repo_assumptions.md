@@ -1,35 +1,40 @@
-# Repo Assumptions — ai-platform-daily-2026-02-07
+# Repo Assumptions: Interactive Benchmarks Implementation
 
-**Status:** Intentionally constrained pending in-repo validation.
-**Item Slug:** ai-platform-daily-2026-02-07
+## Verified Paths
+* `benchmarks/` - Exists and contains various subdirectories (e.g., `ci`, `graph`, `harness`, `runner`, `runtime`, `scenarios`). This is where the interactive benchmark substrate will be placed (`benchmarks/interactive/`).
+* `agents/` - Exists and contains various subdirectories (e.g., `examples`, `executor`, `governance`, `planner`, `registry`). This is where the benchmark agent adapter layer will be placed (`agents/benchmark/`).
+* `artifact/` - Exists and contains GitHub workflow files `.yml.fixed`. Will place artifact JSON schemas here in `artifact/schemas/benchmark/interactive/`.
+* `artifacts/` - Exists and contains directories for operational output (e.g., `evidence`, `schemas`). Will be used as the output directory for deterministic benchmark outputs (`artifacts/benchmarks/interactive/`).
+* `.github/workflows/` - Exists and contains reusable workflows (`_reusable-*.yml`). Used for CI wiring (`benchmark-*.yml`).
+* `.github/required-checks.yml` - Exists and manages required checks for PRs.
+* `docs/ci/REQUIRED_CHECKS_POLICY.yml` - Canonical policy source for release gate requirements.
+* `__tests__/` - Exists and contains tests. Will be used for benchmark unit tests (`__tests__/benchmark/`).
+* `docs/benchmarks/` - Exists and contains benchmark-related documentation. Will place `interactive.md`, `multiagent.md`, etc. here.
+* `docs/standards/` - Does not currently exist based on search, but can be created for benchmark standards (`interactive-benchmarks.md`).
+* `scripts/` - Exists, contains various scripts. Will place drift monitoring scripts in `scripts/monitoring/`.
 
-## Verified (from provided path map)
+## Assumed Paths
+* `SECURITY/` - Does not currently exist at the root level, but `SECURITY.md` exists in `.github/`. We will create `SECURITY/benchmark-threat-model.md` as instructed or place it in a relevant existing directory.
+* `RUNBOOKS/` - Does not currently exist at the root level. Will create `RUNBOOKS/benchmark-interactive.md` as instructed.
+* `GOLDEN/datasets/` - Does not currently exist at the root level. Will create `GOLDEN/datasets/benchmark/interactive/` as instructed for fixtures.
 
-- Runtime: **Node 18+**, **TypeScript**, **pnpm**, GitHub Actions.
-- Canonical paths:
-  - `.github/workflows/{ci-core.yml,ci-pr.yml,ci-security.yml,ci-verify.yml,codeql.yml,agent-guardrails.yml,agentic-plan-gate.yml,_reusable-*.yml}`
-  - `.github/{actions/,scripts/,policies/,MILESTONES/}`
-  - `src/{api/graphql,api/rest,agents,connectors,graphrag}`
-  - `tests/<module>/...`, `tests/e2e/...` (via pnpm scripts)
-- Docs layout: `docs/{architecture,api,security}` with suggested extensions `docs/{governance,operations,ga}`.
+## Inferred Ownership Risks
+* Modifying existing reusable workflows or `ci-core.yml` may affect the entire CI pipeline.
+* Adding new required checks in `REQUIRED_CHECKS_POLICY.yml` and `.github/required-checks.yml` must be done carefully to avoid blocking all PRs inadvertently.
+* Existing benchmark suites inside `benchmarks/` have their own runners and metrics. We should not break them; the new interactive suites must be purely additive.
+* `artifact/` directory currently mostly holds what looks like backed-up workflows (`.yml.fixed`). Putting schemas in `artifact/schemas/` is a new pattern but follows the prompt instructions.
 
-## Assumed (must validate in repo)
+## Must-Not-Touch List
+* `.github/workflows/_reusable-*.yml` (unless strictly necessary and explicitly allowed)
+* `.opa/policy/` (treat as stability-sensitive)
+* Existing `benchmarks/*` directories (e.g., `shootout/`, `spatialgeneval/`)
+* `docs/ci/README.md` (unless adding non-breaking references)
+* `.github/SECURITY.md` (treat as authoritative)
 
-- Actual existing agent runtime entrypoints under `src/agents/` (names, interfaces).
-- Existing policy engine format under `.github/policies/` (OPA vs custom).
-- Evidence schema conventions (filenames, JSON structure).
-- Current CI job names inside the workflows (exact `name:` fields).
-
-## Must-not-touch list (until validated)
-
-- `.github/workflows/codeql.yml`
-- Any production deployment workflows (if present)
-- DB migration directories (if present)
-- Secrets / encrypted configs
-
-## Validation checklist (before PRs merge)
-
-- Confirm `.github/workflows/*` filenames + required checks in branch protection.
-- Confirm `src/agents` architecture (planner/executor/observer?) and how tools are defined today.
-- Confirm logging/telemetry stack (to wire MCP audit + drift detector).
-- Confirm test runner + assertion libs (`pnpm test:*`).
+## Validation Checklist Before First PR
+* [x] Verify `benchmarks/` exists.
+* [x] Verify `agents/` exists.
+* [x] Verify `artifact/` and `artifacts/` exist.
+* [x] Verify CI workflow directories exist.
+* [x] Verify `.github/required-checks.yml` and `docs/ci/REQUIRED_CHECKS_POLICY.yml` exist.
+* [x] Map out the additive changes for PR1.

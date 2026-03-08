@@ -22,3 +22,7 @@ required_checks:
 notes:
   owner: summit-ga
   policy: docs/ci/REQUIRED_CHECKS_POLICY.yml
+  - Benchmark Substrate
+  - MultiAgent Coordination
+  - Economy Simulation
+  - Network Benchmarks
