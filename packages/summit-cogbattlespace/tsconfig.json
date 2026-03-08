@@ -5,11 +5,14 @@
     "moduleResolution": "Bundler",
     "declaration": true,
     "outDir": "dist",
-    "rootDir": "src",
     "strict": true,
     "resolveJsonModule": true,
     "esModuleInterop": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "types": ["node", "jest"],
+    "paths": {
+      "@intelgraph/summit-schemas": ["../summit-schemas/src/index.ts"]
+    }
   },
   "include": ["src/**/*"]
 }
