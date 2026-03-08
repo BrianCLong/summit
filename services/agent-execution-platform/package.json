@@ -39,7 +39,7 @@
     "dotenv": "^17.2.3",
     "cors": "^2.8.5",
     "helmet": "^8.1.0",
-    "express-rate-limit": "^8.1.0"
+    "express-rate-limit": "^7.0.0"
   },
   "devDependencies": {
     "@types/node": "20.19.27",

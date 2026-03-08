@@ -27,7 +27,7 @@
     "dotenv": "^17.2.3",
     "cors": "^2.8.5",
     "helmet": "^8.0.0",
-    "express-rate-limit": "^7.5.0",
+    "express-rate-limit": "^7.0.0",
     "geoip-lite": "^1.4.10"
   },
   "devDependencies": {
