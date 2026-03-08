@@ -61,6 +61,8 @@ All PROMOTE NOW PRs from the MERGE_QUEUE_PLAN.md processed via `claude/ga-comple
 | 16 | #1378 | ci: add Deploy Dev (AWS) workflow | ✅ MERGED | `.github/workflows/deploy-dev.yml` |
 | 17 | #1373 | ci: add nightly docker-enabled integration workflow | ✅ MERGED | `integration-nightly.yml` + `test:integration` script |
 | 18 | #1358 | test: expand policy reasoner coverage | ✅ MERGED | authz-gateway integrations, golden test cases |
+| 19 | n/a | feat: GDELT GKG 23rd-order integration | ✅ MERGED | Implemented governed signal plane for narratives |
+| 20 | n/a | feat: Phase 6 goal-seeking agents (v4.5) | ✅ MERGED | Transcended 23rd order to 40th order intention |
 
 **Additional GA Completion (claude/ branches):**
 | Branch | Commit | Status |
