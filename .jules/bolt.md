@@ -26,3 +26,7 @@
 ## 2026-07-15 - [Safe Batched Upserts with Fallback]
 **Learning:** While batched multi-row inserts improve performance by reducing round-trips, they change the atomicity of the operation; a single failing record can fail the entire batch. To maintain row-level reliability, a batch failure should trigger a fallback to individual inserts for that specific chunk.
 **Action:** Implement a try-catch block around batch queries that falls back to a row-by-row loop for the failed chunk, ensuring that valid records are still processed.
+
+## 2026-03-08 - [Efficient Batched Upserts with Insert/Update Tracking]
+**Learning:** PostgreSQL's `xmax` system column can be used in a `RETURNING` clause (e.g., `RETURNING (xmax = 0) AS inserted`) to efficiently determine if a row was inserted or updated during an `ON CONFLICT` operation. This avoids separate existence checks or complex conditional logic in the application layer when counts of new vs. existing records are required.
+**Action:** Use `RETURNING (xmax = 0) AS inserted` in batched upserts to accurately track operation types without additional queries.

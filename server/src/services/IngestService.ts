@@ -91,7 +91,7 @@ export class IngestService {
 
         // 3. Upsert entities in batches for performance
         // BOLT: Using batched upserts with ON CONFLICT reduces database round-trips from O(N) to O(N/batchSize).
-        const PG_BATCH_SIZE = 100;
+        const PG_BATCH_SIZE = 500;
         await getTracer().withSpan('IngestService.processEntities', async (entitySpan) => {
           for (let i = 0; i < input.entities.length; i += PG_BATCH_SIZE) {
             const batch = input.entities.slice(i, i + PG_BATCH_SIZE);
@@ -148,7 +148,7 @@ export class IngestService {
                   }
                 }
                 await client.query(`RELEASE SAVEPOINT entity_batch_${i}`);
-              } catch (batchError: any) {
+              } catch (batchError: unknown) {
                 await client.query(`ROLLBACK TO SAVEPOINT entity_batch_${i}`);
                 ingestLogger.warn({ error: batchError }, 'Batch entity upsert failed, falling back to individual inserts');
 
@@ -189,7 +189,7 @@ export class IngestService {
                       entitiesUpdated++;
                     }
                     await client.query('RELEASE SAVEPOINT entity_individual');
-                  } catch (err: any) {
+                  } catch (err: unknown) {
                     await client.query('ROLLBACK TO SAVEPOINT entity_individual');
                     const errorMessage = err instanceof Error ? err.message : String(err);
                     errors.push(`Entity ${entityInput.externalId}: ${errorMessage}`);
@@ -204,8 +204,8 @@ export class IngestService {
         // 4. Upsert relationships
         // BOLT: Batching relationships significantly improves throughput for connected data.
         await getTracer().withSpan('IngestService.processRelationships', async (relSpan) => {
-          for (let i = 0; i < input.relationships.length; i += PG_BATCH_SIZE) {
-            const batch = input.relationships.slice(i, i + PG_BATCH_SIZE);
+          for (let i = 0; i < input.relationships.length; i += 500) {
+            const batch = input.relationships.slice(i, i + 500);
             const values: any[] = [];
             const placeholders: string[] = [];
             let paramIndex = 1;
@@ -267,7 +267,7 @@ export class IngestService {
                   }
                 }
                 await client.query(`RELEASE SAVEPOINT rel_batch_${i}`);
-              } catch (batchError: any) {
+              } catch (batchError: unknown) {
                 await client.query(`ROLLBACK TO SAVEPOINT rel_batch_${i}`);
                 ingestLogger.warn({ error: batchError }, 'Batch relationship upsert failed, falling back to individual inserts');
 
@@ -313,7 +313,7 @@ export class IngestService {
                       relationshipsUpdated++;
                     }
                     await client.query('RELEASE SAVEPOINT rel_individual');
-                  } catch (err: any) {
+                  } catch (err: unknown) {
                     await client.query('ROLLBACK TO SAVEPOINT rel_individual');
                     const errorMessage = err instanceof Error ? err.message : String(err);
                     errors.push(`Relationship ${relInput.fromExternalId}->${relInput.toExternalId}: ${errorMessage}`);
@@ -387,9 +387,9 @@ export class IngestService {
           errors,
           provenanceId,
         };
-      } catch (error: any) {
+        } catch (err: unknown) {
         await client.query('ROLLBACK');
-        throw error;
+        throw err;
       } finally {
         client.release();
       }
