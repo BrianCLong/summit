@@ -20,6 +20,9 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Cleanup Worktrees (Fix for Git modules issue)
+        run: rm -rf .worktrees || true
+
       - uses: pnpm/action-setup@v4
 
       - uses: actions/setup-node@v4

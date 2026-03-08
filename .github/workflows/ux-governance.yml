@@ -47,6 +47,14 @@ jobs:
                 labels.push('patch');
                 console.log("Inferred 'patch' from 'chore:' prefix");
               }
+              else if (title.startsWith('perf:')) {
+                labels.push('patch');
+                console.log("Inferred 'patch' from 'perf:' prefix");
+              }
+              else if (title.startsWith('⚡ Bolt:')) {
+                labels.push('patch');
+                console.log("Inferred 'patch' from '⚡ Bolt:' prefix");
+              }
               else if (title.includes('BREAKING CHANGE')) {
                 labels.push('major');
                 console.log("Inferred 'major' from 'BREAKING CHANGE' in title");
@@ -57,7 +65,7 @@ jobs:
             }
 
             if (!hasClassification) {
-              core.setFailed("PR must have a classification label (patch, minor, or major) or use conventional commit prefixes (feat:, fix:, chore:, docs:) in the title.");
+              core.setFailed("PR must have a classification label (patch, minor, or major) or use conventional commit prefixes (feat:, fix:, chore:, docs:, perf:, ⚡ Bolt:) in the title.");
             } else {
               console.log("PR classification check passed.");
             }
