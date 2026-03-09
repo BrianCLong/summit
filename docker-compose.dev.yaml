@@ -8,7 +8,7 @@ services:
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-summit_dev}
       POSTGRES_USER: ${POSTGRES_USER:-summit}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env (see .env.example)}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-summit_dev_pw}
     ports:
       - '5432:5432'
     volumes:
@@ -43,7 +43,7 @@ services:
     container_name: summit-neo4j
     restart: unless-stopped
     environment:
-      NEO4J_AUTH: ${NEO4J_USERNAME:-neo4j}/${NEO4J_PASSWORD:?Set NEO4J_PASSWORD in .env (see .env.example)}
+      NEO4J_AUTH: ${NEO4J_USERNAME:-neo4j}/${NEO4J_PASSWORD:-summit_dev_pw}
       NEO4J_dbms_security_procedures_unrestricted: gds.*,apoc.*
       NEO4J_PLUGINS: '["apoc","graph-data-science"]'
     ports:
@@ -110,7 +110,7 @@ services:
       DATABASE_URL: postgresql://${POSTGRES_USER:-summit}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-summit_dev}
       NEO4J_URI: bolt://neo4j:7687
       NEO4J_USERNAME: ${NEO4J_USERNAME:-neo4j}
-      NEO4J_PASSWORD: ${NEO4J_PASSWORD}
+      NEO4J_PASSWORD: ${NEO4J_PASSWORD:-summit_dev_pw}
       REDIS_HOST: redis
       REDIS_PORT: 6379
       REDIS_PASSWORD: ${REDIS_PASSWORD:-}
@@ -151,19 +151,17 @@ services:
 
   gateway:
     build:
-      context: .
-      dockerfile: apps/gateway/Dockerfile
+      context: ./services/dev-gateway
     container_name: summit-gateway
     restart: unless-stopped
     environment:
-      PORT: 8080
+      PORT: 4100
       PROMETHEUS_PORT: 9464
       # OpenTelemetry Configuration
       OTEL_SERVICE_NAME: summit-gateway
       OTEL_SERVICE_VERSION: 1.0.0
       JAEGER_ENDPOINT: http://jaeger:14268/api/traces
       OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
-      CORE_SUBGRAPH_URL: http://api:4000/graphql
       FEATURE_LAC_ENFORCE: "true"
       COPILOT_NLQ: "true"
       UI_TRIPANE: "true"
@@ -180,10 +178,10 @@ services:
       typesense:
         condition: service_healthy
     ports:
-      - '8080:8080'
+      - '4100:4100'
       - '9464:9464'
     healthcheck:
-      test: [ 'CMD', 'curl', '-f', 'http://localhost:8080/healthz' ]
+      test: [ 'CMD', 'curl', '-f', 'http://localhost:4100/health' ]
       interval: 15s
       timeout: 5s
       retries: 10
@@ -191,7 +189,7 @@ services:
       - summit
     labels:
       - 'prometheus.job=summit_gateway'
-      - 'prometheus.port=8080'
+      - 'prometheus.port=4100'
 
   prov-ledger:
     build: ./services/prov-ledger
@@ -325,7 +323,7 @@ services:
       REDIS_HOST: redis
       REDIS_PORT: 6379
       REDIS_PASSWORD: ${REDIS_PASSWORD:-}
-      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in .env}
+      JWT_SECRET: ${JWT_SECRET:-summit_dev_secret}
       JWT_ALGORITHM: HS256
       CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000}
       CORS_CREDENTIALS: "true"
