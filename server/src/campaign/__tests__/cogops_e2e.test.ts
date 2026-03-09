@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest';
 import { loadCampaignTemplate, validateCampaign } from '../builders';
 import { assembleCogOpsBundle } from '../../provenance/evidence_bundle/generator';
 import { CogOpsReportSchema, CogOpsMetricsSchema, CogOpsStampSchema } from '../../provenance/evidence_bundle/cogops_schemas';
@@ -13,8 +14,8 @@ import { execSync } from 'child_process';
 const ajv = new Ajv2020({ allErrors: true, strict: false });
 addFormats(ajv);
 
-const reportSchema = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'schemas/cogops/report.schema.json'), 'utf8'));
-const metricsSchema = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'schemas/cogops/metrics.schema.json'), 'utf8'));
+const reportSchema = JSON.parse(fs.readFileSync(path.join(process.cwd(), '../schemas/cogops/report.schema.json'), 'utf8'));
+const metricsSchema = JSON.parse(fs.readFileSync(path.join(process.cwd(), '../schemas/cogops/metrics.schema.json'), 'utf8'));
 
 const validateReport = ajv.compile(reportSchema);
 const validateMetrics = ajv.compile(metricsSchema);
