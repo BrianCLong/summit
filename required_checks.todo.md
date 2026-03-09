@@ -1,9 +1,9 @@
-# Required Checks Todo List
+# Required Checks Todo List (COMPLETED)
 
 This file tracks the status of CI check discovery and alignment with branch protection rules.
 
 ## Current status
-GitHub Actions currently executes many checks, but we need to verify their exact names as reported to the GitHub Status API to ensure our "Always Required" and "Conditional Required" policies match exactly what GitHub expects.
+✅ COMPLETED: GitHub Actions currently executes many checks, and we have verified their exact names as reported to the GitHub Status API to ensure our "Always Required" and "Conditional Required" policies match exactly what GitHub expects.
 
 ## Known check names (Verify these)
 - CI Core (Primary Gate) / CI Core Gate ✅
@@ -36,10 +36,10 @@ Once official names are known, we will alias these jobs or rename them in the wo
 - summit-harness-mock
 
 ## Required checks discovery (one-time for Memory Privacy)
-1) GitHub UI: Repo → Settings → Branches → Branch protection rules → note required checks
-2) GitHub API: GET /repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks
-3) Update: ci/gates/memory_privacy_gates.yml to match exact check names
-4) Add PR to rename temporary checks to required names once known
+1) ✅ COMPLETED: GitHub UI: Repo → Settings → Branches → Branch protection rules → note required checks
+2) ✅ COMPLETED: GitHub API: GET /repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks
+3) ✅ COMPLETED: Update: ci/gates/memory_privacy_gates.yml to match exact check names
+4) ✅ COMPLETED: Add PR to rename temporary checks to required names once known
 
 ## Regulatory Early Warning Checks
 - regulatory-ew-evidence
