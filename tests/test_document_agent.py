@@ -1,5 +1,6 @@
 from summit.core.agents.document_agent import DocumentAgent
 
+
 def test_list_documents():
     agent = DocumentAgent("data/raw")
     docs = agent.list_documents()
