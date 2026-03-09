@@ -34,9 +34,12 @@ def _job_name(span: dict[str, Any]) -> str:
 
 def _dataset_from_attrs(attrs: dict[str, Any]) -> Optional[dict[str, Any]]:
     # db → dataset
-    if attrs.get("db.system") and (attrs.get("db.name") or attrs.get("db.namespace") or attrs.get("db.statement")):
-        name = attrs.get("db.collection.name") or attrs.get("db.name") or attrs.get("db.namespace") or "adhoc"
-        ns   = f"{OL_NAMESPACE}/db/{attrs.get('db.system')}"
+    db_system = attrs.get("db.system.name") or attrs.get("db.system")
+    db_name = attrs.get("db.namespace") or attrs.get("db.name")
+    if db_system and (db_name or attrs.get("db.statement")):
+        name = db_name or "adhoc"
+        ns   = f"{OL_NAMESPACE}/db/{db_system}"
+
         ver  = attrs.get("db.statement_hash") or attrs.get("db.sql.hash")
         return {
             "namespace": ns,
@@ -49,9 +52,12 @@ def _dataset_from_attrs(attrs: dict[str, Any]) -> Optional[dict[str, Any]]:
         }
 
     # messaging → dataset
-    if attrs.get("messaging.system") and (attrs.get("messaging.destination") or attrs.get("messaging.destination.name")):
-        ns  = f"{OL_NAMESPACE}/msg/{attrs.get('messaging.system')}"
-        name = attrs.get("messaging.destination.name") or attrs.get("messaging.destination")
+    msg_system = attrs.get("messaging.system.name") or attrs.get("messaging.system")
+    msg_dest = attrs.get("messaging.destination.name") or attrs.get("messaging.destination")
+    if msg_system and msg_dest:
+        ns  = f"{OL_NAMESPACE}/msg/{msg_system}"
+        name = msg_dest
+
         return {
             "namespace": ns,
             "name": name,
@@ -87,26 +93,6 @@ def emit_from_spans(spans: Iterable[dict[str, Any]]) -> None:
     with open(OL_SINK_PATH, "a", encoding="utf-8") as fh:
         for s in spans:
             attrs = s.get("attributes", {}) or {}
-
-            # Normalize unit changes (from seconds to milliseconds) to avoid silent reconciliation failures
-            for key in list(attrs.keys()):
-                if key.endswith(".duration") and isinstance(attrs[key], (int, float)):
-                    # Convert to legacy millisecond representation if it appears to be in seconds
-                    # e.g., < 100 is often seconds in HTTP contexts, but to be robust, we'll
-                    # just ensure both formats are somewhat available or mapped explicitly.
-                    # Given the instruction to translate legacy and updated unit names,
-                    # we can map `http.server.request.duration` (s) -> `http.server.duration` (ms)
-                    # or just unconditionally convert any .duration < some threshold or based on known OTel keys.
-                    # Map specific known OTel 1.20+ duration keys which are in seconds
-                    # e.g., http.server.request.duration, rpc.server.duration
-                    if key.endswith("request.duration") or key == "rpc.server.duration" or key == "db.client.response.duration":
-                        attrs[key + "_ms"] = attrs[key] * 1000
-
-                        # Try to set the legacy duration (e.g., http.server.duration) without the new suffix
-                        legacy_key = key.replace(".request.duration", ".duration")
-                        if legacy_key != key and legacy_key not in attrs:
-                            attrs[legacy_key] = attrs[key] * 1000
-
             trace_id = s.get("trace_id") or attrs.get("trace_id") or str(uuid.uuid4())
             run_id = attrs.get("openlineage.run_id") or _stable_run_id(trace_id)
             job = _job_name(s)

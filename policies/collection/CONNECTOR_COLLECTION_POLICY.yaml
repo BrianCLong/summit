@@ -1,0 +1,13 @@
+version: 1
+policy: connector_collection
+rules:
+  - id: require-policy-ref
+    description: Connector must declare policy references
+    enforce: true
+
+  - id: restrict-scrape-restricted
+    description: Restricted-license scrape connectors are denied by default
+    enforce: true
+
+defaults:
+  verdict: allow

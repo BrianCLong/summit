@@ -1,40 +1,36 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "Interactive Benchmark Trace Event",
-  "type": "object",
-  "properties": {
-    "evidence_id": {
-      "type": "string",
-      "pattern": "^SUMMIT-IB-[a-zA-Z0-9_]+-[a-zA-Z0-9_]+-[0-9]+$"
-    },
-    "step": { "type": "integer" },
-    "timestamp": { "type": "string" },
-    "action": {
-      "type": "object",
-      "properties": {
-        "type": { "type": "string" },
-        "payload": {}
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "step": {
+        "type": "integer"
       },
-      "required": ["type"]
-    },
-    "observation": {
-      "type": "object",
-      "properties": {
-        "state": {},
-        "reward": { "type": "number" },
-        "done": { "type": "boolean" }
+      "timestamp": {
+        "type": "string"
       },
-      "required": ["state"]
-    },
-    "reward": { "type": "number" },
-    "budget": {
-      "type": "object",
-      "properties": {
-        "steps_remaining": { "type": "integer" },
-        "wallclock_remaining_ms": { "type": "integer" }
+      "action": {
+        "type": ["object", "null"],
+        "properties": {
+          "type": { "type": "string" },
+          "payload": { "type": "object" }
+        },
+        "required": ["type"]
       },
-      "required": ["steps_remaining", "wallclock_remaining_ms"]
-    }
-  },
-  "required": ["step", "timestamp", "action", "observation", "reward", "budget"]
+      "observation": {
+        "type": "object"
+      },
+      "reward": {
+        "type": "number"
+      },
+      "done": {
+        "type": "boolean"
+      },
+      "metadata": {
+        "type": "object"
+      }
+    },
+    "required": ["step", "timestamp", "observation", "reward", "done"]
+  }
 }

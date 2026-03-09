@@ -1,0 +1,60 @@
+{
+  "run_id": "run:crtsh.v1:e9416c11b3f9e843",
+  "connector_id": "crtsh.v1",
+  "input": {
+    "domain": "example.com"
+  },
+  "raw_ref": "fixtures/raw.json",
+  "entities": [
+    {
+      "entity_id": "eid:domain:example.com",
+      "entity_type": "domain",
+      "canonical_value": "example.com",
+      "display_name": "example.com",
+      "confidence": 1,
+      "source_refs": [
+        "src:run:crtsh.v1:e9416c11b3f9e843:crtsh"
+      ],
+      "attributes": {
+        "issuer_name": "Example CA"
+      }
+    },
+    {
+      "entity_id": "eid:domain:www.example.com",
+      "entity_type": "domain",
+      "canonical_value": "www.example.com",
+      "display_name": "www.example.com",
+      "confidence": 0.95,
+      "source_refs": [
+        "src:run:crtsh.v1:e9416c11b3f9e843:crtsh"
+      ],
+      "attributes": {}
+    }
+  ],
+  "edges": [
+    {
+      "edge_id": "edge:observed_with:eid:domain:example.com:eid:domain:www.example.com",
+      "edge_type": "observed_with",
+      "from": "eid:domain:example.com",
+      "to": "eid:domain:www.example.com",
+      "confidence": 0.9,
+      "source_refs": [
+        "src:run:crtsh.v1:e9416c11b3f9e843:crtsh"
+      ],
+      "attributes": {}
+    }
+  ],
+  "observations": [
+    {
+      "type": "certificate_transparency_hit",
+      "common_name": "example.com",
+      "san_count": 2
+    }
+  ],
+  "source_metadata": {
+    "provider": "crtsh",
+    "license_class": "public"
+  },
+  "transform_hash": "sha256:f19c2ade2e4e2c303f18b28f9c930533253225b2ebe0f4a844cc58648495a914",
+  "policy_verdict": "allow"
+}
