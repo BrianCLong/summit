@@ -20,6 +20,10 @@ jobs:
           GH_TOKEN: ${{ secrets.PROJECTS_TOKEN }}
         with:
           script: |
+            if (!process.env.GH_TOKEN) {
+              console.log("No GH_TOKEN provided, skipping project sync.");
+              return;
+            }
             const isPR = context.eventName === 'pull_request_target';
             const item = isPR ? context.payload.pull_request : context.payload.issue;
             const labels = (item.labels || []).map(l => (typeof l === 'string' ? l : l.name));
