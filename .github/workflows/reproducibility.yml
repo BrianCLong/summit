@@ -23,6 +23,7 @@ concurrency:
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
+          version: 10.0.0
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
