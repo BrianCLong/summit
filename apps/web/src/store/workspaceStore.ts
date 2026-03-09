@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { TimeWindow, Granularity, TimezoneMode } from '../types/time-window';
 import { normalizeWindow, createInitialTimeWindow } from '../lib/time-window-utils';
 import { trackGoldenPathStep, trackTimeWindowChange, trackQueryLatency } from '../telemetry/metrics';
+import { trackEntitySelected } from '../telemetry/events';
 
 export interface Entity {
   id: string;
@@ -87,11 +88,14 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
   isSyncing: false,
   syncError: null,
 
-  selectEntity: (id) => set((state) => ({
-    selectedEntityIds: state.selectedEntityIds.includes(id)
-      ? state.selectedEntityIds
-      : [...state.selectedEntityIds, id]
-  })),
+  selectEntity: (id) => {
+    const currentState = get();
+    if (currentState.selectedEntityIds.includes(id)) return;
+    const next = [...currentState.selectedEntityIds, id];
+    set({ selectedEntityIds: next });
+    const entity = currentState.allEntities.find((e) => e.id === id);
+    trackEntitySelected(entity?.type ?? 'unknown', next.length);
+  },
 
   deselectEntity: (id) => set((state) => ({
     selectedEntityIds: state.selectedEntityIds.filter((eid) => eid !== id)
