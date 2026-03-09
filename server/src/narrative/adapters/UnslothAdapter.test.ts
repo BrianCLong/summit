@@ -1,9 +1,9 @@
-import { describe, it, expect, jest, beforeEach } from '@jest/globals';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { UnslothAdapter } from './UnslothAdapter.js';
 import type { NarrativeState, NarrativeEvent } from '../types.js';
 
 // Mock global fetch
-global.fetch = jest.fn() as jest.MockedFunction<typeof fetch>;
+global.fetch = vi.fn() as import('vitest').MockedFunction<typeof fetch>;
 
 describe('UnslothAdapter', () => {
   let adapter: UnslothAdapter;
@@ -63,7 +63,7 @@ describe('UnslothAdapter', () => {
   ];
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     adapter = new UnslothAdapter(config);
   });
 
@@ -74,7 +74,7 @@ describe('UnslothAdapter', () => {
       ]
     };
 
-    (global.fetch as jest.MockedFunction<typeof fetch>).mockResolvedValue({
+    (global.fetch as import('vitest').MockedFunction<typeof fetch>).mockResolvedValue({
       ok: true,
       json: async () => mockResponse
     } as Response);
@@ -98,7 +98,7 @@ describe('UnslothAdapter', () => {
       })
     );
 
-    const callArgs = (global.fetch as jest.MockedFunction<typeof fetch>).mock.calls[0];
+    const callArgs = (global.fetch as import('vitest').MockedFunction<typeof fetch>).mock.calls[0];
     const body = JSON.parse(callArgs[1]?.body as string);
 
     // Verify prompt contains history (length check or specific content)
@@ -109,7 +109,7 @@ describe('UnslothAdapter', () => {
   });
 
   it('should handle API errors gracefully', async () => {
-    (global.fetch as jest.MockedFunction<typeof fetch>).mockResolvedValue({
+    (global.fetch as import('vitest').MockedFunction<typeof fetch>).mockResolvedValue({
       ok: false,
       status: 500,
       text: async () => 'Internal Server Error'

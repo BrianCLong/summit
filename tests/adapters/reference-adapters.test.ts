@@ -1,4 +1,5 @@
 // @ts-nocheck
+import { describe, it, expect } from 'vitest';
 import { createHash } from 'node:crypto';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
