@@ -1,8 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 
-// Use environment variable, do not hardcode a fallback secret
-const JWT_SECRET = process.env.JWT_SECRET;
+// Use environment variable, do not hardcode a fallback secret (except in tests)
+const isTestEnv = process.env.NODE_ENV === 'test';
+const JWT_SECRET = process.env.JWT_SECRET || (isTestEnv ? 'test-secret-key-do-not-use-in-prod' : undefined);
 
 export interface AuthRequest extends Request {
   user?: {

@@ -19,7 +19,8 @@ interface AuthContext {
   hasClearance: (level: string) => boolean;
 }
 
-const JWT_SECRET = process.env.JWT_SECRET;
+const isTestEnv = process.env.NODE_ENV === 'test';
+const JWT_SECRET = process.env.JWT_SECRET || (isTestEnv ? 'test-secret-key-do-not-use-in-prod' : undefined);
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '24h';
 
 // Classification levels hierarchy (higher number = higher clearance)
