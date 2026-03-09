@@ -61,12 +61,14 @@ import {
   narrativeSimulationTicksTotal,
   narrativeSimulationEventsTotal,
   narrativeSimulationDurationSeconds,
-  summitHealthChecksTotal
+  summitHealthChecksTotal,
+  deploymentRollbacksTotal
 } from '../monitoring/metrics.js';
 
 export { registry };
 
 export {
+  deploymentRollbacksTotal,
   jobsProcessed,
   outboxSyncLatency,
   activeConnections,
@@ -122,6 +124,7 @@ export {
 };
 
 export const metrics = {
+  deploymentRollbacksTotal,
   jobsProcessed,
   outboxSyncLatency,
   activeConnections,
