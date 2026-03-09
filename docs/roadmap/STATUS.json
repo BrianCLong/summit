@@ -1,6 +1,6 @@
 {
   "last_updated": "2026-03-07T06:03:42Z",
-  "revision_note": "Added unified master subsumption roadmap for Summit evaluation platform.",
+  "revision_note": "Added fsociety deep subsumption governance plan and roadmap tracking entry.",
   "initiatives": [
     {
       "id": "nature-s41562-026-02411-w-layer2-layer3",
@@ -227,6 +227,12 @@
       "status": "completed",
       "owner": "codex",
       "notes": "Unified roadmap for evaluation platform, GA evidence consistency, and multi-agent UX subsumption."
+    },
+    {
+      "id": "fsociety-deep-subsumption-governance",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Published deep subsumption governance plan for fsociety assets with evidence-locked CI and protocol alignment."
     }
   ],
   "summary": {
