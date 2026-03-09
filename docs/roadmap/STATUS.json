@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-03-07T07:30:46Z",
-  "revision_note": "Added Summit AI Engineering Infrastructure v1 strategic execution blueprint with architecture, adoption plan, and governance alignment.",
+  "last_updated": "2026-03-07T05:20:20Z",
+  "revision_note": "Added Cursor-vs-Claude subsumption standard and Proof-Carrying PR control-plane guidance.",
   "initiatives": [
     {
       "id": "nature-s41562-026-02411-w-layer2-layer3",
@@ -215,6 +215,12 @@
       "target_ga": "2026-03-07",
       "description": "Establish baseline AI engineering infrastructure standards, including Cursor/Claude dual-engine patterns and governance-aware CI.",
       "evidence_id": "EVD-ARCH-INFRA-V1"
+    },
+    {
+      "id": "cursor-vs-claude-subsumption-standard",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Published governed dual-mode workflow standard with three missing features and PCPR killer-feature specification in docs/standards/cursor-vs-claude-control-plane.md."
     }
   ],
   "summary": {
