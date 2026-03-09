@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-03-07T05:20:20Z",
-  "revision_note": "Added Cursor-vs-Claude subsumption standard and Proof-Carrying PR control-plane guidance.",
+  "last_updated": "2026-03-07T06:03:42Z",
+  "revision_note": "Added unified master subsumption roadmap for Summit evaluation platform.",
   "initiatives": [
     {
       "id": "nature-s41562-026-02411-w-layer2-layer3",
@@ -221,6 +221,12 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "Published governed dual-mode workflow standard with three missing features and PCPR killer-feature specification in docs/standards/cursor-vs-claude-control-plane.md."
+    },
+    {
+      "id": "summit-master-subsumption-roadmap",
+      "status": "completed",
+      "owner": "codex",
+      "notes": "Unified roadmap for evaluation platform, GA evidence consistency, and multi-agent UX subsumption."
     }
   ],
   "summary": {
