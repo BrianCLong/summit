@@ -201,6 +201,12 @@
       "notes": "Documented CI/CD high-signal deltas with enforced action register and evidence targets."
     },
     {
+      "id": "agent-control-plane-scaffold-foundation",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Scaffold Summit agent control-plane foundation lane, including architecture documentation and core schema definitions."
+    },
+    {
       "id": "summit-master-subsumption-roadmap",
       "status": "completed",
       "owner": "codex",
