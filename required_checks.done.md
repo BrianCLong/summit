@@ -1,4 +1,4 @@
-# Required Checks Todo List
+# Required Checks Done List
 
 This file tracks the status of CI check discovery and alignment with branch protection rules.
 
