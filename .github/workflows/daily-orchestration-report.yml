@@ -1,0 +1,27 @@
+name: Daily Orchestration Report
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+jobs:
+  generate-report:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Generate Orchestration Report
+        run: python3 scripts/monitoring/generate_orchestration_report.py
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: jules-orchestration-report
+          path: artifacts/jules-orchestration-report.json
