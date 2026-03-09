@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def attention_coverage(attention_map, mask):
     """
     Calculates the proportion of attention concentrated inside the mask area.

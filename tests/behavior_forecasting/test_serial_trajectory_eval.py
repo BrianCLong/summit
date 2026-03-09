@@ -1,9 +1,11 @@
-import unittest
-import sys
 import os
+import sys
+import unittest
+
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 
 from benchmarks.behavior_forecasting.serial_trajectory_eval import evaluate_trajectory
+
 
 class TestSerialTrajectory(unittest.TestCase):
     def test_trajectory_eval(self):

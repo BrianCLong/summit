@@ -1,8 +1,11 @@
 import json
 import os
+
 import cv2
 import numpy as np
+
 from pipelines.reference_fidelity_eval.pipeline import ReferenceFidelityPipeline
+
 
 def run_benchmark(dataset, output_dir="reports/ref_fid_eval"):
     """

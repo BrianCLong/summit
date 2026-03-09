@@ -2,6 +2,7 @@ import json
 import os
 import sys
 
+
 def check_drift():
     # Load previous version if available
     previous_path = "artifacts/watchlists/ai-io/report_previous.json"
@@ -15,10 +16,10 @@ def check_drift():
         print(f"Previous watchlist not found at {previous_path}, no drift to compute.")
         return
 
-    with open(previous_path, "r") as f:
+    with open(previous_path) as f:
         previous_data = json.load(f)
 
-    with open(current_path, "r") as f:
+    with open(current_path) as f:
         current_data = json.load(f)
 
     # Simplified drift check based on evidence_id

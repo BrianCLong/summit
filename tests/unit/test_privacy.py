@@ -37,3 +37,11 @@ def test_privacy_guard_wrapper():
     payload = {"secret": "fail"}
     safe = PrivacyGuard.ensure_safe_for_logging(payload)
     assert safe["secret"] == "[REDACTED]"
+from hypothesis import given, strategies as st
+
+@given(st.text(), st.text())
+def test_hypothesis_redaction(secret_val, normal_val):
+    sensitive = {"token": secret_val, "name": normal_val}
+    safe = redact_dict(sensitive)
+    assert safe["token"] == "[REDACTED]"
+    assert safe["name"] == normal_val
