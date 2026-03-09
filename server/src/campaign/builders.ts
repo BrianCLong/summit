@@ -3,8 +3,8 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { Campaign } from './schema';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const _filename = fileURLToPath(import.meta.url);
+const _dirname = path.dirname(_filename);
 
 export async function loadCampaignTemplate(templateName: string): Promise<Campaign> {
   // Validate templateName to prevent Path Traversal
@@ -12,7 +12,7 @@ export async function loadCampaignTemplate(templateName: string): Promise<Campai
       throw new Error(`Invalid template name: ${templateName}`);
   }
 
-  const filePath = path.join(__dirname, 'templates', `${templateName}.json`);
+  const filePath = path.join(_dirname, 'templates', `${templateName}.json`);
   try {
     const data = await fs.readFile(filePath, 'utf-8');
     const campaign = JSON.parse(data) as Campaign;
