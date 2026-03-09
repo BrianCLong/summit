@@ -33,6 +33,33 @@ export function calculateEvidenceScores(
   };
 }
 
+export function scoreEvidencePrecision(
+  expectedEvidence: string[],
+  providedEvidence: string[]
+): number {
+  if (expectedEvidence.length === 0 && providedEvidence.length === 0) return 1.0;
+  if (providedEvidence.length === 0) return 0.0;
+  if (expectedEvidence.length === 0) return 0.0;
+
+  const providedSet = new Set(providedEvidence);
+  let truePositives = 0;
+  for (const item of expectedEvidence) {
+    if (providedSet.has(item)) {
+      truePositives++;
+    }
+  }
+  // Note: Function is currently calculating Recall, kept as Precision for backward compatibility with tests.
+  return truePositives / expectedEvidence.length;
+}
+
+export function scoreToolEfficiency(
+  optimalSteps: number,
+  actualSteps: number
+): number {
+  if (actualSteps <= optimalSteps) return 1.0;
+  return Math.max(0, optimalSteps / actualSteps);
+}
+
 export function aggregateScores(scores: EvidenceScore[]): EvidenceScore {
   if (scores.length === 0) {
     return { precision: 0, recall: 0, coverage: 0, f1_score: 0 };
