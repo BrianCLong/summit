@@ -1,69 +1,88 @@
 import fs from 'fs';
 import path from 'path';
+import crypto from 'crypto';
+
+const schemaDir = path.join(process.cwd(), 'schemas');
+const validDir = path.join(process.cwd(), 'fixtures/schemas/valid');
+const invalidDir = path.join(process.cwd(), 'fixtures/schemas/invalid');
+
+let hasErrors = false;
+
+// We use the already-installed Ajv from the project dependencies via dynamic import if needed
+// or just skip strict validation if we're in a lightweight script, but let's try to find ajv.
 import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
-import { fileURLToPath } from 'url';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-const ajv = new Ajv({ strict: false, allErrors: true });
+const ajv = new Ajv({ allErrors: true });
 addFormats(ajv);
 
-const schemasDir = path.resolve(__dirname, '../../schemas');
-const validFixturesDir = path.resolve(__dirname, '../../fixtures/schemas/valid');
-const invalidFixturesDir = path.resolve(__dirname, '../../fixtures/schemas/invalid');
+function validate(schemaPath, dataPath, shouldBeValid) {
+  const schemaStr = fs.readFileSync(schemaPath, 'utf-8');
+  const dataStr = fs.readFileSync(dataPath, 'utf-8');
 
-// Load dependent schemas first
-const evidenceObjectSchemaPath = path.join(schemasDir, 'evidence_object.schema.json');
-const evidenceObjectSchema = JSON.parse(fs.readFileSync(evidenceObjectSchemaPath, 'utf8'));
-ajv.addSchema(evidenceObjectSchema, 'evidence_object.schema.json');
-
-const schemaPaths = [
-  path.join(schemasDir, 'investigation_run.schema.json'),
-  evidenceObjectSchemaPath,
-  path.join(schemasDir, 'evidence_bundle.schema.json'),
-];
-
-let failed = false;
-
-for (const schemaPath of schemaPaths) {
-  const schemaName = path.basename(schemaPath);
-  const schema = JSON.parse(fs.readFileSync(schemaPath, 'utf8'));
-  const validate = ajv.compile(schema);
-
-  const fixtureName = schemaName.replace('.schema.json', '.json');
-
-  // Test valid fixtures
-  const validFixturePath = path.join(validFixturesDir, fixtureName);
-  if (fs.existsSync(validFixturePath)) {
-    const data = JSON.parse(fs.readFileSync(validFixturePath, 'utf8'));
-    const valid = validate(data);
-    if (!valid) {
-      console.error(`❌ Validation failed for VALID fixture: ${fixtureName}`);
-      console.error(validate.errors);
-      failed = true;
-    } else {
-      console.log(`✅ Validation passed for VALID fixture: ${fixtureName}`);
-    }
+  let schema;
+  let data;
+  try {
+    schema = JSON.parse(schemaStr);
+    data = JSON.parse(dataStr);
+  } catch (e) {
+    console.error(`Error parsing JSON: ${e.message}`);
+    hasErrors = true;
+    return;
   }
 
-  // Test invalid fixtures
-  const invalidFixturePath = path.join(invalidFixturesDir, fixtureName);
-  if (fs.existsSync(invalidFixturePath)) {
-    const data = JSON.parse(fs.readFileSync(invalidFixturePath, 'utf8'));
-    const valid = validate(data);
-    if (valid) {
-      console.error(`❌ Validation passed for INVALID fixture (expected fail): ${fixtureName}`);
-      failed = true;
+  const validateFn = ajv.compile(schema);
+  const valid = validateFn(data);
+
+  if (valid !== shouldBeValid) {
+    console.error(`Validation mismatch for ${dataPath} against ${schemaPath}. Expected valid=${shouldBeValid}, got valid=${valid}`);
+    if (!valid) {
+      console.error(validateFn.errors);
+    }
+    hasErrors = true;
+  } else {
+    console.log(`Successfully validated ${dataPath} (expected valid=${shouldBeValid})`);
+  }
+}
+
+const schemas = {
+  'investigation_run.schema.json': ['investigation_run.json'],
+  'evidence_object.schema.json': ['evidence_object.json'],
+  'evidence_bundle.schema.json': ['evidence_bundle.json']
+};
+
+for (const [schemaName, dataFiles] of Object.entries(schemas)) {
+  const schemaPath = path.join(schemaDir, schemaName);
+
+  if (!fs.existsSync(schemaPath)) {
+    console.error(`Schema not found: ${schemaPath}`);
+    hasErrors = true;
+    continue;
+  }
+
+  for (const dataFile of dataFiles) {
+    const validPath = path.join(validDir, dataFile);
+    if (fs.existsSync(validPath)) {
+      validate(schemaPath, validPath, true);
     } else {
-      console.log(`✅ Validation failed as expected for INVALID fixture: ${fixtureName}`);
+        console.error(`Valid fixture not found: ${validPath}`);
+        hasErrors = true;
+    }
+
+    const invalidPath = path.join(invalidDir, dataFile);
+    if (fs.existsSync(invalidPath)) {
+      validate(schemaPath, invalidPath, false);
+    } else {
+        console.error(`Invalid fixture not found: ${invalidPath}`);
+        hasErrors = true;
     }
   }
 }
 
-if (failed) {
+if (hasErrors) {
+  console.error('Schema validation failed.');
   process.exit(1);
 } else {
-  console.log('✅ All schema validations passed.');
+  console.log('All schemas validated successfully.');
+  process.exit(0);
 }
