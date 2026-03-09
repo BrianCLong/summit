@@ -30,3 +30,6 @@ jobs:
 
       - name: Validate evidence schemas and determinism
         run: pnpm exec tsx scripts/ci/verify-evidence-bundle.ts
+
+      - name: Validate pipeline contracts
+        run: pnpm exec tsx .github/scripts/validate-pipeline-contracts.ts
