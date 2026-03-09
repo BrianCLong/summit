@@ -232,7 +232,7 @@ export class CosignPlugin implements StepPlugin {
   }
 
   private async verifyImage(config: CosignStepConfig): Promise<CosignResult> {
-    const args = ['verify'];
+    const args = ['verify', '--use-signed-timestamps'];
 
     // Add verification method
     if (config.keyless) {
@@ -348,7 +348,7 @@ export class CosignPlugin implements StepPlugin {
   private async verifyAttestation(
     config: CosignStepConfig,
   ): Promise<CosignResult> {
-    const args = ['verify-attestation'];
+    const args = ['verify-attestation', '--use-signed-timestamps'];
 
     // Add verification method
     if (config.keyless) {

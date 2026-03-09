@@ -17,30 +17,32 @@ export function normalizeDataset(attrs: OTelSpanAttributes): OpenLineageDataset 
   let name = "";
 
   // Database mapping
-  if (attrs["db.system"]) {
+  const dbSystem = attrs["db.system.name"] || attrs["db.system"];
+  if (dbSystem) {
     // Construct namespace
     const host = attrs["net.peer.name"] || attrs["server.address"] || attrs["db.connection_string"] || "localhost";
-    const dbName = attrs["db.name"] ? `/${attrs["db.name"]}` : (attrs["db.namespace"] ? `/${attrs["db.namespace"]}` : "");
+    const dbNameVal = attrs["db.namespace"] || attrs["db.name"];
+    const dbName = dbNameVal ? `/${dbNameVal}` : "";
 
     // In many OTel setups, connection string might be full, but for simplicity let's build from pieces
     if (attrs["db.connection_string"] && !attrs["net.peer.name"] && !attrs["server.address"]) {
       // Very basic URL parsing or raw connection string usage if desired, but typically we want a clean URI
-      namespace = `${attrs["db.system"]}://${attrs["db.connection_string"]}`;
+      namespace = `${dbSystem}://${attrs["db.connection_string"]}`;
     } else {
-      namespace = `${attrs["db.system"]}://${host}${dbName}`;
+      namespace = `${dbSystem}://${host}${dbName}`;
     }
 
     // Determine name
-    name = attrs["db.collection.name"] || attrs["db.sql.table"] || attrs["db.cassandra.table"] || attrs["db.mongodb.collection"] || attrs["db.redis.database_index"] || attrs["db.name"] || attrs["db.namespace"] || "unknown_table";
+    name = attrs["db.sql.table"] || attrs["db.cassandra.table"] || attrs["db.mongodb.collection"] || attrs["db.redis.database_index"] || attrs["db.namespace"] || "unknown_table";
 
   }
   // Messaging mapping
-  else if (attrs["messaging.system"]) {
-    const system = attrs["messaging.system"];
+  else if (attrs["messaging.system.name"] || attrs["messaging.system"]) {
+    const system = attrs["messaging.system.name"] || attrs["messaging.system"];
     const url = attrs["messaging.url"] || attrs["net.peer.name"] || attrs["server.address"] || "unknown_broker";
     namespace = `${system}://${url}`;
 
-    name = attrs["messaging.destination"] || attrs["messaging.destination.name"] || "unknown_topic";
+    name = attrs["messaging.destination.name"] || attrs["messaging.destination"] || "unknown_topic";
   }
   // File mapping (S3 / generic file)
   else if (attrs["file.path"]) {
@@ -107,27 +109,4 @@ export function validateOpenLineageEvent(event: any): boolean {
   }
 
   return true;
-}
-
-
-/**
- * Normalizes OpenTelemetry span metrics (e.g., duration) that might have shifted
- * from milliseconds to seconds in recent OTel semantic conventions.
- * Mutates the attrs object to inject legacy/normalized fields.
- */
-export function normalizeDuration(attrs: OTelSpanAttributes): void {
-  for (const key of Object.keys(attrs)) {
-    if (key.endsWith('.duration') && typeof attrs[key] === 'number') {
-      const val = attrs[key];
-      // Map specific known OTel 1.20+ duration keys which are in seconds
-      if (key.endsWith('request.duration') || key === 'rpc.server.duration' || key === 'db.client.response.duration') {
-        attrs[`${key}_ms`] = val * 1000;
-
-        const legacyKey = key.replace('.request.duration', '.duration');
-        if (legacyKey !== key && attrs[legacyKey] === undefined) {
-          attrs[legacyKey] = val * 1000;
-        }
-      }
-    }
-  }
 }

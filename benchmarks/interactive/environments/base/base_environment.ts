@@ -1,29 +1,29 @@
 export interface Observation {
-  state: any;
-  reward?: number;
-  done?: boolean;
+  state: Record<string, unknown>;
+  availableActions: string[];
 }
 
 export interface Action {
   type: string;
-  payload?: any;
+  payload?: Record<string, unknown>;
 }
 
 export interface StepResult {
   observation: Observation;
   reward: number;
   done: boolean;
-  info?: any;
+  info?: Record<string, unknown>;
 }
 
 export interface BudgetState {
-  steps_remaining: number;
-  wallclock_remaining_ms: number;
+  stepsRemaining: number;
+  timeRemainingMs: number;
 }
 
 export interface EnvSnapshot {
-  state: any;
-  budget: BudgetState;
+  seed: number;
+  stepCount: number;
+  state: Record<string, unknown>;
 }
 
 export interface BaseEnvironment {

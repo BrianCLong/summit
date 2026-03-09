@@ -2,41 +2,224 @@
   "metadata": {
     "id": "test-graph-001",
     "version": "2026-03-09T00:00:00Z",
-    "description": "Minimal deterministic fixture",
-    "createdAt": "2026-03-09T00:00:00Z"
+    "description": "Minimal deterministic fixture for ontology validation testing",
+    "createdAt": "2026-03-09T00:00:00Z",
+    "tags": ["test", "fixture", "minimal"]
   },
   "nodes": [
     {
       "id": "tech-transformers",
       "type": "technology",
       "name": "Transformers",
-      "attrs": {"maturity": "mature"},
-      "evidenceRefs": [{"id": "e1", "type": "paper", "source": "arxiv:1706.03762", "observedAt": "2017-06-12T00:00:00Z", "confidence": 1.0}]
+      "description": "Neural network architecture for sequence-to-sequence tasks",
+      "attrs": {
+        "maturity": "mature",
+        "domain": ["nlp", "deep-learning"],
+        "capabilities": ["sequence-modeling", "attention-mechanism"],
+        "strategicImportance": "critical"
+      },
+      "firstSeenAt": "2017-06-12T00:00:00Z",
+      "lastSeenAt": "2026-03-09T00:00:00Z",
+      "evidenceRefs": [
+        {
+          "id": "evidence-001",
+          "type": "paper",
+          "source": "arxiv:1706.03762",
+          "uri": "https://arxiv.org/abs/1706.03762",
+          "observedAt": "2017-06-12T00:00:00Z",
+          "confidence": 1.0,
+          "metadata": {
+            "title": "Attention Is All You Need",
+            "authors": ["Vaswani et al."]
+          }
+        }
+      ]
     },
     {
-      "id": "org-google",
+      "id": "org-google-research",
       "type": "organization",
       "name": "Google Research",
-      "attrs": {"organizationType": "research-lab"},
-      "evidenceRefs": [{"id": "e2", "type": "manual", "source": "public-record", "observedAt": "2026-03-09T00:00:00Z", "confidence": 1.0}]
+      "description": "AI research division of Google",
+      "attrs": {
+        "organizationType": "research-lab",
+        "founded": "2006-01-01",
+        "size": "xlarge",
+        "geography": ["US", "global"],
+        "market": ["research", "b2b-saas"]
+      },
+      "firstSeenAt": "2006-01-01T00:00:00Z",
+      "lastSeenAt": "2026-03-09T00:00:00Z",
+      "evidenceRefs": [
+        {
+          "id": "evidence-002",
+          "type": "manual",
+          "source": "public-record",
+          "observedAt": "2026-03-09T00:00:00Z",
+          "confidence": 1.0
+        }
+      ]
+    },
+    {
+      "id": "capability-llm-inference",
+      "type": "capability",
+      "name": "Large Language Model Inference",
+      "description": "Ability to perform inference on billion-parameter language models",
+      "attrs": {
+        "domain": "nlp",
+        "strategicImportance": "critical",
+        "complexity": "high",
+        "reusability": 0.9
+      },
+      "firstSeenAt": "2018-01-01T00:00:00Z",
+      "lastSeenAt": "2026-03-09T00:00:00Z",
+      "evidenceRefs": [
+        {
+          "id": "evidence-003",
+          "type": "repo",
+          "source": "github.com/google-research/bert",
+          "uri": "https://github.com/google-research/bert",
+          "observedAt": "2018-11-02T00:00:00Z",
+          "confidence": 0.95
+        }
+      ]
+    },
+    {
+      "id": "framework-pytorch",
+      "type": "framework",
+      "name": "PyTorch",
+      "description": "Deep learning framework with dynamic computation graphs",
+      "attrs": {
+        "maturity": "mature",
+        "domain": ["deep-learning", "machine-learning"],
+        "strategicImportance": "high"
+      },
+      "firstSeenAt": "2016-09-01T00:00:00Z",
+      "lastSeenAt": "2026-03-09T00:00:00Z",
+      "evidenceRefs": [
+        {
+          "id": "evidence-004",
+          "type": "repo",
+          "source": "github.com/pytorch/pytorch",
+          "uri": "https://github.com/pytorch/pytorch",
+          "observedAt": "2016-09-01T00:00:00Z",
+          "confidence": 1.0
+        }
+      ]
     }
   ],
   "edges": [
     {
       "id": "edge-001",
       "type": "develops",
-      "from": "org-google",
+      "from": "org-google-research",
       "to": "tech-transformers",
       "weight": 1.0,
-      "evidenceRefs": [{"id": "e3", "type": "paper", "source": "arxiv:1706.03762", "observedAt": "2017-06-12T00:00:00Z", "confidence": 1.0}]
+      "attrs": {
+        "firstObservedAt": "2017-06-12T00:00:00Z"
+      },
+      "evidenceRefs": [
+        {
+          "id": "evidence-005",
+          "type": "paper",
+          "source": "arxiv:1706.03762",
+          "uri": "https://arxiv.org/abs/1706.03762",
+          "observedAt": "2017-06-12T00:00:00Z",
+          "confidence": 1.0,
+          "metadata": {
+            "affiliation": "Google Brain"
+          }
+        }
+      ]
+    },
+    {
+      "id": "edge-002",
+      "type": "implements",
+      "from": "tech-transformers",
+      "to": "capability-llm-inference",
+      "weight": 0.95,
+      "attrs": {
+        "strength": 0.95,
+        "impact": "critical"
+      },
+      "evidenceRefs": [
+        {
+          "id": "evidence-006",
+          "type": "paper",
+          "source": "arxiv:1810.04805",
+          "uri": "https://arxiv.org/abs/1810.04805",
+          "observedAt": "2018-10-11T00:00:00Z",
+          "confidence": 0.95,
+          "metadata": {
+            "title": "BERT: Pre-training of Deep Bidirectional Transformers"
+          }
+        }
+      ]
+    },
+    {
+      "id": "edge-003",
+      "type": "enables",
+      "from": "framework-pytorch",
+      "to": "tech-transformers",
+      "weight": 0.9,
+      "attrs": {
+        "strength": 0.9,
+        "impact": "high"
+      },
+      "evidenceRefs": [
+        {
+          "id": "evidence-007",
+          "type": "repo",
+          "source": "github.com/huggingface/transformers",
+          "uri": "https://github.com/huggingface/transformers",
+          "observedAt": "2018-12-01T00:00:00Z",
+          "confidence": 0.9,
+          "metadata": {
+            "note": "Major transformers library built on PyTorch"
+          }
+        }
+      ]
+    },
+    {
+      "id": "edge-004",
+      "type": "provides",
+      "from": "org-google-research",
+      "to": "capability-llm-inference",
+      "weight": 0.85,
+      "evidenceRefs": [
+        {
+          "id": "evidence-008",
+          "type": "market-signal",
+          "source": "google-cloud-ai",
+          "observedAt": "2019-01-01T00:00:00Z",
+          "confidence": 0.85,
+          "metadata": {
+            "product": "Vertex AI"
+          }
+        }
+      ]
     }
   ],
   "stats": {
-    "nodeCountByType": {"technology": 1, "organization": 1},
-    "edgeCountByType": {"develops": 1},
-    "totalNodes": 2,
-    "totalEdges": 1,
-    "totalEvidenceRefs": 3,
-    "avgConfidence": 1.0
+    "nodeCountByType": {
+      "technology": 1,
+      "organization": 1,
+      "capability": 1,
+      "framework": 1
+    },
+    "edgeCountByType": {
+      "develops": 1,
+      "implements": 1,
+      "enables": 1,
+      "provides": 1
+    },
+    "totalNodes": 4,
+    "totalEdges": 4,
+    "totalEvidenceRefs": 8,
+    "avgConfidence": 0.9375,
+    "temporalCoverage": {
+      "earliestObservation": "2016-09-01T00:00:00Z",
+      "latestObservation": "2026-03-09T00:00:00Z",
+      "spanDays": 3477
+    }
   }
 }

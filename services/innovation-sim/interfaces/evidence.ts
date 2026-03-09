@@ -1,9 +1,18 @@
 /**
  * Evidence Reference Types
+ *
+ * Every claim in the Innovation Simulation system must be backed by evidence.
+ * This module defines the evidence reference schema used throughout the graph.
  */
 
 export type EvidenceType =
-  | "repo" | "paper" | "funding" | "job-posting" | "standard" | "market-signal" | "manual";
+  | "repo"              // Git repository artifacts (commits, PRs, issues)
+  | "paper"             // Research papers, preprints, technical reports
+  | "funding"           // VC rounds, grants, acquisitions
+  | "job-posting"       // Hiring signals (roles, skills, team sizes)
+  | "standard"          // Standards bodies, RFCs, specifications
+  | "market-signal"     // Product launches, adoption metrics, usage data
+  | "manual";           // Human-curated observations
 
 export interface EvidenceRef {
   id: string;
