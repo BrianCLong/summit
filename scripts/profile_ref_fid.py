@@ -1,9 +1,12 @@
 import cProfile
-import pstats
 import io
+import pstats
+
 import cv2
 import numpy as np
+
 from pipelines.reference_fidelity_eval.pipeline import ReferenceFidelityPipeline
+
 
 def profile_pipeline():
     """

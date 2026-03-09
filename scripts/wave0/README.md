@@ -26,7 +26,7 @@ Validates the golden path is working:
 Installs new governance packages:
 - @intelgraph/authority-compiler
 - @intelgraph/canonical-entities
-- @intelgraph/connector-sdk
+- @summit/connector-sdk
 - @intelgraph/prov-ledger-extensions
 - @intelgraph/governance-hooks
 

@@ -37,7 +37,7 @@ Canonical entity type definitions with bitemporal support.
 - Bitemporal fields: validFrom, validTo, observedAt, recordedAt
 - Classification levels: UNCLASSIFIED, CONFIDENTIAL, SECRET, TOP_SECRET
 
-#### @intelgraph/connector-sdk
+#### @summit/connector-sdk
 SDK for building external data source connectors.
 
 **Key Components:**

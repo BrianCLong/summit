@@ -1,4 +1,4 @@
-with open('server/src/marketplace/service.ts', 'r') as f:
+with open('server/src/marketplace/service.ts') as f:
     content = f.read()
 
 # Make sure updateReputation works properly

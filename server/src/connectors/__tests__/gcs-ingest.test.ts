@@ -2,7 +2,7 @@
 import { jest, describe, it, expect, beforeEach } from '@jest/globals';
 
 // Mock connector-sdk before any imports
-jest.mock('@intelgraph/connector-sdk', () => ({
+jest.mock('@summit/connector-sdk', () => ({
   PullConnector: class {},
   ConnectorContext: {},
   ConnectorResult: {},
@@ -11,7 +11,7 @@ jest.mock('@intelgraph/connector-sdk', () => ({
 
 import { GCSBatchConnector } from '../gcs-ingest.js';
 import { Readable } from 'stream';
-import type { ConnectorContext } from '@intelgraph/connector-sdk';
+import type { ConnectorContext } from '@summit/connector-sdk';
 
 // Mock GCSConnector
 const mockGCSConnectorInstance = {

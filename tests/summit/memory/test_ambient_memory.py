@@ -1,6 +1,7 @@
 from datetime import datetime
-import pytest
 from unittest.mock import MagicMock, patch
+
+import pytest
 
 from summit.memory.ingestion import ingest_moment
 from summit.memory.moment import Moment
