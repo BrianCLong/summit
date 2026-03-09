@@ -85,3 +85,8 @@ router.post('/secrets/rotate', rotateHandler);
 **Vulnerability:** Several sensitive endpoints (e.g., `/dr/*`, `/airgap/*`, and `/analytics/*`) were mounted directly at the root in `server/src/app.ts` without authentication or role-based access control middleware. This exposed disaster recovery, data export/import, and graph analytics capabilities to unauthenticated users.
 **Learning:** Routes mounted outside the global `/api` protection block are easily overlooked. Relying on internal router protection is less secure than a "deny-by-default" posture at the application entry point.
 **Prevention:** Apply consistent authentication (`authenticateToken`) and role-based (`ensureRole`) middleware to all routes at the time of mounting in the main application file. Regularly audit root-level route definitions for missing security wrappers.
+
+## 2024-03-07 - [Remove Insecure Default JWT Secrets]
+**Vulnerability:** Default hardcoded JWT secrets (`active-measures-secret-key` and `your-secret-key-change-in-production`) were present in `active-measures-module/src/middleware/auth.ts` and `services/edge-gateway/src/middleware/auth.ts` as fallbacks for the `JWT_SECRET` environment variable.
+**Learning:** Development convenience fallbacks can easily slip into production, enabling catastrophic authentication bypass if the environment variable fails to inject.
+**Prevention:** Remove fallback values for critical secrets. Implement early, fail-fast validation at module initialization to crash the application if required secrets are missing or of insufficient length. However, avoid crashing the test suite by providing mock values when `NODE_ENV` is not 'production'.
