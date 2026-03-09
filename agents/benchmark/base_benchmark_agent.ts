@@ -1,39 +1,24 @@
-import { Observation, Action, BudgetState, StepResult } from '../../benchmarks/interactive/environments/base/base_environment';
+import { RunConfig, BenchmarkAgent } from '../../benchmarks/interactive/runners/interactive_runner';
+import { Observation, Action, StepResult, BudgetState } from '../../benchmarks/interactive/environments/base/base_environment';
 
-export interface RunContext {
-  suiteId: string;
-  caseId: string;
-  agentId: string;
-  seed: number;
-}
+export abstract class BaseBenchmarkAgent implements BenchmarkAgent {
+  protected context!: RunConfig;
+  protected stepHistory: StepResult[] = [];
 
-export interface AgentMemory {
-  history: any[];
-}
+  async init(runContext: RunConfig): Promise<void> {
+    this.context = runContext;
+    this.stepHistory = [];
+  }
 
-export interface AgentSummary {
-  final_state: any;
-  insights: string[];
-}
+  abstract act(observation: Observation, memory: Record<string, unknown>, budget: BudgetState): Promise<Action>;
 
-export interface BenchmarkAgent {
-  /**
-   * Initialize the agent with the current run context.
-   */
-  init(ctx: RunContext): Promise<void>;
+  async update(stepResult: StepResult): Promise<void> {
+    this.stepHistory.push(stepResult);
+  }
 
-  /**
-   * Decide on the next action given the current observation, memory, and budget.
-   */
-  act(obs: Observation, memory: AgentMemory, budget: BudgetState): Promise<Action>;
-
-  /**
-   * Update internal state based on the result of the last action.
-   */
-  update(step: StepResult): Promise<void>;
-
-  /**
-   * Finalize the agent's run and return a summary.
-   */
-  finalize(): Promise<AgentSummary>;
+  async finalize(): Promise<Record<string, unknown>> {
+    return {
+      stepsTaken: this.stepHistory.length
+    };
+  }
 }
