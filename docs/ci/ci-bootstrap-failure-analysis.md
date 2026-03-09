@@ -28,3 +28,8 @@ Based on reviewing `.github/workflows` and related automation scripts (like the 
 
 1. Update `scripts/governance/branch_ownership_enforcer.ts` to properly identify changed files for PRs using GitHub context/API or a safer Git comparison (`git diff --name-only origin/${process.env.GITHUB_BASE_REF} HEAD`).
 2. Alternatively, switch file change detection in PR-related TS scripts to use `gh pr diff --name-only` or `@actions/github` instead of raw git commands to avoid checkout state edge cases.
+
+## Fix Implemented (March 2026)
+
+- Identified missing `fetch-depth` configurations in workflows calling `git log`, `git rev-parse HEAD`, `git fetch`, and `git diff`.
+- Added `fetch-depth: 0` to `actions/checkout` in `.github/workflows/reproducibility.yml`, `.github/workflows/workflow-validity.yml`, `.github/workflows/supply-chain-delta.yml`, `.github/workflows/release-readiness.yml`, `.github/workflows/governance-lockfile-verify.yml`, `.github/workflows/governance-regression-guard.yml`, `.github/workflows/reusable/package.yml`, and `.github/workflows/_reusable-package.yml`.
