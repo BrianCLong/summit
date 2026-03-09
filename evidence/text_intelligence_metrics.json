@@ -1,8 +1,14 @@
 [
-  {
-    "evidence_id": "TI-20260307-001",
-    "document_id": "XYZ123",
-    "metric": "ESG_score",
-    "value": 0.87
-  }
+    {
+        "evidence_id": "TI-20260307-001",
+        "document_id": "DOC001",
+        "metric": "ESG_score",
+        "value": 0.75
+    },
+    {
+        "evidence_id": "TI-20260307-002",
+        "document_id": "DOC002",
+        "metric": "Risk_score",
+        "value": 0.62
+    }
 ]

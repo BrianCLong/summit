@@ -13,7 +13,7 @@ jobs:
           python-version: 3.11
       - name: Install dependencies
         run: pip install -r requirements.txt
-      - name: Run unit tests
+      - name: Run tests
         run: pytest tests/
-      - name: Validate schema
+      - name: QA Validation
         run: python scripts/qa_validation.py
