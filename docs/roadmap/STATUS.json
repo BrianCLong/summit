@@ -207,6 +207,16 @@
       "notes": "Scaffold Summit agent control-plane foundation lane, including architecture documentation and core schema definitions."
     },
     {
+      "id": "ai-infra-blueprint-v1",
+      "status": "completed",
+      "priority": "critical",
+      "owner": "Architecture",
+      "started_at": "2026-03-07",
+      "target_ga": "2026-03-07",
+      "description": "Establish baseline AI engineering infrastructure standards, including Cursor/Claude dual-engine patterns and governance-aware CI.",
+      "evidence_id": "EVD-ARCH-INFRA-V1"
+    },
+    {
       "id": "summit-master-subsumption-roadmap",
       "status": "completed",
       "owner": "codex",
