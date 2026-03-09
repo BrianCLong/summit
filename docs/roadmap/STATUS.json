@@ -1,12 +1,18 @@
 {
-  "last_updated": "2026-03-07T00:00:00Z",
-  "revision_note": "Added unified master subsumption roadmap for evaluation lifecycle, prompt registry, observatory, and evaluation registry execution sequencing.",
+  "last_updated": "2026-03-08T00:00:00Z",
+  "revision_note": "Merged unified master subsumption roadmap and Layer 2/3 regulatory architecture entries. Added RepoOS production deployment.",
   "initiatives": [
     {
       "id": "master-subsumption-roadmap-eval-platform",
       "status": "in_progress",
       "owner": "codex",
       "notes": "Published 12-PR dependency-ordered roadmap with architecture and module interaction diagrams under docs/roadmaps."
+    },
+    {
+      "id": "nature-s41562-026-02411-w-layer2-layer3",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Published governed Layer 2 (regulatory-signals dataset) and Layer 3 (regulatory early-warning) subsumption brief with deterministic CI/evidence posture."
     },
     {
       "id": "adenhq-hive-subsumption-lane1",

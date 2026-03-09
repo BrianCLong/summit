@@ -1,0 +1,44 @@
+version: 1
+lanes:
+  - id: lane.fast
+    title: Fast deterministic
+    allowed_paths:
+      - docs/**
+      - scripts/**
+      - .github/**
+    required_checks:
+      - pr-gate
+    max_open_prs: 5
+    max_frontier_files_changed: 20
+
+  - id: lane.service-bounded
+    title: Service bounded
+    allowed_paths:
+      - server/**
+      - client/**
+      - infra/**
+    required_checks:
+      - pr-gate
+    max_open_prs: 8
+    max_frontier_files_changed: 80
+
+  - id: lane.gov-deterministic
+    title: Governance deterministic
+    allowed_paths:
+      - .github/**
+      - docs/**
+      - scripts/**
+      - tools/**
+    required_checks:
+      - pr-gate
+    max_open_prs: 3
+    max_frontier_files_changed: 30
+
+  - id: lane.heavy
+    title: Heavy integration
+    allowed_paths:
+      - "**/*"
+    required_checks:
+      - pr-gate
+    max_open_prs: 2
+    max_frontier_files_changed: 250

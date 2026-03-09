@@ -1,0 +1,4 @@
+allowlisted_failures:
+  - eslint-fixable
+  - prettier-format
+  - snapshot-update

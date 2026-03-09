@@ -216,7 +216,7 @@ jobs:
       - name: Install Cosign
         uses: sigstore/cosign-installer@v3
         with:
-          cosign-release: v2.2.4
+          cosign-release: 'v3.0.5'
 
       - name: Sign image with Cosign (keyless)
         env:
