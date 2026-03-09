@@ -2,52 +2,113 @@
 import { getDriver, runCypher } from './neo4j.js';
 import { GraphEntity, GraphEdge, EntityType, EdgeType, EpistemicMetadata, SourceReference } from './types.js';
 import { v4 as uuidv4 } from 'uuid';
+import { CypherBuilder } from './queryBuilder.js';
+import { validateGraphEntity, validateGraphEdge } from './schema.js';
 
 export class GraphStore {
   /**
    * Upsert a node in the graph.
    * Handles tenant isolation and time-travel versioning implicitly (simplified: current state).
    */
-  async upsertNode(node: Partial<GraphEntity> & { globalId: string, tenantId: string, entityType: EntityType }): Promise<void> {
-    const query = `
-      MERGE (n:GraphNode { globalId: $globalId })
-      ON CREATE SET
-        n.createdAt = datetime(),
-        n.validFrom = datetime(),
-        n.tenantId = $tenantId,
-        n.entityType = $entityType
-      ON MATCH SET
-        n.updatedAt = datetime()
-
-      SET n += $attributes
-      SET n.epistemic = $epistemicStr
-      SET n.sourceRefs = $sourceRefsStr
-
-      // Add specific label dynamically
-      WITH n
-      CALL apoc.create.addLabels(n, [$entityType]) YIELD node
-      RETURN node
-    `;
+    async upsertNode(node: Partial<GraphEntity> & { globalId: string, tenantId: string, entityType: EntityType }): Promise<void> {
+    const validated = validateGraphEntity(node);
+    const builder = new CypherBuilder()
+      .merge('(n:GraphNode { globalId: $globalId })')
+      .onCreateSet('n', {
+        createdAt: 'datetime()',
+        validFrom: validated.validFrom || 'datetime()',
+        validTo: validated.validTo || null,
+        tenantId: validated.tenantId,
+        entityType: validated.entityType
+      })
+      .onMatchSet('n', {
+        updatedAt: 'datetime()',
+        validTo: validated.validTo || null
+      })
+      .setProperties('n', validated.attributes || {})
+      .set('n', 'epistemic', JSON.stringify(validated.epistemic || {}))
+      .set('n', 'sourceRefs', JSON.stringify(validated.sourceRefs || []))
+      .with('n')
+      .raw('CALL apoc.create.addLabels(n, [$entityType]) YIELD node')
+      .return('node');
 
     const params = {
-      globalId: node.globalId,
-      tenantId: node.tenantId,
-      entityType: node.entityType,
-      attributes: node.attributes || {},
-      epistemicStr: JSON.stringify(node.epistemic || {}),
-      sourceRefsStr: JSON.stringify(node.sourceRefs || [])
+      globalId: validated.globalId,
+      tenantId: validated.tenantId,
+      entityType: validated.entityType
     };
 
-    await runCypher(query, params, {
-      tenantId: node.tenantId,
+    const { query, params: builtParams } = builder.build();
+    await runCypher(query, { ...params, ...builtParams }, {
+      tenantId: validated.tenantId,
       caseId: (node as Record<string, unknown>)?.caseId as string | undefined,
       write: true,
     });
   }
 
+
+
   /**
    * Upsert an edge between two nodes.
    */
+
+  /**
+   * Upsert a batch of nodes in the graph to prevent N+1 issues.
+   */
+  async upsertNodesBatch(nodes: (Partial<GraphEntity> & { globalId: string, tenantId: string, entityType: EntityType })[]): Promise<void> {
+    if (nodes.length === 0) return;
+    const tenantId = nodes[0].tenantId;
+
+    // Ensure consistent tenant
+    const safeNodes = nodes.map(n => {
+      if (n.tenantId !== tenantId) throw new Error("Cross-tenant batching not allowed");
+      return validateGraphEntity(n);
+    });
+
+    const builder = new CypherBuilder()
+      .unwind('$batch', 'node')
+      .merge('(n:GraphNode { globalId: node.globalId })')
+      .onCreateSet('n', {
+        createdAt: 'datetime()',
+        validFrom: 'coalesce(node.validFrom, datetime())',
+        validTo: 'node.validTo',
+        tenantId: 'node.tenantId',
+        entityType: 'node.entityType'
+      })
+      .onMatchSet('n', {
+        updatedAt: 'datetime()',
+        validTo: 'node.validTo'
+      })
+      .setProperties('n', 'node.attributes')
+      .set('n', 'epistemic', 'apoc.convert.toJson(node.epistemic)')
+      .set('n', 'sourceRefs', 'apoc.convert.toJson(node.sourceRefs)')
+      .with('n, node')
+      .raw('CALL apoc.create.addLabels(n, [node.entityType]) YIELD node AS added');
+
+    const { query, params } = builder.build();
+
+    // Pass batch explicitly
+    await runCypher(query, { ...params, batch: safeNodes }, {
+      tenantId,
+      write: true,
+    });
+  }
+
+  /**
+   * Fetch a batch of nodes by ID to prevent N+1 issues.
+   */
+  async getNodesBatch(globalIds: string[], tenantId: string): Promise<GraphEntity[]> {
+    if (globalIds.length === 0) return [];
+    const builder = new CypherBuilder()
+      .unwind('$ids', 'id')
+      .match('(n:GraphNode { globalId: id, tenantId: $tenantId })')
+      .return('n');
+
+    const { query, params } = builder.build();
+    const results = await runCypher(query, { ...params, ids: globalIds, tenantId }, { tenantId });
+    return results.map(r => this.mapNeo4jToEntity(r.n.properties));
+  }
+
   async upsertEdge(edge: Partial<GraphEdge> & { sourceId: string, targetId: string, edgeType: EdgeType, tenantId: string }): Promise<void> {
     const query = `
       MATCH (s:GraphNode { globalId: $sourceId, tenantId: $tenantId })

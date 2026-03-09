@@ -40,3 +40,25 @@ FOR (e:Entity) ON EACH [e.props];
 
 CREATE FULLTEXT INDEX entity_labels_fulltext IF NOT EXISTS  
 FOR (e:Entity) ON EACH [e.labels];
+// Hardening indexes for GraphNode specifically
+CREATE CONSTRAINT graphnode_global_id_unique IF NOT EXISTS
+FOR (n:GraphNode) REQUIRE n.globalId IS UNIQUE;
+
+CREATE INDEX graphnode_tenant_id IF NOT EXISTS
+FOR (n:GraphNode) ON (n.tenantId);
+
+CREATE INDEX graphnode_entity_type IF NOT EXISTS
+FOR (n:GraphNode) ON (n.entityType);
+
+// Spatio-temporal indexes
+CREATE INDEX graphnode_valid_from IF NOT EXISTS
+FOR (n:GraphNode) ON (n.validFrom);
+
+CREATE INDEX graphnode_valid_to IF NOT EXISTS
+FOR (n:GraphNode) ON (n.validTo);
+
+CREATE INDEX rel_valid_from IF NOT EXISTS
+FOR ()-[r:REL]-() ON (r.validFrom);
+
+CREATE INDEX rel_valid_to IF NOT EXISTS
+FOR ()-[r:REL]-() ON (r.validTo);

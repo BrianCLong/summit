@@ -135,3 +135,47 @@ export interface HasPolicyEdge {
 }
 
 export * from './maestro-schema.js';
+import { z } from 'zod';
+
+export const SourceRefSchema = z.object({
+  documentId: z.string(),
+  type: z.string().optional(),
+  metadata: z.record(z.unknown()).optional(),
+});
+
+export const EpistemicMetadataSchema = z.object({
+  confidence: z.number().min(0).max(1).optional(),
+  provenance: z.string().optional(),
+});
+
+export const GraphEntitySchema = z.object({
+  globalId: z.string().min(1),
+  tenantId: z.string().min(1),
+  entityType: z.string().min(1),
+  attributes: z.record(z.unknown()).optional(),
+  epistemic: EpistemicMetadataSchema.optional(),
+  sourceRefs: z.array(SourceRefSchema).optional(),
+  validFrom: z.string().optional(),
+  validTo: z.string().optional(),
+});
+
+export const GraphEdgeSchema = z.object({
+  id: z.string().optional(),
+  sourceId: z.string().min(1),
+  targetId: z.string().min(1),
+  edgeType: z.string().min(1),
+  tenantId: z.string().min(1),
+  attributes: z.record(z.unknown()).optional(),
+  epistemic: EpistemicMetadataSchema.optional(),
+  sourceRefs: z.array(SourceRefSchema).optional(),
+  validFrom: z.string().optional(),
+  validTo: z.string().optional(),
+});
+
+export function validateGraphEntity(payload: unknown) {
+  return GraphEntitySchema.parse(payload);
+}
+
+export function validateGraphEdge(payload: unknown) {
+  return GraphEdgeSchema.parse(payload);
+}

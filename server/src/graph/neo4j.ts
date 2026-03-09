@@ -46,7 +46,12 @@ function buildDriver(uri: string) {
   return neo4j.driver(
     uri,
     neo4j.auth.basic(process.env.NEO4J_USER || 'neo4j', process.env.NEO4J_PASSWORD || 'password'),
-    { disableLosslessIntegers: true },
+    {
+      disableLosslessIntegers: true,
+      maxConnectionPoolSize: parseInt(process.env.NEO4J_MAX_CONNECTION_POOL_SIZE || '100', 10),
+      connectionAcquisitionTimeout: parseInt(process.env.NEO4J_POOL_ACQUISITION_TIMEOUT_MS || '60000', 10),
+      maxTransactionRetryTime: parseInt(process.env.NEO4J_MAX_TRANSACTION_RETRY_TIME_MS || '30000', 10)
+    },
   );
 }
 
@@ -88,7 +93,12 @@ async function executeWithDriver<T>(
 
   const start = Date.now();
   try {
-    const res = await session.run(cypher, params);
+    let res;
+    if (mode === 'write') {
+      res = await session.executeWrite((tx) => tx.run(cypher, params));
+    } else {
+      res = await session.executeRead((tx) => tx.run(cypher, params));
+    }
     const duration = (Date.now() - start) / 1000;
     metrics.observeHistogram('query_duration_seconds', duration, { route, mode });
     return res.records.map((r: any) => r.toObject()) as T[];
