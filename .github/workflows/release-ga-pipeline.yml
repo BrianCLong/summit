@@ -44,7 +44,6 @@ jobs:
       is_ga: ${{ steps.check.outputs.is_ga }}
       tag: ${{ steps.check.outputs.tag }}
       sha: ${{ steps.check.outputs.sha }}
-      version: ${{ steps.check.outputs.version }}
 
     steps:
       - name: Determine Tag and SHA
@@ -202,7 +201,6 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
         with:
-          node-version: 20
           cache: "pnpm"
           cache-dependency-path: '**/pnpm-lock.yaml'
 
@@ -257,12 +255,11 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
         with:
-          version: 10
+
 
       - name: Setup Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
-          node-version: "20"
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
@@ -576,12 +573,10 @@ jobs:
             --arg run_url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
             --arg actor "${{ github.actor }}" \
             '{
-              version: $version,
               pipeline: $pipeline,
               generated_at: $generated_at,
               release: {
                 ga_tag: $ga_tag,
-                base_version: $base_version,
                 commit_sha: $commit_sha,
                 source_rc: $source_rc
               },

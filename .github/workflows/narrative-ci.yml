@@ -48,7 +48,6 @@ jobs:
       - name: Setup OPA
         uses: open-policy-agent/setup-opa@v2
         with:
-          version: v0.68.0
 
       - name: OPA policy tests
         run: |
