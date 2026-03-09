@@ -123,8 +123,8 @@ export default function ExplorePage(): React.ReactElement {
     }
   }, [entityUpdates])
 
-  // Filter data based on current filters
-  const filteredEntities = entities.filter(entity => {
+  // Filter data based on current filters - Memoized for performance
+  const filteredEntities = React.useMemo(() => entities.filter(entity => {
     if (
       filters.entityTypes.length > 0 &&
       !filters.entityTypes.includes(entity.type)
@@ -152,30 +152,41 @@ export default function ExplorePage(): React.ReactElement {
     )
       {return false}
     return true
-  })
+  }), [entities, filters, searchQuery])
 
-  const filteredRelationships = relationships.filter(rel => {
-    if (
-      filters.relationshipTypes.length > 0 &&
-      !filters.relationshipTypes.includes(rel.type)
-    )
-      {return false}
-    // Only include relationships where both entities are in filtered set
-    return (
-      filteredEntities.some(e => e.id === rel.sourceId) &&
-      filteredEntities.some(e => e.id === rel.targetId)
-    )
-  })
+  const filteredRelationships = React.useMemo(() => {
+    // Optimization: Create a Set of filtered entity IDs for O(1) lookup
+    const filteredEntityIds = new Set(filteredEntities.map(e => e.id));
 
-  // Get available filter options
-  const availableEntityTypes = Array.from(new Set(entities.map(e => e.type)))
-  const availableRelationshipTypes = Array.from(
-    new Set(relationships.map(r => r.type))
+    return relationships.filter(rel => {
+      if (
+        filters.relationshipTypes.length > 0 &&
+        !filters.relationshipTypes.includes(rel.type)
+      )
+        {return false}
+
+      // Performance: Use Set lookup O(1) instead of Array.some O(N)
+      return filteredEntityIds.has(rel.sourceId) && filteredEntityIds.has(rel.targetId);
+    });
+  }, [relationships, filteredEntities, filters.relationshipTypes]);
+
+  // Get available filter options - Memoized to prevent redundant calculations
+  const availableEntityTypes = React.useMemo(() =>
+    Array.from(new Set(entities.map(e => e.type))),
+    [entities]
   )
-  const availableTags = Array.from(new Set(entities.flatMap(e => e.tags || [])))
-  const availableSources = Array.from(
-    new Set(entities.map(e => e.source).filter(Boolean))
-  ) as string[]
+  const availableRelationshipTypes = React.useMemo(() =>
+    Array.from(new Set(relationships.map(r => r.type))),
+    [relationships]
+  )
+  const availableTags = React.useMemo(() =>
+    Array.from(new Set(entities.flatMap(e => e.tags || []))),
+    [entities]
+  )
+  const availableSources = React.useMemo(() =>
+    Array.from(new Set(entities.map(e => e.source).filter(Boolean))) as string[],
+    [entities]
+  )
 
   const handleEntitySelect = (entity: Entity) => {
     setSelectedEntityId(entity.id)
