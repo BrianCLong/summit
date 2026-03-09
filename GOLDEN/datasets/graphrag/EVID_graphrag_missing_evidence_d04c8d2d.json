@@ -1,0 +1,9 @@
+{
+  "id": "EVID:graphrag:missing_evidence:d04c8d2d",
+  "case": "missing_evidence",
+  "content": "This is some evidence for missing_evidence test number 15.",
+  "metadata": {
+    "source": "doc_15",
+    "confidence": 0.69
+  }
+}
