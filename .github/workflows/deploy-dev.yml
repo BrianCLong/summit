@@ -29,11 +29,15 @@ jobs:
         run: |
           docker buildx build -f deploy/docker/Dockerfile.api \
             --platform linux/amd64 -t ${{ steps.ecr.outputs.registry }}/intelgraph/app:latest \
+            --cache-from=type=gha \
+            --cache-to=type=gha,mode=max \
             --push .
       - name: Build & push Web
         run: |
           docker buildx build -f deploy/docker/Dockerfile.web \
             --platform linux/amd64 -t ${{ steps.ecr.outputs.registry }}/intelgraph/web:latest \
+            --cache-from=type=gha \
+            --cache-to=type=gha,mode=max \
             --push .
       - name: Install kubectl/helm
         uses: azure/setup-helm@v4
