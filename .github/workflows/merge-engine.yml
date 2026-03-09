@@ -60,23 +60,23 @@ jobs:
             echo
             echo "### Lane Counts"
             python3 - <<'PY'
-import csv
-from collections import Counter
-with open('artifacts/pr_triage.csv', newline='', encoding='utf-8') as fh:
-    rows = list(csv.DictReader(fh))
-counts = Counter(r['lane'] for r in rows)
-for lane, count in sorted(counts.items()):
-    print(f"- {lane}: {count}")
-print()
-print("### Top 10 Queue")
-for row in rows[:10]:
-    print(f"- #{row['number']} {row['title']} ({row['lane']}, ci={row['ci_status']}, conflicts={row['conflicts']})")
-print()
-print("### Top Blockers")
-blockers = [r for r in rows if r['lane'] in {'conflicts', 'quarantine', 'capture-close'}][:10]
-for row in blockers:
-    print(f"- #{row['number']} {row['title']} ({row['lane']}: {row['lane_reason']})")
-PY
+                              import csv
+                              from collections import Counter
+                              with open('artifacts/pr_triage.csv', newline='', encoding='utf-8') as fh:
+                                  rows = list(csv.DictReader(fh))
+                              counts = Counter(r['lane'] for r in rows)
+                              for lane, count in sorted(counts.items()):
+                                                      print(f"- {lane}: {count}")
+                                                            print()
+                                                            print("### Top 10 Queue")
+                              for row in rows[:10]:
+                                                      print(f"- #{row['number']} {row['title']} ({row['lane']}, ci={row['ci_status']}, conflicts={row['conflicts']})")
+                                                            print()
+                                                            print("### Top Blockers")
+                              blockers = [r for r in rows if r['lane'] in {'conflicts', 'quarantine', 'capture-close'}][:10]
+                                        for row in blockers:
+                                                      print(f"- #{row['number']} {row['title']} ({row['lane']}: {row['lane_reason']})")
+                              PY
           } > "${summary_file}"
 
           gh issue comment "${ISSUE_NUMBER}" --body-file "${summary_file}"
