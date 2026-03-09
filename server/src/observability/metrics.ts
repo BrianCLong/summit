@@ -61,7 +61,11 @@ import {
   narrativeSimulationTicksTotal,
   narrativeSimulationEventsTotal,
   narrativeSimulationDurationSeconds,
-  summitHealthChecksTotal
+  summitHealthChecksTotal,
+  // CI Metrics
+  ciRuntimeMinutes,
+  ciTestFlakesTotal,
+  mergeQueueThroughputTotal
 } from '../monitoring/metrics.js';
 
 export { registry };
@@ -118,7 +122,10 @@ export {
   narrativeSimulationTicksTotal,
   narrativeSimulationEventsTotal,
   narrativeSimulationDurationSeconds,
-  summitHealthChecksTotal
+  summitHealthChecksTotal,
+  ciRuntimeMinutes,
+  ciTestFlakesTotal,
+  mergeQueueThroughputTotal
 };
 
 export const metrics = {
@@ -173,5 +180,8 @@ export const metrics = {
   narrativeSimulationTicksTotal,
   narrativeSimulationEventsTotal,
   narrativeSimulationDurationSeconds,
-  summitHealthChecksTotal
+  summitHealthChecksTotal,
+  ciRuntimeMinutes,
+  ciTestFlakesTotal,
+  mergeQueueThroughputTotal
 };
