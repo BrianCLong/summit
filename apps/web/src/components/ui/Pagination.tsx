@@ -87,7 +87,7 @@ export function Pagination({
       {visiblePages.map((page, index) => (
         <React.Fragment key={index}>
           {page === '...' ? (
-            <Button variant="ghost" size="icon" disabled>
+            <Button variant="ghost" size="icon" disabled aria-hidden="true">
               <MoreHorizontal className="h-4 w-4" />
             </Button>
           ) : (
