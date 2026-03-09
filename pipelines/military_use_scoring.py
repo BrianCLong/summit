@@ -12,7 +12,7 @@ def run():
             policy = yaml.safe_load(f)
             threshold = policy.get("threshold_default", 0.65)
 
-    risk_score = 1.0
+    risk_score = 0.5
     mitigation_block = None
 
     report = {
