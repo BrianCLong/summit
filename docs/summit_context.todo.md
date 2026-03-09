@@ -1,5 +1,5 @@
-# Summit Context TODOs
+# Summit Context DONEs
 
-* [ ] Clarify canonical entity model vs `StartupProfile.v1`.
-* [ ] Confirm `summit/evidence/` vs `packages/evidence/` strategy.
-* [ ] Discover existing ingestion framework hooks.
+* [x] Clarify canonical entity model vs `StartupProfile.v1`.
+* [x] Confirm `summit/evidence/` vs `packages/evidence/` strategy.
+* [x] Discover existing ingestion framework hooks.
