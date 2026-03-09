@@ -7,6 +7,8 @@ import { ContradictionDetector } from './ContradictionDetector.js';
 import { OSINTQuery } from './connectors/types.js';
 import { OSINTProfile, Claim, Contradiction } from './types.js';
 import crypto from 'crypto';
+import { OSINTMetricsService } from './metrics/OSINTMetricsService.js';
+
 
 export class OSINTPipeline {
   private resolutionService: EntityResolutionService;
@@ -27,6 +29,14 @@ export class OSINTPipeline {
     console.log(`[OSINT Pipeline] Starting processing for: ${JSON.stringify(query)}`);
 
     // 1. Initial Search/Enrichment to get candidates
+
+    // Metrics: Record lead created
+    OSINTMetricsService.recordEvent({
+      tenantId,
+      eventType: 'lead_created',
+      leadId: query.name || query.companyName || query.username || crypto.randomUUID(),
+    });
+
     const initialEnrichment = await this.enrichmentService.enrich(query);
 
     // [Automation Turn #5 Implementation - Claim-Centric Validation]
@@ -98,6 +108,26 @@ export class OSINTPipeline {
 
     // 3. Save Unified Profile
     await this.resolutionService.save(finalProfile);
+
+
+    // Metrics: Record governed decision
+    const sufficientEvidenceThreshold = 2; // e.g., at least 2 validated claims
+    const hasSufficientEvidence = validatedClaims.length >= sufficientEvidenceThreshold && contradictions.length === 0;
+
+    // Simplistic mock for Maestro decision
+    const decision = aggregateConfidence >= 0.7 ? 'APPROVED' : 'BLOCKED';
+
+    OSINTMetricsService.recordEvent({
+      tenantId,
+      eventType: 'governed_decision',
+      leadId: finalProfile.id,
+      details: {
+        decision,
+        hasSufficientEvidence,
+        evidenceCount: validatedClaims.length,
+        hasMultiSourceCorroboration: validatedClaims.length > 1
+      }
+    });
 
     console.log(`[OSINT Pipeline] Processing complete. Profile ID: ${finalProfile.id}`);
     console.log(`[OSINT Pipeline] Claims: ${finalProfile.claims?.length || 0}, Contradictions: ${finalProfile.contradictions?.length || 0}`);

@@ -85,6 +85,8 @@ import tenantsRouter from './routes/tenants.js';
 import { SummitInvestigate } from './services/SummitInvestigate.js';
 import { streamIngest } from './ingest/stream.js';
 import osintRouter from './routes/osint.js';
+import osintMetricsRouter from './routes/osint_metrics.js';
+import osintMetricsRouter from './routes/osint_metrics.js';
 import palettesRouter from './routes/palettes.js';
 import outreachRouter from './routes/outreach.js';
 
@@ -501,11 +503,12 @@ export const createApp = async () => {
   app.use('/api/abyss', abyssRouter);
   app.use('/api/qaf', qafRouter);
   app.use('/api/siem-platform', siemPlatformRouter);
+  app.use('/api/osint/metrics', osintMetricsRouter);
+  app.use('/api/osint', osintRouter);
   app.use('/api/maestro', maestroRouter);
   app.use('/api/mcp-apps', mcpAppsRouter);
   app.use('/api/tenants', tenantsRouter);
   app.use('/api/actions', actionsRouter);
-  app.use('/api/osint', osintRouter);
   app.use('/api/outreach', outreachRouter);
 
   app.use('/api/meta-orchestrator', metaOrchestratorRouter);
