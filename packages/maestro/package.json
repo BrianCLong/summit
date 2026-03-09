@@ -1,0 +1,20 @@
+{
+  "name": "@summit/maestro",
+  "version": "1.0.0",
+  "description": "Maestro Conductor Core for Summit GA",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@opentelemetry/api": "^1.9.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3",
+    "@types/node": "^22.0.0",
+    "vitest": "^4.0.16"
+  }
+}

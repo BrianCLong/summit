@@ -1,0 +1,22 @@
+{
+  "name": "@summit/adapters",
+  "version": "1.0.0",
+  "description": "External Agent Adapter Layer for Summit GA",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "openai": "^4.0.0",
+    "@anthropic-ai/sdk": "^0.78.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3",
+    "@types/node": "^22.0.0",
+    "vitest": "^4.0.16",
+    "nock": "^14.0.1"
+  }
+}
