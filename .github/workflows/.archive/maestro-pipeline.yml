@@ -58,7 +58,7 @@ jobs:
   sbom:
     name: Attach SBOM
     needs: maestro-delivery
-    uses: ./.github/workflows/_reusable-sbom.yml
+    uses: ./.github/workflows/reusable/sbom.yml
     with:
       service: maestro
     secrets: inherit

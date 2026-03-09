@@ -1,8 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import List, Optional
-
 from .snapshot import SourceSnapshot
-
 
 class BaseConnector(ABC):
     """
@@ -15,7 +13,7 @@ class BaseConnector(ABC):
         self.mirror_root = mirror_root
 
     @abstractmethod
-    def fetch(self) -> list[SourceSnapshot]:
+    def fetch(self) -> List[SourceSnapshot]:
         """
         Retrieves the latest content from the source.
         In offline mode, should read from the local mirror.

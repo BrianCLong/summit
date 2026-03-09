@@ -30,7 +30,7 @@ export class RegionalKMSManager {
 
         try {
             const result = await pool.query(
-                `SELECT * FROM kms_configs 
+                `SELECT * FROM kms_configs
                  WHERE tenant_id = $1 AND region = $2 AND status = 'active'
                  LIMIT 1`,
                 [tenantId, region]

@@ -85,7 +85,9 @@ jobs:
           echo "✅ Baseline updated with approved changes"
 
       - name: Upload config attestation artifacts
-        uses: actions/upload-artifact@v4          name: config-attestation-${{ github.run_id }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: config-attestation-${{ github.run_id }}
           path: |
             evidence/v0.3.3/config/*.json
             evidence/v0.3.3/config/*.txt

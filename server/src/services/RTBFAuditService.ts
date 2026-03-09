@@ -697,19 +697,11 @@ export class RTBFAuditService extends EventEmitter {
     };
   }
 
-  private validateIdentifier(identifier: string): void {
-    if (!/^[a-zA-Z0-9_]+$/.test(identifier)) {
-      throw new Error(`Invalid identifier: ${identifier}`);
-    }
-  }
-
   private buildCountQuery(
     table: string,
     target: RTBFTarget,
   ): { sql: string; params: any[] } {
-    this.validateIdentifier(table);
     const { field, value, operator } = target.identifier;
-    this.validateIdentifier(field);
     let whereClause = '';
     const params: any[] = [];
 
@@ -745,9 +737,7 @@ export class RTBFAuditService extends EventEmitter {
     target: RTBFTarget,
     limit: number,
   ): { sql: string; params: any[] } {
-    this.validateIdentifier(table);
     const { field, value, operator } = target.identifier;
-    this.validateIdentifier(field);
     let whereClause = '';
     const params: any[] = [];
 

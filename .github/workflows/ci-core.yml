@@ -58,11 +58,7 @@ jobs:
           cache: pnpm
 
       - name: Install dependencies
-        uses: nick-fields/retry@v3
-        with:
-          timeout_minutes: 10
-          max_attempts: 3
-          command: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Lint (strict)
         run: pnpm lint --max-warnings 0
@@ -86,11 +82,7 @@ jobs:
           cache: pnpm
 
       - name: Install dependencies
-        uses: nick-fields/retry@v3
-        with:
-          timeout_minutes: 10
-          max_attempts: 3
-          command: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Build all packages
         run: pnpm run build
@@ -105,7 +97,7 @@ jobs:
           retention-days: 7
 
   unit-tests:
-    name: Unit Tests (Core)
+    name: Unit Tests
     runs-on: ubuntu-latest
     needs: [config-preflight]
     steps:
@@ -117,26 +109,14 @@ jobs:
           cache: pnpm
 
       - name: Install dependencies
-        uses: nick-fields/retry@v3
-        with:
-          timeout_minutes: 10
-          max_attempts: 3
-          command: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
-      - name: Run unit tests (blocking)
-        if: github.event_name != 'pull_request'
+      - name: Run unit tests
         run: pnpm test:unit
-
-      - name: Run unit tests (advisory on PR)
-        if: github.event_name == 'pull_request'
-        run: |
-          if ! pnpm test:unit; then
-            echo "::warning::Unit test failures are advisory in CI Core pull_request context."
-          fi
 
       - name: Upload coverage
         uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de # v5
-        if: github.event_name != 'pull_request' && always()
+        if: always()
         continue-on-error: true
         with:
           files: ./coverage/coverage-final.json
@@ -165,11 +145,7 @@ jobs:
           until docker exec summit-redis-test redis-cli ping | grep -q PONG; do sleep 2; done
 
       - name: Install dependencies
-        uses: nick-fields/retry@v3
-        with:
-          timeout_minutes: 10
-          max_attempts: 3
-          command: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Run database migrations
         run: cd server && npx tsx scripts/run-migrations.ts
@@ -220,11 +196,7 @@ jobs:
           cache: pnpm
 
       - name: Install dependencies
-        uses: nick-fields/retry@v3
-        with:
-          timeout_minutes: 10
-          max_attempts: 3
-          command: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Verify runtime configuration
         run: pnpm verify:runtime
@@ -255,11 +227,7 @@ jobs:
           cache: pnpm
 
       - name: Install dependencies
-        uses: nick-fields/retry@v3
-        with:
-          timeout_minutes: 10
-          max_attempts: 3
-          command: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Build twice and compare checksums
         run: |
@@ -306,11 +274,7 @@ jobs:
           cache: pnpm
 
       - name: Install dependencies
-        uses: nick-fields/retry@v3
-        with:
-          timeout_minutes: 10
-          max_attempts: 3
-          command: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Verify governance docs
         run: pnpm ci:docs-governance
@@ -376,11 +340,7 @@ jobs:
           cache: pnpm
 
       - name: Install dependencies
-        uses: nick-fields/retry@v3
-        with:
-          timeout_minutes: 10
-          max_attempts: 3
-          command: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Install Playwright Browsers
         run: pnpm exec playwright install --with-deps
@@ -429,11 +389,7 @@ jobs:
           cache: "pnpm"
 
       - name: Install dependencies
-        uses: nick-fields/retry@v3
-        with:
-          timeout_minutes: 10
-          max_attempts: 3
-          command: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Run SOC control tests
         run: |
@@ -462,11 +418,7 @@ jobs:
           cache: pnpm
 
       - name: Install dependencies
-        uses: nick-fields/retry@v3
-        with:
-          timeout_minutes: 10
-          max_attempts: 3
-          command: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Validate branch protection read token
         env:
@@ -510,12 +462,6 @@ jobs:
     steps:
       - name: Check all gates passed
         run: |
-          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            echo "PR advisory mode: CI Core Gate reports component status but does not block merge."
-            echo "Blocking enforcement remains active on push/main and merge_group."
-            exit 0
-          fi
-
           echo "=== CI Core Gate Status ==="
           echo "Config Preflight: ${{ needs.config-preflight.result }}"
           echo "Lint & Typecheck: ${{ needs.lint-typecheck.result }}"

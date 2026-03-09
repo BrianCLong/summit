@@ -8,7 +8,7 @@ const service = new InboundAlertService();
 router.post('/integrations/inbound/:configId', async (req, res) => {
     try {
         const { configId } = req.params;
-        const signature = req.headers['x-switchboard-signature'] as string || (((req.query.secret as string) as string) as string) as string; // Simplified
+        const signature = req.headers['x-switchboard-signature'] as string || req.query.secret as string; // Simplified
         const tenantId = req.headers['x-tenant-id'] as string; // Or derive from configId lookup
 
         if (!tenantId) {

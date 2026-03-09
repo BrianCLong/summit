@@ -1,7 +1,0 @@
-[
-  {
-    "src": "alice@example.com",
-    "dst": "bob",
-    "features": {"bytes": 100}
-  }
-]

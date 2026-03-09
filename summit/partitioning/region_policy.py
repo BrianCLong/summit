@@ -1,5 +1,4 @@
 from typing import List
-
 from .shard_plan import ShardPlan
 
 # Define allowed regions and their shards
@@ -11,7 +10,7 @@ REGION_SHARDS = {
 DEFAULT_REGION = "us-east"
 
 class RegionPolicy:
-    def resolve_shards(self, plan: ShardPlan) -> list[str]:
+    def resolve_shards(self, plan: ShardPlan) -> List[str]:
         target_region = plan.region or DEFAULT_REGION
 
         # Security check: if explicit region is requested but cross-shard not allowed,

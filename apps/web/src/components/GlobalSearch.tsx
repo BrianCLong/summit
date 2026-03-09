@@ -6,7 +6,6 @@ import { useNavigate } from 'react-router-dom'
 import { Badge } from '@/components/ui/Badge'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { useDemoMode } from '@/components/common/DemoIndicator'
-import { useDebounce } from '@/hooks/useDebounce'
 
 interface SearchResult {
   id: string
@@ -24,7 +23,6 @@ export function GlobalSearch() {
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
   const isDemoMode = useDemoMode()
-  const debouncedQuery = useDebounce(query, 300)
 
   // Mock search function
   const searchFunction = async (query: string): Promise<SearchResult[]> => {
@@ -118,36 +116,16 @@ export function GlobalSearch() {
   }
 
   useEffect(() => {
-    // If query is cleared, clear results immediately without waiting for debounce
     if (!query || !query.trim()) {
       setResults([])
       return
     }
-  }, [query])
 
-  useEffect(() => {
-    if (!debouncedQuery || !debouncedQuery.trim()) {
-      return
-    }
-
-    let active = true
     setLoading(true)
-    searchFunction(debouncedQuery)
-      .then(results => {
-        if (active) {
-          setResults(results)
-        }
-      })
-      .finally(() => {
-        if (active) {
-          setLoading(false)
-        }
-      })
-
-    return () => {
-      active = false
-    }
-  }, [debouncedQuery, isDemoMode])
+    searchFunction(query)
+      .then(setResults)
+      .finally(() => setLoading(false))
+  }, [query, isDemoMode])
 
   const handleSelect = (result: SearchResult) => {
     if (result.href) {

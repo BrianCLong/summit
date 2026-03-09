@@ -93,7 +93,7 @@ verify_bundle() {
     
     say "Verifying bundle signature"
     
-    if cosign verify-blob --use-signed-timestamps --key "$COSIGN_PUB" --signature "${bundle_file}.sig" "$bundle_file"; then
+    if cosign verify-blob --key "$COSIGN_PUB" --signature "${bundle_file}.sig" "$bundle_file"; then
         pass "Bundle signature verified"
         return 0
     else

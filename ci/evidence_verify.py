@@ -27,7 +27,7 @@ def fail(message: str) -> None:
     sys.exit(1)
 
 
-def load_schema(name: str) -> dict[str, Any]:
+def load_schema(name: str) -> Dict[str, Any]:
     schema_path = SCHEMA_DIR / name
     if not schema_path.exists():
         fail(f"missing schema: {schema_path}")
@@ -50,7 +50,7 @@ def is_type(value: Any, schema_type: str) -> bool:
     return False
 
 
-def validate_schema(schema: dict[str, Any], data: Any, context: str) -> bool:
+def validate_schema(schema: Dict[str, Any], data: Any, context: str) -> bool:
     if "anyOf" in schema:
         return any(validate_schema(option, data, context) for option in schema["anyOf"])
 
@@ -85,7 +85,7 @@ def validate_schema(schema: dict[str, Any], data: Any, context: str) -> bool:
     return True
 
 
-def find_forbidden_time_keys(data: Any, path: str = "") -> list[str]:
+def find_forbidden_time_keys(data: Any, path: str = "") -> List[str]:
     found = []
     if isinstance(data, dict):
         for key, value in data.items():
@@ -105,7 +105,7 @@ def ensure_schema(name: str, data: Any, context: str) -> None:
         fail(f"schema validation failed for {context} using {name}")
 
 
-def read_json(path: Path) -> dict[str, Any]:
+def read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
@@ -118,7 +118,7 @@ def check_deny_patterns(path: Path) -> None:
             fail(f"deny-pattern {pattern} found in {path}")
 
 
-def enforce_default_off(report: dict[str, Any], path: Path) -> None:
+def enforce_default_off(report: Dict[str, Any], path: Path) -> None:
     kg_enabled = os.getenv("KG_ENABLED", "").lower() in {"1", "true", "yes"}
     if kg_enabled:
         return

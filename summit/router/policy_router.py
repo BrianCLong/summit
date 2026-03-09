@@ -1,9 +1,6 @@
 from __future__ import annotations
-
 from typing import Any
-
 from .flags import ENABLE_ADAPTIVE_ROUTER
-
 
 class PolicyRouter:
     def route(self, request: dict[str, Any]) -> str:

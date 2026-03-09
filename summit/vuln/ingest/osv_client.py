@@ -1,7 +1,5 @@
-from typing import Any, Dict, List, Optional
-
 import requests
-
+from typing import Dict, Any, List, Optional
 
 class OSVClient:
     """Client for interacting with the OSV API (osv.dev)."""
@@ -11,7 +9,7 @@ class OSVClient:
     def __init__(self, timeout: int = 30):
         self.timeout = timeout
 
-    def get_vuln_by_id(self, vuln_id: str) -> Optional[dict[str, Any]]:
+    def get_vuln_by_id(self, vuln_id: str) -> Optional[Dict[str, Any]]:
         """Fetch a single vulnerability by its ID (e.g. GHSA-..., OSV-...)."""
         url = f"{self.BASE_URL}/vulns/{vuln_id}"
         try:
@@ -27,7 +25,7 @@ class OSVClient:
             print(f"Error fetching {vuln_id} from OSV: {e}")
             return None
 
-    def query_by_package(self, package_name: str, ecosystem: str, version: Optional[str] = None) -> list[dict[str, Any]]:
+    def query_by_package(self, package_name: str, ecosystem: str, version: Optional[str] = None) -> List[Dict[str, Any]]:
         """Query vulnerabilities for a specific package."""
         url = f"{self.BASE_URL}/query"
         payload = {

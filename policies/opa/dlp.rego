@@ -1,5 +1,4 @@
 package composer.dlp
-import rego.v1
 
 # input.dlp_hits: array of findings from your scanners (post-redaction)
 # Example hit: { "severity": "high", "type": "PII_EMAIL", "path": "/logs/build-123.log" }
@@ -11,7 +10,6 @@ block {
 
 # Shadow-able wrapper decision
 package composer.decision_dlp
-import rego.v1
 
 decision := {
   "policy": "dlp",

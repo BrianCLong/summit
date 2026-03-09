@@ -1,0 +1,45 @@
+name: ci-pr
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+concurrency:
+  group: pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+jobs:
+  lint_build:
+    uses: ./.github/workflows/ci-reusable-build.yml
+    with:
+      language: node
+      cache-key: node
+    secrets: inherit
+
+  tests:
+    needs: [lint_build]
+    uses: ./.github/workflows/ci-reusable-test.yml
+    with: { shard-total: 3 }
+
+  scan:
+    needs: [lint_build]
+    uses: ./.github/workflows/ci-reusable-scan.yml
+    secrets: inherit
+
+  package:
+    needs: [tests, scan]
+    uses: ./.github/workflows/ci-reusable-package.yml
+    secrets: inherit
+
+  preview:
+    needs: [package]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Preview deploy
+        run: ./.ci/scripts/preview_deploy.sh
+      - name: Comment URL on PR
+        uses: mshick/add-pr-comment@v2
+        with:
+          message: |
+            🚀 Preview: https://preview.example.com/pr-${{ github.event.pull_request.number }}
+
+  policy_migrations:
+    uses: ./.github/workflows/ci-migration-gate.yml

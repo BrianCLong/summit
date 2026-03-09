@@ -99,7 +99,7 @@ export class AbacLocalEvaluator {
     const actionRoles = this.data.actions[actionKey]?.roles || [];
     const normalizedRoles = new Set(
       [...(input.subject.roles || []), input.subject.role]
-        .filter((r): r is string => !!r)
+        .filter(Boolean)
         .map((role) => role.toLowerCase()),
     );
     const hasRole = actionRoles.some((role) => normalizedRoles.has(role.toLowerCase()));

@@ -1,10 +1,7 @@
 # summit/evals/agentic_misuse/tests/test_deny_by_default.py
-import os
-
 import pytest
-
+import os
 from summit.evals.agentic_misuse.runner import MisuseEvalRunner
-
 
 def test_deny_by_default_policy():
     scenario_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "scenario_specs")

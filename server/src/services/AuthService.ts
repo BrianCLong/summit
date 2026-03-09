@@ -363,7 +363,7 @@ export class AuthService {
         [
           userData.email,
           userData.username,
-          hashedPassword,
+          passwordHash,
           userData.firstName,
           userData.lastName,
           userData.role || 'ANALYST',

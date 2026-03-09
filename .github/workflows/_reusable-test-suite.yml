@@ -16,6 +16,7 @@ on:
         description: "pnpm version to use"
         required: false
         type: string
+        default: "9"
       test-command:
         description: "Custom test command to run"
         required: false

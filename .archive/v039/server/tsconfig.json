@@ -6,7 +6,7 @@
     "outDir": "dist",
     "rootDir": "src",
     "esModuleInterop": true,
-    "strict": true, "types": ["node", "jest", "uuid"],
+    "strict": true,
     "skipLibCheck": true
   },
   "include": ["src"]

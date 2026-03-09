@@ -9,7 +9,7 @@ FROM node:18-alpine AS dependencies
 WORKDIR /app/services/agentic-mesh-evaluation
 
 # Install pnpm
-RUN corepack enable && corepack prepare pnpm@10.0.0 --activate
+RUN corepack enable && corepack prepare pnpm@9.12.0 --activate
 
 # Copy package files
 COPY services/agentic-mesh-evaluation/package.json services/agentic-mesh-evaluation/pnpm-lock.yaml* ./
@@ -28,7 +28,7 @@ COPY tsconfig.base.json ./
 WORKDIR /app/services/agentic-mesh-evaluation
 
 # Install pnpm
-RUN corepack enable && corepack prepare pnpm@10.0.0 --activate
+RUN corepack enable && corepack prepare pnpm@9.12.0 --activate
 
 # Copy package files
 COPY services/agentic-mesh-evaluation/package.json services/agentic-mesh-evaluation/pnpm-lock.yaml* services/agentic-mesh-evaluation/tsconfig.json ./

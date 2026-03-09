@@ -26,7 +26,7 @@ export default defineConfig({
     { name: 'visual', testMatch: /visual\.spec\.ts/, use: { screenshot: 'on' } },
   ],
   webServer: {
-    command: `pnpm run dev -- --host --port ${PORT}`,
+    command: `npm run dev -- --host --port ${PORT}`,
     port: PORT,
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,

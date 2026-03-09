@@ -1,9 +1,6 @@
 import os
-
 import pytest
-
-from summit.agent.context.agents_md_loader import MAX_BYTES, POLICY_PREAMBLE_PATH, load_agents_md
-
+from summit.agent.context.agents_md_loader import load_agents_md, MAX_BYTES, POLICY_PREAMBLE_PATH
 
 def test_budget_enforcement(tmp_path):
     # Create a large AGENTS.md

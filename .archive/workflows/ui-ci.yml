@@ -1,0 +1,48 @@
+name: ui-ci
+
+permissions:
+  contents: read
+on:
+  push:
+    paths:
+      - 'client/**'
+      - '.github/workflows/ui-ci.yml'
+  pull_request:
+    paths:
+      - 'client/**'
+      - '.github/workflows/ui-ci.yml'
+concurrency: { group: ui-${{ github.ref }}, cancel-in-progress: true }
+jobs:
+  build-ui:
+    runs-on: ubuntu-latest
+    env:
+      HUSKY: 0
+      CI: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+        working-directory: client
+      - run: pnpm run lint
+        working-directory: client
+      - run: pnpm run typecheck || true
+        working-directory: client
+      - run: pnpm test -- --coverage --watch=false --maxWorkers=50% || true
+        working-directory: client
+      - name: Set build date
+        id: date
+        run: echo "now=$(date -u +%FT%TZ)" >> $GITHUB_OUTPUT
+      - name: Build UI image with cache
+        uses: docker/build-push-action@v6
+        with:
+          context: ./client
+          push: false
+          tags: intelgraph/ui:pr-${{ github.run_id }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            GIT_COMMIT=${{ github.sha }}
+            BUILD_DATE=${{ steps.date.outputs.now }}

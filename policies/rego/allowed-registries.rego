@@ -1,5 +1,4 @@
 package policies.allowedregistries
-import rego.v1
 
 default allow = false
 

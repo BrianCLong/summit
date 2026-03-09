@@ -53,12 +53,11 @@ jobs:
       run: terraform plan -out=tfplan
 
     - name: Terraform Apply
-      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      if: ((github.ref == 'refs/heads/main' && github.event_name == 'push') && (github.ref == 'refs/heads/main' && github.event_name == 'push')) && (github.ref == 'refs/heads/main' && github.event_name == 'push')
       working-directory: ${{ env.TF_WORKING_DIR }}
       run: terraform apply -auto-approve tfplan
 
     - name: Trigger CodeDeploy
-      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
       working-directory: ${{ env.TF_WORKING_DIR }}
       run: |
         # Get Outputs
@@ -94,7 +93,6 @@ jobs:
         fi
 
     - name: Run Smoke Test
-      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
       working-directory: ${{ env.TF_WORKING_DIR }}
       run: |
         FUNCTION_NAME=$(terraform output -raw lambda_function_name)

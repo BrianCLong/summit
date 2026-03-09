@@ -15,8 +15,6 @@ export interface SchemaMapping {
   overallConfidence: number;
 }
 
-type OntologyTargetType = 'Person' | 'Organization' | 'Event' | 'Asset';
-
 /**
  * Service for autonomously mapping raw data schemas to the IntelGraph Ontology.
  * Task #108: Semantic Consistency Engine.
@@ -27,24 +25,11 @@ export class SemanticMapperService {
   private llmService: MaestroLLMService;
 
   // Internal ontology definitions for mapping targets
-  private ontology: Record<OntologyTargetType, string[]> = {
+  private ontology = {
     Person: ['name', 'email', 'phone', 'birthDate', 'role', 'nationality', 'employer'],
     Organization: ['name', 'website', 'industry', 'foundedDate', 'location', 'tickerSymbol', 'parentCompany'],
     Event: ['title', 'timestamp', 'description', 'location', 'participants', 'eventType', 'severity'],
     Asset: ['id', 'type', 'owner', 'value', 'status', 'acquisitionDate']
-  };
-  private fieldAliases: Record<
-    string,
-    { targetType: OntologyTargetType; targetField: string; weight?: number }
-  > = {
-    full_name: { targetType: 'Person', targetField: 'name', weight: 1.1 },
-    contact_email: { targetType: 'Person', targetField: 'email', weight: 1.1 },
-    job_role: { targetType: 'Person', targetField: 'role', weight: 1.1 },
-    company_name: { targetType: 'Organization', targetField: 'name', weight: 1.3 },
-    org_name: { targetType: 'Organization', targetField: 'name', weight: 1.3 },
-    web_address: { targetType: 'Organization', targetField: 'website', weight: 1.3 },
-    homepage: { targetType: 'Organization', targetField: 'website', weight: 1.2 },
-    founded_in: { targetType: 'Organization', targetField: 'foundedDate', weight: 1.2 }
   };
 
   private constructor() {
@@ -110,53 +95,23 @@ export class SemanticMapperService {
     return this.suggestHeuristicMapping(sampleRecord);
   }
 
-  private normalizeToken(value: string): string {
-    return value.toLowerCase().replace(/[^a-z0-9]/g, '');
-  }
-
-  private fieldMatchesKey(sourceKey: string, ontologyField: string): boolean {
-    const normalizedSource = this.normalizeToken(sourceKey);
-    const normalizedField = this.normalizeToken(ontologyField);
-    if (!normalizedSource || !normalizedField) {
-      return false;
-    }
-    if (normalizedSource === normalizedField) {
-      return true;
-    }
-    // Avoid false positives from single-character keys (e.g. x/y/z).
-    if (normalizedSource.length < 3 || normalizedField.length < 3) {
-      return false;
-    }
-    return (
-      normalizedSource.includes(normalizedField) || normalizedField.includes(normalizedSource)
-    );
-  }
-
   /**
    * Fallback heuristic mapping logic.
    */
   private suggestHeuristicMapping(sampleRecord: Record<string, any>): SchemaMapping {
     const keys = Object.keys(sampleRecord);
-    let bestMatch: { type: OntologyTargetType | 'Unknown'; score: number } = {
-      type: 'Unknown',
-      score: 0
-    };
+    let bestMatch = { type: 'Unknown', score: 0 };
 
     for (const [type, fields] of Object.entries(this.ontology)) {
       let score = 0;
       for (const key of keys) {
-        if (fields.some(f => this.fieldMatchesKey(key, f))) {
+        if (fields.some(f => key.toLowerCase().includes(f.toLowerCase()))) {
           score += 1;
-        }
-
-        const alias = this.fieldAliases[key.toLowerCase()];
-        if (alias && alias.targetType === type) {
-          score += alias.weight ?? 1;
         }
       }
       const normalizedScore = score / keys.length;
       if (normalizedScore > bestMatch.score) {
-        bestMatch = { type: type as OntologyTargetType, score: normalizedScore };
+        bestMatch = { type, score: normalizedScore };
       }
     }
 
@@ -182,21 +137,14 @@ export class SemanticMapperService {
     const targetFields = this.ontology[bestMatch.type as keyof typeof this.ontology] || [];
 
     for (const sourceKey of keys) {
-      const alias = this.fieldAliases[sourceKey.toLowerCase()];
-      const aliasMatch = alias && alias.targetType === bestMatch.type ? alias.targetField : null;
-      const match =
-        aliasMatch ||
-        targetFields.find(t => this.fieldMatchesKey(sourceKey, t));
+      const lowerKey = sourceKey.toLowerCase();
+      const match = targetFields.find(t => lowerKey.includes(t.toLowerCase()) || t.toLowerCase().includes(lowerKey));
 
       mappings.push({
         sourceField: sourceKey,
         targetField: match || `custom_${sourceKey}`,
-        confidence: aliasMatch ? 0.9 : match ? 0.8 : 0.4,
-        reasoning: aliasMatch
-          ? 'Alias heuristic match'
-          : match
-            ? 'Heuristic match'
-            : 'No direct match found'
+        confidence: match ? 0.8 : 0.4,
+        reasoning: match ? 'Heuristic match' : 'No direct match found'
       });
     }
 

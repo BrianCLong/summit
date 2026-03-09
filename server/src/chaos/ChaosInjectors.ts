@@ -282,12 +282,12 @@ export const regionKillInjector: Injector = {
   type: 'region_kill',
 
   canApply(experiment: ChaosExperiment, _context: InjectionContext): boolean {
-    return true; 
+    return true;
   },
 
   async inject(experiment: ChaosExperiment, _context: InjectionContext): Promise<InjectionResult> {
     const targetRegion = (experiment.config as any).region || 'us-east-1';
-    
+
     logger.warn({ experimentId: experiment.id, targetRegion }, 'Chaos: Killing region!');
 
     const availability = RegionalAvailabilityService.getInstance();

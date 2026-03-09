@@ -7,9 +7,7 @@ export class Budget {
   constructor(
     public maxUSD: number,
     public softLimitPct: number = 0.8,
-    public agentId?: string,
-    public agentVersion?: string,
-  ) { }
+  ) {}
 
   charge(usd: number, description?: string): void {
     this.usedUSD += usd;
@@ -119,10 +117,10 @@ export async function callModel(
 export class PRBudgetTracker {
   private prBudgets: Map<number, Budget> = new Map();
 
-  getOrCreateBudget(prNumber: number, maxUSD: number = 10, agentId?: string, agentVersion?: string): Budget {
+  getOrCreateBudget(prNumber: number, maxUSD: number = 10): Budget {
     if (!this.prBudgets.has(prNumber)) {
-      this.prBudgets.set(prNumber, new Budget(maxUSD, 0.8, agentId, agentVersion));
-      logger.info('Created PR budget', { pr: prNumber, budget: maxUSD, agentId });
+      this.prBudgets.set(prNumber, new Budget(maxUSD));
+      logger.info('Created PR budget', { pr: prNumber, budget: maxUSD });
     }
     return this.prBudgets.get(prNumber)!;
   }
@@ -163,8 +161,6 @@ interface BudgetSummary {
   utilization: number;
   transactions: BudgetTransaction[];
   downshiftSuggestion: DownshiftSuggestion | null;
-  agentId?: string;
-  agentVersion?: string;
 }
 
 // Singleton instance for tracking PR budgets

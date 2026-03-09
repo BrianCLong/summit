@@ -189,7 +189,7 @@ router.get(
     try {
       const principal = (req as any).principal;
       const timeRange = parseTimeRange(req);
-      const limit = (req.query.limit as string) ? parseInt((req.query.limit as string) as string, 10) : 10;
+      const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 10;
 
       const envelope = await metricsService.getPolicyEffectiveness(
         principal.tenantId,

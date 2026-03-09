@@ -1,11 +1,6 @@
 {
   "required_files": [
     {
-      "path": "docs/architecture/CANONICAL_GRAPH_CONTRACT.md",
-      "threshold_days": 30,
-      "owner": "Governance"
-    },
-    {
       "path": "docs/governance/CONSTITUTION.md",
       "threshold_days": 30,
       "owner": "Governance"

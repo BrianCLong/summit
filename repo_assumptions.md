@@ -1,23 +1,40 @@
-# repo_assumptions.md
+# Repo Assumptions & Validation
 
-## Verified
-- Summit is a public repo: BrianCLong/summit
-- README positions Summit as an Agentic AI OSINT Platform
-- Stack includes Neo4j, Postgres, Redis, GraphQL
-- Visible top-level dirs include connect, analysis, audit, .opa/policy, SECURITY, RUNBOOKS
-- CI policy names include:
-  - Release Readiness Gate
-  - GA Gate
-  - Unit Tests & Coverage
-  - CI Core (Primary Gate)
+## Verified vs Assumed Directory List
 
-## Assumed
-- New conflict/COP code can live under connect/, analysis/, audit/, docs/, scripts/monitoring/
-- Evidence objects can be introduced without breaking existing consumers if versioned
-- JSON report artifacts are acceptable CI outputs
+| Path | Status | Notes |
+| --- | --- | --- |
+| `.github/workflows/` | ✅ Verified | Present at repo root. |
+| `docs/` | ✅ Verified | Present at repo root. |
+| `scripts/` | ✅ Verified | Present at repo root. |
+| `tests/` | ✅ Verified | Present at repo root. |
+| `src/` | ✅ Verified | Present at repo root. |
+| `server/` | ✅ Verified | Present at repo root. |
+| `client/` | ✅ Verified | Present at repo root. |
+| `packages/` | ✅ Verified | Present at repo root. |
+| `docs/operations/` | Deferred pending validation | Validate before adding new trees. |
+| `docs/governance/` | ✅ Verified | Present at repo root. |
 
-## Must-not-touch
-- Existing branch protection reconciler paths and governance policy semantics
-- Existing production GraphQL schema names unless behind additive versioning
-- Existing security policy docs without maintainer review
-- Existing ingest connectors used in production unless feature-flagged
+## CI Check Names (Exact)
+
+Deferred pending validation against `.github/workflows/*` and branch protection.
+
+## Evidence Schema Conventions (Exact)
+
+Deferred pending validation against `docs/governance/*` and `evidence/` schemas.
+
+## Must-Not-Touch List (Guardrails)
+
+Deferred pending validation. Baseline expectations:
+
+- Lockfiles (`pnpm-lock.yaml`, `package-lock.json`, `yarn.lock`)
+- Production compose files (`docker-compose*.yml`)
+- Secrets or `.env` files
+
+## Validation Checklist
+
+1. Confirm Node version + package manager in `package.json` and workflows.
+2. Confirm workflows and required checks in branch protection.
+3. Confirm evidence/telemetry conventions (schemas, naming, and locations).
+4. Confirm whether `docs/operations/` and `docs/governance/` already exist.
+5. Confirm graph stores in configs (Neo4j/Qdrant/etc).

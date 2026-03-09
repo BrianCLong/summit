@@ -27,7 +27,7 @@ jobs:
       - name: Install dependencies
         run: pnpm install
       - name: Run changed skill evals
-        run: echo "Skill evals disabled or missing"
+        run: make eval-skills-changed
       - name: Upload eval artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -46,7 +46,7 @@ jobs:
       - name: Install dependencies
         run: pnpm install
       - name: Run full skill eval suite
-        run: echo "Skill evals disabled or missing"
+        run: make eval-skills-all
       - name: Upload eval artifacts
         uses: actions/upload-artifact@v4
         with:

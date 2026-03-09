@@ -3,30 +3,29 @@ ACP Registry Client.
 Implements registry fetch, parsing, and normalization.
 """
 from __future__ import annotations
-
-import json
-import urllib.request
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Union
+import json
+import urllib.request
 
 REGISTRY_URL = "https://cdn.agentclientprotocol.com/registry/v1/latest/registry.json"
 
 @dataclass(frozen=True)
 class NpxDist:
     package: str
-    args: list[str]
-    env: dict[str, str]
+    args: List[str]
+    env: Dict[str, str]
 
 @dataclass(frozen=True)
 class BinaryVariant:
     archive: str
     cmd: str
-    args: list[str]
-    env: dict[str, str]
+    args: List[str]
+    env: Dict[str, str]
 
 @dataclass(frozen=True)
 class BinaryDist:
-    variants: dict[str, BinaryVariant]  # e.g., "linux-x86_64"
+    variants: Dict[str, BinaryVariant]  # e.g., "linux-x86_64"
 
 Distribution = Union[NpxDist, BinaryDist]
 
@@ -37,19 +36,19 @@ class AgentDescriptor:
     version: str
     description: str
     repository: Optional[str]
-    authors: list[str]
+    authors: List[str]
     license: str
     icon: Optional[str]
     distribution: Optional[Distribution]
 
-def fetch_registry_json(url: str = REGISTRY_URL, timeout_s: int = 10) -> dict[str, Any]:
+def fetch_registry_json(url: str = REGISTRY_URL, timeout_s: int = 10) -> Dict[str, Any]:
     req = urllib.request.Request(url, headers={"User-Agent": "Summit/1.0"})
     with urllib.request.urlopen(req, timeout=timeout_s) as resp:
         data = resp.read().decode("utf-8")
     return json.loads(data)
 
-def parse_agents(doc: dict[str, Any]) -> list[AgentDescriptor]:
-    agents: list[AgentDescriptor] = []
+def parse_agents(doc: Dict[str, Any]) -> List[AgentDescriptor]:
+    agents: List[AgentDescriptor] = []
     for a in doc.get("agents", []):
         dist = _parse_distribution(a.get("distribution"))
         agents.append(
@@ -67,14 +66,14 @@ def parse_agents(doc: dict[str, Any]) -> list[AgentDescriptor]:
         )
     return agents
 
-def _parse_distribution(d: Optional[dict[str, Any]]) -> Optional[Distribution]:
+def _parse_distribution(d: Optional[Dict[str, Any]]) -> Optional[Distribution]:
     if not d:
         return None
     if "npx" in d:
         n = d["npx"]
         return NpxDist(package=n["package"], args=list(n.get("args", [])), env=dict(n.get("env", {})))
     if "binary" in d:
-        out: dict[str, BinaryVariant] = {}
+        out: Dict[str, BinaryVariant] = {}
         for k, v in d["binary"].items():
             out[k] = BinaryVariant(
                 archive=v["archive"],

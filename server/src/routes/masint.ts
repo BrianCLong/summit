@@ -4,7 +4,6 @@ import { MasintService } from '../services/MasintService.js';
 import { MasintSignalSchema } from '../types/masint.types.js';
 import { ensureAuthenticated } from '../middleware/auth.js';
 import logger from '../utils/logger.js';
-import { firstStringOr } from '../utils/http-param.js';
 
 const router = express.Router();
 const masintService = MasintService.getInstance();
@@ -39,7 +38,7 @@ router.post('/ingest', ensureAuthenticated, async (req, res) => {
  * @access Private
  */
 router.get('/analysis/:id', ensureAuthenticated, async (req, res) => {
-  const id = firstStringOr(req.params.id, '');
+  const { id } = req.params;
   try {
     const result = await masintService.getAnalysis(id);
 

@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 import json
-import os
-import re
 import sys
-
+import re
+import os
 
 def lint_query(query_meta):
     id = query_meta.get('id')
@@ -40,7 +39,7 @@ def main():
         return 0
 
     try:
-        with open(registry_path) as f:
+        with open(registry_path, 'r') as f:
             registry = json.load(f)
     except Exception as e:
         print(f"Failed to load registry: {e}")

@@ -37,7 +37,7 @@ describe('AirGapVulnManager', () => {
     // Dynamic import after mocking
     const fsModule = await import('node:fs/promises');
     fs = fsModule.default || fsModule; // Handle potential default export difference
-    
+
     const module = await import('../airgap-vuln-manager.js');
     AirGapVulnManager = module.AirGapVulnManager;
     getAirGapVulnManager = module.getAirGapVulnManager;

@@ -77,9 +77,6 @@ receivers:
         send_resolved: true
       - api_url: 'http://localhost/dummy'
         send_resolved: true
-    webhook_configs:
-      - url: 'http://localhost:5001/alerts/critical'
-        send_resolved: true
 
   - name: 'warning'
     slack_configs:

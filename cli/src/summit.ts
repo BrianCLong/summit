@@ -8,7 +8,6 @@ import { initAgentScaffold } from './adk/init.js';
 import { validateManifestCommand } from './adk/validate.js';
 import { runAgent } from './adk/run.js';
 import { packAgent } from './adk/pack.js';
-import { registerWorkflowCommands } from './commands/workflow.js';
 
 function renderResult(result: DoctorCheckResult): void {
   const statusIcon =
@@ -51,7 +50,6 @@ async function main() {
   program.name('summit').description('Summit developer toolbox CLI');
 
   registerOpenClawCommands(program);
-  registerWorkflowCommands(program);
 
   (['init', 'check', 'test', 'release-dry-run'] as const).forEach((workflowName) => {
     program

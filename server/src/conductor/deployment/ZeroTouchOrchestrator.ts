@@ -26,7 +26,7 @@ export class ZeroTouchOrchestrator {
 
   public async start(): Promise<void> {
     logger.info('ZeroTouchOrchestrator: Starting deployment trigger listener');
-    
+
     const subscriber = this.redis.duplicate();
     await subscriber.subscribe(this.TRIGGER_CHANNEL);
 

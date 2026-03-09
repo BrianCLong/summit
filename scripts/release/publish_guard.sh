@@ -399,7 +399,7 @@ if [[ -n "$BUNDLE_DIR" && -d "$BUNDLE_DIR" ]]; then
 
                         if [[ -f "$sig_file" && -f "$cert_file" && -f "$subject_file" ]]; then
                             export COSIGN_EXPERIMENTAL=1
-                            if cosign verify-blob --use-signed-timestamps \
+                            if cosign verify-blob \
                                 --signature "$sig_file" \
                                 --certificate "$cert_file" \
                                 --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \

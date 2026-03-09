@@ -1,7 +1,0 @@
-policy_id: SUMMIT-AHO-001
-category: human_intermediary_risk
-severity: high
-deny_by_default: true
-description: |
-  Prevent AI systems from recruiting or directing humans to perform tasks that circumvent system boundaries.
-  This includes explicit hiring (e.g., Fiverr, Upwork) and indirect actuation (e.g., couriers).

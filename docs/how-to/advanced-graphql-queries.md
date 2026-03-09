@@ -1,4 +1,4 @@
-# Patterns
+### Patterns
 
 - **Time‑travel** queries
 - **Policy‑aware** path searches (exclude classified edges)
@@ -13,8 +13,7 @@ type Query {
   timeTravelOrgSuppliers(orgId: ID!, asOf: DateTime!): [Org!]!
   pathsPolicyAware(from: ID!, to: ID!, maxHops: Int = 4): [Path!]!
 }
-
-```text
+```
 
 ### Resolver Guard (TypeScript)
 
@@ -26,15 +25,13 @@ export function assertTenant(ctx: Ctx) {
 export function requireAuthority(ctx: Ctx, scope: string) {
   if (!ctx.scopes?.includes(scope)) throw new Error('unauthorized');
 }
-
-```text
+```
 
 ### Persisted Queries
 
 ```ts
 // on startup, register hashes → queries; reject unknown hashes in prod
-
-```text
+```
 
 ### Example Query
 
@@ -42,5 +39,4 @@ export function requireAuthority(ctx: Ctx, scope: string) {
 query_pathsPolicyAware($from: ID!, $to: ID!) {
   pathsPolicyAware(from: $from, to: $to, maxHops: 3) { nodes { id kind } edges { kind policyTags } }
 }
-
-```text
+```

@@ -1,6 +1,6 @@
 /**
  * Persisted GraphQL Queries & CDN Caching Module
- * 
+ *
  * Implements persistent storage for GraphQL queries and CDN caching for improved performance
  */
 
@@ -70,11 +70,11 @@ export class PersistedQueryStore {
   async saveQuery(query: string, tenantId: string, tags?: string[]): Promise<PersistedQuery> {
     const queryHash = SHA256(query).toString();
     const queryId = uuidv4();
-    
+
     const result = await this.pool.query(
-      `INSERT INTO persisted_queries (id, hash, query, tenant_id, tags) 
-       VALUES ($1, $2, $3, $4, $5) 
-       ON CONFLICT (hash) DO UPDATE SET 
+      `INSERT INTO persisted_queries (id, hash, query, tenant_id, tags)
+       VALUES ($1, $2, $3, $4, $5)
+       ON CONFLICT (hash) DO UPDATE SET
          query = EXCLUDED.query,
          updated_at = CURRENT_TIMESTAMP,
          tags = EXCLUDED.tags
@@ -196,17 +196,17 @@ export class GraphQLCacheManager {
 
     try {
       const cached = await this.redis.get(key);
-      
+
       if (cached) {
         metrics.graphqlCacheHits.inc();
-        
+
         // Decompress if needed
         if (this.defaultConfig.compression) {
           // In a real implementation, we would decompress the value
           // For now, we'll just return as JSON
           return JSON.parse(cached);
         }
-        
+
         return JSON.parse(cached);
       } else {
         metrics.graphqlCacheMisses.inc();
@@ -221,7 +221,7 @@ export class GraphQLCacheManager {
 
   async set(key: string, value: any, config?: Partial<CacheConfig>): Promise<boolean> {
     const effectiveConfig = { ...this.defaultConfig, ...config };
-    
+
     if (!effectiveConfig.enabled) {
       return false;
     }
@@ -229,7 +229,7 @@ export class GraphQLCacheManager {
     try {
       // Serialize value
       const serialized = JSON.stringify(value);
-      
+
       // Set with TTL
       await this.redis.setex(key, effectiveConfig.ttl, serialized);
       metrics.graphqlCacheSets.inc();
@@ -245,13 +245,13 @@ export class GraphQLCacheManager {
     try {
       // Find keys matching the pattern
       const keys = await this.redis.keys(pattern);
-      
+
       if (keys.length > 0) {
         const result = await this.redis.del(...keys);
         logger.info(`Invalidated ${result} cache entries matching pattern: ${pattern}`);
         return result;
       }
-      
+
       return 0;
     } catch (error) {
       logger.error('Cache invalidation error:', error);
@@ -267,32 +267,32 @@ export class GraphQLCacheManager {
     tenantId?: string
   ): string {
     const keyParts = ['graphql', 'response', operationHash];
-    
+
     if (variables) {
       // Create a deterministic hash of variables
       const varHash = SHA256(JSON.stringify(variables)).toString().substring(0, 16);
       keyParts.push(varHash);
     }
-    
+
     if (userId) {
       keyParts.push(`user:${userId}`);
     }
-    
+
     if (tenantId) {
       keyParts.push(`tenant:${tenantId}`);
     }
-    
+
     return keyParts.join(':');
   }
 
   // Create cache key for persisted queries
   createPersistedQueryCacheKey(hash: string, tenantId?: string): string {
     const keyParts = ['graphql', 'persisted', hash];
-    
+
     if (tenantId) {
       keyParts.push(`tenant:${tenantId}`);
     }
-    
+
     return keyParts.join(':');
   }
 }
@@ -311,7 +311,7 @@ export const createPersistedQueryMiddleware = (
       // Handle persisted queries if the request has an operation hash
       if (req.body && req.body.extensions && req.body.extensions.persistedQuery) {
         const { version, sha256Hash } = req.body.extensions.persistedQuery;
-        
+
         if (version !== 1) {
           return res.status(400).json({
             errors: [{ message: 'Unsupported persisted query version' }]
@@ -325,7 +325,7 @@ export const createPersistedQueryMiddleware = (
         if (!persistedQuery) {
           // Not in cache, fetch from database
           persistedQuery = await queryStore.getQueryByHash(sha256Hash);
-          
+
           if (!persistedQuery) {
             // Query not found, return error
             return res.status(400).json({
@@ -339,7 +339,7 @@ export const createPersistedQueryMiddleware = (
 
         // Override the query in the request body with the persisted query
         req.body.query = persistedQuery.query;
-        
+
         // Log the persisted query hit
         logger.debug('Served persisted query', {
           operationHash: sha256Hash,
@@ -391,18 +391,18 @@ export const createResponseCacheMiddleware = (
     } else {
       const operationHash = SHA256(req.body.query || '').toString().substring(0, 16);
       cacheKey = `graphql:response:${operationHash}:${operationName}`;
-      
+
       // Add variable hash if variables are present
       if (req.body.variables) {
         const varHash = SHA256(JSON.stringify(req.body.variables)).toString().substring(0, 16);
         cacheKey += `:${varHash}`;
       }
-      
+
       // Add context-specific identifiers
       if (tenantId !== 'default') {
         cacheKey += `:tenant:${tenantId}`;
       }
-      
+
       if (userId !== 'anonymous') {
         cacheKey += `:user:${userId}`;
       }
@@ -426,14 +426,14 @@ export const createResponseCacheMiddleware = (
 
     // Modify res.json to capture and cache the response
     const originalJson = res.json.bind(res);
-    
+
     res.json = (data: any) => {
       // Determine if we should cache this result
       const shouldCache = !shouldCacheResult || shouldCacheResult(req, data);
-      
+
       if (shouldCache && data && typeof data === 'object') {
         // Cache the response
-        cacheManager.set(cacheKey, data, { 
+        cacheManager.set(cacheKey, data, {
           ttl: req.cacheTtl || 300 // Default 5 minutes
         }).then(success => {
           if (success) {
@@ -478,8 +478,8 @@ export const registerPersistedQuery = async (
 
 // Initialize the GraphQL caching system
 export const initGraphQLCaching = async (
-  pool: Pool, 
-  redis: Redis, 
+  pool: Pool,
+  redis: Redis,
   config?: Partial<CacheConfig>
 ): Promise<{
   queryStore: PersistedQueryStore;

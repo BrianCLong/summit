@@ -36,7 +36,6 @@ jobs:
         with:
           node-version: "20"
           cache: "pnpm"
-          cache-dependency-path: '**/pnpm-lock.yaml'
       - uses: pnpm/action-setup@v4 # v4
       - name: Install
         run: pnpm install --frozen-lockfile
@@ -56,13 +55,11 @@ jobs:
         with:
           node-version: "20"
           cache: "pnpm"
-          cache-dependency-path: '**/pnpm-lock.yaml'
       - name: Setup Node
         uses: actions/setup-node@v4 # v6
         with:
           node-version: "20"
           cache: "pnpm"
-          cache-dependency-path: '**/pnpm-lock.yaml'
       - name: Gitleaks
         uses: gitleaks/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7 # v2
         env:

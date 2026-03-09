@@ -81,7 +81,7 @@
 
 ### Threat Model (GA-ready)
 
-**Assets:** Source PDFs, derived ThreatTraces, Evidence artifacts, provenance ledger.  
+**Assets:** Source PDFs, derived ThreatTraces, Evidence artifacts, provenance ledger.
 **Trust Boundaries:** Offline bundle ingestion boundary, extraction worker boundary, tenant partition boundary.
 
 ### Controls

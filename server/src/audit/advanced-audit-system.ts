@@ -1259,7 +1259,6 @@ export class AdvancedAuditSystem extends EventEmitter {
 
   private async processRealTimeAlerts(event: AuditEvent): Promise<void> {
     if (!this.redis) return;
-    if (typeof (this.redis as any).publish !== 'function') return;
 
     // Implement real-time alerting logic
     if (event.level === 'critical' || event.eventType === 'security_alert') {

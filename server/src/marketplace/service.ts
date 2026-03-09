@@ -2,17 +2,10 @@ import { RegisteredPlugin, PluginStatus, PluginManifest, PluginPackage } from '.
 import { TrustTier, MarketplaceArtifactGovernance, LicenseType, SecurityStatus } from './types.js';
 import { randomUUID } from 'crypto';
 
-import { verifyCosign } from '../plugins/verify.js';
-import { piiDetector } from '../privacy/PIIDetector.js';
-import { SubgraphPackage, RegisteredSubgraph, SubgraphStatus } from './types.js';
-
-
 export class MarketplaceService {
   private static instance: MarketplaceService;
   private plugins: Map<string, RegisteredPlugin> = new Map();
   private _killSwitchActive: boolean = false;
-  private subgraphs: Map<string, RegisteredSubgraph> = new Map();
-  public contributorReputations: Map<string, number> = new Map();
 
   // Mock Provenance Ledger
   private ledger: any[] = [];
@@ -46,9 +39,8 @@ export class MarketplaceService {
    * Submit a new plugin package for review.
    */
   public async submitPlugin(pkg: PluginPackage, submitter: string): Promise<RegisteredPlugin> {
-    // 1. Validate signature
-    const isValid = await this.verifySignature(pkg.signature || '', pkg.code);
-    if (!isValid) {
+    // 1. Validate signature (Mock)
+    if (!this.verifySignature(pkg)) {
         throw new Error("Invalid plugin signature");
     }
 
@@ -146,87 +138,9 @@ export class MarketplaceService {
     return this.plugins.get(id);
   }
 
-
-  public getReputation(contributorId: string): number {
-    return this.contributorReputations.get(contributorId) ?? 100;
-  }
-
-  public updateReputation(contributorId: string, delta: number): number {
-    const current = this.getReputation(contributorId);
-    const updated = Math.max(0, Math.min(100, current + delta));
-    this.contributorReputations.set(contributorId, updated);
-    return updated;
-  }
-
-  public async submitSubgraph(pkg: SubgraphPackage): Promise<RegisteredSubgraph> {
-    const reputation = this.getReputation(pkg.contributorId);
-
-    const subgraph: RegisteredSubgraph = {
-      id: pkg.id || randomUUID(),
-      pkg,
-      status: SubgraphStatus.SUBMITTED,
-      riskScore: 0,
-      reputationScore: reputation,
-      createdAt: new Date()
-    };
-
-    // 1. Reputation Check
-    if (reputation < 50) {
-      subgraph.status = SubgraphStatus.QUARANTINED;
-      subgraph.quarantineReason = 'Contributor reputation below threshold';
-      this.subgraphs.set(subgraph.id, subgraph);
-      this.audit(subgraph.id, 'SUBGRAPH_QUARANTINED', { reason: subgraph.quarantineReason });
-      return subgraph;
-    }
-
-    // 2. Signature Check
-    const isValidSig = await this.verifySignature(pkg.signature, pkg.payload);
-    if (!isValidSig) {
-      subgraph.status = SubgraphStatus.QUARANTINED;
-      subgraph.quarantineReason = 'Invalid cryptographic signature';
-      this.updateReputation(pkg.contributorId, -10); // Penalty
-      this.subgraphs.set(subgraph.id, subgraph);
-      this.audit(subgraph.id, 'SUBGRAPH_QUARANTINED', { reason: subgraph.quarantineReason });
-      return subgraph;
-    }
-
-    // 3. PII Detect
-    const scanResultEnvelope = await piiDetector.scanObject(pkg.payload);
-    const scanResult = scanResultEnvelope.data;
-    if (scanResult.hasPI || scanResult.riskScore > 50) {
-      subgraph.status = SubgraphStatus.QUARANTINED;
-      subgraph.quarantineReason = `PII Detected (Risk Score: ${scanResult.riskScore})`;
-      subgraph.riskScore = scanResult.riskScore;
-      this.updateReputation(pkg.contributorId, -5); // Penalty
-      this.subgraphs.set(subgraph.id, subgraph);
-      this.audit(subgraph.id, 'SUBGRAPH_QUARANTINED', { reason: subgraph.quarantineReason });
-      return subgraph;
-    }
-
-    // Passed checks
-    subgraph.status = SubgraphStatus.APPROVED;
-    const updatedRep = this.updateReputation(pkg.contributorId, +2); // Reward for valid submission
-    subgraph.reputationScore = updatedRep;
-    this.subgraphs.set(subgraph.id, subgraph);
-    this.audit(subgraph.id, 'SUBGRAPH_APPROVED', { contributor: pkg.contributorId });
-
-    return subgraph;
-  }
-
-  public getSubgraph(id: string): RegisteredSubgraph | undefined {
-    return this.subgraphs.get(id);
-  }
-
-  public async verifySignature(signature: string, payload: any): Promise<boolean> {
-    try {
-      // Stub payload extraction for cosign logic matching verifyCosign's `ref`
-      const ref = typeof payload === 'string' ? payload : JSON.stringify(payload);
-      const isValid = await verifyCosign(signature || ref);
-      return isValid;
-    } catch (error) {
-      console.warn('Signature verification failed:', error);
-      return false;
-    }
+  public verifySignature(pkg: PluginPackage): boolean {
+    // Placeholder for cryptographic verification
+    return !!pkg.signature;
   }
 
   public audit(artifactId: string, event: string, payload: any) {

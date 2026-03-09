@@ -1,8 +1,8 @@
-> Owner: @summit/governance
-> Last-Reviewed: 2026-02-25
-> Evidence-IDs: EVD-PLACEHOLDER
-> Status: active
+# Orphan Resolution Log
 
+> **Status:** Closed
+> **Custodian:** Jules
+> **Date:** 2025-10-27
 
 This log records the disposition of orphaned governance artifacts detected during the ownership lock sweep.
 

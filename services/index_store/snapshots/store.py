@@ -1,9 +1,6 @@
 import uuid
 from typing import Dict, Optional
-
 from pydantic import BaseModel
-
-
 class IndexSnapshot(BaseModel):
     snapshot_id: str
     scope: str

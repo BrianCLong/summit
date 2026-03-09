@@ -2,7 +2,6 @@ import { Request, Response } from 'express';
 import { FunnelService } from './FunnelService.js';
 import { Funnel } from './types.js';
 import path from 'path';
-import { firstString } from '../../utils/http-param.js';
 
 const LOG_DIR = process.env.TELEMETRY_LOG_DIR || path.join(process.cwd(), 'logs', 'telemetry');
 const service = new FunnelService(LOG_DIR);
@@ -17,8 +16,7 @@ export const createFunnel = (req: Request, res: Response) => {
 };
 
 export const getFunnelReport = (req: Request, res: Response) => {
-    const id = firstString(req.params.id);
-    if (!id) return res.status(400).json({ error: 'id is required' });
+    const { id } = req.params;
     try {
         const report = service.generateReport(id);
         res.json(report);

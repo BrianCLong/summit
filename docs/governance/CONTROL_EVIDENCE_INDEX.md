@@ -1,8 +1,7 @@
-> Owner: Governance
-> Last-Reviewed: 2026-01-14
-> Evidence-IDs: controlevidenceindex
-> Status: active
-
+Owner: Governance
+Last-Reviewed: 2026-01-14
+Evidence-IDs: control_evidence_index
+Status: active
 
 # Control → Evidence Index
 

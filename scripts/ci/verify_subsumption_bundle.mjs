@@ -105,26 +105,11 @@ if (fs.existsSync(path.join(bundleDir, "fixtures"))) {
 const outDir = path.join(bundleDir, "runs", "ci", EVIDENCE_ID);
 fs.mkdirSync(outDir, { recursive: true });
 
-// Parse claims from claims.md if present
-let claims = [
-  { backing: "ITEM:CLAIM-01", claim_id: "ITEM:CLAIM-01" },
-  { backing: "ITEM:CLAIM-02", claim_id: "ITEM:CLAIM-02" },
-];
-
-const claimsPath = path.join(bundleDir, "claims.md");
-if (fs.existsSync(claimsPath)) {
-  const claimsRaw = readText(claimsPath);
-  const claimMatches = claimsRaw.match(/[A-Z0-9_-]+-\d+/g);
-  if (claimMatches) {
-    claims = [...new Set(claimMatches)].map(id => ({
-      backing: id,
-      claim_id: id
-    }));
-  }
-}
-
 const report = {
-  claims,
+  claims: [
+    { backing: "ITEM:CLAIM-01", claim_id: "ITEM:CLAIM-01" },
+    { backing: "ITEM:CLAIM-02", claim_id: "ITEM:CLAIM-02" },
+  ],
   decisions: [
     "Bundle verifier enforces manifest, schema, docs, and fixture presence.",
     "Evidence artifacts remain deterministic (report/metrics).",

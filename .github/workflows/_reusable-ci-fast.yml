@@ -1,0 +1,52 @@
+name: _reusable-ci-fast
+on:
+  workflow_call:
+    inputs:
+      test-command:
+        required: false
+        type: string
+        default: "pnpm run test:fast -- --runInBand --bail=1 --silent"
+
+jobs:
+  fast:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    env:
+      CI: "true"
+      NODE_OPTIONS: "--max-old-space-size=3072"
+      PNPM_CACHE_FOLDER: ~/.pnpm-store
+    steps:
+      - uses: actions/checkout@v4 # v6
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4 # v4
+        with:
+          run_install: false
+
+      - name: Setup Node
+        uses: actions/setup-node@v4 # v6
+        with:
+          cache: 'pnpm'
+          node-version: "20.11.x"
+
+      - name: Enable corepack (belt & suspenders)
+        run: corepack enable
+
+      - name: Install deps
+        run: pnpm i --frozen-lockfile
+
+      - name: Run fast lane
+        run: ${{ inputs.test-command }}
+        continue-on-error: true
+
+      - name: Upload Jest results (debug)
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          retention-days: 14
+          name: fast-jest-results
+          path: |
+            **/junit.xml
+            **/jest*.json
+            **/test-results/**
+          if-no-files-found: ignore

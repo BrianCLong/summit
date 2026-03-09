@@ -1,13 +1,8 @@
 from __future__ import annotations
-
-import hashlib
-import json
-import os
+import os, json, hashlib
 from pathlib import Path
-
 from .codec import decode_structure, encode_structure
 from .validators import validate_invariants
-
 
 def _sha(s: str) -> str:
     return hashlib.sha256(s.encode("utf-8")).hexdigest()

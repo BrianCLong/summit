@@ -1,23 +1,16 @@
-# IntelGraph repo assumptions
+# Repo Assumptions & Verification
 
-## Verified
-- Public monorepo for Summit exists
-- Node 18+, pnpm, Neo4j 5.x in quickstart
-- GraphQL + REST APIs are core
-- Collaboration/war-room and timeline issues exist
-- CI/workflow surface is large and policy/evidence oriented
+**Verified:**
+*   Monorepo structure with `services/` and `src/`.
+*   `src/` contains core logic and libraries (`intelgraph`, `maestro`, `memory`, etc.).
+*   `services/evals` exists but only contains `runner.ts`.
+*   `src/evals` does NOT exist (will be created).
+*   TypeScript environment.
+*   `src/cli` exists.
 
-## Assumed
-- `server/src/api` or equivalent GraphQL service exists
-- `client/src` or equivalent React frontend exists
-- Neo4j access is centralized behind a shared client
-- Evidence artifacts follow repo-wide conventions
-- Tenant scoping already exists outside IntelGraph
+**Assumed:**
+*   We can add shared evaluation logic to `src/evals`.
+*   Test runner is Jest or similar (implied by `jest.globalSetup.js` in root).
 
-## Validation checklist before PR1 merges
-- Confirm exact package/workspace boundaries
-- Confirm existing GraphQL schema location
-- Confirm auth context shape
-- Confirm standard test command names
-- Confirm runbook/docs locations
-- Confirm must-not-touch branch protection workflows
+**Plan Deviation:**
+*   Instead of putting everything in `services/evals`, we are creating a shared library in `src/evals` to be used by services.

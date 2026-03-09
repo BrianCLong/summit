@@ -2,7 +2,6 @@
 import { EventEmitter } from 'events';
 import argon2 from 'argon2';
 import * as jwt from 'jsonwebtoken';
-import { createHash } from 'crypto';
 import { cacheService } from './CacheService.js';
 import { v4 as uuidv4 } from 'uuid';
 import type { Pool, PoolClient } from 'pg';
@@ -443,7 +442,8 @@ export class SecurityService extends EventEmitter {
    * Hash token for storage (SHA256)
    */
   hashToken(token: string): string {
-    return createHash('sha256').update(token).digest('hex');
+    const crypto = require('crypto');
+    return crypto.createHash('sha256').update(token).digest('hex');
   }
 
   /**

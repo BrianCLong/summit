@@ -62,7 +62,7 @@ jobs:
   sbom:
     name: Publish SBOM snapshot
     needs: open-weekly-issue
-    uses: ./.github/workflows/_reusable-sbom.yml
+    uses: ./.github/workflows/reusable/sbom.yml
     with:
       service: release-train
     secrets: inherit

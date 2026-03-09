@@ -62,17 +62,17 @@ echo "🔍 Verifying signatures..."
 
 # Verify container image signature
 if [ -n "$COSIGN_PWD" ]; then
-    cosign verify --use-signed-timestamps --key env://COSIGN_PWD "${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}" || {
+    cosign verify --key env://COSIGN_PWD "${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}" || {
         echo "❌ Container image verification failed"
         exit 1
     }
 elif [ -f "$KEY_PATH" ]; then
-    cosign verify --use-signed-timestamps --key "$KEY_PATH" "${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}" || {
+    cosign verify --key "$KEY_PATH" "${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}" || {
         echo "❌ Container image verification failed"
         exit 1
     }
 else
-    cosign verify --use-signed-timestamps "${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}" || {
+    cosign verify "${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}" || {
         echo "❌ Container image verification failed"
         exit 1
     }
@@ -87,17 +87,17 @@ if [ -d "dist" ]; then
                 echo "  - Verifying signature for $artifact_name..."
                 
                 if [ -n "$COSIGN_PWD" ]; then
-                    cosign verify-blob --use-signed-timestamps --key env://COSIGN_PWD --signature "$sig_file" "dist/$artifact_name" || {
+                    cosign verify-blob --key env://COSIGN_PWD --signature "$sig_file" "dist/$artifact_name" || {
                         echo "❌ Artifact $artifact_name verification failed"
                         exit 1
                     }
                 elif [ -f "$KEY_PATH" ]; then
-                    cosign verify-blob --use-signed-timestamps --key "$KEY_PATH" --signature "$sig_file" "dist/$artifact_name" || {
+                    cosign verify-blob --key "$KEY_PATH" --signature "$sig_file" "dist/$artifact_name" || {
                         echo "❌ Artifact $artifact_name verification failed"
                         exit 1
                     }
                 else
-                    cosign verify-blob --use-signed-timestamps --signature "$sig_file" "dist/$artifact_name" --certificate-identity-regexp=".*" --certificate-oidc-issuer-regexp=".*" || {
+                    cosign verify-blob --signature "$sig_file" "dist/$artifact_name" --certificate-identity-regexp=".*" --certificate-oidc-issuer-regexp=".*" || {
                         echo "❌ Artifact $artifact_name verification failed (keyless)"
                         exit 1
                     }

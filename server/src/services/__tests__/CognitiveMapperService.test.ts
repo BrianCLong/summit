@@ -1,5 +1,7 @@
-import { afterEach, beforeAll, beforeEach, describe, expect, it, jest } from '@jest/globals';
-import type { Driver, Session } from 'neo4j-driver';
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
+import { CognitiveMapperService } from '../CognitiveMapperService.js';
+import { getNeo4jDriver } from '../../config/database.js';
+import { Driver, Session, Result } from 'neo4j-driver';
 
 // Helper to define Record type since it's hard to import
 interface Neo4jRecord {
@@ -9,10 +11,9 @@ interface Neo4jRecord {
   toObject: () => any;
 }
 
-const getNeo4jDriverMock = jest.fn();
-
-jest.unstable_mockModule('../../config/database.js', () => ({
-  getNeo4jDriver: getNeo4jDriverMock,
+// Mock getNeo4jDriver
+jest.mock('../../config/database', () => ({
+  getNeo4jDriver: jest.fn()
 }));
 
 // Helper to mock Neo4j record
@@ -43,13 +44,8 @@ const mockRecord = (keys: string[], values: any[]): Neo4jRecord => {
 };
 
 describe('CognitiveMapperService', () => {
-  let CognitiveMapperService: any;
   let mockDriver: jest.Mocked<Driver>;
   let mockSession: jest.Mocked<Session>;
-
-  beforeAll(async () => {
-    ({ CognitiveMapperService } = await import('../CognitiveMapperService.js'));
-  });
 
   beforeEach(() => {
     mockSession = {
@@ -64,7 +60,7 @@ describe('CognitiveMapperService', () => {
       close: jest.fn(),
     } as unknown as jest.Mocked<Driver>;
 
-    getNeo4jDriverMock.mockReturnValue(mockDriver);
+    (getNeo4jDriver as jest.Mock).mockReturnValue(mockDriver);
 
     // Reset singleton instance to ensure new mock driver is used
     // @ts-ignore

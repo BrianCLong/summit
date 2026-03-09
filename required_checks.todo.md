@@ -23,7 +23,6 @@ We are using these names in our CI pipeline definitions, but they might be repor
 - `typecheck`
 - `build`
 - `test`
-- `ci-council-evidence`
 
 Once official names are known, we will alias these jobs or rename them in the workflow files to match the branch protection rules.
 
@@ -40,10 +39,3 @@ Once official names are known, we will alias these jobs or rename them in the wo
 2) GitHub API: GET /repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks
 3) Update: ci/gates/memory_privacy_gates.yml to match exact check names
 4) Add PR to rename temporary checks to required names once known
-
-## Regulatory Early Warning Checks
-- regulatory-ew-evidence
-- regulatory-ew-backtest
-- regulatory-ew-policy
-- regulatory-ew-privacy
-- regulatory-ew-deps

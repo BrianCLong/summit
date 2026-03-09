@@ -1,75 +1,87 @@
-# Truth Defense Policy (Cognitive Security Protocol)
-#
-# Implements the 6-pillar framework for defending against cognitive attacks:
-# 1. Information Integrity
-# 2. Narrative Dynamics
-# 3. Temporal Truth Protection
-# 4. Authority Validation
-# 5. Blast Radius Containment
-# 6. Strategic Silence
-#
-# All high-impact decisions and information flows must pass this gate.
+# Truth Defense Policy
+# Enforces adversarial-resistant decision-making rules
 
-package security.truth_defense
+package summit.truth_defense
 
-import rego.v1
+import future.keywords.if
+import future.keywords.in
 
-# Default deny
-default allow = false
-
-# Thresholds
-integrity_threshold_high := 0.85
-integrity_threshold_medium := 0.60
-integrity_threshold_low := 0.40
-confidence_threshold := 0.75
+# Configuration
+default integrity_threshold_high := 0.70
+default integrity_threshold_medium := 0.40
+default integrity_threshold_low := 0.20
+default confidence_threshold := 0.80
+default max_temporal_decay_hours := 24
 
 # ==============================================================================
-# PILLAR 1: Information Integrity Rules
+# PILLAR 1: Integrity Scoring Rules
 # ==============================================================================
 
-# Deny low-integrity information from influencing critical decisions
-deny contains msg if {
-    some decision in input.decisions
-    decision.criticality == "critical"
-    decision.information_integrity < integrity_threshold_medium
-    not decision.emergency_override_active
-    msg := sprintf("Critical decision %v blocked due to low integrity source (< %v)", [decision.id, integrity_threshold_medium])
-}
-
-# Require corroboration for unverified claims > medium impact
-deny contains msg if {
+# Information with low integrity must be quarantined
+deny[msg] if {
     some claim in input.claims
-    claim.impact in ["medium", "high", "critical"]
-    claim.verification_status == "unverified"
-    count(claim.corroborating_sources) < 2
-    msg := sprintf("Unverified high-impact claim %v requires at least 2 corroborating sources", [claim.id])
+    claim.integrity_score < integrity_threshold_low
+    not claim.quarantined
+    msg := sprintf("Claim %v has critically low integrity (%v < %v) and must be quarantined",
+        [claim.id, claim.integrity_score, integrity_threshold_low])
 }
 
-# Detect and flag potential disinformation insertion points
-warn contains msg if {
-    some source in input.information_sources
-    source.reliability_score < 0.50
-    source.volume_spike_detected
-    msg := sprintf("Potential disinfo insertion: unreliable source %v with volume spike", [source.id])
+# High confidence without high integrity triggers escalation
+warn[msg] if {
+    some claim in input.claims
+    claim.confidence > confidence_threshold
+    claim.integrity_score < integrity_threshold_medium
+    not claim.escalated
+    msg := sprintf("Claim %v has high confidence (%v) but medium/low integrity (%v) - escalation required",
+        [claim.id, claim.confidence, claim.integrity_score])
+}
+
+# Integrity score components must all be present
+deny[msg] if {
+    some claim in input.claims
+    not claim.integrity_breakdown
+    msg := sprintf("Claim %v missing integrity score breakdown", [claim.id])
+}
+
+deny[msg] if {
+    some claim in input.claims
+    claim.integrity_breakdown
+    required_components := {"source_volatility", "correlation_independence", "historical_adversarial_behavior", "narrative_shift_velocity", "verification_depth"}
+    missing := required_components - {k | claim.integrity_breakdown[k]}
+    count(missing) > 0
+    msg := sprintf("Claim %v integrity breakdown missing components: %v", [claim.id, missing])
 }
 
 # ==============================================================================
-# PILLAR 2: Narrative Dynamics Rules
+# PILLAR 2: Narrative Collision Detection Rules
 # ==============================================================================
 
-# Alert on rapid narrative shifts (indicator of manipulation)
-warn contains msg if {
-    some narrative in input.narratives
-    narrative.sentiment_shift_rate > 0.40
-    narrative.velocity > 0.80
-    msg := sprintf("Rapid narrative shift detected in %v (shift=%v, velocity=%v)",
-        [narrative.id, narrative.sentiment_shift_rate, narrative.velocity])
+# Premature convergence must be flagged
+warn[msg] if {
+    some event in input.events
+    event.time_since_event_minutes < 30
+    event.narrative_metrics.explanatory_diversity == 1
+    event.narrative_metrics.unexplained_elements_ratio > 0.30
+    not event.premature_convergence_flagged
+    msg := sprintf("Event %v shows premature convergence (ED=1, UER=%v) before 30min threshold",
+        [event.id, event.narrative_metrics.unexplained_elements_ratio])
 }
 
-# Enforce explanatory diversity for complex situations
-deny contains msg if {
+# Coordinated narrative attack detection
+deny[msg] if {
+    some event in input.events
+    event.narrative_metrics.convergence_velocity > 5.0
+    event.narrative_metrics.narrative_diversity_index < 0.20
+    not event.coordinated_attack_investigation
+    msg := sprintf("Event %v exhibits coordinated narrative attack pattern (CV=%v, NDI=%v) - investigation required",
+        [event.id, event.narrative_metrics.convergence_velocity, event.narrative_metrics.narrative_diversity_index])
+}
+
+# Mandatory Alternative Hypothesis requirement
+deny[msg] if {
     some decision in input.decisions
-    decision.complexity == "high"
+    decision.criticality == "high"
+    decision.based_on_narrative
     decision.narrative.explanatory_diversity < 2
     not decision.mandatory_alternative_hypothesis_satisfied
     msg := sprintf("Critical decision %v based on single narrative without MAH satisfied", [decision.id])
@@ -80,7 +92,7 @@ deny contains msg if {
 # ==============================================================================
 
 # Decisions made with degraded temporal value must be flagged
-warn contains msg if {
+warn[msg] if {
     some decision in input.decisions
     decision.temporal_decision_value < 0.50
     decision.criticality in ["high", "critical"]
@@ -90,7 +102,7 @@ warn contains msg if {
 }
 
 # Information arrival deadline enforcement
-deny contains msg if {
+deny[msg] if {
     some decision in input.decisions
     decision.information_deadline_defined
     decision.status == "pending"
@@ -100,7 +112,7 @@ deny contains msg if {
 }
 
 # Delay attack detection
-warn contains msg if {
+warn[msg] if {
     some source in input.information_sources
     source.delay_anomaly_score > 3.0
     not source.delay_investigation_active
@@ -113,7 +125,7 @@ warn contains msg if {
 # ==============================================================================
 
 # Identity verification required for high-impact claims
-deny contains msg if {
+deny[msg] if {
     some claim in input.claims
     claim.impact == "critical"
     not claim.identity_verified
@@ -121,7 +133,7 @@ deny contains msg if {
 }
 
 # Behavioral continuity check
-warn contains msg if {
+warn[msg] if {
     some source in input.information_sources
     source.behavioral_deviation_score > 3.0
     not source.elevated_scrutiny
@@ -129,7 +141,7 @@ warn contains msg if {
         [source.id, source.behavioral_deviation_score])
 }
 
-deny contains msg if {
+deny[msg] if {
     some source in input.information_sources
     source.behavioral_deviation_score > 5.0
     not source.quarantined
@@ -138,7 +150,7 @@ deny contains msg if {
 }
 
 # Sudden source elevation blocking
-deny contains msg if {
+deny[msg] if {
     some claim in input.claims
     claim.impact in ["high", "critical"]
     claim.source.age_days < 30
@@ -149,14 +161,14 @@ deny contains msg if {
 }
 
 # Emergency override logging requirement
-deny contains msg if {
+deny[msg] if {
     some decision in input.decisions
     decision.authority_override_used
     not decision.override_justification
     msg := sprintf("Decision %v used authority override without justification", [decision.id])
 }
 
-deny contains msg if {
+deny[msg] if {
     some decision in input.decisions
     decision.authority_override_used
     not decision.secondary_authorization
@@ -168,7 +180,7 @@ deny contains msg if {
 # ==============================================================================
 
 # Compromised information must trigger dependency freeze
-deny contains msg if {
+deny[msg] if {
     some claim in input.claims
     claim.integrity_score < integrity_threshold_medium
     claim.has_dependencies
@@ -177,7 +189,7 @@ deny contains msg if {
 }
 
 # Containment effectiveness tracking
-warn contains msg if {
+warn[msg] if {
     some containment in input.containments
     containment.active
     containment.containment_effectiveness < 0.80
@@ -186,7 +198,7 @@ warn contains msg if {
 }
 
 # Reversibility index for critical decisions
-warn contains msg if {
+warn[msg] if {
     some decision in input.decisions
     decision.criticality == "critical"
     decision.influenced_by_suspect_information
@@ -201,21 +213,21 @@ warn contains msg if {
 # ==============================================================================
 
 # Strategic silence must be justified and monitored
-deny contains msg if {
+deny[msg] if {
     some decision in input.decisions
     decision.decision_type == "strategic_silence"
     not decision.silence_justification
     msg := sprintf("Decision %v chose strategic silence without justification", [decision.id])
 }
 
-deny contains msg if {
+deny[msg] if {
     some decision in input.decisions
     decision.decision_type == "strategic_silence"
     not decision.review_deadline
     msg := sprintf("Strategic silence decision %v lacks review deadline", [decision.id])
 }
 
-warn contains msg if {
+warn[msg] if {
     some decision in input.decisions
     decision.decision_type == "strategic_silence"
     decision.review_deadline_passed
@@ -224,7 +236,7 @@ warn contains msg if {
 }
 
 # Silence overuse detection
-warn contains msg if {
+warn[msg] if {
     silence_rate := count([d | some d in input.decisions; d.decision_type == "strategic_silence"]) / count(input.decisions)
     silence_rate > 0.30
     msg := sprintf("Strategic silence rate (%v) exceeds 30%% threshold - possible decision paralysis", [silence_rate])
@@ -303,13 +315,10 @@ truth_defense_posture := score if {
     low_integrity_total := count([c | some c in input.claims; c.integrity_score < integrity_threshold_low])
 
     integrity_score := high_integrity_claims / total_claims
-    containment_score := containment_effectiveness(quarantined_low_integrity, low_integrity_total)
+    containment_score := quarantined_low_integrity / low_integrity_total if low_integrity_total > 0 else 1.0
 
     score := (integrity_score + containment_score) / 2
 }
-
-containment_effectiveness(quarantined, total) := 1.0 if total == 0
-containment_effectiveness(quarantined, total) := quarantined / total if total > 0
 
 # Identify high-risk decisions requiring immediate attention
 high_risk_decisions[decision] if {

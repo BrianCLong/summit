@@ -1,6 +1,0 @@
-schema:
-  version: "1.0"
-seed: 42
-queries:
-  - id: "q1"
-    shape: "MATCH (n) RETURN n LIMIT 10"

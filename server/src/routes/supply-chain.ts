@@ -4,7 +4,6 @@ import { SBOMParser } from '../supply-chain/SBOMParser.js';
 import { VulnerabilityService } from '../supply-chain/VulnerabilityService.js';
 import { ContractAnalyzer } from '../supply-chain/ContractAnalyzer.js';
 import { SupplyChainRiskEngine } from '../supply-chain/SupplyChainRiskEngine.js';
-import { firstStringOr } from '../utils/http-param.js';
 
 const router = Router();
 
@@ -32,7 +31,7 @@ router.post('/vendors', async (req: Request, res: Response) => {
 });
 
 router.get('/vendors/:id', async (req: Request, res: Response) => {
-  const vendor = await vendorService.getVendor(firstStringOr(req.params.id, ''));
+  const vendor = await vendorService.getVendor(req.params.id);
   if (!vendor) return res.status(404).json({ error: 'Vendor not found' });
   res.json(vendor);
 });
@@ -46,7 +45,7 @@ router.get('/vendors', async (req: Request, res: Response) => {
  * SBOM Upload & Analysis
  */
 router.post('/vendors/:id/sbom', async (req: Request, res: Response) => {
-  const id = firstStringOr(req.params.id, '');
+  const { id } = req.params;
   const { sbomJson, productName, version } = req.body;
 
   const vendor = await vendorService.getVendor(id);
@@ -70,7 +69,7 @@ router.post('/vendors/:id/sbom', async (req: Request, res: Response) => {
  * Contract Analysis
  */
 router.post('/vendors/:id/contract', async (req: Request, res: Response) => {
-  const id = firstStringOr(req.params.id, '');
+  const { id } = req.params;
   const { contractText } = req.body;
 
   const vendor = await vendorService.getVendor(id);
@@ -89,7 +88,7 @@ router.post('/vendors/:id/contract', async (req: Request, res: Response) => {
  * Risk Assessment
  */
 router.get('/vendors/:id/risk', async (req: Request, res: Response) => {
-  const id = firstStringOr(req.params.id, '');
+  const { id } = req.params;
   const vendor = await vendorService.getVendor(id);
   if (!vendor) return res.status(404).json({ error: 'Vendor not found' });
 

@@ -40,7 +40,7 @@ export default defineConfig({
   ...((process.env.CI && !useWebServer)
     ? {
         webServer: {
-          command: 'sleep 120',
+          command: 'echo "CI uses make up"',
           url: 'http://localhost:3000',
           reuseExistingServer: true,
           timeout: 120_000,

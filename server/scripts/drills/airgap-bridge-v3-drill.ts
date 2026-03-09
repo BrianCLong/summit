@@ -16,7 +16,7 @@ async function runAirgapBridgeDrill() {
 
   const exportService = new DeterministicExportService();
   const airgapService = new AirgapService();
-  
+
   const tenantId = 'airgap-tenant-01';
   const userId = 'user-01';
 
@@ -50,7 +50,7 @@ async function runAirgapBridgeDrill() {
   const bundlePath = join(drillsDir, exportId + '.zip');
   // @ts-ignore
   exportService.tempDir = drillsDir;
-  
+
   await new Promise<void>((resolve, reject) => {
     (exportService as any).createBundle(workDir, exportId, manifest)
       .then(() => setTimeout(resolve, 500))
@@ -58,11 +58,11 @@ async function runAirgapBridgeDrill() {
   });
 
   console.log('--- Step 2: Testing Import Verification ---');
-  
+
   try {
     const result = await airgapService.importBundle(tenantId, bundlePath, userId);
     console.log('Import Status: ' + result.status);
-    
+
     if (result.status === 'verified') {
       logger.info('✅ Air-Gapped Bridge v3 Operational (PQC Verified)');
       process.exit(0);

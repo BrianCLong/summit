@@ -52,7 +52,11 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v3      - name: Setup Node.js
+        uses: pnpm/action-setup@v3
+        with:
+
+
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
@@ -94,7 +98,11 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v3      - name: Setup Node.js
+        uses: pnpm/action-setup@v3
+        with:
+
+
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
@@ -124,7 +132,9 @@ jobs:
         run: pnpm turbo run build --filter='./packages/*'
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v4          name: packages-dist
+        uses: actions/upload-artifact@v4
+        with:
+          name: packages-dist
           path: packages/*/dist
           retention-days: 1
 
@@ -136,7 +146,11 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v3      - name: Setup Node.js
+        uses: pnpm/action-setup@v3
+        with:
+
+
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
@@ -155,7 +169,9 @@ jobs:
           key: node-modules-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
 
       - name: Download packages artifacts
-        uses: actions/download-artifact@v4          name: packages-dist
+        uses: actions/download-artifact@v4
+        with:
+          name: packages-dist
           path: packages
 
       - name: Cache Turbo
@@ -222,7 +238,11 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v3      - name: Setup Node.js
+        uses: pnpm/action-setup@v3
+        with:
+
+
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
@@ -260,7 +280,11 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v3      - name: Setup Node.js
+        uses: pnpm/action-setup@v3
+        with:
+
+
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
@@ -295,7 +319,11 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v3      - name: Setup Node.js
+        uses: pnpm/action-setup@v3
+        with:
+
+
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
@@ -314,14 +342,18 @@ jobs:
           key: node-modules-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
 
       - name: Download packages artifacts
-        uses: actions/download-artifact@v4          name: packages-dist
+        uses: actions/download-artifact@v4
+        with:
+          name: packages-dist
           path: packages
 
       - name: Run tests (shard ${{ matrix.shard }}/4)
         run: pnpm test -- --shard=${{ matrix.shard }}/4
 
       - name: Upload coverage
-        uses: actions/upload-artifact@v4          name: coverage-${{ matrix.shard }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-${{ matrix.shard }}
           path: coverage
           retention-days: 1
 

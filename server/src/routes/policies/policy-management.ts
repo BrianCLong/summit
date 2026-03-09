@@ -23,7 +23,6 @@ import {
 } from '../../services/PolicySimulatorService.js';
 import { Principal, Action } from '../../types/identity.js';
 import logger from '../../utils/logger.js';
-import { firstString, firstStringOr } from '../../utils/http-param.js';
 
 const router = express.Router();
 const authz = new AuthorizationServiceImpl();
@@ -100,20 +99,16 @@ router.get(
   async (req: Request, res: Response): Promise<void> => {
     try {
       const principal = (req as any).principal;
-      const page = firstString(req.query.page);
-      const pageSize = firstString(req.query.pageSize);
-      const status = firstString(req.query.status);
-      const category = firstString(req.query.category);
-      const search = firstString(req.query.search);
+      const { page, pageSize, status, category, search } = req.query;
 
       const envelope = await policyService.listPolicies(
         principal.tenantId,
         {
-          page: page ? parseInt(page, 10) : undefined,
-          pageSize: pageSize ? parseInt(pageSize, 10) : undefined,
+          page: page ? parseInt(page as string, 10) : undefined,
+          pageSize: pageSize ? parseInt(pageSize as string, 10) : undefined,
           status: status as any,
           category: category as any,
-          search,
+          search: search as string,
         },
         principal.id
       );
@@ -138,7 +133,7 @@ router.get(
   async (req: Request, res: Response): Promise<void> => {
     try {
       const principal = (req as any).principal;
-      const id = firstStringOr(req.params.id, '');
+      const { id } = req.params;
 
       const envelope = await policyService.getPolicy(principal.tenantId, id, principal.id);
 
@@ -208,7 +203,7 @@ router.patch(
   async (req: Request, res: Response): Promise<void> => {
     try {
       const principal = (req as any).principal;
-      const id = firstStringOr(req.params.id, '');
+      const { id } = req.params;
       const { changelog, ...updates } = req.body;
 
       const parseResult = updatePolicySchema.safeParse(updates);
@@ -253,7 +248,7 @@ router.delete(
   async (req: Request, res: Response): Promise<void> => {
     try {
       const principal = (req as any).principal;
-      const id = firstStringOr(req.params.id, '');
+      const { id } = req.params;
 
       const envelope = await policyService.deletePolicy(principal.tenantId, id, principal.id);
 
@@ -286,7 +281,7 @@ router.get(
   async (req: Request, res: Response): Promise<void> => {
     try {
       const principal = (req as any).principal;
-      const id = firstStringOr(req.params.id, '');
+      const { id } = req.params;
 
       const envelope = await policyService.listPolicyVersions(
         principal.tenantId,
@@ -314,7 +309,7 @@ router.post(
   async (req: Request, res: Response): Promise<void> => {
     try {
       const principal = (req as any).principal;
-      const id = firstStringOr(req.params.id, '');
+      const { id } = req.params;
       const { targetVersion } = req.body;
 
       if (!targetVersion || typeof targetVersion !== 'number') {
@@ -358,7 +353,7 @@ router.post(
   async (req: Request, res: Response): Promise<void> => {
     try {
       const principal = (req as any).principal;
-      const id = firstStringOr(req.params.id, '');
+      const { id } = req.params;
       const { reason } = req.body;
 
       const envelope = await policyService.submitForApproval(
@@ -393,7 +388,7 @@ router.post(
   async (req: Request, res: Response): Promise<void> => {
     try {
       const principal = (req as any).principal;
-      const id = firstStringOr(req.params.id, '');
+      const { id } = req.params;
       const { notes } = req.body;
 
       const envelope = await policyService.approvePolicy(
@@ -428,7 +423,7 @@ router.post(
   async (req: Request, res: Response): Promise<void> => {
     try {
       const principal = (req as any).principal;
-      const id = firstStringOr(req.params.id, '');
+      const { id } = req.params;
 
       const envelope = await policyService.publishPolicy(
         principal.tenantId,

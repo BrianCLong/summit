@@ -1,8 +1,7 @@
-> Owner: Governance
-> Last-Reviewed: 2026-01-14
-> Evidence-IDs: GOV-005, GOV-006, AUD-001
-> Status: active
-
+Owner: Governance
+Last-Reviewed: 2026-01-14
+Evidence-IDs: GOV-005, GOV-006, AUD-001
+Status: active
 
 # Summit Absorption, Convergence & Anti-Fragmentation Doctrine
 

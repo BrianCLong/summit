@@ -1,8 +1,8 @@
-> Owner: Governance Council
-> Last-Reviewed: 2026-02-25
-> Evidence-IDs: EVD-PLACEHOLDER
-> Status: active
+# Attribution Governance Specification
 
+**Status:** Draft
+**Priority:** P0
+**Owner:** Governance Council
 
 ## 1. Core Principle
 Attribution is a political and legal process, not just a technical output. All attribution claims must be banded by confidence and subject to the "Uncertainty Loop" before public release.

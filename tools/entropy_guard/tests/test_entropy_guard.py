@@ -1,6 +1,5 @@
-import os
 import subprocess
-
+import os
 
 def test_entropy_guard_finds_violation():
     # Run entropy guard on the fixtures directory

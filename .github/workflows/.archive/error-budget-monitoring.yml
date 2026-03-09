@@ -339,7 +339,9 @@ jobs:
             }"
 
       - name: Upload Report Artifact
-        uses: actions/upload-artifact@v4          name: error-budget-report-${{ github.run_number }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: error-budget-report-${{ github.run_number }}
           path: |
             error-budget-report.md
             slo-report.json

@@ -1,0 +1,20 @@
+name: docs-debt
+
+permissions:
+  contents: read
+on:
+  schedule: [{ cron: '0 14 * * 5' }]
+  workflow_dispatch:
+jobs:
+  triage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.create({
+              ...context.repo,
+              title: `Docs Debt — ${new Date().toISOString().slice(0,10)}`,
+              body: 'Review stale report, zero-results, and metrics; file follow-ups.',
+              labels: ['docs','docs-debt']
+            })

@@ -47,7 +47,7 @@ jobs:
   # Performance tests (conditional)
   performance:
     name: Performance Tests
-    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+    if: ((${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}) && (${{ always() && (github.event_name == 'push' && github.ref == 'refs/heads/main') }})) && (always())
     uses: ./.github/workflows/_reusable-test-suite.yml
     with:
       test-type: perf
@@ -56,7 +56,6 @@ jobs:
   # Archive results using AWS workflow
   archive-results:
     name: Archive Test Results
-    if: ${{ always() && (github.event_name == 'push' && github.ref == 'refs/heads/main') }}
     needs: [unit-tests, integration-tests, lint-tests, security]
     uses: ./.github/workflows/_reusable-aws.yml
     with:
@@ -74,7 +73,6 @@ jobs:
   ci-summary:
     name: CI Summary
     runs-on: ubuntu-latest
-    if: always()
     needs: [yaml-lint, unit-tests, integration-tests, lint-tests, security]
     steps:
       - name: Check results

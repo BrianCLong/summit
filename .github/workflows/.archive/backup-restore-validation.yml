@@ -170,7 +170,9 @@ jobs:
           fi
 
       - name: Upload backup artifact
-        uses: actions/upload-artifact@v4          name: test-backup-${{ steps.create_backup.outputs.backup_id }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-backup-${{ steps.create_backup.outputs.backup_id }}
           path: backups/${{ steps.create_backup.outputs.backup_id }}
           retention-days: 7
 
@@ -393,7 +395,9 @@ jobs:
           cat restore-validation-report.md
 
       - name: Upload validation report
-        uses: actions/upload-artifact@v4          name: restore-validation-report
+        uses: actions/upload-artifact@v4
+        with:
+          name: restore-validation-report
           path: restore-validation-report.md
           retention-days: 30
 

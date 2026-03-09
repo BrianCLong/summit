@@ -1,7 +1,7 @@
 import { spawn } from 'child_process';
 import { Logger } from 'pino';
 import logger from '../utils/logger.js';
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 export interface BenchmarkResult {
   tool: 'kube-bench' | 'kubescape';

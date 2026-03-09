@@ -240,7 +240,7 @@ function addTenantFilter(query: string, tenantId: string): string {
 - [GraphQL Security Best Practices](https://cheatsheetseries.owasp.org/cheatsheets/GraphQL_Cheat_Sheet.html)
 - [Neo4j Security Guide](https://neo4j.com/docs/operations-manual/current/security/)
 - [IntelGraph Schema](../../../server/src/graphql/intelgraph/schema.ts)
-- Multi-Tenant ABAC
+- [Multi-Tenant ABAC](../../../SECURITY/policy/opa/multi-tenant-abac.rego)
 
 ---
 

@@ -349,7 +349,7 @@ verify_signature() {
     echo -n "$root_hash" > "$temp_file"
     echo "$signature" > "$temp_sig"
     
-    if cosign verify-blob --use-signed-timestamps --key "${COSIGN_KEY}.pub" --signature "$temp_sig" "$temp_file" >/dev/null 2>&1; then
+    if cosign verify-blob --key "${COSIGN_KEY}.pub" --signature "$temp_sig" "$temp_file" >/dev/null 2>&1; then
         rm -f "$temp_file" "$temp_sig"
         return 0
     else

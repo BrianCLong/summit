@@ -273,7 +273,7 @@ await secretsManager.setRotationPolicy({
   secretId: 'database/postgres/password',
   rotationIntervalDays: 90,  // Rotate every 90 days
   gracePeriodDays: 7,  // Keep old secret valid for 7 days
-  notifyOnRotation: ['security_at_summit.com', 'ops@summit.com'],
+  notifyOnRotation: ['security@summit.com', 'ops@summit.com'],
   enabled: true,
 });
 
@@ -303,7 +303,7 @@ secretsManager.on('notify:rotation', ({ secretId, recipients }) => {
 ```typescript
 // Set approval rules for production changes
 await approvalManager.setApprovalRules('database/postgres', {
-  approvers: ['lead@summit.com', 'cto@summit.com', 'security_at_summit.com'],
+  approvers: ['lead@summit.com', 'cto@summit.com', 'security@summit.com'],
   requiredApprovals: 2,  // Need 2 approvals
   autoApproveFor: ['development'],  // Auto-approve for dev
   requireReason: true,

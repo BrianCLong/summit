@@ -348,7 +348,7 @@ IMG_TAG="${1:?img or tag}"
 cyclonedx-bom -o sbom.json
 cosign sign --yes $REGISTRY_IMAGE:$IMG_TAG
 cosign attest --predicate sbom.json --type cyclonedx $REGISTRY_IMAGE:$IMG_TAG
-cosign verify --use-signed-timestamps $REGISTRY_IMAGE:$IMG_TAG --certificate-identity-regexp ".*github.com/.+/.+/.github/workflows/.+" --certificate-oidc-issuer https://token.actions.githubusercontent.com
+cosign verify $REGISTRY_IMAGE:$IMG_TAG --certificate-identity-regexp ".*github.com/.+/.+/.github/workflows/.+" --certificate-oidc-issuer https://token.actions.githubusercontent.com
 ```
 
 ```bash

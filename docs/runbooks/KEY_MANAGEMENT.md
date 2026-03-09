@@ -282,5 +282,5 @@ Generated automatically and stored in `/compliance/reports/`:
 
 ## Related Documentation
 - [DR Runbook](./DR.md): Database backup and recovery
-- Security Scanning: SAST workflows
+- [Security Scanning](../.github/workflows/semgrep-sast.yml): SAST workflows
 - [Incident Response](./INCIDENT_RESPONSE_PLAYBOOK.md): Security incident procedures

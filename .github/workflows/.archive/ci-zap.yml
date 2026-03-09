@@ -185,7 +185,9 @@ jobs:
 
       - name: Upload ZAP artifacts
         if: ((((always()) && (github.event_name == 'pull_request')) && (steps.evaluate.outputs.has_blockers == 'true')) && (steps.evaluate.outputs.has_blockers != 'true')) && (steps.evaluate.outputs.has_blockers == 'true')
-        uses: actions/upload-artifact@v4          name: zap-${{ matrix.name }}-report
+        uses: actions/upload-artifact@v4
+        with:
+          name: zap-${{ matrix.name }}-report
           path: |
             report_html.html
             report_json.json

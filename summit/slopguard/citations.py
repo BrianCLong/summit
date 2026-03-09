@@ -1,12 +1,12 @@
 import re
-from typing import Any, Dict, List
+from typing import Dict, Any, List
 
 # Simple DOI regex
 DOI_PATTERN = re.compile(r"10\.\d{4,9}/[-._;()/:a-zA-Z0-9]+")
 # Simple URL regex
 URL_PATTERN = re.compile(r"https?://[^\s]+")
 
-def extract_citations(text: str) -> dict[str, list[str]]:
+def extract_citations(text: str) -> Dict[str, List[str]]:
     """Extracts DOIs and URLs from text."""
     dois = DOI_PATTERN.findall(text)
     urls = URL_PATTERN.findall(text)
@@ -15,7 +15,7 @@ def extract_citations(text: str) -> dict[str, list[str]]:
         "urls": urls
     }
 
-def validate_citations(citations: dict[str, list[str]]) -> dict[str, Any]:
+def validate_citations(citations: Dict[str, List[str]]) -> Dict[str, Any]:
     """
     Validates citations.
     """

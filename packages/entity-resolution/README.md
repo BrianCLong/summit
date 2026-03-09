@@ -18,8 +18,8 @@ import { EntityResolver } from '@intelgraph/entity-resolution';
 
 const resolver = new EntityResolver(0.7); // 70% threshold
 
-const entityA = { id: '1', name: 'Alice Smith', email: 'alice@test.internal' };
-const entityB = { id: '2', name: 'Alice Smyth', email: 'alice@test.internal' };
+const entityA = { id: '1', name: 'Alice Smith', email: 'alice@example.com' };
+const entityB = { id: '2', name: 'Alice Smyth', email: 'alice@example.com' };
 
 const scorecard = resolver.match(entityA, entityB);
 
@@ -36,7 +36,3 @@ console.log(scorecard);
 ```
 
 Each merge decision is tied to lineage hashes for audit trail.
-
-## Entity Resolution Engine
-
-Handles executing versioned ER policies and emitting `MERGE_EVENT` lineage nodes.

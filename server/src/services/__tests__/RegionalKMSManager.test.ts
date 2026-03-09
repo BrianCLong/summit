@@ -1,24 +1,19 @@
-import { jest, beforeAll } from '@jest/globals';
+import { jest } from '@jest/globals';
 
 const queryMock = jest.fn();
-
 jest.unstable_mockModule('../../config/database.js', () => ({
-  getPostgresPool: () => ({
-    query: queryMock,
-  }),
+    getPostgresPool: () => ({
+        query: queryMock,
+    }),
 }));
 
-describe('RegionalKMSManager', () => {
-    let RegionalKMSManager: any;
-    let kmsManager: any;
+const { RegionalKMSManager } = await import('../RegionalKMSManager.js');
 
-    beforeAll(async () => {
-        ({ RegionalKMSManager } = await import('../RegionalKMSManager.js'));
-    });
+describe('RegionalKMSManager', () => {
+    let kmsManager: RegionalKMSManager;
 
     beforeEach(() => {
         jest.clearAllMocks();
-        (RegionalKMSManager as any).instance = undefined;
         kmsManager = RegionalKMSManager.getInstance();
     });
 

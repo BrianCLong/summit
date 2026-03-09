@@ -5,8 +5,8 @@ import { MapContainer, TileLayer, Circle, Popup, Polyline } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css';
 import { useLazyQuery } from '@apollo/client/react';
 import { gql } from '@apollo/client';
-import { Button } from '../components/ui/Button';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
+import { Button } from '../components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Label } from '../components/ui/label';
 import { Input } from '../components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/Tabs';
@@ -16,7 +16,7 @@ import L from 'leaflet';
 import icon from 'leaflet/dist/images/marker-icon.png';
 import iconShadow from 'leaflet/dist/images/marker-shadow.png';
 
-const DefaultIcon = L.icon({
+let DefaultIcon = L.icon({
     iconUrl: icon,
     shadowUrl: iconShadow,
     iconSize: [25, 41],
@@ -167,16 +167,11 @@ export const GeoIntPane: React.FC = () => {
                                 </CardHeader>
                                 <CardContent className="space-y-4">
                                     <div className="space-y-2">
-                                        <Label htmlFor="satellite-url">Image URL</Label>
-                                        <Input
-                                            id="satellite-url"
-                                            placeholder="https://example.com/sat1.jpg"
-                                            value={satelliteUrl}
-                                            onChange={(e) => setSatelliteUrl(e.target.value)}
-                                        />
+                                        <Label>Image URL</Label>
+                                        <Input value={satelliteUrl} onChange={(e) => setSatelliteUrl(e.target.value)} />
                                     </div>
-                                    <Button onClick={handleSatAnalysis} loading={satLoading}>
-                                        Analyze Image
+                                    <Button onClick={handleSatAnalysis} disabled={satLoading}>
+                                        {satLoading ? "Analyzing..." : "Analyze Image"}
                                     </Button>
 
                                     {satData && (
@@ -197,25 +192,15 @@ export const GeoIntPane: React.FC = () => {
                                 </CardHeader>
                                 <CardContent className="space-y-4">
                                     <div className="space-y-2">
-                                        <Label htmlFor="before-url">Before Image URL</Label>
-                                        <Input
-                                            id="before-url"
-                                            placeholder="https://example.com/before.jpg"
-                                            value={beforeUrl}
-                                            onChange={(e) => setBeforeUrl(e.target.value)}
-                                        />
+                                        <Label>Before Image URL</Label>
+                                        <Input value={beforeUrl} onChange={(e) => setBeforeUrl(e.target.value)} />
                                     </div>
                                     <div className="space-y-2">
-                                        <Label htmlFor="after-url">After Image URL</Label>
-                                        <Input
-                                            id="after-url"
-                                            placeholder="https://example.com/after.jpg"
-                                            value={afterUrl}
-                                            onChange={(e) => setAfterUrl(e.target.value)}
-                                        />
+                                        <Label>After Image URL</Label>
+                                        <Input value={afterUrl} onChange={(e) => setAfterUrl(e.target.value)} />
                                     </div>
-                                    <Button onClick={handleChangeDetection} loading={changeLoading}>
-                                        Detect Changes
+                                    <Button onClick={handleChangeDetection} disabled={changeLoading}>
+                                        {changeLoading ? "Processing..." : "Detect Changes"}
                                     </Button>
 
                                     {changeData && (
@@ -234,15 +219,11 @@ export const GeoIntPane: React.FC = () => {
                                     <CardTitle>Terrain Analysis</CardTitle>
                                 </CardHeader>
                                 <CardContent className="space-y-4">
-                                    <div id="terrain-desc" className="text-xs text-muted-foreground">
+                                    <div className="text-xs text-muted-foreground">
                                         Analyzes elevation profile along the predefined vector path.
                                     </div>
-                                    <Button
-                                        onClick={handleElevation}
-                                        loading={elevationLoading}
-                                        aria-describedby="terrain-desc"
-                                    >
-                                        Generate Profile
+                                    <Button onClick={handleElevation} disabled={elevationLoading}>
+                                        {elevationLoading ? "Computing DEM..." : "Generate Profile"}
                                     </Button>
                                 </CardContent>
                             </Card>

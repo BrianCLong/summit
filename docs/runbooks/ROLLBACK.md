@@ -30,4 +30,4 @@ The auto-rollback mechanism is triggered by Prometheus alerts:
 - `CanaryHighErrorRate`
 - `CanaryHighLatency`
 
-Check `runbooks/maestro-rollback.md` for orchestrator-specific details.
+Check `RUNBOOKS/maestro-rollback.md` for orchestrator-specific details.

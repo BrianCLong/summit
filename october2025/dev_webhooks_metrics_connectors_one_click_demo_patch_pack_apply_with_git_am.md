@@ -252,7 +252,7 @@ index 0000000..ffffff0
 +
 +echo "==> Helm pull & verify"
 +helm pull oci://ghcr.io/$ORG/charts/$CHART --version $VERSION -d ./charts
-+cosign verify --use-signed-timestamps ghcr.io/$ORG/charts/$CHART:$VERSION \
++cosign verify ghcr.io/$ORG/charts/$CHART:$VERSION \
 +  --certificate-oidc-issuer https://token.actions.githubusercontent.com \
 +  --certificate-identity-regexp ".*github.com/$ORG.*"
 +

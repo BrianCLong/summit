@@ -1,8 +1,0 @@
-# Agent Runtime Tool Access Policy
-# Describes which tools are permitted to be executed inside the sandbox environment.
-
-allowed_tools:
-  - example_tool
-  - calculate_metrics
-  - fetch_data
-  - query_graphrag

@@ -1,7 +1,6 @@
 from .base import Engine, RunRequest, RunResult
 from .evidence_helper import write_engine_evidence
 
-
 class OrchestrationEngine:
     name = "orchestration_engine"
 

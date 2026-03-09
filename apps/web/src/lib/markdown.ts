@@ -4,10 +4,11 @@ import { marked } from 'marked'
 marked.setOptions({
   gfm: true,
   breaks: true,
+  headerIds: false,
+  mangle: false,
 })
 
 export function renderMarkdown(content: string): string {
   const html = marked.parse(content ?? '')
-  const rendered = typeof html === 'string' ? html : ''
-  return DOMPurify.sanitize(rendered, { USE_PROFILES: { html: true } })
+  return DOMPurify.sanitize(html, { USE_PROFILES: { html: true } })
 }

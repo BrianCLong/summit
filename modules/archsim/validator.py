@@ -1,15 +1,13 @@
-import argparse
 import json
 import sys
-from typing import Any, Dict
-
+import argparse
 import jsonschema
-
+from typing import Dict, Any
 
 def validate_spec(spec_path: str, schema_path: str) -> bool:
-    with open(spec_path) as f:
+    with open(spec_path, 'r') as f:
         spec = json.load(f)
-    with open(schema_path) as f:
+    with open(schema_path, 'r') as f:
         schema = json.load(f)
 
     try:

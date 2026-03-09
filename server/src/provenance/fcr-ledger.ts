@@ -1,17 +1,8 @@
 import { provenanceLedger } from './ledger.js';
 import { FcrAlert, FcrCluster, FcrSignal } from '../services/fcr/types.js';
 
-async function safeAppend(entry: Parameters<typeof provenanceLedger.appendEntry>[0]) {
-  try {
-    return await provenanceLedger.appendEntry(entry);
-  } catch {
-    // FCR pipeline should continue even if provenance persistence is unavailable.
-    return null;
-  }
-}
-
 export async function recordFcrIngest(tenantId: string, signals: FcrSignal[]) {
-  return safeAppend({
+  return provenanceLedger.appendEntry({
     tenantId,
     actionType: 'fcr.ingest',
     resourceType: 'fcr.signal',
@@ -32,7 +23,7 @@ export async function recordFcrIngest(tenantId: string, signals: FcrSignal[]) {
 }
 
 export async function recordFcrClusters(tenantId: string, clusters: FcrCluster[]) {
-  return safeAppend({
+  return provenanceLedger.appendEntry({
     tenantId,
     actionType: 'fcr.cluster',
     resourceType: 'fcr.cluster',
@@ -50,7 +41,7 @@ export async function recordFcrClusters(tenantId: string, clusters: FcrCluster[]
 }
 
 export async function recordFcrAlert(tenantId: string, alerts: FcrAlert[]) {
-  return safeAppend({
+  return provenanceLedger.appendEntry({
     tenantId,
     actionType: 'fcr.alert',
     resourceType: 'fcr.alert',

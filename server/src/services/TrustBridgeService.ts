@@ -58,7 +58,7 @@ export class TrustBridgeService {
     logger.info({ handOffId: handOff.handOffId }, 'TrustBridge: Verifying incoming handoff');
 
     const payload = `handOffId=${handOff.handOffId};caseId=${handOff.caseId};agency=${handOff.recipientAgency};items=${handOff.evidenceItems.join(',')}`;
-    
+
     return quantumIdentityManager.verifyIdentity({
         serviceId: payload,
         publicKey: 'institutional-root-key',

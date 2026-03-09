@@ -42,7 +42,9 @@ jobs:
         run: pnpm exec ts-node --project tsconfig.json --esm scripts/cleanup/find-dead-code.ts
 
       - name: Upload dead-code report
-        uses: actions/upload-artifact@v4          name: dead-code-report
+        uses: actions/upload-artifact@v4
+        with:
+          name: dead-code-report
           path: reports/dead-code-report.json
 
       - name: Generate cleanup PR (dry run)

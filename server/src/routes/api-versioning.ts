@@ -123,8 +123,8 @@ export function apiVersionMiddleware(
   }
 
   // 3. Check query param
-  if (!version && typeof (((req.query.api_version as string) as string) as string) === 'string') {
-    version = (((req.query.api_version as string) as string) as string);
+  if (!version && typeof req.query.api_version === 'string') {
+    version = req.query.api_version;
     source = 'query';
   }
 

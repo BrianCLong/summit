@@ -55,7 +55,7 @@ export {
   QueryValidator,
 } from './MutationValidators.js';
 
-import { z, type ZodError } from 'zod';
+import { z, type ZodError } from 'zod/v4';
 import { GraphQLError } from 'graphql';
 
 /**

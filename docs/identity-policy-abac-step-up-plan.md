@@ -52,13 +52,11 @@ The program introduces a layered architecture:
    - Lightweight clients for Go (server-side) and TypeScript (Node/Edge) with retry, caching, and decision tracing.
    - Sample app demonstrates attribute sync, OPA decision query, and WebAuthn enforcement end-to-end.
 
-```text
-
+```
 [Client] → [Gateway w/ Step-Up Middleware] → [AuthZ Gateway (OPA)] ↔ [Attribute Service Cache]
                                                        ↘
                                                         [WebAuthn Attestation Service]
-
-```text
+```
 
 ## Attribute Service Design
 
@@ -100,8 +98,7 @@ requires_step_up {
 obligations := {"step_up": true} {
   requires_step_up
 }
-
-```text
+```
 
 ## Step-Up Authentication Flow
 
@@ -135,7 +132,6 @@ obligations := {"step_up": true} {
       "context": { "device_posture": "compliant", "ip_geo": "US-VA" }
     }
     ```
-
     Response:
     ```json
     {
@@ -146,7 +142,6 @@ obligations := {"step_up": true} {
       "policy_version": "2025.09.1"
     }
     ```
-
   - `GET /subject/:id/attributes` returns aggregated attribute payload with `collected_at`, `source`, and TTL metadata.
   - GRPC mirrors REST schema with protobuf definitions in `proto/identity/authorization.proto`.
 - **SDK Responsibilities:** Local LRU cache (60s), request signing, automatic retries with jitter, distributed tracing instrumentation, metrics emission (`decision_latency_ms`). Primary helper method: `isAllowed(subject, action, resource, context?)` returning `{ allow, obligations, decisionId, policyVersion }` and raising explicit error types for policy, network, or step-up obligations.

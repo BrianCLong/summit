@@ -52,7 +52,7 @@ jobs:
     services:
       # Start test server if running scheduled check
       server:
-        image: node:22
+        image: node:20
         options: --workdir /app
         ports:
           - 3000:3000
@@ -69,7 +69,6 @@ jobs:
         with:
           node-version: "20"
           cache: "pnpm"
-          cache-dependency-path: '**/pnpm-lock.yaml'
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile

@@ -1,0 +1,44 @@
+name: Projects Import
+
+on:
+  push:
+    paths:
+      - 'project_management/github-projects-import.json'
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: read
+  # For Projects v2 GraphQL, prefer a PAT with project access via GH_PROJECTS_TOKEN secret.
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Ensure GH token present
+        id: token
+        run: |
+          if [ -z "${{ secrets.GH_PROJECTS_TOKEN }}" ]; then
+            echo "missing=true" >> $GITHUB_OUTPUT
+          else
+            echo "missing=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Install GitHub CLI
+        if: steps.token.outputs.missing == 'false'
+        uses: cli/cli-action@v2
+
+      - name: Import items into GitHub Project
+        if: steps.token.outputs.missing == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GH_PROJECTS_TOKEN }}
+          PROJECT_JSON: project_management/github-projects-import.json
+        run: |
+          bash scripts/import_projects_items.sh
+
+      - name: Skip (no token configured)
+        if: steps.token.outputs.missing == 'true'
+        run: |
+          echo "GH_PROJECTS_TOKEN not set; skipping Projects import."

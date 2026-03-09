@@ -46,8 +46,6 @@ async function stepUp(app: express.Express, token: string) {
 }
 
 beforeAll((done) => {
-  process.env.AUTHZ_DEMO_USERNAME = 'alice';
-  process.env.AUTHZ_DEMO_PASSWORD = 'password123';
   const upstream = express();
   upstream.get('/resource', (_req, res) => res.json({ data: 'ok' }));
   upstreamServer = upstream.listen(0, () => {
@@ -96,8 +94,6 @@ beforeAll((done) => {
 });
 
 afterAll(async () => {
-  delete process.env.AUTHZ_DEMO_USERNAME;
-  delete process.env.AUTHZ_DEMO_PASSWORD;
   upstreamServer.close();
   opaServer.close();
   await stopObservability();

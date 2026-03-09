@@ -195,7 +195,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Verify digests & provenance
-        run: echo "cosign verify --use-signed-timestamps --certificate-oidc-issuer ..."
+        run: echo "cosign verify --certificate-oidc-issuer ..."
       - name: Generate notes
         run: tools/release-notes.sh
       - name: Attach SBOM

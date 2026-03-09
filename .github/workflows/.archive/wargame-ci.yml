@@ -22,10 +22,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Node.js
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10.0.0
-      - uses: actions/setup-node@v4
+        uses: actions/setup-node@v4
         with:
           cache: 'pnpm'
           node-version: '20' # Ensure this matches project's engine requirement
@@ -124,14 +121,13 @@ jobs:
           echo "Consider adding a step to generate SDL and compare against a baseline or lint."
 
       - name: Stop Docker Compose services
-        if: always() # Ensure services are stopped even if previous steps fail
+        if: (always() # Ensure services are stopped even if previous steps fail) && (github.ref == 'refs/heads/main' # Only deploy from main branch)
         run: docker-compose -f docker-compose.dev.yml down
 
   deploy-staging:
     needs: build-and-test
     runs-on: ubuntu-latest
     environment: staging # Define a staging environment in GitHub
-    if: github.ref == 'refs/heads/main' # Only deploy from main branch
     timeout-minutes: 10
 
     steps:

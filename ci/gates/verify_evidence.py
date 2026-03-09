@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 import json
 import os
-import re
 import sys
+import re
 from typing import Any, Dict, List, Union
 
 # Try to import jsonschema, else fail gracefully (or mock if not critical, but gate should fail)
@@ -13,10 +13,10 @@ except ImportError:
     sys.exit(1)
 
 def load_json(path: str) -> Any:
-    with open(path) as f:
+    with open(path, "r") as f:
         return json.load(f)
 
-def check_determinism(data: Any, path: str) -> list[str]:
+def check_determinism(data: Any, path: str) -> List[str]:
     """
     Recursively check for timestamp-like keys or values in data.
     Allowed only in stamp.json.
@@ -41,7 +41,7 @@ def check_determinism(data: Any, path: str) -> list[str]:
 
     return errors
 
-def validate_artifact(path: str, schema_path: str, is_stamp: bool) -> list[str]:
+def validate_artifact(path: str, schema_path: str, is_stamp: bool) -> List[str]:
     errors = []
     try:
         data = load_json(path)
@@ -65,7 +65,7 @@ def validate_artifact(path: str, schema_path: str, is_stamp: bool) -> list[str]:
 
     return errors
 
-def verify_evidence(repo_root: str) -> list[str]:
+def verify_evidence(repo_root: str) -> List[str]:
     evidence_index_path = os.path.join(repo_root, "evidence", "index.json")
     report_schema_path = os.path.join(repo_root, "intel", "schema", "evidence_report.schema.json")
     metrics_schema_path = os.path.join(repo_root, "intel", "schema", "evidence_metrics.schema.json")

@@ -51,7 +51,9 @@ jobs:
         with:
           path: ${{ inputs.working-directory }}
           output: sbom.json
-      - uses: actions/upload-artifact@v4          name: sbom-${{ inputs.service-name }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sbom-${{ inputs.service-name }}
           path: sbom.json
 
   build-and-push:
@@ -73,5 +75,7 @@ jobs:
           tags: ${{ inputs.service-name }}:latest
           outputs: type=docker,dest=/tmp/image.tar
       - name: Upload Artifact
-        uses: actions/upload-artifact@v4          name: image-${{ inputs.service-name }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: image-${{ inputs.service-name }}
           path: /tmp/image.tar

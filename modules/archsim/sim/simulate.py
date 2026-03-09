@@ -1,8 +1,6 @@
 from __future__ import annotations
-
 from dataclasses import dataclass
-from typing import Any, Dict, List
-
+from typing import Dict, Any, List
 
 @dataclass(frozen=True)
 class SimResult:
@@ -12,12 +10,12 @@ class SimResult:
     cost_usd_per_day: float
     saturation: float
 
-def simulate(spec: dict[str, Any], scenario: dict[str, Any]) -> SimResult:
+def simulate(spec: Dict[str, Any], scenario: Dict[str, Any]) -> SimResult:
     # Deterministic placeholder model:
     # - cost is proportional to component count * replicas
     # - latency grows with connection count and scenario "rps"
-    comps: list[dict[str, Any]] = spec["components"]
-    conns: list[dict[str, Any]] = spec["connections"]
+    comps: List[Dict[str, Any]] = spec["components"]
+    conns: List[Dict[str, Any]] = spec["connections"]
     rps = float(scenario.get("rps", 100.0))
     replica_sum = sum(int(c.get("replicas", 1)) for c in comps)
     cost = 0.10 * replica_sum * len(comps)

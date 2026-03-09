@@ -32,24 +32,9 @@ export class SimpleFeedCollector extends CollectorBase {
     console.log(`[SimpleFeedCollector] Fetching feed from ${url}`);
 
     try {
-      const resolvedIp = await validateSafeUrl(url);
-      const parsed = new URL(url);
+      await validateSafeUrl(url);
 
-      let fetchUrl = url;
-      const headers: Record<string, string> = {};
-
-      if (parsed.protocol === 'http:') {
-        // Fix TOCTOU for HTTP by connecting to the resolved IP
-        const originalHost = parsed.hostname;
-        parsed.hostname = resolvedIp;
-        fetchUrl = parsed.toString();
-        headers['Host'] = originalHost;
-      }
-      // Note: For HTTPS, we cannot easily override hostname without breaking certificate validation (SNI).
-      // Standard fetch certificate validation provides significant protection against DNS rebinding
-      // unless the attacker has a valid certificate for the target domain on the rebinding IP.
-
-      const response = await fetch(fetchUrl, { headers });
+      const response = await fetch(url);
       if (!response.ok) {
         throw new Error(`Failed to fetch feed: ${response.status} ${response.statusText}`);
       }

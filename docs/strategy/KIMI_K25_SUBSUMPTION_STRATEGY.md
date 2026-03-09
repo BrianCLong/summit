@@ -12,10 +12,9 @@
 Moonshot AI's Kimi K2.5 release signals a shift toward **native multimodal, agentic, and long-horizon** models that scale from local to cloud. Summit will not just "support" these models; we will **subsume** their best ideas—specifically their swarm orchestration, "Thinking vs Instant" modes, and deployment parsers—into our own **governance-first architecture**.
 
 Our strategy is to treat the model as a commodity and the **Summit Agentic OS** as the value-add that provides:
-
-1. **Verified Conformance** (Does it actually do what they claim?)
-2. **Governed Swarms** (Can it operate safely in parallel?)
-3. **Policy-Aware Compute** (Is it cost-effective and compliant?)
+1.  **Verified Conformance** (Does it actually do what they claim?)
+2.  **Governed Swarms** (Can it operate safely in parallel?)
+3.  **Policy-Aware Compute** (Is it cost-effective and compliant?)
 
 ---
 
@@ -38,17 +37,13 @@ Our strategy is to treat the model as a commodity and the **Summit Agentic OS** 
 By integrating these features, Summit moves from "running agents" to **"governing the intelligence workforce."**
 
 ### 3.1 Vision-in-the-Loop Conformance
-
 We will standardize the definition of "Native Multimodal" as:
-
 - **Grounding**: Vision must guide tool selection (e.g., screenshot -> click coordinate).
 - **Consistency**: Multi-turn reasoning must not degrade when visual context is compressed.
 - **Robustness**: Tool outputs exceeding context must be pruned according to OPA policy, not random truncation.
 
 ### 3.2 The Reasoning Budget Contract
-
 We move beyond "Thinking vs Instant" toggle. Summit's RBC allows an enterprise to set a **$0.50 budget** for a task; the orchestrator then decides:
-
 - Can I use a local distilled model?
 - Do I need a 3-agent swarm?
 - Is a human-in-the-loop required for the final verification?

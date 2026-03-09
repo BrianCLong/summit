@@ -35,7 +35,7 @@ export class SingularityCorrelationService {
     // 1. Partition & Parallelize (Simulated)
     // In a real system, this would use a distributed compute mesh (Spark/Flink/Ray)
     const shards = Array.from({ length: this.SHARD_COUNT }, (_, i) => `shard-${i}`);
-    
+
     // Simulate parallel execution across shards
     await Promise.all(shards.slice(0, 10).map(async (shardId) => {
         // Parallel scan

@@ -3,7 +3,7 @@
  * Type-safe definitions for agentic RAG orchestration
  */
 
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 // ============================================================================
 // Agent Types for Multi-Agent RAG Orchestration

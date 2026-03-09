@@ -11,7 +11,7 @@
  */
 
 import * as crypto from 'node:crypto';
-import { z } from 'zod';
+import { z } from 'zod/v4';
 import { RiskEngine, RiskResult } from '../../risk/RiskEngine.js';
 import { FeatureVector } from '../../risk/FeatureStore.js';
 import { dualNotary } from '../../federal/dual-notary.js';
@@ -227,7 +227,7 @@ export class XAIOverlayService {
         this.cacheTrace(trace);
       }
 
-      otelService.addSpanAttributes?.({
+      otelService.addSpanAttributes({
         'xai.trace_id': traceId,
         'xai.risk_score': riskResult.score,
         'xai.risk_band': riskResult.band,
@@ -246,8 +246,8 @@ export class XAIOverlayService {
 
       return trace;
     } catch (error: any) {
-      otelService.recordException?.(error);
-      span?.setStatus({ code: 2, message: error.message });
+      otelService.recordException(error);
+      span.setStatus({ code: 2, message: error.message });
       throw error;
     } finally {
       span?.end();
@@ -555,7 +555,7 @@ export class XAIOverlayService {
         result.dualControlRequired = this.requiresDualControl(result);
       }
 
-      otelService.addSpanAttributes?.({
+      otelService.addSpanAttributes({
         'xai.tamper.detected': result.isTampered,
         'xai.tamper.dual_control_required': result.dualControlRequired,
         'xai.tamper.errors': result.verificationErrors.length,
@@ -572,8 +572,8 @@ export class XAIOverlayService {
 
       return result;
     } catch (error: any) {
-      otelService.recordException?.(error);
-      span?.setStatus({ code: 2, message: error.message });
+      otelService.recordException(error);
+      span.setStatus({ code: 2, message: error.message });
       throw error;
     } finally {
       span?.end();
@@ -701,7 +701,7 @@ export class XAIOverlayService {
       const maxDifference = Math.max(...differences.map(d => d.difference));
       const withinTolerance = maxDifference <= this.config.reproducibilityTolerance;
 
-      otelService.addSpanAttributes?.({
+      otelService.addSpanAttributes({
         'xai.reproducibility.within_tolerance': withinTolerance,
         'xai.reproducibility.max_difference': maxDifference,
         'xai.reproducibility.tolerance': this.config.reproducibilityTolerance,
@@ -724,8 +724,8 @@ export class XAIOverlayService {
         withinTolerance,
       };
     } catch (error: any) {
-      otelService.recordException?.(error);
-      span?.setStatus({ code: 2, message: error.message });
+      otelService.recordException(error);
+      span.setStatus({ code: 2, message: error.message });
       throw error;
     } finally {
       span?.end();
@@ -776,7 +776,7 @@ export class XAIOverlayService {
         `${scoreDelta > 0 ? 'increases' : 'decreases'} risk score by ` +
         `${Math.abs(scoreDelta * 100).toFixed(2)}% (sensitivity: ${sensitivity.toFixed(3)})`;
 
-      otelService.addSpanAttributes?.({
+      otelService.addSpanAttributes({
         'xai.sensitivity.feature': featureToVary,
         'xai.sensitivity.variation_percent': variationPercent,
         'xai.sensitivity.score_delta': scoreDelta,
@@ -798,8 +798,8 @@ export class XAIOverlayService {
         explanation,
       };
     } catch (error: any) {
-      otelService.recordException?.(error);
-      span?.setStatus({ code: 2, message: error.message });
+      otelService.recordException(error);
+      span.setStatus({ code: 2, message: error.message });
       throw error;
     } finally {
       span?.end();

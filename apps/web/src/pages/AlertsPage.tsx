@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Download, RefreshCw } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
@@ -18,106 +18,6 @@ import {
 } from '@/hooks/useGraphQL'
 import mockData from '@/mock/data.json'
 import type { Alert, KPIMetric, AlertStatus } from '@/types'
-
-// Helper functions moved outside component
-const getSeverityColor = (severity: string) => {
-  switch (severity) {
-    case 'critical':
-      return 'bg-red-500'
-    case 'high':
-      return 'bg-orange-500'
-    case 'medium':
-      return 'bg-yellow-500'
-    case 'low':
-      return 'bg-blue-500'
-    default:
-      return 'bg-gray-500'
-  }
-}
-
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case 'open':
-      return 'destructive'
-    case 'investigating':
-      return 'warning'
-    case 'resolved':
-      return 'success'
-    default:
-      return 'secondary'
-  }
-}
-
-// Extracted AlertRow component
-const AlertRow = React.memo(({ alert, onStatusChange }: { alert: Alert; onStatusChange: (id: string, status: AlertStatus) => void }) => {
-  return (
-    <tr className="group">
-      <td>
-        <div
-          className={`w-3 h-3 rounded-full ${getSeverityColor(alert.severity)}`}
-        />
-      </td>
-      <td>
-        <div>
-          <div className="font-medium">{alert.title}</div>
-          <div className="text-sm text-muted-foreground line-clamp-1">
-            {alert.description}
-          </div>
-        </div>
-      </td>
-      <td>
-        <Badge
-          variant={
-            alert.severity === 'critical'
-              ? 'destructive'
-              : 'secondary'
-          }
-        >
-          {alert.severity}
-        </Badge>
-      </td>
-      <td>
-        <Badge variant={getStatusColor(alert.status) as 'destructive' | 'warning' | 'success' | 'secondary'}>
-          {alert.status}
-        </Badge>
-      </td>
-      <td className="text-sm text-muted-foreground">
-        {new Date(alert.createdAt).toLocaleDateString()}
-      </td>
-      <td>
-        <div className="flex items-center gap-2">
-          {alert.status === 'open' && (
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() =>
-                onStatusChange(alert.id, 'investigating')
-              }
-            >
-              Investigate
-            </Button>
-          )}
-          {alert.status === 'investigating' && (
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() =>
-                onStatusChange(alert.id, 'resolved')
-              }
-            >
-              Resolve
-            </Button>
-          )}
-          <Button size="sm" variant="ghost">
-            View
-          </Button>
-        </div>
-      </td>
-    </tr>
-  )
-})
-
-AlertRow.displayName = 'AlertRow'
 
 export default function AlertsPage() {
   // GraphQL hooks
@@ -176,8 +76,8 @@ export default function AlertsPage() {
     }
   }, [alertUpdates])
 
-  // Filter alerts - Memoized
-  const filteredAlerts = useMemo(() => alerts.filter(alert => {
+  // Filter alerts
+  const filteredAlerts = alerts.filter(alert => {
     if (selectedSeverity && alert.severity !== selectedSeverity) {return false}
     if (selectedStatus && alert.status !== selectedStatus) {return false}
     if (
@@ -186,10 +86,10 @@ export default function AlertsPage() {
     )
       {return false}
     return true
-  }), [alerts, selectedSeverity, selectedStatus, searchQuery])
+  })
 
-  // Calculate KPIs (do not show change deltas in demo-only mode) - Memoized
-  const kpiMetrics: KPIMetric[] = useMemo(() => [
+  // Calculate KPIs (do not show change deltas in demo-only mode)
+  const kpiMetrics: KPIMetric[] = [
     {
       id: 'critical',
       title: 'Critical Alerts',
@@ -225,10 +125,9 @@ export default function AlertsPage() {
       status: 'neutral',
       ...(alertsData ? { change: { value: 8, direction: 'down', period: 'last week' } } : {}),
     },
-  ], [alerts, alertsData])
+  ]
 
-  // Memoized handler
-  const handleStatusChange = useCallback(async (
+  const handleStatusChange = async (
     alertId: string,
     newStatus: AlertStatus
   ) => {
@@ -254,7 +153,7 @@ export default function AlertsPage() {
     } catch (error) {
       console.error('Failed to update alert status:', error)
     }
-  }, [alertsData, updateAlertStatus])
+  }
 
   const handleRefresh = async () => {
     if (alertsData) {
@@ -263,6 +162,34 @@ export default function AlertsPage() {
       setLoading(true)
       await new Promise(resolve => setTimeout(resolve, 800))
       setLoading(false)
+    }
+  }
+
+  const getSeverityColor = (severity: string) => {
+    switch (severity) {
+      case 'critical':
+        return 'bg-red-500'
+      case 'high':
+        return 'bg-orange-500'
+      case 'medium':
+        return 'bg-yellow-500'
+      case 'low':
+        return 'bg-blue-500'
+      default:
+        return 'bg-gray-500'
+    }
+  }
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'open':
+        return 'destructive'
+      case 'investigating':
+        return 'warning'
+      case 'resolved':
+        return 'success'
+      default:
+        return 'secondary'
     }
   }
 
@@ -409,11 +336,69 @@ export default function AlertsPage() {
               </thead>
               <tbody>
                 {filteredAlerts.map(alert => (
-                  <AlertRow
-                    key={alert.id}
-                    alert={alert}
-                    onStatusChange={handleStatusChange}
-                  />
+                  <tr key={alert.id} className="group">
+                    <td>
+                      <div
+                        className={`w-3 h-3 rounded-full ${getSeverityColor(alert.severity)}`}
+                      />
+                    </td>
+                    <td>
+                      <div>
+                        <div className="font-medium">{alert.title}</div>
+                        <div className="text-sm text-muted-foreground line-clamp-1">
+                          {alert.description}
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <Badge
+                        variant={
+                          alert.severity === 'critical'
+                            ? 'destructive'
+                            : 'secondary'
+                        }
+                      >
+                        {alert.severity}
+                      </Badge>
+                    </td>
+                    <td>
+                      <Badge variant={getStatusColor(alert.status) as 'destructive' | 'warning' | 'success' | 'secondary'}>
+                        {alert.status}
+                      </Badge>
+                    </td>
+                    <td className="text-sm text-muted-foreground">
+                      {new Date(alert.createdAt).toLocaleDateString()}
+                    </td>
+                    <td>
+                      <div className="flex items-center gap-2">
+                        {alert.status === 'open' && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() =>
+                              handleStatusChange(alert.id, 'investigating')
+                            }
+                          >
+                            Investigate
+                          </Button>
+                        )}
+                        {alert.status === 'investigating' && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() =>
+                              handleStatusChange(alert.id, 'resolved')
+                            }
+                          >
+                            Resolve
+                          </Button>
+                        )}
+                        <Button size="sm" variant="ghost">
+                          View
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
                 ))}
               </tbody>
             </Table>

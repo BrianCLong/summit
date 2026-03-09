@@ -7,8 +7,7 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "allowJs": true,
-    "noEmitOnError": false,
-    "types": ["node"]
+    "noEmitOnError": false
   },
   "include": ["**/*.ts"]
 }

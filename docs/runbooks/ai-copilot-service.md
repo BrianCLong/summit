@@ -147,6 +147,6 @@ accountability.
 
 ## Related Documentation
 
-- AI Copilot Service README
-- SLO Configuration
-- Alert Policies
+- [AI Copilot Service README](../services/ai-copilot/README.md)
+- [SLO Configuration](../slo/ai-copilot.yaml)
+- [Alert Policies](../ALERT_POLICIES.yaml)

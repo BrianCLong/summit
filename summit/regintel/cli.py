@@ -1,6 +1,5 @@
 import click
 
-
 @click.group()
 def cli():
     """RegIntel CLI"""

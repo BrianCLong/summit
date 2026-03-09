@@ -31,18 +31,18 @@ async function runQuantumIdentityDrill() {
 
   // 3. PQC Key Exchange (KEM)
   console.log('--- Step 3: PQC-KEM Handshake (Kyber Simulation) ---');
-  
+
   // Gateway initiates handshake using API's public key
   console.log('Gateway -> API: Initiating KEM using API public key...');
   const { sharedSecret: gatewaySecret, ciphertext } = quantumIdentityManager.encapsulate(apiIdentity.publicKey);
-  
+
   console.log('Gateway generated shared secret: ' + gatewaySecret.substring(0, 10) + '...');
   console.log('Ciphertext payload sent to API: ' + ciphertext);
 
   // API decapsulates the ciphertext to recover the secret
   console.log('API -> Gateway: Decapsulating ciphertext...');
   const apiSecret = quantumIdentityManager.decapsulate(ciphertext);
-  
+
   console.log('API recovered shared secret: ' + apiSecret.substring(0, 10) + '...');
 
   // 4. Operational Readiness Check

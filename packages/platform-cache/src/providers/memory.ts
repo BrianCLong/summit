@@ -92,46 +92,6 @@ export class MemoryProvider implements CacheProvider {
     return remaining > 0 ? Math.floor(remaining / 1000) : -1;
   }
 
-  /** Backup memory cache */
-  async backup(): Promise<string> {
-    const backupData: Record<string, { value: any; ttl: number }> = {};
-    for (const [key, value] of this.cache.entries()) {
-      const remainingTTL = this.cache.getRemainingTTL(key);
-      try {
-        backupData[key] = {
-          value: JSON.parse(value),
-          ttl: remainingTTL > 0 ? Math.floor(remainingTTL / 1000) : -1
-        };
-      } catch {
-        // Fallback for non-JSON
-        backupData[key] = {
-          value,
-          ttl: remainingTTL > 0 ? Math.floor(remainingTTL / 1000) : -1
-        };
-      }
-    }
-    return JSON.stringify(backupData);
-  }
-
-  /** Restore memory cache */
-  async restore(backupStr: string): Promise<void> {
-    try {
-      const backupData = JSON.parse(backupStr) as Record<string, { value: any; ttl: number }>;
-      this.cache.clear();
-
-      for (const [key, data] of Object.entries(backupData)) {
-        if (data.ttl > 0) {
-          this.cache.set(key, JSON.stringify(data.value), { ttl: data.ttl * 1000 });
-        } else {
-          this.cache.set(key, JSON.stringify(data.value));
-        }
-      }
-    } catch (error) {
-      console.error('Failed to restore Memory backup:', error);
-      throw error;
-    }
-  }
-
   async close(): Promise<void> {
     this.cache.clear();
   }

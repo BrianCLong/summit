@@ -327,7 +327,9 @@ jobs:
           EOF
 
       - name: Upload chart artifacts
-        uses: actions/upload-artifact@v4          name: helm-chart-${{ matrix.chart.name }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: helm-chart-${{ matrix.chart.name }}
           path: |
             ./rendered/${{ matrix.chart.name }}/
             ./packages/${{ matrix.chart.name }}-*.tgz

@@ -38,7 +38,7 @@ This sitemap links to all major documentation sections for the MVP-4-GA release.
 - **[Agent Overview](AGENT_OVERVIEW.md)**: Details on the autonomous agent architecture.
 
 ## 📦 Releases & Roadmap
-- **Roadmap**: Future plans and strategic direction.
+- **[Roadmap](ROADMAP.md)**: Future plans and strategic direction.
 - **[Current Release Notes](RELEASE_NOTES_2025.10.HALLOWEEN.md)**: Latest release information.
 
 ## 📚 Reference & Standards

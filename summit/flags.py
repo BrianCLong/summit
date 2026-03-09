@@ -1,6 +1,5 @@
 import os
 
-
 def is_feature_enabled(name, default=False):
     val = os.environ.get(name, str(default)).lower()
     return val in ("true", "1", "t", "yes", "y")
@@ -15,4 +14,3 @@ FINANCE_SHADOW_AGENT_ENABLED = is_feature_enabled("FINANCE_SHADOW_AGENT_ENABLED"
 FEATURE_QWEN3_ASR = is_feature_enabled("FEATURE_QWEN3_ASR", default=False)
 FEATURE_QWEN3_TTS = is_feature_enabled("FEATURE_QWEN3_TTS", default=False)
 REDIS_CACHE_ENABLED = is_feature_enabled("REDIS_CACHE_ENABLED", default=True)
-COORDINATION_EVAL = is_feature_enabled("COORDINATION_EVAL", default=False)

@@ -1,9 +1,9 @@
-import hashlib
-import json
 import os
 import re
+import json
+import hashlib
 import sys
-from typing import Any, Dict
+from typing import Dict, Any
 
 # Adjust paths relative to repo root
 REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../"))
@@ -15,7 +15,7 @@ def ensure_dir(path):
     if not os.path.exists(path):
         os.makedirs(path)
 
-def parse_markdown(content: str) -> dict[str, Any]:
+def parse_markdown(content: str) -> Dict[str, Any]:
     sections = {}
     current_section = None
     lines = content.split('\n')
@@ -37,7 +37,7 @@ def parse_markdown(content: str) -> dict[str, Any]:
 
     return {"sections": report_sections}
 
-def generate_stamp(content: str) -> dict[str, str]:
+def generate_stamp(content: str) -> Dict[str, str]:
     hasher = hashlib.sha256()
     hasher.update(content.encode('utf-8'))
     digest = hasher.hexdigest()
@@ -52,7 +52,7 @@ def main():
         print(f"Input file not found: {INPUT_FILE}")
         sys.exit(1)
 
-    with open(INPUT_FILE, encoding='utf-8') as f:
+    with open(INPUT_FILE, 'r', encoding='utf-8') as f:
         content = f.read()
 
     report_content = parse_markdown(content)

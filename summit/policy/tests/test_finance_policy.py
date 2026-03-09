@@ -1,10 +1,8 @@
 import json
-from pathlib import Path
-
 import pytest
-
-from summit.policy.finance_engine import create_finance_engine
+from pathlib import Path
 from summit.protocols.envelope import SummitEnvelope, ToolCall
+from summit.policy.finance_engine import create_finance_engine
 
 FIXTURES_DIR = Path("summit/policy/fixtures")
 

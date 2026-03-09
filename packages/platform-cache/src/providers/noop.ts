@@ -42,14 +42,6 @@ export class NoOpProvider implements CacheProvider {
     return -1;
   }
 
-  async backup(): Promise<string> {
-    return "{}";
-  }
-
-  async restore(_backupStr: string): Promise<void> {
-    // No-op
-  }
-
   async close(): Promise<void> {
     // No-op
   }

@@ -1,6 +1,5 @@
 import { describe, it, expect } from 'vitest';
 import { render } from '@testing-library/react';
-// @ts-expect-error jest-axe has no bundled typings in this workspace
 import { axe, toHaveNoViolations } from 'jest-axe';
 import { Button } from './Button';
 import { Input } from './input';

@@ -520,7 +520,7 @@ control:
             time() - max(backup_last_success_timestamp)
 
     - source: recovery_tests
-      documentation: runbooks/disaster-recovery.md
+      documentation: RUNBOOKS/disaster-recovery.md
       test_logs: /var/log/dr-tests/
 
   tests:

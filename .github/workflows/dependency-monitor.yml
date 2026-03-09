@@ -27,7 +27,7 @@ jobs:
     name: Block vulnerable dependency changes
     runs-on: ubuntu-latest
     # dependency-review-action only works for pull_request/merge_group events
-    if: github.event_name == 'pull_request' || github.event_name == 'pull_request_target' || github.event_name == 'merge_group'
+    if: ${{ vars.MERGE_SURGE != 'true' || github.event_name == 'merge_group' || github.event_name == 'push' || github.event_name == 'schedule' }} ) && (github.event_name == 'pull_request' || github.event_name == 'pull_request_target' || github.event_name == 'merge_group')
     steps:
       - name: Dependency review
         uses: actions/dependency-review-action@3c4e3dcb1aa7874d2c16be7d79418e9b7efd6261 # v4.8.2
@@ -42,7 +42,7 @@ jobs:
     needs: dependency-review
     runs-on: ubuntu-latest
     # Run if dependency-review passed or was skipped, and not from fork PRs
-    if: |
+    if: ${{ vars.MERGE_SURGE != 'true' || github.event_name == 'merge_group' || github.event_name == 'push' || github.event_name == 'schedule' }} ) && (|)
       always() &&
       (needs.dependency-review.result == 'success' || needs.dependency-review.result == 'skipped') &&
       (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
@@ -87,7 +87,7 @@ jobs:
     needs: dependency-review
     runs-on: ubuntu-latest
     # Run if dependency-review passed or was skipped
-    if: always() && (needs.dependency-review.result == 'success' || needs.dependency-review.result == 'skipped')
+    if: ${{ vars.MERGE_SURGE != 'true' || github.event_name == 'merge_group' || github.event_name == 'push' || github.event_name == 'schedule' }} ) && (always() && (needs.dependency-review.result == 'success' || needs.dependency-review.result == 'skipped'))
     steps:
       - name: Notice
         run: |
@@ -96,6 +96,7 @@ jobs:
 
   check-drift:
     name: Check Lockfile Drift
+    if: ${{ vars.MERGE_SURGE != 'true' || github.event_name == 'merge_group' || github.event_name == 'push' || github.event_name == 'schedule' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4 # v4.1.7

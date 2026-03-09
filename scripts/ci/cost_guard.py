@@ -5,14 +5,13 @@ Enforces budget limits defined in .github/ci-cost-policy.yml
 Calculates billable minutes using GitHub API.
 """
 
-import json
 import os
-import subprocess
 import sys
-import time
-from datetime import UTC, datetime, timezone
-
 import yaml
+import json
+import subprocess
+from datetime import datetime, timezone
+import time
 
 POLICY_FILE = ".github/ci-cost-policy.yml"
 MAX_RUNS_TO_ANALYZE = 100 # Limit to avoid API rate limiting (1000/hr usually)
@@ -21,7 +20,7 @@ def load_policy():
     if not os.path.exists(POLICY_FILE):
         print(f"Policy file not found: {POLICY_FILE}")
         sys.exit(1)
-    with open(POLICY_FILE) as f:
+    with open(POLICY_FILE, "r") as f:
         return yaml.safe_load(f)
 
 def run_gh_command(args):
@@ -149,7 +148,7 @@ def main():
     rates = policy['rates']
     thresholds = policy['thresholds']
 
-    now = datetime.now(UTC)
+    now = datetime.now(timezone.utc)
     start_of_month = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
 
     runs = get_runs(start_of_month, repo)
@@ -219,7 +218,7 @@ def main():
 
     usage_percent = (total_cost / budget_limit) * 100 if budget_limit > 0 else 0
 
-    print("--- Cost Report ---")
+    print(f"--- Cost Report ---")
     print(f"Period: {start_of_month.strftime('%Y-%m')}")
     print(f"Runs Analyzed: {analyzed_count}")
     print(f"Hosted Billable Minutes: {total_billable_minutes:.2f}")
@@ -251,11 +250,11 @@ def main():
     # Step Summary
     if os.getenv("GITHUB_STEP_SUMMARY"):
         with open(os.getenv("GITHUB_STEP_SUMMARY"), "a") as f:
-            f.write("## 💰 CI Cost Guard Report\n")
+            f.write(f"## 💰 CI Cost Guard Report\n")
             f.write(f"**Period:** {start_of_month.strftime('%Y-%m')}\n")
             f.write(f"**Status:** {status}\n\n")
-            f.write("| Metric | Value |\n")
-            f.write("|---|---|\n")
+            f.write(f"| Metric | Value |\n")
+            f.write(f"|---|---|\n")
             f.write(f"| **Runs Analyzed** | {analyzed_count} |\n")
             f.write(f"| **Hosted Minutes** | {total_billable_minutes:.2f} |\n")
             f.write(f"| **Self-Hosted Mins** | {total_self_hosted_minutes:.2f} |\n")

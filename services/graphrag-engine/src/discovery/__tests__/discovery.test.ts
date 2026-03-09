@@ -23,9 +23,6 @@ describe('DiscoveryRetriever', () => {
         get: (key: string) => {
           if (key === 'entityId') return 'e1';
           if (key === 'pathNodes') return [{}, {}];
-          if (key === 'pathRels') return [{}];
-          if (key === 'seedId') return 'seed1';
-          if (key === 'confidenceScore') return 0.9;
           return null;
         }
       }

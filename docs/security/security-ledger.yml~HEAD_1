@@ -1,9 +1,0 @@
-# Security Ledger
-# This file tracks the security ledger for GA readiness.
-
-ledger:
-  - id: SL-001
-    date: "2026-02-01"
-    event: "Initial Penetration Test Completed"
-    status: "pass"
-    notes: "No critical vulnerabilities found."

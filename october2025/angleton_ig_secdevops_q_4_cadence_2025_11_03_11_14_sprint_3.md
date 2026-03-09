@@ -32,7 +32,7 @@
 ### P1 — Strongly desired
 
 5. **Runtime Policy Watcher**: OPA decision log shipping (Fluent Bit → Loki) with alerts on deny spikes and high‑risk actions.
-6. **Blue/Green + Verify**: Argo Rollouts with pre/post‑promotion checks (cosign verify --use-signed-timestamps + k6 smoke) and instant rollback.
+6. **Blue/Green + Verify**: Argo Rollouts with pre/post‑promotion checks (cosign verify + k6 smoke) and instant rollback.
 7. **Policy Simulation Mode**: `release.gate` supports dry‑run with diff output for proposed policy changes.
 
 ### P2 — Stretch

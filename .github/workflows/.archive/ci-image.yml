@@ -81,7 +81,9 @@ jobs:
           output: server-sbom.spdx.json
 
       - name: Upload SBOM artifact
-        uses: actions/upload-artifact@0b7f8f6          name: server-sbom
+        uses: actions/upload-artifact@0b7f8f6
+        with:
+          name: server-sbom
           path: server-sbom.spdx.json
 
       - name: Sign images (Cosign keyless)

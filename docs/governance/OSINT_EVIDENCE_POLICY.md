@@ -1,8 +1,9 @@
-> Owner: @intelgraph/provenance-team
-> Last-Reviewed: 2026-01-27
-> Evidence-IDs: EVID-GOV-OSINT-POLICY-001
-> Status: active
-
+**Owner**: @intelgraph/provenance-team
+**Last-Reviewed**: 2026-01-27
+**Evidence-IDs**: EVID-GOV-OSINT-POLICY-001
+**Status**: active
+**ILSA-Level**: 5
+**IBOM-Verified**: true
 
 # OSINT Evidence & Governance Policy
 

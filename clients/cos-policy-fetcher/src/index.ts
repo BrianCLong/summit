@@ -68,7 +68,7 @@ export async function fetchAndVerify({
     ['verify-blob', '--bundle', '-', tarPath],
     bundle,
   );
-  if (code !== 0) {throw new Error(`cosign verify --use-signed-timestamps failed: ${stderr}`);}
+  if (code !== 0) {throw new Error(`cosign verify failed: ${stderr}`);}
 
   // Extract to a directory and return path
   const extractDir = path.join(tmpdir, 'unpacked');

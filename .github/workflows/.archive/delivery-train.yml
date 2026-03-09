@@ -13,36 +13,36 @@ permissions:
 
 jobs:
   unit:
-    uses: ./.github/workflows/_reusable-unit.yml
+    uses: ./.github/workflows/reusable/unit.yml
 
   contract:
-    uses: ./.github/workflows/_reusable-contract.yml
+    uses: ./.github/workflows/reusable/contract.yml
 
   e2e:
-    uses: ./.github/workflows/_reusable-e2e.yml
+    uses: ./.github/workflows/reusable/e2e.yml
 
   sast_sca:
-    uses: ./.github/workflows/_reusable-sast-sca.yml
+    uses: ./.github/workflows/reusable/sast_sca.yml
 
   sbom:
-    uses: ./.github/workflows/_reusable-sbom.yml
+    uses: ./.github/workflows/reusable/sbom.yml
 
   iac_plan:
-    uses: ./.github/workflows/_reusable-iac-plan.yml
+    uses: ./.github/workflows/reusable/iac_plan.yml
 
   policy_opa:
-    uses: ./.github/workflows/_reusable-policy-opa.yml
+    uses: ./.github/workflows/reusable/policy_opa.yml
 
   migrations_gate:
-    uses: ./.github/workflows/_reusable-migrations-gate.yml
+    uses: ./.github/workflows/reusable/migrations_gate.yml
 
   package:
     needs: [unit, contract, e2e, sast_sca, sbom, iac_plan, policy_opa, migrations_gate]
-    uses: ./.github/workflows/_reusable-package.yml
+    uses: ./.github/workflows/reusable/package.yml
 
   preview_deploy:
     needs: [unit, contract, e2e, sast_sca, sbom, iac_plan, policy_opa, migrations_gate, package]
-    uses: ./.github/workflows/_reusable-preview-deploy.yml
+    uses: ./.github/workflows/reusable/preview_deploy.yml
 
   attestation:
     name: attestation

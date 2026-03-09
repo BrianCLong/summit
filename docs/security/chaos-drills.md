@@ -465,8 +465,8 @@ To add a new drill:
 
 ## References
 
-- SECURITY/threat-model.md
-- SECURITY/break-glass.md
-- SECURITY/vuln-management.md
+- [SECURITY/threat-model.md](../../SECURITY/threat-model.md)
+- [SECURITY/break-glass.md](../../SECURITY/break-glass.md)
+- [SECURITY/vuln-management.md](../../SECURITY/vuln-management.md)
 - [OWASP Testing Guide](https://owasp.org/www-project-web-security-testing-guide/)
 - [MITRE ATT&CK Framework](https://attack.mitre.org/)

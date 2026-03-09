@@ -5,14 +5,11 @@ Gated by FEATURE_QWEN3_ASR and ASR_BACKEND.
 from __future__ import annotations
 
 import os
-
 import summit.flags
-
-from ..policy.context_policy import validate_context
+from ._util import deny_if_disabled
 from ..provider import ASRProvider
 from ..types import ASRRequest, ASRResult, ASRSegment
-from ._util import deny_if_disabled
-
+from ..policy.context_policy import validate_context
 
 class Qwen3ASRProvider(ASRProvider):
     def __init__(self, *, backend: str = "transformers") -> None:

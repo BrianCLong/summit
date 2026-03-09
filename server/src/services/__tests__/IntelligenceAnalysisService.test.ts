@@ -1,82 +1,66 @@
-import { beforeAll, beforeEach, describe, expect, it, jest } from '@jest/globals';
 
-const mockDetectAnomalies = jest.fn();
-const mockCalculateRiskScore = jest.fn();
-const mockComputeGraphMetrics = jest.fn();
-const autoMlListModelsMock = jest.fn();
+import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 
-jest.unstable_mockModule('../LLMService.js', () => ({
-  default: class MockLLMService {
-    async summarize(text: string) {
-      return `Summary of ${text}`;
-    }
-    async extract(_text: string, _entities: unknown) {
-      return { Person: ['John'] };
-    }
-    async complete(_params: unknown) {
-      return 'Positive';
-    }
-  },
-}));
+// Mock dependencies
+jest.mock('../LLMService', () => {
+  return class MockLLMService {
+    constructor(config: unknown) {}
+    async summarize(text: string) { return 'Summary of ' + text; }
+    async extract(text: string, entities: unknown) { return { Person: ['John'] }; }
+    async complete(params: unknown) { return 'Positive'; }
+  };
+});
 
-jest.unstable_mockModule('../mlAnalysisService.js', () => ({
+const mockDetectAnomalies = jest.fn() as any;
+const mockCalculateRiskScore = jest.fn() as any;
+const mockComputeGraphMetrics = jest.fn() as any;
+
+jest.mock('../mlAnalysisService', () => ({
   mlAnalysisService: {
     detectAnomalies: (...args: unknown[]) => mockDetectAnomalies(...args),
     calculateRiskScore: (...args: unknown[]) => mockCalculateRiskScore(...args),
     computeGraphMetrics: (...args: unknown[]) => mockComputeGraphMetrics(...args),
-  },
+  }
 }));
 
-jest.unstable_mockModule('../AutoMLService.js', () => ({
-  autoMLService: {
-    listModels: autoMlListModelsMock,
-  },
-}));
-
-jest.unstable_mockModule('../../utils/require.js', () => ({
+// Mock util - MUST be before import of the service
+// Relative path from src/services/__tests__/IntelligenceAnalysisService.test.ts to src/utils/require.ts is ../../utils/require.ts
+// BUT since we import it via module name in the source, we mock it via module path if mapped, or relative path.
+// The source uses: import { requireFunc } from '../utils/require.js';
+// Jest resolver will look for it.
+jest.mock('../../utils/require', () => ({
   requireFunc: (path: string) => {
+    // console.log('Mock requireFunc called with', path);
     if (path.includes('VisionService')) {
       return class MockVisionService {
-        async analyzeImageObjects(_input: unknown) {
-          return { objects: [] };
-        }
-        async analyzeMicroexpressions(_input: unknown) {
-          return { dominant: 'happy' };
-        }
+        async analyzeImageObjects(input: unknown) { return { objects: [] }; }
+        async analyzeMicroexpressions(input: unknown) { return { dominant: 'happy' }; }
       };
     }
     if (path.includes('SentimentService')) {
       return class MockSentimentService {
-        async analyze(_text: string) {
-          return { score: 0.8, label: 'positive', magnitude: 0.9 };
-        }
+        async analyze(text: string) { return { score: 0.8, label: 'positive', magnitude: 0.9 }; }
       };
     }
     if (path.includes('GraphAnalyticsService')) {
       return class MockGraphAnalyticsService {};
     }
     return class Dummy {};
-  },
+  }
 }));
 
-const loggerMock = {
+// Mock logger
+jest.mock('../../utils/logger.js', () => ({
   info: jest.fn(),
   error: jest.fn(),
   warn: jest.fn(),
   debug: jest.fn(),
-};
+}), { virtual: true });
 
-jest.unstable_mockModule('../../utils/logger.js', () => ({
-  default: loggerMock,
-}));
+import { IntelligenceAnalysisService } from '../IntelligenceAnalysisService.js';
 
 describe('IntelligenceAnalysisService', () => {
-  let IntelligenceAnalysisService: any;
-  let service: any;
-
-  beforeAll(async () => {
-    ({ IntelligenceAnalysisService } = await import('../IntelligenceAnalysisService.js'));
-  });
+  let service: IntelligenceAnalysisService;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -89,15 +73,15 @@ describe('IntelligenceAnalysisService', () => {
         description: 'desc',
         baseline_deviation: 1.0,
         contributing_factors: [],
-        timestamp: '2023-01-01',
-      },
+        timestamp: '2023-01-01'
+      }
     ]);
 
     mockCalculateRiskScore.mockResolvedValue({
       confidence: 0.9,
       reasoning: ['Factor 1'],
       probability: 0.9,
-      risk_level: 'CRITICAL',
+      risk_level: 'CRITICAL'
     });
 
     mockComputeGraphMetrics.mockResolvedValue({
@@ -107,10 +91,8 @@ describe('IntelligenceAnalysisService', () => {
       average_path_length: 1,
       network_density: 0.5,
       community_modularity: 0.5,
-      influence_scores: {},
+      influence_scores: {}
     });
-
-    autoMlListModelsMock.mockReturnValue([{ id: 'model-1' }]);
 
     service = new IntelligenceAnalysisService();
   });
@@ -141,7 +123,7 @@ describe('IntelligenceAnalysisService', () => {
 
   it('should classify content', async () => {
     const result = await service.classifyContent('Attack detected', ['Safe', 'Threat']);
-    expect(result.category).toBe('Positive');
+    expect(result.category).toBe('Positive'); // Mock returns 'Positive' for complete
   });
 
   it('should analyze trends', () => {

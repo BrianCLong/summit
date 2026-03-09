@@ -57,12 +57,7 @@ jobs:
           version: v0.61.0
 
       - name: Generate Evidence Bundle
-        run: |
-          if pnpm run -s ga:evidence >/dev/null 2>&1; then
-            pnpm ga:evidence
-          else
-            bash scripts/release/ga_evidence_bundle.sh
-          fi
+        run: pnpm ga:evidence
         env:
           VERSION: ${{ github.event.inputs.version || '5.3.1' }}
 

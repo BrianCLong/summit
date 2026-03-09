@@ -301,7 +301,3 @@ setInterval(() => {
   eventLoopLag.set(Math.max(0, lag));
   lastCheck = now;
 }, 1000);
-
-export function recordMessageFailed(tenant: string, reason: string): void {
-  messageDropped.inc({ tenant, reason });
-}

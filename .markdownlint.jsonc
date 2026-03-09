@@ -1,7 +1,5 @@
 {
   "default": true,
-    "MD028": false,
-    "MD024": false,
   "MD013": false, // line length off for tables/callouts
   "MD033": false, // allow inline HTML
   "MD041": true, // require H1

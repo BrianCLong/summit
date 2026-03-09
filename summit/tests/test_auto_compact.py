@@ -1,6 +1,5 @@
-from summit.agentloop.compaction_adapter import CompactedState, CompactionAdapter
 from summit.context.compaction import CompactionManager
-
+from summit.agentloop.compaction_adapter import CompactionAdapter, CompactedState
 
 def test_compaction_limit():
     manager = CompactionManager(limit=100)

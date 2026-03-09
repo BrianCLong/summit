@@ -1,8 +1,6 @@
 from __future__ import annotations
-
 from dataclasses import dataclass
 from typing import Any, Dict, Tuple
-
 
 @dataclass(frozen=True)
 class SkillFrontmatter:
@@ -12,7 +10,7 @@ class SkillFrontmatter:
     use_for: list[str] | None = None
     do_not_use_for: list[str] | None = None
 
-def split_frontmatter(md: str) -> tuple[dict[str, Any], str]:
+def split_frontmatter(md: str) -> Tuple[Dict[str, Any], str]:
     """
     Clean-room parser:
       - expects optional YAML frontmatter delimited by '---' lines at top
@@ -33,7 +31,7 @@ def split_frontmatter(md: str) -> tuple[dict[str, Any], str]:
     yaml_block = "\n".join(lines[1:end])
     body = "\n".join(lines[end+1:])
     # TODO: parse YAML safely. For now, extremely minimal key: value lines.
-    fm: dict[str, Any] = {}
+    fm: Dict[str, Any] = {}
     for raw in yaml_block.splitlines():
         if ":" not in raw:
             continue
@@ -41,7 +39,7 @@ def split_frontmatter(md: str) -> tuple[dict[str, Any], str]:
         fm[k.strip()] = v.strip().strip('"').strip("'")
     return fm, body
 
-def normalize_frontmatter(fm: dict[str, Any]) -> SkillFrontmatter:
+def normalize_frontmatter(fm: Dict[str, Any]) -> SkillFrontmatter:
     name = str(fm.get("name", "")).strip()
     desc = str(fm.get("description", "")).strip()
     if not name or not desc:

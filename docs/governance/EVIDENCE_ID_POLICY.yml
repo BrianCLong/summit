@@ -44,8 +44,3 @@ ai_patch_max_context_lines: 20  # Limit context to prevent large patch outputs
 ai_patch_safety_filters:
   - "no_secrets_in_output"  # Ensure no sensitive content in patches
   - "evidence_id_format_validation"  # Verify suggested IDs follow format rules
-# Plan Stability Integration
-plan_stability_gate:
-  enabled: true
-  baseline_path: "docs/ga/baselines/plan_baseline.json"
-  telemetry_config: "telemetry/plan_sampler_config.yml"

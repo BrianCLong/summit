@@ -1,5 +1,4 @@
 package companyos.provenance
-import rego.v1
 
 test_approval_required {
     input := {

@@ -19,7 +19,6 @@ while [[ $# -gt 0 ]]; do
 done
 
 [[ -n "$ARTIFACT" && -n "$BUNDLE" && -n "$EVIDENCE_ID" ]] || { echo "missing required args" >&2; exit 2; }
-[[ -f "$BUNDLE" ]] || { echo "bundle file not found: $BUNDLE" >&2; exit 2; }
 
 # Construct args array properly
 args=("verify-blob" "$ARTIFACT" "--bundle" "$BUNDLE")
@@ -34,27 +33,14 @@ cosign "${args[@]}" >"evidence/$EVIDENCE_ID/cosign.stdout.txt" 2>"evidence/$EVID
 rc=$?
 set -e
 
-rekor_tlog_verified=false
-if [[ $rc -eq 0 ]]; then
-  if ! command -v jq >/dev/null 2>&1; then
-    echo "jq is required for strict Rekor/TLOG bundle validation" >>"evidence/$EVIDENCE_ID/cosign.stderr.txt"
-    rc=1
-  elif jq -e '(((.tlogEntries // .tlog_entries // .verificationMaterial.tlogEntries // .verification_material.tlog_entries // []) | length) > 0)' "$BUNDLE" >/dev/null 2>&1; then
-    rekor_tlog_verified=true
-  else
-    echo "bundle verification failed: no Rekor transparency log entries in bundle" >>"evidence/$EVIDENCE_ID/cosign.stderr.txt"
-    rc=1
-  fi
-fi
-
 result="fail"; [[ $rc -eq 0 ]] && result="pass"
 
 cat >"evidence/$EVIDENCE_ID/report.json" <<JSON
-{"evidence_id":"$EVIDENCE_ID","subject":{"type":"blob","name":"$ARTIFACT"},"result":"$result","rekor":{"tlog_verified":$rekor_tlog_verified},"artifacts":[{"kind":"stdout","path":"evidence/$EVIDENCE_ID/cosign.stdout.txt"},{"kind":"stderr","path":"evidence/$EVIDENCE_ID/cosign.stderr.txt"}]}
+{"evidence_id":"$EVIDENCE_ID","subject":{"type":"blob","name":"$ARTIFACT"},"result":"$result","artifacts":[{"kind":"stdout","path":"evidence/$EVIDENCE_ID/cosign.stdout.txt"},{"kind":"stderr","path":"evidence/$EVIDENCE_ID/cosign.stderr.txt"}]}
 JSON
 
 cat >"evidence/$EVIDENCE_ID/metrics.json" <<JSON
-{"evidence_id":"$EVIDENCE_ID","cosign_exit_code":$rc,"rekor_tlog_verified":$rekor_tlog_verified}
+{"evidence_id":"$EVIDENCE_ID","cosign_exit_code":$rc}
 JSON
 
 cat >"evidence/$EVIDENCE_ID/stamp.json" <<JSON

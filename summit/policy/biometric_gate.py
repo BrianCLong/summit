@@ -8,7 +8,7 @@ class GateDecision:
     reason: str
 
 
-def evaluate(event: dict[str, Any], policy: dict[str, Any]) -> GateDecision:
+def evaluate(event: Dict[str, Any], policy: Dict[str, Any]) -> GateDecision:
     if not policy.get("enabled", True):
         return GateDecision(True, "gate_disabled")
     cls = event.get("class", "unknown")

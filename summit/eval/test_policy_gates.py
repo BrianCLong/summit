@@ -1,18 +1,15 @@
 import json
 import os
-
 import pytest
-
-from summit.policy.gates.dep_delta_enforced import check as dep_delta_check
-from summit.policy.gates.no_unsupported_fields import check as unsupported_check
-from summit.policy.gates.pii_redaction_gate import check as pii_check
 from summit.policy.gates.provenance_required import check as provenance_check
+from summit.policy.gates.no_unsupported_fields import check as unsupported_check
 from summit.policy.gates.trust_tier_policy import check as trust_tier_check
-
+from summit.policy.gates.pii_redaction_gate import check as pii_check
+from summit.policy.gates.dep_delta_enforced import check as dep_delta_check
 
 def load(filename):
     path = os.path.join(os.path.dirname(__file__), "fixtures", filename)
-    with open(path, encoding="utf-8") as f:
+    with open(path, "r", encoding="utf-8") as f:
         return json.load(f)
 
 def test_provenance_pass():

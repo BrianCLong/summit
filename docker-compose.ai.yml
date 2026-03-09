@@ -47,7 +47,6 @@ services:
         condition: service_started
     networks:
       - summit
-      - observability
 
   strategic-foresight:
     build:
@@ -70,6 +69,4 @@ services:
 
 networks:
   summit:
-    driver: bridge
-  observability:
     driver: bridge

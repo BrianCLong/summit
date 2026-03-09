@@ -50,10 +50,10 @@
 
 - TODO-54: WebAuthn step-up authentication (P0).
 - TODO-55: Optimize `findDuplicateCandidates` performance (P1).
-- [x] TODO-56: Add failure notifications in DeduplicationInspector (P2).
-- [x] TODO-57: Add loading state in DeduplicationInspector (P2).
+- TODO-56: Add failure notifications in DeduplicationInspector (P2).
+- TODO-57: Add loading state in DeduplicationInspector (P2).
 - TODO-58: Show more entity details in DeduplicationInspector (P1).
-- [x] TODO-59: Adjustable similarity threshold in DeduplicationInspector (P2).
+- TODO-59: Adjustable similarity threshold in DeduplicationInspector (P2).
 
 ## Linear/Project Templates
 

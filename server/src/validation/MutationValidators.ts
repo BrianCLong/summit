@@ -12,7 +12,7 @@
  * - Permission checks
  */
 
-import { z } from 'zod';
+import { z } from 'zod/v4';
 import { sanitizeHtml } from '../utils/htmlSanitizer.js';
 
 // Base validation schemas
@@ -696,10 +696,10 @@ export class SanitizationUtils {
    */
   static sanitizeCypher(input: string): string {
     return input
-      .replace(/\\/g, '\\\\') // Escape backslashes first!
       .replace(/'/g, "\\'") // Escape single quotes
       .replace(/"/g, '\\"') // Escape double quotes
-      .replace(/`/g, '\\`'); // Escape backticks
+      .replace(/`/g, '\\`') // Escape backticks
+      .replace(/\\/g, '\\\\'); // Escape backslashes
   }
 
   /**

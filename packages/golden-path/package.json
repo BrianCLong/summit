@@ -7,7 +7,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "lint": "eslint .",
-    "test": "jest --config ../../jest.config.cjs --runInBand --rootDir ../../ --testPathPatterns=packages/golden-path/__tests__",
+    "test": "jest --config ../../jest.config.cjs --runInBand --rootDir ../../ --testPathPattern=packages/golden-path/__tests__",
     "format": "prettier -w ."
   },
   "devDependencies": {

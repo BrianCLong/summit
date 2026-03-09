@@ -28,18 +28,18 @@ class AgentDefinition:
     risk_tier: RiskTier
     version: str
     updated_at: str
-    capabilities: list[str] = field(default_factory=list)
-    tools: list[str] = field(default_factory=list)
-    data_domains: list[str] = field(default_factory=list)
-    residency_tags: list[str] = field(default_factory=list)
-    compliance_tags: list[str] = field(default_factory=list)
-    allowed_backends: list[str] = field(default_factory=list)
-    defaults: dict = field(default_factory=dict)
+    capabilities: List[str] = field(default_factory=list)
+    tools: List[str] = field(default_factory=list)
+    data_domains: List[str] = field(default_factory=list)
+    residency_tags: List[str] = field(default_factory=list)
+    compliance_tags: List[str] = field(default_factory=list)
+    allowed_backends: List[str] = field(default_factory=list)
+    defaults: Dict = field(default_factory=dict)
     deprecated: bool = False
 
 @dataclass(frozen=True)
 class RegistryDocument:
   version: str
-  capabilities: list[Capability] = field(default_factory=list)
-  agents: list[AgentDefinition] = field(default_factory=list)
+  capabilities: List[Capability] = field(default_factory=list)
+  agents: List[AgentDefinition] = field(default_factory=list)
   signature: Optional[str] = None  # placeholder for cosign/DSSE integration

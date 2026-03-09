@@ -20,16 +20,9 @@ import { configCommands } from './commands/config.js';
 import { pluginCommands } from './commands/plugin.js';
 import { agentsCommands } from './commands/agents.js';
 import { doctor } from './commands/doctor.js';
+import { mediaCommands } from './commands/media.js';
 import { orchCommands } from './commands/orch.js';
-import { replayCommand } from './commands/replay.js';
 import { loadConfig, getConfig } from './config.js';
-
-import { devUpCommand } from './commands/dev-up.js';
-import { devCheckCommand } from './commands/dev-check.js';
-import { agentCommand } from './commands/agent.js';
-import { graphSearchCommand } from './commands/graph-search.js';
-import { graphExplainCommand } from './commands/graph-explain.js';
-
 
 const program = new Command();
 
@@ -108,12 +101,6 @@ program
 // Agent registry commands
 program.addCommand(agentsCommands);
 
-// Orchestration commands
-program.addCommand(orchCommands.root);
-
-// Replay command
-program.addCommand(replayCommand);
-
 // Login command
 program
   .command('login')
@@ -152,25 +139,5 @@ program
     console.log(`Auth:       ${config.token ? chalk.green('Authenticated') : chalk.yellow('Not authenticated')}`);
   });
 
-
-
-// Dev commands
-program
-  .command('dev')
-  .description('Developer commands')
-  .addCommand(devUpCommand)
-  .addCommand(devCheckCommand);
-
-// Agent commands
-program.addCommand(agentCommand);
-
-// Graph commands
-program
-  .command('graph')
-  .description('Graph commands')
-  .addCommand(graphSearchCommand)
-  .addCommand(graphExplainCommand);
-
 // Parse and execute
-
 program.parse();

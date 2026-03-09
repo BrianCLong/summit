@@ -1,14 +1,10 @@
 from typing import List, Tuple
-
 from pydantic import BaseModel
-
 from .compute import SimhashBuilder
-
-
 class IndexCandidate(BaseModel):
     snapshot_id: str
     scope: str
-    simhash: list[int]
+    simhash: List[int]
 class SimhashANN:
     def __init__(self): self.storage = []
     def add(self, c: IndexCandidate): self.storage.append(c)

@@ -1,8 +1,4 @@
-import * as neo4jReal from 'neo4j-driver';
-
-const isMockEnabled = process.env.ZERO_FOOTPRINT !== 'false';
-
-// Mock for neo4j-driver
+// Mock for neo4j-driver - using plain functions since jest may not be available
 const mockSession = () => ({
   run: () => Promise.resolve({ records: [] }),
   close: () => Promise.resolve(undefined),
@@ -19,7 +15,7 @@ const mockDriver = () => ({
   verifyConnectivity: () => Promise.resolve(),
 });
 
-const neo4jMock = {
+const neo4j = {
   driver: () => mockDriver(),
   auth: {
     basic: () => ({ principal: '', credentials: '' }),
@@ -48,8 +44,6 @@ const neo4jMock = {
     Time: class {},
   },
 };
-
-const neo4j = isMockEnabled ? (neo4jMock as any) : neo4jReal;
 
 export default neo4j;
 export const driver = neo4j.driver;

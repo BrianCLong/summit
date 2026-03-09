@@ -1,5 +1,4 @@
 package composer.policy_shadow
-import rego.v1
 
 # Combine sub-decisions and emit a consolidated verdict
 

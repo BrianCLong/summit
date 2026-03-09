@@ -204,7 +204,6 @@ jobs:
         with:
           node-version: 20
           cache: "pnpm"
-          cache-dependency-path: '**/pnpm-lock.yaml'
 
       - name: Setup OPA
         uses: open-policy-agent/setup-opa@b0eb0c1eb5f79b7ec602946f1fa93f3fc06f6e70 # v2
@@ -398,9 +397,9 @@ jobs:
           fi
 
       - name: Install Cosign
-        uses: sigstore/cosign-installer@v3.7.0
+        uses: sigstore/cosign-installer@9614fae9e5c5eddabb09f90a270fcb487c9f7149 # v3.3.0
         with:
-          cosign-release: "v3.0.5"
+          cosign-release: "v2.2.2"
 
       - name: Sign Provenance (Keyless)
         run: |
@@ -452,9 +451,9 @@ jobs:
           path: staging/verification
 
       - name: Install Cosign
-        uses: sigstore/cosign-installer@v3.7.0
+        uses: sigstore/cosign-installer@9614fae9e5c5eddabb09f90a270fcb487c9f7149 # v3.3.0
         with:
-          cosign-release: "v3.0.5"
+          cosign-release: "v2.2.2"
 
       - name: Verify Signed Bundle (Strict)
         env:

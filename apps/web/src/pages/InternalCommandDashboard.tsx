@@ -41,7 +41,7 @@ const InternalCommandDashboard: React.FC = () => {
         ];
 
         const token = localStorage.getItem('auth_token');
-        const headers = token ? { Authorization: `Bearer ${token}` } : undefined;
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
         const results = await Promise.all(
           endpoints.map(async (key) => {

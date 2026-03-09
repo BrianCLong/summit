@@ -90,9 +90,7 @@ export abstract class BaseConnector extends EventEmitter {
   /**
    * Write data to the source (Bi-directional support)
    */
-  async writeRecords(_records: any[]): Promise<void> {
-    throw new Error(`writeRecords is not implemented for connector type "${this.config.type}"`);
-  }
+  abstract writeRecords(records: any[]): Promise<void>;
 
   /**
    * Check the health of the connector

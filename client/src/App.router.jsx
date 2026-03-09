@@ -118,7 +118,6 @@ const ReleaseReadinessRoute = React.lazy(() =>
 );
 const IOCList = React.lazy(() => import('./pages/IOC/IOCList'));
 const IOCDetail = React.lazy(() => import('./pages/IOC/IOCDetail'));
-const NewInvestigation = React.lazy(() => import('./pages/Investigations/NewInvestigation'));
 const HuntList = React.lazy(() => import('./pages/Hunting/HuntList'));
 const HuntDetail = React.lazy(() => import('./pages/Hunting/HuntDetail'));
 const SearchHome = React.lazy(() => import('./pages/Search/SearchHome'));
@@ -804,7 +803,6 @@ function MainLayout() {
               <Route path="/ioc" element={<IOCList />} />
               <Route path="/ioc/:id" element={<IOCDetail />} />
               <Route path="/investigations" element={<InvestigationsPage />} />
-              <Route path="/investigations/new" element={<NewInvestigation />} />
               <Route path="/graph" element={<GraphExplorerPage />} />
               <Route path="/copilot" element={<CopilotPage />} />
               <Route path="/orchestrator" element={<OrchestratorPage />} />

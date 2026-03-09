@@ -1,6 +1,5 @@
 // server/src/routes/abyss.ts
 import { Router, NextFunction, Request, Response } from 'express';
-import crypto from 'crypto';
 import { abyssService } from '../abyss/AbyssService.js';
 
 const router = Router();
@@ -15,26 +14,14 @@ const extremeAuth = (req: Request, res: Response, next: NextFunction) => {
     const requiredHeader = process.env.ABYSS_SECURITY_HEADER;
 
     // Fail secure: If env var is not set, access is denied.
-    if (requiredHeader && typeof authHeader === 'string') {
-        // SECURITY: Use timingSafeEqual to prevent timing attacks on header verification
-        // Ensure both buffers are equal length before comparing to avoid leaking length info
-        // (though in this specific case, leaking length of a fixed API key might be acceptable risk,
-        // using the hash comparison approach is safer generally but slightly more complex.
-        // For simplicity and effectiveness here, we check length first (constant time-ish)
-        // then use timingSafeEqual)
-
-        const a = Buffer.from(authHeader);
-        const b = Buffer.from(requiredHeader);
-
-        if (a.length === b.length && crypto.timingSafeEqual(a, b)) {
-            return next();
+    if (requiredHeader && authHeader === requiredHeader) {
+        next();
+    } else {
+        if (!requiredHeader) {
+            console.error('Security Error: ABYSS_SECURITY_HEADER is not configured.');
         }
+        res.status(403).json({ message: 'Forbidden: Unimaginable authorization is required.' });
     }
-
-    if (!requiredHeader) {
-        console.error('Security Error: ABYSS_SECURITY_HEADER is not configured.');
-    }
-    res.status(403).json({ message: 'Forbidden: Unimaginable authorization is required.' });
 };
 
 /**

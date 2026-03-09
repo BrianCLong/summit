@@ -1,8 +1,4 @@
-# Summit 1.0.0 GA Release Notes
-
-For the complete GA messaging package (release notes, investor and partner briefing, announcement strategy, and enterprise pilot playbook), see:
-
-- [`docs/releases/v1.0.0-ga-launch-package.md`](./v1.0.0-ga-launch-package.md)
+# IntelGraph 1.0.0 GA Release Notes
 
 ## Breaking Changes
 
@@ -16,9 +12,7 @@ For the complete GA messaging package (release notes, investor and partner brief
 
 ## Known Issues
 
-- Operator UI explainability panel is in progress (CLI complete).
-- Memory compaction tuning is ongoing for high-volume ingest.
-- Cost registry requires environment-specific tuning.
+- None reported at GA.
 
 ## Deprecations
 

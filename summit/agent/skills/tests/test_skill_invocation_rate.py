@@ -1,12 +1,10 @@
 import pytest
-
 from summit.agent.skills.invocation_log import (
-    get_metrics,
     record_skill_availability,
     record_skill_invocation,
-    reset_metrics,
+    get_metrics,
+    reset_metrics
 )
-
 
 @pytest.fixture(autouse=True)
 def reset():

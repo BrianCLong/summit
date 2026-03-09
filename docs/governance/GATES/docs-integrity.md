@@ -1,8 +1,7 @@
-> Owner: Governance
-> Last-Reviewed: 2026-01-14
-> Evidence-IDs: governance-docs-integrity
-> Status: active
-
+Owner: Governance
+Last-Reviewed: 2026-01-14
+Evidence-IDs: governance-docs-integrity
+Status: active
 
 # Docs Integrity Gate
 

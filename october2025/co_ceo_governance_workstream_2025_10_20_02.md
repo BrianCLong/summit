@@ -120,8 +120,8 @@ verify:
         cosign attest --predicate provenance.intoto.jsonl --type slsaprovenance $GITHUB_REF_NAME --yes
     - name: Cosign verify
       run: |
-        cosign verify-attestation --use-signed-timestamps $GITHUB_REF_NAME --type cyclonedx --certificate-identity-regexp ".*" --certificate-oidc-issuer-regexp ".*"
-        cosign verify-attestation --use-signed-timestamps $GITHUB_REF_NAME --type slsaprovenance --certificate-identity-regexp ".*" --certificate-oidc-issuer-regexp ".*"
+        cosign verify-attestation $GITHUB_REF_NAME --type cyclonedx --certificate-identity-regexp ".*" --certificate-oidc-issuer-regexp ".*"
+        cosign verify-attestation $GITHUB_REF_NAME --type slsaprovenance --certificate-identity-regexp ".*" --certificate-oidc-issuer-regexp ".*"
     - name: Summarize vulns
       run: |
         CRIT=$(jq '[.vulnerabilities[]?|select(.severity=="CRITICAL")] | length' trivy.json)

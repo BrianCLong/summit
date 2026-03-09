@@ -1,18 +1,16 @@
-from typing import Dict, List, Optional
-
+from typing import List, Optional, Dict
 from pydantic import BaseModel, Field
 
-
 class Aliases(BaseModel):
-    cve: list[str] = Field(default_factory=list)
-    ghsa: list[str] = Field(default_factory=list)
-    osv: list[str] = Field(default_factory=list)
-    vendor: list[str] = Field(default_factory=list)
+    cve: List[str] = Field(default_factory=list)
+    ghsa: List[str] = Field(default_factory=list)
+    osv: List[str] = Field(default_factory=list)
+    vendor: List[str] = Field(default_factory=list)
 
 class Affected(BaseModel):
     package: str
     ecosystem: str
-    versions: list[str] = Field(default_factory=list)
+    versions: List[str] = Field(default_factory=list)
 
 class Severity(BaseModel):
     system: str
@@ -37,8 +35,8 @@ class VulnRecord(BaseModel):
     title: Optional[str] = None
     summary: Optional[str] = None
     details: Optional[str] = None
-    affected: list[Affected] = Field(default_factory=list)
-    severity: list[Severity] = Field(default_factory=list)
-    references: list[Reference] = Field(default_factory=list)
-    provenance: list[Provenance]
-    policy_flags: dict[str, bool] = Field(default_factory=dict)
+    affected: List[Affected] = Field(default_factory=list)
+    severity: List[Severity] = Field(default_factory=list)
+    references: List[Reference] = Field(default_factory=list)
+    provenance: List[Provenance]
+    policy_flags: Dict[str, bool] = Field(default_factory=dict)

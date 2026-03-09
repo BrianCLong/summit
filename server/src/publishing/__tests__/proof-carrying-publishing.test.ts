@@ -365,7 +365,7 @@ describe('Proof-Carrying Publishing', () => {
       const stats = await fs.stat(outputPath);
       expect(stats.isFile()).toBe(true);
       expect(stats.size).toBeGreaterThan(0);
-    }, 120000);
+    });
   });
 
   describe('Revocation Registry', () => {

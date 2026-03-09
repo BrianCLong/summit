@@ -228,7 +228,7 @@ router.get(
   async (req: Request, res: Response): Promise<void> => {
     try {
       const principal = (req as any).principal;
-      const daysAhead = req.query.days ? parseInt(req.query.days as string as string, 10) : 14;
+      const daysAhead = req.query.days ? parseInt(req.query.days as string, 10) : 14;
 
       const envelope = keyRotationService.getKeysNearingExpiry(principal.tenantId, daysAhead);
 

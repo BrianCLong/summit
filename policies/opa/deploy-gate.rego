@@ -1,5 +1,4 @@
 package maestro.deploy
-import rego.v1
 
 # Allow dev deploys only from maintainers and CI bots
 allow {

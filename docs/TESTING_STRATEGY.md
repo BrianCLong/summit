@@ -855,8 +855,8 @@ When tests fail:
 ### Internal Resources
 
 - [Test Templates](./test-templates/)
-- Test Utilities
-- Mock Factories
+- [Test Utilities](../tests/utils/)
+- [Mock Factories](../tests/factories/)
 - [CI Configuration](../.github/workflows/ci.yml)
 
 ### Support

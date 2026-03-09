@@ -5,7 +5,6 @@ import re
 import sys
 from pathlib import Path
 
-
 def fail(msg):
     print(f"FAIL: {msg}", file=sys.stderr)
     sys.exit(1)
@@ -14,7 +13,7 @@ def _validate_recursive(instance, schema, context, root_schema_dir):
     # Handle $ref (simplified)
     if "$ref" in schema:
         ref_path = root_schema_dir / schema["$ref"]
-        with open(ref_path) as f:
+        with open(ref_path, 'r') as f:
             schema = json.load(f)
 
     ptype = schema.get("type")
@@ -68,9 +67,9 @@ def main():
     if not schema_path.exists():
         fail(f"Schema file not found: {schema_path}")
 
-    with open(data_path) as f:
+    with open(data_path, 'r') as f:
         data = json.load(f)
-    with open(schema_path) as f:
+    with open(schema_path, 'r') as f:
         schema = json.load(f)
 
     _validate_recursive(data, schema, "root", schema_path.parent)

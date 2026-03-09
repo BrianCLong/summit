@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 import os
-from datetime import UTC, datetime, timezone
+from datetime import datetime, timezone
 from pathlib import Path
 
 EVIDENCE_ID = "EVD-QWEN3ASR06B-EVAL-001"
@@ -36,7 +36,7 @@ def main() -> int:
     }
     stamp = {
         "evidence_id": EVIDENCE_ID,
-        "created_at": datetime.now(UTC).isoformat(),
+        "created_at": datetime.now(timezone.utc).isoformat(),
     }
     index = {
         "version": "1.0",

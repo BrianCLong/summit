@@ -4,9 +4,8 @@ Unit test runner for detection rules.
 Evaluates rules against positive and negative fixtures.
 """
 import json
-import pathlib
 import sys
-
+import pathlib
 import yaml
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
@@ -65,7 +64,7 @@ def main() -> int:
 
     success = True
     for rf in rule_files:
-        with open(rf) as f:
+        with open(rf, 'r') as f:
             rule = yaml.safe_load(f)
 
         rule_id = rule.get('id')
@@ -74,12 +73,12 @@ def main() -> int:
         # Test positive fixture
         pos_file = FIXTURES_DIR / "positive" / f"pos_{rf.stem.replace('rule_', '')}.json"
         if pos_file.exists():
-            with open(pos_file) as f:
+            with open(pos_file, 'r') as f:
                 events = json.load(f)
             if evaluate_rule(rule, events):
-                print("  [OK] Positive fixture triggered alert")
+                print(f"  [OK] Positive fixture triggered alert")
             else:
-                print("  [ERROR] Positive fixture FAILED to trigger alert", file=sys.stderr)
+                print(f"  [ERROR] Positive fixture FAILED to trigger alert", file=sys.stderr)
                 success = False
         else:
             print(f"  [WARNING] Positive fixture not found: {pos_file}")
@@ -87,12 +86,12 @@ def main() -> int:
         # Test negative fixture
         neg_file = FIXTURES_DIR / "negative" / f"neg_{rf.stem.replace('rule_', '')}.json"
         if neg_file.exists():
-            with open(neg_file) as f:
+            with open(neg_file, 'r') as f:
                 events = json.load(f)
             if not evaluate_rule(rule, events):
-                print("  [OK] Negative fixture did not trigger alert")
+                print(f"  [OK] Negative fixture did not trigger alert")
             else:
-                print("  [ERROR] Negative fixture FALSELY triggered alert", file=sys.stderr)
+                print(f"  [ERROR] Negative fixture FALSELY triggered alert", file=sys.stderr)
                 success = False
         else:
             print(f"  [WARNING] Negative fixture not found: {neg_file}")

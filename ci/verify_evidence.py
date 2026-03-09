@@ -4,6 +4,7 @@ import re
 import sys
 from pathlib import Path
 
+
 ISO_TS_PATTERN = re.compile(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z")
 
 SCHEMA_PATHS = {

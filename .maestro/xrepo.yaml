@@ -1,0 +1,4 @@
+graph:
+  intelgraph: []
+  maestro-conductor: [intelgraph]
+  plugins-core: [maestro-conductor]

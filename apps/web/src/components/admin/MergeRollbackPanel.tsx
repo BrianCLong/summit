@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { gql } from '@apollo/client';
-import { useMutation } from '@apollo/client/react';
+import { gql, useMutation } from '@apollo/client';
 import {
   Alert,
   Box,
@@ -20,24 +19,11 @@ const ROLLBACK_MERGE = gql`
   }
 `;
 
-type RollbackMergeResponse = {
-  rollbackMergeSnapshot?: {
-    success?: boolean;
-    snapshotId?: string;
-    decisionId?: string;
-  };
-};
-
-type RollbackMergeVariables = {
-  mergeId: string;
-  reason: string;
-};
-
 export default function MergeRollbackPanel() {
   const [mergeId, setMergeId] = useState('');
   const [reason, setReason] = useState('');
 
-  const [rollbackMerge, { data, loading, error }] = useMutation<RollbackMergeResponse, RollbackMergeVariables>(ROLLBACK_MERGE);
+  const [rollbackMerge, { data, loading, error }] = useMutation(ROLLBACK_MERGE);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();

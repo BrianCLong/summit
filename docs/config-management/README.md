@@ -79,7 +79,7 @@ await secretsManager.setRotationPolicy({
   secretId: 'database/password',
   rotationIntervalDays: 90,
   gracePeriodDays: 7,
-  notifyOnRotation: ['security_at_summit.com'],
+  notifyOnRotation: ['security@summit.com'],
   enabled: true,
 });
 
@@ -517,4 +517,4 @@ MIT License - see [LICENSE](../../LICENSE)
 - **Documentation**: https://docs.summit.com/config-management
 - **Issues**: https://github.com/BrianCLong/summit/issues
 - **Slack**: #config-management
-- **Email**: support_at_summit.com
+- **Email**: support@summit.com

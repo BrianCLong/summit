@@ -26,14 +26,14 @@ services:
       - summit
 
   api-gateway:
-    build:
-      context: .
-      dockerfile: services/api-gateway/Dockerfile
+    image: summit-gateway:latest
     ports:
       - "4000:4000"
     environment:
       - NODE_ENV=development
-      - GRAPH_SERVICE_URL=http://server:4000
+    volumes:
+      - ./gateway-proxy.js:/app/index.js
+    command: node index.js
     depends_on:
       - server
     networks:

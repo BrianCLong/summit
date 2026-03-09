@@ -54,8 +54,6 @@ export class BudgetAdmissionController {
       userId?: string;
       isEmergency?: boolean;
       tenantId?: string;
-      agentId?: string;
-      agentVersion?: string;
     },
   ): Promise<AdmissionResult> {
     const [hourlyUsage, dailyUsage] = await Promise.all([
@@ -102,11 +100,7 @@ export class BudgetAdmissionController {
       this.hasEmergencyBudget(dailyUsage, projectedCostUsd)
     ) {
       // Reserve the budget for emergency
-      await this.reserveBudget(expert, projectedCostUsd, {
-        tenantId: options?.tenantId,
-        userId: options?.userId,
-        agentId: options?.agentId,
-      });
+      await this.reserveBudget(expert, projectedCostUsd, options?.tenantId, options?.userId);
 
       return {
         admit: true,
@@ -124,11 +118,7 @@ export class BudgetAdmissionController {
 
     if (expertDecision.admit) {
       // Atomically reserve the budget to prevent race conditions
-      await this.reserveBudget(expert, projectedCostUsd, {
-        tenantId: options?.tenantId,
-        userId: options?.userId,
-        agentId: options?.agentId,
-      });
+      await this.reserveBudget(expert, projectedCostUsd, options?.tenantId, options?.userId);
     }
 
     const budgetRemaining = Math.max(
@@ -164,14 +154,11 @@ export class BudgetAdmissionController {
   private async reserveBudget(
     expert: ExpertType,
     costUsd: number,
-    options?: {
-      tenantId?: string;
-      userId?: string;
-      agentId?: string;
-    },
+    tenantId?: string,
+    userId?: string,
   ): Promise<void> {
     const timestamp = Date.now();
-    const tenant = options?.tenantId || 'global';
+    const tenant = tenantId || 'global';
     const hourKey = this.getUsageKey('hour', timestamp, tenant);
     const dayKey = this.getUsageKey('day', timestamp, tenant);
 
@@ -191,14 +178,9 @@ export class BudgetAdmissionController {
     pipeline.expire(`${dayKey}:total`, 86400); // 24 hour TTL
     pipeline.expire(`${dayKey}:experts`, 86400);
 
-    if (options?.userId) {
-      pipeline.hincrbyfloat(`${dayKey}:users`, options.userId, costUsd);
+    if (userId) {
+      pipeline.hincrbyfloat(`${dayKey}:users`, userId, costUsd);
       pipeline.expire(`${dayKey}:users`, 86400);
-    }
-
-    if (options?.agentId) {
-      pipeline.hincrbyfloat(`${dayKey}:agents`, options.agentId, costUsd);
-      pipeline.expire(`${dayKey}:agents`, 86400);
     }
 
     await pipeline.exec();
@@ -219,8 +201,6 @@ export class BudgetAdmissionController {
       userId?: string;
       tenantId?: string;
       reservedCost?: number;
-      agentId?: string;
-      agentVersion?: string;
     },
   ): Promise<void> {
     const timestamp = Date.now();
@@ -263,12 +243,6 @@ export class BudgetAdmissionController {
     if (options?.userId) {
       pipeline.hincrbyfloat(`${dayKey}:users`, options.userId, deltaCost);
       pipeline.expire(`${dayKey}:users`, 86400);
-    }
-
-    // Record per-agent spending if provided
-    if (options?.agentId) {
-      pipeline.hincrbyfloat(`${dayKey}:agents`, options.agentId, deltaCost);
-      pipeline.expire(`${dayKey}:agents`, 86400);
     }
 
     await pipeline.exec();

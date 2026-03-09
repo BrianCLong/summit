@@ -13,7 +13,7 @@ This document is the single source of truth for Summit platform operational read
     *   **Verification:** `pnpm ci:parity`
 
 3.  **Release Gates:** The explicit, mechanically enforced criteria that a change must meet to be promoted to production.
-    *   **Document:** [Release Gates](../governance/RELEASE_GATES.md)
+    *   **Document:** [Release Gates](../../governance/RELEASE_GATES.md)
     *   **Verification:** `pnpm release:preflight`
 
 ## How to Verify Readiness

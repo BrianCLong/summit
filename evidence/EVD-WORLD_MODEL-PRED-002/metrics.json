@@ -1,9 +1,0 @@
-{
-  "evidence_id": "EVD-WORLD_MODEL-PRED-002",
-  "metrics": {
-    "target_prediction_accuracy_delta_pct": 25,
-    "target_rag_grounding_delta_pct": 20,
-    "eval_fixtures_positive": 1,
-    "eval_fixtures_negative": 1
-  }
-}

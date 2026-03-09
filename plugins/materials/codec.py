@@ -1,14 +1,12 @@
 from __future__ import annotations
-
 from dataclasses import dataclass
 from typing import Tuple
 
-
 @dataclass(frozen=True)
 class StructureObj:
-    lattice: tuple[float, float, float]
-    species: tuple[str, ...]
-    coords: tuple[tuple[float, float, float], ...]
+    lattice: Tuple[float, float, float]
+    species: Tuple[str, ...]
+    coords: Tuple[Tuple[float, float, float], ...]
 
 GRAMMAR_VERSION = "toy-v1"
 

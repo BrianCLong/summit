@@ -205,7 +205,7 @@ if (existsSync(SIG_FILE)) {
             const identityRegex = process.env.EXPECTED_IDENTITY_REGEX || '^https://github.com/BrianCLong/summit/.github/workflows/.*@.*$';
             const issuer = process.env.EXPECTED_OIDC_ISSUER || 'https://token.actions.githubusercontent.com';
 
-            const cmd = `cosign verify-blob --use-signed-timestamps --certificate-identity-regexp "${identityRegex}" --certificate-oidc-issuer "${issuer}" --signature "${SIG_FILE}" "${DATA_FILE}"`;
+            const cmd = `cosign verify-blob --certificate-identity-regexp "${identityRegex}" --certificate-oidc-issuer "${issuer}" --signature "${SIG_FILE}" "${DATA_FILE}"`;
 
             try {
                 if (process.env.STRICT_MODE && !process.env.CI) {
@@ -350,12 +350,10 @@ if (existsSync(sumsPath)) {
                 addCheck('bundle-index.json pointers validated');
             }
         } catch (e) {
-            if (e instanceof SyntaxError) {
-                addError('INVALID_JSON', `Failed to parse bundle-index.json: ${e.message}`);
-            } else if (e instanceof ReleaseBundleError) {
+            if (e instanceof ReleaseBundleError) {
                 addError(e.code, e.message);
             } else {
-                addError('INVALID_JSON', `Error processing bundle-index.json: ${e.message}`);
+                addError('INTERNAL_ERROR', `Error processing bundle-index.json: ${e.message}`);
             }
         }
     }
@@ -389,7 +387,7 @@ if (existsSync(sumsPath)) {
                 }
             }
         } catch (e) {
-            addError('JSON_PARSE_ERROR', `Failed to parse provenance.json: ${e.message}`);
+            addError('INVALID_JSON', `Failed to parse provenance.json: ${e.message}`);
         }
     }
 

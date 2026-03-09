@@ -132,32 +132,6 @@ export const resolvers = {
       }
     },
 
-    // Investigation resolvers
-    investigation: async (parent: any, args: any, context: any) => {
-      return delegateToBackend(
-        `query($id: ID!) { investigation(id: $id) { id name description status priority createdAt updatedAt entities { id type } relationships { id type } } }`,
-        args,
-        context
-      );
-    },
-
-    investigations: async (parent: any, args: any, context: any) => {
-      return delegateToBackend(
-        `query($limit: Int, $offset: Int) { investigations(limit: $limit, offset: $offset) { id name description status priority createdAt updatedAt } }`,
-        args,
-        context
-      );
-    },
-
-    // Auth resolvers
-    me: async (parent: any, args: any, context: any) => {
-      return delegateToBackend(
-        `query { me { id email username role isActive lastLogin createdAt updatedAt } }`,
-        {},
-        context
-      );
-    },
-
     // XAI resolvers (delegated to graph-xai service)
     explainEntity: async (parent: any, args: any, context: any) => {
       const { entityId, model, version } = args;
@@ -323,15 +297,6 @@ export const resolvers = {
   },
 
   Mutation: {
-    // Graph mutations
-    createInvestigation: async (parent: any, args: any, context: any) => {
-      return delegateToBackend(
-        `mutation($input: InvestigationInput!) { createInvestigation(input: $input) { id name status priority createdAt } }`,
-        args,
-        context
-      );
-    },
-
     // Provenance mutations
     createClaim: async (parent: any, args: any, context: any) => {
       const serviceHeaders = await buildServiceHeaders('prov-ledger', [

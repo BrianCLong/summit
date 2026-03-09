@@ -1,7 +1,5 @@
 from __future__ import annotations
-
 from ..evidence.emit import emit
-
 
 def record_metric(name: str, value: int = 1) -> None:
     # Emit evidence EVD-COSMOS-SERVER-OBS-001

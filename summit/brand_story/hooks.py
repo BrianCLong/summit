@@ -1,9 +1,7 @@
 from typing import List
-
 from .flags import enabled
 
-
-def generate_hooks(topic: str, platform: str) -> list[str]:
+def generate_hooks(topic: str, platform: str) -> List[str]:
     if not enabled():
         return []
 

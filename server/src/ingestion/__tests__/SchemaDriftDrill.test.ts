@@ -14,7 +14,7 @@ describe('Schema Drift Drill (Task #108)', () => {
 
     expect(mapping.targetType).toBe('Person');
     expect(mapping.overallConfidence).toBeGreaterThan(0.5);
-    
+
     // Check specific field mappings
     const nameMap = mapping.mappings.find(m => m.sourceField === 'full_name');
     expect(nameMap?.targetField).toBe('name');
@@ -33,7 +33,7 @@ describe('Schema Drift Drill (Task #108)', () => {
     const mapping = await semanticMapperService.suggestMapping(rawData);
 
     expect(mapping.targetType).toBe('Organization');
-    
+
     const transformed = semanticMapperService.applyMapping(rawData, mapping);
     expect(transformed.type).toBe('Organization');
     expect(transformed.name).toBe('Acme Corp');

@@ -1,6 +1,6 @@
-import hashlib
 import os
-from typing import List, Optional
+import hashlib
+from typing import Optional, List
 
 MAX_BYTES = 8192  # 8KB budget
 POLICY_PREAMBLE_PATH = os.path.join(os.path.dirname(__file__), "policy_preamble.txt")
@@ -13,7 +13,7 @@ ALLOWED_PHRASES = [
 
 def load_policy_preamble() -> str:
     if os.path.exists(POLICY_PREAMBLE_PATH):
-        with open(POLICY_PREAMBLE_PATH) as f:
+        with open(POLICY_PREAMBLE_PATH, "r") as f:
             return f.read()
     return ""
 
@@ -51,7 +51,7 @@ def load_agents_md(repo_root: str = ".") -> str:
     for filename in candidates:
         filepath = os.path.join(repo_root, filename)
         if os.path.exists(filepath):
-            with open(filepath, encoding="utf-8") as f:
+            with open(filepath, "r", encoding="utf-8") as f:
                 content = f.read()
             break
 

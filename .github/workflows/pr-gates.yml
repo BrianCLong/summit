@@ -120,7 +120,7 @@ jobs:
       - name: Helm Lint
         run: |
           if [ -d "helm" ]; then
-            find helm -name Chart.yaml -exec dirname {} \; | xargs -n1 helm lint
+            helm lint helm/
           fi
 
       - name: Terraform Plan

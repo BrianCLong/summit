@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction, RequestHandler } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { config } from '../config';
 import { logger } from '../utils/logger';
@@ -11,17 +11,16 @@ export interface AuthenticatedRequest extends Request {
   };
 }
 
-export const authenticate: RequestHandler = (
-  req: Request,
+export const authenticate = (
+  req: AuthenticatedRequest,
   res: Response,
   next: NextFunction,
-): void => {
+) => {
   try {
     const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      res.status(401).json({ error: 'Authentication token required' });
-      return;
+      return res.status(401).json({ error: 'Authentication token required' });
     }
 
     const token = authHeader.substring(7); // Remove 'Bearer ' prefix
@@ -29,7 +28,7 @@ export const authenticate: RequestHandler = (
     try {
       const decoded = jwt.verify(token, config.auth.jwtSecret) as any;
 
-      (req as AuthenticatedRequest).user = {
+      req.user = {
         id: decoded.userId || decoded.id,
         email: decoded.email,
         role: decoded.role || 'user',
@@ -38,35 +37,29 @@ export const authenticate: RequestHandler = (
       next();
     } catch (jwtError) {
       logger.warn('Invalid JWT token:', jwtError);
-      res.status(401).json({ error: 'Invalid authentication token' });
-      return;
+      return res.status(401).json({ error: 'Invalid authentication token' });
     }
   } catch (error) {
     logger.error('Authentication error:', error);
-    res.status(500).json({ error: 'Authentication failed' });
-    return;
+    return res.status(500).json({ error: 'Authentication failed' });
   }
 };
 
-export const authorize = (allowedRoles: string[]): RequestHandler => {
-  return (req: Request, res: Response, next: NextFunction): void => {
+export const authorize = (allowedRoles: string[]) => {
+  return (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
-      const authReq = req as AuthenticatedRequest;
-      if (!authReq.user) {
-        res.status(401).json({ error: 'Authentication required' });
-        return;
+      if (!req.user) {
+        return res.status(401).json({ error: 'Authentication required' });
       }
 
-      if (!allowedRoles.includes(authReq.user.role)) {
-        res.status(403).json({ error: 'Insufficient permissions' });
-        return;
+      if (!allowedRoles.includes(req.user.role)) {
+        return res.status(403).json({ error: 'Insufficient permissions' });
       }
 
       next();
     } catch (error) {
       logger.error('Authorization error:', error);
-      res.status(500).json({ error: 'Authorization failed' });
-      return;
+      return res.status(500).json({ error: 'Authorization failed' });
     }
   };
 };

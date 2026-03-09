@@ -14,7 +14,7 @@ def load_never_log_fields():
     path = os.path.join(GOVERNANCE_DIR, 'never_log_fields.yaml')
     fields = []
     try:
-        with open(path) as f:
+        with open(path, 'r') as f:
             for line in f:
                 line = line.strip()
                 if line.startswith('-'):
@@ -68,7 +68,7 @@ def run_gate(target_dir=None):
             for file in files:
                 filepath = os.path.join(root, file)
                 try:
-                    with open(filepath) as f:
+                    with open(filepath, 'r') as f:
                         content = f.read()
                         issues = check_log_content(content, never_log)
                         if issues:

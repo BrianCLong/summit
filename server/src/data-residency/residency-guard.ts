@@ -181,7 +181,7 @@ export class ResidencyGuard {
 
         // Task #97: Join with tenant_partitions to get the authoritative region for this tenant
         const result = await pool.query(
-            `SELECT c.*, p.region as shard_region 
+            `SELECT c.*, p.region as shard_region
              FROM data_residency_configs c
              LEFT JOIN tenant_partitions p ON c.tenant_id = p.tenant_id
              WHERE c.tenant_id = $1`,

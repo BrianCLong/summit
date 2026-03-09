@@ -5,7 +5,7 @@
  * decision support, and monitoring capabilities.
  */
 
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 // ============================================================================
 // ENUMS & CONSTANTS

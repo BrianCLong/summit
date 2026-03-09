@@ -1,0 +1,19 @@
+name: docs-feedback-triage
+
+permissions:
+  contents: read
+on:
+  issues:
+    types: [opened, edited]
+jobs:
+  triage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const issue = context.payload.issue
+            if (issue.title?.startsWith('Docs feedback:')){
+              await github.rest.issues.addLabels({ ...context.repo, issue_number: issue.number, labels: ['docs','docs-feedback'] })
+              await github.rest.issues.addAssignees({ ...context.repo, issue_number: issue.number, assignees: ['intelgraph-docs'] })
+            }

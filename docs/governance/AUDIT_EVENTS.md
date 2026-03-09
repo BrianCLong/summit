@@ -1,8 +1,11 @@
-> Owner: @summit/governance
-> Last-Reviewed: 2026-02-25
-> Evidence-IDs: EVD-PLACEHOLDER
-> Status: active
+# Governance Audit Event Definitions
 
+This document defines the schema and semantics for new audit event types associated with continuous compliance, authenticity verification, and human accountability.
+
+## 1. Compliance Drift Event
+**Type:** `DecisionNode`
+**SubType:** `ComplianceDrift`
+**Description:** Recorded when the continuous compliance monitor detects a discrepancy between a defense action and the current governance policy.
 
 ### Schema
 ```json

@@ -1,7 +1,5 @@
 import pytest
-
 from summit.slopguard.dataset_hygiene import validate_dataset_provenance
-
 
 def test_hygiene_disabled():
     policy = {"feature_flags": {"dataset_pollution_firewall": False}}

@@ -1,12 +1,10 @@
 import json
 import os
-
 import jsonschema
-
 
 def verify_evidence(evidence_id):
     index_path = "evidence/index.json"
-    with open(index_path) as f:
+    with open(index_path, 'r') as f:
         index = json.load(f)
 
     if evidence_id not in index["evidence"]:
@@ -31,9 +29,9 @@ def verify_evidence(evidence_id):
     }
 
     for key, schema_path in schemas.items():
-        with open(paths[key]) as f:
+        with open(paths[key], 'r') as f:
             instance = json.load(f)
-        with open(schema_path) as f:
+        with open(schema_path, 'r') as f:
             schema = json.load(f)
         try:
             jsonschema.validate(instance=instance, schema=schema)

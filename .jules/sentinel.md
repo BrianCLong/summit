@@ -36,11 +36,6 @@ router.post('/secrets/rotate', rotateHandler);
 
 ## Vulnerability Log
 
-## 2026-03-06 - [CRITICAL] Insecure JWT Validation in v24 Signal Ingest
-**Vulnerability:** The `authenticateRequest` middleware in `v24_modules/server/src/ingest/http.ts` used placeholder logic that bypassed JWT signature verification and trusted a user-supplied `tenantId` from the request body.
-**Learning:** Placeholder "TODO" comments in security-critical middleware can easily be overlooked and become critical vulnerabilities in production-like modules. Mocking authentication for "ease of development" without strict environment gates often leads to insecure defaults.
-**Prevention:** Never use placeholder logic for authentication. Always implement full JWT validation (signature, issuer, audience) from the start, or use a robust, well-tested security library. Extract identity and tenancy claims exclusively from the verified token payload.
-
 ## 2025-10-26 - [CRITICAL] Insecure JWT Secret Fallback
 **Vulnerability:** The server used a hardcoded default string ('super-secret-key') for JWT signing when the `JWT_SECRET` environment variable was missing, even in production.
 **Learning:** Default fallbacks for security-critical secrets are dangerous. The absence of a secret in production should be treated as a fatal configuration error, not an opportunity to use a default.
@@ -80,8 +75,3 @@ router.post('/secrets/rotate', rotateHandler);
 **Vulnerability:** The `/search/evidence` endpoint lacked tenant isolation and explicit role checks, allowing any authenticated user to search evidence across all tenants. Additionally, `ensureRole` was case-sensitive, potentially allowing bypasses if role casing was inconsistent.
 **Learning:** Security-critical endpoints, especially those performing full-text search, must explicitly enforce both RBAC and multi-tenant isolation. Core security middleware like `ensureRole` should be robust against trivial variations like casing.
 **Prevention:** Always apply `ensureRole` and tenant-scoping clauses in Cypher queries for any endpoint exposing sensitive graph data. Use case-insensitive comparison in authorization logic.
-
-## 2026-03-05 - [HIGH] Broken Access Control on Legacy and Operational Endpoints
-**Vulnerability:** Several sensitive endpoints (e.g., `/dr/*`, `/airgap/*`, and `/analytics/*`) were mounted directly at the root in `server/src/app.ts` without authentication or role-based access control middleware. This exposed disaster recovery, data export/import, and graph analytics capabilities to unauthenticated users.
-**Learning:** Routes mounted outside the global `/api` protection block are easily overlooked. Relying on internal router protection is less secure than a "deny-by-default" posture at the application entry point.
-**Prevention:** Apply consistent authentication (`authenticateToken`) and role-based (`ensureRole`) middleware to all routes at the time of mounting in the main application file. Regularly audit root-level route definitions for missing security wrappers.

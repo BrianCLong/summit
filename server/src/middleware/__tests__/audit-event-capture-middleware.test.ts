@@ -13,36 +13,37 @@
  * - Context extraction from requests
  */
 
-import { jest, beforeAll } from '@jest/globals';
+import { jest } from '@jest/globals';
 import type { Pool } from 'pg';
 
-let AuditEventCaptureMiddleware: typeof import('../audit-event-capture-middleware.js').AuditEventCaptureMiddleware;
-let EventSourcingService: typeof import('../../services/EventSourcingService.js').EventSourcingService;
-let appendEventSpy: jest.SpyInstance;
+const EventSourcingServiceMock = jest.fn();
+jest.unstable_mockModule('../../services/EventSourcingService.js', () => ({
+  EventSourcingService: EventSourcingServiceMock,
+}));
 
-beforeAll(async () => {
-  ({ AuditEventCaptureMiddleware } = await import('../audit-event-capture-middleware.js'));
-  ({ EventSourcingService } = await import('../../services/EventSourcingService.js'));
-});
+const { AuditEventCaptureMiddleware } = await import('../audit-event-capture-middleware.js');
+const { EventSourcingService } = await import('../../services/EventSourcingService.js');
 
 describe('AuditEventCaptureMiddleware', () => {
   let middleware: AuditEventCaptureMiddleware;
   let mockPgPool: jest.Mocked<Pool>;
+  let mockEventSourcingService: jest.Mocked<EventSourcingService>;
 
   beforeEach(() => {
     jest.clearAllMocks();
 
     // Mock PostgreSQL pool
-    mockPgPool = { query: jest.fn().mockResolvedValue({ rows: [] }) } as any;
-    appendEventSpy = jest
-      .spyOn(EventSourcingService.prototype, 'appendEvent')
-      .mockResolvedValue(undefined);
+    mockPgPool = {} as any;
+
+    // Mock EventSourcingService
+    mockEventSourcingService = {
+      appendEvent: jest.fn(),
+    } as any;
+
+    // Inject mocked service
+    (EventSourcingService as jest.Mock).mockImplementation(() => mockEventSourcingService);
 
     middleware = new AuditEventCaptureMiddleware(mockPgPool);
-  });
-
-  afterEach(() => {
-    appendEventSpy?.mockRestore();
   });
 
   describe('createApolloPlugin', () => {
@@ -109,7 +110,7 @@ describe('AuditEventCaptureMiddleware', () => {
 
       await requestHandlers.willSendResponse(mockRequestContext);
 
-      expect(appendEventSpy).toHaveBeenCalledWith(
+      expect(mockEventSourcingService.appendEvent).toHaveBeenCalledWith(
         expect.objectContaining({
           eventType: expect.any(String),
           aggregateType: 'entity',
@@ -139,7 +140,7 @@ describe('AuditEventCaptureMiddleware', () => {
 
       await requestHandlers.willSendResponse(mockRequestContext);
 
-      expect(appendEventSpy).not.toHaveBeenCalled();
+      expect(mockEventSourcingService.appendEvent).not.toHaveBeenCalled();
     });
 
     it('should skip excluded mutations (login, logout)', async () => {
@@ -173,7 +174,7 @@ describe('AuditEventCaptureMiddleware', () => {
 
       await requestHandlers.willSendResponse(mockRequestContext);
 
-      expect(appendEventSpy).not.toHaveBeenCalled();
+      expect(mockEventSourcingService.appendEvent).not.toHaveBeenCalled();
     });
 
     it('should capture mutation errors', async () => {
@@ -214,7 +215,7 @@ describe('AuditEventCaptureMiddleware', () => {
 
       await requestHandlers.willSendResponse(mockRequestContext);
 
-      expect(appendEventSpy).toHaveBeenCalledWith(
+      expect(mockEventSourcingService.appendEvent).toHaveBeenCalledWith(
         expect.objectContaining({
           eventData: expect.objectContaining({
             success: false,
@@ -275,7 +276,7 @@ describe('AuditEventCaptureMiddleware', () => {
 
       await requestHandlers.willSendResponse(mockRequestContext);
 
-      expect(appendEventSpy).toHaveBeenCalledWith(
+      expect(mockEventSourcingService.appendEvent).toHaveBeenCalledWith(
         expect.objectContaining({
           userId: 'user-456',
           tenantId: 'tenant-789',
@@ -293,7 +294,7 @@ describe('AuditEventCaptureMiddleware', () => {
       const requestHandlers = await plugin.requestDidStart();
 
       // Simulate event sourcing service failure
-      appendEventSpy.mockRejectedValue(
+      mockEventSourcingService.appendEvent.mockRejectedValue(
         new Error('Database connection failed'),
       );
 
@@ -327,7 +328,7 @@ describe('AuditEventCaptureMiddleware', () => {
         requestHandlers.willSendResponse(mockRequestContext),
       ).resolves.not.toThrow();
 
-      expect(appendEventSpy).toHaveBeenCalled();
+      expect(mockEventSourcingService.appendEvent).toHaveBeenCalled();
     });
   });
 
@@ -466,7 +467,7 @@ describe('AuditEventCaptureMiddleware', () => {
 
       await requestHandlers.willSendResponse(mockRequestContext);
 
-      expect(appendEventSpy).toHaveBeenCalledWith(
+      expect(mockEventSourcingService.appendEvent).toHaveBeenCalledWith(
         expect.objectContaining({
           aggregateType: 'entity',
         }),
@@ -501,7 +502,7 @@ describe('AuditEventCaptureMiddleware', () => {
 
       await requestHandlers.willSendResponse(mockRequestContext);
 
-      expect(appendEventSpy).toHaveBeenCalledWith(
+      expect(mockEventSourcingService.appendEvent).toHaveBeenCalledWith(
         expect.objectContaining({
           aggregateType: 'case',
         }),
@@ -536,7 +537,7 @@ describe('AuditEventCaptureMiddleware', () => {
 
       await requestHandlers.willSendResponse(mockRequestContext);
 
-      expect(appendEventSpy).toHaveBeenCalledWith(
+      expect(mockEventSourcingService.appendEvent).toHaveBeenCalledWith(
         expect.objectContaining({
           aggregateType: 'investigation',
         }),
@@ -571,7 +572,7 @@ describe('AuditEventCaptureMiddleware', () => {
 
       await requestHandlers.willSendResponse(mockRequestContext);
 
-      expect(appendEventSpy).toHaveBeenCalledWith(
+      expect(mockEventSourcingService.appendEvent).toHaveBeenCalledWith(
         expect.objectContaining({
           aggregateType: 'unknown',
         }),
@@ -608,7 +609,7 @@ describe('AuditEventCaptureMiddleware', () => {
 
       await requestHandlers.willSendResponse(mockRequestContext);
 
-      expect(appendEventSpy).toHaveBeenCalledWith(
+      expect(mockEventSourcingService.appendEvent).toHaveBeenCalledWith(
         expect.objectContaining({
           aggregateId: 'entity-new-456',
         }),
@@ -648,7 +649,7 @@ describe('AuditEventCaptureMiddleware', () => {
 
       await requestHandlers.willSendResponse(mockRequestContext);
 
-      expect(appendEventSpy).toHaveBeenCalledWith(
+      expect(mockEventSourcingService.appendEvent).toHaveBeenCalledWith(
         expect.objectContaining({
           aggregateId: expect.any(String),
         }),
@@ -684,7 +685,7 @@ describe('AuditEventCaptureMiddleware', () => {
       await requestHandlers.willSendResponse(mockRequestContext);
 
       // Should not capture event without aggregate ID
-      expect(appendEventSpy).not.toHaveBeenCalled();
+      expect(mockEventSourcingService.appendEvent).not.toHaveBeenCalled();
     });
   });
 
@@ -717,7 +718,7 @@ describe('AuditEventCaptureMiddleware', () => {
 
       await requestHandlers.willSendResponse(mockRequestContext);
 
-      expect(appendEventSpy).toHaveBeenCalledWith(
+      expect(mockEventSourcingService.appendEvent).toHaveBeenCalledWith(
         expect.objectContaining({
           userId: 'system', // Fallback to 'system'
           tenantId: 'unknown', // Fallback to 'unknown'
@@ -755,7 +756,7 @@ describe('AuditEventCaptureMiddleware', () => {
 
       await requestHandlers.willSendResponse(mockRequestContext);
 
-      expect(appendEventSpy).toHaveBeenCalledWith(
+      expect(mockEventSourcingService.appendEvent).toHaveBeenCalledWith(
         expect.objectContaining({
           tenantId: 'tenant-from-context',
         }),

@@ -1,9 +1,9 @@
 // packages/orchestrator-store/src/index.ts
 
 import { OrchestratorPostgresStore } from './OrchestratorPostgresStore.js';
-import { 
+import {
   MaestroLoop,
-  MaestroAgent, 
+  MaestroAgent,
   MaestroExperiment,
   MaestroPlaybook,
   CoordinationTask,

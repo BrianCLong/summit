@@ -12,7 +12,7 @@
 
 import { Driver } from 'neo4j-driver';
 import Redis from 'ioredis';
-import { z } from 'zod';
+import { z } from 'zod/v4';
 import { createHash } from 'crypto';
 import logger from '../utils/logger.js';
 import { CircuitBreaker } from '../utils/CircuitBreaker.js';

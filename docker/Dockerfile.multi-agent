@@ -1,8 +1,0 @@
-FROM python:3.11.9-slim@sha256:7f20f23f7e33d6d5f9926be89f6f34f3d3b18ea81455b8e7f7f4d1d1ed74a2d8
-
-WORKDIR /app
-
-COPY agents/runner /app/agents/runner
-
-ENTRYPOINT ["python3", "/app/agents/runner/multi_agent_runner.py"]
-CMD ["--task", "sample", "--out", "/app/artifacts"]

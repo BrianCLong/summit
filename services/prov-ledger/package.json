@@ -13,8 +13,7 @@
     "yargs": "17.7.2",
     "fast-json-stable-stringify": "2.1.0",
     "merkletreejs": "0.3.11",
-    "keccak": "3.0.4",
-    "@intelgraph/cryptographic-agility": "workspace:*"
+    "keccak": "3.0.4"
   },
   "devDependencies": {
     "@types/jest": "29.5.14",

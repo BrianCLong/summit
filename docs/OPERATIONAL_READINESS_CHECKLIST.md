@@ -1,8 +1,8 @@
 # Summit 2026 Q1 Operational Readiness Checklist
 
-**Document Version**: 1.0  
-**Last Updated**: January 30, 2026  
-**Status**: In Progress  
+**Document Version**: 1.0
+**Last Updated**: January 30, 2026
+**Status**: In Progress
 **Target Completion**: March 31, 2026
 
 ---
@@ -437,9 +437,9 @@ This operational readiness checklist provides a comprehensive framework for depl
 
 - [ ] ## Appendix B: Links & Resources
 
-- [ ] - [Production Runbook](../runbooks/deployment-procedures.md)
-- [ ] - [Rollback Procedures](../runbooks/deployment-procedures.md)
-- [ ] - [Incident Response Guide](../runbooks/incident-response.md)
+- [ ] - [Production Runbook](./DEPLOYMENT_RUNBOOK.md)
+- [ ] - [Rollback Procedures](./ROLLBACK_PROCEDURES.md)
+- [ ] - [Incident Response Guide](./INCIDENT_RESPONSE.md)
 - [ ] - [Architecture Documentation](./ARCHITECTURE.md)
 - [ ] - [Security Assessment Report](./SECURITY_ASSESSMENT_TRACKING.md)
 - [ ] - [Implementation Guide](./SECURITY_INITIATIVES_IMPLEMENTATION_GUIDE.md)

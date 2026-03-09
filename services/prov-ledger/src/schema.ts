@@ -1,37 +1,21 @@
 // @ts-nocheck
 import { gql } from 'apollo-server';
-import { addEvidence, addClaim, exportManifest } from './ledger';
 
 export const typeDefs = gql`
-  type Evidence { id: ID!, sha256: String!, contentType: String!, createdAt: String! }
-  type Claim { id: ID!, hashRoot: String!, transformChain: [String!]! }
-  type Manifest { data: String! }
-
-  type Query {
-    _health: String!
-    getManifest(caseId: String!): Manifest!
-  }
-
+  type Evidence { id: ID!, hash: String!, metadata: String }
+  type Claim { id: ID!, evidenceIds: [ID!]!, statement: String! }
+  type Manifest { id: ID!, merkleRoot: String!, createdAt: String! }
+  type Query { _health: String! }
   type Mutation {
-    registerEvidence(sha256: String!, contentType: String!): Evidence!
-    registerClaim(evidenceIds: [ID!]!, transformChain: [String!]!): Claim!
+    registerEvidence(hash: String!, metadata: String): Evidence!
+    sealManifest(claimId: ID!): Manifest!
   }
 `;
 
 export const resolvers = {
-  Query: {
-    _health: () => 'ok',
-    getManifest: async (_: any, { caseId }: any) => {
-      const data = await exportManifest(caseId);
-      return { data };
-    }
-  },
+  Query: { _health: () => 'ok' },
   Mutation: {
-    registerEvidence: async (_: any, { sha256, contentType }: any) => {
-      return await addEvidence(sha256, contentType);
-    },
-    registerClaim: async (_: any, { evidenceIds, transformChain }: any) => {
-      return await addClaim(evidenceIds, transformChain);
-    }
+    registerEvidence: (_: any, { hash, metadata }: any) => ({ id: 'e1', hash, metadata: metadata ?? null }),
+    sealManifest: (_: any, { claimId }: any) => ({ id: claimId, merkleRoot: '0xdeadbeef', createdAt: new Date().toISOString() })
   }
 };

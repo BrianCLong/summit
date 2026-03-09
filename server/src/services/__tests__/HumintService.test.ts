@@ -1,59 +1,43 @@
-import { beforeAll, beforeEach, describe, expect, it, jest } from '@jest/globals';
-import { ReportGrading, SourceReliability, SourceStatus } from '../../types/humint.js';
+import { describe, it, expect, jest, beforeEach, afterEach } from '@jest/globals';
+import { HumintService } from '../HumintService.js';
+import { SourceReliability, SourceStatus, ReportGrading } from '../../types/humint.js';
 
+// Mock dependencies
 const mockQuery = jest.fn();
 const mockRun = jest.fn();
 const mockSessionClose = jest.fn();
-const mockSession = jest.fn();
+const mockSession = jest.fn(() => ({
+  run: mockRun,
+  close: mockSessionClose,
+  lastBookmark: jest.fn(),
+  beginTransaction: jest.fn(),
+  executeRead: jest.fn(),
+  executeWrite: jest.fn(),
+}));
 
-const getPostgresPoolMock = jest.fn();
-const getNeo4jDriverMock = jest.fn();
+const mockDriver = {
+  session: mockSession,
+  close: jest.fn(),
+  verifyConnectivity: jest.fn(),
+  supportsMultiDb: jest.fn(),
+  configuration: jest.fn(),
+};
 
-jest.unstable_mockModule('../../config/database.js', () => ({
-  getPostgresPool: getPostgresPoolMock,
-  getNeo4jDriver: getNeo4jDriverMock,
+jest.mock('../../config/database.js', () => ({
+  getPostgresPool: () => ({
+    query: mockQuery,
+  }),
+  getNeo4jDriver: () => mockDriver,
 }));
 
 describe('HumintService', () => {
-  let HumintService: any;
-  let service: any;
-  let mockPool: any;
-  let mockDriver: any;
+  let service: HumintService;
   const tenantId = 'tenant-123';
   const userId = 'user-456';
 
-  beforeAll(async () => {
-    ({ HumintService } = await import('../HumintService.js'));
-  });
-
   beforeEach(() => {
+    // Reset singleton instance for testing if possible, or just reset mocks
     jest.clearAllMocks();
-
-    mockPool = {
-      query: mockQuery,
-    };
-
-    mockDriver = {
-      session: mockSession,
-      close: jest.fn(),
-      verifyConnectivity: jest.fn(),
-      supportsMultiDb: jest.fn(),
-      configuration: jest.fn(),
-    };
-
-    mockSession.mockReturnValue({
-      run: mockRun,
-      close: mockSessionClose,
-      lastBookmark: jest.fn(),
-      beginTransaction: jest.fn(),
-      executeRead: jest.fn(),
-      executeWrite: jest.fn(),
-    });
-
-    getPostgresPoolMock.mockReturnValue(mockPool);
-    getNeo4jDriverMock.mockReturnValue(mockDriver);
-
-    (HumintService as any).instance = undefined;
     service = HumintService.getInstance();
   });
 
@@ -67,28 +51,34 @@ describe('HumintService', () => {
       };
 
       const mockDbResult = {
-        rows: [
-          {
-            id: 'source-uuid',
-            ...input,
-            recruited_at: new Date(),
-            handler_id: userId,
-            tenant_id: tenantId,
-            created_at: new Date(),
-            updated_at: new Date(),
-          },
-        ],
+        rows: [{
+          id: 'source-uuid',
+          ...input,
+          recruited_at: new Date(),
+          handler_id: userId,
+          tenant_id: tenantId,
+          created_at: new Date(),
+          updated_at: new Date(),
+        }],
       };
 
-      mockQuery.mockResolvedValueOnce(mockDbResult);
-      mockRun.mockResolvedValueOnce({});
-      mockSessionClose.mockResolvedValue(undefined);
+      // Type cast mock to any to avoid TS errors
+      (mockQuery as jest.Mock<any>).mockResolvedValueOnce(mockDbResult);
+      (mockRun as jest.Mock<any>).mockResolvedValueOnce({}); // Neo4j result
+      // Need to ensure close is resolved properly.
+      (mockSessionClose as jest.Mock<any>).mockResolvedValue(undefined);
+
+      // Ensure mockSession returns our mocked object with run()
+      (mockSession as jest.Mock<any>).mockReturnValue({
+        run: mockRun,
+        close: mockSessionClose,
+      });
 
       const result = await service.createSource(tenantId, userId, input);
 
       expect(mockQuery).toHaveBeenCalledWith(
         expect.stringContaining('INSERT INTO humint_sources'),
-        expect.arrayContaining([input.cryptonym, input.reliability, tenantId]),
+        expect.arrayContaining([input.cryptonym, input.reliability, tenantId])
       );
 
       expect(mockRun).toHaveBeenCalledWith(
@@ -96,8 +86,8 @@ describe('HumintService', () => {
         expect.objectContaining({
           id: 'source-uuid',
           cryptonym: input.cryptonym,
-          tenantId,
-        }),
+          tenantId
+        })
       );
 
       expect(result.id).toBe('source-uuid');
@@ -105,16 +95,15 @@ describe('HumintService', () => {
     });
 
     it('should rollback Postgres if Neo4j fails', async () => {
-      const input = {
-        cryptonym: 'FAILED_SPY',
-        reliability: SourceReliability.F,
-        accessLevel: 'None',
-        status: SourceStatus.RECRUITED,
-      };
+        const input = {
+          cryptonym: 'FAILED_SPY',
+          reliability: SourceReliability.F,
+          accessLevel: 'None',
+          status: SourceStatus.RECRUITED,
+        };
 
-      const mockDbResult = {
-        rows: [
-          {
+        const mockDbResult = {
+          rows: [{
             id: 'failed-uuid',
             ...input,
             recruited_at: new Date(),
@@ -122,23 +111,27 @@ describe('HumintService', () => {
             tenant_id: tenantId,
             created_at: new Date(),
             updated_at: new Date(),
-          },
-        ],
-      };
+          }],
+        };
 
-      mockQuery.mockResolvedValueOnce(mockDbResult);
-      mockRun.mockRejectedValueOnce(new Error('Neo4j connection failed'));
-      mockSessionClose.mockResolvedValue(undefined);
+        (mockQuery as jest.Mock<any>).mockResolvedValueOnce(mockDbResult); // Insert success
+        (mockRun as jest.Mock<any>).mockRejectedValueOnce(new Error('Neo4j connection failed')); // Neo4j fail
+        (mockSessionClose as jest.Mock<any>).mockResolvedValue(undefined);
 
-      await expect(service.createSource(tenantId, userId, input)).rejects.toThrow(
-        'Neo4j connection failed',
-      );
+        // Ensure mockSession returns our mocked object with run()
+        (mockSession as jest.Mock<any>).mockReturnValue({
+          run: mockRun,
+          close: mockSessionClose,
+        });
 
-      expect(mockQuery).toHaveBeenCalledWith(
-        expect.stringContaining('DELETE FROM humint_sources WHERE id = $1'),
-        ['failed-uuid'],
-      );
-    });
+        await expect(service.createSource(tenantId, userId, input)).rejects.toThrow('Neo4j connection failed');
+
+        // Verify rollback delete was called
+        expect(mockQuery).toHaveBeenCalledWith(
+          expect.stringContaining('DELETE FROM humint_sources WHERE id = $1'),
+          ['failed-uuid']
+        );
+      });
   });
 
   describe('createReport', () => {
@@ -151,28 +144,26 @@ describe('HumintService', () => {
       };
 
       const mockDbResult = {
-        rows: [
-          {
-            id: 'report-uuid',
-            source_id: input.sourceId,
-            content: input.content,
-            grading: input.grading,
-            status: 'DRAFT',
-            dissemination_list: input.disseminationList,
-            created_by: userId,
-            tenant_id: tenantId,
-            created_at: new Date(),
-          },
-        ],
+        rows: [{
+          id: 'report-uuid',
+          source_id: input.sourceId,
+          content: input.content,
+          grading: input.grading,
+          status: 'DRAFT',
+          dissemination_list: input.disseminationList,
+          created_by: userId,
+          tenant_id: tenantId,
+          created_at: new Date(),
+        }],
       };
 
-      mockQuery.mockResolvedValueOnce(mockDbResult);
+      (mockQuery as jest.Mock<any>).mockResolvedValueOnce(mockDbResult);
 
       const result = await service.createReport(tenantId, userId, input);
 
       expect(mockQuery).toHaveBeenCalledWith(
         expect.stringContaining('INSERT INTO humint_reports'),
-        expect.arrayContaining([input.sourceId, input.content, 'DRAFT']),
+        expect.arrayContaining([input.sourceId, input.content, 'DRAFT'])
       );
 
       expect(result.id).toBe('report-uuid');
@@ -182,6 +173,7 @@ describe('HumintService', () => {
 
   describe('runCIScreening', () => {
     it('should flag burned sources', async () => {
+      // Mock getSource call
       const sourceData = {
         id: 'burned-source',
         cryptonym: 'BURNED_SPY',
@@ -191,7 +183,7 @@ describe('HumintService', () => {
         tenant_id: tenantId,
       };
 
-      mockQuery.mockResolvedValueOnce({ rows: [sourceData] });
+      (mockQuery as jest.Mock<any>).mockResolvedValueOnce({ rows: [sourceData] });
 
       const result = await service.runCIScreening(tenantId, 'burned-source');
 
@@ -200,21 +192,22 @@ describe('HumintService', () => {
     });
 
     it('should pass reliable active sources', async () => {
-      const sourceData = {
-        id: 'good-source',
-        cryptonym: 'GOOD_SPY',
-        reliability: SourceReliability.A,
-        access_level: 'High',
-        status: SourceStatus.RECRUITED,
-        tenant_id: tenantId,
-      };
+        // Mock getSource call
+        const sourceData = {
+          id: 'good-source',
+          cryptonym: 'GOOD_SPY',
+          reliability: SourceReliability.A,
+          access_level: 'High',
+          status: SourceStatus.RECRUITED,
+          tenant_id: tenantId,
+        };
 
-      mockQuery.mockResolvedValueOnce({ rows: [sourceData] });
+        (mockQuery as jest.Mock<any>).mockResolvedValueOnce({ rows: [sourceData] });
 
-      const result = await service.runCIScreening(tenantId, 'good-source');
+        const result = await service.runCIScreening(tenantId, 'good-source');
 
-      expect(result.passed).toBe(true);
-      expect(result.flags).toHaveLength(0);
-    });
+        expect(result.passed).toBe(true);
+        expect(result.flags).toHaveLength(0);
+      });
   });
 });

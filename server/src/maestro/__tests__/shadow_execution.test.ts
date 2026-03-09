@@ -36,7 +36,7 @@ describe('Maestro Shadow Execution', () => {
         });
     });
 
-    it('should execute primary task path without invoking shadow mirroring hooks', async () => {
+    it('should trigger shadow mirroring when configured', async () => {
         configMock.mockResolvedValueOnce({
             targetUrl: 'https://shadow.summit.io',
             samplingRate: 1.0,
@@ -55,8 +55,16 @@ describe('Maestro Shadow Execution', () => {
 
         await maestro.executeTask(task);
 
-        expect(configMock).not.toHaveBeenCalled();
-        expect(shadowMock).not.toHaveBeenCalled();
+        expect(configMock).toHaveBeenCalledWith('tenant-1');
+        expect(shadowMock).toHaveBeenCalledWith(
+            expect.objectContaining({
+                method: 'POST',
+                url: expect.stringContaining('/api/maestro/tasks/task-1/execute')
+            }),
+            expect.objectContaining({
+                targetUrl: 'https://shadow.summit.io'
+            })
+        );
     });
 
     it('should NOT trigger shadow mirroring for shadow requests', async () => {

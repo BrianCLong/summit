@@ -1,7 +1,5 @@
 # Canonical list of required status checks for protected branches
 # Order is stable and intentional (deterministic diffs)
-# NOTE: Canonical policy source is docs/ci/REQUIRED_CHECKS_POLICY.yml.
-# Keep this file in sync for legacy verification consumers.
 
 version: 1
 protected_branches:
@@ -9,16 +7,13 @@ protected_branches:
   - release/*
 
 required_checks:
-  - meta-gate
-  - CI Core Gate ✅
-  - Workflow Validity Check
-  - gate
-  - Release Readiness Gate
-  - Unit Tests
-  - SOC Controls
-  - test (20.x)
-  - Routing Resilience Validation
+  - ci / install
+  - ci / lint
+  - ci / test
+  - ci / build
+  - governance / required-checks
+  - governance / branch-protection
 
 notes:
   owner: summit-ga
-  policy: docs/ci/REQUIRED_CHECKS_POLICY.yml
+  policy: docs/governance/branch-protection/README.md

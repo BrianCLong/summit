@@ -1,8 +1,6 @@
 # summit/fimi/surge/tests/test_window_spike.py
 import pytest
-
 from summit.fimi.surge.surge_detector import FIMISurgeDetector
-
 
 def test_detect_surge():
     detector = FIMISurgeDetector()

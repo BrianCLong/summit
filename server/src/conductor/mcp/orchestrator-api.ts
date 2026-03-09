@@ -2,7 +2,6 @@
 import { Router, Request, Response } from 'express';
 import { orchestrator, WorkflowDefinition, WorkflowRecipes } from './orchestrator.js';
 import logger from '../../config/logger.js';
-import { firstString } from '../../utils/http-param.js';
 
 const router = Router();
 
@@ -32,11 +31,7 @@ router.get('/workflows', (_req: Request, res: Response) => {
 // POST /orchestrator/execute/:workflowId - Execute a workflow
 router.post('/execute/:workflowId', async (req: Request, res: Response) => {
   try {
-    const workflowId = firstString(req.params.workflowId);
-    if (!workflowId) {
-      res.status(400).json({ error: 'workflowId is required' });
-      return;
-    }
+    const { workflowId } = req.params;
     const { initialState = {}, scopes = [] } = req.body;
 
     const execution = await orchestrator.executeWorkflow(
@@ -64,12 +59,7 @@ router.post('/execute/:workflowId', async (req: Request, res: Response) => {
 
 // GET /orchestrator/executions/:id - Get execution status
 router.get('/executions/:id', (req: Request, res: Response) => {
-  const executionId = firstString(req.params.id);
-  if (!executionId) {
-    res.status(400).json({ error: 'id is required' });
-    return;
-  }
-  const execution = orchestrator.getExecution(executionId);
+  const execution = orchestrator.getExecution(req.params.id);
   if (!execution) {
     return res.status(404).json({ error: 'Execution not found' });
   }
@@ -90,11 +80,7 @@ router.get('/recipes', (_req: Request, res: Response) => {
 
 // POST /orchestrator/recipes/:name - Execute a pre-built recipe
 router.post('/recipes/:name', async (req: Request, res: Response) => {
-  const name = firstString(req.params.name);
-  if (!name) {
-    res.status(400).json({ error: 'name is required' });
-    return;
-  }
+  const { name } = req.params;
   const recipeFactory = (WorkflowRecipes as any)[name];
 
   if (!recipeFactory) {

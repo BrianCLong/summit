@@ -37,7 +37,7 @@ else
   sbom_cdx_log="$RECEIPT_DIR/supply-chain-sbom-cyclonedx-$SAFE_TIMESTAMP.log"
   sbom_spdx_log="$RECEIPT_DIR/supply-chain-sbom-spdx-$SAFE_TIMESTAMP.log"
 
-  if cosign verify --use-signed-timestamps "$IMAGE_REF" "${VERIFY_ARGS[@]}" >"$signature_log" 2>&1; then
+  if cosign verify "$IMAGE_REF" "${VERIFY_ARGS[@]}" >"$signature_log" 2>&1; then
     signature_status="passed"
   else
     signature_status="failed"
@@ -45,7 +45,7 @@ else
     FAILURES+=("signature_verification_failed")
   fi
 
-  if cosign verify-attestation --use-signed-timestamps "$IMAGE_REF" --type cyclonedx "${VERIFY_ARGS[@]}" >"$sbom_cdx_log" 2>&1; then
+  if cosign verify-attestation "$IMAGE_REF" --type cyclonedx "${VERIFY_ARGS[@]}" >"$sbom_cdx_log" 2>&1; then
     sbom_cdx_status="passed"
   else
     sbom_cdx_status="failed"
@@ -53,7 +53,7 @@ else
     FAILURES+=("sbom_cyclonedx_attestation_failed")
   fi
 
-  if cosign verify-attestation --use-signed-timestamps "$IMAGE_REF" --type spdxjson "${VERIFY_ARGS[@]}" >"$sbom_spdx_log" 2>&1; then
+  if cosign verify-attestation "$IMAGE_REF" --type spdxjson "${VERIFY_ARGS[@]}" >"$sbom_spdx_log" 2>&1; then
     sbom_spdx_status="passed"
   else
     sbom_spdx_status="failed"

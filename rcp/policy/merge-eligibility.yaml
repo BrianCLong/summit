@@ -1,7 +1,0 @@
-version: "1.0.0"
-effective_date: "2024-05-01"
-minimum_trust_score: 90
-required_checks:
-  - "lint"
-  - "test"
-  - "build"

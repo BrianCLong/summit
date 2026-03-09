@@ -237,7 +237,9 @@ jobs:
         run: cat ${{ steps.schema-report.outputs.path }} >> $GITHUB_STEP_SUMMARY
 
       - name: Upload release report
-        uses: actions/upload-artifact@v4          name: release-report
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-report
           path: ${{ steps.schema-report.outputs.path }}
 
       - name: Fail if schema validation failed

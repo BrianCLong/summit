@@ -18,7 +18,6 @@ import { anomalyDetector } from './lib/telemetry/anomaly-detector.js';
 import { auditLogger } from './middleware/audit-logger.js';
 import { auditFirstMiddleware } from './middleware/audit-first.js';
 import { correlationIdMiddleware } from './middleware/correlation-id.js';
-import { tracingService } from './monitoring/tracing.js';
 import { featureFlagContextMiddleware } from './middleware/feature-flag-context.js';
 import { sanitizeInput } from './middleware/sanitization.js';
 import { piiGuardMiddleware } from './middleware/pii-guard.js';
@@ -87,7 +86,6 @@ import { SummitInvestigate } from './services/SummitInvestigate.js';
 import { streamIngest } from './ingest/stream.js';
 import osintRouter from './routes/osint.js';
 import palettesRouter from './routes/palettes.js';
-import outreachRouter from './routes/outreach.js';
 
 import swaggerUi from 'swagger-ui-express';
 import { swaggerSpec } from './config/swagger.js';
@@ -181,28 +179,7 @@ export const createApp = async () => {
 
   // Add correlation ID middleware FIRST (before other middleware)
   app.use(correlationIdMiddleware);
-  app.use(tracingService.expressMiddleware());
   app.use(featureFlagContextMiddleware);
-
-  // SEC: Stripe webhook requires raw body for signature verification.
-  // Mount it BEFORE express.json() to avoid consuming the stream.
-  app.use('/api/stripe/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
-    const { handleStripeWebhook } = await import('./webhooks/stripe.js');
-    const { stripe } = await import('@summit/billing');
-    const sig = req.headers['stripe-signature'];
-    try {
-      const event = stripe.webhooks.constructEvent(
-        req.body,
-        sig as string,
-        process.env.STRIPE_WEBHOOK_SECRET || ''
-      );
-      await handleStripeWebhook(event);
-      res.json({ received: true });
-    } catch (err: any) {
-      console.error(`Stripe webhook error: ${err.message}`);
-      res.status(400).send(`Webhook Error: ${err.message}`);
-    }
-  });
 
   // Load Shedding / Overload Protection (Second, to reject early)
   app.use(overloadProtection);
@@ -484,7 +461,6 @@ export const createApp = async () => {
   app.use('/api/tenants', tenantsRouter);
   app.use('/api/actions', actionsRouter);
   app.use('/api/osint', osintRouter);
-  app.use('/api/outreach', outreachRouter);
 
   app.use('/api/meta-orchestrator', metaOrchestratorRouter);
   app.use('/api', adminSmokeRouter);
@@ -503,8 +479,8 @@ export const createApp = async () => {
   app.use('/api', dataGovernanceRouter); // Register Data Governance API
   app.use('/api', sharingRouter);
   app.use('/api/gtm', gtmRouter);
-  app.use('/airgap', authenticateToken, ensureRole(['ADMIN']), airgapRouter);
-  app.use('/analytics', authenticateToken, ensureRole(['ADMIN', 'ANALYST']), analyticsRouter);
+  app.use('/airgap', airgapRouter);
+  app.use('/analytics', analyticsRouter);
   app.use('/api', experimentRouter); // Mounts /api/experiments...
   app.use('/api', cohortRouter); // Mounts /api/cohorts...
   app.use('/api', funnelRouter); // Mounts /api/funnels...
@@ -514,7 +490,7 @@ export const createApp = async () => {
   app.use('/api/policy-profiles', policyProfilesRouter);
   app.use('/api/policy-proposals', authenticateToken, policyProposalsRouter);
   app.use('/api/evidence', evidenceRouter);
-  app.use('/dr', authenticateToken, ensureRole(['ADMIN']), drRouter);
+  app.use('/dr', drRouter);
   app.use('/', opsRouter);
   app.use('/api/reporting', reportingRouter);
   app.use('/api/mastery', masteryRouter);

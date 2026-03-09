@@ -83,7 +83,11 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v3      - name: Setup Node.js
+        uses: pnpm/action-setup@v3
+        with:
+          version: ${{ needs.setup.outputs.pnpm }}
+
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ needs.setup.outputs.node }}
@@ -159,7 +163,11 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v3      - name: Setup Node.js
+        uses: pnpm/action-setup@v3
+        with:
+          version: ${{ needs.setup.outputs.pnpm }}
+
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ needs.setup.outputs.node }}
@@ -197,7 +205,9 @@ jobs:
 
       - name: Upload coverage
         if: ((((((((((always()) && (needs.setup.outputs.has-schema == 'true')) && (github.event_name == 'pull_request')) && (always())) && (github.ref == 'refs/heads/main')) && (always())) && (always() && (needs.lint-and-typecheck.result == 'success' || needs.lint-and-typecheck.result == 'skipped'))) && (always())) && (github.ref == 'refs/heads/main' && needs.build-and-attestation.result == 'success')) && (always())) && (always())
-        uses: actions/upload-artifact@v4          name: coverage-${{ github.run_number }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-${{ github.run_number }}
           path: coverage/
           retention-days: 7
 
@@ -210,7 +220,11 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v3      - name: Setup Node.js
+        uses: pnpm/action-setup@v3
+        with:
+          version: ${{ needs.setup.outputs.pnpm }}
+
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ needs.setup.outputs.node }}
@@ -310,7 +324,11 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v3      - name: Setup Node.js
+        uses: pnpm/action-setup@v3
+        with:
+          version: ${{ needs.setup.outputs.pnpm }}
+
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ needs.setup.outputs.node }}
@@ -325,7 +343,9 @@ jobs:
           pnpm run build || echo "Build not configured or failed"
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v4          name: build-artifacts-${{ github.run_number }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts-${{ github.run_number }}
           path: |
             server/dist/
             client/dist/

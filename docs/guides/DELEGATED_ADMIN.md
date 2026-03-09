@@ -5,7 +5,6 @@ This guide outlines the flows for Partners to manage Customer Tenants using the 
 ## 1. Partner Onboarding & Customer Provisioning
 
 ### Flow: Partner Onboards a New Customer
-
 1.  **Partner Login**: Partner Admin logs into the Partner Portal (scoped to their Partner Tenant).
 2.  **Create Tenant**:
     *   Action: `POST /api/partners/tenants`
@@ -18,7 +17,6 @@ This guide outlines the flows for Partners to manage Customer Tenants using the 
 4.  **Result**: The new tenant appears in the Partner's "Managed Tenants" list.
 
 ### Flow: Partner Accesses Customer Tenant
-
 1.  **Select Tenant**: Partner Admin selects "Acme Corp" from the dashboard.
 2.  **Context Switch**:
     *   Frontend requests a temporary access token for `tenant_id=acme-corp-id`.
@@ -32,13 +30,11 @@ This guide outlines the flows for Partners to manage Customer Tenants using the 
 ## 2. Cross-Tenant Monitoring & Bulk Operations
 
 ### Aggregated Dashboard
-
 *   **View**: "Fleet Health"
 *   **Query**: `MATCH (p:Partner {id: $id})-[:MANAGES]->(t:Tenant) RETURN t.status, t.alert_count`
 *   **Use Case**: Spotting outages or security incidents across the entire customer base.
 
 ### Bulk Configuration
-
 *   **Action**: Apply a new Security Policy to all "Gold Tier" customers.
 *   **Flow**:
     1.  Partner selects Policy "Strict-MFA-2025".
@@ -49,7 +45,6 @@ This guide outlines the flows for Partners to manage Customer Tenants using the 
 ## 3. Customer Control & Transparency
 
 ### Limiting Partner Access
-
 *   **Scenario**: A sensitive investigation requires locking out external access.
 *   **Action**: Customer Admin toggles "Partner Access" to `Restricted` or `Off`.
 *   **Effect**:
@@ -57,7 +52,6 @@ This guide outlines the flows for Partners to manage Customer Tenants using the 
     *   Immediate revocation of delegated sessions.
 
 ### Audit Log Visibility
-
 *   Customer Admins see a distinct "Partner Activity" log.
 *   Shows *who* from the Partner organization accessed *what*, and *when*.
 

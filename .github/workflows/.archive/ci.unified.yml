@@ -73,6 +73,8 @@ jobs:
         continue-on-error: true
         timeout-minutes: 8
       - name: Upload k6 artifacts
-        uses: actions/upload-artifact@v4          name: k6-smoke-${{ github.run_id }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: k6-smoke-${{ github.run_id }}
           path: .github/k6/*.json
           retention-days: 7

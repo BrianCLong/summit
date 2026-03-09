@@ -38,9 +38,9 @@ export class CertificationRegistry {
     await pool.query(
       `INSERT INTO partner_certifications (partner_id, name, tier, status, metadata, updated_at)
        VALUES ($1, $2, $3, $4, $5, NOW())
-       ON CONFLICT (partner_id) DO UPDATE SET 
-         status = $4, 
-         metadata = $5, 
+       ON CONFLICT (partner_id) DO UPDATE SET
+         status = $4,
+         metadata = $5,
          updated_at = NOW()`,
       [partner.partnerId, partner.name, partner.tier, partner.status, JSON.stringify(partner.metadata)]
     );

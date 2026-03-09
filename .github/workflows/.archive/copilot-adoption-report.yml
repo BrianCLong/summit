@@ -159,7 +159,9 @@ Generated: **${now} (UTC)**
           file_pattern: "reports/copilot/*.md"
 
       - name: Upload report artifact
-        uses: actions/upload-artifact@v4          name: copilot-weekly-report
+        uses: actions/upload-artifact@v4
+        with:
+          name: copilot-weekly-report
           path: ${{ steps.gen.outputs.path || 'reports/copilot' }}
           retention-days: 30
 

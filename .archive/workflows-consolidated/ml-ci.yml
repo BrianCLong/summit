@@ -1,0 +1,38 @@
+name: ML CI
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - 'ml/**'
+  pull_request:
+    branches:
+      - main
+      - develop
+    paths:
+      - 'ml/**'
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@c9ef52556095b32f140b0c7d74474f53696d9000 # v4
+
+      - name: Setup Python
+        uses: actions/setup-python@824a62378795d7a63864050674956c050c8c0868 # v5
+        with:
+          python-version: '3.9' # Assuming Python 3.9, adjust as needed
+
+      - name: Install dependencies
+        run: pip install .
+        working-directory: ml
+
+      - name: Run pip audit
+        run: pip install pip-audit && pip-audit
+        working-directory: ml
+
+      # Add more steps for ML specific tests, linting, etc.

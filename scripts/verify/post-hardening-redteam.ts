@@ -1,7 +1,7 @@
 // @ts-nocheck
 /**
  * Post-Hardening Red-Team Verification
- * 
+ *
  * Adversarial tests for:
  * 1. Prompt Injection Guardrails
  * 2. Production Config Invariants
@@ -35,7 +35,7 @@ class TestAgent extends BaseAgentArchetype {
   async analyze(query: AgentQuery, context: AgentContext): Promise<AgentAnalysis> {
     const inputStr = JSON.stringify(query.parameters);
     const isValid = await (this as any).validateInput(inputStr, context);
-    
+
     if (!isValid) {
       throw new Error('Adversarial input blocked by guardrails');
     }
@@ -56,7 +56,7 @@ class TestAgent extends BaseAgentArchetype {
 
 async function runRedTeamPass() {
   console.log('🛡️  Starting Post-Hardening Red-Team Verification...');
-  
+
   const results = {
     promptInjection: false,
     configValidation: false,
@@ -96,7 +96,7 @@ async function runRedTeamPass() {
 
   // 2. Verify Config Validation (Lazy/Production)
   console.log('\n--- 2. Testing Production Config Invariants ---');
-  
+
   const originalEnv = { ...process.env };
   try {
     process.env.NODE_ENV = 'production';
@@ -107,7 +107,7 @@ async function runRedTeamPass() {
     process.env.JWT_SECRET = 'short'; // Invalid
     process.env.JWT_REFRESH_SECRET = 'also-short'; // Invalid
     process.env.CORS_ORIGIN = 'https://summit.io';
-    
+
     resetConfig();
     console.log('Triggering config initialization with invalid production values...');
     try {
@@ -149,7 +149,7 @@ async function runRedTeamPass() {
   console.log(`Prompt Injection: ${results.promptInjection ? '✅' : '❌'}`);
   console.log(`Config Validation: ${results.configValidation ? '✅' : '❌'}`);
   console.log(`Audit Integrity: ${results.auditIntegrity ? '✅' : '❌'}`);
-  
+
   if (Object.values(results).every(v => v)) {
     console.log('\n🚀 ALL HARDENING GATES VERIFIED.');
     originalExit(0);

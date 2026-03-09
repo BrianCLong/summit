@@ -16,14 +16,14 @@ steps:
       window: 60
       scope: global
     onFailure: continue
-  
+
   - name: Scale API pods
     actionType: scale_pods
     parameters:
       deployment: api-server
       replicas: 10
     onFailure: continue
-  
+
   - name: Clear API cache
     actionType: clear_cache
     parameters:
@@ -37,7 +37,7 @@ rollbackSteps:
       limit: 1000
       window: 60
       scope: global
-  
+
   - name: Scale down to normal capacity
     actionType: scale_pods
     parameters:

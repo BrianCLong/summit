@@ -1,9 +1,0 @@
-{
-  "run_id": "test-run-12345",
-  "seed_values": {
-    "global_seed": 12345
-  },
-  "created_at": "2026-02-01T12:00:00.000Z",
-  "final_state_hash": "ae27dc2e75015f66b98f41a65b7be1095b244bf7b2d48ec73bb3e140352a2c4c",
-  "agent_graph_version": "v1.0.0"
-}

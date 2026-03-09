@@ -114,7 +114,7 @@ jobs:
         working-directory: server
         run: |
           echo "Running PostgreSQL migrations..."
-          npx tsx scripts/managed-migrate.ts up || echo "Migration skipped or failed"
+          pnpm run migrate || echo "Migration skipped or failed (non-blocking for smoke)"
         env:
           DATABASE_URL: postgres://intelgraph:password@localhost:5432/intelgraph
           POSTGRES_HOST: localhost
@@ -127,7 +127,7 @@ jobs:
         working-directory: server
         run: |
           echo "Starting server in background..."
-          nohup node dist/src/index.js > server.log 2>&1 &
+          nohup node dist/server/src/index.js > server.log 2>&1 &
           echo $! > server.pid
           echo "Server PID: $(cat server.pid)"
         env:

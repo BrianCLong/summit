@@ -11,8 +11,6 @@
     "database.server.name": "postgres_server",
     "table.include.list": "public.*",
     "plugin.name": "pgoutput",
-    "publication.autocreate.mode": "filtered",
-    "tombstones.on.delete": "true",
-    "message.key.columns": "public.my_table:id"
+    "publication.autocreate.mode": "filtered"
   }
 }

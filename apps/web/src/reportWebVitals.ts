@@ -8,20 +8,18 @@ const reportWebVitals = (onPerfEntry?: (metric: any) => void) => {
   } else {
     // Default handler: send to server
     const sendToAnalytics = (metric: any) => {
-      const body = JSON.stringify(metric);
-      const token = localStorage.getItem('auth_token');
-
-      // Always use fetch to support custom headers for authentication
-      // keepalive: true ensures the request outlives the page (similar to sendBeacon)
-      fetch('/api/monitoring/web-vitals', {
-        body,
-        method: 'POST',
-        keepalive: true,
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        const body = JSON.stringify(metric);
+        // Use sendBeacon if available for better reliability on page unload
+        if (navigator.sendBeacon) {
+            navigator.sendBeacon('/api/monitoring/web-vitals', body);
+        } else {
+            fetch('/api/monitoring/web-vitals', {
+                body,
+                method: 'POST',
+                keepalive: true,
+                headers: { 'Content-Type': 'application/json' }
+            }).catch(console.error);
         }
-      }).catch(console.error);
     };
     onCLS(sendToAnalytics);
     onINP(sendToAnalytics);

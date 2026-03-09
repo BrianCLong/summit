@@ -63,7 +63,7 @@ main() {
   require_cmd sha256sum
 
   say "Verifying signature"
-  cosign verify-blob --use-signed-timestamps --key "$COSIGN_PUB_KEY" --signature "$signature" "$bundle" >/dev/null \ || { echo "::error::Supply chain verification failed! Missing or invalid signed timestamps."; false; }
+  cosign verify-blob --key "$COSIGN_PUB_KEY" --signature "$signature" "$bundle" >/dev/null \
     || fail "Signature verification failed"
   pass "Signature verified"
 

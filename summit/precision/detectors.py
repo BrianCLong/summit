@@ -1,10 +1,13 @@
 from __future__ import annotations
 
-import math
 from dataclasses import dataclass
+import math
 from typing import Any, Dict
 
-import torch
+try:
+    import torch
+except ImportError:
+    torch = None
 
 
 @dataclass
@@ -14,6 +17,9 @@ class MismatchReport:
     violations: int = 0
 
 def compute_mismatch_metrics(train_vals: dict[str, Any], rollout_vals: dict[str, Any]) -> MismatchReport:
+    if torch is None:
+        raise ImportError("torch is required for compute_mismatch_metrics")
+
     train_logprobs = train_vals.get("logprobs")
     if train_logprobs is None:
         train_logprobs = train_vals.get("log_probs")
@@ -24,9 +30,6 @@ def compute_mismatch_metrics(train_vals: dict[str, Any], rollout_vals: dict[str,
 
     if train_logprobs is None or rollout_logprobs is None:
         return MismatchReport()
-
-    if torch is None:
-        raise ImportError("torch is required for computing mismatch metrics involving tensors")
 
     delta = (train_logprobs - rollout_logprobs).abs()
 

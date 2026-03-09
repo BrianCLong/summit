@@ -16,9 +16,6 @@ jobs:
               - 'client/**'
             server:
               - 'server/**'
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 10.0.0
       - uses: actions/setup-node@v4
         with:
           cache: 'pnpm'
@@ -44,9 +41,7 @@ jobs:
             pol:
               - 'policies/**'
       - name: Skip (no policy changes)
-        if: steps.pol.outputs.pol != 'true'
+        if: ((steps.pol.outputs.pol != 'true') && (steps.pol.outputs.pol == 'true')) && (steps.pol.outputs.pol == 'true')
         run: echo "No policy changes; skipping OPA tests"
       - uses: open-policy-agent/setup-opa@v2
-        if: steps.pol.outputs.pol == 'true'
       - run: opa fmt -w policies && opa test policies -v
-        if: steps.pol.outputs.pol == 'true'

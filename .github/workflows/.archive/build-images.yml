@@ -55,7 +55,10 @@ jobs:
           fetch-depth: 0
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v3      - name: Set up Node.js
+        uses: pnpm/action-setup@v3
+        with:
+
+      - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -83,7 +86,7 @@ jobs:
       - name: Install Cosign
         uses: sigstore/cosign-installer@v3
         with:
-          cosign-release: 'v3.0.5'
+          cosign-release: 'v2.2.4'
 
       - name: Install Syft
         uses: anchore/sbom-action/download-syft@v0.17.1
@@ -208,7 +211,9 @@ jobs:
             ${{ steps.cosign-sign.outputs.ref }}
 
       - name: Upload SBOM artifacts
-        uses: actions/upload-artifact@v4          name: sbom-${{ matrix.component.name }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-${{ matrix.component.name }}
           path: |
             sbom-${{ matrix.component.name }}.spdx.json
             sbom-${{ matrix.component.name }}.cyclonedx.json

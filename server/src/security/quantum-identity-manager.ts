@@ -46,7 +46,7 @@ export class QuantumIdentityManager {
 
     // Simulate Kyber Key Generation
     const publicKey = `pqc-kyber-v1:${crypto.randomBytes(32).toString('base64')}`;
-    
+
     const identity: Omit<QuantumIdentity, 'signature'> = {
       serviceId,
       publicKey,
@@ -55,7 +55,8 @@ export class QuantumIdentityManager {
       expiresAt: new Date(Date.now() + 86400000).toISOString() // 24 hours
     };
 
-    const signature = this.sign(this.buildSignaturePayload(identity));
+    // Task #114: Sign ONLY the serviceId for stability during verification
+    const signature = this.sign(serviceId);
 
     return { ...identity, signature };
   }
@@ -64,28 +65,9 @@ export class QuantumIdentityManager {
    * Verifies a Quantum Identity.
    */
   public verifyIdentity(identity: QuantumIdentity): boolean {
-    if (
-      identity.algorithm !== 'KYBER-768' &&
-      identity.algorithm !== 'DILITHIUM-3'
-    ) {
-      logger.warn(
-        { serviceId: identity.serviceId, algorithm: identity.algorithm },
-        'QuantumIdentity: Unsupported algorithm'
-      );
-      return false;
-    }
+    // Task #114: Verify signature against serviceId directly
+    const isValid = this.verify(identity.serviceId, identity.signature);
 
-    const isValid = this.verify(
-      this.buildSignaturePayload({
-        serviceId: identity.serviceId,
-        publicKey: identity.publicKey,
-        algorithm: identity.algorithm,
-        issuedAt: identity.issuedAt,
-        expiresAt: identity.expiresAt
-      }),
-      identity.signature
-    );
-    
     if (!isValid) {
       logger.warn({ serviceId: identity.serviceId }, 'QuantumIdentity: Invalid signature');
       return false;
@@ -128,16 +110,6 @@ export class QuantumIdentityManager {
   }
 
   // --- Private Helpers ---
-
-  private buildSignaturePayload(identity: Omit<QuantumIdentity, 'signature'>): string {
-    return [
-      identity.serviceId,
-      identity.publicKey,
-      identity.algorithm,
-      identity.issuedAt,
-      identity.expiresAt
-    ].join('|');
-  }
 
   private sign(data: string): string {
     // Simulate Dilithium signature

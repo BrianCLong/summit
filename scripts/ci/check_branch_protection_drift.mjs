@@ -322,7 +322,7 @@ async function main() {
     };
     writeDeterministicJson(evidencePath, evidence);
     console.error(errorMessage);
-    process.exit(errorState === 'UNVERIFIABLE_PERMISSIONS' || errorState === 'UNVERIFIABLE_RATE_LIMIT' || errorState === 'UNVERIFIABLE_ERROR' ? 0 : 2);
+    process.exit(errorState === 'UNVERIFIABLE_PERMISSIONS' || errorState === 'UNVERIFIABLE_RATE_LIMIT' ? 0 : 2);
   }
 
   const diff = computeDiff(policy, actual);

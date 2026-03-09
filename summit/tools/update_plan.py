@@ -1,8 +1,7 @@
-from typing import Any, Dict
-
+from typing import Dict, Any
 
 class UpdatePlanTool:
-    def get_definition(self) -> dict[str, Any]:
+    def get_definition(self) -> Dict[str, Any]:
         return {
             "type": "function",
             "function": {

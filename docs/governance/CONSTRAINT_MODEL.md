@@ -1,8 +1,12 @@
-> Owner: @summit/governance
-> Last-Reviewed: 2026-02-25
-> Evidence-IDs: EVD-PLACEHOLDER
-> Status: active
+# Summit Constraint Model (Turn #7)
 
+## Overview
+This document defines the constraint-driven operating model for Summit. Unlike instruction-based automation, the Summit Agent Lattice operates by satisfying a set of continuous constraints.
+
+## Principles
+1. **Constraints > Instructions**: Agents must prioritize constraint satisfaction over task completion.
+2. **Reversibility > Certainty**: Actions must be reversible or explicitly authorized as "one-way doors".
+3. **Prevention > Velocity**: It is better to block a bad release than to ship a fast one.
 
 ## The Registry
 The authoritative source of constraints is `governance/constraints.yaml`. This file is consumed by:

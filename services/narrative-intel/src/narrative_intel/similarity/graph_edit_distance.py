@@ -1,8 +1,7 @@
-from typing import Any, Dict
-
+from typing import Dict, Any
 
 class StructureSimilarity:
-    def compute_distance(self, skeleton_a: dict[str, Any], skeleton_b: dict[str, Any]) -> float:
+    def compute_distance(self, skeleton_a: Dict[str, Any], skeleton_b: Dict[str, Any]) -> float:
         """
         Computes similarity distance between two narrative skeletons.
         Lower is more similar.

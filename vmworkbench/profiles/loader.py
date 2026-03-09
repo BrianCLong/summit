@@ -1,7 +1,6 @@
 import os
 import tomllib
-from typing import Any, Dict, List
-
+from typing import Dict, Any, List
 
 class ProfileLoader:
     """
@@ -10,7 +9,7 @@ class ProfileLoader:
     def __init__(self, builtin_dir: str = None, user_dir: str = None):
         self.builtin_dir = builtin_dir or os.path.join(os.path.dirname(__file__), "builtin")
         self.user_dir = user_dir or os.path.expanduser("~/.config/summit/profiles")
-        self.profiles: dict[str, Any] = {}
+        self.profiles: Dict[str, Any] = {}
 
     def load_all(self):
         """Loads all profiles found in the search paths."""
@@ -29,8 +28,8 @@ class ProfileLoader:
                         except Exception as e:
                             print(f"Failed to load profile {path}: {e}")
 
-    def get_profile(self, name: str) -> dict[str, Any]:
+    def get_profile(self, name: str) -> Dict[str, Any]:
         return self.profiles.get(name)
 
-    def list_profiles(self) -> list[str]:
+    def list_profiles(self) -> List[str]:
         return list(self.profiles.keys())

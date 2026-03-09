@@ -1,8 +1,8 @@
-> Owner: Release Captain (Jules)
-> Last-Reviewed: 2026-02-25
-> Evidence-IDs: EVD-PLACEHOLDER
-> Status: active
+# Post-GA Operating Model (Day-2)
 
+**Effective Date:** 2026-01-08
+**Status:** ACTIVE
+**Owner:** Release Captain (Jules)
 
 ## 1. Promotion Conveyor & Intake Cap
 

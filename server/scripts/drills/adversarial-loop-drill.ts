@@ -33,7 +33,7 @@ async function runAdversarialLoopDrill() {
 
   loopService.stopAll();
   console.log('--- Step 2: Verification ---');
-  
+
   logger.info('✅ Adversarial Simulation Loop Operational (Continuous triggering verified)');
   process.exit(0);
 }

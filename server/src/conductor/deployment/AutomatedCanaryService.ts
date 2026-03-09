@@ -15,12 +15,12 @@ export interface CanaryResult {
 
 /**
  * Service for sophisticated Canary Analysis.
- * Simulates ML-driven anomaly detection by comparing canary metrics 
+ * Simulates ML-driven anomaly detection by comparing canary metrics
  * against historical baselines and current production metrics.
  */
 export class AutomatedCanaryService {
   private static instance: AutomatedCanaryService;
-  
+
   // Historical baseline (simulated)
   private baseline = {
     errorRate: 0.005, // 0.5%
@@ -41,7 +41,7 @@ export class AutomatedCanaryService {
    * Compares current metrics against baseline and production.
    */
   public async analyze(
-    canaryMetrics: HealthMetrics, 
+    canaryMetrics: HealthMetrics,
     productionMetrics: HealthMetrics
   ): Promise<CanaryResult> {
     logger.info({ canaryMetrics, productionMetrics }, 'ACA: Starting automated analysis');

@@ -1,7 +1,0 @@
-{
-  "metrics": {
-    "test_coverage": 100,
-    "policy_checks_passed": true,
-    "schema_validation": "success"
-  }
-}

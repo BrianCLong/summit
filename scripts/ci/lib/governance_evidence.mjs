@@ -143,7 +143,7 @@ export function buildGovernanceSummary({ sha, gates }) {
   };
 }
 
-export { sortKeysDeep,
+export {
   compareByCodeUnit,
   hashStringList,
   normalizeRelativePath,
@@ -153,59 +153,3 @@ export { sortKeysDeep,
   contentHash,
   SCHEMA_VERSION
 };
-export function buildPromptInjectionEvidence({ scannedFixtures, violations, sha }) {
-  const verdict = violations.length === 0 ? 'PASS' : 'FAIL';
-  const evidence = {
-    schema_version: SCHEMA_VERSION,
-    gate: 'prompt-injection-gate',
-    sha,
-    verdict,
-    summary: {
-      scanned_fixtures_count: scannedFixtures.length,
-      violation_count: violations.length
-    },
-    details: {
-      violations: violations.sort()
-    }
-  };
-  evidence.content_hash = contentHash(evidence);
-  return evidence;
-}
-
-export function buildToolBoundaryEvidence({ scannedFixtures, violations, sha }) {
-  const verdict = violations.length === 0 ? 'PASS' : 'FAIL';
-  const evidence = {
-    schema_version: SCHEMA_VERSION,
-    gate: 'tool-boundary-gate',
-    sha,
-    verdict,
-    summary: {
-      scanned_fixtures_count: scannedFixtures.length,
-      violation_count: violations.length
-    },
-    details: {
-      violations: violations.sort()
-    }
-  };
-  evidence.content_hash = contentHash(evidence);
-  return evidence;
-}
-
-export function buildLineageIntegrityEvidence({ scannedFixtures, violations, sha }) {
-  const verdict = violations.length === 0 ? 'PASS' : 'FAIL';
-  const evidence = {
-    schema_version: SCHEMA_VERSION,
-    gate: 'lineage-integrity-gate',
-    sha,
-    verdict,
-    summary: {
-      scanned_fixtures_count: scannedFixtures.length,
-      violation_count: violations.length
-    },
-    details: {
-      violations: violations.sort()
-    }
-  };
-  evidence.content_hash = contentHash(evidence);
-  return evidence;
-}

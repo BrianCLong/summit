@@ -33,14 +33,12 @@ ENV PUPPETEER_SKIP_DOWNLOAD=1 \
 
 # Copy workspace configuration
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
-COPY .pnpmfile.cjs ./
 COPY tsconfig.base.json tsconfig.json ./
 COPY server/package.json ./server/
 COPY packages/feature-flags/package.json ./packages/feature-flags/
 COPY packages/osint-collector/package.json ./packages/osint-collector/
 COPY packages/maestro-core/package.json ./packages/maestro-core/
 COPY packages/telemetry-config/package.json ./packages/telemetry-config/
-COPY packages/provenance/package.json ./packages/provenance/
 COPY packages/types/package.json ./packages/types/
 COPY libs/context-shell/node/package.json ./libs/context-shell/node/
 
@@ -51,7 +49,6 @@ RUN pnpm install --filter intelgraph-server... --filter @intelgraph/osint-collec
 COPY packages/feature-flags ./packages/feature-flags/
 COPY packages/osint-collector ./packages/osint-collector/
 COPY packages/maestro-core ./packages/maestro-core/
-COPY packages/provenance ./packages/provenance/
 COPY packages/types ./packages/types/
 
 # Build workspace packages
@@ -59,21 +56,17 @@ RUN pnpm --filter @intelgraph/feature-flags run build
 RUN pnpm --filter @intelgraph/osint-collector run build
 RUN pnpm --filter @intelgraph/maestro-core run build
 
-# Copy server runtime/application tree
-COPY server ./server/
-COPY packages/telemetry-config ./packages/telemetry-config/
-COPY packages/policy-audit ./packages/policy-audit/
-COPY libs/context-shell/node ./libs/context-shell/node/
-COPY apps/search-engine ./apps/search-engine/
-COPY governance ./governance/
-COPY graphql ./graphql/
-COPY schemas ./schemas/
+# Copy the rest of the code
+COPY . .
 
-# Create runtime-write paths for local dev containers
-RUN mkdir -p server/uploads server/logs server/archive/audit server/worm_storage
+# Set permissions
+RUN mkdir -p server/uploads server/logs && chown -R appuser:appgroup /app
 
 # Switch to the server directory for execution
 WORKDIR /app/server
+
+# Switch to non-root user
+USER appuser
 
 HEALTHCHECK --interval=30s --timeout=10s --retries=3 CMD curl -f http://localhost:4000/health/ready || exit 1
 

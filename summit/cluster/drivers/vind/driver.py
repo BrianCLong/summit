@@ -3,7 +3,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Optional
-
 from summit.flags import SUMMIT_VIND_HYBRID_ENABLED, SUMMIT_VIND_SNAPSHOTS_ENABLED
 
 if TYPE_CHECKING:

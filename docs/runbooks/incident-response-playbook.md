@@ -1265,9 +1265,9 @@ kubectl rollout undo deployment/intelgraph-server -n intelgraph
 
 - [Disaster Recovery Procedures](./disaster-recovery-procedures.yaml)
 - [Release Captain Guide](./release-captain-quick-reference.md)
-- SLO API Latency Runbook
-- Backup Runbook
-- Game Day Procedures
+- [SLO API Latency Runbook](../docs/runbooks/slo-api-latency.md)
+- [Backup Runbook](../docs/runbooks/backup_runbook.md)
+- [Game Day Procedures](../docs/runbooks/game-day.md)
 
 ---
 

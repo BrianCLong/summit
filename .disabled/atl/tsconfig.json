@@ -4,7 +4,7 @@
     "module": "es2022",
     "target": "es2022",
     "moduleResolution": "node",
-    "strict": true, "types": ["node", "jest", "uuid"],
+    "strict": true,
     "allowSyntheticDefaultImports": true,
     "types": ["node", "jest"]
   },

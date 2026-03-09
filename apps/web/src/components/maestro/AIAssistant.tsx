@@ -206,7 +206,7 @@ export function AIAssistant({ context }: AIAssistantProps) {
           <SparklesIcon className="h-5 w-5 text-blue-600" />
           <h3 className="font-semibold text-gray-900">Maestro AI Assistant</h3>
         </div>
-        <button aria-label="Close AI Assistant"
+        <button
           onClick={() => setIsOpen(false)}
           className="text-gray-400 hover:text-gray-600"
         >
@@ -293,7 +293,7 @@ export function AIAssistant({ context }: AIAssistantProps) {
               )}
 
               {/* Copy button */}
-              <button aria-label="Copy message"
+              <button
                 onClick={() => copyToClipboard(message.content)}
                 className="mt-2 text-xs opacity-50 hover:opacity-100 flex items-center space-x-1"
               >
@@ -361,7 +361,7 @@ export function AIAssistant({ context }: AIAssistantProps) {
             className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             disabled={isLoading}
           />
-          <button aria-label="Send message"
+          <button
             onClick={sendMessage}
             disabled={!inputValue.trim() || isLoading}
             className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white rounded-lg p-2 transition-colors"

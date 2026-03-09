@@ -231,8 +231,8 @@ jobs:
 
       - name: Install OPA
         run: |
-          curl -L -o opa-bin https://openpolicyagent.org/downloads/latest/opa_linux_amd64
-          chmod +x opa-bin
+          curl -L -o opa https://openpolicyagent.org/downloads/latest/opa_linux_amd64
+          chmod +x opa
           sudo mv opa /usr/local/bin/
 
       - name: Validate ingest policies
@@ -247,7 +247,7 @@ jobs:
           # Evaluate ingest policies against sample input
           if [ -f .ci/policies/ingest.rego ]; then
             echo '{"tenant_id": "test", "replay_requested": true}' | \
-              ./opa-bin eval -d .ci/policies/ingest.rego 'data.ingest.policy.allow' || true
+              opa eval -d .ci/policies/ingest.rego 'data.ingest.policy.allow' || true
           fi
 
   # =========================================================================

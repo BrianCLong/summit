@@ -151,6 +151,7 @@ describe('BackupService', () => {
     expect(service).toBeInstanceOf(BackupService);
     // Explicitly check s3Client presence
     expect((service as any).s3Client).toBeDefined();
+    expect(mockS3Client).toHaveBeenCalled();
   });
 
   // FIXME: Test fails on Neo4j stream mock interaction (apocSuccess logic). Needs robust Observable mock.

@@ -1,24 +1,20 @@
-import { beforeAll, beforeEach, describe, expect, it, jest } from '@jest/globals';
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
+import { DeceptionService } from '../DeceptionService.js';
+import { neo } from '../../db/neo4j.js';
 
-const neoRunMock = jest.fn();
-
-jest.unstable_mockModule('../../db/neo4j.js', () => ({
+// Mock neo4j
+jest.mock('../../db/neo4j.js', () => ({
   neo: {
-    run: neoRunMock,
+    run: jest.fn(),
   },
 }));
 
 describe('DeceptionService', () => {
-  let DeceptionService: any;
-  let service: any;
-
-  beforeAll(async () => {
-    ({ DeceptionService } = await import('../DeceptionService.js'));
-  });
+  let service: DeceptionService;
 
   beforeEach(() => {
-    jest.clearAllMocks();
     service = new DeceptionService();
+    jest.clearAllMocks();
   });
 
   describe('deployHoneypot', () => {
@@ -32,20 +28,20 @@ describe('DeceptionService', () => {
 
       const tenantId = 'test-tenant';
 
-      neoRunMock.mockResolvedValue({
+      (neo.run as jest.Mock).mockResolvedValue({
         records: [],
       });
 
       const id = await service.deployHoneypot(config, tenantId);
 
       expect(id).toBeDefined();
-      expect(neoRunMock).toHaveBeenCalledWith(
+      expect(neo.run).toHaveBeenCalledWith(
         expect.stringContaining('CREATE (h:Honeypot:Asset'),
         expect.objectContaining({
           tenantId,
           name: config.name,
           type: config.type,
-        }),
+        })
       );
     });
   });
@@ -60,34 +56,32 @@ describe('DeceptionService', () => {
         timestamp: new Date(),
       };
 
-      neoRunMock.mockResolvedValue({
-        records: [
-          {
-            get: () => ({
-              properties: {
-                id: 'attacker-1',
-                ipAddress: data.sourceIp,
-                riskScore: { toNumber: () => 10 },
-                techniques: [],
-                firstSeen: Date.now(),
-                lastSeen: Date.now(),
-              },
-            }),
-          },
-        ],
+      (neo.run as jest.Mock).mockResolvedValue({
+        records: [{
+            get: (key: string) => ({
+                properties: {
+                    id: 'attacker-1',
+                    ipAddress: data.sourceIp,
+                    riskScore: { toNumber: () => 10 },
+                    techniques: [],
+                    firstSeen: Date.now(),
+                    lastSeen: Date.now()
+                }
+            })
+        }]
       });
 
       const id = await service.logInteraction(honeypotId, data, tenantId);
 
       expect(id).toBeDefined();
-      expect(neoRunMock).toHaveBeenCalledWith(
+      expect(neo.run).toHaveBeenCalledWith(
         expect.stringContaining('CREATE (i:Interaction:Event'),
         expect.objectContaining({
           honeypotId,
           tenantId,
           sourceIp: data.sourceIp,
           payload: data.payload,
-        }),
+        })
       );
     });
   });
@@ -96,19 +90,17 @@ describe('DeceptionService', () => {
     it('should return a report based on interactions', async () => {
       const tenantId = 'test-tenant';
 
-      neoRunMock.mockResolvedValue({
-        records: [
-          {
-            get: (key: string) => {
-              const values: Record<string, any> = {
-                totalHits: { toNumber: () => 150 },
-                activeHoneypots: { toNumber: () => 5 },
-                uniqueAttackers: [['1.2.3.4'], ['5.6.7.8']],
-              };
-              return values[key];
-            },
-          },
-        ],
+      (neo.run as jest.Mock).mockResolvedValue({
+        records: [{
+          get: (key: string) => {
+            const values: Record<string, any> = {
+              totalHits: { toNumber: () => 150 },
+              activeHoneypots: { toNumber: () => 5 },
+              uniqueAttackers: [['1.2.3.4'], ['5.6.7.8']]
+            };
+            return values[key];
+          }
+        }]
       });
 
       const report = await service.generateThreatIntelligence(tenantId);
@@ -116,17 +108,17 @@ describe('DeceptionService', () => {
       expect(report).toBeDefined();
       expect(report.severity).toBe('CRITICAL');
       expect(report.indicators).toHaveLength(2);
-      expect(neoRunMock).toHaveBeenCalledWith(
+      expect(neo.run).toHaveBeenCalledWith(
         expect.stringContaining('MATCH (h:Honeypot'),
-        expect.objectContaining({ tenantId }),
+        expect.objectContaining({ tenantId })
       );
     });
 
     it('should return a low severity report if no interactions', async () => {
       const tenantId = 'test-tenant';
 
-      neoRunMock.mockResolvedValue({
-        records: [],
+      (neo.run as jest.Mock).mockResolvedValue({
+        records: []
       });
 
       const report = await service.generateThreatIntelligence(tenantId);

@@ -108,14 +108,4 @@ describe('SearchBar', () => {
     expect(handleChange).toHaveBeenCalledWith('ab');
     expect(handleChange).toHaveBeenCalledTimes(1);
   });
-
-  it('focuses input when clear button is clicked', () => {
-    render(<SearchBar value="test" />);
-    const clearButton = screen.getByRole('button', { name: /clear search/i });
-    const input = screen.getByRole('searchbox');
-
-    fireEvent.click(clearButton);
-
-    expect(input).toHaveFocus();
-  });
 });

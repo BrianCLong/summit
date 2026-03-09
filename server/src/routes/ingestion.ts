@@ -7,7 +7,6 @@ import { Pool } from 'pg';
 import { QueueService } from '../ingestion/QueueService.js';
 import { ensureAuthenticated } from '../middleware/auth.js';
 import { BackpressureGuard } from '../backpressure/guard.js';
-import { firstStringOr } from '../utils/http-param.js';
 
 const router = express.Router();
 const orchestrator = new PipelineOrchestrator();
@@ -16,7 +15,7 @@ const queueService = new QueueService();
 
 // Trigger Pipeline Run
 router.post('/pipelines/:key/run', ensureAuthenticated, async (req, res) => {
-  const key = firstStringOr(req.params.key, '');
+  const { key } = req.params;
   // In a real app, we'd fetch config from DB
   // For MVP/Demo, we accept config in body or mock it
   const config = req.body as PipelineConfig;
@@ -76,7 +75,7 @@ router.post('/start', ensureAuthenticated, async (req, res) => {
 // Admin API: Check Job Status (New Endpoint)
 router.get('/status/:jobId', ensureAuthenticated, async (req, res) => {
   try {
-    const status = await queueService.getJobStatus(firstStringOr(req.params.jobId, ''));
+    const status = await queueService.getJobStatus(req.params.jobId);
     if (!status) {
         return res.status(404).json({ error: 'Job not found' });
     }

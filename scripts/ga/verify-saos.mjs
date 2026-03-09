@@ -46,7 +46,7 @@ if (tooShort.length > 0) {
 
 if (missing.length > 0 || tooShort.length > 0) {
   console.error('\nPlease update the PR description to include and fill out these sections correctly.');
-  process.exit(0);
+  process.exit(1);
 }
 
 console.log('✅ S-AOS compliance check passed.');

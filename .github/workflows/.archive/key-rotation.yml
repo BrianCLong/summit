@@ -280,7 +280,9 @@ jobs:
           echo "Rotation event logged"
       
       - name: Upload rotation logs
-        uses: actions/upload-artifact@v4          name: rotation-logs-${{ matrix.key }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: rotation-logs-${{ matrix.key }}
           path: rotation-log.json
           retention-days: 365
 

@@ -28,7 +28,6 @@ import { CommandPalette } from '../../components/control-tower/CommandPalette';
 import { EventDetailPanel } from '../../components/control-tower/EventDetailPanel';
 import { useControlTowerData } from '../../hooks/useControlTowerData';
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts';
-import { MODIFIER_KEY } from '@/lib/utils';
 import { DataIntegrityNotice } from '../../components/common/DataIntegrityNotice';
 import { useDemoMode } from '../../components/common/DemoIndicator';
 
@@ -157,7 +156,7 @@ export const ControlTowerDashboard: React.FC<ControlTowerDashboardProps> = ({
 
         <Box display="flex" alignItems="center" gap={1}>
           {/* Search Button */}
-          <Tooltip title={`Search (${MODIFIER_KEY}K)`}>
+          <Tooltip title="Search (⌘K)">
             <IconButton onClick={() => setCommandPaletteOpen(true)}>
               <SearchIcon />
             </IconButton>

@@ -1,7 +1,5 @@
 from __future__ import annotations
-
 from .codec import StructureObj
-
 
 def validate_invariants(obj: StructureObj) -> list[str]:
     """

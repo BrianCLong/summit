@@ -17,4 +17,3 @@ Create a one-page defensive IO/CogWar radar brief mapped to Summit/IntelGraph ca
 
 ## Verification Tier
 C (documentation-only change with governance updates).
-

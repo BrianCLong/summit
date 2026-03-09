@@ -70,7 +70,7 @@ const externalAndExtensionPlugin = {
   },
 };
 
-console.warn('🚀 Starting isolated build for server (target: dist-isolated)...');
+console.log('🚀 Starting isolated build for server (target: dist-isolated)...');
 
 async function runBuild() {
   const outputDir = 'dist-isolated';
@@ -98,7 +98,7 @@ async function runBuild() {
       },
     });
 
-    console.warn(`✅ Build completed successfully in ${outputDir}`);
+    console.log(`✅ Build completed successfully in ${outputDir}`);
   } catch (error) {
     console.error('❌ Build failed:', error);
     process.exit(1);

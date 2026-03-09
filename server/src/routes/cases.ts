@@ -40,24 +40,15 @@ function getRequestContext(req: any): {
   tenantId: string | null;
   userId: string | null;
 } {
-  // SEC-2025-002: Prioritize identity and tenant context from authenticated user object
-  // populated by middleware, rather than untrusted headers to prevent spoofing.
-  const tenantId =
-    req.user?.tenantId ||
-    req.user?.tenant_id ||
-    req.tenant_id ||
-    req.tenantContext?.tenantId ||
-    (process.env.NODE_ENV === 'test' ? (req.headers['x-tenant-id'] || req.headers['x-tenant']) : null);
-
+  const tenantId = String(
+    req.headers['x-tenant-id'] || req.headers['x-tenant'] || '',
+  );
   const userId =
-    req.user?.id ||
-    req.user?.sub ||
-    req.user?.email ||
-    (process.env.NODE_ENV === 'test' ? req.headers['x-user-id'] : null);
+    req.user?.id || req.headers['x-user-id'] || req.user?.email || 'system';
 
   return {
-    tenantId: tenantId ? String(tenantId) : null,
-    userId: userId ? String(userId) : null,
+    tenantId: tenantId || null,
+    userId: userId || null,
   };
 }
 
@@ -564,14 +555,15 @@ caseRouter.post('/:id/comments', async (req, res) => {
     const pg = getPostgresPool();
     const service = new CommentService(pg);
 
-    const comment = await service.addComment({
-      targetType: 'CASE',
-      targetId: id,
-      authorId: userId,
-      content,
-      metadata,
+    const comment = await service.addComment(
+      {
+        caseId: id,
+        userId,
+        content,
+        metadata,
+      },
       tenantId,
-    });
+    );
 
     await emitAuditEvent(
       {

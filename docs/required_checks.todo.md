@@ -1,6 +1,8 @@
-# Required Checks
+# Required Checks Discovery
 
-* Confirm workflow engine file path
-* Confirm CI check naming convention
-* Confirm evidence ID format
-* Confirm feature-flag system
+* [ ] GitHub UI: Verify branch protection settings.
+* [ ] Identify exact check names for:
+    * `summit-policy-gates`
+    * `summit-schema-validate`
+    * `summit-eval-fixtures`
+* [ ] Update CI configurations with correct names.

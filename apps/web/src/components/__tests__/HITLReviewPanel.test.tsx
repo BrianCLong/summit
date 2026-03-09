@@ -1,7 +1,6 @@
 import { render, screen, fireEvent } from '@testing-library/react'
 import { HITLReviewPanel } from '../HITLReviewPanel'
 import { vi } from 'vitest'
-// @ts-expect-error jest-axe has no bundled typings in this workspace
 import { axe, toHaveNoViolations } from 'jest-axe'
 
 expect.extend(toHaveNoViolations)

@@ -7,9 +7,6 @@ import {
   Calendar,
   User,
   MapPin,
-  CheckCircle2,
-  AlertTriangle,
-  AlertCircle,
 } from 'lucide-react'
 import {
   Drawer,
@@ -243,15 +240,6 @@ export function EntityDrawer({
                       : selectedEntity.confidence > 0.6
                         ? 'warning'
                         : 'error'
-                  }
-                  icon={
-                    selectedEntity.confidence > 0.8 ? (
-                      <CheckCircle2 className="h-3 w-3" />
-                    ) : selectedEntity.confidence > 0.6 ? (
-                      <AlertTriangle className="h-3 w-3" />
-                    ) : (
-                      <AlertCircle className="h-3 w-3" />
-                    )
                   }
                 >
                   {Math.round(selectedEntity.confidence * 100)}% confidence

@@ -1,4 +1,0 @@
-model,baseline_cost_per_1k,dtbe_cost_per_1k,reduction_pct
-GPT-4-class,0.030,0.021,30.0
-Claude-class,0.015,0.009,40.0
-Open-source 70B,0.007,0.005,28.5

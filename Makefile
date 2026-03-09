@@ -24,7 +24,7 @@ IMAGE ?= $(IMAGE_NAME):$(IMAGE_TAG)
 
 # --- Docker Compose Controls ---
 
-up: dev-prereqs ## Run dev stack
+up:     ## Run dev stack
 	docker compose -f $(COMPOSE_DEV_FILE) up --build -d
 
 down:   ## Stop dev stack
@@ -68,8 +68,6 @@ clean:
 	@git branch -D tmp/pr-* 2>/dev/null || true
 
 # --- Development Workflow ---
-
-golden-path: clean bootstrap up ## Run the full golden path: clean, bootstrap, up
 
 bootstrap: ## Install dev dependencies
 	python3 -m venv $(VENV_DIR)

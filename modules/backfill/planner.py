@@ -1,11 +1,11 @@
 import os
-from typing import Any, Dict, List, Optional, Tuple
+from typing import List, Dict, Any, Optional, Tuple
 
 # Feature flag to enable the backfill planner.
 # Defaults to "0" (Disabled).
 ENABLE_BACKFILL_PLANNER = os.environ.get("SUMMIT_BACKFILL_PLANNER", "0") == "1"
 
-def generate_backfill_plan(missing_ranges: list[tuple[str, str]]) -> Optional[list[dict[str, Any]]]:
+def generate_backfill_plan(missing_ranges: List[Tuple[str, str]]) -> Optional[List[Dict[str, Any]]]:
     """
     Generates a backfill plan for the given missing time ranges.
 

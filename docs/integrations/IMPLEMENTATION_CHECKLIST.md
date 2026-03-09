@@ -288,10 +288,10 @@ This checklist provides a comprehensive step-by-step guide for implementing the 
 
 ### Related Documentation
 - [90-Day Roadmap](roadmap-90day.md)
-- [Credential Handling Plan](../governance/CREDENTIALS.md)
+- [Credential Handling Plan](CREDENTIALS.md)
 - [n8n Workflows](n8n-workflows/)
-- [Airtable Schema](../schemas/airtable-schema.json)
-- [Architecture Overview](../architecture/README.md)
+- [Airtable Schema](airtable-schema.json)
+- [Architecture Overview](architecture.md)
 
 ### Change Log
 - 2026-01-18: Initial checklist created

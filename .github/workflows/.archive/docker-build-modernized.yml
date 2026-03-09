@@ -216,7 +216,7 @@ jobs:
       - name: Install Cosign
         uses: sigstore/cosign-installer@v3
         with:
-          cosign-release: 'v3.0.5'
+          cosign-release: v2.2.4
 
       - name: Sign image with Cosign (keyless)
         env:
@@ -244,7 +244,9 @@ jobs:
             ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}/${{ matrix.name }}@${{ steps.build.outputs.digest }}
 
       - name: Upload SBOM artifacts
-        uses: actions/upload-artifact@v4          name: sbom-${{ matrix.name }}-${{ github.run_number }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-${{ matrix.name }}-${{ github.run_number }}
           path: |
             sbom-${{ matrix.name }}.*.json
           retention-days: 90

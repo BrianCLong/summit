@@ -4,7 +4,6 @@ import { ensureAuthenticated } from '../middleware/auth.js';
 import { z } from 'zod';
 import { AppError } from '../lib/errors.js';
 import { logger } from '../config/logger.js';
-import { firstString, firstStringOr } from '../utils/http-param.js';
 
 const router = Router();
 
@@ -74,7 +73,7 @@ router.get('/queues', ensureAuthenticated, ensureTenant, async (req: any, res: a
 // Update queue
 router.put('/queues/:queueId', ensureAuthenticated, ensureTenant, async (req: any, res: any, next: any) => {
     try {
-        const queueId = firstStringOr(req.params.queueId, '');
+        const { queueId } = req.params;
         const updates = UpdateQueueSchema.parse(req.body);
         const queue = await reviewQueueService.updateQueue(
             queueId,
@@ -90,7 +89,7 @@ router.put('/queues/:queueId', ensureAuthenticated, ensureTenant, async (req: an
 // Delete queue
 router.delete('/queues/:queueId', ensureAuthenticated, ensureTenant, async (req: any, res: any, next: any) => {
     try {
-        const queueId = firstStringOr(req.params.queueId, '');
+        const { queueId } = req.params;
         await reviewQueueService.deleteQueue(queueId, req.user!.tenantId);
         res.status(204).send();
     } catch (e: any) {
@@ -102,7 +101,7 @@ router.delete('/queues/:queueId', ensureAuthenticated, ensureTenant, async (req:
 // Should probably be protected by specific permission
 router.post('/queues/:queueId/items', ensureAuthenticated, ensureTenant, async (req: any, res, next) => {
     try {
-        const queueId = firstStringOr(req.params.queueId, '');
+        const { queueId } = req.params;
         const { data, confidence } = EnqueueItemSchema.parse(req.body);
         const item = await reviewQueueService.enqueueItem(
             queueId,
@@ -119,8 +118,8 @@ router.post('/queues/:queueId/items', ensureAuthenticated, ensureTenant, async (
 // Get items for review (with priority sampling)
 router.get('/queues/:queueId/items', ensureAuthenticated, ensureTenant, async (req: any, res, next) => {
     try {
-        const queueId = firstStringOr(req.params.queueId, '');
-        let limit = firstString(req.query.limit) ? parseInt(firstStringOr(req.query.limit, '10')) : 10;
+        const { queueId } = req.params;
+        let limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
         if (isNaN(limit) || limit < 1) limit = 10;
         if (limit > 100) limit = 100; // Cap limit
 
@@ -138,7 +137,7 @@ router.get('/queues/:queueId/items', ensureAuthenticated, ensureTenant, async (r
 // Submit a review decision
 router.post('/items/:itemId/decision', ensureAuthenticated, ensureTenant, async (req: any, res, next) => {
     try {
-        const itemId = firstStringOr(req.params.itemId, '');
+        const { itemId } = req.params;
         const userId = req.user!.id;
         const { decision, metadata } = SubmitDecisionSchema.parse(req.body);
 
@@ -174,7 +173,7 @@ router.post('/items/batch-decision', ensureAuthenticated, ensureTenant, async (r
 // Get queue stats
 router.get('/queues/:queueId/stats', ensureAuthenticated, ensureTenant, async (req, res, next) => {
     try {
-        const queueId = firstStringOr(req.params.queueId, '');
+        const { queueId } = req.params;
         const stats = await reviewQueueService.getQueueStats(
             queueId,
             req.user!.tenantId

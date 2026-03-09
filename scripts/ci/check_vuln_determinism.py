@@ -3,12 +3,11 @@ import os
 import re
 import sys
 
-
 def check_no_timestamps(filepath):
     """Checks that a JSON/JSONL file does not contain wall-clock timestamps."""
     forbidden_keys = {"run_at", "timestamp", "generated_at", "exported_at"}
 
-    with open(filepath) as f:
+    with open(filepath, "r") as f:
         # Check if it looks like JSONL or single JSON
         content = f.read().strip()
         if not content:

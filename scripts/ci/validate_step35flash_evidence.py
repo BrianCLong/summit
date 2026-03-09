@@ -1,14 +1,13 @@
 import json
 import os
-import re
 import sys
-
+import re
 
 def validate_json(filepath, schema_path):
     # This function is a placeholder. In a real CI, we would use jsonschema.
     # For now, just checking valid JSON.
     try:
-        with open(filepath) as f:
+        with open(filepath, 'r') as f:
             json.load(f)
     except Exception as e:
         print(f"Error parsing {filepath}: {e}")
@@ -20,7 +19,7 @@ def check_timestamps(filepath):
     if "stamp.json" in filepath:
         return True
 
-    with open(filepath) as f:
+    with open(filepath, 'r') as f:
         content = f.read()
 
     # Simple regex for ISO8601-like timestamps

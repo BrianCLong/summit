@@ -31,7 +31,7 @@
 
 - **Findings Remediation Pack**: `auditor/findings.json` + changes; linked in Compliance Pack.
 - **SLSA L3 Plan**: doc + CI deltas (OIDC, hermetic build sketch, provenance subjects); canary job with isolated runner.
-- **SDKs GA**: typed clients, cosign verify --use-signed-timestamps util (server assist where needed), tests, examples repo, version policy.
+- **SDKs GA**: typed clients, cosign verify util (server assist where needed), tests, examples repo, version policy.
 - **Entitlements Service**: lightweight service evaluating plan + evidence signals (policy hash, signature verified) → feature flags.
 - **Portal+API**: display entitlement state, enforce usage gates; export billing audit log.
 - **CI Time Budgeting**: measure & optimize pack generation time; cache steps.

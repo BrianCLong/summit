@@ -1,6 +1,7 @@
-import { beforeAll, beforeEach, describe, expect, it, jest } from '@jest/globals';
+import { jest, describe, it, expect, beforeEach } from '@jest/globals';
 
-const mockedFs = {
+// Define mocks before imports
+const mockFs = {
   mkdir: jest.fn(),
   appendFile: jest.fn(),
   readdir: jest.fn(),
@@ -11,41 +12,58 @@ const mockedFs = {
   writeFile: jest.fn(),
 };
 
+const mockLogger = {
+  info: jest.fn(),
+  warn: jest.fn(),
+  error: jest.fn(),
+  debug: jest.fn(),
+  child: jest.fn().mockReturnThis(),
+};
+
+const mockMiddleware = {
+  trackError: jest.fn(),
+};
+
 jest.unstable_mockModule('fs/promises', () => ({
-  ...mockedFs,
-  default: mockedFs,
+  default: mockFs,
+  ...mockFs,
 }));
 
-describe('ImmutableAuditLogService', () => {
-  let service: any;
-  let ImmutableAuditLogService: any;
+jest.unstable_mockModule('../../utils/logger.js', () => ({
+  default: mockLogger,
+  logger: mockLogger,
+  ...mockLogger,
+}));
 
-  beforeAll(async () => {
-    const module = await import('../ImmutableAuditLogService.js');
-    ImmutableAuditLogService = module.ImmutableAuditLogService;
-  });
+jest.unstable_mockModule('../../monitoring/middleware.js', () => ({
+  trackError: mockMiddleware.trackError,
+}));
+
+// Import module under test after mocks
+const { ImmutableAuditLogService } = await import('../ImmutableAuditLogService.js');
+
+describe('ImmutableAuditLogService', () => {
+  let service: any; // Type as any or define interface if needed
+  const mockLogPath = './test-audits';
 
   beforeEach(() => {
     jest.clearAllMocks();
 
-    mockedFs.mkdir.mockResolvedValue(undefined as any);
-    mockedFs.appendFile.mockResolvedValue(undefined as any);
-    mockedFs.readdir.mockResolvedValue([] as any);
-    mockedFs.access.mockRejectedValue(new Error('ENOENT') as any);
-    mockedFs.stat.mockResolvedValue({ size: 0 } as any);
-    mockedFs.readFile.mockResolvedValue('' as any);
-    mockedFs.rm.mockResolvedValue(undefined as any);
-    mockedFs.writeFile.mockResolvedValue(undefined as any);
+    // Setup default mock behaviors
+    mockFs.mkdir.mockResolvedValue(undefined);
+    mockFs.appendFile.mockResolvedValue(undefined);
+    mockFs.readdir.mockResolvedValue([]);
+    mockFs.access.mockRejectedValue(new Error('ENOENT'));
 
     service = new ImmutableAuditLogService({
-      logPath: './test-audits',
+      logPath: mockLogPath,
       enabled: true,
       batchSize: 10,
-      backpressureThreshold: 100,
+      backpressureThreshold: 100
     });
   });
 
-  it('queues and processes audit events', async () => {
+  it('should queue and process audit events', async () => {
     await service.logAuditEvent({
       eventType: 'TEST',
       userId: 'user1',
@@ -55,25 +73,28 @@ describe('ImmutableAuditLogService', () => {
       result: 'success',
       ipAddress: '127.0.0.1',
       currentHash: '',
-      signature: '',
+      signature: ''
     });
 
-    await (service as any).processQueuedEvents();
+    await service.flushQueue();
 
-    expect(mockedFs.mkdir).toHaveBeenCalled();
-    expect(mockedFs.appendFile).toHaveBeenCalled();
+    expect(mockFs.mkdir).toHaveBeenCalled();
+    expect(mockFs.appendFile).toHaveBeenCalled();
 
-    const appendCall = mockedFs.appendFile.mock.calls[0];
+    const appendCall = mockFs.appendFile.mock.calls[0];
     const filePath = appendCall[0] as string;
     const content = appendCall[1] as string;
 
+    // Check if path contains the directory name (ignoring absolute/relative prefix issues)
     expect(filePath).toContain('test-audits');
     expect(content).toContain('"eventType":"TEST"');
     expect(content).toContain('"userId":"user1"');
   });
 
-  it('batches multiple events into a single write', async () => {
+  it('should batch multiple events into a single write (optimization check)', async () => {
     const eventCount = 5;
+
+    // Simulate processing is busy to accumulate events in queue
     (service as any).isProcessing = true;
 
     for (let i = 0; i < eventCount; i++) {
@@ -86,14 +107,19 @@ describe('ImmutableAuditLogService', () => {
         result: 'success',
         ipAddress: '127.0.0.1',
         currentHash: '',
-        signature: '',
+        signature: ''
       });
     }
 
+    // Release processing lock
     (service as any).isProcessing = false;
-    await (service as any).processQueuedEvents();
 
-    const calls = mockedFs.appendFile.mock.calls;
+    // Now flush, it should pick up all events in one batch (batchSize=10)
+    await service.flushQueue();
+
+    const calls = mockFs.appendFile.mock.calls;
+
+    // Expect exactly ONE write call for the batch
     expect(calls.length).toBe(1);
 
     const allContent = calls[0][1] as string;

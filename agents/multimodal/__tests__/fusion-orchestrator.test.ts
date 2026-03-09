@@ -1,6 +1,3 @@
-// @ts-nocheck
-// @ts-nocheck
-
 /**
  * Fusion Orchestrator Tests
  * E2E and performance tests for multimodal fusion pipeline
@@ -15,7 +12,7 @@ import { VideoPipeline } from '../video-pipeline.js';
 import { HallucinationGuard } from '../hallucination-guard.js';
 import { PgVectorStore } from '../pgvector-store.js';
 import { Neo4jEmbeddings } from '../neo4j-embeddings.js';
-import {
+import type {
   FusedEmbedding,
   SourceInput,
   TextEmbedding,
@@ -37,43 +34,43 @@ describe('FusionOrchestrator', () => {
   beforeAll(() => {
     // Setup mocks
     (CLIPPipeline as jest.MockedClass<typeof CLIPPipeline>).mockImplementation(() => ({
-      embedImage: jest.fn().mockResolvedValue(createMockImageEmbedding() as any),
-      embedImageBatch: jest.fn().mockResolvedValue([createMockImageEmbedding() as any]),
+      embedImage: jest.fn().mockResolvedValue(createMockImageEmbedding()),
+      embedImageBatch: jest.fn().mockResolvedValue([createMockImageEmbedding()]),
       clearCache: jest.fn(),
       getStats: jest.fn().mockReturnValue({ model: 'clip', dimension: 768, cacheSize: 0 }),
     } as any));
 
     (TextPipeline as jest.MockedClass<typeof TextPipeline>).mockImplementation(() => ({
-      embedText: jest.fn().mockResolvedValue(createMockTextEmbedding() as any),
-      embedTextBatch: jest.fn().mockResolvedValue([createMockTextEmbedding() as any]),
+      embedText: jest.fn().mockResolvedValue(createMockTextEmbedding()),
+      embedTextBatch: jest.fn().mockResolvedValue([createMockTextEmbedding()]),
       clearCache: jest.fn(),
       getStats: jest.fn().mockReturnValue({ model: 'text', dimension: 1536, cacheSize: 0 }),
-      extractEntities: jest.fn().mockResolvedValue([{ type: 'EMAIL' }, { type: 'URL' }, { type: 'IP_ADDRESS' }]),
     } as any));
 
     (VideoPipeline as jest.MockedClass<typeof VideoPipeline>).mockImplementation(() => ({
-      embedVideo: jest.fn().mockResolvedValue(createMockVideoEmbedding() as any),
+      embedVideo: jest.fn().mockResolvedValue(createMockVideoEmbedding()),
       clearCache: jest.fn(),
       getStats: jest.fn().mockReturnValue({ model: 'clip', cacheSize: 0 }),
     } as any));
 
     (PgVectorStore as jest.MockedClass<typeof PgVectorStore>).mockImplementation(() => ({
-      initialize: jest.fn().mockResolvedValue(undefined as any),
-      store: jest.fn().mockResolvedValue(undefined as any),
-      storeBatch: jest.fn().mockResolvedValue(undefined as any),
-      search: jest.fn().mockResolvedValue([] as any),
-      close: jest.fn().mockResolvedValue(undefined as any),
+      initialize: jest.fn().mockResolvedValue(undefined),
+      store: jest.fn().mockResolvedValue(undefined),
+      storeBatch: jest.fn().mockResolvedValue(undefined),
+      search: jest.fn().mockResolvedValue([]),
+      close: jest.fn().mockResolvedValue(undefined),
     } as any));
 
     (Neo4jEmbeddings as jest.MockedClass<typeof Neo4jEmbeddings>).mockImplementation(() => ({
-      initialize: jest.fn().mockResolvedValue(undefined as any),
-      embedNode: jest.fn().mockResolvedValue({ nodeId: 'test-node',
+      initialize: jest.fn().mockResolvedValue(undefined),
+      embedNode: jest.fn().mockResolvedValue({
+        nodeId: 'test-node',
         labels: ['Entity'],
         properties: {},
         embedding: new Array(128).fill(0.1),
         neighbors: [],
       }),
-      close: jest.fn().mockResolvedValue(undefined as any),
+      close: jest.fn().mockResolvedValue(undefined),
     } as any));
   });
 
@@ -138,7 +135,7 @@ describe('FusionOrchestrator', () => {
 
       expect(result).toBeDefined();
       expect(result.modalityVectors.length).toBe(2);
-      expect(result.crossModalScore).toBeDefined();
+      expect(result.crossModalScore).toBeGreaterThan(0);
     });
 
     it('should handle empty sources gracefully', async () => {
@@ -336,7 +333,7 @@ describe('HallucinationGuard', () => {
 
     it('should detect confidence anomalies', async () => {
       const lowConfidenceSources = [
-        createMockTextEmbedding(),
+        createMockTextEmbedding({ confidence: 0.2 }),
       ];
 
       const fusedEmbedding = createMockFusedEmbedding({
@@ -348,7 +345,7 @@ describe('HallucinationGuard', () => {
       const hasConfidenceAnomaly = result.reasons.some(
         (r) => r.type === 'confidence_anomaly',
       );
-      expect(hasConfidenceAnomaly).toBeDefined();
+      expect(hasConfidenceAnomaly).toBe(true);
     });
   });
 

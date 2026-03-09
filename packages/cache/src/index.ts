@@ -22,7 +22,7 @@ export interface CacheSetOptions extends CacheGetOptions {
 
 export interface CacheClientConfig {
   redisUrl?: string;
-  redis?: Redis | Redis[];
+  redis?: Redis;
   namespace?: string;
   cacheClass?: CacheClass;
   defaultTTLSeconds?: number;
@@ -95,28 +95,10 @@ class MemoryCacheBackend implements CacheBackend {
 }
 
 class RedisCacheBackend implements CacheBackend {
-  private readonly clients: Redis[];
-
-  constructor(clientOrClients: Redis | Redis[]) {
-    this.clients = Array.isArray(clientOrClients) ? clientOrClients : [clientOrClients];
-  }
-
-  private getClient(key: string): Redis {
-    if (this.clients.length === 1) return this.clients[0];
-
-    // Simple hash-based partitioning
-    let hash = 0;
-    for (let i = 0; i < key.length; i++) {
-      hash = ((hash << 5) - hash) + key.charCodeAt(i);
-      hash |= 0; // Convert to 32bit int
-    }
-    const index = Math.abs(hash) % this.clients.length;
-    return this.clients[index];
-  }
+  constructor(private readonly redis: Redis) {}
 
   async get<T>(key: string): Promise<T | null> {
-    const client = this.getClient(key);
-    const value = await client.get(key);
+    const value = await this.redis.get(key);
     if (value === null) return null;
 
     try {
@@ -132,30 +114,28 @@ class RedisCacheBackend implements CacheBackend {
     ttlSeconds?: number,
     _metadata?: { namespace: string; cacheClass: CacheClass },
   ): Promise<void> {
-    const client = this.getClient(key);
     const payload = typeof value === 'string' ? value : JSON.stringify(value);
     if (ttlSeconds) {
-      await client.setex(key, ttlSeconds, payload);
+      await this.redis.setex(key, ttlSeconds, payload);
     } else {
-      await client.set(key, payload);
+      await this.redis.set(key, payload);
     }
   }
 
   async delete(key: string): Promise<void> {
-    const client = this.getClient(key);
-    await client.del(key);
+    await this.redis.del(key);
   }
 
   async close(): Promise<void> {
-    await Promise.all(this.clients.map(client => client.quit()));
+    await this.redis.quit();
   }
 
   async ping(): Promise<void> {
-    await Promise.all(this.clients.map(client => client.ping()));
+    await this.redis.ping();
   }
 
   isConnected(): boolean {
-    return this.clients.every(client => client.status === 'ready');
+    return this.redis.status === 'ready';
   }
 }
 
@@ -236,22 +216,14 @@ export class CacheClient {
     });
 
     if (config.redis || config.redisUrl) {
-      const redisUrls = config.redisUrl ? config.redisUrl.split(',') : [];
-      let redisClients: Redis[] = [];
-
-      if (config.redis) {
-        redisClients = Array.isArray(config.redis) ? config.redis : [config.redis];
-      } else if (redisUrls.length > 0) {
-        redisClients = redisUrls.map(url => new Redis(url, {
+      const redis =
+        config.redis ??
+        new Redis(config.redisUrl as string, {
           lazyConnect: true,
           maxRetriesPerRequest: 2,
           enableOfflineQueue: false,
-        }));
-      }
-
-      if (redisClients.length > 0) {
-        this.redisBackend = new RedisCacheBackend(redisClients);
-      }
+        });
+      this.redisBackend = new RedisCacheBackend(redis);
     }
   }
 

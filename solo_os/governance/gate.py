@@ -1,13 +1,12 @@
 import json
 from pathlib import Path
-from typing import Any, Dict, List
-
+from typing import Dict, Any, List
 
 class GovernanceGate:
     def __init__(self, policy_path: str = None):
         if policy_path is None:
             policy_path = str(Path(__file__).parent / "policy.default.json")
-        with open(policy_path) as f:
+        with open(policy_path, "r") as f:
             self.policy = json.load(f)
 
     def is_allowed(self, action: str, connector: str = None) -> bool:

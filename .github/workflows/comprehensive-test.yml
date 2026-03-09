@@ -26,7 +26,6 @@ jobs:
         with:
           node-version: 20
           cache: 'pnpm'
-          cache-dependency-path: '**/pnpm-lock.yaml'
 
       - name: Setup Python
         uses: actions/setup-python@v5

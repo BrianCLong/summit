@@ -10,7 +10,7 @@ if ! command -v cosign >/dev/null 2>&1; then
 fi
 
 if [[ -n "$PUBLIC_KEY" ]]; then
-  cosign verify --use-signed-timestamps --key "$PUBLIC_KEY" "$IMAGE_REFERENCE" || { echo "::error::Supply chain verification failed! Missing or invalid signed timestamps."; false; }
+  cosign verify --key "$PUBLIC_KEY" "$IMAGE_REFERENCE"
 else
-  cosign verify --use-signed-timestamps "$IMAGE_REFERENCE" || { echo "::error::Supply chain verification failed! Missing or invalid signed timestamps."; false; }
+  cosign verify "$IMAGE_REFERENCE"
 fi

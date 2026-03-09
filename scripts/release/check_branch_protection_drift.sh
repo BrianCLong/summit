@@ -545,7 +545,7 @@ if [[ "$DRIFT_DETECTED" == "true" ]]; then
     if [[ ${#EXTRA_IN_GITHUB[@]} -gt 0 ]]; then
         log_warn "  Extra in GitHub: ${EXTRA_IN_GITHUB[*]}"
     fi
-    
+
     if [[ "$FAIL_ON_DRIFT" == "true" ]]; then
         log_error "Failing due to detected drift (--fail-on-drift active)"
         exit 1

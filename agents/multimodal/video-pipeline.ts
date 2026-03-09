@@ -21,7 +21,7 @@ import type {
 } from './types.js';
 import { CLIPPipeline } from './clip-pipeline.js';
 
-const logger: any = (pino as any)({ name: 'video-pipeline' });
+const logger = pino({ name: 'video-pipeline' });
 
 export interface VideoPipelineConfig {
   clipModel: EmbeddingModel;
@@ -387,13 +387,13 @@ export class VideoPipeline {
             frameNumber: frame.frameNumber,
             error: error instanceof Error ? error.message : 'Unknown',
           });
-          return null as any;
+          return null;
         }
       });
 
       const batchResults = await Promise.all(batchPromises);
       keyFrames.push(
-        ...batchResults.filter((r) => r !== null) as KeyFrame[],
+        ...batchResults.filter((r): r is KeyFrame => r !== null),
       );
     }
 

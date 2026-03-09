@@ -82,17 +82,17 @@ BEGIN
 END;
 $$ language 'plpgsql';
 
-CREATE TRIGGER update_workflow_runs_updated_at 
-    BEFORE UPDATE ON workflow_runs 
+CREATE TRIGGER update_workflow_runs_updated_at
+    BEFORE UPDATE ON workflow_runs
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
-CREATE TRIGGER update_step_executions_updated_at 
-    BEFORE UPDATE ON step_executions 
+CREATE TRIGGER update_step_executions_updated_at
+    BEFORE UPDATE ON step_executions
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 -- Views for common queries
 CREATE VIEW workflow_run_summary AS
-SELECT 
+SELECT
     wr.run_id,
     wr.workflow_name,
     wr.workflow_version,
@@ -109,12 +109,12 @@ SELECT
     EXTRACT(EPOCH FROM (wr.completed_at - wr.created_at)) as duration_seconds
 FROM workflow_runs wr
 LEFT JOIN step_executions se ON wr.run_id = se.run_id
-GROUP BY wr.run_id, wr.workflow_name, wr.workflow_version, wr.tenant_id, 
+GROUP BY wr.run_id, wr.workflow_name, wr.workflow_version, wr.tenant_id,
          wr.environment, wr.status, wr.created_at, wr.completed_at;
 
 -- Cost tracking view
 CREATE VIEW cost_by_tenant_day AS
-SELECT 
+SELECT
     wr.tenant_id,
     DATE(wr.created_at) as execution_date,
     COUNT(DISTINCT wr.run_id) as total_runs,

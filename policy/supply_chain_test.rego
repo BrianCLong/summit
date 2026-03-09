@@ -124,4 +124,3 @@ test_sovereign_deny_containment if {
 		}
 	}
 }
-

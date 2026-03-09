@@ -5,7 +5,6 @@ import { WorkflowService } from '../governance/ontology/WorkflowService.js';
 import { ensureAuthenticated } from '../middleware/auth.js';
 import { createRouteRateLimitMiddleware } from '../middleware/rateLimit.js';
 import type { AuthenticatedRequest } from './types.js';
-import { firstStringOr } from '../utils/http-param.js';
 
 const router = express.Router();
 router.use(createRouteRateLimitMiddleware('governance'));
@@ -25,7 +24,7 @@ router.get('/schemas/latest', ensureAuthenticated, (req: AuthenticatedRequest, r
 });
 
 router.get('/schemas/:id', ensureAuthenticated, (req: AuthenticatedRequest, res: Response) => {
-    const schema = registry.getSchemaById(firstStringOr(req.params.id, ''));
+    const schema = registry.getSchemaById(req.params.id);
     if (!schema) return res.status(404).json({ error: 'Schema not found' });
     res.json(schema);
 });
@@ -74,14 +73,14 @@ router.post('/changes', ensureAuthenticated, (req: AuthenticatedRequest, res: Re
 });
 
 router.get('/changes/:id', ensureAuthenticated, (req: AuthenticatedRequest, res: Response) => {
-    const cr = workflow.getChangeRequest(firstStringOr(req.params.id, ''));
+    const cr = workflow.getChangeRequest(req.params.id);
     if (!cr) return res.status(404).json({ error: 'Change Request not found' });
     res.json(cr);
 });
 
 router.get('/changes/:id/impact', ensureAuthenticated, (req: AuthenticatedRequest, res: Response) => {
     // Determine impact
-    const impact = workflow.calculateImpact(firstStringOr(req.params.id, ''));
+    const impact = workflow.calculateImpact(req.params.id);
     res.json(impact);
 });
 
@@ -89,7 +88,7 @@ router.post('/changes/:id/review', ensureAuthenticated, (req: AuthenticatedReque
     try {
         const { decision, comment } = req.body;
         const reviewer = req.user?.id || 'unknown';
-        const cr = workflow.reviewChangeRequest(firstStringOr(req.params.id, ''), reviewer, decision, comment);
+        const cr = workflow.reviewChangeRequest(req.params.id, reviewer, decision, comment);
         res.json(cr);
     } catch (e: any) {
         res.status(400).json({ error: e.message });
@@ -99,7 +98,7 @@ router.post('/changes/:id/review', ensureAuthenticated, (req: AuthenticatedReque
 router.post('/changes/:id/merge', ensureAuthenticated, (req: AuthenticatedRequest, res: Response) => {
     try {
         const merger = req.user?.id || 'unknown';
-        const newSchema = workflow.mergeChangeRequest(firstStringOr(req.params.id, ''), merger);
+        const newSchema = workflow.mergeChangeRequest(req.params.id, merger);
         res.json(newSchema);
     } catch (e: any) {
         res.status(400).json({ error: e.message });

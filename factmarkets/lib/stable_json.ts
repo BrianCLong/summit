@@ -5,5 +5,5 @@ export function stableStringify(x: any): string {
     v && typeof v === "object"
       ? Object.fromEntries(Object.keys(v).sort().map(k => [k, norm(v[k])]))
       : v;
-  return `${JSON.stringify(norm(x), null, 2)  }\n`;
+  return JSON.stringify(norm(x), null, 2) + "\n";
 }

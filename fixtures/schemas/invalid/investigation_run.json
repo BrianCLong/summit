@@ -1,6 +1,0 @@
-{
-  "run_id": "run-123",
-  "inputs": {"query": "Find malicious actors"},
-  "scope": {"time": "2024"},
-  "outputs_summary": {"findings": 5}
-}

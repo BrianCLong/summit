@@ -1,7 +1,6 @@
 import express, { Request, Response } from 'express';
 import { predictiveThreatService } from '../services/PredictiveThreatService.js';
 import logger from '../utils/logger.js';
-import { firstString, firstStringOr } from '../utils/http-param.js';
 
 const router = express.Router();
 
@@ -13,8 +12,8 @@ const router = express.Router();
  */
 router.get('/forecast/:signal', async (req: Request, res: Response) => {
   try {
-    const signal = firstStringOr(req.params.signal, '');
-    const horizon = parseInt(firstString(req.query.horizon) || '24') || 24;
+    const signal = req.params.signal;
+    const horizon = parseInt(req.query.horizon as string) || 24;
 
     const result = await predictiveThreatService.forecastSignal(signal, horizon);
     res.json(result);

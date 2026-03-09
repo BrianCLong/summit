@@ -28,20 +28,20 @@ export class CascadeDetectionService {
             const query = `
         MATCH (n:Narrative {id: $narrativeId})
         ${tenantId ? 'WHERE n.tenantId = $tenantId' : ''}
-        
+
         // Find the origin actor
         OPTIONAL MATCH (origin:Entity)-[r0:PROMOTES]->(n)
         WITH n, origin, r0.timestamp as originTime
         ORDER BY originTime ASC
         WITH n, head(collect(origin)) as originActor, head(collect(r0)) as originRel
-        
+
         // Find the full propagation path
         MATCH path = (n)<-[:PROMOTES|ADOPTS|SHARES*1..5]-(actor:Entity)
-        
+
         WITH n, originActor, originRel, actor, path, length(path) as hops
         WHERE hops > 0
-        
-        RETURN 
+
+        RETURN
           $narrativeId as narrativeId,
           originActor.id as originActorId,
           originRel.timestamp as startTime,

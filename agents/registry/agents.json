@@ -15,14 +15,6 @@
       "env": "production",
       "runtime": "python",
       "capabilities": ["relay-messaging", "discovery"]
-    },
-    {
-      "id": "maestro-spec-interviewer",
-      "name": "Maestro Spec Interviewer",
-      "owner": "summit-team",
-      "env": "production",
-      "runtime": "python",
-      "capabilities": ["requirements-engineering", "spec-generation"]
     }
   ]
 }

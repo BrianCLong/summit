@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect } from '@jest/globals';
 import { ProposalEngine, DenyRateRule, BurstRule } from '../engine.js';
 import { SecurityEvidence } from '../proposal-types.js';
 

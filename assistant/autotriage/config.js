@@ -107,18 +107,6 @@ export const defaultConfig = {
         minClusterSize: 2,
         maxClusters: 20,
     },
-    initiatives: [
-        {
-            id: "comet_v2_triage",
-            keywords: ["comet v2", "atomic pr"],
-            patterns: [/comet.?v2/i, /atomic.?pr/i],
-        },
-        {
-            id: "websocket_metrics",
-            keywords: ["websocket metrics", "metrics validation"],
-            patterns: [/websocket.?metrics/i, /metrics.?validation/i],
-        },
-    ],
     reporting: {
         topIssuesCount: 10,
         topThemesCount: 10,

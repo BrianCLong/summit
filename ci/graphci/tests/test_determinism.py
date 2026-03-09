@@ -1,9 +1,8 @@
-import json
 import os
 import shutil
 import subprocess
+import json
 from pathlib import Path
-
 
 def test_determinism():
     test_dir = Path("ci/graphci/tests/tmp_determinism")

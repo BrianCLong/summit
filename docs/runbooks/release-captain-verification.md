@@ -369,10 +369,10 @@ vi .github/audit-allowlist.json
 
 ## 📚 Additional Resources
 
-- Release Captain Architecture
-- OPA Policy Reference
-- Security Scanning Guide
-- Deployment Runbooks
+- [Release Captain Architecture](./release-captain-architecture.md)
+- [OPA Policy Reference](../.github/policies/README.md)
+- [Security Scanning Guide](../docs/security/scanning-guide.md)
+- [Deployment Runbooks](./deployment-procedures.md)
 
 _Last updated: $(date '+%Y-%m-%d')_
 _Version: 1.0_

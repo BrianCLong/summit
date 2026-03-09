@@ -1,8 +1,0 @@
-{
-  "EVD-REWS-LEAD-001": ["report.json", "metrics.json"],
-  "EVD-REWS-HARM-002": ["report.json"],
-  "EVD-REWS-FUSION-003": ["report.json"],
-  "EVD-REWS-GRAPHRAG-004": ["report.json", "metrics.json"],
-  "EVD-REWS-FP-005": ["report.json", "metrics.json"],
-  "EVD-REWS-GOV-006": ["report.json"]
-}

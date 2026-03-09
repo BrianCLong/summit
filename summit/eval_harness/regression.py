@@ -1,8 +1,6 @@
 from __future__ import annotations
-
 import json
 from pathlib import Path
-
 
 def compare_metrics(current_path: Path, baseline_path: Path) -> dict[str, float]:
     curr = json.loads(current_path.read_text())["metrics"]

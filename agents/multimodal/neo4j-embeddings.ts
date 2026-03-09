@@ -15,7 +15,7 @@ import type {
   ModalityType,
 } from './types.js';
 
-const logger: any = (pino as any)({ name: 'neo4j-embeddings' });
+const logger = pino({ name: 'neo4j-embeddings' });
 
 export interface Neo4jEmbeddingsConfig extends GraphEmbeddingConfig {
   uri: string;

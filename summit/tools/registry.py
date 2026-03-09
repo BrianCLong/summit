@@ -1,13 +1,12 @@
 import hashlib
 import json
-from typing import Any, Dict, List, Tuple
-
+from typing import List, Dict, Any, Tuple
 
 class ToolRegistry:
     def __init__(self):
-        self._tools: dict[tuple[str, str], dict[str, Any]] = {}
+        self._tools: Dict[Tuple[str, str], Dict[str, Any]] = {}
 
-    def register_tool(self, tool_def: dict[str, Any]):
+    def register_tool(self, tool_def: Dict[str, Any]):
         """
         Registers a tool. tool_def must have 'type' and 'function' (with 'name').
         """
@@ -24,7 +23,7 @@ class ToolRegistry:
         key = (t_type, name)
         self._tools[key] = tool_def
 
-    def get_tools_sorted(self) -> list[dict[str, Any]]:
+    def get_tools_sorted(self) -> List[Dict[str, Any]]:
         """
         Returns tools sorted by (type, name).
         """

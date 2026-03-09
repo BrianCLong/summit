@@ -202,7 +202,7 @@ async function main() {
   const allowlistPath = args.allowlist || 'docs/ci/REQUIRED_CHECKS_ALLOWLIST.yml';
 
   console.log('Policy Reference Validator (Hardened)');
-  
+
   let policyRaw = '';
   let policy = {};
   try {

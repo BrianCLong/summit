@@ -5,7 +5,6 @@ import { SchemaRegistryService } from '../governance/ontology/SchemaRegistryServ
 import { opaClient } from '../services/opa-client.js';
 import { asyncHandler } from '../middleware/async-handler.js';
 import { OntologyAssertion } from '../governance/ontology/models.js';
-import { firstStringOr } from '../utils/http-param.js';
 
 const router = Router();
 const executionService = OntologyExecutionService.getInstance();
@@ -57,7 +56,7 @@ router.get('/schema', asyncHandler(async (req: Request, res: Response) => {
 
 // Get specific schema
 router.get('/schema/:version', asyncHandler(async (req: Request, res: Response) => {
-    const schema = registryService.getSchema(firstStringOr(req.params.version, ''));
+    const schema = registryService.getSchema(req.params.version);
     if (!schema) {
         return res.status(404).json({ error: 'Schema version not found' });
     }
@@ -106,7 +105,7 @@ router.post('/schema/:id/approve', asyncHandler(async (req: Request, res: Respon
         return res.status(401).json({ error: 'Authentication required' });
     }
 
-    const schemaId = firstStringOr(req.params.id, '');
+    const schemaId = req.params.id;
     const schema = registryService.getSchemaById(schemaId);
 
     if (!schema) {

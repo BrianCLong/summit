@@ -66,7 +66,9 @@ jobs:
 
       - name: Upload Playwright artifacts
         if: always()
-        uses: actions/upload-artifact@v4          name: client-playwright-artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: client-playwright-artifacts
           path: |
             client/playwright-report
             client/playwright-results
@@ -77,7 +79,9 @@ jobs:
         working-directory: client
 
       - name: Upload Persisted Queries Manifest
-        uses: actions/upload-artifact@v4          name: persisted-queries-manifest
+        uses: actions/upload-artifact@v4
+        with:
+          name: persisted-queries-manifest
           path: client/persisted-operations.json
 
       - name: Run CodeQL Analysis (Placeholder)
@@ -101,13 +105,17 @@ jobs:
           ARTIFACTS_DIR: artifacts
 
       - name: Upload Supply Chain Artifacts
-        uses: actions/upload-artifact@v4          name: client-supply-chain-artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: client-supply-chain-artifacts
           path: |
             client/sbom.json
             artifacts/build-manifest.*.json
 
       - name: Upload coverage report
-        uses: actions/upload-artifact@v4          name: client-coverage-report
+        uses: actions/upload-artifact@v4
+        with:
+          name: client-coverage-report
           path: client/coverage
 
       - name: Upload coverage to Codecov

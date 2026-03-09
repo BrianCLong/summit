@@ -1,7 +1,5 @@
 import unittest
-
 from modules.reconciler.reconcile import reconcile_expected_vs_actual
-
 
 class TestReconciler(unittest.TestCase):
     def test_reconcile_match(self):

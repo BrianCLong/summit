@@ -10,8 +10,6 @@ These scripts provide comprehensive PR batch management with safety guardrails:
 2. **integration-train.sh** - Creates integration branches for conflicted PRs
 3. **open-orphan-prs.sh** - Surfaces ahead-of-main branches as PRs
 
-4. **ops/merge_train_queue_planner.mjs** - Deterministically classifies PRs into queue labels and emits the next merge batch
-
 ## Quick Start
 
 ```bash
@@ -161,25 +159,6 @@ REPO="myorg/myrepo" DEFAULT_BRANCH="develop" ./scripts/batch-automerge.sh
 2. Check if PR already exists
 3. Create auto-labeled PR: "[Auto] branch → main"
 4. Add `needs-triage` label
-
-### 4. ops/merge_train_queue_planner.mjs
-
-**Purpose**: Turn large PR backlogs into deterministic queue labels and merge batches
-
-**Logic**:
-
-1. Classifies PRs into `queue:merge-now`, `queue:needs-rebase`, `queue:conflict`, `queue:blocked`, `queue:obsolete`
-2. Orders merge candidates by `prio:P*`, mergeability, check status, and oldest update
-3. Emits a machine-readable JSON plan containing queue counts and `nextBatch` PR numbers
-
-**Usage**:
-
-```bash
-node scripts/ops/merge_train_queue_planner.mjs \
-  --input artifacts/open-prs.json \
-  --batch-size 25 \
-  --stale-days 45
-```
 
 ## GitHub Actions Integration
 

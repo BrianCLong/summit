@@ -1,11 +1,9 @@
 from __future__ import annotations
+from typing import Dict, Any, List
 
-from typing import Any, Dict, List
-
-
-def find_spofs(spec: dict[str, Any]) -> list[dict[str, Any]]:
+def find_spofs(spec: Dict[str, Any]) -> List[Dict[str, Any]]:
     # SPOF heuristic: any db/cache/queue with replicas==1 is a finding.
-    out: list[dict[str, Any]] = []
+    out: List[Dict[str, Any]] = []
     for c in spec["components"]:
         if c["type"] in ("db", "cache", "queue") and int(c.get("replicas", 1)) == 1:
             out.append({
@@ -15,8 +13,8 @@ def find_spofs(spec: dict[str, Any]) -> list[dict[str, Any]]:
             })
     return out
 
-def bottleneck_risks(sim_metrics: dict[str, Any]) -> list[dict[str, Any]]:
-    out: list[dict[str, Any]] = []
+def bottleneck_risks(sim_metrics: Dict[str, Any]) -> List[Dict[str, Any]]:
+    out: List[Dict[str, Any]] = []
     if sim_metrics.get("saturation", 0.0) >= 0.85:
         out.append({
             "kind": "bottleneck",

@@ -1,14 +1,13 @@
+from typing import Dict, Any, List, Optional
 import hashlib
 import json
-from typing import Any, Dict, List, Optional
-
 
 class MCPBridge:
     def __init__(self):
         self._known_tools_hash: Optional[str] = None
-        self._tools: list[dict[str, Any]] = []
+        self._tools: List[Dict[str, Any]] = []
 
-    def load_tools(self, tools: list[dict[str, Any]]) -> str:
+    def load_tools(self, tools: List[Dict[str, Any]]) -> str:
         """
         Loads tools and returns their hash.
         """
@@ -16,11 +15,11 @@ class MCPBridge:
         self._known_tools_hash = self._calculate_hash(self._tools)
         return self._known_tools_hash
 
-    def _calculate_hash(self, tools: list[dict[str, Any]]) -> str:
+    def _calculate_hash(self, tools: List[Dict[str, Any]]) -> str:
         json_str = json.dumps(tools, sort_keys=True)
         return hashlib.sha256(json_str.encode('utf-8')).hexdigest()
 
-    def on_tools_list_changed(self, new_tools: list[dict[str, Any]]) -> bool:
+    def on_tools_list_changed(self, new_tools: List[Dict[str, Any]]) -> bool:
         """
         Returns True if tools changed (drift detected).
         """

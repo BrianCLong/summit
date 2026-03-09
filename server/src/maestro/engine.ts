@@ -13,18 +13,12 @@ import {
   TransitionReceiptInput,
   emitTransitionReceipt,
 } from './evidence/transition-receipts.js';
+import { ForkDetector } from '@intelgraph/maestro-core';
 
 // Interface for dependencies
 interface MaestroDependencies {
   db: Pool;
   redisConnection: any; // ioredis
-}
-
-function calculateTaskEntropy(task: unknown): number {
-  const serialized = JSON.stringify(task ?? {});
-  if (!serialized || serialized === '{}') return 0;
-  const uniqueChars = new Set(serialized).size;
-  return Math.min(1, uniqueChars / 64);
 }
 
 export class MaestroEngine {
@@ -107,7 +101,7 @@ export class MaestroEngine {
       [templateId, tenantId]
     );
     if (res.rows.length === 0) throw new Error(`Template not found: ${templateId}`);
-    
+
     const row = res.rows[0];
     const template: MaestroTemplate = {
       id: row.id,
@@ -217,7 +211,7 @@ export class MaestroEngine {
         payload: row.payload,
         config: row.metadata,
       };
-      const entropy = calculateTaskEntropy(taskForEntropy);
+      const entropy = ForkDetector.calculateEntropy(taskForEntropy);
       const priority = 1 + Math.floor((1 - entropy) * 100);
 
       await this.queue.add(row.kind, {
@@ -403,7 +397,7 @@ export class MaestroEngine {
           payload: dependentRow.payload,
           config: dependentRow.metadata,
         };
-        const entropy = calculateTaskEntropy(taskForEntropy);
+        const entropy = ForkDetector.calculateEntropy(taskForEntropy);
         const priority = 1 + Math.floor((1 - entropy) * 100);
 
         await this.queue.add(dependentRow.kind, {

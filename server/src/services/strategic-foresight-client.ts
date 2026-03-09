@@ -9,10 +9,7 @@
 import fetch from 'node-fetch';
 import { getTracer } from '../otel.js';
 
-const tracer =
-  typeof getTracer === 'function'
-    ? getTracer('strategic-foresight-client')
-    : { startSpan: () => ({ end: () => {} }) };
+const tracer = getTracer('strategic-foresight-client');
 
 export interface TrendPrediction {
   trendId: string;

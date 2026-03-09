@@ -75,7 +75,7 @@ This 5-minute workflow validates core platform functionality. See the [Quickstar
 - 📖 [Documentation](/docs)
 - 💬 [GitHub Discussions](https://github.com/BrianCLong/summit/discussions)
 - 🐛 [Issue Tracker](https://github.com/BrianCLong/summit/issues)
-- 📧 Email: support_at_summit.com
+- 📧 Email: support@summit.com
 
 ## Next Steps
 

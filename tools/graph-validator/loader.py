@@ -1,8 +1,7 @@
-import logging
 import os
 import random
 import time
-
+import logging
 from neo4j import GraphDatabase
 
 logging.basicConfig(level=logging.INFO)

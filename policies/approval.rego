@@ -2,9 +2,9 @@
 # Usage: opa eval -d policies/ -i input.json "data.intelgraph.approval"
 
 package intelgraph.approval
-import rego.v1
 
-import rego.v1
+import future.keywords.if
+import future.keywords.in
 
 # Default deny - all operations must be explicitly allowed
 default allow := false
@@ -29,7 +29,7 @@ requires_four_eyes if {
 }
 
 requires_four_eyes if {
-  # Cost threshold: any operation >.00 requires approval
+  # Cost threshold: any operation >$5.00 requires approval
   input.est_usd > 5.0
 }
 

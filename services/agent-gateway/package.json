@@ -10,7 +10,7 @@
     "start": "node dist/server.js",
     "test": "NODE_ENV=test jest",
     "test:watch": "NODE_ENV=test jest --watch",
-    "test:safety": "NODE_ENV=test jest --testPathPatterns=safety-scenarios",
+    "test:safety": "NODE_ENV=test jest --testPathPattern=safety-scenarios",
     "lint": "eslint src --ext .ts",
     "typecheck": "tsc --noEmit",
     "migrate": "node scripts/migrate.js"

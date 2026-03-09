@@ -1,44 +1,132 @@
-import { describe, it, expect, beforeEach } from '@jest/globals';
-import { QuotaExceededException, QuotaService } from '../QuotaService.js';
+import { describe, it, expect, jest, beforeEach } from '@jest/globals';
+import { UsageKind } from '../../types/usage.js';
+import PricingEngine from '../PricingEngine.js';
+type QueryResult<T = unknown> = { rows: T[] };
+type PoolClient = {
+  query: (...args: unknown[]) => Promise<QueryResult<any>>;
+  release: () => Promise<void>;
+};
+
+// 1. Create dependencies
+const mockQuery = jest.fn() as jest.MockedFunction<
+  (...args: any[]) => Promise<QueryResult<any>>
+>;
+const mockRelease = jest.fn() as jest.MockedFunction<() => Promise<void>>;
+const mockClient: PoolClient = {
+  query: mockQuery,
+  release: mockRelease,
+} as unknown as PoolClient;
+const mockConnect = jest.fn(
+  () => Promise.resolve(mockClient),
+) as jest.MockedFunction<() => Promise<PoolClient>>;
+
+// 2. Mock modules
+jest.mock('../../config/database.js', () => ({
+  getPostgresPool: () => ({
+      connect: mockConnect
+  }),
+}));
+
+jest.mock('../../utils/logger.js', () => ({
+  error: jest.fn(),
+  warn: jest.fn(),
+  info: jest.fn(),
+}));
+
+jest.mock('../../utils/metrics.js', () => ({
+  PrometheusMetrics: class {
+    createCounter(): void {}
+    incrementCounter(): void {}
+  }
+}));
+
+// 3. Import Subject
+import { QuotaService } from '../QuotaService.js';
 
 describe('QuotaService', () => {
   let service: QuotaService;
+  let getEffectivePlanSpy: jest.SpiedFunction<typeof PricingEngine.getEffectivePlan>;
+  const basePlan = {
+    id: 'plan-1',
+    name: 'Test',
+    currency: 'USD',
+    features: {},
+    limits: {},
+  };
 
   beforeEach(() => {
-    service = new QuotaService();
+    jest.clearAllMocks();
+    (QuotaService as any).instance = null;
+    mockConnect.mockResolvedValue(mockClient);
+    mockRelease.mockResolvedValue(undefined);
+    mockQuery.mockResolvedValue({ rows: [{ total: '0' }] } as any);
+    getEffectivePlanSpy = jest.spyOn(PricingEngine, 'getEffectivePlan');
+    service = QuotaService.getInstance();
   });
 
-  it('allows usage when within quota', async () => {
-    await service.assert({
-      tenantId: 't1',
-      dimension: 'custom.dimension',
-      quantity: 1,
+  it('should allow if no limit is defined', async () => {
+    getEffectivePlanSpy.mockResolvedValue({
+      plan: basePlan,
+      overrides: null
     });
 
-    const quota = await service.getQuota('t1', 'custom.dimension');
-    expect(quota).not.toBeNull();
-    expect(quota?.used).toBe(1);
-    expect(quota?.limit).toBe(1000);
+    const result = await service.checkQuota({
+      tenantId: 't1',
+      kind: 'custom' as UsageKind,
+      quantity: 1
+    });
+
+    expect(result.allowed).toBe(true);
   });
 
-  it('throws QuotaExceededException when hard cap is exceeded', async () => {
-    await service.setQuota('t1', 'api.calls', 5, 'daily');
-    await service.assert({ tenantId: 't1', dimension: 'api.calls', quantity: 5 });
+  it('should deny if hard cap exceeded', async () => {
+    getEffectivePlanSpy.mockResolvedValue({
+      plan: {
+        ...basePlan,
+        limits: {
+          'custom': { hardCap: 100 }
+        },
+      },
+      overrides: null
+    });
 
-    await expect(
-      service.assert({ tenantId: 't1', dimension: 'api.calls', quantity: 1 }),
-    ).rejects.toBeInstanceOf(QuotaExceededException);
+    // Mock DB returning current usage of 95.
+    // The query returns { rows: [{ total: '95' }] }
+    mockQuery.mockResolvedValueOnce({ rows: [{ total: '95' }] });
+
+    // Requesting 10 more (95 + 10 = 105 > 100)
+    const result = await service.checkQuota({
+      tenantId: 't1',
+      kind: 'custom' as UsageKind,
+      quantity: 10
+    });
+
+    expect(result.allowed).toBe(false);
+    expect(result.remaining).toBe(0);
   });
 
-  it('resets used quota via resetQuota', async () => {
-    await service.setQuota('t1', 'graph.writes', 10, 'daily');
-    await service.assert({ tenantId: 't1', dimension: 'graph.writes', quantity: 7 });
+  it('should trigger soft threshold warning', async () => {
+    getEffectivePlanSpy.mockResolvedValue({
+      plan: {
+        ...basePlan,
+        limits: {
+          'custom': { hardCap: 100, softThresholds: [80] }
+        },
+      },
+      overrides: null
+    });
 
-    let quota = await service.getQuota('t1', 'graph.writes');
-    expect(quota?.used).toBe(7);
+    // Mock DB returning current usage of 75
+    mockQuery.mockResolvedValueOnce({ rows: [{ total: '75' }] });
 
-    await service.resetQuota('t1', 'graph.writes');
-    quota = await service.getQuota('t1', 'graph.writes');
-    expect(quota?.used).toBe(0);
+    // Requesting 10 more (75 + 10 = 85 > 80)
+    const result = await service.checkQuota({
+      tenantId: 't1',
+      kind: 'custom' as UsageKind,
+      quantity: 10
+    });
+
+    expect(result.allowed).toBe(true);
+    expect(result.softThresholdTriggered).toBe(80);
   });
 });

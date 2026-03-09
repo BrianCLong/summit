@@ -176,15 +176,21 @@ jobs:
         name: Client-Coverage
 
     - name: Upload server JUnit report
-      uses: actions/upload-artifact@0b7f8f6        name: server-junit-report
+      uses: actions/upload-artifact@0b7f8f6
+      with:
+        name: server-junit-report
         path: server/junit.xml
 
     - name: Upload client JUnit report
-      uses: actions/upload-artifact@0b7f8f6        name: client-junit-report
+      uses: actions/upload-artifact@0b7f8f6
+      with:
+        name: client-junit-report
         path: client/junit.xml
 
     - name: Publish Test Report
-      uses: dorny/test-reporter@31a54ee        name: Test Results
+      uses: dorny/test-reporter@31a54ee
+      with:
+        name: Test Results
         path: 'server/junit.xml,client/junit.xml'
         reporter: jest-junit
         fail-on-error: true

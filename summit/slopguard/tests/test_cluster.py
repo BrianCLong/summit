@@ -1,10 +1,7 @@
-import json
-import os
-
 import pytest
-
-from summit.slopguard.cluster import REGISTRY_PATH, run_cluster_analysis
-
+import os
+import json
+from summit.slopguard.cluster import run_cluster_analysis, REGISTRY_PATH
 
 @pytest.fixture(autouse=True)
 def cleanup_registry():

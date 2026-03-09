@@ -125,7 +125,7 @@ jobs:
           echo "✅ Health check passed: ${DURATION}ms"
 
       - name: Report metrics to DataDog
-        if: always()
+        if: (((((((((always()) && (failure())) && (github.event.schedule != '* * * * *' || github.run_number % 5 == 0)) && (always())) && (github.event.schedule != '* * * * *' || github.run_number % 10 == 0)) && (failure())) && (always())) && (github.event.schedule != '* * * * *' || github.run_number % 60 == 0)) && (github.event.schedule == '0 0 * * *')) && (failure())
         run: |
           curl -X POST "https://api.datadoghq.com/api/v1/series" \
             -H "Content-Type: application/json" \
@@ -166,7 +166,6 @@ jobs:
             }'
 
       - name: Alert on failure
-        if: failure()
         uses: slackapi/slack-github-action@v1
         with:
           payload: |
@@ -242,17 +241,13 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     # Run every 5 minutes (skip 4 out of 5 runs)
-    if: github.event.schedule != '* * * * *' || github.run_number % 5 == 0
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Setup Node.js
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10.0.0
-      - uses: actions/setup-node@v4
+        uses: actions/setup-node@v4
         with:
           cache: 'pnpm'
           node-version: '20'
@@ -272,7 +267,6 @@ jobs:
         id: synthetic-tests
 
       - name: Upload test results
-        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: synthetic-test-results
@@ -286,7 +280,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     # Run every 10 minutes
-    if: github.event.schedule != '* * * * *' || github.run_number % 10 == 0
 
     strategy:
       matrix:
@@ -303,10 +296,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setup Node.js
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10.0.0
-      - uses: actions/setup-node@v4
+        uses: actions/setup-node@v4
         with:
           cache: 'pnpm'
           node-version: '20'
@@ -390,7 +380,6 @@ jobs:
         id: journey-test
 
       - name: Upload failure screenshot
-        if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: journey-failure-${{ matrix.journey.name }}
@@ -399,7 +388,6 @@ jobs:
             videos/
 
       - name: Report journey metrics
-        if: always()
         run: |
           SUCCESS=${{ steps.journey-test.outcome == 'success' && '1' || '0' }}
 
@@ -426,17 +414,13 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     # Run once per hour
-    if: github.event.schedule != '* * * * *' || github.run_number % 60 == 0
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Setup Node.js
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10.0.0
-      - uses: actions/setup-node@v4
+        uses: actions/setup-node@v4
         with:
           cache: 'pnpm'
           node-version: '20'
@@ -475,7 +459,6 @@ jobs:
     name: SSL Certificate Check
     runs-on: ubuntu-latest
     # Run once per day
-    if: github.event.schedule == '0 0 * * *'
 
     steps:
       - name: Check SSL certificate
@@ -495,7 +478,6 @@ jobs:
           echo "✅ SSL certificate valid"
 
       - name: Alert on expiry
-        if: failure()
         uses: slackapi/slack-github-action@v1
         with:
           payload: |

@@ -19,7 +19,7 @@ import type {
   VideoEmbedding,
 } from './types.js';
 
-const logger: any = (pino as any)({ name: 'hallucination-guard' });
+const logger = pino({ name: 'hallucination-guard' });
 
 export interface HallucinationGuardConfig {
   crossModalThreshold: number;

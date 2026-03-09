@@ -1,7 +1,6 @@
-import os
 import subprocess
 import sys
-
+import os
 
 def test_gate_runner_no_args():
     result = subprocess.run([sys.executable, "ci/gates/gate_runner.py"], capture_output=True, text=True)

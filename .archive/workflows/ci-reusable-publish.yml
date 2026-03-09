@@ -1,0 +1,20 @@
+name: wf-reuse-publish
+on:
+  workflow_call:
+    secrets:
+      REGISTRY_USER: { required: true }
+      REGISTRY_TOKEN: { required: true }
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.REGISTRY_USER }}
+          password: ${{ secrets.REGISTRY_TOKEN }}
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ghcr.io/${{ github.repository }}:sha-${{ github.sha }}

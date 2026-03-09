@@ -8,6 +8,7 @@ inputs:
   pnpm-version:
     description: 'pnpm version'
     required: false
+    default: '8'
   install-deps:
     description: 'Whether to install dependencies'
     required: false
@@ -27,7 +28,9 @@ runs:
         registry-url: 'https://registry.npmjs.org'
 
     - name: Setup pnpm
-      uses: pnpm/action-setup@v4
+      uses: pnpm/action-setup@v2
+      with:
+        version: ${{ inputs.pnpm-version }}
 
     - name: Get pnpm store directory
       shell: bash

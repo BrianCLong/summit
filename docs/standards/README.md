@@ -25,8 +25,7 @@ This repository (`docs/standards/`) contains the authoritative specifications, s
     *Defines requirements for JSDoc, READMEs, ADRs, and this repository.*
 
 ### 04 - Requirements & Specifications
-*   [**Cognitive Security Engine (CSE) Graph Extensions Standard**](./cognitive-security-engine.md)
-    *Defines governed graph extensions, evidence rules, and scoring requirements for CSE.*
+*(Coming Soon)*
 
 ## How to Use
 

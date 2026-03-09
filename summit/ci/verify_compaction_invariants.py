@@ -1,7 +1,6 @@
+import sys
 import json
 import os
-import sys
-
 
 def verify_compaction_invariants(policy_file: str):
     print(f"Loading policy from {policy_file}...")
@@ -9,7 +8,7 @@ def verify_compaction_invariants(policy_file: str):
         print(f"Policy file not found: {policy_file}")
         sys.exit(1)
 
-    with open(policy_file) as f:
+    with open(policy_file, 'r') as f:
         policy = json.load(f)
 
     required = policy.get("required_invariants", [])

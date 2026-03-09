@@ -161,9 +161,9 @@ jobs:
           COSIGN_EXPERIMENTAL: '1'
         run: |
           IMAGE="ghcr.io/companyos/switchboard@${{ inputs.digest || env.DIGEST }}"
-          cosign verify --use-signed-timestamps --certificate-identity "repo:companyos/switchboard:ref:refs/heads/main" \
+          cosign verify --certificate-identity "repo:companyos/switchboard:ref:refs/heads/main" \
             --certificate-oidc-issuer "https://token.actions.githubusercontent.com" $IMAGE
-          cosign verify-attestation --use-signed-timestamps --type cyclonedx $IMAGE
+          cosign verify-attestation --type cyclonedx $IMAGE
       - name: Hash logs & decision trail
         run: |
           sha256sum sbom.json > sbom.sha256

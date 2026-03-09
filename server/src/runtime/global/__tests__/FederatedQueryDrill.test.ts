@@ -7,7 +7,7 @@ describe('Federated Mesh Query Drill (Task #111)', () => {
 
   it('should decompose a global search query into multiple regional sub-queries', async () => {
     const query = 'MATCH (n:Person) WHERE n.name = "BadActor" RETURN n';
-    
+
     const plan = await federatedQueryPlanner.planQuery(query, tenantId, { globalSearch: true });
 
     expect(plan.subQueries.length).toBeGreaterThan(1);
@@ -22,7 +22,7 @@ describe('Federated Mesh Query Drill (Task #111)', () => {
 
   it('should use AGGREGATE strategy for count queries', async () => {
     const query = 'MATCH (n:Event) RETURN count(n)';
-    
+
     const plan = await federatedQueryPlanner.planQuery(query, tenantId);
 
     expect(plan.mergeStrategy).toBe('AGGREGATE');
@@ -30,9 +30,9 @@ describe('Federated Mesh Query Drill (Task #111)', () => {
 
   it('should correctly identify push-down filters from WHERE clauses', async () => {
     const query = 'MATCH (e:Entity) WHERE e.type = "indicator" RETURN e';
-    
+
     const plan = await federatedQueryPlanner.planQuery(query, tenantId);
-    
+
     expect(plan.subQueries[0].pushedDownFilters).toContain('temporal_filter');
   });
 });

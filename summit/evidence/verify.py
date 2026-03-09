@@ -1,10 +1,9 @@
-import hashlib
 import json
 import os
-import re
+import hashlib
 import sys
+import re
 from pathlib import Path
-
 
 def _sha256_file(p: str) -> str:
     h = hashlib.sha256()

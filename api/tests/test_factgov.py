@@ -60,7 +60,7 @@ def test_factgov_workflow():
     vendor_id = vendor["vendor_id"]
 
     # 2. Search Vendors
-    response = client.get("/api/factgov/vendors/search?query=factflow")
+    response = client.get(f"/api/factgov/vendors/search?query=factflow")
     assert response.status_code == 200
     results = response.json()
     assert len(results) >= 1

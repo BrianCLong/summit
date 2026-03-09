@@ -1,9 +1,0 @@
-{
-  "evidence_id": "EVD-WORLD_MODEL-PLAN-003",
-  "metrics": {
-    "target_planning_success_rate_delta_pct": 30,
-    "action_types_defined": 5,
-    "rollout_depth_default": 3,
-    "policy_gate_active": true
-  }
-}

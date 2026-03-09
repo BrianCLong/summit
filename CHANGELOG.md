@@ -15,8 +15,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- ⚡ Bolt: Optimized StrategicPlanRepo to reduce database latency and round-trips by parallelizing independent queries and implementing O(1) batch hydration for child entities.
-- ⚡ Bolt: Optimized RiskRepository signals insertion with batching (chunk size 100) to reduce database round-trips.
 - Added `@summit/trends` package for business trend instrumentation.
 - Added evidence system for Forbes 2026 trends analysis.
 

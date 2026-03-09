@@ -36,7 +36,7 @@ help:
 stage:
 	@echo "== Preflight: GHCR image signing, repo status, and secrets =="
 	command -v cosign >/dev/null || { echo "Install cosign first"; exit 1; }
-	cosign verify --use-signed-timestamps --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
+	cosign verify --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
 	  --certificate-identity-regexp "https://github.com/.+" "$(IMAGE)" >/dev/null && echo "Cosign OK"
 
 	kubectl get ns "$(NS_STG)" >/dev/null 2>&1 || kubectl create ns "$(NS_STG)"

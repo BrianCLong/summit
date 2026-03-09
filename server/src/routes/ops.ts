@@ -18,9 +18,8 @@ const drService = new DisasterRecoveryService();
 const isHotReloadEnabled = () =>
   (process.env.POLICY_HOT_RELOAD || '').toLowerCase() === 'true';
 
-// All /ops routes require authentication and at least OPERATOR role
+// All /ops routes require authentication
 router.use(ensureAuthenticated);
-router.use(ensureRole(['ADMIN', 'admin', 'OPERATOR', 'operator']));
 
 /**
  * @route POST /ops/maintenance

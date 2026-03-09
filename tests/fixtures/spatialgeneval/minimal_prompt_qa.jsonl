@@ -1,4 +1,0 @@
-{"prompt_id": "P001", "scene": "living_room", "prompt_text": "A cat on a mat.", "subdomains": ["relative_position"]}
-{"question_id": "Q001", "prompt_id": "P001", "question": "Where is the cat?", "choices": ["On the mat", "Under the mat"], "answer_index": 0, "subdomain": "relative_position"}
-{"prompt_id": "P002", "scene": "kitchen", "prompt_text": "A dog in a box.", "subdomains": ["relative_position"]}
-{"question_id": "Q002", "prompt_id": "P002", "question": "Where is the dog?", "choices": ["In the box", "Outside the box"], "answer_index": 0, "subdomain": "relative_position"}

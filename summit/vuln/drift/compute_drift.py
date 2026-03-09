@@ -1,9 +1,7 @@
-from typing import Any, Dict, List
-
+from typing import List, Dict, Any
 from summit.vuln.types import VulnRecord
 
-
-def compute_drift(records: list[VulnRecord], cve_known_ids: list[str]) -> dict[str, Any]:
+def compute_drift(records: List[VulnRecord], cve_known_ids: List[str]) -> Dict[str, Any]:
     """Computes drift between ingested records and a known CVE list."""
 
     cve_known_set = set(cve_known_ids)

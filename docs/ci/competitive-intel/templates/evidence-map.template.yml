@@ -15,4 +15,3 @@ competitive-intel-<target_slug>-evidence:
   path: "docs/ci/evidence/<target_slug>/EVIDENCE.md"
   description: "Append-only evidence log"
   generator: "competitive-intel-protocol"
-

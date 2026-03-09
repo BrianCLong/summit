@@ -3,7 +3,7 @@ description: "Bundle-first Sigstore/Cosign verification with pinned cosign and e
 inputs:
   cosign_version:
     required: true
-    default: "3.0.5"
+    default: "3.0.4"
   artifact:
     required: true
   bundle:
@@ -23,14 +23,11 @@ runs:
         set -euo pipefail
         COSIGN_VERSION="${{ inputs.cosign_version }}"
         case "$COSIGN_VERSION" in
-          0.*|1.*|2.*|3.0.[0-4])
-            echo "cosign must be >= 3.0.5 due to certificate chain validation advisory"
-            exit 1
-            ;;
+          3.0.[0-3]) echo "cosign must be >= 3.0.4 due to bundle verification advisory"; exit 1;;
         esac
 
     - name: Install cosign (pinned)
-      uses: sigstore/cosign-installer@v3.7.0
+      uses: sigstore/cosign-installer@v3.5.0
       with:
         cosign-release: "v${{ inputs.cosign_version }}"
 
@@ -39,9 +36,4 @@ runs:
       run: |
         set -euo pipefail
         chmod +x .github/scripts/sigstore/verify.sh
-        .github/scripts/sigstore/verify.sh \
-          --artifact "${{ inputs.artifact }}" \
-          --bundle "${{ inputs.bundle }}" \
-          ${{ inputs.trusted_root != '' && format('--trusted-root "{0}"', inputs.trusted_root) || '' }} \
-          ${{ inputs.signing_config != '' && format('--signing-config "{0}"', inputs.signing_config) || '' }} \
-          --evidence-id "${{ inputs.evidence_id }}"
+        .github/scripts/sigstore/verify.sh           --artifact "${{ inputs.artifact }}"           --bundle "${{ inputs.bundle }}"           ${{ inputs.trusted_root != '' && format('--trusted-root "{0}"', inputs.trusted_root) || '' }}           ${{ inputs.signing_config != '' && format('--signing-config "{0}"', inputs.signing_config) || '' }}           --evidence-id "${{ inputs.evidence_id }}"

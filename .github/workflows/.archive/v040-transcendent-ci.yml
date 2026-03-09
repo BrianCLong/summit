@@ -263,17 +263,17 @@ jobs:
       - name: Run transcendent operation simulations
         run: |
           # Test transcendent intelligence enablement
-          ./opa-bin eval -d policy/v040/mc-admin-v040.rego \
+          opa eval -d policy/v040/mc-admin-v040.rego \
             -i test/fixtures/transcendent-enable-input.json \
             "data.mc.admin.v040.allow"
 
           # Test evolution proposal submission
-          ./opa-bin eval -d policy/v040/mc-admin-v040.rego \
+          opa eval -d policy/v040/mc-admin-v040.rego \
             -i test/fixtures/evolution-proposal-input.json \
             "data.mc.admin.v040.allow"
 
           # Test emergency containment
-          ./opa-bin eval -d policy/v040/mc-admin-v040.rego \
+          opa eval -d policy/v040/mc-admin-v040.rego \
             -i test/fixtures/emergency-containment-input.json \
             "data.mc.admin.v040.allow"
 

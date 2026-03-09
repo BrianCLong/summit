@@ -78,7 +78,7 @@ router.post('/reports', async (req: AuthenticatedRequest, res: Response) => {
 
 router.get('/reports', async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const sourceId = (((req.query.sourceId as string) as string) as string) as string | undefined;
+    const sourceId = req.query.sourceId as string | undefined;
     const reports = await service.listReports(req.user!.tenantId, sourceId);
     res.json(reports);
   } catch (error: any) {

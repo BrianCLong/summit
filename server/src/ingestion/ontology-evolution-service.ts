@@ -32,7 +32,7 @@ export class OntologyEvolutionService {
    */
   public async analyzeDrift(): Promise<SchemaPromotion[]> {
     logger.info('OntologyEvolution: Analyzing schema usage for evolution candidates');
-    
+
     // Simulation: We detected that 80% of "Person" entities have a "linkedin_url" custom field
     const promotions: SchemaPromotion[] = [
       {
@@ -60,7 +60,7 @@ export class OntologyEvolutionService {
    */
   private async persistSuggestions(promotions: SchemaPromotion[]): Promise<void> {
     const pool = getPostgresPool();
-    
+
     // We'll reuse the `audit_events` or similar mechanism if a dedicated table isn't needed yet
     // For now, we just log structurally
     for (const p of promotions) {

@@ -1,13 +1,13 @@
 from __future__ import annotations
 
-import json
 from pathlib import Path
 from typing import Iterable
+import json
 
 from jsonschema import Draft202012Validator
 
-from cogwar.iw.detectors.coordination import detect_coordination_anomalies
 from cogwar.iw.detectors.narrative_shift import detect_narrative_shift
+from cogwar.iw.detectors.coordination import detect_coordination_anomalies
 
 SCHEMA_PATH = Path("schemas/cogwar/iw_alert.schema.json")
 

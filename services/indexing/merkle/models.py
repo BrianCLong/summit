@@ -1,7 +1,5 @@
 from typing import Dict, List, Optional
-
-from pydantic import BaseModel, ConfigDict, Field
-
+from pydantic import BaseModel, Field, ConfigDict
 
 class MerkleNode(BaseModel):
     """A node in the Merkle tree."""
@@ -9,7 +7,7 @@ class MerkleNode(BaseModel):
     name: str  # This will be the opaque ID (HMAC) in production-ready builder
     hash: str
     is_dir: bool = False
-    children: dict[str, "MerkleNode"] = Field(default_factory=dict)
+    children: Dict[str, "MerkleNode"] = Field(default_factory=dict)
 
 MerkleNode.model_rebuild()
 

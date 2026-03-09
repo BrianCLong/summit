@@ -1,5 +1,4 @@
-from .model import Action, Record
-
+from .model import Record, Action
 
 def check_access(record: Record, principal: str, action: Action) -> bool:
     # deny-by-default

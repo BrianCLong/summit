@@ -30,4 +30,3 @@ F) Moat & Gates (controls, policies, CI enforcement)
 Legal/Licensing Guardrail:
 If an extracted idea is license-restricted, summarize at a high level and implement an
 independent design. Record the license and constraints in SOURCES.md.
-

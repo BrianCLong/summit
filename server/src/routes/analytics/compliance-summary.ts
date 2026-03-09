@@ -139,7 +139,7 @@ router.get(
   async (req: Request, res: Response): Promise<void> => {
     try {
       const principal = (req as any).principal;
-      const framework = (((req.query.framework as string) as string) as string) as string | undefined;
+      const framework = req.query.framework as string | undefined;
 
       const envelope = await complianceService.getControlStatus(
         principal.tenantId,

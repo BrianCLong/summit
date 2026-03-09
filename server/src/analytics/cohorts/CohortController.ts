@@ -2,7 +2,6 @@ import { Request, Response } from 'express';
 import { CohortEvaluator } from './CohortEvaluator.js';
 import { Cohort } from './types.js';
 import path from 'path';
-import { firstString } from '../../utils/http-param.js';
 
 // In a real app, inject config
 const LOG_DIR = process.env.TELEMETRY_LOG_DIR || path.join(process.cwd(), 'logs', 'telemetry');
@@ -21,16 +20,14 @@ export const createCohort = (req: Request, res: Response) => {
 };
 
 export const getCohort = (req: Request, res: Response) => {
-    const id = firstString(req.params.id);
-    if (!id) return res.status(400).json({ error: 'id is required' });
+    const { id } = req.params;
     const cohort = cohorts.get(id);
     if (!cohort) return res.status(404).json({ error: 'Not found' });
     res.json(cohort);
 };
 
 export const evaluateCohort = (req: Request, res: Response) => {
-    const id = firstString(req.params.id);
-    if (!id) return res.status(400).json({ error: 'id is required' });
+    const { id } = req.params;
     const cohort = cohorts.get(id);
     if (!cohort) return res.status(404).json({ error: 'Not found' });
 

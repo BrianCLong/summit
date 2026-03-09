@@ -40,7 +40,7 @@ router.post('/catalog/assets', ensureAuthenticated, ensureTenant, async (req: an
 // Search assets
 router.get('/catalog/assets', ensureAuthenticated, ensureTenant, async (req: any, res: any) => {
     try {
-        const query = (((req.query.q as string) as string) as string) as string || '';
+        const query = req.query.q as string || '';
         const assets = await catalog.searchAssets(req.user.tenantId, query);
         res.json(assets);
     } catch (err: any) {

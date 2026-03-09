@@ -1,8 +1,9 @@
-> Owner: @summit/governance
-> Last-Reviewed: 2026-02-25
-> Evidence-IDs: EVD-PLACEHOLDER
-> Status: active
+# Cloud Authorization Strategy (FedRAMP 20x)
+**Status:** Strategic Draft
+**Target:** FedRAMP Moderate / High
+**Modernization:** FedRAMP Authorization Act (2026)
 
+## 1. Vision: FedRAMP as Code
 Summit adopts a "FedRAMP 20x" posture, prioritizing machine-readable evidence (OSCAL) and continuous automated validation over static documentation. This strategy aligns with the 20x goal of reducing authorization timelines.
 
 ## 2. FedRAMP Rev5 vs. 20x Decision Tree

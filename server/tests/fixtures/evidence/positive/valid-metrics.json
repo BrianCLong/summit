@@ -1,7 +1,0 @@
-{
-  "evidence_id": "EVD-test-MODEL-001",
-  "metrics": {
-    "accuracy": 0.95,
-    "passed": true
-  }
-}

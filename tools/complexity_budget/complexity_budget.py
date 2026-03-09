@@ -1,12 +1,9 @@
 #!/usr/bin/env python3
-import json
-import os
-import re
-
+import os, json, re
 
 def count_lines(path):
     try:
-        with open(path, encoding="utf-8") as f:
+        with open(path, "r", encoding="utf-8") as f:
             return len(f.readlines())
     except Exception:
         return 0
@@ -14,7 +11,7 @@ def count_lines(path):
 def count_imports(path):
     count = 0
     try:
-        with open(path, encoding="utf-8") as f:
+        with open(path, "r", encoding="utf-8") as f:
             for line in f:
                 # Python imports
                 if path.endswith(".py"):
@@ -35,7 +32,7 @@ def main() -> int:
 
     rules_path = "policies/complexity_budget/budgets.v1.json"
     try:
-        with open(rules_path) as f:
+        with open(rules_path, "r") as f:
             config = json.load(f)
             thresholds = config.get("thresholds", {})
     except FileNotFoundError:

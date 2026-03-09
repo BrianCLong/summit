@@ -369,7 +369,7 @@ watch 'curl -s http://mc-platform:8080/qam/reweighter/test/status'
 
 ## Related Documentation
 
-- MC Platform Architecture
-- QAM Service Overview
+- [MC Platform Architecture](../docs/architecture.md)
+- [QAM Service Overview](../docs/qam-overview.md)
 - [Incident Response Playbook](./incident-response-playbook.md)
-- Monitoring & Alerting Guide
+- [Monitoring & Alerting Guide](./monitoring-guide.md)

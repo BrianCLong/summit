@@ -1,0 +1,25 @@
+name: Predictive CI (Warm)
+on:
+  pull_request_target:
+    types: [opened, synchronize]
+permissions:
+  contents: read
+  packages: write
+  actions: write
+jobs:
+  warm:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { ref: ${{ github.event.pull_request.head.sha }}, fetch-depth: 0 }
+      - uses: ./.github/actions/setup-turbo
+      - name: Build affected (speculative)
+        run: pnpm turbo run build --filter=...[origin/${{ github.base_ref }}]
+      - name: Test smoke (affected)
+        run: pnpm turbo run test --filter=...[origin/${{ github.base_ref }}] -- --passWithNoTests
+      - name: Pre-push image (optional)
+        uses: ./.github/actions/docker-build-push
+        with:
+          image: ghcr.io/${{ github.repository }}/maestro
+          context: .
+          tags: ghcr.io/${{ github.repository }}/maestro:prewarm-pr-${{ github.event.number }}

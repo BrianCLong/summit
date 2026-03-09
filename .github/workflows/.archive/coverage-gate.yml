@@ -26,7 +26,10 @@ jobs:
           node-version: '20'
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v2      - name: Install dependencies
+        uses: pnpm/action-setup@v2
+        with:
+
+      - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Run tests with coverage
@@ -139,7 +142,9 @@ jobs:
 
       - name: Upload coverage gap analysis
         if: ((always()) && (github.event_name == 'pull_request')) && (github.event_name == 'pull_request')
-        uses: actions/upload-artifact@v4          name: coverage-gap-analysis
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-gap-analysis
           path: coverage/gap-analysis.md
 
       - name: Post coverage comment on PR
@@ -187,7 +192,10 @@ jobs:
           node-version: '20'
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v2      - name: Get base coverage
+        uses: pnpm/action-setup@v2
+        with:
+
+      - name: Get base coverage
         working-directory: base
         run: |
           pnpm install --frozen-lockfile

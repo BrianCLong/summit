@@ -20,7 +20,7 @@ permissions:
 jobs:
   # Parse and route ChatOps commands
   chatops-router:
-    if: github.event.issue.pull_request
+    if: ((github.event.issue.pull_request) && (|)) && (|)
     runs-on: ubuntu-latest
     permissions:
       issues: read
@@ -88,7 +88,6 @@ jobs:
   # Handle /merge-pr command
   merge-pr:
     needs: chatops-router
-    if: |
       needs.chatops-router.outputs.command == 'merge-pr' &&
       needs.chatops-router.outputs.authorized == 'true'
     runs-on: ubuntu-latest
@@ -121,7 +120,6 @@ jobs:
   # Handle /rerun-tests command
   rerun-tests:
     needs: chatops-router
-    if: |
       needs.chatops-router.outputs.command == 'rerun-tests' &&
       needs.chatops-router.outputs.authorized == 'true'
     runs-on: ubuntu-latest
@@ -303,7 +301,7 @@ jobs:
   # Handle /status command
   status:
     needs: chatops-router
-    if: |
+    if: (|) && (|)
       needs.chatops-router.outputs.command == 'status' &&
       needs.chatops-router.outputs.authorized == 'true'
     runs-on: ubuntu-latest
@@ -351,7 +349,6 @@ jobs:
   # Handle /health-check command
   health-check:
     needs: chatops-router
-    if: |
       needs.chatops-router.outputs.command == 'health-check' &&
       needs.chatops-router.outputs.authorized == 'true'
     runs-on: ubuntu-latest
@@ -442,7 +439,7 @@ jobs:
   # Handle unauthorized commands
   unauthorized:
     needs: chatops-router
-    if: |
+    if: (|) && (|)
       needs.chatops-router.outputs.command != '' &&
       needs.chatops-router.outputs.authorized != 'true'
     runs-on: ubuntu-latest
@@ -470,7 +467,6 @@ jobs:
   # Handle unknown commands
   unknown-command:
     needs: chatops-router
-    if: |
       needs.chatops-router.outputs.command != '' &&
       needs.chatops-router.outputs.command != 'merge-pr' &&
       needs.chatops-router.outputs.command != 'rerun-tests' &&

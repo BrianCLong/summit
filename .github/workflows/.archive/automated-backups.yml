@@ -184,7 +184,9 @@ jobs:
           echo "✅ Compressed archive: ${SIZE} bytes"
       
       - name: Upload backup artifacts
-        uses: actions/upload-artifact@v4          name: database-backup-${{ steps.timestamp.outputs.timestamp }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: database-backup-${{ steps.timestamp.outputs.timestamp }}
           path: |
             ${{ env.BACKUP_PATH }}/${{ steps.timestamp.outputs.timestamp }}.tar.gz
             ${{ env.BACKUP_PATH }}/${{ steps.timestamp.outputs.timestamp }}/manifest.json

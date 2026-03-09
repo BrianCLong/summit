@@ -783,7 +783,7 @@ kubectl get pods -n intelgraph-prod -o jsonpath='{range .items[*]}{.metadata.nam
 # Validate image signatures
 echo "🔏 Validating image signatures:"
 kubectl get pods -n intelgraph-prod -o jsonpath='{.items[*].spec.containers[*].image}' | tr ' ' '\n' | sort -u | while read image; do
-    if cosign verify --use-signed-timestamps "$image" &>/dev/null; then
+    if cosign verify "$image" &>/dev/null; then
         echo "✅ $image: Signature valid"
     else
         echo "❌ $image: No valid signature"

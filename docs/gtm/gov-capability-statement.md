@@ -39,7 +39,6 @@ Summit delivers a unified intelligence analysis platform that fuses OSINT and al
 | [Reference B - Details Pending] | Threat Intel | 2024–Present | Consolidated 6 feeds into unified graph; reduced analyst duplication |
 
 **Reference Contacts:**
-
 - Col. Steve Lawlor, USAF (ret.) — [Contact Info Pending Approval]
 - John Price — [Contact Info Pending Approval]
 
@@ -48,14 +47,12 @@ Summit delivers a unified intelligence analysis platform that fuses OSINT and al
 ## Technical Environment
 
 **Architecture:**
-
 - Graph Database: Neo4j 5.x (cypher queries, provenance relationships)
 - Relational: PostgreSQL 15+ (case metadata, audit, reporting)
 - Cache/Queue: Redis, Kafka/Redpanda
 - Orchestration: Kubernetes, Helm, Terraform
 
 **Security Posture:**
-
 - SBOM/SLSA attestations
 - ABAC via Open Policy Agent (OPA)
 - DLP hooks and classification tagging
@@ -64,7 +61,6 @@ Summit delivers a unified intelligence analysis platform that fuses OSINT and al
 - FedRAMP trajectory (High baseline path)
 
 **Deployment Options:**
-
 - GovCloud (AWS/Azure)
 - On-premises (customer-managed or managed service)
 - Air-gapped (fully disconnected operations)
@@ -84,7 +80,6 @@ Summit delivers a unified intelligence analysis platform that fuses OSINT and al
 | Strategic Mission (by approval) | Varies | Varies | $40,000–$60,000 |
 
 **Includes:**
-
 - 1–2 discovery workshops
 - Environment provisioning (deployment pattern to be agreed)
 - Data source connectors (OSINT APIs, document repos, sensor feeds)
@@ -104,25 +99,21 @@ Summit delivers a unified intelligence analysis platform that fuses OSINT and al
 ## Mission Use Cases
 
 **OSINT + All-Source Fusion**
-
 - Unify documents, web sources, sensor feeds, and classified reporting into a single graph
 - Trace provenance from raw source to analytic conclusion
 - Enforce classification and data-handling rules at every step
 
 **Threat / Incident Investigation**
-
 - Link entities across cases and time
 - Timeline analysis for pattern detection
 - Rapid hypothesis generation with AI-assisted queries
 
 **Disinformation & Influence Operations**
-
 - Track narratives, actors, and amplification networks
 - Map coordinated behavior across platforms
 - Exportable evidence packages for reporting
 
 **Supply Chain / Vendor Risk**
-
 - Graph-based third-party relationships
 - Risk propagation analysis
 - Audit-ready documentation

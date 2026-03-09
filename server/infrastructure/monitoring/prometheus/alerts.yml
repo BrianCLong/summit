@@ -180,26 +180,6 @@ groups:
           summary: 'ML model accuracy degraded'
           description: 'ML model accuracy has dropped to {{ $value }}, below 85% threshold.'
 
-      - alert: HighAIJobQueue
-        expr: sum(ai_jobs_queued) > 100
-        for: 5m
-        labels:
-          severity: warning
-        annotations:
-          summary: 'High AI job queue'
-          description: 'AI job queue has {{ $value }} jobs.'
-
-  - name: agent.rules
-    rules:
-      - alert: HighAgentFailureRate
-        expr: sum(rate(agent_executions_total{status="failed"}[5m])) / sum(rate(agent_executions_total[5m])) > 0.1
-        for: 5m
-        labels:
-          severity: warning
-        annotations:
-          summary: 'High agent execution failure rate'
-          description: 'Agent execution failure rate is {{ $value | humanizePercentage }}.'
-
   - name: security.rules
     rules:
       # Security Alerts

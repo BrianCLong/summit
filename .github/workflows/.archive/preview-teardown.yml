@@ -110,13 +110,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Set up Terraform
-        if: hashFiles('infra/preview/*.tf') != ''
+        if: (hashFiles('infra/preview/*.tf') != '') && (env.CLOUD_AUTH != '')
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.9.8
 
       - name: Login cloud
-        if: env.CLOUD_AUTH != ''
         env:
           CLOUD_AUTH: ${{ secrets.CLOUD_AUTH }}
         run: |

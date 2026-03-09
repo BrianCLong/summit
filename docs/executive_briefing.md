@@ -1,16 +1,12 @@
 # Executive Briefing Documentation
 
 ## Overview
-
 This document describes the structure and governance of the Executive Brief Pack.
 
 ## Latest Briefing
-
-- **[AI Company Operating Model Comparison (2026-02-25)](executive/2026-02-25-ai-company-operating-model-comparison.md)**
 - **[Summit Platform Executive Briefing (2026-01-31)](executive/2026-01-31-summit-platform-briefing.md)**
 
 ## Fields
-
 - **pack_id**: Unique identifier for the brief.
 - **title**: Title of the brief.
 - **timeframe**: Period covered by the brief.

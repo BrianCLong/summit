@@ -12,16 +12,11 @@ const tracer = trace.getTracer('graphrag-server');
 
 // Middleware for request tracing
 function tracingMiddleware(req: Request, res: Response, next: NextFunction) {
-  const start = Date.now();
   const span = tracer.startSpan(`${req.method} ${req.path}`);
   span.setAttribute('http.method', req.method);
   span.setAttribute('http.url', req.url);
 
   res.on('finish', () => {
-    const duration = Date.now() - start;
-    httpRequestDurationMicroseconds
-      .labels(req.method, req.route ? req.route.path : req.path, res.statusCode.toString())
-      .observe(duration / 1000);
     span.setAttribute('http.status_code', res.statusCode);
     span.setStatus({
       code: res.statusCode < 400 ? SpanStatusCode.OK : SpanStatusCode.ERROR,
@@ -46,39 +41,6 @@ export function createServer(orchestrator: GraphRAGOrchestrator): express.Applic
 
   app.use(express.json({ limit: '10mb' }));
   app.use(tracingMiddleware);
-
-
-  // Metrics endpoint
-  app.get('/metrics', async (req, res) => {
-    res.set('Content-Type', client.register.contentType);
-    res.end(await client.register.metrics());
-  });
-
-  // Extended Health check for Dashboard
-  app.get('/rag-health', async (req, res) => {
-    try {
-      const health = await orchestrator.healthCheck();
-      const memoryUsage = process.memoryUsage();
-
-      res.json({
-        status: health.healthy ? 'healthy' : 'unhealthy',
-        service: 'graphrag',
-        timestamp: new Date().toISOString(),
-        uptime: process.uptime(),
-        memory: {
-          rss: Math.round(memoryUsage.rss / 1024 / 1024),
-          heapTotal: Math.round(memoryUsage.heapTotal / 1024 / 1024),
-          heapUsed: Math.round(memoryUsage.heapUsed / 1024 / 1024),
-        },
-        components: health.components
-      });
-    } catch (error) {
-      res.status(503).json({
-        status: 'unhealthy',
-        error: error instanceof Error ? error.message : 'Unknown error',
-      });
-    }
-  });
 
   // Health check
   app.get('/health', async (req, res) => {

@@ -151,7 +151,7 @@
 
 ## Personal Deliverables
 
-1. Delegation of Authority
-2. Commercial Fallback Playbook
-3. Incident Response Legal Annex
-4. Crisis Comms Go-Bag
+1. [Delegation of Authority](../../governance/delegation_of_authority.md)
+2. [Commercial Fallback Playbook](../../commercial/contracts/playbook_fallback.md)
+3. [Incident Response Legal Annex](../../legal/incident_response_annex.md)
+4. [Crisis Comms Go-Bag](../../comms/crisis/go_bag.md)

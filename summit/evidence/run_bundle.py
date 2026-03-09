@@ -1,12 +1,11 @@
 import json
+from typing import List, Dict, Any
 from dataclasses import dataclass
-from typing import Any, Dict, List
-
 
 @dataclass
 class RunBundle:
     run_id: str
-    events: list[dict[str, Any]]
+    events: List[Dict[str, Any]]
 
     def to_json(self) -> str:
         return json.dumps({"run_id": self.run_id, "events": self.events})
