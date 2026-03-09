@@ -42,7 +42,7 @@ export function createApp(): Express {
   const distDir = join(__dirname, '..', 'dist');
   app.use(express.static(distDir));
   // SPA fallback
-  app.get('*', (_req: Request, res: Response) => {
+  app.get(/.*/, (_req: Request, res: Response) => {
     res.sendFile(join(distDir, 'index.html'));
   });
 
