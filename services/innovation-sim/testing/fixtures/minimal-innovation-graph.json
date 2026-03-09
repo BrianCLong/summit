@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "id": "test-graph-001",
+    "version": "2026-03-09T00:00:00Z",
+    "description": "Minimal deterministic fixture",
+    "createdAt": "2026-03-09T00:00:00Z"
+  },
+  "nodes": [
+    {
+      "id": "tech-transformers",
+      "type": "technology",
+      "name": "Transformers",
+      "attrs": {"maturity": "mature"},
+      "evidenceRefs": [{"id": "e1", "type": "paper", "source": "arxiv:1706.03762", "observedAt": "2017-06-12T00:00:00Z", "confidence": 1.0}]
+    },
+    {
+      "id": "org-google",
+      "type": "organization",
+      "name": "Google Research",
+      "attrs": {"organizationType": "research-lab"},
+      "evidenceRefs": [{"id": "e2", "type": "manual", "source": "public-record", "observedAt": "2026-03-09T00:00:00Z", "confidence": 1.0}]
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge-001",
+      "type": "develops",
+      "from": "org-google",
+      "to": "tech-transformers",
+      "weight": 1.0,
+      "evidenceRefs": [{"id": "e3", "type": "paper", "source": "arxiv:1706.03762", "observedAt": "2017-06-12T00:00:00Z", "confidence": 1.0}]
+    }
+  ],
+  "stats": {
+    "nodeCountByType": {"technology": 1, "organization": 1},
+    "edgeCountByType": {"develops": 1},
+    "totalNodes": 2,
+    "totalEdges": 1,
+    "totalEvidenceRefs": 3,
+    "avgConfidence": 1.0
+  }
+}
