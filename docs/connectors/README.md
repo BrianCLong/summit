@@ -1,20 +1,13 @@
-# Chronicle Connector
+# Summit Connectors
 
-This connector demonstrates basic ingestion of security log data from Google Chronicle.
+Connectors are the entry points for data into the Summit platform. They extract data from external sources and push it to Switchboard for ingestion.
 
-## How to use
+## Supported Connectors
 
-1.  This connector expects log data in a JSON format, representing Chronicle UDM (Unified Data Model) events.
-2.  The `schema_mapping.py` script provides a simplified example of how Chronicle UDM events can be mapped to IntelGraph entities (e.g., `Event`, `IPAddress`, `Device`, `Person`, `Domain`, `File`).
+*   **REST APIs**: Configurable pollers for fetching JSON/XML payloads.
+*   **CSV/S3**: Batch processors for delimited files stored locally or in object storage.
+*   **Webhooks**: HTTP endpoints for receiving real-time event pushes.
+*   **Debezium**: CDC connectors for PostgreSQL and Neo4j replication.
 
-## Sample Data
-
-See `sample.json` for a basic example of Chronicle UDM events.
-
-## Schema Mapping
-
-The `schema_mapping.py` file contains the logic for converting Chronicle UDM events into IntelGraph entities. This is a simplified mapping for demonstration purposes and would need to be expanded for full Chronicle integration.
-
-## Testing
-
-Unit tests for this connector can be found in `connectors/__tests__/test_chronicle_connector.py`.
+## Creating a Custom Connector
+(Documentation coming soon)

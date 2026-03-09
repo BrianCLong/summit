@@ -1,0 +1,3 @@
+{"id": "TH-2026-001", "actor": "APT-29", "target_industry": "Financial Services", "threat_type": "Ransomware", "severity": "Critical", "description": "New variant of ransomware targeting SWIFT infrastructure."}
+{"id": "TH-2026-002", "actor": "Lazarus Group", "target_industry": "Cryptocurrency Exchanges", "threat_type": "Supply Chain Compromise", "severity": "High", "description": "Exploiting vulnerabilities in popular open-source crypto libraries."}
+{"id": "TH-2026-003", "actor": "Sandworm", "target_industry": "Energy Grid", "threat_type": "ICS/SCADA Manipulation", "severity": "Critical", "description": "Coordinated attacks on regional power distribution networks."}

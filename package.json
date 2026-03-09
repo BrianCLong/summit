@@ -6,6 +6,7 @@
   "type": "module",
   "packageManager": "pnpm@10.0.0",
   "scripts": {
+    "demo:company": "./scripts/wow.sh",
     "gate:report": "node scripts/gates/enforce_report_from_claims.mjs",
     "bootstrap": "chmod +x scripts/bootstrap.sh && scripts/bootstrap.sh",
     "verify": "npx tsx server/scripts/verify-ga-security.ts",
