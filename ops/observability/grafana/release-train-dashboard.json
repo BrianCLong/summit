@@ -371,11 +371,151 @@
           "textMode": "value_and_name",
           "colorMode": "background"
         }
+      },
+      {
+        "id": 8,
+        "title": "Gate Failure Ratio by Gate (%)",
+        "type": "timeseries",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 28 },
+        "targets": [
+          {
+            "expr": "100 * sum by (gate) (rate(rc_gate_total{result=\"fail\"}[30m])) / clamp_min(sum by (gate) (rate(rc_gate_total[30m])), 0.001)",
+            "legendFormat": "{{gate}} fail %",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 0,
+            "max": 100,
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "smooth",
+              "lineWidth": 2,
+              "fillOpacity": 15
+            },
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "color": "green", "value": null },
+                { "color": "yellow", "value": 5 },
+                { "color": "red", "value": 15 }
+              ]
+            }
+          }
+        },
+        "options": {
+          "tooltip": { "mode": "multi", "sort": "desc" },
+          "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull", "max"] }
+        }
+      },
+      {
+        "id": 9,
+        "title": "Merge Readiness Snapshot",
+        "type": "stat",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 28 },
+        "targets": [
+          {
+            "expr": "100 * sum(rate(rc_workflow_success_total[30m])) / clamp_min(sum(rate(rc_workflow_runs_total[30m])), 0.001)",
+            "legendFormat": "Workflow success ratio %",
+            "refId": "A"
+          },
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(rc_pr_time_to_merge_seconds_bucket[30m])) by (le)) / 60",
+            "legendFormat": "P95 time to merge (min)",
+            "refId": "B"
+          },
+          {
+            "expr": "increase(rc_rollback_total[24h])",
+            "legendFormat": "Rollbacks (24h)",
+            "refId": "C"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "min": 0,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "color": "red", "value": 0 },
+                { "color": "yellow", "value": 1 },
+                { "color": "green", "value": 95 }
+              ]
+            }
+          },
+          "overrides": [
+            {
+              "matcher": { "id": "byName", "options": "Workflow success ratio %" },
+              "properties": [
+                { "id": "unit", "value": "percent" },
+                { "id": "max", "value": 100 },
+                {
+                  "id": "thresholds",
+                  "value": {
+                    "mode": "absolute",
+                    "steps": [
+                      { "color": "red", "value": 0 },
+                      { "color": "yellow", "value": 90 },
+                      { "color": "green", "value": 97 }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "matcher": { "id": "byName", "options": "P95 time to merge (min)" },
+              "properties": [
+                { "id": "unit", "value": "m" },
+                {
+                  "id": "thresholds",
+                  "value": {
+                    "mode": "absolute",
+                    "steps": [
+                      { "color": "green", "value": 0 },
+                      { "color": "yellow", "value": 60 },
+                      { "color": "red", "value": 180 }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "matcher": { "id": "byName", "options": "Rollbacks (24h)" },
+              "properties": [
+                { "id": "unit", "value": "short" },
+                {
+                  "id": "thresholds",
+                  "value": {
+                    "mode": "absolute",
+                    "steps": [
+                      { "color": "green", "value": 0 },
+                      { "color": "yellow", "value": 1 },
+                      { "color": "red", "value": 3 }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "options": {
+          "reduceOptions": {
+            "values": false,
+            "calcs": ["lastNotNull"],
+            "fields": ""
+          },
+          "orientation": "horizontal",
+          "textMode": "value_and_name",
+          "colorMode": "background",
+          "graphMode": "area"
+        }
       }
     ],
     "refresh": "30s",
     "schemaVersion": 30,
-    "version": 1,
+    "version": 2,
     "links": [
       {
         "asDropdown": false,
@@ -388,6 +528,18 @@
         "tooltip": "",
         "type": "link",
         "url": "https://github.com/${GITHUB_REPOSITORY}/blob/main/RUNBOOKS/release-captain-verification.md"
+      },
+      {
+        "asDropdown": false,
+        "icon": "external link",
+        "includeVars": false,
+        "keepTime": false,
+        "tags": [],
+        "targetBlank": true,
+        "title": "Control-Plane Triage Runbook",
+        "tooltip": "",
+        "type": "link",
+        "url": "https://github.com/${GITHUB_REPOSITORY}/blob/main/ops/observability/runbooks/release-captain-control-plane.md"
       }
     ]
   }

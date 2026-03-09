@@ -1,7 +1,13 @@
 {
-  "last_updated": "2026-03-07T06:03:42Z",
-  "revision_note": "Added MCP ecosystem alignment plan and roadmap tracking entry.",
+  "last_updated": "2026-03-09T20:47:54Z",
+  "revision_note": "Hardened Release Captain control-plane observability with actionable dashboard panels, alerts, and runbook alignment.",
   "initiatives": [
+    {
+      "id": "ga-control-plane-observability-sweep-release-captain",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Added release-captain control-plane alert rules, merge-readiness dashboard panels, and runbook-linked triage paths for gate concentration, rollback spikes, and circuit-breaker events."
+    },
     {
       "id": "nature-s41562-026-02411-w-layer2-layer3",
       "status": "in_progress",
@@ -168,7 +174,7 @@
       "id": "ip-claims-continuation-pack-c451-s480",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Added defense CRM and simulation apparatus dependent claims C451–C480 and S451–S480."
+      "notes": "Added defense CRM and simulation apparatus dependent claims C451\u2013C480 and S451\u2013S480."
     },
     {
       "id": "io-cogwar-radar-2027-brief",
@@ -186,7 +192,7 @@
       "id": "ip-defense-claims-c391-s420",
       "status": "completed",
       "owner": "codex",
-      "notes": "Added CRM and Simulation Apparatus claims C391–C420/S391–S420 for graph integrity, appeals, and causal guardrails."
+      "notes": "Added CRM and Simulation Apparatus claims C391\u2013C420/S391\u2013S420 for graph integrity, appeals, and causal guardrails."
     },
     {
       "id": "spec-driven-development-docs",
