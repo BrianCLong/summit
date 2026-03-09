@@ -1,5 +1,13 @@
 {
-  "evidence_id": "evid-456",
-  "type": "log",
-  "content": {"message": "actor found"}
+  "evidence_id": "99b8d234ea723a1f4bbd0e060c1d2e3f",
+  "type": "document",
+  "source_id": "google_search:1.0.0",
+  "data": {
+    "title": "Example Corp appoints Jane Doe as CEO",
+    "snippet": "In a recent press release..."
+  },
+  "provenance": {
+    "tool_id": "google_search",
+    "timestamp": "2024-03-09T12:00:00Z"
+  }
 }

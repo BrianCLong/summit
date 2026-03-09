@@ -1,24 +1,54 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "EvidenceBundle",
+  "description": "A collection of EvidenceObjects bound together by hashes and signatures.",
   "type": "object",
   "properties": {
     "bundle_id": {
-      "type": "string"
+      "type": "string",
+      "description": "A unique, deterministic hash identifier for this bundle."
     },
-    "objects": {
+    "run_id": {
+      "type": "string",
+      "description": "The investigation run that produced this bundle."
+    },
+    "evidence_items": {
       "type": "array",
+      "description": "A deterministically ordered list of evidence references within the bundle.",
       "items": {
-        "$ref": "evidence_object.schema.json"
+        "type": "object",
+        "properties": {
+          "evidence_id": {
+            "type": "string",
+            "description": "The hash of the evidence object."
+          },
+          "path": {
+            "type": "string",
+            "description": "The relative path to the evidence object in the artifact store."
+          }
+        },
+        "required": ["evidence_id", "path"],
+        "additionalProperties": false
       }
     },
-    "manifest_hash": {
-      "type": "string"
+    "signatures": {
+      "type": "array",
+      "description": "Cryptographic signatures attesting to the integrity of this bundle.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "signer_id": {
+            "type": "string"
+          },
+          "signature": {
+            "type": "string"
+          }
+        },
+        "required": ["signer_id", "signature"],
+        "additionalProperties": false
+      }
     }
   },
-  "required": [
-    "bundle_id",
-    "objects",
-    "manifest_hash"
-  ]
+  "required": ["bundle_id", "run_id", "evidence_items", "signatures"],
+  "additionalProperties": false
 }
