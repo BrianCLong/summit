@@ -1,12 +1,16 @@
 {
-  "bundle_id": "bundle-789",
-  "objects": [
+  "bundle_id": "8a7b6c5d4e3f2a1b9c8d7e6f5a4b3c2d",
+  "run_id": "8a9c33f2112b4a11b6d0c9f13d8e5e8e",
+  "evidence_items": [
     {
-      "evidence_id": "evid-456",
-      "type": "log",
-      "content": {"message": "actor found"},
-      "hash": "abcdef123456"
+      "evidence_id": "99b8d234ea723a1f4bbd0e060c1d2e3f",
+      "path": "artifacts/evidence/99b8d234ea723a1f4bbd0e060c1d2e3f.json"
     }
   ],
-  "manifest_hash": "deadbeef9876"
+  "signatures": [
+    {
+      "signer_id": "agent:maestro:1.0",
+      "signature": "3045022100a1b2c3d4e5f6..."
+    }
+  ]
 }

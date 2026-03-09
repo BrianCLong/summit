@@ -7,6 +7,7 @@
   "packageManager": "pnpm@10.0.0",
   "scripts": {
     "gate:report": "node scripts/gates/enforce_report_from_claims.mjs",
+    "gate:schema": "node scripts/gates/validate_schemas.mjs",
     "bootstrap": "chmod +x scripts/bootstrap.sh && scripts/bootstrap.sh",
     "verify": "npx tsx server/scripts/verify-ga-security.ts",
     "verify:verbose": "tsx scripts/verify.ts --verbose",

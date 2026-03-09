@@ -1,25 +1,47 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "EvidenceObject",
+  "description": "An immutable, content-addressed artifact produced by an investigation or tool.",
   "type": "object",
   "properties": {
     "evidence_id": {
-      "type": "string"
+      "type": "string",
+      "description": "The unique, deterministic hash identifier of this evidence."
     },
     "type": {
-      "type": "string"
+      "type": "string",
+      "description": "The type of evidence (e.g., entity, relation, document)."
     },
-    "content": {
-      "type": "object"
+    "source_id": {
+      "type": "string",
+      "description": "The identifier of the source or tool that produced this evidence."
     },
-    "hash": {
-      "type": "string"
+    "data": {
+      "type": "object",
+      "description": "The deterministic content of the evidence.",
+      "additionalProperties": true
+    },
+    "provenance": {
+      "type": "object",
+      "description": "Information about how this evidence was derived.",
+      "properties": {
+        "run_id": {
+          "type": "string"
+        },
+        "tool_id": {
+          "type": "string"
+        },
+        "input_hashes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": ["run_id", "tool_id", "input_hashes"],
+      "additionalProperties": false
     }
   },
-  "required": [
-    "evidence_id",
-    "type",
-    "content",
-    "hash"
-  ]
+  "required": ["evidence_id", "type", "source_id", "data", "provenance"],
+  "additionalProperties": false
 }

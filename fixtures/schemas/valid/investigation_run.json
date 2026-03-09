@@ -1,7 +1,21 @@
 {
-  "run_id": "run-123",
-  "inputs": {"query": "Find malicious actors"},
-  "scope": {"time": "2024"},
-  "tools_invoked": ["search", "analyze"],
-  "outputs_summary": {"findings": 5}
+  "run_id": "8a9c33f2112b4a11b6d0c9f13d8e5e8e",
+  "inputs": {
+    "query": "Who is the CEO of Example Corp?"
+  },
+  "scope": {
+    "max_depth": 3,
+    "entities": ["Example Corp"]
+  },
+  "tools_invoked": [
+    {
+      "tool_id": "google_search",
+      "version": "1.0.0",
+      "input_hash": "a1b2c3d4",
+      "output_hash": "e5f6g7h8"
+    }
+  ],
+  "outputs_summary": {
+    "ceo_name": "Jane Doe"
+  }
 }
