@@ -1,13 +1,8 @@
-import hashlib
-import json
-import os
-
+import os, json, hashlib
+from summit.ingestion.notes_loader import NotesLoader
 from summit.embeddings.local_provider import LocalEmbeddingProvider
 from summit.graph.semantic_bridges import SemanticBridgeEngine
-from summit.ingestion.notes_loader import NotesLoader
 from summit.report.generator import ReportGenerator
-
-
 def main():
     notes_dir, out_dir = "samples/notes", "artifacts"
     os.makedirs(out_dir, exist_ok=True)

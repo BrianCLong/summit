@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 import sys
 from collections import Counter, defaultdict
@@ -347,9 +346,6 @@ def evaluate(
         global_violations.extend(violations)
         global_attestation_failures.extend(attestation_failures)
 
-    with open("policy/opa/cve_budget.rego", "rb") as f:
-        policy_hash = hashlib.sha256(f.read()).hexdigest()
-
     summary = {
         "generated_at": now.isoformat(),
         "scanner": vuln_report.get("scanner"),
@@ -368,7 +364,6 @@ def evaluate(
             "configured": [w.to_summary("configured", now) for w in waivers],
         },
         "policy_bundle": "policy/opa/cve_budget.rego",
-        "policy_hash": policy_hash,
     }
 
     if global_violations or global_attestation_failures or missing_services:

@@ -64,7 +64,7 @@ jobs:
         with:
           sbom: sbom.json
           fail-build: true
-          severity-cutoff: critical
+          severity-cutoff: high
           only-fixed: false
           grype-config: security/grype-allowlist.yaml
       - name: Attest SBOM

@@ -1,9 +1,7 @@
-import glob
-import json
 import os
-
+import json
+import glob
 from modules.agentplace.evaluator import AgentPlaceEvaluator
-
 
 def detect_drift():
     base_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
@@ -17,7 +15,7 @@ def detect_drift():
     scores = []
 
     for manifest_file in manifest_files:
-        with open(manifest_file) as f:
+        with open(manifest_file, 'r') as f:
             manifest = json.load(f)
         report = evaluator.evaluate(manifest)
         scores.append(report['risk_score'])

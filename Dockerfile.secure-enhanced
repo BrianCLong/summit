@@ -55,7 +55,7 @@ ENV GRAPHQL_SCHEMA_URL=$GRAPHQL_SCHEMA_URL
 RUN npm run build --workspace=server
 
 # ===== FINAL PRODUCTION STAGE =====
-FROM gcr.io/distroless/nodejs22-debian12:${DISTROLESS_TAG} AS production
+FROM gcr.io/distroless/nodejs20-debian12:${DISTROLESS_TAG} AS production
 
 # Security labels
 LABEL \

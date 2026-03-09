@@ -1,8 +1,6 @@
-from datetime import datetime
-from typing import List, Optional
-
 from pydantic import BaseModel, Field
-
+from typing import Optional, List
+from datetime import datetime
 
 class SystemQualityMetrics(BaseModel):
     defect_density: float = Field(..., description="Failing tests per line of code changed")
@@ -21,4 +19,4 @@ class SystemQualityReport(BaseModel):
     summary: str
     environment: str = "ci"
     backend: str = "systems_quality_evaluator"
-    artifacts: list[str] = []
+    artifacts: List[str] = []

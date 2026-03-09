@@ -5,8 +5,9 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import Dict, List
 
-MemoryEntry = dict[str, str]
-MemorySnapshot = dict[str, object]
+
+MemoryEntry = Dict[str, str]
+MemorySnapshot = Dict[str, object]
 
 
 class BaseMemory(ABC):
@@ -21,5 +22,5 @@ class BaseMemory(ABC):
         """Return deterministic memory state."""
 
     @abstractmethod
-    def entries(self) -> list[MemoryEntry]:
+    def entries(self) -> List[MemoryEntry]:
         """Return current entries in deterministic order."""

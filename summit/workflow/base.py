@@ -1,7 +1,6 @@
-import json
 import os
-from typing import Any, Dict
-
+import json
+from typing import Dict, Any
 
 class WorkflowValidator:
     """Base validator for dbt and Airflow workflows."""
@@ -11,7 +10,7 @@ class WorkflowValidator:
         self.artifacts_dir = "artifacts/workflow"
         os.makedirs(self.artifacts_dir, exist_ok=True)
 
-    def validate(self, path: str, adapter: str) -> dict[str, Any]:
+    def validate(self, path: str, adapter: str) -> Dict[str, Any]:
         """Validates a workflow project."""
         # Minimal scaffold logic
         report = {
@@ -32,7 +31,7 @@ class WorkflowValidator:
         self._emit_artifacts(report, metrics)
         return report
 
-    def _emit_artifacts(self, report: dict[str, Any], metrics: dict[str, Any]):
+    def _emit_artifacts(self, report: Dict[str, Any], metrics: Dict[str, Any]):
         """Emits deterministic JSON artifacts."""
         # report.json
         with open(os.path.join(self.artifacts_dir, "report.json"), "w") as f:

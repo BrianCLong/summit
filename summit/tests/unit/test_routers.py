@@ -1,10 +1,8 @@
-from unittest.mock import AsyncMock
-
-import pytest
 from fastapi.testclient import TestClient
-
 from summit.main import app
 from summit.services.shared.core_verification import CoreVerificationService
+from unittest.mock import AsyncMock
+import pytest
 
 client = TestClient(app)
 

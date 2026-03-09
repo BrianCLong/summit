@@ -1,10 +1,9 @@
-import glob
 import os
 import re
-
+import glob
 
 def fix_file(filepath):
-    with open(filepath) as f:
+    with open(filepath, 'r') as f:
         content = f.read()
 
     # Pattern: req.query.param -> (req.query.param as string)

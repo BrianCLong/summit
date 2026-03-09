@@ -14,7 +14,7 @@ from pathlib import Path
 # Add scripts directory to path to import todo_inventory
 sys.path.append(str(Path(__file__).parent))
 try:
-    from todo_inventory import DEFAULT_MARKERS, walk_paths
+    from todo_inventory import walk_paths, DEFAULT_MARKERS
 except ImportError:
     print("Error: Could not import todo_inventory. Ensure scripts/todo_inventory.py exists.")
     sys.exit(1)

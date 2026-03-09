@@ -1,23 +1,18 @@
-# IntelGraph repo assumptions
+# repo_assumptions.md
 
 ## Verified
-- Public monorepo for Summit exists
-- Node 18+, pnpm, Neo4j 5.x in quickstart
-- GraphQL + REST APIs are core
-- Collaboration/war-room and timeline issues exist
-- CI/workflow surface is large and policy/evidence oriented
+- Public repo: BrianCLong/summit
+- Present root dirs: agents, bench, benchmark, benchmarks, analysis, alerting, artifacts, RUNBOOKS, SECURITY, .github, .ci, .opa/policy
+- Present workflows: CI, agentic-evals, agentic-evals-robust, agentplace-drift, agentplace-policy, evidence-bundle-validation
 
 ## Assumed
-- `server/src/api` or equivalent GraphQL service exists
-- `client/src` or equivalent React frontend exists
-- Neo4j access is centralized behind a shared client
-- Evidence artifacts follow repo-wide conventions
-- Tenant scoping already exists outside IntelGraph
+- benchmarks/ is acceptable for new benchmark suites
+- docs/runbooks/ is acceptable for operational docs
+- artifacts/<feature>/ is acceptable for deterministic output bundles
+- alerting/ or scripts/monitoring/ is acceptable for drift jobs
 
-## Validation checklist before PR1 merges
-- Confirm exact package/workspace boundaries
-- Confirm existing GraphQL schema location
-- Confirm auth context shape
-- Confirm standard test command names
-- Confirm runbook/docs locations
-- Confirm must-not-touch branch protection workflows
+## Must-not-touch
+- Existing core GraphQL/API entrypoints without clear need
+- Existing CI policy files until required-check names are verified
+- Existing evidence-bundle schemas unless backward-compatible
+- Security policy files under .opa/policy and SECURITY without owner review

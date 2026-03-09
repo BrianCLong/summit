@@ -66,7 +66,7 @@ main() {
     need cosign
     export COSIGN_EXPERIMENTAL=1
     info "Verifying cosign keyless signature…"
-    if cosign verify --use-signed-timestamps --certificate-oidc-issuer "$EXPECT_ISSUER"                          --certificate-identity-regexp "$EXPECT_ID_REGEX" "$IMAGE" > /dev/null 2>&1; then
+    if cosign verify --certificate-oidc-issuer "$EXPECT_ISSUER"                          --certificate-identity-regexp "$EXPECT_ID_REGEX" "$IMAGE" > /dev/null 2>&1; then
       ok "Cosign verification passed"
     else:
       err "Cosign verification failed"

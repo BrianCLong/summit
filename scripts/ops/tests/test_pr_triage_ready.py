@@ -1,8 +1,7 @@
-import json
-import os
 import subprocess
+import os
+import json
 import unittest
-
 
 class TestPRTriageReady(unittest.TestCase):
     def setUp(self):
@@ -12,7 +11,7 @@ class TestPRTriageReady(unittest.TestCase):
 
         self.original_worklist_content = None
         if os.path.exists(self.worklist_path):
-            with open(self.worklist_path) as f:
+            with open(self.worklist_path, 'r') as f:
                 self.original_worklist_content = f.read()
 
         mock_worklist = [
@@ -24,7 +23,7 @@ class TestPRTriageReady(unittest.TestCase):
 
         # Patch pr_triage.ts mock data
         self.script_path = os.path.join(os.getcwd(), 'scripts/ops/pr_triage.ts')
-        with open(self.script_path) as f:
+        with open(self.script_path, 'r') as f:
             self.original_script_content = f.read()
 
         new_content = self.original_script_content.replace(

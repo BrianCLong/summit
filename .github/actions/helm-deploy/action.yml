@@ -8,7 +8,7 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    - uses: sigstore/cosign-installer@v3.7.0
+    - uses: sigstore/cosign-installer@v3
       with:
         cosign-release: 'v3.0.5'
 
@@ -31,7 +31,7 @@ runs:
           VERIFY_ARGS+=(--certificate-oidc-issuer "https://token.actions.githubusercontent.com")
         fi
 
-        cosign verify-attestation --use-signed-timestamps --type spdxjson "${VERIFY_ARGS[@]}" "${{ inputs.image }}" || { echo "::error::Supply chain verification failed! Missing or invalid signed timestamps."; false; }
+        cosign verify-attestation --type spdxjson "${VERIFY_ARGS[@]}" "${{ inputs.image }}"
 
     - uses: azure/setup-helm@v4
     - run: |

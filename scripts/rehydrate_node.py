@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 import argparse
-
 from neo4j import GraphDatabase
-
 
 def run(uri, user, pwd, ev_id):
     drv = GraphDatabase.driver(uri, auth=(user, pwd))

@@ -10,10 +10,10 @@ from pydantic import BaseModel, Field, ValidationError
 # For this prototype, we'll assume they are available or we wrap the existing engine.
 
 try:
+    from python.counter_psyops_engine import PsyOpsCounterEngine
     from intelgraph_api_client import IntelGraphAPIClient
     from intelgraph_neo4j_client import IntelGraphNeo4jClient
     from intelgraph_postgres_client import IntelGraphPostgresClient
-    from python.counter_psyops_engine import PsyOpsCounterEngine
 except ImportError:
     # Fallback mocks for development/demonstration if needed
     class PsyOpsCounterEngine: pass
@@ -28,17 +28,17 @@ logger = logging.getLogger(__name__)
 class NarrativeDetectionContract(BaseModel):
     intelgraph_narrative_id: str
     is_adversarial: bool
-    sentiment: dict[str, Any]
-    entities: list[Any]
-    source_data: dict[str, Any]
+    sentiment: Dict[str, Any]
+    entities: List[Any]
+    source_data: Dict[str, Any]
 
 class AnalysisContract(BaseModel):
-    psyops_indicators: dict[str, bool]
+    psyops_indicators: Dict[str, bool]
     narrative_analysis: NarrativeDetectionContract
 
 class CounterMessageContract(BaseModel):
     counter_message: str
-    channels: list[str]
+    channels: List[str]
     narrative_id: str
 
 class ObfuscationContract(BaseModel):
@@ -49,13 +49,13 @@ class ObfuscationContract(BaseModel):
 
 class WorkflowState(BaseModel):
     task_id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    input_data: dict[str, Any]
+    input_data: Dict[str, Any]
     detection: Optional[NarrativeDetectionContract] = None
     analysis: Optional[AnalysisContract] = None
     counter_message: Optional[CounterMessageContract] = None
     obfuscation: Optional[ObfuscationContract] = None
     status: str = "PENDING"
-    errors: list[str] = []
+    errors: List[str] = []
 
 # --- Layer 4: Guardrails ---
 
@@ -78,7 +78,7 @@ class RefinedPsyOpsOrchestrator:
         self.engine = engine
         self.postgres = postgres
 
-    async def run_workflow(self, input_data: dict[str, Any]) -> WorkflowState:
+    async def run_workflow(self, input_data: Dict[str, Any]) -> WorkflowState:
         state = WorkflowState(input_data=input_data)
         state.status = "PROCESSING"
 

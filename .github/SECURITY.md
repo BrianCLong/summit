@@ -33,28 +33,18 @@ When reporting a vulnerability, please include:
 - **Suggested fix** (if you have one)
 - **Your contact information** for follow-up
 
-### Internal Security Issues
-
-For internal security tracking, configuration issues, or tracking known/patched vulnerabilities, please use the **Security Issue Template** rather than a public issue or Security Advisory.
-
-1. Go to the [Issues tab](../../issues/new/choose)
-2. Select **Security Issue**
-3. Fill out the structured form, including the severity and affected component.
-
-This will automatically label the issue and notify the security team based on the selected severity.
-
 ### Response Timeline
 
-We are committed to responding promptly to security reports based on their severity (automated via `severity:*` labels):
+We are committed to responding promptly to security reports:
 
-| Severity | Action | Expected Timeline |
-| -------- | ------ | ----------------- |
-| **Critical** | Immediate response & emergency patch | Response within 24 hours, Patch within 72 hours |
-| **High** | Acknowledge & patch in next release | Acknowledgment within 48 hours |
-| **Moderate** | Acknowledge & patch in next release | Acknowledgment within 48 hours |
-| **Low** | Triage & schedule fix | Triage within 5 business days |
+| Timeline                   | Action                                        |
+| -------------------------- | --------------------------------------------- |
+| **Within 48 hours**        | Acknowledge receipt of your report            |
+| **Within 5 business days** | Initial triage and severity assessment        |
+| **Within 30 days**         | Provide a fix or detailed mitigation plan     |
+| **Within 90 days**         | Coordinated public disclosure (if applicable) |
 
-**Note:** Complex vulnerabilities may require additional time. We will keep you informed of progress
+**Note:** Complex vulnerabilities may require additional time. We will keep you informed of progress.
 
 ---
 

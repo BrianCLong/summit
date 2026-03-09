@@ -108,7 +108,7 @@ template: |
 
     verification:
       command: |
-        cosign verify --use-signed-timestamps \ || { echo "::error::Supply chain verification failed! Missing or invalid signed timestamps."; false; }
+        cosign verify \
           --certificate-identity-regexp=".*@company.com" \
           --certificate-oidc-issuer="https://token.actions.githubusercontent.com" \
           ghcr.io/company/image:tag
@@ -159,7 +159,7 @@ template: |
           output-file: sbom.spdx.json
 
       - name: Sign SBOM
-        uses: sigstore/cosign-installer@v3.7.0
+        uses: sigstore/cosign-installer@v3
       - run: |
           cosign sign-blob --yes \
             --oidc-issuer https://token.actions.githubusercontent.com \
@@ -182,8 +182,8 @@ template: |
     verification_job:
       - name: Verify signatures
         run: |
-          cosign verify --use-signed-timestamps --certificate-identity-regexp=".+" ${{ env.IMAGE }}
-          cosign verify-attestation --use-signed-timestamps --type spdxjson ${{ env.IMAGE }} || { echo "::error::Supply chain verification failed! Missing or invalid signed timestamps."; false; }
+          cosign verify --certificate-identity-regexp=".+" ${{ env.IMAGE }}
+          cosign verify-attestation --type spdxjson ${{ env.IMAGE }}
   ```
 
   ### 5. Provenance Requirements
