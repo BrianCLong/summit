@@ -9,7 +9,7 @@ Use this backlog to steer agents. Reorder rows to reprioritize. Keep the list sh
 | TB-01 | Harden agent guardrails in CI      | High     | done   | Jules       | Owner       | false      | Hardened `agent-contract.json`.                          |
 | TB-02 | Stand up agent activity ledger     | High     | done   | Codex       | Owner       | false      | Ledger updated in `AGENT_ACTIVITY.md`.                   |
 | TB-03 | Refresh human steering guide       | Medium   | done   | Codex       | Owner       | false      | Created `docs/HUMAN_STEERING.md`.                        |
-| TB-04 | Restricted-path coverage audit     | Medium   | ready  | Jules       | Owner       | true       | Human-only check of secrets/security folders.            |
+| TB-04 | Restricted-path coverage audit     | Medium   | done   | Jules       | Owner       | true       | Human-only check of secrets/security folders.            |
 | TB-05 | Prime Brain prompt alignment sweep | Low      | done   | Jules       | Owner       | false      | Normalized `.agentic-prompts/` (archived stale prompts). |
 
 ## How to use this backlog
