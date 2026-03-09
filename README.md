@@ -6,6 +6,20 @@
 [![Coverage](https://img.shields.io/codecov/c/github/BrianCLong/summit)](https://codecov.io/gh/BrianCLong/summit)
 [![License](https://img.shields.io/github/license/BrianCLong/summit)](LICENSE)
 
+## Try the WOW Demo (Recommended First Step!)
+
+```bash
+./scripts/wow-demo.sh
+```
+
+This:
+- Starts infra if needed
+- Ingests bundled demo OSINT data
+- Triggers a full Maestro agent swarm investigation
+- Opens UI + Neo4j browser with results
+
+Expect a full company profile report with entities, relationships, provenance trail, and semantic summaries — all local, no API keys.
+
 ## ✨ Features
 
 - **🤖 Agentic AI**: Multi-agent orchestration for autonomous research

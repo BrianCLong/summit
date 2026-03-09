@@ -1,0 +1,4 @@
+source_id,target_id,relationship_type,weight,source_doc
+ent_002,ent_001,WORKS_FOR,1.0,LinkedIn scrape 2025
+ent_001,doc_001,MENTIONED_IN,0.8,TechCrunch
+ent_002,doc_001,MENTIONED_IN,0.8,TechCrunch

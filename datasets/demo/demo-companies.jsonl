@@ -1,0 +1,2 @@
+{"id": "ent_001", "type": "Company", "name": "Acme Corp", "description": "Tech startup in Denver specializing in AI OSINT tools", "founded": "2024", "location": "Denver, CO", "source": "https://example.com/acme", "provenance_score": 0.95}
+{"id": "ent_002", "type": "Person", "name": "Jane Doe", "role": "CEO", "company_id": "ent_001", "source": "LinkedIn scrape 2025"}
