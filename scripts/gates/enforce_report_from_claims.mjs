@@ -36,6 +36,7 @@ const ALLOWLIST = new Set([
   "scripts/gates/enforce_report_from_claims.mjs",
   "packages/deepfake-detection/src/explainable/explainable-ai.ts",
   "scripts/endpoint-budget-checker.js",
+  "scripts/repoos/package-boundary-check.ts",
   "scripts/security/run-drill.ts",
   "scripts/slo-pr-report.js"
 ]);
