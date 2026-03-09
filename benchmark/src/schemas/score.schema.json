@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.dev/schemas/score.schema.json",
+  "type": "object",
+  "required": [
+    "runId",
+    "benchmarkVersion",
+    "taskId",
+    "agentId",
+    "success",
+    "metrics",
+    "weightedScore",
+    "evaluatorVersion"
+  ],
+  "properties": {
+    "runId": { "type": "string" },
+    "benchmarkVersion": { "type": "string" },
+    "taskId": { "type": "string" },
+    "agentId": { "type": "string" },
+    "success": { "type": "boolean" },
+    "metrics": {
+      "type": "object",
+      "required": ["outcome", "efficiency", "governance"],
+      "properties": {
+        "outcome": { "type": "number", "minimum": 0, "maximum": 1 },
+        "efficiency": { "type": "number", "minimum": 0, "maximum": 1 },
+        "robustness": { "type": "number", "minimum": 0, "maximum": 1 },
+        "governance": { "type": "number", "minimum": 0, "maximum": 1 },
+        "collaboration": { "type": "number", "minimum": 0, "maximum": 1 },
+        "innovationDelta": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+    "weightedScore": { "type": "number", "minimum": 0, "maximum": 1 },
+    "evaluatorVersion": { "type": "string" },
+    "notes": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "additionalProperties": false
+}
