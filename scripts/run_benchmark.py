@@ -1,8 +1,8 @@
+import importlib
 import json
 import os
 import sys
 import time
-import importlib
 from datetime import datetime
 
 # Ensure root directory is in python path
@@ -14,7 +14,7 @@ def load_class(path):
     return getattr(module, class_name)
 
 def run_benchmark(profile_path, output_dir):
-    with open(profile_path, 'r') as f:
+    with open(profile_path) as f:
         profile = json.load(f)
 
     results = {

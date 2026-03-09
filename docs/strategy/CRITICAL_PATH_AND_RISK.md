@@ -3,9 +3,11 @@
 ## The 5 Failure Modes (Ranked by Likelihood)
 
 ### 1. **Founder Burnout / Execution Paralysis** (70% probability)
+
 **The problem**: 7 products = 7x cognitive load. You get stuck context-switching, nothing ships on time.
 
 **Early warning signs**:
+
 - Week 3: Still refactoring architecture instead of talking to customers
 - Week 6: No paying customers yet, still "perfecting" the product
 - Week 9: Hired 2 engineers but they're blocked waiting for your decisions
@@ -13,6 +15,7 @@
 **Prevention protocol**:
 
 **A. Forced Prioritization (Week 1)**
+
 ```
 Pick ONE product to ship first. Kill the rest until Month 3.
 
@@ -38,6 +41,7 @@ PICK ONE. Ship it in 4 weeks. Ignore the other 6 until you have 5 paying custome
 ```
 
 **B. Weekly Forcing Functions**
+
 ```
 Every Monday 9am:
 - What shipped last week? (code deployed, customer signed, hire made)
@@ -49,6 +53,7 @@ If you didn't ship for 2 weeks, the company is dying.
 ```
 
 **C. Delegation Tripwires**
+
 ```
 Week 4: If you're still writing all the code, hire contractor immediately
 Week 8: If you're still doing customer support, hire CS person immediately
@@ -60,9 +65,11 @@ Cost of NOT delegating: You become the bottleneck; nothing scales
 ***
 
 ### 2. **No One Will Pay** (50% probability)
+
 **The problem**: Great tech, no customers. Everyone says "interesting" but no one signs contracts.
 
 **Early warning signs**:
+
 - Week 4: 20 demos, zero pilots
 - Week 8: 3 pilots, but all "we need to wait until Q3" (never happens)
 - Week 12: $0 revenue, burning $50K/month on salaries
@@ -70,6 +77,7 @@ Cost of NOT delegating: You become the bottleneck; nothing scales
 **Prevention protocol**:
 
 **A. Revenue Validation (Week 2-3)**
+
 ```
 Before you build ANYTHING beyond MVP, get LOI (Letter of Intent) from 3 customers.
 
@@ -100,6 +108,7 @@ If 10 customers say "sounds great!" but won't pay $500 for a pilot:
 ```
 
 **B. Pricing Validation (Week 4)**
+
 ```
 For every product, validate pricing BEFORE building:
 
@@ -120,6 +129,7 @@ FactGov: 12% platform fee?
 ```
 
 **C. Payment Collection (Week 5+)**
+
 ```
 Rule: NEVER do work without payment upfront (for SMB/mid-market)
 
@@ -138,9 +148,11 @@ For enterprise (>$100K contracts):
 ***
 
 ### 3. **Can't Hire Fast Enough** (40% probability)
+
 **The problem**: You find product-market fit, but can't scale because you're the only engineer.
 
 **Early warning signs**:
+
 - Week 8: 10 paying customers, but you're working 80 hours/week to support them
 - Week 12: Customer churn because you're too slow to fix bugs
 - Week 16: Can't take on new customers because you can't onboard them
@@ -148,6 +160,7 @@ For enterprise (>$100K contracts):
 **Prevention protocol**:
 
 **A. Hire Earlier Than Comfortable (Week 2-4)**
+
 ```
 DON'T wait for:
 - "Perfect" candidate
@@ -163,6 +176,7 @@ Better to hire and overpay than to lose customers because you're overwhelmed.
 ```
 
 **B. Contractor Bridge (Week 1)**
+
 ```
 While searching for full-time founding engineer:
 
@@ -185,6 +199,7 @@ Where to find:
 ```
 
 **C. Equity Budget (Week 1)**
+
 ```
 Set aside equity NOW before you need it:
 
@@ -203,9 +218,11 @@ If you wait until Week 12 to think about equity, you'll:
 ***
 
 ### 4. **Technical Debt Spiral** (30% probability)
+
 **The problem**: You ship fast, break things, accumulate tech debt. By Month 6, the codebase is unmaintainable.
 
 **Early warning signs**:
+
 - Week 8: Simple feature takes 3 days because codebase is spaghetti
 - Week 12: Production outage every week
 - Week 16: New engineer joins, says "this code is a disaster, we need to rewrite"
@@ -213,6 +230,7 @@ If you wait until Week 12 to think about equity, you'll:
 **Prevention protocol**:
 
 **A. Architecture Guardrails (Week 1)**
+
 ```
 Non-negotiable rules:
 
@@ -238,6 +256,7 @@ Non-negotiable rules:
 ```
 
 **B. Code Review Process (Week 4)**
+
 ```
 Once you have 2+ engineers:
 
@@ -266,6 +285,7 @@ If PRs are taking <1 hour, you're not reviewing carefully enough.
 ```
 
 **C. Testing Pyramid (Week 6)**
+
 ```
 Minimum viable testing:
 
@@ -289,9 +309,11 @@ If you're <30% total test coverage by Month 3, you're accumulating debt.
 ***
 
 ### 5. **Regulatory/Legal Shutdown** (10% probability, but catastrophic)
+
 **The problem**: Government says "you need license to operate" or customer sues you for false verdict.
 
 **Early warning signs**:
+
 - Week 8: Customer asks "are you SOC2 certified?" (you're not)
 - Week 12: Law firm asks "what happens if your AI is wrong and we lose case?" (you have no answer)
 - Week 16: Government agency says "we can only buy from FedRAMP vendors" (you're not)
@@ -299,6 +321,7 @@ If you're <30% total test coverage by Month 3, you're accumulating debt.
 **Prevention protocol**:
 
 **A. Legal Foundation (Week 1)**
+
 ```
 Day 1 checklist:
 □ Form Delaware C-Corp (not LLC)
@@ -322,6 +345,7 @@ This protects you from "your AI was wrong, you owe us $10M" lawsuits.
 ```
 
 **B. Compliance Roadmap (Month 2-6)**
+
 ```
 Tier 1: Required for any B2B SaaS (Month 2-3)
 □ SOC2 Type I ($15K-30K, 3-6 months)
@@ -342,6 +366,7 @@ But START the process early (SOC2 takes 6+ months).
 ```
 
 **C. Insurance (Week 4)**
+
 ```
 Day 1 insurance:
 □ General liability: $1M coverage ($500-1K/year)
@@ -457,6 +482,7 @@ The original plan had 7 products generating $30-50M ARR in Year 1.
 **That's fantasy.**
 
 **Here's reality**:
+
 - You'll launch 1-2 products in Year 1 (not 7)
 - You'll hit $2-5M ARR (not $30M)
 - You'll hire 10-15 people (not 35)
@@ -477,11 +503,13 @@ Don't try to build 7 products in parallel. That's how you build zero products.
 Forget the 7 products. Pick one:
 
 **Option A: FactFlow (Newsroom)**
+
 - Easiest to demo
 - Clear use case (election year)
 - Ship in 4 weeks
 
 **Option B: FactGov (Government)**
+
 - Hardest to build
 - But builds the moat
 - 6-12 month sales cycle

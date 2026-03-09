@@ -1,9 +1,22 @@
+# summit/core/agents/qa_agent.py
+
 class QAAgent:
+    """
+    Validates extraction outputs and monitors drift
+    """
+
     def __init__(self):
+        # TODO: setup validation rules, thresholds
         pass
 
     def run_validation(self, metrics: dict):
-        print("Running validation... TODO")
+        """
+        Run schema validation and anomaly detection
+        """
+        pass
 
     def monitor_drift(self):
-        print("Monitoring drift... TODO")
+        """
+        Scheduled check for embeddings / metric drift
+        """
+        pass

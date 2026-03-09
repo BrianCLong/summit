@@ -1,0 +1,9 @@
+{
+  "id": "EVID:graphrag:conflicting_evidence:6d4b6833",
+  "case": "conflicting_evidence",
+  "content": "This is some evidence for conflicting_evidence test number 2.",
+  "metadata": {
+    "source": "doc_2",
+    "confidence": 0.6
+  }
+}
