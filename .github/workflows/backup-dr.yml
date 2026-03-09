@@ -38,7 +38,7 @@ jobs:
           # If this runs against a remote DB, we just need clients.
 
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d44e03b00a1
         if: ${{ vars.AWS_ENABLED == 'true' }}
 
           aws-region: ${{ vars.AWS_REGION || 'us-east-1' }}

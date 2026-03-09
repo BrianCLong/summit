@@ -23,7 +23,7 @@ jobs:
     steps:
       - uses: actions/checkout @v4
 
-      - uses: aws-actions/configure-aws-credentials @v4
+      - uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d44e03b00a1
         with:
           role-to-assume: ${{ secrets.AWS_GHA_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}

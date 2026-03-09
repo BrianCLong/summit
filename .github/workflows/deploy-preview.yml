@@ -32,7 +32,7 @@ jobs:
 
       # OIDC Authentication
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d44e03b00a1
         with:
           role-to-assume: arn:aws:iam::<acct>:role/summit-preview-deployer
           aws-region: us-east-1
