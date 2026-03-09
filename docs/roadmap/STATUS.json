@@ -217,6 +217,36 @@
       "evidence_id": "EVD-ARCH-INFRA-V1"
     },
     {
+      "id": "cursor-vs-claude-subsumption-standard",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Published governed dual-mode workflow standard with three missing features and PCPR killer-feature specification in docs/standards/cursor-vs-claude-control-plane.md."
+    },
+    {
+      "id": "summit-master-subsumption-roadmap",
+      "status": "completed",
+      "owner": "codex",
+      "notes": "Unified roadmap for evaluation platform, GA evidence consistency, and multi-agent UX subsumption."
+    },
+    {
+      "id": "fsociety-deep-subsumption-governance",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Published deep subsumption governance plan for fsociety assets with evidence-locked CI and protocol alignment."
+    },
+    {
+      "id": "mcp-ecosystem-alignment",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Tighten ecosystem follow-up plan to validated summit paths and checks, ensuring MCP tools meet governance standards."
+    },
+    {
+      "id": "openclaw-agent-integration",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Governance standards for OpenClaw-class agent plane integration, including evidence artifacts and repository state verification."
+    },
+    {
       "id": "praxeology-control-plane",
       "status": "in_progress",
       "owner": "codex",

@@ -1,20 +1,32 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "Interactive Benchmark Report",
   "type": "object",
   "properties": {
-    "evidence_id": {
+    "evidenceId": {
       "type": "string",
       "pattern": "^SUMMIT-IB-[a-zA-Z0-9_]+-[a-zA-Z0-9_]+-[0-9]+$"
     },
-    "suite_id": { "type": "string" },
-    "case_id": { "type": "string" },
-    "agent_id": { "type": "string" },
-    "success": { "type": "boolean" },
-    "steps_taken": { "type": "integer" },
-    "time_elapsed_ms": { "type": "integer" },
-    "final_reward": { "type": "number" },
-    "error": { "type": "string" }
+    "suiteId": {
+      "type": "string"
+    },
+    "caseId": {
+      "type": "string"
+    },
+    "agentId": {
+      "type": "string"
+    },
+    "seed": {
+      "type": "integer"
+    },
+    "success": {
+      "type": "boolean"
+    },
+    "finalReward": {
+      "type": "number"
+    },
+    "stepsTaken": {
+      "type": "integer"
+    }
   },
-  "required": ["evidence_id", "suite_id", "case_id", "agent_id", "success", "steps_taken", "time_elapsed_ms", "final_reward"]
+  "required": ["evidenceId", "suiteId", "caseId", "agentId", "seed", "success", "finalReward", "stepsTaken"]
 }
