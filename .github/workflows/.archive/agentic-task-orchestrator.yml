@@ -47,7 +47,11 @@ jobs:
           cache: 'pnpm'
       
       - name: 📦 Install pnpm
-        uses: pnpm/action-setup@v2      - name: 📚 Install dependencies
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: 📚 Install dependencies
         run: pnpm install --frozen-lockfile
       
       - name: 🤖 Initialize Agentic Orchestrator

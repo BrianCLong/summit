@@ -1,0 +1,14 @@
+name: dbt
+
+permissions:
+  contents: read
+on: [pull_request]
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install dbt-core dbt-postgres
+      - run: dbt build --select state:modified+

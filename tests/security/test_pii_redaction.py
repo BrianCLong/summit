@@ -1,5 +1,4 @@
 import pytest
-
 from summit.security.pii import PIIRedactor, enforce_never_embed
 
 

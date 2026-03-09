@@ -91,8 +91,7 @@ export class PolicyHotReloadService {
   }
 
   async rollback(versionId: string) {
-    // Sprint 08: Automated rollback trigger check
-    // In a real system, this would verify the rollback target is stable
+    assertHotReloadEnabled();
     const previous = policyBundleStore.getCurrent();
     const version = policyBundleStore.rollback(versionId);
 

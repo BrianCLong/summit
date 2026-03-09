@@ -43,7 +43,3 @@ Please adhere to professional standards and respect all contributors.
 ## Review Process
 
 Your code will be reviewed by the "Jules" automated reviewer and/or human maintainers. Address feedback promptly.
-
-## Evidence-first tests
-
-Every non-trivial change must add an artifact + provenance to ensure that the graph intelligence pipelines adhere to our audit-grade determinism mandate. See ADR 0001 and 0002 for the artifact and provenance contracts.

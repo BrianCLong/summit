@@ -1,0 +1,136 @@
+name: CI Health Monitor
+
+on:
+  schedule:
+    # Run daily at 9 AM UTC
+    - cron: '0 9 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  monitor-ci-health:
+    runs-on: ubuntu-latest
+    name: Monitor CI Pipeline Health
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check recent workflow runs
+        id: workflow_check
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: runs } = await github.rest.actions.listWorkflowRuns({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              per_page: 100,
+              created: `>${new Date(Date.now() - 7*24*60*60*1000).toISOString().split('T')[0]}`
+            });
+
+            const stats = {
+              total: runs.workflow_runs.length,
+              success: 0,
+              failure: 0,
+              cancelled: 0,
+              skipped: 0,
+              avg_duration: 0,
+              timeout_failures: 0,
+              flaky_tests: 0
+            };
+
+            let total_duration = 0;
+
+            runs.workflow_runs.forEach(run => {
+              if (run.status === 'completed') {
+                if (run.conclusion === 'success') stats.success++;
+                else if (run.conclusion === 'failure') stats.failure++;
+                else if (run.conclusion === 'cancelled') stats.cancelled++;
+                else if (run.conclusion === 'skipped') stats.skipped++;
+              }
+              if (run.run_duration_ms) {
+                total_duration += run.run_duration_ms;
+              }
+            });
+
+            stats.avg_duration = Math.round(total_duration / stats.total / 60000) || 0;
+            const success_rate = stats.total > 0 ? Math.round((stats.success / stats.total) * 100) : 0;
+
+            console.log('CI Health Report');
+            console.log(`Total runs (7 days): ${stats.total}`);
+            console.log(`Success rate: ${success_rate}%`);
+            console.log(`Avg duration: ${stats.avg_duration} min`);
+            console.log(`Failures: ${stats.failure}`);
+
+            core.setOutput('success_rate', success_rate);
+            core.setOutput('total_runs', stats.total);
+            core.setOutput('failure_count', stats.failure);
+            core.setOutput('avg_duration', stats.avg_duration);
+
+      - name: Create health check issue
+        if: steps.workflow_check.outputs.success_rate < 95
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const success_rate = parseInt('${{ steps.workflow_check.outputs.success_rate }}');
+            const failure_count = parseInt('${{ steps.workflow_check.outputs.failure_count }}');
+
+            const issue_title = `CI Health Alert: Success rate dropped to ${success_rate}%`;
+            const issue_body = `## CI Health Report
+
+            **Success Rate**: ${success_rate}% (below 95% threshold)
+            **Failures in Last 7 Days**: ${failure_count}
+            **Average Job Duration**: ${{ steps.workflow_check.outputs.avg_duration }} minutes
+
+            ### Recommendations
+            - Review recent workflow failures
+            - Check for flaky tests
+            - Verify resource availability
+            - Check for timeout issues
+
+            ### Actions
+            - [ ] Investigate top failure causes
+            - [ ] Update flaky test tracking
+            - [ ] Monitor cache hit rates
+            - [ ] Check runner utilization`;
+
+            try {
+              const { data: existingIssue } = await github.rest.issues.listForRepo({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                state: 'open',
+                labels: ['ci-health']
+              });
+
+              if (existingIssue.length === 0) {
+                await github.rest.issues.create({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  title: issue_title,
+                  body: issue_body,
+                  labels: ['ci-health', 'automated']
+                });
+              }
+            } catch(error) {
+              console.log('Could not create issue:', error);
+            }
+
+      - name: Post to workflow summary
+        run: |
+          echo "## CI Health Check Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Metrics" >> $GITHUB_STEP_SUMMARY
+          echo "- Total Runs (7d): ${{ steps.workflow_check.outputs.total_runs }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Success Rate: ${{ steps.workflow_check.outputs.success_rate }}%" >> $GITHUB_STEP_SUMMARY
+          echo "- Failures: ${{ steps.workflow_check.outputs.failure_count }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Avg Duration: ${{ steps.workflow_check.outputs.avg_duration }} min" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Action Items" >> $GITHUB_STEP_SUMMARY
+          echo "- Check recent PR comments for CI issues" >> $GITHUB_STEP_SUMMARY
+          echo "- Review timeout incidents" >> $GITHUB_STEP_SUMMARY
+          echo "- Monitor cache effectiveness" >> $GITHUB_STEP_SUMMARY

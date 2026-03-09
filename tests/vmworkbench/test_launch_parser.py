@@ -1,8 +1,6 @@
-import os
 import unittest
-
+import os
 from vmworkbench.adapters.qemu.launch_script_parser import parse_launch_script
-
 
 class TestLaunchScriptParser(unittest.TestCase):
     def test_basic_parse(self):
@@ -43,7 +41,7 @@ class TestLaunchScriptParser(unittest.TestCase):
         # Test allow
         allow_path = os.path.join(fixtures_dir, "allow", "basic_qemu.sh")
         if os.path.exists(allow_path):
-            with open(allow_path) as f:
+            with open(allow_path, 'r') as f:
                 content = f.read()
                 result = parse_launch_script(content)
                 self.assertEqual(result["qemu_bin"], "qemu-system-x86_64")
@@ -51,7 +49,7 @@ class TestLaunchScriptParser(unittest.TestCase):
         # Test deny
         deny_path = os.path.join(fixtures_dir, "deny", "pipe.sh")
         if os.path.exists(deny_path):
-            with open(deny_path) as f:
+            with open(deny_path, 'r') as f:
                 content = f.read()
                 with self.assertRaises(ValueError):
                     parse_launch_script(content)

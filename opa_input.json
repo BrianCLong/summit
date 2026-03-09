@@ -18,7 +18,7 @@
   },
   "trust_policy": {
     "ga_gate": {
-      "freeze_mode": "advisory"
+      "freeze_mode": "blocking"
     }
   }
 }

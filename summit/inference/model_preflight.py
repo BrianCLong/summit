@@ -1,13 +1,11 @@
 from __future__ import annotations
-
 from dataclasses import dataclass
 from typing import List, Optional
-
 
 @dataclass(frozen=True)
 class Preflight:
     model_id: str
-    architectures: list[str]
+    architectures: List[str]
     requires_remote_code: bool
     license: Optional[str] = None
 

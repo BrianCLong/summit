@@ -22,7 +22,7 @@ import {
   securityHeaders,
 } from './middleware/security.js';
 import { RBACManager } from '../../../packages/authentication/src/rbac/rbac-manager.js';
-import { auditSink, IAuditSink } from '../../../server/src/audit/sink.js';
+import { auditSink, IAuditSink } from '../../server/src/audit/sink.js';
 
 export interface ApiDependencies extends Partial<GetReceiptDependencies> {
   decisionStore?: PolicyDecisionStore;

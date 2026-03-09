@@ -1,0 +1,13 @@
+# Archived Agentic Prompts
+
+Completed task prompts are moved here after PR merge.
+
+Organized by year-month:
+```
+archived/
+  2025-11/
+    task-001-feature-name.md
+    task-002-bug-fix.md
+  2025-12/
+    task-003-refactoring.md
+```

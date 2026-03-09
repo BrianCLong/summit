@@ -1,8 +1,12 @@
-> Owner: Governance
-> Last-Reviewed: 2026-01-14
-> Evidence-IDs: EVD-PLACEHOLDER
-> Status: active
+Owner: Governance
+Last-Reviewed: 2026-01-14
+Evidence-IDs: none
+Status: active
 
+# Epic 5: Security for AI Systems (LLMs are new attack surfaces)
+
+1.  Threat model AI features: prompt injection, data exfiltration, tool abuse, jailbreaks.
+2.  Implement prompt injection defenses: sanitization, tool permissioning, context isolation.
 3.  Restrict tool execution with allowlists and policy checks (least privilege).
 4.  Implement output filtering for sensitive data leakage.
 5.  Secure RAG: access controls on retrieval corpora, tenant isolation, logging.

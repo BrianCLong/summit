@@ -1,25 +1,37 @@
+// @ts-nocheck
 import { Router } from 'express';
-import { createCheckout } from '@summit/billing';
-import logger from '../config/logger.js';
-import { ensureAuthenticated } from '../middleware/auth.js';
+import express from 'express';
+import { replayGuard, webhookRatelimit } from '../middleware/webhook-guard.js';
+import Stripe from 'stripe';
+import { hmacHex, safeEqual } from '../utils/signature.js';
 
 const router = Router();
 
-router.post('/checkout', ensureAuthenticated, async (req, res) => {
-  const { plan } = req.body;
-  const tenantId = (req as any).user?.tenantId || (req as any).user?.tenant_id;
-
-  if (!tenantId) {
-    return res.status(401).json({ error: 'Unauthorized: Tenant context required' });
-  }
-
-  try {
-    const session = await createCheckout(tenantId, plan);
-    res.json({ url: session.url });
-  } catch (err: any) {
-    logger.error({ err: err.message, tenantId, plan }, 'Failed to create Stripe checkout session');
-    res.status(500).json({ error: err.message });
-  }
+const stripe = new Stripe(process.env.STRIPE_API_KEY || '', {
+  apiVersion: '2024-06-20',
 });
+
+router.post(
+  '/events',
+  webhookRatelimit,
+  replayGuard(),
+  express.raw({ type: '*/*', limit: '1mb' }),
+  (req, res) => {
+    const secret = process.env.STRIPE_WEBHOOK_SECRET;
+    if (!secret) return res.status(503).send('webhook disabled');
+    try {
+      const sig = req.header('Stripe-Signature') || '';
+      const event = stripe.webhooks.constructEvent(
+        req.body as Buffer,
+        sig,
+        secret,
+      );
+      // handle event.type as needed
+      return res.sendStatus(200);
+    } catch {
+      return res.status(400).send('bad signature');
+    }
+  },
+);
 
 export default router;

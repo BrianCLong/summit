@@ -1,7 +1,0 @@
-{
-  "promotion_eligible": true,
-  "required_attestations": [
-    "qa_approval"
-  ],
-  "violations": []
-}

@@ -231,7 +231,7 @@ ok "Preflight OK"
 - `export ORG=BrianCLong/intelgraph; export CHART=intelgraph; export VERSION=1.0.0`
 - `helm registry login ghcr.io -u <gh-user> -p <token>` (if private)
 - `helm pull oci://ghcr.io/$ORG/charts/$CHART --version $VERSION -d ./charts`
-- `cosign verify --use-signed-timestamps ghcr.io/$ORG/charts/$CHART:$VERSION --certificate-oidc-issuer https://token.actions.githubusercontent.com --certificate-identity-regexp ".*github.com/$ORG.*"`
+- `cosign verify ghcr.io/$ORG/charts/$CHART:$VERSION --certificate-oidc-issuer https://token.actions.githubusercontent.com --certificate-identity-regexp ".*github.com/$ORG.*"`
 
 **6–10 min**: Prepare values
 
@@ -283,7 +283,7 @@ onboarding-preflight:
 
 onboarding-install:
 	helm pull oci://ghcr.io/$(ORG)/charts/$(CHART) --version $(VERSION) -d ./charts
-	cosign verify --use-signed-timestamps ghcr.io/$(ORG)/charts/$(CHART):$(VERSION) \
+	cosign verify ghcr.io/$(ORG)/charts/$(CHART):$(VERSION) \
 	  --certificate-oidc-issuer https://token.actions.githubusercontent.com \
 	  --certificate-identity-regexp ".*github.com/$(ORG).*"
 	helm upgrade --install intelgraph ./charts/$(CHART)-$(VERSION).tgz -n intelgraph --create-namespace -f onboarding/values-sample.yaml

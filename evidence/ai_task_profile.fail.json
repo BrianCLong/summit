@@ -1,6 +1,0 @@
-{
-  "task_type": "banking_ledger",
-  "output_determinism_required": true,
-  "regulatory_exposure": "high",
-  "chosen_modality": "genai"
-}

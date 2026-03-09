@@ -1,16 +1,14 @@
-import datetime
-import hashlib
 import json
+import hashlib
+import datetime
 import os
 import subprocess
-
-# Fix path import issue if running from root
-import sys
 from pathlib import Path
-
 from ingest import normalize_items
 from services.ttp_mapper.src.mapper import map_items
 
+# Fix path import issue if running from root
+import sys
 sys.path.append(os.getcwd())
 
 def get_git_commit():
@@ -20,7 +18,7 @@ def get_git_commit():
         return "unknown"
 
 def generate_evid(source_url_hash):
-    date_str = datetime.datetime.now(datetime.UTC).strftime("%Y%m%d")
+    date_str = datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%d")
     return f"EVID-cti-{date_str}-{source_url_hash[:8]}"
 
 def main():
@@ -60,7 +58,7 @@ def main():
     # report.json
     report = {
         "evidence_id": evid,
-        "item_slug": f"cti-subsumption-{datetime.datetime.now(datetime.UTC).strftime('%Y%m%d')}",
+        "item_slug": f"cti-subsumption-{datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%d')}",
         "claims": all_claims,
         "decisions": [],
         "findings": findings
@@ -84,7 +82,7 @@ def main():
     # stamp.json
     stamp = {
         "evidence_id": evid,
-        "generated_at": datetime.datetime.now(datetime.UTC).isoformat(),
+        "generated_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
         "tool_versions": {
             "pipeline": "1.0.0",
             "git_commit": get_git_commit(),

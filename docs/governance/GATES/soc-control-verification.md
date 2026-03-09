@@ -1,8 +1,7 @@
-> Owner: Governance
-> Last-Reviewed: 2026-01-14
-> Evidence-IDs: soc-compliance-report
-> Status: active
-
+Owner: Governance
+Last-Reviewed: 2026-01-14
+Evidence-IDs: soc-compliance-report
+Status: active
 
 # SOC Control Verification Gate
 

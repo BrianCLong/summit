@@ -1,7 +1,0 @@
-{
-  "archive": {
-    "records": [
-      { "id": "arc-1", "service": "wayback", "url": "https://web.archive.org/web/20240202/https://example.org/a" }
-    ]
-  }
-}

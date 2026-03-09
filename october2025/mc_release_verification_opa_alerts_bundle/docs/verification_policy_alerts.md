@@ -4,7 +4,7 @@
 
 Use `release.verify-attestation.yml` to verify SLSA attestations for an OCI image or to check a local artifact placeholder.
 
-- Recommended: publish images (or attestations) to a registry and verify with `cosign verify-attestation --use-signed-timestamps --type slsaprovenance`.
+- Recommended: publish images (or attestations) to a registry and verify with `cosign verify-attestation --type slsaprovenance`.
 - For file-based flows, wire your attestation retrieval and set `provenance_present=true` before OPA evaluation.
 
 ## OPA Release Gate

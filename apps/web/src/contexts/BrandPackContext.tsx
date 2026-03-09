@@ -109,9 +109,9 @@ const defaultBrandPack: BrandPack = {
       lg: Number(tokens.spacing.xl),
     },
     shadows: {
-      sm: String(tokens.shadows.sm),
-      md: String(tokens.shadows.md),
-      lg: String(tokens.shadows.lg),
+      sm: tokens.shadows.sm,
+      md: tokens.shadows.md,
+      lg: tokens.shadows.lg,
     },
   },
   updatedAt: '2026-01-05T02:02:27Z',

@@ -12,7 +12,7 @@
     "typecheck": "tsc --noEmit",
     "lint": "ESLINT_USE_FLAT_CONFIG=false eslint \"src/**/*.ts\"",
     "test": "jest",
-    "test:golden": "jest --testPathPatterns=golden",
+    "test:golden": "jest --testPathPattern=golden",
     "clean": "rm -rf dist"
   },
   "dependencies": {

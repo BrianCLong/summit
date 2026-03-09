@@ -137,36 +137,6 @@ export class WebSocketServer {
       res.status(200).json({ alive: true });
     });
 
-
-    // Dev metrics endpoint
-    if (process.env.NODE_ENV !== 'production') {
-      this.app.get('/_dev/ws-metrics', async (req, res) => {
-        try {
-          const jsonMetrics = await metrics.register.getMetricsAsJSON();
-          const relevantNames = [
-            'websocket_active_connections',
-            'websocket_connections_total',
-            'websocket_messages_received_total',
-            'websocket_messages_sent_total',
-            'websocket_messages_dropped_total'
-          ];
-
-          const snapshot = jsonMetrics
-            .filter(m => relevantNames.includes(m.name))
-            .map(m => ({
-                name: m.name,
-                help: m.help,
-                type: m.type,
-                values: m.values
-            }));
-
-          res.json(snapshot);
-        } catch (error) {
-           logger.error({ error: (error as Error).message }, 'Failed to get dev metrics');
-           res.status(500).json({ error: 'Failed to get dev metrics' });
-        }
-      });
-    }
     // Metrics endpoint
     this.app.get('/metrics', async (req, res) => {
       try {

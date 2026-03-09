@@ -1,19 +1,6 @@
 from .base import Ingestor
 from .pastebin import PastebinIngestor
+from .rss import RSSIngestor
+from .twitter import TwitterIngestor
 
-try:
-    from .rss import RSSIngestor
-except ImportError:  # pragma: no cover - optional dependency
-    RSSIngestor = None  # type: ignore[assignment]
-
-try:
-    from .twitter import TwitterIngestor
-except ImportError:  # pragma: no cover - optional dependency
-    TwitterIngestor = None  # type: ignore[assignment]
-
-__all__ = [
-    "Ingestor",
-    "PastebinIngestor",
-    "RSSIngestor",
-    "TwitterIngestor",
-]
+__all__ = ["Ingestor", "PastebinIngestor", "RSSIngestor", "TwitterIngestor"]

@@ -6,7 +6,6 @@ import { z } from 'zod';
 import {
   register,
   webVitalValue,
-  webVitalDurationSeconds,
   goldenPathStepTotal,
   uiErrorBoundaryCatchTotal,
   maestroDeploymentsTotal,
@@ -432,15 +431,6 @@ router.post('/web-vitals', (req: Request, res: Response) => {
 
   try {
     webVitalValue.set({ metric: name, id: id || 'unknown' }, value);
-
-    // Also observe into histogram. Note: CLS is unitless (0-1), LCP/INP are milliseconds.
-    // Convert LCP/INP/FID/TTFB/FCP to seconds.
-    let observedValue = value;
-    if (['LCP', 'INP', 'FID', 'TTFB', 'FCP'].includes(name)) {
-      observedValue = value / 1000;
-    }
-    webVitalDurationSeconds.observe({ metric: name }, observedValue);
-
     res.status(204).end();
   } catch (error: any) {
     res

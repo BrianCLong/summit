@@ -1,8 +1,7 @@
-> Owner: @intelgraph/policy-team
-> Last-Reviewed: 2026-01-27
-> Evidence-IDs: EVID-OSINT-TURN-004
-> Status: active
-
+Owner: @intelgraph/policy-team
+Last-Reviewed: 2026-01-27
+Evidence-IDs: EVID-OSINT-TURN-004
+Status: active
 
 # AI Regulatory Compliance Map
 

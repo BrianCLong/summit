@@ -62,55 +62,39 @@ The Summit/IntelGraph platform now includes a comprehensive internationalization
 
 ### Package Structure
 
-```text
-
+```
 @intelgraph/i18n/
 ├── src/
 │   ├── config/
 │   │   ├── i18next.ts         # i18next configuration
-
 │   │   └── locales.ts         # Locale definitions
-
 │   ├── hooks/
 │   │   └── useI18n.ts         # React hook
-
 │   ├── components/
 │   │   ├── I18nProvider.tsx   # Provider component
-
 │   │   └── LanguageSwitcher.tsx # Language selector UI
-
 │   ├── utils/
 │   │   └── validation.ts      # Translation validation
-
 │   └── types/
 │       └── index.ts           # TypeScript types
-
 ├── locales/
 │   ├── en-US/                 # Base locale
-
 │   │   ├── common.json
 │   │   ├── auth.json
 │   │   ├── navigation.json
 │   │   └── dashboard.json
 │   ├── es-ES/                 # Spanish
-
 │   ├── ar-SA/                 # Arabic (RTL)
-
 │   └── .../                   # 37 more locales
-
 ├── scripts/
 │   ├── extract-strings.js     # String extraction CLI
-
 │   └── validate-translations.js # Validation CLI
-
 └── README.md
-
-```text
+```
 
 ### Data Flow
 
-```text
-
+```
 User Action (change language)
     ↓
 useI18n hook
@@ -124,8 +108,7 @@ Update React context
 Components re-render with new translations
     ↓
 Update HTML dir/lang attributes (RTL support)
-
-```text
+```
 
 ### Storage
 
@@ -142,8 +125,7 @@ Update HTML dir/lang attributes (RTL support)
 ```bash
 cd summit
 pnpm add @intelgraph/i18n
-
-```text
+```
 
 ### 2. App Setup
 
@@ -159,8 +141,7 @@ function Root() {
     </I18nProvider>
   );
 }
-
-```text
+```
 
 ### 3. Use in Components
 
@@ -179,8 +160,7 @@ function Dashboard() {
     </div>
   );
 }
-
-```text
+```
 
 ### 4. Add Language Switcher
 
@@ -196,8 +176,7 @@ function Header() {
     </header>
   );
 }
-
-```text
+```
 
 ---
 
@@ -223,8 +202,7 @@ Use namespaced, hierarchical keys:
     }
   }
 }
-
-```text
+```
 
 ### Translation Function
 
@@ -246,8 +224,7 @@ t('button.submit', {}, { context: 'form' })
 
 // With default value
 t('custom.key', {}, { defaultValue: 'Fallback text' })
-
-```text
+```
 
 ### Pluralization
 
@@ -265,8 +242,7 @@ Use ICU message format for complex pluralization:
   "file_many": "{count} files",
   "file_other": "{count} files"
 }
-
-```text
+```
 
 Arabic has 6 plural forms (zero, one, two, few, many, other)!
 
@@ -302,8 +278,7 @@ formatRelativeTime(new Date(Date.now() - 3600000));
 // en-US: "1 hour ago"
 // es-ES: "hace 1 hora"
 // de-DE: "vor 1 Stunde"
-
-```text
+```
 
 ### Creating New Translations
 
@@ -320,21 +295,17 @@ formatRelativeTime(new Date(Date.now() - 3600000));
 
 ```bash
 # 1. Create locale directory
-
 mkdir -p packages/i18n/locales/fr-FR
 
 # 2. Copy base locale files
-
 cp packages/i18n/locales/en-US/*.json packages/i18n/locales/fr-FR/
 
 # 3. Translate all strings in fr-FR/*.json
 
 # 4. Validate
-
 cd packages/i18n
 pnpm validate --locales ./locales --base en-US
-
-```text
+```
 
 ### String Extraction
 
@@ -344,18 +315,15 @@ Extract hardcoded strings from source code:
 cd packages/i18n
 
 # Preview extraction (dry run)
-
 node scripts/extract-strings.js ../../apps/web/src --dry-run
 
 # Extract to file
-
 node scripts/extract-strings.js ../../apps/web/src \
   --output ./extracted \
   --namespace extracted
 
 # Review extracted/extracted.json and organize keys
-
-```text
+```
 
 ### Translation Validation
 
@@ -365,22 +333,17 @@ Check translation completeness and correctness:
 cd packages/i18n
 
 # Validate all translations
-
 pnpm validate
 
 # Verbose output with detailed issues
-
 pnpm validate --verbose
 
 # Generate JSON report
-
 pnpm validate --report validation-report.json
 
 # Custom options
-
 pnpm validate --locales ./locales --base en-US
-
-```text
+```
 
 ### Quality Checks
 
@@ -395,8 +358,7 @@ The validation tool checks for:
 
 ### Translation Workflow
 
-```text
-
+```
 Developer writes feature
     ↓
 Uses t('key') for all strings
@@ -414,8 +376,7 @@ Run pnpm validate before commit
 CI validates again
     ↓
 Merge
-
-```text
+```
 
 ---
 
@@ -435,8 +396,7 @@ const { isRTL, direction } = useI18n();
 <div dir={direction}>
   {/* Content automatically mirrors */}
 </div>
-
-```text
+```
 
 ### CSS Considerations
 
@@ -457,8 +417,7 @@ padding-right: 0.5rem;
 /* ✅ Use logical properties */
 margin-inline-start: 1rem;
 padding-inline-end: 0.5rem;
-
-```text
+```
 
 ### RTL Testing Checklist
 
@@ -486,8 +445,7 @@ Use `dir="ltr"` to override:
 ```tsx
 <code dir="ltr">const x = 42;</code>
 <span dir="ltr">{entityId}</span>
-
-```text
+```
 
 ---
 
@@ -496,20 +454,16 @@ Use `dir="ltr"` to override:
 ### 1. Always Use Translation Keys
 
 ❌ **Bad:**
-
 ```tsx
 <button>Save</button>
 <h1>Dashboard</h1>
-
-```text
+```
 
 ✅ **Good:**
-
 ```tsx
 <button>{t('common.save')}</button>
 <h1>{t('dashboard.title')}</h1>
-
-```text
+```
 
 ### 2. Organize Keys Logically
 
@@ -530,42 +484,33 @@ Use namespaces and hierarchies:
     }
   }
 }
-
-```text
+```
 
 ### 3. Parameterize Dynamic Content
 
 ❌ **Bad:**
-
 ```tsx
 {t('welcome')} {userName}
 {count} {t('items')}
-
-```text
+```
 
 ✅ **Good:**
-
 ```tsx
 {t('welcomeBack', { name: userName })}
 {t('item', { count })}
-
-```text
+```
 
 ### 4. Handle Pluralization Properly
 
 ❌ **Bad:**
-
 ```tsx
 {count} {count === 1 ? 'item' : 'items'}
-
-```text
+```
 
 ✅ **Good:**
-
 ```tsx
 {t('item', { count })}
-
-```text
+```
 
 ### 5. Don't Translate Technical Terms
 
@@ -595,8 +540,7 @@ Use descriptive keys and add comments:
     "submit_search": "Search"     // Search-specific
   }
 }
-
-```text
+```
 
 ### 7. Test with Long Translations
 
@@ -611,8 +555,7 @@ const longText = "Aufmerksamkeitsverwaltungssystem";
 
 // Or flexible layouts
 <div className="flex flex-wrap">{t('key')}</div>
-
-```text
+```
 
 ### 8. Keep Keys Stable
 
@@ -629,8 +572,7 @@ Don't change translation keys after deployment - it breaks existing translations
   "oldKey": "Value",   // Keep for backward compat
   "newKey": "Value"    // Add new
 }
-
-```text
+```
 
 ---
 
@@ -640,17 +582,14 @@ Don't change translation keys after deployment - it breaks existing translations
 
 ```bash
 # Run in CI/CD pipeline
-
 pnpm validate --report validation-report.json
 
 # Fail CI if coverage < 90%
-
 if [ $(jq '.summary.coverage' report.json) < 90 ]; then
   echo "Translation coverage below 90%"
   exit 1
 fi
-
-```text
+```
 
 ### Manual QA Checklist
 
@@ -689,8 +628,7 @@ i18n.changeLanguage('fr-FR');
 
 // ✅ Cached after first load
 i18n.changeLanguage('fr-FR'); // Instant (cached)
-
-```text
+```
 
 ### Bundle Size
 
@@ -714,8 +652,7 @@ useEffect(() => {
     loadTranslationBundle(browserLang as Locale, 'common');
   }
 }, []);
-
-```text
+```
 
 ---
 
@@ -782,8 +719,7 @@ The new system is largely compatible with the legacy system:
 
 ```bash
 pnpm add @intelgraph/i18n
-
-```text
+```
 
 #### Step 2: Update Imports
 
@@ -794,8 +730,7 @@ import LocaleSelector from '../components/i18n/LocaleSelector';
 
 // New
 import { useI18n, LanguageSwitcher } from '@intelgraph/i18n';
-
-```text
+```
 
 #### Step 3: Update Provider
 
@@ -809,8 +744,7 @@ import { useI18n, LanguageSwitcher } from '@intelgraph/i18n';
 <I18nProvider defaultLocale="en-US" fallbackLocale="en-US">
   <App />
 </I18nProvider>
-
-```text
+```
 
 #### Step 4: Update Components
 
@@ -822,22 +756,18 @@ const { t, locale, setLocale, formatDate } = useI18n();
 
 // ✅ New features
 const { isRTL, direction, formatRelativeTime } = useI18n();
-
-```text
+```
 
 #### Step 5: Migrate Locale Files
 
 ```bash
 # Copy existing locales
-
 cp -r client/src/locales/* packages/i18n/locales/
 
 # Validate
-
 cd packages/i18n
 pnpm validate
-
-```text
+```
 
 #### Step 6: Test
 
@@ -856,7 +786,6 @@ Store user's language preference in database:
 
 ```graphql
 # Schema
-
 type User {
   id: ID!
   email: String!
@@ -870,7 +799,6 @@ type UserPreferences {
 }
 
 # Mutation
-
 mutation UpdateUserLocale($userId: ID!, $locale: String!) {
   updateUserPreferences(
     userId: $userId
@@ -884,7 +812,6 @@ mutation UpdateUserLocale($userId: ID!, $locale: String!) {
 }
 
 # Query
-
 query GetUserPreferences($userId: ID!) {
   user(id: $userId) {
     preferences {
@@ -892,8 +819,7 @@ query GetUserPreferences($userId: ID!) {
     }
   }
 }
-
-```text
+```
 
 ### Implementation
 
@@ -928,8 +854,7 @@ function App() {
 
   return <LanguageSwitcher />;
 }
-
-```text
+```
 
 ---
 

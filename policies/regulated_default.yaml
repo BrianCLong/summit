@@ -1,7 +1,0 @@
-version: 1
-name: regulated_default
-mode: deny_by_default
-allow_rules:
-  - id: RULE-ALLOW-COMPLIANCE-SUMMARY
-    actor: compliance_analyst
-    intent: summarize_policy

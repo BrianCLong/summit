@@ -3,12 +3,11 @@
 This directory contains the required artifacts for the GA Release.
 
 ## 1. Release Runbooks
-* [ ] [Deployment Runbook](DEPLOY.md)
+* [ ] [Deployment Runbook](../DEPLOY.md)
 * [ ] [Rollback Runbook](ROLLBACK.md)
 * [ ] [Observability Runbook](OBSERVABILITY.md)
 
 ## 2. Acceptance Criteria
-* [x] [GA Exit Criteria v1](GA_EXIT_CRITERIA_v1.md)
 * [ ] All Critical Paths Verified
 * [ ] Security Audit Clean (Exceptions Logged)
 * [ ] Performance Baseline Met (p95 < 1.5s)

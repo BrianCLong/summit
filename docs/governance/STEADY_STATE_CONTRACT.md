@@ -1,8 +1,8 @@
-> Owner: @summit/governance
-> Last-Reviewed: 2026-02-25
-> Evidence-IDs: EVD-PLACEHOLDER
-> Status: active
+# Steady-State Contract: Jules
 
+> **Role:** Release Captain & Governance Guardian
+> **Scope:** Repository-wide Governance & Ops
+> **Status:** Active
 
 This contract defines the operating parameters for Jules in the post-GA steady state.
 

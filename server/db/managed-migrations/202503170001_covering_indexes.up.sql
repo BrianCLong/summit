@@ -10,13 +10,13 @@ CREATE INDEX IF NOT EXISTS idx_entities_tenant_created_cover
   INCLUDE (id, kind, labels, props, updated_at, created_by);
 
 CREATE INDEX IF NOT EXISTS idx_relationships_tenant_src_created_cover
-  ON relationships (tenant_id, from_entity_id, created_at DESC)
-  INCLUDE (id, to_entity_id, relationship_type, props);
+  ON relationships (tenant_id, src_id, created_at DESC)
+  INCLUDE (id, dst_id, type, props, updated_at, created_by);
 
 CREATE INDEX IF NOT EXISTS idx_relationships_tenant_dst_created_cover
-  ON relationships (tenant_id, to_entity_id, created_at DESC)
-  INCLUDE (id, from_entity_id, relationship_type, props);
+  ON relationships (tenant_id, dst_id, created_at DESC)
+  INCLUDE (id, src_id, type, props, updated_at, created_by);
 
 CREATE INDEX IF NOT EXISTS idx_relationships_tenant_type_created_cover
-  ON relationships (tenant_id, relationship_type, created_at DESC)
-  INCLUDE (id, from_entity_id, to_entity_id, props);
+  ON relationships (tenant_id, type, created_at DESC)
+  INCLUDE (id, src_id, dst_id, props, updated_at, created_by);

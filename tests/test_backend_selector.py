@@ -1,9 +1,7 @@
 import pytest
-
-from summit.inference.backend_selector import select_backend
 from summit.inference.model_preflight import Preflight
 from summit.policy.model_loading import ModelLoadingPolicy
-
+from summit.inference.backend_selector import select_backend
 
 @pytest.fixture
 def vllm_supported():

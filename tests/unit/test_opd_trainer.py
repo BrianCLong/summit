@@ -1,13 +1,11 @@
-import sys
-
 import pytest
+import sys
 
 # Try importing torch and the module under test
 try:
     import torch
     import torch.nn as nn
-
-    from summit.post_training.recipes.typhoon_s.opd_trainer import OPDConfig, OPDTrainer
+    from summit.post_training.recipes.typhoon_s.opd_trainer import OPDTrainer, OPDConfig
     TORCH_AVAILABLE = True
 except (ImportError, OSError):
     TORCH_AVAILABLE = False

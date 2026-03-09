@@ -1,8 +1,13 @@
-> Owner: @summit/governance
-> Last-Reviewed: 2026-02-25
-> Evidence-IDs: EVD-PLACEHOLDER
-> Status: active
+# Evidence ID Consistency Gate - Rollout Plan (v1.3.0)
 
+## Executive Summary
+
+The Evidence ID Consistency Gate v1.3.0 is production-ready for enterprise deployment. This document outlines the phased rollout strategy across governance-critical repositories to maximize adoption while minimizing disruption.
+
+## Rollout Phases
+
+### Phase 1: Canary Deployment (Week 1-2)
+**Target Repositories**:
 - `summit/core-platform`
 - `summit/governance-docs`
 

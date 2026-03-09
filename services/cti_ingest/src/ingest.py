@@ -1,14 +1,13 @@
-import datetime
-import hashlib
 import json
-from pathlib import Path
-
+import hashlib
+import datetime
 import jsonschema
+from pathlib import Path
 
 SCHEMA_PATH = Path(__file__).parent.parent / "schemas" / "cti_item.schema.json"
 
 def get_schema():
-    with open(SCHEMA_PATH) as f:
+    with open(SCHEMA_PATH, "r") as f:
         return json.load(f)
 
 def compute_hash(content: str) -> str:
@@ -16,7 +15,7 @@ def compute_hash(content: str) -> str:
 
 def get_safe_timestamp():
     # Avoid T and : to pass verify_evidence.py regex
-    return datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%d_%H-%M-%S_UTC")
+    return datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d_%H-%M-%S_UTC")
 
 def normalize_items():
     # Simulated content fetching

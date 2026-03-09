@@ -290,7 +290,7 @@ router.get(
   async (req: Request, res: Response) => {
     try {
       const tenantId = getTenantId(req);
-      const status = (req.query.status as string) as PolicySuggestion['status'] | undefined;
+      const status = req.query.status as PolicySuggestion['status'] | undefined;
       const limit = parseInt(req.query.limit as string) || 20;
       const offset = parseInt(req.query.offset as string) || 0;
 
@@ -338,7 +338,7 @@ router.get(
         return res.status(404).json({
           error: {
             code: 'NOT_FOUND',
-            message: `Suggestion not found: ${(req.params.id as string)}`,
+            message: `Suggestion not found: ${req.params.id}`,
           },
         });
       }
@@ -403,7 +403,7 @@ router.post(
       );
 
       logger.info({
-        suggestionId: (req.params.id as string),
+        suggestionId: req.params.id,
         decision: feedback.decision,
         reviewedBy: feedback.reviewedBy,
       }, 'Suggestion reviewed');
@@ -441,7 +441,7 @@ router.post(
       const result = await policySuggestionService!.implementSuggestion(req.params.id);
 
       logger.info({
-        suggestionId: (req.params.id as string),
+        suggestionId: req.params.id,
         policyId: result.policyId,
         implementedBy: getUserId(req),
       }, 'Suggestion implemented');
@@ -733,7 +733,7 @@ router.get(
 
       const scope: AnomalyDetectionScope = {
         tenantIds: [tenantId],
-        minSeverity: (req.query.severity as string) as BehavioralAnomaly['severity'],
+        minSeverity: req.query.severity as BehavioralAnomaly['severity'],
         timeRange: {
           start: thirtyDaysAgo.toISOString(),
           end: now.toISOString(),
@@ -743,8 +743,8 @@ router.get(
       const anomalies = await anomalyService!.detectAnomalies(scope);
 
       // Filter by status if provided
-      const filteredAnomalies = (req.query.status as string)
-        ? anomalies.filter(a => a.status === (req.query.status as string))
+      const filteredAnomalies = req.query.status
+        ? anomalies.filter(a => a.status === req.query.status)
         : anomalies;
 
       // Apply pagination
@@ -793,7 +793,7 @@ router.get(
         return res.status(404).json({
           error: {
             code: 'NOT_FOUND',
-            message: `Anomaly not found: ${(req.params.id as string)}`,
+            message: `Anomaly not found: ${req.params.id}`,
           },
         });
       }
@@ -852,7 +852,7 @@ router.patch(
       );
 
       logger.info({
-        anomalyId: (req.params.id as string),
+        anomalyId: req.params.id,
         newStatus: status,
         updatedBy: getUserId(req),
       }, 'Anomaly status updated');
@@ -916,7 +916,7 @@ router.post(
       const anomaly = await anomalyService!.resolveAnomaly(req.params.id, resolution);
 
       logger.info({
-        anomalyId: (req.params.id as string),
+        anomalyId: req.params.id,
         resolution: resolution.resolution,
         resolvedBy: resolution.resolvedBy,
       }, 'Anomaly resolved');
@@ -957,10 +957,10 @@ router.get(
   async (req: Request, res: Response) => {
     try {
       const tenantId = getTenantId(req);
-      const endDate = (req.query.endDate as string)
+      const endDate = req.query.endDate
         ? new Date(req.query.endDate as string)
         : new Date();
-      const startDate = (req.query.startDate as string)
+      const startDate = req.query.startDate
         ? new Date(req.query.startDate as string)
         : new Date(endDate.getTime() - 30 * 24 * 60 * 60 * 1000);
 

@@ -1,5 +1,0 @@
-allowed_scopes:
-  - com.company.*
-blocked_registries:
-  - http://
-enforce_https: true

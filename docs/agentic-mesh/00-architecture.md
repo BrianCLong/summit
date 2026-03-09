@@ -18,16 +18,6 @@ The Agentic Mesh is a secure, auditable, ultra-resilient multi-LLM, multi-tool, 
 
 ---
 
-## Agentic Runtime (AOS) Alignment
-
-1. **Agentic runtime convergence**: Enterprise AI converges on an agentic runtime (Agentic Operating System) that standardizes orchestration, safety, compliance, and resource governance across swarms of agents. [ibm]
-2. **Central control + policy schemas**: The dominant design pattern uses centralized control mechanisms with policy-driven schemas to swap models/tools while keeping guardrails and logging stable. [dainstudios +1]
-3. **Authority alignment**: The Summit Readiness Assertion and governance authority files define the canonical terms, control points, and evidence requirements for this runtime layer. [docs/SUMMIT_READINESS_ASSERTION.md; docs/governance/CONSTITUTION.md; docs/governance/META_GOVERNANCE.md]
-
-**Action for Summit**: Push Summit’s core toward an explicit agentic runtime abstraction with a central execution engine, policy/eval hooks, and pluggable model/tool backends instead of app-specific flows; carry the alignment through the 23rd order of imputed intention. [dainstudios +1]
-
----
-
 ## Core Services
 
 ```
@@ -57,16 +47,16 @@ The Agentic Mesh is a secure, auditable, ultra-resilient multi-LLM, multi-tool, 
 
 ### Service Descriptions
 
-| Service                | Purpose                                                     | Port |
-| ---------------------- | ----------------------------------------------------------- | ---- |
-| **mesh-orchestrator**  | Top-level task coordination, flow execution                 | 5000 |
-| **routing-gateway**    | Model/agent selection based on policy, cost, latency        | 5001 |
-| **policy-enforcer**    | OPA-style policy evaluation for all operations              | 5002 |
-| **provenance-service** | Audit trail, decision lineage, explainability               | 5003 |
-| **agent-registry**     | Agent discovery, capability matching, health checks         | 5004 |
-| **tool-registry**      | Tool discovery, invocation proxying, rate limiting          | 5005 |
-| **events-bus**         | Pub/sub for async agent communication (Redis Streams/Kafka) | 5006 |
-| **task-queue**         | Durable task scheduling and retry (BullMQ/Temporal)         | 5007 |
+| Service | Purpose | Port |
+|---------|---------|------|
+| **mesh-orchestrator** | Top-level task coordination, flow execution | 5000 |
+| **routing-gateway** | Model/agent selection based on policy, cost, latency | 5001 |
+| **policy-enforcer** | OPA-style policy evaluation for all operations | 5002 |
+| **provenance-service** | Audit trail, decision lineage, explainability | 5003 |
+| **agent-registry** | Agent discovery, capability matching, health checks | 5004 |
+| **tool-registry** | Tool discovery, invocation proxying, rate limiting | 5005 |
+| **events-bus** | Pub/sub for async agent communication (Redis Streams/Kafka) | 5006 |
+| **task-queue** | Durable task scheduling and retry (BullMQ/Temporal) | 5007 |
 
 ---
 
@@ -207,21 +197,21 @@ CREATE TABLE tools (
 
 ### Model Provider Failures
 
-| Scenario              | Response                                    |
-| --------------------- | ------------------------------------------- |
-| Provider timeout      | Retry with exponential backoff (3 attempts) |
-| Provider down         | Failover to secondary provider              |
-| Rate limit hit        | Queue tasks, apply backpressure             |
-| Token budget exceeded | Reject task with clear error                |
+| Scenario | Response |
+|----------|----------|
+| Provider timeout | Retry with exponential backoff (3 attempts) |
+| Provider down | Failover to secondary provider |
+| Rate limit hit | Queue tasks, apply backpressure |
+| Token budget exceeded | Reject task with clear error |
 
 ### Agent Failures
 
-| Scenario                      | Response                            |
-| ----------------------------- | ----------------------------------- |
-| Agent crash                   | Re-route to equivalent agent        |
-| Agent timeout                 | Kill, log, retry on different agent |
-| Agent produces invalid output | Route to CriticAgent for review     |
-| No available agents           | Queue with SLO-aware timeout        |
+| Scenario | Response |
+|----------|----------|
+| Agent crash | Re-route to equivalent agent |
+| Agent timeout | Kill, log, retry on different agent |
+| Agent produces invalid output | Route to CriticAgent for review |
+| No available agents | Queue with SLO-aware timeout |
 
 ### Backpressure Mechanisms
 

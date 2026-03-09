@@ -138,7 +138,7 @@ function validateIndexLinks({ indexPath, indexText, repoRoot }) {
     const resolved = path.resolve(path.dirname(absoluteIndexPath), target);
     if (!existsSync(resolved)) {
       const display = path.relative(repoRoot, resolved) || resolved;
-      warnings.push({
+      violations.push({
         path: relativeIndexPath,
         type: 'broken_index_link',
         message: `Missing target for link '${raw}' -> ${display}`
@@ -166,7 +166,7 @@ function validateDocHeaders({ docPath, text, policy, nowUtcDate, warnStale }) {
   const requiredHeaders = policy.required_headers ?? [];
   for (const header of requiredHeaders) {
     if (!headers[header]) {
-      warnings.push({
+      violations.push({
         path: docPath,
         type: 'missing_header',
         message: `Missing required header: ${header}`
@@ -200,13 +200,13 @@ function validateDocHeaders({ docPath, text, policy, nowUtcDate, warnStale }) {
   if (evidenceRaw !== undefined) {
     const trimmed = evidenceRaw.trim();
     if (trimmed.length === 0) {
-      warnings.push({
+      violations.push({
         path: docPath,
         type: 'invalid_evidence_ids',
         message: 'Evidence-IDs header must not be empty.'
       });
     } else if (statusRaw === 'active' && trimmed.toLowerCase() === 'none') {
-      warnings.push({
+      violations.push({
         path: docPath,
         type: 'invalid_evidence_ids_none',
         message: 'Active governance documents must have valid Evidence-IDs (cannot be "none").'
@@ -235,7 +235,11 @@ function validateDocHeaders({ docPath, text, policy, nowUtcDate, warnStale }) {
         type: 'stale_doc',
         message: `Document is stale by ${days} days (max ${policy.max_days_since_reviewed}).`
       };
-      warnings.push(payload);
+      if (warnStale) {
+        warnings.push(payload);
+      } else {
+        violations.push(payload);
+      }
     }
   }
 

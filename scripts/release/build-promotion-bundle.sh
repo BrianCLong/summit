@@ -556,7 +556,7 @@ main() {
   "verification": {
     "offline_verification": "sha256sum -c SHA256SUMS",
     "governance_verification": "sha256sum governance/governance_lockfile.json",
-    "signature_verification": "cosign verify-blob --use-signed-timestamps --signature governance/signatures/governance_SHA256SUMS.sig --certificate governance/signatures/governance_SHA256SUMS.cert --certificate-oidc-issuer https://token.actions.githubusercontent.com --certificate-identity-regexp 'https://github.com/.*/summit/.github/workflows/.*' governance/governance_SHA256SUMS"
+    "signature_verification": "cosign verify-blob --signature governance/signatures/governance_SHA256SUMS.sig --certificate governance/signatures/governance_SHA256SUMS.cert --certificate-oidc-issuer https://token.actions.githubusercontent.com --certificate-identity-regexp 'https://github.com/.*/summit/.github/workflows/.*' governance/governance_SHA256SUMS"
   }
 }
 METADATA_EOF

@@ -1,9 +1,7 @@
 import json
 from pathlib import Path
 from typing import Optional
-
 from .schema import VoiceArtifact
-
 
 class VoiceStore:
     """
@@ -38,7 +36,7 @@ class VoiceStore:
         if not target_path.exists():
             return None
 
-        with open(target_path) as f:
+        with open(target_path, "r") as f:
             data = json.load(f)
 
         return VoiceArtifact(**data)

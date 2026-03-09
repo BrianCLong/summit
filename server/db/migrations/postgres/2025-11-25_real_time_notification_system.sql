@@ -301,7 +301,7 @@ COMMENT ON MATERIALIZED VIEW notification_statistics IS 'Hourly notification sta
 CREATE OR REPLACE FUNCTION refresh_notification_statistics()
 RETURNS VOID AS $$
 BEGIN
-  REFRESH MATERIALIZED VIEW  notification_statistics;
+  REFRESH MATERIALIZED VIEW CONCURRENTLY notification_statistics;
 END;
 $$ LANGUAGE plpgsql;
 

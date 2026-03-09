@@ -1,17 +1,22 @@
-import { describe, it, expect, beforeEach, jest } from '@jest/globals';
+import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 import { promises as fs } from 'fs';
 import os from 'os';
 import path from 'path';
 
-const mockSend = jest.fn();
+const sendMock = jest.fn().mockResolvedValue({});
 
 describe('CdnUploadService', () => {
   beforeEach(() => {
-    mockSend.mockReset();
-    mockSend.mockResolvedValue({});
+    sendMock.mockClear();
   });
 
   it('uploads assets and returns CDN URLs', async () => {
+    jest.resetModules();
+    await jest.unstable_mockModule('@aws-sdk/client-s3', () => ({
+      S3Client: jest.fn(() => ({ send: sendMock })),
+      PutObjectCommand: jest.fn((args) => args),
+    }));
+
     const { CdnUploadService } = await import('../CdnUploadService.js');
     const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'cdn-upload-'));
     const filePath = path.join(tmpDir, 'file.jpg');
@@ -22,16 +27,13 @@ describe('CdnUploadService', () => {
       bucket: 'test-bucket',
       region: 'us-east-1',
       publicUrl: 'https://cdn.example.com',
-      accessKeyId: 'test-access-key',
-      secretAccessKey: 'test-secret-key',
     });
-    (service as any).client.send = mockSend;
 
     const result = await service.uploadFiles([
       { localPath: filePath, key: 'file.jpg', contentType: 'image/jpeg' },
     ]);
 
-    expect(mockSend).toHaveBeenCalledTimes(1);
+    expect(sendMock).toHaveBeenCalled();
     expect(result['file.jpg']).toBe('https://cdn.example.com/file.jpg');
   });
 });

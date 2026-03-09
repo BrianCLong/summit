@@ -1,0 +1,14 @@
+name: pm-autopilot
+
+permissions:
+  contents: read
+on:
+  schedule: [{ cron: "0 15 * * 1" }]  # every Monday 15:00 UTC
+  workflow_dispatch: {}
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: node tools/pm/auto_planner.ts
+        env: { GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}, GITHUB_REPOSITORY: ${{ github.repository }} }

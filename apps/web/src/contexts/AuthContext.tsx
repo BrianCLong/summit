@@ -3,7 +3,6 @@ import type { User } from '@/types'
 
 interface AuthContextType {
   user: User | null
-  token: string | null
   loading: boolean
   login: (email: string, password: string) => Promise<void>
   logout: () => Promise<void>
@@ -111,7 +110,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const value = {
     user,
-    token: localStorage.getItem('auth_token'),
     loading,
     login,
     logout,

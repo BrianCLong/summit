@@ -39,7 +39,7 @@
 **Deliverables**
 
 - Gatekeeper/Kyverno constraints with **progressive enforcement** controlled by ConfigMap/flag.
-- Sigstore policy-controller or cosign verify --use-signed-timestamps job wired to prod registry.
+- Sigstore policy-controller or cosign verify job wired to prod registry.
 - Emergency bypass with annotated change ticket + auto-expiring exception CRD.
 
 **DoD**

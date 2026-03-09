@@ -268,7 +268,7 @@ router.get('/reports/:modelId', async (req, res) => {
   try {
     const tenantId = (req.headers['x-tenant-id'] as string) || 'default';
     const { modelId } = req.params;
-    const timeRangeHours = parseInt(req.query.timeRangeHours as string as string) || 24;
+    const timeRangeHours = parseInt(req.query.timeRangeHours as string) || 24;
 
     const report = await qualityPlatform.generateQualityReport(
       tenantId,

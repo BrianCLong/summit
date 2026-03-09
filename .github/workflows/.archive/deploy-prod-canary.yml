@@ -80,7 +80,7 @@ PY
       - name: Install cosign
         uses: sigstore/cosign-installer@v3
         with:
-          cosign-release: 'v3.0.5'
+          cosign-release: 'v2.2.4'
 
       - name: Create Kubeconfig
         run: |

@@ -125,7 +125,7 @@ spec:
       args:
         - >-
           set -e; \
-          cosign verify-blob --use-signed-timestamps --yes --signature /policy/bundle.sig /policy/switchboard.bundle.tar.gz; \
+          cosign verify-blob --yes --signature /policy/bundle.sig /policy/switchboard.bundle.tar.gz; \
           rekor-cli verify-entry --log-index $(cat /policy/rekor.json | jq -r '.LogIndex');
       volumeMounts: [{ name: policy, mountPath: /policy }]
   containers:

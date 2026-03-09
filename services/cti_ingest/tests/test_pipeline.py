@@ -1,11 +1,8 @@
+import pytest
 import json
 import os
-
-import pytest
-
 from services.cti_ingest.src.ingest import normalize_items
 from services.ttp_mapper.src.mapper import map_items
-
 
 def test_ingest_normalization():
     items = normalize_items()

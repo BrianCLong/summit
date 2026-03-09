@@ -1,6 +1,0 @@
-weights:
-  exposure: 0.45
-  compromise: 0.4
-  severity: 0.15
-  kevMultiplier: 1.5
-halfLifeMinutes: 120

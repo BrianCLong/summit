@@ -1,9 +1,0 @@
-{
-  "type": "object",
-  "required": ["constraint_violation_rate", "expected_value", "risk_score"],
-  "properties": {
-    "constraint_violation_rate": { "type": "number" },
-    "expected_value": { "type": "number" },
-    "risk_score": { "type": "number" }
-  }
-}

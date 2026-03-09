@@ -832,18 +832,6 @@ type NarrativeCascade {
   hops: [CascadeHop!]!
 }
 
-type NarrativeConflict {
-  competingNarrativeId: ID!
-  competingNarrative: CogSecNarrative!
-  conflictScore: Float!
-  contradictingClaims: [ContradictingPair!]!
-}
-
-type ContradictingPair {
-  claim1: CogSecClaim!
-  claim2: CogSecClaim!
-}
-
 type CascadeHop {
   id: ID!
   cascadeId: ID!
@@ -1021,7 +1009,6 @@ extend type Query {
   # Influence Pathways
   influencePathways(narrativeId: ID!): [NarrativeCascade!]!
   narrativeEarlyWarnings(watchlistId: ID): [TippingPointIndicator!]!
-  narrativeConflicts(narrativeId: ID!): [NarrativeConflict!]!
 }
 
 type NarrativeGraph {
@@ -1101,69 +1088,4 @@ extend type Subscription {
 
   # Playbook execution
   playbookActionCompleted(playbookId: ID!): ResponseAction!
-}
-
-# ----------------------------------------------------------------------------
-# Influence Operations Campaign Modeling (Feb 2026)
-# ----------------------------------------------------------------------------
-
-enum SynthesisMethod {
-  HUMAN
-  AI
-  HYBRID
-  UNKNOWN
-}
-
-enum CognitiveObjective {
-  DETER
-  DEMOBILIZE
-  POLARIZE
-  DISCREDIT
-  CONFUSE
-  RECRUIT
-  COERCE
-  OTHER
-}
-
-type IdentitySegment {
-  id: ID!
-  label: String!
-  # e.g., "women candidates", "diaspora community", "favela residents"
-  protectedClass: Boolean! # guardrails for handling/logging
-}
-
-type TriggerEvent {
-  id: ID!
-  kind: String! # KINETIC|CYBER|LEGAL|MEDIA
-  occurredAt: DateTime
-  evidenceIds: [String!]!
-}
-
-type NarrativeSurge {
-  id: ID!
-  narrativeId: ID!
-  windowHoursMin: Int!
-  windowHoursMax: Int!
-  channels: [String!]!
-  rationaleEvidenceIds: [String!]!
-}
-
-extend type CogSecCampaign {
-  cognitiveObjective: CognitiveObjective
-  targetSegments: [IdentitySegment!]
-  contested: Boolean
-  confidence: Float
-}
-
-extend type CogSecNarrative {
-  claimText: String
-  synthesisMethod: SynthesisMethod
-  syntheticCredibilityMarkers: [String!] # e.g., "deepfake_video", "forged_evidence"
-  contested: Boolean
-  confidence: Float
-}
-
-extend type Query {
-  # Added for backwards compatibility and IO extensions
-  cogsecCampaignExt(id: ID!): CogSecCampaign
 }

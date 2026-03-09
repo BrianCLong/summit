@@ -5,7 +5,6 @@ import { ForecastingEngine } from '../summitsight/engine/ForecastingEngine.js';
 import { CorrelationEngine } from '../summitsight/engine/CorrelationEngine.js';
 import { SummitsightDataService } from '../summitsight/SummitsightDataService.js';
 import { ensureAuthenticated } from '../middleware/auth.js';
-import { firstString, firstStringOr } from '../utils/http-param.js';
 
 const router = express.Router();
 
@@ -19,7 +18,7 @@ const dataService = new SummitsightDataService();
 
 router.get('/kpi', ensureAuthenticated, async (req: Request, res: Response) => {
   try {
-    const definitions = await dataService.getKPIDefinitions(firstString(req.query.category));
+    const definitions = await dataService.getKPIDefinitions(req.query.category as string);
     res.json(definitions);
   } catch (error: any) {
     res.status(500).json({ error: (error as Error).message });
@@ -29,7 +28,7 @@ router.get('/kpi', ensureAuthenticated, async (req: Request, res: Response) => {
 router.get('/kpi/:id/status', ensureAuthenticated, async (req: Request, res: Response) => {
   try {
     const tenantId = (req as any).user?.tenantId; // Assuming auth middleware attaches user
-    const status = await kpiEngine.getKPIStatus(firstStringOr(req.params.id, ''), tenantId);
+    const status = await kpiEngine.getKPIStatus(req.params.id, tenantId);
     res.json(status);
   } catch (error: any) {
     res.status(500).json({ error: (error as Error).message });
@@ -39,7 +38,7 @@ router.get('/kpi/:id/status', ensureAuthenticated, async (req: Request, res: Res
 router.get('/kpi/:id/history', ensureAuthenticated, async (req: Request, res: Response) => {
   try {
     const tenantId = (req as any).user?.tenantId;
-    const values = await dataService.getKPIValues(firstStringOr(req.params.id, ''), tenantId, 'daily', 30);
+    const values = await dataService.getKPIValues(req.params.id, tenantId, 'daily', 30);
     res.json(values);
   } catch (error: any) {
     res.status(500).json({ error: (error as Error).message });
@@ -51,7 +50,7 @@ router.get('/kpi/:id/history', ensureAuthenticated, async (req: Request, res: Re
 router.get('/exec-dashboard/:role', ensureAuthenticated, async (req: Request, res: Response) => {
   try {
     // Return curated list of KPIs based on role
-    const role = firstStringOr(req.params.role, '');
+    const role = req.params.role;
     let kpisOfInterest: string[] = [];
 
     switch (role) {
@@ -106,7 +105,7 @@ router.get('/warroom', ensureAuthenticated, async (req: Request, res: Response) 
 router.get('/forecast/:kpiId', ensureAuthenticated, async (req: Request, res: Response) => {
   try {
     const tenantId = (req as any).user?.tenantId;
-    const forecast = await forecastingEngine.generateForecast(firstStringOr(req.params.kpiId, ''), tenantId);
+    const forecast = await forecastingEngine.generateForecast(req.params.kpiId, tenantId);
     res.json(forecast);
   } catch (error: any) {
     res.status(500).json({ error: (error as Error).message });
@@ -116,14 +115,13 @@ router.get('/forecast/:kpiId', ensureAuthenticated, async (req: Request, res: Re
 router.get('/correlation', ensureAuthenticated, async (req: Request, res: Response) => {
   try {
     const tenantId = (req as any).user?.tenantId;
-    const kpiA = firstString(req.query.kpiA);
-    const kpiB = firstString(req.query.kpiB);
+    const { kpiA, kpiB } = req.query;
 
     if (!kpiA || !kpiB) {
         return res.status(400).json({ error: 'kpiA and kpiB are required' });
     }
 
-    const result = await correlationEngine.correlateKPIs(kpiA, kpiB, tenantId);
+    const result = await correlationEngine.correlateKPIs(kpiA as string, kpiB as string, tenantId);
     res.json(result);
   } catch (error: any) {
     res.status(500).json({ error: (error as Error).message });

@@ -1,7 +1,5 @@
 import unittest
-
 from vmworkbench.inventory.classify import classify_device
-
 
 class TestInventoryClassify(unittest.TestCase):
     def test_classify_keyboard(self):

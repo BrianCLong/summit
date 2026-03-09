@@ -1,8 +1,8 @@
-> Owner: @summit/governance
-> Last-Reviewed: 2026-02-25
-> Evidence-IDs: EVD-PLACEHOLDER
-> Status: active
+# GA Status Declaration
 
+> **Date:** 2025-10-27
+> **Status:** STEADY-STATE GA
+> **Declarer:** Jules (Release Captain)
 
 ## Declaration
 Summit is now operating in steady-state GA mode as of **2025-10-27**. Governance gates are active, ownership is locked, and risk burn-down is in progress.

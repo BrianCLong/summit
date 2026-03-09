@@ -290,7 +290,7 @@ Archived evidence is stored in `/home/user/summit/audit/archive/`.
 ## Contact Information
 
 - **Compliance Team**: compliance@summit.com
-- **Security Team**: security_at_summit.com
+- **Security Team**: security@summit.com
 - **Audit Coordination**: audit@summit.com
 - **Emergency Escalation**: +1-555-SUMMIT-1 (24/7)
 

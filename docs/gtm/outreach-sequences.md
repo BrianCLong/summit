@@ -18,7 +18,6 @@ Each sequence follows a 3-touch + 1 breakup pattern over ~3 weeks:
 | Email 4 (Breakup) | Day 18-21 | Permission to close loop |
 
 **Variables to personalize:**
-
 - `{{First}}` — Contact first name
 - `{{Org}}` — Organization name
 - `{{Unit}}` — Specific unit/division
@@ -113,7 +112,6 @@ Hi {{First}},
 Haven't heard back, so I'll assume the timing isn't right for {{Org}} to look at analyst workbench options.
 
 If that changes—especially if you're facing:
-
 - A modernization deadline
 - An audit or compliance push
 - A new mission thread that needs OSINT fusion
@@ -410,7 +408,6 @@ Best,
 ### Discovery Questions
 
 **Current State:**
-
 1. "Walk me through how your analysts handle a typical [case / investigation / alert] today."
 2. "What tools are they using? Where do they spend the most time?"
 3. "When something needs to go to [leadership / legal / oversight], what does that process look like?"
@@ -456,7 +453,6 @@ Track in CRM:
 | Time to first reply | < 5 days |
 
 **A/B Test Candidates:**
-
 - Subject lines (problem vs. outcome)
 - Email length (short vs. detailed)
 - CTA (specific time vs. "let me know")

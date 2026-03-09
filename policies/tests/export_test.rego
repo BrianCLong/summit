@@ -1,5 +1,4 @@
 package intelgraph.export
-import rego.v1
 
 import future.keywords.every
 

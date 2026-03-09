@@ -9,7 +9,6 @@ export interface TriageConfig {
     typeRules: TypeRule[];
     clustering: ClusteringConfig;
     reporting: ReportingConfig;
-    initiatives: InitiativeRule[];
 }
 export interface AreaConfig {
     name: string;
@@ -32,11 +31,6 @@ export interface ClusteringConfig {
     similarityThreshold: number;
     minClusterSize: number;
     maxClusters: number;
-}
-export interface InitiativeRule {
-    id: string;
-    keywords: string[];
-    patterns: RegExp[];
 }
 export interface ReportingConfig {
     topIssuesCount: number;

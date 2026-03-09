@@ -10,7 +10,6 @@ import torch
 from torch import nn
 
 from ..models.sage import GraphSAGE, GraphSAGEConfig, LinkPredictor
-from ..optim import SAM
 
 
 def _negative_samples(
@@ -35,9 +34,6 @@ class LinkPredConfig:
     sage: GraphSAGEConfig
     lr: float = 0.01
     epochs: int = 50
-    optimizer: str = "adam"
-    sam_rho: float = 0.05
-    sam_adaptive: bool = False
 
 
 def train_link_pred(
@@ -51,42 +47,15 @@ def train_link_pred(
     num_nodes = features.size(0)
     encoder = GraphSAGE(cfg.sage)
     predictor = LinkPredictor(cfg.sage.hidden_dim)
-    params = list(encoder.parameters()) + list(predictor.parameters())
-
-    optimizer_name = cfg.optimizer.lower()
-    if optimizer_name == "sam":
-        opt = SAM(
-            params,
-            torch.optim.Adam,
-            lr=cfg.lr,
-            rho=cfg.sam_rho,
-            adaptive=cfg.sam_adaptive,
-        )
-    elif optimizer_name == "adam":
-        opt = torch.optim.Adam(params, lr=cfg.lr)
-    else:
-        raise ValueError(f"Unsupported optimizer: {cfg.optimizer}")
-
+    opt = torch.optim.Adam(list(encoder.parameters()) + list(predictor.parameters()), lr=cfg.lr)
     criterion = nn.BCEWithLogitsLoss()
+
     pos_edges = [tuple(map(int, e)) for e in pos_edges]
 
     for _ in range(cfg.epochs):
         neg_edges = _negative_samples(num_nodes, pos_edges, len(pos_edges))
         all_edges = pos_edges + neg_edges
         labels = torch.tensor([1] * len(pos_edges) + [0] * len(neg_edges), dtype=torch.float32)
-
-        if optimizer_name == "sam":
-
-            def closure() -> torch.Tensor:
-                z = encoder(features, neigh)
-                logits = predictor(z, all_edges)
-                loss = criterion(logits, labels)
-                opt.zero_grad()
-                loss.backward()
-                return loss
-
-            opt.step(closure)
-            continue
 
         z = encoder(features, neigh)
         logits = predictor(z, all_edges)

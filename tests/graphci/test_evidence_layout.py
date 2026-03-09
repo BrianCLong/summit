@@ -1,16 +1,14 @@
-import json
-import shutil
-import sys
-from pathlib import Path
-
 import pytest
+import shutil
+import json
+from pathlib import Path
+import sys
 
 # Add root to sys.path
 sys.path.append(str(Path(__file__).parent.parent.parent))
 
 from ci.graphci.lib.evidence_writer import EvidenceWriter
-from ci.graphci.lib.hash_tree import compute_merkle_root, hash_data
-
+from ci.graphci.lib.hash_tree import hash_data, compute_merkle_root
 
 @pytest.fixture
 def temp_evidence_dir(tmp_path):

@@ -17,7 +17,7 @@ fi
 
 # Strict verification - must pass for deployment to continue
 echo "Verifying image signature..."
-if cosign verify --use-signed-timestamps "${IMAGE_WITH_DIGEST}" \
+if cosign verify "${IMAGE_WITH_DIGEST}" \
     --certificate-identity-regexp ".*@.*" \
     --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
     --output text; then

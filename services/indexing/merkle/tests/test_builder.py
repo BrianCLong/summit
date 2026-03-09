@@ -1,9 +1,6 @@
-from pathlib import Path
-
 import pytest
-
+from pathlib import Path
 from services.indexing.merkle.builder import MerkleBuilder, SyncPlanner
-
 
 def test_merkle_builder_opaque():
     fixture_path = Path(__file__).parent / "fixtures" / "repo_small"

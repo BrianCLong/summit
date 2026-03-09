@@ -1,51 +1,114 @@
-import { NextFunction, Request, Response } from 'express';
+/**
+ * Enhanced Sanitization Middleware
+ *
+ * Uses comprehensive sanitization utilities to protect against:
+ * - XSS attacks
+ * - SQL/Cypher injection attempts
+ * - Malicious payloads
+ * - Excessive input sizes
+ */
 
-function escapeHtml(value: string): string {
-  return value
+import type { Request, Response, NextFunction } from 'express';
+import { SanitizationUtils } from '../validation/index.js';
+import pino from 'pino';
+
+const logger = (pino as any)();
+
+/**
+ * Legacy escape function for backwards compatibility
+ */
+function escape(str: string): string {
+  return str
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
+    .replace(/\"/g, '&quot;')
     .replace(/'/g, '&#x27;');
 }
 
-function sanitizeValue(input: unknown): unknown {
-  if (typeof input === 'string') {
-    return escapeHtml(input).trim().slice(0, 10000);
-  }
-
-  if (Array.isArray(input)) {
-    return input.slice(0, 1000).map((item) => sanitizeValue(item));
-  }
-
-  if (input && typeof input === 'object') {
-    const sanitized: Record<string, unknown> = {};
-    for (const [key, value] of Object.entries(input)) {
-      if (Object.keys(sanitized).length >= 100) break;
-      sanitized[key] = sanitizeValue(value);
-    }
+/**
+ * Enhanced sanitization with comprehensive security checks
+ */
+function sanitize(value: any): any {
+  if (typeof value === 'string') {
+    // Use enhanced sanitization utilities
+    let sanitized = SanitizationUtils.sanitizeHTML(value);
+    sanitized = SanitizationUtils.removeDangerousContent(sanitized);
     return sanitized;
   }
-
-  return input;
+  if (Array.isArray(value)) return value.map(sanitize);
+  if (value && typeof value === 'object') {
+    const result: Record<string, any> = {};
+    for (const [key, val] of Object.entries(value)) {
+      result[key] = sanitize(val);
+    }
+    return result;
+  }
+  return value;
 }
 
+/**
+ * Default sanitization middleware (enhanced version)
+ */
 export default function sanitizeRequest(
   req: Request,
-  _res: Response,
+  res: Response,
   next: NextFunction,
 ): void {
-  if (req.body !== undefined) {
-    req.body = sanitizeValue(req.body);
-  }
+  try {
+    if (req.body) {
+      req.body = SanitizationUtils.sanitizeUserInput(req.body);
+    }
+    if (req.query) {
+      req.query = SanitizationUtils.sanitizeUserInput(req.query);
+    }
+    if (req.params) {
+      const sanitizedParams: Record<string, string> = {};
+      for (const [key, value] of Object.entries(req.params)) {
+        if (typeof value === 'string') {
+          sanitizedParams[key] = SanitizationUtils.sanitizeHTML(value);
+        } else {
+          sanitizedParams[key] = value;
+        }
+      }
+      req.params = sanitizedParams;
+    }
 
-  if (req.query !== undefined) {
-    req.query = sanitizeValue(req.query) as Request['query'];
+    next();
+  } catch (error: any) {
+    logger.error({ error, path: req.path }, 'Sanitization error');
+    res.status(500).json({ error: 'Input sanitization failed' });
   }
+}
 
-  if (req.params !== undefined) {
-    req.params = sanitizeValue(req.params) as Request['params'];
+/**
+ * Strict sanitization mode - removes all potentially dangerous content
+ */
+export function strictSanitizeRequest(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): void {
+  try {
+    if (req.body && typeof req.body === 'object') {
+      const sanitized: Record<string, any> = {};
+      for (const [key, value] of Object.entries(req.body)) {
+        if (typeof value === 'string') {
+          sanitized[key] = SanitizationUtils.removeDangerousContent(
+            SanitizationUtils.sanitizeHTML(value)
+          );
+        } else if (value && typeof value === 'object') {
+          sanitized[key] = SanitizationUtils.sanitizeUserInput(value);
+        } else {
+          sanitized[key] = value;
+        }
+      }
+      req.body = sanitized;
+    }
+
+    next();
+  } catch (error: any) {
+    logger.error({ error, path: req.path }, 'Strict sanitization error');
+    res.status(400).json({ error: 'Input contains invalid content' });
   }
-
-  next();
 }

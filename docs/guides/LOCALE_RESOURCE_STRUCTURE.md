@@ -19,7 +19,6 @@ We split translations into **namespaces** to keep bundle sizes small and allow l
 ## JSON Structure Example
 
 ### `common.json`
-
 ```json
 {
   "actions": {
@@ -43,7 +42,6 @@ We split translations into **namespaces** to keep bundle sizes small and allow l
 ```
 
 ### `dashboard.json`
-
 ```json
 {
   "welcome": "Welcome back, {name}",
@@ -65,7 +63,6 @@ We split translations into **namespaces** to keep bundle sizes small and allow l
 ```
 
 ### `auth.json`
-
 ```json
 {
   "login": {

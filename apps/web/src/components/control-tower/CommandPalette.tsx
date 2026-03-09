@@ -17,7 +17,6 @@ import {
   InputAdornment,
   useTheme,
 } from '@mui/material';
-import { MODIFIER_KEY } from '@/lib/utils';
 import {
   Search as SearchIcon,
   History as HistoryIcon,
@@ -76,7 +75,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
         type: 'action',
         icon: <AddIcon fontSize="small" />,
         title: 'Create new situation',
-        shortcut: `${MODIFIER_KEY}N`,
+        shortcut: '⌘N',
       },
       {
         id: 'action-playbook',
@@ -102,7 +101,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
         type: 'navigation',
         icon: <DashboardIcon fontSize="small" />,
         title: 'Dashboard',
-        shortcut: `${MODIFIER_KEY}D`,
+        shortcut: '⌘D',
       },
       {
         id: 'nav-situations',

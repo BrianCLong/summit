@@ -1,5 +1,0 @@
-{"key": {"pk": "1"}, "op": "c", "before": null, "after": {"pk": "1", "val": "A"}, "source": {"lsn": "0/1"}}
-{"key": {"pk": "2"}, "op": "c", "before": null, "after": {"pk": "2", "val": "B"}, "source": {"lsn": "0/2"}}
-{"key": {"pk": "1"}, "op": "u", "before": {"pk": "1", "val": "A"}, "after": {"pk": "1", "val": "A2"}, "source": {"lsn": "0/3"}}
-{"key": {"pk": "2"}, "op": "d", "before": {"pk": "2", "val": "B"}, "after": null, "source": {"lsn": "0/4"}}
-{"key": {"pk": "2"}, "op": "t", "before": null, "after": null, "source": {"lsn": "0/4"}}

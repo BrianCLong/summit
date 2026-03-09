@@ -1,0 +1,21 @@
+name: openapi-lint
+
+permissions:
+  contents: read
+
+on:
+  pull_request:
+    paths:
+      - 'openapi/**/*.yaml'
+      - 'openapi/**/*.yml'
+
+jobs:
+  spectral:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Lint OpenAPI with Spectral
+        uses: stoplightio/spectral-action@v0.8.10
+        with:
+          file_glob: 'openapi/**/*.y?(a)ml'
+          verbose: true

@@ -5,7 +5,6 @@
 // =============================================
 import React, { useState } from 'react'
 import { Routes, Route, Navigate, useLocation, Link } from 'react-router-dom'
-import { MODIFIER_KEY } from '@/lib/utils'
 import {
   HomeIcon,
   PlayIcon,
@@ -149,7 +148,7 @@ function ContextBar() {
 
         <div className="flex items-center space-x-4">
           <button className="text-sm text-blue-600 hover:text-blue-800">
-            Command Palette ({MODIFIER_KEY}K)
+            Command Palette (⌘K)
           </button>
           <div className="h-6 w-px bg-gray-300" />
           <button className="text-sm text-gray-600 hover:text-gray-800">

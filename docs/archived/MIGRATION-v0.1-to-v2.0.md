@@ -159,4 +159,4 @@ For internal rollout sequencing, see `docs/ops/MIGRATION-COMMS-v0.1-to-v2.0.md` 
 
 - **Issues**: https://github.com/BrianCLong/summit/issues
 - **Discussions**: https://github.com/BrianCLong/summit/discussions
-- **Email**: support_at_summit.com
+- **Email**: support@summit.com

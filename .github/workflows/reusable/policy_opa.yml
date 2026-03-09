@@ -25,4 +25,4 @@ jobs:
       - name: Test release and migration policies
         run: |
           opa test policy/migration_gate.rego policy/release.rego
-          ./opa-bin eval --fail-defined --data policy --input policy/sample_inputs/migration_safe.json "data.summit.gates.migration.allow"
+          opa eval --fail-defined --data policy --input policy/sample_inputs/migration_safe.json "data.summit.gates.migration.allow"

@@ -3,7 +3,6 @@ import express, { Response, NextFunction } from 'express';
 import { graphStreamer } from '../lib/streaming/GraphStreamer.js';
 import { getRedisClient } from '../db/redis.js';
 import type { AuthenticatedRequest } from './types.js';
-import { firstStringOr } from '../utils/http-param.js';
 
 const router = express.Router();
 
@@ -20,7 +19,7 @@ router.post('/start', async (req: AuthenticatedRequest, res: Response) => {
 });
 
 router.get('/:streamId', async (req: AuthenticatedRequest, res: Response) => {
-  const streamId = firstStringOr(req.params.streamId, '');
+  const { streamId } = req.params;
   const redis = getRedisClient();
   const channel = `stream:${streamId}`;
 

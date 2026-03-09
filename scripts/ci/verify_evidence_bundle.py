@@ -3,7 +3,6 @@ import json
 import os
 from pathlib import Path
 
-
 def main() -> int:
     if os.environ.get("SUMMIT_EVIDENCE_ENFORCE", "1") == "0":
         print("[evidence] enforcement disabled via SUMMIT_EVIDENCE_ENFORCE=0")

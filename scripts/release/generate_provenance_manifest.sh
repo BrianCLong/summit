@@ -192,7 +192,7 @@ generate_provenance() {
   "verification": {
     "checksum_file": "SHA256SUMS",
     "signature_file": "provenance.json.sig",
-    "instructions": "Verify with: sha256sum -c SHA256SUMS && cosign verify-blob --use-signed-timestamps --signature provenance.json.sig provenance.json"
+    "instructions": "Verify with: sha256sum -c SHA256SUMS && cosign verify-blob --signature provenance.json.sig provenance.json"
   },
   "attestation_metadata": {
     "generated_at": "${timestamp}",

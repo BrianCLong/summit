@@ -5,8 +5,6 @@ from typing import Any
 
 import requests
 
-from ingestion.utils import compute_hash
-
 from .base import Ingestor
 
 
@@ -29,7 +27,7 @@ class HTTPIngestor(Ingestor):
 
     def normalize(self, item: dict[str, Any]) -> dict[str, Any]:
         return {
-            "id": item.get("id") or compute_hash(item),
+            "id": item.get("id") or hash(str(item)),
             "platform": "http",
             "timestamp": item.get("timestamp"),
             "text": item.get("text", ""),

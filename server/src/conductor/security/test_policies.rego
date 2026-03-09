@@ -106,7 +106,7 @@ test_pii_phone_detected if {
 }
 
 test_pii_credit_card_detected if {
-  input := {"task": "Process payment for XXXX-XXXX-XXXX-XXXX"}
+  input := {"task": "Process payment for 4111-1111-1111-1111"}
   contains_pii with input as input
 }
 

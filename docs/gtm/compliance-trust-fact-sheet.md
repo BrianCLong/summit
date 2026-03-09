@@ -49,7 +49,6 @@ This document provides a concise reference for security and compliance reviewers
 | Dynamic Policy Updates | Hot-reload without service restart |
 
 **Policy Packs Available:**
-
 - Government Baseline (classification, need-to-know, compartments)
 - Enterprise Standard (role + department + data sensitivity)
 - Custom (built to customer requirements during pilot)

@@ -1,14 +1,12 @@
-import json
 import os
-
+import json
 import pytest
 from compute import compute_metrics
-
 
 def test_metrics_calculation():
     # Load fixture
     fixture_path = os.path.join(os.path.dirname(__file__), "fixtures", "runs_v1.json")
-    with open(fixture_path) as f:
+    with open(fixture_path, "r") as f:
         runs = json.load(f)
 
     metrics = compute_metrics(runs)

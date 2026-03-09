@@ -3,6 +3,8 @@ name: 🏭 Mega Merge Orchestrator - Industrial Scale
 on:
   schedule:
     - cron: '*/15 * * * *'  # Every 15 minutes (4x faster)
+  push:
+    branches: [main]
   workflow_dispatch:
     inputs:
       batch_size:
@@ -76,7 +78,7 @@ jobs:
           bash .github/scripts/process-pr-batch.sh /tmp/batch.txt
 
   process-batch-2:
-    name: Batch 2 (PRs 101-180)
+    name: Batch 2 (PRs 101-200)
     needs: analyze
     runs-on: ubuntu-latest
     timeout-minutes: 25
@@ -88,14 +90,14 @@ jobs:
           BATCH_START: 100
           BATCH_SIZE: 100
         run: |
-          gh pr list --limit 180 --json number,headRefName | \
+          gh pr list --limit 200 --json number,headRefName | \
             jq -r '.[] | "\(.number):\(.headRefName)"' | \
             tail -100 > /tmp/batch.txt
 
           bash .github/scripts/process-pr-batch.sh /tmp/batch.txt
 
   process-batch-3:
-    name: Batch 3 (PRs 181-300)
+    name: Batch 3 (PRs 201-300)
     needs: analyze
     runs-on: ubuntu-latest
     timeout-minutes: 25
@@ -214,4 +216,4 @@ jobs:
           echo "Timestamp: $(date -u)"
           echo "Total open PRs: $(gh pr list --limit 1000 | wc -l)"
           echo "Merged today: $(gh pr list --state merged --search "merged:>=$(date -u +%Y-%m-%d)" --limit 500 | wc -l)"
-          echo "Processing rate: 500 PRs per 15 minutes = 1800 PRs/hour"
+          echo "Processing rate: 500 PRs per 15 minutes = 2000 PRs/hour"

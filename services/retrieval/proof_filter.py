@@ -1,8 +1,5 @@
 from typing import List
-
 from services.index_store.proofs.store import ProofStore
-
-
 class RetrievalHit:
     def __init__(self, pid, fh, content):
         self.path_id = pid; self.file_hash = fh; self.content = content

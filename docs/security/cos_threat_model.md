@@ -1,1 +1,0 @@
-# COS Threat Model

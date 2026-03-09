@@ -80,7 +80,7 @@ jobs:
       - name: Evaluate deploy policy
         id: deploy
         run: |
-          ./opa-bin eval \
+          opa eval \
             --format=json \
             -d policy/ \
             -I ci/input.json \
@@ -90,7 +90,7 @@ jobs:
       - name: Evaluate PR policy
         id: pr
         run: |
-          ./opa-bin eval \
+          opa eval \
             --format=json \
             -d policy/ \
             -I ci/input.json \
@@ -101,7 +101,7 @@ jobs:
         id: sbom
         run: |
           if [ -f "samples/sbom/valid.json" ]; then
-            ./opa-bin eval \
+            opa eval \
               --format=json \
               -d policy/ \
               -I samples/sbom/valid.json \

@@ -1,10 +1,7 @@
-from pathlib import Path
-
 import pytest
-
+from pathlib import Path
 from summit.audio.voice.schema import VoiceArtifact
 from summit.audio.voice.store import VoiceStore
-
 
 def test_voice_artifact_roundtrip(tmp_path):
     store = VoiceStore(tmp_path)

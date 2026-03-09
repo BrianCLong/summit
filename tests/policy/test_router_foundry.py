@@ -1,5 +1,4 @@
-from summit.policy.router import RoutingDecision, route_request
-
+from summit.policy.router import route_request, RoutingDecision
 
 def test_route_preference_foundry():
     req = {"preferred_provider": "azure-foundry", "model": "gpt-4"}

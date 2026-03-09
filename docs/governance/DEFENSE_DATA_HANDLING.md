@@ -1,8 +1,7 @@
-> Owner: @summit/governance
-> Last-Reviewed: 2026-02-25
-> Evidence-IDs: EVD-PLACEHOLDER
-> Status: active
-
+# Defense Data Handling (CUI & CMMC)
+**Status:** Mandatory for Defense/Federal Clients
+**Standard:** CMMC 2.0 (Level 2), NIST SP 800-171 Rev 3
+**Scope:** Controlled Unclassified Information (CUI)
 
 ## 1. Executive Summary
 Summit requires strict architectural and procedural controls for handling CUI. Compliance with CMMC 2.0 Level 2 is a baseline requirement for all defense-related deployments. **Encryption alone is insufficient.**

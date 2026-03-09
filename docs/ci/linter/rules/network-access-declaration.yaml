@@ -1,6 +1,0 @@
-# Rule: Network Access Declaration
-# External network access must be statically declared.
-rule:
-  id: network-access-declaration
-  severity: high
-  message: Agent manifests must statically declare required external network access.

@@ -1,6 +1,5 @@
 import logger from '../config/logger.js';
 import { getNeo4jDriver } from '../db/neo4j.js';
-import { RedisService } from '../cache/redis.js';
 import fs from 'fs';
 import readline from 'readline';
 import { promisify } from 'util';
@@ -34,18 +33,14 @@ export class RestoreService {
     }
   }
 
-  async restoreNeo4j(filepath: string, wipe: boolean = false): Promise<void> {
+  async restoreNeo4j(filepath: string): Promise<void> {
     logger.info(`Starting Neo4j restore from ${filepath}...`);
     const driver = getNeo4jDriver();
     const session = driver.session();
 
     try {
-        if (wipe) {
-            logger.warn('Wiping existing Neo4j data...');
-            await session.run('MATCH (n) DETACH DELETE n');
-        } else {
-            logger.info('Appending to existing Neo4j data (no wipe requested).');
-        }
+        logger.info('Wiping existing Neo4j data...');
+        await session.run('MATCH (n) DETACH DELETE n');
 
         const fileStream = fs.createReadStream(filepath);
         let input;
@@ -110,62 +105,6 @@ export class RestoreService {
     } finally {
         await session.close();
     }
-  }
-
-  async restoreRedis(filepath: string, wipe: boolean = false): Promise<void> {
-      logger.info(`Starting Redis restore from ${filepath}...`);
-      const redis = RedisService.getInstance();
-      const client = redis.getClient();
-
-      try {
-          if (wipe) {
-              logger.warn('Flushing Redis DB...');
-              await (client as any).flushdb();
-          }
-
-          const fileStream = fs.createReadStream(filepath);
-          let input;
-
-          if (filepath.endsWith('.gz')) {
-               input = fileStream.pipe(zlib.createGunzip());
-          } else {
-               input = fileStream;
-          }
-
-          const rl = readline.createInterface({
-              input: input,
-              crlfDelay: Infinity
-          });
-
-          let count = 0;
-
-          for await (const line of rl) {
-              if (!line.trim()) continue;
-              try {
-                  const item = JSON.parse(line);
-                  // item: { k: key, t: type, e: ttl(sec), v: base64 }
-                  const key = item.k;
-                  const ttlSec = item.e;
-                  const value = Buffer.from(item.v, 'base64');
-
-                  // Restore command: RESTORE key ttl serialized-value [REPLACE]
-                  // ttl is in ms. If ttlSec is -1, pass 0.
-                  const ttlMs = (ttlSec === -1) ? 0 : ttlSec * 1000;
-
-                  // Use REPLACE to overwrite if exists (even if we didn't wipe, we might want to overwrite collisions)
-                  await (client as any).restore(key, ttlMs, value, 'REPLACE');
-                  count++;
-              } catch (e) {
-                  logger.warn({ error: e }, 'Failed to restore Redis key');
-              }
-          }
-
-          logger.info(`Redis restore completed. Keys restored: ${count}`);
-
-      } catch (error: any) {
-          logger.error('Redis restore failed', error);
-          throw error;
-      }
   }
 
   private async processNodeBatch(session: any, batch: any[]) {

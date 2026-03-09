@@ -90,11 +90,7 @@ router.get('/status', (_req: Request, res: Response) => {
  *         description: Service is healthy
  */
 import { asyncHandler } from '../middleware/async-handler.js';
-import { summitHealthChecksTotal } from '../monitoring/metrics.js';
-
 router.get('/health', asyncHandler(async (_req: Request, res: Response) => {
-  summitHealthChecksTotal.inc({ status: 'success' });
-
   // Removed telemetry call to avoid spam
   res.status(200).json({
     status: 'ok',
@@ -396,4 +392,3 @@ export const checkHealth = async () => {
 };
 
 export default router;
-// Test: validate new workflow system

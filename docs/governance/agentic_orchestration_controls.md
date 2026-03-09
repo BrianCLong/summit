@@ -1,8 +1,8 @@
-> Owner: Governance / Compliance
-> Last-Reviewed: 2026-02-25
-> Evidence-IDs: EVD-PLACEHOLDER
-> Status: active
+# Agentic Orchestration Controls
 
+**Owner:** Governance / Compliance
+**Effective Date:** 2026-01-24
+**Applies To:** All Autonomous Agents & Meta-Orchestrator
 
 ## Overview
 

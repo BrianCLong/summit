@@ -13,7 +13,7 @@ ZIP Export & Certification provides a secure way to bundle IntelGraph data, repo
 
 ### Archive Structure
 
-```text
+```
 export-2025-09-08-abc123.zip
 ├── manifest.json          # Signed manifest with metadata
 ├── data/                  # Exported data files
@@ -29,8 +29,7 @@ export-2025-09-08-abc123.zip
 └── signatures/           # Cryptographic signatures
     ├── manifest.sig      # Manifest signature
     └── content.sig       # Content signature
-
-```text
+```
 
 ### Manifest Format
 
@@ -54,8 +53,7 @@ export-2025-09-08-abc123.zip
     "signature": "base64-encoded-signature"
   }
 }
-
-```text
+```
 
 ## Creating ZIP Exports
 
@@ -83,15 +81,12 @@ curl -X POST https://api.intelgraph.com/v2/exports \
     "format": "zip",
     "include_signatures": true
   }'
-
-```text
+```
 
 ### Using the CLI
 
 ```bash
-
 # Create export
-
 intelgraph export create \
   --scope entities,relationships \
   --date-range 2025-09-01:2025-09-08 \
@@ -99,14 +94,11 @@ intelgraph export create \
   --output export-$(date +%Y%m%d).zip
 
 # Check export status
-
 intelgraph export status abc123def456
 
 # Download when ready
-
 intelgraph export download abc123def456
-
-```text
+```
 
 ## Sample Export
 
@@ -133,8 +125,7 @@ Here's a minimal sample export structure:
     "signature": "sample-signature-base64"
   }
 }
-
-```text
+```
 
 ```json
 // data/sample-entities.json
@@ -154,8 +145,7 @@ Here's a minimal sample export structure:
     "export_timestamp": "2025-09-08T10:30:00Z"
   }
 }
-
-```text
+```
 
 ## Verification Flow
 
@@ -178,32 +168,25 @@ flowchart TD
   K --> L{Signatures valid?}
   L -->|Yes| M[Extract & use]
   L -->|No| N[Reject + alert]
-
-```text
+```
 
 ### Manual Verification
 
 #### Verify Manifest Signature
 
 ```bash
-
 # Extract manifest and signature
-
 unzip -j export.zip manifest.json signatures/manifest.sig
 
 # Verify signature using certificate
-
 openssl dgst -sha256 -verify signing-cert.pem \
   -signature signatures/manifest.sig manifest.json
-
-```text
+```
 
 #### Verify File Checksums
 
 ```bash
-
 # Check each file's checksum against manifest
-
 while read -r path size checksum; do
   echo "Verifying $path..."
   actual=$(sha256sum "$(basename "$path")" | cut -d' ' -f1)
@@ -214,36 +197,28 @@ while read -r path size checksum; do
     echo "✗ $path: FAILED"
   fi
 done < <(jq -r '.files[] | "\(.path) \(.size) \(.checksum)"' manifest.json)
-
-```text
+```
 
 #### Certificate Chain Validation
 
 ```bash
-
 # Verify certificate chain
-
 openssl verify -CAfile ca-chain.pem signing-cert.pem
 
 # Check certificate validity period
-
 openssl x509 -in signing-cert.pem -noout -dates
-
-```text
+```
 
 ### Verification API
 
 ```bash
-
 # Verify export programmatically
-
 curl -X POST https://api.intelgraph.com/v2/exports/verify \
   -H "Content-Type: multipart/form-data" \
   -F "archive=@export.zip" \
   -F "verify_signatures=true" \
   -F "check_timestamps=true"
-
-```text
+```
 
 ## Certification Levels
 
@@ -257,27 +232,23 @@ curl -X POST https://api.intelgraph.com/v2/exports/verify \
 
 ### Common Issues
 
-### Signature Verification Failed
+**Signature Verification Failed**
 
 ```bash
-
 # Check certificate validity
-
 openssl x509 -in certificates/signing-cert.pem -noout -dates
 
 # Verify certificate chain
-
 openssl verify -CAfile certificates/ca-chain.pem certificates/signing-cert.pem
+```
 
-```text
-
-### Checksum Mismatch
+**Checksum Mismatch**
 
 - Archive may be corrupted during transfer
 - Re-download the export
 - Check network integrity
 
-### Permission Denied
+**Permission Denied**
 
 - Verify user has export permissions for requested data
 - Check certification level authorization
@@ -297,5 +268,4 @@ flowchart TD
   D --> E{Certified?}
   E -->|Yes| F[Accept]
   E -->|No| G[Reject + report]
-
-```text
+```

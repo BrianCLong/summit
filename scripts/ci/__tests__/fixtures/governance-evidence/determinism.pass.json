@@ -1,9 +1,0 @@
-{
-  "findings": [],
-  "kind": "determinism_scan",
-  "scanned_files_count": 3,
-  "scanned_files_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
-  "scanned_root": "artifacts/evidence-id-consistency",
-  "schema_version": 1,
-  "verdict": "PASS"
-}

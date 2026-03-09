@@ -1,5 +1,4 @@
 import express from 'express';
-import type { ClientRequest } from 'http';
 import { createProxyMiddleware } from 'http-proxy-middleware';
 import pino from 'pino';
 import pinoHttp from 'pino-http';
@@ -427,7 +426,7 @@ export async function createApp(): Promise<express.Application> {
       target: upstream,
       changeOrigin: true,
       pathRewrite: { '^/protected': '' },
-      onProxyReq: (proxyReq: ClientRequest) => {
+      onProxyReq: (proxyReq) => {
         injectTraceContext(proxyReq);
       },
     } as any),

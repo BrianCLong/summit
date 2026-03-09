@@ -1,12 +1,9 @@
 from typing import Dict, Optional
-
 from pydantic import BaseModel, Field
-
-
 class ContentProofSet(BaseModel):
     workspace_id: str
     root_hash: str
-    proofs: dict[str, str] = Field(default_factory=dict)
+    proofs: Dict[str, str] = Field(default_factory=dict)
 class ProofStore:
     def __init__(self): self.proofsets = {}
     def upload(self, ps): self.proofsets[ps.workspace_id] = ps

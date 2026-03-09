@@ -79,8 +79,6 @@ export const RetrievalQuerySchema = z.object({
   includeCitations: z.boolean().default(true),
   includeGraphPaths: z.boolean().default(true),
   includeCounterfactuals: z.boolean().default(false),
-  strategy: z.enum(["BASELINE", "KG2RAG"]).default("BASELINE"),
-  useKg2Rag: z.boolean().optional(),
   temporalScope: z.object({
     from: z.string().datetime().optional(),
     to: z.string().datetime().optional(),

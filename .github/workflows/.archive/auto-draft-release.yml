@@ -28,7 +28,9 @@ jobs:
           node-version: '20.11.x'
 
       - name: Download artifacts
-        uses: actions/download-artifact@v4          name: validation-artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: validation-artifacts
           path: ./artifacts
         continue-on-error: true
 

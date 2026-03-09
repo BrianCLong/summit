@@ -1,10 +1,8 @@
 import os
-from typing import Any, Dict, List
-
 import requests
+from typing import List, Dict, Any
 
-
-def fetch_runs(owner: str, repo: str, token: str = None, days: int = 1) -> list[dict[Any, Any]]:
+def fetch_runs(owner: str, repo: str, token: str = None, days: int = 1) -> List[Dict[Any, Any]]:
     headers = {}
     if token:
         headers["Authorization"] = f"token {token}"

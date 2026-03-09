@@ -12,7 +12,7 @@
 
 import { Driver } from 'neo4j-driver';
 import { createHash } from 'crypto';
-import { z } from 'zod';
+import { z } from 'zod/v4';
 import logger from '../../utils/logger.js';
 
 const serviceLogger = logger.child({ name: 'STIXTAXIIFusionService' });

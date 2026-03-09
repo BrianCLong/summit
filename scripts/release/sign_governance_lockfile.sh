@@ -269,7 +269,7 @@ EOF
 
         # Verify immediately after signing
         log_verbose "Verifying signature..."
-        if cosign verify-blob --use-signed-timestamps \
+        if cosign verify-blob \
             --signature "$sig_path" \
             --certificate "$cert_path" \
             --certificate-oidc-issuer "$OIDC_ISSUER" \
@@ -365,7 +365,7 @@ do_verify() {
     export COSIGN_EXPERIMENTAL=1
 
     # Verify signature with identity pinning
-    if cosign verify-blob --use-signed-timestamps \
+    if cosign verify-blob \
         --signature "$sig_path" \
         --certificate "$cert_path" \
         --certificate-oidc-issuer "$oidc_issuer" \

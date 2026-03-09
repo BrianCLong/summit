@@ -1,8 +1,7 @@
-> Owner: Governance
-> Last-Reviewed: 2026-01-14
-> Evidence-IDs: EVD-PLACEHOLDER
-> Status: active
-
+Owner: Governance
+Last-Reviewed: 2026-01-14
+Evidence-IDs: none
+Status: active
 
 # Data Classification
 

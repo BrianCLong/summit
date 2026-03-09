@@ -1,11 +1,8 @@
-from pathlib import Path
-
 import pytest
-
+from pathlib import Path
 from benchmarks.spatialgeneval.io import load_prompt_bundle
 from benchmarks.spatialgeneval.judge.base import DummyJudge
-from benchmarks.spatialgeneval.runner import aggregate_scores, run_eval
-
+from benchmarks.spatialgeneval.runner import run_eval, aggregate_scores
 
 def test_score_aggregation():
     results = [

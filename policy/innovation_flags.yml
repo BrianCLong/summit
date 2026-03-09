@@ -1,5 +1,0 @@
-version: 1
-flags:
-  FEATURE_IW: "0"
-  FEATURE_PROVENANCE: "0"
-  FEATURE_INNOVATION: "0"

@@ -40,29 +40,3 @@ export interface PolicyDecision {
   reasons: string[];
   timestamp: Date;
 }
-
-export type ReputationScore = number;
-
-export enum SubgraphStatus {
-  SUBMITTED = 'SUBMITTED',
-  QUARANTINED = 'QUARANTINED',
-  APPROVED = 'APPROVED',
-  REJECTED = 'REJECTED'
-}
-
-export interface SubgraphPackage {
-  id: string;
-  payload: Record<string, unknown>;
-  contributorId: string;
-  signature: string;
-}
-
-export interface RegisteredSubgraph {
-  id: string;
-  pkg: SubgraphPackage;
-  status: SubgraphStatus;
-  riskScore: number;
-  reputationScore: ReputationScore;
-  createdAt: Date;
-  quarantineReason?: string;
-}

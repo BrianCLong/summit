@@ -7,9 +7,8 @@ import argparse
 import json
 import subprocess
 import sys
-from datetime import UTC, datetime
+from datetime import datetime
 from pathlib import Path
-
 
 def run_git(args):
     try:
@@ -86,7 +85,7 @@ def main():
     # Use timezone-aware UTC datetime
     try:
         from datetime import timezone
-        now = datetime.now(UTC)
+        now = datetime.now(timezone.utc)
     except ImportError:
         now = datetime.utcnow()
 

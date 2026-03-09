@@ -996,7 +996,7 @@ export class ProvenanceLedgerV2 extends EventEmitter {
       require('fs').writeFileSync(tempFile, rootHash);
       require('fs').writeFileSync(tempSig, signature);
 
-      const verifyCommand = `cosign verify-blob --use-signed-timestamps --signature=${tempSig} ${tempFile}`;
+      const verifyCommand = `cosign verify-blob --signature=${tempSig} ${tempFile}`;
       execSync(verifyCommand, { encoding: 'utf-8' });
 
       // Cleanup

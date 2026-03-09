@@ -1,4 +1,0 @@
-{
-  "adapter_load_success_rate_slo": 0.999,
-  "policy_failure_rate_alert_threshold": 0.01
-}

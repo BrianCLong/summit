@@ -1,8 +1,3 @@
-Owner: IntelGraph Team
-Last-Reviewed: 2026-02-27
-Evidence-IDs: GA-EVIDENCE-AUTO-FIX
-Status: active
-
 # Recommendations Policy
 
 Only the following next steps are allowed to be recommended by the system:

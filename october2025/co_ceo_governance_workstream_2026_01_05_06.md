@@ -44,7 +44,7 @@
 | Jan 6  | Controls Mapper                    | DevEx           | `controls.json` generated from existing packs              |
 | Jan 7  | Attestation API scaffold + OpenAPI | DevEx           | OpenAPI doc committed; mock server green                   |
 | Jan 8  | OPA v1.4 (tenant + API guards)     | SecOps          | `opa test` green; bundle hash pinned                       |
-| Jan 9  | Trust Portal theming + verify      | PM + Co‑CEO     | Two themes load; cosign verify --use-signed-timestamps shown                       |
+| Jan 9  | Trust Portal theming + verify      | PM + Co‑CEO     | Two themes load; cosign verify shown                       |
 | Jan 12 | Budget Gate in CI                  | DevEx           | Failing budgets block release; pack includes budget report |
 | Jan 13 | Tenant deploys (2x)                | DevEx           | Two branded portals published (staging)                    |
 | Jan 14 | API prod preview + logs            | DevEx           | Read‑only endpoints live behind key; logs visible          |

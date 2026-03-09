@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import Any, Dict, Literal, Optional
 
+
 IntentClass = Literal[
     "command_decode",
     "identity_inference",
@@ -14,4 +15,4 @@ class IntentFrame:
     intent_class: IntentClass
     text: Optional[str]
     confidence: float
-    meta: dict[str, Any]
+    meta: Dict[str, Any]

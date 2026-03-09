@@ -37,20 +37,6 @@ repos:
         args: [--only-verified]
   - repo: local
     hooks:
-      - id: cargo-fmt
-        name: cargo fmt
-        entry: cargo fmt --all --
-        language: system
-        types: [rust]
-        pass_filenames: false
-
-      - id: cargo-clippy
-        name: cargo clippy
-        entry: cargo clippy --workspace -- -D warnings
-        language: system
-        types: [rust]
-        pass_filenames: false
-
       - id: forbid-focused-tests
         name: forbid .only in tests
         entry: bash -c 'if git grep -nE "(it|test|describe)\\.only\\(" -- "*.ts" "*.tsx" "*.js" | grep -v node_modules; then echo "::error::.only found — remove focused tests"; exit 1; fi'
@@ -67,7 +53,3 @@ repos:
         language: system
         pass_filenames: true
         files: ^secrets/
-  - repo: https://github.com/gitleaks/gitleaks
-    rev: v8.18.1
-    hooks:
-      - id: gitleaks

@@ -2,7 +2,7 @@
 import { Router } from 'express';
 import { resourceCostAnalyzerService } from '../services/ResourceCostAnalyzerService.js';
 import { ensureAuthenticated } from '../middleware/auth.js';
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 const router = Router();
 

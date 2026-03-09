@@ -1,7 +1,0 @@
-{
-  "id": "alert-2",
-  "indicator": "Coordination spike",
-  "severity": "extreme",
-  "confidence": 1.2,
-  "references": []
-}

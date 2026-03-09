@@ -10,9 +10,8 @@
  * - Session management
  */
 
-import { jest, beforeAll } from '@jest/globals';
+import { jest } from '@jest/globals';
 import type { Pool } from 'pg';
-import type { AuthService as AuthServiceType } from '../AuthService.js';
 
 // 1. Mock GAEnrollmentService
 const mockCheckUserEnrollmentEligibility = jest.fn();
@@ -49,68 +48,45 @@ const mockSign = jest.fn();
 const mockHash = jest.fn();
 const mockArgonVerify = jest.fn();
 
-// 5. Dynamic Imports
-let AuthService: typeof import('../AuthService.js').AuthService;
-let getPostgresPool: typeof import('../../config/database.js').getPostgresPool;
-let mockSecurityService: any;
+jest.unstable_mockModule('argon2', () => ({
+  __esModule: true,
+  default: {
+    hash: mockHash,
+    verify: mockArgonVerify,
+  },
+  hash: mockHash,
+  verify: mockArgonVerify,
+}));
 
-beforeAll(async () => {
-  process.env.GA_ENROLLMENT_BYPASS = 'true';
-  ({ AuthService } = await import('../AuthService.js'));
-  ({ getPostgresPool } = await import('../../config/database.js'));
-});
+jest.unstable_mockModule('jsonwebtoken', () => ({
+  __esModule: true,
+  default: {
+    sign: mockSign,
+    verify: mockVerify,
+  },
+  sign: mockSign,
+  verify: mockVerify,
+}));
+
+// 5. Dynamic Imports
+const { AuthService } = await import('../AuthService.js');
+const { default: GAEnrollmentService } = await import('../GAEnrollmentService.js');
+const { getPostgresPool } = await import('../../config/database.js');
+const { default: argon2 } = await import('argon2');
+const { default: jwt } = await import('jsonwebtoken');
 
 
 let mockPool: jest.Mocked<Pool>;
 let mockClient: any;
 
 describe('AuthService', () => {
-  let authService: AuthServiceType;
+  let authService: AuthService;
 
   beforeEach(() => {
     // Reset mocks
     // Reset mocks
     jest.clearAllMocks();
-    process.env.GA_ENROLLMENT_BYPASS = 'true';
-    mockCheckUserEnrollmentEligibility.mockResolvedValue({ eligible: true });
-
-    mockSecurityService = {
-      hashPassword: jest.fn(async (password: string) => mockHash(password)),
-      verifyPassword: jest.fn(async (hash: string, password: string) =>
-        mockArgonVerify(hash, password),
-      ),
-      generateDbTokenPair: jest.fn(
-        async (user: any, client: any, scopes: string[] = []) => {
-          const token = mockSign(
-            {
-              userId: user.id,
-              email: user.email,
-              role: user.role,
-              tenantId: user.tenant_id || user.default_tenant_id || 'unknown',
-              scp: scopes,
-            },
-            'test-jwt-secret-for-testing-only',
-            { expiresIn: '24h' },
-          );
-          const refreshToken = 'refresh-token-456';
-          await client.query(
-            'INSERT INTO user_sessions (user_id, refresh_token) VALUES ($1, $2)',
-            [user.id, refreshToken],
-          );
-          return { token, refreshToken };
-        },
-      ),
-      verifyDbToken: jest.fn(async (token: string) => {
-        try {
-          return mockVerify(token, 'test-jwt-secret-for-testing-only');
-        } catch {
-          return null;
-        }
-      }),
-      refreshDbToken: jest.fn(),
-      revokeToken: jest.fn(),
-      hashToken: jest.fn((token: string) => `hash:${token}`),
-    };
+    (GAEnrollmentService.checkUserEnrollmentEligibility as jest.Mock).mockResolvedValue({ eligible: true });
 
     // Mock PostgreSQL client
     mockClient = {
@@ -126,7 +102,7 @@ describe('AuthService', () => {
 
     (getPostgresPool as jest.Mock).mockReturnValue(mockPool);
 
-    authService = new AuthService(mockSecurityService);
+    authService = new AuthService();
   });
 
   describe('register', () => {
@@ -165,7 +141,6 @@ describe('AuthService', () => {
           },
         ],
       });
-      mockClient.query.mockResolvedValueOnce(undefined); // Insert user_tenants
       mockClient.query.mockResolvedValueOnce(undefined); // Insert session
       mockClient.query.mockResolvedValueOnce(undefined); // COMMIT
 
@@ -220,7 +195,6 @@ describe('AuthService', () => {
           },
         ],
       });
-      mockClient.query.mockResolvedValueOnce(undefined); // Insert user_tenants
       mockClient.query.mockResolvedValueOnce(undefined); // Insert session
       mockClient.query.mockResolvedValueOnce(undefined); // COMMIT
 
@@ -261,13 +235,13 @@ describe('AuthService', () => {
           },
         ],
       });
-      mockClient.query.mockResolvedValueOnce(undefined); // Insert user_tenants
       mockClient.query.mockResolvedValueOnce(undefined); // Insert session
       mockClient.query.mockResolvedValueOnce(undefined); // COMMIT
 
       await authService.register(mockUserData);
 
       expect(mockHash).toHaveBeenCalledWith(mockUserData.password);
+      expect(argon2.hash).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -471,9 +445,16 @@ describe('AuthService', () => {
         email: 'test@example.com',
         role: 'ANALYST',
       };
+      const mockUser = {
+        id: mockPayload.userId,
+        email: mockPayload.email,
+        role: mockPayload.role,
+        is_active: false,
+        created_at: new Date(),
+      };
 
       mockVerify.mockReturnValue(mockPayload);
-      mockClient.query.mockResolvedValue({ rows: [] } as any);
+      mockClient.query.mockResolvedValue({ rows: [mockUser] } as any);
 
       const result = await authService.verifyToken(mockToken);
 

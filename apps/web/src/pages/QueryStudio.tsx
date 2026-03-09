@@ -1,4 +1,3 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-nocheck
 import React, { useState } from 'react';
 import { Box, Typography, Paper, Grid } from '@mui/material';
@@ -11,7 +10,6 @@ export const QueryStudio: React.FC = () => {
   const [cypher, setCypher] = useState<string>('');
   const [results, setResults] = useState<any>(null);
   const [loading, setLoading] = useState(false);
-  const [previewLoading, setPreviewLoading] = useState(false);
 
   const handleRunQuery = async (query: string) => {
       setLoading(true);
@@ -32,22 +30,15 @@ export const QueryStudio: React.FC = () => {
   };
 
   const handlePreview = async (prompt: string) => {
-      setPreviewLoading(true);
-      try {
-          // Mock fetch
-          const res = await fetch('/api/query-studio/preview', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ prompt })
-          });
-          const data = await res.json();
-          if (data.cypher) {
-              setCypher(data.cypher);
-          }
-      } catch (err) {
-          console.error(err);
-      } finally {
-          setPreviewLoading(false);
+      // Mock fetch
+      const res = await fetch('/api/query-studio/preview', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt })
+      });
+      const data = await res.json();
+      if (data.cypher) {
+          setCypher(data.cypher);
       }
   };
 
@@ -60,7 +51,7 @@ export const QueryStudio: React.FC = () => {
       <Grid container spacing={3} sx={{ flex: 1, minHeight: 0 }}>
         <Grid item xs={12} md={4} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             <Paper sx={{ p: 2 }}>
-                <QueryInput onPreview={handlePreview} loading={previewLoading} />
+                <QueryInput onPreview={handlePreview} />
             </Paper>
             <Paper sx={{ p: 2, flex: 1 }}>
                 <SavedQueriesList onSelect={setCypher} />

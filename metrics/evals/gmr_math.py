@@ -14,7 +14,7 @@ def median(values: Iterable[float]) -> float:
 
 
 def mad(values: Iterable[float]) -> float:
-    data: list[float] = list(values)
+    data: List[float] = list(values)
     if not data:
         raise ValueError("mad requires at least one value")
     med = median(data)

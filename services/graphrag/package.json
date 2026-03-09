@@ -21,10 +21,9 @@
     "express": "^5.1.0",
     "neo4j-driver": "6.0.1",
     "openai": "^4.103.0",
-    "prom-client": "^15.1.0",
     "redis": "^5.4.2",
     "uuid": "^11.0.3",
-    "zod": "^3.23.8"
+    "zod": "^4.1.12"
   },
   "devDependencies": {
     "@types/express": "^5.0.3",

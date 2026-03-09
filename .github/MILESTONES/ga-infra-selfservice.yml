@@ -1,6 +1,0 @@
-milestone: "ga-infra-selfservice"
-status: "planning"
-acceptance_criteria:
-  - "Infra Registry enabled and enforcing validation"
-  - "Policy execution executing deny-by-default rules with evidence artifacts"
-  - "Scaffolder generating required Backstage-like templates for Summit components"

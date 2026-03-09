@@ -107,7 +107,7 @@ verify_cosign() {
     
     # Verify with Cosign
     if command -v cosign >/dev/null; then
-        if cosign verify-blob --use-signed-timestamps \
+        if cosign verify-blob \
             --key "$public_key" \
             --signature "$signature_file" \
             "$PACKAGE" 2>&1; then

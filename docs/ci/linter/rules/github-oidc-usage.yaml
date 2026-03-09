@@ -1,6 +1,0 @@
-# Rule: GitHub OIDC Usage
-# Ensure cloud credentials rely on OIDC
-rule:
-  id: github-oidc-usage
-  severity: high
-  message: External cloud credentials must use OIDC instead of static secrets.

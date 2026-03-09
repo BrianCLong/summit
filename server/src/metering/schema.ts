@@ -6,9 +6,6 @@ export enum MeterEventKind {
   LLM_TOKENS = 'llm.tokens',
   MAESTRO_COMPUTE_MS = 'maestro.compute.ms',
   API_REQUEST = 'api.request',
-  POLICY_SIMULATION = 'policy.simulation',
-  WORKFLOW_EXECUTION = 'workflow.execution',
-  RECEIPT_WRITE = 'receipt.write',
 }
 
 export interface MeterEventBase {
@@ -61,22 +58,6 @@ export interface RequestMeterEvent extends MeterEventBase {
   statusCode?: number;
 }
 
-export interface PolicySimulationMeterEvent extends MeterEventBase {
-  kind: MeterEventKind.POLICY_SIMULATION;
-  rulesCount: number;
-}
-
-export interface WorkflowExecutionMeterEvent extends MeterEventBase {
-  kind: MeterEventKind.WORKFLOW_EXECUTION;
-  workflowName: string;
-  stepsCount: number;
-}
-
-export interface ReceiptWriteMeterEvent extends MeterEventBase {
-  kind: MeterEventKind.RECEIPT_WRITE;
-  action: string;
-}
-
 export type MeterEvent =
   | IngestMeterEvent
   | QueryMeterEvent
@@ -84,10 +65,7 @@ export type MeterEvent =
   | SeatMeterEvent
   | LlmMeterEvent
   | ComputeMeterEvent
-  | RequestMeterEvent
-  | PolicySimulationMeterEvent
-  | WorkflowExecutionMeterEvent
-  | ReceiptWriteMeterEvent;
+  | RequestMeterEvent;
 
 export interface TenantUsageDailyRow {
   tenantId: string;
@@ -99,9 +77,6 @@ export interface TenantUsageDailyRow {
   llmTokens: number;
   computeMs: number;
   apiRequests: number;
-  policySimulations: number;
-  workflowExecutions: number;
-  receiptWrites: number;
   lastEventAt: string;
   correlationIds: string[];
   // Additional quota tracking fields

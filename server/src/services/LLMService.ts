@@ -107,6 +107,14 @@ export class LLMService {
 
         this.updateMetrics(Date.now() - startTime, response.usage, provider, model);
 
+        if (response.usage) {
+          span.setAttributes({
+            'llm.usage.prompt_tokens': response.usage.prompt_tokens,
+            'llm.usage.completion_tokens': response.usage.completion_tokens,
+            'llm.usage.total_tokens': response.usage.total_tokens,
+          });
+        }
+
         return response.text;
       } catch (error: any) {
         this.metrics.errorCount++;
@@ -159,6 +167,14 @@ export class LLMService {
         const text = response.choices[0].message.content || '';
 
         this.updateMetrics(Date.now() - startTime, response.usage, provider, model);
+
+        if (response.usage) {
+          span.setAttributes({
+            'llm.usage.prompt_tokens': response.usage.prompt_tokens,
+            'llm.usage.completion_tokens': response.usage.completion_tokens,
+            'llm.usage.total_tokens': response.usage.total_tokens,
+          });
+        }
 
         return text;
 

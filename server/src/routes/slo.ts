@@ -5,8 +5,8 @@ const router = express.Router();
 
 router.get('/', async (req, res) => {
   try {
-    const runbook = String((((req.query.runbook as string) as string) as string) || '');
-    const tenant = String((((req.query.tenant as string) as string) as string) || '');
+    const runbook = String(req.query.runbook || '');
+    const tenant = String(req.query.tenant || '');
     if (!runbook || !tenant)
       return res.status(400).json({ error: 'runbook and tenant required' });
     const r = await computeBurn(

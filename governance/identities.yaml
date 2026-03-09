@@ -15,7 +15,3 @@ identities:
     type: "agent"
     description: "AI Software Engineer"
     roles: ["developer", "reviewer"]
-  - id: "BrianCLong"
-    type: "user"
-    description: "Brian Long (Admin)"
-    roles: ["developer", "reviewer", "admin"]

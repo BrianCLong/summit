@@ -36,6 +36,8 @@ jobs:
           files: flags/catalog.yaml
       - name: Upload audit log
         if: always()
-        uses: actions/upload-artifact@v4          name: flagctl-audit
+        uses: actions/upload-artifact@v4
+        with:
+          name: flagctl-audit
           path: tools/flagctl/audit.log
           if-no-files-found: ignore

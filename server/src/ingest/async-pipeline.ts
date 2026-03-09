@@ -1,8 +1,6 @@
 import { Pool } from 'pg';
 import { createHash, randomUUID } from 'crypto';
 import { IngestService, IngestInput } from '../services/IngestService.js';
-import { ResidencyGuard } from '../data-residency/residency-guard.js';
-import { getCurrentRegion } from '../config/regional-config.js';
 import logger from '../utils/logger.js';
 
 export type AsyncIngestStatus =
@@ -52,7 +50,6 @@ export interface AsyncIngestRepository {
     error?: string,
   ): Promise<void>;
   countProcessingForTenant(tenantId: string): Promise<number>;
-  getProcessingCounts(tenantIds: string[]): Promise<Map<string, number>>;
 }
 
 function stableStringify(value: unknown): string {
@@ -93,7 +90,7 @@ class CircuitBreaker {
   constructor(
     private threshold = 3,
     private cooldownMs = 10_000,
-  ) { }
+  ) {}
 
   canPass(key: string, now: number): boolean {
     const openUntil = this.openUntil.get(key) || 0;
@@ -117,7 +114,7 @@ class CircuitBreaker {
 }
 
 export class PgAsyncIngestRepository implements AsyncIngestRepository {
-  constructor(private pool: Pool, private workerId = 'pg-worker') { }
+  constructor(private pool: Pool, private workerId = 'pg-worker') {}
 
   async insertJobWithOutbox(
     payload: IngestInput,
@@ -297,29 +294,6 @@ export class PgAsyncIngestRepository implements AsyncIngestRepository {
     return Number(rows[0]?.count || 0);
   }
 
-  async getProcessingCounts(tenantIds: string[]): Promise<Map<string, number>> {
-    if (tenantIds.length === 0) return new Map();
-
-    const { rows } = await this.pool.query(
-      `SELECT tenant_id, COUNT(*)::int AS count
-         FROM ingest_async_jobs
-        WHERE tenant_id = ANY($1)
-          AND status = 'PROCESSING'
-        GROUP BY tenant_id`,
-      [tenantIds],
-    );
-
-    const map = new Map<string, number>();
-    // Initialize with 0 for all requested tenants to ensure safe lookups
-    tenantIds.forEach((id) => map.set(id, 0));
-
-    rows.forEach((row: any) => {
-      map.set(row.tenant_id, Number(row.count));
-    });
-
-    return map;
-  }
-
   private mapRow(row: Record<string, unknown>): AsyncIngestJob {
     return {
       id: row.id as string,
@@ -474,23 +448,10 @@ export class InMemoryAsyncIngestRepository implements AsyncIngestRepository {
       (job: any) => job.tenantId === tenantId && job.status === 'PROCESSING',
     ).length;
   }
-
-  async getProcessingCounts(tenantIds: string[]): Promise<Map<string, number>> {
-    const map = new Map<string, number>();
-    tenantIds.forEach((id) => map.set(id, 0));
-
-    const jobs = Array.from(this.jobs.values());
-    for (const job of jobs) {
-      if (job.status === 'PROCESSING' && tenantIds.includes(job.tenantId)) {
-        map.set(job.tenantId, (map.get(job.tenantId) || 0) + 1);
-      }
-    }
-    return map;
-  }
 }
 
 export class AsyncIngestDispatcher {
-  constructor(private repo: AsyncIngestRepository) { }
+  constructor(private repo: AsyncIngestRepository) {}
 
   async enqueue(
     payload: IngestInput,
@@ -566,11 +527,6 @@ export class AsyncIngestWorker {
       now,
     );
 
-    const uniqueTenants = Array.from(
-      new Set(events.map((e) => e.job.tenantId)),
-    );
-    const dbCounts = await this.repo.getProcessingCounts(uniqueTenants);
-
     for (const event of events) {
       const tenantId = event.job.tenantId;
 
@@ -580,7 +536,8 @@ export class AsyncIngestWorker {
       }
 
       const active =
-        (this.inFlight.get(tenantId) || 0) + (dbCounts.get(tenantId) || 0);
+        (this.inFlight.get(tenantId) || 0) +
+        (await this.repo.countProcessingForTenant(tenantId));
 
       if (active >= this.options.maxTenantConcurrency!) {
         const delayMs = calculateBackoffDelay(
@@ -608,18 +565,6 @@ export class AsyncIngestWorker {
 
       this.inFlight.set(tenantId, (this.inFlight.get(tenantId) || 0) + 1);
       await this.repo.markJobProcessing(event.jobId);
-
-      const guard = ResidencyGuard.getInstance();
-      const isAllowed = await guard.isRegionAllowed(tenantId, getCurrentRegion(), 'storage');
-
-      if (!isAllowed) {
-        const delayMs = calculateBackoffDelay(event.attempts, this.options.baseBackoffMs, this.options.maxBackoffMs);
-        await this.repo.markOutboxProcessed(event.id); // Or keep it in outbox for retry in correct region?
-        // For now, fail it as it's a residency violation to process here.
-        await this.repo.markJobFailed(event.jobId, `Residency violation: Current region ${getCurrentRegion()} is not allowed for tenant.`);
-        this.inFlight.set(tenantId, Math.max(0, (this.inFlight.get(tenantId) || 1) - 1));
-        continue;
-      }
 
       try {
         await this.ingestService.ingest(event.job.payload);

@@ -38,7 +38,9 @@ jobs:
           python tools/backup-orchestrator/cli.py verify typesense
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4          name: backup-metrics
+        uses: actions/upload-artifact@v4
+        with:
+          name: backup-metrics
           path: |
             /tmp/backup-metrics
             /tmp/backup-artifacts

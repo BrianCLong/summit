@@ -1,6 +1,0 @@
-# Rule: PII Tagging
-# Data flows handling PII must be appropriately tagged and scoped.
-rule:
-  id: pii-tagging
-  severity: critical
-  message: Data flows and agent capabilities handling PII must be tagged and restricted.

@@ -22,7 +22,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           cache: 'pnpm'
-          node-version: 20
+          node-version: 18
 
       - name: Install dependencies
         run: |
@@ -50,7 +50,7 @@ jobs:
   build-android:
     needs: validate
     runs-on: ubuntu-latest
-    if: (github.ref == 'refs/heads/main') && (github.ref == 'refs/heads/main')
+    if: github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v4
 
@@ -64,7 +64,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           cache: 'pnpm'
-          node-version: 20
+          node-version: 18
 
       - name: Install dependencies
         run: |
@@ -83,6 +83,7 @@ jobs:
   build-ios:
     needs: validate
     runs-on: macos-latest
+    if: github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v4
 
@@ -90,7 +91,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           cache: 'pnpm'
-          node-version: 20
+          node-version: 18
 
       - name: Install dependencies
         run: |
@@ -115,7 +116,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           cache: 'pnpm'
-          node-version: 20
+          node-version: 18
 
       - name: Install dependencies
         run: |

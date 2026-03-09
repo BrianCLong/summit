@@ -33,8 +33,6 @@
     "@types/node": "20.19.27",
     "@types/react": "^19.2.5",
     "@types/react-dom": "^19.2.3",
-    "@types/hapi__catbox": "^12.1.0",
-    "@types/hapi__shot": "^6.0.0",
     "@vitejs/plugin-react": "^5.0.4",
     "concurrently": "^9.2.0",
     "electron": "^34.0.0",

@@ -1,12 +1,33 @@
 import { SwitchboardRoute, SwitchboardContext } from './types';
 import { z } from 'zod';
-import { ConsoleLogger, getErrorMessage, Logger, MetricsClient, NoopMetrics } from './observability';
 
 interface RouterOptions {
   defaultTimeout?: number;
   defaultRetries?: number;
   logger?: Logger;
-  metrics?: MetricsClient;
+  metrics?: Metrics;
+}
+
+interface Logger {
+  info(message: string, meta?: any): void;
+  warn(message: string, meta?: any): void;
+  error(message: string, meta?: any): void;
+}
+
+interface Metrics {
+  increment(metric: string, tags?: Record<string, string>): void;
+  histogram(metric: string, value: number, tags?: Record<string, string>): void;
+}
+
+class ConsoleLogger implements Logger {
+  info(message: string, meta?: any) { console.log(JSON.stringify({ level: 'info', message, ...meta })); }
+  warn(message: string, meta?: any) { console.warn(JSON.stringify({ level: 'warn', message, ...meta })); }
+  error(message: string, meta?: any) { console.error(JSON.stringify({ level: 'error', message, ...meta })); }
+}
+
+class NoopMetrics implements Metrics {
+  increment() {}
+  histogram() {}
 }
 
 export class SwitchboardRouter {
@@ -17,8 +38,10 @@ export class SwitchboardRouter {
     this.options = {
       defaultTimeout: 5000,
       defaultRetries: 2,
-      // Defaults are console/no-op; supply real implementations in production.
+      // TODO: Integrate with the application's real logger (e.g. Pino, Winston)
+      // instead of using ConsoleLogger in production.
       logger: options.logger || new ConsoleLogger(),
+      // TODO: Integrate with real metrics (e.g. Prometheus, StatsD)
       metrics: options.metrics || new NoopMetrics(),
       ...options
     };
@@ -44,20 +67,14 @@ export class SwitchboardRouter {
       throw new Error(`Route not found: ${routeId}`);
     }
 
-    this.options.metrics.increment('switchboard.request', {
-      routeId,
-      source: context.source,
-    });
+    this.options.metrics.increment('switchboard.request', { routeId, source: context.source });
 
     // Validate input
     const validationResult = route.inputSchema.safeParse(payload);
     if (!validationResult.success) {
-      this.options.logger.warn(`Invalid input for route ${routeId}`, {
-        error: validationResult.error,
-        context,
-      });
-      this.options.metrics.increment('switchboard.error', { routeId, type: 'validation' });
-      throw new Error(`Invalid input for route ${routeId}: ${validationResult.error.message}`);
+        this.options.logger.warn(`Invalid input for route ${routeId}`, { error: validationResult.error, context });
+        this.options.metrics.increment('switchboard.error', { routeId, type: 'validation' });
+        throw new Error(`Invalid input for route ${routeId}: ${validationResult.error.message}`);
     }
 
     const validatedPayload = validationResult.data;
@@ -70,12 +87,10 @@ export class SwitchboardRouter {
       this.options.logger.info(`Route ${routeId} completed`, { routeId, duration, context });
 
       return result;
-    } catch (error: unknown) {
-      const errorMessage = getErrorMessage(error);
+    } catch (error: any) {
       const duration = performance.now() - start;
       this.options.metrics.histogram('switchboard.latency', duration, { routeId, status: 'error' });
       this.options.metrics.increment('switchboard.error', { routeId, type: 'execution' });
-      this.options.logger.error(`Route ${routeId} failed`, { error: errorMessage, context });
       throw error;
     }
   }
@@ -87,20 +102,13 @@ export class SwitchboardRouter {
     while (attempt <= maxRetries) {
       try {
         return await this.executeWithTimeout(route, payload, context);
-      } catch (error: unknown) {
+      } catch (error: any) {
         attempt++;
-        const errorMessage = getErrorMessage(error);
-        this.options.logger.warn(`Attempt ${attempt} failed for route ${route.id}`, {
-          error: errorMessage,
-          context,
-        });
+        this.options.logger.warn(`Attempt ${attempt} failed for route ${route.id}`, { error: error.message, context });
 
         if (attempt > maxRetries) {
-          this.options.logger.error(`Route ${route.id} failed after ${attempt} attempts`, {
-            error: errorMessage,
-            context,
-          });
-          throw new Error(`Route ${route.id} failed after ${attempt} attempts. Last error: ${errorMessage}`);
+          this.options.logger.error(`Route ${route.id} failed after ${attempt} attempts`, { error: error.message, context });
+          throw new Error(`Route ${route.id} failed after ${attempt} attempts. Last error: ${error.message}`);
         }
 
         // Simple backoff: 100ms * 2^attempt
@@ -119,15 +127,12 @@ export class SwitchboardRouter {
         setTimeout(() => reject(new Error(`Route ${route.id} timed out after ${timeout}ms`)), timeout)
       )
     ]).then(async (result) => {
-      // Validate output
-      const outputValidation = route.outputSchema.safeParse(result);
-      if (!outputValidation.success) {
-        this.options.logger.warn(`Route ${route.id} returned invalid output`, {
-          error: outputValidation.error.message,
-          context,
-        });
-      }
-      return result;
+       // Validate output
+       const outputValidation = route.outputSchema.safeParse(result);
+       if (!outputValidation.success) {
+           this.options.logger.warn(`Route ${route.id} returned invalid output`, { error: outputValidation.error.message, context });
+       }
+       return result;
     });
   }
 }

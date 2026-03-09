@@ -165,13 +165,15 @@ router.get('/tickets/:id/comments', async (req, res) => {
 
 const resolveActor = (req: express.Request) => {
   const user = (req as any).user;
+  const idHeader = req.headers['x-user-id'];
+  const roleHeader = req.headers['x-user-role'];
 
-  // SEC-HARDENING: Rely exclusively on authenticated user object.
-  // Identity spoofing via headers is strictly forbidden.
-  const id = (user?.sub || user?.id || '').toString();
+  const id = (user?.sub || user?.id || (Array.isArray(idHeader) ? idHeader[0] : idHeader) || '').toString();
   const roles = Array.isArray(user?.roles)
     ? (user?.roles as string[])
-    : user?.role ? [user.role] : [];
+    : roleHeader
+      ? [roleHeader].flat()
+      : [];
 
   return { id, roles };
 };

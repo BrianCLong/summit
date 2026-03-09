@@ -12,7 +12,6 @@ import { enhancedOnboardingService } from '../onboarding/index.js';
 import { ensureAuthenticated } from '../middleware/auth.js';
 import { isEnabled } from '../lib/featureFlags.js';
 import logger from '../utils/logger.js';
-import { firstString, firstStringOr } from '../utils/http-param.js';
 
 const router = Router();
 
@@ -112,7 +111,7 @@ router.post(
   requireFeatureFlag('onboarding.enhancedFlow'),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const stepId = firstStringOr(req.params.stepId, '');
+      const { stepId } = req.params;
       const data = CompleteStepSchema.parse(req.body);
       const { tenantId, id: userId } = req.user!;
 
@@ -140,7 +139,7 @@ router.post(
   requireFeatureFlag('onboarding.enhancedFlow'),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const stepId = firstStringOr(req.params.stepId, '');
+      const { stepId } = req.params;
       const { reason } = SkipStepSchema.parse(req.body);
       const { tenantId, id: userId } = req.user!;
 
@@ -168,8 +167,8 @@ router.get(
   requireFeatureFlag('onboarding.sampleContent'),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const persona = firstString(req.query.persona) || 'analyst';
-      const type = firstString(req.query.type);
+      const persona = (req.query.persona as string) || 'analyst';
+      const type = req.query.type as string | undefined;
 
       const result = await enhancedOnboardingService.getSampleContent(
         persona as any,
@@ -219,7 +218,7 @@ router.get(
   requireFeatureFlag('onboarding.contextualHelp'),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const route = firstString(req.query.route) || '/';
+      const route = (req.query.route as string) || '/';
       const { id: userId } = req.user!;
 
       const result = await enhancedOnboardingService.getContextualHelp(route, userId);
@@ -269,12 +268,12 @@ router.get(
         return;
       }
 
-      const period = (firstString(req.query.period) as 'daily' | 'weekly' | 'monthly') || 'weekly';
-      const startDate = firstString(req.query.startDate)
-        ? new Date(firstStringOr(req.query.startDate, ''))
+      const period = (req.query.period as 'daily' | 'weekly' | 'monthly') || 'weekly';
+      const startDate = req.query.startDate
+        ? new Date(req.query.startDate as string)
         : new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-      const endDate = firstString(req.query.endDate)
-        ? new Date(firstStringOr(req.query.endDate, ''))
+      const endDate = req.query.endDate
+        ? new Date(req.query.endDate as string)
         : new Date();
 
       const result = await enhancedOnboardingService.getAnalyticsSummary(

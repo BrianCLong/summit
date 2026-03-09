@@ -1,8 +1,9 @@
-> Owner: Governance
-> Last-Reviewed: 2026-01-14
-> Evidence-IDs: EVD-PLACEHOLDER
-> Status: active
+Owner: Governance
+Last-Reviewed: 2026-01-14
+Evidence-IDs: none
+Status: active
 
+# Canonical Definitions: The Summit Standard
 
 This document defines the non-negotiable standards for "Done", "Secure", and "Compliant" within the Summit ecosystem.
 Any deviation from these standards must be explicitly recorded in the `EXCEPTION_REGISTER.md`.

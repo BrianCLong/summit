@@ -250,7 +250,7 @@ router.delete(
     try {
       const principal = (req as any).principal;
       const { id } = req.params;
-      const hardDelete = req.query.hardDelete === 'true';
+      const hardDelete = req.query.hard === 'true';
 
       const envelope = await userService.deleteUser(
         principal.tenantId,

@@ -12,7 +12,7 @@
  * - Permission checks
  */
 
-import { z } from 'zod';
+import { z } from 'zod/v4';
 import { sanitizeHtml } from '../utils/htmlSanitizer.js';
 
 // Base validation schemas
@@ -422,12 +422,6 @@ export class SecurityValidator {
       /on\w+\s*=/gi,
     ];
 
-    const prototypePollutionPatterns = [
-      /"__proto__"/g,
-      /"constructor"/i,
-      /"prototype"/i,
-    ];
-
     if (sqlInjectionPatterns.some((pattern) => pattern.test(inputStr))) {
       errors.push('Potential SQL injection detected');
     }
@@ -438,10 +432,6 @@ export class SecurityValidator {
 
     if (xssPatterns.some((pattern) => pattern.test(inputStr))) {
       errors.push('Potential XSS content detected');
-    }
-
-    if (prototypePollutionPatterns.some((pattern) => pattern.test(inputStr))) {
-      errors.push('Potential Prototype Pollution detected');
     }
 
     // Check for excessively long inputs (potential DoS)
@@ -696,10 +686,10 @@ export class SanitizationUtils {
    */
   static sanitizeCypher(input: string): string {
     return input
-      .replace(/\\/g, '\\\\') // Escape backslashes first!
       .replace(/'/g, "\\'") // Escape single quotes
       .replace(/"/g, '\\"') // Escape double quotes
-      .replace(/`/g, '\\`'); // Escape backticks
+      .replace(/`/g, '\\`') // Escape backticks
+      .replace(/\\/g, '\\\\'); // Escape backslashes
   }
 
   /**

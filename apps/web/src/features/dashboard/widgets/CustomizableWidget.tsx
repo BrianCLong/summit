@@ -27,24 +27,12 @@ export function CustomizableWidget({
         <CardTitle className="text-sm font-medium">{title}</CardTitle>
         <div className="flex items-center gap-1">
           {onToggleExpand && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-6 w-6 p-0"
-              onClick={onToggleExpand}
-              aria-label={isExpanded ? 'Minimize widget' : 'Maximize widget'}
-            >
+            <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={onToggleExpand}>
               {isExpanded ? <Minimize2 className="h-3 w-3" /> : <Maximize2 className="h-3 w-3" />}
             </Button>
           )}
           {onClose && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-6 w-6 p-0 text-muted-foreground hover:text-destructive"
-              onClick={onClose}
-              aria-label="Close widget"
-            >
+            <Button variant="ghost" size="sm" className="h-6 w-6 p-0 text-muted-foreground hover:text-destructive" onClick={onClose}>
               <X className="h-3 w-3" />
             </Button>
           )}

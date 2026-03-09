@@ -136,7 +136,9 @@ jobs:
           touch "/tmp/digests/${digest#sha256:}"
 
       - name: Upload digest
-        uses: actions/upload-artifact@v4          name: digests-api-${{ steps.platform.outputs.name }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: digests-api-${{ steps.platform.outputs.name }}
           path: /tmp/digests/*
           if-no-files-found: error
           retention-days: 1
@@ -199,7 +201,9 @@ jobs:
           touch "/tmp/digests/${digest#sha256:}"
 
       - name: Upload digest
-        uses: actions/upload-artifact@v4          name: digests-web-${{ steps.platform.outputs.name }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: digests-web-${{ steps.platform.outputs.name }}
           path: /tmp/digests/*
           if-no-files-found: error
           retention-days: 1

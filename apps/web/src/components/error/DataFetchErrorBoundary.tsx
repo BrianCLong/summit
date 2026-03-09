@@ -15,8 +15,8 @@ interface DataFetchErrorFallbackProps {
   error: Error;
   resetErrorBoundary: () => void;
   retryCount: number;
-  isRetrying?: boolean;
-  maxRetries?: number;
+  isRetrying: boolean;
+  maxRetries: number;
   dataSourceName?: string;
 }
 
@@ -24,8 +24,8 @@ const DataFetchErrorFallback: React.FC<DataFetchErrorFallbackProps> = ({
   error,
   resetErrorBoundary,
   retryCount,
-  isRetrying = false,
-  maxRetries = 3,
+  isRetrying,
+  maxRetries,
   dataSourceName = 'data source',
 }) => {
   const canRetry = retryCount < maxRetries;

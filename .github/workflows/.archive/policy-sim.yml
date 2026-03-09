@@ -8,7 +8,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install OPA
-        run: curl -L -o opa-bin https://openpolicyagent.org/downloads/latest/opa_linux_amd64 && chmod +x ./opa-bin
+        run: curl -L -o opa https://openpolicyagent.org/downloads/latest/opa_linux_amd64 && chmod +x ./opa
       - name: Run simulations (hard fail)
         run: |
           ./opa test policies/ -v

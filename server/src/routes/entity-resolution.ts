@@ -57,7 +57,7 @@ router.get('/quality/metrics', async (req, res) => {
 // Guardrail status endpoint
 router.get('/guardrails/status', async (req, res) => {
   try {
-    const datasetId = typeof (((req.query.datasetId as string) as string) as string) === 'string' ? (((req.query.datasetId as string) as string) as string) : undefined;
+    const datasetId = typeof req.query.datasetId === 'string' ? req.query.datasetId : undefined;
     const guardrails = erV2Service.evaluateGuardrails(datasetId);
     const pool = getPostgresPool();
     const overrideResult = await pool.query(

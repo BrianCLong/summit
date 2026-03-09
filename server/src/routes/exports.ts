@@ -22,10 +22,14 @@ router.post(
     const manifestString = JSON.stringify({ tenant, filters, timestamp });
 
     // In a real system, we'd use a private key from KMS/Secrets
-    const secret = process.env.EXPORT_SIGNING_SECRET;
+    let secret = process.env.EXPORT_SIGNING_SECRET;
 
     if (!secret) {
-      throw new Error('EXPORT_SIGNING_SECRET is not configured');
+      if (process.env.NODE_ENV === 'production') {
+        throw new Error('EXPORT_SIGNING_SECRET is not configured');
+      }
+      // In dev/test, fallback to a known secret if not provided
+      secret = 'dev-secret';
     }
 
     const signature = crypto
@@ -71,7 +75,7 @@ router.post(
 
   try {
     const result = await watermarkVerificationService.verify({
-      exportId: (id as string),
+      exportId: id,
       artifactId,
       watermark,
     });

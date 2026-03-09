@@ -1,34 +1,26 @@
-import { beforeAll, beforeEach, describe, expect, it, jest } from '@jest/globals';
+import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 
 const readMock = jest.fn() as jest.MockedFunction<
   (...args: any[]) => Promise<{ rows: any[] }>
 >;
-const getPostgresPoolMock = jest.fn();
-const loggerErrorMock = jest.fn();
 
-jest.unstable_mockModule('../../config/database.js', () => ({
-  getPostgresPool: getPostgresPoolMock,
+jest.mock('../../config/database.js', () => ({
+  getPostgresPool: () => ({
+    read: readMock,
+  }),
 }));
 
-jest.unstable_mockModule('../../utils/logger.js', () => ({
+jest.mock('../../utils/logger.js', () => ({
   default: {
-    error: loggerErrorMock,
+    error: jest.fn(),
   },
 }));
 
+import { TenantUsageService } from '../TenantUsageService.js';
+
 describe('TenantUsageService', () => {
-  let TenantUsageService: any;
-
-  beforeAll(async () => {
-    ({ TenantUsageService } = await import('../TenantUsageService.js'));
-  });
-
   beforeEach(() => {
-    jest.clearAllMocks();
     readMock.mockReset();
-    getPostgresPoolMock.mockReturnValue({
-      read: readMock,
-    });
   });
 
   it('aggregates totals and breakdowns by workflow and environment', async () => {

@@ -1,0 +1,23 @@
+name: wf-reuse-build-python
+on:
+  workflow_call:
+    inputs:
+      python-version: { type: string, default: '3.11' }
+      working-directory: { type: string, default: '.' }
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: ${{ inputs.working-directory }} } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: ${{ inputs.python-version }} }
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt','**/pyproject.toml','**/poetry.lock') }}
+      - name: Install
+        run: |
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          if [ -f pyproject.toml ]; then pip install -e .; fi

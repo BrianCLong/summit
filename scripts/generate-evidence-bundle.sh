@@ -228,7 +228,7 @@ ignore-unfixed: true
 
 ### Cosign Verification
 ```bash
-cosign verify --use-signed-timestamps --certificate-identity="https://github.com/REPO/.github/workflows/cosign-attest.yml@refs/heads/main" \
+cosign verify --certificate-identity="https://github.com/REPO/.github/workflows/cosign-attest.yml@refs/heads/main" \
   --certificate-oidc-issuer="https://token.actions.githubusercontent.com"
 ```
 

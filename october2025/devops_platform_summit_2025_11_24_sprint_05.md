@@ -152,7 +152,7 @@ verify_attestation:
   steps:
     - uses: actions/checkout@v4
     - name: Verify Sigstore provenance
-      run: cosign verify --use-signed-timestamps $IMAGE --certificate-oidc-issuer https://token.actions.githubusercontent.com
+      run: cosign verify $IMAGE --certificate-oidc-issuer https://token.actions.githubusercontent.com
     - name: Verify enclave measurement
       run: ./ci/attest/verify_nitro.sh --expected $MEAS --image $IMAGE
     - name: Gate via OPA

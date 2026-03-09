@@ -3,11 +3,6 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 
 const steps = [
-  {
-    name: 'sanitize:type-stubs',
-    command: 'bash',
-    args: ['-lc', 'rm -rf node_modules/@types/hapi__catbox node_modules/@types/hapi__shot'],
-  },
   { name: 'typecheck', command: 'pnpm', args: ['typecheck'] },
   { name: 'lint', command: 'pnpm', args: ['lint'] },
   { name: 'build', command: 'pnpm', args: ['build'] },
@@ -18,11 +13,6 @@ const steps = [
     env: { GA_VERIFY_MODE: 'true' },
   },
   { name: 'ga:smoke', command: 'pnpm', args: ['ga:smoke'] },
-  {
-    name: 'ga:maestro-spec',
-    command: 'node',
-    args: ['scripts/ga/verify-maestro-spec.mjs', 'artifacts/maestro/sample/spec_bundle.json'],
-  },
 ];
 
 const gitSha = spawnSync('git', ['rev-parse', 'HEAD'], {

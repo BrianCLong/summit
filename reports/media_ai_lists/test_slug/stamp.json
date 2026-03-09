@@ -1,6 +1,0 @@
-{
-  "deterministic": true,
-  "input_hash": "sha256:1234abcd",
-  "report_hash": "5f5bf8ceabb354b4309e639d5e5cb7ecc60a36d72b460cd0ed9b0ca50dfc724b",
-  "version": "0.1.0"
-}

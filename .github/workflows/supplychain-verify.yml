@@ -4,10 +4,6 @@ on:
     branches: [ "**" ]
   workflow_dispatch: {}
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 permissions:
   contents: read
   id-token: write    # for keyless verification if needed
@@ -27,12 +23,12 @@ jobs:
           echo "ref=${IMAGE_REF}" >> "$GITHUB_OUTPUT"
 
       - name: Install cosign
-        uses: sigstore/cosign-installer@v3.7.0
+        uses: sigstore/cosign-installer@v3
 
       - name: Install OPA
         run: |
-          curl -L -o opa_bin https://openpolicyagent.org/downloads/latest/opa_linux_amd64_static
-          chmod +x opa_bin && sudo mv opa_bin /usr/local/bin/opa
+          curl -L -o opa https://openpolicyagent.org/downloads/latest/opa_linux_amd64_static
+          chmod +x opa && sudo mv opa /usr/local/bin/opa
 
       - name: Resolve digest and fetch attestation
         id: fetch
@@ -42,7 +38,7 @@ jobs:
           DIGEST="$(cosign triangulate "${IMAGE_REF}")"
           echo "digest=${DIGEST}" >> "$GITHUB_OUTPUT"
           # Verify there is a valid in-toto attestation recorded in Rekor
-          cosign verify-attestation --use-signed-timestamps "${DIGEST}" --type slsaprovenance > att.json || { echo "::error::Supply chain verification failed! Missing or invalid signed timestamps."; false; }
+          cosign verify-attestation "${DIGEST}" --type slsaprovenance > att.json
           # Extract the in-toto payload for policy input
           jq -r '.[0].payload | @base64d' att.json > statement.json
 

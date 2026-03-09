@@ -95,7 +95,7 @@ Produce a comprehensive security and privacy design pack:
   - [ ] Access controls verified
 
 ### 5. Runbooks
-- [ ] `runbooks/security/`:
+- [ ] `RUNBOOKS/security/`:
   - [ ] Breach response
   - [ ] Insider threat investigation
   - [ ] Legal hold execution

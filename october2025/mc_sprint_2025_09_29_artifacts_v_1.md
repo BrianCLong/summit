@@ -569,7 +569,7 @@ tasks:
 #!/usr/bin/env bash
 set -euo pipefail
 receipt=${1:-receipt.json}
-cosign verify-blob --use-signed-timestamps --signature ${receipt}.sig $receipt
+cosign verify-blob --signature ${receipt}.sig $receipt
 jq -e '.executionId and .signature' $receipt >/dev/null
 ```
 

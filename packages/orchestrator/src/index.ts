@@ -5,5 +5,3 @@ export * from './types.js';
 export * from './eventlog/append.js';
 export * from './eventlog/replay.js';
 export * from './eventlog/verify.js';
-export * from './determinism.js';
-export * from './run_manifest.js';

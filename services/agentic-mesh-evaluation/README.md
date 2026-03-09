@@ -47,7 +47,7 @@ The Agentic Mesh Evaluation Service is a comprehensive platform for orchestratin
 ### Prerequisites
 
 - Node.js ≥ 18.0.0
-- pnpm ≥ 10.0.0
+- pnpm ≥ 9.12.0
 - Redis ≥ 6.0
 - Docker (optional, for containerized deployment)
 - Kubernetes (optional, for production deployment)

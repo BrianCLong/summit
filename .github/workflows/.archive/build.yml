@@ -1,106 +1,49 @@
-name: Supply Chain Build
-
+name: Build & Push
 on:
   push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+    branches: [ main ]
+  workflow_dispatch: {}
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+env:
+  REGISTRY: ${{ secrets.REGISTRY }}            # e.g. ghcr.io/owner
+  IMAGE_NAME: app                               # replace per service
 
 jobs:
-  build-and-attest:
-    name: Build, SBOM & Provenance
+  build:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      id-token: write
       packages: write
-    env:
-      SIGSTORE_KEY: ${{ secrets.SIGSTORE_KEY }}
+      id-token: write
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4 # v4.1.7
+      - uses: actions/checkout@v4
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4 # v4.1.0
-
-      # Note: pnpm version is read from package.json "packageManager" field
-      - name: Setup Node
-        uses: actions/setup-node@v4 # v4
+      - name: Log in to registry
+        uses: docker/login-action@v3
         with:
-          cache: 'pnpm'
-          node-version-file: .nvmrc
+          registry: ${{ env.REGISTRY }}
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Build Project
-        run: pnpm build
-
-      - name: Install Cosign
-        uses: sigstore/cosign-installer@dc72c7d5c4d10cd6bcb8cf6e3fd625a9e5e537da # v3.7.0
-
-      - name: Install Syft
-        uses: anchore/sbom-action/download-syft@6c5cb5bd7dcd9b7f5fe6d7c7e21ed2f6b3f5ab7b # v0.18.0
-
-      - name: Install in-toto
-        run: pip install in-toto
-
-      - name: Setup Signing Key
-        run: |
-          if [ -n "$SIGSTORE_KEY" ]; then
-             echo "$SIGSTORE_KEY" > cosign.key
-          else
-             echo "Generating ephemeral key for demo/check..."
-             cosign generate-key-pair
-          fi
-
-      - name: Generate SBOM (SPDX)
-        run: syft . -o spdx-json=sbom.spdx.json
-
-      - name: Generate SBOM (CycloneDX)
-        run: syft . -o cyclonedx-json=sbom.cdx.json
-
-      - name: Sign SBOMs
-        if: env.SIGSTORE_KEY != ''
-        run: |
-          cosign sign --key cosign.key sbom.spdx.json
-          cosign sign --key cosign.key sbom.cdx.json
-
-      - name: Prepare Artifacts for Provenance
-        run: |
-          # Aggregate artifacts for provenance to match ./dist/* expectation
-          mkdir -p dist
-          # Copy server artifacts if they exist
-          if [ -d "server/dist" ]; then
-            cp -r server/dist/* dist/
-          fi
-          # Copy client artifacts if they exist
-          if [ -d "client/dist" ]; then
-            cp -r client/dist/* dist/
-          fi
-          # Ensure dist is not empty
-          touch dist/build-manifest.txt
-
-      - name: Generate Build Provenance
-        run: |
-          in-toto-run --step-name build \
-            --materials "./src,./sbom.spdx.json" \
-            --products "./dist/*" \
-            --record-keystore cosign.key --no-command || echo "in-toto-run skipped"
-
-          # Sign attestation
-          if [ -f attestation.json ] && [ -n "$SIGSTORE_KEY" ]; then
-             cosign sign --key cosign.key attestation.json || true
-          fi
-
-      - name: Upload Artifacts
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.6.0
+      - name: Extract metadata (tags, labels)
+        id: meta
+        uses: docker/metadata-action@v5
         with:
-          name: sboms
-          path: |
-            sbom.*.json
-            attestation.json
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:main
+          labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Trivy image scan
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          ignore-unfixed: true
+          format: table

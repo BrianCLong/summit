@@ -12,7 +12,6 @@ import { experimentationService } from '../experimentation/index.js';
 import { ensureAuthenticated } from '../middleware/auth.js';
 import { isEnabled } from '../lib/featureFlags.js';
 import logger from '../utils/logger.js';
-import { firstStringOr } from '../utils/http-param.js';
 
 const router = Router();
 
@@ -137,7 +136,7 @@ router.post(
         return;
       }
 
-      const experimentId = firstStringOr(req.params.experimentId, '');
+      const { experimentId } = req.params;
 
       const result = await experimentationService.startExperiment(experimentId);
 
@@ -158,7 +157,7 @@ router.get(
   requireFeatureFlag('experimentation.abTesting'),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const experimentId = firstStringOr(req.params.experimentId, '');
+      const { experimentId } = req.params;
       const { tenantId, id: userId } = req.user!;
 
       // Parse query parameters for additional attributes
@@ -193,7 +192,7 @@ router.post(
   requireFeatureFlag('experimentation.abTesting'),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const experimentId = firstStringOr(req.params.experimentId, '');
+      const { experimentId } = req.params;
       const { tenantId, id: userId } = req.user!;
       const data = GetAssignmentSchema.parse(req.body);
 
@@ -221,7 +220,7 @@ router.post(
   requireFeatureFlag('experimentation.abTesting'),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const experimentId = firstStringOr(req.params.experimentId, '');
+      const { experimentId } = req.params;
       const { id: userId } = req.user!;
       const { metricName, metricValue } = TrackMetricSchema.parse(req.body);
 
@@ -256,7 +255,7 @@ router.get(
         return;
       }
 
-      const experimentId = firstStringOr(req.params.experimentId, '');
+      const { experimentId } = req.params;
 
       const result = await experimentationService.getResults(experimentId);
 
@@ -277,7 +276,7 @@ router.post(
   requireFeatureFlag('experimentation.abTesting'),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const experimentId = firstStringOr(req.params.experimentId, '');
+      const { experimentId } = req.params;
       const { id: userId } = req.user!;
       const { role, approved, comment } = ApproveExperimentSchema.parse(req.body);
 
@@ -319,7 +318,7 @@ router.post(
         return;
       }
 
-      const experimentId = firstStringOr(req.params.experimentId, '');
+      const { experimentId } = req.params;
       const { rolloutWinner } = CompleteExperimentSchema.parse(req.body);
 
       const result = await experimentationService.completeExperiment(

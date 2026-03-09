@@ -1,8 +1,11 @@
-> Owner: Governance
-> Last-Reviewed: 2026-01-14
-> Evidence-IDs: EVD-PLACEHOLDER
-> Status: active
+Owner: Governance
+Last-Reviewed: 2026-01-14
+Evidence-IDs: none
+Status: active
 
+# Epic 3: Model Risk Management (MRM) (treat models like critical systems)
+
+1.  Define model inventory: version, purpose, owner, training data, eval results.
 2.  Create model risk tiers and required controls per tier.
 3.  Implement evaluation harness: accuracy, toxicity, bias, robustness, jailbreak resistance.
 4.  Define guardrails: retrieval grounding, refusal logic, allowed tools/actions.

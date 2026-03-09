@@ -1,7 +1,7 @@
 from typing import Dict
 
 # Voice Instruct Presets (aligned with harvested patterns from ComfyUI-QwenTTS)
-VOICE_INSTRUCT_PRESETS: dict[str, dict[str, str]] = {
+VOICE_INSTRUCT_PRESETS: Dict[str, Dict[str, str]] = {
     "en": {
         "calm": "A calm and professional male voice with a neutral tone.",
         "energetic": "An energetic and excited female voice with high pitch.",

@@ -22,10 +22,6 @@ CANONICAL_ENTITY_TYPES = [
     "Runbook",
     "Authority",
     "License",
-    "Actor",
-    "Platform",
-    "MediaBrand",
-    "IntelligenceService",
 ]
 
 # You can also define canonical relationship types here if needed
@@ -42,11 +38,4 @@ CANONICAL_RELATIONSHIP_TYPES = [
     "CONTROLS",
     "USES",
     "ASSOCIATED_WITH",
-    "LAUNCHED",
-    "AMPLIFIED_VIA",
-    "TARGETED",
-    "IMPERSONATED",
-    "PLACED_CONTENT_IN",
-    "COORDINATED_WITH",
-    "TRIGGERED_BY",
 ]

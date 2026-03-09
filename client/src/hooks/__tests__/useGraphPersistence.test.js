@@ -23,7 +23,7 @@ describe('useGraphPersistence', () => {
       nodeTypeColors: { type: 'red' },
     };
 
-    renderHook(
+    const { rerender } = renderHook(
       (props) => useGraphPersistence(props),
       { initialProps }
     );
@@ -45,7 +45,7 @@ describe('useGraphPersistence', () => {
   });
 
   it('coalesces rapid updates', () => {
-    renderHook(
+    const { rerender } = renderHook(
         (props) => useGraphPersistence(props),
         {
             initialProps: {

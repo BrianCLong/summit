@@ -121,7 +121,7 @@ jobs:
         run: |
           if [ -n "$GHCR_TOKEN" ]; then echo $GHCR_TOKEN | helm registry login ghcr.io -u ${{ github.actor }} --password-stdin; fi
           helm pull oci://ghcr.io/$ORG/charts/$CHART --version $VERSION -d ./charts
-          cosign verify --use-signed-timestamps ghcr.io/$ORG/charts/$CHART:$VERSION \
+          cosign verify ghcr.io/$ORG/charts/$CHART:$VERSION \
             --certificate-oidc-issuer https://token.actions.githubusercontent.com \
             --certificate-identity-regexp ".*github.com/$ORG.*"
 ```

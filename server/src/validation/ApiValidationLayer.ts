@@ -13,8 +13,8 @@
  * @module validation/ApiValidationLayer
  */
 
-import { z } from 'zod';
-import type { ZodSchema, ZodType } from 'zod';
+import { z } from 'zod/v4';
+import type { ZodSchema, ZodType } from 'zod/v4';
 import { Request, Response, NextFunction } from 'express';
 import { ValidationError } from '../errors/ErrorHandlingFramework.js';
 

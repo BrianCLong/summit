@@ -127,7 +127,7 @@ Release Captain integrates with automatic PR validation:
 
 Respects repository CODEOWNERS for:
 
-- Critical path changes (charts/, runbooks/, tools/)
+- Critical path changes (charts/, RUNBOOKS/, tools/)
 - Security-sensitive files
 - Database migrations
 - Infrastructure changes

@@ -139,10 +139,9 @@ app.use('/api', authenticate);
 app.post(
   '/api/dashboards',
   authorize(['user', 'admin']),
-  async (req, res) => {
+  async (req: AuthenticatedRequest, res) => {
     try {
-      const authReq = req as AuthenticatedRequest;
-      const userId = authReq.user.id;
+      const userId = req.user.id;
       const dashboard = await dashboardService.createDashboard(
         req.body,
         userId,
@@ -158,9 +157,8 @@ app.post(
 app.get(
   '/api/dashboards',
   authorize(['user', 'admin']),
-  async (req, res) => {
+  async (req: AuthenticatedRequest, res) => {
     try {
-      const authReq = req as AuthenticatedRequest;
       const {
         page = '1',
         limit = '20',
@@ -185,7 +183,7 @@ app.get(
       };
 
       const result = await dashboardService.listDashboards(
-        authReq.user.id,
+        req.user.id,
         options,
       );
 
@@ -208,13 +206,11 @@ app.get(
 app.get(
   '/api/dashboards/:id',
   authorize(['user', 'admin']),
-  async (req, res) => {
+  async (req: AuthenticatedRequest, res) => {
     try {
-      const authReq = req as AuthenticatedRequest;
-      const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
       const dashboard = await dashboardService.getDashboard(
-        id,
-        authReq.user.id,
+        req.params.id,
+        req.user.id,
       );
 
       if (!dashboard) {
@@ -232,14 +228,12 @@ app.get(
 app.put(
   '/api/dashboards/:id',
   authorize(['user', 'admin']),
-  async (req, res) => {
+  async (req: AuthenticatedRequest, res) => {
     try {
-      const authReq = req as AuthenticatedRequest;
-      const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
       const dashboard = await dashboardService.updateDashboard(
-        id,
+        req.params.id,
         req.body,
-        authReq.user.id,
+        req.user.id,
       );
 
       res.json(dashboard);
@@ -253,11 +247,9 @@ app.put(
 app.delete(
   '/api/dashboards/:id',
   authorize(['user', 'admin']),
-  async (req, res) => {
+  async (req: AuthenticatedRequest, res) => {
     try {
-      const authReq = req as AuthenticatedRequest;
-      const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
-      await dashboardService.deleteDashboard(id, authReq.user.id);
+      await dashboardService.deleteDashboard(req.params.id, req.user.id);
       res.status(204).send();
     } catch (error) {
       logger.error('Error deleting dashboard:', error);
@@ -270,13 +262,11 @@ app.delete(
 app.get(
   '/api/widgets/:id/data',
   authorize(['user', 'admin']),
-  async (req, res) => {
+  async (req: AuthenticatedRequest, res) => {
     try {
-      const authReq = req as AuthenticatedRequest;
-      const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
       const data = await dashboardService.getWidgetData(
-        id,
-        authReq.user.id,
+        req.params.id,
+        req.user.id,
       );
       res.json({ data, timestamp: new Date().toISOString() });
     } catch (error) {
@@ -395,20 +385,18 @@ app.get(
 app.post(
   '/api/dashboard-templates/:id/create',
   authorize(['user', 'admin']),
-  async (req, res) => {
+  async (req: AuthenticatedRequest, res) => {
     try {
-      const authReq = req as AuthenticatedRequest;
       const { name, customizations } = req.body;
 
       if (!name) {
         return res.status(400).json({ error: 'Dashboard name is required' });
       }
 
-      const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
       const dashboard = await dashboardService.createDashboardFromTemplate(
-        id,
+        req.params.id,
         name,
-        authReq.user.id,
+        req.user.id,
         customizations,
       );
 
@@ -426,10 +414,9 @@ app.post(
 app.get(
   '/api/insights/overview',
   authorize(['user', 'admin']),
-  async (req, res) => {
+  async (req: AuthenticatedRequest, res) => {
     try {
-      const authReq = req as AuthenticatedRequest;
-      const insights = await generateOverviewInsights(authReq.user.id);
+      const insights = await generateOverviewInsights(req.user.id);
       res.json(insights);
     } catch (error) {
       logger.error('Error generating overview insights:', error);
@@ -441,11 +428,10 @@ app.get(
 app.get(
   '/api/insights/trends',
   authorize(['user', 'admin']),
-  async (req, res) => {
+  async (req: AuthenticatedRequest, res) => {
     try {
-      const authReq = req as AuthenticatedRequest;
       const { period = '7d' } = req.query;
-      const trends = await generateTrendInsights(authReq.user.id, period as string);
+      const trends = await generateTrendInsights(req.user.id, period as string);
       res.json(trends);
     } catch (error) {
       logger.error('Error generating trend insights:', error);
@@ -458,15 +444,13 @@ app.get(
 app.post(
   '/api/dashboards/:id/export',
   authorize(['user', 'admin']),
-  async (req, res) => {
+  async (req: AuthenticatedRequest, res) => {
     try {
-      const authReq = req as AuthenticatedRequest;
       const { format = 'json' } = req.body;
 
-      const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
       const dashboard = await dashboardService.getDashboard(
-        id,
-        authReq.user.id,
+        req.params.id,
+        req.user.id,
       );
       if (!dashboard) {
         return res.status(404).json({ error: 'Dashboard not found' });

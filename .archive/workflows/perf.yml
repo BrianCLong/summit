@@ -1,0 +1,16 @@
+name: Perf Guard
+
+permissions:
+  contents: read
+on: pull_request
+jobs:
+  perf:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: node tools/perf/harness.ts
+      - run: node tools/perf/guard.ts
+      - name: Flamegraph
+        run: npx 0x -o flamegraph server/dist/index.js || true
+        continue-on-error: true
+        if: failure()

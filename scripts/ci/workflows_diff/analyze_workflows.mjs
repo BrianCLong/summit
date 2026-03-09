@@ -49,9 +49,10 @@ for (const f of all) {
 
   let wf;
   try { wf = readYamlString(forkY); }
-  catch { findings.push({file:f, level:"high", rule:"yaml-parse", msg:"Invalid YAML"}); ; continue; }
+  catch { findings.push({file:f, level:"high", rule:"yaml-parse", msg:"Invalid YAML"}); high++; continue; }
 
   const hasConc = hasConcurrency(wf);
+  if (!hasConc) { findings.push({file:f, level:"high", rule:"concurrency-missing", msg:"No concurrency set at workflow nor job level"}); high++; }
 
   // matrix checks
   if (wf?.jobs && typeof wf.jobs === "object") {

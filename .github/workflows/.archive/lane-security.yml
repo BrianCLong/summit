@@ -43,7 +43,9 @@ jobs:
           echo "{\"bomFormat\": \"CycloneDX\", \"specVersion\": \"1.4\", \"version\": 1}" > sbom.json
 
       - name: Upload SBOM
-        uses: actions/upload-artifact@v4          name: sbom
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom
           path: sbom.json
           retention-days: 30
 
@@ -76,7 +78,9 @@ jobs:
         continue-on-error: true
 
       - name: Download SBOM
-        uses: actions/download-artifact@v4          name: sbom
+        uses: actions/download-artifact@v4
+        with:
+          name: sbom
 
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
@@ -90,13 +94,14 @@ jobs:
 
       - name: Upload Trivy results to GitHub Security
         uses: github/codeql-action/upload-sarif@v3
-        if: ((always()) && (github.event_name == 'pull_request')) && (always())
+        if: always()
         with:
           sarif_file: 'trivy-results.sarif'
 
   dependency-review:
     name: Dependency Review
     runs-on: ubuntu-22.04
+    if: github.event_name == 'pull_request'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -110,6 +115,7 @@ jobs:
     name: Security Summary
     runs-on: ubuntu-22.04
     needs: [sbom-generation, vulnerability-scan]
+    if: always()
     steps:
       - name: Security summary
         run: |

@@ -1,8 +1,6 @@
-import os
 import unittest
-
 from solo_os.governance.gate import GovernanceGate
-
+import os
 
 class TestGateFixtures(unittest.TestCase):
     def test_negative_fixture(self):

@@ -9,25 +9,11 @@
       "@/*": ["./src/*"]
     },
     "skipLibCheck": true,
-    "strict": false,
-    "noImplicitAny": false,
-    "noImplicitThis": false,
-    "forceConsistentCasingInFileNames": false,
     "jsx": "react-jsx",
     "allowImportingTsExtensions": false,
     "typeRoots": ["./node_modules/@types", "../../node_modules/@types"],
     "types": ["node", "jest", "vite/client"]
   },
   "include": ["src", "src/**/*.json"],
-  "exclude": [
-    "src/**/*.test.*",
-    "src/**/*.spec.*",
-    "src/**/*.stories.*",
-    "src/**/*.e2e.*",
-    "src/**/__tests__/**",
-    "src/**/stories/**",
-    "src/test-utils/**",
-    "src/test-utils.tsx"
-  ],
   "references": []
 }

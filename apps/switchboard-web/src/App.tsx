@@ -1,15 +1,21 @@
 import React from 'react';
-import { TaskFeed } from './components/TaskFeed';
+import { AdaptersPage } from './features/adapters/AdaptersPage';
 
 function App() {
   return (
-    <div style={{ padding: '20px', fontFamily: 'system-ui, sans-serif', background: '#f9f9f9', minHeight: '100vh' }}>
-      <header style={{ borderBottom: '1px solid #ddd', marginBottom: '20px', paddingBottom: '10px' }}>
-        <h1 style={{ margin: 0, color: '#333' }}>Switchboard Console</h1>
-        <p style={{ margin: 0, color: '#666' }}>Governance & Approval Queue</p>
+    <div className="app-shell">
+      <header className="app-header">
+        <div>
+          <p className="eyebrow">Switchboard</p>
+          <h1>Adapters</h1>
+          <p className="lede">
+            Manage installed adapters, track verification results, and keep receipts handy for
+            downstream audit.
+          </p>
+        </div>
       </header>
       <main>
-        <TaskFeed />
+        <AdaptersPage />
       </main>
     </div>
   );

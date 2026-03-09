@@ -256,7 +256,7 @@ The schema compatibility check integrates with:
 
 - [Release Ops Index](RELEASE_OPS_INDEX.md)
 - [Dependency Freeze](DEPENDENCY_FREEZE.md)
-- RC Lockdown Workflow
+- [RC Lockdown Workflow](.github/workflows/rc-lockdown.yml)
 - [GraphQL Best Practices](https://graphql.org/learn/best-practices/)
 
 ---

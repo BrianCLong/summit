@@ -6,22 +6,22 @@
 
 import {
   register as registry,
-  summitJobsProcessed as jobsProcessed,
-  summitOutboxSyncLatency as outboxSyncLatency,
-  summitActiveConnections as activeConnections,
-  summitDatabaseQueryDuration as databaseQueryDuration,
-  summitHttpRequestDuration as httpRequestDuration,
-  summitGraphragQueryTotal as graphragQueryTotal,
-  summitGraphragQueryDurationMs as graphragQueryDurationMs,
-  summitQueryPreviewsTotal as queryPreviewsTotal,
-  summitQueryPreviewLatencyMs as queryPreviewLatencyMs,
-  summitQueryPreviewErrorsTotal as queryPreviewErrorsTotal,
-  summitQueryPreviewExecutionsTotal as queryPreviewExecutionsTotal,
-  summitGlassBoxRunsTotal as glassBoxRunsTotal,
-  summitGlassBoxRunDurationMs as glassBoxRunDurationMs,
-  summitGlassBoxCacheHits as glassBoxCacheHits,
-  summitCacheHits as cacheHits,
-  summitCacheMisses as cacheMisses,
+  intelgraphJobsProcessed as jobsProcessed,
+  intelgraphOutboxSyncLatency as outboxSyncLatency,
+  intelgraphActiveConnections as activeConnections,
+  intelgraphDatabaseQueryDuration as databaseQueryDuration,
+  intelgraphHttpRequestDuration as httpRequestDuration,
+  intelgraphGraphragQueryTotal as graphragQueryTotal,
+  intelgraphGraphragQueryDurationMs as graphragQueryDurationMs,
+  intelgraphQueryPreviewsTotal as queryPreviewsTotal,
+  intelgraphQueryPreviewLatencyMs as queryPreviewLatencyMs,
+  intelgraphQueryPreviewErrorsTotal as queryPreviewErrorsTotal,
+  intelgraphQueryPreviewExecutionsTotal as queryPreviewExecutionsTotal,
+  intelgraphGlassBoxRunsTotal as glassBoxRunsTotal,
+  intelgraphGlassBoxRunDurationMs as glassBoxRunDurationMs,
+  intelgraphGlassBoxCacheHits as glassBoxCacheHits,
+  intelgraphCacheHits as cacheHits,
+  intelgraphCacheMisses as cacheMisses,
   copilotApiRequestTotal,
   copilotApiRequestDurationMs,
   // Maestro Metrics
@@ -54,14 +54,7 @@ import {
   // Standard metrics
   httpRequestsTotal as stdHttpRequestsTotal,
   httpRequestDuration as stdHttpRequestDuration,
-  dbQueriesTotal,
-  dbQueryDuration,
-  websocketConnections,
-  narrativeSimulationActiveSimulations,
-  narrativeSimulationTicksTotal,
-  narrativeSimulationEventsTotal,
-  narrativeSimulationDurationSeconds,
-  summitHealthChecksTotal
+  websocketConnections
 } from '../monitoring/metrics.js';
 
 export { registry };
@@ -111,14 +104,7 @@ export {
   maestroMttrHours,
   stdHttpRequestsTotal,
   stdHttpRequestDuration,
-  dbQueriesTotal,
-  dbQueryDuration,
-  websocketConnections,
-  narrativeSimulationActiveSimulations,
-  narrativeSimulationTicksTotal,
-  narrativeSimulationEventsTotal,
-  narrativeSimulationDurationSeconds,
-  summitHealthChecksTotal
+  websocketConnections
 };
 
 export const metrics = {
@@ -166,12 +152,5 @@ export const metrics = {
   maestroMttrHours,
   stdHttpRequestsTotal,
   stdHttpRequestDuration,
-  dbQueriesTotal,
-  dbQueryDuration,
-  websocketConnections,
-  narrativeSimulationActiveSimulations,
-  narrativeSimulationTicksTotal,
-  narrativeSimulationEventsTotal,
-  narrativeSimulationDurationSeconds,
-  summitHealthChecksTotal
+  websocketConnections
 };

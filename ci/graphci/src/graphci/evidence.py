@@ -1,12 +1,9 @@
 from __future__ import annotations
-
 import json
 import os
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass, asdict
 from typing import Any, Dict, List, Optional
-
 from .hashutil import sha256_bytes, stable_json_dumps
-
 
 @dataclass(frozen=True)
 class EvidenceStamp:
@@ -43,6 +40,6 @@ class EvidenceWriter:
         """Writes the evidence stamp file."""
         return self.write_json("stamp.json", asdict(stamp))
 
-    def write_metrics(self, metrics: dict[str, Any]) -> str:
+    def write_metrics(self, metrics: Dict[str, Any]) -> str:
         """Writes the evidence metrics file."""
         return self.write_json("metrics.json", metrics)

@@ -13,8 +13,7 @@
     "removeComments": true,
     "allowSyntheticDefaultImports": true,
     "allowImportingTsExtensions": false,
-    "composite": true,
-    "types": ["node", "express", "jest", "cors", "compression"]
+    "composite": true
     ,"tsBuildInfoFile": "dist/.tsbuildinfo"
   },
   "include": [

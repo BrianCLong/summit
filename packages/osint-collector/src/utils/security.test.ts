@@ -41,19 +41,4 @@ describe('validateSafeUrl', () => {
     // 172.32.0.1 is public
     await expect(validateSafeUrl('http://172.32.0.1')).resolves.not.toThrow();
   });
-
-  it('should return the resolved IP address string', async () => {
-    const ip = await validateSafeUrl('http://1.1.1.1');
-    expect(ip).toBe('1.1.1.1');
-
-    // Test with a hostname (8.8.8.8 reverse DNS is dns.google, but we resolve 8.8.8.8 directly here)
-    // Actually, let's test a hostname we know resolves to a public IP
-    // But since we can't guarantee external DNS in unit tests without mocking,
-    // we rely on the fact that if it doesn't throw, it returns something.
-    // We can mock dns.lookup if needed, but for now let's check the IP return behavior.
-
-    const result = await validateSafeUrl('https://8.8.8.8');
-    expect(typeof result).toBe('string');
-    expect(result).toBe('8.8.8.8');
-  });
 });

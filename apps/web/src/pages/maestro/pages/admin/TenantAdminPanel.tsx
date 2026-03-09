@@ -28,8 +28,7 @@ const planOptions = [
 ]
 
 export default function TenantAdminPanel() {
-  useAuth()
-  const token = localStorage.getItem('auth_token')
+  const { token } = useAuth()
   const [tenants, setTenants] = useState<Tenant[]>([])
   const [selectedTenantId, setSelectedTenantId] = useState<string>('')
   const [selectedTenant, setSelectedTenant] = useState<Tenant | null>(null)

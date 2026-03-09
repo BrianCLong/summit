@@ -26,7 +26,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { Tooltip } from '@/components/ui/Tooltip'
-import { Kbd } from '@/components/ui/Kbd'
 import {
   AnalystViewProvider,
   useAnalystView,
@@ -270,7 +269,9 @@ function AnalystConsoleInner({
                     <CardTitle className="text-sm flex items-center gap-2">
                       <Network className="h-4 w-4" />
                       Graph
-                      <Kbd keys={['mod', '1']} className="ml-auto bg-slate-800" />
+                      <kbd className="ml-auto text-xs px-1.5 py-0.5 bg-slate-800 rounded hidden sm:inline">
+                        ⌘1
+                      </kbd>
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="p-0 h-[calc(100%-3rem)]">
@@ -291,7 +292,9 @@ function AnalystConsoleInner({
                     <CardTitle className="text-sm flex items-center gap-2">
                       <Clock className="h-4 w-4" />
                       Timeline
-                      <Kbd keys={['mod', '2']} className="ml-auto bg-slate-800" />
+                      <kbd className="ml-auto text-xs px-1.5 py-0.5 bg-slate-800 rounded hidden sm:inline">
+                        ⌘2
+                      </kbd>
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="p-0 h-[calc(100%-3rem)]">
@@ -313,7 +316,9 @@ function AnalystConsoleInner({
                   <CardTitle className="text-sm flex items-center gap-2">
                     <MapPin className="h-4 w-4" />
                     Map
-                    <Kbd keys={['mod', '3']} className="ml-auto bg-slate-800" />
+                    <kbd className="ml-auto text-xs px-1.5 py-0.5 bg-slate-800 rounded hidden sm:inline">
+                      ⌘3
+                    </kbd>
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-0 h-[calc(100%-3rem)]">
@@ -344,25 +349,20 @@ function AnalystConsoleInner({
           Shortcuts
         </div>
         <div className="space-y-1 text-slate-400">
-          <div className="flex items-center justify-between gap-4">
-            <span>Focus pane</span>
-            <Kbd keys={['mod', '1-3']} className="bg-slate-800" />
+          <div>
+            <kbd className="px-1 bg-slate-800 rounded">⌘1-3</kbd> Focus pane
           </div>
-          <div className="flex items-center justify-between gap-4">
-            <span>Provenance</span>
-            <Kbd keys="P" className="bg-slate-800" />
+          <div>
+            <kbd className="px-1 bg-slate-800 rounded">P</kbd> Provenance
           </div>
-          <div className="flex items-center justify-between gap-4">
-            <span>Explain panel</span>
-            <Kbd keys="E" className="bg-slate-800" />
+          <div>
+            <kbd className="px-1 bg-slate-800 rounded">E</kbd> Explain panel
           </div>
-          <div className="flex items-center justify-between gap-4">
-            <span>Reset</span>
-            <Kbd keys="R" className="bg-slate-800" />
+          <div>
+            <kbd className="px-1 bg-slate-800 rounded">R</kbd> Reset
           </div>
-          <div className="flex items-center justify-between gap-4">
-            <span>Clear selection</span>
-            <Kbd keys="Esc" className="bg-slate-800" />
+          <div>
+            <kbd className="px-1 bg-slate-800 rounded">Esc</kbd> Clear selection
           </div>
         </div>
       </div>

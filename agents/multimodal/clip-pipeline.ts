@@ -18,7 +18,7 @@ import type {
   ProvenanceInfo,
 } from './types.js';
 
-const logger: any = (pino as any)({ name: 'clip-pipeline' });
+const logger = pino({ name: 'clip-pipeline' });
 
 // CLIP Model Configurations
 const CLIP_MODELS: Record<string, CLIPModelConfig> = {

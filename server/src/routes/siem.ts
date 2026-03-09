@@ -345,8 +345,8 @@ router.get(
   query('provider').isString().optional(),
   async (req: Request, res: Response) => {
     try {
-      const timeRange = ((((req.query.timeRange as string) as string) as string) as string) || '24h';
-      const providerFilter = (((req.query.provider as string) as string) as string) as string;
+      const timeRange = (req.query.timeRange as string) || '24h';
+      const providerFilter = req.query.provider as string;
 
       // In a real implementation, this would query actual metrics from monitoring systems
       const mockMetrics = {

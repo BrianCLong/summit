@@ -268,7 +268,7 @@ new_issue "[EPIC] EP-5 Observability & IR" "- Dashboards\n- SLOs\n- Alert routes
 
 new_issue "[EPIC] EP-6 Enterprise SSO/SCIM (basic)" "- OIDC + SCIM sync\n- Admin UX\n\n**AC:** IdP demoed; deprovision ≤ 5m." "epic,mvp-2,backend"
 
-new_issue "[EPIC] EP-7 Release Security" "- SBOM, cosign, provenance in OCI\n- CI policy gates\n\n**AC:** Signed artifacts; SBOM diff enforced; cosign verify --use-signed-timestamps in CI." "epic,mvp-2,security,infra"
+new_issue "[EPIC] EP-7 Release Security" "- SBOM, cosign, provenance in OCI\n- CI policy gates\n\n**AC:** Signed artifacts; SBOM diff enforced; cosign verify in CI." "epic,mvp-2,security,infra"
 
 # Child issues (examples)
 new_issue "feat: Postgres RLS for tenant_id" "Implement RLS policies on all tables with tenant_id; verify with integration tests." "mvp-2,backend,security"
@@ -532,7 +532,7 @@ jobs:
           # Update image list accordingly
           images=( ghcr.io/owner/summit-api:latest ghcr.io/owner/summit-client:latest )
           for img in "${images[@]}"; do
-            cosign verify --use-signed-timestamps --certificate-identity-regexp ".*" "$img" || exit 1
+            cosign verify --certificate-identity-regexp ".*" "$img" || exit 1
           done
 ```
 

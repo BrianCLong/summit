@@ -17,8 +17,7 @@ const mockScan = () => {
   // Attempt real scan
   try {
     console.log("Attempting real vulnerability scan (pnpm audit)...");
-    const env = { ...process.env, NODE_OPTIONS: '--max-old-space-size=4096' };
-    execSync('pnpm audit --audit-level=critical --json', { stdio: 'pipe', env });
+    execSync('pnpm audit --audit-level=critical --json', { stdio: 'pipe' });
     console.log("No critical vulnerabilities found.");
   } catch (e: any) {
     if (e.status === 1) {

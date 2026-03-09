@@ -13,18 +13,12 @@ import {
   TransitionReceiptInput,
   emitTransitionReceipt,
 } from './evidence/transition-receipts.js';
+import { ForkDetector } from '@intelgraph/maestro-core';
 
 // Interface for dependencies
 interface MaestroDependencies {
   db: Pool;
   redisConnection: any; // ioredis
-}
-
-function calculateTaskEntropy(task: unknown): number {
-  const serialized = JSON.stringify(task ?? {});
-  if (!serialized || serialized === '{}') return 0;
-  const uniqueChars = new Set(serialized).size;
-  return Math.min(1, uniqueChars / 64);
 }
 
 export class MaestroEngine {
@@ -37,16 +31,15 @@ export class MaestroEngine {
   constructor(private deps: MaestroDependencies) {
     this.db = deps.db;
 
-    // Initialize BullMQ with duplicated connections to avoid sharing blocking/non-blocking state
-    const connection = deps.redisConnection;
-    this.queue = new Queue('maestro_v2', { connection: connection.duplicate() });
-    this.queueEvents = new QueueEvents('maestro_v2', { connection: connection.duplicate() });
+    // Initialize BullMQ
+    this.queue = new Queue('maestro_v2', { connection: deps.redisConnection });
+    this.queueEvents = new QueueEvents('maestro_v2', { connection: deps.redisConnection });
 
     // Initialize generic worker
     this.worker = new Worker('maestro_v2', async (job: any) => {
       const { taskId, runId, tenantId } = job.data;
       return this.processTask(taskId, runId, tenantId);
-    }, { connection: connection.duplicate(), concurrency: 5 });
+    }, { connection: deps.redisConnection, concurrency: 5 });
 
     // Setup event listeners
     this.setupEventListeners();
@@ -217,7 +210,7 @@ export class MaestroEngine {
         payload: row.payload,
         config: row.metadata,
       };
-      const entropy = calculateTaskEntropy(taskForEntropy);
+      const entropy = ForkDetector.calculateEntropy(taskForEntropy);
       const priority = 1 + Math.floor((1 - entropy) * 100);
 
       await this.queue.add(row.kind, {
@@ -403,7 +396,7 @@ export class MaestroEngine {
           payload: dependentRow.payload,
           config: dependentRow.metadata,
         };
-        const entropy = calculateTaskEntropy(taskForEntropy);
+        const entropy = ForkDetector.calculateEntropy(taskForEntropy);
         const priority = 1 + Math.floor((1 - entropy) * 100);
 
         await this.queue.add(dependentRow.kind, {

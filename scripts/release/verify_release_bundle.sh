@@ -395,7 +395,7 @@ if [[ -d "${BUNDLE_DIR}/governance" ]]; then
 
                         if [[ -f "$SIG_FILE" && -f "$CERT_FILE" && -f "$SUBJECT_FILE" ]]; then
                             export COSIGN_EXPERIMENTAL=1
-                            if cosign verify-blob --use-signed-timestamps \
+                            if cosign verify-blob \
                                 --signature "$SIG_FILE" \
                                 --certificate "$CERT_FILE" \
                                 --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \

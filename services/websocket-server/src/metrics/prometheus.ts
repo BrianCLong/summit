@@ -182,40 +182,6 @@ export const eventLoopLag = new promClient.Gauge({
   registers: [register],
 });
 
-// ---------------------------------------------------------------------------
-// Security observability metrics
-// Answers: "unusual sensitive-read spikes?", "audit write failures?",
-//          "disproportionate auth errors?"
-// ---------------------------------------------------------------------------
-
-export const securityAuthDenialsTotal = new promClient.Counter({
-  name: 'websocket_security_auth_denials_total',
-  help: 'Auth/permission denials with structured reason for SOC dashboards',
-  labelNames: ['reason', 'tenant'],
-  registers: [register],
-});
-
-export const securityPermissionDenialsTotal = new promClient.Counter({
-  name: 'websocket_security_permission_denials_total',
-  help: 'Permission check denials on WebSocket handlers',
-  labelNames: ['permission', 'tenant'],
-  registers: [register],
-});
-
-export const securityAuditWritesTotal = new promClient.Counter({
-  name: 'websocket_security_audit_writes_total',
-  help: 'Audit events written from WebSocket service',
-  labelNames: ['event_type', 'outcome'],
-  registers: [register],
-});
-
-export const securitySensitiveEventsTotal = new promClient.Counter({
-  name: 'websocket_security_sensitive_events_total',
-  help: 'Security-sensitive events (room joins, collaboration, presence) for spike detection',
-  labelNames: ['event_type', 'tenant'],
-  registers: [register],
-});
-
 // Helper functions
 export function recordConnectionStart(tenant: string): void {
   totalConnections.inc({ tenant });
@@ -271,23 +237,6 @@ export function recordRedisOperation(
   }
 }
 
-// Security observability helpers
-export function recordSecurityAuthDenial(reason: string, tenant: string): void {
-  securityAuthDenialsTotal.inc({ reason, tenant });
-}
-
-export function recordSecurityPermissionDenial(permission: string, tenant: string): void {
-  securityPermissionDenialsTotal.inc({ permission, tenant });
-}
-
-export function recordSecurityAuditWrite(eventType: string, outcome: 'success' | 'failure'): void {
-  securityAuditWritesTotal.inc({ event_type: eventType, outcome });
-}
-
-export function recordSecuritySensitiveEvent(eventType: string, tenant: string): void {
-  securitySensitiveEventsTotal.inc({ event_type: eventType, tenant });
-}
-
 // Metrics endpoint handler
 export async function getMetrics(): Promise<string> {
   return await register.metrics();
@@ -301,7 +250,3 @@ setInterval(() => {
   eventLoopLag.set(Math.max(0, lag));
   lastCheck = now;
 }, 1000);
-
-export function recordMessageFailed(tenant: string, reason: string): void {
-  messageDropped.inc({ tenant, reason });
-}

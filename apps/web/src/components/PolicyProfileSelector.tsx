@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/Button';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/RadioGroup';
-import { Label } from '@/components/ui/label';
+import { Label } from '@/components/ui/Label';
 import { Card, CardContent } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { CheckCircle2, ShieldAlert } from 'lucide-react';
@@ -24,8 +24,7 @@ interface PolicyProfileSelectorProps {
 }
 
 export function PolicyProfileSelector({ tenantId, currentProfile, onSuccess }: PolicyProfileSelectorProps) {
-  useAuth();
-  const token = localStorage.getItem('auth_token');
+  const { token } = useAuth();
   const [profiles, setProfiles] = useState<PolicyProfile[]>([]);
   const [selectedProfile, setSelectedProfile] = useState<string>(currentProfile || 'baseline');
   const [loading, setLoading] = useState(true);
@@ -36,7 +35,9 @@ export function PolicyProfileSelector({ tenantId, currentProfile, onSuccess }: P
     const fetchProfiles = async () => {
       try {
         const res = await fetch('/api/policy-profiles', {
-          headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
         });
         const json = await res.json();
         if (json.success) {
@@ -61,7 +62,7 @@ export function PolicyProfileSelector({ tenantId, currentProfile, onSuccess }: P
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({ profileId: selectedProfile })
       });

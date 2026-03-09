@@ -1,0 +1,29 @@
+name: e2e-playwright
+on:
+  workflow_dispatch:
+    inputs:
+      baseURL:
+        description: 'Preview Base URL (e.g., https://pr-123.preview.app)'
+        required: true
+permissions: { contents: read }
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: corepack enable && corepack prepare pnpm@latest --activate
+      - run: pnpm install --frozen-lockfile
+      - name: Install browsers
+        run: pnpm exec playwright install --with-deps
+      - name: Run Playwright
+        env:
+          BASE_URL: ${{ inputs.baseURL }}
+          GRAPHQL_URL: ${{ inputs.baseURL }}/graphql
+        run: pnpm exec playwright test --reporter=list
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report
+          path: playwright-report

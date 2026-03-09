@@ -93,7 +93,7 @@ jobs:
   sbom:
     name: Publish SBOM
     needs: release
-    uses: ./.github/workflows/_reusable-sbom.yml
+    uses: ./.github/workflows/reusable/sbom.yml
     with:
       service: release
     secrets: inherit

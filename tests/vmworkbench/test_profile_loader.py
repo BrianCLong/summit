@@ -1,8 +1,6 @@
-import os
 import unittest
-
+import os
 from vmworkbench.profiles.loader import ProfileLoader
-
 
 class TestProfileLoader(unittest.TestCase):
     def test_load_from_dir(self):

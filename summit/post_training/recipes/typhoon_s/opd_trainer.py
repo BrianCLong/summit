@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 from typing import Any, Dict, Optional
-
 import torch
 import torch.nn.functional as F
 
@@ -22,7 +21,7 @@ class OPDTrainer:
         self.student_model = student_model
         self.teacher_model = teacher_model
 
-    def train_step(self, batch: dict[str, torch.Tensor]) -> dict[str, Any]:
+    def train_step(self, batch: Dict[str, torch.Tensor]) -> Dict[str, Any]:
         """
         Executes a single training step with teacher-in-loop forward pass.
         Computes KL divergence between teacher and student token distributions.

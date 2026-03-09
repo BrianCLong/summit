@@ -11,10 +11,10 @@ Summit's integration platform connects 12 enterprise PM/collaboration tools into
 ## Quick Links
 
 - **[90-Day Roadmap](roadmap-90day.md)** - Three-phase delivery plan
-- **[Architecture](../architecture/README.md)** - System design and data flows
-- **[Airtable Hub Schema](../schemas/airtable-schema.json)** - Central data model
+- **[Architecture](architecture.md)** - System design and data flows
+- **[Airtable Hub Schema](airtable-schema.json)** - Central data model
 - **[Implementation Checklist](IMPLEMENTATION_CHECKLIST.md)** - Step-by-step execution plan
-- **[Credential Management](../governance/CREDENTIALS.md)** - Security and secrets management
+- **[Credential Management](CREDENTIAL_HANDLING.md)** - Security and secrets management
 
 ## Integration Platforms
 
@@ -120,11 +120,11 @@ Summit's integration platform connects 12 enterprise PM/collaboration tools into
 
 ### For Developers
 
-1. **Read the Architecture**: Start with [architecture.md](../architecture/README.md)
+1. **Read the Architecture**: Start with [architecture.md](architecture.md)
 2. **Review Setup Guides**: Check platform-specific setup documentation
-3. **Set Up Credentials**: Follow [CREDENTIALS.md](../governance/CREDENTIALS.md)
+3. **Set Up Credentials**: Follow [CREDENTIAL_HANDLING.md](CREDENTIAL_HANDLING.md)
 4. **Deploy n8n Workflows**: Use specs in [n8n-workflows/](n8n-workflows/)
-5. **Configure Airtable**: Apply [airtable-schema.json](../schemas/airtable-schema.json)
+5. **Configure Airtable**: Apply [airtable-schema.json](airtable-schema.json)
 
 ### For Product Managers
 
@@ -134,7 +134,7 @@ Summit's integration platform connects 12 enterprise PM/collaboration tools into
 
 ### For Operations
 
-1. **Security Review**: [CREDENTIALS.md](../governance/CREDENTIALS.md)
+1. **Security Review**: [CREDENTIAL_HANDLING.md](CREDENTIAL_HANDLING.md)
 2. **Deployment Plan**: [IMPLEMENTATION_CHECKLIST.md](IMPLEMENTATION_CHECKLIST.md)
 3. **Monitoring Setup**: See architecture operational guidelines
 
@@ -243,9 +243,9 @@ Agent task specifications:
 
 ### Internal
 
-- **Engineering**: See [architecture.md](../architecture/README.md)
+- **Engineering**: See [architecture.md](architecture.md)
 - **Product**: See [roadmap-90day.md](roadmap-90day.md)
-- **Security**: See [CREDENTIALS.md](../governance/CREDENTIALS.md)
+- **Security**: See [CREDENTIAL_HANDLING.md](CREDENTIAL_HANDLING.md)
 
 ### External
 

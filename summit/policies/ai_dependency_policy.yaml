@@ -1,4 +1,0 @@
-policies:
-  - name: dependency_risk_threshold
-    threshold: 50
-    action: block

@@ -1,7 +1,5 @@
 import pytest
-
 from summit.audio.voice.consent import require_consent
-
 
 def test_deny_without_consent():
     with pytest.raises(PermissionError) as excinfo:

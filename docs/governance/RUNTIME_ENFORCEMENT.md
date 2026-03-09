@@ -1,8 +1,7 @@
-> Owner: Governance
-> Last-Reviewed: 2026-01-14
-> Evidence-IDs: EVD-PLACEHOLDER
-> Status: planned
-
+Owner: Governance
+Last-Reviewed: 2026-01-14
+Evidence-IDs: none
+Status: planned
 
 # Runtime Governance Enforcement
 

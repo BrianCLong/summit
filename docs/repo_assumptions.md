@@ -1,23 +1,21 @@
-# IntelGraph repo assumptions
+# Repo Assumptions (Subsumption Bundle Scaffold)
 
 ## Verified
-- Public monorepo for Summit exists
-- Node 18+, pnpm, Neo4j 5.x in quickstart
-- GraphQL + REST APIs are core
-- Collaboration/war-room and timeline issues exist
-- CI/workflow surface is large and policy/evidence oriented
 
-## Assumed
-- `server/src/api` or equivalent GraphQL service exists
-- `client/src` or equivalent React frontend exists
-- Neo4j access is centralized behind a shared client
-- Evidence artifacts follow repo-wide conventions
-- Tenant scoping already exists outside IntelGraph
+- Repo state: Intentionally constrained to local verification; external branch protection state is deferred pending governance access.
 
-## Validation checklist before PR1 merges
-- Confirm exact package/workspace boundaries
-- Confirm existing GraphQL schema location
-- Confirm auth context shape
-- Confirm standard test command names
-- Confirm runbook/docs locations
-- Confirm must-not-touch branch protection workflows
+## Assumed (must validate)
+
+- CI uses GitHub Actions.
+- Node runtime is available for CI scripts.
+- Evidence artifacts are acceptable as JSON outputs under `evidence/`.
+
+## Must-not-touch
+
+- Existing workflows (modify only by adding new workflow or a single job if conventions require).
+- Public API surfaces and packages unless explicitly required by a gate.
+
+## Validation plan
+
+- Discover required checks (see `docs/required_checks.todo.md`).
+- Confirm Node version and package manager conventions.

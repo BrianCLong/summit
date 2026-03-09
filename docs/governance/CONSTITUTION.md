@@ -1,8 +1,7 @@
-> Owner: Governance
-> Last-Reviewed: 2026-01-14
-> Evidence-IDs: GOV-001, GOV-002, GOV-003, AI-001, AI-002, AUD-001
-> Status: active
-
+Owner: Governance
+Last-Reviewed: 2026-01-14
+Evidence-IDs: GOV-001, GOV-002, GOV-003, AI-001, AI-002, AUD-001
+Status: active
 
 # MASTER PROMPT — The Summit Constitution (Canonical Doctrine)
 

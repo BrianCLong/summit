@@ -234,5 +234,5 @@ gh pr close $PR_NUMBER --comment "Closing as stale. Superseded by #XXX."
 ## Related Documents
 
 - [Release Captain Guide](./release-captain.md)
-- CI Core Workflow
-- reports/draft_promotion/
+- [CI Core Workflow](../.github/workflows/ci-core.yml)
+- [reports/draft_promotion/](../../reports/draft_promotion/)

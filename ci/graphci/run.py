@@ -1,15 +1,13 @@
 #!/usr/bin/env python3
 import argparse
-import json
 import sys
+import json
 from pathlib import Path
-
 # Add root to sys.path to allow importing from ci module
 sys.path.append(str(Path(__file__).parent.parent.parent))
 
 from ci.graphci.lib.evidence_writer import EvidenceWriter
 from ci.graphci.lib.hash_tree import hash_data
-
 
 def main():
     parser = argparse.ArgumentParser(description="GraphCI: Competitive Intelligence Pipeline")

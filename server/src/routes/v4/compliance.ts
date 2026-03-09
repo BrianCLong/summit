@@ -28,7 +28,6 @@ import {
   SOXComplianceService,
   createSOXComplianceService,
 } from '../../compliance/frameworks/SOXControls.js';
-import { firstStringOr } from '../../utils/http-param.js';
 import { GovernanceVerdict } from '../../governance/types.js';
 
 // =============================================================================
@@ -379,7 +378,7 @@ router.get(
   '/hipaa/assessments/:id',
   requirePermission('compliance:read'),
   async (req: Request, res: Response) => {
-    const assessment = await hipaaService!.getAssessment(firstStringOr(req.params.id, ''));
+    const assessment = await hipaaService!.getAssessment(req.params.id);
     if (!assessment) {
       return res.status(404).json({ error: 'Assessment not found' });
     }
@@ -648,7 +647,7 @@ router.get(
   '/sox/assessments/:id',
   requirePermission('compliance:read'),
   async (req: Request, res: Response) => {
-    const assessment = await soxService!.getAssessment(firstStringOr(req.params.id, ''));
+    const assessment = await soxService!.getAssessment(req.params.id);
     if (!assessment) {
       return res.status(404).json({ error: 'Assessment not found' });
     }

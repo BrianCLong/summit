@@ -1,7 +1,6 @@
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { createHmac, randomUUID } from 'crypto';
-import pinoModule from 'pino';
-const pino = (pinoModule as any).default || pinoModule;
+import pino from 'pino';
 
 const logger = pino({ name: 'BillingAdapter' });
 

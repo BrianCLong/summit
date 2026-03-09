@@ -2,8 +2,8 @@
 import fs from "node:fs";
 import path from "node:path";
 
-let ITEM_SLUG = "ingress-nginx-retirement";
-let EVIDENCE_ID = "EVD-INGNGX-GOV-002";
+const ITEM_SLUG = "ingress-nginx-retirement";
+const EVIDENCE_ID = "EVD-INGNGX-GOV-002";
 
 function fail(msg) {
   console.error(msg);
@@ -69,15 +69,7 @@ const manifestRaw = readText(manifestPath);
 
 // NOTE: This is intentionally minimal; full YAML structure validation is enforced via required file existence checks.
 const top = parseYamlMinimal(manifestRaw);
-// Make version optional for backward compatibility with existing manifests
-// if (!top.version) fail("Manifest missing: version");
-
-// Extract slug and evidence_id from manifest if possible
-const slugMatch = manifestRaw.match(/slug:\s*["']?([A-Za-z0-9_-]+)["']?/);
-if (slugMatch) ITEM_SLUG = slugMatch[1];
-
-const evIdMatch = manifestRaw.match(/EVD-[A-Z0-9-]+/);
-if (evIdMatch) EVIDENCE_ID = evIdMatch[0];
+if (!top.version) fail("Manifest missing: version");
 
 const root = path.resolve(path.dirname(manifestPath), "..", "..");
 const required = [
@@ -93,38 +85,19 @@ for (const p of required) {
 
 // Deny-by-default fixtures required for every bundle
 const bundleDir = path.dirname(manifestPath);
-const denyFixtureDir = path.join(bundleDir, "fixtures", "deny");
-const allowFixtureDir = path.join(bundleDir, "fixtures", "allow");
-
-// Make fixture checks more flexible: only require the directories to exist if they are real bundles
-if (fs.existsSync(path.join(bundleDir, "fixtures"))) {
-  if (!fs.existsSync(denyFixtureDir)) fail(`Missing deny-by-default fixture directory: ${denyFixtureDir}`);
-  if (!fs.existsSync(allowFixtureDir)) fail(`Missing allow fixture directory: ${allowFixtureDir}`);
-}
+const denyFixture = path.join(bundleDir, "fixtures", "deny", "README.md");
+const allowFixture = path.join(bundleDir, "fixtures", "allow", "README.md");
+if (!fs.existsSync(denyFixture)) fail(`Missing deny-by-default fixture: ${denyFixture}`);
+if (!fs.existsSync(allowFixture)) fail(`Missing allow fixture: ${allowFixture}`);
 
 const outDir = path.join(bundleDir, "runs", "ci", EVIDENCE_ID);
 fs.mkdirSync(outDir, { recursive: true });
 
-// Parse claims from claims.md if present
-let claims = [
-  { backing: "ITEM:CLAIM-01", claim_id: "ITEM:CLAIM-01" },
-  { backing: "ITEM:CLAIM-02", claim_id: "ITEM:CLAIM-02" },
-];
-
-const claimsPath = path.join(bundleDir, "claims.md");
-if (fs.existsSync(claimsPath)) {
-  const claimsRaw = readText(claimsPath);
-  const claimMatches = claimsRaw.match(/[A-Z0-9_-]+-\d+/g);
-  if (claimMatches) {
-    claims = [...new Set(claimMatches)].map(id => ({
-      backing: id,
-      claim_id: id
-    }));
-  }
-}
-
 const report = {
-  claims,
+  claims: [
+    { backing: "ITEM:CLAIM-01", claim_id: "ITEM:CLAIM-01" },
+    { backing: "ITEM:CLAIM-02", claim_id: "ITEM:CLAIM-02" },
+  ],
   decisions: [
     "Bundle verifier enforces manifest, schema, docs, and fixture presence.",
     "Evidence artifacts remain deterministic (report/metrics).",

@@ -95,7 +95,7 @@ Contact ID,Account Name,First Name,Last Name,Title,Role,Email,Phone,LinkedIn,Sou
 | **Last Name** | Contact last name | "Smith" |
 | **Title** | Job title | "Director of Intelligence Operations" |
 | **Role** | MEDDICC role | Economic Buyer, Technical Buyer, Champion, User, Influencer, Legal/Compliance |
-| **Email** | Work email | "<jane.smith@agency.gov>" |
+| **Email** | Work email | "jane.smith@agency.gov" |
 | **Phone** | Work phone | "+1-202-555-0100" |
 | **LinkedIn** | LinkedIn profile URL | "linkedin.com/in/janesmith" |
 | **Source** | How contact was acquired | "LinkedIn", "Conference", "Referral", "Website" |

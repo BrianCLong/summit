@@ -261,7 +261,7 @@ wget https://github.com/<org>/<repo>/releases/download/ga/v2.0.0/summit-2.0.0.ta
 wget https://github.com/<org>/<repo>/releases/download/ga/v2.0.0/summit-2.0.0.tar.gz.cert
 
 # Verify signature
-cosign verify-blob --use-signed-timestamps \
+cosign verify-blob \
   --certificate summit-2.0.0.tar.gz.cert \
   --signature summit-2.0.0.tar.gz.sig \
   summit-2.0.0.tar.gz
@@ -534,7 +534,7 @@ git push origin :refs/tags/ga/v2.0.0
 
 # Verify a release artifact
 sha256sum -c summit-2.0.0.tar.gz.sha256
-cosign verify-blob --use-signed-timestamps --certificate *.cert --signature *.sig summit-2.0.0.tar.gz
+cosign verify-blob --certificate *.cert --signature *.sig summit-2.0.0.tar.gz
 ```
 
 ### Useful Links

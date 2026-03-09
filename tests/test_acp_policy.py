@@ -1,7 +1,5 @@
 import pytest
-
 from summit.acp.policy import AcpPolicy, assert_https_and_allowlisted
-
 
 def test_rejects_http():
     with pytest.raises(ValueError, match="GATE-ACP-SC-001: non-https url"):
