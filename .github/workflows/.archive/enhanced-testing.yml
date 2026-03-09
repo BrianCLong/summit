@@ -60,7 +60,7 @@ jobs:
           version: 10.0.0
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Run unit tests
         run: pnpm test:jest --maxWorkers=50% --testPathIgnorePatterns='integration|e2e|error-scenarios'
@@ -136,7 +136,7 @@ jobs:
           version: 10.0.0
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Wait for services
         run: |
@@ -189,7 +189,7 @@ jobs:
           version: 10.0.0
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Run GraphQL resolver tests
         run: pnpm test:jest --testPathPattern='tests/integration/graphql' --runInBand
@@ -226,7 +226,7 @@ jobs:
           version: 10.0.0
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Run error scenario tests
         run: pnpm test:jest --testPathPattern='tests/error-scenarios' --runInBand

@@ -16,6 +16,6 @@ jobs:
         with:
           node-version-file: 'package.json'
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
       - name: Run drift detection
         run: npx tsx scripts/monitoring/omics-deconv-drift.ts

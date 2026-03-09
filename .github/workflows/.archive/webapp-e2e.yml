@@ -22,7 +22,7 @@ jobs:
       - name: Install dependencies and browsers
         run: |
           corepack enable || true
-          pnpm install --frozen-lockfile=false
+          pnpm install --no-frozen-lockfile=false
           pnpm exec playwright install --with-deps
       - name: Run Playwright suite (smoke, integration, visual)
         env:
@@ -57,7 +57,7 @@ jobs:
       - name: Install dependencies
         run: |
           corepack enable || true
-          pnpm install --frozen-lockfile=false
+          pnpm install --no-frozen-lockfile=false
       - name: Start webapp dev server
         env:
           WEBAPP_PORT: 4173
