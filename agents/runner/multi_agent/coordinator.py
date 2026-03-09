@@ -13,11 +13,11 @@ AGENT_VERSION = "0.1.0"
 DEFAULT_EVIDENCE_ID = "EVD-SUMMIT-MULTIAGENT-001"
 
 
-def _canonical(data: Dict[str, object]) -> str:
+def _canonical(data: dict[str, object]) -> str:
     return json.dumps(data, sort_keys=True, separators=(",", ":"))
 
 
-def run_task(task: str, out_dir: Path, evidence_id: str = DEFAULT_EVIDENCE_ID) -> Dict[str, str]:
+def run_task(task: str, out_dir: Path, evidence_id: str = DEFAULT_EVIDENCE_ID) -> dict[str, str]:
     planner = PlannerAgent(name="planner", version=AGENT_VERSION)
     executor = ExecutorAgent(name="executor", version=AGENT_VERSION)
     critic = CriticAgent(name="critic", version=AGENT_VERSION)
@@ -47,7 +47,7 @@ def run_task(task: str, out_dir: Path, evidence_id: str = DEFAULT_EVIDENCE_ID) -
     }
 
     deterministic_hash = hashlib.sha256(
-        f"{_canonical(report)}|{_canonical(metrics)}".encode("utf-8")
+        f"{_canonical(report)}|{_canonical(metrics)}".encode()
     ).hexdigest()
     stamp = {
         "evidence_id": evidence_id,

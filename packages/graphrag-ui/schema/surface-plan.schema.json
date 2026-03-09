@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.example.com/schema/surface-plan.schema.json",
+  "title": "Surface Plan",
+  "description": "Deterministic plan for generating an autonomous product surface.",
+  "type": "object",
+  "properties": {
+    "evidenceId": {
+      "type": "string",
+      "pattern": "^APS-surface-plan-\\d+$"
+    },
+    "surfaceSlug": {
+      "type": "string"
+    },
+    "templateId": {
+      "type": "string"
+    },
+    "graphSnapshotId": {
+      "type": "string"
+    },
+    "panels": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/PanelSpec"
+      }
+    },
+    "policy": {
+      "$ref": "#/$defs/PolicyEnvelope"
+    }
+  },
+  "required": ["evidenceId", "surfaceSlug", "templateId", "graphSnapshotId", "panels", "policy"],
+  "additionalProperties": false,
+  "$defs": {
+    "PanelSpec": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "widgets": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/WidgetSpec" }
+        }
+      },
+      "required": ["id", "title", "widgets"],
+      "additionalProperties": false
+    },
+    "WidgetSpec": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "type": { "type": "string" },
+        "dataBinding": { "$ref": "#/$defs/DataBindingSpec" },
+        "interactions": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/InteractionSpec" }
+        }
+      },
+      "required": ["id", "type", "dataBinding"],
+      "additionalProperties": false
+    },
+    "DataBindingSpec": {
+      "type": "object",
+      "properties": {
+        "source": { "type": "string" },
+        "query": { "type": "string" }
+      },
+      "required": ["source", "query"],
+      "additionalProperties": false
+    },
+    "InteractionSpec": {
+      "type": "object",
+      "properties": {
+        "event": { "type": "string" },
+        "action": { "type": "string" }
+      },
+      "required": ["event", "action"],
+      "additionalProperties": false
+    },
+    "PolicyEnvelope": {
+      "type": "object",
+      "properties": {
+        "version": { "type": "string" },
+        "allowlist": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "required": ["version", "allowlist"],
+      "additionalProperties": false
+    }
+  }
+}

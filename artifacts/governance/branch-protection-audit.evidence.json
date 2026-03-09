@@ -1,0 +1,10 @@
+{
+  "error": {
+    "code": "MISSING_TOKEN",
+    "http_status": null
+  },
+  "kind": "branch_protection_audit",
+  "schema_version": 1,
+  "state": "UNVERIFIABLE_PERMISSIONS",
+  "target_branch": "main"
+}
