@@ -46,16 +46,28 @@ router.get('/readyz', (_req: Request, res: Response) => {
     return buildDisabledResponse(res);
   }
 
-  const readiness = {
-    database: 'skipped',
-    cache: 'skipped',
-    messaging: 'skipped',
-  } as const;
+  // Shallow readiness: validate that critical env vars are present without
+  // doing I/O (keeps the probe cheap for high-frequency K8s polling).
+  const requiredVars = ['DATABASE_URL', 'NEO4J_URI', 'JWT_SECRET', 'JWT_REFRESH_SECRET'];
+  const missing = requiredVars.filter(v => !process.env[v]);
+
+  if (missing.length > 0) {
+    logger.warn({ event: 'readyz_missing_vars', missing }, 'Readiness probe failed: missing required env vars');
+    return res.status(503).json({
+      status: 'not_ready',
+      reason: 'missing_config',
+      missing,
+      ...baseStatus(),
+    });
+  }
 
   res.status(200).json({
     status: 'ready',
-    checks: readiness,
-    message: 'Shallow readiness probe; deep checks remain on /health/ready',
+    checks: {
+      database: 'config_present',
+      cache: 'config_present',
+    },
+    message: 'Shallow readiness probe; use /health/ready for deep dependency checks',
     ...baseStatus(),
   });
 });
@@ -90,7 +102,7 @@ router.get('/status', (_req: Request, res: Response) => {
  *         description: Service is healthy
  */
 import { asyncHandler } from '../middleware/async-handler.js';
-import { summitHealthChecksTotal } from '../monitoring/metrics.js';
+import { summitHealthChecksTotal } from '../observability/metrics.js';
 
 router.get('/health', asyncHandler(async (_req: Request, res: Response) => {
   summitHealthChecksTotal.inc({ status: 'success' });
@@ -370,23 +382,89 @@ router.get('/health/live', (_req: Request, res: Response) => {
 
 /**
  * Deployment validation endpoint
- * Checks all criteria required for a successful deployment
+ * Used by smoke-test and CI post-deploy gate to confirm the deployment is
+ * ready to receive production traffic.
+ *
+ * Checks:
+ *   1. required env vars present (config)
+ *   2. PostgreSQL reachable (connectivity)
+ *   3. no pending Prisma migrations (migrations current)
+ *   4. Redis reachable (cache layer)
  */
 router.get('/health/deployment', async (_req: Request, res: Response) => {
-  // 1. Check basic connectivity
-  // 2. Check migrations (simulated check)
-  // 3. Check configuration
-  const checks = {
-    connectivity: true,
-    migrations: true, // In real app, query schema_migrations table
-    config: true
-  };
+  const checks: Record<string, string> = {};
+  const errors: string[] = [];
 
-  if (checks.connectivity && checks.migrations && checks.config) {
-    res.status(200).json({ status: 'ready_for_traffic', checks });
+  // ── Config check ───────────────────────────────────────────────────────────
+  const requiredVars = ['DATABASE_URL', 'NEO4J_URI', 'JWT_SECRET', 'JWT_REFRESH_SECRET'];
+  const missingVars = requiredVars.filter(v => !process.env[v]);
+  if (missingVars.length === 0) {
+    checks.config = 'ok';
   } else {
-    res.status(503).json({ status: 'deployment_failed', checks });
+    checks.config = 'missing_vars';
+    errors.push(`Missing env vars: ${missingVars.join(', ')}`);
+    logger.error({ event: 'deployment_check_config_fail', missingVars }, 'Deployment check: missing config');
   }
+
+  // ── Postgres connectivity + migration check ────────────────────────────────
+  try {
+    const { getPostgresPool } = await import('../db/postgres.js');
+    const pool = getPostgresPool();
+    await pool.query('SELECT 1');
+    checks.postgres = 'reachable';
+
+    // Check for pending migrations via the _prisma_migrations table (if it exists)
+    try {
+      const result = await pool.query<{ count: string }>(
+        `SELECT COUNT(*)::text AS count FROM _prisma_migrations WHERE finished_at IS NULL AND rolled_back_at IS NULL`
+      );
+      const pending = parseInt(result.rows[0]?.count ?? '0', 10);
+      if (pending > 0) {
+        checks.migrations = `pending_${pending}`;
+        errors.push(`${pending} pending Prisma migration(s) – run db:migrate before serving traffic`);
+        logger.error({ event: 'deployment_check_migrations_pending', pending }, 'Deployment check: pending migrations');
+      } else {
+        checks.migrations = 'current';
+      }
+    } catch {
+      // _prisma_migrations may not exist in all environments (e.g. non-Prisma schemas)
+      checks.migrations = 'table_not_found';
+    }
+  } catch (error: any) {
+    const msg = error instanceof Error ? error.message : String(error);
+    checks.postgres = 'unreachable';
+    checks.migrations = 'skipped';
+    errors.push(`PostgreSQL: ${msg}`);
+    logger.error({ event: 'deployment_check_postgres_fail', error }, 'Deployment check: postgres unreachable');
+  }
+
+  // ── Redis connectivity ─────────────────────────────────────────────────────
+  try {
+    const { getRedisClient } = await import('../db/redis.js');
+    const redis = getRedisClient();
+    await redis.ping();
+    checks.redis = 'reachable';
+  } catch (error: any) {
+    const msg = error instanceof Error ? error.message : String(error);
+    checks.redis = 'unreachable';
+    errors.push(`Redis: ${msg}`);
+    logger.error({ event: 'deployment_check_redis_fail', error }, 'Deployment check: redis unreachable');
+  }
+
+  const allOk = errors.length === 0;
+  const httpStatus = allOk ? 200 : 503;
+  const status = allOk ? 'ready_for_traffic' : 'not_ready';
+
+  if (!allOk) {
+    logger.warn({ event: 'deployment_check_failed', checks, errors }, 'Deployment check failed');
+  }
+
+  res.status(httpStatus).json({
+    status,
+    checks,
+    errors,
+    ...baseStatus(),
+  });
 });
 
 // Deep health check for all dependencies (Database, Redis, etc.)

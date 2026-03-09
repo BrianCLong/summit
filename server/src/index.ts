@@ -61,8 +61,18 @@ const startServer = async () => {
   // 1. Load Secrets (Environment or Vault)
   await bootstrapSecrets();
 
-  // Log Config
-
+  // Structured startup log with key runtime parameters for operational visibility
+  logger.info({
+    event: 'startup_begin',
+    nodeEnv: process.env.NODE_ENV,
+    port: process.env.PORT || 4000,
+    version: process.env.APP_VERSION || process.env.npm_package_version || 'unknown',
+    commit: process.env.GIT_COMMIT || process.env.COMMIT_SHA || 'unknown',
+    aiEnabled: process.env.AI_ENABLED === 'true',
+    kafkaEnabled: process.env.KAFKA_ENABLED === 'true',
+    requireRealDbs: process.env.REQUIRE_REAL_DBS !== 'false',
+    disableNeo4j: !!process.env.DISABLE_NEO4J,
+  }, 'Server startup initiated');
 
   const app = await createApp();
   const schema = makeExecutableSchema({ typeDefs, resolvers });
@@ -163,7 +173,14 @@ const startServer = async () => {
 
   const port = Number(cfg.PORT || 4000);
   httpServer.listen(port, async () => {
-    logger.info(`Server listening on port ${port}`);
+    logger.info({
+      event: 'startup_complete',
+      port,
+      nodeEnv: process.env.NODE_ENV,
+      version: process.env.APP_VERSION || process.env.npm_package_version || 'unknown',
+      commit: process.env.GIT_COMMIT || process.env.COMMIT_SHA || 'unknown',
+      uptimeSeconds: process.uptime(),
+    }, `Server listening on port ${port}`);
 
     // Initialize and start Data Retention Service
     if (!process.env.DISABLE_NEO4J) {

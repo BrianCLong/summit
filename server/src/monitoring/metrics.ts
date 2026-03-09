@@ -1139,6 +1139,75 @@ try {
   register.registerMetric(maestroSynthesisOperations);
 } catch (e) { }
 
+// ── Operational / release-readiness metrics ──────────────────────────────────
+
+// Health check invocations (used by /health endpoint and smoke tests)
+export const summitHealthChecksTotal = createCounter({
+  registers: [],
+  name: 'summit_health_checks_total',
+  help: 'Total health check invocations by status',
+  labelNames: ['status'],
+});
+
+// Feature flag evaluations (tracks which flags are hit and their outcomes)
+export const summitFeatureFlagEvaluationsTotal = createCounter({
+  registers: [],
+  name: 'summit_feature_flag_evaluations_total',
+  help: 'Total feature flag evaluations by flag name and result',
+  labelNames: ['flag', 'result'],
+});
+
+// Kill-switch / safe-degradation activations
+export const summitKillSwitchActivationsTotal = createCounter({
+  registers: [],
+  name: 'summit_kill_switch_activations_total',
+  help: 'Count of kill-switch or safe-degradation path activations',
+  labelNames: ['switch', 'reason'],
+});
+
+// Plugin sandbox events
+export const summitPluginEventsTotal = createCounter({
+  registers: [],
+  name: 'summit_plugin_events_total',
+  help: 'Plugin lifecycle events (discovery, load, load_failure, unload)',
+  labelNames: ['plugin', 'event'],
+});
+
+// i18n resource loading events
+export const summitI18nEventsTotal = createCounter({
+  registers: [],
+  name: 'summit_i18n_events_total',
+  help: 'i18n resource loading events (loaded, fallback, error)',
+  labelNames: ['locale', 'namespace', 'event'],
+});
+
+// API adapter failures (external service integration errors)
+export const summitApiAdapterFailuresTotal = createCounter({
+  registers: [],
+  name: 'summit_api_adapter_failures_total',
+  help: 'Total external API adapter failures',
+  labelNames: ['adapter', 'operation', 'error_code'],
+});
+
+// Startup duration (tracks time-to-ready across deployments)
+export const summitStartupDurationSeconds = createHistogram({
+  registers: [],
+  name: 'summit_startup_duration_seconds',
+  help: 'Application startup duration in seconds',
+  labelNames: ['phase'],
+  buckets: [0.5, 1, 2, 5, 10, 20, 30, 60],
+});
+
+try {
+  register.registerMetric(summitHealthChecksTotal);
+  register.registerMetric(summitFeatureFlagEvaluationsTotal);
+  register.registerMetric(summitKillSwitchActivationsTotal);
+  register.registerMetric(summitPluginEventsTotal);
+  register.registerMetric(summitI18nEventsTotal);
+  register.registerMetric(summitApiAdapterFailuresTotal);
+  register.registerMetric(summitStartupDurationSeconds);
+} catch (e) { }
+
 // Debug log to verify metrics loading
 if (process.env.NODE_ENV === 'test') {
   // console.log('DEBUG: metrics.ts loaded in test environment');
@@ -1228,6 +1297,13 @@ export const metrics = {
   narrativeSimulationTicksTotal,
   narrativeSimulationEventsTotal,
   narrativeSimulationDurationSeconds,
+  summitHealthChecksTotal,
+  summitFeatureFlagEvaluationsTotal,
+  summitKillSwitchActivationsTotal,
+  summitPluginEventsTotal,
+  summitI18nEventsTotal,
+  summitApiAdapterFailuresTotal,
+  summitStartupDurationSeconds,
 };
 
 export default metrics;

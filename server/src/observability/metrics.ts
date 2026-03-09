@@ -61,7 +61,13 @@ import {
   narrativeSimulationTicksTotal,
   narrativeSimulationEventsTotal,
   narrativeSimulationDurationSeconds,
-  summitHealthChecksTotal
+  summitHealthChecksTotal,
+  summitFeatureFlagEvaluationsTotal,
+  summitKillSwitchActivationsTotal,
+  summitPluginEventsTotal,
+  summitI18nEventsTotal,
+  summitApiAdapterFailuresTotal,
+  summitStartupDurationSeconds,
 } from '../monitoring/metrics.js';
 
 export { registry };
@@ -118,7 +124,13 @@ export {
   narrativeSimulationTicksTotal,
   narrativeSimulationEventsTotal,
   narrativeSimulationDurationSeconds,
-  summitHealthChecksTotal
+  summitHealthChecksTotal,
+  summitFeatureFlagEvaluationsTotal,
+  summitKillSwitchActivationsTotal,
+  summitPluginEventsTotal,
+  summitI18nEventsTotal,
+  summitApiAdapterFailuresTotal,
+  summitStartupDurationSeconds,
 };
 
 export const metrics = {
@@ -173,5 +185,11 @@ export const metrics = {
   narrativeSimulationTicksTotal,
   narrativeSimulationEventsTotal,
   narrativeSimulationDurationSeconds,
-  summitHealthChecksTotal
+  summitHealthChecksTotal,
+  summitFeatureFlagEvaluationsTotal,
+  summitKillSwitchActivationsTotal,
+  summitPluginEventsTotal,
+  summitI18nEventsTotal,
+  summitApiAdapterFailuresTotal,
+  summitStartupDurationSeconds,
 };
