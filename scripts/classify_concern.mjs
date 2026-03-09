@@ -3,6 +3,21 @@ import { execSync } from 'child_process';
 import path from 'path';
 import yaml from 'js-yaml';
 
+import { program } from 'commander';
+const opts = program
+  .option('--dry-run', 'Simulate without changes')
+  .option('--verbose', 'Detailed logging')
+  .option('--help', 'Show help')
+  .parse().opts();
+
+if (opts.help) {
+  console.log(program.helpInformation());
+  process.exit(0);
+}
+const dryRun = opts.dryRun ?? false;
+const verbose = opts.verbose ?? false;
+
+
 function getChangedFiles() {
   try {
     const output = execSync('git diff --name-only origin/main...HEAD').toString();

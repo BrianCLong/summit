@@ -10,6 +10,21 @@
 
 import { policyEngine } from '../services/repoos/governor/policy-engine.js';
 
+import { program } from 'commander';
+const opts = program
+  .option('--dry-run', 'Simulate without changes')
+  .option('--verbose', 'Detailed logging')
+  .option('--help', 'Show help')
+  .parse().opts();
+
+if (opts.help) {
+  console.log(program.helpInformation());
+  process.exit(0);
+}
+const dryRun = opts.dryRun ?? false;
+const verbose = opts.verbose ?? false;
+
+
 // ============================================================================
 // DEMO SCENARIOS
 // ============================================================================

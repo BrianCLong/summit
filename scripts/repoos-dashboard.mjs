@@ -9,6 +9,21 @@
 import { execSync } from 'child_process';
 import fs from 'fs/promises';
 
+import { program } from 'commander';
+const opts = program
+  .option('--dry-run', 'Simulate without changes')
+  .option('--verbose', 'Detailed logging')
+  .option('--help', 'Show help')
+  .parse().opts();
+
+if (opts.help) {
+  console.log(program.helpInformation());
+  process.exit(0);
+}
+const dryRun = opts.dryRun ?? false;
+const verbose = opts.verbose ?? false;
+
+
 const REFRESH_INTERVAL = 5000; // 5 seconds
 
 function clearScreen() {

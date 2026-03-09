@@ -5,6 +5,9 @@
 [![Build Status](https://github.com/BrianCLong/summit/workflows/CI/badge.svg)](https://github.com/BrianCLong/summit/actions)
 [![Coverage](https://img.shields.io/codecov/c/github/BrianCLong/summit)](https://codecov.io/gh/BrianCLong/summit)
 [![License](https://img.shields.io/github/license/BrianCLong/summit)](LICENSE)
+[![RepoOS](https://img.shields.io/badge/RepoOS-active-blueviolet)](https://github.com/BrianCLong/summit/tree/main/scripts#repoos-governance)
+[![Evidence Signing](https://img.shields.io/badge/evidence-signed-green)](https://github.com/BrianCLong/summit/tree/main/scripts#evidence--provenance)
+[![Last Commit](https://img.shields.io/github/last-commit/BrianCLong/summit)](https://github.com/BrianCLong/summit/commits/main)
 
 ## ✨ Features
 
@@ -22,6 +25,11 @@
 - Node.js 18+
 - Docker & Docker Compose
 - Neo4j 5.x (via Docker)
+
+### ⚡️ Quick Demo
+```bash
+./scripts/repoos-quick-start.sh
+```
 
 ### Install & Run
 
@@ -225,3 +233,10 @@ We welcome contributions! Please see:
 
 Built with ❤️ by [@BrianCLong](https://github.com/BrianCLong) and [contributors](https://github.com/BrianCLong/summit/graphs/contributors)
 \n\n# Verified Governance (2026-02-10)
+
+## RepoOS Governance Layer (March 2026)
+- Governor demo: scripts/repoos-governor-demo.mjs
+- GA validation showcase
+- Analysis & dashboard tools
+- PR concern enforcement (one-concern-per-PR)
+- Evidence: signing, verification, bundling, indexing
