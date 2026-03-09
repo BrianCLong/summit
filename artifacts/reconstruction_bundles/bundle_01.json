@@ -1,0 +1,12 @@
+{
+  "bundle_id": "rb_001",
+  "capability": "graphrag_adapters",
+  "fragments": ["frag_1", "frag_7", "frag_19"],
+  "target_paths": ["src/adapters/graphrag.ts"],
+  "confidence": 0.84,
+  "synthesis_strategy": "merge+repair",
+  "validation": {
+    "compile": false,
+    "tests": null
+  }
+}
