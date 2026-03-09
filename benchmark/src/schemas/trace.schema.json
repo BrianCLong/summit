@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.dev/schemas/trace.schema.json",
+  "type": "object",
+  "required": ["eventId", "runId", "ts", "step", "actor", "kind", "payload"],
+  "properties": {
+    "eventId": { "type": "string" },
+    "runId": { "type": "string" },
+    "ts": { "type": "string", "format": "date-time" },
+    "step": { "type": "integer", "minimum": 0 },
+    "actor": {
+      "type": "object",
+      "required": ["type", "id"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["agent", "tool", "evaluator", "system"]
+        },
+        "id": { "type": "string" },
+        "role": { "type": "string" }
+      }
+    },
+    "kind": {
+      "type": "string",
+      "enum": [
+        "run_started",
+        "observation",
+        "reasoning",
+        "tool_called",
+        "tool_result",
+        "artifact_written",
+        "delegation",
+        "policy_check",
+        "evaluation",
+        "submission",
+        "run_finished"
+      ]
+    },
+    "payload": { "type": "object" }
+  },
+  "additionalProperties": false
+}
