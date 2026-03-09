@@ -1,10 +1,10 @@
 {
   "metadata": {
     "id": "summit-adoption-analysis",
-    "version": "2026-03-09T11:49:45.305Z",
+    "version": "2026-03-09T12:00:07.559Z",
     "description": "Adoption curve analysis of Summit innovation graph",
     "graphSource": "summit-innovation-graph-simple",
-    "createdAt": "2026-03-09T11:49:45.305Z"
+    "createdAt": "2026-03-09T12:00:07.559Z"
   },
   "estimates": [
     {
@@ -17,7 +17,7 @@
       "velocity": null,
       "signalCount": 1,
       "confidence": 0.05,
-      "estimatedAt": "2026-03-09T11:49:45.297Z"
+      "estimatedAt": "2026-03-09T12:00:07.558Z"
     },
     {
       "nodeId": "commit-34c64b1",
@@ -29,7 +29,7 @@
       "velocity": null,
       "signalCount": 1,
       "confidence": 0.05,
-      "estimatedAt": "2026-03-09T11:49:45.305Z"
+      "estimatedAt": "2026-03-09T12:00:07.558Z"
     },
     {
       "nodeId": "commit-a2f04ba",
@@ -41,7 +41,7 @@
       "velocity": null,
       "signalCount": 1,
       "confidence": 0.05,
-      "estimatedAt": "2026-03-09T11:49:45.305Z"
+      "estimatedAt": "2026-03-09T12:00:07.558Z"
     },
     {
       "nodeId": "commit-8e6a74d",
@@ -53,7 +53,7 @@
       "velocity": null,
       "signalCount": 1,
       "confidence": 0.05,
-      "estimatedAt": "2026-03-09T11:49:45.305Z"
+      "estimatedAt": "2026-03-09T12:00:07.558Z"
     },
     {
       "nodeId": "commit-0e5f342",
@@ -65,7 +65,7 @@
       "velocity": null,
       "signalCount": 1,
       "confidence": 0.05,
-      "estimatedAt": "2026-03-09T11:49:45.305Z"
+      "estimatedAt": "2026-03-09T12:00:07.558Z"
     },
     {
       "nodeId": "commit-52f611e",
@@ -77,7 +77,7 @@
       "velocity": null,
       "signalCount": 1,
       "confidence": 0.05,
-      "estimatedAt": "2026-03-09T11:49:45.305Z"
+      "estimatedAt": "2026-03-09T12:00:07.558Z"
     },
     {
       "nodeId": "commit-4e18d0f",
@@ -89,7 +89,7 @@
       "velocity": null,
       "signalCount": 1,
       "confidence": 0.05,
-      "estimatedAt": "2026-03-09T11:49:45.305Z"
+      "estimatedAt": "2026-03-09T12:00:07.558Z"
     },
     {
       "nodeId": "commit-d5dd984",
@@ -101,7 +101,7 @@
       "velocity": null,
       "signalCount": 1,
       "confidence": 0.05,
-      "estimatedAt": "2026-03-09T11:49:45.305Z"
+      "estimatedAt": "2026-03-09T12:00:07.558Z"
     },
     {
       "nodeId": "commit-652698a",
@@ -113,7 +113,7 @@
       "velocity": null,
       "signalCount": 1,
       "confidence": 0.05,
-      "estimatedAt": "2026-03-09T11:49:45.305Z"
+      "estimatedAt": "2026-03-09T12:00:07.558Z"
     },
     {
       "nodeId": "commit-e639c61",
@@ -125,7 +125,7 @@
       "velocity": null,
       "signalCount": 1,
       "confidence": 0.05,
-      "estimatedAt": "2026-03-09T11:49:45.305Z"
+      "estimatedAt": "2026-03-09T12:00:07.558Z"
     },
     {
       "nodeId": "commit-29b04a6",
@@ -137,7 +137,7 @@
       "velocity": null,
       "signalCount": 1,
       "confidence": 0.05,
-      "estimatedAt": "2026-03-09T11:49:45.305Z"
+      "estimatedAt": "2026-03-09T12:00:07.558Z"
     },
     {
       "nodeId": "commit-e76194f",
@@ -149,7 +149,7 @@
       "velocity": null,
       "signalCount": 1,
       "confidence": 0.05,
-      "estimatedAt": "2026-03-09T11:49:45.305Z"
+      "estimatedAt": "2026-03-09T12:00:07.558Z"
     },
     {
       "nodeId": "commit-4f37679",
@@ -161,7 +161,7 @@
       "velocity": null,
       "signalCount": 1,
       "confidence": 0.05,
-      "estimatedAt": "2026-03-09T11:49:45.305Z"
+      "estimatedAt": "2026-03-09T12:00:07.558Z"
     },
     {
       "nodeId": "commit-2bd4bde",
@@ -173,7 +173,7 @@
       "velocity": null,
       "signalCount": 1,
       "confidence": 0.05,
-      "estimatedAt": "2026-03-09T11:49:45.305Z"
+      "estimatedAt": "2026-03-09T12:00:07.558Z"
     },
     {
       "nodeId": "commit-76d6411",
@@ -185,7 +185,7 @@
       "velocity": null,
       "signalCount": 1,
       "confidence": 0.05,
-      "estimatedAt": "2026-03-09T11:49:45.305Z"
+      "estimatedAt": "2026-03-09T12:00:07.558Z"
     },
     {
       "nodeId": "commit-ce13fa4",
@@ -197,7 +197,7 @@
       "velocity": null,
       "signalCount": 1,
       "confidence": 0.05,
-      "estimatedAt": "2026-03-09T11:49:45.305Z"
+      "estimatedAt": "2026-03-09T12:00:07.558Z"
     },
     {
       "nodeId": "commit-c8ea3d3",
@@ -209,7 +209,7 @@
       "velocity": null,
       "signalCount": 1,
       "confidence": 0.05,
-      "estimatedAt": "2026-03-09T11:49:45.305Z"
+      "estimatedAt": "2026-03-09T12:00:07.558Z"
     },
     {
       "nodeId": "commit-54cc2bc",
@@ -221,7 +221,7 @@
       "velocity": null,
       "signalCount": 1,
       "confidence": 0.05,
-      "estimatedAt": "2026-03-09T11:49:45.305Z"
+      "estimatedAt": "2026-03-09T12:00:07.558Z"
     },
     {
       "nodeId": "commit-e7cc39f",
@@ -233,7 +233,7 @@
       "velocity": null,
       "signalCount": 1,
       "confidence": 0.05,
-      "estimatedAt": "2026-03-09T11:49:45.305Z"
+      "estimatedAt": "2026-03-09T12:00:07.558Z"
     },
     {
       "nodeId": "commit-801f8a9",
@@ -245,7 +245,7 @@
       "velocity": null,
       "signalCount": 1,
       "confidence": 0.05,
-      "estimatedAt": "2026-03-09T11:49:45.305Z"
+      "estimatedAt": "2026-03-09T12:00:07.558Z"
     },
     {
       "nodeId": "innovation-simulation-engine",
@@ -257,7 +257,7 @@
       "velocity": null,
       "signalCount": 2,
       "confidence": 0.2,
-      "estimatedAt": "2026-03-09T11:49:45.305Z"
+      "estimatedAt": "2026-03-09T12:00:07.558Z"
     },
     {
       "nodeId": "repository-archaeology-engine",
@@ -269,7 +269,7 @@
       "velocity": null,
       "signalCount": 2,
       "confidence": 0.2,
-      "estimatedAt": "2026-03-09T11:49:45.305Z"
+      "estimatedAt": "2026-03-09T12:00:07.559Z"
     },
     {
       "nodeId": "evolution-intelligence-system",
@@ -281,7 +281,7 @@
       "velocity": null,
       "signalCount": 2,
       "confidence": 0.2,
-      "estimatedAt": "2026-03-09T11:49:45.305Z"
+      "estimatedAt": "2026-03-09T12:00:07.559Z"
     },
     {
       "nodeId": "summit-platform",
@@ -293,7 +293,7 @@
       "velocity": null,
       "signalCount": 1,
       "confidence": 0.05,
-      "estimatedAt": "2026-03-09T11:49:45.305Z"
+      "estimatedAt": "2026-03-09T12:00:07.559Z"
     }
   ],
   "summary": {

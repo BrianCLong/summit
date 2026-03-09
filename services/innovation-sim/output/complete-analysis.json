@@ -1,0 +1,2476 @@
+{
+  "metadata": {
+    "id": "summit-complete-analysis",
+    "version": "1.0.0-pr10",
+    "description": "Complete Innovation Simulation System analysis of Summit",
+    "generatedAt": "2026-03-09T12:00:07.535Z",
+    "commitRange": "f78a482...a8c9b98",
+    "totalCommits": 100
+  },
+  "graph": {
+    "metadata": {
+      "id": "summit-full-history-graph",
+      "version": "2026-03-09T12:00:07.533Z",
+      "description": "Summit innovation graph with 100 commits",
+      "createdAt": "2026-03-09T12:00:07.533Z"
+    },
+    "nodes": [
+      {
+        "id": "commit-a8c9b98",
+        "type": "project",
+        "name": "feat(innovation-sim): PR6-10 - Complete simulation system (s",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1773057478,
+          "date": "2026-03-09T11:57:58.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-a8c9b98",
+            "type": "repo",
+            "source": "summit@a8c9b98",
+            "observedAt": "2026-03-09T11:57:58.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-0e531e1",
+        "type": "project",
+        "name": "feat(innovation-sim): PR5 - Diffusion + Lock-in Engine",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1773057236,
+          "date": "2026-03-09T11:53:56.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-0e531e1",
+            "type": "repo",
+            "source": "summit@0e531e1",
+            "observedAt": "2026-03-09T11:53:56.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-b8ec987",
+        "type": "project",
+        "name": "feat(innovation-sim): PR4 - Adoption Curve Engine with matur",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1773057029,
+          "date": "2026-03-09T11:50:29.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-b8ec987",
+            "type": "repo",
+            "source": "summit@b8ec987",
+            "observedAt": "2026-03-09T11:50:29.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-224937f",
+        "type": "project",
+        "name": "feat(innovation-sim): complete meta-validation with comprehe",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1773056461,
+          "date": "2026-03-09T11:41:01.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-224937f",
+            "type": "repo",
+            "source": "summit@224937f",
+            "observedAt": "2026-03-09T11:41:01.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-b6db9d0",
+        "type": "project",
+        "name": "chore: merge origin/main and resolve conflicts surgically",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1773055668,
+          "date": "2026-03-09T11:27:48.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-b6db9d0",
+            "type": "repo",
+            "source": "summit@b6db9d0",
+            "observedAt": "2026-03-09T11:27:48.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-34c64b1",
+        "type": "project",
+        "name": "chore: merge origin/main and resolve conflicts surgically",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1773036622,
+          "date": "2026-03-09T06:10:22.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-34c64b1",
+            "type": "repo",
+            "source": "summit@34c64b1",
+            "observedAt": "2026-03-09T06:10:22.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-a2f04ba",
+        "type": "project",
+        "name": "docs(repoos): add complete autonomous governor system docume",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1773036600,
+          "date": "2026-03-09T06:10:00.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-a2f04ba",
+            "type": "repo",
+            "source": "summit@a2f04ba",
+            "observedAt": "2026-03-09T06:10:00.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-8e6a74d",
+        "type": "project",
+        "name": "feat(repoos): add self-healing CI queue management",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1773036442,
+          "date": "2026-03-09T06:07:22.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-8e6a74d",
+            "type": "repo",
+            "source": "summit@8e6a74d",
+            "observedAt": "2026-03-09T06:07:22.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-0e5f342",
+        "type": "project",
+        "name": "feat(repoos): add agent proposal sandbox with behavior monit",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1773036349,
+          "date": "2026-03-09T06:05:49.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-0e5f342",
+            "type": "repo",
+            "source": "summit@0e5f342",
+            "observedAt": "2026-03-09T06:05:49.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-52f611e",
+        "type": "project",
+        "name": "feat(repoos): add predictive risk forecasting with ML-style ",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1773036266,
+          "date": "2026-03-09T06:04:26.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-52f611e",
+            "type": "repo",
+            "source": "summit@52f611e",
+            "observedAt": "2026-03-09T06:04:26.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-4e18d0f",
+        "type": "project",
+        "name": "feat(repoos): add autonomous governor with constitutional en",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1773035022,
+          "date": "2026-03-09T05:43:42.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-4e18d0f",
+            "type": "repo",
+            "source": "summit@4e18d0f",
+            "observedAt": "2026-03-09T05:43:42.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-d5dd984",
+        "type": "project",
+        "name": "feat: Add codex tasks for roadmap items 70-92 (#19663)",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1773029943,
+          "date": "2026-03-09T04:19:03.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-d5dd984",
+            "type": "repo",
+            "source": "summit@d5dd984",
+            "observedAt": "2026-03-09T04:19:03.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-652698a",
+        "type": "project",
+        "name": "feat(factory): Add Claude AI software factory orchestration ",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1773029940,
+          "date": "2026-03-09T04:19:00.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-652698a",
+            "type": "repo",
+            "source": "summit@652698a",
+            "observedAt": "2026-03-09T04:19:00.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-e639c61",
+        "type": "project",
+        "name": "feat(ai-stack): implement unified agentic control plane (#19",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1773029937,
+          "date": "2026-03-09T04:18:57.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-e639c61",
+            "type": "repo",
+            "source": "summit@e639c61",
+            "observedAt": "2026-03-09T04:18:57.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-29b04a6",
+        "type": "project",
+        "name": "feat(evidence): implement Summit Evidence Protocol (SEP) cor",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1773029933,
+          "date": "2026-03-09T04:18:53.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-29b04a6",
+            "type": "repo",
+            "source": "summit@29b04a6",
+            "observedAt": "2026-03-09T04:18:53.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-e76194f",
+        "type": "project",
+        "name": "feat(agents): introduce GPT-5.4 Tool Search architecture (#1",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1773029930,
+          "date": "2026-03-09T04:18:50.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-e76194f",
+            "type": "repo",
+            "source": "summit@e76194f",
+            "observedAt": "2026-03-09T04:18:50.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-4f37679",
+        "type": "project",
+        "name": "feat: Complete RepoOS Evolution Intelligence System Implemen",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1773029927,
+          "date": "2026-03-09T04:18:47.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-4f37679",
+            "type": "repo",
+            "source": "summit@4f37679",
+            "observedAt": "2026-03-09T04:18:47.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-2bd4bde",
+        "type": "project",
+        "name": "feat(ledger): implement bitemporal claim writeset ledger wit",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1773029884,
+          "date": "2026-03-09T04:18:04.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-2bd4bde",
+            "type": "repo",
+            "source": "summit@2bd4bde",
+            "observedAt": "2026-03-09T04:18:04.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-76d6411",
+        "type": "project",
+        "name": "feat(repoos): Production-Ready Stability Layer, Constitution",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1773029879,
+          "date": "2026-03-09T04:17:59.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-76d6411",
+            "type": "repo",
+            "source": "summit@76d6411",
+            "observedAt": "2026-03-09T04:17:59.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-ce13fa4",
+        "type": "project",
+        "name": "feat: Epistemic Immune System and Doctrine Playbook (#19617)",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1773029876,
+          "date": "2026-03-09T04:17:56.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-ce13fa4",
+            "type": "repo",
+            "source": "summit@ce13fa4",
+            "observedAt": "2026-03-09T04:17:56.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-c8ea3d3",
+        "type": "project",
+        "name": "feat(api): execution intent contract (#19641)",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1773029873,
+          "date": "2026-03-09T04:17:53.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-c8ea3d3",
+            "type": "repo",
+            "source": "summit@c8ea3d3",
+            "observedAt": "2026-03-09T04:17:53.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-54cc2bc",
+        "type": "project",
+        "name": "feat(repoos): add CNPR scaffolding configs and docs (#19638)",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1773029870,
+          "date": "2026-03-09T04:17:50.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-54cc2bc",
+            "type": "repo",
+            "source": "summit@54cc2bc",
+            "observedAt": "2026-03-09T04:17:50.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-e7cc39f",
+        "type": "project",
+        "name": "feat(osint): instrument OSINT Analyst Assist desk with core ",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1773029867,
+          "date": "2026-03-09T04:17:47.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-e7cc39f",
+            "type": "repo",
+            "source": "summit@e7cc39f",
+            "observedAt": "2026-03-09T04:17:47.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-801f8a9",
+        "type": "project",
+        "name": "feat: Implement Postgres-Neo4j deterministic parity (#19616)",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1773029864,
+          "date": "2026-03-09T04:17:44.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-801f8a9",
+            "type": "repo",
+            "source": "summit@801f8a9",
+            "observedAt": "2026-03-09T04:17:44.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-a4e854f",
+        "type": "project",
+        "name": "feat(graph-timeline): Add Express proxy, uncertainty visual ",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1773029860,
+          "date": "2026-03-09T04:17:40.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-a4e854f",
+            "type": "repo",
+            "source": "summit@a4e854f",
+            "observedAt": "2026-03-09T04:17:40.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-da0025c",
+        "type": "project",
+        "name": "feat(project): add Maestro governance UX issues for Analyst ",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1773029857,
+          "date": "2026-03-09T04:17:37.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-da0025c",
+            "type": "repo",
+            "source": "summit@da0025c",
+            "observedAt": "2026-03-09T04:17:37.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-83639be",
+        "type": "project",
+        "name": "feat(ai): Add security remediation prompt template (#19614)",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1773029854,
+          "date": "2026-03-09T04:17:34.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-83639be",
+            "type": "repo",
+            "source": "summit@83639be",
+            "observedAt": "2026-03-09T04:17:34.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-16c69df",
+        "type": "project",
+        "name": "feat(governance): pin policy bundle SHA to GA releases (#196",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1773018211,
+          "date": "2026-03-09T01:03:31.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-16c69df",
+            "type": "repo",
+            "source": "summit@16c69df",
+            "observedAt": "2026-03-09T01:03:31.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-a0fb249",
+        "type": "project",
+        "name": "ci(governance): extract strict CI/governance slice from PR 1",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1773018203,
+          "date": "2026-03-09T01:03:23.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-a0fb249",
+            "type": "repo",
+            "source": "summit@a0fb249",
+            "observedAt": "2026-03-09T01:03:23.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-a6747cb",
+        "type": "project",
+        "name": "Summit Analyst Workflows & Multi-Agent UX (Items 162-184) (#",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1773018194,
+          "date": "2026-03-09T01:03:14.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-a6747cb",
+            "type": "repo",
+            "source": "summit@a6747cb",
+            "observedAt": "2026-03-09T01:03:14.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-648df62",
+        "type": "project",
+        "name": "fix(ci): restore valid ci.yml parsing on main (#19618)",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1773018191,
+          "date": "2026-03-09T01:03:11.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-648df62",
+            "type": "repo",
+            "source": "summit@648df62",
+            "observedAt": "2026-03-09T01:03:11.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-d03805d",
+        "type": "project",
+        "name": "feat(protocol): introduce Summit Bench evaluation standard (",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1773017999,
+          "date": "2026-03-09T00:59:59.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-d03805d",
+            "type": "repo",
+            "source": "summit@d03805d",
+            "observedAt": "2026-03-09T00:59:59.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-39187ac",
+        "type": "project",
+        "name": "feat(text-intel): add text intelligence architecture skeleto",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1773017995,
+          "date": "2026-03-09T00:59:55.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-39187ac",
+            "type": "repo",
+            "source": "summit@39187ac",
+            "observedAt": "2026-03-09T00:59:55.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-47f30ab",
+        "type": "project",
+        "name": "feat(aps): Add foundation for Autonomous Product Surface Gen",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1773017711,
+          "date": "2026-03-09T00:55:11.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-47f30ab",
+            "type": "repo",
+            "source": "summit@47f30ab",
+            "observedAt": "2026-03-09T00:55:11.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-719926d",
+        "type": "project",
+        "name": "feat(bench): implement Summit Bench Protocol (#19680)",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1773017708,
+          "date": "2026-03-09T00:55:08.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-719926d",
+            "type": "repo",
+            "source": "summit@719926d",
+            "observedAt": "2026-03-09T00:55:08.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-baa5c36",
+        "type": "project",
+        "name": "refactor: redefine tag strategy and establish release calend",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1773017704,
+          "date": "2026-03-09T00:55:04.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-baa5c36",
+            "type": "repo",
+            "source": "summit@baa5c36",
+            "observedAt": "2026-03-09T00:55:04.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-33044e3",
+        "type": "project",
+        "name": "feat(security): implement safe contained autonomy evaluation",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1773017701,
+          "date": "2026-03-09T00:55:01.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-33044e3",
+            "type": "repo",
+            "source": "summit@33044e3",
+            "observedAt": "2026-03-09T00:55:01.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-bd2d9bd",
+        "type": "project",
+        "name": "feat: Implement Agent Capability Graph (ACG) (#19690)",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1773017693,
+          "date": "2026-03-09T00:54:53.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-bd2d9bd",
+            "type": "repo",
+            "source": "summit@bd2d9bd",
+            "observedAt": "2026-03-09T00:54:53.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-f930022",
+        "type": "project",
+        "name": "feat(ledger): implement Universal AI Execution Ledger MWS (#",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1773017688,
+          "date": "2026-03-09T00:54:48.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-f930022",
+            "type": "repo",
+            "source": "summit@f930022",
+            "observedAt": "2026-03-09T00:54:48.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-71047dd",
+        "type": "project",
+        "name": "feat(benchmark): add summit-bench kernel schemas and core co",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1773017634,
+          "date": "2026-03-09T00:53:54.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-71047dd",
+            "type": "repo",
+            "source": "summit@71047dd",
+            "observedAt": "2026-03-09T00:53:54.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-99a07b2",
+        "type": "project",
+        "name": "feat: implement uncertainty control plane prototype (#19721)",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1773017630,
+          "date": "2026-03-09T00:53:50.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-99a07b2",
+            "type": "repo",
+            "source": "summit@99a07b2",
+            "observedAt": "2026-03-09T00:53:50.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-52e93d4",
+        "type": "project",
+        "name": "feat(watchlist): add deterministic AI-IO watchlist and monit",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1773017626,
+          "date": "2026-03-09T00:53:46.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-52e93d4",
+            "type": "repo",
+            "source": "summit@52e93d4",
+            "observedAt": "2026-03-09T00:53:46.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-083ffa5",
+        "type": "project",
+        "name": "feat(benchmarks): add deterministic agent benchmark spine (#",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1773015508,
+          "date": "2026-03-09T00:18:28.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-083ffa5",
+            "type": "repo",
+            "source": "summit@083ffa5",
+            "observedAt": "2026-03-09T00:18:28.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-6c41a8b",
+        "type": "project",
+        "name": "feat(architecture): add summit architecture map (#19674)",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1773015505,
+          "date": "2026-03-09T00:18:25.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-6c41a8b",
+            "type": "repo",
+            "source": "summit@6c41a8b",
+            "observedAt": "2026-03-09T00:18:25.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-c7bdc9b",
+        "type": "project",
+        "name": "feat(supply-chain): add deterministic artifact schemas for r",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1773015502,
+          "date": "2026-03-09T00:18:22.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-c7bdc9b",
+            "type": "repo",
+            "source": "summit@c7bdc9b",
+            "observedAt": "2026-03-09T00:18:22.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-2dca56e",
+        "type": "project",
+        "name": "🎨 Palette: Enhance Badge semantics and icon support (#19773",
+        "attrs": {
+          "author": "BrianAtTopicality",
+          "timestamp": 1773015498,
+          "date": "2026-03-09T00:18:18.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-2dca56e",
+            "type": "repo",
+            "source": "summit@2dca56e",
+            "observedAt": "2026-03-09T00:18:18.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-1539eba",
+        "type": "project",
+        "name": "feat: comprehensive observability and monitoring with Promet",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1773015318,
+          "date": "2026-03-09T00:15:18.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-1539eba",
+            "type": "repo",
+            "source": "summit@1539eba",
+            "observedAt": "2026-03-09T00:15:18.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-27e0e43",
+        "type": "project",
+        "name": "feat(repoos): control plane scaffold (#19782)",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1773015314,
+          "date": "2026-03-09T00:15:14.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-27e0e43",
+            "type": "repo",
+            "source": "summit@27e0e43",
+            "observedAt": "2026-03-09T00:15:14.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-76fd9f3",
+        "type": "project",
+        "name": "feat(protocol): deterministic artifact contract (#19780)",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1773015310,
+          "date": "2026-03-09T00:15:10.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-76fd9f3",
+            "type": "repo",
+            "source": "summit@76fd9f3",
+            "observedAt": "2026-03-09T00:15:10.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-f9826f1",
+        "type": "project",
+        "name": "feat: enhance Summit data storage and caching infrastructure",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1773015307,
+          "date": "2026-03-09T00:15:07.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-f9826f1",
+            "type": "repo",
+            "source": "summit@f9826f1",
+            "observedAt": "2026-03-09T00:15:07.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-3fa8676",
+        "type": "project",
+        "name": "feat(adapters): external agent adapter layer (#19779)",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1773015302,
+          "date": "2026-03-09T00:15:02.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-3fa8676",
+            "type": "repo",
+            "source": "summit@3fa8676",
+            "observedAt": "2026-03-09T00:15:02.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-5a2b00b",
+        "type": "project",
+        "name": "feat(gtse): add GTSE C4 architecture diagram and initial ADR",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1773015012,
+          "date": "2026-03-09T00:10:12.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-5a2b00b",
+            "type": "repo",
+            "source": "summit@5a2b00b",
+            "observedAt": "2026-03-09T00:10:12.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-9c24faf",
+        "type": "project",
+        "name": "docs(safety): add Summit Autonomous Safety Architecture and ",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1773011616,
+          "date": "2026-03-08T23:13:36.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-9c24faf",
+            "type": "repo",
+            "source": "summit@9c24faf",
+            "observedAt": "2026-03-08T23:13:36.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-5069d59",
+        "type": "project",
+        "name": "feat(leaderboard): signed benchmark result bundles (#19783)",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1773011012,
+          "date": "2026-03-08T23:03:32.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-5069d59",
+            "type": "repo",
+            "source": "summit@5069d59",
+            "observedAt": "2026-03-08T23:03:32.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-10e8445",
+        "type": "project",
+        "name": "feat(evidence): repo evidence graph generation (#19781)",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1773010634,
+          "date": "2026-03-08T22:57:14.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-10e8445",
+            "type": "repo",
+            "source": "summit@10e8445",
+            "observedAt": "2026-03-08T22:57:14.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-c9ddc20",
+        "type": "project",
+        "name": "feat(repoos): enforce monorepo package boundaries (#19762)",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1773010488,
+          "date": "2026-03-08T22:54:48.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-c9ddc20",
+            "type": "repo",
+            "source": "summit@c9ddc20",
+            "observedAt": "2026-03-08T22:54:48.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-6e8646b",
+        "type": "project",
+        "name": "feat(release): Add validate-release-artifacts validation sui",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1773010382,
+          "date": "2026-03-08T22:53:02.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-6e8646b",
+            "type": "repo",
+            "source": "summit@6e8646b",
+            "observedAt": "2026-03-08T22:53:02.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-97b9543",
+        "type": "project",
+        "name": "Complete Eval-driven Agentic RAG Implementation (#19771)",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1773010076,
+          "date": "2026-03-08T22:47:56.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-97b9543",
+            "type": "repo",
+            "source": "summit@97b9543",
+            "observedAt": "2026-03-08T22:47:56.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-10e5795",
+        "type": "project",
+        "name": "feat: add AI Infrastructure Intelligence Stack architecture ",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1773009482,
+          "date": "2026-03-08T22:38:02.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-10e5795",
+            "type": "repo",
+            "source": "summit@10e5795",
+            "observedAt": "2026-03-08T22:38:02.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-881ad03",
+        "type": "project",
+        "name": "fix: resolve git 128 failures and benchmark determinism (#19",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1773005360,
+          "date": "2026-03-08T21:29:20.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-881ad03",
+            "type": "repo",
+            "source": "summit@881ad03",
+            "observedAt": "2026-03-08T21:29:20.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-e7bf9c3",
+        "type": "project",
+        "name": "feat(bench): expand GraphRAG benchmark suite (#19784)",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1773004355,
+          "date": "2026-03-08T21:12:35.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-e7bf9c3",
+            "type": "repo",
+            "source": "summit@e7bf9c3",
+            "observedAt": "2026-03-08T21:12:35.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-6d88030",
+        "type": "project",
+        "name": "🛡️ Sentinel: [HIGH] Harden SSO routes and mitigate HPP (#19",
+        "attrs": {
+          "author": "BrianAtTopicality",
+          "timestamp": 1773002691,
+          "date": "2026-03-08T20:44:51.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-6d88030",
+            "type": "repo",
+            "source": "summit@6d88030",
+            "observedAt": "2026-03-08T20:44:51.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-696efc8",
+        "type": "project",
+        "name": "test: Validate Evolution Intelligence PR Classification (#19",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1773002472,
+          "date": "2026-03-08T20:41:12.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-696efc8",
+            "type": "repo",
+            "source": "summit@696efc8",
+            "observedAt": "2026-03-08T20:41:12.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-5a2130e",
+        "type": "project",
+        "name": "feat(retrieval-policy): add control plane, taxonomy, benchma",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1773002458,
+          "date": "2026-03-08T20:40:58.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-5a2130e",
+            "type": "repo",
+            "source": "summit@5a2130e",
+            "observedAt": "2026-03-08T20:40:58.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-08680ea",
+        "type": "project",
+        "name": "feat: Add branch ownership and naming enforcement (#19694)",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1772948418,
+          "date": "2026-03-08T05:40:18.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-08680ea",
+            "type": "repo",
+            "source": "summit@08680ea",
+            "observedAt": "2026-03-08T05:40:18.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-c552ea9",
+        "type": "project",
+        "name": "feat(cli): complete CLI architecture for Summit agents (#196",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1772948368,
+          "date": "2026-03-08T05:39:28.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-c552ea9",
+            "type": "repo",
+            "source": "summit@c552ea9",
+            "observedAt": "2026-03-08T05:39:28.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-e2483d0",
+        "type": "project",
+        "name": "feat: add neo4j stress tests and graph health report (#19698",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1772948355,
+          "date": "2026-03-08T05:39:15.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-e2483d0",
+            "type": "repo",
+            "source": "summit@e2483d0",
+            "observedAt": "2026-03-08T05:39:15.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-bf81973",
+        "type": "project",
+        "name": "feat: Implement automated security issue tracking and triage",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1772948309,
+          "date": "2026-03-08T05:38:29.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-bf81973",
+            "type": "repo",
+            "source": "summit@bf81973",
+            "observedAt": "2026-03-08T05:38:29.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-c2dd006",
+        "type": "project",
+        "name": "feat: add PR triage service (#19703)",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1772948296,
+          "date": "2026-03-08T05:38:16.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-c2dd006",
+            "type": "repo",
+            "source": "summit@c2dd006",
+            "observedAt": "2026-03-08T05:38:16.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-8a6265a",
+        "type": "project",
+        "name": "refactor: unify test harnesses (#19710)",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1772948282,
+          "date": "2026-03-08T05:38:02.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-8a6265a",
+            "type": "repo",
+            "source": "summit@8a6265a",
+            "observedAt": "2026-03-08T05:38:02.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-e1235a3",
+        "type": "project",
+        "name": "feat: Add initial Uncertainty Control Plane schema and polic",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1772948065,
+          "date": "2026-03-08T05:34:25.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-e1235a3",
+            "type": "repo",
+            "source": "summit@e1235a3",
+            "observedAt": "2026-03-08T05:34:25.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-cfe001b",
+        "type": "project",
+        "name": "feat(orchestrator): implement explicit Uncertainty Control P",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1772948051,
+          "date": "2026-03-08T05:34:11.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-cfe001b",
+            "type": "repo",
+            "source": "summit@cfe001b",
+            "observedAt": "2026-03-08T05:34:11.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-7d0303a",
+        "type": "project",
+        "name": "feat(orchestrator): add bayesian uncertainty decomposition f",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1772948038,
+          "date": "2026-03-08T05:33:58.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-7d0303a",
+            "type": "repo",
+            "source": "summit@7d0303a",
+            "observedAt": "2026-03-08T05:33:58.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-4f1ca83",
+        "type": "project",
+        "name": "feat: integrate UMAD (Uncertainty-Guided Multi-Agent Debate)",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1772947990,
+          "date": "2026-03-08T05:33:10.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-4f1ca83",
+            "type": "repo",
+            "source": "summit@4f1ca83",
+            "observedAt": "2026-03-08T05:33:10.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-8e46274",
+        "type": "project",
+        "name": "Deploy Claude Marketplace strategic breakdown (#19723)",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1772947976,
+          "date": "2026-03-08T05:32:56.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-8e46274",
+            "type": "repo",
+            "source": "summit@8e46274",
+            "observedAt": "2026-03-08T05:32:56.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-50b86d5",
+        "type": "project",
+        "name": "feat: add Summit Code UI – repo-scale workflow browser (#197",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1772947964,
+          "date": "2026-03-08T05:32:44.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-50b86d5",
+            "type": "repo",
+            "source": "summit@50b86d5",
+            "observedAt": "2026-03-08T05:32:44.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-af85d71",
+        "type": "project",
+        "name": "feat: add PR triage workspace with queue, diff preview, and ",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1772947951,
+          "date": "2026-03-08T05:32:31.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-af85d71",
+            "type": "repo",
+            "source": "summit@af85d71",
+            "observedAt": "2026-03-08T05:32:31.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-0fc84ee",
+        "type": "project",
+        "name": "feat: add track 3 prompts for ga readiness (#19727)",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1772947938,
+          "date": "2026-03-08T05:32:18.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-0fc84ee",
+            "type": "repo",
+            "source": "summit@0fc84ee",
+            "observedAt": "2026-03-08T05:32:18.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-55548fb",
+        "type": "project",
+        "name": "feat: implement Iran War COP base logic, schema, and templat",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1772947677,
+          "date": "2026-03-08T05:27:57.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-55548fb",
+            "type": "repo",
+            "source": "summit@55548fb",
+            "observedAt": "2026-03-08T05:27:57.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-a757066",
+        "type": "project",
+        "name": "feat(startup): add founder momentum scoring module and AI fo",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1772947627,
+          "date": "2026-03-08T05:27:07.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-a757066",
+            "type": "repo",
+            "source": "summit@a757066",
+            "observedAt": "2026-03-08T05:27:07.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-20c5877",
+        "type": "project",
+        "name": "feat(intelgraph): implement persian narrative radar mws (#19",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1772947461,
+          "date": "2026-03-08T05:24:21.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-20c5877",
+            "type": "repo",
+            "source": "summit@20c5877",
+            "observedAt": "2026-03-08T05:24:21.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-4ed7f58",
+        "type": "project",
+        "name": "feat(ontology): add AI-enabled influence campaign schema and",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1772947448,
+          "date": "2026-03-08T05:24:08.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-4ed7f58",
+            "type": "repo",
+            "source": "summit@4ed7f58",
+            "observedAt": "2026-03-08T05:24:08.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-63742b9",
+        "type": "project",
+        "name": "Add Cognitive Battlespace UI (#19740)",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1772947434,
+          "date": "2026-03-08T05:23:54.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-63742b9",
+            "type": "repo",
+            "source": "summit@63742b9",
+            "observedAt": "2026-03-08T05:23:54.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-bce2836",
+        "type": "project",
+        "name": "feat(text-intel): Implement Text Intelligence Engine skeleto",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1772947421,
+          "date": "2026-03-08T05:23:41.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-bce2836",
+            "type": "repo",
+            "source": "summit@bce2836",
+            "observedAt": "2026-03-08T05:23:41.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-25dd3b5",
+        "type": "project",
+        "name": "feat(praxeology): add praxeology endpoints and action signat",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1772947408,
+          "date": "2026-03-08T05:23:28.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-25dd3b5",
+            "type": "repo",
+            "source": "summit@25dd3b5",
+            "observedAt": "2026-03-08T05:23:28.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-948e794",
+        "type": "project",
+        "name": "feat: Implement CDLRM Cognitive Battlespace UI Layer (#19744",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1772947262,
+          "date": "2026-03-08T05:21:02.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-948e794",
+            "type": "repo",
+            "source": "summit@948e794",
+            "observedAt": "2026-03-08T05:21:02.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-b2ba67e",
+        "type": "project",
+        "name": "Implement Bitemporal WriteSet Ledger Infrastructure (#19745)",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1772947249,
+          "date": "2026-03-08T05:20:49.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-b2ba67e",
+            "type": "repo",
+            "source": "summit@b2ba67e",
+            "observedAt": "2026-03-08T05:20:49.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-2965016",
+        "type": "project",
+        "name": "feat: generalized reference-fidelity benchmark subsumption (",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1772947199,
+          "date": "2026-03-08T05:19:59.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-2965016",
+            "type": "repo",
+            "source": "summit@2965016",
+            "observedAt": "2026-03-08T05:19:59.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-4fd5e09",
+        "type": "project",
+        "name": "feat(benchmark): add AgentVista subsumption bundle plan (#19",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1772947186,
+          "date": "2026-03-08T05:19:46.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-4fd5e09",
+            "type": "repo",
+            "source": "summit@4fd5e09",
+            "observedAt": "2026-03-08T05:19:46.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-081e772",
+        "type": "project",
+        "name": "feat(intelgraph): implement minimal winning slice for intelg",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1772947001,
+          "date": "2026-03-08T05:16:41.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-081e772",
+            "type": "repo",
+            "source": "summit@081e772",
+            "observedAt": "2026-03-08T05:16:41.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-17c84fe",
+        "type": "project",
+        "name": "feat(capabilities): create summit skill graph v3 repo skelet",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1772946973,
+          "date": "2026-03-08T05:16:13.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-17c84fe",
+            "type": "repo",
+            "source": "summit@17c84fe",
+            "observedAt": "2026-03-08T05:16:13.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-e81e6d7",
+        "type": "project",
+        "name": "feat: enforce report separation gate and reporting contract ",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1772946959,
+          "date": "2026-03-08T05:15:59.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-e81e6d7",
+            "type": "repo",
+            "source": "summit@e81e6d7",
+            "observedAt": "2026-03-08T05:15:59.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-1652d45",
+        "type": "project",
+        "name": "feat(benchmarks): Implement Behavior Forecasting Platform MW",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1772946913,
+          "date": "2026-03-08T05:15:13.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-1652d45",
+            "type": "repo",
+            "source": "summit@1652d45",
+            "observedAt": "2026-03-08T05:15:13.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-93c798d",
+        "type": "project",
+        "name": "Add deterministic lineage/provenance automation report (#164",
+        "attrs": {
+          "author": "google-labs-jules[bot]",
+          "timestamp": 1772946684,
+          "date": "2026-03-08T05:11:24.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-93c798d",
+            "type": "repo",
+            "source": "summit@93c798d",
+            "observedAt": "2026-03-08T05:11:24.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-792c956",
+        "type": "project",
+        "name": "docs(ai-assist): expand SWE-rebench architecture guidance fo",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1772946337,
+          "date": "2026-03-08T05:05:37.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-792c956",
+            "type": "repo",
+            "source": "summit@792c956",
+            "observedAt": "2026-03-08T05:05:37.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-632d597",
+        "type": "project",
+        "name": "docs(architecture): add Summit trust architecture overview a",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1772946323,
+          "date": "2026-03-08T05:05:23.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-632d597",
+            "type": "repo",
+            "source": "summit@632d597",
+            "observedAt": "2026-03-08T05:05:23.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-3ca95e7",
+        "type": "project",
+        "name": "fix(ci): make Python CI robust for packages without [dev] ex",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1772946242,
+          "date": "2026-03-08T05:04:02.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-3ca95e7",
+            "type": "repo",
+            "source": "summit@3ca95e7",
+            "observedAt": "2026-03-08T05:04:02.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-e7d5c2b",
+        "type": "project",
+        "name": "docs(architecture): add AI infrastructure stack map and cont",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1772946221,
+          "date": "2026-03-08T05:03:41.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-e7d5c2b",
+            "type": "repo",
+            "source": "summit@e7d5c2b",
+            "observedAt": "2026-03-08T05:03:41.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-1384af5",
+        "type": "project",
+        "name": "fix(observability): Normalize OpenTelemetry breaking semanti",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1772946208,
+          "date": "2026-03-08T05:03:28.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-1384af5",
+            "type": "repo",
+            "source": "summit@1384af5",
+            "observedAt": "2026-03-08T05:03:28.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "commit-f78a482",
+        "type": "project",
+        "name": "docs: add repository archaeology engine architecture doc (#1",
+        "attrs": {
+          "author": "BrianCLong",
+          "timestamp": 1772946195,
+          "date": "2026-03-08T05:03:15.000Z"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-f78a482",
+            "type": "repo",
+            "source": "summit@f78a482",
+            "observedAt": "2026-03-08T05:03:15.000Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "innovation-simulation-engine",
+        "type": "technology",
+        "name": "Innovation Simulation Engine",
+        "attrs": {
+          "maturity": "growth",
+          "strategic_importance": "critical"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-innovation-simulation-engine",
+            "type": "manual",
+            "source": "summit-architecture",
+            "observedAt": "2026-03-09T12:00:07.533Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "repository-archaeology-engine",
+        "type": "technology",
+        "name": "Repository Archaeology Engine",
+        "attrs": {
+          "maturity": "mature"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-repository-archaeology-engine",
+            "type": "manual",
+            "source": "summit-architecture",
+            "observedAt": "2026-03-09T12:00:07.533Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "evolution-intelligence-system",
+        "type": "technology",
+        "name": "Evolution Intelligence System",
+        "attrs": {
+          "maturity": "mature"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-evolution-intelligence-system",
+            "type": "manual",
+            "source": "summit-architecture",
+            "observedAt": "2026-03-09T12:00:07.533Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "evidence-protocol",
+        "type": "technology",
+        "name": "Summit Evidence Protocol",
+        "attrs": {
+          "maturity": "emerging"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-evidence-protocol",
+            "type": "manual",
+            "source": "summit-architecture",
+            "observedAt": "2026-03-09T12:00:07.533Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "summit-platform",
+        "type": "organization",
+        "name": "Summit Platform",
+        "attrs": {
+          "organization_type": "enterprise"
+        },
+        "evidenceRefs": [
+          {
+            "id": "evidence-summit-platform",
+            "type": "manual",
+            "source": "summit-architecture",
+            "observedAt": "2026-03-09T12:00:07.533Z",
+            "confidence": 1
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "id": "edge-summit-develops-innovation-sim",
+        "type": "develops",
+        "from": "summit-platform",
+        "to": "innovation-simulation-engine",
+        "evidenceRefs": [
+          {
+            "id": "evidence-edge-1",
+            "type": "manual",
+            "source": "summit-architecture",
+            "observedAt": "2026-03-09T12:00:07.533Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "edge-innovation-sim-builds-on-archaeology",
+        "type": "builds-on",
+        "from": "innovation-simulation-engine",
+        "to": "repository-archaeology-engine",
+        "evidenceRefs": [
+          {
+            "id": "evidence-edge-2",
+            "type": "manual",
+            "source": "summit-architecture",
+            "observedAt": "2026-03-09T12:00:07.533Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "edge-innovation-sim-builds-on-evolution",
+        "type": "builds-on",
+        "from": "innovation-simulation-engine",
+        "to": "evolution-intelligence-system",
+        "evidenceRefs": [
+          {
+            "id": "evidence-edge-3",
+            "type": "manual",
+            "source": "summit-architecture",
+            "observedAt": "2026-03-09T12:00:07.533Z",
+            "confidence": 1
+          }
+        ]
+      },
+      {
+        "id": "edge-innovation-sim-uses-evidence-protocol",
+        "type": "uses",
+        "from": "innovation-simulation-engine",
+        "to": "evidence-protocol",
+        "evidenceRefs": [
+          {
+            "id": "evidence-edge-4",
+            "type": "manual",
+            "source": "summit-architecture",
+            "observedAt": "2026-03-09T12:00:07.533Z",
+            "confidence": 1
+          }
+        ]
+      }
+    ]
+  },
+  "analysis": {
+    "adoption": [
+      {
+        "nodeId": "innovation-simulation-engine",
+        "phase": "growth",
+        "adoptionRate": 0.1,
+        "momentum": 0.5,
+        "velocity": 0.03,
+        "acceleration": 0,
+        "signals": [
+          {
+            "timestamp": "2026-03-09T12:00:07.533Z",
+            "metric": "mention_count",
+            "value": 1,
+            "source": "summit-architecture",
+            "confidence": 1
+          }
+        ],
+        "confidence": 0.8
+      },
+      {
+        "nodeId": "repository-archaeology-engine",
+        "phase": "mature",
+        "adoptionRate": 0.1,
+        "momentum": 0.5,
+        "velocity": 0.03,
+        "acceleration": 0,
+        "signals": [
+          {
+            "timestamp": "2026-03-09T12:00:07.533Z",
+            "metric": "mention_count",
+            "value": 1,
+            "source": "summit-architecture",
+            "confidence": 1
+          }
+        ],
+        "confidence": 0.8
+      },
+      {
+        "nodeId": "evolution-intelligence-system",
+        "phase": "mature",
+        "adoptionRate": 0.1,
+        "momentum": 0.5,
+        "velocity": 0.03,
+        "acceleration": 0,
+        "signals": [
+          {
+            "timestamp": "2026-03-09T12:00:07.533Z",
+            "metric": "mention_count",
+            "value": 1,
+            "source": "summit-architecture",
+            "confidence": 1
+          }
+        ],
+        "confidence": 0.8
+      },
+      {
+        "nodeId": "evidence-protocol",
+        "phase": "emerging",
+        "adoptionRate": 0.1,
+        "momentum": 0.5,
+        "velocity": 0.03,
+        "acceleration": 0,
+        "signals": [
+          {
+            "timestamp": "2026-03-09T12:00:07.533Z",
+            "metric": "mention_count",
+            "value": 1,
+            "source": "summit-architecture",
+            "confidence": 1
+          }
+        ],
+        "confidence": 0.8
+      },
+      {
+        "nodeId": "summit-platform",
+        "phase": "growth",
+        "adoptionRate": 0.1,
+        "momentum": 0.5,
+        "velocity": 0.03,
+        "acceleration": 0,
+        "signals": [
+          {
+            "timestamp": "2026-03-09T12:00:07.533Z",
+            "metric": "mention_count",
+            "value": 1,
+            "source": "summit-architecture",
+            "confidence": 1
+          }
+        ],
+        "confidence": 0.8
+      }
+    ],
+    "diffusion": [
+      {
+        "nodeId": "innovation-simulation-engine",
+        "currentAdoption": 0.1,
+        "predictedAdoption": {
+          "t30": 0.5,
+          "t90": 0.7,
+          "t180": 0.85,
+          "t365": 0.95
+        },
+        "diffusionRate": 0.03,
+        "networkMetrics": {
+          "degree": 4,
+          "inDegree": 1,
+          "outDegree": 3,
+          "pageRank": 0.25,
+          "closeness": 0.5,
+          "betweenness": 0.3
+        },
+        "lockInEffect": {
+          "strength": 0.1275,
+          "components": {
+            "networkEffect": 0.05,
+            "switchingCost": 0.2,
+            "complementAssets": 0.1,
+            "standardization": 0.2
+          },
+          "directDependents": [
+            "summit-platform"
+          ],
+          "confidence": 0.7
+        },
+        "vulnerabilities": {
+          "competitors": [],
+          "switchingFeasibility": 0.8725,
+          "replacementRisk": 0.2
+        },
+        "confidence": 0.75
+      },
+      {
+        "nodeId": "repository-archaeology-engine",
+        "currentAdoption": 0.1,
+        "predictedAdoption": {
+          "t30": 0.5,
+          "t90": 0.7,
+          "t180": 0.85,
+          "t365": 0.95
+        },
+        "diffusionRate": 0.03,
+        "networkMetrics": {
+          "degree": 1,
+          "inDegree": 1,
+          "outDegree": 0,
+          "pageRank": 0.25,
+          "closeness": 0.5,
+          "betweenness": 0.3
+        },
+        "lockInEffect": {
+          "strength": 0.0675,
+          "components": {
+            "networkEffect": 0.05,
+            "switchingCost": 0,
+            "complementAssets": 0.1,
+            "standardization": 0.2
+          },
+          "directDependents": [
+            "innovation-simulation-engine"
+          ],
+          "confidence": 0.7
+        },
+        "vulnerabilities": {
+          "competitors": [],
+          "switchingFeasibility": 0.9325,
+          "replacementRisk": 0.2
+        },
+        "confidence": 0.75
+      },
+      {
+        "nodeId": "evolution-intelligence-system",
+        "currentAdoption": 0.1,
+        "predictedAdoption": {
+          "t30": 0.5,
+          "t90": 0.7,
+          "t180": 0.85,
+          "t365": 0.95
+        },
+        "diffusionRate": 0.03,
+        "networkMetrics": {
+          "degree": 1,
+          "inDegree": 1,
+          "outDegree": 0,
+          "pageRank": 0.25,
+          "closeness": 0.5,
+          "betweenness": 0.3
+        },
+        "lockInEffect": {
+          "strength": 0.0675,
+          "components": {
+            "networkEffect": 0.05,
+            "switchingCost": 0,
+            "complementAssets": 0.1,
+            "standardization": 0.2
+          },
+          "directDependents": [
+            "innovation-simulation-engine"
+          ],
+          "confidence": 0.7
+        },
+        "vulnerabilities": {
+          "competitors": [],
+          "switchingFeasibility": 0.9325,
+          "replacementRisk": 0.2
+        },
+        "confidence": 0.75
+      },
+      {
+        "nodeId": "evidence-protocol",
+        "currentAdoption": 0.1,
+        "predictedAdoption": {
+          "t30": 0.5,
+          "t90": 0.7,
+          "t180": 0.85,
+          "t365": 0.95
+        },
+        "diffusionRate": 0.03,
+        "networkMetrics": {
+          "degree": 1,
+          "inDegree": 1,
+          "outDegree": 0,
+          "pageRank": 0.25,
+          "closeness": 0.5,
+          "betweenness": 0.3
+        },
+        "lockInEffect": {
+          "strength": 0.0675,
+          "components": {
+            "networkEffect": 0.05,
+            "switchingCost": 0,
+            "complementAssets": 0.1,
+            "standardization": 0.2
+          },
+          "directDependents": [
+            "innovation-simulation-engine"
+          ],
+          "confidence": 0.7
+        },
+        "vulnerabilities": {
+          "competitors": [],
+          "switchingFeasibility": 0.9325,
+          "replacementRisk": 0.2
+        },
+        "confidence": 0.75
+      },
+      {
+        "nodeId": "summit-platform",
+        "currentAdoption": 0.1,
+        "predictedAdoption": {
+          "t30": 0.5,
+          "t90": 0.7,
+          "t180": 0.85,
+          "t365": 0.95
+        },
+        "diffusionRate": 0.03,
+        "networkMetrics": {
+          "degree": 1,
+          "inDegree": 0,
+          "outDegree": 1,
+          "pageRank": 0,
+          "closeness": 0.5,
+          "betweenness": 0.3
+        },
+        "lockInEffect": {
+          "strength": 0.05,
+          "components": {
+            "networkEffect": 0,
+            "switchingCost": 0.06666666666666667,
+            "complementAssets": 0,
+            "standardization": 0.2
+          },
+          "directDependents": [],
+          "confidence": 0.7
+        },
+        "vulnerabilities": {
+          "competitors": [],
+          "switchingFeasibility": 0.95,
+          "replacementRisk": 0.2
+        },
+        "confidence": 0.75
+      }
+    ],
+    "recommendations": [
+      {
+        "id": "rec-innovation-simulation-engine",
+        "type": "monitor",
+        "targetNode": "innovation-simulation-engine",
+        "nodeName": "Innovation Simulation Engine",
+        "rationale": "Continue monitoring",
+        "confidence": 0.75,
+        "expectedOutcome": {
+          "benefit": 0.7,
+          "cost": 0.3,
+          "timeHorizon": 90,
+          "roi": 2.3
+        }
+      },
+      {
+        "id": "rec-repository-archaeology-engine",
+        "type": "monitor",
+        "targetNode": "repository-archaeology-engine",
+        "nodeName": "Repository Archaeology Engine",
+        "rationale": "Continue monitoring",
+        "confidence": 0.75,
+        "expectedOutcome": {
+          "benefit": 0.7,
+          "cost": 0.3,
+          "timeHorizon": 90,
+          "roi": 2.3
+        }
+      },
+      {
+        "id": "rec-evolution-intelligence-system",
+        "type": "monitor",
+        "targetNode": "evolution-intelligence-system",
+        "nodeName": "Evolution Intelligence System",
+        "rationale": "Continue monitoring",
+        "confidence": 0.75,
+        "expectedOutcome": {
+          "benefit": 0.7,
+          "cost": 0.3,
+          "timeHorizon": 90,
+          "roi": 2.3
+        }
+      },
+      {
+        "id": "rec-evidence-protocol",
+        "type": "monitor",
+        "targetNode": "evidence-protocol",
+        "nodeName": "Summit Evidence Protocol",
+        "rationale": "Continue monitoring",
+        "confidence": 0.75,
+        "expectedOutcome": {
+          "benefit": 0.7,
+          "cost": 0.3,
+          "timeHorizon": 90,
+          "roi": 2.3
+        }
+      },
+      {
+        "id": "rec-summit-platform",
+        "type": "monitor",
+        "targetNode": "summit-platform",
+        "nodeName": "Summit Platform",
+        "rationale": "Continue monitoring",
+        "confidence": 0.75,
+        "expectedOutcome": {
+          "benefit": 0.7,
+          "cost": 0.3,
+          "timeHorizon": 90,
+          "roi": 2.3
+        }
+      }
+    ],
+    "releaseGates": [
+      {
+        "id": "gate-accuracy",
+        "name": "Prediction Accuracy",
+        "threshold": 0.7,
+        "currentValue": 0.82,
+        "passed": true,
+        "severity": "blocking"
+      },
+      {
+        "id": "gate-calibration",
+        "name": "Confidence Calibration",
+        "threshold": 0.8,
+        "currentValue": 0.85,
+        "passed": true,
+        "severity": "warning"
+      },
+      {
+        "id": "gate-recommendations",
+        "name": "Recommendation Coverage",
+        "threshold": 5,
+        "currentValue": 5,
+        "passed": true,
+        "severity": "warning"
+      },
+      {
+        "id": "gate-confidence",
+        "name": "High Confidence Recommendations",
+        "threshold": 3,
+        "currentValue": 5,
+        "passed": true,
+        "severity": "info"
+      }
+    ]
+  },
+  "summary": {
+    "totalNodes": 105,
+    "totalEdges": 4,
+    "techNodes": 5,
+    "recommendations": 5,
+    "highConfidenceRecs": 5,
+    "gatesPass": 4,
+    "gatesTotal": 4,
+    "systemApproved": true
+  },
+  "keyInsights": [
+    "100 commits analyzed spanning 5 core technologies",
+    "5 strategic recommendations generated",
+    "Innovation Simulation Engine shows growth maturity",
+    "System lock-in strength: 0.128",
+    "Release gates: 4/4 passed",
+    "✓ System approved for release"
+  ]
+}
