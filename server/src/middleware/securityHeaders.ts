@@ -14,7 +14,7 @@ interface SecurityHeadersOptions {
  * CSP can be toggled separately via SECURITY_HEADERS_CSP_ENABLED / SECURITY_HEADERS_CSP_REPORT_ONLY.
  */
 export function securityHeaders({
-  enabled = process.env.SECURITY_HEADERS_ENABLED !== 'false',
+  enabled = true, // Force enabled for security hardening
   allowedOrigins = [],
   enableCsp = process.env.SECURITY_HEADERS_CSP_ENABLED === 'true' ||
     process.env.NODE_ENV === 'production',

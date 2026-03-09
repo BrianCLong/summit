@@ -289,7 +289,12 @@ export async function findTenantNodes(
   const session = createTenantSession(driver, context);
   try {
     const filterClause = filter
-      ? Object.keys(filter).map(key => `n.${key} = $${key}`).join(' AND ')
+      ? Object.keys(filter).map(key => {
+          if (!/^[a-zA-Z0-9_]+$/.test(key)) {
+            throw new Error('Invalid filter key format');
+          }
+          return `n.${key} = ${key}`;
+        }).join(' AND ')
       : 'true';
 
     return await session.run(
