@@ -95,3 +95,11 @@
 - [ ] Dependencies have been audited (`pnpm audit`).
 - [ ] No restrictive licenses introduced (GPL, AGPL, LGPL).
 - [ ] No regression on branch protections or compliance gates.
+
+## Merge Safety Check (Wave 2)
+
+<!-- Wave 2 Orchestrator Rules. Required for merge. -->
+
+- [ ] **Small & Localized**: PR is minimal, clean, and does not include unrelated architectural refactors.
+- [ ] **No Infrastructure Tampering**: Does not modify protected files (e.g., `package.json`, `pnpm-lock.yaml`, core CI workflows).
+- [ ] **Deterministic**: Changes are deterministic, easily reviewable, and maintain test stability.
