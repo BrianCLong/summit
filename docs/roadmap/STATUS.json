@@ -1,6 +1,6 @@
 {
   "last_updated": "2026-03-07T06:03:42Z",
-  "revision_note": "Added governed OpenClaw-class agent plane standard and repo assumptions.",
+  "revision_note": "Added praxeology control plane and roadmap tracking entry.",
   "initiatives": [
     {
       "id": "nature-s41562-026-02411-w-layer2-layer3",
@@ -245,6 +245,12 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "Governance standards for OpenClaw-class agent plane integration, including evidence artifacts and repository state verification."
+    },
+    {
+      "id": "praxeology-control-plane",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Praxeology graph implementation with quarantined PG writeset validators and control-plane API."
     }
   ],
   "summary": {
