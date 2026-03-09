@@ -144,7 +144,7 @@ data:
 
     # 1. Verify cosign signature
     echo "[1/5] Verifying cosign signature..."
-    cosign verify \
+    cosign verify --use-signed-timestamps \ || { echo "::error::Supply chain verification failed! Missing or invalid signed timestamps."; false; }
       --key /keys/cosign.pub \
       --insecure-ignore-tlog=true \
       "${IMAGE}" || {
@@ -154,7 +154,7 @@ data:
 
     # 2. Verify SLSA provenance
     echo "[2/5] Verifying SLSA provenance..."
-    cosign verify-attestation \
+    cosign verify-attestation --use-signed-timestamps \ || { echo "::error::Supply chain verification failed! Missing or invalid signed timestamps."; false; }
       --key /keys/cosign.pub \
       --type slsaprovenance \
       --insecure-ignore-tlog=true \
@@ -173,7 +173,7 @@ data:
 
     # 3. Verify SBOM attestation
     echo "[3/5] Verifying SBOM attestation..."
-    cosign verify-attestation \
+    cosign verify-attestation --use-signed-timestamps \ || { echo "::error::Supply chain verification failed! Missing or invalid signed timestamps."; false; }
       --key /keys/cosign.pub \
       --type cyclonedx \
       --insecure-ignore-tlog=true \

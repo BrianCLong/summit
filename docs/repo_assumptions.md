@@ -1,15 +1,23 @@
-# Repo Reality Check
+# IntelGraph repo assumptions
 
-Verified vs assumed directories:
-- Directories verified to exist.
+## Verified
+- Public monorepo for Summit exists
+- Node 18+, pnpm, Neo4j 5.x in quickstart
+- GraphQL + REST APIs are core
+- Collaboration/war-room and timeline issues exist
+- CI/workflow surface is large and policy/evidence oriented
 
-Verified naming conventions for agents, schemas, evals, and CI checks.
-Verified deterministic artifact conventions.
-Verified evidence schema format.
+## Assumed
+- `server/src/api` or equivalent GraphQL service exists
+- `client/src` or equivalent React frontend exists
+- Neo4j access is centralized behind a shared client
+- Evidence artifacts follow repo-wide conventions
+- Tenant scoping already exists outside IntelGraph
 
-Must-not-touch files list:
-- LICENSE
-- dependency lockfiles
-- primary release workflow
-- existing public API entrypoints
-- existing benchmark golden files
+## Validation checklist before PR1 merges
+- Confirm exact package/workspace boundaries
+- Confirm existing GraphQL schema location
+- Confirm auth context shape
+- Confirm standard test command names
+- Confirm runbook/docs locations
+- Confirm must-not-touch branch protection workflows

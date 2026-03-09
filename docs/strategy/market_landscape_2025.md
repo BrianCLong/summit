@@ -238,8 +238,8 @@ This matrix compares Summit against 5 key players from the clusters above, highl
 | **Deployment** | **Hybrid / Air-Gapped Capable** | SaaS / Cloud | Desktop / Enterprise Server | SaaS | SaaS | SaaS |
 | **Primary User** | **Intel Analyst + Autonomous Agent** | Investigator | Analyst | SOC Analyst / CISO | Knowledge Worker | Support Agent / Employee |
 
-### Key Differentiators:
+### Key Differentiators
 
-1.  **Goal-Seeking vs. Searching:** Unlike Glean or Recorded Future which excel at *retrieving* information, Summit's agents *act* to uncover it, following multi-step investigative plans.
-2.  **Policy-as-Code:** Unlike ShadowDragon or Maltego where governance is often post-hoc or RBAC-based, Summit embeds OPA policies into every agent action, enabling safe autonomous operations.
-3.  **The "Espionage" Wedge:** While others focus on cyber-threats (Recorded Future) or criminal investigations (ShadowDragon), Summit specifically targets the high-stakes domain of corporate espionage, influence operations, and deepfake defense.
+1. **Goal-Seeking vs. Searching:** Unlike Glean or Recorded Future which excel at *retrieving* information, Summit's agents *act* to uncover it, following multi-step investigative plans.
+2. **Policy-as-Code:** Unlike ShadowDragon or Maltego where governance is often post-hoc or RBAC-based, Summit embeds OPA policies into every agent action, enabling safe autonomous operations.
+3. **The "Espionage" Wedge:** While others focus on cyber-threats (Recorded Future) or criminal investigations (ShadowDragon), Summit specifically targets the high-stakes domain of corporate espionage, influence operations, and deepfake defense.

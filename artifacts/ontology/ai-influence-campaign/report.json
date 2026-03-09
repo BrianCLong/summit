@@ -1,0 +1,119 @@
+[
+  {
+    "campaign_id": "camp_cartel_fear_amp",
+    "actor_ids": [
+      "actor_cjng_cartel"
+    ],
+    "objectives": [
+      "Intimidation",
+      "Perception Warfare"
+    ],
+    "tactics": [
+      {
+        "tactic_id": "AMPLIFICATION_AND_SWARMING",
+        "technique_ids": [
+          "bot-amplified-hashtag-flood"
+        ]
+      },
+      {
+        "tactic_id": "EVENT_EXPLOITATION",
+        "technique_ids": [
+          "kinetic-event-fear-amplification"
+        ]
+      }
+    ],
+    "ai_usage": [
+      {
+        "phase": "AMPLIFICATION_AND_SWARMING",
+        "capability": "AI-generated Fear Content",
+        "evidence_ids": [
+          "EVID:ai-influence-campaign:evidence:0002"
+        ]
+      }
+    ],
+    "evidence": [
+      {
+        "evidence_id": "EVID:ai-influence-campaign:evidence:0002",
+        "label": "Reuters Report on Cartel Disinformation"
+      }
+    ]
+  },
+  {
+    "campaign_id": "camp_scam_transrep",
+    "actor_ids": [
+      "actor_criminal_scam_syndicate",
+      "actor_state_aligned_repressor"
+    ],
+    "objectives": [
+      "Financial Fraud",
+      "Transnational Repression"
+    ],
+    "tactics": [
+      {
+        "tactic_id": "HARASSMENT_AND_REPRESSION",
+        "technique_ids": [
+          "mass-reporting-account-suppression"
+        ]
+      },
+      {
+        "tactic_id": "PERSONA_FABRICATION",
+        "technique_ids": [
+          "romance-scam-trust-building",
+          "synthetic-headshot-seeding"
+        ]
+      }
+    ],
+    "ai_usage": [
+      {
+        "phase": "PERSONA_FABRICATION",
+        "capability": "ChatGPT-driven Romance Personas",
+        "evidence_ids": [
+          "EVID:ai-influence-campaign:evidence:0003"
+        ]
+      }
+    ],
+    "evidence": [
+      {
+        "evidence_id": "EVID:ai-influence-campaign:evidence:0003",
+        "label": "OpenAI Threat Report Feb 2026"
+      }
+    ]
+  },
+  {
+    "campaign_id": "camp_state_uk_china",
+    "actor_ids": [
+      "actor_prc_intel_group"
+    ],
+    "objectives": [
+      "Democracy Interference",
+      "Political Espionage"
+    ],
+    "tactics": [
+      {
+        "tactic_id": "IMPERSONATION_AND_DECEPTION",
+        "technique_ids": [
+          "fake-journalist-persona"
+        ]
+      },
+      {
+        "tactic_id": "RECON_AND_TARGETING",
+        "technique_ids": []
+      }
+    ],
+    "ai_usage": [
+      {
+        "phase": "RECON_AND_TARGETING",
+        "capability": "LLM-assisted Target Profiling",
+        "evidence_ids": [
+          "EVID:ai-influence-campaign:evidence:0001"
+        ]
+      }
+    ],
+    "evidence": [
+      {
+        "evidence_id": "EVID:ai-influence-campaign:evidence:0001",
+        "label": "UK Arrest Report March 2026"
+      }
+    ]
+  }
+]
