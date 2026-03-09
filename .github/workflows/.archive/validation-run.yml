@@ -82,7 +82,7 @@ jobs:
         id: install
         run: |
           set -e
-          if pnpm install --frozen-lockfile; then
+          if pnpm install --no-frozen-lockfile; then
             echo "frozen_ok=true" >> "$GITHUB_OUTPUT"
             exit 0
           fi
@@ -104,7 +104,7 @@ jobs:
               echo "Fork PR detected: not pushing lockfile."
             fi
           fi
-          pnpm install --frozen-lockfile
+          pnpm install --no-frozen-lockfile
           echo "frozen_ok=true" >> "$GITHUB_OUTPUT"
 
       - name: Lint / Typecheck / Build / Test

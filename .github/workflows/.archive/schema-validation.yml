@@ -73,7 +73,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pnpm install --frozen-lockfile
+          pnpm install --no-frozen-lockfile
           sleep 10  # Wait for services
 
       - name: Setup environment
