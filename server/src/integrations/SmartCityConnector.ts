@@ -151,7 +151,7 @@ export class SmartCityConnector {
 
     try {
       // Simulated connectivity test
-      await this.delay(Math.random() * 100 + 50);
+      await this.delay(75);
       const latency = Date.now() - startTime;
 
       endpoint.status = 'ACTIVE';
@@ -343,7 +343,7 @@ export class SmartCityConnector {
     try {
       // Simulated sync
       await this.delay(500);
-      const records = Math.floor(Math.random() * 100) + 10;
+      const records = 50;
 
       endpoint.lastSync = new Date();
       endpoint.status = 'ACTIVE';

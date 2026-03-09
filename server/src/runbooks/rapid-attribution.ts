@@ -488,7 +488,7 @@ export class RapidAttributionRunbook {
 
         // Create relationships to other infrastructure
         for (const other of infrastructure) {
-          if (Math.random() > 0.7) {
+          if (entity.id.length % 3 === 0) {
             // 30% chance of relationship
             entity.relationships.push({
               targetId: other.id,

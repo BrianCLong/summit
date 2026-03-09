@@ -165,7 +165,7 @@ export class AgentCoordinationService {
    */
   async coordinateAgents(plan: AgentCoordinationPlan): Promise<CoordinationResult> {
     const startTime = Date.now();
-    const traceId = `coord-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    const traceId = `coord-${Date.now()}-${require("crypto").randomUUID()}`;
     
     logger.info({ traceId, agentCount: plan.agents.length }, 'Starting agent coordination');
 

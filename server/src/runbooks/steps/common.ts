@@ -52,7 +52,7 @@ export class AnalyticsStep implements RunbookStep {
     const { algorithm, inputData } = parameters;
     // Mock analytics
     return {
-      score: Math.random(),
+      score: 0.85,
       clusters: [],
       anomalies: []
     };

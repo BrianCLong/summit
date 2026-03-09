@@ -466,7 +466,7 @@ class SandboxManager {
         }
       }
 
-      return Math.random() > 0.5;
+      return false;
     } catch {
       return false;
     }
