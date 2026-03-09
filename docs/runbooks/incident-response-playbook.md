@@ -839,9 +839,9 @@ Incident Commander: [Name]
 
 | ID | Action | Owner | Priority | Due Date | Status |
 |----|--------|-------|----------|----------|--------|
-| 1 | [Action description] | @name | P0/P1/P2 | YYYY-MM-DD | TODO |
-| 2 | [Action description] | @name | P0/P1/P2 | YYYY-MM-DD | TODO |
-| 3 | [Action description] | @name | P0/P1/P2 | YYYY-MM-DD | TODO |
+| 1 | [Action description] | @name | P0/P1/P2 | YYYY-MM-DD | TBD |
+| 2 | [Action description] | @name | P0/P1/P2 | YYYY-MM-DD | TBD |
+| 3 | [Action description] | @name | P0/P1/P2 | YYYY-MM-DD | TBD |
 
 ### Action Item Categories
 - **Prevent**: Actions to prevent this specific incident from recurring

@@ -1,34 +1,21 @@
-# Incident Response Runbook (GA)
+# Incident Response Runbook
 
-## Severity Levels
--   **SEV-1 (Critical)**: Service Down, Data Loss, Security Breach.
-    -   **Response**: Immediate PagerDuty to On-Call + Eng Manager. War Room required.
-    -   **SLO**: Ack < 15m, Resolve < 4h.
--   **SEV-2 (High)**: Core feature broken, high friction, no workaround.
-    -   **Response**: Page On-Call. Fix within 24h.
--   **SEV-3 (Medium)**: Non-critical, workaround exists.
-    -   **Response**: Business hours.
--   **SEV-4 (Low)**: Minor cosmetic.
+## 1. Triage & Acknowledge
+- Acknowledge the PagerDuty alert.
+- Join the active incident channel (e.g., `#incidents-active`).
+- Declare incident severity (SEV1, SEV2, SEV3).
 
-## Response Process (IMOC - Incident Manager On Call)
-1.  **Acknowledge**: Ack the page within 15 mins.
-2.  **Assess**: Is it Sev-1? If yes, declare "Major Incident" in Slack `#incidents`.
-3.  **Contain**:
-    -   If caused by recent deploy -> **ROLLBACK**.
-    -   If caused by load -> **Scale Up** or **Enable Rate Limits**.
-    -   If security -> **Isolate** affected nodes.
-4.  **Communicate**:
-    -   Update Status Page: "Investigating issues with..."
-    -   Update Internal Stakeholders every 30 mins.
-5.  **Resolve**: Restore service.
-6.  **Post-Mortem**: Within 48 hours. Root cause analysis (5 Whys).
+## 2. Investigate
+- Check Grafana dashboards for latency, error rates, and CPU/Memory usage.
+- Search logs in Datadog/Kibana for stack traces.
+- Identify the blast radius and affected subsystems.
 
-## Communication Templates
-### Status Page - Investigating
-> "We are currently investigating reports of [Issue Description]. Users may experience [Impact]. Updates will be provided shortly."
+## 3. Mitigate
+- If the issue is tied to a recent release, initiate a rollback (see [ROLLBACK.md](./ROLLBACK.md)).
+- If a bad feature flag is suspected, disable the flag.
+- Scale up resources if experiencing capacity issues.
 
-### Status Page - Identified
-> "The issue has been identified as [Cause]. A fix is being [implemented/verified]."
-
-### Status Page - Resolved
-> "The issue has been resolved and systems are operating normally."
+## 4. Resolve & Review
+- Confirm metrics return to normal.
+- Close the incident.
+- Schedule a blameless postmortem (see [POSTMORTEM_TEMPLATE.md](../templates/POSTMORTEM_TEMPLATE.md)).

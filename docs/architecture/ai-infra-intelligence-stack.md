@@ -2,7 +2,6 @@
 
 ## Purpose
 
-TODO
 
 ## Layers
 
@@ -14,8 +13,6 @@ TODO
 
 ## Evidence model
 
-TODO
 
 ## PR roadmap
 
-TODO
