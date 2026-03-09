@@ -1,18 +1,19 @@
-import fs from 'node:fs/promises';
-import path from 'node:path';
-import { DeterministicResult, PromptCase, TraceEvent } from '../../../runner/types.js';
+import fs from "node:fs/promises";
+import path from "node:path";
+
+import { DeterministicResult, PromptCase, TraceEvent } from "../../../runner/types.js";
 
 const readJson = async <T>(filePath: string): Promise<T> => {
-  const raw = await fs.readFile(filePath, 'utf8');
+  const raw = await fs.readFile(filePath, "utf8");
   return JSON.parse(raw) as T;
 };
 
-const findRunId = (trace: TraceEvent[]): string => trace[0]?.run_id ?? 'unknown';
+const findRunId = (trace: TraceEvent[]): string => trace[0]?.run_id ?? "unknown";
 
 const extractChangedPaths = (trace: TraceEvent[]): string[] => {
   const changes: string[] = [];
   trace
-    .filter((event) => event.event_type === 'file_changes')
+    .filter((event) => event.event_type === "file_changes")
     .forEach((event) => {
       const entries = (event.data.changes as string[] | undefined) ?? [];
       entries.forEach((line) => {
@@ -41,13 +42,7 @@ export const grade = async ({
   let passed = 0;
 
   for (const promptCase of prompts) {
-    const resultPath = path.join(
-      skillDir,
-      'artifacts',
-      runId,
-      promptCase.id,
-      'result.json',
-    );
+    const resultPath = path.join(skillDir, "artifacts", runId, promptCase.id, "result.json");
     const result = await readJson<{ triggered: boolean }>(resultPath);
     const triggerPass = result.triggered === promptCase.expected_trigger;
     checks.push({
@@ -61,13 +56,7 @@ export const grade = async ({
       passed += 1;
     }
 
-    const fixPath = path.join(
-      skillDir,
-      'artifacts',
-      runId,
-      promptCase.id,
-      'ci-fix-summary.json',
-    );
+    const fixPath = path.join(skillDir, "artifacts", runId, promptCase.id, "ci-fix-summary.json");
     const fixExists = await fs
       .access(fixPath)
       .then(() => true)
@@ -76,7 +65,7 @@ export const grade = async ({
     checks.push({
       id: `artifact-${promptCase.id}`,
       pass: fixPass,
-      notes: fixPass ? undefined : 'Unexpected CI fix artifact presence',
+      notes: fixPass ? undefined : "Unexpected CI fix artifact presence",
     });
     if (fixPass) {
       passed += 1;
@@ -84,15 +73,13 @@ export const grade = async ({
   }
 
   const changedPaths = extractChangedPaths(trace);
-  const allowedPrefix = path.join('evals', 'skills', 'fix-failing-ci', 'artifacts');
-  const invalidPaths = changedPaths.filter(
-    (changed) => !changed.startsWith(allowedPrefix),
-  );
+  const allowedPrefix = path.join("evals", "skills", "fix-failing-ci", "artifacts");
+  const invalidPaths = changedPaths.filter((changed) => !changed.startsWith(allowedPrefix));
   const pathPass = invalidPaths.length === 0;
   checks.push({
-    id: 'artifact-boundary',
+    id: "artifact-boundary",
     pass: pathPass,
-    notes: pathPass ? undefined : `Unexpected changes: ${invalidPaths.join(', ')}`,
+    notes: pathPass ? undefined : `Unexpected changes: ${invalidPaths.join(", ")}`,
   });
   if (pathPass) {
     passed += 1;

@@ -1,3 +1,5 @@
 export class AgentRunner {
-  run() { return "run"; }
+  run() {
+    return "run";
+  }
 }

@@ -3,9 +3,9 @@
  * Used to classify sensitive data facets and content within memory records.
  */
 export enum RedactionClass {
-  PII = "pii",               // Names, emails, phones
-  PHI = "phi",               // Medical records, health data
-  FINANCIAL = "financial",   // Credit cards, bank accounts, budgets
+  PII = "pii", // Names, emails, phones
+  PHI = "phi", // Medical records, health data
+  FINANCIAL = "financial", // Credit cards, bank accounts, budgets
   ACCESSIBILITY = "accessibility", // Disability info, accommodations
 }
 

@@ -1,11 +1,11 @@
-import { createHash } from 'node:crypto';
+import { createHash } from "node:crypto";
 
 const sortValue = (value: unknown): unknown => {
   if (Array.isArray(value)) {
     return value.map(sortValue);
   }
 
-  if (value && typeof value === 'object') {
+  if (value && typeof value === "object") {
     return Object.keys(value as Record<string, unknown>)
       .sort()
       .reduce<Record<string, unknown>>((accumulator, key) => {
@@ -19,11 +19,9 @@ const sortValue = (value: unknown): unknown => {
 
 export const stableJsonStringify = (obj: unknown): string => JSON.stringify(sortValue(obj));
 
-export const sha256 = (input: string): string =>
-  createHash('sha256').update(input).digest('hex');
+export const sha256 = (input: string): string => createHash("sha256").update(input).digest("hex");
 
-export const hashInputs = (inputs: AgentTaskInput): string =>
-  sha256(stableJsonStringify(inputs));
+export const hashInputs = (inputs: AgentTaskInput): string => sha256(stableJsonStringify(inputs));
 
 export const hashOutputs = (outputs: AgentTaskOutput): string =>
   sha256(stableJsonStringify(outputs));

@@ -1,10 +1,15 @@
-import fs from 'node:fs/promises';
-import path from 'node:path';
-import { spawn } from 'node:child_process';
-import { fileURLToPath, pathToFileURL } from 'node:url';
-import yaml from 'js-yaml';
-import { ensureDir, writeJson } from './filesystem.js';
-import { parsePromptsCsv } from './csv.js';
+import { spawn } from "node:child_process";
+import fs from "node:fs/promises";
+import path from "node:path";
+import { fileURLToPath, pathToFileURL } from "node:url";
+
+import yaml from "js-yaml";
+
+import { parsePromptsCsv } from "./csv.js";
+import { ensureDir, writeJson } from "./filesystem.js";
+import { parseTrace } from "./parse_trace.js";
+import { writeJUnitReport, writeMarkdownReport } from "./report.js";
+import { combineScores, loadBaselineScore, persistScore, persistScoreHistory } from "./score.js";
 import {
   CaseResult,
   PromptCase,
@@ -12,33 +17,22 @@ import {
   TraceEvent,
   DeterministicResult,
   RubricResult,
-} from './types.js';
-import { parseTrace } from './parse_trace.js';
-import {
-  combineScores,
-  loadBaselineScore,
-  persistScore,
-  persistScoreHistory,
-} from './score.js';
-import { writeJUnitReport, writeMarkdownReport } from './report.js';
+} from "./types.js";
 
-const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
+const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 
 const nowIso = () => new Date().toISOString();
 
 const parseArgs = (): { skill: string; runId: string } => {
   const args = process.argv.slice(2);
-  const skillIndex = args.indexOf('--skill');
-  const runIndex = args.indexOf('--run-id');
+  const skillIndex = args.indexOf("--skill");
+  const runIndex = args.indexOf("--run-id");
   if (skillIndex === -1 || !args[skillIndex + 1]) {
-    throw new Error('Missing --skill argument');
+    throw new Error("Missing --skill argument");
   }
   return {
     skill: args[skillIndex + 1],
-    runId:
-      runIndex !== -1 && args[runIndex + 1]
-        ? args[runIndex + 1]
-        : `run-${Date.now()}`,
+    runId: runIndex !== -1 && args[runIndex + 1] ? args[runIndex + 1] : `run-${Date.now()}`,
   };
 };
 
@@ -47,27 +41,27 @@ const runCommand = async (
   env: NodeJS.ProcessEnv,
   timeoutMs: number,
   stdoutPath: string,
-  stderrPath: string,
+  stderrPath: string
 ): Promise<{ exitCode: number | null; durationMs: number }> => {
   const [bin, ...args] = command;
   await ensureDir(path.dirname(stdoutPath));
-  const stdout = await fs.open(stdoutPath, 'w');
-  const stderr = await fs.open(stderrPath, 'w');
+  const stdout = await fs.open(stdoutPath, "w");
+  const stderr = await fs.open(stderrPath, "w");
   const start = Date.now();
   return new Promise((resolve, reject) => {
     const child = spawn(bin, args, {
       cwd: repoRoot,
       env,
-      stdio: ['ignore', stdout.createWriteStream(), stderr.createWriteStream()],
+      stdio: ["ignore", stdout.createWriteStream(), stderr.createWriteStream()],
     });
     const timer = setTimeout(() => {
-      child.kill('SIGTERM');
+      child.kill("SIGTERM");
     }, timeoutMs);
-    child.on('error', (error) => {
+    child.on("error", (error) => {
       clearTimeout(timer);
       reject(error);
     });
-    child.on('close', (code) => {
+    child.on("close", (code) => {
       clearTimeout(timer);
       const durationMs = Date.now() - start;
       resolve({ exitCode: code, durationMs });
@@ -78,62 +72,45 @@ const runCommand = async (
   });
 };
 
-const runGitStatus = async (): Promise<string[]> => {
+const runGitStatus = (): Promise<string[]> => {
   return new Promise((resolve, reject) => {
-    const child = spawn('git', ['status', '--porcelain=v1'], {
+    const child = spawn("git", ["status", "--porcelain=v1"], {
       cwd: repoRoot,
-      stdio: ['ignore', 'pipe', 'pipe'],
+      stdio: ["ignore", "pipe", "pipe"],
     });
-    let output = '';
-    let errorOutput = '';
-    child.stdout.on('data', (data) => {
+    let output = "";
+    let errorOutput = "";
+    child.stdout.on("data", (data) => {
       output += data.toString();
     });
-    child.stderr.on('data', (data) => {
+    child.stderr.on("data", (data) => {
       errorOutput += data.toString();
     });
-    child.on('close', (code) => {
+    child.on("close", (code) => {
       if (code !== 0) {
-        reject(new Error(errorOutput || 'git status failed'));
+        reject(new Error(errorOutput || "git status failed"));
       } else {
-        resolve(
-          output
-            .split(/\r?\n/)
-            .filter((line) => line.trim().length > 0),
-        );
+        resolve(output.split(/\r?\n/).filter((line) => line.trim().length > 0));
       }
     });
   });
 };
 
 const loadConfig = async (skill: string): Promise<SkillRunConfig> => {
-  const configPath = path.join(
-    repoRoot,
-    'evals',
-    'skills',
-    skill,
-    'configs',
-    'run.yaml',
-  );
-  const raw = await fs.readFile(configPath, 'utf8');
+  const configPath = path.join(repoRoot, "evals", "skills", skill, "configs", "run.yaml");
+  const raw = await fs.readFile(configPath, "utf8");
   return yaml.load(raw) as SkillRunConfig;
 };
 
 const loadPrompts = async (skill: string): Promise<PromptCase[]> => {
-  const promptsPath = path.join(
-    repoRoot,
-    'evals',
-    'skills',
-    skill,
-    'prompts.csv',
-  );
-  const raw = await fs.readFile(promptsPath, 'utf8');
+  const promptsPath = path.join(repoRoot, "evals", "skills", skill, "prompts.csv");
+  const raw = await fs.readFile(promptsPath, "utf8");
   return parsePromptsCsv(raw);
 };
 
 const buildTraceWriter = async (tracePath: string) => {
   await ensureDir(path.dirname(tracePath));
-  const stream = await fs.open(tracePath, 'w');
+  const stream = await fs.open(tracePath, "w");
   return {
     write: async (event: TraceEvent) => {
       await stream.write(`${JSON.stringify(event)}\n`);
@@ -150,13 +127,14 @@ const runCase = async (
   promptCase: PromptCase,
   config: SkillRunConfig,
   traceWriter: { write: (event: TraceEvent) => Promise<void> },
-  artifactDir: string,
+  artifactDir: string
 ): Promise<CaseResult> => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const caseStart = Date.now();
   await ensureDir(artifactDir);
   await traceWriter.write({
     ts: nowIso(),
-    event_type: 'case_start',
+    event_type: "case_start",
     run_id: runId,
     skill,
     prompt_id: promptCase.id,
@@ -169,7 +147,7 @@ const runCase = async (
   const gitBefore = await runGitStatus();
   await traceWriter.write({
     ts: nowIso(),
-    event_type: 'command_start',
+    event_type: "command_start",
     run_id: runId,
     skill,
     prompt_id: promptCase.id,
@@ -186,12 +164,12 @@ const runCase = async (
       SKILL_OUTPUT_DIR: artifactDir,
     },
     config.timeout_ms,
-    path.join(artifactDir, 'stdout.log'),
-    path.join(artifactDir, 'stderr.log'),
+    path.join(artifactDir, "stdout.log"),
+    path.join(artifactDir, "stderr.log")
   );
   await traceWriter.write({
     ts: nowIso(),
-    event_type: 'command_end',
+    event_type: "command_end",
     run_id: runId,
     skill,
     prompt_id: promptCase.id,
@@ -204,7 +182,7 @@ const runCase = async (
   const fileChanges = gitAfter.filter((line) => !gitBefore.includes(line));
   await traceWriter.write({
     ts: nowIso(),
-    event_type: 'file_changes',
+    event_type: "file_changes",
     run_id: runId,
     skill,
     prompt_id: promptCase.id,
@@ -214,7 +192,7 @@ const runCase = async (
   });
   await traceWriter.write({
     ts: nowIso(),
-    event_type: 'case_end',
+    event_type: "case_end",
     run_id: runId,
     skill,
     prompt_id: promptCase.id,
@@ -233,7 +211,7 @@ const runCase = async (
   };
 };
 
-const loadModule = async <T>(modulePath: string): Promise<T> => {
+const loadModule = <T>(modulePath: string): Promise<T> => {
   const absolute = path.resolve(repoRoot, modulePath);
   return import(pathToFileURL(absolute).href) as Promise<T>;
 };
@@ -242,15 +220,16 @@ const runDeterministicGrader = async (
   config: SkillRunConfig,
   tracePath: string,
   skillDir: string,
-  prompts: PromptCase[],
+  prompts: PromptCase[]
 ): Promise<DeterministicResult> => {
   const module = await loadModule<{ grade: typeof gradeDeterministic }>(
-    config.deterministic_grader,
+    config.deterministic_grader
   );
   const trace = await parseTrace(tracePath);
   return module.grade({ trace, prompts, skillDir, repoRoot });
 };
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 type gradeDeterministic = (input: {
   trace: TraceEvent[];
   prompts: PromptCase[];
@@ -261,15 +240,14 @@ type gradeDeterministic = (input: {
 const runRubricGrader = async (
   config: SkillRunConfig,
   tracePath: string,
-  skillDir: string,
+  skillDir: string
 ): Promise<RubricResult> => {
-  const module = await loadModule<{ grade: typeof gradeRubric }>(
-    config.rubric.grader,
-  );
+  const module = await loadModule<{ grade: typeof gradeRubric }>(config.rubric.grader);
   const trace = await parseTrace(tracePath);
   return module.grade({ trace, skillDir, repoRoot });
 };
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 type gradeRubric = (input: {
   trace: TraceEvent[];
   skillDir: string;
@@ -280,15 +258,15 @@ const run = async () => {
   const { skill, runId } = parseArgs();
   const config = await loadConfig(skill);
   const prompts = await loadPrompts(skill);
-  const skillDir = path.join(repoRoot, 'evals', 'skills', skill);
-  const artifactRoot = path.join(skillDir, 'artifacts', runId);
+  const skillDir = path.join(repoRoot, "evals", "skills", skill);
+  const artifactRoot = path.join(skillDir, "artifacts", runId);
   await ensureDir(artifactRoot);
 
-  const tracePath = path.join(artifactRoot, 'trace.jsonl');
+  const tracePath = path.join(artifactRoot, "trace.jsonl");
   const traceWriter = await buildTraceWriter(tracePath);
   await traceWriter.write({
     ts: nowIso(),
-    event_type: 'run_start',
+    event_type: "run_start",
     run_id: runId,
     skill,
     data: {
@@ -300,20 +278,13 @@ const run = async () => {
   const caseResults: CaseResult[] = [];
   for (const promptCase of prompts) {
     const caseArtifactDir = path.join(artifactRoot, promptCase.id);
-    const result = await runCase(
-      skill,
-      runId,
-      promptCase,
-      config,
-      traceWriter,
-      caseArtifactDir,
-    );
+    const result = await runCase(skill, runId, promptCase, config, traceWriter, caseArtifactDir);
     caseResults.push(result);
   }
 
   await traceWriter.write({
     ts: nowIso(),
-    event_type: 'run_end',
+    event_type: "run_end",
     run_id: runId,
     skill,
     data: {
@@ -322,43 +293,33 @@ const run = async () => {
   });
   await traceWriter.close();
 
-  const deterministic = await runDeterministicGrader(
-    config,
-    tracePath,
-    skillDir,
-    prompts,
-  );
+  const deterministic = await runDeterministicGrader(config, tracePath, skillDir, prompts);
   const rubric = await runRubricGrader(config, tracePath, skillDir);
 
-  const baselinePath = path.join(skillDir, 'baselines', 'score.json');
+  const baselinePath = path.join(skillDir, "baselines", "score.json");
   const baselineScore = await loadBaselineScore(baselinePath);
-  const summary = combineScores(
-    skill,
-    runId,
-    deterministic,
-    rubric,
-    baselineScore,
-    5,
-  );
+  const summary = combineScores(skill, runId, deterministic, rubric, baselineScore, 5);
 
-  const deterministicPath = path.join(artifactRoot, 'deterministic.json');
-  const rubricPath = path.join(artifactRoot, 'rubric.json');
-  const scorePath = path.join(artifactRoot, 'score.json');
+  const deterministicPath = path.join(artifactRoot, "deterministic.json");
+  const rubricPath = path.join(artifactRoot, "rubric.json");
+  const scorePath = path.join(artifactRoot, "score.json");
   await writeJson(deterministicPath, deterministic);
   await writeJson(rubricPath, rubric);
   await persistScore(scorePath, summary);
-  await persistScoreHistory(path.join(skillDir, 'baselines'), runId, summary);
+  await persistScoreHistory(path.join(skillDir, "baselines"), runId, summary);
 
-  await writeMarkdownReport(path.join(artifactRoot, 'report.md'), summary);
-  await writeJUnitReport(path.join(artifactRoot, 'report.junit.xml'), summary);
+  await writeMarkdownReport(path.join(artifactRoot, "report.md"), summary);
+  await writeJUnitReport(path.join(artifactRoot, "report.junit.xml"), summary);
 
-  const summaryIndexPath = path.join(skillDir, 'artifacts', 'latest.json');
+  const summaryIndexPath = path.join(skillDir, "artifacts", "latest.json");
   await writeJson(summaryIndexPath, summary);
 
+  // eslint-disable-next-line no-console
   console.log(`Eval skill ${skill} completed with score ${summary.combined_score}.`);
 };
 
 run().catch((error) => {
+  // eslint-disable-next-line no-console
   console.error(error);
   process.exitCode = 1;
 });

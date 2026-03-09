@@ -1,4 +1,4 @@
-import { reconstruct, ShareBundle } from '../secret_sharing/additive';
+import { reconstruct, ShareBundle } from "../secret_sharing/additive";
 
 export function evaluate(bundle: ShareBundle): number {
   // Mock evaluation: just reconstructs a specific feature sum

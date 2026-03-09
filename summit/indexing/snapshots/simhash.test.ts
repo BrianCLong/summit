@@ -7,8 +7,8 @@ describe("simhash", () => {
       hash: "root",
       children: [
         { path_token: "a.js", hash: "hash-a" },
-        { path_token: "b.js", hash: "hash-b" }
-      ]
+        { path_token: "b.js", hash: "hash-b" },
+      ],
     };
     const hash1 = computeSimilarityHash(tree);
     const hash2 = computeSimilarityHash(tree);

@@ -23,13 +23,13 @@ export function calculateEvidenceScores(
   const recall = expectedSet.size === 0 ? 1.0 : truePositives / expectedSet.size;
   const coverage = expectedSet.size === 0 ? 1.0 : truePositives / expectedSet.size;
 
-  const f1_score = (precision + recall) === 0 ? 0 : 2 * (precision * recall) / (precision + recall);
+  const f1_score = precision + recall === 0 ? 0 : (2 * (precision * recall)) / (precision + recall);
 
   return {
     precision,
     recall,
     coverage,
-    f1_score
+    f1_score,
   };
 }
 

@@ -1,4 +1,4 @@
-import type { Writable } from 'stream';
+import type { Writable } from "stream";
 
 export type SseEvent = {
   id?: string;
@@ -11,11 +11,9 @@ export const formatSseEvent = (event: SseEvent): string => {
   if (event.id) {
     lines.push(`id: ${event.id}`);
   }
-  event.data
-    .split('\n')
-    .forEach((line) => lines.push(`data: ${line}`));
-  lines.push('');
-  return `${lines.join('\n')}\n`;
+  event.data.split("\n").forEach((line) => lines.push(`data: ${line}`));
+  lines.push("");
+  return `${lines.join("\n")}\n`;
 };
 
 export class SseEmitter {
@@ -29,13 +27,13 @@ export class SseEmitter {
 
   async send(event: SseEvent): Promise<void> {
     const payload = formatSseEvent(event);
-    const size = Buffer.byteLength(payload, 'utf-8');
+    const size = Buffer.byteLength(payload, "utf-8");
     if (size > this.maxBytesPerEvent) {
-      throw new Error('SSE event exceeds max bytes per event');
+      throw new Error("SSE event exceeds max bytes per event");
     }
     if (!this.writable.write(payload)) {
       await new Promise<void>((resolve) => {
-        this.writable.once('drain', () => resolve());
+        this.writable.once("drain", () => resolve());
       });
     }
   }

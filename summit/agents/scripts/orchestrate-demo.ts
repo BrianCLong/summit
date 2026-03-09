@@ -1,14 +1,14 @@
-import { AgentOrchestrator } from '../orchestrator/agent-orchestrator.js';
-import { EventLogWriter } from '../logging/event-log.js';
-import type { Agent, AgentTask } from '../types.js';
+import { EventLogWriter } from "../logging/event-log.js";
+import { AgentOrchestrator } from "../orchestrator/agent-orchestrator.js";
+import type { Agent, AgentTask } from "../types.js";
 
 const demoAgent: Agent = {
-  name: 'demo-agent',
+  name: "demo-agent",
   canHandle: () => true,
-  async execute(task: AgentTask) {
+  execute(task: AgentTask) {
     return {
       task_id: task.id,
-      status: 'success',
+      status: "success",
       outputs: { echoed: task.inputs },
       attempt: 1,
       started_at: new Date().toISOString(),
@@ -19,11 +19,11 @@ const demoAgent: Agent = {
 
 const tasks: AgentTask[] = [
   {
-    id: 'demo-1',
+    id: "demo-1",
     priority: 10,
     created_at: new Date().toISOString(),
-    type: 'demo',
-    inputs: { message: 'summit orchestrator demo' },
+    type: "demo",
+    inputs: { message: "summit orchestrator demo" },
   },
 ];
 

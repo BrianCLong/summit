@@ -4,8 +4,8 @@
  * Demonstrates integration with FactCert for provenance attachment.
  */
 
-import { attachProvenance } from '../../services/factcert/index.js';
-import { generateEvidenceId } from './evidence_id.js';
+import { generateEvidenceId } from "./evidence_id.js";
+import { attachProvenance } from "../../services/factcert/index.js";
 
 export interface MarketReport {
   evidence_id: string;
@@ -13,7 +13,7 @@ export interface MarketReport {
   claims: Array<{
     claim_id: string;
     text: string;
-    status: 'VERIFIED' | 'INCONSISTENT' | 'UNVERIFIABLE' | 'NEEDS_REVIEW';
+    status: "VERIFIED" | "INCONSISTENT" | "UNVERIFIABLE" | "NEEDS_REVIEW";
   }>;
   limitations: string[];
   needs_review: boolean;
@@ -31,19 +31,19 @@ export async function generateCertifiedReport(
       {
         claim_id: "CLAIM-001",
         text: "Market manipulation detected in sector X",
-        status: "VERIFIED"
-      }
+        status: "VERIFIED",
+      },
     ],
     limitations: [],
-    needs_review: false
+    needs_review: false,
   };
 
   // 2. Attach FactCert provenance
   const certifiedReport = await attachProvenance(report, {
-    domain: 'finance',
+    domain: "finance",
     reviewers: reviewers,
     auditOptions: { enableBlackbox: true, archiveToLake: true },
-    assuranceLevel: 'enterprise'
+    assuranceLevel: "enterprise",
   });
 
   return certifiedReport;

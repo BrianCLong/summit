@@ -1,8 +1,9 @@
 #!/usr/bin/env node
-import path from 'path';
-import process from 'process';
-import { MetricRegistry } from './registry';
-import { Dialect } from './types';
+import path from "path";
+import process from "process";
+
+import { MetricRegistry } from "./registry";
+import { Dialect } from "./types";
 
 function usage(): never {
   process.stderr.write(`Usage:
@@ -18,10 +19,10 @@ function parseFlags(args: string[]): Record<string, string> {
   const flags: Record<string, string> = {};
   for (let i = 0; i < args.length; i++) {
     const token = args[i];
-    if (token.startsWith('--')) {
+    if (token.startsWith("--")) {
       const key = token.slice(2);
       const value = args[i + 1];
-      if (!value || value.startsWith('--')) {
+      if (!value || value.startsWith("--")) {
         throw new Error(`Flag ${token} requires a value.`);
       }
       flags[key] = value;
@@ -35,15 +36,15 @@ function resolveRegistry(flags: Record<string, string>): MetricRegistry {
   return new MetricRegistry({
     specsRoot: flags.specs ? path.resolve(flags.specs) : undefined,
     outputRoot: flags.out ? path.resolve(flags.out) : undefined,
-    goldenRoot: flags.golden ? path.resolve(flags.golden) : undefined
+    goldenRoot: flags.golden ? path.resolve(flags.golden) : undefined,
   });
 }
 
 function asDialect(value: string | undefined): Dialect {
-  if (value === 'bigquery' || value === 'snowflake' || value === 'postgres') {
+  if (value === "bigquery" || value === "snowflake" || value === "postgres") {
     return value;
   }
-  throw new Error(`Unsupported dialect ${value ?? '<missing>'}`);
+  throw new Error(`Unsupported dialect ${value ?? "<missing>"}`);
 }
 
 function main() {
@@ -53,15 +54,15 @@ function main() {
   }
 
   try {
-    if (command === 'compile') {
+    if (command === "compile") {
       const dialect = asDialect(rest[0]);
       const flags = parseFlags(rest.slice(1));
       const registry = resolveRegistry(flags);
       const written = registry.writeCompiledArtifacts(dialect, flags.metric);
       if (written.length === 0) {
-        process.stdout.write('No artifacts changed.\n');
+        process.stdout.write("No artifacts changed.\n");
       } else {
-        process.stdout.write('Wrote artifacts:\n');
+        process.stdout.write("Wrote artifacts:\n");
         for (const file of written) {
           process.stdout.write(`  ${file}\n`);
         }
@@ -69,7 +70,7 @@ function main() {
       return;
     }
 
-    if (command === 'diff') {
+    if (command === "diff") {
       const [metricName, left, right, ...flagArgs] = rest;
       if (!metricName || !left || !right) {
         usage();
@@ -81,29 +82,29 @@ function main() {
       return;
     }
 
-    if (command === 'test') {
+    if (command === "test") {
       const dialect = asDialect(rest[0]);
       const flags = parseFlags(rest.slice(1));
       const registry = resolveRegistry(flags);
       const failures = registry.runConformance(dialect, flags.metric);
       if (failures.length > 0) {
-        process.stderr.write('Conformance failures detected:\n');
+        process.stderr.write("Conformance failures detected:\n");
         for (const failure of failures) {
           process.stderr.write(`- ${failure}\n`);
         }
         process.exitCode = 1;
       } else {
-        process.stdout.write('All compiled SQL artifacts match golden outputs.\n');
+        process.stdout.write("All compiled SQL artifacts match golden outputs.\n");
       }
       return;
     }
 
-    if (command === 'golden') {
+    if (command === "golden") {
       const dialect = asDialect(rest[0]);
       const flags = parseFlags(rest.slice(1));
       const registry = resolveRegistry(flags);
       const written = registry.exportGoldenFixtures(dialect, flags.metric);
-      process.stdout.write('Exported golden fixtures:\n');
+      process.stdout.write("Exported golden fixtures:\n");
       for (const file of written) {
         process.stdout.write(`  ${file}\n`);
       }

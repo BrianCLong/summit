@@ -1,17 +1,17 @@
-import { split, reconstruct } from '../../src/secret_sharing/additive';
+import { split, reconstruct } from "../../src/secret_sharing/additive";
 
-describe('Additive Secret Sharing', () => {
+describe("Additive Secret Sharing", () => {
   const MODULUS = 1000;
 
   beforeAll(() => {
-    process.env.PP_ALERTS_HMAC_KEY = 'test-key';
+    process.env.PP_ALERTS_HMAC_KEY = "test-key";
   });
 
   afterAll(() => {
     delete process.env.PP_ALERTS_HMAC_KEY;
   });
 
-  it('should split and reconstruct correctly', () => {
+  it("should split and reconstruct correctly", () => {
     const value = 123;
     const nShares = 3;
     const bundle = split(value, nShares, MODULUS);
@@ -20,7 +20,7 @@ describe('Additive Secret Sharing', () => {
     expect(result).toBe(value);
   });
 
-  it('should fail if a share is tampered', () => {
+  it("should fail if a share is tampered", () => {
     const value = 123;
     const bundle = split(value, 3, MODULUS);
     // Tamper value
@@ -28,11 +28,11 @@ describe('Additive Secret Sharing', () => {
     expect(() => reconstruct(bundle)).toThrow(/Integrity check failed/);
   });
 
-  it('should fail if nShares < 2', () => {
+  it("should fail if nShares < 2", () => {
     expect(() => split(10, 1, MODULUS)).toThrow();
   });
 
-  it('should fail if value >= modulus', () => {
+  it("should fail if value >= modulus", () => {
     expect(() => split(MODULUS + 1, 3, MODULUS)).toThrow();
   });
 });

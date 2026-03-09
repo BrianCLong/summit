@@ -1,7 +1,7 @@
 // Build OPA input from GitHub Actions context.
 // Usage: node ci/build-opa-input.js "$GITHUB_EVENT_PATH" > ci/input.json
 
-import fs from 'fs';
+import fs from "fs";
 
 function main() {
   const eventPath = process.argv[2];
@@ -31,16 +31,16 @@ function main() {
     pr: {
       approvals,
       labels,
-      checks
+      checks,
     },
     artifact: {
       sbom: {
-        signed: sbomSigned
-      }
+        signed: sbomSigned,
+      },
     },
     security: {
-      failures: securityFailures
-    }
+      failures: securityFailures,
+    },
   };
 
   process.stdout.write(`${JSON.stringify(input, null, 2)}\n`);

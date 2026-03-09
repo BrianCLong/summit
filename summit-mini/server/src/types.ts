@@ -7,8 +7,16 @@ export type ReceiptV01 = {
   ts: string;
   actor: { id: string; type: "user" | "service" };
   action: string;
-  inputs: Array<{ kind: "text" | "url" | "file" | "record"; ref: string; meta?: Record<string, unknown> }>;
-  outputs: Array<{ kind: "doc" | "node" | "edge" | "policyDecision"; ref: string; meta?: Record<string, unknown> }>;
+  inputs: Array<{
+    kind: "text" | "url" | "file" | "record";
+    ref: string;
+    meta?: Record<string, unknown>;
+  }>;
+  outputs: Array<{
+    kind: "doc" | "node" | "edge" | "policyDecision";
+    ref: string;
+    meta?: Record<string, unknown>;
+  }>;
   hashes: { inputSha256: string; outputSha256?: string };
   notes?: string;
 };

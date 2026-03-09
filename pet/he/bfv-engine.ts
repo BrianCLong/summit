@@ -3,8 +3,8 @@
  * Sprint 28B: Privacy-Enhancing Computation - Exact arithmetic over encrypted integers
  */
 
-import { EventEmitter } from 'events';
-import crypto from 'crypto';
+import crypto from "crypto";
+import { EventEmitter } from "events";
 
 export interface BFVParameters {
   polyModulusDegree: number; // 4096, 8192, 16384, 32768
@@ -45,7 +45,7 @@ export interface BFVPlaintext {
 
 export interface BatchedOperation {
   id: string;
-  operation: 'add' | 'multiply' | 'subtract';
+  operation: "add" | "multiply" | "subtract";
   ciphertexts: string[];
   result: string;
   simdLanes: number;
@@ -76,10 +76,7 @@ export class BFVEngine extends EventEmitter {
 
     // Generate key material
     const keyPair = this.generateBFVKeys(parameters);
-    const relinKeys = this.generateRelinearizationKeys(
-      keyPair,
-      parameters,
-    );
+    const relinKeys = this.generateRelinearizationKeys(keyPair, parameters);
 
     const context: BFVContext = {
       id: contextId,
@@ -91,7 +88,7 @@ export class BFVEngine extends EventEmitter {
     };
 
     this.contexts.set(contextId, context);
-    this.emit('context_generated', context);
+    this.emit("context_generated", context);
 
     return context;
   }
@@ -99,13 +96,10 @@ export class BFVEngine extends EventEmitter {
   /**
    * Encode and encrypt integer values using batching
    */
-  encryptBatched(
-    contextId: string,
-    values: bigint[],
-  ): BFVCiphertext {
+  encryptBatched(contextId: string, values: bigint[]): BFVCiphertext {
     const context = this.contexts.get(contextId);
     if (!context) {
-      throw new Error('Context not found');
+      throw new Error("Context not found");
     }
 
     const slots = this.calculateSlots(context.parameters);
@@ -117,10 +111,7 @@ export class BFVEngine extends EventEmitter {
     }
 
     // Use Chinese Remainder Theorem for batching
-    const plaintext = this.batchEncode(
-      paddedValues,
-      context.parameters.plaintextModulus,
-    );
+    const plaintext = this.batchEncode(paddedValues, context.parameters.plaintextModulus);
 
     const ciphertext: BFVCiphertext = {
       id: crypto.randomUUID(),
@@ -131,13 +122,13 @@ export class BFVEngine extends EventEmitter {
       slots,
       metadata: {
         encrypted: true,
-        operation: 'encrypt_batched',
+        operation: "encrypt_batched",
         timestamp: new Date(),
       },
     };
 
     this.ciphertexts.set(ciphertext.id, ciphertext);
-    this.emit('data_encrypted', { ciphertext, batchSize: values.length });
+    this.emit("data_encrypted", { ciphertext, batchSize: values.length });
 
     return ciphertext;
   }
@@ -148,27 +139,21 @@ export class BFVEngine extends EventEmitter {
   decryptBatched(ciphertextId: string): bigint[] {
     const ciphertext = this.ciphertexts.get(ciphertextId);
     if (!ciphertext) {
-      throw new Error('Ciphertext not found');
+      throw new Error("Ciphertext not found");
     }
 
     const context = this.contexts.get(ciphertext.contextId);
     if (!context || !context.secretKey) {
-      throw new Error('Secret key not available');
+      throw new Error("Secret key not available");
     }
 
     // Decrypt to plaintext
-    const plaintext = this.performBFVDecryption(
-      context.secretKey,
-      ciphertext.data,
-    );
+    const plaintext = this.performBFVDecryption(context.secretKey, ciphertext.data);
 
     // Batch decode using CRT
-    const values = this.batchDecode(
-      plaintext,
-      context.parameters.plaintextModulus,
-    );
+    const values = this.batchDecode(plaintext, context.parameters.plaintextModulus);
 
-    this.emit('data_decrypted', { ciphertextId, batchSize: values.length });
+    this.emit("data_decrypted", { ciphertextId, batchSize: values.length });
 
     return values.slice(0, ciphertext.slots);
   }
@@ -176,19 +161,12 @@ export class BFVEngine extends EventEmitter {
   /**
    * SIMD homomorphic addition
    */
-  addSIMD(
-    ciphertextIds: string[],
-    performer: string,
-  ): BFVCiphertext {
-    const operation = this.startBatchedOperation(
-      'add',
-      ciphertextIds,
-      performer,
-    );
+  addSIMD(ciphertextIds: string[], performer: string): BFVCiphertext {
+    const operation = this.startBatchedOperation("add", ciphertextIds, performer);
 
     try {
       if (ciphertextIds.length < 2) {
-        throw new Error('Need at least 2 ciphertexts for addition');
+        throw new Error("Need at least 2 ciphertexts for addition");
       }
 
       let result = this.ciphertexts.get(ciphertextIds[0]);
@@ -203,7 +181,7 @@ export class BFVEngine extends EventEmitter {
         }
 
         if (result.contextId !== operand.contextId) {
-          throw new Error('All ciphertexts must use same context');
+          throw new Error("All ciphertexts must use same context");
         }
 
         // Perform SIMD addition
@@ -212,14 +190,11 @@ export class BFVEngine extends EventEmitter {
           contextId: result.contextId,
           data: this.performBFVAdd(result.data, operand.data),
           size: Math.max(result.size, operand.size),
-          noiseLevel: this.estimateNoiseAfterAdd(
-            result.noiseLevel,
-            operand.noiseLevel,
-          ),
+          noiseLevel: this.estimateNoiseAfterAdd(result.noiseLevel, operand.noiseLevel),
           slots: Math.min(result.slots, operand.slots),
           metadata: {
             encrypted: true,
-            operation: 'add_simd',
+            operation: "add_simd",
             timestamp: new Date(),
           },
         };
@@ -230,7 +205,7 @@ export class BFVEngine extends EventEmitter {
 
       this.completeBatchedOperation(operation.id, result.id);
 
-      this.emit('simd_addition', {
+      this.emit("simd_addition", {
         operands: ciphertextIds,
         result: result.id,
         simdLanes: result.slots,
@@ -246,15 +221,11 @@ export class BFVEngine extends EventEmitter {
   /**
    * SIMD homomorphic multiplication
    */
-  multiplySIMD(
-    ciphertextId1: string,
-    ciphertextId2: string,
-    performer: string,
-  ): BFVCiphertext {
+  multiplySIMD(ciphertextId1: string, ciphertextId2: string, performer: string): BFVCiphertext {
     const operation = this.startBatchedOperation(
-      'multiply',
+      "multiply",
       [ciphertextId1, ciphertextId2],
-      performer,
+      performer
     );
 
     try {
@@ -262,16 +233,16 @@ export class BFVEngine extends EventEmitter {
       const ct2 = this.ciphertexts.get(ciphertextId2);
 
       if (!ct1 || !ct2) {
-        throw new Error('Ciphertexts not found');
+        throw new Error("Ciphertexts not found");
       }
 
       if (ct1.contextId !== ct2.contextId) {
-        throw new Error('Ciphertexts must use same context');
+        throw new Error("Ciphertexts must use same context");
       }
 
       // Check noise levels before multiplication
       if (ct1.noiseLevel > 0.8 || ct2.noiseLevel > 0.8) {
-        throw new Error('Noise levels too high for safe multiplication');
+        throw new Error("Noise levels too high for safe multiplication");
       }
 
       const result: BFVCiphertext = {
@@ -279,14 +250,11 @@ export class BFVEngine extends EventEmitter {
         contextId: ct1.contextId,
         data: this.performBFVMultiply(ct1.data, ct2.data),
         size: ct1.size + ct2.size - 1, // Size grows with multiplication
-        noiseLevel: this.estimateNoiseAfterMultiply(
-          ct1.noiseLevel,
-          ct2.noiseLevel,
-        ),
+        noiseLevel: this.estimateNoiseAfterMultiply(ct1.noiseLevel, ct2.noiseLevel),
         slots: Math.min(ct1.slots, ct2.slots),
         metadata: {
           encrypted: true,
-          operation: 'multiply_simd',
+          operation: "multiply_simd",
           timestamp: new Date(),
         },
       };
@@ -294,12 +262,11 @@ export class BFVEngine extends EventEmitter {
       this.ciphertexts.set(result.id, result);
 
       // Relinearize if size > 2
-      const finalResult =
-        result.size > 2 ? this.relinearize(result.id, performer) : result;
+      const finalResult = result.size > 2 ? this.relinearize(result.id, performer) : result;
 
       this.completeBatchedOperation(operation.id, finalResult.id);
 
-      this.emit('simd_multiplication', {
+      this.emit("simd_multiplication", {
         operands: [ciphertextId1, ciphertextId2],
         result: finalResult.id,
         simdLanes: finalResult.slots,
@@ -315,15 +282,11 @@ export class BFVEngine extends EventEmitter {
   /**
    * Homomorphic subtraction
    */
-  subtract(
-    ciphertextId1: string,
-    ciphertextId2: string,
-    performer: string,
-  ): BFVCiphertext {
+  subtract(ciphertextId1: string, ciphertextId2: string, performer: string): BFVCiphertext {
     const operation = this.startBatchedOperation(
-      'subtract',
+      "subtract",
       [ciphertextId1, ciphertextId2],
-      performer,
+      performer
     );
 
     try {
@@ -331,11 +294,11 @@ export class BFVEngine extends EventEmitter {
       const ct2 = this.ciphertexts.get(ciphertextId2);
 
       if (!ct1 || !ct2) {
-        throw new Error('Ciphertexts not found');
+        throw new Error("Ciphertexts not found");
       }
 
       if (ct1.contextId !== ct2.contextId) {
-        throw new Error('Ciphertexts must use same context');
+        throw new Error("Ciphertexts must use same context");
       }
 
       const result: BFVCiphertext = {
@@ -347,7 +310,7 @@ export class BFVEngine extends EventEmitter {
         slots: Math.min(ct1.slots, ct2.slots),
         metadata: {
           encrypted: true,
-          operation: 'subtract',
+          operation: "subtract",
           timestamp: new Date(),
         },
       };
@@ -365,26 +328,19 @@ export class BFVEngine extends EventEmitter {
   /**
    * Add plaintext constant to ciphertext (SIMD)
    */
-  addPlaintext(
-    ciphertextId: string,
-    plaintextValues: bigint[],
-    _performer: string,
-  ): BFVCiphertext {
+  addPlaintext(ciphertextId: string, plaintextValues: bigint[], _performer: string): BFVCiphertext {
     const ciphertext = this.ciphertexts.get(ciphertextId);
     if (!ciphertext) {
-      throw new Error('Ciphertext not found');
+      throw new Error("Ciphertext not found");
     }
 
     const context = this.contexts.get(ciphertext.contextId);
     if (!context) {
-      throw new Error('Context not found');
+      throw new Error("Context not found");
     }
 
     // Encode plaintext values
-    const plaintext = this.batchEncode(
-      plaintextValues,
-      context.parameters.plaintextModulus,
-    );
+    const plaintext = this.batchEncode(plaintextValues, context.parameters.plaintextModulus);
 
     const result: BFVCiphertext = {
       id: crypto.randomUUID(),
@@ -395,7 +351,7 @@ export class BFVEngine extends EventEmitter {
       slots: ciphertext.slots,
       metadata: {
         encrypted: true,
-        operation: 'add_plaintext',
+        operation: "add_plaintext",
         timestamp: new Date(),
       },
     };
@@ -410,22 +366,19 @@ export class BFVEngine extends EventEmitter {
   multiplyPlaintext(
     ciphertextId: string,
     plaintextValues: bigint[],
-    _performer: string,
+    _performer: string
   ): BFVCiphertext {
     const ciphertext = this.ciphertexts.get(ciphertextId);
     if (!ciphertext) {
-      throw new Error('Ciphertext not found');
+      throw new Error("Ciphertext not found");
     }
 
     const context = this.contexts.get(ciphertext.contextId);
     if (!context) {
-      throw new Error('Context not found');
+      throw new Error("Context not found");
     }
 
-    const plaintext = this.batchEncode(
-      plaintextValues,
-      context.parameters.plaintextModulus,
-    );
+    const plaintext = this.batchEncode(plaintextValues, context.parameters.plaintextModulus);
 
     const result: BFVCiphertext = {
       id: crypto.randomUUID(),
@@ -436,7 +389,7 @@ export class BFVEngine extends EventEmitter {
       slots: ciphertext.slots,
       metadata: {
         encrypted: true,
-        operation: 'multiply_plaintext',
+        operation: "multiply_plaintext",
         timestamp: new Date(),
       },
     };
@@ -448,13 +401,10 @@ export class BFVEngine extends EventEmitter {
   /**
    * Relinearize to reduce ciphertext size
    */
-  relinearize(
-    ciphertextId: string,
-    _performer: string,
-  ): BFVCiphertext {
+  relinearize(ciphertextId: string, _performer: string): BFVCiphertext {
     const ciphertext = this.ciphertexts.get(ciphertextId);
     if (!ciphertext) {
-      throw new Error('Ciphertext not found');
+      throw new Error("Ciphertext not found");
     }
 
     if (ciphertext.size <= 2) {
@@ -463,21 +413,18 @@ export class BFVEngine extends EventEmitter {
 
     const context = this.contexts.get(ciphertext.contextId);
     if (!context) {
-      throw new Error('Context not found');
+      throw new Error("Context not found");
     }
 
     const relinearized: BFVCiphertext = {
       ...ciphertext,
       id: crypto.randomUUID(),
-      data: this.performBFVRelinearization(
-        ciphertext.data,
-        context.relinKeys,
-      ),
+      data: this.performBFVRelinearization(ciphertext.data, context.relinKeys),
       size: 2, // Reduced to 2 polynomials
       noiseLevel: ciphertext.noiseLevel + 0.2, // Small noise increase
       metadata: {
         ...ciphertext.metadata,
-        operation: 'relinearize',
+        operation: "relinearize",
         timestamp: new Date(),
       },
     };
@@ -492,12 +439,12 @@ export class BFVEngine extends EventEmitter {
   estimateMultiplicativeDepth(ciphertextId: string): number {
     const ciphertext = this.ciphertexts.get(ciphertextId);
     if (!ciphertext) {
-      throw new Error('Ciphertext not found');
+      throw new Error("Ciphertext not found");
     }
 
     const context = this.contexts.get(ciphertext.contextId);
     if (!context) {
-      throw new Error('Context not found');
+      throw new Error("Context not found");
     }
 
     // Estimate based on noise level and modulus chain
@@ -516,30 +463,27 @@ export class BFVEngine extends EventEmitter {
     const filtered = contextId
       ? operations.filter((op) => {
           const operandCtx =
-            op.ciphertexts[0] &&
-            this.ciphertexts.get(op.ciphertexts[0])?.contextId;
+            op.ciphertexts[0] && this.ciphertexts.get(op.ciphertexts[0])?.contextId;
           return operandCtx === contextId;
         })
       : operations;
 
     return filtered
-      .sort(
-        (a, b) => b.timing.startTime.getTime() - a.timing.startTime.getTime(),
-      )
+      .sort((a, b) => b.timing.startTime.getTime() - a.timing.startTime.getTime())
       .slice(0, limit);
   }
 
   private validateParameters(params: BFVParameters): void {
     if (![4096, 8192, 16384, 32768].includes(params.polyModulusDegree)) {
-      throw new Error('Invalid polynomial modulus degree');
+      throw new Error("Invalid polynomial modulus degree");
     }
 
     if (params.coeffModulus.length < 1) {
-      throw new Error('Coefficient modulus chain required');
+      throw new Error("Coefficient modulus chain required");
     }
 
     if (params.plaintextModulus <= BigInt(1)) {
-      throw new Error('Plaintext modulus must be > 1');
+      throw new Error("Plaintext modulus must be > 1");
     }
   }
 
@@ -553,22 +497,19 @@ export class BFVEngine extends EventEmitter {
     secretKey: string;
   } {
     return {
-      publicKey: `bfv_pk_${crypto.randomBytes(32).toString('hex')}`,
-      secretKey: `bfv_sk_${crypto.randomBytes(32).toString('hex')}`,
+      publicKey: `bfv_pk_${crypto.randomBytes(32).toString("hex")}`,
+      secretKey: `bfv_sk_${crypto.randomBytes(32).toString("hex")}`,
     };
   }
 
   private generateRelinearizationKeys(
     _keyPair: { publicKey: string; secretKey: string },
-    _params: BFVParameters,
+    _params: BFVParameters
   ): string {
-    return `bfv_relin_${crypto.randomBytes(64).toString('hex')}`;
+    return `bfv_relin_${crypto.randomBytes(64).toString("hex")}`;
   }
 
-  private batchEncode(
-    values: bigint[],
-    modulus: bigint,
-  ): BFVPlaintext {
+  private batchEncode(values: bigint[], modulus: bigint): BFVPlaintext {
     return {
       id: crypto.randomUUID(),
       values,
@@ -577,25 +518,16 @@ export class BFVEngine extends EventEmitter {
     };
   }
 
-  private batchDecode(
-    plaintext: BFVPlaintext,
-    _modulus: bigint,
-  ): bigint[] {
+  private batchDecode(plaintext: BFVPlaintext, _modulus: bigint): bigint[] {
     return plaintext.values;
   }
 
-  private performBFVEncryption(
-    _publicKey: string,
-    _plaintext: BFVPlaintext,
-  ): Buffer {
+  private performBFVEncryption(_publicKey: string, _plaintext: BFVPlaintext): Buffer {
     // Mock encryption
     return crypto.randomBytes(1024);
   }
 
-  private performBFVDecryption(
-    _secretKey: string,
-    _ciphertext: Buffer,
-  ): BFVPlaintext {
+  private performBFVDecryption(_secretKey: string, _ciphertext: Buffer): BFVPlaintext {
     return {
       id: crypto.randomUUID(),
       values: [BigInt(1), BigInt(2), BigInt(3)],
@@ -608,38 +540,23 @@ export class BFVEngine extends EventEmitter {
     return crypto.randomBytes(Math.max(data1.length, data2.length));
   }
 
-  private performBFVMultiply(
-    data1: Buffer,
-    data2: Buffer,
-  ): Buffer {
+  private performBFVMultiply(data1: Buffer, data2: Buffer): Buffer {
     return crypto.randomBytes(data1.length + data2.length);
   }
 
-  private performBFVSubtract(
-    data1: Buffer,
-    data2: Buffer,
-  ): Buffer {
+  private performBFVSubtract(data1: Buffer, data2: Buffer): Buffer {
     return crypto.randomBytes(Math.max(data1.length, data2.length));
   }
 
-  private performBFVAddPlaintext(
-    ciphertext: Buffer,
-    _plaintext: BFVPlaintext,
-  ): Buffer {
+  private performBFVAddPlaintext(ciphertext: Buffer, _plaintext: BFVPlaintext): Buffer {
     return crypto.randomBytes(ciphertext.length);
   }
 
-  private performBFVMultiplyPlaintext(
-    ciphertext: Buffer,
-    _plaintext: BFVPlaintext,
-  ): Buffer {
+  private performBFVMultiplyPlaintext(ciphertext: Buffer, _plaintext: BFVPlaintext): Buffer {
     return crypto.randomBytes(ciphertext.length);
   }
 
-  private performBFVRelinearization(
-    data: Buffer,
-    _relinKeys: string,
-  ): Buffer {
+  private performBFVRelinearization(data: Buffer, _relinKeys: string): Buffer {
     return crypto.randomBytes(Math.floor(data.length * 0.67));
   }
 
@@ -656,15 +573,15 @@ export class BFVEngine extends EventEmitter {
   }
 
   private startBatchedOperation(
-    operation: BatchedOperation['operation'],
+    operation: BatchedOperation["operation"],
     ciphertexts: string[],
-    _performer: string,
+    _performer: string
   ): BatchedOperation {
     const op: BatchedOperation = {
       id: crypto.randomUUID(),
       operation,
       ciphertexts,
-      result: '',
+      result: "",
       simdLanes: this.ciphertexts.get(ciphertexts[0])?.slots || 0,
       timing: {
         startTime: new Date(),
@@ -675,31 +592,23 @@ export class BFVEngine extends EventEmitter {
     return op;
   }
 
-  private completeBatchedOperation(
-    operationId: string,
-    resultId: string,
-  ): void {
+  private completeBatchedOperation(operationId: string, resultId: string): void {
     const operation = this.batchedOps.get(operationId);
     if (operation) {
       operation.result = resultId;
       operation.timing.endTime = new Date();
       operation.timing.duration =
-        operation.timing.endTime.getTime() -
-        operation.timing.startTime.getTime();
+        operation.timing.endTime.getTime() - operation.timing.startTime.getTime();
       this.batchedOps.set(operationId, operation);
     }
   }
 
-  private failBatchedOperation(
-    operationId: string,
-    _error: string,
-  ): void {
+  private failBatchedOperation(operationId: string, _error: string): void {
     const operation = this.batchedOps.get(operationId);
     if (operation) {
       operation.timing.endTime = new Date();
       operation.timing.duration =
-        operation.timing.endTime.getTime() -
-        operation.timing.startTime.getTime();
+        operation.timing.endTime.getTime() - operation.timing.startTime.getTime();
       this.batchedOps.set(operationId, operation);
     }
   }

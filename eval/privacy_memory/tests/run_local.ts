@@ -1,12 +1,15 @@
-import { InMemoryMemoryBroker } from "../../../core/memory/storage_memory";
-import contextCollapseFixtures from "../fixtures/context_collapse.json" assert { type: "json" };
 import assert from "assert";
 
+import { InMemoryMemoryBroker } from "../../../core/memory/storage_memory";
+import contextCollapseFixtures from "../fixtures/context_collapse.json" assert { type: "json" };
+
 async function runTests() {
+  // eslint-disable-next-line no-console
   console.log("Running Memory Privacy Local Tests...");
   const broker = new InMemoryMemoryBroker();
 
   for (const scenario of contextCollapseFixtures) {
+    // eslint-disable-next-line no-console
     console.log(`Scenario: ${scenario.name}`);
     // 1. Setup
     for (const recordData of scenario.records) {
@@ -34,11 +37,13 @@ async function runTests() {
           `Leak detected in '${testCase.description}': found forbidden content '${forbidden}'`
         );
       }
+      // eslint-disable-next-line no-console
       console.log(`  PASSED: ${testCase.description}`);
     }
   }
 
   // Purpose mismatch test
+  // eslint-disable-next-line no-console
   console.log("Scenario: Purpose Mismatch");
   await broker.remember({
     userId: "u1",
@@ -57,9 +62,11 @@ async function runTests() {
     contextSpace: "work",
   });
   assert.strictEqual(results.length, 0, "Recall should return 0 results for mismatched purpose");
+  // eslint-disable-next-line no-console
   console.log("  PASSED: Purpose mismatch check");
 
   // Cross-user isolation test
+  // eslint-disable-next-line no-console
   console.log("Scenario: Cross-User Isolation");
   await broker.remember({
     userId: "user_A",
@@ -78,12 +85,15 @@ async function runTests() {
     contextSpace: "personal",
   });
   assert.strictEqual(resultsUserB.length, 0, "User B should not see User A's memories");
+  // eslint-disable-next-line no-console
   console.log("  PASSED: Cross-user isolation check");
 
+  // eslint-disable-next-line no-console
   console.log("All Memory Privacy local tests passed!");
 }
 
 runTests().catch((err) => {
+  // eslint-disable-next-line no-console
   console.error("Tests failed:", err);
   process.exit(1);
 });

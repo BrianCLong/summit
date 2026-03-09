@@ -25,7 +25,9 @@ export function calculateEntropy(dist: AnswerDistribution): number {
  */
 export function normalizeDistribution(dist: AnswerDistribution): AnswerDistribution {
   const total = Object.values(dist).reduce((sum, val) => sum + val, 0);
-  if (total === 0) return {};
+  if (total === 0) {
+    return {};
+  }
 
   const normalized: AnswerDistribution = {};
   for (const [key, value] of Object.entries(dist)) {
@@ -40,11 +42,13 @@ export function normalizeDistribution(dist: AnswerDistribution): AnswerDistribut
 export function calculateMixtureDistribution(dists: AnswerDistribution[]): AnswerDistribution {
   const mixture: AnswerDistribution = {};
   const n = dists.length;
-  if (n === 0) return mixture;
+  if (n === 0) {
+    return mixture;
+  }
 
   for (const dist of dists) {
     for (const [key, prob] of Object.entries(dist)) {
-      mixture[key] = (mixture[key] || 0) + (prob / n);
+      mixture[key] = (mixture[key] || 0) + prob / n;
     }
   }
   return mixture;
@@ -55,7 +59,9 @@ export function calculateMixtureDistribution(dists: AnswerDistribution[]): Answe
  * JSD(p1, p2, ... pn) = H(Mixture(p1..pn)) - (1/n * sum(H(pi)))
  */
 export function calculateJSD(dists: AnswerDistribution[]): number {
-  if (dists.length === 0) return 0;
+  if (dists.length === 0) {
+    return 0;
+  }
 
   const mixture = calculateMixtureDistribution(dists);
   const entropyOfMixture = calculateEntropy(mixture);
@@ -71,13 +77,17 @@ export function calculateJSD(dists: AnswerDistribution[]): number {
  * @param agentDistributions Array of answer distributions (one per agent).
  *                           Each distribution maps an answer to its probability (0-1).
  */
-export function computeUncertaintyDecomposition(agentDistributions: AnswerDistribution[]): UncertaintyRecord {
+export function computeUncertaintyDecomposition(
+  agentDistributions: AnswerDistribution[]
+): UncertaintyRecord {
   if (agentDistributions.length === 0) {
     return { sysEu: 0, sysAu: 0, totalUncertainty: 0 };
   }
 
   // Sys-AU is the average entropy of the agents' distributions.
-  const sysAu = agentDistributions.reduce((sum, dist) => sum + calculateEntropy(dist), 0) / agentDistributions.length;
+  const sysAu =
+    agentDistributions.reduce((sum, dist) => sum + calculateEntropy(dist), 0) /
+    agentDistributions.length;
 
   // Sys-EU is the Jensen-Shannon divergence across agents.
   const sysEu = calculateJSD(agentDistributions);
@@ -85,6 +95,6 @@ export function computeUncertaintyDecomposition(agentDistributions: AnswerDistri
   return {
     sysEu,
     sysAu,
-    totalUncertainty: sysEu + sysAu
+    totalUncertainty: sysEu + sysAu,
   };
 }

@@ -1,6 +1,7 @@
-import fs from 'node:fs';
-import path from 'node:path';
-import { sha256, stableStringify } from '../../../packages/dpec/src/hash';
+import fs from "node:fs";
+import path from "node:path";
+
+import { sha256, stableStringify } from "../../../packages/dpec/src/hash";
 
 export interface SkillRegistrySnapshot {
   snapshot_version: 1;
@@ -13,18 +14,18 @@ export interface SkillRegistrySnapshot {
 }
 
 export function buildSkillRegistrySnapshot(registry: unknown): SkillRegistrySnapshot {
-  if (registry && typeof registry === 'object') {
+  if (registry && typeof registry === "object") {
     const candidate = registry as Record<string, unknown>;
     if (candidate.snapshot_version === 1 && Array.isArray(candidate.skills)) {
       return {
         snapshot_version: 1,
         skills: (candidate.skills as Array<Record<string, unknown>>)
           .map((skill) => ({
-            id: String(skill.id ?? ''),
-            version: typeof skill.version === 'string' ? skill.version : undefined,
-            path: typeof skill.path === 'string' ? skill.path : undefined,
+            id: String(skill.id ?? ""),
+            version: typeof skill.version === "string" ? skill.version : undefined,
+            path: typeof skill.path === "string" ? skill.path : undefined,
             schema:
-              skill.schema && typeof skill.schema === 'object'
+              skill.schema && typeof skill.schema === "object"
                 ? (skill.schema as Record<string, unknown>)
                 : undefined,
           }))
@@ -38,18 +39,18 @@ export function buildSkillRegistrySnapshot(registry: unknown): SkillRegistrySnap
     ? registry
     : Object.entries((registry ?? {}) as Record<string, unknown>).map(([id, value]) => ({
         id,
-        ...(typeof value === 'object' && value ? (value as Record<string, unknown>) : {}),
+        ...(typeof value === "object" && value ? (value as Record<string, unknown>) : {}),
       }));
 
   const skills = entries
     .map((entry) => {
       const skill = entry as Record<string, unknown>;
       return {
-        id: String(skill.id ?? ''),
-        version: typeof skill.version === 'string' ? skill.version : undefined,
-        path: typeof skill.path === 'string' ? skill.path : undefined,
+        id: String(skill.id ?? ""),
+        version: typeof skill.version === "string" ? skill.version : undefined,
+        path: typeof skill.path === "string" ? skill.path : undefined,
         schema:
-          skill.schema && typeof skill.schema === 'object'
+          skill.schema && typeof skill.schema === "object"
             ? (skill.schema as Record<string, unknown>)
             : undefined,
       };
@@ -69,10 +70,10 @@ export function snapshotSha256(snapshot: SkillRegistrySnapshot): string {
 
 export function writeSkillRegistrySnapshot(
   registry: unknown,
-  outFile = path.resolve(process.cwd(), 'summit/agents/skills/registry.snapshot.json')
+  outFile = path.resolve(process.cwd(), "summit/agents/skills/registry.snapshot.json")
 ): SkillRegistrySnapshot {
   const snapshot = buildSkillRegistrySnapshot(registry);
   fs.mkdirSync(path.dirname(outFile), { recursive: true });
-  fs.writeFileSync(outFile, `${stableStringify(snapshot)}\n`, 'utf8');
+  fs.writeFileSync(outFile, `${stableStringify(snapshot)}\n`, "utf8");
   return snapshot;
 }

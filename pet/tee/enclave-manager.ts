@@ -3,12 +3,12 @@
  * Sprint 28B: Privacy-Enhancing Computation - Secure attested computation
  */
 
-import { EventEmitter } from 'events';
-import crypto from 'crypto';
+import crypto from "crypto";
+import { EventEmitter } from "events";
 
 export interface EnclaveConfig {
   id: string;
-  type: 'sgx' | 'sev' | 'trustzone' | 'keystone' | 'nitro';
+  type: "sgx" | "sev" | "trustzone" | "keystone" | "nitro";
   name: string;
   version: string;
   security: {
@@ -25,8 +25,8 @@ export interface EnclaveConfig {
     networkAccess: boolean;
   };
   policies: {
-    dataRetention: 'none' | 'temporary' | 'persistent';
-    auditLevel: 'minimal' | 'standard' | 'comprehensive';
+    dataRetention: "none" | "temporary" | "persistent";
+    auditLevel: "minimal" | "standard" | "comprehensive";
     emergencyTermination: boolean;
   };
   createdAt: Date;
@@ -36,13 +36,13 @@ export interface EnclaveConfig {
 export interface EnclaveInstance {
   id: string;
   configId: string;
-  status: 'initializing' | 'running' | 'suspended' | 'terminated' | 'error';
+  status: "initializing" | "running" | "suspended" | "terminated" | "error";
   attestation: {
     quote: string;
     measurement: string;
     signature: string;
     timestamp: Date;
-    verificationStatus: 'pending' | 'verified' | 'failed';
+    verificationStatus: "pending" | "verified" | "failed";
   };
   runtime: {
     startTime: Date;
@@ -118,7 +118,7 @@ export interface AttestationReport {
   };
   timestamp: Date;
   verification: {
-    status: 'valid' | 'invalid' | 'revoked' | 'unknown';
+    status: "valid" | "invalid" | "revoked" | "unknown";
     certificateChain: string[];
     revocationList: string[];
   };
@@ -137,9 +137,7 @@ export class EnclaveManager extends EventEmitter {
   /**
    * Register enclave configuration
    */
-  registerConfig(
-    config: Omit<EnclaveConfig, 'id' | 'createdAt' | 'updatedAt'>,
-  ): EnclaveConfig {
+  registerConfig(config: Omit<EnclaveConfig, "id" | "createdAt" | "updatedAt">): EnclaveConfig {
     const fullConfig: EnclaveConfig = {
       ...config,
       id: crypto.randomUUID(),
@@ -151,7 +149,7 @@ export class EnclaveManager extends EventEmitter {
     this.validateEnclaveConfig(fullConfig);
 
     this.configs.set(fullConfig.id, fullConfig);
-    this.emit('config_registered', fullConfig);
+    this.emit("config_registered", fullConfig);
 
     return fullConfig;
   }
@@ -159,25 +157,22 @@ export class EnclaveManager extends EventEmitter {
   /**
    * Create and initialize enclave instance
    */
-  createEnclave(
-    configId: string,
-    requestor: string,
-  ): EnclaveInstance {
+  createEnclave(configId: string, requestor: string): EnclaveInstance {
     const config = this.configs.get(configId);
     if (!config) {
-      throw new Error('Enclave configuration not found');
+      throw new Error("Enclave configuration not found");
     }
 
     const instance: EnclaveInstance = {
       id: crypto.randomUUID(),
       configId,
-      status: 'initializing',
+      status: "initializing",
       attestation: {
-        quote: '',
-        measurement: '',
-        signature: '',
+        quote: "",
+        measurement: "",
+        signature: "",
         timestamp: new Date(),
-        verificationStatus: 'pending',
+        verificationStatus: "pending",
       },
       runtime: {
         startTime: new Date(),
@@ -195,7 +190,7 @@ export class EnclaveManager extends EventEmitter {
         accessLog: [
           {
             timestamp: new Date(),
-            operation: 'create',
+            operation: "create",
             requestor,
             approved: true,
           },
@@ -212,27 +207,26 @@ export class EnclaveManager extends EventEmitter {
       instance.attestation = {
         quote: attestation.quote,
         measurement: attestation.measurement.mrenclave,
-        signature: attestation.verification.certificateChain[0] || '',
+        signature: attestation.verification.certificateChain[0] || "",
         timestamp: attestation.timestamp,
-        verificationStatus:
-          attestation.verification.status === 'valid' ? 'verified' : 'failed',
+        verificationStatus: attestation.verification.status === "valid" ? "verified" : "failed",
       };
 
       this.attestations.set(instance.id, attestation);
 
-      if (instance.attestation.verificationStatus === 'verified') {
-        instance.status = 'running';
+      if (instance.attestation.verificationStatus === "verified") {
+        instance.status = "running";
       } else {
-        instance.status = 'error';
-        throw new Error('Attestation failed');
+        instance.status = "error";
+        throw new Error("Attestation failed");
       }
 
       this.instances.set(instance.id, instance);
-      this.emit('enclave_created', instance);
+      this.emit("enclave_created", instance);
 
       return instance;
     } catch (error) {
-      instance.status = 'error';
+      instance.status = "error";
       this.instances.set(instance.id, instance);
       throw error;
     }
@@ -246,15 +240,15 @@ export class EnclaveManager extends EventEmitter {
     functionName: string,
     inputs: Array<{ data: Buffer; encrypted?: boolean }>,
     requestor: string,
-    purpose: string,
+    purpose: string
   ): SecureComputation {
     const instance = this.instances.get(enclaveId);
     if (!instance) {
-      throw new Error('Enclave instance not found');
+      throw new Error("Enclave instance not found");
     }
 
-    if (instance.status !== 'running') {
-      throw new Error('Enclave is not running');
+    if (instance.status !== "running") {
+      throw new Error("Enclave is not running");
     }
 
     const computation: SecureComputation = {
@@ -265,7 +259,7 @@ export class EnclaveManager extends EventEmitter {
         id: crypto.randomUUID(),
         encrypted: input.encrypted || false,
         sealed: false,
-        hash: crypto.createHash('sha256').update(input.data).digest('hex'),
+        hash: crypto.createHash("sha256").update(input.data).digest("hex"),
       })),
       outputs: [],
       computation: {
@@ -275,29 +269,24 @@ export class EnclaveManager extends EventEmitter {
         inputsVerified: false,
         computationAttested: false,
         outputsSealed: false,
-        integrityProof: '',
+        integrityProof: "",
       },
       metadata: {
         requestor,
         purpose,
-        confidentialityLevel: 'HIGH',
+        confidentialityLevel: "HIGH",
       },
     };
 
     try {
       // Verify input integrity
-      computation.attestation.inputsVerified =
-        this.verifyInputIntegrity(inputs);
+      computation.attestation.inputsVerified = this.verifyInputIntegrity(inputs);
 
       // Seal inputs in enclave
       const sealedInputs = this.sealInputsInEnclave(instance, inputs);
 
       // Execute computation
-      const results = this.performSecureComputation(
-        instance,
-        functionName,
-        sealedInputs,
-      );
+      const results = this.performSecureComputation(instance, functionName, sealedInputs);
 
       // Seal outputs
       const sealedOutputs = this.sealOutputsInEnclave(instance, results);
@@ -305,20 +294,18 @@ export class EnclaveManager extends EventEmitter {
         id: crypto.randomUUID(),
         encrypted: true,
         sealed: true,
-        hash: crypto.createHash('sha256').update(output.data).digest('hex'),
+        hash: crypto.createHash("sha256").update(output.data).digest("hex"),
       }));
 
       computation.computation.endTime = new Date();
       computation.computation.duration =
-        computation.computation.endTime.getTime() -
-        computation.computation.startTime.getTime();
+        computation.computation.endTime.getTime() - computation.computation.startTime.getTime();
       computation.computation.exitCode = 0;
 
       // Generate attestation proof
       computation.attestation.computationAttested = true;
       computation.attestation.outputsSealed = true;
-      computation.attestation.integrityProof =
-        this.generateIntegrityProof(computation, instance);
+      computation.attestation.integrityProof = this.generateIntegrityProof(computation, instance);
 
       // Update instance runtime
       instance.runtime.lastActivity = new Date();
@@ -328,7 +315,7 @@ export class EnclaveManager extends EventEmitter {
       this.instances.set(enclaveId, instance);
       this.computations.set(computation.id, computation);
 
-      this.emit('secure_computation_completed', computation);
+      this.emit("secure_computation_completed", computation);
 
       return computation;
     } catch (error) {
@@ -344,19 +331,15 @@ export class EnclaveManager extends EventEmitter {
   /**
    * Unseal data from enclave
    */
-  unsealData(
-    enclaveId: string,
-    sealedDataId: string,
-    requestor: string,
-  ): Buffer {
+  unsealData(enclaveId: string, sealedDataId: string, requestor: string): Buffer {
     const instance = this.instances.get(enclaveId);
     if (!instance) {
-      throw new Error('Enclave instance not found');
+      throw new Error("Enclave instance not found");
     }
 
     const sealedData = instance.sealed.data.get(sealedDataId);
     if (!sealedData) {
-      throw new Error('Sealed data not found');
+      throw new Error("Sealed data not found");
     }
 
     // Log access
@@ -372,7 +355,7 @@ export class EnclaveManager extends EventEmitter {
     // Unseal using enclave key
     const unsealedData = this.performUnseal(instance, sealedData);
 
-    this.emit('data_unsealed', { enclaveId, dataId: sealedDataId, requestor });
+    this.emit("data_unsealed", { enclaveId, dataId: sealedDataId, requestor });
 
     return unsealedData;
   }
@@ -383,24 +366,24 @@ export class EnclaveManager extends EventEmitter {
   terminateEnclave(enclaveId: string, requestor: string): void {
     const instance = this.instances.get(enclaveId);
     if (!instance) {
-      throw new Error('Enclave instance not found');
+      throw new Error("Enclave instance not found");
     }
 
     const config = this.configs.get(instance.configId);
     if (!config) {
-      throw new Error('Enclave configuration not found');
+      throw new Error("Enclave configuration not found");
     }
 
     // Clear sealed data if policy requires
-    if (config.policies.dataRetention === 'none') {
+    if (config.policies.dataRetention === "none") {
       instance.sealed.keys.clear();
       instance.sealed.data.clear();
     }
 
-    instance.status = 'terminated';
+    instance.status = "terminated";
     instance.audit.accessLog.push({
       timestamp: new Date(),
-      operation: 'terminate',
+      operation: "terminate",
       requestor,
       approved: true,
     });
@@ -410,7 +393,7 @@ export class EnclaveManager extends EventEmitter {
     // Perform platform-specific cleanup
     this.cleanupEnclave(instance, config);
 
-    this.emit('enclave_terminated', { enclaveId, requestor });
+    this.emit("enclave_terminated", { enclaveId, requestor });
   }
 
   /**
@@ -418,7 +401,7 @@ export class EnclaveManager extends EventEmitter {
    */
   verifyRemoteAttestation(
     quote: string,
-    expectedMeasurement?: string,
+    expectedMeasurement?: string
   ): {
     valid: boolean;
     report: AttestationReport;
@@ -431,35 +414,30 @@ export class EnclaveManager extends EventEmitter {
       const report = this.parseAttestationQuote(quote);
 
       // Verify certificate chain
-      const certChainValid = this.verifyCertificateChain(
-        report.verification.certificateChain,
-      );
+      const certChainValid = this.verifyCertificateChain(report.verification.certificateChain);
       if (!certChainValid) {
-        errors.push('Invalid certificate chain');
+        errors.push("Invalid certificate chain");
       }
 
       // Check revocation list
       const revoked = this.checkRevocationStatus(report);
       if (revoked) {
-        errors.push('Certificate revoked');
+        errors.push("Certificate revoked");
       }
 
       // Verify measurement if provided
-      if (
-        expectedMeasurement &&
-        report.measurement.mrenclave !== expectedMeasurement
-      ) {
-        errors.push('Measurement mismatch');
+      if (expectedMeasurement && report.measurement.mrenclave !== expectedMeasurement) {
+        errors.push("Measurement mismatch");
       }
 
       // Verify TCB level
       const tcbValid = this.verifyTCBLevel(report.tcb);
       if (!tcbValid) {
-        errors.push('Invalid TCB level');
+        errors.push("Invalid TCB level");
       }
 
       const valid = errors.length === 0;
-      report.verification.status = valid ? 'valid' : 'invalid';
+      report.verification.status = valid ? "valid" : "invalid";
 
       this.attestations.set(report.enclaveId, report);
 
@@ -471,19 +449,19 @@ export class EnclaveManager extends EventEmitter {
         enclaveId: crypto.randomUUID(),
         quote,
         measurement: {
-          mrenclave: '',
-          mrsigner: '',
+          mrenclave: "",
+          mrsigner: "",
           isvprodid: 0,
           isvsvn: 0,
         },
         tcb: {
-          cpusvn: '',
+          cpusvn: "",
           pcesvn: 0,
-          sgxType: 'unknown',
+          sgxType: "unknown",
         },
         timestamp: new Date(),
         verification: {
-          status: 'invalid',
+          status: "invalid",
           certificateChain: [],
           revocationList: [],
         },
@@ -496,7 +474,7 @@ export class EnclaveManager extends EventEmitter {
   /**
    * Get enclave instances
    */
-  getInstances(status?: EnclaveInstance['status']): EnclaveInstance[] {
+  getInstances(status?: EnclaveInstance["status"]): EnclaveInstance[] {
     const instances = Array.from(this.instances.values());
     return status ? instances.filter((i) => i.status === status) : instances;
   }
@@ -512,50 +490,44 @@ export class EnclaveManager extends EventEmitter {
       : computations;
 
     return filtered
-      .sort(
-        (a, b) =>
-          b.computation.startTime.getTime() - a.computation.startTime.getTime(),
-      )
+      .sort((a, b) => b.computation.startTime.getTime() - a.computation.startTime.getTime())
       .slice(0, limit);
   }
 
   private validateEnclaveConfig(config: EnclaveConfig): void {
     if (config.resources.maxMemoryMB <= 0) {
-      throw new Error('Invalid memory limit');
+      throw new Error("Invalid memory limit");
     }
 
     if (config.resources.maxComputeTimeMS <= 0) {
-      throw new Error('Invalid compute time limit');
+      throw new Error("Invalid compute time limit");
     }
 
     // Validate security requirements based on type
     switch (config.type) {
-      case 'sgx':
+      case "sgx":
         if (!config.security.attestationRequired) {
-          throw new Error('SGX requires attestation');
+          throw new Error("SGX requires attestation");
         }
         break;
-      case 'sev':
+      case "sev":
         if (!config.security.memoryEncryption) {
-          throw new Error('SEV requires memory encryption');
+          throw new Error("SEV requires memory encryption");
         }
         break;
     }
   }
 
-  private initializeEnclave(
-    instance: EnclaveInstance,
-    config: EnclaveConfig,
-  ): void {
+  private initializeEnclave(instance: EnclaveInstance, config: EnclaveConfig): void {
     // Platform-specific initialization
     switch (config.type) {
-      case 'sgx':
+      case "sgx":
         this.initializeSGXEnclave(instance, config);
         break;
-      case 'sev':
+      case "sev":
         this.initializeSEVEnclave(instance, config);
         break;
-      case 'nitro':
+      case "nitro":
         this.initializeNitroEnclave(instance, config);
         break;
       default:
@@ -563,68 +535,54 @@ export class EnclaveManager extends EventEmitter {
     }
   }
 
-  private initializeSGXEnclave(
-    instance: EnclaveInstance,
-    _config: EnclaveConfig,
-  ): void {
+  private initializeSGXEnclave(instance: EnclaveInstance, _config: EnclaveConfig): void {
     // SGX-specific initialization
-    this.emit('enclave_init', { type: 'sgx', enclaveId: instance.id });
+    this.emit("enclave_init", { type: "sgx", enclaveId: instance.id });
   }
 
-  private initializeSEVEnclave(
-    instance: EnclaveInstance,
-    _config: EnclaveConfig,
-  ): void {
+  private initializeSEVEnclave(instance: EnclaveInstance, _config: EnclaveConfig): void {
     // AMD SEV-specific initialization
-    this.emit('enclave_init', { type: 'sev', enclaveId: instance.id });
+    this.emit("enclave_init", { type: "sev", enclaveId: instance.id });
   }
 
-  private initializeNitroEnclave(
-    instance: EnclaveInstance,
-    _config: EnclaveConfig,
-  ): void {
+  private initializeNitroEnclave(instance: EnclaveInstance, _config: EnclaveConfig): void {
     // AWS Nitro-specific initialization
-    this.emit('enclave_init', { type: 'nitro', enclaveId: instance.id });
+    this.emit("enclave_init", { type: "nitro", enclaveId: instance.id });
   }
 
-  private generateAttestation(
-    instance: EnclaveInstance,
-    config: EnclaveConfig,
-  ): AttestationReport {
+  private generateAttestation(instance: EnclaveInstance, config: EnclaveConfig): AttestationReport {
     // Generate mock attestation
     return {
       enclaveId: instance.id,
-      quote: `mock_quote_${crypto.randomBytes(32).toString('hex')}`,
+      quote: `mock_quote_${crypto.randomBytes(32).toString("hex")}`,
       measurement: {
-        mrenclave: crypto.randomBytes(32).toString('hex'),
-        mrsigner: crypto.randomBytes(32).toString('hex'),
+        mrenclave: crypto.randomBytes(32).toString("hex"),
+        mrsigner: crypto.randomBytes(32).toString("hex"),
         isvprodid: 1,
         isvsvn: 1,
       },
       tcb: {
-        cpusvn: crypto.randomBytes(16).toString('hex'),
+        cpusvn: crypto.randomBytes(16).toString("hex"),
         pcesvn: 1,
         sgxType: config.type,
       },
       timestamp: new Date(),
       verification: {
-        status: 'valid',
-        certificateChain: [`cert_${crypto.randomBytes(16).toString('hex')}`],
+        status: "valid",
+        certificateChain: [`cert_${crypto.randomBytes(16).toString("hex")}`],
         revocationList: [],
       },
     };
   }
 
-  private verifyInputIntegrity(
-    inputs: Array<{ data: Buffer }>,
-  ): boolean {
+  private verifyInputIntegrity(inputs: Array<{ data: Buffer }>): boolean {
     // Verify input data integrity
     return inputs.every((input) => input.data.length > 0);
   }
 
   private sealInputsInEnclave(
     instance: EnclaveInstance,
-    inputs: Array<{ data: Buffer }>,
+    inputs: Array<{ data: Buffer }>
   ): Array<{ id: string; sealed: Buffer }> {
     return inputs.map((input) => ({
       id: crypto.randomUUID(),
@@ -635,7 +593,7 @@ export class EnclaveManager extends EventEmitter {
   private performSecureComputation(
     _instance: EnclaveInstance,
     _functionName: string,
-    inputs: Array<{ id: string; sealed: Buffer }>,
+    inputs: Array<{ id: string; sealed: Buffer }>
   ): Array<{ data: Buffer }> {
     // Mock secure computation
     return inputs.map((input) => ({
@@ -645,7 +603,7 @@ export class EnclaveManager extends EventEmitter {
 
   private sealOutputsInEnclave(
     instance: EnclaveInstance,
-    outputs: Array<{ data: Buffer }>,
+    outputs: Array<{ data: Buffer }>
   ): Array<{ id: string; data: Buffer }> {
     return outputs.map((output) => {
       const id = crypto.randomUUID();
@@ -660,34 +618,30 @@ export class EnclaveManager extends EventEmitter {
 
   private performSeal(instance: EnclaveInstance, data: Buffer): Buffer {
     // Mock sealing - in practice, use platform-specific sealing
-    const key =
-      instance.sealed.keys.get('master') || this.generateSealingKey(instance);
-    instance.sealed.keys.set('master', key);
+    const key = instance.sealed.keys.get("master") || this.generateSealingKey(instance);
+    instance.sealed.keys.set("master", key);
 
-    const cipher = crypto.createCipher('aes-256-cbc', key);
+    const cipher = crypto.createCipher("aes-256-cbc", key);
     return Buffer.concat([cipher.update(data), cipher.final()]);
   }
 
-  private performUnseal(
-    instance: EnclaveInstance,
-    sealedData: Buffer,
-  ): Buffer {
-    const key = instance.sealed.keys.get('master');
+  private performUnseal(instance: EnclaveInstance, sealedData: Buffer): Buffer {
+    const key = instance.sealed.keys.get("master");
     if (!key) {
-      throw new Error('Sealing key not found');
+      throw new Error("Sealing key not found");
     }
 
-    const decipher = crypto.createDecipher('aes-256-cbc', key);
+    const decipher = crypto.createDecipher("aes-256-cbc", key);
     return Buffer.concat([decipher.update(sealedData), decipher.final()]);
   }
 
   private generateSealingKey(_instance: EnclaveInstance): string {
-    return crypto.randomBytes(32).toString('hex');
+    return crypto.randomBytes(32).toString("hex");
   }
 
   private generateIntegrityProof(
     computation: SecureComputation,
-    instance: EnclaveInstance,
+    instance: EnclaveInstance
   ): string {
     const data = JSON.stringify({
       computationId: computation.id,
@@ -698,30 +652,28 @@ export class EnclaveManager extends EventEmitter {
       timestamp: computation.computation.startTime,
     });
 
-    return crypto.createHash('sha256').update(data).digest('hex');
+    return crypto.createHash("sha256").update(data).digest("hex");
   }
 
-  private parseAttestationQuote(
-    quote: string,
-  ): AttestationReport {
+  private parseAttestationQuote(quote: string): AttestationReport {
     // Mock quote parsing
     return {
       enclaveId: crypto.randomUUID(),
       quote,
       measurement: {
-        mrenclave: crypto.randomBytes(32).toString('hex'),
-        mrsigner: crypto.randomBytes(32).toString('hex'),
+        mrenclave: crypto.randomBytes(32).toString("hex"),
+        mrsigner: crypto.randomBytes(32).toString("hex"),
         isvprodid: 1,
         isvsvn: 1,
       },
       tcb: {
-        cpusvn: crypto.randomBytes(16).toString('hex'),
+        cpusvn: crypto.randomBytes(16).toString("hex"),
         pcesvn: 1,
-        sgxType: 'sgx',
+        sgxType: "sgx",
       },
       timestamp: new Date(),
       verification: {
-        status: 'valid',
+        status: "valid",
         certificateChain: [],
         revocationList: [],
       },
@@ -732,23 +684,16 @@ export class EnclaveManager extends EventEmitter {
     return chain.length > 0;
   }
 
-  private checkRevocationStatus(
-    _report: AttestationReport,
-  ): boolean {
+  private checkRevocationStatus(_report: AttestationReport): boolean {
     return false; // Not revoked
   }
 
-  private verifyTCBLevel(
-    tcb: AttestationReport['tcb'],
-  ): boolean {
+  private verifyTCBLevel(tcb: AttestationReport["tcb"]): boolean {
     return tcb.pcesvn > 0;
   }
 
-  private cleanupEnclave(
-    instance: EnclaveInstance,
-    _config: EnclaveConfig,
-  ): void {
+  private cleanupEnclave(instance: EnclaveInstance, _config: EnclaveConfig): void {
     // Platform-specific cleanup
-    this.emit('enclave_cleanup', { enclaveId: instance.id });
+    this.emit("enclave_cleanup", { enclaveId: instance.id });
   }
 }

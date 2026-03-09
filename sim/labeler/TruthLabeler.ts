@@ -1,3 +1,5 @@
 export class TruthLabeler {
-  label() { return "label"; }
+  label() {
+    return "label";
+  }
 }

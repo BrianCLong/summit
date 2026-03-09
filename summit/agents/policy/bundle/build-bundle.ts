@@ -1,12 +1,14 @@
-import fs from 'node:fs';
-import path from 'node:path';
-import yaml from 'js-yaml';
-import { sha256, stableStringify } from '../../../../packages/dpec/src/hash';
+import fs from "node:fs";
+import path from "node:path";
+
+import yaml from "js-yaml";
+
+import type { BundleEnv, PolicyBundle, PolicySignature } from "./types";
+import { sha256, stableStringify } from "../../../../packages/dpec/src/hash";
 import {
   buildSkillRegistrySnapshot,
   writeSkillRegistrySnapshot,
-} from '../../skills/registry.snapshot';
-import type { BundleEnv, PolicyBundle, PolicySignature } from './types';
+} from "../../skills/registry.snapshot";
 
 export interface BuildBundleOptions {
   createdAt?: string;
@@ -24,10 +26,10 @@ export function canonicalPolicySha256(policyYamlText: string): string {
 
 function loadSkillsSnapshot(skillsPath: string, env: BundleEnv): unknown {
   if (fs.existsSync(skillsPath)) {
-    return JSON.parse(fs.readFileSync(skillsPath, 'utf8'));
+    return JSON.parse(fs.readFileSync(skillsPath, "utf8"));
   }
 
-  if (env === 'prod') {
+  if (env === "prod") {
     throw new Error(`Missing skills snapshot at ${skillsPath}`);
   }
 
@@ -35,11 +37,11 @@ function loadSkillsSnapshot(skillsPath: string, env: BundleEnv): unknown {
 }
 
 export function buildBundle(env: BundleEnv, options: BuildBundleOptions = {}): PolicyBundle {
-  const policyPath = options.policyPath ?? 'summit/agents/policy/policy.yml';
-  const skillsPath = options.skillsSnapshotPath ?? 'summit/agents/skills/registry.snapshot.json';
+  const policyPath = options.policyPath ?? "summit/agents/policy/policy.yml";
+  const skillsPath = options.skillsSnapshotPath ?? "summit/agents/skills/registry.snapshot.json";
   const outputPath = options.outputPath ?? `summit/agents/policy/policy-bundle.${env}.json`;
 
-  const policyText = fs.readFileSync(policyPath, 'utf8');
+  const policyText = fs.readFileSync(policyPath, "utf8");
   const policySha = canonicalPolicySha256(policyText);
 
   const skillsSnapshot = buildSkillRegistrySnapshot(loadSkillsSnapshot(skillsPath, env));
@@ -47,7 +49,7 @@ export function buildBundle(env: BundleEnv, options: BuildBundleOptions = {}): P
 
   if (!fs.existsSync(skillsPath)) {
     fs.mkdirSync(path.dirname(skillsPath), { recursive: true });
-    fs.writeFileSync(skillsPath, `${stableStringify(skillsSnapshot)}\n`, 'utf8');
+    fs.writeFileSync(skillsPath, `${stableStringify(skillsSnapshot)}\n`, "utf8");
   }
 
   const bundle: PolicyBundle = {
@@ -64,12 +66,12 @@ export function buildBundle(env: BundleEnv, options: BuildBundleOptions = {}): P
   };
 
   fs.mkdirSync(path.dirname(outputPath), { recursive: true });
-  fs.writeFileSync(outputPath, `${stableStringify(bundle)}\n`, 'utf8');
+  fs.writeFileSync(outputPath, `${stableStringify(bundle)}\n`, "utf8");
 
   return bundle;
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
-  const env = (process.argv[2] ?? 'dev') as BundleEnv;
+  const env = (process.argv[2] ?? "dev") as BundleEnv;
   buildBundle(env);
 }

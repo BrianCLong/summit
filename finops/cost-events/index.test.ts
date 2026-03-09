@@ -1,9 +1,9 @@
-import { calculateCostUnits } from './index';
+import { calculateCostUnits } from "./index";
 
-describe('calculateCostUnits', () => {
-  it('calculates query costs correctly', () => {
+describe("calculateCostUnits", () => {
+  it("calculates query costs correctly", () => {
     const units = calculateCostUnits({
-      operationType: 'query',
+      operationType: "query",
       dimensions: {
         query_complexity: 5,
         rows_scanned: 1000,
@@ -16,9 +16,9 @@ describe('calculateCostUnits', () => {
     expect(units).toBe(140);
   });
 
-  it('calculates ingest costs correctly', () => {
+  it("calculates ingest costs correctly", () => {
     const units = calculateCostUnits({
-      operationType: 'ingest',
+      operationType: "ingest",
       dimensions: {
         io_bytes: 50000,
         objects_written: 50,
@@ -29,9 +29,9 @@ describe('calculateCostUnits', () => {
     expect(units).toBe(60);
   });
 
-  it('calculates export costs correctly', () => {
+  it("calculates export costs correctly", () => {
     const units = calculateCostUnits({
-      operationType: 'export',
+      operationType: "export",
       dimensions: {
         io_bytes: 100000,
         objects_written: 10,
@@ -42,9 +42,9 @@ describe('calculateCostUnits', () => {
     expect(units).toBe(60);
   });
 
-  it('handles missing dimensions gracefully', () => {
+  it("handles missing dimensions gracefully", () => {
     const units = calculateCostUnits({
-      operationType: 'query',
+      operationType: "query",
       dimensions: {},
     });
     expect(units).toBe(10); // Base cost

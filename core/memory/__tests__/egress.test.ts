@@ -1,9 +1,9 @@
-import { MemoryBroker, ToolManifest } from '../broker';
-import { InMemoryMemoryStorage } from '../storage_memory';
-import { RedactionClass } from '../../privacy/classification';
-import { MemoryScope } from '../types';
+import { RedactionClass } from "../../privacy/classification";
+import { MemoryBroker, ToolManifest } from "../broker";
+import { InMemoryMemoryStorage } from "../storage_memory";
+import { MemoryScope } from "../types";
 
-describe('Tool Egress Policy', () => {
+describe("Tool Egress Policy", () => {
   let broker: MemoryBroker;
   let storage: InMemoryMemoryStorage;
 
@@ -11,8 +11,8 @@ describe('Tool Egress Policy', () => {
     {
       id: "search-tool",
       allowed_context_spaces: ["work:acme"],
-      redaction_classes: [RedactionClass.PII]
-    }
+      redaction_classes: [RedactionClass.PII],
+    },
   ];
 
   beforeEach(async () => {
@@ -28,7 +28,7 @@ describe('Tool Egress Policy', () => {
       facets: {},
       sources: ["chat"],
       expiresAt: Date.now() + 100000,
-      visibility: "user"
+      visibility: "user",
     });
 
     await broker.remember({
@@ -40,11 +40,11 @@ describe('Tool Egress Policy', () => {
       facets: {},
       sources: ["chat"],
       expiresAt: Date.now() + 100000,
-      visibility: "user"
+      visibility: "user",
     });
   });
 
-  test('should allow egress with redaction for authorized context', async () => {
+  test("should allow egress with redaction for authorized context", async () => {
     const scope: MemoryScope = { userId: "u1", purpose: "assist", contextSpace: "work:acme" };
     const results = await broker.toolEgress("search-tool", scope, manifest);
 
@@ -52,14 +52,14 @@ describe('Tool Egress Policy', () => {
     expect(results[0]).toBe("Talk to [EMAIL_REDACTED]");
   });
 
-  test('should deny egress for unauthorized context', async () => {
+  test("should deny egress for unauthorized context", async () => {
     const scope: MemoryScope = { userId: "u1", purpose: "assist", contextSpace: "personal" };
     const results = await broker.toolEgress("search-tool", scope, manifest);
 
     expect(results.length).toBe(0);
   });
 
-  test('should throw error for unregistered tool', async () => {
+  test("should throw error for unregistered tool", async () => {
     const scope: MemoryScope = { userId: "u1", purpose: "assist", contextSpace: "work:acme" };
     await expect(broker.toolEgress("evil-tool", scope, manifest)).rejects.toThrow(/not registered/);
   });

@@ -28,8 +28,8 @@
  */
 
 // Re-export v1 contracts
-export * from './v1/index.js'
+export * from "./v1/index.js";
 
 // Package metadata
-export const CONTRACT_VERSION = '1.0.0'
-export const SUPPORTED_API_VERSIONS = ['v1'] as const
+export const CONTRACT_VERSION = "1.0.0";
+export const SUPPORTED_API_VERSIONS = ["v1"] as const;

@@ -1,3 +1,5 @@
 export class MetricsCollector {
-  collect() { return "metrics"; }
+  collect() {
+    return "metrics";
+  }
 }

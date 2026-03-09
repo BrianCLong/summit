@@ -1,9 +1,10 @@
 import time
 import uuid
-import numpy as np
-from typing import Any, Dict, List, Optional
 from dataclasses import asdict
 from datetime import datetime
+from typing import Any, Dict, List, Optional
+
+import numpy as np
 
 # Mockable external dependencies
 try:

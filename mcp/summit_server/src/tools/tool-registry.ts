@@ -1,6 +1,6 @@
-import type { ToolDefinition, ToolIndexEntry, ToolSchema } from '../types.js';
-import type { JsonValue } from '../utils/stable-json.js';
-import { hashJson } from '../utils/hash.js';
+import type { ToolDefinition, ToolIndexEntry, ToolSchema } from "../types.js";
+import { hashJson } from "../utils/hash.js";
+import type { JsonValue } from "../utils/stable-json.js";
 
 export class ToolRegistry {
   private tools: Map<string, ToolDefinition<any, any>>;
@@ -53,13 +53,7 @@ export class ToolRegistry {
   routeTools(query: string, limit = 5): ToolIndexEntry[] {
     const normalized = query.toLowerCase();
     const scored = this.listIndex().map((tool) => {
-      const haystack = [
-        tool.name,
-        tool.description,
-        tool.tags.join(' '),
-      ]
-        .join(' ')
-        .toLowerCase();
+      const haystack = [tool.name, tool.description, tool.tags.join(" ")].join(" ").toLowerCase();
       const score = normalized
         .split(/\s+/g)
         .filter(Boolean)

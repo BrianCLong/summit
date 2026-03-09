@@ -9,7 +9,7 @@ export interface AgentTask {
 
 export interface AgentResult {
   task_id: string;
-  status: 'success' | 'failed';
+  status: "success" | "failed";
   outputs: Record<string, unknown>;
   error?: string;
   attempt: number;
@@ -24,16 +24,16 @@ export interface Agent {
 }
 
 export type AgentEventType =
-  | 'RUN_STARTED'
-  | 'TASK_ENQUEUED'
-  | 'TASK_DEQUEUED'
-  | 'AGENT_SELECTED'
-  | 'AGENT_EXEC_STARTED'
-  | 'AGENT_EXEC_FINISHED'
-  | 'TASK_RETRIED'
-  | 'TASK_FAILED'
-  | 'RUN_FINISHED'
-  | 'LOG_WRITE_FAILED';
+  | "RUN_STARTED"
+  | "TASK_ENQUEUED"
+  | "TASK_DEQUEUED"
+  | "AGENT_SELECTED"
+  | "AGENT_EXEC_STARTED"
+  | "AGENT_EXEC_FINISHED"
+  | "TASK_RETRIED"
+  | "TASK_FAILED"
+  | "RUN_FINISHED"
+  | "LOG_WRITE_FAILED";
 
 export interface AgentEvent {
   run_id: string;
@@ -44,7 +44,7 @@ export interface AgentEvent {
   inputs_hash: string | null;
   outputs_hash: string | null;
   attempt: number | null;
-  status: 'success' | 'failed' | 'retrying' | 'started' | 'finished' | null;
+  status: "success" | "failed" | "retrying" | "started" | "finished" | null;
   metadata: Record<string, unknown>;
 }
 

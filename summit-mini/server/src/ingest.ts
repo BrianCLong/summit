@@ -1,4 +1,5 @@
 import crypto from "node:crypto";
+
 import { nanoid } from "nanoid";
 
 type Extracted = {
@@ -24,7 +25,9 @@ export function extractGraph(content: string): Extracted {
 
   const counts = new Map<string, number>();
   for (const t of tokens) {
-    if (t.length < 3) {continue;}
+    if (t.length < 3) {
+      continue;
+    }
     const key = t.trim();
     counts.set(key, (counts.get(key) ?? 0) + 1);
   }
@@ -36,7 +39,7 @@ export function extractGraph(content: string): Extracted {
       id: `n_${nanoid(10)}`,
       label,
       kind: /^[A-Z]/.test(label) ? "proper" : "token",
-      score: c
+      score: c,
     }));
 
   // Co-occurrence edges across top 12 candidates (very small demo)
@@ -47,8 +50,16 @@ export function extractGraph(content: string): Extracted {
       const w = 1; // keep simple
       const srcItem = top[i];
       const dstItem = top[j];
-      if (!srcItem || !dstItem) { continue; } // Ensure items are not null/undefined
-      edges.push({ id: `e_${nanoid(10)}`, src: srcItem.id, dst: dstItem.id, kind: "cooccurs", weight: w });
+      if (!srcItem || !dstItem) {
+        continue;
+      } // Ensure items are not null/undefined
+      edges.push({
+        id: `e_${nanoid(10)}`,
+        src: srcItem.id,
+        dst: dstItem.id,
+        kind: "cooccurs",
+        weight: w,
+      });
     }
   }
 

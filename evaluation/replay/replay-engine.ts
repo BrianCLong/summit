@@ -1,4 +1,4 @@
-import { canonicalizeJson } from '../utils/canonical-json';
+import { canonicalizeJson } from "../utils/canonical-json";
 
 export class ReplayEngine {
   public compareArtifacts(actual: any, expected: any): boolean {

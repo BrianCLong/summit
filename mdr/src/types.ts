@@ -1,4 +1,4 @@
-export type Dialect = 'bigquery' | 'snowflake' | 'postgres';
+export type Dialect = "bigquery" | "snowflake" | "postgres";
 
 export interface GrainColumn {
   column: string;
@@ -8,7 +8,7 @@ export interface GrainColumn {
 
 export interface Filter {
   column: string;
-  operator: '=' | '!=' | '<' | '>' | '<=' | '>=' | 'IN';
+  operator: "=" | "!=" | "<" | ">" | "<=" | ">=" | "IN";
   value: string | number | boolean | (string | number | boolean)[];
 }
 

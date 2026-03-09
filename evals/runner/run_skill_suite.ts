@@ -1,29 +1,30 @@
-import { spawn } from 'node:child_process';
-import fs from 'node:fs/promises';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { ensureDir, readJson } from './filesystem.js';
-import { writeSuiteMarkdown } from './report.js';
-import { ScoreSummary } from './types.js';
+import { spawn } from "node:child_process";
+import fs from "node:fs/promises";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
-const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
+import { ensureDir, readJson } from "./filesystem.js";
+import { writeSuiteMarkdown } from "./report.js";
+import { ScoreSummary } from "./types.js";
+
+const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 
 const listSkills = async (): Promise<string[]> => {
-  const skillsDir = path.join(repoRoot, 'evals', 'skills');
+  const skillsDir = path.join(repoRoot, "evals", "skills");
   const entries = await fs.readdir(skillsDir, { withFileTypes: true });
   return entries
     .filter((entry) => entry.isDirectory())
     .map((entry) => entry.name)
-    .filter((name) => !name.startsWith('.'));
+    .filter((name) => !name.startsWith("."));
 };
 
-const runSkill = async (skill: string): Promise<void> =>
+const runSkill = (skill: string): Promise<void> =>
   new Promise((resolve, reject) => {
-    const child = spawn('npx', ['tsx', 'evals/runner/run_skill_eval.ts', '--skill', skill], {
+    const child = spawn("npx", ["tsx", "evals/runner/run_skill_eval.ts", "--skill", skill], {
       cwd: repoRoot,
-      stdio: 'inherit',
+      stdio: "inherit",
     });
-    child.on('close', (code) => {
+    child.on("close", (code) => {
       if (code === 0) {
         resolve();
       } else {
@@ -32,8 +33,8 @@ const runSkill = async (skill: string): Promise<void> =>
     });
   });
 
-const loadLatestSummary = async (skill: string): Promise<ScoreSummary> => {
-  const summaryPath = path.join(repoRoot, 'evals', 'skills', skill, 'artifacts', 'latest.json');
+const loadLatestSummary = (skill: string): Promise<ScoreSummary> => {
+  const summaryPath = path.join(repoRoot, "evals", "skills", skill, "artifacts", "latest.json");
   return readJson<ScoreSummary>(summaryPath);
 };
 
@@ -43,17 +44,18 @@ const run = async () => {
     await runSkill(skill);
   }
   const summaries = await Promise.all(skills.map(loadLatestSummary));
-  const reportDir = path.join(repoRoot, 'evals', 'runner', 'reports');
+  const reportDir = path.join(repoRoot, "evals", "runner", "reports");
   await ensureDir(reportDir);
-  await writeSuiteMarkdown(path.join(reportDir, 'suite.md'), summaries);
+  await writeSuiteMarkdown(path.join(reportDir, "suite.md"), summaries);
   await fs.writeFile(
-    path.join(reportDir, 'suite.json'),
+    path.join(reportDir, "suite.json"),
     `${JSON.stringify(summaries, null, 2)}\n`,
-    'utf8',
+    "utf8"
   );
 };
 
 run().catch((error) => {
+  // eslint-disable-next-line no-console
   console.error(error);
   process.exitCode = 1;
 });

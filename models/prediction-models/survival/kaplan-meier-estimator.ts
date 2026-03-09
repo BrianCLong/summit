@@ -26,7 +26,7 @@ export class KaplanMeierEstimator {
     const sorted = [...data].sort((a, b) => a.time - b.time);
 
     // Get unique event times
-    const eventTimes = [...new Set(sorted.filter(d => d.event).map(d => d.time))];
+    const eventTimes = [...new Set(sorted.filter((d) => d.event).map((d) => d.time))];
 
     let nAtRisk = sorted.length;
     let survivalProb = 1.0;
@@ -34,14 +34,17 @@ export class KaplanMeierEstimator {
     this.survivalFunction = [];
 
     for (const time of eventTimes) {
-      const nEvents = sorted.filter(d => d.time === time && d.event).length;
-      const nCensored = sorted.filter(d => d.time === time && !d.event).length;
+      const nEvents = sorted.filter((d) => d.time === time && d.event).length;
+      const nCensored = sorted.filter((d) => d.time === time && !d.event).length;
 
       // Calculate survival probability
       survivalProb *= (nAtRisk - nEvents) / nAtRisk;
 
       // Greenwood's formula for confidence interval
-      const variance = this.calculateVariance(eventTimes.slice(0, eventTimes.indexOf(time) + 1), sorted);
+      const variance = this.calculateVariance(
+        eventTimes.slice(0, eventTimes.indexOf(time) + 1),
+        sorted
+      );
       const se = Math.sqrt(variance) * survivalProb;
       const confidence: [number, number] = [
         Math.max(0, survivalProb - 1.96 * se),
@@ -56,7 +59,7 @@ export class KaplanMeierEstimator {
         confidence,
       });
 
-      nAtRisk -= (nEvents + nCensored);
+      nAtRisk -= nEvents + nCensored;
     }
   }
 
@@ -65,7 +68,7 @@ export class KaplanMeierEstimator {
    */
   survivalAt(t: number): number {
     if (this.survivalFunction.length === 0) {
-      throw new Error('Model must be fitted first');
+      throw new Error("Model must be fitted first");
     }
 
     // Find the largest time <= t
@@ -105,14 +108,14 @@ export class KaplanMeierEstimator {
     let nAtRisk = data.length;
 
     for (const time of times) {
-      const nEvents = data.filter(d => d.time === time && d.event).length;
+      const nEvents = data.filter((d) => d.time === time && d.event).length;
 
       if (nAtRisk > 0 && nAtRisk - nEvents > 0) {
         variance += nEvents / (nAtRisk * (nAtRisk - nEvents));
       }
 
-      const nCensored = data.filter(d => d.time === time && !d.event).length;
-      nAtRisk -= (nEvents + nCensored);
+      const nCensored = data.filter((d) => d.time === time && !d.event).length;
+      nAtRisk -= nEvents + nCensored;
     }
 
     return variance;

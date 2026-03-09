@@ -1,15 +1,15 @@
-import sensitiveFields from '../../policy/sensitive_fields.json';
+import sensitiveFields from "../../policy/sensitive_fields.json";
 
 export interface Violation {
   path: string;
   key: string;
 }
 
-export function scanPayload(payload: any, path: string = ''): Violation[] {
+export function scanPayload(payload: any, path: string = ""): Violation[] {
   const violations: Violation[] = [];
   const sensitiveKeys = new Set(sensitiveFields.sensitive_keys);
 
-  if (payload === null || typeof payload !== 'object') {
+  if (payload === null || typeof payload !== "object") {
     return violations;
   }
 
@@ -21,7 +21,7 @@ export function scanPayload(payload: any, path: string = ''): Violation[] {
         violations.push({ path: currentPath, key });
       }
 
-      if (typeof payload[key] === 'object') {
+      if (typeof payload[key] === "object") {
         violations.push(...scanPayload(payload[key], currentPath));
       }
     }
@@ -33,7 +33,7 @@ export function scanPayload(payload: any, path: string = ''): Violation[] {
 export function validate(payload: any): void {
   const violations = scanPayload(payload);
   if (violations.length > 0) {
-    const details = violations.map(v => `${v.path} (matched ${v.key})`).join(', ');
+    const details = violations.map((v) => `${v.path} (matched ${v.key})`).join(", ");
     throw new Error(`Governance Violation: Plaintext sensitive fields detected: ${details}`);
   }
 }

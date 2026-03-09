@@ -1,10 +1,11 @@
-import { randomUUID } from 'node:crypto';
+import { randomUUID } from "node:crypto";
+
 import type {
   UncertaintyRecord,
   UncertaintyState,
   UncertaintyScores,
   UncertaintyMeta,
-} from './models.js';
+} from "./models.js";
 
 export class UncertaintyRegistry {
   private records: Map<string, UncertaintyRecord> = new Map();
@@ -12,7 +13,7 @@ export class UncertaintyRegistry {
   createRecord(
     entityRef: string,
     initialMetrics?: Partial<UncertaintyScores>,
-    meta?: Partial<UncertaintyMeta>,
+    meta?: Partial<UncertaintyMeta>
   ): UncertaintyRecord {
     const id = randomUUID();
     const now = new Date().toISOString();
@@ -37,7 +38,7 @@ export class UncertaintyRegistry {
     const record: UncertaintyRecord = {
       id,
       appliesTo: entityRef,
-      state: 'Detected',
+      state: "Detected",
       scores,
       meta: metadata,
     };
@@ -49,7 +50,7 @@ export class UncertaintyRegistry {
   updateRecord(
     id: string,
     metricsPatch?: Partial<UncertaintyScores>,
-    newState?: UncertaintyState,
+    newState?: UncertaintyState
   ): UncertaintyRecord | null {
     const record = this.records.get(id);
     if (!record) {

@@ -3,8 +3,8 @@
  * Sprint 28B: Private aggregations using secret sharing and Beaver triples
  */
 
-import { EventEmitter } from 'events';
-import crypto from 'crypto';
+import crypto from "crypto";
+import { EventEmitter } from "events";
 
 export interface MPCParty {
   id: string;
@@ -22,7 +22,7 @@ export interface SecretShare {
   threshold: number;
   totalShares: number;
   metadata: {
-    algorithm: 'additive' | 'shamir';
+    algorithm: "additive" | "shamir";
     prime?: string;
     fieldSize: number;
   };
@@ -31,12 +31,12 @@ export interface SecretShare {
 export interface MPCCircuit {
   id: string;
   name: string;
-  operation: 'count' | 'distinct' | 'topk' | 'cooccurrence' | 'sum' | 'average';
+  operation: "count" | "distinct" | "topk" | "cooccurrence" | "sum" | "average";
   inputs: {
     partyId: string;
     datasetId: string;
     fieldName: string;
-    dataType: 'int' | 'float' | 'string' | 'bool';
+    dataType: "int" | "float" | "string" | "bool";
   }[];
   parameters: Record<string, any>;
   estimatedCost: {
@@ -56,12 +56,12 @@ export interface MPCSession {
   parties: string[];
   coordinator: string;
   status:
-    | 'setup'
-    | 'input-sharing'
-    | 'computation'
-    | 'output-reconstruction'
-    | 'completed'
-    | 'failed';
+    | "setup"
+    | "input-sharing"
+    | "computation"
+    | "output-reconstruction"
+    | "completed"
+    | "failed";
   currentRound: number;
   totalRounds: number;
   shares: Map<string, SecretShare[]>;
@@ -127,7 +127,7 @@ export class MPCProtocol extends EventEmitter {
   /**
    * Register a party in the MPC network
    */
-  registerParty(party: Omit<MPCParty, 'isOnline' | 'lastSeen'>): void {
+  registerParty(party: Omit<MPCParty, "isOnline" | "lastSeen">): void {
     const fullParty: MPCParty = {
       ...party,
       isOnline: false,
@@ -135,13 +135,13 @@ export class MPCProtocol extends EventEmitter {
     };
 
     this.parties.set(party.id, fullParty);
-    this.emit('party_registered', fullParty);
+    this.emit("party_registered", fullParty);
   }
 
   /**
    * Create MPC circuit for a specific computation
    */
-  createCircuit(circuit: Omit<MPCCircuit, 'id' | 'estimatedCost'>): MPCCircuit {
+  createCircuit(circuit: Omit<MPCCircuit, "id" | "estimatedCost">): MPCCircuit {
     const cost = this.estimateCircuitCost(circuit);
 
     const fullCircuit: MPCCircuit = {
@@ -152,7 +152,7 @@ export class MPCProtocol extends EventEmitter {
     };
 
     this.circuits.set(fullCircuit.id, fullCircuit);
-    this.emit('circuit_created', fullCircuit);
+    this.emit("circuit_created", fullCircuit);
 
     return fullCircuit;
   }
@@ -163,11 +163,11 @@ export class MPCProtocol extends EventEmitter {
   async startSession(
     circuitId: string,
     parties: string[],
-    inputData: Map<string, any>,
+    inputData: Map<string, any>
   ): Promise<MPCSession> {
     const circuit = this.circuits.get(circuitId);
     if (!circuit) {
-      throw new Error('Circuit not found');
+      throw new Error("Circuit not found");
     }
 
     // Validate all parties are online
@@ -183,7 +183,7 @@ export class MPCProtocol extends EventEmitter {
       circuitId,
       parties,
       coordinator: this.partyId,
-      status: 'setup',
+      status: "setup",
       currentRound: 0,
       totalRounds: circuit.estimatedCost.rounds,
       shares: new Map(),
@@ -208,16 +208,16 @@ export class MPCProtocol extends EventEmitter {
       // Phase 3: Output reconstruction
       await this.outputReconstructionPhase(session);
 
-      session.status = 'completed';
+      session.status = "completed";
       session.endTime = new Date();
     } catch (error) {
-      session.status = 'failed';
+      session.status = "failed";
       session.error = error.message;
       session.endTime = new Date();
       throw error;
     }
 
-    this.emit('session_completed', session);
+    this.emit("session_completed", session);
     return session;
   }
 
@@ -231,16 +231,16 @@ export class MPCProtocol extends EventEmitter {
       field?: string;
       filter?: (item: any) => boolean;
       differentialPrivacy?: { epsilon: number; delta: number };
-    } = {},
+    } = {}
   ): Promise<MPCResult> {
     const circuit = this.createCircuit({
-      name: 'private-count',
-      operation: 'count',
+      name: "private-count",
+      operation: "count",
       inputs: Array.from(datasets.keys()).map((partyId) => ({
         partyId,
         datasetId: `dataset-${partyId}`,
-        fieldName: options.field || '*',
-        dataType: 'int',
+        fieldName: options.field || "*",
+        dataType: "int",
       })),
       parameters: {
         filter: options.filter?.toString(),
@@ -250,25 +250,16 @@ export class MPCProtocol extends EventEmitter {
 
     const inputData = new Map();
     for (const [partyId, data] of datasets) {
-      const count = options.filter
-        ? data.filter(options.filter).length
-        : data.length;
+      const count = options.filter ? data.filter(options.filter).length : data.length;
       inputData.set(partyId, count);
     }
 
-    const session = await this.startSession(
-      circuit.id,
-      participants,
-      inputData,
-    );
+    const session = await this.startSession(circuit.id, participants, inputData);
 
     // Add differential privacy noise if requested
     let result = session.finalResult;
     if (options.differentialPrivacy) {
-      result = this.addDifferentialPrivacyNoise(
-        result,
-        options.differentialPrivacy,
-      );
+      result = this.addDifferentialPrivacyNoise(result, options.differentialPrivacy);
     }
 
     return this.formatMPCResult(session, result);
@@ -284,16 +275,16 @@ export class MPCProtocol extends EventEmitter {
     field: string,
     options: {
       differentialPrivacy?: { epsilon: number; delta: number };
-    } = {},
+    } = {}
   ): MPCResult {
     const circuit = this.createCircuit({
-      name: 'private-topk',
-      operation: 'topk',
+      name: "private-topk",
+      operation: "topk",
       inputs: Array.from(datasets.keys()).map((partyId) => ({
         partyId,
         datasetId: `dataset-${partyId}`,
         fieldName: field,
-        dataType: 'string',
+        dataType: "string",
       })),
       parameters: {
         k,
@@ -331,11 +322,7 @@ export class MPCProtocol extends EventEmitter {
     if (options.differentialPrivacy) {
       result = result.map(([key, count]) => [
         key,
-        Math.max(
-          0,
-          count +
-            this.generateLaplaceNoise(options.differentialPrivacy.epsilon),
-        ),
+        Math.max(0, count + this.generateLaplaceNoise(options.differentialPrivacy.epsilon)),
       ]);
     }
 
@@ -345,7 +332,7 @@ export class MPCProtocol extends EventEmitter {
       circuitId: circuit.id,
       parties: participants,
       coordinator: this.partyId,
-      status: 'completed',
+      status: "completed",
       currentRound: circuit.estimatedCost.rounds,
       totalRounds: circuit.estimatedCost.rounds,
       shares: new Map(),
@@ -372,15 +359,13 @@ export class MPCProtocol extends EventEmitter {
     field: string,
     options: {
       differentialPrivacy?: { epsilon: number; delta: number };
-    } = {},
+    } = {}
   ): MPCResult {
     // Use HyperLogLog sketches for scalable distinct counting
     const sketches = new Map<string, Set<string>>();
 
     for (const [partyId, data] of datasets) {
-      const distinctValues = new Set(
-        data.map((item) => String(item[field])).filter(Boolean),
-      );
+      const distinctValues = new Set(data.map((item) => String(item[field])).filter(Boolean));
       sketches.set(partyId, distinctValues);
     }
 
@@ -396,20 +381,17 @@ export class MPCProtocol extends EventEmitter {
 
     // Add differential privacy noise if requested
     if (options.differentialPrivacy) {
-      result = Math.max(
-        0,
-        result + this.generateLaplaceNoise(options.differentialPrivacy.epsilon),
-      );
+      result = Math.max(0, result + this.generateLaplaceNoise(options.differentialPrivacy.epsilon));
     }
 
     const circuit = this.createCircuit({
-      name: 'private-distinct',
-      operation: 'distinct',
+      name: "private-distinct",
+      operation: "distinct",
       inputs: Array.from(datasets.keys()).map((partyId) => ({
         partyId,
         datasetId: `dataset-${partyId}`,
         fieldName: field,
-        dataType: 'string',
+        dataType: "string",
       })),
       parameters: {
         field,
@@ -422,7 +404,7 @@ export class MPCProtocol extends EventEmitter {
       circuitId: circuit.id,
       parties: participants,
       coordinator: this.partyId,
-      status: 'completed',
+      status: "completed",
       currentRound: circuit.estimatedCost.rounds,
       totalRounds: circuit.estimatedCost.rounds,
       shares: new Map(),
@@ -443,10 +425,7 @@ export class MPCProtocol extends EventEmitter {
   /**
    * Precompute Beaver triples for multiplication
    */
-  precomputeBeaverTriples(
-    count: number,
-    parties: string[],
-  ): BeaverTriple[] {
+  precomputeBeaverTriples(count: number, parties: string[]): BeaverTriple[] {
     const triples: BeaverTriple[] = [];
 
     for (let i = 0; i < count; i++) {
@@ -482,22 +461,16 @@ export class MPCProtocol extends EventEmitter {
       triples.push(triple);
     }
 
-    this.emit('beaver_triples_precomputed', { count, parties });
+    this.emit("beaver_triples_precomputed", { count, parties });
     return triples;
   }
 
-  private setupPhase(
-    session: MPCSession,
-    inputData: Map<string, any>,
-  ): void {
-    session.status = 'input-sharing';
+  private setupPhase(session: MPCSession, inputData: Map<string, any>): void {
+    session.status = "input-sharing";
 
     // Create input commitments
     for (const [partyId, data] of inputData) {
-      const commitment = crypto
-        .createHash('sha256')
-        .update(JSON.stringify(data))
-        .digest('hex');
+      const commitment = crypto.createHash("sha256").update(JSON.stringify(data)).digest("hex");
       session.audit.inputCommitments.set(partyId, commitment);
     }
 
@@ -507,11 +480,11 @@ export class MPCProtocol extends EventEmitter {
       session.shares.set(partyId, shares);
     }
 
-    this.emit('setup_phase_completed', session);
+    this.emit("setup_phase_completed", session);
   }
 
   private async computationPhase(session: MPCSession): Promise<void> {
-    session.status = 'computation';
+    session.status = "computation";
     const circuit = this.circuits.get(session.circuitId);
     if (!circuit) {
       throw new Error(`Circuit not found: ${session.circuitId}`);
@@ -519,30 +492,30 @@ export class MPCProtocol extends EventEmitter {
 
     // Execute computation based on operation type
     switch (circuit.operation) {
-      case 'count':
+      case "count":
         await this.executeCountCircuit(session);
         break;
-      case 'sum':
+      case "sum":
         await this.executeSumCircuit(session);
         break;
-      case 'topk':
+      case "topk":
         await this.executeTopKCircuit(session);
         break;
       default:
         throw new Error(`Unsupported operation: ${circuit.operation}`);
     }
 
-    this.emit('computation_phase_completed', session);
+    this.emit("computation_phase_completed", session);
   }
 
   private outputReconstructionPhase(session: MPCSession): void {
-    session.status = 'output-reconstruction';
+    session.status = "output-reconstruction";
 
     // Reconstruct final result from shares
     const resultShares = session.intermediateResults.get(session.currentRound);
     session.finalResult = this.reconstructSecret(resultShares);
 
-    this.emit('output_reconstruction_completed', session);
+    this.emit("output_reconstruction_completed", session);
   }
 
   private executeCountCircuit(session: MPCSession): void {
@@ -579,11 +552,7 @@ export class MPCProtocol extends EventEmitter {
     session.intermediateResults.set(session.currentRound, []);
   }
 
-  private createAdditiveShares(
-    data: any[],
-    parties: string[],
-    field: string,
-  ): SecretShare[] {
+  private createAdditiveShares(data: any[], parties: string[], field: string): SecretShare[] {
     // Count occurrences of field values
     const counts = new Map<string, number>();
     for (const item of data) {
@@ -596,10 +565,7 @@ export class MPCProtocol extends EventEmitter {
     return this.createAdditiveSharesFromValue(totalCount, parties);
   }
 
-  private createAdditiveSharesFromValue(
-    value: number,
-    parties: string[],
-  ): SecretShare[] {
+  private createAdditiveSharesFromValue(value: number, parties: string[]): SecretShare[] {
     const shares: SecretShare[] = [];
     let sum = 0;
 
@@ -615,7 +581,7 @@ export class MPCProtocol extends EventEmitter {
         threshold: parties.length,
         totalShares: parties.length,
         metadata: {
-          algorithm: 'additive',
+          algorithm: "additive",
           fieldSize: 32,
         },
       });
@@ -630,7 +596,7 @@ export class MPCProtocol extends EventEmitter {
       threshold: parties.length,
       totalShares: parties.length,
       metadata: {
-        algorithm: 'additive',
+        algorithm: "additive",
         fieldSize: 32,
       },
     });
@@ -638,10 +604,7 @@ export class MPCProtocol extends EventEmitter {
     return shares;
   }
 
-  private addShares(
-    shares1: SecretShare[],
-    shares2: SecretShare[],
-  ): SecretShare[] {
+  private addShares(shares1: SecretShare[], shares2: SecretShare[]): SecretShare[] {
     const result: SecretShare[] = [];
 
     for (let i = 0; i < shares1.length; i++) {
@@ -659,7 +622,9 @@ export class MPCProtocol extends EventEmitter {
   }
 
   private reconstructSecret(shares: SecretShare[]): number {
-    if (!shares || shares.length === 0) {return 0;}
+    if (!shares || shares.length === 0) {
+      return 0;
+    }
 
     let sum = 0;
     for (const share of shares) {
@@ -670,20 +635,20 @@ export class MPCProtocol extends EventEmitter {
   }
 
   private estimateCircuitCost(
-    circuit: Omit<MPCCircuit, 'id' | 'estimatedCost'>,
-  ): MPCCircuit['estimatedCost'] {
+    circuit: Omit<MPCCircuit, "id" | "estimatedCost">
+  ): MPCCircuit["estimatedCost"] {
     const parties = circuit.inputs.length;
     const baseRounds = 2; // Setup + computation
 
     switch (circuit.operation) {
-      case 'count':
-      case 'sum':
+      case "count":
+      case "sum":
         return {
           rounds: baseRounds,
           bandwidthMB: parties * 0.1,
           computeTimeMs: parties * 100,
         };
-      case 'topk': {
+      case "topk": {
         const k = circuit.parameters.k || 10;
         return {
           rounds: baseRounds + Math.log2(k),
@@ -701,13 +666,13 @@ export class MPCProtocol extends EventEmitter {
   }
 
   private calculatePrecomputeNeeds(
-    circuit: Omit<MPCCircuit, 'id' | 'estimatedCost'>,
-    _cost: MPCCircuit['estimatedCost'],
-  ): MPCCircuit['precomputeRequirements'] {
+    circuit: Omit<MPCCircuit, "id" | "estimatedCost">,
+    _cost: MPCCircuit["estimatedCost"]
+  ): MPCCircuit["precomputeRequirements"] {
     const parties = circuit.inputs.length;
 
     switch (circuit.operation) {
-      case 'topk':
+      case "topk":
         return {
           beaverTriples: parties * (circuit.parameters.k || 10),
           randomValues: parties * 100,
@@ -722,7 +687,7 @@ export class MPCProtocol extends EventEmitter {
 
   private addDifferentialPrivacyNoise(
     value: number,
-    params: { epsilon: number; delta: number },
+    params: { epsilon: number; delta: number }
   ): number {
     const noise = this.generateLaplaceNoise(params.epsilon);
     return Math.max(0, Math.round(value + noise));
@@ -731,10 +696,7 @@ export class MPCProtocol extends EventEmitter {
   private generateLaplaceNoise(epsilon: number): number {
     // Generate Laplace noise for differential privacy
     const u1 = Math.random();
-    const noise =
-      (1 / epsilon) *
-      Math.sign(u1 - 0.5) *
-      Math.log(1 - 2 * Math.abs(u1 - 0.5));
+    const noise = (1 / epsilon) * Math.sign(u1 - 0.5) * Math.log(1 - 2 * Math.abs(u1 - 0.5));
     return noise;
   }
 
@@ -755,13 +717,9 @@ export class MPCProtocol extends EventEmitter {
         kAnonymity: circuit.parameters.kAnonymity,
       },
       verification: {
-        commitmentHash: this.calculateCommitmentHash(
-          session.audit.inputCommitments,
-        ),
+        commitmentHash: this.calculateCommitmentHash(session.audit.inputCommitments),
         participantSignatures: new Map(),
-        transcriptHash: this.calculateTranscriptHash(
-          session.audit.roundTranscripts,
-        ),
+        transcriptHash: this.calculateTranscriptHash(session.audit.roundTranscripts),
       },
       metadata: {
         computeTime: (session.endTime ?? new Date()).getTime() - session.startTime.getTime(),
@@ -773,16 +731,16 @@ export class MPCProtocol extends EventEmitter {
   }
 
   private calculateCommitmentHash(commitments: Map<string, string>): string {
-    const hash = crypto.createHash('sha256');
+    const hash = crypto.createHash("sha256");
     for (const commitment of commitments.values()) {
       hash.update(commitment);
     }
-    return hash.digest('hex');
+    return hash.digest("hex");
   }
 
   private calculateTranscriptHash(transcripts: any[]): string {
-    const hash = crypto.createHash('sha256');
+    const hash = crypto.createHash("sha256");
     hash.update(JSON.stringify(transcripts));
-    return hash.digest('hex');
+    return hash.digest("hex");
   }
 }

@@ -4,22 +4,22 @@
  */
 
 // Provenance & Metadata
-export * from './provenance.js'
+export * from "./provenance.js";
 
 // Entities
-export * from './entities.js'
+export * from "./entities.js";
 
 // Edges
-export * from './edges.js'
+export * from "./edges.js";
 
 // Ingestion (Switchboard → IntelGraph)
-export * from './ingestion.js'
+export * from "./ingestion.js";
 
 // Queries (IntelGraph API)
-export * from './queries.js'
+export * from "./queries.js";
 
 // Workflows (Maestro Conductor)
-export * from './workflows.js'
+export * from "./workflows.js";
 
 // Insights (CompanyOS API)
-export * from './insights.js'
+export * from "./insights.js";

@@ -1,8 +1,8 @@
-// ESLint v9 flat-config root
-// Applies base JS/TS rules across the monorepo; package-level configs refine further.
 import js from '@eslint/js';
 import * as tseslint from 'typescript-eslint';
 import globals from 'globals';
+import importPlugin from 'eslint-plugin-import';
+import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
 
 const IGNORE = [
   '**/node_modules/**',
@@ -159,7 +159,11 @@ export default [
   { ignores: IGNORE },
   js.configs.recommended,
   ...tseslint.configs.recommended, // type-agnostic rules; package configs can opt into type-aware if desired
+  eslintPluginPrettierRecommended,
   {
+    plugins: {
+      import: importPlugin
+    },
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: 'module',
@@ -175,30 +179,48 @@ export default [
     },
     settings: {
       react: { version: 'detect' },
+      'import/resolver': {
+        node: {
+          extensions: ['.js', '.jsx', '.ts', '.tsx']
+        }
+      }
     },
     rules: {
       // Code Quality
-      'no-console': 'warn',
-      'no-debugger': 'warn', // Relaxed to warn for gradual migration
-      'no-alert': 'warn',
-      'no-var': 'warn', // Relaxed to warn for gradual migration
-      'prefer-const': 'warn',
-      'prefer-arrow-callback': 'warn',
-      'prefer-template': 'warn',
-      'no-nested-ternary': 'warn',
-      'no-unneeded-ternary': 'warn',
+      'no-console': 'error',
+      'no-debugger': 'error', // Relaxed to warn for gradual migration
+      'no-alert': 'error',
+      'no-var': 'error', // Relaxed to warn for gradual migration
+      'prefer-const': 'error',
+      'prefer-arrow-callback': 'error',
+      'prefer-template': 'error',
+      'no-nested-ternary': 'error',
+      'no-unneeded-ternary': 'error',
+
+      // Import rules
+      'import/order': [
+        'error',
+        {
+          groups: ['builtin', 'external', 'internal', ['parent', 'sibling', 'index']],
+          'newlines-between': 'always',
+          alphabetize: {
+            order: 'asc',
+            caseInsensitive: true,
+          },
+        },
+      ],
 
       // Error Prevention
       'no-unused-vars': 'off', // handled by @typescript-eslint/no-unused-vars
       'no-unused-expressions': 'off',
       'no-undef': 'off', // TypeScript handles this
-      'eqeqeq': ['warn', 'always', { null: 'ignore' }], // Relaxed to warn for gradual migration
-      'no-implicit-coercion': 'warn',
-      'no-throw-literal': 'warn', // Relaxed to warn for gradual migration
+      'eqeqeq': ['error', 'always', { null: 'ignore' }], // Relaxed to warn for gradual migration
+      'no-implicit-coercion': 'error',
+      'no-throw-literal': 'error', // Relaxed to warn for gradual migration
 
       // TypeScript
       '@typescript-eslint/no-unused-vars': [
-        'warn',
+        'error',
         {
           argsIgnorePattern: '^_',
           varsIgnorePattern: '^_',
@@ -207,7 +229,7 @@ export default [
       ],
       '@typescript-eslint/no-explicit-any': 'off', // Pragmatic for gradual migration
       '@typescript-eslint/no-unused-expressions': [
-        'warn', // Relaxed to warn for gradual migration
+        'error', // Relaxed to warn for gradual migration
         {
           allowShortCircuit: true,
           allowTernary: true,
@@ -215,42 +237,42 @@ export default [
       ],
       '@typescript-eslint/explicit-function-return-type': 'off',
       '@typescript-eslint/explicit-module-boundary-types': 'off',
-      '@typescript-eslint/no-non-null-assertion': 'warn',
-      '@typescript-eslint/no-require-imports': 'warn', // Relaxed for gradual migration
-      '@typescript-eslint/ban-ts-comment': 'warn', // Relaxed for gradual migration
-      '@typescript-eslint/no-empty-object-type': 'warn',
-      '@typescript-eslint/no-namespace': 'warn',
-      '@typescript-eslint/no-this-alias': 'warn',
-      '@typescript-eslint/triple-slash-reference': 'warn',
-      'no-useless-escape': 'warn', // Relaxed for gradual migration
-      'no-case-declarations': 'warn',
-      'no-empty': 'warn',
-      'no-useless-catch': 'warn',
-      'no-prototype-builtins': 'warn',
-      'no-fallthrough': 'warn',
-      'no-control-regex': 'warn',
-      'no-constant-binary-expression': 'warn',
-      'no-dupe-keys': 'warn',
-      'no-shadow-restricted-names': 'warn',
-      'no-irregular-whitespace': 'warn',
-      'no-duplicate-case': 'warn',
-      'no-async-promise-executor': 'warn',
-      'no-cond-assign': 'warn',
-      'no-unreachable': 'warn',
-      'no-unexpected-multiline': 'warn',
-      'no-sparse-arrays': 'warn',
-      'no-empty-pattern': 'warn',
-      'prefer-spread': 'warn',
-      'no-redeclare': 'warn',
-      'no-dupe-class-members': 'warn',
+      '@typescript-eslint/no-non-null-assertion': 'error',
+      '@typescript-eslint/no-require-imports': 'error', // Relaxed for gradual migration
+      '@typescript-eslint/ban-ts-comment': 'error', // Relaxed for gradual migration
+      '@typescript-eslint/no-empty-object-type': 'error',
+      '@typescript-eslint/no-namespace': 'error',
+      '@typescript-eslint/no-this-alias': 'error',
+      '@typescript-eslint/triple-slash-reference': 'error',
+      'no-useless-escape': 'error', // Relaxed for gradual migration
+      'no-case-declarations': 'error',
+      'no-empty': 'error',
+      'no-useless-catch': 'error',
+      'no-prototype-builtins': 'error',
+      'no-fallthrough': 'error',
+      'no-control-regex': 'error',
+      'no-constant-binary-expression': 'error',
+      'no-dupe-keys': 'error',
+      'no-shadow-restricted-names': 'error',
+      'no-irregular-whitespace': 'error',
+      'no-duplicate-case': 'error',
+      'no-async-promise-executor': 'error',
+      'no-cond-assign': 'error',
+      'no-unreachable': 'error',
+      'no-unexpected-multiline': 'error',
+      'no-sparse-arrays': 'error',
+      'no-empty-pattern': 'error',
+      'prefer-spread': 'error',
+      'no-redeclare': 'error',
+      'no-dupe-class-members': 'error',
 
       // Best Practices
-      curly: ['warn', 'all'],
-      'no-eval': 'warn', // Relaxed to warn for gradual migration
-      'no-implied-eval': 'warn', // Relaxed to warn for gradual migration
-      'no-new-func': 'warn', // Relaxed to warn for gradual migration
-      'no-return-await': 'warn',
-      'require-await': 'warn',
+      curly: ['error', 'all'],
+      'no-eval': 'error', // Relaxed to warn for gradual migration
+      'no-implied-eval': 'error', // Relaxed to warn for gradual migration
+      'no-new-func': 'error', // Relaxed to warn for gradual migration
+      'no-return-await': 'error',
+      'require-await': 'error',
     },
   },
 ];

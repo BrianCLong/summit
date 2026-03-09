@@ -2,9 +2,11 @@ export async function ingest(payload: { source: string; content: string; actorId
   const r = await fetch("/api/ingest", {
     method: "POST",
     headers: { "content-type": "application/json" },
-    body: JSON.stringify(payload)
+    body: JSON.stringify(payload),
   });
-  if (!r.ok) {throw new Error(await r.text());}
+  if (!r.ok) {
+    throw new Error(await r.text());
+  }
   return r.json();
 }
 

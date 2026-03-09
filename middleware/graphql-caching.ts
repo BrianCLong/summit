@@ -1,16 +1,17 @@
 /**
  * Persisted GraphQL Queries & CDN Caching Module
- * 
+ *
  * Implements persistent storage for GraphQL queries and CDN caching for improved performance
  */
 
-import { Request, Response, NextFunction } from 'express';
-import { Redis } from 'ioredis';
-import { SHA256 } from 'crypto-js';
-import { logger } from '../config/logger.js';
-import { metrics } from '../observability/metrics.js';
-import { Pool } from 'pg';
-import { v4 as uuidv4 } from 'uuid';
+import { SHA256 } from "crypto-js";
+import { Request, Response, NextFunction } from "express";
+import { Redis } from "ioredis";
+import { Pool } from "pg";
+import { v4 as uuidv4 } from "uuid";
+
+import { logger } from "../config/logger.js";
+import { metrics } from "../observability/metrics.js";
 
 // Interface for persisted query storage
 export interface PersistedQuery {
@@ -64,13 +65,13 @@ export class PersistedQueryStore {
   async initialize(): Promise<void> {
     // Create the table if it doesn't exist
     await this.pool.query(PERSISTED_QUERIES_TABLE_SQL);
-    logger.info('PersistedQueryStore initialized successfully');
+    logger.info("PersistedQueryStore initialized successfully");
   }
 
   async saveQuery(query: string, tenantId: string, tags?: string[]): Promise<PersistedQuery> {
     const queryHash = SHA256(query).toString();
     const queryId = uuidv4();
-    
+
     const result = await this.pool.query(
       `INSERT INTO persisted_queries (id, hash, query, tenant_id, tags) 
        VALUES ($1, $2, $3, $4, $5) 
@@ -97,10 +98,7 @@ export class PersistedQueryStore {
   }
 
   async getQueryByHash(hash: string): Promise<PersistedQuery | null> {
-    const result = await this.pool.query(
-      'SELECT * FROM persisted_queries WHERE hash = $1',
-      [hash]
-    );
+    const result = await this.pool.query("SELECT * FROM persisted_queries WHERE hash = $1", [hash]);
 
     if (result.rows.length === 0) {
       return null;
@@ -121,10 +119,7 @@ export class PersistedQueryStore {
   }
 
   async getQueryById(id: string): Promise<PersistedQuery | null> {
-    const result = await this.pool.query(
-      'SELECT * FROM persisted_queries WHERE id = $1',
-      [id]
-    );
+    const result = await this.pool.query("SELECT * FROM persisted_queries WHERE id = $1", [id]);
 
     if (result.rows.length === 0) {
       return null;
@@ -146,11 +141,11 @@ export class PersistedQueryStore {
 
   async getAllQueriesForTenant(tenantId: string): Promise<PersistedQuery[]> {
     const result = await this.pool.query(
-      'SELECT * FROM persisted_queries WHERE tenant_id = $1 ORDER BY created_at DESC',
+      "SELECT * FROM persisted_queries WHERE tenant_id = $1 ORDER BY created_at DESC",
       [tenantId]
     );
 
-    return result.rows.map(row => ({
+    return result.rows.map((row) => ({
       id: row.id,
       hash: row.hash,
       query: row.query,
@@ -165,7 +160,7 @@ export class PersistedQueryStore {
 
   async deleteQuery(id: string): Promise<boolean> {
     const result = await this.pool.query(
-      'DELETE FROM persisted_queries WHERE id = $1 RETURNING id',
+      "DELETE FROM persisted_queries WHERE id = $1 RETURNING id",
       [id]
     );
 
@@ -183,8 +178,8 @@ export class GraphQLCacheManager {
     this.defaultConfig = {
       ttl: 300, // 5 minutes default
       maxSize: 1000,
-      enabled: process.env.GRAPHQL_CACHE_ENABLED === 'true',
-      compression: process.env.GRAPHQL_CACHE_COMPRESSION === 'true',
+      enabled: process.env.GRAPHQL_CACHE_ENABLED === "true",
+      compression: process.env.GRAPHQL_CACHE_COMPRESSION === "true",
       ...config,
     };
   }
@@ -196,23 +191,23 @@ export class GraphQLCacheManager {
 
     try {
       const cached = await this.redis.get(key);
-      
+
       if (cached) {
         metrics.graphqlCacheHits.inc();
-        
+
         // Decompress if needed
         if (this.defaultConfig.compression) {
           // In a real implementation, we would decompress the value
           // For now, we'll just return as JSON
           return JSON.parse(cached);
         }
-        
+
         return JSON.parse(cached);
       } else {
         metrics.graphqlCacheMisses.inc();
       }
     } catch (error) {
-      logger.error('Cache get error:', error);
+      logger.error("Cache get error:", error);
       metrics.graphqlCacheErrors.inc();
     }
 
@@ -221,7 +216,7 @@ export class GraphQLCacheManager {
 
   async set(key: string, value: any, config?: Partial<CacheConfig>): Promise<boolean> {
     const effectiveConfig = { ...this.defaultConfig, ...config };
-    
+
     if (!effectiveConfig.enabled) {
       return false;
     }
@@ -229,13 +224,13 @@ export class GraphQLCacheManager {
     try {
       // Serialize value
       const serialized = JSON.stringify(value);
-      
+
       // Set with TTL
       await this.redis.setex(key, effectiveConfig.ttl, serialized);
       metrics.graphqlCacheSets.inc();
       return true;
     } catch (error) {
-      logger.error('Cache set error:', error);
+      logger.error("Cache set error:", error);
       metrics.graphqlCacheErrors.inc();
       return false;
     }
@@ -245,16 +240,16 @@ export class GraphQLCacheManager {
     try {
       // Find keys matching the pattern
       const keys = await this.redis.keys(pattern);
-      
+
       if (keys.length > 0) {
         const result = await this.redis.del(...keys);
         logger.info(`Invalidated ${result} cache entries matching pattern: ${pattern}`);
         return result;
       }
-      
+
       return 0;
     } catch (error) {
-      logger.error('Cache invalidation error:', error);
+      logger.error("Cache invalidation error:", error);
       return 0;
     }
   }
@@ -266,34 +261,34 @@ export class GraphQLCacheManager {
     userId?: string,
     tenantId?: string
   ): string {
-    const keyParts = ['graphql', 'response', operationHash];
-    
+    const keyParts = ["graphql", "response", operationHash];
+
     if (variables) {
       // Create a deterministic hash of variables
       const varHash = SHA256(JSON.stringify(variables)).toString().substring(0, 16);
       keyParts.push(varHash);
     }
-    
+
     if (userId) {
       keyParts.push(`user:${userId}`);
     }
-    
+
     if (tenantId) {
       keyParts.push(`tenant:${tenantId}`);
     }
-    
-    return keyParts.join(':');
+
+    return keyParts.join(":");
   }
 
   // Create cache key for persisted queries
   createPersistedQueryCacheKey(hash: string, tenantId?: string): string {
-    const keyParts = ['graphql', 'persisted', hash];
-    
+    const keyParts = ["graphql", "persisted", hash];
+
     if (tenantId) {
       keyParts.push(`tenant:${tenantId}`);
     }
-    
-    return keyParts.join(':');
+
+    return keyParts.join(":");
   }
 }
 
@@ -304,17 +299,18 @@ export const createPersistedQueryMiddleware = (
 ) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const startTime = Date.now();
-      const tenantId = req.headers['x-tenant-id'] as string || 'default';
-      const userId = (req.user as any)?.id || 'anonymous';
+      const tenantId = (req.headers["x-tenant-id"] as string) || "default";
+      const userId = (req.user as any)?.id || "anonymous";
 
       // Handle persisted queries if the request has an operation hash
       if (req.body && req.body.extensions && req.body.extensions.persistedQuery) {
         const { version, sha256Hash } = req.body.extensions.persistedQuery;
-        
+
         if (version !== 1) {
           return res.status(400).json({
-            errors: [{ message: 'Unsupported persisted query version' }]
+            errors: [{ message: "Unsupported persisted query version" }],
           });
         }
 
@@ -325,11 +321,11 @@ export const createPersistedQueryMiddleware = (
         if (!persistedQuery) {
           // Not in cache, fetch from database
           persistedQuery = await queryStore.getQueryByHash(sha256Hash);
-          
+
           if (!persistedQuery) {
             // Query not found, return error
             return res.status(400).json({
-              errors: [{ message: 'Persisted query not found' }]
+              errors: [{ message: "Persisted query not found" }],
             });
           }
 
@@ -339,22 +335,22 @@ export const createPersistedQueryMiddleware = (
 
         // Override the query in the request body with the persisted query
         req.body.query = persistedQuery.query;
-        
+
         // Log the persisted query hit
-        logger.debug('Served persisted query', {
+        logger.debug("Served persisted query", {
           operationHash: sha256Hash,
           queryId: persistedQuery.id,
           tenantId,
-          userId
+          userId,
         });
       }
 
       // Continue to next middleware
       next();
     } catch (error) {
-      logger.error('Persisted query middleware error:', error);
+      logger.error("Persisted query middleware error:", error);
       return res.status(500).json({
-        errors: [{ message: 'Internal server error' }]
+        errors: [{ message: "Internal server error" }],
       });
     }
   };
@@ -371,16 +367,16 @@ export const createResponseCacheMiddleware = (
   const { shouldCacheResult, cacheKeyFn } = options;
 
   return async (req: Request, res: Response, next: NextFunction) => {
-    if (req.method !== 'POST' || !req.body) {
+    if (req.method !== "POST" || !req.body) {
       return next();
     }
 
-    const tenantId = req.headers['x-tenant-id'] as string || 'default';
-    const userId = (req.user as any)?.id || 'anonymous';
-    const operationName = req.body.operationName || 'anonymous';
+    const tenantId = (req.headers["x-tenant-id"] as string) || "default";
+    const userId = (req.user as any)?.id || "anonymous";
+    const operationName = req.body.operationName || "anonymous";
 
     // For mutations, never cache
-    if (req.body.query && req.body.query.includes('mutation')) {
+    if (req.body.query && req.body.query.includes("mutation")) {
       return next();
     }
 
@@ -389,21 +385,23 @@ export const createResponseCacheMiddleware = (
     if (cacheKeyFn) {
       cacheKey = cacheKeyFn(req);
     } else {
-      const operationHash = SHA256(req.body.query || '').toString().substring(0, 16);
+      const operationHash = SHA256(req.body.query || "")
+        .toString()
+        .substring(0, 16);
       cacheKey = `graphql:response:${operationHash}:${operationName}`;
-      
+
       // Add variable hash if variables are present
       if (req.body.variables) {
         const varHash = SHA256(JSON.stringify(req.body.variables)).toString().substring(0, 16);
         cacheKey += `:${varHash}`;
       }
-      
+
       // Add context-specific identifiers
-      if (tenantId !== 'default') {
+      if (tenantId !== "default") {
         cacheKey += `:tenant:${tenantId}`;
       }
-      
-      if (userId !== 'anonymous') {
+
+      if (userId !== "anonymous") {
         cacheKey += `:user:${userId}`;
       }
     }
@@ -412,46 +410,49 @@ export const createResponseCacheMiddleware = (
     const cachedResponse = await cacheManager.get(cacheKey);
 
     if (cachedResponse) {
-      logger.debug('Served GraphQL response from cache', {
+      logger.debug("Served GraphQL response from cache", {
         cacheKey,
         operationName,
         tenantId,
-        userId
+        userId,
       });
 
-      res.set('X-Cache', 'HIT');
-      res.set('X-Cache-Key', cacheKey);
+      res.set("X-Cache", "HIT");
+      res.set("X-Cache-Key", cacheKey);
       return res.json(cachedResponse);
     }
 
     // Modify res.json to capture and cache the response
     const originalJson = res.json.bind(res);
-    
+
     res.json = (data: any) => {
       // Determine if we should cache this result
       const shouldCache = !shouldCacheResult || shouldCacheResult(req, data);
-      
-      if (shouldCache && data && typeof data === 'object') {
+
+      if (shouldCache && data && typeof data === "object") {
         // Cache the response
-        cacheManager.set(cacheKey, data, { 
-          ttl: req.cacheTtl || 300 // Default 5 minutes
-        }).then(success => {
-          if (success) {
-            logger.debug('Cached GraphQL response', {
-              cacheKey,
-              operationName,
-              tenantId,
-              userId,
-              dataLength: JSON.stringify(data).length
-            });
-          }
-        }).catch(err => {
-          logger.error('Failed to cache GraphQL response:', err);
-        });
+        cacheManager
+          .set(cacheKey, data, {
+            ttl: req.cacheTtl || 300, // Default 5 minutes
+          })
+          .then((success) => {
+            if (success) {
+              logger.debug("Cached GraphQL response", {
+                cacheKey,
+                operationName,
+                tenantId,
+                userId,
+                dataLength: JSON.stringify(data).length,
+              });
+            }
+          })
+          .catch((err) => {
+            logger.error("Failed to cache GraphQL response:", err);
+          });
       }
 
-      res.set('X-Cache', 'MISS');
-      res.set('X-Cache-Key', cacheKey);
+      res.set("X-Cache", "MISS");
+      res.set("X-Cache-Key", cacheKey);
       return originalJson(data);
     };
 
@@ -467,19 +468,19 @@ export const registerPersistedQuery = async (
   tags?: string[]
 ): Promise<string> => {
   const persisted = await queryStore.saveQuery(query, tenantId, tags);
-  logger.info('Registered persisted query', {
+  logger.info("Registered persisted query", {
     queryId: persisted.id,
     operationHash: persisted.hash,
     tenantId,
-    tags
+    tags,
   });
   return persisted.id;
 };
 
 // Initialize the GraphQL caching system
 export const initGraphQLCaching = async (
-  pool: Pool, 
-  redis: Redis, 
+  pool: Pool,
+  redis: Redis,
   config?: Partial<CacheConfig>
 ): Promise<{
   queryStore: PersistedQueryStore;
@@ -495,12 +496,12 @@ export const initGraphQLCaching = async (
   const persistedQueryMiddleware = createPersistedQueryMiddleware(queryStore, cacheManager);
   const responseCacheMiddleware = createResponseCacheMiddleware(cacheManager);
 
-  logger.info('GraphQL caching system initialized');
+  logger.info("GraphQL caching system initialized");
 
   return {
     queryStore,
     cacheManager,
     persistedQueryMiddleware,
-    responseCacheMiddleware
+    responseCacheMiddleware,
   };
 };

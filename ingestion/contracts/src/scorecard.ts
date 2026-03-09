@@ -1,4 +1,4 @@
-import { Scorecard, ValidationFinding } from './types.js';
+import { Scorecard, ValidationFinding } from "./types.js";
 
 export function buildScorecard(
   contractId: string,
@@ -6,8 +6,8 @@ export function buildScorecard(
   findings: ValidationFinding[],
   webhooksDelivered: number
 ): Scorecard {
-  const critical = findings.filter((finding) => finding.severity === 'error').length;
-  const warnings = findings.filter((finding) => finding.severity === 'warning').length;
+  const critical = findings.filter((finding) => finding.severity === "error").length;
+  const warnings = findings.filter((finding) => finding.severity === "warning").length;
 
   const completeness = Math.max(0, 100 - warnings * 10 - critical * 20);
   const safety = Math.max(0, 100 - critical * 25);
@@ -20,6 +20,6 @@ export function buildScorecard(
     safety,
     governance,
     webhooksDelivered,
-    findings
+    findings,
   };
 }

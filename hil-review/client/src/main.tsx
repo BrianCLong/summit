@@ -1,15 +1,16 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import App from './App';
-import './styles.css';
+import React from "react";
+import ReactDOM from "react-dom/client";
 
-const rootElement = document.getElementById('root');
+import App from "./App";
+import "./styles.css";
+
+const rootElement = document.getElementById("root");
 if (rootElement) {
   ReactDOM.createRoot(rootElement).render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
+    <React.StrictMode>
+      <App />
+    </React.StrictMode>
   );
 } else {
-  process.stderr.write('Failed to find the root element\n');
+  process.stderr.write("Failed to find the root element\n");
 }

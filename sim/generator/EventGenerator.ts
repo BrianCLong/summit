@@ -1,3 +1,5 @@
 export class EventGenerator {
-  generate() { return "event"; }
+  generate() {
+    return "event";
+  }
 }

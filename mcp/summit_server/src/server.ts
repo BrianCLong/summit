@@ -1,17 +1,14 @@
-import { randomUUID } from 'crypto';
-import type {
-  EvidenceEvent,
-  ToolExecutionContext,
-  ToolExecutionResult,
-} from './types.js';
-import { sanitizeOutput } from './sanitization/sanitize.js';
-import { EvidenceStore } from './evidence/evidence-store.js';
-import { ToolRegistry } from './tools/tool-registry.js';
-import { SkillsRegistry } from './skills/skills-registry.js';
-import { createBuiltinTools } from './tools/builtin-tools.js';
-import { evaluatePolicy } from './policy/policy-gate.js';
-import { executeReact, type ReactRequest } from './react/react-loop.js';
-import { stableStringify } from './utils/stable-json.js';
+import { randomUUID } from "crypto";
+
+import { EvidenceStore } from "./evidence/evidence-store.js";
+import { evaluatePolicy } from "./policy/policy-gate.js";
+import { executeReact, type ReactRequest } from "./react/react-loop.js";
+import { sanitizeOutput } from "./sanitization/sanitize.js";
+import { SkillsRegistry } from "./skills/skills-registry.js";
+import { createBuiltinTools } from "./tools/builtin-tools.js";
+import { ToolRegistry } from "./tools/tool-registry.js";
+import type { EvidenceEvent, ToolExecutionContext, ToolExecutionResult } from "./types.js";
+import { stableStringify } from "./utils/stable-json.js";
 
 export type McpRequest = {
   sessionId?: string;
@@ -26,16 +23,16 @@ export type McpRequest = {
   };
   request:
     | {
-        type: 'tool';
+        type: "tool";
         toolId: string;
         input: Record<string, unknown>;
       }
     | {
-        type: 'react';
+        type: "react";
         react: ReactRequest;
       }
     | {
-        type: 'route_tools';
+        type: "route_tools";
         query: string;
         limit?: number;
       };
@@ -65,7 +62,7 @@ export class McpServer {
     toolRegistry: ToolRegistry,
     skillsRegistry: SkillsRegistry,
     evidenceStore: EvidenceStore,
-    options: McpServerOptions,
+    options: McpServerOptions
   ) {
     this.toolRegistry = toolRegistry;
     this.skillsRegistry = skillsRegistry;
@@ -82,18 +79,13 @@ export class McpServer {
         getToolSchema: (toolId) => toolRegistry.getSchema(toolId),
         skillsRegistry,
         evidenceStore,
-      }),
+      })
     );
-    return new McpServer(
-      toolRegistry,
-      skillsRegistry,
-      evidenceStore,
-      {
-        maxSessionsPerTenant: 3,
-        maxToolCallsPerRequest: 5,
-        ...options,
-      },
-    );
+    return new McpServer(toolRegistry, skillsRegistry, evidenceStore, {
+      maxSessionsPerTenant: 3,
+      maxToolCallsPerRequest: 5,
+      ...options,
+    });
   }
 
   async handle(request: McpRequest): Promise<McpResponse> {
@@ -105,7 +97,7 @@ export class McpServer {
         sessionId,
         traceId,
         ok: false,
-        error: 'Max concurrent sessions exceeded for tenant',
+        error: "Max concurrent sessions exceeded for tenant",
       };
     }
 
@@ -123,7 +115,7 @@ export class McpServer {
       timestamp: new Date().toISOString(),
       traceId,
       sessionId,
-      type: 'request',
+      type: "request",
       detail: {
         type: request.request.type,
         actor: request.actor,
@@ -132,29 +124,24 @@ export class McpServer {
     });
 
     try {
-      if (request.request.type === 'route_tools') {
+      if (request.request.type === "route_tools") {
         const routed = this.toolRegistry.routeTools(
           request.request.query,
-          request.request.limit ?? 5,
+          request.request.limit ?? 5
         );
         return { sessionId, traceId, ok: true, data: routed };
       }
-      if (request.request.type === 'react') {
+      if (request.request.type === "react") {
         const response = await executeReact(
           this.toolRegistry,
           context,
           request.request.react,
           this.options.maxToolCallsPerRequest,
-          (toolId, input, toolContext) =>
-            this.executeTool(toolId, input, toolContext),
+          (toolId, input, toolContext) => this.executeTool(toolId, input, toolContext)
         );
         return { sessionId, traceId, ok: true, data: response };
       }
-      const result = await this.executeTool(
-        request.request.toolId,
-        request.request.input,
-        context,
-      );
+      const result = await this.executeTool(request.request.toolId, request.request.input, context);
       return {
         sessionId,
         traceId,
@@ -168,7 +155,7 @@ export class McpServer {
         timestamp: new Date().toISOString(),
         traceId,
         sessionId,
-        type: 'error',
+        type: "error",
         detail: { message },
       });
       return { sessionId, traceId, ok: false, error: message };
@@ -178,7 +165,7 @@ export class McpServer {
   private async executeTool(
     toolId: string,
     input: Record<string, unknown>,
-    context: ToolExecutionContext,
+    context: ToolExecutionContext
   ): Promise<ToolExecutionResult<unknown>> {
     const tool = this.toolRegistry.getTool(toolId);
     const parsed = tool.schema.inputSchema.safeParse(input);
@@ -195,11 +182,11 @@ export class McpServer {
       timestamp: new Date().toISOString(),
       traceId: context.traceId,
       sessionId: context.sessionId,
-      type: 'policy',
+      type: "policy",
       detail: decision,
     });
 
-    if (decision.decision === 'deny') {
+    if (decision.decision === "deny") {
       return { ok: false, error: decision.reason };
     }
 
@@ -223,7 +210,7 @@ export class McpServer {
       timestamp: new Date().toISOString(),
       traceId: context.traceId,
       sessionId: context.sessionId,
-      type: 'tool',
+      type: "tool",
       detail: {
         toolId: tool.schema.id,
         durationMs: Date.now() - start,
@@ -236,6 +223,7 @@ export class McpServer {
   private logEvent(event: EvidenceEvent): void {
     this.evidenceStore.recordEvent(event);
     const payload = stableStringify(event as never);
+    // eslint-disable-next-line no-console
     console.info(payload);
   }
 

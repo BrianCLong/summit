@@ -1,13 +1,13 @@
 export type TraceEventType =
-  | 'run_start'
-  | 'run_end'
-  | 'case_start'
-  | 'case_end'
-  | 'command_start'
-  | 'command_end'
-  | 'file_changes'
-  | 'artifact_written'
-  | 'metric';
+  | "run_start"
+  | "run_end"
+  | "case_start"
+  | "case_end"
+  | "command_start"
+  | "command_end"
+  | "file_changes"
+  | "artifact_written"
+  | "metric";
 
 export interface TraceEvent {
   ts: string;

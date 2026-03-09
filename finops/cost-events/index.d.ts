@@ -3,36 +3,36 @@
  * This event is designed to be privacy-safe, avoiding PII.
  */
 export interface CostEvent {
-    id: string;
-    timestamp: string;
-    tenantHash: string;
-    scopeHash: string;
-    operationType: 'query' | 'ingest' | 'export' | 'storage_growth';
-    units: number;
-    dimensions: CostDimensions;
-    correlationId: string;
+  id: string;
+  timestamp: string;
+  tenantHash: string;
+  scopeHash: string;
+  operationType: "query" | "ingest" | "export" | "storage_growth";
+  units: number;
+  dimensions: CostDimensions;
+  correlationId: string;
 }
 /**
  * Quantitative, non-sensitive dimensions of an operation used for cost calculation.
  * All dimensions are optional and bounded to prevent high cardinality.
  */
 export interface CostDimensions {
-    query_complexity?: number;
-    rows_scanned?: number;
-    rows_returned?: number;
-    io_bytes?: number;
-    objects_written?: number;
-    cpu_ms?: number;
+  query_complexity?: number;
+  rows_scanned?: number;
+  rows_returned?: number;
+  io_bytes?: number;
+  objects_written?: number;
+  cpu_ms?: number;
 }
 /**
  * Input for the unit calculator.
  */
 export interface CostCalculationInput {
-    operationType: CostEvent['operationType'];
-    dimensions: CostDimensions;
-    tenantId: string;
-    scopeId: string;
-    correlationId: string;
+  operationType: CostEvent["operationType"];
+  dimensions: CostDimensions;
+  tenantId: string;
+  scopeId: string;
+  correlationId: string;
 }
 /**
  * Calculates a deterministic cost in abstract units.
@@ -40,7 +40,10 @@ export interface CostCalculationInput {
  * @param version - The version of the weights to use.
  * @returns The calculated cost in units.
  */
-export declare function calculateCostUnits(input: Omit<CostCalculationInput, 'tenantId' | 'scopeId' | 'correlationId'>, version?: string): number;
+export declare function calculateCostUnits(
+  input: Omit<CostCalculationInput, "tenantId" | "scopeId" | "correlationId">,
+  version?: string
+): number;
 /**
  * Constructs and "emits" a cost event.
  * In a real system, this would send the event to a logging pipeline,

@@ -1,6 +1,11 @@
-import { SnapshotStamp } from './schema';
+import { SnapshotStamp } from "./schema";
 
-export function buildSnapshot(stampId: string, utc: string, sources: number, claims: number): SnapshotStamp {
+export function buildSnapshot(
+  stampId: string,
+  utc: string,
+  sources: number,
+  claims: number
+): SnapshotStamp {
   return {
     snapshot_id: stampId,
     as_of_utc: utc,

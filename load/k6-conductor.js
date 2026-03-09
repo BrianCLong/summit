@@ -1,104 +1,103 @@
 // k6 Load Test for Conductor Routing Hot Paths
 // Tests routing performance under various load conditions
 
-import http from 'k6/http';
-import { sleep, check } from 'k6';
-import { Rate, Trend, Counter } from 'k6/metrics';
+import { sleep, check } from "k6";
+import http from "k6/http";
+import { Rate, Trend, Counter } from "k6/metrics";
 
 // Custom metrics
-export const routingErrors = new Rate('routing_errors');
-export const routingLatency = new Trend('routing_latency');
-export const routingThroughput = new Counter('routing_requests');
-export const expertSelectionDistribution = new Counter('expert_selection');
+export const routingErrors = new Rate("routing_errors");
+export const routingLatency = new Trend("routing_latency");
+export const routingThroughput = new Counter("routing_requests");
+export const expertSelectionDistribution = new Counter("expert_selection");
 
 // Load test configuration
 export const options = {
   stages: [
-    { duration: '30s', target: 5 }, // Ramp up to 5 users
-    { duration: '1m', target: 10 }, // Stay at 10 users
-    { duration: '2m', target: 25 }, // Ramp up to 25 users
-    { duration: '3m', target: 50 }, // Peak load at 50 users
-    { duration: '2m', target: 25 }, // Ramp down to 25 users
-    { duration: '1m', target: 10 }, // Ramp down to 10 users
-    { duration: '30s', target: 0 }, // Ramp down to 0 users
+    { duration: "30s", target: 5 }, // Ramp up to 5 users
+    { duration: "1m", target: 10 }, // Stay at 10 users
+    { duration: "2m", target: 25 }, // Ramp up to 25 users
+    { duration: "3m", target: 50 }, // Peak load at 50 users
+    { duration: "2m", target: 25 }, // Ramp down to 25 users
+    { duration: "1m", target: 10 }, // Ramp down to 10 users
+    { duration: "30s", target: 0 }, // Ramp down to 0 users
   ],
   thresholds: {
     // Core performance thresholds
-    http_req_failed: ['rate<0.01'], // Error rate < 1%
-    http_req_duration: ['p(95)<800', 'p(99)<1200'], // 95th and 99th percentiles < 800ms and 1200ms
+    http_req_failed: ["rate<0.01"], // Error rate < 1%
+    http_req_duration: ["p(95)<800", "p(99)<1200"], // 95th and 99th percentiles < 800ms and 1200ms
 
     // Conductor-specific thresholds
-    routing_errors: ['rate<0.005'], // Routing error rate < 0.5%
-    routing_latency: ['p(95)<600', 'avg<300'], // Routing latency 95th percentile and average < 600ms and 300ms
+    routing_errors: ["rate<0.005"], // Routing error rate < 0.5%
+    routing_latency: ["p(95)<600", "avg<300"], // Routing latency 95th percentile and average < 600ms and 300ms
 
     // Checks
-    checks: ['rate>0.98'], // Check success rate > 98%
+    checks: ["rate>0.98"], // Check success rate > 98%
   },
   // Resource limits
   noConnectionReuse: false,
-  userAgent: 'k6-conductor-load-test/1.0',
+  userAgent: "k6-conductor-load-test/1.0",
 };
 
 // Configuration
-const SRV = __ENV.SRV || 'http://localhost:4000/graphql';
+const SRV = __ENV.SRV || "http://localhost:4000/graphql";
 const headers = {
-  'content-type': 'application/json',
-  'user-agent': 'k6-conductor-load-test/1.0',
+  "content-type": "application/json",
+  "user-agent": "k6-conductor-load-test/1.0",
 };
 
 // Test scenarios with different routing patterns
 const scenarios = [
   // Graph-heavy queries (should route to GRAPH_TOOL)
   {
-    name: 'graph_heavy',
+    name: "graph_heavy",
     weight: 30,
     query:
-      'Find all connections between suspicious entities in the last 30 days using graph algorithms',
-    expectedExpert: 'GRAPH_TOOL',
+      "Find all connections between suspicious entities in the last 30 days using graph algorithms",
+    expectedExpert: "GRAPH_TOOL",
   },
 
   // LLM light queries (should route to LLM_LIGHT)
   {
-    name: 'llm_light',
+    name: "llm_light",
     weight: 25,
-    query: 'Summarize this brief intelligence report in 2-3 sentences',
-    expectedExpert: 'LLM_LIGHT',
+    query: "Summarize this brief intelligence report in 2-3 sentences",
+    expectedExpert: "LLM_LIGHT",
   },
 
   // LLM heavy queries (should route to LLM_HEAVY)
   {
-    name: 'llm_heavy',
+    name: "llm_heavy",
     weight: 20,
     query:
-      'Analyze this complex geopolitical situation and provide detailed strategic recommendations with multiple scenarios and risk assessments',
-    expectedExpert: 'LLM_HEAVY',
+      "Analyze this complex geopolitical situation and provide detailed strategic recommendations with multiple scenarios and risk assessments",
+    expectedExpert: "LLM_HEAVY",
   },
 
   // RAG queries (should route to RAG_TOOL)
   {
-    name: 'rag_search',
+    name: "rag_search",
     weight: 15,
     query:
-      'Search our knowledge base for information about cyber threat actors and their recent campaigns',
-    expectedExpert: 'RAG_TOOL',
+      "Search our knowledge base for information about cyber threat actors and their recent campaigns",
+    expectedExpert: "RAG_TOOL",
   },
 
   // Files operations (should route to FILES_TOOL)
   {
-    name: 'files_ops',
+    name: "files_ops",
     weight: 5,
-    query:
-      'Export the investigation results to PDF format with executive summary',
-    expectedExpert: 'FILES_TOOL',
+    query: "Export the investigation results to PDF format with executive summary",
+    expectedExpert: "FILES_TOOL",
   },
 
   // OSINT queries (should route to OSINT_TOOL)
   {
-    name: 'osint_lookup',
+    name: "osint_lookup",
     weight: 5,
     query:
-      'Gather open source intelligence on this organization from social media and news sources',
-    expectedExpert: 'OSINT_TOOL',
+      "Gather open source intelligence on this organization from social media and news sources",
+    expectedExpert: "OSINT_TOOL",
   },
 ];
 
@@ -156,8 +155,8 @@ function testPreviewRouting(scenario) {
 
   // Validate response
   const success = check(response, {
-    'status is 200': (r) => r.status === 200,
-    'has data': (r) => {
+    "status is 200": (r) => r.status === 200,
+    "has data": (r) => {
       try {
         const data = r.json();
         return data.data && data.data.previewRouting;
@@ -165,7 +164,7 @@ function testPreviewRouting(scenario) {
         return false;
       }
     },
-    'expert selected': (r) => {
+    "expert selected": (r) => {
       try {
         const data = r.json();
         return data.data.previewRouting.expert !== null;
@@ -173,15 +172,15 @@ function testPreviewRouting(scenario) {
         return false;
       }
     },
-    'confidence present': (r) => {
+    "confidence present": (r) => {
       try {
         const data = r.json();
-        return typeof data.data.previewRouting.confidence === 'number';
+        return typeof data.data.previewRouting.confidence === "number";
       } catch (_e) {
         return false;
       }
     },
-    'response time OK': () => latency < 1000,
+    "response time OK": () => latency < 1000,
   });
 
   if (!success) {
@@ -191,11 +190,7 @@ function testPreviewRouting(scenario) {
   // Track expert selection distribution
   try {
     const data = response.json();
-    if (
-      data.data &&
-      data.data.previewRouting &&
-      data.data.previewRouting.expert
-    ) {
+    if (data.data && data.data.previewRouting && data.data.previewRouting.expert) {
       expertSelectionDistribution.add(1, {
         expert: data.data.previewRouting.expert,
       });
@@ -239,8 +234,8 @@ function testConductExecution(scenario) {
   const response = http.post(SRV, query, { headers });
 
   check(response, {
-    'conduct status is 200': (r) => r.status === 200,
-    'conduct has data': (r) => {
+    "conduct status is 200": (r) => r.status === 200,
+    "conduct has data": (r) => {
       try {
         const data = r.json();
         return data.data && data.data.conduct;
@@ -248,7 +243,7 @@ function testConductExecution(scenario) {
         return false;
       }
     },
-    'conduct has expert': (r) => {
+    "conduct has expert": (r) => {
       try {
         const data = r.json();
         return data.data.conduct.expertId !== null;
@@ -256,7 +251,7 @@ function testConductExecution(scenario) {
         return false;
       }
     },
-    'conduct has audit': (r) => {
+    "conduct has audit": (r) => {
       try {
         const data = r.json();
         return data.data.conduct.auditId !== null;
@@ -292,9 +287,7 @@ export function setup() {
   // Scenarios: ${scenarios.map((s) => `${s.name} (${s.weight}%)`).join(', ')}
 
   // Health check before starting
-  const healthCheck = http.get(
-    `${SRV.replace('/graphql', '')}/health/conductor`,
-  );
+  const healthCheck = http.get(`${SRV.replace("/graphql", "")}/health/conductor`);
   if (healthCheck.status !== 200) {
     throw new Error(`Health check failed: ${healthCheck.status}`);
   }

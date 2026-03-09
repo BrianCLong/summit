@@ -1,5 +1,6 @@
-import { QueueJob, QueueProvider, EnqueueReceipt } from './provider';
-import * as crypto from 'crypto';
+import * as crypto from "crypto";
+
+import { QueueJob, QueueProvider, EnqueueReceipt } from "./provider";
 
 export interface GovernanceConfig {
   maxRetries: number;
@@ -16,10 +17,10 @@ export class GovernedQueueProvider implements QueueProvider {
   }
 
   private hashPayload(payload: any): string {
-    return crypto.createHash('sha256').update(JSON.stringify(payload)).digest('hex');
+    return crypto.createHash("sha256").update(JSON.stringify(payload)).digest("hex");
   }
 
-  async enqueue(job: QueueJob): Promise<EnqueueReceipt> {
+  enqueue(job: QueueJob): Promise<EnqueueReceipt> {
     if ((job.retries || 0) > this.config.maxRetries) {
       throw new Error(`Retry cap hit. Max retries: ${this.config.maxRetries}`);
     }
@@ -36,7 +37,7 @@ export class GovernedQueueProvider implements QueueProvider {
     return this.baseProvider.enqueue(job);
   }
 
-  async getStatus(jobId: string) {
+  getStatus(jobId: string) {
     return this.baseProvider.getStatus(jobId);
   }
 

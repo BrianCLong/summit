@@ -1,4 +1,5 @@
 import { createHash } from "crypto";
+
 import { ChunkRef } from "../interfaces.js";
 
 export interface Chunker {
@@ -20,7 +21,7 @@ export class LineChunker implements Chunker {
         start_line: start,
         end_line: end,
         content_hash: hash,
-        path_token: filePath
+        path_token: filePath,
       });
     }
     return out;

@@ -1,4 +1,4 @@
-import { MemoryRecord } from '../types';
+import { MemoryRecord } from "../types";
 
 export interface PortableBundle {
   version: string;
@@ -9,8 +9,12 @@ export interface PortableBundle {
   signature: string;
 }
 
-export function pack(userId: string, contextSpace: string, memories: MemoryRecord[]): PortableBundle {
-  if (process.env.MEMORY_PORTABILITY_ENABLED !== 'true') {
+export function pack(
+  userId: string,
+  contextSpace: string,
+  memories: MemoryRecord[]
+): PortableBundle {
+  if (process.env.MEMORY_PORTABILITY_ENABLED !== "true") {
     throw new Error("Memory portability is currently disabled.");
   }
 
@@ -20,7 +24,7 @@ export function pack(userId: string, contextSpace: string, memories: MemoryRecor
     contextSpace,
     memories,
     exportedAt: Date.now(),
-    signature: "simulated-hmac-signature"
+    signature: "simulated-hmac-signature",
   };
 
   return bundle;

@@ -1,10 +1,10 @@
-import { appendFileSync, mkdirSync } from 'fs';
-import { join } from 'path';
+import { appendFileSync, mkdirSync } from "fs";
+import { join } from "path";
 
 export class AppendOnlyAuditLog {
   private readonly file: string;
 
-  constructor(filename = 'audit.log') {
+  constructor(filename = "audit.log") {
     this.file = join(process.cwd(), filename);
     mkdirSync(process.cwd(), { recursive: true });
   }

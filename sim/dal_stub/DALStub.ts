@@ -1,3 +1,5 @@
 export class DALStub {
-  stub() { return "stub"; }
+  stub() {
+    return "stub";
+  }
 }

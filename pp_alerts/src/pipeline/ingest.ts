@@ -1,4 +1,4 @@
-import { validate } from '../policy/no_plaintext_sensitive';
+import { validate } from "../policy/no_plaintext_sensitive";
 
 export interface IngestPayload {
   topology: any; // GraphTopology

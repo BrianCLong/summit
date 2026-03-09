@@ -1,14 +1,13 @@
-import { readFileSync } from 'fs';
-import { fileURLToPath } from 'url';
-import path from 'path';
-import type { PolicyDecision, ToolExecutionContext, ToolSchema } from '../types.js';
-import type { z } from 'zod';
+import { readFileSync } from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 
-const policyPath = path.join(
-  path.dirname(fileURLToPath(import.meta.url)),
-  'policies.json',
-);
-const policies = JSON.parse(readFileSync(policyPath, 'utf-8')) as {
+import type { z } from "zod";
+
+import type { PolicyDecision, ToolExecutionContext, ToolSchema } from "../types.js";
+
+const policyPath = path.join(path.dirname(fileURLToPath(import.meta.url)), "policies.json");
+const policies = JSON.parse(readFileSync(policyPath, "utf-8")) as {
   version: string;
   rules: { id: string; riskTier: string; requiredScopes: string[] }[];
   breakGlass: { scope: string; maxDurationMinutes: number };
@@ -38,24 +37,23 @@ const isBreakGlassValid = (context: ToolExecutionContext): boolean => {
 
 const collectRequiredScopes = <TInput extends z.ZodTypeAny, TOutput>(
   tool: ToolSchema<TInput, TOutput>,
-  riskTier: string,
+  riskTier: string
 ): string[] => {
-  const ruleScopes = policies.rules.find((rule) => rule.riskTier === riskTier)
-    ?.requiredScopes;
+  const ruleScopes = policies.rules.find((rule) => rule.riskTier === riskTier)?.requiredScopes;
   return Array.from(new Set([...(ruleScopes ?? []), ...tool.requiredScopes]));
 };
 
 export const evaluatePolicy = <TInput extends z.ZodTypeAny, TOutput>(
   tool: ToolSchema<TInput, TOutput>,
-  context: ToolExecutionContext,
+  context: ToolExecutionContext
 ): PolicyDecision => {
   const requiredScopes = collectRequiredScopes(tool, tool.riskTier);
   const breakGlassAllowed = isBreakGlassValid(context);
 
   if (breakGlassAllowed) {
     return {
-      decision: 'allow',
-      reason: `Break-glass approved: ${context.breakGlass?.reason ?? 'unspecified'}`,
+      decision: "allow",
+      reason: `Break-glass approved: ${context.breakGlass?.reason ?? "unspecified"}`,
       toolId: tool.id,
       riskTier: tool.riskTier,
       scopesRequired: requiredScopes,
@@ -64,13 +62,11 @@ export const evaluatePolicy = <TInput extends z.ZodTypeAny, TOutput>(
     };
   }
 
-  const hasScopes = requiredScopes.every((scope) =>
-    context.scopes.includes(scope),
-  );
+  const hasScopes = requiredScopes.every((scope) => context.scopes.includes(scope));
   if (!hasScopes) {
     return {
-      decision: 'deny',
-      reason: `Missing required scopes: ${requiredScopes.filter((scope) => !context.scopes.includes(scope)).join(', ')}`,
+      decision: "deny",
+      reason: `Missing required scopes: ${requiredScopes.filter((scope) => !context.scopes.includes(scope)).join(", ")}`,
       toolId: tool.id,
       riskTier: tool.riskTier,
       scopesRequired: requiredScopes,
@@ -80,8 +76,8 @@ export const evaluatePolicy = <TInput extends z.ZodTypeAny, TOutput>(
   }
 
   return {
-    decision: 'allow',
-    reason: 'Policy allowlist satisfied',
+    decision: "allow",
+    reason: "Policy allowlist satisfied",
     toolId: tool.id,
     riskTier: tool.riskTier,
     scopesRequired: requiredScopes,

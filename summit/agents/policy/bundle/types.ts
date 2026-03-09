@@ -1,7 +1,7 @@
-export type BundleEnv = 'dev' | 'test' | 'prod';
+export type BundleEnv = "dev" | "test" | "prod";
 
 export interface PolicySignature {
-  type: 'sha256';
+  type: "sha256";
   signer: string;
   sig: string;
 }

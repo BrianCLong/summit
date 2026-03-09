@@ -1,4 +1,4 @@
-export type CostBucket = 'compute' | 'storage' | 'egress' | 'third_party';
+export type CostBucket = "compute" | "storage" | "egress" | "third_party";
 
 export interface MeteringRatios {
   computePerUnitUsd: number;
@@ -46,53 +46,40 @@ function roundCurrency(value: number): number {
 
 export function allocateCostBuckets(
   usage: MeteredUsage,
-  ratios: MeteringRatios = defaultMeteringRatios,
+  ratios: MeteringRatios = defaultMeteringRatios
 ): AllocationResult {
-  const computeCost = roundCurrency(
-    (usage.computeUnits || 0) * ratios.computePerUnitUsd,
-  );
-  const storageCost = roundCurrency(
-    (usage.storageGbHours || 0) * ratios.storagePerGbHourUsd,
-  );
-  const egressCost = roundCurrency(
-    (usage.egressGb || 0) * ratios.egressPerGbUsd,
-  );
+  const computeCost = roundCurrency((usage.computeUnits || 0) * ratios.computePerUnitUsd);
+  const storageCost = roundCurrency((usage.storageGbHours || 0) * ratios.storagePerGbHourUsd);
+  const egressCost = roundCurrency((usage.egressGb || 0) * ratios.egressPerGbUsd);
   const thirdPartyCost = roundCurrency(
-    (usage.thirdPartyRequests || 0) * ratios.thirdPartyPerRequestUsd,
+    (usage.thirdPartyRequests || 0) * ratios.thirdPartyPerRequestUsd
   );
 
-  const totalCost =
-    computeCost + storageCost + egressCost + thirdPartyCost || 0;
+  const totalCost = computeCost + storageCost + egressCost + thirdPartyCost || 0;
 
   const buckets: AllocationBreakdown[] = [
-    { bucket: 'compute' as CostBucket, costUsd: computeCost, units: usage.computeUnits },
-    { bucket: 'storage' as CostBucket, costUsd: storageCost, units: usage.storageGbHours },
-    { bucket: 'egress' as CostBucket, costUsd: egressCost, units: usage.egressGb },
+    { bucket: "compute" as CostBucket, costUsd: computeCost, units: usage.computeUnits },
+    { bucket: "storage" as CostBucket, costUsd: storageCost, units: usage.storageGbHours },
+    { bucket: "egress" as CostBucket, costUsd: egressCost, units: usage.egressGb },
     {
-      bucket: 'third_party' as CostBucket,
+      bucket: "third_party" as CostBucket,
       costUsd: thirdPartyCost,
       units: usage.thirdPartyRequests,
     },
   ].map((entry) => ({
     ...entry,
-    allocationPct:
-      totalCost > 0 ? Math.round((entry.costUsd / totalCost) * 10000) / 100 : 0,
+    allocationPct: totalCost > 0 ? Math.round((entry.costUsd / totalCost) * 10000) / 100 : 0,
   }));
 
   return {
     totalCostUsd: roundCurrency(totalCost),
     buckets,
     unitCosts: {
-      costPerComputeUnit:
-        usage.computeUnits > 0 ? computeCost / usage.computeUnits : 0,
-      costPerGbHour:
-        usage.storageGbHours > 0 ? storageCost / usage.storageGbHours : 0,
-      costPerEgressGb:
-        usage.egressGb > 0 ? egressCost / usage.egressGb : 0,
+      costPerComputeUnit: usage.computeUnits > 0 ? computeCost / usage.computeUnits : 0,
+      costPerGbHour: usage.storageGbHours > 0 ? storageCost / usage.storageGbHours : 0,
+      costPerEgressGb: usage.egressGb > 0 ? egressCost / usage.egressGb : 0,
       costPerThirdPartyRequest:
-        usage.thirdPartyRequests > 0
-          ? thirdPartyCost / usage.thirdPartyRequests
-          : 0,
+        usage.thirdPartyRequests > 0 ? thirdPartyCost / usage.thirdPartyRequests : 0,
     },
     meteringApplied: ratios,
   };

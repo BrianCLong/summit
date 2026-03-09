@@ -1,4 +1,4 @@
-export type RiskLevel = 'low' | 'medium' | 'high';
+export type RiskLevel = "low" | "medium" | "high";
 
 export interface Metric {
   name: string;
@@ -46,7 +46,7 @@ export interface ModelCardInput {
 }
 
 export interface SignatureBlock {
-  algorithm: 'ed25519';
+  algorithm: "ed25519";
   publicKey: string;
   value: string;
 }

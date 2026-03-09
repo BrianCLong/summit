@@ -1,4 +1,4 @@
-import { RawIntelRecord } from './config';
+import { RawIntelRecord } from "./config";
 
 export function normalizeRecord(raw: RawIntelRecord) {
   return {

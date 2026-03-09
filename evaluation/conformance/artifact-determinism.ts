@@ -1,4 +1,4 @@
-import { canonicalizeJson } from '../utils/canonical-json';
+import { canonicalizeJson } from "../utils/canonical-json";
 
 export interface DeterminismCheckResult {
   isDeterministic: boolean;
@@ -29,6 +29,6 @@ export function checkArtifactDeterminism(artifact: any): DeterminismCheckResult 
 
   return {
     isDeterministic: violations.length === 0,
-    violations
+    violations,
   };
 }

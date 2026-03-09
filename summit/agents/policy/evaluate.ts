@@ -1,7 +1,7 @@
 import { minimatch } from "minimatch";
 
-import type { PolicyDecision, SkillInvocation } from "../skills/types.js";
 import type { PolicyRule, SkillPolicy } from "./load-policy.js";
+import type { PolicyDecision, SkillInvocation } from "../skills/types.js";
 
 function intersects(needles: string[] | undefined, haystack: string[]): boolean {
   if (!needles || needles.length === 0) {

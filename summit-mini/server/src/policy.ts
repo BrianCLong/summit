@@ -1,4 +1,5 @@
 import { nanoid } from "nanoid";
+
 import type { PolicyDecisionV01 } from "./types.js";
 
 // Simple built-in policy (replace later with OPA)
@@ -24,7 +25,7 @@ export function evaluatePolicy(params: { content: string; receiptRef: string }):
       result: "deny",
       reasons,
       obligations: [],
-      receiptRef
+      receiptRef,
     };
   }
 
@@ -39,7 +40,7 @@ export function evaluatePolicy(params: { content: string; receiptRef: string }):
       result: "allow_with_obligations",
       reasons,
       obligations,
-      receiptRef
+      receiptRef,
     };
   }
 
@@ -51,6 +52,6 @@ export function evaluatePolicy(params: { content: string; receiptRef: string }):
     result: "allow",
     reasons: ["No sensitive patterns detected by builtin policy."],
     obligations: [],
-    receiptRef
+    receiptRef,
   };
 }

@@ -1,14 +1,15 @@
-import { z } from 'zod';
+import { z } from "zod";
+
+import type { EvidenceStore } from "../evidence/evidence-store.js";
+import type { SkillsRegistry } from "../skills/skills-registry.js";
 import type {
   EvidenceBundle,
   ToolDefinition,
   ToolExecutionContext,
   ToolIndexEntry,
   ToolSchema,
-} from '../types.js';
-import type { EvidenceStore } from '../evidence/evidence-store.js';
-import type { SkillsRegistry } from '../skills/skills-registry.js';
-import { hashJson } from '../utils/hash.js';
+} from "../types.js";
+import { hashJson } from "../utils/hash.js";
 
 const limitedString = (max: number) => z.string().min(1).max(max);
 
@@ -19,40 +20,38 @@ type BuiltinToolDeps = {
   evidenceStore: EvidenceStore;
 };
 
-export const createBuiltinTools = (
-  deps: BuiltinToolDeps,
-): ToolDefinition<any, any>[] => {
+export const createBuiltinTools = (deps: BuiltinToolDeps): ToolDefinition<any, any>[] => {
   const listCapabilities: ToolDefinition<
     z.ZodTypeAny,
     {
       tools: ToolIndexEntry[];
-      skills: ReturnType<SkillsRegistry['list']>;
+      skills: ReturnType<SkillsRegistry["list"]>;
     }
   > = {
     schema: {
-      id: 'list_capabilities',
-      name: 'List capabilities',
-      description: 'Return lightweight capability and skill indexes.',
-      tags: ['capabilities', 'discovery'],
-      riskTier: 'low',
+      id: "list_capabilities",
+      name: "List capabilities",
+      description: "Return lightweight capability and skill indexes.",
+      tags: ["capabilities", "discovery"],
+      riskTier: "low",
       requiredScopes: [],
-      costHint: 'low',
-      version: 'v1',
+      costHint: "low",
+      version: "v1",
       inputSchema: z.object({}).strict(),
       outputSchema: z.object({
         tools: z.array(z.any()),
         skills: z.array(z.any()),
       }),
-      inputJsonSchema: { type: 'object', properties: {}, additionalProperties: false },
+      inputJsonSchema: { type: "object", properties: {}, additionalProperties: false },
       outputJsonSchema: {
-        type: 'object',
+        type: "object",
         properties: {
-          tools: { type: 'array', items: { type: 'object' } },
-          skills: { type: 'array', items: { type: 'object' } },
+          tools: { type: "array", items: { type: "object" } },
+          skills: { type: "array", items: { type: "object" } },
         },
       },
     },
-    handler: async () => ({
+    handler: () => ({
       tools: deps.getToolIndex(),
       skills: deps.skillsRegistry.list(),
     }),
@@ -63,34 +62,34 @@ export const createBuiltinTools = (
     { schema: ToolSchema<any, any>; schemaHash: string }
   > = {
     schema: {
-      id: 'get_tool_schema',
-      name: 'Get tool schema',
-      description: 'Return full tool schema on-demand.',
-      tags: ['capabilities', 'schema'],
-      riskTier: 'low',
+      id: "get_tool_schema",
+      name: "Get tool schema",
+      description: "Return full tool schema on-demand.",
+      tags: ["capabilities", "schema"],
+      riskTier: "low",
       requiredScopes: [],
-      costHint: 'low',
-      version: 'v1',
+      costHint: "low",
+      version: "v1",
       inputSchema: z.object({ tool_id: limitedString(80) }).strict(),
       outputSchema: z.object({
         schema: z.any(),
         schemaHash: z.string(),
       }),
       inputJsonSchema: {
-        type: 'object',
-        properties: { tool_id: { type: 'string', maxLength: 80 } },
-        required: ['tool_id'],
+        type: "object",
+        properties: { tool_id: { type: "string", maxLength: 80 } },
+        required: ["tool_id"],
         additionalProperties: false,
       },
       outputJsonSchema: {
-        type: 'object',
+        type: "object",
         properties: {
-          schema: { type: 'object' },
-          schemaHash: { type: 'string' },
+          schema: { type: "object" },
+          schemaHash: { type: "string" },
         },
       },
     },
-    handler: async (input) => {
+    handler: (input) => {
       const schema = deps.getToolSchema(input.tool_id);
       return {
         schema,
@@ -106,28 +105,28 @@ export const createBuiltinTools = (
 
   const getSkillToc: ToolDefinition<
     z.ZodTypeAny,
-    { skill: ReturnType<SkillsRegistry['list']>[number] }
+    { skill: ReturnType<SkillsRegistry["list"]>[number] }
   > = {
     schema: {
-      id: 'get_skill_toc',
-      name: 'Get skill TOC',
-      description: 'Return TOC for a skill module.',
-      tags: ['skills'],
-      riskTier: 'low',
+      id: "get_skill_toc",
+      name: "Get skill TOC",
+      description: "Return TOC for a skill module.",
+      tags: ["skills"],
+      riskTier: "low",
       requiredScopes: [],
-      costHint: 'low',
-      version: 'v1',
+      costHint: "low",
+      version: "v1",
       inputSchema: z.object({ skill_id: limitedString(80) }).strict(),
       outputSchema: z.object({ skill: z.any() }),
       inputJsonSchema: {
-        type: 'object',
-        properties: { skill_id: { type: 'string', maxLength: 80 } },
-        required: ['skill_id'],
+        type: "object",
+        properties: { skill_id: { type: "string", maxLength: 80 } },
+        required: ["skill_id"],
         additionalProperties: false,
       },
       outputJsonSchema: {
-        type: 'object',
-        properties: { skill: { type: 'object' } },
+        type: "object",
+        properties: { skill: { type: "object" } },
       },
     },
     handler: async (input) => ({
@@ -135,19 +134,16 @@ export const createBuiltinTools = (
     }),
   };
 
-  const getSkillSection: ToolDefinition<
-    z.ZodTypeAny,
-    { section: string }
-  > = {
+  const getSkillSection: ToolDefinition<z.ZodTypeAny, { section: string }> = {
     schema: {
-      id: 'get_skill_section',
-      name: 'Get skill section',
-      description: 'Return a specific section from a skill module.',
-      tags: ['skills'],
-      riskTier: 'low',
+      id: "get_skill_section",
+      name: "Get skill section",
+      description: "Return a specific section from a skill module.",
+      tags: ["skills"],
+      riskTier: "low",
       requiredScopes: [],
-      costHint: 'low',
-      version: 'v1',
+      costHint: "low",
+      version: "v1",
       inputSchema: z
         .object({
           skill_id: limitedString(80),
@@ -156,24 +152,21 @@ export const createBuiltinTools = (
         .strict(),
       outputSchema: z.object({ section: z.string() }),
       inputJsonSchema: {
-        type: 'object',
+        type: "object",
         properties: {
-          skill_id: { type: 'string', maxLength: 80 },
-          section: { type: 'string', maxLength: 80 },
+          skill_id: { type: "string", maxLength: 80 },
+          section: { type: "string", maxLength: 80 },
         },
-        required: ['skill_id', 'section'],
+        required: ["skill_id", "section"],
         additionalProperties: false,
       },
       outputJsonSchema: {
-        type: 'object',
-        properties: { section: { type: 'string' } },
+        type: "object",
+        properties: { section: { type: "string" } },
       },
     },
     handler: async (input) => ({
-      section: await deps.skillsRegistry.getSkillSection(
-        input.skill_id,
-        input.section,
-      ),
+      section: await deps.skillsRegistry.getSkillSection(input.skill_id, input.section),
     }),
   };
 
@@ -182,15 +175,15 @@ export const createBuiltinTools = (
     { rows: { id: string; label: string; score: number }[] }
   > = {
     schema: {
-      id: 'run_query_readonly',
-      name: 'Run readonly query',
-      description: 'Execute a safe, mocked read query path.',
-      tags: ['query', 'readonly'],
-      riskTier: 'medium',
-      requiredScopes: ['mcp:query:readonly'],
-      costHint: 'medium',
-      version: 'v1',
-      aliases: ['query.readonly'],
+      id: "run_query_readonly",
+      name: "Run readonly query",
+      description: "Execute a safe, mocked read query path.",
+      tags: ["query", "readonly"],
+      riskTier: "medium",
+      requiredScopes: ["mcp:query:readonly"],
+      costHint: "medium",
+      version: "v1",
+      aliases: ["query.readonly"],
       inputSchema: z
         .object({
           query: limitedString(256),
@@ -203,37 +196,37 @@ export const createBuiltinTools = (
             id: z.string(),
             label: z.string(),
             score: z.number(),
-          }),
+          })
         ),
       }),
       inputJsonSchema: {
-        type: 'object',
+        type: "object",
         properties: {
-          query: { type: 'string', maxLength: 256 },
-          limit: { type: 'integer', minimum: 1, maximum: 50 },
+          query: { type: "string", maxLength: 256 },
+          limit: { type: "integer", minimum: 1, maximum: 50 },
         },
-        required: ['query'],
+        required: ["query"],
         additionalProperties: false,
       },
       outputJsonSchema: {
-        type: 'object',
+        type: "object",
         properties: {
           rows: {
-            type: 'array',
+            type: "array",
             items: {
-              type: 'object',
+              type: "object",
               properties: {
-                id: { type: 'string' },
-                label: { type: 'string' },
-                score: { type: 'number' },
+                id: { type: "string" },
+                label: { type: "string" },
+                score: { type: "number" },
               },
-              required: ['id', 'label', 'score'],
+              required: ["id", "label", "score"],
             },
           },
         },
       },
     },
-    handler: async (input: { query: string; limit: number }) => ({
+    handler: (input: { query: string; limit: number }) => ({
       rows: Array.from({ length: input.limit }).map((_, index) => ({
         id: `row-${index + 1}`,
         label: `Result for ${input.query}`,
@@ -242,36 +235,31 @@ export const createBuiltinTools = (
     }),
   };
 
-  const exportEvidence: ToolDefinition<
-    z.ZodTypeAny,
-    { bundle: EvidenceBundle }
-  > = {
+  const exportEvidence: ToolDefinition<z.ZodTypeAny, { bundle: EvidenceBundle }> = {
     schema: {
-      id: 'export_evidence',
-      name: 'Export evidence bundle',
-      description: 'Export the audit evidence bundle for a session.',
-      tags: ['evidence', 'audit'],
-      riskTier: 'medium',
-      requiredScopes: ['mcp:evidence:read'],
-      costHint: 'medium',
-      version: 'v1',
+      id: "export_evidence",
+      name: "Export evidence bundle",
+      description: "Export the audit evidence bundle for a session.",
+      tags: ["evidence", "audit"],
+      riskTier: "medium",
+      requiredScopes: ["mcp:evidence:read"],
+      costHint: "medium",
+      version: "v1",
       inputSchema: z.object({ session_id: limitedString(64) }).strict(),
       outputSchema: z.object({ bundle: z.any() }),
       inputJsonSchema: {
-        type: 'object',
-        properties: { session_id: { type: 'string', maxLength: 64 } },
-        required: ['session_id'],
+        type: "object",
+        properties: { session_id: { type: "string", maxLength: 64 } },
+        required: ["session_id"],
         additionalProperties: false,
       },
       outputJsonSchema: {
-        type: 'object',
-        properties: { bundle: { type: 'object' } },
+        type: "object",
+        properties: { bundle: { type: "object" } },
       },
     },
-    handler: async (input, context: ToolExecutionContext) => ({
-      bundle: deps.evidenceStore.exportBundle(
-        input.session_id ?? context.sessionId,
-      ),
+    handler: (input, context: ToolExecutionContext) => ({
+      bundle: deps.evidenceStore.exportBundle(input.session_id ?? context.sessionId),
     }),
   };
 

@@ -7,7 +7,7 @@ export type JsonValue =
   | { [key: string]: JsonValue };
 
 const isPlainObject = (value: JsonValue): value is { [key: string]: JsonValue } =>
-  Boolean(value) && typeof value === 'object' && !Array.isArray(value);
+  Boolean(value) && typeof value === "object" && !Array.isArray(value);
 
 export const stableSortValue = (value: JsonValue): JsonValue => {
   if (Array.isArray(value)) {
@@ -24,5 +24,4 @@ export const stableSortValue = (value: JsonValue): JsonValue => {
   return value;
 };
 
-export const stableStringify = (value: JsonValue): string =>
-  JSON.stringify(stableSortValue(value));
+export const stableStringify = (value: JsonValue): string => JSON.stringify(stableSortValue(value));

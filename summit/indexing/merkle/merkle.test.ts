@@ -1,7 +1,8 @@
-import { buildMerkleTree, diffMerkle } from "./merkle";
 import * as fs from "fs";
-import * as path from "path";
 import * as os from "os";
+import * as path from "path";
+
+import { buildMerkleTree, diffMerkle } from "./merkle";
 
 describe("Merkle Tree", () => {
   let tempDir: string;

@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect } from "react";
 
 type ShortcutMap = Record<string, () => void>;
 
@@ -9,13 +9,13 @@ type Options = {
 
 const normalize = (event: KeyboardEvent) => {
   const modifiers = [
-    event.metaKey ? 'Meta' : '',
-    event.ctrlKey ? 'Ctrl' : '',
-    event.altKey ? 'Alt' : '',
-    event.shiftKey ? 'Shift' : ''
+    event.metaKey ? "Meta" : "",
+    event.ctrlKey ? "Ctrl" : "",
+    event.altKey ? "Alt" : "",
+    event.shiftKey ? "Shift" : "",
   ]
     .filter(Boolean)
-    .join('+');
+    .join("+");
   const key = event.key.length === 1 ? event.key.toLowerCase() : event.key;
   return modifiers ? `${modifiers}+${key}` : key;
 };
@@ -37,7 +37,7 @@ export function useKeyboardShortcuts(map: ShortcutMap, options: Options = {}) {
       }
     };
 
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
   }, [map, options.enabled, options.preventDefault]);
 }

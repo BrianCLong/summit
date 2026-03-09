@@ -1,17 +1,17 @@
 export type UncertaintyState =
-  | 'Detected'
-  | 'Characterized'
-  | 'Mitigated'
-  | 'Resolved'
-  | 'Escalated'
-  | 'Expired';
+  | "Detected"
+  | "Characterized"
+  | "Mitigated"
+  | "Resolved"
+  | "Escalated"
+  | "Expired";
 
 export type UncertaintyCategory =
-  | 'data-quality'
-  | 'coordination'
-  | 'model-knowledge'
-  | 'tool-failure'
-  | 'model-disagreement';
+  | "data-quality"
+  | "coordination"
+  | "model-knowledge"
+  | "tool-failure"
+  | "model-disagreement";
 
 export interface UncertaintyScores {
   epistemic_score: number;

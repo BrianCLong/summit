@@ -1,4 +1,4 @@
-import { Component, signal, input, inject } from '@angular/core';
+import { Component, signal, input, inject } from "@angular/core";
 
 @Component({
   standalone: true,
@@ -6,7 +6,7 @@ import { Component, signal, input, inject } from '@angular/core';
     @if (visible()) {
       <div>Hello</div>
     }
-  `
+  `,
 })
 export class ModernComponent {
   data = input<string>();

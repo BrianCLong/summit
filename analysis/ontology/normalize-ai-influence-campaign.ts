@@ -1,13 +1,15 @@
-import { AiInfluenceCampaignEnricher } from '../../agents/ontology/aiInfluenceCampaignEnricher';
-import * as fs from 'fs';
-import * as path from 'path';
+import * as fs from "fs";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import * as path from "path";
+
+import { AiInfluenceCampaignEnricher } from "../../agents/ontology/aiInfluenceCampaignEnricher";
 
 export function normalizeFixtures(fixturePaths: string[]): any[] {
   const enricher = new AiInfluenceCampaignEnricher();
   const normalizedFixtures = [];
 
   for (const fp of fixturePaths) {
-    const data = JSON.parse(fs.readFileSync(fp, 'utf-8'));
+    const data = JSON.parse(fs.readFileSync(fp, "utf-8"));
     normalizedFixtures.push(enricher.enrich(data));
   }
 

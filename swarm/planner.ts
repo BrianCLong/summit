@@ -1,5 +1,9 @@
 import crypto from "crypto";
-export type SwarmRunRequest = { mode: "instant"|"thinking"|"agent"|"swarm"; prompt: string; budgets: { maxAgents:number; maxSteps:number; maxToolCalls:number; maxWallMs:number }; };
+export type SwarmRunRequest = {
+  mode: "instant" | "thinking" | "agent" | "swarm";
+  prompt: string;
+  budgets: { maxAgents: number; maxSteps: number; maxToolCalls: number; maxWallMs: number };
+};
 export type PlannedTask = { taskId: string; description: string; dependsOn: string[] };
 export type SwarmPlan = { runId: string; tasks: PlannedTask[] };
 export function deterministicRunId(req: SwarmRunRequest): string {
@@ -8,5 +12,10 @@ export function deterministicRunId(req: SwarmRunRequest): string {
 }
 export function plan(req: SwarmRunRequest): SwarmPlan {
   const runId = deterministicRunId(req);
-  return { runId, tasks: [{ taskId: "t0", description: `Execute prompt: ${req.prompt.slice(0, 50)}...`, dependsOn: [] }] };
+  return {
+    runId,
+    tasks: [
+      { taskId: "t0", description: `Execute prompt: ${req.prompt.slice(0, 50)}...`, dependsOn: [] },
+    ],
+  };
 }

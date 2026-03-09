@@ -1,4 +1,5 @@
 import React from "react";
+
 import { ingest, getGraph, getReceipts, getDecisions } from "./api";
 
 export default function App() {
@@ -42,8 +43,18 @@ export default function App() {
         <div style={{ border: "1px solid #ddd", borderRadius: 12, padding: 12 }}>
           <h2>Ingest</h2>
           <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
-            <input value={source} onChange={(e) => setSource(e.target.value)} placeholder="source" style={{ flex: 1 }} />
-            <input value={actorId} onChange={(e) => setActorId(e.target.value)} placeholder="actorId" style={{ flex: 1 }} />
+            <input
+              value={source}
+              onChange={(e) => setSource(e.target.value)}
+              placeholder="source"
+              style={{ flex: 1 }}
+            />
+            <input
+              value={actorId}
+              onChange={(e) => setActorId(e.target.value)}
+              placeholder="actorId"
+              style={{ flex: 1 }}
+            />
           </div>
           <textarea
             value={content}
@@ -69,7 +80,10 @@ export default function App() {
               <ul style={{ maxHeight: 220, overflow: "auto" }}>
                 {(graph.nodes ?? []).slice(0, 50).map((n: any) => (
                   <li key={n.id}>
-                    <code>{n.label}</code> <span style={{ opacity: 0.7 }}>({n.kind}, score {n.score})</span>
+                    <code>{n.label}</code>{" "}
+                    <span style={{ opacity: 0.7 }}>
+                      ({n.kind}, score {n.score})
+                    </span>
                   </li>
                 ))}
               </ul>
@@ -79,7 +93,10 @@ export default function App() {
               <ul style={{ maxHeight: 220, overflow: "auto" }}>
                 {(graph.edges ?? []).slice(0, 50).map((e: any) => (
                   <li key={e.id}>
-                    <code>{e.kind}</code> <span style={{ opacity: 0.7 }}>{e.src} → {e.dst}</span>
+                    <code>{e.kind}</code>{" "}
+                    <span style={{ opacity: 0.7 }}>
+                      {e.src} → {e.dst}
+                    </span>
                   </li>
                 ))}
               </ul>

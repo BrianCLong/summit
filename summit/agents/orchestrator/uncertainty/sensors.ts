@@ -1,5 +1,5 @@
-import { globalRegistry, type UncertaintyRegistry } from './registry.js';
-import type { UncertaintyCategory, UncertaintyState } from './models.js';
+import type { UncertaintyCategory, UncertaintyState } from "./models.js";
+import { globalRegistry, type UncertaintyRegistry } from "./registry.js";
 
 export interface UncertaintySensor {
   run(entityRef: string, data: Record<string, unknown>, registry: UncertaintyRegistry): void;
@@ -9,14 +9,18 @@ export class DisagreementSensor implements UncertaintySensor {
   constructor(private threshold: number = 0.3) {}
 
   private computeSimilarity(answers: string[]): number {
-    if (!answers || answers.length === 0) return 0.0;
+    if (!answers || answers.length === 0) {
+      return 0.0;
+    }
     const uniqueAnswers = new Set(answers);
     return answers.length > 1 ? 1.0 - uniqueAnswers.size / answers.length : 1.0;
   }
 
   run(entityRef: string, data: Record<string, unknown>, registry: UncertaintyRegistry): void {
     const answers = data.answers as string[] | undefined;
-    if (!answers || answers.length === 0) return;
+    if (!answers || answers.length === 0) {
+      return;
+    }
 
     const similarity = this.computeSimilarity(answers);
     const disagreement_index = 1.0 - similarity;
@@ -28,14 +32,14 @@ export class DisagreementSensor implements UncertaintySensor {
           registry.updateRecord(
             record.id,
             { disagreement_index },
-            'Characterized' as UncertaintyState,
+            "Characterized" as UncertaintyState
           );
         }
       } else {
         registry.createRecord(
           entityRef,
           { disagreement_index },
-          { category: 'model-disagreement' as UncertaintyCategory },
+          { category: "model-disagreement" as UncertaintyCategory }
         );
       }
     }
@@ -59,14 +63,14 @@ export class EvidenceSparsitySensor implements UncertaintySensor {
           registry.updateRecord(
             record.id,
             { evidence_coverage },
-            'Characterized' as UncertaintyState,
+            "Characterized" as UncertaintyState
           );
         }
       } else {
         registry.createRecord(
           entityRef,
           { evidence_coverage },
-          { category: 'data-quality' as UncertaintyCategory },
+          { category: "data-quality" as UncertaintyCategory }
         );
       }
     }
@@ -89,7 +93,9 @@ export class DiverseAgentEntropySensor implements UncertaintySensor {
 
   run(entityRef: string, data: Record<string, unknown>, registry: UncertaintyRegistry): void {
     const probabilities = data.probabilities as number[] | undefined;
-    if (!probabilities || probabilities.length === 0) return;
+    if (!probabilities || probabilities.length === 0) {
+      return;
+    }
 
     const epistemic_score = this.computeEntropy(probabilities);
 
@@ -100,14 +106,14 @@ export class DiverseAgentEntropySensor implements UncertaintySensor {
           registry.updateRecord(
             record.id,
             { epistemic_score },
-            'Characterized' as UncertaintyState,
+            "Characterized" as UncertaintyState
           );
         }
       } else {
         registry.createRecord(
           entityRef,
           { epistemic_score },
-          { category: 'model-knowledge' as UncertaintyCategory },
+          { category: "model-knowledge" as UncertaintyCategory }
         );
       }
     }
@@ -129,11 +135,16 @@ export class UncertaintySensorRunner {
     this.sensors.push(sensor);
   }
 
-  runAll(entityRef: string, data: Record<string, unknown>, registry: UncertaintyRegistry = globalRegistry): void {
+  runAll(
+    entityRef: string,
+    data: Record<string, unknown>,
+    registry: UncertaintyRegistry = globalRegistry
+  ): void {
     for (const sensor of this.sensors) {
       try {
         sensor.run(entityRef, data, registry);
       } catch (e) {
+        // eslint-disable-next-line no-console
         console.error(`Sensor failed:`, e);
       }
     }

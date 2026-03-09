@@ -1,1 +1,1 @@
-export default { dir: 'pact/pacts', spec: 2 };
+export default { dir: "pact/pacts", spec: 2 };

@@ -1,14 +1,13 @@
-import { MemoryBroker } from "./broker";
-import { MemoryRecord, MemoryScope } from "./types";
-import { canRead, canWrite } from "./policy";
 import { randomUUID } from "crypto";
+
+import { MemoryBroker } from "./broker";
+import { canRead, canWrite } from "./policy";
+import { MemoryRecord, MemoryScope } from "./types";
 
 export class InMemoryMemoryBroker implements MemoryBroker {
   private records: MemoryRecord[] = [];
 
-  async remember(
-    recordData: Omit<MemoryRecord, "id" | "createdAt">
-  ): Promise<MemoryRecord> {
+  remember(recordData: Omit<MemoryRecord, "id" | "createdAt">): Promise<MemoryRecord> {
     const decision = canWrite(recordData);
     if (!decision.allow) {
       throw new Error(`Write denied: ${decision.reason}`);
@@ -24,14 +23,14 @@ export class InMemoryMemoryBroker implements MemoryBroker {
     return record;
   }
 
-  async recall(scope: MemoryScope): Promise<MemoryRecord[]> {
+  recall(scope: MemoryScope): Promise<MemoryRecord[]> {
     return this.records.filter((record) => {
       const decision = canRead(scope, record);
       return decision.allow;
     });
   }
 
-  async update(id: string, updates: Partial<MemoryRecord>): Promise<MemoryRecord> {
+  update(id: string, updates: Partial<MemoryRecord>): Promise<MemoryRecord> {
     const index = this.records.findIndex((r) => r.id === id);
     if (index === -1) {
       throw new Error(`Record ${id} not found`);
@@ -48,14 +47,14 @@ export class InMemoryMemoryBroker implements MemoryBroker {
     return updatedRecord;
   }
 
-  async forget(id: string): Promise<void> {
+  forget(id: string): Promise<void> {
     const index = this.records.findIndex((r) => r.id === id);
     if (index !== -1) {
       this.records.splice(index, 1);
     }
   }
 
-  async export(userId: string, contextSpace: string): Promise<string> {
+  export(userId: string, contextSpace: string): Promise<string> {
     const userRecords = this.records.filter(
       (r) => r.userId === userId && r.contextSpace === contextSpace
     );

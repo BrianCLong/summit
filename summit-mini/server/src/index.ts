@@ -1,6 +1,8 @@
-import express from "express";
 import crypto from "node:crypto";
+
+import express from "express";
 import { nanoid } from "nanoid";
+
 import { openDb } from "./db.js";
 import { extractGraph } from "./ingest.js";
 import { evaluatePolicy } from "./policy.js";
@@ -22,18 +24,28 @@ app.post("/api/ingest", (req, res) => {
   const content = String(req.body?.content ?? "");
   const actorId = String(req.body?.actorId ?? "local-user");
 
-  if (!content.trim()) {return res.status(400).json({ error: "content_required" });}
+  if (!content.trim()) {
+    return res.status(400).json({ error: "content_required" });
+  }
 
   const createdAt = new Date().toISOString();
   const extracted = extractGraph(content);
 
   // Store doc
-  db.prepare("INSERT INTO docs (id, source, content, created_at) VALUES (?, ?, ?, ?)")
-    .run(extracted.docId, source, content, createdAt);
+  db.prepare("INSERT INTO docs (id, source, content, created_at) VALUES (?, ?, ?, ?)").run(
+    extracted.docId,
+    source,
+    content,
+    createdAt
+  );
 
   // Store nodes/edges
-  const insN = db.prepare("INSERT OR REPLACE INTO nodes (id, label, kind, score) VALUES (?, ?, ?, ?)");
-  const insE = db.prepare("INSERT OR REPLACE INTO edges (id, src, dst, kind, weight) VALUES (?, ?, ?, ?, ?)");
+  const insN = db.prepare(
+    "INSERT OR REPLACE INTO nodes (id, label, kind, score) VALUES (?, ?, ?, ?)"
+  );
+  const insE = db.prepare(
+    "INSERT OR REPLACE INTO edges (id, src, dst, kind, weight) VALUES (?, ?, ?, ?, ?)"
+  );
 
   const nodeIds: string[] = [];
   for (const n of extracted.nodes) {
@@ -58,29 +70,39 @@ app.post("/api/ingest", (req, res) => {
     outputs: [
       { kind: "doc", ref: extracted.docId },
       ...nodeIds.map((id) => ({ kind: "node" as const, ref: id })),
-      ...edgeIds.map((id) => ({ kind: "edge" as const, ref: id }))
+      ...edgeIds.map((id) => ({ kind: "edge" as const, ref: id })),
     ],
-    hashes: { inputSha256: extracted.inputSha256 }
+    hashes: { inputSha256: extracted.inputSha256 },
   };
 
-  db.prepare("INSERT INTO receipts (id, ts, json) VALUES (?, ?, ?)")
-    .run(receipt.receiptId, receipt.ts, JSON.stringify(receipt));
+  db.prepare("INSERT INTO receipts (id, ts, json) VALUES (?, ?, ?)").run(
+    receipt.receiptId,
+    receipt.ts,
+    JSON.stringify(receipt)
+  );
 
   // Policy decision (references receipt)
   const decision = evaluatePolicy({ content, receiptRef: receipt.receiptId });
-  db.prepare("INSERT INTO decisions (id, ts, json) VALUES (?, ?, ?)")
-    .run(decision.decisionId, decision.ts, JSON.stringify(decision));
+  db.prepare("INSERT INTO decisions (id, ts, json) VALUES (?, ?, ?)").run(
+    decision.decisionId,
+    decision.ts,
+    JSON.stringify(decision)
+  );
 
   // Optional output hash (receipt+decision)
   receipt.hashes.outputSha256 = sha256(JSON.stringify({ receipt, decision }));
-  db.prepare("UPDATE receipts SET json = ? WHERE id = ?")
-    .run(JSON.stringify(receipt), receipt.receiptId);
+  db.prepare("UPDATE receipts SET json = ? WHERE id = ?").run(
+    JSON.stringify(receipt),
+    receipt.receiptId
+  );
 
   res.json({ docId: extracted.docId, receipt, decision });
 });
 
 app.get("/api/graph", (_req, res) => {
-  const nodes = db.prepare("SELECT id, label, kind, score FROM nodes ORDER BY score DESC LIMIT 200").all();
+  const nodes = db
+    .prepare("SELECT id, label, kind, score FROM nodes ORDER BY score DESC LIMIT 200")
+    .all();
   const edges = db.prepare("SELECT id, src, dst, kind, weight FROM edges LIMIT 400").all();
   res.json({ nodes, edges });
 });

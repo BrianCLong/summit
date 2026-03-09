@@ -3,8 +3,8 @@
  * Sprint 28B+: Advanced cryptographic protocols for privacy-preserving set operations
  */
 
-import { EventEmitter } from 'events';
-import crypto from 'crypto';
+import crypto from "crypto";
+import { EventEmitter } from "events";
 
 export interface PSIDataset {
   id: string;
@@ -19,14 +19,14 @@ export interface PSIDataset {
   };
   metadata: {
     elementCount: number;
-    dataType: 'email' | 'phone' | 'identifier' | 'address' | 'generic';
+    dataType: "email" | "phone" | "identifier" | "address" | "generic";
     created: Date;
     lastAccessed: Date;
     accessCount: number;
   };
   privacy: {
     pepperSalt: string;
-    hashAlgorithm: 'sha256' | 'blake2b' | 'sha3-256';
+    hashAlgorithm: "sha256" | "blake2b" | "sha3-256";
     normalization: boolean;
   };
 }
@@ -34,15 +34,10 @@ export interface PSIDataset {
 export interface PSIProtocolConfig {
   id: string;
   name: string;
-  type:
-    | 'ecdh_psi'
-    | 'oprf_psi'
-    | 'bloom_psi'
-    | 'circuit_psi'
-    | 'polynomial_psi';
+  type: "ecdh_psi" | "oprf_psi" | "bloom_psi" | "circuit_psi" | "polynomial_psi";
   security: {
-    curveType?: 'p256' | 'p384' | 'curve25519';
-    oprfFunction?: 'ristretto255' | 'curve25519';
+    curveType?: "p256" | "p384" | "curve25519";
+    oprfFunction?: "ristretto255" | "curve25519";
     polyDegree?: number;
     falsePositiveRate?: number; // For Bloom filters
   };
@@ -56,7 +51,7 @@ export interface PSIProtocolConfig {
     differentialPrivacy: boolean;
     epsilon?: number;
     delta?: number;
-    noiseDistribution?: 'laplace' | 'gaussian';
+    noiseDistribution?: "laplace" | "gaussian";
   };
 }
 
@@ -65,31 +60,31 @@ export interface PSIJob {
   protocol: PSIProtocolConfig;
   participants: Array<{
     id: string;
-    role: 'sender' | 'receiver' | 'both';
+    role: "sender" | "receiver" | "both";
     dataset: string;
     endpoint?: string;
   }>;
-  status: 'pending' | 'setup' | 'running' | 'completed' | 'failed' | 'aborted';
+  status: "pending" | "setup" | "running" | "completed" | "failed" | "aborted";
   phases: {
     setup: {
       startTime?: Date;
       endTime?: Date;
-      status: 'pending' | 'completed' | 'failed';
+      status: "pending" | "completed" | "failed";
     };
     exchange: {
       startTime?: Date;
       endTime?: Date;
-      status: 'pending' | 'completed' | 'failed';
+      status: "pending" | "completed" | "failed";
     };
     computation: {
       startTime?: Date;
       endTime?: Date;
-      status: 'pending' | 'completed' | 'failed';
+      status: "pending" | "completed" | "failed";
     };
     verification: {
       startTime?: Date;
       endTime?: Date;
-      status: 'pending' | 'completed' | 'failed';
+      status: "pending" | "completed" | "failed";
     };
   };
   results?: {
@@ -170,17 +165,14 @@ export class PSIEngine extends EventEmitter {
    * Register dataset for PSI operations
    */
   registerDataset(
-    dataset: Omit<
-      PSIDataset,
-      'id' | 'hashedElements' | 'bloomFilter' | 'metadata'
-    >,
+    dataset: Omit<PSIDataset, "id" | "hashedElements" | "bloomFilter" | "metadata">
   ): PSIDataset {
     const fullDataset: PSIDataset = {
       ...dataset,
       id: crypto.randomUUID(),
       metadata: {
         elementCount: dataset.elements.length,
-        dataType: dataset.metadata?.dataType || 'generic',
+        dataType: dataset.metadata?.dataType || "generic",
         created: new Date(),
         lastAccessed: new Date(),
         accessCount: 0,
@@ -191,7 +183,7 @@ export class PSIEngine extends EventEmitter {
     this.preprocessDataset(fullDataset);
 
     this.datasets.set(fullDataset.id, fullDataset);
-    this.emit('dataset_registered', fullDataset);
+    this.emit("dataset_registered", fullDataset);
 
     return fullDataset;
   }
@@ -204,29 +196,29 @@ export class PSIEngine extends EventEmitter {
     datasetB: string,
     participantA: string,
     participantB: string,
-    config: Partial<PSIProtocolConfig> = {},
+    config: Partial<PSIProtocolConfig> = {}
   ): PSIJob {
-    const protocol = this.getOrCreateProtocol('ecdh_psi', config);
+    const protocol = this.getOrCreateProtocol("ecdh_psi", config);
 
     const job: PSIJob = {
       id: crypto.randomUUID(),
       protocol,
       participants: [
-        { id: participantA, role: 'sender', dataset: datasetA },
-        { id: participantB, role: 'receiver', dataset: datasetB },
+        { id: participantA, role: "sender", dataset: datasetA },
+        { id: participantB, role: "receiver", dataset: datasetB },
       ],
-      status: 'pending',
+      status: "pending",
       phases: {
-        setup: { status: 'pending' },
-        exchange: { status: 'pending' },
-        computation: { status: 'pending' },
-        verification: { status: 'pending' },
+        setup: { status: "pending" },
+        exchange: { status: "pending" },
+        computation: { status: "pending" },
+        verification: { status: "pending" },
       },
       audit: {
         createdAt: new Date(),
         createdBy: participantA,
-        purpose: 'Privacy-preserving record linkage',
-        dataUsageAgreement: 'DUA-PSI-001',
+        purpose: "Privacy-preserving record linkage",
+        dataUsageAgreement: "DUA-PSI-001",
         approvals: [],
       },
       telemetry: {
@@ -241,15 +233,15 @@ export class PSIEngine extends EventEmitter {
 
     // Execute PSI asynchronously
     this.executeECDHPSIJob(job).catch((error) => {
-      job.status = 'failed';
+      job.status = "failed";
       job.telemetry.errors.push({
         timestamp: new Date(),
-        phase: 'execution',
+        phase: "execution",
         error: error.message,
         recovered: false,
       });
       this.jobs.set(job.id, job);
-      this.emit('psi_failed', { jobId: job.id, error: error.message });
+      this.emit("psi_failed", { jobId: job.id, error: error.message });
     });
 
     return job;
@@ -263,29 +255,29 @@ export class PSIEngine extends EventEmitter {
     datasetB: string,
     participantA: string,
     participantB: string,
-    config: Partial<PSIProtocolConfig> = {},
+    config: Partial<PSIProtocolConfig> = {}
   ): PSIJob {
-    const protocol = this.getOrCreateProtocol('oprf_psi', config);
+    const protocol = this.getOrCreateProtocol("oprf_psi", config);
 
     const job: PSIJob = {
       id: crypto.randomUUID(),
       protocol,
       participants: [
-        { id: participantA, role: 'sender', dataset: datasetA },
-        { id: participantB, role: 'receiver', dataset: datasetB },
+        { id: participantA, role: "sender", dataset: datasetA },
+        { id: participantB, role: "receiver", dataset: datasetB },
       ],
-      status: 'pending',
+      status: "pending",
       phases: {
-        setup: { status: 'pending' },
-        exchange: { status: 'pending' },
-        computation: { status: 'pending' },
-        verification: { status: 'pending' },
+        setup: { status: "pending" },
+        exchange: { status: "pending" },
+        computation: { status: "pending" },
+        verification: { status: "pending" },
       },
       audit: {
         createdAt: new Date(),
         createdBy: participantA,
-        purpose: 'Privacy-preserving entity matching',
-        dataUsageAgreement: 'DUA-PSI-002',
+        purpose: "Privacy-preserving entity matching",
+        dataUsageAgreement: "DUA-PSI-002",
         approvals: [],
       },
       telemetry: {
@@ -300,9 +292,9 @@ export class PSIEngine extends EventEmitter {
 
     // Execute OPRF PSI asynchronously
     this.executeOPRFPSIJob(job).catch((error) => {
-      job.status = 'failed';
+      job.status = "failed";
       this.jobs.set(job.id, job);
-      this.emit('psi_failed', { jobId: job.id, error: error.message });
+      this.emit("psi_failed", { jobId: job.id, error: error.message });
     });
 
     return job;
@@ -316,9 +308,9 @@ export class PSIEngine extends EventEmitter {
     datasetB: string,
     participantA: string,
     participantB: string,
-    falsePositiveRate: number = 0.001,
+    falsePositiveRate: number = 0.001
   ): PSIJob {
-    const protocol = this.getOrCreateProtocol('bloom_psi', {
+    const protocol = this.getOrCreateProtocol("bloom_psi", {
       security: { falsePositiveRate },
     });
 
@@ -326,21 +318,21 @@ export class PSIEngine extends EventEmitter {
       id: crypto.randomUUID(),
       protocol,
       participants: [
-        { id: participantA, role: 'sender', dataset: datasetA },
-        { id: participantB, role: 'receiver', dataset: datasetB },
+        { id: participantA, role: "sender", dataset: datasetA },
+        { id: participantB, role: "receiver", dataset: datasetB },
       ],
-      status: 'pending',
+      status: "pending",
       phases: {
-        setup: { status: 'pending' },
-        exchange: { status: 'pending' },
-        computation: { status: 'pending' },
-        verification: { status: 'pending' },
+        setup: { status: "pending" },
+        exchange: { status: "pending" },
+        computation: { status: "pending" },
+        verification: { status: "pending" },
       },
       audit: {
         createdAt: new Date(),
         createdBy: participantA,
-        purpose: 'Large-scale privacy-preserving matching',
-        dataUsageAgreement: 'DUA-PSI-003',
+        purpose: "Large-scale privacy-preserving matching",
+        dataUsageAgreement: "DUA-PSI-003",
         approvals: [],
       },
       telemetry: {
@@ -355,9 +347,9 @@ export class PSIEngine extends EventEmitter {
 
     // Execute Bloom PSI asynchronously
     this.executeBloomPSIJob(job).catch((error) => {
-      job.status = 'failed';
+      job.status = "failed";
       this.jobs.set(job.id, job);
-      this.emit('psi_failed', { jobId: job.id, error: error.message });
+      this.emit("psi_failed", { jobId: job.id, error: error.message });
     });
 
     return job;
@@ -369,11 +361,11 @@ export class PSIEngine extends EventEmitter {
   generateLinkHints(
     jobId: string,
     maxHints: number = 1000,
-    confidenceThreshold: number = 0.8,
+    confidenceThreshold: number = 0.8
   ): Array<{ leftHash: string; rightHash: string; confidence: number }> {
     const job = this.jobs.get(jobId);
-    if (!job || job.status !== 'completed' || !job.results) {
-      throw new Error('Job not completed or results not available');
+    if (!job || job.status !== "completed" || !job.results) {
+      throw new Error("Job not completed or results not available");
     }
 
     const hints: Array<{
@@ -394,11 +386,11 @@ export class PSIEngine extends EventEmitter {
           leftHash: hint.leftHash,
           rightHash: hint.rightHash,
           confidence: hint.confidence,
-        })),
+        }))
       );
     }
 
-    this.emit('link_hints_generated', { jobId, hintCount: hints.length });
+    this.emit("link_hints_generated", { jobId, hintCount: hints.length });
     return hints;
   }
 
@@ -409,27 +401,26 @@ export class PSIEngine extends EventEmitter {
     jobId: string,
     epsilon: number,
     delta: number = 1e-6,
-    mechanism: 'laplace' | 'gaussian' = 'laplace',
+    mechanism: "laplace" | "gaussian" = "laplace"
   ): void {
     const job = this.jobs.get(jobId);
     if (!job || !job.results) {
-      throw new Error('Job or results not found');
+      throw new Error("Job or results not found");
     }
 
     const originalSize = job.results.intersectionSize;
     let noisySize: number;
 
     switch (mechanism) {
-      case 'laplace': {
+      case "laplace": {
         const laplacianNoise = this.sampleLaplace(0, 1 / epsilon);
         noisySize = Math.max(0, Math.round(originalSize + laplacianNoise));
         break;
       }
 
-      case 'gaussian': {
+      case "gaussian": {
         const sensitivity = 1; // For set intersection
-        const sigma =
-          (Math.sqrt(2 * Math.log(1.25 / delta)) * sensitivity) / epsilon;
+        const sigma = (Math.sqrt(2 * Math.log(1.25 / delta)) * sensitivity) / epsilon;
         const gaussianNoise = this.sampleGaussian(0, sigma);
         noisySize = Math.max(0, Math.round(originalSize + gaussianNoise));
         break;
@@ -448,10 +439,12 @@ export class PSIEngine extends EventEmitter {
     }
 
     // Record privacy parameters
-    if (!job.results) {job.results = { intersectionSize: 0, confidence: 0 };}
+    if (!job.results) {
+      job.results = { intersectionSize: 0, confidence: 0 };
+    }
 
     this.jobs.set(jobId, job);
-    this.emit('differential_privacy_applied', {
+    this.emit("differential_privacy_applied", {
       jobId,
       epsilon,
       delta,
@@ -468,7 +461,7 @@ export class PSIEngine extends EventEmitter {
   } {
     const job = this.jobs.get(jobId);
     if (!job) {
-      throw new Error('Job not found');
+      throw new Error("Job not found");
     }
 
     const proofs: Array<{ type: string; valid: boolean; details: any }> = [];
@@ -491,7 +484,7 @@ export class PSIEngine extends EventEmitter {
 
     const allValid = proofs.every((proof) => proof.valid);
 
-    this.emit('computation_verified', {
+    this.emit("computation_verified", {
       jobId,
       valid: allValid,
       proofCount: proofs.length,
@@ -515,9 +508,7 @@ export class PSIEngine extends EventEmitter {
 
     if (timeframe) {
       jobs = jobs.filter(
-        (job) =>
-          job.audit.createdAt >= timeframe.start &&
-          job.audit.createdAt <= timeframe.end,
+        (job) => job.audit.createdAt >= timeframe.start && job.audit.createdAt <= timeframe.end
       );
     }
 
@@ -526,7 +517,7 @@ export class PSIEngine extends EventEmitter {
         acc[job.protocol.type] = (acc[job.protocol.type] || 0) + 1;
         return acc;
       },
-      {} as Record<string, number>,
+      {} as Record<string, number>
     );
 
     const byStatus = jobs.reduce(
@@ -534,33 +525,25 @@ export class PSIEngine extends EventEmitter {
         acc[job.status] = (acc[job.status] || 0) + 1;
         return acc;
       },
-      {} as Record<string, number>,
+      {} as Record<string, number>
     );
 
-    const completedJobs = jobs.filter(
-      (job) => job.status === 'completed' && job.results,
-    );
+    const completedJobs = jobs.filter((job) => job.status === "completed" && job.results);
 
     const averageIntersectionSize =
       completedJobs.length > 0
-        ? completedJobs.reduce(
-            (sum, job) => sum + (job.results?.intersectionSize || 0),
-            0,
-          ) / completedJobs.length
+        ? completedJobs.reduce((sum, job) => sum + (job.results?.intersectionSize || 0), 0) /
+          completedJobs.length
         : 0;
 
     const averageComputationTime =
       jobs.length > 0
-        ? jobs.reduce(
-            (sum, job) => sum + job.telemetry.computation.duration,
-            0,
-          ) / jobs.length
+        ? jobs.reduce((sum, job) => sum + job.telemetry.computation.duration, 0) / jobs.length
         : 0;
 
     const totalBandwidth = jobs.reduce(
-      (sum, job) =>
-        sum + job.telemetry.bandwidth.sent + job.telemetry.bandwidth.received,
-      0,
+      (sum, job) => sum + job.telemetry.bandwidth.sent + job.telemetry.bandwidth.received,
+      0
     );
 
     return {
@@ -585,36 +568,27 @@ export class PSIEngine extends EventEmitter {
     // Hash elements with pepper/salt
     dataset.hashedElements = normalizedElements.map((element) => {
       const data = element + dataset.privacy.pepperSalt;
-      return crypto
-        .createHash(dataset.privacy.hashAlgorithm)
-        .update(data)
-        .digest('hex');
+      return crypto.createHash(dataset.privacy.hashAlgorithm).update(data).digest("hex");
     });
 
     // Create Bloom filter for large datasets
     if (dataset.elements.length > 10000) {
-      dataset.bloomFilter = this.createBloomFilter(
-        dataset.hashedElements,
-        0.001,
-      );
+      dataset.bloomFilter = this.createBloomFilter(dataset.hashedElements, 0.001);
     }
   }
 
-  private normalizeElement(
-    element: string,
-    dataType: PSIDataset['metadata']['dataType'],
-  ): string {
+  private normalizeElement(element: string, dataType: PSIDataset["metadata"]["dataType"]): string {
     switch (dataType) {
-      case 'email':
+      case "email":
         return element.toLowerCase().trim();
-      case 'phone':
-        return element.replace(/\D/g, ''); // Remove non-digits
-      case 'address':
+      case "phone":
+        return element.replace(/\D/g, ""); // Remove non-digits
+      case "address":
         return element
           .toLowerCase()
-          .replace(/[^\w\s]/g, '')
+          .replace(/[^\w\s]/g, "")
           .trim();
-      case 'identifier':
+      case "identifier":
         return element.toUpperCase().trim();
       default:
         return element.toLowerCase().trim();
@@ -623,8 +597,8 @@ export class PSIEngine extends EventEmitter {
 
   private createBloomFilter(
     elements: string[],
-    falsePositiveRate: number,
-  ): PSIDataset['bloomFilter'] {
+    falsePositiveRate: number
+  ): PSIDataset["bloomFilter"] {
     const n = elements.length;
     const m = Math.ceil((-n * Math.log(falsePositiveRate)) / Math.log(2) ** 2);
     const k = Math.ceil((m / n) * Math.log(2));
@@ -634,7 +608,7 @@ export class PSIEngine extends EventEmitter {
     for (const element of elements) {
       for (let i = 0; i < k; i++) {
         const hash = crypto
-          .createHash('sha256')
+          .createHash("sha256")
           .update(element + i)
           .digest();
         const index = hash.readUInt32BE(0) % m;
@@ -648,18 +622,18 @@ export class PSIEngine extends EventEmitter {
   }
 
   private getOrCreateProtocol(
-    type: PSIProtocolConfig['type'],
-    config: Partial<PSIProtocolConfig>,
+    type: PSIProtocolConfig["type"],
+    config: Partial<PSIProtocolConfig>
   ): PSIProtocolConfig {
-    const protocolId = `${type}_${crypto.randomBytes(4).toString('hex')}`;
+    const protocolId = `${type}_${crypto.randomBytes(4).toString("hex")}`;
 
     const defaultConfig: PSIProtocolConfig = {
       id: protocolId,
       name: `${type.toUpperCase()} Protocol`,
       type,
       security: {
-        curveType: 'p256',
-        oprfFunction: 'ristretto255',
+        curveType: "p256",
+        oprfFunction: "ristretto255",
         falsePositiveRate: 0.001,
       },
       performance: {
@@ -687,44 +661,40 @@ export class PSIEngine extends EventEmitter {
     try {
       // Setup phase
       job.phases.setup.startTime = new Date();
-      job.status = 'setup';
+      job.status = "setup";
 
       this.setupECDHKeys(job);
 
       job.phases.setup.endTime = new Date();
-      job.phases.setup.status = 'completed';
+      job.phases.setup.status = "completed";
 
       // Exchange phase
       job.phases.exchange.startTime = new Date();
-      job.status = 'running';
+      job.status = "running";
 
-      const { encryptedSetA, encryptedSetB } =
-        this.performECDHExchange(job);
+      const { encryptedSetA, encryptedSetB } = this.performECDHExchange(job);
 
       job.phases.exchange.endTime = new Date();
-      job.phases.exchange.status = 'completed';
+      job.phases.exchange.status = "completed";
 
       // Computation phase
       job.phases.computation.startTime = new Date();
 
-      const intersection = this.computeECDHIntersection(
-        encryptedSetA,
-        encryptedSetB,
-      );
+      const intersection = this.computeECDHIntersection(encryptedSetA, encryptedSetB);
 
       job.phases.computation.endTime = new Date();
-      job.phases.computation.status = 'completed';
+      job.phases.computation.status = "completed";
 
       // Verification phase
       job.phases.verification.startTime = new Date();
 
       const verified = this.verifyECDHResult(job, intersection);
       if (!verified) {
-        throw new Error('PSI result verification failed');
+        throw new Error("PSI result verification failed");
       }
 
       job.phases.verification.endTime = new Date();
-      job.phases.verification.status = 'completed';
+      job.phases.verification.status = "completed";
 
       // Update results
       job.results = {
@@ -732,30 +702,30 @@ export class PSIEngine extends EventEmitter {
         confidence: 1.0,
         linkHints: Array.from(intersection.elements).map((element, index) => ({
           leftHash: `left_${crypto
-            .createHash('sha256')
-            .update(`${element  }left`)
-            .digest('hex')
+            .createHash("sha256")
+            .update(`${element}left`)
+            .digest("hex")
             .slice(0, 16)}`,
           rightHash: `right_${crypto
-            .createHash('sha256')
-            .update(`${element  }right`)
-            .digest('hex')
+            .createHash("sha256")
+            .update(`${element}right`)
+            .digest("hex")
             .slice(0, 16)}`,
           confidence: 0.95 + Math.random() * 0.05, // Mock confidence
           metadata: { index },
         })),
       };
 
-      job.status = 'completed';
+      job.status = "completed";
       job.telemetry.computation.duration = Date.now() - startTime;
 
       this.jobs.set(job.id, job);
-      this.emit('psi_completed', {
+      this.emit("psi_completed", {
         jobId: job.id,
         intersectionSize: intersection.size,
       });
     } catch (error) {
-      job.status = 'failed';
+      job.status = "failed";
       job.telemetry.errors.push({
         timestamp: new Date(),
         phase: job.status,
@@ -773,44 +743,40 @@ export class PSIEngine extends EventEmitter {
     try {
       // Setup phase
       job.phases.setup.startTime = new Date();
-      job.status = 'setup';
+      job.status = "setup";
 
       this.setupOPRFKeys(job);
 
       job.phases.setup.endTime = new Date();
-      job.phases.setup.status = 'completed';
+      job.phases.setup.status = "completed";
 
       // Exchange phase
       job.phases.exchange.startTime = new Date();
-      job.status = 'running';
+      job.status = "running";
 
-      const { blindedElements, oprfOutputs } =
-        this.performOPRFExchange(job);
+      const { blindedElements, oprfOutputs } = this.performOPRFExchange(job);
 
       job.phases.exchange.endTime = new Date();
-      job.phases.exchange.status = 'completed';
+      job.phases.exchange.status = "completed";
 
       // Computation phase
       job.phases.computation.startTime = new Date();
 
-      const intersection = this.computeOPRFIntersection(
-        blindedElements,
-        oprfOutputs,
-      );
+      const intersection = this.computeOPRFIntersection(blindedElements, oprfOutputs);
 
       job.phases.computation.endTime = new Date();
-      job.phases.computation.status = 'completed';
+      job.phases.computation.status = "completed";
 
       // Verification phase
       job.phases.verification.startTime = new Date();
 
       const verified = this.verifyOPRFResult(job, intersection);
       if (!verified) {
-        throw new Error('OPRF PSI result verification failed');
+        throw new Error("OPRF PSI result verification failed");
       }
 
       job.phases.verification.endTime = new Date();
-      job.phases.verification.status = 'completed';
+      job.phases.verification.status = "completed";
 
       // Update results
       job.results = {
@@ -818,30 +784,30 @@ export class PSIEngine extends EventEmitter {
         confidence: 0.98, // OPRF provides high confidence
         linkHints: Array.from(intersection.elements).map((element, index) => ({
           leftHash: `oprf_left_${crypto
-            .createHash('sha256')
-            .update(`${element  }left`)
-            .digest('hex')
+            .createHash("sha256")
+            .update(`${element}left`)
+            .digest("hex")
             .slice(0, 16)}`,
           rightHash: `oprf_right_${crypto
-            .createHash('sha256')
-            .update(`${element  }right`)
-            .digest('hex')
+            .createHash("sha256")
+            .update(`${element}right`)
+            .digest("hex")
             .slice(0, 16)}`,
           confidence: 0.98 + Math.random() * 0.02,
-          metadata: { index, protocol: 'oprf' },
+          metadata: { index, protocol: "oprf" },
         })),
       };
 
-      job.status = 'completed';
+      job.status = "completed";
       job.telemetry.computation.duration = Date.now() - startTime;
 
       this.jobs.set(job.id, job);
-      this.emit('psi_completed', {
+      this.emit("psi_completed", {
         jobId: job.id,
         intersectionSize: intersection.size,
       });
     } catch (error) {
-      job.status = 'failed';
+      job.status = "failed";
       this.jobs.set(job.id, job);
       throw error;
     }
@@ -853,49 +819,44 @@ export class PSIEngine extends EventEmitter {
     try {
       // Setup phase
       job.phases.setup.startTime = new Date();
-      job.status = 'setup';
+      job.status = "setup";
 
       const datasetA = this.datasets.get(job.participants[0].dataset);
       const datasetB = this.datasets.get(job.participants[1].dataset);
       if (!datasetA || !datasetB) {
-        throw new Error('Datasets not found');
+        throw new Error("Datasets not found");
       }
 
       job.phases.setup.endTime = new Date();
-      job.phases.setup.status = 'completed';
+      job.phases.setup.status = "completed";
 
       // Exchange phase - exchange Bloom filters
       job.phases.exchange.startTime = new Date();
-      job.status = 'running';
+      job.status = "running";
 
       if (!datasetA.bloomFilter || !datasetB.bloomFilter) {
-        throw new Error('Bloom filters not available for datasets');
+        throw new Error("Bloom filters not available for datasets");
       }
 
       const filterA = datasetA.bloomFilter;
       const filterB = datasetB.bloomFilter;
 
       job.phases.exchange.endTime = new Date();
-      job.phases.exchange.status = 'completed';
+      job.phases.exchange.status = "completed";
 
       // Computation phase - estimate intersection using Bloom filters
       job.phases.computation.startTime = new Date();
 
-      const intersection = this.estimateBloomIntersection(
-        filterA,
-        filterB,
-        datasetA,
-        datasetB,
-      );
+      const intersection = this.estimateBloomIntersection(filterA, filterB, datasetA, datasetB);
 
       job.phases.computation.endTime = new Date();
-      job.phases.computation.status = 'completed';
+      job.phases.computation.status = "completed";
 
       // Verification phase
       job.phases.verification.startTime = new Date();
 
       job.phases.verification.endTime = new Date();
-      job.phases.verification.status = 'completed';
+      job.phases.verification.status = "completed";
 
       // Update results
       job.results = {
@@ -905,16 +866,16 @@ export class PSIEngine extends EventEmitter {
         linkHints: [], // Bloom filters don't provide individual matches
       };
 
-      job.status = 'completed';
+      job.status = "completed";
       job.telemetry.computation.duration = Date.now() - startTime;
 
       this.jobs.set(job.id, job);
-      this.emit('psi_completed', {
+      this.emit("psi_completed", {
         jobId: job.id,
         intersectionSize: intersection.estimate,
       });
     } catch (error) {
-      job.status = 'failed';
+      job.status = "failed";
       this.jobs.set(job.id, job);
       throw error;
     }
@@ -923,13 +884,13 @@ export class PSIEngine extends EventEmitter {
   private setupECDHKeys(job: PSIJob): void {
     // Generate ECDH key pairs for each participant
     for (const participant of job.participants) {
-      const keyPair = crypto.generateKeyPairSync('ec', {
-        namedCurve: job.protocol.security.curveType || 'prime256v1',
+      const keyPair = crypto.generateKeyPairSync("ec", {
+        namedCurve: job.protocol.security.curveType || "prime256v1",
       });
 
       this.ecdhKeys.set(participant.id, {
-        private: keyPair.privateKey.export({ type: 'pkcs8', format: 'der' }),
-        public: keyPair.publicKey.export({ type: 'spki', format: 'der' }),
+        private: keyPair.privateKey.export({ type: "pkcs8", format: "der" }),
+        public: keyPair.publicKey.export({ type: "spki", format: "der" }),
       });
     }
 
@@ -955,30 +916,23 @@ export class PSIEngine extends EventEmitter {
     const datasetA = this.datasets.get(job.participants[0].dataset);
     const datasetB = this.datasets.get(job.participants[1].dataset);
     if (!datasetA?.hashedElements || !datasetB?.hashedElements) {
-      throw new Error('Datasets or hashed elements not found');
+      throw new Error("Datasets or hashed elements not found");
     }
 
     // Mock ECDH encryption of sets
     const encryptedSetA = new Set(
       datasetA.hashedElements.map((element) =>
-        crypto
-          .createHash('sha256')
-          .update(`${element  }ecdh_a`)
-          .digest('hex'),
-      ),
+        crypto.createHash("sha256").update(`${element}ecdh_a`).digest("hex")
+      )
     );
 
     const encryptedSetB = new Set(
       datasetB.hashedElements.map((element) =>
-        crypto
-          .createHash('sha256')
-          .update(`${element  }ecdh_b`)
-          .digest('hex'),
-      ),
+        crypto.createHash("sha256").update(`${element}ecdh_b`).digest("hex")
+      )
     );
 
-    job.telemetry.bandwidth.sent +=
-      (encryptedSetA.size + encryptedSetB.size) * 32;
+    job.telemetry.bandwidth.sent += (encryptedSetA.size + encryptedSetB.size) * 32;
     job.telemetry.rounds += 2;
 
     return { encryptedSetA, encryptedSetB };
@@ -991,7 +945,7 @@ export class PSIEngine extends EventEmitter {
     const datasetA = this.datasets.get(job.participants[0].dataset);
     const datasetB = this.datasets.get(job.participants[1].dataset);
     if (!datasetA?.hashedElements || !datasetB?.hashedElements) {
-      throw new Error('Datasets or hashed elements not found');
+      throw new Error("Datasets or hashed elements not found");
     }
 
     // Mock OPRF blinding and evaluation
@@ -1000,33 +954,20 @@ export class PSIEngine extends EventEmitter {
 
     // Simulate OPRF protocol
     datasetA.hashedElements.forEach((element) => {
-      const blinded = crypto
-        .createHash('sha256')
-        .update(`${element  }blind`)
-        .digest('hex');
-      const oprfOutput = crypto
-        .createHash('sha256')
-        .update(`${blinded  }oprf`)
-        .digest('hex');
+      const blinded = crypto.createHash("sha256").update(`${element}blind`).digest("hex");
+      const oprfOutput = crypto.createHash("sha256").update(`${blinded}oprf`).digest("hex");
       blindedElements.set(element, blinded);
       oprfOutputs.set(blinded, oprfOutput);
     });
 
     datasetB.hashedElements.forEach((element) => {
-      const blinded = crypto
-        .createHash('sha256')
-        .update(`${element  }blind`)
-        .digest('hex');
-      const oprfOutput = crypto
-        .createHash('sha256')
-        .update(`${blinded  }oprf`)
-        .digest('hex');
+      const blinded = crypto.createHash("sha256").update(`${element}blind`).digest("hex");
+      const oprfOutput = crypto.createHash("sha256").update(`${blinded}oprf`).digest("hex");
       blindedElements.set(element, blinded);
       oprfOutputs.set(blinded, oprfOutput);
     });
 
-    job.telemetry.bandwidth.sent +=
-      (blindedElements.size + oprfOutputs.size) * 32;
+    job.telemetry.bandwidth.sent += (blindedElements.size + oprfOutputs.size) * 32;
     job.telemetry.rounds += 3;
 
     return { blindedElements, oprfOutputs };
@@ -1034,7 +975,7 @@ export class PSIEngine extends EventEmitter {
 
   private computeECDHIntersection(
     encryptedSetA: Set<string>,
-    encryptedSetB: Set<string>,
+    encryptedSetB: Set<string>
   ): { size: number; elements: Set<string> } {
     const intersection = new Set<string>();
 
@@ -1055,7 +996,7 @@ export class PSIEngine extends EventEmitter {
 
   private computeOPRFIntersection(
     blindedElements: Map<string, string>,
-    oprfOutputs: Map<string, string>,
+    oprfOutputs: Map<string, string>
   ): { size: number; elements: Set<string> } {
     const intersection = new Set<string>();
 
@@ -1073,10 +1014,10 @@ export class PSIEngine extends EventEmitter {
   }
 
   private estimateBloomIntersection(
-    filterA: NonNullable<PSIDataset['bloomFilter']>,
-    filterB: NonNullable<PSIDataset['bloomFilter']>,
+    filterA: NonNullable<PSIDataset["bloomFilter"]>,
+    filterB: NonNullable<PSIDataset["bloomFilter"]>,
     datasetA: PSIDataset,
-    datasetB: PSIDataset,
+    datasetB: PSIDataset
   ): {
     estimate: number;
     confidence: number;
@@ -1105,10 +1046,9 @@ export class PSIEngine extends EventEmitter {
     const estimate = Math.max(
       0,
       ((setBits / m -
-        Math.pow(1 - Math.exp((-k * nA) / m), k) *
-          Math.pow(1 - Math.exp((-k * nB) / m), k)) *
+        Math.pow(1 - Math.exp((-k * nA) / m), k) * Math.pow(1 - Math.exp((-k * nB) / m), k)) *
         m) /
-        (k * k),
+        (k * k)
     );
 
     // Calculate confidence based on filter parameters
@@ -1122,14 +1062,18 @@ export class PSIEngine extends EventEmitter {
   }
 
   private calculateHashSimilarity(hash1: string, hash2: string): number {
-    if (hash1 === hash2) {return 1.0;}
+    if (hash1 === hash2) {
+      return 1.0;
+    }
 
     // Simple Hamming distance-based similarity
     let matches = 0;
     const minLength = Math.min(hash1.length, hash2.length);
 
     for (let i = 0; i < minLength; i++) {
-      if (hash1[i] === hash2[i]) {matches++;}
+      if (hash1[i] === hash2[i]) {
+        matches++;
+      }
     }
 
     return matches / minLength;
@@ -1152,29 +1096,28 @@ export class PSIEngine extends EventEmitter {
   private sampleGaussian(mu: number, sigma: number): number {
     let u = 0,
       v = 0;
-    while (u === 0) {u = Math.random();}
-    while (v === 0) {v = Math.random();}
+    while (u === 0) {
+      u = Math.random();
+    }
+    while (v === 0) {
+      v = Math.random();
+    }
 
     const z = Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
     return z * sigma + mu;
   }
 
-  private verifyProtocolAdherence(
-    job: PSIJob,
-  ): { type: string; valid: boolean; details: any } {
+  private verifyProtocolAdherence(job: PSIJob): { type: string; valid: boolean; details: any } {
     // Verify that the protocol was executed correctly
-    const expectedPhases = ['setup', 'exchange', 'computation', 'verification'];
+    const expectedPhases = ["setup", "exchange", "computation", "verification"];
     const completedPhases = Object.keys(job.phases).filter(
-      (phase) =>
-        job.phases[phase as keyof typeof job.phases].status === 'completed',
+      (phase) => job.phases[phase as keyof typeof job.phases].status === "completed"
     );
 
-    const valid = expectedPhases.every((phase) =>
-      completedPhases.includes(phase),
-    );
+    const valid = expectedPhases.every((phase) => completedPhases.includes(phase));
 
     return {
-      type: 'protocol_adherence',
+      type: "protocol_adherence",
       valid,
       details: {
         expectedPhases,
@@ -1184,16 +1127,14 @@ export class PSIEngine extends EventEmitter {
     };
   }
 
-  private verifyParticipantSignatures(
-    job: PSIJob,
-  ): { type: string; valid: boolean; details: any } {
+  private verifyParticipantSignatures(job: PSIJob): { type: string; valid: boolean; details: any } {
     // Mock signature verification
     const signatures = job.participants.map(
-      (p) => `sig_${p.id}_${crypto.randomBytes(8).toString('hex')}`,
+      (p) => `sig_${p.id}_${crypto.randomBytes(8).toString("hex")}`
     );
 
     return {
-      type: 'participant_signatures',
+      type: "participant_signatures",
       valid: true,
       details: {
         participantCount: job.participants.length,
@@ -1202,17 +1143,13 @@ export class PSIEngine extends EventEmitter {
     };
   }
 
-  private verifyComputationBounds(
-    job: PSIJob,
-  ): { type: string; valid: boolean; details: any } {
+  private verifyComputationBounds(job: PSIJob): { type: string; valid: boolean; details: any } {
     const withinBounds =
-      job.telemetry.computation.memory <=
-        job.protocol.performance.memoryLimitMB &&
-      (job.results?.intersectionSize || 0) <=
-        job.protocol.performance.maxSetSize;
+      job.telemetry.computation.memory <= job.protocol.performance.memoryLimitMB &&
+      (job.results?.intersectionSize || 0) <= job.protocol.performance.maxSetSize;
 
     return {
-      type: 'computation_bounds',
+      type: "computation_bounds",
       valid: withinBounds,
       details: {
         memoryUsed: job.telemetry.computation.memory,
@@ -1223,9 +1160,7 @@ export class PSIEngine extends EventEmitter {
     };
   }
 
-  private verifyPrivacyGuarantees(
-    job: PSIJob,
-  ): { type: string; valid: boolean; details: any } {
+  private verifyPrivacyGuarantees(job: PSIJob): { type: string; valid: boolean; details: any } {
     // Verify that privacy constraints were met
     const noRawDataLeaked = !job.results?.intersectionElements;
     const dpApplied = job.protocol.privacy.differentialPrivacy
@@ -1233,7 +1168,7 @@ export class PSIEngine extends EventEmitter {
       : true;
 
     return {
-      type: 'privacy_guarantees',
+      type: "privacy_guarantees",
       valid: noRawDataLeaked && dpApplied,
       details: {
         noRawDataLeaked,
@@ -1245,46 +1180,42 @@ export class PSIEngine extends EventEmitter {
 
   private verifyECDHResult(
     job: PSIJob,
-    intersection: { size: number; elements: Set<string> },
+    intersection: { size: number; elements: Set<string> }
   ): boolean {
     // Mock verification of ECDH PSI result
     return (
       intersection.size >= 0 &&
       intersection.size <=
         Math.min(
-          this.datasets.get(job.participants[0].dataset)?.metadata
-            .elementCount || 0,
-          this.datasets.get(job.participants[1].dataset)?.metadata
-            .elementCount || 0,
+          this.datasets.get(job.participants[0].dataset)?.metadata.elementCount || 0,
+          this.datasets.get(job.participants[1].dataset)?.metadata.elementCount || 0
         )
     );
   }
 
   private verifyOPRFResult(
     job: PSIJob,
-    intersection: { size: number; elements: Set<string> },
+    intersection: { size: number; elements: Set<string> }
   ): boolean {
     // Mock verification of OPRF PSI result
     return (
       intersection.size >= 0 &&
       intersection.size <=
         Math.min(
-          this.datasets.get(job.participants[0].dataset)?.metadata
-            .elementCount || 0,
-          this.datasets.get(job.participants[1].dataset)?.metadata
-            .elementCount || 0,
+          this.datasets.get(job.participants[0].dataset)?.metadata.elementCount || 0,
+          this.datasets.get(job.participants[1].dataset)?.metadata.elementCount || 0
         )
     );
   }
 
   private initializeDefaultProtocols(): void {
     // ECDH PSI for medium-sized sets
-    this.protocols.set('default_ecdh', {
-      id: 'default_ecdh',
-      name: 'Default ECDH PSI',
-      type: 'ecdh_psi',
+    this.protocols.set("default_ecdh", {
+      id: "default_ecdh",
+      name: "Default ECDH PSI",
+      type: "ecdh_psi",
       security: {
-        curveType: 'p256',
+        curveType: "p256",
       },
       performance: {
         maxSetSize: 100000,
@@ -1298,12 +1229,12 @@ export class PSIEngine extends EventEmitter {
     });
 
     // OPRF PSI for high-security applications
-    this.protocols.set('default_oprf', {
-      id: 'default_oprf',
-      name: 'Default OPRF PSI',
-      type: 'oprf_psi',
+    this.protocols.set("default_oprf", {
+      id: "default_oprf",
+      name: "Default OPRF PSI",
+      type: "oprf_psi",
       security: {
-        oprfFunction: 'ristretto255',
+        oprfFunction: "ristretto255",
       },
       performance: {
         maxSetSize: 1000000,
@@ -1319,10 +1250,10 @@ export class PSIEngine extends EventEmitter {
     });
 
     // Bloom PSI for very large sets
-    this.protocols.set('default_bloom', {
-      id: 'default_bloom',
-      name: 'Default Bloom PSI',
-      type: 'bloom_psi',
+    this.protocols.set("default_bloom", {
+      id: "default_bloom",
+      name: "Default Bloom PSI",
+      type: "bloom_psi",
       security: {
         falsePositiveRate: 0.001,
       },

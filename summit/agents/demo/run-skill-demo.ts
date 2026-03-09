@@ -13,7 +13,7 @@ async function run(): Promise<void> {
     provenanceSink: (event) => provenanceLog.push(event),
   });
 
-  orchestrator.registerSkill("tests.run", async () => ({ ok: true, suite: "unit" }));
+  orchestrator.registerSkill("tests.run", () => ({ ok: true, suite: "unit" }));
 
   const allowedInvocation: SkillInvocation = {
     run_id: runId,
@@ -38,21 +38,28 @@ async function run(): Promise<void> {
   };
 
   const allowed = await orchestrator.invokeSkill(allowedInvocation);
+  // eslint-disable-next-line no-console
   console.log("Allowed invocation result:", allowed);
 
   try {
     await orchestrator.invokeSkill(deniedInvocation);
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.log("Denied invocation error:", (error as Error).message);
   }
 
+  // eslint-disable-next-line no-console
   console.log("Event log tail:");
+  // eslint-disable-next-line no-console
   console.log(eventLog.slice(-6));
+  // eslint-disable-next-line no-console
   console.log("Provenance log tail:");
+  // eslint-disable-next-line no-console
   console.log(provenanceLog.slice(-6));
 }
 
 run().catch((error) => {
+  // eslint-disable-next-line no-console
   console.error(error);
   process.exitCode = 1;
 });

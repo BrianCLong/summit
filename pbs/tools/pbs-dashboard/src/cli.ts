@@ -1,6 +1,8 @@
+import path from "node:path";
+
 import { Command } from "commander";
 import fs from "fs-extra";
-import path from "node:path";
+
 import { renderDashboard } from "./generator";
 import { reportSchema } from "./types";
 

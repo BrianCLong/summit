@@ -1,4 +1,4 @@
-import * as crypto from 'node:crypto';
+import * as crypto from "node:crypto";
 
 export interface ResultBundlePayload {
   protocolVersion: string;
@@ -19,18 +19,21 @@ export interface SignedResultBundle extends ResultBundlePayload {
  * @param privateKeyHex - The hex-encoded ed25519 private key
  * @returns A signed bundle including the signature
  */
-export function signResultBundle(payload: ResultBundlePayload, privateKeyHex: string): SignedResultBundle {
+export function signResultBundle(
+  payload: ResultBundlePayload,
+  privateKeyHex: string
+): SignedResultBundle {
   const privateKey = crypto.createPrivateKey({
-    key: Buffer.from(privateKeyHex, 'hex'),
-    format: 'der',
-    type: 'pkcs8'
+    key: Buffer.from(privateKeyHex, "hex"),
+    format: "der",
+    type: "pkcs8",
   });
 
   const dataToSign = Buffer.from(JSON.stringify(payload));
-  const signature = crypto.sign(null, dataToSign, privateKey).toString('hex');
+  const signature = crypto.sign(null, dataToSign, privateKey).toString("hex");
 
   return {
     ...payload,
-    signature
+    signature,
   };
 }

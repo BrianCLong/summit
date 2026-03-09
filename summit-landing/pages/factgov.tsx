@@ -2,9 +2,7 @@ export default function FactGov() {
   return (
     <div className="max-w-4xl mx-auto p-8">
       <h1 className="text-4xl font-bold">FactGov</h1>
-      <p className="text-xl mt-4">
-        Government Verification Marketplace
-      </p>
+      <p className="text-xl mt-4">Government Verification Marketplace</p>
 
       <div className="mt-8">
         <h2 className="text-2xl font-semibold">Features</h2>
@@ -29,5 +27,5 @@ export default function FactGov() {
         </a>
       </div>
     </div>
-  )
+  );
 }

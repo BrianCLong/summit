@@ -1,3 +1,5 @@
 export class ExperimentCLI {
-  run() { return "cli"; }
+  run() {
+    return "cli";
+  }
 }
