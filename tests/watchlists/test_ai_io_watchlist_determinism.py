@@ -1,8 +1,10 @@
 import json
 import os
-import unittest
 import sys
+import unittest
+
 from scripts.watchlists.build_ai_io_watchlist import build_watchlist
+
 
 class TestAIIOWatchlistDeterminism(unittest.TestCase):
     def test_determinism(self):

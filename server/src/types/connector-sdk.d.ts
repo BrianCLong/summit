@@ -1,4 +1,4 @@
-declare module '@intelgraph/connector-sdk' {
+declare module '@summit/connector-sdk' {
   export type ConnectorEntity = Record<string, unknown>;
 
   export interface ConnectorManifest {

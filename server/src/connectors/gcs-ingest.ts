@@ -6,7 +6,7 @@ import {
   ConnectorConfig,
   ConnectorManifest,
   ConnectorEntity,
-} from '@intelgraph/connector-sdk';
+} from '@summit/connector-sdk';
 import { GCSConnector, GCSObjectMetadata } from './gcs.js';
 import pLimit from 'p-limit';
 import { parse } from 'csv-parse';

@@ -51,7 +51,7 @@
   2. `ConnectorRegistry` service implemented for dynamic discovery.
   3. `CSVConnector` refactored to inherit from SDK.
 - **Tasks**
-  - Core: Implement `@intelgraph/connector-sdk` package.
+  - Core: Implement `@summit/connector-sdk` package.
   - Registry: Build discovery and heartbeat service.
   - Refactor: Port CSVConnector to SDK.
 - **Estimation:** 8 points

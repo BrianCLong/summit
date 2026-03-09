@@ -1,7 +1,9 @@
-import sys
 import os
+import sys
+
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from summit.core.agents.qa_agent import QAAgent
+
 
 def main():
     qa_agent = QAAgent()

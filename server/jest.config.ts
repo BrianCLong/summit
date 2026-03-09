@@ -203,7 +203,7 @@ const config: Config = {
     '^graphql-query-complexity$': '<rootDir>/tests/mocks/graphql-query-complexity.ts',
     '^mysql2/promise$': '<rootDir>/tests/mocks/mysql2.ts',
     '@intelgraph/post-quantum-crypto': '<rootDir>/tests/mocks/post-quantum-crypto.ts',
-    '@intelgraph/connector-sdk': '<rootDir>/tests/mocks/connector-sdk.ts',
+    '@summit/connector-sdk': '<rootDir>/tests/mocks/connector-sdk.ts',
     '^@/(.*)$': '<rootDir>/src/$1',
     '^@tests/(.*)$': '<rootDir>/tests/$1',
     '^(\\.{1,2}/.*)\\.js$': '$1',
