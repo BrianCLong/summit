@@ -33,6 +33,15 @@ EXCLUDE_LABELS="${EXCLUDE_LABELS:-do-not-merge,blocked,WIP,hold,logical,workflow
 AUTO_MERGE_STRATEGY="${AUTO_MERGE_STRATEGY:-squash}"
 # Dry run? (1 prints intended actions without executing merges)
 DRY_RUN="${DRY_RUN:-0}"
+POSITIONAL_ARGS=()
+while [[ "$#" -gt 0 ]]; do
+    case $1 in
+        --dry-run) DRY_RUN=1; shift ;;
+        *) POSITIONAL_ARGS+=("$1"); shift ;;
+    esac
+done
+set -- "${POSITIONAL_ARGS[@]}"
+
 
 json_log() {
   local event="$1"; shift

@@ -8,15 +8,22 @@ OVERRIDE_REASON=""
 FINAL_OUTPUT_DIR="dist/release"
 
 # Parse arguments
+DRY_RUN="${DRY_RUN:-false}"
 while [[ "$#" -gt 0 ]]; do
     case $1 in
         --tag) TAG="$2"; shift ;;
         --override-freeze) OVERRIDE_FREEZE=true ;;
         --override-reason) OVERRIDE_REASON="$2"; shift ;;
+        --dry-run) DRY_RUN=true ;;
         *) echo "Unknown parameter passed: $1"; exit 1 ;;
     esac
     shift
 done
+
+if [ "$DRY_RUN" = "true" ]; then
+    echo "[DRY RUN] Would run Release Gate..."
+    exit 0
+fi
 
 echo "🚀 Starting Release Gate..."
 echo "   Tag: $TAG"

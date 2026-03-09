@@ -17,6 +17,66 @@ env:
   NODE_OPTIONS: --max-old-space-size=8192
 
 jobs:
+  determinism-tests:
+    name: Determinism Tests
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Detect changed files
+        id: changed
+        uses: tj-actions/changed-files@v44
+        with:
+          files: |
+            tests/**/determinism*
+            tests/**/cbm*
+            tests/**/evidence*
+            scripts/ci/**
+      - name: Setup pnpm
+        if: steps.changed.outputs.any_changed == 'true'
+        uses: pnpm/action-setup@v4
+      - name: Setup Node
+        if: steps.changed.outputs.any_changed == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: "pnpm"
+      - name: Install dependencies
+        if: steps.changed.outputs.any_changed == 'true'
+        run: pnpm install --frozen-lockfile
+      - name: Run Determinism & Evidence Tests
+        if: steps.changed.outputs.any_changed == 'true'
+        run: pnpm test --grep "determinism"
+
+  fast-smoke-tests:
+    name: Fast Smoke Tests
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Detect changed test dirs
+        id: changed
+        uses: tj-actions/changed-files@v44
+        with:
+          files: tests/**
+      - name: Setup pnpm
+        if: steps.changed.outputs.any_changed == 'true'
+        uses: pnpm/action-setup@v4
+      - name: Setup Node
+        if: steps.changed.outputs.any_changed == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: "pnpm"
+      - name: Install dependencies
+        if: steps.changed.outputs.any_changed == 'true'
+        run: pnpm install --frozen-lockfile
+      - name: Run changed tests
+        if: steps.changed.outputs.any_changed == 'true'
+        run: pnpm test ${{ steps.changed.outputs.all_changed_files }}
+
   config-guard:
     name: Build & Test (Untrusted)
     runs-on: ubuntu-latest
