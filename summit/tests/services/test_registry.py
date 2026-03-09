@@ -1,63 +1,62 @@
 import pytest
-import datetime
-from unittest.mock import patch, MagicMock
-from summit.registry.service import RegistryService
-from summit.registry.model import AgentDefinition, RegistryDocument, RiskTier
+from summit.registry.service import SkillRegistryService
+from summit.skills.models import Skill, SkillSignature, EnvironmentAssumptions, SkillTest
 
-@pytest.fixture
-def mock_store():
-    # We patch at the place where RegistryService imports them or uses them
-    with patch("summit.registry.service.load_registry") as mock_load, \
-         patch("summit.registry.service.save_registry") as mock_save, \
-         patch("summit.registry.service.emit") as mock_emit:
-        yield mock_load, mock_save, mock_emit
+def test_register_skill():
+    service = SkillRegistryService()
 
-def test_create_agent(mock_store):
-    mock_load, mock_save, mock_emit = mock_store
-
-    # Mock initial empty registry
-    mock_load.return_value = RegistryDocument(version="1.0", capabilities=[], agents=[])
-
-    service = RegistryService(registry_path="/tmp/registry.json")
-
-    agent_def = AgentDefinition(
-        id="agent-1",
-        name="Test Agent",
-        owner="test-owner",
-        risk_tier=RiskTier.LOW,
+    skill = Skill(
+        name="test-skill",
         version="1.0.0",
-        updated_at=datetime.datetime.now().isoformat()
+        description="A test skill",
+        signature=SkillSignature(inputs={"a": "str"}, outputs={"b": "str"}),
+        preconditions=[],
+        postconditions=[],
+        environment=EnvironmentAssumptions([], [], []),
+        examples=[],
+        tests=[],
+        owners=["team-a"]
     )
 
-    result = service.create_agent(agent_def)
+    result = service.register_skill(skill)
+    assert result == "test-skill@1.0.0 registered successfully."
+    assert service.get_skill("test-skill", "1.0.0") == skill
 
-    assert result == agent_def
-    mock_save.assert_called_once()
-    mock_emit.assert_called_once()
+def test_get_skill_latest():
+    service = SkillRegistryService()
 
-def test_get_agent(mock_store):
-    mock_load, _, _ = mock_store
-
-    agent_def = AgentDefinition(
-        id="agent-1",
-        name="Test Agent",
-        owner="test-owner",
-        risk_tier=RiskTier.LOW,
+    skill_1 = Skill(
+        name="test-skill",
         version="1.0.0",
-        updated_at=datetime.datetime.now().isoformat()
+        description="A test skill v1",
+        signature=SkillSignature(inputs={}, outputs={}),
+        preconditions=[],
+        postconditions=[],
+        environment=EnvironmentAssumptions([], [], []),
+        examples=[],
+        tests=[],
+        owners=["team-a"]
     )
 
-    mock_load.return_value = RegistryDocument(version="1.0", capabilities=[], agents=[agent_def])
+    skill_2 = Skill(
+        name="test-skill",
+        version="1.1.0",
+        description="A test skill v2",
+        signature=SkillSignature(inputs={}, outputs={}),
+        preconditions=[],
+        postconditions=[],
+        environment=EnvironmentAssumptions([], [], []),
+        examples=[],
+        tests=[],
+        owners=["team-a"]
+    )
 
-    service = RegistryService(registry_path="/tmp/registry.json")
+    service.register_skill(skill_1)
+    service.register_skill(skill_2)
 
-    result = service.get_agent("agent-1")
-    assert result == agent_def
+    # Should return the latest version
+    assert service.get_skill("test-skill") == skill_2
 
-    # Check that it returns None for non-existent agent
-    # We need to simulate loading again or assume it loads every time
-    # Service implementation calls _load() every time which calls load_registry()
-    # So we can change return value if needed, but here we just check non-existent ID
-
-    result_none = service.get_agent("non-existent")
-    assert result_none is None
+def test_get_skill_not_found():
+    service = SkillRegistryService()
+    assert service.get_skill("non-existent") is None
