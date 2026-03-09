@@ -33,3 +33,10 @@ export type { VisualizationOptions, GraphData } from './visualization/GraphVisua
 
 // Re-export for convenience
 export { STANDARD_NAMESPACES } from './types/ontology.js';
+
+// Temporal and Causal Intelligence Additions
+export { CausalIntelligenceEngine } from './temporal/causal/CausalIntelligenceEngine.js';
+export type { CausalRelationship, IntelligenceScore } from './temporal/causal/CausalIntelligenceEngine.js';
+
+export { GeospatialIndex } from './temporal/geospatial/GeospatialIndex.js';
+export { TemporalSearch } from './temporal/temporal-search.js';
