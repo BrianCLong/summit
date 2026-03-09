@@ -34,7 +34,6 @@ jobs:
         with:
           ref: ${{ inputs.ref }}
 
-          fetch-depth: 0
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
@@ -55,7 +54,6 @@ jobs:
           chmod +x scripts/go-live/post-deploy-canary.sh
           scripts/go-live/post-deploy-canary.sh
 
-        working-directory: ${{ github.workspace }}
       - name: Run SLO Snapshot
         if: ${{ inputs.prom_url != '' }}
         env:
@@ -65,7 +63,6 @@ jobs:
         run: |
           npx tsx scripts/go-live/prom-slo-snapshot.ts
 
-        working-directory: ${{ github.workspace }}
       - name: Generate Evidence Bundle
         run: pnpm evidence:post-deploy:gen
 

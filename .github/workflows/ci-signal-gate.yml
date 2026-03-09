@@ -1,7 +1,7 @@
 name: CI Signal Gate
 on:
   workflow_dispatch:
-  schedule: [cron: "*/30 * * * *"]
+  schedule: [{cron: "*/30 * * * *"}]
   pull_request:
 
 concurrency:
@@ -18,8 +18,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-        with:
-          fetch-depth: 0
       - name: Setup gh + jq
         run: |
           sudo apt-get update && sudo apt-get install -y jq
@@ -37,7 +35,6 @@ jobs:
           REPO="${{ github.repository }}"
           ./scripts/ci/harvest_actions_signals.sh "$REPO" 100
 
-        working-directory: ${{ github.workspace }}
       - name: Compute metrics
         run: |
           REPO="${{ github.repository }}"
@@ -45,7 +42,6 @@ jobs:
           echo "Computed metrics:"
           cat runs_metrics.json | jq .success_rate_pct
 
-        working-directory: ${{ github.workspace }}
       - name: Diff vs prior
         run: |
           # PR fast-path: avoid long artifact-history fetches in required context.
@@ -69,13 +65,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-        working-directory: ${{ github.workspace }}
       - name: Enforce policy (blocking)
         if: github.event_name != 'pull_request'
         run: |
           ./scripts/ci/gate_check.sh runs_metrics.json .ci/policy.json runs_diff.json
 
-        working-directory: ${{ github.workspace }}
       - name: Enforce policy (advisory on PR)
         if: github.event_name == 'pull_request'
         run: |
@@ -83,7 +77,6 @@ jobs:
             echo "::warning::CI signal gate is advisory on pull_request context."
           fi
 
-        working-directory: ${{ github.workspace }}
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         if: always()

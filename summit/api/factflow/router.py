@@ -1,9 +1,7 @@
-import time
-
 from fastapi import APIRouter, Depends
-
-from summit.observability import Metrics
 from summit.services.shared.core_verification import CoreVerificationService
+from summit.observability import Metrics
+import time
 
 router = APIRouter(prefix="/api/factflow", tags=["FactFlow"])
 

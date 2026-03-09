@@ -1,12 +1,9 @@
-import json
-from unittest.mock import MagicMock, patch
-
-import fakeredis
 import pytest
-
-from summit.cache.redis_client import RedisClient
+import json
+from unittest.mock import patch, MagicMock
 from summit.services.cache import CacheService
-
+from summit.cache.redis_client import RedisClient
+import fakeredis
 
 @pytest.fixture
 def mock_redis():

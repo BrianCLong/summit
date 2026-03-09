@@ -2,7 +2,7 @@
  * IngestService Unit Tests
  */
 
-import { jest, describe, it, expect, beforeEach, afterEach } from '@jest/globals';
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import type { IngestService as IngestServiceType, IngestInput } from '../IngestService.js';
 import type { Pool } from 'pg';
 import type { Driver } from 'neo4j-driver';
@@ -138,17 +138,12 @@ describe('IngestService', () => {
       mockClient.query
         .mockResolvedValueOnce({ rows: [], rowCount: 0 }) // BEGIN
         .mockResolvedValueOnce({ rows: [{ id: 'prov-123' }] }) // INSERT provenance
-        .mockResolvedValueOnce({
-            rows: [
-                { inserted: true },
-                { inserted: true }
-            ]
-        }) // BATCH INSERT entities
-        .mockResolvedValueOnce({
-            rows: [
-                { inserted: true }
-            ]
-        }) // BATCH INSERT relationships
+        .mockResolvedValueOnce({ rows: [] }) // Check existing entity
+        .mockResolvedValueOnce({ rows: [{ id: 'stable-id-1' }] }) // INSERT entity 1
+        .mockResolvedValueOnce({ rows: [] }) // Check existing entity
+        .mockResolvedValueOnce({ rows: [{ id: 'stable-id-2' }] }) // INSERT entity 2
+        .mockResolvedValueOnce({ rows: [] }) // Check existing relationship
+        .mockResolvedValueOnce({ rows: [{ id: 'rel-1' }] }) // INSERT relationship
         .mockResolvedValueOnce({ rows: [] }) // COMMIT
         .mockResolvedValueOnce({
           rows: [
@@ -252,20 +247,16 @@ describe('IngestService', () => {
       mockClient.query
         .mockResolvedValueOnce({ rows: [] }) // BEGIN
         .mockResolvedValueOnce({ rows: [{ id: 'prov-123' }] }) // Provenance
-        .mockResolvedValueOnce({
-            rows: [
-                { inserted: true }
-            ]
-        }) // BATCH INSERT entities (intra-batch dedup should result in 1 upsert)
+        .mockResolvedValueOnce({ rows: [] }) // Check entity 1
+        .mockResolvedValueOnce({ rows: [{ id: 'stable-1' }] }) // Insert entity 1
+        .mockResolvedValueOnce({ rows: [{ id: 'stable-1' }] }) // Check entity 2 (found)
+        .mockResolvedValueOnce({ rows: [{ id: 'stable-1' }] }) // Update entity 2
         .mockResolvedValueOnce({ rows: [] }); // COMMIT
 
       const result = await ingestService.ingest(input);
 
-      // We only expect 1 created because they were deduped in the batch
-      // The test originally expected 1 created and 1 updated because it was iterative.
-      // With batching, duplicate items in same batch are collapsed.
       expect(result.entitiesCreated).toBe(1);
-      expect(result.entitiesUpdated).toBe(0);
+      expect(result.entitiesUpdated).toBe(1);
     });
 
     it('should rollback transaction on error', async () => {
@@ -323,11 +314,8 @@ describe('IngestService', () => {
       mockClient.query
         .mockResolvedValueOnce({ rows: [] }) // BEGIN
         .mockResolvedValueOnce({ rows: [{ id: 'prov-123' }] })
-        .mockResolvedValueOnce({
-            rows: [
-                { inserted: true }
-            ]
-        }) // BATCH INSERT entities
+        .mockResolvedValueOnce({ rows: [] })
+        .mockResolvedValueOnce({ rows: [{ id: 'stable-1' }] })
         .mockResolvedValueOnce({ rows: [] }); // COMMIT
 
       const result = await ingestService.ingest(input);

@@ -12,8 +12,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
@@ -35,7 +33,6 @@ jobs:
           NEO4J_PASSWORD: ${{ secrets.NEO4J_PASSWORD }}
         run: node scripts/ci/validate_graph_pg_sync.mjs
 
-        working-directory: ${{ github.workspace }}
       - name: Upload Metrics
         uses: actions/upload-artifact@v4
         with:
@@ -44,5 +41,3 @@ jobs:
             artifacts/graph-sync/metrics.json
             artifacts/graph-sync/recon.json
             artifacts/graph-sync/evidence.json
-permissions:
-  contents: read

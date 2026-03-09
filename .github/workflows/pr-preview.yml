@@ -21,25 +21,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 1
           submodules: false
 
       - name: Configure kubelogin
         run: ./scripts/preview/configure_kubelogin.sh
 
-        working-directory: ${{ github.workspace }}
       - name: Build & push images
         run: ./scripts/preview/build_and_push.sh "${{ github.event.pull_request.number }}"
 
-        working-directory: ${{ github.workspace }}
       - name: Deploy preview stack
         run: ./scripts/preview/deploy.sh "${{ github.event.pull_request.number }}"
 
-        working-directory: ${{ github.workspace }}
       - name: Comment with preview URL
         run: ./scripts/preview/comment.sh "${{ github.event.pull_request.number }}"
 
-        working-directory: ${{ github.workspace }}
       - name: Set status check
         if: always()
         run: |

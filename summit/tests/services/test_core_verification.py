@@ -1,11 +1,8 @@
+import pytest
 import asyncio
 from unittest.mock import AsyncMock, patch
-
-import pytest
-
-from summit.services.cache import CacheService
 from summit.services.shared.core_verification import CoreVerificationService
-
+from summit.services.cache import CacheService
 
 @pytest.fixture
 def mock_cache():

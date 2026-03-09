@@ -1,7 +1,6 @@
 {
-  "run_id": "RUN-002",
-  "inputs": "invalid_inputs",
-  "scope": {},
-  "tools_invoked": ["search"],
-  "outputs_summary": "Should fail because inputs is not an object."
+  "run_id": "run-123",
+  "inputs": {"query": "Find malicious actors"},
+  "scope": {"time": "2024"},
+  "outputs_summary": {"findings": 5}
 }

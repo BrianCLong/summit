@@ -1,4 +1,4 @@
-import { toRejectionReport, validators } from '@intelgraph/summit-schemas';
+import { toRejectionReport, validators } from '../../summit-schemas/src';
 import type { CogBattleStorage } from '../storage';
 import type { Artifact } from '../types';
 

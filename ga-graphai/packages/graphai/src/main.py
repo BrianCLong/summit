@@ -4,11 +4,11 @@ from dataclasses import dataclass
 from typing import Any
 
 from fastapi import FastAPI, HTTPException
-from features import build_degree_features
 from pstr import PstrRequest, PstrResponse, pstr_search
 from pydantic import BaseModel, Field
 
 from analytics import analyze_graph
+from features import build_degree_features
 
 
 class FeatureBuildRequest(BaseModel):

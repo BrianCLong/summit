@@ -79,7 +79,6 @@ jobs:
             echo "Trivy scan script not found, skipping."
           fi
 
-        working-directory: ${{ github.workspace }}
       - name: Run SAST (Lint)
         run: npm run lint
 
@@ -90,8 +89,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4 # v6
 
-        with:
-          fetch-depth: 0
       - name: Install pnpm
         uses: pnpm/action-setup@v4
 
@@ -120,8 +117,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4 # v6
 
-        with:
-          fetch-depth: 0
       - name: Helm Lint
         run: |
           if [ -d "helm" ]; then
@@ -150,8 +145,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4 # v6
 
-        with:
-          fetch-depth: 0
       - name: Install pnpm
         uses: pnpm/action-setup@v4
 

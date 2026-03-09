@@ -99,5 +99,3 @@ jobs:
           retention-days: 14
           name: test-results
           path: server/junit.xml
-permissions:
-  contents: read

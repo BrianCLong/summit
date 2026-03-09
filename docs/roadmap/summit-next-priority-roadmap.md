@@ -1,7 +1,6 @@
 # Summit Next-Priority Roadmap (GA Sprint)
 
 ## Readiness Assertion
-
 Summit advances to GA only when the Golden Path, governed evidence, and enforceable agent controls are simultaneously shippable. This roadmap converts that requirement into an execution sequence with explicit exit criteria.
 
 ## Priority Stack
@@ -31,19 +30,19 @@ Summit advances to GA only when the Golden Path, governed evidence, and enforcea
 
 ### P1 — Intelligence Differentiation (Why Summit Wins)
 
-1. **IntelGraph Insight Engine v1**
+4. **IntelGraph Insight Engine v1**
    - Add hub/anomaly pattern detection.
    - Add bounded multi-hop inference.
    - Add confidence scoring and hypothesis tracking.
    - **Exit metric:** deterministic insight statements with confidence and supporting evidence paths.
 
-2. **Difficulty-aware model routing (DAAO-lite)**
+5. **Difficulty-aware model routing (DAAO-lite)**
    - Route simple tasks to low-cost models.
    - Escalate hard reasoning to premium models.
    - Route unsafe/ambiguous tasks to human review.
    - **Exit metric:** lower inference cost per task with unchanged or improved quality gate pass rate.
 
-3. **Memory architecture v1**
+6. **Memory architecture v1**
    - Episodic memory: run logs and outcomes.
    - Semantic memory: graph facts and verified entities.
    - Procedural memory: policies, tools, and reusable playbooks.
@@ -51,25 +50,24 @@ Summit advances to GA only when the Golden Path, governed evidence, and enforcea
 
 ### P2 — Revenue Wedge (Switchboard)
 
-1. **Switchboard OSINT front door**
+7. **Switchboard OSINT front door**
    - Entity search, relationship visualization, claim verification, report export.
    - **Exit metric:** a non-technical operator can complete one publishable report flow end-to-end.
 
-2. **Enterprise pilot playbook**
+8. **Enterprise pilot playbook**
    - Package use cases, deployment sequence, security posture, and ROI narrative.
    - Target investigative journalism, compliance teams, NGOs, and state/local government.
    - **Exit metric:** pilot package accepted by at least one design partner without custom architecture rewrite.
 
 ### P3 — Trust, Safety, and Governance Moat
 
-1. **FactCert / claim verification module**
+9. **FactCert / claim verification module**
    - Implement claim evidence scoring, source reliability weighting, and conflict detection.
    - **Exit metric:** every exported claim carries verification metadata and conflict status.
 
-2. **Operator control dashboard**
-
-- Show active agents, risk scores, policy violations, evidence completeness, and cost telemetry.
-- **Exit metric:** operators can detect and intervene on policy/risk drift in one screen.
+10. **Operator control dashboard**
+   - Show active agents, risk scores, policy violations, evidence completeness, and cost telemetry.
+   - **Exit metric:** operators can detect and intervene on policy/risk drift in one screen.
 
 ## Single Highest-Leverage Move (Now)
 

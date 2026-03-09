@@ -18,11 +18,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - name: Verify bundle
         run: |
           node scripts/ci/verify_subsumption_bundle.mjs subsumption/item-unknown/manifest.yaml
-        working-directory: ${{ github.workspace }}
-permissions:
-  contents: read

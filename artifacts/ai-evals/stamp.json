@@ -1,6 +1,0 @@
-{
-  "job": "ai-evals",
-  "runner": "local",
-  "lockHash": "dummy-hash-for-local-run",
-  "timestamp": "2026-03-08T17:28:09.547Z"
-}

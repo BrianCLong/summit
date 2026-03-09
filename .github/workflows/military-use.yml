@@ -2,17 +2,15 @@ name: military-use-risk-check
 
 on:
   pull_request:
-    branches: [main]
+    branches: [ main ]
   push:
-    branches: [main]
+    branches: [ main ]
 
 jobs:
   military-use-check:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -24,5 +22,3 @@ jobs:
       - name: Governance fail-fast rule
         run: |
           python3 -c "import json, sys; d=json.load(open('reports/military_use/report.json')); sys.exit(1 if d.get('military_use_risk_score', 0) > 0.65 and d.get('mitigation_block') is None else 0)"
-permissions:
-  contents: read

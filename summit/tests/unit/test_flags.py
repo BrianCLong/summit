@@ -1,8 +1,6 @@
+from summit.flags import is_feature_enabled
 import os
 from unittest.mock import patch
-
-from summit.flags import is_feature_enabled
-
 
 def test_is_feature_enabled():
     with patch.dict(os.environ, {"TEST_FEATURE": "true"}):

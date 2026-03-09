@@ -16,8 +16,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4 # v6
-        with:
-          fetch-depth: 0
       - uses: pnpm/action-setup@v4 # v4
       - uses: pnpm/action-setup@v4 # v4
       - name: Install
@@ -33,8 +31,6 @@ jobs:
     continue-on-error: true
     steps:
       - uses: actions/checkout@v4 # v6
-        with:
-          fetch-depth: 0
       - name: Setup Node
         uses: actions/setup-node@v4 # v6
         with:
@@ -82,8 +78,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4 # v6
-        with:
-          fetch-depth: 0
       - name: Setup OPA
         uses: open-policy-agent/setup-opa@950f159a49aa91f9323f36f1de81c7f6b5de9576 # v2
         with:
@@ -100,8 +94,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4 # v6
-        with:
-          fetch-depth: 0
       - name: Bootstrap & Smoke
         run: |
           echo "Executing Golden Path Smoke Test..."
@@ -122,5 +114,3 @@ jobs:
           # if [[ "${{ needs.policy-check.result }}" != "success" ]]; then exit 1; fi
           if [[ "${{ needs.smoke-test.result }}" != "success" ]]; then exit 1; fi
           echo "GATE PASSED: MVP-4-GA Candidate Verified."
-permissions:
-  contents: read

@@ -21,8 +21,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4 # v6
 
-        with:
-          fetch-depth: 0
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
       - name: Setup Node.js
@@ -59,6 +57,3 @@ jobs:
              echo "SECURITY VIOLATION: Proposal targeted a secrets file!"
              exit 1
           fi
-        working-directory: ${{ github.workspace }}
-permissions:
-  contents: read

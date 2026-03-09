@@ -57,7 +57,6 @@ jobs:
             --out artifacts/pr-containment/${{ inputs.pr_number }} \
             $FLAGS
 
-        working-directory: ${{ github.workspace }}
       - name: Upload Analysis Artifacts
         uses: actions/upload-artifact@v4 # v6
         with:

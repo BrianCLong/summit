@@ -1,7 +1,7 @@
 import os
 
 filepath = "apps/web/src/App.tsx"
-with open(filepath) as f:
+with open(filepath, "r") as f:
     content = f.read()
 
 # Add Lazy Import

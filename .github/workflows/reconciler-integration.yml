@@ -27,8 +27,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-        with:
-          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
@@ -52,5 +50,3 @@ jobs:
         with:
           name: reconcile-metrics
           path: observability/reconcile_metrics.prom
-permissions:
-  contents: read

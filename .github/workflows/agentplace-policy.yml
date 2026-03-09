@@ -20,8 +20,6 @@ jobs:
       SUMMIT_AGENTPLACE_ENABLED: ${{ vars.SUMMIT_AGENTPLACE_ENABLED || 'false' }}
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -40,8 +38,6 @@ jobs:
       SUMMIT_AGENTPLACE_ENABLED: ${{ vars.SUMMIT_AGENTPLACE_ENABLED || 'false' }}
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -61,8 +57,6 @@ jobs:
       SUMMIT_AGENTPLACE_ENABLED: ${{ vars.SUMMIT_AGENTPLACE_ENABLED || 'false' }}
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -72,6 +66,3 @@ jobs:
       - name: Run Performance Profiling
         run: |
           PYTHONPATH=. python3 scripts/profile_agentplace.py
-        working-directory: ${{ github.workspace }}
-permissions:
-  contents: read

@@ -9,5 +9,3 @@ jobs:
     uses: ./.github/workflows/ci-security.yml
     secrets:
       snyk_token: ${{ secrets.SNYK_TOKEN }}
-permissions:
-  contents: read

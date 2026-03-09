@@ -1,5 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "EvidenceObject",
   "type": "object",
   "properties": {
     "evidence_id": {
@@ -8,18 +9,17 @@
     "type": {
       "type": "string"
     },
-    "content_hash": {
-      "type": "string"
+    "content": {
+      "type": "object"
     },
-    "source": {
+    "hash": {
       "type": "string"
     }
   },
   "required": [
     "evidence_id",
     "type",
-    "content_hash",
-    "source"
-  ],
-  "additionalProperties": false
+    "content",
+    "hash"
+  ]
 }

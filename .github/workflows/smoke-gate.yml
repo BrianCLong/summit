@@ -82,8 +82,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-        with:
-          fetch-depth: 0
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
 
@@ -236,5 +234,3 @@ jobs:
             echo "| Smoke Test | FAILED |" >> $GITHUB_STEP_SUMMARY
             echo "| Check Artifacts | smoke-gate-logs |" >> $GITHUB_STEP_SUMMARY
           fi
-permissions:
-  contents: read

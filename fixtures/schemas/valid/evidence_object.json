@@ -1,6 +1,6 @@
 {
-  "evidence_id": "EVD-001",
-  "type": "text",
-  "content_hash": "a1b2c3d4",
-  "source": "https://example.com"
+  "evidence_id": "evid-456",
+  "type": "log",
+  "content": {"message": "actor found"},
+  "hash": "abcdef123456"
 }

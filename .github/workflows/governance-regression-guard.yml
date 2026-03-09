@@ -52,8 +52,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4 # v4
 
-        with:
-          fetch-depth: 0
       - name: Setup Python
         uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v5
         with:
@@ -65,7 +63,6 @@ jobs:
       - name: Make Scripts Executable
         run: chmod +x scripts/release/*.sh
 
-        working-directory: ${{ github.workspace }}
       - name: Compute Governance Hash
         id: hash
         run: |
@@ -78,7 +75,6 @@ jobs:
             echo "::warning::No governance lockfile found"
           fi
 
-        working-directory: ${{ github.workspace }}
       - name: Check Governance Compliance
         id: compliance
         run: |
@@ -126,7 +122,6 @@ jobs:
           echo "| Governance Lockfile | ${LOCKFILE_SCORE}% |" >> $GITHUB_STEP_SUMMARY
           echo "| Governance Health | ${HEALTH_SCORE}% |" >> $GITHUB_STEP_SUMMARY
 
-        working-directory: ${{ github.workspace }}
       - name: Evaluate Regression
         id: evaluate
         run: |
@@ -160,7 +155,6 @@ jobs:
 
           echo "passed=${PASSED}" >> $GITHUB_OUTPUT
 
-        working-directory: ${{ github.workspace }}
       - name: Log to Audit Trail
         if: always()
         run: |
@@ -185,7 +179,6 @@ jobs:
             --metadata "{\"status\": \"${STATUS}\", \"score\": ${SCORE}, \"passed\": ${PASSED}, \"governance_hash\": \"${HASH:-null}\", \"pr_number\": ${{ github.event.pull_request.number || 0 }}}" \
             || echo "::warning::Failed to update audit log"
 
-        working-directory: ${{ github.workspace }}
       - name: Upload Compliance Report
         uses: actions/upload-artifact@v4 # v4
         if: always()

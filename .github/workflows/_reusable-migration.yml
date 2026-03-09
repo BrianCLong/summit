@@ -8,12 +8,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4 # v4
-        with:
-          fetch-depth: 0
       - name: Plan & shadow verify
         run: |
           chmod +x ops/db/migrate ops/db/verify
           ./ops/db/migrate --plan --no-apply
           ./ops/db/verify --shadow
-permissions:
-  contents: read

@@ -104,7 +104,6 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
-          fetch-depth: 0
       - name: Install yq
         run: |
           sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/download/v4.40.5/yq_linux_amd64
@@ -153,7 +152,6 @@ jobs:
           # Run remediation
           ./scripts/release/run_remediation.sh $ARGS
 
-        working-directory: ${{ github.workspace }}
       - name: Check for State Changes
         id: check_changes
         run: |

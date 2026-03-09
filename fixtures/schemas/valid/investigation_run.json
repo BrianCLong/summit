@@ -1,11 +1,7 @@
 {
-  "run_id": "RUN-001",
-  "inputs": {
-    "query": "Who is John Doe?"
-  },
-  "scope": {
-    "domain": "public"
-  },
-  "tools_invoked": ["search"],
-  "outputs_summary": "John Doe is a person."
+  "run_id": "run-123",
+  "inputs": {"query": "Find malicious actors"},
+  "scope": {"time": "2024"},
+  "tools_invoked": ["search", "analyze"],
+  "outputs_summary": {"findings": 5}
 }

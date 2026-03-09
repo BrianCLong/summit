@@ -43,12 +43,11 @@ jobs:
       - name: Checkout (shallow)
         uses: actions/checkout@v4 # v4
         with:
-          fetch-depth: 0
+          fetch-depth: 2
 
       - name: Check for loop avoidance
         id: check
         run: |
-          git fetch --tags --force
           # Get the last commit message
           LAST_COMMIT_MSG=$(git log -1 --pretty=%B)
 
@@ -121,7 +120,6 @@ jobs:
         run: |
           chmod +x scripts/release/*.sh || true
 
-        working-directory: ${{ github.workspace }}
       - name: Create Artifact Directory
         run: |
           mkdir -p artifacts/release-train
@@ -165,7 +163,6 @@ jobs:
       # =========================================================================
       # C) RAISE/UPDATE BLOCKER ISSUES
       # =========================================================================
-        working-directory: ${{ github.workspace }}
       - name: "Step 2: Raise Blocker Issues"
         id: blocker_issues
         if: env.ENABLE_ISSUE_WRITES == 'true'
@@ -221,7 +218,6 @@ jobs:
       # =========================================================================
       # D) APPLY ROUTING LABELS
       # =========================================================================
-        working-directory: ${{ github.workspace }}
       - name: "Step 3: Apply Routing"
         id: routing
         if: env.ENABLE_ROUTING == 'true'
@@ -256,7 +252,6 @@ jobs:
       # =========================================================================
       # E) APPLY ESCALATION THRESHOLDS
       # =========================================================================
-        working-directory: ${{ github.workspace }}
       - name: "Step 4: Apply Escalation"
         id: escalation
         if: env.ENABLE_ESCALATION == 'true'
@@ -291,7 +286,6 @@ jobs:
       # =========================================================================
       # F) GENERATE DAILY DIGEST (Cadence-Gated: once per day in configured window)
       # =========================================================================
-        working-directory: ${{ github.workspace }}
       - name: "Step 5: Check Digest Cadence"
         id: digest_cadence
         env:
@@ -315,7 +309,6 @@ jobs:
             echo "should_run=true" >> $GITHUB_OUTPUT
           fi
 
-        working-directory: ${{ github.workspace }}
       - name: "Step 5: Generate Digest"
         id: digest
         if: steps.digest_cadence.outputs.should_run == 'true'
@@ -347,7 +340,6 @@ jobs:
 
           echo "::endgroup::"
 
-        working-directory: ${{ github.workspace }}
       - name: "Step 5: Skip Digest (Outside Window)"
         if: steps.digest_cadence.outputs.should_run != 'true'
         run: |
@@ -386,7 +378,6 @@ jobs:
             echo "should_run=true" >> $GITHUB_OUTPUT
           fi
 
-        working-directory: ${{ github.workspace }}
       - name: "Step 6: Generate Handoff"
         id: handoff
         if: steps.handoff_cadence.outputs.should_run == 'true'
@@ -418,7 +409,6 @@ jobs:
 
           echo "::endgroup::"
 
-        working-directory: ${{ github.workspace }}
       - name: "Step 6: Skip Handoff (Outside Window)"
         if: steps.handoff_cadence.outputs.should_run != 'true'
         run: |
@@ -465,7 +455,6 @@ jobs:
       # =========================================================================
       # G.6) RENDER SINGLE PAGE AS HTML
       # =========================================================================
-        working-directory: ${{ github.workspace }}
       - name: "Step 7b: Render Single Page HTML"
         id: single_page_html
         run: |
@@ -498,7 +487,6 @@ jobs:
       # =========================================================================
       # G.7) GENERATE BUNDLE INDEX PAGE
       # =========================================================================
-        working-directory: ${{ github.workspace }}
       - name: "Step 7c: Generate Bundle Index"
         id: bundle_index
         run: |
@@ -525,7 +513,6 @@ jobs:
       # =========================================================================
       # H) UPLOAD ARTIFACT BUNDLE
       # =========================================================================
-        working-directory: ${{ github.workspace }}
       - name: "Step 8: Prepare Artifact Bundle"
         run: |
           echo "::group::Prepare Artifact Bundle"

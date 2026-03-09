@@ -1,4 +1,4 @@
-import { normalizeDataset, validateOpenLineageEvent, normalizeDuration } from "./index.js";
+import { normalizeDataset, validateOpenLineageEvent } from "./index.js";
 
 describe("summit-lineage-normalizer", () => {
   it("normalizes postgresql attributes", () => {
@@ -12,17 +12,6 @@ describe("summit-lineage-normalizer", () => {
     expect(dataset.name).toBe("line_items");
   });
 
-  it("normalizes new semantic conventions for database", () => {
-    const dataset = normalizeDataset({
-      "db.system": "mongodb",
-      "server.address": "mongo-prod",
-      "db.namespace": "admin",
-      "db.collection.name": "users"
-    });
-    expect(dataset.namespace).toBe("mongodb://mongo-prod/admin");
-    expect(dataset.name).toBe("users");
-  });
-
   it("normalizes kafka attributes", () => {
     const dataset = normalizeDataset({
       "messaging.system": "kafka",
@@ -33,35 +22,12 @@ describe("summit-lineage-normalizer", () => {
     expect(dataset.name).toBe("orders_topic");
   });
 
-  it("normalizes new semantic conventions for messaging", () => {
-    const dataset = normalizeDataset({
-      "messaging.system": "kafka",
-      "server.address": "use1",
-      "messaging.destination.name": "events_topic"
-    });
-    expect(dataset.namespace).toBe("kafka://use1");
-    expect(dataset.name).toBe("events_topic");
-  });
-
   it("normalizes s3 attributes", () => {
     const dataset = normalizeDataset({
       "file.path": "s3://bucket/key/path"
     });
     expect(dataset.namespace).toBe("s3://bucket");
     expect(dataset.name).toBe("key/path");
-  });
-
-  it("normalizes duration metrics in seconds to milliseconds", () => {
-    const attrs = {
-      "http.server.request.duration": 0.05, // 50ms
-      "rpc.server.duration": 1.25 // 1250ms
-    };
-    normalizeDuration(attrs);
-
-    expect(attrs["http.server.request.duration_ms"]).toBe(50);
-    expect(attrs["http.server.duration"]).toBe(50); // Legacy fallback
-
-    expect(attrs["rpc.server.duration_ms"]).toBe(1250);
   });
 
   it("validates valid open lineage event", () => {

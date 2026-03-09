@@ -16,8 +16,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
@@ -27,8 +25,5 @@ jobs:
         run: python3 benchmarks/ai-mockup-2026/runner.py --check
       - name: Drift detection gate
         run: python3 scripts/monitoring/ai-mockup-2026-drift.py
-        working-directory: ${{ github.workspace }}
       - name: Tests
         run: pytest benchmarks/ai-mockup-2026/test_runner.py
-permissions:
-  contents: read

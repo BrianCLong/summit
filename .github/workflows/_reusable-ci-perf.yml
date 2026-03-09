@@ -17,8 +17,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4 # v6
 
-        with:
-          fetch-depth: 0
       - name: Setup pnpm
         uses: pnpm/action-setup@v4 # v4
 
@@ -48,7 +46,6 @@ jobs:
       - name: Wait for GraphQL API
         run: ./scripts/wait-for.sh localhost:4000 90
 
-        working-directory: ${{ github.workspace }}
       - name: Execute k6 thresholds
         uses: grafana/k6-action@e4714b734f2b0afaabeb7b4a69142745548ab9ec # v0.3.1
         with:
@@ -66,7 +63,6 @@ jobs:
             --journey GP-001 \
             --report perf/reports/latency-budget-report.json
 
-        working-directory: ${{ github.workspace }}
       - name: Upload k6 report
         if: always()
         uses: actions/upload-artifact@v4 # v6
@@ -84,4 +80,3 @@ jobs:
           else
             echo "No resolver metrics found; skipping regression check."
           fi
-        working-directory: ${{ github.workspace }}

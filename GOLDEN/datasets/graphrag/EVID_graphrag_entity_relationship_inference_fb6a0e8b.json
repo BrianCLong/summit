@@ -1,9 +1,0 @@
-{
-  "id": "EVID:graphrag:entity_relationship_inference:fb6a0e8b",
-  "case": "entity_relationship_inference",
-  "content": "This is some evidence for entity_relationship_inference test number 8.",
-  "metadata": {
-    "source": "doc_8",
-    "confidence": 0.77
-  }
-}

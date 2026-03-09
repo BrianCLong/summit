@@ -2,7 +2,7 @@ name: MemAlign CI
 
 on:
   push:
-    branches: [main]
+    branches: [ main ]
     paths:
       - 'src/evals/memalign/**'
       - 'src/cli/judge_align.ts'
@@ -21,8 +21,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-        with:
-          fetch-depth: 0
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -37,8 +35,5 @@ jobs:
       - name: Run Benchmark
         run: npx tsx scripts/bench/memalign_bench.ts
 
-        working-directory: ${{ github.workspace }}
       - name: Verify CLI
         run: npx tsx src/cli/judge_align.ts --help
-permissions:
-  contents: read

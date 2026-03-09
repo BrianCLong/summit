@@ -30,7 +30,6 @@ Legend: 🟢 solid / 🟡 partial / 🟠 early / 🔴 missing
 **Objective:** Prevent architectural drift before scaling.
 
 **Deliverables:**
-
 - Canonical Data Contract v1 covering Entity, Event, Relationship, Evidence, Claim, Narrative.
 - Required field policy (`id`, `type`, `time`, `confidence`, `source_refs`, `provenance`).
 - Graph-as-System-of-Record assertion for all final outputs.
@@ -41,7 +40,6 @@ Legend: 🟢 solid / 🟡 partial / 🟠 early / 🔴 missing
 **Objective:** Every claim is reproducible and attributable.
 
 **Deliverables:**
-
 - Provenance objects for source, extraction, and transformation lifecycle.
 - Evidence binder per investigation.
 - Boundary policy: graph rejects writes missing `source_refs` and extraction references.
@@ -51,7 +49,6 @@ Legend: 🟢 solid / 🟡 partial / 🟠 early / 🔴 missing
 **Objective:** Scale ingestion with low per-source overhead.
 
 **Deliverables:**
-
 - Connector interface (`discover`, `fetch`, `normalize`, `extract`, `load`).
 - Idempotent queue/job model with retries and deterministic run IDs.
 - Five proving connectors (news, filings, sanctions, court/public record, social capture).
@@ -61,7 +58,6 @@ Legend: 🟢 solid / 🟡 partial / 🟠 early / 🔴 missing
 **Objective:** Keep graph identity clean and queryable.
 
 **Deliverables:**
-
 - Type/relation registries with CI linting.
 - Compatibility-tested ontology migrations.
 - ER service with alias tables, confidence scores, merge/unmerge audits.
@@ -71,7 +67,6 @@ Legend: 🟢 solid / 🟡 partial / 🟠 early / 🔴 missing
 **Objective:** Query truth across time, not just latest snapshots.
 
 **Deliverables:**
-
 - Temporal edge fields (`valid_from`, `valid_to`, `observed_at`).
 - As-of network queries.
 - Coexistence model for contradictory claims with confidence + provenance.
@@ -81,7 +76,6 @@ Legend: 🟢 solid / 🟡 partial / 🟠 early / 🔴 missing
 **Objective:** Convert graph structure into repeatable insight.
 
 **Deliverables:**
-
 - Deterministic jobs: community, centrality, anomaly, flow.
 - Persisted derived artifacts in graph with provenance lineage.
 - Analyst-facing analytics catalog and job explainability metadata.
@@ -91,7 +85,6 @@ Legend: 🟢 solid / 🟡 partial / 🟠 early / 🔴 missing
 **Objective:** Enable complete investigations inside Summit.
 
 **Deliverables:**
-
 - Investigation object (scope, hypotheses, labels, owner).
 - Workspace tabs: Timeline, Graph, Evidence Binder, Hypothesis Board, Reports.
 - Pin-and-cite workflow that anchors every note to claims/evidence.
@@ -101,7 +94,6 @@ Legend: 🟢 solid / 🟡 partial / 🟠 early / 🔴 missing
 **Objective:** Safely automate investigative throughput.
 
 **Deliverables:**
-
 - Agent output contracts requiring structured artifacts.
 - Critic/verifier loop with deterministic policy gates.
 - Regression eval harness for schema, provenance, and quality checks.
@@ -111,7 +103,6 @@ Legend: 🟢 solid / 🟡 partial / 🟠 early / 🔴 missing
 **Objective:** Enterprise-grade control surfaces.
 
 **Deliverables:**
-
 - ABAC/OPA enforcement on graph, connectors, agents, and exports.
 - End-to-end access audit logs and redaction pathways.
 - Policy evidence bundles attached to release artifacts.
@@ -121,7 +112,6 @@ Legend: 🟢 solid / 🟡 partial / 🟠 early / 🔴 missing
 **Objective:** Deploy in constrained and disconnected environments.
 
 **Deliverables:**
-
 - Reproducible Docker/Kubernetes profiles.
 - Offline bootstrap pack and local model gateway profile.
 - Signed release/update channels with rollback playbooks.
@@ -131,7 +121,6 @@ Legend: 🟢 solid / 🟡 partial / 🟠 early / 🔴 missing
 **Objective:** Transition from product to extensible ecosystem.
 
 **Deliverables:**
-
 - Plugin contracts for connectors, analytics, UI panels, and agent skills.
 - Compatibility policy and semantic versioning contract.
 - Internal registry with vetting and deprecation controls.

@@ -10,14 +10,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - name: Run drift monitor
         run: |
           python3 scripts/monitoring/offline_drift.py \
             --expected-hash 0000000000000000000000000000000000000000000000000000000000000000 \
             --current-output "offline drift probe" \
             --out drift_report.json
-        working-directory: ${{ github.workspace }}
-permissions:
-  contents: read

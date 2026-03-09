@@ -5,13 +5,13 @@ on:
     branches: [main, develop]
     paths:
       - '**/*.py'
-      - '**/pyproject.toml'
-      - '**/requirements*.txt'
+      - 'pyproject.toml'
+      - 'requirements*.txt'
   pull_request:
     paths:
       - '**/*.py'
-      - '**/pyproject.toml'
-      - '**/requirements*.txt'
+      - 'pyproject.toml'
+      - 'requirements*.txt'
 
 jobs:
   python-ci:
@@ -22,5 +22,3 @@ jobs:
     uses: ./.github/workflows/_reusable-python.yml
     with:
       python-version: ${{ matrix.python-version }}
-permissions:
-  contents: read

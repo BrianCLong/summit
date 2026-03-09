@@ -31,8 +31,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4 # v6
 
-        with:
-          fetch-depth: 0
       - name: Install Git 2.47.1+ and disable bundle URIs
         shell: bash
         run: |
@@ -81,5 +79,3 @@ jobs:
       - name: Install dependencies
         if: ${{ inputs.install-deps }}
         run: pnpm install --frozen-lockfile --prefer-offline
-permissions:
-  contents: read

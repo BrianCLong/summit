@@ -26,8 +26,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4 # v6
 
-        with:
-          fetch-depth: 0
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
       - name: Setup pnpm
@@ -44,8 +42,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4 # v6
 
-        with:
-          fetch-depth: 0
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
         with:
@@ -62,5 +58,3 @@ jobs:
 
       - name: Verify Compliance Drift
         run: pnpm verify:compliance
-permissions:
-  contents: read

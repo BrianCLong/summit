@@ -24,8 +24,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-        with:
-          fetch-depth: 0
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -92,8 +90,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-        with:
-          fetch-depth: 0
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
 
@@ -110,5 +106,3 @@ jobs:
 
       - name: Run Playwright tests
         run: npx playwright test e2e/summit-smoke.spec.ts
-permissions:
-  contents: read

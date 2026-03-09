@@ -1,5 +1,21 @@
-1. **Repository Reality Check and MWS**: Set up the skeleton structure and essential interfaces matching the Summit Skill Graph v3 architecture as per the user's provided document.
-2. **Setup directories and files**: Recreate the directories and populate them with stub code as generated in the provided user doc.
-3. **Verify files**: Check that files have been successfully created.
-4. **Pre-commit**: Complete the required pre-commit checks.
-5. **Submit**: Create PR to add the framework.
+1. **Define Schema for Moments**
+   - Create `summit/memory/moment.py` containing a `Moment` dataclass/Pydantic model.
+   - Schema should include: `timestamp`, `source_app`, `uri`, `title`, `text`, `metadata`, `sensitivity_tags`, `hash`, and an `id`.
+
+2. **Ingestion Endpoint & Capture Adapter**
+   - Create `summit/memory/ingestion.py` which exposes an ingestion function (or class) to capture moments.
+   - It will normalize input into the `Moment` schema.
+
+3. **Hybrid Retrieval (Vector + Graph)**
+   - Create `summit/memory/retrieval.py` for hybrid retrieval.
+   - Mock integration with Qdrant (using a simple dictionary/list or mocking the `VectorSearch` class) and Neo4j (using a simple dictionary/list or mock graph).
+   - Ensure the retrieval function accepts a query and returns moments with their citations.
+
+4. **Evidence Citations**
+   - Ensure retrieved moments format properly as evidence with source, timestamp, app, uri.
+
+5. **Policy Controls**
+   - Implement policy filters in the ingestion and/or retrieval layer. Exclude domains, apps, handle sensitive fields.
+
+6. **Tests and Validation**
+   - Create `tests/summit/memory/test_ambient_memory.py` to verify ingestion, retrieval, and policy controls.

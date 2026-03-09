@@ -1,9 +1,6 @@
-from unittest.mock import AsyncMock, MagicMock, patch
-
 import pytest
-
+from unittest.mock import AsyncMock, MagicMock, patch
 from summit.services.shared.core_verification import CoreVerificationService
-
 
 @pytest.fixture
 def mock_cache():

@@ -17,7 +17,6 @@ jobs:
         with:
           ref: ${{ github.event.inputs.ref }}
 
-          fetch-depth: 0
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
       - name: Setup Node
@@ -35,7 +34,6 @@ jobs:
         run: |
           ./scripts/verification/generate_ops_evidence_pack.sh
 
-        working-directory: ${{ github.workspace }}
       - name: Upload Evidence Pack
         if: always()
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
@@ -44,5 +42,3 @@ jobs:
           path: artifacts/ops-evidence/*.tar.gz
           retention-days: 7
           if-no-files-found: error
-permissions:
-  contents: read

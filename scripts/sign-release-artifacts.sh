@@ -120,9 +120,9 @@ if [ -d "$ARTIFACT_DIR" ]; then
             
             # Verify the signature
             if [ -n "$COSIGN_PWD" ]; then
-                cosign verify-blob --use-signed-timestamps --key env://COSIGN_PWD --signature "$signature_file" --certificate "$cert_file" "$artifact" || { echo "::error::Supply chain verification failed! Missing or invalid signed timestamps."; false; }
+                cosign verify-blob --use-signed-timestamps --key env://COSIGN_PWD --signature "$signature_file" --certificate "$cert_file" "$artifact"
             else
-                cosign verify-blob --use-signed-timestamps --signature "$signature_file" --certificate "$cert_file" --yes "$artifact" || { echo "::error::Supply chain verification failed! Missing or invalid signed timestamps."; false; }
+                cosign verify-blob --use-signed-timestamps --signature "$signature_file" --certificate "$cert_file" --yes "$artifact"
             fi
             
             SIGNATURE_COUNT=$((SIGNATURE_COUNT + 1))

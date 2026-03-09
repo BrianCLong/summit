@@ -52,8 +52,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4 # v4.1.7
 
-        with:
-          fetch-depth: 0
       - name: Prepare report directory
         run: mkdir -p "$REPORT_DIR"
 
@@ -101,8 +99,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4 # v4.1.7
-        with:
-          fetch-depth: 0
       - name: Install pnpm
         uses: pnpm/action-setup@v4 # v4.1.0
       - name: Setup Node
@@ -113,4 +109,3 @@ jobs:
       # Note: pnpm version is read from package.json "packageManager" field
       - name: Check Drift
         run: ./scripts/check-lockfile-drift.sh
-        working-directory: ${{ github.workspace }}

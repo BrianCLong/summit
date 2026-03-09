@@ -92,8 +92,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4 # v4
 
-        with:
-          fetch-depth: 0
       - name: Check Freeze Mode
         run: |
           chmod +x scripts/release/enforce_freeze_gate.sh
@@ -109,7 +107,6 @@ jobs:
   # Stage 1: Lineage Check (fail fast)
   # Verify GA tag points to successful RC commit
   # ═══════════════════════════════════════════════════════════════════════════
-        working-directory: ${{ github.workspace }}
   lineage:
     name: "1️⃣ Lineage Check"
     runs-on: ubuntu-latest
@@ -172,7 +169,6 @@ jobs:
             exit 1
           fi
 
-        working-directory: ${{ github.workspace }}
       - name: Lineage Summary
         if: always()
         run: |
@@ -224,9 +220,8 @@ jobs:
               --workflow-run "${{ github.run_id }}" || true
           fi
 
-        working-directory: ${{ github.workspace }}
       - name: Install Cosign
-        uses: sigstore/cosign-installer@v3.7.0
+        uses: sigstore/cosign-installer@9614fae9e5c5eddabb09f90a270fcb487c9f7149 # v3.3.0
         with:
           cosign-release: "v3.0.5"
 
@@ -280,7 +275,7 @@ jobs:
           path: staging/verification
 
       - name: Install Cosign
-        uses: sigstore/cosign-installer@v3.7.0
+        uses: sigstore/cosign-installer@9614fae9e5c5eddabb09f90a270fcb487c9f7149 # v3.3.0
         with:
           cosign-release: "v3.0.5"
 
@@ -291,7 +286,6 @@ jobs:
           chmod +x scripts/release/verify-release-bundle.mjs
           node scripts/release/verify-release-bundle.mjs --path staging/ga-bundle --strict
 
-        working-directory: ${{ github.workspace }}
       - name: Run Publish Guard
         id: guard
         run: |
@@ -318,7 +312,6 @@ jobs:
             echo "publish_allowed=false" >> $GITHUB_OUTPUT
           fi
 
-        working-directory: ${{ github.workspace }}
       - name: Upload Publish Guard Report
         uses: actions/upload-artifact@v4 # v4
         with:
@@ -354,8 +347,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4 # v4
 
-        with:
-          fetch-depth: 0
       - name: Download All Artifacts
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v4
         with:
@@ -543,8 +534,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4 # v4
 
-        with:
-          fetch-depth: 0
       - name: Download GA Release Bundle
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v4
         with:

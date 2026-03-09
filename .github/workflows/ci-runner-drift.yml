@@ -17,8 +17,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-        with:
-          fetch-depth: 0
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
       - name: Setup Node.js
@@ -33,4 +31,3 @@ jobs:
 
       - name: Run Drift Detection
         run: npx tsx scripts/monitoring/ci-runner-drift.ts
-        working-directory: ${{ github.workspace }}

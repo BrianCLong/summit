@@ -24,7 +24,6 @@ jobs:
         with:
           persist-credentials: false
 
-          fetch-depth: 0
       - name: Run Scorecard analysis
         uses: ossf/scorecard-action@v2.3.1
         with:

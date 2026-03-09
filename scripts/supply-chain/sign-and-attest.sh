@@ -56,10 +56,10 @@ if [ "$TYPE" = "image" ]; then
   if [ "$USE_KEYLESS" = "true" ]; then
     # In production, you should constrain identity to your repo:
     # e.g., --certificate-identity https://github.com/BrianCLong/summit/.github/workflows/supply-chain-attest.yml@refs/heads/main
-    cosign verify --use-signed-timestamps "$IMAGE_OR_BLOB" --certificate-identity-regexp ".*" --certificate-oidc-issuer "https://token.actions.githubusercontent.com" || { echo "::error::Supply chain verification failed! Missing or invalid signed timestamps."; false; }
+    cosign verify --use-signed-timestamps "$IMAGE_OR_BLOB" --certificate-identity-regexp ".*" --certificate-oidc-issuer "https://token.actions.githubusercontent.com"
   else
     if [ -n "$COSIGN_PUBLIC_KEY" ]; then
-      cosign verify --use-signed-timestamps --key "$COSIGN_PUBLIC_KEY" "$IMAGE_OR_BLOB" || { echo "::error::Supply chain verification failed! Missing or invalid signed timestamps."; false; }
+      cosign verify --use-signed-timestamps --key "$COSIGN_PUBLIC_KEY" "$IMAGE_OR_BLOB"
     else
       echo "⚠️ Skipping verification: COSIGN_PUBLIC_KEY not provided."
     fi
@@ -72,10 +72,10 @@ elif [ "$TYPE" = "blob" ]; then
 
   echo "🔍 Verifying blob signature..."
   if [ "$USE_KEYLESS" = "true" ]; then
-    cosign verify-blob --use-signed-timestamps --bundle "$BUNDLE_PATH" --certificate-identity-regexp ".*" --certificate-oidc-issuer "https://token.actions.githubusercontent.com" "$IMAGE_OR_BLOB" || { echo "::error::Supply chain verification failed! Missing or invalid signed timestamps."; false; }
+    cosign verify-blob --use-signed-timestamps --bundle "$BUNDLE_PATH" --certificate-identity-regexp ".*" --certificate-oidc-issuer "https://token.actions.githubusercontent.com" "$IMAGE_OR_BLOB"
   else
     if [ -n "$COSIGN_PUBLIC_KEY" ]; then
-      cosign verify-blob --use-signed-timestamps --key "$COSIGN_PUBLIC_KEY" --bundle "$BUNDLE_PATH" "$IMAGE_OR_BLOB" || { echo "::error::Supply chain verification failed! Missing or invalid signed timestamps."; false; }
+      cosign verify-blob --use-signed-timestamps --key "$COSIGN_PUBLIC_KEY" --bundle "$BUNDLE_PATH" "$IMAGE_OR_BLOB"
     else
       echo "⚠️ Skipping verification: COSIGN_PUBLIC_KEY not provided."
     fi

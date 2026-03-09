@@ -4,7 +4,7 @@ export { PluginManifestSchema, PluginSignatureSchema } from './manifest/schema.j
 export { PluginManifestValidationError } from './errors/PluginManifestValidationError.js';
 
 // Core
-export { PluginManager, type PluginManagerOptions } from './core/PluginManager.js';
+export { PluginManager } from './core/PluginManager.js';
 export { DefaultPluginLoader } from './core/PluginLoader.js';
 export { PluginSandbox, type ResourceUsage } from './core/PluginSandbox.js';
 export { DefaultDependencyResolver } from './core/DependencyResolver.js';

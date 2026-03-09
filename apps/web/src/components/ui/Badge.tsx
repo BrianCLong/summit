@@ -43,36 +43,21 @@ const badgeVariants = cva(
 )
 
 export interface BadgeProps
-  extends React.HTMLAttributes<HTMLSpanElement>,
+  extends React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof badgeVariants> {
-  'data-ai-suggestion'?: boolean
-  icon?: React.ReactNode
-}
+      'data-ai-suggestion'?: boolean;
+    }
 
-function Badge({
-  className,
-  variant,
-  'data-ai-suggestion': isAiSuggestion,
-  icon,
-  children,
-  ...props
-}: BadgeProps) {
+function Badge({ className, variant, 'data-ai-suggestion': isAiSuggestion, ...props }: BadgeProps) {
+  // We can't use useSelector here if Badge is used outside of Redux context or in a pure presentation way
+  // But Badge is a UI component.
+  // Ideally, the parent should hide it, but "Invisible Hand" implies a global toggle that hides ALL badges that might be AI.
+  // If we can't easily hook into store here without breaking tests or Storybook, we should use a CSS class approach.
+  // The 'invisibleHandMode' adds a class to the body, and we use CSS to hide things.
+  // Let's rely on the body class 'invisible-hand-mode' which we can set in App.tsx or similar.
+
   return (
-    <span
-      className={cn(
-        badgeVariants({ variant }),
-        className,
-        isAiSuggestion ? 'ai-suggestion-badge' : ''
-      )}
-      {...props}
-    >
-      {icon && (
-        <span className="mr-1 inline-flex items-center" aria-hidden="true">
-          {icon}
-        </span>
-      )}
-      {children}
-    </span>
+    <div className={cn(badgeVariants({ variant }), className, isAiSuggestion ? 'ai-suggestion-badge' : '')} {...props} />
   )
 }
 

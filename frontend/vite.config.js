@@ -7,8 +7,6 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     setupFiles: './src/setupTests.js',
-    // Ensure @vitejs/plugin-react can inject its preamble in test files
-    includeSource: ['src/**/*.{ts,tsx}'],
   },
   server: {
     proxy: {

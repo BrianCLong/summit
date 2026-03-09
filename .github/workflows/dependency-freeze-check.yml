@@ -61,7 +61,6 @@ jobs:
       - name: Check for RC Phase
         id: rc-phase
         run: |
-          git fetch --tags --force
           # Check if we're in RC stabilization phase
           LATEST_RC=$(git tag -l 'v*.*.*-rc.*' --sort=-v:refname | head -1)
 
@@ -115,7 +114,6 @@ jobs:
 
           exit $EXIT_CODE
 
-        working-directory: ${{ github.workspace }}
       - name: Skip Check (Not in RC Phase)
         if: steps.rc-phase.outputs.in_stabilization != 'true'
         run: |

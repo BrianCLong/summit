@@ -2,9 +2,9 @@ name: Agent Runtime CI
 
 on:
   push:
-    branches: ["main"]
+    branches: [ "main" ]
   pull_request:
-    branches: ["main"]
+    branches: [ "main" ]
 
 jobs:
   test-matrix:
@@ -15,8 +15,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-        with:
-          fetch-depth: 0
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -54,5 +52,3 @@ jobs:
         run: |
           # Requires a repo-visible comment explaining its purpose and linking to a governance acceptance record (e.g., ADR-052)
           echo "This shim job aggregates matrix test results for the Agent Runtime CI as required by ADR-052."
-permissions:
-  contents: read

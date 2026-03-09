@@ -42,8 +42,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-        with:
-          fetch-depth: 0
       - name: Quick PR count
         id: count
         env:
@@ -65,8 +63,6 @@ jobs:
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - name: Process batch
         env:
           GH_TOKEN: ${{ github.token }}
@@ -79,7 +75,6 @@ jobs:
 
           bash .github/scripts/process-pr-batch.sh /tmp/batch.txt
 
-        working-directory: ${{ github.workspace }}
   process-batch-2:
     name: Batch 2 (PRs 101-180)
     needs: analyze
@@ -87,8 +82,6 @@ jobs:
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - name: Process batch
         env:
           GH_TOKEN: ${{ github.token }}
@@ -101,7 +94,6 @@ jobs:
 
           bash .github/scripts/process-pr-batch.sh /tmp/batch.txt
 
-        working-directory: ${{ github.workspace }}
   process-batch-3:
     name: Batch 3 (PRs 181-300)
     needs: analyze
@@ -109,8 +101,6 @@ jobs:
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - name: Process batch
         env:
           GH_TOKEN: ${{ github.token }}
@@ -121,7 +111,6 @@ jobs:
 
           bash .github/scripts/process-pr-batch.sh /tmp/batch.txt
 
-        working-directory: ${{ github.workspace }}
   process-batch-4:
     name: Batch 4 (PRs 301-400)
     needs: analyze
@@ -129,8 +118,6 @@ jobs:
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - name: Process batch
         env:
           GH_TOKEN: ${{ github.token }}
@@ -141,7 +128,6 @@ jobs:
 
           bash .github/scripts/process-pr-batch.sh /tmp/batch.txt
 
-        working-directory: ${{ github.workspace }}
   process-batch-5:
     name: Batch 5 (PRs 401-500)
     needs: analyze
@@ -149,8 +135,6 @@ jobs:
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - name: Process batch
         env:
           GH_TOKEN: ${{ github.token }}
@@ -162,7 +146,6 @@ jobs:
           bash .github/scripts/process-pr-batch.sh /tmp/batch.txt
 
   # Job 7: Merge all ready PRs
-        working-directory: ${{ github.workspace }}
   merge:
     name: Mass Merge Execution
     needs: [process-batch-1, process-batch-2, process-batch-3, process-batch-4, process-batch-5]
@@ -172,8 +155,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-        with:
-          fetch-depth: 0
       - name: Mass merge ready PRs
         env:
           GH_TOKEN: ${{ github.token }}

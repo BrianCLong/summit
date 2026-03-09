@@ -14,11 +14,6 @@ import { PluginManifestSchema } from '../manifest/schema.js';
 import { PluginManifestValidationError } from '../errors/PluginManifestValidationError.js';
 import { verifySignature } from '../security/verifySignature.js';
 
-export interface PluginManagerOptions {
-  /** Base URL for the platform API exposed to plugins via context.api */
-  apiBaseUrl?: string;
-}
-
 /**
  * Central plugin manager implementing microkernel pattern
  */
@@ -28,21 +23,18 @@ export class PluginManager extends EventEmitter {
   private registry: PluginRegistry;
   private dependencyResolver: DependencyResolver;
   private platformVersion: string;
-  private options: PluginManagerOptions;
 
   constructor(
     loader: PluginLoader,
     registry: PluginRegistry,
     dependencyResolver: DependencyResolver,
-    platformVersion: string,
-    options: PluginManagerOptions = {}
+    platformVersion: string
   ) {
     super();
     this.loader = loader;
     this.registry = registry;
     this.dependencyResolver = dependencyResolver;
     this.platformVersion = platformVersion;
-    this.options = options;
   }
 
   /**
@@ -61,17 +53,12 @@ export class PluginManager extends EventEmitter {
     }
 
     if (verificationEnabled) {
-      const verificationResult = await verifySignature({
+      await verifySignature({
         manifest: manifestToInstall,
         signature: manifestToInstall.signature?.signature,
         publicKey: manifestToInstall.signature?.publicKey,
         algorithm: manifestToInstall.signature?.algorithm,
       });
-      if (verificationResult.status === 'invalid') {
-        throw new Error(
-          `Plugin ${id} failed signature verification: ${verificationResult.reason ?? 'unknown reason'}`
-        );
-      }
     }
 
     // Check platform compatibility
@@ -345,35 +332,13 @@ export class PluginManager extends EventEmitter {
     };
   }
 
-  private createAPI(pluginId: string): any {
-    const apiBaseUrl = this.options?.apiBaseUrl;
-    if (apiBaseUrl) {
-      return {
-        request: (endpoint: string, options?: RequestInit) =>
-          fetch(`${apiBaseUrl}${endpoint}`, options).then((res) => res.json()),
-        graphql: (query: string, variables?: Record<string, unknown>) =>
-          fetch(`${apiBaseUrl}/graphql`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ query, variables }),
-          }).then((res) => res.json()),
-      };
-    }
-
-    // No base URL configured: return a stub that resolves to null rather than
-    // rejecting, so plugins that call the API gracefully handle missing data.
-    /* eslint-disable no-console */
+  private createAPI(_pluginId: string): any {
     return {
-      request: (endpoint: string) => {
-        console.warn(`[${pluginId}] Plugin API not configured; ignoring request to ${endpoint}`);
-        return Promise.resolve(null);
-      },
-      graphql: (query: string) => {
-        console.warn(`[${pluginId}] Plugin API not configured; ignoring graphql query`);
-        return Promise.resolve({ data: null });
-      },
+      request: (_endpoint: string, _options?: any) =>
+        Promise.reject(new Error('Not implemented')),
+      graphql: (_query: string, _variables?: any) =>
+        Promise.reject(new Error('Not implemented')),
     };
-    /* eslint-enable no-console */
   }
 
   private createEventBus(_pluginId: string): any {

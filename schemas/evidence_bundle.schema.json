@@ -1,28 +1,36 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "EvidenceBundle",
+  "description": "Collection of evidence objects and signatures.",
   "type": "object",
   "properties": {
     "bundle_id": {
-      "type": "string"
-    },
-    "run_id": {
-      "type": "string"
+      "type": "string",
+      "description": "Unique, deterministic identifier for this bundle."
     },
     "evidence_objects": {
       "type": "array",
       "items": {
         "type": "string"
-      }
+      },
+      "description": "List of evidence IDs included in this bundle."
     },
-    "bundle_hash": {
-      "type": "string"
+    "manifest_hash": {
+      "type": "string",
+      "description": "Hash of the bundle manifest."
+    },
+    "signatures": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "signer_id": { "type": "string" },
+          "signature": { "type": "string" }
+        },
+        "required": ["signer_id", "signature"]
+      }
     }
   },
-  "required": [
-    "bundle_id",
-    "run_id",
-    "evidence_objects",
-    "bundle_hash"
-  ],
+  "required": ["bundle_id", "evidence_objects", "manifest_hash", "signatures"],
   "additionalProperties": false
 }

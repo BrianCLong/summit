@@ -14,8 +14,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - uses: actions/download-artifact@v4
         with:
           pattern: run-meta-*
@@ -25,7 +23,6 @@ jobs:
         with:
           node-version: 20
       - run: node scripts/ci-rollup.cjs
-        working-directory: ${{ github.workspace }}
       - uses: actions/upload-artifact@v4
         with:
           name: ci-rollup-json
@@ -34,5 +31,3 @@ jobs:
         with:
           name: ci-rollup-csv
           path: ci-rollup.csv
-permissions:
-  contents: read

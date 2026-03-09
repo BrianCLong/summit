@@ -9,8 +9,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - name: Verify Infra Modules
         run: echo "Verifying modules..."
       - name: Run Policy Engine
@@ -19,5 +17,3 @@ jobs:
         run: echo "Dry run deployment..."
       - name: Generate Evidence
         run: echo "Generating evidence..."
-permissions:
-  contents: read

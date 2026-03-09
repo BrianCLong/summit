@@ -12,8 +12,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-        with:
-          fetch-depth: 0
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -32,11 +30,8 @@ jobs:
       - name: Run Drift Check
         run: npx tsx scripts/monitoring/policy-cards-v0-drift.ts
 
-        working-directory: ${{ github.workspace }}
       - name: Archive Drift Report
         uses: actions/upload-artifact@v4
         with:
           name: policy-drift-report
           path: artifacts/policy/drift_report.json
-permissions:
-  contents: read

@@ -16,8 +16,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4 # v4.1.7
 
-        with:
-          fetch-depth: 0
       - name: Use pinned pnpm
         uses: pnpm/action-setup@v4 # v4.1.0
         with:
@@ -38,5 +36,3 @@ jobs:
 
       - name: Test
         run: pnpm --filter ${{ matrix.package }} test
-permissions:
-  contents: read

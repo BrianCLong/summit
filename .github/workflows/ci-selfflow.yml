@@ -6,5 +6,3 @@ jobs:
     steps:
       - run: pnpm test:selfflow
       - run: pnpm eval:selfflow
-permissions:
-  contents: read

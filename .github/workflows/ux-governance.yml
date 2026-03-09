@@ -10,8 +10,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-        with:
-          fetch-depth: 0
       - name: Check PR Semantic Versioning
         uses: actions/github-script@v7
         with:
@@ -33,19 +31,19 @@ jobs:
             // Auto-infer from title if no classification label is present
             if (!hasClassification) {
               console.log("No classification label found. Attempting inference from title...");
-              if (title.startsWith('feat:')) {
+              if (title.match(/^feat(\(.*\))?:/)) {
                 labels.push('minor');
                 console.log("Inferred 'minor' from 'feat:' prefix");
               }
-              else if (title.startsWith('fix:')) {
+              else if (title.match(/^fix(\(.*\))?:/)) {
                 labels.push('patch');
                 console.log("Inferred 'patch' from 'fix:' prefix");
               }
-              else if (title.startsWith('docs:')) {
+              else if (title.match(/^docs(\(.*\))?:/)) {
                 labels.push('patch');
                 console.log("Inferred 'patch' from 'docs:' prefix");
               }
-              else if (title.startsWith('chore:')) {
+              else if (title.match(/^chore(\(.*\))?:/)) {
                 labels.push('patch');
                 console.log("Inferred 'patch' from 'chore:' prefix");
               }
@@ -63,5 +61,3 @@ jobs:
             } else {
               console.log("PR classification check passed.");
             }
-permissions:
-  contents: read

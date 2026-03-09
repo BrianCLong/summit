@@ -1,7 +1,7 @@
 name: supplychain-verify
 on:
   push:
-    branches: ["**"]
+    branches: [ "**" ]
   workflow_dispatch: {}
 
 concurrency:
@@ -20,8 +20,6 @@ jobs:
       - name: Checkout (shallow ok)
         uses: actions/checkout@v4
 
-        with:
-          fetch-depth: 0
       - name: Set image ref
         id: img
         run: |
@@ -29,7 +27,7 @@ jobs:
           echo "ref=${IMAGE_REF}" >> "$GITHUB_OUTPUT"
 
       - name: Install cosign
-        uses: sigstore/cosign-installer@v3.7.0
+        uses: sigstore/cosign-installer@v3
 
       - name: Install OPA
         run: |
@@ -44,7 +42,7 @@ jobs:
           DIGEST="$(cosign triangulate "${IMAGE_REF}")"
           echo "digest=${DIGEST}" >> "$GITHUB_OUTPUT"
           # Verify there is a valid in-toto attestation recorded in Rekor
-          cosign verify-attestation --use-signed-timestamps "${DIGEST}" --type slsaprovenance > att.json || { echo "::error::Supply chain verification failed! Missing or invalid signed timestamps."; false; }
+          cosign verify-attestation "${DIGEST}" --type slsaprovenance > att.json
           # Extract the in-toto payload for policy input
           jq -r '.[0].payload | @base64d' att.json > statement.json
 

@@ -116,7 +116,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          git fetch --tags --force
           chmod +x scripts/release/prepare-stabilization-rc.sh
 
           COMMIT_SHA="${{ steps.params.outputs.commit_sha }}"
@@ -164,7 +163,6 @@ jobs:
           echo "Generated RC: ${TAG}"
           echo "Artifacts: ${ARTIFACT_DIR}"
 
-        working-directory: ${{ github.workspace }}
       - name: Capture Verification Status
         if: always()
         run: |
@@ -182,7 +180,6 @@ jobs:
             echo "Verification script not available" > "${ARTIFACT_DIR}/required_checks_snapshot.txt"
           fi
 
-        working-directory: ${{ github.workspace }}
       - name: Upload RC Bundle Artifact
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
@@ -192,7 +189,6 @@ jobs:
 
       - name: Job Summary
         run: |
-          git fetch --tags --force
           TAG="${{ steps.prepare.outputs.tag }}"
           COMMIT_SHA="${{ steps.params.outputs.commit_sha }}"
           ARTIFACT_NAME="${{ steps.prepare.outputs.artifact_name }}"

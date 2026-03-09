@@ -12,8 +12,6 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-        with:
-          fetch-depth: 0
       - name: Gather Patches
         run: |
           echo "Scanning open PRs..."
@@ -22,9 +20,6 @@ jobs:
           echo "Applying sequentially..."
           # Mock: scripts/patch_frontier_worker.mjs
 
-        working-directory: ${{ github.workspace }}
       - name: Output Canonical PR
         run: |
           echo "No work lost. Canonical PR updated."
-permissions:
-  contents: read

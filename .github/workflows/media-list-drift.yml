@@ -10,8 +10,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
@@ -27,6 +25,3 @@ jobs:
             --current reports/media_ai_lists/test_slug/report.json \
             --new reports/media_ai_lists/test_slug/new_report.json \
             --output reports/media_ai_lists/test_slug/trend.json
-        working-directory: ${{ github.workspace }}
-permissions:
-  contents: read

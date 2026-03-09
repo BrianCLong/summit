@@ -11,8 +11,6 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
@@ -41,5 +39,3 @@ jobs:
         run: |
           echo "## LSN Window Health" >> $GITHUB_STEP_SUMMARY
           cat metrics.json >> $GITHUB_STEP_SUMMARY
-permissions:
-  contents: read

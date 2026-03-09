@@ -93,7 +93,7 @@ RUN trivy fs --no-progress --format table --exit-code 0 /scan || true
 # =============================================================================
 # Stage 5: Production Runtime (Distroless)
 # =============================================================================
-FROM gcr.io/distroless/nodejs22-debian12:nonroot AS production-distroless
+FROM gcr.io/distroless/nodejs20-debian12:nonroot AS production-distroless
 
 # Labels for image metadata and security tracking
 LABEL org.opencontainers.image.source="https://github.com/BrianCLong/summit" \

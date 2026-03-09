@@ -14,8 +14,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4 # v6
-        with:
-          fetch-depth: 0
       - uses: pnpm/action-setup@v4 # v4
       - uses: actions/setup-node@v4 # v6
         with:
@@ -26,7 +24,6 @@ jobs:
       - name: Run Release Verification Script
         run: ./scripts/verify-release.sh
 
-        working-directory: ${{ github.workspace }}
   check-changelog:
     name: Check Changelog Update
     runs-on: ubuntu-latest
@@ -39,6 +36,3 @@ jobs:
         run: git fetch origin main
       - name: Check Changelog
         run: ./scripts/check-changelog.sh origin/main
-        working-directory: ${{ github.workspace }}
-permissions:
-  contents: read

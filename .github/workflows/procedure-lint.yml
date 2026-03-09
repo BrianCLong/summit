@@ -23,8 +23,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-        with:
-          fetch-depth: 0
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
 
@@ -41,8 +39,5 @@ jobs:
       - name: Procedure lint
         run: pnpm exec tsx scripts/procedures/lint.ts
 
-        working-directory: ${{ github.workspace }}
       - name: Procedure compile benchmark
         run: pnpm exec tsx bench/procedure_compile.bench.ts
-permissions:
-  contents: read

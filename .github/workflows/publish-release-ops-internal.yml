@@ -39,8 +39,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4 # v4
 
-        with:
-          fetch-depth: 0
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
       - name: Setup Node.js
@@ -99,7 +97,6 @@ jobs:
       - name: Make Scripts Executable
         run: chmod +x scripts/release/*.sh
 
-        working-directory: ${{ github.workspace }}
       - name: Build Full Internal Package
         run: |
           mkdir -p internal-package
@@ -191,7 +188,6 @@ jobs:
           echo "=== Internal Package Contents ==="
           ls -la internal-package/
 
-        working-directory: ${{ github.workspace }}
       - name: Upload Internal Package
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4
         with:

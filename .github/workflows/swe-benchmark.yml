@@ -10,11 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - name: Run SWE Benchmark
         run: pnpm summit:swe:run all
         env:
           SUMMIT_SWE_REBENCH_ENABLED: 'true'
-permissions:
-  contents: read

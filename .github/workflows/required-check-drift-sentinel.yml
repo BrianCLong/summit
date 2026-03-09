@@ -24,8 +24,6 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
-        with:
-          fetch-depth: 0
       - name: Set up Node.js
         uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
         with:
@@ -38,7 +36,6 @@ jobs:
         run: |
           node scripts/ci/check_required_contexts_drift.mjs --static-only
 
-        working-directory: ${{ github.workspace }}
       - name: Run Drift Sentinel (Full Mode)
         if: github.event_name != 'pull_request'
         env:
@@ -46,7 +43,6 @@ jobs:
         run: |
           node scripts/ci/check_required_contexts_drift.mjs
 
-        working-directory: ${{ github.workspace }}
       - name: Upload Report
         if: always()
         uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0

@@ -9,5 +9,3 @@ jobs:
       - run: echo "prediction accuracy threshold"
       - run: echo "simulation success rate"
       - run: echo "security audit pass"
-permissions:
-  contents: read

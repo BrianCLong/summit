@@ -28,8 +28,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4 # v6
 
-        with:
-          fetch-depth: 0
       - name: Setup pnpm
         uses: pnpm/action-setup@v4 # v4
 
@@ -58,8 +56,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4 # v6
 
-        with:
-          fetch-depth: 0
       - name: Set up QEMU
         uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130 # v3
 
@@ -106,7 +102,7 @@ jobs:
           fail-on-severity: critical
 
       - name: Install Cosign
-        uses: sigstore/cosign-installer@v3.7.0
+        uses: sigstore/cosign-installer@a39c2dc7b40653b5511219e93de1c7d5293aa357 # v3.1.1
 
       - name: Sign the container image
         run: cosign sign --yes "${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ inputs.image_name }}@${{ steps.build-and-push.outputs.digest }}"
@@ -122,8 +118,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4 # v6
 
-        with:
-          fetch-depth: 0
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3
         with:
@@ -147,5 +141,3 @@ jobs:
             --data zero-trust/policies/opa/deployment.rego \
             --input image-config.json \
             'data.docker.policy.deny'
-permissions:
-  contents: read

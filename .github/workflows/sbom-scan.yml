@@ -53,8 +53,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-        with:
-          fetch-depth: 0
       - name: Generate SBOM with Syft
         uses: anchore/sbom-action@62ad5284b8ced813296287a0b63906cb364b73ee # v0
         with:
@@ -66,7 +64,7 @@ jobs:
         with:
           sbom: sbom.json
           fail-build: true
-          severity-cutoff: critical
+          severity-cutoff: high
           only-fixed: false
           grype-config: security/grype-allowlist.yaml
       - name: Attest SBOM

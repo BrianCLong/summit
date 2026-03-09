@@ -21,8 +21,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-        with:
-          fetch-depth: 0
       - name: Set up Go (stable)
         uses: actions/setup-go@v5
         with:
@@ -57,5 +55,3 @@ jobs:
             (cd "$mod_dir" && govulncheck ./...)
             echo "::endgroup::"
           done
-permissions:
-  contents: read

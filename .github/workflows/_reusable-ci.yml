@@ -54,8 +54,6 @@ jobs:
         task: [lint, typecheck, test]
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
@@ -72,5 +70,3 @@ jobs:
           else
             pnpm -w ${{ matrix.task }}
           fi
-permissions:
-  contents: read

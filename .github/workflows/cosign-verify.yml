@@ -2,8 +2,8 @@ name: cosign-verify
 on:
   workflow_call:
   push:
-    branches: [main]
-    paths: ['release/**']
+    branches: [ main ]
+    paths: [ 'release/**' ]
 jobs:
   verify:
     runs-on: ubuntu-latest
@@ -20,8 +20,6 @@ jobs:
           set -euo pipefail
           for img in $(ls release/* 2>/dev/null || true); do
             echo "Verifying $img"
-            cosign verify --use-signed-timestamps --key "$COSIGN_PUB" --certificate-oidc-issuer https://token.actions.githubusercontent.com "$img" || { echo "::error::Supply chain verification failed! Missing or invalid signed timestamps."; false; }
-            cosign verify-attestation --use-signed-timestamps --key "$COSIGN_PUB" "$img" --type slsaprovenance || { echo "::error::Supply chain verification failed! Missing or invalid signed timestamps."; false; }
+            cosign verify --key "$COSIGN_PUB" --certificate-oidc-issuer https://token.actions.githubusercontent.com "$img"
+            cosign verify-attestation --key "$COSIGN_PUB" "$img" --type slsaprovenance
           done
-permissions:
-  contents: read

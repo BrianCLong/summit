@@ -10,8 +10,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - name: Require deps delta doc when lockfiles change
         run: |
           git fetch origin ${{ github.base_ref }} --depth=1
@@ -27,5 +25,3 @@ jobs:
           else
             echo "No lockfile changes detected."
           fi
-permissions:
-  contents: read

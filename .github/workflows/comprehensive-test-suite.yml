@@ -2,9 +2,9 @@ name: Comprehensive Test Suite
 
 on:
   push:
-    branches: [main]
+    branches: [ main ]
   pull_request:
-    branches: [main]
+    branches: [ main ]
   workflow_dispatch:
 
 concurrency:
@@ -19,8 +19,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-        with:
-          fetch-depth: 0
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -62,8 +60,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-        with:
-          fetch-depth: 0
       - name: Install System Dependencies
         run: |
           sudo apt-get update
@@ -100,7 +96,6 @@ jobs:
         env:
           COVERAGE_SCOPE: all
 
-        working-directory: ${{ github.workspace }}
       - name: Upload Coverage Report
         if: always()
         uses: actions/upload-artifact@v4
@@ -117,8 +112,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-        with:
-          fetch-depth: 0
       - name: Install pnpm
         uses: pnpm/action-setup@v4
 
@@ -164,5 +157,3 @@ jobs:
           name: playwright-report
           path: playwright-report/
           retention-days: 14
-permissions:
-  contents: read

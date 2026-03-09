@@ -20,8 +20,6 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
@@ -31,9 +29,5 @@ jobs:
       - name: Validate Workflow Drift
         run: node scripts/ci/validate_workflows.mjs
 
-        working-directory: ${{ github.workspace }}
       - name: Validate Workflow Budget
         run: node scripts/ci/workflow-budget-sentinel.mjs
-        working-directory: ${{ github.workspace }}
-permissions:
-  contents: read

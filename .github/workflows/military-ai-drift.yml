@@ -7,10 +7,5 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - name: Run drift detection
         run: python scripts/monitoring/military-ai-drift.py
-        working-directory: ${{ github.workspace }}
-permissions:
-  contents: read

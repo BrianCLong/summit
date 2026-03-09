@@ -32,8 +32,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-        with:
-          fetch-depth: 0
       - name: Install pnpm
         uses: pnpm/action-setup@v4
 
@@ -78,8 +76,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-        with:
-          fetch-depth: 0
       - name: Install pnpm
         uses: pnpm/action-setup@v4
 
@@ -124,5 +120,3 @@ jobs:
           name: golden-path-evidence
           path: artifacts/evidence/
           retention-days: 7
-permissions:
-  contents: read

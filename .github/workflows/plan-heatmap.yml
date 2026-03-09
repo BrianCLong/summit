@@ -11,11 +11,9 @@ jobs:
       PLAN_SAMPLING_RATE: "0.0075"
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - name: Setup Python
         uses: actions/setup-python@v5
-        with: {python-version: "3.11"}
+        with: { python-version: "3.11" }
       - name: Install deps
         run: pip install pyyaml
       - name: Collect last-N samples
@@ -36,6 +34,3 @@ jobs:
       - name: Stability Gate
         id: gate
         run: python scripts/ci/plan_stability_gate.py
-        working-directory: ${{ github.workspace }}
-permissions:
-  contents: read

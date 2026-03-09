@@ -1,9 +1,0 @@
-{
-  "title": "Engineering Health",
-  "widgets": [
-    { "name": "Median PR Readiness", "type": "stat" },
-    { "name": "CI Success Rate", "type": "stat" },
-    { "name": "Flaky Workflows", "type": "stat" },
-    { "name": "Architecture Drift Violations", "type": "stat" }
-  ]
-}

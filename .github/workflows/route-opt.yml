@@ -18,8 +18,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
@@ -29,17 +27,13 @@ jobs:
           pip install jsonschema
       - name: Generate report artifact
         run: python scripts/ci/check_determinism_hash.py
-        working-directory: ${{ github.workspace }}
       - name: check-route-schema
         run: python scripts/ci/check_route_schema.py
 
-        working-directory: ${{ github.workspace }}
   check-determinism-hash:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
@@ -50,13 +44,10 @@ jobs:
       - name: check-determinism-hash
         run: python scripts/ci/check_determinism_hash.py
 
-        working-directory: ${{ github.workspace }}
   profile-route-opt:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
@@ -67,14 +58,11 @@ jobs:
       - name: profile-route-opt
         run: python scripts/profile_route_opt.py
 
-        working-directory: ${{ github.workspace }}
   route-opt-drift:
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
@@ -86,6 +74,3 @@ jobs:
         run: |
           python scripts/profile_route_opt.py
           python scripts/monitoring/route-opt-drift.py
-        working-directory: ${{ github.workspace }}
-permissions:
-  contents: read

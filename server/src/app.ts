@@ -50,6 +50,7 @@ import receiptsRouter from './routes/receipts.js';
 import predictiveRouter from './routes/predictive.js';
 import { policyRouter } from './routes/policy.js';
 import policyManagementRouter from './routes/policies/policy-management.js';
+import { metricsRoute } from './http/metricsRoute.js';
 import monitoringBackpressureRouter from './routes/monitoring-backpressure.js';
 import rbacRouter from './routes/rbacRoutes.js';
 // import { licenseRuleValidationMiddleware } from './graphql/middleware/licenseRuleValidationMiddleware.js';
@@ -152,19 +153,7 @@ import { failoverOrchestrator } from './runtime/global/FailoverOrchestrator.js';
 import { buildApprovalsRouter } from './routes/approvals.js';
 import { shadowTrafficMiddleware } from './middleware/ShadowTrafficMiddleware.js';
 
-import { initializeObservability, setupObservability } from '@intelgraph/observability';
-
 export const createApp = async () => {
-  // Initialize comprehensive observability before application start
-  await initializeObservability({
-    service: {
-      name: 'summit-server',
-      version: '1.0.0', // Read from package.json in production
-      environment: process.env.NODE_ENV || 'development',
-    },
-    archetype: 'api-service',
-  });
-
   // Initialize OpenTelemetry tracing
   // Tracer is already initialized in index.ts, but we ensure it's available here
   // Verified usage for comprehensive observability
@@ -175,17 +164,6 @@ export const createApp = async () => {
   }
 
   const app = express();
-
-  // Setup @intelgraph/observability Express middleware
-  // This registers /metrics, /health, /health/live, /health/ready, /health/detailed
-  // and adds comprehensive RED/USE metrics and tracing headers
-  setupObservability(app, {
-    service: {
-      name: 'summit-server',
-      version: '1.0.0',
-      environment: process.env.NODE_ENV || 'development',
-    },
-  });
   const logger = (pino as any)();
 
   const isProduction = cfg.NODE_ENV === 'production';
@@ -572,7 +550,7 @@ export const createApp = async () => {
   if (cfg.FACTFLOW_ENABLED) {
     app.use('/api/factflow', factFlowRouter);
   }
-  // @intelgraph/observability setupObservability middleware provides /metrics endpoint automatically
+  app.get('/metrics', metricsRoute);
   // Re-added Approvals Router with Maestro context
   app.use('/api/approvals', authenticateToken, buildApprovalsRouter());
 

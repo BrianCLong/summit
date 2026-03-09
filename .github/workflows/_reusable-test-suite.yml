@@ -49,8 +49,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4 # v6
 
-        with:
-          fetch-depth: 0
       - name: Setup toolchain
         uses: ./.github/actions/setup-toolchain
         with:
@@ -109,5 +107,3 @@ jobs:
         with:
           directory: ${{ inputs.working-directory }}/coverage
           fail_ci_if_error: false
-permissions:
-  contents: read

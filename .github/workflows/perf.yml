@@ -20,8 +20,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4 # v6
 
-        with:
-          fetch-depth: 0
       - name: Setup k6
         uses: grafana/setup-k6-action@ffe7d7290dfa715e48c2ccc924d068444c94bde2 # v1
 
@@ -54,5 +52,3 @@ jobs:
           else
              echo "SLO Probe results missing" >> $GITHUB_STEP_SUMMARY
           fi
-permissions:
-  contents: read

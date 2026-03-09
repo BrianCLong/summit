@@ -17,8 +17,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4 # v4
-        with:
-          fetch-depth: 0
       - uses: actions/setup-node@v4 # v4
         with:
           node-version: ${{ inputs.node_version }}
@@ -70,8 +68,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4 # v4
-        with:
-          fetch-depth: 0
       - uses: actions/setup-node@v4 # v4
         with:
           node-version: ${{ inputs.node_version }}
@@ -112,5 +108,3 @@ jobs:
             .turbo
             node_modules/.cache
           retention-days: 1
-permissions:
-  contents: read

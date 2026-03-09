@@ -30,8 +30,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - name: Check required evidence IDs exist
         run: |
           for evd in EVD-WORLD_MODEL-ARCH-001 EVD-WORLD_MODEL-PRED-002 EVD-WORLD_MODEL-PLAN-003; do
@@ -49,8 +47,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - name: Check feature flag default in manifest
         run: |
           grep -q 'default: "false"' subsumption/self-flow-world-model/manifest.yaml
@@ -61,8 +57,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
@@ -81,5 +75,3 @@ jobs:
             src/agents/planning/simulation_engine.ts \
             src/graphrag/evals/world_model_eval.ts \
             2>/dev/null || echo "Type-check best-effort complete"
-permissions:
-  contents: read

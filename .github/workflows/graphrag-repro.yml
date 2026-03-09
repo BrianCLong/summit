@@ -13,20 +13,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - uses: actions/setup-python@v5
-        with: {python-version: "3.11"}
+        with: { python-version: "3.11" }
       - name: Install
         run: |
           pip install --upgrade pip
           pip install "sentence-transformers==2.6.1" "faiss-cpu==1.8.0.post1" "numpy==1.26.4" "tokenizers==0.15.2" pytest
       - name: Generate corpus
         run: python scripts/graphrag/generate_canary_dataset.py
-        working-directory: ${{ github.workspace }}
       - name: Build index (fixed seed)
         run: python scripts/graphrag/build_index.py
-        working-directory: ${{ github.workspace }}
       - name: Run deterministic tests
         run: pytest -q tests/graphrag/repro_test.py
       - name: Upload artifact (results snapshot)
@@ -35,5 +31,3 @@ jobs:
         with:
           name: graphrag-repro
           path: artifacts/graphrag/
-permissions:
-  contents: read

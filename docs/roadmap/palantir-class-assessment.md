@@ -1,11 +1,9 @@
 # Palantir-Class Capability Assessment (Summit)
 
 ## Summit Readiness Assertion
-
 This assessment codifies the present state and dictates the governed path forward under the repository's readiness doctrine. All ratings are evidence-constrained and intentionally conservative.
 
 ## Rating Scale
-
 - 🟢 Solid
 - 🟡 Partial
 - 🟠 Early
@@ -29,5 +27,4 @@ Confidence levels: **High / Medium / Low**
 | 12 | Developer + plugin ecosystem | 🔴 | Medium | Platformization intent exists; plugin contracts/registry/versioning are not yet productized. | Publish plugin contracts + compatibility policy + registry. |
 
 ## Programmatic Conclusion
-
 Summit is in a **governed partial-readiness state** with strongest footing in governance intent and evidence culture, and highest risk in ontology hardening, ER, temporal semantics, and plugin platformization. Advancement requires strict sequencing and short feedback loops.

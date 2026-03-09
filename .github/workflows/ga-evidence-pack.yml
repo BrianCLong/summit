@@ -21,8 +21,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-        with:
-          fetch-depth: 0
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
 
@@ -41,7 +39,6 @@ jobs:
         env:
           NODE_ENV: production
 
-        working-directory: ${{ github.workspace }}
       - name: Upload Evidence Bundle
         if: always()
         uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4

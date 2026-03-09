@@ -261,7 +261,7 @@ EOF
         cat << EOF
 
 # Verify signature (requires cosign)
-cosign verify-blob --use-signed-timestamps \\ || { echo "::error::Supply chain verification failed! Missing or invalid signed timestamps."; false; }
+cosign verify-blob --use-signed-timestamps \\
   --signature governance/signatures/governance_SHA256SUMS.sig \\
   --certificate governance/signatures/governance_SHA256SUMS.cert \\
   --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \\

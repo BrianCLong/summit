@@ -77,7 +77,7 @@ jobs:
           sudo mv opa /usr/local/bin/
 
           # Cosign
-          curl -L -o cosign https://github.com/sigstore/cosign/releases/download/v3.0.5/cosign-linux-amd64
+          curl -L -o cosign https://github.com/sigstore/cosign/releases/download/v2.2.3/cosign-linux-amd64
           chmod +x cosign
           sudo mv cosign /usr/local/bin/
 
@@ -126,7 +126,6 @@ jobs:
 
       # 4. SLO & Performance Readiness
       # Note: This might require a running stack. In CI, we use docker-compose.
-        working-directory: ${{ github.workspace }}
       - name: Boot Minimal Stack for SLO Check
         run: |
           docker compose -f docker-compose.yml -f docker-compose.minimal.yml up -d
@@ -138,7 +137,6 @@ jobs:
           # Use the hardened script that no longer uses mocks
           node scripts/generate-evidence-bundle.js
 
-        working-directory: ${{ github.workspace }}
       - name: Upload Readiness Artifacts
         if: always()
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4
@@ -165,5 +163,3 @@ jobs:
             echo "### ❌ GA Readiness Failed" >> $GITHUB_STEP_SUMMARY
             echo "One or more gates failed. Check job logs for details." >> $GITHUB_STEP_SUMMARY
           fi
-permissions:
-  contents: read

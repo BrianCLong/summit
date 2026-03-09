@@ -15,13 +15,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - uses: actions/setup-python@v5
-        with: {python-version: "3.11"}
+        with: { python-version: "3.11" }
       - run: pip install pytest jsonschema prov
       - name: Run provenance validator
         run: |
           pytest tests/test_openlineage_to_prov.py -q --maxfail=1
-permissions:
-  contents: read

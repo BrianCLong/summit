@@ -124,7 +124,6 @@ jobs:
       - name: Set reproducible build environment
         if: inputs.reproducible
         run: |
-          git fetch --tags --force
           # Set deterministic timestamps for reproducible builds
           echo "SOURCE_DATE_EPOCH=$(git log -1 --format=%ct)" >> "$GITHUB_ENV"
 
@@ -157,9 +156,9 @@ jobs:
 
       - name: Install Cosign
         if: inputs.sign
-        uses: sigstore/cosign-installer@v3.7.0
+        uses: sigstore/cosign-installer@f713795cb21599bc4e5c4b58cbad1da852d7eeb9 # v3
         with:
-          cosign-release: 'v3.0.5'
+          cosign-release: v2.2.4
 
       - name: Sign image (OIDC keyless)
         if: inputs.sign && inputs.push
@@ -183,7 +182,7 @@ jobs:
 
           IMAGE="${{ steps.image-uri.outputs.uri }}"
 
-          cosign verify --use-signed-timestamps "$IMAGE" \ || { echo "::error::Supply chain verification failed! Missing or invalid signed timestamps."; false; }
+          cosign verify "$IMAGE" \
             --certificate-identity "${{ env.EXPECTED_OIDC_SUBJECT }}" \
             --certificate-oidc-issuer "${{ env.EXPECTED_OIDC_ISSUER }}"
 

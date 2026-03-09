@@ -27,9 +27,9 @@ scrape_configs:
     scrape_interval: 15s
 
   # Application services
-  - job_name: 'summit-server'
+  - job_name: 'intelgraph-api'
     static_configs:
-      - targets: ['server:4000']
+      - targets: ['api:9464']
     metrics_path: /metrics
     scrape_interval: 5s
     scrape_timeout: 5s
@@ -39,7 +39,7 @@ scrape_configs:
         target_label: instance
       - source_labels: [__address__]
         target_label: service
-        replacement: 'summit-server'
+        replacement: 'api'
 
   - job_name: 'intelgraph-gateway'
     static_configs:

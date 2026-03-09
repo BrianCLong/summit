@@ -22,8 +22,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-        with:
-          fetch-depth: 0
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
 
@@ -53,5 +51,3 @@ jobs:
           name: test-results-gate
           path: test-results
           retention-days: 7
-permissions:
-  contents: read

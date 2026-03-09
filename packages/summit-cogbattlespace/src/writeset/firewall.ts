@@ -1,4 +1,4 @@
-import { validators } from '@intelgraph/summit-schemas';
+import { validators } from '../../summit-schemas/src';
 import type { CogBattleStorage } from '../storage';
 import type { CogRejectionError, CogRejectionItem, CogRejectionReport, CogWriteOp, CogWriteSet } from './types';
 
@@ -94,11 +94,11 @@ export async function applyCogWriteSet(
   if (!validators.cogWriteSet(ws)) {
     return {
       ok: false,
-      writesetId: (ws as any).writesetId ?? 'unknown',
+      writesetId: ws.writesetId ?? 'unknown',
       summary: {
-        receivedOps: (ws as any).ops?.length ?? 0,
+        receivedOps: ws.ops?.length ?? 0,
         acceptedOps: 0,
-        rejectedOps: (ws as any).ops?.length ?? 0,
+        rejectedOps: ws.ops?.length ?? 0,
       },
       items: [
         {

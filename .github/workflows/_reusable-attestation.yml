@@ -8,5 +8,3 @@ jobs:
     steps:
       - name: Placeholder Attestation
         run: echo "Generating attestations..."
-permissions:
-  contents: read

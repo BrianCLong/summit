@@ -44,7 +44,7 @@ jobs:
             task: build
     steps:
       - uses: actions/checkout@v4
-        with: {fetch-depth: 0}
+        with: { fetch-depth: 0 }
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
@@ -72,14 +72,11 @@ jobs:
         if: matrix.task == 'lint'
         run: cd server && npx tsx scripts/check-error-codes-doc.ts
 
-        working-directory: ${{ github.workspace }}
   config-guard:
     name: Config Guard
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - uses: pnpm/action-setup@v4
       - uses: pnpm/action-setup@v4
       - name: Install
@@ -93,8 +90,6 @@ jobs:
     needs: [config-guard] # fast fail
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version-file: ".nvmrc"
@@ -122,7 +117,6 @@ jobs:
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/summit_test
 
-        working-directory: ${{ github.workspace }}
       - name: Run integration tests
         run: pnpm test:integration
         env:
@@ -140,8 +134,6 @@ jobs:
     needs: [config-guard]
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - uses: pnpm/action-setup@v4
       - uses: pnpm/action-setup@v4
       - name: Install dependencies
@@ -157,8 +149,6 @@ jobs:
     needs: [build-test] # Run after standard build/test matrix
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version-file: ".nvmrc"
@@ -171,7 +161,6 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Build twice and compare checksums
         run: |
-          git fetch --tags --force
           set -euo pipefail
           export SOURCE_DATE_EPOCH=$(git log -1 --pretty=format:%ct)
 
@@ -199,8 +188,6 @@ jobs:
     needs: [integration-tests, build-test]
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
@@ -229,8 +216,6 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
@@ -265,16 +250,12 @@ jobs:
     needs: [config-guard]
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - uses: pnpm/action-setup@v4
       - uses: pnpm/action-setup@v4
       - name: Verify TSConfig Exclusions Frozen
         run: node scripts/ci/verify_tsconfig_excludes_frozen.mjs
-        working-directory: ${{ github.workspace }}
       - name: Verify TSConfig Inheritance
         run: node scripts/ci/verify_tsconfig_inheritance.mjs
-        working-directory: ${{ github.workspace }}
       - name: Install dependencies (for governance docs)
         run: pnpm install --frozen-lockfile
       - name: Verify governance docs
@@ -286,8 +267,6 @@ jobs:
     needs: [config-guard]
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
@@ -302,7 +281,6 @@ jobs:
         run: |
           mkdir -p soc-compliance-reports
           bash scripts/test-soc-controls.sh soc-compliance-reports
-        working-directory: ${{ github.workspace }}
       - name: Upload SOC compliance reports
         uses: actions/upload-artifact@v4
         with:
@@ -316,8 +294,6 @@ jobs:
     needs: [build-test]
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
@@ -331,7 +307,5 @@ jobs:
         run: npx jest tests/packs/determinism.test.ts
       - name: Determinism Check
         run: npx tsx .github/scripts/check-determinism.ts
-        working-directory: ${{ github.workspace }}
       - name: Never-log Scan
         run: npx tsx .github/scripts/check-never-log.ts
-        working-directory: ${{ github.workspace }}

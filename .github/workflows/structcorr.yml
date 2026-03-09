@@ -11,8 +11,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
@@ -30,6 +28,3 @@ jobs:
           export SUMMIT_STRUCTCORR=1
           python scripts/profiling/structcorr_profile.py
           python scripts/monitoring/structcorr-drift.py
-        working-directory: ${{ github.workspace }}
-permissions:
-  contents: read

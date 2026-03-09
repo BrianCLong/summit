@@ -32,13 +32,13 @@ jobs:
             const labels = [];
 
             // Type detection from conventional commits
-            if (title.startsWith('feat:') || title.includes('[feature]')) {
+            if (title.match(/^feat(\(.*\))?:/) || title.includes('[feature]')) {
               labels.push('type: feature');
             }
-            if (title.startsWith('fix:') || title.includes('[fix]') || title.includes('[bug]')) {
+            if (title.match(/^fix(\(.*\))?:/) || title.includes('[fix]') || title.includes('[bug]')) {
               labels.push('type: bugfix');
             }
-            if (title.startsWith('docs:') || title.includes('[docs]')) {
+            if (title.match(/^docs(\(.*\))?:/) || title.includes('[docs]')) {
               labels.push('type: documentation');
             }
             if (title.startsWith('refactor:') || title.includes('[refactor]')) {
@@ -50,7 +50,7 @@ jobs:
             if (title.startsWith('test:') || title.includes('[test]')) {
               labels.push('type: tests');
             }
-            if (title.startsWith('chore:') || title.includes('[chore]')) {
+            if (title.match(/^chore(\(.*\))?:/) || title.includes('[chore]')) {
               labels.push('type: chore');
             }
             if (title.startsWith('ci:') || title.includes('[ci]')) {

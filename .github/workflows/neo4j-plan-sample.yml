@@ -19,11 +19,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-        with:
-          fetch-depth: 0
       - name: Setup Python
         uses: actions/setup-python@v5
-        with: {python-version: '3.11'}
+        with: { python-version: '3.11' }
 
       - name: Install deps
         run: |
@@ -67,11 +65,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-        with:
-          fetch-depth: 0
       - name: Setup Python
         uses: actions/setup-python@v5
-        with: {python-version: '3.11'}
+        with: { python-version: '3.11' }
 
       - name: Download candidate artifact
         uses: actions/download-artifact@v4
@@ -98,5 +94,3 @@ jobs:
             --candidate candidate/plan-fingerprints.jsonl \
             --novel-threshold 0.10 \
             --min-count-rare 1
-permissions:
-  contents: read

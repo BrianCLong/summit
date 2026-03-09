@@ -8,10 +8,5 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - name: Run drift check
         run: python scripts/monitoring/pushback-over-validation-drift.py
-        working-directory: ${{ github.workspace }}
-permissions:
-  contents: read

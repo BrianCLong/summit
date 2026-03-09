@@ -36,10 +36,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4 # v6
 
-        with:
-          fetch-depth: 0
       - name: Install Cosign
-        uses: sigstore/cosign-installer@v3.7.0
+        uses: sigstore/cosign-installer@f713795cb21599bc4e5c4b58cbad1da852d7eeb9 # v3
         with:
           cosign-release: "v3.0.5"
 
@@ -50,7 +48,6 @@ jobs:
           EXPECTED_IDENTITY_REGEX: ${{ inputs.expected_identity_regex }}
           EXPECTED_OIDC_ISSUER: ${{ inputs.expected_oidc_issuer }}
 
-        working-directory: ${{ github.workspace }}
       - name: Upload supply chain compliance receipt
         if: always()
         uses: actions/upload-artifact@v4 # v6
@@ -103,7 +100,6 @@ jobs:
         env:
           PROMETHEUS_URL: ${{ secrets.PROMETHEUS_URL || 'http://prometheus:9090' }}
 
-        working-directory: ${{ github.workspace }}
       - name: Canary synthetic probe
         run: |
           for region in $REGIONS_TO_DEPLOY; do
@@ -124,5 +120,3 @@ jobs:
             echo "--- Promoting $region ---"
             ./deploy/promote-region.sh "$region"
           done
-permissions:
-  contents: read

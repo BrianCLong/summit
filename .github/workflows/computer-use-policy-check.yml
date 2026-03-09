@@ -28,8 +28,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-        with:
-          fetch-depth: 0
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
@@ -45,5 +43,3 @@ jobs:
           python -m pytest --noconftest -q \
             summit/agents/computer_use/tests/test_executor.py \
             summit/tests/test_computer_use_cli.py
-permissions:
-  contents: read

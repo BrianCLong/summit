@@ -70,8 +70,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4 # v6
 
-        with:
-          fetch-depth: 0
       - name: Setup pnpm
         uses: pnpm/action-setup@v4 # v4
 
@@ -129,7 +127,6 @@ jobs:
             echo "run_id=unknown" >> $GITHUB_OUTPUT
           fi
 
-        working-directory: ${{ github.workspace }}
       - name: Upload Evidence Artifacts
         if: always()
         uses: actions/upload-artifact@v4 # v6

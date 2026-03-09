@@ -62,12 +62,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4 # v4
 
-        with:
-          fetch-depth: 0
       - name: Make Scripts Executable
         run: chmod +x scripts/release/*.sh
 
-        working-directory: ${{ github.workspace }}
       - name: Check Lockfile Exists
         id: check-exists
         run: |
@@ -133,7 +130,6 @@ jobs:
 
           exit ${EXIT_CODE:-0}
 
-        working-directory: ${{ github.workspace }}
       - name: No Lockfile Summary
         if: steps.check-exists.outputs.exists != 'true'
         run: |
@@ -151,7 +147,6 @@ jobs:
           echo './scripts/release/generate_governance_lockfile.sh --sha $(git rev-parse HEAD)' >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
 
-        working-directory: ${{ github.workspace }}
       - name: Log to Audit Trail
         if: always()
         run: |
@@ -184,7 +179,6 @@ jobs:
             --metadata "{\"exists\": ${EXISTS:-false}, \"passed\": ${{ steps.verify.outputs.passed || 0 }}, \"failed\": ${FAILED:-0}, \"warned\": ${WARNED:-0}}" \
             || echo "::warning::Failed to update audit log"
 
-        working-directory: ${{ github.workspace }}
       - name: Upload Verification Report
         uses: actions/upload-artifact@v4 # v4
         if: steps.check-exists.outputs.exists == 'true'

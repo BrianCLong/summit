@@ -1,5 +1,5 @@
 filepath = "apps/web/vite.config.ts"
-with open(filepath) as f:
+with open(filepath, "r") as f:
     content = f.read()
 
 # Add proxy

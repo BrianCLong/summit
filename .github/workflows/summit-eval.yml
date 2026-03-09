@@ -2,7 +2,7 @@ name: Summit Eval Gates
 
 on:
   push:
-    branches: [main]
+    branches: [ main ]
     paths:
       - 'summit/eval_harness/**'
       - 'summit/evidence/**'
@@ -20,8 +20,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -35,14 +33,11 @@ jobs:
             --schema summit/eval_harness/dataset.schema.json \
             --jsonl
 
-        working-directory: ${{ github.workspace }}
   run-eval-harness:
     runs-on: ubuntu-latest
     needs: validate-schemas
     steps:
       - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -60,5 +55,3 @@ jobs:
           ls -l evidence/EVD-CI-TEST-001/report.json
           ls -l evidence/EVD-CI-TEST-001/metrics.json
           ls -l evidence/EVD-CI-TEST-001/stamp.json
-permissions:
-  contents: read

@@ -34,5 +34,3 @@ jobs:
   #   uses: ./.github/workflows/_reusable-canary-rollback.yml
   #   with:
   #     service-name: copilot
-permissions:
-  contents: read

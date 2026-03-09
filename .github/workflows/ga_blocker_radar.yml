@@ -89,7 +89,6 @@ jobs:
             echo "No drift script found." > drift.log
           fi
 
-        working-directory: ${{ github.workspace }}
       - name: Evidence determinism (run twice + diff)
         id: determinism
         shell: bash
@@ -129,7 +128,6 @@ jobs:
             echo "No evidence generation script found." > determinism.diff
           fi
 
-        working-directory: ${{ github.workspace }}
       - name: Select highest leverage blocker
         id: select
         shell: bash

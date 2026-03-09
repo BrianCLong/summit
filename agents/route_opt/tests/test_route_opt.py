@@ -5,6 +5,7 @@ from pathlib import Path
 from agents.route_opt.planner import run
 from agents.route_opt.validator import validate_output
 
+
 FIXTURE = Path(__file__).resolve().parent / "fixtures" / "input.json"
 
 

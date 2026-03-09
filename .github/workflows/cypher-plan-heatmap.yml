@@ -2,7 +2,7 @@ name: cypher-plan-heatmap
 on:
   pull_request:
   push:
-    branches: [main]
+    branches: [ main ]
 
 jobs:
   cypher_heatmap:
@@ -13,8 +13,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-        with:
-          fetch-depth: 0
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -49,5 +47,3 @@ jobs:
             out/cypher/heatmap.json
             out/cypher/topk.json
             out/cypher/plan_summaries.json
-permissions:
-  contents: read

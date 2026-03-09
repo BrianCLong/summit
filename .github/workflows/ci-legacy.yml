@@ -25,8 +25,6 @@ jobs:
     continue-on-error: true  # NON-BLOCKING
     steps:
       - uses: actions/checkout@v4 # v6
-        with:
-          fetch-depth: 0
       - uses: pnpm/action-setup@v4 # v4
       - uses: actions/setup-node@v4 # v6
         with:
@@ -59,8 +57,6 @@ jobs:
     continue-on-error: true  # NON-BLOCKING (ESM loader issues)
     steps:
       - uses: actions/checkout@v4 # v6
-        with:
-          fetch-depth: 0
       - uses: pnpm/action-setup@v4 # v4
       - uses: actions/setup-node@v4 # v6
         with:
@@ -92,8 +88,6 @@ jobs:
     continue-on-error: true  # NON-BLOCKING
     steps:
       - uses: actions/checkout@v4 # v6
-        with:
-          fetch-depth: 0
       - uses: pnpm/action-setup@v4 # v4
       - uses: actions/setup-node@v4 # v6
         with:
@@ -127,7 +121,6 @@ jobs:
             echo "Benchmarks skipped (not yet implemented)"
           fi
 
-        working-directory: ${{ github.workspace }}
   deprecated-checks:
     name: Deprecated Checks (Migration in Progress)
     runs-on: ubuntu-latest
@@ -172,8 +165,6 @@ jobs:
     continue-on-error: true  # NON-BLOCKING
     steps:
       - uses: actions/checkout@v4 # v6
-        with:
-          fetch-depth: 0
       - uses: pnpm/action-setup@v4 # v4
       - uses: actions/setup-node@v4 # v6
         with:
@@ -206,8 +197,6 @@ jobs:
     continue-on-error: true  # NON-BLOCKING
     steps:
       - uses: actions/checkout@v4 # v6
-        with:
-          fetch-depth: 0
       - uses: pnpm/action-setup@v4 # v4
       - uses: actions/setup-node@v4 # v6
         with:
@@ -278,5 +267,3 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Note**: These are informational and tracked for future stabilization." >> $GITHUB_STEP_SUMMARY
           echo "See \`docs/ga/CI_CONSOLIDATION_PLAN.md\` for migration status." >> $GITHUB_STEP_SUMMARY
-permissions:
-  contents: read

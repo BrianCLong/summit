@@ -24,8 +24,6 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4 # v6
 
-        with:
-          fetch-depth: 0
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
       - name: Setup Node.js
@@ -40,5 +38,3 @@ jobs:
 
       - name: Lint API Spec
         run: spectral lint docs/api-spec.yaml --ruleset openapi/.spectral.yaml
-permissions:
-  contents: read

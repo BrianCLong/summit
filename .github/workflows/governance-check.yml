@@ -15,8 +15,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4 # v6
 
-        with:
-          fetch-depth: 0
       - name: Check Labels
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
         with:
@@ -27,9 +25,9 @@ jobs:
 
             // Auto-infer from title if no labels
             if (labels.length === 0) {
-              if (title.startsWith('feat:')) labels.push('minor');
-              else if (title.startsWith('fix:')) labels.push('patch');
-              else if (title.startsWith('docs:')) labels.push('patch');
+              if (title.match(/^feat(\(.*\))?:/)) labels.push('minor');
+              else if (title.match(/^fix(\(.*\))?:/)) labels.push('patch');
+              else if (title.match(/^docs(\(.*\))?:/)) labels.push('patch');
               else if (title.includes('BREAKING CHANGE')) labels.push('major');
             }
 
@@ -45,5 +43,3 @@ jobs:
     steps:
       - name: Verify Major Approval
         run: echo "Checking for Architecture Review (Mock)..."
-permissions:
-  contents: read

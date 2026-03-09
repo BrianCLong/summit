@@ -2,7 +2,7 @@ name: Infra Drift Risk
 
 on:
   pull_request:
-    branches: [main]
+    branches: [ main ]
     paths:
       - "infra/**"
       - ".github/workflows/infra-drift.yml"
@@ -38,8 +38,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-        with:
-          fetch-depth: 0
       - name: Setup tools
         uses: hashicorp/setup-terraform@v3
         with:
@@ -87,8 +85,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-        with:
-          fetch-depth: 0
       - name: Setup tools
         uses: hashicorp/setup-terraform@v3
         with:

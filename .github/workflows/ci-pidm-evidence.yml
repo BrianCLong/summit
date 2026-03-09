@@ -17,8 +17,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
@@ -33,6 +31,3 @@ jobs:
         run: pnpm test
       - name: Verify PIDM evidence index
         run: npx tsx .github/scripts/verify_evidence_index.ts
-        working-directory: ${{ github.workspace }}
-permissions:
-  contents: read
