@@ -13,6 +13,7 @@ import {
   History,
   LogOut,
   Command,
+  GitPullRequest,
 } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
@@ -88,6 +89,13 @@ const navItems: NavItem[] = [
     name: 'Internal Command',
     href: '/internal/command',
     icon: Command as React.ComponentType<{ className?: string }>,
+    resource: 'dashboards',
+    action: 'read',
+  },
+  {
+    name: 'PR Triage',
+    href: '/pr-triage',
+    icon: GitPullRequest as React.ComponentType<{ className?: string }>,
     resource: 'dashboards',
     action: 'read',
   },

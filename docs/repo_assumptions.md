@@ -1,14 +1,23 @@
-verified:
-  - ci.yml exists
-  - repo uses observability/metrics
-  - metrics include intelgraph_active_connections
-  - governance drift checks exist
+# IntelGraph repo assumptions
 
-assumed:
-  - docs/watchlists/, docs/standards/, scripts/watchlists/, artifacts/watchlists/ are acceptable paths
-  - JSON artifact conventions align with existing Summit subsumption bundles
+## Verified
+- Public monorepo for Summit exists
+- Node 18+, pnpm, Neo4j 5.x in quickstart
+- GraphQL + REST APIs are core
+- Collaboration/war-room and timeline issues exist
+- CI/workflow surface is large and policy/evidence oriented
 
-must_not_touch:
-  - existing branch protection / governance policy definitions
-  - shared observability facade
-  - release determinism policy surfaces unless explicitly needed
+## Assumed
+- `server/src/api` or equivalent GraphQL service exists
+- `client/src` or equivalent React frontend exists
+- Neo4j access is centralized behind a shared client
+- Evidence artifacts follow repo-wide conventions
+- Tenant scoping already exists outside IntelGraph
+
+## Validation checklist before PR1 merges
+- Confirm exact package/workspace boundaries
+- Confirm existing GraphQL schema location
+- Confirm auth context shape
+- Confirm standard test command names
+- Confirm runbook/docs locations
+- Confirm must-not-touch branch protection workflows
