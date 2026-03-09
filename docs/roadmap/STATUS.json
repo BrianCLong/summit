@@ -1,7 +1,13 @@
 {
-  "last_updated": "2026-03-07T06:03:42Z",
-  "revision_note": "Added MCP ecosystem alignment plan and roadmap tracking entry.",
+  "last_updated": "2026-03-09T21:16:14Z",
+  "revision_note": "Hardened Makefile smoke bootstrap for constrained/offline environments and fixed format target virtualenv variable.",
   "initiatives": [
+    {
+      "id": "smoke-bootstrap-resilience",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Bootstrap now tolerates transient package index/registry failures for Python and pnpm installs, preserving smoke progression where infra prerequisites exist."
+    },
     {
       "id": "nature-s41562-026-02411-w-layer2-layer3",
       "status": "in_progress",
