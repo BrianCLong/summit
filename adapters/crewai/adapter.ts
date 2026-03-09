@@ -1,7 +1,7 @@
 import { SummitAgentAdapter, Trace, Metrics } from '../../sdk/agent-adapter';
 import { convertToSummitTrace, convertToSummitMetrics } from '../conversion';
 
-export class LangGraphAdapter implements SummitAgentAdapter {
+export class CrewAIAdapter implements SummitAgentAdapter {
   private events: any[] = [];
   private metrics: Metrics = {
     invocations: 0,
@@ -12,11 +12,10 @@ export class LangGraphAdapter implements SummitAgentAdapter {
   public recordEvent(event: any) {
     this.events.push(event);
     this.metrics.invocations++;
-    // Assume event might have token/latency data to parse in a real implementation
   }
 
   async emitTrace(): Promise<Trace> {
-    return convertToSummitTrace('lg', this.events);
+    return convertToSummitTrace('crewai', this.events);
   }
 
   async emitMetrics(): Promise<Metrics> {
