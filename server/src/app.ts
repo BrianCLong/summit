@@ -34,6 +34,7 @@ import { safetyModeMiddleware, resolveSafetyState } from './middleware/safety-mo
 import { residencyEnforcement } from './middleware/residency.js';
 import { requestProfilingMiddleware } from './middleware/request-profiling.js';
 import { securityHeaders } from './middleware/securityHeaders.js';
+import { cookieParserMiddleware, createCsrfLayer, shouldBypassCsrf } from './security/http-shield.js';
 import { securityHardening } from './middleware/security-hardening.js';
 import { abuseGuard } from './middleware/abuseGuard.js';
 import exceptionRouter from './data-residency/exceptions/routes.js';
@@ -194,7 +195,7 @@ export const createApp = async () => {
   const allowedOrigins = cfg.CORS_ORIGIN.split(',')
     .map((origin: string) => origin.trim())
     .filter(Boolean);
-  const securityHeadersEnabled = process.env.SECURITY_HEADERS_ENABLED !== 'false';
+  const securityHeadersEnabled = true;
   const cspReportOnly = process.env.SECURITY_HEADERS_CSP_REPORT_ONLY === 'true';
   const cspEnabledFlag = process.env.SECURITY_HEADERS_CSP_ENABLED === 'true';
 
@@ -233,6 +234,8 @@ export const createApp = async () => {
   app.use(compression());
 
   app.use(hpp());
+  app.use(cookieParserMiddleware);
+  app.use(createCsrfLayer(shouldBypassCsrf).middleware);
 
   app.use(
     securityHeaders({
@@ -245,7 +248,8 @@ export const createApp = async () => {
   app.use(
     cors({
       origin: (origin, callback) => {
-        if (!origin || cfg.NODE_ENV !== 'production') {
+        if (!origin) {
+          // Allow server-to-server requests without origin
           return callback(null, true);
         }
         if (allowedOrigins.includes(origin)) {
@@ -320,35 +324,7 @@ export const createApp = async () => {
     applyProductionSecurity(app);
   }
 
-  const authenticateToken =
-    cfg.NODE_ENV === 'production'
-      ? productionAuthMiddleware
-      : (req: Request, res: Response, next: NextFunction) => {
-        // Development mode - relaxed auth for easier testing
-        const authHeader = req.headers['authorization'];
-        const token = authHeader && authHeader.split(' ')[1];
-
-        if (token) {
-          return next();
-        }
-
-        // SEC-2025-001: Fail Closed by default.
-        // Only allow bypass if explicitly enabled via env var.
-        if (process.env.ENABLE_INSECURE_DEV_AUTH === 'true') {
-          console.warn('Development: No token provided, allowing request (ENABLE_INSECURE_DEV_AUTH=true)');
-          (req as any).user = {
-            sub: 'dev-user',
-            email: 'dev@intelgraph.local',
-            role: 'admin',
-            tenantId: 'global',
-            id: 'dev-user', // SEC-2025-002: Ensure downstream helpers rely on user object, not headers
-          };
-          return next();
-        }
-
-        // Default: Reject unauthenticated requests even in dev/test if bypass not enabled
-        res.status(401).json({ error: 'Unauthorized', message: 'No token provided' });
-      };
+  const authenticateToken = productionAuthMiddleware;
 
   // Helper to bypass public webhooks from strict tenant/auth enforcement
   const isPublicWebhook = (req: any) => {

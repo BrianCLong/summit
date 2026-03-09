@@ -11,6 +11,8 @@ import {
   rejectApproval,
 } from '../services/approvals.js';
 import { firstString, firstStringOr } from '../utils/http-param.js';
+import { ensureRole } from '../middleware/auth.js';
+import { getAuditSystem } from '../audit/advanced-audit-system.js';
 
 interface ApprovalPayload {
   userId?: string;
@@ -91,7 +93,7 @@ export function buildApprovalsRouter(maestro?: Maestro): express.Router {
     }
   });
 
-  router.post('/:id/approve', ensureApprover, async (req, res, next) => {
+  router.post('/:id/approve', ensureRole(['admin', 'approver']), ensureApprover, async (req, res, next) => {
     try {
       const approverId = resolveUserId(req);
       if (!approverId) {
@@ -143,13 +145,25 @@ export function buildApprovalsRouter(maestro?: Maestro): express.Router {
         'Approval executed',
       );
 
+      getAuditSystem().recordEvent({
+        eventType: 'approval_executed',
+        action: 'approve',
+        userId: approverId,
+        tenantId: (req as any).user?.tenantId || 'unknown',
+        serviceId: 'approvals',
+        resourceType: 'approval',
+        resourceId: approval.id,
+        outcome: 'success',
+        level: 'info'
+      }).catch(err => approvalsLogger.error({ err }, 'Failed to record audit event'));
+
       res.json({ approval, actionResult });
     } catch (error: any) {
       next(error);
     }
   });
 
-  router.post('/:id/reject', ensureApprover, async (req, res, next) => {
+  router.post('/:id/reject', ensureRole(['admin', 'approver']), ensureApprover, async (req, res, next) => {
     try {
       const approverId = resolveUserId(req);
       if (!approverId) {
@@ -175,6 +189,18 @@ export function buildApprovalsRouter(maestro?: Maestro): express.Router {
         },
         'Approval rejected',
       );
+
+      getAuditSystem().recordEvent({
+        eventType: 'approval_rejected',
+        action: 'reject',
+        userId: approverId,
+        tenantId: (req as any).user?.tenantId || 'unknown',
+        serviceId: 'approvals',
+        resourceType: 'approval',
+        resourceId: approval.id,
+        outcome: 'success',
+        level: 'info'
+      }).catch(err => approvalsLogger.error({ err }, 'Failed to record audit event'));
 
       res.json({ approval });
     } catch (error: any) {
