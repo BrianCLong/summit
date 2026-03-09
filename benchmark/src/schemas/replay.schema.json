@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.dev/schemas/replay.schema.json",
+  "type": "object",
+  "required": ["runId", "benchmarkVersion", "taskId", "environmentRef", "randomSeed", "tracePath"],
+  "properties": {
+    "runId": { "type": "string" },
+    "benchmarkVersion": { "type": "string" },
+    "taskId": { "type": "string" },
+    "environmentRef": { "type": "string" },
+    "randomSeed": { "type": "integer" },
+    "tracePath": { "type": "string" }
+  },
+  "additionalProperties": false
+}

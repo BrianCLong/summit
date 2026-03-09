@@ -1,41 +1,13 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "adk/spec/trace.schema.json",
-  "title": "Summit Bench Trace Artifact",
-  "description": "Deterministic execution trace for an AI agent run in the Summit Bench protocol.",
+  "title": "Summit Agent Evaluation Trace",
   "type": "object",
   "required": ["trace_version", "agent_id", "steps", "evidence_ids"],
   "properties": {
-    "trace_version": {
-      "type": "string",
-      "description": "Version of the Summit trace protocol (e.g., '1.0')."
-    },
-    "agent_id": {
-      "type": "string",
-      "description": "Identifier for the agent or framework that produced this trace (e.g., 'summit-agent', 'langgraph-plugin')."
-    },
-    "steps": {
-      "type": "array",
-      "description": "Ordered sequence of steps taken by the agent.",
-      "items": {
-        "type": "object",
-        "required": ["step", "action"],
-        "properties": {
-          "step": { "type": "integer" },
-          "action": { "type": "string" },
-          "tool": { "type": "string" },
-          "input": { "type": ["object", "string", "null"] },
-          "output": { "type": ["object", "array", "string", "null"] }
-        }
-      }
-    },
-    "evidence_ids": {
-      "type": "array",
-      "description": "List of stable Evidence IDs encountered or produced during the run (e.g., 'EVID:dataset:case:seq').",
-      "items": {
-        "type": "string",
-        "pattern": "^EVID:"
-      }
-    }
+    "trace_version": { "type": "string" },
+    "agent_id": { "type": "string" },
+    "steps": { "type": "array" },
+    "evidence_ids": { "type": "array", "items": { "type": "string" } }
   }
 }

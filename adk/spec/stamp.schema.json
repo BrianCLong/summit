@@ -1,21 +1,11 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "adk/spec/stamp.schema.json",
-  "title": "Summit Bench Stamp Artifact",
-  "description": "Environment snapshot to ensure deterministic replay.",
+  "title": "Summit Agent Evaluation Stamp",
   "type": "object",
-  "required": ["stamp_version", "environment_hash", "runner"],
+  "required": ["stamp_version", "agent_id"],
   "properties": {
     "stamp_version": { "type": "string" },
-    "environment_hash": { "type": "string" },
-    "runner": { "type": "string" },
-    "run_nonce": { "type": "string" },
-    "system_metadata": {
-      "type": "object",
-      "properties": {
-        "model": { "type": "string" },
-        "temperature": { "type": "number" }
-      }
-    }
+    "agent_id": { "type": "string" }
   }
 }

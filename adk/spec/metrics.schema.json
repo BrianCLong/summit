@@ -1,19 +1,11 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "adk/spec/metrics.schema.json",
-  "title": "Summit Bench Metrics Artifact",
-  "description": "Deterministic performance and evaluation metrics for an agent run.",
+  "title": "Summit Agent Evaluation Metrics",
   "type": "object",
-  "required": ["metrics_version", "scores"],
+  "required": ["metrics_version", "agent_id"],
   "properties": {
     "metrics_version": { "type": "string" },
-    "scores": {
-      "type": "object",
-      "additionalProperties": { "type": "number" }
-    },
-    "counts": {
-      "type": "object",
-      "additionalProperties": { "type": "integer" }
-    }
+    "agent_id": { "type": "string" }
   }
 }

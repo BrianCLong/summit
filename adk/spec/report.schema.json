@@ -1,19 +1,11 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "adk/spec/report.schema.json",
-  "title": "Summit Bench Report Artifact",
-  "description": "Final deterministic outcome of a benchmark run.",
+  "title": "Summit Agent Evaluation Report",
   "type": "object",
-  "required": ["report_version", "status", "summary", "governance_score"],
+  "required": ["report_version", "agent_id"],
   "properties": {
     "report_version": { "type": "string" },
-    "status": { "type": "string", "enum": ["success", "failure", "error", "policy_violation"] },
-    "summary": { "type": "string" },
-    "governance_score": { "type": "number", "minimum": 0, "maximum": 1 },
-    "final_answer": { "type": ["string", "object", "null"] },
-    "evidence_used": {
-      "type": "array",
-      "items": { "type": "string" }
-    }
+    "agent_id": { "type": "string" }
   }
 }
