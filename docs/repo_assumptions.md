@@ -1,21 +1,23 @@
-# Repository Assumptions & Validations
+# IntelGraph repo assumptions
 
 ## Verified
-- **Host shell path**: The frontend app seems to be located at `client/` (not `apps/web/`). There is a `client` workspace in `package.json`.
-- **Backend path**: `server/`.
-- **Frontend framework**: React (inferred from `package.json` devDependencies like `eslint-plugin-react`).
-- **Test runner**: `jest` and `vitest` are present in `package.json`. Playwright is used for E2E tests (`@playwright/test`).
-- **Artifact directory conventions**: `artifacts/` or `dist/evidence/` based on `ci:soc-report` script in `package.json`.
-- **Evidence schema location**: Not entirely found yet, but we will use the `APS-<slug>-<nnn>` pattern as specified.
-- **Must-not-touch files**: Existing `.github/workflows/*security*`, existing DB migrations, auth middlewares.
-- **Package structure**: It's a `pnpm` workspace with `packages/*`, `client`, and `server`.
+- Public monorepo for Summit exists
+- Node 18+, pnpm, Neo4j 5.x in quickstart
+- GraphQL + REST APIs are core
+- Collaboration/war-room and timeline issues exist
+- CI/workflow surface is large and policy/evidence oriented
 
-## Assumed (To be mapped or created)
-- `packages/surfaces/` for generated dashboard surfaces
-- `packages/design-ingestion/` for Figma MCP normalization
-- `packages/graphrag-ui/` for graph → UI planning
-- `scripts/surfaces/` for deterministic generation / drift / deploy tasks
-- Telemetry event sink: Needs to be implemented or hooked into an existing logging sink.
-- GraphRAG read APIs: We assume we'll use a `GraphSnapshot` mock or interface until we integrate with the actual backend.
+## Assumed
+- `server/src/api` or equivalent GraphQL service exists
+- `client/src` or equivalent React frontend exists
+- Neo4j access is centralized behind a shared client
+- Evidence artifacts follow repo-wide conventions
+- Tenant scoping already exists outside IntelGraph
 
-We will proceed with creating the skeletons under `packages/graphrag-ui/`, `packages/surfaces/`, `packages/ui-refactor-agent/`, `scripts/surfaces/`, etc., as per the plan. For the host shell, we will target `client/src/` instead of `apps/web/src/`.
+## Validation checklist before PR1 merges
+- Confirm exact package/workspace boundaries
+- Confirm existing GraphQL schema location
+- Confirm auth context shape
+- Confirm standard test command names
+- Confirm runbook/docs locations
+- Confirm must-not-touch branch protection workflows

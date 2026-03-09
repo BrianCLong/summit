@@ -1,0 +1,26 @@
+name: Requeue
+
+on:
+  merge_group:
+    types: [checks_requested]
+  workflow_dispatch:
+
+jobs:
+  heal:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Detect Failure
+        run: |
+          echo "Detecting merge queue failure..."
+
+      - name: Auto-rebase
+        run: |
+          echo "Auto-rebasing canonical branch..."
+
+      - name: Rerun CI
+        run: |
+          echo "Rerunning CI..."
+
+      - name: Requeue
+        run: |
+          echo "Requeuing PR..."
