@@ -4,6 +4,22 @@
 
 set -euo pipefail
 
+DRY_RUN="${DRY_RUN:-false}"
+POSITIONAL_ARGS=()
+while [[ "$#" -gt 0 ]]; do
+    case $1 in
+        --dry-run) DRY_RUN=true; shift ;;
+        *) POSITIONAL_ARGS+=("$1"); shift ;;
+    esac
+done
+set -- "${POSITIONAL_ARGS[@]}"
+
+if [ "$DRY_RUN" = "true" ]; then
+    echo "[DRY RUN] Would auto rollback..."
+    exit 0
+fi
+
+
 # Configuration
 NAMESPACE="${NAMESPACE:-intelgraph}"
 SERVICE_NAME="${SERVICE_NAME:-intelgraph-server}"

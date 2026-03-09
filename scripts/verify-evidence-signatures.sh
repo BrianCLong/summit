@@ -1,6 +1,22 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+DRY_RUN="${DRY_RUN:-false}"
+POSITIONAL_ARGS=()
+while [[ "$#" -gt 0 ]]; do
+    case $1 in
+        --dry-run) DRY_RUN=true; shift ;;
+        *) POSITIONAL_ARGS+=("$1"); shift ;;
+    esac
+done
+set -- "${POSITIONAL_ARGS[@]}"
+
+if [ "$DRY_RUN" = "true" ]; then
+    echo "[DRY RUN] Would verify evidence signatures..."
+    exit 0
+fi
+
+
 EVIDENCE_DIR=${1:-./evidence/ga}
 SIGNATURE_DIR=${SIGNATURE_DIR:-"$EVIDENCE_DIR/signatures"}
 COSIGN_PUB=${COSIGN_PUB:-./keys/cosign.pub}

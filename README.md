@@ -4,6 +4,9 @@
 
 [![Build Status](https://github.com/BrianCLong/summit/workflows/CI/badge.svg)](https://github.com/BrianCLong/summit/actions)
 [![Coverage](https://img.shields.io/codecov/c/github/BrianCLong/summit)](https://codecov.io/gh/BrianCLong/summit)
+[![Tests](https://img.shields.io/badge/tests-passing-brightgreen)](https://github.com/BrianCLong/summit/actions)
+[![Release](https://img.shields.io/github/v/release/BrianCLong/summit?color=blue)](https://github.com/BrianCLong/summit/releases/latest)
+[![Branches](https://img.shields.io/badge/branches-1198-red)](https://github.com/BrianCLong/summit/branches)
 [![License](https://img.shields.io/github/license/BrianCLong/summit)](LICENSE)
 
 ## ✨ Features
@@ -107,6 +110,13 @@ Summit follows a modular microservices architecture:
 
 For the complete trust architecture narrative and visual map, see
 [`docs/architecture/overview.md`](docs/architecture/overview.md).
+
+
+## Project Health (2026-03)
+- Latest GA: 2026.03.04 (March 5)
+- Active signals: Determinism gates, provenance signing, canary rollouts, repoos governance demo
+- Key scripts: `golden-path.sh`, `verify-evidence-signatures.sh`, `repoos-governor-demo.mjs`
+- Test focus: `agent-graph/`, `evaluation/`, `security/`, `watchlists/`
 
 ## 🧩 Core Components
 

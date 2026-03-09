@@ -190,15 +190,21 @@ labels:
   deployment-environment: $NEXT_ENV
 EOF
 
-    # Deploy using Helm
-    helm upgrade --install \
-        "${RELEASE_NAME}-${NEXT_ENV}" \
-        ./charts/maestro \
-        --namespace "$NAMESPACE" \
-        --values "/tmp/values-${NEXT_ENV}.yaml" \
-        --timeout "${TIMEOUT}s" \
-        --wait \
-        --atomic
+
+    if [ "$DRY_RUN" = "true" ]; then
+        log_info "[DRY RUN] Would deploy using Helm for ${RELEASE_NAME}-${NEXT_ENV}"
+    else
+        # Deploy using Helm
+        helm upgrade --install \
+            "${RELEASE_NAME}-${NEXT_ENV}" \
+            ./charts/maestro \
+            --namespace "$NAMESPACE" \
+            --values "/tmp/values-${NEXT_ENV}.yaml" \
+            --timeout "${TIMEOUT}s" \
+            --wait \
+            --atomic
+    fi
+
     
     log_success "Deployed to $NEXT_ENV environment"
 }
@@ -316,19 +322,26 @@ run_smoke_tests() {
 switch_traffic() {
     log_info "Switching traffic to $NEXT_ENV environment..."
     
-    # Update the main service selector to point to the new environment
-    kubectl patch service "$SERVICE_NAME" \
-        --namespace "$NAMESPACE" \
-        --type='merge' \
-        --patch="{\"spec\":{\"selector\":{\"environment\":\"$NEXT_ENV\"}}}"
-    
-    # Wait a moment for the change to propagate
-    sleep 10
-    
-    # Verify the switch
-    NEW_SELECTOR=$(kubectl get service "$SERVICE_NAME" \
-        -n "$NAMESPACE" \
-        -o jsonpath='{.spec.selector.environment}')
+
+    if [ "$DRY_RUN" = "true" ]; then
+        log_info "[DRY RUN] Would switch traffic to $NEXT_ENV environment"
+        NEW_SELECTOR="$NEXT_ENV"
+    else
+        # Update the main service selector to point to the new environment
+        kubectl patch service "$SERVICE_NAME" \
+            --namespace "$NAMESPACE" \
+            --type="merge" \
+            --patch="{\"spec\":{\"selector\":{\"environment\":\"$NEXT_ENV\"}}}"
+
+        # Wait a moment for the change to propagate
+        sleep 10
+
+        # Verify the switch
+        NEW_SELECTOR=$(kubectl get service "$SERVICE_NAME" \
+            -n "$NAMESPACE" \
+            -o jsonpath="{.spec.selector.environment}")
+    fi
+
     
     if [[ "$NEW_SELECTOR" == "$NEXT_ENV" ]]; then
         log_success "Traffic successfully switched to $NEXT_ENV"

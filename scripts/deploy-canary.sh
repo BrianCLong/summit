@@ -3,6 +3,16 @@ set -eo pipefail
 
 # --- Configuration ---
 # These variables would typically be sourced from a CI/CD environment
+DRY_RUN="${DRY_RUN:-false}"
+POSITIONAL_ARGS=()
+while [[ "$#" -gt 0 ]]; do
+    case $1 in
+        --dry-run) DRY_RUN=true; shift ;;
+        *) POSITIONAL_ARGS+=("$1"); shift ;;
+    esac
+done
+set -- "${POSITIONAL_ARGS[@]}"
+
 SERVICE_NAME="${1:-my-app}"
 NEW_VERSION="${2:-v1.1.0}"
 KUBE_NAMESPACE="${KUBE_NAMESPACE:-production}"
@@ -20,44 +30,58 @@ update_traffic_rules() {
   local version="$2"
   local percentage="$3"
   log "Updating traffic routing: ${service}@${version} -> ${percentage}%"
-  # Example with a service mesh like Istio:
-  # istioctl apply -f - <<EOF
-  # apiVersion: networking.istio.io/v1alpha3
-  # kind: VirtualService
-  # metadata:
-  #   name: ${service}
-  # spec:
-  #   hosts:
-  #   - "${service}"
-  #   http:
-  #   - route:
-  #     - destination:
-  #         host: ${service}
-  #         subset: "v-stable"
-  #       weight: $((100 - percentage))
-  #     - destination:
-  #         host: ${service}
-  #         subset: "v-canary"
-  #       weight: ${percentage}
-  # EOF
+  if [ "$DRY_RUN" = "true" ]; then
+    log "[DRY] Would apply traffic routing for ${service}@${version} -> ${percentage}%"
+  else
+    # Example with a service mesh like Istio:
+    # istioctl apply -f - <<EOF
+    # apiVersion: networking.istio.io/v1alpha3
+    # kind: VirtualService
+    # metadata:
+    #   name: ${service}
+    # spec:
+    #   hosts:
+    #   - "${service}"
+    #   http:
+    #   - route:
+    #     - destination:
+    #         host: ${service}
+    #         subset: "v-stable"
+    #       weight: $((100 - percentage))
+    #     - destination:
+    #         host: ${service}
+    #         subset: "v-canary"
+    #       weight: ${percentage}
+    # EOF
+    :
+  fi
 }
 
 deploy_canary() {
   local service="$1"
   local version="$2"
   log "Deploying new canary version: ${service}:${version}"
-  # Example with kubectl:
-  # kubectl set image deployment/${service}-canary --namespace ${KUBE_NAMESPACE} ${service}=${service}:${version}
-  # kubectl rollout status deployment/${service}-canary --namespace ${KUBE_NAMESPACE}
+  if [ "$DRY_RUN" = "true" ]; then
+    log "[DRY] Would deploy canary version: ${service}:${version}"
+  else
+    # Example with kubectl:
+    # kubectl set image deployment/${service}-canary --namespace ${KUBE_NAMESPACE} ${service}=${service}:${version}
+    # kubectl rollout status deployment/${service}-canary --namespace ${KUBE_NAMESPACE}
+    :
+  fi
 }
 
 promote_canary() {
     local service="$1"
     local version="$2"
     log "Promoting canary version ${version} to stable"
-    # kubectl set image deployment/${service}-stable --namespace ${KUBE_NAMESPACE} ${service}=${service}:${version}
-    # rollout status deployment/${service}-stable --namespace ${KUBE_NAMESPACE}
-    update_traffic_rules "$service" "$version" 0 # Shift all traffic away from canary
+    if [ "$DRY_RUN" = "true" ]; then
+      log "[DRY] Would promote canary version ${version} to stable"
+    else
+      # kubectl set image deployment/${service}-stable --namespace ${KUBE_NAMESPACE} ${service}=${service}:${version}
+      # rollout status deployment/${service}-stable --namespace ${KUBE_NAMESPACE}
+      update_traffic_rules "$service" "$version" 0 # Shift all traffic away from canary
+    fi
     log "Promotion complete."
 }
 

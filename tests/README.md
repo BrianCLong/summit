@@ -489,3 +489,33 @@ gh workflow run enhanced-testing.yml \
 - [Testing Library](https://testing-library.com/)
 - [CLAUDE.md Testing Section](../CLAUDE.md#testing-strategy)
 - [CONTRIBUTING.md](../CONTRIBUTING.md) - Full testing guidelines
+
+## Test Hierarchy & Governance
+
+The test suite is deeply nested to group tests by type, domain, and functionality. We've established a strict hierarchy to organize the 150+ subdirectories cleanly.
+
+### Key Subdirectories
+
+- **`unit/`**: Fast, isolated tests for individual components.
+- **`integration/`**: Tests checking the interaction between connected components and databases.
+- **`e2e/`**: End-to-end user flows, often using Playwright.
+- **`provenance/`**: Tests verifying evidence chains and artifact lineage.
+- **`policy/`**: Governance tests, OPA policy checks, and security guardrails.
+- **`agent-graph/`**: Validation of agent behavior, workflow graphs, and orchestration.
+- **`benchmarks/`**: Performance, determinism, and load threshold test cases.
+- **`evaluation/`**: Harnesses scoring LLM outputs and agent behaviors.
+- **`security/`**: Access control, data privacy, and vulnerability checks.
+- **`replay/`**: Historical traffic or state replaying for regression verification.
+- **`watchlists/`**: Validations targeting specific critical pathways and compliance checks.
+
+### Running Specific Suites
+
+You can run specific groups using custom scripts or `pnpm test` filtering:
+
+- Run determinism suite: `pnpm test:determinism` (or `pnpm test --grep "determinism"`)
+- Run unit tests: `pnpm test:unit`
+- Run e2e tests: `pnpm test:e2e`
+
+### CI Enforcements
+
+Our CI pipeline (`.github/workflows/ci.yml`) enforces this structure by specifically targeting modified test directories on PRs via the `fast-smoke-tests` and `determinism-tests` jobs to protect regression of governance and orchestration layers.
