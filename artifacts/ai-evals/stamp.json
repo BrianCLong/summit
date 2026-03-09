@@ -1,6 +1,4 @@
 {
-  "job": "ai-evals",
-  "runner": "local",
-  "lockHash": "dummy-hash-for-local-run",
-  "timestamp": "2026-03-07T20:36:06.706Z"
+  "timestamp": "2026-03-08T15:44:17.929Z",
+  "signature": "sha256:dummy-sig"
 }

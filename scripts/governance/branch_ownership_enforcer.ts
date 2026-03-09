@@ -15,6 +15,7 @@ function getBranchName(): string {
     if (headRef) return headRef;
 
     try {
+        if (process.env.GITHUB_HEAD_REF) return process.env.GITHUB_HEAD_REF;
         return execSync('git rev-parse --abbrev-ref HEAD', { encoding: 'utf-8' }).trim();
     } catch (e) {
         return 'unknown';
@@ -119,7 +120,8 @@ async function main() {
         } else {
             // Local test fallback
             console.log(`Fetching changed files via git diff...`);
-            const out = execSync(`git diff --name-only HEAD~1 HEAD`, { encoding: 'utf-8' });
+            const baseRef = process.env.GITHUB_BASE_REF || 'main';
+            const out = execSync(`git diff --name-only origin/${baseRef}...HEAD`, { encoding: 'utf-8' });
             changedFiles = out.split('\n').filter(Boolean);
         }
     } catch (e) {
