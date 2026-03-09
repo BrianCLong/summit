@@ -1,13 +1,14 @@
 from abc import ABC, abstractmethod
-from typing import Dict, Any, Optional
 from dataclasses import dataclass
+from typing import Any, Dict, Optional
+
 
 @dataclass
 class ModelOutput:
     text: str
     tokens_used: int
     latency_ms: float
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
 
 class BaseModelAdapter(ABC):
     MODEL_ID: str
