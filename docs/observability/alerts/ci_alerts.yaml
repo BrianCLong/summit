@@ -1,0 +1,35 @@
+groups:
+- name: ci_merge_queue_alerts
+  rules:
+  - alert: HighCIRuntime
+    expr: avg(ci_runtime_minutes) by (pipeline) > 15
+    for: 1h
+    labels:
+      severity: warning
+      team: platform-eng
+    annotations:
+      summary: "High CI runtime detected on {{ $labels.pipeline }}"
+      description: "The CI pipeline {{ $labels.pipeline }} is taking longer than 15 minutes on average over the last hour. Check CI Time Budget."
+      runbook: "docs/runbooks/ci-runtime-degradation-runbook.md"
+
+  - alert: HighTestFlakeRate
+    expr: sum(ci_test_flakes_total) / sum(ci_tests_total) * 100 > 5
+    for: 1h
+    labels:
+      severity: critical
+      team: qa-eng
+    annotations:
+      summary: "High test flake rate detected"
+      description: "The test flake rate has exceeded 5% over the last hour. Investigate recent merges."
+      runbook: "docs/runbooks/test-flake-resolution-runbook.md"
+
+  - alert: MergeQueueThroughputLow
+    expr: rate(merge_queue_prs_merged_total[1h]) * 3600 < 1
+    for: 2h
+    labels:
+      severity: warning
+      team: developer-experience
+    annotations:
+      summary: "Low merge queue throughput"
+      description: "Fewer than 1 PR per hour has been merged through the queue. Queue may be stalled."
+      runbook: "docs/runbooks/merge-queue-stalled-runbook.md"

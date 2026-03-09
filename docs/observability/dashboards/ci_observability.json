@@ -1,0 +1,42 @@
+{
+  "title": "CI Runtime & Merge Queue Observability",
+  "panels": [
+    {
+      "title": "Average CI Runtime (Minutes)",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "avg(ci_runtime_minutes) by (pipeline)",
+          "legendFormat": "{{pipeline}}"
+        }
+      ]
+    },
+    {
+      "title": "Test Flake Rate (%)",
+      "type": "gauge",
+      "targets": [
+        {
+          "expr": "sum(ci_test_flakes) / sum(ci_tests_total) * 100",
+          "legendFormat": "Flake Rate"
+        }
+      ],
+      "thresholds": {
+        "steps": [
+          { "value": 0, "color": "green" },
+          { "value": 2, "color": "yellow" },
+          { "value": 5, "color": "red" }
+        ]
+      }
+    },
+    {
+      "title": "Merge Queue Throughput (PRs/Hour)",
+      "type": "stat",
+      "targets": [
+        {
+          "expr": "rate(merge_queue_prs_merged_total[1h]) * 3600",
+          "legendFormat": "Throughput"
+        }
+      ]
+    }
+  ]
+}

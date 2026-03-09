@@ -290,6 +290,31 @@ export const erMergeOutcomesTotal = createCounter({
 });
 
 // Deployment rollbacks
+
+
+// CI & Merge Queue Metrics
+export const ciRuntimeMinutes = createHistogram({
+  registers: [],
+  name: 'ci_runtime_minutes',
+  help: 'CI execution runtime duration in minutes',
+  labelNames: ['pipeline', 'status'],
+  buckets: [1, 2, 5, 10, 15, 20, 30],
+});
+
+export const ciTestFlakesTotal = createCounter({
+  registers: [],
+  name: 'ci_test_flakes_total',
+  help: 'Total number of flaky tests detected in CI',
+  labelNames: ['suite', 'test_name'],
+});
+
+export const mergeQueueThroughputTotal = createCounter({
+  registers: [],
+  name: 'merge_queue_prs_merged_total',
+  help: 'Total number of PRs successfully processed through the merge queue',
+  labelNames: ['repository', 'base_branch'],
+});
+
 export const deploymentRollbacksTotal = createCounter({
   registers: [],
   name: 'deployment_rollbacks_total',
@@ -395,6 +420,10 @@ try {
   register.registerMetric(investigationsActive);
   register.registerMetric(investigationOperations);
   register.registerMetric(erMergeOutcomesTotal);
+
+  register.registerMetric(ciRuntimeMinutes);
+  register.registerMetric(ciTestFlakesTotal);
+  register.registerMetric(mergeQueueThroughputTotal);
   register.registerMetric(deploymentRollbacksTotal);
   register.registerMetric(approvalsPending);
   register.registerMetric(approvalsApprovedTotal);
