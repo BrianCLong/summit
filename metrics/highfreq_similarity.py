@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 
+
 def highfreq_map(img):
     """
     Computes a high-frequency feature map of an image using the Laplacian operator.

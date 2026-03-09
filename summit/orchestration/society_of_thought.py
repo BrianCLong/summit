@@ -1,13 +1,15 @@
 from __future__ import annotations
 
+import math
+import os
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
+
 import yaml
-import os
-import math
 
 from summit.governance.guards import AgentGuard
 from summit.orchestration.policy.trace_redaction import TraceRedactor
+
 try:
     from summit.orchestration.umad.signals import calculate_sys_au, calculate_sys_eu
 except ImportError:
@@ -65,7 +67,7 @@ class SocietyOfThoughtEngine:
     if self.use_umad:
         try:
             config_path = os.path.join(os.path.dirname(__file__), 'umad', 'umad_config.yaml')
-            with open(config_path, 'r') as f:
+            with open(config_path) as f:
                 self.umad_config = yaml.safe_load(f).get('umad', {})
         except Exception as e:
             # Fallback configuration

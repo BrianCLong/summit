@@ -1,4 +1,4 @@
-with open('server/src/federation/service.ts', 'r') as f:
+with open('server/src/federation/service.ts') as f:
     lines = f.readlines()
 
 while lines and lines[-1].strip() == '}':
