@@ -47,3 +47,9 @@
 **Learning:** Icons in `EmptyState` components are purely decorative as they accompany a clear title and description. Marking them with `aria-hidden="true"` reduces noise for screen reader users.
 
 **Action:** Always audit interactive dashboard list items for keyboard support and ensure decorative icons in common components are hidden from the accessibility tree.
+
+## 2026-03-09 - Loading State Accessibility Persistence
+
+**Learning:** Accessibility features like `aria-busy` and `role="status"` are often overlooked during initial component implementation but are critical for screen reader users to understand asynchronous application states. Existing unit tests in this repository explicitly check for these attributes, highlighting their importance in the project's quality standards.
+
+**Action:** When creating or modifying interactive components with loading states, always include `aria-busy` on the trigger and `role="status"` on the indicator.
