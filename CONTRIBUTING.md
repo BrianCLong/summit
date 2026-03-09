@@ -153,3 +153,10 @@ source ~/.bashrc
 - **License**: Contributions are accepted under the terms in [`CONTRIBUTOR_LICENSE_AGREEMENT.md`](CONTRIBUTOR_LICENSE_AGREEMENT.md).
 
 Thank you for building with us!
+
+## 💡 Code Examples
+
+For examples of core usage scenarios, check out these files:
+
+- **Entity Extraction**: `docs/agents/entity-extractor.md`
+- **Link Analysis**: `docs/architecture/knowledge-graph.md`

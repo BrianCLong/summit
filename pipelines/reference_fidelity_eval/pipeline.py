@@ -1,8 +1,10 @@
-from metrics.highfreq_similarity import detail_similarity
-from metrics.attention_coverage import attention_coverage
-from metrics.mask_containment import mask_containment
-import numpy as np
 import cv2
+import numpy as np
+
+from metrics.attention_coverage import attention_coverage
+from metrics.highfreq_similarity import detail_similarity
+from metrics.mask_containment import mask_containment
+
 
 class ReferenceFidelityPipeline:
     """
