@@ -1,3 +1,5 @@
+# Centralized Identity Resolution Engine
+
 Resolve multiple identifiers (e.g., aliasing, codename reuse, platform-specific IDs) across domains.
 
 Maintain immutable provenance trails.
