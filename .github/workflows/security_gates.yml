@@ -80,3 +80,31 @@ jobs:
         run: |
           # In a real scenario, this would check all installed skills
           python3 security/supply_chain/verify_signatures.py tests/fixtures/sc/signed_skill.json
+
+  gate-secret-scanning:
+    if: ${{ github.event_name == 'merge_group' || github.event_name == 'push' || (github.event_name == 'pull_request' && vars.MERGE_SURGE != 'true') }}
+    name: gate/secret_scanning
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  compliance-audit:
+    if: ${{ github.event_name == 'merge_group' || github.event_name == 'push' || (github.event_name == 'pull_request' && vars.MERGE_SURGE != 'true') }}
+    name: gate/compliance_audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Generate Audit Bundle
+        run: ./scripts/security/unified_audit_bundle.sh
+      - name: Upload Audit Bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: unified-audit-bundle
+          path: artifacts/unified_audit_bundle.tar.gz
+          retention-days: 90
