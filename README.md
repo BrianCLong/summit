@@ -2,6 +2,7 @@
 
 > Open-source intelligence gathering powered by agentic AI, knowledge graphs, and real-time data ingestion.
 
+[![Sprint Activity](https://img.shields.io/badge/sprint-Mar%209%202026-orange)](https://github.com/BrianCLong/summit/commits/main)
 [![Build Status](https://github.com/BrianCLong/summit/workflows/CI/badge.svg)](https://github.com/BrianCLong/summit/actions)
 [![Coverage](https://img.shields.io/codecov/c/github/BrianCLong/summit)](https://codecov.io/gh/BrianCLong/summit)
 [![License](https://img.shields.io/github/license/BrianCLong/summit)](LICENSE)
@@ -225,3 +226,12 @@ We welcome contributions! Please see:
 
 Built with ❤️ by [@BrianCLong](https://github.com/BrianCLong) and [contributors](https://github.com/BrianCLong/summit/graphs/contributors)
 \n\n# Verified Governance (2026-02-10)
+
+## March 9, 2026 Sprint Highlights
+- **RepoOS Production Layer**: Stability, constitution, monitoring, evolution intelligence (#19778, #19768)
+- **Summit Evidence Protocol (SEP) Core** + bitemporal provenance ledger (#19675, #19611)
+- **Deterministic Parity** Postgres ↔ Neo4j (#19616)
+- **Agentic Control Plane** + GPT-5.4 Tool Search (#19671, #19746)
+- **Praxeology** quarantined validators + cognitive terrain engine (#19619, #19759)
+- Governance docs: OpenClaw-class agents, subsumption roadmaps
+- Quick smoke: `./scripts/repoos-evidence-smoke.sh`

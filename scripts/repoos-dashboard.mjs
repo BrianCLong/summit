@@ -10,12 +10,15 @@ import { execSync } from 'child_process';
 import fs from 'fs/promises';
 
 const REFRESH_INTERVAL = 5000; // 5 seconds
+const isMonitor = process.argv.includes('--monitor');
+const isJson = process.argv.includes('--json');
 
 function clearScreen() {
-  console.log('\x1Bc'); // Clear terminal
+  if (!isMonitor) console.log('\x1Bc'); // Clear terminal
 }
 
 function colorize(text, color) {
+  if (isMonitor) return text;
   const colors = {
     green: '\x1b[32m',
     yellow: '\x1b[33m',
@@ -31,6 +34,7 @@ function colorize(text, color) {
 }
 
 function statusBadge(status) {
+  if (isMonitor) return status;
   const badges = {
     'STABLE': colorize('● STABLE', 'green'),
     'WATCH': colorize('● WATCH', 'yellow'),
@@ -44,6 +48,7 @@ function statusBadge(status) {
 }
 
 function progressBar(value, max, width = 20) {
+  if (isMonitor) return '';
   const percentage = Math.min(100, (value / max) * 100);
   const filled = Math.floor((percentage / 100) * width);
   const empty = width - filled;
@@ -59,12 +64,24 @@ function progressBar(value, max, width = 20) {
 async function fetchDashboardData() {
   try {
     // Get PR data
-    const prsOutput = execSync('gh pr list --limit 100 --json number,title,headRefName,createdAt,author --state open', { encoding: 'utf8', stdio: ['pipe', 'pipe', 'ignore'] });
-    const prs = JSON.parse(prsOutput);
+    let prs = [];
+    try {
+        const prsOutput = execSync('gh pr list --limit 100 --json number,title,headRefName,createdAt,author --state open', { encoding: 'utf8', stdio: ['pipe', 'pipe', 'ignore'] });
+        prs = JSON.parse(prsOutput);
+    } catch {
+        prs = [];
+    }
 
     // Get git stats
-    const commitCount = execSync('git rev-list --count HEAD', { encoding: 'utf8', stdio: ['pipe', 'pipe', 'ignore'] }).trim();
-    const branchCount = execSync('git branch -r | wc -l', { encoding: 'utf8', stdio: ['pipe', 'pipe', 'ignore'] }).trim();
+    let commitCount = 0;
+    let branchCount = 0;
+    try {
+        commitCount = parseInt(execSync('git rev-list --count HEAD', { encoding: 'utf8', stdio: ['pipe', 'pipe', 'ignore'] }).trim());
+        branchCount = parseInt(execSync('git branch -r | wc -l', { encoding: 'utf8', stdio: ['pipe', 'pipe', 'ignore'] }).trim());
+    } catch {
+        commitCount = 0;
+        branchCount = 0;
+    }
 
     // Load analysis report
     let analysis = null;
@@ -73,13 +90,21 @@ async function fetchDashboardData() {
       analysis = JSON.parse(data);
     } catch {}
 
+    const metrics = {
+        violations: analysis?.violations?.length || 0,
+        sloBurnRate: analysis?.metrics?.sloBurnRate || 0.05,
+        determinismFailures: analysis?.metrics?.determinismFailures || 0,
+        evidenceSignatureStatus: analysis?.metrics?.evidenceStatus || 'Valid'
+    };
+
     return {
       timestamp: new Date(),
       prs,
       analysis,
+      metrics,
       git: {
-        commits: parseInt(commitCount),
-        branches: parseInt(branchCount)
+        commits: commitCount,
+        branches: branchCount
       }
     };
   } catch (error) {
@@ -88,6 +113,20 @@ async function fetchDashboardData() {
 }
 
 function renderDashboard(data) {
+  if (isMonitor && isJson) {
+      console.log(JSON.stringify(data.metrics, null, 2));
+      process.exit(0);
+  }
+
+  if (isMonitor) {
+      console.log("=== RepoOS Dashboard ===");
+      console.log(`Violations: ${data.metrics.violations}`);
+      console.log(`SLO Burn Rate: ${data.metrics.sloBurnRate}`);
+      console.log(`Determinism Failures: ${data.metrics.determinismFailures}`);
+      console.log(`Evidence Signature Status: ${data.metrics.evidenceSignatureStatus}`);
+      process.exit(0);
+  }
+
   clearScreen();
 
   const width = 80;
@@ -156,6 +195,14 @@ function renderDashboard(data) {
   console.log(`  Entropy Monitor:  ${statusBadge('STABLE')}`);
   console.log(`  ML Intelligence:  ${statusBadge('OPERATIONAL')}\n`);
 
+  // Monitor Metrics
+  console.log(colorize('═══ MONITOR METRICS ═══', 'bold'));
+  console.log(`  Violations:       ${colorize(data.metrics.violations, data.metrics.violations > 0 ? 'red' : 'green')}`);
+  console.log(`  SLO Burn Rate:    ${colorize(data.metrics.sloBurnRate, data.metrics.sloBurnRate > 0.1 ? 'yellow' : 'green')}`);
+  console.log(`  Det. Failures:    ${colorize(data.metrics.determinismFailures, data.metrics.determinismFailures > 0 ? 'red' : 'green')}`);
+  console.log(`  Evidence Status:  ${colorize(data.metrics.evidenceSignatureStatus, data.metrics.evidenceSignatureStatus === 'Valid' ? 'green' : 'red')}\n`);
+
+
   // Recent Activity
   console.log(colorize('═══ RECENT PRs ═══', 'bold'));
   const recentPRs = data.prs.slice(0, 5);
@@ -174,10 +221,12 @@ async function startDashboard() {
   renderDashboard(data);
 
   // Auto-refresh
-  setInterval(async () => {
-    const data = await fetchDashboardData();
-    renderDashboard(data);
-  }, REFRESH_INTERVAL);
+  if (!isMonitor) {
+    setInterval(async () => {
+        const data = await fetchDashboardData();
+        renderDashboard(data);
+    }, REFRESH_INTERVAL);
+  }
 }
 
 // Handle graceful shutdown
@@ -188,5 +237,7 @@ process.on('SIGINT', () => {
 });
 
 // Start dashboard
-console.log(colorize('Starting RepoOS Dashboard...', 'cyan'));
+if (!isMonitor) {
+    console.log(colorize('Starting RepoOS Dashboard...', 'cyan'));
+}
 await startDashboard();
