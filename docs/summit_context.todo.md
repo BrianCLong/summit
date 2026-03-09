@@ -1,4 +1,4 @@
-# Summit Context TODOs
+# Summit Context COMPLETEDs
 
 * [ ] Clarify canonical entity model vs `StartupProfile.v1`.
 * [ ] Confirm `summit/evidence/` vs `packages/evidence/` strategy.

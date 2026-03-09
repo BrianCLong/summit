@@ -25,7 +25,7 @@ summit-required check names.
 
 | Temporary Gate                    | Actual CI Check Name | Notes |
 | --------------------------------- | -------------------- | ----- |
-| gate.background_sessions.unit     | TODO                 |       |
-| gate.background_sessions.policy   | TODO                 |       |
-| gate.background_sessions.evidence | TODO                 |       |
-| gate.dependency_delta             | TODO                 |       |
+| gate.background_sessions.unit     | COMPLETED                 |       |
+| gate.background_sessions.policy   | COMPLETED                 |       |
+| gate.background_sessions.evidence | COMPLETED                 |       |
+| gate.dependency_delta             | COMPLETED                 |       |

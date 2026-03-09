@@ -1,4 +1,4 @@
-# Required Checks (TODO Binding)
+# Required Checks (COMPLETED Binding)
 
 - lint
 - typecheck

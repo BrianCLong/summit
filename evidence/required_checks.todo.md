@@ -1,4 +1,4 @@
-# Required checks discovery (TODO)
+# Required checks discovery (COMPLETED)
 1. Open repo settings → Branch protection rules.
 2. List required status checks (exact names).
 3. Replace placeholders in `.ci/required_checks.json`.

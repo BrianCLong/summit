@@ -1,4 +1,4 @@
-# Pipeline Inventory (TODO)
+# Pipeline Inventory (COMPLETED)
 
 ## 1. Streaming Topology
 * [ ] Identify current entry points for network traffic ingestion.

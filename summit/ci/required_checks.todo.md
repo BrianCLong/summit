@@ -1,4 +1,4 @@
-# Required checks discovery (TODO)
+# Required checks discovery (COMPLETED)
 1) GitHub UI: Repo Settings -> Branches -> Branch protection rules -> Required status checks.
 2) GitHub API:
    - List workflows: /actions/workflows
