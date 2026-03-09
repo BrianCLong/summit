@@ -1,0 +1,71 @@
+boundaries:
+  - name: packages-domain
+    pattern: packages/**
+    allowed_dependencies:
+      - packages/**
+      - tools/**
+      - libs/**
+      - platform/**
+  - name: services-domain
+    pattern: services/**
+    allowed_dependencies:
+      - packages/**
+      - libs/**
+      - tools/**
+      - services/**
+      - platform/**
+  - name: agents-domain
+    pattern: agents/**
+    allowed_dependencies:
+      - packages/**
+      - libs/**
+      - tools/**
+      - agents/**
+      - platform/**
+  - name: apps-domain
+    pattern: apps/**
+    allowed_dependencies:
+      - packages/**
+      - libs/**
+      - tools/**
+      - services/**
+      - agents/**
+      - apps/**
+      - platform/**
+      - client
+      - server
+  - name: platform-domain
+    pattern: platform/**
+    allowed_dependencies:
+      - packages/**
+      - libs/**
+      - tools/**
+      - platform/**
+  - name: tools-domain
+    pattern: tools/**
+    allowed_dependencies:
+      - packages/**
+      - libs/**
+      - tools/**
+      - platform/**
+  - name: libs-domain
+    pattern: libs/**
+    allowed_dependencies:
+      - libs/**
+      - packages/**
+      - platform/**
+  - name: server-domain
+    pattern: server
+    allowed_dependencies:
+      - packages/**
+      - libs/**
+      - tools/**
+      - services/**
+      - platform/**
+  - name: client-domain
+    pattern: client
+    allowed_dependencies:
+      - packages/**
+      - libs/**
+      - tools/**
+      - platform/**
