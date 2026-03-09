@@ -1,5 +1,7 @@
 import unittest
+
 from .signals import calculate_sys_au, calculate_sys_eu, calculate_umad_rewards
+
 
 class TestUMADSignals(unittest.TestCase):
     def test_calculate_sys_au(self):
