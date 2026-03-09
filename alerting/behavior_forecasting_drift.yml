@@ -1,7 +1,0 @@
-name: behavior_forecast_calibration_drift
-description: "Triggers when model actual behavior diverges from predicted behavior"
-threshold:
-  metric: "calibration_error_7d"
-  operator: ">"
-  value: "baseline_calibration_error * 1.15"
-severity: high

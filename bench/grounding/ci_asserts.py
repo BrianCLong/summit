@@ -1,7 +1,4 @@
-import json
-import os
-import sys
-
+import json, sys, os
 THRESH_DROP = -0.05   # fail if delta <= -0.05
 MIN_PLAN = 95.0       # %
 

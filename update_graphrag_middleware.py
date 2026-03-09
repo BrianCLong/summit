@@ -1,7 +1,7 @@
 import os
 
 filepath = "services/graphrag/src/server.ts"
-with open(filepath) as f:
+with open(filepath, "r") as f:
     content = f.read()
 
 search_str = """function tracingMiddleware(req: Request, res: Response, next: NextFunction) {

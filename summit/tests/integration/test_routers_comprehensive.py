@@ -1,8 +1,6 @@
 import pytest
-
 from summit.services.cache import CacheService
 from summit.services.shared.core_verification import CoreVerificationService
-
 
 def test_health_endpoints(client):
     endpoints = [

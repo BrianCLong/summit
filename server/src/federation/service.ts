@@ -162,45 +162,4 @@ export class FederationService {
   static getRequest(id: string): DeconflictionRequest | undefined {
       return this.requests.get(id);
   }
-
-  static exportToSTIX(subgraphId: string, payload: any, provenance: any): any {
-    return {
-      type: "bundle",
-      id: `bundle--${subgraphId}`,
-      spec_version: "2.1",
-      objects: [
-        {
-          type: "report",
-          id: `report--${subgraphId}`,
-          name: "Federated Threat Intelligence Subgraph",
-          published: new Date().toISOString(),
-          object_refs: [],
-          custom_properties: {
-            x_summit_payload: payload,
-            x_summit_provenance: provenance
-          }
-        }
-      ]
-    };
-  }
-
-  static exportToMISP(subgraphId: string, payload: any, provenance: any): any {
-    return {
-      Event: {
-        info: "Federated Threat Intelligence Subgraph",
-        date: new Date().toISOString().split('T')[0],
-        uuid: subgraphId,
-        Attribute: [
-          {
-            type: "text",
-            category: "Other",
-            value: "See payload attachment",
-            comment: "Imported via Summit Federation",
-            x_summit_payload: payload,
-            x_summit_provenance: provenance
-          }
-        ]
-      }
-    };
-}
 }

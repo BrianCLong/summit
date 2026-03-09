@@ -1,7 +1,7 @@
 import importlib.util
+import sys
 import os
 import pathlib
-import sys
 import unittest
 
 BASE_DIR = pathlib.Path(__file__).resolve().parents[1] / "kafka_push_proxy"

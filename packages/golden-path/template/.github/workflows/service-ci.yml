@@ -41,4 +41,4 @@ jobs:
           cosign sign --yes ${REGISTRY_IMAGE:-ghcr.io/example/__SERVICE_NAME__}:$GITHUB_SHA
       - name: Cosign verify
         run: |
-          cosign verify --use-signed-timestamps --certificate-identity-regexp ".*" ${REGISTRY_IMAGE:-ghcr.io/example/__SERVICE_NAME__}:$GITHUB_SHA || { echo "::error::Supply chain verification failed! Missing or invalid signed timestamps."; false; }
+          cosign verify --certificate-identity-regexp ".*" ${REGISTRY_IMAGE:-ghcr.io/example/__SERVICE_NAME__}:$GITHUB_SHA

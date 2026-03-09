@@ -98,18 +98,18 @@ AI-native enterprise operating models are emerging, yet critical gaps remain unr
 
 ## Source Index
 
-1. <https://www.mckinsey.com/capabilities/people-and-organizational-performance/our-insights/the-agentic-organization-contours-of-the-next-paradigm-for-the-ai-era>
-2. <https://www.headquarter.ai/en/post/mckinsey-agentic-organization>
-3. <https://www.ibm.com/thought-leadership/institute-business-value/en-us/report/agentic-ai-operating-model>
-4. <https://gigster.com/blog/why-your-enterprise-isnt-ready-for-agentic-ai-workflows/>
-5. <https://nirmaljeet.com/2025/12/23/the-ai-operating-model-gap/>
-6. <https://www.gcaie.org/post/the-ai-operating-model-playbook-redesigning-the-enterprise-for-scaled-ai>
-7. <https://menlovc.com/perspective/2025-the-state-of-generative-ai-in-the-enterprise/>
-8. <https://www.brianheger.com/the-agentic-organization-contours-of-the-next-paradigm-for-the-ai-era-mckinsey/>
-9. <https://xmpro.com/the-industrial-agentic-organization-part-1-understanding-the-shift/>
-10. <https://www.photon.com/why-agentic-ai-success-requires-strategy-not-experimentation>
-11. <https://www.salesforce.com/news/futures25/>
-12. <https://jefftowson.com/membership_content/the-basics-of-an-agentic-ai-operating-model-tech-strategy/>
-13. <https://www.linkedin.com/pulse/scaling-agentic-ai-enterprise-business-value-mesh-tekleadersinc-ta7lc>
-14. <https://www.linkedin.com/posts/brooke-weddle_the-agentic-organization-contours-of-the-activity-7378833305565077504-p3kB>
-15. <https://www.crmbuyer.com/story/agentic-ai-forces-brands-to-rethink-discovery-and-loyalty-177579.html>
+1. https://www.mckinsey.com/capabilities/people-and-organizational-performance/our-insights/the-agentic-organization-contours-of-the-next-paradigm-for-the-ai-era
+2. https://www.headquarter.ai/en/post/mckinsey-agentic-organization
+3. https://www.ibm.com/thought-leadership/institute-business-value/en-us/report/agentic-ai-operating-model
+4. https://gigster.com/blog/why-your-enterprise-isnt-ready-for-agentic-ai-workflows/
+5. https://nirmaljeet.com/2025/12/23/the-ai-operating-model-gap/
+6. https://www.gcaie.org/post/the-ai-operating-model-playbook-redesigning-the-enterprise-for-scaled-ai
+7. https://menlovc.com/perspective/2025-the-state-of-generative-ai-in-the-enterprise/
+8. https://www.brianheger.com/the-agentic-organization-contours-of-the-next-paradigm-for-the-ai-era-mckinsey/
+9. https://xmpro.com/the-industrial-agentic-organization-part-1-understanding-the-shift/
+10. https://www.photon.com/why-agentic-ai-success-requires-strategy-not-experimentation
+11. https://www.salesforce.com/news/futures25/
+12. https://jefftowson.com/membership_content/the-basics-of-an-agentic-ai-operating-model-tech-strategy/
+13. https://www.linkedin.com/pulse/scaling-agentic-ai-enterprise-business-value-mesh-tekleadersinc-ta7lc
+14. https://www.linkedin.com/posts/brooke-weddle_the-agentic-organization-contours-of-the-activity-7378833305565077504-p3kB
+15. https://www.crmbuyer.com/story/agentic-ai-forces-brands-to-rethink-discovery-and-loyalty-177579.html

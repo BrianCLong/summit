@@ -1,9 +1,6 @@
-from unittest.mock import AsyncMock, patch
-
 import pytest
-
+from unittest.mock import AsyncMock, patch
 from summit.services.shared.core_verification import CoreVerificationService
-
 
 @pytest.mark.asyncio
 async def test_verify_claim_cache_hit(core_verification_service):

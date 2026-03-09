@@ -17,7 +17,7 @@ class OutsourcingEvent:
     action_verb: str
     domain: str
     evidence_id: Optional[str] = None
-    metadata: Optional[dict[str, Any]] = None
+    metadata: Optional[Dict[str, Any]] = None
 
 class CausalityLedger:
     """
@@ -36,7 +36,7 @@ class CausalityLedger:
                    action_verb: str = "unknown",
                    domain: str = "general",
                    evidence_id: Optional[str] = None,
-                   metadata: Optional[dict[str, Any]] = None) -> str:
+                   metadata: Optional[Dict[str, Any]] = None) -> str:
 
         event_id = str(uuid.uuid4())
         event = OutsourcingEvent(
@@ -61,12 +61,12 @@ class CausalityLedger:
             logger.error(f"Failed to log outsourcing attempt: {e}")
             raise e
 
-    def read_ledger(self) -> list[dict[str, Any]]:
+    def read_ledger(self) -> list[Dict[str, Any]]:
         if not self.ledger_file.exists():
             return []
 
         entries = []
-        with open(self.ledger_file, encoding="utf-8") as f:
+        with open(self.ledger_file, "r", encoding="utf-8") as f:
             for line in f:
                 if line.strip():
                     try:

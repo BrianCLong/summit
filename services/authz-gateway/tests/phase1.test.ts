@@ -78,7 +78,7 @@ describe('Phase 1 gates', () => {
     expect(buildDeterministicHmac('artifact', 'secret')).toEqual(buildDeterministicHmac('artifact', 'secret'));
   });
 
-  it('wraps cosign verify --use-signed-timestamps errors with actionable context', () => {
+  it('wraps cosign verify errors with actionable context', () => {
     expect(() => cosignVerifyArtifact('missing', 'sig')).toThrow(Phase1GateError);
   });
 });

@@ -235,7 +235,7 @@ jobs:
           curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin v1.4.1
 
           # Install Cosign
-          curl -sSfL https://github.com/sigstore/cosign/releases/download/v3.0.5/cosign-linux-amd64 -o /usr/local/bin/cosign
+          curl -sSfL https://github.com/sigstore/cosign/releases/download/v2.2.4/cosign-linux-amd64 -o /usr/local/bin/cosign
           chmod +x /usr/local/bin/cosign
 
           # Install Grype
@@ -395,7 +395,7 @@ jobs:
           mkdir -p "$BUNDLE_DIR/tools/bin"
 
           # Download static binaries for offline use
-          curl -sSfL https://github.com/sigstore/cosign/releases/download/v3.0.5/cosign-linux-amd64 \
+          curl -sSfL https://github.com/sigstore/cosign/releases/download/v2.2.4/cosign-linux-amd64 \
             -o "$BUNDLE_DIR/tools/bin/cosign"
           chmod +x "$BUNDLE_DIR/tools/bin/cosign"
 

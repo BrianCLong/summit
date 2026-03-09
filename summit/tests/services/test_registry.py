@@ -1,11 +1,8 @@
-import datetime
-from unittest.mock import MagicMock, patch
-
 import pytest
-
-from summit.registry.model import AgentDefinition, RegistryDocument, RiskTier
+import datetime
+from unittest.mock import patch, MagicMock
 from summit.registry.service import RegistryService
-
+from summit.registry.model import AgentDefinition, RegistryDocument, RiskTier
 
 @pytest.fixture
 def mock_store():

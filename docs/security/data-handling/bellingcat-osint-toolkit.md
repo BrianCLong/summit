@@ -1,17 +1,19 @@
-# Data Handling: Bellingcat OSINT Toolkit MWS
+# Bellingcat OSINT Toolkit Data Handling
 
-## Classification and Minimization
+## Never-log policy
 
-- Raw media bytes are never logged.
-- Faces, phone numbers, and emails are redacted from emitted finding metadata.
-- Only fixture references and hashes are retained for reproducibility.
+- raw cookies
+- auth headers
+- session tokens
+- full-page HTML captures by default
+- PII from social profiles unless explicitly classified and consented
 
-## Logging Rules
+## Default retention
 
-- Do not persist PII-bearing fields in `report.json` or `provenance.json`.
-- Keep policy decisions explicit and auditable in `provenance.json`.
-- Keep `stamp.json` timestamp-free to preserve determinism.
+- Artifacts are retained locally only.
+- No automatic artifact upload is allowed in MWS mode.
 
-## Governance
+## Redaction
 
-This flow is intentionally constrained to offline fixture execution for safe, reviewable behavior.
+- Use structured logging with denylist key filtering.
+- Denylist keys include: `cookie`, `authorization`, `set-cookie`, `token`, `session`, `password`.

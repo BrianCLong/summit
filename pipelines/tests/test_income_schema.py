@@ -4,6 +4,7 @@ from pathlib import Path
 import pytest
 from jsonschema import Draft7Validator
 
+
 SCHEMA_PATH = Path("pipelines/income_engine/income_model.schema.json")
 
 

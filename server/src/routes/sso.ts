@@ -4,7 +4,7 @@ import { asyncHandler } from '../middleware/async-handler.js';
 import { SSOService } from '../services/SSOService.js';
 import { tenantService } from '../services/TenantService.js';
 import { rateLimitMiddleware } from '../middleware/rateLimit.js';
-import { ensureAuthenticated, ensureRole } from '../middleware/auth.js';
+import { ensureAuthenticated } from '../middleware/auth.js';
 import { z } from 'zod';
 import logger from '../utils/logger.js';
 import config from '../config/index.js';
@@ -12,16 +12,6 @@ import cookieParser from 'cookie-parser'; // Assuming cookie-parser is available
 
 const router = Router();
 const ssoService = new SSOService();
-
-/**
- * Helper to ensure a parameter is a single string, mitigating HPP attacks.
- */
-function toSingleString(param: any): string | undefined {
-  if (Array.isArray(param)) {
-    return param[0] as string;
-  }
-  return typeof param === 'string' ? param : undefined;
-}
 
 // Validation schemas
 const ssoConfigSchema = z.object({
@@ -54,17 +44,20 @@ const ssoConfigSchema = z.object({
  * @desc Configure SSO for a tenant
  * @access Private (Admin of Tenant or System Admin)
  */
-router.post('/tenants/:id/sso', ensureAuthenticated, ensureRole(['ADMIN', 'admin']), rateLimitMiddleware, asyncHandler(async (req, res) => {
+router.post('/tenants/:id/sso', ensureAuthenticated, rateLimitMiddleware, asyncHandler(async (req, res) => {
   const { id } = req.params;
 
   // Strict Access Control:
   // Must be logged in (ensureAuthenticated handles this)
-  // Must be ADMIN role (ensureRole handles this)
+  // Must be ADMIN role
   // Must be associated with the tenant ID (or be a system-wide admin if that concept exists, here we stick to tenant admin)
 
-  // SEC: Check if user belongs to this tenant. Supports both camelCase and snake_case tenantId properties.
-  const userTenantId = (req.user as any)!.tenantId || (req.user as any)!.tenant_id;
-  if (userTenantId !== id) {
+  if ((req.user as any)!.role !== 'ADMIN') {
+    return res.status(403).json({ error: 'Unauthorized: Admin role required' });
+  }
+
+  // Check if user belongs to this tenant
+  if ((req.user as any)!.tenantId !== id) {
     // In a real system, we might check if user is a "Super Admin" across tenants.
     // For now, strict tenant isolation.
     return res.status(403).json({ error: 'Unauthorized: Access restricted to tenant members' });
@@ -128,11 +121,7 @@ router.post('/auth/sso/:tenantId/callback', rateLimitMiddleware, asyncHandler(as
 
   // CSRF / State Validation
   const stateCookie = req.cookies['sso_state'];
-  // SEC-HPP: Protect against HTTP Parameter Pollution by ensuring we only use a single string
-  const stateParam = toSingleString(req.body.RelayState) ||
-                     toSingleString(req.body.state) ||
-                     toSingleString(req.query.state) ||
-                     toSingleString(req.query.RelayState);
+  const stateParam = req.body.RelayState || req.body.state || (req.query.state as string) || (req.query.RelayState as string);
 
   // In SAML, RelayState is passed back. In OIDC, state is passed back.
   // Note: Some IdPs might not preserve RelayState perfectly in all flows (e.g. IdP initiated),
@@ -178,8 +167,7 @@ router.get('/auth/sso/:tenantId/callback', rateLimitMiddleware, asyncHandler(asy
   const baseUrl = `${req.protocol}://${req.get('host')}`;
 
   const stateCookie = req.cookies['sso_state'];
-  // SEC-HPP: Protect against HTTP Parameter Pollution by ensuring we only use a single string
-  const stateParam = toSingleString(req.query.state) || toSingleString(req.query.RelayState);
+  const stateParam = (req.query.state as string) || (req.query.RelayState as string);
 
   if (!stateCookie || !stateParam || stateCookie !== stateParam) {
     logger.warn(`SSO State mismatch or missing. Cookie: ${stateCookie ? 'present' : 'missing'}, Param: ${stateParam ? 'present' : 'missing'}`);

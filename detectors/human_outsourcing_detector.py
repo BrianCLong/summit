@@ -1,8 +1,7 @@
-import hashlib
 import re
+import hashlib
 from dataclasses import dataclass
 from typing import List, Optional
-
 
 @dataclass
 class DetectionResult:

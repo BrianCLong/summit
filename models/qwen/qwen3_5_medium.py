@@ -1,8 +1,6 @@
 import time
-from typing import Any, Dict
-
 from models.base import BaseModelAdapter, ModelOutput
-
+from typing import Dict, Any
 
 class Qwen35MediumAdapter(BaseModelAdapter):
     MODEL_ID = "qwen3.5-medium"

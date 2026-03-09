@@ -141,7 +141,6 @@ graph TD
 ```
 
 ### 7.1 Core Services
-
 - **Charter Service:** manages agent mandates and constraints.  
 - **Policy Engine (OPA):** evaluates actions against charter + governance rules.  
 - **Governance Graph:** canonical store for agents, humans, systems, policies, changes.  
@@ -149,7 +148,6 @@ graph TD
 - **Drift Detector:** raises governed events when claims diverge from evidence.  
 
 ### 7.2 Data Model (Minimal)
-
 - **Agent** (id, charter_ref, owner, scope)  
 - **Policy** (id, rule, authority, version)  
 - **Change** (id, type, actor_ref, policy_eval_ref, hash)  
@@ -160,14 +158,12 @@ graph TD
 ## 8. Implementation (Documentation-Only, Execution-Ready)
 
 ### 8.1 Work Packages
-
 - **WP1:** Charter registry + policy gate wiring.  
 - **WP2:** Event stream → governance graph ingestion.  
 - **WP3:** Claim–evidence–action schema + drift detection rule.  
 - **WP4:** Demo storyboard + deterministic replay output.  
 
 ### 8.2 Evidence Artifacts
-
 - Charter registry snapshot (JSON).  
 - Policy evaluation logs (OPA).  
 - Governance graph query outputs (JSON).  

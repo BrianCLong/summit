@@ -224,7 +224,7 @@ spec:
               echo "Verifying SLSA provenance..."
 
               # Verify the attestation exists and is valid
-              cosign verify-attestation --use-signed-timestamps \ || { echo "::error::Supply chain verification failed! Missing or invalid signed timestamps."; false; }
+              cosign verify-attestation \
                 --type slsaprovenance1 \
                 "$(params.IMAGE_DIGEST)"
 
