@@ -1,0 +1,26 @@
+{
+  "resourceName": "test-decision-001",
+  "status": {
+    "phase": "Admitted",
+    "allowed": true,
+    "trustScore": 80,
+    "riskScore": 10,
+    "conditions": [
+      {
+        "type": "EvidenceResolved",
+        "status": "True",
+        "reason": "Resolved successfully"
+      },
+      {
+        "type": "LineageVerified",
+        "status": "True",
+        "reason": "Lineage verified"
+      },
+      {
+        "type": "PolicyAdmitted",
+        "status": "True",
+        "reason": "Policy checks passed"
+      }
+    ]
+  }
+}

@@ -1,0 +1,35 @@
+name: Decision Control Plane CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    paths:
+      - "packages/decision-control-plane/**"
+      - ".opa/policy/decision_admission.rego"
+      - "GOLDEN/datasets/decision-kubernetes/**"
+      - "scripts/decision/**"
+
+jobs:
+  test-and-verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Test Decision CRDs and Controllers
+        run: |
+          npx tsx --test packages/decision-control-plane/__tests__/*.spec.ts
+
+      - name: Conformance Test
+        run: |
+          npx tsx scripts/decision/run-conformance.ts
+          cat report.json

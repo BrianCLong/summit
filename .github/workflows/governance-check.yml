@@ -31,8 +31,8 @@ jobs:
               else if (title.includes('BREAKING CHANGE')) labels.push('major');
             }
 
-            const valid = labels.some(l => ['patch', 'minor', 'major'].includes(l));
-            if (!valid && !labels.some(l => ['chore', 'test', 'ci', 'refactor', 'perf', 'style', 'build'].includes(l))) {
+            const valid = labels.some(l => ['patch', 'minor', 'major', 'chore', 'test', 'ci', 'refactor', 'perf', 'style', 'build'].includes(l));
+            if (!valid && !title.match(/^(feat|fix|docs|chore|test|ci|refactor|perf|style|build)(\(.*\))?:/)) {
               core.setFailed("PR must have a classification label (patch, minor, major) or a conventional commit prefix (feat:, fix:, chore:, test:, ci:, etc.).");
             }
 
