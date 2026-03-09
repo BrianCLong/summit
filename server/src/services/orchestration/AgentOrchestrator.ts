@@ -9,6 +9,8 @@ import { IntelGraphIntegration } from './IntelGraphIntegration.js';
 import { traceTask } from './telemetry.js';
 import { EventEmitter } from 'events';
 import { randomUUID } from 'crypto';
+import { JobQueue } from '../../queue/job-queue.js';
+import { getRedisClient } from '../../db/redis.js';
 
 export class AgentOrchestrator extends EventEmitter {
   private static instance: AgentOrchestrator;
@@ -19,8 +21,7 @@ export class AgentOrchestrator extends EventEmitter {
   public policyEngine: PolicyEngine;
   public persistence: PersistenceLayer;
   public intelGraph: IntelGraphIntegration;
-
-  private processInterval: NodeJS.Timeout;
+  private jobQueue: JobQueue<AgentTask>;
 
   private constructor() {
     super();
@@ -28,17 +29,54 @@ export class AgentOrchestrator extends EventEmitter {
     this.taskRouter = TaskRouter.getInstance();
     this.consensusManager = ConsensusManager.getInstance();
     this.policyEngine = PolicyEngine.getInstance();
-    this.persistence = new InMemoryPersistence(); // Default to InMemory
+    this.persistence = new InMemoryPersistence(); // Default to InMemory, could be injected
     this.intelGraph = IntelGraphIntegration.getInstance();
 
-    // Periodically process queue
-    this.processInterval = setInterval(() => this.processQueue(), 5000);
+    this.jobQueue = new JobQueue<AgentTask>({
+      name: 'agent_tasks',
+      connection: getRedisClient()
+    });
+
+    this.initWorker();
+  }
+
+  private async initWorker() {
+    await this.jobQueue.start(async (job) => {
+      const task = job.data;
+      return traceTask('processTask', async () => {
+        // Route
+        const agentId = await this.taskRouter.routeTask(task);
+
+        if (agentId) {
+          // Assign
+          await this.persistence.updateTaskStatus(task.id, 'assigned', agentId);
+          this.lifecycleManager.updateStatus(agentId, 'busy');
+
+          // Notify Agent
+          this.emit('task_assigned', { taskId: task.id, agentId });
+          logger.info(`Task ${task.id} assigned to ${agentId}`);
+
+          // Log to IntelGraph
+          const agent = this.lifecycleManager.getAgent(agentId);
+          if (agent) {
+              await this.intelGraph.logAgentDecision(agent, task, 'ASSIGNED', 'Best match by capability score');
+          }
+
+          // Simulation of task completion
+          // await this.persistence.updateTaskStatus(task.id, 'completed', agentId);
+          // this.lifecycleManager.updateStatus(agentId, 'idle');
+
+          return { status: 'assigned', agentId };
+        } else {
+          logger.debug(`No agent available for task ${task.id}, requeuing`);
+          throw new Error('No agent available'); // BullMQ will retry based on backoff
+        }
+      });
+    });
   }
 
   public shutdown() {
-    if (this.processInterval) {
-      clearInterval(this.processInterval);
-    }
+    this.jobQueue.shutdown();
   }
 
   public static getInstance(): AgentOrchestrator {
@@ -74,60 +112,14 @@ export class AgentOrchestrator extends EventEmitter {
 
       await this.persistence.saveTask(task);
 
-      // 3. Decompose (if needed) - Stub for now
-      // In a real system, we'd use an LLM here to break down the task
-      // const subtasks = await this.decomposeTask(task);
-      // this.taskQueue.push(...subtasks);
+      // 3. Enqueue to BullMQ
+      const priority = taskDef.priority === 'critical' ? 1 : taskDef.priority === 'high' ? 2 : taskDef.priority === 'medium' ? 3 : 4;
+      await this.jobQueue.enqueue(task, { priority, jobId: task.id });
 
       logger.info(`Task submitted: ${task.id}`);
 
       return task.id;
     });
-  }
-
-  public async processQueue() {
-    return traceTask('processQueue', async () => {
-        const pendingTasks = await this.persistence.getPendingTasks();
-        if (pendingTasks.length === 0) return;
-
-        for (const task of pendingTasks) {
-          // Check dependencies
-          if (!this.checkDependencies(task)) {
-            continue;
-          }
-
-          // Route
-          const agentId = this.taskRouter.routeTask(task);
-
-          if (agentId) {
-            // Assign
-            await this.persistence.updateTaskStatus(task.id, 'assigned', agentId);
-            this.lifecycleManager.updateStatus(agentId, 'busy');
-
-            // Notify Agent (simulation)
-            // In reality, this would send a message via message bus
-            this.emit('task_assigned', { taskId: task.id, agentId });
-            logger.info(`Task ${task.id} assigned to ${agentId}`);
-
-            // Log to IntelGraph
-            const agent = this.lifecycleManager.getAgent(agentId);
-            if (agent) {
-                await this.intelGraph.logAgentDecision(agent, task, 'ASSIGNED', 'Best match by capability score');
-            }
-          } else {
-            // No agent available
-            // logger.debug(`No agent available for task ${task.id}`);
-          }
-        }
-    });
-  }
-
-  private checkDependencies(task: AgentTask): boolean {
-    if (task.dependencies.length === 0) return true;
-    // Check if all dependent tasks are complete
-    // This requires looking up tasks which we don't store persistently in this class yet
-    // Assuming dependencies are satisfied for this prototype or implemented with a lookup
-    return true;
   }
 
   public async broadcastMessage(message: AgentMessage) {
