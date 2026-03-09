@@ -34,7 +34,7 @@ export class CosignVerifier {
     } = options;
 
     try {
-      const args = ['verify'];
+      const args = ['verify', '--use-signed-timestamps'];
 
       // Authentication method
       if (publicKey && fs.existsSync(publicKey)) {
@@ -127,7 +127,7 @@ export class CosignVerifier {
     } = options;
 
     try {
-      const args = ['verify-attestation'];
+      const args = ['verify-attestation', '--use-signed-timestamps'];
 
       if (publicKey && fs.existsSync(publicKey)) {
         args.push('--key', publicKey);

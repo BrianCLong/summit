@@ -389,7 +389,7 @@ export class CosignVerifier {
     signatures?: SignatureInfo[];
     rekorEntries?: RekorEntryInfo[];
   }> {
-    const args = ['verify', '--output=json'];
+    const args = ['verify', '--use-signed-timestamps', '--output=json'];
 
     if (options.keyless) {
       args.push('--certificate-identity-regexp=.*');
@@ -466,6 +466,7 @@ export class CosignVerifier {
   }> {
     const args = [
       'verify-attestation',
+      '--use-signed-timestamps',
       '--output=json',
       `--type=${predicateType}`,
       '--certificate-identity-regexp=.*',

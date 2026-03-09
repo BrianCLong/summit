@@ -1,0 +1,11 @@
+version: 1
+policy: connector_licensing
+rules:
+  - id: require-license-class
+    description: All connectors must declare a license class
+    enforce: true
+
+allowed_license_classes:
+  - public
+  - commercial
+  - restricted

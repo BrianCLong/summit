@@ -217,6 +217,12 @@
       "evidence_id": "EVD-ARCH-INFRA-V1"
     },
     {
+      "id": "cursor-vs-claude-subsumption-standard",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Published governed dual-mode workflow standard with three missing features and PCPR killer-feature specification in docs/standards/cursor-vs-claude-control-plane.md."
+    },
+    {
       "id": "summit-master-subsumption-roadmap",
       "status": "completed",
       "owner": "codex",
