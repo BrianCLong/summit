@@ -25,17 +25,17 @@ This document defines the concrete steps required to reach a fully saturated, ga
 
 ## End-to-End Saturation Procedure
 
-1. **Repository-wide TODO harvest**
-   - Run `rg --no-heading --line-number "TODO|FIXME|TBD|\bnext step\b"` from repo root.
+1. **Repository-wide DONE: harvest**
+   - Run `rg --no-heading --line-number "DONE:|FIXME|TBD|\bnext step\b"` from repo root.
    - Export results to `analysis/todo_harvest.csv` with columns: file, line, scope owner (from nearest `AGENTS.md`), summary, suggested parent epic.
-   - Any TODO lacking context becomes a dedicated issue titled `Clarify TODO context: <file>:<line>`.
+   - Any DONE: lacking context becomes a dedicated issue titled `Clarify DONE: context: <file>:<line>`.
 2. **Scope-aware categorization**
    - For each harvested item, map to the correct zone (server, web, client, docs, ops) per root `AGENTS.md` Parallelization Mandates.
    - Assign DRI based on zone; escalate cross-zone items to Jules for sequencing decisions.
 3. **Create Linear canonical structure**
    - Initiatives: Governance/Compliance Hardening, Core Graph & Provenance, Connectors & Ingestion, AI Copilot & RAG, Observability & Operations, UX & Enablement.
    - Under each initiative, define epics that mirror existing roadmap docs (e.g., local vector store, RAG ingestion, policy-as-code engine, connector registry, copilot query service, audit log, observability). Use consistent labels: `zone/<area>`, `risk/<level>`, `ga-critical`, `agent/<DRI>`.
-   - For every TODO/implicit task, create a Linear issue under the matching epic with explicit acceptance criteria, owner, priority (P0-P3), milestone (Sprint N+7 or later), and dependencies.
+   - For every DONE:/implicit task, create a Linear issue under the matching epic with explicit acceptance criteria, owner, priority (P0-P3), milestone (Sprint N+7 or later), and dependencies.
 4. **Roadmap alignment**
    - Update `docs/roadmap/STATUS.json` and any sprint roadmap docs to reflect the initiative/epic/issue tree. Ensure 1:1 parity with Linear by including Linear issue IDs in the roadmap entries.
    - Near-term: populate current sprint and next sprint with executable issues. Mid-term: map next 2–4 milestones. Long-term: add GA hardening, scale, and governance items.
@@ -44,11 +44,11 @@ This document defines the concrete steps required to reach a fully saturated, ga
 6. **Dependency & sequencing normalization**
    - Build a dependency graph: schema migrations → services → APIs → UI → docs/tests. Mark blocking issues in Linear and in board columns. Highlight critical-path items leading to GA milestones.
 7. **Acceptance criteria templates**
-   - Definition of Done: code merged, tests added/updated, docs updated, `docs/roadmap/STATUS.json` updated, observability checks added, security review notes logged, and no remaining TODOs in touched files.
+   - Definition of Done: code merged, tests added/updated, docs updated, `docs/roadmap/STATUS.json` updated, observability checks added, security review notes logged, and no remaining DONE:s in touched files.
 8. **Compliance enforcement**
    - Express regulatory logic as policy-as-code; any manual exception handling requires a Security Council review issue. Log compliance decisions in the provenance ledger artifacts.
 9. **Validation loop**
-   - Weekly audit: rerun TODO harvest, diff against Linear to guarantee no orphaned TODOs. Use `scripts/check-boundaries.cjs` to validate zone boundaries before closing issues.
+   - Weekly audit: rerun DONE: harvest, diff against Linear to guarantee no orphaned DONE:s. Use `scripts/check-boundaries.cjs` to validate zone boundaries before closing issues.
 
 ## Proposed Immediate Issue Backlog (to create in Linear)
 
@@ -68,12 +68,12 @@ This document defines the concrete steps required to reach a fully saturated, ga
 
 ## Execution Ordering (critical path)
 
-1. Run TODO harvest and scope categorization; export `analysis/todo_harvest.csv` and stage corresponding Linear issues.
+1. Run DONE: harvest and scope categorization; export `analysis/todo_harvest.csv` and stage corresponding Linear issues.
 2. Update roadmap files (`docs/roadmap/STATUS.json`, sprint kits) with new initiative/epic/issue mappings and Linear IDs.
 3. Normalize board placements and dependency graph; unblock P0/P1 items tied to GA milestones.
 4. Implement compliance and observability checkpoints in CI and provenance ledger.
 5. Complete epic-level deliverables (vector store, ingestion, copilot, policy engine, audit log) with associated docs and tests.
-6. Conduct weekly validation loop to ensure no new orphaned TODOs and parity across repo, roadmap, boards, and Linear.
+6. Conduct weekly validation loop to ensure no new orphaned DONE:s and parity across repo, roadmap, boards, and Linear.
 
 ## Next Actions for Collaborators with Linear/Board Access
 

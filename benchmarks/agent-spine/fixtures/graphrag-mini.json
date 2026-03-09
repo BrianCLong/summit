@@ -1,0 +1,9 @@
+{
+  "suite": "graphrag-mini",
+  "case_id": "001",
+  "prompt": "Summarize linked evidence",
+  "expected_evidence": ["doc-1", "doc-2"],
+  "tool_trace": [
+    { "tool": "graphrag.lookup", "input": "entity:A", "output_ref": "ref-1" }
+  ]
+}

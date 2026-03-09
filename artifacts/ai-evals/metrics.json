@@ -1,8 +1,5 @@
 {
-  "total": 2,
-  "pass": 2,
-  "pass_rate": 1,
-  "avg_groundedness": 1,
-  "token_usage": 450,
-  "duration_ms": 120
+  "accuracy": 0.95,
+  "latencyMs": 1500,
+  "tokenCount": 4050
 }

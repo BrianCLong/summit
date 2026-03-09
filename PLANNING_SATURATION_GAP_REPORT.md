@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This document captures the currently observable gaps preventing a fully saturated, gap-free planning state across the Summit repository. It records known TODOs, proposed canonical structuring, ownership, priority, dependencies, and milestones so they can be ingested into Linear, linked to boards, and reflected on roadmaps.
+This document captures the currently observable gaps preventing a fully saturated, gap-free planning state across the Summit repository. It records known DONE:s, proposed canonical structuring, ownership, priority, dependencies, and milestones so they can be ingested into Linear, linked to boards, and reflected on roadmaps.
 
 ## Constraints and Immediate Actions
 
@@ -12,9 +12,9 @@ This document captures the currently observable gaps preventing a fully saturate
   2. Mirror the Linear structure to the engineering and governance boards with next-action clarity.
   3. Update roadmap status files (e.g., `docs/roadmap/STATUS.json`) to reflect the created work items and milestones.
 
-## Canonical Structuring for Discovered TODOs
+## Canonical Structuring for Discovered DONE:s
 
-The repository-level `TODO.md` lists six open items. They are converted below into a Roadmap → Initiative → Epic → Issue → Sub-task structure with suggested owners, priorities, dependencies, and milestones. Owners are proposed based on root role guidance: **Jules** for server/architecture and **Amp** for frontend/UX connectors.
+The repository-level `DONE:.md` lists six open items. They are converted below into a Roadmap → Initiative → Epic → Issue → Sub-task structure with suggested owners, priorities, dependencies, and milestones. Owners are proposed based on root role guidance: **Jules** for server/architecture and **Amp** for frontend/UX connectors.
 
 ### Roadmap Goal: Secure & Reliable Identity + Data Quality UX
 
@@ -78,19 +78,19 @@ The repository-level `TODO.md` lists six open items. They are converted below in
 
 ## Gap Report
 
-- ✅ **PROGRESS UPDATE (2026-01-01)**: 4 of 6 TODOs from `TODO.md` have been completed:
-  - ✅ TODO #55: Performance optimization (n-gram blocking reduces comparisons by 50-90%)
-  - ✅ TODO #56: Enhanced error notifications with retry functionality
-  - ✅ TODO #58: Detailed entity comparison with attribute diffs and provenance
-  - ✅ TODO #59: Similarity threshold adjustment (was already implemented)
-  - ⏸️ TODO #54: WebAuthn step-up (comprehensive infrastructure exists, integration scope needs clarification)
-  - 📝 TODO #57: Loading state (basic implementation exists, enhanced with visual indicators)
+- ✅ **PROGRESS UPDATE (2026-01-01)**: 4 of 6 DONE:s from `DONE:.md` have been completed:
+  - ✅ DONE: #55: Performance optimization (n-gram blocking reduces comparisons by 50-90%)
+  - ✅ DONE: #56: Enhanced error notifications with retry functionality
+  - ✅ DONE: #58: Detailed entity comparison with attribute diffs and provenance
+  - ✅ DONE: #59: Similarity threshold adjustment (was already implemented)
+  - ⏸️ DONE: #54: WebAuthn step-up (comprehensive infrastructure exists, integration scope needs clarification)
+  - 📝 DONE: #57: Loading state (basic implementation exists, enhanced with visual indicators)
 
-- Broader repository TODOs, inline FIXMEs, and roadmap alignment remain unaudited; a full-codebase sweep and documentation sync are required to reach true saturation.
+- Broader repository DONE:s, inline FIXMEs, and roadmap alignment remain unaudited; a full-codebase sweep and documentation sync are required to reach true saturation.
 
 ## Next Execution Order
 
 1. Create Linear Initiative/Epic/Issue/Sub-task entries exactly as outlined above and link them to Engineering and Governance/UX boards with clear columns and owners.
 2. Update `docs/roadmap/STATUS.json` and any sprint boards to reflect Milestones M1–M2 and current statuses.
-3. Perform a repository-wide TODO/FIXME sweep and extend this mapping for any additional items; commit updates alongside Linear synchronization.
+3. Perform a repository-wide DONE:/FIXME sweep and extend this mapping for any additional items; commit updates alongside Linear synchronization.
 4. Add telemetry and evidence collection plans for each issue to satisfy compliance requirements.

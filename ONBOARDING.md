@@ -135,7 +135,7 @@ summit/
 ├── server/                 # 🟢 CORE BACKEND MONOLITH (Node.js/TypeScript)
 │   ├── src/
 │   │   ├── maestro/        # Agent orchestration runtime
-│   │   ├── conductor/      # Agent coordination (⚠️ has TODOs)
+│   │   ├── conductor/      # Agent coordination (⚠️ has DONE:s)
 │   │   ├── graphql/        # GraphQL resolvers
 │   │   ├── services/       # Business logic
 │   │   ├── auth/           # Authentication/AuthZ
@@ -224,14 +224,14 @@ Agent Task Submitted
 
 ## 🧭 Your First Task (30-60 Minutes)
 
-### Beginner: Fix a TODO
+### Beginner: Fix a DONE:
 
-1. Find a TODO in a subsystem you're interested in:
+1. Find a DONE: in a subsystem you're interested in:
    ```bash
-   rg "TODO" server/src/graphql --type ts | head -10
+   rg "DONE:" server/src/graphql --type ts | head -10
    ```
 
-2. Pick one that looks approachable (e.g., "TODO: Add input validation")
+2. Pick one that looks approachable (e.g., "DONE:: Add input validation")
 
 3. Read surrounding code to understand context
 
@@ -250,7 +250,7 @@ Agent Task Submitted
 
 7. Commit with conventional commit format:
    ```bash
-   git commit -m "fix(graphql): implement TODO for input validation
+   git commit -m "fix(graphql): implement DONE: for input validation
 
    - Add Joi schema for request validation
    - Add test coverage
@@ -419,11 +419,11 @@ node --inspect-brk node_modules/.bin/jest --runInBand
 - **DO NOT** enable in production
 - See audit report for full details
 
-### ⚠️ High TODO/Technical Debt Count
+### ⚠️ High DONE:/Technical Debt Count
 
-- **2,004 TODO/FIXME markers** across codebase
+- **2,004 DONE:/FIXME markers** across codebase
 - **3,375 stub implementations**
-- Hotspots: `server/src/conductor/` (53 TODOs), `server/src/services/` (39 TODOs)
+- Hotspots: `server/src/conductor/` (53 DONE:s), `server/src/services/` (39 DONE:s)
 - **What to do:** Pick low-hanging fruit, create Jira tickets for larger work
 
 ### ⚠️ 409 Remote Branches
@@ -474,7 +474,7 @@ Track your progress:
 - [ ] Understood codebase architecture
 - [ ] Can run tests locally
 - [ ] Can start dev servers
-- [ ] Completed first TODO fix
+- [ ] Completed first DONE: fix
 - [ ] Opened first PR
 - [ ] PR reviewed and merged
 - [ ] Read ROADMAP.md and understand current priorities

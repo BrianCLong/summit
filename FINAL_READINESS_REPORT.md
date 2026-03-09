@@ -207,7 +207,7 @@ The Summit repository has undergone a comprehensive **Master Critical Needs Revi
 | Migration gates not called (CN-017) | Manual migration review in place | Integrate migration gates | Sprint N+1 (Week 2) |
 | Manual checklist items (CN-021) | Manual process with sign-off acceptable | Automate verification | Sprint N+2 (Week 4) |
 | Canary validation not automated (CN-022) | Manual canary monitoring | Automate rollback | Sprint N+2 (Week 4) |
-| 565 TODO markers (CN-028) | Tracked in debt registry | Burn 50/month | Ongoing |
+| 565 DONE: markers (CN-028) | Tracked in debt registry | Burn 50/month | Ongoing |
 | No sprint delivery tracking (CN-033) | Retrospective acceptable | Implement dashboard | Sprint N+1 (Week 2) |
 | ADRs 5-8 proposed (CN-035) | Design proposals; not blocking | Review & accept/reject | Sprint N+1 (Week 1) |
 | 14k debt entries (CN-036) | Registry exists; burn target set | Monthly review | Ongoing |

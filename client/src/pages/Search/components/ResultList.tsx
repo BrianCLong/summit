@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   Box,
   Card,
@@ -126,28 +126,36 @@ export default function ResultList({
 
   const resultsPerPage = 10;
 
-  const sortedResults = [...results].sort((a, b) => {
-    switch (sortBy) {
-      case 'relevance':
-        return b.score - a.score;
-      case 'date':
-        return (
-          new Date(b.lastUpdated).getTime() - new Date(a.lastUpdated).getTime()
-        );
-      case 'title':
-        return a.title.localeCompare(b.title);
-      case 'type':
-        return a.type.localeCompare(b.type);
-      default:
-        return 0;
-    }
-  });
+  // ⚡ Bolt: Memoize expensive sorting operation so it only recalculates when results or sortBy changes,
+  // preventing O(n log n) sorting on every render (e.g. when opening menus or bookmarking)
+  const sortedResults = useMemo(() => {
+    return [...results].sort((a, b) => {
+      switch (sortBy) {
+        case 'relevance':
+          return b.score - a.score;
+        case 'date':
+          return (
+            new Date(b.lastUpdated).getTime() - new Date(a.lastUpdated).getTime()
+          );
+        case 'title':
+          return a.title.localeCompare(b.title);
+        case 'type':
+          return a.type.localeCompare(b.type);
+        default:
+          return 0;
+      }
+    });
+  }, [results, sortBy]);
 
   const startIndex = (page - 1) * resultsPerPage;
-  const paginatedResults = sortedResults.slice(
-    startIndex,
-    startIndex + resultsPerPage,
-  );
+
+  // ⚡ Bolt: Memoize pagination slice to avoid creating a new array reference on every render
+  const paginatedResults = useMemo(() => {
+    return sortedResults.slice(
+      startIndex,
+      startIndex + resultsPerPage,
+    );
+  }, [sortedResults, startIndex, resultsPerPage]);
 
   const handleMenuOpen = (
     resultId: string,

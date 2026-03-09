@@ -34,6 +34,7 @@ import { safetyModeMiddleware, resolveSafetyState } from './middleware/safety-mo
 import { residencyEnforcement } from './middleware/residency.js';
 import { requestProfilingMiddleware } from './middleware/request-profiling.js';
 import { securityHeaders } from './middleware/securityHeaders.js';
+import { cookieParserMiddleware, createCsrfLayer, shouldBypassCsrf } from './security/http-shield.js';
 import { securityHardening } from './middleware/security-hardening.js';
 import { abuseGuard } from './middleware/abuseGuard.js';
 import exceptionRouter from './data-residency/exceptions/routes.js';
@@ -50,7 +51,6 @@ import receiptsRouter from './routes/receipts.js';
 import predictiveRouter from './routes/predictive.js';
 import { policyRouter } from './routes/policy.js';
 import policyManagementRouter from './routes/policies/policy-management.js';
-import { metricsRoute } from './http/metricsRoute.js';
 import monitoringBackpressureRouter from './routes/monitoring-backpressure.js';
 import rbacRouter from './routes/rbacRoutes.js';
 // import { licenseRuleValidationMiddleware } from './graphql/middleware/licenseRuleValidationMiddleware.js';
@@ -153,7 +153,19 @@ import { failoverOrchestrator } from './runtime/global/FailoverOrchestrator.js';
 import { buildApprovalsRouter } from './routes/approvals.js';
 import { shadowTrafficMiddleware } from './middleware/ShadowTrafficMiddleware.js';
 
+import { initializeObservability, setupObservability } from '@intelgraph/observability';
+
 export const createApp = async () => {
+  // Initialize comprehensive observability before application start
+  await initializeObservability({
+    service: {
+      name: 'summit-server',
+      version: '1.0.0', // Read from package.json in production
+      environment: process.env.NODE_ENV || 'development',
+    },
+    archetype: 'api-service',
+  });
+
   // Initialize OpenTelemetry tracing
   // Tracer is already initialized in index.ts, but we ensure it's available here
   // Verified usage for comprehensive observability
@@ -164,13 +176,24 @@ export const createApp = async () => {
   }
 
   const app = express();
+
+  // Setup @intelgraph/observability Express middleware
+  // This registers /metrics, /health, /health/live, /health/ready, /health/detailed
+  // and adds comprehensive RED/USE metrics and tracing headers
+  setupObservability(app, {
+    service: {
+      name: 'summit-server',
+      version: '1.0.0',
+      environment: process.env.NODE_ENV || 'development',
+    },
+  });
   const logger = (pino as any)();
 
   const isProduction = cfg.NODE_ENV === 'production';
   const allowedOrigins = cfg.CORS_ORIGIN.split(',')
     .map((origin: string) => origin.trim())
     .filter(Boolean);
-  const securityHeadersEnabled = process.env.SECURITY_HEADERS_ENABLED !== 'false';
+  const securityHeadersEnabled = true;
   const cspReportOnly = process.env.SECURITY_HEADERS_CSP_REPORT_ONLY === 'true';
   const cspEnabledFlag = process.env.SECURITY_HEADERS_CSP_ENABLED === 'true';
 
@@ -209,6 +232,8 @@ export const createApp = async () => {
   app.use(compression());
 
   app.use(hpp());
+  app.use(cookieParserMiddleware);
+  app.use(createCsrfLayer(shouldBypassCsrf).middleware);
 
   app.use(
     securityHeaders({
@@ -221,7 +246,8 @@ export const createApp = async () => {
   app.use(
     cors({
       origin: (origin, callback) => {
-        if (!origin || cfg.NODE_ENV !== 'production') {
+        if (!origin) {
+          // Allow server-to-server requests without origin
           return callback(null, true);
         }
         if (allowedOrigins.includes(origin)) {
@@ -296,35 +322,7 @@ export const createApp = async () => {
     applyProductionSecurity(app);
   }
 
-  const authenticateToken =
-    cfg.NODE_ENV === 'production'
-      ? productionAuthMiddleware
-      : (req: Request, res: Response, next: NextFunction) => {
-        // Development mode - relaxed auth for easier testing
-        const authHeader = req.headers['authorization'];
-        const token = authHeader && authHeader.split(' ')[1];
-
-        if (token) {
-          return next();
-        }
-
-        // SEC-2025-001: Fail Closed by default.
-        // Only allow bypass if explicitly enabled via env var.
-        if (process.env.ENABLE_INSECURE_DEV_AUTH === 'true') {
-          console.warn('Development: No token provided, allowing request (ENABLE_INSECURE_DEV_AUTH=true)');
-          (req as any).user = {
-            sub: 'dev-user',
-            email: 'dev@intelgraph.local',
-            role: 'admin',
-            tenantId: 'global',
-            id: 'dev-user', // SEC-2025-002: Ensure downstream helpers rely on user object, not headers
-          };
-          return next();
-        }
-
-        // Default: Reject unauthenticated requests even in dev/test if bypass not enabled
-        res.status(401).json({ error: 'Unauthorized', message: 'No token provided' });
-      };
+  const authenticateToken = productionAuthMiddleware;
 
   // Helper to bypass public webhooks from strict tenant/auth enforcement
   const isPublicWebhook = (req: any) => {
@@ -550,7 +548,7 @@ export const createApp = async () => {
   if (cfg.FACTFLOW_ENABLED) {
     app.use('/api/factflow', factFlowRouter);
   }
-  app.get('/metrics', metricsRoute);
+  // @intelgraph/observability setupObservability middleware provides /metrics endpoint automatically
   // Re-added Approvals Router with Maestro context
   app.use('/api/approvals', authenticateToken, buildApprovalsRouter());
 

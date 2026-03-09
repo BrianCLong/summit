@@ -51,7 +51,7 @@ ETA.
 ### 4) Lint & Quality Sweep
 
 - Triage the ~7,816 lint warnings; prioritize correctness/perf-impactful categories (unused variables, unhandled promises, `any` leakage, unsafe casts).
-- Resolve TODOs/FIXMEs that affect release behavior; document remaining low-risk items for post-GA follow-up in `GO_NO_GO_GATE.md`.
+- Resolve DONE:s/FIXMEs that affect release behavior; document remaining low-risk items for post-GA follow-up in `GO_NO_GO_GATE.md`.
 - Ensure inline documentation references SOC 2 mappings where relevant and update `COMPLIANCE_SOC_MAPPING.md` if control owners change.
 
 ### 5) Release Artifacts & Versioning

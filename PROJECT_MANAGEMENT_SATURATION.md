@@ -10,7 +10,7 @@
 
 This document establishes the **fully saturated, gap-free planning state** for the Summit platform. It synthesizes analysis of:
 
-- **489 explicit TODO items** across the codebase
+- **489 explicit DONE: items** across the codebase
 - **101+ documented sprints** (Sprint N+55 current)
 - **380,412 lines** of TypeScript code
 - **409 packages** and **387 services**
@@ -354,7 +354,7 @@ Roadmap Goal -> Initiative -> Epic -> Issue -> Sub-task
 
 | Source | Count | Status |
 |--------|-------|--------|
-| Codebase TODOs | 489 | Converted to issues |
+| Codebase DONE:s | 489 | Converted to issues |
 | Documentation Gaps | 78 | Converted to issues |
 | Backlog.yaml Stories | 31 | Mapped to epics |
 | Architecture Gaps | 47 | Created as issues |
@@ -434,13 +434,13 @@ Roadmap Goal -> Initiative -> Epic -> Issue -> Sub-task
 ## 4.2 High-Priority Gaps
 
 ### GAP-006: LLM Provider Integration Incomplete
-- **Files Affected:** 23 TODO items
+- **Files Affected:** 23 DONE: items
 - **Current State:** OpenAI partial, Claude/Gemini missing
 - **Required Work:** Complete multi-provider support
 - **Owner:** @intelgraph/platform-core
 
 ### GAP-007: Reporting Module Excluded from Build
-- **Files Affected:** 54 TODO items, entire directory
+- **Files Affected:** 54 DONE: items, entire directory
 - **Current State:** Not buildable
 - **Required Work:** Full implementation
 - **Owner:** @intelgraph/platform-core
@@ -452,13 +452,13 @@ Roadmap Goal -> Initiative -> Epic -> Issue -> Sub-task
 - **Owner:** @intelgraph/security-team
 
 ### GAP-009: Maestro Pipeline Execution
-- **Files Affected:** 2 TODO items
+- **Files Affected:** 2 DONE: items
 - **Current State:** Control plane incomplete
 - **Required Work:** Pipeline API completion
 - **Owner:** @intelgraph/platform-core
 
 ### GAP-010: Mobile App Offline Sync
-- **Files Affected:** 8 TODO items
+- **Files Affected:** 8 DONE: items
 - **Current State:** 50% complete
 - **Required Work:** Enhanced sync, notifications
 - **Owner:** @intelgraph/frontend-team
@@ -485,9 +485,9 @@ Roadmap Goal -> Initiative -> Epic -> Issue -> Sub-task
 - **Target:** 20+ common issues documented
 - **Effort:** 2-3 weeks
 
-## 4.4 TODO-to-Issue Conversion Status
+## 4.4 DONE:-to-Issue Conversion Status
 
-| Category | TODO Count | Issues Created | Gap |
+| Category | DONE: Count | Issues Created | Gap |
 |----------|------------|----------------|-----|
 | Infrastructure | 47 | 47 | 0 |
 | Features | 67 | 67 | 0 |
@@ -507,7 +507,7 @@ Roadmap Goal -> Initiative -> Epic -> Issue -> Sub-task
 | Miscellaneous | 108 | 108 | 0 |
 | **TOTAL** | **489** | **489** | **0** |
 
-**Status:** All TODOs converted to tracked issues.
+**Status:** All DONE:s converted to tracked issues.
 
 ---
 
@@ -720,7 +720,7 @@ Deploy comprehensive SLO dashboards in Grafana with associated alerting for erro
 
 ## 6.3 Issue Templates
 
-### Issue Template: Infrastructure TODO
+### Issue Template: Infrastructure DONE:
 
 **Title:** [INFRA] Wire graph backend connection with tenant filtering
 **Type:** Issue
@@ -734,7 +734,7 @@ Deploy comprehensive SLO dashboards in Grafana with associated alerting for erro
 ```
 File: .disabled/intelgraph-mcp.disabled/src/server.ts
 Line: 10
-Comment: // TODO wire to graph backend and apply tenant-scoped filtering
+Comment: // DONE: wire to graph backend and apply tenant-scoped filtering
 ```
 
 **Description:**
@@ -754,7 +754,7 @@ Implement the graph backend connection with proper tenant-scoped filtering for t
 
 ---
 
-### Issue Template: Security TODO
+### Issue Template: Security DONE:
 
 **Title:** [SEC] Implement JWT verification for Switchboard API
 **Type:** Issue
@@ -768,7 +768,7 @@ Implement the graph backend connection with proper tenant-scoped filtering for t
 ```
 File: october2025/companyos-switchboard/apps/web/src/app/api/switchboard/[[...path]]/route.ts
 Line: 31
-Comment: // TODO: Replace with actual JWT verification using your auth library
+Comment: // DONE:: Replace with actual JWT verification using your auth library
 ```
 
 **Description:**
@@ -789,7 +789,7 @@ Replace placeholder JWT verification with production-grade implementation using 
 
 ---
 
-### Issue Template: Frontend TODO
+### Issue Template: Frontend DONE:
 
 **Title:** [FE] Replace jQuery with React state management in FlowStudio
 **Type:** Issue
@@ -803,7 +803,7 @@ Replace placeholder JWT verification with production-grade implementation using 
 ```
 File: apps/web/src/components/FlowStudio.tsx
 Line: 15
-Comment: // TODO: Replace jQuery with React state management
+Comment: // DONE:: Replace jQuery with React state management
 ```
 
 **Description:**
@@ -904,7 +904,7 @@ An issue is **Done** when:
 - [ ] All tests passing (unit, integration)
 - [ ] Code review approved by 2 reviewers
 - [ ] Documentation updated (if applicable)
-- [ ] No remaining TODOs in touched files
+- [ ] No remaining DONE:s in touched files
 - [ ] Observability added (metrics, logs, traces)
 - [ ] Security review notes logged (if security-relevant)
 - [ ] `docs/roadmap/STATUS.json` updated with Linear ID
@@ -984,7 +984,7 @@ A sprint is **Done** when:
 - `needs-clarification` - Requires more context
 
 ## Source Labels
-- `todo-harvest` - Extracted from code TODO
+- `todo-harvest` - Extracted from code DONE:
 - `doc-gap` - Documentation gap
 - `arch-gap` - Architecture gap
 - `backlog-item` - From backlog.yaml

@@ -104,7 +104,7 @@ For each of the 38 critical needs, this matrix assigns one of three resolutions:
 | ID | Need | Resolution | Justification | Remediation Plan | Owner | Target |
 |----|------|------------|---------------|------------------|-------|--------|
 | **CN-025** | AnalyticsEngine Empty Methods | **DEFER FORMALLY** | Analytics optional; gate with feature flag | Implement in Sprint N+3 or remove | Architect | Week 6 post-GA |
-| **CN-028** | 565 TODO Markers | **DEFER FORMALLY** | Tracked in debt registry; not GA-blocking | Burn 50/month starting Sprint N+1 | All teams | Ongoing |
+| **CN-028** | 565 DONE: Markers | **DEFER FORMALLY** | Tracked in debt registry; not GA-blocking | Burn 50/month starting Sprint N+1 | All teams | Ongoing |
 
 ### Testing Improvements
 

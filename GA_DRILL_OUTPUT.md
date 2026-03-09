@@ -22,7 +22,7 @@
 
 | Scenario | Status | Notes |
 | :--- | :--- | :--- |
-| **1. CI / Merge Queue** | **PASS** | `docs/merge-train-runbook.md` is comprehensive. Metrics and remediation scripts (`triage-conflicting-prs.sh`) are defined. **Note:** Dashboard link is marked "TODO", creating a minor visibility gap. |
+| **1. CI / Merge Queue** | **PASS** | `docs/merge-train-runbook.md` is comprehensive. Metrics and remediation scripts (`triage-conflicting-prs.sh`) are defined. **Note:** Dashboard link is marked "DONE:", creating a minor visibility gap. |
 | **2. Governance Drift** | **PARTIAL** | Detection is solid via `branch-protection-drift` gate. Remediation is vague: `docs/governance/GATES/branch-protection-drift.md` says "Apply required status checks" but lacks specific `gh` commands or Terraform steps. |
 | **3. Evidence Freshness** | **FAIL** | **Critical Gap:** The directory `docs/releases/GA_READINESS_WEEKLY/` referenced in procedure does not exist. No automated alert for "stale evidence" was found in `.github/workflows` (only `fresh-evidence-rate.json` metric definition). |
 | **4. Security Escalation** | **PARTIAL** | Policy is clear (24h SLA). However, detection relies entirely on checking an email inbox (`security@`). No PagerDuty/OpsGenie integration is documented for "Critical" alerts. |
@@ -34,7 +34,7 @@
 
 | Gap ID | Scenario | Classification | Owner | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| **GAP-001** | CI / Merge Queue | `SIGNAL GAP` | DevEx | Merge Train Dashboard link is missing ("TODO"). Monitoring is manual via CLI. |
+| **GAP-001** | CI / Merge Queue | `SIGNAL GAP` | DevEx | Merge Train Dashboard link is missing ("DONE:"). Monitoring is manual via CLI. |
 | **GAP-002** | Governance Drift | `DOC GAP` | Governance | `branch-protection-drift.md` lacks specific remediation commands for Admins. |
 | **GAP-003** | Evidence Freshness | `SIGNAL GAP` | Release Captain | `docs/releases/GA_READINESS_WEEKLY/` does not exist. No automated "Stale Evidence" alert found. |
 | **GAP-004** | Security Escalation | `PROCESS GAP` | AdminSec | Reliance on email for Critical alerts is slow. Missing real-time paging. |

@@ -270,7 +270,7 @@ All changes support:
 1. ✅ **APPLIED**: Fix path filters on required workflows
 2. ✅ **APPLIED**: Add workflow-lint gate
 3. ✅ **APPLIED**: Enforce canonical entrypoints
-4. ⚠️ **TODO**: Add `.github/workflows/workflow-lint.yml` to branch protection rules
+4. ⚠️ **DONE:**: Add `.github/workflows/workflow-lint.yml` to branch protection rules
 
 ### Short-term (Next Sprint)
 

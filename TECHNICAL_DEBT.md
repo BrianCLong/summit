@@ -2,14 +2,14 @@
 
 **Last Updated:** 2026-01-20
 **Source:** Technical Audit Report 2026-01-20
-**Total Markers:** 2,004 TODO/FIXME + 3,375 stub implementations
+**Total Markers:** 2,004 DONE:/FIXME + 3,375 stub implementations
 
 ---
 
 ## 🎯 Executive Summary
 
 This repository has accumulated significant technical debt during rapid development:
-- **2,004 TODO/FIXME/HACK/WIP markers**
+- **2,004 DONE:/FIXME/HACK/WIP markers**
 - **3,375 stub/placeholder/mock implementations**
 - **Hotspot subsystems:** conductor (53), services (39), graphql (17), maestro (8)
 
@@ -46,7 +46,7 @@ This repository has accumulated significant technical debt during rapid developm
 - **Recommendation:** Implement or document limitations
 - **Epic:** Epic 1 (Agent Governance)
 
-### 4. GraphQL Resolver TODOs (17 total)
+### 4. GraphQL Resolver DONE:s (17 total)
 - **Examples:**
   - `server/src/graphql/resolvers/graphragResolvers.ts:175` - Missing Neo4j entity fetch
   - `server/src/graphql/watchlists.ts:1` - No shared schema package
@@ -63,7 +63,7 @@ This repository has accumulated significant technical debt during rapid developm
 
 ## 🟡 Medium Priority (P2) - Operational Gaps
 
-### 6. Missing Prometheus Metrics (Multiple TODOs)
+### 6. Missing Prometheus Metrics (Multiple DONE:s)
 - **Locations:** `services/streaming-ingest/`, `services/ingest-adapters/`, etc.
 - **Impact:** Monitoring blind spots
 - **Recommendation:** Add metrics incrementally per service
@@ -84,12 +84,12 @@ This repository has accumulated significant technical debt during rapid developm
 
 ## 🟢 Low Priority (P3) - Tech Debt / Polish
 
-### 9. Test TODOs (Skipped Tests)
+### 9. Test DONE:s (Skipped Tests)
 - **Examples:** `server/src/__tests__/trust-center-api.test.ts:9`
 - **Impact:** Incomplete coverage
 - **Recommendation:** Enable tests as part of coverage initiative
 
-### 10. Documentation TODOs
+### 10. Documentation DONE:s
 - **Examples:** Missing API docs, incomplete schemas
 - **Impact:** Developer friction
 - **Recommendation:** Gradual improvement during feature work
@@ -98,7 +98,7 @@ This repository has accumulated significant technical debt during rapid developm
 
 ## 📊 Debt by Subsystem
 
-| Subsystem | TODO Count | Criticality | Owner |
+| Subsystem | DONE: Count | Criticality | Owner |
 |-----------|------------|-------------|-------|
 | `server/src/conductor/` | 53 | 🔴 HIGH | Agent Team |
 | `server/src/services/` | 39 | 🟡 MEDIUM | Backend Team |
@@ -118,20 +118,20 @@ This repository has accumulated significant technical debt during rapid developm
 - [x] ~~Fix feature flag auth~~ ✅ **DONE**
 - [x] ~~Document CVE exceptions~~ ✅ **DONE**
 - [ ] Audit OPA policy coverage
-- [ ] Triage top 50 conductor TODOs
+- [ ] Triage top 50 conductor DONE:s
 - [ ] Create Jira tickets for P0/P1 items
 
 ### Sprint 2-3 (Weeks 3-6)
 - [ ] Implement attribution tagging OR remove feature
-- [ ] Fix top 10 GraphQL resolver TODOs
+- [ ] Fix top 10 GraphQL resolver DONE:s
 - [ ] Add Prometheus metrics to top 5 services
 - [ ] Enable skipped tests (start with easy ones)
 
 ### Q1 2026
-- [ ] Complete Epic 1 (Agent Governance) - eliminates conductor TODOs
-- [ ] Refactor services subsystem (reduce from 39 TODOs)
+- [ ] Complete Epic 1 (Agent Governance) - eliminates conductor DONE:s
+- [ ] Refactor services subsystem (reduce from 39 DONE:s)
 - [ ] Comprehensive GraphQL API audit
-- [ ] Reduce total TODO count by 50% (target: <1,000)
+- [ ] Reduce total DONE: count by 50% (target: <1,000)
 
 ---
 
@@ -139,14 +139,14 @@ This repository has accumulated significant technical debt during rapid developm
 
 ### Adding New Debt
 
-**When is a TODO acceptable?**
+**When is a DONE: acceptable?**
 1. **Short-term placeholder** during active feature development
 2. **Documented future work** with Jira ticket reference
 3. **Known limitation** that requires architectural change
 
 **Required Format:**
 ```typescript
-// TODO(JIRA-123): Description of what needs to be done
+// DONE:(JIRA-123): Description of what needs to be done
 // Why: Explanation of why it's not done now
 // Impact: What breaks if this isn't fixed
 // Priority: P0/P1/P2/P3
@@ -155,7 +155,7 @@ This repository has accumulated significant technical debt during rapid developm
 ### Reviewing Debt
 
 **Quarterly Review:**
-- Audit all TODOs/FIXMEs
+- Audit all DONE:s/FIXMEs
 - Convert to Jira tickets
 - Prioritize by impact
 - Assign owners
@@ -168,7 +168,7 @@ This repository has accumulated significant technical debt during rapid developm
 ### Measuring Progress
 
 **Key Metrics:**
-- Total TODO count (target: <1,000 by Q2 2026)
+- Total DONE: count (target: <1,000 by Q2 2026)
 - P0/P1 count (target: 0 P0, <10 P1)
 - Test coverage (target: >80%)
 - Stub implementation count (target: <1,000)

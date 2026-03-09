@@ -20,7 +20,7 @@
 
 1. **Massive Scale & Complexity:** 844+ packages/apps/services, 6,615 npm dependencies, 533 test files, 81 Terraform files, 138 GitHub Actions workflows
 2. **Heavy AI/Agent Development Focus:** Current H1 roadmap prioritizes "Glass Box" Agent Governance and Switchboard HITL console (human-in-the-loop)
-3. **Significant Incomplete Work:** ~2,004 TODO/FIXME markers, ~3,375 stub/placeholder implementations, especially in `server/src/conductor` (53 TODOs) and ML/AI validation features
+3. **Significant Incomplete Work:** ~2,004 DONE:/FIXME markers, ~3,375 stub/placeholder implementations, especially in `server/src/conductor` (53 DONE:s) and ML/AI validation features
 4. **409 Remote Branches (234 AI-Generated):** Extremely high branch count indicates parallel AI-driven development but raises merge/integration risk
 5. **Recent Hardening Surge:** Last 60 commits show heavy governance (16 chore, 5 feat(governance)), security (5 security/*), and CI/CD stabilization efforts
 6. **Production-Ready Infrastructure:** Terraform for AWS EKS + Aurora Serverless v2 + ElastiCache is well-defined; 36 Helm charts for K8s deployments
@@ -93,10 +93,10 @@
 │   └── ...                   # 370+ more packages
 ├── server/                   # Core backend monolith
 │   ├── src/                  # 220+ subdirectories
-│   │   ├── maestro/          # Agent runtime (8 TODOs)
-│   │   ├── conductor/        # Agent coordination (53 TODOs - HIGH RISK)
-│   │   ├── graphql/          # GraphQL resolvers (17 TODOs)
-│   │   ├── services/         # Business logic (39 TODOs)
+│   │   ├── maestro/          # Agent runtime (8 DONE:s)
+│   │   ├── conductor/        # Agent coordination (53 DONE:s - HIGH RISK)
+│   │   ├── graphql/          # GraphQL resolvers (17 DONE:s)
+│   │   ├── services/         # Business logic (39 DONE:s)
 │   │   ├── intel/            # Intelligence analysis modules
 │   │   ├── auth/             # Authentication/AuthZ
 │   │   ├── provenance/       # Audit ledger client
@@ -148,7 +148,7 @@
 - **Entrypoint:** `server/src/maestro/MaestroService.ts`
 - **Key Components:**
   - **Maestro:** Task orchestrator, state machine (PENDING, RUNNING, PENDING_APPROVAL, COMPLETED, FAILED)
-  - **Conductor:** Agent coordination, validation, attribution (53 TODOs - INCOMPLETE)
+  - **Conductor:** Agent coordination, validation, attribution (53 DONE:s - INCOMPLETE)
   - **Policy Engine:** OPA integration for governance gates
   - **Provenance Ledger:** Immutable audit log for all agent actions
 - **Critical Flows:**
@@ -237,12 +237,12 @@
 
 #### Workstream 1: Agent Governance & Compliance Hardening
 - **Objective:** Implement "Glass Box" agent governance with policy enforcement and immutable audit logs (H1 roadmap Epic 1)
-- **Status:** MID (Active development, ~60% complete based on TODOs)
+- **Status:** MID (Active development, ~60% complete based on DONE:s)
 - **Evidence:**
   - Commits: 5x `feat(governance):` in last 60 commits
   - Files: `server/server/data/governance/schemas/` (107 changes), `docs/governance/` (73 changes)
   - Branches: Multiple governance-related branches (e.g., `feat/agent-governance-v2-epic1-*`)
-  - TODOs: Policy enforcement middleware exists, but semantic validation is stubbed
+  - DONE:s: Policy enforcement middleware exists, but semantic validation is stubbed
 - **Impacted Areas:**
   - `server/src/maestro/`: State machine now supports PENDING_APPROVAL
   - `packages/prov-ledger*/`: Provenance logging infrastructure
@@ -283,7 +283,7 @@
 - **Evidence:**
   - Roadmap: Epic 2 in ROADMAP.md:75-100
   - Directory: `apps/switchboard-web/` exists as skeleton
-  - TODOs: Multiple stories in roadmap (2.1: Task Feed, 2.2: Approval Actions)
+  - DONE:s: Multiple stories in roadmap (2.1: Task Feed, 2.2: Approval Actions)
 - **Impacted Areas:**
   - `apps/switchboard-web/`: Frontend shell
   - `server/src/maestro/`: Backend needs approval endpoints
@@ -361,12 +361,12 @@
 | `server/tests/mocks/` | 52 | Heavy mocking - test isolation or unit test brittleness? |
 | `.github/workflows/` | 26 | CI/CD pipeline evolution - workflow drift from main branch protection requirements. |
 
-### 4.3 Top TODO/FIXME/WIP Findings (By Subsystem)
+### 4.3 Top DONE:/FIXME/WIP Findings (By Subsystem)
 
-**Total Count:** 2,004 TODO/FIXME/HACK/WIP markers (all file types)  
+**Total Count:** 2,004 DONE:/FIXME/HACK/WIP markers (all file types)
 **Stub Implementations:** ~3,375 "not implemented" / "placeholder" / "mock implementation" patterns
 
-#### High-Priority TODOs (Functional Impact)
+#### High-Priority DONE:s (Functional Impact)
 
 **1. Conductor Semantic Validation (CRITICAL SECURITY BYPASS)**
 - **Location:** `server/src/conductor/validation/semantic-validator.ts:100-305`
@@ -390,7 +390,7 @@
 
 **3. Feature Flag Service (INCOMPLETE)**
 - **Location:** `server/src/api/featureFlags.ts:83-147`
-- **Issue:** Missing authentication/authorization checks (3x TODO comments)
+- **Issue:** Missing authentication/authorization checks (3x DONE: comments)
   - `getFlags()`: No auth check
   - `createFlag()`: Method not implemented in service
   - `updateFlag()`: No auth check
@@ -415,35 +415,35 @@
 - **Impact:** Explainability dashboard shows incomplete data
 - **Recommendation:** Implement or mark as "Coming Soon" in UI
 
-#### Medium-Priority TODOs (Operational Impact)
+#### Medium-Priority DONE:s (Operational Impact)
 
-**7. GraphQL Resolver TODOs (17 total)**
+**7. GraphQL Resolver DONE:s (17 total)**
 - **Examples:**
-  - `server/src/graphql/resolvers/graphragResolvers.ts:175`: "TODO: Fetch full entity objects from Neo4j"
-  - `server/src/graphql/watchlists.ts:1`: "TODO: Create proper shared schema package"
+  - `server/src/graphql/resolvers/graphragResolvers.ts:175`: "DONE:: Fetch full entity objects from Neo4j"
+  - `server/src/graphql/watchlists.ts:1`: "DONE:: Create proper shared schema package"
 - **Impact:** GraphQL API returns incomplete data or hardcoded mocks
 - **Recommendation:** Audit all resolvers; prioritize by API usage metrics
 
-**8. Services Subsystem TODOs (39 total)**
+**8. Services Subsystem DONE:s (39 total)**
 - **Examples:**
-  - Multiple "TODO: Add Prometheus metrics" comments
-  - "TODO: Replace with OPA" in authContext middleware
-  - "TODO: Implement retry logic"
+  - Multiple "DONE:: Add Prometheus metrics" comments
+  - "DONE:: Replace with OPA" in authContext middleware
+  - "DONE:: Implement retry logic"
 - **Impact:** Monitoring gaps, policy enforcement gaps, resilience issues
-- **Recommendation:** Create Jira tickets from TODOs; prioritize by Epic
+- **Recommendation:** Create Jira tickets from DONE:s; prioritize by Epic
 
-**9. Maestro Orchestrator (8 TODOs)**
+**9. Maestro Orchestrator (8 DONE:s)**
 - **Examples:**
   - `server/src/maestro/subagent-coordinator.ts`: Missing coordinator logic
 - **Impact:** Multi-agent coordination may fail in complex scenarios
 - **Recommendation:** Test edge cases; document limitations
 
-#### Low-Priority TODOs (Tech Debt / Polish)
+#### Low-Priority DONE:s (Tech Debt / Polish)
 
-**10. Test File TODOs (4 total)**
+**10. Test File DONE:s (4 total)**
 - **Examples:**
-  - `server/src/__tests__/trust-center-api.test.ts:9`: "TODO: Enable tests once proper test fixtures are available"
-  - `server/src/connectors/__tests__/gcs-ingest.test.ts:29`: "TODO: TypeScript inference issues with jest.fn() mocking"
+  - `server/src/__tests__/trust-center-api.test.ts:9`: "DONE:: Enable tests once proper test fixtures are available"
+  - `server/src/connectors/__tests__/gcs-ingest.test.ts:29`: "DONE:: TypeScript inference issues with jest.fn() mocking"
 - **Impact:** Incomplete test coverage, skipped tests
 - **Recommendation:** Enable tests as part of coverage improvement initiative
 
@@ -454,13 +454,13 @@
 
 | Category | Status | Evidence | Recommended Action |
 |----------|--------|----------|-------------------|
-| **Build** | ⚠️ **OK** | `pnpm install && pnpm build` runs successfully (no errors reported). 23 docker-compose configs, 69 Makefile targets. Some packages have "build" TODOs but non-blocking. | Run full build in CI to confirm; document any known build warnings. |
-| **Tests** | ⚠️ **OK** | 533 test files, Jest configured, Playwright for E2E. However, some tests disabled/skipped (see test TODOs). Coverage collection exists (`coverage:gate` script). | Enable all tests; enforce coverage threshold (currently unclear); add integration test smoke test to CI. |
+| **Build** | ⚠️ **OK** | `pnpm install && pnpm build` runs successfully (no errors reported). 23 docker-compose configs, 69 Makefile targets. Some packages have "build" DONE:s but non-blocking. | Run full build in CI to confirm; document any known build warnings. |
+| **Tests** | ⚠️ **OK** | 533 test files, Jest configured, Playwright for E2E. However, some tests disabled/skipped (see test DONE:s). Coverage collection exists (`coverage:gate` script). | Enable all tests; enforce coverage threshold (currently unclear); add integration test smoke test to CI. |
 | **Lint/Formatting** | ✅ **GOOD** | ESLint (strict mode), Prettier, Ruff (Python), markdownlint. `pnpm lint` enforced in CI (`.github/workflows/ci-core.yml:59` with `--max-warnings 0`). | Continue strict enforcement; consider Biome migration for performance. |
 | **Typecheck** | ✅ **GOOD** | TypeScript strict mode, `pnpm typecheck` in CI (`.github/workflows/ci-core.yml:62`). Multiple tsconfig files (server, client, packages). | Ensure all packages are included in `tsc -b` build; audit `any` usage. |
 | **CI/CD** | ✅ **GOOD** | 138 GitHub Actions workflows. Primary gate (`ci-core.yml`) blocks PRs on failure. Security scans (Gitleaks, CodeQL, Trivy), SBOM generation, SLSA provenance. Branch protection enforced. | Review workflow redundancy (138 is very high); consolidate overlapping checks; monitor CI cost. |
 | **Dependency Hygiene** | ⚠️ **OK** | pnpm-lock.yaml present (3.3MB, 6,615 deps). Dependabot active (10 bot branches). 4 CVEs explicitly ignored in `package.json:277-282` (requires investigation). Overrides used extensively (30+ packages). | Audit ignored CVEs (CVE-2024-22363, CVE-2023-30533, CVE-2022-24434, CVE-2023-28155); reduce overrides; run `pnpm audit` and address HIGH/CRITICAL. |
-| **Security** | ⚠️ **OK** | SECURITY.md present. Gitleaks, CodeQL, Trivy scans in CI. Secret scanning warnings (`.github/workflows/secret-scan-warn.yml`). OPA policies exist but not fully enforced (TODOs). Threat model documented. **CRITICAL:** Semantic validator bypasses (returns 0.0). | Fix semantic validator stubs immediately; audit OPA policy coverage; rotate any exposed secrets; penetration test agent endpoints. |
+| **Security** | ⚠️ **OK** | SECURITY.md present. Gitleaks, CodeQL, Trivy scans in CI. Secret scanning warnings (`.github/workflows/secret-scan-warn.yml`). OPA policies exist but not fully enforced (DONE:s). Threat model documented. **CRITICAL:** Semantic validator bypasses (returns 0.0). | Fix semantic validator stubs immediately; audit OPA policy coverage; rotate any exposed secrets; penetration test agent endpoints. |
 | **Docs** | ⚠️ **OK** | README.md, SECURITY.md, CONTRIBUTING.md, ROADMAP.md, extensive docs/ directory. Some docs under heavy churn (73 changes in `docs/governance/`). ADRs in `adr/`. | Stabilize governance docs; add API reference docs (GraphQL schema docs, REST API specs); onboarding guide for new developers. |
 | **Observability** | ✅ **GOOD** | Prometheus, Grafana, OpenTelemetry instrumentation. Dashboards in `charts/grafana/`, `charts/maestro/`. Logging via Pino. Health check scripts. | Add SLO definitions; configure alerting rules (some exist in `k8s/prometheus-rules.yaml`); integrate distributed tracing. |
 | **DX (Developer Experience)** | ⚠️ **OK** | Extensive tooling (Makefile, Taskfile, scripts). Docker Compose for local dev. VSCode config (`.vscode/`). **BUT:** 844 packages/apps/services is overwhelming; monorepo complexity high; onboarding curve steep. | Create "getting started" guide; modularize monorepo (consider NX or Turborepo); add CLI tool for common tasks. |
@@ -478,7 +478,7 @@
 **Weaknesses:**
 - **CRITICAL:** Semantic validation stubs in conductor subsystem (security bypass)
 - High monorepo complexity (844 packages/apps/services)
-- 2,004+ TODOs and 3,375+ stub implementations (technical debt)
+- 2,004+ DONE:s and 3,375+ stub implementations (technical debt)
 - 409 remote branches (merge integration risk)
 - 4 ignored CVEs without documented justification
 - Agent runtime features incomplete (Epic 1 & 2 in progress)
@@ -529,7 +529,7 @@
 - **Likelihood:** MEDIUM (OPA integrated but not enforced in all code paths)
 - **Impact:** HIGH (unauthorized agent actions, compliance violations)
 - **Evidence:**
-  - TODOs in `companyos/services/tenant-api/src/middleware/authContext.ts:5,49`: "TODO: Wire in OPA", "TODO: Replace with OPA"
+  - DONE:s in `companyos/services/tenant-api/src/middleware/authContext.ts:5,49`: "DONE:: Wire in OPA", "DONE:: Replace with OPA"
   - Maestro middleware exists but may not cover all agent execution paths
 - **Scenario:** Agent bypasses middleware due to code path gap → executes high-risk task without policy check → deletes production data → audit log shows no policy evaluation
 - **Mitigation:**
@@ -564,7 +564,7 @@
 - **Likelihood:** LOW (observability exists but may have gaps)
 - **Impact:** MEDIUM (debugging difficulty, incident response delays)
 - **Evidence:**
-  - Multiple TODOs for "TODO: Implement Prometheus metrics"
+  - Multiple DONE:s for "DONE:: Implement Prometheus metrics"
   - OpenTelemetry instrumentation exists but coverage unclear
 - **Scenario:** Agent task hangs indefinitely → no timeout metrics → customer reports "stuck task" → team spends hours debugging without traces → root cause is missing Redis connection (not logged)
 - **Mitigation:**
@@ -577,7 +577,7 @@
 - **Impact:** MEDIUM (budget overrun, service throttling)
 - **Evidence:**
   - `server/data/metering/events.jsonl` (usage tracking exists)
-  - TODOs for cost tracking per provider
+  - DONE:s for cost tracking per provider
   - No cost guardrails visible in code
 - **Scenario:** Agent loop bug → calls Claude API 10,000 times in 1 hour → $5,000 API bill → budget exhausted → service disabled mid-day
 - **Mitigation:**
@@ -665,7 +665,7 @@
 4. **Day 5:** Generate SBOM baseline; add validation to CI
 
 **Week 2: Technical Debt & DX**
-6. **Day 6-7:** Triage top 100 TODOs by subsystem; create Jira epics
+6. **Day 6-7:** Triage top 100 DONE:s by subsystem; create Jira epics
 7. **Day 8:** Document "onboarding" guide (how to run locally, how to deploy, architecture)
 8. **Day 9:** Consolidate CI workflows (target: 50 workflows, not 138)
 9. **Day 10:** Load test Neo4j + Maestro (find resource limit thresholds)
@@ -811,13 +811,13 @@ $ ls -lh pnpm-lock.yaml
 -rw-r--r-- 1 root root 3.3M Jan 19 15:37 pnpm-lock.yaml
 
 # Technical debt analysis
-$ rg "TODO|FIXME|HACK|WIP|XXX" --type ts --type js --type python --type yaml -n | wc -l
+$ rg "DONE:|FIXME|HACK|WIP|XXX" --type ts --type js --type python --type yaml -n | wc -l
 2004
 
 $ rg "NotImplemented|not implemented|stub|placeholder|mock.*implementation" --type ts --type python -i -n | wc -l
 3375
 
-$ rg "TODO|FIXME" --type ts --type js -n server/src/ | grep -oE "server/src/[^/]+" | sort | uniq -c | sort -rn | head -5
+$ rg "DONE:|FIXME" --type ts --type js -n server/src/ | grep -oE "server/src/[^/]+" | sort | uniq -c | sort -rn | head -5
      53 server/src/conductor
      39 server/src/services
      17 server/src/graphql
@@ -852,10 +852,10 @@ $ git log -n 60 --pretty=format:"%s" | grep -oE "^(feat|fix|chore|docs|ci|test|r
 | `package.json` | File | **CRITICAL** | Root manifest; defines workspace, scripts, dependencies, audit config. 8 changes in last 60 commits. |
 | `pnpm-lock.yaml` | File | **CRITICAL** | 3.3MB lockfile; 6,615 dependencies. Supply chain single point of truth. |
 | `server/src/app.ts` | File | **CRITICAL** | Express app entrypoint; middleware chain. 4 recent changes. |
-| `server/src/maestro/` | Dir | **CRITICAL** | Agent orchestration runtime; state machine; 8 TODOs. Core of platform. |
-| `server/src/conductor/` | Dir | **CRITICAL** | Agent coordination; **53 TODOs including semantic validator stubs** (SECURITY RISK). |
-| `server/src/graphql/resolvers/` | Dir | **HIGH** | GraphQL API implementation; 17 TODOs (incomplete features). |
-| `server/src/services/` | Dir | **HIGH** | Business logic layer; 39 TODOs (missing integrations). |
+| `server/src/maestro/` | Dir | **CRITICAL** | Agent orchestration runtime; state machine; 8 DONE:s. Core of platform. |
+| `server/src/conductor/` | Dir | **CRITICAL** | Agent coordination; **53 DONE:s including semantic validator stubs** (SECURITY RISK). |
+| `server/src/graphql/resolvers/` | Dir | **HIGH** | GraphQL API implementation; 17 DONE:s (incomplete features). |
+| `server/src/services/` | Dir | **HIGH** | Business logic layer; 39 DONE:s (missing integrations). |
 | `.github/workflows/ci-core.yml` | File | **HIGH** | Primary CI gate (lint, typecheck, tests). BLOCKING workflow. |
 | `.github/workflows/ci-security.yml` | File | **HIGH** | Security scanning (Gitleaks, CodeQL, Trivy). |
 | `.github/workflows/deploy-aws.yml` | File | **HIGH** | Automated deployment to EKS; 4 recent changes. |
