@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.io/schemas/execution/decision/v1",
+  "title": "Execution Decision",
+  "description": "Summit control plane admission decision for an ExecutionIntent.",
+  "type": "object",
+  "required": [
+    "decision_id",
+    "intent_id",
+    "admit",
+    "evidence_id"
+  ],
+  "properties": {
+    "decision_id": {
+      "type": "string"
+    },
+    "intent_id": {
+      "type": "string"
+    },
+    "admit": {
+      "type": "boolean"
+    },
+    "reasons": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "route_ref": {
+      "type": "string"
+    },
+    "policy_bindings": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "budget_lease_id": {
+      "type": "string"
+    },
+    "evidence_id": {
+      "type": "string"
+    },
+    "signature": {
+      "type": "string",
+      "description": "Cryptographic signature over the decision payload to prevent tampering by local runners."
+    }
+  }
+}
