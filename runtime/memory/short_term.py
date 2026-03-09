@@ -17,7 +17,7 @@ class ShortTermMemory(BaseMemory):
         if window_size <= 0:
             raise ValueError("window_size must be > 0")
         self.window_size = window_size
-        self._buffer: List[MemoryEntry] = []
+        self._buffer: list[MemoryEntry] = []
 
     def add(self, role: str, content: str) -> None:
         entry: MemoryEntry = {"role": role, "content": content}
@@ -25,7 +25,7 @@ class ShortTermMemory(BaseMemory):
         if len(self._buffer) > self.window_size:
             self._buffer = self._buffer[-self.window_size :]
 
-    def entries(self) -> List[MemoryEntry]:
+    def entries(self) -> list[MemoryEntry]:
         return [dict(item) for item in self._buffer]
 
     def snapshot(self) -> MemorySnapshot:
@@ -48,7 +48,7 @@ def _compute_evidence_id(memory_snapshot: MemorySnapshot) -> str:
 def write_memory_artifacts(
     memory: BaseMemory,
     artifact_dir: str | Path = "artifacts",
-) -> Dict[str, str]:
+) -> dict[str, str]:
     """Write deterministic memory artifacts used by CI evidence gates."""
 
     directory = Path(artifact_dir)

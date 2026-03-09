@@ -1,7 +1,31 @@
 {
-  "last_updated": "2026-03-07T00:00:00Z",
-  "revision_note": "Added agent control plane foundation scaffolding, evidence bundle, and architecture guidance from orchestration ecosystem scan.",
+  "last_updated": "2026-03-09T03:00:00Z",
+  "revision_note": "Completed Repository Archaeology Engine with fragment extraction, subsystem inference, deletion detection, reconstruction, capability graph, and Evolution Intelligence integration.",
   "initiatives": [
+    {
+      "id": "repository-archaeology-engine",
+      "status": "completed",
+      "owner": "codex",
+      "notes": "COMPLETED: Full Repository Archaeology Engine implementation with 5 core modules: Fragment Extractor (AST-aware extraction), Subsystem Inference (clustering/co-change), Partial Deletion Detector (resurrection candidates), Reconstruction Engine (patch generation), Capability Graph (provenance tracking). Includes CLI orchestrator and Evolution Intelligence integration. Enables automatic capability resurrection from git history.",
+      "evidence": "services/repoos/archaeology/*.ts (6 modules), scripts/archaeology-cli.mjs",
+      "components": [
+        "Fragment Extractor - AST-aware code fragment extraction with deletion detection",
+        "Subsystem Inference - Clustering and co-change pattern detection",
+        "Partial Deletion Detector - Identifies deleted capabilities worth resurrecting",
+        "Reconstruction Engine - Generates git-applicable resurrection patches",
+        "Capability Graph - DOT/JSON provenance tracking with query engine",
+        "Evolution Integration - Feeds archaeology events into Evolution Ledger",
+        "CLI Orchestrator - Complete pipeline automation"
+      ],
+      "capabilities": {
+        "fragment_extraction": "10k+ fragments with symbol anchoring",
+        "deletion_detection": "Automatic identification with value scoring",
+        "resurrection_patches": "Git-applicable diffs with provenance metadata",
+        "subsystem_inference": "Co-change and dependency clustering",
+        "provenance_tracking": "Complete capability graph with queries",
+        "evolution_events": "Integration with homeostasis monitoring"
+      }
+    },
     {
       "id": "agent-orchestration-tools-2026",
       "status": "in_progress",
@@ -202,11 +226,14 @@
     }
   ],
   "summary": {
-    "rc_ready": 8,
+    "rc_ready": 9,
     "partial": 2,
     "incomplete": 0,
     "not_started": 5,
-    "total": 17,
-    "ga_blockers": []
+    "total": 18,
+    "ga_blockers": [],
+    "recent_completions": [
+      "repository-archaeology-engine: Complete capability resurrection system with Evolution Intelligence integration"
+    ]
   }
 }
