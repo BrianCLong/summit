@@ -22,6 +22,7 @@ This is more lucrative and defensible than the verification service itself becau
 
 **Input**: Every claim your verification API processes
 **Output**:
+
 - Labeled claim triplets (claim, evidence, verdict, confidence)
 - Adversarial variants (paraphrases that fool competitors' systems)
 - Multilingual claim clusters (same claim in 20+ languages)
@@ -54,6 +55,7 @@ License to buyers
 ```
 
 **Cost structure**:
+
 - Base verification: $0.001-0.01 per claim (your existing infrastructure)
 - Paraphrasing (Gemini Flash): +$0.0005 per claim
 - Adversarial generation (open-source Qwen2.5-7B): +$0 (self-hosted)
@@ -171,11 +173,13 @@ Example use case:
 | Year 5 | $10M | $120M | $130M | 85% |
 
 **Key drivers**:
+
 - **API scales linearly** (more customers = more verifications)
 - **Dataset licensing scales exponentially** (2-3 Tier-1 contracts = $10-100M)
 - **Gross margin improves** as fixed infrastructure cost amortized across larger dataset
 
 **Comparable benchmarks**:
+
 - Hugging Face dataset licensing: $1-50M+ per major customer (Anthropic, Google, Meta)
 - NVIDIA Nemotron-4: Open synthetic data, but you're capturing proprietary value
 - Tonic.ai (synthetic data provider): $15-50M+ estimated ARR across enterprise customers
@@ -187,6 +191,7 @@ Example use case:
 ### 2.1 Dataset Network Effects
 
 **The flywheel**:
+
 ```
 Every claim verified → 10-100 training examples generated → Dataset grows
                                                               ↓
@@ -204,6 +209,7 @@ Every claim verified → 10-100 training examples generated → Dataset grows
 ```
 
 **Lock-in mechanism**: Once Google fine-tunes Gemini on your MultiClaim Pro dataset, they can't easily switch because:
+
 - Retraining a 100B+ parameter model = $5-20M in compute
 - Knowledge is baked into model weights; can't "un-train"
 - Maintenance: if you release improved dataset, they either retrain ($$) or use stale data
@@ -211,6 +217,7 @@ Every claim verified → 10-100 training examples generated → Dataset grows
 ### 2.2 Proprietary Data Moat
 
 You own:
+
 1. **Claim clusters**: Grouping of semantically similar claims across 50+ languages. Scrapers can get raw claims, but semantic clustering requires fact-checked verdicts. Competitors have to re-verify everything.
 
 2. **Adversarial variants**: 15 persuasion techniques applied systematically (Piskorski taxonomy + LLM generation). You've tested which techniques fool which detectors—competitors don't have this empirical data.
@@ -220,6 +227,7 @@ You own:
 4. **Relationship graphs**: Claim A supports/contradicts Claim B. Maps narrative structure. Enables pre-bunking tools and narrative detection systems. Proprietary to you.
 
 **Defensibility score**: 8/10. Difficult (not impossible) to replicate; requires:
+
 - Years of verification work (you have head start)
 - Multilingual fact-checking teams (expensive)
 - Adversarial testing infrastructure (you're building it)
@@ -227,6 +235,7 @@ You own:
 ### 2.3 Regulatory Tailwind (DSA + Online Safety Bill)
 
 The **Digital Services Act** (enforced Feb 2024+) requires platforms to:
+
 - Document efforts to remove/label disinformation
 - Conduct risk assessments on algorithmic amplification
 - Provide transparency reports on content moderation
@@ -248,6 +257,7 @@ The **Digital Services Act** (enforced Feb 2024+) requires platforms to:
 **Targets**: Anthropic, Google DeepMind, Meta AI, xAI, Mistral
 
 **Sales process**:
+
 1. **Inbound**: Reach out once you have 10K+ verified multilingual claims
    - "We've generated 500K claim variants across 50 languages with adversarial robustness scoring. Interested in licensing for your next model training?"
 
@@ -270,6 +280,7 @@ The **Digital Services Act** (enforced Feb 2024+) requires platforms to:
 **Pitch**: "DSA requires you to demonstrate robustness of disinformation detection. AdvClaim Armor provides independent benchmarking against adversarial attacks. Use this in your transparency reports."
 
 **Deal structure**:
+
 - Meta: $2-5M/year to license AdvClaim Armor for continuous robustness validation
 - EU Digital Services Coordinators: $500K-2M contracts to validate platform claims about detection quality
 
@@ -324,6 +335,7 @@ The **Digital Services Act** (enforced Feb 2024+) requires platforms to:
 ### Months 1-6: Build Synthetic Data Generation Pipeline
 
 **Goals**:
+
 - Integrate SynDy-style label generation into verification API
 - Generate 10K verified claims with 5 paraphrases each = 50K variants
 - Test multilingual coverage (10 languages minimum)
@@ -336,6 +348,7 @@ The **Digital Services Act** (enforced Feb 2024+) requires platforms to:
 ### Months 6-12: Alpha Product + Early Access
 
 **Goals**:
+
 - Launch "MultiClaim Early Access" to 3-5 research partners (academic)
 - Generate 50K verified claims with full variant set = 250K+ training examples
 - Benchmark against public datasets (FEVER, MultiFC)
@@ -350,6 +363,7 @@ The **Digital Services Act** (enforced Feb 2024+) requires platforms to:
 ### Months 12-18: Commercialize + Tier-1 Outreach
 
 **Goals**:
+
 - Launch three product tiers (Claim Clusters, AdvClaim Armor, Custom)
 - Reach out to 10 LLM labs + platforms with custom proposals
 - Close first Tier-1 contract ($1M+)
@@ -364,6 +378,7 @@ The **Digital Services Act** (enforced Feb 2024+) requires platforms to:
 ### Months 18-24: Scale + International Expansion
 
 **Goals**:
+
 - Expand to 500K+ verified claims
 - Add domain-specific dataset tiers (Health, Finance, Climate)
 - Launch multilingual coverage (30+ languages)
@@ -396,6 +411,7 @@ The **Digital Services Act** (enforced Feb 2024+) requires platforms to:
 You're not building a fact-checking startup. You're building an **AI training data company** with a fact-checking verification system as a lead generation engine. This shift in positioning unlocks 10-100x more value.
 
 **Year 5 outcome**:
+
 - Verification API: $10M ARR, 85% margin → $8.5M net
 - Dataset licensing: $120M ARR, 90% margin → $108M net
 - **Total**: $130M ARR, $116.5M net profit at scale

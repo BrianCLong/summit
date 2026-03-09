@@ -18,7 +18,7 @@ PROV="$OUT/provenance.slsa.json"
 if [ -f "dist/artifact.tgz" ]; then
   # Example: verify an attached signature/attestation if present
   if [ -f "dist/artifact.tgz.sig" ]; then
-    cosign verify-blob --signature dist/artifact.tgz.sig dist/artifact.tgz || true
+    cosign verify-blob --use-signed-timestamps --signature dist/artifact.tgz.sig dist/artifact.tgz || true
   fi
   # If an attestation exists, dump it; otherwise synthesize a minimal stub
   if [ -f "dist/provenance.slsa.json" ]; then

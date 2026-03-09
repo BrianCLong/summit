@@ -1,0 +1,36 @@
+{
+  "$id": "https://summit.com/schemas/ai-factory/plan.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Factory Plan",
+  "type": "object",
+  "properties": {
+    "itemSlug": { "type": "string" },
+    "mws": { "type": "string" },
+    "workItems": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "title": { "type": "string" },
+          "ownedPaths": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "claimRefs": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": { "type": "string" }
+              },
+              "required": ["id"]
+            }
+          }
+        },
+        "required": ["id", "title", "ownedPaths", "claimRefs"]
+      }
+    }
+  },
+  "required": ["itemSlug", "mws", "workItems"]
+}

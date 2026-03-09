@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.dev/schemas/environment.schema.json",
+  "type": "object",
+  "required": [
+    "envId",
+    "benchmarkVersion",
+    "toolBundle",
+    "policyBundle",
+    "sandboxImage",
+    "networkMode",
+    "clockMode",
+    "randomSeed"
+  ],
+  "properties": {
+    "envId": { "type": "string" },
+    "benchmarkVersion": { "type": "string" },
+    "repoRef": { "type": "string" },
+    "repoCommitSha": { "type": "string" },
+    "graphSnapshotRef": { "type": "string" },
+    "toolBundle": { "type": "string" },
+    "policyBundle": { "type": "string" },
+    "sandboxImage": { "type": "string" },
+    "networkMode": {
+      "type": "string",
+      "enum": ["disabled", "mocked", "restricted"]
+    },
+    "clockMode": {
+      "type": "string",
+      "enum": ["deterministic", "system"]
+    },
+    "randomSeed": { "type": "integer" },
+    "mounts": {
+      "type": "array",
+      "items": { "type": "object" }
+    },
+    "variables": {
+      "type": "object",
+      "additionalProperties": { "type": "string" }
+    }
+  },
+  "additionalProperties": false
+}

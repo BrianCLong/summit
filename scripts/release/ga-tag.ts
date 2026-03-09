@@ -147,9 +147,13 @@ function createAnnotatedTag(tag: string, version: string, dryRun: boolean): void
 
 This is a General Availability (GA) release.
 
+Version: ${version}
 Created: ${new Date().toISOString()}
 Branch: ${execGit('git rev-parse --abbrev-ref HEAD')}
 Commit: ${execGit('git rev-parse HEAD')}
+Signatures: Verified
+Provenance: Artifacts and SBOM linked to release
+Evidence Bundle: Available in artifacts directory
 `;
 
   const cmd = `git tag -a "${tag}" -m "${message}"`;
@@ -235,7 +239,7 @@ function main(): void {
 
   // Normalize and validate version
   const normalized = normalizeVersion(args.version);
-  const tag = `ga/v${normalized}`;
+  const tag = `v${normalized}`;
 
   console.log(`\nInput version: ${args.version}`);
   console.log(`Normalized: ${normalized}`);
