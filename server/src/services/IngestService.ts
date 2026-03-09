@@ -94,57 +94,85 @@ export class IngestService {
         await getTracer().withSpan('IngestService.processEntities', async (entitySpan) => {
           for (let i = 0; i < input.entities.length; i += BATCH_SIZE) {
             const batch = input.entities.slice(i, i + BATCH_SIZE);
+            const entitiesToUpsert = new Map<string, any>();
 
+            // Generate IDs and deduplicate within batch
             for (const entityInput of batch) {
-              try {
-                const stableId = this.generateStableId(
-                  input.tenantId,
-                  entityInput.kind,
-                  entityInput.properties,
-                );
+              const stableId = this.generateStableId(
+                input.tenantId,
+                entityInput.kind,
+                entityInput.properties,
+              );
 
-                // Map external ID to stable ID
-                if (entityInput.externalId) {
-                  idMap.set(entityInput.externalId, stableId);
-                }
-
-                const existing = await this.findEntityByStableId(client, stableId);
-
-                if (existing) {
-                  // Update existing entity
-                  await this.updateEntity(client, {
-                    id: existing.id,
-                    labels: entityInput.labels,
-                    properties: entityInput.properties,
-                    provenanceId,
-                  });
-                  entitiesUpdated++;
-                } else {
-                  // Create new entity
-                  await this.createEntity(client, {
-                    id: stableId,
-                    tenantId: input.tenantId,
-                    kind: entityInput.kind,
-                    labels: entityInput.labels,
-                    properties: entityInput.properties,
-                    userId: input.userId,
-                    provenanceId,
-                  });
-                  entitiesCreated++;
-                }
-              } catch (error: any) {
-                const errorMessage = error instanceof Error ? error.message : String(error);
-                errors.push(`Entity ${entityInput.externalId}: ${errorMessage}`);
-                ingestLogger.warn({ error, entityInput }, 'Failed to ingest entity');
+              if (entityInput.externalId) {
+                idMap.set(entityInput.externalId, stableId);
               }
+
+              entitiesToUpsert.set(stableId, {
+                id: stableId,
+                tenantId: input.tenantId,
+                kind: entityInput.kind,
+                labels: entityInput.labels,
+                properties: entityInput.properties,
+                userId: input.userId,
+                provenanceId,
+              });
+            }
+
+            if (entitiesToUpsert.size === 0) continue;
+
+            try {
+              // BOLT OPTIMIZATION: Use batched PostgreSQL upsert to reduce database round-trips.
+              // Reduces complexity from O(N) queries to O(N/batchSize).
+              const values: any[] = [];
+              const placeholders: string[] = [];
+              let paramIndex = 1;
+
+              for (const entity of entitiesToUpsert.values()) {
+                values.push(
+                  entity.id,
+                  entity.tenantId,
+                  entity.kind,
+                  entity.labels,
+                  JSON.stringify(entity.properties),
+                  entity.userId,
+                  entity.provenanceId,
+                );
+                placeholders.push(
+                  `($${paramIndex}, $${paramIndex + 1}, $${paramIndex + 2}, $${paramIndex + 3}, $${paramIndex + 4}, $${paramIndex + 5}, $${paramIndex + 6})`,
+                );
+                paramIndex += 7;
+              }
+
+              const sql = `
+                INSERT INTO entities (id, tenant_id, kind, labels, props, created_by, provenance_id)
+                VALUES ${placeholders.join(', ')}
+                ON CONFLICT (id) DO UPDATE SET
+                  labels = EXCLUDED.labels,
+                  props = EXCLUDED.props,
+                  provenance_id = EXCLUDED.provenance_id,
+                  updated_at = NOW()
+                RETURNING (xmax = 0) AS inserted`;
+
+              const { rows } = await client.query(sql, values);
+              for (const row of rows) {
+                if (row.inserted) entitiesCreated++;
+                else entitiesUpdated++;
+              }
+            } catch (error: any) {
+              errors.push(`Entity Batch Error: ${error.message}`);
+              ingestLogger.warn({ error }, 'Failed to ingest entity batch');
             }
           }
         });
 
-        // 4. Upsert relationships
+        // 4. Upsert relationships in batches
         await getTracer().withSpan('IngestService.processRelationships', async (relSpan) => {
-          for (const relInput of input.relationships) {
-            try {
+          for (let i = 0; i < input.relationships.length; i += BATCH_SIZE) {
+            const batch = input.relationships.slice(i, i + BATCH_SIZE);
+            const relsToUpsert = new Map<string, any>();
+
+            for (const relInput of batch) {
               const fromId = idMap.get(relInput.fromExternalId);
               const toId = idMap.get(relInput.toExternalId);
 
@@ -161,36 +189,63 @@ export class IngestService {
                 relInput.relationshipType,
               );
 
-              const existing = await this.findRelationshipById(client, relId);
+              relsToUpsert.set(relId, {
+                id: relId,
+                tenantId: input.tenantId,
+                fromEntityId: fromId,
+                toEntityId: toId,
+                relationshipType: relInput.relationshipType,
+                properties: relInput.properties || null,
+                confidence: relInput.confidence,
+                source: relInput.source || input.sourceType,
+                provenanceId,
+              });
+            }
 
-              if (existing) {
-                await this.updateRelationship(client, {
-                  id: relId,
-                  properties: relInput.properties,
-                  confidence: relInput.confidence,
-                  provenanceId,
-                });
-                relationshipsUpdated++;
-              } else {
-                await this.createRelationship(client, {
-                  id: relId,
-                  tenantId: input.tenantId,
-                  fromEntityId: fromId,
-                  toEntityId: toId,
-                  relationshipType: relInput.relationshipType,
-                  properties: relInput.properties || {},
-                  confidence: relInput.confidence,
-                  source: relInput.source || input.sourceType,
-                  provenanceId,
-                });
-                relationshipsCreated++;
+            if (relsToUpsert.size === 0) continue;
+
+            try {
+              // BOLT OPTIMIZATION: Batched relationship upserts for high throughput.
+              const values: any[] = [];
+              const placeholders: string[] = [];
+              let paramIndex = 1;
+
+              for (const rel of relsToUpsert.values()) {
+                values.push(
+                  rel.id,
+                  rel.tenantId,
+                  rel.fromEntityId,
+                  rel.toEntityId,
+                  rel.relationshipType,
+                  rel.properties ? JSON.stringify(rel.properties) : null,
+                  rel.confidence,
+                  rel.source,
+                  rel.provenanceId,
+                );
+                placeholders.push(
+                  `($${paramIndex}, $${paramIndex + 1}, $${paramIndex + 2}, $${paramIndex + 3}, $${paramIndex + 4}, $${paramIndex + 5}, $${paramIndex + 6}, $${paramIndex + 7}, $${paramIndex + 8})`,
+                );
+                paramIndex += 9;
+              }
+
+              const sql = `
+                INSERT INTO relationships (id, tenant_id, from_entity_id, to_entity_id, relationship_type, props, confidence, source, provenance_id)
+                VALUES ${placeholders.join(', ')}
+                ON CONFLICT (id) DO UPDATE SET
+                  props = COALESCE(EXCLUDED.props, relationships.props),
+                  confidence = EXCLUDED.confidence,
+                  provenance_id = EXCLUDED.provenance_id,
+                  last_seen = NOW()
+                RETURNING (xmax = 0) AS inserted`;
+
+              const { rows } = await client.query(sql, values);
+              for (const row of rows) {
+                if (row.inserted) relationshipsCreated++;
+                else relationshipsUpdated++;
               }
             } catch (error: any) {
-              const errorMessage = error instanceof Error ? error.message : String(error);
-              errors.push(
-                `Relationship ${relInput.fromExternalId}->${relInput.toExternalId}: ${errorMessage}`,
-              );
-              ingestLogger.warn({ error, relInput }, 'Failed to ingest relationship');
+              errors.push(`Relationship Batch Error: ${error.message}`);
+              ingestLogger.warn({ error }, 'Failed to ingest relationship batch');
             }
           }
         });
@@ -341,146 +396,6 @@ export class IngestService {
     );
   }
 
-  /**
-   * Find entity by stable ID
-   */
-  private async findEntityByStableId(
-    client: PoolClient,
-    stableId: string,
-  ): Promise<{ id: string } | undefined> {
-    const { rows } = await client.query(
-      `SELECT * FROM entities WHERE id = $1`,
-      [stableId],
-    );
-    return rows[0];
-  }
-
-  /**
-   * Create entity
-   */
-  private async createEntity(
-    client: PoolClient,
-    data: {
-      id: string;
-      tenantId: string;
-      kind: string;
-      labels: string[];
-      properties: Record<string, unknown>;
-      userId: string;
-      provenanceId: string;
-    },
-  ): Promise<void> {
-    await client.query(
-      `INSERT INTO entities (
-        id, tenant_id, kind, labels, props, created_by, provenance_id
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-      [
-        data.id,
-        data.tenantId,
-        data.kind,
-        data.labels,
-        JSON.stringify(data.properties),
-        data.userId,
-        data.provenanceId,
-      ],
-    );
-  }
-
-  /**
-   * Update entity
-   */
-  private async updateEntity(
-    client: PoolClient,
-    data: {
-      id: string;
-      labels: string[];
-      properties: Record<string, unknown>;
-      provenanceId: string;
-    },
-  ): Promise<void> {
-    await client.query(
-      `UPDATE entities
-       SET labels = $2, props = $3, updated_at = NOW(), provenance_id = $4
-       WHERE id = $1`,
-      [data.id, data.labels, JSON.stringify(data.properties), data.provenanceId],
-    );
-  }
-
-  /**
-   * Find relationship by ID
-   */
-  private async findRelationshipById(
-    client: PoolClient,
-    id: string,
-  ): Promise<{ id: string } | undefined> {
-    const { rows } = await client.query(
-      `SELECT * FROM relationships WHERE id = $1`,
-      [id],
-    );
-    return rows[0];
-  }
-
-  /**
-   * Create relationship
-   */
-  private async createRelationship(
-    client: PoolClient,
-    data: {
-      id: string;
-      tenantId: string;
-      fromEntityId: string;
-      toEntityId: string;
-      relationshipType: string;
-      properties: Record<string, unknown>;
-      confidence: number;
-      source: string;
-      provenanceId: string;
-    },
-  ): Promise<void> {
-    await client.query(
-      `INSERT INTO relationships (
-        id, tenant_id, from_entity_id, to_entity_id, relationship_type,
-        props, confidence, source, provenance_id, first_seen
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW())`,
-      [
-        data.id,
-        data.tenantId,
-        data.fromEntityId,
-        data.toEntityId,
-        data.relationshipType,
-        JSON.stringify(data.properties),
-        data.confidence,
-        data.source,
-        data.provenanceId,
-      ],
-    );
-  }
-
-  /**
-   * Update relationship
-   */
-  private async updateRelationship(
-    client: PoolClient,
-    data: {
-      id: string;
-      properties?: Record<string, unknown>;
-      confidence: number;
-      provenanceId: string;
-    },
-  ): Promise<void> {
-    await client.query(
-      `UPDATE relationships
-       SET props = COALESCE($2, props), confidence = $3,
-           provenance_id = $4, last_seen = NOW()
-       WHERE id = $1`,
-      [
-        data.id,
-        data.properties ? JSON.stringify(data.properties) : null,
-        data.confidence,
-        data.provenanceId,
-      ],
-    );
-  }
 
   /**
    * Sync entities/relationships to Neo4j
