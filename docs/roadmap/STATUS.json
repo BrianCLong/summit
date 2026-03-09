@@ -1,6 +1,6 @@
 {
   "last_updated": "2026-03-07T06:03:42Z",
-  "revision_note": "Added fsociety deep subsumption governance plan and roadmap tracking entry.",
+  "revision_note": "Added MCP ecosystem alignment plan and roadmap tracking entry.",
   "initiatives": [
     {
       "id": "nature-s41562-026-02411-w-layer2-layer3",
@@ -233,6 +233,12 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "Published deep subsumption governance plan for fsociety assets with evidence-locked CI and protocol alignment."
+    },
+    {
+      "id": "mcp-ecosystem-alignment",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Tighten ecosystem follow-up plan to validated summit paths and checks, ensuring MCP tools meet governance standards."
     }
   ],
   "summary": {
