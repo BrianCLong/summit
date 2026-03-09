@@ -5,12 +5,14 @@ import time
 from kafka import KafkaProducer
 from kafka.errors import NoBrokersAvailable
 
-from ingestion.ingestors import PastebinIngestor, RSSIngestor, TwitterIngestor
+from ingestion.ingestors import DEFAULT_SOURCES, build_ingestors
 
 print("Ingestion service starting up...")
 
 KAFKA_BOOTSTRAP_SERVERS = os.environ.get("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092")
-RAW_POSTS_TOPIC = "raw.posts"
+RAW_POSTS_TOPIC = os.environ.get("RAW_POSTS_TOPIC", "raw.posts")
+INGEST_LOOP_SECONDS = int(os.environ.get("INGEST_LOOP_SECONDS", "5"))
+SOURCE_CONFIG_ENV = "INGEST_SOURCE_CONFIG"
 
 producer = None
 max_attempts = 10
@@ -36,18 +38,30 @@ else:
     raise Exception("Failed to connect to Kafka after multiple attempts.")
 
 
-def main():
-    ingestors = [
-        RSSIngestor(producer, RAW_POSTS_TOPIC, ["https://example.com/feed"]),
-        TwitterIngestor(producer, RAW_POSTS_TOPIC, api_client=None),
-        PastebinIngestor(producer, RAW_POSTS_TOPIC, api_client=None),
-    ]
+def _load_source_config() -> list[dict[str, object]]:
+    raw = os.environ.get(SOURCE_CONFIG_ENV)
+    if not raw:
+        return DEFAULT_SOURCES
 
-    print("Starting ingestion service...")
+    try:
+        config = json.loads(raw)
+        if isinstance(config, list):
+            return [item for item in config if isinstance(item, dict)]
+    except json.JSONDecodeError:
+        print(f"Invalid {SOURCE_CONFIG_ENV}; using default sources")
+
+    return DEFAULT_SOURCES
+
+
+def main():
+    source_config = _load_source_config()
+    ingestors = build_ingestors(producer=producer, topic=RAW_POSTS_TOPIC, source_configs=source_config)
+
+    print(f"Starting ingestion service with {len(ingestors)} sources...")
     while True:
         for ingestor in ingestors:
             ingestor.run()
-        time.sleep(5)
+        time.sleep(INGEST_LOOP_SECONDS)
 
 
 if __name__ == "__main__":
