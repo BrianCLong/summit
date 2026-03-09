@@ -1,36 +1,12 @@
 {
-  "last_updated": "2026-03-09T03:00:00Z",
-  "revision_note": "Completed Repository Archaeology Engine with fragment extraction, subsystem inference, deletion detection, reconstruction, capability graph, and Evolution Intelligence integration.",
+  "last_updated": "2026-03-07T06:03:42Z",
+  "revision_note": "Added graph-native agent control plane foundation and roadmap tracking entry.",
   "initiatives": [
     {
-      "id": "repository-archaeology-engine",
-      "status": "completed",
-      "owner": "codex",
-      "notes": "COMPLETED: Full Repository Archaeology Engine implementation with 5 core modules: Fragment Extractor (AST-aware extraction), Subsystem Inference (clustering/co-change), Partial Deletion Detector (resurrection candidates), Reconstruction Engine (patch generation), Capability Graph (provenance tracking). Includes CLI orchestrator and Evolution Intelligence integration. Enables automatic capability resurrection from git history.",
-      "evidence": "services/repoos/archaeology/*.ts (6 modules), scripts/archaeology-cli.mjs",
-      "components": [
-        "Fragment Extractor - AST-aware code fragment extraction with deletion detection",
-        "Subsystem Inference - Clustering and co-change pattern detection",
-        "Partial Deletion Detector - Identifies deleted capabilities worth resurrecting",
-        "Reconstruction Engine - Generates git-applicable resurrection patches",
-        "Capability Graph - DOT/JSON provenance tracking with query engine",
-        "Evolution Integration - Feeds archaeology events into Evolution Ledger",
-        "CLI Orchestrator - Complete pipeline automation"
-      ],
-      "capabilities": {
-        "fragment_extraction": "10k+ fragments with symbol anchoring",
-        "deletion_detection": "Automatic identification with value scoring",
-        "resurrection_patches": "Git-applicable diffs with provenance metadata",
-        "subsystem_inference": "Co-change and dependency clustering",
-        "provenance_tracking": "Complete capability graph with queries",
-        "evolution_events": "Integration with homeostasis monitoring"
-      }
-    },
-    {
-      "id": "agent-orchestration-tools-2026",
+      "id": "nature-s41562-026-02411-w-layer2-layer3",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Added control-plane scaffolding (registry/router/policy/planner/telemetry), GraphRAG context-compiler skeleton, evidence bundle, and architecture strategy document."
+      "notes": "Published governed Layer 2 (regulatory-signals dataset) and Layer 3 (regulatory early-warning) subsumption brief with deterministic CI/evidence posture."
     },
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -192,7 +168,7 @@
       "id": "ip-claims-continuation-pack-c451-s480",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Added defense CRM and simulation apparatus dependent claims C451\u2013C480 and S451\u2013S480."
+      "notes": "Added defense CRM and simulation apparatus dependent claims C451–C480 and S451–S480."
     },
     {
       "id": "io-cogwar-radar-2027-brief",
@@ -210,7 +186,7 @@
       "id": "ip-defense-claims-c391-s420",
       "status": "completed",
       "owner": "codex",
-      "notes": "Added CRM and Simulation Apparatus claims C391\u2013C420/S391\u2013S420 for graph integrity, appeals, and causal guardrails."
+      "notes": "Added CRM and Simulation Apparatus claims C391–C420/S391–S420 for graph integrity, appeals, and causal guardrails."
     },
     {
       "id": "spec-driven-development-docs",
@@ -223,17 +199,20 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "Documented CI/CD high-signal deltas with enforced action register and evidence targets."
+    },
+    {
+      "id": "agent-control-plane-scaffold",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Scaffold graph-native control plane foundation for agent orchestration and ecosystem patterns."
     }
   ],
   "summary": {
-    "rc_ready": 9,
+    "rc_ready": 8,
     "partial": 2,
     "incomplete": 0,
     "not_started": 5,
-    "total": 18,
-    "ga_blockers": [],
-    "recent_completions": [
-      "repository-archaeology-engine: Complete capability resurrection system with Evolution Intelligence integration"
-    ]
+    "total": 17,
+    "ga_blockers": []
   }
 }
