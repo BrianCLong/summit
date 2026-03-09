@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from dataclasses import dataclass, field
 import hashlib
 import re
+from dataclasses import dataclass, field
 from typing import Any
 
 EVIDENCE_ID_PATTERN = re.compile(r"^EVID-AFD-[0-9]{8}-[0-9]{4}$")

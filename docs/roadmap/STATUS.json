@@ -1,4 +1,5 @@
 {
+<<<<<<< HEAD
   "last_updated": "2026-03-07T04:18:41Z",
   "revision_note": "Added fsociety deep subsumption governance plan and roadmap initiative entry.",
   "initiatives": [
@@ -7,6 +8,16 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "Published deep subsumption plan for umeshshinde19/fsociety focused on deny-by-default governance, deterministic evidence artifacts, and drift monitoring."
+=======
+  "last_updated": "2026-03-07T06:03:42Z",
+  "revision_note": "Added Nature s41562-026-02411-w Layer 2/3 regulatory subsumption architecture brief and roadmap tracking entry.",
+  "initiatives": [
+    {
+      "id": "nature-s41562-026-02411-w-layer2-layer3",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Published governed Layer 2 (regulatory-signals dataset) and Layer 3 (regulatory early-warning) subsumption brief with deterministic CI/evidence posture."
+>>>>>>> origin/main
     },
     {
       "id": "adenhq-hive-subsumption-lane1",
