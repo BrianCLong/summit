@@ -68,7 +68,7 @@
     "ci:cluster": "npx tsx scripts/triage/ci-signature-cluster.ts",
     "pr:risk": "node scripts/pr-risk-score.js",
     "db:migrate": "cd server && npm run db:migrate",
-    "db:seed": "cd server && npm run db:seed",
+    "db:seed": "cd server && npm run seed:golden && npm run seed:datasets",
     "db:reset": "npm run db:migrate && npm run db:seed",
     "db:migrate:neo4j": "npx ts-node --esm scripts/migrate.ts",
     "health": "chmod +x scripts/health-check.sh && scripts/health-check.sh",

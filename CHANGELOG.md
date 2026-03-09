@@ -1,5 +1,15 @@
 # Changelog
 
+## [4.2.0] - 2026-02-11
+
+### Added
+- **Evidence-First Release Rail**: Implemented a Repeatable, Policy-Gated delivery path.
+- **API v1**: Core intelligence APIs now versioned under `/v1` prefix.
+- **Provenance Tracking**: Added `provenance_ref` to API responses for auditable evidence chains.
+- **Supply Chain Security**: Automated CycloneDX SBOM generation and artifact signing.
+- **Policy-as-Code**: Integrated Open Policy Agent (OPA) with baseline security policies.
+- **Enhanced DevX**: Added preflight checks and automated golden dataset seeding.
+
 <!--
 POLICY:
 1. Always maintain an [Unreleased] section at the top.

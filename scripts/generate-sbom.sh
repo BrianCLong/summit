@@ -115,7 +115,7 @@ done
 sed -i '' '$ s/,$//' "$OUTPUT_DIR/SBOM_SUMMARY-${VERSION}.json" 2>/dev/null || sed -i '$ s/,$//' "$OUTPUT_DIR/SBOM_SUMMARY-${VERSION}.json"
 cat >> "$OUTPUT_DIR/SBOM_SUMMARY-${VERSION}.json" << EOF
   ],
-  "totalSboms": $(ls "$OUTPUT_DIR"/*.json 2>/dev/null | grep -c "cdx\|spdx" || echo 0)
+  "totalSboms": $(ls "$OUTPUT_DIR"/*.json 2>/dev/null | grep -E "cdx|spdx" | wc -l)
 }
 EOF
 

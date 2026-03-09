@@ -1,0 +1,29 @@
+apiVersion: sloth.slok.dev/v1
+kind: PrometheusServiceLevel
+metadata:
+  name: api-availability
+spec:
+  service: api
+  slos:
+    - name: api-availability
+      objective: 99.9
+      sli:
+        events:
+          errorQuery: sum(rate(http_requests_total{service="api",status=~"5.."}[5m]))
+          totalQuery: sum(rate(http_requests_total{service="api"}[5m]))
+      alerting:
+        name: APIAvailabilityLow
+        labels: { severity: critical, team: platform }
+        annotations:
+          summary: "API availability SLO burn is too high"
+    - name: api-latency
+      objective: 95
+      sli:
+        events:
+          errorQuery: sum(rate(http_request_duration_seconds_bucket{service="api",le="0.5"}[5m]))
+          totalQuery: sum(rate(http_request_duration_seconds_count{service="api"}[5m]))
+      alerting:
+        name: APILatencyHigh
+        labels: { severity: warning, team: platform }
+        annotations:
+          summary: "API P95 latency is above 500ms"

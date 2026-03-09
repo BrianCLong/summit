@@ -5,7 +5,7 @@ from datetime import datetime
 
 import redis
 import spacy
-from fastapi import Depends, FastAPI, Header, HTTPException
+from fastapi import APIRouter, Depends, FastAPI, Header, HTTPException
 from neo4j import GraphDatabase
 from neo4j.exceptions import ServiceUnavailable
 
@@ -39,6 +39,7 @@ class TelemetryAnalysisResponse(BaseModel):
     entities: list[dict]
     sentiment: float
     narratives: list[str]
+    provenance_ref: str | None = None
 
 class IntentEstimationRequest(BaseModel):
     telemetry_summary: str
@@ -49,6 +50,7 @@ class IntentEstimationResponse(BaseModel):
     estimated_intent: str
     likelihood: float
     reasoning: str
+    provenance_ref: str | None = None
 
 class PlaybookGenerationRequest(BaseModel):
     crisis_type: str
@@ -64,6 +66,7 @@ class PlaybookGenerationResponse(BaseModel):
     steps: list[str]
     metrics_of_effectiveness: list[str]
     metrics_of_performance: list[str]
+    provenance_ref: str | None = None
 
 class EdgePrediction(BaseModel):
     source: str
@@ -91,6 +94,13 @@ provider.add_span_processor(processor)
 trace.set_tracer_provider(provider)
 
 app = FastAPI()
+v1_router = APIRouter(prefix="/v1")
+
+def get_provenance_ref():
+    """Helper to generate a provenance reference from the current trace."""
+    current_span = trace.get_current_span()
+    trace_id = format(current_span.get_span_context().trace_id, '032x')
+    return f"trace:{trace_id}"
 
 # --- AI/ML Model Loading ---
 nlp = None
@@ -132,6 +142,27 @@ redis_client = None
 def health_check():
     return {"status": "ok"}
 
+# Aliases for v1 endpoints to maintain backward compatibility
+@app.post("/analyze-telemetry", response_model=TelemetryAnalysisResponse, tags=["Legacy"])
+async def analyze_telemetry_legacy(request: TelemetryAnalysisRequest, api_key: str = Depends(verify_api_key)):
+    return await analyze_telemetry(request, api_key)
+
+@app.post("/estimate-intent", response_model=IntentEstimationResponse, tags=["Legacy"])
+async def estimate_intent_legacy(request: IntentEstimationRequest, api_key: str = Depends(verify_api_key)):
+    return await estimate_intent(request, api_key)
+
+@app.post("/generate-playbook", response_model=PlaybookGenerationResponse, tags=["Legacy"])
+async def generate_playbook_legacy(request: PlaybookGenerationRequest, api_key: str = Depends(verify_api_key)):
+    return await generate_playbook(request, api_key)
+
+try:
+    from .gnn import _link_predictions_impl
+    @app.get("/ai/gnn/link-predictions", tags=["Legacy"])
+    async def link_predictions_legacy(refresh: bool = Query(False)):
+        return await _link_predictions_impl(refresh)
+except Exception:
+    pass
+
 @app.get("/graph")
 def get_graph_data():
     if not neo4j_driver:
@@ -155,7 +186,7 @@ def get_graph_data():
             edges.append({"id": relationship.id, "source": relationship.start_node.id, "target": relationship.end_node.id, "type": relationship.type, "properties": dict(relationship)})
     return {"nodes": nodes, "edges": edges}
 
-@app.post("/analyze-telemetry", response_model=TelemetryAnalysisResponse)
+@v1_router.post("/analyze-telemetry", response_model=TelemetryAnalysisResponse)
 async def analyze_telemetry(request: TelemetryAnalysisRequest, api_key: str = Depends(verify_api_key)):
     if not nlp or not sentence_model:
         raise HTTPException(status_code=503, detail="NLP models not loaded.")
@@ -166,9 +197,14 @@ async def analyze_telemetry(request: TelemetryAnalysisRequest, api_key: str = De
     if "disinfo" in request.text.lower(): narratives.append("disinformation_campaign")
     if "unity" in request.text.lower(): narratives.append("unity_messaging")
     if "threat" in request.text.lower(): narratives.append("threat_mitigation")
-    return {"entities": entities, "sentiment": sentiment, "narratives": narratives}
+    return {
+        "entities": entities,
+        "sentiment": sentiment,
+        "narratives": narratives,
+        "provenance_ref": get_provenance_ref()
+    }
 
-@app.post("/estimate-intent", response_model=IntentEstimationResponse)
+@v1_router.post("/estimate-intent", response_model=IntentEstimationResponse)
 async def estimate_intent(request: IntentEstimationRequest, api_key: str = Depends(verify_api_key)):
     prompt = f"Estimate intent based on telemetry: {request.telemetry_summary}..."
     llm_response_str = await llm_provider._cached_generate_text(prompt)
@@ -177,9 +213,10 @@ async def estimate_intent(request: IntentEstimationRequest, api_key: str = Depen
         "estimated_intent": llm_response.get("estimated_intent", "Unknown"),
         "likelihood": llm_response.get("likelihood", 0.5),
         "reasoning": llm_response.get("reasoning", "No reasoning provided by LLM."),
+        "provenance_ref": get_provenance_ref()
     }
 
-@app.post("/generate-playbook", response_model=PlaybookGenerationResponse)
+@v1_router.post("/generate-playbook", response_model=PlaybookGenerationResponse)
 async def generate_playbook(request: PlaybookGenerationRequest, api_key: str = Depends(verify_api_key)):
     prompt = f"Generate a strategic playbook for a {request.crisis_type} crisis..."
     llm_response_str = await llm_provider._cached_generate_text(prompt)
@@ -191,9 +228,10 @@ async def generate_playbook(request: PlaybookGenerationRequest, api_key: str = D
         "steps": llm_response.get("steps", []),
         "metrics_of_effectiveness": llm_response.get("metrics_of_effectiveness", []),
         "metrics_of_performance": llm_response.get("metrics_of_performance", []),
+        "provenance_ref": get_provenance_ref()
     }
 
-@app.get("/forecast/graph", response_model=ForecastResponse)
+@v1_router.get("/forecast/graph", response_model=ForecastResponse)
 async def forecast_graph(entity_id: str, past_days: int = 14, future_days: int = 30):
     cache_key = GraphForecaster.cache_key(entity_id, past_days, future_days)
     if redis_client:
@@ -207,6 +245,8 @@ async def forecast_graph(entity_id: str, past_days: int = 14, future_days: int =
     if redis_client:
         redis_client.setex(cache_key, 3600, response.json())
     return response
+
+app.include_router(v1_router)
 
 # --- Router Includes ---
 try:

@@ -5,11 +5,15 @@ include Makefile.merge-train
 
 .PHONY: up down restart logs shell clean
 .PHONY: dev test lint build format ci
-.PHONY: db-migrate db-seed sbom k6
+.PHONY: db-migrate db-seed sbom sign k6 policy-test
 .PHONY: merge-s25 merge-s25.resume merge-s25.clean pr-release provenance ci-check prereqs contracts policy-sim rerere dupescans
-.PHONY: bootstrap
+.PHONY: bootstrap dev-preflight
 .PHONY: dev-prereqs dev-up dev-down dev-smoke
 .PHONY: demo demo-down demo-check demo-seed demo-smoke
+
+dev-preflight:
+	@chmod +x scripts/dev-preflight.sh
+	@./scripts/dev-preflight.sh
 
 COMPOSE_DEV_FILE ?= docker-compose.dev.yaml
 DEV_ENV_FILE ?= .env
@@ -38,7 +42,7 @@ dev-prereqs:
 	@[ -f "$(DEV_ENV_FILE)" ] || { echo "$(DEV_ENV_FILE) missing. Copy from .env.example before starting (cp .env.example $(DEV_ENV_FILE))."; exit 1; }
 	@command -v curl >/dev/null 2>&1 || { echo "curl not found. Install curl for smoke checks."; exit 1; }
 
-dev-up: dev-prereqs ## Validate prereqs then start dev stack
+dev-up: dev-prereqs dev-preflight ## Validate prereqs then start dev stack
 	@echo "Starting dev stack with $(COMPOSE_DEV_FILE)..."
 	docker compose -f $(COMPOSE_DEV_FILE) up --build -d
 
@@ -69,7 +73,7 @@ clean:
 
 # --- Development Workflow ---
 
-bootstrap: ## Install dev dependencies
+bootstrap: dev-preflight ## Install dev dependencies
 	python3 -m venv $(VENV_DIR)
 	$(VENV_BIN)/pip install -U pip
 	$(VENV_BIN)/pip install -e ".[otel,policy,sbom,perf]"
@@ -122,8 +126,22 @@ validate-ops: ## Validate observability assets (dashboards, alerts, runbooks)
 rollback-drill: ## Run simulated rollback drill
 	@node scripts/ops/rollback_drill.js
 
-sbom:   ## Generate CycloneDX SBOM
-	@pnpm cyclonedx-npm --output-format JSON --output-file sbom.json
+sbom:   ## Generate unified CycloneDX SBOM (Node + Python)
+	@chmod +x scripts/generate-sbom.sh
+	@./scripts/generate-sbom.sh "summit-platform" "v$(PACKAGE_VERSION)" "artifacts/sbom"
+
+sign:   ## Sign build artifacts
+	@chmod +x scripts/sign-artifacts.sh
+	@./scripts/sign-artifacts.sh "summit-platform" "v$(PACKAGE_VERSION)"
+
+policy-test: ## Run OPA policy tests (baseline only)
+	@if command -v opa >/dev/null 2>&1; then \
+		opa test policy/baseline.rego policy/baseline_test.rego -v; \
+	else \
+		echo "⚠️  opa not found. Downloading OPA..."; \
+		curl -sL -o opa-bin https://openpolicyagent.org/downloads/latest/opa_linux_amd64 && chmod +x ./opa-bin; \
+		./opa-bin test policy/baseline.rego policy/baseline_test.rego -v; \
+	fi
 
 supplychain.evidence: ## Generate supply chain evidence artifacts
 	@bash hack/supplychain/evidence_id.sh > evidence_id.txt

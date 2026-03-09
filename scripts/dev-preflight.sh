@@ -1,6 +1,35 @@
 #!/usr/bin/env bash
 set -uo pipefail
 
+echo "🔍 Running enhanced preflight checks..."
+
+# 1. Check Node version
+REQUIRED_NODE_MAJOR=20
+if command -v node >/dev/null 2>&1; then
+  CURRENT_NODE=$(node -v)
+  CURRENT_MAJOR=$(node -v | cut -d'v' -f2 | cut -d'.' -f1)
+  if (( CURRENT_MAJOR < REQUIRED_NODE_MAJOR )); then
+    echo "❌ Required Node version >= v$REQUIRED_NODE_MAJOR, but found $CURRENT_NODE"
+    exit 1
+  fi
+  echo "✅ Node version $CURRENT_NODE is valid."
+else
+  echo "❌ node is not installed."
+  exit 1
+fi
+
+# 2. Check Docker
+if command -v docker >/dev/null 2>&1; then
+  if ! docker info &> /dev/null; then
+    echo "❌ Docker daemon is not running."
+    exit 1
+  fi
+  echo "✅ Docker is running."
+else
+  echo "❌ docker is not installed."
+  exit 1
+fi
+
 # Required ports for the stack
 # 3000: Client
 # 4000: API
