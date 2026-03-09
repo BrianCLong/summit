@@ -1,11 +1,12 @@
 import json
 import logging
 import os
-from typing import Any, Optional, Union, Iterator
+from typing import Any, Iterator, Optional, Union
 
 import redis
+
 try:
-    from redis.cluster import RedisCluster, ClusterNode
+    from redis.cluster import ClusterNode, RedisCluster
 except ImportError:
     RedisCluster = None
     ClusterNode = None
