@@ -76,6 +76,17 @@ curl -X POST http://localhost:4000/api/graphql \
 open http://localhost:3000
 ```
 
+### 🚀 Testing Ingestion
+
+While the full Connectors integration is under development, you can test a sample data ingestion flow locally:
+
+```bash
+pnpm ingest:demo
+```
+
+This script will process mock OSINT records from the `GOLDEN/datasets/fusion_demo.jsonl` file to demonstrate the structure of ingestion pipelines.
+
+
 ## 🏛 Architecture
 
 Summit follows a modular microservices architecture:
