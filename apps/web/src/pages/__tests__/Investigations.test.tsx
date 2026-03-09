@@ -35,7 +35,7 @@ describe('Investigations Page Accessibility', () => {
 
     // In our implementation, the graph nodes have role="graphics-symbol" and are focusable
     const nodes = screen.getAllByRole('graphics-symbol')
-    const firstNode = nodes.find(n => n.getAttribute('aria-label')?.includes('Strategic Hub Alpha'))
+    const firstNode = nodes.find(n => n.tagName === 'g' && n.getAttribute('aria-label')?.includes('Strategic Hub Alpha'))
 
     if (firstNode) {
         fireEvent.click(firstNode)
@@ -43,7 +43,7 @@ describe('Investigations Page Accessibility', () => {
         // Check aria-live region (hidden)
         const announcement = screen.getByText(/Selected entity: Strategic Hub Alpha/i)
         expect(announcement).toBeInTheDocument()
-        expect(announcement.parentElement).toHaveAttribute('aria-live', 'polite')
+        expect(announcement).toHaveAttribute('aria-live', 'polite')
     }
   })
 
@@ -59,7 +59,7 @@ describe('Investigations Page Accessibility', () => {
         expect(document.activeElement).toBe(firstNode)
 
         fireEvent.keyDown(firstNode, { key: 'Enter' })
-        expect(screen.getByText(/Strategic Hub Alpha/i)).toBeInTheDocument()
+        expect(screen.getAllByText(/Strategic Hub Alpha/i)[0]).toBeInTheDocument()
     }
   })
 })

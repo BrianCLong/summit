@@ -44,14 +44,14 @@ interface GraphLink extends SimulationLinkDatum<GraphNode> {
  * GraphView component with full ARIA support and keyboard navigation.
  * Targets WCAG AA compliance and Lighthouse 95+.
  */
-export const GraphView: React.FC<GraphViewProps> = ({
+export const GraphView = ({
   entities,
   relationships,
   layout = { type: 'force', settings: {} },
   onEntitySelect,
   selectedEntityId,
   className,
-}) => {
+}: GraphViewProps): React.ReactElement => {
   const svgRef = useRef<SVGSVGElement>(null)
   const [dimensions, setDimensions] = useState({ width: 800, height: 600 })
 
@@ -134,7 +134,7 @@ export const GraphView: React.FC<GraphViewProps> = ({
       .attr('stroke', '#94a3b8')
       .attr('stroke-opacity', 0.6)
       .attr('stroke-width', 2)
-      .attr('stroke-dasharray', d => d.relationship.properties?.style === 'dashed' || d.relationship.type === 'narrative' ? '5,5' : 'none')
+      .attr('stroke-dasharray', d => d.relationship.properties?.style === 'dashed' || (d.relationship.type as string) === 'narrative' ? '5,5' : 'none')
 
     // Render Nodes
     const node = g

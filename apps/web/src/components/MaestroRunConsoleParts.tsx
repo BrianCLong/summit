@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useState } from 'react';
-import type { MaestroRunResponse, TaskResult } from '@/types/maestro';
+import type { MaestroRunResponse, RunCostSummary, TaskResult } from '@/types/maestro';
 
 import {
   Loader2,
@@ -171,7 +171,7 @@ export const RunSummary: React.FC<RunPartProps> = React.memo(({ selectedRun }) =
                 By model
               </p>
               <div className="space-y-1">
-                {Object.entries(selectedRun.costSummary.byModel).map(
+                {(Object.entries(selectedRun.costSummary.byModel) as Array<[string, RunCostSummary['byModel'][string]]>).map(
                   ([model, stats]) => (
                     <div
                       key={model}

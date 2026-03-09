@@ -9,7 +9,7 @@ interface IntegrationFormProps {
 }
 
 export const IntegrationForm = React.memo<IntegrationFormProps>(({ type, initialConfig = {}, onSave, onTest, onCancel }) => {
-    const [config, setConfig] = useState(initialConfig);
+    const [config, setConfig] = useState<{ url?: string; secret?: string; [key: string]: unknown }>(initialConfig);
     const [loading, setLoading] = useState(false);
 
     const handleSaveClick = async () => {

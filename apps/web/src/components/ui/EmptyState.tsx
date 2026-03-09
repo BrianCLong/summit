@@ -55,11 +55,10 @@ export function EmptyState({
         className
       )}
     >
-      <div className="mb-4 rounded-full bg-muted p-4">
+      <div className="mb-4 rounded-full bg-muted p-4" aria-hidden="true">
         {IconComponent ? (
           <IconComponent
             className="h-8 w-8 text-muted-foreground"
-            aria-hidden="true"
           />
         ) : React.isValidElement(icon) ? (
           React.cloneElement(icon as React.ReactElement, {

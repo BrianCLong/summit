@@ -84,3 +84,7 @@ export function debounce<T extends (...args: any[]) => any>(
 export function generateId(): string {
   return Math.random().toString(36).substr(2, 9)
 }
+
+// Platform-aware modifier key labels for keyboard shortcuts
+export const MODIFIER_KEY = typeof navigator !== 'undefined' && /Mac|iPod|iPhone|iPad/.test(navigator.platform) ? '⌘' : 'Ctrl'
+export const SHIFT_KEY = '⇧'

@@ -14,6 +14,13 @@ const renderPage = () =>
     </KeyboardShortcutsProvider>
   )
 
+// Helper: wait until at least one element matching text is in the document
+const waitForText = (text: RegExp | string) =>
+  waitFor(() => {
+    const elements = screen.getAllByText(text)
+    expect(elements.length).toBeGreaterThan(0)
+  })
+
 describe('PRTriagePage', () => {
   beforeEach(() => {
     window.localStorage.clear()
@@ -43,18 +50,15 @@ describe('PRTriagePage', () => {
 
   it('shows mock PRs in the queue after loading', async () => {
     renderPage()
-    await waitFor(() => {
-      expect(screen.getByText(/branch convergence metrics/i)).toBeInTheDocument()
-    })
-    expect(screen.getByText(/governance conflict/i)).toBeInTheDocument()
-    expect(screen.getByText(/PR triage workspace/i)).toBeInTheDocument()
+    await waitForText(/branch convergence metrics/i)
+    expect(screen.getAllByText(/branch convergence metrics/i).length).toBeGreaterThan(0)
+    expect(screen.getAllByText(/governance-conflict/i).length).toBeGreaterThan(0)
+    expect(screen.getAllByText(/PR triage workspace/i).length).toBeGreaterThan(0)
   })
 
   it('selects a PR and shows diff preview on click', async () => {
     renderPage()
-    await waitFor(() => {
-      expect(screen.getByText(/branch convergence metrics/i)).toBeInTheDocument()
-    })
+    await waitForText(/branch convergence metrics/i)
 
     // The first PR row button should be auto-selected; click a second one
     const conflictRow = screen.getAllByRole('button', { pressed: false })[0]
@@ -68,18 +72,16 @@ describe('PRTriagePage', () => {
 
   it('displays risk checklist for the active PR', async () => {
     renderPage()
-    await waitFor(() => {
-      expect(screen.getByText(/branch convergence metrics/i)).toBeInTheDocument()
-    })
+    await waitForText(/branch convergence metrics/i)
 
     // Risk Checklist section should be visible for the auto-selected first PR
-    expect(screen.getByText('Risk Checklist')).toBeInTheDocument()
+    expect(screen.getAllByText(/Risk Checklist/i).length).toBeGreaterThan(0)
   })
 
   it('shows "pass" / "fail" badges in the risk checklist', async () => {
     renderPage()
     await waitFor(() => {
-      expect(screen.getByText('Risk Checklist')).toBeInTheDocument()
+      expect(screen.getAllByText(/Risk Checklist/i).length).toBeGreaterThan(0)
     })
     const passBadges = screen.getAllByText('pass')
     expect(passBadges.length).toBeGreaterThan(0)
@@ -87,9 +89,7 @@ describe('PRTriagePage', () => {
 
   it('filters by status bucket', async () => {
     renderPage()
-    await waitFor(() => {
-      expect(screen.getByText(/branch convergence metrics/i)).toBeInTheDocument()
-    })
+    await waitForText(/branch convergence metrics/i)
 
     // Click "Conflict" bucket pill
     const conflictPill = screen.getByRole('button', { name: /Conflict \(\d+\)/i })
@@ -97,17 +97,15 @@ describe('PRTriagePage', () => {
 
     await waitFor(() => {
       // The conflict PR should still be visible
-      expect(screen.getByText(/governance conflict/i)).toBeInTheDocument()
+      expect(screen.getAllByText(/governance-conflict/i).length).toBeGreaterThan(0)
       // The merge-ready PR should no longer be in the queue
-      expect(screen.queryByText(/branch convergence metrics/i)).not.toBeInTheDocument()
+      expect(screen.queryAllByText(/branch convergence metrics/i)).toHaveLength(0)
     })
   })
 
   it('filters by priority', async () => {
     renderPage()
-    await waitFor(() => {
-      expect(screen.getByText(/branch convergence metrics/i)).toBeInTheDocument()
-    })
+    await waitForText(/branch convergence metrics/i)
 
     const prioritySelect = screen.getByLabelText('Priority')
     fireEvent.change(prioritySelect, { target: { value: 'low' } })
@@ -115,18 +113,16 @@ describe('PRTriagePage', () => {
     await waitFor(() => {
       // Only the docs PR is low priority
       expect(screen.getByText(/triage-runbook/i)).toBeInTheDocument()
-      expect(screen.queryByText(/branch convergence metrics/i)).not.toBeInTheDocument()
+      expect(screen.queryAllByText(/branch convergence metrics/i)).toHaveLength(0)
     })
   })
 
   it('shows branch convergence info in diff preview', async () => {
     renderPage()
-    await waitFor(() => {
-      expect(screen.getByText(/branch convergence metrics/i)).toBeInTheDocument()
-    })
+    await waitForText(/branch convergence metrics/i)
 
     // Click the merge-ready PR (PR #101)
-    const prRow = screen.getByText(/branch convergence metrics/i).closest('button')
+    const prRow = screen.getAllByText(/branch convergence metrics/i)[0].closest('button')
     if (prRow) fireEvent.click(prRow)
 
     await waitFor(() => {
@@ -136,12 +132,10 @@ describe('PRTriagePage', () => {
 
   it('shows conflict status in branch convergence for conflict PRs', async () => {
     renderPage()
-    await waitFor(() => {
-      expect(screen.getByText(/governance conflict/i)).toBeInTheDocument()
-    })
+    await waitForText(/governance-conflict/i)
 
-    // Click the conflict PR row
-    const conflictRow = screen.getByText(/governance conflict/i).closest('button')
+    // Click the conflict PR row (branch name contains governance-conflict)
+    const conflictRow = screen.getAllByText(/governance-conflict/i)[0].closest('button')
     if (conflictRow) fireEvent.click(conflictRow)
 
     await waitFor(() => {
@@ -151,9 +145,7 @@ describe('PRTriagePage', () => {
 
   it('renders collapsed diff files that expand on click', async () => {
     renderPage()
-    await waitFor(() => {
-      expect(screen.getByText(/branch convergence metrics/i)).toBeInTheDocument()
-    })
+    await waitForText(/branch convergence metrics/i)
 
     // PR #101 diff: apps/api/src/routes/convergence.ts should be expandable
     // First file auto-expands; clicking the second should expand it
@@ -169,18 +161,14 @@ describe('PRTriagePage', () => {
 
   it('has Quick Assign input and Assign button', async () => {
     renderPage()
-    await waitFor(() => {
-      expect(screen.getByText(/branch convergence metrics/i)).toBeInTheDocument()
-    })
+    await waitForText(/branch convergence metrics/i)
     expect(screen.getByLabelText('Quick Assign')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /assign/i })).toBeInTheDocument()
   })
 
   it('shows approve / request-changes / defer action buttons', async () => {
     renderPage()
-    await waitFor(() => {
-      expect(screen.getByText(/branch convergence metrics/i)).toBeInTheDocument()
-    })
+    await waitForText(/branch convergence metrics/i)
     expect(screen.getByRole('button', { name: /approve/i })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /request changes/i })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /defer/i })).toBeInTheDocument()
@@ -188,15 +176,11 @@ describe('PRTriagePage', () => {
 
   it('reset button restores mock data', async () => {
     renderPage()
-    await waitFor(() => {
-      expect(screen.getByText(/branch convergence metrics/i)).toBeInTheDocument()
-    })
+    await waitForText(/branch convergence metrics/i)
 
     const resetBtn = screen.getByLabelText('Reset PR queue')
     fireEvent.click(resetBtn)
 
-    await waitFor(() => {
-      expect(screen.getByText(/branch convergence metrics/i)).toBeInTheDocument()
-    })
+    await waitForText(/branch convergence metrics/i)
   })
 })

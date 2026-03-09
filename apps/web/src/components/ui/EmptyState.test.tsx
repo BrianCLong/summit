@@ -13,8 +13,8 @@ describe('EmptyState', () => {
 
   it('renders the chart icon when icon="chart"', () => {
     const { container } = render(<EmptyState title="Test" icon="chart" />);
-    // BarChart3 should be rendered. We can check if a lucide icon is present.
-    const icon = container.querySelector('.lucide-bar-chart-3');
+    // BarChart3 was renamed to ChartColumn in lucide-react v0.400+; class reflects new name
+    const icon = container.querySelector('.lucide-chart-column');
     expect(icon).not.toBeNull();
   });
 

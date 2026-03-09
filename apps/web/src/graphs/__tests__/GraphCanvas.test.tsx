@@ -1,12 +1,18 @@
 import React from 'react'
 import { render } from '@testing-library/react'
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { GraphCanvas } from '../GraphCanvas'
 import type { Entity, Relationship, GraphLayout } from '@/types'
 
-// Mock D3 modules to avoid JSDOM issues with SVG methods if necessary,
-// but for now let's see if it mounts with basic stubs.
-// Actually, d3-force simulation runs a timer which might need cleanup or mocking.
+vi.mock('@/contexts/AuthContext', () => ({
+  useAuth: () => ({ user: { id: '1', name: 'Test User', permissions: [], role: 'viewer' }, loading: false }),
+  AuthProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}))
+
+vi.mock('@/hooks/useRbac', () => ({
+  useRbac: () => ({ hasPermission: true, loading: false }),
+  useRbacMultiple: () => ({ hasAllPermissions: true, loading: false }),
+}))
 
 const MOCK_ENTITIES: Entity[] = [
   { id: '1', name: 'Test', type: 'PERSON', confidence: 1, properties: {}, createdAt: '', updatedAt: '' }

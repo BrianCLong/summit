@@ -25,8 +25,9 @@ export const HITLReviewPanel: React.FC<HITLReviewPanelProps> = ({ taskId, workfl
         <pre className="text-xs overflow-auto">{JSON.stringify(data, null, 2)}</pre>
       </div>
       <div className="mt-4">
-        <label className="block text-sm font-medium text-gray-700">Decision:</label>
+        <label htmlFor="decision-select" className="block text-sm font-medium text-gray-700">Decision:</label>
         <select
+          id="decision-select"
           className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
           value={decision || ''}
           onChange={(e) => setDecision(e.target.value as 'approved' | 'rejected')}
@@ -38,8 +39,9 @@ export const HITLReviewPanel: React.FC<HITLReviewPanelProps> = ({ taskId, workfl
       </div>
       {decision === 'rejected' && (
         <div className="mt-4">
-          <label className="block text-sm font-medium text-gray-700">Reason for Rejection:</label>
+          <label htmlFor="rejection-reason" className="block text-sm font-medium text-gray-700">Reason for Rejection:</label>
           <textarea
+            id="rejection-reason"
             className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
             rows={3}
             value={reason}

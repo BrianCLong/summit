@@ -24,8 +24,8 @@ describe('FlagGuard', () => {
   })
 
   test('renders children when user has all permissions', () => {
-    (AuthContext.useAuth as any).mockReturnValue({ user: { id: '1' }, loading: false })
-    (RbacHooks.useRbacMultiple as any).mockReturnValue({ hasAllPermissions: true, loading: false })
+    ;(AuthContext.useAuth as any).mockReturnValue({ user: { id: '1' }, loading: false })
+    ;(RbacHooks.useRbacMultiple as any).mockReturnValue({ hasAllPermissions: true, loading: false })
 
     render(
       <FlagGuard required={[{ resource: 'test', action: 'read' }]}>
@@ -38,8 +38,8 @@ describe('FlagGuard', () => {
   })
 
   test('renders DisabledOverlay when user misses permissions and no fallback', () => {
-    (AuthContext.useAuth as any).mockReturnValue({ user: { id: '1' }, loading: false })
-    (RbacHooks.useRbacMultiple as any).mockReturnValue({ hasAllPermissions: false, loading: false })
+    ;(AuthContext.useAuth as any).mockReturnValue({ user: { id: '1' }, loading: false })
+    ;(RbacHooks.useRbacMultiple as any).mockReturnValue({ hasAllPermissions: false, loading: false })
 
     render(
       <FlagGuard required={[{ resource: 'test', action: 'read' }]}>
@@ -52,8 +52,8 @@ describe('FlagGuard', () => {
   })
 
   test('renders fallback when user misses permissions and fallback provided', () => {
-    (AuthContext.useAuth as any).mockReturnValue({ user: { id: '1' }, loading: false })
-    (RbacHooks.useRbacMultiple as any).mockReturnValue({ hasAllPermissions: false, loading: false })
+    ;(AuthContext.useAuth as any).mockReturnValue({ user: { id: '1' }, loading: false })
+    ;(RbacHooks.useRbacMultiple as any).mockReturnValue({ hasAllPermissions: false, loading: false })
 
     render(
       <FlagGuard

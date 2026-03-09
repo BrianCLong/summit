@@ -144,12 +144,16 @@ export default function AlertsPage() {
       setAlerts(alertsData.alerts)
       setLoading(alertsLoading)
       setError(alertsError)
+    } else if (alertsLoading) {
+      // Still fetching — do not resolve to error state yet
+      setLoading(true)
+      setError(null)
     } else {
       if (!isDemoMode) {
         setAlerts([])
         setLoading(false)
         setError(
-          new Error('Live alerts are unavailable without a backend connection.')
+          alertsError ?? new Error('Live alerts are unavailable without a backend connection.')
         )
         return
       }

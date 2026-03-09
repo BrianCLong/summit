@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Command } from 'cmdk'
+import { Command, CommandDialog } from 'cmdk'
 import { useNavigate } from 'react-router-dom'
 import {
   Calculator,
@@ -38,7 +38,7 @@ export function CommandPalette(): React.ReactElement {
   }, [])
 
   return (
-    <Command.Dialog
+    <CommandDialog
       open={open}
       onOpenChange={setOpen}
       label="Global Command Menu"
@@ -141,6 +141,6 @@ export function CommandPalette(): React.ReactElement {
           <Kbd>esc</Kbd> to close
         </div>
       </div>
-    </Command.Dialog>
+    </CommandDialog>
   )
 }

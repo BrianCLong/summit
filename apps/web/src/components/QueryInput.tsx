@@ -39,8 +39,9 @@ export const QueryInput: React.FC<QueryInputProps> = ({ onPreview, loading = fal
         onClick={() => onPreview(input)}
         disabled={!input.trim() || loading}
         aria-busy={loading}
+        aria-label="Generate Cypher"
       >
-        {loading ? <CircularProgress size={24} color="inherit" /> : 'Generate Cypher'}
+        {loading ? <CircularProgress size={24} color="inherit" aria-hidden="true" /> : 'Generate Cypher'}
       </Button>
     </Box>
   );

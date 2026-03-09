@@ -43,7 +43,9 @@ vi.mock('@/components/ui/Skeleton', () => ({
 }))
 
 vi.mock('@/components/ui/EmptyState', () => ({
-  EmptyState: ({ title }: { title: string }) => <div>{title}</div>,
+  EmptyState: ({ title, description }: { title: string; description?: string }) => (
+    <div>{title}{description && <span>{description}</span>}</div>
+  ),
 }))
 
 vi.mock('@/components/ui/SearchBar', () => ({

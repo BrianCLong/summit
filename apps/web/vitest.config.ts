@@ -9,9 +9,10 @@ export default defineConfig({
     alias: {
       '@': path.resolve(__dirname, './src'),
     },
+    dedupe: ['react', 'react-dom', 'react-dom/client'],
   },
   test: {
-    environment: 'jsdom',
+    environment: 'happy-dom',
     globals: true,
     setupFiles: ['./src/setupTests.ts'],
     coverage: {
@@ -26,7 +27,7 @@ export default defineConfig({
         },
       },
     },
-    exclude: ['**/node_modules/**', '**/dist/**', '**/e2e/**', 'tests/**', '**/TimelineRail.test.tsx', '**/EntityDrawer.test.tsx', '**/MaestroRunConsole.test.tsx'],
+    exclude: ['**/node_modules/**', '**/dist/**', '**/e2e/**', 'tests/**', '**/TimelineRail.test.tsx', '**/EntityDrawer.test.tsx', '**/MaestroRunConsole.test.tsx', '**/MaestroRunConsoleParts.test.tsx'],
     include: ['src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
   },
 })

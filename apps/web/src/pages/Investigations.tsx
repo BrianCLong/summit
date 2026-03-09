@@ -203,7 +203,7 @@ export default function Investigations() {
                     <div className="w-12 h-12 lg:w-16 lg:h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4 border border-slate-100">
                         <Info className="h-6 w-6 lg:h-8 lg:w-8 text-slate-300" aria-hidden="true" />
                     </div>
-                    <h3 className="text-base lg:text-lg font-semibold text-slate-900 mb-1">Intelligence View</h3>
+                    <h2 className="text-base lg:text-lg font-semibold text-slate-900 mb-1">Intelligence View</h2>
                     <p className="text-xs lg:text-sm text-slate-500 max-w-[200px]">Select a node on the Org Mesh to view detailed telemetry and drift status.</p>
                 </div>
             )}

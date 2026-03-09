@@ -50,15 +50,20 @@ export function KeyboardShortcutsHelp(): React.ReactElement {
                       {shortcut.keys.map((keyGroup, idx) => (
                         <div key={idx} className="flex gap-1">
                           {idx > 0 && <span className="text-muted-foreground text-xs mx-1">or</span>}
-                          {keyGroup.split('+').map((key) => (
-                            <Badge
-                              key={key}
-                              variant="secondary"
-                              className="font-mono text-xs px-1.5 min-w-[20px] justify-center capitalize"
-                            >
-                              {key === 'mod' ? '⌘' : key === 'shift' ? '⇧' : key}
-                            </Badge>
-                          ))}
+                          {keyGroup.split('+').map((key) => {
+                            const display = key === 'mod' ? '⌘' : key === 'shift' ? '⇧' : key
+                            const label = key === 'mod' ? 'Command' : key === 'shift' ? 'Shift' : key
+                            return (
+                              <Badge
+                                key={key}
+                                variant="secondary"
+                                className="font-mono text-xs px-1.5 min-w-[20px] justify-center capitalize"
+                                aria-label={label}
+                              >
+                                {display}
+                              </Badge>
+                            )
+                          })}
                         </div>
                       ))}
                     </div>
@@ -75,17 +80,17 @@ export function KeyboardShortcutsHelp(): React.ReactElement {
             <div className="space-y-2">
               <div className="flex items-center justify-between gap-4">
                 <span className="text-sm">Show this help</span>
-                <Badge variant="secondary" className="font-mono text-xs px-1.5 min-w-[20px] justify-center">
+                <Badge variant="secondary" className="font-mono text-xs px-1.5 min-w-[20px] justify-center" aria-label="Question mark">
                   ?
                 </Badge>
               </div>
               <div className="flex items-center justify-between gap-4">
                 <span className="text-sm">Command Palette</span>
                 <div className="flex gap-1">
-                  <Badge variant="secondary" className="font-mono text-xs px-1.5 min-w-[20px] justify-center">
+                  <Badge variant="secondary" className="font-mono text-xs px-1.5 min-w-[20px] justify-center" aria-label="Command">
                     ⌘
                   </Badge>
-                  <Badge variant="secondary" className="font-mono text-xs px-1.5 min-w-[20px] justify-center">
+                  <Badge variant="secondary" className="font-mono text-xs px-1.5 min-w-[20px] justify-center" aria-label="K">
                     K
                   </Badge>
                 </div>
