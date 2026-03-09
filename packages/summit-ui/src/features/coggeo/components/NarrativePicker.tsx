@@ -8,7 +8,11 @@ type Props = {
 };
 
 export const NarrativePicker: FC<Props> = ({ narratives, selected, onSelect }) => (
-  <select value={selected ?? ""} onChange={(event) => onSelect(event.target.value)}>
+  <select
+    aria-label="Select narrative"
+    value={selected ?? ""}
+    onChange={(event) => onSelect(event.target.value)}
+  >
     <option value="">Select narrative</option>
     {narratives.map((narrative) => (
       <option key={narrative.id} value={narrative.id}>
