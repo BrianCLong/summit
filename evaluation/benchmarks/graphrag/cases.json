@@ -1,7 +1,344 @@
-[
-  {
-    "id": "graphrag-1",
-    "task": "Explain relationship between entity A and entity B",
-    "required_evidence": ["EVID:doc123", "EVID:doc456"]
-  }
-]
+{
+  "tasks": [
+    {
+      "id": "task_0",
+      "type": "entity_relationship_inference",
+      "evidence_id": "EVID:graphrag:entity_relationship_inference:a3681b41",
+      "query": "What can you infer about entity_relationship_inference from document 0?",
+      "expected_evidence": [
+        "EVID:graphrag:entity_relationship_inference:a3681b41"
+      ]
+    },
+    {
+      "id": "task_1",
+      "type": "multi_hop_retrieval",
+      "evidence_id": "EVID:graphrag:multi_hop_retrieval:20862169",
+      "query": "What can you infer about multi_hop_retrieval from document 1?",
+      "expected_evidence": [
+        "EVID:graphrag:multi_hop_retrieval:20862169"
+      ]
+    },
+    {
+      "id": "task_2",
+      "type": "conflicting_evidence",
+      "evidence_id": "EVID:graphrag:conflicting_evidence:6d4b6833",
+      "query": "What can you infer about conflicting_evidence from document 2?",
+      "expected_evidence": [
+        "EVID:graphrag:conflicting_evidence:6d4b6833"
+      ]
+    },
+    {
+      "id": "task_3",
+      "type": "missing_evidence",
+      "evidence_id": "EVID:graphrag:missing_evidence:b93a4d40",
+      "query": "What can you infer about missing_evidence from document 3?",
+      "expected_evidence": []
+    },
+    {
+      "id": "task_4",
+      "type": "entity_relationship_inference",
+      "evidence_id": "EVID:graphrag:entity_relationship_inference:0908e7a1",
+      "query": "What can you infer about entity_relationship_inference from document 4?",
+      "expected_evidence": [
+        "EVID:graphrag:entity_relationship_inference:0908e7a1"
+      ]
+    },
+    {
+      "id": "task_5",
+      "type": "multi_hop_retrieval",
+      "evidence_id": "EVID:graphrag:multi_hop_retrieval:02e39fab",
+      "query": "What can you infer about multi_hop_retrieval from document 5?",
+      "expected_evidence": [
+        "EVID:graphrag:multi_hop_retrieval:02e39fab"
+      ]
+    },
+    {
+      "id": "task_6",
+      "type": "conflicting_evidence",
+      "evidence_id": "EVID:graphrag:conflicting_evidence:2b1815de",
+      "query": "What can you infer about conflicting_evidence from document 6?",
+      "expected_evidence": [
+        "EVID:graphrag:conflicting_evidence:2b1815de"
+      ]
+    },
+    {
+      "id": "task_7",
+      "type": "missing_evidence",
+      "evidence_id": "EVID:graphrag:missing_evidence:63064381",
+      "query": "What can you infer about missing_evidence from document 7?",
+      "expected_evidence": []
+    },
+    {
+      "id": "task_8",
+      "type": "entity_relationship_inference",
+      "evidence_id": "EVID:graphrag:entity_relationship_inference:fb6a0e8b",
+      "query": "What can you infer about entity_relationship_inference from document 8?",
+      "expected_evidence": [
+        "EVID:graphrag:entity_relationship_inference:fb6a0e8b"
+      ]
+    },
+    {
+      "id": "task_9",
+      "type": "multi_hop_retrieval",
+      "evidence_id": "EVID:graphrag:multi_hop_retrieval:2b2da037",
+      "query": "What can you infer about multi_hop_retrieval from document 9?",
+      "expected_evidence": [
+        "EVID:graphrag:multi_hop_retrieval:2b2da037"
+      ]
+    },
+    {
+      "id": "task_10",
+      "type": "conflicting_evidence",
+      "evidence_id": "EVID:graphrag:conflicting_evidence:5c270d92",
+      "query": "What can you infer about conflicting_evidence from document 10?",
+      "expected_evidence": [
+        "EVID:graphrag:conflicting_evidence:5c270d92"
+      ]
+    },
+    {
+      "id": "task_11",
+      "type": "missing_evidence",
+      "evidence_id": "EVID:graphrag:missing_evidence:5bbf33a0",
+      "query": "What can you infer about missing_evidence from document 11?",
+      "expected_evidence": []
+    },
+    {
+      "id": "task_12",
+      "type": "entity_relationship_inference",
+      "evidence_id": "EVID:graphrag:entity_relationship_inference:45c47f6c",
+      "query": "What can you infer about entity_relationship_inference from document 12?",
+      "expected_evidence": [
+        "EVID:graphrag:entity_relationship_inference:45c47f6c"
+      ]
+    },
+    {
+      "id": "task_13",
+      "type": "multi_hop_retrieval",
+      "evidence_id": "EVID:graphrag:multi_hop_retrieval:310e32f7",
+      "query": "What can you infer about multi_hop_retrieval from document 13?",
+      "expected_evidence": [
+        "EVID:graphrag:multi_hop_retrieval:310e32f7"
+      ]
+    },
+    {
+      "id": "task_14",
+      "type": "conflicting_evidence",
+      "evidence_id": "EVID:graphrag:conflicting_evidence:00fc6ab3",
+      "query": "What can you infer about conflicting_evidence from document 14?",
+      "expected_evidence": [
+        "EVID:graphrag:conflicting_evidence:00fc6ab3"
+      ]
+    },
+    {
+      "id": "task_15",
+      "type": "missing_evidence",
+      "evidence_id": "EVID:graphrag:missing_evidence:d04c8d2d",
+      "query": "What can you infer about missing_evidence from document 15?",
+      "expected_evidence": []
+    },
+    {
+      "id": "task_16",
+      "type": "entity_relationship_inference",
+      "evidence_id": "EVID:graphrag:entity_relationship_inference:85cd04f4",
+      "query": "What can you infer about entity_relationship_inference from document 16?",
+      "expected_evidence": [
+        "EVID:graphrag:entity_relationship_inference:85cd04f4"
+      ]
+    },
+    {
+      "id": "task_17",
+      "type": "multi_hop_retrieval",
+      "evidence_id": "EVID:graphrag:multi_hop_retrieval:5c7fc246",
+      "query": "What can you infer about multi_hop_retrieval from document 17?",
+      "expected_evidence": [
+        "EVID:graphrag:multi_hop_retrieval:5c7fc246"
+      ]
+    },
+    {
+      "id": "task_18",
+      "type": "conflicting_evidence",
+      "evidence_id": "EVID:graphrag:conflicting_evidence:febb45ef",
+      "query": "What can you infer about conflicting_evidence from document 18?",
+      "expected_evidence": [
+        "EVID:graphrag:conflicting_evidence:febb45ef"
+      ]
+    },
+    {
+      "id": "task_19",
+      "type": "missing_evidence",
+      "evidence_id": "EVID:graphrag:missing_evidence:67bdc754",
+      "query": "What can you infer about missing_evidence from document 19?",
+      "expected_evidence": []
+    },
+    {
+      "id": "task_20",
+      "type": "entity_relationship_inference",
+      "evidence_id": "EVID:graphrag:entity_relationship_inference:ed58d315",
+      "query": "What can you infer about entity_relationship_inference from document 20?",
+      "expected_evidence": [
+        "EVID:graphrag:entity_relationship_inference:ed58d315"
+      ]
+    },
+    {
+      "id": "task_21",
+      "type": "multi_hop_retrieval",
+      "evidence_id": "EVID:graphrag:multi_hop_retrieval:f82b6be7",
+      "query": "What can you infer about multi_hop_retrieval from document 21?",
+      "expected_evidence": [
+        "EVID:graphrag:multi_hop_retrieval:f82b6be7"
+      ]
+    },
+    {
+      "id": "task_22",
+      "type": "conflicting_evidence",
+      "evidence_id": "EVID:graphrag:conflicting_evidence:c94a0355",
+      "query": "What can you infer about conflicting_evidence from document 22?",
+      "expected_evidence": [
+        "EVID:graphrag:conflicting_evidence:c94a0355"
+      ]
+    },
+    {
+      "id": "task_23",
+      "type": "missing_evidence",
+      "evidence_id": "EVID:graphrag:missing_evidence:b9a61eb7",
+      "query": "What can you infer about missing_evidence from document 23?",
+      "expected_evidence": []
+    },
+    {
+      "id": "task_24",
+      "type": "entity_relationship_inference",
+      "evidence_id": "EVID:graphrag:entity_relationship_inference:952eb8d3",
+      "query": "What can you infer about entity_relationship_inference from document 24?",
+      "expected_evidence": [
+        "EVID:graphrag:entity_relationship_inference:952eb8d3"
+      ]
+    },
+    {
+      "id": "task_25",
+      "type": "multi_hop_retrieval",
+      "evidence_id": "EVID:graphrag:multi_hop_retrieval:a78ff623",
+      "query": "What can you infer about multi_hop_retrieval from document 25?",
+      "expected_evidence": [
+        "EVID:graphrag:multi_hop_retrieval:a78ff623"
+      ]
+    },
+    {
+      "id": "task_26",
+      "type": "conflicting_evidence",
+      "evidence_id": "EVID:graphrag:conflicting_evidence:54979ea0",
+      "query": "What can you infer about conflicting_evidence from document 26?",
+      "expected_evidence": [
+        "EVID:graphrag:conflicting_evidence:54979ea0"
+      ]
+    },
+    {
+      "id": "task_27",
+      "type": "missing_evidence",
+      "evidence_id": "EVID:graphrag:missing_evidence:3074d4a4",
+      "query": "What can you infer about missing_evidence from document 27?",
+      "expected_evidence": []
+    },
+    {
+      "id": "task_28",
+      "type": "entity_relationship_inference",
+      "evidence_id": "EVID:graphrag:entity_relationship_inference:dd94548e",
+      "query": "What can you infer about entity_relationship_inference from document 28?",
+      "expected_evidence": [
+        "EVID:graphrag:entity_relationship_inference:dd94548e"
+      ]
+    },
+    {
+      "id": "task_29",
+      "type": "multi_hop_retrieval",
+      "evidence_id": "EVID:graphrag:multi_hop_retrieval:cca0f3ec",
+      "query": "What can you infer about multi_hop_retrieval from document 29?",
+      "expected_evidence": [
+        "EVID:graphrag:multi_hop_retrieval:cca0f3ec"
+      ]
+    },
+    {
+      "id": "task_30",
+      "type": "conflicting_evidence",
+      "evidence_id": "EVID:graphrag:conflicting_evidence:67621285",
+      "query": "What can you infer about conflicting_evidence from document 30?",
+      "expected_evidence": [
+        "EVID:graphrag:conflicting_evidence:67621285"
+      ]
+    },
+    {
+      "id": "task_31",
+      "type": "missing_evidence",
+      "evidence_id": "EVID:graphrag:missing_evidence:0331769c",
+      "query": "What can you infer about missing_evidence from document 31?",
+      "expected_evidence": []
+    },
+    {
+      "id": "task_32",
+      "type": "entity_relationship_inference",
+      "evidence_id": "EVID:graphrag:entity_relationship_inference:d6d7b986",
+      "query": "What can you infer about entity_relationship_inference from document 32?",
+      "expected_evidence": [
+        "EVID:graphrag:entity_relationship_inference:d6d7b986"
+      ]
+    },
+    {
+      "id": "task_33",
+      "type": "multi_hop_retrieval",
+      "evidence_id": "EVID:graphrag:multi_hop_retrieval:df526e86",
+      "query": "What can you infer about multi_hop_retrieval from document 33?",
+      "expected_evidence": [
+        "EVID:graphrag:multi_hop_retrieval:df526e86"
+      ]
+    },
+    {
+      "id": "task_34",
+      "type": "conflicting_evidence",
+      "evidence_id": "EVID:graphrag:conflicting_evidence:41e0ee70",
+      "query": "What can you infer about conflicting_evidence from document 34?",
+      "expected_evidence": [
+        "EVID:graphrag:conflicting_evidence:41e0ee70"
+      ]
+    },
+    {
+      "id": "task_35",
+      "type": "missing_evidence",
+      "evidence_id": "EVID:graphrag:missing_evidence:83941250",
+      "query": "What can you infer about missing_evidence from document 35?",
+      "expected_evidence": []
+    },
+    {
+      "id": "task_36",
+      "type": "entity_relationship_inference",
+      "evidence_id": "EVID:graphrag:entity_relationship_inference:bf4212b9",
+      "query": "What can you infer about entity_relationship_inference from document 36?",
+      "expected_evidence": [
+        "EVID:graphrag:entity_relationship_inference:bf4212b9"
+      ]
+    },
+    {
+      "id": "task_37",
+      "type": "multi_hop_retrieval",
+      "evidence_id": "EVID:graphrag:multi_hop_retrieval:aa4f14c5",
+      "query": "What can you infer about multi_hop_retrieval from document 37?",
+      "expected_evidence": [
+        "EVID:graphrag:multi_hop_retrieval:aa4f14c5"
+      ]
+    },
+    {
+      "id": "task_38",
+      "type": "conflicting_evidence",
+      "evidence_id": "EVID:graphrag:conflicting_evidence:403d817d",
+      "query": "What can you infer about conflicting_evidence from document 38?",
+      "expected_evidence": [
+        "EVID:graphrag:conflicting_evidence:403d817d"
+      ]
+    },
+    {
+      "id": "task_39",
+      "type": "missing_evidence",
+      "evidence_id": "EVID:graphrag:missing_evidence:9cebfea8",
+      "query": "What can you infer about missing_evidence from document 39?",
+      "expected_evidence": []
+    }
+  ]
+}

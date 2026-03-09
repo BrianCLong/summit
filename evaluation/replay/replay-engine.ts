@@ -1,11 +1,8 @@
-export function simulateTool(step: any) {
-  // Dummy tool simulation
-  return step.output || null;
-}
+import { canonicalizeJson } from '../utils/canonical-json';
 
-export function replayTrace(trace: any) {
-  if (!trace || !trace.steps) return;
-  for (const step of trace.steps) {
-    simulateTool(step);
+export class ReplayEngine {
+  public compareArtifacts(actual: any, expected: any): boolean {
+    // Replace JSON.stringify with canonical serialization
+    return canonicalizeJson(actual) === canonicalizeJson(expected);
   }
 }

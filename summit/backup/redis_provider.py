@@ -4,7 +4,7 @@ import os
 from datetime import datetime
 from typing import Any, Dict
 
-from summit.cache.redis_client import RedisClient
+from summit.cache.redis_client import RedisClient, RedisCluster
 
 from .core import BackupProvider
 
@@ -23,8 +23,10 @@ class RedisBackupProvider(BackupProvider):
             logger.warning("Redis client disabled, skipping backup.")
             return {"status": "skipped", "reason": "Redis disabled"}
 
+        # Prefix with partition name for clear organization
+        partition = getattr(self.client, 'partition', 'default')
         timestamp = datetime.utcnow().strftime("%Y%m%d%H%M%S")
-        filename = f"redis_backup_{timestamp}.jsonl"
+        filename = f"redis_backup_{partition}_{timestamp}.jsonl"
         filepath = os.path.join(destination, filename)
 
         count = 0
@@ -64,6 +66,7 @@ class RedisBackupProvider(BackupProvider):
                 "status": "success",
                 "file": filepath,
                 "count": count,
+                "partition": partition,
                 "timestamp": timestamp
             }
         except Exception as e:
@@ -82,40 +85,53 @@ class RedisBackupProvider(BackupProvider):
             logger.error(f"Backup file not found: {source}")
             return False
 
+        is_cluster = RedisCluster is not None and isinstance(self.client.client, RedisCluster)
         import base64
         count = 0
         try:
             with open(source) as f:
-                pipe = self.client.pipeline()
-                for i, line in enumerate(f):
-                    try:
-                        record = json.loads(line)
-                        key = record["k"]
-                        dump_b64 = record["v"]
-                        pttl = record["t"]
+                if is_cluster:
+                    # Redis Cluster pipelines can fail across slots.
+                    # For a simple, reliable DR restore, execute command by command.
+                    for i, line in enumerate(f):
+                        try:
+                            record = json.loads(line)
+                            key = record["k"]
+                            dump_b64 = record["v"]
+                            pttl = record["t"]
 
-                        dump_val = base64.b64decode(dump_b64)
+                            dump_val = base64.b64decode(dump_b64)
+                            self.client.client.restore(key, pttl, dump_val, replace=True)
+                            count += 1
+                        except Exception as e:
+                            logger.error(f"Error restoring line {i+1}: {e}")
+                else:
+                    pipe = self.client.pipeline()
+                    for i, line in enumerate(f):
+                        try:
+                            record = json.loads(line)
+                            key = record["k"]
+                            dump_b64 = record["v"]
+                            pttl = record["t"]
 
-                        # RESTORE key ttl value [REPLACE]
-                        # ttl is in ms. If 0, it means persistent.
-                        # However, Redis RESTORE command treats 0 as expired?
-                        # Actually RESTORE ttl argument: "If ttl is 0 the key is created without any expire."
+                            dump_val = base64.b64decode(dump_b64)
 
-                        # Pipeline restore
-                        pipe.restore(key, pttl, dump_val, replace=True)
+                            # Pipeline restore
+                            pipe.restore(key, pttl, dump_val, replace=True)
+                            count += 1
 
-                        if (i + 1) % 1000 == 0:
-                            pipe.execute()
-                            # Create new pipeline
-                            pipe = self.client.pipeline()
+                            if (i + 1) % 1000 == 0:
+                                pipe.execute()
+                                # Create new pipeline
+                                pipe = self.client.pipeline()
 
-                    except Exception as e:
-                        logger.error(f"Error restoring line {i+1}: {e}")
+                        except Exception as e:
+                            logger.error(f"Error restoring line {i+1}: {e}")
 
-                # Execute remaining
-                pipe.execute()
+                    # Execute remaining
+                    pipe.execute()
 
-            logger.info(f"Redis restore completed from {source}")
+            logger.info(f"Redis restore completed from {source}, total restored: {count}")
             return True
         except Exception as e:
             logger.error(f"Redis restore failed: {e}")

@@ -27,6 +27,11 @@ jobs:
             // ----- CONFIG YOU MUST FILL IN -----
             // Get these via a one-time GraphQL query (I include it below)
             const PROJECT_NODE_ID = "PVT_kwDOXXXXXXXX"; // Project #7 node_id
+
+            if (PROJECT_NODE_ID === "PVT_kwDOXXXXXXXX") {
+              console.log("Skipping project sync: Dummy PROJECT_NODE_ID detected. Please configure real project IDs.");
+              return;
+            }
             const FIELD_PRIORITY_ID = "PVTF_lADOXXXXXX"; // field id
             const FIELD_STATE_ID = "PVTF_lADOYYYYYY";
             const FIELD_BUCKET_ID = "PVTF_lADOZZZZZZ";
