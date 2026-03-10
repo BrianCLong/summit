@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { RollbackEngine } from './rollback-engine.js';
 import { MultiRegionProber } from './multi-region-prober.js';
-import { rollbackEventsTotal } from '../../monitoring/metrics.js';
+import { deploymentRollbacksTotal } from '../../monitoring/metrics.js';
 
 export interface RollbackTriggerConfig {
   errorRateThreshold: number; // e.g. 0.05 for 5%
@@ -59,7 +59,7 @@ export class AutoRollbackMonitor {
       console.warn(`[AutoRollback] Threshold reached. Triggering rollback for ${this.serviceName}.`);
 
       // Update Prometheus metrics
-      rollbackEventsTotal.inc({ service: this.serviceName, reason: 'health_check_failed' });
+      deploymentRollbacksTotal.inc({ service: this.serviceName, reason: 'health_check_failed' });
 
       await this.rollbackEngine.performRollback({
         serviceName: this.serviceName,

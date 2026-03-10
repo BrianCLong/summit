@@ -25,8 +25,8 @@ const tokenEstimationErrorRatio = new Histogram({
   registers: [register],
 });
 
-const rollbackEventsTotal = new Counter({
-  name: 'rollback_events_total',
+const deploymentRollbacksTotal = new Counter({
+  name: 'deployment_rollbacks_total',
   help: 'Total number of rollback events by reason and type',
   labelNames: ['reason', 'type', 'tenant', 'operation'],
   registers: [register],
@@ -272,7 +272,7 @@ export class SafeMutationMetrics {
     tenant: string,
     operation: string,
   ): void {
-    rollbackEventsTotal.inc({ reason, type, tenant, operation });
+    deploymentRollbacksTotal.inc({ reason, type, tenant, operation });
 
     logger.warn('Rollback event recorded', {
       reason,

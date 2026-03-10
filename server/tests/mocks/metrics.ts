@@ -139,7 +139,7 @@ export const mcpSessionsTotal = createMockMetric();
 export const mcpInvocationsTotal = createMockMetric();
 export const regionProbeLatencyMs = createMockMetric();
 export const regionHealthStatus = createMockMetric();
-export const rollbackEventsTotal = createMockMetric();
+export const deploymentRollbacksTotal = createMockMetric();
 
 // Export metrics object
 export const metrics = {
@@ -261,7 +261,7 @@ export const metrics = {
   regionProbeLatencyMs,
   regionHealthStatus,
   resolverLatencyMs,
-  rollbackEventsTotal,
+  deploymentRollbacksTotal,
   serviceAutoRemediationsTotal,
   tenantScopeViolationsTotal,
   uiErrorBoundaryCatchTotal,
