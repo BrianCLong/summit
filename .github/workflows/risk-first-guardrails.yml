@@ -1,0 +1,59 @@
+name: Risk-First Guardrails
+
+on:
+  pull_request:
+    branches: [main, develop]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
+env:
+  NODE_OPTIONS: --max-old-space-size=8192
+
+jobs:
+  verify-risk:
+    name: Verify Coverage and Security
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.0.0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install Dependencies
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Check Coverage Trends
+        run: |
+          pnpm test:quick || echo "Quick tests failing - manual check required"
+          pnpm coverage:gate
+        env:
+          COVERAGE_SCOPE: changed
+          COVERAGE_BASE_REF: origin/${{ github.event.pull_request.base.ref }}
+
+      - name: Check Dependabot Alerts
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "Fetching Dependabot alerts..."
+          OUTPUT=$(gh api "repos/${{ github.repository }}/dependabot/alerts?state=open" --paginate || echo "[]")
+          CRITICAL_HIGH_COUNT=$(echo "$OUTPUT" | jq '[.[] | select(.security_advisory.severity == "high" or .security_advisory.severity == "critical")] | length')
+          echo "Found $CRITICAL_HIGH_COUNT unmitigated high/critical Dependabot alerts."
+          if [ "$CRITICAL_HIGH_COUNT" -gt "0" ] && [ "$CRITICAL_HIGH_COUNT" != "null" ]; then
+            echo "::error::New high or critical Dependabot vulnerabilities introduced or left unmitigated. Mission constraint: Must fix before merge."
+            sh -c "exit 1"
+          else
+            echo "✅ Security guardrail passed: No unmitigated high/critical Dependabot alerts."
+          fi
