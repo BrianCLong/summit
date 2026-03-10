@@ -23,7 +23,7 @@ permissions:
 jobs:
   compliance-security:
     name: Compliance & Security
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout code
         uses: actions/checkout@v4 # v6
@@ -61,7 +61,6 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
         with:
-          cache: 'pnpm'
           node-version: "18"
 
       - name: Install dependencies
@@ -84,7 +83,7 @@ jobs:
 
   build-test:
     name: Build & Test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout code
         uses: actions/checkout@v4 # v6
@@ -95,7 +94,6 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
         with:
-          cache: 'pnpm'
           node-version: "18"
 
       - name: Install dependencies
@@ -112,7 +110,7 @@ jobs:
 
   infrastructure:
     name: Infrastructure Checks
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout code
         uses: actions/checkout@v4 # v6
@@ -138,7 +136,7 @@ jobs:
   preview-env:
     name: Preview Environment
     needs: [build-test, infrastructure]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     permissions:
       pull-requests: write
     steps:
@@ -151,7 +149,6 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
         with:
-          cache: 'pnpm'
           node-version: "18"
 
       - name: Install dependencies

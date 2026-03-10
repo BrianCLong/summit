@@ -1,0 +1,8 @@
+name: Universal Architecture Evaluation
+version: 1.0.0
+description: Validates that a workflow adheres to the universal production AI pattern.
+threshold: 7
+required_controls:
+  - structured_state
+  - validation
+  - evals

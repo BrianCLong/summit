@@ -52,7 +52,7 @@ jobs:
   # Job 1: Validate inputs and verify the hotfix is safe to release
   verify-hotfix:
     name: Verify Hotfix
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     outputs:
       tag: ${{ steps.version.outputs.tag }}
       evidence_sha256: ${{ steps.bundle.outputs.evidence_sha256 }}
@@ -268,7 +268,7 @@ jobs:
     name: Publish Hotfix
     needs: [verify-hotfix]
     if: needs.verify-hotfix.outputs.gates_passed == 'true'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     # HOTFIX APPROVAL GATE
     # Configure required reviewers in GitHub: Settings → Environments → hotfix-release
     environment:

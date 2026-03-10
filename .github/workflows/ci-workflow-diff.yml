@@ -16,7 +16,7 @@ permissions:
 
 jobs:
   drift-guard:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 15
     steps:
       - name: Checkout fork
@@ -42,7 +42,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'pnpm'
           cache-dependency-path: '**/pnpm-lock.yaml'
 
       - name: Install deps

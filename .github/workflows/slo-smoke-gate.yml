@@ -47,7 +47,7 @@ env:
 jobs:
   slo-smoke-gate:
     name: SLO Smoke Gate
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 15
 
     steps:
@@ -71,9 +71,9 @@ jobs:
       - name: Start application stack
         run: |
           if [ -f ops/docker-compose.ci.yml ]; then
-            docker compose -f ops/docker-compose.ci.yml up -d --wait --wait-timeout 120
+            cp .env.example .env && docker compose -f ops/docker-compose.ci.yml up -d --wait --wait-timeout 120
           elif [ -f ops/docker-compose.yml ]; then
-            docker compose -f ops/docker-compose.yml up -d --wait --wait-timeout 120
+            cp .env.example .env && docker compose -f ops/docker-compose.yml up -d --wait --wait-timeout 120
           else
             echo "::warning::No docker-compose found, attempting make up"
             make up || true
@@ -134,4 +134,4 @@ jobs:
       - name: Teardown stack
         if: always()
         run: |
-          docker compose down -v --remove-orphans 2>/dev/null || make down || true
+          cp .env.example .env && docker compose down -v --remove-orphans 2>/dev/null || make down || true

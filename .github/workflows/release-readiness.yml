@@ -44,7 +44,7 @@ permissions:
 jobs:
   release-readiness:
     name: Release Readiness Gate
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 20
 
     steps:
@@ -58,7 +58,6 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
         with:
-          cache: 'pnpm'
           node-version: "20"
 
       - name: Setup Python

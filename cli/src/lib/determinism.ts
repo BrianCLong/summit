@@ -24,7 +24,8 @@ export const DETERMINISM_EXIT_CODES = {
 /**
  * Hash algorithms supported
  */
-export type HashAlgorithm = 'sha256' | 'sha512' | 'md5';
+export type HashAlgorithm = 'sha256' | 'sha384' | 'sha512' | 'md5';
+export const SECURE_HASH_ALGORITHMS = ['sha256', 'sha384', 'sha512'] as const;
 
 /**
  * Determinism harness options
@@ -38,6 +39,8 @@ export interface DeterminismOptions {
   failFast: boolean;
   /** Hash algorithm (default: sha256) */
   hashAlgo: HashAlgorithm;
+  /** Allow legacy insecure md5 hashing (default: false) */
+  allowInsecureMd5?: boolean;
   /** Include full stdout in evidence (default: false) */
   includeStdout: boolean;
   /** Package name to run tests for (optional) */
@@ -57,6 +60,7 @@ export const DEFAULT_DETERMINISM_OPTIONS: DeterminismOptions = {
   runs: 3,
   failFast: true,
   hashAlgo: 'sha256',
+  allowInsecureMd5: false,
   includeStdout: false,
   requireTestsPass: false,
   includeTimestamps: false,
@@ -137,6 +141,14 @@ export function generateDeterministicId(command: string, runs: number): string {
  */
 export function computeHash(content: string, algo: HashAlgorithm): string {
   return crypto.createHash(algo).update(content, 'utf8').digest('hex');
+}
+
+export function validateHashAlgorithm(algo: HashAlgorithm, allowInsecureMd5 = false): void {
+  if (algo === 'md5' && !allowInsecureMd5) {
+    throw new Error(
+      'Insecure hash algorithm md5 is disabled by default. Use sha256/sha384/sha512, or explicitly set allowInsecureMd5 for legacy compatibility.'
+    );
+  }
 }
 
 /**
@@ -514,6 +526,7 @@ export async function runDeterminismHarness(
   options: Partial<DeterminismOptions> = {}
 ): Promise<DeterminismResult> {
   const opts: DeterminismOptions = { ...DEFAULT_DETERMINISM_OPTIONS, ...options };
+  validateHashAlgorithm(opts.hashAlgo, opts.allowInsecureMd5);
 
   // Generate output directory
   const id = generateDeterministicId(`${command} ${args.join(' ')}`, opts.runs);

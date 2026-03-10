@@ -1,5 +1,7 @@
 import unittest
+
 from models.qwen.qwen3_5_medium import Qwen35MediumAdapter
+
 
 class TestQwen35MediumAdapter(unittest.TestCase):
     def test_generate(self):

@@ -1,0 +1,412 @@
+{
+  "metrics": {
+    "total_tasks": 40,
+    "overall_precision": 0.8875,
+    "overall_recall": 0.875,
+    "overall_coverage": 0.875,
+    "overall_f1": 0.8,
+    "timestamp": "2026-03-08T15:40:08.319Z"
+  },
+  "results": [
+    {
+      "taskId": "task_0",
+      "type": "entity_relationship_inference",
+      "score": {
+        "precision": 1,
+        "recall": 1,
+        "coverage": 1,
+        "f1_score": 1
+      }
+    },
+    {
+      "taskId": "task_1",
+      "type": "multi_hop_retrieval",
+      "score": {
+        "precision": 1,
+        "recall": 0,
+        "coverage": 0,
+        "f1_score": 0
+      }
+    },
+    {
+      "taskId": "task_2",
+      "type": "conflicting_evidence",
+      "score": {
+        "precision": 1,
+        "recall": 1,
+        "coverage": 1,
+        "f1_score": 1
+      }
+    },
+    {
+      "taskId": "task_3",
+      "type": "missing_evidence",
+      "score": {
+        "precision": 1,
+        "recall": 1,
+        "coverage": 1,
+        "f1_score": 1
+      }
+    },
+    {
+      "taskId": "task_4",
+      "type": "entity_relationship_inference",
+      "score": {
+        "precision": 1,
+        "recall": 1,
+        "coverage": 1,
+        "f1_score": 1
+      }
+    },
+    {
+      "taskId": "task_5",
+      "type": "multi_hop_retrieval",
+      "score": {
+        "precision": 1,
+        "recall": 1,
+        "coverage": 1,
+        "f1_score": 1
+      }
+    },
+    {
+      "taskId": "task_6",
+      "type": "conflicting_evidence",
+      "score": {
+        "precision": 1,
+        "recall": 1,
+        "coverage": 1,
+        "f1_score": 1
+      }
+    },
+    {
+      "taskId": "task_7",
+      "type": "missing_evidence",
+      "score": {
+        "precision": 1,
+        "recall": 1,
+        "coverage": 1,
+        "f1_score": 1
+      }
+    },
+    {
+      "taskId": "task_8",
+      "type": "entity_relationship_inference",
+      "score": {
+        "precision": 1,
+        "recall": 1,
+        "coverage": 1,
+        "f1_score": 1
+      }
+    },
+    {
+      "taskId": "task_9",
+      "type": "multi_hop_retrieval",
+      "score": {
+        "precision": 1,
+        "recall": 1,
+        "coverage": 1,
+        "f1_score": 1
+      }
+    },
+    {
+      "taskId": "task_10",
+      "type": "conflicting_evidence",
+      "score": {
+        "precision": 1,
+        "recall": 1,
+        "coverage": 1,
+        "f1_score": 1
+      }
+    },
+    {
+      "taskId": "task_11",
+      "type": "missing_evidence",
+      "score": {
+        "precision": 1,
+        "recall": 1,
+        "coverage": 1,
+        "f1_score": 1
+      }
+    },
+    {
+      "taskId": "task_12",
+      "type": "entity_relationship_inference",
+      "score": {
+        "precision": 1,
+        "recall": 0,
+        "coverage": 0,
+        "f1_score": 0
+      }
+    },
+    {
+      "taskId": "task_13",
+      "type": "multi_hop_retrieval",
+      "score": {
+        "precision": 1,
+        "recall": 1,
+        "coverage": 1,
+        "f1_score": 1
+      }
+    },
+    {
+      "taskId": "task_14",
+      "type": "conflicting_evidence",
+      "score": {
+        "precision": 1,
+        "recall": 1,
+        "coverage": 1,
+        "f1_score": 1
+      }
+    },
+    {
+      "taskId": "task_15",
+      "type": "missing_evidence",
+      "score": {
+        "precision": 1,
+        "recall": 1,
+        "coverage": 1,
+        "f1_score": 1
+      }
+    },
+    {
+      "taskId": "task_16",
+      "type": "entity_relationship_inference",
+      "score": {
+        "precision": 0.5,
+        "recall": 1,
+        "coverage": 1,
+        "f1_score": 0.6666666666666666
+      }
+    },
+    {
+      "taskId": "task_17",
+      "type": "multi_hop_retrieval",
+      "score": {
+        "precision": 0.5,
+        "recall": 1,
+        "coverage": 1,
+        "f1_score": 0.6666666666666666
+      }
+    },
+    {
+      "taskId": "task_18",
+      "type": "conflicting_evidence",
+      "score": {
+        "precision": 1,
+        "recall": 1,
+        "coverage": 1,
+        "f1_score": 1
+      }
+    },
+    {
+      "taskId": "task_19",
+      "type": "missing_evidence",
+      "score": {
+        "precision": 1,
+        "recall": 1,
+        "coverage": 1,
+        "f1_score": 1
+      }
+    },
+    {
+      "taskId": "task_20",
+      "type": "entity_relationship_inference",
+      "score": {
+        "precision": 1,
+        "recall": 1,
+        "coverage": 1,
+        "f1_score": 1
+      }
+    },
+    {
+      "taskId": "task_21",
+      "type": "multi_hop_retrieval",
+      "score": {
+        "precision": 1,
+        "recall": 1,
+        "coverage": 1,
+        "f1_score": 1
+      }
+    },
+    {
+      "taskId": "task_22",
+      "type": "conflicting_evidence",
+      "score": {
+        "precision": 1,
+        "recall": 1,
+        "coverage": 1,
+        "f1_score": 1
+      }
+    },
+    {
+      "taskId": "task_23",
+      "type": "missing_evidence",
+      "score": {
+        "precision": 0,
+        "recall": 1,
+        "coverage": 1,
+        "f1_score": 0
+      }
+    },
+    {
+      "taskId": "task_24",
+      "type": "entity_relationship_inference",
+      "score": {
+        "precision": 1,
+        "recall": 0,
+        "coverage": 0,
+        "f1_score": 0
+      }
+    },
+    {
+      "taskId": "task_25",
+      "type": "multi_hop_retrieval",
+      "score": {
+        "precision": 1,
+        "recall": 0,
+        "coverage": 0,
+        "f1_score": 0
+      }
+    },
+    {
+      "taskId": "task_26",
+      "type": "conflicting_evidence",
+      "score": {
+        "precision": 0,
+        "recall": 0,
+        "coverage": 0,
+        "f1_score": 0
+      }
+    },
+    {
+      "taskId": "task_27",
+      "type": "missing_evidence",
+      "score": {
+        "precision": 0,
+        "recall": 1,
+        "coverage": 1,
+        "f1_score": 0
+      }
+    },
+    {
+      "taskId": "task_28",
+      "type": "entity_relationship_inference",
+      "score": {
+        "precision": 0.5,
+        "recall": 1,
+        "coverage": 1,
+        "f1_score": 0.6666666666666666
+      }
+    },
+    {
+      "taskId": "task_29",
+      "type": "multi_hop_retrieval",
+      "score": {
+        "precision": 1,
+        "recall": 1,
+        "coverage": 1,
+        "f1_score": 1
+      }
+    },
+    {
+      "taskId": "task_30",
+      "type": "conflicting_evidence",
+      "score": {
+        "precision": 1,
+        "recall": 1,
+        "coverage": 1,
+        "f1_score": 1
+      }
+    },
+    {
+      "taskId": "task_31",
+      "type": "missing_evidence",
+      "score": {
+        "precision": 1,
+        "recall": 1,
+        "coverage": 1,
+        "f1_score": 1
+      }
+    },
+    {
+      "taskId": "task_32",
+      "type": "entity_relationship_inference",
+      "score": {
+        "precision": 1,
+        "recall": 1,
+        "coverage": 1,
+        "f1_score": 1
+      }
+    },
+    {
+      "taskId": "task_33",
+      "type": "multi_hop_retrieval",
+      "score": {
+        "precision": 1,
+        "recall": 1,
+        "coverage": 1,
+        "f1_score": 1
+      }
+    },
+    {
+      "taskId": "task_34",
+      "type": "conflicting_evidence",
+      "score": {
+        "precision": 1,
+        "recall": 1,
+        "coverage": 1,
+        "f1_score": 1
+      }
+    },
+    {
+      "taskId": "task_35",
+      "type": "missing_evidence",
+      "score": {
+        "precision": 1,
+        "recall": 1,
+        "coverage": 1,
+        "f1_score": 1
+      }
+    },
+    {
+      "taskId": "task_36",
+      "type": "entity_relationship_inference",
+      "score": {
+        "precision": 1,
+        "recall": 1,
+        "coverage": 1,
+        "f1_score": 1
+      }
+    },
+    {
+      "taskId": "task_37",
+      "type": "multi_hop_retrieval",
+      "score": {
+        "precision": 1,
+        "recall": 1,
+        "coverage": 1,
+        "f1_score": 1
+      }
+    },
+    {
+      "taskId": "task_38",
+      "type": "conflicting_evidence",
+      "score": {
+        "precision": 1,
+        "recall": 1,
+        "coverage": 1,
+        "f1_score": 1
+      }
+    },
+    {
+      "taskId": "task_39",
+      "type": "missing_evidence",
+      "score": {
+        "precision": 1,
+        "recall": 1,
+        "coverage": 1,
+        "f1_score": 1
+      }
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["version", "lanes"],
+  "properties": {
+    "version": { "type": "integer" },
+    "lanes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "allowed_paths", "required_checks", "max_open_prs"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^lane\\.[a-z0-9._-]+$" },
+          "title": { "type": "string" },
+          "allowed_paths": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "required_checks": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "max_open_prs": { "type": "integer", "minimum": 1 }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": false
+}

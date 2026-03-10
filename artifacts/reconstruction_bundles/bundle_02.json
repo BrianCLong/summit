@@ -1,0 +1,12 @@
+{
+  "bundle_id": "rb_002",
+  "capability": "agent_runtime_tests",
+  "fragments": ["frag_12", "frag_45", "frag_88"],
+  "target_paths": ["tests/agent_runtime.spec.ts"],
+  "confidence": 0.92,
+  "synthesis_strategy": "merge",
+  "validation": {
+    "compile": true,
+    "tests": false
+  }
+}

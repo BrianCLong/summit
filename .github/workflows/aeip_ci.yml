@@ -8,9 +8,9 @@ on:
 
 jobs:
   check-context-determinism:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Run context validation
         run: |
           python3 -c "
@@ -19,9 +19,9 @@ cv = ContextValidator()
 assert cv.validate_recency({'last_updated': '2023-01-01'}), 'Failed recency validation'
           "
   check-policy-binding:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Run policy enforcement validation
         run: |
           python3 -c "
@@ -30,9 +30,9 @@ pe = PermissionEnforcer()
 assert pe.enforce({'agent_id': 'agent-1', 'action_type': 'read'}, {'clearance': 'level-1'}), 'Failed policy enforcement'
           "
   check-entity-reconciliation:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Run entity reconciliation
         run: |
           python3 -c "
@@ -41,9 +41,9 @@ re = ReconciliationEngine()
 assert re.reconcile({'id': '123'}, {'entity_id': '123'}), 'Failed entity reconciliation'
           "
   check-evidence-id-format:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Validate evidence ID
         run: |
           python3 -c "
@@ -60,9 +60,9 @@ for dir_name in os.listdir('evidence/aeip'):
         sys.exit(1)
           "
   check-stamp-determinism:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Validate determinism in stamp
         run: |
           python3 -c "
@@ -76,9 +76,9 @@ with open('evidence/aeip/AEIP-TEST-CONTROL-002/stamp.json', 'r') as f:
         raise ValueError('Timestamp found in stamp file violating determinism.')
           "
   check-performance-budget:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Profile AEIP
         run: |
           ./scripts/profile_aeip.py

@@ -55,7 +55,7 @@ permissions:
 jobs:
   audit:
     name: Type Safety Audit
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     outputs:
       total_any: ${{ steps.audit.outputs.total_any }}
       strict_any: ${{ steps.audit.outputs.strict_any }}

@@ -1,0 +1,2843 @@
+{
+  "metadata": {
+    "id": "summit-complete-analysis",
+    "version": "2026-03-09T12:46:10.106Z",
+    "description": "Complete Summit innovation graph: 1000 commits, 100 PRs, 70 technologies",
+    "createdAt": "2026-03-09T12:46:10.106Z",
+    "scope": {
+      "commits": 1000,
+      "prs": 100,
+      "technologies": 70,
+      "services": 418,
+      "packages": 517,
+      "apps": 42
+    }
+  },
+  "graph": {
+    "nodes": 288,
+    "edges": 8,
+    "stats": {
+      "nodeCountByType": {
+        "project": 250,
+        "technology": 33,
+        "organization": 1,
+        "framework": 2,
+        "product": 1,
+        "capability": 1
+      },
+      "edgeCountByType": {
+        "develops": 3,
+        "builds-on": 2,
+        "uses": 3
+      },
+      "totalNodes": 288,
+      "totalEdges": 8,
+      "totalEvidenceRefs": 296
+    }
+  },
+  "analysis": {
+    "adoption": [
+      {
+        "nodeId": "tech-typescript",
+        "nodeName": "typescript",
+        "phase": "declining",
+        "adoptionRate": 0.85,
+        "momentum": -0.5,
+        "velocity": 0.03,
+        "acceleration": 0,
+        "signalCount": 1,
+        "confidence": 0.8
+      },
+      {
+        "nodeId": "tech--types-node",
+        "nodeName": "@types/node",
+        "phase": "mature",
+        "adoptionRate": 0.6,
+        "momentum": 0.3,
+        "velocity": 0.03,
+        "acceleration": 0,
+        "signalCount": 1,
+        "confidence": 0.8
+      },
+      {
+        "nodeId": "tech-eslint",
+        "nodeName": "eslint",
+        "phase": "growth",
+        "adoptionRate": 0.35,
+        "momentum": 0.9,
+        "velocity": 0.03,
+        "acceleration": 0,
+        "signalCount": 1,
+        "confidence": 0.8
+      },
+      {
+        "nodeId": "tech-jest",
+        "nodeName": "jest",
+        "phase": "growth",
+        "adoptionRate": 0.3,
+        "momentum": 0.9,
+        "velocity": 0.03,
+        "acceleration": 0,
+        "signalCount": 1,
+        "confidence": 0.8
+      },
+      {
+        "nodeId": "tech-zod",
+        "nodeName": "zod",
+        "phase": "growth",
+        "adoptionRate": 0.3,
+        "momentum": 0.9,
+        "velocity": 0.03,
+        "acceleration": 0,
+        "signalCount": 1,
+        "confidence": 0.8
+      },
+      {
+        "nodeId": "tech--opentelemetry-api",
+        "nodeName": "@opentelemetry/api",
+        "phase": "growth",
+        "adoptionRate": 0.25,
+        "momentum": 0.9,
+        "velocity": 0.03,
+        "acceleration": 0,
+        "signalCount": 1,
+        "confidence": 0.8
+      },
+      {
+        "nodeId": "tech-vitest",
+        "nodeName": "vitest",
+        "phase": "growth",
+        "adoptionRate": 0.25,
+        "momentum": 0.9,
+        "velocity": 0.03,
+        "acceleration": 0,
+        "signalCount": 1,
+        "confidence": 0.8
+      },
+      {
+        "nodeId": "tech--types-jest",
+        "nodeName": "@types/jest",
+        "phase": "growth",
+        "adoptionRate": 0.2,
+        "momentum": 0.9,
+        "velocity": 0.03,
+        "acceleration": 0,
+        "signalCount": 1,
+        "confidence": 0.8
+      },
+      {
+        "nodeId": "tech-ts-jest",
+        "nodeName": "ts-jest",
+        "phase": "growth",
+        "adoptionRate": 0.2,
+        "momentum": 0.9,
+        "velocity": 0.03,
+        "acceleration": 0,
+        "signalCount": 1,
+        "confidence": 0.8
+      },
+      {
+        "nodeId": "tech-react",
+        "nodeName": "react",
+        "phase": "growth",
+        "adoptionRate": 0.2,
+        "momentum": 0.9,
+        "velocity": 0.03,
+        "acceleration": 0,
+        "signalCount": 1,
+        "confidence": 0.8
+      },
+      {
+        "nodeId": "tech-react-dom",
+        "nodeName": "react-dom",
+        "phase": "growth",
+        "adoptionRate": 0.2,
+        "momentum": 0.9,
+        "velocity": 0.03,
+        "acceleration": 0,
+        "signalCount": 1,
+        "confidence": 0.8
+      },
+      {
+        "nodeId": "tech-commander",
+        "nodeName": "commander",
+        "phase": "growth",
+        "adoptionRate": 0.15,
+        "momentum": 0.9,
+        "velocity": 0.03,
+        "acceleration": 0,
+        "signalCount": 1,
+        "confidence": 0.8
+      },
+      {
+        "nodeId": "tech-ts-node",
+        "nodeName": "ts-node",
+        "phase": "growth",
+        "adoptionRate": 0.15,
+        "momentum": 0.9,
+        "velocity": 0.03,
+        "acceleration": 0,
+        "signalCount": 1,
+        "confidence": 0.8
+      },
+      {
+        "nodeId": "tech-undici",
+        "nodeName": "undici",
+        "phase": "growth",
+        "adoptionRate": 0.15,
+        "momentum": 0.9,
+        "velocity": 0.03,
+        "acceleration": 0,
+        "signalCount": 1,
+        "confidence": 0.8
+      },
+      {
+        "nodeId": "tech--types-react",
+        "nodeName": "@types/react",
+        "phase": "growth",
+        "adoptionRate": 0.15,
+        "momentum": 0.9,
+        "velocity": 0.03,
+        "acceleration": 0,
+        "signalCount": 1,
+        "confidence": 0.8
+      },
+      {
+        "nodeId": "tech-pino",
+        "nodeName": "pino",
+        "phase": "emerging",
+        "adoptionRate": 0.1,
+        "momentum": 0.7,
+        "velocity": 0.03,
+        "acceleration": 0,
+        "signalCount": 1,
+        "confidence": 0.8
+      },
+      {
+        "nodeId": "tech-neo4j-driver",
+        "nodeName": "neo4j-driver",
+        "phase": "emerging",
+        "adoptionRate": 0.1,
+        "momentum": 0.7,
+        "velocity": 0.03,
+        "acceleration": 0,
+        "signalCount": 1,
+        "confidence": 0.8
+      },
+      {
+        "nodeId": "tech--noble-ed25519",
+        "nodeName": "@noble/ed25519",
+        "phase": "emerging",
+        "adoptionRate": 0.1,
+        "momentum": 0.7,
+        "velocity": 0.03,
+        "acceleration": 0,
+        "signalCount": 1,
+        "confidence": 0.8
+      },
+      {
+        "nodeId": "tech--types-react-dom",
+        "nodeName": "@types/react-dom",
+        "phase": "emerging",
+        "adoptionRate": 0.1,
+        "momentum": 0.7,
+        "velocity": 0.03,
+        "acceleration": 0,
+        "signalCount": 1,
+        "confidence": 0.8
+      },
+      {
+        "nodeId": "tech--vitejs-plugin-react",
+        "nodeName": "@vitejs/plugin-react",
+        "phase": "emerging",
+        "adoptionRate": 0.1,
+        "momentum": 0.7,
+        "velocity": 0.03,
+        "acceleration": 0,
+        "signalCount": 1,
+        "confidence": 0.8
+      },
+      {
+        "nodeId": "tech-vite",
+        "nodeName": "vite",
+        "phase": "emerging",
+        "adoptionRate": 0.1,
+        "momentum": 0.7,
+        "velocity": 0.03,
+        "acceleration": 0,
+        "signalCount": 1,
+        "confidence": 0.8
+      },
+      {
+        "nodeId": "tech-tsx",
+        "nodeName": "tsx",
+        "phase": "emerging",
+        "adoptionRate": 0.1,
+        "momentum": 0.7,
+        "velocity": 0.03,
+        "acceleration": 0,
+        "signalCount": 1,
+        "confidence": 0.8
+      },
+      {
+        "nodeId": "tech-fastify",
+        "nodeName": "fastify",
+        "phase": "emerging",
+        "adoptionRate": 0.1,
+        "momentum": 0.7,
+        "velocity": 0.03,
+        "acceleration": 0,
+        "signalCount": 1,
+        "confidence": 0.8
+      },
+      {
+        "nodeId": "tech-ts-node-dev",
+        "nodeName": "ts-node-dev",
+        "phase": "emerging",
+        "adoptionRate": 0.1,
+        "momentum": 0.7,
+        "velocity": 0.03,
+        "acceleration": 0,
+        "signalCount": 1,
+        "confidence": 0.8
+      },
+      {
+        "nodeId": "tech-ajv",
+        "nodeName": "ajv",
+        "phase": "emerging",
+        "adoptionRate": 0.05,
+        "momentum": 0.7,
+        "velocity": 0.03,
+        "acceleration": 0,
+        "signalCount": 1,
+        "confidence": 0.8
+      },
+      {
+        "nodeId": "tech-ajv-formats",
+        "nodeName": "ajv-formats",
+        "phase": "emerging",
+        "adoptionRate": 0.05,
+        "momentum": 0.7,
+        "velocity": 0.03,
+        "acceleration": 0,
+        "signalCount": 1,
+        "confidence": 0.8
+      },
+      {
+        "nodeId": "tech--jest-globals",
+        "nodeName": "@jest/globals",
+        "phase": "emerging",
+        "adoptionRate": 0.05,
+        "momentum": 0.7,
+        "velocity": 0.03,
+        "acceleration": 0,
+        "signalCount": 1,
+        "confidence": 0.8
+      },
+      {
+        "nodeId": "tech--typescript-eslint-eslint-plugin",
+        "nodeName": "@typescript-eslint/eslint-plugin",
+        "phase": "emerging",
+        "adoptionRate": 0.05,
+        "momentum": 0.7,
+        "velocity": 0.03,
+        "acceleration": 0,
+        "signalCount": 1,
+        "confidence": 0.8
+      },
+      {
+        "nodeId": "tech--typescript-eslint-parser",
+        "nodeName": "@typescript-eslint/parser",
+        "phase": "emerging",
+        "adoptionRate": 0.05,
+        "momentum": 0.7,
+        "velocity": 0.03,
+        "acceleration": 0,
+        "signalCount": 1,
+        "confidence": 0.8
+      },
+      {
+        "nodeId": "tech-axios",
+        "nodeName": "axios",
+        "phase": "emerging",
+        "adoptionRate": 0.05,
+        "momentum": 0.7,
+        "velocity": 0.03,
+        "acceleration": 0,
+        "signalCount": 1,
+        "confidence": 0.8
+      },
+      {
+        "nodeId": "summit-platform",
+        "nodeName": "Summit Platform",
+        "phase": "mature",
+        "adoptionRate": 0.1,
+        "momentum": 0.3,
+        "velocity": 0.03,
+        "acceleration": 0,
+        "signalCount": 1,
+        "confidence": 0.8
+      },
+      {
+        "nodeId": "innovation-simulation-engine",
+        "nodeName": "Innovation Simulation Engine",
+        "phase": "growth",
+        "adoptionRate": 0.1,
+        "momentum": 0.9,
+        "velocity": 0.03,
+        "acceleration": 0,
+        "signalCount": 1,
+        "confidence": 0.8
+      },
+      {
+        "nodeId": "repository-archaeology-engine",
+        "nodeName": "Repository Archaeology Engine",
+        "phase": "mature",
+        "adoptionRate": 0.1,
+        "momentum": 0.3,
+        "velocity": 0.03,
+        "acceleration": 0,
+        "signalCount": 1,
+        "confidence": 0.8
+      },
+      {
+        "nodeId": "evolution-intelligence-system",
+        "nodeName": "Evolution Intelligence System",
+        "phase": "mature",
+        "adoptionRate": 0.1,
+        "momentum": 0.3,
+        "velocity": 0.03,
+        "acceleration": 0,
+        "signalCount": 1,
+        "confidence": 0.8
+      },
+      {
+        "nodeId": "evidence-protocol",
+        "nodeName": "Summit Evidence Protocol",
+        "phase": "emerging",
+        "adoptionRate": 0.1,
+        "momentum": 0.7,
+        "velocity": 0.03,
+        "acceleration": 0,
+        "signalCount": 1,
+        "confidence": 0.8
+      },
+      {
+        "nodeId": "intelgraph-platform",
+        "nodeName": "IntelGraph Platform",
+        "phase": "growth",
+        "adoptionRate": 0.1,
+        "momentum": 0.9,
+        "velocity": 0.03,
+        "acceleration": 0,
+        "signalCount": 1,
+        "confidence": 0.8
+      },
+      {
+        "nodeId": "autonomous-ops",
+        "nodeName": "Autonomous Operations",
+        "phase": "emerging",
+        "adoptionRate": 0.1,
+        "momentum": 0.7,
+        "velocity": 0.03,
+        "acceleration": 0,
+        "signalCount": 1,
+        "confidence": 0.8
+      },
+      {
+        "nodeId": "agent-control-plane",
+        "nodeName": "Agent Control Plane",
+        "phase": "growth",
+        "adoptionRate": 0.1,
+        "momentum": 0.9,
+        "velocity": 0.03,
+        "acceleration": 0,
+        "signalCount": 1,
+        "confidence": 0.8
+      }
+    ],
+    "diffusion": [
+      {
+        "nodeId": "tech-typescript",
+        "nodeName": "typescript",
+        "currentAdoption": 0.85,
+        "predictedAdoption": {
+          "t30": 1,
+          "t90": 1,
+          "t180": 1,
+          "t365": 1
+        },
+        "diffusionRate": 0.03,
+        "networkMetrics": {
+          "degree": 1,
+          "inDegree": 1,
+          "outDegree": 0,
+          "pageRank": 0.125,
+          "closeness": 0.5,
+          "betweenness": 0.3
+        },
+        "lockInEffect": {
+          "strength": 0.0675,
+          "components": {
+            "networkEffect": 0.05,
+            "switchingCost": 0,
+            "complementAssets": 0.1,
+            "standardization": 0.2
+          },
+          "directDependents": [
+            "tech-react"
+          ],
+          "confidence": 0.7
+        },
+        "vulnerabilities": {
+          "competitors": [],
+          "switchingFeasibility": 0.9325,
+          "replacementRisk": 0.27975
+        },
+        "confidence": 0.75
+      },
+      {
+        "nodeId": "tech--types-node",
+        "nodeName": "@types/node",
+        "currentAdoption": 0.6,
+        "predictedAdoption": {
+          "t30": 0.72,
+          "t90": 0.8999999999999999,
+          "t180": 1,
+          "t365": 1
+        },
+        "diffusionRate": 0.03,
+        "networkMetrics": {
+          "degree": 0,
+          "inDegree": 0,
+          "outDegree": 0,
+          "pageRank": 0,
+          "closeness": 0.5,
+          "betweenness": 0.3
+        },
+        "lockInEffect": {
+          "strength": 0.03,
+          "components": {
+            "networkEffect": 0,
+            "switchingCost": 0,
+            "complementAssets": 0,
+            "standardization": 0.2
+          },
+          "directDependents": [],
+          "confidence": 0.7
+        },
+        "vulnerabilities": {
+          "competitors": [],
+          "switchingFeasibility": 0.97,
+          "replacementRisk": 0.291
+        },
+        "confidence": 0.75
+      },
+      {
+        "nodeId": "tech-eslint",
+        "nodeName": "eslint",
+        "currentAdoption": 0.35,
+        "predictedAdoption": {
+          "t30": 0.42,
+          "t90": 0.5249999999999999,
+          "t180": 0.63,
+          "t365": 0.77
+        },
+        "diffusionRate": 0.03,
+        "networkMetrics": {
+          "degree": 0,
+          "inDegree": 0,
+          "outDegree": 0,
+          "pageRank": 0,
+          "closeness": 0.5,
+          "betweenness": 0.3
+        },
+        "lockInEffect": {
+          "strength": 0.03,
+          "components": {
+            "networkEffect": 0,
+            "switchingCost": 0,
+            "complementAssets": 0,
+            "standardization": 0.2
+          },
+          "directDependents": [],
+          "confidence": 0.7
+        },
+        "vulnerabilities": {
+          "competitors": [],
+          "switchingFeasibility": 0.97,
+          "replacementRisk": 0.291
+        },
+        "confidence": 0.75
+      },
+      {
+        "nodeId": "tech-jest",
+        "nodeName": "jest",
+        "currentAdoption": 0.3,
+        "predictedAdoption": {
+          "t30": 0.36,
+          "t90": 0.44999999999999996,
+          "t180": 0.54,
+          "t365": 0.66
+        },
+        "diffusionRate": 0.03,
+        "networkMetrics": {
+          "degree": 0,
+          "inDegree": 0,
+          "outDegree": 0,
+          "pageRank": 0,
+          "closeness": 0.5,
+          "betweenness": 0.3
+        },
+        "lockInEffect": {
+          "strength": 0.03,
+          "components": {
+            "networkEffect": 0,
+            "switchingCost": 0,
+            "complementAssets": 0,
+            "standardization": 0.2
+          },
+          "directDependents": [],
+          "confidence": 0.7
+        },
+        "vulnerabilities": {
+          "competitors": [],
+          "switchingFeasibility": 0.97,
+          "replacementRisk": 0.291
+        },
+        "confidence": 0.75
+      },
+      {
+        "nodeId": "tech-zod",
+        "nodeName": "zod",
+        "currentAdoption": 0.3,
+        "predictedAdoption": {
+          "t30": 0.36,
+          "t90": 0.44999999999999996,
+          "t180": 0.54,
+          "t365": 0.66
+        },
+        "diffusionRate": 0.03,
+        "networkMetrics": {
+          "degree": 0,
+          "inDegree": 0,
+          "outDegree": 0,
+          "pageRank": 0,
+          "closeness": 0.5,
+          "betweenness": 0.3
+        },
+        "lockInEffect": {
+          "strength": 0.03,
+          "components": {
+            "networkEffect": 0,
+            "switchingCost": 0,
+            "complementAssets": 0,
+            "standardization": 0.2
+          },
+          "directDependents": [],
+          "confidence": 0.7
+        },
+        "vulnerabilities": {
+          "competitors": [],
+          "switchingFeasibility": 0.97,
+          "replacementRisk": 0.291
+        },
+        "confidence": 0.75
+      },
+      {
+        "nodeId": "tech--opentelemetry-api",
+        "nodeName": "@opentelemetry/api",
+        "currentAdoption": 0.25,
+        "predictedAdoption": {
+          "t30": 0.3,
+          "t90": 0.375,
+          "t180": 0.45,
+          "t365": 0.55
+        },
+        "diffusionRate": 0.03,
+        "networkMetrics": {
+          "degree": 0,
+          "inDegree": 0,
+          "outDegree": 0,
+          "pageRank": 0,
+          "closeness": 0.5,
+          "betweenness": 0.3
+        },
+        "lockInEffect": {
+          "strength": 0.03,
+          "components": {
+            "networkEffect": 0,
+            "switchingCost": 0,
+            "complementAssets": 0,
+            "standardization": 0.2
+          },
+          "directDependents": [],
+          "confidence": 0.7
+        },
+        "vulnerabilities": {
+          "competitors": [],
+          "switchingFeasibility": 0.97,
+          "replacementRisk": 0.291
+        },
+        "confidence": 0.75
+      },
+      {
+        "nodeId": "tech-vitest",
+        "nodeName": "vitest",
+        "currentAdoption": 0.25,
+        "predictedAdoption": {
+          "t30": 0.3,
+          "t90": 0.375,
+          "t180": 0.45,
+          "t365": 0.55
+        },
+        "diffusionRate": 0.03,
+        "networkMetrics": {
+          "degree": 0,
+          "inDegree": 0,
+          "outDegree": 0,
+          "pageRank": 0,
+          "closeness": 0.5,
+          "betweenness": 0.3
+        },
+        "lockInEffect": {
+          "strength": 0.03,
+          "components": {
+            "networkEffect": 0,
+            "switchingCost": 0,
+            "complementAssets": 0,
+            "standardization": 0.2
+          },
+          "directDependents": [],
+          "confidence": 0.7
+        },
+        "vulnerabilities": {
+          "competitors": [],
+          "switchingFeasibility": 0.97,
+          "replacementRisk": 0.291
+        },
+        "confidence": 0.75
+      },
+      {
+        "nodeId": "tech--types-jest",
+        "nodeName": "@types/jest",
+        "currentAdoption": 0.2,
+        "predictedAdoption": {
+          "t30": 0.24,
+          "t90": 0.30000000000000004,
+          "t180": 0.36000000000000004,
+          "t365": 0.44000000000000006
+        },
+        "diffusionRate": 0.03,
+        "networkMetrics": {
+          "degree": 0,
+          "inDegree": 0,
+          "outDegree": 0,
+          "pageRank": 0,
+          "closeness": 0.5,
+          "betweenness": 0.3
+        },
+        "lockInEffect": {
+          "strength": 0.03,
+          "components": {
+            "networkEffect": 0,
+            "switchingCost": 0,
+            "complementAssets": 0,
+            "standardization": 0.2
+          },
+          "directDependents": [],
+          "confidence": 0.7
+        },
+        "vulnerabilities": {
+          "competitors": [],
+          "switchingFeasibility": 0.97,
+          "replacementRisk": 0.291
+        },
+        "confidence": 0.75
+      },
+      {
+        "nodeId": "tech-ts-jest",
+        "nodeName": "ts-jest",
+        "currentAdoption": 0.2,
+        "predictedAdoption": {
+          "t30": 0.24,
+          "t90": 0.30000000000000004,
+          "t180": 0.36000000000000004,
+          "t365": 0.44000000000000006
+        },
+        "diffusionRate": 0.03,
+        "networkMetrics": {
+          "degree": 0,
+          "inDegree": 0,
+          "outDegree": 0,
+          "pageRank": 0,
+          "closeness": 0.5,
+          "betweenness": 0.3
+        },
+        "lockInEffect": {
+          "strength": 0.03,
+          "components": {
+            "networkEffect": 0,
+            "switchingCost": 0,
+            "complementAssets": 0,
+            "standardization": 0.2
+          },
+          "directDependents": [],
+          "confidence": 0.7
+        },
+        "vulnerabilities": {
+          "competitors": [],
+          "switchingFeasibility": 0.97,
+          "replacementRisk": 0.291
+        },
+        "confidence": 0.75
+      },
+      {
+        "nodeId": "tech-react",
+        "nodeName": "react",
+        "currentAdoption": 0.2,
+        "predictedAdoption": {
+          "t30": 0.24,
+          "t90": 0.30000000000000004,
+          "t180": 0.36000000000000004,
+          "t365": 0.44000000000000006
+        },
+        "diffusionRate": 0.03,
+        "networkMetrics": {
+          "degree": 1,
+          "inDegree": 0,
+          "outDegree": 1,
+          "pageRank": 0,
+          "closeness": 0.5,
+          "betweenness": 0.3
+        },
+        "lockInEffect": {
+          "strength": 0.05,
+          "components": {
+            "networkEffect": 0,
+            "switchingCost": 0.06666666666666667,
+            "complementAssets": 0,
+            "standardization": 0.2
+          },
+          "directDependents": [],
+          "confidence": 0.7
+        },
+        "vulnerabilities": {
+          "competitors": [],
+          "switchingFeasibility": 0.95,
+          "replacementRisk": 0.285
+        },
+        "confidence": 0.75
+      },
+      {
+        "nodeId": "tech-react-dom",
+        "nodeName": "react-dom",
+        "currentAdoption": 0.2,
+        "predictedAdoption": {
+          "t30": 0.24,
+          "t90": 0.30000000000000004,
+          "t180": 0.36000000000000004,
+          "t365": 0.44000000000000006
+        },
+        "diffusionRate": 0.03,
+        "networkMetrics": {
+          "degree": 0,
+          "inDegree": 0,
+          "outDegree": 0,
+          "pageRank": 0,
+          "closeness": 0.5,
+          "betweenness": 0.3
+        },
+        "lockInEffect": {
+          "strength": 0.03,
+          "components": {
+            "networkEffect": 0,
+            "switchingCost": 0,
+            "complementAssets": 0,
+            "standardization": 0.2
+          },
+          "directDependents": [],
+          "confidence": 0.7
+        },
+        "vulnerabilities": {
+          "competitors": [],
+          "switchingFeasibility": 0.97,
+          "replacementRisk": 0.291
+        },
+        "confidence": 0.75
+      },
+      {
+        "nodeId": "tech-commander",
+        "nodeName": "commander",
+        "currentAdoption": 0.15,
+        "predictedAdoption": {
+          "t30": 0.18,
+          "t90": 0.22499999999999998,
+          "t180": 0.27,
+          "t365": 0.33
+        },
+        "diffusionRate": 0.03,
+        "networkMetrics": {
+          "degree": 0,
+          "inDegree": 0,
+          "outDegree": 0,
+          "pageRank": 0,
+          "closeness": 0.5,
+          "betweenness": 0.3
+        },
+        "lockInEffect": {
+          "strength": 0.03,
+          "components": {
+            "networkEffect": 0,
+            "switchingCost": 0,
+            "complementAssets": 0,
+            "standardization": 0.2
+          },
+          "directDependents": [],
+          "confidence": 0.7
+        },
+        "vulnerabilities": {
+          "competitors": [],
+          "switchingFeasibility": 0.97,
+          "replacementRisk": 0.291
+        },
+        "confidence": 0.75
+      },
+      {
+        "nodeId": "tech-ts-node",
+        "nodeName": "ts-node",
+        "currentAdoption": 0.15,
+        "predictedAdoption": {
+          "t30": 0.18,
+          "t90": 0.22499999999999998,
+          "t180": 0.27,
+          "t365": 0.33
+        },
+        "diffusionRate": 0.03,
+        "networkMetrics": {
+          "degree": 0,
+          "inDegree": 0,
+          "outDegree": 0,
+          "pageRank": 0,
+          "closeness": 0.5,
+          "betweenness": 0.3
+        },
+        "lockInEffect": {
+          "strength": 0.03,
+          "components": {
+            "networkEffect": 0,
+            "switchingCost": 0,
+            "complementAssets": 0,
+            "standardization": 0.2
+          },
+          "directDependents": [],
+          "confidence": 0.7
+        },
+        "vulnerabilities": {
+          "competitors": [],
+          "switchingFeasibility": 0.97,
+          "replacementRisk": 0.291
+        },
+        "confidence": 0.75
+      },
+      {
+        "nodeId": "tech-undici",
+        "nodeName": "undici",
+        "currentAdoption": 0.15,
+        "predictedAdoption": {
+          "t30": 0.18,
+          "t90": 0.22499999999999998,
+          "t180": 0.27,
+          "t365": 0.33
+        },
+        "diffusionRate": 0.03,
+        "networkMetrics": {
+          "degree": 0,
+          "inDegree": 0,
+          "outDegree": 0,
+          "pageRank": 0,
+          "closeness": 0.5,
+          "betweenness": 0.3
+        },
+        "lockInEffect": {
+          "strength": 0.03,
+          "components": {
+            "networkEffect": 0,
+            "switchingCost": 0,
+            "complementAssets": 0,
+            "standardization": 0.2
+          },
+          "directDependents": [],
+          "confidence": 0.7
+        },
+        "vulnerabilities": {
+          "competitors": [],
+          "switchingFeasibility": 0.97,
+          "replacementRisk": 0.291
+        },
+        "confidence": 0.75
+      },
+      {
+        "nodeId": "tech--types-react",
+        "nodeName": "@types/react",
+        "currentAdoption": 0.15,
+        "predictedAdoption": {
+          "t30": 0.18,
+          "t90": 0.22499999999999998,
+          "t180": 0.27,
+          "t365": 0.33
+        },
+        "diffusionRate": 0.03,
+        "networkMetrics": {
+          "degree": 0,
+          "inDegree": 0,
+          "outDegree": 0,
+          "pageRank": 0,
+          "closeness": 0.5,
+          "betweenness": 0.3
+        },
+        "lockInEffect": {
+          "strength": 0.03,
+          "components": {
+            "networkEffect": 0,
+            "switchingCost": 0,
+            "complementAssets": 0,
+            "standardization": 0.2
+          },
+          "directDependents": [],
+          "confidence": 0.7
+        },
+        "vulnerabilities": {
+          "competitors": [],
+          "switchingFeasibility": 0.97,
+          "replacementRisk": 0.291
+        },
+        "confidence": 0.75
+      },
+      {
+        "nodeId": "tech-pino",
+        "nodeName": "pino",
+        "currentAdoption": 0.1,
+        "predictedAdoption": {
+          "t30": 0.12,
+          "t90": 0.15000000000000002,
+          "t180": 0.18000000000000002,
+          "t365": 0.22000000000000003
+        },
+        "diffusionRate": 0.03,
+        "networkMetrics": {
+          "degree": 0,
+          "inDegree": 0,
+          "outDegree": 0,
+          "pageRank": 0,
+          "closeness": 0.5,
+          "betweenness": 0.3
+        },
+        "lockInEffect": {
+          "strength": 0.03,
+          "components": {
+            "networkEffect": 0,
+            "switchingCost": 0,
+            "complementAssets": 0,
+            "standardization": 0.2
+          },
+          "directDependents": [],
+          "confidence": 0.7
+        },
+        "vulnerabilities": {
+          "competitors": [],
+          "switchingFeasibility": 0.97,
+          "replacementRisk": 0.291
+        },
+        "confidence": 0.75
+      },
+      {
+        "nodeId": "tech-neo4j-driver",
+        "nodeName": "neo4j-driver",
+        "currentAdoption": 0.1,
+        "predictedAdoption": {
+          "t30": 0.12,
+          "t90": 0.15000000000000002,
+          "t180": 0.18000000000000002,
+          "t365": 0.22000000000000003
+        },
+        "diffusionRate": 0.03,
+        "networkMetrics": {
+          "degree": 0,
+          "inDegree": 0,
+          "outDegree": 0,
+          "pageRank": 0,
+          "closeness": 0.5,
+          "betweenness": 0.3
+        },
+        "lockInEffect": {
+          "strength": 0.03,
+          "components": {
+            "networkEffect": 0,
+            "switchingCost": 0,
+            "complementAssets": 0,
+            "standardization": 0.2
+          },
+          "directDependents": [],
+          "confidence": 0.7
+        },
+        "vulnerabilities": {
+          "competitors": [],
+          "switchingFeasibility": 0.97,
+          "replacementRisk": 0.291
+        },
+        "confidence": 0.75
+      },
+      {
+        "nodeId": "tech--noble-ed25519",
+        "nodeName": "@noble/ed25519",
+        "currentAdoption": 0.1,
+        "predictedAdoption": {
+          "t30": 0.12,
+          "t90": 0.15000000000000002,
+          "t180": 0.18000000000000002,
+          "t365": 0.22000000000000003
+        },
+        "diffusionRate": 0.03,
+        "networkMetrics": {
+          "degree": 0,
+          "inDegree": 0,
+          "outDegree": 0,
+          "pageRank": 0,
+          "closeness": 0.5,
+          "betweenness": 0.3
+        },
+        "lockInEffect": {
+          "strength": 0.03,
+          "components": {
+            "networkEffect": 0,
+            "switchingCost": 0,
+            "complementAssets": 0,
+            "standardization": 0.2
+          },
+          "directDependents": [],
+          "confidence": 0.7
+        },
+        "vulnerabilities": {
+          "competitors": [],
+          "switchingFeasibility": 0.97,
+          "replacementRisk": 0.291
+        },
+        "confidence": 0.75
+      },
+      {
+        "nodeId": "tech--types-react-dom",
+        "nodeName": "@types/react-dom",
+        "currentAdoption": 0.1,
+        "predictedAdoption": {
+          "t30": 0.12,
+          "t90": 0.15000000000000002,
+          "t180": 0.18000000000000002,
+          "t365": 0.22000000000000003
+        },
+        "diffusionRate": 0.03,
+        "networkMetrics": {
+          "degree": 0,
+          "inDegree": 0,
+          "outDegree": 0,
+          "pageRank": 0,
+          "closeness": 0.5,
+          "betweenness": 0.3
+        },
+        "lockInEffect": {
+          "strength": 0.03,
+          "components": {
+            "networkEffect": 0,
+            "switchingCost": 0,
+            "complementAssets": 0,
+            "standardization": 0.2
+          },
+          "directDependents": [],
+          "confidence": 0.7
+        },
+        "vulnerabilities": {
+          "competitors": [],
+          "switchingFeasibility": 0.97,
+          "replacementRisk": 0.291
+        },
+        "confidence": 0.75
+      },
+      {
+        "nodeId": "tech--vitejs-plugin-react",
+        "nodeName": "@vitejs/plugin-react",
+        "currentAdoption": 0.1,
+        "predictedAdoption": {
+          "t30": 0.12,
+          "t90": 0.15000000000000002,
+          "t180": 0.18000000000000002,
+          "t365": 0.22000000000000003
+        },
+        "diffusionRate": 0.03,
+        "networkMetrics": {
+          "degree": 0,
+          "inDegree": 0,
+          "outDegree": 0,
+          "pageRank": 0,
+          "closeness": 0.5,
+          "betweenness": 0.3
+        },
+        "lockInEffect": {
+          "strength": 0.03,
+          "components": {
+            "networkEffect": 0,
+            "switchingCost": 0,
+            "complementAssets": 0,
+            "standardization": 0.2
+          },
+          "directDependents": [],
+          "confidence": 0.7
+        },
+        "vulnerabilities": {
+          "competitors": [],
+          "switchingFeasibility": 0.97,
+          "replacementRisk": 0.291
+        },
+        "confidence": 0.75
+      },
+      {
+        "nodeId": "tech-vite",
+        "nodeName": "vite",
+        "currentAdoption": 0.1,
+        "predictedAdoption": {
+          "t30": 0.12,
+          "t90": 0.15000000000000002,
+          "t180": 0.18000000000000002,
+          "t365": 0.22000000000000003
+        },
+        "diffusionRate": 0.03,
+        "networkMetrics": {
+          "degree": 0,
+          "inDegree": 0,
+          "outDegree": 0,
+          "pageRank": 0,
+          "closeness": 0.5,
+          "betweenness": 0.3
+        },
+        "lockInEffect": {
+          "strength": 0.03,
+          "components": {
+            "networkEffect": 0,
+            "switchingCost": 0,
+            "complementAssets": 0,
+            "standardization": 0.2
+          },
+          "directDependents": [],
+          "confidence": 0.7
+        },
+        "vulnerabilities": {
+          "competitors": [],
+          "switchingFeasibility": 0.97,
+          "replacementRisk": 0.291
+        },
+        "confidence": 0.75
+      },
+      {
+        "nodeId": "tech-tsx",
+        "nodeName": "tsx",
+        "currentAdoption": 0.1,
+        "predictedAdoption": {
+          "t30": 0.12,
+          "t90": 0.15000000000000002,
+          "t180": 0.18000000000000002,
+          "t365": 0.22000000000000003
+        },
+        "diffusionRate": 0.03,
+        "networkMetrics": {
+          "degree": 0,
+          "inDegree": 0,
+          "outDegree": 0,
+          "pageRank": 0,
+          "closeness": 0.5,
+          "betweenness": 0.3
+        },
+        "lockInEffect": {
+          "strength": 0.03,
+          "components": {
+            "networkEffect": 0,
+            "switchingCost": 0,
+            "complementAssets": 0,
+            "standardization": 0.2
+          },
+          "directDependents": [],
+          "confidence": 0.7
+        },
+        "vulnerabilities": {
+          "competitors": [],
+          "switchingFeasibility": 0.97,
+          "replacementRisk": 0.291
+        },
+        "confidence": 0.75
+      },
+      {
+        "nodeId": "tech-fastify",
+        "nodeName": "fastify",
+        "currentAdoption": 0.1,
+        "predictedAdoption": {
+          "t30": 0.12,
+          "t90": 0.15000000000000002,
+          "t180": 0.18000000000000002,
+          "t365": 0.22000000000000003
+        },
+        "diffusionRate": 0.03,
+        "networkMetrics": {
+          "degree": 0,
+          "inDegree": 0,
+          "outDegree": 0,
+          "pageRank": 0,
+          "closeness": 0.5,
+          "betweenness": 0.3
+        },
+        "lockInEffect": {
+          "strength": 0.03,
+          "components": {
+            "networkEffect": 0,
+            "switchingCost": 0,
+            "complementAssets": 0,
+            "standardization": 0.2
+          },
+          "directDependents": [],
+          "confidence": 0.7
+        },
+        "vulnerabilities": {
+          "competitors": [],
+          "switchingFeasibility": 0.97,
+          "replacementRisk": 0.291
+        },
+        "confidence": 0.75
+      },
+      {
+        "nodeId": "tech-ts-node-dev",
+        "nodeName": "ts-node-dev",
+        "currentAdoption": 0.1,
+        "predictedAdoption": {
+          "t30": 0.12,
+          "t90": 0.15000000000000002,
+          "t180": 0.18000000000000002,
+          "t365": 0.22000000000000003
+        },
+        "diffusionRate": 0.03,
+        "networkMetrics": {
+          "degree": 0,
+          "inDegree": 0,
+          "outDegree": 0,
+          "pageRank": 0,
+          "closeness": 0.5,
+          "betweenness": 0.3
+        },
+        "lockInEffect": {
+          "strength": 0.03,
+          "components": {
+            "networkEffect": 0,
+            "switchingCost": 0,
+            "complementAssets": 0,
+            "standardization": 0.2
+          },
+          "directDependents": [],
+          "confidence": 0.7
+        },
+        "vulnerabilities": {
+          "competitors": [],
+          "switchingFeasibility": 0.97,
+          "replacementRisk": 0.291
+        },
+        "confidence": 0.75
+      },
+      {
+        "nodeId": "tech-ajv",
+        "nodeName": "ajv",
+        "currentAdoption": 0.05,
+        "predictedAdoption": {
+          "t30": 0.06,
+          "t90": 0.07500000000000001,
+          "t180": 0.09000000000000001,
+          "t365": 0.11000000000000001
+        },
+        "diffusionRate": 0.03,
+        "networkMetrics": {
+          "degree": 0,
+          "inDegree": 0,
+          "outDegree": 0,
+          "pageRank": 0,
+          "closeness": 0.5,
+          "betweenness": 0.3
+        },
+        "lockInEffect": {
+          "strength": 0.03,
+          "components": {
+            "networkEffect": 0,
+            "switchingCost": 0,
+            "complementAssets": 0,
+            "standardization": 0.2
+          },
+          "directDependents": [],
+          "confidence": 0.7
+        },
+        "vulnerabilities": {
+          "competitors": [],
+          "switchingFeasibility": 0.97,
+          "replacementRisk": 0.291
+        },
+        "confidence": 0.75
+      },
+      {
+        "nodeId": "tech-ajv-formats",
+        "nodeName": "ajv-formats",
+        "currentAdoption": 0.05,
+        "predictedAdoption": {
+          "t30": 0.06,
+          "t90": 0.07500000000000001,
+          "t180": 0.09000000000000001,
+          "t365": 0.11000000000000001
+        },
+        "diffusionRate": 0.03,
+        "networkMetrics": {
+          "degree": 0,
+          "inDegree": 0,
+          "outDegree": 0,
+          "pageRank": 0,
+          "closeness": 0.5,
+          "betweenness": 0.3
+        },
+        "lockInEffect": {
+          "strength": 0.03,
+          "components": {
+            "networkEffect": 0,
+            "switchingCost": 0,
+            "complementAssets": 0,
+            "standardization": 0.2
+          },
+          "directDependents": [],
+          "confidence": 0.7
+        },
+        "vulnerabilities": {
+          "competitors": [],
+          "switchingFeasibility": 0.97,
+          "replacementRisk": 0.291
+        },
+        "confidence": 0.75
+      },
+      {
+        "nodeId": "tech--jest-globals",
+        "nodeName": "@jest/globals",
+        "currentAdoption": 0.05,
+        "predictedAdoption": {
+          "t30": 0.06,
+          "t90": 0.07500000000000001,
+          "t180": 0.09000000000000001,
+          "t365": 0.11000000000000001
+        },
+        "diffusionRate": 0.03,
+        "networkMetrics": {
+          "degree": 0,
+          "inDegree": 0,
+          "outDegree": 0,
+          "pageRank": 0,
+          "closeness": 0.5,
+          "betweenness": 0.3
+        },
+        "lockInEffect": {
+          "strength": 0.03,
+          "components": {
+            "networkEffect": 0,
+            "switchingCost": 0,
+            "complementAssets": 0,
+            "standardization": 0.2
+          },
+          "directDependents": [],
+          "confidence": 0.7
+        },
+        "vulnerabilities": {
+          "competitors": [],
+          "switchingFeasibility": 0.97,
+          "replacementRisk": 0.291
+        },
+        "confidence": 0.75
+      },
+      {
+        "nodeId": "tech--typescript-eslint-eslint-plugin",
+        "nodeName": "@typescript-eslint/eslint-plugin",
+        "currentAdoption": 0.05,
+        "predictedAdoption": {
+          "t30": 0.06,
+          "t90": 0.07500000000000001,
+          "t180": 0.09000000000000001,
+          "t365": 0.11000000000000001
+        },
+        "diffusionRate": 0.03,
+        "networkMetrics": {
+          "degree": 0,
+          "inDegree": 0,
+          "outDegree": 0,
+          "pageRank": 0,
+          "closeness": 0.5,
+          "betweenness": 0.3
+        },
+        "lockInEffect": {
+          "strength": 0.03,
+          "components": {
+            "networkEffect": 0,
+            "switchingCost": 0,
+            "complementAssets": 0,
+            "standardization": 0.2
+          },
+          "directDependents": [],
+          "confidence": 0.7
+        },
+        "vulnerabilities": {
+          "competitors": [],
+          "switchingFeasibility": 0.97,
+          "replacementRisk": 0.291
+        },
+        "confidence": 0.75
+      },
+      {
+        "nodeId": "tech--typescript-eslint-parser",
+        "nodeName": "@typescript-eslint/parser",
+        "currentAdoption": 0.05,
+        "predictedAdoption": {
+          "t30": 0.06,
+          "t90": 0.07500000000000001,
+          "t180": 0.09000000000000001,
+          "t365": 0.11000000000000001
+        },
+        "diffusionRate": 0.03,
+        "networkMetrics": {
+          "degree": 0,
+          "inDegree": 0,
+          "outDegree": 0,
+          "pageRank": 0,
+          "closeness": 0.5,
+          "betweenness": 0.3
+        },
+        "lockInEffect": {
+          "strength": 0.03,
+          "components": {
+            "networkEffect": 0,
+            "switchingCost": 0,
+            "complementAssets": 0,
+            "standardization": 0.2
+          },
+          "directDependents": [],
+          "confidence": 0.7
+        },
+        "vulnerabilities": {
+          "competitors": [],
+          "switchingFeasibility": 0.97,
+          "replacementRisk": 0.291
+        },
+        "confidence": 0.75
+      },
+      {
+        "nodeId": "tech-axios",
+        "nodeName": "axios",
+        "currentAdoption": 0.05,
+        "predictedAdoption": {
+          "t30": 0.06,
+          "t90": 0.07500000000000001,
+          "t180": 0.09000000000000001,
+          "t365": 0.11000000000000001
+        },
+        "diffusionRate": 0.03,
+        "networkMetrics": {
+          "degree": 0,
+          "inDegree": 0,
+          "outDegree": 0,
+          "pageRank": 0,
+          "closeness": 0.5,
+          "betweenness": 0.3
+        },
+        "lockInEffect": {
+          "strength": 0.03,
+          "components": {
+            "networkEffect": 0,
+            "switchingCost": 0,
+            "complementAssets": 0,
+            "standardization": 0.2
+          },
+          "directDependents": [],
+          "confidence": 0.7
+        },
+        "vulnerabilities": {
+          "competitors": [],
+          "switchingFeasibility": 0.97,
+          "replacementRisk": 0.291
+        },
+        "confidence": 0.75
+      },
+      {
+        "nodeId": "summit-platform",
+        "nodeName": "Summit Platform",
+        "currentAdoption": 0.1,
+        "predictedAdoption": {
+          "t30": 0.12,
+          "t90": 0.15000000000000002,
+          "t180": 0.18000000000000002,
+          "t365": 0.22000000000000003
+        },
+        "diffusionRate": 0.03,
+        "networkMetrics": {
+          "degree": 3,
+          "inDegree": 0,
+          "outDegree": 3,
+          "pageRank": 0,
+          "closeness": 0.5,
+          "betweenness": 0.3
+        },
+        "lockInEffect": {
+          "strength": 0.09,
+          "components": {
+            "networkEffect": 0,
+            "switchingCost": 0.2,
+            "complementAssets": 0,
+            "standardization": 0.2
+          },
+          "directDependents": [],
+          "confidence": 0.7
+        },
+        "vulnerabilities": {
+          "competitors": [],
+          "switchingFeasibility": 0.91,
+          "replacementRisk": 0.273
+        },
+        "confidence": 0.75
+      },
+      {
+        "nodeId": "innovation-simulation-engine",
+        "nodeName": "Innovation Simulation Engine",
+        "currentAdoption": 0.1,
+        "predictedAdoption": {
+          "t30": 0.12,
+          "t90": 0.15000000000000002,
+          "t180": 0.18000000000000002,
+          "t365": 0.22000000000000003
+        },
+        "diffusionRate": 0.03,
+        "networkMetrics": {
+          "degree": 4,
+          "inDegree": 1,
+          "outDegree": 3,
+          "pageRank": 0.125,
+          "closeness": 0.5,
+          "betweenness": 0.3
+        },
+        "lockInEffect": {
+          "strength": 0.1275,
+          "components": {
+            "networkEffect": 0.05,
+            "switchingCost": 0.2,
+            "complementAssets": 0.1,
+            "standardization": 0.2
+          },
+          "directDependents": [
+            "summit-platform"
+          ],
+          "confidence": 0.7
+        },
+        "vulnerabilities": {
+          "competitors": [],
+          "switchingFeasibility": 0.8725,
+          "replacementRisk": 0.26175
+        },
+        "confidence": 0.75
+      },
+      {
+        "nodeId": "repository-archaeology-engine",
+        "nodeName": "Repository Archaeology Engine",
+        "currentAdoption": 0.1,
+        "predictedAdoption": {
+          "t30": 0.12,
+          "t90": 0.15000000000000002,
+          "t180": 0.18000000000000002,
+          "t365": 0.22000000000000003
+        },
+        "diffusionRate": 0.03,
+        "networkMetrics": {
+          "degree": 1,
+          "inDegree": 1,
+          "outDegree": 0,
+          "pageRank": 0.125,
+          "closeness": 0.5,
+          "betweenness": 0.3
+        },
+        "lockInEffect": {
+          "strength": 0.0675,
+          "components": {
+            "networkEffect": 0.05,
+            "switchingCost": 0,
+            "complementAssets": 0.1,
+            "standardization": 0.2
+          },
+          "directDependents": [
+            "innovation-simulation-engine"
+          ],
+          "confidence": 0.7
+        },
+        "vulnerabilities": {
+          "competitors": [],
+          "switchingFeasibility": 0.9325,
+          "replacementRisk": 0.27975
+        },
+        "confidence": 0.75
+      },
+      {
+        "nodeId": "evolution-intelligence-system",
+        "nodeName": "Evolution Intelligence System",
+        "currentAdoption": 0.1,
+        "predictedAdoption": {
+          "t30": 0.12,
+          "t90": 0.15000000000000002,
+          "t180": 0.18000000000000002,
+          "t365": 0.22000000000000003
+        },
+        "diffusionRate": 0.03,
+        "networkMetrics": {
+          "degree": 1,
+          "inDegree": 1,
+          "outDegree": 0,
+          "pageRank": 0.125,
+          "closeness": 0.5,
+          "betweenness": 0.3
+        },
+        "lockInEffect": {
+          "strength": 0.0675,
+          "components": {
+            "networkEffect": 0.05,
+            "switchingCost": 0,
+            "complementAssets": 0.1,
+            "standardization": 0.2
+          },
+          "directDependents": [
+            "innovation-simulation-engine"
+          ],
+          "confidence": 0.7
+        },
+        "vulnerabilities": {
+          "competitors": [],
+          "switchingFeasibility": 0.9325,
+          "replacementRisk": 0.27975
+        },
+        "confidence": 0.75
+      },
+      {
+        "nodeId": "evidence-protocol",
+        "nodeName": "Summit Evidence Protocol",
+        "currentAdoption": 0.1,
+        "predictedAdoption": {
+          "t30": 0.12,
+          "t90": 0.15000000000000002,
+          "t180": 0.18000000000000002,
+          "t365": 0.22000000000000003
+        },
+        "diffusionRate": 0.03,
+        "networkMetrics": {
+          "degree": 1,
+          "inDegree": 1,
+          "outDegree": 0,
+          "pageRank": 0.125,
+          "closeness": 0.5,
+          "betweenness": 0.3
+        },
+        "lockInEffect": {
+          "strength": 0.0675,
+          "components": {
+            "networkEffect": 0.05,
+            "switchingCost": 0,
+            "complementAssets": 0.1,
+            "standardization": 0.2
+          },
+          "directDependents": [
+            "innovation-simulation-engine"
+          ],
+          "confidence": 0.7
+        },
+        "vulnerabilities": {
+          "competitors": [],
+          "switchingFeasibility": 0.9325,
+          "replacementRisk": 0.27975
+        },
+        "confidence": 0.75
+      },
+      {
+        "nodeId": "intelgraph-platform",
+        "nodeName": "IntelGraph Platform",
+        "currentAdoption": 0.1,
+        "predictedAdoption": {
+          "t30": 0.12,
+          "t90": 0.15000000000000002,
+          "t180": 0.18000000000000002,
+          "t365": 0.22000000000000003
+        },
+        "diffusionRate": 0.03,
+        "networkMetrics": {
+          "degree": 2,
+          "inDegree": 1,
+          "outDegree": 1,
+          "pageRank": 0.125,
+          "closeness": 0.5,
+          "betweenness": 0.3
+        },
+        "lockInEffect": {
+          "strength": 0.0875,
+          "components": {
+            "networkEffect": 0.05,
+            "switchingCost": 0.06666666666666667,
+            "complementAssets": 0.1,
+            "standardization": 0.2
+          },
+          "directDependents": [
+            "summit-platform"
+          ],
+          "confidence": 0.7
+        },
+        "vulnerabilities": {
+          "competitors": [],
+          "switchingFeasibility": 0.9125,
+          "replacementRisk": 0.27375
+        },
+        "confidence": 0.75
+      },
+      {
+        "nodeId": "autonomous-ops",
+        "nodeName": "Autonomous Operations",
+        "currentAdoption": 0.1,
+        "predictedAdoption": {
+          "t30": 0.12,
+          "t90": 0.15000000000000002,
+          "t180": 0.18000000000000002,
+          "t365": 0.22000000000000003
+        },
+        "diffusionRate": 0.03,
+        "networkMetrics": {
+          "degree": 0,
+          "inDegree": 0,
+          "outDegree": 0,
+          "pageRank": 0,
+          "closeness": 0.5,
+          "betweenness": 0.3
+        },
+        "lockInEffect": {
+          "strength": 0.03,
+          "components": {
+            "networkEffect": 0,
+            "switchingCost": 0,
+            "complementAssets": 0,
+            "standardization": 0.2
+          },
+          "directDependents": [],
+          "confidence": 0.7
+        },
+        "vulnerabilities": {
+          "competitors": [],
+          "switchingFeasibility": 0.97,
+          "replacementRisk": 0.291
+        },
+        "confidence": 0.75
+      },
+      {
+        "nodeId": "agent-control-plane",
+        "nodeName": "Agent Control Plane",
+        "currentAdoption": 0.1,
+        "predictedAdoption": {
+          "t30": 0.12,
+          "t90": 0.15000000000000002,
+          "t180": 0.18000000000000002,
+          "t365": 0.22000000000000003
+        },
+        "diffusionRate": 0.03,
+        "networkMetrics": {
+          "degree": 2,
+          "inDegree": 2,
+          "outDegree": 0,
+          "pageRank": 0.25,
+          "closeness": 0.5,
+          "betweenness": 0.3
+        },
+        "lockInEffect": {
+          "strength": 0.10500000000000001,
+          "components": {
+            "networkEffect": 0.1,
+            "switchingCost": 0,
+            "complementAssets": 0.2,
+            "standardization": 0.2
+          },
+          "directDependents": [
+            "summit-platform",
+            "intelgraph-platform"
+          ],
+          "confidence": 0.7
+        },
+        "vulnerabilities": {
+          "competitors": [],
+          "switchingFeasibility": 0.895,
+          "replacementRisk": 0.2685
+        },
+        "confidence": 0.75
+      }
+    ],
+    "recommendations": [
+      {
+        "id": "rec-tech-typescript",
+        "type": "migrate",
+        "targetNode": "tech-typescript",
+        "nodeName": "typescript",
+        "nodeType": "technology",
+        "rationale": "typescript is declining - begin migration planning",
+        "priority": "high",
+        "evidence": {
+          "adoptionPhase": "declining",
+          "adoptionRate": 0.85,
+          "lockInStrength": 0.0675,
+          "momentum": -0.5,
+          "pageRank": 0.125
+        },
+        "confidence": 0.75,
+        "expectedOutcome": {
+          "benefit": 0.51,
+          "cost": 0.930375,
+          "timeHorizon": 60,
+          "roi": 0.5481660620717453
+        }
+      },
+      {
+        "id": "rec-tech-pino",
+        "type": "invest",
+        "targetNode": "tech-pino",
+        "nodeName": "pino",
+        "nodeType": "technology",
+        "rationale": "pino is emerging with low lock-in - good time to invest before standards solidify",
+        "priority": "high",
+        "evidence": {
+          "adoptionPhase": "emerging",
+          "adoptionRate": 0.1,
+          "lockInStrength": 0.03,
+          "momentum": 0.7,
+          "pageRank": 0
+        },
+        "confidence": 0.75,
+        "expectedOutcome": {
+          "benefit": 0.847,
+          "cost": 0.7104999999999999,
+          "timeHorizon": 180,
+          "roi": 1.1921182266009853
+        }
+      },
+      {
+        "id": "rec-tech-neo4j-driver",
+        "type": "invest",
+        "targetNode": "tech-neo4j-driver",
+        "nodeName": "neo4j-driver",
+        "nodeType": "technology",
+        "rationale": "neo4j-driver is emerging with low lock-in - good time to invest before standards solidify",
+        "priority": "high",
+        "evidence": {
+          "adoptionPhase": "emerging",
+          "adoptionRate": 0.1,
+          "lockInStrength": 0.03,
+          "momentum": 0.7,
+          "pageRank": 0
+        },
+        "confidence": 0.75,
+        "expectedOutcome": {
+          "benefit": 0.847,
+          "cost": 0.7104999999999999,
+          "timeHorizon": 180,
+          "roi": 1.1921182266009853
+        }
+      },
+      {
+        "id": "rec-tech--noble-ed25519",
+        "type": "invest",
+        "targetNode": "tech--noble-ed25519",
+        "nodeName": "@noble/ed25519",
+        "nodeType": "technology",
+        "rationale": "@noble/ed25519 is emerging with low lock-in - good time to invest before standards solidify",
+        "priority": "high",
+        "evidence": {
+          "adoptionPhase": "emerging",
+          "adoptionRate": 0.1,
+          "lockInStrength": 0.03,
+          "momentum": 0.7,
+          "pageRank": 0
+        },
+        "confidence": 0.75,
+        "expectedOutcome": {
+          "benefit": 0.847,
+          "cost": 0.7104999999999999,
+          "timeHorizon": 180,
+          "roi": 1.1921182266009853
+        }
+      },
+      {
+        "id": "rec-tech--types-react-dom",
+        "type": "invest",
+        "targetNode": "tech--types-react-dom",
+        "nodeName": "@types/react-dom",
+        "nodeType": "technology",
+        "rationale": "@types/react-dom is emerging with low lock-in - good time to invest before standards solidify",
+        "priority": "high",
+        "evidence": {
+          "adoptionPhase": "emerging",
+          "adoptionRate": 0.1,
+          "lockInStrength": 0.03,
+          "momentum": 0.7,
+          "pageRank": 0
+        },
+        "confidence": 0.75,
+        "expectedOutcome": {
+          "benefit": 0.847,
+          "cost": 0.7104999999999999,
+          "timeHorizon": 180,
+          "roi": 1.1921182266009853
+        }
+      },
+      {
+        "id": "rec-tech--vitejs-plugin-react",
+        "type": "invest",
+        "targetNode": "tech--vitejs-plugin-react",
+        "nodeName": "@vitejs/plugin-react",
+        "nodeType": "technology",
+        "rationale": "@vitejs/plugin-react is emerging with low lock-in - good time to invest before standards solidify",
+        "priority": "high",
+        "evidence": {
+          "adoptionPhase": "emerging",
+          "adoptionRate": 0.1,
+          "lockInStrength": 0.03,
+          "momentum": 0.7,
+          "pageRank": 0
+        },
+        "confidence": 0.75,
+        "expectedOutcome": {
+          "benefit": 0.847,
+          "cost": 0.7104999999999999,
+          "timeHorizon": 180,
+          "roi": 1.1921182266009853
+        }
+      },
+      {
+        "id": "rec-tech-vite",
+        "type": "invest",
+        "targetNode": "tech-vite",
+        "nodeName": "vite",
+        "nodeType": "technology",
+        "rationale": "vite is emerging with low lock-in - good time to invest before standards solidify",
+        "priority": "high",
+        "evidence": {
+          "adoptionPhase": "emerging",
+          "adoptionRate": 0.1,
+          "lockInStrength": 0.03,
+          "momentum": 0.7,
+          "pageRank": 0
+        },
+        "confidence": 0.75,
+        "expectedOutcome": {
+          "benefit": 0.847,
+          "cost": 0.7104999999999999,
+          "timeHorizon": 180,
+          "roi": 1.1921182266009853
+        }
+      },
+      {
+        "id": "rec-tech-tsx",
+        "type": "invest",
+        "targetNode": "tech-tsx",
+        "nodeName": "tsx",
+        "nodeType": "technology",
+        "rationale": "tsx is emerging with low lock-in - good time to invest before standards solidify",
+        "priority": "high",
+        "evidence": {
+          "adoptionPhase": "emerging",
+          "adoptionRate": 0.1,
+          "lockInStrength": 0.03,
+          "momentum": 0.7,
+          "pageRank": 0
+        },
+        "confidence": 0.75,
+        "expectedOutcome": {
+          "benefit": 0.847,
+          "cost": 0.7104999999999999,
+          "timeHorizon": 180,
+          "roi": 1.1921182266009853
+        }
+      },
+      {
+        "id": "rec-tech-fastify",
+        "type": "invest",
+        "targetNode": "tech-fastify",
+        "nodeName": "fastify",
+        "nodeType": "technology",
+        "rationale": "fastify is emerging with low lock-in - good time to invest before standards solidify",
+        "priority": "high",
+        "evidence": {
+          "adoptionPhase": "emerging",
+          "adoptionRate": 0.1,
+          "lockInStrength": 0.03,
+          "momentum": 0.7,
+          "pageRank": 0
+        },
+        "confidence": 0.75,
+        "expectedOutcome": {
+          "benefit": 0.847,
+          "cost": 0.7104999999999999,
+          "timeHorizon": 180,
+          "roi": 1.1921182266009853
+        }
+      },
+      {
+        "id": "rec-tech-ts-node-dev",
+        "type": "invest",
+        "targetNode": "tech-ts-node-dev",
+        "nodeName": "ts-node-dev",
+        "nodeType": "technology",
+        "rationale": "ts-node-dev is emerging with low lock-in - good time to invest before standards solidify",
+        "priority": "high",
+        "evidence": {
+          "adoptionPhase": "emerging",
+          "adoptionRate": 0.1,
+          "lockInStrength": 0.03,
+          "momentum": 0.7,
+          "pageRank": 0
+        },
+        "confidence": 0.75,
+        "expectedOutcome": {
+          "benefit": 0.847,
+          "cost": 0.7104999999999999,
+          "timeHorizon": 180,
+          "roi": 1.1921182266009853
+        }
+      },
+      {
+        "id": "rec-tech-ajv",
+        "type": "invest",
+        "targetNode": "tech-ajv",
+        "nodeName": "ajv",
+        "nodeType": "technology",
+        "rationale": "ajv is emerging with low lock-in - good time to invest before standards solidify",
+        "priority": "high",
+        "evidence": {
+          "adoptionPhase": "emerging",
+          "adoptionRate": 0.05,
+          "lockInStrength": 0.03,
+          "momentum": 0.7,
+          "pageRank": 0
+        },
+        "confidence": 0.75,
+        "expectedOutcome": {
+          "benefit": 0.847,
+          "cost": 0.7104999999999999,
+          "timeHorizon": 180,
+          "roi": 1.1921182266009853
+        }
+      },
+      {
+        "id": "rec-tech-ajv-formats",
+        "type": "invest",
+        "targetNode": "tech-ajv-formats",
+        "nodeName": "ajv-formats",
+        "nodeType": "technology",
+        "rationale": "ajv-formats is emerging with low lock-in - good time to invest before standards solidify",
+        "priority": "high",
+        "evidence": {
+          "adoptionPhase": "emerging",
+          "adoptionRate": 0.05,
+          "lockInStrength": 0.03,
+          "momentum": 0.7,
+          "pageRank": 0
+        },
+        "confidence": 0.75,
+        "expectedOutcome": {
+          "benefit": 0.847,
+          "cost": 0.7104999999999999,
+          "timeHorizon": 180,
+          "roi": 1.1921182266009853
+        }
+      },
+      {
+        "id": "rec-tech--jest-globals",
+        "type": "invest",
+        "targetNode": "tech--jest-globals",
+        "nodeName": "@jest/globals",
+        "nodeType": "technology",
+        "rationale": "@jest/globals is emerging with low lock-in - good time to invest before standards solidify",
+        "priority": "high",
+        "evidence": {
+          "adoptionPhase": "emerging",
+          "adoptionRate": 0.05,
+          "lockInStrength": 0.03,
+          "momentum": 0.7,
+          "pageRank": 0
+        },
+        "confidence": 0.75,
+        "expectedOutcome": {
+          "benefit": 0.847,
+          "cost": 0.7104999999999999,
+          "timeHorizon": 180,
+          "roi": 1.1921182266009853
+        }
+      },
+      {
+        "id": "rec-tech--typescript-eslint-eslint-plugin",
+        "type": "invest",
+        "targetNode": "tech--typescript-eslint-eslint-plugin",
+        "nodeName": "@typescript-eslint/eslint-plugin",
+        "nodeType": "technology",
+        "rationale": "@typescript-eslint/eslint-plugin is emerging with low lock-in - good time to invest before standards solidify",
+        "priority": "high",
+        "evidence": {
+          "adoptionPhase": "emerging",
+          "adoptionRate": 0.05,
+          "lockInStrength": 0.03,
+          "momentum": 0.7,
+          "pageRank": 0
+        },
+        "confidence": 0.75,
+        "expectedOutcome": {
+          "benefit": 0.847,
+          "cost": 0.7104999999999999,
+          "timeHorizon": 180,
+          "roi": 1.1921182266009853
+        }
+      },
+      {
+        "id": "rec-tech--typescript-eslint-parser",
+        "type": "invest",
+        "targetNode": "tech--typescript-eslint-parser",
+        "nodeName": "@typescript-eslint/parser",
+        "nodeType": "technology",
+        "rationale": "@typescript-eslint/parser is emerging with low lock-in - good time to invest before standards solidify",
+        "priority": "high",
+        "evidence": {
+          "adoptionPhase": "emerging",
+          "adoptionRate": 0.05,
+          "lockInStrength": 0.03,
+          "momentum": 0.7,
+          "pageRank": 0
+        },
+        "confidence": 0.75,
+        "expectedOutcome": {
+          "benefit": 0.847,
+          "cost": 0.7104999999999999,
+          "timeHorizon": 180,
+          "roi": 1.1921182266009853
+        }
+      },
+      {
+        "id": "rec-tech-axios",
+        "type": "invest",
+        "targetNode": "tech-axios",
+        "nodeName": "axios",
+        "nodeType": "technology",
+        "rationale": "axios is emerging with low lock-in - good time to invest before standards solidify",
+        "priority": "high",
+        "evidence": {
+          "adoptionPhase": "emerging",
+          "adoptionRate": 0.05,
+          "lockInStrength": 0.03,
+          "momentum": 0.7,
+          "pageRank": 0
+        },
+        "confidence": 0.75,
+        "expectedOutcome": {
+          "benefit": 0.847,
+          "cost": 0.7104999999999999,
+          "timeHorizon": 180,
+          "roi": 1.1921182266009853
+        }
+      },
+      {
+        "id": "rec-evidence-protocol",
+        "type": "invest",
+        "targetNode": "evidence-protocol",
+        "nodeName": "Summit Evidence Protocol",
+        "nodeType": "framework",
+        "rationale": "Summit Evidence Protocol is emerging with low lock-in - good time to invest before standards solidify",
+        "priority": "high",
+        "evidence": {
+          "adoptionPhase": "emerging",
+          "adoptionRate": 0.1,
+          "lockInStrength": 0.0675,
+          "momentum": 0.7,
+          "pageRank": 0.125
+        },
+        "confidence": 0.75,
+        "expectedOutcome": {
+          "benefit": 0.847,
+          "cost": 0.723625,
+          "timeHorizon": 180,
+          "roi": 1.1704957678355503
+        }
+      },
+      {
+        "id": "rec-autonomous-ops",
+        "type": "invest",
+        "targetNode": "autonomous-ops",
+        "nodeName": "Autonomous Operations",
+        "nodeType": "capability",
+        "rationale": "Autonomous Operations is emerging with low lock-in - good time to invest before standards solidify",
+        "priority": "high",
+        "evidence": {
+          "adoptionPhase": "emerging",
+          "adoptionRate": 0.1,
+          "lockInStrength": 0.03,
+          "momentum": 0.7,
+          "pageRank": 0
+        },
+        "confidence": 0.75,
+        "expectedOutcome": {
+          "benefit": 0.847,
+          "cost": 0.7104999999999999,
+          "timeHorizon": 180,
+          "roi": 1.1921182266009853
+        }
+      },
+      {
+        "id": "rec-tech--types-node",
+        "type": "monitor",
+        "targetNode": "tech--types-node",
+        "nodeName": "@types/node",
+        "nodeType": "technology",
+        "rationale": "Continue monitoring",
+        "priority": "medium",
+        "evidence": {
+          "adoptionPhase": "mature",
+          "adoptionRate": 0.6,
+          "lockInStrength": 0.03,
+          "momentum": 0.3,
+          "pageRank": 0
+        },
+        "confidence": 0.75,
+        "expectedOutcome": {
+          "benefit": 0.327,
+          "cost": 0.10149999999999999,
+          "timeHorizon": 30,
+          "roi": 3.221674876847291
+        }
+      },
+      {
+        "id": "rec-tech-eslint",
+        "type": "monitor",
+        "targetNode": "tech-eslint",
+        "nodeName": "eslint",
+        "nodeType": "technology",
+        "rationale": "Continue monitoring",
+        "priority": "medium",
+        "evidence": {
+          "adoptionPhase": "growth",
+          "adoptionRate": 0.35,
+          "lockInStrength": 0.03,
+          "momentum": 0.9,
+          "pageRank": 0
+        },
+        "confidence": 0.75,
+        "expectedOutcome": {
+          "benefit": 0.381,
+          "cost": 0.10149999999999999,
+          "timeHorizon": 90,
+          "roi": 3.7536945812807887
+        }
+      },
+      {
+        "id": "rec-tech-jest",
+        "type": "monitor",
+        "targetNode": "tech-jest",
+        "nodeName": "jest",
+        "nodeType": "technology",
+        "rationale": "Continue monitoring",
+        "priority": "medium",
+        "evidence": {
+          "adoptionPhase": "growth",
+          "adoptionRate": 0.3,
+          "lockInStrength": 0.03,
+          "momentum": 0.9,
+          "pageRank": 0
+        },
+        "confidence": 0.75,
+        "expectedOutcome": {
+          "benefit": 0.381,
+          "cost": 0.10149999999999999,
+          "timeHorizon": 90,
+          "roi": 3.7536945812807887
+        }
+      },
+      {
+        "id": "rec-tech-zod",
+        "type": "monitor",
+        "targetNode": "tech-zod",
+        "nodeName": "zod",
+        "nodeType": "technology",
+        "rationale": "Continue monitoring",
+        "priority": "medium",
+        "evidence": {
+          "adoptionPhase": "growth",
+          "adoptionRate": 0.3,
+          "lockInStrength": 0.03,
+          "momentum": 0.9,
+          "pageRank": 0
+        },
+        "confidence": 0.75,
+        "expectedOutcome": {
+          "benefit": 0.381,
+          "cost": 0.10149999999999999,
+          "timeHorizon": 90,
+          "roi": 3.7536945812807887
+        }
+      },
+      {
+        "id": "rec-tech--opentelemetry-api",
+        "type": "monitor",
+        "targetNode": "tech--opentelemetry-api",
+        "nodeName": "@opentelemetry/api",
+        "nodeType": "technology",
+        "rationale": "Continue monitoring",
+        "priority": "medium",
+        "evidence": {
+          "adoptionPhase": "growth",
+          "adoptionRate": 0.25,
+          "lockInStrength": 0.03,
+          "momentum": 0.9,
+          "pageRank": 0
+        },
+        "confidence": 0.75,
+        "expectedOutcome": {
+          "benefit": 0.381,
+          "cost": 0.10149999999999999,
+          "timeHorizon": 90,
+          "roi": 3.7536945812807887
+        }
+      },
+      {
+        "id": "rec-tech-vitest",
+        "type": "monitor",
+        "targetNode": "tech-vitest",
+        "nodeName": "vitest",
+        "nodeType": "technology",
+        "rationale": "Continue monitoring",
+        "priority": "medium",
+        "evidence": {
+          "adoptionPhase": "growth",
+          "adoptionRate": 0.25,
+          "lockInStrength": 0.03,
+          "momentum": 0.9,
+          "pageRank": 0
+        },
+        "confidence": 0.75,
+        "expectedOutcome": {
+          "benefit": 0.381,
+          "cost": 0.10149999999999999,
+          "timeHorizon": 90,
+          "roi": 3.7536945812807887
+        }
+      },
+      {
+        "id": "rec-tech--types-jest",
+        "type": "monitor",
+        "targetNode": "tech--types-jest",
+        "nodeName": "@types/jest",
+        "nodeType": "technology",
+        "rationale": "Continue monitoring",
+        "priority": "medium",
+        "evidence": {
+          "adoptionPhase": "growth",
+          "adoptionRate": 0.2,
+          "lockInStrength": 0.03,
+          "momentum": 0.9,
+          "pageRank": 0
+        },
+        "confidence": 0.75,
+        "expectedOutcome": {
+          "benefit": 0.381,
+          "cost": 0.10149999999999999,
+          "timeHorizon": 90,
+          "roi": 3.7536945812807887
+        }
+      },
+      {
+        "id": "rec-tech-ts-jest",
+        "type": "monitor",
+        "targetNode": "tech-ts-jest",
+        "nodeName": "ts-jest",
+        "nodeType": "technology",
+        "rationale": "Continue monitoring",
+        "priority": "medium",
+        "evidence": {
+          "adoptionPhase": "growth",
+          "adoptionRate": 0.2,
+          "lockInStrength": 0.03,
+          "momentum": 0.9,
+          "pageRank": 0
+        },
+        "confidence": 0.75,
+        "expectedOutcome": {
+          "benefit": 0.381,
+          "cost": 0.10149999999999999,
+          "timeHorizon": 90,
+          "roi": 3.7536945812807887
+        }
+      },
+      {
+        "id": "rec-tech-react",
+        "type": "monitor",
+        "targetNode": "tech-react",
+        "nodeName": "react",
+        "nodeType": "technology",
+        "rationale": "Continue monitoring",
+        "priority": "medium",
+        "evidence": {
+          "adoptionPhase": "growth",
+          "adoptionRate": 0.2,
+          "lockInStrength": 0.05,
+          "momentum": 0.9,
+          "pageRank": 0
+        },
+        "confidence": 0.75,
+        "expectedOutcome": {
+          "benefit": 0.381,
+          "cost": 0.1025,
+          "timeHorizon": 90,
+          "roi": 3.7170731707317075
+        }
+      },
+      {
+        "id": "rec-tech-react-dom",
+        "type": "monitor",
+        "targetNode": "tech-react-dom",
+        "nodeName": "react-dom",
+        "nodeType": "technology",
+        "rationale": "Continue monitoring",
+        "priority": "medium",
+        "evidence": {
+          "adoptionPhase": "growth",
+          "adoptionRate": 0.2,
+          "lockInStrength": 0.03,
+          "momentum": 0.9,
+          "pageRank": 0
+        },
+        "confidence": 0.75,
+        "expectedOutcome": {
+          "benefit": 0.381,
+          "cost": 0.10149999999999999,
+          "timeHorizon": 90,
+          "roi": 3.7536945812807887
+        }
+      },
+      {
+        "id": "rec-tech-commander",
+        "type": "monitor",
+        "targetNode": "tech-commander",
+        "nodeName": "commander",
+        "nodeType": "technology",
+        "rationale": "Continue monitoring",
+        "priority": "medium",
+        "evidence": {
+          "adoptionPhase": "growth",
+          "adoptionRate": 0.15,
+          "lockInStrength": 0.03,
+          "momentum": 0.9,
+          "pageRank": 0
+        },
+        "confidence": 0.75,
+        "expectedOutcome": {
+          "benefit": 0.381,
+          "cost": 0.10149999999999999,
+          "timeHorizon": 90,
+          "roi": 3.7536945812807887
+        }
+      },
+      {
+        "id": "rec-tech-ts-node",
+        "type": "monitor",
+        "targetNode": "tech-ts-node",
+        "nodeName": "ts-node",
+        "nodeType": "technology",
+        "rationale": "Continue monitoring",
+        "priority": "medium",
+        "evidence": {
+          "adoptionPhase": "growth",
+          "adoptionRate": 0.15,
+          "lockInStrength": 0.03,
+          "momentum": 0.9,
+          "pageRank": 0
+        },
+        "confidence": 0.75,
+        "expectedOutcome": {
+          "benefit": 0.381,
+          "cost": 0.10149999999999999,
+          "timeHorizon": 90,
+          "roi": 3.7536945812807887
+        }
+      },
+      {
+        "id": "rec-tech-undici",
+        "type": "monitor",
+        "targetNode": "tech-undici",
+        "nodeName": "undici",
+        "nodeType": "technology",
+        "rationale": "Continue monitoring",
+        "priority": "medium",
+        "evidence": {
+          "adoptionPhase": "growth",
+          "adoptionRate": 0.15,
+          "lockInStrength": 0.03,
+          "momentum": 0.9,
+          "pageRank": 0
+        },
+        "confidence": 0.75,
+        "expectedOutcome": {
+          "benefit": 0.381,
+          "cost": 0.10149999999999999,
+          "timeHorizon": 90,
+          "roi": 3.7536945812807887
+        }
+      },
+      {
+        "id": "rec-tech--types-react",
+        "type": "monitor",
+        "targetNode": "tech--types-react",
+        "nodeName": "@types/react",
+        "nodeType": "technology",
+        "rationale": "Continue monitoring",
+        "priority": "medium",
+        "evidence": {
+          "adoptionPhase": "growth",
+          "adoptionRate": 0.15,
+          "lockInStrength": 0.03,
+          "momentum": 0.9,
+          "pageRank": 0
+        },
+        "confidence": 0.75,
+        "expectedOutcome": {
+          "benefit": 0.381,
+          "cost": 0.10149999999999999,
+          "timeHorizon": 90,
+          "roi": 3.7536945812807887
+        }
+      },
+      {
+        "id": "rec-summit-platform",
+        "type": "monitor",
+        "targetNode": "summit-platform",
+        "nodeName": "Summit Platform",
+        "nodeType": "organization",
+        "rationale": "Continue monitoring",
+        "priority": "medium",
+        "evidence": {
+          "adoptionPhase": "mature",
+          "adoptionRate": 0.1,
+          "lockInStrength": 0.09,
+          "momentum": 0.3,
+          "pageRank": 0
+        },
+        "confidence": 0.75,
+        "expectedOutcome": {
+          "benefit": 0.327,
+          "cost": 0.1045,
+          "timeHorizon": 30,
+          "roi": 3.1291866028708135
+        }
+      },
+      {
+        "id": "rec-innovation-simulation-engine",
+        "type": "monitor",
+        "targetNode": "innovation-simulation-engine",
+        "nodeName": "Innovation Simulation Engine",
+        "nodeType": "technology",
+        "rationale": "Continue monitoring",
+        "priority": "medium",
+        "evidence": {
+          "adoptionPhase": "growth",
+          "adoptionRate": 0.1,
+          "lockInStrength": 0.1275,
+          "momentum": 0.9,
+          "pageRank": 0.125
+        },
+        "confidence": 0.75,
+        "expectedOutcome": {
+          "benefit": 0.381,
+          "cost": 0.106375,
+          "timeHorizon": 90,
+          "roi": 3.5816686251468863
+        }
+      },
+      {
+        "id": "rec-repository-archaeology-engine",
+        "type": "monitor",
+        "targetNode": "repository-archaeology-engine",
+        "nodeName": "Repository Archaeology Engine",
+        "nodeType": "technology",
+        "rationale": "Continue monitoring",
+        "priority": "medium",
+        "evidence": {
+          "adoptionPhase": "mature",
+          "adoptionRate": 0.1,
+          "lockInStrength": 0.0675,
+          "momentum": 0.3,
+          "pageRank": 0.125
+        },
+        "confidence": 0.75,
+        "expectedOutcome": {
+          "benefit": 0.327,
+          "cost": 0.103375,
+          "timeHorizon": 30,
+          "roi": 3.1632406287787185
+        }
+      },
+      {
+        "id": "rec-evolution-intelligence-system",
+        "type": "monitor",
+        "targetNode": "evolution-intelligence-system",
+        "nodeName": "Evolution Intelligence System",
+        "nodeType": "technology",
+        "rationale": "Continue monitoring",
+        "priority": "medium",
+        "evidence": {
+          "adoptionPhase": "mature",
+          "adoptionRate": 0.1,
+          "lockInStrength": 0.0675,
+          "momentum": 0.3,
+          "pageRank": 0.125
+        },
+        "confidence": 0.75,
+        "expectedOutcome": {
+          "benefit": 0.327,
+          "cost": 0.103375,
+          "timeHorizon": 30,
+          "roi": 3.1632406287787185
+        }
+      },
+      {
+        "id": "rec-intelgraph-platform",
+        "type": "monitor",
+        "targetNode": "intelgraph-platform",
+        "nodeName": "IntelGraph Platform",
+        "nodeType": "product",
+        "rationale": "Continue monitoring",
+        "priority": "medium",
+        "evidence": {
+          "adoptionPhase": "growth",
+          "adoptionRate": 0.1,
+          "lockInStrength": 0.0875,
+          "momentum": 0.9,
+          "pageRank": 0.125
+        },
+        "confidence": 0.75,
+        "expectedOutcome": {
+          "benefit": 0.381,
+          "cost": 0.104375,
+          "timeHorizon": 90,
+          "roi": 3.650299401197605
+        }
+      },
+      {
+        "id": "rec-agent-control-plane",
+        "type": "monitor",
+        "targetNode": "agent-control-plane",
+        "nodeName": "Agent Control Plane",
+        "nodeType": "framework",
+        "rationale": "Continue monitoring",
+        "priority": "medium",
+        "evidence": {
+          "adoptionPhase": "growth",
+          "adoptionRate": 0.1,
+          "lockInStrength": 0.10500000000000001,
+          "momentum": 0.9,
+          "pageRank": 0.25
+        },
+        "confidence": 0.75,
+        "expectedOutcome": {
+          "benefit": 0.381,
+          "cost": 0.10525000000000001,
+          "timeHorizon": 90,
+          "roi": 3.6199524940617573
+        }
+      }
+    ]
+  },
+  "summary": {
+    "dataScope": {
+      "commits": 1000,
+      "prs": 100,
+      "technologies": 70,
+      "nodes": 288,
+      "edges": 8
+    },
+    "analysis": {
+      "adoptionEstimates": 38,
+      "diffusionEstimates": 38,
+      "recommendations": 38,
+      "highPriorityRecs": 18
+    },
+    "topRecommendations": [
+      {
+        "type": "migrate",
+        "target": "typescript",
+        "priority": "high",
+        "confidence": 0.75
+      },
+      {
+        "type": "invest",
+        "target": "pino",
+        "priority": "high",
+        "confidence": 0.75
+      },
+      {
+        "type": "invest",
+        "target": "neo4j-driver",
+        "priority": "high",
+        "confidence": 0.75
+      },
+      {
+        "type": "invest",
+        "target": "@noble/ed25519",
+        "priority": "high",
+        "confidence": 0.75
+      },
+      {
+        "type": "invest",
+        "target": "@types/react-dom",
+        "priority": "high",
+        "confidence": 0.75
+      },
+      {
+        "type": "invest",
+        "target": "@vitejs/plugin-react",
+        "priority": "high",
+        "confidence": 0.75
+      },
+      {
+        "type": "invest",
+        "target": "vite",
+        "priority": "high",
+        "confidence": 0.75
+      },
+      {
+        "type": "invest",
+        "target": "tsx",
+        "priority": "high",
+        "confidence": 0.75
+      },
+      {
+        "type": "invest",
+        "target": "fastify",
+        "priority": "high",
+        "confidence": 0.75
+      },
+      {
+        "type": "invest",
+        "target": "ts-node-dev",
+        "priority": "high",
+        "confidence": 0.75
+      }
+    ]
+  },
+  "keyInsights": [
+    "Summit has 288 nodes in innovation graph spanning 6 categories",
+    "16 technologies show high momentum (>0.7), indicating rapid adoption potential",
+    "17 emerging technologies warrant investment",
+    "Average system confidence: 75%"
+  ],
+  "generatedAt": "2026-03-09T12:46:10.125Z"
+}

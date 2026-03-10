@@ -22,10 +22,16 @@ app.post('/events', (req, res) => {
     receivedAt: new Date().toISOString(),
   });
 
-  // TODO: Add logic to build the GSN graph based on events
+  // Logic to build the GSN graph based on events
+  const claims = (evidenceStore[prId] || []).map((ev: any, idx: number) => ({
+    id: `C${idx + 1}`,
+    text: `Evidence ${ev.eventType} verified at ${ev.receivedAt}`,
+    metadata: ev.data,
+  }));
+
   caseStore[prId] = {
     goal: { id: 'G1', text: `PR ${prId} is safe` },
-    claims: [],
+    claims,
   };
 
   res.status(202).send({ status: 'accepted' });

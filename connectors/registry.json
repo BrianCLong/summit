@@ -650,6 +650,49 @@
       "maintainer": "summit-core",
       "documentation": "docs/connectors/rss-news.md",
       "path": "connectors/rss_news_connector/"
+    },
+    {
+      "id": "gdelt-gkg",
+      "name": "GDELT GKG Connector",
+      "description": "Ingest narrative intelligence from GDELT Global Knowledge Graph",
+      "version": "1.0.0",
+      "status": "stable",
+      "category": "osint",
+      "capabilities": [
+        "pull",
+        "batch"
+      ],
+      "certificationBadges": [
+        {
+          "id": "narrative-signal-plane",
+          "label": "Narrative signal plane isolation verified",
+          "status": "certified",
+          "issuedBy": "osint-practice",
+          "issuedAt": "2026-03-07"
+        }
+      ],
+      "entityTypes": [
+        "Observation",
+        "Person",
+        "Organization",
+        "Location",
+        "Theme"
+      ],
+      "relationshipTypes": [
+        "MENTIONS",
+        "LOCATED_AT"
+      ],
+      "authentication": [
+        "none"
+      ],
+      "rateLimit": {
+        "requestsPerMinute": 1,
+        "burstLimit": 1
+      },
+      "license": "GDELT",
+      "maintainer": "summit-core",
+      "documentation": "docs/connectors/gdelt-gkg.md",
+      "path": "connectors/gdelt_gkg/"
     }
   ],
   "categories": [
