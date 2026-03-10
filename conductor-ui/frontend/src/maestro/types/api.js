@@ -1,2 +1,0 @@
-// API types
-export {};
