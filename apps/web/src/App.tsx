@@ -64,6 +64,9 @@ const ReceiptsPage = React.lazy(() => import('@/pages/ReceiptsPage'))
 const TenantOpsPage = React.lazy(() => import('@/pages/TenantOpsPage'))
 const OutreachDashboard = React.lazy(() => import('@/pages/outreach-dashboard'))
 
+// Cognitive Command Center
+const CognitiveCommandApp = React.lazy(() => import('../../../../ui/cognitive-command/CognitiveCommandApp').then(m => ({ default: m.CognitiveCommandApp })))
+
 // Workbench
 import { WorkbenchShell } from '@/workbench/shell/WorkbenchLayout'
 
@@ -162,6 +165,9 @@ function App() {
                       <Route path="/approvals" element={<ApprovalsPage />} />
                       <Route path="/receipts" element={<ReceiptsPage />} />
                       <Route path="/tenant-ops" element={<TenantOpsPage />} />
+
+                      {/* Cognitive Command Center */}
+                      <Route path="/cognitive-command/*" element={<CognitiveCommandApp />} />
 
                       {/* Workbench Route */}
                       <Route path="/workbench" element={<WorkbenchShell />} />

@@ -1,0 +1,25 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "summit://schemas/narrative-battlespace",
+  "title": "NarrativeCluster",
+  "type": "object",
+  "required": ["id", "label", "description", "stance", "reach", "velocity", "coherence", "firstSeen", "lastActive"],
+  "properties": {
+    "id": { "type": "string", "format": "uuid" },
+    "label": { "type": "string" },
+    "description": { "type": "string" },
+    "stance": { "type": "string", "enum": ["adversarial", "defensive", "neutral", "allied", "unknown"] },
+    "reach": { "type": "number", "minimum": 0 },
+    "velocity": { "type": "number" },
+    "coherence": { "type": "number", "minimum": 0, "maximum": 1 },
+    "firstSeen": { "type": "string", "format": "date-time" },
+    "lastActive": { "type": "string", "format": "date-time" },
+    "sourceCount": { "type": "integer", "minimum": 0 },
+    "messageCount": { "type": "integer", "minimum": 0 },
+    "themes": { "type": "array", "items": { "type": "string" } },
+    "linkedEntityIds": { "type": "array", "items": { "type": "string" } },
+    "linkedActorIds": { "type": "array", "items": { "type": "string" } },
+    "channels": { "type": "array", "items": { "type": "string" } },
+    "sentiment": { "type": "number", "minimum": -1, "maximum": 1 }
+  }
+}

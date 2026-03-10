@@ -1,0 +1,31 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "summit://schemas/mission-command",
+  "title": "MissionCommandState",
+  "type": "object",
+  "required": ["id", "title", "description", "state", "priority", "objective", "progress", "startDate", "createdAt"],
+  "properties": {
+    "id": { "type": "string", "format": "uuid" },
+    "title": { "type": "string" },
+    "description": { "type": "string" },
+    "state": { "type": "string", "enum": ["green", "watch", "degraded", "critical", "decision_required"] },
+    "priority": { "type": "string", "enum": ["low", "medium", "high", "critical"] },
+    "objective": { "type": "string" },
+    "progress": { "type": "number", "minimum": 0, "maximum": 100 },
+    "startDate": { "type": "string", "format": "date-time" },
+    "targetDate": { "type": "string", "format": "date-time" },
+    "assignedAnalysts": { "type": "array", "items": { "type": "string" } },
+    "activeAgentIds": { "type": "array", "items": { "type": "string" } },
+    "activeSimulationIds": { "type": "array", "items": { "type": "string" } },
+    "intelligenceGaps": { "type": "array", "items": { "type": "object" } },
+    "blockers": { "type": "array", "items": { "type": "object" } },
+    "dependencies": { "type": "array", "items": { "type": "object" } },
+    "threats": { "type": "array", "items": { "type": "string" } },
+    "opportunities": { "type": "array", "items": { "type": "string" } },
+    "recommendations": { "type": "array", "items": { "type": "string" } },
+    "createdAt": { "type": "string", "format": "date-time" },
+    "updatedAt": { "type": "string", "format": "date-time" },
+    "lastReviewedAt": { "type": "string", "format": "date-time" },
+    "tags": { "type": "array", "items": { "type": "string" } }
+  }
+}

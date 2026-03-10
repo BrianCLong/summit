@@ -1,0 +1,42 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "summit://schemas/world-state",
+  "title": "WorldStateSnapshot",
+  "type": "object",
+  "required": ["id", "timestamp", "dimensions", "overallStability", "changeVelocity", "activeThreatCount"],
+  "properties": {
+    "id": { "type": "string", "format": "uuid" },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "dimensions": { "type": "array", "items": { "$ref": "#/definitions/WorldDimension" } },
+    "overallStability": { "type": "number", "minimum": 0, "maximum": 1 },
+    "changeVelocity": { "type": "number" },
+    "activeThreatCount": { "type": "integer", "minimum": 0 },
+    "keyDrivers": { "type": "array", "items": { "type": "string" } },
+    "metadata": { "type": "object" }
+  },
+  "definitions": {
+    "WorldDimension": {
+      "type": "object",
+      "required": ["type", "state", "score", "trend"],
+      "properties": {
+        "type": { "type": "string", "enum": ["geopolitical", "technical", "narrative", "economic", "social", "environmental", "military"] },
+        "state": { "type": "string", "enum": ["stable", "shifting", "volatile", "critical"] },
+        "score": { "type": "number", "minimum": 0, "maximum": 100 },
+        "trend": { "type": "string", "enum": ["improving", "stable", "degrading", "unknown"] },
+        "factors": { "type": "array", "items": { "$ref": "#/definitions/WorldFactor" } }
+      }
+    },
+    "WorldFactor": {
+      "type": "object",
+      "required": ["id", "name", "value", "trend", "impact"],
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "value": { "type": "number" },
+        "trend": { "type": "string", "enum": ["up", "down", "stable"] },
+        "impact": { "type": "string", "enum": ["low", "medium", "high", "critical"] },
+        "linkedEntityIds": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  }
+}
