@@ -1,0 +1,15 @@
+{
+  "program": "summit-early-adopters",
+  "window": "rolling-30d",
+  "metrics": {
+    "active_users": 14,
+    "workflows_executed": 37,
+    "integrations_installed": 11
+  },
+  "targets": {
+    "active_users": 50,
+    "workflows_executed": 150,
+    "integrations_installed": 35
+  },
+  "updated_at": "2026-03-10T00:00:00Z"
+}

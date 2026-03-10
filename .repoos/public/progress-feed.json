@@ -1,0 +1,14 @@
+{
+  "feed": [
+    {
+      "timestamp": "2026-03-10T20:35:08.319Z",
+      "message": "Weekly update generated for 2026-W11",
+      "stats": {
+        "active_contributors": 0,
+        "integration_installs": 0,
+        "plugin_creation": 0
+      }
+    }
+  ],
+  "updated_at": "2026-03-10T20:35:08.319Z"
+}

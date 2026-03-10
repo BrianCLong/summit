@@ -1,0 +1,37 @@
+{
+  "program": "integration-magnet",
+  "window": "rolling-30d",
+  "metrics": {
+    "installations": 0,
+    "workflow_executions": 0,
+    "api_usage": 0
+  },
+  "by_integration": {
+    "github": {
+      "installations": 0,
+      "workflow_executions": 0,
+      "api_usage": 0
+    },
+    "aws": {
+      "installations": 0,
+      "workflow_executions": 0,
+      "api_usage": 0
+    },
+    "datadog": {
+      "installations": 0,
+      "workflow_executions": 0,
+      "api_usage": 0
+    },
+    "github-actions": {
+      "installations": 0,
+      "workflow_executions": 0,
+      "api_usage": 0
+    },
+    "snyk": {
+      "installations": 0,
+      "workflow_executions": 0,
+      "api_usage": 0
+    }
+  },
+  "updated_at": "2026-03-10T00:00:00Z"
+}

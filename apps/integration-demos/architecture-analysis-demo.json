@@ -1,0 +1,10 @@
+{
+  "name": "architecture-analysis-demo",
+  "description": "Import repository topology and generate architecture risk signals.",
+  "steps": [
+    "clone repository metadata",
+    "extract service and dependency map",
+    "score trust boundaries",
+    "write findings to Summit graph"
+  ]
+}

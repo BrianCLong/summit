@@ -1,7 +1,13 @@
 {
-  "last_updated": "2026-03-09T22:00:00Z",
-  "revision_note": "Integrated Stage 7 validation infrastructure, Antigravity governance ledger, and hardened docker stack into the master roadmap.",
+  "last_updated": "2026-03-10T00:30:00Z",
+  "revision_note": "Added repoos traction engine artifacts: early adopters program, integration magnet scaffolds, and build-in-public automation.",
   "initiatives": [
+    {
+      "id": "repoos-traction-engine-bootstrap",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Bootstrapped .repoos program state, integration demo assets, and automation scripts for onboarding + public progress updates."
+    },
     {
       "id": "antigravity-governance-ledger",
       "status": "completed",

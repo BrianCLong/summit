@@ -1,0 +1,30 @@
+{
+  "program": "summit-early-adopters",
+  "version": "1.0.0",
+  "entries": [
+    {
+      "organization_name": "Atlas Public Safety Office",
+      "captured_at": "2026-03-09T20:10:00Z",
+      "feature_gaps": [
+        "Bulk case import wizard needs CSV validation previews"
+      ],
+      "usability_issues": [
+        "Graph filtering requires too many clicks for common pivots"
+      ],
+      "integration_requests": [
+        "Native SIEM export (Splunk HEC)"
+      ],
+      "severity": "high",
+      "owner": "product"
+    },
+    {
+      "organization_name": "Demo Org",
+      "captured_at": "2026-03-10T20:35:05.352Z",
+      "feature_gaps": [],
+      "usability_issues": [],
+      "integration_requests": [],
+      "severity": "pending",
+      "owner": "product"
+    }
+  ]
+}
