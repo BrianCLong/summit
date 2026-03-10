@@ -213,3 +213,50 @@ jobs:
         with:
           name: verification-artifacts
           path: artifacts/**
+  deterministic-benchmarks:
+    runs-on: ubuntu-latest
+    if: contains(github.event.head_commit.message, 'determinism') || github.event_name == 'schedule'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: "pnpm"
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install Pytest
+        run: pip install pytest
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - run: pnpm test --grep "benchmark|interactive|deterministic" || pytest tests/benchmarks/** tests/**/test_*determinism*.py --junitxml=results.xml
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: benchmark-results
+          path: results.xml
+
+  praxeology-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: "pnpm"
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install Pytest
+        run: pip install pytest
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - run: pytest tests/praxeology/test_*.py
