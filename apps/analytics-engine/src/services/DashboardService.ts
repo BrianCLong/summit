@@ -899,18 +899,6 @@ export class DashboardService {
   }
 
   async getDashboardTemplates(category?: string): Promise<DashboardTemplate[]> {
-    const cacheKey = category ? `templates:${category}` : 'templates:all';
-    if (this.redisClient) {
-      try {
-        const cached = await this.redisClient.get(cacheKey);
-        if (cached) {
-          return JSON.parse(cached as string) as DashboardTemplate[];
-        }
-      } catch (err) {
-        logger.warn(`Failed to read templates from cache: ${err}`);
-      }
-    }
-
     let query = 'SELECT * FROM dashboard_templates';
     const params = [];
 
@@ -923,7 +911,7 @@ export class DashboardService {
 
     const result = await this.pgPool.query(query, params);
 
-    const resultObj = result.rows.map((row) => ({
+    return result.rows.map((row) => ({
       id: row.id,
       name: row.name,
       description: row.description,
@@ -933,16 +921,6 @@ export class DashboardService {
       isBuiltIn: row.is_built_in,
       preview: row.preview,
     }));
-
-    if (this.redisClient) {
-      try {
-        await this.redisClient.setEx(cacheKey, 3600, JSON.stringify(resultObj));
-      } catch (err) {
-        logger.warn(`Failed to write templates to cache: ${err}`);
-      }
-    }
-
-    return resultObj;
   }
 
   async createDashboardFromTemplate(
