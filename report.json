@@ -1,1 +1,5 @@
-{"status": "ok"}
+{
+  "id": "SUMMIT-MAR-epistemic-001",
+  "decision": "APPROVE",
+  "evidence": ["ev-1", "ev-2"]
+}

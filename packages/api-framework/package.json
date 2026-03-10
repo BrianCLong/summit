@@ -25,6 +25,12 @@
     "@intelgraph/streaming-api": "workspace:*",
 <<<<<<< HEAD
     express: "5.2.0",
+    @apollo/server: "4.11.0",
+    graphql: "16.12.0",
+    winston: "3.18.3"
+=======
+<<<<<<< HEAD
+    express: "5.2.0",
     @apollo/server: "4.11.3",
     graphql: "16.12.0",
     winston: "3.18.3"
@@ -39,6 +45,7 @@
     "@apollo/server": "4.11.3",
     graphql: "16.12.0",
     winston: "3.18.3"
+>>>>>>> origin/main
 >>>>>>> origin/main
 >>>>>>> origin/main
   },

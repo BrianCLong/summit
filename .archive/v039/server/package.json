@@ -10,6 +10,15 @@
   },
   "dependencies": {
 <<<<<<< HEAD
+    @apollo/server: "4.11.0",
+    body-parser: "1.20.2",
+    cors: "2.8.5",
+    express: "4.19.2",
+    graphql: "16.9.0",
+    node-fetch: "3.3.2",
+    pino: "9.3.2"
+=======
+<<<<<<< HEAD
     @apollo/server: "4.11.3",
     body-parser: "1.20.2",
     cors: "2.8.5",
@@ -25,6 +34,7 @@
     graphql: "16.9.0",
     node-fetch: "3.3.2",
     pino: "9.3.2"
+>>>>>>> origin/main
 >>>>>>> origin/main
   },
   "devDependencies": {

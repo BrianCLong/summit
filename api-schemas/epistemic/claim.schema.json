@@ -1,24 +1,13 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "summit.epistemic.claim",
-  "title": "Epistemic Claim",
-  "description": "A node in the IntelGraph representing an epistemic claim",
   "type": "object",
-  "required": ["claim_id", "statement", "status", "confidence", "epistemic_uncertainty", "aleatoric_uncertainty", "domain"],
+  "required": ["claim_id", "statement", "evidence_ids", "independent_sources", "conflict_score", "support_score"],
   "properties": {
     "claim_id": { "type": "string" },
     "statement": { "type": "string" },
-    "status": {
-      "type": "string",
-      "enum": ["hypothesized", "corroborated", "refuted", "deprecated"]
-    },
-    "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
-    "epistemic_uncertainty": { "type": "number", "minimum": 0, "maximum": 1 },
-    "aleatoric_uncertainty": { "type": "number", "minimum": 0, "maximum": 1 },
-    "domain": { "type": "string" },
-    "support_score": { "type": "number", "minimum": 0, "maximum": 1 },
+    "evidence_ids": { "type": "array", "items": { "type": "string" } },
+    "independent_sources": { "type": "integer", "minimum": 0 },
     "conflict_score": { "type": "number", "minimum": 0, "maximum": 1 },
-    "created_by_agent_id": { "type": "string" },
-    "subject_ref": { "type": "string" }
+    "support_score": { "type": "number", "minimum": 0, "maximum": 1 }
   }
 }

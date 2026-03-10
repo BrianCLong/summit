@@ -1,23 +1,20 @@
-# Epistemic Assurance Plane Runbook
+# Epistemic Assurance Plane Runbooks
+
+## Scenarios
+*   Policy threshold misconfiguration
+*   Evidence bundle validation failures
+*   Drift spike in blocked-vs-approved ratio
+*   Provenance write failures
+*   Stale-source outbreak
+*   Emergency feature-flag rollback
 
 ## Alerts
+*   Publication approvals with missing provenance > 0
+*   Independent-source validator error rate
+*   Drift detector threshold breach
+*   Decision latency p95 budget exceeded
 
-1. **Drift Detector Alert: Approval Rate**
-   - **Condition**: Discrepancy between current approval rate and historical average > 15%.
-   - **Action**: Check if policy definitions in `.opa/policy/` have been altered. Revert changes if unauthorized. Examine recent OSINT leads for unusually poor evidence.
-
-2. **Drift Detector Alert: Support Score**
-   - **Condition**: Discrepancy between current average support score and historical average > 10%.
-   - **Action**: Review ingestion agents. Data sources might be degraded, or new reliable sources are skewing results higher.
-
-3. **High Block Rate: Missing Evidence**
-   - **Condition**: Spike in "missing_evidence" rationales.
-   - **Action**: Verify the OSINT ingestion pipeline. Ensure Evidence nodes are correctly linked to EpistemicClaims.
-
-4. **Provenance Write Failure**
-   - **Condition**: Maestro fails to write `ProvenanceStep`.
-   - **Action**: Check IntelGraph connection and permissions.
-
-## Emergency Mitigation
-
-- If the assurance plane blocks critical operations incorrectly, temporarily disable the `osint-high-impact` policy requirement by returning default approvals in `evaluateEpistemicIntent` behind a feature flag (Requires executive approval).
+## SLO/SLA Assumptions
+*   Decision service availability 99.9%
+*   Zero publish decisions without evidence bundle
+*   24h max to investigate policy drift alert

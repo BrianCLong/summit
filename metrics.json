@@ -1,1 +1,8 @@
-{"metrics": "ok"}
+{
+  "timestamp": "2026-03-07T10:20:15.679Z",
+  "totalDecisions": 100,
+  "approvedCount": 60,
+  "blockedCount": 20,
+  "escalatedCount": 10,
+  "degradedCount": 10
+}
