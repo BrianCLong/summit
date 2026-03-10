@@ -1,0 +1,142 @@
+{
+  "version": "1.0.0",
+  "byType": {
+    "plugin": [
+      "plugin-graph-risk-engine",
+      "plugin-observability-suite"
+    ],
+    "developer": [
+      "dev-aria-lane",
+      "dev-kai-tan"
+    ],
+    "partner": [
+      "partner-atlas-security"
+    ],
+    "integration": [
+      "integration-slack-alert-bridge"
+    ],
+    "event": [
+      "event-summit-build-2026"
+    ]
+  },
+  "queryExamples": {
+    "pluginsByCategory": {
+      "risk-analytics": [
+        "plugin-graph-risk-engine"
+      ],
+      "observability": [
+        "plugin-observability-suite"
+      ]
+    },
+    "developersByExpertise": {
+      "observability": [
+        "dev-aria-lane"
+      ],
+      "distributed-systems": [
+        "dev-aria-lane"
+      ],
+      "graph-analytics": [
+        "dev-kai-tan"
+      ],
+      "threat-modeling": [
+        "dev-kai-tan"
+      ]
+    },
+    "partnerIntegrationsByPlatform": {
+      "slack": [
+        "integration-slack-alert-bridge"
+      ]
+    }
+  },
+  "records": [
+    {
+      "id": "dev-aria-lane",
+      "name": "Aria Lane",
+      "type": "developer",
+      "expertise": [
+        "observability",
+        "distributed-systems"
+      ],
+      "region": "NA",
+      "profile": "Senior plugin contributor focused on reliability telemetry.",
+      "_source": ".repoos/developers/aria-lane.json"
+    },
+    {
+      "id": "dev-kai-tan",
+      "name": "Kai Tan",
+      "type": "developer",
+      "expertise": [
+        "graph-analytics",
+        "threat-modeling"
+      ],
+      "region": "APAC",
+      "profile": "Graph analytics specialist for intelligence workloads.",
+      "_source": ".repoos/developers/kai-tan.json"
+    },
+    {
+      "id": "event-summit-build-2026",
+      "name": "Summit Build 2026",
+      "type": "event",
+      "tracks": [
+        "plugins",
+        "partners",
+        "economics"
+      ],
+      "location": "Berlin",
+      "quarter": "2026-Q2",
+      "_source": ".repoos/events/summit-build-2026.json"
+    },
+    {
+      "id": "integration-slack-alert-bridge",
+      "name": "Slack Alert Bridge",
+      "type": "integration",
+      "platform": "slack",
+      "category": "notifications",
+      "partnerId": "partner-atlas-security",
+      "_source": ".repoos/integrations/slack-alert-bridge.json"
+    },
+    {
+      "id": "partner-atlas-security",
+      "name": "Atlas Security",
+      "type": "partner",
+      "platforms": [
+        "aws",
+        "gcp"
+      ],
+      "focus": [
+        "security",
+        "compliance"
+      ],
+      "tier": "strategic",
+      "_source": ".repoos/partners/atlas-security.json"
+    },
+    {
+      "id": "plugin-graph-risk-engine",
+      "name": "Graph Risk Engine",
+      "type": "plugin",
+      "category": "risk-analytics",
+      "tags": [
+        "graph",
+        "risk",
+        "scoring"
+      ],
+      "description": "Risk scoring extensions for relationship graphs.",
+      "maintainerId": "dev-kai-tan",
+      "_source": ".repoos/marketplace/graph-risk-engine.json"
+    },
+    {
+      "id": "plugin-observability-suite",
+      "name": "Observability Suite",
+      "type": "plugin",
+      "category": "observability",
+      "tags": [
+        "metrics",
+        "tracing",
+        "alerts"
+      ],
+      "description": "Unified telemetry plugin for Summit workloads.",
+      "maintainerId": "dev-aria-lane",
+      "_source": ".repoos/marketplace/observability-suite.json"
+    }
+  ]
+}

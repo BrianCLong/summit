@@ -1,0 +1,8 @@
+{
+  "id": "integration-slack-alert-bridge",
+  "name": "Slack Alert Bridge",
+  "type": "integration",
+  "platform": "slack",
+  "category": "notifications",
+  "partnerId": "partner-atlas-security"
+}

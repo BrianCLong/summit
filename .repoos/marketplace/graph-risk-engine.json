@@ -1,0 +1,9 @@
+{
+  "id": "plugin-graph-risk-engine",
+  "name": "Graph Risk Engine",
+  "type": "plugin",
+  "category": "risk-analytics",
+  "tags": ["graph", "risk", "scoring"],
+  "description": "Risk scoring extensions for relationship graphs.",
+  "maintainerId": "dev-kai-tan"
+}

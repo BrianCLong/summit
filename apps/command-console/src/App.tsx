@@ -76,6 +76,7 @@ function SummaryTable({
 
 export default function App() {
   const [snapshot, setSnapshot] = useState<CommandConsoleSnapshot | null>(null);
+  const [indexSummary, setIndexSummary] = useState<Record<string, number> | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -95,6 +96,29 @@ export default function App() {
       .catch((err: Error) => setError(err.message))
       .finally(() => setLoading(false));
   }, [enabled]);
+
+  useEffect(() => {
+    fetch('/.repoos/index/platform-index.json')
+      .then(async (res) => {
+        if (!res.ok) {
+          throw new Error('Platform index unavailable');
+        }
+        return res.json();
+      })
+      .then((index) => {
+        const records = index.records ?? [];
+        setIndexSummary({
+          plugin: records.filter((asset: { type: string }) => asset.type === 'plugin').length,
+          developer: records.filter((asset: { type: string }) => asset.type === 'developer').length,
+          partner: records.filter((asset: { type: string }) => asset.type === 'partner').length,
+          integration: records.filter((asset: { type: string }) => asset.type === 'integration').length,
+          event: records.filter((asset: { type: string }) => asset.type === 'event').length,
+        });
+      })
+      .catch(() => {
+        setIndexSummary(null);
+      });
+  }, []);
 
   const incidentCount = useMemo(
     () =>
@@ -247,6 +271,24 @@ export default function App() {
               ))}
             </ul>
           </div>
+        </div>
+      </Section>
+
+      <Section title="Platform Index Dashboard">
+        <div style={cardStyle}>
+          {indexSummary ? (
+            <ul style={{ margin: 0, paddingLeft: 18, color: '#334155' }}>
+              <li>Plugins indexed: {indexSummary.plugin}</li>
+              <li>Developers indexed: {indexSummary.developer}</li>
+              <li>Partners indexed: {indexSummary.partner}</li>
+              <li>Integrations indexed: {indexSummary.integration}</li>
+              <li>Events indexed: {indexSummary.event}</li>
+            </ul>
+          ) : (
+            <p style={{ margin: 0, color: '#64748b' }}>
+              Platform index summary is deferred pending index artifact availability.
+            </p>
+          )}
         </div>
       </Section>
 
