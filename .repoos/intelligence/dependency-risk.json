@@ -1,0 +1,144 @@
+{
+  "summary": {
+    "circular_dependencies": 8,
+    "high_fan_in_modules": 9,
+    "unstable_clusters": 9
+  },
+  "circular_dependencies": [
+    "benchmarks -> server -> agents -> benchmarks",
+    "benchmarks -> server -> scripts -> benchmarks",
+    "server -> scripts -> server",
+    "server -> tools -> server",
+    "services -> benchmarks -> server -> packages -> services",
+    "services -> benchmarks -> server -> scripts -> services",
+    "services -> benchmarks -> server -> services",
+    "services -> benchmarks -> server -> tools -> services"
+  ],
+  "high_fan_in_modules": [
+    {
+      "module": "server",
+      "fan_in": 12
+    },
+    {
+      "module": "packages",
+      "fan_in": 8
+    },
+    {
+      "module": "services",
+      "fan_in": 6
+    },
+    {
+      "module": "benchmarks",
+      "fan_in": 4
+    },
+    {
+      "module": "agents",
+      "fan_in": 3
+    },
+    {
+      "module": "api",
+      "fan_in": 3
+    },
+    {
+      "module": "core",
+      "fan_in": 3
+    },
+    {
+      "module": "scripts",
+      "fan_in": 3
+    },
+    {
+      "module": "sdk",
+      "fan_in": 3
+    }
+  ],
+  "unstable_dependency_clusters": [
+    {
+      "module": "server",
+      "linked_modules": [
+        "agents",
+        "packages",
+        "schemas",
+        "scripts",
+        "services",
+        "tools"
+      ],
+      "churn": 27924,
+      "instability_score": 11176.8
+    },
+    {
+      "module": "packages",
+      "linked_modules": [
+        "perf",
+        "prov-ledger",
+        "schemas",
+        "services"
+      ],
+      "churn": 26276,
+      "instability_score": 10515.2
+    },
+    {
+      "module": "services",
+      "linked_modules": [
+        "benchmarks",
+        "finops",
+        "libs",
+        "packages",
+        "server"
+      ],
+      "churn": 20505,
+      "instability_score": 8205.6
+    },
+    {
+      "module": "scripts",
+      "linked_modules": [
+        "agentic",
+        "agents",
+        "benchmarks",
+        "feature-flags",
+        "governance",
+        "packages",
+        "server",
+        "services"
+      ],
+      "churn": 9247,
+      "instability_score": 3700.6
+    },
+    {
+      "module": "agents",
+      "linked_modules": [
+        "benchmarks"
+      ],
+      "churn": 1544,
+      "instability_score": 619.4
+    },
+    {
+      "module": "sdk",
+      "linked_modules": [],
+      "churn": 1189,
+      "instability_score": 477.4
+    },
+    {
+      "module": "benchmarks",
+      "linked_modules": [
+        "server"
+      ],
+      "churn": 258,
+      "instability_score": 105.6
+    },
+    {
+      "module": "api",
+      "linked_modules": [
+        "core"
+      ],
+      "churn": 218,
+      "instability_score": 89
+    },
+    {
+      "module": "core",
+      "linked_modules": [],
+      "churn": 76,
+      "instability_score": 32.2
+    }
+  ]
+}

@@ -1,0 +1,563 @@
+{
+  "summary": {
+    "drift_level": "LOW",
+    "subsystem_boundary_violations": 85,
+    "avg_module_coupling": 0.08
+  },
+  "subsystem_boundary_violations": [
+    {
+      "from": "__tests__",
+      "to": "api"
+    },
+    {
+      "from": "__tests__",
+      "to": "apps"
+    },
+    {
+      "from": "__tests__",
+      "to": "audit"
+    },
+    {
+      "from": "__tests__",
+      "to": "benchmarks"
+    },
+    {
+      "from": "__tests__",
+      "to": "cli"
+    },
+    {
+      "from": "__tests__",
+      "to": "SECURITY"
+    },
+    {
+      "from": "__tests__",
+      "to": "server"
+    },
+    {
+      "from": "adapters",
+      "to": "config"
+    },
+    {
+      "from": "adapters",
+      "to": "core"
+    },
+    {
+      "from": "adapters",
+      "to": "sdk"
+    },
+    {
+      "from": "agent",
+      "to": "datasets"
+    },
+    {
+      "from": "agents",
+      "to": "benchmarks"
+    },
+    {
+      "from": "api",
+      "to": "core"
+    },
+    {
+      "from": "apps",
+      "to": "api"
+    },
+    {
+      "from": "apps",
+      "to": "policy"
+    },
+    {
+      "from": "apps",
+      "to": "prov-ledger-service"
+    },
+    {
+      "from": "apps",
+      "to": "services"
+    },
+    {
+      "from": "bench",
+      "to": "agentic"
+    },
+    {
+      "from": "benchmarks",
+      "to": "server"
+    },
+    {
+      "from": "cli",
+      "to": "api"
+    },
+    {
+      "from": "cli",
+      "to": "services"
+    },
+    {
+      "from": "companyos",
+      "to": "agents"
+    },
+    {
+      "from": "companyos",
+      "to": "clients"
+    },
+    {
+      "from": "eslint.complexity.config.mjs",
+      "to": "eslint.config.mjs"
+    },
+    {
+      "from": "eval",
+      "to": "core"
+    },
+    {
+      "from": "eval",
+      "to": "sdk"
+    },
+    {
+      "from": "evaluation",
+      "to": "datasets"
+    },
+    {
+      "from": "examples",
+      "to": "packages"
+    },
+    {
+      "from": "examples",
+      "to": "sdk"
+    },
+    {
+      "from": "ga-graphai",
+      "to": "packages"
+    },
+    {
+      "from": "gateway",
+      "to": "server"
+    },
+    {
+      "from": "jobs",
+      "to": "server"
+    },
+    {
+      "from": "packages",
+      "to": "perf"
+    },
+    {
+      "from": "packages",
+      "to": "prov-ledger"
+    },
+    {
+      "from": "packages",
+      "to": "schemas"
+    },
+    {
+      "from": "packages",
+      "to": "services"
+    },
+    {
+      "from": "reliability",
+      "to": "server"
+    },
+    {
+      "from": "reproduce_issue_script.ts",
+      "to": "server"
+    },
+    {
+      "from": "scripts",
+      "to": "agentic"
+    },
+    {
+      "from": "scripts",
+      "to": "agents"
+    },
+    {
+      "from": "scripts",
+      "to": "benchmarks"
+    },
+    {
+      "from": "scripts",
+      "to": "feature-flags"
+    },
+    {
+      "from": "scripts",
+      "to": "governance"
+    },
+    {
+      "from": "scripts",
+      "to": "packages"
+    },
+    {
+      "from": "scripts",
+      "to": "server"
+    },
+    {
+      "from": "scripts",
+      "to": "services"
+    },
+    {
+      "from": "server",
+      "to": "agents"
+    },
+    {
+      "from": "server",
+      "to": "packages"
+    },
+    {
+      "from": "server",
+      "to": "schemas"
+    },
+    {
+      "from": "server",
+      "to": "scripts"
+    },
+    {
+      "from": "server",
+      "to": "services"
+    },
+    {
+      "from": "server",
+      "to": "tools"
+    },
+    {
+      "from": "services",
+      "to": "benchmarks"
+    },
+    {
+      "from": "services",
+      "to": "finops"
+    },
+    {
+      "from": "services",
+      "to": "libs"
+    },
+    {
+      "from": "services",
+      "to": "packages"
+    },
+    {
+      "from": "services",
+      "to": "server"
+    },
+    {
+      "from": "summit",
+      "to": "packages"
+    },
+    {
+      "from": "test",
+      "to": "client"
+    },
+    {
+      "from": "test",
+      "to": "scripts"
+    },
+    {
+      "from": "test",
+      "to": "server"
+    },
+    {
+      "from": "test",
+      "to": "tooling"
+    },
+    {
+      "from": "test_db.ts",
+      "to": "server"
+    },
+    {
+      "from": "tests",
+      "to": ".github"
+    },
+    {
+      "from": "tests",
+      "to": "adapters"
+    },
+    {
+      "from": "tests",
+      "to": "apps"
+    },
+    {
+      "from": "tests",
+      "to": "clients"
+    },
+    {
+      "from": "tests",
+      "to": "conductor-ui"
+    },
+    {
+      "from": "tests",
+      "to": "evaluation"
+    },
+    {
+      "from": "tests",
+      "to": "evidence"
+    },
+    {
+      "from": "tests",
+      "to": "packages"
+    },
+    {
+      "from": "tests",
+      "to": "perf"
+    },
+    {
+      "from": "tests",
+      "to": "policy"
+    },
+    {
+      "from": "tests",
+      "to": "reliability"
+    },
+    {
+      "from": "tests",
+      "to": "scripts"
+    },
+    {
+      "from": "tests",
+      "to": "server"
+    },
+    {
+      "from": "tests",
+      "to": "src"
+    },
+    {
+      "from": "tests",
+      "to": "subsumption"
+    },
+    {
+      "from": "tests",
+      "to": "summit"
+    },
+    {
+      "from": "tests",
+      "to": "swarm"
+    },
+    {
+      "from": "tests",
+      "to": "test"
+    },
+    {
+      "from": "tools",
+      "to": "packages"
+    },
+    {
+      "from": "tools",
+      "to": "server"
+    },
+    {
+      "from": "tools",
+      "to": "services"
+    },
+    {
+      "from": "tools",
+      "to": "summit"
+    }
+  ],
+  "coupling_increase_signals": [
+    {
+      "module": "tools",
+      "files": 708,
+      "coupling": 4,
+      "churn": 63953,
+      "structural_complexity_score": 13075.4
+    },
+    {
+      "module": "server",
+      "files": 4855,
+      "coupling": 6,
+      "churn": 27924,
+      "structural_complexity_score": 7529.2
+    },
+    {
+      "module": "packages",
+      "files": 3488,
+      "coupling": 4,
+      "churn": 26276,
+      "structural_complexity_score": 6652
+    },
+    {
+      "module": "docs",
+      "files": 34,
+      "coupling": 0,
+      "churn": 27624,
+      "structural_complexity_score": 5538.4
+    },
+    {
+      "module": "services",
+      "files": 2756,
+      "coupling": 5,
+      "churn": 20505,
+      "structural_complexity_score": 5205.4
+    },
+    {
+      "module": "scripts",
+      "files": 1146,
+      "coupling": 8,
+      "churn": 9247,
+      "structural_complexity_score": 2311
+    },
+    {
+      "module": "apps",
+      "files": 1114,
+      "coupling": 4,
+      "churn": 7065,
+      "structural_complexity_score": 1860.2
+    },
+    {
+      "module": ".github",
+      "files": 57,
+      "coupling": 0,
+      "churn": 8378,
+      "structural_complexity_score": 1698.4
+    },
+    {
+      "module": "client",
+      "files": 1074,
+      "coupling": 0,
+      "churn": 5743,
+      "structural_complexity_score": 1578.2
+    },
+    {
+      "module": "tests",
+      "files": 736,
+      "coupling": 18,
+      "churn": 3952,
+      "structural_complexity_score": 1092
+    }
+  ],
+  "structural_complexity_growth": [
+    {
+      "module": "tools",
+      "files": 708,
+      "coupling": 4,
+      "churn": 63953,
+      "structural_complexity_score": 13075.4
+    },
+    {
+      "module": "server",
+      "files": 4855,
+      "coupling": 6,
+      "churn": 27924,
+      "structural_complexity_score": 7529.2
+    },
+    {
+      "module": "packages",
+      "files": 3488,
+      "coupling": 4,
+      "churn": 26276,
+      "structural_complexity_score": 6652
+    },
+    {
+      "module": "docs",
+      "files": 34,
+      "coupling": 0,
+      "churn": 27624,
+      "structural_complexity_score": 5538.4
+    },
+    {
+      "module": "services",
+      "files": 2756,
+      "coupling": 5,
+      "churn": 20505,
+      "structural_complexity_score": 5205.4
+    },
+    {
+      "module": "scripts",
+      "files": 1146,
+      "coupling": 8,
+      "churn": 9247,
+      "structural_complexity_score": 2311
+    },
+    {
+      "module": "apps",
+      "files": 1114,
+      "coupling": 4,
+      "churn": 7065,
+      "structural_complexity_score": 1860.2
+    },
+    {
+      "module": ".github",
+      "files": 57,
+      "coupling": 0,
+      "churn": 8378,
+      "structural_complexity_score": 1698.4
+    },
+    {
+      "module": "client",
+      "files": 1074,
+      "coupling": 0,
+      "churn": 5743,
+      "structural_complexity_score": 1578.2
+    },
+    {
+      "module": "tests",
+      "files": 736,
+      "coupling": 18,
+      "churn": 3952,
+      "structural_complexity_score": 1092
+    },
+    {
+      "module": "summit",
+      "files": 749,
+      "coupling": 1,
+      "churn": 3811,
+      "structural_complexity_score": 1062.2
+    },
+    {
+      "module": "evidence",
+      "files": 8,
+      "coupling": 0,
+      "churn": 4634,
+      "structural_complexity_score": 930
+    },
+    {
+      "module": "ga-graphai",
+      "files": 452,
+      "coupling": 1,
+      "churn": 3265,
+      "structural_complexity_score": 834.2
+    },
+    {
+      "module": "prompts",
+      "files": 1,
+      "coupling": 0,
+      "churn": 2612,
+      "structural_complexity_score": 522.8
+    },
+    {
+      "module": "src",
+      "files": 76,
+      "coupling": 0,
+      "churn": 2407,
+      "structural_complexity_score": 511.8
+    },
+    {
+      "module": "october2025",
+      "files": 18,
+      "coupling": 0,
+      "churn": 2266,
+      "structural_complexity_score": 460.4
+    },
+    {
+      "module": "ops",
+      "files": 85,
+      "coupling": 0,
+      "churn": 2113,
+      "structural_complexity_score": 456.6
+    },
+    {
+      "module": "conductor-ui",
+      "files": 274,
+      "coupling": 0,
+      "churn": 1676,
+      "structural_complexity_score": 444.8
+    },
+    {
+      "module": "agents",
+      "files": 176,
+      "coupling": 1,
+      "churn": 1544,
+      "structural_complexity_score": 379.6
+    },
+    {
+      "module": "sdk",
+      "files": 118,
+      "coupling": 0,
+      "churn": 1189,
+      "structural_complexity_score": 285
+    }
+  ]
+}

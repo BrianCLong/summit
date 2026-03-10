@@ -1,0 +1,16 @@
+{
+  "summary": {
+    "ci_failure_likelihood": 0.949,
+    "ci_failure_risk_level": "ELEVATED",
+    "architectural_instability": 0.99,
+    "architecture_risk_level": "HIGH",
+    "maintenance_risk": 0.99,
+    "maintenance_risk_level": "HIGH"
+  },
+  "factors": {
+    "circular_dependencies": 8,
+    "high_fan_in_modules": 9,
+    "subsystem_boundary_violations": 85,
+    "top_hotspot_score_sum": 591.6
+  }
+}
