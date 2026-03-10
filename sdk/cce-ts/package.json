@@ -7,9 +7,9 @@
     "build": "tsc -p tsconfig.json"
   },
   "dependencies": {
-    "@grpc/grpc-js": "^1.10.0"
+    "@grpc/grpc-js": "1.10.0"
   },
   "devDependencies": {
-    "typescript": "^5.4.0"
+    "typescript": "5.4.0"
   }
 }

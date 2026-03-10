@@ -4,7 +4,7 @@
   "description": "Autonomous development agent for VS Code",
   "version": "4.2.3",
   "engines": {
-    "vscode": "^1.80.0"
+    vscode: "1.80.0"
   },
   "categories": [
     "Other"
@@ -24,8 +24,8 @@
     "compile": "tsc -p ./"
   },
   "devDependencies": {
-    "@types/vscode": "^1.80.0",
+    "@types/vscode": "1.80.0",
     "@types/node": "18.x",
-    "typescript": "^5.1.3"
+    "typescript": "5.1.3"
   }
 }

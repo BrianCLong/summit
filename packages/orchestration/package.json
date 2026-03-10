@@ -11,13 +11,13 @@
     "lint": "eslint src"
   },
   "dependencies": {
-    "uuid": "^13.0.0",
-    "redis": "^5.8.1"
+    "uuid": "13.0.0",
+    "redis": "5.8.1"
   },
   "devDependencies": {
     "@types/node": "20.19.27",
-    "@types/uuid": "^11.0.0",
-    "typescript": "^5.9.3"
+    "@types/uuid": "11.0.0",
+    "typescript": "5.9.3"
   },
   "keywords": [
     "orchestration",

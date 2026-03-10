@@ -17,8 +17,8 @@
     "vis-timeline": "*"
   },
   "devDependencies": {
-    "@playwright/test": "^1.58.2",
+    @playwright/test: "1.58.2",
     "parcel": "*",
-    "playwright": "^1.58.2"
+    playwright: "1.58.2"
   }
 }

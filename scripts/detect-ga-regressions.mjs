@@ -80,6 +80,37 @@ async function detectErrorConcentration() {
     };
   }
   return { detected: false };
+async function createIncident(category, details) {
+  if (!process.env.GITHUB_TOKEN && !process.env.GH_TOKEN) {
+    console.log('⚠️  No GITHUB_TOKEN found. Skipping automated incident creation.');
+    return;
+  }
+
+  const title = `🚨 GA REGRESSION: ${category} detected`;
+  const body = `
+## Symptom
+${details}
+
+## Context
+Detected during GA early-life regression sweep at ${new Date().toISOString()}.
+
+## Posture
+- **GA Posture**: ga:blocker
+- **Priority**: P0
+- **Source**: scripts/detect-ga-regressions.mjs
+
+## Action Required
+Follow the [GA Launch-Week Iteration Loop](RUNBOOKS/GA_LAUNCH_WEEK_ITERATION.md).
+  `.trim();
+
+  try {
+    // Using gh cli assuming it is installed in CI environment
+    const cmd = `gh issue create --title "${title}" --body "${body}" --label "ga:blocker,priority:P0,type:bug"`;
+    console.log(`📡 Creating incident: ${title}`);
+    execSync(cmd);
+  } catch (err) {
+    console.error(`❌ Failed to create incident: ${err.message}`);
+  }
 }
 
 async function run() {
@@ -92,12 +123,15 @@ async function run() {
   ]);
 
   let issuesFound = 0;
+  let report = '';
 
   console.log('--- 🌪️  Retry Storm Detection ---');
   if (retries.detected) {
     issuesFound++;
     retries.services.forEach(s => {
-      console.log(`❌ STORM DETECTED: Service "${s.name}" retry ratio is ${s.ratio}`);
+      const msg = `STORM DETECTED: Service "${s.name}" retry ratio is ${s.ratio}`;
+      console.log(`❌ ${msg}`);
+      report += `- ${msg}\n`;
     });
   } else {
     console.log('✅ No retry storms detected.');
@@ -107,7 +141,9 @@ async function run() {
   if (queues.detected) {
     issuesFound++;
     queues.queues.forEach(q => {
-      console.log(`❌ STAGNATION: Queue "${q.name}" is backed up (${q.depth} items) and failing.`);
+      const msg = `STAGNATION: Queue "${q.name}" is backed up (${q.depth} items) and failing.`;
+      console.log(`❌ ${msg}`);
+      report += `- ${msg}\n`;
     });
   } else {
     console.log('✅ Queues are flowing or healthy.');
@@ -117,7 +153,9 @@ async function run() {
   if (hotspots.detected) {
     issuesFound++;
     hotspots.hotspots.forEach(h => {
-      console.log(`❌ CONCENTRATION: Service "${h.service}" accounts for ${h.concentration * 100}% of all errors.`);
+      const msg = `CONCENTRATION: Service "${h.service}" accounts for ${h.concentration * 100}% of all errors.`;
+      console.log(`❌ ${msg}`);
+      report += `- ${msg}\n`;
     });
   } else {
     console.log('✅ Errors are distributed or minimal.');
@@ -126,6 +164,7 @@ async function run() {
   console.log('\n' + '='.repeat(50));
   if (issuesFound > 0) {
     console.log(`🔴 REGRESSION SIGNALS DETECTED (${issuesFound} categories)`);
+    await createIncident('Early GA Regression', report);
     console.log('Action: Follow RUNBOOKS/GA_LAUNCH_WEEK_ITERATION.md immediately.');
     process.exit(1);
   } else {

@@ -33,14 +33,33 @@ const MARKET_WEIGHTS = {
 /**
  * Extract historical PRs
  */
-async function extractHistoricalPRs(limit = 500) {
-  console.log(`\nExtracting last ${limit} merged PRs...`);
+async function extractHistoricalPRs(options = {}) {
+  const { limit = 500, days = null } = options;
+
+  let filterMessage = `last ${limit} merged PRs`;
+  let searchQuery = '';
+
+  if (days) {
+    const since = new Date();
+    since.setDate(since.getDate() - days);
+    const sinceDate = since.toISOString().split('T')[0];
+    searchQuery = `merged:>=${sinceDate}`;
+    filterMessage = `merged PRs from last ${days} days (since ${sinceDate})`;
+  }
+
+  console.log(`\nExtracting ${filterMessage}...`);
 
   try {
-    const prsJson = execSync(
-      `gh pr list --state merged --limit ${limit} --json number,title,createdAt,mergedAt,author,labels,additions,deletions,files,reviews`,
-      { encoding: 'utf-8', maxBuffer: 10 * 1024 * 1024 }
-    );
+    let ghCommand = `gh pr list --state merged --limit ${limit} --json number,title,createdAt,mergedAt,author,labels,additions,deletions,files,reviews`;
+
+    if (searchQuery) {
+      ghCommand += ` --search "${searchQuery}"`;
+    }
+
+    const prsJson = execSync(ghCommand, {
+      encoding: 'utf-8',
+      maxBuffer: 20 * 1024 * 1024
+    });
 
     const prs = JSON.parse(prsJson);
 
@@ -318,8 +337,38 @@ async function runReplay() {
   console.log('║                                                                ║');
   console.log('╚════════════════════════════════════════════════════════════════╝\n');
 
+  // Parse command-line arguments
+  const args = process.argv.slice(2);
+  let days = null;
+  let limit = 1000; // Increase default limit for 90-day windows
+
+  for (let i = 0; i < args.length; i++) {
+    if (args[i] === '--days' && args[i + 1]) {
+      days = parseInt(args[i + 1]);
+    } else if (args[i] === '--limit' && args[i + 1]) {
+      limit = parseInt(args[i + 1]);
+    }
+  }
+
+  // Default to 90 days if not specified
+  if (!days && args.includes('--window')) {
+    const windowIdx = args.indexOf('--window');
+    if (args[windowIdx + 1]) {
+      const window = args[windowIdx + 1];
+      if (window.endsWith('d')) {
+        days = parseInt(window);
+      }
+    }
+  }
+
+  // Use 90 days for proper validation
+  if (!days) {
+    days = 90;
+    console.log('Using default 90-day window for Gate 2 validation\n');
+  }
+
   // Extract historical data
-  const prs = await extractHistoricalPRs(500);
+  const prs = await extractHistoricalPRs({ limit, days });
 
   // Run simulations
   console.log('━━━ Running Simulations ━━━\n');

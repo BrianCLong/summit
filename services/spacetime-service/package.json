@@ -29,26 +29,26 @@
   "dependencies": {
     "@intelgraph/common-types": "workspace:*",
     "@intelgraph/geospatial": "workspace:*",
-    "@turf/turf": "^7.1.0",
-    "geojson": "^0.5.0",
-    "ngeohash": "^0.6.3",
-    "rbush": "^4.0.1",
-    "uuid": "^9.0.0",
-    "zod": "^3.22.4"
+    "@turf/turf": "7.1.0",
+    "geojson": "0.5.0",
+    "ngeohash": "0.6.3",
+    "rbush": "4.0.1",
+    "uuid": "9.0.0",
+    "zod": "3.22.4"
   },
   "devDependencies": {
-    "@jest/globals": "^30.0.0",
-    "@types/geojson": "^7946.0.14",
-    "@types/jest": "^30.0.0",
-    "@types/ngeohash": "^0.6.8",
+    "@jest/globals": "30.0.0",
+    "@types/geojson": "7946.0.14",
+    "@types/jest": "30.0.0",
+    "@types/ngeohash": "0.6.8",
     "@types/node": "20.19.27",
-    "@types/rbush": "^3.0.3",
-    "@types/uuid": "^9.0.0",
-    "fast-check": "^3.15.0",
-    "jest": "^30.2.0",
-    "ts-jest": "^29.1.0",
-    "tsx": "^4.6.0",
-    "typescript": "^5.9.3"
+    "@types/rbush": "3.0.3",
+    "@types/uuid": "9.0.0",
+    "fast-check": "3.15.0",
+    "jest": "30.2.0",
+    "ts-jest": "29.1.0",
+    "tsx": "4.6.0",
+    "typescript": "5.9.3"
   },
   "exports": {
     ".": {
