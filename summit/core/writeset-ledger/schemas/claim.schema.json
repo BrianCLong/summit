@@ -1,0 +1,174 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.local/schemas/claim.schema.json",
+  "title": "Claim",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "claim_id",
+    "subject",
+    "predicate",
+    "record_time",
+    "status",
+    "confidence",
+    "uncertainty",
+    "provenance_refs"
+  ],
+  "properties": {
+    "claim_id": {
+      "type": "string",
+      "pattern": "^claim-[A-Za-z0-9._:-]+$"
+    },
+    "subject": {
+      "$ref": "#/$defs/nodeRef"
+    },
+    "predicate": {
+      "type": "string",
+      "minLength": 1
+    },
+    "object": {
+      "$ref": "#/$defs/objectValue"
+    },
+    "valid_time_start": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "valid_time_end": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "record_time": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "uncertainty": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "candidate",
+        "supported",
+        "contested",
+        "validated",
+        "rejected"
+      ]
+    },
+    "supports": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^claim-[A-Za-z0-9._:-]+$"
+      },
+      "uniqueItems": true,
+      "default": []
+    },
+    "contradicts": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^claim-[A-Za-z0-9._:-]+$"
+      },
+      "uniqueItems": true,
+      "default": []
+    },
+    "supersedes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^claim-[A-Za-z0-9._:-]+$"
+      },
+      "uniqueItems": true,
+      "default": []
+    },
+    "graph_target": {
+      "type": "string",
+      "enum": ["RG", "BG", "NG", "TG", "PG"],
+      "description": "Reality, Belief, Narrative, Teleology, or Praxeology graph target."
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true,
+      "default": []
+    },
+    "provenance_refs": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "pattern": "^prov-[A-Za-z0-9._:-]+$"
+      },
+      "uniqueItems": true
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "required": ["valid_time_start", "valid_time_end"]
+      },
+      "then": {
+        "properties": {
+          "valid_time_end": {
+            "format": "date-time"
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "nodeRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "id"],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "entity",
+            "claim",
+            "event",
+            "document",
+            "narrative",
+            "belief",
+            "goal",
+            "strategy",
+            "action"
+          ]
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "literalValue": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "value"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["string", "number", "boolean", "json"]
+        },
+        "value": {}
+      }
+    },
+    "objectValue": {
+      "oneOf": [
+        { "$ref": "#/$defs/nodeRef" },
+        { "$ref": "#/$defs/literalValue" }
+      ]
+    }
+  }
+}

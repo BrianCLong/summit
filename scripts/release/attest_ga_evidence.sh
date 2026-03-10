@@ -298,6 +298,25 @@ cosign attest-blob \
 
 log_success "SPDX attestation: sbom-spdx.intoto.jsonl"
 
+
+# Attest policy-bundle.prod.json
+if [[ -f "${EVIDENCE_DIR}/policy/policy-bundle.prod.json" ]]; then
+    log_info "Attesting policy-bundle.prod.json (Custom)..."
+    cosign attest-blob \
+        --predicate "${EVIDENCE_DIR}/policy/policy-bundle.prod.json" \
+        --type custom \
+        --yes \
+        "${EVIDENCE_DIR}/policy/policy-bundle.prod.json" \
+        --output-file "${OUTPUT_DIR}/policy-bundle.intoto.jsonl" 2>&1 | tee -a "${OUTPUT_DIR}/attestation.log" >&2 || {
+        log_error "Policy bundle attestation failed"
+        exit 1
+    }
+    log_success "Policy bundle attestation: policy-bundle.intoto.jsonl"
+else
+    log_error "policy-bundle.prod.json not found in evidence directory. Policy bundle attestation is required."
+    exit 1
+fi
+
 # Generate attestation manifest
 log_info "Generating attestation manifest..."
 
@@ -341,6 +360,13 @@ cat > "${OUTPUT_DIR}/attestation-manifest.json" << EOF
       "subject": "sbom.spdx.json",
       "type": "spdx",
       "digest_sha256": "$(sha256sum "${EVIDENCE_DIR}/sbom.spdx.json" | cut -d' ' -f1)"
+    },
+    {
+      "name": "policy-bundle",
+      "file": "policy-bundle.intoto.jsonl",
+      "subject": "policy/policy-bundle.prod.json",
+      "type": "custom",
+      "digest_sha256": "$(sha256sum "${EVIDENCE_DIR}/policy/policy-bundle.prod.json" 2>/dev/null | cut -d' ' -f1 || echo "")"
     }
   ],
   "verification": {
@@ -381,7 +407,7 @@ sudo mv cosign-linux-amd64 /usr/local/bin/cosign
 Verify that the evidence checksums file was attested by the authorized GitHub workflow:
 
 ```bash
-cosign verify-blob-attestation --use-signed-timestamps \
+cosign verify-blob-attestation --use-signed-timestamps \ || { echo "::error::Supply chain verification failed! Missing or invalid signed timestamps."; false; }
   --certificate-identity-regexp "https://github.com/.*/summit/.github/workflows/.*" \
   --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
   --type slsaprovenance \
@@ -397,7 +423,7 @@ cosign verify-blob-attestation --use-signed-timestamps \
 ### 2. Verify CycloneDX SBOM Attestation
 
 ```bash
-cosign verify-blob-attestation --use-signed-timestamps \
+cosign verify-blob-attestation --use-signed-timestamps \ || { echo "::error::Supply chain verification failed! Missing or invalid signed timestamps."; false; }
   --certificate-identity-regexp "https://github.com/.*/summit/.github/workflows/.*" \
   --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
   --type cyclonedx \
@@ -408,7 +434,7 @@ cosign verify-blob-attestation --use-signed-timestamps \
 ### 3. Verify SPDX SBOM Attestation
 
 ```bash
-cosign verify-blob-attestation --use-signed-timestamps \
+cosign verify-blob-attestation --use-signed-timestamps \ || { echo "::error::Supply chain verification failed! Missing or invalid signed timestamps."; false; }
   --certificate-identity-regexp "https://github.com/.*/summit/.github/workflows/.*" \
   --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
   --type spdx \
@@ -416,7 +442,18 @@ cosign verify-blob-attestation --use-signed-timestamps \
   ../sbom.spdx.json
 ```
 
-### 4. Verify Evidence Checksums
+### 4. Verify Policy Bundle Attestation
+
+```bash
+cosign verify-blob-attestation --use-signed-timestamps \
+  --certificate-identity-regexp "https://github.com/.*/summit/.github/workflows/.*" \
+  --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
+  --type custom \
+  --bundle policy-bundle.intoto.jsonl \
+  ../policy/policy-bundle.prod.json
+```
+
+### 5. Verify Evidence Checksums
 
 After verifying attestations, verify the integrity of all evidence files:
 
@@ -453,7 +490,7 @@ The trust anchor is:
 Check that the certificate identity matches:
 ```bash
 # Extract certificate from attestation
-cosign verify-blob-attestation --use-signed-timestamps --insecure-ignore-tlog \
+cosign verify-blob-attestation --use-signed-timestamps --insecure-ignore-tlog \ || { echo "::error::Supply chain verification failed! Missing or invalid signed timestamps."; false; }
   --certificate-identity-regexp ".*" \
   --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
   --type slsaprovenance \
@@ -488,6 +525,7 @@ echo "  Attestations:  ${OUTPUT_DIR}" >&2
 echo "  Provenance:    provenance.intoto.jsonl" >&2
 echo "  SBOM (CDX):    sbom-cdx.intoto.jsonl" >&2
 echo "  SBOM (SPDX):   sbom-spdx.intoto.jsonl" >&2
+    echo "  Policy Bundle: policy-bundle.intoto.jsonl" >&2
 echo "  Manifest:      attestation-manifest.json" >&2
 echo "  Instructions:  verify.md" >&2
 echo "" >&2

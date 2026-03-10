@@ -1,0 +1,7 @@
+[
+  {
+    "id": "EVID:graphrag:case1",
+    "task": "Identify relationship between entity A and entity B",
+    "required_evidence": ["EVID:doc123", "EVID:doc456"]
+  }
+]

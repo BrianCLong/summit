@@ -1,0 +1,11 @@
+name: AI Stack Scheduled Shadow Run
+on:
+  schedule:
+    - cron: '0 * * * *'
+jobs:
+  shadow-run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Trigger AI Stack
+        run: echo "Triggered"

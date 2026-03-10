@@ -34,6 +34,16 @@ interface AuditEvent {
   currentHash: string;  // Hash of this event
   signature: string;    // Cryptographic signature of the event
   metadata?: Record<string, any>;
+
+  // Mandatory for security-critical actions
+  reason?: string;
+  legalBasis?: string;
+}
+
+export interface AuditSyncOptions {
+  syncToPostgres?: boolean;
+  caseId?: string;
+  resourceType?: string;
 }
 
 interface AuditLogConfig {
@@ -80,7 +90,7 @@ export class ImmutableAuditLogService {
   private isProcessing: boolean;
   private privateKey: crypto.KeyObject;
   private publicKey: crypto.KeyObject;
-  
+
   constructor(config: Partial<AuditLogConfig> = {}) {
     this.config = {
       enabled: process.env.AUDIT_LOG_ENABLED !== 'false',
@@ -93,25 +103,18 @@ export class ImmutableAuditLogService {
       queueSizeLimit: config.queueSizeLimit || 5000,
       ...config
     };
-    
+
     this.logPath = path.join(process.cwd(), this.config.logPath);
     this.retentionDays = this.config.retentionDays;
     this.auditQueue = [];
     this.isProcessing = false;
-    
-    // Generate RSA key pair for cryptographic signatures
-    const { privateKey, publicKey } = crypto.generateKeyPairSync('rsa', {
-      modulusLength: 4096,
-      publicKeyEncoding: { type: 'spki', format: 'pem' },
-      privateKeyEncoding: { type: 'pkcs8', format: 'pem' }
-    });
-    
-    this.privateKey = privateKey;
-    this.publicKey = publicKey;
-    
+
+    // Initialize cryptographic keys
+    this.initializeKeys();
+
     // Create log directory
     fs.mkdir(this.logPath, { recursive: true });
-    
+
     logger.info({
       logPath: this.logPath,
       retentionDays: this.retentionDays,
@@ -120,9 +123,78 @@ export class ImmutableAuditLogService {
   }
 
   /**
+   * Initialize cryptographic keys for signatures
+   * Loads from file if exists, otherwise generates and saves
+   */
+  private async initializeKeys(): Promise<void> {
+    const keyDir = path.join(this.logPath, 'keys');
+    const privateKeyPath = path.join(keyDir, 'private.pem');
+    const publicKeyPath = path.join(keyDir, 'public.pem');
+
+    try {
+      await fs.mkdir(keyDir, { recursive: true });
+
+      if (await this.fileExists(privateKeyPath) && await this.fileExists(publicKeyPath)) {
+        const privPem = await fs.readFile(privateKeyPath, 'utf8');
+        const pubPem = await fs.readFile(publicKeyPath, 'utf8');
+
+        this.privateKey = crypto.createPrivateKey(privPem);
+        this.publicKey = crypto.createPublicKey(pubPem);
+
+        logger.info({ keyDir }, 'Loaded persistent audit keys from disk');
+      } else {
+        logger.warn({ keyDir }, 'Persistent audit keys not found, generating new pair');
+
+        const { privateKey, publicKey } = crypto.generateKeyPairSync('rsa', {
+          modulusLength: 4096,
+          publicKeyEncoding: { type: 'spki', format: 'pem' },
+          privateKeyEncoding: { type: 'pkcs8', format: 'pem' }
+        });
+
+        await fs.writeFile(privateKeyPath, privateKey.export({ type: 'pkcs8', format: 'pem' }));
+        await fs.writeFile(publicKeyPath, publicKey.export({ type: 'spki', format: 'pem' }));
+
+        this.privateKey = privateKey;
+        this.publicKey = publicKey;
+
+        logger.info({ keyDir }, 'Generated and saved new persistent audit keys');
+      }
+    } catch (error) {
+      logger.error({
+        error: error instanceof Error ? error.message : String(error),
+        keyDir
+      }, 'Failed to initialize persistent audit keys');
+
+      // Fallback to ephemeral keys
+      const { privateKey, publicKey } = crypto.generateKeyPairSync('rsa', {
+        modulusLength: 4096,
+        publicKeyEncoding: { type: 'spki', format: 'pem' },
+        privateKeyEncoding: { type: 'pkcs8', format: 'pem' }
+      });
+      this.privateKey = privateKey;
+      this.publicKey = publicKey;
+    }
+  }
+
+  /**
+   * Helpers to check if file exists
+   */
+  private async fileExists(path: string): Promise<boolean> {
+    try {
+      await fs.access(path);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
    * Log an audit event with cryptographic integrity
    */
-  async logAuditEvent(event: Omit<AuditEvent, 'id' | 'timestamp' | 'currentHash' | 'signature'>): Promise<boolean> {
+  async logAuditEvent(
+    event: Omit<AuditEvent, 'id' | 'timestamp' | 'currentHash' | 'signature'>,
+    options: AuditSyncOptions = {}
+  ): Promise<boolean> {
     if (!this.config.enabled) return true;
 
     try {
@@ -141,16 +213,21 @@ export class ImmutableAuditLogService {
         ...augmentedEvent,
         previousHash: augmentedEvent.previousHash
       }, Object.keys(augmentedEvent).sort());
-      
+
       augmentedEvent.currentHash = crypto.createHash('sha256').update(serializedEvent).digest('hex');
-      
+
       // Add cryptographic signature
       const sign = crypto.createSign('SHA256');
       sign.update(serializedEvent);
       augmentedEvent.signature = sign.sign(this.privateKey, 'hex');
 
-      // Add to queue for processing
+      // Add to queue for processing to file
       this.auditQueue.push(augmentedEvent);
+
+      // Unified Sink: Sync to PostgreSQL if requested
+      if (options.syncToPostgres) {
+        this.syncToPostgres(augmentedEvent, options);
+      }
 
       // Check for backpressure
       if (this.auditQueue.length > this.config.backpressureThreshold) {
@@ -158,7 +235,7 @@ export class ImmutableAuditLogService {
           queueSize: this.auditQueue.length,
           threshold: this.config.backpressureThreshold
         }, 'Audit log backpressure detected, processing events');
-        
+
         // Process events immediately if backpressure detected
         await this.processQueuedEvents();
       } else {
@@ -180,9 +257,49 @@ export class ImmutableAuditLogService {
         error: error instanceof Error ? error.message : String(error),
         event
       }, 'Error logging audit event');
-      
+
       trackError('auditing', 'AuditEventLogError');
       return false;
+    }
+  }
+
+  /**
+   * Sync audit event to PostgreSQL via AuditAccessLogRepo
+   */
+  private async syncToPostgres(event: AuditEvent, options: AuditSyncOptions): Promise<void> {
+    try {
+      const { getPostgresPool } = await import('../db/postgres.js');
+      const { AuditAccessLogRepo } = await import('../repos/AuditAccessLogRepo.js');
+
+      const pg = getPostgresPool();
+      const repo = new AuditAccessLogRepo(pg as any);
+
+      await repo.logAccess({
+        tenantId: event.tenantId,
+        caseId: options.caseId || 'SYSTEM',
+        userId: event.userId,
+        action: event.action,
+        resourceType: options.resourceType || event.eventType,
+        resourceId: event.resource,
+        reason: event.reason || 'System automated event',
+        legalBasis: (event.legalBasis as any) || 'legitimate_interest',
+        ipAddress: event.ipAddress,
+        userAgent: event.userAgent,
+        requestId: (event.metadata as any)?.requestId,
+        correlationId: (event.metadata as any)?.correlationId,
+        metadata: {
+          ...event.metadata,
+          file_id: event.id,
+          file_hash: event.currentHash,
+          file_signature: event.signature
+        }
+      });
+    } catch (error) {
+      logger.error({
+        error: error instanceof Error ? error.message : String(error),
+        eventId: event.id
+      }, 'Failed to sync audit event to PostgreSQL');
+      trackError('auditing', 'AuditPostgresSyncError');
     }
   }
 
@@ -200,11 +317,11 @@ export class ImmutableAuditLogService {
     try {
       while (this.auditQueue.length > 0) {
         const batch = this.auditQueue.splice(0, this.config.batchSize);
-        
+
         // Get current date for organizing logs by date
         const currentDate = new Date().toISOString().split('T')[0];
         const logFilePath = path.join(this.logPath, currentDate, 'audit.log');
-        
+
         await fs.mkdir(path.dirname(logFilePath), { recursive: true });
 
         // Write events to log file in append-only fashion
@@ -223,7 +340,7 @@ export class ImmutableAuditLogService {
       logger.error({
         error: error instanceof Error ? error.message : String(error)
       }, 'Error processing audit event queue');
-      
+
       trackError('auditing', 'AuditEventQueueProcessingError');
     } finally {
       this.isProcessing = false;
@@ -238,7 +355,7 @@ export class ImmutableAuditLogService {
       // Find most recent audit log file
       const currentDate = new Date().toISOString().split('T')[0];
       const logFilePath = path.join(this.logPath, currentDate, 'audit.log');
-      
+
       if (await this.fileExists(logFilePath)) {
         const stats = await fs.stat(logFilePath);
         if (stats.size > 0) {
@@ -254,29 +371,18 @@ export class ImmutableAuditLogService {
           }
         }
       }
-      
+
       // If no previous events, return genesis hash
       return 'genesis-block-hash';
     } catch (error) {
       logger.warn({
         error: error instanceof Error ? error.message : String(error)
       }, 'Could not retrieve last audit event hash, using genesis');
-      
+
       return 'genesis-block-hash';
     }
   }
 
-  /**
-   * Verify if a file exists
-   */
-  private async fileExists(filePath: string): Promise<boolean> {
-    try {
-      await fs.access(filePath);
-      return true;
-    } catch {
-      return false;
-    }
-  }
 
   /**
    * Query audit events with filtering options
@@ -287,22 +393,22 @@ export class ImmutableAuditLogService {
     try {
       const results: AuditEvent[] = [];
       const dateFolders = await fs.readdir(this.logPath);
-      
+
       // Query across multiple date folders for the requested time range
       for (const dateFolder of dateFolders) {
         const logFilePath = path.join(this.logPath, dateFolder, 'audit.log');
-        
+
         if (await this.fileExists(logFilePath)) {
           const content = await fs.readFile(logFilePath, 'utf-8');
           const lines = content.trim().split('\n').filter((line: string) => line.trim() !== '');
-          
+
           for (const line of lines) {
             try {
               const event: AuditEvent = JSON.parse(line);
-              
+
               if (this.matchesCriteria(event, options)) {
                 results.push(event);
-                
+
                 // Apply limit if specified
                 if (options.limit && results.length >= options.limit) {
                   return results;
@@ -321,7 +427,7 @@ export class ImmutableAuditLogService {
 
       // Apply sorting and offset
       results.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
-      
+
       if (options.offset) {
         results.splice(0, options.offset);
       }
@@ -332,7 +438,7 @@ export class ImmutableAuditLogService {
         error: error instanceof Error ? error.message : String(error),
         queryOptions: options
       }, 'Error querying audit events');
-      
+
       trackError('auditing', 'AuditEventQueryError');
       return [];
     }
@@ -347,15 +453,15 @@ export class ImmutableAuditLogService {
     if (options.eventType && event.eventType !== options.eventType) return false;
     if (options.action && event.action !== options.action) return false;
     if (options.result && event.result !== options.result) return false;
-    
+
     if (options.startTime && new Date(event.timestamp) < new Date(options.startTime)) {
       return false;
     }
-    
+
     if (options.endTime && new Date(event.timestamp) > new Date(options.endTime)) {
       return false;
     }
-    
+
     return true;
   }
 
@@ -392,32 +498,32 @@ export class ImmutableAuditLogService {
         }
 
         const logFilePath = path.join(this.logPath, dateFolder, 'audit.log');
-        
+
         if (await this.fileExists(logFilePath)) {
           const content = await fs.readFile(logFilePath, 'utf-8');
           const lines = content.trim().split('\n').filter((line: string) => line.trim() !== '');
-          
+
           for (const line of lines) {
             try {
               const event: AuditEvent = JSON.parse(line);
               totalEvents++;
-              
+
               // Verify cryptographic signature
               const verify = crypto.createVerify('SHA256');
               const serializedEvent = JSON.stringify({
                 ...event,
                 previousHash: event.previousHash
               }, Object.keys(event).filter(k => k !== 'signature').sort());
-              
+
               verify.update(serializedEvent);
               const signatureValid = verify.verify(this.publicKey, event.signature, 'hex');
-              
+
               if (!signatureValid) {
                 tamperedEvents++;
                 chainIntegrity = false;
                 continue;
               }
-              
+
               // Verify hash chain integrity
               if (event.previousHash !== expectedPreviousHash) {
                 tamperedEvents++;
@@ -450,7 +556,7 @@ export class ImmutableAuditLogService {
                 error: error instanceof Error ? error.message : String(error),
                 logFilePath
               }, 'Error verifying integrity of audit event');
-              
+
               tamperedEvents++;
               chainIntegrity = false;
             }
@@ -483,9 +589,9 @@ export class ImmutableAuditLogService {
       logger.error({
         error: error instanceof Error ? error.message : String(error)
       }, 'Error in audit log integrity verification');
-      
+
       trackError('auditing', 'AuditIntegrityVerificationError');
-      
+
       return {
         valid: false,
         tamperedEvents: 0,
@@ -501,20 +607,20 @@ export class ImmutableAuditLogService {
    * Export audit events for external analysis
    */
   async exportAuditEvents(
-    outputPath: string, 
+    outputPath: string,
     options: AuditQueryOptions = {}
   ): Promise<{ success: boolean; exportedCount: number; outputPath: string }> {
     try {
       const events = await this.queryAuditEvents(options);
-      
+
       await fs.mkdir(path.dirname(outputPath), { recursive: true });
       await fs.writeFile(outputPath, JSON.stringify(events, null, 2));
-      
+
       logger.info({
         exportedCount: events.length,
         outputPath
       }, 'Audit events exported successfully');
-      
+
       return {
         success: true,
         exportedCount: events.length,
@@ -526,9 +632,9 @@ export class ImmutableAuditLogService {
         outputPath,
         queryOptions: options
       }, 'Error exporting audit events');
-      
+
       trackError('auditing', 'AuditExportError');
-      
+
       return {
         success: false,
         exportedCount: 0,
@@ -542,20 +648,20 @@ export class ImmutableAuditLogService {
    */
   async cleanupExpiredLogs(): Promise<number> {
     let cleanedCount = 0;
-    
+
     try {
       const dateFolders = await fs.readdir(this.logPath);
       const thresholdDate = new Date();
       thresholdDate.setDate(thresholdDate.getDate() - this.retentionDays);
-      
+
       for (const dateFolder of dateFolders) {
         const folderDate = new Date(dateFolder);
-        
+
         if (folderDate < thresholdDate) {
           const folderPath = path.join(this.logPath, dateFolder);
           await fs.rm(folderPath, { recursive: true, force: true });
           cleanedCount++;
-          
+
           logger.info({
             folderPath,
             folderDate,
@@ -563,7 +669,7 @@ export class ImmutableAuditLogService {
           }, 'Expired audit log folder removed');
         }
       }
-      
+
       logger.info({
         cleanedFolders: cleanedCount
       }, 'Audit log cleanup completed');
@@ -571,10 +677,10 @@ export class ImmutableAuditLogService {
       logger.error({
         error: error instanceof Error ? error.message : String(error)
       }, 'Error cleaning up expired audit logs');
-      
+
       trackError('auditing', 'AuditCleanupError');
     }
-    
+
     return cleanedCount;
   }
 
@@ -597,49 +703,49 @@ export class ImmutableAuditLogService {
         latestEvent: null as string | null,
         dailyAvgEvents: 0
       };
-      
+
       const today = new Date().toISOString().split('T')[0];
-      
+
       for (const dateFolder of dateFolders) {
         const logFilePath = path.join(this.logPath, dateFolder, 'audit.log');
-        
+
         if (await this.fileExists(logFilePath)) {
           const content = await fs.readFile(logFilePath, 'utf-8');
           const lines = content.trim().split('\n').filter((line: string) => line.trim() !== '');
-          
+
           if (dateFolder === today) {
             stats.eventsToday = lines.length;
           }
-          
+
           stats.totalEvents += lines.length;
-          
+
           if (lines.length > 0) {
             const firstEvent: AuditEvent = JSON.parse(lines[0]);
             const lastEvent: AuditEvent = JSON.parse(lines[lines.length - 1]);
-            
+
             if (!stats.earliestEvent || firstEvent.timestamp < stats.earliestEvent) {
               stats.earliestEvent = firstEvent.timestamp;
             }
-            
+
             if (!stats.latestEvent || lastEvent.timestamp > stats.latestEvent) {
               stats.latestEvent = lastEvent.timestamp;
             }
           }
         }
       }
-      
+
       if (dateFolders.length > 0) {
         stats.dailyAvgEvents = Math.round(stats.totalEvents / dateFolders.length);
       }
-      
+
       return stats;
     } catch (error) {
       logger.error({
         error: error instanceof Error ? error.message : String(error)
       }, 'Error getting audit stats');
-      
+
       trackError('auditing', 'AuditStatsError');
-      
+
       return {
         totalEvents: 0,
         eventsToday: 0,
@@ -668,9 +774,9 @@ export class ImmutableAuditLogService {
   }> {
     const queueSize = this.auditQueue.length;
     const backpressure = queueSize > this.config.backpressureThreshold;
-    
+
     const integrityReport = await this.verifyIntegrity();
-    
+
     let status: 'healthy' | 'degraded' | 'unhealthy';
     if (!this.config.enabled) {
       status = 'unhealthy';
@@ -679,7 +785,7 @@ export class ImmutableAuditLogService {
     } else {
       status = 'healthy';
     }
-    
+
     return {
       status,
       details: {
@@ -736,11 +842,11 @@ export const auditLoggingMiddleware = (auditService: ImmutableAuditLogService) =
     }
 
     const startTime = Date.now();
-    
+
     // Prepare audit event for successful request
     res.on('finish', async () => {
       const duration = Date.now() - startTime;
-      
+
       const auditEvent: Omit<AuditEvent, 'id' | 'timestamp' | 'currentHash' | 'signature'> = {
         eventType: 'API_CALL',
         userId: req.user?.id || 'anonymous',
@@ -748,8 +854,8 @@ export const auditLoggingMiddleware = (auditService: ImmutableAuditLogService) =
         action: `${req.method} ${req.path}`,
         resource: req.path,
         result: res.statusCode >= 200 && res.statusCode < 300 ? 'success' :
-                res.statusCode >= 400 && res.statusCode < 500 ? 'denied' :
-                res.statusCode >= 500 ? 'error' : 'failure',
+          res.statusCode >= 400 && res.statusCode < 500 ? 'denied' :
+            res.statusCode >= 500 ? 'error' : 'failure',
         ipAddress: req.ip,
         userAgent: req.get('User-Agent'),
         metadata: {
@@ -758,7 +864,7 @@ export const auditLoggingMiddleware = (auditService: ImmutableAuditLogService) =
           contentLength: res.get('Content-Length'),
           referer: req.get('Referer'),
           origin: req.get('Origin'),
-          headers: Object.keys(req.headers).filter(header => 
+          headers: Object.keys(req.headers).filter(header =>
             header.startsWith('x-') || header === 'authorization' || header === 'cookie'
           ).reduce((obj, header) => {
             obj[header] = req.headers[header];
