@@ -1,0 +1,16 @@
+{
+  "deterministic": true,
+  "summary": {
+    "totalAssets": 7,
+    "plugins": 2,
+    "developers": 2,
+    "partners": 1,
+    "integrations": 1,
+    "events": 1
+  },
+  "checks": [
+    "sorted-by-type-and-id",
+    "timestamp-free-output",
+    "source-path-captured"
+  ]
+}

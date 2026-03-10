@@ -1,0 +1,31 @@
+name: platform-index
+
+on:
+  schedule:
+    - cron: '0 4 * * 1'
+  workflow_dispatch:
+
+jobs:
+  rebuild-index:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Collect ecosystem assets and rebuild index
+        run: node scripts/repoos/platform-indexer.mjs
+
+      - name: Upload platform index artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: platform-index-artifacts
+          path: |
+            .repoos/index/ecosystem-assets.json
+            .repoos/index/index-schema.json
+            .repoos/index/platform-index.json
+            .repoos/evidence/platform-index-report.json
