@@ -2,7 +2,7 @@ packages:
   - 'packages/*'
   - 'services/*'
   - 'apps/*'
-  - 'libs/*'
+  - 'libs/*/*'
   - 'tools/*'
   - 'platform/*'
   - 'agents/*'
