@@ -16,6 +16,7 @@ jobs:
           python-version: '3.11'
       - name: Install test deps
         run: python -m pip install pytest
+          export PYTHONPATH=src
       - name: Run structcorr tests
         run: |
           pytest -q tests/structcorr/test_json_contracts.py

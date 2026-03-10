@@ -34,7 +34,7 @@ jobs:
         run: |
           # Generate SBOM in XML format (version 1.5)
           # We use cdxgen which is versatile for monorepos
-          npx @cyclonedx/cdxgen -r . -o cyclonedx.xml -t javascript --fail-on-error
+          NODE_OPTIONS="--max-old-space-size=8192" npx @cyclonedx/cdxgen -r . -o cyclonedx.xml -t javascript --fail-on-error
         env:
           FETCH_LICENSE: 'true'
 
