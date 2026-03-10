@@ -1,5 +1,6 @@
 import json
 import os
+import secrets
 import time
 from datetime import datetime
 
@@ -77,7 +78,7 @@ class ForecastResponse(BaseModel):
 # --- Dependencies ---
 async def verify_api_key(x_api_key: str = Header(..., alias="X-API-Key")):
     """Dependency to verify API key."""
-    if x_api_key != API_KEY:
+    if not secrets.compare_digest(x_api_key, API_KEY):
         raise HTTPException(status_code=401, detail="Invalid API Key")
     return x_api_key
 
