@@ -1,0 +1,112 @@
+[
+  {
+    "id": "intelgraph",
+    "name": "IntelGraph",
+    "category": "Analytics",
+    "description": "Graph analytics engine",
+    "backendEndpoints": [
+      "/api/graph"
+    ],
+    "requiredPermissions": [
+      "analyst",
+      "operator",
+      "admin"
+    ],
+    "uiSurface": "GraphWorkspace",
+    "visualizationType": "NetworkGraph"
+  },
+  {
+    "id": "repoos",
+    "name": "RepoOS",
+    "category": "Governance",
+    "description": "Repository OS governance system",
+    "backendEndpoints": [
+      "/api/repoos"
+    ],
+    "requiredPermissions": [
+      "viewer",
+      "analyst",
+      "operator",
+      "admin"
+    ],
+    "uiSurface": "RepoDashboard",
+    "visualizationType": "MetricCard"
+  },
+  {
+    "id": "evolution_ledger",
+    "name": "Evolution Ledger",
+    "category": "Evolution",
+    "description": "Architecture evolution tracking",
+    "backendEndpoints": [
+      "/api/evolution"
+    ],
+    "requiredPermissions": [
+      "analyst",
+      "admin"
+    ],
+    "uiSurface": "EvolutionLedgerView",
+    "visualizationType": "TimelineGraph"
+  },
+  {
+    "id": "timemachine",
+    "name": "Software Time Machine",
+    "category": "TimeMachine",
+    "description": "Historical architecture replay",
+    "backendEndpoints": [
+      "/api/time"
+    ],
+    "requiredPermissions": [
+      "analyst",
+      "admin"
+    ],
+    "uiSurface": "RepoTimeline",
+    "visualizationType": "Timeline"
+  },
+  {
+    "id": "simulation",
+    "name": "Simulation Engine",
+    "category": "Simulation",
+    "description": "Technology evolution simulator",
+    "backendEndpoints": [
+      "/api/sim"
+    ],
+    "requiredPermissions": [
+      "operator",
+      "admin"
+    ],
+    "uiSurface": "SimulationRunner",
+    "visualizationType": "ScenarioTree"
+  },
+  {
+    "id": "agents",
+    "name": "Agent Intelligence",
+    "category": "Agents",
+    "description": "Agent performance and benchmarks",
+    "backendEndpoints": [
+      "/api/agents"
+    ],
+    "requiredPermissions": [
+      "analyst",
+      "operator",
+      "admin"
+    ],
+    "uiSurface": "AgentDashboard",
+    "visualizationType": "Table"
+  },
+  {
+    "id": "threat",
+    "name": "Threat Intelligence",
+    "category": "Threat",
+    "description": "Actor graph and risk scoring",
+    "backendEndpoints": [
+      "/api/threat"
+    ],
+    "requiredPermissions": [
+      "analyst",
+      "operator",
+      "admin"
+    ],
+    "uiSurface": "ThreatGraph",
+    "visualizationType": "RiskHeatmap"
+  }
+]
