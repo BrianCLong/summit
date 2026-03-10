@@ -1,4 +1,4 @@
-# Required Checks Discovery (TODO) — azure-turin-v7
+# Required Checks Discovery (COMPLETED) — azure-turin-v7
 
 ## Goal
 Identify the exact required check names enforced by branch protection for `main` (Golden Path).

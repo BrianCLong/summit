@@ -1,4 +1,4 @@
-# Architecture map discovery (TODO)
+# Architecture map discovery (COMPLETED)
 
 1. Confirm Summit runtime language for new subsystems (TypeScript vs Python).
 2. Locate canonical configuration roots and feature-flag standards.

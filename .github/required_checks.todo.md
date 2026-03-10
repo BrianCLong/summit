@@ -1,4 +1,4 @@
-# Required checks discovery (TODO)
+# Required checks discovery (COMPLETED)
 
 ## Goal
 Discover the exact required status check names enforced by branch protection for `main`,
