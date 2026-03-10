@@ -1,0 +1,11 @@
+{
+  "restrictedAreas": [
+    {
+      "paths": [
+        "package.json",
+        "pnpm-lock.yaml"
+      ],
+      "overrideLabel": "override-restricted"
+    }
+  ]
+}

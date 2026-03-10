@@ -1109,6 +1109,13 @@ export const maestroSynthesisOperations = createCounter({
   help: 'Data synthesis operations',
 });
 
+export const summitActiveConnections = createGauge({
+  registers: [],
+  name: 'summit_active_connections',
+  help: 'Number of active connections for summit services',
+  labelNames: ['service'],
+});
+
 // Register new metrics
 try {
   register.registerMetric(maestroOrchestrationRequests);
@@ -1137,6 +1144,7 @@ try {
   register.registerMetric(maestroDataSourcesActive);
   register.registerMetric(maestroWebScrapingRequests);
   register.registerMetric(maestroSynthesisOperations);
+  register.registerMetric(summitActiveConnections);
 } catch (e) { }
 
 // Debug log to verify metrics loading
@@ -1228,6 +1236,7 @@ export const metrics = {
   narrativeSimulationTicksTotal,
   narrativeSimulationEventsTotal,
   narrativeSimulationDurationSeconds,
+  summitActiveConnections,
 };
 
 export default metrics;
