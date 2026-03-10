@@ -1,6 +1,6 @@
 import json
-import sys
 import os
+import sys
 
 # Ensure the root of the repository is in the sys.path so we can import 'intelgraph'
 sys.path.insert(0, os.getcwd())
@@ -18,7 +18,7 @@ def main():
         print(f"File not found: {filepath}")
         sys.exit(1)
 
-    with open(filepath, 'r') as f:
+    with open(filepath) as f:
         try:
             data = json.load(f)
         except json.JSONDecodeError as e:

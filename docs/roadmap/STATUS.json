@@ -1,7 +1,32 @@
 {
-  "last_updated": "2026-02-08T00:34:47Z",
-  "revision_note": "Added action pinning preflight gate, allowlist policy, and deterministic evidence emitters.",
+  "last_updated": "2026-03-09T22:00:00Z",
+  "revision_note": "Integrated Stage 7 validation infrastructure, Antigravity governance ledger, and hardened docker stack into the master roadmap.",
   "initiatives": [
+    {
+      "id": "antigravity-governance-ledger",
+      "status": "completed",
+      "owner": "antigravity",
+      "notes": "Strict evidence check (no mocks) and valid governance ledger proof integrated into release-ga.yml."
+    },
+    {
+      "id": "hardened-docker-stack",
+      "status": "completed",
+      "owner": "ops",
+      "notes": "Fixed Neo4j password, Dockerfile pnpm/lockfile issues, and tsconfig missing files. Stack starts and verifies 'No Mocks' policy."
+    },
+    {
+      "id": "stage-7-validation-infrastructure",
+      "status": "completed",
+      "owner": "codex",
+      "notes": "Completed initial validation infrastructure for Stage 7 compliance, including evidence trackers and gate 3 setup.",
+      "evidence_id": "EVD-ARCH-INFRA-V1"
+    },
+    {
+      "id": "nature-s41562-026-02411-w-layer2-layer3",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Implementing Layer 2 (Causal Mediation) and Layer 3 (Counterfactual) for the Nature-published social science replication framework."
+    },
     {
       "id": "adenhq-hive-subsumption-lane1",
       "status": "in_progress",
@@ -193,14 +218,64 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "Documented CI/CD high-signal deltas with enforced action register and evidence targets."
+    },
+    {
+      "id": "agent-control-plane-scaffold-foundation",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Scaffold Summit agent control-plane foundation lane, including architecture documentation and core schema definitions."
+    },
+    {
+      "id": "ai-infra-blueprint-v1",
+      "status": "completed",
+      "priority": "critical",
+      "owner": "Architecture",
+      "started_at": "2026-03-07",
+      "target_ga": "2026-03-07",
+      "description": "Establish baseline AI engineering infrastructure standards, including Cursor/Claude dual-engine patterns and governance-aware CI.",
+      "evidence_id": "EVD-ARCH-INFRA-V1"
+    },
+    {
+      "id": "cursor-vs-claude-subsumption-standard",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Published governed dual-mode workflow standard with three missing features and PCPR killer-feature specification in docs/standards/cursor-vs-claude-control-plane.md."
+    },
+    {
+      "id": "summit-master-subsumption-roadmap",
+      "status": "completed",
+      "owner": "codex",
+      "notes": "Unified roadmap for evaluation platform, GA evidence consistency, and multi-agent UX subsumption."
+    },
+    {
+      "id": "fsociety-deep-subsumption-governance",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Published deep subsumption governance plan for fsociety assets with evidence-locked CI and protocol alignment."
+    },
+    {
+      "id": "mcp-ecosystem-alignment",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Tighten ecosystem follow-up plan to validated summit paths and checks, ensuring MCP tools meet governance standards."
+    },
+    {
+      "id": "openclaw-agent-integration",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Governance standards for OpenClaw-class agent plane integration, including evidence artifacts and repository state verification."
+    },
+    {
+      "id": "praxeology-control-plane",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Praxeology graph implementation with quarantined PG writeset validators and control-plane API."
     }
   ],
   "summary": {
-    "rc_ready": 8,
-    "partial": 2,
-    "incomplete": 0,
-    "not_started": 5,
-    "total": 17,
-    "ga_blockers": []
+    "total_initiatives": 32,
+    "completed": 8,
+    "in_progress": 24,
+    "at_risk": 0
   }
 }

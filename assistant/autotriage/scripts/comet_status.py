@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 import json
+import os
 import subprocess
 import sys
-import os
 
 STATUS_FILE = "docs/comet-v2-status.json"
 
@@ -10,7 +10,7 @@ def load_status():
     if not os.path.exists(STATUS_FILE):
         print(f"Error: {STATUS_FILE} not found.")
         sys.exit(1)
-    with open(STATUS_FILE, "r") as f:
+    with open(STATUS_FILE) as f:
         return json.load(f)
 
 def check_pr_status(pr_url):

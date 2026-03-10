@@ -1,0 +1,31 @@
+name: Neo4j Postgres Parity Check
+
+on:
+  schedule:
+    - cron: '0 * * * *' # Run hourly
+  workflow_dispatch:
+
+jobs:
+  parity-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install psycopg2-binary neo4j
+
+      - name: Run Parity Check
+        env:
+          PG_DSN: ${{ secrets.PG_DSN }}
+          NEO4J_URI: ${{ secrets.NEO4J_URI }}
+          NEO4J_USER: ${{ secrets.NEO4J_USER }}
+          NEO4J_PASS: ${{ secrets.NEO4J_PASS }}
+        run: python tools/parity/neo4j_postgres_parity_check.py

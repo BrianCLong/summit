@@ -1,0 +1,24 @@
+name: gdelt-gkg-connector
+description: GDELT Global Knowledge Graph (GKG) connector for narrative intelligence
+version: 1.0.0
+author: IntelGraph Team
+ingestion_type: batch
+supported_formats:
+  - csv
+  - zip
+schema_mapping_file: parse_gkg_v21.ts
+golden_io_tests:
+  - test_gdelt_parsing.ts
+rate_limit:
+  requests_per_hour: 4 # GDELT updates every 15 mins
+  burst_limit: 1
+pii_flags:
+  - names: 'Contains names of people mentioned in news'
+  - locations: 'Contains locations mentioned in news'
+license: 'GDELT Open Data'
+classification: 'open-source'
+retention_policy: 'infinite' # Historical narrative data
+configuration:
+  user_agent: 'IntelGraph GDELT Connector 1.0'
+  timeout_seconds: 60
+  verify_ssl: true

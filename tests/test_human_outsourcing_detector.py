@@ -1,7 +1,10 @@
-import pytest
 import json
 from pathlib import Path
+
+import pytest
+
 from detectors.human_outsourcing_detector import HumanOutsourcingDetector
+
 
 def test_detect_hiring_platform():
     detector = HumanOutsourcingDetector()
@@ -38,7 +41,7 @@ def test_fixture_compliance():
     if not fixture_path.exists():
         pytest.skip("Fixture not found")
 
-    with open(fixture_path, "r") as f:
+    with open(fixture_path) as f:
         data = json.load(f)
 
     detector = HumanOutsourcingDetector()
