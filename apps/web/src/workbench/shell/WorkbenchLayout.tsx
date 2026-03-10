@@ -3,7 +3,7 @@ import { useWorkbenchStore } from '../store/viewStore'
 import { LinkAnalysisCanvas } from '../canvas/LinkAnalysisCanvas'
 import { InspectorPanel } from '../inspector/InspectorPanel'
 import { Button } from '@/components/ui/Button'
-import { PanelLeft, PanelRight, Save, Layout } from 'lucide-react'
+import { PanelLeft, PanelRight, Save } from 'lucide-react'
 import type { Entity, Relationship } from '@/types'
 
 // Mock Data for Shell Dev
@@ -71,7 +71,7 @@ export function WorkbenchShell() {
         {/* Toolbar */}
         <div className="h-12 border-b flex items-center px-4 justify-between bg-card">
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" onClick={toggleLeftRail}>
+            <Button variant="ghost" size="icon" onClick={toggleLeftRail} aria-label="Toggle case context panel">
               <PanelLeft className="h-4 w-4" />
             </Button>
             <span className="font-medium text-sm">Investigator Workbench</span>
@@ -82,7 +82,7 @@ export function WorkbenchShell() {
                <Save className="h-4 w-4 mr-2" />
                Save View
              </Button>
-             <Button variant="ghost" size="icon" onClick={toggleRightRail}>
+             <Button variant="ghost" size="icon" onClick={toggleRightRail} aria-label="Toggle inspector panel">
               <PanelRight className="h-4 w-4" />
             </Button>
           </div>
