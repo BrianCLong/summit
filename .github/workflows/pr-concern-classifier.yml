@@ -1,0 +1,39 @@
+name: PR Concern Classifier
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  classify:
+    name: Classify Concern
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Classify concern
+        run: |
+          # Read files into an array safely using null-terminated output
+          readarray -d '' CHANGED_FILES < <(git diff -z --name-only origin/${{ github.base_ref }} ${{ github.sha }})
+          npx tsx scripts/repoos/map-concern.ts "${CHANGED_FILES[@]}"
+          cat concern-classification.json
+
+      - name: Upload concern artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: concern-classification
+          path: concern-classification.json

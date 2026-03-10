@@ -9,5 +9,5 @@ class BaseAgent:
     name: str
     version: str = "0.1.0"
 
-    def run(self, task: str, context: Dict[str, str]) -> Dict[str, str]:
+    def run(self, task: str, context: dict[str, str]) -> dict[str, str]:
         raise NotImplementedError

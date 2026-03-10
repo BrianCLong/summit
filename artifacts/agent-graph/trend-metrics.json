@@ -1,0 +1,7 @@
+{
+  "denied_edge_count": 0,
+  "new_node_count": 0,
+  "policy_mismatch_count": 0,
+  "average_compile_time_ms": 1,
+  "artifact_instability_rate": 0
+}

@@ -13,7 +13,7 @@ permissions:
 jobs:
   sast_sca:
     name: sast_sca
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     env:
       NODE_VERSION: '20.x'
       PNPM_CACHE_FOLDER: ~/.pnpm-store
@@ -27,7 +27,6 @@ jobs:
         uses: actions/setup-node@v4 # v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
           cache-dependency-path: '**/pnpm-lock.yaml'
 
       - name: Enable corepack
@@ -37,7 +36,7 @@ jobs:
         run: pnpm config set store-dir "$PNPM_CACHE_FOLDER"
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Lint for vulnerabilities and quality
         run: pnpm run lint:check

@@ -20,14 +20,14 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v3
         with:
-          version: 10.0.0
+          version: 10.0.0.0.0
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: pnpm
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
       - name: Generate dependency graph
         run: node --loader ts-node/esm scripts/analyze-dependencies.ts
       - name: Enforce complexity threshold

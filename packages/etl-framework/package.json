@@ -13,16 +13,16 @@
   "dependencies": {
     "@intelgraph/common-types": "workspace:*",
     "@intelgraph/data-integration": "workspace:*",
-    "zod": "^3.24.1",
-    "winston": "^3.17.0",
-    "pg": "^8.16.3",
-    "bull": "^4.16.5",
-    "node-cron": "^3.0.3"
+    "zod": "3.24.1",
+    "winston": "3.17.0",
+    "pg": "8.16.3",
+    "bull": "4.16.5",
+    "node-cron": "3.0.3"
   },
   "devDependencies": {
     "@types/node": "20.19.27",
-    "typescript": "^5.9.3",
-    "jest": "^30.2.0",
-    "@types/jest": "^30.0.0"
+    "typescript": "5.9.3",
+    "jest": "30.2.0",
+    "@types/jest": "30.0.0"
   }
 }

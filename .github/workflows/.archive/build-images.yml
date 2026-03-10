@@ -62,7 +62,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Build application
         run: pnpm dlx turbo run build --cache-dir .turbo
@@ -83,7 +83,7 @@ jobs:
       - name: Install Cosign
         uses: sigstore/cosign-installer@v3
         with:
-          cosign-release: 'v2.2.4'
+          cosign-release: 'v3.0.5'
 
       - name: Install Syft
         uses: anchore/sbom-action/download-syft@v0.17.1

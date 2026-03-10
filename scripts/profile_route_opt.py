@@ -15,8 +15,8 @@ if str(ROOT) not in sys.path:
 import json
 import time
 import tracemalloc
-from agents.route_opt.planner import run
 
+from agents.route_opt.planner import run
 
 FIXTURE = Path("agents/route_opt/tests/fixtures/input.json")
 OUTPUT = Path("artifacts/route_plan/perf.json")

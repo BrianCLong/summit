@@ -47,3 +47,9 @@
 **Learning:** Icons in `EmptyState` components are purely decorative as they accompany a clear title and description. Marking them with `aria-hidden="true"` reduces noise for screen reader users.
 
 **Action:** Always audit interactive dashboard list items for keyboard support and ensure decorative icons in common components are hidden from the accessibility tree.
+
+## 2026-02-12 - Semantic Consistency for Inline Components
+
+**Learning:** UI components intended for inline usage (like Badges) must utilize semantic `<span>` tags rather than `<div>` to avoid invalid HTML nesting when used inside typographic elements (e.g., `<p>`, `<h1>`). A mismatch between implementation (`div`) and test expectations (`span`) often indicates a regression in accessibility and structural integrity.
+
+**Action:** Ensure all atomic inline components default to `<span>` and support flexible icon insertion to reinforce semantic meaning.

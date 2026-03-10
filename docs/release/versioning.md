@@ -6,6 +6,19 @@
 
 This document describes the semantic versioning rules used by the MAE Release Captain automation.
 
+## Release Cadence Calendar
+
+To ensure predictability and stability, Summit follows a strict release cadence calendar:
+
+| Event | Cadence | Schedule | Target Environment |
+|-------|---------|----------|--------------------|
+| **Canary** | Continuous | On every merge to main | `canary` |
+| **Release Candidate (RC)** | Daily | Monday-Thursday 10:00 UTC | `staging` |
+| **Stable Release** | Weekly | Tuesday 13:00 UTC | `prod` (Internal/SaaS) |
+| **General Availability (GA)** | Quarterly | First Tuesday of Quarter | `prod` (Enterprise/Airgap) |
+
+*Note: Hotfixes are processed out-of-band and bypass the weekly schedule, but must still pass RC validation.*
+
 ## Version Format
 
 We follow [Semantic Versioning 2.0.0](https://semver.org/) with the format:
@@ -236,13 +249,37 @@ Migration steps:
 
 ## Tags and Branches
 
-### Tag Format
+### Tag Strategy (Unified)
 
-| Tag Pattern | Description |
-|-------------|-------------|
-| `vX.Y.Z` | Production release |
-| `vX.Y.Z-rc.N` | Release candidate |
-| `vX.Y.Z-hotfix` | Hotfix marker (temporary) |
+To avoid redundancy and ensure clarity, we have collapsed legacy tagging strategies (e.g., date-based `vYYYY.MM.DD-buildN` and environment-specific `vX.Y.Z-ga`) into a strict Semantic Versioning strategy.
+
+| Tag Pattern | Channel | Description |
+|-------------|---------|-------------|
+| `vX.Y.Z` | Stable & GA | Verified Production and General Availability releases |
+| `vX.Y.Z-rc.N` | Integration | Release candidate for staging validation |
+| `vX.Y.Z-canary.N` | Canary | Ephemeral pre-release for continuous testing |
+
+*Note: `vX.Y.Z-hotfix` is no longer used; hotfixes simply bump the patch version (e.g., `vX.Y.Z+1`).*
+
+### Release Metadata & Provenance
+
+All tags **MUST** be annotated and correspond to signed releases. To ensure each tag is reconstructible with provenance, tag annotations must include the following metadata:
+- **Version**: The semantic version.
+- **Commit**: The underlying commit SHA.
+- **Signatures**: Proof of signing (GPG/Cosign).
+- **Provenance**: A reference or link to the SLSA provenance and SBOM artifacts.
+- **Evidence Bundle**: Link to the evidence directory containing test results and audits.
+
+Example annotated tag message:
+```text
+Release v1.2.3
+
+Version: 1.2.3
+Commit: a1b2c3d4e5f6g7h8i9j0
+Signature: Verified (Cosign)
+Provenance: https://github.com/org/repo/actions/runs/12345
+Evidence Bundle: artifacts/evidence/go-live/a1b2c3d4e5f6g7h8i9j0/evidence.json
+```
 
 ### Branch Format
 

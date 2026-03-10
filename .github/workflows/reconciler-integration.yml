@@ -10,7 +10,7 @@ on:
 
 jobs:
   canary:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 15
     services:
       neo4j:

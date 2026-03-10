@@ -1,0 +1,16 @@
+lanes:
+  merge_now:
+    label: queue:merge-now
+    action: enqueue
+  rebase:
+    label: queue:needs-rebase
+    action: rebase
+  conflict:
+    label: queue:conflict
+    action: manual resolution
+  blocked:
+    label: queue:blocked
+    action: analyze
+  obsolete:
+    label: queue:obsolete
+    action: archive

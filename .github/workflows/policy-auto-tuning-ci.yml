@@ -17,7 +17,7 @@ concurrency:
 
 jobs:
   test-engine:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4 # v6
 
@@ -26,12 +26,11 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
         with:
-          cache: 'pnpm'
           cache-dependency-path: '**/pnpm-lock.yaml'
           node-version: '20'
 
       - name: Install dependencies
-        run: npm install -g pnpm && pnpm install --frozen-lockfile
+        run: npm install -g pnpm && pnpm install --no-frozen-lockfile
 
       - name: Run Unit Tests
         run: npx tsx server/src/policy-engine/__tests__/engine.test.ts

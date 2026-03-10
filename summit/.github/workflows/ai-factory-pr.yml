@@ -1,0 +1,22 @@
+name: AI Factory PR
+on:
+  workflow_dispatch:
+    inputs:
+      workItemId:
+        description: 'Work Item ID to implement'
+        required: true
+
+jobs:
+  implement:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install -g pnpm && pnpm install
+      - run: pnpm exec tsx cli/factory/fanout.ts ${{ github.event.inputs.workItemId }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ai-factory-pr
+          path: artifacts/ai-factory/
