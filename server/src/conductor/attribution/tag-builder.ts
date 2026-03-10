@@ -24,6 +24,7 @@
  */
 
 import crypto from 'crypto';
+import logger from '../../utils/logger.js';
 
 /**
  * Source context with sensitivity labels
@@ -119,16 +120,8 @@ export interface DeletionQueryResult {
  * Token Attribution Graph Builder
  */
 export class TokenAttributionGraphBuilder {
-  // In-memory store for attribution graphs (TODO: replace with PostgreSQL)
-  private attributionGraphs: Map<string, AttributionGraph> = new Map();
-
-  constructor(
-    // NOTE: Using simplified implementation without external dependencies
-    // TODO: Inject LLM client with streaming API access
-    // TODO: Inject PostgreSQL client for attribution_graphs table
-    // TODO: Inject tokenizer (e.g., tiktoken for GPT models)
-  ) {
-    console.warn('[AI Attribution] Using simplified in-memory implementation. For production, integrate PostgreSQL persistence.');
+  constructor() {
+    logger.info('[AI Attribution] TokenAttributionGraphBuilder initialized with PostgreSQL persistence.');
   }
 
   /**
@@ -222,9 +215,27 @@ export class TokenAttributionGraphBuilder {
       createdAt: new Date(),
     };
 
-    // Store in memory (TODO: persist to PostgreSQL)
-    this.attributionGraphs.set(outputId, graph);
-    console.info(`[AI Attribution] Stored attribution graph for output ${outputId} with ${nodes.length} attribution nodes.`);
+    // Store in PostgreSQL
+    try {
+      const { getPostgresPool } = await import('../../db/postgres.js');
+      const pg = getPostgresPool();
+
+      await pg.query(
+        `INSERT INTO maestro.attribution_graphs (output_id, output_text, token_count, nodes, sources, created_at)
+         VALUES ($1, $2, $3, $4, $5, $6)
+         ON CONFLICT (output_id) DO UPDATE SET
+           output_text = EXCLUDED.output_text,
+           token_count = EXCLUDED.token_count,
+           nodes = EXCLUDED.nodes,
+           sources = EXCLUDED.sources,
+           created_at = EXCLUDED.created_at`,
+        [graph.outputId, graph.outputText, graph.tokenCount, JSON.stringify(graph.nodes), JSON.stringify(graph.sources), graph.createdAt]
+      );
+
+      logger.info({ outputId: graph.outputId }, '[AI Attribution] Persisted attribution graph to PostgreSQL');
+    } catch (error) {
+      logger.error({ error: error instanceof Error ? error.message : String(error), outputId }, '[AI Attribution] Failed to persist attribution graph');
+    }
 
     return graph;
   }
@@ -244,31 +255,41 @@ export class TokenAttributionGraphBuilder {
    * @returns Deletion query result with affected outputs
    */
   async queryBySource(sourceId: string): Promise<DeletionQueryResult> {
-    // Query in-memory store (TODO: replace with PostgreSQL query)
-    const affectedOutputs: DeletionQueryResult['affectedOutputs'] = [];
+    try {
+      const { getPostgresPool } = await import('../../db/postgres.js');
+      const pg = getPostgresPool();
 
-    for (const [outputId, graph] of this.attributionGraphs.entries()) {
-      // Find all nodes that reference this source
-      const relevantNodes = graph.nodes.filter(node => node.sourceId === sourceId);
+      // Use SQL jsonb search for efficient lookup
+      // Find rows where 'nodes' array contains an object with sourceId matching the parameter
+      const { rows } = await pg.query(
+        `SELECT output_id, output_text, nodes FROM maestro.attribution_graphs
+         WHERE nodes @> $1::jsonb`,
+        [JSON.stringify([{ sourceId }])]
+      );
 
-      if (relevantNodes.length > 0) {
+      const affectedOutputs: DeletionQueryResult['affectedOutputs'] = rows.map((row: any) => {
+        const nodes: AttributionNode[] = row.nodes;
+        const relevantNodes = nodes.filter(node => node.sourceId === sourceId);
         const tokenRanges = relevantNodes.map(node => node.tokenSpan);
-        const redactedText = this.redactTokenRanges(graph.outputText, tokenRanges);
+        const redactedText = this.redactTokenRanges(row.output_text, tokenRanges);
 
-        affectedOutputs.push({
-          outputId,
+        return {
+          outputId: row.output_id,
           tokenRanges,
           redactedText,
-        });
-      }
+        };
+      });
+
+      logger.info({ sourceId, count: affectedOutputs.length }, '[AI Attribution] Queried outputs by source attribution');
+
+      return {
+        affectedOutputs,
+        totalCount: affectedOutputs.length,
+      };
+    } catch (error) {
+      logger.error({ error: error instanceof Error ? error.message : String(error), sourceId }, '[AI Attribution] Failed to query by source');
+      return { affectedOutputs: [], totalCount: 0 };
     }
-
-    console.info(`[AI Attribution] Found ${affectedOutputs.length} outputs containing data from source ${sourceId}`);
-
-    return {
-      affectedOutputs,
-      totalCount: affectedOutputs.length,
-    };
   }
 
   /**
@@ -282,15 +303,28 @@ export class TokenAttributionGraphBuilder {
    * @returns Attribution graph showing source breakdown
    */
   async queryByOutput(outputId: string): Promise<AttributionGraph | null> {
-    // Query in-memory store (TODO: replace with PostgreSQL query)
-    const graph = this.attributionGraphs.get(outputId);
+    try {
+      const { getPostgresPool } = await import('../../db/postgres.js');
+      const pg = getPostgresPool();
 
-    if (!graph) {
-      console.warn(`[AI Attribution] No attribution graph found for output ${outputId}`);
+      const { rows } = await pg.query(
+        `SELECT output_id as "outputId", output_text as "outputText", token_count as "tokenCount", 
+                nodes, sources, created_at as "createdAt"
+         FROM maestro.attribution_graphs
+         WHERE output_id = $1`,
+        [outputId]
+      );
+
+      if (rows.length === 0) {
+        logger.warn({ outputId }, '[AI Attribution] No attribution graph found in database');
+        return null;
+      }
+
+      return rows[0] as AttributionGraph;
+    } catch (error) {
+      logger.error({ error: error instanceof Error ? error.message : String(error), outputId }, '[AI Attribution] Failed to query by output');
       return null;
     }
-
-    return graph;
   }
 
   /**

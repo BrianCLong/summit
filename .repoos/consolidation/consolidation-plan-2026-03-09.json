@@ -1,0 +1,877 @@
+{
+  "generated_at": "2026-03-09T16:33:40.855Z",
+  "status": "proposed",
+  "impact": {
+    "current_subsystems": 975,
+    "projected_subsystems": 719,
+    "subsystems_eliminated": 256,
+    "reduction_percentage": "26.3",
+    "estimated_entropy_reduction": "5.12"
+  },
+  "recommendation_count": 60,
+  "recommendations": [
+    {
+      "cluster_id": 730,
+      "consolidation_type": "merge",
+      "parent_subsystem": "packages/slow-query-killer",
+      "child_subsystems": [
+        "services/admin-api",
+        "packages/metrics-exporter"
+      ],
+      "total_files": 8,
+      "subsystems_eliminated": 2,
+      "estimated_entropy_reduction": 0.04
+    },
+    {
+      "cluster_id": 653,
+      "consolidation_type": "merge",
+      "parent_subsystem": "services/digital-twin-cognition",
+      "child_subsystems": [
+        "services/api-gateway",
+        "services/dashboard-service",
+        "services/xai-explain-anomaly",
+        "packages/governance-hooks",
+        "packages/graphql",
+        "apps/desktop-electron",
+        "apps/intelgraph-api"
+      ],
+      "total_files": 40,
+      "subsystems_eliminated": 7,
+      "estimated_entropy_reduction": 0.14
+    },
+    {
+      "cluster_id": 458,
+      "consolidation_type": "merge",
+      "parent_subsystem": "packages/speech-recognition",
+      "child_subsystems": [
+        "services/audio-service",
+        "services/transcription-service",
+        "packages/audio-analytics",
+        "packages/audio-enhancement",
+        "packages/audio-forensics",
+        "packages/audio-intelligence",
+        "packages/audio-processing",
+        "packages/speaker-identification",
+        "packages/telephony"
+      ],
+      "total_files": 23,
+      "subsystems_eliminated": 9,
+      "estimated_entropy_reduction": 0.18
+    },
+    {
+      "cluster_id": 513,
+      "consolidation_type": "merge",
+      "parent_subsystem": "packages/media-manipulation",
+      "child_subsystems": [
+        "services/authenticity-service",
+        "packages/content-verification"
+      ],
+      "total_files": 8,
+      "subsystems_eliminated": 2,
+      "estimated_entropy_reduction": 0.04
+    },
+    {
+      "cluster_id": 465,
+      "consolidation_type": "merge",
+      "parent_subsystem": "services/battle-api",
+      "child_subsystems": [
+        "services/battle-command-service",
+        "services/battle-fusion-service",
+        "services/battle-ingest-service",
+        "packages/battle-fusion",
+        "packages/battle-types"
+      ],
+      "total_files": 6,
+      "subsystems_eliminated": 5,
+      "estimated_entropy_reduction": 0.1
+    },
+    {
+      "cluster_id": 470,
+      "consolidation_type": "merge",
+      "parent_subsystem": "packages/behavioral-analysis",
+      "child_subsystems": [
+        "services/biometric-service",
+        "services/identity-fusion",
+        "packages/biometrics",
+        "packages/document-verification",
+        "packages/facial-recognition",
+        "packages/identity-resolution",
+        "packages/watchlist-screening"
+      ],
+      "total_files": 14,
+      "subsystems_eliminated": 7,
+      "estimated_entropy_reduction": 0.14
+    },
+    {
+      "cluster_id": 534,
+      "consolidation_type": "merge",
+      "parent_subsystem": "packages/business-glossary",
+      "child_subsystems": [
+        "packages/catalog-analytics",
+        "packages/semantic-search"
+      ],
+      "total_files": 11,
+      "subsystems_eliminated": 2,
+      "estimated_entropy_reduction": 0.04
+    },
+    {
+      "cluster_id": 753,
+      "consolidation_type": "merge",
+      "parent_subsystem": "packages/language-models",
+      "child_subsystems": [
+        "services/nlp-service",
+        "packages/entity-extraction"
+      ],
+      "total_files": 25,
+      "subsystems_eliminated": 2,
+      "estimated_entropy_reduction": 0.04
+    },
+    {
+      "cluster_id": 493,
+      "consolidation_type": "merge",
+      "parent_subsystem": "packages/cloud-platform",
+      "child_subsystems": [
+        "services/cloud-platform-service"
+      ],
+      "total_files": 10,
+      "subsystems_eliminated": 1,
+      "estimated_entropy_reduction": 0.02
+    },
+    {
+      "cluster_id": 498,
+      "consolidation_type": "merge",
+      "parent_subsystem": "packages/real-time-sync",
+      "child_subsystems": [
+        "services/collaboration-service",
+        "packages/collaboration",
+        "packages/commenting",
+        "packages/version-control",
+        "packages/workspace"
+      ],
+      "total_files": 21,
+      "subsystems_eliminated": 5,
+      "estimated_entropy_reduction": 0.1
+    },
+    {
+      "cluster_id": 899,
+      "consolidation_type": "merge",
+      "parent_subsystem": "services/counterterrorism-service",
+      "child_subsystems": [
+        "services/threat-assessment-service",
+        "packages/extremism-monitor",
+        "packages/foreign-fighters",
+        "packages/propaganda-analysis",
+        "packages/radicalization-detection",
+        "packages/terrorist-finance",
+        "packages/terrorist-tracking"
+      ],
+      "total_files": 27,
+      "subsystems_eliminated": 7,
+      "estimated_entropy_reduction": 0.14
+    },
+    {
+      "cluster_id": 222,
+      "consolidation_type": "merge",
+      "parent_subsystem": "packages/blockchain",
+      "child_subsystems": [
+        "services/crypto",
+        "packages/bitemporal",
+        "packages/chain-of-custody",
+        "packages/digital-signatures",
+        "packages/fztr-relay",
+        "packages/smart-contracts"
+      ],
+      "total_files": 24,
+      "subsystems_eliminated": 6,
+      "estimated_entropy_reduction": 0.12
+    },
+    {
+      "cluster_id": 789,
+      "consolidation_type": "merge",
+      "parent_subsystem": "packages/cryptographic-agility",
+      "child_subsystems": [
+        "services/crypto-service",
+        "apps/observability"
+      ],
+      "total_files": 8,
+      "subsystems_eliminated": 2,
+      "estimated_entropy_reduction": 0.04
+    },
+    {
+      "cluster_id": 503,
+      "consolidation_type": "merge",
+      "parent_subsystem": "services/espionage-service",
+      "child_subsystems": [
+        "services/data-marketplace",
+        "services/data-pool",
+        "services/distributed-registry",
+        "services/foreign-intel-service",
+        "packages/agent-identification",
+        "packages/autonomous-ops",
+        "packages/bilateral-relations",
+        "packages/ci-analytics",
+        "packages/common-types",
+        "packages/counterintel-ops",
+        "packages/covert-operations",
+        "packages/covert-ops",
+        "packages/covert-ops-module",
+        "packages/crisis-diplomacy",
+        "packages/darkweb-intel",
+        "packages/deception-tech",
+        "packages/diplomatic-comms",
+        "packages/diplomatic-personnel",
+        "packages/diplomatic-tracking",
+        "packages/economic-diplomacy",
+        "packages/espionage-tracking",
+        "packages/foreign-intelligence",
+        "packages/foreign-policy-analysis",
+        "packages/fusion-analytics",
+        "packages/ioc-manager",
+        "packages/malware-analysis",
+        "packages/multilateral-tracking",
+        "packages/predictive-diplomacy",
+        "packages/quantum-supply-chain",
+        "packages/sigint-processor",
+        "packages/technical-intelligence",
+        "packages/threat-actors",
+        "packages/threat-hunting",
+        "packages/threat-intelligence",
+        "packages/treaty-monitor",
+        "packages/vulnerability-intel"
+      ],
+      "total_files": 93,
+      "subsystems_eliminated": 36,
+      "estimated_entropy_reduction": 0.72
+    },
+    {
+      "cluster_id": 542,
+      "consolidation_type": "merge",
+      "parent_subsystem": "packages/kpw-media",
+      "child_subsystems": [
+        "services/deception-detection-service",
+        "packages/deception-detector",
+        "packages/disinformation-detection",
+        "packages/fake-account-detection",
+        "packages/synthetic-media"
+      ],
+      "total_files": 17,
+      "subsystems_eliminated": 5,
+      "estimated_entropy_reduction": 0.1
+    },
+    {
+      "cluster_id": 548,
+      "consolidation_type": "merge",
+      "parent_subsystem": "services/model-serving-service",
+      "child_subsystems": [
+        "services/dl-training-service",
+        "packages/cnn-framework",
+        "packages/deep-learning-core",
+        "packages/distributed-training",
+        "packages/generative-models",
+        "packages/model-interpretability",
+        "packages/model-optimization",
+        "packages/neural-networks",
+        "packages/rnn-platform",
+        "packages/training-strategies",
+        "packages/transformers"
+      ],
+      "total_files": 19,
+      "subsystems_eliminated": 11,
+      "estimated_entropy_reduction": 0.22
+    },
+    {
+      "cluster_id": 570,
+      "consolidation_type": "merge",
+      "parent_subsystem": "services/edge-orchestrator",
+      "child_subsystems": [
+        "packages/edge-ai",
+        "packages/edge-computing",
+        "packages/edge-runtime",
+        "packages/edge-sync",
+        "packages/federated-learning"
+      ],
+      "total_files": 20,
+      "subsystems_eliminated": 5,
+      "estimated_entropy_reduction": 0.1
+    },
+    {
+      "cluster_id": 769,
+      "consolidation_type": "merge",
+      "parent_subsystem": "packages/attribution-engine",
+      "child_subsystems": [
+        "services/enrichment-service",
+        "services/osint-service",
+        "packages/osint-search"
+      ],
+      "total_files": 13,
+      "subsystems_eliminated": 3,
+      "estimated_entropy_reduction": 0.06
+    },
+    {
+      "cluster_id": 583,
+      "consolidation_type": "merge",
+      "parent_subsystem": "packages/data-integration",
+      "child_subsystems": [
+        "services/etl-service",
+        "services/orchestration",
+        "packages/data-lineage"
+      ],
+      "total_files": 15,
+      "subsystems_eliminated": 3,
+      "estimated_entropy_reduction": 0.06
+    },
+    {
+      "cluster_id": 588,
+      "consolidation_type": "merge",
+      "parent_subsystem": "packages/cqrs",
+      "child_subsystems": [
+        "services/event-bus-service",
+        "packages/event-bus",
+        "packages/event-sourcing",
+        "packages/event-streaming",
+        "packages/messaging"
+      ],
+      "total_files": 30,
+      "subsystems_eliminated": 5,
+      "estimated_entropy_reduction": 0.1
+    },
+    {
+      "cluster_id": 685,
+      "consolidation_type": "merge",
+      "parent_subsystem": "services/streaming-ingest",
+      "child_subsystems": [
+        "packages/cep-engine",
+        "packages/kafka-integration",
+        "packages/policy-engine",
+        "packages/prov-ledger-client",
+        "packages/prov-ledger-extensions",
+        "packages/prov-ledger-sdk",
+        "packages/prov-ledger-verifier",
+        "packages/stream-analytics"
+      ],
+      "total_files": 47,
+      "subsystems_eliminated": 8,
+      "estimated_entropy_reduction": 0.16
+    },
+    {
+      "cluster_id": 283,
+      "consolidation_type": "merge",
+      "parent_subsystem": "services/policy-engine",
+      "child_subsystems": [
+        "services/ga-policy-engine"
+      ],
+      "total_files": 2,
+      "subsystems_eliminated": 1,
+      "estimated_entropy_reduction": 0.02
+    },
+    {
+      "cluster_id": 448,
+      "consolidation_type": "merge",
+      "parent_subsystem": "packages/api-analytics",
+      "child_subsystems": [
+        "services/gateway-service",
+        "packages/api-management"
+      ],
+      "total_files": 4,
+      "subsystems_eliminated": 2,
+      "estimated_entropy_reduction": 0.04
+    },
+    {
+      "cluster_id": 632,
+      "consolidation_type": "merge",
+      "parent_subsystem": "packages/spatial-analysis",
+      "child_subsystems": [
+        "services/geocoding-api",
+        "services/geotemporal-api"
+      ],
+      "total_files": 12,
+      "subsystems_eliminated": 2,
+      "estimated_entropy_reduction": 0.04
+    },
+    {
+      "cluster_id": 179,
+      "consolidation_type": "merge",
+      "parent_subsystem": "services/graph-analytics",
+      "child_subsystems": [
+        "services/gpu-graph-analytics"
+      ],
+      "total_files": 2,
+      "subsystems_eliminated": 1,
+      "estimated_entropy_reduction": 0.02
+    },
+    {
+      "cluster_id": 645,
+      "consolidation_type": "merge",
+      "parent_subsystem": "packages/graph-algorithms",
+      "child_subsystems": [
+        "services/graph-db-service",
+        "packages/graph-database",
+        "packages/graph-query",
+        "packages/link-prediction",
+        "packages/relationship-mining"
+      ],
+      "total_files": 18,
+      "subsystems_eliminated": 5,
+      "estimated_entropy_reduction": 0.1
+    },
+    {
+      "cluster_id": 686,
+      "consolidation_type": "merge",
+      "parent_subsystem": "packages/graph-reasoning",
+      "child_subsystems": [
+        "services/sparql-endpoint",
+        "packages/entity-linking",
+        "packages/graph-ai-core",
+        "packages/semantic-analysis"
+      ],
+      "total_files": 19,
+      "subsystems_eliminated": 4,
+      "estimated_entropy_reduction": 0.08
+    },
+    {
+      "cluster_id": 673,
+      "consolidation_type": "merge",
+      "parent_subsystem": "services/ingest-runner",
+      "child_subsystems": [
+        "packages/ingest-connector-sdk"
+      ],
+      "total_files": 9,
+      "subsystems_eliminated": 1,
+      "estimated_entropy_reduction": 0.02
+    },
+    {
+      "cluster_id": 348,
+      "consolidation_type": "merge",
+      "parent_subsystem": "services/ingest-wizard",
+      "child_subsystems": [
+        "services/schema-ingest-wizard"
+      ],
+      "total_files": 4,
+      "subsystems_eliminated": 1,
+      "estimated_entropy_reduction": 0.02
+    },
+    {
+      "cluster_id": 707,
+      "consolidation_type": "merge",
+      "parent_subsystem": "services/integration-gateway",
+      "child_subsystems": [
+        "packages/integration-twin",
+        "packages/mandates"
+      ],
+      "total_files": 11,
+      "subsystems_eliminated": 2,
+      "estimated_entropy_reduction": 0.04
+    },
+    {
+      "cluster_id": 690,
+      "consolidation_type": "merge",
+      "parent_subsystem": "packages/unified-analytics",
+      "child_subsystems": [
+        "services/lakehouse-service",
+        "packages/cloud-governance",
+        "packages/object-storage"
+      ],
+      "total_files": 11,
+      "subsystems_eliminated": 3,
+      "estimated_entropy_reduction": 0.06
+    },
+    {
+      "cluster_id": 698,
+      "consolidation_type": "merge",
+      "parent_subsystem": "services/logistics-automation-service",
+      "child_subsystems": [
+        "services/smart-contracting-service",
+        "packages/logistics-automation-types"
+      ],
+      "total_files": 8,
+      "subsystems_eliminated": 2,
+      "estimated_entropy_reduction": 0.04
+    },
+    {
+      "cluster_id": 717,
+      "consolidation_type": "merge",
+      "parent_subsystem": "packages/hierarchy-management",
+      "child_subsystems": [
+        "services/mdm-service",
+        "services/ref-data-service",
+        "packages/mdm-analytics",
+        "packages/mdm-governance",
+        "packages/mdm-stewardship",
+        "packages/mdm-sync",
+        "packages/reference-data"
+      ],
+      "total_files": 14,
+      "subsystems_eliminated": 7,
+      "estimated_entropy_reduction": 0.14
+    },
+    {
+      "cluster_id": 728,
+      "consolidation_type": "merge",
+      "parent_subsystem": "packages/metadata-discovery",
+      "child_subsystems": [
+        "services/metadata-service"
+      ],
+      "total_files": 7,
+      "subsystems_eliminated": 1,
+      "estimated_entropy_reduction": 0.02
+    },
+    {
+      "cluster_id": 763,
+      "consolidation_type": "merge",
+      "parent_subsystem": "services/mission-coordination-service",
+      "child_subsystems": [
+        "services/operations-c2-service",
+        "packages/collection-coordination",
+        "packages/decision-support",
+        "packages/multi-int-fusion",
+        "packages/operations-center",
+        "packages/operations-management",
+        "packages/targeting-support"
+      ],
+      "total_files": 8,
+      "subsystems_eliminated": 7,
+      "estimated_entropy_reduction": 0.14
+    },
+    {
+      "cluster_id": 846,
+      "consolidation_type": "merge",
+      "parent_subsystem": "packages/sentiment-analysis",
+      "child_subsystems": [
+        "services/ml-inference",
+        "packages/influence-detection",
+        "packages/narrative-tracking"
+      ],
+      "total_files": 20,
+      "subsystems_eliminated": 3,
+      "estimated_entropy_reduction": 0.06
+    },
+    {
+      "cluster_id": 735,
+      "consolidation_type": "merge",
+      "parent_subsystem": "packages/mlops-platform",
+      "child_subsystems": [
+        "services/mlops-service",
+        "services/model-registry-service",
+        "packages/model-explainability",
+        "packages/model-monitoring",
+        "packages/model-serving",
+        "packages/training-orchestration"
+      ],
+      "total_files": 15,
+      "subsystems_eliminated": 6,
+      "estimated_entropy_reduction": 0.12
+    },
+    {
+      "cluster_id": 615,
+      "consolidation_type": "merge",
+      "parent_subsystem": "services/prediction-service",
+      "child_subsystems": [
+        "services/model-training",
+        "packages/feature-engineering",
+        "packages/risk-scoring",
+        "packages/ts-feature-engineering"
+      ],
+      "total_files": 21,
+      "subsystems_eliminated": 4,
+      "estimated_entropy_reduction": 0.08
+    },
+    {
+      "cluster_id": 782,
+      "consolidation_type": "merge",
+      "parent_subsystem": "packages/plugin-sdk",
+      "child_subsystems": [
+        "services/plugin-executor",
+        "services/plugin-registry",
+        "packages/plugin-host"
+      ],
+      "total_files": 17,
+      "subsystems_eliminated": 3,
+      "estimated_entropy_reduction": 0.06
+    },
+    {
+      "cluster_id": 791,
+      "consolidation_type": "merge",
+      "parent_subsystem": "services/predictd",
+      "child_subsystems": [
+        "packages/predictive-graph-intelligence"
+      ],
+      "total_files": 4,
+      "subsystems_eliminated": 1,
+      "estimated_entropy_reduction": 0.02
+    },
+    {
+      "cluster_id": 810,
+      "consolidation_type": "merge",
+      "parent_subsystem": "packages/quantum-simulation",
+      "child_subsystems": [
+        "services/quantum-service",
+        "packages/quantum-ml",
+        "packages/quantum-optimization"
+      ],
+      "total_files": 14,
+      "subsystems_eliminated": 3,
+      "estimated_entropy_reduction": 0.06
+    },
+    {
+      "cluster_id": 591,
+      "consolidation_type": "merge",
+      "parent_subsystem": "services/realtime",
+      "child_subsystems": [
+        "packages/events-producer"
+      ],
+      "total_files": 2,
+      "subsystems_eliminated": 1,
+      "estimated_entropy_reduction": 0.02
+    },
+    {
+      "cluster_id": 425,
+      "consolidation_type": "merge",
+      "parent_subsystem": "packages/red-team",
+      "child_subsystems": [
+        "services/red-team-service",
+        "packages/purple-team",
+        "packages/threat-emulation",
+        "packages/vulnerability-intelligence"
+      ],
+      "total_files": 20,
+      "subsystems_eliminated": 4,
+      "estimated_entropy_reduction": 0.08
+    },
+    {
+      "cluster_id": 885,
+      "consolidation_type": "merge",
+      "parent_subsystem": "packages/supply-chain-ai",
+      "child_subsystems": [
+        "services/risk-assessment-service",
+        "services/supply-chain-service",
+        "packages/component-tracker",
+        "packages/logistics-intel",
+        "packages/supplier-risk",
+        "packages/supply-chain-mapper",
+        "packages/supply-chain-types",
+        "packages/third-party-risk"
+      ],
+      "total_files": 20,
+      "subsystems_eliminated": 8,
+      "estimated_entropy_reduction": 0.16
+    },
+    {
+      "cluster_id": 723,
+      "consolidation_type": "merge",
+      "parent_subsystem": "services/scenario-registry",
+      "child_subsystems": [
+        "services/scoring-engine",
+        "packages/mesh-eval-sdk"
+      ],
+      "total_files": 10,
+      "subsystems_eliminated": 2,
+      "estimated_entropy_reduction": 0.04
+    },
+    {
+      "cluster_id": 852,
+      "consolidation_type": "merge",
+      "parent_subsystem": "services/sigint-service",
+      "child_subsystems": [
+        "packages/comint-analyzer",
+        "packages/cryptanalysis-engine",
+        "packages/geolocation-engine",
+        "packages/network-interceptor",
+        "packages/rf-processor",
+        "packages/shared"
+      ],
+      "total_files": 34,
+      "subsystems_eliminated": 6,
+      "estimated_entropy_reduction": 0.12
+    },
+    {
+      "cluster_id": 888,
+      "consolidation_type": "merge",
+      "parent_subsystem": "packages/synthetic-data",
+      "child_subsystems": [
+        "services/synthesis-service",
+        "packages/audio-synthesis",
+        "packages/data-augmentation",
+        "packages/geospatial-synthesis",
+        "packages/graph-synthesis",
+        "packages/image-synthesis",
+        "packages/privacy-preserving",
+        "packages/text-generation"
+      ],
+      "total_files": 18,
+      "subsystems_eliminated": 8,
+      "estimated_entropy_reduction": 0.16
+    },
+    {
+      "cluster_id": 511,
+      "consolidation_type": "merge",
+      "parent_subsystem": "packages/etl-assistant",
+      "child_subsystems": [
+        "services/universal-ingestion",
+        "packages/license-registry"
+      ],
+      "total_files": 11,
+      "subsystems_eliminated": 2,
+      "estimated_entropy_reduction": 0.04
+    },
+    {
+      "cluster_id": 509,
+      "consolidation_type": "merge",
+      "parent_subsystem": "packages/computer-vision",
+      "child_subsystems": [
+        "services/vision-api",
+        "packages/face-analysis",
+        "packages/image-forensics",
+        "packages/object-detection",
+        "packages/ocr",
+        "packages/satellite-imagery",
+        "packages/video-analysis"
+      ],
+      "total_files": 19,
+      "subsystems_eliminated": 7,
+      "estimated_entropy_reduction": 0.14
+    },
+    {
+      "cluster_id": 538,
+      "consolidation_type": "merge",
+      "parent_subsystem": "packages/dimensional-modeling",
+      "child_subsystems": [
+        "services/warehouse-service",
+        "packages/olap-engine"
+      ],
+      "total_files": 10,
+      "subsystems_eliminated": 2,
+      "estimated_entropy_reduction": 0.04
+    },
+    {
+      "cluster_id": 416,
+      "consolidation_type": "merge",
+      "parent_subsystem": "services/zk-tx",
+      "child_subsystems": [
+        "services/zk-tx-svc"
+      ],
+      "total_files": 5,
+      "subsystems_eliminated": 1,
+      "estimated_entropy_reduction": 0.02
+    },
+    {
+      "cluster_id": 926,
+      "consolidation_type": "merge",
+      "parent_subsystem": "packages/3d-visualization",
+      "child_subsystems": [
+        "packages/charting",
+        "packages/map-visualization",
+        "packages/network-graph"
+      ],
+      "total_files": 4,
+      "subsystems_eliminated": 3,
+      "estimated_entropy_reduction": 0.06
+    },
+    {
+      "cluster_id": 451,
+      "consolidation_type": "merge",
+      "parent_subsystem": "packages/crsp",
+      "child_subsystems": [
+        "packages/acs-learner",
+        "packages/acs-simulator",
+        "packages/adc",
+        "packages/atl"
+      ],
+      "total_files": 11,
+      "subsystems_eliminated": 4,
+      "estimated_entropy_reduction": 0.08
+    },
+    {
+      "cluster_id": 431,
+      "consolidation_type": "merge",
+      "parent_subsystem": "packages/agent-gym",
+      "child_subsystems": [
+        "packages/agent-gym-metrics"
+      ],
+      "total_files": 10,
+      "subsystems_eliminated": 1,
+      "estimated_entropy_reduction": 0.02
+    },
+    {
+      "cluster_id": 619,
+      "consolidation_type": "merge",
+      "parent_subsystem": "packages/policy",
+      "child_subsystems": [
+        "packages/agent-registry",
+        "packages/foundry"
+      ],
+      "total_files": 12,
+      "subsystems_eliminated": 2,
+      "estimated_entropy_reduction": 0.04
+    },
+    {
+      "cluster_id": 905,
+      "consolidation_type": "merge",
+      "parent_subsystem": "packages/anomaly-detection",
+      "child_subsystems": [
+        "packages/ml-models",
+        "packages/network-threat-detection"
+      ],
+      "total_files": 9,
+      "subsystems_eliminated": 2,
+      "estimated_entropy_reduction": 0.04
+    },
+    {
+      "cluster_id": 812,
+      "consolidation_type": "merge",
+      "parent_subsystem": "packages/query-language",
+      "child_subsystems": [
+        "packages/api-framework",
+        "packages/streaming-api"
+      ],
+      "total_files": 15,
+      "subsystems_eliminated": 2,
+      "estimated_entropy_reduction": 0.04
+    },
+    {
+      "cluster_id": 697,
+      "consolidation_type": "merge",
+      "parent_subsystem": "packages/logger",
+      "child_subsystems": [
+        "packages/errors"
+      ],
+      "total_files": 5,
+      "subsystems_eliminated": 1,
+      "estimated_entropy_reduction": 0.02
+    },
+    {
+      "cluster_id": 733,
+      "consolidation_type": "merge",
+      "parent_subsystem": "packages/wmd-tracking",
+      "child_subsystems": [
+        "packages/hrn",
+        "packages/missile-intelligence",
+        "packages/proliferation-networks",
+        "packages/technical-analysis",
+        "packages/treaty-verification"
+      ],
+      "total_files": 36,
+      "subsystems_eliminated": 5,
+      "estimated_entropy_reduction": 0.1
+    },
+    {
+      "cluster_id": 849,
+      "consolidation_type": "merge",
+      "parent_subsystem": "packages/sgf-evidence",
+      "child_subsystems": [
+        "packages/sgf-evals",
+        "packages/sgf-ledger",
+        "packages/sgf-schema"
+      ],
+      "total_files": 7,
+      "subsystems_eliminated": 3,
+      "estimated_entropy_reduction": 0.06
+    }
+  ],
+  "execution_notes": [
+    "Consolidations should be implemented as separate PRs",
+    "Each consolidation must preserve all exports",
+    "Update import paths across the codebase",
+    "Run full test suite after each consolidation",
+    "Record consolidation events in Evolution Ledger"
+  ]
+}

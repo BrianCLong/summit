@@ -1,0 +1,27 @@
+{
+  "writeset_id": "ws_0002",
+  "created_at": "2026-03-05T07:01:00.000Z",
+  "actor": { "kind": "system", "id": "fixture" },
+  "intent": "ingest",
+  "ops": [
+    {
+      "op": "upsert_node",
+      "domain": "NG",
+      "kind": "narrative",
+      "id": "ng_1",
+      "data": { "text": "A secret operation is underway.", "topic": "rumor" }
+    },
+    {
+      "op": "upsert_node",
+      "domain": "BG",
+      "kind": "belief",
+      "id": "bg_1",
+      "data": {
+        "actor_id": "actor_tele",
+        "belief": "Secret operation confirmed",
+        "confidence": 0.55
+      }
+    }
+  ],
+  "meta": { "replication_count": 250, "coordination_score": 0.82 }
+}

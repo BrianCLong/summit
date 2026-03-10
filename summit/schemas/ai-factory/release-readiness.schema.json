@@ -1,0 +1,20 @@
+{
+  "$id": "https://summit.com/schemas/ai-factory/release-readiness.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Release Readiness",
+  "type": "object",
+  "properties": {
+    "passed": { "type": "boolean" },
+    "blockers": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "required_checks": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "policy_drift": { "type": "boolean" },
+    "recommendation": { "type": "string" }
+  },
+  "required": ["passed", "blockers", "required_checks", "policy_drift", "recommendation"]
+}

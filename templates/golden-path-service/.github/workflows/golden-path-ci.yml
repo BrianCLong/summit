@@ -57,7 +57,7 @@ jobs:
           docker tag ${{ github.repository }}:${{ github.sha }} ghcr.io/${{ github.repository }}:${{ github.sha }}
           docker push ghcr.io/${{ github.repository }}:${{ github.sha }}
       - name: Cosign sign
-        uses: sigstore/cosign-installer@v3
+        uses: sigstore/cosign-installer@v3.7.0
       - run: cosign sign --yes ghcr.io/${{ github.repository }}:${{ github.sha }}
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -74,9 +74,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install cosign
-        uses: sigstore/cosign-installer@v3
+        uses: sigstore/cosign-installer@v3.7.0
       - name: Verify cosign signature
-        run: cosign verify ghcr.io/${{ github.repository }}:${{ github.sha }}
+        run: cosign verify --use-signed-timestamps ghcr.io/${{ github.repository }}:${{ github.sha }}
       - name: Helm install/upgrade
         uses: azure/k8s-deploy@v5
         with:

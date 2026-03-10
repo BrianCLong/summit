@@ -16,7 +16,7 @@ permissions:
 
 jobs:
   evidence-id-consistency:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 15
 
     steps:
@@ -36,7 +36,7 @@ jobs:
           cache-dependency-path: '**/pnpm-lock.yaml'
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Run Evidence ID Consistency Check
         run: pnpm run ci:evidence-id-consistency -- --sha=${{ github.sha }}

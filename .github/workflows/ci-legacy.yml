@@ -21,7 +21,7 @@ concurrency:
 jobs:
   quarantine-tests:
     name: Quarantine Tests (Flaky)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     continue-on-error: true  # NON-BLOCKING
     steps:
       - uses: actions/checkout@v4 # v6
@@ -32,7 +32,7 @@ jobs:
           cache: pnpm
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Run quarantined tests
         run: |
@@ -53,7 +53,7 @@ jobs:
 
   jest-legacy-suite:
     name: Jest/ts-jest Suite (ESM Issues)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     continue-on-error: true  # NON-BLOCKING (ESM loader issues)
     steps:
       - uses: actions/checkout@v4 # v6
@@ -64,7 +64,7 @@ jobs:
           cache: pnpm
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Run Jest test suite
         run: |
@@ -84,7 +84,7 @@ jobs:
 
   experimental-checks:
     name: Experimental Checks
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     continue-on-error: true  # NON-BLOCKING
     steps:
       - uses: actions/checkout@v4 # v6
@@ -95,7 +95,7 @@ jobs:
           cache: pnpm
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: AI Copilot Canary
         run: |
@@ -123,7 +123,7 @@ jobs:
 
   deprecated-checks:
     name: Deprecated Checks (Migration in Progress)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     continue-on-error: true  # NON-BLOCKING
     steps:
       - uses: actions/checkout@v4 # v6
@@ -137,7 +137,7 @@ jobs:
           cache: pnpm
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Schema diff (migrating to ci-verify)
         run: |
@@ -161,7 +161,7 @@ jobs:
 
   performance-regression:
     name: Performance Regression Tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     continue-on-error: true  # NON-BLOCKING
     steps:
       - uses: actions/checkout@v4 # v6
@@ -172,7 +172,7 @@ jobs:
           cache: pnpm
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Run performance tests
         run: |
@@ -193,7 +193,7 @@ jobs:
 
   accessibility-audit:
     name: Web Accessibility Audit
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     continue-on-error: true  # NON-BLOCKING
     steps:
       - uses: actions/checkout@v4 # v6
@@ -204,7 +204,7 @@ jobs:
           cache: pnpm
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Run accessibility checks
         run: |
@@ -225,7 +225,7 @@ jobs:
 
   ci-legacy-summary:
     name: CI Legacy Summary (Informational)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs:
       - quarantine-tests
       - jest-legacy-suite

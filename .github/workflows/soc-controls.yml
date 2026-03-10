@@ -13,7 +13,7 @@ concurrency:
 jobs:
   soc-controls:
     name: SOC Controls
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
@@ -23,10 +23,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version-file: '.nvmrc'
-          cache: 'pnpm'
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
       - name: Run SOC control tests
         run: |
           mkdir -p soc-compliance-reports

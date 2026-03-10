@@ -19,12 +19,12 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "neo4j-driver": "^5.15.0"
+    "neo4j-driver": "5.15.0"
   },
   "devDependencies": {
-    "@types/node": "^20.0.0",
-    "@types/pg": "^8.10.0",
-    "typescript": "^5.3.3"
+    "@types/node": "20.0.0",
+    "@types/pg": "8.10.0",
+    "typescript": "5.3.3"
   },
   "keywords": [
     "query",

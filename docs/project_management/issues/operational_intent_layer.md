@@ -1,3 +1,5 @@
+# Operational Intent Layer
+
 Goal: Encode inferred or explicit intentions behind actors/entities (e.g., recruitment, sabotage, exfiltration) derived from pattern fusion or SME annotation.
 
 Use Case Examples:

@@ -1,0 +1,12 @@
+{
+  "$id": "https://schemas.summit.dev/writeset/WriteSetEnvelope.CogGeoExtension.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "WriteSetEnvelopeCogGeoExtension",
+  "type": "object",
+  "additionalProperties": true,
+  "properties": {
+    "coggeo": {
+      "$ref": "https://schemas.summit.dev/coggeo/CogGeoWriteSet.schema.json"
+    }
+  }
+}

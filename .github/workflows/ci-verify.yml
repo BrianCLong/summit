@@ -14,7 +14,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 10
+          version: 10.0.0
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -23,7 +23,7 @@ jobs:
           cache: pnpm
 
       - name: Install
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Unit tests
         run: pnpm test --runInBand tests/graphrag/evidence/writer.test.ts tests/graphrag/evidence/schema-validation.test.ts

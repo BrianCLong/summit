@@ -22,14 +22,14 @@
     }
   },
   "dependencies": {
-    "zod": "^3.22.4",
-    "uuid": "^9.0.0"
+    "zod": "3.22.4",
+    "uuid": "9.0.0"
   },
   "devDependencies": {
-    "typescript": "^5.3.0",
-    "vitest": "^1.0.0",
-    "@types/node": "^20.10.0",
-    "@types/uuid": "^9.0.0"
+    "typescript": "5.3.0",
+    "vitest": "1.0.0",
+    "@types/node": "20.10.0",
+    "@types/uuid": "9.0.0"
   },
   "author": "Summit Platform",
   "license": "MIT"

@@ -1,0 +1,20 @@
+name: Patch Frontier Convergence Engine
+
+on:
+  schedule:
+    - cron: '*/15 * * * *' # Run every 15 minutes
+  workflow_dispatch:
+
+jobs:
+  converge:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Converge Patches
+        run: node scripts/patch_frontier_converge.mjs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

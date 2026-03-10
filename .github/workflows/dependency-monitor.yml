@@ -25,7 +25,7 @@ env:
 jobs:
   dependency-review:
     name: Block vulnerable dependency changes
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     # dependency-review-action only works for pull_request/merge_group events
     if: github.event_name == 'pull_request' || github.event_name == 'pull_request_target' || github.event_name == 'merge_group'
     steps:
@@ -40,7 +40,7 @@ jobs:
   snyk-scan:
     name: Snyk dependency vulnerability scan
     needs: dependency-review
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     # Run if dependency-review passed or was skipped, and not from fork PRs
     if: |
       always() &&
@@ -85,7 +85,7 @@ jobs:
   snyk-skip-notice:
     name: Snyk scan (skipped - no token)
     needs: dependency-review
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     # Run if dependency-review passed or was skipped
     if: always() && (needs.dependency-review.result == 'success' || needs.dependency-review.result == 'skipped')
     steps:
@@ -96,7 +96,7 @@ jobs:
 
   check-drift:
     name: Check Lockfile Drift
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4 # v4.1.7
       - name: Install pnpm
@@ -104,7 +104,6 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4 # v4
         with:
-          cache: 'pnpm'
           node-version-file: .nvmrc
       # Note: pnpm version is read from package.json "packageManager" field
       - name: Check Drift

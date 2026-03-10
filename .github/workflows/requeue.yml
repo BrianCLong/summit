@@ -1,0 +1,13 @@
+name: Merge Queue Convergence Recovery
+
+on:
+  merge_group:
+    types: [checks_requested]
+
+jobs:
+  auto-rebase:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Auto Rebase + Requeue logic
+        run: echo "This would attempt an auto-rebase and requeue on merge queue failure to prevent stalls."
