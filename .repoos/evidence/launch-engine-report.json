@@ -1,0 +1,23 @@
+{
+  "schema_version": "1.0",
+  "engine": "summit-ecosystem-launch-engine",
+  "launch_summary": {
+    "total_launches": 1,
+    "stage_distribution": {
+      "planning": 1,
+      "integration_readiness": 0,
+      "documentation_preparation": 0,
+      "public_announcement": 0,
+      "post_launch_monitoring": 0
+    },
+    "launch_ids": [
+      "ecosystem-spring-2026"
+    ]
+  },
+  "metrics_summary": {
+    "plugin_installs_delta_percent": 0,
+    "api_traffic_delta_percent": 0,
+    "developer_signups_delta_percent": 0,
+    "marketplace_activity_delta_percent": 0
+  }
+}

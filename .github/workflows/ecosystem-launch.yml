@@ -1,0 +1,42 @@
+name: ecosystem-launch
+
+on:
+  workflow_dispatch:
+    inputs:
+      launch_id:
+        description: 'Launch initiative identifier'
+        required: true
+        default: 'ecosystem-spring-2026'
+
+jobs:
+  launch-initiation:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Validate launch components
+        run: |
+          node scripts/repoos/launch-engine.mjs status "${{ github.event.inputs.launch_id }}"
+
+      - name: Publish launch artifacts
+        run: |
+          node scripts/repoos/launch-engine.mjs build "${{ github.event.inputs.launch_id }}"
+          node scripts/repoos/launch-engine.mjs report
+
+      - name: Update launch registry
+        run: |
+          node scripts/repoos/launch-engine.mjs list
+
+      - name: Upload launch artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: launch-artifacts-${{ github.event.inputs.launch_id }}
+          path: |
+            .repoos/launch
+            .repoos/evidence/launch-engine-report.json
