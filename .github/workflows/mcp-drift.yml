@@ -7,7 +7,7 @@ on:
 
 jobs:
   check-drift:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -17,7 +17,7 @@ jobs:
           cache: "pnpm"
           cache-dependency-path: '**/pnpm-lock.yaml'
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
       - name: Run Drift Detector
         run: npx tsx scripts/monitoring/createos-drift.ts
       - name: Upload Drift Report

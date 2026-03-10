@@ -28,7 +28,7 @@ concurrency:
 jobs:
   ci-check:
     name: Optimized CI Check
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: ${{ inputs.timeout-minutes }}
 
     permissions:

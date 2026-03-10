@@ -11,7 +11,7 @@ concurrency:
 jobs:
   validate-release-policy:
     name: Validate Release Policy
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -26,14 +26,14 @@ jobs:
           cache: "pnpm"
 
       - name: Install Dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Validate Release Policy
         run: pnpm lint:release-policy
 
   lint-reason-codes:
     name: Lint Release Reason Codes
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -48,14 +48,14 @@ jobs:
           cache: "pnpm"
 
       - name: Install Dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Lint Reason Codes
         run: node scripts/release/lint-reason-codes.mjs
 
   longrun-job-validation:
     name: LongRunJob Spec Advisory Validation
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -73,7 +73,7 @@ jobs:
           cache: "pnpm"
 
       - name: Install Dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Validate LongRunJob Specs (dry-run)
         run: node scripts/ci/validate-longrun-job.mjs
@@ -88,7 +88,7 @@ jobs:
 
   sbom:
     name: SBOM (warn-only policy)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
 

@@ -23,6 +23,7 @@ interface DeterminismCommandOptions {
   outputDir?: string;
   failFast: boolean;
   hash: HashAlgorithm;
+  allowInsecureMd5: boolean;
   includeStdout: boolean;
   package?: string;
   requireTestsPass: boolean;
@@ -95,7 +96,8 @@ export function registerDeterminismCommands(program: Command): void {
     .option('--output-dir <path>', 'Output directory for evidence')
     .option('--fail-fast', 'Stop on first mismatch', true)
     .option('--no-fail-fast', 'Continue all runs even on mismatch')
-    .option('--hash <algo>', 'Hash algorithm (sha256, sha512, md5)', 'sha256')
+    .option('--hash <algo>', 'Hash algorithm (sha256, sha384, sha512; md5 requires --allow-insecure-md5)', 'sha256')
+    .option('--allow-insecure-md5', 'Allow legacy md5 hashing (insecure)', false)
     .option('--include-stdout', 'Store full stdout in evidence', false)
     .option('--package <name>', 'Also run package tests N times')
     .option('--require-tests-pass', 'Fail if package tests fail', false)
@@ -112,6 +114,7 @@ export function registerDeterminismCommands(program: Command): void {
           packageName: opts.package,
           requireTestsPass: opts.requireTestsPass,
           includeTimestamps: opts.includeTimestamps,
+          allowInsecureMd5: opts.allowInsecureMd5,
         };
 
         const result = await runDeterminismHarness(command, args, options);

@@ -1,0 +1,10 @@
+{
+  "item": "agent-orchestration-tools-2026",
+  "category": "ecosystem_scan",
+  "capabilities_identified": 8,
+  "summit_modules_impacted": [
+    "src/agents",
+    "src/graphrag"
+  ],
+  "strategic_outcome": "Build a graph-native agent control plane and integrate external frameworks through governed adapters."
+}

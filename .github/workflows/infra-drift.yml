@@ -29,7 +29,7 @@ env:
 jobs:
   drift:
     name: Drift – plan & risk
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     defaults:
       run:
         shell: bash
@@ -67,7 +67,7 @@ jobs:
 
   plan:
     name: Plan (${{ matrix.ws }})
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: [drift]
     strategy:
       fail-fast: false

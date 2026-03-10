@@ -19,18 +19,18 @@
   ],
   "dependencies": {
     "@intelgraph/osint-collector": "workspace:*",
-    "axios": "^1.7.9",
-    "natural": "^7.0.7",
-    "sentiment": "^5.0.2",
-    "compromise": "^14.13.0",
-    "face-api.js": "^0.22.2",
-    "sharp": "^0.33.5",
-    "exiftool-vendored": "^28.6.0"
+    "axios": "1.7.9",
+    "natural": "7.0.7",
+    "sentiment": "5.0.2",
+    "compromise": "14.13.0",
+    "face-api.js": "0.22.2",
+    "sharp": "0.33.5",
+    "exiftool-vendored": "28.6.0"
   },
   "devDependencies": {
     "@types/node": "20.19.27",
-    "typescript": "^5.9.3",
-    "jest": "^30.2.0",
-    "@types/jest": "^30.0.0"
+    "typescript": "5.9.3",
+    "jest": "30.2.0",
+    "@types/jest": "30.0.0"
   }
 }

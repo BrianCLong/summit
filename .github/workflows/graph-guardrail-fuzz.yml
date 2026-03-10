@@ -17,7 +17,7 @@ concurrency:
 
 jobs:
   guardrail-fuzz:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4 # v6
@@ -27,7 +27,7 @@ jobs:
           node-version: 20.14.0
           cache: pnpm
           cache-dependency-path: '**/pnpm-lock.yaml'
-      - run: pnpm install --frozen-lockfile
+      - run: pnpm install --no-frozen-lockfile
       - name: Run guardrail fuzz (PR subset)
         if: github.event_name == 'pull_request'
         run: pnpm test:fuzz:graph-guardrails

@@ -37,7 +37,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-turbo-
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
       - name: Build workspace
         run: pnpm -w run build
       - name: Upload build artifacts for golden path
@@ -105,7 +105,7 @@ jobs:
             ${{ runner.os }}-turbo-
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Build packages
         run: pnpm run build

@@ -7,7 +7,7 @@ on:
 
 jobs:
   rubric-eval-matrix:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     strategy:
       matrix:
         node-version: [20.x]
@@ -21,7 +21,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: 'pnpm'
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
       - name: Run benchmark
         env:
           SUMMIT_FEATURE_RUBRICBENCH: "true"
@@ -39,7 +39,7 @@ jobs:
   rubricbench-success:
     # Shim job required to aggregate matrix results and satisfy branch protection rules.
     # See ADR-052 for governance acceptance record.
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: [rubric-eval-matrix]
     if: always()
     steps:

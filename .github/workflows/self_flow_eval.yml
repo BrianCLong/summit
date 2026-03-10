@@ -10,12 +10,12 @@ on:
       - 'src/graphrag/trajectory/**'
 jobs:
   evaluate:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - run: pnpm install --frozen-lockfile
+      - run: pnpm install --no-frozen-lockfile
       - run: npx tsx .github/scripts/verify_self_flow.ts

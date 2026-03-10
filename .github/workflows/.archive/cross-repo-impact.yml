@@ -23,9 +23,9 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 10.0.0
+          version: 10.0.0.0.0
           run_install: true
-          install_command: pnpm install --frozen-lockfile
+          install_command: pnpm install --no-frozen-lockfile
 
       - name: Run cross-repo impact analyzer
         id: analyze

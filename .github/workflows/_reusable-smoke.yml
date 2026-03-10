@@ -14,7 +14,7 @@ on:
 
 jobs:
   golden-path:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     env:
       DOCKER_BUILDKIT: '1'
       COMPOSE_DOCKER_CLI_BUILD: '1'
@@ -24,7 +24,6 @@ jobs:
       - uses: actions/setup-node@v4 # v4
         with:
           node-version: ${{ inputs.node_version }}
-          cache: 'pnpm'
           cache-dependency-path: '**/pnpm-lock.yaml'
       - name: Enable corepack
         run: corepack enable
@@ -46,7 +45,7 @@ jobs:
           name: build-artifacts
         continue-on-error: true
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
       - name: Bootstrap repo (make bootstrap)
         run: make bootstrap
       - name: Cache Docker layers

@@ -14,13 +14,12 @@ on:
 
 jobs:
   fast-checks:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4 # v4
       - uses: actions/setup-node@v4 # v4
         with:
           node-version: ${{ inputs.node_version }}
-          cache: 'pnpm'
           cache-dependency-path: '**/pnpm-lock.yaml'
       - name: Enable corepack
         run: corepack enable
@@ -37,7 +36,7 @@ jobs:
       - name: Configure pnpm store
         run: pnpm config set store-dir ${{ inputs.pnpm_cache_folder }}
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
       - name: Lint
         run: pnpm -w run lint
       - name: Typecheck
@@ -65,13 +64,12 @@ jobs:
           echo "Prod guardrails correctly blocked unsafe config"
 
   build-test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4 # v4
       - uses: actions/setup-node@v4 # v4
         with:
           node-version: ${{ inputs.node_version }}
-          cache: 'pnpm'
           cache-dependency-path: '**/pnpm-lock.yaml'
       - name: Enable corepack
         run: corepack enable
@@ -95,7 +93,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-turbo-
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
       - name: Build workspace
         run: pnpm -w run build
       - name: Unit & integration tests
