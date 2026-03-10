@@ -1,0 +1,4 @@
+[
+  {"signal_type":"economic-intelligence","category":"compliance-ops","demand_score":0.83,"growth_score":0.74,"geography":"north-america","technology":"policy-ai","partner_vertical":"finserv"},
+  {"signal_type":"economic-intelligence","category":"security-automation","demand_score":0.81,"growth_score":0.77,"geography":"europe","technology":"agent-security","partner_vertical":"public-sector"}
+]

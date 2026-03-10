@@ -96,6 +96,18 @@ async function loadSimulation() {
 }
 
 /**
+ * Load strategic growth data
+ */
+async function loadStrategicGrowth() {
+  try {
+    const content = await fs.readFile('.repoos/growth/expansion-opportunities.json', 'utf-8');
+    return JSON.parse(content);
+  } catch (error) {
+    return null;
+  }
+}
+
+/**
  * Format percentage bar
  */
 function formatBar(value, width = 20, threshold = 0.8) {
@@ -255,6 +267,25 @@ function displayGenomeFitness(genome) {
 }
 
 /**
+ * Display strategic growth dashboard
+ */
+function displayStrategicGrowth(growth) {
+  console.log(`${COLORS.bright}Strategic Growth${COLORS.reset}`);
+  console.log(`─────────────────────────────────────────────────────────────────\n`);
+
+  if (!growth) {
+    console.log(`${COLORS.dim}No strategic growth data available${COLORS.reset}\n`);
+    return;
+  }
+
+  const totals = growth.totals || {};
+
+  console.log(`Expansion Opportunities: ${totals.expansion_opportunities || 0}`);
+  console.log(`New Plugin Categories: ${totals.plugin_categories || 0}`);
+  console.log(`Partner Verticals: ${totals.partner_verticals || 0}\n`);
+}
+
+/**
  * Display simulation forecast
  */
 function displaySimulationForecast(simulation) {
@@ -349,12 +380,14 @@ async function main() {
   const market = await loadPatchMarket();
   const genome = await loadGenome();
   const simulation = await loadSimulation();
+  const strategicGrowth = await loadStrategicGrowth();
 
   // Display console
   displaySystemHealth(stability, genome, simulation);
   displayStabilityMetrics(stability);
   displayPatchMarket(market);
   displayGenomeFitness(genome);
+  displayStrategicGrowth(strategicGrowth);
   displaySimulationForecast(simulation);
   await displayRecentActivity();
   displayFooter();

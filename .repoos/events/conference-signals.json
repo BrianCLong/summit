@@ -1,0 +1,4 @@
+[
+  {"signal_type":"conference-trend","category":"workflow-automation","demand_score":0.8,"growth_score":0.84,"geography":"europe","technology":"agent-orchestration","partner_vertical":"telecom"},
+  {"signal_type":"conference-trend","category":"compliance-ops","demand_score":0.76,"growth_score":0.82,"geography":"africa","technology":"policy-ai","partner_vertical":"public-sector"}
+]

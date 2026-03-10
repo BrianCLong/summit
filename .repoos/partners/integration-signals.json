@@ -1,0 +1,4 @@
+[
+  {"signal_type":"partner-integration","category":"data-quality","demand_score":0.82,"growth_score":0.81,"geography":"middle-east","technology":"stream-analytics","partner_vertical":"energy"},
+  {"signal_type":"partner-integration","category":"security-automation","demand_score":0.86,"growth_score":0.78,"geography":"north-america","technology":"agent-security","partner_vertical":"finserv"}
+]

@@ -1,0 +1,4 @@
+[
+  {"signal_type":"developer-activity","category":"workflow-automation","demand_score":0.85,"growth_score":0.8,"geography":"latam","technology":"agent-orchestration","partner_vertical":"retail"},
+  {"signal_type":"developer-activity","category":"compliance-ops","demand_score":0.79,"growth_score":0.76,"geography":"apac","technology":"policy-ai","partner_vertical":"healthcare"}
+]
