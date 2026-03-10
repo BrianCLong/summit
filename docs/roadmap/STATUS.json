@@ -3,6 +3,12 @@
   "revision_note": "Integrated Stage 7 validation infrastructure, Antigravity governance ledger, and hardened docker stack into the master roadmap.",
   "initiatives": [
     {
+      "id": "repo-intelligence-engine",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Delivered deterministic repository intelligence CLI, risk artifacts, HTML report, and scheduled CI workflow for architecture drift detection."
+    },
+    {
       "id": "antigravity-governance-ledger",
       "status": "completed",
       "owner": "antigravity",
@@ -187,7 +193,7 @@
       "id": "ip-claims-continuation-pack-c451-s480",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Added defense CRM and simulation apparatus dependent claims C451–C480 and S451–S480."
+      "notes": "Added defense CRM and simulation apparatus dependent claims C451\u2013C480 and S451\u2013S480."
     },
     {
       "id": "io-cogwar-radar-2027-brief",
@@ -205,7 +211,7 @@
       "id": "ip-defense-claims-c391-s420",
       "status": "completed",
       "owner": "codex",
-      "notes": "Added CRM and Simulation Apparatus claims C391–C420/S391–S420 for graph integrity, appeals, and causal guardrails."
+      "notes": "Added CRM and Simulation Apparatus claims C391\u2013C420/S391\u2013S420 for graph integrity, appeals, and causal guardrails."
     },
     {
       "id": "spec-driven-development-docs",
@@ -273,9 +279,9 @@
     }
   ],
   "summary": {
-    "total_initiatives": 32,
+    "total_initiatives": 33,
     "completed": 8,
-    "in_progress": 24,
+    "in_progress": 25,
     "at_risk": 0
   }
 }

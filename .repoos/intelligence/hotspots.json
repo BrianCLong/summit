@@ -1,0 +1,708 @@
+{
+  "summary": {
+    "hotspots_detected": 55489,
+    "top_hotspot": "docs/roadmap/STATUS.json"
+  },
+  "hotspots": [
+    {
+      "path": "docs/roadmap/STATUS.json",
+      "change_frequency": 135,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 7,
+      "hotspot_score": 82.05
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "change_frequency": 88,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 14,
+      "hotspot_score": 54.9
+    },
+    {
+      "path": ".github/workflows/ci-core.yml",
+      "change_frequency": 67,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 7,
+      "hotspot_score": 41.25
+    },
+    {
+      "path": ".github/workflows/ci.yml",
+      "change_frequency": 66,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 9,
+      "hotspot_score": 40.95
+    },
+    {
+      "path": ".github/workflows/ci-pr.yml",
+      "change_frequency": 60,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 3,
+      "hotspot_score": 36.45
+    },
+    {
+      "path": ".github/workflows/unit-test-coverage.yml",
+      "change_frequency": 59,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 4,
+      "hotspot_score": 36
+    },
+    {
+      "path": ".github/workflows/release-readiness.yml",
+      "change_frequency": 56,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 4,
+      "hotspot_score": 34.2
+    },
+    {
+      "path": ".github/workflows/workflow-validity.yml",
+      "change_frequency": 55,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 3,
+      "hotspot_score": 33.45
+    },
+    {
+      "path": "scripts/ci/governance-meta-gate.mjs",
+      "change_frequency": 55,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 2,
+      "hotspot_score": 33.3
+    },
+    {
+      "path": ".github/workflows/ci-signal-gate.yml",
+      "change_frequency": 54,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 2,
+      "hotspot_score": 32.7
+    },
+    {
+      "path": "docs/ci/REQUIRED_CHECKS_POLICY.yml",
+      "change_frequency": 54,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 1,
+      "hotspot_score": 32.55
+    },
+    {
+      "path": "package.json",
+      "change_frequency": 32,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 5,
+      "hotspot_score": 19.95
+    },
+    {
+      "path": "server/package.json",
+      "change_frequency": 28,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 8,
+      "hotspot_score": 18
+    },
+    {
+      "path": ".github/workflows/pr-quality-gate.yml",
+      "change_frequency": 25,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 5,
+      "hotspot_score": 15.75
+    },
+    {
+      "path": "prompts/registry.yaml",
+      "change_frequency": 25,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 3,
+      "hotspot_score": 15.45
+    },
+    {
+      "path": ".github/workflows/release-ga-pipeline.yml",
+      "change_frequency": 21,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 7,
+      "hotspot_score": 13.65
+    },
+    {
+      "path": "apps/intelgraph-api/package.json",
+      "change_frequency": 21,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 5,
+      "hotspot_score": 13.35
+    },
+    {
+      "path": ".github/workflows/dependency-monitor.yml",
+      "change_frequency": 20,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 6,
+      "hotspot_score": 12.9
+    },
+    {
+      "path": ".github/workflows/governance-evidence-contracts.yml",
+      "change_frequency": 19,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 7,
+      "hotspot_score": 12.45
+    },
+    {
+      "path": ".github/workflows/ci-verify.yml",
+      "change_frequency": 19,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 6,
+      "hotspot_score": 12.3
+    },
+    {
+      "path": ".github/workflows/ga-gate.yml",
+      "change_frequency": 19,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 6,
+      "hotspot_score": 12.3
+    },
+    {
+      "path": "packages/rate-limiter/package.json",
+      "change_frequency": 19,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 6,
+      "hotspot_score": 12.3
+    },
+    {
+      "path": ".github/workflows/agentic-plan-gate.yml",
+      "change_frequency": 19,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 5,
+      "hotspot_score": 12.15
+    },
+    {
+      "path": ".github/workflows/dependency-audit.yml",
+      "change_frequency": 19,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 5,
+      "hotspot_score": 12.15
+    },
+    {
+      "path": ".github/workflows/ci-legacy.yml",
+      "change_frequency": 19,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 4,
+      "hotspot_score": 12
+    },
+    {
+      "path": ".github/workflows/release-train.yml",
+      "change_frequency": 19,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 4,
+      "hotspot_score": 12
+    },
+    {
+      "path": ".github/workflows/soc-controls.yml",
+      "change_frequency": 18,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 7,
+      "hotspot_score": 11.85
+    },
+    {
+      "path": ".github/workflows/golden-path-e2e.yml",
+      "change_frequency": 18,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 5,
+      "hotspot_score": 11.55
+    },
+    {
+      "path": "apps/server/package.json",
+      "change_frequency": 18,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 5,
+      "hotspot_score": 11.55
+    },
+    {
+      "path": "packages/api-framework/package.json",
+      "change_frequency": 18,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 5,
+      "hotspot_score": 11.55
+    },
+    {
+      "path": ".github/workflows/archsim.yml",
+      "change_frequency": 18,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 4,
+      "hotspot_score": 11.4
+    },
+    {
+      "path": ".github/workflows/ci-preflight.yml",
+      "change_frequency": 18,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 4,
+      "hotspot_score": 11.4
+    },
+    {
+      "path": "deepagent-mvp/package.json",
+      "change_frequency": 17,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 5,
+      "hotspot_score": 10.95
+    },
+    {
+      "path": "evidence/index.json",
+      "change_frequency": 18,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 1,
+      "hotspot_score": 10.95
+    },
+    {
+      "path": "gateway/package.json",
+      "change_frequency": 17,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 5,
+      "hotspot_score": 10.95
+    },
+    {
+      "path": "services/admin-api/package.json",
+      "change_frequency": 17,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 5,
+      "hotspot_score": 10.95
+    },
+    {
+      "path": "services/admin-automation/package.json",
+      "change_frequency": 17,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 5,
+      "hotspot_score": 10.95
+    },
+    {
+      "path": "services/api-gateway/package.json",
+      "change_frequency": 17,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 5,
+      "hotspot_score": 10.95
+    },
+    {
+      "path": "services/battle-api/package.json",
+      "change_frequency": 17,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 5,
+      "hotspot_score": 10.95
+    },
+    {
+      "path": "services/config-service/package.json",
+      "change_frequency": 17,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 5,
+      "hotspot_score": 10.95
+    },
+    {
+      "path": "services/control-tower-service/package.json",
+      "change_frequency": 17,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 5,
+      "hotspot_score": 10.95
+    },
+    {
+      "path": "services/data-monetization-engine/package.json",
+      "change_frequency": 17,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 5,
+      "hotspot_score": 10.95
+    },
+    {
+      "path": "services/digital-twin/package.json",
+      "change_frequency": 17,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 5,
+      "hotspot_score": 10.95
+    },
+    {
+      "path": "services/graph-core/package.json",
+      "change_frequency": 17,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 5,
+      "hotspot_score": 10.95
+    },
+    {
+      "path": "services/predictive-analytics/anomaly-time-warp/package.json",
+      "change_frequency": 17,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 5,
+      "hotspot_score": 10.95
+    },
+    {
+      "path": "services/predictive-analytics/causal-horizon-engine/package.json",
+      "change_frequency": 17,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 5,
+      "hotspot_score": 10.95
+    },
+    {
+      "path": "services/predictive-analytics/collective-intelligence-weaving/package.json",
+      "change_frequency": 17,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 5,
+      "hotspot_score": 10.95
+    },
+    {
+      "path": "services/predictive-analytics/cross-system-entanglement/package.json",
+      "change_frequency": 17,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 5,
+      "hotspot_score": 10.95
+    },
+    {
+      "path": "services/predictive-analytics/emergent-pattern-genesis/package.json",
+      "change_frequency": 17,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 5,
+      "hotspot_score": 10.95
+    },
+    {
+      "path": "services/predictive-analytics/predictive-integrity-shield/package.json",
+      "change_frequency": 17,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 5,
+      "hotspot_score": 10.95
+    },
+    {
+      "path": "services/predictive-analytics/recursive-outcome-amplifier/package.json",
+      "change_frequency": 17,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 5,
+      "hotspot_score": 10.95
+    },
+    {
+      "path": "services/predictive-analytics/synthetic-future-personas/package.json",
+      "change_frequency": 17,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 5,
+      "hotspot_score": 10.95
+    },
+    {
+      "path": "services/predictive-analytics/temporal-fracture-forecasting/package.json",
+      "change_frequency": 17,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 5,
+      "hotspot_score": 10.95
+    },
+    {
+      "path": "services/predictive-analytics/uncertainty-field-mapping/package.json",
+      "change_frequency": 17,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 5,
+      "hotspot_score": 10.95
+    },
+    {
+      "path": "companyos/services/tenant-api/package.json",
+      "change_frequency": 17,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 4,
+      "hotspot_score": 10.8
+    },
+    {
+      "path": ".github/workflows/infra-drift.yml",
+      "change_frequency": 17,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 3,
+      "hotspot_score": 10.65
+    },
+    {
+      "path": "server/src/app.ts",
+      "change_frequency": 17,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 3,
+      "hotspot_score": 10.65
+    },
+    {
+      "path": ".github/workflows/ci-workflow-diff.yml",
+      "change_frequency": 16,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 5,
+      "hotspot_score": 10.35
+    },
+    {
+      "path": ".github/workflows/golden-path-supply-chain.yml",
+      "change_frequency": 16,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 4,
+      "hotspot_score": 10.2
+    },
+    {
+      "path": ".github/workflows/governance-meta-gate.yml",
+      "change_frequency": 16,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 4,
+      "hotspot_score": 10.2
+    },
+    {
+      "path": "conductor-ui/backend/package.json",
+      "change_frequency": 16,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 4,
+      "hotspot_score": 10.2
+    },
+    {
+      "path": "gateway/graphql-bff/package.json",
+      "change_frequency": 16,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 4,
+      "hotspot_score": 10.2
+    },
+    {
+      "path": "intelgraph-quickstart/api/package.json",
+      "change_frequency": 16,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 4,
+      "hotspot_score": 10.2
+    },
+    {
+      "path": "intelgraph/server/package.json",
+      "change_frequency": 16,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 4,
+      "hotspot_score": 10.2
+    },
+    {
+      "path": ".github/workflows/branch-protection-drift.yml",
+      "change_frequency": 16,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 3,
+      "hotspot_score": 10.05
+    },
+    {
+      "path": ".github/workflows/supplychain-gates.yml",
+      "change_frequency": 16,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 3,
+      "hotspot_score": 10.05
+    },
+    {
+      "path": ".github/workflows/e2e-tests.yml",
+      "change_frequency": 15,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 5,
+      "hotspot_score": 9.75
+    },
+    {
+      "path": ".github/workflows/compliance-governance.yml",
+      "change_frequency": 15,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 4,
+      "hotspot_score": 9.6
+    },
+    {
+      "path": ".github/workflows/security_gates.yml",
+      "change_frequency": 15,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 2,
+      "hotspot_score": 9.3
+    },
+    {
+      "path": ".github/workflows/build.yml",
+      "change_frequency": 14,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 5,
+      "hotspot_score": 9.15
+    },
+    {
+      "path": "repo_assumptions.md",
+      "change_frequency": 15,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 1,
+      "hotspot_score": 9.15
+    },
+    {
+      "path": ".github/workflows/_reusable-ga-readiness.yml",
+      "change_frequency": 14,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 4,
+      "hotspot_score": 9
+    },
+    {
+      "path": ".github/workflows/slsa-provenance.yml",
+      "change_frequency": 14,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 4,
+      "hotspot_score": 9
+    },
+    {
+      "path": "docs/repo_assumptions.md",
+      "change_frequency": 15,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 0,
+      "hotspot_score": 9
+    },
+    {
+      "path": ".github/workflows/pr-preview-cleanup.yml",
+      "change_frequency": 14,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 3,
+      "hotspot_score": 8.85
+    },
+    {
+      "path": ".github/workflows/summit-eval.yml",
+      "change_frequency": 14,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 3,
+      "hotspot_score": 8.85
+    },
+    {
+      "path": "evidence/schemas/index.schema.json",
+      "change_frequency": 14,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 3,
+      "hotspot_score": 8.85
+    },
+    {
+      "path": ".github/workflows/ci-actionlint.yml",
+      "change_frequency": 14,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 2,
+      "hotspot_score": 8.7
+    },
+    {
+      "path": ".github/workflows/summit-evidence.yml",
+      "change_frequency": 14,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 2,
+      "hotspot_score": 8.7
+    },
+    {
+      "path": ".github/workflows/_reusable-pipeline-verify.yml",
+      "change_frequency": 13,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 5,
+      "hotspot_score": 8.55
+    },
+    {
+      "path": ".github/workflows/ci-council-evidence.yml",
+      "change_frequency": 13,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 5,
+      "hotspot_score": 8.55
+    },
+    {
+      "path": ".github/workflows/a11y-keyboard-smoke.yml",
+      "change_frequency": 13,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 4,
+      "hotspot_score": 8.4
+    },
+    {
+      "path": ".github/workflows/pr-gates.yml",
+      "change_frequency": 13,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 4,
+      "hotspot_score": 8.4
+    },
+    {
+      "path": ".github/workflows/audit-exception-expiry.yml",
+      "change_frequency": 13,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 3,
+      "hotspot_score": 8.25
+    },
+    {
+      "path": ".github/workflows/codeql.yml",
+      "change_frequency": 13,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 3,
+      "hotspot_score": 8.25
+    },
+    {
+      "path": "pnpm-workspace.yaml",
+      "change_frequency": 13,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 3,
+      "hotspot_score": 8.25
+    },
+    {
+      "path": ".github/workflows/auto-enqueue.yml",
+      "change_frequency": 13,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 2,
+      "hotspot_score": 8.1
+    },
+    {
+      "path": ".github/workflows/dependency-freeze-check.yml",
+      "change_frequency": 13,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 2,
+      "hotspot_score": 8.1
+    },
+    {
+      "path": ".github/workflows/entropy-guard.yml",
+      "change_frequency": 13,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 2,
+      "hotspot_score": 8.1
+    },
+    {
+      "path": ".github/workflows/evidence_ci_step35flash.yml",
+      "change_frequency": 13,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 2,
+      "hotspot_score": 8.1
+    },
+    {
+      "path": ".github/workflows/evidence.yml",
+      "change_frequency": 13,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 2,
+      "hotspot_score": 8.1
+    },
+    {
+      "path": ".github/workflows/governance-lockfile-verify.yml",
+      "change_frequency": 13,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 2,
+      "hotspot_score": 8.1
+    },
+    {
+      "path": ".github/workflows/governance.yml",
+      "change_frequency": 13,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 2,
+      "hotspot_score": 8.1
+    },
+    {
+      "path": ".github/workflows/graphci_determinism.yml",
+      "change_frequency": 13,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 2,
+      "hotspot_score": 8.1
+    },
+    {
+      "path": ".github/workflows/memalign-ci.yml",
+      "change_frequency": 13,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 2,
+      "hotspot_score": 8.1
+    },
+    {
+      "path": ".github/workflows/release-ops-orchestrator.yml",
+      "change_frequency": 13,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 2,
+      "hotspot_score": 8.1
+    },
+    {
+      "path": ".github/workflows/subsumption-bundle-verify.yml",
+      "change_frequency": 13,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 2,
+      "hotspot_score": 8.1
+    },
+    {
+      "path": ".github/workflows/supply-chain-delta.yml",
+      "change_frequency": 13,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 2,
+      "hotspot_score": 8.1
+    },
+    {
+      "path": ".github/workflows/toolcall_conformance.yml",
+      "change_frequency": 13,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 2,
+      "hotspot_score": 8.1
+    },
+    {
+      "path": ".github/workflows/comprehensive-test.yml",
+      "change_frequency": 12,
+      "merge_conflicts": 0,
+      "repeated_bug_fixes": 5,
+      "hotspot_score": 7.95
+    }
+  ]
+}

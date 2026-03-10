@@ -1,0 +1,36 @@
+name: Repo Intelligence
+
+on:
+  pull_request:
+  schedule:
+    - cron: '0 7 * * 1'
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Analyze repository graph and architecture risk
+        run: node scripts/repoos/repo-intelligence.mjs .
+
+      - name: Upload repository intelligence artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: repo-intelligence
+          path: |
+            .repoos/intelligence/repo-graph.json
+            .repoos/intelligence/dependency-risk.json
+            .repoos/intelligence/architecture-drift.json
+            .repoos/intelligence/hotspots.json
+            .repoos/intelligence/risk-predictions.json
+            .repoos/intelligence/report.html
+            .repoos/evidence/repo-intelligence-report.json
