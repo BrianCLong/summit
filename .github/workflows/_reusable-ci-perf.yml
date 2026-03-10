@@ -9,7 +9,7 @@ permissions:
 jobs:
   perf:
     name: GraphQL SLO guardrail
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 45
     permissions:
       contents: read

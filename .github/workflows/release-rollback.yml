@@ -32,7 +32,7 @@ permissions:
 jobs:
   validate:
     name: Validate Rollback Request
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     outputs:
       valid: ${{ steps.validate.outputs.valid }}
       previous_tag: ${{ steps.validate.outputs.previous_tag }}
@@ -88,7 +88,7 @@ jobs:
 
   approve:
     name: Rollback Approval
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: validate
     if: needs.validate.outputs.valid == 'true' && inputs.dry_run == false
     environment: hotfix-release
@@ -102,7 +102,7 @@ jobs:
 
   rollback:
     name: Execute Rollback
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: [validate, approve]
     if: always() && needs.validate.outputs.valid == 'true' && (needs.approve.result == 'success' || inputs.dry_run == true)
 
@@ -192,7 +192,7 @@ jobs:
 
   notify:
     name: Send Notifications
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: [validate, rollback]
     if: always() && needs.rollback.result == 'success' && inputs.dry_run == false
 

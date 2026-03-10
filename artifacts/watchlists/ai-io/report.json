@@ -1,0 +1,246 @@
+{
+  "bot_infra_trends": [
+    {
+      "category": "bot_infra_trend",
+      "claim_refs": [
+        "ITEM:CLAIM-03"
+      ],
+      "evidence_id": "SUMMIT-AIIO-F61A",
+      "observable_signals": [
+        "Repeated tenant / provider reuse across otherwise distinct accounts",
+        "Abuse of productivity suites, CDNs, cloud storage, or contractor tooling",
+        "Narrative bursts shortly after credential exposure or account takeover events"
+      ],
+      "summit_fit": [
+        "Identity collision heuristics",
+        "Infrastructure reuse fingerprints"
+      ],
+      "title": "Living-off-the-land influence infrastructure",
+      "watch_priority": "P1",
+      "why_now": "More operations will ride on trusted SaaS, enterprise tooling, cloud identities, and legitimate collaboration channels instead of bespoke malware-only stacks."
+    },
+    {
+      "category": "bot_infra_trend",
+      "claim_refs": [
+        "ITEM:CLAIM-03"
+      ],
+      "evidence_id": "SUMMIT-AIIO-B19F",
+      "observable_signals": [
+        "Impossible travel",
+        "Abrupt topic pivots on aged accounts",
+        "Style drift with preserved account social graph",
+        "Synchronized 'legit-looking' engagement rings"
+      ],
+      "summit_fit": [
+        "Synthetic identity detection",
+        "Account-role inference"
+      ],
+      "title": "Synthetic identity + rented-account operations",
+      "watch_priority": "P1",
+      "why_now": "More campaigns will use AI-enhanced personas, bought or rented accounts, and blended human/bot posting to avoid old bot heuristics."
+    },
+    {
+      "category": "bot_infra_trend",
+      "claim_refs": [
+        "ITEM:CLAIM-05"
+      ],
+      "evidence_id": "SUMMIT-AIIO-793A",
+      "observable_signals": [
+        "Semantically equivalent claims crossing languages with low lexical overlap",
+        "Common citation skeletons and rhetorical templates",
+        "Time-lagged cascades from fringe channels to mainstream platforms"
+      ],
+      "summit_fit": [
+        "Cross-language narrative-family clustering"
+      ],
+      "title": "Multilingual narrative laundering",
+      "watch_priority": "P1",
+      "why_now": "Operators will seed in one language, repackage in another, and re-import narratives with localized style."
+    },
+    {
+      "category": "bot_infra_trend",
+      "claim_refs": [
+        "ITEM:CLAIM-02"
+      ],
+      "evidence_id": "SUMMIT-AIIO-D7AE",
+      "observable_signals": [
+        "Correlation between intrusion telemetry and narrative escalation",
+        "Same victim set appearing in both phishing and influence datasets",
+        "Campaign pivots after sanctions, elections, or kinetic events"
+      ],
+      "summit_fit": [
+        "Hybrid event correlation"
+      ],
+      "title": "Cyber + influence coupling as default, not exception",
+      "watch_priority": "P2",
+      "why_now": "Intrusion, credential theft, and influence amplification will increasingly share infrastructure and timing windows."
+    }
+  ],
+  "detection_methods": [
+    {
+      "category": "detection_method",
+      "claim_refs": [
+        "ITEM:CLAIM-07"
+      ],
+      "evidence_id": "SUMMIT-AIIO-735B",
+      "observable_signals": [
+        "Prioritize account-role inference",
+        "Surface driver / broker / amplifier nodes",
+        "Retain temporal edge semantics"
+      ],
+      "summit_fit": [
+        "Narrative graph engine",
+        "Coordination detector"
+      ],
+      "title": "Graph foundation models for IO-driver discovery",
+      "watch_priority": "P1",
+      "why_now": "IOHunter is squarely on Summit\u2019s target line: uncovering the accounts that orchestrate campaigns, not merely classifying content."
+    },
+    {
+      "category": "detection_method",
+      "claim_refs": [
+        "ITEM:CLAIM-08"
+      ],
+      "evidence_id": "SUMMIT-AIIO-8D24",
+      "observable_signals": [
+        "Keep graph features first-class",
+        "Use LLMs for embedding / explanation / weak labeling",
+        "Do not let pure text classification dominate campaign scoring"
+      ],
+      "summit_fit": [
+        "Graph+LLM detection methods"
+      ],
+      "title": "Topology + language-embedding fusion",
+      "watch_priority": "P1",
+      "why_now": "Aletheia explicitly combines topological features with language embeddings for detection and forecasting."
+    },
+    {
+      "category": "detection_method",
+      "claim_refs": [
+        "ITEM:CLAIM-08"
+      ],
+      "evidence_id": "SUMMIT-AIIO-F6DC",
+      "observable_signals": [
+        "Add benchmark adapters early",
+        "Require out-of-domain generalization tests",
+        "Track calibration, not just F1"
+      ],
+      "summit_fit": [
+        "Benchmark integration"
+      ],
+      "title": "Text-attributed graph benchmarks for misinformation",
+      "watch_priority": "P1",
+      "why_now": "TAGFN and TAG-AD indicate the benchmark ecosystem is finally catching up to graph+LLM detection for fake news and misinformation."
+    },
+    {
+      "category": "detection_method",
+      "claim_refs": [],
+      "evidence_id": "SUMMIT-AIIO-927F",
+      "observable_signals": [
+        "Use LLMs as triage, explanation, and labeling assistants",
+        "Keep final detection grounded in propagation, account behavior, and infra reuse"
+      ],
+      "summit_fit": [
+        "LLM assistants"
+      ],
+      "title": "LLM-assisted influence-campaign classification",
+      "watch_priority": "P2",
+      "why_now": "Growing work on using LLMs directly for campaign detection, often with metadata and network features."
+    },
+    {
+      "category": "detection_method",
+      "claim_refs": [],
+      "evidence_id": "SUMMIT-AIIO-E491",
+      "observable_signals": [
+        "Plan for image/video nodes in the graph",
+        "Add 'claim package' objects, not just posts"
+      ],
+      "summit_fit": [
+        "Multimodal graph elements"
+      ],
+      "title": "Evidence-grounded multimodal graph methods",
+      "watch_priority": "P2",
+      "why_now": "Multimodal misinformation work is converging on graph-based evidence consistency."
+    }
+  ],
+  "research_programs": [
+    {
+      "category": "research_program",
+      "claim_refs": [
+        "ITEM:CLAIM-05"
+      ],
+      "evidence_id": "SUMMIT-AIIO-A01E",
+      "observable_signals": [
+        "New datasets in English, Arabic, Chinese, Russian",
+        "Explainable authorship methods",
+        "Machine-generated text fingerprinting that survives paraphrase",
+        "Benchmarks usable for cross-language attribution"
+      ],
+      "summit_fit": [
+        "Multilingual narrative clustering",
+        "Authorship residuals"
+      ],
+      "title": "IARPA HIATUS",
+      "watch_priority": "P1",
+      "why_now": "Directly aimed at authorship attribution, author privacy, and machine-generated text detection."
+    },
+    {
+      "category": "research_program",
+      "claim_refs": [
+        "ITEM:CLAIM-04"
+      ],
+      "evidence_id": "SUMMIT-AIIO-E8B9",
+      "observable_signals": [
+        "Formal cognitive-attack threat models",
+        "Measurable operator-deception scenarios",
+        "Machine-verifiable assurance cases for human-facing systems"
+      ],
+      "summit_fit": [
+        "Trust-network impact scoring",
+        "Formal verification of UI claims"
+      ],
+      "title": "DARPA ICS (Intrinsic Cognitive Security)",
+      "watch_priority": "P1",
+      "why_now": "One of the clearest official 'cognitive attack' programs."
+    },
+    {
+      "category": "research_program",
+      "claim_refs": [
+        "ITEM:CLAIM-06"
+      ],
+      "evidence_id": "SUMMIT-AIIO-CEC6",
+      "observable_signals": [
+        "DECIPHER / LocUS / related releases",
+        "Decision-support methods for sparse, ambiguous environments",
+        "Effect-measurement programs, not just detection programs"
+      ],
+      "summit_fit": [
+        "Campaign effect modeling",
+        "Narrative propagation graphs"
+      ],
+      "title": "IARPA human-systems portfolio around social influence / decision-making",
+      "watch_priority": "P1",
+      "why_now": "Includes social influence, behavior change, and decision-making."
+    },
+    {
+      "category": "research_program",
+      "claim_refs": [
+        "ITEM:CLAIM-01",
+        "ITEM:CLAIM-02",
+        "ITEM:CLAIM-03"
+      ],
+      "evidence_id": "SUMMIT-AIIO-14E2",
+      "observable_signals": [
+        "New quarterly misuse typologies",
+        "Traces of model-to-platform handoff",
+        "Repeated TTPs across vendors"
+      ],
+      "summit_fit": [
+        "Threat intelligence integration"
+      ],
+      "title": "Platform/provider threat-intelligence programs as quasi-research pipelines",
+      "watch_priority": "P2",
+      "why_now": "Functionally part of the research surface because they see misuse telemetry others do not."
+    }
+  ]
+}

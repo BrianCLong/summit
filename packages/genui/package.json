@@ -9,11 +9,11 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "zod": "^4.2.1"
+    "zod": "4.2.1"
   },
   "devDependencies": {
-    "typescript": "^5.9.3",
-    "vitest": "^4.0.16"
+    "typescript": "5.9.3",
+    "vitest": "4.0.16"
   },
   "exports": {
     ".": {

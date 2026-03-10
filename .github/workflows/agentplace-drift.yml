@@ -7,7 +7,7 @@ on:
 
 jobs:
   drift-check:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     if: env.SUMMIT_AGENTPLACE_ENABLED == 'true'
     env:
       SUMMIT_AGENTPLACE_ENABLED: ${{ vars.SUMMIT_AGENTPLACE_ENABLED || 'false' }}

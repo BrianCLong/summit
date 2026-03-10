@@ -19,7 +19,7 @@ permissions:
 jobs:
   governance-evidence:
     name: Validate Governance Evidence
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
       - name: Checkout
@@ -33,7 +33,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'pnpm'
           cache-dependency-path: '**/pnpm-lock.yaml'
 
       - name: Setup Python

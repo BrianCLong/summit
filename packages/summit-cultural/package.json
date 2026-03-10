@@ -11,11 +11,21 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "zod": "^4.1.12"
+<<<<<<< HEAD
+    "zod": "4.1.12"
   },
   "devDependencies": {
-    "tsx": "^4.20.6",
-    "typescript": "^5.9.3"
+    "tsx": "4.20.6",
+    "typescript": "5.9.3"
+=======
+    react: "19.2.4",
+    zod: "4.1.12"
+  },
+  "devDependencies": {
+    @types/react: "19.2.14",
+    tsx: "4.20.6",
+    typescript: "5.9.3"
+>>>>>>> origin/main
   },
   "exports": {
     ".": {

@@ -14,15 +14,7 @@ import { PolicyGuard } from './policyGuard.js';
 import { systemMonitor } from '../lib/system-monitor.js';
 import { getTracer, SpanStatusCode, SpanKind } from '../observability/tracer.js';
 
-// Mock Budget class until we locate the real one or fix the import
-class Budget {
-    maxUSD: number;
-    usedUSD: number;
-    constructor(maxUSD: number) {
-        this.maxUSD = maxUSD;
-        this.usedUSD = 0;
-    }
-}
+import { Budget } from '../../ai/llmBudget.js';
 
 const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379', {
   maxRetriesPerRequest: null,
@@ -223,11 +215,16 @@ class MaestroOrchestrator {
           const result = await handler(job);
           const duration = Date.now() - startTime;
 
+          // Commit cost to persistent ledger
+          if (result.cost > 0) {
+            await budget.charge(result.cost, `Agent ${agentName} execution`);
+          }
+
           // Update task result with guardrail metadata
           return {
             ...result,
             duration,
-            cost: budget.usedUSD,
+            cost: (await budget.ledger.getBudgetUtilization(budget.tenantId))?.currentMonthSpend || 0,
           };
         } catch (error: any) {
           const duration = Date.now() - startTime;
@@ -248,7 +245,7 @@ class MaestroOrchestrator {
           return {
             success: false,
             duration,
-            cost: budget.usedUSD,
+            cost: (await budget.ledger.getBudgetUtilization(budget.tenantId))?.currentMonthSpend || 0,
             errors: [errorMessage],
           };
         }

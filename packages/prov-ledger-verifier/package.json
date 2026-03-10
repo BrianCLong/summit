@@ -17,14 +17,14 @@
     "verify:fixtures": "pnpm run build && node dist/cli.js --bundle fixtures/valid-bundle --json && node dist/cli.js --bundle fixtures/valid-bundle.zip --json"
   },
   "dependencies": {
-    "adm-zip": "^0.5.12"
+    "adm-zip": "0.5.12"
   },
   "devDependencies": {
-    "@types/adm-zip": "^0.5.6",
-    "@types/jest": "^30.0.0",
-    "@types/node": "^22.10.1",
-    "jest": "^30.2.0",
-    "ts-jest": "^29.4.5",
-    "typescript": "^5.9.3"
+    "@types/adm-zip": "0.5.6",
+    "@types/jest": "30.0.0",
+    "@types/node": "22.10.1",
+    "jest": "30.2.0",
+    "ts-jest": "29.4.5",
+    "typescript": "5.9.3"
   }
 }
