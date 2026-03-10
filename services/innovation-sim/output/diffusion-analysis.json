@@ -1,0 +1,911 @@
+{
+  "metadata": {
+    "id": "summit-diffusion-analysis",
+    "version": "2026-03-09T11:53:21.609Z",
+    "description": "Diffusion and lock-in analysis of Summit innovation graph",
+    "graphSource": "summit-innovation-graph-simple",
+    "createdAt": "2026-03-09T11:53:21.623Z"
+  },
+  "estimates": [
+    {
+      "nodeId": "commit-b6db9d0",
+      "nodeName": "chore: merge origin/main and resolve conflicts sur",
+      "nodeType": "project",
+      "currentAdoption": 0.1,
+      "predictedAdoption": {
+        "t30": 0.7469468730570815,
+        "t90": 0.9950306712941828,
+        "t180": 0.9999890447941933,
+        "t365": 0.9999999999623124
+      },
+      "networkMetrics": {
+        "nodeId": "commit-b6db9d0",
+        "degree": 0,
+        "inDegree": 0,
+        "outDegree": 0,
+        "pageRank": 0,
+        "closeness": 0,
+        "betweenness": 0
+      },
+      "lockInEffect": {
+        "nodeId": "commit-b6db9d0",
+        "strength": 0.03,
+        "components": {
+          "networkEffect": 0,
+          "switchingCost": 0,
+          "complementAssets": 0,
+          "standardization": 0.2
+        },
+        "directDependents": [],
+        "confidence": 0.7
+      },
+      "vulnerabilities": {
+        "switchingFeasibility": 0.97,
+        "replacementRisk": 1.843
+      }
+    },
+    {
+      "nodeId": "commit-34c64b1",
+      "nodeName": "chore: merge origin/main and resolve conflicts sur",
+      "nodeType": "project",
+      "currentAdoption": 0.1,
+      "predictedAdoption": {
+        "t30": 0.7469468730570815,
+        "t90": 0.9950306712941828,
+        "t180": 0.9999890447941933,
+        "t365": 0.9999999999623124
+      },
+      "networkMetrics": {
+        "nodeId": "commit-34c64b1",
+        "degree": 0,
+        "inDegree": 0,
+        "outDegree": 0,
+        "pageRank": 0,
+        "closeness": 0,
+        "betweenness": 0
+      },
+      "lockInEffect": {
+        "nodeId": "commit-34c64b1",
+        "strength": 0.03,
+        "components": {
+          "networkEffect": 0,
+          "switchingCost": 0,
+          "complementAssets": 0,
+          "standardization": 0.2
+        },
+        "directDependents": [],
+        "confidence": 0.7
+      },
+      "vulnerabilities": {
+        "switchingFeasibility": 0.97,
+        "replacementRisk": 1.843
+      }
+    },
+    {
+      "nodeId": "commit-a2f04ba",
+      "nodeName": "docs(repoos): add complete autonomous governor sys",
+      "nodeType": "project",
+      "currentAdoption": 0.1,
+      "predictedAdoption": {
+        "t30": 0.7469468730570815,
+        "t90": 0.9950306712941828,
+        "t180": 0.9999890447941933,
+        "t365": 0.9999999999623124
+      },
+      "networkMetrics": {
+        "nodeId": "commit-a2f04ba",
+        "degree": 0,
+        "inDegree": 0,
+        "outDegree": 0,
+        "pageRank": 0,
+        "closeness": 0,
+        "betweenness": 0
+      },
+      "lockInEffect": {
+        "nodeId": "commit-a2f04ba",
+        "strength": 0.03,
+        "components": {
+          "networkEffect": 0,
+          "switchingCost": 0,
+          "complementAssets": 0,
+          "standardization": 0.2
+        },
+        "directDependents": [],
+        "confidence": 0.7
+      },
+      "vulnerabilities": {
+        "switchingFeasibility": 0.97,
+        "replacementRisk": 1.843
+      }
+    },
+    {
+      "nodeId": "commit-8e6a74d",
+      "nodeName": "feat(repoos): add self-healing CI queue management",
+      "nodeType": "project",
+      "currentAdoption": 0.1,
+      "predictedAdoption": {
+        "t30": 0.7469468730570815,
+        "t90": 0.9950306712941828,
+        "t180": 0.9999890447941933,
+        "t365": 0.9999999999623124
+      },
+      "networkMetrics": {
+        "nodeId": "commit-8e6a74d",
+        "degree": 0,
+        "inDegree": 0,
+        "outDegree": 0,
+        "pageRank": 0,
+        "closeness": 0,
+        "betweenness": 0
+      },
+      "lockInEffect": {
+        "nodeId": "commit-8e6a74d",
+        "strength": 0.03,
+        "components": {
+          "networkEffect": 0,
+          "switchingCost": 0,
+          "complementAssets": 0,
+          "standardization": 0.2
+        },
+        "directDependents": [],
+        "confidence": 0.7
+      },
+      "vulnerabilities": {
+        "switchingFeasibility": 0.97,
+        "replacementRisk": 1.843
+      }
+    },
+    {
+      "nodeId": "commit-0e5f342",
+      "nodeName": "feat(repoos): add agent proposal sandbox with beha",
+      "nodeType": "project",
+      "currentAdoption": 0.1,
+      "predictedAdoption": {
+        "t30": 0.7469468730570815,
+        "t90": 0.9950306712941828,
+        "t180": 0.9999890447941933,
+        "t365": 0.9999999999623124
+      },
+      "networkMetrics": {
+        "nodeId": "commit-0e5f342",
+        "degree": 0,
+        "inDegree": 0,
+        "outDegree": 0,
+        "pageRank": 0,
+        "closeness": 0,
+        "betweenness": 0
+      },
+      "lockInEffect": {
+        "nodeId": "commit-0e5f342",
+        "strength": 0.03,
+        "components": {
+          "networkEffect": 0,
+          "switchingCost": 0,
+          "complementAssets": 0,
+          "standardization": 0.2
+        },
+        "directDependents": [],
+        "confidence": 0.7
+      },
+      "vulnerabilities": {
+        "switchingFeasibility": 0.97,
+        "replacementRisk": 1.843
+      }
+    },
+    {
+      "nodeId": "commit-52f611e",
+      "nodeName": "feat(repoos): add predictive risk forecasting with",
+      "nodeType": "project",
+      "currentAdoption": 0.1,
+      "predictedAdoption": {
+        "t30": 0.7469468730570815,
+        "t90": 0.9950306712941828,
+        "t180": 0.9999890447941933,
+        "t365": 0.9999999999623124
+      },
+      "networkMetrics": {
+        "nodeId": "commit-52f611e",
+        "degree": 0,
+        "inDegree": 0,
+        "outDegree": 0,
+        "pageRank": 0,
+        "closeness": 0,
+        "betweenness": 0
+      },
+      "lockInEffect": {
+        "nodeId": "commit-52f611e",
+        "strength": 0.03,
+        "components": {
+          "networkEffect": 0,
+          "switchingCost": 0,
+          "complementAssets": 0,
+          "standardization": 0.2
+        },
+        "directDependents": [],
+        "confidence": 0.7
+      },
+      "vulnerabilities": {
+        "switchingFeasibility": 0.97,
+        "replacementRisk": 1.843
+      }
+    },
+    {
+      "nodeId": "commit-4e18d0f",
+      "nodeName": "feat(repoos): add autonomous governor with constit",
+      "nodeType": "project",
+      "currentAdoption": 0.1,
+      "predictedAdoption": {
+        "t30": 0.7469468730570815,
+        "t90": 0.9950306712941828,
+        "t180": 0.9999890447941933,
+        "t365": 0.9999999999623124
+      },
+      "networkMetrics": {
+        "nodeId": "commit-4e18d0f",
+        "degree": 0,
+        "inDegree": 0,
+        "outDegree": 0,
+        "pageRank": 0,
+        "closeness": 0,
+        "betweenness": 0
+      },
+      "lockInEffect": {
+        "nodeId": "commit-4e18d0f",
+        "strength": 0.03,
+        "components": {
+          "networkEffect": 0,
+          "switchingCost": 0,
+          "complementAssets": 0,
+          "standardization": 0.2
+        },
+        "directDependents": [],
+        "confidence": 0.7
+      },
+      "vulnerabilities": {
+        "switchingFeasibility": 0.97,
+        "replacementRisk": 1.843
+      }
+    },
+    {
+      "nodeId": "commit-d5dd984",
+      "nodeName": "feat: Add codex tasks for roadmap items 70-92 (#19",
+      "nodeType": "project",
+      "currentAdoption": 0.1,
+      "predictedAdoption": {
+        "t30": 0.7469468730570815,
+        "t90": 0.9950306712941828,
+        "t180": 0.9999890447941933,
+        "t365": 0.9999999999623124
+      },
+      "networkMetrics": {
+        "nodeId": "commit-d5dd984",
+        "degree": 0,
+        "inDegree": 0,
+        "outDegree": 0,
+        "pageRank": 0,
+        "closeness": 0,
+        "betweenness": 0
+      },
+      "lockInEffect": {
+        "nodeId": "commit-d5dd984",
+        "strength": 0.03,
+        "components": {
+          "networkEffect": 0,
+          "switchingCost": 0,
+          "complementAssets": 0,
+          "standardization": 0.2
+        },
+        "directDependents": [],
+        "confidence": 0.7
+      },
+      "vulnerabilities": {
+        "switchingFeasibility": 0.97,
+        "replacementRisk": 1.843
+      }
+    },
+    {
+      "nodeId": "commit-652698a",
+      "nodeName": "feat(factory): Add Claude AI software factory orch",
+      "nodeType": "project",
+      "currentAdoption": 0.1,
+      "predictedAdoption": {
+        "t30": 0.7469468730570815,
+        "t90": 0.9950306712941828,
+        "t180": 0.9999890447941933,
+        "t365": 0.9999999999623124
+      },
+      "networkMetrics": {
+        "nodeId": "commit-652698a",
+        "degree": 0,
+        "inDegree": 0,
+        "outDegree": 0,
+        "pageRank": 0,
+        "closeness": 0,
+        "betweenness": 0
+      },
+      "lockInEffect": {
+        "nodeId": "commit-652698a",
+        "strength": 0.03,
+        "components": {
+          "networkEffect": 0,
+          "switchingCost": 0,
+          "complementAssets": 0,
+          "standardization": 0.2
+        },
+        "directDependents": [],
+        "confidence": 0.7
+      },
+      "vulnerabilities": {
+        "switchingFeasibility": 0.97,
+        "replacementRisk": 1.843
+      }
+    },
+    {
+      "nodeId": "commit-e639c61",
+      "nodeName": "feat(ai-stack): implement unified agentic control ",
+      "nodeType": "project",
+      "currentAdoption": 0.1,
+      "predictedAdoption": {
+        "t30": 0.7469468730570815,
+        "t90": 0.9950306712941828,
+        "t180": 0.9999890447941933,
+        "t365": 0.9999999999623124
+      },
+      "networkMetrics": {
+        "nodeId": "commit-e639c61",
+        "degree": 0,
+        "inDegree": 0,
+        "outDegree": 0,
+        "pageRank": 0,
+        "closeness": 0,
+        "betweenness": 0
+      },
+      "lockInEffect": {
+        "nodeId": "commit-e639c61",
+        "strength": 0.03,
+        "components": {
+          "networkEffect": 0,
+          "switchingCost": 0,
+          "complementAssets": 0,
+          "standardization": 0.2
+        },
+        "directDependents": [],
+        "confidence": 0.7
+      },
+      "vulnerabilities": {
+        "switchingFeasibility": 0.97,
+        "replacementRisk": 1.843
+      }
+    },
+    {
+      "nodeId": "commit-29b04a6",
+      "nodeName": "feat(evidence): implement Summit Evidence Protocol",
+      "nodeType": "project",
+      "currentAdoption": 0.1,
+      "predictedAdoption": {
+        "t30": 0.7469468730570815,
+        "t90": 0.9950306712941828,
+        "t180": 0.9999890447941933,
+        "t365": 0.9999999999623124
+      },
+      "networkMetrics": {
+        "nodeId": "commit-29b04a6",
+        "degree": 0,
+        "inDegree": 0,
+        "outDegree": 0,
+        "pageRank": 0,
+        "closeness": 0,
+        "betweenness": 0
+      },
+      "lockInEffect": {
+        "nodeId": "commit-29b04a6",
+        "strength": 0.03,
+        "components": {
+          "networkEffect": 0,
+          "switchingCost": 0,
+          "complementAssets": 0,
+          "standardization": 0.2
+        },
+        "directDependents": [],
+        "confidence": 0.7
+      },
+      "vulnerabilities": {
+        "switchingFeasibility": 0.97,
+        "replacementRisk": 1.843
+      }
+    },
+    {
+      "nodeId": "commit-e76194f",
+      "nodeName": "feat(agents): introduce GPT-5.4 Tool Search archit",
+      "nodeType": "project",
+      "currentAdoption": 0.1,
+      "predictedAdoption": {
+        "t30": 0.7469468730570815,
+        "t90": 0.9950306712941828,
+        "t180": 0.9999890447941933,
+        "t365": 0.9999999999623124
+      },
+      "networkMetrics": {
+        "nodeId": "commit-e76194f",
+        "degree": 0,
+        "inDegree": 0,
+        "outDegree": 0,
+        "pageRank": 0,
+        "closeness": 0,
+        "betweenness": 0
+      },
+      "lockInEffect": {
+        "nodeId": "commit-e76194f",
+        "strength": 0.03,
+        "components": {
+          "networkEffect": 0,
+          "switchingCost": 0,
+          "complementAssets": 0,
+          "standardization": 0.2
+        },
+        "directDependents": [],
+        "confidence": 0.7
+      },
+      "vulnerabilities": {
+        "switchingFeasibility": 0.97,
+        "replacementRisk": 1.843
+      }
+    },
+    {
+      "nodeId": "commit-4f37679",
+      "nodeName": "feat: Complete RepoOS Evolution Intelligence Syste",
+      "nodeType": "project",
+      "currentAdoption": 0.1,
+      "predictedAdoption": {
+        "t30": 0.7469468730570815,
+        "t90": 0.9950306712941828,
+        "t180": 0.9999890447941933,
+        "t365": 0.9999999999623124
+      },
+      "networkMetrics": {
+        "nodeId": "commit-4f37679",
+        "degree": 0,
+        "inDegree": 0,
+        "outDegree": 0,
+        "pageRank": 0,
+        "closeness": 0,
+        "betweenness": 0
+      },
+      "lockInEffect": {
+        "nodeId": "commit-4f37679",
+        "strength": 0.03,
+        "components": {
+          "networkEffect": 0,
+          "switchingCost": 0,
+          "complementAssets": 0,
+          "standardization": 0.2
+        },
+        "directDependents": [],
+        "confidence": 0.7
+      },
+      "vulnerabilities": {
+        "switchingFeasibility": 0.97,
+        "replacementRisk": 1.843
+      }
+    },
+    {
+      "nodeId": "commit-2bd4bde",
+      "nodeName": "feat(ledger): implement bitemporal claim writeset ",
+      "nodeType": "project",
+      "currentAdoption": 0.1,
+      "predictedAdoption": {
+        "t30": 0.7469468730570815,
+        "t90": 0.9950306712941828,
+        "t180": 0.9999890447941933,
+        "t365": 0.9999999999623124
+      },
+      "networkMetrics": {
+        "nodeId": "commit-2bd4bde",
+        "degree": 0,
+        "inDegree": 0,
+        "outDegree": 0,
+        "pageRank": 0,
+        "closeness": 0,
+        "betweenness": 0
+      },
+      "lockInEffect": {
+        "nodeId": "commit-2bd4bde",
+        "strength": 0.03,
+        "components": {
+          "networkEffect": 0,
+          "switchingCost": 0,
+          "complementAssets": 0,
+          "standardization": 0.2
+        },
+        "directDependents": [],
+        "confidence": 0.7
+      },
+      "vulnerabilities": {
+        "switchingFeasibility": 0.97,
+        "replacementRisk": 1.843
+      }
+    },
+    {
+      "nodeId": "commit-76d6411",
+      "nodeName": "feat(repoos): Production-Ready Stability Layer, Co",
+      "nodeType": "project",
+      "currentAdoption": 0.1,
+      "predictedAdoption": {
+        "t30": 0.7469468730570815,
+        "t90": 0.9950306712941828,
+        "t180": 0.9999890447941933,
+        "t365": 0.9999999999623124
+      },
+      "networkMetrics": {
+        "nodeId": "commit-76d6411",
+        "degree": 0,
+        "inDegree": 0,
+        "outDegree": 0,
+        "pageRank": 0,
+        "closeness": 0,
+        "betweenness": 0
+      },
+      "lockInEffect": {
+        "nodeId": "commit-76d6411",
+        "strength": 0.03,
+        "components": {
+          "networkEffect": 0,
+          "switchingCost": 0,
+          "complementAssets": 0,
+          "standardization": 0.2
+        },
+        "directDependents": [],
+        "confidence": 0.7
+      },
+      "vulnerabilities": {
+        "switchingFeasibility": 0.97,
+        "replacementRisk": 1.843
+      }
+    },
+    {
+      "nodeId": "commit-ce13fa4",
+      "nodeName": "feat: Epistemic Immune System and Doctrine Playboo",
+      "nodeType": "project",
+      "currentAdoption": 0.1,
+      "predictedAdoption": {
+        "t30": 0.7469468730570815,
+        "t90": 0.9950306712941828,
+        "t180": 0.9999890447941933,
+        "t365": 0.9999999999623124
+      },
+      "networkMetrics": {
+        "nodeId": "commit-ce13fa4",
+        "degree": 0,
+        "inDegree": 0,
+        "outDegree": 0,
+        "pageRank": 0,
+        "closeness": 0,
+        "betweenness": 0
+      },
+      "lockInEffect": {
+        "nodeId": "commit-ce13fa4",
+        "strength": 0.03,
+        "components": {
+          "networkEffect": 0,
+          "switchingCost": 0,
+          "complementAssets": 0,
+          "standardization": 0.2
+        },
+        "directDependents": [],
+        "confidence": 0.7
+      },
+      "vulnerabilities": {
+        "switchingFeasibility": 0.97,
+        "replacementRisk": 1.843
+      }
+    },
+    {
+      "nodeId": "commit-c8ea3d3",
+      "nodeName": "feat(api): execution intent contract (#19641)",
+      "nodeType": "project",
+      "currentAdoption": 0.1,
+      "predictedAdoption": {
+        "t30": 0.7469468730570815,
+        "t90": 0.9950306712941828,
+        "t180": 0.9999890447941933,
+        "t365": 0.9999999999623124
+      },
+      "networkMetrics": {
+        "nodeId": "commit-c8ea3d3",
+        "degree": 0,
+        "inDegree": 0,
+        "outDegree": 0,
+        "pageRank": 0,
+        "closeness": 0,
+        "betweenness": 0
+      },
+      "lockInEffect": {
+        "nodeId": "commit-c8ea3d3",
+        "strength": 0.03,
+        "components": {
+          "networkEffect": 0,
+          "switchingCost": 0,
+          "complementAssets": 0,
+          "standardization": 0.2
+        },
+        "directDependents": [],
+        "confidence": 0.7
+      },
+      "vulnerabilities": {
+        "switchingFeasibility": 0.97,
+        "replacementRisk": 1.843
+      }
+    },
+    {
+      "nodeId": "commit-54cc2bc",
+      "nodeName": "feat(repoos): add CNPR scaffolding configs and doc",
+      "nodeType": "project",
+      "currentAdoption": 0.1,
+      "predictedAdoption": {
+        "t30": 0.7469468730570815,
+        "t90": 0.9950306712941828,
+        "t180": 0.9999890447941933,
+        "t365": 0.9999999999623124
+      },
+      "networkMetrics": {
+        "nodeId": "commit-54cc2bc",
+        "degree": 0,
+        "inDegree": 0,
+        "outDegree": 0,
+        "pageRank": 0,
+        "closeness": 0,
+        "betweenness": 0
+      },
+      "lockInEffect": {
+        "nodeId": "commit-54cc2bc",
+        "strength": 0.03,
+        "components": {
+          "networkEffect": 0,
+          "switchingCost": 0,
+          "complementAssets": 0,
+          "standardization": 0.2
+        },
+        "directDependents": [],
+        "confidence": 0.7
+      },
+      "vulnerabilities": {
+        "switchingFeasibility": 0.97,
+        "replacementRisk": 1.843
+      }
+    },
+    {
+      "nodeId": "commit-e7cc39f",
+      "nodeName": "feat(osint): instrument OSINT Analyst Assist desk ",
+      "nodeType": "project",
+      "currentAdoption": 0.1,
+      "predictedAdoption": {
+        "t30": 0.7469468730570815,
+        "t90": 0.9950306712941828,
+        "t180": 0.9999890447941933,
+        "t365": 0.9999999999623124
+      },
+      "networkMetrics": {
+        "nodeId": "commit-e7cc39f",
+        "degree": 0,
+        "inDegree": 0,
+        "outDegree": 0,
+        "pageRank": 0,
+        "closeness": 0,
+        "betweenness": 0
+      },
+      "lockInEffect": {
+        "nodeId": "commit-e7cc39f",
+        "strength": 0.03,
+        "components": {
+          "networkEffect": 0,
+          "switchingCost": 0,
+          "complementAssets": 0,
+          "standardization": 0.2
+        },
+        "directDependents": [],
+        "confidence": 0.7
+      },
+      "vulnerabilities": {
+        "switchingFeasibility": 0.97,
+        "replacementRisk": 1.843
+      }
+    },
+    {
+      "nodeId": "commit-801f8a9",
+      "nodeName": "feat: Implement Postgres-Neo4j deterministic parit",
+      "nodeType": "project",
+      "currentAdoption": 0.1,
+      "predictedAdoption": {
+        "t30": 0.7469468730570815,
+        "t90": 0.9950306712941828,
+        "t180": 0.9999890447941933,
+        "t365": 0.9999999999623124
+      },
+      "networkMetrics": {
+        "nodeId": "commit-801f8a9",
+        "degree": 0,
+        "inDegree": 0,
+        "outDegree": 0,
+        "pageRank": 0,
+        "closeness": 0,
+        "betweenness": 0
+      },
+      "lockInEffect": {
+        "nodeId": "commit-801f8a9",
+        "strength": 0.03,
+        "components": {
+          "networkEffect": 0,
+          "switchingCost": 0,
+          "complementAssets": 0,
+          "standardization": 0.2
+        },
+        "directDependents": [],
+        "confidence": 0.7
+      },
+      "vulnerabilities": {
+        "switchingFeasibility": 0.97,
+        "replacementRisk": 1.843
+      }
+    },
+    {
+      "nodeId": "innovation-simulation-engine",
+      "nodeName": "Innovation Simulation Engine",
+      "nodeType": "technology",
+      "currentAdoption": 0.1,
+      "predictedAdoption": {
+        "t30": 0.9814214739852589,
+        "t90": 0.9999998402904243,
+        "t180": 0.9999999999999961,
+        "t365": 1
+      },
+      "networkMetrics": {
+        "nodeId": "innovation-simulation-engine",
+        "degree": 3,
+        "inDegree": 1,
+        "outDegree": 2,
+        "pageRank": 0.3333333333333333,
+        "closeness": 0.8888888888888888,
+        "betweenness": 1
+      },
+      "lockInEffect": {
+        "nodeId": "innovation-simulation-engine",
+        "strength": 0.1075,
+        "components": {
+          "networkEffect": 0.05,
+          "switchingCost": 0.13333333333333333,
+          "complementAssets": 0.1,
+          "standardization": 0.2
+        },
+        "directDependents": [
+          "summit-platform"
+        ],
+        "confidence": 0.7
+      },
+      "vulnerabilities": {
+        "switchingFeasibility": 0.8925,
+        "replacementRisk": 0.1785
+      }
+    },
+    {
+      "nodeId": "repository-archaeology-engine",
+      "nodeName": "Repository Archaeology Engine",
+      "nodeType": "technology",
+      "currentAdoption": 0.1,
+      "predictedAdoption": {
+        "t30": 0.9814214739852589,
+        "t90": 0.9999998402904243,
+        "t180": 0.9999999999999961,
+        "t365": 1
+      },
+      "networkMetrics": {
+        "nodeId": "repository-archaeology-engine",
+        "degree": 1,
+        "inDegree": 1,
+        "outDegree": 0,
+        "pageRank": 0.3333333333333333,
+        "closeness": 0.96,
+        "betweenness": 0.3333333333333333
+      },
+      "lockInEffect": {
+        "nodeId": "repository-archaeology-engine",
+        "strength": 0.0675,
+        "components": {
+          "networkEffect": 0.05,
+          "switchingCost": 0,
+          "complementAssets": 0.1,
+          "standardization": 0.2
+        },
+        "directDependents": [
+          "innovation-simulation-engine"
+        ],
+        "confidence": 0.7
+      },
+      "vulnerabilities": {
+        "switchingFeasibility": 0.9325,
+        "replacementRisk": 0.1865
+      }
+    },
+    {
+      "nodeId": "evolution-intelligence-system",
+      "nodeName": "Evolution Intelligence System",
+      "nodeType": "technology",
+      "currentAdoption": 0.1,
+      "predictedAdoption": {
+        "t30": 0.9814214739852589,
+        "t90": 0.9999998402904243,
+        "t180": 0.9999999999999961,
+        "t365": 1
+      },
+      "networkMetrics": {
+        "nodeId": "evolution-intelligence-system",
+        "degree": 1,
+        "inDegree": 1,
+        "outDegree": 0,
+        "pageRank": 0.3333333333333333,
+        "closeness": 0.96,
+        "betweenness": 0.3333333333333333
+      },
+      "lockInEffect": {
+        "nodeId": "evolution-intelligence-system",
+        "strength": 0.0675,
+        "components": {
+          "networkEffect": 0.05,
+          "switchingCost": 0,
+          "complementAssets": 0.1,
+          "standardization": 0.2
+        },
+        "directDependents": [
+          "innovation-simulation-engine"
+        ],
+        "confidence": 0.7
+      },
+      "vulnerabilities": {
+        "switchingFeasibility": 0.9325,
+        "replacementRisk": 0.1865
+      }
+    },
+    {
+      "nodeId": "summit-platform",
+      "nodeName": "Summit Platform",
+      "nodeType": "organization",
+      "currentAdoption": 0.1,
+      "predictedAdoption": {
+        "t30": 0.7469468730570815,
+        "t90": 0.9950306712941828,
+        "t180": 0.9999890447941933,
+        "t365": 0.9999999999623124
+      },
+      "networkMetrics": {
+        "nodeId": "summit-platform",
+        "degree": 1,
+        "inDegree": 0,
+        "outDegree": 1,
+        "pageRank": 0,
+        "closeness": 0.96,
+        "betweenness": 0.3333333333333333
+      },
+      "lockInEffect": {
+        "nodeId": "summit-platform",
+        "strength": 0.05,
+        "components": {
+          "networkEffect": 0,
+          "switchingCost": 0.06666666666666667,
+          "complementAssets": 0,
+          "standardization": 0.2
+        },
+        "directDependents": [],
+        "confidence": 0.7
+      },
+      "vulnerabilities": {
+        "switchingFeasibility": 0.95,
+        "replacementRisk": 0
+      }
+    }
+  ],
+  "summary": {
+    "totalNodes": 24,
+    "avgLockIn": 0.03718750000000002,
+    "highLockInNodes": 0,
+    "avgPageRank": 0.041666666666666664
+  }
+}

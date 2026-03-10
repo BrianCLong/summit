@@ -1,21 +1,23 @@
 {
   "name": "@summit/summit-praxeology",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "test": "vitest run"
+    "test": "vitest run",
+    "dev:pg": "tsx src/api/pgServe.ts"
   },
   "dependencies": {
     "ajv": "^8.18.0",
-    "ajv-formats": "^3.0.1"
+    "ajv-formats": "^3.0.1",
+    "express": "^4.21.2"
   },
   "devDependencies": {
-    "@types/express": "^5.0.6",
-    "express": "^5.2.1",
+    "@types/express": "^5.0.1",
+    "tsx": "^4.19.3",
     "typescript": "^5.9.3",
     "vitest": "^2.1.9"
   }

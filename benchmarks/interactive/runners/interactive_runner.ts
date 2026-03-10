@@ -1,36 +1,41 @@
-import { BaseEnvironment, Observation, Action, BudgetState, StepResult } from '../environments/base/base_environment';
-import { BenchmarkAgent, AgentMemory, RunContext } from '../../../agents/benchmark/base_benchmark_agent';
+import { BaseEnvironment, Action, StepResult } from '../environments/base/base_environment';
 
-export interface BudgetPolicy {
+export interface RunConfig {
+  suiteId: string;
+  caseId: string;
+  agentId: string;
+  seed: number;
   maxSteps: number;
-  wallclockLimitMs: number;
+  budgetPolicy: Record<string, unknown>;
+  artifactDir: string;
 }
 
-export interface RunConfig extends RunContext {
-  maxSteps: number;
-  budgetPolicy: BudgetPolicy;
-  artifactDir: string;
+export interface TraceEvent {
+  step: number;
+  timestamp: string; // Deterministic wall-clock timestamp or zero'd for reproducibility
+  action: Action | null;
+  observation: Record<string, unknown>;
+  reward: number;
+  done: boolean;
+  metadata?: Record<string, unknown>;
 }
 
 export interface RunResult {
   suiteId: string;
   caseId: string;
   agentId: string;
-  success: boolean;
+  seed: number;
   stepsTaken: number;
-  timeElapsedMs: number;
   finalReward: number;
-  error?: string;
-  traces: TraceEvent[];
+  success: boolean;
+  trace: TraceEvent[];
 }
 
-export interface TraceEvent {
-  step: number;
-  timestamp: string; // Deterministic virtual timestamp
-  action: Action;
-  observation: Observation;
-  reward: number;
-  budget: BudgetState;
+export interface BenchmarkAgent {
+  init(runContext: RunConfig): Promise<void>;
+  act(observation: any, memory: any, budget: any): Promise<Action>;
+  update(stepResult: StepResult): Promise<void>;
+  finalize(): Promise<Record<string, unknown>>;
 }
 
 export async function runInteractive(
@@ -38,65 +43,62 @@ export async function runInteractive(
   environment: BaseEnvironment,
   agent: BenchmarkAgent
 ): Promise<RunResult> {
-  const startTime = Date.now();
+  const trace: TraceEvent[] = [];
   let stepsTaken = 0;
   let finalReward = 0;
-  const traces: TraceEvent[] = [];
 
-  try {
-    let observation = await environment.reset(config.seed, config);
-    await agent.init(config);
-    const memory: AgentMemory = { history: [] };
+  await agent.init(config);
+  let obs = await environment.reset(config.seed, config.budgetPolicy);
 
-    while (!environment.isTerminal() && stepsTaken < config.budgetPolicy.maxSteps) {
-      if (Date.now() - startTime > config.budgetPolicy.wallclockLimitMs) {
-        throw new Error('Wallclock budget exceeded');
-      }
+  trace.push({
+    step: stepsTaken,
+    timestamp: "1970-01-01T00:00:00Z", // Enforcing determinism
+    action: null,
+    observation: obs.state,
+    reward: 0,
+    done: false
+  });
 
-      const budget = environment.budget();
-      const action = await agent.act(observation, memory, budget);
-      const stepResult = await environment.step(action);
-
-      await agent.update(stepResult);
-
-      traces.push({
-        step: stepsTaken,
-        timestamp: `step_${stepsTaken}`, // Deterministic timestamp string
-        action,
-        observation: stepResult.observation,
-        reward: stepResult.reward,
-        budget: environment.budget()
-      });
-
-      observation = stepResult.observation;
-      finalReward += stepResult.reward;
-      stepsTaken++;
-
-      if (stepResult.done) break;
+  while (!environment.isTerminal() && stepsTaken < config.maxSteps) {
+    const budget = environment.budget();
+    if (budget.stepsRemaining <= 0 || budget.timeRemainingMs <= 0) {
+      break;
     }
 
-    return {
-      suiteId: config.suiteId,
-      caseId: config.caseId,
-      agentId: config.agentId,
-      success: true,
-      stepsTaken,
-      timeElapsedMs: Date.now() - startTime,
-      finalReward,
-      traces
-    };
+    const action = await agent.act(obs, {}, budget);
+    const stepResult = await environment.step(action);
 
-  } catch (err: any) {
-    return {
-      suiteId: config.suiteId,
-      caseId: config.caseId,
-      agentId: config.agentId,
-      success: false,
-      stepsTaken,
-      timeElapsedMs: Date.now() - startTime,
-      finalReward,
-      error: err.message,
-      traces
-    };
+    await agent.update(stepResult);
+
+    stepsTaken++;
+    finalReward += stepResult.reward;
+    obs = stepResult.observation;
+
+    trace.push({
+      step: stepsTaken,
+      timestamp: "1970-01-01T00:00:00Z", // Enforcing determinism
+      action: action,
+      observation: obs.state,
+      reward: stepResult.reward,
+      done: stepResult.done,
+      metadata: stepResult.info
+    });
+
+    if (stepResult.done) {
+      break;
+    }
   }
+
+  await agent.finalize();
+
+  return {
+    suiteId: config.suiteId,
+    caseId: config.caseId,
+    agentId: config.agentId,
+    seed: config.seed,
+    stepsTaken,
+    finalReward,
+    success: finalReward > 0, // Simplified success logic for substrate
+    trace
+  };
 }

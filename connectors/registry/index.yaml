@@ -1,0 +1,7 @@
+connectors:
+  - id: whois.v1
+    path: connectors/examples/whois
+    status: active
+  - id: crtsh.v1
+    path: connectors/examples/crtsh
+    status: active
