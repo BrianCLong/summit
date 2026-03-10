@@ -9,7 +9,7 @@
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { resolve, join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import yaml from 'js-yaml';
+import yaml from './../../tmp_node_env/node_modules/js-yaml/index.js';
 import {
   normalizeRelativePath,
   sha256Hex,

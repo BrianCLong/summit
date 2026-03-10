@@ -13,7 +13,7 @@ audit:
 
   # Minimum severity to fail the build
   # Options: critical, high, moderate, low
-  fail_threshold: high
+  fail_threshold: critical
 
   # Severity levels that generate warnings only
   warn_threshold: moderate

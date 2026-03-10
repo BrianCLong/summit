@@ -1,0 +1,5 @@
+{
+  "accuracy": 0.95,
+  "latencyMs": 1500,
+  "tokenCount": 4050
+}

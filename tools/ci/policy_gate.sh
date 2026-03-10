@@ -14,7 +14,7 @@ fi
 if command -v cosign >/dev/null 2>&1; then
   echo "Verifying policy bundle signature..."
   test -f policy/maestro-policy-bundle.tgz || (cd policy && ./build.sh)
-  cosign verify-blob --signature policy/maestro-policy-bundle.sig policy/maestro-policy-bundle.tgz
+  cosign verify-blob --use-signed-timestamps --signature policy/maestro-policy-bundle.sig policy/maestro-policy-bundle.tgz || { echo "::error::Supply chain verification failed! Missing or invalid signed timestamps."; false; }
 else
   echo "cosign not found; skipping signature verify (CI should run this)" >&2
 fi

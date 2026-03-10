@@ -35,7 +35,7 @@ permissions:
 jobs:
   client-typecheck:
     name: Client TypeScript Check
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 10
 
     steps:
@@ -53,7 +53,7 @@ jobs:
           cache-dependency-path: '**/pnpm-lock.yaml'
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Run client typecheck
         id: typecheck

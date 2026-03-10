@@ -13,8 +13,8 @@
     "prov-ledger": "file:../prov-ledger"
   },
   "devDependencies": {
-    "@types/node": "^20.12.7",
-    "typescript": "^5.4.0",
-    "vitest": "^1.6.1"
+    "@types/node": "20.12.7",
+    "typescript": "5.4.0",
+    "vitest": "1.6.1"
   }
 }

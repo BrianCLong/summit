@@ -22,14 +22,14 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install cosign
-        uses: sigstore/cosign-installer@v3.5.0
+        uses: sigstore/cosign-installer@v3.7.0
 
       - name: Verify OCI image attestation (if image_ref provided)
         if: ${{ inputs.image_ref != '' }}
         env:
           COSIGN_EXPERIMENTAL: '1'
         run: |
-          cosign verify-attestation             --type slsaprovenance             --certificate-oidc-issuer https://token.actions.githubusercontent.com             --certificate-identity-regexp 'https://github.com/.+/.+/.github/workflows/.+@.+'
+          cosign verify-attestation --use-signed-timestamps             --type slsaprovenance             --certificate-oidc-issuer https://token.actions.githubusercontent.com             --certificate-identity-regexp 'https://github.com/.+/.+/.github/workflows/.+@.+' || { echo "::error::Supply chain verification failed! Missing or invalid signed timestamps."; false; }
             ${{ inputs.image_ref }}
 
       - name: Verify file-based attestation presence (fallback)

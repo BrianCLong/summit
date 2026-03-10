@@ -1,0 +1,24 @@
+{
+  "id": "pg.action.sig.coordinated-posting.v1",
+  "label": "Coordinated posting signature",
+  "description": "Observed pattern of synchronized high-volume posting across monitored channels.",
+  "indicators": [
+    {
+      "id": "ind1",
+      "signal": "coordinated posting pattern",
+      "weight": 0.7,
+      "evidenceKinds": ["post", "report"]
+    }
+  ],
+  "constraints": [
+    {
+      "id": "c1",
+      "description": "Observed only as analytic signature; not a prescriptive procedure."
+    }
+  ],
+  "provenance": {
+    "source": "internal-analytic-seed",
+    "createdAt": "2026-03-05T00:00:00Z",
+    "curator": "summit.seed"
+  }
+}

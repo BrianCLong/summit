@@ -12,4 +12,7 @@ for (const path of required) {
     throw new Error(`Missing required evidence file: ${path}`)
   }
 }
+<<<<<<< HEAD
 console.log("All evidence files exist.");
+=======
+>>>>>>> origin/main

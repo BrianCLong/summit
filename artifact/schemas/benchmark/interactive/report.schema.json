@@ -1,0 +1,32 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "evidenceId": {
+      "type": "string",
+      "pattern": "^SUMMIT-IB-[a-zA-Z0-9_]+-[a-zA-Z0-9_]+-[0-9]+$"
+    },
+    "suiteId": {
+      "type": "string"
+    },
+    "caseId": {
+      "type": "string"
+    },
+    "agentId": {
+      "type": "string"
+    },
+    "seed": {
+      "type": "integer"
+    },
+    "success": {
+      "type": "boolean"
+    },
+    "finalReward": {
+      "type": "number"
+    },
+    "stepsTaken": {
+      "type": "integer"
+    }
+  },
+  "required": ["evidenceId", "suiteId", "caseId", "agentId", "seed", "success", "finalReward", "stepsTaken"]
+}

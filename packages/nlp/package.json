@@ -38,19 +38,19 @@
     "lemmatization"
   ],
   "dependencies": {
-    "compromise": "^14.13.0",
-    "franc": "^6.2.0",
-    "natural": "^7.0.7",
-    "stopword": "^3.1.1",
-    "wink-nlp": "^2.2.0",
-    "wink-eng-lite-web-model": "^1.5.0",
-    "unorm": "^1.6.0"
+    "compromise": "14.13.0",
+    "franc": "6.2.0",
+    "natural": "7.0.7",
+    "stopword": "3.1.1",
+    "wink-nlp": "2.2.0",
+    "wink-eng-lite-web-model": "1.5.0",
+    "unorm": "1.6.0"
   },
   "devDependencies": {
-    "@types/jest": "^30.0.0",
+    "@types/jest": "30.0.0",
     "@types/node": "20.19.27",
-    "jest": "^30.2.0",
-    "typescript": "^5.9.3",
+    "jest": "30.2.0",
+    "typescript": "5.9.3",
     "eslint": "9.39.2"
   }
 }

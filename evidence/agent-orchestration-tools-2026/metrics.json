@@ -1,0 +1,12 @@
+{
+  "capability_gaps": [
+    "agent_registry",
+    "orchestration_planner",
+    "fleet_observability"
+  ],
+  "target_metrics": {
+    "agent_routing_latency_ms": 50,
+    "agent_success_rate": 0.9,
+    "task_completion_rate": 0.8
+  }
+}

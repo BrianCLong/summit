@@ -23,7 +23,7 @@ env:
 jobs:
   test:
     name: Test Service
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4 # v6
@@ -45,7 +45,7 @@ jobs:
 
   build-scan-sign:
     name: Build, Scan, Sign, and Attest
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: test
     permissions:
       contents: read
@@ -102,7 +102,7 @@ jobs:
           fail-on-severity: critical
 
       - name: Install Cosign
-        uses: sigstore/cosign-installer@a39c2dc7b40653b5511219e93de1c7d5293aa357 # v3.1.1
+        uses: sigstore/cosign-installer@v3.7.0
 
       - name: Sign the container image
         run: cosign sign --yes "${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ inputs.image_name }}@${{ steps.build-and-push.outputs.digest }}"
@@ -111,7 +111,7 @@ jobs:
 
   policy-gate:
     name: OPA Policy Gate
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: build-scan-sign
 
     steps:

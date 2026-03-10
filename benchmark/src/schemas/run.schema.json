@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.dev/schemas/run.schema.json",
+  "type": "object",
+  "required": ["runId", "benchmarkVersion", "taskId", "agentId", "environmentRef", "status", "startTime"],
+  "properties": {
+    "runId": { "type": "string" },
+    "benchmarkVersion": { "type": "string" },
+    "taskId": { "type": "string" },
+    "agentId": { "type": "string" },
+    "environmentRef": { "type": "string" },
+    "status": {
+      "type": "string",
+      "enum": ["pending", "running", "completed", "failed", "timeout"]
+    },
+    "startTime": { "type": "string", "format": "date-time" },
+    "endTime": { "type": "string", "format": "date-time" },
+    "error": { "type": "string" }
+  },
+  "additionalProperties": false
+}

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { describe, it, expect } from 'vitest'
 import { getEarlyWarning } from '../../../../src/api/rest/regulatory/early-warning'
 
@@ -14,4 +15,10 @@ describe("policy guards", () => {
     };
     expect(payload).not.toHaveProperty('consumer_name');
   });
+=======
+describe("policy guards", () => {
+  it("blocks high-severity without review", async () => {
+    expect(true).toBe(true)
+  })
+>>>>>>> origin/main
 })

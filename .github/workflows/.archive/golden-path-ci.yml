@@ -17,7 +17,7 @@ jobs:
           cache: 'pnpm'
           node-version: '20'
       - name: Install Dependencies
-        run: pnpm install --frozen-lockfile=false
+        run: pnpm install --no-frozen-lockfile=false
       - name: Run Unit Tests
         run: pnpm test
 
@@ -35,7 +35,7 @@ jobs:
           node-version: '20'
 
       - name: Install Dependencies
-        run: pnpm install --frozen-lockfile=false
+        run: pnpm install --no-frozen-lockfile=false
 
       - name: Build Application
         run: pnpm build
@@ -71,7 +71,7 @@ jobs:
           node-version: '20'
 
       - name: Install Dependencies
-        run: pnpm install --frozen-lockfile=false
+        run: pnpm install --no-frozen-lockfile=false
 
       - name: Install Playwright Browsers
         run: pnpm exec playwright install chromium

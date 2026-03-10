@@ -9,10 +9,10 @@
     "build": "tsc -p tsconfig.json"
   },
   "dependencies": {
-    "elasticsearch": "^16.7.3"
+    "elasticsearch": "16.7.3"
   },
   "devDependencies": {
     "@types/node": "20.19.27",
-    "typescript": "^5.9.3"
+    "typescript": "5.9.3"
   }
 }

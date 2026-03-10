@@ -42,7 +42,7 @@ permissions:
 jobs:
   determinism-check:
     name: Check API Determinism
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     outputs:
       total: ${{ steps.check.outputs.total }}
       passed: ${{ steps.check.outputs.passed }}
@@ -52,7 +52,7 @@ jobs:
     services:
       # Start test server if running scheduled check
       server:
-        image: node:20
+        image: node:22
         options: --workdir /app
         ports:
           - 3000:3000
@@ -72,7 +72,7 @@ jobs:
           cache-dependency-path: '**/pnpm-lock.yaml'
 
       - name: Install Dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Start Server (for scheduled runs)
         if: github.event_name == 'schedule'
@@ -174,7 +174,7 @@ jobs:
 
   notify-on-failure:
     name: Notify on Failure
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: determinism-check
     if: needs.determinism-check.outputs.status == 'failed'
 

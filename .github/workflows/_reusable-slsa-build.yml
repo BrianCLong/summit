@@ -84,7 +84,7 @@ env:
 jobs:
   build:
     name: Build & Attest
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     outputs:
       digest: ${{ steps.build.outputs.digest }}
       image-uri: ${{ steps.image-uri.outputs.uri }}
@@ -156,9 +156,9 @@ jobs:
 
       - name: Install Cosign
         if: inputs.sign
-        uses: sigstore/cosign-installer@f713795cb21599bc4e5c4b58cbad1da852d7eeb9 # v3
+        uses: sigstore/cosign-installer@v3.7.0
         with:
-          cosign-release: v2.2.4
+          cosign-release: 'v3.0.5'
 
       - name: Sign image (OIDC keyless)
         if: inputs.sign && inputs.push
@@ -182,7 +182,7 @@ jobs:
 
           IMAGE="${{ steps.image-uri.outputs.uri }}"
 
-          cosign verify "$IMAGE" \
+          cosign verify --use-signed-timestamps "$IMAGE" \ || { echo "::error::Supply chain verification failed! Missing or invalid signed timestamps."; false; }
             --certificate-identity "${{ env.EXPECTED_OIDC_SUBJECT }}" \
             --certificate-oidc-issuer "${{ env.EXPECTED_OIDC_ISSUER }}"
 
