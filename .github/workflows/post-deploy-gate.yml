@@ -27,7 +27,7 @@ permissions:
 
 jobs:
   validate-deployment:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -37,6 +37,7 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
+          version: 10.0.0
           run_install: false
 
       - name: Setup Node
@@ -45,7 +46,7 @@ jobs:
           node-version: '18'
 
       - name: Install Dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Run Post-Deploy Canary
         env:

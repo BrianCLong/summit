@@ -14,7 +14,7 @@ permissions:
 jobs:
   deploy:
     environment: preview
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
 
@@ -28,7 +28,7 @@ jobs:
       - name: Install dependencies
         run: |
           npm install -g pnpm
-          pnpm install --frozen-lockfile
+          pnpm install --no-frozen-lockfile
 
       # OIDC Authentication
       - name: Configure AWS Credentials

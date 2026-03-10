@@ -18,7 +18,7 @@ permissions:
 jobs:
   pr_path_labeler:
     if: github.event_name == 'pull_request_target'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/labeler@v5
         with:
@@ -26,7 +26,7 @@ jobs:
           configuration-path: .github/labeler.yml
 
   keyword_triage:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Apply deterministic keyword labels
         uses: actions/github-script@v7

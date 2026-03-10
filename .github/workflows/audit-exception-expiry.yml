@@ -19,7 +19,7 @@ concurrency:
 
 jobs:
   validate-exceptions:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4 # v6
@@ -29,7 +29,6 @@ jobs:
       - name: Use Node.js 20
         uses: actions/setup-node@v4 # v6
         with:
-          cache: 'pnpm'
           node-version: "20"
       - name: Install dependencies
         run: |

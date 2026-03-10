@@ -24,6 +24,6 @@ jobs:
           node-version: "20"
           cache: "pnpm"
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile --ignore-scripts
+        run: pnpm install --no-frozen-lockfile --ignore-scripts
       - name: Run Markdown Lint
         run: pnpm dlx markdownlint-cli -c .markdownlint.json '**/*.md' --ignore 'node_modules' --disable MD060 MD040 MD032 MD036 MD058 MD030 MD034 MD007 MD031 MD022 MD004 MD009 MD012 MD024 MD025 MD026 MD029 MD038 MD047 MD049

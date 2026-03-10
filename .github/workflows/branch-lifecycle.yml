@@ -24,7 +24,7 @@ permissions:
 jobs:
   cleanup-merged-branches:
     name: Delete Merged Branches
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -67,7 +67,7 @@ jobs:
 
   warn-stale-branches:
     name: Warn About Stale Branches
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -184,7 +184,7 @@ jobs:
 
   delete-stale-branches:
     name: Delete Stale Branches
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -232,7 +232,7 @@ jobs:
 
   report-statistics:
     name: Branch Statistics
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: [cleanup-merged-branches, delete-stale-branches]
     steps:
       - name: Checkout repository

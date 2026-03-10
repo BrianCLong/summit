@@ -23,14 +23,14 @@
     "@ga-graphai/common-types": "file:../../ga-graphai/packages/common-types",
     "@ga-graphai/cost-guard": "file:../../ga-graphai/packages/cost-guard",
     "@ga-graphai/maestro-conductor": "file:../../ga-graphai/packages/maestro-conductor",
-    "yaml": "^2.3.4",
-    "zod": "^3.22.4"
+    "yaml": "2.3.4",
+    "zod": "3.22.4"
   },
   "devDependencies": {
-    "@types/node": "^20.12.7",
-    "tsx": "^4.7.1",
-    "typescript": "^5.4.5",
-    "vitest": "^1.6.0"
+    "@types/node": "20.12.7",
+    "tsx": "4.7.1",
+    "typescript": "5.4.5",
+    "vitest": "1.6.0"
   },
   "keywords": [
     "eval",

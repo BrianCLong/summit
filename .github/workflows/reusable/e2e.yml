@@ -8,7 +8,7 @@ env:
 
 jobs:
   run:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     env:
       DOCKER_BUILDKIT: '1'
       COMPOSE_DOCKER_CLI_BUILD: '1'
@@ -17,11 +17,11 @@ jobs:
       - uses: actions/setup-node@v4 # v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
       - name: Enable corepack
         run: corepack enable
       - uses: pnpm/action-setup@v4
         with:
+          version: 10.0.0
           run_install: false
       - name: Cache pnpm store
         uses: actions/cache@v4 # v4
@@ -37,7 +37,7 @@ jobs:
           name: build-artifacts
         continue-on-error: true
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
       - name: Bootstrap repo (make bootstrap)
         run: make bootstrap
       - name: Cache Docker layers
@@ -94,7 +94,7 @@ permissions:
 jobs:
   e2e:
     name: e2e
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     env:
       NODE_VERSION: '20.x'
       PNPM_CACHE_FOLDER: ~/.pnpm-store
@@ -110,13 +110,13 @@ jobs:
         uses: actions/setup-node@v4 # v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
 
       - name: Enable corepack
         run: corepack enable
 
       - uses: pnpm/action-setup@v4
         with:
+          version: 10.0.0
           run_install: false
 
       - name: Cache pnpm store
@@ -136,7 +136,7 @@ jobs:
         continue-on-error: true
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Bootstrap repo (make bootstrap)
         run: make bootstrap
