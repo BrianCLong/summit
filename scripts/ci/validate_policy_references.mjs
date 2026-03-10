@@ -90,7 +90,7 @@ function resolveTemplate(template, matrixCombo) {
   let result = template;
   for (const [key, value] of Object.entries(matrixCombo)) {
     const escapedKey = String(key).replace(/\./g, '\\.');
-    const regex = new RegExp('\$\s*\{\{\s*matrix\.' + escapedKey + '\s*\}\}', 'g');
+    const regex = new RegExp('\\$\\s*\\{\\{\\s*matrix\\.' + escapedKey + '\\s*\\}\\}', 'g');
     result = result.replace(regex, String(value));
   }
   return result;
@@ -101,7 +101,7 @@ export function expandMatrix(matrix) {
   const { include = [], exclude = [], ...dimensions } = matrix;
   const keys = Object.keys(dimensions).filter(k => Array.isArray(dimensions[k]));
   if (keys.length === 0 && include.length === 0) return [];
-  let combinations = [{}];
+  let combinations = keys.length > 0 ? [{}] : [];
   for (const key of keys) {
     const next = [];
     for (const combo of combinations) {
@@ -114,14 +114,18 @@ export function expandMatrix(matrix) {
   }
   if (include.length > 0) {
     for (const inc of include) {
-      let matched = false;
+      let entriesMatched = 0;
       for (let i = 0; i < combinations.length; i++) {
-        if (Object.keys(inc).every(k => !(k in dimensions) || String(combinations[i][k]) === String(inc[k]))) {
+        // GH logic: an include entry matches if all its keys that are dimensions match.
+        // If it matches, it augments. If it doesn't match any, it's a new combination.
+        const dimKeysInInc = Object.keys(inc).filter(k => k in dimensions);
+        const matches = dimKeysInInc.length > 0 && dimKeysInInc.every(k => String(combinations[i][k]) === String(inc[k]));
+        if (matches) {
           combinations[i] = { ...combinations[i], ...inc };
-          matched = true;
+          entriesMatched++;
         }
       }
-      if (!matched) combinations.push(inc);
+      if (entriesMatched === 0) combinations.push(inc);
     }
   }
   return combinations;
