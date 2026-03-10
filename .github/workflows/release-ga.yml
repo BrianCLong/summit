@@ -223,7 +223,7 @@ jobs:
       - name: Install Cosign
         uses: sigstore/cosign-installer@9614fae9e5c5eddabb09f90a270fcb487c9f7149 # v3.3.0
         with:
-          cosign-release: "v3.0.5"
+          cosign-release: "v2.2.4"
 
       - name: Sign Provenance (Keyless)
         run: |
@@ -277,7 +277,7 @@ jobs:
       - name: Install Cosign
         uses: sigstore/cosign-installer@9614fae9e5c5eddabb09f90a270fcb487c9f7149 # v3.3.0
         with:
-          cosign-release: "v3.0.5"
+          cosign-release: "v2.2.4"
 
       - name: Verify Signed Bundle (Strict)
         env:
