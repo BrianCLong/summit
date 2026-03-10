@@ -37,7 +37,7 @@ jobs:
       - name: Build Policy Cards
         run: |
           cd packages/policy-cards
-          pnpm install --no-frozen-lockfile
+          pnpm install
           pnpm run build
 
       - name: Run Policy Validation

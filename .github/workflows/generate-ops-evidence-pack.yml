@@ -27,7 +27,7 @@ jobs:
           node-version: '20'
 
       - name: Install Dependencies
-        run: npm install -g pnpm && pnpm install --no-frozen-lockfile
+        run: npm install -g pnpm && pnpm install
 
       - name: Generate Ops Evidence Pack
         id: generate
