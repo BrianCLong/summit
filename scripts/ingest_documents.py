@@ -2,6 +2,7 @@
 
 from summit.core.agents.document_agent import DocumentAgent
 
+
 def main():
     agent = DocumentAgent(source_path="data/raw")
     agent.ingest()

@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def mask_containment(target, gen, mask):
     """
     Ensures that modifications are contained within the masked region.

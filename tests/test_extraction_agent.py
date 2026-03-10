@@ -1,5 +1,6 @@
 from summit.core.agents.extraction_agent import ExtractionAgent
 
+
 def test_extract_metrics():
     agent = ExtractionAgent()
     mock_text = "This is a test document."
