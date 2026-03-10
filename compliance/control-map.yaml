@@ -72,7 +72,7 @@ controls:
   AI2.1:
     description: "Human Oversight & Intervention (EU AI Act Art 14)"
     summit_artifacts:
-      - "apps/web/src/components/ReviewQueue.tsx"
+      - "apps/web/src/components/HITLReviewPanel.tsx"
     evidence:
       - "ci/human-review-logs"
     status: covered
@@ -90,7 +90,7 @@ controls:
   SC1.1:
     description: "Software Supply Chain Provenance (SLSA)"
     summit_artifacts:
-      - ".summit/provenance-policy.json"
+      - "policy/provenance.rego"
       - ".github/workflows/provenance-verify.yml"
     evidence:
       - "ci/gsv-attest-verify"
