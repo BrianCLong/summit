@@ -1,0 +1,48 @@
+{
+  "currency": "USD",
+  "value_signals": {
+    "partner_ecosystem_revenue_impact": 58000,
+    "integration_adoption": [
+      {
+        "partner_id": "prt-acme-si",
+        "partner_name": "Acme SI",
+        "adoption_count": 34,
+        "revenue_impact": 28000
+      },
+      {
+        "partner_id": "prt-northstar",
+        "partner_name": "Northstar DataOps",
+        "adoption_count": 26,
+        "revenue_impact": 21000
+      },
+      {
+        "partner_id": "prt-orbit",
+        "partner_name": "Orbit Federal",
+        "adoption_count": 12,
+        "revenue_impact": 9000
+      }
+    ],
+    "plugin_economic_contribution": [
+      {
+        "plugin_id": "intel-brief-studio",
+        "plugin_name": "Intel Brief Studio",
+        "contribution_share": 0.1774
+      },
+      {
+        "plugin_id": "obs-lens-pro",
+        "plugin_name": "Observability Lens Pro",
+        "contribution_share": 0.3871
+      },
+      {
+        "plugin_id": "risk-atlas",
+        "plugin_name": "Risk Atlas",
+        "contribution_share": 0.3145
+      },
+      {
+        "plugin_id": "trace-guard",
+        "plugin_name": "Trace Guard",
+        "contribution_share": 0.121
+      }
+    ]
+  }
+}
