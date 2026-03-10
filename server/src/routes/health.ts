@@ -90,7 +90,7 @@ router.get('/status', (_req: Request, res: Response) => {
  *         description: Service is healthy
  */
 import { asyncHandler } from '../middleware/async-handler.js';
-import { summitHealthChecksTotal } from '../monitoring/metrics.js';
+
 
 router.get('/health', asyncHandler(async (_req: Request, res: Response) => {
   summitHealthChecksTotal.inc({ status: 'success' });
