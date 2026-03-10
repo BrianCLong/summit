@@ -15,7 +15,9 @@ verdict := {
 } else = verdict {
   input.mode == "enforce"
   some dec in [data.composer.decision, data.composer.decision_dlp.decision, data.composer.decision_cmk.decision]
-  allow_all := all(decisions, func(x){ x.allow })
+  allow_all if {
+    count([d | d := decisions[_]; d.allow == true]) == count(decisions)
+}
   decisions := [data.composer.decision, data.composer.decision_dlp.decision, data.composer.decision_cmk.decision]
 }
 

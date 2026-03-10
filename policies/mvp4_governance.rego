@@ -6,34 +6,34 @@ import rego.v1
 default allow = false
 
 # Allow only if specific policy grants access
-allow {
+allow if {
     input.type == "mutation"
     input.verdict == "allow"
     has_valid_provenance(input.provenance)
 }
 
 # Rule: Provenance must define actor and justification
-has_valid_provenance(prov) {
+has_valid_provenance(prov) if {
     prov.actor_id != ""
     prov.justification != ""
     prov.timestamp > 0
 }
 
 # Rule: Block High Risk actions without "Break Glass" flag
-deny {
+deny if {
     input.risk_level == "critical"
     not input.break_glass == true
     msg := "Critical actions require break_glass flag"
 }
 
 # Rule: Enforce License Entitlements
-deny {
+deny if {
     input.feature_flag
     not entitlements_include(input.user.entitlements, input.feature_flag)
     msg := "User does not have license for this feature"
 }
 
-entitlements_include(entitlements, feature) {
+entitlements_include(entitlements, feature) if {
     some i
     entitlements[i] == feature
 }

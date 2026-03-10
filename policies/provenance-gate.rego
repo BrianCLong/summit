@@ -5,26 +5,26 @@ import rego.v1
 default allow = false
 
 # Allow ingestion if all requirements are met
-allow {
+allow if {
     has_valid_signature
     has_policy_decision
     is_authorized_agent
 }
 
 # Check if the UEF entry has a valid signature witness
-has_valid_signature {
+has_valid_signature if {
     input.witness.signature != ""
     input.witness.keyId != ""
 }
 
 # Check if the action was authorized by the Policy Engine
-has_policy_decision {
+has_policy_decision if {
     input.actor.policyDecisionId != ""
     # In a real implementation, we would verify this ID against the Decision Ledger
 }
 
 # Check if the actor is a known authorized agent
-is_authorized_agent {
+is_authorized_agent if {
     input.actor.type == "agent"
     authorized_agents[input.actor.id]
 }
@@ -37,17 +37,17 @@ authorized_agents = {
 }
 
 # Violation reasons for debugging
-violation[msg] {
+violation contains msg if {
     not has_valid_signature
     msg := "Missing or invalid cryptographic signature"
 }
 
-violation[msg] {
+violation contains msg if {
     not has_policy_decision
     msg := "Missing Policy Decision ID"
 }
 
-violation[msg] {
+violation contains msg if {
     not is_authorized_agent
     msg := sprintf("Unauthorized actor: %v", [input.actor.id])
 }

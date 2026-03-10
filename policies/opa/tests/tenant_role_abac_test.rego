@@ -87,11 +87,11 @@ retention_drift_resource := object.union(base_resource, {"retention_days": 60})
 
 mismatched_purpose_resource := object.union(base_resource, {"purpose_tags": ["fraud-monitoring"]})
 
-test_manager_can_read_confidential_report {
+test_manager_can_read_confidential_report if {
   data.summit.authz.allow with input as allow_input
 }
 
-test_cross_tenant_access_denied {
+test_cross_tenant_access_denied if {
   not data.summit.authz.allow with input as {
     "subject": base_subject,
     "resource": cross_tenant_resource,
@@ -100,7 +100,7 @@ test_cross_tenant_access_denied {
   }
 }
 
-test_missing_encryption_denied {
+test_missing_encryption_denied if {
   not data.summit.authz.allow with input as {
     "subject": base_subject,
     "resource": unencrypted_resource,
@@ -109,7 +109,7 @@ test_missing_encryption_denied {
   }
 }
 
-test_retention_policy_enforced {
+test_retention_policy_enforced if {
   not data.summit.authz.allow with input as {
     "subject": base_subject,
     "resource": retention_drift_resource,
@@ -118,7 +118,7 @@ test_retention_policy_enforced {
   }
 }
 
-test_purpose_mismatch_denied {
+test_purpose_mismatch_denied if {
   not data.summit.authz.allow with input as {
     "subject": base_subject,
     "resource": mismatched_purpose_resource,
@@ -127,7 +127,7 @@ test_purpose_mismatch_denied {
   }
 }
 
-test_legal_hold_requires_legal_role {
+test_legal_hold_requires_legal_role if {
   not data.summit.authz.allow with input as {
     "subject": base_subject,
     "resource": legal_hold_resource,
@@ -136,7 +136,7 @@ test_legal_hold_requires_legal_role {
   }
 }
 
-test_legal_hold_allows_legal_role {
+test_legal_hold_allows_legal_role if {
   data.summit.authz.allow with input as {
     "subject": legal_hold_subject,
     "resource": legal_hold_resource,

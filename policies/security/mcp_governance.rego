@@ -1,8 +1,6 @@
 package security.mcp
 import rego.v1
 
-import future.keywords.if
-import future.keywords.in
 
 default allow := false
 

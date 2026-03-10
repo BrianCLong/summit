@@ -1,7 +1,9 @@
 package summit
 
+import rego.v1
+
 # Block mutable major tags like @v1, @v2, or unpinned "uses: owner/repo@ref" where ref matches v\d+$
-deny[msg] {
+deny contains msg if {
   some i
   uses := input.workflows[i].uses
   regex.match("@v\\d+$", uses)
@@ -11,7 +13,7 @@ deny[msg] {
 }
 
 # Also block missing SHA pin (allow @v4 or full 40-char SHA). Tweak as you prefer.
-deny[msg] {
+deny contains msg if {
   some i
   uses := input.workflows[i].uses
   startswith(uses, "actions/")                  # marketplace or GH official

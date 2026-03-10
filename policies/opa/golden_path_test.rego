@@ -1,6 +1,7 @@
 package golden_path_test
+
+import rego.v1
 import data.golden_path
-import future.keywords.if
 
 test_allow_main_passing if {
     golden_path.warn == set() with input as {"branch": "main", "checks": {"Golden Path Supply Chain": "success"}}

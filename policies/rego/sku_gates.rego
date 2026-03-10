@@ -8,10 +8,10 @@ default allow_feature := false
 
 # Define gates
 gate["Team"]        = { "export.pdf", "edge.sync" }
-gate["Business"]    = gate["Team"]        ∪ { "qos.override", "audit.evidence" }
-gate["Enterprise"]  = gate["Business"]    ∪ { "byok", "hsm" }
+gate["Business"]    = gate["Team"]        | { "qos.override", "audit.evidence" }
+gate["Enterprise"]  = gate["Business"]    | { "byok", "hsm" }
 
-allow_feature {
+allow_feature if {
   some t
   t := input.subject.tier
   gate[t][_] == input.feature

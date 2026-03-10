@@ -1,7 +1,8 @@
 # (same as in sprint doc)
 package abac.authz
 
-import future.keywords.in
+import rego.v1
+
 
 default allow = false
 

@@ -3,16 +3,16 @@ import rego.v1
 
 # Require CMK for artifacts in protected namespaces
 
-needs_cmk {
+needs_cmk if {
   input.tenant.protected == true
 }
 
-missing_cmk {
+missing_cmk if {
   needs_cmk
   not input.artifact.kms_key_id
 }
 
-allow {
+allow if {
   not needs_cmk
 } else = allow {
   needs_cmk

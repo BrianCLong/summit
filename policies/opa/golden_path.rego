@@ -1,7 +1,7 @@
 package golden_path
 
-import future.keywords.if
-import future.keywords.contains
+import rego.v1
+
 
 # Default to allow (warn only)
 default allow = true

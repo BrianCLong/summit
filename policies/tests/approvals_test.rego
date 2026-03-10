@@ -1,7 +1,7 @@
 package companyos.provenance
 import rego.v1
 
-test_approval_required {
+test_approval_required if {
     input := {
         "action": "delete",
         "resource": {"sensitivity": "high"}

@@ -7,7 +7,7 @@ default allow := false
 simulate := input.simulate
 
 # Sensitivity tiers requiring step-up auth
-requires_step_up {
+requires_step_up if {
   input.bundle.sensitivity == "Sensitive" or input.bundle.sensitivity == "Restricted"
 }
 
@@ -16,11 +16,11 @@ has_webauthn := input.user.webauthn == true
 # DLP: fields to redact (pii prefixes and explicit list)
 pii_prefix := "pii:"
 
-explicit_pii[field] {
+explicit_pii contains field if {
   field := input.policy.pii[_]
 }
 
-should_redact_field(field) {
+should_redact_field(field) if {
   startswith(field, pii_prefix)
 } else {
   explicit_pii[field]
@@ -32,12 +32,12 @@ redact_record(obj) = out {
 }
 
 # Deny reasons
-deny_reason["step_up_required"] {
+deny_reason contains "step_up_required" if {
   requires_step_up
   not has_webauthn
 }
 
-deny_reason[reason] {
+deny_reason contains reason if {
   input.export.options.disallow_unmasked
   some f
   should_redact_field(f)
@@ -45,11 +45,11 @@ deny_reason[reason] {
   reason := sprintf("unmasked_field:%s", [f])
 }
 
-would_allow {
+would_allow if {
   not deny_reason[_]
 }
 
-allow {
+allow if {
   would_allow
 }
 

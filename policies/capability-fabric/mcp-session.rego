@@ -3,6 +3,6 @@ import rego.v1
 
 default allow = false
 
-allow {
+allow if {
   input.subjectAttributes.scopes[_] == "mcp:session"
 }

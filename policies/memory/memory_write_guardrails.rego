@@ -1,5 +1,7 @@
 package summit.memory.guardrails
 
+import rego.v1
+
 # Deny direct memory writes for high-trust tiers unless explicitly approved.
 deny contains msg if {
   input.operation == "write"

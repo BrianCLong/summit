@@ -1,5 +1,7 @@
 package tests.quality_gates
 
+import rego.v1
+
 import data.quality.gates
 
 valid_input := {
@@ -27,31 +29,31 @@ valid_input := {
   }
 }
 
-test_quality_gate_allows_valid_release {
+test_quality_gate_allows_valid_release if {
   gates.allow with input as valid_input
 }
 
-test_quality_gate_denies_on_low_coverage {
-  bad := valid_input with "coverage".global as 0.7
+test_quality_gate_denies_on_low_coverage if {
+  bad := object.union(valid_input, {"coverage": {"global": 0.7}})
   not gates.allow with input as bad
   gates.deny_reasons["coverage_below_threshold: 0.70 < 0.90"] with input as bad
 }
 
-test_quality_gate_denies_on_forbidden_license {
+test_quality_gate_denies_on_forbidden_license if {
   bad := valid_input with "sbom".licenses as ["Apache-2.0", "GPL-3.0"]
   not gates.allow with input as bad
   gates.deny_reasons[reason] with input as bad
   reason == "denied_license:GPL-3.0"
 }
 
-test_quality_gate_denies_on_stale_chaos {
+test_quality_gate_denies_on_stale_chaos if {
   bad := valid_input with "chaos".lastRunHours as 1000
   not gates.allow with input as bad
   gates.deny_reasons[reason] with input as bad
   reason == "chaos_stale:1000"
 }
 
-test_quality_gate_denies_on_load_breach {
+test_quality_gate_denies_on_load_breach if {
   bad := valid_input with "load".p95 as 450
   not gates.allow with input as bad
   gates.deny_reasons[reason] with input as bad
