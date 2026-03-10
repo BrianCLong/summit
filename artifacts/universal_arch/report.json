@@ -1,0 +1,7 @@
+{
+  "workflow": "mock_test_workflow",
+  "eval_result": {
+    "pass": true,
+    "score": 7
+  }
+}

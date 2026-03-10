@@ -120,7 +120,6 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v4
         with:
-          cache: 'pnpm'
           node-version: ${{ inputs.node-version }}
 
       - name: Setup pnpm
@@ -194,7 +193,6 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v4
         with:
-          cache: 'pnpm'
           node-version: ${{ inputs.node-version }}
 
       - name: Setup pnpm
@@ -266,7 +264,6 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v4
         with:
-          cache: 'pnpm'
           node-version: ${{ inputs.node-version }}
 
       - name: Setup pnpm
@@ -361,7 +358,7 @@ jobs:
           output-file: sbom.spdx.json
 
       - name: Install Cosign
-        uses: sigstore/cosign-installer@f713795cb21599bc4e5c4b58cbad1da852d7eeb9 # v3
+        uses: sigstore/cosign-installer@v3.7.0
 
       - name: Sign Image
         run: |

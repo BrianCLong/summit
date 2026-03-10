@@ -1,0 +1,113 @@
+name: RepoOS Auto-Batch PRs
+
+on:
+  schedule:
+    # Run every 6 hours
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+    inputs:
+      concern:
+        description: 'Specific concern to batch (or "all")'
+        required: false
+        default: 'all'
+      dry_run:
+        description: 'Dry run mode'
+        required: false
+        type: boolean
+        default: true
+
+jobs:
+  auto-batch:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Analyze and batch PRs
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DRY_RUN: ${{ inputs.dry_run }}
+        run: |
+          echo "🔄 Starting RepoOS Auto-Batch..."
+          echo "Mode: ${DRY_RUN:-true}"
+
+          cat > /tmp/repoos-batch.mjs << 'SCRIPT_END'
+          #!/usr/bin/env node
+          import { execSync } from 'child_process';
+
+          const DRY_RUN = process.env.DRY_RUN !== 'false';
+
+          function detectConcern(pr) {
+            const text = `${pr.title} ${pr.headRefName}`.toLowerCase();
+            if (/security|auth/i.test(text)) return 'security';
+            if (/ai|ml|governance/i.test(text)) return 'ai-governance';
+            if (/graph|neo4j/i.test(text)) return 'graph';
+            if (/perf|performance/i.test(text)) return 'performance';
+            return 'general';
+          }
+
+          const prs = JSON.parse(execSync('gh pr list --limit 100 --json number,title,headRefName,labels --state open', { encoding: 'utf8' }));
+
+          // Group by concern
+          const batches = new Map();
+          for (const pr of prs) {
+            // Skip PRs already in batches or with certain labels
+            const labels = pr.labels.map(l => l.name);
+            if (labels.includes('do-not-merge') || labels.includes('work-in-progress')) continue;
+
+            const concern = detectConcern(pr);
+            if (!batches.has(concern)) batches.set(concern, []);
+            batches.get(concern).push(pr);
+          }
+
+          // Add batch labels to PRs
+          for (const [concern, prs] of batches.entries()) {
+            if (prs.length < 3) continue; // Need at least 3 PRs to batch
+
+            console.log(`\n📦 Batch: ${concern} (${prs.length} PRs)`);
+
+            for (const pr of prs) {
+              console.log(`  - #${pr.number}: ${pr.title.substring(0, 50)}`);
+
+              if (!DRY_RUN) {
+                try {
+                  execSync(`gh pr edit ${pr.number} --add-label "repoos:batch-${concern}"`, { stdio: 'pipe' });
+                } catch (e) {
+                  console.error(`  ⚠️  Failed to label #${pr.number}`);
+                }
+              }
+            }
+          }
+
+          console.log(`\n✅ Processed ${prs.length} PRs into ${batches.size} batches`);
+          console.log(DRY_RUN ? '(DRY RUN - no changes made)' : '(Labels applied)');
+          SCRIPT_END
+
+          node /tmp/repoos-batch.mjs
+
+      - name: Generate batch report
+        run: |
+          echo "## RepoOS Auto-Batch Report" > repoos-batch-report.md
+          echo "" >> repoos-batch-report.md
+          echo "**Run at:** $(date -u +"%Y-%m-%d %H:%M:%S UTC")" >> repoos-batch-report.md
+          echo "**Mode:** ${DRY_RUN:-true}" >> repoos-batch-report.md
+          echo "" >> repoos-batch-report.md
+          echo "### Batches Created" >> repoos-batch-report.md
+          echo "See job logs for details" >> repoos-batch-report.md
+
+      - name: Post summary
+        run: |
+          echo "### RepoOS Auto-Batch Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Batch processing complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Mode: \`${DRY_RUN:-true}\`" >> $GITHUB_STEP_SUMMARY

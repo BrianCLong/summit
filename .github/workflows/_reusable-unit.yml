@@ -26,7 +26,6 @@ jobs:
         uses: actions/setup-node@v4 # v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
           cache-dependency-path: '**/pnpm-lock.yaml'
 
       - name: Enable corepack

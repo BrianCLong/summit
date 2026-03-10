@@ -47,7 +47,6 @@ jobs:
       - uses: actions/setup-node@v4 # v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
       
       # Restore or create cache
       - name: Cache dependencies
@@ -102,7 +101,6 @@ jobs:
       - uses: actions/setup-node@v4 # v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
       
       # Restore cached dependencies from setup job
       - name: Restore dependencies
@@ -173,7 +171,6 @@ jobs:
       - uses: actions/setup-node@v4 # v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
       
       - name: Restore dependencies
         uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4

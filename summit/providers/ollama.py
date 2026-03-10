@@ -7,6 +7,7 @@ from typing import Any
 
 import requests
 
+
 class OllamaProvider:
     def __init__(
         self,

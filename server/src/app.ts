@@ -50,7 +50,6 @@ import receiptsRouter from './routes/receipts.js';
 import predictiveRouter from './routes/predictive.js';
 import { policyRouter } from './routes/policy.js';
 import policyManagementRouter from './routes/policies/policy-management.js';
-import { metricsRoute } from './http/metricsRoute.js';
 import monitoringBackpressureRouter from './routes/monitoring-backpressure.js';
 import rbacRouter from './routes/rbacRoutes.js';
 // import { licenseRuleValidationMiddleware } from './graphql/middleware/licenseRuleValidationMiddleware.js';
@@ -86,6 +85,8 @@ import tenantsRouter from './routes/tenants.js';
 import { SummitInvestigate } from './services/SummitInvestigate.js';
 import { streamIngest } from './ingest/stream.js';
 import osintRouter from './routes/osint.js';
+import osintMetricsRouter from './routes/osint_metrics.js';
+import osintMetricsRouter from './routes/osint_metrics.js';
 import palettesRouter from './routes/palettes.js';
 import outreachRouter from './routes/outreach.js';
 
@@ -153,7 +154,19 @@ import { failoverOrchestrator } from './runtime/global/FailoverOrchestrator.js';
 import { buildApprovalsRouter } from './routes/approvals.js';
 import { shadowTrafficMiddleware } from './middleware/ShadowTrafficMiddleware.js';
 
+import { initializeObservability, setupObservability } from '@intelgraph/observability';
+
 export const createApp = async () => {
+  // Initialize comprehensive observability before application start
+  await initializeObservability({
+    service: {
+      name: 'summit-server',
+      version: '1.0.0', // Read from package.json in production
+      environment: process.env.NODE_ENV || 'development',
+    },
+    archetype: 'api-service',
+  });
+
   // Initialize OpenTelemetry tracing
   // Tracer is already initialized in index.ts, but we ensure it's available here
   // Verified usage for comprehensive observability
@@ -164,6 +177,17 @@ export const createApp = async () => {
   }
 
   const app = express();
+
+  // Setup @intelgraph/observability Express middleware
+  // This registers /metrics, /health, /health/live, /health/ready, /health/detailed
+  // and adds comprehensive RED/USE metrics and tracing headers
+  setupObservability(app, {
+    service: {
+      name: 'summit-server',
+      version: '1.0.0',
+      environment: process.env.NODE_ENV || 'development',
+    },
+  });
   const logger = (pino as any)();
 
   const isProduction = cfg.NODE_ENV === 'production';
@@ -479,11 +503,12 @@ export const createApp = async () => {
   app.use('/api/abyss', abyssRouter);
   app.use('/api/qaf', qafRouter);
   app.use('/api/siem-platform', siemPlatformRouter);
+  app.use('/api/osint/metrics', osintMetricsRouter);
+  app.use('/api/osint', osintRouter);
   app.use('/api/maestro', maestroRouter);
   app.use('/api/mcp-apps', mcpAppsRouter);
   app.use('/api/tenants', tenantsRouter);
   app.use('/api/actions', actionsRouter);
-  app.use('/api/osint', osintRouter);
   app.use('/api/outreach', outreachRouter);
 
   app.use('/api/meta-orchestrator', metaOrchestratorRouter);
@@ -550,7 +575,7 @@ export const createApp = async () => {
   if (cfg.FACTFLOW_ENABLED) {
     app.use('/api/factflow', factFlowRouter);
   }
-  app.get('/metrics', metricsRoute);
+  // @intelgraph/observability setupObservability middleware provides /metrics endpoint automatically
   // Re-added Approvals Router with Maestro context
   app.use('/api/approvals', authenticateToken, buildApprovalsRouter());
 

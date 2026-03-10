@@ -1,0 +1,10 @@
+{
+  "ontology_version": "v0",
+  "schema_hash": "68664d01f993529787b0b922b8cfdb9b23f05a40590970f24f3b6e2099e7a409",
+  "fixture_ids": [
+    "camp_cartel_fear_amp",
+    "camp_scam_transrep",
+    "camp_state_uk_china"
+  ],
+  "generator_version": "1"
+}
