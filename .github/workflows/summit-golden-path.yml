@@ -10,7 +10,7 @@ permissions:
 jobs:
   golden-path:
     name: golden-path
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     env:
       BUILD_ID: pr-${{ github.event.pull_request.number }}-${{ github.run_id }}
       COMMIT_SHA: ${{ github.sha }}

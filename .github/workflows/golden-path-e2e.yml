@@ -27,7 +27,7 @@ env:
 jobs:
   golden-path-investigations:
     name: Golden Path - Investigations
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
@@ -70,7 +70,7 @@ jobs:
 
   golden-path-frontend:
     name: Golden Path - Consolidated Frontend
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4

@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   sbom-generate:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
 
@@ -49,7 +49,7 @@ jobs:
             pnpm-deps.json
 
   sbom-validate:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: sbom-generate
     steps:
       - uses: actions/checkout@v4
@@ -74,7 +74,7 @@ jobs:
             --lockfile pnpm-deps.json
 
   provenance-attest-verify:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: [sbom-validate]
     steps:
       - uses: actions/checkout@v4

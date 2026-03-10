@@ -31,7 +31,7 @@ concurrency:
 jobs:
   redaction-tests:
     name: Redaction Layer Tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 5
 
     steps:
@@ -89,7 +89,7 @@ jobs:
 
   verify-policy-syntax:
     name: Verify Policy Syntax
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 2
 
     steps:

@@ -10,7 +10,7 @@ concurrency:
 
 jobs:
   integration:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
       - name: Install pnpm
@@ -25,7 +25,7 @@ jobs:
         run: pnpm run test:integration --passWithNoTests
 
   security:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
       - name: Install pnpm
@@ -40,7 +40,7 @@ jobs:
         run: pnpm audit --production
 
   graph-validation:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
       - name: Install pnpm

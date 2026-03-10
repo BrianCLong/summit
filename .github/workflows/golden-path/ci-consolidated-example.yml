@@ -34,7 +34,7 @@ env:
 jobs:
   # Single setup job that all test jobs can depend on
   setup:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     name: 📦 Setup Dependencies
     outputs:
       cache-key: ${{ steps.cache.outputs.cache-primary-key }}
@@ -83,7 +83,7 @@ jobs:
           - accessibility
         # Optionally test on multiple OS
         os:
-          - ubuntu-latest
+          - ubuntu-22.04
         # Can add node versions if needed
         # node-version: [20, 20]
         
@@ -91,7 +91,7 @@ jobs:
         include:
           # Run e2e tests on macOS too
           - suite: e2e
-            os: macos-latest
+            os: macos-26
     
     steps:
       - uses: actions/checkout@v4 # v4
@@ -138,7 +138,7 @@ jobs:
   # Aggregate results from all test jobs
   test-summary:
     needs: test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     name: 📊 Test Summary
     
     steps:
@@ -160,7 +160,7 @@ jobs:
   # Quality gates - run in parallel with tests
   lint:
     needs: setup
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     name: ✨ Lint
     
     steps:
@@ -190,7 +190,7 @@ jobs:
   docker-build:
     if: contains(github.event.pull_request.labels.*.name, 'docker')
     needs: [test, lint]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     name: 🐳 Docker Build
     
     steps:

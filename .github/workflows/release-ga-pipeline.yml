@@ -39,7 +39,7 @@ jobs:
   # ═══════════════════════════════════════════════════════════════════════════
   gate:
     name: "0️⃣ Gate Check"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     outputs:
       is_ga: ${{ steps.check.outputs.is_ga }}
       tag: ${{ steps.check.outputs.tag }}
@@ -80,7 +80,7 @@ jobs:
   # ═══════════════════════════════════════════════════════════════════════════
   freeze-gate:
     name: "🔒 Freeze Gate"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: gate
     if: needs.gate.outputs.is_ga == 'true'
 
@@ -105,7 +105,7 @@ jobs:
   # ═══════════════════════════════════════════════════════════════════════════
   lineage:
     name: "1️⃣ Lineage Check"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: [gate, freeze-gate]
     if: needs.gate.outputs.is_ga == 'true'
 
@@ -186,7 +186,7 @@ jobs:
 
   skills-vet:
     name: "Skills Vet"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: [gate, freeze-gate]
     if: needs.gate.outputs.is_ga == 'true'
 
@@ -229,7 +229,7 @@ jobs:
   # ═══════════════════════════════════════════════════════════════════════════
   verify:
     name: "2️⃣ Verification"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: [gate, lineage]
     if: needs.gate.outputs.is_ga == 'true'
 
@@ -351,7 +351,7 @@ jobs:
   # ═══════════════════════════════════════════════════════════════════════════
   build-bundle:
     name: "3️⃣ Build GA Bundle"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: [gate, lineage, verify]
     if: needs.gate.outputs.is_ga == 'true'
 
@@ -425,7 +425,7 @@ jobs:
   # ═══════════════════════════════════════════════════════════════════════════
   publish-guard:
     name: "4️⃣ Publish Guard"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: [gate, lineage, verify, build-bundle]
     if: needs.gate.outputs.is_ga == 'true'
 
@@ -541,7 +541,7 @@ jobs:
   # ═══════════════════════════════════════════════════════════════════════════
   assemble:
     name: "5️⃣ Assemble Release Bundle"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: [gate, lineage, verify, build-bundle, publish-guard]
     if: needs.gate.outputs.is_ga == 'true'
 
@@ -719,7 +719,7 @@ jobs:
   # ═══════════════════════════════════════════════════════════════════════════
   publish:
     name: "6️⃣ Publish Release"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: [gate, lineage, verify, build-bundle, publish-guard, assemble]
     if: |
       needs.gate.outputs.is_ga == 'true' &&
