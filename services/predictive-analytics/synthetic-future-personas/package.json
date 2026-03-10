@@ -24,6 +24,13 @@
     winston: "3.11.0"
 =======
 <<<<<<< HEAD
+    @apollo/server: "4.13.0",
+    graphql: "16.8.1",
+    neo4j-driver: "5.14.0",
+    uuid: "9.0.1",
+    winston: "3.11.0"
+=======
+<<<<<<< HEAD
     @apollo/server: "4.11.3",
     graphql: "16.8.1",
     neo4j-driver: "5.14.0",
@@ -63,6 +70,7 @@
     neo4j-driver: "5.14.0",
     uuid: "9.0.1",
     winston: "3.11.0"
+>>>>>>> origin/main
 >>>>>>> origin/main
 >>>>>>> origin/main
 >>>>>>> origin/main

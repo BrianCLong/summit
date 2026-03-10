@@ -30,6 +30,13 @@
     uuid: "9.0.1"
 =======
 <<<<<<< HEAD
+    @apollo/server: "4.13.0",
+    graphql: "16.8.1",
+    neo4j-driver: "5.14.0",
+    pino: "8.16.2",
+    uuid: "9.0.1"
+=======
+<<<<<<< HEAD
     @apollo/server: "4.11.3",
     graphql: "16.8.1",
     neo4j-driver: "5.14.0",
@@ -69,6 +76,7 @@
     neo4j-driver: "5.14.0",
     pino: "8.16.2",
     uuid: "9.0.1"
+>>>>>>> origin/main
 >>>>>>> origin/main
 >>>>>>> origin/main
 >>>>>>> origin/main

@@ -17,6 +17,9 @@
     @apollo/server: "4.13.0",
 =======
 <<<<<<< HEAD
+    @apollo/server: "4.13.0",
+=======
+<<<<<<< HEAD
     @apollo/server: "4.11.3",
 =======
 <<<<<<< HEAD
@@ -32,6 +35,7 @@
     "@apollo/server": "4.16.0",
 =======
     "@apollo/server": "4.11.3",
+>>>>>>> origin/main
 >>>>>>> origin/main
 >>>>>>> origin/main
 >>>>>>> origin/main
