@@ -8,7 +8,10 @@ const Card = React.forwardRef<
   <div
     ref={ref}
     className={cn(
-      'rounded-lg border bg-card text-card-foreground shadow-sm',
+      'rounded-lg border',
+      'border-[var(--border-subtle)] bg-[var(--surface-panel)]',
+      'text-[var(--text-primary)]',
+      'shadow-xs',
       className
     )}
     {...props}
@@ -22,20 +25,25 @@ const CardHeader = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn('flex flex-col space-y-1.5 p-6', className)}
+    className={cn(
+      'flex flex-col gap-1 px-5 py-4',
+      'border-b border-[var(--border-subtle)]',
+      className
+    )}
     {...props}
   />
 ))
 CardHeader.displayName = 'CardHeader'
 
 const CardTitle = React.forwardRef<
-  HTMLParagraphElement,
+  HTMLHeadingElement,
   React.HTMLAttributes<HTMLHeadingElement>
 >(({ className, ...props }, ref) => (
   <h3
     ref={ref}
     className={cn(
-      'text-2xl font-semibold leading-none tracking-tight',
+      'text-[13px] font-semibold leading-tight tracking-[-0.01em]',
+      'text-[var(--text-primary)]',
       className
     )}
     {...props}
@@ -49,7 +57,7 @@ const CardDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <p
     ref={ref}
-    className={cn('text-sm text-muted-foreground', className)}
+    className={cn('text-[12px] text-[var(--text-secondary)] leading-snug', className)}
     {...props}
   />
 ))
@@ -59,7 +67,7 @@ const CardContent = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => (
-  <div ref={ref} className={cn('p-6 pt-0', className)} {...props} />
+  <div ref={ref} className={cn('px-5 py-4', className)} {...props} />
 ))
 CardContent.displayName = 'CardContent'
 
@@ -69,7 +77,11 @@ const CardFooter = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn('flex items-center p-6 pt-0', className)}
+    className={cn(
+      'flex items-center px-5 py-3',
+      'border-t border-[var(--border-subtle)]',
+      className
+    )}
     {...props}
   />
 ))

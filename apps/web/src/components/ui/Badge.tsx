@@ -3,35 +3,62 @@ import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '@/lib/utils'
 
 const badgeVariants = cva(
-  'inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+  [
+    'inline-flex items-center gap-1',
+    'rounded px-1.5 py-0.5',
+    'text-[10px] font-semibold leading-none',
+    'tracking-[0.04em] uppercase',
+    'border transition-colors',
+    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-600)]',
+  ].join(' '),
   {
     variants: {
       variant: {
+        // Primary filled
         default:
-          'border-transparent bg-primary text-primary-foreground hover:bg-primary/80',
+          'bg-[var(--accent-subtle)] text-[var(--accent-300)] border-[var(--border-accent)]',
+
+        // Neutral secondary
         secondary:
-          'border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80',
+          'bg-[var(--surface-overlay)] text-[var(--text-secondary)] border-[var(--border-subtle)]',
+
+        // Severity — Critical
         destructive:
-          'border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80',
-        outline: 'text-foreground',
+          'bg-[var(--severity-critical-bg)] text-[var(--severity-critical-fg)] border-[var(--severity-critical-border)]',
+
+        // Outlined neutral
+        outline:
+          'bg-transparent text-[var(--text-secondary)] border-[var(--border-default)]',
+
+        // Severity — Low / Success
         success:
-          'border-transparent bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
+          'bg-[var(--severity-low-bg)] text-[var(--severity-low-fg)] border-[var(--severity-low-border)]',
+
+        // Severity — Medium / Warning
         warning:
-          'border-transparent bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
+          'bg-[var(--severity-medium-bg)] text-[var(--severity-medium-fg)] border-[var(--severity-medium-border)]',
+
+        // Severity — High / Error
         error:
-          'border-transparent bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300',
-        info: 'border-transparent bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
-        // IntelGraph specific variants
+          'bg-[var(--severity-high-bg)] text-[var(--severity-high-fg)] border-[var(--severity-high-border)]',
+
+        // Info
+        info:
+          'bg-[var(--severity-info-bg)] text-[var(--severity-info-fg)] border-[var(--severity-info-border)]',
+
+        // Threat levels (for backwards compatibility + explicit semantic naming)
         'threat-low':
-          'border-transparent bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
+          'bg-[var(--severity-low-bg)] text-[var(--severity-low-fg)] border-[var(--severity-low-border)]',
         'threat-medium':
-          'border-transparent bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
+          'bg-[var(--severity-medium-bg)] text-[var(--severity-medium-fg)] border-[var(--severity-medium-border)]',
         'threat-high':
-          'border-transparent bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300',
+          'bg-[var(--severity-high-bg)] text-[var(--severity-high-fg)] border-[var(--severity-high-border)]',
         'threat-critical':
-          'border-transparent bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300',
+          'bg-[var(--severity-critical-bg)] text-[var(--severity-critical-fg)] border-[var(--severity-critical-border)]',
+
+        // Intel brand
         intel:
-          'border-transparent bg-intel-100 text-intel-800 dark:bg-intel-900 dark:text-intel-300',
+          'bg-[var(--accent-subtle)] text-[var(--accent-400)] border-[var(--border-accent)]',
       },
     },
     defaultVariants: {
@@ -64,7 +91,7 @@ function Badge({
       )}
       {...props}
     >
-      {icon && <span className="mr-1.5 flex items-center">{icon}</span>}
+      {icon && <span className="flex items-center">{icon}</span>}
       {children}
     </span>
   )
