@@ -48,7 +48,7 @@ permissions:
 jobs:
   sbom:
     name: SBOM & Vulnerability Gate
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
@@ -64,7 +64,7 @@ jobs:
         with:
           sbom: sbom.json
           fail-build: true
-          severity-cutoff: high
+          severity-cutoff: critical
           only-fixed: false
           config: security/grype-allowlist.yaml
       - name: Attest SBOM

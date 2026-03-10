@@ -1,7 +1,19 @@
-import type { CogGeoWriteSet } from "../api/types";
+import { createWriteSetValidatorWithCogGeo } from "./validateWritesetWithCogGeo.js";
 
-export async function writeCogGeoArtifacts(writeSet: CogGeoWriteSet): Promise<void> {
-  if (writeSet.writes.length === 0) {
-    throw new Error("CogGeo write set must include at least one write.");
+const { validate } = createWriteSetValidatorWithCogGeo();
+
+export async function writeCogGeoArtifacts(writesetEnvelope: any): Promise<{ accepted: boolean; rejectionReport?: unknown }> {
+  const ok = validate(writesetEnvelope);
+  if (!ok) {
+    return {
+      accepted: false,
+      rejectionReport: {
+        kind: "ajv_validation_failed",
+        errors: (validate as any).errors ?? [],
+      },
+    };
   }
+
+  // TODO: SV rules + IntelGraph persist
+  return { accepted: true };
 }

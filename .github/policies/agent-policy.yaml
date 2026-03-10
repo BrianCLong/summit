@@ -1,0 +1,24 @@
+version: 1
+policy: agent-control-plane
+requirements:
+  - field: id
+    required: true
+  - field: capabilities
+    required: true
+    min_items: 1
+  - field: riskLevel
+    required: true
+    allowed_values:
+      - low
+      - medium
+      - high
+  - field: tools
+    required: true
+    min_items: 1
+  - field: observabilityScore
+    required: false
+denies:
+  - condition: "riskLevel == 'high' && (observabilityScore == null || observabilityScore < 0.8)"
+    reason: OBSERVABILITY_SCORE_TOO_LOW
+  - condition: "capabilities.length == 0"
+    reason: MISSING_CAPABILITIES

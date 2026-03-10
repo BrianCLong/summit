@@ -995,7 +995,11 @@ importers:
   apps/intelgraph-api:
     dependencies:
       '@apollo/server':
+<<<<<<< HEAD
         specifier: ^4.11.3
+=======
+        specifier: ^4.11.0
+>>>>>>> origin/main
         version: 4.13.0(graphql@16.12.0)
       '@as-integrations/express4':
         specifier: ^1.0.0
@@ -2127,7 +2131,11 @@ importers:
   apps/server:
     dependencies:
       '@apollo/server':
+<<<<<<< HEAD
         specifier: ^4.11.3
+=======
+        specifier: ^4.11.0
+>>>>>>> origin/main
         version: 4.13.0(graphql@16.12.0)
       axios:
         specifier: ^1.7.9
@@ -3963,7 +3971,11 @@ importers:
   packages/api-framework:
     dependencies:
       '@apollo/server':
+<<<<<<< HEAD
         specifier: ^4.11.3
+=======
+        specifier: ^4.11.0
+>>>>>>> origin/main
         version: 4.13.0(graphql@16.12.0)
       '@intelgraph/query-language':
         specifier: workspace:*
@@ -11165,7 +11177,11 @@ importers:
   packages/rate-limiter:
     dependencies:
       '@apollo/server':
+<<<<<<< HEAD
         specifier: ^4.11.3
+=======
+        specifier: ^4.11.0
+>>>>>>> origin/main
         version: 4.13.0(graphql@16.12.0)
       express:
         specifier: '>=4.21.0'
@@ -14285,7 +14301,11 @@ importers:
   services/admin-api:
     dependencies:
       '@apollo/server':
+<<<<<<< HEAD
         specifier: ^4.11.3
+=======
+        specifier: ^4.11.0
+>>>>>>> origin/main
         version: 4.13.0(graphql@16.12.0)
       '@intelgraph/metrics-exporter':
         specifier: workspace:*
@@ -14334,7 +14354,11 @@ importers:
   services/admin-automation:
     dependencies:
       '@apollo/server':
+<<<<<<< HEAD
         specifier: ^4.11.3
+=======
+        specifier: ^4.11.0
+>>>>>>> origin/main
         version: 4.13.0(graphql@16.12.0)
       cors:
         specifier: ^2.8.5
@@ -15007,7 +15031,11 @@ importers:
   services/api-gateway:
     dependencies:
       '@apollo/server':
+<<<<<<< HEAD
         specifier: ^4.11.3
+=======
+        specifier: ^4.11.0
+>>>>>>> origin/main
         version: 4.13.0(graphql@16.12.0)
       '@as-integrations/express4':
         specifier: ^1.1.2
@@ -15473,7 +15501,11 @@ importers:
   services/battle-api:
     dependencies:
       '@apollo/server':
+<<<<<<< HEAD
         specifier: ^4.11.3
+=======
+        specifier: ^4.11.0
+>>>>>>> origin/main
         version: 4.13.0(graphql@16.12.0)
       '@graphql-tools/schema':
         specifier: ^10.0.30
@@ -16323,7 +16355,11 @@ importers:
   services/control-tower-service:
     dependencies:
       '@apollo/server':
+<<<<<<< HEAD
         specifier: ^4.11.3
+=======
+        specifier: ^4.11.0
+>>>>>>> origin/main
         version: 4.13.0(graphql@16.12.0)
       '@graphql-tools/schema':
         specifier: ^10.0.0
@@ -16889,7 +16925,11 @@ importers:
   services/data-monetization-engine:
     dependencies:
       '@apollo/server':
+<<<<<<< HEAD
         specifier: ^4.11.3
+=======
+        specifier: ^4.11.0
+>>>>>>> origin/main
         version: 4.13.0(graphql@16.12.0)
       '@intelgraph/data-monetization-types':
         specifier: workspace:*
@@ -54791,8 +54831,18 @@ snapshots:
       '@apollo/server': 4.13.0(graphql@16.12.0)
       express: 5.2.1
 
+<<<<<<< HEAD
   '@as-integrations/express4@1.1.2(@apollo/server@5.4.0(graphql@16.12.0))(express@5.2.1)':
     dependencies:
+=======
+  '@as-integrations/express4@1.1.2(@apollo/server@4.13.0(graphql@16.12.0))(express@5.2.1)':
+    dependencies:
+      '@apollo/server': 4.13.0(graphql@16.12.0)
+      express: 5.2.1
+
+  '@as-integrations/express4@1.1.2(@apollo/server@5.4.0(graphql@16.12.0))(express@5.2.1)':
+    dependencies:
+>>>>>>> origin/main
       '@apollo/server': 5.4.0(graphql@16.12.0)
       express: 5.2.1
 

@@ -1,0 +1,42 @@
+C4Context
+    title GTSE (Global Technology Strategy Engine) Architecture
+
+    Person(analyst, "Strategy Analyst / Exec", "Explores architecture snapshots, simulates future ecosystems, reviews forecast briefs")
+
+    System_Ext(repos, "GitHub / Git Ecosystems", "Source code, commits, issues, pull requests, releases")
+    System_Ext(ecosystem, "Technology Ecosystem Signals", "Package registries, regulatory feeds, hardware supply catalogs")
+
+    System_Boundary(summit_gtse, "Summit Global Technology Strategy Engine (GTSE)") {
+
+        System(rae, "Repository Archaeology Engine (RAE)", "Extracts fragments, infers subsystems, detects deletions, synthesizes candidate patches")
+        System(stm, "Software Time Machine (STM)", "Reconstructs historical architecture states and simulates alternate repository branches")
+        System(gid, "Global Innovation Discovery (GID)", "Mines multi-repo patterns for abandoned capabilities and capability recurrence")
+        System(tews, "Technology Early Warning System (TEWS)", "Detects emerging paradigms based on recurrence, readiness, and survival signals")
+        System(tes, "Technology Evolution Simulator (TES)", "Explores candidate architectures under technical, economic, and regulatory pressures")
+        System(gtse_core, "Global Technology Strategy Engine Core", "Models technology ecosystems and produces scenario forecasts for organizations")
+
+        SystemDb(intelgraph, "IntelGraph Knowledge Substrate", "Graph+Vector memory storing capabilities, snapshots, patches, scenarios, and provenance (Neo4j, Qdrant)")
+    }
+
+    Rel(analyst, gtse_core, "Views strategic forecasts and technology watchlists", "HTTPS/UI")
+    Rel(analyst, tes, "Configures scenario pressures and simulation parameters", "HTTPS/UI")
+    Rel(analyst, stm, "Explores architecture snapshots and branches", "HTTPS/UI")
+
+    Rel(rae, repos, "Ingests commits and source code fragments", "API / Webhooks")
+    Rel(tews, ecosystem, "Ingests dependency maturity and ecosystem trend signals", "API")
+
+    Rel(rae, intelgraph, "Writes capability nodes, fragment edges, and deletion events")
+    Rel(stm, intelgraph, "Reads fragments, writes architecture snapshots and branches")
+    Rel(gid, intelgraph, "Clusters capabilities across repositories")
+    Rel(tews, intelgraph, "Writes paradigm alerts and convergence signals")
+    Rel(tes, intelgraph, "Reads architectures, writes simulated outcomes and fitness scores")
+    Rel(gtse_core, intelgraph, "Aggregates ecosystem trends into strategy forecasts")
+
+    Rel(rae, stm, "Provides reconstructed bundles")
+    Rel(stm, gid, "Provides historical architecture states")
+    Rel(gid, tews, "Provides cross-repo innovation clusters")
+    Rel(tews, tes, "Provides emerging paradigms")
+    Rel(tes, gtse_core, "Provides architecture simulation outcomes")
+
+    UpdateElementStyle(analyst, $fontColor="white", $bgColor="#08427b", $borderColor="#052e56")
+    UpdateElementStyle(summit_gtse, $fontColor="white", $bgColor="#1168bd", $borderColor="#0b4884")

@@ -17,10 +17,10 @@
     "@intelgraph/vulnerability-intelligence": "workspace:*",
     "@intelgraph/purple-team": "workspace:*",
     "@intelgraph/threat-emulation": "workspace:*",
-    "zod": "^3.22.0"
+    "zod": "3.22.0"
   },
   "devDependencies": {
-    "@types/node": "^20.0.0",
-    "typescript": "^5.3.0"
+    "@types/node": "20.0.0",
+    "typescript": "5.3.0"
   }
 }
