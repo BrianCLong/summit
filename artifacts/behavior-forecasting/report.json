@@ -1,0 +1,7 @@
+{
+  "evidence_id": "EVID-BF-SCENARIO-0001",
+  "policy_violation_probability": 0.15,
+  "calibration_error": 0.02,
+  "fixture_integrity": true,
+  "decision": "deny"
+}

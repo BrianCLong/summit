@@ -1,0 +1,77 @@
+version: 1
+item:
+  title: "Timer-S1: A Billion-Scale Time Series Foundation Model with Serial Scaling"
+  links: ["https://huggingface.co/papers/2603.04791"]
+  type: "paper"
+  date_version: "2024"
+  intriguing_claim: "Timer-S1 introduces a Mixture-of-Experts time-series foundation model using Serial-Token Prediction (STP) training, TimeMoE blocks, and TimeBench (1T datapoints) to improve long-horizon forecasting. This capability is subsumed into Summit as a Predictive Governance Engine for AI behavior forecasting."
+item_slug: "timer-s1-behavior-forecasting"
+
+claim_registry:
+  mode: "missing-item"
+  claims_file: "subsumption/timer-s1-behavior-forecasting/claims.md"
+
+prs:
+  - title: "feat(benchmarks): add behavior forecasting event schema and deterministic fixtures"
+    lane: "benchmarks"
+    owner: "Architecture Agent"
+    risk: "green"
+  - title: "feat(benchmarks): add serial trajectory forecasting evaluator"
+    lane: "evaluation"
+    owner: "Evaluation Agent"
+    risk: "green"
+  - title: "feat(policy): add forecast-aware governance gate"
+    lane: "governance"
+    owner: "Security Agent"
+    risk: "yellow"
+  - title: "feat(analysis): add counterfactual scenario runner for agent behavior"
+    lane: "analysis"
+    owner: "Architecture Agent"
+    risk: "green"
+  - title: "feat(alerting): add forecast-vs-actual drift detector"
+    lane: "ops"
+    owner: "Ops Agent"
+    risk: "green"
+  - title: "feat(ci): add behavior forecasting evidence lane and release decision pack"
+    lane: "ci"
+    owner: "Integration Agent"
+    risk: "yellow"
+
+gates:
+  - name: "behavior-forecasting"
+    required_checks_status: "assumed"
+    deny_by_default_required: true
+
+evidence:
+  schemas:
+    report: "evidence/schemas/report.schema.json"
+    metrics: "evidence/schemas/metrics.schema.json"
+    stamp: "evidence/schemas/stamp.schema.json"
+  index: "evidence/index.json"
+  required_ids:
+    - "EVID-BF-SCENARIO-0001"
+
+docs_targets:
+  - "docs/standards/behavior-forecasting-platform.md"
+  - "docs/security/data-handling/behavior-forecasting-platform.md"
+  - "docs/ops/runbooks/behavior-forecasting-platform.md"
+  - "docs/ops/runbooks/forecast-gate-triage.md"
+  - "docs/repo_assumptions.md"
+  - "docs/decisions/behavior-forecasting-platform.md"
+
+fixtures:
+  deny_policy_dir: "subsumption/timer-s1-behavior-forecasting/fixtures/policy/deny"
+  tests:
+    positive:
+      - "subsumption/timer-s1-behavior-forecasting/fixtures/tests/positive/minimal_bundle"
+    negative:
+      - "subsumption/timer-s1-behavior-forecasting/fixtures/tests/negative/missing_docs"
+
+feature_flags: []
+dependency_delta:
+  required_if_deps_change: true
+  doc_root: "deps_delta"
+
+required_checks_discovery:
+  status: "assumed"
+  instructions: "docs/required_checks.todo.md"
