@@ -1,0 +1,51 @@
+{
+  "currency": "USD",
+  "signals": {
+    "plugin_purchases": [
+      {
+        "plugin_id": "intel-brief-studio",
+        "plugin_name": "Intel Brief Studio",
+        "category": "Productivity",
+        "transactions": 180,
+        "gross_revenue": 22000
+      },
+      {
+        "plugin_id": "obs-lens-pro",
+        "plugin_name": "Observability Lens Pro",
+        "category": "Observability",
+        "transactions": 320,
+        "gross_revenue": 48000
+      },
+      {
+        "plugin_id": "risk-atlas",
+        "plugin_name": "Risk Atlas",
+        "category": "Risk",
+        "transactions": 210,
+        "gross_revenue": 39000
+      },
+      {
+        "plugin_id": "trace-guard",
+        "plugin_name": "Trace Guard",
+        "category": "Security",
+        "transactions": 96,
+        "gross_revenue": 15000
+      }
+    ],
+    "developer_earnings": [
+      {
+        "developer_id": "dev-orion",
+        "earnings": 44100
+      },
+      {
+        "developer_id": "dev-atlas",
+        "earnings": 27300
+      },
+      {
+        "developer_id": "dev-summit-labs",
+        "earnings": 15400
+      }
+    ],
+    "marketplace_revenue": 124000,
+    "partner_integration_revenue": 58000
+  }
+}

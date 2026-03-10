@@ -1,0 +1,30 @@
+{
+  "currency": "USD",
+  "metrics": {
+    "total_developer_earnings": 86800,
+    "average_plugin_revenue": 31000,
+    "top_performing_plugins": [
+      {
+        "plugin_id": "obs-lens-pro",
+        "plugin_name": "Observability Lens Pro",
+        "category": "Observability",
+        "gross_revenue": 48000,
+        "developer_earnings": 33600
+      },
+      {
+        "plugin_id": "risk-atlas",
+        "plugin_name": "Risk Atlas",
+        "category": "Risk",
+        "gross_revenue": 39000,
+        "developer_earnings": 27300
+      },
+      {
+        "plugin_id": "intel-brief-studio",
+        "plugin_name": "Intel Brief Studio",
+        "category": "Productivity",
+        "gross_revenue": 22000,
+        "developer_earnings": 15400
+      }
+    ]
+  }
+}
