@@ -1,0 +1,14 @@
+{
+  "item_slug": "agent-fleet-control-plane-2027",
+  "generated_at": "2026-03-07T00:00:00Z",
+  "schema_version": "1.0.0",
+  "pr_lane": "foundation",
+  "feature_flags": {
+    "SUMMIT_AGENT_CONTROL_PLANE": false,
+    "SUMMIT_GRAPH_CONTEXT_COMPILER": false,
+    "SUMMIT_DETERMINISTIC_ROUTER": false,
+    "SUMMIT_DURABLE_SAGA_RUNTIME": false,
+    "SUMMIT_CAUSATION_ENGINE": false,
+    "SUMMIT_INTEROP_FABRIC": false
+  }
+}

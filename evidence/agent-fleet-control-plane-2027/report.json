@@ -1,0 +1,59 @@
+{
+  "item_slug": "agent-fleet-control-plane-2027",
+  "category": "ecosystem_scan",
+  "source": "CIO: 21 agent orchestration tools for managing your AI fleet",
+  "source_date": "2026-03-05",
+  "verified_inputs": [
+    "Enterprises deploy multiple AI agents across workflows",
+    "Organizations require platforms to build, coordinate, monitor, and manage agents",
+    "The article lists 21 orchestration tools/platforms",
+    "Tools break tasks into parts, feed multiple models, collect results, support loops, human sign-off",
+    "A2A protocol standardizes agent-to-agent communication"
+  ],
+  "assumptions": [
+    {
+      "id": "A-001",
+      "assumption": "Summit wants a vendor-neutral control plane, not a single-framework bet",
+      "validation": "Confirm against GA milestone goals"
+    },
+    {
+      "id": "A-002",
+      "assumption": "Knowledge-graph-aware routing is Summit's strongest architectural differentiator",
+      "validation": "Benchmark against framework-only planners"
+    },
+    {
+      "id": "A-003",
+      "assumption": "Foundation lane first, innovation lane behind feature flags",
+      "validation": "Enforce via PR stack and feature flags"
+    }
+  ],
+  "capabilities_identified": 10,
+  "tools_analyzed": 21,
+  "summit_strategy": {
+    "copy": ["LangGraph", "Temporal", "Pydantic AI patterns", "Kubiya determinism", "Vellum eval", "PagerDuty remediation", "BigPanda correlation", "DynaTrace causation", "Griptape context compaction"],
+    "integrate": ["AWS Bedrock AgentCore", "AutoGen", "Semantic Kernel", "LlamaIndex", "ServiceNow", "Agentforce", "n8n", "Devin", "Strands Agent"],
+    "obsolete": ["CrewAI", "Relevance AI"]
+  },
+  "summit_modules_impacted": [
+    "src/agents/controlplane/registry",
+    "src/agents/controlplane/planner",
+    "src/agents/controlplane/router",
+    "src/agents/controlplane/policy",
+    "src/agents/controlplane/telemetry",
+    "src/agents/runtime/saga",
+    "src/graphrag/context-compiler",
+    "src/connectors/interop"
+  ],
+  "capability_gaps_identified": [
+    "agent_registry",
+    "policy_decision_point",
+    "graph_context_compiler",
+    "task_decomposer_with_evidence_hooks",
+    "cost_latency_risk_router",
+    "durable_saga_runtime",
+    "flight_recorder",
+    "remediation_causation_engine",
+    "human_authority_gateway",
+    "interop_fabric"
+  ]
+}
