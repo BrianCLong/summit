@@ -1,23 +1,27 @@
-from typing import Any, Dict, List
+from typing import List, Dict
 
-def validate_markdown_table(data: str) -> List[Dict[str, str]]:
+def validate_markdown_table(md: str) -> List[Dict[str, str]]:
     findings = []
-    lines = [line.strip() for line in data.split("\n") if line.strip()]
+
+    lines = md.strip().split("\n")
     if not lines:
         return findings
 
-    col_counts = [line.count("|") for line in lines if "|" in line]
-    if not col_counts:
-        return findings
+    num_cols = None
+    consistent = True
 
-    if len(set(col_counts)) > 1:
-        findings.append({"rule": "md_table.column_consistency", "severity": "fail"})
-    else:
+    for line in lines:
+        if "|" not in line: continue
+        parts = [p.strip() for p in line.split("|")][1:-1] # assuming standard format
+        if num_cols is None:
+            num_cols = len(parts)
+        elif len(parts) != num_cols:
+            consistent = False
+            break
+
+    if consistent:
         findings.append({"rule": "md_table.column_consistency", "severity": "info"})
-
-    if len(lines) > 1 and set(lines[1].replace("|", "").replace("-", "").replace(":", "").strip()) == set():
-        findings.append({"rule": "md_table.has_header_sep", "severity": "info"})
     else:
-        findings.append({"rule": "md_table.has_header_sep", "severity": "fail"})
+        findings.append({"rule": "md_table.column_consistency", "severity": "fail"})
 
     return findings

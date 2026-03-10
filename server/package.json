@@ -40,9 +40,14 @@
   },
   "dependencies": {
 <<<<<<< HEAD
+    "@intelgraph/outreach": "workspace:*",
+    @apollo/server: "5.4.0",
+=======
+<<<<<<< HEAD
     "@apollo/server": "5.4.0",
 =======
     "@apollo/server": "4.11.3",
+>>>>>>> origin/main
 >>>>>>> origin/main
     "@as-integrations/express4": "1.1.2",
     "@aws-sdk/client-s3": "3.962.0",
@@ -54,6 +59,10 @@
     "@intelgraph/observability": "workspace:^",
     "@intelgraph/provenance": "workspace:*",
     "@intelgraph/telemetry-config": "file:../packages/telemetry-config",
+<<<<<<< HEAD
+
+    @node-saml/node-saml: "5.1.0",
+=======
 <<<<<<< HEAD
     @node-saml/node-saml: "5.1.0",
 =======
@@ -74,6 +83,7 @@
     "@node-saml/node-saml": "5.1.0",
 =======
     @node-saml/node-saml: "5.1.0",
+>>>>>>> origin/main
 >>>>>>> origin/main
 >>>>>>> origin/main
 >>>>>>> origin/main

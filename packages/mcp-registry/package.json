@@ -1,0 +1,19 @@
+{
+  "name": "@summit/mcp-registry",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Private MCP registry in Summit",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    zod: "3.22.4"
+  },
+  "devDependencies": {
+    typescript: "5.0.0",
+    vitest: "1.0.0"
+  }
+}

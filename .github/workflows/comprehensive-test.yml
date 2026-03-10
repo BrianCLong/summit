@@ -1,4 +1,4 @@
-name: Comprehensive Test Suite
+name: Comprehensive Test Suite 2
 
 on:
   push:

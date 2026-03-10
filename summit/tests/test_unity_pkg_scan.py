@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from summit.pkg.dag import DependencyCycleError, topological_order
+from summit.pkg.dag import DependencyCycleError, topological_sort
 from summit.pkg.semver import SemVerError, validate_semver
 from summit.pkg.unity_adapter import build_package_report
 
@@ -26,7 +26,7 @@ def test_build_package_report_is_deterministic() -> None:
     assert metrics1 == metrics2
     assert stamp1 == stamp2
     assert report1["evidence_id"] == "EVIDENCE:UNITYPKG:com.company.demo:1.2.3"
-    assert report1["topological_order"][0] == "com.company.demo"
+    assert report1["topological_sort"][0] == "com.company.demo"
 
 
 def test_semver_rejects_wildcard() -> None:
@@ -40,7 +40,7 @@ def test_cycle_detection_raises() -> None:
         "b": ["a"],
     }
     with pytest.raises(DependencyCycleError):
-        topological_order(dag)
+        topological_sort(dag)
 
 
 def test_cli_artifact_schema(tmp_path: Path) -> None:
