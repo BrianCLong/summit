@@ -67,3 +67,65 @@
 OSINT methodology is converging on a central principle: **credibility is dynamic, contextual, and inseparable from how data was collected.** Automation that accelerates collection without encoding provenance, uncertainty, and failure modes will increasingly undermine—rather than enhance—intelligence value.
 
 *End of Automation Turn #5.*
+
+---
+
+## 🔧 **Implementation Status**
+
+**Evidence ID:** E-20260204-001
+
+### Claim-Centric Validation Pipeline (Implemented)
+
+The following components have been implemented in `server/src/osint/`:
+
+#### 1. ClaimExtractor (`ClaimExtractor.ts`)
+- Extracts discrete, atomic claims from OSINT enrichment results
+- Supports social profiles, corporate records, and public records
+- Generates content-based claim IDs for deduplication
+- Claims are subject-predicate-object triples with provenance
+
+#### 2. ClaimValidator (`ClaimValidator.ts`)
+- Source-independent validation using multiple strategies:
+  - **CorroborationStrategy**: Multi-source agreement verification
+  - **TemporalConsistencyStrategy**: Temporal validity checks
+  - **SemanticPlausibilityStrategy**: Domain-specific semantic rules
+- Updates verification history with confidence deltas
+
+#### 3. ContradictionDetector (`ContradictionDetector.ts`)
+- Detects conflicts using extensible rules:
+  - **TemporalOverlapRule**: Overlapping validity with different values
+  - **MutualExclusionRule**: Logically incompatible states
+  - **NumericRangeRule**: Significant numeric discrepancies
+  - **StatusTransitionRule**: Invalid state transitions
+- Assigns severity levels (low/medium/high)
+
+#### 4. OSINTPipeline Integration (`OSINTPipeline.ts`)
+- Orchestrates extraction → validation → contradiction detection
+- Implements Risk Monitor threshold (< 0.4 triggers alert)
+- Weighted confidence aggregation:
+  - Confirmed claims: 1.5x weight
+  - Uncertain claims: 0.8x weight
+  - Refuted claims: 0.3x weight
+- Contradiction penalties: high (-0.15), medium (-0.08), low (-0.03)
+- Claim and contradiction merging for incremental updates
+
+### API Surface
+
+```typescript
+// Get claims needing investigation
+pipeline.getLowConfidenceClaims(profile, threshold?: number): Claim[]
+
+// Get critical contradictions for analyst review
+pipeline.getCriticalContradictions(profile): Contradiction[]
+```
+
+### Evidence ID Format
+
+All pipeline operations generate Evidence IDs in the format: `E-YYYYMMDD-NNN`
+
+### Next Steps
+
+1. Integrate with Neo4j graph for claim persistence (via `ClaimRepo`)
+2. Connect Risk Monitor agent event emission
+3. Add OPA policy gates for governance enforcement
+4. Implement provenance ledger integration for cryptographic chain-of-custody
