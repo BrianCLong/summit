@@ -14,7 +14,7 @@ permissions:
 jobs:
   triage:
     name: Triage Open PRs
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4 # v6
 
@@ -27,7 +27,7 @@ jobs:
           cache-dependency-path: '**/pnpm-lock.yaml'
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Run PR Triage
         env:

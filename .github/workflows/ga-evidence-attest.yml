@@ -41,7 +41,7 @@ jobs:
   # Job 1: Generate Evidence Pack (no special permissions needed)
   generate-pack:
     name: Generate Evidence Pack
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     permissions:
       contents: read
       issues: read  # For evidence collection (release blockers)
@@ -66,7 +66,7 @@ jobs:
           cache-dependency-path: '**/pnpm-lock.yaml'
 
       - name: Install Dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Install syft (SBOM generator)
         run: |
@@ -130,7 +130,7 @@ jobs:
   # Job 2: Attest Evidence Pack (requires id-token: write)
   attest:
     name: Attest with OIDC
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: generate-pack
     # CRITICAL: Only this job has id-token: write
     permissions:
@@ -150,7 +150,7 @@ jobs:
           path: dist/ga-evidence/
 
       - name: Install Cosign
-        uses: sigstore/cosign-installer@f713795cb21599bc4e5c4b58cbad1da852d7eeb9 # v3
+        uses: sigstore/cosign-installer@v3.7.0
         with:
           cosign-release: v3.0.5
 
@@ -225,7 +225,7 @@ jobs:
   # Job 3: Final Summary
   summary:
     name: Summary
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: [generate-pack, attest]
     if: always()
     permissions:

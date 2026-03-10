@@ -10,12 +10,12 @@
       "import": "./dist/index.js"
     },
     "./dist/scheduler/graph.js": {
-        "types": "./dist/scheduler/graph.d.ts",
-        "import": "./dist/scheduler/graph.js"
+      "types": "./dist/scheduler/graph.d.ts",
+      "import": "./dist/scheduler/graph.js"
     },
     "./dist/scheduler/transitions.js": {
-        "types": "./dist/scheduler/transitions.d.ts",
-        "import": "./dist/scheduler/transitions.js"
+      "types": "./dist/scheduler/transitions.d.ts",
+      "import": "./dist/scheduler/transitions.js"
     }
   },
   "type": "module",
@@ -26,15 +26,15 @@
     "lint": "eslint src --ext .ts"
   },
   "dependencies": {
-    "fs-extra": "^11.2.0",
-    "uuid": "^13.0.0",
+    "fs-extra": "11.2.0",
+    "uuid": "13.0.0",
     "@summit/policy": "workspace:*"
   },
   "devDependencies": {
-    "@types/node": "^20.10.0",
-    "@types/fs-extra": "^11.0.4",
-    "@types/uuid": "^11.0.0",
-    "typescript": "^5.3.0",
-    "vitest": "^1.6.0"
+    "@types/node": "20.10.0",
+    "@types/fs-extra": "11.0.4",
+    "@types/uuid": "11.0.0",
+    "typescript": "5.3.0",
+    "vitest": "1.6.0"
   }
 }

@@ -48,7 +48,7 @@ permissions:
 jobs:
   governance-gate:
     name: Governance Gate
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     outputs:
       status: ${{ steps.health.outputs.status }}
       score: ${{ steps.health.outputs.score }}

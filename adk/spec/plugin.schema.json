@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "adk/spec/plugin.schema.json",
+  "title": "Summit Agent Plugin",
+  "type": "object",
+  "required": ["name", "framework", "adapter", "entrypoint", "benchmarks"],
+  "properties": {
+    "name": { "type": "string" },
+    "framework": { "type": "string" },
+    "adapter": { "type": "string" },
+    "entrypoint": { "type": "string" },
+    "benchmarks": { "type": "array", "items": { "type": "string" } }
+  }
+}

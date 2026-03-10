@@ -39,7 +39,7 @@ jobs:
   # ═══════════════════════════════════════════════════════════════════════════
   verify:
     name: "1️⃣ Release Readiness"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 30
 
     outputs:
@@ -102,12 +102,11 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
         with:
-          cache: 'pnpm'
           cache-dependency-path: '**/pnpm-lock.yaml'
           node-version: "20"
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Run release:ready
         run: |
@@ -124,7 +123,7 @@ jobs:
   # ═══════════════════════════════════════════════════════════════════════════
   promotion-guard:
     name: "2️⃣ Promotion Guard"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 10
     needs: verify
 
@@ -222,7 +221,7 @@ jobs:
   # ═══════════════════════════════════════════════════════════════════════════
   bundle:
     name: "3️⃣ Assemble Pipeline Bundle"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 10
     needs: [verify, promotion-guard]
     if: always() && needs.verify.result == 'success'

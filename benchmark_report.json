@@ -1,0 +1,6 @@
+{
+  "dataset_size": 100,
+  "ingest_latency_sec": 1.6874768733978271,
+  "search_latency_ms": 24.744510650634766,
+  "retrieval_accuracy": 1.0
+}

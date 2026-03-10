@@ -16,13 +16,13 @@ const mockScan = () => {
 
   // Attempt real scan
   try {
-    console.log("Attempting real vulnerability scan (pnpm audit)...");
+    console.log("Attempting real vulnerability scan (pnpm audit --ignore-scripts)...");
     const env = { ...process.env, NODE_OPTIONS: '--max-old-space-size=4096' };
-    execSync('pnpm audit --audit-level=critical --json', { stdio: 'pipe', env });
+    execSync('pnpm audit --ignore-scripts --audit-level=critical --json', { stdio: 'pipe', env });
     console.log("No critical vulnerabilities found.");
   } catch (e: any) {
     if (e.status === 1) {
-       console.warn("Critical vulnerabilities detected by pnpm audit.");
+       console.warn("Critical vulnerabilities detected by pnpm audit --ignore-scripts.");
        try {
          const output = e.stdout.toString();
          const json = JSON.parse(output);
@@ -33,7 +33,7 @@ const mockScan = () => {
              }
          }
        } catch (parseError) {
-           console.warn("Could not parse pnpm audit output.");
+           console.warn("Could not parse pnpm audit --ignore-scripts output.");
        }
     } else {
         console.warn("Vulnerability scan failed to run or encountered system error:", e.message);

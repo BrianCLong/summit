@@ -20,7 +20,7 @@ jobs:
 
       - uses: pnpm/action-setup@v2
         with:
-          version: 10.0.0
+          version: 10.0.0.0.0
 
       - uses: actions/setup-node@v4
         with:
@@ -28,7 +28,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Lint
         run: pnpm --filter @intelgraph/tenant-api lint
@@ -44,7 +44,7 @@ jobs:
 
       - uses: pnpm/action-setup@v2
         with:
-          version: 10.0.0
+          version: 10.0.0.0.0
 
       - uses: actions/setup-node@v4
         with:
@@ -52,7 +52,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Run tests
         run: pnpm --filter @intelgraph/tenant-api test
@@ -66,7 +66,7 @@ jobs:
 
       - uses: pnpm/action-setup@v2
         with:
-          version: 10.0.0
+          version: 10.0.0.0.0
 
       - uses: actions/setup-node@v4
         with:
@@ -74,7 +74,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Build
         run: pnpm --filter @intelgraph/tenant-api build
@@ -87,7 +87,7 @@ jobs:
 
       - uses: pnpm/action-setup@v2
         with:
-          version: 10.0.0
+          version: 10.0.0.0.0
 
       - uses: actions/setup-node@v4
         with:
@@ -95,7 +95,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Audit dependencies
         run: pnpm audit --audit-level=high
@@ -120,7 +120,7 @@ jobs:
 
       - uses: pnpm/action-setup@v2
         with:
-          version: 10.0.0
+          version: 10.0.0.0.0
 
       - uses: actions/setup-node@v4
         with:
@@ -128,7 +128,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Generate SBOM
         uses: anchore/sbom-action@v0

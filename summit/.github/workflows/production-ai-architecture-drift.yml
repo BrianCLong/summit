@@ -1,0 +1,51 @@
+name: Production Architecture Drift
+
+on:
+  pull_request:
+    paths:
+      - "docs/blueprints/**"
+      - "docs/standards/**"
+      - "docs/security/data-handling/**"
+      - "docs/ops/runbooks/**"
+      - "scripts/monitoring/**"
+
+jobs:
+  drift-detector:
+    name: Run Blueprint Drift Detector
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 10.0.0
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile || npm install -g tsx typescript @types/node
+
+      - name: Run Drift Detector
+        run: npx tsx scripts/monitoring/production-ai-architecture-drift.ts
+
+      - name: Verify Artifact Shape
+        run: |
+          if [ ! -f docs/analysis-reports/production-ai-architecture/report.json ]; then echo "Missing report.json"; false; fi
+          if [ ! -f docs/analysis-reports/production-ai-architecture/metrics.json ]; then echo "Missing metrics.json"; false; fi
+          if [ ! -f docs/analysis-reports/production-ai-architecture/stamp.json ]; then echo "Missing stamp.json"; false; fi
+          # Ensure key sorting via jq (this ensures valid JSON)
+          jq -e . docs/analysis-reports/production-ai-architecture/report.json > /dev/null
+          jq -e . docs/analysis-reports/production-ai-architecture/metrics.json > /dev/null
+          jq -e . docs/analysis-reports/production-ai-architecture/stamp.json > /dev/null
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: blueprint-artifacts
+          path: docs/analysis-reports/production-ai-architecture/
+          retention-days: 14

@@ -1,0 +1,209 @@
+name: RepoOS Continuous Monitoring
+
+on:
+  schedule:
+    # Run every 15 minutes during work hours (9 AM - 6 PM UTC)
+    - cron: '*/15 9-18 * * 1-5'
+    # Run every hour outside work hours
+    - cron: '0 * * * *'
+  workflow_dispatch:
+    inputs:
+      force_analysis:
+        description: 'Force full PR analysis'
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  monitor-repoos:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: read
+      issues: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run RepoOS PR Analysis
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cat > /tmp/repoos-monitor.mjs << 'SCRIPT_END'
+          #!/usr/bin/env node
+          import { execSync } from 'child_process';
+          import fs from 'fs/promises';
+
+          const concernPatterns = {
+            'security': /security|auth|cve|vulnerability/i,
+            'performance': /perf|performance|optimize/i,
+            'ai-governance': /ai|ml|model|governance/i,
+            'graph': /graph|neo4j|cypher/i,
+            'cicd': /ci.*cd|github|workflow/i,
+            'frontend': /frontend|ui|react/i,
+            'backend': /backend|api|server/i
+          };
+
+          function detectConcerns(pr) {
+            const text = `${pr.title} ${pr.headRefName}`.toLowerCase();
+            const concerns = [];
+            for (const [concern, pattern] of Object.entries(concernPatterns)) {
+              if (pattern.test(text)) concerns.push(concern);
+            }
+            return concerns.length > 0 ? concerns : ['general'];
+          }
+
+          const prs = JSON.parse(execSync('gh pr list --limit 100 --json number,title,headRefName,createdAt,author --state open', { encoding: 'utf8' }));
+
+          const concernMap = new Map();
+          const prAnalysis = [];
+          for (const pr of prs) {
+            const concerns = detectConcerns(pr);
+            const age = Math.round((Date.now() - new Date(pr.createdAt)) / 86400000);
+            for (const concern of concerns) {
+              if (!concernMap.has(concern)) concernMap.set(concern, []);
+              concernMap.get(concern).push(pr.number);
+            }
+            prAnalysis.push({ number: pr.number, title: pr.title, concerns, age });
+          }
+
+          const report = {
+            timestamp: new Date().toISOString(),
+            totalPRs: prs.length,
+            concerns: Object.fromEntries(Array.from(concernMap.entries()).map(([c, p]) => [c, p.length])),
+            ageDistribution: {
+              fresh: prAnalysis.filter(p => p.age <= 1).length,
+              recent: prAnalysis.filter(p => p.age <= 7).length,
+              aging: prAnalysis.filter(p => p.age <= 30).length,
+              stale: prAnalysis.filter(p => p.age > 30).length
+            },
+            health: {
+              status: prAnalysis.filter(p => p.age > 30).length > 10 ? 'DEGRADED' : 'HEALTHY',
+              entropy: 'STABLE'
+            }
+          };
+
+          await fs.mkdir('artifacts', { recursive: true });
+          await fs.writeFile('artifacts/repoos-monitor.json', JSON.stringify(report, null, 2));
+
+          console.log(`✓ Analyzed ${report.totalPRs} PRs`);
+          console.log(`✓ Status: ${report.health.status}`);
+          console.log(`✓ Stale PRs: ${report.ageDistribution.stale}`);
+
+          // Exit with error if health is degraded
+          if (report.health.status === 'DEGRADED') {
+            console.error('⚠️  Repository health is DEGRADED');
+            process.exit(1);
+          }
+          SCRIPT_END
+
+          node /tmp/repoos-monitor.mjs
+
+      - name: Check for concerning trends
+        run: |
+          STALE_COUNT=$(cat artifacts/repoos-monitor.json | jq -r '.ageDistribution.stale')
+          TOTAL_PRS=$(cat artifacts/repoos-monitor.json | jq -r '.totalPRs')
+
+          echo "Stale PRs: $STALE_COUNT"
+          echo "Total PRs: $TOTAL_PRS"
+
+          # Alert if more than 10% are stale
+          if [ "$STALE_COUNT" -gt 10 ]; then
+            echo "::warning::High number of stale PRs detected: $STALE_COUNT"
+          fi
+
+          # Alert if too many total PRs
+          if [ "$TOTAL_PRS" -gt 150 ]; then
+            echo "::warning::PR count is high: $TOTAL_PRS (threshold: 150)"
+          fi
+
+      - name: Generate Health Badge
+        run: |
+          STATUS=$(cat artifacts/repoos-monitor.json | jq -r '.health.status')
+          COLOR="brightgreen"
+
+          if [ "$STATUS" = "DEGRADED" ]; then
+            COLOR="yellow"
+          elif [ "$STATUS" = "UNHEALTHY" ]; then
+            COLOR="red"
+          fi
+
+          echo "STATUS=$STATUS" >> $GITHUB_ENV
+          echo "BADGE_COLOR=$COLOR" >> $GITHUB_ENV
+
+      - name: Update monitoring artifacts
+        run: |
+          git config user.name "RepoOS Monitor"
+          git config user.email "repoos@summit.ai"
+
+          # Only commit if there are changes
+          if [ -n "$(git status --porcelain artifacts/repoos-monitor.json 2>/dev/null)" ]; then
+            git add artifacts/repoos-monitor.json || true
+            git commit -m "chore(repoos): update monitoring data [skip ci]
+
+Status: ${{ env.STATUS }}
+Timestamp: $(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+Co-authored-by: RepoOS Monitor <repoos@summit.ai>" || echo "No changes to commit"
+
+            git push || echo "Push failed, will retry on next run"
+          else
+            echo "No changes detected in monitoring data"
+          fi
+
+      - name: Create alert issue if needed
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const report = JSON.parse(fs.readFileSync('artifacts/repoos-monitor.json', 'utf8'));
+
+            const issueTitle = `🚨 RepoOS Alert: Repository Health Degraded`;
+            const issueBody = `## RepoOS Monitoring Alert
+
+**Status:** ${report.health.status}
+**Timestamp:** ${report.timestamp}
+**Total PRs:** ${report.totalPRs}
+
+### Issue Summary
+- **Stale PRs (>30d):** ${report.ageDistribution.stale}
+- **Aging PRs (7-30d):** ${report.ageDistribution.aging}
+- **Fresh PRs (≤7d):** ${report.ageDistribution.recent}
+
+### Top Concerns
+${Object.entries(report.concerns).sort((a,b) => b[1] - a[1]).slice(0, 5).map(([c, count]) => `- **${c}:** ${count} PRs`).join('\n')}
+
+### Recommended Actions
+1. Review and close stale PRs
+2. Prioritize high-concern categories
+3. Enable automated batching for high-volume concerns
+
+---
+*Generated by RepoOS Continuous Monitoring*`;
+
+            // Check if alert issue already exists
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'repoos-alert'
+            });
+
+            if (issues.data.length === 0) {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: issueTitle,
+                body: issueBody,
+                labels: ['repoos-alert', 'priority-high']
+              });
+            }

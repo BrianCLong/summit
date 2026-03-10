@@ -1,0 +1,261 @@
+# Branch Protection Configuration for Stage 7 Meta-Governance Lock
+#
+# This file documents the required branch protection rules for Gate 3
+# (Governance Bypass Game Day) validation.
+#
+# These protections enforce the constitutional lock and prevent control
+# loops from being disabled without proper authorization.
+#
+# NOTE: This is a documentation/configuration file. Actual enforcement
+# is done via GitHub UI or API. See scripts/repoos/apply-branch-protection.sh
+# for automated application.
+
+version: "1.0.0"
+
+# ========================================
+# Main Branch Protection (Production)
+# ========================================
+branches:
+  main:
+    protection:
+      # Require pull request reviews
+      required_pull_request_reviews:
+        required_approving_review_count: 2
+        dismiss_stale_reviews: true
+        require_code_owner_reviews: true
+        require_last_push_approval: true
+
+      # Require status checks
+      required_status_checks:
+        strict: true
+        checks:
+          - "constitution-enforcement"
+          - "evidence-governance"
+          - "stability-envelope-check"
+          - "meta-governance-lock-verification"
+
+      # Enforce branch rules
+      enforce_admins: true  # CRITICAL: Admins cannot bypass
+      allow_force_pushes: false
+      allow_deletions: false
+      required_linear_history: false  # Allow merge commits
+
+      # Require signed commits
+      required_signatures: true
+
+      # Restrict pushes
+      restrictions:
+        users: []
+        teams: ["intelgraph-core"]
+        apps: []
+
+  # ========================================
+  # Golden Path Branch (Architecture)
+  # ========================================
+  golden-path:
+    protection:
+      required_pull_request_reviews:
+        required_approving_review_count: 2
+        dismiss_stale_reviews: true
+        require_code_owner_reviews: true
+
+      required_status_checks:
+        strict: true
+        checks:
+          - "constitution-enforcement"
+          - "stability-envelope-check"
+
+      enforce_admins: true
+      allow_force_pushes: false
+      allow_deletions: false
+
+  # ========================================
+  # Frontier Branches (Wildcard)
+  # ========================================
+  "frontier/*":
+    protection:
+      required_pull_request_reviews:
+        required_approving_review_count: 1
+
+      required_status_checks:
+        strict: false
+        checks:
+          - "constitution-enforcement"
+
+      enforce_admins: false  # Allow flexibility on frontier branches
+      allow_force_pushes: true  # Allow force push on frontier branches
+      allow_deletions: true
+
+# ========================================
+# File-Level Protection Requirements
+# ========================================
+# These files require CODEOWNERS approval (via .github/CODEOWNERS)
+protected_files:
+  # Tier 1: Meta-governance (3 approvals required)
+  tier_1_critical:
+    - ".repoos/meta-governance-lock.yml"
+    - ".repoos/constitution.yml"
+    required_approvals: 3
+    cooling_period_hours: 24
+    requires_issue_reference: true
+
+  # Tier 2: Core governance (2 approvals required)
+  tier_2_governance:
+    - ".repoos/evidence-governor-config.yml"
+    - ".repoos/stability-envelope.yml"
+    - ".repoos/agent-budget.yml"
+    - ".repoos/patch-surface-limiting.yml"
+    - ".repoos/domain-map.yml"
+    required_approvals: 2
+    cooling_period_hours: 12
+
+  # Tier 3: Control loops (2 approvals required)
+  tier_3_control_loops:
+    - "scripts/repoos/homeostasis-controller.mjs"
+    - "scripts/repoos/self-healing-orchestrator.mjs"
+    - "scripts/repoos/evidence-governor.mjs"
+    - "scripts/repoos/architecture-evolution-simulator.mjs"
+    - "scripts/repoos/patch-market.mjs"
+    - "scripts/repoos/autonomous-architecture-synthesis.mjs"
+    required_approvals: 2
+
+  # Tier 4: Workflows (2 approvals required)
+  tier_4_workflows:
+    - ".github/workflows/stage-6-7-enforcement.yml"
+    - ".github/workflows/constitution-enforcement.yml"
+    required_approvals: 2
+
+# ========================================
+# Emergency Override Procedure
+# ========================================
+emergency_override:
+  enabled: true
+
+  # Requirements for emergency override
+  requirements:
+    - type: approvals
+      count: 3
+      description: "3 approvals from different teams (architecture, platform, security)"
+
+    - type: incident
+      required: true
+      description: "Must reference incident ID in PR/issue"
+
+    - type: cooling_period
+      hours: 24
+      description: "24-hour cooling period before merge (can be waived with 4th approval)"
+
+    - type: documentation
+      required: true
+      description: "Override justification in PR description"
+
+  # Override expiration
+  expiration:
+    max_duration_hours: 168  # 7 days
+    auto_revert: true
+    revert_issue_auto_create: true
+
+  # Audit trail
+  audit:
+    log_all_attempts: true
+    log_location: ".repoos/governance-audit-log.json"
+    require_post_mortem: true
+
+# ========================================
+# Gate 3 Validation Requirements
+# ========================================
+gate_3_validation:
+  description: "Governance Bypass Game Day"
+
+  # Bypass attack scenarios to test
+  scenarios:
+    - id: "bypass-1"
+      name: "Direct edit without PR"
+      target: ".repoos/meta-governance-lock.yml"
+      method: "force-push"
+      expected: "rejected"
+
+    - id: "bypass-2"
+      name: "PR without required approvals"
+      target: ".repoos/constitution.yml"
+      method: "PR with 1 approval"
+      expected: "blocked by branch protection"
+
+    - id: "bypass-3"
+      name: "Disable stability monitor"
+      target: "scripts/repoos/homeostasis-controller.mjs"
+      method: "Comment out logic"
+      expected: "blocked by CODEOWNERS"
+
+    - id: "bypass-4"
+      name: "Modify protected workflow"
+      target: ".github/workflows/constitution-enforcement.yml"
+      method: "PR from admin"
+      expected: "enforce_admins blocks"
+
+    - id: "bypass-5"
+      name: "Emergency override without incident"
+      target: ".repoos/meta-governance-lock.yml"
+      method: "3 approvals, no incident ID"
+      expected: "blocked by workflow validation"
+
+  # Success criteria
+  success_criteria:
+    - criterion: "100% of bypass attempts rejected"
+      threshold: "5/5 scenarios blocked"
+
+    - criterion: "All attempts logged"
+      verification: "Check .repoos/governance-audit-log.json"
+
+    - criterion: "Valid override works"
+      test: "3 approvals + incident + 24h cooling"
+
+    - criterion: "Auto-revert after expiration"
+      test: "Override expires after 168h"
+
+# ========================================
+# Monitoring and Alerting
+# ========================================
+monitoring:
+  # Alert on suspicious activity
+  alerts:
+    - trigger: "force_push_to_main"
+      severity: "critical"
+      action: "immediate_revert"
+
+    - trigger: "protected_file_modified_without_codeowners"
+      severity: "critical"
+      action: "block_merge"
+
+    - trigger: "emergency_override_requested"
+      severity: "high"
+      action: "notify_all_teams"
+
+    - trigger: "multiple_failed_bypass_attempts"
+      severity: "high"
+      action: "security_review"
+
+  # Audit log retention
+  audit_log:
+    retention_days: 365
+    location: ".repoos/governance-audit-log.json"
+    backup_location: "s3://summit-governance-audit/"
+
+# ========================================
+# Application Instructions
+# ========================================
+application:
+  # These protections should be applied via:
+  # 1. GitHub UI: Settings → Branches → Branch protection rules
+  # 2. GitHub API: scripts/repoos/apply-branch-protection.sh
+  # 3. Terraform: infra/github/branch-protection.tf (if using IaC)
+
+  # Validation:
+  # - Run: scripts/repoos/validate-branch-protection.sh
+  # - Expected: All protections match this config
+  # - Gate 3: Run bypass drill to test enforcement
+
+  # Notes:
+  # - enforce_admins: true is CRITICAL for constitutional lock
+  # - Without this, repository admins can bypass all protections
+  # - This is the enforcement surface that makes meta-governance real

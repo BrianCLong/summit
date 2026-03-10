@@ -1,0 +1,26 @@
+[
+  {
+    "id": "pop-baltic-russian-speakers",
+    "name": "Baltic Russian Speakers",
+    "regionId": "baltics",
+    "h3Cells": ["871f1d489ffffff"],
+    "languages": ["ru", "et", "lv"],
+    "dialects": ["baltic-russian"],
+    "educationDistribution": { "secondary": 0.52, "higher": 0.31 },
+    "economicProfile": "mixed urban labor and service workers",
+    "mediaConsumption": ["telegram", "youtube", "local-tv"],
+    "historicalMemories": ["soviet-collapse", "nato-expansion"],
+    "valueSignals": ["stability", "identity", "economic-security"]
+  },
+  {
+    "id": "pop-german-industrial-workers",
+    "name": "German Industrial Workers",
+    "regionId": "germany-industrial",
+    "h3Cells": ["871fa1234ffffff"],
+    "languages": ["de"],
+    "economicProfile": "industrial labor and technical trades",
+    "mediaConsumption": ["youtube", "facebook", "regional-news"],
+    "historicalMemories": ["energy-shock", "deindustrialization"],
+    "valueSignals": ["economic-security", "order", "social-stability"]
+  }
+]

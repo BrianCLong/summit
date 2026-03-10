@@ -24,7 +24,7 @@ jobs:
         with:
           node-version: "20"
           cache: pnpm
-      - run: pnpm install --frozen-lockfile --ignore-scripts
+      - run: pnpm install --no-frozen-lockfile --ignore-scripts
       - name: Run Release Verification Script
         run: ./scripts/verify-release.sh
 

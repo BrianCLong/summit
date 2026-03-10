@@ -18,11 +18,11 @@
     "codegen": "playwright codegen localhost:3000"
   },
   "dependencies": {
-    "@playwright/test": "^1.44.0",
-    "@axe-core/playwright": "^4.9.0"
+    "@playwright/test": "1.44.0",
+    "@axe-core/playwright": "4.9.0"
   },
   "devDependencies": {
-    "@types/node": "^20.0.0",
-    "allure-playwright": "^2.15.1"
+    "@types/node": "20.0.0",
+    "allure-playwright": "2.15.1"
   }
 }
