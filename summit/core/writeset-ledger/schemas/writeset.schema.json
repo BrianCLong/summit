@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.local/schemas/writeset.schema.json",
+  "title": "WriteSet",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "writeset_id",
+    "record_time",
+    "writer",
+    "claims",
+    "provenance"
+  ],
+  "properties": {
+    "writeset_id": {
+      "type": "string",
+      "pattern": "^ws-[A-Za-z0-9._:-]+$"
+    },
+    "batch_signature": {
+      "type": "string",
+      "pattern": "^[A-Fa-f0-9]{32,128}$",
+      "description": "Deterministic hash of ordered ops + origin metadata for dedupe/replay."
+    },
+    "record_time": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "writer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["actor_id", "type", "version"],
+      "properties": {
+        "actor_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "type": "string",
+          "enum": ["human", "agent", "extractor", "model"]
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "claims": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "claim.schema.json"
+      }
+    },
+    "provenance": {
+      "type": "array",
+      "items": {
+        "$ref": "provenance.schema.json"
+      },
+      "default": []
+    },
+    "validations": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/validationResult"
+      },
+      "default": []
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true,
+      "default": {}
+    }
+  },
+  "$defs": {
+    "validationResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["validator", "status"],
+      "properties": {
+        "validator": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["pass", "warn", "fail"]
+        },
+        "message": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

@@ -18,11 +18,11 @@
   },
   "dependencies": {
     "@intelgraph/logger": "workspace:*",
-    "uuid": "^11.0.5"
+    "uuid": "11.0.5"
   },
   "devDependencies": {
-    "@types/uuid": "^10.0.0",
+    "@types/uuid": "10.0.0",
     "@types/node": "20.19.27",
-    "typescript": "^5.9.3"
+    "typescript": "5.9.3"
   }
 }

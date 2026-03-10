@@ -442,7 +442,8 @@ intelgraph determinism clean --max-age-days 7
 | `-n, --runs <n>`       | Number of runs                       | `3`                         |
 | `--output-dir <path>`  | Output directory for evidence        | `.claude/determinism/<id>/` |
 | `--fail-fast`          | Stop on first mismatch               | `true`                      |
-| `--hash <algo>`        | Hash algorithm (sha256, sha512, md5) | `sha256`                    |
+| `--hash <algo>`        | Hash algorithm (sha256, sha384, sha512; md5 requires --allow-insecure-md5) | `sha256`                    |
+| `--allow-insecure-md5` | Allow legacy insecure md5 hashing                     | `false`                     |
 | `--include-stdout`     | Store full stdout in evidence        | `false`                     |
 | `--package <name>`     | Also run package tests N times       | -                           |
 | `--require-tests-pass` | Fail if package tests fail           | `false`                     |

@@ -23,16 +23,16 @@
   "author": "Summit Engineering",
   "license": "Apache-2.0",
   "dependencies": {
-    "@noble/ed25519": "^3.0.0",
-    "bs58": "^6.0.0",
-    "canonicalize": "^2.0.0",
-    "commander": "^12.1.0",
-    "luxon": "^3.5.0"
+    "@noble/ed25519": "3.0.0",
+    "bs58": "6.0.0",
+    "canonicalize": "2.0.0",
+    "commander": "12.1.0",
+    "luxon": "3.5.0"
   },
   "devDependencies": {
-    "@types/bs58": "^4.0.4",
-    "@types/express": "^5.0.3",
-    "@types/node": "^20.12.7",
-    "typescript": "^5.9.2"
+    "@types/bs58": "4.0.4",
+    "@types/express": "5.0.3",
+    "@types/node": "20.12.7",
+    "typescript": "5.9.2"
   }
 }

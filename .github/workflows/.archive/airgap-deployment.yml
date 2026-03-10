@@ -37,7 +37,7 @@ permissions:
 
 env:
   TF_VERSION: '1.6.0'
-  COSIGN_VERSION: '2.2.0'
+  COSIGN_VERSION: '3.0.5'
   SYFT_VERSION: '0.98.0'
   GRYPE_VERSION: '0.72.0'
 

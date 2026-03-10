@@ -79,6 +79,33 @@ export class LedgerStore {
    * If writeset_id already exists -> reject (immutability).
    */
   async appendWriteSet(ws: WriteSet): Promise<{ writeset_id: string; sha256: string }> {
+    const oldToNewId = new Map<string, string>();
+
+    for (const a of ws.artifacts) {
+      if (!a.artifact_id || a.artifact_id.startsWith("TEMP_")) {
+        const oldId = a.artifact_id;
+        a.artifact_id = crypto.createHash("sha256").update(a.uri + a.observed_at + (a.sha256 || "")).digest("hex");
+        if (oldId) oldToNewId.set(oldId, a.artifact_id);
+      }
+    }
+    for (const c of ws.claims) {
+      if (!c.claim_id || c.claim_id.startsWith("TEMP_")) {
+        const oldId = c.claim_id;
+        c.claim_id = crypto.createHash("sha256").update(c.statement + c.valid_time.start + (c.topic || "")).digest("hex");
+        if (oldId) oldToNewId.set(oldId, c.claim_id);
+      }
+    }
+
+    // Update links to use newly generated IDs
+    for (const l of ws.links) {
+      if (oldToNewId.has(l.from)) {
+        l.from = oldToNewId.get(l.from)!;
+      }
+      if (oldToNewId.has(l.to)) {
+        l.to = oldToNewId.get(l.to)!;
+      }
+    }
+
     const raw = JSON.stringify(ws);
     const sha256 = crypto.createHash("sha256").update(raw).digest("hex");
 
@@ -153,17 +180,17 @@ export class LedgerStore {
 
   // ---- duckdb helpers ----
 
-  private async exec(sql: string): Promise<void> {
+  async exec(sql: string): Promise<void> {
     await this.db.exec(sql);
   }
 
-  private async run(sql: string, params: any[] = []): Promise<void> {
+  async run(sql: string, params: any[] = []): Promise<void> {
     const stmt = await this.db.prepare(sql);
     await stmt.run(...params);
     await stmt.finalize();
   }
 
-  private async getOne<T>(sql: string, params: any[] = []): Promise<T | null> {
+  async getOne<T>(sql: string, params: any[] = []): Promise<T | null> {
     const stmt = await this.db.prepare(sql);
     const rows = await stmt.all(...params);
     await stmt.finalize();

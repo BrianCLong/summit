@@ -43,7 +43,6 @@ Proposed unblock sequence:
 - **Proposed "Stabilize:" PR title:** `Stabilize: GitHub PR orchestration runtime access`
 - **Golden status:** **Yellow** (no evidence of regressions in local tree, but release readiness cannot be validated against remote protected-branch checks).
 
-
 ## Continuation Plan (Keep Going)
 
 To continue immediately after this blocked run, execute the deterministic precheck in `docs/roadmap/GA_MERGE_ORCHESTRATOR_PRECHECK.md` and then resume at STEP 0.

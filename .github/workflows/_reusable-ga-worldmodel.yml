@@ -3,7 +3,7 @@ on:
   workflow_call:
 jobs:
   ga:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - run: echo "Checking GA readiness..."
       - run: echo "prediction accuracy threshold"
