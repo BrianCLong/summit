@@ -1,0 +1,1044 @@
+{
+  "source": "fallback-local",
+  "api_status": "blocked",
+  "api_error": "<urlopen error Tunnel connection failed: 403 Forbidden>",
+  "repository": {
+    "owner": "BrianCLong",
+    "name": "summit",
+    "default_branch": "main"
+  },
+  "workflows": [
+    {
+      "path": ".github/workflows/_auth-oidc.yml"
+    },
+    {
+      "path": ".github/workflows/_deploy.yml"
+    },
+    {
+      "path": ".github/workflows/_hardening.yml"
+    },
+    {
+      "path": ".github/workflows/_reusable-attestation.yml"
+    },
+    {
+      "path": ".github/workflows/_reusable-aws.yml"
+    },
+    {
+      "path": ".github/workflows/_reusable-build-test.yml"
+    },
+    {
+      "path": ".github/workflows/_reusable-build.yml"
+    },
+    {
+      "path": ".github/workflows/_reusable-canary-rollback.yml"
+    },
+    {
+      "path": ".github/workflows/_reusable-ci-metrics.yml"
+    },
+    {
+      "path": ".github/workflows/_reusable-ci-perf.yml"
+    },
+    {
+      "path": ".github/workflows/_reusable-ci.yml"
+    },
+    {
+      "path": ".github/workflows/_reusable-contract.yml"
+    },
+    {
+      "path": ".github/workflows/_reusable-e2e.yml"
+    },
+    {
+      "path": ".github/workflows/_reusable-ga-readiness.yml"
+    },
+    {
+      "path": ".github/workflows/_reusable-ga-selfflow.yml"
+    },
+    {
+      "path": ".github/workflows/_reusable-ga-worldmodel.yml"
+    },
+    {
+      "path": ".github/workflows/_reusable-go.yml"
+    },
+    {
+      "path": ".github/workflows/_reusable-governance-gate.yml"
+    },
+    {
+      "path": ".github/workflows/_reusable-iac-plan.yml"
+    },
+    {
+      "path": ".github/workflows/_reusable-migration.yml"
+    },
+    {
+      "path": ".github/workflows/_reusable-migrations-gate.yml"
+    },
+    {
+      "path": ".github/workflows/_reusable-node-pnpm-setup.yml"
+    },
+    {
+      "path": ".github/workflows/_reusable-package.yml"
+    },
+    {
+      "path": ".github/workflows/_reusable-pipeline-verify.yml"
+    },
+    {
+      "path": ".github/workflows/_reusable-policy-opa.yml"
+    },
+    {
+      "path": ".github/workflows/_reusable-preview-deploy.yml"
+    },
+    {
+      "path": ".github/workflows/_reusable-python.yml"
+    },
+    {
+      "path": ".github/workflows/_reusable-rdp-hardened.yml"
+    },
+    {
+      "path": ".github/workflows/_reusable-rdp-oidc-auth.yml"
+    },
+    {
+      "path": ".github/workflows/_reusable-release.yml"
+    },
+    {
+      "path": ".github/workflows/_reusable-rust.yml"
+    },
+    {
+      "path": ".github/workflows/_reusable-sast-sca.yml"
+    },
+    {
+      "path": ".github/workflows/_reusable-sbom.yml"
+    },
+    {
+      "path": ".github/workflows/_reusable-security-compliance.yml"
+    },
+    {
+      "path": ".github/workflows/_reusable-security-scan.yml"
+    },
+    {
+      "path": ".github/workflows/_reusable-security.yml"
+    },
+    {
+      "path": ".github/workflows/_reusable-setup.yml"
+    },
+    {
+      "path": ".github/workflows/_reusable-slsa-build.yml"
+    },
+    {
+      "path": ".github/workflows/_reusable-smoke.yml"
+    },
+    {
+      "path": ".github/workflows/_reusable-supply-chain-policy.yml"
+    },
+    {
+      "path": ".github/workflows/_reusable-test-suite.yml"
+    },
+    {
+      "path": ".github/workflows/_reusable-test.yml"
+    },
+    {
+      "path": ".github/workflows/_reusable-toolchain-setup.yml"
+    },
+    {
+      "path": ".github/workflows/_reusable-unit.yml"
+    },
+    {
+      "path": ".github/workflows/a11y-keyboard-smoke.yml"
+    },
+    {
+      "path": ".github/workflows/aeip_ci.yml"
+    },
+    {
+      "path": ".github/workflows/agent-capability-graph-drift.yml"
+    },
+    {
+      "path": ".github/workflows/agent-capability-graph.yml"
+    },
+    {
+      "path": ".github/workflows/agent-drift.yml"
+    },
+    {
+      "path": ".github/workflows/agent-guardrails.yml"
+    },
+    {
+      "path": ".github/workflows/agent-scaling-gate.yml"
+    },
+    {
+      "path": ".github/workflows/agent-scaling-monitor.yml"
+    },
+    {
+      "path": ".github/workflows/agent-trust.yml"
+    },
+    {
+      "path": ".github/workflows/agentic-plan-gate.yml"
+    },
+    {
+      "path": ".github/workflows/agentic-policy-drift.yml"
+    },
+    {
+      "path": ".github/workflows/agentplace-drift.yml"
+    },
+    {
+      "path": ".github/workflows/agentplace-policy.yml"
+    },
+    {
+      "path": ".github/workflows/ai-assist-gates.yml"
+    },
+    {
+      "path": ".github/workflows/ai-copilot-canary.yml"
+    },
+    {
+      "path": ".github/workflows/ai-dependency-firewall.yml"
+    },
+    {
+      "path": ".github/workflows/ai-firewall.yml"
+    },
+    {
+      "path": ".github/workflows/ai-governance.yml"
+    },
+    {
+      "path": ".github/workflows/ai-mockup-2026-benchmark.yml"
+    },
+    {
+      "path": ".github/workflows/ai-stack-drift.yml"
+    },
+    {
+      "path": ".github/workflows/ai-stack-scheduled-shadow.yml"
+    },
+    {
+      "path": ".github/workflows/ai-supply-chain-firewall.yml"
+    },
+    {
+      "path": ".github/workflows/api-determinism-check.yml"
+    },
+    {
+      "path": ".github/workflows/api-lint.yml"
+    },
+    {
+      "path": ".github/workflows/architecture-map-validation.yml"
+    },
+    {
+      "path": ".github/workflows/archsim.yml"
+    },
+    {
+      "path": ".github/workflows/artifact_hygiene.yml"
+    },
+    {
+      "path": ".github/workflows/audit-exception-expiry.yml"
+    },
+    {
+      "path": ".github/workflows/auto-approve-prs.yml"
+    },
+    {
+      "path": ".github/workflows/auto-enqueue.yml"
+    },
+    {
+      "path": ".github/workflows/auto-remediation.yml"
+    },
+    {
+      "path": ".github/workflows/auto-triage-blockers.yml"
+    },
+    {
+      "path": ".github/workflows/auto-triage.yml"
+    },
+    {
+      "path": ".github/workflows/azure-turin-v7-drift.yml"
+    },
+    {
+      "path": ".github/workflows/backup-dr.yml"
+    },
+    {
+      "path": ".github/workflows/behavior-forecasting.yml"
+    },
+    {
+      "path": ".github/workflows/bidirectional-sync.yml"
+    },
+    {
+      "path": ".github/workflows/bizplan-formation.yml"
+    },
+    {
+      "path": ".github/workflows/branch-lifecycle.yml"
+    },
+    {
+      "path": ".github/workflows/branch-ownership.yml"
+    },
+    {
+      "path": ".github/workflows/branch-protection-drift.yml"
+    },
+    {
+      "path": ".github/workflows/budget-guard.yml"
+    },
+    {
+      "path": ".github/workflows/build.yml"
+    },
+    {
+      "path": ".github/workflows/capability-gate.yml"
+    },
+    {
+      "path": ".github/workflows/cda-drift.yml"
+    },
+    {
+      "path": ".github/workflows/check-drift.yml"
+    },
+    {
+      "path": ".github/workflows/ci-2602-18283.yml"
+    },
+    {
+      "path": ".github/workflows/ci-actionlint.yml"
+    },
+    {
+      "path": ".github/workflows/ci-ael.yml"
+    },
+    {
+      "path": ".github/workflows/ci-agent-runtime.yml"
+    },
+    {
+      "path": ".github/workflows/ci-ai-governance.yml"
+    },
+    {
+      "path": ".github/workflows/ci-concurrency-enforcer.yml"
+    },
+    {
+      "path": ".github/workflows/ci-core.yml"
+    },
+    {
+      "path": ".github/workflows/ci-cos.yml"
+    },
+    {
+      "path": ".github/workflows/ci-council-evidence.yml"
+    },
+    {
+      "path": ".github/workflows/ci-drift-sentinel.yml"
+    },
+    {
+      "path": ".github/workflows/ci-flake-monitor.yml"
+    },
+    {
+      "path": ".github/workflows/ci-genui-security.yml"
+    },
+    {
+      "path": ".github/workflows/ci-go.yml"
+    },
+    {
+      "path": ".github/workflows/ci-golden-path.yml"
+    },
+    {
+      "path": ".github/workflows/ci-governance.yml"
+    },
+    {
+      "path": ".github/workflows/ci-infra-verify.yml"
+    },
+    {
+      "path": ".github/workflows/ci-intelgraph-server.yml"
+    },
+    {
+      "path": ".github/workflows/ci-legacy.yml"
+    },
+    {
+      "path": ".github/workflows/ci-multicloud.yml"
+    },
+    {
+      "path": ".github/workflows/ci-pidm-evidence.yml"
+    },
+    {
+      "path": ".github/workflows/ci-post-merge.yml"
+    },
+    {
+      "path": ".github/workflows/ci-pr-triage.yml"
+    },
+    {
+      "path": ".github/workflows/ci-pr.yml"
+    },
+    {
+      "path": ".github/workflows/ci-preflight.yml"
+    },
+    {
+      "path": ".github/workflows/ci-python.yml"
+    },
+    {
+      "path": ".github/workflows/ci-queue-monitor.yml"
+    },
+    {
+      "path": ".github/workflows/ci-rdp-gates.yml"
+    },
+    {
+      "path": ".github/workflows/ci-regulatory-early-warning.yml"
+    },
+    {
+      "path": ".github/workflows/ci-rubricbench.yml"
+    },
+    {
+      "path": ".github/workflows/ci-run-metadata-collector.yml"
+    },
+    {
+      "path": ".github/workflows/ci-run-telemetry-rollup.yml"
+    },
+    {
+      "path": ".github/workflows/ci-runner-drift.yml"
+    },
+    {
+      "path": ".github/workflows/ci-rust.yml"
+    },
+    {
+      "path": ".github/workflows/ci-sbom.yml"
+    },
+    {
+      "path": ".github/workflows/ci-security.yml"
+    },
+    {
+      "path": ".github/workflows/ci-selfflow.yml"
+    },
+    {
+      "path": ".github/workflows/ci-semantic-search.yml"
+    },
+    {
+      "path": ".github/workflows/ci-sgf.yml"
+    },
+    {
+      "path": ".github/workflows/ci-signal-gate.yml"
+    },
+    {
+      "path": ".github/workflows/ci-template-optimized.yml"
+    },
+    {
+      "path": ".github/workflows/ci-verify.yml"
+    },
+    {
+      "path": ".github/workflows/ci-workflow-diff.yml"
+    },
+    {
+      "path": ".github/workflows/ci-worldmodel.yml"
+    },
+    {
+      "path": ".github/workflows/ci.yml"
+    },
+    {
+      "path": ".github/workflows/client-ci.yml"
+    },
+    {
+      "path": ".github/workflows/client-typecheck.yml"
+    },
+    {
+      "path": ".github/workflows/codeql.yml"
+    },
+    {
+      "path": ".github/workflows/compliance-drift-check.yml"
+    },
+    {
+      "path": ".github/workflows/compliance-governance.yml"
+    },
+    {
+      "path": ".github/workflows/compliance.yml"
+    },
+    {
+      "path": ".github/workflows/comprehensive-test-suite.yml"
+    },
+    {
+      "path": ".github/workflows/comprehensive-test.yml"
+    },
+    {
+      "path": ".github/workflows/computer-use-policy-check.yml"
+    },
+    {
+      "path": ".github/workflows/connector-sdk.yml"
+    },
+    {
+      "path": ".github/workflows/copilot-golden-path.yml"
+    },
+    {
+      "path": ".github/workflows/copilot-pr-metrics-ci.yml"
+    },
+    {
+      "path": ".github/workflows/copilot_pr_metrics_monitor.yml"
+    },
+    {
+      "path": ".github/workflows/cosign-verify.yml"
+    },
+    {
+      "path": ".github/workflows/cypher-plan-heatmap.yml"
+    },
+    {
+      "path": ".github/workflows/dependency-audit.yml"
+    },
+    {
+      "path": ".github/workflows/dependency-freeze-check.yml"
+    },
+    {
+      "path": ".github/workflows/dependency-monitor.yml"
+    },
+    {
+      "path": ".github/workflows/deploy-aws.yml"
+    },
+    {
+      "path": ".github/workflows/deploy-dev.yml"
+    },
+    {
+      "path": ".github/workflows/deploy-multi-region.yml"
+    },
+    {
+      "path": ".github/workflows/deploy-preview.yml"
+    },
+    {
+      "path": ".github/workflows/disinfo.yml"
+    },
+    {
+      "path": ".github/workflows/doc-link-check.yml"
+    },
+    {
+      "path": ".github/workflows/docs-ci.yml"
+    },
+    {
+      "path": ".github/workflows/docs-fast-track.yml"
+    },
+    {
+      "path": ".github/workflows/docs-lint.yml"
+    },
+    {
+      "path": ".github/workflows/e2e-tests.yml"
+    },
+    {
+      "path": ".github/workflows/e2e-vind-bench.yml"
+    },
+    {
+      "path": ".github/workflows/e2e-vind-lifecycle.yml"
+    },
+    {
+      "path": ".github/workflows/e2e-vind-smoke.yml"
+    },
+    {
+      "path": ".github/workflows/emu3-ci.yml"
+    },
+    {
+      "path": ".github/workflows/entropy-guard.yml"
+    },
+    {
+      "path": ".github/workflows/eval-skills.yml"
+    },
+    {
+      "path": ".github/workflows/evidence-collection.yml"
+    },
+    {
+      "path": ".github/workflows/evidence-id-consistency.yml"
+    },
+    {
+      "path": ".github/workflows/evidence-pack.yml"
+    },
+    {
+      "path": ".github/workflows/evidence-validate.yml"
+    },
+    {
+      "path": ".github/workflows/evidence.yml"
+    },
+    {
+      "path": ".github/workflows/evidence_ci_step35flash.yml"
+    },
+    {
+      "path": ".github/workflows/evolution-constitution.yml"
+    },
+    {
+      "path": ".github/workflows/evolution-pr-events.yml"
+    },
+    {
+      "path": ".github/workflows/experiment-aware-release.yml"
+    },
+    {
+      "path": ".github/workflows/extortion-gates.yml"
+    },
+    {
+      "path": ".github/workflows/framework-risk-gate.yml"
+    },
+    {
+      "path": ".github/workflows/fusion-sklearn-ci.yml"
+    },
+    {
+      "path": ".github/workflows/ga-evidence-attest.yml"
+    },
+    {
+      "path": ".github/workflows/ga-evidence-pack.yml"
+    },
+    {
+      "path": ".github/workflows/ga-evidence.yml"
+    },
+    {
+      "path": ".github/workflows/ga-gate.yml"
+    },
+    {
+      "path": ".github/workflows/ga-slice-org-mesh-twin.yml"
+    },
+    {
+      "path": ".github/workflows/ga_blocker_radar.yml"
+    },
+    {
+      "path": ".github/workflows/gates.yml"
+    },
+    {
+      "path": ".github/workflows/generate-ops-evidence-pack.yml"
+    },
+    {
+      "path": ".github/workflows/genui-monitor.yml"
+    },
+    {
+      "path": ".github/workflows/go-live-gate.yml"
+    },
+    {
+      "path": ".github/workflows/go-live-release.yml"
+    },
+    {
+      "path": ".github/workflows/golden-path-e2e.yml"
+    },
+    {
+      "path": ".github/workflows/golden-path-gate.yml"
+    },
+    {
+      "path": ".github/workflows/golden-path-supply-chain.yml"
+    },
+    {
+      "path": ".github/workflows/governance-check.yml"
+    },
+    {
+      "path": ".github/workflows/governance-engine.yml"
+    },
+    {
+      "path": ".github/workflows/governance-evidence-contracts.yml"
+    },
+    {
+      "path": ".github/workflows/governance-lockfile-verify.yml"
+    },
+    {
+      "path": ".github/workflows/governance-meta-gate.yml"
+    },
+    {
+      "path": ".github/workflows/governance-regression-guard.yml"
+    },
+    {
+      "path": ".github/workflows/governance.yml"
+    },
+    {
+      "path": ".github/workflows/graph-guardrail-fuzz.yml"
+    },
+    {
+      "path": ".github/workflows/graph-sync-gate.yml"
+    },
+    {
+      "path": ".github/workflows/graph-sync.yml"
+    },
+    {
+      "path": ".github/workflows/graphci_determinism.yml"
+    },
+    {
+      "path": ".github/workflows/graphrag-eval.yml"
+    },
+    {
+      "path": ".github/workflows/graphrag-repro.yml"
+    },
+    {
+      "path": ".github/workflows/grounding-bench.yml"
+    },
+    {
+      "path": ".github/workflows/hello-service-ci.yml"
+    },
+    {
+      "path": ".github/workflows/hotfix-release.yml"
+    },
+    {
+      "path": ".github/workflows/hybrid_search_ci.yml"
+    },
+    {
+      "path": ".github/workflows/infra-ci.yml"
+    },
+    {
+      "path": ".github/workflows/infra-deploy.yml"
+    },
+    {
+      "path": ".github/workflows/infra-diff.yml"
+    },
+    {
+      "path": ".github/workflows/infra-drift.yml"
+    },
+    {
+      "path": ".github/workflows/infra-validate.yml"
+    },
+    {
+      "path": ".github/workflows/infra-verify.yml"
+    },
+    {
+      "path": ".github/workflows/integration-nightly.yml"
+    },
+    {
+      "path": ".github/workflows/integration-tests.yml"
+    },
+    {
+      "path": ".github/workflows/intelgraph-ci.yml"
+    },
+    {
+      "path": ".github/workflows/issue-queue-bot.yml"
+    },
+    {
+      "path": ".github/workflows/jetrl-ci.yml"
+    },
+    {
+      "path": ".github/workflows/lsn-window.yml"
+    },
+    {
+      "path": ".github/workflows/macos-26-canary.yml"
+    },
+    {
+      "path": ".github/workflows/main-validation.yml"
+    },
+    {
+      "path": ".github/workflows/mcp-drift.yml"
+    },
+    {
+      "path": ".github/workflows/media-list-drift.yml"
+    },
+    {
+      "path": ".github/workflows/mega-merge-orchestrator.yml"
+    },
+    {
+      "path": ".github/workflows/mega-pr-containment.yml"
+    },
+    {
+      "path": ".github/workflows/memalign-ci.yml"
+    },
+    {
+      "path": ".github/workflows/merge-engine.yml"
+    },
+    {
+      "path": ".github/workflows/merge-train-autopilot.yml"
+    },
+    {
+      "path": ".github/workflows/merge-train-labeler.yml"
+    },
+    {
+      "path": ".github/workflows/military-ai-drift.yml"
+    },
+    {
+      "path": ".github/workflows/military-use.yml"
+    },
+    {
+      "path": ".github/workflows/mvp4-gate.yml"
+    },
+    {
+      "path": ".github/workflows/narrative-ci.yml"
+    },
+    {
+      "path": ".github/workflows/neo4j-parity-check.yml"
+    },
+    {
+      "path": ".github/workflows/neo4j-plan-sample.yml"
+    },
+    {
+      "path": ".github/workflows/nightly.yml"
+    },
+    {
+      "path": ".github/workflows/offline-drift.yml"
+    },
+    {
+      "path": ".github/workflows/omics-drift.yml"
+    },
+    {
+      "path": ".github/workflows/ontology-lint.yml"
+    },
+    {
+      "path": ".github/workflows/opa-policy-test.yml"
+    },
+    {
+      "path": ".github/workflows/package-boundary.yml"
+    },
+    {
+      "path": ".github/workflows/parity-check.yml"
+    },
+    {
+      "path": ".github/workflows/patch-frontier.yml"
+    },
+    {
+      "path": ".github/workflows/perf.yml"
+    },
+    {
+      "path": ".github/workflows/plan-heatmap.yml"
+    },
+    {
+      "path": ".github/workflows/policy-auto-tuning-ci.yml"
+    },
+    {
+      "path": ".github/workflows/policy-drift.yml"
+    },
+    {
+      "path": ".github/workflows/policy-validate.yml"
+    },
+    {
+      "path": ".github/workflows/post-deploy-gate.yml"
+    },
+    {
+      "path": ".github/workflows/post-release-canary.yml"
+    },
+    {
+      "path": ".github/workflows/pr-artifact-preserver.yml"
+    },
+    {
+      "path": ".github/workflows/pr-classification.yml"
+    },
+    {
+      "path": ".github/workflows/pr-concern-classifier.yml"
+    },
+    {
+      "path": ".github/workflows/pr-conflict-forecast.yml"
+    },
+    {
+      "path": ".github/workflows/pr-dedupe-gate.yml"
+    },
+    {
+      "path": ".github/workflows/pr-gate.yml"
+    },
+    {
+      "path": ".github/workflows/pr-gates.yml"
+    },
+    {
+      "path": ".github/workflows/pr-planner.yml"
+    },
+    {
+      "path": ".github/workflows/pr-preview-cleanup.yml"
+    },
+    {
+      "path": ".github/workflows/pr-preview.yml"
+    },
+    {
+      "path": ".github/workflows/pr-quality-gate.yml"
+    },
+    {
+      "path": ".github/workflows/pr-size-labeler.yml"
+    },
+    {
+      "path": ".github/workflows/pr-triage.yml"
+    },
+    {
+      "path": ".github/workflows/pre-release-health-check.yml"
+    },
+    {
+      "path": ".github/workflows/procedure-lint.yml"
+    },
+    {
+      "path": ".github/workflows/prod-simulation.yml"
+    },
+    {
+      "path": ".github/workflows/project-p0-queue.yml"
+    },
+    {
+      "path": ".github/workflows/prompt-evidence-guard.yml"
+    },
+    {
+      "path": ".github/workflows/prov-mapping-gate.yml"
+    },
+    {
+      "path": ".github/workflows/provenance-verify.yml"
+    },
+    {
+      "path": ".github/workflows/publish-release-ops-internal.yml"
+    },
+    {
+      "path": ".github/workflows/rag-data-integrity.yml"
+    },
+    {
+      "path": ".github/workflows/rc-preparation.yml"
+    },
+    {
+      "path": ".github/workflows/reconciler-integration.yml"
+    },
+    {
+      "path": ".github/workflows/redaction-tests.yml"
+    },
+    {
+      "path": ".github/workflows/regulatory-drift.yml"
+    },
+    {
+      "path": ".github/workflows/release-cut.yml"
+    },
+    {
+      "path": ".github/workflows/release-ga-pipeline.yml"
+    },
+    {
+      "path": ".github/workflows/release-ga.yml"
+    },
+    {
+      "path": ".github/workflows/release-gate.yml"
+    },
+    {
+      "path": ".github/workflows/release-integrity.yml"
+    },
+    {
+      "path": ".github/workflows/release-ops-orchestrator.yml"
+    },
+    {
+      "path": ".github/workflows/release-rc.yml"
+    },
+    {
+      "path": ".github/workflows/release-readiness.yml"
+    },
+    {
+      "path": ".github/workflows/release-reliability.yml"
+    },
+    {
+      "path": ".github/workflows/release-rollback.yml"
+    },
+    {
+      "path": ".github/workflows/release-train.yml"
+    },
+    {
+      "path": ".github/workflows/render-evidence-graph.yml"
+    },
+    {
+      "path": ".github/workflows/repetition-check.yml"
+    },
+    {
+      "path": ".github/workflows/repoos-auto-batch.yml"
+    },
+    {
+      "path": ".github/workflows/repoos-continuous-monitoring.yml"
+    },
+    {
+      "path": ".github/workflows/repro-build-check.yml"
+    },
+    {
+      "path": ".github/workflows/repro-docker.yml"
+    },
+    {
+      "path": ".github/workflows/reproducibility.yml"
+    },
+    {
+      "path": ".github/workflows/requeue.yml"
+    },
+    {
+      "path": ".github/workflows/required-check-drift-sentinel.yml"
+    },
+    {
+      "path": ".github/workflows/reusable-golden-path.yml"
+    },
+    {
+      "path": ".github/workflows/route-opt.yml"
+    },
+    {
+      "path": ".github/workflows/sass-spec-lint.yml"
+    },
+    {
+      "path": ".github/workflows/sbom-scan.yml"
+    },
+    {
+      "path": ".github/workflows/schema-diff.yml"
+    },
+    {
+      "path": ".github/workflows/scorecard.yml"
+    },
+    {
+      "path": ".github/workflows/security-issue-triage.yml"
+    },
+    {
+      "path": ".github/workflows/security-playbook-automation.yml"
+    },
+    {
+      "path": ".github/workflows/security-supplychain.yml"
+    },
+    {
+      "path": ".github/workflows/security_gates.yml"
+    },
+    {
+      "path": ".github/workflows/self_flow_eval.yml"
+    },
+    {
+      "path": ".github/workflows/serious-client-tone-drift.yml"
+    },
+    {
+      "path": ".github/workflows/server-ci.yml"
+    },
+    {
+      "path": ".github/workflows/slo-smoke-gate.yml"
+    },
+    {
+      "path": ".github/workflows/slsa-provenance.yml"
+    },
+    {
+      "path": ".github/workflows/smoke-gate.yml"
+    },
+    {
+      "path": ".github/workflows/soc-controls.yml"
+    },
+    {
+      "path": ".github/workflows/sparkline-report.yml"
+    },
+    {
+      "path": ".github/workflows/stage-6-7-enforcement.yml"
+    },
+    {
+      "path": ".github/workflows/stale-pr-cleanup.yml"
+    },
+    {
+      "path": ".github/workflows/structcorr.yml"
+    },
+    {
+      "path": ".github/workflows/subsumption-bundle-verify.yml"
+    },
+    {
+      "path": ".github/workflows/summit-ci.yml"
+    },
+    {
+      "path": ".github/workflows/summit-eval.yml"
+    },
+    {
+      "path": ".github/workflows/summit-evidence.yml"
+    },
+    {
+      "path": ".github/workflows/summit-golden-path.yml"
+    },
+    {
+      "path": ".github/workflows/summit-ui-ci.yml"
+    },
+    {
+      "path": ".github/workflows/supply-chain-delta.yml"
+    },
+    {
+      "path": ".github/workflows/supplychain-drift.yml"
+    },
+    {
+      "path": ".github/workflows/supplychain-gates.yml"
+    },
+    {
+      "path": ".github/workflows/supplychain-verify.yml"
+    },
+    {
+      "path": ".github/workflows/swe-benchmark.yml"
+    },
+    {
+      "path": ".github/workflows/swe-drift-monitor.yml"
+    },
+    {
+      "path": ".github/workflows/telemetry-lineage-gates.yml"
+    },
+    {
+      "path": ".github/workflows/toolcall_conformance.yml"
+    },
+    {
+      "path": ".github/workflows/type-safety-audit.yml"
+    },
+    {
+      "path": ".github/workflows/ultra-merge-orchestrator.yml"
+    },
+    {
+      "path": ".github/workflows/unit-test-coverage.yml"
+    },
+    {
+      "path": ".github/workflows/ux-governance.yml"
+    },
+    {
+      "path": ".github/workflows/validate-slsa-and-spdx.yml"
+    },
+    {
+      "path": ".github/workflows/validate_lineage.yml"
+    },
+    {
+      "path": ".github/workflows/verify-cosign-bundle.yml"
+    },
+    {
+      "path": ".github/workflows/vmworkbench-ci.yml"
+    },
+    {
+      "path": ".github/workflows/workflow-validity.yml"
+    }
+  ]
+}
