@@ -36,8 +36,18 @@ export default function SuggestedConnectionsPanel() {
         {predictions.map((p) => (
           <li key={`${p.source}-${p.target}`}>
             {p.source} ➜ {p.target} ({p.confidence.toFixed(2)})
-            <button onClick={() => handleAction(p, true)}>Confirm</button>
-            <button onClick={() => handleAction(p, false)}>Deny</button>
+            <button
+              onClick={() => handleAction(p, true)}
+              aria-label={`Confirm connection ${p.source} to ${p.target}`}
+            >
+              Confirm
+            </button>
+            <button
+              onClick={() => handleAction(p, false)}
+              aria-label={`Deny connection ${p.source} to ${p.target}`}
+            >
+              Deny
+            </button>
           </li>
         ))}
       </ul>
