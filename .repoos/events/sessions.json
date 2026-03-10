@@ -1,0 +1,28 @@
+{
+  "sessions": [
+    {
+      "session_title": "Intent-Driven Plugin Deployment at Scale",
+      "speaker": "Avery Chen",
+      "topic": "Marketplace Operations",
+      "plugin_or_integration_demonstrated": "Summit Marketplace Revenue Insights"
+    },
+    {
+      "session_title": "Operationalizing Partner Accelerators",
+      "speaker": "Mina Patel",
+      "topic": "Partner Enablement",
+      "plugin_or_integration_demonstrated": "Partner Accelerator Cohort Manager"
+    },
+    {
+      "session_title": "Economic Intelligence Feedback Loops",
+      "speaker": "Jonas Alvarez",
+      "topic": "Platform Analytics",
+      "plugin_or_integration_demonstrated": "Economic Intelligence Signal Router"
+    },
+    {
+      "session_title": "Secure Plugin Trust for Enterprise",
+      "speaker": "Fatima Noor",
+      "topic": "Security & Governance",
+      "plugin_or_integration_demonstrated": "Signed Plugin Provenance Gateway"
+    }
+  ]
+}

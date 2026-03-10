@@ -1,0 +1,32 @@
+{
+  "speakers": [
+    {
+      "developer_id": "dev-0108",
+      "organization": "Summit Labs",
+      "sessions_presented": [
+        "Intent-Driven Plugin Deployment at Scale"
+      ]
+    },
+    {
+      "developer_id": "dev-0214",
+      "organization": "IntelGraph Partner Engineering",
+      "sessions_presented": [
+        "Operationalizing Partner Accelerators"
+      ]
+    },
+    {
+      "developer_id": "dev-0342",
+      "organization": "Summit Economic Systems",
+      "sessions_presented": [
+        "Economic Intelligence Feedback Loops"
+      ]
+    },
+    {
+      "developer_id": "dev-0551",
+      "organization": "Summit Security Architecture",
+      "sessions_presented": [
+        "Secure Plugin Trust for Enterprise"
+      ]
+    }
+  ]
+}
