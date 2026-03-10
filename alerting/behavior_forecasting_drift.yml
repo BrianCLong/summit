@@ -1,8 +1,0 @@
-alerts:
-  - name: "behavior_forecast_calibration_drift"
-    description: "Fires when the 7-day average calibration error exceeds the baseline by 15%."
-    severity: "warning"
-    runbook_url: "docs/ops/runbooks/behavior-forecasting-platform.md"
-  - name: "behavior_forecast_fixture_integrity_failed"
-    description: "Fires when the behavior forecasting fixture schema breaks."
-    severity: "critical"

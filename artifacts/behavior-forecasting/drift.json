@@ -1,7 +1,0 @@
-{
-  "calibration_error_7d": 0.055,
-  "baseline": 0.05,
-  "threshold": 0.057499999999999996,
-  "drift_detected": false,
-  "alerts": []
-}

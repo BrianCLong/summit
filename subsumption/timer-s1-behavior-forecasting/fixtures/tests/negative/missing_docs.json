@@ -1,5 +1,0 @@
-{
-  "test_case": "missing_docs_negative",
-  "expected": "fail",
-  "description": "A negative test fixture demonstrating failure when behavior forecasting bundle lacks proper documentation."
-}
