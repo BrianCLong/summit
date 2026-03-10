@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.io/schemas/execution/intent/v1",
+  "title": "Execution Intent",
+  "description": "A declarative request for AI execution submitted to the Summit control plane.",
+  "type": "object",
+  "required": [
+    "intent_id",
+    "agent_ref",
+    "requester_ref",
+    "objective",
+    "constraints"
+  ],
+  "properties": {
+    "intent_id": {
+      "type": "string",
+      "description": "Unique identifier for this execution intent."
+    },
+    "agent_ref": {
+      "type": "string",
+      "description": "Reference to the agent identity requested to perform the execution."
+    },
+    "requester_ref": {
+      "type": "string",
+      "description": "Reference to the identity of the service or user requesting the execution."
+    },
+    "objective": {
+      "type": "string",
+      "description": "The goal or prompt to be executed."
+    },
+    "tool_refs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "List of tools requested for this execution."
+    },
+    "data_class": {
+      "type": "string",
+      "description": "Data classification level of the inputs."
+    },
+    "budget_ref": {
+      "type": "string",
+      "description": "Reference to the budget to be consumed."
+    },
+    "constraints": {
+      "type": "object",
+      "properties": {
+        "max_cost_usd": {
+          "type": "number",
+          "description": "Maximum allowed cost for this execution in USD."
+        },
+        "max_latency_ms": {
+          "type": "integer",
+          "description": "Maximum allowed latency in milliseconds."
+        },
+        "deterministic_mode": {
+          "type": "boolean",
+          "description": "Whether the execution must run in a deterministic mode (e.g. for CI or evidence)."
+        }
+      }
+    }
+  }
+}

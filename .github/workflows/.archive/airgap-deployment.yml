@@ -37,7 +37,7 @@ permissions:
 
 env:
   TF_VERSION: '1.6.0'
-  COSIGN_VERSION: '2.2.0'
+  COSIGN_VERSION: '3.0.5'
   SYFT_VERSION: '0.98.0'
   GRYPE_VERSION: '0.72.0'
 
@@ -263,7 +263,7 @@ jobs:
       - name: Setup Node.js
         uses: pnpm/action-setup@v4
         with:
-          version: 10
+          version: 10.0.0
       - uses: actions/setup-node@v4
         with:
           cache: 'pnpm'

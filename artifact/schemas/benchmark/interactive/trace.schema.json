@@ -1,0 +1,36 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "step": {
+        "type": "integer"
+      },
+      "timestamp": {
+        "type": "string"
+      },
+      "action": {
+        "type": ["object", "null"],
+        "properties": {
+          "type": { "type": "string" },
+          "payload": { "type": "object" }
+        },
+        "required": ["type"]
+      },
+      "observation": {
+        "type": "object"
+      },
+      "reward": {
+        "type": "number"
+      },
+      "done": {
+        "type": "boolean"
+      },
+      "metadata": {
+        "type": "object"
+      }
+    },
+    "required": ["step", "timestamp", "observation", "reward", "done"]
+  }
+}
