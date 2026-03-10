@@ -1,10 +1,18 @@
 {
-  "error": {
-    "code": "MISSING_TOKEN",
-    "http_status": null
+  "diff": {
+    "extra_in_github": [],
+    "missing_in_github": [
+      "CI Core Gate ✅",
+      "Release Readiness Gate",
+      "SOC Controls",
+      "Workflow Validity Check",
+      "gate",
+      "meta-gate"
+    ],
+    "strict_mismatch": true
   },
   "kind": "branch_protection_audit",
   "schema_version": 1,
-  "state": "UNVERIFIABLE_PERMISSIONS",
+  "state": "VERIFIED_DRIFT",
   "target_branch": "main"
 }

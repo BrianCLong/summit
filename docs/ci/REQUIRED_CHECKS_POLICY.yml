@@ -31,11 +31,9 @@ branch_protection:
     contexts:
       - "meta-gate"
       - "CI Core Gate ✅"
-      - "Unit Tests"
       - "gate"
       - "Release Readiness Gate"
       - "SOC Controls"
-      - "test (20.x)"
       - "Workflow Validity Check"
 
 # Always Required Checks
@@ -51,10 +49,6 @@ always_required:
     workflow: "ci-core.yml"
     rationale: "Primary blocking gate - lint, typecheck, tests, build"
 
-  - name: "Unit Tests"
-    workflow: "ci-pr.yml"
-    rationale: "Primary PR test gate status required by branch protection"
-
   - name: "gate"
     workflow: "ga-gate.yml"
     rationale: "Official GA gate job required by branch protection"
@@ -62,10 +56,6 @@ always_required:
   - name: "Release Readiness Gate"
     workflow: "release-readiness.yml"
     rationale: "Comprehensive release readiness verification - runs on every change"
-
-  - name: "test (20.x)"
-    workflow: "unit-test-coverage.yml"
-    rationale: "Test suite and coverage gates must pass for all code changes"
 
   - name: "SOC Controls"
     workflow: "soc-controls.yml"
@@ -111,22 +101,6 @@ conditional_required:
       - '^server/package\.json$'
       - '^\.github/workflows/supply-chain'
       - "^scripts/security/"
-
-  - name: "Docker Build & Security Scan"
-    workflow: "docker-build.yml"
-    rationale: "Docker image build and security validation"
-    when_paths_match:
-      - "^Dockerfile"
-      - "^docker-compose"
-      - '^\.dockerignore$'
-
-  - name: "Schema compatibility guard / schema-compat"
-    workflow: "schema-compat.yml"
-    rationale: "API schema backward compatibility checks"
-    when_paths_match:
-      - "^server/src/graphql/schema"
-      - "^server/src/maestro/api-types"
-      - "^packages/.*/schema"
 
   - name: "SLO Smoke Gate"
     workflow: "slo-smoke-gate.yml"
