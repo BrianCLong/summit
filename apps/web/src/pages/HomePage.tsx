@@ -5,13 +5,16 @@ import {
   AlertTriangle,
   FileText,
   BarChart3,
+  TrendingUp,
+  TrendingDown,
+  Minus,
+  Network,
+  Activity,
+  Shield,
+  Clock,
+  ChevronRight,
+  Zap,
 } from 'lucide-react'
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
 import { KPIStrip } from '@/components/panels/KPIStrip'
@@ -24,24 +27,148 @@ import { DataIntegrityNotice } from '@/components/common/DataIntegrityNotice'
 import { useDemoMode } from '@/components/common/DemoIndicator'
 import mockData from '@/mock/data.json'
 import type { KPIMetric, Investigation, Alert, Case } from '@/types'
+import { cn } from '@/lib/utils'
 
+// ── Severity badge ─────────────────────────────────────────────
+function SeverityBadge({ level }: { level: string }) {
+  const map: Record<string, string> = {
+    critical: 'severity-critical',
+    high: 'severity-high',
+    medium: 'severity-medium',
+    low: 'severity-low',
+  }
+  return (
+    <span
+      className={cn(
+        'inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wider',
+        map[level] ?? 'severity-info'
+      )}
+    >
+      {level}
+    </span>
+  )
+}
+
+// ── Quick action card ──────────────────────────────────────────
+interface QuickAction {
+  title: string
+  description: string
+  icon: React.ComponentType<{ className?: string }>
+  href: string
+  accent: string
+  badge?: string
+}
+
+function QuickActionCard({ action, onClick }: { action: QuickAction; onClick: () => void }) {
+  const Icon = action.icon
+  return (
+    <button
+      onClick={onClick}
+      className={cn(
+        'group relative w-full text-left rounded-lg p-4',
+        'border border-[var(--border-subtle)] bg-[var(--surface-panel)]',
+        'hover:border-[var(--border-default)] hover:bg-[var(--surface-overlay)]',
+        'transition-all duration-150',
+        'focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-600)]'
+      )}
+    >
+      <div className="flex items-start gap-3">
+        {/* Icon */}
+        <div
+          className="shrink-0 w-8 h-8 rounded-md flex items-center justify-center"
+          style={{ background: action.accent }}
+        >
+          <Icon className="h-4 w-4 text-white" />
+        </div>
+
+        {/* Text */}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+            <span className="text-[13px] font-semibold text-[var(--text-primary)] leading-tight">
+              {action.title}
+            </span>
+            {action.badge && (
+              <span className="severity-critical inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold">
+                {action.badge}
+              </span>
+            )}
+          </div>
+          <p className="text-[11px] text-[var(--text-tertiary)] mt-0.5 leading-snug">
+            {action.description}
+          </p>
+        </div>
+
+        {/* Arrow */}
+        <ChevronRight
+          className={cn(
+            'shrink-0 h-4 w-4 text-[var(--text-disabled)] mt-0.5',
+            'group-hover:text-[var(--text-tertiary)] group-hover:translate-x-0.5',
+            'transition-all duration-150'
+          )}
+        />
+      </div>
+    </button>
+  )
+}
+
+// ── Metric delta indicator ─────────────────────────────────────
+function DeltaIndicator({ value, unit = '%' }: { value: number; unit?: string }) {
+  if (value === 0) return <Minus className="h-3 w-3 text-[var(--text-tertiary)]" />
+  const positive = value > 0
+  return (
+    <span
+      className={cn(
+        'inline-flex items-center gap-0.5 text-[11px] font-semibold tabular-nums',
+        positive ? 'text-[var(--status-success)]' : 'text-[var(--severity-critical-fg)]'
+      )}
+    >
+      {positive
+        ? <TrendingUp className="h-3 w-3" />
+        : <TrendingDown className="h-3 w-3" />
+      }
+      {Math.abs(value)}{unit}
+    </span>
+  )
+}
+
+// ── Status row item ────────────────────────────────────────────
+function StatusIndicator({ label, status }: { label: string; status: 'ok' | 'warning' | 'error' }) {
+  const colors = {
+    ok: 'var(--status-active)',
+    warning: 'var(--status-warning)',
+    error: 'var(--status-error)',
+  }
+  return (
+    <div className="flex items-center justify-between py-1.5">
+      <span className="text-[12px] text-[var(--text-secondary)]">{label}</span>
+      <div className="flex items-center gap-1.5">
+        <span
+          className="w-1.5 h-1.5 rounded-full"
+          style={{ background: colors[status] }}
+        />
+        <span className="text-[11px] font-medium capitalize" style={{ color: colors[status] }}>
+          {status === 'ok' ? 'Operational' : status}
+        </span>
+      </div>
+    </div>
+  )
+}
+
+// ── Main component ─────────────────────────────────────────────
 export default function HomePage() {
   const navigate = useNavigate()
   const { user } = useAuth()
   const [loading, setLoading] = useState(true)
   const [kpiMetrics, setKpiMetrics] = useState<KPIMetric[]>([])
-  const [recentInvestigations, setRecentInvestigations] = useState<
-    Investigation[]
-  >([])
+  const [recentInvestigations, setRecentInvestigations] = useState<Investigation[]>([])
   const [recentAlerts, setRecentAlerts] = useState<Alert[]>([])
   const [recentCases, setRecentCases] = useState<Case[]>([])
   const isDemoMode = useDemoMode()
 
   useEffect(() => {
-    const loadDashboardData = async () => {
+    const load = async () => {
       try {
         setLoading(true)
-
         if (!isDemoMode) {
           setKpiMetrics([])
           setRecentInvestigations([])
@@ -49,87 +176,51 @@ export default function HomePage() {
           setRecentCases([])
           return
         }
-
-        // Simulate API calls
-        await new Promise(resolve => setTimeout(resolve, 1000))
-
+        await new Promise(resolve => setTimeout(resolve, 800))
         setKpiMetrics(mockData.kpiMetrics as KPIMetric[])
-        setRecentInvestigations(
-          mockData.investigations.slice(0, 3) as Investigation[]
-        )
-        setRecentAlerts(mockData.alerts.slice(0, 4) as Alert[])
-        setRecentCases(mockData.cases.slice(0, 2) as Case[])
-      } catch (error) {
-        console.error('Failed to load dashboard data:', error)
+        setRecentInvestigations(mockData.investigations.slice(0, 4) as Investigation[])
+        setRecentAlerts(mockData.alerts.slice(0, 5) as Alert[])
+        setRecentCases(mockData.cases.slice(0, 3) as Case[])
+      } catch (err) {
+        console.error('Failed to load dashboard data:', err)
       } finally {
         setLoading(false)
       }
     }
-
-    loadDashboardData()
+    load()
   }, [isDemoMode])
 
-  const quickActions = [
+  const quickActions: QuickAction[] = [
     {
       title: 'Start Investigation',
-      description: 'Create a new investigation',
-      icon: Search,
+      description: 'Open IntelGraph and begin a new entity investigation',
+      icon: Network,
       href: '/explore',
-      color: 'bg-blue-500',
+      accent: 'linear-gradient(135deg, var(--accent-700), var(--accent-500))',
     },
     {
       title: 'Review Alerts',
-      description: 'Review security alerts and triage status',
+      description: 'Triage security alerts and escalate findings',
       icon: AlertTriangle,
       href: '/alerts',
-      color: 'bg-red-500',
+      accent: 'linear-gradient(135deg, #7f1d1d, #dc2626)',
       badge: isDemoMode ? '3' : undefined,
     },
     {
-      title: 'View Cases',
-      description: 'Manage active cases',
+      title: 'Active Cases',
+      description: 'Manage open investigations and case files',
       icon: FileText,
       href: '/cases',
-      color: 'bg-green-500',
+      accent: 'linear-gradient(135deg, #134e4a, #0d9488)',
     },
     {
       title: 'Command Center',
-      description: 'Real-time operations dashboard',
-      icon: BarChart3,
+      description: 'Real-time operational status and mission control',
+      icon: Activity,
       href: '/dashboards/command-center',
-      color: 'bg-purple-500',
+      accent: 'linear-gradient(135deg, #4a1d96, #7c3aed)',
     },
   ]
-
-  const getSeverityBadgeVariant = (severity: string) => {
-    switch (severity) {
-      case 'critical':
-        return 'destructive'
-      case 'high':
-        return 'destructive'
-      case 'medium':
-        return 'warning'
-      case 'low':
-        return 'secondary'
-      default:
-        return 'secondary'
-    }
-  }
-
-  const getPriorityBadgeVariant = (priority: string) => {
-    switch (priority) {
-      case 'critical':
-        return 'destructive'
-      case 'high':
-        return 'destructive'
-      case 'medium':
-        return 'warning'
-      case 'low':
-        return 'secondary'
-      default:
-        return 'secondary'
-    }
-  }
 
   const handleItemKeyDown = (e: React.KeyboardEvent, path: string) => {
     if (e.key === 'Enter' || e.key === ' ') {
@@ -138,334 +229,438 @@ export default function HomePage() {
     }
   }
 
+  const now = new Date()
+  const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false })
+  const dateStr = now.toLocaleDateString('en-US', {
+    weekday: 'short', month: 'short', day: 'numeric', year: 'numeric',
+  })
+
   return (
-    <div className="p-6 space-y-6">
-      {/* Welcome Header */}
-      <div className="flex items-center justify-between">
+    <div
+      className="h-full flex flex-col"
+      style={{ background: 'var(--surface-base)' }}
+    >
+      {/* ── Page Header ─────────────────────────────────── */}
+      <div
+        className="shrink-0 px-6 py-4 border-b flex items-center justify-between"
+        style={{ borderColor: 'var(--border-subtle)' }}
+      >
         <div>
-          <h1 className="text-3xl font-bold">
-            Welcome back, {user?.name?.split(' ')[0] || 'User'}
+          <h1 className="text-[20px] font-semibold text-[var(--text-primary)] tracking-[-0.025em] leading-tight">
+            {greeting()} {user?.name?.split(' ')[0] || 'Operator'}
           </h1>
-          <p className="text-muted-foreground mt-1">
-            Here's what's happening with your intelligence operations
+          <p className="text-[12px] text-[var(--text-tertiary)] mt-0.5">
+            Intelligence operations overview
           </p>
         </div>
-        <div className="text-sm text-muted-foreground">
-          {new Date().toLocaleDateString('en-US', {
-            weekday: 'long',
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-          })}
-        </div>
-      </div>
 
-      <DataIntegrityNotice
-        mode={isDemoMode ? 'demo' : 'unavailable'}
-        context="Home overview"
-      />
-
-      <ActivationProgressTile />
-
-      {/* KPI Metrics */}
-      <div>
-        <h2 className="text-lg font-semibold mb-4">Key Metrics</h2>
-        <KPIStrip
-          data={kpiMetrics}
-          loading={loading}
-          onSelect={metric => {
-            if (metric.id === 'threats') {navigate('/alerts')}
-            else if (metric.id === 'investigations') {navigate('/explore')}
-          }}
-        />
-        {!loading && kpiMetrics.length === 0 && (
-          <div className="mt-4">
-            <EmptyState
-              icon="chart"
-              title="No live metrics"
-              description="Connect a data source to populate KPI metrics."
-            />
+        <div className="flex items-center gap-4">
+          {/* Datetime */}
+          <div className="text-right">
+            <div className="text-[18px] font-mono font-semibold text-[var(--text-primary)] tabular-nums leading-none">
+              {timeStr}
+            </div>
+            <div className="text-[10px] text-[var(--text-tertiary)] mt-0.5 tracking-wide">
+              {dateStr}
+            </div>
           </div>
-        )}
-      </div>
-
-      {/* Quick Actions */}
-      <div>
-        <h2 className="text-lg font-semibold mb-4">Quick Actions</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {quickActions.map(action => {
-            const Icon = action.icon
-            return (
-              <Card
-                key={action.title}
-                className="cursor-pointer hover:shadow-md transition-shadow focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
-                onClick={() => navigate(action.href)}
-                tabIndex={0}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    navigate(action.href);
-                  }
-                }}
-                role="button"
-                aria-label={`${action.title}: ${action.description}`}
-              >
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-3">
-                    <div
-                      className={`p-2 rounded-lg ${action.color} text-white`}
-                    >
-                      <Icon className="h-5 w-5" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="font-medium flex items-center gap-2">
-                        {action.title}
-                        {action.badge && (
-                          <Badge variant="destructive" className="text-xs">
-                            {action.badge}
-                          </Badge>
-                        )}
-                      </div>
-                      <div className="text-sm text-muted-foreground">
-                        {action.description}
-                      </div>
-                    </div>
-                    <ArrowRight className="h-4 w-4 text-muted-foreground" />
-                  </div>
-                </CardContent>
-              </Card>
-            )
-          })}
         </div>
       </div>
 
-      {/* Recent Activity Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-        {/* Recent Investigations */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base flex items-center gap-2">
-              <Search className="h-4 w-4" />
-              Recent Investigations
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {loading
-              ? [...Array(3)].map((_, i) => (
-                  <div key={i} className="space-y-2">
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-3 w-2/3" />
-                  </div>
-                ))
-              : recentInvestigations.map(investigation => (
+      {/* ── Content ──────────────────────────────────────── */}
+      <div className="flex-1 overflow-auto scrollbar-thin">
+        <div className="px-6 py-5 space-y-6 max-w-[1400px]">
+
+          <DataIntegrityNotice
+            mode={isDemoMode ? 'demo' : 'unavailable'}
+            context="Home overview"
+          />
+
+          <ActivationProgressTile />
+
+          {/* ── KPI Strip ─────────────────────────────────── */}
+          <section aria-labelledby="kpi-heading">
+            <div className="flex items-center justify-between mb-3">
+              <h2 id="kpi-heading" className="label-caps">
+                Operational Metrics
+              </h2>
+            </div>
+            <KPIStrip
+              data={kpiMetrics}
+              loading={loading}
+              onSelect={metric => {
+                if (metric.id === 'threats') navigate('/alerts')
+                else if (metric.id === 'investigations') navigate('/explore')
+              }}
+            />
+            {!loading && kpiMetrics.length === 0 && (
+              <div className="mt-3">
+                <EmptyState
+                  icon="chart"
+                  title="No live metrics"
+                  description="Connect a data source to populate KPI metrics."
+                />
+              </div>
+            )}
+          </section>
+
+          {/* ── Two-column layout ─────────────────────────── */}
+          <div className="grid grid-cols-1 xl:grid-cols-[1fr_320px] gap-5">
+
+            {/* Left: Quick actions + Activity ─────────────── */}
+            <div className="space-y-5">
+
+              {/* Quick actions grid */}
+              <section aria-labelledby="actions-heading">
+                <h2 id="actions-heading" className="label-caps mb-3">Quick Actions</h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  {quickActions.map(action => (
+                    <QuickActionCard
+                      key={action.href}
+                      action={action}
+                      onClick={() => navigate(action.href)}
+                    />
+                  ))}
+                </div>
+              </section>
+
+              {/* Recent investigations + Alerts row */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+
+                {/* Recent Investigations */}
+                <section
+                  aria-labelledby="investigations-heading"
+                  className="rounded-lg border overflow-hidden"
+                  style={{
+                    background: 'var(--surface-panel)',
+                    borderColor: 'var(--border-subtle)',
+                  }}
+                >
                   <div
-                    key={investigation.id}
-                    role="button"
-                    tabIndex={0}
-                    aria-label={`View investigation: ${investigation.title}`}
-                    className="flex items-center justify-between p-3 hover:bg-muted/50 rounded-lg cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-                    onClick={() =>
-                      navigate(`/explore?investigation=${investigation.id}`)
+                    className="flex items-center justify-between px-4 py-3 border-b"
+                    style={{ borderColor: 'var(--border-subtle)' }}
+                  >
+                    <h2
+                      id="investigations-heading"
+                      className="flex items-center gap-2 text-[12px] font-semibold text-[var(--text-primary)]"
+                    >
+                      <Network className="h-3.5 w-3.5 text-[var(--accent-400)]" />
+                      Investigations
+                    </h2>
+                    <button
+                      onClick={() => navigate('/explore')}
+                      className="text-[11px] text-[var(--text-accent)] hover:text-[var(--accent-300)] transition-colors"
+                    >
+                      View all →
+                    </button>
+                  </div>
+
+                  <div className="divide-y" style={{ borderColor: 'var(--border-subtle)' }}>
+                    {loading
+                      ? [...Array(4)].map((_, i) => (
+                          <div key={i} className="px-4 py-3 space-y-1.5">
+                            <div className="h-3.5 w-4/5 rounded skeleton-shimmer" />
+                            <div className="h-2.5 w-1/2 rounded skeleton-shimmer" />
+                          </div>
+                        ))
+                      : recentInvestigations.length > 0
+                        ? recentInvestigations.map(inv => (
+                            <div
+                              key={inv.id}
+                              role="button"
+                              tabIndex={0}
+                              aria-label={`Open investigation: ${inv.title}`}
+                              className="group px-4 py-3 flex items-center gap-3 hover:bg-[var(--surface-overlay)] cursor-pointer transition-colors focus-visible:outline-none focus-visible:bg-[var(--surface-overlay)]"
+                              onClick={() => navigate(`/explore?investigation=${inv.id}`)}
+                              onKeyDown={e => handleItemKeyDown(e, `/explore?investigation=${inv.id}`)}
+                            >
+                              <div className="flex-1 min-w-0">
+                                <div className="text-[12px] font-medium text-[var(--text-primary)] truncate leading-tight">
+                                  {inv.title}
+                                </div>
+                                <div className="text-[11px] text-[var(--text-tertiary)] mt-0.5">
+                                  {inv.entityCount} entities · {inv.relationshipCount} relationships
+                                </div>
+                              </div>
+                              <div className="shrink-0 flex items-center gap-1.5">
+                                <SeverityBadge level={inv.priority} />
+                              </div>
+                            </div>
+                          ))
+                        : (
+                          <div className="px-4 py-8">
+                            <EmptyState
+                              icon="search"
+                              title="No investigations"
+                              description="Start a new investigation to see it here."
+                              className="py-0"
+                              action={{
+                                label: 'Start Investigation',
+                                onClick: () => navigate('/explore'),
+                                variant: 'outline',
+                              }}
+                            />
+                          </div>
+                        )
                     }
-                    onKeyDown={e =>
-                      handleItemKeyDown(
-                        e,
-                        `/explore?investigation=${investigation.id}`
+                  </div>
+                </section>
+
+                {/* Recent Alerts */}
+                <section
+                  aria-labelledby="alerts-heading"
+                  className="rounded-lg border overflow-hidden"
+                  style={{
+                    background: 'var(--surface-panel)',
+                    borderColor: 'var(--border-subtle)',
+                  }}
+                >
+                  <div
+                    className="flex items-center justify-between px-4 py-3 border-b"
+                    style={{ borderColor: 'var(--border-subtle)' }}
+                  >
+                    <h2
+                      id="alerts-heading"
+                      className="flex items-center gap-2 text-[12px] font-semibold text-[var(--text-primary)]"
+                    >
+                      <AlertTriangle className="h-3.5 w-3.5 text-[var(--severity-critical-fg)]" />
+                      Active Alerts
+                      {isDemoMode && recentAlerts.length > 0 && (
+                        <span className="severity-critical text-[10px] px-1.5 py-0.5 rounded font-semibold">
+                          {recentAlerts.length}
+                        </span>
+                      )}
+                    </h2>
+                    <button
+                      onClick={() => navigate('/alerts')}
+                      className="text-[11px] text-[var(--text-accent)] hover:text-[var(--accent-300)] transition-colors"
+                    >
+                      View all →
+                    </button>
+                  </div>
+
+                  <div className="divide-y" style={{ borderColor: 'var(--border-subtle)' }}>
+                    {loading
+                      ? [...Array(5)].map((_, i) => (
+                          <div key={i} className="px-4 py-3 space-y-1.5">
+                            <div className="h-3.5 w-4/5 rounded skeleton-shimmer" />
+                            <div className="h-2.5 w-1/3 rounded skeleton-shimmer" />
+                          </div>
+                        ))
+                      : recentAlerts.length > 0
+                        ? recentAlerts.map(alert => (
+                            <div
+                              key={alert.id}
+                              role="button"
+                              tabIndex={0}
+                              aria-label={`View alert: ${alert.title}`}
+                              className="group px-4 py-3 flex items-center gap-3 hover:bg-[var(--surface-overlay)] cursor-pointer transition-colors focus-visible:outline-none focus-visible:bg-[var(--surface-overlay)]"
+                              onClick={() => navigate(`/alerts/${alert.id}`)}
+                              onKeyDown={e => handleItemKeyDown(e, `/alerts/${alert.id}`)}
+                            >
+                              <div className="flex-1 min-w-0">
+                                <div className="text-[12px] font-medium text-[var(--text-primary)] truncate leading-tight">
+                                  {alert.title}
+                                </div>
+                                <div className="text-[11px] text-[var(--text-tertiary)] mt-0.5">
+                                  {alert.source} · {new Date(alert.createdAt).toLocaleDateString()}
+                                </div>
+                              </div>
+                              <SeverityBadge level={alert.severity} />
+                            </div>
+                          ))
+                        : (
+                          <div className="px-4 py-8">
+                            <EmptyState
+                              icon="alert"
+                              title="No alerts"
+                              description="New security alerts will appear here."
+                              className="py-0"
+                              action={{
+                                label: 'View All Alerts',
+                                onClick: () => navigate('/alerts'),
+                                variant: 'outline',
+                              }}
+                            />
+                          </div>
+                        )
+                    }
+                  </div>
+                </section>
+              </div>
+            </div>
+
+            {/* Right rail: Status + Cases ───────────────────── */}
+            <div className="space-y-5">
+
+              {/* System Status */}
+              <section
+                aria-labelledby="status-heading"
+                className="rounded-lg border overflow-hidden"
+                style={{
+                  background: 'var(--surface-panel)',
+                  borderColor: 'var(--border-subtle)',
+                }}
+              >
+                <div
+                  className="flex items-center justify-between px-4 py-3 border-b"
+                  style={{ borderColor: 'var(--border-subtle)' }}
+                >
+                  <h2
+                    id="status-heading"
+                    className="flex items-center gap-2 text-[12px] font-semibold text-[var(--text-primary)]"
+                  >
+                    <Shield className="h-3.5 w-3.5 text-[var(--status-active)]" />
+                    System Status
+                  </h2>
+                  <span
+                    className="inline-flex items-center gap-1 text-[10px] font-semibold text-[var(--status-active)]"
+                  >
+                    <span className="w-1.5 h-1.5 rounded-full bg-[var(--status-active)] animate-pulse" />
+                    All Systems
+                  </span>
+                </div>
+                <div className="px-4 divide-y" style={{ borderColor: 'var(--border-subtle)' }}>
+                  <StatusIndicator label="IntelGraph Engine" status="ok" />
+                  <StatusIndicator label="Data Ingestion" status="ok" />
+                  <StatusIndicator label="AI Orchestration" status="ok" />
+                  <StatusIndicator label="Alert Pipeline" status="ok" />
+                  <StatusIndicator label="Evidence Store" status="ok" />
+                </div>
+                <div
+                  className="px-4 py-3 border-t"
+                  style={{ borderColor: 'var(--border-subtle)' }}
+                >
+                  <button
+                    onClick={() => navigate('/trust')}
+                    className="text-[11px] text-[var(--text-accent)] hover:text-[var(--accent-300)] transition-colors"
+                  >
+                    Trust & Governance dashboard →
+                  </button>
+                </div>
+              </section>
+
+              {/* Active Cases */}
+              <section
+                aria-labelledby="cases-heading"
+                className="rounded-lg border overflow-hidden"
+                style={{
+                  background: 'var(--surface-panel)',
+                  borderColor: 'var(--border-subtle)',
+                }}
+              >
+                <div
+                  className="flex items-center justify-between px-4 py-3 border-b"
+                  style={{ borderColor: 'var(--border-subtle)' }}
+                >
+                  <h2
+                    id="cases-heading"
+                    className="flex items-center gap-2 text-[12px] font-semibold text-[var(--text-primary)]"
+                  >
+                    <FileText className="h-3.5 w-3.5 text-[var(--text-tertiary)]" />
+                    Active Cases
+                  </h2>
+                  <button
+                    onClick={() => navigate('/cases')}
+                    className="text-[11px] text-[var(--text-accent)] hover:text-[var(--accent-300)] transition-colors"
+                  >
+                    View all →
+                  </button>
+                </div>
+
+                <div className="divide-y" style={{ borderColor: 'var(--border-subtle)' }}>
+                  {loading
+                    ? [...Array(3)].map((_, i) => (
+                        <div key={i} className="px-4 py-3 space-y-1.5">
+                          <div className="h-3.5 w-4/5 rounded skeleton-shimmer" />
+                          <div className="h-2.5 w-1/2 rounded skeleton-shimmer" />
+                        </div>
+                      ))
+                    : recentCases.length > 0
+                      ? recentCases.map(case_ => (
+                          <div
+                            key={case_.id}
+                            role="button"
+                            tabIndex={0}
+                            aria-label={`View case: ${case_.title}`}
+                            className="group px-4 py-3 flex items-center gap-3 hover:bg-[var(--surface-overlay)] cursor-pointer transition-colors focus-visible:outline-none focus-visible:bg-[var(--surface-overlay)]"
+                            onClick={() => navigate(`/cases/${case_.id}`)}
+                            onKeyDown={e => handleItemKeyDown(e, `/cases/${case_.id}`)}
+                          >
+                            <div className="flex-1 min-w-0">
+                              <div className="text-[12px] font-medium text-[var(--text-primary)] truncate leading-tight">
+                                {case_.title}
+                              </div>
+                              <div className="text-[11px] text-[var(--text-tertiary)] mt-0.5">
+                                {case_.investigationIds.length} investigations · {case_.alertIds.length} alerts
+                              </div>
+                            </div>
+                            <SeverityBadge level={case_.priority} />
+                          </div>
+                        ))
+                      : (
+                        <div className="px-4 py-8">
+                          <EmptyState
+                            icon="file"
+                            title="No active cases"
+                            description="Manage investigations in cases."
+                            className="py-0"
+                            action={{
+                              label: 'View Cases',
+                              onClick: () => navigate('/cases'),
+                              variant: 'outline',
+                            }}
+                          />
+                        </div>
                       )
-                    }
-                  >
-                    <div className="flex-1 min-w-0">
-                      <div className="font-medium truncate">
-                        {investigation.title}
-                      </div>
-                      <div className="text-sm text-muted-foreground">
-                        {investigation.entityCount} entities •{' '}
-                        {investigation.relationshipCount} relationships
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Badge
-                        variant={getPriorityBadgeVariant(
-                          investigation.priority
-                        )}
-                        className="text-xs"
-                      >
-                        {investigation.priority}
-                      </Badge>
-                      <Badge variant="outline" className="text-xs">
-                        {investigation.status}
-                      </Badge>
-                    </div>
-                  </div>
-                ))}
-            {!loading && recentInvestigations.length === 0 && (
-              <EmptyState
-                icon="search"
-                title="No investigations"
-                description="Start a new investigation to see it here."
-                className="py-4"
-                action={{
-                  label: 'Start Investigation',
-                  onClick: () => navigate('/explore'),
-                  variant: 'outline',
-                }}
-              />
-            )}
-            <Button
-              variant="ghost"
-              size="sm"
-              className="w-full mt-2"
-              onClick={() => navigate('/explore')}
-            >
-              View All Investigations
-              <ArrowRight className="h-3 w-3 ml-1" />
-            </Button>
-          </CardContent>
-        </Card>
+                  }
+                </div>
+              </section>
 
-        {/* Recent Alerts */}
-        <Card className="h-full flex flex-col">
-          <CardHeader>
-            <CardTitle className="text-base flex items-center gap-2">
-              <AlertTriangle className="h-4 w-4" />
-              Recent Alerts
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3 flex-1">
-            {loading
-              ? [...Array(4)].map((_, i) => (
-                  <div key={i} className="space-y-2">
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-3 w-1/2" />
-                  </div>
-                ))
-              : recentAlerts.map(alert => (
+              {/* Maestro shortcut */}
+              <button
+                onClick={() => navigate('/maestro')}
+                className={cn(
+                  'group w-full text-left rounded-lg p-4',
+                  'border border-[var(--border-subtle)]',
+                  'hover:border-[var(--border-accent)] hover:bg-[var(--accent-subtle)]',
+                  'transition-all duration-200',
+                  'focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-600)]'
+                )}
+                style={{ background: 'var(--surface-panel)' }}
+              >
+                <div className="flex items-center gap-3">
                   <div
-                    key={alert.id}
-                    role="button"
-                    tabIndex={0}
-                    aria-label={`View alert: ${alert.title}`}
-                    className="flex items-center justify-between p-3 hover:bg-muted/50 rounded-lg cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-                    onClick={() => navigate(`/alerts/${alert.id}`)}
-                    onKeyDown={e =>
-                      handleItemKeyDown(e, `/alerts/${alert.id}`)
-                    }
+                    className="w-8 h-8 rounded-md flex items-center justify-center shrink-0"
+                    style={{ background: 'linear-gradient(135deg, #4a1d96, #7c3aed)' }}
                   >
-                    <div className="flex-1 min-w-0">
-                      <div className="font-medium truncate">{alert.title}</div>
-                      <div className="text-sm text-muted-foreground">
-                        {alert.source} •{' '}
-                        {new Date(alert.createdAt).toLocaleDateString()}
-                      </div>
+                    <Zap className="h-4 w-4 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="text-[12px] font-semibold text-[var(--text-primary)]">
+                      Maestro Orchestration
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Badge
-                        variant={getSeverityBadgeVariant(alert.severity)}
-                        className="text-xs"
-                      >
-                        {alert.severity}
-                      </Badge>
+                    <div className="text-[11px] text-[var(--text-tertiary)] mt-0.5">
+                      Launch AI-powered investigation workflows
                     </div>
                   </div>
-                ))}
-            {!loading && recentAlerts.length === 0 && (
-              <EmptyState
-                icon="alert"
-                title="No alerts"
-                description="New security alerts will appear here."
-                className="py-4"
-                action={{
-                  label: 'View All Alerts',
-                  onClick: () => navigate('/alerts'),
-                  variant: 'outline',
-                }}
-              />
-            )}
-            <Button
-              variant="ghost"
-              size="sm"
-              className="w-full mt-2"
-              onClick={() => navigate('/alerts')}
-            >
-              View All Alerts
-              <ArrowRight className="h-3 w-3 ml-1" />
-            </Button>
-          </CardContent>
-        </Card>
+                  <ChevronRight className="h-4 w-4 text-[var(--text-disabled)] group-hover:text-[var(--text-tertiary)] group-hover:translate-x-0.5 transition-all" />
+                </div>
+              </button>
 
-        {/* Recent Cases */}
-        <Card className="h-full flex flex-col">
-          <CardHeader>
-            <CardTitle className="text-base flex items-center gap-2">
-              <FileText className="h-4 w-4" />
-              Active Cases
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3 flex-1">
-            {loading
-              ? [...Array(2)].map((_, i) => (
-                  <div key={i} className="space-y-2">
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-3 w-3/4" />
-                  </div>
-                ))
-              : recentCases.map(case_ => (
-                  <div
-                    key={case_.id}
-                    role="button"
-                    tabIndex={0}
-                    aria-label={`View case: ${case_.title}`}
-                    className="flex items-center justify-between p-3 hover:bg-muted/50 rounded-lg cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-                    onClick={() => navigate(`/cases/${case_.id}`)}
-                    onKeyDown={e =>
-                      handleItemKeyDown(e, `/cases/${case_.id}`)
-                    }
-                  >
-                    <div className="flex-1 min-w-0">
-                      <div className="font-medium truncate">{case_.title}</div>
-                      <div className="text-sm text-muted-foreground">
-                        {case_.investigationIds.length} investigations •{' '}
-                        {case_.alertIds.length} alerts
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Badge
-                        variant={getPriorityBadgeVariant(case_.priority)}
-                        className="text-xs"
-                      >
-                        {case_.priority}
-                      </Badge>
-                      <Badge variant="outline" className="text-xs">
-                        {case_.status.replace('_', ' ')}
-                      </Badge>
-                    </div>
-                  </div>
-                ))}
-            {!loading && recentCases.length === 0 && (
-              <EmptyState
-                icon="file"
-                title="No active cases"
-                description="Manage your active investigations in cases."
-                className="py-4"
-                action={{
-                  label: 'View All Cases',
-                  onClick: () => navigate('/cases'),
-                  variant: 'outline',
-                }}
-              />
-            )}
-            <Button
-              variant="ghost"
-              size="sm"
-              className="w-full mt-2"
-              onClick={() => navigate('/cases')}
-            >
-              View All Cases
-              <ArrowRight className="h-3 w-3 ml-1" />
-            </Button>
-          </CardContent>
-        </Card>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   )
+}
+
+function greeting(): string {
+  const h = new Date().getHours()
+  if (h < 5)  return 'Good night,'
+  if (h < 12) return 'Good morning,'
+  if (h < 17) return 'Good afternoon,'
+  if (h < 21) return 'Good evening,'
+  return 'Good night,'
 }

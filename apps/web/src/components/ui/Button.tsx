@@ -5,26 +5,88 @@ import { cn } from '@/lib/utils'
 import { Spinner } from './Spinner'
 
 const buttonVariants = cva(
-  'inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
+  [
+    'inline-flex items-center justify-center whitespace-nowrap',
+    'font-medium tracking-[-0.01em]',
+    'transition-all duration-150',
+    'focus-visible:outline-none',
+    'focus-visible:ring-2 focus-visible:ring-[var(--accent-600)] focus-visible:ring-offset-1',
+    'focus-visible:ring-offset-[var(--surface-base)]',
+    'disabled:cursor-not-allowed disabled:opacity-40',
+    'select-none',
+  ].join(' '),
   {
     variants: {
       variant: {
-        default: 'bg-primary text-primary-foreground hover:bg-primary/90',
-        destructive:
-          'bg-destructive text-destructive-foreground hover:bg-destructive/90',
-        outline:
-          'border border-input bg-background hover:bg-accent hover:text-accent-foreground',
-        secondary:
-          'bg-secondary text-secondary-foreground hover:bg-secondary/80',
-        ghost: 'hover:bg-accent hover:text-accent-foreground',
-        link: 'text-primary underline-offset-4 hover:underline',
-        intel: 'bg-intel-600 text-white hover:bg-intel-700',
+        // Primary action — filled accent
+        default: [
+          'bg-[var(--accent-600)] text-white',
+          'hover:bg-[var(--accent-500)] active:bg-[var(--accent-700)]',
+          'shadow-sm hover:shadow-glow-sm',
+        ].join(' '),
+
+        // Destructive action
+        destructive: [
+          'bg-[var(--severity-critical-solid)] text-white',
+          'hover:bg-[#ef4444] active:bg-[#b91c1c]',
+          'shadow-sm',
+        ].join(' '),
+
+        // Secondary outlined
+        outline: [
+          'bg-transparent text-[var(--text-primary)]',
+          'border border-[var(--border-default)]',
+          'hover:bg-[var(--surface-overlay)] hover:border-[var(--border-strong)]',
+          'active:bg-[var(--surface-high)]',
+        ].join(' '),
+
+        // Neutral secondary filled
+        secondary: [
+          'bg-[var(--surface-overlay)] text-[var(--text-primary)]',
+          'border border-[var(--border-subtle)]',
+          'hover:bg-[var(--surface-high)] hover:border-[var(--border-default)]',
+          'active:bg-[var(--surface-highest)]',
+        ].join(' '),
+
+        // Minimal ghost
+        ghost: [
+          'bg-transparent text-[var(--text-secondary)]',
+          'hover:bg-[var(--surface-overlay)] hover:text-[var(--text-primary)]',
+          'active:bg-[var(--surface-high)]',
+        ].join(' '),
+
+        // Text link
+        link: [
+          'bg-transparent text-[var(--text-accent)] underline-offset-4',
+          'hover:underline hover:text-[var(--accent-300)]',
+          'p-0 h-auto',
+        ].join(' '),
+
+        // Intel/brand primary (alias for default, kept for compatibility)
+        intel: [
+          'bg-[var(--accent-600)] text-white',
+          'hover:bg-[var(--accent-500)] active:bg-[var(--accent-700)]',
+          'shadow-sm hover:shadow-glow-sm',
+        ].join(' '),
+
+        // Critical/danger with subtle fill (for warnings that aren't full red)
+        danger: [
+          'bg-[var(--severity-critical-bg)] text-[var(--severity-critical-fg)]',
+          'border border-[var(--severity-critical-border)]',
+          'hover:bg-[var(--severity-critical-solid)] hover:text-white',
+          'active:bg-[#b91c1c]',
+        ].join(' '),
       },
+
       size: {
-        default: 'h-10 px-4 py-2',
-        sm: 'h-9 rounded-md px-3',
-        lg: 'h-11 rounded-md px-8',
-        icon: 'h-10 w-10',
+        xs:      'h-6 px-2 text-[11px] rounded-md gap-1',
+        sm:      'h-7 px-3 text-[12px] rounded-md gap-1.5',
+        default: 'h-8 px-3.5 text-[13px] rounded-md gap-2',
+        lg:      'h-9 px-4 text-[14px] rounded-md gap-2',
+        xl:      'h-10 px-5 text-[14px] rounded-md gap-2.5',
+        icon:    'h-8 w-8 rounded-md',
+        'icon-sm': 'h-7 w-7 rounded-md',
+        'icon-xs': 'h-6 w-6 rounded-md',
       },
     },
     defaultVariants: {
@@ -35,8 +97,7 @@ const buttonVariants = cva(
 )
 
 export interface ButtonProps
-  extends
-    React.ButtonHTMLAttributes<HTMLButtonElement>,
+  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
   asChild?: boolean
   loading?: boolean
@@ -57,21 +118,22 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     ref
   ) => {
     const Comp = asChild ? Slot : 'button'
-    const isIcon = size === 'icon'
+    const isIconOnly = size === 'icon' || size === 'icon-sm' || size === 'icon-xs'
 
     return (
       <Comp
         className={cn(buttonVariants({ variant, size, className }))}
         ref={ref}
         disabled={disabled || loading}
+        aria-busy={loading || undefined}
         {...props}
       >
         {loading && !asChild ? (
-          isIcon ? (
-            <Spinner />
+          isIconOnly ? (
+            <Spinner className="h-3.5 w-3.5" />
           ) : (
             <>
-              <Spinner className="mr-2" />
+              <Spinner className="h-3.5 w-3.5" />
               {children}
             </>
           )
