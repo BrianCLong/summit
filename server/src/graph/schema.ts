@@ -43,6 +43,11 @@ export interface Entity extends BaseNode {
  * core informational units that form the basis of the provenance trail.
  */
 export interface Claim extends BaseNode {
+  domain?: string;
+  scope?: string;
+  status?: 'HYPOTHESIS' | 'ACCEPTED' | 'DEPRECATED' | 'DISPUTED';
+  epistemicUncertainty?: number;
+  aleatoricUncertainty?: number;
   /** The textual content of the claim or assertion. */
   statement: string;
   /** A numerical value from 0.0 to 1.0 representing the confidence in the claim's validity. */
@@ -58,6 +63,8 @@ export interface Claim extends BaseNode {
  * Evidence provides the verifiable grounding for claims.
  */
 export interface Evidence extends BaseNode {
+  evidenceType?: 'OBSERVATION' | 'DOCUMENT' | 'RUN' | 'HUMAN_JUDGMENT';
+  strength?: number;
   /** A URL or other resource identifier pointing to the source of the evidence. */
   sourceURI: string;
   /** A cryptographic hash (e.g., SHA-256) of the source content to ensure integrity. */
@@ -135,3 +142,66 @@ export interface HasPolicyEdge {
 }
 
 export * from './maestro-schema.js';
+/**
+ * @interface Episode
+ * @extends BaseNode
+ * @description Represents a situated slice of activity with a time window, actors, and environment.
+ */
+export interface Episode extends BaseNode {
+  startTime: string;
+  endTime?: string;
+  activityType: string;
+  context: string;
+  environment?: string;
+}
+
+/**
+ * @interface Perspective
+ * @extends BaseNode
+ * @description Represents a particular stakeholder's viewpoint on an episode.
+ */
+export interface Perspective extends BaseNode {
+  actorId: string;
+  goals: string[];
+  emotions?: string[];
+  attentionFocus?: string[];
+  stakeholderClass?: string;
+}
+
+/**
+ * @interface Mediation
+ * @extends BaseNode
+ * @description Represents how an AI tool or agent altered the experience in an episode.
+ */
+export interface Mediation extends BaseNode {
+  mediatorId: string;
+  alterationType: 'WARNING' | 'COGNITIVE_LOAD_REDUCTION' | 'AMBIGUITY_INTRODUCTION' | 'OTHER';
+  description: string;
+  confusionDelta?: number;
+  surpriseDelta?: number;
+  trustDelta?: number;
+}
+
+/**
+ * @interface ExperiencedByEdge
+ * @description Defines the relationship connecting an Episode to a Perspective.
+ */
+export interface ExperiencedByEdge {
+  type: 'EXPERIENCED_BY';
+}
+
+/**
+ * @interface MediatedByEdge
+ * @description Defines the relationship connecting an Episode to a Mediation.
+ */
+export interface MediatedByEdge {
+  type: 'MEDIATED_BY';
+}
+
+/**
+ * @interface ProducedByEdge
+ * @description Defines the relationship connecting a Claim to the Agent/Model that produced it.
+ */
+export interface ProducedByEdge {
+  type: 'PRODUCED_BY';
+}
