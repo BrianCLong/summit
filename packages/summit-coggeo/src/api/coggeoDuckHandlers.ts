@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import type { CogGeoDuckStore } from "../storage/duckdb/coggeoDuckStore.js";
+=======
+import type { CogGeoDuckStore } from "../storage/duckdb/coggeoDuckStore";
+>>>>>>> origin/main
 
 export function createNarrativesHandler(store: CogGeoDuckStore) {
   return async function narrativesHandler(_req: any, res: any) {

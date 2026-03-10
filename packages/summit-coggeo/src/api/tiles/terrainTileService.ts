@@ -1,9 +1,16 @@
+<<<<<<< HEAD
 import type { TerrainLayerKind, TerrainTileQuery } from "./contracts.js";
 import { tileToBBoxWgs84 } from "./mercator.js";
 import { h3ToPolygon, polygonIntersectsBBox } from "./h3geom.js";
 // @ts-ignore
 import geojsonvt from "geojson-vt";
 // @ts-ignore
+=======
+import type { TerrainLayerKind, TerrainTileQuery } from "./contracts";
+import { tileToBBoxWgs84 } from "./mercator";
+import { h3ToPolygon, polygonIntersectsBBox } from "./h3geom";
+import geojsonvt from "geojson-vt";
+>>>>>>> origin/main
 import vtpbf from "vt-pbf";
 
 export interface TerrainCellRow {
@@ -20,6 +27,13 @@ export interface TerrainCellRow {
 }
 
 export interface TerrainCellStore {
+<<<<<<< HEAD
+=======
+  /**
+   * Retrieve cells for (tsBucket,narrativeId) with optional coarse filtering.
+   * In a real impl, do bbox filtering in the query (e.g., precomputed h3->bbox).
+   */
+>>>>>>> origin/main
   listCells(args: { tsBucket: string; narrativeId: string }): Promise<TerrainCellRow[]>;
 }
 
@@ -67,7 +81,10 @@ export async function buildTerrainTileGeoJSON(args: {
       geometry: poly,
       properties: {
         id: cell.id,
+<<<<<<< HEAD
         explain_id: `explain:\${cell.id}`,
+=======
+>>>>>>> origin/main
         h3: cell.h3,
         narrative_id: cell.narrative_id,
         ts_bucket: cell.ts_bucket,
@@ -77,6 +94,10 @@ export async function buildTerrainTileGeoJSON(args: {
         temperature: cell.temperature,
         turbulence: cell.turbulence,
         storm_score: cell.storm_score,
+<<<<<<< HEAD
+=======
+        explain_id: `explain:${cell.id}`, // <- important for click-to-explain
+>>>>>>> origin/main
       },
     });
 
@@ -101,6 +122,10 @@ export async function buildTerrainTileMVT(args: {
   q: TerrainTileQuery;
   store: TerrainCellStore;
 }): Promise<{ meta: any; mvt: Buffer } | null> {
+<<<<<<< HEAD
+=======
+  // Build GeoJSON first (single source of truth), then encode to MVT
+>>>>>>> origin/main
   const { meta, geojson } = await buildTerrainTileGeoJSON({
     z: args.z,
     x: args.x,
@@ -110,6 +135,10 @@ export async function buildTerrainTileMVT(args: {
     maxFeatures: 5000,
   });
 
+<<<<<<< HEAD
+=======
+  // geojson-vt builds a tile index for slicing/encoding
+>>>>>>> origin/main
   const tileIndex = geojsonvt(geojson as any, {
     maxZoom: 14,
     indexMaxZoom: 5,
@@ -123,6 +152,10 @@ export async function buildTerrainTileMVT(args: {
     return { meta: { ...meta, featureCount: 0, format: "mvt" }, mvt: Buffer.from([]) };
   }
 
+<<<<<<< HEAD
+=======
+  // Encode to MVT
+>>>>>>> origin/main
   const layers = {
     terrain: tile,
   };

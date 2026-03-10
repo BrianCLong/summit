@@ -5,7 +5,7 @@ on:
     inputs:
       runs-on:
         type: string
-        default: ubuntu-latest
+        default: ubuntu-22.04
       timeout-minutes:
         type: integer
         default: 10

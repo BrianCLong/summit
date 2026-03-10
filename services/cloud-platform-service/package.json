@@ -12,19 +12,19 @@
   },
   "dependencies": {
     "@intelgraph/cloud-platform": "workspace:*",
-    "express": "^5.2.0",
-    "cors": "^2.8.5",
-    "helmet": "^8.1.0",
-    "pino": "^10.1.0",
-    "pino-http": "^11.0.0",
-    "zod": "^4.1.12"
+    "express": "5.2.0",
+    "cors": "2.8.5",
+    "helmet": "8.1.0",
+    "pino": "10.1.0",
+    "pino-http": "11.0.0",
+    "zod": "4.1.12"
   },
   "devDependencies": {
-    "@types/express": "^5.0.3",
-    "@types/cors": "^2.8.19",
+    "@types/express": "5.0.3",
+    "@types/cors": "2.8.19",
     "@types/node": "20.19.27",
-    "typescript": "^5.9.3",
-    "nodemon": "^3.1.11",
-    "tsx": "^4.19.0"
+    "typescript": "5.9.3",
+    "nodemon": "3.1.11",
+    "tsx": "4.19.0"
   }
 }

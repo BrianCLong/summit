@@ -1,0 +1,13 @@
+{
+  "$id": "summit.epistemic.decision",
+  "type": "object",
+  "required": ["decision_id", "claim_id", "policy_id", "decision", "evidence_ids"],
+  "properties": {
+    "decision_id": { "type": "string" },
+    "claim_id": { "type": "string" },
+    "policy_id": { "type": "string" },
+    "decision": { "enum": ["APPROVE", "DEGRADE", "BLOCK", "ESCALATE"] },
+    "evidence_ids": { "type": "array", "items": { "type": "string" } },
+    "reason": { "type": "string" }
+  }
+}

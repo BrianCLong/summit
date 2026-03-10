@@ -11,7 +11,7 @@
     "test:smoke": "k6 run --vus 1 --duration 30s maestro-load-test.js"
   },
   "devDependencies": {
-    "k6": "^0.48.0"
+    "k6": "0.48.0"
   },
   "keywords": [
     "load-testing",

@@ -25,6 +25,10 @@ export class IntelGraphAdapterStub {
     for (const n of nodes) lines.push(JSON.stringify({ kind: "node", ...n }));
     for (const e of edges) lines.push(JSON.stringify({ kind: "edge", ...e }));
 
+<<<<<<< HEAD
+=======
+    // If CogGeo embedded:
+>>>>>>> origin/main
     if (envelope?.coggeo) {
       lines.push(JSON.stringify({ kind: "coggeo", ...envelope.coggeo }));
     }

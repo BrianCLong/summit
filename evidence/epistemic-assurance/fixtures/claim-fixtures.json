@@ -1,0 +1,20 @@
+{
+  "claims": [
+    {
+      "claim_id": "claim-1",
+      "statement": "The project uses epistemic assurance policies.",
+      "evidence_ids": ["ev-1"],
+      "independent_sources": 1,
+      "conflict_score": 0.0,
+      "support_score": 0.9
+    },
+    {
+      "claim_id": "claim-2",
+      "statement": "There is a conflict in the data.",
+      "evidence_ids": ["ev-2", "ev-3"],
+      "independent_sources": 2,
+      "conflict_score": 0.8,
+      "support_score": 0.5
+    }
+  ]
+}

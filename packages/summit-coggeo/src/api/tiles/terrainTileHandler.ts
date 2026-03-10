@@ -1,6 +1,12 @@
+<<<<<<< HEAD
 import type { TerrainCellStore } from "./terrainTileService.js";
 import { buildTerrainTileGeoJSON, buildTerrainTileMVT } from "./terrainTileService.js";
 import type { TerrainLayerKind } from "./contracts.js";
+=======
+import type { TerrainCellStore } from "./terrainTileService";
+import { buildTerrainTileGeoJSON, buildTerrainTileMVT } from "./terrainTileService";
+import type { TerrainLayerKind } from "./contracts";
+>>>>>>> origin/main
 
 function wantsMVT(req: any): boolean {
   const q = String(req.query?.format ?? "").toLowerCase();
@@ -22,7 +28,11 @@ export function createTerrainTileHandler(store: TerrainCellStore) {
     if (!z && z !== 0) return res.status(400).json({ error: "missing z" });
     if (!narrativeId || !tsBucket || !layer) return res.status(400).json({ error: "missing narrativeId/tsBucket/layer" });
 
+<<<<<<< HEAD
     const q = { narrativeId, tsBucket, layer, format: (wantsMVT(req) ? "mvt" : "geojson") as "mvt" | "geojson" };
+=======
+    const q = { narrativeId, tsBucket, layer, format: wantsMVT(req) ? ("mvt" as const) : ("geojson" as const) };
+>>>>>>> origin/main
 
     if (wantsMVT(req)) {
       const mvt = await buildTerrainTileMVT({ z, x, y, q, store });
@@ -31,6 +41,10 @@ export function createTerrainTileHandler(store: TerrainCellStore) {
         res.setHeader("X-Summit-Tile-Meta", JSON.stringify(mvt.meta));
         return res.status(200).send(mvt.mvt);
       }
+<<<<<<< HEAD
+=======
+      // fallthrough to geojson if MVT not available
+>>>>>>> origin/main
     }
 
     const out = await buildTerrainTileGeoJSON({ z, x, y, q, store, maxFeatures: 5000 });

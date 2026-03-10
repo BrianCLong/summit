@@ -8,7 +8,7 @@ on:
 jobs:
   lint-ontology:
     name: Lint Ontology and Schemas
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -21,6 +21,7 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
+          version: 10.0.0
           run_install: false
 
       - name: Lint Markdown Files
