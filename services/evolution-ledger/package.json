@@ -1,0 +1,7 @@
+{
+  "name": "@summit/evolution-ledger",
+  "version": "1.0.0",
+  "description": "Evolution Ledger Service",
+  "type": "module",
+  "dependencies": {}
+}
