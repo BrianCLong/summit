@@ -142,17 +142,20 @@ export function GraphCanvas({
       entity,
     }))
 
+    // Performance: Use a Map for O(1) node lookups, replacing O(N) find
+    const nodeMap = new Map(nodes.map(node => [node.id, node]));
+
     const links: GraphLink[] = relationships
       .filter(rel => {
-        const sourceNode = nodes.find(n => n.id === rel.sourceId)
-        const targetNode = nodes.find(n => n.id === rel.targetId)
+        const sourceNode = nodeMap.get(rel.sourceId)
+        const targetNode = nodeMap.get(rel.targetId)
         return sourceNode && targetNode
       })
       .map(rel => ({
         id: rel.id,
         relationship: rel,
-        source: nodes.find(n => n.id === rel.sourceId)!,
-        target: nodes.find(n => n.id === rel.targetId)!,
+        source: nodeMap.get(rel.sourceId)!,
+        target: nodeMap.get(rel.targetId)!,
       }))
 
     // Create simulation based on layout type
