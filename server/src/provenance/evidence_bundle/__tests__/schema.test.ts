@@ -6,12 +6,17 @@ import Ajv2020 from 'ajv/dist/2020.js';
 import addFormats from 'ajv-formats';
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const ajv = new Ajv2020({ allErrors: true, strict: false });
 addFormats(ajv);
 
-const reportSchema = JSON.parse(fs.readFileSync(path.join(process.cwd(), '../schemas/cogops/report.schema.json'), 'utf8'));
-const metricsSchema = JSON.parse(fs.readFileSync(path.join(process.cwd(), '../schemas/cogops/metrics.schema.json'), 'utf8'));
+const schemaRoot = path.resolve(__dirname, '../../../../../schemas/cogops');
+const reportSchema = JSON.parse(fs.readFileSync(path.join(schemaRoot, 'report.schema.json'), 'utf8'));
+const metricsSchema = JSON.parse(fs.readFileSync(path.join(schemaRoot, 'metrics.schema.json'), 'utf8'));
 
 const validateReport = ajv.compile(reportSchema);
 const validateMetrics = ajv.compile(metricsSchema);
