@@ -7,3 +7,10 @@ type RegulatoryEarlyWarning {
   topDrivers: [String!]!
   evidenceIds: [String!]!
 }
+<<<<<<< HEAD
+
+type Query {
+  regulatoryEarlyWarning(institutionId: ID!): RegulatoryEarlyWarning
+}
+=======
+>>>>>>> origin/main

@@ -1,3 +1,10 @@
+<<<<<<< HEAD
+regulatory-ew-evidence
+regulatory-ew-backtest
+regulatory-ew-policy
+regulatory-ew-privacy
+regulatory-ew-deps
+=======
 # Required Checks Mapping TODO
 
 Track which workflows produce which status checks, and which checks are currently required on protected branches.
@@ -11,3 +18,4 @@ Track which workflows produce which status checks, and which checks are currentl
 
 ## Initial target
 Map current PR gate and any evidence / policy / privacy checks that AI-generated PRs are expected to satisfy.
+>>>>>>> origin/main
