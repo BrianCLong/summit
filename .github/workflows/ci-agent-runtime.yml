@@ -8,7 +8,7 @@ on:
 
 jobs:
   test-matrix:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     strategy:
       matrix:
         test-type: [unit, security, sandbox-isolation, policy-enforcement]
@@ -37,7 +37,7 @@ jobs:
 
   ci-agent-runtime-success:
     needs: test-matrix
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     if: always()
     steps:
       - name: Aggregate Matrix Results

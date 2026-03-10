@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 concerns:
   ci-gate:
     owner: platform/ci
@@ -18,3 +19,17 @@ concerns:
     owner: platform/governance
     canonical_branch: concern/docs-governance
     description: updates to governance documentation
+=======
+ci-gate:
+  owner: platform/ci
+  canonical_branch: concern/ci-gate
+  description: deterministic CI gate architecture
+
+neo4j-reconciliation:
+  owner: graph/core
+  canonical_branch: concern/neo4j-reconciliation
+
+artifact-evidence:
+  owner: governance
+  canonical_branch: concern/artifact-evidence
+>>>>>>> origin/main

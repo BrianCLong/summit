@@ -4,8 +4,8 @@ on: [pull_request]
 
 jobs:
   retrieval-tests:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - run: pnpm install
       - run: pnpm test

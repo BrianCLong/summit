@@ -1,0 +1,82 @@
+# Frontier Ownership Configuration
+#
+# Defines which frontiers own which code paths.
+# The sovereignty checker uses this to enforce the rule:
+# "No direct modification of frontier-owned domains"
+#
+# When a frontier is active (has pending patches or is synthesizing),
+# direct commits to its owned paths are rejected by CI.
+
+auth-system:
+  paths:
+    - services/auth/**
+    - packages/auth/**
+    - server/src/auth/**
+    - server/src/security/**
+  description: Authentication and authorization systems
+
+graphql-layer:
+  paths:
+    - gateway/graphql-bff/**
+    - services/*/graphql/**
+    - "**/*.graphql"
+  description: GraphQL API layer and schemas
+
+evidence-graph:
+  paths:
+    - packages/evidence-graph/**
+    - services/evidence-**/**
+    - packages/prov-ledger/**
+  description: Evidence and provenance graph systems
+
+knowledge-graph:
+  paths:
+    - packages/knowledge-graph/**
+    - services/graph-core/**
+    - packages/graph-rag/**
+  description: Knowledge graph and reasoning systems
+
+ml-platform:
+  paths:
+    - packages/ml-**/**
+    - services/ml-**/**
+    - packages/deep-learning-core/**
+    - services/model-**/**
+  description: ML/AI platform components
+
+intelligence-platform:
+  paths:
+    - packages/threat-**/**
+    - packages/multi-int-fusion/**
+    - services/predictive-analytics/**
+  description: Intelligence analysis and fusion systems
+
+api-gateway:
+  paths:
+    - gateway/**
+    - services/api-gateway/**
+  description: API gateway and routing
+
+database-layer:
+  paths:
+    - server/src/db/**
+    - services/*/db/**
+    - packages/*/migrations/**
+  description: Database schemas and migrations
+
+frontend-platform:
+  paths:
+    - client/**
+    - apps/web/**
+    - apps/mobile/**
+    - packages/*/src/components/**
+  description: Frontend applications and components
+
+repoos-core:
+  paths:
+    - services/repoos/**
+    - scripts/repoos/**
+    - .repoos/**
+    - .github/workflows/evolution-**
+    - .github/workflows/pr-**
+  description: RepoOS core autonomous engineering system

@@ -19,11 +19,11 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "prom-client": "^15.1.0"
+    "prom-client": "15.1.0"
   },
   "devDependencies": {
-    "@types/node": "^20.0.0",
-    "typescript": "^5.3.3"
+    "@types/node": "20.0.0",
+    "typescript": "5.3.3"
   },
   "keywords": [
     "prometheus",

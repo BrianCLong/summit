@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   sbom-generate:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
 
@@ -25,7 +25,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20.19.0'
-          cache: 'pnpm'
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -50,7 +49,7 @@ jobs:
             pnpm-deps.json
 
   sbom-validate:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: sbom-generate
     steps:
       - uses: actions/checkout@v4
@@ -75,7 +74,7 @@ jobs:
             --lockfile pnpm-deps.json
 
   provenance-attest-verify:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: [sbom-validate]
     steps:
       - uses: actions/checkout@v4
@@ -92,7 +91,7 @@ jobs:
           subject-path: ./cyclonedx.xml
 
       - name: Install cosign
-        uses: sigstore/cosign-installer@v3
+        uses: sigstore/cosign-installer@v3.7.0
 
       # Verify using Sigstore bundle + Rekor inclusion (no skipping tlog)
       - name: Verify attestation bundle & Rekor inclusion
@@ -100,7 +99,7 @@ jobs:
           # GitHub stores attestation as a linked artifact; fetch bundle path
           gh attestation download --artifact-path ./cyclonedx.xml --bundle bundle.json
           # Verify signature + cert + Rekor inclusion from bundle (keyless OIDC)
-          cosign verify-blob --bundle bundle.json ./cyclonedx.xml
+          cosign verify-blob --use-signed-timestamps --bundle bundle.json ./cyclonedx.xml || { echo "::error::Supply chain verification failed! Missing or invalid signed timestamps."; false; }
 
       - name: Enforce attestation TTL/recency (<= 24h)
         run: |

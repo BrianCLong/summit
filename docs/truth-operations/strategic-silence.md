@@ -21,37 +21,43 @@ This is psychologically counterintuitive. It is also essential.
 Organizations and systems face powerful pressure to **do something**:
 
 **Psychological Pressure**:
+
 - "We can't just sit here"
 - "Doing nothing looks bad"
 - "We have to respond or we look incompetent"
 
 **Institutional Pressure**:
+
 - Metrics reward visible action
 - Inaction is harder to justify than action
 - "What did you do about it?" is easier to answer than "Why did you wait?"
 
 **Adversarial Exploitation**:
+
 - Adversaries trigger this bias deliberately
 - Force hasty decisions by creating urgency
 - **The goal isn't to make you act correctly, it's to make you act prematurely**
 
 ### The Cost of Premature Action
 
-**Example 1: Security Theater**
+### Example 1: Security Theater
+
 - Alert triggers
 - Team scrambles to respond
 - Resources deployed
 - Turns out to be false positive
 - Real threat ignored during distraction
 
-**Example 2: Overreaction Cascade**
+### Example 2: Overreaction Cascade
+
 - Minor anomaly detected
 - Automated systems escalate
 - Human operators feel pressure to act
 - Aggressive mitigation deployed
 - Mitigation causes more damage than original issue
 
-**Example 3: Information Disclosure**
+### Example 3: Information Disclosure
+
 - Adversary probes system
 - System responds differently to valid vs. invalid inputs
 - Response pattern leaks information
@@ -69,7 +75,8 @@ Organizations and systems face powerful pressure to **do something**:
 **Strategic Silence**: Wait for sufficient information, if time permits
 
 **Justification**:
-```
+
+```text
 expected_value(wait) = p(better_info) × value(correct_decision)
                        - cost(delay)
 
@@ -78,17 +85,16 @@ expected_value(act) = p(guess_correct) × value(correct_decision)
 
 IF expected_value(wait) > expected_value(act):
   THEN strategic_silence is optimal
-```
-
+```text
 **Example**:
-```
+
+```text
 Ambiguous alert: Could be attack, could be benign unusual activity
 Acting: 40% chance attack (good response), 60% chance false positive (wasted resources + disruption)
 Waiting: 5 minutes to gather more data, 95% chance of correct classification
 
 Decision: WAIT (strategic silence for 5 minutes)
-```
-
+```text
 ### Category 2: Adversarial Probing
 
 **Scenario**: Adversary testing defenses, trying to learn system behavior
@@ -99,7 +105,8 @@ Decision: WAIT (strategic silence for 5 minutes)
 **Justification**: Information denial
 
 **Example**:
-```
+
+```text
 Probe: Invalid authentication attempt with specific pattern
 Response A: Immediate block + error message detailing why
   → Adversary learns: "This pattern is detected, try different pattern"
@@ -107,8 +114,7 @@ Response B: No response, connection times out normally
   → Adversary learns: Nothing (could be network issue, could be detection, can't tell)
 
 Decision: Strategic silence (no special response)
-```
-
+```text
 ### Category 3: Low-Value Targets
 
 **Scenario**: Minor issue not worth the cost of response
@@ -119,15 +125,15 @@ Decision: Strategic silence (no special response)
 **Justification**: Resource optimization
 
 **Example**:
-```
+
+```text
 Issue: Cosmetic UI glitch affecting 0.01% of users in rare edge case
 Fix cost: 8 hours engineering time
 Impact: User annoyance (low severity)
 Opportunity cost: 8 hours not spent on critical security patch
 
 Decision: Strategic silence (do not fix, document as known-minor-issue)
-```
-
+```text
 ### Category 4: Baiting and Provocation
 
 **Scenario**: Adversary trying to provoke overreaction
@@ -138,7 +144,8 @@ Decision: Strategic silence (do not fix, document as known-minor-issue)
 **Justification**: Deny adversary their goal
 
 **Example**:
-```
+
+```text
 Provocation: Public claim "Your system has vulnerability X"
 Goal: Force rushed patch that introduces new bugs or reveals architecture
 Response A: Emergency patch (plays into adversary hands)
@@ -146,8 +153,7 @@ Response B: Strategic silence + internal verification + measured response only i
   → Adversary gains no information about whether claim was accurate
 
 Decision: Strategic silence (external) + internal investigation (private)
-```
-
+```text
 ### Category 5: Time-Based Defense
 
 **Scenario**: Responding now helps adversary, delaying helps defender
@@ -156,22 +162,22 @@ Decision: Strategic silence (external) + internal investigation (private)
 **Strategic Silence**: Delayed response that denies adversary timing advantage
 
 **Example**:
-```
+
+```text
 Detection: Attacker has foothold but hasn't moved laterally yet
 Immediate Response: Kick attacker out (they know they're detected, try again differently)
 Delayed Response: Monitor attacker activity, map their tools/techniques, prepare coordinated eviction
   → When ready, simultaneous eviction + patching + threat intelligence publication
 
 Decision: Strategic silence (appear unaware while preparing comprehensive response)
-```
-
+```text
 ---
 
 ## Strategic Silence Framework
 
 ### Decision Tree
 
-```
+```text
 Alert/Event Detected
     │
     ├─ Is immediate action required to prevent irreversible damage?
@@ -197,16 +203,17 @@ Alert/Event Detected
     └─ Is this provocation/baiting?
        ├─ YES → STRATEGIC SILENCE (deny adversary their goal)
        └─ NO → ACT
-```
-
+```text
 ### Silence Classification
 
 Summit recognizes **four types of silence**:
 
 #### Type 1: Observational Silence
+
 **Definition**: Watching without acting to gather information
 
 **Characteristics**:
+
 - Temporary (has defined endpoint)
 - Active (deliberate observation)
 - Preparatory (building toward action)
@@ -214,9 +221,11 @@ Summit recognizes **four types of silence**:
 **Example**: Monitoring attacker to understand their full operation before eviction
 
 #### Type 2: Denial Silence
+
 **Definition**: Refusing to respond to deny adversary information
 
 **Characteristics**:
+
 - Potentially indefinite
 - Passive externally, active internally
 - Defensive posture
@@ -224,9 +233,11 @@ Summit recognizes **four types of silence**:
 **Example**: Not responding to probes or provocations
 
 #### Type 3: Prioritization Silence
+
 **Definition**: Choosing not to act due to higher priorities
 
 **Characteristics**:
+
 - Indefinite (until priorities change)
 - Explicit decision
 - Resource-driven
@@ -234,9 +245,11 @@ Summit recognizes **four types of silence**:
 **Example**: Deferring minor bugs to focus on critical security
 
 #### Type 4: Uncertainty Silence
+
 **Definition**: Waiting for better information before acting
 
 **Characteristics**:
+
 - Temporary (until information arrives or deadline forces decision)
 - Information-seeking active
 - Risk management
@@ -252,6 +265,7 @@ Summit recognizes **four types of silence**:
 **Requirement**: "Strategic Silence" must be a valid decision option, not just absence of decision
 
 **Implementation**:
+
 ```json
 {
   "alert_id": "alert_78923",
@@ -264,9 +278,9 @@ Summit recognizes **four types of silence**:
   "success_criteria": "Telemetry arrives and enables confident decision",
   "escalation_trigger": "If telemetry not available by 14:33, decide with available information"
 }
-```
-
+```text
 **Key Elements**:
+
 - Silence is **named and justified**, not just "we didn't do anything"
 - Has defined **review point** (not indefinite drift)
 - Includes **escalation trigger** (what breaks the silence)
@@ -277,7 +291,7 @@ Summit recognizes **four types of silence**:
 
 **Solution**: Active monitoring of silent decisions
 
-```
+```text
 FOR each strategic_silence decision:
   TRACK:
     - Time in silence
@@ -290,21 +304,19 @@ FOR each strategic_silence decision:
     - Escalation trigger occurred
     - New information arrived that changes calculus
     - Silence duration exceeds acceptable for type
-```
-
+```text
 ### Protocol 3: Justification Requirements
 
 **Silence requires stronger justification than action**:
 
-```
+```text
 To choose STRATEGIC_SILENCE, operator must document:
   1. What action is NOT being taken
   2. Why inaction is preferable to action
   3. What conditions would trigger action
   4. How long silence is acceptable
   5. How silence will be monitored
-```
-
+```text
 **Rationale**: Prevents "silence by default" or "silence due to indecision"
 
 ### Protocol 4: External vs. Internal Silence
@@ -312,7 +324,8 @@ To choose STRATEGIC_SILENCE, operator must document:
 **Principle**: Silence externally doesn't mean silence internally
 
 **Implementation**:
-```
+
+```text
 External Silence:
   - No response to adversary
   - No public communication
@@ -323,21 +336,20 @@ Internal Activity:
   - Defenses being prepared
   - Intelligence gathering active
   - Response being planned
-```
-
+```text
 **Example**:
-```
+
+```text
 Adversary Perspective: "They haven't responded, maybe not detected"
 Defender Reality: "Fully aware, building comprehensive response, timing eviction for maximum effectiveness"
-```
-
+```text
 ---
 
 ## Operator Interface for Silence
 
 ### Silence Dashboard
 
-```
+```text
 ┌──────────────────────────────────────────────────────┐
 │ ACTIVE STRATEGIC SILENCE DECISIONS                   │
 ├──────────────────────────────────────────────────────┤
@@ -363,11 +375,10 @@ Defender Reality: "Fully aware, building comprehensive response, timing eviction
 │    [REPRIORITIZE] [CLOSE AS WONT-FIX]               │
 │                                                      │
 └──────────────────────────────────────────────────────┘
-```
-
+```text
 ### Silence Justification Template
 
-```
+```text
 ┌──────────────────────────────────────────────────────┐
 │ STRATEGIC SILENCE DECISION                           │
 ├──────────────────────────────────────────────────────┤
@@ -405,8 +416,7 @@ Defender Reality: "Fully aware, building comprehensive response, timing eviction
 │                                                      │
 │ [CONFIRM SILENCE] [REVISE] [CANCEL - ACT NOW]       │
 └──────────────────────────────────────────────────────┘
-```
-
+```text
 ---
 
 ## Adversarial Scenarios
@@ -416,17 +426,20 @@ Defender Reality: "Fully aware, building comprehensive response, timing eviction
 **Adversary Goal**: Trigger defensive response that reveals capabilities
 
 **Attack**:
+
 1. Launch low-level probe
 2. Observe defensive response
 3. Learn from response (what's detected, how it's blocked, what tools are in use)
 4. Refine attack to evade those specific defenses
 
 **Traditional Defense**: Automatic response to all probes
+
 - Consistent, but predictable
 - Every probe teaches adversary something
 
 **Strategic Silence Defense**:
-```
+
+```text
 Probe detected
   ↓
 Classify: Low-level, non-damaging
@@ -438,24 +451,26 @@ Decision: DENIAL SILENCE
   - Internal logging for pattern analysis
   ↓
 Adversary learns: Nothing
-```
-
+```text
 ### Scenario 2: Alert Flooding to Force Action
 
 **Adversary Goal**: Overwhelm with alerts to force hasty decisions
 
 **Attack**:
+
 1. Generate high volume of low-priority alerts
 2. Hide critical alert in the noise
 3. Defenders either miss it (good for attacker) or rush through triage (good for attacker)
 
 **Traditional Defense**: Process all alerts
+
 - Alert fatigue
 - Rushed decisions
 - Real threats missed or mishandled
 
 **Strategic Silence Defense**:
-```
+
+```text
 Alert flood detected
   ↓
 Decision: PRIORITIZATION SILENCE on low-value alerts
@@ -465,24 +480,26 @@ Decision: PRIORITIZATION SILENCE on low-value alerts
   ↓
 Critical alert visible, receives proper attention
 Low-value noise ignored (strategic silence)
-```
-
+```text
 ### Scenario 3: Provocation for Overreaction
 
 **Adversary Goal**: Cause defenders to damage themselves
 
 **Attack**:
+
 1. Trigger alarm that suggests major threat
 2. Defender responds aggressively (e.g., shutdown critical systems)
 3. Defender causes more damage than attacker ever could
 
 **Traditional Defense**: Respond to apparent severity
+
 - Aggressive mitigation deployed
 - Turns out to be false alarm
 - Self-inflicted damage
 
 **Strategic Silence Defense**:
-```
+
+```text
 High-severity alert received
   ↓
 Integrity scoring: LOW (suspicious characteristics)
@@ -496,56 +513,62 @@ Decision: UNCERTAINTY SILENCE
 Verification reveals: False alarm
   ↓
 Strategic silence prevented self-inflicted damage
-```
-
+```text
 ---
 
 ## Metrics for Strategic Silence
 
 ### Effectiveness Metrics
 
-**1. Silence Success Rate**
-```
+### 1. Silence Success Rate
+
+```text
 SSR = silence_decisions_validated_correct / total_silence_decisions
-```
+```text
 Measures: How often silence was the right choice
 
-**2. Premature Action Prevented**
-```
+### 2. Premature Action Prevented
+
+```text
 PAP = count(actions that would have been wrong if taken immediately)
-```
+```text
 Measures: Damage avoided by waiting
 
-**3. Intelligence Gain from Observation**
-```
+### 3. Intelligence Gain from Observation
+
+```text
 IGO = threat_intelligence_value(observed) - threat_intelligence_value(immediate_response)
-```
+```text
 Measures: Value of observational silence
 
-**4. Silence Maintenance**
-```
+### 4. Silence Maintenance
+
+```text
 SM = silence_decisions_reviewed_on_time / total_silence_decisions
-```
+```text
 Measures: Whether silence is actively managed (not neglect)
 
 ### Risk Metrics
 
-**1. Silence Overuse**
-```
+### 1. Silence Overuse
+
+```text
 SO = silence_decisions / total_decisions
-```
+```text
 Warning: If SO > 0.3, may indicate decision paralysis rather than strategic choice
 
-**2. Silence Duration Excess**
-```
+### 2. Silence Duration Excess
+
+```text
 SDE = count(silence exceeded intended duration) / total_silence_decisions
-```
+```text
 Warning: If SDE > 0.1, silence monitoring may be insufficient
 
-**3. Broken Silence Regret**
-```
+### 3. Broken Silence Regret
+
+```text
 BSR = count(regretted breaking silence too soon) / count(silence broken)
-```
+```text
 Measures: Are we breaking silence prematurely?
 
 ---
@@ -553,23 +576,28 @@ Measures: Are we breaking silence prematurely?
 ## Integration with Other Pillars
 
 ### With Integrity Scoring
+
 - Low integrity can justify UNCERTAINTY SILENCE (wait for better information)
 - High integrity can override silence (act confidently)
 
 ### With Narrative Collision
+
 - Premature narrative convergence can be met with OBSERVATIONAL SILENCE (wait for alternatives)
 - Silence allows narrative diversity to emerge
 
 ### With Temporal Truth
+
 - Temporal pressure works against silence
 - Framework must balance "wait for information" vs. "decide before window closes"
 - Explicit tension to be managed, not eliminated
 
 ### With Authority Continuity
+
 - Compromised authority can trigger DENIAL SILENCE (don't act on suspect source)
 - Established authority can justify breaking silence (trust source, act now)
 
 ### With Blast Radius Containment
+
 - Silence can be form of containment (do nothing to prevent cascade)
 - Sometimes "don't execute dependent decision" is same as strategic silence
 
@@ -580,10 +608,12 @@ Measures: Are we breaking silence prematurely?
 ### Reframing Inaction
 
 **Old Mental Model**:
+
 - Action = Competence
 - Inaction = Weakness/Indecision
 
 **New Mental Model**:
+
 - **Strategic** Action = Competence
 - **Strategic** Silence = Competence
 - **Hasty** Action = Liability
@@ -594,24 +624,26 @@ Measures: Are we breaking silence prematurely?
 **Challenge**: Rewarding silence is counterintuitive
 
 **Solution**: Track and celebrate "prevented disasters"
-```
+
+```text
 Award: "Best Strategic Silence of the Quarter"
 Winner: Operator who chose 10-minute observational silence that:
   - Prevented premature eviction
   - Enabled mapping of full attack infrastructure
   - Led to comprehensive threat intelligence
   - Resulted in zero lateral movement or data loss
-```
-
+```text
 ### Silence Training
 
 Operators must be trained to:
+
 - Recognize when silence is appropriate
 - Justify silence decisions
 - Monitor active silence
 - Know when to break silence
 
 **Exercises**:
+
 - Red team scenarios where immediate action is wrong
 - Post-mortems analyzing "what if we had waited?"
 - Silence decision role-playing
@@ -625,24 +657,29 @@ Operators must be trained to:
 In game-theoretic scenarios, **not responding** communicates information:
 
 **To Adversaries**:
+
 - "We're confident enough not to react to your provocation"
 - "We're observing, not ignorant"
 - "Your move"
 
 **To Partners**:
+
 - "Situation is under control, no emergency action needed"
 - "We're handling it, don't escalate"
 
 **To Public**:
+
 - "This doesn't merit comment" (can defuse or contain)
 
 ### Adversarial Silence Interpretation
 
 Sophisticated adversaries watch for silence:
+
 - "They haven't responded → Maybe not detected?" (exploit)
 - "They haven't responded → Maybe detected and observing?" (caution)
 
 **Defender strategy**: Make silence **ambiguous**
+
 - Sometimes silence means detection
 - Sometimes silence means non-detection
 - Adversary cannot tell which
@@ -654,6 +691,7 @@ Sophisticated adversaries watch for silence:
 Action bias is human nature. It's also exploitable.
 
 Strategic silence requires discipline, justification, and active management—but it prevents:
+
 - Premature decisions based on insufficient information
 - Overreactions that cause more damage than threats
 - Information leakage to adversaries
@@ -662,6 +700,7 @@ Strategic silence requires discipline, justification, and active management—bu
 Summit's innovation is treating silence as a **positive, justified, monitored decision** rather than absence of decision.
 
 This capability is essential for:
+
 - Adversarial environments where responses leak information
 - Time-sensitive scenarios where premature action is worse than delayed action
 - Resource-constrained environments where not everything can be addressed

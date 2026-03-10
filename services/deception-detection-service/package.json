@@ -17,15 +17,15 @@
     "@intelgraph/fake-account-detection": "workspace:*",
     "@intelgraph/synthetic-media": "workspace:*",
     "@intelgraph/content-verification": "workspace:*",
-    "express": "^5.2.0",
-    "cors": "^2.8.5",
-    "multer": "^2.0.2"
+    "express": "5.2.0",
+    "cors": "2.8.5",
+    "multer": "2.0.2"
   },
   "devDependencies": {
-    "typescript": "^5.9.3",
+    "typescript": "5.9.3",
     "@types/node": "20.19.27",
-    "@types/express": "^5.0.0",
-    "@types/cors": "^2.8.17",
-    "@types/multer": "^1.4.12"
+    "@types/express": "5.0.0",
+    "@types/cors": "2.8.17",
+    "@types/multer": "1.4.12"
   }
 }

@@ -1,0 +1,232 @@
+# Meta-Governance Lock Configuration
+#
+# Protects RepoOS control loops from being disabled or bypassed.
+# This is a critical safeguard for autonomous repository stability.
+#
+# Beyond FAANG: Constitutional immutability for autonomous systems
+
+version: "1.0.0"
+enabled: true
+
+# Protected systems that cannot be disabled without override protocol
+protected_systems:
+  - id: stability-envelope-monitor
+    path: scripts/repoos/stability-envelope-monitor.mjs
+    description: "Predictive stability monitoring (FE/RMR/MTS metrics)"
+    criticality: critical
+
+  - id: evidence-governor
+    path: scripts/repoos/evidence-governor.mjs
+    description: "Evidence-bound governance for architecture decisions"
+    criticality: critical
+
+  - id: constitution-workflow
+    path: .github/workflows/constitutional-enforcement.yml
+    description: "Constitutional law enforcement in CI"
+    criticality: critical
+
+  - id: patch-market
+    path: scripts/repoos/patch-market.mjs
+    description: "Market-based patch prioritization"
+    criticality: high
+
+  - id: homeostasis-controller
+    path: scripts/repoos/homeostasis-controller.mjs
+    description: "Autonomous stability control and healing"
+    criticality: critical
+
+  - id: architectural-genome
+    path: scripts/repoos/architectural-genome.mjs
+    description: "Evolutionary architecture tracking"
+    criticality: high
+
+  - id: autonomous-synthesis
+    path: scripts/repoos/autonomous-architecture-synthesis.mjs
+    description: "Autonomous architecture generation"
+    criticality: medium
+
+  - id: router-core
+    path: .repoos/router-config.yml
+    description: "PR routing and domain assignment"
+    criticality: critical
+
+# Override policy - required to modify protected systems
+override_policy:
+  # Number of architecture-owners signatures required
+  required_signatures: 3
+
+  # Minimum cooling period before override takes effect (hours)
+  cooling_period_hours: 24
+
+  # Maximum override duration (hours)
+  max_override_duration_hours: 168  # 7 days
+
+  # Required evidence for override request
+  required_evidence:
+    - impact-analysis.json
+    - rollback-plan.md
+    - emergency-justification.md
+
+  # Notification channels
+  notifications:
+    - slack: "#architecture-critical"
+    - email: "architecture-owners@summit.ai"
+    - pagerduty: "architecture-emergency"
+
+# Protected branches
+protected_branches:
+  - name: main
+    protection_level: maximum
+    bypass_allowed: false
+
+  - name: golden-path
+    protection_level: maximum
+    bypass_allowed: false
+
+  - name: production
+    protection_level: maximum
+    bypass_allowed: false
+
+# Protected files - require elevated approval
+protected_files:
+  - pattern: ".repoos/**"
+    required_approvers: 2
+    teams: ["architecture-owners"]
+
+  - pattern: "scripts/repoos/**"
+    required_approvers: 2
+    teams: ["architecture-owners"]
+
+  - pattern: "platform-interface/**"
+    required_approvers: 2
+    teams: ["architecture-owners", "interface-guardians"]
+
+  - pattern: ".github/workflows/constitutional-*.yml"
+    required_approvers: 3
+    teams: ["architecture-owners", "governance-owners"]
+
+  - pattern: ".repoos/evolution-constitution.yml"
+    required_approvers: 3
+    teams: ["architecture-owners", "governance-owners"]
+    bypass_allowed: false
+
+# Lock audit trail
+audit_trail:
+  enabled: true
+  storage_path: .repoos/governance-ledger/meta-lock-audit.json
+  retention_days: 730  # 2 years
+
+  # Events to audit
+  events:
+    - override_requested
+    - override_approved
+    - override_rejected
+    - override_executed
+    - override_reverted
+    - lock_violated
+    - lock_bypassed_attempted
+
+# Violation handling
+violation_policy:
+  # Action on lock violation attempt
+  on_violation:
+    - block_operation
+    - create_incident
+    - notify_security_team
+    - audit_log
+
+  # Automatic revert on unauthorized changes
+  auto_revert: true
+
+  # Quarantine period for violating branches
+  quarantine_period_hours: 48
+
+# Emergency override contacts
+emergency_contacts:
+  - role: "CTO"
+    slack: "@cto"
+    email: "cto@summit.ai"
+
+  - role: "Lead Architect"
+    slack: "@lead-architect"
+    email: "lead-architect@summit.ai"
+
+  - role: "Security Lead"
+    slack: "@security-lead"
+    email: "security@summit.ai"
+
+# Integration with other systems
+integrations:
+  evolution_ledger:
+    enabled: true
+    record_all_override_attempts: true
+
+  evidence_governor:
+    enabled: true
+    require_evidence_for_overrides: true
+
+  stability_monitor:
+    enabled: true
+    block_overrides_during_instability: true
+
+  homeostasis:
+    enabled: true
+    prevent_homeostasis_disable: true
+
+# Self-protection - meta-lock protecting itself
+self_protection:
+  enabled: true
+  required_signatures_to_modify: 4
+  cooling_period_hours: 72
+  requires_board_approval: true
+
+  # The meta-governance lock file itself requires maximum protection
+  protected_paths:
+    - .repoos/meta-governance-lock.yml
+    - scripts/repoos/meta-governance-lock-enforcer.mjs
+
+# Compliance and reporting
+compliance:
+  # Report generation
+  weekly_status_report: true
+  monthly_audit_report: true
+
+  # Compliance checks
+  check_frequency_hours: 24
+
+  # Attestation requirements
+  quarterly_attestation_required: true
+  attestation_signers: ["CTO", "Lead Architect", "Compliance Lead"]
+
+# Lock health monitoring
+health_monitoring:
+  enabled: true
+  check_interval_minutes: 60
+
+  # Alert on suspicious patterns
+  alert_on:
+    - multiple_override_attempts
+    - rapid_override_requests
+    - override_during_instability
+    - unauthorized_file_modifications
+    - lock_configuration_changes
+
+  # Auto-remediation
+  auto_remediation:
+    enabled: true
+    revert_unauthorized_changes: true
+    lock_violating_accounts: false  # Manual review required
+
+# Documentation
+documentation:
+  override_process: docs/governance/meta-lock-override-process.md
+  emergency_procedures: docs/governance/meta-lock-emergency-procedures.md
+  audit_procedures: docs/governance/meta-lock-audit-procedures.md
+
+# Status
+status:
+  lock_active: true
+  last_reviewed: "2026-03-09"
+  next_review_due: "2026-06-09"
+  active_overrides: 0
+  lifetime_override_count: 0

@@ -1,0 +1,5 @@
+{
+  "token_regression": false,
+  "tool_failure_rate": 0.01,
+  "latency_drift": false
+}

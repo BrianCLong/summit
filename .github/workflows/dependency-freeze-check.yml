@@ -46,7 +46,7 @@ permissions:
 jobs:
   check-freeze:
     name: Verify Dependency Freeze
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     outputs:
       status: ${{ steps.verify.outputs.status }}
