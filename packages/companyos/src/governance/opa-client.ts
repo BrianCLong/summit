@@ -23,14 +23,15 @@ export class OpaClient {
   async evaluate(policy: string, input: unknown): Promise<OpaResult> {
     const url = `${this.endpoint}/v1/data/${policy.replace(/\./g, '/')}`;
 
-    let lastError: any;
+    let lastError: unknown;
     for (let i = 0; i < 3; i++) {
       try {
         const response = await axios.post(url, { input });
         return response.data.result as OpaResult;
-      } catch (error: any) {
+      } catch (error: unknown) {
         lastError = error;
-        if (error.code === 'ECONNREFUSED' || error.code === 'ETIMEDOUT') {
+        const axiosError = error as { code?: string };
+        if (axiosError.code === 'ECONNREFUSED' || axiosError.code === 'ETIMEDOUT') {
           continue;
         }
         throw new PolicyEvaluationError('Failed to evaluate policy', error);

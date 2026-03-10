@@ -38,16 +38,17 @@ export abstract class BaseAdapter implements IAgentAdapter {
   abstract invoke(task: AgentTask): Promise<AgentResult>;
 
   protected async withRetry<T>(fn: () => Promise<T>): Promise<T> {
-    let lastError: any;
+    let lastError: unknown;
     for (let i = 0; i < this.maxRetries; i++) {
       try {
         await this.checkRateLimit();
         return await fn();
-      } catch (error: any) {
+      } catch (error: unknown) {
         lastError = error;
-        if (error instanceof RateLimitError || (error.status === 429)) {
+        const status = (error as { status?: number }).status;
+        if (error instanceof RateLimitError || status === 429) {
           const delay = this.baseDelayMs * Math.pow(2, i) + Math.random() * 100;
-          await new Promise(resolve => setTimeout(resolve, delay));
+          await new Promise((resolve) => setTimeout(resolve, delay));
           continue;
         }
         throw error;

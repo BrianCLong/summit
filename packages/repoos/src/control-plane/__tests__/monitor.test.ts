@@ -24,9 +24,11 @@ describe('MonitorLoop', () => {
     const consoleSpy = vi.spyOn(console, 'log');
 
     monitor.start();
-    await vi.advanceTimersByTimeAsync(30000);
-
+    // Immediate execution
     expect(cp.healthCheck).toHaveBeenCalledTimes(1);
+
+    await vi.advanceTimersByTimeAsync(30000);
+    expect(cp.healthCheck).toHaveBeenCalledTimes(2);
     expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('subsystem_health'));
 
     monitor.stop();
@@ -44,8 +46,10 @@ describe('MonitorLoop', () => {
 
     const monitor = new MonitorLoop(cp);
     monitor.start();
-    await vi.advanceTimersByTimeAsync(1000);
     expect(cp.healthCheck).toHaveBeenCalledTimes(1);
+
+    await vi.advanceTimersByTimeAsync(1000);
+    expect(cp.healthCheck).toHaveBeenCalledTimes(2);
     monitor.stop();
     delete process.env.MONITOR_INTERVAL_MS;
   });

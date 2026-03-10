@@ -13,7 +13,7 @@ export interface AuditLogger {
 
 export interface AuditableService {
   name: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export function wireAuditEvents(
@@ -24,10 +24,11 @@ export function wireAuditEvents(
     const methodsToWrap = ['invoke', 'execute', 'start', 'stop', 'save', 'delete'];
 
     for (const methodName of methodsToWrap) {
-      if (typeof service[methodName] === 'function') {
-        const originalMethod = service[methodName];
+      const method = service[methodName];
+      if (typeof method === 'function') {
+        const originalMethod = method as (...args: unknown[]) => Promise<unknown>;
 
-        service[methodName] = async function (...args: any[]) {
+        service[methodName] = async function (this: unknown, ...args: unknown[]) {
           const timestamp = new Date().toISOString();
           try {
             const result = await originalMethod.apply(this, args);
@@ -40,14 +41,15 @@ export function wireAuditEvents(
               metadata: { args },
             });
             return result;
-          } catch (error: any) {
+          } catch (error: unknown) {
+            const errorMessage = error instanceof Error ? error.message : String(error);
             auditLogger.log({
               timestamp,
               actorId: 'system',
               action: methodName,
               resource: service.name,
               outcome: 'failure',
-              metadata: { args, error: error.message },
+              metadata: { args, error: errorMessage },
             });
             throw error;
           }

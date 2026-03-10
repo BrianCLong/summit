@@ -7,7 +7,7 @@ export interface EnforcementResult {
 }
 
 export interface AuditLogger {
-  log(event: any): string;
+  log(event: Record<string, unknown>): string;
 }
 
 export class GovernanceAgent {

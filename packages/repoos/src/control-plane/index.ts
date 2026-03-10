@@ -3,7 +3,7 @@ import { ControlPlaneStatus, Subsystem, SubsystemStatus } from './types.js';
 export class ControlPlane {
   private startTime: number | null = null;
   private running: boolean = false;
-  private inFlightChecks: Set<Promise<any>> = new Set();
+  private inFlightChecks: Set<Promise<unknown>> = new Set();
 
   constructor(private subsystems: Subsystem[]) {}
 

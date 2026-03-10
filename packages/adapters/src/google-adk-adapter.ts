@@ -24,7 +24,7 @@ export class GoogleADKAdapter extends BaseAdapter {
         throw new Error(`ADK responded with status: ${response.status}`);
       }
 
-      const data = (await response.json()) as any;
+    const data = (await response.json()) as { output: string; tokensUsed?: number };
       return {
         taskId: task.taskId,
         output: data.output,

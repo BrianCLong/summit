@@ -1,0 +1,6 @@
+{
+  "id": "entity-1",
+  "tags": ["tag1", "tag2"],
+  "schemaVersion": "2",
+  "other": "data"
+}

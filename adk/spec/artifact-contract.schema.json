@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SignedArtifact",
+  "type": "object",
+  "required": ["hash", "signature", "timestamp", "version"],
+  "properties": {
+    "hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "signature": {
+      "type": "string"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "version": {
+      "type": "string",
+      "enum": ["1"]
+    }
+  },
+  "additionalProperties": false
+}

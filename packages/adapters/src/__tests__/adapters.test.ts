@@ -1,33 +1,30 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import nock from 'nock';
 import { OpenAIAdapter } from '../openai-adapter.js';
 import { AnthropicAdapter } from '../anthropic-adapter.js';
 import { GoogleADKAdapter } from '../google-adk-adapter.js';
 import { RateLimitError } from '../base-adapter.js';
 
-describe('Adapters with Mocks', () => {
+describe('Adapters with Nock', () => {
   const task = { taskId: '1', instruction: 'Hello' };
 
   beforeEach(() => {
-    vi.stubGlobal('fetch', vi.fn());
+    if (!nock.isActive()) nock.activate();
   });
 
   afterEach(() => {
-    vi.unstubAllGlobals();
-    vi.resetAllMocks();
+    nock.cleanAll();
+    nock.restore();
   });
 
   describe('OpenAIAdapter', () => {
     it('should invoke successfully', async () => {
-      const mockResponse = {
-        ok: true,
-        status: 200,
-        headers: new Headers({ 'content-type': 'application/json' }),
-        json: async () => ({
+      nock('https://api.openai.com')
+        .post('/v1/chat/completions')
+        .reply(200, {
           choices: [{ message: { content: 'Hi' } }],
-          usage: { total_tokens: 10 }
-        }),
-      };
-      const fetchSpy = vi.mocked(global.fetch).mockResolvedValue(mockResponse as any);
+          usage: { total_tokens: 10 },
+        });
 
       const adapter = new OpenAIAdapter('test-key');
       const result = await adapter.invoke(task);
@@ -36,23 +33,20 @@ describe('Adapters with Mocks', () => {
     });
 
     it('should retry on 429', async () => {
-      const mock429 = { ok: false, status: 429, headers: new Headers() };
-      const mock200 = {
-        ok: true,
-        status: 200,
-        headers: new Headers({ 'content-type': 'application/json' }),
-        json: async () => ({
-          choices: [{ message: { content: 'Success' } }],
-          usage: { total_tokens: 5 }
-        }),
-      };
+      nock('https://api.openai.com')
+        .post('/v1/chat/completions')
+        .reply(429);
 
-      const fetchSpy = vi.mocked(global.fetch)
-        .mockResolvedValueOnce(mock429 as any)
-        .mockResolvedValueOnce(mock200 as any);
+      nock('https://api.openai.com')
+        .post('/v1/chat/completions')
+        .reply(200, {
+          choices: [{ message: { content: 'Success' } }],
+          usage: { total_tokens: 5 },
+        });
 
       const adapter = new OpenAIAdapter('test-key');
-      (adapter as any).baseDelayMs = 1;
+      // @ts-expect-error accessing private for test
+      adapter.baseDelayMs = 1;
       const result = await adapter.invoke(task);
       expect(result.output).toBe('Success');
     });
@@ -60,16 +54,12 @@ describe('Adapters with Mocks', () => {
 
   describe('AnthropicAdapter', () => {
     it('should invoke successfully', async () => {
-      const mockResponse = {
-        ok: true,
-        status: 200,
-        headers: new Headers({ 'content-type': 'application/json' }),
-        json: async () => ({
+      nock('https://api.anthropic.com')
+        .post('/v1/messages')
+        .reply(200, {
           content: [{ type: 'text', text: 'Hello from Claude' }],
-          usage: { total_tokens: 15 }
-        }),
-      };
-      const fetchSpy = vi.mocked(global.fetch).mockResolvedValue(mockResponse as any);
+          usage: { total_tokens: 15 },
+        });
 
       const adapter = new AnthropicAdapter('test-key');
       const result = await adapter.invoke(task);
@@ -79,16 +69,12 @@ describe('Adapters with Mocks', () => {
 
   describe('GoogleADKAdapter', () => {
     it('should invoke successfully', async () => {
-      const endpoint = 'http://localhost:8080/adk';
-      process.env.GOOGLE_ADK_ENDPOINT = endpoint;
+      const endpoint = 'http://localhost:8080';
+      process.env.GOOGLE_ADK_ENDPOINT = `${endpoint}/adk`;
 
-      const mockResponse = {
-        ok: true,
-        status: 200,
-        headers: new Headers({ 'content-type': 'application/json' }),
-        json: async () => ({ output: 'ADK result', tokensUsed: 20 }),
-      };
-      const fetchSpy = vi.mocked(global.fetch).mockResolvedValue(mockResponse as any);
+      nock(endpoint)
+        .post('/adk')
+        .reply(200, { output: 'ADK result', tokensUsed: 20 });
 
       const adapter = new GoogleADKAdapter();
       const result = await adapter.invoke(task);
@@ -99,8 +85,10 @@ describe('Adapters with Mocks', () => {
   describe('BaseAdapter Rate Limiting', () => {
     it('should throw RateLimitError when tokens are exhausted', async () => {
       const adapter = new OpenAIAdapter('test-key');
-      (adapter as any).tokens = 0;
-      (adapter as any).maxRetries = 1;
+      // @ts-expect-error accessing private for test
+      adapter.tokens = 0;
+      // @ts-expect-error accessing private for test
+      adapter.maxRetries = 1;
 
       await expect(adapter.invoke(task)).rejects.toThrow(RateLimitError);
     });

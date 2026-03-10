@@ -7,7 +7,7 @@ export interface Job {
   priority: 0 | 1 | 2;
   retries?: number;
   timeoutMs?: number;
-  handler: (payload: any) => Promise<any>;
+  handler: (payload: unknown) => Promise<unknown>;
 }
 
 export type JobStatus = 'queued' | 'running' | 'completed' | 'failed';
@@ -52,14 +52,14 @@ export class Conductor {
         'job.priority': job.priority,
       });
 
-      let lastError: any;
+      let lastError: unknown;
       for (let attempt = 1; attempt <= maxRetries + 1; attempt++) {
         try {
           const output = await Promise.race([
             job.handler(job.payload),
             new Promise((_, reject) =>
               setTimeout(() => reject(new Error('Timeout')), timeoutMs)
-            )
+            ),
           ]);
 
           const result: JobResult = {
@@ -74,9 +74,10 @@ export class Conductor {
           span.setStatus({ code: SpanStatusCode.OK });
           span.end();
           return result;
-        } catch (error: any) {
+        } catch (error: unknown) {
           lastError = error;
-          span.addEvent('retry', { attempt, error: error.message });
+          const errorMessage = error instanceof Error ? error.message : String(error);
+          span.addEvent('retry', { attempt, error: errorMessage });
           if (attempt <= maxRetries) {
             const delay = Math.pow(2, attempt) * 100;
             await new Promise(resolve => setTimeout(resolve, delay));
@@ -86,8 +87,11 @@ export class Conductor {
       }
 
       this.statuses.set(jobId, 'failed');
-      span.setStatus({ code: SpanStatusCode.ERROR, message: lastError.message });
-      span.recordException(lastError);
+      const finalErrorMessage = lastError instanceof Error ? lastError.message : String(lastError);
+      span.setStatus({ code: SpanStatusCode.ERROR, message: finalErrorMessage });
+      if (lastError instanceof Error) {
+        span.recordException(lastError);
+      }
       span.end();
       throw lastError;
     });
