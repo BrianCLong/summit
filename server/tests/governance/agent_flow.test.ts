@@ -1,8 +1,8 @@
-import { jest } from '@jest/globals';
+import { vi, describe, it, expect, beforeAll, beforeEach } from 'vitest';
 
-const mockQuery = jest.fn();
+const mockQuery = vi.fn();
 
-jest.mock('../../src/config/database.js', () => ({
+vi.mock('../../src/config/database.js', () => ({
   getPostgresPool: () => ({
     query: mockQuery,
   }),

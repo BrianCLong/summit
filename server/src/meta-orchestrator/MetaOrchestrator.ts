@@ -2,7 +2,9 @@ import { AgentRegistry } from './AgentRegistry.js';
 import { HealthMonitor } from './HealthMonitor.js';
 import { NegotiationEngine } from './NegotiationEngine.js';
 import { GovernanceExtension } from './GovernanceExtension.js';
+import { MessageBroker } from './MessageBroker.js';
 import { Agent, Negotiation } from './types.js';
+import { traceTask } from '../services/orchestration/telemetry.js';
 
 export class MetaOrchestrator {
   private static instance: MetaOrchestrator;
@@ -11,12 +13,14 @@ export class MetaOrchestrator {
   public healthMonitor: HealthMonitor;
   public negotiationEngine: NegotiationEngine;
   public governance: GovernanceExtension;
+  public messageBroker: MessageBroker;
 
   private constructor() {
     this.registry = AgentRegistry.getInstance();
     this.healthMonitor = new HealthMonitor();
     this.negotiationEngine = new NegotiationEngine();
     this.governance = new GovernanceExtension();
+    this.messageBroker = MessageBroker.getInstance();
 
     this.healthMonitor.startMonitoring();
   }
@@ -28,19 +32,27 @@ export class MetaOrchestrator {
     return MetaOrchestrator.instance;
   }
 
-  public registerAgent(agent: Omit<Agent, 'status' | 'health'>): Agent {
-    return this.registry.registerAgent(agent);
+  public async registerAgent(agent: Omit<Agent, 'status' | 'health'>): Promise<Agent> {
+    return traceTask('registerAgent', async () => {
+      return await this.registry.registerAgent(agent);
+    });
   }
 
-  public getAgents(tenantId?: string): Agent[] {
-    return this.registry.getAllAgents(tenantId);
+  public async getAgents(tenantId?: string): Promise<Agent[]> {
+    return traceTask('getAgents', async () => {
+      return await this.registry.getAllAgents(tenantId);
+    });
   }
 
   public async createNegotiation(initiatorId: string, participantIds: string[], topic: string, context: any, tenantId: string): Promise<Negotiation> {
-     return this.negotiationEngine.initiateNegotiation(initiatorId, participantIds, topic, context, tenantId);
+     return traceTask('createNegotiation', async () => {
+        return this.negotiationEngine.initiateNegotiation(initiatorId, participantIds, topic, context, tenantId);
+     });
   }
 
   public async submitProposal(negotiationId: string, agentId: string, content: any): Promise<Negotiation> {
-      return this.negotiationEngine.submitProposal(negotiationId, agentId, content);
+      return traceTask('submitProposal', async () => {
+         return this.negotiationEngine.submitProposal(negotiationId, agentId, content);
+      });
   }
 }

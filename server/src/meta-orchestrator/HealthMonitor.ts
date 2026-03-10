@@ -25,31 +25,31 @@ export class HealthMonitor {
     }
   }
 
-  private checkAgents(): void {
-    const agents = this.registry.getAllAgents();
+  private async checkAgents(): Promise<void> {
+    const agents = await this.registry.getAllAgents();
     const now = new Date();
 
     for (const agent of agents) {
-      const timeSinceLastHeartbeat = now.getTime() - agent.health.lastHeartbeat.getTime();
+      const timeSinceLastHeartbeat = now.getTime() - new Date(agent.health.lastHeartbeat).getTime();
 
       if (timeSinceLastHeartbeat > this.TIMEOUT_MS && agent.status !== AgentStatus.OFFLINE) {
         console.warn(`Agent ${agent.id} timed out. Marking as OFFLINE.`);
-        this.registry.updateStatus(agent.id, AgentStatus.OFFLINE);
+        await this.registry.updateStatus(agent.id, AgentStatus.OFFLINE);
       }
     }
   }
 
-  public reportHeartbeat(agentId: string, metrics: { cpu: number; memory: number; activeTasks: number }): void {
-    this.registry.updateHealth(agentId, {
+  public async reportHeartbeat(agentId: string, metrics: { cpu: number; memory: number; activeTasks: number }): Promise<void> {
+    await this.registry.updateHealth(agentId, {
       cpuUsage: metrics.cpu,
       memoryUsage: metrics.memory,
       activeTasks: metrics.activeTasks
     });
 
     // If agent was offline, mark it as IDLE or BUSY depending on tasks
-    const agent = this.registry.getAgent(agentId);
+    const agent = await this.registry.getAgent(agentId);
     if (agent && agent.status === AgentStatus.OFFLINE) {
-        this.registry.updateStatus(agentId, metrics.activeTasks > 0 ? AgentStatus.BUSY : AgentStatus.IDLE);
+        await this.registry.updateStatus(agentId, metrics.activeTasks > 0 ? AgentStatus.BUSY : AgentStatus.IDLE);
     }
   }
 }

@@ -11,35 +11,79 @@ const orchestrator = MetaOrchestrator.getInstance();
 router.use(ensureAuthenticated);
 
 // Agents
-router.get('/agents', (req, res) => {
-  const tenantId = req.user?.tenant_id;
-  const agents = orchestrator.getAgents(tenantId);
-  res.json(agents);
-});
-
-router.post('/agents', (req, res) => {
-  const agentData = req.body;
-  const tenantId = req.user?.tenant_id;
-
-  // Ensure tenantId matches
-  if (!agentData.tenantId) {
-      agentData.tenantId = tenantId;
+router.get('/agents', async (req, res) => {
+  try {
+    const tenantId = req.user?.tenant_id;
+    const agents = await orchestrator.getAgents(tenantId);
+    res.json(agents);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
   }
+});
 
-  if (agentData.tenantId !== tenantId) {
-      return res.status(403).json({ error: 'Tenant mismatch' });
+router.post('/agents', async (req, res) => {
+  try {
+    const agentData = req.body;
+    const tenantId = req.user?.tenant_id;
+
+    // Ensure tenantId matches
+    if (!agentData.tenantId) {
+        agentData.tenantId = tenantId;
+    }
+
+    if (agentData.tenantId !== tenantId) {
+        return res.status(403).json({ error: 'Tenant mismatch' });
+    }
+
+    const agent = await orchestrator.registerAgent(agentData);
+    res.status(201).json(agent);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
   }
-
-  const agent = orchestrator.registerAgent(agentData);
-  res.status(201).json(agent);
 });
 
-router.post('/agents/:id/heartbeat', (req, res) => {
-    const { id } = req.params;
-    const metrics = req.body; // { cpu, memory, activeTasks }
-    orchestrator.healthMonitor.reportHeartbeat(id, metrics);
-    res.sendStatus(200);
+router.post('/agents/:id/heartbeat', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const metrics = req.body; // { cpu, memory, activeTasks }
+        await orchestrator.healthMonitor.reportHeartbeat(id, metrics);
+        res.sendStatus(200);
+    } catch (err: any) {
+        res.status(500).json({ error: err.message });
+    }
 });
+
+router.post('/agents/:id/stop', async (req, res) => {
+    try {
+        const { id } = req.params;
+        await orchestrator.registry.updateStatus(id, 'OFFLINE' as any);
+        res.sendStatus(200);
+    } catch (err: any) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+router.post('/agents/:id/start', async (req, res) => {
+    try {
+        const { id } = req.params;
+        await orchestrator.registry.updateStatus(id, 'IDLE' as any);
+        res.sendStatus(200);
+    } catch (err: any) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Messages
+router.post('/agents/messages', async (req, res) => {
+    try {
+        const { topic, message } = req.body;
+        const messageId = await orchestrator.messageBroker.publish(topic, message);
+        res.status(201).json({ id: messageId });
+    } catch (err: any) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 
 // Negotiations
 router.get('/negotiations', (req, res) => {
