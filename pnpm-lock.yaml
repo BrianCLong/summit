@@ -13795,6 +13795,9 @@ importers:
       '@intelgraph/maestro-core':
         specifier: workspace:*
         version: link:../platform/maestro-core
+      '@intelgraph/observability':
+        specifier: workspace:^
+        version: link:../packages/observability
       '@intelgraph/provenance':
         specifier: workspace:*
         version: link:../packages/provenance

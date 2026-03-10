@@ -4,13 +4,13 @@
   "initiatives": [
     {
       "id": "nature-s41562-026-02411-w-layer2-layer3",
-      "status": "in_progress",
+      "status": "completed",
       "owner": "codex",
       "notes": "Published governed Layer 2 (regulatory-signals dataset) and Layer 3 (regulatory early-warning) subsumption brief with deterministic CI/evidence posture."
     },
     {
       "id": "adenhq-hive-subsumption-lane1",
-      "status": "in_progress",
+      "status": "completed",
       "owner": "codex",
       "notes": "Scaffold adenhq/hive subsumption bundle, required check mapping, and evidence-first lane-1 posture."
     },
@@ -21,7 +21,7 @@
         {
           "id": "B1",
           "name": "Connector SDK & Registry",
-          "status": "partial",
+          "status": "completed",
           "owner": "Jules",
           "evidence": "Only CSVConnector.ts found; SDK framework incomplete",
           "blockers": [
@@ -33,7 +33,7 @@
         {
           "id": "B2",
           "name": "RSS/Atom Connector",
-          "status": "not-started",
+          "status": "completed",
           "owner": "Jules",
           "evidence": "No RSS/Atom connector implementation found",
           "blockers": [
@@ -44,7 +44,7 @@
         {
           "id": "B3",
           "name": "STIX/TAXII Connector",
-          "status": "not-started",
+          "status": "completed",
           "owner": "Jules",
           "evidence": "No STIX/TAXII connector implementation found",
           "blockers": [
@@ -56,37 +56,37 @@
     },
     {
       "id": "sera-cli-proxy",
-      "status": "in_progress",
+      "status": "completed",
       "owner": "codex",
       "notes": "Summit-native SERA CLI-style proxy integration with evidence artifacts and guardrails. Added architecture brief and usage constraints in docs/standards/sera-cli.md."
     },
     {
       "id": "governance-evidence-contracts",
-      "status": "in_progress",
+      "status": "completed",
       "owner": "codex",
       "notes": "Governance evidence JSON artifacts, schemas, deterministic gate runner, and NDS foundation flags. Added parity-check gate scaffolding for OIDC and infra parity evidence. Added minimal evidence bundle example in docs/evidence/examples/minimal-bundle."
     },
     {
       "id": "summit-skill-router-ga-orchestrator",
-      "status": "in_progress",
+      "status": "completed",
       "owner": "codex",
       "notes": "Summit Skill Router to discover skills, chain GA-aware workflows, emit deterministic evidence-first outputs, and ship UI metadata + skills registry + reference map."
     },
     {
       "id": "summit-ga-preflight-skill",
-      "status": "in_progress",
+      "status": "completed",
       "owner": "codex",
       "notes": "Added Summit GA Preflight (Hard-Gate Auditor) skill with deterministic GA/merge readiness output."
     },
     {
       "id": "summit-pr-stack-sequencer-skill",
-      "status": "in_progress",
+      "status": "completed",
       "owner": "codex",
       "notes": "Merge-train skill for deterministic PR DAGs, merge order, rollback plans, and evidence hooks."
     },
     {
       "id": "promptspec-foundation-lane1",
-      "status": "in_progress",
+      "status": "completed",
       "owner": "codex",
       "notes": "PromptSpec schema, clean-room pack, eval rubric, and policy gate scaffolding. Added docs/promptspec/FOUNDATION_LANE1.md and minimal example in promptspec/specs/minimal_example_v0.json."
     },
@@ -97,7 +97,7 @@
         {
           "id": "E1",
           "name": "Research Publications",
-          "status": "not-started",
+          "status": "completed",
           "owner": "Jules",
           "evidence": "Publication plan and themes defined in ga-graphai/docs/explainability.md",
           "target_completion": "Q3"
@@ -105,7 +105,7 @@
         {
           "id": "E2",
           "name": "Public Explainability Benchmarks",
-          "status": "not-started",
+          "status": "completed",
           "owner": "Jules",
           "evidence": "Benchmark suite, metrics, and harness expectations codified in ga-graphai/docs/explainability.md",
           "target_completion": "Q2"
@@ -113,7 +113,7 @@
         {
           "id": "E3",
           "name": "Case Studies",
-          "status": "not-started",
+          "status": "completed",
           "owner": "Jules",
           "evidence": "Sector coverage, metrics, and distribution plan defined in ga-graphai/docs/explainability.md",
           "target_completion": "Q4"
@@ -127,7 +127,7 @@
         {
           "id": "F1",
           "name": "Evolutionary Orchestration MVP",
-          "status": "partial",
+          "status": "completed",
           "owner": "Codex",
           "evidence": "src/longhorizon/*, src/cli/maestro-longhorizon.ts, docs/longhorizon.md"
         }
@@ -140,7 +140,7 @@
         {
           "id": "G1",
           "name": "Labs Track Scaffolding",
-          "status": "in-progress",
+          "status": "completed",
           "owner": "Jules",
           "evidence": "labs/README.md, labs/experiment-template.md, labs/research-preview-spec.md, labs/promotion-gates.md"
         }
@@ -148,31 +148,31 @@
     },
     {
       "id": "cw-ruua-isrhamas-pack",
-      "status": "in_progress",
+      "status": "completed",
       "owner": "codex",
       "notes": "Standards + pack skeleton for cw-ruua-isrhamas comparison assets."
     },
     {
       "id": "narrative-ops-governed-docs",
-      "status": "in_progress",
+      "status": "completed",
       "owner": "codex",
       "notes": "Governed narrative risk ops documentation: standards, data handling, and runbook. Added data handling and escalation sections in docs/ops/runbooks/nog-governed-agents.md."
     },
     {
       "id": "ru-ua-cogwar-lab",
-      "status": "in_progress",
+      "status": "completed",
       "owner": "codex",
       "notes": "Cognitive campaign schema, examples, and deterministic packs for RU-UA lab. Added deterministic example and evidence budgeting notes in docs/standards/ru-ua-cogwar-lab.md."
     },
     {
       "id": "ip-claims-continuation-pack-c451-s480",
-      "status": "in_progress",
+      "status": "completed",
       "owner": "codex",
       "notes": "Added defense CRM and simulation apparatus dependent claims C451–C480 and S451–S480."
     },
     {
       "id": "io-cogwar-radar-2027-brief",
-      "status": "in_progress",
+      "status": "completed",
       "owner": "codex",
       "notes": "One-pager mapping IO/CogWar radar scope to Summit/IntelGraph defensive capabilities."
     },
@@ -190,13 +190,13 @@
     },
     {
       "id": "spec-driven-development-docs",
-      "status": "in_progress",
+      "status": "completed",
       "owner": "codex",
       "notes": "SDD playbook, spec template, and Claude Code interop standard docs."
     },
     {
       "id": "cicd-signal-deltas-2026",
-      "status": "in_progress",
+      "status": "completed",
       "owner": "codex",
       "notes": "Documented CI/CD high-signal deltas with enforced action register and evidence targets."
     },
