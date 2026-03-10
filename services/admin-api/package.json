@@ -14,9 +14,13 @@
   },
   "dependencies": {
 <<<<<<< HEAD
+    @apollo/server: "4.11.3",
+=======
+<<<<<<< HEAD
     "@apollo/server": "4.16.0",
 =======
     "@apollo/server": "4.11.3",
+>>>>>>> origin/main
 >>>>>>> origin/main
     "@intelgraph/metrics-exporter": "workspace:*",
     "@intelgraph/slow-query-killer": "workspace:*",

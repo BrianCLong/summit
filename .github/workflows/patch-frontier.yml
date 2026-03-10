@@ -1,25 +1,20 @@
-name: Patch Frontier Convergence
+name: Patch Frontier Convergence Engine
 
 on:
   schedule:
-    - cron: '*/30 * * * *' # Run every 30 minutes
+    - cron: '*/15 * * * *' # Run every 15 minutes
   workflow_dispatch:
 
 jobs:
   converge:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
-      - name: Gather Patches
-        run: |
-          echo "Scanning open PRs..."
-          echo "Classifying by concern..."
-          echo "Pulling patches for canonical branches..."
-          echo "Applying sequentially..."
-          # Mock: scripts/patch_frontier_worker.mjs
-
-      - name: Output Canonical PR
-        run: |
-          echo "No work lost. Canonical PR updated."
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Converge Patches
+        run: node scripts/patch_frontier_converge.mjs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

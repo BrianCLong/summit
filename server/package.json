@@ -55,10 +55,14 @@
     "@intelgraph/provenance": "workspace:*",
     "@intelgraph/telemetry-config": "file:../packages/telemetry-config",
 <<<<<<< HEAD
+    @node-saml/node-saml: "5.1.0",
+=======
+<<<<<<< HEAD
     "@intelgraph/context-shell": "workspace:*",
     "@node-saml/node-saml": "5.1.0",
 =======
     @node-saml/node-saml: "5.1.0",
+>>>>>>> origin/main
 >>>>>>> origin/main
     "@opentelemetry/api": "1.9.0",
     "@opentelemetry/auto-instrumentations-node": "0.39.0",
