@@ -12,7 +12,7 @@ concurrency:
 jobs:
   required-checks:
     name: governance / required-checks
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
       - run: npm install yaml

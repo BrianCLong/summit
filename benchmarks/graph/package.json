@@ -13,11 +13,11 @@
     "clean": "rm -rf reports/*.json reports/*.html"
   },
   "dependencies": {
-    "neo4j-driver": "^5.22.0",
-    "pino": "^8.16.0",
-    "yargs": "^17.7.2"
+    "neo4j-driver": "5.22.0",
+    "pino": "8.16.0",
+    "yargs": "17.7.2"
   },
   "devDependencies": {
-    "@types/node": "^20.0.0"
+    "@types/node": "20.0.0"
   }
 }

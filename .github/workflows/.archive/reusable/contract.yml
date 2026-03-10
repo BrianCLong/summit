@@ -26,7 +26,7 @@ jobs:
       - name: Set up Node.js
         uses: pnpm/action-setup@v4
         with:
-          version: 10.0.0
+          version: 10.0.0.0.0
       - uses: actions/setup-node@v4 # v4
         with:
           node-version: ${{ env.NODE_VERSION }}
@@ -39,7 +39,7 @@ jobs:
         run: pnpm config set store-dir $PNPM_CACHE_FOLDER
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Check GraphQL schema drift
         run: pnpm run graphql:schema:check

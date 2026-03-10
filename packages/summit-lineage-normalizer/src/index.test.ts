@@ -22,6 +22,28 @@ describe("summit-lineage-normalizer", () => {
     expect(dataset.name).toBe("orders_topic");
   });
 
+
+  it("normalizes postgresql attributes with new semantic conventions", () => {
+    const dataset = normalizeDataset({
+      "db.system.name": "postgresql",
+      "server.address": "orders-prod",
+      "db.namespace": "public",
+      "db.sql.table": "line_items"
+    });
+    expect(dataset.namespace).toBe("postgresql://orders-prod/public");
+    expect(dataset.name).toBe("line_items");
+  });
+
+  it("normalizes kafka attributes with new semantic conventions", () => {
+    const dataset = normalizeDataset({
+      "messaging.system.name": "kafka",
+      "server.address": "use1",
+      "messaging.destination.name": "orders_topic"
+    });
+    expect(dataset.namespace).toBe("kafka://use1");
+    expect(dataset.name).toBe("orders_topic");
+  });
+
   it("normalizes s3 attributes", () => {
     const dataset = normalizeDataset({
       "file.path": "s3://bucket/key/path"

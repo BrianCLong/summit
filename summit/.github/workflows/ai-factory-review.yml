@@ -1,0 +1,21 @@
+name: AI Factory Architecture & Policy Review
+on:
+  pull_request:
+    types: [opened, synchronize]
+    paths:
+      - 'artifacts/ai-factory/**/*.patch'
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install -g pnpm && pnpm install
+      - run: pnpm exec tsx cli/factory/review.ts ${{ github.event.pull_request.number }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ai-factory-review-${{ github.event.pull_request.number }}
+          path: artifacts/ai-factory/pr-${{ github.event.pull_request.number }}/review/

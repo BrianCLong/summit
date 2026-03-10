@@ -1,0 +1,89 @@
+name: PR Planner
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  plan-prs:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install GitHub CLI
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # gh is pre-installed on ubuntu-latest runners
+          gh version
+
+      - name: Classify PRs
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Fetch all open PRs
+          gh pr list --state open --json number,mergeable,commits,files,statusCheckRollup > prs.json
+
+          for row in $(jq -c '.[]' prs.json); do
+            PR=$(echo $row | jq -r '.number')
+            MERGEABLE=$(echo $row | jq -r '.mergeable')
+
+            # Remove all queue labels first to start fresh
+            gh pr edit $PR --remove-label "queue:merge-now,queue:needs-rebase,queue:conflict,queue:blocked,queue:obsolete" || true
+
+            # 1. Obsolete: Empty diff (0 commits)
+            COMMITS=$(echo $row | jq -r '.commits | length')
+            if [ "$COMMITS" -eq 0 ]; then
+              gh pr edit $PR --add-label "queue:obsolete"
+              continue
+            fi
+
+            # 2. Conflict: Merge conflict detected
+            if [ "$MERGEABLE" == "CONFLICTING" ]; then
+              gh pr edit $PR --add-label "queue:conflict"
+              continue
+            fi
+
+            # 3. Blocked: Touches protected governance files
+            PROTECTED_FILES_TOUCHED=0
+            for file in $(echo $row | jq -r '.files[].path' || echo ""); do
+              if [[ $file == summit/agents/policy/* ]] || \
+                 [[ $file == summit/agents/skills/* ]] || \
+                 [[ $file == tools/governance/* ]] || \
+                 [[ $file == docs/governance/* ]]; then
+                PROTECTED_FILES_TOUCHED=1
+                break
+              fi
+            done
+
+            if [ "$PROTECTED_FILES_TOUCHED" -eq 1 ]; then
+              gh pr edit $PR --add-label "queue:blocked"
+              continue
+            fi
+
+            # 4. Needs Rebase vs Merge Now
+            # In a real scenario we'd query check-runs, but here we can check if it's mergeable.
+            # If MERGEABLE is MERGEABLE, it has no conflicts and might be up to date.
+            # If it's UNKNOWN, it might need a rebase.
+            if [ "$MERGEABLE" == "MERGEABLE" ]; then
+              # Assuming CI is green if it's fully mergeable, otherwise it would be BLOCKED or we'd check statusCheckRollup
+              # Let's check if there's any failure in statusCheckRollup
+              CI_STATE=$(echo $row | jq -r '.statusCheckRollup | map(.state) | join(",")' || echo "")
+              if [[ $CI_STATE == *"FAILURE"* ]] || [[ $CI_STATE == *"ERROR"* ]]; then
+                # Needs rebase or fix
+                gh pr edit $PR --add-label "queue:needs-rebase"
+              else
+                gh pr edit $PR --add-label "queue:merge-now"
+              fi
+            else
+              # UNKNOWN state, safely assume it needs a rebase to be sure
+              gh pr edit $PR --add-label "queue:needs-rebase"
+            fi
+          done

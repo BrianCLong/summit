@@ -291,6 +291,29 @@ EOF
 
 chmod +x "${OUTPUT_DIR}/publish_to_ga.sh"
 
+
+# Generate and include policy-bundle.prod.json (Required)
+log_info "Generating policy-bundle.prod.json..."
+if [[ ! -f "tools/governance/build-policy-bundles.ts" ]]; then
+    log_error "build-policy-bundles.ts not found. Policy bundle generation is required."
+    exit 1
+fi
+
+ALLOW_GOV_APPROVAL=1 pnpm exec tsx tools/governance/build-policy-bundles.ts > /dev/null 2>&1 || {
+    log_error "Failed to build policy bundles"
+    exit 1
+}
+
+if [[ ! -f "summit/agents/policy/policy-bundle.prod.json" ]]; then
+    log_error "policy-bundle.prod.json not found after build. It is a required artifact."
+    exit 1
+fi
+
+mkdir -p "${OUTPUT_DIR}/policy"
+cp "summit/agents/policy/policy-bundle.prod.json" "${OUTPUT_DIR}/policy/"
+POLICY_BUNDLE_HASH=$(sha256sum "${OUTPUT_DIR}/policy/policy-bundle.prod.json" | cut -d' ' -f1)
+log_verbose "Policy bundle hash: ${POLICY_BUNDLE_HASH}"
+
 # Generate GA_RELEASE_CHECKLIST.md
 log_info "Generating GA_RELEASE_CHECKLIST.md..."
 cat > "${OUTPUT_DIR}/GA_RELEASE_CHECKLIST.md" << EOF
@@ -371,6 +394,10 @@ cat > "${OUTPUT_DIR}/ga_metadata.json" << EOF
   },
   "governance_hash": "${GOVERNANCE_LOCKFILE_HASH:-null}",
   "governance_lockfile": ${GOVERNANCE_JSON},
+  "policy_bundle": {
+    "path": "policy/policy-bundle.prod.json",
+    "sha256": "${POLICY_BUNDLE_HASH:-null}"
+  },
   "verification": {
     "lineage_required": true,
     "two_person_approval": true,
@@ -391,6 +418,8 @@ if [[ -f "${SCRIPT_DIR}/verify-rc-lineage.sh" ]]; then
     log_verbose "Copying verify-rc-lineage.sh..."
     cp "${SCRIPT_DIR}/verify-rc-lineage.sh" "${OUTPUT_DIR}/"
 fi
+
+
 
 # Generate governance lockfile
 log_info "Generating governance lockfile..."

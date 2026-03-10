@@ -2,7 +2,7 @@ name: ai-governance
 on: [pull_request]
 jobs:
   evidence-verify:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -11,7 +11,7 @@ jobs:
       - run: python3 scripts/verify_evidence.py
 
   policy-deny-default:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5

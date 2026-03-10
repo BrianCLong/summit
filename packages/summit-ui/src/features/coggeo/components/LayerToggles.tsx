@@ -1,17 +1,24 @@
-import type { FC } from "react";
+import React from "react";
 
-type Props = {
-  layers: Record<string, boolean>;
-  onToggle: (layer: string) => void;
-};
+export type LayerKind = "pressure" | "temperature" | "storm" | "wind" | "turbulence";
 
-export const LayerToggles: FC<Props> = ({ layers, onToggle }) => (
-  <div>
-    {Object.entries(layers).map(([layer, enabled]) => (
-      <label key={layer} style={{ display: "block" }}>
-        <input type="checkbox" checked={enabled} onChange={() => onToggle(layer)} />
-        {layer}
-      </label>
-    ))}
-  </div>
-);
+export function LayerToggles(props: {
+  enabled: Record<LayerKind, boolean>;
+  onToggle: (k: LayerKind) => void;
+}) {
+  const items: LayerKind[] = ["pressure", "temperature", "storm", "wind", "turbulence"];
+  return (
+    <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+      {items.map((k) => (
+        <label key={k} style={{ display: "flex", gap: 6, alignItems: "center" }}>
+          <input
+            type="checkbox"
+            checked={props.enabled[k]}
+            onChange={() => props.onToggle(k)}
+          />
+          <span>{k}</span>
+        </label>
+      ))}
+    </div>
+  );
+}

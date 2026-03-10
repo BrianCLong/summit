@@ -47,7 +47,7 @@ env:
 jobs:
   check-drift:
     name: Check Branch Protection Drift
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     outputs:
       drift_detected: ${{ steps.check.outputs.drift_detected }}

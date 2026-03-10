@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "summit.epistemic.evidence",
+  "title": "Epistemic Evidence",
+  "description": "Evidence node supporting or refuting a claim",
+  "type": "object",
+  "required": ["evidence_id", "source_type", "reliability_score"],
+  "properties": {
+    "evidence_id": { "type": "string" },
+    "source_type": { "type": "string" },
+    "source_handle": { "type": "string" },
+    "snippet_hash": { "type": "string" },
+    "reliability_score": { "type": "number", "minimum": 0, "maximum": 1 }
+  }
+}

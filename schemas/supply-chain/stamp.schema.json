@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.dev/schemas/supply-chain/stamp.schema.json",
+  "title": "Summit Supply Chain Stamp",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "tool",
+    "run",
+    "inputs"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^1\\.0\\.0$"
+    },
+    "tool": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "version"],
+      "properties": {
+        "name": { "type": "string", "const": "summit" },
+        "version": { "type": "string", "minLength": 1 },
+        "git_sha": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{7,64}$"
+        }
+      }
+    },
+    "run": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["run_id", "started_at"],
+      "properties": {
+        "run_id": { "type": "string", "minLength": 1 },
+        "started_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "finished_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "hostname": { "type": "string" },
+        "ci": { "type": "boolean" }
+      }
+    },
+    "inputs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["ref", "kind"],
+        "properties": {
+          "ref": { "type": "string", "minLength": 1 },
+          "kind": {
+            "type": "string",
+            "enum": ["image", "sbom", "attestation", "signature", "policy"]
+          },
+          "digest": {
+            "type": "string",
+            "pattern": "^(sha256|sha512):[a-f0-9]{32,128}$"
+          }
+        }
+      }
+    },
+    "environment": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "os": { "type": "string" },
+        "arch": { "type": "string" },
+        "node_version": { "type": "string" }
+      }
+    }
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "compile_ms": 1,
+  "validation_ms": 2,
+  "traversal_depth": 2,
+  "denied_edges": 0
+}

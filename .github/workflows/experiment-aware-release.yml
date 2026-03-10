@@ -10,14 +10,13 @@ concurrency:
 
 jobs:
   evaluate-learning-value:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
-          cache: 'pnpm'
           node-version: '20'
 
       # In a real scenario, this would install dependencies and run a script using the new package
