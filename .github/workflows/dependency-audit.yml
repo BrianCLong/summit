@@ -265,7 +265,7 @@ jobs:
       - name: Attempt Fixes
         run: |
           pnpm audit --fix || true
-          pnpm install
+          pnpm install --no-frozen-lockfile
 
       - name: Check for Changes
         id: check
