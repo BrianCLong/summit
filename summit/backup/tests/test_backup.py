@@ -9,7 +9,6 @@ from unittest.mock import MagicMock, call, patch
 from summit.backup.manager import BackupManager
 from summit.backup.redis_provider import RedisBackupProvider
 
-
 class MockRedisCluster:
     pass
 

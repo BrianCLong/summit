@@ -2,12 +2,11 @@ import json
 import os
 import sys
 
-
 def detect_drift(current_metrics_file, baseline_metrics_file):
     try:
-        with open(current_metrics_file) as f:
+        with open(current_metrics_file, "r") as f:
             current = json.load(f)
-        with open(baseline_metrics_file) as f:
+        with open(baseline_metrics_file, "r") as f:
             baseline = json.load(f)
 
         if current.get("calibration_error", 0) > baseline.get("calibration_error", 0) * 1.15:

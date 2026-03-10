@@ -1,9 +1,6 @@
 import unittest
-
 import numpy as np
-
 from metrics.mask_containment import mask_containment
-
 
 class TestMaskContainment(unittest.TestCase):
 

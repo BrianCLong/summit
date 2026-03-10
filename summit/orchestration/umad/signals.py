@@ -1,8 +1,8 @@
 import math
-from typing import Any, Dict, List, Union
 
+from typing import List, Dict, Any, Union
 
-def calculate_sys_au(probabilities: list[float]) -> float:
+def calculate_sys_au(probabilities: List[float]) -> float:
     """
     Calculate Aleatoric Uncertainty (Sys-AU) as Shannon Entropy.
 
@@ -28,12 +28,12 @@ def calculate_sys_au(probabilities: list[float]) -> float:
     return entropy
 
 
-def _kl_divergence(p: list[float], q: list[float]) -> float:
+def _kl_divergence(p: List[float], q: List[float]) -> float:
     """Calculate KL Divergence D_KL(P || Q)"""
     return sum(p_i * math.log2(p_i / q_i) for p_i, q_i in zip(p, q) if p_i > 0 and q_i > 0)
 
 
-def calculate_sys_eu(belief_dists: list[list[float]]) -> float:
+def calculate_sys_eu(belief_dists: List[List[float]]) -> float:
     """
     Calculate Epistemic Uncertainty (Sys-EU) using Jensen-Shannon Divergence (JSD).
 
@@ -71,8 +71,8 @@ def calculate_umad_rewards(
     agent_accuracy: float,
     sys_au: float,
     peer_accuracy_gain: float,
-    config: dict[str, Any]
-) -> dict[str, float]:
+    config: Dict[str, Any]
+) -> Dict[str, float]:
     """
     Calculate UMAD rewards (accuracy, aleatoric uncertainty, epistemic influence).
 

@@ -1,9 +1,6 @@
 import unittest
-
 import numpy as np
-
 from metrics.attention_coverage import attention_coverage
-
 
 class TestAttentionCoverage(unittest.TestCase):
 

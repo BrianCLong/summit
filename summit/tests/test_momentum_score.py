@@ -1,7 +1,5 @@
 import unittest
-
 from summit.evaluation.startup_momentum.momentum_score import compute_momentum_score
-
 
 class TestMomentumScore(unittest.TestCase):
     def test_determinism(self):

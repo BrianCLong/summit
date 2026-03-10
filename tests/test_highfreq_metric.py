@@ -1,10 +1,7 @@
 import unittest
-
-import cv2
 import numpy as np
-
-from metrics.highfreq_similarity import detail_similarity, highfreq_map
-
+import cv2
+from metrics.highfreq_similarity import highfreq_map, detail_similarity
 
 class TestHighFreqMetric(unittest.TestCase):
 

@@ -1,7 +1,7 @@
-import json
-import sys
 import time
 from datetime import datetime
+import json
+import sys
 
 from summit.memory.ingestion import ingest_moment
 from summit.memory.policy import AmbientPolicy

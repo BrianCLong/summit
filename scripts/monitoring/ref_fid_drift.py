@@ -2,7 +2,6 @@ import json
 import os
 import sys
 
-
 def detect_drift(report_dir="reports/ref_fid_eval", threshold=0.8):
     """
     Checks the metrics.json artifact for fidelity regressions.
@@ -13,7 +12,7 @@ def detect_drift(report_dir="reports/ref_fid_eval", threshold=0.8):
         print(f"Error: {metrics_path} not found.")
         sys.exit(1)
 
-    with open(metrics_path) as f:
+    with open(metrics_path, "r") as f:
         metrics = json.load(f)
 
     hf_score = metrics.get("overall_highfreq_similarity", 0.0)

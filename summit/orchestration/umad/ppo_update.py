@@ -2,7 +2,6 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-
 class UMADPPOAgent(nn.Module):
     """
     A minimal pseudocode sketch for the UMAD PPO Agent (Phase 2).

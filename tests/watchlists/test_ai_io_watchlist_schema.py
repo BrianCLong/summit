@@ -1,9 +1,7 @@
 import json
 import os
 import unittest
-
 from scripts.watchlists.build_ai_io_watchlist import build_watchlist
-
 
 class TestAIIOWatchlistSchema(unittest.TestCase):
     def test_schema_validity(self):

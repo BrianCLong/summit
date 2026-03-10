@@ -1,9 +1,5 @@
 #!/usr/bin/env python3
-import hashlib
-import os
-import sys
-
-import psycopg2
+import hashlib, os, psycopg2, sys
 from neo4j import GraphDatabase
 
 PG_DSN = os.getenv("PG_DSN")                # e.g., postgres://user:pass@host/db

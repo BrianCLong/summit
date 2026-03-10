@@ -1,8 +1,6 @@
-import os
 import unittest
-
+import os
 from summit.agents.ai_founder_agent.agent import run_founder_agent
-
 
 class TestFounderAgent(unittest.TestCase):
     def test_pipeline_runs(self):

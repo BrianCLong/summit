@@ -1,6 +1,5 @@
 from summit.core.agents.extraction_agent import ExtractionAgent
 
-
 def test_extract_metrics():
     agent = ExtractionAgent()
     metrics = agent.extract_metrics("Sample text")

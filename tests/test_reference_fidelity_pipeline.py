@@ -1,9 +1,6 @@
 import unittest
-
 import numpy as np
-
 from pipelines.reference_fidelity_eval.pipeline import ReferenceFidelityPipeline
-
 
 class TestReferenceFidelityPipeline(unittest.TestCase):
 

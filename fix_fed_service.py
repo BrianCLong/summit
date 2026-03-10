@@ -1,4 +1,4 @@
-with open('server/src/federation/service.ts') as f:
+with open('server/src/federation/service.ts', 'r') as f:
     content = f.read()
 
 # Make sure the new methods are inside the class

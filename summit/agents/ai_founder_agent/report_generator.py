@@ -1,6 +1,5 @@
 import json
 
-
 def create_report(idea_text, problem, interviews, momentum_score):
     report = {
         "idea": idea_text,

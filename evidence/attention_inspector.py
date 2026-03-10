@@ -1,6 +1,5 @@
 import numpy as np
 
-
 class AttentionInspector:
     """
     Collects attention map metrics for evidence storage.

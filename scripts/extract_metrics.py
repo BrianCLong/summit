@@ -1,10 +1,8 @@
-import os
 import sys
-
+import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from summit.core.agents.document_agent import DocumentAgent
 from summit.core.agents.extraction_agent import ExtractionAgent
-
+from summit.core.agents.document_agent import DocumentAgent
 
 def main():
     doc_agent = DocumentAgent("data/raw")

@@ -1,6 +1,6 @@
 import json
-import os
 import unittest
+import os
 from unittest.mock import MagicMock, patch
 
 from summit.cache.redis_client import RedisClient

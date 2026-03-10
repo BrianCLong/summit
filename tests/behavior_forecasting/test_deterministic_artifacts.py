@@ -1,7 +1,6 @@
+import unittest
 import json
 import os
-import unittest
-
 
 class TestDeterministicArtifacts(unittest.TestCase):
     def test_artifact_schema_and_determinism(self):

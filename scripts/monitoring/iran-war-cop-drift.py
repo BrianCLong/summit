@@ -2,7 +2,6 @@
 import json
 import sys
 
-
 def main():
     report = {
         "status": "ok",

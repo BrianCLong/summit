@@ -1,9 +1,7 @@
-import os
 import sys
-
+import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from summit.core.agents.analytics_agent import AnalyticsAgent
-
 
 def main():
     analytics_agent = AnalyticsAgent()
