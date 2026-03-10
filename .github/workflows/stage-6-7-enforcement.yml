@@ -1,0 +1,399 @@
+name: Stage 6/7 Enforcement
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  pull_request_review:
+    types: [submitted]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  # Job 1: Patch Market Scoring
+  patch-market-scoring:
+    name: Patch Market Value Assessment
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: |
+          if [ -f package.json ]; then
+            npm install js-yaml
+          fi
+
+      - name: Run Patch Market Scoring
+        id: patch-market
+        run: |
+          node scripts/repoos/patch-market.mjs
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
+
+      - name: Upload Patch Market Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: patch-market-report
+          path: .repoos/patch-market/
+          retention-days: 30
+
+  # Job 2: Evidence-Bound Governance
+  evidence-governance:
+    name: Evidence Bundle Validation
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Check if evidence required
+        id: evidence-check
+        run: |
+          node scripts/repoos/evidence-governor.mjs ${{ github.event.pull_request.number }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
+
+      - name: Generate evidence template if missing
+        if: failure()
+        run: |
+          node scripts/repoos/evidence-governor.mjs ${{ github.event.pull_request.number }} --template
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
+
+      - name: Upload Governance Decision
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: governance-decision
+          path: .repoos/governance-ledger/
+          retention-days: 90
+
+      - name: Comment on PR if evidence missing
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '⚠️ **Evidence Bundle Required**\n\nThis PR requires an evidence bundle for architectural governance.\n\nPlease create evidence artifacts in `evidence/pr-${{ github.event.pull_request.number }}/`:\n- `impact-analysis.json`\n- `dependency-diff.json`\n- `stability-simulation.json`\n- `architecture-rationale.md`\n\nRun `node scripts/repoos/evidence-governor.mjs ${{ github.event.pull_request.number }} --template` to generate templates.'
+            })
+
+  # Job 3: Stability Envelope Check
+  stability-envelope:
+    name: Stability Envelope Monitoring
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: |
+          if [ -f package.json ]; then
+            npm install js-yaml
+          fi
+
+      - name: Run Stability Monitoring
+        id: stability
+        run: |
+          node scripts/repoos/stability-envelope-monitor.mjs
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_SAMPLE_SIZE: 100
+        continue-on-error: true
+
+      - name: Upload Stability Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stability-report
+          path: .repoos/stability-reports/
+          retention-days: 90
+
+      - name: Alert on instability
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '⚠️ **Repository Stability Warning**\n\nStability envelope monitoring detected elevated risk.\n\nReview the stability report artifact for details.\n\nConsider deferring non-critical PRs until stability improves.'
+            })
+
+  # Job 4: Architecture Evolution Simulation
+  evolution-simulation:
+    name: Architecture Evolution Forecast
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'pull_request' &&
+      (contains(github.event.pull_request.labels.*.name, 'architecture') ||
+       contains(github.event.pull_request.title, 'architecture') ||
+       contains(github.event.pull_request.title, 'refactor'))
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: |
+          if [ -f package.json ]; then
+            npm install js-yaml
+          fi
+
+      - name: Run Evolution Simulation
+        id: simulation
+        run: |
+          node scripts/repoos/architecture-evolution-simulator.mjs
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SIM_HORIZON_DAYS: 180
+        continue-on-error: true
+
+      - name: Upload Simulation Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: evolution-simulation
+          path: .repoos/simulator/
+          retention-days: 90
+
+      - name: Comment simulation results
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            try {
+              const report = JSON.parse(fs.readFileSync('.repoos/simulator/architecture-future-report.json', 'utf-8'));
+              const envelope = report.stability_envelope;
+
+              let body = '📊 **Architecture Evolution Forecast**\n\n';
+              body += `**Simulation Horizon:** ${report.simulation_horizon_days} days\n`;
+              body += `**Projected Stability:** ${envelope.overall_status}\n\n`;
+              body += `**Predicted Metrics:**\n`;
+              body += `- Frontier Entropy: ${(envelope.metrics.fe * 100).toFixed(1)}%\n`;
+              body += `- Dependency Density: ${(envelope.metrics.dd * 100).toFixed(1)}%\n`;
+              body += `- Merge Utilization: ${(envelope.metrics.rho * 100).toFixed(0)}%\n`;
+              body += `- Agent Pressure: ${(envelope.metrics.api * 100).toFixed(0)}%\n\n`;
+
+              if (report.interventions && report.interventions.length > 0) {
+                body += `**⚠️ Interventions Recommended:** ${report.interventions.length}\n`;
+                for (const intervention of report.interventions.slice(0, 3)) {
+                  body += `- ${intervention.action}\n`;
+                }
+              }
+
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body
+              });
+            } catch (error) {
+              console.log('Could not post simulation results:', error.message);
+            }
+
+  # Job 5: Architectural Genome Update
+  genome-update:
+    name: Update Architectural Genome
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: main
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Extract Genome
+        run: |
+          node scripts/repoos/architectural-genome.mjs
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
+
+      - name: Commit Genome Update
+        run: |
+          git config user.name "RepoOS Bot"
+          git config user.email "repoos@summit.ai"
+
+          if [ -f .repoos/genome/architecture-genome.json ]; then
+            git add .repoos/genome/
+            git commit -m "chore: update architectural genome" || echo "No genome changes"
+            git push || echo "Push failed - may require manual intervention"
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
+
+  # Job 6: Meta-Governance Lock Enforcement
+  meta-governance-lock:
+    name: Meta-Governance Lock Check
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check protected files
+        id: protected-check
+        run: |
+          # Check if PR modifies protected files
+          PROTECTED_PATHS=(
+            ".repoos/"
+            "scripts/repoos/"
+            "platform-interface/"
+            ".github/workflows/constitutional-"
+            ".repoos/evolution-constitution.yml"
+            ".repoos/meta-governance-lock.yml"
+          )
+
+          FILES_CHANGED=$(git diff --name-only origin/main...HEAD)
+
+          PROTECTED_MODIFIED=false
+          for path in "${PROTECTED_PATHS[@]}"; do
+            if echo "$FILES_CHANGED" | grep -q "^$path"; then
+              echo "⚠️ Protected path modified: $path"
+              PROTECTED_MODIFIED=true
+            fi
+          done
+
+          if [ "$PROTECTED_MODIFIED" = true ]; then
+            echo "protected=true" >> $GITHUB_OUTPUT
+            exit 1
+          else
+            echo "protected=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+        continue-on-error: true
+
+      - name: Require elevated approval
+        if: steps.protected-check.outputs.protected == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '🔒 **Meta-Governance Lock**\n\nThis PR modifies protected RepoOS infrastructure.\n\n**Required approvals:** 2+ from `architecture-owners`\n\n**Protected paths:**\n- `.repoos/`\n- `scripts/repoos/`\n- `platform-interface/`\n- Constitutional workflows\n\nReview meta-governance policy: `.repoos/meta-governance-lock.yml`'
+            })
+
+  # Job 7: Synthesis Pattern Detection
+  synthesis-detection:
+    name: Detect Synthesis Opportunities
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run Synthesis Detection
+        run: |
+          node scripts/repoos/autonomous-architecture-synthesis.mjs
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
+
+      - name: Upload Synthesis Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: synthesis-report
+          path: .repoos/synthesis/
+          retention-days: 30
+
+  # Summary Job
+  stage-6-7-summary:
+    name: Stage 6/7 Summary
+    runs-on: ubuntu-latest
+    needs: [patch-market-scoring, evidence-governance, stability-envelope, meta-governance-lock]
+    if: always() && github.event_name == 'pull_request'
+
+    steps:
+      - name: Generate Summary
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const jobs = [
+              { name: 'Patch Market', result: '${{ needs.patch-market-scoring.result }}' },
+              { name: 'Evidence Governance', result: '${{ needs.evidence-governance.result }}' },
+              { name: 'Stability Envelope', result: '${{ needs.stability-envelope.result }}' },
+              { name: 'Meta-Governance', result: '${{ needs.meta-governance-lock.result }}' }
+            ];
+
+            let body = '## Stage 6/7 Autonomous Architecture Check\n\n';
+
+            for (const job of jobs) {
+              const icon = job.result === 'success' ? '✅' :
+                          job.result === 'failure' ? '❌' :
+                          job.result === 'skipped' ? '⏭️' : '⚠️';
+              body += `${icon} ${job.name}: ${job.result}\n`;
+            }
+
+            body += '\n*Powered by RepoOS Stage 6/7 Autonomous Architecture*';
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body
+            });

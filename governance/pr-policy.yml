@@ -1,0 +1,10 @@
+<<<<<<< HEAD
+max_open_prs_per_concern: 1
+max_total_open_prs: 100
+max_agent_prs_per_hour: 20
+enforcement_mode: strict # either 'warn' or 'strict'
+=======
+max_open_prs_per_concern: 5
+max_total_open_prs: 200
+max_agent_prs_per_hour: 20
+>>>>>>> origin/main

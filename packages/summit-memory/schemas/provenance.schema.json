@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "summit/provenance.schema.json",
+  "type": "object",
+  "required": ["sourceId", "sourceType"],
+  "properties": {
+    "sourceId": { "type": "string", "minLength": 1 },
+    "sourceType": { "type": "string", "minLength": 1 },
+    "uri": { "type": "string" },
+    "collector": { "type": "string" },
+    "hash": { "type": "string" },
+    "observedAt": { "type": "string", "format": "date-time" },
+    "ingestedAt": { "type": "string", "format": "date-time" }
+  },
+  "additionalProperties": false
+}

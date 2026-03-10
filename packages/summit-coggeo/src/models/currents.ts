@@ -1,11 +1,12 @@
-export type OceanCurrent = {
+export interface OceanCurrent {
   id: string;
-  origin: string;
-  destination: string;
+  label: string;
   strength: number;
-  evidence_refs: string[];
-};
+  direction: string;
+  time_window: string;
+  explain_ref: string;
+}
 
-export function detectOceanCurrents(): OceanCurrent[] {
+export function detectCurrents(_args: { window: string }): OceanCurrent[] {
   return [];
 }

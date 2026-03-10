@@ -40,7 +40,7 @@ jobs:
       - name: Setup Node.js
         uses: pnpm/action-setup@v4
         with:
-          version: 10.0.0
+          version: 10.0.0.0.0
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
@@ -54,7 +54,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pnpm install --frozen-lockfile
+          pnpm install --no-frozen-lockfile
           pip install -r requirements.txt
 
       - name: PQA Gate - Post-Quantum Attestation

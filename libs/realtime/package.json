@@ -8,11 +8,11 @@
     "build": "tsc"
   },
   "dependencies": {
-    "graphql-ws": "^5.14.0",
-    "ws": "^8.13.0"
+    "graphql-ws": "5.14.0",
+    "ws": "8.13.0"
   },
   "devDependencies": {
-    "typescript": "^5.0.0",
-    "@types/ws": "^8.5.5"
+    "typescript": "5.0.0",
+    "@types/ws": "8.5.5"
   }
 }

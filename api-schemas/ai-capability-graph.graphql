@@ -1,0 +1,38 @@
+type AIPlatform {
+  id: ID!
+  name: String!
+  marketplaces: [AIMarketplace!]
+}
+
+type AIMarketplace {
+  id: ID!
+  name: String!
+  platform: AIPlatform!
+  tools: [AITool!]
+}
+
+type AICapability {
+  id: ID!
+  name: String!
+  category: String!
+  tools: [AITool!]
+}
+
+type CapabilityCluster {
+  id: ID!
+  name: String!
+  signals: [String!]
+}
+
+type AITool {
+  id: ID!
+  name: String!
+  provider: String!
+  capabilities: [AICapability!]
+}
+
+extend type Company {
+  id: ID!
+  name: String!
+  aiCapabilities: [AICapability!]
+}

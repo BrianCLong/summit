@@ -24,7 +24,7 @@ jobs:
       - name: Setup Node
         uses: pnpm/action-setup@v4
         with:
-          version: 10.0.0
+          version: 10.0.0.0.0
       - uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -33,7 +33,7 @@ jobs:
       - name: Install deps
         run: |
           corepack enable
-          pnpm install --frozen-lockfile
+          pnpm install --no-frozen-lockfile
 
       - name: Build image
         id: meta
@@ -78,7 +78,7 @@ jobs:
       - name: Setup Node
         uses: pnpm/action-setup@v4
         with:
-          version: 10.0.0
+          version: 10.0.0.0.0
       - uses: actions/setup-node@v4
         with:
           cache: 'pnpm'

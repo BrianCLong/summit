@@ -1,6 +1,8 @@
 import pytest
+
 from summit.embeddings.local_provider import LocalEmbeddingProvider
 from summit.graph.semantic_bridges import SemanticBridgeEngine, cosine_similarity
+
 
 def test_deterministic_embeddings():
     provider = LocalEmbeddingProvider()

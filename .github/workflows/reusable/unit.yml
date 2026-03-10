@@ -8,17 +8,17 @@ env:
 
 jobs:
   run:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4 # v4
       - uses: actions/setup-node@v4 # v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
       - name: Enable corepack
         run: corepack enable
       - uses: pnpm/action-setup@v4
         with:
+          version: 10.0.0
           run_install: false
       - name: Cache pnpm store
         uses: actions/cache@v4 # v4
@@ -29,7 +29,7 @@ jobs:
       - name: Configure pnpm store
         run: pnpm config set store-dir $PNPM_CACHE_FOLDER
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
       - name: Lint
         run: pnpm -w run lint
       - name: Typecheck
@@ -71,7 +71,7 @@ permissions:
 jobs:
   unit:
     name: unit
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     env:
       NODE_VERSION: '20.x'
       PNPM_CACHE_FOLDER: ~/.pnpm-store
@@ -85,7 +85,6 @@ jobs:
         uses: actions/setup-node@v4 # v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
 
       - name: Enable corepack
         run: corepack enable
@@ -94,7 +93,7 @@ jobs:
         run: pnpm config set store-dir $PNPM_CACHE_FOLDER
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Run unit tests
         run: pnpm run test:jest

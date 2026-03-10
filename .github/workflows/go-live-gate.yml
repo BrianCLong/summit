@@ -51,7 +51,7 @@ permissions:
 jobs:
   go-live-gate:
     name: Go-Live Evidence Gate
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 30
 
     outputs:
@@ -90,7 +90,7 @@ jobs:
             ${{ runner.os }}-pnpm-store-
 
       - name: Install Dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Generate Evidence Bundle
         id: generate

@@ -6,10 +6,10 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@types/node": "^25.3.5",
-    "ajv": "^8.18.0",
-    "ajv-formats": "^3.0.1",
-    "typescript": "^5.9.3",
-    "vitest": "^4.0.18"
+    @types/node: "25.3.5",
+    ajv: "8.18.0",
+    ajv-formats: "3.0.1",
+    typescript: "5.9.3",
+    vitest: "4.0.18"
   }
 }

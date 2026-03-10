@@ -1,0 +1,275 @@
+# Agent Output Budget Configuration
+#
+# Prevents agent storms by enforcing daily patch quotas per agent class.
+# Critical constraint for repositories operating above 1000 patches/day.
+#
+# Beyond FAANG: Agent budget enforcement prevents runaway patch generation
+
+version: "1.0.0"
+enabled: true
+
+# Global patch rate limits
+global_limits:
+  # Maximum total patches per day across all agents
+  max_patches_per_day: 500
+
+  # Maximum patches per hour (burst protection)
+  max_patches_per_hour: 50
+
+  # Safety factor - operate at this % of merge capacity
+  merge_capacity_safety_factor: 0.70
+
+  # Alert threshold
+  alert_threshold_percentage: 0.85
+
+# Agent class budgets
+agent_classes:
+  research_agents:
+    max_patches_per_day: 50
+    max_patches_per_hour: 8
+    priority_weight: 0.6
+    description: "Research and analysis agents"
+    examples:
+      - "pattern-miner"
+      - "architecture-analyzer"
+      - "dependency-mapper"
+
+  refactor_agents:
+    max_patches_per_day: 30
+    max_patches_per_hour: 5
+    priority_weight: 0.7
+    description: "Code refactoring and cleanup agents"
+    examples:
+      - "code-modernizer"
+      - "dependency-updater"
+      - "tech-debt-reducer"
+
+  architecture_agents:
+    max_patches_per_day: 10
+    max_patches_per_hour: 2
+    priority_weight: 1.0
+    description: "High-impact architecture change agents"
+    examples:
+      - "synthesis-agent"
+      - "consolidation-agent"
+      - "interface-spine-migrator"
+
+  bugfix_agents:
+    max_patches_per_day: 80
+    max_patches_per_hour: 12
+    priority_weight: 0.8
+    description: "Bug detection and fixing agents"
+    examples:
+      - "security-patcher"
+      - "regression-fixer"
+      - "error-handler"
+
+  test_agents:
+    max_patches_per_day: 40
+    max_patches_per_hour: 6
+    priority_weight: 0.5
+    description: "Test generation and improvement agents"
+    examples:
+      - "test-generator"
+      - "coverage-improver"
+      - "e2e-builder"
+
+  documentation_agents:
+    max_patches_per_day: 25
+    max_patches_per_hour: 4
+    priority_weight: 0.4
+    description: "Documentation and comment agents"
+    examples:
+      - "doc-generator"
+      - "readme-updater"
+      - "api-documenter"
+
+  dependency_agents:
+    max_patches_per_day: 20
+    max_patches_per_hour: 3
+    priority_weight: 0.6
+    description: "Dependency update and management agents"
+    examples:
+      - "npm-updater"
+      - "security-updater"
+      - "deprecation-migrator"
+
+  performance_agents:
+    max_patches_per_day: 15
+    max_patches_per_hour: 3
+    priority_weight: 0.7
+    description: "Performance optimization agents"
+    examples:
+      - "query-optimizer"
+      - "cache-improver"
+      - "bundle-optimizer"
+
+# Dynamic budget scaling
+dynamic_scaling:
+  enabled: true
+
+  # Auto-scale budgets based on merge capacity
+  scale_with_merge_capacity: true
+
+  # Scale factors by time of day (UTC)
+  time_based_scaling:
+    # Peak hours (higher activity, lower budgets)
+    peak_hours:
+      start: 14  # 2 PM UTC
+      end: 22    # 10 PM UTC
+      scale_factor: 0.80
+
+    # Off-peak hours (lower activity, higher budgets)
+    off_peak_hours:
+      start: 22  # 10 PM UTC
+      end: 14    # 2 PM UTC
+      scale_factor: 1.20
+
+  # Scale based on repository health
+  health_based_scaling:
+    - health_score_range: [85, 100]
+      scale_factor: 1.10
+
+    - health_score_range: [70, 85]
+      scale_factor: 1.00
+
+    - health_score_range: [50, 70]
+      scale_factor: 0.80
+
+    - health_score_range: [0, 50]
+      scale_factor: 0.50
+
+  # Scale based on stability envelope
+  stability_based_scaling:
+    # If frontier entropy elevated, reduce budgets
+    - metric: frontier_entropy
+      threshold: 0.35
+      operator: greater_than
+      scale_factor: 0.70
+
+    # If merge utilization high, reduce budgets
+    - metric: merge_utilization
+      threshold: 0.85
+      operator: greater_than
+      scale_factor: 0.60
+
+    # If agent pressure high, reduce budgets
+    - metric: agent_pressure
+      threshold: 0.85
+      operator: greater_than
+      scale_factor: 0.50
+
+# Budget enforcement
+enforcement:
+  # Action when agent exceeds budget
+  on_budget_exceeded:
+    - throttle_agent
+    - create_alert
+    - log_to_ledger
+
+  # Grace period before enforcement (minutes)
+  grace_period_minutes: 30
+
+  # Cooldown period after exceeding (hours)
+  cooldown_period_hours: 6
+
+  # Allow budget borrowing from future allocation
+  allow_borrowing: false
+
+  # Maximum consecutive violations before suspension
+  max_violations_before_suspension: 3
+
+# Monitoring and alerting
+monitoring:
+  # Track budget utilization
+  track_utilization: true
+
+  # Alert channels
+  alert_channels:
+    - slack: "#agent-operations"
+    - email: "agent-ops@summit.ai"
+
+  # Alert conditions
+  alerts:
+    - condition: "global_utilization > 0.90"
+      severity: critical
+      message: "Global agent budget utilization critical"
+
+    - condition: "agent_class_utilization > 0.95"
+      severity: high
+      message: "Agent class budget nearly exhausted"
+
+    - condition: "consecutive_violations >= 3"
+      severity: high
+      message: "Agent repeatedly violating budget"
+
+# Budget reporting
+reporting:
+  # Daily budget report
+  daily_report: true
+  report_time: "09:00"  # UTC
+
+  # Weekly budget analysis
+  weekly_report: true
+  report_day: "monday"
+
+  # Metrics to track
+  tracked_metrics:
+    - total_patches_generated
+    - budget_utilization_percentage
+    - violations_count
+    - throttled_agents_count
+    - average_patch_value_score
+
+# Integration with other systems
+integrations:
+  patch_market:
+    enabled: true
+    # Higher priority agents get more budget flexibility
+    priority_based_allocation: true
+
+  stability_monitor:
+    enabled: true
+    # Auto-reduce budgets during instability
+    auto_throttle_on_instability: true
+
+  meta_governance:
+    enabled: true
+    # Budget configuration changes require governance approval
+    require_approval_for_changes: true
+
+# Exemptions
+exemptions:
+  # Critical agents exempt from budgets
+  exempt_agents: []
+
+  # Emergency override
+  emergency_override:
+    enabled: true
+    required_approvals: 2
+    max_duration_hours: 24
+    requires_incident_id: true
+
+# Audit and compliance
+audit:
+  log_all_budget_events: true
+  retention_days: 365
+
+  # Quarterly budget review
+  quarterly_review_required: true
+
+  # Budget efficiency metrics
+  track_efficiency_metrics: true
+  metrics:
+    - patches_per_agent_hour
+    - budget_utilization_vs_merge_rate
+    - cost_per_merged_patch
+    - agent_productivity_score
+
+# Status
+status:
+  budget_active: true
+  last_reviewed: "2026-03-09"
+  next_review_due: "2026-06-09"
+  current_global_utilization: 0.0
+  active_violations: 0

@@ -1,0 +1,9 @@
+{
+  "name": "summit-api",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    express: "4.19.0",
+    "@summit/summit-cultural": "file:../../packages/summit-cultural"
+  }
+}
