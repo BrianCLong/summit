@@ -7,7 +7,15 @@
     "target": "ES2022",
     "moduleResolution": "Bundler",
     "declaration": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "types": [
+      "node"
+    ],
+    "typeRoots": [
+      "../../node_modules/@types"
+    ]
   },
-  "include": ["src/**/*"]
+  "include": [
+    "src/**/*"
+  ]
 }

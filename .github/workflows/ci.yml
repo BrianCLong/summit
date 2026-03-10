@@ -1,12 +1,12 @@
 name: CI
 
-'on':
-  pull_request: {}
+on:
+  pull_request:
   push:
-    branches: [ main ]
+    branches: [main]
     paths-ignore:
       - "**/*.md"
-  merge_group: {}
+  merge_group:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
@@ -19,11 +19,13 @@ env:
 jobs:
   config-guard:
     name: Build & Test (Untrusted)
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     permissions:
       contents: read
     timeout-minutes: 5
     steps:
+      - name: Clean orphaned worktrees
+        run: rm -rf .worktrees
       - uses: actions/checkout@v4
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -33,13 +35,16 @@ jobs:
         run: pnpm -w check:jest-config
 
   lint:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
+      - name: Clean orphaned worktrees
+        run: rm -rf .worktrees
       - uses: actions/checkout@v4
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
+          cache: "pnpm"
           node-version-file: .nvmrc
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -49,14 +54,17 @@ jobs:
   typecheck:
     name: Typecheck
     needs: lint
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
+      - name: Clean orphaned worktrees
+        run: rm -rf .worktrees
       - uses: actions/checkout@v4
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
+          cache: "pnpm"
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
       - name: Install dependencies
@@ -66,10 +74,12 @@ jobs:
 
   unit-tests:
     name: Unit Tests (CI)
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     timeout-minutes: 15
     needs: [typecheck]
     steps:
+      - name: Clean orphaned worktrees
+        run: rm -rf .worktrees
       - uses: actions/checkout@v4
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -100,16 +110,19 @@ jobs:
           path: server/coverage/
 
   integration-test:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     timeout-minutes: 5
     needs: [config-guard]
     steps:
+      - name: Clean orphaned worktrees
+        run: rm -rf .worktrees
       - uses: actions/checkout@v4
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
+          cache: "pnpm"
           node-version-file: .nvmrc
       - name: Verify TSConfig Exclusions Frozen
         run: node scripts/ci/verify_tsconfig_excludes_frozen.mjs
@@ -125,7 +138,7 @@ jobs:
 
   soc-controls:
     name: SOC Controls (CI)
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     timeout-minutes: 10
     needs: [config-guard]
     services:
@@ -153,6 +166,8 @@ jobs:
         ports:
           - 7687:7687
     steps:
+      - name: Clean orphaned worktrees
+        run: rm -rf .worktrees
       - uses: actions/checkout@v4
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -175,8 +190,10 @@ jobs:
 
   verify-versions:
     name: Verify Workflow Versions
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
+      - name: Clean orphaned worktrees
+        run: rm -rf .worktrees
       - uses: actions/checkout@v4
       - name: Verify Versions
         uses: ./.github/actions/verify-workflow-versions

@@ -995,7 +995,11 @@ importers:
   apps/intelgraph-api:
     dependencies:
       '@apollo/server':
+<<<<<<< HEAD
+        specifier: ^4.11.3
+=======
         specifier: ^4.11.0
+>>>>>>> origin/main
         version: 4.13.0(graphql@16.12.0)
       '@as-integrations/express4':
         specifier: ^1.0.0
@@ -2127,7 +2131,11 @@ importers:
   apps/server:
     dependencies:
       '@apollo/server':
+<<<<<<< HEAD
+        specifier: ^4.11.3
+=======
         specifier: ^4.11.0
+>>>>>>> origin/main
         version: 4.13.0(graphql@16.12.0)
       axios:
         specifier: ^1.7.9
@@ -3963,7 +3971,11 @@ importers:
   packages/api-framework:
     dependencies:
       '@apollo/server':
+<<<<<<< HEAD
+        specifier: ^4.11.3
+=======
         specifier: ^4.11.0
+>>>>>>> origin/main
         version: 4.13.0(graphql@16.12.0)
       '@intelgraph/query-language':
         specifier: workspace:*
@@ -11165,7 +11177,11 @@ importers:
   packages/rate-limiter:
     dependencies:
       '@apollo/server':
+<<<<<<< HEAD
+        specifier: ^4.11.3
+=======
         specifier: ^4.11.0
+>>>>>>> origin/main
         version: 4.13.0(graphql@16.12.0)
       express:
         specifier: '>=4.21.0'
@@ -14285,7 +14301,11 @@ importers:
   services/admin-api:
     dependencies:
       '@apollo/server':
+<<<<<<< HEAD
+        specifier: ^4.11.3
+=======
         specifier: ^4.11.0
+>>>>>>> origin/main
         version: 4.13.0(graphql@16.12.0)
       '@intelgraph/metrics-exporter':
         specifier: workspace:*
@@ -14334,7 +14354,11 @@ importers:
   services/admin-automation:
     dependencies:
       '@apollo/server':
+<<<<<<< HEAD
+        specifier: ^4.11.3
+=======
         specifier: ^4.11.0
+>>>>>>> origin/main
         version: 4.13.0(graphql@16.12.0)
       cors:
         specifier: ^2.8.5
@@ -15007,7 +15031,11 @@ importers:
   services/api-gateway:
     dependencies:
       '@apollo/server':
+<<<<<<< HEAD
+        specifier: ^4.11.3
+=======
         specifier: ^4.11.0
+>>>>>>> origin/main
         version: 4.13.0(graphql@16.12.0)
       '@as-integrations/express4':
         specifier: ^1.1.2
@@ -15473,7 +15501,11 @@ importers:
   services/battle-api:
     dependencies:
       '@apollo/server':
+<<<<<<< HEAD
+        specifier: ^4.11.3
+=======
         specifier: ^4.11.0
+>>>>>>> origin/main
         version: 4.13.0(graphql@16.12.0)
       '@graphql-tools/schema':
         specifier: ^10.0.30
@@ -16244,11 +16276,11 @@ importers:
   services/config-service:
     dependencies:
       '@apollo/server':
-        specifier: ^4.11.0
-        version: 4.12.2(graphql@16.12.0)
+        specifier: ^4.11.3
+        version: 4.13.0(graphql@16.12.0)
       '@as-integrations/express4':
         specifier: ^1.1.2
-        version: 1.1.2(@apollo/server@4.12.2(graphql@16.12.0))(express@5.2.1)
+        version: 1.1.2(@apollo/server@4.13.0(graphql@16.12.0))(express@5.2.1)
       cors:
         specifier: ^2.8.5
         version: 2.8.6
@@ -16323,7 +16355,11 @@ importers:
   services/control-tower-service:
     dependencies:
       '@apollo/server':
+<<<<<<< HEAD
+        specifier: ^4.11.3
+=======
         specifier: ^4.11.0
+>>>>>>> origin/main
         version: 4.13.0(graphql@16.12.0)
       '@graphql-tools/schema':
         specifier: ^10.0.0
@@ -16889,7 +16925,11 @@ importers:
   services/data-monetization-engine:
     dependencies:
       '@apollo/server':
+<<<<<<< HEAD
+        specifier: ^4.11.3
+=======
         specifier: ^4.11.0
+>>>>>>> origin/main
         version: 4.13.0(graphql@16.12.0)
       '@intelgraph/data-monetization-types':
         specifier: workspace:*
@@ -17158,8 +17198,8 @@ importers:
   services/digital-twin:
     dependencies:
       '@apollo/server':
-        specifier: ^4.11.0
-        version: 4.12.2(graphql@16.12.0)
+        specifier: ^4.11.3
+        version: 4.13.0(graphql@16.12.0)
       '@opentelemetry/api':
         specifier: 1.7.0
         version: 1.7.0
@@ -18772,8 +18812,8 @@ importers:
   services/graph-core:
     dependencies:
       '@apollo/server':
-        specifier: ^4.11.0
-        version: 4.12.2(graphql@16.12.0)
+        specifier: ^4.11.3
+        version: 4.13.0(graphql@16.12.0)
       '@graphql-tools/schema':
         specifier: ^10.0.6
         version: 10.0.30(graphql@16.12.0)
@@ -24381,13 +24421,6 @@ packages:
 
   '@apollo/server-gateway-interface@2.0.0':
     resolution: {integrity: sha512-3HEMD6fSantG2My3jWkb9dvfkF9vJ4BDLRjMgsnD790VINtuPaEp+h3Hg9HOHiWkML6QsOhnaRqZ+gvhp3y8Nw==}
-    peerDependencies:
-      graphql: 16.12.0
-
-  '@apollo/server@4.12.2':
-    resolution: {integrity: sha512-jKRlf+sBMMdKYrjMoiWKne42Eb6paBfDOr08KJnUaeaiyWFj+/040FjVPQI7YGLfdwnYIsl1NUUqS2UdgezJDg==}
-    engines: {node: '>=14.16.0'}
-    deprecated: Apollo Server v4 is end-of-life since January 26, 2026. As long as you are already using a non-EOL version of Node.js, upgrading to v5 should take only a few minutes. See https://www.apollographql.com/docs/apollo-server/previous-versions for details.
     peerDependencies:
       graphql: 16.12.0
 
@@ -54537,36 +54570,6 @@ snapshots:
       '@apollo/utils.logger': 3.0.0
       graphql: 16.12.0
 
-  '@apollo/server@4.12.2(graphql@16.12.0)':
-    dependencies:
-      '@apollo/cache-control-types': 1.0.3(graphql@16.12.0)
-      '@apollo/server-gateway-interface': 1.1.1(graphql@16.12.0)
-      '@apollo/usage-reporting-protobuf': 4.1.1
-      '@apollo/utils.createhash': 2.0.2
-      '@apollo/utils.fetcher': 2.0.1
-      '@apollo/utils.isnodelike': 2.0.1
-      '@apollo/utils.keyvaluecache': 2.1.1
-      '@apollo/utils.logger': 2.0.1
-      '@apollo/utils.usagereporting': 2.1.0(graphql@16.12.0)
-      '@apollo/utils.withrequired': 2.0.1
-      '@graphql-tools/schema': 9.0.19(graphql@16.12.0)
-      '@types/express': 4.17.25
-      '@types/express-serve-static-core': 4.19.6
-      '@types/node-fetch': 2.6.13
-      async-retry: 1.3.3
-      cors: 2.8.6
-      express: 5.2.1
-      graphql: 16.12.0
-      loglevel: 1.9.2
-      lru-cache: 7.18.3
-      negotiator: 0.6.4
-      node-abort-controller: 3.1.1
-      node-fetch: 3.3.2
-      uuid: 9.0.1
-      whatwg-mimetype: 3.0.0
-    transitivePeerDependencies:
-      - supports-color
-
   '@apollo/server@4.13.0(graphql@16.12.0)':
     dependencies:
       '@apollo/cache-control-types': 1.0.3(graphql@16.12.0)
@@ -54823,11 +54826,15 @@ snapshots:
     dependencies:
       node-fetch: 3.3.2
 
-  '@as-integrations/express4@1.1.2(@apollo/server@4.12.2(graphql@16.12.0))(express@5.2.1)':
+  '@as-integrations/express4@1.1.2(@apollo/server@4.13.0(graphql@16.12.0))(express@5.2.1)':
     dependencies:
-      '@apollo/server': 4.12.2(graphql@16.12.0)
+      '@apollo/server': 4.13.0(graphql@16.12.0)
       express: 5.2.1
 
+<<<<<<< HEAD
+  '@as-integrations/express4@1.1.2(@apollo/server@5.4.0(graphql@16.12.0))(express@5.2.1)':
+    dependencies:
+=======
   '@as-integrations/express4@1.1.2(@apollo/server@4.13.0(graphql@16.12.0))(express@5.2.1)':
     dependencies:
       '@apollo/server': 4.13.0(graphql@16.12.0)
@@ -54835,6 +54842,7 @@ snapshots:
 
   '@as-integrations/express4@1.1.2(@apollo/server@5.4.0(graphql@16.12.0))(express@5.2.1)':
     dependencies:
+>>>>>>> origin/main
       '@apollo/server': 5.4.0(graphql@16.12.0)
       express: 5.2.1
 
@@ -71166,7 +71174,9 @@ snapshots:
     transitivePeerDependencies:
       - '@babel/core'
       - '@babel/preset-env'
+      - bufferutil
       - supports-color
+      - utf-8-validate
 
   '@react-native/normalize-colors@0.76.9': {}
 
