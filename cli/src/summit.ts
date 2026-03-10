@@ -9,6 +9,7 @@ import { validateManifestCommand } from './adk/validate.js';
 import { runAgent } from './adk/run.js';
 import { packAgent } from './adk/pack.js';
 import { registerWorkflowCommands } from './commands/workflow.js';
+import { registerPredictCiCommand } from './commands/predict-ci.js';
 
 function renderResult(result: DoctorCheckResult): void {
   const statusIcon =
@@ -52,6 +53,7 @@ async function main() {
 
   registerOpenClawCommands(program);
   registerWorkflowCommands(program);
+  registerPredictCiCommand(program);
 
   (['init', 'check', 'test', 'release-dry-run'] as const).forEach((workflowName) => {
     program
