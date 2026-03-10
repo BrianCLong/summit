@@ -1,0 +1,11 @@
+{
+  "funded_initiatives": [
+    {
+      "project_name": "Policy-Aware SDK Starter",
+      "developer_or_partner": "Summit Core Developer Relations",
+      "funding_amount": 60000,
+      "initiative_type": "developer-tooling",
+      "expected_impact": "Accelerates first plugin time-to-market and improves developer onboarding success."
+    }
+  ]
+}

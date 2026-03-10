@@ -1,0 +1,28 @@
+{
+  "grant_categories": [
+    {
+      "id": "ecosystem-plugins",
+      "name": "ecosystem plugins",
+      "description": "Extensions and marketplace plugins that expand Summit use-cases.",
+      "max_grant_amount": 150000
+    },
+    {
+      "id": "infrastructure-integrations",
+      "name": "infrastructure integrations",
+      "description": "Critical adapters and integrations for enterprise and partner systems.",
+      "max_grant_amount": 250000
+    },
+    {
+      "id": "research-prototypes",
+      "name": "research prototypes",
+      "description": "Applied research pilots that can become production ecosystem capabilities.",
+      "max_grant_amount": 300000
+    },
+    {
+      "id": "developer-tooling",
+      "name": "developer tooling",
+      "description": "SDK, testing, and automation tools that accelerate ecosystem builders.",
+      "max_grant_amount": 120000
+    }
+  ]
+}
