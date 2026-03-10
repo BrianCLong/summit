@@ -2,9 +2,9 @@ name: AI Dependency Firewall
 on: [push, pull_request]
 jobs:
   scan:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Run AI Dependency Firewall
         run: |
           echo "Scanning for malicious AI-generated dependencies..."

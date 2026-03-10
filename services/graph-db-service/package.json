@@ -15,14 +15,14 @@
     "@intelgraph/graph-algorithms": "workspace:*",
     "@intelgraph/relationship-mining": "workspace:*",
     "@intelgraph/link-prediction": "workspace:*",
-    "express": "^5.2.0",
-    "cors": "^2.8.5"
+    "express": "5.2.0",
+    "cors": "2.8.5"
   },
   "devDependencies": {
     "@types/node": "20.19.27",
-    "@types/express": "^5.0.1",
-    "@types/cors": "^2.8.17",
-    "typescript": "^5.9.3",
-    "tsx": "^4.0.0"
+    "@types/express": "5.0.1",
+    "@types/cors": "2.8.17",
+    "typescript": "5.9.3",
+    "tsx": "4.0.0"
   }
 }

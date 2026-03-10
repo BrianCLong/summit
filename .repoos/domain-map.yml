@@ -1,0 +1,514 @@
+# Summit Domain Topology
+#
+# Hierarchical architecture consolidating 978 subsystems → 35 domains
+# This enables deterministic routing, frontier entropy control, and
+# autonomous architecture synthesis.
+#
+# Structure:
+#   Domain (architectural boundary)
+#     ├── Capabilities (functional groups)
+#     └── Subsystems (implementation units)
+
+version: "1.0.0"
+generated: "2026-03-09"
+subsystem_count_target: 35
+current_subsystem_count: 978
+consolidation_ratio: 27.9
+
+domains:
+  # Core Platform
+  repoos-core:
+    description: "Repository operating system core infrastructure"
+    frontier: platform
+    owner_team: architecture-owners
+    capabilities:
+      - router
+      - evolution-ledger
+      - governance
+      - consolidation
+    subsystem_patterns:
+      - ".repoos/**"
+      - "scripts/repoos/**"
+      - "packages/repoos-*/**"
+
+  platform-runtime:
+    description: "Core platform execution and runtime services"
+    frontier: platform
+    owner_team: platform-owners
+    capabilities:
+      - execution
+      - lifecycle
+      - resource-management
+    subsystem_patterns:
+      - "packages/summit-core/**"
+      - "packages/summit-runtime/**"
+      - "server/src/platform/**"
+
+  # Intelligence & Analytics
+  intelligence-platform:
+    description: "AI/ML intelligence processing and analysis"
+    frontier: intelligence
+    owner_team: intelligence-owners
+    capabilities:
+      - intel-query
+      - intel-enrichment
+      - intel-analysis
+      - threat-intelligence
+    subsystem_patterns:
+      - "packages/*-intelligence/**"
+      - "packages/threat-*/**"
+      - "services/*-intel/**"
+
+  knowledge-graph:
+    description: "Graph database and entity resolution"
+    frontier: intelligence
+    owner_team: graph-owners
+    capabilities:
+      - graph-api
+      - entity-resolution
+      - relationship-inference
+      - graph-reasoning
+    subsystem_patterns:
+      - "packages/knowledge-graph/**"
+      - "packages/graph-*/**"
+      - "packages/entity-*/**"
+      - "services/graph-*/**"
+      - "intelgraph/**"
+
+  ml-platform:
+    description: "Machine learning training and serving"
+    frontier: ml
+    owner_team: ml-owners
+    capabilities:
+      - model-training
+      - model-serving
+      - mlops
+      - deep-learning
+    subsystem_patterns:
+      - "packages/ml-*/**"
+      - "packages/*-learning/**"
+      - "packages/model-*/**"
+      - "services/ml-*/**"
+      - "apps/ml-*/**"
+
+  predictive-analytics:
+    description: "Advanced predictive and forecasting systems"
+    frontier: ml
+    owner_team: ml-owners
+    capabilities:
+      - forecasting
+      - anomaly-detection
+      - causal-inference
+      - predictive-modeling
+    subsystem_patterns:
+      - "packages/predictive-*/**"
+      - "packages/forecasting/**"
+      - "packages/causal-*/**"
+      - "services/predictive-*/**"
+
+  # Data Platform
+  data-platform:
+    description: "Data ingestion, processing, and storage"
+    frontier: data
+    owner_team: data-owners
+    capabilities:
+      - lakehouse
+      - object-storage
+      - data-pipeline
+      - etl
+    subsystem_patterns:
+      - "packages/lakehouse/**"
+      - "packages/*-storage/**"
+      - "services/lakehouse-*/**"
+      - "services/data-*/**"
+
+  analytics-engine:
+    description: "Analytics processing and reporting"
+    frontier: data
+    owner_team: analytics-owners
+    capabilities:
+      - unified-analytics
+      - fusion-analytics
+      - reporting
+    subsystem_patterns:
+      - "packages/*-analytics/**"
+      - "services/*-analytics/**"
+      - "apps/analytics-*/**"
+
+  # Agent Systems
+  agent-orchestration:
+    description: "Multi-agent coordination and orchestration"
+    frontier: backend
+    owner_team: agent-owners
+    capabilities:
+      - maestro
+      - switchboard
+      - agent-runtime
+      - agent-mesh
+    subsystem_patterns:
+      - "packages/maestro-*/**"
+      - "packages/agent-*/**"
+      - "packages/orchestration/**"
+      - "packages/orchestrator/**"
+      - "services/agent-*/**"
+
+  autonomous-ops:
+    description: "Autonomous operations and automation"
+    frontier: backend
+    owner_team: agent-owners
+    capabilities:
+      - rpa
+      - workflow-automation
+      - task-routing
+    subsystem_patterns:
+      - "packages/autonomous-*/**"
+      - "packages/rpa/**"
+      - "packages/task-*/**"
+
+  # API & Integration
+  api-gateway:
+    description: "API gateway and external integrations"
+    frontier: backend
+    owner_team: api-owners
+    capabilities:
+      - gateway
+      - api-framework
+      - graphql-bff
+    subsystem_patterns:
+      - "gateway/**"
+      - "packages/api-*/**"
+      - "services/api-*/**"
+
+  connector-platform:
+    description: "Data connectors and integrations"
+    frontier: backend
+    owner_team: integration-owners
+    capabilities:
+      - connector-sdk
+      - connectors
+      - integration
+    subsystem_patterns:
+      - "packages/connector-*/**"
+      - "packages/connectors/**"
+
+  # Frontend
+  frontend-platform:
+    description: "Web and mobile frontend applications"
+    frontier: frontend
+    owner_team: frontend-owners
+    capabilities:
+      - web-app
+      - mobile-interface
+      - summit-ui
+    subsystem_patterns:
+      - "client/**"
+      - "apps/web/**"
+      - "ui/**"
+      - "packages/*-ui/**"
+      - "packages/summit-ui/**"
+
+  mobile-native:
+    description: "Native mobile applications"
+    frontier: frontend
+    owner_team: mobile-owners
+    capabilities:
+      - mobile-native
+      - mobile-sdk
+    subsystem_patterns:
+      - "apps/mobile-*/**"
+      - "packages/mobile-*/**"
+
+  # Specialized Intelligence
+  computer-vision:
+    description: "Image and video analysis"
+    frontier: ml
+    owner_team: vision-owners
+    capabilities:
+      - object-detection
+      - facial-recognition
+      - image-forensics
+      - video-analysis
+    subsystem_patterns:
+      - "packages/computer-vision/**"
+      - "packages/*-detection/**"
+      - "packages/*-recognition/**"
+      - "packages/image-*/**"
+      - "packages/video-*/**"
+
+  audio-intelligence:
+    description: "Audio processing and analysis"
+    frontier: ml
+    owner_team: audio-owners
+    capabilities:
+      - speech-recognition
+      - speaker-identification
+      - audio-forensics
+    subsystem_patterns:
+      - "packages/audio-*/**"
+      - "packages/speech-*/**"
+      - "packages/speaker-*/**"
+
+  nlp-platform:
+    description: "Natural language processing"
+    frontier: ml
+    owner_team: nlp-owners
+    capabilities:
+      - semantic-analysis
+      - entity-linking
+      - transformers
+    subsystem_patterns:
+      - "packages/semantic-*/**"
+      - "packages/entity-linking/**"
+      - "packages/transformers/**"
+
+  # Specialized Services
+  geospatial-intelligence:
+    description: "Geospatial analysis and mapping"
+    frontier: intelligence
+    owner_team: geo-owners
+    capabilities:
+      - satellite-imagery
+      - geopolitical-analysis
+      - geotemporal-api
+    subsystem_patterns:
+      - "packages/satellite-*/**"
+      - "packages/geopolitical-*/**"
+      - "services/geotemporal-*/**"
+
+  cyber-intelligence:
+    description: "Cyber threat intelligence"
+    frontier: security
+    owner_team: security-owners
+    capabilities:
+      - darkweb-intel
+      - malware-analysis
+      - vulnerability-intel
+    subsystem_patterns:
+      - "packages/darkweb-*/**"
+      - "packages/malware-*/**"
+      - "packages/vulnerability-*/**"
+
+  covert-ops:
+    description: "Covert operations and deception technology"
+    frontier: security
+    owner_team: security-owners
+    capabilities:
+      - deception-tech
+      - attack-surface
+      - threat-hunting
+    subsystem_patterns:
+      - "packages/covert-*/**"
+      - "packages/deception-*/**"
+      - "packages/attack-*/**"
+      - "packages/threat-hunting/**"
+
+  # Security & Governance
+  security-platform:
+    description: "Security, authentication, and authorization"
+    frontier: security
+    owner_team: security-owners
+    capabilities:
+      - auth
+      - encryption
+      - key-management
+      - biometrics
+    subsystem_patterns:
+      - "server/src/security/**"
+      - "packages/biometrics/**"
+      - "services/security-*/**"
+
+  policy-governance:
+    description: "Policy enforcement and governance"
+    frontier: security
+    owner_team: governance-owners
+    capabilities:
+      - policy-engine
+      - compliance
+      - audit
+    subsystem_patterns:
+      - "packages/policy-*/**"
+      - "services/policy-*/**"
+      - "packages/cloud-governance/**"
+
+  # Operations & Observability
+  observability:
+    description: "Monitoring, metrics, and observability"
+    frontier: platform
+    owner_team: platform-owners
+    capabilities:
+      - metrics
+      - tracing
+      - logging
+      - alerting
+    subsystem_patterns:
+      - "packages/observability/**"
+      - "packages/monitoring/**"
+      - "server/src/monitoring/**"
+
+  operations-center:
+    description: "Operations management and control"
+    frontier: platform
+    owner_team: platform-owners
+    capabilities:
+      - operations-management
+      - control-tower
+      - admin-automation
+    subsystem_patterns:
+      - "packages/operations-*/**"
+      - "services/control-tower-*/**"
+      - "services/admin-*/**"
+
+  # Business & Workflow
+  workflow-engine:
+    description: "Workflow orchestration and automation"
+    frontier: backend
+    owner_team: workflow-owners
+    capabilities:
+      - workflow-execution
+      - business-rules
+      - decision-support
+    subsystem_patterns:
+      - "apps/workflow-*/**"
+      - "packages/business-rules/**"
+      - "packages/decision-*/**"
+
+  document-platform:
+    description: "Document processing and governance"
+    frontier: backend
+    owner_team: doc-owners
+    capabilities:
+      - ocr
+      - document-verification
+      - document-governance
+    subsystem_patterns:
+      - "packages/ocr/**"
+      - "packages/document-*/**"
+      - "services/docling-*/**"
+
+  # Specialized Platforms
+  search-engine:
+    description: "Search and discovery"
+    frontier: backend
+    owner_team: search-owners
+    capabilities:
+      - search
+      - indexing
+      - semantic-search
+    subsystem_patterns:
+      - "apps/search-*/**"
+      - "packages/search-*/**"
+
+  telephony-platform:
+    description: "Telephony and communications"
+    frontier: backend
+    owner_team: comms-owners
+    capabilities:
+      - telephony
+      - communications
+    subsystem_patterns:
+      - "packages/telephony/**"
+
+  # Platform Services
+  cloud-platform:
+    description: "Cloud infrastructure and services"
+    frontier: platform
+    owner_team: platform-owners
+    capabilities:
+      - cloud-platform
+      - infrastructure
+      - deployment
+    subsystem_patterns:
+      - "packages/cloud-platform/**"
+      - "services/cloud-*/**"
+
+  developer-experience:
+    description: "Developer tools and experience"
+    frontier: platform
+    owner_team: devex-owners
+    capabilities:
+      - no-code-builder
+      - ingest-wizard
+      - dev-tools
+    subsystem_patterns:
+      - "packages/no-code-*/**"
+      - "packages/ingest-*/**"
+      - "tools/**"
+
+  # Data Products
+  risk-intelligence:
+    description: "Risk scoring and assessment"
+    frontier: intelligence
+    owner_team: risk-owners
+    capabilities:
+      - risk-scoring
+      - watchlist-screening
+    subsystem_patterns:
+      - "packages/risk-*/**"
+      - "packages/watchlist-*/**"
+
+  targeting-support:
+    description: "Intelligence targeting and support"
+    frontier: intelligence
+    owner_team: targeting-owners
+    capabilities:
+      - targeting-support
+      - collection-coordination
+    subsystem_patterns:
+      - "packages/targeting-*/**"
+      - "packages/collection-*/**"
+
+  # Legacy & Migration
+  legacy-systems:
+    description: "Legacy systems under migration"
+    frontier: general
+    owner_team: platform-owners
+    capabilities:
+      - legacy-apis
+      - migration-support
+    subsystem_patterns:
+      - ".archive/**"
+      - "october2025/**"
+
+# Routing Rules
+routing_rules:
+  # Cross-domain changes require synthesis PR
+  cross_domain_policy: synthesis_required
+
+  # Default domain for unclassified files
+  default_domain: platform-runtime
+
+  # Interface spine exceptions
+  interface_spine_domain: platform-interface
+
+  # Documentation routes to docs domain
+  documentation_patterns:
+    - "docs/**"
+    - "*.md"
+    - "README"
+
+  # Configuration routes to config domain
+  config_patterns:
+    - ".github/**"
+    - "*.yml"
+    - "*.yaml"
+    - "*.json"
+    - "package.json"
+
+# Consolidation Tracking
+consolidation:
+  phase: "initial"
+  target_completion: "2026-06-09"
+  estimated_entropy_reduction: 5.12
+  projected_subsystem_count: 35
+  current_frontier_entropy: 1.20
+  target_frontier_entropy: 0.25
+
+# Meta-Governance
+meta_governance:
+  protected: true
+  requires_multi_party_approval: true
+  approval_count: 3
+  approval_groups:
+    - architecture-owners
+    - governance-owners
+    - platform-owners

@@ -47,11 +47,11 @@
     "npm": ">=8.0.0"
   },
   "devDependencies": {
-    "concurrently": "^8.2.0",
-    "prettier": "^3.0.0",
-    "husky": "^8.0.3",
-    "lint-staged": "^13.2.3",
-    "@playwright/test": "^1.56.1"
+    "concurrently": "8.2.0",
+    "prettier": "3.0.0",
+    "husky": "8.0.3",
+    "lint-staged": "13.2.3",
+    "@playwright/test": "1.56.1"
   },
   "husky": {
     "hooks": {

@@ -2,6 +2,9 @@ import express from 'express';
 import { z } from 'zod';
 import { DataResidencyService } from '../data-residency/residency-service.js';
 import { otelService } from '../middleware/observability/otel-tracing.js';
+import { ImmutableAuditLogService } from '../services/ImmutableAuditLogService.js';
+
+const auditService = new ImmutableAuditLogService();
 
 const router = express.Router();
 const dataResidencyService = new DataResidencyService();
@@ -81,7 +84,7 @@ const TransferComplianceSchema = z.object({
  * POST /api/data-residency/configure-residency
  * Configure data residency requirements for a tenant
  */
-router.post('/configure-residency', async (req, res) => {
+router.post('/configure-residency', async (req: any, res: any) => {
   const span = otelService.createSpan('data-residency.configure-residency');
 
   try {
@@ -106,6 +109,20 @@ router.post('/configure-residency', async (req, res) => {
       'data-residency.country': validatedConfig.country,
       'data-residency.encryption_required': validatedConfig.encryptionRequired,
     });
+
+    // Audit Configuration Change
+    await auditService.logAuditEvent({
+      eventType: 'CONFIG_CHANGE',
+      userId: (req.headers['x-user-id'] as string) || 'anonymous',
+      tenantId,
+      action: 'configure-residency',
+      resource: configId,
+      result: 'success',
+      ipAddress: (req.headers['x-forwarded-for'] as string) || req.ip || '0.0.0.0',
+      reason: (req.headers['x-audit-reason'] as string) || 'Tenant Data Residency configuration update',
+      legalBasis: (req.headers['x-audit-legal-basis'] as string) || 'CONTRACTUAL_OBLIGATION',
+      metadata: { config: validatedConfig }
+    }, { syncToPostgres: true });
   } catch (error: any) {
     console.error('Data residency configuration failed:', error);
     otelService.recordException(error);
@@ -139,7 +156,7 @@ router.post('/configure-residency', async (req, res) => {
  * POST /api/data-residency/configure-kms
  * Configure BYOK (Bring Your Own Key) for customer-managed encryption
  */
-router.post('/configure-kms', async (req, res) => {
+router.post('/configure-kms', async (req: any, res: any) => {
   const span = otelService.createSpan('data-residency.configure-kms');
 
   try {
@@ -167,6 +184,20 @@ router.post('/configure-kms', async (req, res) => {
       'data-residency.kms_provider': validatedConfig.provider,
       'data-residency.kms_region': validatedConfig.region,
     });
+
+    // Audit KMS Configuration Change
+    await auditService.logAuditEvent({
+      eventType: 'CONFIG_CHANGE',
+      userId: (req.headers['x-user-id'] as string) || 'anonymous',
+      tenantId,
+      action: 'configure-kms',
+      resource: kmsConfigId,
+      result: 'success',
+      ipAddress: (req.headers['x-forwarded-for'] as string) || req.ip || '0.0.0.0',
+      reason: (req.headers['x-audit-reason'] as string) || 'Tenant KMS configuration update',
+      legalBasis: (req.headers['x-audit-legal-basis'] as string) || 'SECURITY_HARDENING',
+      metadata: { provider: validatedConfig.provider, region: validatedConfig.region }
+    }, { syncToPostgres: true });
   } catch (error: any) {
     console.error('KMS configuration failed:', error);
     otelService.recordException(error);
@@ -208,7 +239,7 @@ router.post('/configure-kms', async (req, res) => {
  * POST /api/data-residency/encrypt
  * Encrypt data using configured KMS and residency policies
  */
-router.post('/encrypt', async (req, res) => {
+router.post('/encrypt', async (req: any, res: any) => {
   const span = otelService.createSpan('data-residency.encrypt-data');
 
   try {
@@ -236,6 +267,20 @@ router.post('/encrypt', async (req, res) => {
       'data-residency.compliant': result.residencyCompliant,
       'data-residency.encrypted': true,
     });
+
+    // Audit Encryption Access
+    await auditService.logAuditEvent({
+      eventType: 'DATA_ACCESS',
+      userId: (req.headers['x-user-id'] as string) || 'anonymous',
+      tenantId,
+      action: 'encrypt',
+      resource: 'kms/encryption',
+      result: 'success',
+      ipAddress: (req.headers['x-forwarded-for'] as string) || req.ip || '0.0.0.0',
+      reason: (req.headers['x-audit-reason'] as string) || 'On-demand data encryption',
+      legalBasis: (req.headers['x-audit-legal-basis'] as string) || 'COMPLIANCE_ENFORCEMENT',
+      metadata: { classification: validatedRequest.dataClassification.level }
+    }, { syncToPostgres: true });
   } catch (error: any) {
     console.error('Data encryption failed:', error);
     otelService.recordException(error);
@@ -270,7 +315,7 @@ router.post('/encrypt', async (req, res) => {
  * POST /api/data-residency/decrypt
  * Decrypt data using configured KMS
  */
-router.post('/decrypt', async (req, res) => {
+router.post('/decrypt', async (req: any, res: any) => {
   const span = otelService.createSpan('data-residency.decrypt-data');
 
   try {
@@ -293,6 +338,19 @@ router.post('/decrypt', async (req, res) => {
       'data-residency.tenant_id': tenantId,
       'data-residency.decryption_successful': true,
     });
+
+    // Audit Decryption Access
+    await auditService.logAuditEvent({
+      eventType: 'DATA_ACCESS',
+      userId: (req.headers['x-user-id'] as string) || 'anonymous',
+      tenantId,
+      action: 'decrypt',
+      resource: 'kms/decryption',
+      result: 'success',
+      ipAddress: (req.headers['x-forwarded-for'] as string) || req.ip || '0.0.0.0',
+      reason: (req.headers['x-audit-reason'] as string) || 'On-demand data decryption',
+      legalBasis: (req.headers['x-audit-legal-basis'] as string) || 'LEGITIMATE_INTEREST',
+    }, { syncToPostgres: true });
   } catch (error: any) {
     console.error('Data decryption failed:', error);
     otelService.recordException(error);
@@ -317,7 +375,7 @@ router.post('/decrypt', async (req, res) => {
  * POST /api/data-residency/check-transfer-compliance
  * Check compliance for cross-region data transfers
  */
-router.post('/check-transfer-compliance', async (req, res) => {
+router.post('/check-transfer-compliance', async (req: any, res: any) => {
   const span = otelService.createSpan(
     'data-residency.check-transfer-compliance',
   );
@@ -383,7 +441,7 @@ router.post('/check-transfer-compliance', async (req, res) => {
  * GET /api/data-residency/report
  * Generate comprehensive data residency compliance report
  */
-router.get('/report', async (req, res) => {
+router.get('/report', async (req: any, res: any) => {
   const span = otelService.createSpan('data-residency.generate-report');
 
   try {
@@ -416,7 +474,7 @@ router.get('/report', async (req, res) => {
  * GET /api/data-residency/health
  * Data residency service health check
  */
-router.get('/health', async (req, res) => {
+router.get('/health', async (req: any, res: any) => {
   const span = otelService.createSpan('data-residency.health');
 
   try {
@@ -463,7 +521,7 @@ router.get('/health', async (req, res) => {
  * GET /api/data-residency/supported-regions
  * Get list of supported regions and their compliance characteristics
  */
-router.get('/supported-regions', async (req, res) => {
+router.get('/supported-regions', async (req: any, res: any) => {
   const span = otelService.createSpan('data-residency.supported-regions');
 
   try {
@@ -543,7 +601,7 @@ router.get('/supported-regions', async (req, res) => {
  * GET /api/data-residency/data-classifications
  * Get supported data classification levels and their requirements
  */
-router.get('/data-classifications', async (req, res) => {
+router.get('/data-classifications', async (req: any, res: any) => {
   const span = otelService.createSpan('data-residency.data-classifications');
 
   try {

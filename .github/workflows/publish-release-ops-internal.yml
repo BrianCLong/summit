@@ -33,7 +33,7 @@ permissions:
 jobs:
   build-internal:
     name: Build Internal Package
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
       - name: Checkout
@@ -44,7 +44,6 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v4
         with:
-          cache: 'pnpm'
           cache-dependency-path: '**/pnpm-lock.yaml'
           node-version: "20"
 

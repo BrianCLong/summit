@@ -11,7 +11,7 @@ on:
 jobs:
   ai_supply_chain_firewall:
     name: Run AI Supply Chain Firewall Gate
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
