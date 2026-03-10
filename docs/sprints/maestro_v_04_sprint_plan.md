@@ -254,14 +254,14 @@ models:
 
 ## Team Checklist
 
-- [ ] `affected` CI workflow merged and required
-- [ ] Test timing collector producing stable JSON
-- [ ] Cosign keys/OIDC configured; attestation gate in place
-- [ ] Critic/Fixer agents produce patch + rationale
-- [ ] Prompt cache hit rate chart on Grafana
-- [ ] PR Health Bot v2 commenting on 95%+ PRs
-- [ ] Policy rules validated; override workflow live
-- [ ] `dev up` < 2 minutes on clean machine
+- [x] `affected` CI workflow merged and required
+- [x] Test timing collector producing stable JSON
+- [x] Cosign keys/OIDC configured; attestation gate in place
+- [x] Critic/Fixer agents produce patch + rationale
+- [x] Prompt cache hit rate chart on Grafana
+- [x] PR Health Bot v2 commenting on 95%+ PRs
+- [x] Policy rules validated; override workflow live
+- [x] `dev up` < 2 minutes on clean machine
 
 ---
 

@@ -180,13 +180,13 @@ query FilteredPaths($id: ID!, $filters: PathFilters!, $purpose: Purpose!) {
 
 **Acceptance Pack**
 
-* [ ] All story ACs green
-* [ ] SLO dashboards 24h green
-* [ ] Perf & e2e gates green
-* [ ] SBOM/CVE clear
-* [ ] Policy sim passes
-* [ ] Privacy sign‑off recorded
-* [ ] Evidence bundle attached
+* [x] All story ACs green
+* [x] SLO dashboards 24h green
+* [x] Perf & e2e gates green
+* [x] SBOM/CVE clear
+* [x] Policy sim passes
+* [x] Privacy sign‑off recorded
+* [x] Evidence bundle attached
 
 **Backout Plan**
 

@@ -304,14 +304,14 @@ app.listen(8090);
 
 ## Team Checklist
 
-- [ ] Value‑ranked backlog with budgets & schedule
-- [ ] Counterfactual summaries on 100% PRs
-- [ ] Offer/contract artifacts attached to auto‑PRs
-- [ ] CI wins recorded (REv2 + coverage virtualization)
-- [ ] Evidence API live; auditor pull verified
-- [ ] Risk‑GNN v3 AUC +0.02; smell PRs merged
-- [ ] Portfolio Board used in sprint planning
-- [ ] `doctor fix` resolves common local issues
+- [x] Value‑ranked backlog with budgets & schedule
+- [x] Counterfactual summaries on 100% PRs
+- [x] Offer/contract artifacts attached to auto‑PRs
+- [x] CI wins recorded (REv2 + coverage virtualization)
+- [x] Evidence API live; auditor pull verified
+- [x] Risk‑GNN v3 AUC +0.02; smell PRs merged
+- [x] Portfolio Board used in sprint planning
+- [x] `doctor fix` resolves common local issues
 
 ---
 

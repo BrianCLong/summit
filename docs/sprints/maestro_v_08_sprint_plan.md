@@ -387,14 +387,14 @@ export async function take(
 
 ## Team Checklist
 
-- [ ] LinUCB router picks arms with context; safety fallback works
-- [ ] Decision Cards attached to 100% PRs
-- [ ] Risk/routing explanations accurate in spot checks
-- [ ] OPA/Rego gates enabled in CI/CD/agents
-- [ ] TIA reduces test time by ≥35%
-- [ ] Flake rate ≤0.2% with auto‑stabilization PRs
-- [ ] Quotas & alerts enforced; no overruns
-- [ ] Repro Packs + Shadow Replays working end‑to‑end
+- [x] LinUCB router picks arms with context; safety fallback works
+- [x] Decision Cards attached to 100% PRs
+- [x] Risk/routing explanations accurate in spot checks
+- [x] OPA/Rego gates enabled in CI/CD/agents
+- [x] TIA reduces test time by ≥35%
+- [x] Flake rate ≤0.2% with auto‑stabilization PRs
+- [x] Quotas & alerts enforced; no overruns
+- [x] Repro Packs + Shadow Replays working end‑to‑end
 
 ---
 

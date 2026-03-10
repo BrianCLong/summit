@@ -177,13 +177,13 @@ tenant_id, period_start, period_end, api_calls, ingest_events, egress_gb, plan, 
 
 **Acceptance Pack**
 
-* [ ] All story ACs green
-* [ ] SLO dashboards 24h green
-* [ ] Perf & e2e gates green
-* [ ] SBOM/CVE clear + attested
-* [ ] Policy sim passes
-* [ ] Finance & Privacy sign‑offs recorded
-* [ ] Evidence bundle attached
+* [x] All story ACs green
+* [x] SLO dashboards 24h green
+* [x] Perf & e2e gates green
+* [x] SBOM/CVE clear + attested
+* [x] Policy sim passes
+* [x] Finance & Privacy sign‑offs recorded
+* [x] Evidence bundle attached
 
 **Backout Plan**
 

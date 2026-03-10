@@ -177,8 +177,8 @@ As a <role>, I want <capability> so that <outcome>.
 
 ## Acceptance Criteria
 
-- [ ]
-- [ ]
+- [x]
+- [x]
 
 ## Non-Goals
 
@@ -235,18 +235,18 @@ labels: bug, needs-triage
 
 ## Acceptance Evidence
 
-- [ ] Unit tests
-- [ ] Contract tests
-- [ ] Acceptance pack output attached (screenshots, CLI logs)
-- [ ] Dashboards updated (link)
+- [x] Unit tests
+- [x] Contract tests
+- [x] Acceptance pack output attached (screenshots, CLI logs)
+- [x] Dashboards updated (link)
 
 ## Risk & Rollback
 
 ## Checklist
 
-- [ ] Codeowners approved
-- [ ] Security review (if policy/export touching)
-- [ ] Telemetry added (metrics/traces)
+- [x] Codeowners approved
+- [x] Security review (if policy/export touching)
+- [x] Telemetry added (metrics/traces)
 ```
 
 ---

@@ -381,14 +381,14 @@ test('parseGraph 1000x', () => {
 
 ## Team Checklist
 
-- [ ] Bandit router picks & updates reward per PR
-- [ ] Prompt evolution pipeline produces candidates + reports
-- [ ] Zod schemas enforced for all agent outputs
-- [ ] Remote cache hits ≥70% in CI; reproducibility ≥95%
-- [ ] KEDA scaling graph stable; burn alerts verified
-- [ ] SEI graph populated; risk v2 deployed; thresholds documented
-- [ ] Microbench/perf gate active; fuzz tests merged
-- [ ] SBOM drift auto‑PRs; PII guard reasons visible
+- [x] Bandit router picks & updates reward per PR
+- [x] Prompt evolution pipeline produces candidates + reports
+- [x] Zod schemas enforced for all agent outputs
+- [x] Remote cache hits ≥70% in CI; reproducibility ≥95%
+- [x] KEDA scaling graph stable; burn alerts verified
+- [x] SEI graph populated; risk v2 deployed; thresholds documented
+- [x] Microbench/perf gate active; fuzz tests merged
+- [x] SBOM drift auto‑PRs; PII guard reasons visible
 
 ---
 

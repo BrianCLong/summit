@@ -393,16 +393,16 @@ np.save('artifacts/hazard_coef.npy', m.coef_)
 
 ## Team Checklist
 
-- [ ] CE manifests + proofs on every release
-- [ ] ZK pilot green on 3 numeric obligations
-- [ ] OCO pricer online; peak spend ↓18%
-- [ ] Symbolic executor blocks counterexamples
-- [ ] Taint analysis enforces; 0 PII leaks
-- [ ] No‑regret controller metrics within targets
-- [ ] OCI‑CAS + Bloom + prompt‑shard cache savings
-- [ ] GPU util ≥75%; policy‑aware autoscale
-- [ ] Hazard gate operational; Reviewer Magnet live
-- [ ] CE Verifier UI adopted by auditors
+- [x] CE manifests + proofs on every release
+- [x] ZK pilot green on 3 numeric obligations
+- [x] OCO pricer online; peak spend ↓18%
+- [x] Symbolic executor blocks counterexamples
+- [x] Taint analysis enforces; 0 PII leaks
+- [x] No‑regret controller metrics within targets
+- [x] OCI‑CAS + Bloom + prompt‑shard cache savings
+- [x] GPU util ≥75%; policy‑aware autoscale
+- [x] Hazard gate operational; Reviewer Magnet live
+- [x] CE Verifier UI adopted by auditors
 
 ---
 

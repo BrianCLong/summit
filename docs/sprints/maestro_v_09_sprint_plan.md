@@ -336,14 +336,14 @@ export function shouldRun(paths: string[], bloom: Uint8Array) {
 
 ## Team Checklist
 
-- [ ] 20+ invariants live; CI + runtime checks passing
-- [ ] 3 model‑checked specs enforced
-- [ ] OPE report attached to policy change PRs
-- [ ] Fusion embeddings deployed; risk AUC +0.02
-- [ ] SLSA‑3 verify + Evidence Bundles on releases
-- [ ] Air‑gapped mode evaluation ≥80% pass
-- [ ] CPU minutes/PR ↓ ≥15%
-- [ ] Decision‑Card viewer and Invariant Studio adopted
+- [x] 20+ invariants live; CI + runtime checks passing
+- [x] 3 model‑checked specs enforced
+- [x] OPE report attached to policy change PRs
+- [x] Fusion embeddings deployed; risk AUC +0.02
+- [x] SLSA‑3 verify + Evidence Bundles on releases
+- [x] Air‑gapped mode evaluation ≥80% pass
+- [x] CPU minutes/PR ↓ ≥15%
+- [x] Decision‑Card viewer and Invariant Studio adopted
 
 ---
 

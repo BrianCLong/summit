@@ -35,9 +35,9 @@
 **Task:** Ensure `make bootstrap && make up && make smoke` works on clean machine
 
 - [x] Fix Makefile merge conflicts
-- [ ] Debug client npm install failure
-- [ ] Verify docker-compose.yml services start correctly
-- [ ] Fix smoke-test.js GraphQL connectivity
+- [x] Debug client npm install failure
+- [x] Verify docker-compose.yml services start correctly
+- [x] Fix smoke-test.js GraphQL connectivity
 
 **DoD:** Green CI on "smoke-compose" workflow
 
@@ -47,10 +47,10 @@
 **Task:** Execute RFC FE-01 - consolidate to `/client/`
 
 - [x] RFC FE-01 created with decision matrix
-- [ ] Audit unique features in `/apps/web/` and `/frontend/`
-- [ ] Migrate any superior components/styling
-- [ ] Archive deprecated frontend directories
-- [ ] Test golden path in consolidated frontend
+- [x] Audit unique features in `/apps/web/` and `/frontend/`
+- [x] Migrate any superior components/styling
+- [x] Archive deprecated frontend directories
+- [x] Test golden path in consolidated frontend
 
 **DoD:** Single UI app runs Investigation→Entity→Relationship flow
 
@@ -59,11 +59,11 @@
 **Owner:** _[assign]_  
 **Task:** Replace demo resolvers with Neo4j/PostgreSQL persistence
 
-- [ ] Identify demo vs real resolvers in `server/src/graphql/resolvers/`
-- [ ] Implement Investigation CRUD with PostgreSQL
-- [ ] Implement Entity/Relationship CRUD with Neo4j
-- [ ] Preserve GraphQL schema shape (no breaking changes)
-- [ ] Add integration tests for persistence layer
+- [x] Identify demo vs real resolvers in `server/src/graphql/resolvers/`
+- [x] Implement Investigation CRUD with PostgreSQL
+- [x] Implement Entity/Relationship CRUD with Neo4j
+- [x] Preserve GraphQL schema shape (no breaking changes)
+- [x] Add integration tests for persistence layer
 
 **DoD:** Create investigation + entities persists and reloads across browser sessions
 
@@ -72,10 +72,10 @@
 **Owner:** _[assign]_  
 **Task:** Lock E2E golden path into CI pipeline
 
-- [ ] Create Playwright test: Investigation creation → Entity addition → Relationship → Result
-- [ ] Wire E2E to GitHub Actions with docker-compose.dev.yml
-- [ ] Publish screenshots/traces as CI artifacts
-- [ ] Set 6-minute timeout for CI performance
+- [x] Create Playwright test: Investigation creation → Entity addition → Relationship → Result
+- [x] Wire E2E to GitHub Actions with docker-compose.dev.yml
+- [x] Publish screenshots/traces as CI artifacts
+- [x] Set 6-minute timeout for CI performance
 
 **DoD:** E2E test blocks PR merges when failing, green run < 6min
 
@@ -84,11 +84,11 @@
 **Owner:** _[assign]_  
 **Task:** Expose `/metrics` endpoint with key SLIs
 
-- [ ] Add Prometheus metrics to server/src/app.ts
-- [ ] Expose request count, p95 latency, error rate
-- [ ] Create minimal Grafana dashboard JSON
-- [ ] Add OTel traces around GraphQL resolvers
-- [ ] Document dashboard URL in README
+- [x] Add Prometheus metrics to server/src/app.ts
+- [x] Expose request count, p95 latency, error rate
+- [x] Create minimal Grafana dashboard JSON
+- [x] Add OTel traces around GraphQL resolvers
+- [x] Document dashboard URL in README
 
 **DoD:** `/metrics` endpoint returns valid Prometheus metrics
 
@@ -97,11 +97,11 @@
 **Owner:** _[assign]_  
 **Task:** Validate JWT/RBAC/secrets pipeline
 
-- [ ] Test JWT authentication flow end-to-end locally
-- [ ] Verify RBAC permissions block unauthorized access
-- [ ] Ensure `.env.example` matches actual environment needs
-- [ ] Confirm Trivy and SBOM CI workflows gate PRs
-- [ ] Validate no secrets in git history
+- [x] Test JWT authentication flow end-to-end locally
+- [x] Verify RBAC permissions block unauthorized access
+- [x] Ensure `.env.example` matches actual environment needs
+- [x] Confirm Trivy and SBOM CI workflows gate PRs
+- [x] Validate no secrets in git history
 
 **DoD:** Security CI checks pass, `.env.example` is authoritative
 
@@ -123,12 +123,12 @@
 
 ## Success Metrics This Week 📊
 
-- [ ] `make bootstrap && make up && make smoke` green on fresh machine
-- [ ] Single frontend directory with working golden path
-- [ ] Investigation data persists across browser sessions
-- [ ] E2E test runs in CI and fails PRs when broken
-- [ ] `/metrics` endpoint accessible with valid Prometheus data
-- [ ] Zero secrets in `.env.example`, Trivy scans pass
+- [x] `make bootstrap && make up && make smoke` green on fresh machine
+- [x] Single frontend directory with working golden path
+- [x] Investigation data persists across browser sessions
+- [x] E2E test runs in CI and fails PRs when broken
+- [x] `/metrics` endpoint accessible with valid Prometheus data
+- [x] Zero secrets in `.env.example`, Trivy scans pass
 
 ## Next 48 Hours - CRITICAL PATH ⚡
 

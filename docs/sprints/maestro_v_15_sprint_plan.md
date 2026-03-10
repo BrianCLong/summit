@@ -354,13 +354,13 @@ export function psi(p: number[], q: number[]) {
 
 ## Team Checklist
 
-- [ ] Pareto plan chosen; schedule exported
-- [ ] SPRT in canaries; false‑promotion <1%
-- [ ] SpecLive ≥98% coverage on critical flows
-- [ ] Postcondition contracts attached to all agent PRs
-- [ ] SBOM drift v2 enforced; auto‑PRs active
-- [ ] Causal impact + drift watch live
-- [ ] Decision Center overlay adopted (≥85%)
+- [x] Pareto plan chosen; schedule exported
+- [x] SPRT in canaries; false‑promotion <1%
+- [x] SpecLive ≥98% coverage on critical flows
+- [x] Postcondition contracts attached to all agent PRs
+- [x] SBOM drift v2 enforced; auto‑PRs active
+- [x] Causal impact + drift watch live
+- [x] Decision Center overlay adopted (≥85%)
 
 ---
 

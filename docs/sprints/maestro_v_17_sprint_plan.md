@@ -376,14 +376,14 @@ export function shapley(gains: number[], k = 100) {
 
 ## Team Checklist
 
-- [ ] Mutation coverage ≥85%; noisy‑denies <3%
-- [ ] Dueling prompts +0.01 Eval at −8% cost
-- [ ] SpecLive CEP: 15+ guards, bundles attach to PRs
-- [ ] Hypergraph TIA v3 saves ≥10% time
-- [ ] SPIFFE mTLS live; Merkle roots on releases
-- [ ] Nix mirror + REv4 + carbon deferrals active
-- [ ] Shapley attribution + Ghost Reviewer live
-- [ ] Maestro Studio adopted ≥85%
+- [x] Mutation coverage ≥85%; noisy‑denies <3%
+- [x] Dueling prompts +0.01 Eval at −8% cost
+- [x] SpecLive CEP: 15+ guards, bundles attach to PRs
+- [x] Hypergraph TIA v3 saves ≥10% time
+- [x] SPIFFE mTLS live; Merkle roots on releases
+- [x] Nix mirror + REv4 + carbon deferrals active
+- [x] Shapley attribution + Ghost Reviewer live
+- [x] Maestro Studio adopted ≥85%
 
 ---
 
