@@ -1,8 +1,6 @@
 import * as React from 'react'
 import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '@/lib/utils'
-import { useSelector } from 'react-redux'
-import type { RootState } from '@/store'
 
 const badgeVariants = cva(
   'inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
@@ -52,9 +50,9 @@ export interface BadgeProps
 function Badge({
   className,
   variant,
-  'data-ai-suggestion': isAiSuggestion,
   icon,
   children,
+  'data-ai-suggestion': isAiSuggestion,
   ...props
 }: BadgeProps) {
   return (
@@ -66,11 +64,7 @@ function Badge({
       )}
       {...props}
     >
-      {icon && (
-        <span className="mr-1 inline-flex items-center" aria-hidden="true">
-          {icon}
-        </span>
-      )}
+      {icon && <span className="mr-1.5 flex items-center">{icon}</span>}
       {children}
     </span>
   )
