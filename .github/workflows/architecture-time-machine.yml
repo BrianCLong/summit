@@ -1,0 +1,36 @@
+name: architecture-time-machine
+
+on:
+  schedule:
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+
+jobs:
+  reconstruct:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Reconstruct architecture timeline
+        run: node scripts/repoos/architecture-time-machine.mjs .
+
+      - name: Upload architecture history artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: architecture-time-machine-history
+          path: |
+            .repoos/history/architecture-snapshots.json
+            .repoos/history/dependency-evolution.json
+            .repoos/history/drift-timeline.json
+            .repoos/history/architecture-events.json
+            .repoos/history/pr-root-cause.json
+            .repoos/history/architecture-timeline.html
+            .repoos/evidence/architecture-time-machine-report.json
