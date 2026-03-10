@@ -57,3 +57,41 @@
 /docs/releases/     @BrianCLong
 /.github/workflows/release*  @BrianCLong
 /scripts/release/   @BrianCLong
+
+# ========================================
+# Stage 7 Constitutional Protections
+# (Gate 3: Meta-Governance Lock Enforcement)
+# ========================================
+
+# Meta-governance lock configuration (requires 3 approvals for override)
+# This is the highest protection level - changes bypass constitutional lock
+/.repoos/meta-governance-lock.yml @BrianCLong @intelgraph-core @intelgraph-security
+
+# Constitution and core governance policies (requires 3 approvals)
+/.repoos/constitution.yml @BrianCLong @intelgraph-core @intelgraph-security
+/.repoos/evidence-governor-config.yml @BrianCLong @intelgraph-core
+
+# Stability envelope and monitoring (requires 2 approvals)
+/.repoos/stability-envelope.yml @BrianCLong @intelgraph-core
+/.repoos/agent-budget.yml @BrianCLong @intelgraph-core
+/.repoos/patch-surface-limiting.yml @BrianCLong @intelgraph-core
+
+# Domain topology (requires 2 approvals - high architectural impact)
+/.repoos/domain-map.yml @BrianCLong @intelgraph-core
+
+# Control loop scripts (requires 2 approvals)
+/scripts/repoos/homeostasis-controller.mjs @BrianCLong @intelgraph-core
+/scripts/repoos/self-healing-orchestrator.mjs @BrianCLong @intelgraph-core
+/scripts/repoos/evidence-governor.mjs @BrianCLong @intelgraph-security
+/scripts/repoos/architecture-evolution-simulator.mjs @BrianCLong @intelgraph-core
+/scripts/repoos/patch-market.mjs @BrianCLong @intelgraph-core
+/scripts/repoos/autonomous-architecture-synthesis.mjs @BrianCLong @intelgraph-core
+/scripts/repoos/agent-budget-enforcer.mjs @BrianCLong @intelgraph-core
+/scripts/repoos/patch-surface-limiter.mjs @BrianCLong @intelgraph-core
+
+# Stage 6/7 enforcement workflows (requires 2 approvals)
+/.github/workflows/stage-6-7-enforcement.yml @BrianCLong @intelgraph-core
+/.github/workflows/constitution-enforcement.yml @BrianCLong @intelgraph-core
+
+# Platform interface (spine) - requires 2 approvals for API stability
+/platform-interface/ @BrianCLong @intelgraph-api

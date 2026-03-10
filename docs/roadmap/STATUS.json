@@ -1,12 +1,31 @@
 {
-  "last_updated": "2026-03-07T06:03:42Z",
-  "revision_note": "Added praxeology control plane and roadmap tracking entry.",
+  "last_updated": "2026-03-09T22:00:00Z",
+  "revision_note": "Integrated Stage 7 validation infrastructure, Antigravity governance ledger, and hardened docker stack into the master roadmap.",
   "initiatives": [
+    {
+      "id": "antigravity-governance-ledger",
+      "status": "completed",
+      "owner": "antigravity",
+      "notes": "Strict evidence check (no mocks) and valid governance ledger proof integrated into release-ga.yml."
+    },
+    {
+      "id": "hardened-docker-stack",
+      "status": "completed",
+      "owner": "ops",
+      "notes": "Fixed Neo4j password, Dockerfile pnpm/lockfile issues, and tsconfig missing files. Stack starts and verifies 'No Mocks' policy."
+    },
+    {
+      "id": "stage-7-validation-infrastructure",
+      "status": "completed",
+      "owner": "codex",
+      "notes": "Completed initial validation infrastructure for Stage 7 compliance, including evidence trackers and gate 3 setup.",
+      "evidence_id": "EVD-ARCH-INFRA-V1"
+    },
     {
       "id": "nature-s41562-026-02411-w-layer2-layer3",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Published governed Layer 2 (regulatory-signals dataset) and Layer 3 (regulatory early-warning) subsumption brief with deterministic CI/evidence posture."
+      "notes": "Implementing Layer 2 (Causal Mediation) and Layer 3 (Counterfactual) for the Nature-published social science replication framework."
     },
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -254,11 +273,9 @@
     }
   ],
   "summary": {
-    "rc_ready": 8,
-    "partial": 2,
-    "incomplete": 0,
-    "not_started": 5,
-    "total": 17,
-    "ga_blockers": []
+    "total_initiatives": 32,
+    "completed": 8,
+    "in_progress": 24,
+    "at_risk": 0
   }
 }
