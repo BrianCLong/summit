@@ -1,6 +1,6 @@
 export interface Observation {
   state: Record<string, unknown>;
-  availableActions: string[];
+  availableActions?: string[];
 }
 
 export interface Action {
@@ -16,8 +16,8 @@ export interface StepResult {
 }
 
 export interface BudgetState {
-  stepsRemaining: number;
-  timeRemainingMs: number;
+  steps_remaining: number;
+  wallclock_remaining_ms: number;
 }
 
 export interface EnvSnapshot {
