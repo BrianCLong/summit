@@ -1,0 +1,58 @@
+name: PR Architecture Copilot
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  architecture-copilot:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Fetch PR files
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const files = await github.paginate(github.rest.pulls.listFiles, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+              per_page: 100,
+            });
+            const fs = require('fs');
+            fs.mkdirSync('.repoos/pr-analysis', { recursive: true });
+            fs.writeFileSync('.repoos/pr-analysis/pr-files.json', JSON.stringify(files, null, 2));
+
+      - name: Run PR architecture analysis
+        run: node scripts/pr-architecture-copilot.mjs --files-json .repoos/pr-analysis/pr-files.json
+
+      - name: Comment architecture summary on PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const body = fs.readFileSync('.repoos/pr-analysis/pr-comment.md', 'utf8');
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body,
+            });
+
+      - name: Upload architecture report
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr-architecture-analysis
+          path: |
+            .repoos/pr-analysis/pr-change-summary.json
+            .repoos/pr-analysis/dependency-impact.json
+            .repoos/pr-analysis/architecture-boundaries.json
+            .repoos/pr-analysis/risk-score.json
+            .repoos/pr-analysis/pr-architecture-report.html
+            .repoos/evidence/pr-architecture-copilot-report.json
