@@ -1,0 +1,34 @@
+name: conference-system
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.repoos/events/**/*.json'
+      - 'scripts/repoos/conference-system.mjs'
+
+jobs:
+  event-registration:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Validate event schema
+        run: node scripts/repoos/conference-system.mjs conference validate-schema
+
+      - name: Update conference registry and evidence artifact
+        run: node scripts/repoos/conference-system.mjs conference build-report
+
+      - name: Publish event artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: conference-system-artifacts
+          path: |
+            .repoos/events/*.json
+            .repoos/evidence/conference-system-report.json

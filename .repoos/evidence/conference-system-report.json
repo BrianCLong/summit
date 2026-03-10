@@ -1,0 +1,47 @@
+{
+  "summary": {
+    "total_events": 3,
+    "total_sessions": 4,
+    "total_speakers": 4,
+    "total_attendees": 11900,
+    "total_developer_signups": 1890,
+    "total_plugin_installs_during_events": 27900
+  },
+  "events": [
+    {
+      "event_name": "Summit Build Global 2026",
+      "location": "San Francisco, USA",
+      "date": "2026-09-14",
+      "participating_partners": [
+        "Anduril",
+        "Datadog",
+        "Neo4j",
+        "Snowflake"
+      ]
+    },
+    {
+      "event_name": "Summit Partner Summit EMEA",
+      "location": "Berlin, Germany",
+      "date": "2026-11-05",
+      "participating_partners": [
+        "Grafana Labs",
+        "HashiCorp",
+        "Palantir",
+        "Red Hat"
+      ]
+    },
+    {
+      "event_name": "Summit Plugin Accelerator APJ",
+      "location": "Singapore",
+      "date": "2027-02-19",
+      "participating_partners": [
+        "Cloudflare",
+        "Elastic",
+        "MongoDB",
+        "Snyk"
+      ]
+    }
+  ],
+  "generated_by": "scripts/repoos/conference-system.mjs",
+  "deterministic": true
+}

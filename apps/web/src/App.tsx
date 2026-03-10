@@ -63,6 +63,7 @@ const ApprovalsPage = React.lazy(() => import('@/pages/ApprovalsPage'))
 const ReceiptsPage = React.lazy(() => import('@/pages/ReceiptsPage'))
 const TenantOpsPage = React.lazy(() => import('@/pages/TenantOpsPage'))
 const OutreachDashboard = React.lazy(() => import('@/pages/outreach-dashboard'))
+const DeveloperConferencePage = React.lazy(() => import('@/pages/developer/DeveloperConferencePage'))
 
 // Workbench
 import { WorkbenchShell } from '@/workbench/shell/WorkbenchLayout'
@@ -253,6 +254,11 @@ function App() {
                               <UsageCostDashboard />
                             </DataFetchErrorBoundary>
                           }
+                        />
+
+                        <Route
+                          path="developer/conferences"
+                          element={<DeveloperConferencePage />}
                         />
                         <Route
                           path="internal/command"

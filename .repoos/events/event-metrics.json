@@ -1,0 +1,22 @@
+{
+  "metrics": [
+    {
+      "event_name": "Summit Build Global 2026",
+      "attendees": 5400,
+      "developer_signups": 870,
+      "plugin_installs_during_event": 12400
+    },
+    {
+      "event_name": "Summit Partner Summit EMEA",
+      "attendees": 2900,
+      "developer_signups": 430,
+      "plugin_installs_during_event": 6400
+    },
+    {
+      "event_name": "Summit Plugin Accelerator APJ",
+      "attendees": 3600,
+      "developer_signups": 590,
+      "plugin_installs_during_event": 9100
+    }
+  ]
+}

@@ -14,6 +14,7 @@ import {
   LogOut,
   Command,
   GitPullRequest,
+  CalendarDays,
 } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
@@ -96,6 +97,13 @@ const navItems: NavItem[] = [
     name: 'PR Triage',
     href: '/pr-triage',
     icon: GitPullRequest as React.ComponentType<{ className?: string }>,
+    resource: 'dashboards',
+    action: 'read',
+  },
+  {
+    name: 'Developer Conferences',
+    href: '/developer/conferences',
+    icon: CalendarDays as React.ComponentType<{ className?: string }>,
     resource: 'dashboards',
     action: 'read',
   },

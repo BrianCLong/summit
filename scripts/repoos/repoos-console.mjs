@@ -96,6 +96,24 @@ async function loadSimulation() {
 }
 
 /**
+ * Load conference system data
+ */
+async function loadConferenceData() {
+  try {
+    const [registry, sessions, metrics, evidence] = await Promise.all([
+      fs.readFile('.repoos/events/conference-registry.json', 'utf-8').then(JSON.parse),
+      fs.readFile('.repoos/events/sessions.json', 'utf-8').then(JSON.parse),
+      fs.readFile('.repoos/events/event-metrics.json', 'utf-8').then(JSON.parse),
+      fs.readFile('.repoos/evidence/conference-system-report.json', 'utf-8').then(JSON.parse),
+    ]);
+
+    return { registry, sessions, metrics, evidence };
+  } catch (error) {
+    return null;
+  }
+}
+
+/**
  * Format percentage bar
  */
 function formatBar(value, width = 20, threshold = 0.8) {
@@ -290,6 +308,42 @@ function displaySimulationForecast(simulation) {
 }
 
 /**
+ * Display conference dashboard
+ */
+function displayConferenceDashboard(conferenceData) {
+  console.log(`${COLORS.bright}Conference Dashboard${COLORS.reset}`);
+  console.log(`─────────────────────────────────────────────────────────────────\n`);
+
+  if (!conferenceData) {
+    console.log(`${COLORS.dim}No conference data available${COLORS.reset}\n`);
+    return;
+  }
+
+  const events = conferenceData.registry?.events || [];
+  const sessions = conferenceData.sessions?.sessions || [];
+  const metrics = conferenceData.metrics?.metrics || [];
+  const summary = conferenceData.evidence?.summary || {};
+
+  console.log(`Upcoming Events: ${events.length}`);
+  console.log(`Tracked Sessions: ${sessions.length}`);
+  console.log(`Total Attendees: ${summary.total_attendees || 0}`);
+  console.log(`Developer Signups: ${summary.total_developer_signups || 0}`);
+  console.log(`Plugin Installs: ${summary.total_plugin_installs_during_events || 0}\n`);
+
+  if (events.length > 0) {
+    console.log('Next Conferences:');
+    for (const event of [...events].sort((a, b) => a.date.localeCompare(b.date)).slice(0, 3)) {
+      const eventMetric = metrics.find(item => item.event_name === event.event_name);
+      console.log(
+        `  ${COLORS.dim}•${COLORS.reset} ${event.date} | ${event.event_name} (${event.location})` +
+          (eventMetric ? ` | installs ${eventMetric.plugin_installs_during_event}` : '')
+      );
+    }
+    console.log('');
+  }
+}
+
+/**
  * Display recent activity
  */
 async function displayRecentActivity() {
@@ -349,6 +403,7 @@ async function main() {
   const market = await loadPatchMarket();
   const genome = await loadGenome();
   const simulation = await loadSimulation();
+  const conferenceData = await loadConferenceData();
 
   // Display console
   displaySystemHealth(stability, genome, simulation);
@@ -356,6 +411,7 @@ async function main() {
   displayPatchMarket(market);
   displayGenomeFitness(genome);
   displaySimulationForecast(simulation);
+  displayConferenceDashboard(conferenceData);
   await displayRecentActivity();
   displayFooter();
 }
