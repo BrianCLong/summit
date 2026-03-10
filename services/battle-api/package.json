@@ -17,6 +17,10 @@
     @graphql-tools/schema: "10.0.30",
 =======
 <<<<<<< HEAD
+    @apollo/server: "4.11.0",
+    @graphql-tools/schema: "10.0.30",
+=======
+<<<<<<< HEAD
     @apollo/server: "4.11.3",
     @graphql-tools/schema: "10.0.30",
 =======
@@ -26,6 +30,7 @@
 =======
     "@apollo/server": "4.11.3",
     @graphql-tools/schema: "10.0.30",
+>>>>>>> origin/main
 >>>>>>> origin/main
 >>>>>>> origin/main
 >>>>>>> origin/main
