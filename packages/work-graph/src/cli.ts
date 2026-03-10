@@ -206,6 +206,15 @@ async function showHealth(): Promise<void> {
       quality: number;
       predictability: number;
       agentEfficiency: number;
+      architecture: {
+        score: number;
+        trend30d: number;
+        couplingScore: number;
+        circularDependencies: number;
+        subsystemViolations: number;
+        hotspotInstability: number;
+        primaryRisks: string[];
+      };
     };
   }>(`
     query {
@@ -215,6 +224,15 @@ async function showHealth(): Promise<void> {
         quality
         predictability
         agentEfficiency
+        architecture {
+          score
+          trend30d
+          couplingScore
+          circularDependencies
+          subsystemViolations
+          hotspotInstability
+          primaryRisks
+        }
       }
     }
   `);
@@ -226,6 +244,22 @@ async function showHealth(): Promise<void> {
   console.log(`Quality:        ${h.quality}%`);
   console.log(`Predictability: ${h.predictability}%`);
   console.log(`Agent Efficiency: ${h.agentEfficiency}%`);
+
+  console.log('\nRepository Architecture Health');
+  console.log('------------------------------');
+  console.log(`Score: ${h.architecture.score} / 100`);
+  console.log(`Trend: ${h.architecture.trend30d}% over last 30 days`);
+  console.log(`Coupling Score: ${h.architecture.couplingScore}`);
+  console.log(`Circular Dependencies: ${h.architecture.circularDependencies}`);
+  console.log(`Subsystem Violations: ${h.architecture.subsystemViolations}`);
+  console.log(`Hotspot Instability: ${h.architecture.hotspotInstability}`);
+
+  if (h.architecture.primaryRisks.length > 0) {
+    console.log('\nPrimary Risks');
+    for (const risk of h.architecture.primaryRisks) {
+      console.log(`• ${risk}`);
+    }
+  }
 }
 
 // ============================================
