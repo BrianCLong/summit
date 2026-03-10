@@ -1,0 +1,66 @@
+# 🔒 Jules GA Readiness: Complete Security & Technical Debt Remediation
+
+**Mission:** Risk‑first GA trajectory. For the next 7 days, optimize for *security and reliability* over new features. Your primary objective is to (1) establish a precise GA risk baseline and (2) aggressively burn down test‑coverage gaps, code‑scanning alerts, and Dependabot vulnerabilities across all four Summit repos (IntelGraph, Maestro Conductor, CompanyOS, Switchboard). New feature work is strictly secondary and only allowed when it directly unblocks coverage or alert reduction. Use the “🔒 Jules GA Readiness: Complete Security & Technical Debt Remediation” page as the *recently finished* baseline, and the “Summit Platform — GA Specification v1.0” GA Exit Criteria section as the *target state*.
+
+---
+## Phase 1 — GA Delta Scan & Truth Set (Day 1–2)
+
+- [ ] **Run Comprehensive Risk Scan:** From the current `main` branches (IntelGraph, Maestro, CompanyOS, Switchboard).
+  - Security / dependency: Dependabot, `npm audit`, Snyk (if configured), GitHub code scanning.
+  - Quality: TypeScript errors, ESLint errors/warnings, build warnings in dev and production builds.
+- [ ] **Capture Metrics per Repo:**
+  - Test coverage % (overall and critical paths) vs the ≥80% GA target.
+  - Counts of: open P0/P1 issues, code‑scanning alerts (by severity), Dependabot vulns (by severity).
+- [ ] **Create Artifact:** “Summit — GA Risk Gap Report v0.1 (Jules)” structured as:
+  - **Section 1:** Snapshot metrics per repo (coverage, alert counts, P0/P1, build/TS/lint status).
+  - **Section 2:** Direct mapping to **GA Exit Criteria** checklist, one line per item with status (✅/🟡/🔴) and a link to evidence.
+- [ ] **Update this Page:** Post‑sprint summary stating whether the “zero alerts / zero vulnerabilities / zero build warnings / zero TS+lint errors” criteria are satisfied on `main`, linking to the Risk Gap Report.
+
+**Constraints for Phase 1:**
+- No new features.
+- All work reproducible via CI jobs and logged with timestamps.
+
+---
+## Phase 2 — Coverage & Alerts Burn‑Down (Day 3–5)
+
+**Goal:** Maximize risk reduction per unit time. Prioritize (a) P0/P1 issues, (b) critical/high security problems, (c) test coverage on critical paths.
+
+- [ ] **1. P0/P1 and Critical/High Security First:**
+  - Identify open P0/P1 issues and critical/high alerts across repos.
+  - Fix them or document blockers/root causes.
+  - Ensure CI prevents merging new critical/high vulns.
+- [ ] **2. Code‑Scanning & Dependabot Backlog:**
+  - Baseline: 5,000+ code scanning alerts, 253 Dependabot vulnerabilities.
+  - Priority: 1. Critical + exploitable, 2. High severity, 3. Medium in production paths.
+  - Resolve Dependabot PRs (fix tests, resolve conflicts, merge).
+- [ ] **3. Test Coverage Acceleration (Toward ≥80%):**
+  - Identify lowest‑coverage critical paths (e.g., IntelGraph query engine, Maestro routing/synthesis, CompanyOS RBAC + tenancy, Switchboard ingest pipeline).
+  - Add deterministic, non-flaky unit/integration tests (happy path, error handling).
+  - Update Risk Gap Report with new coverage metrics.
+- [ ] **4. “No Regression” Guardrails:**
+  - Enforce NO PR increases total code‑scanning alerts or Dependabot vuln counts.
+  - Enforce ZERO TypeScript errors, ZERO lint errors, and NO new build warnings on `main`.
+
+**Constraints for Phase 2:**
+- New features only allowed if they enable better tests/remediation/scanning.
+- Favor simple, correct fixes over large refactors.
+
+---
+## Phase 3 — Risk‑Aligned Hardening & Report v0.2 (Day 6–7)
+
+- [ ] **1. Close Key GA Risk Gaps:**
+  - Address 🟡 or 🔴 GA Exit Criteria items with risk-first changes.
+  - Prioritize: OPA consent enforcement, PIIDetector v2 coverage, missing audit logging.
+- [ ] **2. Latency + SLO Guardrails (Light‑Touch):**
+  - Run repeatable benchmarks for IntelGraph p95 (1M nodes) and Maestro p95 (5 concurrent jobs).
+  - Apply small, safe improvements (e.g., N+1 fixes, cache use) or log findings.
+- [ ] **3. Publish “Summit — GA Risk Gap Report v0.2 (Jules)”:**
+  - Update all GA Exit Criteria with latest status/evidence.
+  - Add: "State of Risk" summary, Top 10 residual risks, and "Recommendation: Next 30 Days".
+
+---
+**Global Constraints:**
+- Maintain clean, green PRs into `main`.
+- Archive sessions post-merge.
+- No new agents/complex features unless they measurably reduce risk.
+- End of 7 days: Leave a summary comment for Brian in the Risk Gap Report.
