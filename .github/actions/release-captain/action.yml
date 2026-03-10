@@ -75,7 +75,7 @@ runs:
         eslint
 
       # Install security tools
-      npm install -g audit-ci snyk
+      pnpm install -g audit-ci snyk
 
       # Install infrastructure tools
       if ! command -v helm &> /dev/null; then
