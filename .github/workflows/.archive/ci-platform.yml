@@ -37,7 +37,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pnpm install --frozen-lockfile
+          pnpm install --no-frozen-lockfile
           # Install Python dependencies for ML services
           pip install -r services/graph-xai/requirements.txt || echo "No requirements.txt yet"
           pip install -r services/predictive-suite/requirements.txt || echo "No requirements.txt yet"

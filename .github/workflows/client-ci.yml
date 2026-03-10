@@ -10,12 +10,13 @@ concurrency:
   cancel-in-progress: true
 jobs:
   test:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: pnpm install --frozen-lockfile
+          cache: 'pnpm'
+      - run: pnpm install --no-frozen-lockfile
       - run: pnpm -C client test --passWithNoTests

@@ -40,7 +40,7 @@ jobs:
           corepack prepare pnpm@9.12.3 --activate || true
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile=false
+        run: pnpm install --no-frozen-lockfile=false
 
       - name: Install ESLint plugins for complexity
         run: |
@@ -220,7 +220,7 @@ jobs:
           corepack prepare pnpm@9.12.3 --activate || true
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile=false
+        run: pnpm install --no-frozen-lockfile=false
 
       - name: Run tests with coverage
         continue-on-error: true

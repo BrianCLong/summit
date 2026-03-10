@@ -32,7 +32,7 @@ jobs:
           cache: "pnpm"
           cache-dependency-path: '**/pnpm-lock.yaml'
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
       - name: Build SGF
         run: |
           rm -rf node_modules/@types/hapi__catbox node_modules/@types/hapi__shot

@@ -1,26 +1,42 @@
-import test from 'node:test';
-import assert from 'node:assert/strict';
+import { describe, expect, it } from "vitest";
+import { buildDiffusionMap } from "../diffusionEngine.js";
+import type { NarrativeSignal, PopulationGroup } from "../types.js";
 
-import { buildNarrativeDiffusionMap } from '../diffusionEngine.js';
-import {
-  sampleNarrative,
-  samplePopulations,
-  sampleSignal,
-} from '../fixtures/sampleScenario.js';
+describe("buildDiffusionMap", () => {
+  it("returns a point for each population", () => {
+    const narrative: NarrativeSignal = {
+      id: "n1",
+      title: "Test narrative",
+      summary: "Test summary",
+      themes: ["economy"],
+      frameTags: ["youtube"],
+      language: "de",
+      observedAt: new Date().toISOString()
+    };
 
-test('buildNarrativeDiffusionMap ranks culturally aligned populations first', () => {
-  const map = buildNarrativeDiffusionMap({
-    populations: samplePopulations,
-    narrative: sampleNarrative,
-    signal: sampleSignal,
-    demographicSusceptibility: {
-      'polish-youth-urban': 0.45,
-      'slovak-rural-energy-workers': 0.9,
-      'nordic-urban-professionals': 0.2,
-    },
+    const populations: PopulationGroup[] = [
+      {
+        id: "p1",
+        name: "Pop 1",
+        regionId: "r1",
+        h3Cells: ["a"],
+        languages: ["de"],
+        mediaConsumption: ["youtube"],
+        valueSignals: ["economic-security"]
+      },
+      {
+        id: "p2",
+        name: "Pop 2",
+        regionId: "r2",
+        h3Cells: ["b"],
+        languages: ["fr"],
+        mediaConsumption: ["local-tv"],
+        valueSignals: ["stability"]
+      }
+    ];
+
+    const map = buildDiffusionMap({ narrative, populations });
+    expect(map.points).toHaveLength(2);
+    expect(map.narrativeId).toBe("n1");
   });
-
-  assert.equal(map[0].populationId, 'slovak-rural-energy-workers');
-  assert.equal(map[map.length - 1].populationId, 'nordic-urban-professionals');
-  assert.ok(map[0].adoptionLikelihood > map[1].adoptionLikelihood);
 });

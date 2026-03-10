@@ -1,34 +1,23 @@
-# @intelgraph/summit-cultural
+# summit-cultural
 
-Cultural-Demographic-Linguistic Reality Modeling (CDLRM) primitives for Summit.
+Summit cultural/demographic/linguistic reality modeling package.
 
-## Included modules
+## Modes
 
-- `schema/culturalReality.schema.json`: seed schema for Cultural Reality Graph ingest.
-- `narrativeCompatibility.ts`: compatibility scoring for narrative/population fit.
-- `diffusionEngine.ts`: ranked narrative diffusion map generation.
-- `fixtures/sampleScenario.ts`: reproducible scenario fixture.
-- `golden-tests/diffusionEngine.test.ts`: golden path confidence test.
+- local: fixtures + in-memory or DuckDB-backed persistence
+- distributed: same APIs with queue / external backends behind adapters
 
-## Usage
+## Initial surfaces
 
-```ts
-import { buildNarrativeDiffusionMap } from '@intelgraph/summit-cultural';
-import {
-  sampleNarrative,
-  samplePopulations,
-  sampleSignal,
-} from './src/fixtures/sampleScenario.js';
+- Cultural graph snapshot
+- Narrative compatibility scoring
+- Diffusion map generation
+- Linguistic anomaly detection
 
-const map = buildNarrativeDiffusionMap({
-  populations: samplePopulations,
-  narrative: sampleNarrative,
-  signal: sampleSignal,
-});
-```
+## Suggested next increments
 
-## MAESTRO alignment
-
-- **Layers**: Data, Agents, Observability.
-- **Threats considered**: Narrative injection, translated-propaganda spoofing, demographic overfitting.
-- **Mitigations**: Deterministic weighted scoring, explicit linguistic authenticity penalty, reproducible fixtures.
+1. Add AJV runtime validator loader for all schemas
+2. Add DuckDB persistence implementation
+3. Add H3 polygon conversion helpers
+4. Add ingestion adapters for real narrative streams
+5. Add provenance envelope hooks for assessments and maps

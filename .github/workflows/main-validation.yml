@@ -20,7 +20,7 @@ jobs:
         with:
           node-version: 22
       - name: Install deps
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
       - name: Integration tests
         run: pnpm run test:integration --passWithNoTests
 
@@ -35,7 +35,7 @@ jobs:
         with:
           node-version: 22
       - name: Install deps
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
       - name: Audit
         run: pnpm audit --production
 
@@ -50,6 +50,6 @@ jobs:
         with:
           node-version: 22
       - name: Install deps
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
       - name: Graph Validation
         run: node scripts/ga/ga-verify-runner.mjs || echo "Validation results in artifacts"

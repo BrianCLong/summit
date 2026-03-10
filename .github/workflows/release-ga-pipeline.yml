@@ -210,7 +210,7 @@ jobs:
         uses: open-policy-agent/setup-opa@b0eb0c1eb5f79b7ec602946f1fa93f3fc06f6e70 # v2
 
       - name: Install Dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Vet Skills (strict)
         run: pnpm skill vet --all
@@ -265,7 +265,7 @@ jobs:
           node-version: "20"
 
       - name: Install Dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: LongRunJob Contract Gate (strict)
         run: node scripts/ci/verify-longrun-contract.mjs

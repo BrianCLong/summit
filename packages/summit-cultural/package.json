@@ -1,36 +1,28 @@
 {
-  "name": "@intelgraph/summit-cultural",
+  "name": "@summit/summit-cultural",
   "version": "0.1.0",
-  "description": "Cultural-Demographic-Linguistic Reality Modeling primitives for Summit",
+  "private": true,
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "tsc",
-    "test": "node --test --import tsx src/golden-tests/*.test.ts",
-    "typecheck": "tsc --noEmit"
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint src --ext .ts,.tsx",
+    "dev:fixtures": "node --loader ts-node/esm src/index.ts"
   },
   "dependencies": {
-<<<<<<< HEAD
-    "zod": "4.1.12"
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1",
+    "h3-js": "^4.1.0",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
-    "tsx": "4.20.6",
-    "typescript": "5.9.3"
-=======
-    react: "19.2.4",
-    zod: "4.1.12"
-  },
-  "devDependencies": {
-    @types/react: "19.2.14",
-    tsx: "4.20.6",
-    typescript: "5.9.3"
->>>>>>> origin/main
-  },
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
-    }
+    "@types/geojson": "^7946.0.16",
+    "@types/node": "^22.10.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.0",
+    "vitest": "^2.1.8"
   }
 }

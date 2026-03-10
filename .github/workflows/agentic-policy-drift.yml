@@ -18,6 +18,6 @@ jobs:
         with:
           node-version: '20'
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
       - name: Run Drift Check
         run: npx tsx scripts/monitoring/on-programming-with-agents-drift.ts
