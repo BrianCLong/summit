@@ -1,0 +1,59 @@
+{
+  "currency": "USD",
+  "developer_share_rate": 0.7,
+  "prior_period_marketplace_revenue": 96000,
+  "plugin_sales": [
+    {
+      "plugin_id": "obs-lens-pro",
+      "plugin_name": "Observability Lens Pro",
+      "category": "Observability",
+      "developer_id": "dev-orion",
+      "transactions": 320,
+      "gross_revenue": 48000
+    },
+    {
+      "plugin_id": "risk-atlas",
+      "plugin_name": "Risk Atlas",
+      "category": "Risk",
+      "developer_id": "dev-atlas",
+      "transactions": 210,
+      "gross_revenue": 39000
+    },
+    {
+      "plugin_id": "intel-brief-studio",
+      "plugin_name": "Intel Brief Studio",
+      "category": "Productivity",
+      "developer_id": "dev-summit-labs",
+      "transactions": 180,
+      "gross_revenue": 22000
+    },
+    {
+      "plugin_id": "trace-guard",
+      "plugin_name": "Trace Guard",
+      "category": "Security",
+      "developer_id": "dev-orion",
+      "transactions": 96,
+      "gross_revenue": 15000
+    }
+  ],
+  "partner_integrations": [
+    {
+      "partner_id": "prt-acme-si",
+      "partner_name": "Acme SI",
+      "adoption_count": 34,
+      "revenue_impact": 28000
+    },
+    {
+      "partner_id": "prt-northstar",
+      "partner_name": "Northstar DataOps",
+      "adoption_count": 26,
+      "revenue_impact": 21000
+    },
+    {
+      "partner_id": "prt-orbit",
+      "partner_name": "Orbit Federal",
+      "adoption_count": 12,
+      "revenue_impact": 9000
+    }
+  ]
+}

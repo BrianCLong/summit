@@ -1,0 +1,28 @@
+{
+  "currency": "USD",
+  "growth": {
+    "marketplace_transaction_volume": 806,
+    "revenue_growth_rate": 0.2917,
+    "plugin_category_expansion": {
+      "category_count": 4,
+      "categories_by_revenue": [
+        {
+          "category": "Observability",
+          "revenue": 48000
+        },
+        {
+          "category": "Risk",
+          "revenue": 39000
+        },
+        {
+          "category": "Productivity",
+          "revenue": 22000
+        },
+        {
+          "category": "Security",
+          "revenue": 15000
+        }
+      ]
+    }
+  }
+}
