@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "summit.epistemic.policy",
+  "title": "Epistemic Policy",
+  "description": "Policy defining thresholds for claim evaluation",
+  "type": "object",
+  "required": ["policy_id", "min_support_score", "max_epistemic_uncertainty", "min_independent_sources", "max_conflict_score"],
+  "properties": {
+    "policy_id": { "type": "string" },
+    "min_support_score": { "type": "number", "minimum": 0, "maximum": 1 },
+    "max_epistemic_uncertainty": { "type": "number", "minimum": 0, "maximum": 1 },
+    "min_independent_sources": { "type": "integer", "minimum": 0 },
+    "max_conflict_score": { "type": "number", "minimum": 0, "maximum": 1 },
+    "require_human_approval": { "type": "boolean" }
+  }
+}

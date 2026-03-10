@@ -1,43 +1,40 @@
-# Repo Reality Check
+# Repo Assumptions and Ground Truth
 
-## Verified vs Assumed
+This document logs the verified paths and assumptions for implementing the Epistemic Assurance Plane based on the repository structure.
 
-| Aspect | Verified | Assumed |
-|---|---|---|
-| Package Manager | pnpm | |
-| Bootstrap | `./scripts/golden-path.sh` | |
-| Governance Policy | `docs/ci/REQUIRED_CHECKS_POLICY.yml` | |
-| Reconciler | `./scripts/release/reconcile_branch_protection.sh` | |
-| Top-level dirs | `ci`, `cli`, `client` (via `packages/`), `server` | |
-| Governor Package Layout | | `packages/governor-*` |
-| CLI Entrypoint | | `cli/governor/index.ts` |
-| JSON Schema utility | | Standard zod or built-in validation |
+## Verified Paths
 
-## Must-not-touch
-- `docs/ci/REQUIRED_CHECKS_POLICY.yml`
-- `./scripts/release/reconcile_branch_protection.sh`
-- existing branch-protection drift workflows
-- release/versioning scripts
-- current GA gate definitions
+1. **Maestro Orchestrator**: `services/maestro-orchestrator/`
+   - Entry point: `services/maestro-orchestrator/src/index.ts`
+   - App setup: `services/maestro-orchestrator/src/app.ts`
 
-## IntelGraph Repo Assumptions (Verified)
-- Public monorepo for Summit exists
-- Node 18+, pnpm, Neo4j 5.x in quickstart
-- GraphQL + REST APIs are core
-- Collaboration/war-room and timeline issues exist
-- CI/workflow surface is large and policy/evidence oriented
+2. **IntelGraph Schema**: `intelgraph/schema/`
+   - Canonical types: `intelgraph/schema/canonical_types.py`
+   - Graph primitives: `intelgraph/schema/graph_primitives.py`
 
-## IntelGraph Assumed
-- `server/src/api` or equivalent GraphQL service exists
-- `client/src` or equivalent React frontend exists
-- Neo4j access is centralized behind a shared client
-- Evidence artifacts follow repo-wide conventions
-- Tenant scoping already exists outside IntelGraph
+3. **IntelGraph Server**: `intelgraph/server/src/`
+   - Services module: `intelgraph/server/src/services/`
+   - Graphql: `intelgraph/server/src/graphql/`
 
-## Validation checklist before PR1 merges
-- Confirm exact package/workspace boundaries
-- Confirm existing GraphQL schema location
-- Confirm auth context shape
-- Confirm standard test command names
-- Confirm runbook/docs locations
-- Confirm must-not-touch branch protection workflows
+4. **API Schemas**: `api-schemas/`
+
+5. **Workflows**: `.github/workflows/`
+
+6. **Evidence Directory**: `evidence/`
+
+## Missing / Assumed Paths to Create
+
+- `api-schemas/epistemic/` (for claim, policy, decision schemas)
+- `services/maestro-orchestrator/src/epistemic.ts` (for intent evaluate and policy engine)
+- `intelgraph/schema/epistemic.py` (for epistemic schema definitions)
+- `scripts/monitoring/epistemic-assurance-drift.ts` (for epistemic assurance drift detector)
+- `evidence/epistemic-assurance/fixtures/` (for abuse-case fixtures)
+- `tests/epistemic/` (for determinism test suites)
+
+## Must-Not-Touch List
+
+- `.github/workflows/ci.yml` (and core validation workflows unless directly adding jobs)
+- Existing `.opa/policy/**`
+- Existing evidence bundle schemas unless extending
+- `SECURITY/**` and `.security/**`
+

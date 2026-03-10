@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "summit.epistemic.decision",
+  "title": "Epistemic Decision",
+  "description": "The result of evaluating a claim against a policy",
+  "type": "object",
+  "required": ["decision_id", "claim_id", "policy_id", "decision", "evidence_ids"],
+  "properties": {
+    "decision_id": { "type": "string" },
+    "claim_id": { "type": "string" },
+    "policy_id": { "type": "string" },
+    "decision": {
+      "type": "string",
+      "enum": ["APPROVE", "DEGRADE", "BLOCK", "ESCALATE"]
+    },
+    "rationale": { "type": "string" },
+    "evidence_ids": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}
