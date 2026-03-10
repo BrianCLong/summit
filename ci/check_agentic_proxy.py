@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
 import argparse
-import sys
-import os
 import json
-from pathlib import Path
+import os
+import sys
 from dataclasses import asdict
+from pathlib import Path
 
 # Add root to python path to import detectors
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 
 from detectors.human_outsourcing_detector import HumanOutsourcingDetector
+
 
 def scan_file(detector: HumanOutsourcingDetector, filepath: Path) -> list[dict]:
     violations = []

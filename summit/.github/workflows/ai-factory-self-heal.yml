@@ -1,0 +1,22 @@
+name: AI Factory Self-Heal
+on:
+  workflow_run:
+    workflows: ["CI Core", "Unit Tests & Coverage"]
+    types:
+      - completed
+
+jobs:
+  heal:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'failure' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install -g pnpm && pnpm install
+      - run: pnpm exec tsx cli/factory/heal.ts ${{ github.event.workflow_run.head_branch }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ai-factory-self-heal-${{ github.event.workflow_run.head_sha }}
+          path: artifacts/ai-factory/

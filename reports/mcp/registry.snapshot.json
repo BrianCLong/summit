@@ -1,0 +1,18 @@
+[
+  {
+    "serverId": "summit-graphrag",
+    "tenantVisibility": ["tenant-a"],
+    "tools": [
+      {
+        "name": "search_knowledge",
+        "description": "Search the GraphRAG",
+        "capabilityTags": ["search.semantic"],
+        "riskTags": []
+      }
+    ],
+    "resources": [],
+    "prompts": [],
+    "transport": "stdio",
+    "authModel": "bearer"
+  }
+]

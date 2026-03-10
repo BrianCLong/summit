@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   restricted-path-check:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout code
         uses: actions/checkout@v4 # v6
@@ -71,7 +71,7 @@ jobs:
             }
 
   pr-metadata-check:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout code
         uses: actions/checkout@v4 # v6
@@ -88,7 +88,7 @@ jobs:
 
   saos-enforcement:
     name: S-AOS Enforcement
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout code
         uses: actions/checkout@v4 # v6
@@ -108,7 +108,7 @@ jobs:
           PR_BODY: ${{ github.event.pull_request.body }}
 
   pii-scan:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout code
         uses: actions/checkout@v4 # v6

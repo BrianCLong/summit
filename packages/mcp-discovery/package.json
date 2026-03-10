@@ -1,0 +1,19 @@
+{
+  "name": "@summit/mcp-discovery",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Discovery index, scoring, and ABAC-filtered tool selection",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@summit/mcp-registry": "workspace:*"
+  },
+  "devDependencies": {
+    typescript: "5.0.0",
+    vitest: "1.0.0"
+  }
+}

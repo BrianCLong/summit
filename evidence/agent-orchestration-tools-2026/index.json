@@ -1,0 +1,23 @@
+{
+  "item": "agent-orchestration-tools-2026",
+  "evidence": [
+    {
+      "id": "EVD-AOT2026-ARCH-001",
+      "files": [
+        "docs/architecture/agent-control-plane-2027.md"
+      ]
+    },
+    {
+      "id": "EVD-AOT2026-TOOLS-002",
+      "files": [
+        "evidence/agent-orchestration-tools-2026/report.json"
+      ]
+    },
+    {
+      "id": "EVD-AOT2026-PATTERNS-003",
+      "files": [
+        "evidence/agent-orchestration-tools-2026/metrics.json"
+      ]
+    }
+  ]
+}

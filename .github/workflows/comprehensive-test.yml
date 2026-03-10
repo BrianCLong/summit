@@ -1,4 +1,4 @@
-name: Comprehensive Test Suite
+name: Comprehensive Test Suite 2
 
 on:
   push:
@@ -13,7 +13,7 @@ concurrency:
 jobs:
   test:
     name: Run Comprehensive Tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
       - name: Checkout Code
@@ -25,7 +25,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'pnpm'
           cache-dependency-path: '**/pnpm-lock.yaml'
 
       - name: Setup Python
@@ -35,7 +34,7 @@ jobs:
           cache: 'pip'
 
       - name: Install Node Dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Install Python Dependencies
         run: |

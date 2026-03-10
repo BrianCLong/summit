@@ -4,6 +4,7 @@ This ledger tracks recent agent activity so humans can spot thrash, stalls, or c
 
 | task_id | branch                         | pr / link | agent | status           | notes                                                     | updated    |
 | ------- | ------------------------------ | --------- | ----- | ---------------- | --------------------------------------------------------- | ---------- |
+| TB-10   | agentic/runtime/multi-agent-controller | (pending) | Jules | in-progress      | Implement Multi-Agent Controller with Tmux/Burst modes    | 2026-03-07 |
 | TB-01   | agentic/jules/task-guardrails  | (pending) | Jules | in-progress      | Guardrail workflow + contract refresh.                    | 2026-01-01 |
 | TB-02   | agentic/codex/task-ledger      | (pending) | Codex | in-progress      | Drafting AGENT_ACTIVITY + backlog wiring.                 | 2026-01-01 |
 | TB-03   | agentic/codex/task-owner-guide | (pending) | Codex | in-progress      | HUMAN_OWNER_GUIDE.md authored.                            | 2026-01-01 |
@@ -14,6 +15,7 @@ This ledger tracks recent agent activity so humans can spot thrash, stalls, or c
 | TB-03   | main                           | n/a       | Agent | done             | Created HUMAN_STEERING.md.                                | 2026-02-01 |
 | TB-01   | main                           | n/a       | Agent | done             | Hardened agent-contract.json.                             | 2026-02-01 |
 | TB-08   | main                           | n/a       | Agent | done             | Integrated Email & Multimodal Vision/Signal services.     | 2026-02-02 |
+| TB-09   | main                           | n/a       | Jules | done             | Fulfilled 23rd-order delivery and 40th-order intention.   | 2026-03-07 |
 
 ## How to update
 

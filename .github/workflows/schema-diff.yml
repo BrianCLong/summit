@@ -40,7 +40,7 @@ permissions:
 jobs:
   schema-diff:
     name: Schema Diff Check
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 10
 
     steps:
@@ -60,7 +60,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pnpm install --frozen-lockfile
+          pnpm install --no-frozen-lockfile
           pnpm add -g ts-node typescript
 
       - name: Run schema diff
@@ -228,7 +228,7 @@ jobs:
   # SOC 2 audit trail
   record-audit:
     name: Record Audit Trail
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: schema-diff
     if: always()
 

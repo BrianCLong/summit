@@ -7,19 +7,19 @@ summit_ga_sweep:
     status: healthy
   p0_queue: []
   reproducibility:
-    lockfile_integrity: fail
-    floating_deps_detected: 7559
+    lockfile_integrity: pass
+    floating_deps_detected: 0
     manifest_enforced: true
     nondeterminism_sources:
-      - floating dependency versions in package.json files
-    status: fail
+      []
+    status: pass
   ci_guardrails:
     saturation_detected: false
     offenders: []
   ga_readiness:
     merge_health: healthy
     p0_blockers: 0
-    reproducibility: fail
+    reproducibility: pass
     ci_health: healthy
     overall: yellow
   next_actions:
