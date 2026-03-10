@@ -28,3 +28,8 @@ Based on reviewing `.github/workflows` and related automation scripts (like the 
 
 1. Update `scripts/governance/branch_ownership_enforcer.ts` to properly identify changed files for PRs using GitHub context/API or a safer Git comparison (`git diff --name-only origin/${process.env.GITHUB_BASE_REF} HEAD`).
 2. Alternatively, switch file change detection in PR-related TS scripts to use `gh pr diff --name-only` or `@actions/github` instead of raw git commands to avoid checkout state edge cases.
+
+## 4. Implemented Fix
+
+The recommended minimal fix was implemented by adding `fetch-tags: true` to the `actions/checkout@v4` step in `.github/workflows/branch-ownership.yml`.
+This provides Git with the full tag history context needed to resolve references, explicitly addressing the root cause of `git exit code 128` without modifying the workspace or altering checkout paradigms across other unrelated apps.
