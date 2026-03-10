@@ -3,6 +3,7 @@ import { Router } from 'express';
 import express from 'express';
 import crypto from 'crypto';
 import { replayGuard, webhookRatelimit } from '../middleware/webhook-guard.js';
+import { safeEqual } from '../utils/signature.js';
 
 const router = Router();
 
@@ -19,7 +20,7 @@ router.post(
       .update(req.body as Buffer)
       .digest('base64');
     const sig = req.header('X-Shopify-Hmac-Sha256') || '';
-    if (h !== sig) return res.status(401).send('bad signature');
+    if (!safeEqual(h, sig)) return res.status(401).send('bad signature');
     return res.sendStatus(200);
   },
 );

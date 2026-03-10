@@ -2,6 +2,7 @@ import { randomUUID } from 'crypto';
 import { pg } from '../../db/pg.js';
 import { InboundAlertConfig, InboundAlert } from './types.js';
 import { IncidentService } from '../../services/IncidentService.js'; // Hypothetical service
+import { safeEqual } from '../../utils/signature.js';
 
 export class InboundAlertService {
   async processAlert(
@@ -23,7 +24,7 @@ export class InboundAlertService {
 
     // 2. Verify Signature (simplified)
     // In production, we'd use HMAC with config.secret
-    if (config.secret && signature !== config.secret) {
+    if (config.secret && !safeEqual(signature, config.secret)) {
         // Log potential attack
         throw new Error('Invalid signature');
     }

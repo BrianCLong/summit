@@ -1,4 +1,5 @@
 import crypto from 'crypto';
+import { safeEqual } from '../utils/signature.js';
 import { BillingAdapter, UsageReport } from './types.js';
 import { tenantCostService } from '../services/TenantCostService.js';
 import { logger } from '../config/logger.js';
@@ -97,7 +98,7 @@ export class BillingService {
 
     // For this prototype, we'll just check if the signature is valid
     const recomputedSig = this.signReport(exportedReport);
-    if (recomputedSig !== exportedReport.signature) {
+    if (!safeEqual(recomputedSig, exportedReport.signature)) {
        logger.error({ tenantId }, 'Billing signature mismatch!');
        return { variance: 100, alert: true };
     }

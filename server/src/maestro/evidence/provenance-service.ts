@@ -1,4 +1,5 @@
 import crypto from 'crypto';
+import { safeEqual } from '../../utils/signature.js';
 // import { S3Client, PutObjectCommand, HeadObjectCommand } from '@aws-sdk/client-s3';
 import { getPostgresPool } from '../../db/postgres.js';
 import { otelService } from '../../middleware/observability/otel-tracing.js';
@@ -264,7 +265,7 @@ export class EvidenceProvenanceService {
           .update(entry.chain_data)
           .digest('hex');
 
-        provenanceValid = expectedSignature === entry.signature;
+        provenanceValid = safeEqual(expectedSignature, entry.signature);
       }
 
       const result = {
@@ -377,7 +378,7 @@ export class EvidenceProvenanceService {
         .update(chainData)
         .digest('hex');
 
-      if (expectedSignature !== entry.row.signature) {
+      if (!safeEqual(expectedSignature, entry.row.signature)) {
         errors.push(
           `Signature mismatch for receipt ${entry.artifactId}`,
         );
