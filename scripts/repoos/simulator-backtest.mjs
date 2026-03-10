@@ -29,7 +29,7 @@ async function extractHistoricalState(daysAgo = 90) {
   console.log(`\nExtracting repository state from ${daysAgo} days ago...\n`);
 
   const targetDate = new Date();
-  targetDate.setDate(targetDate.setDate() - daysAgo);
+  targetDate.setDate(targetDate.getDate() - daysAgo);
   const targetDateStr = targetDate.toISOString().split('T')[0];
 
   try {
