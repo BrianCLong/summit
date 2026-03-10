@@ -1,0 +1,8 @@
+{
+  "id": "dev-kai-tan",
+  "name": "Kai Tan",
+  "type": "developer",
+  "expertise": ["graph-analytics", "threat-modeling"],
+  "region": "APAC",
+  "profile": "Graph analytics specialist for intelligence workloads."
+}

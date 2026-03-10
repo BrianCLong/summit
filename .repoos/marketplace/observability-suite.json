@@ -1,0 +1,9 @@
+{
+  "id": "plugin-observability-suite",
+  "name": "Observability Suite",
+  "type": "plugin",
+  "category": "observability",
+  "tags": ["metrics", "tracing", "alerts"],
+  "description": "Unified telemetry plugin for Summit workloads.",
+  "maintainerId": "dev-aria-lane"
+}
