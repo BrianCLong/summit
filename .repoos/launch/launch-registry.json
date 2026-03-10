@@ -1,0 +1,37 @@
+{
+  "schema_version": "1.0",
+  "program": "summit-ecosystem-launch-engine",
+  "launches": [
+    {
+      "launch_id": "ecosystem-spring-2026",
+      "title": "Summit Ecosystem Spring 2026 Launch",
+      "status": "planning",
+      "stage": "planning",
+      "target_window": "2026-Q2",
+      "owners": [
+        "ecosystem-platform",
+        "developer-relations",
+        "partner-accelerator"
+      ],
+      "components": {
+        "plugin_launches": [
+          "signal-fusion-suite",
+          "adversary-pattern-workbench"
+        ],
+        "partner_integrations": [
+          "contoso-threat-feed",
+          "fabrikam-identity-fabric"
+        ],
+        "ecosystem_announcements": [
+          "marketplace-growth-update",
+          "launch-webinar-series"
+        ]
+      },
+      "artifacts": {
+        "timeline": ".repoos/launch/launch-timeline.json",
+        "metrics": ".repoos/launch/launch-metrics.json",
+        "package": ".repoos/launch/packages/ecosystem-spring-2026-package.json"
+      }
+    }
+  ]
+}

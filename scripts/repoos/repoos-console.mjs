@@ -95,6 +95,26 @@ async function loadSimulation() {
   }
 }
 
+
+/**
+ * Load launch engine artifacts
+ */
+async function loadLaunchEngine() {
+  try {
+    const [registryRaw, metricsRaw] = await Promise.all([
+      fs.readFile('.repoos/launch/launch-registry.json', 'utf-8'),
+      fs.readFile('.repoos/launch/launch-metrics.json', 'utf-8')
+    ]);
+
+    return {
+      registry: JSON.parse(registryRaw),
+      metrics: JSON.parse(metricsRaw)
+    };
+  } catch (error) {
+    return null;
+  }
+}
+
 /**
  * Format percentage bar
  */
@@ -289,6 +309,49 @@ function displaySimulationForecast(simulation) {
   }
 }
 
+
+/**
+ * Display launch dashboard
+ */
+function displayLaunchDashboard(launchEngine) {
+  console.log(`${COLORS.bright}Ecosystem Launch Dashboard${COLORS.reset}`);
+  console.log(`─────────────────────────────────────────────────────────────────\n`);
+
+  if (!launchEngine) {
+    console.log(`${COLORS.dim}No launch engine data available${COLORS.reset}\n`);
+    return;
+  }
+
+  const launches = launchEngine.registry.launches || [];
+  const activeLaunches = launches.filter(launch => launch.status !== 'completed');
+
+  console.log(`Registered Launches: ${launches.length}`);
+  console.log(`Active Launches: ${activeLaunches.length}`);
+
+  if (activeLaunches.length > 0) {
+    console.log('In-Flight Initiatives:');
+    for (const launch of activeLaunches.slice(0, 3)) {
+      console.log(`  ${COLORS.dim}•${COLORS.reset} ${launch.launch_id} (${launch.stage})`);
+    }
+  }
+
+  const metrics = launchEngine.metrics.metrics;
+  console.log('');
+  console.log('Launch Metrics Snapshot:');
+  console.log(
+    `  Plugin Installs: ${metrics.plugin_installs.current} (target +${metrics.plugin_installs.target_delta_percent}%)`
+  );
+  console.log(
+    `  API RPS: ${metrics.api_traffic_increase.current_rps} (target +${metrics.api_traffic_increase.target_delta_percent}%)`
+  );
+  console.log(
+    `  Weekly Signups: ${metrics.developer_signups.current_weekly} (target +${metrics.developer_signups.target_delta_percent}%)`
+  );
+  console.log(
+    `  Marketplace Tx: ${metrics.marketplace_activity.current_transactions} (target +${metrics.marketplace_activity.target_delta_percent}%)\n`
+  );
+}
+
 /**
  * Display recent activity
  */
@@ -349,6 +412,7 @@ async function main() {
   const market = await loadPatchMarket();
   const genome = await loadGenome();
   const simulation = await loadSimulation();
+  const launchEngine = await loadLaunchEngine();
 
   // Display console
   displaySystemHealth(stability, genome, simulation);
@@ -356,6 +420,7 @@ async function main() {
   displayPatchMarket(market);
   displayGenomeFitness(genome);
   displaySimulationForecast(simulation);
+  displayLaunchDashboard(launchEngine);
   await displayRecentActivity();
   displayFooter();
 }

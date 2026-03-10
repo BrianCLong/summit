@@ -1,0 +1,25 @@
+{
+  "schema_version": "1.0",
+  "metrics": {
+    "plugin_installs": {
+      "baseline": 1200,
+      "current": 1200,
+      "target_delta_percent": 35
+    },
+    "api_traffic_increase": {
+      "baseline_rps": 240,
+      "current_rps": 240,
+      "target_delta_percent": 20
+    },
+    "developer_signups": {
+      "baseline_weekly": 180,
+      "current_weekly": 180,
+      "target_delta_percent": 25
+    },
+    "marketplace_activity": {
+      "baseline_transactions": 320,
+      "current_transactions": 320,
+      "target_delta_percent": 30
+    }
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "schema_version": "1.0",
+  "launch_id": "ecosystem-spring-2026",
+  "title": "Summit Ecosystem Spring 2026 Launch",
+  "package_assets": {
+    "plugin_releases": [
+      "signal-fusion-suite",
+      "adversary-pattern-workbench"
+    ],
+    "integration_demos": [
+      "contoso-threat-feed",
+      "fabrikam-identity-fabric"
+    ],
+    "documentation_updates": [
+      "developer-portal-release-notes",
+      "integration-quickstart-guides",
+      "marketplace-listing-refresh"
+    ],
+    "demo_gallery_updates": [
+      "launch-scenario-overview",
+      "partner-integration-walkthrough",
+      "plugin-value-showcase"
+    ]
+  }
+}

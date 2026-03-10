@@ -1,0 +1,50 @@
+{
+  "schema_version": "1.0",
+  "stages": [
+    {
+      "name": "planning",
+      "order": 1,
+      "exit_criteria": [
+        "launch charter approved",
+        "scope locked",
+        "owner assignment complete"
+      ]
+    },
+    {
+      "name": "integration_readiness",
+      "order": 2,
+      "exit_criteria": [
+        "partner integration validation green",
+        "plugin compatibility test pass",
+        "rollout runbooks approved"
+      ]
+    },
+    {
+      "name": "documentation_preparation",
+      "order": 3,
+      "exit_criteria": [
+        "developer docs published",
+        "migration guides reviewed",
+        "demo gallery snapshots refreshed"
+      ]
+    },
+    {
+      "name": "public_announcement",
+      "order": 4,
+      "exit_criteria": [
+        "announcement brief approved",
+        "community post scheduled",
+        "partner co-marketing assets synchronized"
+      ]
+    },
+    {
+      "name": "post_launch_monitoring",
+      "order": 5,
+      "exit_criteria": [
+        "72h telemetry verified",
+        "incident log clean",
+        "launch retrospective filed"
+      ]
+    }
+  ]
+}
