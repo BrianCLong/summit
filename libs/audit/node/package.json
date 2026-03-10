@@ -4,11 +4,11 @@
   "main": "index.ts",
   "types": "index.ts",
   "dependencies": {
-    "@opentelemetry/api": "^1.0.0"
+    "@opentelemetry/api": "1.0.0"
   },
   "devDependencies": {
-    "typescript": "^5.0.0",
-    "@types/node": "^20.0.0"
+    "typescript": "5.0.0",
+    "@types/node": "20.0.0"
   },
   "scripts": {
     "build": "tsc index.ts"

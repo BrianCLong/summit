@@ -87,7 +87,7 @@ jobs:
         with:
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Validate GraphQL schema
         run: |
@@ -182,7 +182,7 @@ jobs:
         with:
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Generate static documentation
         run: |

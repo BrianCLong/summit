@@ -5,7 +5,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from summit.pkg.dag import DependencyCycleError, detect_cycle_from_edges
+from summit.pkg.dag import DependencyCycleError, topological_sort
 from summit.pkg.unity_adapter import UnityPackageValidationError, scan_unity_package
 
 FIXTURE = Path("summit/tests/fixtures/unity_pkg/package.json")
@@ -34,7 +34,7 @@ class UnityPackageScanTests(unittest.TestCase):
 
     def test_cycle_detection_raises(self) -> None:
         with self.assertRaises(DependencyCycleError):
-            detect_cycle_from_edges(
+            topological_sort(
                 ["A", "B", "C"],
                 [("A", "B"), ("B", "C"), ("C", "A")],
             )

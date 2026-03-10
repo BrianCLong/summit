@@ -1,0 +1,10 @@
+{
+  "id": "EVD-AFCP-EVAL-005",
+  "item_slug": "agent-fleet-control-plane-2027",
+  "type": "evaluation",
+  "files": [
+    "docs/ga/agent-control-plane-ga.md",
+    ".github/MILESTONES/agent-control-plane-ga.yml"
+  ],
+  "created_at": "2026-03-07T00:00:00Z"
+}

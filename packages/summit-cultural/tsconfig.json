@@ -1,15 +1,17 @@
 {
-  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "lib": ["ES2022"],
+    "strict": true,
+    "declaration": true,
     "outDir": "dist",
     "rootDir": "src",
-    "module": "ESNext",
-    "target": "ES2022",
-    "moduleResolution": "Bundler",
-    "declaration": true,
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "skipLibCheck": true,
+<<<<<<< HEAD
     "types": []
   },
   "include": [
@@ -19,4 +21,10 @@
   "exclude": [
     "src/golden-tests/**/*.ts"
   ]
+=======
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": ["src/**/*"],
+  "exclude": ["dist", "node_modules"]
+>>>>>>> origin/main
 }

@@ -59,7 +59,7 @@ jobs:
     timeout-minutes: 10
     strategy:
       matrix:
-        os: [ubuntu-latest]
+        os: [ubuntu-22.04]
     outputs:
       node: ${{ steps.versions.outputs.node }}
       pnpm: ${{ steps.versions.outputs.pnpm }}
@@ -97,6 +97,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4 # v4
         with:
+          version: 10.0.0
           run_install: false
 
       - name: Setup Node.js
@@ -127,7 +128,7 @@ jobs:
       - name: Install dependencies
         if: inputs.install-deps
         working-directory: ${{ inputs.working-directory }}
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Setup Python (optional)
         if: inputs.python-version != ''

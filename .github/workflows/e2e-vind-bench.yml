@@ -14,7 +14,7 @@ concurrency:
 jobs:
   bench-test:
     name: LB probe + cache benchmark
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     if: vars.SUMMIT_VIND_CI == '1' && vars.SUMMIT_VIND_BENCH == '1'
 
     steps:

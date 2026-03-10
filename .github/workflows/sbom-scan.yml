@@ -48,13 +48,13 @@ permissions:
 jobs:
   sbom:
     name: SBOM & Vulnerability Gate
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
 
       - name: Generate SBOM with Syft
-        uses: anchore/sbom-action@62ad5284b8ced813296287a0b63906cb364b73ee # v0
+        uses: anchore/sbom-action@v0 # v0
         with:
           format: cyclonedx-json
           output-file: sbom.json
@@ -66,7 +66,7 @@ jobs:
           fail-build: true
           severity-cutoff: high
           only-fixed: false
-          grype-config: security/grype-allowlist.yaml
+          config: security/grype-allowlist.yaml
       - name: Attest SBOM
         uses: actions/attest-sbom@v3
         with:

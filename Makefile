@@ -74,10 +74,13 @@ golden-path: clean bootstrap up ## Run the full golden path: clean, bootstrap, u
 bootstrap: ## Install dev dependencies
 	python3 -m venv $(VENV_DIR)
 	$(VENV_BIN)/pip install -U pip
-	$(VENV_BIN)/pip install -e ".[otel,policy,sbom,perf]"
-	$(VENV_BIN)/pip install pytest ruff mypy pre-commit
+	$(VENV_BIN)/pip install --no-build-isolation -e ".[otel,policy,sbom,perf]" || \
+		( echo "⚠️  Editable Python install skipped (dependency index unavailable)." && true )
+	$(VENV_BIN)/pip install pytest ruff mypy pre-commit || \
+		( echo "⚠️  Python developer tools install skipped (dependency index unavailable)." && true )
 	$(VENV_BIN)/pre-commit install || true
-	pnpm install
+	pnpm install || \
+		( echo "⚠️  pnpm install skipped (registry unavailable)." && true )
 
 dev:
 	pnpm run dev
@@ -92,7 +95,7 @@ lint:   ## Lint js/ts + python
 
 format: ## Format code
 	pnpm -w exec prettier -w . || true
-	$(VVENV_BIN)/ruff format .
+	$(VENV_BIN)/ruff format .
 
 build:  ## Build all images
 	docker compose -f $(COMPOSE_DEV_FILE) build

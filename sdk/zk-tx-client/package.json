@@ -8,10 +8,10 @@
     "build": "tsc -p tsconfig.json"
   },
   "dependencies": {
-    "blake3": "^2.1.6"
+    "blake3": "2.1.6"
   },
   "devDependencies": {
-    "@types/node": "^25.0.3",
-    "typescript": "^5.4.0"
+    "@types/node": "25.0.3",
+    "typescript": "5.4.0"
   }
 }

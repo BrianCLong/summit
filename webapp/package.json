@@ -7,10 +7,18 @@
     "lint": "prettier -c ."
   },
   "devDependencies": {
-    "prettier": "^3.3.3"
+    "prettier": "3.3.3"
   },
   "dependencies": {
-    "hono": "^4.11.10"
+<<<<<<< HEAD
+    hono: "4.11.10"
+=======
+<<<<<<< HEAD
+    "hono": "4.11.10"
+=======
+    hono: "4.12.4"
+>>>>>>> origin/main
+>>>>>>> origin/main
   },
   "version": "4.2.3"
 }

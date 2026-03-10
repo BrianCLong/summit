@@ -21,7 +21,10 @@ Traditional systems operate on a single axis:
 ```text
 Low Confidence ←→ High Confidence
 ```text
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/main
 Summit operates on two axes:
 
 ```text
@@ -33,7 +36,10 @@ Low Confidence ───────┼─────── High Confidence
                       │
                 Low Integrity
 ```text
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/main
 This creates **four quadrants** with different operational implications:
 
 ### Quadrant 1: High Confidence, High Integrity
@@ -74,7 +80,10 @@ Integrity scores are computed from **five factors**:
 ```text
 SV = 1 - (variance(source_behavior) / expected_variance)
 ```text
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/main
 **Factors**:
 
 - Frequency of contradictory statements
@@ -96,7 +105,10 @@ SV = 1 - (variance(source_behavior) / expected_variance)
 ```text
 CI = unique_sources / total_sources
 ```text
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/main
 **Factors**:
 
 - Number of independent verification paths
@@ -118,7 +130,10 @@ CI = unique_sources / total_sources
 ```text
 HAB = 1 - (successful_attacks_via_source / total_attacks_detected)
 ```text
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/main
 **Factors**:
 
 - Number of times source was compromised
@@ -140,7 +155,10 @@ HAB = 1 - (successful_attacks_via_source / total_attacks_detected)
 ```text
 NSV = 1 - (narrative_change_rate / expected_change_rate)
 ```text
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/main
 **Factors**:
 
 - Speed of adopting new narratives
@@ -162,7 +180,10 @@ NSV = 1 - (narrative_change_rate / expected_change_rate)
 ```text
 VD = verified_links / total_links_in_chain
 ```text
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/main
 **Factors**:
 
 - Cryptographic verification of source identity
@@ -186,7 +207,10 @@ The **final Integrity Score (IS)** is computed as a weighted geometric mean:
 ```text
 IS = (SV^w1 × CI^w2 × HAB^w3 × NSV^w4 × VD^w5)^(1/(w1+w2+w3+w4+w5))
 ```text
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/main
 **Default weights** (tunable per deployment):
 
 - w1 (Source Volatility) = 0.15
@@ -252,7 +276,10 @@ Summit maintains **both** confidence and integrity as first-class metadata:
   "rationale": "High confidence but medium integrity due to low correlation independence (0.42) and weak verification depth (0.35)"
 }
 ```text
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/main
 ---
 
 ## Decision Rules
@@ -264,14 +291,20 @@ IF confidence > 0.80 AND integrity < 0.60 THEN
   ESCALATE for independent verification
   LOG as potential coordination attack
 ```text
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/main
 ### Rule 2: Integrity Gates Critical Decisions
 
 ```text
 IF decision_impact = CRITICAL THEN
   REQUIRE integrity > 0.70 OR human_override
 ```text
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/main
 ### Rule 3: Integrity Anomalies Trigger Investigation
 
 ```text
@@ -279,13 +312,19 @@ IF integrity_score < (baseline - 2×stddev) THEN
   INITIATE adversarial investigation
   NOTIFY security operations
 ```text
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/main
 ### Rule 4: Integrity Decay Over Time
 
 ```text
 integrity_effective = integrity_base × exp(-λ × time_since_verification)
 ```text
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/main
 Where λ is tuned based on information volatility
 
 ---
@@ -361,7 +400,10 @@ ALERT: integrity_drop_rate > acceptable_velocity
 ALERT: correlation_independence approaching zero (coordination attack)
 ALERT: source_volatility sudden spike (compromise indicator)
 ```text
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/main
 ### Integrity Dashboard Metrics
 
 - Distribution of integrity scores across all active information
@@ -396,7 +438,10 @@ Integrity: 0.43 (breakdown)
 
 ACTION: Hold automated response, dispatch human verification
 ```text
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/main
 ### Outcome
 
 Human investigation reveals:

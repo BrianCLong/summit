@@ -10,7 +10,7 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "ioredis": "^5.8.2",
-    "neo4j-driver": "^5.28.1"
+    "ioredis": "5.8.2",
+    "neo4j-driver": "5.28.1"
   }
 }

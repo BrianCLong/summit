@@ -1,0 +1,111 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.local/schemas/provenance.schema.json",
+  "title": "ProvenanceRef",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "provenance_id",
+    "source_type",
+    "source_uri",
+    "content_hash",
+    "extractor"
+  ],
+  "properties": {
+    "provenance_id": {
+      "type": "string",
+      "pattern": "^prov-[A-Za-z0-9._:-]+$"
+    },
+    "source_type": {
+      "type": "string",
+      "enum": [
+        "pdf",
+        "web",
+        "tweet",
+        "video",
+        "audio",
+        "sensor",
+        "report",
+        "chat",
+        "manual",
+        "derived"
+      ]
+    },
+    "source_uri": {
+      "type": "string",
+      "minLength": 1
+    },
+    "content_hash": {
+      "type": "string",
+      "pattern": "^[A-Fa-f0-9]{32,128}$"
+    },
+    "source_title": {
+      "type": "string"
+    },
+    "observed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "extractor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "version"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "config_hash": {
+          "type": "string",
+          "pattern": "^[A-Fa-f0-9]{32,128}$"
+        }
+      }
+    },
+    "model": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "provider": { "type": "string" },
+        "name": { "type": "string" },
+        "version": { "type": "string" },
+        "prompt_hash": {
+          "type": "string",
+          "pattern": "^[A-Fa-f0-9]{32,128}$"
+        }
+      }
+    },
+    "reviewer": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "actor_id": { "type": "string" },
+        "review_state": {
+          "type": "string",
+          "enum": ["unreviewed", "accepted", "rejected", "needs_followup"]
+        },
+        "reviewed_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "transformation_chain": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "default": []
+    },
+    "signature": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": { "type": "string" },
+        "value": { "type": "string" },
+        "issued_at": { "type": "string", "format": "date-time" }
+      }
+    }
+  }
+}

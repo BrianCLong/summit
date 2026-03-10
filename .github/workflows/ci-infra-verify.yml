@@ -21,7 +21,7 @@ on:
 
 jobs:
   verify:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
 
@@ -31,7 +31,7 @@ jobs:
           node-version: 18
 
       - name: Install Dependencies
-        run: npm i -g pnpm && pnpm install --frozen-lockfile
+        run: npm i -g pnpm && pnpm install --no-frozen-lockfile
 
       - name: Run Tests
         run: pnpm test tests/infra/

@@ -27,7 +27,7 @@ on:
 jobs:
   verify-evidence:
     name: Verify WORLD_MODEL evidence bundle
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
       - name: Check required evidence IDs exist
@@ -44,7 +44,7 @@ jobs:
 
   verify-feature-flag:
     name: Verify WORLD_MODEL_ENABLED defaults to false
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
       - name: Check feature flag default in manifest
@@ -54,7 +54,7 @@ jobs:
 
   lint-worldmodel:
     name: TypeScript type-check world-model modules
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

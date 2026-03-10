@@ -23,7 +23,7 @@ env:
 jobs:
   test:
     name: Test Service
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4 # v6
@@ -45,7 +45,7 @@ jobs:
 
   build-scan-sign:
     name: Build, Scan, Sign, and Attest
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: test
     permissions:
       contents: read
@@ -111,7 +111,7 @@ jobs:
 
   policy-gate:
     name: OPA Policy Gate
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: build-scan-sign
 
     steps:

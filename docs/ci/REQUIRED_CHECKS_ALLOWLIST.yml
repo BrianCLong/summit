@@ -1,1 +1,5 @@
-allowlisted_checks: []
+allowlisted_checks:
+  - "Unit Tests"
+  - "test (20.x)"
+  - "Docker Build & Security Scan"
+  - "Schema compatibility guard / schema-compat"

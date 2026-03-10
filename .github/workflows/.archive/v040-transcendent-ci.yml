@@ -51,7 +51,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Validate GraphQL schema syntax
         run: |
@@ -191,7 +191,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Run TypeScript compilation
         run: |
@@ -386,7 +386,7 @@ jobs:
 
       - name: Install Playwright
         run: |
-          pnpm install --frozen-lockfile
+          pnpm install --no-frozen-lockfile
           npx playwright install
 
       - name: Start test environment

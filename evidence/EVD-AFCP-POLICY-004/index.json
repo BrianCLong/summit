@@ -1,0 +1,12 @@
+{
+  "id": "EVD-AFCP-POLICY-004",
+  "item_slug": "agent-fleet-control-plane-2027",
+  "type": "policy",
+  "files": [
+    "src/agents/controlplane/policy/PolicyDecisionPoint.ts",
+    "src/agents/controlplane/policy/PolicyTypes.ts",
+    ".github/policies/agent-policy.yaml",
+    "tests/agents/controlplane/deny-fixtures.test.ts"
+  ],
+  "created_at": "2026-03-07T00:00:00Z"
+}

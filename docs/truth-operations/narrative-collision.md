@@ -115,7 +115,10 @@ Summit constructs a **dynamic graph** tracking competing explanations:
        └──→ [Narrative C] (Support: 1 source, Coherence: 0.40, Age: 5min)
                  └──→ [Sub-explanation C1]
 ```text
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/main
 ### Node Attributes
 
 **Event Node**:
@@ -146,7 +149,10 @@ Summit constructs a **dynamic graph** tracking competing explanations:
 ```text
 ED = count(narratives with support ≥ threshold)
 ```text
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/main
 **Healthy State**: Multiple competing narratives during early investigation
 **Warning Sign**: ED drops to 1 very quickly
 
@@ -163,7 +169,10 @@ ED = count(narratives with support ≥ threshold)
 ```text
 CV = Δ(dominant_narrative_support) / Δt
 ```text
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/main
 **Healthy State**: Gradual convergence as evidence accumulates
 **Warning Sign**: Sudden spike in support for single narrative
 
@@ -180,7 +189,10 @@ CV = Δ(dominant_narrative_support) / Δt
 ```text
 UER = count(unexplained_facts) / count(total_facts)
 ```text
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/main
 **Healthy State**: UER decreases as investigation progresses
 **Warning Sign**: Dominant narrative accepted while UER remains high
 
@@ -197,7 +209,10 @@ UER = count(unexplained_facts) / count(total_facts)
 ```text
 SS = count(explicit_rejections_of_alternatives) / count(alternative_proposals)
 ```text
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/main
 **Healthy State**: Alternatives dismissed with evidence
 **Warning Sign**: Alternatives dismissed without investigation
 
@@ -215,7 +230,10 @@ SS = count(explicit_rejections_of_alternatives) / count(alternative_proposals)
 NDI = -Σ(p_i × log(p_i))
 where p_i = support_i / total_support
 ```text
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/main
 **Healthy State**: NDI decreases gradually as evidence accumulates
 **Warning Sign**: NDI drops suddenly (coordinated convergence)
 
@@ -233,7 +251,10 @@ THEN
    ALERT: "Premature narrative convergence detected"
    ACTION: Force alternative hypothesis generation
 ```text
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/main
 Default: T_min = 30 minutes for major incidents
 
 ### Rule 2: Coordinated Narrative Attack
@@ -246,7 +267,10 @@ THEN
    ALERT: "Potential coordinated narrative attack"
    ACTION: Escalate to security operations
 ```text
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/main
 ### Rule 3: Unexplained Elements Warning
 
 ```text
@@ -256,7 +280,10 @@ THEN
    ALERT: "High confidence narrative with significant unexplained elements"
    ACTION: Require explicit justification for unexplained facts
 ```text
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/main
 ### Rule 4: Alternative Suppression Detection
 
 ```text
@@ -266,7 +293,10 @@ THEN
    ALERT: "Active suppression of alternative explanations"
    ACTION: Mandate alternative exploration
 ```text
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/main
 ---
 
 ## Defensive Protocols
@@ -349,7 +379,10 @@ Cross-pillar integration:
   "recommended_action": "MANDATE_ALTERNATIVE_EXPLORATION"
 }
 ```text
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/main
 ---
 
 ## Case Study: Narrative Attack on Financial System
@@ -379,7 +412,10 @@ ALERT: Convergence velocity exceeds safe threshold
 ACTION: Mandatory Alternative Hypothesis protocol activated
 ACTION: Red team assigned
 ```text
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/main
 **09:15**: Red team investigates, finds:
 
 - Algorithm behavior was normal
@@ -433,7 +469,10 @@ Prominent display:
   ⚠ Why is CPU usage normal if this is compute-bound?
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```text
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/main
 ### Narrative Timeline
 
 Shows evolution of explanatory diversity:
@@ -444,7 +483,10 @@ Shows evolution of explanatory diversity:
 09:30 ██           (1 narrative) ⚠ CONVERGENCE ALERT
 09:45 ██           (1 narrative) ⚠ HIGH UER WARNING
 ```text
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/main
 ---
 
 ## Implementation Architecture
@@ -473,7 +515,10 @@ Alert Generation
     ↓
 Operator Interface
 ```text
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/main
 ### Storage Schema
 
 ```json
@@ -498,7 +543,10 @@ Operator Interface
   "metrics_timeline": [...]
 }
 ```text
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/main
 ---
 
 ## Advanced Features
