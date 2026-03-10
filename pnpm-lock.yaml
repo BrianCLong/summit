@@ -995,11 +995,11 @@ importers:
   apps/intelgraph-api:
     dependencies:
       '@apollo/server':
-        specifier: ^4.13.0
-        version: 4.13.0(graphql@16.12.0)
+        specifier: 4.11.3
+        version: 4.11.3(graphql@16.12.0)
       '@as-integrations/express4':
         specifier: ^1.0.0
-        version: 1.1.2(@apollo/server@4.13.0(graphql@16.12.0))(express@5.2.1)
+        version: 1.1.2(@apollo/server@4.11.3(graphql@16.12.0))(express@5.2.1)
       '@opentelemetry/api':
         specifier: ^1.9.0
         version: 1.9.0
@@ -2127,8 +2127,8 @@ importers:
   apps/server:
     dependencies:
       '@apollo/server':
-        specifier: ^4.13.0
-        version: 4.13.0(graphql@16.12.0)
+        specifier: 4.11.3
+        version: 4.11.3(graphql@16.12.0)
       axios:
         specifier: ^1.7.9
         version: 1.13.6
@@ -3382,117 +3382,6 @@ importers:
         specifier: 4.0.16
         version: 4.0.16(@opentelemetry/api@1.9.0)(@types/node@20.19.27)(happy-dom@20.0.11)(jiti@2.6.1)(jsdom@27.4.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@20.19.27)(typescript@5.9.3))(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
-  libs/audit/node:
-    dependencies:
-      '@opentelemetry/api':
-        specifier: ^1.0.0
-        version: 1.9.0
-    devDependencies:
-      '@types/node':
-        specifier: ^20.0.0
-        version: 20.19.27
-      typescript:
-        specifier: ^5.0.0
-        version: 5.9.3
-
-  libs/configguard/ts:
-    dependencies:
-      ajv:
-        specifier: ^8.17.1
-        version: 8.18.0
-      ajv-formats:
-        specifier: ^3.0.1
-        version: 3.0.1(ajv@8.18.0)
-      chalk:
-        specifier: ^5.3.0
-        version: 5.6.2
-      commander:
-        specifier: ^12.1.0
-        version: 12.1.0
-      fast-glob:
-        specifier: ^3.3.2
-        version: 3.3.3
-      yaml:
-        specifier: ^2.6.0
-        version: 2.8.2
-    devDependencies:
-      '@types/jest':
-        specifier: ^29.5.14
-        version: 29.5.14
-      '@types/node':
-        specifier: ^22.10.1
-        version: 22.19.7
-      ts-jest:
-        specifier: ^29.2.6
-        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(esbuild@0.27.2)(jest-util@30.2.0)(jest@30.2.0(@types/node@22.19.7)(babel-plugin-macros@3.1.0)(esbuild-register@3.6.0(esbuild@0.27.2))(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@22.19.7)(typescript@5.9.3)))(typescript@5.9.3)
-      typescript:
-        specifier: ^5.7.3
-        version: 5.9.3
-
-  libs/context-shell/node:
-    devDependencies:
-      '@types/jest':
-        specifier: ^30.0.0
-        version: 30.0.0
-      '@types/node':
-        specifier: 20.19.27
-        version: 20.19.27
-      eslint:
-        specifier: ^9.39.1
-        version: 9.39.2(jiti@2.6.1)
-      jest:
-        specifier: ^30.2.0
-        version: 30.2.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(esbuild-register@3.6.0(esbuild@0.27.2))(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3))
-      ts-jest:
-        specifier: ^29.4.5
-        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(esbuild@0.27.2)(jest-util@30.2.0)(jest@30.2.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(esbuild-register@3.6.0(esbuild@0.27.2))(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3)))(typescript@5.9.3)
-      typescript:
-        specifier: ^5.9.3
-        version: 5.9.3
-
-  libs/ingest-worker/node:
-    dependencies:
-      '@opentelemetry/api':
-        specifier: ^1.7.0
-        version: 1.9.0
-      ioredis:
-        specifier: ^5.3.2
-        version: 5.8.2
-      pg:
-        specifier: ^8.11.3
-        version: 8.18.0
-      pino:
-        specifier: ^8.16.2
-        version: 8.21.0
-    devDependencies:
-      '@types/jest':
-        specifier: ^29.5.11
-        version: 29.5.14
-      '@types/node':
-        specifier: ^20.10.5
-        version: 20.19.27
-      '@types/pg':
-        specifier: ^8.10.9
-        version: 8.16.0
-      '@typescript-eslint/eslint-plugin':
-        specifier: ^6.15.0
-        version: 6.21.0(@typescript-eslint/parser@6.21.0(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)
-      '@typescript-eslint/parser':
-        specifier: ^6.15.0
-        version: 6.21.0(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)
-      eslint:
-        specifier: ^9.39.2
-        version: 9.39.2(jiti@2.6.1)
-      jest:
-        specifier: ^29.7.0
-        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3))
-      ts-jest:
-        specifier: ^29.1.1
-        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3)))(typescript@5.9.3)
-      typescript:
-        specifier: ^5.3.3
-        version: 5.9.3
-
   libs/realtime:
     dependencies:
       graphql-ws:
@@ -4074,8 +3963,8 @@ importers:
   packages/api-framework:
     dependencies:
       '@apollo/server':
-        specifier: ^4.13.0
-        version: 4.13.0(graphql@16.12.0)
+        specifier: 4.11.3
+        version: 4.11.3(graphql@16.12.0)
       '@intelgraph/query-language':
         specifier: workspace:*
         version: link:../query-language
@@ -11276,8 +11165,8 @@ importers:
   packages/rate-limiter:
     dependencies:
       '@apollo/server':
-        specifier: ^4.13.0
-        version: 4.13.0(graphql@16.12.0)
+        specifier: 4.11.3
+        version: 4.11.3(graphql@16.12.0)
       express:
         specifier: '>=4.21.0'
         version: 5.2.1
@@ -13821,9 +13710,6 @@ importers:
       '@graphql-tools/schema':
         specifier: 10.0.30
         version: 10.0.30(graphql@16.12.0)
-      '@intelgraph/context-shell':
-        specifier: workspace:*
-        version: link:../libs/context-shell/node
       '@intelgraph/feature-flags':
         specifier: workspace:*
         version: link:../packages/feature-flags
@@ -14399,8 +14285,8 @@ importers:
   services/admin-api:
     dependencies:
       '@apollo/server':
-        specifier: ^4.13.0
-        version: 4.13.0(graphql@16.12.0)
+        specifier: 4.11.3
+        version: 4.11.3(graphql@16.12.0)
       '@intelgraph/metrics-exporter':
         specifier: workspace:*
         version: link:../../packages/metrics-exporter
@@ -14448,8 +14334,8 @@ importers:
   services/admin-automation:
     dependencies:
       '@apollo/server':
-        specifier: ^4.13.0
-        version: 4.13.0(graphql@16.12.0)
+        specifier: 4.11.3
+        version: 4.11.3(graphql@16.12.0)
       cors:
         specifier: ^2.8.5
         version: 2.8.6
@@ -15121,11 +15007,11 @@ importers:
   services/api-gateway:
     dependencies:
       '@apollo/server':
-        specifier: ^4.13.0
-        version: 4.13.0(graphql@16.12.0)
+        specifier: 4.11.3
+        version: 4.11.3(graphql@16.12.0)
       '@as-integrations/express4':
         specifier: ^1.1.2
-        version: 1.1.2(@apollo/server@4.13.0(graphql@16.12.0))(express@5.2.1)
+        version: 1.1.2(@apollo/server@4.11.3(graphql@16.12.0))(express@5.2.1)
       compression:
         specifier: ^1.7.4
         version: 1.8.1
@@ -15587,8 +15473,8 @@ importers:
   services/battle-api:
     dependencies:
       '@apollo/server':
-        specifier: ^4.13.0
-        version: 4.13.0(graphql@16.12.0)
+        specifier: 4.11.3
+        version: 4.11.3(graphql@16.12.0)
       '@graphql-tools/schema':
         specifier: ^10.0.30
         version: 10.0.30(graphql@16.12.0)
@@ -16358,11 +16244,11 @@ importers:
   services/config-service:
     dependencies:
       '@apollo/server':
-        specifier: ^4.13.0
-        version: 4.13.0(graphql@16.12.0)
+        specifier: 4.11.3
+        version: 4.11.3(graphql@16.12.0)
       '@as-integrations/express4':
         specifier: ^1.1.2
-        version: 1.1.2(@apollo/server@4.13.0(graphql@16.12.0))(express@5.2.1)
+        version: 1.1.2(@apollo/server@4.11.3(graphql@16.12.0))(express@5.2.1)
       cors:
         specifier: ^2.8.5
         version: 2.8.6
@@ -16437,8 +16323,8 @@ importers:
   services/control-tower-service:
     dependencies:
       '@apollo/server':
-        specifier: ^4.13.0
-        version: 4.13.0(graphql@16.12.0)
+        specifier: 4.11.3
+        version: 4.11.3(graphql@16.12.0)
       '@graphql-tools/schema':
         specifier: ^10.0.0
         version: 10.0.30(graphql@16.12.0)
@@ -17003,8 +16889,8 @@ importers:
   services/data-monetization-engine:
     dependencies:
       '@apollo/server':
-        specifier: ^4.13.0
-        version: 4.13.0(graphql@16.12.0)
+        specifier: 4.11.3
+        version: 4.11.3(graphql@16.12.0)
       '@intelgraph/data-monetization-types':
         specifier: workspace:*
         version: link:../../packages/data-monetization-types
@@ -17272,8 +17158,8 @@ importers:
   services/digital-twin:
     dependencies:
       '@apollo/server':
-        specifier: ^4.13.0
-        version: 4.13.0(graphql@16.12.0)
+        specifier: 4.11.3
+        version: 4.11.3(graphql@16.12.0)
       '@opentelemetry/api':
         specifier: 1.7.0
         version: 1.7.0
@@ -18886,8 +18772,8 @@ importers:
   services/graph-core:
     dependencies:
       '@apollo/server':
-        specifier: ^4.13.0
-        version: 4.13.0(graphql@16.12.0)
+        specifier: 4.11.3
+        version: 4.11.3(graphql@16.12.0)
       '@graphql-tools/schema':
         specifier: ^10.0.6
         version: 10.0.30(graphql@16.12.0)
@@ -24495,6 +24381,13 @@ packages:
 
   '@apollo/server-gateway-interface@2.0.0':
     resolution: {integrity: sha512-3HEMD6fSantG2My3jWkb9dvfkF9vJ4BDLRjMgsnD790VINtuPaEp+h3Hg9HOHiWkML6QsOhnaRqZ+gvhp3y8Nw==}
+    peerDependencies:
+      graphql: 16.12.0
+
+  '@apollo/server@4.11.3':
+    resolution: {integrity: sha512-mW8idE2q0/BN14mimfJU5DAnoPHZRrAWgwsVLBEdACds+mxapIYxIbI6AH4AsOpxfrpvHts3PCYDbopy1XPW1g==}
+    engines: {node: '>=14.16.0'}
+    deprecated: Apollo Server v4 is end-of-life since January 26, 2026. As long as you are already using a non-EOL version of Node.js, upgrading to v5 should take only a few minutes. See https://www.apollographql.com/docs/apollo-server/previous-versions for details.
     peerDependencies:
       graphql: 16.12.0
 
@@ -54644,6 +54537,36 @@ snapshots:
       '@apollo/utils.logger': 3.0.0
       graphql: 16.12.0
 
+  '@apollo/server@4.11.3(graphql@16.12.0)':
+    dependencies:
+      '@apollo/cache-control-types': 1.0.3(graphql@16.12.0)
+      '@apollo/server-gateway-interface': 1.1.1(graphql@16.12.0)
+      '@apollo/usage-reporting-protobuf': 4.1.1
+      '@apollo/utils.createhash': 2.0.2
+      '@apollo/utils.fetcher': 2.0.1
+      '@apollo/utils.isnodelike': 2.0.1
+      '@apollo/utils.keyvaluecache': 2.1.1
+      '@apollo/utils.logger': 2.0.1
+      '@apollo/utils.usagereporting': 2.1.0(graphql@16.12.0)
+      '@apollo/utils.withrequired': 2.0.1
+      '@graphql-tools/schema': 9.0.19(graphql@16.12.0)
+      '@types/express': 4.17.25
+      '@types/express-serve-static-core': 4.19.6
+      '@types/node-fetch': 2.6.13
+      async-retry: 1.3.3
+      cors: 2.8.6
+      express: 5.2.1
+      graphql: 16.12.0
+      loglevel: 1.9.2
+      lru-cache: 7.18.3
+      negotiator: 0.6.4
+      node-abort-controller: 3.1.1
+      node-fetch: 3.3.2
+      uuid: 9.0.1
+      whatwg-mimetype: 3.0.0
+    transitivePeerDependencies:
+      - supports-color
+
   '@apollo/server@4.13.0(graphql@16.12.0)':
     dependencies:
       '@apollo/cache-control-types': 1.0.3(graphql@16.12.0)
@@ -54900,9 +54823,9 @@ snapshots:
     dependencies:
       node-fetch: 3.3.2
 
-  '@as-integrations/express4@1.1.2(@apollo/server@4.13.0(graphql@16.12.0))(express@5.2.1)':
+  '@as-integrations/express4@1.1.2(@apollo/server@4.11.3(graphql@16.12.0))(express@5.2.1)':
     dependencies:
-      '@apollo/server': 4.13.0(graphql@16.12.0)
+      '@apollo/server': 4.11.3(graphql@16.12.0)
       express: 5.2.1
 
   '@as-integrations/express4@1.1.2(@apollo/server@5.4.0(graphql@16.12.0))(express@5.2.1)':

@@ -12,6 +12,7 @@ permissions:
 
 jobs:
   sync_project:
+    if: false
     runs-on: ubuntu-latest
     steps:
       - name: Sync item to Project #7 and set fields

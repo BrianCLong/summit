@@ -1,0 +1,25 @@
+{
+  "writeset_id": "ws_rg_promotion_001",
+  "system_time": "2026-03-06T12:06:00Z",
+  "source": "fixture.rg.promotion",
+  "ops": [
+    {
+      "op": "PROPOSE_PROMOTION",
+      "promotion": {
+        "promotion_id": "promotion_001",
+        "claim_id": "bg_claim_001",
+        "from_graph": "BG",
+        "to_graph": "RG"
+      }
+    }
+  ],
+  "provenance": {
+    "artifacts": [
+      {
+        "artifact_id": "artifact_social_003",
+        "type": "social_post",
+        "sha256": "ccc333"
+      }
+    ]
+  }
+}
