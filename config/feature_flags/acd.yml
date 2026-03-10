@@ -1,0 +1,5 @@
+# Autonomous Capability Discovery (ACD) Feature Flags
+# Default OFF to prevent auto-taxonomy mutation
+acd_enabled: false
+auto_taxonomy_promotion: false
+min_confidence_threshold: 0.8

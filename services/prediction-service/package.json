@@ -9,18 +9,18 @@
     "test": "jest"
   },
   "dependencies": {
-    "express": "^5.2.0",
-    "zod": "^4.1.12",
-    "body-parser": "^1.20.2",
+    "express": "5.2.0",
+    "zod": "4.1.12",
+    "body-parser": "1.20.2",
     "@intelgraph/forecasting": "workspace:*",
     "@intelgraph/predictive-models": "workspace:*",
     "@intelgraph/risk-scoring": "workspace:*"
   },
   "devDependencies": {
-    "typescript": "^5.9.3",
-    "@types/express": "^5.0.3",
+    "typescript": "5.9.3",
+    "@types/express": "5.0.3",
     "@types/node": "20.19.27",
-    "@types/body-parser": "^1.19.5"
+    "@types/body-parser": "1.19.5"
   },
   "type": "module",
   "types": "dist/index.d.ts"

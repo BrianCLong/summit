@@ -1,0 +1,806 @@
+%% docs/architecture/master-architecture.mmd %%
+%% Summit Master Architecture Map %%
+%% ASSUMPTION: exact repo paths/modules should be validated against BrianCLong/summit before merge. %%
+%% Goal: production-grade repo-shaped architecture diagram covering six layers: %%
+%% 1) Dev Stack Map 2) Tool Adapter Control Plane 3) AI Tool Radar %%
+%% 4) Market Intelligence 5) Strategy Engine 6) Self-Improving Engineering System
+
+flowchart TD
+
+%% ========================================================= %%
+%% GLOBAL STYLES %%
+%% ========================================================= %%
+
+classDef ext fill:#f7f7f8,stroke:#8a8f98,color:#222;
+classDef repo fill:#eef6ff,stroke:#4a7bd1,color:#111;
+classDef core fill:#eefbf2,stroke:#2d8a4b,color:#111;
+classDef data fill:#fff8e8,stroke:#c48a00,color:#111;
+classDef ci fill:#f5efff,stroke:#7a4fd1,color:#111;
+classDef sec fill:#fff0f0,stroke:#c23b3b,color:#111;
+classDef doc fill:#f2fbff,stroke:#2b9bb5,color:#111;
+classDef art fill:#faf5ef,stroke:#9c6b2f,color:#111;
+classDef control fill:#f3f7f0,stroke:#6c8e3d,color:#111;
+
+%% ========================================================= %%
+%% EXTERNAL ECOSYSTEM %%
+%% ========================================================= %%
+
+subgraph EXT["External AI Developer Ecosystem"]
+direction TB
+
+subgraph EXT_IDE["IDE / Assistant Tools"]
+Cursor["Cursor"]:::ext
+Copilot["GitHub Copilot"]:::ext
+ClaudeCode["Claude Code"]:::ext
+Windsurf["Windsurf"]:::ext
+Cody["Sourcegraph Cody"]:::ext
+Aider["Aider"]:::ext
+Devin["Devin"]:::ext
+OpenAICLI["OpenAI Codex / CLI"]:::ext
+Codeium["Codeium"]:::ext
+Sweep["Sweep"]:::ext
+end
+
+subgraph EXT_SIGNALS["Ecosystem Signal Sources"]
+GitHubAPI["GitHub API"]:::ext
+RSSFeeds["RSS / News Feeds"]:::ext
+ToolDirs["AI Tool Directories"]:::ext
+Jobs["Job Boards"]:::ext
+Funding["Funding / VC Data"]:::ext
+Benchmarks["Model Benchmark Reports"]:::ext
+DocsSources["Public Docs / Release Notes"]:::ext
+end
+end
+
+%% ========================================================= %%
+%% REPO ROOT / ENTRYPOINTS %%
+%% ========================================================= %%
+
+subgraph REPO["BrianCLong/summit Repository"]
+direction TB
+
+subgraph CLI["CLI / Entrypoints"]
+CLIrun["pnpm summit"]:::repo
+CLIdevstack["devstack:run"]:::repo
+CLIradar["radar:update"]:::repo
+CLImarket["market-intel:run"]:::repo
+CLIstrategy["strategy:run"]:::repo
+CLIself["self-improve:run"]:::repo
+CLIarch["architecture:check"]:::repo
+end
+
+subgraph DOCS["Repo Documentation"]
+DocsArch["docs/architecture/master-architecture.mmd"]:::doc
+DocsOverview["docs/architecture/system-overview.md"]:::doc
+DocsStandards["docs/standards/*.md"]:::doc
+DocsSecurity["docs/security/data-handling/*.md"]:::doc
+DocsOps["docs/ops/runbooks/*.md"]:::doc
+DocsAssume["docs/repo/*_assumptions.md"]:::doc
+end
+
+subgraph SCRIPTS["Scripts / Monitoring / Benchmarks"]
+PerfDev["scripts/perf/devstack-benchmark.ts"]:::repo
+PerfRadar["scripts/perf/radar-benchmark.ts"]:::repo
+PerfMarket["scripts/perf/market-intel-benchmark.ts"]:::repo
+PerfStrategy["scripts/perf/strategy-benchmark.ts"]:::repo
+PerfSelf["scripts/perf/self-improve-benchmark.ts"]:::repo
+MonRadar["scripts/monitoring/tool-radar-drift.ts"]:::repo
+MonMarket["scripts/monitoring/market-intel-drift.ts"]:::repo
+MonStrategy["scripts/monitoring/strategy-drift.ts"]:::repo
+MonSelf["scripts/monitoring/self-improvement-drift.ts"]:::repo
+MonArch["scripts/monitoring/architecture-drift.ts"]:::repo
+end
+end
+
+%% ========================================================= %%
+%% LAYER 1 - DEV STACK MAP %%
+%% ========================================================= %%
+
+subgraph L1["Layer 1 — AI Dev Stack Map"]
+direction TB
+
+subgraph DevstackRegistry["src/devstack/registry"]
+DSMap["devstack-map.json"]:::data
+DSSchema["schema.ts"]:::repo
+DSProfiles["deployment-profiles.ts"]:::repo
+DSCap["tool-capabilities.ts"]:::repo
+end
+
+subgraph DevstackAdapters["src/devstack/adapters"]
+BaseAdapter["base-adapter.ts"]:::repo
+AdapterRegistry["registry.ts"]:::repo
+CursorAdapter["cursor-adapter.ts"]:::repo
+CopilotAdapter["copilot-adapter.ts"]:::repo
+ClaudeAdapter["claude-code-adapter.ts"]:::repo
+WindsurfAdapter["windsurf-adapter.ts"]:::repo
+CodyAdapter["cody-adapter.ts"]:::repo
+AiderAdapter["aider-adapter.ts"]:::repo
+DevinAdapter["devin-adapter.ts"]:::repo
+OpenAIAdapter["openai-cli-adapter.ts"]:::repo
+end
+
+subgraph DevstackOrch["src/devstack/orchestrator"]
+DevstackRunner["devstack-runner.ts"]:::control
+TaskPlanner["task-planner.ts"]:::control
+ToolSelector["tool-selector.ts"]:::control
+OutputNormalizer["output-normalizer.ts"]:::control
+end
+
+subgraph DevstackTelemetry["src/devstack/telemetry"]
+DSMetrics["metrics.ts"]:::repo
+DSLatency["tool-latency.ts"]:::repo
+DSSuccess["agent-success-rate.ts"]:::repo
+end
+
+subgraph DevstackArtifacts["artifacts/devstack"]
+DSReport["report.json"]:::art
+DSMetricsJson["metrics.json"]:::art
+DSMapJson["devstack.json"]:::art
+DSStamp["stamp.json"]:::art
+end
+end
+
+%% ========================================================= %%
+%% LAYER 2 - TOOL ADAPTER CONTROL PLANE %%
+%% ========================================================= %%
+
+subgraph L2["Layer 2 — Tool Adapter Control Plane"]
+direction TB
+
+subgraph Agents["src/agents"]
+AgentOrchestrator["orchestrator.ts"]:::control
+AgentRunner["task-runner.ts"]:::control
+StepLimiter["execution-guard.ts"]:::sec
+PolicyFilter["policy-filter.ts"]:::sec
+ContextBus["context-bus.ts"]:::control
+end
+
+subgraph Evidence["src/evidence"]
+EvidenceSchema["evidence-schema.ts"]:::repo
+EvidenceWriter["evidence-writer.ts"]:::repo
+DeterministicHasher["deterministic-hasher.ts"]:::repo
+EvidenceValidator["evidence-validator.ts"]:::sec
+end
+
+subgraph AdapterArtifacts["artifacts/agent-run"]
+AGReport["report.json"]:::art
+AGMetrics["metrics.json"]:::art
+AGStamp["stamp.json"]:::art
+end
+end
+
+%% ========================================================= %%
+%% SHARED DATA / GRAPH CORE %%
+%% ========================================================= %%
+
+subgraph CORE["Shared Platform Core"]
+direction TB
+
+subgraph GraphCore["Knowledge Graph / Retrieval Core"]
+Neo4j["Neo4j Graph"]:::core
+Qdrant["Qdrant Vector Index"]:::core
+Postgres["PostgreSQL"]:::core
+Redis["Redis"]:::core
+GraphSchema["graph-schema.ts"]:::repo
+EntityResolver["entity-resolver.ts"]:::control
+EmbeddingPipeline["embedding-pipeline.ts"]:::control
+Retrieval["retrieval.ts"]:::control
+GraphRAG["GraphRAG Service"]:::core
+end
+
+subgraph SharedSchemas["Shared Contracts"]
+EvidenceID["Evidence ID Pattern\nEVID-<domain>-<task>-<hash>"]:::data
+ReportSchema["report.schema.json"]:::data
+MetricsSchema["metrics.schema.json"]:::data
+StampSchema["stamp.schema.json"]:::data
+end
+
+subgraph SecurityLayer["Security / Governance"]
+NeverLog["never-log rules"]:::sec
+Redaction["redaction.ts"]:::sec
+SecretsGate["secret scanning gate"]:::sec
+PolicyTests["policy regression tests"]:::sec
+DenyByDefault["deny-by-default defaults"]:::sec
+end
+end
+
+%% ========================================================= %%
+%% LAYER 3 - AI TOOL RADAR %%
+%% ========================================================= %%
+
+subgraph L3["Layer 3 — AI Tool Radar"]
+direction TB
+
+subgraph RadarRegistry["src/radar/registry"]
+RadarTools["tools.json"]:::data
+RadarSchema["schema.ts"]:::repo
+RadarCategories["categories.ts"]:::repo
+RadarTaxonomy["taxonomy.ts"]:::repo
+end
+
+subgraph RadarScanner["src/radar/scanner"]
+ToolScanner["tool-scanner.ts"]:::control
+SourceConnector["source-connectors.ts"]:::repo
+RepoCrawler["repo-crawler.ts"]:::repo
+ReleaseWatcher["release-watcher.ts"]:::repo
+MetadataSanitizer["metadata-sanitizer.ts"]:::sec
+end
+
+subgraph RadarClassifier["src/radar/classifier"]
+ToolClassifier["tool-classifier.ts"]:::control
+CapabilityInfer["capability-inference.ts"]:::control
+SegmentInfer["segment-inference.ts"]:::control
+LaunchDetector["launch-detector.ts"]:::control
+end
+
+subgraph RadarTrends["src/radar/trends"]
+TrendEngine["trend-engine.ts"]:::control
+EcosystemMap["ecosystem-map.ts"]:::repo
+ChangeDetector["change-detector.ts"]:::repo
+end
+
+subgraph RadarArtifacts["artifacts/tool-radar"]
+RadarJson["radar.json"]:::art
+RadarMetrics["metrics.json"]:::art
+RadarStamp["stamp.json"]:::art
+TrendReport["trend-report.json"]:::art
+EcosystemJson["ecosystem-map.json"]:::art
+end
+end
+
+%% ========================================================= %%
+%% LAYER 4 - MARKET INTELLIGENCE %%
+%% ========================================================= %%
+
+subgraph L4["Layer 4 — Market Intelligence Engine"]
+direction TB
+
+subgraph MarketSignals["src/market-intel/signals"]
+SignalSchema["signal-schema.ts"]:::repo
+FundingSignal["funding-signal.ts"]:::repo
+HiringSignal["hiring-signal.ts"]:::repo
+GitHubSignal["github-signal.ts"]:::repo
+BenchmarkSignal["benchmark-signal.ts"]:::repo
+end
+
+subgraph MarketIngest["src/market-intel/ingestion"]
+SignalIngestor["signal-ingestor.ts"]:::control
+FundingIngest["funding-ingest.ts"]:::repo
+HiringIngest["hiring-ingest.ts"]:::repo
+GitHubIngest["github-ingest.ts"]:::repo
+BenchmarkIngest["benchmark-ingest.ts"]:::repo
+CrossSourceValidation["cross-source-validation.ts"]:::sec
+end
+
+subgraph MarketAnalytics["src/market-intel/analytics"]
+TrendAnalysis["trend-analysis.ts"]:::control
+DeltaEngine["delta-engine.ts"]:::control
+RankingEngine["ranking-engine.ts"]:::control
+AnomalyDetection["anomaly-detection.ts"]:::sec
+end
+
+subgraph MarketDashboards["src/market-intel/dashboards"]
+DashboardBuilder["dashboard-builder.ts"]:::repo
+ReportBuilder["report-builder.ts"]:::repo
+RankingView["tool-ranking-view.ts"]:::repo
+end
+
+subgraph MarketArtifacts["artifacts/market-intel"]
+MarketReport["report.json"]:::art
+MarketMetrics["metrics.json"]:::art
+MarketStamp["stamp.json"]:::art
+MarketDeltas["market-deltas.json"]:::art
+EcosystemDash["ecosystem-dashboard.json"]:::art
+ToolRanking["tool-ranking.json"]:::art
+end
+end
+
+%% ========================================================= %%
+%% LAYER 5 - STRATEGY ENGINE %%
+%% ========================================================= %%
+
+subgraph L5["Layer 5 — Autonomous Strategy Engine"]
+direction TB
+
+subgraph StrategyDiscovery["src/strategy/discovery"]
+ToolDiscovery["tool-discovery.ts"]:::control
+OpportunitySource["opportunity-source.ts"]:::repo
+CandidateQueue["candidate-queue.ts"]:::repo
+end
+
+subgraph StrategyReasoning["src/strategy/reasoning"]
+OpportunityScoring["opportunity-scoring.ts"]:::control
+PriorityModel["priority-model.ts"]:::control
+FitAnalysis["summit-fit-analysis.ts"]:::control
+RiskScoring["risk-scoring.ts"]:::sec
+end
+
+subgraph StrategyPlanning["src/strategy/planning"]
+SubsumptionPlanner["subsumption-planner.ts"]:::control
+StrategyPlan["strategy-plan.ts"]:::repo
+MinimalWinningSlice["mws-builder.ts"]:::repo
+DoDRubric["definition-of-done.ts"]:::repo
+end
+
+subgraph StrategyPR["src/strategy/pr-generator"]
+PRStackBuilder["pr-stack-builder.ts"]:::control
+PathPlanner["repo-path-planner.ts"]:::control
+GatePlanner["ci-gate-planner.ts"]:::control
+PatchSkeletons["patch-skeletons.ts"]:::repo
+end
+
+subgraph StrategyRoadmap["src/strategy/roadmap"]
+IntegrationQueue["integration-queue.ts"]:::repo
+PriorityBoard["priority-board.ts"]:::repo
+DeprPlan["deprecation-plan.ts"]:::repo
+end
+
+subgraph StrategyArtifacts["artifacts/strategy"]
+PlanJson["plan.json"]:::art
+IntegrationPlan["integration-plan.json"]:::art
+PRStackJson["pr-stack.json"]:::art
+StrategyStamp["stamp.json"]:::art
+Opportunities["integration-opportunities.json"]:::art
+end
+end
+
+%% ========================================================= %%
+%% LAYER 6 - SELF-IMPROVING ENGINEERING SYSTEM %%
+%% ========================================================= %%
+
+subgraph L6["Layer 6 — Autonomous Self-Improving Engineering System"]
+direction TB
+
+subgraph SelfTelemetry["src/self-improve/telemetry"]
+PlatformMetrics["platform-metrics.ts"]:::control
+LatencyMetrics["latency-metrics.ts"]:::repo
+CouplingMetrics["coupling-metrics.ts"]:::repo
+FailureMetrics["failure-metrics.ts"]:::repo
+end
+
+subgraph SelfAnalysis["src/self-improve/analysis"]
+ArchitectureAnalyzer["architecture-analyzer.ts"]:::control
+WeaknessDetector["weakness-detector.ts"]:::control
+RedundancyFinder["redundancy-finder.ts"]:::control
+HotspotDetector["hotspot-detector.ts"]:::control
+end
+
+subgraph SelfPlanning["src/self-improve/planning"]
+RefactorPlanner["refactor-planner.ts"]:::control
+RefactorPlan["refactor-plan.ts"]:::repo
+StagedRollout["staged-rollout.ts"]:::sec
+BlastRadius["blast-radius-estimator.ts"]:::sec
+end
+
+subgraph SelfEval["src/self-improve/evaluation"]
+BenchmarkComparator["benchmark-comparator.ts"]:::control
+RegressionChecker["regression-checker.ts"]:::sec
+MergeabilityCheck["mergeability-check.ts"]:::sec
+end
+
+subgraph SelfPR["src/self-improve/pr-generator"]
+ImprovementPRBuilder["improvement-pr-builder.ts"]:::control
+InternalPatchPlan["internal-patch-plan.ts"]:::repo
+end
+
+subgraph SelfArtifacts["artifacts/self-improve"]
+SelfReport["report.json"]:::art
+RefactorPlanJson["refactor-plan.json"]:::art
+SelfStamp["stamp.json"]:::art
+PlatformHealth["platform-health.json"]:::art
+RefactorOpps["refactor-opportunities.json"]:::art
+end
+end
+
+%% ========================================================= %%
+%% CI / TEST / GOVERNANCE %%
+%% ========================================================= %%
+
+subgraph CI["GitHub Actions / CI Gates"]
+direction TB
+
+subgraph Workflows[".github/workflows"]
+WDevstack["devstack-gate.yml"]:::ci
+WAgent["agentic-plan-gate.yml"]:::ci
+WRadar["radar-update.yml"]:::ci
+WMarket["market-intel.yml"]:::ci
+WStrategy["strategy-engine.yml"]:::ci
+WSelf["self-improve.yml"]:::ci
+WArch["architecture-check.yml"]:::ci
+WDrift["architecture-monitor.yml"]:::ci
+end
+
+subgraph Checks["Checks / Policies"]
+DeterminismCheck["deterministic output check"]:::ci
+EvidenceCompleteness["evidence completeness"]:::ci
+ArtifactValidation["artifact schema validation"]:::ci
+PerfBudget["performance budget enforcement"]:::ci
+SecurityPolicy["security policy validation"]:::ci
+DocLint["doc + diagram lint"]:::ci
+TestSuites["test suites"]:::ci
+end
+
+subgraph Tests["Representative Tests"]
+TS1["tests/security/devstack-injection.test.ts"]:::ci
+TS2["tests/security/radar-ingestion.test.ts"]:::ci
+TS3["tests/security/market-signal-validation.test.ts"]:::ci
+TS4["tests/security/strategy-engine-validation.test.ts"]:::ci
+TS5["tests/security/refactor-validation.test.ts"]:::ci
+TS6["tests/docs/architecture-validation.test.ts"]:::ci
+end
+end
+
+%% ========================================================= %%
+%% DATA FLOW - EXTERNAL TO DEV STACK %%
+%% ========================================================= %%
+
+Cursor --> CursorAdapter
+Copilot --> CopilotAdapter
+ClaudeCode --> ClaudeAdapter
+Windsurf --> WindsurfAdapter
+Cody --> CodyAdapter
+Aider --> AiderAdapter
+Devin --> DevinAdapter
+OpenAICLI --> OpenAIAdapter
+Codeium --> AdapterRegistry
+Sweep --> AdapterRegistry
+
+BaseAdapter --> AdapterRegistry
+AdapterRegistry --> ToolSelector
+DSMap --> ToolSelector
+DSProfiles --> ToolSelector
+DSCap --> ToolSelector
+ToolSelector --> TaskPlanner
+TaskPlanner --> DevstackRunner
+OutputNormalizer --> DSReport
+DSMetrics --> DSMetricsJson
+DSMap --> DSMapJson
+DevstackRunner --> DSStamp
+DevstackRunner --> OutputNormalizer
+DevstackRunner --> DSMetrics
+DSLatency --> DSMetrics
+DSSuccess --> DSMetrics
+
+%% ========================================================= %%
+%% DATA FLOW - ADAPTER CONTROL PLANE %%
+%% ========================================================= %%
+
+DevstackRunner --> AgentOrchestrator
+TaskPlanner --> AgentRunner
+ToolSelector --> AgentRunner
+AgentOrchestrator --> AgentRunner
+AgentRunner --> ContextBus
+PolicyFilter --> AgentRunner
+StepLimiter --> AgentRunner
+AgentRunner --> EvidenceWriter
+EvidenceSchema --> EvidenceWriter
+DeterministicHasher --> EvidenceWriter
+EvidenceValidator --> EvidenceWriter
+
+EvidenceWriter --> AGReport
+EvidenceWriter --> AGMetrics
+DeterministicHasher --> AGStamp
+
+%% ========================================================= %%
+%% SHARED CORE CONNECTIONS %%
+%% ========================================================= %%
+
+ContextBus --> GraphRAG
+EntityResolver --> GraphRAG
+EmbeddingPipeline --> Qdrant
+Retrieval --> GraphRAG
+
+GraphRAG --> Neo4j
+GraphRAG --> Qdrant
+GraphRAG --> Postgres
+GraphRAG --> Redis
+
+EvidenceSchema --> ReportSchema
+DSMetrics --> MetricsSchema
+DeterministicHasher --> StampSchema
+EvidenceWriter --> EvidenceID
+
+NeverLog --> Redaction
+Redaction --> ContextBus
+SecretsGate --> SecurityPolicy
+PolicyTests --> SecurityPolicy
+DenyByDefault --> PolicyFilter
+
+%% ========================================================= %%
+%% RADAR INGESTION FLOWS %%
+%% ========================================================= %%
+
+GitHubAPI --> SourceConnector
+RSSFeeds --> SourceConnector
+ToolDirs --> SourceConnector
+DocsSources --> SourceConnector
+
+SourceConnector --> ToolScanner
+RepoCrawler --> ToolScanner
+ReleaseWatcher --> ToolScanner
+MetadataSanitizer --> ToolScanner
+ToolScanner --> ToolClassifier
+ToolClassifier --> CapabilityInfer
+ToolClassifier --> SegmentInfer
+ToolClassifier --> LaunchDetector
+
+CapabilityInfer --> TrendEngine
+SegmentInfer --> TrendEngine
+LaunchDetector --> ChangeDetector
+ChangeDetector --> TrendEngine
+
+TrendEngine --> TrendReport
+TrendEngine --> EcosystemJson
+ToolScanner --> RadarJson
+ToolClassifier --> RadarMetrics
+TrendEngine --> RadarStamp
+
+RadarTools --> ToolClassifier
+RadarSchema --> RadarTools
+RadarTaxonomy --> ToolClassifier
+RadarCategories --> ToolClassifier
+
+%% ========================================================= %%
+%% MARKET INTELLIGENCE FLOWS %%
+%% ========================================================= %%
+
+Funding --> FundingIngest
+Jobs --> HiringIngest
+GitHubAPI --> GitHubIngest
+Benchmarks --> BenchmarkIngest
+
+FundingIngest --> SignalIngestor
+HiringIngest --> SignalIngestor
+GitHubIngest --> SignalIngestor
+BenchmarkIngest --> SignalIngestor
+CrossSourceValidation --> SignalIngestor
+
+SignalSchema --> FundingSignal
+SignalSchema --> HiringSignal
+SignalSchema --> GitHubSignal
+SignalSchema --> BenchmarkSignal
+
+SignalIngestor --> TrendAnalysis
+SignalIngestor --> DeltaEngine
+SignalIngestor --> RankingEngine
+SignalIngestor --> AnomalyDetection
+
+TrendAnalysis --> MarketReport
+DeltaEngine --> MarketDeltas
+RankingEngine --> ToolRanking
+DashboardBuilder --> EcosystemDash
+ReportBuilder --> MarketMetrics
+
+TrendAnalysis --> DashboardBuilder
+RankingEngine --> RankingView
+RankingView --> DashboardBuilder
+DeltaEngine --> MarketStamp
+
+%% ========================================================= %%
+%% STRATEGY ENGINE FLOWS %%
+%% ========================================================= %%
+
+RadarJson --> ToolDiscovery
+TrendReport --> OpportunitySource
+MarketDeltas --> OpportunitySource
+ToolRanking --> OpportunitySource
+EcosystemJson --> OpportunitySource
+
+ToolDiscovery --> CandidateQueue
+OpportunitySource --> CandidateQueue
+CandidateQueue --> OpportunityScoring
+CandidateQueue --> FitAnalysis
+CandidateQueue --> RiskScoring
+
+OpportunityScoring --> PriorityModel
+FitAnalysis --> PriorityModel
+RiskScoring --> PriorityModel
+
+PriorityModel --> SubsumptionPlanner
+SubsumptionPlanner --> MinimalWinningSlice
+SubsumptionPlanner --> DoDRubric
+SubsumptionPlanner --> StrategyPlan
+
+StrategyPlan --> PRStackBuilder
+PRStackBuilder --> PathPlanner
+PRStackBuilder --> GatePlanner
+PRStackBuilder --> PatchSkeletons
+
+PriorityModel --> IntegrationQueue
+IntegrationQueue --> PriorityBoard
+PriorityModel --> DeprPlan
+
+SubsumptionPlanner --> PlanJson
+SubsumptionPlanner --> IntegrationPlan
+PRStackBuilder --> PRStackJson
+PRStackBuilder --> StrategyStamp
+PriorityBoard --> Opportunities
+
+%% ========================================================= %%
+%% SELF-IMPROVING ENGINE FLOWS %%
+%% ========================================================= %%
+
+AGMetrics --> PlatformMetrics
+DSMetricsJson --> PlatformMetrics
+RadarMetrics --> PlatformMetrics
+MarketMetrics --> PlatformMetrics
+PlanJson --> PlatformMetrics
+
+PlatformMetrics --> LatencyMetrics
+PlatformMetrics --> CouplingMetrics
+PlatformMetrics --> FailureMetrics
+
+LatencyMetrics --> ArchitectureAnalyzer
+CouplingMetrics --> ArchitectureAnalyzer
+FailureMetrics --> ArchitectureAnalyzer
+
+ArchitectureAnalyzer --> WeaknessDetector
+ArchitectureAnalyzer --> RedundancyFinder
+ArchitectureAnalyzer --> HotspotDetector
+
+WeaknessDetector --> RefactorPlanner
+RedundancyFinder --> RefactorPlanner
+HotspotDetector --> RefactorPlanner
+
+RefactorPlanner --> RefactorPlan
+StagedRollout --> RefactorPlanner
+BlastRadius --> RefactorPlanner
+
+RefactorPlan --> BenchmarkComparator
+RefactorPlan --> RegressionChecker
+RefactorPlan --> MergeabilityCheck
+
+BenchmarkComparator --> ImprovementPRBuilder
+RegressionChecker --> ImprovementPRBuilder
+MergeabilityCheck --> ImprovementPRBuilder
+ImprovementPRBuilder --> InternalPatchPlan
+
+ArchitectureAnalyzer --> SelfReport
+RefactorPlan --> RefactorPlanJson
+ImprovementPRBuilder --> SelfStamp
+BenchmarkComparator --> PlatformHealth
+ImprovementPRBuilder --> RefactorOpps
+
+%% ========================================================= %%
+%% GRAPH ENRICHMENT ACROSS LAYERS %%
+%% ========================================================= %%
+
+DSMap --> Neo4j
+AdapterRegistry --> Neo4j
+AGReport --> Neo4j
+RadarJson --> Neo4j
+TrendReport --> Neo4j
+MarketReport --> Neo4j
+ToolRanking --> Neo4j
+PlanJson --> Neo4j
+RefactorPlanJson --> Neo4j
+
+DSReport --> Qdrant
+AGReport --> Qdrant
+TrendReport --> Qdrant
+MarketReport --> Qdrant
+PlanJson --> Qdrant
+SelfReport --> Qdrant
+
+MarketDeltas --> Postgres
+ToolRanking --> Postgres
+Opportunities --> Postgres
+PlatformHealth --> Postgres
+
+RadarMetrics --> Redis
+MarketMetrics --> Redis
+AGMetrics --> Redis
+SelfStamp --> Redis
+
+%% ========================================================= %%
+%% CI FLOWS %%
+%% ========================================================= %%
+
+CLIdevstack --> WDevstack
+CLIrun --> WAgent
+CLIradar --> WRadar
+CLImarket --> WMarket
+CLIstrategy --> WStrategy
+CLIself --> WSelf
+CLIarch --> WArch
+
+WDevstack --> DeterminismCheck
+WDevstack --> ArtifactValidation
+WDevstack --> PerfBudget
+
+WAgent --> EvidenceCompleteness
+WAgent --> SecurityPolicy
+
+WRadar --> ArtifactValidation
+WRadar --> SecurityPolicy
+
+WMarket --> ArtifactValidation
+WMarket --> PerfBudget
+
+WStrategy --> DeterminismCheck
+WStrategy --> SecurityPolicy
+
+WSelf --> PerfBudget
+WSelf --> TestSuites
+
+WArch --> DocLint
+WDrift --> DocLint
+
+DeterminismCheck --> DSReport
+DeterminismCheck --> AGReport
+DeterminismCheck --> PlanJson
+EvidenceCompleteness --> AGReport
+ArtifactValidation --> RadarJson
+ArtifactValidation --> MarketReport
+ArtifactValidation --> RefactorPlanJson
+PerfBudget --> PerfDev
+PerfBudget --> PerfRadar
+PerfBudget --> PerfMarket
+PerfBudget --> PerfStrategy
+PerfBudget --> PerfSelf
+SecurityPolicy --> TS1
+SecurityPolicy --> TS2
+SecurityPolicy --> TS3
+SecurityPolicy --> TS4
+SecurityPolicy --> TS5
+DocLint --> TS6
+
+%% ========================================================= %%
+%% MONITORING / DRIFT FLOWS %%
+%% ========================================================= %%
+
+MonRadar --> RadarJson
+MonRadar --> TrendReport
+MonMarket --> MarketReport
+MonMarket --> ToolRanking
+MonStrategy --> PlanJson
+MonStrategy --> Opportunities
+MonSelf --> SelfReport
+MonSelf --> PlatformHealth
+MonArch --> DocsArch
+MonArch --> DocsOverview
+MonArch --> WDrift
+
+MonRadar --> WRadar
+MonMarket --> WMarket
+MonStrategy --> WStrategy
+MonSelf --> WSelf
+
+%% ========================================================= %%
+%% DOC / OPS / SECURITY LINKAGE %%
+%% ========================================================= %%
+
+DocsArch --> DocsOverview
+DocsOverview --> DocsStandards
+DocsStandards --> DocsSecurity
+DocsSecurity --> DocsOps
+DocsAssume --> DocsOverview
+
+DocsArch --> WArch
+DocsSecurity --> SecurityPolicy
+DocsOps --> WSelf
+
+%% ========================================================= %%
+%% MASTER LAYER CHAIN %%
+%% ========================================================= %%
+
+L1 --> L2
+L2 --> CORE
+CORE --> L3
+L3 --> L4
+L4 --> L5
+L5 --> L6
+
+%% ========================================================= %%
+%% CLASS ASSIGNMENTS %%
+%% ========================================================= %%
+
+class Cursor,Copilot,ClaudeCode,Windsurf,Cody,Aider,Devin,OpenAICLI,Codeium,Sweep,GitHubAPI,RSSFeeds,ToolDirs,Jobs,Funding,Benchmarks,DocsSources ext;
+class CLIrun,CLIdevstack,CLIradar,CLImarket,CLIstrategy,CLIself,CLIarch,DSProfiles,DSCap,DSSchema,BaseAdapter,AdapterRegistry,CursorAdapter,CopilotAdapter,ClaudeAdapter,WindsurfAdapter,CodyAdapter,AiderAdapter,DevinAdapter,OpenAIAdapter,DSMetrics,DSLatency,DSSuccess,EvidenceSchema,EvidenceWriter,DeterministicHasher,GraphSchema,DocsArch,DocsOverview,DocsStandards,DocsSecurity,DocsOps,DocsAssume,PerfDev,PerfRadar,PerfMarket,PerfStrategy,PerfSelf,MonRadar,MonMarket,MonStrategy,MonSelf,MonArch,RadarSchema,RadarCategories,RadarTaxonomy,SourceConnector,RepoCrawler,ReleaseWatcher,SignalSchema,FundingSignal,HiringSignal,GitHubSignal,BenchmarkSignal,FundingIngest,HiringIngest,GitHubIngest,BenchmarkIngest,DashboardBuilder,ReportBuilder,RankingView,OpportunitySource,CandidateQueue,StrategyPlan,MinimalWinningSlice,DoDRubric,PatchSkeletons,IntegrationQueue,PriorityBoard,DeprPlan,LatencyMetrics,CouplingMetrics,FailureMetrics,RefactorPlan,InternalPatchPlan repo;
+class DevstackRunner,TaskPlanner,ToolSelector,OutputNormalizer,AgentOrchestrator,AgentRunner,ContextBus,EntityResolver,EmbeddingPipeline,Retrieval,GraphRAG,ToolScanner,ToolClassifier,CapabilityInfer,SegmentInfer,LaunchDetector,TrendEngine,SignalIngestor,TrendAnalysis,DeltaEngine,RankingEngine,ToolDiscovery,OpportunityScoring,PriorityModel,FitAnalysis,SubsumptionPlanner,PRStackBuilder,PathPlanner,GatePlanner,PlatformMetrics,ArchitectureAnalyzer,WeaknessDetector,RedundancyFinder,HotspotDetector,RefactorPlanner,BenchmarkComparator,ImprovementPRBuilder control;
+class DSMap,DSReport,DSMetricsJson,DSMapJson,DSStamp,AGReport,AGMetrics,AGStamp,EvidenceID,ReportSchema,MetricsSchema,StampSchema,RadarTools,RadarJson,RadarMetrics,RadarStamp,TrendReport,EcosystemJson,MarketReport,MarketMetrics,MarketStamp,MarketDeltas,EcosystemDash,ToolRanking,PlanJson,IntegrationPlan,PRStackJson,StrategyStamp,Opportunities,SelfReport,RefactorPlanJson,SelfStamp,PlatformHealth,RefactorOpps data;
+class Neo4j,Qdrant,Postgres,Redis core;
+class WDevstack,WAgent,WRadar,WMarket,WStrategy,WSelf,WArch,WDrift,DeterminismCheck,EvidenceCompleteness,ArtifactValidation,PerfBudget,SecurityPolicy,DocLint,TestSuites,TS1,TS2,TS3,TS4,TS5,TS6 ci;
+class StepLimiter,PolicyFilter,EvidenceValidator,SecurityLayer,NeverLog,Redaction,SecretsGate,PolicyTests,DenyByDefault,MetadataSanitizer,CrossSourceValidation,AnomalyDetection,RiskScoring,StagedRollout,BlastRadius,RegressionChecker,MergeabilityCheck sec;
+class DocsArch,DocsOverview,DocsStandards,DocsSecurity,DocsOps,DocsAssume doc;
+class DSReport,DSMetricsJson,DSMapJson,DSStamp,AGReport,AGMetrics,AGStamp,RadarJson,RadarMetrics,RadarStamp,TrendReport,EcosystemJson,MarketReport,MarketMetrics,MarketStamp,MarketDeltas,EcosystemDash,ToolRanking,PlanJson,IntegrationPlan,PRStackJson,StrategyStamp,Opportunities,SelfReport,RefactorPlanJson,SelfStamp,PlatformHealth,RefactorOpps art;

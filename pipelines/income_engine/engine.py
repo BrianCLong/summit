@@ -14,7 +14,6 @@ from .leverage import asset_leverage_index, simplicity_score
 from .recurrence import recurrence_score
 from .report import build_evidence_id, enforce_claim_policy, write_artifacts
 
-
 SCHEMA_PATH = Path(__file__).with_name("income_model.schema.json")
 
 
