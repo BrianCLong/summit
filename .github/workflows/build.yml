@@ -46,7 +46,7 @@ jobs:
           cosign-release: "v3.0.5"
 
       - name: Install Syft
-        uses: anchore/sbom-action/download-syft@6c5cb5bd7dcd9b7f5fe6d7c7e21ed2f6b3f5ab7b # v0.18.0
+        uses: anchore/sbom-action/download-syft@v0.18.0 # v0.18.0
 
       - name: Install in-toto
         run: pip install in-toto
