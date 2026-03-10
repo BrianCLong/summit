@@ -165,6 +165,7 @@ function App() {
 
                       {/* Workbench Route */}
                       <Route path="/workbench" element={<WorkbenchShell />} />
+                      <Route path="/warroom" element={<WarRoomApp />} />
                       <Route path="/copilot" element={<CopilotPage />} />
 
                       {/* Protected routes with layout */}
