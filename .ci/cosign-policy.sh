@@ -28,7 +28,7 @@ if [[ -f "$SIG_PATH" ]]; then
     exit 1
   fi
   echo "Verifying SBOM signature..."
-  cosign verify-blob --use-signed-timestamps --key "$PUBKEY_PATH" --signature "$SIG_PATH" "$SBOM_PATH" >/dev/null
+  cosign verify-blob --use-signed-timestamps --key "$PUBKEY_PATH" --signature "$SIG_PATH" "$SBOM_PATH" >/dev/null || { echo "::error::Supply chain verification failed! Missing or invalid signed timestamps."; false; }
   echo "SBOM signature: OK"
   exit 0
 fi

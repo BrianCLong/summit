@@ -22,7 +22,7 @@ permissions:
 jobs:
   sbom:
     name: Generate SBOM
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     outputs:
       sbom-path: ${{ steps.generate.outputs.sbom-path }}
     steps:
@@ -38,6 +38,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4 # v4
         with:
+          version: 10.0.0
           run_install: false
 
       - name: Install Syft

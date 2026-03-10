@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "adk/spec/report.schema.json",
+  "title": "Summit Agent Evaluation Report",
+  "type": "object",
+  "required": ["report_version", "agent_id"],
+  "properties": {
+    "report_version": { "type": "string" },
+    "agent_id": { "type": "string" }
+  }
+}

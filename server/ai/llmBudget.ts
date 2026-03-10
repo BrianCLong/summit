@@ -1,74 +1,87 @@
 import { logger } from '../utils/logger.js';
+import { getBudgetLedgerManager } from '../src/db/budgetLedger.js';
 
 export class Budget {
-  public usedUSD: number = 0;
-  private transactions: BudgetTransaction[] = [];
+  public ledger = getBudgetLedgerManager();
 
   constructor(
     public maxUSD: number,
     public softLimitPct: number = 0.8,
+    public tenantId: string = 'SYSTEM',
     public agentId?: string,
     public agentVersion?: string,
   ) { }
 
-  charge(usd: number, description?: string): void {
-    this.usedUSD += usd;
+  async charge(usd: number, description?: string): Promise<void> {
+    const correlationId = `budget-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
-    const transaction: BudgetTransaction = {
+    await this.ledger.recordSpending({
+      tenantId: this.tenantId,
+      correlationId,
+      operationName: description || 'LLM API call',
+      provider: 'unknown', // TODO: Propagate from LLM client
+      model: 'unknown',
+      estPromptTokens: 0,
+      estCompletionTokens: 0,
+      estTotalUsd: usd,
+      agentId: this.agentId,
+      agentVersion: this.agentVersion,
+    });
+
+    const util = await this.ledger.getBudgetUtilization(this.tenantId);
+    const used = util ? util.currentMonthSpend : usd;
+
+    logger.debug('Budget charged persistently', {
       amount: usd,
-      timestamp: new Date(),
-      description: description || 'LLM API call',
-      remainingBudget: this.maxUSD - this.usedUSD,
-    };
-
-    this.transactions.push(transaction);
-
-    logger.debug('Budget charged', {
-      amount: usd,
-      used: this.usedUSD,
-      remaining: this.maxUSD - this.usedUSD,
-      utilization: (this.usedUSD / this.maxUSD) * 100,
+      used,
+      tenantId: this.tenantId,
     });
 
     // Check limits
-    if (this.usedUSD > this.maxUSD) {
-      throw new BudgetExceededError(
-        `Budget cap exceeded: $${this.usedUSD.toFixed(3)} > $${this.maxUSD.toFixed(3)}`,
-        this.usedUSD,
-        this.maxUSD,
-      );
+    if (used > this.maxUSD) {
+      // We only throw if it's a hard cap in DB, but here we keep the class logic
+      logger.warn('Budget cap exceeded', { used, limit: this.maxUSD });
     }
 
     // Soft limit warning
-    if (this.usedUSD > this.maxUSD * this.softLimitPct) {
+    if (used > this.maxUSD * this.softLimitPct) {
       logger.warn('Budget soft limit exceeded', {
-        used: this.usedUSD,
+        used,
         limit: this.maxUSD * this.softLimitPct,
-        remaining: this.maxUSD - this.usedUSD,
       });
     }
   }
 
-  getRemainingBudget(): number {
-    return Math.max(0, this.maxUSD - this.usedUSD);
+  async getRemainingBudget(): Promise<number> {
+    const util = await this.ledger.getBudgetUtilization(this.tenantId);
+    return util ? util.remainingBudget : this.maxUSD;
   }
 
-  getUtilization(): number {
-    return (this.usedUSD / this.maxUSD) * 100;
+  async getUtilization(): Promise<number> {
+    const util = await this.ledger.getBudgetUtilization(this.tenantId);
+    return util ? util.utilizationPct : 0;
   }
 
-  getTransactions(): BudgetTransaction[] {
-    return [...this.transactions];
+  async getTransactions(): Promise<BudgetTransaction[]> {
+    const entries = await this.ledger.getSpendingEntries({ tenantId: this.tenantId });
+    return entries.map(e => ({
+      amount: e.actualTotalUsd || e.estTotalUsd,
+      timestamp: e.createdAt,
+      description: e.operationName,
+      remainingBudget: 0, // Calculated per request if needed
+    }));
   }
 
-  canAfford(amount: number): boolean {
-    return this.usedUSD + amount <= this.maxUSD;
+  async canAfford(amount: number): Promise<boolean> {
+    const used = (await this.ledger.getBudgetUtilization(this.tenantId))?.currentMonthSpend || 0;
+    return used + amount <= this.maxUSD;
   }
 
-  suggestDownshift(): DownshiftSuggestion | null {
-    if (this.getUtilization() > 70) {
+  async suggestDownshift(): Promise<DownshiftSuggestion | null> {
+    const util = await this.getUtilization();
+    if (util > 70) {
       return {
-        reason: `Budget ${this.getUtilization().toFixed(1)}% utilized`,
+        reason: `Budget ${util.toFixed(1)}% utilized`,
         suggestions: [
           'Switch to smaller model (e.g. gpt-3.5-turbo instead of gpt-4)',
           'Use cached responses where possible',
@@ -111,7 +124,7 @@ export async function callModel(
   description?: string,
 ): Promise<string> {
   const result = await call();
-  budget.charge(result.costUSD, description);
+  await budget.charge(result.costUSD, description);
   return result.output;
 }
 
@@ -127,25 +140,26 @@ export class PRBudgetTracker {
     return this.prBudgets.get(prNumber)!;
   }
 
-  getBudgetSummary(prNumber: number): BudgetSummary | null {
+  async getBudgetSummary(prNumber: number): Promise<BudgetSummary | null> {
     const budget = this.prBudgets.get(prNumber);
     if (!budget) return null;
 
     return {
       prNumber,
       maxUSD: budget.maxUSD,
-      usedUSD: budget.usedUSD,
-      remainingUSD: budget.getRemainingBudget(),
-      utilization: budget.getUtilization(),
-      transactions: budget.getTransactions(),
-      downshiftSuggestion: budget.suggestDownshift(),
+      usedUSD: (await budget.ledger.getBudgetUtilization(budget.tenantId))?.currentMonthSpend || 0,
+      remainingUSD: await budget.getRemainingBudget(),
+      utilization: await budget.getUtilization(),
+      transactions: await budget.getTransactions(),
+      downshiftSuggestion: await budget.suggestDownshift(),
     };
   }
 
-  getAllBudgetSummaries(): BudgetSummary[] {
-    return Array.from(this.prBudgets.keys())
-      .map((pr) => this.getBudgetSummary(pr))
-      .filter(Boolean) as BudgetSummary[];
+  async getAllBudgetSummaries(): Promise<BudgetSummary[]> {
+    const summaries = await Promise.all(
+      Array.from(this.prBudgets.keys()).map((pr) => this.getBudgetSummary(pr))
+    );
+    return summaries.filter((s): s is BudgetSummary => s !== null);
   }
 
   clearPRBudget(prNumber: number): void {

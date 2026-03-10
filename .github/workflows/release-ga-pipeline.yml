@@ -39,7 +39,7 @@ jobs:
   # ═══════════════════════════════════════════════════════════════════════════
   gate:
     name: "0️⃣ Gate Check"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     outputs:
       is_ga: ${{ steps.check.outputs.is_ga }}
       tag: ${{ steps.check.outputs.tag }}
@@ -80,7 +80,7 @@ jobs:
   # ═══════════════════════════════════════════════════════════════════════════
   freeze-gate:
     name: "🔒 Freeze Gate"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: gate
     if: needs.gate.outputs.is_ga == 'true'
 
@@ -105,7 +105,7 @@ jobs:
   # ═══════════════════════════════════════════════════════════════════════════
   lineage:
     name: "1️⃣ Lineage Check"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: [gate, freeze-gate]
     if: needs.gate.outputs.is_ga == 'true'
 
@@ -186,7 +186,7 @@ jobs:
 
   skills-vet:
     name: "Skills Vet"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: [gate, freeze-gate]
     if: needs.gate.outputs.is_ga == 'true'
 
@@ -229,7 +229,7 @@ jobs:
   # ═══════════════════════════════════════════════════════════════════════════
   verify:
     name: "2️⃣ Verification"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: [gate, lineage]
     if: needs.gate.outputs.is_ga == 'true'
 
@@ -257,7 +257,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
         with:
-          version: 10
+          version: 10.0.0
 
       - name: Setup Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
@@ -351,7 +351,7 @@ jobs:
   # ═══════════════════════════════════════════════════════════════════════════
   build-bundle:
     name: "3️⃣ Build GA Bundle"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: [gate, lineage, verify]
     if: needs.gate.outputs.is_ga == 'true'
 
@@ -398,7 +398,7 @@ jobs:
           fi
 
       - name: Install Cosign
-        uses: sigstore/cosign-installer@9614fae9e5c5eddabb09f90a270fcb487c9f7149 # v3.3.0
+        uses: sigstore/cosign-installer@v3.7.0
         with:
           cosign-release: "v3.0.5"
 
@@ -425,7 +425,7 @@ jobs:
   # ═══════════════════════════════════════════════════════════════════════════
   publish-guard:
     name: "4️⃣ Publish Guard"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: [gate, lineage, verify, build-bundle]
     if: needs.gate.outputs.is_ga == 'true'
 
@@ -452,9 +452,34 @@ jobs:
           path: staging/verification
 
       - name: Install Cosign
-        uses: sigstore/cosign-installer@9614fae9e5c5eddabb09f90a270fcb487c9f7149 # v3.3.0
+        uses: sigstore/cosign-installer@v3.7.0
         with:
           cosign-release: "v3.0.5"
+
+      - name: Verify Policy Bundle and Governance Approvals
+        run: |
+          echo "Building policy bundle to verify governance approvals..."
+          ALLOW_GOV_APPROVAL=1 pnpm exec tsx tools/governance/build-policy-bundles.ts
+
+          # Read the new hash
+          NEW_HASH=$(sha256sum "summit/agents/policy/policy-bundle.prod.json" | cut -d' ' -f1)
+
+          # Verify against the attested policy bundle in the GA bundle
+          ATTESTED_POLICY="staging/ga-bundle/policy/policy-bundle.prod.json"
+          if [[ ! -f "${ATTESTED_POLICY}" ]]; then
+            echo "::error::Attested policy-bundle.prod.json not found in staging/ga-bundle/policy/"
+            exit 1
+          fi
+          ATTESTED_HASH=$(sha256sum "${ATTESTED_POLICY}" | cut -d' ' -f1)
+
+          if [[ "${NEW_HASH}" != "${ATTESTED_HASH}" ]]; then
+            echo "::error::Policy bundle hash mismatch! Expected ${ATTESTED_HASH}, generated ${NEW_HASH}"
+            exit 1
+          fi
+
+          echo "Running policy checks against the bundle..."
+          pnpm exec tsx tools/governance/check-policy.ts "summit/agents/policy/policy-bundle.prod.json"
+          echo "Policy bundle verification passed!"
 
       - name: Verify Signed Bundle (Strict)
         env:
@@ -516,7 +541,7 @@ jobs:
   # ═══════════════════════════════════════════════════════════════════════════
   assemble:
     name: "5️⃣ Assemble Release Bundle"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: [gate, lineage, verify, build-bundle, publish-guard]
     if: needs.gate.outputs.is_ga == 'true'
 
@@ -694,7 +719,7 @@ jobs:
   # ═══════════════════════════════════════════════════════════════════════════
   publish:
     name: "6️⃣ Publish Release"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: [gate, lineage, verify, build-bundle, publish-guard, assemble]
     if: |
       needs.gate.outputs.is_ga == 'true' &&

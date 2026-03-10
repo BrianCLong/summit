@@ -1,0 +1,16 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "evidence_id_pattern": {
+      "type": "string"
+    },
+    "required_report_files": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": ["evidence_id_pattern", "required_report_files"]
+}

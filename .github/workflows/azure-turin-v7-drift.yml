@@ -4,7 +4,7 @@ on:
     - cron: '0 0 * * 1' # Weekly
 jobs:
   check-drift:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
       - name: Setup pnpm

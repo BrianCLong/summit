@@ -9,6 +9,7 @@
     "test": "jest"
   },
   "dependencies": {
+<<<<<<< HEAD
     "@apollo/gateway": "2.12.1",
     "@apollo/server": "4.16.0",
     "@opentelemetry/api": "1.9.0",
@@ -18,6 +19,17 @@
     "graphql-query-complexity": "0.12.0",
     "pino": "8.17.0",
     "redis": "5.8.1"
+=======
+    @apollo/gateway: "2.12.1",
+    "@apollo/server": "4.11.3",
+    @opentelemetry/api: "1.9.0",
+    @opentelemetry/sdk-trace-base: "2.0.1",
+    dataloader: "2.2.2",
+    graphql: "16.8.1",
+    graphql-query-complexity: "0.12.0",
+    pino: "8.17.0",
+    redis: "5.8.1"
+>>>>>>> origin/main
   },
   "devDependencies": {
     "@types/jest": "29.5.14",

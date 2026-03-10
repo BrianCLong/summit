@@ -60,7 +60,8 @@
     "lint:server": "cd server && npm run lint",
     "lint:client": "cd client && npm run lint",
     "test:quarantine": "echo 'Quarantine test placeholder - no flaky tests currently'",
-    "typecheck": "tsc -b --pretty false",
+    "typecheck:preflight": "node tools/typecheck/validate-tsconfig-types.mjs",
+    "typecheck": "pnpm run typecheck:preflight && tsc -b --pretty false",
     "typecheck:server": "cd server && tsc --noEmit",
     "typecheck:client": "cd client && tsc --noEmit",
     "format": "prettier -w . && ruff format",
@@ -125,9 +126,10 @@
     "generate:provenance": "npx tsx scripts/compliance/generate_provenance.ts",
     "ga:verify": "node scripts/ga/ga-verify-runner.mjs",
     "ga:verify:server": "pnpm --filter intelgraph-server typecheck && pnpm --filter intelgraph-server build && pnpm --filter intelgraph-server test:unit",
-    "ga:smoke": "echo '\u2705 Smoke tests not configured - add integration tests here' && exit 0",
+    "ga:smoke": "echo '✅ Smoke tests not configured - add integration tests here' && exit 0",
     "release:ready": "pnpm ga:verify && pnpm --filter intelgraph-server test:ci && bash scripts/ci/validate-workflow-filters.sh",
-    "prepare": "husky"
+    "prepare": "husky",
+    "verify:archive": "bash scripts/verify-archive-integrity.sh"
   },
   "keywords": [
     "intelligence-analysis",
@@ -142,7 +144,7 @@
   "author": "IntelGraph Team",
   "license": "MIT",
   "engines": {
-    "node": ">=18.18",
+    "node": ">=22.0.0",
     "npm": ">=8.0.0"
   },
   "devDependencies": {
@@ -276,7 +278,7 @@
       "ignoreCves": []
     },
     "overrides": {
-      "entities": "^4.5.0",
+      entities: "4.5.0",
       "d3-color": ">=3.1.0",
       "node-fetch": ">=2.6.7",
       "ws": ">=8.17.1",

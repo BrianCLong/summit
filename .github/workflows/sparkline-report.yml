@@ -4,7 +4,7 @@ on:
   workflow_dispatch: {}
 jobs:
   generate:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
 
@@ -28,6 +28,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
+          version: 10.0.0
           run_install: false
 
       - name: Install deps (none required) & generate
