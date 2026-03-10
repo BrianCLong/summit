@@ -29,7 +29,7 @@ jobs:
       status: success
     steps:
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@e301518471c62803a63119ac606994770289f660 # v4.0.2
+        uses: aws-actions/configure-aws-credentials@v4.0.2 # v4.0.2
 
           role-to-assume: ${{ inputs.role-to-assume }}
           aws-region: ${{ inputs.aws-region }}
