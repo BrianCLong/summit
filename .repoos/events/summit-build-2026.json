@@ -1,0 +1,8 @@
+{
+  "id": "event-summit-build-2026",
+  "name": "Summit Build 2026",
+  "type": "event",
+  "tracks": ["plugins", "partners", "economics"],
+  "location": "Berlin",
+  "quarter": "2026-Q2"
+}

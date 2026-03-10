@@ -1,0 +1,8 @@
+{
+  "id": "partner-atlas-security",
+  "name": "Atlas Security",
+  "type": "partner",
+  "platforms": ["aws", "gcp"],
+  "focus": ["security", "compliance"],
+  "tier": "strategic"
+}

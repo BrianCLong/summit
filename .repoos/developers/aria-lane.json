@@ -1,0 +1,8 @@
+{
+  "id": "dev-aria-lane",
+  "name": "Aria Lane",
+  "type": "developer",
+  "expertise": ["observability", "distributed-systems"],
+  "region": "NA",
+  "profile": "Senior plugin contributor focused on reliability telemetry."
+}

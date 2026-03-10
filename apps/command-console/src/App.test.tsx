@@ -58,10 +58,25 @@ describe('Command Console dashboard', () => {
   beforeEach(() => {
     vi.useFakeTimers({ shouldAdvanceTime: true });
     vi.stubEnv('VITE_COMMAND_CONSOLE_ENABLED', 'true');
-    global.fetch = vi.fn().mockResolvedValue({
-      ok: true,
-      json: async () => mockSnapshot,
-    } as any);
+    global.fetch = vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.includes('platform-index.json')) {
+        return {
+          ok: true,
+          json: async () => ({
+            records: [
+              { id: 'plugin-observability-suite', type: 'plugin' },
+              { id: 'dev-aria-lane', type: 'developer' },
+            ],
+          }),
+        } as any;
+      }
+
+      return {
+        ok: true,
+        json: async () => mockSnapshot,
+      } as any;
+    });
   });
 
   afterEach(() => {
@@ -83,6 +98,7 @@ describe('Command Console dashboard', () => {
     // Multiple elements contain "acme" so check at least one exists
     expect(screen.getAllByText(/acme/).length).toBeGreaterThan(0);
     expect(screen.getByText(/LLM Tokens/)).toBeInTheDocument();
+    expect(screen.getByText(/Platform Index Dashboard/i)).toBeInTheDocument();
   });
 
   it('shows a helpful message when disabled', async () => {
