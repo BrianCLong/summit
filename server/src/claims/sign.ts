@@ -1,5 +1,6 @@
 import crypto from 'crypto';
 import fetch from 'node-fetch';
+import { MerkleLog } from '../transparency/MerkleLog.js';
 
 export async function signClaimSet(transitKey: string, payload: any) {
   const bytes = Buffer.from(JSON.stringify(payload));
@@ -21,6 +22,8 @@ export async function signClaimSet(transitKey: string, payload: any) {
 }
 
 export function verifyMerkle(root: string, leaves: string[]) {
-  // TODO: reuse MerkleLog to recompute root; placeholder returns true
-  return !!root && Array.isArray(leaves);
+  if (!root || !Array.isArray(leaves)) return false;
+  const log = new MerkleLog();
+  leaves.forEach((l) => log.append(l));
+  return log.root() === root;
 }
