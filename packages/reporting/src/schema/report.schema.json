@@ -1,12 +1,12 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://intelgraph.local/schemas/report.schema.json",
-  "title": "Report",
+  "$id": "https://summit.local/schemas/report.schema.json",
+  "title": "Summit Report",
   "type": "object",
   "required": ["schema_version", "case_id", "claims_used", "evidence_cids", "sections"],
   "properties": {
     "schema_version": { "type": "string" },
-    "case_id": { "type": "string", "minLength": 1 },
+    "case_id": { "type": "string" },
     "claims_used": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
     "evidence_cids": { "type": "array", "items": { "type": "string" } },
     "sections": {

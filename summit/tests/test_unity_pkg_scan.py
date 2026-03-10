@@ -9,7 +9,6 @@ from summit.pkg.dag import DependencyCycleError, topological_sort
 from summit.pkg.semver import SemVerError, validate_semver
 from summit.pkg.unity_adapter import build_package_report
 
-
 FIXTURE_MANIFEST = Path("summit/tests/fixtures/unity_pkg/package.json")
 
 

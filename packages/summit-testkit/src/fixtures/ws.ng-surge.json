@@ -1,0 +1,53 @@
+{
+  "writeset_id": "ws_ng_surge_001",
+  "system_time": "2026-03-06T12:00:00Z",
+  "source": "fixture.ng",
+  "ops": [
+    {
+      "op": "UPSERT_CLAIM",
+      "graph": "NG",
+      "claim": {
+        "claim_id": "ng_claim_001",
+        "subject": "channel:alpha",
+        "predicate": "pushes",
+        "object": "narrative:shockwave",
+        "confidence": 0.65,
+        "time": {
+          "valid_from": "2026-03-06T11:59:00Z",
+          "valid_to": null
+        },
+        "evidence_ids": ["artifact_social_001"]
+      }
+    },
+    {
+      "op": "UPSERT_CLAIM",
+      "graph": "NG",
+      "claim": {
+        "claim_id": "ng_claim_002",
+        "subject": "channel:beta",
+        "predicate": "pushes",
+        "object": "narrative:shockwave",
+        "confidence": 0.62,
+        "time": {
+          "valid_from": "2026-03-06T11:59:30Z",
+          "valid_to": null
+        },
+        "evidence_ids": ["artifact_social_002"]
+      }
+    }
+  ],
+  "provenance": {
+    "artifacts": [
+      {
+        "artifact_id": "artifact_social_001",
+        "type": "social_post",
+        "sha256": "aaa111"
+      },
+      {
+        "artifact_id": "artifact_social_002",
+        "type": "social_post",
+        "sha256": "bbb222"
+      }
+    ]
+  }
+}

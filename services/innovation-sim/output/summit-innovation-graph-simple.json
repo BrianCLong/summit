@@ -1,0 +1,501 @@
+{
+  "metadata": {
+    "id": "summit-innovation-graph-simple",
+    "version": "2026-03-09T11:31:09.222Z",
+    "description": "Summit innovation graph (simplified meta-validation)",
+    "createdAt": "2026-03-09T11:31:09.222Z"
+  },
+  "nodes": [
+    {
+      "id": "commit-b6db9d0",
+      "type": "project",
+      "name": "chore: merge origin/main and resolve conflicts sur",
+      "attrs": {
+        "author": "BrianCLong",
+        "timestamp": 1773055668
+      },
+      "evidenceRefs": [
+        {
+          "id": "evidence-commit-b6db9d0",
+          "type": "repo",
+          "source": "summit@b6db9d0",
+          "observedAt": "2026-03-09T11:27:48.000Z",
+          "confidence": 1
+        }
+      ]
+    },
+    {
+      "id": "commit-34c64b1",
+      "type": "project",
+      "name": "chore: merge origin/main and resolve conflicts sur",
+      "attrs": {
+        "author": "BrianCLong",
+        "timestamp": 1773036622
+      },
+      "evidenceRefs": [
+        {
+          "id": "evidence-commit-34c64b1",
+          "type": "repo",
+          "source": "summit@34c64b1",
+          "observedAt": "2026-03-09T06:10:22.000Z",
+          "confidence": 1
+        }
+      ]
+    },
+    {
+      "id": "commit-a2f04ba",
+      "type": "project",
+      "name": "docs(repoos): add complete autonomous governor sys",
+      "attrs": {
+        "author": "BrianCLong",
+        "timestamp": 1773036600
+      },
+      "evidenceRefs": [
+        {
+          "id": "evidence-commit-a2f04ba",
+          "type": "repo",
+          "source": "summit@a2f04ba",
+          "observedAt": "2026-03-09T06:10:00.000Z",
+          "confidence": 1
+        }
+      ]
+    },
+    {
+      "id": "commit-8e6a74d",
+      "type": "project",
+      "name": "feat(repoos): add self-healing CI queue management",
+      "attrs": {
+        "author": "BrianCLong",
+        "timestamp": 1773036442
+      },
+      "evidenceRefs": [
+        {
+          "id": "evidence-commit-8e6a74d",
+          "type": "repo",
+          "source": "summit@8e6a74d",
+          "observedAt": "2026-03-09T06:07:22.000Z",
+          "confidence": 1
+        }
+      ]
+    },
+    {
+      "id": "commit-0e5f342",
+      "type": "project",
+      "name": "feat(repoos): add agent proposal sandbox with beha",
+      "attrs": {
+        "author": "BrianCLong",
+        "timestamp": 1773036349
+      },
+      "evidenceRefs": [
+        {
+          "id": "evidence-commit-0e5f342",
+          "type": "repo",
+          "source": "summit@0e5f342",
+          "observedAt": "2026-03-09T06:05:49.000Z",
+          "confidence": 1
+        }
+      ]
+    },
+    {
+      "id": "commit-52f611e",
+      "type": "project",
+      "name": "feat(repoos): add predictive risk forecasting with",
+      "attrs": {
+        "author": "BrianCLong",
+        "timestamp": 1773036266
+      },
+      "evidenceRefs": [
+        {
+          "id": "evidence-commit-52f611e",
+          "type": "repo",
+          "source": "summit@52f611e",
+          "observedAt": "2026-03-09T06:04:26.000Z",
+          "confidence": 1
+        }
+      ]
+    },
+    {
+      "id": "commit-4e18d0f",
+      "type": "project",
+      "name": "feat(repoos): add autonomous governor with constit",
+      "attrs": {
+        "author": "BrianCLong",
+        "timestamp": 1773035022
+      },
+      "evidenceRefs": [
+        {
+          "id": "evidence-commit-4e18d0f",
+          "type": "repo",
+          "source": "summit@4e18d0f",
+          "observedAt": "2026-03-09T05:43:42.000Z",
+          "confidence": 1
+        }
+      ]
+    },
+    {
+      "id": "commit-d5dd984",
+      "type": "project",
+      "name": "feat: Add codex tasks for roadmap items 70-92 (#19",
+      "attrs": {
+        "author": "BrianCLong",
+        "timestamp": 1773029943
+      },
+      "evidenceRefs": [
+        {
+          "id": "evidence-commit-d5dd984",
+          "type": "repo",
+          "source": "summit@d5dd984",
+          "observedAt": "2026-03-09T04:19:03.000Z",
+          "confidence": 1
+        }
+      ]
+    },
+    {
+      "id": "commit-652698a",
+      "type": "project",
+      "name": "feat(factory): Add Claude AI software factory orch",
+      "attrs": {
+        "author": "BrianCLong",
+        "timestamp": 1773029940
+      },
+      "evidenceRefs": [
+        {
+          "id": "evidence-commit-652698a",
+          "type": "repo",
+          "source": "summit@652698a",
+          "observedAt": "2026-03-09T04:19:00.000Z",
+          "confidence": 1
+        }
+      ]
+    },
+    {
+      "id": "commit-e639c61",
+      "type": "project",
+      "name": "feat(ai-stack): implement unified agentic control ",
+      "attrs": {
+        "author": "BrianCLong",
+        "timestamp": 1773029937
+      },
+      "evidenceRefs": [
+        {
+          "id": "evidence-commit-e639c61",
+          "type": "repo",
+          "source": "summit@e639c61",
+          "observedAt": "2026-03-09T04:18:57.000Z",
+          "confidence": 1
+        }
+      ]
+    },
+    {
+      "id": "commit-29b04a6",
+      "type": "project",
+      "name": "feat(evidence): implement Summit Evidence Protocol",
+      "attrs": {
+        "author": "BrianCLong",
+        "timestamp": 1773029933
+      },
+      "evidenceRefs": [
+        {
+          "id": "evidence-commit-29b04a6",
+          "type": "repo",
+          "source": "summit@29b04a6",
+          "observedAt": "2026-03-09T04:18:53.000Z",
+          "confidence": 1
+        }
+      ]
+    },
+    {
+      "id": "commit-e76194f",
+      "type": "project",
+      "name": "feat(agents): introduce GPT-5.4 Tool Search archit",
+      "attrs": {
+        "author": "BrianCLong",
+        "timestamp": 1773029930
+      },
+      "evidenceRefs": [
+        {
+          "id": "evidence-commit-e76194f",
+          "type": "repo",
+          "source": "summit@e76194f",
+          "observedAt": "2026-03-09T04:18:50.000Z",
+          "confidence": 1
+        }
+      ]
+    },
+    {
+      "id": "commit-4f37679",
+      "type": "project",
+      "name": "feat: Complete RepoOS Evolution Intelligence Syste",
+      "attrs": {
+        "author": "BrianCLong",
+        "timestamp": 1773029927
+      },
+      "evidenceRefs": [
+        {
+          "id": "evidence-commit-4f37679",
+          "type": "repo",
+          "source": "summit@4f37679",
+          "observedAt": "2026-03-09T04:18:47.000Z",
+          "confidence": 1
+        }
+      ]
+    },
+    {
+      "id": "commit-2bd4bde",
+      "type": "project",
+      "name": "feat(ledger): implement bitemporal claim writeset ",
+      "attrs": {
+        "author": "BrianCLong",
+        "timestamp": 1773029884
+      },
+      "evidenceRefs": [
+        {
+          "id": "evidence-commit-2bd4bde",
+          "type": "repo",
+          "source": "summit@2bd4bde",
+          "observedAt": "2026-03-09T04:18:04.000Z",
+          "confidence": 1
+        }
+      ]
+    },
+    {
+      "id": "commit-76d6411",
+      "type": "project",
+      "name": "feat(repoos): Production-Ready Stability Layer, Co",
+      "attrs": {
+        "author": "BrianCLong",
+        "timestamp": 1773029879
+      },
+      "evidenceRefs": [
+        {
+          "id": "evidence-commit-76d6411",
+          "type": "repo",
+          "source": "summit@76d6411",
+          "observedAt": "2026-03-09T04:17:59.000Z",
+          "confidence": 1
+        }
+      ]
+    },
+    {
+      "id": "commit-ce13fa4",
+      "type": "project",
+      "name": "feat: Epistemic Immune System and Doctrine Playboo",
+      "attrs": {
+        "author": "BrianCLong",
+        "timestamp": 1773029876
+      },
+      "evidenceRefs": [
+        {
+          "id": "evidence-commit-ce13fa4",
+          "type": "repo",
+          "source": "summit@ce13fa4",
+          "observedAt": "2026-03-09T04:17:56.000Z",
+          "confidence": 1
+        }
+      ]
+    },
+    {
+      "id": "commit-c8ea3d3",
+      "type": "project",
+      "name": "feat(api): execution intent contract (#19641)",
+      "attrs": {
+        "author": "BrianCLong",
+        "timestamp": 1773029873
+      },
+      "evidenceRefs": [
+        {
+          "id": "evidence-commit-c8ea3d3",
+          "type": "repo",
+          "source": "summit@c8ea3d3",
+          "observedAt": "2026-03-09T04:17:53.000Z",
+          "confidence": 1
+        }
+      ]
+    },
+    {
+      "id": "commit-54cc2bc",
+      "type": "project",
+      "name": "feat(repoos): add CNPR scaffolding configs and doc",
+      "attrs": {
+        "author": "BrianCLong",
+        "timestamp": 1773029870
+      },
+      "evidenceRefs": [
+        {
+          "id": "evidence-commit-54cc2bc",
+          "type": "repo",
+          "source": "summit@54cc2bc",
+          "observedAt": "2026-03-09T04:17:50.000Z",
+          "confidence": 1
+        }
+      ]
+    },
+    {
+      "id": "commit-e7cc39f",
+      "type": "project",
+      "name": "feat(osint): instrument OSINT Analyst Assist desk ",
+      "attrs": {
+        "author": "BrianCLong",
+        "timestamp": 1773029867
+      },
+      "evidenceRefs": [
+        {
+          "id": "evidence-commit-e7cc39f",
+          "type": "repo",
+          "source": "summit@e7cc39f",
+          "observedAt": "2026-03-09T04:17:47.000Z",
+          "confidence": 1
+        }
+      ]
+    },
+    {
+      "id": "commit-801f8a9",
+      "type": "project",
+      "name": "feat: Implement Postgres-Neo4j deterministic parit",
+      "attrs": {
+        "author": "BrianCLong",
+        "timestamp": 1773029864
+      },
+      "evidenceRefs": [
+        {
+          "id": "evidence-commit-801f8a9",
+          "type": "repo",
+          "source": "summit@801f8a9",
+          "observedAt": "2026-03-09T04:17:44.000Z",
+          "confidence": 1
+        }
+      ]
+    },
+    {
+      "id": "innovation-simulation-engine",
+      "type": "technology",
+      "name": "Innovation Simulation Engine",
+      "attrs": {
+        "maturity": "nascent",
+        "strategic_importance": "critical"
+      },
+      "evidenceRefs": [
+        {
+          "id": "evidence-innovation-simulation-engine",
+          "type": "manual",
+          "source": "summit-architecture-review",
+          "observedAt": "2026-03-09T00:00:00Z",
+          "confidence": 1
+        }
+      ]
+    },
+    {
+      "id": "repository-archaeology-engine",
+      "type": "technology",
+      "name": "Repository Archaeology Engine",
+      "attrs": {
+        "maturity": "emerging"
+      },
+      "evidenceRefs": [
+        {
+          "id": "evidence-repository-archaeology-engine",
+          "type": "manual",
+          "source": "summit-architecture-review",
+          "observedAt": "2026-03-09T00:00:00Z",
+          "confidence": 1
+        }
+      ]
+    },
+    {
+      "id": "evolution-intelligence-system",
+      "type": "technology",
+      "name": "Evolution Intelligence System",
+      "attrs": {
+        "maturity": "mature"
+      },
+      "evidenceRefs": [
+        {
+          "id": "evidence-evolution-intelligence-system",
+          "type": "manual",
+          "source": "summit-architecture-review",
+          "observedAt": "2026-03-09T00:00:00Z",
+          "confidence": 1
+        }
+      ]
+    },
+    {
+      "id": "summit-platform",
+      "type": "organization",
+      "name": "Summit Platform",
+      "attrs": {
+        "organization_type": "enterprise"
+      },
+      "evidenceRefs": [
+        {
+          "id": "evidence-summit-platform",
+          "type": "manual",
+          "source": "summit-architecture-review",
+          "observedAt": "2026-03-09T00:00:00Z",
+          "confidence": 1
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge-summit-develops-innovation-sim",
+      "type": "develops",
+      "from": "summit-platform",
+      "to": "innovation-simulation-engine",
+      "evidenceRefs": [
+        {
+          "id": "evidence-edge-1",
+          "type": "manual",
+          "source": "summit-architecture-review",
+          "observedAt": "2026-03-09T00:00:00Z",
+          "confidence": 1
+        }
+      ]
+    },
+    {
+      "id": "edge-innovation-sim-builds-on-archaeology",
+      "type": "builds-on",
+      "from": "innovation-simulation-engine",
+      "to": "repository-archaeology-engine",
+      "evidenceRefs": [
+        {
+          "id": "evidence-edge-2",
+          "type": "manual",
+          "source": "summit-architecture-review",
+          "observedAt": "2026-03-09T00:00:00Z",
+          "confidence": 1
+        }
+      ]
+    },
+    {
+      "id": "edge-innovation-sim-builds-on-evolution",
+      "type": "builds-on",
+      "from": "innovation-simulation-engine",
+      "to": "evolution-intelligence-system",
+      "evidenceRefs": [
+        {
+          "id": "evidence-edge-3",
+          "type": "manual",
+          "source": "summit-architecture-review",
+          "observedAt": "2026-03-09T00:00:00Z",
+          "confidence": 1
+        }
+      ]
+    }
+  ],
+  "stats": {
+    "nodeCountByType": {
+      "project": 20,
+      "technology": 3,
+      "organization": 1
+    },
+    "edgeCountByType": {
+      "develops": 1,
+      "builds-on": 2
+    },
+    "totalNodes": 24,
+    "totalEdges": 3,
+    "totalEvidenceRefs": 27,
+    "avgConfidence": 1
+  }
+}

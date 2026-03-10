@@ -27,6 +27,9 @@ export enum CanonicalEntityType {
   RUNBOOK = 'RUNBOOK',
   EVIDENCE = 'EVIDENCE',
   HYPOTHESIS = 'HYPOTHESIS',
+  EPISODE = 'EPISODE',
+  PERSPECTIVE = 'PERSPECTIVE',
+  MEDIATION = 'MEDIATION',
 }
 
 export enum SensitivityLevel {
@@ -179,6 +182,15 @@ export enum CanonicalRelationshipType {
   PRECEDES = 'PRECEDES',               // Event → Event
   FOLLOWS = 'FOLLOWS',                 // Event → Event
   CONCURRENT_WITH = 'CONCURRENT_WITH', // Event → Event
+
+  // Phenomenology relationships (NEW)
+  EXPERIENCED_BY = 'EXPERIENCED_BY',   // Episode -> Actor
+  MEDIATED_BY = 'MEDIATED_BY',         // Episode -> Tool/Agent
+  HAS_PERSPECTIVE = 'HAS_PERSPECTIVE', // Episode -> Perspective
+
+  // Epistemology relationships (NEW)
+  PRODUCED_BY = 'PRODUCED_BY',         // Claim -> Agent/Model
+  UPDATED_BY = 'UPDATED_BY',           // Claim -> Agent/Model
 
   // Hypothesis relationships (NEW)
   EXPLAINS = 'EXPLAINS',               // Hypothesis → Observation

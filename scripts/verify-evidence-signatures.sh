@@ -42,9 +42,9 @@ verify_signature() {
 
   if command -v cosign &> /dev/null; then
     if [ -f "$COSIGN_PUB" ] && [ -s "$COSIGN_PUB" ]; then
-      cosign verify-blob --use-signed-timestamps --key "$COSIGN_PUB" --signature "$signature_path" "$file" >/dev/null
+      cosign verify-blob --use-signed-timestamps --key "$COSIGN_PUB" --signature "$signature_path" "$file" >/dev/null || { echo "::error::Supply chain verification failed! Missing or invalid signed timestamps."; false; }
     elif [ -f "$certificate_path" ] && [ -s "$certificate_path" ]; then
-      cosign verify-blob --use-signed-timestamps \
+      cosign verify-blob --use-signed-timestamps \ || { echo "::error::Supply chain verification failed! Missing or invalid signed timestamps."; false; }
         --certificate "$certificate_path" \
         --signature "$signature_path" \
         --certificate-identity-regexp=".*" \

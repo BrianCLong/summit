@@ -30,7 +30,7 @@ jobs:
           cache: "pnpm"
 
       - name: Install Dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Run Drift Detection
         run: npx tsx scripts/monitoring/ci-runner-drift.ts

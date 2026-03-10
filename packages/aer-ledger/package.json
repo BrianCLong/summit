@@ -13,14 +13,14 @@
     "test": "jest --passWithNoTests"
   },
   "dependencies": {
-    "express": "^5.2.0",
-    "body-parser": "^2.2.0"
+    "express": "5.2.0",
+    "body-parser": "2.2.0"
   },
   "devDependencies": {
-    "typescript": "^5.9.3",
+    "typescript": "5.9.3",
     "@types/node": "20.19.27",
-    "@types/express": "^5.0.3",
-    "jest": "^30.2.0",
-    "@types/jest": "^30.0.0"
+    "@types/express": "5.0.3",
+    "jest": "30.2.0",
+    "@types/jest": "30.0.0"
   }
 }

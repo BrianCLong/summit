@@ -34,9 +34,12 @@ def _job_name(span: dict[str, Any]) -> str:
 
 def _dataset_from_attrs(attrs: dict[str, Any]) -> Optional[dict[str, Any]]:
     # db → dataset
-    if attrs.get("db.system") and (attrs.get("db.name") or attrs.get("db.statement")):
-        name = attrs.get("db.name") or "adhoc"
-        ns   = f"{OL_NAMESPACE}/db/{attrs.get('db.system')}"
+    db_system = attrs.get("db.system.name") or attrs.get("db.system")
+    db_name = attrs.get("db.namespace") or attrs.get("db.name")
+    if db_system and (db_name or attrs.get("db.statement")):
+        name = db_name or "adhoc"
+        ns   = f"{OL_NAMESPACE}/db/{db_system}"
+
         ver  = attrs.get("db.statement_hash") or attrs.get("db.sql.hash")
         return {
             "namespace": ns,
@@ -49,9 +52,12 @@ def _dataset_from_attrs(attrs: dict[str, Any]) -> Optional[dict[str, Any]]:
         }
 
     # messaging → dataset
-    if attrs.get("messaging.system") and attrs.get("messaging.destination"):
-        ns  = f"{OL_NAMESPACE}/msg/{attrs.get('messaging.system')}"
-        name = attrs.get("messaging.destination")
+    msg_system = attrs.get("messaging.system.name") or attrs.get("messaging.system")
+    msg_dest = attrs.get("messaging.destination.name") or attrs.get("messaging.destination")
+    if msg_system and msg_dest:
+        ns  = f"{OL_NAMESPACE}/msg/{msg_system}"
+        name = msg_dest
+
         return {
             "namespace": ns,
             "name": name,

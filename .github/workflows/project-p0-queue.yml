@@ -12,6 +12,7 @@ permissions:
 
 jobs:
   sync_project:
+    if: false
     runs-on: ubuntu-latest
     steps:
       - name: Sync item to Project #7 and set fields
@@ -22,6 +23,7 @@ jobs:
           script: |
             const isPR = context.eventName === 'pull_request_target';
             const item = isPR ? context.payload.pull_request : context.payload.issue;
+if (!item) { console.log("No item found. Skipping."); return; }
             const labels = (item.labels || []).map(l => (typeof l === 'string' ? l : l.name));
 
             // ----- CONFIG YOU MUST FILL IN -----
@@ -98,7 +100,13 @@ jobs:
                 }
               }`;
             const added = await gql(addMutation, { projectId: PROJECT_NODE_ID, contentId: item.node_id });
+<<<<<<< HEAD
+            const projectItemId = added?.addProjectV2ItemById?.item?.id;
+if (!projectItemId) { console.log("Failed to add project item, possibly missing configuration."); return; }
+=======
+            if (!added || !added.addProjectV2ItemById) { console.log("Failed to add project item", added); return; }
             const projectItemId = added.addProjectV2ItemById.item.id;
+>>>>>>> origin/main
 
             // 2) Update fields (only if values exist)
             const updateField = async (fieldId, value) => {

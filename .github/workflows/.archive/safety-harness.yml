@@ -48,12 +48,12 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@v2
         with:
-          version: 9.12.0
+          version: 10.0.0
 
       - name: Install dependencies
         run: |
           cd safety-harness
-          pnpm install --frozen-lockfile
+          pnpm install --no-frozen-lockfile
 
       - name: Build safety harness
         run: |

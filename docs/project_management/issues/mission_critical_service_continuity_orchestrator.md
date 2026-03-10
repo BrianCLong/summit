@@ -1,1 +1,3 @@
+# Mission Critical Service Continuity Orchestrator
+
 Tracks dependencies between business services and threat vectors in real time, automatically reprioritizing detection rules and failover paths to keep high-value operations running during active attacks.

@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "summit.epistemic.provenance",
+  "title": "Epistemic Provenance Step",
+  "description": "A step in the provenance graph",
+  "type": "object",
+  "required": ["step_id", "operation_type", "model_id"],
+  "properties": {
+    "step_id": { "type": "string" },
+    "operation_type": { "type": "string" },
+    "model_id": { "type": "string" },
+    "model_version": { "type": "string" },
+    "pipeline_stage": { "type": "string" }
+  }
+}

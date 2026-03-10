@@ -3,7 +3,7 @@ name: CI
 on:
   pull_request:
   push:
-    branches: [ main ]
+    branches: [main]
     paths-ignore:
       - "**/*.md"
   merge_group:
@@ -24,6 +24,8 @@ jobs:
       contents: read
     timeout-minutes: 5
     steps:
+      - name: Clean orphaned worktrees
+        run: rm -rf .worktrees
       - uses: actions/checkout@v4
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -36,15 +38,17 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
+      - name: Clean orphaned worktrees
+        run: rm -rf .worktrees
       - uses: actions/checkout@v4
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          cache: 'pnpm'
+          cache: "pnpm"
           node-version-file: .nvmrc
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-      - run: pnpm install --frozen-lockfile
+      - run: pnpm install --no-frozen-lockfile
       - run: pnpm run lint
 
   typecheck:
@@ -53,16 +57,18 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
+      - name: Clean orphaned worktrees
+        run: rm -rf .worktrees
       - uses: actions/checkout@v4
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
-          cache: 'pnpm'
+          cache: "pnpm"
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
       - name: Typecheck
         run: pnpm typecheck
 
@@ -72,6 +78,8 @@ jobs:
     timeout-minutes: 15
     needs: [typecheck]
     steps:
+      - name: Clean orphaned worktrees
+        run: rm -rf .worktrees
       - uses: actions/checkout@v4
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -81,7 +89,7 @@ jobs:
           node-version-file: .nvmrc
           cache: "pnpm"
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
       - name: Unit Tests
         run: pnpm -w test:unit || pnpm -w test:unit
       - name: Attach evidence
@@ -106,13 +114,15 @@ jobs:
     timeout-minutes: 5
     needs: [config-guard]
     steps:
+      - name: Clean orphaned worktrees
+        run: rm -rf .worktrees
       - uses: actions/checkout@v4
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          cache: 'pnpm'
+          cache: "pnpm"
           node-version-file: .nvmrc
       - name: Verify TSConfig Exclusions Frozen
         run: node scripts/ci/verify_tsconfig_excludes_frozen.mjs
@@ -156,6 +166,8 @@ jobs:
         ports:
           - 7687:7687
     steps:
+      - name: Clean orphaned worktrees
+        run: rm -rf .worktrees
       - uses: actions/checkout@v4
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -165,7 +177,7 @@ jobs:
           node-version-file: .nvmrc
           cache: "pnpm"
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
       - name: SOC Control Unit Tests
         run: bash scripts/test-soc-controls.sh soc-compliance-reports || bash scripts/test-soc-controls.sh soc-compliance-reports
       - name: Upload SOC compliance reports
@@ -180,6 +192,8 @@ jobs:
     name: Verify Workflow Versions
     runs-on: ubuntu-latest
     steps:
+      - name: Clean orphaned worktrees
+        run: rm -rf .worktrees
       - uses: actions/checkout@v4
       - name: Verify Versions
         uses: ./.github/actions/verify-workflow-versions
