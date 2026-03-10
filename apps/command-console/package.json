@@ -11,20 +11,20 @@
     "lint": "eslint . --ext .ts,.tsx --report-unused-disable-directives"
   },
   "dependencies": {
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0"
+    "react": "19.2.0",
+    "react-dom": "19.2.0"
   },
   "devDependencies": {
-    "@testing-library/jest-dom": "^6.6.3",
-    "@testing-library/react": "^16.2.0",
-    "@types/react": "^19.2.0",
-    "@types/react-dom": "^19.2.0",
-    "@vitejs/plugin-react": "^4.3.4",
-    "eslint": "^9.39.2",
-    "eslint-plugin-react-hooks": "^5.1.0-rc.0",
-    "jsdom": "^26.0.0",
-    "typescript": "^5.7.3",
-    "vite": "^5.4.11",
-    "vitest": "^2.1.5"
+    "@testing-library/jest-dom": "6.6.3",
+    "@testing-library/react": "16.2.0",
+    "@types/react": "19.2.0",
+    "@types/react-dom": "19.2.0",
+    "@vitejs/plugin-react": "4.3.4",
+    "eslint": "9.39.2",
+    "eslint-plugin-react-hooks": "5.1.0-rc.0",
+    "jsdom": "26.0.0",
+    "typescript": "5.7.3",
+    "vite": "5.4.11",
+    "vitest": "2.1.5"
   }
 }

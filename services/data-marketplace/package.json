@@ -14,13 +14,13 @@
     "@intelgraph/common-types": "workspace:*",
     "@intelgraph/distributed-registry": "workspace:*",
     "@intelgraph/data-pool": "workspace:*",
-    "fastify": "^4.28.0",
-    "zod": "^3.23.0",
-    "ethers": "^6.12.0"
+    "fastify": "4.28.0",
+    "zod": "3.23.0",
+    "ethers": "6.12.0"
   },
   "devDependencies": {
-    "typescript": "^5.3.3",
-    "tsx": "^4.7.0",
-    "vitest": "^1.6.0"
+    "typescript": "5.3.3",
+    "tsx": "4.7.0",
+    "vitest": "1.6.0"
   }
 }

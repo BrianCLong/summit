@@ -17,6 +17,7 @@ import {
   generateDiffMarkdown,
   writeEvidenceArtifacts,
   getDeterministicEnv,
+  validateHashAlgorithm,
   type DeterminismOptions,
   type DeterminismResult,
   type RunResult,
@@ -39,6 +40,11 @@ describe('Determinism Harness', () => {
       expect(hash).toBe('b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9');
     });
 
+    it('computes sha384 hash', () => {
+      const hash = computeHash('hello world', 'sha384');
+      expect(hash).toHaveLength(96);
+    });
+
     it('computes sha512 hash', () => {
       const hash = computeHash('hello world', 'sha512');
       expect(hash).toHaveLength(128);
@@ -59,6 +65,23 @@ describe('Determinism Harness', () => {
       const hash1 = computeHash('content a', 'sha256');
       const hash2 = computeHash('content b', 'sha256');
       expect(hash1).not.toBe(hash2);
+    });
+  });
+
+
+  describe('validateHashAlgorithm', () => {
+    it('allows secure hash algorithms', () => {
+      expect(() => validateHashAlgorithm('sha256')).not.toThrow();
+      expect(() => validateHashAlgorithm('sha384')).not.toThrow();
+      expect(() => validateHashAlgorithm('sha512')).not.toThrow();
+    });
+
+    it('rejects md5 by default', () => {
+      expect(() => validateHashAlgorithm('md5')).toThrow(/disabled by default/i);
+    });
+
+    it('allows md5 when explicitly enabled', () => {
+      expect(() => validateHashAlgorithm('md5', true)).not.toThrow();
     });
   });
 

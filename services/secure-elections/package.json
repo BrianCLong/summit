@@ -31,18 +31,18 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@fastify/cors": "^8.4.1",
-    "@fastify/helmet": "^11.1.1",
-    "fastify": "^4.24.3",
-    "pino": "^8.16.2",
-    "zod": "^3.22.4"
+    "@fastify/cors": "8.4.1",
+    "@fastify/helmet": "11.1.1",
+    "fastify": "4.24.3",
+    "pino": "8.16.2",
+    "zod": "3.22.4"
   },
   "devDependencies": {
-    "@types/node": "^20.10.0",
-    "@vitest/coverage-v8": "^1.0.4",
-    "tsx": "^4.6.2",
-    "typescript": "^5.3.3",
-    "vitest": "^1.0.4"
+    "@types/node": "20.10.0",
+    "@vitest/coverage-v8": "1.0.4",
+    "tsx": "4.6.2",
+    "typescript": "5.3.3",
+    "vitest": "1.0.4"
   },
   "engines": {
     "node": ">=18.18.0"

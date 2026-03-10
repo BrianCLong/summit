@@ -1,0 +1,22 @@
+name: Capability Quality Gate
+
+on:
+  push:
+    paths:
+      - 'packages/capabilities/**'
+
+jobs:
+  eval:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - name: Install deps
+        run: pnpm install
+      - name: Run capability evaluations
+        run: pnpm ts-node packages/capabilities/capability-evaluator/evaluator.ts
+      - name: Check metrics
+        run: pnpm ts-node scripts/evolution/automated-evolution.ts

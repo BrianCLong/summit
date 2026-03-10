@@ -1,0 +1,68 @@
+name: connector-sdk
+
+on:
+  pull_request:
+    paths:
+      - "packages/connector-sdk/**"
+      - "schemas/connectors/**"
+      - "connectors/**"
+      - "policies/**"
+      - "docs/specs/CONNECTOR_SDK.md"
+      - "docs/adr/ADR-0001-connector-sdk.md"
+      - "scripts/validate-connectors.mjs"
+      - "scripts/replay-connectors.mjs"
+      - "scripts/check-determinism.mjs"
+      - ".github/workflows/connector-sdk.yml"
+  push:
+    branches: ["main"]
+    paths:
+      - "packages/connector-sdk/**"
+      - "schemas/connectors/**"
+      - "connectors/**"
+      - "policies/**"
+      - "docs/specs/CONNECTOR_SDK.md"
+      - "docs/adr/ADR-0001-connector-sdk.md"
+      - "scripts/validate-connectors.mjs"
+      - "scripts/replay-connectors.mjs"
+      - "scripts/check-determinism.mjs"
+      - ".github/workflows/connector-sdk.yml"
+
+concurrency:
+  group: connector-sdk-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: connector-sdk/validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+
+      - name: Install deps
+        run: |
+          pnpm install ajv ajv-formats yaml
+
+      - name: Validate connector manifests
+        run: npx tsx scripts/validate-connectors.mjs
+
+      - name: Replay connector fixtures
+        run: npx tsx scripts/replay-connectors.mjs
+
+      - name: Check determinism
+        run: npx tsx scripts/check-determinism.mjs
+
+      - name: Verify required docs
+        run: |
+          test -f docs/specs/CONNECTOR_SDK.md
+          test -f docs/adr/ADR-0001-connector-sdk.md

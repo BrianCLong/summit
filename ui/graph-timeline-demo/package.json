@@ -1,0 +1,24 @@
+{
+  "name": "summit-graph-timeline-demo",
+  "private": true,
+  "scripts": {
+    "start": "concurrently \"node server.js\" \"parcel public/index.html --port 8081\""
+  },
+  "dependencies": {
+    "concurrently": "*",
+    "cors": "*",
+    "express": "*",
+    "leaflet": "*",
+    "neo4j-driver": "*",
+    "neovis.js": "*",
+    "react": "*",
+    "react-dom": "*",
+    "vis-data": "*",
+    "vis-timeline": "*"
+  },
+  "devDependencies": {
+    @playwright/test: "1.58.2",
+    "parcel": "*",
+    playwright: "1.58.2"
+  }
+}

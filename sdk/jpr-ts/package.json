@@ -8,10 +8,10 @@
     "build": "tsc -p tsconfig.json"
   },
   "dependencies": {
-    "yaml": "^2.4.5"
+    "yaml": "2.4.5"
   },
   "devDependencies": {
-    "@types/node": "^20.11.30",
-    "typescript": "^5.4.5"
+    "@types/node": "20.11.30",
+    "typescript": "5.4.5"
   }
 }

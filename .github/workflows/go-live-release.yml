@@ -28,7 +28,7 @@ permissions:
 jobs:
   go-live-gate:
     name: Go-Live Evidence Gate
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 30
     outputs:
       passed: ${{ steps.verify.outputs.passed }}
@@ -124,7 +124,7 @@ jobs:
   create-release:
     name: Create GitHub Release
     needs: go-live-gate
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     if: needs.go-live-gate.outputs.passed == 'true'
 
     steps:
@@ -195,7 +195,7 @@ jobs:
   notify-failure:
     name: Notify on Failure
     needs: go-live-gate
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     if: needs.go-live-gate.outputs.passed != 'true'
 
     steps:
