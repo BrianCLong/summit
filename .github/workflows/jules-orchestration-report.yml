@@ -1,0 +1,27 @@
+name: Jules Orchestration Supervisor
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # Daily at midnight
+  workflow_dispatch:
+
+jobs:
+  generate-report:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Run Orchestration Supervisor
+        run: node scripts/generate-jules-report.mjs
+
+      - name: Upload Report Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: jules-orchestration-report
+          path: artifacts/jules-orchestration-report.json
