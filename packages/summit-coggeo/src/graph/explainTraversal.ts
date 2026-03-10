@@ -1,5 +1,10 @@
+<<<<<<< HEAD
+import type { IntelGraphClient } from "./intelGraphClient.js";
+import type { ExplainPayload } from "../api/types.js";
+=======
 import type { IntelGraphClient } from "./intelGraphClient";
 import type { ExplainPayload } from "../api/types";
+>>>>>>> origin/main
 
 type StormEvent = {
   id: string;
@@ -38,6 +43,8 @@ function topK<T>(arr: T[], k: number, score: (t: T) => number): T[] {
     .map((x) => x.t);
 }
 
+<<<<<<< HEAD
+=======
 /**
  * Evidence walking strategy:
  * StormEvent -> STORM_AFFECTS_CELL -> TerrainCell
@@ -46,6 +53,7 @@ function topK<T>(arr: T[], k: number, score: (t: T) => number): T[] {
  * NOTE: We haven’t created CELL_SUPPORTED_BY_OBS edges in earlier stubs.
  * If you already have a different evidence edge name, map it here.
  */
+>>>>>>> origin/main
 export async function buildExplainForStorm(args: {
   stormId: string;
   graph: IntelGraphClient;
@@ -63,13 +71,19 @@ export async function buildExplainForStorm(args: {
   }
   const storm = stormNode.data;
 
+<<<<<<< HEAD
+=======
   // Load cells
+>>>>>>> origin/main
   const cellIds: string[] = storm.cells ?? [];
   const cellNodes = await args.graph.getNodeBatch<TerrainCell>(cellIds);
   const cells = cellNodes.map((n) => n.data);
 
+<<<<<<< HEAD
+=======
   // Evidence: gather observations for top cells
   // We assume edges: CELL_SUPPORTED_BY_OBS from cellId -> obsId
+>>>>>>> origin/main
   const obsIds = new Set<string>();
   for (const cid of topK(cellIds, 20, (id) => {
     const c = cells.find((x) => x.id === id);
@@ -81,7 +95,10 @@ export async function buildExplainForStorm(args: {
   const obsNodes = obsIds.size ? await args.graph.getNodeBatch<Observation>(Array.from(obsIds).slice(0, 50)) : [];
   const observations = obsNodes.map((n) => n.data);
 
+<<<<<<< HEAD
+=======
   // Driver heuristics (replace with your real attribution model later)
+>>>>>>> origin/main
   const maxPressure = cells.reduce((m, c) => Math.max(m, c.pressure ?? 0), 0);
   const maxTemp = cells.reduce((m, c) => Math.max(m, c.temperature ?? 0), 0);
   const maxTurb = cells.reduce((m, c) => Math.max(m, c.turbulence ?? 0), 0);

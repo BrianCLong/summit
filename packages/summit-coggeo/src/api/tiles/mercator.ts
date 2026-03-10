@@ -1,4 +1,7 @@
+<<<<<<< HEAD
+=======
 // Minimal WebMercator helpers (no deps)
+>>>>>>> origin/main
 export interface BBoxWgs84 { west: number; south: number; east: number; north: number; }
 
 export function tileToBBoxWgs84(z: number, x: number, y: number): BBoxWgs84 {

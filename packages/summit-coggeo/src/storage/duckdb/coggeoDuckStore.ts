@@ -1,7 +1,13 @@
 import type duckdb from "duckdb";
+<<<<<<< HEAD
+import { all, run } from "./duckdbClient.js";
+import type { TerrainCellRow } from "../../api/tiles/terrainTileService.js";
+import type { ExplainPayload } from "../../api/types.js";
+=======
 import { all, run } from "./duckdbClient";
 import type { TerrainCellRow } from "../../api/tiles/terrainTileService";
 import type { ExplainPayload } from "../../api/types";
+>>>>>>> origin/main
 
 export interface NarrativeRow {
   id: string;
@@ -28,7 +34,10 @@ export class CogGeoDuckStore {
   ) {}
 
   async init(): Promise<void> {
+<<<<<<< HEAD
+=======
     // Terrain cells (existing)
+>>>>>>> origin/main
     await run(this.conn, `
       CREATE TABLE IF NOT EXISTS terrain_cells (
         id VARCHAR,
@@ -44,7 +53,10 @@ export class CogGeoDuckStore {
       );
     `);
 
+<<<<<<< HEAD
+=======
     // Narratives
+>>>>>>> origin/main
     await run(this.conn, `
       CREATE TABLE IF NOT EXISTS coggeo_narratives (
         id VARCHAR,
@@ -56,7 +68,10 @@ export class CogGeoDuckStore {
       );
     `);
 
+<<<<<<< HEAD
+=======
     // Storms
+>>>>>>> origin/main
     await run(this.conn, `
       CREATE TABLE IF NOT EXISTS coggeo_storms (
         id VARCHAR,
@@ -68,7 +83,10 @@ export class CogGeoDuckStore {
       );
     `);
 
+<<<<<<< HEAD
+=======
     // Explains
+>>>>>>> origin/main
     await run(this.conn, `
       CREATE TABLE IF NOT EXISTS coggeo_explains (
         id VARCHAR,
@@ -77,7 +95,10 @@ export class CogGeoDuckStore {
       );
     `);
 
+<<<<<<< HEAD
+=======
     // Evidence edges: cell -> obs (for explain)
+>>>>>>> origin/main
     await run(this.conn, `
       CREATE TABLE IF NOT EXISTS coggeo_cell_obs (
         cell_id VARCHAR,
@@ -85,7 +106,10 @@ export class CogGeoDuckStore {
       );
     `);
 
+<<<<<<< HEAD
+=======
     // Optional parquet load for terrain
+>>>>>>> origin/main
     await run(this.conn, `
       CREATE TEMP VIEW IF NOT EXISTS _parquet_cells AS
       SELECT * FROM read_parquet('${this.opts.parquetPath}');
@@ -142,7 +166,10 @@ export class CogGeoDuckStore {
   }
 
   async listStorms(args: { timeRange: string; narrativeId?: string }): Promise<StormRow[]> {
+<<<<<<< HEAD
+=======
     // Minimal: ignore timeRange parsing for now; return recent
+>>>>>>> origin/main
     if (args.narrativeId) {
       return await all(this.conn, `
         SELECT * FROM coggeo_storms WHERE narrative_id = ? ORDER BY start_ts DESC LIMIT 200
@@ -169,7 +196,10 @@ export class CogGeoDuckStore {
   }
 
   async linkCellToObs(cellId: string, obsIds: string[]): Promise<void> {
+<<<<<<< HEAD
+=======
     // naive: wipe then insert
+>>>>>>> origin/main
     await run(this.conn, `DELETE FROM coggeo_cell_obs WHERE cell_id = ?`, [cellId]);
     for (const obsId of obsIds) {
       await run(this.conn, `INSERT INTO coggeo_cell_obs VALUES (?, ?)`, [cellId, obsId]);

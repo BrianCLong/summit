@@ -1,4 +1,6 @@
 export type ISODateTime = string;
+<<<<<<< HEAD
+=======
 
 export type TerrainLayerKind =
   | "pressure"
@@ -45,22 +47,30 @@ export type Observation = {
   geo?: { h3?: string; country?: string | null; region?: string | null } | null;
   provenance: { collector: string; hash: string; confidence?: number };
 };
+>>>>>>> origin/main
 
-export type Narrative = { id: string; label: string; evidence_refs: string[] };
+export type TerrainLayerKind =
+  | "pressure"
+  | "temperature"
+  | "storm"
+  | "wind"
+  | "turbulence";
 
-export type TerrainCell = {
+export type ExplainKind = "storm" | "well" | "fault" | "plate" | "current" | "terrain";
+
+<<<<<<< HEAD
+export interface ExplainPayload {
   id: string;
-  ts_bucket: string;
-  h3: string;
-  narrative_id: string;
-  pressure: number;
-  temperature: number;
-  wind_u?: number;
-  wind_v?: number;
-  turbulence?: number;
-  storm_score?: number;
-};
+  kind: ExplainKind;
+  summary: string;
+  drivers: Array<{ name: string; delta: number; evidence: string[] }>;
+  top_narratives?: Array<{ narrative_id: string; role: string; evidence: string[] }>;
+  confidence: number;
+  provenance: { models: string[]; prompt_ids?: string[] };
+}
 
+export interface CogGeoStormSummary {
+=======
 export type CogGeoWrite = {
   kind?: string;
   payload: Record<string, unknown>;
@@ -68,9 +78,17 @@ export type CogGeoWrite = {
 };
 
 export type CogGeoWriteSet = {
+>>>>>>> origin/main
   id: string;
-  created_at: string;
-  producer: string;
-  writes: CogGeoWrite[];
-  evidence_refs: string[];
-};
+  narrative_id: string;
+  start_ts: ISODateTime;
+  end_ts?: ISODateTime | null;
+  severity: number;
+  explain_ref: string;
+}
+
+export interface TerrainTileQuery {
+  narrativeId: string;
+  tsBucket: string;
+  layer: TerrainLayerKind;
+}

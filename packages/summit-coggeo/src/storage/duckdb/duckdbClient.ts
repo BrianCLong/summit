@@ -13,8 +13,13 @@ export function createDuckDBClient(opts: { path: string }): DuckDBClient {
     db,
     async connect() {
       return new Promise((resolve, reject) => {
+<<<<<<< HEAD
+        db.connect();
+        resolve(db.connect() as unknown as duckdb.Connection);
+=======
         const conn = db.connect();
         resolve(conn);
+>>>>>>> origin/main
       });
     },
     async close() {
@@ -34,9 +39,15 @@ export async function run(conn: duckdb.Connection, sql: string, params: any[] = 
 
 export async function all<T = any>(conn: duckdb.Connection, sql: string, params: any[] = []): Promise<T[]> {
   return await new Promise<T[]>((resolve, reject) => {
+<<<<<<< HEAD
+    conn.all(sql, ...params, (err: any, rows: any) => {
+      if (err) return reject(err);
+      resolve(rows);
+=======
     conn.all(sql, ...params, (err: any, res: duckdb.TableData) => {
       if (err) return reject(err);
       resolve(res as unknown as T[]);
+>>>>>>> origin/main
     });
   });
 }

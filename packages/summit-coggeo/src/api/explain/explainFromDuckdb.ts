@@ -1,5 +1,10 @@
+<<<<<<< HEAD
+import type { CogGeoDuckStore } from "../../storage/duckdb/coggeoDuckStore.js";
+import type { ExplainPayload } from "../types.js";
+=======
 import type { CogGeoDuckStore } from "../../storage/duckdb/coggeoDuckStore";
 import type { ExplainPayload } from "../types";
+>>>>>>> origin/main
 
 export async function explainForCell(args: { explainId: string; store: CogGeoDuckStore }): Promise<ExplainPayload> {
   const cellId = args.explainId.replace(/^explain:/, "");
