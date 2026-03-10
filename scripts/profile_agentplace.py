@@ -1,11 +1,8 @@
-import json
-import os
 import time
-
+import os
+import json
 import psutil
-
 from modules.agentplace.evaluator import AgentPlaceEvaluator
-
 
 def profile():
     base_dir = os.path.dirname(os.path.dirname(__file__))
@@ -15,7 +12,7 @@ def profile():
 
     evaluator = AgentPlaceEvaluator(risk_model_path, schema_path)
 
-    with open(manifest_path) as f:
+    with open(manifest_path, 'r') as f:
         manifest = json.load(f)
 
     # Latency measurement

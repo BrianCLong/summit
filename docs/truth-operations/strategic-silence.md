@@ -86,6 +86,10 @@ expected_value(act) = p(guess_correct) × value(correct_decision)
 IF expected_value(wait) > expected_value(act):
   THEN strategic_silence is optimal
 ```text
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin/main
 **Example**:
 
 ```text
@@ -95,6 +99,10 @@ Waiting: 5 minutes to gather more data, 95% chance of correct classification
 
 Decision: WAIT (strategic silence for 5 minutes)
 ```text
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin/main
 ### Category 2: Adversarial Probing
 
 **Scenario**: Adversary testing defenses, trying to learn system behavior
@@ -115,6 +123,10 @@ Response B: No response, connection times out normally
 
 Decision: Strategic silence (no special response)
 ```text
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin/main
 ### Category 3: Low-Value Targets
 
 **Scenario**: Minor issue not worth the cost of response
@@ -134,6 +146,10 @@ Opportunity cost: 8 hours not spent on critical security patch
 
 Decision: Strategic silence (do not fix, document as known-minor-issue)
 ```text
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin/main
 ### Category 4: Baiting and Provocation
 
 **Scenario**: Adversary trying to provoke overreaction
@@ -154,6 +170,10 @@ Response B: Strategic silence + internal verification + measured response only i
 
 Decision: Strategic silence (external) + internal investigation (private)
 ```text
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin/main
 ### Category 5: Time-Based Defense
 
 **Scenario**: Responding now helps adversary, delaying helps defender
@@ -171,6 +191,10 @@ Delayed Response: Monitor attacker activity, map their tools/techniques, prepare
 
 Decision: Strategic silence (appear unaware while preparing comprehensive response)
 ```text
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin/main
 ---
 
 ## Strategic Silence Framework
@@ -204,6 +228,10 @@ Alert/Event Detected
        ├─ YES → STRATEGIC SILENCE (deny adversary their goal)
        └─ NO → ACT
 ```text
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin/main
 ### Silence Classification
 
 Summit recognizes **four types of silence**:
@@ -279,6 +307,10 @@ Summit recognizes **four types of silence**:
   "escalation_trigger": "If telemetry not available by 14:33, decide with available information"
 }
 ```text
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin/main
 **Key Elements**:
 
 - Silence is **named and justified**, not just "we didn't do anything"
@@ -305,6 +337,10 @@ FOR each strategic_silence decision:
     - New information arrived that changes calculus
     - Silence duration exceeds acceptable for type
 ```text
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin/main
 ### Protocol 3: Justification Requirements
 
 **Silence requires stronger justification than action**:
@@ -317,6 +353,10 @@ To choose STRATEGIC_SILENCE, operator must document:
   4. How long silence is acceptable
   5. How silence will be monitored
 ```text
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin/main
 **Rationale**: Prevents "silence by default" or "silence due to indecision"
 
 ### Protocol 4: External vs. Internal Silence
@@ -337,12 +377,20 @@ Internal Activity:
   - Intelligence gathering active
   - Response being planned
 ```text
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin/main
 **Example**:
 
 ```text
 Adversary Perspective: "They haven't responded, maybe not detected"
 Defender Reality: "Fully aware, building comprehensive response, timing eviction for maximum effectiveness"
 ```text
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin/main
 ---
 
 ## Operator Interface for Silence
@@ -376,6 +424,10 @@ Defender Reality: "Fully aware, building comprehensive response, timing eviction
 │                                                      │
 └──────────────────────────────────────────────────────┘
 ```text
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin/main
 ### Silence Justification Template
 
 ```text
@@ -417,6 +469,10 @@ Defender Reality: "Fully aware, building comprehensive response, timing eviction
 │ [CONFIRM SILENCE] [REVISE] [CANCEL - ACT NOW]       │
 └──────────────────────────────────────────────────────┘
 ```text
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin/main
 ---
 
 ## Adversarial Scenarios
@@ -452,6 +508,10 @@ Decision: DENIAL SILENCE
   ↓
 Adversary learns: Nothing
 ```text
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin/main
 ### Scenario 2: Alert Flooding to Force Action
 
 **Adversary Goal**: Overwhelm with alerts to force hasty decisions
@@ -481,6 +541,10 @@ Decision: PRIORITIZATION SILENCE on low-value alerts
 Critical alert visible, receives proper attention
 Low-value noise ignored (strategic silence)
 ```text
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin/main
 ### Scenario 3: Provocation for Overreaction
 
 **Adversary Goal**: Cause defenders to damage themselves
@@ -514,6 +578,10 @@ Verification reveals: False alarm
   ↓
 Strategic silence prevented self-inflicted damage
 ```text
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin/main
 ---
 
 ## Metrics for Strategic Silence
@@ -525,6 +593,10 @@ Strategic silence prevented self-inflicted damage
 ```text
 SSR = silence_decisions_validated_correct / total_silence_decisions
 ```text
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin/main
 Measures: How often silence was the right choice
 
 ### 2. Premature Action Prevented
@@ -532,6 +604,10 @@ Measures: How often silence was the right choice
 ```text
 PAP = count(actions that would have been wrong if taken immediately)
 ```text
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin/main
 Measures: Damage avoided by waiting
 
 ### 3. Intelligence Gain from Observation
@@ -539,6 +615,10 @@ Measures: Damage avoided by waiting
 ```text
 IGO = threat_intelligence_value(observed) - threat_intelligence_value(immediate_response)
 ```text
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin/main
 Measures: Value of observational silence
 
 ### 4. Silence Maintenance
@@ -546,6 +626,10 @@ Measures: Value of observational silence
 ```text
 SM = silence_decisions_reviewed_on_time / total_silence_decisions
 ```text
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin/main
 Measures: Whether silence is actively managed (not neglect)
 
 ### Risk Metrics
@@ -555,6 +639,10 @@ Measures: Whether silence is actively managed (not neglect)
 ```text
 SO = silence_decisions / total_decisions
 ```text
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin/main
 Warning: If SO > 0.3, may indicate decision paralysis rather than strategic choice
 
 ### 2. Silence Duration Excess
@@ -562,6 +650,10 @@ Warning: If SO > 0.3, may indicate decision paralysis rather than strategic choi
 ```text
 SDE = count(silence exceeded intended duration) / total_silence_decisions
 ```text
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin/main
 Warning: If SDE > 0.1, silence monitoring may be insufficient
 
 ### 3. Broken Silence Regret
@@ -569,6 +661,10 @@ Warning: If SDE > 0.1, silence monitoring may be insufficient
 ```text
 BSR = count(regretted breaking silence too soon) / count(silence broken)
 ```text
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin/main
 Measures: Are we breaking silence prematurely?
 
 ---
@@ -633,6 +729,10 @@ Winner: Operator who chose 10-minute observational silence that:
   - Led to comprehensive threat intelligence
   - Resulted in zero lateral movement or data loss
 ```text
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin/main
 ### Silence Training
 
 Operators must be trained to:

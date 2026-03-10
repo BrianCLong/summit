@@ -1,12 +1,9 @@
-from unittest.mock import patch
-
-import fakeredis
 import pytest
+from unittest.mock import patch
 from fastapi.testclient import TestClient
-
-from summit.cache.redis_client import RedisClient
 from summit.main import app
-
+from summit.cache.redis_client import RedisClient
+import fakeredis
 
 @pytest.fixture(autouse=True)
 def mock_redis():

@@ -134,6 +134,10 @@ Summit maintains a **comprehensive historical record** for each information sour
   ]
 }
 ```text
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin/main
 ### Continuity Baseline Components
 
 1. **Alert Rate**: Frequency of messages/claims
@@ -163,6 +167,10 @@ Where:
   baseline_i = historical mean
   σ_i = historical standard deviation
 ```text
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin/main
 **Threshold**: BDS > 3.0 indicates significant behavioral change
 
 #### 2. Alert Rate Anomaly (ARA)
@@ -172,6 +180,10 @@ Where:
 ```text
 ARA = (current_rate - expected_rate) / σ_rate
 ```text
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin/main
 **Warning Signs**:
 
 - ARA > +3.0: Suspiciously high activity (possible flooding)
@@ -184,6 +196,10 @@ ARA = (current_rate - expected_rate) / σ_rate
 ```text
 CS = |current_confidence_mean - baseline_confidence_mean|
 ```text
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin/main
 **Warning Signs**:
 
 - Sudden increase in confidence (possibly overconfident false claims)
@@ -196,6 +212,10 @@ CS = |current_confidence_mean - baseline_confidence_mean|
 ```text
 SIS = (critical_alerts / total_alerts)_current / (critical_alerts / total_alerts)_baseline
 ```text
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin/main
 **Warning Signs**:
 
 - SIS > 2.0: Possible manipulation to trigger overreaction
@@ -207,6 +227,10 @@ SIS = (critical_alerts / total_alerts)_current / (critical_alerts / total_alerts
 ```text
 LD = 1 - cosine_similarity(current_embedding, baseline_embedding)
 ```text
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin/main
 **Warning Signs**:
 
 - LD > 0.3: Possible different author, compromised account
@@ -233,6 +257,10 @@ IF verification fails:
   ALERT security operations
   SUSPEND source pending investigation
 ```text
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin/main
 ### Protocol 2: Authority Score Maintenance
 
 **Principle**: Authority is earned continuously through accuracy
@@ -249,6 +277,10 @@ Where:
   accuracy_bonus = weighted by claim difficulty
   penalty_for_errors = proportional to severity of mistake
 ```text
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin/main
 **Result**: Sources must continuously demonstrate accuracy to maintain authority
 
 ### Protocol 3: Continuity Monitoring
@@ -271,6 +303,10 @@ FOR each source:
     MANDATORY human review
     FORENSIC investigation
 ```text
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin/main
 ### Protocol 4: Sudden Elevation Blocking
 
 **Principle**: New sources cannot make high-impact claims without proven track record
@@ -286,6 +322,10 @@ THEN
    LOG as potential authority inflation attack
    REQUIRE established source confirmation
 ```text
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin/main
 **Parameters**:
 
 - minimum_age: 30 days of validated activity
@@ -316,6 +356,10 @@ THEN
      - Security operations (immediate)
      - Audit team (for review)
 ```text
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin/main
 ---
 
 ## Authority Attack Scenarios and Defenses
@@ -346,6 +390,10 @@ Continuity: FAIL (BDS = 4.2, LD = 0.45)
 
 ACTION: Quarantine source, require out-of-band verification
 ```text
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin/main
 ### Scenario 2: Authority Laundering
 
 **Attack**: Low-credibility source gets claims validated by compromised high-credibility intermediary
@@ -375,6 +423,10 @@ Validation Pattern: ANOMALY
 
 ACTION: Reject laundering attempt, investigate analyst account
 ```text
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin/main
 ### Scenario 3: Sudden Source Emergence
 
 **Attack**: Adversary creates new "expert" source and attempts high-impact claim
@@ -401,6 +453,10 @@ REQUIRE:
 
 LOG: Potential authority inflation attack
 ```text
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin/main
 ### Scenario 4: Gradual Authority Degradation
 
 **Attack**: Slowly compromise source reputation to mask later false claims
@@ -425,6 +481,10 @@ Authority Score Trajectory:
 ALERT: Unusual authority trajectory pattern
 ACTION: Increase verification requirements
 ```text
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin/main
 ---
 
 ## Authority Under Time Pressure
@@ -438,6 +498,10 @@ required_authority(urgency) = base_authority - (urgency_factor × time_pressure)
 
 But never below absolute_minimum_authority
 ```text
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin/main
 **Example**:
 
 ```text
@@ -445,6 +509,10 @@ Normal: Require authority_score ≥ 0.80
 High urgency: Require authority_score ≥ 0.65
 Critical urgency: Require authority_score ≥ 0.50 (absolute minimum)
 ```text
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin/main
 **Guardrails**:
 
 1. Urgency must be independently validated (not just claimed)
@@ -470,6 +538,10 @@ THEN
      - Automatic expiry (24 hours)
      - Post-event validation
 ```text
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin/main
 ---
 
 ## Authority Reputation Network
@@ -492,6 +564,10 @@ Sources gain authority through:
                 │
            [Source C]
 ```text
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin/main
 **Authority Flow**:
 
 - If A (high authority) validates B → B's authority increases
@@ -539,6 +615,10 @@ Sources gain authority through:
 │ [VIEW HISTORY] [ADJUST THRESHOLDS] [OVERRIDE]        │
 └───────────────────────────────────────────────────────┘
 ```text
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin/main
 ### Authority Anomaly Alerts
 
 ```text
@@ -557,6 +637,10 @@ Sources gain authority through:
    └─ Claim impact: MEDIUM
    └─ ACTION: Requires confirmation from established source
 ```text
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin/main
 ---
 
 ## Integration with Other Pillars

@@ -40,6 +40,9 @@
   },
   "dependencies": {
 <<<<<<< HEAD
+    @apollo/server: "5.4.0",
+=======
+<<<<<<< HEAD
     "@intelgraph/outreach": "workspace:*",
     @apollo/server: "5.4.0",
 =======
@@ -47,6 +50,7 @@
     "@apollo/server": "5.4.0",
 =======
     "@apollo/server": "4.11.3",
+>>>>>>> origin/main
 >>>>>>> origin/main
 >>>>>>> origin/main
     "@as-integrations/express4": "1.1.2",

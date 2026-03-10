@@ -168,6 +168,10 @@ Decision: Act or Wait?
         ↓
 Continuous Monitoring & Feedback Loop
 ```text
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin/main
 See [diagrams/truth-defense-flow.svg](./diagrams/truth-defense-flow.svg) for visual representation.
 
 ---

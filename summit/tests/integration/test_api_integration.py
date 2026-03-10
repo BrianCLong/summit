@@ -1,10 +1,7 @@
-import os
-
 import pytest
+import os
 import redis
-
 from summit.flags import REDIS_CACHE_ENABLED
-
 
 @pytest.mark.skipif(not REDIS_CACHE_ENABLED, reason="Redis cache disabled")
 def test_factflow_integration_with_redis(client):

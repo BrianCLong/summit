@@ -1,9 +1,0 @@
-{
-  "title": "Security Posture",
-  "widgets": [
-    { "name": "Open CodeQL Alerts", "type": "stat" },
-    { "name": "Dependabot Findings", "type": "stat" },
-    { "name": "Secret Scanning Alerts", "type": "stat" },
-    { "name": "Security Score", "type": "stat" }
-  ]
-}

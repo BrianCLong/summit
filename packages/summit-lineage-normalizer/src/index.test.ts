@@ -22,6 +22,8 @@ describe("summit-lineage-normalizer", () => {
     expect(dataset.name).toBe("orders_topic");
   });
 
+<<<<<<< HEAD
+=======
 
   it("normalizes postgresql attributes with new semantic conventions", () => {
     const dataset = normalizeDataset({
@@ -44,6 +46,7 @@ describe("summit-lineage-normalizer", () => {
     expect(dataset.name).toBe("orders_topic");
   });
 
+>>>>>>> origin/main
   it("normalizes s3 attributes", () => {
     const dataset = normalizeDataset({
       "file.path": "s3://bucket/key/path"

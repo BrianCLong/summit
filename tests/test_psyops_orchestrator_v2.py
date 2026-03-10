@@ -1,13 +1,6 @@
-from unittest.mock import MagicMock
-
 import pytest
-
-from intelgraph_psyops_orchestrator_v2 import (
-    GuardrailResult,
-    RefinedPsyOpsOrchestrator,
-    WorkflowState,
-)
-
+from unittest.mock import MagicMock
+from intelgraph_psyops_orchestrator_v2 import RefinedPsyOpsOrchestrator, WorkflowState, GuardrailResult
 
 @pytest.mark.asyncio
 async def test_workflow_success():

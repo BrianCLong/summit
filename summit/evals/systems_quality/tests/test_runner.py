@@ -1,12 +1,9 @@
-import json
-import os
-from unittest.mock import patch
-
 import pytest
-
+import os
+import json
+from unittest.mock import patch
 from summit.evals.systems_quality.runner import SystemsQualityEvaluator
 from summit.evals.systems_quality.schemas import SystemQualityReport
-
 
 @patch("summit.evals.systems_quality.runner.calculate_defect_density")
 @patch("summit.evals.systems_quality.runner.calculate_rework_rate")

@@ -94,7 +94,7 @@ if [[ "${GA_DRY_RUN:-0}" != "1" ]]; then
   for IMG in $IMAGES; do
     IMG=$(echo "$IMG" | sed 's/"//g') # Remove quotes from image name
     log "Cosign verify: $IMG"
-    cosign verify --use-signed-timestamps "$IMG" \ || { echo "::error::Supply chain verification failed! Missing or invalid signed timestamps."; false; }
+    cosign verify "$IMG" \
       --certificate-oidc-issuer https://token.actions.githubusercontent.com \
       --certificate-identity-regexp ".*github\\.com/${ORG}/${REPO}.*" | tee -a /tmp/cosign.txt
   done

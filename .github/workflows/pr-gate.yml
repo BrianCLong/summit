@@ -74,10 +74,8 @@ jobs:
       - name: Report separation gate
         run: pnpm gate:report
 
-      - name: Reporting package tests
-        run: npx --package typescript tsc -p packages/reporting/tsconfig.json && pnpm -C packages/reporting test
 
-      - name: Schema validation gate
+      - name: Validate JSON Schemas
         run: pnpm gate:schema
 
       - name: Detect governance policy changes

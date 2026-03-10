@@ -1,10 +1,7 @@
 import json
 
 from summit.evals.coordination.coordination_schema import CoordinationEvent, validate_event_stream
-from summit.evals.coordination.coordination_score import (
-    score_coordination,
-    write_coordination_artifacts,
-)
+from summit.evals.coordination.coordination_score import score_coordination, write_coordination_artifacts
 
 
 def _events():

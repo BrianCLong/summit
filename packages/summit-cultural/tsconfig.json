@@ -11,8 +11,20 @@
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "skipLibCheck": true,
+<<<<<<< HEAD
+    "types": []
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.json"
+  ],
+  "exclude": [
+    "src/golden-tests/**/*.ts"
+  ]
+=======
     "forceConsistentCasingInFileNames": true
   },
   "include": ["src/**/*"],
   "exclude": ["dist", "node_modules"]
+>>>>>>> origin/main
 }

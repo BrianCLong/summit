@@ -8,9 +8,13 @@
   },
   "dependencies": {
 <<<<<<< HEAD
+    @apollo/server: "4.13.0",
+=======
+<<<<<<< HEAD
     "@apollo/server": "4.13.0",
 =======
     "@apollo/server": "4.11.3",
+>>>>>>> origin/main
 >>>>>>> origin/main
     "@opentelemetry/api": "latest",
     "@opentelemetry/auto-instrumentations-node": "0.67.3",

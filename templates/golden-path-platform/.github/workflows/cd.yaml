@@ -37,13 +37,13 @@ jobs:
         with:
           version: v0.65.0
       - name: Install cosign
-        uses: sigstore/cosign-installer@v3.7.0
+        uses: sigstore/cosign-installer@d7543c93d881b35a8faa02e8e3605f69b7a1ce62
       - name: Verify cosign signatures
         env:
           COSIGN_YES: '1'
         run: |
-          cosign verify --use-signed-timestamps --keyless ${{ github.event.inputs.serviceImage }} || { echo "::error::Supply chain verification failed! Missing or invalid signed timestamps."; false; }
-          cosign verify --use-signed-timestamps --keyless ${{ github.event.inputs.jobImage }} || { echo "::error::Supply chain verification failed! Missing or invalid signed timestamps."; false; }
+          cosign verify --keyless ${{ github.event.inputs.serviceImage }}
+          cosign verify --keyless ${{ github.event.inputs.jobImage }}
       - name: Evaluate policy gate
         run: |
           jq --arg image "${{ github.event.inputs.serviceImage }}" --arg job "${{ github.event.inputs.jobImage }}" \

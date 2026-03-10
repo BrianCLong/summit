@@ -16,6 +16,10 @@
     "ajv-formats": "3.0.1"
   },
   "devDependencies": {
+<<<<<<< HEAD
+    typescript: "5.9.3",
+    vitest: "2.1.9"
+=======
     "typescript": "5.9.3",
     "vitest": "2.1.9"
 =======
@@ -28,6 +32,7 @@
     tsx: "4.19.3",
     typescript: "5.9.3",
     vitest: "2.1.9"
+>>>>>>> origin/main
 >>>>>>> origin/main
   }
 }

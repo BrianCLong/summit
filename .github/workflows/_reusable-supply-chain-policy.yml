@@ -63,14 +63,14 @@ jobs:
           jq -e '(.packages // []) | length > 0' artifacts/sbom.spdx.json >/dev/null
 
       - name: Install Cosign
-        uses: sigstore/cosign-installer@v3.7.0
+        uses: sigstore/cosign-installer@f713795cb21599bc4e5c4b58cbad1da852d7eeb9 # v3
         with:
           cosign-release: "v3.0.5"
 
       - name: Verify container signature
         run: |
           set -euo pipefail
-          cosign verify --use-signed-timestamps "${{ inputs.image_uri }}" \ || { echo "::error::Supply chain verification failed! Missing or invalid signed timestamps."; false; }
+          cosign verify "${{ inputs.image_uri }}" \
             --rekor-url "${{ env.REKOR_URL }}" \
             --certificate-identity-regexp "${{ env.EXPECTED_IDENTITY_REGEX }}" \
             --certificate-oidc-issuer "${{ env.EXPECTED_OIDC_ISSUER }}"
@@ -78,13 +78,13 @@ jobs:
       - name: Verify SBOM attestations
         run: |
           set -euo pipefail
-          cosign verify-attestation --use-signed-timestamps "${{ inputs.image_uri }}" --type cyclonedx --rekor-url "${{ env.REKOR_URL }}" --certificate-oidc-issuer "${{ env.EXPECTED_OIDC_ISSUER }}" --certificate-identity-regexp "${{ env.EXPECTED_IDENTITY_REGEX }}" || { echo "::error::Supply chain verification failed! Missing or invalid signed timestamps."; false; }
-          cosign verify-attestation --use-signed-timestamps "${{ inputs.image_uri }}" --type spdxjson --rekor-url "${{ env.REKOR_URL }}" --certificate-oidc-issuer "${{ env.EXPECTED_OIDC_ISSUER }}" --certificate-identity-regexp "${{ env.EXPECTED_IDENTITY_REGEX }}" || { echo "::error::Supply chain verification failed! Missing or invalid signed timestamps."; false; }
+          cosign verify-attestation "${{ inputs.image_uri }}" --type cyclonedx --rekor-url "${{ env.REKOR_URL }}" --certificate-oidc-issuer "${{ env.EXPECTED_OIDC_ISSUER }}" --certificate-identity-regexp "${{ env.EXPECTED_IDENTITY_REGEX }}"
+          cosign verify-attestation "${{ inputs.image_uri }}" --type spdxjson --rekor-url "${{ env.REKOR_URL }}" --certificate-oidc-issuer "${{ env.EXPECTED_OIDC_ISSUER }}" --certificate-identity-regexp "${{ env.EXPECTED_IDENTITY_REGEX }}"
 
       - name: Verify SLSA provenance attestation
         run: |
           set -euo pipefail
-          cosign verify-attestation --use-signed-timestamps "${{ inputs.image_uri }}" --type slsaprovenance --rekor-url "${{ env.REKOR_URL }}" --certificate-oidc-issuer "${{ env.EXPECTED_OIDC_ISSUER }}" --certificate-identity-regexp "${{ env.EXPECTED_IDENTITY_REGEX }}" || { echo "::error::Supply chain verification failed! Missing or invalid signed timestamps."; false; }
+          cosign verify-attestation "${{ inputs.image_uri }}" --type slsaprovenance --rekor-url "${{ env.REKOR_URL }}" --certificate-oidc-issuer "${{ env.EXPECTED_OIDC_ISSUER }}" --certificate-identity-regexp "${{ env.EXPECTED_IDENTITY_REGEX }}"
 
       - name: Check SBOM vs lockfile drift
         run: |

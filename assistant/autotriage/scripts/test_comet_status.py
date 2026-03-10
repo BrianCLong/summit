@@ -1,14 +1,13 @@
-import json
-import os
-import subprocess
-import sys
 import unittest
-from unittest.mock import MagicMock, patch
+import json
+from unittest.mock import patch, MagicMock
+import subprocess
+import os
+import sys
 
 # Add directory to sys.path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 import comet_status
-
 
 class TestCometStatus(unittest.TestCase):
 

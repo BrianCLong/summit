@@ -6,7 +6,7 @@ on:
 
 jobs:
   enforce-classification:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
@@ -31,19 +31,19 @@ jobs:
             // Auto-infer from title if no classification label is present
             if (!hasClassification) {
               console.log("No classification label found. Attempting inference from title...");
-              if (title.includes('feat:') || title.includes('feat(')) {
+              if (title.match(/^feat(\(.*\))?:/)) {
                 labels.push('minor');
                 console.log("Inferred 'minor' from 'feat:' prefix");
               }
-              else if (title.includes('fix:') || title.includes('fix(')) {
+              else if (title.match(/^fix(\(.*\))?:/)) {
                 labels.push('patch');
                 console.log("Inferred 'patch' from 'fix:' prefix");
               }
-              else if (title.includes('docs:') || title.includes('docs(')) {
+              else if (title.match(/^docs(\(.*\))?:/)) {
                 labels.push('patch');
                 console.log("Inferred 'patch' from 'docs:' prefix");
               }
-              else if (title.includes('chore:')) {
+              else if (title.match(/^chore(\(.*\))?:/)) {
                 labels.push('patch');
                 console.log("Inferred 'patch' from 'chore:' prefix");
               }

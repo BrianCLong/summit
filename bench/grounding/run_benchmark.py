@@ -1,15 +1,8 @@
-import hashlib
-import json
-import os
-import time
-
-import faiss
-import numpy as np
-import orjson
-import pandas as pd
+import os, json, orjson, time, hashlib, numpy as np, pandas as pd
+from tqdm import tqdm
 from neo4j import GraphDatabase
 from sentence_transformers import SentenceTransformer
-from tqdm import tqdm
+import faiss
 
 SEED = int(os.getenv("EMBEDDING_SEED", "20240101"))
 np.random.seed(SEED)

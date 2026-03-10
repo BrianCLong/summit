@@ -1,7 +1,7 @@
 import os
 
 filepath = "services/rag/src/main.py"
-with open(filepath) as f:
+with open(filepath, "r") as f:
     content = f.read()
 
 # Import

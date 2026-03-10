@@ -21,8 +21,12 @@ export function normalizeDataset(attrs: OTelSpanAttributes): OpenLineageDataset 
   if (dbSystem) {
     // Construct namespace
     const host = attrs["net.peer.name"] || attrs["server.address"] || attrs["db.connection_string"] || "localhost";
+<<<<<<< HEAD
+    const dbName = attrs["db.name"] ? `/${attrs["db.name"]}` : "";
+=======
     const dbNameVal = attrs["db.namespace"] || attrs["db.name"];
     const dbName = dbNameVal ? `/${dbNameVal}` : "";
+>>>>>>> origin/main
 
     // In many OTel setups, connection string might be full, but for simplicity let's build from pieces
     if (attrs["db.connection_string"] && !attrs["net.peer.name"] && !attrs["server.address"]) {

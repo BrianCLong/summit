@@ -7,7 +7,6 @@ While FactFlow (newsroom SaaS) attacks the media market, you can simultaneously 
 **FactLaw** = Your verification API + legal workflow automation, positioned as an **add-on module for eDiscovery platforms** (Relativity, Everlaw, Nuix) and **standalone for legal teams, compliance departments, and government investigations.**
 
 This is faster cash than FactFlow because:
-
 - **Shorter sales cycle**: 6-10 weeks vs. 8-12 weeks (legal teams have fixed budgets; newsrooms are cost-conscious)
 - **Higher deal size**: $15-50K/month contracts (vs. $5-7K newsroom contracts)
 - **Stronger MOAT**: Legal defensibility + compliance requirements lock customers in (switching costs are 5-10x higher in legal than media)
@@ -35,13 +34,11 @@ Modern litigation is drowning in **malicious and accidental misinformation**:
 ### 1.2 Market Size & Competitive Gap
 
 **eDiscovery market**:
-
 - Size: $2.1B (2024), growing 15% annually
 - Major platforms: Relativity (Lexis Nexis, $1B+ revenue), Everlaw, Nuix, OpenText, Reveal
 - Add-on market: $500M+ (analytics, AI, authentication, workflows)
 
 **Legal tech fact-checking segment**:
-
 - Competitors: **NONE** (no dedicated legal eDiscovery fact-checking SaaS exists)
 - Adjacent: ZeroFox (brand monitoring, not legal), PeakMetrics (narrative intelligence, not legal)
 - Academic: Work on deepfake detection in legal, but no commercialized SaaS [complexdiscovery](https://complexdiscovery.com/from-evidence-to-misinformation-courts-brace-for-deepfake-challenges/)
@@ -164,7 +161,6 @@ Output:
 **You don't sell FactLaw directly; you embed it in Relativity, Everlaw, Nuix.**
 
 **Partnership model**:
-
 ```
 Your API ← Integrated into Relativity's eDiscovery workflow
           ← Called when lawyer uploads evidence
@@ -178,7 +174,6 @@ Revenue share:
 ```
 
 **Direct sales channel** (for firms too large for Relativity/Everlaw):
-
 - Sell directly to BigLaw (100+ attorneys), government litigation teams, in-house counsel
 
 ***
@@ -188,27 +183,23 @@ Revenue share:
 ### 3.1 Embedded (via Relativity/Everlaw) Pricing
 
 **Pay-per-authentication model** (most defensible):
-
 - $0.50 per evidence item authenticated
 - $0.75 per deepfake analysis
 - $1.00 per deposition transcript analyzed (real-time)
 - $0.25 per AI-generation detection
 
 **Platform partner margin structure**:
-
 - You keep 40%; Relativity/Everlaw takes 60%
 - Pricing transparent to end users (appears as line item in eDiscovery bill)
 
 ### 3.2 Direct Sales Pricing (Law Firms + Government)
 
 **Tier 1: Startup Law Firm** ($3,000/month)
-
 - 500 evidence authentications/month included
 - 20 deposition transcripts/month
 - Email support, 24-hour response
 
 **Tier 2: Mid-size Firm** ($12,000/month)
-
 - 5,000 authentications/month
 - Unlimited depositions
 - Priority support, 2-hour response
@@ -216,7 +207,6 @@ Revenue share:
 - Integrations: Relativity, Lexis Nexis, LawGain
 
 **Tier 3: BigLaw / Government** ($50,000-200,000/month)
-
 - Unlimited authentications + analyses
 - Dedicated AI models trained on firm's past cases (improves accuracy over time)
 - White-label option (own UI, your branding)
@@ -241,20 +231,17 @@ Revenue share:
 ## 5. Market Size & TAM
 
 **Total Addressable Market (TAM)**:
-
 - eDiscovery platform users: 50K+
 - BigLaw firms needing evidence authentication: 3,000+
 - Government litigation teams (US + EU): 1,000+
 - **Total potential customers: 54,000+**
 
 **Serviceable Obtainable Market (SOM), Year 1**:
-
 - Via Relativity integration: 500 users × $5K = $2.5M
 - Direct sales (BigLaw): 20 firms × $50K = $1M
 - **Year 1 SOM: $3.5M ARR**
 
 **Year 3 projection**:
-
 - Platform integration (2 platforms: Relativity + Everlaw): 2,000 users × $5K = $10M
 - Direct sales (100 BigLaw firms): $5M
 - Government contracts: $2M
@@ -269,14 +256,12 @@ Revenue share:
 **Goal**: Working deepfake detection module compatible with Relativity's API
 
 **Tech stack**:
-
 - Your verification API (already built)
 - Face forensics library (Face Forensics++, Media Forensics toolkit)
 - Relativity plugin framework (Python SDK)
 - AWS Lambda for async processing
 
 **Deliverables**:
-
 - Evidence authentication module (deepfake detection only)
 - Relativity plugin (connects to Relativity's document viewer)
 - API documentation for Relativity devs
@@ -288,7 +273,6 @@ Revenue share:
 **Goal**: Full product feature set
 
 **Work**:
-
 - Deposition real-time fact-checking module
 - AI-generation detection engine
 - Legal team UX (simplified dashboard for lawyers, not data scientists)
@@ -302,7 +286,6 @@ Revenue share:
 **Goal**: 3-5 direct customers + 2 platform partnerships signed
 
 **Work**:
-
 - Pitch to Relativity (partnership manager + demos)
 - Outreach to 30 BigLaw firms (cold sales)
 - Beta with 2-3 firms (free/heavily discounted)
@@ -316,12 +299,10 @@ Revenue share:
 **Goal**: First paid customers + signed platform partnership
 
 **Customers**:
-
 - 5 direct law firms ($3-12K/month each)
 - **Relativity partnership agreement signed** (massive win)
 
 **Execution**:
-
 - Customer success team (1 person, manages integrations)
 - Platform integration support team (1 person, works with Relativity)
 - Revenue: $20-30K MRR by week 16
@@ -372,7 +353,6 @@ Revenue share:
 ## Conclusion
 
 FactLaw is a **parallel, non-cannibalistic revenue stream** that launches simultaneously with FactFlow, capitalizing on:
-
 - **Zero competition** in legal fact-checking
 - **Huge market** ($2B eDiscovery market)
 - **Regulatory enforcement** (deepfakes in court, DSA compliance)

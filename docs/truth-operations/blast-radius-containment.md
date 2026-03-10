@@ -36,6 +36,10 @@ Action 2: Defer other projects
     ↓
 Communication: Customer notification about "performance improvements"
 ```text
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin/main
 **Time of Discovery**: 4 hours later, original claim was false (monitoring bug)
 
 **Damage**:
@@ -105,6 +109,10 @@ Summit maintains a **real-time graph** of causal dependencies:
                          │
                          └──influences──> [Resource: Assign engineer to perf work]
 ```text
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin/main
 ### Node Types
 
 1. **Information Nodes**: Claims, observations, measurements
@@ -141,6 +149,10 @@ Summit maintains a **real-time graph** of causal dependencies:
 4. FLAG all completed decisions for review
 5. QUARANTINE all communications based on compromised information
 ```text
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin/main
 **Example**:
 
 ```json
@@ -162,6 +174,10 @@ Summit maintains a **real-time graph** of causal dependencies:
   ]
 }
 ```text
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin/main
 ### Protocol 2: Impact Assessment
 
 **After containment**, systematically assess damage:
@@ -185,6 +201,10 @@ Summit maintains a **real-time graph** of causal dependencies:
    - Identify decisions that depend on this decision
    - Recursive containment if necessary
 ```text
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin/main
 ### Protocol 3: Selective Re-evaluation
 
 **Not all decisions require re-evaluation**:
@@ -199,6 +219,10 @@ FOR each influenced decision:
   ELSE
      REQUIRE explicit re-evaluation with corrected information
 ```text
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin/main
 **Rationale**: Conserve operator attention for truly compromised decisions
 
 ### Protocol 4: Controlled Communication Rollback
@@ -219,6 +243,10 @@ FOR each influenced decision:
 4. REQUIRE approval before sending
 5. TRACK correction delivery
 ```text
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin/main
 ---
 
 ## Blast Radius Metrics
@@ -230,6 +258,10 @@ FOR each influenced decision:
 ```text
 PD = max(path_length from compromised_info to leaf_decision)
 ```text
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin/main
 **Example**: False claim → 3 decisions → 2 actions = PD of 5
 
 ### 2. Cascade Width (CW)
@@ -239,6 +271,10 @@ PD = max(path_length from compromised_info to leaf_decision)
 ```text
 CW = count(unique_decisions influenced by compromised_info)
 ```text
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin/main
 ### 3. Reversibility Index (RI)
 
 **Measures**: What percentage of influenced decisions can be undone
@@ -246,6 +282,10 @@ CW = count(unique_decisions influenced by compromised_info)
 ```text
 RI = reversible_decisions / total_influenced_decisions
 ```text
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin/main
 **Interpretation**:
 
 - RI = 1.0: Full rollback possible
@@ -259,6 +299,10 @@ RI = reversible_decisions / total_influenced_decisions
 ```text
 TS = detection_time - introduction_time
 ```text
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin/main
 **Significance**: Longer TS → larger blast radius (more time to propagate)
 
 ### 5. Containment Effectiveness (CE)
@@ -268,6 +312,10 @@ TS = detection_time - introduction_time
 ```text
 CE = decisions_frozen / (decisions_frozen + decisions_executed_post_detection)
 ```text
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin/main
 **Goal**: CE → 1.0 (perfect containment)
 
 ---
@@ -332,6 +380,10 @@ CONTAINMENT ACTIONS:
   ✓ Flagged 1 completed action for review
   ✓ Prevented 2 external communications
 ```text
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin/main
 **10:11**: Operator review confirms false positive
 **10:12**: Database de-isolation (was flagged for review, not assumed correct)
 **10:13**: Password reset cancelled (only 5% affected, targeted communication to those users)
@@ -360,6 +412,10 @@ CONTAINMENT ACTIONS:
 - Continue normal operations
 - Watch for additional integrity degradation
 ```text
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin/main
 ### Tier 2: Caution (Integrity 0.40-0.60)
 
 **Action**: Soft containment
@@ -370,6 +426,10 @@ CONTAINMENT ACTIONS:
 - Prevent automated escalation
 - Prepare rollback procedures
 ```text
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin/main
 ### Tier 3: Containment (Integrity 0.20-0.40)
 
 **Action**: Hard containment
@@ -381,6 +441,10 @@ CONTAINMENT ACTIONS:
 - Prevent external communications
 - Require explicit override to proceed
 ```text
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin/main
 ### Tier 4: Quarantine (Integrity <0.20)
 
 **Action**: Maximum isolation
@@ -392,6 +456,10 @@ CONTAINMENT ACTIONS:
 - Security team notification
 - No overrides without dual authorization
 ```text
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin/main
 ---
 
 ## Operator Interface
@@ -424,6 +492,10 @@ CONTAINMENT ACTIONS:
 │ [VIEW IMPACT GRAPH] [BEGIN REMEDIATION] [OVERRIDE]     │
 └─────────────────────────────────────────────────────────┘
 ```text
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin/main
 ### Impact Graph Visualization
 
 ```text
@@ -447,6 +519,10 @@ Legend:
   [COMPLETED ⚠] - Requires review/remediation
   [X%] - Influence weight
 ```text
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin/main
 ---
 
 ## Remediation Workflow
@@ -462,6 +538,10 @@ OPERATOR REVIEW:
 
 If adversarial → ESCALATE to security operations
 ```text
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin/main
 ### Step 2: Prioritize Impact
 
 ```text
@@ -476,6 +556,10 @@ CATEGORIZE:
   🟢 MEDIUM: Review within 24 hours
   ⚪ LOW: Review when convenient
 ```text
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin/main
 ### Step 3: Execute Remediation
 
 ```text
@@ -493,6 +577,10 @@ FOR each impacted decision:
 
   REQUIRE: Explicit operator decision for each
 ```text
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin/main
 ### Step 4: Communication
 
 ```text
@@ -507,6 +595,10 @@ INTERNAL:
   EXPLAIN what happened, what's changing
   PROVIDE timeline for remediation
 ```text
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin/main
 ### Step 5: Post-Incident
 
 ```text
@@ -525,6 +617,10 @@ DOCUMENT LESSONS:
   - Train operators on pattern recognition
   - Update runbooks
 ```text
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin/main
 ---
 
 ## Integration with Other Pillars

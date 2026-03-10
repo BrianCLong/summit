@@ -178,7 +178,7 @@ jobs:
             evidence/evidence.md \
             evidence/checksums.txt \
             evidence/sbom.cdx.json \
-            evidence/provenance.json
+            fixtures/evidence/provenance.json
 
       - name: Release Summary
         run: |

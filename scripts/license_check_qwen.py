@@ -9,7 +9,7 @@ def check_license():
         print(f"ERROR: License file not found at {LICENSE_PATH}")
         sys.exit(1)
 
-    with open(LICENSE_PATH) as f:
+    with open(LICENSE_PATH, 'r') as f:
         content = f.read()
         if EXPECTED_LICENSE_TYPE not in content:
             print(f"WARNING: License content does not explicitly match expected type '{EXPECTED_LICENSE_TYPE}'")

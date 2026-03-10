@@ -11,10 +11,9 @@ GitHub's release of the Copilot SDK demonstrates that **agentic runtimes must be
 ## The Strategy
 
 We will refactor `packages/maestro-core` into `@summit/agent-runtime`, a library that can be imported into:
-
-1. **Summit Web App:** For in-browser agent capabilities.
-2. **External Integrations:** Embedding Summit intelligence into partner tools.
-3. **Edge Workers:** Running lightweight agents on Vercel/Cloudflare.
+1.  **Summit Web App:** For in-browser agent capabilities.
+2.  **External Integrations:** Embedding Summit intelligence into partner tools.
+3.  **Edge Workers:** Running lightweight agents on Vercel/Cloudflare.
 
 ## Architecture: The "Runtime Loop"
 
@@ -38,6 +37,6 @@ await agent.execute("Analyze this threat");
 
 ## Roadmap
 
-1. **Q1 2026:** Decouple `maestro-core` from Node.js specifics (e.g., `fs`, `child_process`).
-2. **Q2 2026:** Publish `@summit/agent-runtime` (Private Beta).
-3. **Q3 2026:** Release "Summit Copilot" for VS Code using the SDK.
+1.  **Q1 2026:** Decouple `maestro-core` from Node.js specifics (e.g., `fs`, `child_process`).
+2.  **Q2 2026:** Publish `@summit/agent-runtime` (Private Beta).
+3.  **Q3 2026:** Release "Summit Copilot" for VS Code using the SDK.
