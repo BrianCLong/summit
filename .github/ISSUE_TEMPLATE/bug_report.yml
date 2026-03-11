@@ -1,13 +1,58 @@
-name: Bug report
-labels: [bug]
+name: Bug Report
+description: Create a report to help us improve Summit
+title: "[Bug]: "
+labels: ["bug", "needs-triage"]
+assignees: []
 body:
-  - type: textarea
-    id: desc
-    attributes: { label: Description, description: What happened? }
-    validations: { required: true }
-  - type: textarea
-    id: repro
-    attributes: { label: Reproduction, description: Steps to reproduce }
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bug report!
   - type: input
     id: version
-    attributes: { label: Version/commit }
+    attributes:
+      label: Summit Version
+      description: What version of Summit are you using? (e.g., 4.x, main branch)
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: A clear and concise description of what the bug is.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to Reproduce
+      description: Steps to reproduce the behavior.
+      placeholder: |
+        1. Go to '...'
+        2. Click on '....'
+        3. Scroll down to '....'
+        4. See error
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: A clear and concise description of what you expected to happen.
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant Logs
+      description: Please copy and paste any relevant logs, errors, or stack traces here.
+      render: bash
+  - type: checkboxes
+    id: environment
+    attributes:
+      label: Environment
+      options:
+        - label: I am using the latest version of Summit.
+        - label: I have searched existing issues and PRs for this bug.
+    validations:
+      required: true

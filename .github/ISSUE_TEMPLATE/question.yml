@@ -1,0 +1,22 @@
+name: Question
+description: Ask a question about Summit
+title: "[Question]: "
+labels: ["question", "needs-triage"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for asking a question! Please check the documentation first to see if it's already answered.
+  - type: textarea
+    id: question
+    attributes:
+      label: What is your question?
+      description: A clear and concise description of what you're asking.
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Add any other context or screenshots about the question here.

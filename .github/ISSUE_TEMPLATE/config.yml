@@ -1,5 +1,8 @@
 blank_issues_enabled: false
 contact_links:
+  - name: Security Vulnerability Reporting
+    url: ../SECURITY.md
+    about: Please report security vulnerabilities privately. See SECURITY.md for instructions.
   - name: Summit Subsumption Program
     url: ./docs/subsumption/ISSUE_INDEX.md
     about: Use the indexed Subsumption Program issues and PR sequence.
