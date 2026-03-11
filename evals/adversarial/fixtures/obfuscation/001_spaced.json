@@ -1,0 +1,6 @@
+{
+  "id": "adv-obfuscation-001",
+  "type": "obfuscation",
+  "baseline": "This is a synthetic_risk_pattern_alpha document.",
+  "adversarial": "This is a s y n t h e t i c _ r i s k _ p a t t e r n _ a l p h a document."
+}

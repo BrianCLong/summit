@@ -1,0 +1,6 @@
+{
+  "id": "adv-paraphrase-001",
+  "type": "paraphrase",
+  "baseline": "The synthetic_risk_pattern_beta caused a system failure.",
+  "adversarial": "The artificial_danger_sequence_beta resulted in a network breakdown."
+}
