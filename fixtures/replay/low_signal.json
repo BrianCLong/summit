@@ -1,0 +1,46 @@
+{
+  "scenario": "low_signal",
+  "window_days": 30,
+  "prs": [
+    {
+      "number": 201,
+      "title": "Minor typo fix in variable name",
+      "labels": ["chore"],
+      "files": ["src/utils/string.ts"],
+      "created_at": "2024-01-02T10:00:00Z",
+      "merged_at": "2024-01-05T10:00:00Z",
+      "market_score": 0.05,
+      "author": "new-dev"
+    },
+    {
+      "number": 202,
+      "title": "Add comments to tests",
+      "labels": ["tests"],
+      "files": ["test/utils/string.test.ts"],
+      "created_at": "2024-01-08T11:00:00Z",
+      "merged_at": "2024-01-12T10:00:00Z",
+      "market_score": 0.10,
+      "author": "new-dev"
+    },
+    {
+      "number": 203,
+      "title": "Reformat whitespace in README",
+      "labels": ["docs", "chore"],
+      "files": ["README.md"],
+      "created_at": "2024-01-18T14:00:00Z",
+      "merged_at": "2024-01-22T09:00:00Z",
+      "market_score": 0.02,
+      "author": "doc-writer"
+    },
+    {
+      "number": 204,
+      "title": "Update dev dependency",
+      "labels": ["dependencies", "chore"],
+      "files": ["package.json", "pnpm-lock.yaml"],
+      "created_at": "2024-01-25T16:00:00Z",
+      "merged_at": "2024-01-30T10:00:00Z",
+      "market_score": 0.15,
+      "author": "dependabot"
+    }
+  ]
+}
