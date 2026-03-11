@@ -1,0 +1,38 @@
+name: engineering-intelligence-network
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 4 * * 1'
+
+jobs:
+  build-network-intelligence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Build Engineering Intelligence Network artifacts
+        run: |
+          node scripts/network/repository-ingestion-engine.mjs
+          node scripts/network/global-pattern-detector.mjs
+          node scripts/network/network-learning-engine.mjs
+          node scripts/network/network-intelligence-report.mjs
+
+      - name: Upload EIN artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: engineering-intelligence-network
+          path: |
+            .global-intelligence/repository-dataset.json
+            .global-intelligence/global-patterns.json
+            .global-intelligence/network-learning-models.json
+            .global-intelligence/evidence-ledger-entry.json
+            .global-intelligence/engineering-intelligence-network.json

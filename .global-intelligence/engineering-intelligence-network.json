@@ -1,0 +1,65 @@
+{
+  "repositories_analyzed": 1,
+  "architecture_patterns": [
+    {
+      "id": "dependency-topology-depth-median",
+      "signal": "Dependency depth proxy across repositories",
+      "median_depth": 1,
+      "evidence": [
+        {
+          "repository_id": "summit",
+          "depth": 1
+        }
+      ]
+    },
+    {
+      "id": "ci-workflow-topology",
+      "signal": "Workflow footprint as CI complexity proxy",
+      "median_workflows": 341,
+      "evidence": [
+        {
+          "repository_id": "summit",
+          "workflows": 341
+        }
+      ]
+    }
+  ],
+  "dependency_growth_models": [],
+  "refactor_success_models": [
+    {
+      "id": "refactor-intensity-proxy",
+      "signal": "Recent refactor event density",
+      "median_refactor_events": 0,
+      "evidence": [
+        {
+          "repository_id": "summit",
+          "refactor_events": 0
+        }
+      ]
+    }
+  ],
+  "technology_trends": [],
+  "network_learning": {
+    "stability_predictor": {
+      "model_type": "deterministic-linear-proxy",
+      "coefficients": {
+        "dependency_depth_weight": 0.05,
+        "ci_workflow_weight": 17.05,
+        "refactor_event_weight": 0
+      }
+    },
+    "evolution_simulator": {
+      "model_type": "ecosystem-adoption-simulator",
+      "adoption_pressure": 0,
+      "growth_factor": 1
+    },
+    "architecture_optimizer": {
+      "model_type": "pattern-ranked-recommender",
+      "top_dependency_clusters": []
+    },
+    "innovation_detection_models": {
+      "model_type": "trend-momentum-detector",
+      "technology_trends": []
+    }
+  }
+}
