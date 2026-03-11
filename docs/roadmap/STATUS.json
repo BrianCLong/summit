@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-03-09T22:00:00Z",
-  "revision_note": "Integrated Stage 7 validation infrastructure, Antigravity governance ledger, and hardened docker stack into the master roadmap.",
+  "last_updated": "2026-03-10T23:56:54Z",
+  "revision_note": "Added 2026 funding action register initiative and synchronized roadmap summary counts.",
   "initiatives": [
     {
       "id": "antigravity-governance-ledger",
@@ -270,12 +270,18 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "Praxeology graph implementation with quarantined PG writeset validators and control-plane API."
+    },
+    {
+      "id": "funding-pipeline-2026-action-register",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Added 2026 external funding pipeline, prioritized queue, and evidence package requirements in docs/institutional/ORG_AND_FUNDING.md."
     }
   ],
   "summary": {
-    "total_initiatives": 32,
+    "total_initiatives": 33,
     "completed": 8,
-    "in_progress": 24,
+    "in_progress": 25,
     "at_risk": 0
   }
 }
