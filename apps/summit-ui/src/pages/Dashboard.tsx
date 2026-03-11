@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { getDashboard } from '../api';
 import type { DashboardData } from '../types';
 import { TopFindings } from '../components/TopFindings';
+import { KnowledgeGraph } from '../components/KnowledgeGraph';
 
 function StatCard({ label, value, accent }: { label: string; value: string | number; accent?: string }) {
   return (
@@ -114,6 +115,26 @@ export function Dashboard() {
           </div>
         </div>
       )}
+
+      {/* ── Knowledge Graph ── */}
+      <div className="card">
+        <div className="card-title">Knowledge Graph</div>
+        <KnowledgeGraph
+          width={800}
+          height={400}
+          nodes={[
+            { id: 'Agent-1', group: 1 },
+            { id: 'Agent-2', group: 1 },
+            { id: 'Task-A', group: 2 },
+            { id: 'Task-B', group: 2 },
+          ]}
+          links={[
+            { source: 'Agent-1', target: 'Task-A', value: 1 },
+            { source: 'Agent-2', target: 'Task-B', value: 2 },
+            { source: 'Agent-1', target: 'Task-B', value: 1 },
+          ]}
+        />
+      </div>
     </div>
   );
 }

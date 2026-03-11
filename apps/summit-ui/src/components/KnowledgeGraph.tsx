@@ -64,13 +64,15 @@ export const KnowledgeGraph: React.FC<KnowledgeGraphProps> = ({
       .join('circle')
       .attr('r', 8)
       .attr('fill', (d) => color(String(d.group || 1)))
-      .call(
+
+
+      .call((
         d3
           .drag<SVGCircleElement, GraphNode>()
           .on('start', dragstarted)
           .on('drag', dragged)
           .on('end', dragended)
-      );
+      ) as any);
 
     node.append('title').text((d) => d.id);
 
