@@ -1,0 +1,8 @@
+{
+  "evidence_id": "EVD-COMPLETENESS-EVAL-984E0C18",
+  "metrics": {
+    "average_completeness": 0.7281746031746031,
+    "average_omission_rate": 0.7428571428571429,
+    "sample_size": 3
+  }
+}
