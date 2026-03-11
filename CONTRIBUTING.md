@@ -12,7 +12,11 @@ Whether you are a human developer or an AI agent, this guide will help you contr
 
 ## 🚀 Getting Started
 
-If you are new here, please start with our **[Developer Onboarding Guide](docs/ONBOARDING.md)**. It will get you from `git clone` to a running stack in under 30 minutes.
+If you are new here, please start with our detailed guides in **[`docs/contributing/`](docs/contributing/README.md)**.
+- **[Development Setup & Repository Structure](docs/contributing/setup.md)**
+- **[Testing Locally](docs/contributing/testing.md)**
+- **[Code Style & Contribution Standards](docs/contributing/standards.md)**
+- **[Contribution Workflow & Architecture Guidelines](docs/contributing/workflow.md)**
 
 ### The "Golden Path" Command
 
@@ -86,7 +90,7 @@ Co-authored-by: Alice Smith <alice@example.com>
 
 ### The "Council of Solvers"
 
-Major architectural changes are reviewed by our internal "Council of Solvers" (a set of specialized AI agents). If your PR receives automated feedback from "Jules" or "Amp", treat it as you would a human code review.
+Major architectural changes are reviewed by our internal "Council of Solvers" (a set of specialized AI agents). If your PR receives automated feedback from "Jules" or "Amp", treat it as you would a human code review. See [Standards](docs/contributing/standards.md) for details on Architecture Decision Records (ADRs).
 
 ## 🔐 Secrets Handling & Shell Hygiene
 
