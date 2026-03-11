@@ -38,6 +38,11 @@ Summit’s core innovation is **explainable authority**. We make power, agency, 
 *   **Concept:** The philosophical agreement between human institutions and machine agents.
 *   **Key Idea:** Integrating non-human agency into accountability structures.
 
+### 7. [Narrative Stack Hardening & Expansion Plan (2026)](./narrative-stack-hardening-2026.md)
+*   **Concept:** Converged hardening plan based on January 2026 research updates.
+*   **Key Idea:** Move from content moderation to governed coordination + systemic-risk defense.
+*   **Outcome:** Priority backlog, verification contract, rollback triggers, and MAESTRO alignment.
+
 ## Usage
 
 These documents form the **Narrative Endgame** for Summit. They should be used to:
