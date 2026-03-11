@@ -1,10 +1,11 @@
-import re
+import html
 
-with open('.github/workflows/comprehensive-test.yml') as f:
+with open('scripts/profiling/generate_flamegraph.py', 'r') as f:
     content = f.read()
 
-content = re.sub(r"python-version: '3.10'", "python-version: '3.11'", content)
-content = re.sub(r"node-version: 20", "node-version-file: '.nvmrc'", content)
+content = content.replace('<td>{item["name"]}</td>', '<td>{html.escape(item["name"])}</td>')
 
-with open('.github/workflows/comprehensive-test.yml', 'w') as f:
-    f.write(content)
+with open('scripts/profiling/generate_flamegraph.py', 'w') as f:
+    f.write('import html\n' + content)
+
+print("Patched generate_flamegraph.py")
