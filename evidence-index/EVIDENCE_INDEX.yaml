@@ -1,0 +1,36 @@
+version: 1
+artifacts:
+  report:
+    description: "Main deterministic report of an action or event"
+    schema_ref: "schemas/evidence/report.schema.json"
+    typical_path_pattern: "evidence/*/report.json"
+    required_fields:
+      - "evidence_id"
+      - "summary"
+      - "artifacts"
+    retention:
+      policy: "indefinite"
+      archival_location: "evidence-archive/{YYYY-MM-DD}/"
+    validation_command: "python3 -m jsonschema -i {file} schemas/evidence/report.schema.json"
+
+  metrics:
+    description: "Deterministic quantitative metrics accompanying a report"
+    schema_ref: "schemas/evidence/metrics.schema.json"
+    typical_path_pattern: "evidence/*/metrics.json"
+    required_fields:
+      - "evidence_id"
+    retention:
+      policy: "indefinite"
+      archival_location: "evidence-archive/{YYYY-MM-DD}/"
+    validation_command: "python3 -m jsonschema -i {file} schemas/evidence/metrics.schema.json"
+
+  stamp:
+    description: "Time-based non-deterministic stamp indicating when evidence was collected"
+    schema_ref: "schemas/evidence/stamp.schema.json"
+    typical_path_pattern: "evidence/*/stamp.json"
+    required_fields:
+      - "timestamp"
+    retention:
+      policy: "indefinite"
+      archival_location: "evidence-archive/{YYYY-MM-DD}/"
+    validation_command: "python3 -m jsonschema -i {file} schemas/evidence/stamp.schema.json"
