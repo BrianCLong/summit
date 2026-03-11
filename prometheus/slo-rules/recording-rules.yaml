@@ -1,0 +1,119 @@
+groups:
+  - name: slo_recording_rules
+    rules:
+      # API Availability (99.9%)
+      # Successful requests / Total requests
+      - record: job:http_requests_total:rate5m
+        expr: sum by (job) (rate(http_requests_total[5m]))
+      - record: job:http_requests_errors:rate5m
+        expr: sum by (job) (rate(http_requests_total{status=~"5.."}[5m]))
+      - record: slo:api_availability:ratio_rate5m
+        expr: 1 - (job:http_requests_errors:rate5m / job:http_requests_total:rate5m)
+
+      - record: job:http_requests_total:rate1h
+        expr: sum by (job) (rate(http_requests_total[1h]))
+      - record: job:http_requests_errors:rate1h
+        expr: sum by (job) (rate(http_requests_total{status=~"5.."}[1h]))
+      - record: slo:api_availability:ratio_rate1h
+        expr: 1 - (job:http_requests_errors:rate1h / job:http_requests_total:rate1h)
+
+      - record: job:http_requests_total:rate6h
+        expr: sum by (job) (rate(http_requests_total[6h]))
+      - record: job:http_requests_errors:rate6h
+        expr: sum by (job) (rate(http_requests_total{status=~"5.."}[6h]))
+      - record: slo:api_availability:ratio_rate6h
+        expr: 1 - (job:http_requests_errors:rate6h / job:http_requests_total:rate6h)
+
+      - record: job:http_requests_total:rate3d
+        expr: sum by (job) (rate(http_requests_total[3d]))
+      - record: job:http_requests_errors:rate3d
+        expr: sum by (job) (rate(http_requests_total{status=~"5.."}[3d]))
+      - record: slo:api_availability:ratio_rate3d
+        expr: 1 - (job:http_requests_errors:rate3d / job:http_requests_total:rate3d)
+
+      # Evidence Pipeline Success Rate (99.5%)
+      - record: job:evidence_pipeline_total:rate5m
+        expr: sum by (job) (rate(evidence_artifacts_total[5m]))
+      - record: job:evidence_pipeline_errors:rate5m
+        expr: sum by (job) (rate(evidence_artifacts_total{status="invalid"}[5m]))
+      - record: slo:evidence_pipeline_success:ratio_rate5m
+        expr: 1 - (job:evidence_pipeline_errors:rate5m / job:evidence_pipeline_total:rate5m)
+
+      - record: job:evidence_pipeline_total:rate1h
+        expr: sum by (job) (rate(evidence_artifacts_total[1h]))
+      - record: job:evidence_pipeline_errors:rate1h
+        expr: sum by (job) (rate(evidence_artifacts_total{status="invalid"}[1h]))
+      - record: slo:evidence_pipeline_success:ratio_rate1h
+        expr: 1 - (job:evidence_pipeline_errors:rate1h / job:evidence_pipeline_total:rate1h)
+
+      - record: job:evidence_pipeline_total:rate6h
+        expr: sum by (job) (rate(evidence_artifacts_total[6h]))
+      - record: job:evidence_pipeline_errors:rate6h
+        expr: sum by (job) (rate(evidence_artifacts_total{status="invalid"}[6h]))
+      - record: slo:evidence_pipeline_success:ratio_rate6h
+        expr: 1 - (job:evidence_pipeline_errors:rate6h / job:evidence_pipeline_total:rate6h)
+
+      - record: job:evidence_pipeline_total:rate3d
+        expr: sum by (job) (rate(evidence_artifacts_total[3d]))
+      - record: job:evidence_pipeline_errors:rate3d
+        expr: sum by (job) (rate(evidence_artifacts_total{status="invalid"}[3d]))
+      - record: slo:evidence_pipeline_success:ratio_rate3d
+        expr: 1 - (job:evidence_pipeline_errors:rate3d / job:evidence_pipeline_total:rate3d)
+
+      # CI Gate Pass Rate (98%)
+      - record: job:ci_pipeline_runs_total:rate5m
+        expr: sum by (job) (rate(ci_pipeline_runs_total[5m]))
+      - record: job:ci_pipeline_runs_errors:rate5m
+        expr: sum by (job) (rate(ci_pipeline_runs_total{status="failed"}[5m]))
+      - record: slo:ci_gate_pass_rate:ratio_rate5m
+        expr: 1 - (job:ci_pipeline_runs_errors:rate5m / job:ci_pipeline_runs_total:rate5m)
+
+      - record: job:ci_pipeline_runs_total:rate1h
+        expr: sum by (job) (rate(ci_pipeline_runs_total[1h]))
+      - record: job:ci_pipeline_runs_errors:rate1h
+        expr: sum by (job) (rate(ci_pipeline_runs_total{status="failed"}[1h]))
+      - record: slo:ci_gate_pass_rate:ratio_rate1h
+        expr: 1 - (job:ci_pipeline_runs_errors:rate1h / job:ci_pipeline_runs_total:rate1h)
+
+      - record: job:ci_pipeline_runs_total:rate6h
+        expr: sum by (job) (rate(ci_pipeline_runs_total[6h]))
+      - record: job:ci_pipeline_runs_errors:rate6h
+        expr: sum by (job) (rate(ci_pipeline_runs_total{status="failed"}[6h]))
+      - record: slo:ci_gate_pass_rate:ratio_rate6h
+        expr: 1 - (job:ci_pipeline_runs_errors:rate6h / job:ci_pipeline_runs_total:rate6h)
+
+      - record: job:ci_pipeline_runs_total:rate3d
+        expr: sum by (job) (rate(ci_pipeline_runs_total[3d]))
+      - record: job:ci_pipeline_runs_errors:rate3d
+        expr: sum by (job) (rate(ci_pipeline_runs_total{status="failed"}[3d]))
+      - record: slo:ci_gate_pass_rate:ratio_rate3d
+        expr: 1 - (job:ci_pipeline_runs_errors:rate3d / job:ci_pipeline_runs_total:rate3d)
+
+      # Deploy Success Rate (99%)
+      - record: job:deployments_total:rate5m
+        expr: sum by (job) (rate(deployments_total[5m]))
+      - record: job:deployments_errors:rate5m
+        expr: sum by (job) (rate(deployments_total{status="failed"}[5m]))
+      - record: slo:deploy_success_rate:ratio_rate5m
+        expr: 1 - (job:deployments_errors:rate5m / job:deployments_total:rate5m)
+
+      - record: job:deployments_total:rate1h
+        expr: sum by (job) (rate(deployments_total[1h]))
+      - record: job:deployments_errors:rate1h
+        expr: sum by (job) (rate(deployments_total{status="failed"}[1h]))
+      - record: slo:deploy_success_rate:ratio_rate1h
+        expr: 1 - (job:deployments_errors:rate1h / job:deployments_total:rate1h)
+
+      - record: job:deployments_total:rate6h
+        expr: sum by (job) (rate(deployments_total[6h]))
+      - record: job:deployments_errors:rate6h
+        expr: sum by (job) (rate(deployments_total{status="failed"}[6h]))
+      - record: slo:deploy_success_rate:ratio_rate6h
+        expr: 1 - (job:deployments_errors:rate6h / job:deployments_total:rate6h)
+
+      - record: job:deployments_total:rate3d
+        expr: sum by (job) (rate(deployments_total[3d]))
+      - record: job:deployments_errors:rate3d
+        expr: sum by (job) (rate(deployments_total{status="failed"}[3d]))
+      - record: slo:deploy_success_rate:ratio_rate3d
+        expr: 1 - (job:deployments_errors:rate3d / job:deployments_total:rate3d)

@@ -1,0 +1,44 @@
+slos:
+  - name: API Availability
+    description: "The Summit API must be available to process requests."
+    sli:
+      description: "Percentage of successful HTTP requests (non-5xx) out of all requests."
+      metric_source: "prometheus"
+    objective: 99.9
+    window: "30d"
+    error_budget:
+      calculation: "(1 - 0.999) * 30 days = 43.2 minutes of allowed downtime per 30 days"
+      burn_rate_methodology: "Error budget is tracked on a rolling 30-day window. Alerts trigger based on burn rate multipliers (e.g., 5% of budget in 1h)."
+
+  - name: Evidence Pipeline Success Rate
+    description: "Evidence artifacts generated must be valid and successfully processed."
+    sli:
+      description: "Percentage of valid evidence artifacts successfully processed out of all generated artifacts."
+      metric_source: "prometheus"
+    objective: 99.5
+    window: "30d"
+    error_budget:
+      calculation: "0.5% of total generated evidence artifacts"
+      burn_rate_methodology: "Error budget is the total number of expected valid artifacts * 0.005. Burn rate tracks the ratio of invalid/failed artifacts."
+
+  - name: CI Gate Pass Rate
+    description: "Pull requests should pass all CI gates without requiring manual override."
+    sli:
+      description: "Percentage of PRs that pass CI gates automatically out of all merged PRs."
+      metric_source: "prometheus"
+    objective: 98.0
+    window: "30d"
+    error_budget:
+      calculation: "2.0% of total CI pipeline runs allowed to fail or require manual intervention"
+      burn_rate_methodology: "Error budget is the total number of CI runs * 0.02. Burn rate alerts track spikes in CI failures."
+
+  - name: Deploy Success Rate
+    description: "Deployments should succeed without requiring a rollback."
+    sli:
+      description: "Percentage of successful deployments without rollbacks out of all deployments."
+      metric_source: "prometheus"
+    objective: 99.0
+    window: "30d"
+    error_budget:
+      calculation: "1.0% of deployments allowed to fail or require rollback"
+      burn_rate_methodology: "Error budget is the total number of deployments * 0.01. Burn rate is tracked per deployment cycle."
