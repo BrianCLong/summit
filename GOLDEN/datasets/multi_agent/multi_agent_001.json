@@ -1,0 +1,31 @@
+{
+  "results": [
+    {
+      "task_id": "ma_task_1",
+      "agent_logs": [
+        { "from": "orchestrator", "to": "researcher", "action": "delegate_research", "timestamp": "2026-03-09T09:00:00Z" },
+        { "from": "researcher", "to": "orchestrator", "action": "return_findings", "evidence": "EVID:multi_agent:ev_market_trend_doc", "timestamp": "2026-03-09T09:05:00Z" },
+        { "from": "orchestrator", "to": "writer", "action": "delegate_writing", "timestamp": "2026-03-09T09:05:30Z" },
+        { "from": "writer", "to": "orchestrator", "action": "return_report", "evidence": "EVID:multi_agent:ev_summary_report", "timestamp": "2026-03-09T09:10:00Z" }
+      ],
+      "provided_evidence": [
+        "EVID:multi_agent:ev_market_trend_doc",
+        "EVID:multi_agent:ev_summary_report"
+      ],
+      "status": "success"
+    },
+    {
+      "task_id": "ma_task_2",
+      "agent_logs": [
+        { "from": "orchestrator", "to": "security_analyst_1", "action": "request_assessment", "timestamp": "2026-03-09T10:00:00Z" },
+        { "from": "orchestrator", "to": "security_analyst_2", "action": "request_assessment", "timestamp": "2026-03-09T10:00:05Z" },
+        { "from": "orchestrator", "to": "adjudicator", "action": "resolve_conflict", "timestamp": "2026-03-09T10:05:00Z" },
+        { "from": "adjudicator", "to": "orchestrator", "action": "final_decision", "evidence": "EVID:multi_agent:resolved_risk_cve_2026_001", "timestamp": "2026-03-09T10:10:00Z" }
+      ],
+      "provided_evidence": [
+        "EVID:multi_agent:resolved_risk_cve_2026_001"
+      ],
+      "status": "success"
+    }
+  ]
+}

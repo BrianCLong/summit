@@ -1,0 +1,45 @@
+{
+  "results": [
+    {
+      "task_id": "task_1",
+      "tool_calls": [
+        {
+          "tool_name": "search_capital",
+          "query": "France",
+          "result_evidence": "EVID:tooluse:doc_capital_france"
+        },
+        {
+          "tool_name": "search_population",
+          "query": "Paris",
+          "result_evidence": "EVID:tooluse:doc_population_paris"
+        }
+      ],
+      "provided_evidence": [
+        "EVID:tooluse:doc_capital_france",
+        "EVID:tooluse:doc_population_paris"
+      ],
+      "actual_steps": 2,
+      "status": "success"
+    },
+    {
+      "task_id": "task_2",
+      "tool_calls": [
+        {
+          "tool_name": "search_ceo",
+          "query": "Apple",
+          "result_evidence": "EVID:tooluse:doc_ceo_apple"
+        },
+        {
+          "tool_name": "search_redundant",
+          "query": "Apple CEO name",
+          "result_evidence": "EVID:tooluse:doc_ceo_apple_duplicate"
+        }
+      ],
+      "provided_evidence": [
+        "EVID:tooluse:doc_ceo_apple"
+      ],
+      "actual_steps": 2,
+      "status": "success"
+    }
+  ]
+}

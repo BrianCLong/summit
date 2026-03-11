@@ -1,0 +1,32 @@
+[
+  {
+    "id": "ma_task_1",
+    "type": "agent_delegation",
+    "evidence_id": "EVID:multi_agent:delegation:1",
+    "query": "Research the market trend for EVs and write a summary report.",
+    "expected_coordination": [
+      { "from": "orchestrator", "to": "researcher", "action": "delegate_research" },
+      { "from": "researcher", "to": "orchestrator", "action": "return_findings" },
+      { "from": "orchestrator", "to": "writer", "action": "delegate_writing" },
+      { "from": "writer", "to": "orchestrator", "action": "return_report" }
+    ],
+    "expected_evidence": [
+      "EVID:multi_agent:ev_market_trend_doc",
+      "EVID:multi_agent:ev_summary_report"
+    ]
+  },
+  {
+    "id": "ma_task_2",
+    "type": "agent_consensus",
+    "evidence_id": "EVID:multi_agent:consensus:1",
+    "query": "Determine the highest risk vulnerability from the provided list.",
+    "expected_coordination": [
+      { "from": "orchestrator", "to": "security_analyst_1", "action": "request_assessment" },
+      { "from": "orchestrator", "to": "security_analyst_2", "action": "request_assessment" },
+      { "from": "orchestrator", "to": "adjudicator", "action": "resolve_conflict" }
+    ],
+    "expected_evidence": [
+      "EVID:multi_agent:resolved_risk_cve_2026_001"
+    ]
+  }
+]

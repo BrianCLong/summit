@@ -1,0 +1,23 @@
+[
+  {
+    "id": "task_1",
+    "type": "tool_call_efficiency",
+    "evidence_id": "EVID:tooluse:tool_call_efficiency:1",
+    "query": "Find the capital of France and its population.",
+    "expected_evidence": [
+      "EVID:tooluse:doc_capital_france",
+      "EVID:tooluse:doc_population_paris"
+    ],
+    "optimal_steps": 2
+  },
+  {
+    "id": "task_2",
+    "type": "tool_call_redundancy",
+    "evidence_id": "EVID:tooluse:tool_call_redundancy:1",
+    "query": "Who is the CEO of Apple?",
+    "expected_evidence": [
+      "EVID:tooluse:doc_ceo_apple"
+    ],
+    "optimal_steps": 1
+  }
+]
