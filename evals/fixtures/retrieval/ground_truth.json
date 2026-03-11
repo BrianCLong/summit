@@ -1,0 +1,20 @@
+[
+  {
+    "query_id": "q1",
+    "query": "What companies did Elon Musk found?",
+    "ground_truth_nodes": ["node_elon_musk", "node_spacex", "node_tesla", "node_xcorp"],
+    "ground_truth_edges": ["edge_founder_spacex", "edge_founder_tesla", "edge_founder_xcorp"]
+  },
+  {
+    "query_id": "q2",
+    "query": "Who acquired GitHub and when?",
+    "ground_truth_nodes": ["node_github", "node_microsoft", "node_2018"],
+    "ground_truth_edges": ["edge_acquired_by_msft", "edge_acquisition_date"]
+  },
+  {
+    "query_id": "q3",
+    "query": "What is the capital of France?",
+    "ground_truth_nodes": ["node_france", "node_paris"],
+    "ground_truth_edges": ["edge_capital_of"]
+  }
+]
