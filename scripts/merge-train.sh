@@ -1,34 +1,94 @@
 #!/usr/bin/env bash
-set -e
+set -euo pipefail
 
-# MERGE TRAIN ORCHESTRATOR
-# Coordinates the state of the merge train and kicks off processing if stuck
-# Updated for Merge-Train Stabilization Blueprint
+# Merge Train Orchestrator
+# Starts or advances the merge train by running the existing queue workflows.
 
-echo "🚂 Checking Merge Train Status..."
+usage() {
+  cat <<'EOF'
+Usage: ./scripts/merge-train.sh [--batch-size N] [--target-depth N] [--dry-run]
 
-QUEUE_LENGTH=$(gh pr list --label "merge-queue" --json number | jq 'length')
-echo "Queue Length: $QUEUE_LENGTH"
+Options:
+  --batch-size N    Number of PRs to label queue:merge-now (default: 25)
+  --target-depth N  Desired merge queue depth for feeder (default: 20)
+  --dry-run         Show planned actions without mutating state
+  -h, --help        Show this help text
+EOF
+}
 
-if [ "$QUEUE_LENGTH" -eq 0 ]; then
-  echo "✅ Merge train is empty and clear."
-  exit 0
-fi
+require_cmd() {
+  if ! command -v "$1" >/dev/null 2>&1; then
+    echo "Missing required command: $1" >&2
+    exit 1
+  fi
+}
 
-# Check if main is green
-MAIN_STATUS=$(gh run list --branch main --limit 1 --json conclusion --jq '.[0].conclusion')
+batch_size=25
+target_depth=20
+dry_run=false
 
-if [ "$MAIN_STATUS" != "success" ]; then
-  echo "⚠️ Main branch is not green (Status: $MAIN_STATUS). Halting merge train."
-  # Optionally notify Slack/Teams
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --batch-size)
+      batch_size="$2"
+      shift 2
+      ;;
+    --target-depth)
+      target_depth="$2"
+      shift 2
+      ;;
+    --dry-run)
+      dry_run=true
+      shift
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      echo "Unknown argument: $1" >&2
+      usage
+      exit 1
+      ;;
+  esac
+done
+
+require_cmd gh
+require_cmd jq
+
+repo="$(gh repo view --json nameWithOwner --jq .nameWithOwner)"
+default_branch="$(gh repo view --json defaultBranchRef --jq .defaultBranchRef.name)"
+
+echo "🚂 Merge train kickstart for ${repo}"
+echo "ℹ️  Default branch: ${default_branch}"
+
+queue_depth="$(gh pr list --search 'is:pr is:open is:queued' --json number --jq 'length')"
+ready_count="$(gh pr list --label 'queue:merge-now' --state open --json number --jq 'length')"
+main_status="$(gh run list --branch "${default_branch}" --limit 1 --json conclusion --jq '.[0].conclusion // "unknown"')"
+
+echo "📊 Current queue depth: ${queue_depth}"
+echo "📊 Current queue:merge-now count: ${ready_count}"
+echo "📊 Latest ${default_branch} workflow conclusion: ${main_status}"
+
+if [[ "${main_status}" != "success" ]]; then
+  echo "⛔ ${default_branch} is not green. Resolve branch health before feeding merge queue."
   exit 1
 fi
 
-echo "🚦 Main is green. Processing next item in queue..."
+if [[ "${dry_run}" == "true" ]]; then
+  echo "🧪 Dry run enabled. Would dispatch workflows:"
+  echo "   - Merge train labeler (batch_size=${batch_size})"
+  echo "   - Merge Queue Feeder (target depth env uses workflow default, ${target_depth} suggested)"
+  exit 0
+fi
 
-# Get oldest PR in queue
-NEXT_PR=$(gh pr list --label "merge-queue" --json number --limit 1 --jq '.[0].number')
+echo "🏷️  Dispatching Merge train labeler..."
+gh workflow run "Merge train labeler" -f batch_size="${batch_size}"
 
-echo "Processing PR #$NEXT_PR"
-# Trigger the merge-queue-kicker workflow or manually process
-gh workflow run merge.queue.kicker.yml -f pr_number="$NEXT_PR"
+echo "🧭 Dispatching Merge Queue Feeder..."
+gh workflow run "Merge Queue Feeder"
+
+echo "✅ Merge train workflows dispatched. Monitor with:"
+echo "   gh run list --workflow 'Merge train labeler' --limit 5"
+echo "   gh run list --workflow 'Merge Queue Feeder' --limit 5"
+echo "   gh pr list --search 'is:pr is:open is:queued' --limit ${target_depth}"
