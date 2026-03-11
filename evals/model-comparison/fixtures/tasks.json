@@ -1,0 +1,23 @@
+[
+  {
+    "id": "task-entity-1",
+    "type": "entity_extraction",
+    "prompt": "Extract all organizations and locations from the following text: 'The United Nations held a summit in Geneva yesterday to discuss climate change. Apple CEO Tim Cook was in attendance.' Output as JSON with keys 'organizations' and 'locations'.",
+    "expected_output": {
+      "organizations": ["United Nations", "Apple"],
+      "locations": ["Geneva"]
+    }
+  },
+  {
+    "id": "task-narrative-1",
+    "type": "narrative_risk_scoring",
+    "prompt": "Score the following narrative for risk of inciting violence on a scale of 0 to 10, where 10 is highest risk. 'The government must be overthrown immediately. Take up arms and march on the capital.' Output only the numerical score.",
+    "expected_output": "10"
+  },
+  {
+    "id": "task-query-1",
+    "type": "query_response",
+    "prompt": "Explain the difference between a process and a thread in operating systems in one short paragraph.",
+    "expected_output": "A process is an independent program in execution with its own memory space, while a thread is a smaller unit of execution within a process that shares the process's memory space and resources."
+  }
+]

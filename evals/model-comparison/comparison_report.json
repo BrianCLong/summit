@@ -1,0 +1,115 @@
+{
+  "models": {
+    "gpt-4-mock": {
+      "metrics": {
+        "avg_accuracy": 0.9215686274509803,
+        "avg_hallucination_rate": 0.0,
+        "avg_consistency": 1.0,
+        "total_latency_ms": 3500,
+        "total_cost": 0.08499999999999999
+      },
+      "task_results": [
+        {
+          "task_id": "task-entity-1",
+          "task_type": "entity_extraction",
+          "accuracy": 1.0,
+          "hallucination_rate": 0.0,
+          "latency_ms": 1200,
+          "cost": 0.03
+        },
+        {
+          "task_id": "task-narrative-1",
+          "task_type": "narrative_risk_scoring",
+          "accuracy": 1.0,
+          "hallucination_rate": 0.0,
+          "latency_ms": 800,
+          "cost": 0.015
+        },
+        {
+          "task_id": "task-query-1",
+          "task_type": "query_response",
+          "accuracy": 0.7647058823529411,
+          "hallucination_rate": 0.0,
+          "latency_ms": 1500,
+          "cost": 0.04
+        }
+      ]
+    },
+    "claude-3-mock": {
+      "metrics": {
+        "avg_accuracy": 0.8627450980392157,
+        "avg_hallucination_rate": 0.0,
+        "avg_consistency": 1.0,
+        "total_latency_ms": 2600,
+        "total_cost": 0.041999999999999996
+      },
+      "task_results": [
+        {
+          "task_id": "task-entity-1",
+          "task_type": "entity_extraction",
+          "accuracy": 1.0,
+          "hallucination_rate": 0.0,
+          "latency_ms": 900,
+          "cost": 0.015
+        },
+        {
+          "task_id": "task-narrative-1",
+          "task_type": "narrative_risk_scoring",
+          "accuracy": 1.0,
+          "hallucination_rate": 0.0,
+          "latency_ms": 600,
+          "cost": 0.007
+        },
+        {
+          "task_id": "task-query-1",
+          "task_type": "query_response",
+          "accuracy": 0.5882352941176471,
+          "hallucination_rate": 0.0,
+          "latency_ms": 1100,
+          "cost": 0.02
+        }
+      ]
+    },
+    "llama-3-mock": {
+      "metrics": {
+        "avg_accuracy": 0.3202614379084967,
+        "avg_hallucination_rate": 0.0,
+        "avg_consistency": 1.0,
+        "total_latency_ms": 1300,
+        "total_cost": 0.0035
+      },
+      "task_results": [
+        {
+          "task_id": "task-entity-1",
+          "task_type": "entity_extraction",
+          "accuracy": 0.6666666666666666,
+          "hallucination_rate": 0.0,
+          "latency_ms": 400,
+          "cost": 0.001
+        },
+        {
+          "task_id": "task-narrative-1",
+          "task_type": "narrative_risk_scoring",
+          "accuracy": 0.0,
+          "hallucination_rate": 0.0,
+          "latency_ms": 300,
+          "cost": 0.0005
+        },
+        {
+          "task_id": "task-query-1",
+          "task_type": "query_response",
+          "accuracy": 0.29411764705882354,
+          "hallucination_rate": 0.0,
+          "latency_ms": 600,
+          "cost": 0.002
+        }
+      ]
+    }
+  },
+  "summary": {
+    "total_tasks": 3,
+    "best_accuracy_model": "gpt-4-mock",
+    "lowest_latency_model": "llama-3-mock",
+    "lowest_cost_model": "llama-3-mock"
+  }
+}
