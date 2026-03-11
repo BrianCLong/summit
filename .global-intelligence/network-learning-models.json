@@ -1,0 +1,25 @@
+{
+  "schema_version": "1.0.0",
+  "repositories_analyzed": 1,
+  "stability_predictor": {
+    "model_type": "deterministic-linear-proxy",
+    "coefficients": {
+      "dependency_depth_weight": 0.05,
+      "ci_workflow_weight": 17.05,
+      "refactor_event_weight": 0
+    }
+  },
+  "evolution_simulator": {
+    "model_type": "ecosystem-adoption-simulator",
+    "adoption_pressure": 0,
+    "growth_factor": 1
+  },
+  "architecture_optimizer": {
+    "model_type": "pattern-ranked-recommender",
+    "top_dependency_clusters": []
+  },
+  "innovation_detection_models": {
+    "model_type": "trend-momentum-detector",
+    "technology_trends": []
+  }
+}

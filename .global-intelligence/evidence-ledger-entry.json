@@ -1,0 +1,19 @@
+{
+  "ledger_version": "1.0.0",
+  "artifact": "network-learning-models.json",
+  "sha256": "7254f775764aae73247c3743fa12404ff40523a5651c289edea44bd3e691f0d3",
+  "source_artifacts": [
+    "repository-dataset.json",
+    "global-patterns.json"
+  ],
+  "evidence_chain": [
+    {
+      "type": "repository-knowledge-graph",
+      "path": ".global-intelligence/repository-dataset.json"
+    },
+    {
+      "type": "global-patterns",
+      "path": ".global-intelligence/global-patterns.json"
+    }
+  ]
+}
