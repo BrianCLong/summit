@@ -1,0 +1,26 @@
+[
+  {
+    "id": "res-001",
+    "query": "Summarize the events of the cyberattack on CorpX.",
+    "response": "On Tuesday morning, CorpX detected unauthorized access to their primary database. The attackers initially gained entry through a compromised vendor credential on Monday night. By Wednesday, the incident response team had successfully contained the breach. According to the preliminary analysis, no customer data was exfiltrated during the incident.",
+    "expected_coherence": "high"
+  },
+  {
+    "id": "res-002",
+    "query": "What is the relationship between Alice and Bob?",
+    "response": "Alice is the CEO of the company. Bob met her at a conference in 2019. The CEO was not present at the meeting. Bob told him that the project was delayed. She approved the budget for the new initiative. Alice and Bob have worked together for five years.",
+    "expected_coherence": "low"
+  },
+  {
+    "id": "res-003",
+    "query": "Explain the timeline of the Apollo 11 mission.",
+    "response": "The Apollo 11 mission launched on July 16, 1969. Neil Armstrong became the first man to walk on the moon on July 20. Before the launch, extensive training was conducted over several years. They returned to Earth safely on July 24. However, the crew never made it back.",
+    "expected_coherence": "low"
+  },
+  {
+    "id": "res-004",
+    "query": "Describe the architecture of the new system.",
+    "response": "The new system utilizes a microservices architecture to enhance scalability. The frontend is built with React, communicating with backend services via RESTful APIs. Data is stored in a distributed PostgreSQL database, ensuring high availability. Furthermore, Redis is employed for caching frequently accessed data to improve response times.",
+    "expected_coherence": "high"
+  }
+]
