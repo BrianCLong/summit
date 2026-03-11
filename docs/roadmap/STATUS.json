@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-03-09T22:00:00Z",
-  "revision_note": "Integrated Stage 7 validation infrastructure, Antigravity governance ledger, and hardened docker stack into the master roadmap.",
+  "last_updated": "2026-03-10T00:00:00Z",
+  "revision_note": "Added March 2026 market signal package and governance-ready GTM artifacts.",
   "initiatives": [
     {
       "id": "antigravity-governance-ledger",
@@ -270,12 +270,18 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "Praxeology graph implementation with quarantined PG writeset validators and control-plane API."
+    },
+    {
+      "id": "market-signals-2026-03-10",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Published March 2026 market-signals brief, refreshed positioning language for GraphRAG + GPT-5.4 cycle, and added ISO 42001/EU AI Act checklist for regulated GTM motions."
     }
   ],
   "summary": {
-    "total_initiatives": 32,
+    "total_initiatives": 33,
     "completed": 8,
-    "in_progress": 24,
+    "in_progress": 25,
     "at_risk": 0
   }
 }
