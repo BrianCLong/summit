@@ -2,6 +2,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { buildEvidenceIndex } from "./index.js";
 import type { EvidenceEntry, EvidenceWriterOptions } from "./types.js";
+import { emitRiskObservation } from "../../counter_ai/hooks.js";
 
 function stableStringify(value: unknown): string {
   if (Array.isArray(value)) {
@@ -27,6 +28,7 @@ export async function writeEvidenceBundle(
   );
 
   for (const entry of sortedEntries) {
+    emitRiskObservation('graph_indexing:relation_creation', { evidence_id: entry.report.evidence_id });
     const evidenceDir = path.join(options.baseDir, entry.report.evidence_id);
     await mkdir(evidenceDir, { recursive: true });
 
