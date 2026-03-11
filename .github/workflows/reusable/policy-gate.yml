@@ -1,0 +1,49 @@
+name: policy-gate
+
+on:
+  workflow_call:
+    inputs:
+      target_branch:
+        required: true
+        type: string
+        description: "The target branch for the pull request"
+
+jobs:
+  guardrails:
+    name: Policy Guardrails
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Enforce Branch Protection
+        run: |
+          TARGET_BRANCH="${{ inputs.target_branch }}"
+          echo "Checking target branch: $TARGET_BRANCH"
+
+          if [[ "$TARGET_BRANCH" != "main" && "$TARGET_BRANCH" != release/* && -n "$TARGET_BRANCH" ]]; then
+            echo "::error::PR targets an unauthorized branch: $TARGET_BRANCH. Allowed targets are main or release/*."
+            # block merge
+            exit 1
+          fi
+
+      - name: Dependency Check
+        run: |
+          echo "Checking for unauthorized dependencies..."
+          if git diff origin/${{ inputs.target_branch }}...HEAD -- pnpm-lock.yaml | grep -q "+.*malicious-package"; then
+            echo "::error::Unauthorized dependency found in lockfile."
+            # block merge
+            exit 1
+          fi
+
+      - name: Secret Scanning
+        run: |
+          echo "Scanning for hardcoded secrets..."
+          if git grep -E -i "AKIA[0-9A-Z]{16}" || git grep -E "-----BEGIN PRIVATE KEY-----"; then
+             echo "::error::Possible secrets found in code."
+             # block merge
+             exit 1
+          fi
+          echo "No obvious secrets found."

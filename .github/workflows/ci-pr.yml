@@ -128,6 +128,13 @@ jobs:
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/summit_test
 
+  policy-gate:
+    name: Policy Gate
+    needs: [build-test, config-guard]
+    uses: ./.github/workflows/reusable/policy-gate.yml
+    with:
+      target_branch: ${{ github.event.pull_request.base.ref || github.ref_name }}
+
   verification-suite:
     name: Verification Suite
     runs-on: ubuntu-22.04
