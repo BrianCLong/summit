@@ -34,8 +34,14 @@ const collectArtifacts = (workspaces: any[], outDir: string): string[] => {
       for (const file of files) {
         const srcFile = path.join(distPath, file);
         const destFile = path.join(packageOutDir, file);
-        fs.copyFileSync(srcFile, destFile);
-        collectedFiles.push(destFile);
+        const stat = fs.statSync(srcFile);
+        if (stat.isDirectory()) {
+          fs.cpSync(srcFile, destFile, { recursive: true });
+          collectedFiles.push(destFile);
+        } else {
+          fs.copyFileSync(srcFile, destFile);
+          collectedFiles.push(destFile);
+        }
       }
     }
   }
