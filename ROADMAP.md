@@ -11,16 +11,14 @@
 | **Koshchei** | **DIFFERENTIATOR** | Narrative simulation engine (`server/src/narrative/`) now integrated with Neo4j graph hydration and MCP tool exposure. Production-ready for predictive analysis. |
 | **Switchboard** | **DIFFERENTIATOR** | `apps/switchboard-web` now provides HITL review console with task approval/rejection and context detail views. |
 | **companyOS** | **FOUNDATION** | `companyos/src` provides the identity/policy fabric (Identity, AuthZ), essential for governance but needs tighter integration. |
- HEAD
-| Component       | Maturity           | Justification                                                                                                                  |
-| --------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------ |
-| **Summit**      | **DIFFERENTIATOR** | Mature `apps/web` with complex UI (TriPane, MaestroConsole) and solid `server` integration. It is the operational core.        |
-| **IntelGraph**  | **FOUNDATION**     | Stable graph logic in `server/src/graph` and `intelgraph/`. Provides the critical data layer for the stack.                    |
-| **Maestro**     | **DIFFERENTIATOR** | Active development in `server/src/maestro`. Core runtime for agents, but governance features are still evolving.               |
-| **Koshchei**    | **EXPERIMENT**     | Simulation engine (`server/src/narrative/engine.ts`) exists as a prototype but is not fully integrated with the graph or UI.   |
-| **Switchboard** | **EXPERIMENT**     | `apps/switchboard-web` is currently a shell/adapter view. Needs significant work to become a HITL review console.              |
-| **companyOS**   | **FOUNDATION**     | `companyos/src` provides the identity/policy fabric (Identity, AuthZ), essential for governance but needs tighter integration. |
- origin/main
+| Component | Maturity | Justification |
+|-----------|----------|---------------|
+| **Summit** | **DIFFERENTIATOR** | Mature `apps/web` with complex UI (TriPane, MaestroConsole) and solid `server` integration. It is the operational core. |
+| **IntelGraph** | **FOUNDATION** | Stable graph logic in `server/src/graph` and `intelgraph/`. Provides the critical data layer for the stack. |
+| **Maestro** | **DIFFERENTIATOR** | Active development in `server/src/maestro`. Core runtime for agents, but governance features are still evolving. |
+| **Koshchei** | **EXPERIMENT** | Simulation engine (`server/src/narrative/engine.ts`) exists as a prototype but is not fully integrated with the graph or UI. |
+| **Switchboard** | **EXPERIMENT** | `apps/switchboard-web` is currently a shell/adapter view. Needs significant work to become a HITL review console. |
+| **companyOS** | **FOUNDATION** | `companyos/src` provides the identity/policy fabric (Identity, AuthZ), essential for governance but needs tighter integration. |
 
 ---
 
@@ -228,27 +226,11 @@
     *   [x] Chart renders vertical markers for significant events.
     *   [x] Clicking a marker shows the Event details in a side panel.
 *   **Labels:** `product:summit`, `area:ux`, `type:enhancement`, `estimate:3d`, `priority:p3`
- HEAD
-#### Story 4.1: Narrative Arc Data API
-- **Description:** Expose a new GraphQL/REST endpoint that returns time-series data for Story Arcs from a simulation run.
-- **Acceptance Criteria:**
-  - [ ] `GET /api/narrative/:simId/arcs`.
-  - [ ] Returns JSON: `[{ tick: 0, theme: "Fear", momentum: 0.5 }, ...]`.
-  - [ ] Cached for performance on finished simulations.
-- **Labels:** `product:summit`, `area:api`, `type:backend`, `estimate:3d`, `priority:p2`
-#### Story 4.2: Momentum Chart Component
-- **Description:** Build a Recharts multi-line chart component in `apps/web` to visualize the Arc data.
-  - [ ] X-Axis: Time/Ticks. Y-Axis: Momentum (0-1).
-  - [ ] Distinct colors per Theme.
-  - [ ] Tooltip showing "Top Contributing Entities" at that timestamp.
-- **Labels:** `product:summit`, `area:frontend`, `type:feature`, `estimate:5d`, `priority:p2`
-#### Story 4.3: Arc "Key Moments" Annotations
+#### Story 4.3: Arc "Key Moments" Annotations [DONE]
 - **Description:** Overlay "Intervention Events" (e.g., Agent Actions) on the timeline to show cause-and-effect.
-  - [ ] API includes `events[]` with timestamps.
-  - [ ] Chart renders vertical markers for significant events.
-  - [ ] Clicking a marker shows the Event details in a side panel.
-- **Labels:** `product:summit`, `area:ux`, `type:enhancement`, `estimate:3d`, `priority:p3`
- origin/main
+  - [x] API includes `events[]` with timestamps.
+  - [x] Chart renders vertical markers for significant events.
+  - [x] Clicking a marker shows the Event details in a side panel.
 
 ---
 
