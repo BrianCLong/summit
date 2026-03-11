@@ -1,0 +1,71 @@
+{
+  "metrics": {
+    "expected_calibration_error": 0.14656089497479946,
+    "maximum_calibration_error": 0.21208073550594064,
+    "overall_confidence": 0.6565608949747995,
+    "overall_accuracy": 0.51,
+    "systematic_pattern": "Systematically overconfident"
+  },
+  "bins": [
+    {
+      "bin_range": "0.00-0.10",
+      "bin_size": 0,
+      "average_confidence": 0.0,
+      "average_accuracy": 0.0
+    },
+    {
+      "bin_range": "0.10-0.20",
+      "bin_size": 6,
+      "average_confidence": 0.1714695647961942,
+      "average_accuracy": 0.0
+    },
+    {
+      "bin_range": "0.20-0.30",
+      "bin_size": 27,
+      "average_confidence": 0.26355554320988506,
+      "average_accuracy": 0.18518518518518517
+    },
+    {
+      "bin_range": "0.30-0.40",
+      "bin_size": 58,
+      "average_confidence": 0.35001176998869926,
+      "average_accuracy": 0.13793103448275862
+    },
+    {
+      "bin_range": "0.40-0.50",
+      "bin_size": 52,
+      "average_confidence": 0.4536559025181939,
+      "average_accuracy": 0.3269230769230769
+    },
+    {
+      "bin_range": "0.50-0.60",
+      "bin_size": 65,
+      "average_confidence": 0.5514659128504321,
+      "average_accuracy": 0.4153846153846154
+    },
+    {
+      "bin_range": "0.60-0.70",
+      "bin_size": 59,
+      "average_confidence": 0.6413118333352862,
+      "average_accuracy": 0.4406779661016949
+    },
+    {
+      "bin_range": "0.70-0.80",
+      "bin_size": 74,
+      "average_confidence": 0.7503243780742919,
+      "average_accuracy": 0.6351351351351351
+    },
+    {
+      "bin_range": "0.80-0.90",
+      "bin_size": 59,
+      "average_confidence": 0.8478167778205492,
+      "average_accuracy": 0.6949152542372882
+    },
+    {
+      "bin_range": "0.90-1.00",
+      "bin_size": 100,
+      "average_confidence": 0.9701696447069506,
+      "average_accuracy": 0.84
+    }
+  ]
+}
