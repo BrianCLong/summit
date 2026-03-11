@@ -1,0 +1,57 @@
+playbook_id: "CRITICAL_INFRA_RUMOR_CAMPAIGN_DEFENSE"
+name: "Critical Infrastructure Rumor Campaign Defense"
+description: "Defensive playbook for mitigating rumor campaigns targeting critical infrastructure."
+applicability_conditions:
+  persona_attributes:
+    risk_level: "HIGH"
+  campaign_attributes:
+    narrative_type: "critical-infra"
+objectives:
+  - "protect critical infra operations"
+  - "increase early warning"
+phases:
+  OBSERVE:
+    - name: "Monitor Critical Infra Sentiment"
+      description: "Track sentiment and potential rumor generation around key assets."
+      step_type: "SAFE_AUTOMATION"
+      dependencies: []
+      suggested_integrations: ["Summit Dashboard"]
+    - name: "Identify Emerging Rumors"
+      description: "Detect new or escalating rumors concerning infrastructure safety or reliability."
+      step_type: "AGENT_ASSIST"
+      dependencies: ["Monitor Critical Infra Sentiment"]
+      suggested_integrations: ["Alerting System"]
+  ORIENT:
+    - name: "Validate Rumor Accuracy"
+      description: "Determine the truthfulness and potential impact of the rumor."
+      step_type: "HUMAN_ONLY"
+      dependencies: ["Identify Emerging Rumors"]
+      suggested_integrations: []
+    - name: "Assess Threat Level"
+      description: "Evaluate the risk to operations and public safety."
+      step_type: "HUMAN_ONLY"
+      dependencies: ["Validate Rumor Accuracy"]
+      suggested_integrations: []
+  DECIDE:
+    - name: "Develop Response Strategy"
+      description: "Create a plan to address the rumor, including internal communications and public statements."
+      step_type: "HUMAN_ONLY"
+      dependencies: ["Assess Threat Level"]
+      suggested_integrations: []
+  ACT:
+    - name: "Issue Internal Guidance"
+      description: "Communicate facts and response protocols to relevant teams."
+      step_type: "HUMAN_ONLY"
+      dependencies: ["Develop Response Strategy"]
+      suggested_integrations: ["Email", "Intranet"]
+    - name: "Release Public Clarification"
+      description: "Provide accurate information to the public to counter the rumor."
+      step_type: "HUMAN_ONLY"
+      dependencies: ["Develop Response Strategy"]
+      suggested_integrations: ["Website", "Press Release"]
+role_assignments:
+  CTI_Analyst: "Monitor and assess rumors."
+  Comms: "Manage internal and external communications."
+  Operations: "Ensure infrastructure safety and continuity."
+automation_suggestions:
+  - "Automate sentiment tracking and alert generation for specific keywords."

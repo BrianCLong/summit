@@ -1,0 +1,50 @@
+playbook_id: "HIGH_DECEPTION_PERSONA_CLUSTER_TRIAGE"
+name: "High Deception Persona Cluster Triage"
+description: "Defensive playbook for triage of complex, high-deception persona clusters."
+applicability_conditions:
+  persona_attributes:
+    deception_profile: "HIGH"
+  campaign_attributes: {}
+objectives:
+  - "increase early warning"
+  - "reduce amplification"
+phases:
+  OBSERVE:
+    - name: "Identify High-Deception Indicators"
+      description: "Monitor for patterns indicative of highly deceptive persona behavior."
+      step_type: "SAFE_AUTOMATION"
+      dependencies: []
+      suggested_integrations: ["Summit Dashboard", "Deception Analytics Model"]
+    - name: "Isolate Suspected Clusters"
+      description: "Group potentially related deceptive accounts for further analysis."
+      step_type: "AGENT_ASSIST"
+      dependencies: ["Identify High-Deception Indicators"]
+      suggested_integrations: ["Clustering Algorithm"]
+  ORIENT:
+    - name: "Analyze Cluster Cohesion"
+      description: "Determine the strength and nature of connections within the identified cluster."
+      step_type: "HUMAN_ONLY"
+      dependencies: ["Isolate Suspected Clusters"]
+      suggested_integrations: []
+    - name: "Determine Deception Intent"
+      description: "Assess the ultimate goal or target of the deceptive cluster."
+      step_type: "HUMAN_ONLY"
+      dependencies: ["Analyze Cluster Cohesion"]
+      suggested_integrations: []
+  DECIDE:
+    - name: "Formulate Mitigation Options"
+      description: "Develop strategies to counter the deceptive activities (e.g., account flagging, targeted counter-messaging)."
+      step_type: "HUMAN_ONLY"
+      dependencies: ["Determine Deception Intent"]
+      suggested_integrations: []
+  ACT:
+    - name: "Implement Mitigation Strategy"
+      description: "Execute the chosen mitigation options."
+      step_type: "HUMAN_ONLY"
+      dependencies: ["Formulate Mitigation Options"]
+      suggested_integrations: []
+role_assignments:
+  CTI_Analyst: "Analyze and interpret deception data."
+  Data_Science: "Develop and maintain deception models."
+automation_suggestions:
+  - "Automate the initial identification and clustering of potentially deceptive accounts."

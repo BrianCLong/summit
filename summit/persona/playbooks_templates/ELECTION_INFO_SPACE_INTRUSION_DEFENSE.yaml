@@ -1,0 +1,58 @@
+playbook_id: "ELECTION_INFO_SPACE_INTRUSION_DEFENSE"
+name: "Election Info Space Intrusion Defense"
+description: "Defensive playbook for mitigating coordinated intrusions into election information spaces."
+applicability_conditions:
+  persona_attributes:
+    risk_level: "CRITICAL"
+    platform_spread: ["facebook", "twitter", "reddit"]
+  campaign_attributes:
+    narrative_type: "election-interference"
+objectives:
+  - "protect electoral integrity"
+  - "increase early warning"
+phases:
+  OBSERVE:
+    - name: "Monitor Election Keywords"
+      description: "Track trending topics and keywords related to the election."
+      step_type: "SAFE_AUTOMATION"
+      dependencies: []
+      suggested_integrations: ["Summit Dashboard", "Twitter API"]
+    - name: "Identify Anomaly Spikes"
+      description: "Detect sudden, unnatural spikes in specific narratives."
+      step_type: "AGENT_ASSIST"
+      dependencies: ["Monitor Election Keywords"]
+      suggested_integrations: ["Anomaly Detection Model"]
+  ORIENT:
+    - name: "Assess Persona Authenticity"
+      description: "Evaluate the authenticity of the accounts driving the narrative."
+      step_type: "HUMAN_ONLY"
+      dependencies: ["Identify Anomaly Spikes"]
+      suggested_integrations: []
+    - name: "Identify Disinformation Sources"
+      description: "Determine potential origins and affiliations of the campaign."
+      step_type: "HUMAN_ONLY"
+      dependencies: ["Assess Persona Authenticity"]
+      suggested_integrations: []
+  DECIDE:
+    - name: "Formulate Mitigation Plan"
+      description: "Develop strategies to counter the disinformation (e.g., public awareness, platform reporting)."
+      step_type: "HUMAN_ONLY"
+      dependencies: ["Identify Disinformation Sources"]
+      suggested_integrations: []
+  ACT:
+    - name: "Report to Platforms"
+      description: "Submit actionable intelligence to social media platforms for account takedowns."
+      step_type: "HUMAN_ONLY"
+      dependencies: ["Formulate Mitigation Plan"]
+      suggested_integrations: []
+    - name: "Publish Public Advisories"
+      description: "Release factual information to counter the disinformation."
+      step_type: "HUMAN_ONLY"
+      dependencies: ["Formulate Mitigation Plan"]
+      suggested_integrations: ["Website", "Press Release"]
+role_assignments:
+  CTI_Analyst: "Monitor and analyze threats."
+  Legal: "Ensure compliance and handle external reporting."
+  Comms: "Draft and disseminate public advisories."
+automation_suggestions:
+  - "Automate keyword monitoring and anomaly detection alerts."
