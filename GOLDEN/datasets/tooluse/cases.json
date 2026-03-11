@@ -1,0 +1,23 @@
+[
+  {
+    "id": "EVID:tooluse:case1",
+    "task": "Search code for a specific bug and fix it using standard tools.",
+    "required_evidence": [
+      "EVID:tooluse:evidence:tooluse:doc1:ab0b0c42"
+    ]
+  },
+  {
+    "id": "EVID:tooluse:case2",
+    "task": "Execute a Python script with bash tool and read the output.",
+    "required_evidence": [
+      "EVID:tooluse:evidence:tooluse:doc2:7678bcf6"
+    ]
+  },
+  {
+    "id": "EVID:tooluse:case3",
+    "task": "Use grep to find occurrences of a deprecated API across the repository.",
+    "required_evidence": [
+      "EVID:tooluse:evidence:tooluse:doc3:587fbefc"
+    ]
+  }
+]
