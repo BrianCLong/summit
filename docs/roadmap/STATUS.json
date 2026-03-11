@@ -1,7 +1,13 @@
 {
-  "last_updated": "2026-03-09T22:00:00Z",
-  "revision_note": "Integrated Stage 7 validation infrastructure, Antigravity governance ledger, and hardened docker stack into the master roadmap.",
+  "last_updated": "2026-03-10T00:00:00Z",
+  "revision_note": "Added Work Graph architecture health scoring telemetry and CLI reporting for continuous architecture observability.",
   "initiatives": [
+    {
+      "id": "work-graph-architecture-health-score",
+      "status": "completed",
+      "owner": "codex",
+      "notes": "Implemented architecture health scoring model (coupling, cycles, subsystem violations, hotspot instability) and surfaced it in GraphQL + CLI health output."
+    },
     {
       "id": "antigravity-governance-ledger",
       "status": "completed",

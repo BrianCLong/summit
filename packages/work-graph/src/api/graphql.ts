@@ -12,6 +12,7 @@ import {
   generateAgentWorkload,
   generateIntentFlow,
 } from '../visualizations/mermaid.js';
+import { calculateArchitectureHealth } from '../metrics/architecture-health.js';
 
 export interface GraphStore {
   getNode<T>(id: string): Promise<T | null>;
@@ -174,7 +175,18 @@ type HealthScore {
   quality: Float!
   predictability: Float!
   agentEfficiency: Float!
+  architecture: ArchitectureHealth!
   alerts: [Alert!]!
+}
+
+type ArchitectureHealth {
+  score: Float!
+  trend30d: Float!
+  couplingScore: Float!
+  circularDependencies: Int!
+  subsystemViolations: Int!
+  hotspotInstability: Int!
+  primaryRisks: [String!]!
 }
 
 type Alert {
@@ -271,7 +283,22 @@ export function createWorkGraphAPI(graphStore: GraphStore) {
         return graphStore.getNodes<Sprint>(filter);
       },
       edges: (_: unknown, args: { sourceId?: string; targetId?: string; type?: string }) => graphStore.getEdges(args),
-      healthScore: () => ({ overall: 75, velocity: 80, quality: 70, predictability: 75, agentEfficiency: 85, alerts: [] }),
+      healthScore: async () => {
+        const allNodes = await graphStore.getNodes<WorkGraphNode>({});
+        const allEdges = await graphStore.getEdges({});
+        const architecture = calculateArchitectureHealth(allNodes, allEdges);
+        const architecturePenalty = Math.max(0, 100 - architecture.score);
+
+        return {
+          overall: Math.max(0, Math.round((75 - architecturePenalty * 0.4) * 10) / 10),
+          velocity: Math.max(0, Math.round((80 - architecturePenalty * 0.25) * 10) / 10),
+          quality: Math.max(0, Math.round((70 - architecturePenalty * 0.3) * 10) / 10),
+          predictability: Math.max(0, Math.round((75 - architecturePenalty * 0.35) * 10) / 10),
+          agentEfficiency: Math.max(0, Math.round((85 - architecturePenalty * 0.15) * 10) / 10),
+          architecture,
+          alerts: [],
+        };
+      },
       stats: async () => {
         const allNodes = await graphStore.getNodes({});
         const allEdges = await graphStore.getEdges({});
