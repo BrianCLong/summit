@@ -1,0 +1,21 @@
+{
+  "integration": "aws",
+  "version": "0.1.0",
+  "auth": {
+    "type": "api_key",
+    "env_var": "AWS_API_KEY"
+  },
+  "triggers": [
+    "manual",
+    "scheduled"
+  ],
+  "actions": [
+    "fetch",
+    "normalize",
+    "publish-to-summit"
+  ],
+  "observability": {
+    "metrics_prefix": "summit.integration.aws",
+    "error_budget_slo": 99.5
+  }
+}

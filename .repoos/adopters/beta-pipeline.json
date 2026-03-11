@@ -1,0 +1,59 @@
+{
+  "pipeline": "private-beta",
+  "version": "1.0.0",
+  "stages": [
+    {
+      "name": "invited",
+      "entry_criteria": [
+        "Qualified by use-case fit",
+        "DPA or pilot agreement shared"
+      ],
+      "exit_criteria": [
+        "Invitation accepted",
+        "Initial stakeholder call scheduled"
+      ]
+    },
+    {
+      "name": "onboarding",
+      "entry_criteria": [
+        "Technical owner identified",
+        "Sandbox access provisioned"
+      ],
+      "exit_criteria": [
+        "API key generated",
+        "First project initialized"
+      ]
+    },
+    {
+      "name": "first workflow completed",
+      "entry_criteria": [
+        "Demo dataset loaded",
+        "Primary workflow selected"
+      ],
+      "exit_criteria": [
+        "Workflow executed end-to-end",
+        "Success metrics captured"
+      ]
+    },
+    {
+      "name": "feedback collected",
+      "entry_criteria": [
+        "At least one workflow run in production-like conditions"
+      ],
+      "exit_criteria": [
+        "Structured feedback captured",
+        "Prioritized action items logged"
+      ]
+    },
+    {
+      "name": "advocate",
+      "entry_criteria": [
+        "Positive NPS or explicit value confirmation",
+        "At least one measurable business outcome"
+      ],
+      "exit_criteria": [
+        "Case study or reference call approved"
+      ]
+    }
+  ]
+}

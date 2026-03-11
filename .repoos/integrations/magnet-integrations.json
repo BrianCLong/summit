@@ -1,0 +1,36 @@
+{
+  "program": "integration-magnet",
+  "version": "1.0.0",
+  "targets": [
+    {
+      "name": "github",
+      "category": "source-control",
+      "priority": "high",
+      "status": "planned"
+    },
+    {
+      "name": "aws",
+      "category": "cloud",
+      "priority": "high",
+      "status": "planned"
+    },
+    {
+      "name": "datadog",
+      "category": "observability",
+      "priority": "high",
+      "status": "planned"
+    },
+    {
+      "name": "github-actions",
+      "category": "ci-cd",
+      "priority": "high",
+      "status": "planned"
+    },
+    {
+      "name": "snyk",
+      "category": "security-scanner",
+      "priority": "medium",
+      "status": "planned"
+    }
+  ]
+}

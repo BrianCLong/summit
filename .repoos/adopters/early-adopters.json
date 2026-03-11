@@ -1,0 +1,48 @@
+{
+  "program": "summit-early-adopters",
+  "version": "1.0.0",
+  "last_updated": "2026-03-10T20:35:05.350Z",
+  "target_range": {
+    "minimum_organizations": 20,
+    "maximum_organizations": 50
+  },
+  "organizations": [
+    {
+      "organization_name": "Northwind Intelligence Lab",
+      "use_case": "Entity resolution across multi-source incident timelines",
+      "onboarding_status": "invited",
+      "feedback_collected": false
+    },
+    {
+      "organization_name": "BlueHarbor Risk Analytics",
+      "use_case": "Threat correlation and workflow orchestration",
+      "onboarding_status": "onboarding",
+      "feedback_collected": false
+    },
+    {
+      "organization_name": "Atlas Public Safety Office",
+      "use_case": "Cross-jurisdiction case graph enrichment",
+      "onboarding_status": "first workflow completed",
+      "feedback_collected": true
+    },
+    {
+      "organization_name": "Demo Org",
+      "use_case": "Pilot workflow validation",
+      "onboarding_status": "onboarding",
+      "feedback_collected": false,
+      "onboarding_artifacts": {
+        "api_key": "summit_demoorg_1773174905350",
+        "project_slug": "demo-org",
+        "workflow": {
+          "setup": [
+            "API key creation",
+            "First project initialization",
+            "Plugin installation",
+            "Demo workflow execution"
+          ],
+          "status": "automated"
+        }
+      }
+    }
+  ]
+}

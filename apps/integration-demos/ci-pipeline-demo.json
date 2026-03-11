@@ -1,0 +1,10 @@
+{
+  "name": "ci-pipeline-demo",
+  "description": "Ingest CI run metadata and annotate graph relationships for failing services.",
+  "steps": [
+    "collect GitHub Actions run",
+    "normalize workflow artifacts",
+    "publish run + failure nodes",
+    "emit summary report"
+  ]
+}

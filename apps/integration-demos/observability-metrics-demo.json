@@ -1,0 +1,10 @@
+{
+  "name": "observability-metrics-demo",
+  "description": "Sync platform metrics to Summit and correlate reliability with release cadence.",
+  "steps": [
+    "fetch Datadog metrics",
+    "map services to ownership graph",
+    "detect anomalous deltas",
+    "publish incident candidates"
+  ]
+}
