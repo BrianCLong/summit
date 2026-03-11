@@ -232,7 +232,7 @@ export function InvestigatorWorkbench() {
             {ENTITY_TYPES.map(et => (
               <div
                 key={et.type}
-                className="p-2 border rounded bg-muted text-xs cursor-move flex flex-col items-center gap-1 hover:bg-muted/80 transition-colors focus:outline-none focus:ring-2 focus:ring-ring"
+                className="p-2 border border-border bg-muted text-xs cursor-move flex flex-col items-center gap-1 hover:bg-accent hover:text-accent-foreground transition-colors focus:outline-none focus:ring-1 focus:ring-ring"
                 draggable
                 tabIndex={0}
                 role="listitem"
@@ -266,7 +266,7 @@ export function InvestigatorWorkbench() {
 
       {/* Main Content: Canvas */}
       <div className="flex-1 flex flex-col relative" role="main">
-        <div className="flex-1 relative bg-slate-50 dark:bg-slate-900" aria-label="Graph Canvas">
+        <div className="flex-1 relative bg-background" aria-label="Graph Canvas">
            <GraphCanvas
               ref={graphRef}
               entities={filteredData.entities}
