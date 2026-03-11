@@ -79,6 +79,7 @@ import { DemoIndicator } from '@/components/common/DemoIndicator'
 import { DemoModeGate } from '@/components/common/DemoModeGate'
 import { isDemoModeEnabled } from '@/lib/demoMode'
 import { CommandPalette } from '@/components/CommandPalette'
+import { WarRoom } from '../../../ui/warroom';
 
 function App() {
   const [showPalette, setShowPalette] = React.useState(false);
@@ -228,6 +229,15 @@ function App() {
                               <CommandCenterDashboard />
                             </DataFetchErrorBoundary>
                           }
+                        />
+                        <Route
+                          path="warroom"
+                          element={
+                            <DataFetchErrorBoundary dataSourceName="War Room">
+                              <WarRoom />
+                            </DataFetchErrorBoundary>
+                          }
+                        />
                         />
                         <Route
                           path="dashboards/supply-chain"
