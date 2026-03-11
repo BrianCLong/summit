@@ -1,0 +1,57 @@
+{
+  "timestamp": "2026-03-11T19:07:54.271Z",
+  "metrics": {
+    "singleQueryLatency": {
+      "p50": 37.4668,
+      "p95": 49.34582,
+      "p99": 49.400687
+    },
+    "concurrentThroughput": {
+      "10_clients": {
+        "concurrency": 10,
+        "throughputQps": 58.163959012230336,
+        "p50": 135.608268,
+        "p95": 171.821207,
+        "p99": 171.821207
+      },
+      "50_clients": {
+        "concurrency": 50,
+        "throughputQps": 251.0540126138574,
+        "p50": 159.586639,
+        "p95": 197.710161,
+        "p99": 199.02612
+      },
+      "100_clients": {
+        "concurrency": 100,
+        "throughputQps": 501.98873882638327,
+        "p50": 151.195469,
+        "p95": 194.085651,
+        "p99": 198.749696
+      }
+    },
+    "memoryUsage": {
+      "avgMemoryMb": 31.38424738754225
+    },
+    "queryComplexityExecutionTime": {
+      "simple": {
+        "p50": 34.357171,
+        "p95": 49.483191,
+        "p99": 49.483191
+      },
+      "multi-hop": {
+        "p50": 174.45344,
+        "p95": 198.515187,
+        "p99": 198.515187
+      },
+      "deep-chain": {
+        "p50": 415.705314,
+        "p95": 495.802668,
+        "p99": 495.802668
+      }
+    },
+    "ingestionThroughput": {
+      "docsPerSecond": 33.89168291414458,
+      "totalDocs": 100
+    }
+  }
+}
