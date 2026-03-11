@@ -1,0 +1,5 @@
+{
+  "scenario_id": "permission_escalation",
+  "actual_outcome": "blocked",
+  "actual_reason": "API Error: unauthorized permission modification"
+}

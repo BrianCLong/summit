@@ -1,0 +1,5 @@
+{
+  "scenario_id": "force_push",
+  "actual_outcome": "blocked",
+  "actual_reason": "Push rejected: fast-forward only"
+}
