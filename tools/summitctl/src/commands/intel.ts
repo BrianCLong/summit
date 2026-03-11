@@ -5,12 +5,26 @@ import path from 'path';
 
 export const intelCommand = new Command('intel')
   .description('Manage the Summit Engineering Intelligence Platform');
+export const intelligenceSubstrateCommand = new Command('intelligence-substrate')
+  .description('Manage the Summit Engineering Intelligence Substrate');
 
-intelCommand
+intelligenceSubstrateCommand
   .command('status')
   .description('Check the status of the intelligence platform')
-  .action(() => {
+  .action(async () => {
     console.log('--- Summit Engineering Intelligence Status ---');
+    try {
+      const res = await fetch('http://localhost:4050/api/intel/generate');
+      // or run script directly
+      if (res.ok) {
+        console.log('Intelligence API: ONLINE');
+      } else {
+        console.log(`Intelligence API: OFFLINE (Status: ${res.status})`);
+      }
+    } catch (e) {
+      console.log('Intelligence API: OFFLINE (Connection error)');
+    }
+
     const services = ['intelligence-api', 'intelligence-console'];
     services.forEach(s => {
       try {

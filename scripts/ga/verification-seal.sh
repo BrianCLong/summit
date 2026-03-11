@@ -3,13 +3,22 @@ echo "--- Summit GA Verification Seal ---"
 echo "Initializing final platform audit..."
 
 # 1. Check for core intelligence artifacts
-ARTIFACTS=("stability-report.json" "repository-state.json" "architecture-roadmap.json" "innovation-report.json" "learning-outcomes.json")
-BASE_DIR="engineering-intelligence/repoos"
+REPO_ARTIFACTS=("stability-report.json" "repository-state.json" "architecture-roadmap.json")
+GLOBAL_ARTIFACTS=("innovation-report.json" "learning-outcomes.json")
+REPO_DIR="intelligence-substrate/repoos"
+GLOBAL_DIR="intelligence-substrate/global"
 
 MISSING=0
-for art in "${ARTIFACTS[@]}"; do
-    if [ ! -f "$BASE_DIR/$art" ]; then
-        echo "[ERROR] Missing artifact: $art"
+for art in "${REPO_ARTIFACTS[@]}"; do
+    if [ ! -f "$REPO_DIR/$art" ]; then
+        echo "[ERROR] Missing repo artifact: $art"
+        MISSING=$((MISSING+1))
+    fi
+done
+
+for art in "${GLOBAL_ARTIFACTS[@]}"; do
+    if [ ! -f "$GLOBAL_DIR/$art" ]; then
+        echo "[ERROR] Missing global artifact: $art"
         MISSING=$((MISSING+1))
     fi
 done
@@ -26,7 +35,7 @@ if [ ! -f "docker-compose.dev.yaml" ] || [ ! -f "Makefile" ]; then
 fi
 
 # 3. Generate the certificate
-CERT_PATH="$BASE_DIR/summit-ga-certificate.json"
+CERT_PATH="intelligence-substrate/repoos/summit-ga-certificate.json"
 cat <<EOF > "$CERT_PATH"
 {
   "version": "1.0.0",

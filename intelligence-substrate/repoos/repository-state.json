@@ -1,0 +1,31 @@
+{
+  "timestamp": "2026-03-11T04:34:25.243Z",
+  "nodes": [
+    {
+      "id": "gateway",
+      "type": "service",
+      "stability": 0.85,
+      "links": [
+        "api",
+        "intelligence-api"
+      ]
+    },
+    {
+      "id": "api",
+      "type": "service",
+      "stability": 0.82,
+      "links": [
+        "neo4j",
+        "postgres"
+      ]
+    },
+    {
+      "id": "intelligence-api",
+      "type": "service",
+      "stability": 0.95,
+      "links": []
+    }
+  ],
+  "health_score": 88,
+  "active_refactors": 3
+}

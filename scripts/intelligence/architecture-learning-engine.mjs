@@ -2,6 +2,9 @@ import fs from 'fs';
 import path from 'path';
 
 const EVIDENCE_DIR = 'evidence';
+const INTEL_DIR = 'intelligence-substrate'; // New constant for the intelligence directory
+const REPOOS_DIR = path.join(INTEL_DIR, 'repoos'); // REPOOS_DIR now uses INTEL_DIR
+const LEARNING_FILE = path.join(INTEL_DIR, 'global', 'learning-outcomes.json'); // Assuming LEARNING_FILE should also be under INTEL_DIR
 
 async function processOutcomes() {
     console.log('--- Summit Architecture Learning Engine ---');

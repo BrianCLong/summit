@@ -1,9 +1,9 @@
 import fs from 'fs';
 import path from 'path';
 
-const INTEL_BASE_DIR = 'engineering-intelligence';
-const REPOOS_DIR = path.join(INTEL_BASE_DIR, 'repoos');
-const GLOBAL_DIR = path.join(INTEL_BASE_DIR, 'global');
+const INTEL_DIR = 'intelligence-substrate';
+const REPOOS_DIR = path.join(INTEL_DIR, 'repoos');
+const GLOBAL_INTEL_DIR = path.join(INTEL_DIR, 'global');
 
 function ensureDir(dir) {
     if (!fs.existsSync(dir)) {
@@ -60,7 +60,7 @@ async function generateAll() {
     });
 
     // 4. Innovation Report
-    writeJson(GLOBAL_DIR, 'innovation-report.json', {
+    writeJson(GLOBAL_INTEL_DIR, 'innovation-report.json', {
         timestamp: new Date().toISOString(),
         summary: "Weekly Architectural Innovation Summary",
         innovations: [

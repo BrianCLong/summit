@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 
 export class IntelligenceController {
-  private baseDir = path.join(process.cwd(), 'engineering-intelligence');
+  private baseDir = path.join(process.cwd(), 'intelligence-substrate');
   private repoosBase = path.join(this.baseDir, 'repoos');
   private globalIntelBase = path.join(this.baseDir, 'global');
 
