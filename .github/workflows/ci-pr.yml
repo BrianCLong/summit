@@ -27,21 +27,9 @@ permissions:
   id-token: write # if you use OIDC in any job
 
 jobs:
-  build-test:
-    name: ${{ matrix.name }}
+  lint:
+    name: Lint
     runs-on: ubuntu-22.04
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - name: Lint
-            task: lint
-          - name: Typecheck
-            task: typecheck
-          - name: Unit Tests
-            task: test
-          - name: Build
-            task: build
     steps:
       - uses: actions/checkout@v4
         with: { fetch-depth: 0 }
@@ -52,32 +40,108 @@ jobs:
           cache: "pnpm"
       - name: Install
         run: pnpm install --no-frozen-lockfile
-      - name: Run ${{ matrix.task }}
-        run: |
-          case "${{ matrix.task }}" in
-            lint) pnpm -r lint ;;
-            typecheck) pnpm -r typecheck ;;
-            test)
-              if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-                echo "PR context: unit test coverage is enforced by the separate required 'test (20.x)' check."
-                echo "Skipping recursive workspace test fanout here to avoid duplicate and non-deterministic package-runner failures."
-              else
-                pnpm -r test -- --ci
-              fi
-              ;;
-            build) pnpm -r build ;;
-          esac
-
+      - name: Run lint
+        run: pnpm -r lint
       - name: Check error codes documentation
-        if: matrix.task == 'lint'
         run: cd server && npx tsx scripts/check-error-codes-doc.ts
+
+  typecheck:
+    name: Typecheck
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: "pnpm"
+      - name: Install
+        run: pnpm install --no-frozen-lockfile
+      - name: Run typecheck
+        run: pnpm -r typecheck
+
+  unit-tests-matrix:
+    name: Unit Tests (${{ matrix.node-version }})
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: ['18.x', '20.x', '22.x']
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "pnpm"
+      - name: Install
+        run: pnpm install --no-frozen-lockfile
+      - name: Run test
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            echo "PR context: unit test coverage is enforced by the separate required 'test (20.x)' check."
+            echo "Skipping recursive workspace test fanout here to avoid duplicate and non-deterministic package-runner failures."
+          else
+            pnpm -r test -- --ci
+          fi
+
+
+
+  unit-tests-gate:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    needs: [unit-tests-matrix]
+    if: always()
+    steps:
+      - name: Gate check
+        run: |
+          if [ "${{ needs.unit-tests-matrix.result }}" != "success" ]; then
+            echo "::error::Unit Tests matrix failed"
+            exit 1
+          fi
+          echo "All matrix Unit Tests passed"
+
+  build-matrix:
+    name: Build (${{ matrix.node-version }})
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: ['18.x', '20.x', '22.x']
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "pnpm"
+      - name: Install
+        run: pnpm install --no-frozen-lockfile
+      - name: Run build
+        run: pnpm -r build
+
+  build-gate:
+    name: Build
+    runs-on: ubuntu-latest
+    needs: [build-matrix]
+    if: always()
+    steps:
+      - name: Gate check
+        run: |
+          if [ "${{ needs.build-matrix.result }}" != "success" ]; then
+            echo "::error::Build matrix failed"
+            exit 1
+          fi
+          echo "All matrix Build tasks passed"
 
   config-guard:
     name: Config Guard
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
       - uses: pnpm/action-setup@v4
       - name: Install
         run: pnpm install --no-frozen-lockfile
@@ -135,7 +199,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
-      - uses: pnpm/action-setup@v4
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
       - name: Verify runtime configuration
@@ -146,7 +209,7 @@ jobs:
   deterministic-build:
     name: Deterministic Build
     runs-on: ubuntu-22.04
-    needs: [build-test] # Run after standard build/test matrix
+    needs: [build-gate] # Run after standard build/test matrix
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -185,7 +248,7 @@ jobs:
   golden-path:
     name: Golden Path Smoke Test
     runs-on: ubuntu-22.04
-    needs: [integration-tests, build-test]
+    needs: [integration-tests, build-gate]
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -251,7 +314,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
-      - uses: pnpm/action-setup@v4
       - name: Verify TSConfig Exclusions Frozen
         run: node scripts/ci/verify_tsconfig_excludes_frozen.mjs
       - name: Verify TSConfig Inheritance
@@ -291,7 +353,7 @@ jobs:
   mcp-pack-gates:
     name: MCP & Pack Gates
     runs-on: ubuntu-22.04
-    needs: [build-test]
+    needs: [build-gate]
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
