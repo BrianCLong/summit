@@ -30,7 +30,7 @@ function validateBranchName(branch: string): string | null {
         }
     }
     // Allow Jules agent generated branch names during development
-    if (branch.startsWith('jules-')) {
+    if (branch.startsWith('jules-') || branch.startsWith('marathon-')) {
         return 'chore';
     }
     return null;
