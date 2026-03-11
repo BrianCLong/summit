@@ -59,7 +59,7 @@ jobs:
       - name: Install dependencies
         run: |
           corepack enable
-          pnpm install --no-frozen-lockfile
+          pnpm install --frozen-lockfile
 
       - name: Install Release Captain dependencies
         run: |

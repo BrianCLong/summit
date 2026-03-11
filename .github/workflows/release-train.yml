@@ -60,7 +60,7 @@ jobs:
           node-version: "20"
 
       - name: Install Dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Build Packages
         id: build

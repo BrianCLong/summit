@@ -20,7 +20,7 @@ jobs:
         with:
           node-version: 20
           cache: 'pnpm'
-      - run: pnpm install --no-frozen-lockfile
+      - run: pnpm install --frozen-lockfile
       - run: pnpm run test:agents
       - name: Archive artifacts
         uses: actions/upload-artifact@v4

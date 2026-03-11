@@ -20,7 +20,7 @@ jobs:
           node-version: "20"
           cache: pnpm
           cache-dependency-path: '**/pnpm-lock.yaml'
-      - run: pnpm install --no-frozen-lockfile --ignore-scripts
+      - run: pnpm install --frozen-lockfile --ignore-scripts
       - name: Run Release Verification Script
         run: ./scripts/verify-release.sh
 

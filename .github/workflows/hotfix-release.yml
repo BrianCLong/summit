@@ -146,7 +146,7 @@ jobs:
           cache-dependency-path: '**/pnpm-lock.yaml'
 
       - name: Install Dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Run Release Gates
         id: gates

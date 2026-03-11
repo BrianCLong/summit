@@ -140,7 +140,7 @@ jobs:
           node-version-file: .nvmrc
 
       - name: Install Dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Verify Go-Live Evidence
         id: verify
@@ -204,7 +204,7 @@ jobs:
           node-version-file: .nvmrc
 
       - name: Install Dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Generate Release Notes
         id: generate

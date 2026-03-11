@@ -34,7 +34,7 @@ jobs:
           cache: 'pip'
 
       - name: Install Node Dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Install Python Dependencies
         run: |

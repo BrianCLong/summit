@@ -37,7 +37,7 @@ jobs:
           cache-dependency-path: '**/pnpm-lock.yaml'
 
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
       - name: Generate SBOM
         run: pnpm generate:sbom
       - name: Upload SBOM
@@ -61,7 +61,7 @@ jobs:
           cache-dependency-path: '**/pnpm-lock.yaml'
 
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
       - name: Generate Provenance
         run: pnpm generate:provenance
       - name: Upload Provenance

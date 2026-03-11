@@ -70,7 +70,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: pnpm
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
       - name: Lint
         run: pnpm lint
       - name: Typecheck
@@ -94,7 +94,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: pnpm
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
       - name: Run unit tests
         run: pnpm test:unit
 
@@ -116,7 +116,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: pnpm
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
       - name: Run contract tests
         run: pnpm run test:policy
 
@@ -139,7 +139,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: pnpm
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
       - name: Run Playwright suite
         run: pnpm e2e
 

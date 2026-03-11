@@ -45,7 +45,7 @@ jobs:
       - name: Install dependencies
         run: |
           corepack enable
-          pnpm install --no-frozen-lockfile --ignore-scripts
+          pnpm install --frozen-lockfile --ignore-scripts
 
       - name: Verify schema governance
         run: |

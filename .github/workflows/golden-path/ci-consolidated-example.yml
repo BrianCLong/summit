@@ -64,7 +64,7 @@ jobs:
       
       - name: Install dependencies
         if: steps.cache.outputs.cache-hit != 'true'
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
   
   # Matrix-driven test execution - replaces 5 separate workflows
   test:

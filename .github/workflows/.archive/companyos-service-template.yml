@@ -33,7 +33,7 @@ jobs:
       - name: Install deps
         run: |
           corepack enable
-          pnpm install --no-frozen-lockfile
+          pnpm install --frozen-lockfile
 
       - name: Build image
         id: meta

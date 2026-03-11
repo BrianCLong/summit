@@ -22,7 +22,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Install dependencies
-        run: npm install -g pnpm && pnpm install --no-frozen-lockfile
+        run: npm install -g pnpm && pnpm install --frozen-lockfile
 
       - name: Run Compliance Check
         run: pnpm compliance:check

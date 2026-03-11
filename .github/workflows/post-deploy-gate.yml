@@ -45,7 +45,7 @@ jobs:
           node-version: '18'
 
       - name: Install Dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Run Post-Deploy Canary
         env:

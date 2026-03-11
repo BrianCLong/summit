@@ -53,7 +53,7 @@ jobs:
       - name: Install dependencies
         run: |
           cd safety-harness
-          pnpm install --no-frozen-lockfile
+          pnpm install --frozen-lockfile
 
       - name: Build safety harness
         run: |

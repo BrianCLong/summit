@@ -61,7 +61,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pnpm install --no-frozen-lockfile
+          pnpm install --frozen-lockfile
           # Wait for services to be ready
           sleep 10
 

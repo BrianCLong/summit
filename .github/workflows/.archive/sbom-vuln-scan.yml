@@ -60,7 +60,7 @@ jobs:
           version: 10.0.0
 
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Install Syft
         uses: anchore/sbom-action/download-syft@v0

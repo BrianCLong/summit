@@ -56,7 +56,7 @@ jobs:
             ${{ runner.os }}-turbo-
 
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Build packages
         run: pnpm run build

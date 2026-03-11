@@ -65,7 +65,7 @@ jobs:
           node-version: "20"
 
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Generate SBOM
         run: npm run generate:sbom
@@ -99,7 +99,7 @@ jobs:
           node-version: "20"
 
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Build
         run: pnpm build
@@ -155,7 +155,7 @@ jobs:
           node-version: "20"
 
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Deploy Preview Environment
         id: deploy

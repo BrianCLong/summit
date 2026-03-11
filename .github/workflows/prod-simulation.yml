@@ -42,7 +42,7 @@ jobs:
           version: 'latest'
 
       - name: Install Dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Run Simulation Script
         run: ./scripts/ci/simulate_prod_deploy.sh

@@ -26,7 +26,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Install deps
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Check Queue Saturation
         run: |

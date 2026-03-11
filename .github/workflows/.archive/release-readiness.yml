@@ -72,7 +72,7 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          pnpm install --no-frozen-lockfile
+          pnpm install --frozen-lockfile
 
       - name: Download actionlint
         run: |

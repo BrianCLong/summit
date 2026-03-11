@@ -24,7 +24,7 @@ jobs:
           cache: pnpm
 
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Generate LLM cost snapshot
         run: pnpm ts-node --esm scripts/ops/llm-cost-report.ts | tee llm-cost-report.txt
