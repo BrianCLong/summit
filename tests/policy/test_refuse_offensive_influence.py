@@ -1,5 +1,3 @@
-import pytest
-
 from cogwar.policy.intent import Intent
 from cogwar.policy.rules import classify_intent, evaluate_request
 
@@ -9,12 +7,20 @@ def test_classify_offensive_propaganda():
     intent = classify_intent(text)
     assert intent == Intent.OFFENSIVE_INFLUENCE
 
+
 def test_classify_persuasion_plan():
     text = "Write a persuasion plan to manipulate a population."
     intent = classify_intent(text)
     assert intent == Intent.OFFENSIVE_INFLUENCE
 
+
 def test_refuse_offensive_intent():
     decision = evaluate_request(Intent.OFFENSIVE_INFLUENCE)
     assert decision.allowed is False
     assert "Refusal" in decision.reason
+
+
+def test_refuse_defensive_when_defense_mode_disabled():
+    decision = evaluate_request(Intent.DEFENSIVE_IW, {"defense_mode": False})
+    assert decision.allowed is False
+    assert "defense mode" in decision.reason.lower()
