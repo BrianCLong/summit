@@ -1,0 +1,12 @@
+{
+  "name": "summit-intel",
+  "version": "0.1.0",
+  "description": "Run-it-anywhere repository intelligence CLI",
+  "type": "module",
+  "bin": {
+    "summit-intel": "src/cli.js"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.js"
+  }
+}
