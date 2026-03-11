@@ -1,6 +1,18 @@
 import uuid
 from typing import Any, Dict, List
 
+from cogwar.innovation.countermeasure_orchestrator import (
+    synthesize_countermeasure_playbook,
+)
+
+
+def _merge_actions(base_actions: List[str], additions: List[str]) -> List[str]:
+    merged: List[str] = []
+    for action in base_actions + additions:
+        if action not in merged:
+            merged.append(action)
+    return merged
+
 
 def generate_warning(indicators: list[dict[str, Any]]) -> dict[str, Any]:
     """
@@ -43,5 +55,16 @@ def generate_warning(indicators: list[dict[str, Any]]) -> dict[str, Any]:
         ],
         "evidence_refs": [ind["id"] for ind in indicators]
     }
+
+    try:
+        playbook = synthesize_countermeasure_playbook(indicators)
+        warning["countermeasure_playbook"] = playbook
+        warning["recommended_defensive_actions"] = _merge_actions(
+            warning["recommended_defensive_actions"],
+            [action["title"] for action in playbook["selected_actions"]],
+        )
+    except PermissionError:
+        # Innovation pipeline is intentionally gated by feature flag.
+        pass
 
     return warning

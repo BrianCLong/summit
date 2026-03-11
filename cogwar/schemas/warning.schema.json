@@ -31,6 +31,9 @@
     "evidence_refs": {
       "type": "array",
       "items": { "type": "string" }
+    },
+    "countermeasure_playbook": {
+      "$ref": "countermeasure_playbook.schema.json"
     }
   }
 }

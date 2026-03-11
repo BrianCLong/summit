@@ -1,0 +1,93 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "CountermeasurePlaybook",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "risk_index",
+    "strategy_focus",
+    "budget_used",
+    "budget_remaining",
+    "selected_actions",
+    "orchestration_timeline",
+    "safeguards"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "cogwar.countermeasure_playbook.v1"
+    },
+    "risk_index": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "strategy_focus": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "budget_used": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "budget_remaining": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "selected_actions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "action_id",
+          "title",
+          "phase",
+          "cost",
+          "priority_score",
+          "expected_risk_reduction",
+          "rationale"
+        ],
+        "properties": {
+          "action_id": { "type": "string" },
+          "title": { "type": "string" },
+          "phase": {
+            "type": "string",
+            "enum": ["immediate", "short_term", "sustained"]
+          },
+          "cost": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "priority_score": { "type": "number" },
+          "expected_risk_reduction": {
+            "type": "number",
+            "minimum": 0.0,
+            "maximum": 1.0
+          },
+          "rationale": { "type": "string" }
+        }
+      }
+    },
+    "orchestration_timeline": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["phase", "action_ids"],
+        "properties": {
+          "phase": {
+            "type": "string",
+            "enum": ["immediate", "short_term", "sustained"]
+          },
+          "action_ids": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        }
+      }
+    },
+    "safeguards": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}
