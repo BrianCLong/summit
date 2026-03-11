@@ -1,0 +1,79 @@
+{
+  "metrics": {
+    "totalQueries": 10,
+    "recallAt1": 1,
+    "mrr": 1
+  },
+  "results": [
+    {
+      "question": "Can you provide data for node 100?",
+      "expectedNodeId": "100",
+      "retrievedNodeId": "100",
+      "rank": 1,
+      "response": "Inferred from 100"
+    },
+    {
+      "question": "I need information about entity 205.",
+      "expectedNodeId": "205",
+      "retrievedNodeId": "205",
+      "rank": 1,
+      "response": "Inferred from 205"
+    },
+    {
+      "question": "What is the context of node 300?",
+      "expectedNodeId": "300",
+      "retrievedNodeId": "300",
+      "rank": 1,
+      "response": "Inferred from 300"
+    },
+    {
+      "question": "Give me details on 404.",
+      "expectedNodeId": "404",
+      "retrievedNodeId": "404",
+      "rank": 1,
+      "response": "Inferred from 404"
+    },
+    {
+      "question": "Tell me about node 500.",
+      "expectedNodeId": "500",
+      "retrievedNodeId": "500",
+      "rank": 1,
+      "response": "Inferred from 500"
+    },
+    {
+      "question": "Describe the content of entity 600.",
+      "expectedNodeId": "600",
+      "retrievedNodeId": "600",
+      "rank": 1,
+      "response": "Inferred from 600"
+    },
+    {
+      "question": "Retrieve node 700's record.",
+      "expectedNodeId": "700",
+      "retrievedNodeId": "700",
+      "rank": 1,
+      "response": "Inferred from 700"
+    },
+    {
+      "question": "What does node 800 say?",
+      "expectedNodeId": "800",
+      "retrievedNodeId": "800",
+      "rank": 1,
+      "response": "Inferred from 800"
+    },
+    {
+      "question": "Find info on node 900.",
+      "expectedNodeId": "900",
+      "retrievedNodeId": "900",
+      "rank": 1,
+      "response": "Inferred from 900"
+    },
+    {
+      "question": "Lookup entity 1000.",
+      "expectedNodeId": "1000",
+      "retrievedNodeId": "1000",
+      "rank": 1,
+      "response": "Inferred from 1000"
+    }
+  ]
+}
