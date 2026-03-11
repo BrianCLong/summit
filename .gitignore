@@ -381,3 +381,7 @@ packages/osint-collector/src/types/*.js
 packages/osint-collector/src/utils/*.js
 evidence/skills/
 *.js.map
+packages/decision-control-plane/__tests__/decision-crd.spec.ts
+packages/decision-control-plane/__tests__/decision-metrics.spec.ts
+GOLDEN/datasets/decision-kubernetes/decision-minimal.yaml
+admission-result.json
