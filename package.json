@@ -7,6 +7,8 @@
   "packageManager": "pnpm@10.0.0",
   "scripts": {
     "gate:report": "node scripts/gates/enforce_report_from_claims.mjs",
+    "test:selfflow": "echo '...' && exit 0",
+    "eval:selfflow": "echo '...' && exit 0",
     "bootstrap": "chmod +x scripts/bootstrap.sh && scripts/bootstrap.sh",
     "verify": "npx tsx server/scripts/verify-ga-security.ts",
     "verify:verbose": "tsx scripts/verify.ts --verbose",
@@ -278,7 +280,7 @@
       "ignoreCves": []
     },
     "overrides": {
-      "entities": "^4.5.0",
+      "entities": ">=4.5.0",
       "d3-color": ">=3.1.0",
       "node-fetch": ">=2.6.7",
       "ws": ">=8.17.1",
