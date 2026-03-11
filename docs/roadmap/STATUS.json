@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-03-09T22:00:00Z",
-  "revision_note": "Integrated Stage 7 validation infrastructure, Antigravity governance ledger, and hardened docker stack into the master roadmap.",
+  "last_updated": "2026-03-10T23:58:38Z",
+  "revision_note": "Added Q2 2026 board-pack artifact for GraphRAG + narrative intelligence strategy and updated roadmap summary counts.",
   "initiatives": [
     {
       "id": "antigravity-governance-ledger",
@@ -270,11 +270,17 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "Praxeology graph implementation with quarantined PG writeset validators and control-plane API."
+    },
+    {
+      "id": "q2-2026-board-pack-graphrag-narrative-intelligence",
+      "status": "completed",
+      "owner": "codex",
+      "notes": "Added board-ready slide outline, memo narrative, KPI instrumentation map, and bet charter template in docs/roadmaps/q2-2026-board-pack-graphrag-narrative-intelligence.md."
     }
   ],
   "summary": {
-    "total_initiatives": 32,
-    "completed": 8,
+    "total_initiatives": 33,
+    "completed": 9,
     "in_progress": 24,
     "at_risk": 0
   }
