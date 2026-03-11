@@ -770,6 +770,8 @@ ${c('cyan', 'Examples:')}
   summit smoke                  # Validate golden path
   summit test --watch           # Watch mode tests
   summit db migrate             # Run migrations
+  summit automation log         # View SAFE_AUTOMATION execution logs
+
   summit new service my-api     # Create new service
   summit pr check               # Pre-PR validation
 
@@ -842,6 +844,34 @@ async function main() {
     case 'pr':
       exitCode = await pr(args);
       break;
+    case 'automation':
+      const automationSubCommand = args[0];
+      if (automationSubCommand === 'log') {
+        const limitIndex = args.indexOf('--limit');
+        const limit = limitIndex !== -1 && args[limitIndex + 1] ? args[limitIndex + 1] : 50;
+        console.log(`Fetching last ${limit} automation executions...`);
+        // We call out to the python module to query the log
+        const pyScript = `
+import sys
+from src.automation.executor import AutomationExecutionLog
+
+log = AutomationExecutionLog()
+entries = log.query(limit=${limit})
+if not entries:
+    print("No execution logs found.")
+    sys.exit(0)
+
+for e in entries:
+    print(f"[{e.timestamp}] {e.action_class} on {e.subject_type}:{e.subject_id} -> {e.result}")
+    if e.error_message:
+        print(f"  Reason/Error: {e.error_message}")
+`;
+        exec(`PYTHONPATH=. python3 -c '${pyScript}'`, { stdio: 'inherit' });
+      } else {
+        console.log('Usage: summit automation <log> [--limit N]');
+      }
+      break;
+
     case 'help':
     case undefined:
       help();

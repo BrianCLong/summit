@@ -1,0 +1,36 @@
+policies:
+  - action_class: ADD_TO_WATCHLIST
+    subject_types:
+      - PERSONA
+      - CAMPAIGN
+    min_risk_level: MEDIUM
+    required_governance_tier: NONE
+    constraints:
+      internal_only: true
+      read_only_configs: true
+
+  - action_class: RAISE_INTERNAL_CASE
+    subject_types:
+      - PERSONA
+      - CAMPAIGN
+      - EVIDENCE
+    min_risk_level: HIGH
+    required_governance_tier: TIER_1_COUNCIL
+    constraints:
+      dry_run_only: false
+
+  - action_class: TUNE_DETECTION_THRESHOLD
+    subject_types:
+      - CAMPAIGN
+    min_risk_level: CRITICAL
+    required_governance_tier: EXECUTIVE_COUNCIL
+    constraints:
+      internal_only: true
+
+  - action_class: TAG_PERSONA_HIGH_RISK
+    subject_types:
+      - PERSONA
+    min_risk_level: MEDIUM
+    required_governance_tier: TIER_1_COUNCIL
+    constraints:
+      internal_only: true
