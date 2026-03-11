@@ -1,15 +1,36 @@
-1. **Understand requirements**: We need to implement Eval-driven Agentic RAG, incorporating testing harnesses (evals), verifier loops for grounding citations, cost controls, agent copilot structures, and updating CI.
-2. **Reviewing Codebase**: Searched `server/src/ai/rag` and `server/src/ai/evals`, identifying entry points, policy integrations. Also confirmed github actions workflows and scripts.
-3. **Execute creation**:
-   - `docs/standards/eval-driven-agentic-rag-2026.md`, `docs/security/data-handling/eval-driven-agentic-rag-2026.md`, `docs/ops/runbooks/eval-driven-agentic-rag-2026.md`
-   - `repo_assumptions.md` created
-   - Evals harness logic: `server/src/ai/evals/harness.ts`, `server/api-schemas/ai-evals.report.schema.json`
-   - Graders: `string_check`, `citation_match`, `groundedness`, fixtures `jailbreaks.jsonl`
-   - Script for evals `scripts/ai/run_ai_evals.mjs` which emits deterministic artifacts.
-   - Verifier loop: `flags.ts`, `citation_resolver.ts`, `verifier.ts`, `verifier.test.ts`.
-   - Router: `intent_router.ts`, `workflow.ts`, `action_envelope.ts`.
-   - Model Routing: `model_router.ts`, `budgets.ts`, `response_cache.ts`
-   - Drift check: `eval-driven-agentic-rag-2026-drift.mjs`
-4. **Update Repo logic**: We also modified `package.json` with `test:ai-evals`, patched `.github/workflows/ci.yml` and `.github/required-checks.yml`.
-5. **Verify/Pre-commit**: We ran tests successfully and generated artifacts.
-6. **Submit**: Use `submit` to complete the issue.
+1. **Define the Domain Models (`packages/narrative-engine/src/core/types.ts`)**:
+   - Add `NarrativeRiskFactors` type:
+     ```typescript
+     export interface NarrativeRiskFactors {
+       viralityVelocity: number;
+       adversarialAmplificationRatio: number;
+       factualAccuracyDelta: number;
+       emotionalManipulationIndex: number;
+     }
+     ```
+   - Add `NarrativeRiskScore` type:
+     ```typescript
+     export interface NarrativeRiskScore {
+       clusterId: string;
+       overallRisk: number; // 0-100
+       factors: NarrativeRiskFactors;
+       timestamp: number;
+     }
+     ```
+
+2. **Implement `NarrativeRiskScorer` (`packages/narrative-engine/src/core/NarrativeRiskScorer.ts`)**:
+   - Create a class `NarrativeRiskScorer` with a method `computeRiskScore(clusterId: string, factors: NarrativeRiskFactors): NarrativeRiskScore`.
+   - The overall risk should be a composite score. A simple weighted average would work (e.g., 30% virality, 30% adversarial, 20% factual delta, 20% emotional). We will ensure the inputs are scaled properly (assuming 0-1 or 0-100, we'll document expectations, probably normalizing to 0-100 internally).
+   - Add method `batchScore(clusters: {clusterId: string, factors: NarrativeRiskFactors}[]): NarrativeRiskScore[]`.
+
+3. **Update API router (`packages/narrative-engine/src/api/routes.ts`)**:
+   - Add a new route `POST /api/narrative/score` that accepts an array of clusters with their factors and returns the computed scores.
+
+4. **Write Unit Tests (`packages/narrative-engine/tests/NarrativeRiskScorer.test.ts`)**:
+   - Test `computeRiskScore` with different inputs to ensure the composite calculation is correct and bounded between 0-100.
+   - Test `batchScore`.
+   - Test the new API endpoint `/api/narrative/score` in `integration.test.ts` or a new test.
+
+5. **Export from `index.ts`**.
+
+6. **Pre-commit and run checks**.
