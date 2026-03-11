@@ -947,3 +947,26 @@ prompts:
         retirement_target: 0
     allowed_operations:
       - edit
+  - id: summit-ui-total-modernization
+    version: v1
+    path: prompts/ui/summit-ui-total-modernization@v1.md
+    sha256: f48e0eb6055cf22e42534ff35c650e8fd04c76741f8675412b8a2ffb8ce900c0
+    description: Drive full-stack UI capability discovery and unified Summit interface modernization.
+    scope:
+      paths:
+        - prompts/ui/summit-ui-total-modernization@v1.md
+        - prompts/registry.yaml
+        - docs/roadmap/STATUS.json
+      domains:
+        - ui
+        - governance
+        - documentation
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
