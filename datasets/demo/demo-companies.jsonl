@@ -1,0 +1,4 @@
+{"id":"ent_001","type":"Company","name":"Acme Corp","description":"Tech startup in Denver specializing in AI OSINT tools.","founded":"2024","location":"Denver, CO","source":"https://example.com/acme","provenance_score":0.95}
+{"id":"ent_002","type":"Person","name":"Jane Doe","role":"CEO","company_id":"ent_001","location":"Denver, CO","source":"https://www.linkedin.com/in/jane-doe","provenance_score":0.83}
+{"id":"ent_003","type":"Company","name":"Northstar Logistics","description":"Regional freight analytics provider with contracts in the Mountain West.","founded":"2018","location":"Salt Lake City, UT","source":"https://example.com/northstar","provenance_score":0.91}
+{"id":"ent_004","type":"Person","name":"Miguel Alvarez","role":"CFO","company_id":"ent_003","location":"Salt Lake City, UT","source":"State filing 2025-11","provenance_score":0.77}

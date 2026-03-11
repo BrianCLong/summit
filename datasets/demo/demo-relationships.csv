@@ -1,0 +1,8 @@
+source_id,relationship,target_id,confidence,evidence
+ent_002,LEADS,ent_001,0.93,"Company leadership profile"
+ent_004,LEADS_FINANCE,ent_003,0.88,"Corporate filing"
+ent_001,PARTNERS_WITH,ent_003,0.79,"MOU announcement 2026-03-01"
+news_001,MENTIONS,ent_001,0.97,"Article text contains full company name"
+news_002,MENTIONS,ent_003,0.96,"Article text contains full company name"
+news_003,MENTIONS,ent_001,0.95,"Article text contains full company name"
+news_003,MENTIONS,ent_003,0.95,"Article text contains full company name"

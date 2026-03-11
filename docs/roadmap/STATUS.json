@@ -1,7 +1,13 @@
 {
-  "last_updated": "2026-03-07T06:03:42Z",
-  "revision_note": "Added Nature s41562-026-02411-w Layer 2/3 regulatory subsumption architecture brief and roadmap tracking entry.",
+  "last_updated": "2026-03-09T00:00:00Z",
+  "revision_note": "Added instant-wow demo track with bundled datasets and one-command local demo flow.",
   "initiatives": [
+    {
+      "id": "instant-wow-demo-flow",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Bundled datasets/demo assets, wow-demo launcher script, and first-run docs to compress time-to-value."
+    },
     {
       "id": "nature-s41562-026-02411-w-layer2-layer3",
       "status": "in_progress",

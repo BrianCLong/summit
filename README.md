@@ -64,6 +64,23 @@ make up         # Start all services via Docker Compose
 
 Refer to [Golden Path Troubleshooting](docs/dev/golden-path-troubleshooting.md) for common issues (like Docker rate limits).
 
+### ⚡ Try the WOW Demo (Recommended First Insight)
+
+```bash
+./scripts/wow-demo.sh
+```
+
+This one-command flow:
+
+- Starts the local stack if it is not already running
+- Ingests bundled demo OSINT datasets from `datasets/demo/`
+- Triggers a demo agent swarm investigation for `Acme Corp`
+- Opens both the Summit report dashboard and Neo4j browser
+
+Expect a provenance-rich first run in under ~3 minutes on a healthy local environment.
+
+See [docs/demo.md](docs/demo.md) for endpoint overrides and troubleshooting.
+
 ### First Query
 
 ```bash
