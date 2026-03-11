@@ -113,15 +113,20 @@ validate_yaml() {
         return
     fi
 
-    # Try yq first, then python3
-    if command_exists yq; then
-        if yq eval '.' "${REPO_ROOT}/${file}" > /dev/null 2>&1; then
+    # Prefer python3/PyYAML for reliable YAML validation.
+    # yq has multiple incompatible distributions (Python yq v3 uses jq syntax;
+    # Go yq v4 uses 'eval' syntax). Rather than detect the flavor, we rely on
+    # python3+PyYAML which is always present in CI and handles all YAML 1.1/1.2.
+    # Fall back to Go-yq only when python3 is unavailable.
+    if command_exists python3; then
+        if python3 -c "import yaml; yaml.safe_load(open('${REPO_ROOT}/${file}'))" 2>/dev/null; then
             echo "VALID"
         else
             echo "INVALID"
         fi
-    elif command_exists python3; then
-        if python3 -c "import yaml; yaml.safe_load(open('${REPO_ROOT}/${file}'))" 2>/dev/null; then
+    elif command_exists yq && yq --version 2>&1 | grep -q 'mikefarah\|version v[4-9]'; then
+        # Go-based yq (mikefarah) supports 'eval' syntax
+        if yq eval '.' "${REPO_ROOT}/${file}" > /dev/null 2>&1; then
             echo "VALID"
         else
             echo "INVALID"
@@ -161,7 +166,7 @@ validate_required_fields_yaml() {
         return
     fi
 
-    if ! command_exists yq && ! command_exists python3; then
+    if ! command_exists python3 && ! command_exists yq; then
         echo "SKIPPED"
         return
     fi
@@ -171,9 +176,8 @@ validate_required_fields_yaml() {
 
     for field in "${FIELD_ARRAY[@]}"; do
         local value=""
-        if command_exists yq; then
-            value=$(yq eval ".${field} // \"\"" "${REPO_ROOT}/${file}" 2>/dev/null || echo "")
-        elif command_exists python3; then
+        # Prefer python3 over yq (see validate_yaml comment for rationale).
+        if command_exists python3; then
             value=$(python3 -c "
 import yaml
 with open('${REPO_ROOT}/${file}') as f:
@@ -187,6 +191,8 @@ with open('${REPO_ROOT}/${file}') as f:
             val = None
     print(val if val else '')
 " 2>/dev/null || echo "")
+        elif command_exists yq && yq --version 2>&1 | grep -q 'mikefarah\|version v[4-9]'; then
+            value=$(yq eval ".${field} // \"\"" "${REPO_ROOT}/${file}" 2>/dev/null || echo "")
         fi
 
         if [[ -z "${value}" || "${value}" == "null" ]]; then
