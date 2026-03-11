@@ -62,7 +62,7 @@ This document maps IntelGraph platform capabilities to SOC 2 Trust Services Crit
 
 ```
 /services/policy/           # OPA policy engine
-/SECURITY/docs/ABAC.md      # ABAC implementation guide
+/docs/policy/abac-model.md  # ABAC implementation guide
 /SECURITY/docs/IC-MULTI-TENANCY.md  # Tenant isolation
 /server/src/middleware/auth.ts      # Authentication middleware
 /audit/ga-evidence/governance/sample-verdicts.json  # Authorization decisions
@@ -90,9 +90,9 @@ This document maps IntelGraph platform capabilities to SOC 2 Trust Services Crit
 
 ```
 /services/audit_svc/        # Audit logging service
-/server/src/services/userService.ts  # User management
+/server/src/services/UserManagementService.ts  # User management
 /audit/ga-evidence/governance/policy-audit-log.json  # Access grant audit log
-/docs/RUNBOOKS/user-lifecycle.md  # User lifecycle procedures
+/docs/RUNBOOKS/user-management.md  # User lifecycle procedures
 ```
 
 **Gap Analysis**: ✅ None - Fully implemented
@@ -115,7 +115,7 @@ This document maps IntelGraph platform capabilities to SOC 2 Trust Services Crit
 **Evidence Location**:
 
 ```
-/server/src/services/userService.ts  # Access revocation logic
+/server/src/services/UserManagementService.ts  # Access revocation logic
 /services/audit_svc/                # Revocation audit trail
 /docs/RUNBOOKS/incident-response.md  # Emergency procedures
 ```
@@ -171,7 +171,7 @@ This document maps IntelGraph platform capabilities to SOC 2 Trust Services Crit
 /observability/prometheus/          # Prometheus configuration
 /observability/grafana/dashboards/  # 12+ monitoring dashboards
 /server/src/observability/          # OTel instrumentation
-/docs/RUNBOOKS/monitoring.md        # Monitoring procedures
+/docs/RUNBOOKS/operational-status.md # Monitoring procedures
 ```
 
 **Gap Analysis**:
@@ -209,7 +209,7 @@ This document maps IntelGraph platform capabilities to SOC 2 Trust Services Crit
 
 ```
 /.github/workflows/ci.yml           # CI/CD pipeline
-/.github/workflows/release.yml      # Release automation
+/.github/workflows/release-ga.yml   # Release automation
 /.github/PULL_REQUEST_TEMPLATE.md   # Change request template
 /audit/ga-evidence/attestations/release-captain-template.md  # Approval template
 /docs/ARCHITECTURE.md               # Change management process
@@ -237,7 +237,7 @@ This document maps IntelGraph platform capabilities to SOC 2 Trust Services Crit
 
 ```
 /scripts/smoke-test.js              # Golden path validation
-/server/src/health.ts               # Health check endpoints
+/server/src/services/SystemHealthService.ts  # Health check endpoints
 /observability/grafana/dashboards/  # Operational dashboards
 /docs/TESTPLAN.md                   # Testing strategy
 ```
@@ -264,7 +264,7 @@ This document maps IntelGraph platform capabilities to SOC 2 Trust Services Crit
 
 ```
 /docs/RUNBOOKS/incident-response.md # Incident response procedures
-/docs/RUNBOOKS/on-call-guide.md     # On-call playbook
+/docs/RUNBOOKS/on-call.md          # On-call playbook
 /services/audit_svc/                # Security event logging
 /observability/prometheus/alerts/   # Alert rules
 ```
