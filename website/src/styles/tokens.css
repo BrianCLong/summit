@@ -1,12 +1,16 @@
 :root {
-  --bg: #0b0f14;
-  --fg: #e7edf5;
-  --muted: #b8c4d4;
-  --muted2: #91a1b6;
-  --card: rgba(255, 255, 255, 0.03);
-  --border: rgba(255, 255, 255, 0.09);
-  --accent: #9fd0ff;
-  --danger: #ff6b6b;
-  --ok: #7ee787;
-  --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  /* Summit Obsidian Theme - Architectural Website */
+  --bg: #0a0a0a;
+  --fg: #fafafa;
+  --muted: #a3a3a3;
+  --muted2: #737373;
+  --card: #121212;
+  --border: #262626;
+  --accent: #fafafa; /* Use stark white as accent for website */
+  --danger: #ef4444;
+  --ok: #10b981;
+  --shadow: 0 4px 24px -4px rgba(0, 0, 0, 0.5);
+  
+  /* Radii - Severe 2px */
+  --radius: 0.125rem;
 }
