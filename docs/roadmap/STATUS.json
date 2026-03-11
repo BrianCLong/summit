@@ -1,7 +1,13 @@
 {
-  "last_updated": "2026-03-07T06:03:42Z",
-  "revision_note": "Added Nature s41562-026-02411-w Layer 2/3 regulatory subsumption architecture brief and roadmap tracking entry.",
+  "last_updated": "2026-03-09T05:01:34Z",
+  "revision_note": "Added Phase 7 self-improving memory loop blueprint and roadmap tracking entry.",
   "initiatives": [
+    {
+      "id": "phase7-self-improving-memory-loop",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Published governed Phase 7 blueprint for self-improving memory, local LoRA continual learning, reflection-agent PR loop, and rollback gates."
+    },
     {
       "id": "nature-s41562-026-02411-w-layer2-layer3",
       "status": "in_progress",
