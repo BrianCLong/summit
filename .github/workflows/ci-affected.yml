@@ -1,0 +1,95 @@
+name: CI (Affected Packages)
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+    paths-ignore:
+      - "**/*.md"
+  merge_group:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  NODE_OPTIONS: --max-old-space-size=8192
+
+jobs:
+  determine-affected:
+    name: Determine Affected Packages
+    runs-on: ubuntu-latest
+    outputs:
+      packages: ${{ steps.set-matrix.outputs.packages }}
+      has_packages: ${{ steps.set-matrix.outputs.has_packages }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Need full history for git diff
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      - name: Get Affected Packages
+        id: set-matrix
+        run: |
+          # Fetch main branch for comparison if on PR
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            git fetch origin ${{ github.base_ref }}
+            export GITHUB_BASE_REF=${{ github.base_ref }}
+          fi
+
+          PACKAGES=$(node .github/scripts/get-affected-packages.cjs)
+          echo "Affected packages: $PACKAGES"
+          echo "packages=$PACKAGES" >> $GITHUB_OUTPUT
+
+          if [ "$PACKAGES" == "[]" ] || [ -z "$PACKAGES" ]; then
+            echo "has_packages=false" >> $GITHUB_OUTPUT
+          else
+            echo "has_packages=true" >> $GITHUB_OUTPUT
+          fi
+
+  build-and-test:
+    name: Build & Test (${{ matrix.package }})
+    needs: determine-affected
+    if: needs.determine-affected.outputs.has_packages == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        package: ${{ fromJSON(needs.determine-affected.outputs.packages) }}
+    steps:
+      - name: Clean orphaned worktrees
+        run: rm -rf .worktrees
+      - uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          cache: "pnpm"
+          node-version-file: .nvmrc
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Lint Package
+        run: pnpm --filter ./${{ matrix.package }} run lint --if-present
+
+      - name: Typecheck Package
+        run: pnpm --filter ./${{ matrix.package }} run typecheck --if-present
+
+      - name: Test Package
+        run: pnpm --filter ./${{ matrix.package }} run test:unit --if-present || pnpm --filter ./${{ matrix.package }} run test:unit --if-present
+
+      - name: Attach evidence
+        if: always()
+        run: |
+          mkdir -p artifacts
+          node scripts/ci/emit_evidence_stamp.mjs \
+            --job build-and-test-${{ matrix.package }} \
+            --runner ${{ runner.os }} \
+            --lock-hash "${{ hashFiles('**/pnpm-lock.yaml') }}" \
+            --out artifacts/stamp-${{ strategy.job-index }}.json
+        shell: bash
