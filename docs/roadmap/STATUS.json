@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-03-09T22:00:00Z",
-  "revision_note": "Integrated Stage 7 validation infrastructure, Antigravity governance ledger, and hardened docker stack into the master roadmap.",
+  "last_updated": "2026-03-10T00:00:00Z",
+  "revision_note": "Added GTM top-4 account execution plan with 30-day sequences and aligned roadmap tracking.",
   "initiatives": [
     {
       "id": "antigravity-governance-ledger",
@@ -270,12 +270,18 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "Praxeology graph implementation with quarantined PG writeset validators and control-plane API."
+    },
+    {
+      "id": "gtm-top4-account-plan-2026-03",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Published top-4 target account plan (ServiceNow, Panther, Ivalua, GEP) with first-touch messaging, 30-day sequences, and KPI framework in docs/gtm/top-4-account-plan-2026-03.md."
     }
   ],
   "summary": {
-    "total_initiatives": 32,
+    "total_initiatives": 33,
     "completed": 8,
-    "in_progress": 24,
+    "in_progress": 25,
     "at_risk": 0
   }
 }
