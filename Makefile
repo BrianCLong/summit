@@ -3,7 +3,13 @@
 
 include Makefile.merge-train
 
-.PHONY: up down restart logs shell clean
+intel-up:
+	docker-compose -f docker-compose.dev.yaml up -d intelligence-api intelligence-console
+
+intel-logs:
+	docker-compose -f docker-compose.dev.yaml logs -f intelligence-api intelligence-console
+
+.PHONY: up down restart logs shell clean intel-up intel-logs help
 .PHONY: dev test lint build format ci
 .PHONY: db-migrate db-seed sbom k6
 .PHONY: merge-s25 merge-s25.resume merge-s25.clean pr-release provenance ci-check prereqs contracts policy-sim rerere dupescans

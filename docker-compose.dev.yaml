@@ -544,6 +544,35 @@ services:
       - 'prometheus.job=summit-ai'
       - 'prometheus.port=8000'
 
+  intelligence-api:
+    build:
+      context: ./services/intelligence-api
+      dockerfile: Dockerfile
+    container_name: summit-intelligence-api
+    restart: unless-stopped
+    ports:
+      - '4050:4050'
+    volumes:
+      - ./engineering-intelligence:/app/engineering-intelligence
+    networks:
+      - summit
+    labels:
+      - 'prometheus.job=intelligence_api'
+      - 'prometheus.port=4050'
+
+  intelligence-console:
+    build:
+      context: ./apps/intelligence-console
+      dockerfile: Dockerfile.dev
+    container_name: summit-intelligence-console
+    restart: unless-stopped
+    ports:
+      - '5173:5173'
+    depends_on:
+      - intelligence-api
+    networks:
+      - summit
+
 volumes:
   postgres_data:
   redis_data:
