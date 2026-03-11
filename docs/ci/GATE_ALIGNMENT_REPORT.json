@@ -1,0 +1,121 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "version": "1.0.0",
+  "description": "Deterministic gate alignment audit — maps required check names to their producing workflows. No timestamps.",
+  "policy_source": "docs/ci/REQUIRED_CHECKS_POLICY.yml",
+
+  "required_checks": [
+    {
+      "check_name": "meta-gate",
+      "workflow_file": ".github/workflows/governance-meta-gate.yml",
+      "workflow_name": "Governance Meta Gate",
+      "job_name": "meta-gate",
+      "triggers": ["pull_request:main", "push:main", "merge_group"],
+      "status": "verified"
+    },
+    {
+      "check_name": "CI Core Gate \u2705",
+      "workflow_file": ".github/workflows/ci-core.yml",
+      "workflow_name": "CI Core (Primary Gate)",
+      "job_name": "CI Core Gate \u2705",
+      "triggers": ["pull_request:main", "push:main", "merge_group"],
+      "status": "verified"
+    },
+    {
+      "check_name": "Workflow Validity Check",
+      "workflow_file": ".github/workflows/workflow-validity.yml",
+      "workflow_name": "Workflow Validity Gate",
+      "job_name": "Workflow Validity Check",
+      "triggers": ["pull_request:main", "push:main", "merge_group"],
+      "status": "verified"
+    },
+    {
+      "check_name": "gate",
+      "workflow_file": ".github/workflows/ga-gate.yml",
+      "workflow_name": "GA Gate",
+      "job_name": "gate",
+      "triggers": ["pull_request:main", "push:main"],
+      "status": "verified"
+    },
+    {
+      "check_name": "Release Readiness Gate",
+      "workflow_file": ".github/workflows/release-readiness.yml",
+      "workflow_name": "Release Readiness Gate",
+      "job_name": "Release Readiness Gate",
+      "triggers": ["pull_request:main", "push:main", "merge_group", "workflow_dispatch"],
+      "status": "verified"
+    },
+    {
+      "check_name": "Unit Tests",
+      "workflow_file": ".github/workflows/ci-pr.yml",
+      "workflow_name": "unknown — confirm via live PR run",
+      "job_name": "unknown — confirm via live PR run",
+      "triggers": ["pull_request:main"],
+      "status": "unconfirmed"
+    },
+    {
+      "check_name": "SOC Controls",
+      "workflow_file": ".github/workflows/soc-controls.yml",
+      "workflow_name": "unknown — confirm via live PR run",
+      "job_name": "unknown — confirm via live PR run",
+      "triggers": ["pull_request:main", "push:main"],
+      "status": "unconfirmed"
+    },
+    {
+      "check_name": "test (20.x)",
+      "workflow_file": ".github/workflows/unit-test-coverage.yml",
+      "workflow_name": "unknown — confirm via live PR run",
+      "job_name": "unknown — confirm via live PR run",
+      "triggers": ["pull_request:main", "push:main"],
+      "status": "unconfirmed"
+    }
+  ],
+
+  "fixes_applied": [
+    {
+      "blocker_id": "BLOCKER-1",
+      "description": "Duplicate pnpm/action-setup and setup-node in ci-core.yml",
+      "files": [".github/workflows/ci-core.yml"],
+      "severity": "high"
+    },
+    {
+      "blocker_id": "BLOCKER-2",
+      "description": "Concurrency group collision between release-ga.yml and release-ga-pipeline.yml",
+      "files": [".github/workflows/release-ga.yml"],
+      "severity": "high"
+    },
+    {
+      "blocker_id": "BLOCKER-3",
+      "description": "Phantom required check 'Routing Resilience Validation' with no producing workflow",
+      "files": [".github/required-checks.yml"],
+      "severity": "high"
+    },
+    {
+      "blocker_id": "BLOCKER-4",
+      "description": "REQUIRED_CHECKS_POLICY.json had stale check names diverging from canonical YAML",
+      "files": ["docs/ci/REQUIRED_CHECKS_POLICY.json"],
+      "severity": "medium"
+    }
+  ],
+
+  "remaining_risks": [
+    {
+      "risk_id": "RISK-1",
+      "description": "Three-way divergence in branch-protection documentation (required-checks.yml, branch-protection-config.yml, branch-protection-rules.md)",
+      "severity": "medium",
+      "action": "Deprecate branch-protection-rules.md; annotate branch-protection-config.yml as governance-lock config, not live required-check list"
+    },
+    {
+      "risk_id": "RISK-2",
+      "description": "release-ga.yml (minimal bypass) still triggers on GA tags and could race release-ga-pipeline.yml publish step",
+      "severity": "medium",
+      "action": "Consider removing push:tags trigger from release-ga.yml once release-ga-pipeline.yml is confirmed stable"
+    },
+    {
+      "risk_id": "RISK-3",
+      "description": "Unit Tests, SOC Controls, and test (20.x) check names unconfirmed against live GitHub status checks",
+      "severity": "low",
+      "action": "Run a live PR and capture actual status check names from GitHub UI"
+    }
+  ]
+}

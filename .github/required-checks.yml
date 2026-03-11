@@ -17,7 +17,6 @@ required_checks:
   - Unit Tests
   - SOC Controls
   - test (20.x)
-  - Routing Resilience Validation
 
 notes:
   owner: summit-ga

@@ -36,8 +36,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 3
     steps:
-      - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@v4
+      - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
       - name: Validate Jest & pnpm Configuration
         run: node scripts/ci/validate-jest-config.cjs
@@ -47,11 +46,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: [config-preflight]
     steps:
-      - uses: actions/checkout@v4 # v6
-      - uses: actions/setup-node@v4 # v6
-        with:
-          cache: "pnpm"
-          node-version-file: .nvmrc
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
