@@ -5,7 +5,6 @@
   "type": "object",
   "required": [
     "evidenceId",
-    "timestamp",
     "source",
     "ilsaLevel",
     "ibomVerified",
@@ -17,19 +16,35 @@
       "format": "uuid",
       "description": "Unique identifier for the evidence artifact."
     },
-    "timestamp": {
-      "type": "string",
-      "format": "date-time",
-      "description": "Time of collection or observation."
-    },
     "source": {
       "type": "object",
-      "required": ["id", "type", "uri"],
+      "required": [
+        "id",
+        "type",
+        "uri"
+      ],
       "properties": {
-        "id": { "type": "string" },
-        "type": { "type": "string", "enum": ["social", "darkweb", "media", "financial", "geospatial", "cyber"] },
-        "uri": { "type": "string", "format": "uri" },
-        "collector_agent": { "type": "string" }
+        "id": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "social",
+            "darkweb",
+            "media",
+            "financial",
+            "geospatial",
+            "cyber"
+          ]
+        },
+        "uri": {
+          "type": "string",
+          "format": "uri"
+        },
+        "collector_agent": {
+          "type": "string"
+        }
       }
     },
     "ilsaLevel": {
@@ -46,15 +61,23 @@
       "type": "object",
       "description": "The raw or normalized OSINT payload.",
       "properties": {
-        "raw_payload_hash": { "type": "string" },
+        "raw_payload_hash": {
+          "type": "string"
+        },
         "entities": {
           "type": "array",
           "items": {
             "type": "object",
             "properties": {
-              "id": { "type": "string" },
-              "type": { "type": "string" },
-              "label": { "type": "string" }
+              "id": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string"
+              },
+              "label": {
+                "type": "string"
+              }
             }
           }
         },
@@ -63,9 +86,15 @@
           "items": {
             "type": "object",
             "properties": {
-              "source": { "type": "string" },
-              "target": { "type": "string" },
-              "type": { "type": "string" }
+              "source": {
+                "type": "string"
+              },
+              "target": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string"
+              }
             }
           }
         }
@@ -73,12 +102,29 @@
     },
     "modality": {
       "type": "string",
-      "enum": ["text", "image", "video", "audio", "structured"],
+      "enum": [
+        "text",
+        "image",
+        "video",
+        "audio",
+        "structured"
+      ],
       "default": "text"
     },
     "tags": {
       "type": "array",
-      "items": { "type": "string" }
+      "items": {
+        "type": "string"
+      }
+    },
+    "schemaVersion": {
+      "type": "string",
+      "description": "Schema version for this evidence artifact"
+    }
+  },
+  "propertyNames": {
+    "not": {
+      "pattern": "(?i)(timestamp|time|created_at|updated_at|last_update|started_at|finished_at|ended_at|duration_ms)"
     }
   }
 }

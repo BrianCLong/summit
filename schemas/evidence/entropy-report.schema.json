@@ -34,7 +34,12 @@
     },
     "entropy": {
       "type": "object",
-      "required": ["current", "velocity", "acceleration", "assessment"],
+      "required": [
+        "current",
+        "velocity",
+        "acceleration",
+        "assessment"
+      ],
       "properties": {
         "current": {
           "type": "number",
@@ -42,7 +47,10 @@
           "description": "Current Shannon entropy value"
         },
         "velocity": {
-          "type": ["number", "null"],
+          "type": [
+            "number",
+            "null"
+          ],
           "description": "Current entropy velocity (d(Entropy)/dt)"
         },
         "acceleration": {
@@ -50,35 +58,61 @@
           "description": "Whether acceleration is detected (3+ consecutive increases)"
         },
         "assessment": {
-          "enum": ["stable", "watch", "warning", "critical"],
+          "enum": [
+            "stable",
+            "watch",
+            "warning",
+            "critical"
+          ],
           "description": "Velocity-based assessment level"
         }
       }
     },
     "velocity": {
       "type": "object",
-      "required": ["current", "average", "confidence"],
+      "required": [
+        "current",
+        "average",
+        "confidence"
+      ],
       "properties": {
         "current": {
-          "type": ["number", "null"],
+          "type": [
+            "number",
+            "null"
+          ],
           "description": "Current velocity measurement"
         },
         "average": {
-          "type": ["number", "null"],
+          "type": [
+            "number",
+            "null"
+          ],
           "description": "Average velocity over history window"
         },
         "confidence": {
-          "enum": ["low", "medium", "high"],
+          "enum": [
+            "low",
+            "medium",
+            "high"
+          ],
           "description": "Prediction confidence level based on velocity variance"
         }
       }
     },
     "prediction": {
-      "type": ["object", "null"],
+      "type": [
+        "object",
+        "null"
+      ],
       "description": "Instability prediction (null if insufficient data)",
       "properties": {
         "status": {
-          "enum": ["approaching", "unstable", "stable"],
+          "enum": [
+            "approaching",
+            "unstable",
+            "stable"
+          ],
           "description": "Prediction status"
         },
         "secondsToInstability": {
@@ -87,21 +121,41 @@
           "description": "Estimated seconds until instability threshold"
         },
         "timeBand": {
-          "enum": ["<1h", "<24h", "1-3d", ">3d", "stable", "unstable"],
+          "enum": [
+            "<1h",
+            "<24h",
+            "1-3d",
+            ">3d",
+            "stable",
+            "unstable"
+          ],
           "description": "Categorized time band for instability prediction"
         },
         "confidence": {
-          "enum": ["low", "medium", "high"],
+          "enum": [
+            "low",
+            "medium",
+            "high"
+          ],
           "description": "Prediction confidence level"
         }
       }
     },
     "assessment": {
       "type": "object",
-      "required": ["level", "recommendation", "controlActions"],
+      "required": [
+        "level",
+        "recommendation",
+        "controlActions"
+      ],
       "properties": {
         "level": {
-          "enum": ["stable", "watch", "warning", "critical"],
+          "enum": [
+            "stable",
+            "watch",
+            "warning",
+            "critical"
+          ],
           "description": "Assessment level (matches entropy.assessment)"
         },
         "recommendation": {
@@ -120,7 +174,11 @@
     "thresholds": {
       "type": "object",
       "description": "Velocity thresholds used for assessment",
-      "required": ["stable", "watch", "warning"],
+      "required": [
+        "stable",
+        "watch",
+        "warning"
+      ],
       "properties": {
         "stable": {
           "type": "number",
@@ -156,6 +214,11 @@
           "description": "Maximum history window size"
         }
       }
+    }
+  },
+  "propertyNames": {
+    "not": {
+      "pattern": "(?i)(timestamp|time|created_at|updated_at|last_update|started_at|finished_at|ended_at|duration_ms)"
     }
   }
 }

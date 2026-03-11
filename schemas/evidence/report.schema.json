@@ -149,5 +149,10 @@
       "additionalProperties": false
     }
   ],
-  "additionalProperties": true
+  "additionalProperties": true,
+  "propertyNames": {
+    "not": {
+      "pattern": "(?i)(timestamp|time|created_at|updated_at|last_update|started_at|finished_at|ended_at|duration_ms)"
+    }
+  }
 }

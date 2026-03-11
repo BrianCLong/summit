@@ -33,7 +33,10 @@
     },
     "config": {
       "type": "object",
-      "required": ["lookbackDays", "maxCommits"],
+      "required": [
+        "lookbackDays",
+        "maxCommits"
+      ],
       "properties": {
         "lookbackDays": {
           "type": "integer",
@@ -49,7 +52,12 @@
     },
     "summary": {
       "type": "object",
-      "required": ["totalCommits", "concerns", "filesImpacted", "entropy"],
+      "required": [
+        "totalCommits",
+        "concerns",
+        "filesImpacted",
+        "entropy"
+      ],
       "properties": {
         "totalCommits": {
           "type": "integer",
@@ -74,38 +82,75 @@
         "lanes": {
           "type": "object",
           "description": "Candidate distribution across triage lanes",
-          "required": ["A", "B", "C", "D"],
+          "required": [
+            "A",
+            "B",
+            "C",
+            "D"
+          ],
           "properties": {
             "A": {
               "type": "object",
-              "required": ["count", "description"],
+              "required": [
+                "count",
+                "description"
+              ],
               "properties": {
-                "count": { "type": "integer", "minimum": 0 },
-                "description": { "type": "string" }
+                "count": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "description": {
+                  "type": "string"
+                }
               }
             },
             "B": {
               "type": "object",
-              "required": ["count", "description"],
+              "required": [
+                "count",
+                "description"
+              ],
               "properties": {
-                "count": { "type": "integer", "minimum": 0 },
-                "description": { "type": "string" }
+                "count": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "description": {
+                  "type": "string"
+                }
               }
             },
             "C": {
               "type": "object",
-              "required": ["count", "description"],
+              "required": [
+                "count",
+                "description"
+              ],
               "properties": {
-                "count": { "type": "integer", "minimum": 0 },
-                "description": { "type": "string" }
+                "count": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "description": {
+                  "type": "string"
+                }
               }
             },
             "D": {
               "type": "object",
-              "required": ["count", "description"],
+              "required": [
+                "count",
+                "description"
+              ],
               "properties": {
-                "count": { "type": "integer", "minimum": 0 },
-                "description": { "type": "string" }
+                "count": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "description": {
+                  "type": "string"
+                }
               }
             }
           }
@@ -118,7 +163,11 @@
       "patternProperties": {
         "^[a-z-]+$": {
           "type": "object",
-          "required": ["count", "patchSize", "commits"],
+          "required": [
+            "count",
+            "patchSize",
+            "commits"
+          ],
           "properties": {
             "count": {
               "type": "integer",
@@ -132,7 +181,9 @@
             },
             "commits": {
               "type": "array",
-              "items": { "type": "string" },
+              "items": {
+                "type": "string"
+              },
               "description": "List of short commit hashes"
             }
           }
@@ -144,7 +195,11 @@
       "description": "Most frequently touched files",
       "items": {
         "type": "object",
-        "required": ["file", "touchCount", "concerns"],
+        "required": [
+          "file",
+          "touchCount",
+          "concerns"
+        ],
         "properties": {
           "file": {
             "type": "string",
@@ -157,7 +212,9 @@
           },
           "concerns": {
             "type": "array",
-            "items": { "type": "string" },
+            "items": {
+              "type": "string"
+            },
             "description": "Concerns affecting this file"
           }
         }
@@ -168,7 +225,13 @@
       "description": "Resurrection candidates ranked by score",
       "items": {
         "type": "object",
-        "required": ["hash", "shortHash", "subject", "score", "lane"],
+        "required": [
+          "hash",
+          "shortHash",
+          "subject",
+          "score",
+          "lane"
+        ],
         "properties": {
           "hash": {
             "type": "string",
@@ -188,11 +251,6 @@
             "type": "string",
             "description": "Commit author"
           },
-          "date": {
-            "type": "string",
-            "format": "date-time",
-            "description": "Commit timestamp in ISO 8601 format"
-          },
           "concern": {
             "type": "string",
             "description": "Detected concern category"
@@ -204,7 +262,12 @@
             "description": "Resurrection candidate score (0-200)"
           },
           "lane": {
-            "enum": ["A", "B", "C", "D"],
+            "enum": [
+              "A",
+              "B",
+              "C",
+              "D"
+            ],
             "description": "Triage lane assignment"
           },
           "duplicate": {
@@ -238,11 +301,18 @@
           },
           "files": {
             "type": "array",
-            "items": { "type": "string" },
+            "items": {
+              "type": "string"
+            },
             "description": "List of files changed"
           }
         }
       }
+    }
+  },
+  "propertyNames": {
+    "not": {
+      "pattern": "(?i)(timestamp|time|created_at|updated_at|last_update|started_at|finished_at|ended_at|duration_ms)"
     }
   }
 }
