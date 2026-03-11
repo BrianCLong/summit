@@ -58,3 +58,19 @@ Summit is the intelligence platform that enforces governance in code, not policy
 
 ### The "Why Us?" (Executive)
 "Summit de-risks your most critical data operations. Instead of hoping your team follows compliance rules, Summit makes it impossible not to. It’s the difference between a handshake and a smart contract."
+
+
+---
+
+## March 2026 Positioning Update (GraphRAG + GPT-5.4 Cycle)
+
+### Updated Position Statement
+Summit delivers open-source, governed GraphRAG that amplifies GPT-5.4 class models with structured graph memory, evidence-bound retrieval, and compliance-grade traceability.
+
+### Competitive Contrast for Field Teams
+- **Levelpath-style orchestration studios:** excellent for workflow assembly; weak on provenance-grade reasoning in regulated decisions.
+- **Model-only upgrades (GPT-5.4 class):** improve baseline intelligence but do not solve evidence lineage, policy enforcement, or audit replay.
+- **Vendor-locked stacks:** introduce policy-volatility and procurement concentration risk.
+
+### Message to Regulated Buyers
+If your AI output can trigger audit, legal, or supervisory review, your winning architecture is not just agent orchestration. It is **governed GraphRAG plus policy-enforced evidence trails**.
