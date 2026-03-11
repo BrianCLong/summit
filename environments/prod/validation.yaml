@@ -1,0 +1,36 @@
+environment: "prod"
+
+# Required environment variables
+env_vars:
+  - "DATABASE_URL"
+  - "REDIS_URL"
+  - "API_KEY"
+  - "PROD_METRICS_KEY"
+
+# External services or databases to check connectivity against
+connectivity:
+  - name: "Primary Database"
+    type: "tcp"
+    host: "db.prod.internal"
+    port: 5432
+    critical: true
+  - name: "Read Replica Database"
+    type: "tcp"
+    host: "db-replica.prod.internal"
+    port: 5432
+    critical: true
+  - name: "Cache Layer"
+    type: "tcp"
+    host: "redis.prod.internal"
+    port: 6379
+    critical: true
+  - name: "Payment Gateway API"
+    type: "http"
+    url: "https://api.stripe.com/healthcheck"
+    critical: true
+
+# Required secrets/configs that must exist
+configs:
+  - "auth-secrets"
+  - "db-credentials"
+  - "tls-certificates"
