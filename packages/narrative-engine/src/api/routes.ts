@@ -1,5 +1,7 @@
 import { Router, type Request, type Response } from 'express';
 import { SimulationEngine } from '../core/SimulationEngine.js';
+import { NarrativeRiskScorer } from '../core/NarrativeRiskScorer.js';
+import type { NarrativeRiskFactors } from '../core/types.js';
 import type { Event, SimConfig } from '../core/types.js';
 import { simulationTelemetry } from '../telemetry.js';
 
@@ -79,6 +81,25 @@ export function createNarrativeRouter(engine?: SimulationEngine): Router {
       res
         .status(500)
         .json({ status: 'error', message: (error as Error).message });
+    }
+  });
+
+
+  router.post('/api/narrative/score', (req: Request, res: Response) => {
+    try {
+      const clusters = req.body.clusters as { clusterId: string; factors: NarrativeRiskFactors }[];
+      if (!clusters || !Array.isArray(clusters)) {
+        res.status(400).json({ status: 'error', message: 'Missing or invalid clusters array' });
+        return;
+      }
+      const scorer = new NarrativeRiskScorer();
+      const scores = scorer.batchScore(clusters);
+      res.status(200).json({ status: 'success', scores });
+    } catch (error) {
+      telemetry.logError('narrative_scoring_failed', {
+        message: (error as Error).message,
+      });
+      res.status(500).json({ status: 'error', message: (error as Error).message });
     }
   });
 

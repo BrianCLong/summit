@@ -129,3 +129,19 @@ export interface BaselineDrift {
   driftScore: number;
   timeWindowDays: number;
 }
+
+// --- Narrative Risk Scoring Types ---
+
+export interface NarrativeRiskFactors {
+  viralityVelocity: number;
+  adversarialAmplificationRatio: number;
+  factualAccuracyDelta: number;
+  emotionalManipulationIndex: number;
+}
+
+export interface NarrativeRiskScore {
+  clusterId: string;
+  overallRisk: number; // 0-100
+  factors: NarrativeRiskFactors;
+  timestamp: number;
+}
