@@ -1,0 +1,619 @@
+openapi: 3.0.3
+info:
+  title: Summit Platform API
+  description: |
+    Comprehensive API documentation for the Summit Intelligence Platform.
+    This API provides access to the platform's core capabilities, including case management,
+    evidence handling, AI-driven analysis, and automated orchestration.
+  version: 1.0.0
+  contact:
+    name: Summit Platform Team
+    email: support@summit.tech
+  license:
+    name: Proprietary
+    url: https://summit.tech/license
+
+servers:
+  - url: http://localhost:4000/api
+    description: Local Development Server
+  - url: https://api.summit.tech/v1
+    description: Production Server
+
+tags:
+  - name: Cases
+    description: Investigation case management
+  - name: Evidence
+    description: Evidence handling and annotation
+  - name: Ingest
+    description: Data ingestion and connector management
+  - name: Triage
+    description: AI-generated triage and suggestions
+  - name: AI
+    description: AI-powered analysis and extraction
+  - name: Maestro
+    description: Workflow orchestration and monitoring
+  - name: Health
+    description: System health and monitoring
+
+paths:
+  /health:
+    get:
+      tags:
+        - Health
+      summary: Health check
+      description: Returns the health status of the service.
+      operationId: getHealth
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Health'
+              example:
+                status: ok
+                timestamp: "2025-01-15T10:30:00Z"
+                version: "1.0.0"
+
+  /cases:
+    post:
+      tags:
+        - Cases
+      summary: Create investigation case
+      description: Creates a new investigation case in draft status.
+      operationId: postCases
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - title
+              properties:
+                title:
+                  type: string
+                  description: Title of the investigation case
+            example:
+              title: "Financial Fraud Investigation Alpha"
+      responses:
+        '200':
+          description: Case created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                  case:
+                    $ref: '#/components/schemas/Case'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+
+  /cases/{caseId}:
+    get:
+      tags:
+        - Cases
+      summary: Get case details
+      description: Retrieve a case by its unique ID.
+      operationId: getCaseById
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Unique ID of the case
+      responses:
+        '200':
+          description: Case details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                  case:
+                    $ref: '#/components/schemas/Case'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /cases/{caseId}/approve:
+    post:
+      tags:
+        - Cases
+      summary: Approve case
+      description: Updates case status to approved and records audit entry.
+      operationId: approveCase
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Case approved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                  case:
+                    $ref: '#/components/schemas/Case'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /cases/{caseId}/export:
+    get:
+      tags:
+        - Cases
+      summary: Export case bundle
+      description: Exports case data including evidence references and watermark metadata.
+      operationId: exportCase
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Case export bundle
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaseExport'
+
+  /evidence/{evidenceId}/annotations:
+    get:
+      tags:
+        - Evidence
+      summary: List evidence annotations
+      description: Retrieve annotations attached to a piece of evidence.
+      operationId: listEvidenceAnnotations
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: evidenceId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of annotations
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Annotation'
+    post:
+      tags:
+        - Evidence
+      summary: Create evidence annotation
+      description: Adds a new annotation to the evidence item.
+      operationId: createEvidenceAnnotation
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: evidenceId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - range
+                - note
+              properties:
+                range:
+                  type: string
+                  description: Text range or coordinates for the annotation
+                note:
+                  type: string
+                  description: Content of the annotation
+            example:
+              range: "45-89"
+              note: "Suspicious transaction pattern detected"
+      responses:
+        '200':
+          description: Annotation created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                  annotation:
+                    $ref: '#/components/schemas/Annotation'
+
+  /ingest/connectors:
+    get:
+      tags:
+        - Ingest
+      summary: List ingest connectors
+      description: Returns connectors supported by the ingestion service.
+      operationId: listConnectors
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Connector catalog
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Connector'
+
+  /ingest/start:
+    post:
+      tags:
+        - Ingest
+      summary: Start ingest job
+      description: Starts a new ingest job using the specified connector configuration.
+      operationId: startIngest
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - connector
+              properties:
+                connector:
+                  type: string
+                config:
+                  type: object
+                  additionalProperties: true
+            example:
+              connector: "twitter"
+              config:
+                query: "#cybersecurity"
+                limit: 100
+      responses:
+        '200':
+          description: Ingest job started
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                  jobId:
+                    type: string
+                  connector:
+                    type: string
+
+  /triage/suggestions:
+    get:
+      tags:
+        - Triage
+      summary: List triage suggestions
+      description: Retrieves AI-generated suggestions in reverse chronological order.
+      operationId: listSuggestions
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Suggestion list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Suggestion'
+
+  /ai/predict-links:
+    post:
+      tags:
+        - AI
+      summary: Predict potential links
+      description: Predict potential links between entities using GNN model.
+      operationId: predictLinks
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - entityId
+              properties:
+                entityId:
+                  type: string
+                topK:
+                  type: integer
+                  default: 10
+                investigationId:
+                  type: string
+            example:
+              entityId: "person123"
+              topK: 5
+      responses:
+        '200':
+          description: Link prediction successful
+        '400':
+          $ref: '#/components/responses/ValidationError'
+
+  /maestro/runs:
+    get:
+      tags:
+        - Maestro
+      summary: List runs
+      description: Retrieve a paginated list of Maestro workflow runs.
+      operationId: listMaestroRuns
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: A list of runs
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/MaestroRun'
+    post:
+      tags:
+        - Maestro
+      summary: Create run
+      description: Create and start a new workflow run.
+      operationId: createMaestroRun
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - pipeline_id
+                - pipeline_name
+              properties:
+                pipeline_id:
+                  type: string
+                  format: uuid
+                pipeline_name:
+                  type: string
+                input_params:
+                  type: object
+      responses:
+        '201':
+          description: Run created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                  status:
+                    type: string
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  responses:
+    UnauthorizedError:
+      description: Authentication required or invalid token
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    ForbiddenError:
+      description: Insufficient permissions
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFoundError:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    ValidationError:
+      description: Validation failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+  schemas:
+    Health:
+      type: object
+      required:
+        - status
+        - timestamp
+      properties:
+        status:
+          type: string
+          enum: [ok, error]
+        timestamp:
+          type: string
+          format: date-time
+        version:
+          type: string
+
+    Case:
+      type: object
+      required:
+        - id
+        - title
+        - status
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+          enum: [draft, active, approved, archived]
+        createdAt:
+          type: string
+          format: date-time
+
+    CaseExport:
+      type: object
+      properties:
+        caseId:
+          type: string
+        exportUrl:
+          type: string
+        expiresAt:
+          type: string
+          format: date-time
+
+    Annotation:
+      type: object
+      required:
+        - id
+        - evidenceId
+        - range
+        - note
+      properties:
+        id:
+          type: string
+        evidenceId:
+          type: string
+        range:
+          type: string
+        note:
+          type: string
+        authorId:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    Connector:
+      type: object
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        type:
+          type: string
+        status:
+          type: string
+
+    Suggestion:
+      type: object
+      required:
+        - id
+        - type
+        - confidence
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+          enum: [link, anomaly, entity]
+        confidence:
+          type: number
+        reasoning:
+          type: string
+        data:
+          type: object
+
+    MaestroRun:
+      type: object
+      required:
+        - id
+        - status
+      properties:
+        id:
+          type: string
+          format: uuid
+        pipeline:
+          type: string
+        status:
+          type: string
+          enum: [queued, running, succeeded, failed, cancelled]
+        durationMs:
+          type: integer
+        cost:
+          type: number
+        createdAt:
+          type: string
+          format: date-time
+
+    Error:
+      type: object
+      required:
+        - ok
+        - error
+      properties:
+        ok:
+          type: boolean
+          default: false
+        error:
+          type: string
+        code:
+          type: string
+        requestId:
+          type: string
