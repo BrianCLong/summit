@@ -4,6 +4,8 @@ import { Buffer } from 'node:buffer';
 import crypto from 'node:crypto';
 import Redis from 'ioredis';
 import { queueProcessingDuration, queueProcessed } from '../../../libs/ops/src/metrics-queue.js';
+import * as http from 'node:http';
+import { register } from 'prom-client';
 
 export type JobPayload = Record<string, unknown>;
 
@@ -113,6 +115,7 @@ async function recordFailure(job: Job, error: unknown, ctx: WorkerContext): Prom
 export async function processPayload(raw: string, ctx: WorkerContext): Promise<void> {
   const job = deserializeJob(raw);
   const handler = HANDLERS[job.type];
+  console.log(JSON.stringify({ event: 'job_start', jobId: job.id, type: job.type }));
   const timer = queueProcessingDuration.startTimer({ type: job.type });
   try {
     if (!handler) {
@@ -121,8 +124,10 @@ export async function processPayload(raw: string, ctx: WorkerContext): Promise<v
 
     const result = await handler(job, ctx);
     await recordResult(job, result, ctx);
+    console.log(JSON.stringify({ event: 'job_complete', jobId: job.id, type: job.type }));
     queueProcessed.inc({ status: 'success', type: job.type });
   } catch (err) {
+    console.error(JSON.stringify({ event: 'job_error', jobId: job.id, type: job.type, error: err instanceof Error ? err.message : String(err) }));
     queueProcessed.inc({ status: 'failure', type: job.type });
     await recordFailure(job, err, ctx);
     throw err;
@@ -145,12 +150,36 @@ async function runLoop(): Promise<void> {
     try {
       await processPayload(payload, ctx);
     } catch (err) {
-      console.error('job_fail', err);
+      console.error(JSON.stringify({ event: 'job_fail', error: err instanceof Error ? err.message : String(err) }));
     }
   }
 }
 
+
+const server = http.createServer(async (req, res) => {
+  if (req.url === '/health') {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ status: 'ok' }));
+  } else if (req.url === '/metrics') {
+    try {
+      res.writeHead(200, { 'Content-Type': register.contentType });
+      res.end(await register.metrics());
+    } catch (err) {
+      res.writeHead(500);
+      res.end('Failed to collect metrics');
+    }
+  } else {
+    res.writeHead(404);
+    res.end();
+  }
+});
+
+const PORT = process.env.PORT || 9090;
+server.listen(PORT, () => {
+  console.log(JSON.stringify({ event: 'server_start', port: PORT }));
+});
+
 runLoop().catch((err) => {
-  console.error(err);
+  console.error(JSON.stringify({ event: 'worker_crash', error: err instanceof Error ? err.message : String(err) }));
   process.exit(1);
 });
