@@ -1,5 +1,6 @@
 package infowar_test
 
+import future.keywords.if
 import data.infowar
 
 test_allow_analyst if {
