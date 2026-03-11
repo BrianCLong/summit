@@ -1,0 +1,152 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.example/schema/cogwar/defensive_friction_plan.schema.json",
+  "title": "Defensive Friction Plan",
+  "type": "object",
+  "required": [
+    "plan_id",
+    "objective",
+    "selected_intervention_ids",
+    "projected_residual_curve",
+    "projected_risk_reduction",
+    "projected_residual_risk",
+    "confidence",
+    "rollback_triggers",
+    "rationale",
+    "caveats"
+  ],
+  "properties": {
+    "plan_id": {
+      "type": "string"
+    },
+    "objective": {
+      "type": "string"
+    },
+    "selected_intervention_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "selected_interventions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "intent",
+          "target_channels",
+          "friction_gain",
+          "decay_gain",
+          "cost",
+          "reversibility",
+          "latency_steps"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "intent": {
+            "type": "string",
+            "const": "defensive"
+          },
+          "target_channels": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "friction_gain": {
+            "type": "number",
+            "minimum": 0
+          },
+          "decay_gain": {
+            "type": "number",
+            "minimum": 0
+          },
+          "cost": {
+            "type": "number",
+            "minimum": 0
+          },
+          "reversibility": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "latency_steps": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "projected_baseline_curve": {
+      "type": "array",
+      "items": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1
+      }
+    },
+    "projected_residual_curve": {
+      "type": "array",
+      "items": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1
+      }
+    },
+    "projected_risk_reduction": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "projected_residual_risk": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "max_budget": {
+      "type": "number",
+      "minimum": 0
+    },
+    "total_cost": {
+      "type": "number",
+      "minimum": 0
+    },
+    "average_reversibility": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "rollback_triggers": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "rationale": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "caveats": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "additionalProperties": true
+}
