@@ -1,9 +1,12 @@
+import "./instrumentation";
 import express from "express";
 import { ApolloServer } from "@apollo/server";
 import { expressMiddleware } from "@as-integrations/express4";
 import { ApolloGateway, RemoteGraphQLDataSource } from "@apollo/gateway";
 import { security } from "./security";
 import { policyGuard } from "./middleware/policyGuard";
+import { loggingMiddleware } from "./middleware/logging";
+import { otelMiddleware } from "./middleware/otel";
 import searchRouter from "./routes/search";
 import { logger } from "./logger";
 import yaml from "yaml";
@@ -15,6 +18,8 @@ const PORT = process.env.PORT || 8080;
 async function startGateway() {
   const app = express();
   app.use(express.json({ limit: "1mb" }));
+  app.use(otelMiddleware);
+  app.use(loggingMiddleware);
   app.use(security);
   
   // Routes
