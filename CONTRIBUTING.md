@@ -149,7 +149,10 @@ source ~/.bashrc
 
 ## ⚖️ Governance
 
-- **Code of Conduct**: Please adhere to our [Code of Conduct](CODE_OF_CONDUCT.md).
-- **License**: Contributions are accepted under the terms in [`CONTRIBUTOR_LICENSE_AGREEMENT.md`](CONTRIBUTOR_LICENSE_AGREEMENT.md).
+All contributions, decision-making, code ownership, PR review processes, and release strategies are governed by our official specifications. Please refer to:
+
+- **[Canonical Governance Specification](docs/governance/GOVERNANCE.md)**: The single source of truth for Golden Main rules, branching strategies, and accountability.
+- **[Code of Conduct](CODE_OF_CONDUCT.md)**: Adhere to our community standards.
+- **[License](CONTRIBUTOR_LICENSE_AGREEMENT.md)**: Contributions are accepted under the terms of our CLA.
 
 Thank you for building with us!

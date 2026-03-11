@@ -15,6 +15,8 @@ This index is the authoritative navigation layer for governance artifacts.
 
 ## Start Here
 
+- [Governance Specification](GOVERNANCE.md)
+
 - [Succession Readiness](SUCCESSION_READINESS.md)
 - [Summit Readiness Assertion](../SUMMIT_READINESS_ASSERTION.md)
 - [Governance Ownership](OWNERSHIP.md)
