@@ -16,6 +16,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4 # v6
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4 # v6
+        with:
+          node-version: 20
+          cache: "pnpm"
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
@@ -35,6 +40,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4 # v6
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4 # v6
+        with:
+          node-version: 20
+          cache: "pnpm"
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
@@ -68,17 +78,17 @@ jobs:
         uses: anchore/sbom-action/download-syft@v0
 
       - name: Generate SBOM artifact
-        run: bash scripts/generate-sbom.sh summit-platform ci-build artifacts/sbom
+        run: bash scripts/generate-sbom.sh . artifacts/sbom/sbom.json
 
       - name: SBOM policy check (non-blocking)
         continue-on-error: true
         env:
-          SBOM_FILE: artifacts/sbom/summit-platform-main-ci-build.cdx.json
+          SBOM_FILE: artifacts/sbom/sbom.json
         run: node scripts/sbom-policy-check.mjs
 
       - name: Upload SBOM artifact
         uses: actions/upload-artifact@v4
         with:
           name: sbom-cyclonedx
-          path: artifacts/sbom/
+          path: artifacts/sbom/sbom.json
           retention-days: 14

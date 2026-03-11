@@ -89,9 +89,9 @@ Summit follows a modular microservices architecture:
 **Deep Dive Docs:**
 
 - [🏛 Architecture Overview](docs/architecture/README.md)
-- [🔌 Data Ingestion](docs/universal-ingestion-etl-architecture.md)
-- [🤖 Agent System](docs/agent-archetypes.md)
-- [🕸 Knowledge Graphs](docs/graph_ai_current_state.md)
+- [🔌 Data Ingestion](docs/architecture/ingestion.md)
+- [🤖 Agent System](docs/architecture/agents.md)
+- [🕸 Knowledge Graphs](docs/architecture/knowledge-graph.md)
 - [🔒 Security](docs/security/README.md)
 
 ## 📚 Key Components
@@ -116,7 +116,7 @@ Retrieval-augmented generation with knowledge graphs:
 - Vector similarity search
 - LLM-powered synthesis
 
-See: [GraphRAG Guide](docs/graphrag-architecture.md)
+See: [GraphRAG Guide](docs/graphrag/README.md)
 
 ### Agents
 
@@ -130,9 +130,9 @@ See: [Agent Development](docs/agents/README.md)
 
 ## 📡 API Reference
 
-- [GraphQL Schema](docs/graphql/SCHEMA_GOVERNANCE.md)
-- [REST Endpoints](docs/openapi/index.html)
-- [CompanyOS SDK](docs/summit_internal_companyos.md)
+- [GraphQL Schema](docs/api/graphql.md)
+- [REST Endpoints](docs/api/rest.md)
+- [CompanyOS SDK](docs/api/companyos.md)
 
 ## 🧪 Testing
 
@@ -172,7 +172,7 @@ docker-compose -f docker-compose.prod.yml up -d
 kubectl apply -f k8s/
 ```
 
-See: [Deployment Guide](docs/DEPLOY.md)
+See: [Deployment Guide](docs/deployment/README.md)
 
 ## 🤝 Contributing
 
@@ -180,7 +180,7 @@ We welcome contributions! Please see:
 
 - [Contributing Guidelines](CONTRIBUTING.md)
 - [Code of Conduct](CODE_OF_CONDUCT.md)
-- [Development Setup](docs/development/monorepo-and-pnpm.md)
+- [Development Setup](docs/development/setup.md)
 
 ## 📄 License
 
