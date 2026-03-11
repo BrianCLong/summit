@@ -1,0 +1,53 @@
+name: Compliance Automation (SBOM & Policy Hashing)
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  compliance-gate:
+    name: SBOM Generation and Policy Hashing
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate CycloneDX SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          format: cyclonedx-json
+          output-file: sbom.json
+
+      - name: Upload SBOM Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-artifact
+          path: sbom.json
+          retention-days: 90
+
+      - name: Hash Policy Files and Gate
+        run: |
+          echo "Checking for policy changes..."
+
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            CHANGED_POLICIES=$(git diff --name-only origin/main...${{ github.sha }} | grep -E "policy\\.(yaml|yml)$|policies/.*\\.(yaml|yml)$" || true)
+
+            if [ -n "$CHANGED_POLICIES" ]; then
+              echo "::error::Unapproved policy changes detected!"
+              echo "The following policy files have been modified:"
+              echo "$CHANGED_POLICIES"
+              echo "Policy changes require explicit approval. Failing the build."
+              exit 1
+            else
+              echo "No policy files were modified in this PR."
+              find . -type f \( -name "policy.yaml" -o -name "policy.yml" -o -path "*/policies/*.yaml" -o -path "*/policies/*.yml" \) | sort | xargs cat 2>/dev/null | sha256sum > policy_hash.txt || echo "No policies found" > policy_hash.txt
+              echo "Current Policy Hash: $(cat policy_hash.txt)"
+            fi
+          else
+            echo "Push to main detected. Logging policy hash."
+            find . -type f \( -name "policy.yaml" -o -name "policy.yml" -o -path "*/policies/*.yaml" -o -path "*/policies/*.yml" \) | sort | xargs cat 2>/dev/null | sha256sum > policy_hash.txt || echo "No policies found" > policy_hash.txt
+            echo "Current Policy Hash: $(cat policy_hash.txt)"
+          fi
