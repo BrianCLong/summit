@@ -1,6 +1,0 @@
-{
-  "name": "@intelgraph/graph-algos-js",
-  "version": "4.2.3",
-  "main": "index.js",
-  "type": "module"
-}

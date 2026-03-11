@@ -1,7 +1,0 @@
-{
-  "name": "@safety/ai-safety-suite",
-  "version": "4.2.3",
-  "type": "module",
-  "private": true,
-  "main": "src/index.ts"
-}

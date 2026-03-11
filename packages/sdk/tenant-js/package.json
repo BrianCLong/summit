@@ -1,7 +1,0 @@
-{
-  "name": "@intelgraph/tenant-js",
-  "version": "4.2.3",
-  "private": true,
-  "main": "index.js",
-  "type": "module"
-}

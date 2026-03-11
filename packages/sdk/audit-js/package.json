@@ -1,6 +1,0 @@
-{
-  "name": "@intelgraph/audit-js",
-  "version": "4.2.3",
-  "type": "module",
-  "main": "src/index.js"
-}
