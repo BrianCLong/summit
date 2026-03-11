@@ -1,0 +1,142 @@
+[
+  {
+    "id": "CASE-001",
+    "question": "What are the primary nodes in the Global Threat Network?",
+    "ground_truth": "The Global Threat Network consists of North Star, Silent Shadow, and Phantom.",
+    "expected_entities": ["North Star", "Silent Shadow", "Phantom"],
+    "intent": "Network Structure"
+  },
+  {
+    "id": "CASE-002",
+    "question": "Who leads the Silent Shadow group?",
+    "ground_truth": "The Silent Shadow group is led by Alex Vane.",
+    "expected_entities": ["Silent Shadow", "Alex Vane"],
+    "intent": "Leadership"
+  },
+  {
+    "id": "CASE-003",
+    "question": "What is the relationship between Phantom and North Star?",
+    "ground_truth": "Phantom provides logistical support to North Star.",
+    "expected_entities": ["Phantom", "North Star"],
+    "intent": "Relationship"
+  },
+  {
+    "id": "CASE-004",
+    "question": "List all campaigns associated with North Star.",
+    "ground_truth": "North Star is associated with Project Aurora and Operation Nightfall.",
+    "expected_entities": ["North Star", "Project Aurora", "Operation Nightfall"],
+    "intent": "Campaign Association"
+  },
+  {
+    "id": "CASE-005",
+    "question": "Where is the Silent Shadow group based?",
+    "ground_truth": "Silent Shadow is based in Eastern Europe.",
+    "expected_entities": ["Silent Shadow", "Eastern Europe"],
+    "intent": "Location"
+  },
+  {
+    "id": "CASE-006",
+    "question": "What are the common tactics used by Phantom?",
+    "ground_truth": "Phantom uses social engineering and supply chain attacks.",
+    "expected_entities": ["Phantom", "social engineering", "supply chain attacks"],
+    "intent": "Tactics"
+  },
+  {
+    "id": "CASE-007",
+    "question": "Which entity funded Operation Nightfall?",
+    "ground_truth": "Operation Nightfall was funded by the Obsidian Syndicate.",
+    "expected_entities": ["Operation Nightfall", "Obsidian Syndicate"],
+    "intent": "Funding"
+  },
+  {
+    "id": "CASE-008",
+    "question": "Who is the primary contact for the Obsidian Syndicate?",
+    "ground_truth": "The primary contact for the Obsidian Syndicate is Marcus Thorne.",
+    "expected_entities": ["Obsidian Syndicate", "Marcus Thorne"],
+    "intent": "Contact"
+  },
+  {
+    "id": "CASE-009",
+    "question": "What is the connection between Alex Vane and Marcus Thorne?",
+    "ground_truth": "Alex Vane and Marcus Thorne are known associates in the cybercrime underworld.",
+    "expected_entities": ["Alex Vane", "Marcus Thorne"],
+    "intent": "Personal Connection"
+  },
+  {
+    "id": "CASE-010",
+    "question": "List the infrastructure used by Project Aurora.",
+    "ground_truth": "Project Aurora uses the Azure Nexus and Crimson Cloud servers.",
+    "expected_entities": ["Project Aurora", "Azure Nexus", "Crimson Cloud"],
+    "intent": "Infrastructure"
+  },
+  {
+    "id": "CASE-011",
+    "question": "What are the key dates for Operation Nightfall?",
+    "ground_truth": "Operation Nightfall began in March 2023 and concluded in October 2023.",
+    "expected_entities": ["Operation Nightfall", "March 2023", "October 2023"],
+    "intent": "Timeline"
+  },
+  {
+    "id": "CASE-012",
+    "question": "Who discovered the Global Threat Network?",
+    "ground_truth": "The Global Threat Network was discovered by the Summit Intelligence Unit.",
+    "expected_entities": ["Global Threat Network", "Summit Intelligence Unit"],
+    "intent": "Discovery"
+  },
+  {
+    "id": "CASE-013",
+    "question": "What is the primary objective of North Star?",
+    "ground_truth": "The primary objective of North Star is political destabilization.",
+    "expected_entities": ["North Star", "political destabilization"],
+    "intent": "Objective"
+  },
+  {
+    "id": "CASE-014",
+    "question": "What are the known aliases of Alex Vane?",
+    "ground_truth": "Alex Vane is also known as 'The Architect' and 'Ghost-1'.",
+    "expected_entities": ["Alex Vane", "The Architect", "Ghost-1"],
+    "intent": "Aliases"
+  },
+  {
+    "id": "CASE-015",
+    "question": "Which sectors are targeted by Silent Shadow?",
+    "ground_truth": "Silent Shadow targets the energy and finance sectors.",
+    "expected_entities": ["Silent Shadow", "energy", "finance"],
+    "intent": "Targeting"
+  },
+  {
+    "id": "CASE-016",
+    "question": "What is the malware signature of Project Aurora?",
+    "ground_truth": "Project Aurora uses the 'Aurora-X' and 'Eclipse' malware strains.",
+    "expected_entities": ["Project Aurora", "Aurora-X", "Eclipse"],
+    "intent": "Malware"
+  },
+  {
+    "id": "CASE-017",
+    "question": "Who is the lead analyst for the Phantom investigation?",
+    "ground_truth": "The lead analyst is Sarah Jenkins from Summit.",
+    "expected_entities": ["Phantom", "Sarah Jenkins"],
+    "intent": "Investigation Team"
+  },
+  {
+    "id": "CASE-018",
+    "question": "What is the relationship between the Obsidian Syndicate and the Global Threat Network?",
+    "ground_truth": "The Obsidian Syndicate is the primary financial backer of the Global Threat Network.",
+    "expected_entities": ["Obsidian Syndicate", "Global Threat Network"],
+    "intent": "Financial Backing"
+  },
+  {
+    "id": "CASE-019",
+    "question": "Where was Marcus Thorne last seen?",
+    "ground_truth": "Marcus Thorne was last seen in Zurich, Switzerland.",
+    "expected_entities": ["Marcus Thorne", "Zurich", "Switzerland"],
+    "intent": "Last Known Location"
+  },
+  {
+    "id": "CASE-020",
+    "question": "What are the future plans for the Global Threat Network?",
+    "ground_truth": "The Global Threat Network plans to expand into IoT-based attacks.",
+    "expected_entities": ["Global Threat Network", "IoT-based attacks"],
+    "intent": "Future Plans"
+  }
+]
