@@ -1,0 +1,43 @@
+# Canonical Release Readiness Telemetry Pack
+# Defines signals indicating whether a release is safe, and criteria for degraded state pausing.
+
+dependency_health_checks:
+  - name: "github_api_core"
+    endpoint: "https://api.github.com/zen"
+    expected_response: 200
+    timeout: 10
+    critical: true
+  - name: "npm_registry"
+    endpoint: "https://registry.npmjs.org/"
+    expected_response: 200
+    timeout: 10
+    critical: true
+  - name: "github_actions_status"
+    endpoint: "https://www.githubstatus.com/api/v2/components.json"
+    # We will check if the Actions component is operational via jq in the script
+    expected_response: 200
+    timeout: 10
+    critical: true
+
+post_merge_confidence_signals:
+  - name: "ci_workflow_success_rate"
+    metric: "github_actions_success_percentage"
+    threshold: 95
+    check_interval_seconds: 300
+    critical: true
+  - name: "coverage_gate_status"
+    metric: "test_coverage_pass_rate"
+    threshold: 80
+    check_interval_seconds: 300
+    critical: true
+
+degradation_indicators:
+  - signal: "ci_workflow_failures"
+    condition: "consecutive_failures >= 3"
+    action: "pause_release"
+  - signal: "auth0_api_latency"
+    condition: "p99_latency_ms > 1000"
+    action: "pause_release"
+  - signal: "postgres_connection_errors"
+    condition: "error_rate > 0.05"
+    action: "pause_release"
