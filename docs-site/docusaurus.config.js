@@ -6,17 +6,17 @@
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-  title: 'Maestro & IntelGraph API Docs',
-  tagline: 'Orchestrate Intelligence, Securely.',
-  url: 'https://intelgraph.github.io',
-  baseUrl: '/intelgraph/',
+  title: 'Summit // Sovereign Intelligence OS',
+  tagline: 'The Definitive Documentation for Strategic Force.',
+  url: 'https://docs.summit.ai',
+  baseUrl: '/',
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
   favicon: 'img/favicon.ico',
 
   // GitHub pages deployment config.
-  organizationName: 'intelgraph', // Usually your GitHub org/user name.
-  projectName: 'intelgraph', // Usually your repo name.
+  organizationName: 'summit-intel', 
+  projectName: 'summit-docs', 
 
   themes: ['@docusaurus/theme-mermaid'],
   markdown: {
@@ -30,14 +30,11 @@ const config = {
       ({
         docs: {
           sidebarPath: require.resolve('./sidebars.js'),
+          routeBasePath: '/',
           editUrl:
-            'https://github.com/intelgraph/intelgraph/tree/main/docs-site/',
+            'https://github.com/BrianCLong/summit/tree/main/docs/',
         },
-        blog: {
-          showReadingTime: true,
-          editUrl:
-            'https://github.com/intelgraph/intelgraph/tree/main/docs-site/',
-        },
+        blog: false,
         theme: { customCss: require.resolve('./src/css/custom.css') },
       }),
     ],
@@ -46,28 +43,32 @@ const config = {
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
+      colorMode: {
+        defaultMode: 'dark',
+        disableSwitch: true,
+        respectPrefersColorScheme: false,
+      },
       navbar: {
-        title: 'Maestro & IntelGraph',
-        logo: { alt: 'Maestro & IntelGraph Logo', src: 'img/logo.svg' },
+        title: 'SUMMIT // INTEL',
+        logo: { alt: 'Summit Logo', src: 'img/logo.svg' },
         items: [
-          { type: 'doc', docId: 'intro', position: 'left', label: 'Docs' },
-          { to: '/blog', label: 'Blog', position: 'left' },
+          { type: 'doc', docId: 'intro', position: 'left', label: 'Protocol' },
+          { to: '/runbooks', label: 'Runbooks', position: 'left' },
           {
-             href: '/storybook',
-             label: 'Storybook',
+             href: '/api',
+             label: 'API Reference',
              position: 'left',
           },
           {
-            href: 'https://github.com/intelgraph/intelgraph',
-            label: 'GitHub',
+            href: 'https://github.com/BrianCLong/summit',
+            label: 'Source',
             position: 'right',
           },
         ],
       },
       footer: {
         style: 'dark',
-        links: [],
-        copyright: `Copyright © ${new Date().getFullYear()} IntelGraph. Built with Docusaurus.`,
+        copyright: `OPERATIONAL_STATUS: NOMINAL // © ${new Date().getFullYear()} SUMMIT INTELLIGENCE SYSTEMS`,
       },
       // prism: { theme: lightCodeTheme, darkTheme: darkCodeTheme },
       algolia: {
