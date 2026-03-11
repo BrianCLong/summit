@@ -1,0 +1,13 @@
+{
+  "id": "doc2",
+  "text": "Microsoft was founded by Bill Gates. It competes with Apple.",
+  "entities": [
+    {"id": "p1", "mention": "Microsoft", "type": "ORGANIZATION", "linked_id": "WIKIDATA:Q2283"},
+    {"id": "p2", "mention": "Bill Gates", "type": "PERSON", "linked_id": "WIKIDATA:Q5284"},
+    {"id": "p3", "mention": "Apple", "type": "ORGANIZATION", "linked_id": null}
+  ],
+  "relations": [
+    {"source": "p1", "target": "p2", "type": "FOUNDED_BY"},
+    {"source": "p1", "target": "p3", "type": "COMPETES_WITH"}
+  ]
+}
