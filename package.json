@@ -127,6 +127,8 @@
     "ga:verify": "node scripts/ga/ga-verify-runner.mjs",
     "ga:verify:server": "pnpm --filter intelgraph-server typecheck && pnpm --filter intelgraph-server build && pnpm --filter intelgraph-server test:unit",
     "ga:smoke": "echo '✅ Smoke tests not configured - add integration tests here' && exit 0",
+    "evidence:post-deploy:gen": "bash scripts/go-live/post-deploy-canary.sh",
+    "evidence:post-deploy:verify": "node scripts/go-live/verify-post-deploy-evidence.mjs",
     "release:ready": "pnpm ga:verify && pnpm --filter intelgraph-server test:ci && bash scripts/ci/validate-workflow-filters.sh",
     "prepare": "husky",
     "gate:schema": "node scripts/gates/validate_schemas.mjs"
