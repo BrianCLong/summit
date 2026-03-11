@@ -1,0 +1,40 @@
+name: innovation-fund
+
+on:
+  push:
+    paths:
+      - '.repoos/fund/proposals.json'
+      - 'scripts/repoos/innovation-fund.mjs'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  evaluate-proposals:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Validate proposal schema
+        run: node scripts/repoos/innovation-fund.mjs fund validate-proposals
+
+      - name: Evaluate proposals
+        run: node scripts/repoos/innovation-fund.mjs fund evaluate
+
+      - name: Update deterministic fund report
+        run: node scripts/repoos/innovation-fund.mjs fund build-report
+
+      - name: Upload innovation fund artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: innovation-fund-artifacts
+          path: |
+            .repoos/fund/evaluation-results.json
+            .repoos/evidence/innovation-fund-report.json

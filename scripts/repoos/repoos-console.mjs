@@ -96,6 +96,27 @@ async function loadSimulation() {
 }
 
 /**
+ * Load innovation fund data
+ */
+async function loadInnovationFund() {
+  try {
+    const [registryRaw, proposalsRaw, evaluationsRaw] = await Promise.all([
+      fs.readFile('.repoos/fund/innovation-fund-registry.json', 'utf-8'),
+      fs.readFile('.repoos/fund/proposals.json', 'utf-8'),
+      fs.readFile('.repoos/fund/evaluation-results.json', 'utf-8')
+    ]);
+
+    return {
+      registry: JSON.parse(registryRaw),
+      proposals: JSON.parse(proposalsRaw),
+      evaluations: JSON.parse(evaluationsRaw)
+    };
+  } catch (error) {
+    return null;
+  }
+}
+
+/**
  * Format percentage bar
  */
 function formatBar(value, width = 20, threshold = 0.8) {
@@ -290,6 +311,37 @@ function displaySimulationForecast(simulation) {
 }
 
 /**
+ * Display innovation funding dashboard
+ */
+function displayInnovationFund(fund) {
+  console.log(`${COLORS.bright}Innovation Funding Dashboard${COLORS.reset}`);
+  console.log(`─────────────────────────────────────────────────────────────────\n`);
+
+  if (!fund) {
+    console.log(`${COLORS.dim}No innovation fund data available${COLORS.reset}\n`);
+    return;
+  }
+
+  const funded = fund.registry?.funded_initiatives || [];
+  const proposals = fund.proposals?.proposals || [];
+  const evaluations = fund.evaluations?.results || [];
+
+  const totalFunding = funded.reduce((sum, initiative) => sum + Number(initiative.funding_amount || 0), 0);
+  const approved = proposals.filter((proposal) => proposal.status === 'approved').length;
+
+  console.log(`Funded Initiatives: ${funded.length}`);
+  console.log(`Total Committed: $${totalFunding.toLocaleString('en-US')}`);
+  console.log(`Submitted Proposals: ${proposals.length}`);
+  console.log(`Approved Proposals: ${approved}\n`);
+
+  if (evaluations.length > 0) {
+    const top = [...evaluations].sort((a, b) => b.weighted_score - a.weighted_score)[0];
+    console.log(`Top Proposal: ${top.proposal_id} (${top.project_name})`);
+    console.log(`Score: ${top.weighted_score} (${top.recommendation.toUpperCase()})\n`);
+  }
+}
+
+/**
  * Display recent activity
  */
 async function displayRecentActivity() {
@@ -349,6 +401,7 @@ async function main() {
   const market = await loadPatchMarket();
   const genome = await loadGenome();
   const simulation = await loadSimulation();
+  const innovationFund = await loadInnovationFund();
 
   // Display console
   displaySystemHealth(stability, genome, simulation);
@@ -356,6 +409,7 @@ async function main() {
   displayPatchMarket(market);
   displayGenomeFitness(genome);
   displaySimulationForecast(simulation);
+  displayInnovationFund(innovationFund);
   await displayRecentActivity();
   displayFooter();
 }

@@ -1,0 +1,40 @@
+{
+  "proposals": [
+    {
+      "proposal_id": "IF-001",
+      "project_name": "Graph Query Assistant Plugin",
+      "developer_or_partner": "Northstar Labs",
+      "project_description": "A governed plugin that generates explainable graph investigations for analysts.",
+      "requested_funding": 90000,
+      "ecosystem_impact": 87,
+      "initiative_type": "ecosystem-plugins",
+      "expected_adoption_potential": 82,
+      "strategic_alignment": 90,
+      "status": "submitted"
+    },
+    {
+      "proposal_id": "IF-002",
+      "project_name": "Zero-Trust Connector Pack",
+      "developer_or_partner": "SignalForge",
+      "project_description": "Enterprise integration bundle for high-assurance ingestion and policy controls.",
+      "requested_funding": 160000,
+      "ecosystem_impact": 92,
+      "initiative_type": "infrastructure-integrations",
+      "expected_adoption_potential": 78,
+      "strategic_alignment": 94,
+      "status": "submitted"
+    },
+    {
+      "proposal_id": "IF-003",
+      "project_name": "Adaptive Evidence Budget Research",
+      "developer_or_partner": "Civic Intelligence Research Group",
+      "project_description": "Research prototype for dynamic evidence budgeting to improve retrieval quality.",
+      "requested_funding": 130000,
+      "ecosystem_impact": 84,
+      "initiative_type": "research-prototypes",
+      "expected_adoption_potential": 70,
+      "strategic_alignment": 88,
+      "status": "submitted"
+    }
+  ]
+}

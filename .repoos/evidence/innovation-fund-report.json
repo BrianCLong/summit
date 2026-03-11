@@ -1,0 +1,15 @@
+{
+  "fund_summary": {
+    "total_submitted_proposals": 3,
+    "total_approved_proposals": 0,
+    "total_committed_funding": 60000,
+    "funded_initiatives_by_type": {
+      "developer-tooling": 1
+    },
+    "highest_ranked_proposal": {
+      "proposal_id": "IF-002",
+      "project_name": "Zero-Trust Connector Pack",
+      "weighted_score": 88.3
+    }
+  }
+}

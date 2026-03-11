@@ -1,0 +1,42 @@
+{
+  "criteria": [
+    "ecosystem impact",
+    "developer adoption potential",
+    "strategic alignment"
+  ],
+  "results": [
+    {
+      "proposal_id": "IF-002",
+      "project_name": "Zero-Trust Connector Pack",
+      "developer_or_partner": "SignalForge",
+      "initiative_type": "infrastructure-integrations",
+      "ecosystem_impact": 92,
+      "developer_adoption_potential": 78,
+      "strategic_alignment": 94,
+      "weighted_score": 88.3,
+      "recommendation": "approve"
+    },
+    {
+      "proposal_id": "IF-001",
+      "project_name": "Graph Query Assistant Plugin",
+      "developer_or_partner": "Northstar Labs",
+      "initiative_type": "ecosystem-plugins",
+      "ecosystem_impact": 87,
+      "developer_adoption_potential": 82,
+      "strategic_alignment": 90,
+      "weighted_score": 86.25,
+      "recommendation": "approve"
+    },
+    {
+      "proposal_id": "IF-003",
+      "project_name": "Adaptive Evidence Budget Research",
+      "developer_or_partner": "Civic Intelligence Research Group",
+      "initiative_type": "research-prototypes",
+      "ecosystem_impact": 84,
+      "developer_adoption_potential": 70,
+      "strategic_alignment": 88,
+      "weighted_score": 80.8,
+      "recommendation": "review"
+    }
+  ]
+}
