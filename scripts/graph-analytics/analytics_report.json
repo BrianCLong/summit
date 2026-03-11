@@ -1,0 +1,175 @@
+{
+  "timestamp": "2026-03-11T19:24:21.707079",
+  "graph_size": {
+    "node_count": 100,
+    "edge_count": 297,
+    "average_degree": 5.94
+  },
+  "connectivity": {
+    "num_strongly_connected_components": 9,
+    "largest_scc_size": 92,
+    "num_weakly_connected_components": 1,
+    "largest_wcc_size": 100
+  },
+  "community_detection_summary": {
+    "num_communities": 9,
+    "modularity": 0.4031
+  },
+  "growth_trend": [
+    {
+      "date": "2026-02-09",
+      "new_edges": 2,
+      "cumulative_edges": 2
+    },
+    {
+      "date": "2026-02-10",
+      "new_edges": 10,
+      "cumulative_edges": 12
+    },
+    {
+      "date": "2026-02-11",
+      "new_edges": 9,
+      "cumulative_edges": 21
+    },
+    {
+      "date": "2026-02-12",
+      "new_edges": 9,
+      "cumulative_edges": 30
+    },
+    {
+      "date": "2026-02-13",
+      "new_edges": 15,
+      "cumulative_edges": 45
+    },
+    {
+      "date": "2026-02-14",
+      "new_edges": 9,
+      "cumulative_edges": 54
+    },
+    {
+      "date": "2026-02-15",
+      "new_edges": 8,
+      "cumulative_edges": 62
+    },
+    {
+      "date": "2026-02-16",
+      "new_edges": 10,
+      "cumulative_edges": 72
+    },
+    {
+      "date": "2026-02-17",
+      "new_edges": 13,
+      "cumulative_edges": 85
+    },
+    {
+      "date": "2026-02-18",
+      "new_edges": 10,
+      "cumulative_edges": 95
+    },
+    {
+      "date": "2026-02-19",
+      "new_edges": 14,
+      "cumulative_edges": 109
+    },
+    {
+      "date": "2026-02-20",
+      "new_edges": 10,
+      "cumulative_edges": 119
+    },
+    {
+      "date": "2026-02-21",
+      "new_edges": 7,
+      "cumulative_edges": 126
+    },
+    {
+      "date": "2026-02-22",
+      "new_edges": 10,
+      "cumulative_edges": 136
+    },
+    {
+      "date": "2026-02-23",
+      "new_edges": 4,
+      "cumulative_edges": 140
+    },
+    {
+      "date": "2026-02-24",
+      "new_edges": 13,
+      "cumulative_edges": 153
+    },
+    {
+      "date": "2026-02-25",
+      "new_edges": 8,
+      "cumulative_edges": 161
+    },
+    {
+      "date": "2026-02-26",
+      "new_edges": 5,
+      "cumulative_edges": 166
+    },
+    {
+      "date": "2026-02-27",
+      "new_edges": 10,
+      "cumulative_edges": 176
+    },
+    {
+      "date": "2026-02-28",
+      "new_edges": 11,
+      "cumulative_edges": 187
+    },
+    {
+      "date": "2026-03-01",
+      "new_edges": 12,
+      "cumulative_edges": 199
+    },
+    {
+      "date": "2026-03-02",
+      "new_edges": 8,
+      "cumulative_edges": 207
+    },
+    {
+      "date": "2026-03-03",
+      "new_edges": 8,
+      "cumulative_edges": 215
+    },
+    {
+      "date": "2026-03-04",
+      "new_edges": 12,
+      "cumulative_edges": 227
+    },
+    {
+      "date": "2026-03-05",
+      "new_edges": 10,
+      "cumulative_edges": 237
+    },
+    {
+      "date": "2026-03-06",
+      "new_edges": 10,
+      "cumulative_edges": 247
+    },
+    {
+      "date": "2026-03-07",
+      "new_edges": 9,
+      "cumulative_edges": 256
+    },
+    {
+      "date": "2026-03-08",
+      "new_edges": 17,
+      "cumulative_edges": 273
+    },
+    {
+      "date": "2026-03-09",
+      "new_edges": 8,
+      "cumulative_edges": 281
+    },
+    {
+      "date": "2026-03-10",
+      "new_edges": 12,
+      "cumulative_edges": 293
+    },
+    {
+      "date": "2026-03-11",
+      "new_edges": 4,
+      "cumulative_edges": 297
+    }
+  ]
+}
