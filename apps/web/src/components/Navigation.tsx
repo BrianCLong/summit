@@ -150,7 +150,7 @@ const NavItemComponent = ({ item, user }: { item: NavItem; user: User | null }) 
           to={item.href}
           className={({ isActive: linkIsActive }) =>
             cn(
-              'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2',
+              'flex items-center gap-3 px-3 py-2 rounded-sm text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:ring-offset-1',
               linkIsActive || isActive
                 ? 'bg-accent text-accent-foreground'
                 : 'text-muted-foreground'
@@ -182,11 +182,11 @@ export function Navigation({ user }: NavigationProps) {
   const { openSearch } = useSearch()
 
   return (
-    <nav className="w-64 border-r bg-muted/50 flex flex-col">
+    <nav className="w-64 border-r border-border bg-background flex flex-col">
       {/* Logo */}
       <div className="p-6 border-b">
         <NavLink to="/" className="flex items-center gap-3">
-          <div className="h-8 w-8 bg-primary rounded-lg flex items-center justify-center">
+          <div className="h-8 w-8 bg-primary rounded-sm flex items-center justify-center">
             <span className="text-primary-foreground font-bold text-sm">
               IG
             </span>
@@ -244,7 +244,7 @@ export function Navigation({ user }: NavigationProps) {
         {/* User Profile & Logout */}
         <div className="pt-4 space-y-2">
           <div className="flex items-center gap-3 px-3 py-2">
-            <div className="h-8 w-8 bg-primary rounded-full flex items-center justify-center">
+            <div className="h-8 w-8 bg-primary rounded-sm flex items-center justify-center">
               <span className="text-primary-foreground text-xs font-medium">
                 {user?.name?.charAt(0) || 'U'}
               </span>

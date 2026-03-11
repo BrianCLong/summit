@@ -75,15 +75,14 @@ export default function CommandCenterDashboard() {
         data={commandCenterMetrics}
         loading={loading}
         columns={6}
-        className="cyber-glow"
       />
 
       <EROpsPanel />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-        <Card className="intel-gradient text-white">
+        <Card className="border-t-4 border-t-destructive">
           <CardHeader>
-            <CardTitle className="text-white">🚨 Threat Radar</CardTitle>
+            <CardTitle>🚨 Threat Radar</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">

@@ -459,7 +459,7 @@ export function EntityDrawer({
 
               <div className="space-y-3">
                 <div className="flex gap-3">
-                  <div className="w-2 h-2 bg-green-500 rounded-full mt-2"></div>
+                  <div className="w-2 h-2 bg-green-500 mt-2"></div>
                   <div>
                     <div className="font-medium text-sm">Entity Created</div>
                     <div className="text-xs text-muted-foreground">
@@ -469,7 +469,7 @@ export function EntityDrawer({
                 </div>
 
                 <div className="flex gap-3">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
+                  <div className="w-2 h-2 bg-blue-500 mt-2"></div>
                   <div>
                     <div className="font-medium text-sm">Last Updated</div>
                     <div className="text-xs text-muted-foreground">
