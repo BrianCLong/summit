@@ -1,0 +1,63 @@
+name: Security Policy Gate
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/**/*.yml'
+      - '.github/workflows/**/*.yaml'
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/**/*.yml'
+      - '.github/workflows/**/*.yaml'
+
+permissions:
+  contents: read
+
+jobs:
+  check-workflows:
+    name: Check Workflows for Security Policy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+
+      - name: Setup Node
+        uses: actions/setup-node@3922559a89f3c5f0f047e7d67ca588b5c467abb2 # v4.1.0
+        with:
+          node-version: 22
+          cache: 'pnpm'
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Find Changed Workflows and Run Checks
+        run: |
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            # Get list of added/modified workflow files in PR
+            git diff --name-only origin/${{ github.base_ref }} HEAD > changed_files.txt || true
+          else
+            # On push
+            git diff --name-only HEAD~1 HEAD > changed_files.txt || true
+          fi
+
+          CHANGED_FILES=$(grep -E '^.github/workflows/.*\.(yml|yaml)$' changed_files.txt || true)
+
+          if [ -z "$CHANGED_FILES" ]; then
+            echo "No workflow files changed."
+            # no-op
+          else
+            echo "Changed workflow files:"
+            echo "$CHANGED_FILES"
+
+            # Convert newline separated list to space separated list for script
+            FILES_ARGS=$(echo "$CHANGED_FILES" | tr '\n' ' ')
+
+            node scripts/policy/check-workflows.js $FILES_ARGS
+          fi
