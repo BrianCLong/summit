@@ -1,0 +1,80 @@
+[
+  {
+    "id": "tc1_accurate_citation",
+    "query": "What are the primary symptoms of Disease X?",
+    "expected_deterministic_answer": {
+      "text": "The primary symptoms of Disease X are fever and fatigue [doc1].",
+      "citations": [
+        {"doc_id": "doc1", "passage": "Fever and fatigue are the most common early indicators of Disease X.", "type": "primary"}
+      ]
+    },
+    "ground_truth": {
+      "source_documents": {
+        "doc1": {"text": "Fever and fatigue are the most common early indicators of Disease X.", "type": "primary", "reliability": "high"}
+      },
+      "contains_claimed_info": true,
+      "factors_reliability": true,
+      "acknowledges_conflicts": false,
+      "distinguishes_primary_secondary": true
+    }
+  },
+  {
+    "id": "tc2_hallucinated_citation",
+    "query": "What is the capital of Country Y?",
+    "expected_deterministic_answer": {
+      "text": "The capital is City Z [doc99].",
+      "citations": [
+        {"doc_id": "doc99", "passage": "City Z is the capital.", "type": "primary"}
+      ]
+    },
+    "ground_truth": {
+      "source_documents": {
+        "doc2": {"text": "Country Y's capital is a highly debated topic, though formally it has no capital.", "type": "secondary", "reliability": "medium"}
+      },
+      "contains_claimed_info": false,
+      "factors_reliability": false,
+      "acknowledges_conflicts": false,
+      "distinguishes_primary_secondary": false
+    }
+  },
+  {
+    "id": "tc3_conflicting_sources",
+    "query": "Who won the battle of River A?",
+    "expected_deterministic_answer": {
+      "text": "Sources conflict on the victor. General B claims victory [doc3], but Historian C argues it was a draw [doc4].",
+      "citations": [
+        {"doc_id": "doc3", "passage": "We achieved total victory at River A.", "type": "primary"},
+        {"doc_id": "doc4", "passage": "The battle of River A resulted in a stalemate with heavy losses on both sides.", "type": "secondary"}
+      ]
+    },
+    "ground_truth": {
+      "source_documents": {
+        "doc3": {"text": "We achieved total victory at River A.", "type": "primary", "reliability": "low"},
+        "doc4": {"text": "The battle of River A resulted in a stalemate with heavy losses on both sides.", "type": "secondary", "reliability": "high"}
+      },
+      "contains_claimed_info": true,
+      "factors_reliability": true,
+      "acknowledges_conflicts": true,
+      "distinguishes_primary_secondary": true
+    }
+  },
+  {
+    "id": "tc4_passage_does_not_contain_claim",
+    "query": "Is Chemical D toxic?",
+    "expected_deterministic_answer": {
+      "text": "Chemical D is highly toxic to humans [doc5].",
+      "citations": [
+        {"doc_id": "doc5", "passage": "Chemical D is a colorless liquid used in manufacturing.", "type": "primary"}
+      ]
+    },
+    "ground_truth": {
+      "source_documents": {
+        "doc5": {"text": "Chemical D is a colorless liquid used in manufacturing.", "type": "primary", "reliability": "high"}
+      },
+      "contains_claimed_info": false,
+      "factors_reliability": false,
+      "acknowledges_conflicts": false,
+      "distinguishes_primary_secondary": false
+    }
+  }
+]
