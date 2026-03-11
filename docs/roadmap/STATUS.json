@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-03-09T22:00:00Z",
-  "revision_note": "Integrated Stage 7 validation infrastructure, Antigravity governance ledger, and hardened docker stack into the master roadmap.",
+  "last_updated": "2026-03-11T00:00:00Z",
+  "revision_note": "Added 6-month ICP priority decision for legal/compliance segment with 30/60/90 execution sequence in market-entry sector sequencing.",
   "initiatives": [
     {
       "id": "antigravity-governance-ledger",
@@ -187,7 +187,7 @@
       "id": "ip-claims-continuation-pack-c451-s480",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Added defense CRM and simulation apparatus dependent claims C451–C480 and S451–S480."
+      "notes": "Added defense CRM and simulation apparatus dependent claims C451\u2013C480 and S451\u2013S480."
     },
     {
       "id": "io-cogwar-radar-2027-brief",
@@ -205,7 +205,7 @@
       "id": "ip-defense-claims-c391-s420",
       "status": "completed",
       "owner": "codex",
-      "notes": "Added CRM and Simulation Apparatus claims C391–C420/S391–S420 for graph integrity, appeals, and causal guardrails."
+      "notes": "Added CRM and Simulation Apparatus claims C391\u2013C420/S391\u2013S420 for graph integrity, appeals, and causal guardrails."
     },
     {
       "id": "spec-driven-development-docs",
@@ -270,6 +270,12 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "Praxeology graph implementation with quarantined PG writeset validators and control-plane API."
+    },
+    {
+      "id": "icp-legal-compliance-priority-2026h1",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Documented single-segment focus decision: legal/compliance ops in regulated enterprises, plus positioning and 30/60/90 plan in docs/market-entry/sector-sequencing.md."
     }
   ],
   "summary": {
